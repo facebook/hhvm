@@ -345,6 +345,9 @@ class virtual ['c] map :
         on_Static_var : 'd ->
                         Ast_visitors_ancestors.expr list ->
                         Ast_visitors_ancestors.stmt;
+        on_Global_var : 'd ->
+                        Ast_visitors_ancestors.expr list ->
+                        Ast_visitors_ancestors.stmt;
         on_Stmt : 'd ->
                   Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def;
         on_String : 'd ->
@@ -944,6 +947,8 @@ class virtual ['c] map :
     method on_Starstar : 'd -> Ast_visitors_ancestors.bop
     method on_Static : 'd -> Ast_visitors_ancestors.kind
     method on_Static_var :
+      'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
+    method on_Global_var :
       'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
     method on_Stmt :
       'd -> Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def

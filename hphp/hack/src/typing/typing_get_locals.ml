@@ -69,7 +69,9 @@ and terminal_ tcopt nsenv ~in_try = function
   | Break _ (* TODO this is terminal sometimes too, except switch, see above. *)
   | GotoLabel _
   | Goto _
-  | Static_var _ -> ()
+  | Static_var _
+  | Global_var _
+    -> ()
 
 and terminal_catch tcopt nsenv ~in_try (_, _, b) =
   terminal tcopt nsenv ~in_try b
@@ -134,7 +136,7 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Expr _ | Break _ | Continue _ | Throw _
   | Do _ | While _ | For _ | Foreach _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
-  | Def_inline _ | Noop -> acc
+  | Global_var _ | Def_inline _ | Noop -> acc
   | Block b -> block tcopt acc b
   | If (_, b1, b2) ->
     let term1 = is_terminal tcopt nsenv b1 in

@@ -210,6 +210,7 @@ class virtual ['b] reduce :
         on_Slash : 'c -> 'd; on_Star : 'c -> 'd; on_Starstar : 'c -> 'd;
         on_Static : 'c -> 'd;
         on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> 'd;
+        on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd;
         on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd;
@@ -562,6 +563,7 @@ class virtual ['b] reduce :
     method on_Starstar : 'c -> 'd
     method on_Static : 'c -> 'd
     method on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> 'd
+    method on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd
     method on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd

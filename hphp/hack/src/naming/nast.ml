@@ -142,6 +142,7 @@ type stmt =
   | GotoLabel of pstring
   | Goto of pstring
   | Static_var of expr list
+  | Global_var of expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
@@ -492,6 +493,7 @@ class type ['a] visitor_type = object
   method on_goto_label : 'a -> pstring -> 'a
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
+  method on_global_var : 'a -> expr list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
@@ -572,6 +574,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Some e -> this#on_expr acc e
 
   method on_static_var acc el = List.fold_left this#on_expr acc el
+
+  method on_global_var acc el = List.fold_left this#on_expr acc el
 
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
@@ -656,6 +660,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
+    | Global_var el           -> this#on_global_var acc el
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

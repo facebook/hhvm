@@ -214,6 +214,7 @@ class virtual ['b] iter :
         on_Slash : 'c -> unit; on_Star : 'c -> unit;
         on_Starstar : 'c -> unit; on_Static : 'c -> unit;
         on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> unit;
+        on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> unit;
         on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> unit;
         on_String : 'c -> Ast_visitors_ancestors.pstring -> unit;
         on_String2 : 'c -> Ast_visitors_ancestors.expr list -> unit;
@@ -581,6 +582,7 @@ class virtual ['b] iter :
     method on_Starstar : 'c -> unit
     method on_Static : 'c -> unit
     method on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> unit
+    method on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> unit
     method on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> unit
     method on_String : 'c -> Ast_visitors_ancestors.pstring -> unit
     method on_String2 : 'c -> Ast_visitors_ancestors.expr list -> unit

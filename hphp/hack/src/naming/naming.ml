@@ -1687,6 +1687,7 @@ module Make (GetLocals : GetLocals) = struct
     | GotoLabel label      -> name_goto_label env label
     | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
+    | Global_var el        -> N.Global_var (global_varl env el)
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
@@ -1882,6 +1883,11 @@ module Make (GetLocals : GetLocals) = struct
 
   and static_varl env l = List.map l (static_var env)
   and static_var env = function
+    | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
+    | e -> expr env e
+
+  and global_varl env l = List.map l (global_var env)
+  and global_var env = function
     | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
     | e -> expr env e
 

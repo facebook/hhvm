@@ -56,11 +56,8 @@ module CheckFunctionBody = struct
     | _, Expr e ->
         expr_allow_await f_type e;
         ()
-    | _, Noop
-    | _, Fallthrough
-    | _, (GotoLabel _ | Goto _)
-    | _, Break _ | _, Continue _ -> ()
-    | _, Static_var _ -> ()
+    | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
+         | Static_var _ | Global_var _ ) -> ()
     | _, If (cond, b1, b2) ->
         expr f_type cond;
         block f_type b1;
@@ -756,8 +753,9 @@ and stmt env = function
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
-  | Static_var el ->
-    List.iter el (expr env)
+  | Static_var el
+  | Global_var el
+    -> List.iter el (expr env)
   | If (e, b1, b2) ->
     expr env e;
     block env b1;

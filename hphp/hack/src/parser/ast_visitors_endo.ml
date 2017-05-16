@@ -685,6 +685,9 @@ class virtual ['self] endo =
     method on_Static_var env this c0 =
       let r0 = self#on_list self#on_expr env c0 in
       if c0 == r0 then this else Static_var r0
+    method on_Global_var env this c0 =
+      let r0 = self#on_list self#on_expr env c0 in
+      if c0 == r0 then this else Global_var r0
     method on_If env this c0 c1 c2 =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_block env c1 in
@@ -749,6 +752,7 @@ class virtual ['self] endo =
       | GotoLabel c0 -> self#on_GotoLabel env this c0
       | Goto c0 -> self#on_Goto env this c0
       | Static_var c0 -> self#on_Static_var env this c0
+      | Global_var c0 -> self#on_Global_var env this c0
       | If (c0, c1, c2) -> self#on_If env this c0 c1 c2
       | Do (c0, c1) -> self#on_Do env this c0 c1
       | While (c0, c1) -> self#on_While env this c0 c1

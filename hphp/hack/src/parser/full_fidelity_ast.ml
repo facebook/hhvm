@@ -1115,6 +1115,8 @@ and pStmt : stmt parser = fun node env ->
       ))
   | BreakStatement _ -> Break (get_pos node)
   | ContinueStatement _ -> Continue (get_pos node)
+  | GlobalStatement { global_variables; _ } ->
+    Global_var (couldMap ~f:pExpr global_variables env)
   | _ when env.max_depth > 0 ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
      *

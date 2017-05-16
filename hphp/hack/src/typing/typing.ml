@@ -653,6 +653,15 @@ and stmt env = function
     end ~init:env in
     let env, tel, _ = exprs env el in
     env, T.Static_var tel
+  | Global_var el ->
+    let env = List.fold_left el ~f:begin fun env e ->
+      match e with
+        | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
+          Env.add_todo env (TGen.no_generic p x)
+        | _ -> env
+    end ~init:env in
+    let env, tel, _ = exprs env el in
+    env, T.Global_var tel
   | Throw (is_terminal, e) ->
     let p = fst e in
     let env, te, ty = expr env e in

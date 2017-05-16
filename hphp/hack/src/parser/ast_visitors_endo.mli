@@ -525,6 +525,10 @@ class virtual ['b] endo :
                         Ast_visitors_ancestors.stmt ->
                         Ast_visitors_ancestors.expr list ->
                         Ast_visitors_ancestors.stmt;
+        on_Global_var : 'c ->
+                        Ast_visitors_ancestors.stmt ->
+                        Ast_visitors_ancestors.expr list ->
+                        Ast_visitors_ancestors.stmt;
         on_Stmt : 'c ->
                   Ast_visitors_ancestors.def ->
                   Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def;
@@ -1352,6 +1356,10 @@ class virtual ['b] endo :
     method on_Static :
       'c -> Ast_visitors_ancestors.kind -> Ast_visitors_ancestors.kind
     method on_Static_var :
+      'c ->
+      Ast_visitors_ancestors.stmt ->
+      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
+    method on_Global_var :
       'c ->
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt

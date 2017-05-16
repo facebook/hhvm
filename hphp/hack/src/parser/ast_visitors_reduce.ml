@@ -398,6 +398,7 @@ class virtual ['self] reduce =
       let r1 = self#on_option self#on_expr env c1 in
       self#add r0 r1
     method on_Static_var = self#on_list self#on_expr
+    method on_Global_var = self#on_list self#on_expr
     method on_If env c0 c1 c2 =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_block env c1 in
@@ -446,6 +447,7 @@ class virtual ['self] reduce =
       | GotoLabel c0 -> self#on_GotoLabel env c0
       | Goto c0 -> self#on_Goto env c0
       | Static_var c0 -> self#on_Static_var env c0
+      | Global_var c0 -> self#on_Global_var env c0
       | If (c0, c1, c2) -> self#on_If env c0 c1 c2
       | Do (c0, c1) -> self#on_Do env c0 c1
       | While (c0, c1) -> self#on_While env c0 c1

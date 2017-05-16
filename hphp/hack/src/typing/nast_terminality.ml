@@ -85,7 +85,9 @@ end = struct
     | Fallthrough
     | GotoLabel _
     | Expr _
-    | Static_var _ -> ()
+    | Static_var _
+    | Global_var _
+      -> ()
 
   and terminal_catchl env inside_case = function
     | [] -> raise Exit
@@ -165,7 +167,9 @@ end = struct
     | Noop
     | GotoLabel _
     | Expr _
-    | Static_var _ -> ()
+    | Static_var _
+    | Global_var _
+      -> ()
 
   and terminal_catchl env = function
     | [] -> raise Exit

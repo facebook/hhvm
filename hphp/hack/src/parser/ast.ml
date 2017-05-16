@@ -261,6 +261,7 @@ and stmt =
   | GotoLabel of pstring
   | Goto of pstring
   | Static_var of expr list
+  | Global_var of expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block

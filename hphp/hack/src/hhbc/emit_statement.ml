@@ -97,6 +97,8 @@ let rec emit_stmt st =
     emit_nyi "Def_inline"
   | A.Static_var es ->
     emit_static_var es
+  | A.Global_var _ ->
+    emit_nyi "Global_var"
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough

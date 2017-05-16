@@ -178,7 +178,7 @@ let rec connect_persistent'
     | Server_dormant
     | Server_died
     | Server_missing
-    | Build_id_mismatched ->
+    | Build_id_mismatched _ ->
       (* IDE mode doesn't handle (re-)starting the server - needs to be done
        * separately with hh start or similar. *)
       (* TODO: @ljw, @kasper: why doesn't the server handle? Shouldn't it? *)

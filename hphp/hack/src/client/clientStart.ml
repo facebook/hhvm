@@ -92,7 +92,7 @@ let should_start env =
   | Result.Ok _conn -> false
   | Result.Error
       ( SMUtils.Server_missing
-      | SMUtils.Build_id_mismatched
+      | SMUtils.Build_id_mismatched _
       | SMUtils.Server_died
       ) -> true
   | Result.Error SMUtils.Server_dormant ->

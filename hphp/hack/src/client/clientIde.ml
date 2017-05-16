@@ -55,7 +55,7 @@ let rec connect_persistent env retries start_time =
     | SMUtils.Server_dormant
     | SMUtils.Server_died
     | SMUtils.Server_missing
-    | SMUtils.Build_id_mismatched ->
+    | SMUtils.Build_id_mismatched _ ->
       (* IDE mode doesn't handle (re-)starting the server - needs to be done
        * separately with hh start or similar. *)
       raise Exit_status.(Exit_with IDE_no_server)

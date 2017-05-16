@@ -257,10 +257,25 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         (Tty.spinner());
       HackEventLogger.client_connect_once_busy start_time;
       connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
-    | SMUtils.Build_id_mismatched ->
-      Printf.eprintf begin
-        "hh_server's version doesn't match the client's, "^^
-        "so it will exit.\n%!"
+    | SMUtils.Build_id_mismatched mismatch_info_opt ->
+      let open ServerMonitorUtils in
+      Printf.eprintf
+        "hh_server's version doesn't match the client's, so it will exit.\n";
+      begin match mismatch_info_opt with
+        | None -> ()
+        | Some mismatch_info ->
+          let secs = int_of_float
+            ((Unix.gettimeofday ()) -. mismatch_info.existing_launch_time) in
+          let time =
+            if secs > 86400 then Printf.sprintf "%n days" (secs / 86400)
+            else if secs > 3600 then Printf.sprintf "%n hours" (secs / 3600)
+            else if secs > 60 then Printf.sprintf "%n minutes" (secs / 60)
+            else Printf.sprintf "%n seconds" (secs) in
+          Printf.eprintf
+            "  hh_server '%s' was launched %s ago.\n%!"
+            (String.concat " " mismatch_info.existing_argv)
+            time;
+          ()
       end;
       if env.autostart
       then
@@ -274,7 +289,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
            *)
           Tail.close_env tail_env;
           connect env retries start_time tail_env
-        end else raise Exit_status.(Exit_with Build_id_mismatch)
+        end else raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
 
 let connect env =
   let link_file = ServerFiles.log_link env.root in

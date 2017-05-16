@@ -158,6 +158,7 @@ class virtual ['b] reduce :
         on_Invariant : 'c -> 'd;
         on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> 'd;
         on_List : 'c -> Ast_visitors_ancestors.expr list -> 'd;
+        on_Cmp : 'c -> 'd;
         on_Lt : 'c -> 'd; on_Lte : 'c -> 'd; on_Ltlt : 'c -> 'd;
         on_Lvar : 'c -> Ast_visitors_ancestors.id -> 'd;
         on_Lvarvar : 'c -> int -> Ast_visitors_ancestors.id -> 'd;
@@ -394,6 +395,7 @@ class virtual ['b] reduce :
     method on_Class_get :
       'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> 'd
     method on_Clone : 'c -> Ast_visitors_ancestors.expr -> 'd
+    method on_Cmp : 'c -> 'd
     method on_Cnormal : 'c -> 'd
     method on_Collection :
       'c ->

@@ -70,7 +70,6 @@ quick/dict/apc.php
 quick/dict/basic-getters.php
 quick/dict/basic-init.php
 quick/dict/basic-setters.php
-quick/dict/comparisons.php
 quick/dict/convert.php
 quick/dict/dtor.php
 quick/dict/invalid-scalar.php
@@ -205,7 +204,6 @@ quick/invoke.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-init.php
 quick/keyset/basic-setters.php
-quick/keyset/comparisons.php
 quick/keyset/convert.php
 quick/keyset/invalid-scalar.php
 quick/keyset/is-a.php
@@ -346,7 +344,6 @@ quick/vec/apc.php
 quick/vec/basic-getters.php
 quick/vec/basic-init.php
 quick/vec/basic-setters.php
-quick/vec/comparisons.php
 quick/vec/convert.php
 quick/vec/dtor.php
 quick/vec/is-a.php

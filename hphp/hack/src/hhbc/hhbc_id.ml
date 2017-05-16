@@ -31,7 +31,7 @@ module Class = struct
   let to_raw_string s = s
   let elaborate_id ns id =
     let mangled_name = SU.Xhp.mangle (snd id) in
-    match Hhbc_alias.opt_normalize mangled_name with
+    match Hhbc_alias.opt_normalize (SU.strip_global_ns mangled_name) with
     | None -> elaborate_id ns Ast_defs.NSClass (fst id, mangled_name)
     | Some s -> s, None
 

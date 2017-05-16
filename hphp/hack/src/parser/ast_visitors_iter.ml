@@ -607,6 +607,7 @@ class virtual ['self] iter =
     method on_BArbar env = ()
     method on_Lt env = ()
     method on_Lte env = ()
+    method on_Cmp env = ()
     method on_Gt env = ()
     method on_Gte env = ()
     method on_Dot env = ()
@@ -638,6 +639,7 @@ class virtual ['self] iter =
       | Bar -> self#on_Bar env
       | Ltlt -> self#on_Ltlt env
       | Gtgt -> self#on_Gtgt env
+      | Cmp -> self#on_Cmp env
       | Percent -> self#on_Percent env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0

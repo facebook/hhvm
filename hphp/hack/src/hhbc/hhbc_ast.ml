@@ -254,6 +254,9 @@ type istype_op =
   | OpArr
   | OpObj
   | OpScalar (* Int or Dbl or Str or Bool *)
+  | OpKeyset
+  | OpDict
+  | OpVec
 
 type instruct_isset =
   | IssetC

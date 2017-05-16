@@ -166,7 +166,9 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.expr_ ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
-        on_Cnormal : 'c ->
+       on_Cmp : 'c ->
+                Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
+       on_Cnormal : 'c ->
                      Ast_visitors_ancestors.class_kind ->
                      Ast_visitors_ancestors.class_kind;
         on_Collection : 'c ->
@@ -989,6 +991,8 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Cmp :
+      'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_Cnormal :
       'c ->
       Ast_visitors_ancestors.class_kind -> Ast_visitors_ancestors.class_kind

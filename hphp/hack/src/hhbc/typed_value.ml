@@ -9,6 +9,7 @@
 *)
 
 module SU = Hhbc_string_utils
+open Core
 
 (* We introduce a type for Hack/PHP values, mimicking what happens at runtime.
  * Currently this is used for constant folding. By defining a special type, we
@@ -438,3 +439,9 @@ let cast_to_arraykey v =
   match v with
   | String s -> Some (String s)
   | _ -> cast_to_int v
+
+let add_to_dict d k v =
+  (* We traverse twice but don't blow the stack on large lists *)
+  if List.exists d (fun (k',_) -> k=k')
+  then List.map d (fun (k', v') -> if k=k' then (k', v) else (k', v'))
+  else d @ [(k,v)]

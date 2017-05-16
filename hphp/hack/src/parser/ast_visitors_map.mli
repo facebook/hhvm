@@ -121,6 +121,7 @@ class virtual ['c] map :
         on_Clone : 'd ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
+        on_Cmp : 'd -> Ast_visitors_ancestors.bop;
         on_Cnormal : 'd -> Ast_visitors_ancestors.class_kind;
         on_Collection : 'd ->
                         Ast_visitors_ancestors.id ->
@@ -731,6 +732,7 @@ class virtual ['c] map :
       Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_Clone :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Cmp : 'd -> Ast_visitors_ancestors.bop
     method on_Cnormal : 'd -> Ast_visitors_ancestors.class_kind
     method on_Collection :
       'd ->

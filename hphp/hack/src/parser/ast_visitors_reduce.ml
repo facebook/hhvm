@@ -677,6 +677,7 @@ class virtual ['self] reduce =
     method on_BArbar _ = self#e
     method on_Lt _ = self#e
     method on_Lte _ = self#e
+    method on_Cmp _ = self#e
     method on_Gt _ = self#e
     method on_Gte _ = self#e
     method on_Dot _ = self#e
@@ -701,6 +702,7 @@ class virtual ['self] reduce =
       | BArbar -> self#on_BArbar env
       | Lt -> self#on_Lt env
       | Lte -> self#on_Lte env
+      | Cmp -> self#on_Cmp env
       | Gt -> self#on_Gt env
       | Gte -> self#on_Gte env
       | Dot -> self#on_Dot env

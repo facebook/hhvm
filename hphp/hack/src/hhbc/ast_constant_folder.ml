@@ -11,6 +11,7 @@ module A = Ast
 module TV = Typed_value
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
+module TVL = Unique_list_typed_value
 open Core
 
 (* Literal expressions can be converted into values *)
@@ -28,9 +29,17 @@ let rec expr_to_typed_value (_, expr_) =
   | A.Collection ((_, "vec"), fields) ->
     TV.Vec (List.map fields value_afield_to_typed_value)
   | A.Collection ((_, "keyset"), fields) ->
-    TV.Keyset (List.map fields value_afield_to_typed_value)
+    let l = List.fold_left fields
+      ~f:(fun l x -> TVL.add l (value_afield_to_typed_value x))
+      ~init:TVL.empty in
+    TV.Keyset (List.rev (TVL.items l))
   | A.Collection ((_, ("dict" | "ImmMap" | "Map")), fields) ->
-    TV.Dict (List.map fields afield_to_typed_value_pair)
+    (* TODO: avoid quadratic-time behaviour *)
+    let d = List.fold_left fields
+      ~f:(fun d x ->
+        let k, v = afield_to_typed_value_pair x in
+        Typed_value.add_to_dict d k v) ~init:[] in
+    TV.Dict d
   | _ ->
     failwith "expr_to_typed_value: not a literal"
 

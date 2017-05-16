@@ -221,10 +221,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
   | Some TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
   | Some TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
-  (* The spaceship operator `<=>` isn't implemented in AST, but has the same
-   * typing properties as `<=`
-   *)
-  | Some TK.LessThanEqualGreaterThan    -> Binop (Lte,               lhs, rhs)
+  | Some TK.LessThanEqualGreaterThan    -> Binop (Cmp,               lhs, rhs)
   (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as
    * `BinaryOperator`s, whereas the typed AST has separate constructors for
    * NullCoalesce, Pipe and Binop. This is why we don't just project onto a

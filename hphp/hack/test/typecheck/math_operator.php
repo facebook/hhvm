@@ -58,6 +58,9 @@ function foo(): void {
   $d = $a && $b;
   $d = $a || $b;
 
+  // Spaceship operator
+  $i = $a <=> $b;
+
   // Float operations
   $float_1 = 4.0;
   $float_2 = 3.0;

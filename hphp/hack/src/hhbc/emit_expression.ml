@@ -85,6 +85,7 @@ let from_binop op =
   | A.Bar -> instr (IOp BitOr)
   | A.Ltlt -> instr (IOp Shl)
   | A.Gtgt -> instr (IOp Shr)
+  | A.Cmp -> instr (IOp Cmp)
   | A.Percent -> instr (IOp Mod)
   | A.Xor -> instr (IOp BitXor)
   | A.Eq _ -> emit_nyi "Eq"
@@ -140,6 +141,9 @@ let istype_op id =
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar
+  | "is_keyset" -> Some OpKeyset
+  | "is_dict" -> Some OpDict
+  | "is_vec" -> Some OpVec
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
@@ -1573,6 +1577,27 @@ and emit_call (_, expr_ as expr) args uargs =
     gather [
       from_expr e;
       instr (IOp CastDouble)
+    ], Flavor.Cell
+
+  | A.Id (_, "vec") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastVec)
+    ], Flavor.Cell
+
+  | A.Id (_, "keyset") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastKeyset)
+    ], Flavor.Cell
+
+  | A.Id (_, "dict") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastDict)
     ], Flavor.Cell
 
   | A.Id (_, "invariant") when List.length args > 0 ->

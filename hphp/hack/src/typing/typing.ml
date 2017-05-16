@@ -4050,7 +4050,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       if not in_cond
       then Typing_equality_check.assert_nontrivial p bop env ty1 ty2;
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
-  | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte ->
+  | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
+      let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
       let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
       let ty_datetime =
@@ -4063,7 +4064,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
        *   function(DateTime, DateTime): bool
        *)
       if both_sub ty_num || both_sub ty_string || both_sub ty_datetime
-      then make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
+      then make_result env te1 te2 (Reason.Rcomp p, ty_result)
       else
         (* TODO this is questionable; PHP's semantics for conversions with "<"
          * are pretty crazy and we may want to just disallow this? *)
@@ -4071,7 +4072,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
          *   function<T>(T, T): bool
          *)
         let env, _ = Type.unify p Reason.URnone env ty1 ty2 in
-        make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
+        make_result env te1 te2 (Reason.Rcomp p, ty_result)
   | Ast.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)

@@ -307,7 +307,7 @@ let priorities = [
   (Left, [Tbar]);
   (Left, [Tamp]);
   (NonAssoc, [Teqeq; Tdiff; Teqeqeq; Tdiff2]);
-  (NonAssoc, [Tlt; Tlte; Tgt; Tgte]);
+  (NonAssoc, [Tlt; Tlte; Tgt; Tgte; Tcmp]);
   (Left, [Tltlt; Tgtgt]);
   (Left, [Tplus; Tminus; Tdot]);
   (Left, [Tstar; Tslash; Tpercent]);
@@ -2718,6 +2718,8 @@ and expr_remain env e1 =
       expr_binop env Tgte Gte e1
   | Tlte ->
       expr_binop env Tlte Lte e1
+  | Tcmp ->
+      expr_binop env Tcmp Cmp e1
   | Tamp ->
       expr_binop env Tamp Amp e1
   | Tbar ->

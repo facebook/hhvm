@@ -1069,6 +1069,7 @@ class virtual ['self] endo =
     method on_Lte env this = this
     method on_Gt env this = this
     method on_Gte env this = this
+    method on_Cmp env this = this
     method on_Dot env this = this
     method on_Amp env this = this
     method on_Bar env this = this
@@ -1101,6 +1102,7 @@ class virtual ['self] endo =
       | Bar -> self#on_Bar env this
       | Ltlt -> self#on_Ltlt env this
       | Gtgt -> self#on_Gtgt env this
+      | Cmp -> self#on_Cmp env this
       | Percent -> self#on_Percent env this
       | Xor -> self#on_Xor env this
       | Eq c0 -> self#on_Eq env this c0

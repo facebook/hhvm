@@ -279,6 +279,9 @@ let string_of_istype_op op =
   | OpArr -> "Arr"
   | OpObj -> "Obj"
   | OpScalar -> "Scalar"
+  | OpVec -> "Vec"
+  | OpDict -> "Dict"
+  | OpKeyset -> "Keyset"
 
 let string_of_initprop_op op =
   match op with
@@ -741,6 +744,7 @@ and string_of_bop = function
   | A.BArbar -> "||"
   | A.Lt -> "<"
   | A.Lte -> "<="
+  | A.Cmp -> "<=>"
   | A.Gt -> ">"
   | A.Gte -> ">="
   | A.Dot -> "."

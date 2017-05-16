@@ -797,6 +797,7 @@ class virtual ['self] map =
     method on_BArbar env = BArbar
     method on_Lt env = Lt
     method on_Lte env = Lte
+    method on_Cmp env = Cmp
     method on_Gt env = Gt
     method on_Gte env = Gte
     method on_Dot env = Dot
@@ -830,6 +831,7 @@ class virtual ['self] map =
       | Bar -> self#on_Bar env
       | Ltlt -> self#on_Ltlt env
       | Gtgt -> self#on_Gtgt env
+      | Cmp -> self#on_Cmp env
       | Percent -> self#on_Percent env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0

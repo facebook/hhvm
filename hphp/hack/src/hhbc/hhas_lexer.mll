@@ -49,6 +49,10 @@ let sillyend = ';' digit+
 let id = ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_' '\\' '$' '#'] | "::")* sillyend?
 let escapequote = "\\\""
 let comment = '#' [^ '\r' '\n']* newline
+let nonquote = [^ '"']
+let quote = '"'
+let nontriple = (nonquote | quote nonquote | quote quote nonquote)* quote? quote?
+let triplequoted = quote quote quote nontriple quote quote quote
 
 rule read =
   parse
@@ -71,7 +75,7 @@ rule read =
   | ".filepath" {FILEPATHDIRECTIVE}
   | ".alias"    {ALIASDIRECTIVE}
   | id          {ID (Lexing.lexeme lexbuf)}
-  | "\"\"\""    {read_triplequoted_string (Buffer.create 17) lexbuf}
+  | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
   | escapequote {read_php_escaped_string (Buffer.create 17) lexbuf}
   | '"'         { read_string (Buffer.create 17) lexbuf}
   | newline     {NEWLINE}

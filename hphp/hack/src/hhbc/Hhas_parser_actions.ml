@@ -81,8 +81,34 @@ let rec parse_attribute c =
  | None -> List.rev sofar
  | Some a -> parse_attribute_list c (a::sofar)
 
+(* Now that lexing triplequoted strings doesn't do any unescaping at all,
+   we need a separate unescaper to run before we scan them in attributes.
+   It would be more efficient to fold this pass into the scanning done
+   by parse_attribute above. But this is easier, because of the fact that
+   we use the length to decide how many characters to read in the 's' case.
+   Note that match s[i+1] can throw if the string ends with a naked backslash.
+*)
+let my_unescape s =
+  let num_chars = String.length s in
+  let buf = Buffer.create num_chars in
+  let rec copy_from i =
+    if i = num_chars then Buffer.contents buf
+    else match s.[i] with
+      | '\\' -> (match s.[i+1] with
+                  | '\\' -> Buffer.add_char buf '\\'
+                  | 'r' -> Buffer.add_char buf '\r'
+                  | 'n' -> Buffer.add_char buf '\n'
+                  | 't' -> Buffer.add_char buf '\t'
+                  | '?' -> Buffer.add_char buf '?'
+                  | '"' -> Buffer.add_char buf '"'
+                  | _ -> report_error "bad escaped character in triplequoted"
+                  );
+                  copy_from (i+2)
+      | c -> Buffer.add_char buf c ; copy_from (i+1) in
+  copy_from 0
+
 let attribute_from_string s =
-  match parse_attribute (Scanf.Scanning.from_string s) with
+  match parse_attribute (Scanf.Scanning.from_string (my_unescape s)) with
    | Some a -> a
    | None -> report_error "attribute from string failed"
 

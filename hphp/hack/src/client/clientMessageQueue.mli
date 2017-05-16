@@ -6,6 +6,7 @@ type t
 type client_message_kind =
  | Request
  | Notification
+ | Response
 
 val kind_to_string : client_message_kind -> string
 
@@ -18,6 +19,8 @@ type client_message = {
   method_ : string; (* mandatory for request+notification; empty otherwise *)
   id : Hh_json.json option; (* mandatory for request+response *)
   params : Hh_json.json option; (* optional for request+notification *)
+  result : Hh_json.json option; (* optional for response *)
+  error: Hh_json.json option; (* optional for response *)
 }
 
 type result =

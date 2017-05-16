@@ -4,10 +4,12 @@ open Lsp_fmt
 type client_message_kind =
  | Request
  | Notification
+ | Response
 
 let kind_to_string = function
  | Request -> "Request"
  | Notification -> "Notification"
+ | Response -> "Response"
 
 type client_message = {
   timestamp : float;
@@ -15,6 +17,8 @@ type client_message = {
   method_ : string; (* mandatory for request+notification; empty otherwise *)
   id : Hh_json.json option; (* mandatory for request+response *)
   params : Hh_json.json option; (* optional for request+notification *)
+  result : Hh_json.json option; (* optional for response *)
+  error: Hh_json.json option; (* optional for response *)
 }
 
 type result =
@@ -61,16 +65,25 @@ let read_message (reader : Buffered_line_reader.t) : client_message =
   let id = Jget.val_opt json "id" in
   let method_ = Jget.string_opt json "method" in
   let params = Jget.val_opt json "params" in
-  let kind = match id, method_ with
-    | Some _id, Some _method -> Request
-    | None,     Some _method -> Notification
-    | _,        _            -> raise (Lsp.Error.Invalid_request "Not JsonRPC")
+  let result = Jget.val_opt json "result" in
+  let error = Jget.obj_opt json "error" in
+  (* Following categorization mostly mirrors that of VSCode except that     *)
+  (* VSCode allows number+string+null ID for response, but we allow any ID. *)
+  (* https://github.com/Microsoft/vscode-languageserver-node/blob/master/jsonrpc/src/main.ts#L655 *)
+  let kind = match id, method_, result, error with
+    | Some _id, Some _method, _, _            -> Request
+    | None,     Some _method, _, _            -> Notification
+    | _,        _,            Some _result, _ -> Response
+    | _,        _,            _, Some _error  -> Response
+    | _ -> raise (Lsp.Error.Invalid_request "Not JsonRPC")
   in
   {
     timestamp = Unix.gettimeofday ();
     id;
     method_ = Option.value method_ ~default:""; (* is easier to consume *)
     params;
+    result;
+    error;
     kind;
   }
 

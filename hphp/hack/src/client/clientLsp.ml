@@ -136,6 +136,20 @@ type event =
   | Client_error
   | Client_exit (* client exited unceremoniously, without an exit message *)
 
+(* To handle requests, we use a global list of callbacks for when the *)
+(* response is received, and a global id counter for correlation...   *)
+module Callback = struct
+  type t = {
+    method_: string; (* name of the request *)
+    on_result: Hh_json.json option -> unit; (* takes the result *)
+    on_error: int -> string -> Hh_json.json option -> unit;
+    (* code, message, data *)
+  }
+end
+let requests_counter: IMap.key ref = ref 0
+let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
+
+
 let rec connect_persistent'
   (root: Path.t)
   (retries: int)
@@ -318,12 +332,71 @@ let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
   in
   message |> Hh_json.json_to_string |> Http_lite.write_message outchan
 
-let short_timeout = 2.5
-let long_timeout = 15.0
+(* request: produce a Request message *)
+let request
+  (outchan: out_channel)
+  (on_result: Hh_json.json option -> unit)
+  (on_error: int -> string -> Hh_json.json option -> unit)
+  (method_: string)
+  (json: Hh_json.json)
+  : unit =
+  incr requests_counter;
+  let callback = { Callback.method_; on_result; on_error; } in
+  let request_id = !requests_counter in
+  requests_outstanding := IMap.add request_id callback !requests_outstanding;
+
+  let open Hh_json in
+  let message = JSON_Object [
+    "jsonrpc", string_ "2.0";
+    "id", int_ request_id;
+    "method", string_ method_;
+    "params", json;
+  ]
+  in
+  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+
+let get_outstanding_request (id: Hh_json.json option) =
+  match id with
+  | Some (Hh_json.JSON_Number s) -> begin
+    try
+      let id = int_of_string s in
+      Option.map (IMap.get id !requests_outstanding) ~f:(fun v -> (id, v))
+    with Failure _ -> None
+    end
+  | _ -> None
+
+let get_outstanding_method_name (id: Hh_json.json option) : string =
+  let open Callback in
+  match (get_outstanding_request id) with
+  | Some (_, callback) -> callback.method_
+  | None -> ""
+
+let do_response
+  (id: Hh_json.json option)
+  (result: Hh_json.json option)
+  (error: Hh_json.json option)
+  : unit =
+  let open Callback in
+  let id, on_result, on_error = match (get_outstanding_request id) with
+    | Some (id, callback) -> (id, callback.on_result, callback.on_error)
+    | None -> raise (Error.Invalid_request "response to non-existent id")
+  in
+  requests_outstanding := IMap.remove id !requests_outstanding;
+  if Option.is_some error then
+    let code = Jget.int_exn error "code" in
+    let message = Jget.string_exn error "message" in
+    let data = Jget.val_opt error "data" in
+    on_error code message data
+  else
+    on_result result
+
 
 (* cancel_if_stale: If a message is stale, throw the necessary exception to
    cancel it. A message is considered stale if it's sufficiently old and there
    are other messages in the queue that are newer than it. *)
+let short_timeout = 2.5
+let long_timeout = 15.0
+
 let cancel_if_stale
   (state: state)
   (message: ClientMessageQueue.client_message)
@@ -715,6 +788,10 @@ let handle_event (state: state) (event: event) : unit =
   let open ClientMessageQueue in
   let exit () = exit (if state.lsp_state = Post_shutdown then 0 else 1) in
   match state.lsp_state, event with
+  (* response *)
+  | _, Client_message c when c.kind = ClientMessageQueue.Response ->
+    do_response c.id c.result c.error
+
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" -> exit ()
   | _, Client_exit -> exit ()
@@ -886,8 +963,12 @@ let main () : unit =
           (* Log to scuba the time the message arrived at hh_client and the *)
           (* time we finished handling it. This includes any time it spent  *)
           (* waiting in the queue...                                        *)
+          let command =
+            if c.kind = Response
+            then get_outstanding_method_name c.id
+            else c.method_ in
           HackEventLogger.client_handled_command
-            ~command:c.method_
+            ~command
             ~start_t:c.timestamp
             ~kind:(kind_to_string c.kind);
           (* If we're connected to a server and have no more messages in   *)

@@ -669,7 +669,9 @@ let parse_initialize (params: json option) : Initialize.params =
 
 let print_initialize_error (r: Initialize.error_data) : json =
   let open Initialize in
-  JSON_Bool r.retry
+  JSON_Object [
+    "retry", JSON_Bool r.retry;
+  ]
 
 let print_initialize (r: Initialize.result) : json =
   let open Initialize in
@@ -746,6 +748,7 @@ let print_initialize (r: Initialize.result) : json =
 (************************************************************************)
 
 let get_error_info (e: exn) : int * string * json option =
+  (* returns (lspErrorCode, friendlyMessage, lspData) *)
   match e with
   | Error.Parse message -> (-32700, message, None)
   | Error.Invalid_request message -> (-32600, message, None)
@@ -758,19 +761,22 @@ let get_error_info (e: exn) : int * string * json option =
   | Error.Server_not_initialized message -> (-32002, message, None)
   | Error.Unknown message -> (-32001, message, None)
   | Error.Request_cancelled message -> (-32800, message, None)
-  | _ -> (-32001, "Internal error", None)
+  | _ -> (-32001, Printexc.to_string e, None)
 
 let print_error (e: exn) : json =
   let open Hh_json in
-  let (code, message, data) = get_error_info e in
-  (* TODO: move the backtrace into "data" once Nuclide can log it there. *)
-  let message = Printf.sprintf "%s - %s - %s"
-    message
-    (Printexc.to_string e)
-    (Printexc.get_backtrace ())
-    in
-  Jprint.object_opt [
-    "code", Some (int_ code);
-    "message", Some (string_ message);
+  let (code, message, original_data) = get_error_info e in
+  let stack = ("stack", string_ (Printexc.get_backtrace ())) in
+  (* We'd like to add a stack-trace. The only place we can fit it, that will *)
+  (* be respected by vscode-jsonrpc, is inside the 'data' field. And we can  *)
+  (* do that only if data is an object. We can synthesize one if needed.     *)
+  let data = match original_data with
+    | None -> JSON_Object [stack]
+    | Some (JSON_Object o) -> JSON_Object (stack :: o)
+    | Some primitive -> primitive
+  in
+  JSON_Object [
+    "code", int_ code;
+    "message", string_ message;
     "data", data;
   ]

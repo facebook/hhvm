@@ -775,8 +775,7 @@ let do_initialize (params: Initialize.params)
     (Some server_conn, result)
   with
   | e ->
-    let message = (Printexc.to_string e) ^ ": " ^ (Printexc.get_backtrace ()) in
-    raise (Error.Server_error_start (message, {retry = false;}))
+    raise e
 
 (************************************************************************)
 (** Message handling                                                   **)

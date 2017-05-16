@@ -2199,6 +2199,309 @@ TO_STRING_VARIABLE_TEXT
 
 end (* GenerateFFTokenKind *)
 
+module GenerateFFPositionedSyntax = struct
+  exception No_fields_in_schema_node of schema_node
+
+  let to_kind_declaration x =
+    Printf.sprintf "  | %s\n" x.token_kind
+
+  let to_from_string x =
+    Printf.sprintf "  | \"%s\" -> Some %s\n" x.token_text x.token_kind
+
+  let to_to_string x =
+    Printf.sprintf "  | %s -> \"%s\"\n" x.token_kind x.token_text
+
+  let full_fidelity_positioned_syntax_template = begin "(**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the \"hack\" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ * @" ^ "generated THIS FILE IS GENERATED; DO NOT EDIT IT
+ * To regenerate this file:
+ *   buck run hphp/hack/src:generate_full_fidelity
+ *)
+
+(**
+ * Positioned syntax tree
+ *
+ * A positioned syntax tree stores the original source text,
+ * the offset of the leading trivia, the width of the leading trivia,
+ * node proper, and trailing trivia. From all this information we can
+ * rapidly compute the absolute position of any portion of the node,
+ * or the text.
+ *
+ *)
+
+module SyntaxTree = Full_fidelity_syntax_tree
+module SourceText = Full_fidelity_source_text
+module PositionedToken = Full_fidelity_positioned_token
+
+module SyntaxWithPositionedToken =
+  Full_fidelity_syntax.WithToken(PositionedToken)
+
+module PositionedSyntaxValue = struct
+  type t = {
+    source_text: SourceText.t;
+    offset: int; (* Beginning of first trivia *)
+    leading_width: int;
+    width: int; (* Width of node, not counting trivia *)
+    trailing_width: int;
+  }
+
+  let make source_text offset leading_width width trailing_width =
+    { source_text; offset; leading_width; width; trailing_width }
+
+  let source_text value =
+    value.source_text
+
+  let start_offset value =
+    value.offset
+
+  let leading_width value =
+    value.leading_width
+
+  let width value =
+    value.width
+
+  let trailing_width value =
+    value.trailing_width
+end
+
+include SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)
+
+let source_text node =
+  PositionedSyntaxValue.source_text (value node)
+
+let leading_width node =
+  PositionedSyntaxValue.leading_width (value node)
+
+let width node =
+  PositionedSyntaxValue.width (value node)
+
+let trailing_width node =
+  PositionedSyntaxValue.trailing_width (value node)
+
+let full_width node =
+  (leading_width node) + (width node) + (trailing_width node)
+
+let leading_start_offset node =
+  PositionedSyntaxValue.start_offset (value node)
+
+let leading_end_offset node =
+  let w = (leading_width node) - 1 in
+  let w = if w < 0 then 0 else w in
+  (leading_start_offset node) + w
+
+let start_offset node =
+  (leading_start_offset node) + (leading_width node)
+
+let end_offset node =
+  let w = (width node) - 1 in
+  let w = if w < 0 then 0 else w in
+  (start_offset node) + w
+
+let trailing_start_offset node =
+  (leading_start_offset node) + (leading_width node) + (width node)
+
+let trailing_end_offset node =
+  let w = (full_width node) - 1 in
+  let w = if w < 0 then 0 else w in
+  (leading_start_offset node) + w
+
+let leading_start_position node =
+  SourceText.offset_to_position (source_text node) (leading_start_offset node)
+
+let leading_end_position node =
+  SourceText.offset_to_position (source_text node) (leading_end_offset node)
+
+let start_position node =
+  SourceText.offset_to_position (source_text node) (start_offset node)
+
+let end_position node =
+  SourceText.offset_to_position (source_text node) (end_offset node)
+
+let trailing_start_position node =
+  SourceText.offset_to_position (source_text node) (trailing_start_offset node)
+
+let trailing_end_position node =
+  SourceText.offset_to_position (source_text node) (trailing_end_offset node)
+
+let leading_span node =
+  ((leading_start_position node), (leading_end_position node))
+
+let span node =
+  ((start_position node), (end_position node))
+
+let trailing_span node =
+  ((trailing_start_position node), (trailing_end_position node))
+
+let full_span node =
+  ((leading_start_position node), (trailing_end_position node))
+
+let full_text node =
+  SourceText.sub
+    (source_text node) (leading_start_offset node) (full_width node)
+
+let leading_text node =
+  SourceText.sub
+    (source_text node)
+    (leading_start_offset node)
+    (leading_width node)
+
+let trailing_text node =
+  SourceText.sub
+    (source_text node) ((end_offset node) + 1) (trailing_width node)
+
+let text node =
+  SourceText.sub (source_text node) (start_offset node) (width node)
+
+module FromMinimal = struct
+  module SyntaxKind = Full_fidelity_syntax_kind
+  module M = Full_fidelity_minimal_syntax
+
+  exception Multiplicitous_conversion_result of int
+
+  type todo =
+  | Build of (M.t * int * todo)
+  | Convert of (M.t * todo)
+  | Done
+
+  let from_minimal source_text (node : M.t) : t =
+    let make_syntax minimal_node positioned_syntax offset =
+      let leading_width = M.leading_width minimal_node in
+      let width = M.width minimal_node in
+      let trailing_width = M.trailing_width minimal_node in
+      let value = PositionedSyntaxValue.make
+        source_text offset leading_width width trailing_width in
+      make positioned_syntax value
+    in
+    let build minimal_t (results : t list) : syntax * t list =
+      match M.kind minimal_t, results with
+      | SyntaxKind.SyntaxList, _ ->
+        let len =
+          match M.syntax minimal_t with
+          | M.SyntaxList l -> List.length l
+          | _ -> failwith \"SyntaxKind out of sync with Syntax (impossible).\"
+        in
+        let rec aux ls n rs =
+          match n, rs with
+          | 0, _ -> ls, rs
+          | _, [] -> failwith \"Rebuilding list with insufficient elements.\"
+          | n, (r::rs) -> aux (r :: ls) (n - 1) rs
+        in
+        let ls, rs = aux [] len results in
+        SyntaxList ls, rs
+BUILD_CASES
+      | _ ->
+        failwith @@ Printf.sprintf
+          \"BUILD: Failed to build %s with %d results.\"
+          (SyntaxKind.to_string @@ M.kind minimal_t)
+          (List.length results)
+    in
+
+    let rec dispatch (offset : int) (todo : todo) (results : t list) : t =
+      match todo with
+      | Build (node, node_offset, todo) ->
+        let syntax, results = build node results in
+        let results = make_syntax node syntax node_offset :: results in
+        dispatch offset todo results
+      | Convert (n, todo) -> convert offset todo results n
+      | Done ->
+        (match results with
+        | [result] -> result
+        | _  -> raise @@ Multiplicitous_conversion_result (List.length results)
+        )
+    and convert (offset : int) (todo : todo) (results : t list) : M.t -> t = function
+    | { M.syntax = M.Token token; _ } as minimal_t ->
+      let token = PositionedToken.from_minimal source_text token offset in
+      let syntax = Token token in
+      let node = make_syntax minimal_t syntax offset in
+      let offset = offset + M.full_width minimal_t in
+      dispatch offset todo (node :: results)
+    | { M.syntax = M.Missing; _ } as minimal_t ->
+      let node = make_syntax minimal_t Missing offset in
+      dispatch offset todo (node :: results)
+    | { M.syntax = M.SyntaxList l; _ } as minimal_t ->
+      let todo = Build (minimal_t, offset, todo) in
+      let todo = List.fold_right (fun n t -> Convert (n,t)) l todo in
+      dispatch offset todo results
+CONVERT_CASES    in
+    convert 0 Done [] node
+end
+
+let from_minimal = FromMinimal.from_minimal
+
+let from_tree tree =
+  from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree)
+
+"
+end
+
+  let to_convert_cases x =
+    let open Printf in
+    let fields, first, other =
+      match List.map (sprintf "%s_%s" x.prefix) x.fields with
+      | (first :: other) as fields -> fields, first, other
+      | _ -> raise (No_fields_in_schema_node x)
+    in
+    let fields =
+      String.concat "\n        ; " @@
+        List.map (sprintf "M.%s_%s" x.prefix) x.fields
+    in
+    let todos =
+      String.concat "" @@
+        List.rev_map (sprintf "let todo = Convert (%s, todo) in\n        ") other
+    in
+    Printf.sprintf
+"    | { M.syntax = M.%s
+        { %s
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        %sconvert offset todo results %s
+"
+      x.kind_name
+      fields
+      todos
+      first
+
+  let to_build_cases x =
+    let open Printf in
+    let fields = List.map (sprintf "%s_%s" x.prefix) x.fields in
+    sprintf
+"      | SyntaxKind.%s
+      , (  %s
+        :: results
+        ) ->
+          %s
+          { %s
+          }, results
+"
+      x.kind_name
+      (String.concat "\n        :: " @@ List.rev fields)
+      x.kind_name
+      (String.concat "\n          ; " fields)
+
+  let full_fidelity_positioned_syntax =
+  {
+    filename = full_fidelity_path_prefix ^ "full_fidelity_positioned_syntax.ml";
+    template = full_fidelity_positioned_syntax_template;
+    transformations = [
+      { pattern = "CONVERT_CASES"; func = to_convert_cases };
+      { pattern = "BUILD_CASES";   func = to_build_cases   };
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = []
+  }
+
+end (* GenerateFFPositionedSyntax *)
+
 let () =
   generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
@@ -2206,4 +2509,5 @@ let () =
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
   generate_file GenerateFFHack.full_fidelity_hack;
   generate_file GenerateFFTokenKind.full_fidelity_token_kind;
-  generate_file GenerateFFJSONSchema.full_fidelity_json_schema
+  generate_file GenerateFFJSONSchema.full_fidelity_json_schema;
+  generate_file GenerateFFPositionedSyntax.full_fidelity_positioned_syntax;

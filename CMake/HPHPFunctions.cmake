@@ -134,7 +134,7 @@ function(embed_sections TARGET DEST)
   add_custom_command(TARGET ${TARGET} PRE_BUILD
     # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
-    COMMAND "${HPHP_HOME}/hphp/util/generate-buildinfo.sh"
+    COMMAND "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"
     VERBATIM)

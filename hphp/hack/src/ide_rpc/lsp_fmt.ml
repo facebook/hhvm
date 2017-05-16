@@ -351,6 +351,31 @@ let print_show_message (type_: Message_type.t) (message: string) : json =
 
 
 (************************************************************************)
+(** window/showMessage request                                         **)
+(************************************************************************)
+
+let print_show_message_request
+  (type_: Message_type.t)
+  (message: string)
+  (titles: string list)
+  : json =
+  let open Show_message_request in
+  let print_action (action: message_action_item) : json =
+    JSON_Object [
+      "title", JSON_String action.title;
+    ]
+  in
+  let actions = List.map titles ~f:(fun title -> { title; }) in
+  let r = { type_; message; actions; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
+    "actions", JSON_Array (List.map r.actions ~f:print_action);
+  ]
+
+
+
+(************************************************************************)
 (** textDocument/hover request                                         **)
 (************************************************************************)
 

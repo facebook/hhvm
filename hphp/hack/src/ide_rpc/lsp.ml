@@ -645,6 +645,22 @@ module Show_message = struct
 end
 
 
+(* ShowMessage request, method="window/showMessageRequest" *)
+module Show_message_request = struct
+  type params = show_message_request_params
+
+  and show_message_request_params = {
+    type_: Message_type.t;
+    message: string;
+    actions: message_action_item list;
+  }
+
+  and message_action_item = {
+    title: string;
+  }
+end
+
+
 (* ErrorResponse *)
 module Error = struct
   (* Defined by JSON-RPC. *)

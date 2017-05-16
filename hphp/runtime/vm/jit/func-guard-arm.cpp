@@ -84,14 +84,13 @@ TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
     // Typically a func guard is a smashable movq followed by an ldr, cmp, b,
     // br, and a 64 bit target. However, relocation can shorten the sequence,
     // so search backwards until the smashable movq is found.
-    for (int length = 0; length < (5 * 4) + 8; length+= 4) {
+    for (int length = 0; length < (5 * 4) + 8; length += 4) {
       TCA inst = prologue - (smashableMovqLen() + length);
       if (isSmashableMovq(inst)) return inst;
     }
-    not_reached();
+    always_assert(false);
   }
   return prologue;
-
 }
 
 bool funcGuardMatches(TCA guard, const Func* func) {

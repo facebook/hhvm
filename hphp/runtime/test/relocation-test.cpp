@@ -26,6 +26,8 @@ using namespace vixl;
 
 namespace HPHP { namespace jit {
 
+namespace arm {
+
 uint8_t* code_;
 size_t blockSize_ = 4096;
 
@@ -423,4 +425,4 @@ TEST(Relocation, AdjustMovzMovk) {
   EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end));
 }
 
-}}
+}}}

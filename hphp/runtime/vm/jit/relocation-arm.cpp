@@ -75,7 +75,7 @@ struct JmpOutOfRange : std::exception {};
  */
 struct Env {
   explicit Env(RelocationInfo& rel, CodeBlock& destBlock,
-               TCA start, TCA end, CGMeta& meta, TCA*& exitAddr)
+               TCA start, TCA end, CGMeta& meta, TCA* exitAddr)
     : rel(rel)
     , destBlock(destBlock)
     , start(start)
@@ -89,9 +89,9 @@ struct Env {
 
   RelocationInfo& rel;
   CodeBlock& destBlock;
-  TCA start, end;
-  CGMeta& meta;
-  TCA*& exitAddr;
+  const TCA start, end;
+  const CGMeta& meta;
+  TCA* exitAddr;
   bool updateInternalRefs;
 
   /*
@@ -209,8 +209,10 @@ bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
   }
   env.updateInternalRefs = true;
   FTRACE(3,
-         "Relocated smashable at src 0x{:08x} with target 0x{:08x} to 0x{:08x} (0x{:08x})\n",
-         (uint64_t)srcAddr, (uint64_t)target, *((uint32_t*)destAddr), (uint64_t)destAddr);
+         "Relocated smashable at src 0x{:08x} ",
+         "with target 0x{:08x} to 0x{:08x} (0x{:08x})\n",
+         (uint64_t)srcAddr, (uint64_t)target,
+         *((uint32_t*)destAddr), (uint64_t)destAddr);
 
   return true;
 }
@@ -237,8 +239,8 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         src->IsLoadLiteral() ||
         src->IsCondBranchImm() ||
         src->IsUncondBranchImm() ||
-	src->IsCompareBranch() ||
-	src->IsTestBranch())) return false;
+        src->IsCompareBranch() ||
+        src->IsTestBranch())) return false;
 
   auto target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
 
@@ -331,11 +333,11 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         auto const rt = vixl::Register(src->Rt(), 64);
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-	if (src->Mask(CompareBranchMask) == CBZ_x) {
-	  a.Cbnz(rt, &end);
-	} else {
-	  a.Cbz(rt, &end);
-	}
+        if (src->Mask(CompareBranchMask) == CBZ_x) {
+          a.Cbnz(rt, &end);
+        } else {
+          a.Cbz(rt, &end);
+        }
         a.Mov(tmp, src->ImmPCOffsetTarget());
         a.Br(tmp);
         a.bind(&end);
@@ -356,11 +358,11 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         auto const rt = vixl::Register(src->Rt(), 64);
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-	if (src->Mask(TestBranchMask) == TBZ) {
-	  a.Tbnz(rt, bit_pos, &end);
-	} else {
-	  a.Tbz(rt, bit_pos, &end);
-	}
+        if (src->Mask(TestBranchMask) == TBZ) {
+          a.Tbnz(rt, bit_pos, &end);
+        } else {
+          a.Tbz(rt, bit_pos, &end);
+        }
         a.Mov(tmp, src->ImmPCOffsetTarget());
         a.Br(tmp);
         a.bind(&end);
@@ -621,8 +623,8 @@ size_t relocateImpl(Env& env) {
       for (auto src = Instruction::Cast(env.start);
            src < Instruction::Cast(env.end);
            src = src->NextInstruction()) {
-        auto destAddr = env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(src));
-        auto dest = Instruction::Cast(destAddr);
+        auto const destAddr = env.rel.adjustedAddressAfter(reinterpret_cast<TCA>(src));
+        auto const dest = Instruction::Cast(destAddr);
 
         // Adjust this instruction if A) it wasn't written from a pc relative
         // instruction to an absolute (or vice-versa) and B) it isn't a literal.
@@ -632,15 +634,15 @@ size_t relocateImpl(Env& env) {
            *   ADR/ADRP
            *   LDR (literal)
            *   B[.<cc>] (immediate)
-	   *   CB[N]Z
-	   *   TB[N]Z
+           *   CB[N]Z
+           *   TB[N]Z
            */
           if (src->IsPCRelAddressing() ||
               src->IsLoadLiteral() ||
               src->IsCondBranchImm() ||
               src->IsUncondBranchImm() ||
-	      src->IsCompareBranch() ||
-	      src->IsTestBranch()) {
+              src->IsCompareBranch() ||
+              src->IsTestBranch()) {
             auto old_target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
             auto adjusted_target = env.rel.adjustedAddressAfter(old_target);
             auto new_target = adjusted_target ? adjusted_target : old_target;

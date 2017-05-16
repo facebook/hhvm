@@ -229,10 +229,6 @@ void clearTCMaps(TCA start, TCA end) {
         instSz = di.size();
         break;
       }
-      default: {
-        not_reached();
-        break;
-      }
     }
 
     if (profData && (isBranch || isNop || isCall)) {

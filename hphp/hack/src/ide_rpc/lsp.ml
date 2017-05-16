@@ -196,6 +196,16 @@ module Symbol_information = struct
 end
 
 
+(* For showing messages (not diagnostics) in the user interface. *)
+module Message_type = struct
+  type t =
+    | ErrorMessage  (* 1 *)
+    | WarningMessage  (* 2 *)
+    | InfoMessage  (* 3 *)
+    | LogMessage  (* 4 *)
+end
+
+
 (* Cancellation notification, method="$/cancelRequest" *)
 module CancelRequest = struct
   type params = cancel_params
@@ -609,6 +619,28 @@ module Document_on_type_formatting = struct
     position: position;  (* the position at which this request was sent *)
     ch: string;  (* the character that has been typed *)
     options: Document_formatting.formatting_options;
+  }
+end
+
+
+(* LogMessage notification, method="window/logMessage" *)
+module Log_message = struct
+  type params = log_message_params
+
+  and log_message_params = {
+    type_: Message_type.t;
+    message: string;
+  }
+end
+
+
+(* ShowMessage notification, method="window/showMessage" *)
+module Show_message = struct
+  type params = show_message_params
+
+  and show_message_params = {
+    type_: Message_type.t;
+    message: string;
   }
 end
 

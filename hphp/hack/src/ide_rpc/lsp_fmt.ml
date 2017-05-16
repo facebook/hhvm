@@ -235,6 +235,14 @@ let print_symbol_information (info: Symbol_information.t) : json =
     "containerName", Option.map info.container_name string_;
   ]
 
+let print_message_type (type_: Message_type.t) : json =
+  let open Message_type in
+  match type_ with
+    | ErrorMessage -> int_ 1
+    | WarningMessage -> int_ 2
+    | InfoMessage -> int_ 3
+    | LogMessage -> int_ 4
+
 
 (************************************************************************)
 (** shutdown request                                                   **)
@@ -313,6 +321,32 @@ let print_diagnostics (r: Publish_diagnostics.params) : json =
   JSON_Object [
     "uri", JSON_String r.uri;
     "diagnostics", JSON_Array (List.map r.diagnostics ~f:print_diagnostic)
+  ]
+
+
+(************************************************************************)
+(** window/logMessage notification                                     **)
+(************************************************************************)
+
+let print_log_message (type_: Message_type.t) (message: string) : json =
+  let open Log_message in
+  let r = { type_; message; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
+  ]
+
+
+(************************************************************************)
+(** window/showMessage notification                                    **)
+(************************************************************************)
+
+let print_show_message (type_: Message_type.t) (message: string) : json =
+  let open Show_message in
+  let r = { type_; message; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
   ]
 
 

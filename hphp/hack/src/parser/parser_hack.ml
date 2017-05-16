@@ -4357,6 +4357,7 @@ and namespace_group_use env kind prefix =
 
   let allow_change_kind = (kind = NSClass) in
   let unprefixed = namespace_use_list env allow_change_kind Trcb kind [] in
+  expect env Tsc;
   List.map unprefixed begin fun (kind, (p1, s1), id2) ->
     (kind, (p1, prefix ^ s1), id2)
   end

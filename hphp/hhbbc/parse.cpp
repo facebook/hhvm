@@ -194,11 +194,17 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *     fault-protected region begins a block.
    *
    *   - Each fault or catch entry point begins a block.
+   *
+   *   - The instruction immediately after the end of any
+   *     fault or catch region begins a block.
    */
   for (auto& eh : fe.ehtab) {
     markBlock(eh.m_base);
     markBlock(eh.m_past);
     markBlock(eh.m_handler);
+    if (eh.m_end != kInvalidOffset) {
+      markBlock(eh.m_end);
+    }
   }
 
   // Now, each interval in blockStarts delinates a basic block.

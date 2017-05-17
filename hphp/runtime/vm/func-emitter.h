@@ -50,6 +50,7 @@ struct EHEntEmitter {
   int m_iterId;
   int m_parentIndex;
   Offset m_handler;
+  Offset m_end;
 
   template<class SerDe> void serde(SerDe& sd);
 };

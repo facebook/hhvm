@@ -717,6 +717,9 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << " itRef " << (it->m_itRef ? "true" : "false");
     }
     out << " handle at " << it->m_handler;
+    if (it->m_end != kInvalidOffset) {
+      out << ":" << it->m_end;
+    }
     if (it->m_parentIndex != -1) {
       out << " parentIndex " << it->m_parentIndex;
     }

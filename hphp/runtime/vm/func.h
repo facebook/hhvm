@@ -75,6 +75,7 @@ struct EHEnt {
   int m_iterId;
   int m_parentIndex;
   Offset m_handler;
+  Offset m_end;
 };
 
 /*

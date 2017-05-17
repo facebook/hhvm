@@ -145,6 +145,7 @@ static std::vector<EHEnt> toFixed(const std::vector<EHEntEmitter>& vec) {
     e.m_iterId = ehe.m_iterId;
     e.m_parentIndex = ehe.m_parentIndex;
     e.m_handler = ehe.m_handler;
+    e.m_end = ehe.m_end;
     ret.emplace_back(std::move(e));
   }
   return ret;

@@ -806,15 +806,18 @@ private:
 
   struct CatchRegion {
     CatchRegion(Offset start,
+                Offset handler,
                 Offset end,
                 Id iterId,
                 IterKind kind)
       : m_start(start)
+      , m_handler(handler)
       , m_end(end)
       , m_iterId(iterId)
       , m_iterKind(kind) {}
 
     Offset m_start;
+    Offset m_handler;
     Offset m_end;
     Id m_iterId;
     IterKind m_iterKind;
@@ -10286,15 +10289,17 @@ void EmitterVisitor::emitCatch(Emitter& e,
   Label afterCatch;
   e.Jmp(afterCatch);
 
-  Offset end = e.getUnitEmitter().bcPos();
+  Offset handler = e.getUnitEmitter().bcPos();
 
   e.Catch();
   emitCatchBody();
   e.Throw();
 
+  Offset end = e.getUnitEmitter().bcPos();
   afterCatch.set(e);
 
-  m_catchRegions.push_back(new CatchRegion(start, end, iter.iterId, iter.kind));
+  m_catchRegions.push_back(
+      new CatchRegion(start, handler, end, iter.iterId, iter.kind));
 }
 
 void EmitterVisitor::newFaultRegion(Offset start,
@@ -10341,10 +10346,11 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
     auto& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Catch;
     e.m_base = cr->m_start;
-    e.m_past = cr->m_end;
+    e.m_past = cr->m_handler;
     e.m_iterId = cr->m_iterId;
     e.m_itRef = cr->m_iterKind == KindOfMIter;
-    e.m_handler = cr->m_end;
+    e.m_handler = cr->m_handler;
+    e.m_end = cr->m_end;
     assert(e.m_base != kInvalidOffset);
     assert(e.m_past != kInvalidOffset);
     assert(e.m_handler != kInvalidOffset);
@@ -10361,6 +10367,7 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
     e.m_iterId = fr->m_iterId;
     e.m_itRef = fr->m_iterKind == KindOfMIter;
     e.m_handler = fr->m_func->getAbsoluteOffset();
+    e.m_end = kInvalidOffset;
     assert(e.m_handler != kInvalidOffset);
     delete fr;
   }

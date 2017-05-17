@@ -1550,6 +1550,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
+  eh.m_end = kInvalidOffset;
 
   as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
@@ -1578,6 +1579,7 @@ void parse_catch(AsmState& as, int nestLevel) {
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
+  eh.m_end = kInvalidOffset;
 
   as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
@@ -1587,7 +1589,7 @@ void parse_catch(AsmState& as, int nestLevel) {
  *                     ;
  */
 void parse_try_catch(AsmState& as, int nestLevel) {
-  const Offset tryStart = as.ue->bcPos();
+  const Offset start = as.ue->bcPos();
 
   int iterId = -1;
   as.in.skipWhitespace();
@@ -1602,7 +1604,7 @@ void parse_try_catch(AsmState& as, int nestLevel) {
     as.error("expected .try region to not fall-thru");
   }
 
-  const Offset tryEnd = as.ue->bcPos();
+  const Offset handler = as.ue->bcPos();
 
   // Emit catch body.
   as.enterReachableRegion(0);
@@ -1619,12 +1621,15 @@ void parse_try_catch(AsmState& as, int nestLevel) {
   as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
+  const Offset end = as.ue->bcPos();
+
   auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
-  eh.m_base = tryStart;
-  eh.m_past = tryEnd;
+  eh.m_base = start;
+  eh.m_past = handler;
   eh.m_iterId = iterId;
-  eh.m_handler = tryEnd;
+  eh.m_handler = handler;
+  eh.m_end = end;
 }
 
 /*

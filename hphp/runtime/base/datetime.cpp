@@ -300,6 +300,9 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
       m_tz = TimeZone::Current();
     }
     t->tz_info = m_tz->get();
+    if (!t->tz_info) {
+      raise_error("No tz info found for timezone check for tzdata package.");
+    }
     t->zone_type = TIMELIB_ZONETYPE_ID;
     timelib_unixtime2local(t, (timelib_sll)m_timestamp);
   }

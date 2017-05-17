@@ -38,6 +38,7 @@ struct PerfTable {
 struct HardwareCounterImpl;
 struct StructuredLogEntry;
 
+/* If you change the public interface, remember to update the stubs below. */
 struct HardwareCounter {
   HardwareCounter();
   ~HardwareCounter();
@@ -87,6 +88,8 @@ private:
 
 #else // NO_HARDWARE_COUNTERS
 
+struct StructuredLogEntry;
+
 /* Stub implementation for platforms without hardware counters (non-linux)
  * This mock class pretends to track performance events, but just returns
  * static values, so it doesn't even need to worry about thread safety
@@ -107,7 +110,9 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void UpdateServiceData(const timespec& begin, bool includingPsp) { }
+  static void UpdateServiceData(const timespec& begin,
+                                StructuredLogEntry* entry,
+                                bool includingPsp) { }
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,

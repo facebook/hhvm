@@ -33,9 +33,11 @@ TIMEOUT_DURATION='30s'
 export HHVM_USE_BUCK=1
 "$BUCK" build @mode/opt-hhvm -c cxx.extra_cxxppflags='-D USE_LOWPTR' \
   //hphp/hhvm:hhvm
-
-# retrieve HHVM binary
 HHVM_PATH="$(find buck-out -type f -name hhvm | grep -v outputs | grep opt | head -n 1)"
+
+# prepare hackc
+"$BUCK" build //hphp/hack/src:hh_single_compile
+HACKC_PATH=$("$BUCK" targets --show-output //hphp/hack/src:hh_single_compile | cut -d' ' -f2)
 
 NUM_LINES_HHVM=0
 NUM_LINES_HH=0
@@ -52,9 +54,7 @@ for FILE in $PHP_FILES; do
 
   # Hack
   HH_TMP=$(mktemp /tmp/measure_hh_codegen.hh.XXXXXX)
-  "$TIMEOUT_BIN" "$TIMEOUT_DURATION"  \
-    "$BUCK" run //hphp/hack/src:hh_single_compile -- \
-      "$FILE" > "$HH_TMP"
+  "$TIMEOUT_BIN" "$TIMEOUT_DURATION" "$HACKC_PATH" "$FILE" > "$HH_TMP"
 
   NUM_LINES_HHVM=$((NUM_LINES_HHVM + $(wc -l < "$HHVM_TMP")))
   NUM_LINES_HH=$((NUM_LINES_HH + $(wc -l < "$HH_TMP")))

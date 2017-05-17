@@ -86,8 +86,71 @@ let levenshtein value_comparer l1 l2 =
   let (totalsize,_) = memo.(len1).(0) in
   (n, (totalsize, readback len1 len2 ""))
 
+(* In contrast to the above, a really stupid pointwise comparer for lists
+   that runs in linear time and stops producing detailed diff outputs after
+   a threshold has been reached.
+   One could usefully replace this with something better, but still linear.
+*)
+let max_array_size = 1000000
+let edit_cost_threshold = 20
+
+let rec dumb_compare value_comparer l1 l2 costsofar sizesofar buf =
+ let possibly_remove x x_xsize =
+   if costsofar < edit_cost_threshold then
+     (Buffer.add_string buf (deletestring (value_comparer.string_of x));
+      if costsofar+x_xsize >= edit_cost_threshold then
+        Buffer.add_string buf "...truncated..."
+      else ())
+   else () in
+  let possibly_add x x_xsize =
+    if costsofar < edit_cost_threshold then
+       (Buffer.add_string buf (addstring (value_comparer.string_of x));
+        if costsofar+x_xsize >= edit_cost_threshold then
+          Buffer.add_string buf "...truncated..."
+        else ())
+    else () in
+  let possibly_edit edits size =
+    if costsofar < edit_cost_threshold then
+      (Buffer.add_string buf edits;
+       if costsofar + size >= edit_cost_threshold then
+          Buffer.add_string buf "...truncated..."
+       else ())
+    else () in
+ match l1, l2 with
+  | [], [] -> (costsofar, (sizesofar, Buffer.contents buf))
+  | x::xs, [] -> let x_size = value_comparer.size_of x in
+                  possibly_remove x x_size;
+                  dumb_compare value_comparer xs []
+                    (costsofar + x_size)
+                    (sizesofar + x_size)
+                    buf
+  | [], y::ys -> let y_size = value_comparer.size_of y in
+                  possibly_add y y_size;
+                  dumb_compare value_comparer [] ys
+                    (costsofar + y_size)
+                    (sizesofar + y_size)
+                    buf
+  | x::xs, y::ys ->
+    let (editcost,(size,edits)) = value_comparer.comparer x y in
+    if editcost = 0 then
+          dumb_compare value_comparer xs ys costsofar (size+sizesofar) buf
+    else
+          (possibly_edit edits editcost;
+           dumb_compare value_comparer xs ys (editcost+costsofar)
+            (size+sizesofar) buf)
+
+let falling_back_list_comparer value_comparer l1 l2 =
+  let len1 = List.length l1 in
+  let len2 = List.length l2 in
+   if len1 * len2 < max_array_size then levenshtein value_comparer l1 l2
+   else (print_endline "\n****Falling back on dumb comparer";
+         dumb_compare value_comparer l1 l2 0 0 (Buffer.create len1))
+
+(* Now the default list comparer, which does levenshtein unless the input looks
+   too big for a quadratic algorithm, when it falls back to dumb_compare
+*)
 let list_comparer elt_comparer inbetween = {
-  comparer = levenshtein elt_comparer;
+  comparer = falling_back_list_comparer elt_comparer;
   size_of = (fun l -> sumsize elt_comparer.size_of l);
   string_of = (fun l -> "[" ^ (concatstrs
      (List.map (fun elt -> elt_comparer.string_of elt ^ inbetween) l)) ^ "]");

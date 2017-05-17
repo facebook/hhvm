@@ -97,7 +97,8 @@ ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
  */
 ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
   if (UNLIKELY(tv->m_type == KindOfRef)) {
-    tv = tv->m_data.pref->tv();
+    assertx(tv->m_data.pref->tv()->m_type != KindOfUninit);
+    return *tv->m_data.pref->tv();
   }
   if (tv->m_type == KindOfUninit) return make_tv<KindOfNull>();
   return *tv;

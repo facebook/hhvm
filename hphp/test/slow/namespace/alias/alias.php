@@ -1,4 +1,4 @@
-<?hh
+<?php
 
 namespace ABC\QRS\XYZ {
   function foo() { echo "foo\n"; }

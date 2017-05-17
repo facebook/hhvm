@@ -495,7 +495,7 @@ BaseMap::php_zip(const Variant& iterable) {
     const Elm& e = data()[i];
     Variant v = iter.second();
     auto pair = req::make<c_Pair>(e.data, *v.asCell());
-    auto const tv = make_tv<KindOfObject>(pair.detach());
+    auto const tv = make_tv<KindOfObject>(pair.get());
     if (e.hasIntKey()) {
       map->setRaw(e.ikey, tv);
     } else {

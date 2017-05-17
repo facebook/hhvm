@@ -39,7 +39,8 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
     match initial_value with
     | None -> None, false, None
     | Some expr ->
-      match Ast_constant_folder.expr_to_opt_typed_value expr with
+      match Ast_constant_folder.expr_to_opt_typed_value
+        (Emit_expression.get_namespace ()) expr with
       | Some v ->
         Some v, false, None
       | None ->

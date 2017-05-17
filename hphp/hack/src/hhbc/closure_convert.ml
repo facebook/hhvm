@@ -40,6 +40,8 @@ type state = {
   class_num : int;
   (* The closure classes themselves *)
   closures : class_ list;
+  (* The current namespace environment *)
+  namespace: Namespace_env.env;
 }
 
 let initial_state initial_class_num =
@@ -51,6 +53,7 @@ let initial_state initial_class_num =
   total_count = 0;
   class_num = initial_class_num;
   closures = [];
+  namespace = Namespace_env.empty_with_default_popt;
 }
 
 (* Add a variable to the captured variables *)
@@ -104,6 +107,9 @@ let enter_lambda st fd =
 
 let add_defined_var st var =
   { st with defined_vars = SSet.add var st.defined_vars }
+
+let set_namespace st ns =
+  { st with namespace = ns }
 
 let reset_function_count st =
   { st with per_function_count = 0; }
@@ -476,7 +482,8 @@ let convert_params env st param_list =
 
 let convert_fun st fd =
   let fd =
-    if constant_folding () then Ast_constant_folder.fold_function fd else fd in
+    if constant_folding ()
+    then Ast_constant_folder.fold_function fd else fd in
   let env = env_with_function env_toplevel fd in
   let st = reset_function_count st in
   let st, block = convert_block env st fd.f_body in
@@ -486,12 +493,14 @@ let convert_fun st fd =
 let rec convert_class st cd =
   let env = env_with_class cd in
   let st = reset_function_count st in
-  let st, c_body = List.map_env st cd.c_body (convert_class_elt env) in
+  let st, c_body = List.map_env st cd.c_body
+    (convert_class_elt cd.Ast.c_namespace env) in
   st, { cd with c_body = c_body }
 
-and convert_class_elt env st ce =
+and convert_class_elt ns env st ce =
   let ce =
-    if constant_folding () then Ast_constant_folder.fold_class_elt ce else ce in
+    if constant_folding ()
+    then Ast_constant_folder.fold_class_elt ns ce else ce in
   match ce with
   | Method md ->
     let env = env_with_method env md in
@@ -504,12 +513,14 @@ and convert_class_elt env st ce =
 
 let convert_toplevel st stmt =
   let stmt =
-    if constant_folding () then Ast_constant_folder.fold_stmt stmt else stmt in
+    if constant_folding ()
+    then Ast_constant_folder.fold_stmt st.namespace stmt else stmt in
   convert_stmt env_toplevel st stmt
 
 and convert_gconst st gconst =
   let gconst =
-    if constant_folding () then Ast_constant_folder.fold_gconst gconst
+    if constant_folding ()
+    then Ast_constant_folder.fold_gconst gconst
     else gconst in
   let st, expr = convert_expr env_toplevel st gconst.Ast.cst_value in
   st, { gconst with Ast.cst_value = expr }
@@ -534,8 +545,8 @@ let rec convert_toplevel_def st d =
     st, Namespace(id, dl)
   | NamespaceUse x ->
     st, NamespaceUse x
-  | SetNamespaceEnv e ->
-    st, SetNamespaceEnv e
+  | SetNamespaceEnv ns ->
+    set_namespace st ns, SetNamespaceEnv ns
 
 and convert_toplevel_prog st dl =
   List.map_env st dl convert_toplevel_def

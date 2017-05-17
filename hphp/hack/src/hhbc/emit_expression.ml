@@ -11,6 +11,7 @@
 open Core
 open Hhbc_ast
 open Instruction_sequence
+open Ast_class_expr
 
 module A = Ast
 module H = Hhbc_ast
@@ -346,33 +347,14 @@ and emit_conditional_expression etest etrue efalse =
       instr_label end_label;
     ]
 
-and emit_aget class_expr =
-  match class_expr with
-  | _, A.Lvar (_, id) when not (is_local_this id) ->
-    instr (IGet (ClsRefGetL (Local.Named id, 0)))
-
-  | _ ->
-    gather [
-      from_expr class_expr;
-      instr_clsrefgetc;
-    ]
-
-and rename_id_if_namespaced s = Hhbc_alias.normalize s
-
-and emit_new class_expr args uargs =
+and emit_new expr args uargs =
   let nargs = List.length args + List.length uargs in
-  match class_expr with
-  | _, A.Id (_, id) when id = SN.Classes.cStatic ->
-    gather [
-      emit_class_id id;
-      instr_fpushctor nargs 0;
-      emit_args_and_call args uargs;
-      instr_popr
-    ]
-
-  | _, A.Id_type_arguments (id, _)
-  | _, A.Id id ->
-    let fq_id, _id_opt = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
+  let cexpr, _ = expr_to_class_expr (get_scope ()) expr in
+  match cexpr with
+    (* Special case for statically-known class *)
+  | Class_id id ->
+    let fq_id, _id_opt =
+      Hhbc_id.Class.elaborate_id (get_namespace ()) id in
     let push_instr = instr (ICall (FPushCtorD (nargs, fq_id))) in
     gather [
       push_instr;
@@ -381,7 +363,7 @@ and emit_new class_expr args uargs =
     ]
   | _ ->
     gather [
-      emit_aget class_expr;
+      emit_class_expr cexpr;
       instr_fpushctor nargs 0;
       emit_args_and_call args uargs;
       instr_popr
@@ -415,73 +397,29 @@ and emit_call_expr expr =
     if flavor = Flavor.Ref then instr_unboxr else empty
   ]
 
-and emit_known_class_id cid =
+and emit_known_class_id id =
+  let fq_id, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
   gather [
-    instr_string (SU.Xhp.mangle @@ Utils.strip_ns cid);
+    instr_string (Hhbc_id.Class.to_raw_string fq_id);
     instr_clsrefgetc;
   ]
 
-and get_original_class () =
-  let scope = get_scope () in
-  Ast_scope.Scope.get_class scope
+and emit_class_expr cexpr =
+  match cexpr with
+  | Class_static -> instr (IMisc (LateBoundCls 0))
+  | Class_parent -> instr (IMisc (Parent 0))
+  | Class_self -> instr (IMisc (Self 0))
+  | Class_id id -> emit_known_class_id id
+  | Class_expr (_, A.Lvar (_, id)) ->
+    instr (IGet (ClsRefGetL (Local.Named id, 0)))
+  | Class_expr expr -> gather [from_expr expr; instr_clsrefgetc]
 
-(* Get the original enclosing class if possible *)
-and get_original_class_name () =
-  match get_original_class () with
-  | None ->  None
-  | Some cd ->
-    (* If we're in a closure we unmangle the name to get the original class *)
-    match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
-    | None -> Some (snd cd.Ast.c_name)
-    | Some scope_name ->
-      match SU.Closures.split_scope_name scope_name with
-      | [class_name] -> Some class_name
-      | [class_name; _method_name] -> Some class_name
-      | _ -> None
-
-and get_original_parent_class_name () =
-  let scope = get_scope () in
-  match Ast_scope.Scope.get_class scope with
-  | None ->  None
-  | Some cd ->
-    match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
-    | Some _ -> None
-    | None ->
-      match cd.A.c_extends with
-      | [(_, A.Happly((_, parent_cid), _))] -> Some parent_cid
-      | _ -> None
-
-(* Transform `self` into enclosing class and `parent` into parent of enclosing
- * class, if they exist *)
-and resolve_class cid =
-  if cid = SN.Classes.cSelf
-  then Option.value ~default:cid (get_original_class_name ())
-  else
-  if cid = SN.Classes.cParent
-  then Option.value ~default:cid (get_original_parent_class_name ())
-  else cid
-
-and emit_class_id cid =
-  if cid = SN.Classes.cStatic
-  then instr (IMisc (LateBoundCls 0))
-  else
-  let cid = resolve_class cid in
-  if cid = SN.Classes.cParent
-  then instr (IMisc (Parent 0))
-  else
-  if cid = SN.Classes.cSelf
-  then instr (IMisc (Self 0))
-  else
-  if cid.[0] = '$'
-  then instr (IGet (ClsRefGetL (Local.Named cid, 0)))
-  else emit_known_class_id cid
-
-
-and emit_class_get param_num_opt qop cid id =
+and emit_class_get param_num_opt qop cid (_, id) =
+  let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
       (* We need to strip off the initial dollar *)
       instr_string (SU.Locals.strip_dollar id);
-      emit_class_id cid;
+      emit_class_expr cexpr;
       match (param_num_opt, qop) with
       | (None, QueryOp.CGet) -> instr_cgets
       | (None, QueryOp.Isset) -> instr_issets
@@ -493,55 +431,22 @@ and emit_class_get param_num_opt qop cid id =
  * We follow the logic for the Construct::KindOfClassConstantExpression
  * case in emitter.cpp
  *)
-and emit_class_const cid id =
-  let clscns () =
+and emit_class_const cid (_, id) =
+  let cexpr, _ = expr_to_class_expr (get_scope()) (id_to_expr cid) in
+  match cexpr with
+  | Class_id cid ->
+    let fq_id, _id_opt =
+      Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
     if id = SN.Members.mClass
-    then IMisc (ClsRefName 0)
-    else ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)) in
-  let get_original_name () =
-    if cid = SN.Classes.cSelf
-    then  Option.value ~default:cid (get_original_class_name ())
-    else cid in
-
-  if cid.[0] = '$'
-  then
-    instrs [
-      IGet (ClsRefGetL (Local.Named cid, 0));
-      clscns ();
-    ]
-  else
-  if cid = SN.Classes.cStatic
-  then
-    instrs [
-      IMisc (LateBoundCls 0);
-      clscns ();
-    ]
-  else
-  match get_original_class () with
-  | Some cd when cd.Ast.c_kind <> A.Ctrait ->
-    let cid = get_original_name () in
-    if id = SN.Members.mClass
-    then instr_string (Utils.strip_ns cid)
-    else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id,
-      Hhbc_id.Class.from_ast_name cid)))
+    then instr_string (Hhbc_id.Class.to_raw_string fq_id)
+    else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
   | _ ->
-    if cid = SN.Classes.cSelf
-    then
-      instrs [
-        IMisc (Self 0);
-        clscns ();
-      ]
-    else if cid = SN.Classes.cParent
-    then
-      instrs [
-        IMisc (Parent 0);
-        clscns ()
-      ]
-    else
+    gather [
+      emit_class_expr cexpr;
       if id = SN.Members.mClass
-      then instr_string (Utils.strip_ns cid)
-      else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id,
-        Hhbc_id.Class.from_ast_name cid)))
+      then instr (IMisc (ClsRefName 0))
+      else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
+    ]
 
 and emit_await e =
   let after_await = Label.next_regular () in
@@ -670,7 +575,7 @@ and emit_call_isset_expr (_, expr_ as expr) =
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Isset base_expr opt_elem_expr
-  | A.Class_get ((_, cid), (_, id))  ->
+  | A.Class_get (cid, id)  ->
     emit_class_get None QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Isset expr prop nullflavor
@@ -698,7 +603,7 @@ and emit_call_empty_expr (_, expr_ as expr) =
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Empty base_expr opt_elem_expr
-  | A.Class_get ((_, cid), (_, id))  ->
+  | A.Class_get (cid, id) ->
     emit_class_get None QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Empty expr prop nullflavor
@@ -766,7 +671,7 @@ and from_expr expr =
   | A.False -> instr_false
   | A.True -> instr_true
   | A.Lvar (_, x) -> emit_local x
-  | A.Class_const ((_, cid), (_, id)) -> emit_class_const cid id
+  | A.Class_const (cid, id) -> emit_class_const cid id
   | A.Unop (op, e) -> emit_unop op e
   | A.Binop (op, e1, e2) -> emit_binop expr op e1 e2
   | A.Pipe (e1, e2) -> emit_pipe e1 e2
@@ -823,7 +728,7 @@ and from_expr expr =
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
-  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None QueryOp.CGet cid id
+  | A.Class_get (cid, id)  -> emit_class_get None QueryOp.CGet cid id
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e -> from_expr e
   | A.Id id -> emit_id id
@@ -953,7 +858,7 @@ and emit_named_collection expr pos name fields =
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and emit_collection ?(transform_to_collection) expr es =
-  match Ast_constant_folder.expr_to_opt_typed_value expr with
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace ()) expr with
   | Some tv ->
     emit_static_collection ~transform_to_collection tv
   | None ->
@@ -980,7 +885,7 @@ and emit_pipe e1 e2 =
  *)
 and emit_jmpz (_, expr_ as expr) label =
   let opt = optimize_null_check () in
-  match Ast_constant_folder.expr_to_opt_typed_value expr with
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace()) expr with
   | Some v ->
     if Typed_value.to_bool v then empty else instr_jmp label
   | None ->
@@ -1025,7 +930,7 @@ and emit_jmpz (_, expr_ as expr) label =
  *)
 and emit_jmpnz (_, expr_ as expr) label =
   let opt = optimize_null_check () in
-  match Ast_constant_folder.expr_to_opt_typed_value expr with
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace ()) expr with
   | Some v ->
     if Typed_value.to_bool v then instr_jmp label else empty
   | None ->
@@ -1296,12 +1201,13 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      ],
      total_stack_size
 
-   | A.Class_get((_, cid), (_, id)) ->
+   | A.Class_get(cid, (_, id)) ->
      let prop_expr_instrs =
        instr_string (SU.Locals.strip_dollar id) in
+     let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
      gather [
        prop_expr_instrs;
-       emit_class_id cid
+       emit_class_expr cexpr
      ],
      gather [
        instr_basesc base_offset
@@ -1347,7 +1253,7 @@ and emit_arg i ((_, expr_) as e) =
   | A.Obj_get(e1, e2, nullflavor) ->
     emit_obj_get (Some i) QueryOp.CGet e1 e2 nullflavor
 
-  | A.Class_get((_, cid), (_, id)) ->
+  | A.Class_get(cid, id) ->
     emit_class_get (Some i) QueryOp.CGet cid id
 
   | _ ->
@@ -1410,37 +1316,33 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
 
-  | A.Class_const ((_, cid), (_, id))
-    when cid = SN.Classes.cSelf || cid = SN.Classes.cParent ->
-    gather [
-      instr_string id;
-      emit_class_id cid;
-      instr (ICall (FPushClsMethodF (nargs, 0)));
-    ]
-
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
-    gather [
-      instr_string id;
-      emit_class_id cid;
-      instr (ICall (FPushClsMethod (nargs, 0)));
-      ]
-
-  | A.Class_const ((_, cid), (_, id)) when cid.[0] = '$' ->
-    gather [
-      instr_string id;
-      instr (IGet (ClsRefGetL (Local.Named cid, 0)));
-      instr (ICall (FPushClsMethod (nargs, 0)))
-    ]
-
-  | A.Class_const (cid,  (_, id)) ->
-    let fq_cid, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
+  | A.Class_const (cid, (_, id)) ->
+    let cexpr, forward = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     let method_id = Hhbc_id.Method.from_ast_name id in
-    instr (ICall (FPushClsMethodD (nargs, method_id, fq_cid)))
+    if forward then
+      gather [
+        instr_string (Hhbc_id.Method.to_raw_string method_id);
+        emit_class_expr cexpr;
+        instr (ICall (FPushClsMethodF (nargs, 0)));
+      ]
+    else begin match cexpr with
+    (* Statically known *)
+    | Class_id cid ->
+      let fq_cid, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
+      instr (ICall (FPushClsMethodD (nargs, method_id, fq_cid)))
+    | _ ->
+      gather [
+        instr_string (Hhbc_id.Method.to_raw_string method_id);
+        emit_class_expr cexpr;
+        instr (ICall (FPushClsMethod (nargs, 0)));
+      ]
+    end
 
-  | A.Class_get ((_, cid), (_, id)) when id.[0] = '$' ->
+  | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
+    let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
       emit_local id;
-      emit_class_id cid;
+      emit_class_expr cexpr;
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
@@ -1819,13 +1721,14 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | A.Class_get ((_, cid), (_, id)) ->
+  | A.Class_get (cid, (_, id)) ->
     let prop_expr_instrs =
       instr_string (SU.Locals.strip_dollar id) in
-    let final_instr = emit_final_static_op cid id op in
+    let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
+    let final_instr = emit_final_static_op (snd cid) id op in
     gather [
       prop_expr_instrs;
-      emit_class_id cid;
+      emit_class_expr cexpr;
       rhs_instrs;
       final_instr
     ]

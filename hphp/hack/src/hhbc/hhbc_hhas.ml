@@ -842,7 +842,8 @@ and string_of_param_default_value expr =
     let e2 = string_of_param_default_value e2 in
     e1 ^ s ^ e2
   in
-  let expr = Ast_constant_folder.fold_expr expr in
+  let expr = Ast_constant_folder.fold_expr
+    Namespace_env.empty_with_default_popt expr in
   match snd expr with
   | A.Id (_, litstr)
   | A.Id_type_arguments ((_, litstr), _)

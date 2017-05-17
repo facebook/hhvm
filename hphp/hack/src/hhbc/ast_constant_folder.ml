@@ -12,10 +12,11 @@ module TV = Typed_value
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TVL = Unique_list_typed_value
+open Ast_class_expr
 open Core
 
 (* Literal expressions can be converted into values *)
-let rec expr_to_typed_value (_, expr_) =
+let rec expr_to_typed_value ns (_, expr_) =
   match expr_ with
   | A.Int (_, s) -> TV.Int (Int64.of_string s)
   | A.True -> TV.Bool true
@@ -25,25 +26,33 @@ let rec expr_to_typed_value (_, expr_) =
   | A.Float (_, s) -> TV.Float (float_of_string s)
   | A.Id (_, id) when id = "NAN" -> TV.Float nan
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
-  | A.Array fields -> array_to_typed_value fields
+  | A.Array fields -> array_to_typed_value ns fields
   | A.Collection ((_, "vec"), fields) ->
-    TV.Vec (List.map fields value_afield_to_typed_value)
+    TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), fields) ->
     let l = List.fold_left fields
-      ~f:(fun l x -> TVL.add l (value_afield_to_typed_value x))
+      ~f:(fun l x -> TVL.add l (value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (List.rev (TVL.items l))
   | A.Collection ((_, ("dict" | "ImmMap" | "Map")), fields) ->
     (* TODO: avoid quadratic-time behaviour *)
     let d = List.fold_left fields
       ~f:(fun d x ->
-        let k, v = afield_to_typed_value_pair x in
+        let k, v = afield_to_typed_value_pair ns x in
         Typed_value.add_to_dict d k v) ~init:[] in
     TV.Dict d
+  | A.Class_const(cid, (_, id)) when id = SN.Members.mClass ->
+    let cexpr, _ = expr_to_class_expr [] (id_to_expr cid) in
+    begin match cexpr with
+    | Class_id cid ->
+      let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in
+      TV.String (Hhbc_id.Class.to_raw_string fq_id)
+    | _ -> failwith "expr_to_typed_value: not a literal"
+    end
   | _ ->
     failwith "expr_to_typed_value: not a literal"
 
-and array_to_typed_value fields =
+and array_to_typed_value ns fields =
   let pairs, _ =
     List.fold_left fields ~init:([], Int64.zero)
       ~f:(fun (pairs, maxindex) afield ->
@@ -51,51 +60,52 @@ and array_to_typed_value fields =
           (* Special treatment for explicit integer key *)
         | A.AFkvalue ((_, A.Int (_, s)), value) ->
           let newindex = Int64.of_string s in
-          (TV.Int newindex, expr_to_typed_value value) :: pairs,
+          (TV.Int newindex, expr_to_typed_value ns value) :: pairs,
             Int64.add (if Int64.compare newindex maxindex > 0
             then newindex else maxindex) Int64.one
         | A.AFkvalue (key, value) ->
-          (key_expr_to_typed_value key, expr_to_typed_value value) :: pairs,
+          (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
+            :: pairs,
           maxindex
         | A.AFvalue value ->
-          (TV.Int maxindex, expr_to_typed_value value) :: pairs,
+          (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
             Int64.add maxindex Int64.one)
   in TV.Array (List.rev pairs)
 
-and key_expr_to_typed_value expr =
-  let tv = expr_to_typed_value expr in
+and key_expr_to_typed_value ns expr =
+  let tv = expr_to_typed_value ns expr in
   match TV.cast_to_arraykey tv with
   | Some tv -> tv
   | None -> failwith "key_expr_to_typed_value: invalid key type"
 
-and array_afield_to_typed_value_pair index afield =
+and array_afield_to_typed_value_pair ns index afield =
   match afield with
   | A.AFvalue e ->
-    (TV.Int (Int64.of_int index), expr_to_typed_value e)
+    (TV.Int (Int64.of_int index), expr_to_typed_value ns e)
   | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value key, expr_to_typed_value value)
+    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
 
-and afield_to_typed_value_pair afield =
+and afield_to_typed_value_pair ns afield =
   match afield with
   | A.AFvalue (_key, _value) ->
     failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value key, expr_to_typed_value value)
+    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
 
-and value_afield_to_typed_value afield =
+and value_afield_to_typed_value ns afield =
   match afield with
-  | A.AFvalue e -> expr_to_typed_value e
+  | A.AFvalue e -> expr_to_typed_value ns e
   | A.AFkvalue (_key, _value) ->
     failwith "value_afield_to_typed_value: unexpected key=>value"
 
-let literal_from_expr expr = expr_to_typed_value expr
+let literal_from_expr ns expr = expr_to_typed_value ns expr
 
-let literals_from_exprs_with_index exprs =
+let literals_from_exprs_with_index ns exprs =
   List.concat @@ List.mapi exprs (fun index e ->
-    [TV.Int (Int64.of_int index); literal_from_expr e])
+    [TV.Int (Int64.of_int index); literal_from_expr ns e])
 
-let expr_to_opt_typed_value e =
-  try Some (expr_to_typed_value e) with Failure _ -> None
+let expr_to_opt_typed_value ns e =
+  try Some (expr_to_typed_value ns e) with Failure _ -> None
 
 (* Any value can be converted into a literal expression *)
 let rec value_to_expr_ p v =
@@ -182,7 +192,13 @@ let cast_value hint v =
  * expressions. *)
 let folder_visitor =
 object (self)
-  inherit [_] Ast_visitors.endo as _super
+  inherit [_] Ast_visitors.endo as super
+
+  method! on_class_ _env cd =
+    super#on_class_ cd.Ast.c_namespace cd
+
+  method! on_fun_ _env fd =
+    super#on_fun_ fd.Ast.f_namespace fd
 
   (* Type casts. cast_expr is A.Cast(hint, e) *)
   method! on_Cast env cast_expr hint e =
@@ -191,7 +207,7 @@ object (self)
       if enew == e
       then cast_expr
       else A.Cast(hint, enew) in
-    match expr_to_opt_typed_value enew with
+    match expr_to_opt_typed_value env enew with
     | None -> default ()
     | Some v ->
       match cast_value (snd hint) v with
@@ -205,7 +221,7 @@ object (self)
       if enew == e
       then unop_expr
       else A.Unop(unop, enew) in
-    match expr_to_opt_typed_value enew with
+    match expr_to_opt_typed_value env enew with
     | None -> default ()
     | Some v ->
       match unop_on_value unop v with
@@ -220,8 +236,8 @@ object (self)
       if e1new == e1 && e2new == e2
       then binop_expr
       else (A.Binop(binop, e1new, e2new)) in
-    match expr_to_opt_typed_value e1new,
-          expr_to_opt_typed_value e2new with
+    match expr_to_opt_typed_value env e1new,
+          expr_to_opt_typed_value env e2new with
     | Some v1, Some v2 ->
       begin match binop_on_values binop v1 v2 with
       | None -> default ()
@@ -233,13 +249,13 @@ object (self)
   method on_GotoLabel _ parent _ = parent
 end
 
-let fold_expr e =
-  folder_visitor#on_expr () e
+let fold_expr ns e =
+  folder_visitor#on_expr ns e
 let fold_function fd =
-  folder_visitor#on_fun_ () fd
-let fold_stmt s =
-  folder_visitor#on_stmt () s
+  folder_visitor#on_fun_ fd.Ast.f_namespace fd
+let fold_stmt ns s =
+  folder_visitor#on_stmt ns s
 let fold_gconst c =
-  folder_visitor#on_gconst () c
-let fold_class_elt ce =
-  folder_visitor#on_class_elt () ce
+  folder_visitor#on_gconst c.Ast.cst_namespace c
+let fold_class_elt ns ce =
+  folder_visitor#on_class_elt ns ce

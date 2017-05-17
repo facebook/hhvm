@@ -66,22 +66,22 @@ let from_extends ~namespace ~is_enum _tparams extends =
 let from_implements ~namespace implements =
   List.map implements (hint_to_class ~namespace)
 
-let from_constant (_hint, name, const_init) =
+let from_constant ns (_hint, name, const_init) =
   (* The type hint is omitted. *)
   match const_init with
   | None -> None (* Abstract constants are omitted *)
   | Some init ->
     let constant_name = Litstr.to_string @@ snd name in
     let constant_value, initializer_instrs =
-      match Ast_constant_folder.expr_to_opt_typed_value init with
+      match Ast_constant_folder.expr_to_opt_typed_value ns init with
       | Some v ->
         v, None
       | None ->
         Typed_value.Uninit, Some (Emit_expression.from_expr init) in
     Some (Hhas_constant.make constant_name constant_value initializer_instrs)
 
-let from_constants ast_constants =
-  List.filter_map ast_constants from_constant
+let from_constants ns ast_constants =
+  List.filter_map ast_constants (from_constant ns)
 
 let from_type_constant ast_type_constant =
   match ast_type_constant.A.tconst_type with
@@ -112,10 +112,10 @@ let from_class_elt_classvars elt =
     List.map cvl (Emit_property.from_ast kind_list type_hint)
   | _ -> []
 
-let from_class_elt_constants elt =
+let from_class_elt_constants ns elt =
   match elt with
   | A.Const(hint_opt, l) ->
-    List.filter_map l (fun (id, e) -> from_constant (hint_opt, id, Some e))
+    List.filter_map l (fun (id, e) -> from_constant ns (hint_opt, id, Some e))
   | _ -> []
 
 let from_class_elt_typeconsts elt =
@@ -241,7 +241,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   Label.reset_label ();
   let class_properties = List.concat_map class_body from_class_elt_classvars in
   let class_constants =
-    List.concat_map class_body from_class_elt_constants in
+    List.concat_map class_body (from_class_elt_constants namespace) in
   let pinit_methods =
     if List.exists class_properties
       (fun p -> Option.is_some (Hhas_property.initializer_instrs p)

@@ -36,7 +36,6 @@ quick/class_abstract_final1.php
 quick/class_abstract_final2.php
 quick/class_abstract_final4.php
 quick/class_abstract_final5.php
-quick/class_class_constant.php
 quick/class_constant.php
 quick/class_constant_array.php
 quick/closure_class.php
@@ -63,7 +62,6 @@ quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
 quick/cuf__callStatic4.php
 quick/debug_backtrace_continuation.php
-quick/decrefstack1.php
 quick/defaultVals.php
 quick/destruct.php
 quick/dict/apc.php

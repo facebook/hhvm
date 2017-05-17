@@ -17,7 +17,8 @@ let ast_attribute_name: A.user_attribute -> Litstr.id =
 
 let from_attribute_base attribute_name arguments =
   let attribute_arguments =
-    Ast_constant_folder.literals_from_exprs_with_index arguments in
+    Ast_constant_folder.literals_from_exprs_with_index
+      (Emit_expression.get_namespace ()) arguments in
   Hhas_attribute.make attribute_name attribute_arguments
 
 let from_ast : A.user_attribute -> Hhas_attribute.t =

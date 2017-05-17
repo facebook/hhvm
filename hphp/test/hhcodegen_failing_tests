@@ -4,7 +4,6 @@ quick/FPassC.php
 quick/FPassR.php
 quick/FPushCtor.php
 quick/FPushObjMethod.php
-quick/GetGbl.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/SetOpProp.php
@@ -15,7 +14,6 @@ quick/__call.php
 quick/__isset.php
 quick/abs_codegen.php
 quick/actrec.php
-quick/alias_torture.php
 quick/all_type_comparison_test.php
 quick/apc.php
 quick/array_packed.php
@@ -48,7 +46,6 @@ quick/cmp.php
 quick/constIntToString.php
 quick/const_cflow.php
 quick/continue.php
-quick/coverage.php
 quick/cse_fwdctx.php
 quick/ctor_param_promotion.php
 quick/ctor_param_promotion_abstract.php
@@ -63,7 +60,6 @@ quick/cuf__callStatic3.php
 quick/cuf__callStatic4.php
 quick/debug_backtrace_continuation.php
 quick/defaultVals.php
-quick/destruct.php
 quick/dict/apc.php
 quick/dict/basic-getters.php
 quick/dict/basic-init.php
@@ -97,8 +93,6 @@ quick/eval_noreturn.php
 quick/exception_bug_2080454.php
 quick/exception_many_locals.php
 quick/exceptions.php
-quick/exceptions2.php
-quick/exceptions3.php
 quick/exceptions7.php
 quick/exceptions8.php
 quick/exit.php
@@ -115,7 +109,6 @@ quick/floateq.php
 quick/flow.php
 quick/foreach-bad.php
 quick/foreach-superglobals.php
-quick/fpush_fatal.php
 quick/fsc01.php
 quick/fsc02.php
 quick/fun_catch_block.php
@@ -130,9 +123,6 @@ quick/generator_varargs.php
 quick/generator_vars.php
 quick/get_class.php
 quick/get_class_methods2.php
-quick/getter-magic.php
-quick/global-obj-dtor.php
-quick/guard-bug.php
 quick/hh_async_closure_return_type_0.php
 quick/hh_async_closure_return_type_1.php
 quick/hh_async_closure_return_type_2.php
@@ -167,7 +157,6 @@ quick/hopt-simp.php
 quick/hopt-true3.php
 quick/hopt-true4.php
 quick/hopt-xor-simp.php
-quick/hopt_late_jcc_to_jmp.php
 quick/hopt_sprop_accessibility.php
 quick/iconv_stream_filter.php
 quick/impl_abstract_default_vals.php
@@ -183,7 +172,6 @@ quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_sa.php
 quick/impl_abstract_dv_si.php
 quick/impl_abstract_dv_so.php
-quick/incdec-magic2.php
 quick/incdec-magic4.php
 quick/incdec-magic5.php
 quick/incdec-string.php
@@ -264,12 +252,10 @@ quick/prop_order.php
 quick/prop_order_parens.php
 quick/properties-dynamic.php
 quick/properties2.php
-quick/pseudomain1.php
 quick/reassign_this2.php
 quick/reassign_this3.php
 quick/recursive-getter.php
 quick/recursive-isset.php
-quick/recursive-magic-call.php
 quick/recursive_iterator_iterator_empty.php
 quick/redeclared_function.php
 quick/redeclared_method.php
@@ -282,17 +268,12 @@ quick/regpressure_bug.php
 quick/reqonce.php
 quick/reserved_class1.php
 quick/reserved_class2.php
-quick/resurrect.php
-quick/retc-destruct.php
 quick/retval_backtrace.php
 quick/rounding.php
 quick/selfparent.php
 quick/serialize.php
-quick/setop-magic2.php
 quick/setop-magic4.php
 quick/setop-magic5.php
-quick/setter-magic.php
-quick/setter-magic2.php
 quick/short_array_syntax.php
 quick/silencer.php
 quick/simp-add-dbl.php
@@ -301,7 +282,6 @@ quick/simp-mul-dbl.php
 quick/some_cmp_tests.php
 quick/sp.php
 quick/sqrt.php
-quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
 quick/static-closure-ctx.php
 quick/static_array.php
@@ -315,7 +295,6 @@ quick/string-cse.php
 quick/string-util.php
 quick/strlen_non_integer.php
 quick/switch.php
-quick/switchRef.php
 quick/switch_special_cases.php
 quick/syntax-error.php
 quick/temparray.php
@@ -358,6 +337,5 @@ quick/xhp-malformed.php
 quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
-quick/zend_bug54265.php
 quick/zend_indirect_method_call_005.php
 quick/zero_eval_stack_depth.php

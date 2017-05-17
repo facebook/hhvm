@@ -22,6 +22,11 @@ let add_local bareparam (needs_local_this, locals) (_, name) =
 class declvar_visitor = object(this)
   inherit [bool * ULS.t] Ast_visitor.ast_visitor as _super
 
+  method! on_global_var acc exprs =
+    List.fold_left exprs ~init:acc
+      ~f:(fun acc (_, e) ->
+        match e with Ast.Id id -> add_local false acc id
+                  | _ -> acc)
   method! on_lvar acc id = add_local false acc id
   method! on_lvarvar acc _ id = add_local false acc id
   method! on_efun acc _fn use_list =

@@ -97,8 +97,8 @@ let rec emit_stmt st =
     emit_nyi "Def_inline"
   | A.Static_var es ->
     emit_static_var es
-  | A.Global_var _ ->
-    emit_nyi "Global_var"
+  | A.Global_var es ->
+    emit_global_vars es
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
@@ -125,6 +125,20 @@ and emit_if condition consequence alternative =
       emit_stmt alternative;
       instr_label done_label;
     ]
+
+and emit_global_vars es =
+  let emit_global_var (_, e) =
+    match e with
+    | A.Id (_, name) when name.[0] = '$' ->
+      gather [
+        instr_string (SU.Locals.strip_dollar name);
+        instr (IGet VGetG);
+        instr (IMutator (BindL (Local.Named name)));
+        instr (IBasic PopV);
+      ]
+    | _ ->
+      emit_nyi "global expression"
+  in gather (List.map es emit_global_var)
 
 and emit_static_var es =
   let emit_static_var_single e =

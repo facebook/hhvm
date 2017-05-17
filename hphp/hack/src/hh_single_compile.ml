@@ -12,6 +12,8 @@ open Core
 open String_utils
 open Sys_utils
 
+module P = Printf
+
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
@@ -26,6 +28,7 @@ type options = {
   debug_time      : bool;
   parser          : parser;
   output_file     : string;
+  quiet_mode      : bool;
 }
 
 (*****************************************************************************)
@@ -62,7 +65,8 @@ let parse_options () =
   let parser = ref FFP in
   let config = ref [] in
   let output_file = ref "" in
-  let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
+  let quiet_mode = ref false in
+  let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
       , Arg.Set fallback
@@ -71,6 +75,10 @@ let parse_options () =
       ("--debug-time"
       , Arg.Set debug_time
       , " Enables debugging logging for elapsed time"
+      );
+      ("--quiet-mode"
+      , Arg.Set quiet_mode
+      , " Runs very quietly, and ignore any result if invoked without -o (lower priority than the debug-time option)"
       );
       ("-v"
       , Arg.String (fun str -> config := str :: !config)
@@ -99,6 +107,7 @@ let parse_options () =
   ; debug_time  = !debug_time
   ; parser      = !parser
   ; output_file = !output_file
+  ; quiet_mode  = !quiet_mode
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -182,7 +191,7 @@ let parse_name compiler_options popt files_contents =
   end
 
 let hhvm_unix_call config filename =
-  Printf.printf "compiling: %s\n" filename;
+  P.printf "compiling: %s\n" filename;
   let readme, writeme = Unix.pipe () in
   let prog_name = "/usr/local/hphpi/bin/hhvm" in
   let options =
@@ -208,10 +217,10 @@ let add_to_time_ref r t0 =
   t
 
 let print_debug_time_info filename debug_time =
-  Printf.fprintf stderr "File %s:\n" (Relative_path.to_absolute filename);
-  Printf.fprintf stderr "Parsing: %0.3f s\n" !(debug_time.parsing_t);
-  Printf.fprintf stderr "Codegen: %0.3f s\n" !(debug_time.codegen_t);
-  Printf.fprintf stderr "Printing: %0.3f s\n" !(debug_time.printing_t)
+  P.eprintf "File %s:\n" (Relative_path.to_absolute filename);
+  P.eprintf "Parsing: %0.3f s\n" !(debug_time.parsing_t);
+  P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
+  P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
 
 let do_compile filename compiler_options opts files_info debug_time = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
@@ -270,13 +279,19 @@ let process_single_file compiler_options popt tcopt filename outputfile =
     let text =
       do_compile filename compiler_options tcopt files_info debug_time in
     match outputfile with
-    | None -> Printf.printf "%s" text
+    | None ->
+      if not compiler_options.quiet_mode
+      then P.printf "%s" text
+      else ()
     | Some outputfile -> Sys_utils.write_file ~file:outputfile text
   with e ->
-    let f = Relative_path.to_absolute filename in
-    Printf.fprintf stderr "Error in file %s: %s\n" f (Printexc.to_string e)
+    if not compiler_options.quiet_mode
+    then
+      let f = Relative_path.to_absolute filename in
+      P.fprintf stderr "Error in file %s: %s\n" f (Printexc.to_string e)
+    else ()
 
-let compile_files_recursively dir f =
+let compile_files_recursively compiler_options f =
   let rec loop dirs = begin
     match dirs with
     | [] -> ()
@@ -288,7 +303,9 @@ let compile_files_recursively dir f =
             f ^ ".hhas"
           in
           if Sys.file_exists outputfile then
-            Printf.fprintf stderr "Output file %s already exists\n" outputfile
+            if not compiler_options.quiet_mode
+            then P.fprintf stderr "Output file %s already exists\n" outputfile
+            else ()
           else begin
             f (Relative_path.create Relative_path.Dummy p) (Some outputfile)
           end
@@ -302,14 +319,14 @@ let compile_files_recursively dir f =
       List.iter fs compile_file;
       loop (ds @ dirs)
   end
-  in loop [dir]
+  in loop [compiler_options.filename]
 
 let decl_and_run_mode compiler_options popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
   let process_single_file = process_single_file compiler_options popt tcopt in
   if Sys.is_directory compiler_options.filename then
-    compile_files_recursively compiler_options.filename process_single_file
+    compile_files_recursively compiler_options process_single_file
   else
     let filename =
       Relative_path.create Relative_path.Dummy compiler_options.filename in

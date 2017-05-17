@@ -220,6 +220,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.EqualEqualEqual             -> Binop (EQeqeq,            lhs, rhs)
   | Some TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
   | Some TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
+  | Some TK.LessThanGreaterThan         -> Binop (Diff,              lhs, rhs)
   | Some TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
   | Some TK.LessThanEqualGreaterThan    -> Binop (Cmp,               lhs, rhs)
   (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as

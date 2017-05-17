@@ -432,6 +432,9 @@ match arg with
                | "Arr" -> OpArr
                | "Obj" -> OpObj
                | "Scalar" -> OpScalar
+               | "Keyset" -> OpKeyset
+               | "Dict" -> OpDict
+               | "Vec" -> OpVec
                | _ -> report_error ("bad istype_op" ^ s))
   | _ -> report_error "bad arg to istype_op"
 

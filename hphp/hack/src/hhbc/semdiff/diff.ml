@@ -585,7 +585,10 @@ exception Array_id
 let rec get_id_from_data_decl dd (tv : Typed_value.t) =
  match dd with
   | [] -> raise Array_id
-  | (n,tv') :: rest -> if tv = tv' then (n:int) else get_id_from_data_decl rest tv
+  | (n,tv') :: rest ->
+    if tv = tv'
+    then (n:int)
+    else get_id_from_data_decl rest tv
 
 let my_string_of_instruction dd i =
  let f s tv = s ^ " A_" ^ (string_of_int (get_id_from_data_decl dd tv)) in
@@ -637,20 +640,9 @@ let asnstostring asns = concatstrs (List.map asntostring asns)
 let instruct_list_comparer_with_semdiff = {
   comparer = (fun l1 l2 ->
                match Rhl.equiv l1 l2 with
-                | None -> (print_endline "semdiff succeeded";
-                           (0, (List.length l1, "")) )
-                | Some (pc,pc',props,assumed,todo) ->
-                  (print_endline "semdiff failed";
-                  Printf.printf
-                  "pc=%s, pc'=%s, i=%s i'=%s props=%s\nassumed=%s\ntodo=%s"
-                  (string_of_pc pc) (string_of_pc pc')
-                  (my_string_of_instruction !data_decls_ref1
-                    (List.nth l1 (Rhl.ip_of_pc pc)))
-                  (my_string_of_instruction !data_decls_ref2
-                    (List.nth l2 (Rhl.ip_of_pc pc' )))
-                  (propstostring props) (asnstostring assumed)
-                  (asnstostring todo);
-                  instruct_list_comparer.comparer l1 l2)
+                | None -> 0, (List.length l1, "")
+                | Some (_, _, _, _, _) ->
+                  (instruct_list_comparer.comparer l1 l2)
              );
   size_of = instruct_list_comparer.size_of;
   string_of = instruct_list_comparer.string_of;

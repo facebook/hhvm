@@ -12,6 +12,7 @@ open Diff
 
 type options = {
   files : string * string;
+  similarity : bool;
 }
 
 let die str =
@@ -21,13 +22,26 @@ let die str =
   exit 2
 
 let parse_options () =
+  let similarity = ref false in
   let purpose = "Hhas differencing tool" in
   let usage =
     Printf.sprintf "%s\nUsage: %s file1 file2\n" purpose Sys.argv.(0)
   in
-  if Array.length Sys.argv <> 3
-  then die usage
-  else {files = (Sys.argv.(1), Sys.argv.(2));}
+  let options =
+    [ ("--similarity"
+      , Arg.Set similarity
+      , " Only displays the similarity percentage on STDOUT"
+      );
+    ] in
+  let options = Arg.align ~limit:25 options in
+  let files = ref [] in
+  Arg.parse options (fun file -> files := file::!files) usage;
+  match !files with
+  | [x; y] ->
+    { files = (x, y)
+    ; similarity = !similarity
+    }
+  | _ -> die usage
 
 let parse_file program_parser filename =
   let channel = open_in filename in (* TODO: error handling *)
@@ -56,9 +70,12 @@ let run options =
   Diff.data_decls_ref2 := data_decls2;
 
   let (d,(s,e)) = program_comparer.comparer prog1 prog2 in
-  (Printf.printf "distance = %d\nsize = %d\nsimilarity =%.2f%%\nedits=\n%s"
-         d s (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) e;
-  print_endline defaultstring) (* make sure the colors are back to normal *)
+  let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
+  if options.similarity
+  then Printf.printf "%.2f" similarity
+  else (Printf.printf
+    "distance = %d\nsize = %d\nsimilarity =%.2f%%\nedits=\n%s" d s similarity e;
+    print_endline defaultstring) (* make sure the colors are back to normal *)
 
 (* command line driver *)
 let _ =

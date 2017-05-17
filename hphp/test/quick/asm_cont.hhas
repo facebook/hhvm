@@ -8,7 +8,7 @@
   FCall 0
   UnboxR
   IterInit 0 L0 $i
-  .try_catch F2 {
+  .try {
   L1:
     String "\n"
     CGetL2 $i
@@ -16,14 +16,14 @@
     Print
     PopC
     IterNext 0 L1 $i
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
   }
 L0:
   Int 1
   RetC
-F2:
-  Catch
-  IterFree 0
-  Throw
 }
 
 .function R() isGenerator {

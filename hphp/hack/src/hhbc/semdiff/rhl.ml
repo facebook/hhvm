@@ -58,13 +58,13 @@ let exntable prog =
    match p with
    | [] -> (mapsofar, parents)
    | (i::is) -> (match i with
-      | ITry (TryCatchBegin l)
+      | ITry (TryCatchLegacyBegin l)
       | ITry (TryFaultBegin l) ->
         (match currentstack with
           | [] -> exntable' is (n+1) [l] mapsofar parents
           | h::_ -> exntable' is (n+1) (l::currentstack) ((n,h)::mapsofar)
             ((l,h)::parents))
-      | ITry TryCatchEnd
+      | ITry TryCatchLegacyEnd
       | ITry TryFaultEnd ->
         exntable' is (n+1) (List.tl currentstack)
                   ((n, List.hd currentstack)::mapsofar)

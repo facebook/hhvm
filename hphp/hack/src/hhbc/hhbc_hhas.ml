@@ -596,9 +596,12 @@ let string_of_try instruction =
   match instruction with
   | TryFaultBegin label ->
     ".try_fault " ^ (string_of_label label) ^ " {"
-  | TryCatchBegin label ->
+  | TryCatchLegacyBegin label ->
     ".try_catch " ^ (string_of_label label) ^ " {"
   | TryFaultEnd
+  | TryCatchLegacyEnd -> "}"
+  | TryCatchBegin -> ".try {"
+  | TryCatchMiddle -> "} .catch {"
   | TryCatchEnd -> "}"
 
 let string_of_async = function
@@ -654,14 +657,18 @@ let adjusted_indent instruction indent =
   | IComment _ -> 0
   | ILabel _
   | ITry TryFaultEnd
+  | ITry TryCatchLegacyEnd
+  | ITry TryCatchMiddle
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 
 let new_indent instruction indent =
   match instruction with
   | ITry (TryFaultBegin _)
-  | ITry (TryCatchBegin _) -> indent + 2
+  | ITry (TryCatchLegacyBegin _)
+  | ITry TryCatchBegin -> indent + 2
   | ITry TryFaultEnd
+  | ITry TryCatchLegacyEnd
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 

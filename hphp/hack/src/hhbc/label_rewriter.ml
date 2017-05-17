@@ -51,7 +51,7 @@ let get_regular_labels instr =
 (* Get any labels referred to in catch or fault handlers *)
 let get_catch_or_fault_labels instr =
   match instr with
-  | ITry (TryCatchBegin l | TryFaultBegin l) -> [l]
+  | ITry (TryCatchLegacyBegin l | TryFaultBegin l) -> [l]
   | _ -> []
 
 (* Generate new labels for all labels referenced in instructions and default
@@ -142,7 +142,8 @@ let rewrite_params_and_body defs used refs params body =
     | IContFlow (SSwitch pairs) ->
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
-    | ITry (TryCatchBegin l) -> Some (ITry (TryCatchBegin (relabel l)))
+    | ITry (TryCatchLegacyBegin l) ->
+      Some (ITry (TryCatchLegacyBegin (relabel l)))
     | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
     | ILabel l ->
       begin match Label.option_map relabel_define_label_id l with

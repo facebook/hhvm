@@ -495,8 +495,11 @@ type async_functions =
   | Await
 
 type instruct_try =
-  | TryCatchBegin of Label.t
+  | TryCatchBegin
+  | TryCatchMiddle
   | TryCatchEnd
+  | TryCatchLegacyBegin of Label.t
+  | TryCatchLegacyEnd
   | TryFaultBegin of Label.t
   | TryFaultEnd
 

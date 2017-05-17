@@ -594,8 +594,18 @@ struct AsmState {
     currentStackDepth->setCurrentAbsolute(*this, stackDepth);
   }
 
+  bool isUnreachable() {
+    return currentStackDepth == nullptr;
+  }
+
   void enterUnreachableRegion() {
     currentStackDepth = nullptr;
+  }
+
+  void enterReachableRegion(int stackDepth) {
+    unnamedStackDepths.emplace_back(std::make_unique<StackDepth>());
+    currentStackDepth = unnamedStackDepths.back().get();
+    currentStackDepth->setBase(*this, stackDepth);
   }
 
   void addLabelDVInit(const std::string& name, int paramId) {
@@ -722,6 +732,7 @@ struct AsmState {
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
+    unnamedStackDepths.clear();
     fdescDepth = 0;
     maxUnnamed = -1;
     fpiToUpdate.clear();
@@ -794,6 +805,7 @@ struct AsmState {
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
+  std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
   int fdescDepth{0};
   int minStackDepth{0};
   int maxUnnamed{-1};
@@ -1571,6 +1583,51 @@ void parse_catch(AsmState& as, int nestLevel) {
 }
 
 /*
+ * directive-try-catch : integer? '{' function-body ".catch" '{' function-body
+ *                     ;
+ */
+void parse_try_catch(AsmState& as, int nestLevel) {
+  const Offset tryStart = as.ue->bcPos();
+
+  int iterId = -1;
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    iterId = read_opcode_arg<int32_t>(as);
+  }
+
+  // Emit try body.
+  as.in.expectWs('{');
+  parse_function_body(as, nestLevel + 1);
+  if (!as.isUnreachable()) {
+    as.error("expected .try region to not fall-thru");
+  }
+
+  const Offset tryEnd = as.ue->bcPos();
+
+  // Emit catch body.
+  as.enterReachableRegion(0);
+  as.ue->emitOp(OpCatch);
+  as.adjustStack(1);
+  as.enforceStackDepth(1);
+
+  std::string word;
+  as.in.skipWhitespace();
+  if (!as.in.readword(word) || word != ".catch") {
+    as.error("expected .catch directive after .try");
+  }
+  as.in.skipWhitespace();
+  as.in.expectWs('{');
+  parse_function_body(as, nestLevel + 1);
+
+  auto& eh = as.fe->addEHEnt();
+  eh.m_type = EHEnt::Type::Catch;
+  eh.m_base = tryStart;
+  eh.m_past = tryEnd;
+  eh.m_iterId = iterId;
+  eh.m_handler = tryEnd;
+}
+
+/*
  * function-body :  fbody-line* '}'
  *               ;
  *
@@ -1579,6 +1636,7 @@ void parse_catch(AsmState& as, int nestLevel) {
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
+ *            |  ".try" directive-try-catch
  *            |  ".ismemoizewrapper"
  *            |  ".dyncallwrapper" string-literal
  *            |  label-name
@@ -1621,6 +1679,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
       if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
+      if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {

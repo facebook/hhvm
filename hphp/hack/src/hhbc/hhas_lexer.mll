@@ -69,6 +69,8 @@ rule read =
   | ".enum_ty"  {ENUMTYDIRECTIVE}
   | ".use"      {USESDIRECTIVE}
   | ".numclsrefslots" {NUMCLSREFSLOTSDIRECTIVE}
+  | ".try"      {TRYDIRECTIVE}
+  | ".catch"    {CATCHDIRECTIVE}
   | ".try_fault" {TRYFAULTDIRECTIVE}
   | ".try_catch" {TRYCATCHDIRECTIVE}
   | ".property" {PROPERTYDIRECTIVE}

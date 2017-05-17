@@ -1,50 +1,40 @@
-# Test case for two catch regions with the same ending offset.
-
 .main {
-  .try_catch ex {
+  .try {
     FPushFuncD 0 "main"
     FCall 0
     UnboxR
+    RetC
+  } .catch {
     PopC
+    String "Finished!\n"
+    Print
+    RetC
   }
-
-ex:
-  Catch
-  PopC
-  String "Finished!\n"
-  Print
-  RetC
 }
 
 .function main {
-  .try_catch handler1 {
+  .try {
     String "foo\n"
     Print
     PopC
-    Jmp next
 
-  handler2:
-    Catch
-    String "handler2\n"
-    Print
-    PopC
-    Throw
-
-  next:
-    .try_catch handler2 {
+    .try {
       FPushCtorD 1 "Exception"
       String "ex"
       FPassC 0
       FCall 1
       PopR
       Throw
+    } .catch {
+      String "handler2\n"
+      Print
+      PopC
+      Throw
     }
+  } .catch {
+    String "handler1\n"
+    Print
+    PopC
+    Throw
   }
-
-handler1:
-  Catch
-  String "handler1\n"
-  Print
-  PopC
-  Throw
 }

@@ -288,19 +288,14 @@ and emit_catches catch_list end_label =
 
 and emit_try_catch try_block catch_list =
   let end_label = Label.next_regular () in
-  let catch_label = Label.next_catch () in
-  let try_body = gather [
+  gather [
+    instr_try_catch_begin;
     emit_stmt try_block;
     instr_jmp end_label;
-  ] in
-  gather [
-    instr_try_catch_begin catch_label;
-    try_body;
-    instr_try_catch_end;
-    instr_label catch_label;
-    instr_catch;
+    instr_try_catch_middle;
     emit_catches catch_list end_label;
     instr_throw;
+    instr_try_catch_end;
     instr_label end_label;
   ]
 

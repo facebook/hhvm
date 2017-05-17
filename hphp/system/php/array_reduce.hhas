@@ -38,11 +38,11 @@ check_func:
           JmpZ bad_func
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
             CGetL $input
             IterInit 1 endloop $v
 
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop_x:   FPushCufIter 2 0
               FPassL 0 $res
               FPassL 1 $v
@@ -51,22 +51,17 @@ check_func:
               SetL $res
               PopC
               IterNext 1 loop_x $v
+              Jmp endloop
+  } .catch {
+              IterFree 1
+              Throw
   }
-
-            Jmp endloop
-
-  kill_iter_1:
-            Catch
-            IterFree 1
+} .catch {
+            CIterFree 0
             Throw
 }
 
 endloop:  CIterFree 0
           CGetL $res
           RetC
-
-kill_iter_0:
-          Catch
-          CIterFree 0
-          Throw
 }

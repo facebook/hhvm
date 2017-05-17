@@ -262,7 +262,8 @@ let instr_try_fault fault_label try_body fault_body =
     instr_try_fault_end;
   ]
 
-let instr_try_catch_begin catch_label = instr (ITry (TryCatchBegin catch_label))
+let instr_try_catch_begin = instr (ITry TryCatchBegin)
+let instr_try_catch_middle = instr (ITry TryCatchMiddle)
 let instr_try_catch_end = instr (ITry TryCatchEnd)
 
 (*  Note that at this time we do NOT want to recurse on the instruction

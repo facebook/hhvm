@@ -16,7 +16,7 @@ function ImplementMapFilter($withKey, $immutable, $filter) {
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
 
 PART1
 ;
@@ -39,7 +39,7 @@ PART1
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
 
 PART2
 ;
@@ -73,20 +73,15 @@ PART2
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0

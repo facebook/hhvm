@@ -36,6 +36,8 @@ open Hhas_parser_actions
 %token QUOTE ATAUNDERSCORE UNDERSCORE
 %token PLUS
 %token TRYCATCHDIRECTIVE
+%token TRYDIRECTIVE
+%token CATCHDIRECTIVE
 %token ALIASDIRECTIVE
 
 %start program
@@ -366,11 +368,26 @@ functionbody:
        { Instruction_sequence.gather
          [
            Instruction_sequence.instr (
-             Hhbc_ast.ITry(Hhbc_ast.TryCatchBegin (makelabel $2)));
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchLegacyBegin (makelabel $2)));
            $5;
            Instruction_sequence.instr (
-             Hhbc_ast.ITry(Hhbc_ast.TryCatchEnd));
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchLegacyEnd));
            $9
+         ] }
+    | TRYDIRECTIVE LBRACE NEWLINE functionbody nl RBRACE
+       CATCHDIRECTIVE LBRACE NEWLINE functionbody nl RBRACE nl
+       functionbody
+       { Instruction_sequence.gather
+         [
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchBegin));
+           $4;
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchMiddle));
+           $10;
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchEnd));
+           $14
          ] }
 ;
 instruction:

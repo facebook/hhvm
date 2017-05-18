@@ -20,7 +20,7 @@ let rec expr_requires_deep_init (_, expr_) =
     expr_requires_deep_init e1
   | A.Binop(_, e1, e2) ->
     expr_requires_deep_init e1 || expr_requires_deep_init e2
-  | A.Lvar _ | A.Null | A.False | A.True | A.Id _ | A.Int _
+  | A.Lvar _ | A.Null | A.False | A.True | A.Int _
   | A.Float _ | A.String _ -> false
   | _ -> true
 
@@ -48,6 +48,8 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
         let prolog, epilog =
           if is_static
           then empty, instr (IMutator (InitProp (pid, Static)))
+          else if is_private
+          then empty, instr (IMutator (InitProp (pid, NonStatic)))
           else
             gather [
               instr (IMutator (CheckProp pid));

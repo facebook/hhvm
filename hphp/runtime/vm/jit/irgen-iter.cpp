@@ -279,7 +279,7 @@ void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
     switch (iterKind) {
     case KindOfIter:  gen(env, IterFree,  IterId(iterId), fp(env)); break;
     case KindOfMIter: gen(env, MIterFree, IterId(iterId), fp(env)); break;
-    case KindOfCIter: gen(env, CIterFree, IterId(iterId), fp(env)); break;
+    case KindOfCIter: emitCIterFree(env, iterId); break;
     }
   }
 
@@ -289,7 +289,18 @@ void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
   auto const src        = popC(env);
   auto const type       = src->type();
-  if (type.subtypeOfAny(TArrLike, TStr, TObj)) {
+
+  if (type <= TObj) {
+    auto const slowExit = makeExitSlow(env);
+    auto const cls      = gen(env, LdObjClass, src);
+    auto const func     = gen(env, LdObjInvoke, slowExit, cls);
+    gen(env, StCufIterFunc, IterId(iterId), fp(env), func);
+    gen(env, StCufIterCtx, IterId(iterId), fp(env), src);
+    gen(env, StCufIterInvName, IterId(iterId), fp(env), cns(env, TNullptr));
+    return;
+  }
+
+  if (type.subtypeOfAny(TArr, TStr)) {
     auto const res = gen(
       env,
       DecodeCufIter,
@@ -307,7 +318,23 @@ void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
 }
 
 void emitCIterFree(IRGS& env, int32_t iterId) {
-  gen(env, CIterFree, IterId(iterId), fp(env));
+  auto const ctx = gen(
+    env,
+    LdCufIterCtx,
+    TCtx | TNullptr,
+    IterId(iterId),
+    fp(env)
+  );
+  auto const invName = gen(
+    env,
+    LdCufIterInvName,
+    TStr | TNullptr,
+    IterId(iterId),
+    fp(env)
+  );
+  ifNonNull(env, ctx, [&](SSATmp* t) { decRef(env, t); });
+  ifNonNull(env, invName, [&](SSATmp* t) { decRef(env, t); });
+  gen(env, KillCufIter, IterId(iterId), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

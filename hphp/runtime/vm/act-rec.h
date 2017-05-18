@@ -134,6 +134,7 @@ struct ActRec {
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
+  static constexpr uintptr_t kTrashedFuncSlot = 0xfeeefeeef00fe00d;
 
   /////////////////////////////////////////////////////////////////////////////
 

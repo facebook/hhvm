@@ -281,10 +281,6 @@ void cgMIterFree(IRLS& env, const IRInstruction* inst) {
   implIterFree(env, inst, CallSpec::method(&Iter::mfree));
 }
 
-void cgCIterFree(IRLS& env, const IRInstruction* inst) {
-  implIterFree(env, inst, CallSpec::method(&Iter::cfree));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t decodeCufIterHelper(Iter* it, TypedValue func, ActRec* ar) {
@@ -323,6 +319,71 @@ void cgDecodeCufIter(IRLS& env, const IRInstruction* inst) {
 
   cgCallHelper(vmain(env), env, CallSpec::direct(decodeCufIterHelper),
                callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgStCufIterFunc(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<StCufIterFunc>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const func    = srcLoc(env, inst, 1).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << store{func, fp[iterOff + CufIter::funcOff()]};
+}
+
+void cgStCufIterCtx(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<StCufIterCtx>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const ctx     = srcLoc(env, inst, 1).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << store{ctx, fp[iterOff + CufIter::ctxOff()]};
+}
+
+void cgStCufIterInvName(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<StCufIterInvName>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const name    = srcLoc(env, inst, 1).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << store{name, fp[iterOff + CufIter::nameOff()]};
+}
+
+void cgLdCufIterFunc(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<LdCufIterFunc>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const dst     = dstLoc(env, inst, 0).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << load{fp[iterOff + CufIter::funcOff()], dst};
+}
+
+void cgLdCufIterCtx(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<LdCufIterCtx>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const dst     = dstLoc(env, inst, 0).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << load{fp[iterOff + CufIter::ctxOff()], dst};
+}
+
+void cgLdCufIterInvName(IRLS& env, const IRInstruction* inst) {
+  auto const extra   = inst->extra<LdCufIterInvName>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const dst     = dstLoc(env, inst, 0).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  vmain(env) << load{fp[iterOff + CufIter::nameOff()], dst};
+}
+
+void cgKillCufIter(IRLS& env, const IRInstruction* inst) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
+
+  auto& v            = vmain(env);
+  auto const extra   = inst->extra<KillCufIter>();
+  auto const fp      = srcLoc(env, inst, 0).reg();
+  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+
+  uint64_t trash;
+  memset(&trash, kTrashCufIter, sizeof(trash));
+  auto const trashCns = v.cns(trash);
+
+  v << store{trashCns, fp[iterOff + CufIter::funcOff()]};
+  v << store{trashCns, fp[iterOff + CufIter::ctxOff()]};
+  v << store{trashCns, fp[iterOff + CufIter::nameOff()]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

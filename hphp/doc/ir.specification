@@ -322,7 +322,7 @@ exceptions depending on how coercion is implemented.
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA,Cls), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA,Cls,Ctx,Str), B
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
@@ -1505,9 +1505,9 @@ To string conversions:
 
 9. Call & Return
 
-| SpillFrame<offset,numArgs,invName>,
+| SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr),
+|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr),
 |   CRc
 
   Operands:
@@ -1516,21 +1516,10 @@ To string conversions:
      S1 - callee Func or nullptr
      S2 - object (for FPushObjMethod*), class (for FPushClsMethod*), context
           (for FPushClsMethodF), or nullptr (for FPushFunc*).
+     S3 - invoke name for magic dispatch
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
-
-| CufIterSpillFrame<offset,numArgs,iterId>, ND,
-|                                           S(StkPtr) S(FramePtr),
-|                                           NF
-
-  Operands:
-
-     S0 - caller stack pointer
-     S1 - caller frame pointer
-
-  Defines the fields for an activation record using data from the iterator
-  iterId, and writes them to the stack pointed to by S1, at offset.
 
 | FreeActRec, D(FramePtr), S(FramePtr), NF
 
@@ -2454,16 +2443,41 @@ To string conversions:
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.
 
-| DecodeCufIter<iterId>, D(Bool), S(ArrLike,Obj,Str)  S(FramePtr), Er
+| DecodeCufIter<iterId>, D(Bool), S(Arr,Obj,Str)  S(FramePtr), Er
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.
   Does not raise warnings, or throw exceptions.
 
-| CIterFree<iterId>, ND, S(FramePtr), NF
+| StCufIterFunc<iterId>, ND, S(FramePtr) S(Func), NF
 
-  Free the iterator variable whose index is given by IterId in the stack frame
-  pointed to by S0.
+  Store S1 to the `func' field of the iterator specified by IterId.
+
+| StCufIterCtx<iterId>, ND, S(FramePtr) S(Ctx,Nullptr), CRc
+
+  Store S1 to the `this' field of the iterator specified by IterId.
+
+| StCufIterInvName<iterId>, ND, S(FramePtr) S(Str,Nullptr), CRc
+
+  Store S1 to the `invName' field of the iterator specified by IterId.
+
+| LdCufIterFunc<iterId,T>, DParam(Func), S(FramePtr), NF
+
+  Load the `func' field of the iterator specified by IterId.
+
+| LdCufIterCtx<iterId,T>, DParam(Ctx|Nullptr), S(FramePtr), NF
+
+  Load the `this' field of the iterator specified by IterId.
+
+| LdCufIterInvName<iterId,T>, DParam(Str|Nullptr), S(FramePtr), NF
+
+  Load the `invName' field of the iterator specified by IterId.
+
+| KillCufIter<iterId>, ND, S(FramePtr), NF
+
+  Mark the iterator specified by IterId as no longer containing a values. This
+  is used to aid in memory analysis. In debugging builds, it may overwrite the
+  slot with a poison value.
 
 
 18. Member instruction support

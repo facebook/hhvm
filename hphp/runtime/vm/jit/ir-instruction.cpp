@@ -158,8 +158,8 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case SpillFrame:
-      // Consumes the $this/Class field of the ActRec
-      return srcNo == 2;
+      // Consumes the $this/Class or invName field of the ActRec
+      return srcNo == 2 || srcNo == 3;
 
     case CheckNullptr:
       return srcNo == 0;

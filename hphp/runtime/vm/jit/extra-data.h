@@ -478,28 +478,6 @@ struct JmpSwitchData : IRExtraData {
   IRSPRelOffset spOffBCFromIRSP;
 };
 
-struct FPushCufData : IRExtraData {
-  FPushCufData(IRSPRelOffset spOffset, uint32_t a, int32_t id)
-    : spOffset(spOffset)
-    , args(a)
-    , iterId(id)
-  {}
-
-  bool equals(FPushCufData o) const {
-    return iterId == o.iterId && args == o.args;
-  }
-  size_t hash() const {
-    return std::hash<uint32_t>()(iterId) ^ std::hash<uint32_t>()(args);
-  }
-  std::string show() const {
-    return folly::to<std::string>(spOffset.offset, ',', iterId, ',', args);
-  }
-
-  IRSPRelOffset spOffset;
-  uint32_t args;
-  uint32_t iterId;
-};
-
 struct LdTVAuxData : IRExtraData {
   explicit LdTVAuxData(int32_t v = -1) : valid(v) {}
 
@@ -554,13 +532,10 @@ struct ReqRetranslateData : IRExtraData {
  */
 struct ActRecInfo : IRExtraData {
   IRSPRelOffset spOffset;
-  const StringData* invName;  // may be nullptr
   int32_t numArgs;
 
   std::string show() const {
-    return folly::to<std::string>(spOffset.offset, ',',
-                                  numArgs,
-                                  invName ? " M" : "");
+    return folly::to<std::string>(spOffset.offset, ',', numArgs);
   }
 };
 
@@ -1249,8 +1224,14 @@ X(StClsRef,                     ClsRefSlotData);
 X(KillClsRef,                   ClsRefSlotData);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
-X(CIterFree,                    IterId);
 X(DecodeCufIter,                IterId);
+X(StCufIterFunc,                IterId);
+X(StCufIterCtx,                 IterId);
+X(StCufIterInvName,             IterId);
+X(LdCufIterFunc,                IterId);
+X(LdCufIterCtx,                 IterId);
+X(LdCufIterInvName,             IterId);
+X(KillCufIter,                  IterId);
 X(IterInit,                     IterData);
 X(IterInitK,                    IterData);
 X(IterNext,                     IterData);
@@ -1272,7 +1253,6 @@ X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
 X(ExtendsClass,                 ExtendsClassData);
-X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);

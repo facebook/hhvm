@@ -306,7 +306,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
             ReleaseVVAndSkip,
-            CIterFree,
             MIterFree,
             MIterNext,
             MIterNextK,
@@ -942,18 +941,52 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Instructions that manipulate cuf-iter slots
 
-  case CufIterSpillFrame:
-    return may_load_store(ACufIterAny, AStackAny);
-
-  case DecodeCufIter:
-  case CIterFree:  // decrefs context object
+  case DecodeCufIter: {
+    auto const iterId = inst.extra<DecodeCufIter>()->iterId;
+    auto const func = AliasClass { ACufIterFunc { inst.src(1), iterId } };
+    auto const ctx = AliasClass { ACufIterCtx { inst.src(1), iterId } };
+    auto const invName = AliasClass { ACufIterInvName { inst.src(1), iterId } };
     return may_raise(
       inst,
-      may_load_store(
-        AHeapAny | ACufIterAny,
-        AHeapAny | ACufIterAny
-      )
+      may_load_store(AHeapAny, AHeapAny | func | ctx | invName)
     );
+  }
+
+  case StCufIterFunc:
+    return PureStore {
+      ACufIterFunc { inst.src(0), inst.extra<StCufIterFunc>()->iterId },
+      inst.src(1)
+    };
+  case StCufIterCtx:
+    return PureStore {
+      ACufIterCtx { inst.src(0), inst.extra<StCufIterCtx>()->iterId },
+      inst.src(1)
+    };
+  case StCufIterInvName:
+    return PureStore {
+      ACufIterInvName { inst.src(0), inst.extra<StCufIterInvName>()->iterId },
+      inst.src(1)
+    };
+  case LdCufIterFunc:
+    return PureLoad {
+      ACufIterFunc { inst.src(0), inst.extra<LdCufIterFunc>()->iterId }
+    };
+  case LdCufIterCtx:
+    return PureLoad {
+      ACufIterCtx { inst.src(0), inst.extra<LdCufIterCtx>()->iterId }
+    };
+  case LdCufIterInvName:
+    return PureLoad {
+      ACufIterInvName { inst.src(0), inst.extra<LdCufIterInvName>()->iterId }
+    };
+
+  case KillCufIter: {
+    auto const iterId = inst.extra<KillCufIter>()->iterId;
+    auto const func = AliasClass { ACufIterFunc { inst.src(0), iterId } };
+    auto const ctx = AliasClass { ACufIterCtx { inst.src(0), iterId } };
+    auto const invName = AliasClass { ACufIterInvName { inst.src(0), iterId } };
+    return may_load_store_kill(AEmpty, AEmpty, func | ctx | invName);
+  }
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores

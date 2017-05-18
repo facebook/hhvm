@@ -892,7 +892,6 @@ void fpushActRec(IRGS& env,
     env,
     BCSPRelOffset{-int32_t{kNumActRecCells}}
   );
-  info.invName = invName;
   info.numArgs = numArgs;
 
   gen(
@@ -901,27 +900,40 @@ void fpushActRec(IRGS& env,
     info,
     sp(env),
     func,
-    objOrClass
+    objOrClass,
+    invName ? cns(env, invName) : cns(env, TNullptr)
   );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
-  gen(
+  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
+  auto const ctx = gen(
     env,
-    CufIterSpillFrame,
-    FPushCufData {
-      offsetFromIRSP(
-        env,
-        BCSPRelOffset{-int32_t{kNumActRecCells}}
-      ),
-      static_cast<uint32_t>(numParams),
-      itId
-    },
-    sp(env),
+    LdCufIterCtx,
+    TCtx | TNullptr,
+    IterId(itId),
     fp(env)
   );
+  auto const invName = gen(
+    env,
+    LdCufIterInvName,
+    TStr | TNullptr,
+    IterId(itId),
+    fp(env)
+  );
+
+  ActRecInfo info;
+  info.spOffset = offsetFromIRSP(
+    env,
+    BCSPRelOffset{-int32_t{kNumActRecCells}}
+  );
+  info.numArgs = numParams;
+
+  ifNonNull(env, ctx, [&](SSATmp* t) { gen(env, IncRef, t); });
+  ifNonNull(env, invName, [&](SSATmp* t) { gen(env, IncRef, t); });
+  gen(env, SpillFrame, info, sp(env), func, ctx, invName);
 }
 
 void emitFPushCuf(IRGS& env, int32_t numArgs) {

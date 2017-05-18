@@ -284,6 +284,9 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdStk:
     case LdMBase:
     case LdClsRef:
+    case LdCufIterFunc:
+    case LdCufIterCtx:
+    case LdCufIterInvName:
     case LdMem:
       assertx(inst.hasTypeParam());
       return true;
@@ -813,6 +816,7 @@ void refine_load(Global& env,
          flags.refinedType);
 
   inst.setTypeParam(flags.refinedType);
+  retypeDests(&inst, &env.unit);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -263,6 +263,9 @@ bool canDCE(IRInstruction* inst) {
   case Select:
   case MemoGet:
   case LdARCtx:
+  case LdCufIterFunc:
+  case LdCufIterCtx:
+  case LdCufIterInvName:
   case StrictlyIntegerConv:
     assertx(!inst->isControlFlow());
     return true;
@@ -271,7 +274,6 @@ bool canDCE(IRInstruction* inst) {
   case AKExistsObj:
   case StStk:
   case SpillFrame:
-  case CufIterSpillFrame:
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
@@ -547,7 +549,9 @@ bool canDCE(IRInstruction* inst) {
   case IterFree:
   case MIterFree:
   case DecodeCufIter:
-  case CIterFree:
+  case StCufIterFunc:
+  case StCufIterCtx:
+  case StCufIterInvName:
   case BaseG:
   case PropX:
   case PropQ:
@@ -663,6 +667,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileInstanceCheck:
   case MemoSet:
   case KillClsRef:
+  case KillCufIter:
     return false;
 
   case AKExistsArr:

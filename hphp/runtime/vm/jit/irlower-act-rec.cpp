@@ -60,20 +60,12 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-int iterOffset(const BCMarker& marker, uint32_t id) {
-  auto const func = marker.func();
-  return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
-}
-
-}
-
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
   auto const funcTmp = inst->src(1);
   auto const ctxTmp = inst->src(2);
+  auto const invNameTmp = inst->src(3);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -91,112 +83,112 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
       v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
       v << store{cctx, ar + AROFF(m_thisUnsafe)};
     }
-  } else if (ctxTmp->isA(TCtx)) {
-    // We don't have to incref here;
-    auto const ctx = srcLoc(env, inst, 2).reg();
-    v << store{ctx, ar + AROFF(m_thisUnsafe)};
-  } else {
-    always_assert(ctxTmp->isA(TNullptr));
+  } else if (ctxTmp->isA(TNullptr)) {
     // No $this or class; this happens in FPushFunc.
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
     }
+  } else {
+    // It could be TCls | TCtx | TNullptr, but we can't distinguish TCls and
+    // TCtx so assert it doesn't happen. We don't generate SpillFrames with such
+    // input types.
+    assertx(ctxTmp->isA(TCtx | TNullptr));
+
+    // We don't have to incref here
+    auto const ctx = srcLoc(env, inst, 2).reg();
+    v << store{ctx, ar + AROFF(m_thisUnsafe)};
+    if (RuntimeOption::EvalHHIRGenerateAsserts &&
+        ctxTmp->type().maybe(TNullptr)) {
+      auto const sf = v.makeReg();
+      v << testq{ctx, ctx, sf};
+      ifThen(
+        v,
+        CC_Z,
+        sf,
+        [&] (Vout& v) {
+          emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
+        }
+      );
+    }
   }
 
+  auto const caller = inst->marker().func();
+  auto const baseFlags =
+    !caller->isBuiltin() && !caller->unit()->useStrictTypes()
+      ? ActRec::Flags::UseWeakTypes
+      : ActRec::Flags::None;
+  auto const naaf = static_cast<int32_t>(
+    ActRec::encodeNumArgsAndFlags(extra->numArgs, baseFlags)
+  );
+  auto const naafMagic = static_cast<int32_t>(
+    ActRec::encodeNumArgsAndFlags(
+      extra->numArgs,
+      static_cast<ActRec::Flags>(baseFlags | ActRec::Flags::MagicDispatch)
+    )
+  );
+
   // Set m_invName.
-  if (extra->invName) {
-    auto const invName = reinterpret_cast<uintptr_t>(extra->invName);
-    emitImmStoreq(v, invName, ar + AROFF(m_invName));
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+  if (invNameTmp->isA(TNullptr)) {
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+    }
+    v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
+  } else {
+    assertx(invNameTmp->isA(TStr | TNullptr));
+
+    // We don't have to incref here
+    auto const invName = srcLoc(env, inst, 3).reg();
+    v << store{invName, ar + AROFF(m_invName)};
+    if (!invNameTmp->type().maybe(TNullptr)) {
+      v << storeli{naafMagic, ar + AROFF(m_numArgsAndFlags)};
+    } else {
+      auto const sf = v.makeReg();
+      auto const naafReg = v.makeReg();
+      v << testq{invName, invName, sf};
+      v << cmovl{
+        CC_Z,
+        sf,
+        v.cns(static_cast<uint32_t>(naafMagic)),
+        v.cns(static_cast<uint32_t>(naaf)),
+        naafReg
+      };
+      v << storel{naafReg, ar + AROFF(m_numArgsAndFlags)};
+      if (RuntimeOption::EvalHHIRGenerateAsserts) {
+        ifThen(
+          v,
+          CC_Z,
+          sf,
+          [&] (Vout& v) {
+            emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+          }
+        );
+      }
+    }
   }
 
   // Set m_func.
-  if (!funcTmp->isA(TNullptr)) {
-    auto const func = srcLoc(env, inst, 1).reg(0);
-    v << store{func, ar + AROFF(m_func)};
-  }
-
-  auto const caller = inst->marker().func();
-  auto flags = !caller->isBuiltin() && !caller->unit()->useStrictTypes()
-    ? ActRec::Flags::UseWeakTypes
-    : ActRec::Flags::None;
-  if (extra->invName) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
-  }
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags)
-  );
-  v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
-}
-
-void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<CufIterSpillFrame>();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-
-  auto& v = vmain(env);
-
-  auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
-
-  auto const func = v.makeReg();
-  v << load{fp[iterOff + CufIter::funcOff()], func};
-  v << store{func, ar + AROFF(m_func)};
-
-  auto const ctx = v.makeReg();
-  v << load{fp[iterOff + CufIter::ctxOff()], ctx};
-  v << store{ctx, ar + AROFF(m_thisUnsafe)};
-
-  { // Incref m_this, if it's indeed a $this (rather than a class context).
-    auto const sf = v.makeReg();
-    auto const shifted = v.makeReg();
-    v << shrqi{1, ctx, shifted, sf};
-    ifThen(v, CC_NBE, sf, [&](Vout& v) {
-      auto const rthis = v.makeReg();
-      v << shlqi{1, shifted, rthis, v.makeReg()};
-      emitIncRef(v, rthis);
-    });
-  }
-
-  auto const caller = inst->marker().func();
-  auto const flags = !caller->isBuiltin() && !caller->unit()->useStrictTypes()
-    ? ActRec::Flags::UseWeakTypes
-    : ActRec::Flags::None;
-
-  auto const name = v.makeReg();
-  auto const sf = v.makeReg();
-  v << load{fp[iterOff + CufIter::nameOff()], name};
-  v << store{name, ar + AROFF(m_invName)};
-  v << testq{name, name, sf};
-
-  ifThenElse(v, CC_NZ, sf,
-    [&] (Vout& v) {
-      static_assert(UncountedValue < 0 && StaticValue < 0, "");
-
-      // Incref m_invName if it's non-persistent.
-      auto const sf = v.makeReg();
-      v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-      ifThen(v, CC_GE, sf, [&] (Vout& v) { emitIncRef(v, name); });
-
-      auto const naaf = static_cast<int32_t>(
-        ActRec::encodeNumArgsAndFlags(
-          safe_cast<int32_t>(extra->args),
-          static_cast<ActRec::Flags>(ActRec::Flags::MagicDispatch | flags)
-        )
-      );
-      v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
-    },
-    [&] (Vout& v) {
-      auto const naaf = static_cast<int32_t>(
-        ActRec::encodeNumArgsAndFlags(
-          safe_cast<int32_t>(extra->args),
-          flags
-        )
-      );
-      v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
+  if (funcTmp->isA(TNullptr)) {
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
     }
-  );
+  } else {
+    assertx(funcTmp->isA(TFunc | TNullptr));
+    auto const func = srcLoc(env, inst, 1).reg();
+    v << store{func, ar + AROFF(m_func)};
+    if (RuntimeOption::EvalHHIRGenerateAsserts &&
+        funcTmp->type().maybe(TNullptr)) {
+      auto const sf = v.makeReg();
+      v << testq{func, func, sf};
+      ifThen(
+        v,
+        CC_Z,
+        sf,
+        [&] (Vout& v) {
+          emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
+        }
+      );
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

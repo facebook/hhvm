@@ -153,14 +153,14 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
   auto const done_block  = defBlock(env);
 
   using T = decltype(branch(taken_block));
-  auto const v1 = BranchImpl<T>::go(branch, taken_block, next);
+  SSATmp* v1 = BranchImpl<T>::go(branch, taken_block, next);
   if (v1) {
     gen(env, Jmp, done_block, v1);
   } else {
     gen(env, Jmp, done_block);
   }
   env.irb->appendBlock(taken_block);
-  auto const v2 = taken();
+  SSATmp* v2 = taken();
   assertx(!v1 == !v2);
   if (v2) {
     gen(env, Jmp, done_block, v2);
@@ -322,6 +322,19 @@ void ifThen(IRGS& env, Branch branch, Taken taken) {
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
   ifBranch<false>(env, branch, next);
+}
+
+/*
+ * Code emitted in the `then' lambda will be executed iff `tmp' isn't a Nullptr.
+ */
+template<class Then>
+void ifNonNull(IRGS& env, SSATmp* tmp, Then then) {
+  cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckNonNull, taken, tmp); },
+    [&] (SSATmp* s) { then(s); return nullptr; },
+    [] { return nullptr; }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

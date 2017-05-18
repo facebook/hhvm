@@ -116,6 +116,12 @@ inline int ExecutionContext::getLastErrorLine() const {
   return m_lastErrorLine;
 }
 
+inline Array ExecutionContext::releaseDeferredErrors() {
+  auto ret = std::move(m_deferredErrors);
+  m_deferredErrors = Array::CreateVec();
+  return ret;
+}
+
 inline Array ExecutionContext::getEnvs() const {
   return m_envs;
 }

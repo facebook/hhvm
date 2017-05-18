@@ -622,6 +622,7 @@ struct RuntimeOption {
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
+  F(uint32_t, MaxDeferredErrors,       50)                              \
   F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \

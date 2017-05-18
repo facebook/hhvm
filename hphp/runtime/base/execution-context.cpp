@@ -90,6 +90,7 @@ ExecutionContext::ExecutionContext()
   , m_stdoutBytesWritten(0)
   , m_errorState(ExecutionContext::ErrorState::NoError)
   , m_lastErrorNum(0)
+  , m_deferredErrors(staticEmptyVecArray())
   , m_throwAllErrors(false)
   , m_pageletTasksStarted(0)
   , m_vhost(nullptr)
@@ -756,7 +757,13 @@ const StaticString
   s_file("file"),
   s_function("function"),
   s_line("line"),
-  s_php_errormsg("php_errormsg");
+  s_php_errormsg("php_errormsg"),
+  s_error_num("error-num"),
+  s_error_string("error-string"),
+  s_error_file("error-file"),
+  s_error_line("error-line"),
+  s_error_backtrace("error-backtrace"),
+  s_overflow("overflow");
 
 void ExecutionContext::handleError(const std::string& msg,
                                    int errnum,
@@ -833,6 +840,27 @@ void ExecutionContext::handleError(const std::string& msg,
       }
     }
 
+    // If we're inside an error handler already, queue it up on the deferred
+    // list.
+    if (getErrorState() == ErrorState::ExecutingUserHandler) {
+      auto& deferred = m_deferredErrors;
+      if (deferred.size() < RuntimeOption::EvalMaxDeferredErrors) {
+        auto fileAndLine = ee.getFileAndLine();
+        deferred.append(
+          make_dict_array(
+            s_error_num, errnum,
+            s_error_string, msg,
+            s_error_file, std::move(fileAndLine.first),
+            s_error_line, fileAndLine.second,
+            s_error_backtrace, ee.getBacktrace()
+          )
+        );
+      } else if (!deferred.empty()) {
+        auto& last = deferred.lvalAt(deferred.size() - 1);
+        if (last.isDict()) last.asArrRef().set(s_overflow, true);
+      }
+    }
+
     if (errorNeedsLogging(errnum)) {
       DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, ee.getMessage()));
       auto fileAndLine = ee.getFileAndLine();
@@ -865,6 +893,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       auto const context = RuntimeOption::EnableContextInErrorHandler
         ? getDefinedVariables(ar)
         : empty_array();
+      m_deferredErrors = Array::CreateVec();
+      SCOPE_EXIT { m_deferredErrors = Array::CreateVec(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),
@@ -1455,6 +1485,8 @@ void ExecutionContext::requestExit() {
   if (!m_lastError.isNull()) {
     clearLastError();
   }
+
+  m_deferredErrors = Array::CreateVec();
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);
 }

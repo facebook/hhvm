@@ -317,6 +317,12 @@ bool HHVM_FUNCTION(user_error, const String& error_msg,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Array HHVM_FUNCTION(HH_deferred_errors) {
+  return g_context->releaseDeferredErrors();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void StandardExtension::initErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
@@ -335,7 +341,7 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_error);
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
-
+  HHVM_FALIAS(HH\\deferred_errors, HH_deferred_errors);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,

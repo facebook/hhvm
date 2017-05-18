@@ -249,3 +249,36 @@ function hphp_debug_caller_info(): array<string, mixed>;
 
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_debug_backtrace_hash(): int;
+
+namespace HH {
+
+  /*
+   * Retrieve errors generated while inside the error handler. Since the error
+   * handler will not be invoked recursively, such errors will not use the
+   * normal error handler machinery. Instead, the information for the error will
+   * be queued onto a deferred list which can be accessed via this function. To
+   * keep memory usage under control, the deferred list is bounded. The deferred
+   * list is automatically cleared when the error handler is returned from, so
+   * it must be accessed from within the error handler. Calling this function
+   * has the side-effect of clearing the deferred list, so a subsequent call
+   * will just reflect any new notices generated.
+   *
+   * The returned value is a vec, with each element a dict containing
+   * information for a single error. Each dict has the following fields:
+   *
+   * - "error-num"       : Error number (first parameter to the error handler)
+   * - "error-string"    : Error string (second parameter to the error handler)
+   * - "error-file"      : File where error occurred (third parameter to the
+   *                       error handler)
+   * - "error-line"      : Line number where error occurred (fourth parameter
+   *                       tp the error handler)
+   * - "error-backtrace" : Backtrace where error occurred (sixth parameter
+   *                       to the error handler)
+   *
+   * If there were more errors than could be queued, the last entry will have an
+   * additional field called "overflow" set to true.
+   */
+  <<__Native>>
+  function deferred_errors(): vec;
+
+}

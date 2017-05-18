@@ -741,6 +741,13 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
       }
     } catch (const DebuggerException &e) {
       throw;
+    } catch (const Object &o) {
+      Logger::Warning(DEBUGGER_LOG_TAG
+                      "Cmd type %d onServer() threw a php exception %s",
+                      res->getType(), o->getVMClass()->name()->data());
+      Debugger::UsageLog("server", getSandboxId(), "ProxyError",
+                         "Command exception");
+      cmdFailure = true;
     } catch (const std::exception& e) {
       Logger::Warning(DEBUGGER_LOG_TAG
        "Cmd type %d onServer() threw exception %s", res->getType(), e.what());
@@ -773,6 +780,13 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(append_stderr, &sb);
   }
+  SCOPE_EXIT {
+    g_context->setStdout(nullptr, nullptr);
+    g_context->swapOutputBuffer(save);
+    if (flags & ExecutePHPFlagsLog) {
+      Logger::SetThreadHook(nullptr, nullptr);
+    }
+  };
   String code(php.c_str(), php.size(), CopyString);
   // We're about to start executing more PHP. This is typically done
   // in response to commands from the client, and the client expects
@@ -795,11 +809,6 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     switchThreadMode(origThreadMode, m_thread);
   };
   auto const ret = g_context->evalPHPDebugger(code.get(), frame);
-  g_context->setStdout(nullptr, nullptr);
-  g_context->swapOutputBuffer(save);
-  if (flags & ExecutePHPFlagsLog) {
-    Logger::SetThreadHook(nullptr, nullptr);
-  }
   output = sb.detach();
   return {ret.failed, ret.result};
 }

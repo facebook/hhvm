@@ -2214,7 +2214,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   } catch (Object &e) {
     errorString << s_phpException.data();
     errorString << " : ";
-    errorString << e->invokeToString().data();
+    try {
+      errorString << e->invokeToString().data();
+    } catch (...) {
+      errorString << e->getVMClass()->name()->data();
+    }
   } catch (...) {
     errorString << s_cppException.data();
   }

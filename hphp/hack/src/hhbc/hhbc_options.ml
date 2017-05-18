@@ -16,6 +16,7 @@ type t = {
   option_enable_hiphop_syntax : bool;
   option_constant_folding : bool;
   option_optimize_null_check : bool;
+  option_optimize_cuf : bool;
 }
 
 (* Default, as with HHVM, is for Eval.EnableHipHopSyntax=0 *)
@@ -24,11 +25,13 @@ let default = {
   option_enable_hiphop_syntax = false;
   option_constant_folding = true;
   option_optimize_null_check = true;
+  option_optimize_cuf = true;
 }
 
 let enable_hiphop_syntax options = options.option_enable_hiphop_syntax
 let constant_folding options = options.option_constant_folding
 let optimize_null_check options = options.option_optimize_null_check
+let optimize_cuf options = options.option_optimize_cuf
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
@@ -52,6 +55,8 @@ let set_option options name value =
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
     { options with option_optimize_null_check = as_bool value }
+  | "hack.compiler.optimizecuf" ->
+    { options with option_optimize_cuf = as_bool value }
   | _ -> options
 
 (* Construct an instance of Hhbc_options.t from the options as specified

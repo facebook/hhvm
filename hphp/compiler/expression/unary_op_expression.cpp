@@ -200,7 +200,7 @@ bool UnaryOpExpression::isScalar() const {
   case '-':
   case '~':
   case '@':
-    return m_exp->isScalar();
+    return !RuntimeOption::EvalDisableHphpcOpts && m_exp->isScalar();
   case T_ARRAY:
     return isArrayScalar(m_exp);
   case T_VEC:
@@ -351,6 +351,8 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
+  if (RuntimeOption::EvalDisableHphpcOpts) return false;
+
   bool ret = true;
   try {
     ThrowAllErrorsSetter taes;

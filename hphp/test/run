@@ -260,6 +260,9 @@ function hh_codegen_cmd($options) {
   // get 100% test coverage this will need to be fixed
   $cmd = hh_codegen_path();
   $cmd .= ' -v Eval.EnableHipHopSyntax=1';
+  $cmd .= ' -v Hack.Compiler.ConstantFolding=0';
+  $cmd .= ' -v Hack.Compiler.OptimizeNullCheck=0';
+  $cmd .= ' -v Hack.Compiler.OptimizeCuf=0';
   return $cmd;
 }
 
@@ -829,6 +832,10 @@ function hhvm_cmd_impl() {
 
     if (isset($options['run-hh-codegen'])) {
       $args[] = '-vEval.AllowHhas=1';
+    }
+
+    if (isset($options['compare-hh-codegen'])) {
+      $args[] = '-vEval.DisableHphpcOpts=1';
     }
 
     if (!isset($options['cores'])) {

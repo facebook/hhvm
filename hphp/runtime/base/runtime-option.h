@@ -593,6 +593,7 @@ struct RuntimeOption {
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \
+  F(bool, DisableHphpcOpts,            false)                           \
   F(bool, DumpTC,                      false)                           \
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \

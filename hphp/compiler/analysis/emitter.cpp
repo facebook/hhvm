@@ -6563,7 +6563,8 @@ bool EmitterVisitor::emitInlineGen(
 ) {
   if (!m_ue.m_isHHFile || !RuntimeOption::EnableHipHopSyntax ||
       !expression->is(Expression::KindOfSimpleFunctionCall) ||
-      RuntimeOption::EvalJitEnableRenameFunction) {
+      RuntimeOption::EvalJitEnableRenameFunction ||
+      RuntimeOption::EvalDisableHphpcOpts) {
     return false;
   }
 
@@ -9322,6 +9323,8 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     { "fb_call_user_func_safe_return", 2, INT_MAX, CallUserFuncSafeReturn },
   };
 
+  if (RuntimeOption::EvalDisableHphpcOpts) return false;
+
   ExpressionListPtr params = func->getParams();
   if (!params) return false;
   int nParams = params->getCount();
@@ -10812,6 +10815,8 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
 Thunklet::~Thunklet() {}
 
 static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
+  if (RuntimeOption::EvalDisableHphpcOpts) return ConstructPtr();
+
   for (int i = 0, n = c->getKidCount(); i < n; i++) {
     if (ConstructPtr k = c->getNthKid(i)) {
       if (ConstructPtr rep = doOptimize(k, ar)) {

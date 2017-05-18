@@ -55,6 +55,9 @@ let set_needs_local_this n = needs_local_this := n
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
+let optimize_cuf () =
+  Hhbc_options.optimize_cuf !Hhbc_options.compiler_options
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
@@ -1444,7 +1447,8 @@ and emit_call (_, expr_ as expr) args uargs =
          ] end in
     instrs, Flavor.Cell
 
-  | A.Id (_, id) when is_call_user_func id (List.length args)->
+  | A.Id (_, id) when
+    (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
     if List.length uargs != 0 then
     failwith "Using argument unpacking for a call_user_func is not supported";
     begin match args with

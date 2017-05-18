@@ -1625,8 +1625,8 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
   Fmt [
     transform left_p;
     when_present params split;
-    WithRule (Rule.Argument, Fmt [
-      transform_possible_comma_list params right_p;
+    WithRule (Rule.Argument, Span [
+      Span [ transform_possible_comma_list params right_p ];
       transform colon;
       when_present colon space;
       transform ret_type;

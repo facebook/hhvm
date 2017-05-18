@@ -226,42 +226,27 @@ dict(2) {
 ====================================================
 bool(false)
 ----------------------------------------------------
-
-Warning: Bool to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "Bool to dict conversion"
 ====================================================
 ====================================================
 NULL
 ----------------------------------------------------
-
-Warning: Null to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "Null to dict conversion"
 ====================================================
 ====================================================
 int(123)
 ----------------------------------------------------
-
-Warning: Int to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "Int to dict conversion"
 ====================================================
 ====================================================
 float(1.23)
 ----------------------------------------------------
-
-Warning: Double to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "Double to dict conversion"
 ====================================================
 ====================================================
 string(4) "abcd"
 ----------------------------------------------------
-
-Warning: String to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "String to dict conversion"
 ====================================================
 ====================================================
 object(IterableObj)#1 (1) {
@@ -290,18 +275,12 @@ Exception: "ThrowIterableObj"
 object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
-
-Warning: Non-iterable object conversion to dict in %s on line %d
-dict(0) {
-}
+Exception: "Non-iterable object to dict conversion"
 ====================================================
 ====================================================
 resource(1) of type (stream)
 ----------------------------------------------------
-
-Warning: Resource to dict conversion in %s on line %d
-dict(0) {
-}
+Exception: "Resource to dict conversion"
 ====================================================
 ====================================================
 object(HH\Vector)#%d (3) {

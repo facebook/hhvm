@@ -361,9 +361,9 @@ static ArrayData* convObjToVArrImpl(ObjectData* obj) {
     return arr.detach();
   }
 
-  raise_warning("Non-iterable object conversion to varray");
-  decRefObj(obj);
-  return staticEmptyArray();
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Non-iterable object to varray conversion"
+  );
 }
 
 namespace {
@@ -429,9 +429,9 @@ static ArrayData* convObjToDArrImpl(ObjectData* obj) {
     return arr.detach();
   }
 
-  raise_warning("Non-iterable object conversion to darray");
-  decRefObj(obj);
-  return staticEmptyArray();
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Non-iterable object to darray conversion"
+  );
 }
 
 void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {

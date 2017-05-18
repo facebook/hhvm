@@ -542,37 +542,35 @@ void tvCastToVecInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        raise_warning("Null to vec conversion");
-        a = staticEmptyVecArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Null to vec conversion"
+        );
 
       case KindOfBoolean:
-        raise_warning("Bool to vec conversion");
-        a = staticEmptyVecArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Bool to vec conversion"
+        );
 
       case KindOfInt64:
-        raise_warning("Int to vec conversion");
-        a = staticEmptyVecArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Int to vec conversion"
+        );
 
       case KindOfDouble:
-        raise_warning("Double to vec conversion");
-        a = staticEmptyVecArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Double to vec conversion"
+        );
 
       case KindOfPersistentString:
       case KindOfString:
-        raise_warning("String to vec conversion");
-        a = staticEmptyVecArray();
-        decRefStr(tv->m_data.pstr);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "String to vec conversion"
+        );
 
       case KindOfResource:
-        raise_warning("Resource to vec conversion");
-        a = staticEmptyVecArray();
-        decRefRes(tv->m_data.pres);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Resource to vec conversion"
+        );
 
       case KindOfPersistentDict:
       case KindOfDict: {
@@ -619,8 +617,9 @@ void tvCastToVecInPlace(TypedValue* tv) {
           }
           a = arr.detach();
         } else {
-          raise_warning("Non-iterable object conversion to vec");
-          a = staticEmptyVecArray();
+          SystemLib::throwInvalidOperationExceptionObject(
+            "Non-iterable object to vec conversion"
+          );
         }
         decRefObj(obj);
         continue;
@@ -646,37 +645,35 @@ void tvCastToDictInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        raise_warning("Null to dict conversion");
-        a = staticEmptyDictArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Null to dict conversion"
+        );
 
       case KindOfBoolean:
-        raise_warning("Bool to dict conversion");
-        a = staticEmptyDictArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Bool to dict conversion"
+        );
 
       case KindOfInt64:
-        raise_warning("Int to dict conversion");
-        a = staticEmptyDictArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Int to dict conversion"
+        );
 
       case KindOfDouble:
-        raise_warning("Double to dict conversion");
-        a = staticEmptyDictArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Double to dict conversion"
+        );
 
       case KindOfPersistentString:
       case KindOfString:
-        raise_warning("String to dict conversion");
-        a = staticEmptyDictArray();
-        decRefStr(tv->m_data.pstr);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "String to dict conversion"
+        );
 
       case KindOfResource:
-        raise_warning("Resource to dict conversion");
-        a = staticEmptyDictArray();
-        decRefRes(tv->m_data.pres);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Resource to dict conversion"
+        );
 
       case KindOfPersistentVec:
       case KindOfVec: {
@@ -722,14 +719,12 @@ void tvCastToDictInPlace(TypedValue* tv) {
           }
           a = arr.detach();
         } else {
-          raise_warning("Non-iterable object conversion to dict");
-          a = staticEmptyDictArray();
+          SystemLib::throwInvalidOperationExceptionObject(
+            "Non-iterable object to dict conversion"
+          );
         }
-        tv->m_data.parr = a;
-        tv->m_type = KindOfDict;
-        assert(cellIsPlausible(*tv));
         decRefObj(obj);
-        return;
+        continue;
       }
 
       case KindOfRef:
@@ -752,37 +747,35 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        raise_warning("Null to keyset conversion");
-        a = staticEmptyKeysetArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Null to keyset conversion"
+        );
 
       case KindOfBoolean:
-        raise_warning("Bool to keyset conversion");
-        a = staticEmptyKeysetArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Bool to keyset conversion"
+        );
 
       case KindOfInt64:
-        raise_warning("Int to keyset conversion");
-        a = staticEmptyKeysetArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Int to keyset conversion"
+        );
 
       case KindOfDouble:
-        raise_warning("Double to keyset conversion");
-        a = staticEmptyKeysetArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Double to keyset conversion"
+        );
 
       case KindOfPersistentString:
       case KindOfString:
-        raise_warning("String to keyset conversion");
-        a = staticEmptyKeysetArray();
-        decRefStr(tv->m_data.pstr);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "String to keyset conversion"
+        );
 
       case KindOfResource:
-        raise_warning("Resource to keyset conversion");
-        a = staticEmptyKeysetArray();
-        decRefRes(tv->m_data.pres);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Resource to keyset conversion"
+        );
 
       case KindOfPersistentVec:
       case KindOfVec: {
@@ -828,8 +821,9 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
           }
           a = arr.detach();
         } else {
-          raise_warning("Non-iterable object conversion to keyset");
-          a = staticEmptyKeysetArray();
+          SystemLib::throwInvalidOperationExceptionObject(
+            "Non-iterable object to keyset conversion"
+          );
         }
         decRefObj(obj);
         continue;
@@ -855,37 +849,35 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        raise_warning("Null to varray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Null to varray conversion"
+        );
 
       case KindOfBoolean:
-        raise_warning("Bool to varray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Bool to varray conversion"
+        );
 
       case KindOfInt64:
-        raise_warning("Int to varray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Int to varray conversion"
+        );
 
       case KindOfDouble:
-        raise_warning("Double to varray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Double to varray conversion"
+        );
 
       case KindOfPersistentString:
       case KindOfString:
-        raise_warning("String to varray conversion");
-        a = staticEmptyArray();
-        decRefStr(tv->m_data.pstr);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "String to varray conversion"
+        );
 
       case KindOfResource:
-        raise_warning("Resource to varray conversion");
-        a = staticEmptyArray();
-        decRefRes(tv->m_data.pres);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Resource to varray conversion"
+        );
 
       case KindOfPersistentVec:
       case KindOfVec: {
@@ -940,8 +932,9 @@ void tvCastToVArrayInPlace(TypedValue* tv) {
           }
           a = arr.detach();
         } else {
-          raise_warning("Non-iterable object conversion to varray");
-          a = staticEmptyArray();
+          SystemLib::throwInvalidOperationExceptionObject(
+            "Non-iterable object to varray conversion"
+          );
         }
         decRefObj(obj);
         continue;
@@ -969,37 +962,35 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        raise_warning("Null to darray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Null to darray conversion"
+        );
 
       case KindOfBoolean:
-        raise_warning("Bool to darray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Bool to darray conversion"
+        );
 
       case KindOfInt64:
-        raise_warning("Int to darray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Int to darray conversion"
+        );
 
       case KindOfDouble:
-        raise_warning("Double to darray conversion");
-        a = staticEmptyArray();
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Double to darray conversion"
+        );
 
       case KindOfPersistentString:
       case KindOfString:
-        raise_warning("String to darray conversion");
-        a = staticEmptyArray();
-        decRefStr(tv->m_data.pstr);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "String to darray conversion"
+        );
 
       case KindOfResource:
-        raise_warning("Resource to darray conversion");
-        a = staticEmptyArray();
-        decRefRes(tv->m_data.pres);
-        continue;
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Resource to darray conversion"
+        );
 
       case KindOfPersistentVec:
       case KindOfVec: {
@@ -1045,8 +1036,9 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
           }
           a = arr.detach();
         } else {
-          raise_warning("Non-iterable object conversion to darray");
-          a = staticEmptyArray();
+          SystemLib::throwInvalidOperationExceptionObject(
+            "Non-iterable object to darray conversion"
+          );
         }
         decRefObj(obj);
         continue;

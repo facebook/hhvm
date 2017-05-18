@@ -342,42 +342,27 @@ keyset(2) {
 ====================================================
 bool(false)
 ----------------------------------------------------
-
-Warning: Bool to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Bool to keyset conversion"
 ====================================================
 ====================================================
 NULL
 ----------------------------------------------------
-
-Warning: Null to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Null to keyset conversion"
 ====================================================
 ====================================================
 int(123)
 ----------------------------------------------------
-
-Warning: Int to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Int to keyset conversion"
 ====================================================
 ====================================================
 float(1.23)
 ----------------------------------------------------
-
-Warning: Double to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Double to keyset conversion"
 ====================================================
 ====================================================
 string(4) "abcd"
 ----------------------------------------------------
-
-Warning: String to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "String to keyset conversion"
 ====================================================
 ====================================================
 object(IterableObj)#1 (1) {
@@ -403,18 +388,12 @@ Exception: "ThrowIterableObj"
 object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
-
-Warning: Non-iterable object conversion to keyset in %s on line %d
-keyset(0) {
-}
+Exception: "Non-iterable object to keyset conversion"
 ====================================================
 ====================================================
 resource(1) of type (stream)
 ----------------------------------------------------
-
-Warning: Resource to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Resource to keyset conversion"
 ====================================================
 ====================================================
 object(HH\Vector)#%d (3) {

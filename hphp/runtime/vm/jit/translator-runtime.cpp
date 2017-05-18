@@ -328,9 +328,9 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
     return arr.detach();
   }
 
-  raise_warning("Non-iterable object conversion to vec");
-  decRefObj(obj);
-  return staticEmptyVecArray();
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Non-iterable object to vec conversion"
+  );
 }
 
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
@@ -371,9 +371,9 @@ ArrayData* convObjToDictHelper(ObjectData* obj) {
     return arr.detach();
   }
 
-  raise_warning("Non-iterable object conversion to dict");
-  decRefObj(obj);
-  return staticEmptyDictArray();
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Non-iterable object to dict conversion"
+  );
 }
 
 ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
@@ -414,9 +414,9 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
     return arr.detach();
   }
 
-  raise_warning("Non-iterable object conversion to keyset");
-  decRefObj(obj);
-  return staticEmptyKeysetArray();
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Non-iterable object to keyset conversion"
+  );
 }
 
 int64_t convObjToDblHelper(const ObjectData* o) {

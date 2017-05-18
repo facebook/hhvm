@@ -174,42 +174,27 @@ vec(5) {
 ====================================================
 bool(false)
 ----------------------------------------------------
-
-Warning: Bool to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "Bool to vec conversion"
 ====================================================
 ====================================================
 NULL
 ----------------------------------------------------
-
-Warning: Null to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "Null to vec conversion"
 ====================================================
 ====================================================
 int(123)
 ----------------------------------------------------
-
-Warning: Int to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "Int to vec conversion"
 ====================================================
 ====================================================
 float(1.23)
 ----------------------------------------------------
-
-Warning: Double to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "Double to vec conversion"
 ====================================================
 ====================================================
 string(4) "abcd"
 ----------------------------------------------------
-
-Warning: String to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "String to vec conversion"
 ====================================================
 ====================================================
 object(IterableObj)#1 (1) {
@@ -235,18 +220,12 @@ Exception: "ThrowIterableObj"
 object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
-
-Warning: Non-iterable object conversion to vec in %s on line %d
-vec(0) {
-}
+Exception: "Non-iterable object to vec conversion"
 ====================================================
 ====================================================
 resource(1) of type (stream)
 ----------------------------------------------------
-
-Warning: Resource to vec conversion in %s on line %d
-vec(0) {
-}
+Exception: "Resource to vec conversion"
 ====================================================
 ====================================================
 object(HH\Vector)#%d (3) {

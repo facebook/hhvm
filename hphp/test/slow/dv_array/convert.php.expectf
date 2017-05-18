@@ -1,38 +1,17 @@
 ============== test_varray =========================
-
-Warning: Null to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Null to varray conversion
 ============== test_varray =========================
-
-Warning: Bool to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Bool to varray conversion
 ============== test_varray =========================
-
-Warning: Bool to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Bool to varray conversion
 ============== test_varray =========================
-
-Warning: String to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: String to varray conversion
 ============== test_varray =========================
-
-Warning: Int to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Int to varray conversion
 ============== test_varray =========================
-
-Warning: String to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: String to varray conversion
 ============== test_varray =========================
-
-Warning: Double to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Double to varray conversion
 ============== test_varray =========================
 array(0) {
 }
@@ -93,15 +72,9 @@ array(3) {
   int(200)
 }
 ============== test_varray =========================
-
-Warning: Resource to varray conversion in %s/convert.php on line 46
-array(0) {
-}
+Exception: Resource to varray conversion
 ============== test_varray =========================
-
-Warning: Non-iterable object conversion to varray in %s/convert.php on line 46
-array(0) {
-}
+Exception: Non-iterable object to varray conversion
 ============== test_varray =========================
 array(3) {
   [0]=>
@@ -164,40 +137,19 @@ array(2) {
   int(100)
 }
 ============== test_darray =========================
-
-Warning: Null to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Null to darray conversion
 ============== test_darray =========================
-
-Warning: Bool to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Bool to darray conversion
 ============== test_darray =========================
-
-Warning: Bool to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Bool to darray conversion
 ============== test_darray =========================
-
-Warning: String to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: String to darray conversion
 ============== test_darray =========================
-
-Warning: Int to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Int to darray conversion
 ============== test_darray =========================
-
-Warning: String to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: String to darray conversion
 ============== test_darray =========================
-
-Warning: Double to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Double to darray conversion
 ============== test_darray =========================
 array(0) {
 }
@@ -258,15 +210,9 @@ array(3) {
   int(200)
 }
 ============== test_darray =========================
-
-Warning: Resource to darray conversion in %s/convert.php on line 55
-array(0) {
-}
+Exception: Resource to darray conversion
 ============== test_darray =========================
-
-Warning: Non-iterable object conversion to darray in %s/convert.php on line 55
-array(0) {
-}
+Exception: Non-iterable object to darray conversion
 ============== test_darray =========================
 array(3) {
   [100]=>
@@ -325,40 +271,19 @@ array(2) {
   int(100)
 }
 ============== test_indirect (HH\varray) ==================
-
-Warning: Null to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Null to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: Bool to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Bool to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: Bool to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Bool to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: String to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: String to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: Int to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Int to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: String to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: String to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: Double to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Double to varray conversion
 ============== test_indirect (HH\varray) ==================
 array(0) {
 }
@@ -419,15 +344,9 @@ array(3) {
   int(200)
 }
 ============== test_indirect (HH\varray) ==================
-
-Warning: Resource to varray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Resource to varray conversion
 ============== test_indirect (HH\varray) ==================
-
-Warning: Non-iterable object conversion to varray in %s/convert.php on line 63
-array(0) {
-}
+Exception: Non-iterable object to varray conversion
 ============== test_indirect (HH\varray) ==================
 array(3) {
   [0]=>
@@ -490,40 +409,19 @@ array(2) {
   int(100)
 }
 ============== test_indirect (HH\darray) ==================
-
-Warning: Null to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Null to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: Bool to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Bool to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: Bool to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Bool to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: String to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: String to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: Int to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Int to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: String to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: String to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: Double to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Double to darray conversion
 ============== test_indirect (HH\darray) ==================
 array(0) {
 }
@@ -584,15 +482,9 @@ array(3) {
   int(200)
 }
 ============== test_indirect (HH\darray) ==================
-
-Warning: Resource to darray conversion in %s/convert.php on line 63
-array(0) {
-}
+Exception: Resource to darray conversion
 ============== test_indirect (HH\darray) ==================
-
-Warning: Non-iterable object conversion to darray in %s/convert.php on line 63
-array(0) {
-}
+Exception: Non-iterable object to darray conversion
 ============== test_indirect (HH\darray) ==================
 array(3) {
   [100]=>

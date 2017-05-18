@@ -2454,6 +2454,19 @@ SSATmp* simplifyCheckClosureStaticLocInit(State& env,
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
+  auto const type = inst->src(0)->type();
+
+  if (type <= TNullptr || inst->next() == inst->taken()) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+
+  if (!type.maybe(TNullptr)) return inst->src(0);
+
+  return nullptr;
+}
+
 SSATmp* simplifyCheckRefs(State& env, const IRInstruction* inst) {
   if (!inst->src(0)->hasConstVal()) return nullptr;
 
@@ -3437,6 +3450,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckType)
   X(CheckTypeMem)
   X(AssertType)
+  X(CheckNonNull)
   X(CheckPackedArrayDataBounds)
   X(ReservePackedArrayDataNewElem)
   X(CoerceCellToBool)

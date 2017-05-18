@@ -11,6 +11,7 @@
 val emit_body:
   scope: Ast_scope.Scope.t ->
   is_closure_body: bool ->
+  is_memoize_wrapper:bool ->
   skipawaitable: bool ->
   default_dropthrough: Instruction_sequence.t option ->
   return_value: Instruction_sequence.t ->

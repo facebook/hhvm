@@ -34,11 +34,13 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
   let method_is_generator = false in
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
+  let method_is_memoize_wrapper = false in
   let method_body = Hhas_body.make
     instrs
     method_decl_vars
     method_num_iters
     method_num_cls_ref_slots
+    method_is_memoize_wrapper
     params
     method_return_type in
   Hhas_method.make

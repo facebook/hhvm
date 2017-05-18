@@ -68,6 +68,7 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
     is_public
     is_static
     is_deep_init
+    false (*no_serialize*)
     pid
     initial_value
     initializer_instrs

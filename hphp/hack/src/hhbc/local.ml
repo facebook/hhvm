@@ -24,5 +24,5 @@ let get_unnamed_local () =
   next_local := current + 1;
   Unnamed current
 
-let reset_local () =
-  next_local := 0
+let reset_local base =
+  next_local := base

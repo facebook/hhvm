@@ -39,6 +39,7 @@ let emit_main defs =
     Emit_body.emit_body
       ~namespace:Namespace_env.empty_with_default_popt
       ~is_closure_body:false
+      ~is_memoize_wrapper:false
       ~skipawaitable:false
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(instr_int 1)

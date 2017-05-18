@@ -73,12 +73,17 @@ let rec emit_defs defs =
     let i2 = emit_defs defs in
     gather [i1; i2]
 
-let emit_body ~scope ~is_closure_body ~skipawaitable ~default_dropthrough
-  ~return_value ~namespace params ret body =
+let emit_body
+  ~scope
+  ~is_closure_body
+  ~is_memoize_wrapper
+  ~skipawaitable
+  ~default_dropthrough
+  ~return_value
+  ~namespace params ret body =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
-  Local.reset_local ();
   Iterator.reset_iterator ();
   Emit_expression.set_scope scope;
   let return_type_info =
@@ -101,6 +106,7 @@ let emit_body ~scope ~is_closure_body ~skipawaitable ~default_dropthrough
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params body in
+  Local.reset_local (List.length params + List.length decl_vars);
   Emit_expression.set_needs_local_this needs_local_this;
   let stmt_instrs = emit_defs body in
   let fault_instrs = extract_fault_instructions stmt_instrs in
@@ -130,6 +136,7 @@ let emit_body ~scope ~is_closure_body ~skipawaitable ~default_dropthrough
     decl_vars
     num_iters
     num_cls_ref_slots
+    is_memoize_wrapper
     params
     return_type_info,
     is_generator,

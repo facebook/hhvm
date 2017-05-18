@@ -64,6 +64,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       ~scope:scope
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ~is_closure_body:method_is_closure_body
+      ~is_memoize_wrapper:false
       ~default_dropthrough
       ~return_value:instr_null
       ~namespace

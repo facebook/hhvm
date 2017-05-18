@@ -30,9 +30,6 @@ let next_typedef_counter () =
   typedef_counter := c + 1;
   c
 
-(* State associated with a single body of code *)
-let total_named_locals = ref 0
-
 (* Array identifier map *)
 let array_identifier_counter = ref 0
 let next_array_identifier () =
@@ -105,7 +102,7 @@ let string_of_param_num i = string_of_int i
 
 let string_of_local_id x =
   match x with
-  | Local.Unnamed i -> "_" ^ (string_of_int (!total_named_locals + i))
+  | Local.Unnamed i -> "_" ^ (string_of_int i)
   | Local.Named s -> s
   | Local.Pipe -> failwith "$$ should not have survived to codegen"
 
@@ -1007,10 +1004,10 @@ let add_num_iters buf indent num_iters =
 
 let add_body buf indent body =
   add_num_iters buf indent (Hhas_body.num_iters body);
+  if Hhas_body.is_memoize_wrapper body
+  then add_indented_line buf indent ".ismemoizewrapper;";
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
-  total_named_locals := List.length (Hhas_body.decl_vars body) +
-    List.length (Hhas_body.params body);
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 
@@ -1117,6 +1114,7 @@ let add_implements buf class_implements =
 let property_attributes p =
   let module P = Hhas_property in
   let attrs = [] in
+  let attrs = if P.no_serialize p then "no_serialize" :: attrs else attrs in
   let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in
   let attrs = if P.is_public p then "public" :: attrs else attrs in

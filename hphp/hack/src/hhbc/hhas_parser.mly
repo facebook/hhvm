@@ -24,6 +24,7 @@ open Hhas_parser_actions
 %token DATADECLDIRECTIVE NUMITERSDIRECTIVE NUMCLSREFSLOTSDIRECTIVE
 %token METHODDIRECTIVE CONSTDIRECTIVE ENUMTYDIRECTIVE USESDIRECTIVE
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
+%token ISMEMOIZEWRAPPERDIRECTIVE
 %token LANGLE
 %token RANGLE
 %token LPAR
@@ -61,7 +62,8 @@ maindecl:
     | MAINDIRECTIVE LBRACE nl numiters declvars nl functionbody RBRACE nl
       {Hhas_body.make $7(*instrs*)
         $5(*declvars*) $4(*numiters*)
-        0(*numclsrefslots*) [](*params*) None(*return type*)
+        0(*numclsrefslots*) false(*ismemoizewrapper*)
+        [](*params*) None(*return type*)
       (* TODO: This is currently wrong, as it includes defcls and type alias
          instructions in the body. We strip the former later *)}
 ;
@@ -82,12 +84,14 @@ nonclassattribute:
 ;
 fundecl:
     | FUNCTIONDIRECTIVE functionattributes typeinfooption ID fparams
-      functionflags LBRACE nl numiters numclsrefslots declvars functionbody RBRACE
+      functionflags LBRACE nl ismemoizewrapper numiters numclsrefslots declvars
+      functionbody RBRACE
         {Hhas_function.make $2(*attributes*)
            (Hhbc_id.Function.from_raw_string $4)(*name*)
-             (Hhas_body.make $12(*instrs*)
-             $11(*declvars*)
-             $9 (*numiters*) $10 (*numclsrefslots *)
+             (Hhas_body.make $13(*instrs*)
+             $12(*declvars*)
+             $10 (*numiters*) $11 (*numclsrefslots *)
+             $9 (*ismemoizewrapper*)
              $5(*params*) $3(*typeinfo*))
             (isasync $6)
             (isgenerator $6)
@@ -100,6 +104,10 @@ nl:
 declvars:
     | /* empty */ {[]}
     | DECLVARSDIRECTIVE declvarlist SEMI nl {$2}
+;
+ismemoizewrapper:
+    | /* empty */ {false}
+    | ISMEMOIZEWRAPPERDIRECTIVE SEMI nl {true}
 ;
 declvarlist:
     | vname  {[$1]}
@@ -170,7 +178,7 @@ methodname:
 ;
 methoddecl:
  | METHODDIRECTIVE classattributes typeinfooption methodname fparams idlist LBRACE nl
-    numclsrefslots numiters declvars functionbody RBRACE nl
+    numclsrefslots numiters declvars ismemoizewrapper functionbody RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
     (List.mem "protected" (snd $2))
@@ -181,10 +189,11 @@ methoddecl:
     (List.mem "abstract" (snd $2))
     (Hhbc_id.Method.from_raw_string $4) (* name *)
     (Hhas_body.make
-      $12 (* method instructions *)
+      $13 (* method instructions *)
       $11 (* declvars *)
       $10 (* numiters *)
       $9 (* num cls ref slots *)
+      $12 (* ismemoizewrapper *)
       $5 (* params *)
       $3 (* return type *)
       )
@@ -214,6 +223,7 @@ classproperty:
     (List.mem "public" $2)
     (List.mem "static" $2)
     (List.mem "deep_init" $2)
+    (List.mem "no_serialize" $2)
     (Hhbc_id.Prop.from_raw_string $3) (*name *)
     $6 (*initial value *)
     None (* initializer instructions. already been emitted elsewhere *)

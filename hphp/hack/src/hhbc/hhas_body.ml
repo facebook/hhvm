@@ -14,16 +14,25 @@ type t = {
   body_decl_vars         : string list; (* Actually local_id list *)
   body_num_iters         : int;
   body_num_cls_ref_slots : int;
+  body_is_memoize_wrapper: bool;
   body_params            : Hhas_param.t list;
   body_return_type       : Hhas_type_info.t option;
 }
 
-let make instrs decl_vars num_iters num_cls_ref_slots params return_type =
+let make
+  instrs
+  decl_vars
+  num_iters
+  num_cls_ref_slots
+  is_memoize_wrapper
+  params
+  return_type =
   {
     body_instrs = instrs;
     body_decl_vars = decl_vars;
     body_num_iters = num_iters;
     body_num_cls_ref_slots = num_cls_ref_slots;
+    body_is_memoize_wrapper = is_memoize_wrapper;
     body_params = params;
     body_return_type = return_type;
   }
@@ -34,8 +43,6 @@ let decl_vars body = body.body_decl_vars
 let num_iters body = body.body_num_iters
 let num_cls_ref_slots body = body.body_num_cls_ref_slots
 let return_type body = body.body_return_type
-
+let is_memoize_wrapper body = body.body_is_memoize_wrapper
 let with_instrs body instrs = { body with body_instrs = instrs }
-let with_num_cls_ref_slots body slots =
-  { body with body_num_cls_ref_slots = slots }
 let with_decl_vars body decl_vars = { body with body_decl_vars = decl_vars }

@@ -61,7 +61,6 @@ let memoize_function_no_params renamed_name =
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
   gather [
-    instr_entrynop;
     instr_false;
     instr_staticlocinit local_guard static_memoize_cache_guard;
     instr_null;
@@ -113,11 +112,6 @@ let memoize_function_with_params params renamed_name =
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed (param_count + 1) in
   gather [
-    (* Why do we emit a no-op that cannot be removed here?
-    The alleged reason for this no-op is because the runtime handles a branch
-    to the first intruction poorly, but we know there will never be any such
-    branch in this method. *)
-    instr_entrynop;
     Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     instr_dict (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
@@ -154,8 +148,16 @@ let memoize_function compiled =
   let body = Hhas_function.body compiled in
   let params = Hhas_body.params body in
   let body_instrs = memoized_function_body params renamed_name in
-  let body = Hhas_body.with_instrs body body_instrs in
-  let memoized = Hhas_function.with_body compiled body in
+  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
+  let memoized_body = Hhas_body.make
+    body_instrs
+    [] (* decl_vars *)
+    0 (* num_iters *)
+    num_cls_ref_slots
+    true (* is_memoize_wrapper *)
+    params
+    (Hhas_body.return_type body) in
+  let memoized = Hhas_function.with_body compiled memoized_body in
   (renamed, memoized)
 
 let memoize_functions compiled_funcs =
@@ -179,7 +181,6 @@ let memoize_instance_method_no_params original_name =
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
   gather [
-    instr_entrynop;
     instr_checkthis;
     instr_null;
     instr_ismemotype;
@@ -253,8 +254,6 @@ let memoize_instance_method_with_params params original_name total_count index =
   of locals, so we'll just use that. *)
   let first_parameter_local = local_count in
   gather [
-    (* Why do we emit a no-op that cannot be removed here? *)
-    instr_entrynop;
     Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     instr_checkthis;
     index_block;
@@ -291,7 +290,6 @@ let memoize_static_method_no_params original_name class_name =
   let original_name_lc = String.lowercase_ascii
     (Hhbc_id.Method.to_raw_string original_name) in
   gather [
-    instr_entrynop;
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_0;
@@ -358,7 +356,6 @@ let memoize_static_method_with_params params original_name class_name =
   let original_name_lc = String.lowercase_ascii
     (Hhbc_id.Method.to_raw_string original_name) in
   gather [
-    instr_entrynop;
     Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     param_code_sets params param_count;
     instr_string (original_name_lc ^ multi_memoize_cache);
@@ -380,7 +377,7 @@ let memoize_static_method_with_params params original_name class_name =
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
-    instr_basesc 0;
+    instr_basesc 1;
     instr_memoset 1 first_local param_count;
     instr_retc ]
 
@@ -407,9 +404,15 @@ let memoize_method method_ memoizer =
   let instrs = memoizer params original_name in
   let instrs = rewrite_class_refs instrs in
   let num_cls_ref_slots = get_num_cls_ref_slots instrs in
-  let body = Hhas_body.with_instrs body instrs in
-  let body = Hhas_body.with_num_cls_ref_slots body num_cls_ref_slots in
-  let memoized = Hhas_method.with_body method_ body in
+  let memoized_body = Hhas_body.make
+    instrs
+    [] (* decl_vars *)
+    0 (* num_iters *)
+    num_cls_ref_slots
+    true (* is_memoize_wrapper *)
+    params
+    (Hhas_body.return_type body) in
+  let memoized = Hhas_method.with_body method_ memoized_body in
   (renamed, memoized)
 
 let memoize_instance_method method_ total_count index =
@@ -438,41 +441,49 @@ let add_instance_properties class_ =
   let (count, zero_params) =
     Core.List.fold_left methods ~init:(0, false) ~f:folder in
   if count = 1 && zero_params then
-    let property = Hhas_property.make true false false false false
-      shared_single_memoize_cache empty_dict_init None in
+    let property = Hhas_property.make true false false false false true
+      shared_single_memoize_cache null_init None in
     let class_ = Hhas_class.with_property class_ property in
-    let property = Hhas_property.make true false false false false
+    let property = Hhas_property.make true false false false false true
       shared_single_memoize_cache_guard false_init None in
     Hhas_class.with_property class_ property
   else
-    let property = Hhas_property.make true false false false false
+    let property = Hhas_property.make true false false false false true
       shared_multi_memoize_cache empty_dict_init None in
     Hhas_class.with_property class_ property
-
-let memoize_instance_methods class_ =
-  let methods = Hhas_class.methods class_ in
-  let memoized_count = Core.List.count methods is_memoized_instance in
-  let folder (count, acc) method_ =
-    if is_memoized_instance method_ then
-      let (renamed, memoized) = memoize_instance_method
-        method_ memoized_count count in
-      (count + 1, memoized :: renamed :: acc)
-    else
-      (count, method_ :: acc) in
-  let (count, methods) = Core.List.fold_left methods ~init:(0, []) ~f:folder in
-  if count = 0 then
-    class_
-  else
-    let class_ = add_instance_properties class_ in
-    let methods = List.rev methods in
-    Hhas_class.with_methods class_ methods
 
 let is_memoized_static method_ =
   (Hhas_method.is_static method_) &&
   Hhas_attribute.is_memoized (Hhas_method.attributes method_)
 
-let add_static_properties class_ =
-  let folder class_ method_ =
+let memoize_methods class_ =
+  let methods = Hhas_class.methods class_ in
+  let memoized_count = Core.List.count methods is_memoized_instance in
+  let rec gather count methods acc_renamed acc_memoized =
+    match methods with
+    | [] ->
+      (count, List.rev acc_renamed @ List.rev acc_memoized)
+    | method_ :: methods ->
+      if is_memoized_instance method_
+      then
+        let (renamed, memoized) = memoize_instance_method
+          method_ memoized_count count in
+        gather (count+1) methods (renamed::acc_renamed) (memoized::acc_memoized)
+      else
+      if is_memoized_static method_ then
+        let (renamed, memoized) = memoize_static_method class_ method_ in
+        gather count methods (renamed::acc_renamed) (memoized::acc_memoized)
+      else
+        gather count methods (method_::acc_renamed) acc_memoized
+  in
+  let (count, methods) = gather 0 methods [] [] in
+  let class_ =
+    if count = 0 then class_
+    else add_instance_properties class_ in
+  Hhas_class.with_methods class_ methods
+
+let make_static_properties class_ =
+  let mapper method_ =
     if is_memoized_static method_ then
       let params = Hhas_body.params (Hhas_method.body method_) in
       let original_name =
@@ -480,36 +491,27 @@ let add_static_properties class_ =
         (String.lowercase_ascii @@ Hhbc_id.Method.to_raw_string
         @@ Hhas_method.name method_) in
       if params = [] then
-        let property = Hhas_property.make true false false true false
-          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache) null_init None in
-        let class_ = Hhas_class.with_property class_ property in
-        let property = Hhas_property.make true false false true false
-          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache_guard) false_init None in
-        Hhas_class.with_property class_ property
+        let property2 = Hhas_property.make true false false true false true
+          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache)
+          null_init None in
+        let property1 = Hhas_property.make true false false true false true
+          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache_guard)
+          false_init None in
+        [property1; property2]
       else
-        let property = Hhas_property.make true false false true false
-          (Hhbc_id.Prop.add_suffix original_name multi_memoize_cache) null_init None in
-        Hhas_class.with_property class_ property
+        let property = Hhas_property.make true false false true false true
+          (Hhbc_id.Prop.add_suffix original_name multi_memoize_cache)
+          empty_dict_init None in
+        [property]
     else
-      class_ in
+      [] in
   let methods = Hhas_class.methods class_ in
-  Core.List.fold_left methods ~init:class_ ~f:folder
-
-let memoize_static_methods class_ =
-  let mapper method_ =
-    if is_memoized_static method_ then
-      let (renamed, memoized) = memoize_static_method class_ method_ in
-      [ renamed ; memoized ]
-    else
-      [ method_ ] in
-  let class_ = add_static_properties class_ in
-  let methods = Hhas_class.methods class_ in
-  let methods = Core.List.bind methods mapper in
-  Hhas_class.with_methods class_ methods
+  Core.List.concat_map methods mapper
 
 let memoize_class class_ =
-  let class_ = memoize_instance_methods class_ in
-  memoize_static_methods class_
+  let properties = make_static_properties class_ in
+  let class_ = memoize_methods class_ in
+  Hhas_class.with_properties class_ properties
 
 let memoize_classes classes =
   List.map memoize_class classes

@@ -1641,12 +1641,13 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   simplify(unit);
 
   lowerForARM(unit);
-  reuseImmq(unit);
+
   simplify(unit);
 
   if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
   }
+  reuseImmq(unit);
 
   optimizeCopies(unit, abi);
 

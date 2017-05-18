@@ -38,12 +38,12 @@ namespace {
 
 // track ldimmq values
 struct ImmState {
-  ImmState() : val{0}, base{} {}
+  ImmState() {}
   ImmState(Immed64 a, Vreg b) : val{a}, base{b} {}
 
   void reset() { base = Vreg{}; }
 
-  Immed64 val;
+  Immed64 val{0};
   Vreg base;
 };
 
@@ -70,13 +70,10 @@ folly::Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
   for (auto const& elem : env.immStateVec) {
     if (!elem.base.isValid()) continue;
     int64_t q = elem.val.q();
-    if ((p >= q) && (p < (q + 4095))) {
+    if (((p >= q) && (p < (q + 4095))) ||
+        ((p < q) && (q < (p + 4095)))) {
       reg = elem.base;
-      return folly::Optional<int>(safe_cast<int>(p - q));
-    }
-    if ((p < q) && (q < (p + 4095))) {
-      reg = elem.base;
-      return folly::Optional<int>(safe_cast<int>(p - q));
+      return folly::make_optional(safe_cast<int>(p - q));
     }
   }
   return folly::none;
@@ -85,7 +82,7 @@ folly::Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
 template <typename Inst>
 void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) {
   // leaky bucket
-  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan] = ImmState{};
+  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan].reset();
 }
 
 template<typename ReuseImm>
@@ -110,10 +107,10 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
 
 void reuseImmq(Env& env, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
-  auto& inst = env.unit.blocks[b].code[i];
+  auto const& inst = env.unit.blocks[b].code[i];
 
-  if (isBlockEnd(inst) || isCall(inst)) {
-    for (auto &elem : env.immStateVec) elem.reset();
+  if (isCall(inst)) {
+    for (auto& elem : env.immStateVec) elem.reset();
     return;
   } 
 
@@ -148,7 +145,7 @@ void reuseImmq(Vunit& unit) {
   }
 
   for (auto const b : labels) {
-    for (auto &elem : env.immStateVec) elem.reset();
+    for (auto& elem : env.immStateVec) elem.reset();
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       reuseImmq(env, b, i);
     }

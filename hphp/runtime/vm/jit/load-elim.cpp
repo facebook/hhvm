@@ -266,6 +266,11 @@ struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FRefinableLoad { Type refinedType; };
 
 /*
+ * The instruction is a call to a callee who's identity has been determined.
+ */
+struct FSpecifiable { const Func* callee; };
+
+/*
  * The instruction can be legally replaced with a Jmp to either its next or
  * taken edge.
  */
@@ -273,7 +278,7 @@ struct FJmpNext {};
 struct FJmpTaken {};
 
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FJmpNext,FJmpTaken>;
+                             FSpecifiable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -288,6 +293,8 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdCufIterCtx:
     case LdCufIterInvName:
     case LdMem:
+    case LdARFuncPtr:
+    case LdARCtx:
       assertx(inst.hasTypeParam());
       return true;
     default:
@@ -502,10 +509,37 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
-void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.writes_locals) {
+Flags handle_call_effects(Local& env,
+                          const IRInstruction& inst,
+                          CallEffects effects) {
+  // If the callee isn't already known, see if we can determine it. We can
+  // determine it if we know the precise type of the Func stored in the spilled
+  // frame.
+  auto const knownCallee = [&]() -> const Func* {
+    if (inst.is(Call)) return inst.extra<Call>()->callee;
+    if (inst.is(CallArray)) return inst.extra<CallArray>()->callee;
+    return nullptr;
+  }();
+
+  Flags flags = FNone{};
+  auto writesLocals = effects.writes_locals;
+  if (!knownCallee) {
+    if (auto const meta = env.global.ainfo.find(canonicalize(effects.callee))) {
+      assertx(meta->index < kMaxTrackedALocs);
+      if (env.state.avail[meta->index]) {
+        auto const& tracked = env.state.tracked[meta->index];
+        if (tracked.knownType.hasConstVal(TFunc)) {
+          auto const callee = tracked.knownType.funcVal();
+          if (writesLocals) writesLocals = funcWritesLocals(callee);
+          flags = FSpecifiable { callee };
+        }
+      }
+    }
+  }
+
+  if (writesLocals) {
     clear_everything(env);
-    return;
+    return flags;
   }
 
   /*
@@ -526,6 +560,8 @@ void handle_call_effects(Local& env, CallEffects effects) {
     if (!env.state.avail[aloc]) continue;
     env.state.tracked[aloc].knownValue = nullptr;
   }
+
+  return flags;
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {
@@ -588,12 +624,13 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr); },
+    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr);
+                              store(env, m.callee, m.calleeValue); },
 
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
-    [&] (CallEffects x)     { handle_call_effects(env, x); }
+    [&] (CallEffects x)     { flags = handle_call_effects(env, inst, x); }
   );
 
   switch (inst.op()) {
@@ -819,6 +856,34 @@ void refine_load(Global& env,
   retypeDests(&inst, &env.unit);
 }
 
+void specify_call(Global& env,
+                  IRInstruction& inst,
+                  const FSpecifiable& flags) {
+  FTRACE(2, "      specifiable: {} -> {}\n",
+         inst.toString(),
+         flags.callee->fullName());
+
+  if (inst.is(Call)) {
+    auto& extra = *inst.extra<Call>();
+    assertx(extra.callee == nullptr);
+    extra.callee = flags.callee;
+    extra.writeLocals = funcWritesLocals(flags.callee);
+    extra.readLocals = funcReadsLocals(flags.callee);
+    extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
+    retypeDests(&inst, &env.unit);
+    return;
+  }
+
+  if (inst.is(CallArray)) {
+    auto& extra = *inst.extra<CallArray>();
+    assertx(extra.callee == nullptr);
+    extra.callee = flags.callee;
+    extra.writeLocals = funcWritesLocals(flags.callee);
+    extra.readLocals = funcReadsLocals(flags.callee);
+    retypeDests(&inst, &env.unit);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -844,7 +909,9 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
 
     [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
-    [&] (FRefinableLoad flags) { refine_load(env, inst, flags); },
+    [&] (FRefinableLoad f) { refine_load(env, inst, f); },
+
+    [&] (FSpecifiable f) { specify_call(env, inst, f); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");

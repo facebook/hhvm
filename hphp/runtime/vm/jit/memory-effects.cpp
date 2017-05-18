@@ -235,6 +235,36 @@ AliasClass stack_below(SSATmp* base, Off offset) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Helper functions for alias classes representing an ActRec on the stack
+ * (whether pre-live or live).
+ */
+
+// Return an AliasClass representing an entire ActRec at base + offset.
+AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
+  return AStack {
+    base,
+    // The offset is the bottom of where the ActRec is stored, but AliasClass
+    // needs an offset to the highest cell.
+    offset + int32_t{kNumActRecCells} - 1,
+    int32_t{kNumActRecCells}
+  };
+}
+
+// Return an AliasClass representing just the context field of an ActRec at base
+// + offset.
+AliasClass actrec_ctx(SSATmp* base, IRSPRelOffset offset) {
+  return AStack { base, offset + int32_t{kActRecCtxCellOff}, 1 };
+}
+
+// Return AliasClass representing just the func field of an ActRec at base +
+// offset.
+AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
+  return AStack { base, offset + int32_t{kActRecFuncCellOff}, 1 };
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Determine an AliasClass representing any locals in the instruction's frame
 // which might be accessed via debug_backtrace().
 
@@ -699,12 +729,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
-    auto const arStack = AStack {
-      inst.src(0),
-      // Same as spillframe
-      spOffset + int32_t{kNumActRecCells} - 1,
-      int32_t{kNumActRecCells}
-    };
+    auto const arStack = actrec(inst.src(0), spOffset);
     // This instruction doesn't actually load but SpillFrame cannot be pushed
     // past it
     return may_load_store(arStack, arStack);
@@ -768,13 +793,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           inst.src(0),
           extra->spOffset + extra->numParams + kNumActRecCells - 1
         ),
+        // Locals.
         (extra->writeLocals || extra->readLocals)
-          ? AFrameAny : backtrace_locals(inst)
+          ? AFrameAny : backtrace_locals(inst),
+        // Callee.
+        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
       };
     }
 
   case ContEnter:
-    return CallEffects { false, AMIStateAny, AStackAny, AFrameAny };
+    return CallEffects { false, AMIStateAny, AStackAny, AFrameAny, AStackAny };
 
   case Call:
     {
@@ -788,8 +816,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           inst.src(0),
           extra->spOffset + extra->numParams + kNumActRecCells - 1
         ),
+        // Locals.
         (extra->writeLocals || extra->readLocals)
-          ? AFrameAny : backtrace_locals(inst)
+          ? AFrameAny : backtrace_locals(inst),
+        // Callee.
+        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
       };
     }
 
@@ -1344,20 +1375,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const spOffset = inst.extra<SpillFrame>()->spOffset;
       return PureSpillFrame {
-        AStack {
-          inst.src(0),
-          // SpillFrame's spOffset is to the bottom of where it will store the
-          // ActRec, but AliasClass needs an offset to the highest cell it will
-          // store.
-          spOffset + int32_t{kNumActRecCells} - 1,
-          int32_t{kNumActRecCells}
-        },
-        AStack {
-          inst.src(0),
-          // The context is in the highest slot.
-          spOffset + int32_t{kNumActRecCells} - 1,
-          1
-        }
+        actrec(inst.src(0), spOffset),
+        actrec_ctx(inst.src(0), spOffset),
+        actrec_func(inst.src(0), spOffset),
+        inst.src(1)
       };
     }
 
@@ -1393,29 +1414,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_raise(inst, may_load_store(AUnknown, AUnknown));
     }
 
-  case LdARFuncPtr:
   case LdARCtx:
-    // These instructions are essentially PureLoads, but we don't handle
-    // non-TV's in PureLoad so we have to treat it as may_load_store.  We also
-    // treat it as loading an entire ActRec-sized part of the stack, although it
-    // only loads a single value from it.
-    return may_load_store(
-      AStack {
-        inst.src(0),
-        inst.extra<IRSPRelOffsetData>()->offset + int32_t{kNumActRecCells} - 1,
-        int32_t{kNumActRecCells}
-      },
-      AEmpty
-    );
+    return PureLoad {
+      actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
+    };
+  case LdARFuncPtr:
+    return PureLoad {
+      actrec_func(inst.src(0), inst.extra<LdARFuncPtr>()->offset)
+    };
 
   case DbgAssertARFunc:
-    // Similar to LdARFuncPtr
     return may_load_store(
-      AStack {
-        inst.src(0),
-        inst.extra<DbgAssertARFunc>()->offset + int32_t{kNumActRecCells} - 1,
-        int32_t{kNumActRecCells}
-      },
+      actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),
       AEmpty
     );
 
@@ -1742,40 +1752,37 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IrrelevantEffects{};
   }
 
-  case LdArrFPushCuf:  // autoloads
-  case LdArrFuncCtx:   // autoloads
+  case LdArrFPushCuf:
+  case LdArrFuncCtx:
+  case LdStrFPushCuf:
+  case LdFunc: // these all can autoload
+    {
+      AliasClass effects =
+        actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
+      return may_raise(inst, may_load_store(effects, effects));
+    }
+
   case LdObjMethod:    // can't autoload, but can decref $this right now
-  case LdStrFPushCuf:  // autoload
-    /*
-     * Note that these instructions make stores to a pre-live actrec on the
-     * eval stack.
-     *
-     * It is probably safe for these instructions to have may-load only from
-     * the portion of the evaluation stack below the actrec they are
-     * manipulating, but since there's always going to be either a Call or a
-     * region exit following it it doesn't help us eliminate anything for now,
-     * so we just pretend it can read/write anything on the stack.
-     */
-    return may_raise(inst, may_load_store(AStackAny, AStackAny));
+    {
+      AliasClass effects =
+        actrec(inst.src(1), inst.extra<LdObjMethod>()->offset);
+      return may_raise(inst, may_load_store(effects, effects));
+    }
 
   case LookupClsMethod:   // autoload, and it writes part of the new actrec
     {
-      AliasClass effects = AStack {
-        inst.src(2),
-        inst.extra<LookupClsMethod>()->calleeAROffset,
-        int32_t{kNumActRecCells}
-      };
+      AliasClass effects =
+        actrec(inst.src(2), inst.extra<LookupClsMethod>()->calleeAROffset);
       return may_raise(inst, may_load_store(effects, effects));
     }
+
   case ProfileMethod:
     {
-      AliasClass effects = AStack {
-        inst.src(0),
-        inst.extra<ProfileMethod>()->bcSPOff,
-        int32_t{kNumActRecCells}
-      };
+      AliasClass effects =
+        actrec(inst.src(0), inst.extra<ProfileMethod>()->bcSPOff);
       return may_load_store(effects, AEmpty);
     }
+
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
@@ -1831,7 +1838,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
-  case LdFunc:         // autoload
   case LdFuncCached:   // autoload
   case LdFuncCachedU:  // autoload
   case LdSwitchObjIndex:  // decrefs arg
@@ -1945,14 +1951,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgTrashFrame:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      AStack {
-        inst.src(0),
-        // SpillFrame's spOffset is to the bottom of where it will store the
-        // ActRec, but AliasClass needs an offset to the highest cell it will
-        // store.
-        inst.extra<DbgTrashFrame>()->offset + int32_t{kNumActRecCells} - 1,
-        int32_t{kNumActRecCells}
-      }
+      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset)
     };
   case DbgTrashMem:
     return GeneralEffects {
@@ -2029,14 +2028,17 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst);
                                always_assert(x.value != nullptr); },
-    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx);
-                               always_assert(x.ctx <= x.stk); },
+    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx); check(x.callee);
+                               always_assert(x.ctx <= x.stk);
+                               always_assert(x.callee <= x.stk); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
     [&] (CallEffects x)      { check(x.kills);
                                check(x.stack);
-                               check(x.locals); },
+                               check(x.locals);
+                               check(x.callee);
+                               always_assert(x.callee <= x.stack); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2078,7 +2080,11 @@ MemEffects canonicalize(MemEffects me) {
       return PureStore { canonicalize(x.dst), x.value };
     },
     [&] (PureSpillFrame x) -> R {
-      return PureSpillFrame { canonicalize(x.stk), canonicalize(x.ctx) };
+      return PureSpillFrame {
+        canonicalize(x.stk),
+        canonicalize(x.ctx),
+        canonicalize(x.callee)
+      };
     },
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
@@ -2088,7 +2094,8 @@ MemEffects canonicalize(MemEffects me) {
         x.writes_locals,
         canonicalize(x.kills),
         canonicalize(x.stack),
-        canonicalize(x.locals)
+        canonicalize(x.locals),
+        canonicalize(x.callee)
       };
     },
     [&] (ReturnEffects x) -> R {
@@ -2117,14 +2124,19 @@ std::string show(MemEffects effects) {
       return sformat("exit({} ; {})", show(x.live), show(x.kills));
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {} ; {})",
+      return sformat("call({} ; {} ; {} ; {})",
         show(x.kills),
         show(x.stack),
-        show(x.locals)
+        show(x.locals),
+        show(x.callee)
       );
     },
     [&] (PureSpillFrame x) {
-      return sformat("stFrame({} ; {})", show(x.stk), show(x.ctx));
+      return sformat("stFrame({} ; {} ; {})",
+        show(x.stk),
+        show(x.ctx),
+        show(x.callee)
+      );
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },

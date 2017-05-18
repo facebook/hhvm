@@ -387,6 +387,16 @@ static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
 bool isReturnHelper(void* address);
 bool isDebuggerReturnHelper(void* address);
 
+/* Offset of the m_func and m_thisUnsafe fields in cells */
+
+static_assert(offsetof(ActRec, m_func) % sizeof(Cell) == 0, "");
+static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(Cell) == 0, "");
+
+constexpr auto kActRecFuncCellOff = offsetof(ActRec, m_func) /
+                                    sizeof(Cell);
+constexpr auto kActRecCtxCellOff  = offsetof(ActRec, m_thisUnsafe) /
+                                    sizeof(Cell);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -51,14 +51,17 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (ReturnEffects x)     { visit(x.kills); },
         [&] (CallEffects x)       { visit(x.kills);
                                     visit(x.stack);
-                                    visit(x.locals); },
+                                    visit(x.locals);
+                                    visit(x.callee); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);
                                     visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (PureSpillFrame x)    { visit(x.stk); visit(x.ctx); },
+        [&] (PureSpillFrame x)    { visit(x.stk);
+                                    visit(x.ctx);
+                                    visit(x.callee); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );
     }

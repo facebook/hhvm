@@ -1343,7 +1343,7 @@ To string conversions:
   Try to load the Func named funcName from the RDS. If the function is not
   defined, branch to B.
 
-| LdARFuncPtr<offset>, D(Func), S(StkPtr), NF
+| LdARFuncPtr<offset>, DParam(Func), S(StkPtr), NF
 
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.

@@ -93,6 +93,7 @@ void XMLReader::close() {
   SYNC_VM_REGS_SCOPED();
   if (m_stream) {
     m_stream->close();
+    m_stream = nullptr;
   }
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);

@@ -1739,8 +1739,7 @@ let scour_comments
             (* Ending comments produces the comment just scanned *)
             | `LineCmt,     '\n' -> mk `Line  start idx @@ go next `Free next
             | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
-            (* Whitespace skips everywhere else *)
-            | _, (' ' | '\t' | '\n')      -> go start state        next
+            (* PHP has line comments delimited by a # *)
             | `Free,     '#'              -> go next `LineCmt      next
             (* All other comment delimiters start with a / *)
             | `Free,     '/'              -> go start `SawSlash    next
@@ -1751,6 +1750,8 @@ let scour_comments
             | `EmbeddedCmt, '*'           -> go start `EndEmbedded next
             | `EndEmbedded, '*'           -> go start `EndEmbedded next
             | `EndEmbedded,  _            -> go start `EmbeddedCmt next
+            (* Whitespace skips everywhere else *)
+            | _, (' ' | '\t' | '\n')      -> go start state        next
             (* When scanning comments, anything else is accepted *)
             | `LineCmt,     _             -> go start state        next
             | `EmbeddedCmt, _             -> go start state        next

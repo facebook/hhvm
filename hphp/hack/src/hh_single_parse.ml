@@ -129,8 +129,15 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
       exit_with CmpDifferent
     end;
 
-    let ast_comments = ast_result.Parser_hack.comments in
-    let ffp_comments = ffp_result.Lowerer.comments in
+    let is_pragma_free (_, s) =
+      let regexp = Str.regexp "HH_\\(IGNORE_ERROR\\|FIXME\\)\\[[0-9]*\\]" in
+      try ignore (Str.search_forward regexp s 0); false with
+      | Not_found -> true
+    in
+    let by_pos (p, _) (p', _) = Pos.compare p p' in
+    let ast_comments = List.sort by_pos ast_result.Parser_hack.comments in
+    let ffp_comments = List.filter is_pragma_free ffp_result.Lowerer.comments in
+    let ffp_comments = List.sort by_pos ffp_comments in
     let only_exp (p,s) =
       sprintf "  - Only in expected: '%s' (%s)\n" s (Pos.string_no_file p)
     in
@@ -151,6 +158,9 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
         && Pos.end_line px = Pos.end_line py
         && Pos.start_cnum px = Pos.start_cnum py
       -> comments_diff xs ys
+    | (px,sx)::xs, (py,sy)::ys when sx = sy ->
+      sprintf "  - Pos diff for comment: %s expected, but found %s\n"
+        (Pos.string_no_file px) (Pos.string_no_file py) :: comments_diff xs ys
     | x::xs, ys ->
       let diff, ys = skip x ys in
       diff @ comments_diff xs ys

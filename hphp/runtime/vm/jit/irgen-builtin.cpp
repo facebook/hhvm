@@ -1228,8 +1228,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                     targetTy == TDbl ||
                     callee->params()[paramIdx].nativeArg);
             return gen(env, LdMem,
-                       targetTy == TBool || targetTy == TBoxedCell ?
-                       TInt : targetTy == TBottom ? TCell : targetTy,
+                       targetTy == TBottom ? TCell : targetTy,
                        param.value);
           }
           return param.value;

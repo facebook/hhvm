@@ -79,7 +79,8 @@ let from_constant ns (_hint, name, const_init) =
       | Some v ->
         v, None
       | None ->
-        Typed_value.Uninit, Some (Emit_expression.from_expr init) in
+        Typed_value.Uninit,
+        Some (Emit_expression.from_expr ~need_ref:false init) in
     Some (Hhas_constant.make constant_name constant_value initializer_instrs)
 
 let from_constants ns ast_constants =

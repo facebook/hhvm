@@ -165,9 +165,10 @@ let get_passByRefKind expr =
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
-let get_queryMOpMode op =
+let get_queryMOpMode need_ref op =
   match op with
   | QueryOp.CGet -> MemberOpMode.Warn
+  | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
 
 let is_special_function e =
@@ -190,25 +191,32 @@ let extract_shape_field_name = function
 
 let rec expr_and_newc instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
-    gather [from_expr e; instr_to_add_new]
+    gather [from_expr ~need_ref:false e; instr_to_add_new]
   | A.AFkvalue (k, v) ->
     gather [
       emit_two_exprs k v;
       instr_to_add
     ]
 
-and emit_local x =
+and emit_local need_ref x =
   let scope = get_scope () in
-  if x = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
-    && not (get_needs_local_this ())
-  then instr (IMisc (BareThis Notice))
+  if x = SN.SpecialIdents.this &&
+    Ast_scope.Scope.has_this scope &&
+    not (get_needs_local_this ()) then
+    if need_ref then
+      instr_vgetl (Local.Named x)
+    else
+      instr (IMisc (BareThis Notice))
   else
   if x = SN.Superglobals.globals
   then gather [
     instr_string (SU.Locals.strip_dollar x);
     instr (IGet CGetG)
   ]
-  else instr_cgetl (Local.Named x)
+  else if need_ref then
+    instr_vgetl (Local.Named x)
+  else
+    instr_cgetl (Local.Named x)
 
 (* Emit CGetL2 for local variables, and return true to indicate that
  * the result will be just below the top of the stack *)
@@ -218,12 +226,12 @@ and emit_first_expr e =
     instr_cgetl2 (Local.Named local), true
 
   | _ ->
-    from_expr e, false
+    from_expr ~need_ref:false e, false
 
 (* Special case for binary operations to make use of CGetL2 *)
 and emit_two_exprs e1 e2 =
   let instrs1, is_under_top = emit_first_expr e1 in
-  let instrs2 = from_expr e2 in
+  let instrs2 = from_expr ~need_ref:false e2 in
   gather @@
     if is_under_top
     then [instrs2; instrs1]
@@ -235,7 +243,7 @@ and emit_is_null e =
     instr_istypel (Local.Named id) OpNull
   | _ ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr_istypec OpNull
     ]
 
@@ -273,17 +281,26 @@ and emit_binop expr op e1 e2 =
         from_binop op
       ]
 
+and emit_box_if_necessary need_ref instr =
+  if need_ref then
+    gather [
+      instr;
+      instr_box
+    ]
+  else
+    instr
+
 and emit_instanceof e1 e2 =
   match (e1, e2) with
   | (_, (_, A.Id id)) ->
     let id, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
     gather [
-      from_expr e1;
+      from_expr ~need_ref:false e1;
       instr_instanceofd id ]
   | _ ->
     gather [
-      from_expr e1;
-      from_expr e2;
+      from_expr ~need_ref:false e1;
+      from_expr ~need_ref:false e2;
       instr_instanceof ]
 
 and emit_null_coalesce e1 e2 =
@@ -295,7 +312,7 @@ and emit_null_coalesce e1 e2 =
     instr_not;
     instr_jmpnz end_label;
     instr_popc;
-    from_expr e2;
+    from_expr ~need_ref:false e2;
     instr_label end_label;
   ]
 
@@ -322,7 +339,7 @@ and emit_cast hint expr =
       emit_nyi "cast type"
     end in
   gather [
-    from_expr expr;
+    from_expr ~need_ref:false expr;
     op;
   ]
 
@@ -333,20 +350,20 @@ and emit_conditional_expression etest etrue efalse =
     let end_label = Label.next_regular () in
     gather [
       emit_jmpz etest false_label;
-      from_expr etrue;
+      from_expr ~need_ref:false etrue;
       instr_jmp end_label;
       instr_label false_label;
-      from_expr efalse;
+      from_expr ~need_ref:false efalse;
       instr_label end_label;
     ]
   | None ->
     let end_label = Label.next_regular () in
     gather [
-      from_expr etest;
+      from_expr ~need_ref:false etest;
       instr_dup;
       instr_jmpnz end_label;
       instr_popc;
-      from_expr efalse;
+      from_expr ~need_ref:false efalse;
       instr_label end_label;
     ]
 
@@ -374,7 +391,7 @@ and emit_new expr args uargs =
 
 and emit_clone expr =
   gather [
-    from_expr expr;
+    from_expr ~need_ref:false expr;
     instr_clone;
   ]
 
@@ -385,19 +402,25 @@ and emit_shape expr fl =
       ~f:(fun (fn, e) ->
             A.AFkvalue ((p, extract_shape_field_name_pstring fn), e))
   in
-  from_expr (p, A.Array fl)
+  from_expr ~need_ref:false (p, A.Array fl)
 
 and emit_tuple p es =
   (* Did you know that tuples are functions? *)
   let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
-  from_expr (p, A.Array af_list)
+  from_expr ~need_ref:false (p, A.Array af_list)
 
-and emit_call_expr expr =
+and emit_call_expr need_ref expr =
   let instrs, flavor = emit_flavored_expr expr in
   gather [
     instrs;
     (* If the instruction has produced a ref then unbox it *)
-    if flavor = Flavor.Ref then instr_unboxr else empty
+    if flavor = Flavor.Ref then
+      if need_ref then
+        instr_boxr
+      else
+        instr_unboxr
+    else
+      empty
   ]
 
 and emit_known_class_id id =
@@ -415,7 +438,7 @@ and emit_class_expr cexpr =
   | Class_id id -> emit_known_class_id id
   | Class_expr (_, A.Lvar (_, id)) ->
     instr (IGet (ClsRefGetL (Local.Named id, 0)))
-  | Class_expr expr -> gather [from_expr expr; instr_clsrefgetc]
+  | Class_expr expr -> gather [from_expr ~need_ref:false expr; instr_clsrefgetc]
 
 and emit_class_get param_num_opt qop cid (_, id) =
   let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
@@ -454,7 +477,7 @@ and emit_class_const cid (_, id) =
 and emit_await e =
   let after_await = Label.next_regular () in
   gather [
-    from_expr e;
+    from_expr ~need_ref:false e;
     instr_dup;
     instr_istypec OpNull;
     instr_jmpnz after_await;
@@ -465,13 +488,13 @@ and emit_await e =
 and emit_yield = function
   | A.AFvalue e ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr_yield;
     ]
   | A.AFkvalue (e1, e2) ->
     gather [
-      from_expr e1;
-      from_expr e2;
+      from_expr ~need_ref:false e1;
+      from_expr ~need_ref:false e2;
       instr_yieldk;
     ]
 
@@ -479,14 +502,15 @@ and emit_string2 exprs =
   match exprs with
   | [e] ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastString)
     ]
   | e1::e2::es ->
     gather @@ [
       emit_two_exprs e1 e2;
       instr (IOp Concat);
-      gather (List.map es (fun e -> gather [from_expr e; instr (IOp Concat)]))
+      gather (List.map es (fun e ->
+        gather [from_expr ~need_ref:false e; instr (IOp Concat)]))
     ]
 
   | [] -> failwith "String2 with zero arguments is impossible"
@@ -545,7 +569,7 @@ and emit_xhp p id attributes children =
   let children_vec = make_varray p children in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
-  from_expr @@
+  from_expr ~need_ref:false @@
     (p, A.New (
       (p, A.Id (rename_xhp id)),
       [attribute_map ; children_vec ; filename ; line],
@@ -559,29 +583,39 @@ and emit_import flavor e =
     | A.RequireOnce -> instr @@ IIncludeEvalDefine ReqOnce
   in
   gather [
-    from_expr e;
+    from_expr ~need_ref:false e;
     import_instr;
   ]
 
-and emit_lvarvar n (_, id) =
+and emit_lvarvar need_ref n (_, id) =
   gather [
     instr_cgetl (Local.Named id);
-    gather @@ List.replicate ~num:n instr_cgetn;
+    if need_ref then
+      let prefix =
+        if n = 1 then empty
+        else gather @@ List.replicate ~num:(n - 1) instr_cgetn
+      in
+      gather [
+        prefix;
+        instr_vgetn
+      ]
+    else
+      gather @@ List.replicate ~num:n instr_cgetn
   ]
 
 and emit_call_isset_expr (_, expr_ as expr) =
   match expr_ with
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IIsset IssetG)
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
-    emit_array_get None QueryOp.Isset base_expr opt_elem_expr
+    emit_array_get false None QueryOp.Isset base_expr opt_elem_expr
   | A.Class_get (cid, id)  ->
     emit_class_get None QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get None QueryOp.Isset expr prop nullflavor
+    emit_obj_get false None QueryOp.Isset expr prop nullflavor
   | A.Lvar(_, id) when is_local_this id ->
     gather [
       instr (IMisc (BareThis NoNotice));
@@ -592,7 +626,7 @@ and emit_call_isset_expr (_, expr_ as expr) =
     instr (IIsset (IssetL (Local.Named id)))
   | _ ->
     gather [
-      from_expr expr;
+      from_expr ~need_ref:false expr;
       instr_istypec OpNull;
       instr_not
     ]
@@ -601,20 +635,20 @@ and emit_call_empty_expr (_, expr_ as expr) =
   match expr_ with
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IIsset EmptyG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get None QueryOp.Empty base_expr opt_elem_expr
+    emit_array_get false None QueryOp.Empty base_expr opt_elem_expr
   | A.Class_get (cid, id) ->
     emit_class_get None QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get None QueryOp.Empty expr prop nullflavor
+    emit_obj_get false None QueryOp.Empty expr prop nullflavor
   | A.Lvar(_, id) when not (is_local_this id) ->
     instr (IIsset (EmptyL (Local.Named id)))
   | _ ->
     gather [
-      from_expr expr;
+      from_expr ~need_ref:false expr;
       instr_not
     ]
 
@@ -647,7 +681,9 @@ and emit_call_isset_exprs exprs =
 
 and emit_exit expr_opt =
   gather [
-    (match expr_opt with None -> instr_int 0 | Some e -> from_expr e);
+    (match expr_opt with
+      | None -> instr_int 0
+      | Some e -> from_expr ~need_ref:false e);
     instr_exit;
   ]
 
@@ -663,55 +699,91 @@ and emit_idx ~is_array es =
     if is_array then instr_array_idx else instr_idx;
   ]
 
-and from_expr expr =
+and from_expr expr ~need_ref =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
-  | A.Float (_, litstr) -> instr_double litstr
-  | A.String (_, litstr) -> instr_string litstr
+  | A.Float (_, litstr) ->
+    emit_box_if_necessary need_ref @@ instr_double litstr
+  | A.String (_, litstr) ->
+    emit_box_if_necessary need_ref @@ instr_string litstr
   (* TODO deal with integer out of range *)
-  | A.Int (_, litstr) -> instr_int_of_string litstr
-  | A.Null -> instr_null
-  | A.False -> instr_false
-  | A.True -> instr_true
-  | A.Lvar (_, x) -> emit_local x
-  | A.Class_const (cid, id) -> emit_class_const cid id
-  | A.Unop (op, e) -> emit_unop op e
-  | A.Binop (op, e1, e2) -> emit_binop expr op e1 e2
-  | A.Pipe (e1, e2) -> emit_pipe e1 e2
-  | A.Dollardollar -> instr_cgetl2 Local.Pipe
-  | A.InstanceOf (e1, e2) -> emit_instanceof e1 e2
-  | A.NullCoalesce (e1, e2) -> emit_null_coalesce e1 e2
-  | A.Cast((_, hint), e) -> emit_cast hint e
+  | A.Int (_, litstr) ->
+    emit_box_if_necessary need_ref @@ instr_int_of_string litstr
+  | A.Null ->
+    emit_box_if_necessary need_ref @@ instr_null
+  | A.False ->
+    emit_box_if_necessary need_ref @@ instr_false
+  | A.True ->
+    emit_box_if_necessary need_ref @@ instr_true
+  | A.Lvar (_, x) ->
+    emit_local need_ref x
+  | A.Class_const (cid, id) ->
+    emit_class_const cid id
+  | A.Unop (op, e) ->
+    emit_unop need_ref op e
+  | A.Binop (op, e1, e2) ->
+    emit_box_if_necessary need_ref @@ emit_binop expr op e1 e2
+  | A.Pipe (e1, e2) ->
+    emit_box_if_necessary need_ref @@ emit_pipe e1 e2
+  | A.Dollardollar ->
+    instr_cgetl2 Local.Pipe
+  | A.InstanceOf (e1, e2) ->
+    emit_box_if_necessary need_ref @@ emit_instanceof e1 e2
+  | A.NullCoalesce (e1, e2) ->
+    emit_box_if_necessary need_ref @@ emit_null_coalesce  e1 e2
+  | A.Cast((_, hint), e) ->
+    emit_box_if_necessary need_ref @@ emit_cast hint e
   | A.Eif (etest, etrue, efalse) ->
-    emit_conditional_expression etest etrue efalse
-  | A.Expr_list es -> gather @@ List.map es ~f:from_expr
+    emit_box_if_necessary need_ref @@
+      emit_conditional_expression etest etrue efalse
+  | A.Expr_list es -> gather @@ List.map es ~f:(from_expr ~need_ref:false)
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
-      from_expr e;
-      instr (IGet CGetG)
+      from_expr ~need_ref:false e;
+      instr (IGet (if need_ref then VGetG else CGetG))
+    ]
+  | A.Array_get((_, A.Lvarvar (n, (_, x))), Some e)
+    when x = SN.Superglobals.globals ->
+    gather [
+      from_expr ~need_ref:false e;
+      instr (IGet CGetG);
+      if n = 1 then
+        empty
+      else
+        gather @@ List.replicate (n - 1) instr_cgetn;
+      if need_ref then
+        instr_vgetn
+      else
+        instr_cgetn
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get None QueryOp.CGet base_expr opt_elem_expr
+    let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
+    emit_array_get need_ref None query_op base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get None QueryOp.CGet expr prop nullflavor
+    let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
+    emit_obj_get need_ref None query_op expr prop nullflavor
   | A.Call ((_, A.Id (_, "isset")), exprs, []) ->
-    emit_call_isset_exprs exprs
+    emit_box_if_necessary need_ref @@ emit_call_isset_exprs exprs
   | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
-    emit_call_empty_expr expr
-  | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
+    emit_box_if_necessary need_ref @@ emit_call_empty_expr expr
+  | A.Call ((p, A.Id (_, "tuple")), es, _) ->
+    emit_box_if_necessary need_ref @@ emit_tuple p es
   | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx ~is_array:false es ->
-    emit_idx ~is_array:false es
+    emit_box_if_necessary need_ref @@ emit_idx ~is_array:false es
   | A.Call ((_, A.Id (_, "hphp_array_idx")), es, _)
-    when is_valid_idx ~is_array:true es -> emit_idx ~is_array:true es
+    when is_valid_idx ~is_array:true es ->
+    emit_box_if_necessary need_ref @@  emit_idx ~is_array:true es
   | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
-    gather [
-      from_expr expr2;
+    emit_box_if_necessary need_ref @@ gather [
+      from_expr ~need_ref:false expr2;
       instr (IIncludeEvalDefine
         (DefCns (Hhbc_id.Const.from_raw_string (snd s))))
     ]
-  | A.Call _ -> emit_call_expr expr
-  | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
-  | A.Array es -> emit_collection expr es
+  | A.Call _ -> emit_call_expr need_ref expr
+  | A.New (typeexpr, args, uargs) ->
+    emit_box_if_necessary need_ref @@ emit_new typeexpr args uargs
+  | A.Array es ->
+    emit_box_if_necessary need_ref @@ emit_collection expr es
   | A.Darray es ->
     es
       |> List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
@@ -721,9 +793,11 @@ and from_expr expr =
       |> List.map ~f:(fun e -> A.AFvalue e)
       |> emit_collection expr
   | A.Collection ((pos, name), fields) ->
-    emit_named_collection expr pos name fields
-  | A.Clone e -> emit_clone e
-  | A.Shape fl -> emit_shape expr fl
+    emit_box_if_necessary need_ref @@ emit_named_collection expr pos name fields
+  | A.Clone e ->
+    emit_box_if_necessary need_ref @@ emit_clone e
+  | A.Shape fl ->
+    emit_box_if_necessary need_ref @@ emit_shape expr fl
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
   | A.Yield_break ->
@@ -733,12 +807,23 @@ and from_expr expr =
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
   | A.Class_get (cid, id)  -> emit_class_get None QueryOp.CGet cid id
   | A.String2 es -> emit_string2 es
-  | A.Unsafeexpr e -> from_expr e
+  | A.Unsafeexpr e ->
+    let instr = from_expr ~need_ref:false e in
+    if need_ref then
+      gather [
+        instr;
+        instr_vgetn
+      ]
+    else
+      gather [
+        instr;
+        instr_cgetn
+      ]
   | A.Id id -> emit_id id
   | A.Xml (id, attributes, children) ->
     emit_xhp (fst expr) id attributes children
   | A.Import (flavor, e) -> emit_import flavor e
-  | A.Lvarvar (n, id) -> emit_lvarvar n id
+  | A.Lvarvar (n, id) -> emit_lvarvar need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id id
   | A.List _ ->
     failwith "List destructor can only be used as an lvar"
@@ -785,14 +870,18 @@ and emit_dynamic_collection ~transform_to_collection expr es =
     gather [
       gather @@
       List.map es
-        ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
+        ~f:(function
+          | A.AFvalue e -> from_expr ~need_ref:false e
+          | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
     ]
   end else if are_all_keys_strings && is_array then begin
     let es =
       List.map es
-        ~f:(function A.AFkvalue ((_, A.String (_, s)), v) -> s, from_expr v
-                   | _ -> failwith "impossible")
+        ~f:(function
+          | A.AFkvalue ((_, A.String (_, s)), v) ->
+            s, from_expr ~need_ref:false v
+          | _ -> failwith "impossible")
     in
     gather [
       gather @@ List.map es ~f:snd;
@@ -854,8 +943,9 @@ and emit_named_collection expr pos name fields =
         fields
   | "Pair" ->
     gather [
-      gather (List.map fields (function A.AFvalue e -> from_expr e
-                                | _ -> failwith "impossible Pair argument"));
+      gather (List.map fields (function
+        | A.AFvalue e -> from_expr ~need_ref:false e
+        | _ -> failwith "impossible Pair argument"));
       instr (ILitConst NewPair);
     ]
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
@@ -877,7 +967,7 @@ and emit_pipe e1 e2 =
         IGet (CGetL2 temp)
       | _ -> i in
     InstrSeq.map e ~f:rewriter in
-  rewrite_dollardollar (from_expr e2)
+  rewrite_dollardollar (from_expr ~need_ref:false e2)
   end
 
 (* Emit code that is equivalent to
@@ -921,7 +1011,7 @@ and emit_jmpz (_, expr_ as expr) label =
       ]
     | _ ->
       gather [
-        from_expr expr;
+        from_expr ~need_ref:false expr;
         instr_jmpz label
       ]
 
@@ -966,7 +1056,7 @@ and emit_jmpnz (_, expr_ as expr) label =
       ]
     | _ ->
       gather [
-        from_expr expr;
+        from_expr ~need_ref:false expr;
         instr_jmpnz label
       ]
 
@@ -986,14 +1076,14 @@ and emit_quiet_expr (_, expr_ as expr) =
   | A.Lvar (_, x) when not (is_local_this x) ->
     instr_cgetquietl (Local.Named x)
   | _ ->
-    from_expr expr
+    from_expr ~need_ref:false expr
 
 (* Emit code for e1[e2] or isset(e1[e2]).
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get param_num_opt qop base_expr opt_elem_expr =
-  let mode = get_queryMOpMode qop in
+and emit_array_get need_ref param_num_opt qop base_expr opt_elem_expr =
+  let mode = get_queryMOpMode need_ref qop in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
     emit_base mode elem_stack_size param_num_opt base_expr in
@@ -1002,7 +1092,11 @@ and emit_array_get param_num_opt qop base_expr opt_elem_expr =
   let final_instr =
     instr (IFinal (
       match param_num_opt with
-      | None -> QueryM (total_stack_size, qop, mk)
+      | None ->
+        if need_ref then
+          VGetM (total_stack_size, mk)
+        else
+          QueryM (total_stack_size, qop, mk)
       | Some i -> FPassM (i, total_stack_size, mk)
     )) in
   gather [
@@ -1016,8 +1110,8 @@ and emit_array_get param_num_opt qop base_expr opt_elem_expr =
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_obj_get param_num_opt qop expr prop null_flavor =
-  let mode = get_queryMOpMode qop in
+and emit_obj_get need_ref param_num_opt qop expr prop null_flavor =
+  let mode = get_queryMOpMode need_ref qop in
   let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
     emit_base mode prop_stack_size param_num_opt expr in
@@ -1026,7 +1120,11 @@ and emit_obj_get param_num_opt qop expr prop null_flavor =
   let final_instr =
     instr (IFinal (
       match param_num_opt with
-      | None -> QueryM (total_stack_size, qop, mk)
+      | None ->
+        if need_ref then
+          VGetM (total_stack_size, mk)
+        else
+          QueryM (total_stack_size, qop, mk)
       | Some i -> FPassM (i, total_stack_size, mk)
     )) in
   gather [
@@ -1041,7 +1139,7 @@ and emit_elem_instrs opt_elem_expr =
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar (_, id))) when not (is_local_this id) -> empty, 0
-  | Some expr -> from_expr expr, 1
+  | Some expr -> from_expr ~need_ref:false expr, 1
   | None -> empty, 0
 
 and emit_prop_instrs (_, expr_ as expr) =
@@ -1049,7 +1147,7 @@ and emit_prop_instrs (_, expr_ as expr) =
   (* These all have special inline versions of member keys *)
   | A.Lvar (_, id) when not (is_local_this id) -> empty, 0
   | A.Id _ -> empty, 0
-  | _ -> from_expr expr, 1
+  | _ -> from_expr ~need_ref:false expr, 1
 
 (* Get the member key for an array element expression: the `elem` in
  * expressions of the form `base[elem]`.
@@ -1141,7 +1239,6 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        | Some i -> FPassBaseL (i, Local.Named x)
        )),
      0
-
    | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar (_, y)))
      when x = SN.Superglobals.globals ->
      empty,
@@ -1153,7 +1250,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      0
 
    | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
-     let elem_expr_instrs = from_expr e in
+     let elem_expr_instrs = from_expr ~need_ref:false e in
      elem_expr_instrs,
      instr (IBase (
      match param_num_opt with
@@ -1216,8 +1313,20 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        instr_basesc base_offset
      ],
      1
+   | A.Lvarvar (1, (_, id)) ->
+     empty,
+     instr_basenl (Local.Named id) base_mode,
+     0
+   | A.Lvarvar (n, (_, id)) ->
+     let base_expr_instrs =
+       instr_cgetl (Local.Named id)::
+       List.replicate (n - 1) instr_cgetn
+     in
+     gather base_expr_instrs,
+     instr_basenc base_offset base_mode,
+     1
 
-    | _ ->
+   | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr expr in
      base_expr_instrs,
      instr (IBase (if flavor = Flavor.Ref
@@ -1246,15 +1355,15 @@ and emit_arg i ((_, expr_) as e) =
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (ICall (FPassG i))
     ]
 
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get (Some i) QueryOp.CGet base_expr opt_elem_expr
+    emit_array_get false (Some i) QueryOp.CGet base_expr opt_elem_expr
 
   | A.Obj_get(e1, e2, nullflavor) ->
-    emit_obj_get (Some i) QueryOp.CGet e1 e2 nullflavor
+    emit_obj_get false (Some i) QueryOp.CGet e1 e2 nullflavor
 
   | A.Class_get(cid, id) ->
     emit_class_get (Some i) QueryOp.CGet cid id
@@ -1296,7 +1405,7 @@ and emit_object_expr (_, expr_ as expr) =
   match expr_ with
   | A.Lvar(_, x) when is_local_this x ->
     instr_this
-  | _ -> from_expr expr
+  | _ -> from_expr ~need_ref:false expr
 
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
@@ -1315,7 +1424,7 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Obj_get(obj, method_expr, null_flavor) ->
     gather [
       emit_object_expr obj;
-      from_expr method_expr;
+      from_expr ~need_ref:false method_expr;
       instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
 
@@ -1344,7 +1453,7 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
     let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
-      emit_local id;
+      emit_local false id;
       emit_class_expr cexpr;
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
@@ -1359,7 +1468,7 @@ and emit_call_lhs (_, expr_ as expr) nargs =
 
   | _ ->
     gather [
-      from_expr expr;
+      from_expr ~need_ref:false expr;
       instr (ICall (FPushFunc nargs))
     ]
 
@@ -1381,7 +1490,7 @@ and is_call_user_func id num_args =
 
 and emit_call_user_func_args i expr =
   gather [
-    from_expr expr;
+    from_expr ~need_ref:false expr;
     instr_fpass PassByRefKind.AllowCell i;
   ]
 
@@ -1390,7 +1499,7 @@ and emit_call_user_func id arg args =
     | "fb_call_user_func_safe_return" ->
       begin match args with
         | [] -> failwith "fb_call_user_func_safe_return - requires default arg"
-        | a :: args -> from_expr a, args
+        | a :: args -> from_expr ~need_ref:false a, args
       end
     | _ -> empty, args
   in
@@ -1423,7 +1532,7 @@ and emit_call_user_func id arg args =
     | _ -> Flavor.Ref
   in
   gather [
-    from_expr arg;
+    from_expr ~need_ref:false arg;
     begin_instr;
     gather (List.mapi args emit_call_user_func_args);
     call_instr;
@@ -1441,7 +1550,7 @@ and emit_call (_, expr_ as expr) args uargs =
   | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
-           from_expr arg;
+           from_expr ~need_ref:false arg;
            instr (IOp Print);
            if i = nargs-1 then empty else instr_popc
          ] end in
@@ -1460,49 +1569,49 @@ and emit_call (_, expr_ as expr) args uargs =
   | A.Id (_, "intval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastInt)
     ], Flavor.Cell
 
   | A.Id (_, "strval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastString)
     ], Flavor.Cell
 
   | A.Id (_, "boolval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastBool)
     ], Flavor.Cell
 
   | A.Id (_, "floatval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastDouble)
     ], Flavor.Cell
 
   | A.Id (_, "vec") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastVec)
     ], Flavor.Cell
 
   | A.Id (_, "keyset") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastKeyset)
     ], Flavor.Cell
 
   | A.Id (_, "dict") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IOp CastDict)
     ], Flavor.Cell
 
@@ -1546,7 +1655,7 @@ and emit_call (_, expr_ as expr) args uargs =
       Flavor.Cell
     | [arg_expr], Some i ->
       gather [
-        from_expr arg_expr;
+        from_expr ~need_ref:false arg_expr;
         instr (IIsset (IsTypeC i))
       ], Flavor.Cell
     | _ -> default ()
@@ -1562,7 +1671,7 @@ and emit_flavored_expr (_, expr_ as expr) =
   | A.Call (e, args, uargs) when not (is_special_function e) ->
     emit_call e args uargs
   | _ ->
-    from_expr expr, Flavor.Cell
+    from_expr ~need_ref:false expr, Flavor.Cell
 
 and emit_final_member_op stack_index op mk =
   match op with
@@ -1648,7 +1757,7 @@ and emit_lval_op op expr1 opt_expr2 =
       let rhs_instrs, rhs_stack_size =
         match opt_expr2 with
         | None -> empty, 0
-        | Some e -> from_expr e, 1 in
+        | Some e -> from_expr ~need_ref:false e, 1 in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
@@ -1678,7 +1787,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op op in
     if rhs_stack_size = 0
-    then gather [from_expr e; final_global_op_instrs]
+    then gather [from_expr ~need_ref:false e; final_global_op_instrs]
     else
       let index_instrs, under_top = emit_first_expr e in
       if under_top
@@ -1762,32 +1871,42 @@ and from_unop op =
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat ->
     emit_nyi "unop - probably does not need translation"
 
-and emit_unop op e =
+and emit_unop need_ref op e =
   let unop_instr = from_unop op in
   match op with
-  | A.Utild -> gather [from_expr e; unop_instr]
-  | A.Unot -> gather [from_expr e; unop_instr]
-  | A.Uplus -> gather
+  | A.Utild ->
+    emit_box_if_necessary need_ref @@ gather [
+      from_expr ~need_ref:false e; unop_instr
+    ]
+  | A.Unot ->
+    emit_box_if_necessary need_ref @@ gather [
+      from_expr ~need_ref:false e; unop_instr
+    ]
+  | A.Uplus ->
+    emit_box_if_necessary need_ref @@ gather
     [instr (ILitConst (Int (Int64.zero)));
-    from_expr e;
+    from_expr ~need_ref:false e;
     unop_instr]
-  | A.Uminus -> gather
+  | A.Uminus ->
+    emit_box_if_necessary need_ref @@ gather
     [instr (ILitConst (Int (Int64.zero)));
-    from_expr e;
+    from_expr ~need_ref:false e;
     unop_instr]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"
     | Some incdec_op ->
-      emit_lval_op (LValOp.IncDec incdec_op) e None
+      let instr = emit_lval_op (LValOp.IncDec incdec_op) e None in
+      emit_box_if_necessary need_ref instr
     end
   | A.Uref ->
+    (*TODO: add support for references e*)
     emit_nyi "references"
   | A.Usplat ->
-    from_expr e
+    from_expr ~need_ref:false e
 
 and from_exprs exprs =
-  gather (List.map exprs from_expr)
+  gather (List.map exprs (from_expr ~need_ref:false))
 
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
  * temporary local `temp` (unless it is itself a local). Then use `f` to
@@ -1811,7 +1930,7 @@ and stash_in_local ?(leave_on_stack=false) e f =
     let temp = Local.get_unnamed_local () in
     let fault_label = Label.next_fault () in
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr_setl temp;
       instr_popc;
       instr_try_fault

@@ -27,6 +27,16 @@ class declvar_visitor = object(this)
       ~f:(fun acc (_, e) ->
         match e with Ast.Id id -> add_local false acc id
                   | _ -> acc)
+  method! on_foreach acc e pos iterator block =
+    let acc =
+      match snd e with
+      | Ast.Lvar(_, "$this" as id) when Iterator.is_mutable_iterator iterator ->
+        add_local true acc id
+      | _ ->
+        acc
+    in
+    _super#on_foreach acc e pos iterator block
+
   method! on_lvar acc id = add_local false acc id
   method! on_lvarvar acc _ id = add_local false acc id
   method! on_efun acc _fn use_list =

@@ -62,7 +62,7 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
         Some Typed_value.Uninit, not is_static && expr_requires_deep_init expr,
           Some (gather [
             prolog;
-            Emit_expression.from_expr expr;
+            Emit_expression.from_expr ~need_ref:false expr;
             epilog]) in
   Hhas_property.make
     is_private

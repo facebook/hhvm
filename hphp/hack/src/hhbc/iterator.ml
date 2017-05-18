@@ -30,3 +30,9 @@ let free_iterator () =
 let reset_iterator () =
   next_iterator := 0;
   num_iterators := 0
+
+let is_mutable_iterator iterator =
+  match iterator with
+  | Ast.As_kv (_, (_, Ast.Unop(Ast.Uref, _)))
+  | Ast.As_v (_, Ast.Unop(Ast.Uref, _)) -> true
+  | _ -> false

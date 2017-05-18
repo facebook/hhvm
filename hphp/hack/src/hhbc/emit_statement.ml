@@ -55,7 +55,7 @@ let rec emit_stmt st =
     ]
   | A.Return (_,  Some expr) ->
     gather [
-      from_expr expr;
+      from_expr ~need_ref:false expr;
       emit_return ();
     ]
   | A.GotoLabel (_, label) ->
@@ -77,7 +77,7 @@ let rec emit_stmt st =
     emit_for e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
@@ -154,14 +154,14 @@ and emit_static_var es =
       gather [
         instr_static_loc name;
         instr_jmpnz l;
-        from_expr e;
+        from_expr ~need_ref:false e;
         instr_setl @@ Local.Named name;
         instr_popc;
         instr_label l;
       ]
     | A.Binop (A.Eq _, (_, A.Lvar (_, name)), e) ->
       gather [
-        from_expr e;
+        from_expr ~need_ref:false e;
         instr_static_loc_init name;
       ]
     | _ -> failwith "Static var - impossible"
@@ -254,9 +254,18 @@ and emit_switch scrutinee_expr cl =
             (* Special case for simple scrutinee *)
             match scrutinee_expr with
             | (_, A.Lvar _) ->
-              gather [from_expr e; instr_cgetl2 local; instr_eq; instr_jmpnz l]
+              gather [
+                from_expr ~need_ref:false e;
+                instr_cgetl2 local;
+                instr_eq;
+                instr_jmpnz l
+                ]
             | _ ->
-              gather [instr_cgetl local; from_expr e; instr_eq; instr_jmpnz l]
+              gather [
+                instr_cgetl local;
+                from_expr ~need_ref:false e;
+                instr_eq;
+                instr_jmpnz l]
         end
   in
   let instrs = gather [
@@ -576,8 +585,6 @@ and emit_foreach _has_await collection iterator block =
   let loop_head_label = Label.next_regular () in
   let mutable_iter = is_mutable_iterator iterator in
   (* TODO: add support for mutable iterators *)
-  if mutable_iter then emit_nyi "MIter not supported"
-  else
   let key_local_opt, value_local, key_preamble, value_preamble =
     emit_iterator_key_value_storage iterator
   in
@@ -625,7 +632,7 @@ and emit_foreach _has_await collection iterator block =
   let body = emit_stmt block in
 
   let result = gather [
-    from_expr collection;
+    from_expr ~need_ref:mutable_iter collection;
     init;
     instr_try_fault
       fault_label

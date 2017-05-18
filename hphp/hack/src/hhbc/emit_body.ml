@@ -43,7 +43,7 @@ let rec emit_def def =
       then Hhbc_id.Const.from_raw_string cns_name
       else Hhbc_id.Const.from_ast_name cns_name in
     gather [
-      Emit_expression.from_expr c.Ast.cst_value;
+      Emit_expression.from_expr ~need_ref:false c.Ast.cst_value;
       instr (IIncludeEvalDefine (DefCns cns_id));
       instr_popc;
     ]

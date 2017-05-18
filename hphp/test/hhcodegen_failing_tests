@@ -159,6 +159,8 @@ quick/interface11.php
 quick/interface4.php
 quick/interface8.php
 quick/invoke.php
+quick/IterInitM.php
+quick/keyref_error.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-setters.php
 quick/keyset/invalid-scalar.php
@@ -191,6 +193,7 @@ quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names_class.php
 quick/null_constant.php
+quick/objiter.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
@@ -225,6 +228,7 @@ quick/reflection_static_vars.php
 quick/regpressure.php
 quick/reserved_class1.php
 quick/reserved_class2.php
+quick/return-from-foreach.php
 quick/selfparent.php
 quick/serialize.php
 quick/setop-magic4.php

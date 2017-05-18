@@ -553,32 +553,55 @@ let string_of_misc instruction =
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
     | _ -> failwith "instruct_misc Not Implemented"
 
+let iterator_instruction_name_prefix instruction =
+  let iterator_instruction_name =
+    match instruction with
+    | IterInit _ -> "IterInit"
+    | MIterInit _ -> "MIterInit"
+    | IterInitK _ -> "IterInitK"
+    | MIterInitK _ -> "MIterInitK"
+    | IterNext _ -> "IterNext"
+    | MIterNext _ -> "MIterNext"
+    | IterNextK _ -> "IterNextK"
+    | MIterNextK _ -> "MIterNextK"
+    | IterFree _ -> "IterFree"
+    | MIterFree _ -> "MIterFree"
+    | _ -> failwith "invalid iterator instruction"
+  in
+  iterator_instruction_name ^ " "
+
 let string_of_iterator instruction =
   match instruction with
-  | IterInit (id, label, value) ->
-    "IterInit " ^
+  | IterInit (id, label, value)
+  | MIterInit (id, label, value) ->
+    (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id) ^ " " ^
     (string_of_label label) ^ " " ^
     (string_of_local_id value)
-  | IterInitK (id, label, key, value) ->
-    "IterInitK " ^
-    (string_of_iterator_id id) ^ " " ^
-    (string_of_label label) ^ " " ^
-    (string_of_local_id key) ^ " " ^
-    (string_of_local_id value)
-  | IterNext (id, label, value) ->
-    "IterNext " ^
-    (string_of_iterator_id id) ^ " " ^
-    (string_of_label label) ^ " " ^
-    (string_of_local_id value)
-  | IterNextK (id, label, key, value) ->
-    "IterNextK " ^
+  | IterInitK (id, label, key, value)
+  | MIterInitK (id, label, key, value) ->
+    (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id) ^ " " ^
     (string_of_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
-  | IterFree id ->
-    "IterFree " ^ (string_of_iterator_id id)
+  | IterNext (id, label, value)
+  | MIterNext (id, label, value) ->
+    (iterator_instruction_name_prefix instruction) ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id value)
+  | IterNextK (id, label, key, value)
+  | MIterNextK (id, label, key, value) ->
+    (iterator_instruction_name_prefix instruction) ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id key) ^ " " ^
+    (string_of_local_id value)
+  | IterFree id
+  | MIterFree id ->
+    (iterator_instruction_name_prefix instruction) ^
+    (string_of_iterator_id id)
   | IterBreak (label, iterlist) ->
       "IterBreak " ^
       (string_of_label label) ^

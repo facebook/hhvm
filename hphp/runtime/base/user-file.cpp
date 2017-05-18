@@ -199,17 +199,19 @@ bool UserFile::openImpl(const String& filename, const String& mode,
 }
 
 bool UserFile::close() {
-  // fclose() should prevent this from being called on a closed stream
-  assert(!isClosed());
+  // fclose() should prevent this from being called on a closed stream, but
+  // xmlreader may close the file multiple times.
+  bool ret = true;
+  if (!isClosed()) {
+    // PHP's streams layer explicitly flushes on close
+    // Mimick that for user-wrappers by pushing the flush here
+    // without impacting other HPHP stream types.
+    ret = flushImpl(false) || !RuntimeOption::CheckFlushOnUserClose;
 
-  // PHP's streams layer explicitly flushes on close
-  // Mimick that for user-wrappers by pushing the flush here
-  // without impacting other HPHP stream types.
-  bool ret = flushImpl(false) || !RuntimeOption::CheckFlushOnUserClose;
-
-  // void stream_close()
-  invoke(m_StreamClose, s_stream_close, Array::Create());
-  setIsClosed(true);
+    // void stream_close()
+    invoke(m_StreamClose, s_stream_close, Array::Create());
+    setIsClosed(true);
+  }
   return ret;
 }
 

@@ -572,13 +572,22 @@ module WithStatementAndDeclAndTypeParser
     let result = make_inclusion_expression require filename in
     (parser, result)
 
-  and next_is_lower_precedence parser =
+  and peek_next_kind_if_operator parser =
     let kind = peek_token_kind parser in
-    if not (Operator.is_trailing_operator_token kind) then
-      true (* No trailing operator; terminate the expression. *)
+    if Operator.is_trailing_operator_token kind then
+      Some kind
     else
+      None
+
+  and operator_has_lower_precedence operator_opt parser =
+    match operator_opt with
+    | Some kind ->
       let operator = Operator.trailing_from_token kind in
       (Operator.precedence operator) < parser.precedence
+    | None -> true (* No trailing operator; terminate the expression. *)
+
+  and next_is_lower_precedence parser =
+    operator_has_lower_precedence (peek_next_kind_if_operator parser) parser
 
   and parse_remaining_expression_or_specified_function_call parser term =
     try begin
@@ -593,8 +602,40 @@ module WithStatementAndDeclAndTypeParser
       parser, function_call
     end with Cancel_attempt -> parse_remaining_expression parser term
 
+  and is_valid_left_hand_of_assignment t =
+    is_variable_expression t ||
+    is_subscript_expression t ||
+    is_member_selection_expression t ||
+    is_scope_resolution_expression t
+
+  and is_parsable_as_assignment operator left_term left_precedence =
+    (* in PHP precedence of assignment in expression is bumped up to
+       recognize cases like !$x = ... or $a == $b || $c = ...
+       which should be parsed as !($x = ...) and $a == $b || ($c = ...)
+    *)
+    match operator with
+    | Equal ->
+      (is_list_expression left_term ||
+       is_valid_left_hand_of_assignment left_term) &&
+      left_precedence < Operator.precedence_for_assignment_in_expressions
+    | PlusEqual | MinusEqual | StarEqual | SlashEqual |
+      StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
+      BarEqual | CaratEqual | LessThanLessThanEqual |
+      GreaterThanGreaterThanEqual ->
+      is_valid_left_hand_of_assignment left_term &&
+      left_precedence < Operator.precedence_for_assignment_in_expressions
+    | _ -> false
+
   and parse_remaining_expression parser term =
-    if next_is_lower_precedence parser then (parser, term)
+    let operatorOpt = peek_next_kind_if_operator parser in
+    if operator_has_lower_precedence operatorOpt parser then
+      match operatorOpt with
+      | Some operator
+        when is_parsable_as_assignment operator term parser.precedence ->
+        with_reset_precedence parser (fun p ->
+          parse_remaining_binary_expression p term
+        )
+      | _ -> (parser, term)
     else match peek_token_kind parser with
     (* Binary operators *)
     (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
@@ -1388,17 +1429,37 @@ TODO: This will need to be fixed to allow situations where the qualified name
        In this case "right term" would be B and "left precedence"
        would be the precedence of +.
        See comments above for more details. *)
-    let token = peek_token parser in
-    if Operator.is_trailing_operator_token (Token.kind token) then
-      let right_operator = Operator.trailing_from_token (Token.kind token) in
+    let kind = Token.kind (peek_token parser) in
+    if Operator.is_trailing_operator_token kind then
+      let right_operator = Operator.trailing_from_token kind in
       let right_precedence = Operator.precedence right_operator in
       let associativity = Operator.associativity right_operator in
+      let parse_as_assignment =
+        (* check if this is the case ... $a = ...
+           where
+             'left_precedence' - precedence of the operation on the left of $a
+             'rigft_term' - $a
+             'kind' - operator that follows right_term
+
+          in case if right_term is valid left hand side for the assignment
+          and token is assignment operator and left_precedence is less than
+          bumped priority fort the assignment we reset precedence before parsing
+          right hand side of the assignment to make sure it is consumed.
+          *)
+        is_parsable_as_assignment kind right_term left_precedence in
       if right_precedence > left_precedence ||
         (associativity = Operator.RightAssociative &&
-          right_precedence = left_precedence ) then
-        let parser1 = with_precedence parser right_precedence in
+         right_precedence = left_precedence ) ||
+         parse_as_assignment then
         let (parser2, right_term) =
-          parse_remaining_expression parser1 right_term in
+          if parse_as_assignment then
+            with_reset_precedence parser (fun p ->
+              parse_remaining_expression p right_term
+            )
+          else
+            let parser1 = with_precedence parser right_precedence in
+            parse_remaining_expression parser1 right_term
+          in
         let parser3 = with_precedence parser2 parser.precedence in
         parse_remaining_binary_expression_helper
           parser3 right_term left_precedence

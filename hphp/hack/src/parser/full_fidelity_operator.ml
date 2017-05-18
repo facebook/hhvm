@@ -130,15 +130,19 @@ let precedence operator =
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
-  | DollarOperator | UnaryPlusOperator | UnaryMinusOperator -> 19
+  | UnaryPlusOperator | UnaryMinusOperator -> 19
   | InstanceofOperator -> 20
   | ExponentOperator -> 21
   | PostfixIncrementOperator | PostfixDecrementOperator -> 22
   | FunctionCallOperator -> 23
   | NewOperator | CloneOperator -> 24
-  | IndexingOperator -> 25
-  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 26
-  | ScopeResolutionOperator -> 27
+  (* value 25 is reserved for assignment that appear in expressions *)
+  | IndexingOperator -> 26
+  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 27
+  | ScopeResolutionOperator -> 28
+  | DollarOperator -> 29
+
+let precedence_for_assignment_in_expressions = 25
 
 let associativity operator =
   match operator with

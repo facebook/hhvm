@@ -51,16 +51,12 @@ typedef hphp_string_map<Symbol*> StringToSymbolMap;
 typedef std::vector<Symbol*>     SymbolVec;
 
 struct Symbol {
-  Symbol() : m_hash(0), m_parameter(-1) { m_flags_val = 0; }
+  Symbol() : m_parameter(-1) { m_flags_val = 0; }
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
 
-  void setName(const std::string &name) {
-    m_name = name;
-    m_hash = (unsigned int) hash_string_unsafe(m_name.c_str(), m_name.size());
-  }
+  void setName(const std::string &name) { m_name = name; }
   const std::string &getName() const { return m_name; }
-  unsigned int getHash() const { return m_hash; }
 
   bool isPresent() const { return m_flags.m_declaration_set; }
   bool checkDefined();
@@ -173,7 +169,6 @@ struct Symbol {
   void serializeClassVar(JSON::DocTarget::OutputStream &out) const;
 private:
   std::string  m_name;
-  unsigned int m_hash;
   union {
     uint32_t m_flags_val;
     struct {
@@ -215,8 +210,6 @@ private:
       unsigned m_stashedVal : 1;
       unsigned m_reseated : 1;
     } m_flags;
-
-
   };
   static_assert(
     sizeof(decltype(m_flags_val)) == sizeof(decltype(m_flags)),

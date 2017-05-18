@@ -1206,6 +1206,22 @@ struct ProfileMethodData : IRExtraData {
   rds::Handle handle;
 };
 
+struct FuncGuardData : IRExtraData {
+  FuncGuardData(const Func* func, TCA* prologueAddrPtr)
+    : func(func)
+    , prologueAddrPtr(prologueAddrPtr)
+  {}
+
+  std::string show() const {
+    return folly::sformat("{}=>{}",
+      func->fullName(), prologueAddrPtr
+    );
+  }
+
+  const Func* func;
+  TCA* prologueAddrPtr;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1380,6 +1396,7 @@ X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
+X(FuncGuard,                    FuncGuardData);
 
 #undef X
 

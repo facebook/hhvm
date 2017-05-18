@@ -68,6 +68,7 @@ let read_and_wait_pid_nonblocking process =
   acc;
   acc_err; } = process in
   match !process_status with
+  | Process_aborted _
   | Process_exited _ ->
     ()
   | Process_running pid ->
@@ -88,6 +89,7 @@ let is_ready process =
   let open Process_types in
   match !(process.process_status) with
   | Process_running _ -> false
+  | Process_aborted Input_too_large
   | Process_exited _ -> true
 
 (**
@@ -123,6 +125,8 @@ let rec read_and_wait_pid ~retries process =
   match !process_status with
   | Process_exited status ->
     make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
+  | Process_aborted Input_too_large ->
+    Result.Error Process_aborted_input_too_large
   | Process_running pid ->
   let fds = filter_none [stdout_fd; stderr_fd;] in
   if fds = []
@@ -158,11 +162,32 @@ let read_and_wait_pid ~timeout process =
     (float_of_int timeout) /. sleep_seconds_per_retry in
   read_and_wait_pid ~retries process
 
-let exec prog ?env args =
+let failure_msg failure =
+  let open Process_types in
+  match failure with
+    | Timed_out (stdout, stderr) ->
+      Printf.sprintf "Process timed out. stdout:\n%s\nstderr:\n%s\n"
+      stdout stderr
+    | Process_exited_abnormally (_, stdout, stderr) ->
+      Printf.sprintf "Process exited abnormally. stdout:\n%s\nstderr:\n%s\n"
+      stdout stderr
+    | Process_aborted_input_too_large ->
+      "Process_aborted_input_too_large"
+
+(** Exec the given program with these args. If input is set, send it to
+ * the stdin on the spawned program and then close the file descriptor.
+ *
+ * Note: See Input_too_large
+ *)
+let exec prog ?input ?env args =
+  let open Process_types in
   let args = Array.of_list (prog :: args) in
   let stdin_child, stdin_parent = Unix.pipe () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
+  Unix.set_close_on_exec stdin_parent;
+  Unix.set_close_on_exec stdout_parent;
+  Unix.set_close_on_exec stderr_parent;
   let pid = match env with
   | None ->
     Unix.create_process prog args stdin_child stdout_child stderr_child
@@ -173,19 +198,35 @@ let exec prog ?env args =
   Unix.close stdin_child;
   Unix.close stdout_child;
   Unix.close stderr_child;
+  let input_failed = match input with
+    | None -> false
+    | Some input ->
+      let written = Unix.write stdin_parent input 0 (String.length input) in
+      written <> String.length input
+  in
+  let process_status = if input_failed then begin
+    Unix.kill pid Sys.sigkill;
+    Process_aborted Input_too_large
+  end
+  else begin
+    Process_running pid
+  end
+  in
+  Unix.close stdin_parent;
   {
-    Process_types.stdin_fd = ref @@ Some stdin_parent;
+    stdin_fd = ref @@ None;
     stdout_fd = ref @@ Some stdout_parent;
     stderr_fd = ref @@ Some stderr_parent;
     acc = Stack.create ();
     acc_err = Stack.create ();
-    process_status = ref @@ Process_types.Process_running pid;
+    process_status = ref @@ process_status;
   }
 
 let run_daemon entry params =
+  let stdin = Daemon.null_fd () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
-  let handle = Daemon.spawn (stdout_child, stderr_child) entry params in
+  let handle = Daemon.spawn (stdin, stdout_child, stderr_child) entry params in
   {
     Process_types.stdin_fd = ref @@ Some (Daemon.descr_of_in_channel
       (fst handle.Daemon.channels));

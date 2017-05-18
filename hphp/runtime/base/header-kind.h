@@ -91,8 +91,7 @@ protected:
       mutable RefCount m_count;
       HeaderKind m_kind;
       mutable uint8_t m_weak_refed:1;
-      mutable uint8_t m_partially_inited:1;
-      mutable uint8_t m_marks:6;
+      mutable uint8_t m_marks:7;
       mutable uint16_t m_aux16;
     };
     struct {

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -103,6 +104,7 @@ const StaticString
   s_ord("ord"),
   s_chr("chr"),
   s_func_num_args("func_num_args"),
+  s_array_key_cast("hh\\array_key_cast"),
   s_one("1"),
   s_empty("");
 
@@ -375,12 +377,24 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
 
   auto const needle = params[0].value;
   auto const array = flipped.toArray();
-  return gen(
-    env,
-    AKExistsArr,
-    cns(env, ArrayData::GetScalarArray(array.get())),
-    needle
-  );
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    // AKExistsArr can throw with HackArrCompatNotices enabled, so we need to
+    // manually provide a catch trace.
+    return gen(
+      env,
+      AKExistsArr,
+      make_opt_catch(env, params),
+      cns(env, ArrayData::GetScalarArray(array.get())),
+      needle
+    );
+  } else {
+    return gen(
+      env,
+      AKExistsArr,
+      cns(env, ArrayData::GetScalarArray(array.get())),
+      needle
+    );
+  }
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
@@ -545,6 +559,22 @@ SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
   return cns(env, TInitNull);
 }
 
+SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+
+  env.irb->constrainValue(value, DataTypeSpecific);
+
+  if (value->isA(TInt))  return value;
+  if (value->isA(TNull)) return cns(env, staticEmptyString());
+  if (value->isA(TBool)) return gen(env, ConvBoolToInt, value);
+  if (value->isA(TDbl))  return gen(env, ConvDblToInt, value);
+  if (value->isA(TRes))  return gen(env, ConvResToInt, value);
+  if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
+
+  return nullptr;
+}
+
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
@@ -615,7 +645,7 @@ SSATmp* opt_foldable(IRGS& env,
                                         nullptr, nullptr,
                                         ExecutionContext::InvokeNormal,
                                         !func->unit()->useStrictTypes());
-    SCOPE_EXIT { tvRefcountedDecRef(retVal); };
+    SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));
 
     switch (retVal.m_type) {
@@ -679,7 +709,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
                               uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
-    auto const fname = func->name();
+    auto const fname = func->fullName();
 
     if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
       return retVal;
@@ -708,6 +738,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(func_num_args)
     X(min2)
     X(set_frame_metadata)
+    X(array_key_cast)
 
 #undef X
 
@@ -1450,7 +1481,7 @@ void emitFCallBuiltin(IRGS& env,
                       int32_t numArgs,
                       int32_t numNonDefault,
                       const StringData* funcName) {
-  auto const callee = Unit::lookupFunc(funcName);
+  auto const callee = Unit::lookupBuiltin(funcName);
 
   if (!callee) PUNT(Missing-builtin);
 
@@ -1814,7 +1845,7 @@ void implGenericIdx(IRGS& env) {
 
   SSATmp* const args[] = { base, key, def };
 
-  static auto func = Unit::lookupFunc(s_idx.get());
+  static auto func = Unit::lookupBuiltin(s_idx.get());
   assert(func && func->numParams() == 3);
 
   emitDirectCall(env, func, 3, args);

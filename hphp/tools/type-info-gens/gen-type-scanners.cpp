@@ -501,7 +501,7 @@ struct Generator::Layout {
   }
 
   void setSuffix(Layout other) {
-    suffix = folly::make_unique<Layout>(std::move(other));
+    suffix = std::make_unique<Layout>(std::move(other));
   }
 
   void merge(const Layout& other, size_t offset);
@@ -3140,6 +3140,7 @@ void Generator::operator()(std::ostream& os) const {
   os << "#include <limits>\n\n";
 
   os << "#include \"hphp/util/assertions.h\"\n";
+  os << "#include \"hphp/util/portability.h\"\n";
   os << "#include \"hphp/util/type-scan.h\"\n\n";
 
   os << "using namespace HPHP::type_scan;\n";
@@ -3155,7 +3156,8 @@ void Generator::operator()(std::ostream& os) const {
   os << "}\n\n";
 
   os << "extern \"C\" {\n\n"
-     << "const Metadata* " << HPHP::type_scan::detail::kInitFuncName
+     << "EXTERNALLY_VISIBLE const Metadata* "
+     << HPHP::type_scan::detail::kInitFuncName
      << "(size_t& table_size) {\n"
      << "  init_indices();\n"
      << "  table_size = " << m_indexed_types.size()+2 << ";\n"
@@ -3169,7 +3171,7 @@ Generator::Layout::Layout(const Layout& other)
   , ptrs{other.ptrs}
   , conservative{other.conservative}
   , custom{other.custom}
-  , suffix{other.suffix ? folly::make_unique<Layout>(*other.suffix) : nullptr}
+  , suffix{other.suffix ? std::make_unique<Layout>(*other.suffix) : nullptr}
   , suffix_begin{other.suffix_begin}
 {
 }
@@ -3179,7 +3181,7 @@ Generator::Layout& Generator::Layout::operator=(const Layout& other) {
   ptrs = other.ptrs;
   conservative = other.conservative;
   custom = other.custom;
-  suffix = other.suffix ? folly::make_unique<Layout>(*other.suffix) : nullptr;
+  suffix = other.suffix ? std::make_unique<Layout>(*other.suffix) : nullptr;
   suffix_begin = other.suffix_begin;
   return *this;
 }

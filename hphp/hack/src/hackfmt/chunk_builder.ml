@@ -54,17 +54,15 @@ let builder = object (this)
   val mutable span_alloc = Span_allocator.make ();
   val mutable block_indent = 0;
 
-  val mutable in_range = Chunk_group.No;
-  val mutable start_char = 0;
-  val mutable end_char = max_int;
   val mutable seen_chars = 0;
+  val mutable last_chunk_end = 0;
 
   val mutable last_string_type = Other;
 
   (* TODO: Make builder into an instantiable class instead of
    * having this reset method
    *)
-  method private reset start_c end_c =
+  method private reset () =
     Stack.clear open_spans;
     rules <- [];
     lazy_rules <- ISet.empty;
@@ -81,15 +79,13 @@ let builder = object (this)
     span_alloc <- Span_allocator.make ();
     block_indent <- 0;
 
-    in_range <- Chunk_group.No;
-    start_char <- start_c;
-    end_char <- end_c;
     seen_chars <- 0;
+    last_chunk_end <- 0;
 
     last_string_type <- Other;
     ()
 
-  method private add_string ?(is_trivia=false) s =
+  method private add_string ?(is_trivia=false) ?(multiline=false) s width =
     if last_string_type = DocStringClose && (is_trivia || s <> ";")
       then this#hard_split ();
 
@@ -97,19 +93,26 @@ let builder = object (this)
       | hd :: tl when hd.Chunk.is_appendable ->
         let text = hd.Chunk.text ^ (if pending_space then " " else "") ^ s in
         pending_space <- false;
-        {hd with Chunk.text = text} :: tl
+        let indentable = hd.Chunk.indentable && not multiline in
+        let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
+        hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
           pending_space <- false;
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
-            let cs = Chunk.make s (List.hd rules) nesting :: chunks in
+            let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+            let chunk = {chunk with Chunk.indentable = not multiline} in
+            let cs = chunk :: chunks in
             this#end_rule ();
             next_split_rule <- NoRule;
             cs
           in
           match next_split_rule with
-            | NoRule -> Chunk.make s (List.hd rules) nesting :: chunks
+            | NoRule ->
+              let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+              let chunk = {chunk with Chunk.indentable = not multiline} in
+              chunk :: chunks
             | LazyRuleID rule_id ->
               this#start_lazy_rule rule_id;
               handle_started_next_split_rule ()
@@ -118,6 +121,8 @@ let builder = object (this)
               handle_started_next_split_rule ()
       end
     );
+
+    this#advance width;
 
     if not is_trivia then begin
       lazy_rules <- ISet.union next_lazy_rules lazy_rules;
@@ -129,8 +134,15 @@ let builder = object (this)
         Stack.push (open_span (List.length chunks - 1) cost) open_spans
       );
 
-      if last_string_type = DocStringClose && s = ";"
-        then this#hard_split ();
+      if last_string_type = DocStringClose && s = ";" then begin
+        (* Normally, we'd have already counted the newline in the semicolon's
+         * trailing trivia before splitting. Since here we're splitting before
+         * getting the chance to handle that trailing trivia, we temporarily
+         * advance to make sure the new chunk has the correct start_char. *)
+        this#advance 1;
+        this#hard_split ();
+        this#advance (-1);
+      end
     end;
 
     last_string_type <- Other;
@@ -158,7 +170,8 @@ let builder = object (this)
           | hd :: _ -> hd
         in
         let chunk = Chunk.finalize hd rule rule_alloc
-          space_if_not_split pending_comma in
+          space_if_not_split pending_comma seen_chars in
+        last_chunk_end <- seen_chars;
         space_if_not_split <- pending_space;
         pending_comma <- None;
         chunk :: tl
@@ -186,8 +199,9 @@ let builder = object (this)
     let nesting = nesting_alloc.Nesting_allocator.current_nesting in
     let create_empty_chunk () =
       let rule = this#create_rule Rule.Always in
-      let chunk = Chunk.make "" (Some rule) nesting in
-      Chunk.finalize chunk rule rule_alloc false None
+      let chunk = Chunk.make "" (Some rule) nesting last_chunk_end in
+      last_chunk_end <- seen_chars;
+      Chunk.finalize chunk rule rule_alloc false None seen_chars
     in
     (chunks <- match chunks with
       | [] -> create_empty_chunk () :: chunks
@@ -201,12 +215,20 @@ let builder = object (this)
     this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
-  method private hard_split () =
-    this#split ();
-    this#set_next_split_rule (RuleKind Rule.Always);
-    if List.is_empty rules &&
-      not (List.is_empty chunks) &&
+  method private is_at_chunk_group_boundry () =
+    List.is_empty rules &&
+      ISet.is_empty lazy_rules &&
+      ISet.is_empty next_lazy_rules &&
       not (Nesting_allocator.is_nested nesting_alloc)
+
+  method private hard_split () =
+    begin match chunks with
+      | [] -> ()
+      | _ ->
+        this#split ();
+        this#set_next_split_rule (RuleKind Rule.Always);
+    end;
+    if this#is_at_chunk_group_boundry () && not (List.is_empty chunks)
     then this#push_chunk_group ()
 
   method private set_next_split_rule rule_type =
@@ -280,92 +302,50 @@ let builder = object (this)
     for end chunks and block nesting
   *)
   method private start_block_nest () =
-    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
+    if this#is_at_chunk_group_boundry ()
     then block_indent <- block_indent + 2
     else this#nest ()
 
   method private end_block_nest () =
-    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
+    if this#is_at_chunk_group_boundry ()
     then block_indent <- block_indent - 2
     else this#unnest ()
 
   method private push_chunk_group () =
-    let print_range = Chunk_group.(match in_range with
-      | StartAt n when n = List.length chunks -> No
-      | EndAt n when n = List.length chunks -> All
-      | _ -> in_range
-    ) in
-
     chunk_groups <- Chunk_group.({
       chunks = (List.rev chunks);
       rule_map = rule_alloc.Rule_allocator.rule_map;
       rule_dependency_map = rule_alloc.Rule_allocator.dependency_map;
       block_indentation = block_indent;
-      print_range;
     }) :: chunk_groups;
 
-    in_range <- Chunk_group.(match in_range with
-      | StartAt _ -> All
-      | All -> All
-      | Range _ -> No
-      | EndAt _ -> No
-      | No -> No
-    );
     chunks <- [];
     rule_alloc <- Rule_allocator.make ();
     nesting_alloc <- Nesting_allocator.make ();
     span_alloc <- Span_allocator.make ()
 
   method private _end () =
-    (*TODO: warn if not empty? *)
-    if not (List.is_empty chunks) then this#hard_split ();
-    List.rev_filter
-      chunk_groups ~f:(fun cg -> Chunk_group.(cg.print_range <> No))
+    this#hard_split ();
+    let last_chunk_empty = match chunks with
+      | hd :: tl -> hd.Chunk.text = ""
+      | [] ->
+        match chunk_groups with
+        | [] -> true
+        | hd :: tl ->
+          match List.rev hd.Chunk_group.chunks with
+          | [] -> true
+          | hd :: tl -> hd.Chunk.text = ""
+    in
+    if not last_chunk_empty then
+      this#add_always_empty_chunk ();
+    this#push_chunk_group ();
+    List.rev chunk_groups
 
-  (* TODO: move the partial formatting logic to it's own module somehow *)
   method private advance n =
     seen_chars <- seen_chars + n;
 
-  (* TODO: make this idempotent *)
-  method private check_range () =
-    if seen_chars = start_char then
-      in_range <- (match chunks with
-        | [] -> Chunk_group.All
-        | hd :: _ ->
-          next_split_rule <- RuleKind Rule.Always;
-          this#simple_split_if_unsplit ();
-          Chunk_group.StartAt (List.length chunks)
-      );
-    if seen_chars = end_char then
-      in_range <- begin
-        if List.is_empty chunks
-        then Chunk_group.No
-        else begin
-          let end_at = List.length chunks in
-          match in_range with
-            | Chunk_group.StartAt start_at ->
-              Chunk_group.Range (start_at, end_at)
-            | Chunk_group.Range _ -> in_range
-            | _ -> Chunk_group.EndAt end_at
-        end;
-      end
-
-  method private text text width =
-    this#check_range ();
-    this#add_string text;
-    this#advance width;
-
-  method private comment text width =
-    this#check_range ();
-    this#add_string ~is_trivia:true text;
-    this#advance width;
-
-  method private ignore width =
-    this#check_range ();
-    this#advance width;
-
-  method build_chunk_groups node start_char end_char =
-    this#reset start_char end_char;
+  method build_chunk_groups node =
+    this#reset ();
     this#consume_fmt_node node;
     this#_end ()
 
@@ -377,12 +357,26 @@ let builder = object (this)
     | Fmt nodes ->
       List.iter nodes this#consume_fmt_node
     | Text (text, width) ->
-      this#text text width
+      this#add_string text width;
     | Comment (text, width) ->
-      this#comment text width
+      this#add_string ~is_trivia:true text width;
     | Ignore (_, width) ->
-      this#ignore width
+      this#advance width;
+    | MultilineString (strings, width) ->
+      let prev_seen = seen_chars in
+      begin match strings with
+      | hd :: tl ->
+        this#add_string hd (String.length hd);
+        List.iter tl (fun s -> begin
+          this#advance 1;
+          this#hard_split ();
+          this#add_string ~multiline:true s (String.length s);
+        end);
+      | [] -> ()
+      end;
+      seen_chars <- prev_seen + width;
     | DocLiteral node ->
+      this#set_next_split_rule (RuleKind (Rule.Simple Cost.Assignment));
       this#consume_fmt_node node;
       last_string_type <- DocStringClose;
     | NumericLiteral node ->
@@ -446,3 +440,6 @@ let builder = object (this)
     | TrailingComma ->
       this#set_pending_comma ()
 end
+
+let build node =
+  builder#build_chunk_groups node

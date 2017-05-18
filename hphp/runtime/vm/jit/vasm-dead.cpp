@@ -105,6 +105,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::loadqp:
     case Vinstr::loadsd:
     case Vinstr::loadtqb:
+    case Vinstr::loadtql:
     case Vinstr::loadups:
     case Vinstr::loadw:
     case Vinstr::loadzbl:
@@ -145,8 +146,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::shrqi:
     case Vinstr::sqrtsd:
     case Vinstr::srem:
-    case Vinstr::subb:
-    case Vinstr::subbi:
     case Vinstr::subl:
     case Vinstr::subli:
     case Vinstr::subq:
@@ -179,6 +178,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::bindaddr:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
+    case Vinstr::funcguard:
     case Vinstr::call:
     case Vinstr::callarray:
     case Vinstr::callfaststub:

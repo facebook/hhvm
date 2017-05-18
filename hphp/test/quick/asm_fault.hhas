@@ -9,7 +9,7 @@
 }
 
 .function throw_stuff($msg) {
-  .try_catch handler {
+  .try {
     String "about to throw: "
     CGetL $msg
     Concat
@@ -23,14 +23,12 @@
     FCall 1
     PopR
     Throw
+  } .catch {
+    String "throw_stuff's exception handler ...\n"
+    Print
+    PopC
+    Throw
   }
-
-handler:
-  Catch
-  String "throw_stuff's exception handler ...\n"
-  Print
-  PopC
-  Throw
 }
 
 .function foo() {
@@ -38,7 +36,7 @@ handler:
   Print
   PopC
 
-  .try_catch handler {
+  .try {
     String "In region\n"
     Print
     PopC
@@ -52,17 +50,14 @@ handler:
     String "unreached\n"
     Print
     PopC
+    True
+    RetC
+  } .catch {
+    String "In foo's exception handler\n"
+    Print
+    PopC
+    Throw
   }
-
-  True
-  RetC
-
-handler:
-  Catch
-  String "In foo's exception handler\n"
-  Print
-  PopC
-  Throw
 }
 
 .class One extends Exception {}
@@ -75,7 +70,7 @@ handler:
            PopC
 
 repeat:
-           .try_catch catcher {
+           .try {
              CGetL $counter
              Switch Unbounded 0 <make_one make_two make_three>
 
@@ -93,77 +88,74 @@ make_three:  FPushCtorD 1 "Three"
              FCall 1
              PopR
              Throw
+           } .catch {
+             Dup
+             InstanceOfD "One"
+             JmpNZ on_one
+             Dup
+             InstanceOfD "Two"
+             JmpNZ on_two
+             Dup
+             InstanceOfD "Three"
+             JmpNZ on_three
+             Throw
+on_one:      String "one\n"
+             Print
+             PopC
+             Int 1
+             SetL $counter
+             PopC
+             PopC
+             Jmp repeat
+on_two:      PopC
+             String "two\n"
+             Print
+             PopC
+             Int 2
+             SetL $counter
+             PopC
+             Jmp repeat
+on_three:    String "three\n"
+             Print
+             PopC
+             Throw
            }
-
-catcher:   Catch
-           Dup
-           InstanceOfD "One"
-           JmpNZ on_one
-           Dup
-           InstanceOfD "Two"
-           JmpNZ on_two
-           Dup
-           InstanceOfD "Three"
-           JmpNZ on_three
-           Throw
-on_one:    String "one\n"
-           Print
-           PopC
-           Int 1
-           SetL $counter
-           PopC
-           PopC
-           Jmp repeat
-on_two:    PopC
-           String "two\n"
-           Print
-           PopC
-           Int 2
-           SetL $counter
-           PopC
-           Jmp repeat
-on_three:  String "three\n"
-           Print
-           PopC
-           Throw
-
 }
 
 .function main() {
          False
          SetL $ever_caught
          PopC
+         String "foo"
 
-         .try_catch catcher {
-            FPushFuncD 0 "foo"
-            FCall 0
-            PopR
-         }
-
-resume:  .try_catch catcher {
-           FPushFuncD 0 "throw_various"
+resume:  .try {
+           FPushFunc 0
            FCall 0
            PopR
+           Jmp resume2
+         } .catch {
+           SetL $ex
+           PopC
+           String "top-level catch handler got: "
+           PushL $ex
+           FPushObjMethodD 0 "getMessage" NullThrows
+           FCall 0
+           UnboxR
+           Concat
+           String "\n"
+           Concat
+           Print
+           PopC
+           # This might be illegal hhbc?
+           CGetL $ever_caught
+           True
+           SetL $ever_caught
+           PopC
+           JmpNZ resume2
+           String "throw_various"
+           Jmp resume
          }
 
 resume2: True
          RetC
-
-catcher: String "top-level catch handler got: "
-         Catch
-         FPushObjMethodD 0 "getMessage" NullThrows
-         FCall 0
-         UnboxR
-         Concat
-         String "\n"
-         Concat
-         Print
-         PopC
-         # This might be illegal hhbc?
-         CGetL $ever_caught
-         True
-         SetL $ever_caught
-         PopC
-         JmpZ resume
-         Jmp resume2
 }

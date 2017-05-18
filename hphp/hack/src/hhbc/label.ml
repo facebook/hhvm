@@ -14,6 +14,7 @@ type t =
   | Catch of int
   | Fault of int
   | DefaultArg of int
+  | Named of string
 
 let id label =
   match label with
@@ -21,6 +22,7 @@ let id label =
   | Catch id
   | Fault id
   | DefaultArg id -> id
+  | Named _ -> failwith "Label should be rewritten before this point"
 
 let option_map f label =
   match label with
@@ -32,6 +34,7 @@ let option_map f label =
     begin match f id with None -> None | Some id -> Some (Fault id) end
   | DefaultArg id ->
     begin match f id with None -> None | Some id -> Some (DefaultArg id) end
+  | Named _ -> failwith "Label should be rewritten before this point"
 
 let map f label =
   match label with
@@ -39,6 +42,7 @@ let map f label =
   | Catch id -> Catch (f id)
   | Fault id -> Fault (f id)
   | DefaultArg id -> DefaultArg (f id)
+  | Named _ -> failwith "Label should be rewritten before this point"
 
 (* Numbers for string label *)
 let next_label = ref 0
@@ -60,13 +64,8 @@ let next_fault () =
 let next_default_arg () =
   DefaultArg (get_next_label())
 
+let named name =
+  Named name
+
 let reset_label () =
   next_label := 0
-
-(* Numbers for array, map, dict, set, shape labels *)
-let next_data_label = ref 0
-
-let get_next_data_label () =
-  let current = !next_data_label in
-  next_data_label := current + 1;
-  current

@@ -151,7 +151,7 @@ inline int low_mallocx_huge1g_flags() {
   return MALLOCX_ARENA(low_huge1g_arena) | MALLOCX_TCACHE_NONE;
 }
 
-inline int low_dallocx_huge1g_flags() {
+inline constexpr int low_dallocx_huge1g_flags() {
   return MALLOCX_TCACHE_NONE;
 }
 
@@ -159,7 +159,7 @@ inline int mallocx_huge1g_flags() {
   return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE_NONE;
 }
 
-inline int dallocx_huge1g_flags() {
+inline constexpr int dallocx_huge1g_flags() {
   return MALLOCX_TCACHE_NONE;
 }
 

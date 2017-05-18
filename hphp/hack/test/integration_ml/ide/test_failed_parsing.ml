@@ -66,5 +66,5 @@ let () =
   let env = Test.wait env in
   let _, loop_output = Test.(run_loop_once env default_loop_input) in
   (* Bar depends on foo, so change of foo will trigger recheck of bar.
-   * Verify that doing this doesn't forget about parsing stage errors *)
-  Test.assert_diagnostics loop_output bar_parse_error_diagnostics
+   * Verify that doing this doesn't change previous parsing stage errors *)
+  Test.assert_no_diagnostics loop_output

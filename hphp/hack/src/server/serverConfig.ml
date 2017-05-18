@@ -126,6 +126,24 @@ let config_experimental_tc_features config =
       let sl = Str.split config_list_regexp s in
       process_experimental sl
 
+let process_migration_flags sl =
+  match sl with
+  | ["false"] -> SSet.empty
+  | ["true"] -> TypecheckerOptions.migration_flags_all
+  | flags ->
+    begin
+      List.iter flags ~f:(fun s ->
+        if not (SSet.mem TypecheckerOptions.migration_flags_all s)
+        then failwith ("invalid migration flag: " ^ s));
+      List.fold_left flags ~f:SSet.add ~init:SSet.empty
+    end
+
+let config_tc_migration_flags config =
+  SMap.get config "enable_tc_migration_flags"
+  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
+  |> List.map ~f:String.lowercase_ascii
+  |> process_migration_flags
+
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -154,6 +172,12 @@ let prepare_auto_namespace_map config =
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
+let prepare_ignored_fixme_codes config =
+  SMap.get config "ignored_fixme_codes"
+  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
+  |> List.map ~f:int_of_string
+  |> List.fold_right ~init:ISet.empty ~f:ISet.add
+
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let local_config = ServerLocalConfig.load () in
@@ -174,8 +198,12 @@ let load config_filename options =
     (bool_ "safe_vector_array" ~default:false config)
     (config_user_attributes config)
     (config_experimental_tc_features config)
+    (config_tc_migration_flags config)
     (prepare_auto_namespace_map config)
+    (prepare_ignored_fixme_codes config)
   in
+  Errors.ignored_fixme_codes :=
+    (GlobalOptions.ignored_fixme_codes global_opts);
   {
     load_script = load_script;
     load_script_timeout = load_script_timeout;
@@ -208,6 +236,7 @@ let load_script_timeout config = config.load_script_timeout
 let load_mini_script config = config.load_mini_script
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
+let state_prefetcher_script config = config.state_prefetcher_script
 let typechecker_options config = config.tc_options
 let parser_options config = config.parser_options
 let formatter_override config = config.formatter_override

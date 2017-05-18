@@ -114,6 +114,20 @@ let try_parse (env : env) (f : env -> 'a option) : 'a option =
   | Some x -> Some x
   | None   -> (restore_lexbuf_state env.lb saved; None)
 
+(* Same as try_parse, but returns None if parsing produced errors. *)
+let try_parse_with_errors (env : env) (f : env -> 'a) : 'a option =
+  let parse env =
+    let error_state = !(env.errors) in
+    let result = f env in
+    if !(env.errors) == error_state then
+        Some result
+    else
+      (
+        env.errors := error_state;
+        None
+      ) in
+  try_parse env parse
+
 (* Return the next token without updating lexer state *)
 let peek env =
   let saved = save_lexbuf_state env.lb in
@@ -236,6 +250,8 @@ let rec check_lvalue env = function
       error_at env pos "?-> syntax is not supported for lvalues"
   | pos, Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
       error_at env pos "->: syntax is not supported for lvalues"
+  | pos, Array_get ((_, Class_const _), _) ->
+      error_at env pos "Array-like class consts are not valid lvalues"
   | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
     Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->
@@ -291,7 +307,7 @@ let priorities = [
   (Left, [Tbar]);
   (Left, [Tamp]);
   (NonAssoc, [Teqeq; Tdiff; Teqeqeq; Tdiff2]);
-  (NonAssoc, [Tlt; Tlte; Tgt; Tgte]);
+  (NonAssoc, [Tlt; Tlte; Tgt; Tgte; Tcmp]);
   (Left, [Tltlt; Tgtgt]);
   (Left, [Tplus; Tminus; Tdot]);
   (Left, [Tstar; Tslash; Tpercent]);
@@ -706,7 +722,7 @@ and toplevel_word def_start ~attr env = function
 
 and define_or_stmt env = function
   | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value], [])) ->
-      Constant {
+    Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
       cst_name = name;
@@ -1089,7 +1105,7 @@ and hint env =
   | Tat ->
       let start = Pos.make env.file env.lb in
       let h = hint env in
-      Pos.btw start (fst h), snd h
+      Pos.btw start (fst h), Hsoft h
   | _ ->
       error_expect env "type";
       let pos = Pos.make env.file env.lb in
@@ -2020,6 +2036,12 @@ and ignore_statement env =
   ignore (statement env);
   env.errors := error_state
 
+and parse_expr env =
+  L.back env.lb;
+  let e = expr env in
+  expect env Tsc;
+  Expr e
+
 and statement_word env = function
   | "break"    -> statement_break env
   | "continue" -> statement_continue env
@@ -2035,17 +2057,35 @@ and statement_word env = function
   | "switch"   -> statement_switch env
   | "foreach"  -> statement_foreach env
   | "try"      -> statement_try env
+  | "goto"     -> statement_goto env
   | "function" | "class" | "trait" | "interface" | "const"
   | "async" | "abstract" | "final" ->
       error env
           "Parse error: declarations are not supported outside global scope";
       ignore (ignore_toplevel None ~attr:[] [] env (fun _ -> true));
       Noop
-  | x ->
-      L.back env.lb;
-      let e = expr env in
-      expect env Tsc;
-      Expr e
+  | x when peek env = Tcolon ->
+    (* Unfortunately, some XHP elements allow for expressions to look like goto
+     * label declarations. For example,
+     *
+     *   await :intern:roadmap:project::genUpdateOnClient($project);
+     *
+     * Looks like it is declaring a label whose name is await. To preserve
+     * compatibility with PHP while working around this issue, we use the
+     * following heuristic:
+     *
+     * When we encounter a statement that is a word followed by a colon:
+     *   1) Attempt to parse it as an expression. If there are no additional
+     *      errors, the result is used as the expression.
+     *   2) If there are additional errors, then revert the error and lexer
+     *      state, and parse the statement as a goto label.
+     *)
+    (
+      match try_parse_with_errors env parse_expr with
+      | Some expr -> expr
+      | None -> statement_goto_label env x
+    )
+  | x -> parse_expr env
 
 (*****************************************************************************)
 (* Break statement *)
@@ -2097,6 +2137,36 @@ and return_value env =
       let e = expr env in
       expect env Tsc;
       Some e
+
+(*****************************************************************************)
+(* Goto statement *)
+(*****************************************************************************)
+
+and statement_goto_label env label =
+  let pos = Pos.make env.file env.lb in
+  let goto_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      env.popt
+      TypecheckerOptions.experimental_goto in
+  if not goto_allowed then error env "goto is not supported.";
+  expect env Tcolon;
+  GotoLabel (pos, label)
+
+and statement_goto env =
+  let pos = Pos.make env.file env.lb in
+  let goto_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      env.popt
+      TypecheckerOptions.experimental_goto in
+  if not goto_allowed then error env "goto labels are not supported.";
+  match L.token env.file env.lb with
+    | Tword ->
+      let word = Lexing.lexeme env.lb in
+      expect env Tsc;
+      Goto (pos, word)
+    | _ ->
+      error env "goto must use a label.";
+      Noop
 
 (*****************************************************************************)
 (* Static variables *)
@@ -2648,6 +2718,8 @@ and expr_remain env e1 =
       expr_binop env Tgte Gte e1
   | Tlte ->
       expr_binop env Tlte Lte e1
+  | Tcmp ->
+      expr_binop env Tcmp Cmp e1
   | Tamp ->
       expr_binop env Tamp Amp e1
   | Tbar ->
@@ -2949,9 +3021,9 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       pos, Null
   | "array" ->
       expr_array env pos
-  | "darray" ->
+  | "darray" when peek env = Tlb ->
       expr_darray env pos
-  | "varray" ->
+  | "varray" when peek env = Tlb ->
       expr_varray env pos
   | "shape" ->
       expr_shape env pos
@@ -4287,6 +4359,7 @@ and namespace_group_use env kind prefix =
 
   let allow_change_kind = (kind = NSClass) in
   let unprefixed = namespace_use_list env allow_change_kind Trcb kind [] in
+  expect env Tsc;
   List.map unprefixed begin fun (kind, (p1, s1), id2) ->
     (kind, (p1, prefix ^ s1), id2)
   end

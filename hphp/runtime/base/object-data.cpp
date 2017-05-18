@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -168,7 +170,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   auto prop = reinterpret_cast<TypedValue*>(this + 1);
   auto const stop = prop + nProps;
   for (; prop != stop; ++prop) {
-    tvRefcountedDecRef(prop);
+    tvDecRefGen(prop);
   }
 
   // Deliberately reload `attrs' to check for dynamic properties.  This made
@@ -773,8 +775,8 @@ ObjectData* ObjectData::clone() {
     if (props[i].attrs & AttrNoSerialize) {
       continue;
     }
-    tvRefcountedDecRef(&clonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
+    tvDecRefGen(&clonePropVec[i]);
+    tvDupWithRef(propVec()[i], clonePropVec[i]);
   }
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     clone->setAttribute(HasDynPropArr);
@@ -903,7 +905,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
     *dst = *src;
     // m_aux.u_deepInit is true for properties that need "deep" initialization
     if (src->deepInit()) {
-      tvRefcountedIncRef(dst);
+      tvIncRefGen(dst);
       collections::deepCopy(dst);
     }
   }
@@ -1109,7 +1111,7 @@ bool ObjectData::invokeSet(const StringData* key, const TypedValue* val) {
     };
     return g_context->invokeMethod(this, meth, folly::range(args));
   });
-  if (r) tvRefcountedDecRef(r.val);
+  if (r) tvDecRefGen(r.val);
   return r.ok();
 }
 
@@ -1135,7 +1137,7 @@ bool ObjectData::invokeUnset(const StringData* key) {
   auto const info = PropAccessInfo { this, key, UseUnset };
   auto r = magic_prop_impl(key, info,
                            MagicInvoker{s___unset.get(), info});
-  if (r) tvRefcountedDecRef(r.val);
+  if (r) tvDecRefGen(r.val);
   return r.ok();
 }
 
@@ -1156,7 +1158,7 @@ bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue* val) {
   auto r = guardedNativePropResult(
     Native::setProp(Object{this}, StrNR(key), tvAsVariant(val))
   );
-  tvRefcountedDecRef(r.val);
+  tvDecRefGen(r.val);
   return r.ok();
 }
 
@@ -1170,7 +1172,7 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
   auto r = guardedNativePropResult(
       Native::unsetProp(Object{this}, StrNR(key))
   );
-  tvRefcountedDecRef(r.val);
+  tvDecRefGen(r.val);
   return r.ok();
 }
 
@@ -1311,7 +1313,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
       if (!r.val.m_data.num) return true;
       if (auto r2 = invokeNativeGetProp(key)) {
         auto const emptyResult = !cellToBool(*tvToCell(&r2.val));
-        tvRefcountedDecRef(&r2.val);
+        tvDecRefGen(&r2.val);
         return emptyResult;
       }
       return false;
@@ -1328,7 +1330,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
   if (getAttribute(UseGet)) {
     if (auto r = invokeGet(key)) {
       auto const emptyResult = !cellToBool(*tvToCell(&r.val));
-      tvRefcountedDecRef(&r.val);
+      tvDecRefGen(&r.val);
       return emptyResult;
     }
   }
@@ -1409,7 +1411,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   if (prop && lookup.accessible) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       if (auto r = invokeGet(key)) {
-        SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+        SCOPE_EXIT { tvDecRefGen(r.val); };
         setopBody(tvToCell(&r.val), op, val);
         if (getAttribute(UseSet)) {
           cellDup(*tvToCell(&r.val), tvRef);
@@ -1447,7 +1449,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   if (useGet && !useSet) {
     auto r = invokeGet(key);
     if (!r) tvWriteNull(&r.val);
-    SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+    SCOPE_EXIT { tvDecRefGen(r.val); };
 
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
     // here, even though it comes before the IncDecOp in the analogous
@@ -1501,7 +1503,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (prop && lookup.accessible) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       if (auto r = invokeGet(key)) {
-        SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+        SCOPE_EXIT { tvDecRefGen(r.val); };
         auto const dest = IncDecBody(op, &r.val);
         if (getAttribute(UseSet)) {
           invokeSet(key, &r.val);
@@ -1525,7 +1527,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
-      SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+      SCOPE_EXIT { tvDecRefGen(r.val); };
       tvUnboxIfNeeded(&r.val);
       auto const dest = IncDecBody(op, &r.val);
       if (invokeNativeSetProp(key, &r.val)) {
@@ -1540,7 +1542,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (useGet && !useSet) {
     auto r = invokeGet(key);
     if (!r) tvWriteNull(&r.val);
-    SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+    SCOPE_EXIT { tvDecRefGen(r.val); };
     tvUnboxIfNeeded(&r.val);
     auto const dest = IncDecBody(op, &r.val);
     if (prop) raise_error("Cannot access protected property");
@@ -1558,7 +1560,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
 
   if (useGet && useSet) {
     if (auto r = invokeGet(key)) {
-      SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+      SCOPE_EXIT { tvDecRefGen(r.val); };
       tvUnboxIfNeeded(&r.val);
       auto const dest = IncDecBody(op, &r.val);
       invokeSet(key, &r.val);
@@ -1721,7 +1723,7 @@ String ObjectData::invokeToString() {
   if (!isStringType(tv.m_type)) {
     // Discard the value returned by the __toString() method and raise
     // a recoverable error
-    tvRefcountedDecRef(tv);
+    tvDecRefGen(tv);
     raise_recoverable_error(
       "Method %s::__toString() must return a string value",
       m_cls->preClass()->name()->data());

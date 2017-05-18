@@ -75,6 +75,7 @@ struct EHEnt {
   int m_iterId;
   int m_parentIndex;
   Offset m_handler;
+  Offset m_end;
 };
 
 /*
@@ -348,6 +349,7 @@ struct Func final {
    *
    * @requires: shared()->m_preClass == nullptr
    */
+  NamedEntity* getNamedEntity();
   const NamedEntity* getNamedEntity() const;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -693,6 +695,16 @@ struct Func final {
   bool isMemoizeWrapper() const;
 
   /*
+   * Is this string the name of a memoize implementation.
+   */
+  static bool isMemoizeImplName(const StringData*);
+
+  /*
+   * Is this function a memoization implementation.
+   */
+  bool isMemoizeImpl() const;
+
+  /*
    * Assuming this func is a memoization wrapper, the name of the function it is
    * wrapping.
    *
@@ -915,16 +927,7 @@ struct Func final {
    */
   bool isPersistent() const;
 
-  /*
-   * Is this always the function that's returned when we look up its name from
-   * the context of `fromUnit'?
-   *
-   * A weaker condition than persistence, since a function is always name
-   * binding immutable from the context of the unit in which it is defined.
-   * Used to make some translation-time optimizations which make assumptions
-   * about where function calls will go.
-   */
-  bool isNameBindingImmutable(const Unit* fromUnit) const;
+  bool isInterceptable() const;
 
   /*
    * Given that func would be called when func->name() is invoked on cls,

@@ -43,5 +43,9 @@ inline Class* NamedEntity::clsList() const {
   return m_clsList;
 }
 
+inline Func* NamedEntity::uniqueFunc() const {
+  return m_uniqueFunc;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

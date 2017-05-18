@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 #define incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/vm/name-value-table.h"
 
 namespace HPHP {
 
@@ -79,11 +80,11 @@ public:
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
 
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayLval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
 
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
@@ -138,6 +139,7 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
 
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);

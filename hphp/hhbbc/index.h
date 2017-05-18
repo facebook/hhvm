@@ -45,6 +45,8 @@ struct Index;
 struct PublicSPropIndexer;
 struct FuncAnalysis;
 
+extern const Type TTop;
+
 namespace php {
 struct Class;
 struct Func;
@@ -404,6 +406,18 @@ struct Index {
     lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Try to find a res::Class for a given php::Class.
+   *
+   * Note, the returned class may or may not be *defined* at the
+   * program point you care about (it could be non-hoistable, even
+   * though it's unique, for example).
+   *
+   * Returns a name-only resolution if there are no legal
+   * instantiations of the class, or if there is more than one.
+   */
+  res::Class resolve_class(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Try to resolve which class will be the class named `name' from a
    * given context, if we can resolve it to a single class.
    *
@@ -415,6 +429,29 @@ struct Index {
    * object type.  (E.g. if there are type aliases.)
    */
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
+
+  /*
+   * Try to resolve self/parent types for the given context
+   */
+  folly::Optional<res::Class> selfCls(const Context& ctx) const;
+  folly::Optional<res::Class> parentCls(const Context& ctx) const;
+
+  struct ResolvedInfo {
+    AnnotType                               type;
+    bool                                    nullable;
+    Either<SString,borrowed_ptr<ClassInfo>> value;
+  };
+
+  /*
+   * Try to resolve name, looking through TypeAliases and enums.
+   */
+  ResolvedInfo resolve_type_name(SString name) const;
+
+  /*
+   * Try to resolve name in the given context. Follows TypeAliases.
+   */
+  folly::Optional<Type> resolve_class_or_type_alias(
+    const Context& ctx, SString name, const Type& candidate) const;
 
   /*
    * Resolve a closure class.
@@ -487,14 +524,21 @@ struct Index {
    * For some non-soft constraints (such as "Stringish"), this
    * function may return a Type that is a strict supertype of the
    * constraint's type.
+   *
+   * If something is known about the type of the object against which
+   * the constraint will be checked, it can be passed in to help
+   * disambiguate certain constraints (useful because we don't support
+   * arbitrary unions, or intersection).
    */
-  Type lookup_constraint(Context, const TypeConstraint&) const;
+  Type lookup_constraint(Context, const TypeConstraint&,
+                         const Type& t = TTop) const;
 
   /*
    * If this function returns true, it is safe to assume that Type t
    * will always satisfy TypeConstraint tc at run time.
    */
-  bool satisfies_constraint(Context, Type t, const TypeConstraint& tc) const;
+  bool satisfies_constraint(Context, const Type& t,
+                            const TypeConstraint& tc) const;
 
   /*
    * Lookup what the best known Type for a class constant would be,
@@ -730,7 +774,14 @@ private:
                             borrowed_ptr<const php::Class>) const;
   bool could_be_related(borrowed_ptr<const php::Class>,
                         borrowed_ptr<const php::Class>) const;
-  Type satisfies_constraint_helper(Context, const TypeConstraint&) const;
+
+  template<bool getSuperType>
+  Type get_type_for_constraint(Context,
+                               const TypeConstraint&,
+                               const Type&) const;
+  folly::Optional<Type> get_type_for_annotated_type(
+    Context ctx, AnnotType annot, bool nullable,
+    SString name, const Type& candidate) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

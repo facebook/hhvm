@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
@@ -573,7 +574,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
      * We're responsible for freeing the return value if we exit with an
      * exception.  See irgen-ret.
      */
-    tvRefcountedDecRef(retval);
+    tvDecRefGen(retval);
     throw;
   }
 }

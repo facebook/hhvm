@@ -32,7 +32,15 @@ inline bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
 }
 
 inline bool hasEdges(Opcode opcode) {
-  return opcodeHasFlags(opcode, Branch | MayRaiseError);
+  if (opcodeHasFlags(opcode, Branch | MayRaiseError)) {
+    // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
+    // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
+    // aren't.
+    return
+      (opcode != AKExistsArr && opcode != ArrayIdx && opcode != ArrayIsset) ||
+      RuntimeOption::EvalHackArrCompatNotices;
+  }
+  return false;
 }
 
 inline bool opHasExtraData(Opcode op) {

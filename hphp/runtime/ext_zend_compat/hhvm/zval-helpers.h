@@ -19,6 +19,8 @@
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 namespace HPHP {
 
 // Assumes 'tv' is dead
@@ -33,10 +35,9 @@ inline void tvWriteZval(zval* pref, TypedValue* tv) {
 // Assumes 'tv' is live
 inline void tvSetZval(zval* pref, TypedValue* tv) {
   assert(tvIsPlausible(*tv));
-  auto const oldType = tv->m_type;
-  auto const oldDatum = tv->m_data.num;
+  auto const oldTV = *tv;
   tvWriteZval(pref, tv);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldTV);
 }
 
 }

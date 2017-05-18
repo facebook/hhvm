@@ -72,8 +72,49 @@ let go genv content from to_ =
   then go_hackfmt genv content from to_
   else go_hh_format genv content from to_
 
-let go_ide genv content range =
+(* Our formatting engine can only handle ranges that span entire rows.  *)
+(* This is signified by a range that starts at column 1 on one row,     *)
+(* and ends at column 1 on another (because it's half-open).            *)
+(* Nuclide always provides correct ranges, but other editors might not. *)
+let expand_range_to_whole_rows content range =
   let open Ide_api_types in
-  let from, to_ = File_content.get_offsets content (range.st, range.ed) in
+  let open File_content in
+  (* It's easy to expand the start of the range if necessary, but to expand *)
+  (* the end of the range requres more work... *)
+  let range = {range with st = {range.st with column = 1}} in
+  let from0, to0 = get_offsets content (range.st, range.ed) in
+  if range.ed.column = 1 || to0 = String.length content then
+    (range, from0, to0)  (* common case is performant. *)
+  else
+    (* First guess: we'll extend range.ed to the end of the line. *)
+    let ed = {line = range.ed.line + 1; column = 1} in
+    (* But if this is longer than the length of the file, pull back. *)
+    let ed_file = offset_to_position content (String.length content) in
+    let ed =
+      if ed.line < ed_file.line ||
+        (ed.line = ed_file.line && ed.column <= ed_file.column)
+      then ed
+      else ed_file in
+    let range = {range with ed} in
+    let from0, to0 = get_offsets content (range.st, range.ed) in
+    (range, from0, to0)
+
+let go_ide genv content range_opt =
+  let open Ide_api_types in
+  let open ServerFormatTypes in
+  let open File_content in
+  let range, from0, to0 = match range_opt with
+    | None ->
+        let from0 = 0 in
+        let to0 = String.length content in
+        let ed = offset_to_position content to0 in
+        let range = {st = {line = 1; column = 1;}; ed;} in
+        (range, from0, to0)
+    | Some range ->
+        expand_range_to_whole_rows content range
+  in
   (* get_offsets returns 0-based offsets, but we need 1-based. *)
-  go genv content (from + 1) (to_ + 1)
+  let result = go genv content (from0 + 1) (to0 + 1) in
+  match result with
+    | Result.Ok new_text -> Result.Ok {new_text; range;}
+    | Result.Error e -> Result.Error e

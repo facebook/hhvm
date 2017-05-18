@@ -629,12 +629,14 @@ void emit_eh_region(FuncEmitter& fe,
     [&] (const php::CatchRegion& cr) {
       eh.m_type = EHEnt::Type::Catch;
       eh.m_handler = blockInfo[cr.catchEntry].offset;
+      eh.m_end = kInvalidOffset;
       eh.m_iterId = cr.iterId;
       eh.m_itRef = cr.itRef;
     },
     [&] (const php::FaultRegion& fr) {
       eh.m_type = EHEnt::Type::Fault;
       eh.m_handler = blockInfo[fr.faultEntry].offset;
+      eh.m_end = kInvalidOffset;
       eh.m_iterId = fr.iterId;
       eh.m_itRef = fr.itRef;
     }
@@ -698,7 +700,7 @@ void emit_ehent_tree(FuncEmitter& fe,
       ? nullptr
       : borrow(exnMap[activeList.back()].back());
     exnMap[p].push_back(
-      folly::make_unique<EHRegion>(
+      std::make_unique<EHRegion>(
         EHRegion { p, parent, start, kInvalidOffset }
       )
     );
@@ -806,11 +808,15 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
   case T::Null:
   case T::Cell:
   case T::Ref:
   case T::InitUnc:
   case T::Unc:
+  case T::UncArrKey:
+  case T::ArrKey:
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
@@ -1086,7 +1092,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   auto const is_systemlib = is_systemlib_part(unit);
   Trace::Bump bumper{Trace::hhbbc_emit, kSystemLibBump, is_systemlib};
 
-  auto ue = folly::make_unique<UnitEmitter>(unit.md5);
+  auto ue = std::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_preloadPriority = unit.preloadPriority;

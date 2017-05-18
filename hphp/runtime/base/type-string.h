@@ -206,7 +206,7 @@ public:
     return *this;
   }
   const String& shrink(size_t len) {
-    assert(m_str);
+    assert(m_str && !m_str->isImmutable());
     if (m_str->capacity() - len > kMinShrinkThreshold) {
       m_str = req::ptr<StringData>::attach(m_str->shrinkImpl(len));
     } else {

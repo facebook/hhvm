@@ -113,7 +113,7 @@ let handle_connection_ genv env client =
   let open ServerCommandTypes in
   try
     match ClientProvider.read_connection_type client with
-    | Persistent ->
+    | Persistent_hard ->
       let env = match env.persistent_client with
         | Some old_client ->
           ClientProvider.send_push_message_to_client old_client
@@ -123,13 +123,24 @@ let handle_connection_ genv env client =
       in
       ClientProvider.send_response_to_client client Connected;
       { env with persistent_client =
-          Some (ClientProvider.make_persistent client)}
+          Some (ClientProvider.make_persistent client)}, false
+    | Persistent_soft ->
+      if Option.is_some env.persistent_client then begin
+        ClientProvider.send_response_to_client
+          client Denied_due_to_existing_persistent_connection;
+        ClientProvider.shutdown_client client;
+        env, false
+      end else begin
+        ClientProvider.send_response_to_client client Connected;
+        { env with persistent_client =
+            Some (ClientProvider.make_persistent client)}, false
+      end
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
   | ClientProvider.Client_went_away | Read_command_timeout ->
     ClientProvider.shutdown_client client;
-    env
+    env, false
   (** Connection dropped off. Its unforunate that we don't actually know
    * which connection went bad (could be any write to any connection to
    * child processes/daemons), we just assume at this top-level that
@@ -141,7 +152,7 @@ let handle_connection_ genv env client =
   | Sys_error("Connection reset by peer") ->
     Hh_logger.log "Client channel went bad. Shutting down client connection";
     ClientProvider.shutdown_client client;
-    env
+    env, false
   | e ->
     HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
@@ -149,10 +160,11 @@ let handle_connection_ genv env client =
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
-    env
+    env, false
 
 let handle_persistent_connection_ genv env client =
    try
+    let env = { env with ide_idle = false; } in
      ServerCommand.handle genv env client
    with
    (** TODO: Make sure the pipe exception is really about this client. *)
@@ -161,17 +173,17 @@ let handle_persistent_connection_ genv env client =
    | Sys_error("Broken pipe")
    | ServerCommandTypes.Read_command_timeout
    | ServerClientProvider.Client_went_away ->
-     shutdown_persistent_client env client
+     shutdown_persistent_client env client, false
    | e ->
      let msg = Printexc.to_string e in
      EventLogger.master_exception e;
      Printf.fprintf stderr "Error: %s\n%!" msg;
      Printexc.print_backtrace stderr;
-     shutdown_persistent_client env client
+     shutdown_persistent_client env client, false
 
-let handle_connection genv env client is_persistent =
+let handle_connection genv env client is_from_existing_persistent_client =
   ServerIdle.stamp_connection ();
-  match is_persistent with
+  match is_from_existing_persistent_client with
     | true -> handle_persistent_connection_ genv env client
     | false -> handle_connection_ genv env client
 
@@ -188,7 +200,8 @@ let recheck genv old_env check_kind =
  * right after one rechecking round finishes to be part of the same
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
-let rec recheck_loop acc genv env new_client has_persistent_connection_request =
+let rec recheck_loop ~force_flush
+acc genv env new_client has_persistent_connection_request =
   let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
   (** When a new client connects, we use the synchronous notifier.
@@ -198,18 +211,19 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
    * NB: This also uses synchronous notify on establishing a persistent
    * connection. This is harmless, but could maybe be filtered away. *)
   let env, raw_updates =
-    match new_client, has_persistent_connection_request with
-    | Some _, false -> begin
+    match force_flush, new_client, has_persistent_connection_request with
+    | true, _, _
+    | _, Some _, false -> begin
       env, try Notifier_synchronous_changes (genv.notifier ()) with
       | Watchman.Timeout -> Notifier_unavailable
       end
-    | None, false when t -. env.last_notifier_check_time > 0.5 ->
+    | _, None, false when t -. env.last_notifier_check_time > 0.5 ->
       { env with last_notifier_check_time = t; }, genv.notifier_async ()
       (* Do not process any disk changes when there are pending persistent
        * client requests - some of them might be edits, and we don't want to
        * do analysis on mid-edit state of the world *)
-    | _, true
-    | None , _->
+    | _, _, true
+    | _, None , _->
       env, Notifier_async_changes SSet.empty
   in
   let genv, acc, raw_updates = match raw_updates with
@@ -229,7 +243,9 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   let updates = Program.process_updates genv env raw_updates in
 
   let is_idle = (not has_persistent_connection_request) &&
-    t -. env.last_command_time > 0.1 in
+     (* "average person types [...] between 190 and 200 characters per minute"
+      * 60/200 = 0.3 *)
+     t -. env.last_command_time > 0.3 in
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
@@ -254,22 +270,37 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
-    recheck_loop acc genv env new_client has_persistent_connection_request
+    (* Avoid batching ide rechecks with disk rechecks - there might be
+      * other ide edits to process first and we want to give the main loop
+      * a chance to process them first. *)
+    if ide_recheck then acc, env else
+      recheck_loop ~force_flush:false
+        acc genv env new_client has_persistent_connection_request
   end
 
-let recheck_loop genv env client has_persistent_connection_request =
-  let stats, env = recheck_loop empty_recheck_loop_stats genv env client
-    has_persistent_connection_request in
-  { env with recent_recheck_loop_stats = stats }
+let recheck_loop ~force_flush
+  genv env client has_persistent_connection_request =
+    let stats, env = recheck_loop ~force_flush
+      empty_recheck_loop_stats genv env client
+      has_persistent_connection_request in
+    { env with recent_recheck_loop_stats = stats }
 
 let new_serve_iteration_id () =
   Random_id.short_string ()
 
-let serve_one_iteration genv env client_provider =
+let serve_one_iteration ~force_flush genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
   let client, has_persistent_connection_request =
-    ClientProvider.sleep_and_check client_provider env.persistent_client in
+    ClientProvider.sleep_and_check
+      client_provider
+      env.persistent_client
+      ~ide_idle:env.ide_idle
+  in
+  (* client here is "None" if we should either handle from our existing  *)
+  (* persistent client (i.e. has_persistent_connection_request), or if   *)
+  (* there's nothing to handle. It's "Some ..." if we should handle from *)
+  (* a new client.                                                       *)
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
   let env = if not has_persistent_connection_request &&
     client = None && not has_parsing_hook
@@ -293,7 +324,8 @@ let serve_one_iteration genv env client_provider =
   end else env in
   let start_t = Unix.gettimeofday () in
   HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
-  let env = recheck_loop genv env client has_persistent_connection_request in
+  let env = recheck_loop ~force_flush genv env client
+    has_persistent_connection_request in
   let stats = env.recent_recheck_loop_stats in
   if stats.rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t has_parsing_hook
@@ -307,13 +339,18 @@ let serve_one_iteration genv env client_provider =
       ~default:env
       ~f:begin fun sub ->
 
-    let sub, errors =
-      Diagnostic_subscription.pop_errors sub env.editor_open_files in
+    let client = Utils.unsafe_opt env.persistent_client in
+    (* We possibly just did a lot of work. Check the client again to see
+     * that we are still idle before proceeding to send diagnostics *)
+    if ClientProvider.client_has_message client then env else
+    (* We processed some edits but didn't recheck them yet. *)
+    if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then env else
+
+    let sub, errors = Diagnostic_subscription.pop_errors sub in
 
     if not @@ SMap.is_empty errors then begin
       let id = Diagnostic_subscription.get_id sub in
       let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
-      let client = Utils.unsafe_opt env.persistent_client in
       try
         ClientProvider.send_push_message_to_client client res
       with ClientProvider.Client_went_away ->
@@ -323,38 +360,46 @@ let serve_one_iteration genv env client_provider =
     { env with diag_subscribe = Some sub }
   end in
 
-  let env = match client with
-  | None -> env
+  let env, needs_flush = match client with
+  | None -> env, false
   | Some client -> begin
     try
-      let env = handle_connection genv env client false in
+      (* client here is the new client (not the existing persistent client) *)
+      (* whose request we're going to handle.                               *)
+      let env, needs_flush = handle_connection genv env client false in
       HackEventLogger.handled_connection start_t;
-      env
+      env, needs_flush
     with
     | e ->
       HackEventLogger.handle_connection_exception e;
       Hh_logger.log "Handling client failed. Ignoring.";
-      env
+      env, false
   end in
   if has_persistent_connection_request then
     let client = Utils.unsafe_opt env.persistent_client in
+    (* client here is the existing persistent client *)
+    (* whose request we're going to handle.          *)
     HackEventLogger.got_persistent_client_channels start_t;
     (try
-      let env = handle_connection genv env client true in
+      let env, needs_flush_2 = handle_connection genv env client true in
       HackEventLogger.handled_persistent_connection start_t;
-      env
+      env, needs_flush || needs_flush_2
     with
     | e ->
       HackEventLogger.handle_persistent_connection_exception e;
       Hh_logger.log "Handling persistent client failed. Ignoring.";
-      env)
-  else env
+      env, needs_flush)
+  else env, needs_flush
 
 let serve genv env in_fd _ =
   let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
   let env = ref env in
+  let force_flush = ref false in
   while true do
-    env := serve_one_iteration genv !env client_provider;
+    let new_env, needs_flush = serve_one_iteration ~force_flush:(!force_flush)
+      genv !env client_provider in
+    env := new_env;
+    force_flush := needs_flush;
   done
 
 let program_init genv =
@@ -411,9 +456,11 @@ let program_init genv =
   HackEventLogger.init_really_end init_type;
   env
 
-let setup_server options handle =
+let setup_server ~informant_managed options handle =
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
+  let (>>|) = Option.(>>|) in
+  ignore ((Sys_utils.get_env "HOSTNAME") >>| (Hh_logger.log "Hostname: %s"));
   let root = ServerArgs.root options in
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
@@ -439,6 +486,7 @@ let setup_server options handle =
   else HackEventLogger.init
     root
     init_id
+    informant_managed
     (Unix.gettimeofday ())
     lazy_parse
     lazy_init
@@ -463,7 +511,7 @@ let setup_server options handle =
   ServerEnvBuild.make_genv options config local_config handle, init_id
 
 let run_once options handle =
-  let genv, _ = setup_server options handle in
+  let genv, _ = setup_server ~informant_managed:false options handle in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -477,7 +525,7 @@ let run_once options handle =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main_exn options (ic, oc) =
+let daemon_main_exn ~informant_managed options (ic, oc) =
   Printexc.record_backtrace true;
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
@@ -485,14 +533,14 @@ let daemon_main_exn options (ic, oc) =
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
 
-  let genv, init_id = setup_server options handle in
+  let genv, init_id = setup_server ~informant_managed options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
   let env = MainInit.go genv options init_id (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
-let daemon_main (state, options) (ic, oc) =
+let daemon_main (informant_managed, state, options) (ic, oc) =
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
   (* Restore hhi files every time the server restarts
@@ -500,7 +548,7 @@ let daemon_main (state, options) (ic, oc) =
   ignore (Hhi.get_hhi_root());
 
   ServerUtils.with_exit_on_exception @@ fun () ->
-  daemon_main_exn options (ic, oc)
+  daemon_main_exn ~informant_managed options (ic, oc)
 
 
 let entry =

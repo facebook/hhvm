@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/bloom-filter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
@@ -33,7 +34,6 @@
 #include <vector>
 #include <folly/Range.h>
 #include <folly/portability/Unistd.h>
-#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 TRACE_SET_MOD(gc);
@@ -62,6 +62,8 @@ struct Marker {
   // mark ambiguous pointers in the range [start,start+len)
   void conservativeScan(const void* start, size_t len);
 
+  static bool marked(const HeapObject* h) { return h->marks() & GCBits::Mark; }
+  static bool marked(const Header* h) { return marked(&h->hdr_); }
   bool mark(const void*, GCBits = GCBits::Mark);
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
@@ -76,22 +78,15 @@ struct Marker {
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
 
-  // Whether the object with the given type-index should be recorded as an
-  // "unknown" object.
-  bool typeIndexIsUnknown(type_scan::Index tyindex) const {
-    return type_scan::hasNonConservative() &&
-      tyindex == type_scan::kIndexUnknown;
-  }
-
-  Counter allocd_, marked_, pinned_, freed_, unknown_; // bytes
+  Counter allocd_, marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
-  size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
+  size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
   size_t max_worklist_{0}; // max size of work_
+  size_t freed_bytes_{0};
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
-  std::vector<const Header*> unknown_objects_; // objs w/ unknown typescan id
 };
 
 // mark the object at p, return true if first time.
@@ -156,10 +151,13 @@ DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
 }
 
 void Marker::checkedEnqueue(const void* p, GCBits bits) {
-  if (auto h = ptrs_.header(p)) {
+  if (auto r = ptrs_.region(p)) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
     // we'll skip it when we process the queue.
+    auto h = r->first;
     if (mark(h, bits)) {
+      marked_ += r->second;
+      pinned_ += bits == GCBits::Pin ? r->second : 0;
       enqueue(h);
       assert(checkEnqueuedKind(h));
     }
@@ -184,35 +182,44 @@ Marker::conservativeScan(const void* start, size_t len) {
   }
 }
 
-inline int64_t cpu_micros() {
-  return HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
+inline int64_t cpu_ns() {
+  return HPHP::Timer::GetThreadCPUTimeNanos();
 }
+
+/*
+ * If we have non-conservative scanners, we must treat all unknown
+ * type-index allocations in the heap as roots. Why? The generated
+ * scanners will only report a pointer if it knows the pointer can point
+ * to an object on the request heap. It does this by tracking all types
+ * which are allocated via the allocation functions via the type-index
+ * mechanism. If an allocation has an unknown type-index, then by definition
+ * we don't know which type it contains, and therefore the auto generated
+ * scanners will never report a pointer to such a type.
+ *
+ * The only good way to solve this is to treat such allocations as roots
+ * and conservative scan them. If we're conservative scanning everything,
+ * we need to take no special action, as the above problem only applies to
+ * auto generated scanners.
+ */
 
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Marker::init() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { init_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
   MM().initFree();
-  initfree_us_ = cpu_micros() - t0;
-  auto tyindex_max = type_scan::Index(
-      type_scan::detail::g_metadata_table_size
-  );
+  initfree_ns_ = cpu_ns() - t0;
   MM().iterate([&](Header* h, size_t allocSize) {
     auto kind = h->kind();
-    if (kind == HeaderKind::Free) return;
+    if (kind == HeaderKind::Free) return; // continue
     h->hdr_.clearMarks();
     allocd_ += allocSize;
     ptrs_.insert(h, allocSize);
-    if (type_scan::hasNonConservative()) {
-      auto tyindex = kind == HeaderKind::Resource ? h->res_.typeIndex() :
-                     kind == HeaderKind::NativeData ? h->native_.typeIndex() :
-                     kind == HeaderKind::SmallMalloc ? h->malloc_.typeIndex() :
-                     kind == HeaderKind::BigMalloc ? h->malloc_.typeIndex() :
-                     tyindex_max;
-      if (tyindex == type_scan::kIndexUnknown) {
-        unknown_objects_.emplace_back(h);
-        unknown_ += allocSize;
-      }
+    if ((kind == HeaderKind::SmallMalloc || kind == HeaderKind::BigMalloc) &&
+        !type_scan::isKnownType(h->malloc_.typeIndex())) {
+      // unknown type for a req::malloc'd block. See rationale above.
+      unknown_ += allocSize;
+      h->hdr_.mark(GCBits::Pin);
+      enqueue(h);
     }
   });
   ptrs_.prepare();
@@ -236,8 +243,8 @@ void Marker::finish_typescan() {
 }
 
 NEVER_INLINE void Marker::traceRoots() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { roots_ns_ = cpu_ns() - t0; };
   iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
     type_scanner_.scanByIndex(tyindex, p, size);
     finish_typescan();
@@ -247,227 +254,54 @@ NEVER_INLINE void Marker::traceRoots() {
 }
 
 NEVER_INLINE void Marker::trace() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { mark_us_ = cpu_micros() - t0; };
-  const auto process_worklist = [this](){
-    while (!work_.empty()) {
-      auto h = work_.back();
-      work_.pop_back();
-      scanHeader(h, type_scanner_);
-      finish_typescan();
-    }
-  };
-
-  process_worklist();
-
-  /*
-   * If the type-scanners has non-conservative scanners, we must treat all
-   * unknown type-index allocations in the heap as roots. Why? The auto
-   * generated scanners will only report a pointer if it knows the pointer can
-   * point to an object on the request heap. It does this by tracking all types
-   * which are allocated via the allocation functions via the type-index
-   * mechanism. If an allocation has an unknown type-index, then by definition
-   * we don't know which type it contains, and therefore the auto generated
-   * scanners will never report a pointer to such a type. So, if there's a
-   * countable object which is only reachable via one of these unknown
-   * type-index allocations, we'll garbage collect that countable object even if
-   * the unknown type-index allocation is reachable. The only good way to solve
-   * this is to treat such allocations as roots and always conservative scan
-   * them. If we're conservative scanning everything, we need to take no special
-   * action, as the above problem only applies to auto generated scanners.
-   *
-   * Do this after draining the worklist, as we want to prefer discovering
-   * things via non-conservative means.
-   */
-  if (!unknown_objects_.empty()) {
-    auto const t0 = cpu_micros();
-    SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
-    for (const auto h : unknown_objects_) {
-      if (mark(h, GCBits::Pin)) {
-        enqueue(h);
-      }
-    }
-    process_worklist();
-  } else {
-    unknown_us_ = 0;
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { mark_ns_ = cpu_ns() - t0; };
+  while (!work_.empty()) {
+    auto h = work_.back();
+    work_.pop_back();
+    scanHeader(h, type_scanner_);
+    finish_typescan();
   }
-}
-
-// check that headers have a "sensible" state during sweeping.
-DEBUG_ONLY bool check_sweep_header(const Header* h) {
-  switch (h->kind()) {
-    case HeaderKind::Packed:
-    case HeaderKind::Mixed:
-    case HeaderKind::Dict:
-    case HeaderKind::Empty:
-    case HeaderKind::VecArray:
-    case HeaderKind::Keyset:
-    case HeaderKind::Apc:
-    case HeaderKind::Globals:
-    case HeaderKind::Proxy:
-    case HeaderKind::String:
-    case HeaderKind::Resource:
-    case HeaderKind::Ref:
-      // ordinary counted objects
-      break;
-    case HeaderKind::Object:
-    case HeaderKind::Vector:
-    case HeaderKind::Map:
-    case HeaderKind::Set:
-    case HeaderKind::Pair:
-    case HeaderKind::ImmVector:
-    case HeaderKind::ImmMap:
-    case HeaderKind::ImmSet:
-    case HeaderKind::WaitHandle:
-    case HeaderKind::AwaitAllWH:
-      // objects; should not have native-data
-      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
-      break;
-    case HeaderKind::AsyncFuncFrame:
-    case HeaderKind::NativeData:
-    case HeaderKind::ClosureHdr:
-      // not counted but marked when embedded object is marked
-      break;
-    case HeaderKind::SmallMalloc:
-    case HeaderKind::BigMalloc:
-      // not counted but can be marked.
-      break;
-    case HeaderKind::Free:
-      // free memory; these should not be marked.
-      assert(!(h->hdr_.marks() & GCBits::Mark));
-      break;
-    case HeaderKind::AsyncFuncWH:
-    case HeaderKind::Closure:
-    case HeaderKind::BigObj:
-    case HeaderKind::Hole:
-      // These should never be encountered because they don't represent
-      // independent allocations.
-      assert(false && "invalid header kind");
-      break;
-  }
-  return true;
 }
 
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Marker::sweep() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { sweep_us_ = cpu_micros() - t0; };
   auto& mm = MM();
-  const bool use_quarantine = RuntimeOption::EvalQuarantine;
-  if (use_quarantine) mm.beginQuarantine();
-  SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
-  std::deque<std::pair<Header*,size_t>> defer;
+  auto const t0 = cpu_ns();
+  auto const usage0 = mm.currentUsage();
+  if (RuntimeOption::EvalQuarantine) mm.beginQuarantine();
+  SCOPE_EXIT {
+    if (RuntimeOption::EvalQuarantine) mm.endQuarantine();
+    freed_bytes_ = usage0 - mm.currentUsage();
+    sweep_ns_ = cpu_ns() - t0;
+    assert(freed_bytes_ >= 0);
+  };
+
+  g_context->sweepDynPropTable([&](const ObjectData* obj) {
+    auto h = ptrs_.header(obj);
+    return !h || !marked(h);
+  });
+
+  mm.sweepApcArrays([&](APCLocalArray* a) {
+    return !marked(a);
+  });
+
+  mm.sweepApcStrings([&](StringData* s) {
+    return !marked(s);
+  });
+
+  mm.initFree();
+
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
-    assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks() & GCBits::Mark) {
-      marked_ += h_size;
-      if (hdr->hdr_.marks() == GCBits::Pin) pinned_ += h_size;
-      return; // continue iterate loop
-    }
-    // when freeing objects below, do not run their destructors! we don't
-    // want to execute cascading decrefs or anything. the normal release()
-    // methods of refcounted classes aren't usable because they run dtors.
-    auto h = const_cast<Header*>(hdr);
-    switch (h->kind()) {
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
-      case HeaderKind::Keyset:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::Resource:
-      case HeaderKind::Ref:
-        freed_ += h_size;
-        mm.objFree(h, h_size);
-        break;
-      case HeaderKind::Object:
-      case HeaderKind::WaitHandle:
-      case HeaderKind::AwaitAllWH:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-      case HeaderKind::AsyncFuncFrame:
-      case HeaderKind::ClosureHdr:
-      case HeaderKind::NativeData: {
-        auto obj = h->obj();
-        if (obj->getAttribute(ObjectData::HasDynPropArr)) {
-          defer.push_back({h, h_size});
-        } else {
-          freed_ += h_size;
-          mm.objFree(h, h_size);
-        }
-        break;
-      }
-      case HeaderKind::Apc:
-        defer.push_back({h, h_size});
-        break;
-      case HeaderKind::String:
-        freed_ += h_size;
-        h->str_.release(); // also maybe atomic-dec APCString
-        break;
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-        // Don't free malloc-ed allocations even if they're not reachable.
-        // NativeData types might leak these
-        break;
-      case HeaderKind::Free:
-        // should not be in ptrmap; fall through to assert
-      case HeaderKind::Hole:
-      case HeaderKind::BigObj:
-      case HeaderKind::AsyncFuncWH:
-      case HeaderKind::Closure:
-        assert(false && "skipped by forEachHeader()");
-        break;
+    if (!marked(hdr) &&
+        hdr->kind() != HeaderKind::Free &&
+        hdr->kind() != HeaderKind::SmallMalloc &&
+        hdr->kind() != HeaderKind::BigMalloc) {
+      mm.objFree(const_cast<Header*>(hdr), h_size);
     }
   });
-  // deferred items explicitly free auxilary blocks, so it's unsafe to
-  // sweep them while iterating over ptrs_.
-  for (auto& e : defer) {
-    auto h = e.first;
-    auto h_size = e.second;
-    freed_ += h_size;
-    if (isObjectKind(h->kind()) || h->kind() == HeaderKind::NativeData ||
-        h->kind() == HeaderKind::AsyncFuncFrame) {
-      assert(h->obj()->getAttribute(ObjectData::HasDynPropArr));
-      auto obj = h->obj();
-      // dynPropTable is a req::hash_map, so this will req::free junk
-      g_context->dynPropTable.erase(obj);
-      mm.objFree(h, h_size);
-    } else if (h->kind() == HeaderKind::Apc) {
-      h->apc_.reap(); // also frees localCache and atomic-dec APCArray
-    } else {
-      always_assert(false && "what other kinds need deferral?");
-    }
-  }
 }
-
-template<size_t NBITS> struct BloomFilter {
-  BloomFilter() : bits_{NBITS} {}
-  using T = const void*;
-  static size_t h1(size_t h) { return h % NBITS; }
-  static size_t h2(size_t h) { return (h / NBITS) % NBITS; }
-  void insert(T x) {
-    auto h = hash_int64(intptr_t(x));
-    bits_.set(h1(h)).set(h2(h));
-  }
-  bool test(T x) const {
-    auto h = hash_int64(intptr_t(x));
-    return bits_.test(h1(h)) & bits_.test(h2(h));
-  }
-  void clear() {
-    bits_.reset();
-    static_assert(NBITS < (1LL << 32), "");
-  }
-private:
-  boost::dynamic_bitset<> bits_;
-};
 
 thread_local bool t_eager_gc{false};
 thread_local BloomFilter<256*1024> t_surprise_filter;
@@ -508,12 +342,12 @@ void logCollection(const char* phase, const Marker& mkr) {
       t_req_age,
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
-      mkr.init_us_/1000,
-      mkr.mark_us_/1000,
+      mkr.init_ns_/1000000,
+      mkr.mark_ns_/1000000,
       mkr.allocd_.bytes/1024/1024,
       100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
       100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
-      mkr.freed_.bytes/1024.0/1024.0,
+      mkr.freed_bytes_/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
     );
@@ -525,12 +359,11 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("gc_num", t_gc_num);
   sample.setInt("req_age_micros", t_req_age);
   // timers of gc-sub phases
-  sample.setInt("init_micros", mkr.init_us_);
-  sample.setInt("initfree_micros", mkr.initfree_us_);
-  sample.setInt("roots_micros", mkr.roots_us_);
-  sample.setInt("mark_micros", mkr.mark_us_); // includes unknown
-  sample.setInt("unknown_micros", mkr.unknown_us_);
-  sample.setInt("sweep_micros", mkr.sweep_us_);
+  sample.setInt("init_micros", mkr.init_ns_/1000);
+  sample.setInt("initfree_micros", mkr.initfree_ns_/1000);
+  sample.setInt("roots_micros", mkr.roots_ns_/1000);
+  sample.setInt("mark_micros", mkr.mark_ns_/1000);
+  sample.setInt("sweep_micros", mkr.sweep_ns_/1000);
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);
   sample.setInt("allocd_objects", mkr.allocd_.count);
@@ -538,7 +371,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("marked_bytes", mkr.marked_.bytes);
   sample.setInt("pinned_bytes", mkr.pinned_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);
-  sample.setInt("freed_bytes", mkr.freed_.bytes);
+  sample.setInt("freed_bytes", mkr.freed_bytes_);
   sample.setInt("trigger_bytes", t_trigger);
   sample.setInt("cscanned_roots", mkr.cscanned_roots_.bytes);
   sample.setInt("xscanned_roots", mkr.xscanned_roots_.bytes);
@@ -622,7 +455,7 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
-  t_req_age = cpu_micros() - m_req_start_micros;
+  t_req_age = cpu_ns()/1000 - m_req_start_micros;
   t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();

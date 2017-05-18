@@ -37,7 +37,7 @@ void findFixups(TCA start, TCA end, CGMeta& fixups) {
   not_implemented();
 }
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
-                TCA*) {
+                TCA*, AreaIndex) {
   not_implemented();
   return 0;
 }

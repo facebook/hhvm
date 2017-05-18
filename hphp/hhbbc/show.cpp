@@ -519,6 +519,11 @@ std::string show(const Type& t) {
   case BOptKeysetN:  ret = "?KeysetN"; break;
   case BOptKeyset:   ret = "?Keyset";  break;
 
+  case BUncArrKey:    ret = "UncArrKey";  break;
+  case BArrKey:       ret = "ArrKey";     break;
+  case BOptUncArrKey: ret = "?UncArrKey"; break;
+  case BOptArrKey:    ret = "?ArrKey";    break;
+
   case BInitPrim:    ret = "InitPrim"; break;
   case BPrim:        ret = "Prim";     break;
   case BInitUnc:     ret = "InitUnc";  break;

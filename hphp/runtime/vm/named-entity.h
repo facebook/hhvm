@@ -40,11 +40,12 @@ struct String;
 
 /*
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
- * used as magic values.
+ * used as magic values. Optimized for comparisons between static strings.
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return int64_t(s1) > 0 && s1->isame(s2);
+    assert(int64_t(s2) > 0);  // RHS is never a magic value.
+    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
 
@@ -158,6 +159,21 @@ struct NamedEntity {
   void pushClass(Class* cls);
   void removeClass(Class* goner);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Unique func.
+
+  /*
+   * Return the unique func corresponding to this name, or nullptr if there is
+   * none registered.
+   */
+  Func* uniqueFunc() const;
+
+  /*
+   * Register the unique func corresponding to this name.
+   *
+   * Precondition: func->isUnique()
+   */
+  void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
@@ -200,6 +216,8 @@ public:
 private:
   AtomicLowPtr<Class, std::memory_order_acquire,
                std::memory_order_release> m_clsList{nullptr};
+  AtomicLowPtr<Func, std::memory_order_acquire,
+               std::memory_order_release> m_uniqueFunc{nullptr};
 };
 
 /*

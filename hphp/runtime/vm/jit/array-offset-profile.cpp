@@ -110,9 +110,11 @@ void ArrayOffsetProfile::update(const ArrayData* ad,
       auto const a = MixedArray::asMixed(ad);
 
       int64_t i;
-      return checkForInt && ad->convertKey(sd, i)
-        ? a->find(i, hash_int64(i))
-        : a->find(sd, sd->hash());
+      if (checkForInt && ad->convertKey(sd, i, false)) {
+        return !RuntimeOption::EvalHackArrCompatNotices ?
+          a->find(i, hash_int64(i)) : -1;
+      }
+      return a->find(sd, sd->hash());
     } else if (ad->isKeyset()) {
       return SetArray::asSet(ad)->find(sd, sd->hash());
     } else {

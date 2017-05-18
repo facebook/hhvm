@@ -27,7 +27,10 @@
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/zend-functions.h"
 
@@ -39,13 +42,16 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -97,7 +103,7 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }
-  tvRefcountedDecRef(value);
+  tvDecRefGen(value);
   return r;
 }
 
@@ -114,10 +120,11 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
+template <bool intishWarn>
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
@@ -128,16 +135,25 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;
-  ArrayData* retval = UNLIKELY(ad->convertKey(key, intkey)) ?
-                  ad->set(intkey, tvAsCVarRef(&value), copy) :
-                  ad->set(key, tvAsCVarRef(&value), copy);
+  ArrayData* retval;
+  if (UNLIKELY(key->isStrictlyInteger(intkey))) {
+    if (intishWarn) raise_intish_index_cast();
+    retval = ad->set(intkey, *tvToCell(&value), copy);
+  } else {
+    retval = ad->set(key, *tvToCell(&value), copy);
+  }
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   decRefStr(key);
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
+
+template ArrayData*
+addElemStringKeyHelper<true>(ArrayData*, StringData*, TypedValue);
+template ArrayData*
+addElemStringKeyHelper<false>(ArrayData*, StringData*, TypedValue);
 
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
                                    int64_t key,
@@ -150,7 +166,7 @@ ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
 }
 
@@ -166,7 +182,7 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   decRefStr(key);
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
 }
 
@@ -392,7 +408,7 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   if (obj->instanceof(SystemLib::s_IteratorClass)) {
     auto arr = Array::CreateKeyset();
     for (ArrayIter iter(obj); iter; ++iter) {
-      arr.append(iter.first());
+      arr.append(iter.second());
     }
     decRefObj(obj);
     return arr.detach();
@@ -420,7 +436,7 @@ int64_t convResToDblHelper(const ResourceHdr* r) {
 }
 
 int64_t convCellToDblHelper(TypedValue tv) {
-  return reinterpretDblAsInt(tvCastToDouble(&tv));
+  return reinterpretDblAsInt(tvCastToDouble(tv));
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {
@@ -728,20 +744,49 @@ ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   return UNLIKELY(tv == nullptr) ? def : *tv;
 }
+
+template <bool intishWarn>
+NEVER_INLINE
+TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  int64_t i;
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return getDefaultIfNullCell(a->nvGet(i), def);
+  } else {
+    return getDefaultIfNullCell(a->nvGet(key), def);
+  }
 }
 
-TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+NEVER_INLINE
+TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
+}
+
+TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
+  return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+}
+
+template <bool intishWarn>
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow<intishWarn>(a, key, def);
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
-         getDefaultIfNullCell(a->nvGet(key), def);
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return getDefaultIfNullCell(MixedArray::NvGetInt(a, i), def);
+  } else {
+    return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+  }
 }
+
+template TypedValue arrayIdxSi<false>(ArrayData*, StringData*, TypedValue);
+template TypedValue arrayIdxSi<true>(ArrayData*, StringData*, TypedValue);
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArray());
@@ -978,13 +1023,17 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 
 namespace MInstrHelpers {
 
+template <bool intishWarn>
 TypedValue setOpElem(TypedValue* base, TypedValue key,
                      Cell val, SetOpOp op) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val);
+  auto result = HPHP::SetOpElem<intishWarn>(localTvRef, op, base, key, &val);
 
   return cGetRefShuffle(localTvRef, result);
 }
+
+template TypedValue setOpElem<true>(TypedValue*, TypedValue, Cell, SetOpOp);
+template TypedValue setOpElem<false>(TypedValue*, TypedValue, Cell, SetOpOp);
 
 StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
@@ -1005,36 +1054,49 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return result ? !cellIsNull(result) : false;
 }
 
+template <bool intishWarn>
 void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   TypedValue localTvRef;
-  auto elem = HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, key);
+  auto elem =
+    HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, key);
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
     return;
   }
 
   tvBindRef(val, elem);
 }
 
+template void bindElemC<true>(TypedValue*, TypedValue, RefData*);
+template void bindElemC<false>(TypedValue*, TypedValue, RefData*);
+
+template <bool intishWarn>
 void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
   auto elem = UNLIKELY(val.m_type == KindOfRef)
-    ? HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, *keyC)
-    : HPHP::ElemD<MOpMode::Define, false>(localTvRef, base, *keyC);
+    ? HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, *keyC)
+    : HPHP::ElemD<MOpMode::Define, false, intishWarn>(localTvRef, base, *keyC);
   // Intentionally leak the old value pointed to by elem, including from magic
   // methods.
   tvDup(val, *elem);
 }
 
+template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue);
+template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue);
+
+template <bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
-  auto const result = HPHP::IncDecElem(op, base, key);
+  auto const result = HPHP::IncDecElem<intishWarn>(op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }
+
+template TypedValue incDecElem<true>(TypedValue*, TypedValue, IncDecOp);
+template TypedValue incDecElem<false>(TypedValue*, TypedValue, IncDecOp);
 
 void bindNewElem(TypedValue* base, RefData* val) {
   if (UNLIKELY(isHackArrayType(base->m_type))) {
@@ -1047,7 +1109,7 @@ void bindNewElem(TypedValue* base, RefData* val) {
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
     return;
   }
 
@@ -1072,6 +1134,55 @@ TypedValue* elemVecIU(TypedValue* base, int64_t key) {
 
 uintptr_t tlsBaseNoInline() {
   return tlsBase();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Sometimes calls to builtin functions are inlined so that the call itself can
+ * occur via CallBuiltin rather than NativeImpl.  In these instances it's
+ * possible that no ActRec was pushed for the builtin call, in which case the
+ * liveFunc() will be the caller rather than the callee.
+ *
+ * If no ActRec was pushed for the builtin function, inspect the caller to
+ * determine if the call used strict types.
+ */
+bool useStrictTypes(const Func* callee) {
+  return liveFunc() == callee
+    ? !liveFrame()->useWeakTypes()
+    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+}
+
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
+  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
+             RuntimeOption::EnableHipHopSyntax)) {
+    return;
+  }
+
+  VMRegAnchor _;
+  if (!useStrictTypes(func)) return;
+
+  auto const& tc = func->params()[argNum - 1].typeConstraint;
+  tc.verifyParam(&tv, func, argNum - 1, true);
+}
+
+TVCoercionException::TVCoercionException(const Func* func,
+                                         int arg_num,
+                                         DataType actual,
+                                         DataType expected)
+    : std::runtime_error(
+        folly::format("Unable to coerce param {} to {}() "
+                      "from {} to {}",
+                      arg_num,
+                      func->name(),
+                      actual,
+                      expected).str())
+{
+  if (func->attrs() & AttrParamCoerceModeFalse) {
+    m_tv = make_tv<KindOfBoolean>(false);
+  } else {
+    m_tv = make_tv<KindOfNull>();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

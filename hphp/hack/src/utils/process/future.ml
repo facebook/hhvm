@@ -23,7 +23,11 @@ type 'a t = 'a promise ref
 let make process transformer =
   ref (Incomplete (process, transformer))
 
-let get : 'a t -> 'a = fun promise -> match !promise with
+let of_value v = ref @@ Complete v
+
+let get : 'a t -> 'a =
+  let open Process_types in
+  fun promise -> match !promise with
   | Complete v -> v
   | Incomplete (process, transformer) ->
     match Process.read_and_wait_pid ~timeout:30 process with
@@ -31,13 +35,15 @@ let get : 'a t -> 'a = fun promise -> match !promise with
       let result = transformer stdout in
       let () = promise := Complete result in
       result
-    | Result.Error (Process_types.Process_exited_abnormally
+    | Result.Error (Process_exited_abnormally
         (status, _, stderr)) ->
       (** TODO: Prefer monad over exceptions. *)
       raise (Future_sig.Process_failure (status, stderr))
-    | Result.Error (Process_types.Timed_out (_, stderr)) ->
+    | Result.Error (Timed_out (_, stderr)) ->
       (** TODO: Prefer monad over exceptions. *)
       raise (Future_sig.Timed_out stderr)
+    | Result.Error Process_aborted_input_too_large ->
+      raise Future_sig.Process_aborted
 
 let is_ready promise = match !promise with
   | Complete _ -> true

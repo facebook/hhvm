@@ -22,9 +22,10 @@
 #include <sys/types.h>
 
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -38,7 +39,6 @@ struct RefData;
 struct StringData;
 struct MArrayIter;
 struct MixedArray;
-struct ArrayLval;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -78,12 +78,12 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static bool ExistsStr(const ArrayData*, const StringData*) {
     return false;
   }
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static ArrayLval LvalNewRef(ArrayData*, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
@@ -143,11 +143,13 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
     return const_cast<ArrayData*>(ad);
   }
 
+  static constexpr auto ToVArray = &ToPHPArray;
+
 private:
-  static ArrayLval MakePacked(TypedValue);
-  static ArrayLval MakePackedInl(TypedValue);
-  static ArrayLval MakeMixed(StringData*, TypedValue);
-  static ArrayLval MakeMixed(int64_t, TypedValue);
+  static member_lval MakePacked(TypedValue);
+  static member_lval MakePackedInl(TypedValue);
+  static member_lval MakeMixed(StringData*, TypedValue);
+  static member_lval MakeMixed(int64_t, TypedValue);
 
 private:
   struct Initializer;

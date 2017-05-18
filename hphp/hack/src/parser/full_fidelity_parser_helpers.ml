@@ -161,7 +161,7 @@ module WithParser(Parser : ParserType) = struct
       let (parser, token) = next_xhp_class_name parser in
       (parser, make_token token)
     else
-      expect_name parser
+      expect_name_allow_keywords parser
 
   let next_xhp_class_name_or_other parser =
     if is_next_xhp_class_name parser then next_xhp_class_name parser

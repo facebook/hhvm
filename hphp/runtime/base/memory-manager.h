@@ -86,12 +86,12 @@ MemoryManager& MM();
  * quantized into a fixed set of size classes, the sizes of which are an
  * implementation detail documented here to shed light on the algorithms that
  * compute size classes.  Request sizes are rounded up to the nearest size in
- * the relevant SMALL_SIZES table; e.g. 17 is rounded up to 32.  There are
+ * the relevant SIZE_CLASSES table; e.g. 17 is rounded up to 32.  There are
  * 4 size classes for each doubling of size
  * (ignoring the alignment-constrained smallest size classes), which limits
  * internal fragmentation to 20%.
  *
- * SMALL_SIZES: Complete table of SMALL_SIZE(index, lg_grp, lg_delta, ndelta,
+ * SIZE_CLASSES: Complete table of SIZE_CLASS(index, lg_grp, lg_delta, ndelta,
  *              lg_delta_lookup, ncontig) tuples.
  *   index: Size class index.
  *   lg_grp: Lg group base size (no deltas added).
@@ -104,141 +104,143 @@ MemoryManager& MM();
  *            than zero, and small enough that the contiguous regions fit within
  *            one slab.
  */
-#define SMALL_SIZES \
+#define SIZE_CLASSES \
 /*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig */ \
-  SMALL_SIZE(  0,      4,        4,      0,  4,             128) \
-  SMALL_SIZE(  1,      4,        4,      1,  4,             128) \
-  SMALL_SIZE(  2,      4,        4,      2,  4,             128) \
-  SMALL_SIZE(  3,      4,        4,      3,  4,              96) \
+  SIZE_CLASS(  0,      4,        4,      0,  4,             128) \
+  SIZE_CLASS(  1,      4,        4,      1,  4,             128) \
+  SIZE_CLASS(  2,      4,        4,      2,  4,             128) \
+  SIZE_CLASS(  3,      4,        4,      3,  4,              96) /* 64 */\
   \
-  SMALL_SIZE(  4,      6,        4,      1,  4,              96) \
-  SMALL_SIZE(  5,      6,        4,      2,  4,              96) \
-  SMALL_SIZE(  6,      6,        4,      3,  4,              96) \
-  SMALL_SIZE(  7,      6,        4,      4,  4,              64) \
+  SIZE_CLASS(  4,      6,        4,      1,  4,              96) \
+  SIZE_CLASS(  5,      6,        4,      2,  4,              96) \
+  SIZE_CLASS(  6,      6,        4,      3,  4,              96) \
+  SIZE_CLASS(  7,      6,        4,      4,  4,              64) /* 128 */\
   \
-  SMALL_SIZE(  8,      7,        5,      1,  5,              64) \
-  SMALL_SIZE(  9,      7,        5,      2,  5,              64) \
-  SMALL_SIZE( 10,      7,        5,      3,  5,              64) \
-  SMALL_SIZE( 11,      7,        5,      4,  5,              32) \
+  SIZE_CLASS(  8,      7,        5,      1,  5,              64) \
+  SIZE_CLASS(  9,      7,        5,      2,  5,              64) \
+  SIZE_CLASS( 10,      7,        5,      3,  5,              64) \
+  SIZE_CLASS( 11,      7,        5,      4,  5,              32) /* 256 */\
   \
-  SMALL_SIZE( 12,      8,        6,      1,  6,              32) \
-  SMALL_SIZE( 13,      8,        6,      2,  6,              32) \
-  SMALL_SIZE( 14,      8,        6,      3,  6,              32) \
-  SMALL_SIZE( 15,      8,        6,      4,  6,              16) \
+  SIZE_CLASS( 12,      8,        6,      1,  6,              32) \
+  SIZE_CLASS( 13,      8,        6,      2,  6,              32) \
+  SIZE_CLASS( 14,      8,        6,      3,  6,              32) \
+  SIZE_CLASS( 15,      8,        6,      4,  6,              16) /* 512 */\
   \
-  SMALL_SIZE( 16,      9,        7,      1,  7,              16) \
-  SMALL_SIZE( 17,      9,        7,      2,  7,              16) \
-  SMALL_SIZE( 18,      9,        7,      3,  7,              16) \
-  SMALL_SIZE( 19,      9,        7,      4,  7,               8) \
+  SIZE_CLASS( 16,      9,        7,      1,  7,              16) \
+  SIZE_CLASS( 17,      9,        7,      2,  7,              16) \
+  SIZE_CLASS( 18,      9,        7,      3,  7,              16) \
+  SIZE_CLASS( 19,      9,        7,      4,  7,               8) /* 1K */\
   \
-  SMALL_SIZE( 20,     10,        8,      1,  8,               8) \
-  SMALL_SIZE( 21,     10,        8,      2,  8,               8) \
-  SMALL_SIZE( 22,     10,        8,      3,  8,               8) \
-  SMALL_SIZE( 23,     10,        8,      4,  8,               4) \
+  SIZE_CLASS( 20,     10,        8,      1,  8,               8) \
+  SIZE_CLASS( 21,     10,        8,      2,  8,               8) \
+  SIZE_CLASS( 22,     10,        8,      3,  8,               8) \
+  SIZE_CLASS( 23,     10,        8,      4,  8,               4) /* 2K */\
   \
-  SMALL_SIZE( 24,     11,        9,      1,  9,               4) \
-  SMALL_SIZE( 25,     11,        9,      2,  9,               4) \
-  SMALL_SIZE( 26,     11,        9,      3,  9,               4) \
-  SMALL_SIZE( 27,     11,        9,      4,  9,               2) \
+  SIZE_CLASS( 24,     11,        9,      1,  9,               4) \
+  SIZE_CLASS( 25,     11,        9,      2,  9,               4) \
+  SIZE_CLASS( 26,     11,        9,      3,  9,               4) \
+  SIZE_CLASS( 27,     11,        9,      4,  9,               2) /* 4K */\
   \
-  SMALL_SIZE( 28,     12,       10,      1, no,               2) \
-  SMALL_SIZE( 29,     12,       10,      2, no,               2) \
-  SMALL_SIZE( 30,     12,       10,      3, no,               2) \
-  SMALL_SIZE( 31,     12,       10,      4, no,               1) \
+  SIZE_CLASS( 28,     12,       10,      1, no,               2) \
+  SIZE_CLASS( 29,     12,       10,      2, no,               2) \
+  SIZE_CLASS( 30,     12,       10,      3, no,               2) \
+  SIZE_CLASS( 31,     12,       10,      4, no,               1) /* 8K */\
   \
-  SMALL_SIZE( 32,     13,       11,      1, no,               1) \
-  SMALL_SIZE( 33,     13,       11,      2, no,               1) \
-  SMALL_SIZE( 34,     13,       11,      3, no,               1) \
-  SMALL_SIZE( 35,     13,       11,      4, no,               1) \
+  SIZE_CLASS( 32,     13,       11,      1, no,               1) \
+  SIZE_CLASS( 33,     13,       11,      2, no,               1) \
+  SIZE_CLASS( 34,     13,       11,      3, no,               1) \
+  SIZE_CLASS( 35,     13,       11,      4, no,               1) /* 16K */\
   \
-  SMALL_SIZE( 36,     14,       12,      1, no,               1) \
-  SMALL_SIZE( 37,     14,       12,      2, no,               1) \
-  SMALL_SIZE( 38,     14,       12,      3, no,               1) \
-  SMALL_SIZE( 39,     14,       12,      4, no,               1) \
+  SIZE_CLASS( 36,     14,       12,      1, no,               1) \
+  SIZE_CLASS( 37,     14,       12,      2, no,               1) \
+  SIZE_CLASS( 38,     14,       12,      3, no,               1) \
+  SIZE_CLASS( 39,     14,       12,      4, no,               1) /* 32K */\
   \
-  SMALL_SIZE( 40,     15,       13,      1, no,               1) \
-  SMALL_SIZE( 41,     15,       13,      2, no,               1) \
-  SMALL_SIZE( 42,     15,       13,      3, no,               1) \
-  SMALL_SIZE( 43,     15,       13,      4, no,               1) \
+  SIZE_CLASS( 40,     15,       13,      1, no,               1) \
+  SIZE_CLASS( 41,     15,       13,      2, no,               1) \
+  SIZE_CLASS( 42,     15,       13,      3, no,               1) \
+  SIZE_CLASS( 43,     15,       13,      4, no,               1) /* 64K */\
   \
-  SMALL_SIZE( 44,     16,       14,      1, no,               1) \
-  SMALL_SIZE( 45,     16,       14,      2, no,               1) \
-  SMALL_SIZE( 46,     16,       14,      3, no,               1) \
-  SMALL_SIZE( 47,     16,       14,      4, no,               1) \
+  SIZE_CLASS( 44,     16,       14,      1, no,               1) \
+  SIZE_CLASS( 45,     16,       14,      2, no,               1) \
+  SIZE_CLASS( 46,     16,       14,      3, no,               1) \
+  SIZE_CLASS( 47,     16,       14,      4, no,               1) /* 128K */\
   \
-  SMALL_SIZE( 48,     17,       15,      1, no,               1) \
-  SMALL_SIZE( 49,     17,       15,      2, no,               1) \
-  SMALL_SIZE( 50,     17,       15,      3, no,               1) \
-  SMALL_SIZE( 51,     17,       15,      4, no,               1) \
+  SIZE_CLASS( 48,     17,       15,      1, no,               1) \
+  SIZE_CLASS( 49,     17,       15,      2, no,               1) \
+  SIZE_CLASS( 50,     17,       15,      3, no,               1) \
+  SIZE_CLASS( 51,     17,       15,      4, no,               1) /* 256K */\
   \
-  SMALL_SIZE( 52,     18,       16,      1, no,               1) \
-  SMALL_SIZE( 53,     18,       16,      2, no,               1) \
-  SMALL_SIZE( 54,     18,       16,      3, no,               1) \
-  SMALL_SIZE( 55,     18,       16,      4, no,               1) \
+  SIZE_CLASS( 52,     18,       16,      1, no,               1) \
+  SIZE_CLASS( 53,     18,       16,      2, no,               1) \
+  SIZE_CLASS( 54,     18,       16,      3, no,               1) \
+  SIZE_CLASS( 55,     18,       16,      4, no,               1) /* 512K */\
   \
-  SMALL_SIZE( 56,     19,       17,      1, no,               1) \
-  SMALL_SIZE( 57,     19,       17,      2, no,               1) \
-  SMALL_SIZE( 58,     19,       17,      3, no,               1) \
-  SMALL_SIZE( 59,     19,       17,      4, no,               1) \
+  SIZE_CLASS( 56,     19,       17,      1, no,               1) \
+  SIZE_CLASS( 57,     19,       17,      2, no,               1) \
+  SIZE_CLASS( 58,     19,       17,      3, no,               1) \
+  SIZE_CLASS( 59,     19,       17,      4, no,               1) /* 1M */\
   \
-  SMALL_SIZE( 60,     20,       18,      1, no,               1) \
-  SMALL_SIZE( 61,     20,       18,      2, no,               1) \
-  SMALL_SIZE( 62,     20,       18,      3, no,               1) \
-  SMALL_SIZE( 63,     20,       18,      4, no,               1) \
+  SIZE_CLASS( 60,     20,       18,      1, no,               1) \
+  SIZE_CLASS( 61,     20,       18,      2, no,               1) \
+  SIZE_CLASS( 62,     20,       18,      3, no,               1) \
+  SIZE_CLASS( 63,     20,       18,      4, no,               1) /* 2M */\
   \
-  SMALL_SIZE( 64,     21,       19,      1, no,               1) \
-  SMALL_SIZE( 65,     21,       19,      2, no,               1) \
-  SMALL_SIZE( 66,     21,       19,      3, no,               1) \
-  SMALL_SIZE( 67,     21,       19,      4, no,               1) \
+  SIZE_CLASS( 64,     21,       19,      1, no,               1) \
+  SIZE_CLASS( 65,     21,       19,      2, no,               1) \
+  SIZE_CLASS( 66,     21,       19,      3, no,               1) \
+  SIZE_CLASS( 67,     21,       19,      4, no,               1) /* 4M */\
   \
-  SMALL_SIZE( 68,     22,       20,      1, no,               1) \
-  SMALL_SIZE( 69,     22,       20,      2, no,               1) \
-  SMALL_SIZE( 70,     22,       20,      3, no,               1) \
-  SMALL_SIZE( 71,     22,       20,      4, no,               1) \
+  SIZE_CLASS( 68,     22,       20,      1, no,               1) \
+  SIZE_CLASS( 69,     22,       20,      2, no,               1) \
+  SIZE_CLASS( 70,     22,       20,      3, no,               1) \
+  SIZE_CLASS( 71,     22,       20,      4, no,               1) /* 8M */\
   \
-  SMALL_SIZE( 72,     23,       21,      1, no,               1) \
-  SMALL_SIZE( 73,     23,       21,      2, no,               1) \
-  SMALL_SIZE( 74,     23,       21,      3, no,               1) \
-  SMALL_SIZE( 75,     23,       21,      4, no,               1) \
+  SIZE_CLASS( 72,     23,       21,      1, no,               1) \
+  SIZE_CLASS( 73,     23,       21,      2, no,               1) \
+  SIZE_CLASS( 74,     23,       21,      3, no,               1) \
+  SIZE_CLASS( 75,     23,       21,      4, no,               1) /* 16M */\
   \
-  SMALL_SIZE( 76,     24,       22,      1, no,               1) \
-  SMALL_SIZE( 77,     24,       22,      2, no,               1) \
-  SMALL_SIZE( 78,     24,       22,      3, no,               1) \
-  SMALL_SIZE( 79,     24,       22,      4, no,               1) \
+  SIZE_CLASS( 76,     24,       22,      1, no,               1) \
+  SIZE_CLASS( 77,     24,       22,      2, no,               1) \
+  SIZE_CLASS( 78,     24,       22,      3, no,               1) \
+  SIZE_CLASS( 79,     24,       22,      4, no,               1) /* 32M */\
   \
-  SMALL_SIZE( 80,     25,       23,      1, no,               1) \
-  SMALL_SIZE( 81,     25,       23,      2, no,               1) \
-  SMALL_SIZE( 82,     25,       23,      3, no,               1) \
-  SMALL_SIZE( 83,     25,       23,      4, no,               1) \
+  SIZE_CLASS( 80,     25,       23,      1, no,               1) \
+  SIZE_CLASS( 81,     25,       23,      2, no,               1) \
+  SIZE_CLASS( 82,     25,       23,      3, no,               1) \
+  SIZE_CLASS( 83,     25,       23,      4, no,               1) /* 64M */\
   \
-  SMALL_SIZE( 84,     26,       24,      1, no,               1) \
-  SMALL_SIZE( 85,     26,       24,      2, no,               1) \
-  SMALL_SIZE( 86,     26,       24,      3, no,               1) \
-  SMALL_SIZE( 87,     26,       24,      4, no,               1) \
+  SIZE_CLASS( 84,     26,       24,      1, no,               1) \
+  SIZE_CLASS( 85,     26,       24,      2, no,               1) \
+  SIZE_CLASS( 86,     26,       24,      3, no,               1) \
+  SIZE_CLASS( 87,     26,       24,      4, no,               1) /* 128M */\
   \
-  SMALL_SIZE( 88,     27,       25,      1, no,               1) \
-  SMALL_SIZE( 89,     27,       25,      2, no,               1) \
-  SMALL_SIZE( 90,     27,       25,      3, no,               1) \
-  SMALL_SIZE( 91,     27,       25,      4, no,               1) \
+  SIZE_CLASS( 88,     27,       25,      1, no,               1) \
+  SIZE_CLASS( 89,     27,       25,      2, no,               1) \
+  SIZE_CLASS( 90,     27,       25,      3, no,               1) \
+  SIZE_CLASS( 91,     27,       25,      4, no,               1) /* 256M */\
   \
-  SMALL_SIZE( 92,     28,       26,      1, no,               1) \
-  SMALL_SIZE( 93,     28,       26,      2, no,               1) \
-  SMALL_SIZE( 94,     28,       26,      3, no,               1) \
-  SMALL_SIZE( 95,     28,       26,      4, no,               1) \
+  SIZE_CLASS( 92,     28,       26,      1, no,               1) \
+  SIZE_CLASS( 93,     28,       26,      2, no,               1) \
+  SIZE_CLASS( 94,     28,       26,      3, no,               1) \
+  SIZE_CLASS( 95,     28,       26,      4, no,               1) /* 512M */\
   \
-  SMALL_SIZE( 96,     29,       27,      1, no,               1) \
-  SMALL_SIZE( 97,     29,       27,      2, no,               1) \
-  SMALL_SIZE( 98,     29,       27,      3, no,               1) \
-  SMALL_SIZE( 99,     29,       27,      4, no,               1) \
+  SIZE_CLASS( 96,     29,       27,      1, no,               1) \
+  SIZE_CLASS( 97,     29,       27,      2, no,               1) \
+  SIZE_CLASS( 98,     29,       27,      3, no,               1) \
+  SIZE_CLASS( 99,     29,       27,      4, no,               1) /* 1G */\
   \
-  SMALL_SIZE(100,     30,       28,      1, no,               1) \
-  SMALL_SIZE(101,     30,       28,      2, no,               1) \
-  SMALL_SIZE(102,     30,       28,      3, no,               1) \
-  SMALL_SIZE(103,     30,       28,      4, no,               1) \
+  SIZE_CLASS(100,     30,       28,      1, no,               1) \
+  SIZE_CLASS(101,     30,       28,      2, no,               1) \
+  SIZE_CLASS(102,     30,       28,      3, no,               1) \
+  SIZE_CLASS(103,     30,       28,      4, no,               1) /* 2G */\
   \
-  SMALL_SIZE(104,     31,       29,      1, no,               1) \
-  SMALL_SIZE(105,     31,       29,      2, no,               1) \
-  SMALL_SIZE(106,     31,       29,      3, no,               1) \
+  SIZE_CLASS(104,     31,       29,      1, no,               1) \
+  SIZE_CLASS(105,     31,       29,      2, no,               1) \
+  SIZE_CLASS(106,     31,       29,      3, no,               1) /* 3.5G */\
+
+constexpr uint32_t kNumSizeClasses = 107;
 
 alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #define S2I_4(i)  i,
@@ -248,9 +250,9 @@ alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #define S2I_8(i)  S2I_7(i) S2I_7(i)
 #define S2I_9(i)  S2I_8(i) S2I_8(i)
 #define S2I_no(i)
-#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   S2I_##lg_delta_lookup(index)
-  SMALL_SIZES
+  SIZE_CLASSES
 #undef S2I_4
 #undef S2I_5
 #undef S2I_6
@@ -258,21 +260,21 @@ alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #undef S2I_8
 #undef S2I_9
 #undef S2I_no
-#undef SMALL_SIZE
+#undef SIZE_CLASS
 };
 
-alignas(64) constexpr uint32_t kSmallIndex2Size[] = {
-#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+alignas(64) constexpr uint32_t kSizeIndex2Size[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)),
-  SMALL_SIZES
-#undef SMALL_SIZE
+  SIZE_CLASSES
+#undef SIZE_CLASS
 };
 
 alignas(64) constexpr unsigned kNContigTab[] = {
-#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   ncontig,
-  SMALL_SIZES
-#undef SMALL_SIZE
+  SIZE_CLASSES
+#undef SIZE_CLASS
 };
 
 constexpr uint32_t kMaxSmallSizeLookup = 4096;
@@ -297,13 +299,19 @@ constexpr unsigned kLgSizeClassesPerDoubling = 2;
 constexpr uint32_t kNumSmallSizes = 63;
 static_assert(kNumSmallSizes <= (1 << 6),
               "only 6 bits available in HeapObject");
+static_assert(kNumSmallSizes < kNumSizeClasses,
+              "small sizes should be a proper subset of all sizes");
+static_assert(kNumSizeClasses <= (sizeof(kSizeIndex2Size) / sizeof(uint32_t)),
+              "Extend SIZE_CLASSES macro");
 
-constexpr uint32_t kMaxSmallSize = kSmallIndex2Size[kNumSmallSizes-1];
+constexpr uint32_t kMaxSmallSize = kSizeIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
               "Too few size classes");
 static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
-static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
-              "Extend SMALL_SIZES table");
+
+constexpr uint32_t kMaxSizeClass = kSizeIndex2Size[kNumSizeClasses-1];
+static_assert(kMaxSmallSize < kMaxSizeClass,
+              "largest small size should be smaller than largest overall size");
 
 /*
  * Constants for the various debug junk-filling of different types of
@@ -566,8 +574,8 @@ struct MemoryManager {
    * Allocate/deallocate by size class index.  This is useful when size
    * class is already calculated at the call site.
    */
-  void* mallocSmallIndex(size_t index, uint32_t size);
-  void freeSmallIndex(void* ptr, size_t index, uint32_t size);
+  void* mallocSmallIndex(size_t index);
+  void freeSmallIndex(void* ptr, size_t index);
 
   /*
    * These functions are useful when working directly with size classes outside
@@ -576,10 +584,11 @@ struct MemoryManager {
    * Note that we intentionally use size_t for size class index here, so that
    * gcc would not generate inefficient code.
    */
-  static size_t computeSmallSize2Index(uint32_t size);
+  static size_t computeSize2Index(uint32_t size);
   static size_t lookupSmallSize2Index(uint32_t size);
   static size_t smallSize2Index(uint32_t size);
-  static uint32_t smallIndex2Size(size_t index);
+  static size_t size2Index(uint32_t size);
+  static uint32_t sizeIndex2Size(size_t index);
 
   /////////////////////////////////////////////////////////////////////////////
   // Cleanup.
@@ -689,6 +698,7 @@ struct MemoryManager {
    */
   int64_t getAllocated() const;
   int64_t getDeallocated() const;
+  int64_t currentUsage() const;
 
   /*
    * Reset all stats that are synchronzied externally from the memory manager.
@@ -757,6 +767,8 @@ struct MemoryManager {
   void addApcArray(APCLocalArray*);
   void removeApcArray(APCLocalArray*);
   void addSweepable(Sweepable*);
+  template<class Fn> void sweepApcArrays(Fn fn);
+  template<class Fn> void sweepApcStrings(Fn fn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.
@@ -872,9 +884,10 @@ private:
   void storeTail(void* tail, uint32_t tailBytes);
   void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
                  uint32_t splitUsable, unsigned splitInd);
-  void* slabAlloc(uint32_t bytes, unsigned index);
+  void* slabAlloc(uint32_t bytes, size_t index);
   void* newSlab(uint32_t nbytes);
-  void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
+  void* mallocSmallSizeFast(uint32_t bytes, size_t index);
+  void* mallocSmallSizeSlow(uint32_t bytes, size_t index);
   void  updateBigStats();
 
   static uint32_t bsr(uint32_t x);

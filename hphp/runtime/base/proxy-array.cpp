@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-custom-element.h"
 #include "hphp/util/hphp-config.h"
@@ -131,58 +132,58 @@ const TypedValue* ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvTryGet(k);
 }
 
-ArrayLval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+member_lval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, true);
   }
-  auto const r = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+member_lval ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalRef(k, true);
   }
-  auto const r = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval ProxyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, true);
   }
-  auto const r = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+member_lval ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalRef(k, true);
   }
-  auto const r = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalNew(ArrayData* ad, bool copy) {
+member_lval ProxyArray::LvalNew(ArrayData* ad, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNew(true);
   }
-  auto const r = innerArr(ad)->lvalNew(innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lvalNew(innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalNewRef(ArrayData* ad, bool copy) {
+member_lval ProxyArray::LvalNewRef(ArrayData* ad, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNewRef(true);
   }
-  auto const r = innerArr(ad)->lvalNewRef(innerArr(ad)->cowCheck());
-  reseatable(ad, r.array);
-  return {ad, r.val};
+  auto const lval = innerArr(ad)->lvalNewRef(innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
 ArrayData* ProxyArray::SetInt(ArrayData* ad,
@@ -347,6 +348,12 @@ ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool copy) {
   return const_cast<ArrayData*>(ad);
 }
 
+ArrayData* ProxyArray::ToVArray(ArrayData* ad, bool copy) {
+  auto const r = innerArr(ad)->toVArray(innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return const_cast<ArrayData*>(ad);
+}
+
 void ProxyArray::Renumber(ArrayData* ad) {
   innerArr(ad)->renumber();
 }
@@ -503,27 +510,27 @@ void* ProxyArray::proxyGet(StringData * str) const {
   if (!innerArr(this)->exists(str)) {
     return nullptr;
   }
-  auto r = innerArr(this)->lval(str, false);
-  reseatable(this, r.array);
-  return elementToData(r.val);
+  auto lval = innerArr(this)->lval(str, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
 void* ProxyArray::proxyGet(int64_t k) const {
   if (!innerArr(this)->exists(k)) {
     return nullptr;
   }
-  auto r = innerArr(this)->lval(k, false);
-  reseatable(this, r.array);
-  return elementToData(r.val);
+  auto lval = innerArr(this)->lval(k, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
 void* ProxyArray::proxyGet(const Variant & k) const {
   if (!innerArr(this)->exists(k)) {
     return nullptr;
   }
-  auto r = innerArr(this)->lval(k, false);
-  reseatable(this, r.array);
-  return elementToData(r.val);
+  auto lval = innerArr(this)->lval(k, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
 void * ProxyArray::proxyGet(MArrayIter & pos) const {

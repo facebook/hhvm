@@ -22,7 +22,9 @@
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -422,7 +424,7 @@ public:
   void popC() {
     assert(m_top != m_base);
     assert(cellIsPlausible(*m_top));
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -448,7 +450,7 @@ public:
   void popTV() {
     assert(m_top != m_base);
     assert(tvIsPlausible(*m_top));
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -750,7 +752,7 @@ public:
   void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = c;
   }
 
@@ -759,7 +761,7 @@ public:
   void replaceC() {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = make_tv<DT>();
   }
 
@@ -768,14 +770,14 @@ public:
   void replaceC(T value) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = make_tv<DT>(value);
   }
 
   ALWAYS_INLINE
   void replaceTV(const TypedValue& tv) {
     assert(m_top != m_base);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = tv;
   }
 
@@ -783,7 +785,7 @@ public:
   ALWAYS_INLINE
   void replaceTV() {
     assert(m_top != m_base);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = make_tv<DT>();
   }
 
@@ -791,7 +793,7 @@ public:
   ALWAYS_INLINE
   void replaceTV(T value) {
     assert(m_top != m_base);
-    tvRefcountedDecRef(m_top);
+    tvDecRefGen(m_top);
     *m_top = make_tv<DT>(value);
   }
 

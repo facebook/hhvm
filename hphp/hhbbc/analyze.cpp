@@ -103,7 +103,18 @@ State entry_state(const Index& index,
       }
       continue;
     }
-    ret.locals[locId] = ctx.func->params[locId].byRef ? TGen : TCell;
+    auto const& param = ctx.func->params[locId];
+    if (ctx.func->isMemoizeImpl &&
+        !param.byRef &&
+        options.HardTypeHints) {
+      auto const& constraint = param.typeConstraint;
+      if (constraint.hasConstraint() && !constraint.isTypeVar() &&
+          !constraint.isTypeConstant()) {
+        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
+        continue;
+      }
+    }
+    ret.locals[locId] = param.byRef ? TGen : TCell;
   }
 
   /*

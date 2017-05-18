@@ -48,6 +48,7 @@ struct apcExtension final : Extension {
   static int PurgeRate;
   static bool AllowObj;
   static int TTLLimit;
+  static int64_t TTLMaxFinite;
   static std::vector<std::string> HotPrefix;
   static int HotSize;
   static double HotLoadFactor;

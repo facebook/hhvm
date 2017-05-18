@@ -55,6 +55,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Habstr x              -> this#on_abstr  acc x
     | Harray (hopt1, hopt2) -> this#on_array  acc hopt1 hopt2
     | Hdarray (h1, h2)      -> this#on_array  acc (Some h1) (Some h2)
+    | Hdarray_or_varray h
     | Hvarray h             -> this#on_array  acc (Some h) None
     | Hprim p               -> this#on_prim   acc p
     | Hoption h             -> this#on_option acc h
@@ -119,6 +120,7 @@ module CheckInstantiability = struct
         | Harray _
         | Hdarray _
         | Hvarray _
+        | Hdarray_or_varray _
         | Hprim _
         | Hoption _
         | Hfun _

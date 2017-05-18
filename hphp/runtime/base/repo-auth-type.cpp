@@ -22,7 +22,8 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -99,11 +100,15 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::OptArrKey:
+  case T::OptUncArrKey:
   case T::Null:
   case T::Cell:
   case T::Ref:
   case T::InitUnc:
   case T::Unc:
+  case T::ArrKey:
+  case T::UncArrKey:
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
@@ -297,6 +302,19 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
            (tv.m_type == KindOfString && tv.m_data.pstr->isStatic()) ||
            (tv.m_type == KindOfArray && tv.m_data.parr->isStatic());
 
+  case T::OptArrKey:
+    if (initNull) return true;
+    // fallthrough
+  case T::ArrKey:
+    return isStringType(tv.m_type) || tv.m_type == KindOfInt64;
+
+  case T::OptUncArrKey:
+    if (initNull) return true;
+    // fallthrough
+  case T::UncArrKey:
+    return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
+      tv.m_type == KindOfInt64;
+
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -326,11 +344,15 @@ std::string show(RepoAuthType rat) {
   case T::OptDbl:   return "?Dbl";
   case T::OptRes:   return "?Res";
   case T::OptObj:   return "?Obj";
+  case T::OptUncArrKey: return "?UncArrKey";
+  case T::OptArrKey: return "?ArrKey";
   case T::Null:     return "Null";
   case T::Cell:     return "Cell";
   case T::Ref:      return "Ref";
   case T::InitUnc:  return "InitUnc";
   case T::Unc:      return "Unc";
+  case T::UncArrKey:return "UncArrKey";
+  case T::ArrKey:   return "ArrKey";
   case T::InitCell: return "InitCell";
   case T::InitGen:  return "InitGen";
   case T::Gen:      return "Gen";

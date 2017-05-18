@@ -29,6 +29,8 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/runtime/base/array-iterator.h"
+
 #include "hphp/util/bitops.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
@@ -38,9 +40,12 @@
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
+
+#include "hphp/runtime/base/mixed-array.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -167,6 +172,18 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+// The number of pops as seen by dce.
+uint32_t numPop(const Bytecode& bc) {
+  if (bc.op == Op::CGetL2) return 1;
+  return bc.numPop();
+}
+
+// The number of pushes as seen by dce.
+uint32_t numPush(const Bytecode& bc) {
+  if (bc.op == Op::CGetL2) return 2;
+  return bc.numPush();
+}
+
 // Returns whether decrefing a type could run a destructor.
 bool couldRunDestructor(const Type& t) {
   // We could check for specialized objects to see if they don't
@@ -202,11 +219,11 @@ bool readCouldHaveSideEffects(const Type& t) {
  * Use information of a stack cell.
  */
 enum class Use {
-  // Indicates that the cell is (unconditionally) not used.
-  Not,
-
   // Indicates that the cell is (possibly) used.
-  Used,
+  Used = 0,
+
+  // Indicates that the cell is (unconditionally) not used.
+  Not = 1,
 
   /*
    * Indicates that the cell is only used if it was the last reference alive.
@@ -217,8 +234,37 @@ enum class Use {
    * If the producer of the cell knows that it is not the last reference, then
    * it can treat Use::UsedIfLastRef as being equivalent to Use::Not.
    */
-  UsedIfLastRef,
+  UsedIfLastRef = 2,
+
+  /*
+   * Indicates that the stack slot contains an array-like being
+   * constructed by AddElemCs, which looks like it can be optimized to
+   * a NewStructArray, NewPackedArray, or NewVecArray.
+   */
+  AddElemC = 3,
+
+  /*
+   * Modifier or-ed into the above to indicate that this use is linked
+   * to the stack slot below it (in stack order - the bottom of the
+   * stack is below the top); either they are both optimized, or
+   * neither is.
+   */
+  Linked = 4,
 };
+
+Use operator|(Use a, Use b) {
+  return static_cast<Use>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+Use operator&(Use a, Use b) {
+  return static_cast<Use>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+bool any(Use a) {
+  return static_cast<int>(a) != 0;
+}
+
+Use mask_use(Use a) { return a & static_cast<Use>(3); }
 
 struct InstrId {
   BlockId blk;
@@ -249,18 +295,14 @@ bool operator<(const LocationId& i1, const LocationId& i2) {
 
 enum class DceAction {
   Kill,
-  PopOutputs
+  PopInputs,
+  PopOutputs,
+  Replace,
+  PopAndReplace
 };
 
-const char* show(DceAction action) {
-  switch (action) {
-    case DceAction::Kill: return "Kill";
-    case DceAction::PopOutputs: return "PopOutputs";
-  };
-  not_reached();
-}
-
 using DceActionMap = std::map<InstrId, DceAction>;
+using DceReplaceMap = std::map<InstrId, CompactVector<Bytecode>>;
 
 struct UseInfo {
   explicit UseInfo(Use u) : usage(u) {}
@@ -280,10 +322,6 @@ struct UseInfo {
    */
   LocationId location { NoBlockId, 0, false };
 };
-
-std::string show(InstrId id) {
-  return folly::sformat("{}:{}", id.blk, id.idx);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -328,6 +366,12 @@ struct DceState {
   DceActionMap actionMap;
 
   /*
+   * Actions of type Replace in the actionMap have an entry here with
+   * the replacement bytecodes.
+   */
+  DceReplaceMap replaceMap;
+
+  /*
    * The set of locals and class-ref slots that were ever live in this block.
    * (This includes ones that were live going out of this block.)  This set is
    * used by global DCE to remove locals and class-ref slots that are completely
@@ -341,21 +385,59 @@ struct DceState {
    * of the slot is removed, the corresponding actions must be taken.
    */
   std::vector<UseInfo> slotUsage;
+
+  /*
+   * Flag to indicate local vs global dce.
+   */
+  bool isLocal{false};
 };
 
 //////////////////////////////////////////////////////////////////////
+// debugging
 
-const char* show(Use u) {
-  switch (u) {
-  case Use::Not:              return "0";
-  case Use::Used:             return "U";
-  case Use::UsedIfLastRef:    return "UL";
-  }
+const char* show(DceAction action) {
+  switch (action) {
+    case DceAction::Kill:          return "Kill";
+    case DceAction::PopInputs:     return "PopInputs";
+    case DceAction::PopOutputs:    return "PopOutputs";
+    case DceAction::Replace:       return "Replace";
+    case DceAction::PopAndReplace: return "PopAndReplace";
+  };
   not_reached();
 }
 
+std::string show(InstrId id) {
+  return folly::sformat("{}:{}", id.blk, id.idx);
+}
+
+inline void validate(Use u) {
+  assert(!any(u & Use::Linked) ||
+         mask_use(u) == Use::Not ||
+         mask_use(u) == Use::UsedIfLastRef);
+}
+
+const char* show(Use u) {
+  validate(u);
+  auto ret = [&] {
+    switch (mask_use(u)) {
+      case Use::Used:          return "*U";
+      case Use::Not:           return "*0";
+      case Use::UsedIfLastRef: return "*UL";
+      case Use::AddElemC:      return "*AE";
+      case Use::Linked: not_reached();
+    }
+    not_reached();
+  }();
+
+  return !any(u & Use::Linked) ? ret + 1 : ret;
+}
+
+std::string show(const LocationId& id) {
+  return folly::sformat("{}:{}{}", id.blk, id.id, id.isSlot ? "(slot)" : "");
+}
+
 std::string show(const DceActionMap::value_type& elm) {
-  return folly::sformat("{}@{}", show(elm.first), show(elm.second));
+  return folly::sformat("{}={}", show(elm.first), show(elm.second));
 }
 
 std::string show(const DceActionMap& actions) {
@@ -367,7 +449,7 @@ std::string show(const DceActionMap& actions) {
 }
 
 std::string DEBUG_ONLY show(const UseInfo& ui) {
-  return folly::sformat("{}@{}", show(ui.usage), show(ui.actions));
+  return folly::sformat("{}({})", show(ui.usage), show(ui.actions));
 }
 
 std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
@@ -403,80 +485,77 @@ struct Env {
   DceState& dceState;
   const Bytecode& op;
   InstrId id;
+  LocalId loc;
   const State& stateBefore;
   const StepFlags& flags;
+  const State& stateAfter;
 };
 
 //////////////////////////////////////////////////////////////////////
+// Properties of UseInfo
 
-void markSetDead(Env& env, const DceActionMap& actions) {
-  env.dceState.actionMap.emplace(env.id, DceAction::Kill);
-  FTRACE(2, "     marking {} {}\n", show(env.id), show(actions));
-  for (auto& i : actions) env.dceState.actionMap.insert(i);
+bool isLinked(const UseInfo& ui) {
+  return any(ui.usage & Use::Linked);
 }
 
-void markUisDead(Env& env, const UseInfo& ui) {
-  markSetDead(env, ui.actions);
+bool lastUiIsLinked(const UseInfo& ui) {
+  return isLinked(ui);
 }
 
 template<typename... Args>
-void markUisDead(Env& env, const UseInfo& ui, Args&&... args) {
-  markUisDead(env, ui);
-  markUisDead(env, std::forward<Args>(args)...);
+bool lastUiIsLinked(const UseInfo& ui, const Args&... args) {
+  return lastUiIsLinked(args...);
+}
+
+bool allUnused() { return true; }
+template<class... Args>
+bool allUnused(const UseInfo& ui, const Args&... args) {
+  return (mask_use(ui.usage)) == Use::Not &&
+    allUnused(args...);
+}
+
+bool allUnusedIfNotLastRef() { return true; }
+template<class... Args>
+bool allUnusedIfNotLastRef(const UseInfo& ui, const Args&... args) {
+  auto u = mask_use(ui.usage);
+  return (u == Use::Not || u == Use::UsedIfLastRef) &&
+    allUnusedIfNotLastRef(args...);
+}
+
+bool alwaysPop(const UseInfo& ui) {
+  return
+    ui.location.blk != NoBlockId ||
+    ui.actions.size() > 1;
+}
+
+template<typename... Args>
+bool alwaysPop(const UseInfo& ui, const Args&... args) {
+  return alwaysPop(ui) || alwaysPop(args...);
+}
+
+bool maybePop(Env& env, const UseInfo& ui) {
+  return
+    (ui.actions.size() == 1 &&
+     ui.actions.begin()->first.idx > env.id.idx + 1);
+}
+
+template<typename... Args>
+bool maybePop(Env& env, const UseInfo& ui, const Args&... args) {
+  return maybePop(env, ui) || maybePop(env, args...);
 }
 
 /*
- * During global dce, a particular stack element could be pushed
- * on multiple paths. eg:
- *
- *   $a ? f() : 42
- *
- * If f() is known to return a non-counted type, we have UnboxRNop ->
- * PopC on one path, and Int 42 -> PopC on another, and the PopC marks
- * its value Use::Not. When we get to the Int 42 it thinks both
- * instructions can be killed; but when we get to the UnboxRNop it
- * does nothing. So any time we decide to ignore a Use::Not or
- * Use::UsedIfLastRef, we have to record that fact so we can prevent
- * the other paths from trying to use that information. We communicate
- * this via the ui.location field, and the forcedLiveLocations set.
- *
- * Note that a more sophisticated system would insert a PopC after the
- * UnboxRNop, and allow the 42/PopC to be removed (work in progress).
+ * Determine whether its worth inserting PopCs after an instruction
+ * that can't be dced in order to execute the dependent actions.
  */
-void markUisLive(Env& env, const UseInfo& ui) {
-  if (ui.usage != Use::Used && ui.location.blk != NoBlockId) {
-    env.dceState.forcedLiveLocations.insert(ui.location);
-  }
-}
-
 template<typename... Args>
-void markUisLive(Env& env, const UseInfo& ui, Args&&... args) {
-  markUisLive(env, ui);
-  markUisLive(env, std::forward<Args>(args)...);
-}
-
-void markDead(Env& env) {
-  env.dceState.actionMap.emplace(env.id, DceAction::Kill);
-  FTRACE(2, "     marking {}\n", show(env.id));
+bool shouldPopOutputs(Env& env, const Args&... args) {
+  if (alwaysPop(args...)) return true;
+  return maybePop(env, args...);
 }
 
 //////////////////////////////////////////////////////////////////////
-// eval stack
-
-void pop(Env& env, UseInfo&& ui) {
-  FTRACE(2, "      pop({})\n", show(ui.usage));
-  env.dceState.stack.push_back(std::move(ui));
-}
-
-void pop(Env& env, Use u, DceActionMap actions) {
-  pop(env, {u, std::move(actions)});
-}
-
-void pop(Env& env, Use u, InstrId id) {
-  pop(env, {u, {{id, DceAction::Kill}}});
-}
-
-void pop(Env& env) { pop(env, Use::Used, DceActionMap{}); }
+// query eval stack
 
 Type topT(Env& env, uint32_t idx = 0) {
   assert(idx < env.stateBefore.stack.size());
@@ -489,170 +568,12 @@ Type topC(Env& env, uint32_t idx = 0) {
   return t;
 }
 
-void discard(Env& env) {
-  pop(env, Use::Not, env.id);
-}
-
-bool allUnused() { return true; }
-template<class... Args>
-bool allUnused(const UseInfo& ui, Args&&... args) {
-  return ui.usage == Use::Not &&
-    allUnused(std::forward<Args>(args)...);
-}
-
-bool allUnusedIfNotLastRef() { return true; }
-template<class... Args>
-bool allUnusedIfNotLastRef(const UseInfo& ui, Args&&... args) {
-  return (ui.usage == Use::Not || ui.usage == Use::UsedIfLastRef) &&
-    allUnusedIfNotLastRef(std::forward<Args>(args)...);
-}
-
-void combineSets(UseInfo&) {}
-template<class... Args>
-void combineSets(UseInfo& accum, const UseInfo& ui, Args&&... args) {
-  accum.actions.insert(begin(ui.actions), end(ui.actions));
-  if (accum.location.blk == NoBlockId ||
-      accum.location < ui.location) {
-    accum.location = ui.location;
-  }
-  combineSets(accum, std::forward<Args>(args)...);
-}
-
-// The instruction wants to be killed, as long as its inputs can be
-// killed; combine the UseInfo sets from its outputs, and make an
-// appropriate number of Use::Not pops.
-template<class... Args>
-void passThrough(Env& env, Args&&... args) {
-  UseInfo ui { Use::Not, {{ env.id, DceAction::Kill }} };
-  combineSets(ui, std::forward<Args>(args)...);
-
-  for (auto i = 1; i < env.op.numPop(); ++i) {
-    pop(env, UseInfo{ui});
-  }
-  pop(env, std::move(ui));
-}
-
-bool popCouldRunDestructor(Env& env) {
+bool popCouldRunDestructor(Env& env, uint32_t i = 0) {
   // If there's an equivLocal, we know that it's not the last
   // reference, so popping the stack won't run any destructors.
-  return
-    env.stateBefore.stack.back().equivLocal == NoLocalId &&
-    couldRunDestructor(topC(env));
-}
-
-/*
- * It may be ok to remove pops on objects with destructors in some scenarios
- * (where it won't change the observable point at which a destructor runs).  We
- * could also look at the object type and see if it is known that it can't have
- * a user-defined destructor.
- *
- * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
- * to the producer of the cell that the it is considered used if it could be
- * the last reference alive (in which case the destructor would be run on
- * Pop). If the producer knows that the cell is not the last reference (e.g. if
- * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
- */
-void discardNonDtors(Env& env) {
-  if (popCouldRunDestructor(env)) {
-    return pop(env, Use::UsedIfLastRef, env.id);
-  }
-  discard(env);
-}
-
-enum class PushFlags {
-  MarkLive,
-  MarkDead,
-  PassThrough,
-  PopOutputs
-};
-
-bool alwaysPop(const UseInfo& ui) {
-  return
-    ui.location.blk != NoBlockId ||
-    ui.actions.size() > 1;
-}
-
-template<typename... Args>
-bool alwaysPop(const UseInfo& ui, Args&&... args) {
-  return alwaysPop(ui) || alwaysPop(std::forward<Args>(args)...);
-}
-
-bool maybePop(Env& env, const UseInfo& ui) {
-  return
-    (ui.actions.size() == 1 &&
-     ui.actions.begin()->first.idx > env.id.idx + 1);
-}
-
-template<typename... Args>
-bool maybePop(Env& env, const UseInfo& ui, Args&&... args) {
-  return maybePop(env, ui) || maybePop(env, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-bool shouldPopOutputs(Env& env, Args&&... args) {
-  if (alwaysPop(std::forward<Args>(args)...)) return true;
-  return maybePop(env, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-void popOutputs(Env& env, Args&&... args) {
-  if (shouldPopOutputs(env, std::forward<Args>(args)...)) {
-    markUisDead(env, std::forward<Args>(args)...);
-    env.dceState.actionMap[env.id] = DceAction::PopOutputs;
-    return;
-  }
-  markUisLive(env, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-void handle_push(Env& env, PushFlags pf, Args&&... uis) {
-  switch (pf) {
-    case PushFlags::MarkLive:
-      markUisLive(env, std::forward<Args>(uis)...);
-      return;
-    case PushFlags::MarkDead:
-      markUisDead(env, std::forward<Args>(uis)...);
-      return;
-    case PushFlags::PassThrough:
-      passThrough(env, std::move(uis)...);
-      return;
-    case PushFlags::PopOutputs:
-      popOutputs(env, std::forward<Args>(uis)...);
-      return;
-  }
-}
-
-template<typename F>
-void push(Env& env, F fun) {
-  always_assert(!env.dceState.stack.empty());
-  auto ui = std::move(env.dceState.stack.back());
-  env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(ui.usage), show(ui.actions));
-  auto const f = fun(ui);
-  handle_push(env, f, std::move(ui));
-}
-
-void push(Env& env) {
-  push(env, [](const UseInfo&) { return PushFlags::MarkLive; });
-}
-
-template<typename F>
-void push2(Env& env, F fun) {
-  always_assert(env.dceState.stack.size() >= 2);
-  auto u1 = std::move(env.dceState.stack.back());
-  env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u1.actions));
-  auto u2 = std::move(env.dceState.stack.back());
-  env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u2.actions));
-  auto const f = fun(u1, u2);
-  handle_push(env, f, std::move(u1), std::move(u2));
-}
-
-void pushRemovable(Env& env) {
-  push(env,[] (const UseInfo& ui) {
-      return ui.usage == Use::Not ? PushFlags::MarkDead : PushFlags::MarkLive;
-    });
+  auto const& s = env.stateBefore.stack;
+  auto const& e = s[s.size() - i - 1];
+  return e.equivLocal == NoLocalId && couldRunDestructor(e.type);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -668,6 +589,15 @@ void addLocGen(Env& env, uint32_t id) {
   FTRACE(2, "      loc-gen: {}\n", id);
   if (id >= kMaxTrackedLocals) return;
   env.dceState.liveLocals[id] = 1;
+}
+
+/*
+ * Indicate that this instruction will use the value of loc unless we
+ * kill it. handle_push will take care of calling addLocGen if
+ * appropriate.
+ */
+void scheduleGenLoc(Env& env, LocalId loc) {
+  env.loc = loc;
 }
 
 void addLocKill(Env& env, uint32_t id) {
@@ -756,7 +686,8 @@ void writeSlot(Env& env, uint32_t id) {
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 0;
   env.dceState.usedSlots[id] = 1;
-  auto& ui = env.dceState.slotUsage[id];
+  auto const& ui = env.dceState.slotUsage[id];
+  validate(ui.usage);
   if (ui.usage != Use::Used &&
       ui.actions.size() &&
       ui.location.blk != NoBlockId) {
@@ -772,6 +703,322 @@ bool isSlotLive(Env& env, uint32_t id) {
 
 UseInfo slotUsage(Env& env, uint32_t id) {
   return std::move(env.dceState.slotUsage[id]);
+}
+
+//////////////////////////////////////////////////////////////////////
+// manipulate eval stack
+
+void pop(Env& env, UseInfo&& ui) {
+  FTRACE(2, "      pop({})\n", show(ui.usage));
+  env.dceState.stack.push_back(std::move(ui));
+}
+
+void pop(Env& env, Use u, DceActionMap actions) {
+  pop(env, {u, std::move(actions)});
+}
+
+void pop(Env& env, Use u, InstrId id) {
+  pop(env, {u, {{id, DceAction::Kill}}});
+}
+
+void pop(Env& env) { pop(env, Use::Used, DceActionMap{}); }
+
+void discard(Env& env) {
+  pop(env, Use::Not, env.id);
+}
+
+/*
+ * It may be ok to remove pops on objects with destructors in some scenarios
+ * (where it won't change the observable point at which a destructor runs).  We
+ * could also look at the object type and see if it is known that it can't have
+ * a user-defined destructor.
+ *
+ * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
+ * to the producer of the cell that the it is considered used if it could be
+ * the last reference alive (in which case the destructor would be run on
+ * Pop). If the producer knows that the cell is not the last reference (e.g. if
+ * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
+ */
+void discardNonDtors(Env& env) {
+  if (popCouldRunDestructor(env)) {
+    return pop(env, Use::UsedIfLastRef, env.id);
+  }
+  discard(env);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Mark a UseInfo used; if its linked also mark the ui below it used.
+ * As we mark them used, we may also need to add them to
+ * forcedLiveLocations to prevent inconsistencies in the global state
+ * (see markUisLive).
+ */
+void use(std::set<LocationId>& forcedLive,
+         std::vector<UseInfo>& uis, uint32_t i) {
+  while (true) {
+    auto& ui = uis[i];
+    auto linked = isLinked(ui);
+    if (ui.usage != Use::Used &&
+        ui.location.blk != NoBlockId) {
+      forcedLive.insert(ui.location);
+    }
+    ui.usage = Use::Used;
+    ui.actions.clear();
+    if (!linked) break;
+    assert(i);
+    i--;
+  }
+}
+
+/*
+ * A UseInfo has been popped, and we want to perform its actions. If
+ * its not linked we'll just add them to the dceState; otherwise we'll
+ * add them to the UseInfo on the top of the stack.
+ */
+DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
+  if (!linked) {
+    FTRACE(2, "     committing {}: {}\n", show(env.id), show(am));
+  }
+
+  assert(!linked || env.dceState.stack.back().usage != Use::Used);
+
+  auto& dst = linked ?
+    env.dceState.stack.back().actions : env.dceState.actionMap;
+
+  for (auto& i : am) {
+    auto ret = dst.insert(i);
+    if (!ret.second && i.second != ret.first->second) {
+      assert(i.second == DceAction::Kill);
+      if (ret.first->second == DceAction::PopAndReplace) {
+        ret.first->second = DceAction::Replace;
+      } else if (ret.first->second == DceAction::PopInputs) {
+        ret.first->second = DceAction::Kill;
+      } else {
+        always_assert(false);
+      }
+    }
+  }
+  if (!am.count(env.id)) {
+    dst.emplace(env.id, DceAction::Kill);
+  }
+  return dst;
+}
+
+/*
+ * Combine a set of UseInfos into the first, and return the combined one.
+ */
+UseInfo& combineUis(UseInfo& ui) { return ui; }
+template<class... Args>
+UseInfo& combineUis(UseInfo& accum, const UseInfo& ui, const Args&... args) {
+  accum.actions.insert(begin(ui.actions), end(ui.actions));
+  if (accum.location.blk == NoBlockId ||
+      accum.location < ui.location) {
+    accum.location = ui.location;
+  }
+  return combineUis(accum, args...);
+}
+
+/*
+ * The current instruction is going to be replaced with PopCs. Perform
+ * appropriate pops (either Use::Not or Use::UsedIfLastRef).
+ */
+void ignoreInputs(Env& env, bool linked, DceActionMap&& actions) {
+  auto const np = numPop(env.op);
+  if (!np) return;
+
+  auto usage = [&] (uint32_t i) {
+    auto ret = popCouldRunDestructor(env, i) ? Use::UsedIfLastRef : Use::Not;
+    if (linked) ret = ret | Use::Linked;
+    return ret;
+  };
+
+  for (auto i = np; --i; ) {
+    pop(env, usage(i), DceActionMap {});
+    linked = true;
+  }
+  pop(env, usage(0), std::move(actions));
+}
+
+DceActionMap& commitUis(Env& env, bool linked, const UseInfo& ui) {
+  return commitActions(env, linked, ui.actions);
+}
+
+template<typename... Args>
+DceActionMap& commitUis(Env& env, bool linked,
+                        const UseInfo& ui, const Args&... args) {
+  commitUis(env, linked, ui);
+  return commitUis(env, linked, args...);
+}
+
+/*
+ * During global dce, a particular stack element could be pushed
+ * on multiple paths. eg:
+ *
+ *   $a ? f() : 42
+ *
+ * If f() is known to return a non-counted type, we have UnboxRNop ->
+ * PopC on one path, and Int 42 -> PopC on another, and the PopC marks
+ * its value Use::Not. When we get to the Int 42 it thinks both
+ * instructions can be killed; but when we get to the UnboxRNop it
+ * does nothing. So any time we decide to ignore a Use::Not or
+ * Use::UsedIfLastRef, we have to record that fact so we can prevent
+ * the other paths from trying to use that information. We communicate
+ * this via the ui.location field, and the forcedLiveLocations set.
+ *
+ * [ We deal with this case now by inserting a PopC after the
+ *   UnboxRNop, which allows the 42/PopC to be removed - but there are
+ *   other cases that are not yet handled. ]
+ */
+void markUisLive(Env& env, bool linked, const UseInfo& ui) {
+  validate(ui.usage);
+  if (ui.usage != Use::Used &&
+      ui.location.blk != NoBlockId) {
+    env.dceState.forcedLiveLocations.insert(ui.location);
+  }
+  if (linked) {
+    use(env.dceState.forcedLiveLocations,
+        env.dceState.stack, env.dceState.stack.size() - 1);
+  }
+}
+
+template<typename... Args>
+void markUisLive(Env& env, bool linked,
+                 const UseInfo& ui, const Args&... args) {
+  markUisLive(env, false, ui);
+  markUisLive(env, linked, args...);
+}
+
+template<typename... Args>
+void popOutputs(Env& env, bool linked, const Args&... args) {
+  if (shouldPopOutputs(env, args...)) {
+    auto& actions = commitUis(env, linked, args...);
+    actions[env.id] = DceAction::PopOutputs;
+    return;
+  }
+  markUisLive(env, linked, args...);
+}
+
+void markDead(Env& env) {
+  env.dceState.actionMap[env.id] = DceAction::Kill;
+  FTRACE(2, "     Killing {}\n", show(env.id));
+}
+
+void pop_inputs(Env& env, uint32_t numPop) {
+  for (auto i = uint32_t{0}; i < numPop; ++i) {
+    pop(env);
+  }
+}
+
+enum class PushFlags {
+  MarkLive,
+  MarkDead,
+  MarkUnused,
+  PopOutputs,
+  AddElemC
+};
+
+template<typename... Args>
+void handle_push(Env& env, PushFlags pf, Args&... uis) {
+  auto linked = lastUiIsLinked(uis...);
+
+  if (env.loc != NoLocalId && (linked ||
+                               pf == PushFlags::MarkLive ||
+                               pf == PushFlags::PopOutputs)) {
+    addLocGen(env, env.loc);
+  }
+
+  switch (pf) {
+    case PushFlags::MarkLive:
+      markUisLive(env, linked, uis...);
+      break;
+
+    case PushFlags::MarkDead:
+      commitUis(env, linked, uis...);
+      break;
+
+    case PushFlags::MarkUnused: {
+      // Our outputs are unused, their consumers are being removed,
+      // and we don't care about our inputs. Replace with
+      // appropriately unused pops of the inputs.
+      auto& ui = combineUis(uis...);
+      // use emplace so that the callee can override the action
+      ui.actions.emplace(env.id, DceAction::PopInputs);
+      commitActions(env, linked, ui.actions);
+      if (numPop(env.op)) {
+        ignoreInputs(env, linked, {{ env.id, DceAction::Kill }});
+      }
+      return;
+    }
+
+    case PushFlags::PopOutputs:
+      popOutputs(env, linked, uis...);
+      break;
+
+    case PushFlags::AddElemC: {
+      assert(!linked);
+      auto& ui = combineUis(uis...);
+      ui.usage = Use::AddElemC;
+      // For the last AddElemC, we will already have added a Replace
+      // action for env.id - so the following emplace will silently
+      // fail; for the rest, we just want to kill the AddElemC
+      ui.actions.emplace(env.id, DceAction::Kill);
+      pop(env, std::move(ui));
+
+      // The key is known; we must drop it if we convert to New*Array.
+      pop(env, Use::Not | Use::Linked, DceActionMap {});
+
+      // The value going into the array is a normal use.
+      pop(env);
+      return;
+    }
+  }
+  pop_inputs(env, numPop(env.op));
+}
+
+template<typename F>
+auto stack_ops(Env& env, F fun)
+  -> decltype(fun(std::declval<UseInfo&>()),void(0)) {
+  always_assert(!env.dceState.stack.empty());
+  auto ui = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  FTRACE(2, "      stack_ops({}@{})\n", show(ui.usage), show(ui.actions));
+  env.loc = NoLocalId;
+  auto const f = fun(ui);
+  handle_push(env, f, ui);
+}
+
+void stack_ops(Env& env) {
+  stack_ops(env, [](const UseInfo&) { return PushFlags::MarkLive; });
+}
+
+template<typename F>
+auto stack_ops(Env& env, F fun)
+  -> decltype(fun(std::declval<UseInfo&>(), std::declval<UseInfo&>()),void(0)) {
+  always_assert(env.dceState.stack.size() >= 2);
+  auto u1 = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  auto u2 = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  FTRACE(2, "      stack_ops({}@{},{}@{})\n",
+         show(u1.usage), show(u1.actions), show(u1.usage), show(u2.actions));
+  env.loc = NoLocalId;
+  auto const f = fun(u1, u2);
+  handle_push(env, f, u1, u2);
+}
+
+void push_outputs(Env& env, uint32_t numPush) {
+  for (auto i = uint32_t{0}; i < numPush; ++i) {
+    auto ui = std::move(env.dceState.stack.back());
+    env.dceState.stack.pop_back();
+    markUisLive(env, isLinked(ui), ui);
+  }
+}
+
+void pushRemovable(Env& env) {
+  stack_ops(env,[] (const UseInfo& ui) {
+      return allUnused(ui) ? PushFlags::MarkUnused : PushFlags::MarkLive;
+    });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -798,7 +1045,6 @@ void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
-void dce(Env& env, const bc::Array&)         { pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
 void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }
@@ -811,13 +1057,11 @@ void dce(Env& env, const bc::File&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
-void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
 void dce(Env& env, const bc::UnboxRNop&) {
-  push(env, [&] (const UseInfo& ui) {
-      pop(env);
+  stack_ops(env, [&] (const UseInfo& ui) {
       return allUnused(ui) ?
         PushFlags::PopOutputs : PushFlags::MarkLive;
     });
@@ -826,7 +1070,7 @@ void dce(Env& env, const bc::UnboxRNop&) {
 void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
   // class-ref.
-  push(env, [&] (UseInfo& ui) {
+  stack_ops(env, [&] (UseInfo& ui) {
       if (allUnused(ui)) {
         readSlotDiscardable(env, op.slot, std::move(ui.actions));
       } else {
@@ -867,7 +1111,7 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
   auto const ty = locRaw(env, op.loc1);
   if (clsRefGetHelper(env, ty, op.slot)) {
     assert(!readCouldHaveSideEffects(ty));
-    markUisDead(env, slotUsage(env, op.slot));
+    commitActions(env, false, slotUsage(env, op.slot).actions);
     return;
   }
 
@@ -877,7 +1121,7 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
 
 void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
   if (safe && !isSlotLive(env, slot)) {
-    markUisDead(env, slotUsage(env, slot));
+    commitActions(env, false, slotUsage(env, slot).actions);
     return;
   }
   writeSlot(env, slot);
@@ -910,54 +1154,152 @@ void dce(Env& env, const bc::Dup&) {
   //     o Otherwise we're done.
   //   - Otherwise, if the original value is unused, kill the dup
   //     and all dependent instructions.
-  push(env, [&] (const UseInfo& u1) {
+  stack_ops(env, [&] (UseInfo& dup, UseInfo& orig) {
       // Dup pushes a cell that is guaranteed to be not the last reference.
       // So, it can be eliminated if the cell it pushes is used as either
       // Use::Not or Use::UsedIfLastRef.
-      auto u1_unused = allUnusedIfNotLastRef(u1);
-      push(env, [&] (UseInfo& u2) {
-          if (allUnused(u2)) {
-            if (u1_unused) {
-              return PushFlags::PassThrough;
-            }
-            pop(env);
-            return PushFlags::MarkDead;
-          }
-          pop(env);
-          return PushFlags::MarkLive;
-        });
-      return u1_unused ? PushFlags::MarkDead : PushFlags::MarkLive;
+      auto const dup_unused = allUnusedIfNotLastRef(dup);
+      auto const orig_unused = allUnused(orig) &&
+        (!isLinked(dup) || dup_unused);
+
+      if (dup_unused && orig_unused) {
+        return PushFlags::MarkUnused;
+      }
+
+      if (dup_unused) {
+        markUisLive(env, isLinked(orig), orig);
+        orig.actions.clear();
+        return PushFlags::MarkDead;
+      }
+
+      if (orig_unused) {
+        markUisLive(env, false, dup);
+        dup.actions.clear();
+        return PushFlags::MarkDead;
+      }
+
+      return PushFlags::MarkLive;
     });
 }
 
 void dce(Env& env, const bc::CGetL& op) {
-  push(env, [&] (const UseInfo& ui) {
+  stack_ops(env, [&] (const UseInfo& ui) {
+      scheduleGenLoc(env, op.loc1);
       if (allUnused(ui) && !readCouldHaveSideEffects(locRaw(env, op.loc1))) {
-        return PushFlags::MarkDead;
+        return PushFlags::MarkUnused;
       }
-      addLocGen(env, op.loc1);
       return PushFlags::MarkLive;
     });
 }
 
 void dce(Env& env, const bc::CGetL2& op) {
   auto const ty = locRaw(env, op.loc1);
-  addLocGen(env, op.loc1);
 
-  push2(env, [&] (const UseInfo& u1, const UseInfo& u2) {
+  stack_ops(env, [&] (const UseInfo& u1, const UseInfo& u2) {
+      scheduleGenLoc(env, op.loc1);
       if (readCouldHaveSideEffects(ty) || !allUnused(u1, u2)) {
-        pop(env);
         return PushFlags::MarkLive;
-      } else {
-        return PushFlags::PassThrough;
       }
+      return PushFlags::MarkUnused;
     });
 }
 
 void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
-void dce(Env& env, const bc::Exit&)  { push(env); pop(env); readDtorLocs(env); }
+void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
+
+void dce(Env& env, const bc::Array& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
+
+      if (ui.usage != Use::AddElemC) return PushFlags::MarkLive;
+
+      assert(!env.dceState.isLocal);
+
+      CompactVector<Bytecode> bcs;
+      IterateV(op.arr1, [&] (const TypedValue* tv) {
+          bcs.push_back(gen_constant(*tv));
+        });
+      env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+      ui.actions[env.id] = DceAction::Replace;
+      return PushFlags::MarkUnused;
+    });
+}
+
+void dce(Env& env, const bc::NewMixedArray&) {
+  stack_ops(env,[] (const UseInfo& ui) {
+      if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      return PushFlags::MarkLive;
+    });
+}
+
+void dce(Env& env, const bc::AddElemC& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      if (env.dceState.isLocal) {
+        // Converting to New*Array changes the stack layout,
+        // which can invalidate the FuncAnalysis; only do it in global
+        // dce, since we're going to recompute the FuncAnalysis anyway.
+        return PushFlags::MarkLive;
+      }
+
+      auto const& arrPost = env.stateAfter.stack.back().type;
+      auto const& arrPre = topC(env, 2);
+      auto const postSize = arr_size(arrPost);
+      if (!postSize || postSize == arr_size(arrPre)) {
+        // if postSize is known, and equal to preSize, the AddElemC
+        // didn't add an element (duplicate key) so we have to give up.
+        // if its not known, we also have nothing to do.
+        return PushFlags::MarkLive;
+      }
+      if (ui.usage == Use::AddElemC) {
+        return PushFlags::AddElemC;
+      }
+      auto const cat = categorize_array(arrPost);
+      if (cat.hasValue) {
+        if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
+        auto v = tv(arrPost);
+        CompactVector<Bytecode> bcs;
+        if (arrPost.subtypeOf(TArrN)) {
+          bcs.emplace_back(bc::Array { v->m_data.parr });
+        } else {
+          assert(arrPost.subtypeOf(TDictN));
+          bcs.emplace_back(bc::Dict { v->m_data.parr });
+        }
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::PopAndReplace;
+        return PushFlags::MarkUnused;
+      }
+
+      if (isLinked(ui)) return PushFlags::MarkLive;
+
+      if (arrPost.strictSubtypeOf(TArrN)) {
+        CompactVector<Bytecode> bcs;
+        if (cat.cat == Type::ArrayCat::Struct &&
+            *postSize <= MixedArray::MaxStructMakeSize) {
+          bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
+        } else if (cat.cat == Type::ArrayCat::Packed) {
+          bcs.emplace_back(
+            bc::NewPackedArray { static_cast<int32_t>(*postSize) }
+          );
+        } else {
+          return PushFlags::MarkLive;
+        }
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::Replace;
+        return PushFlags::AddElemC;
+      }
+
+      return PushFlags::MarkLive;
+    });
+}
 
 void dce(Env& env, const bc::SetL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
@@ -967,8 +1309,7 @@ void dce(Env& env, const bc::SetL& op) {
            LocalStaticBinding::Bound);
     return markDead(env);
   }
-  push(env);
-  pop(env);
+  stack_ops(env);
   if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
     addLocGen(env, op.loc1);
   } else {
@@ -996,20 +1337,20 @@ void dce(Env& env, const bc::UnsetL& op) {
 }
 
 /*
- * IncDecL is a read-modify-write: can be removed if the local isn't live, the
- * set can't have side effects, and no one reads the value it pushes.  If the
- * instruction is not dead, always add the local to the set of upward exposed
- * uses.
+ * IncDecL is a read-modify-write: can be removed if the local isn't
+ * live, the set can't have side effects, and no one reads the value
+ * it pushes.  If the instruction is not dead, add the local to the
+ * set of upward exposed uses.
  */
 void dce(Env& env, const bc::IncDecL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
                          readCouldHaveSideEffects(oldTy);
-  push(env, [&] (const UseInfo& ui) {
+  stack_ops(env, [&] (const UseInfo& ui) {
+      scheduleGenLoc(env, op.loc1);
       if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
-        return PushFlags::MarkDead;
+        return PushFlags::MarkUnused;
       }
-      addLocGen(env, op.loc1);
       return PushFlags::MarkLive;
     });
 }
@@ -1053,17 +1394,15 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
 void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
 
-  push(env, [&] (UseInfo& ui) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      scheduleGenLoc(env, op.loc1);
       if (!isLocLive(env, op.loc1) && allUnused(ui)) {
         if (!setLocCouldHaveSideEffects(env, op.loc1) &&
             !readCouldHaveSideEffects(oldTy) &&
             !setOpLSideEffects(op, oldTy, topC(env))) {
-          pop(env, Use::Not, std::move(ui.actions));
-          return PushFlags::MarkDead;
+          return PushFlags::MarkUnused;
         }
       }
-      pop(env);
-      addLocGen(env, op.loc1);
       return PushFlags::MarkLive;
     });
 }
@@ -1095,14 +1434,33 @@ dce_slot_default(Env& env, const Op& op) {}
 template<class Op>
 void dce(Env& env, const Op& op) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
-  for (auto i = uint32_t{0}; i < op.numPush(); ++i) {
-    push(env);
-  }
-  for (auto i = uint32_t{0}; i < op.numPop(); ++i) {
-    pop(env);
-  }
+  push_outputs(env, op.numPush());
+  pop_inputs(env, op.numPop());
   dce_slot_default(env, op);
 }
+
+/*
+ * There's a set of Base instructions that read a cell from the stack
+ * without popping it. For correctness, we need to mark the cell as
+ * used.
+ */
+template<class Op>
+void touch(Env& env, const Op& op, int32_t ix) {
+  addLocGenSet(env, env.flags.mayReadLocalSet);
+  push_outputs(env, op.numPush());
+  pop_inputs(env, op.numPop());
+  dce_slot_default(env, op);
+  use(env.dceState.forcedLiveLocations,
+      env.dceState.stack, env.dceState.stack.size() - 1 - ix);
+}
+
+void dce(Env& env, const bc::BaseC& op)       { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseNC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseGC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseSC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseR& op)       { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::FPassBaseNC& op) { touch(env, op, op.arg2); }
+void dce(Env& env, const bc::FPassBaseGC& op) { touch(env, op, op.arg2); }
 
 void dispatch_dce(Env& env, const Bytecode& op) {
 #define O(opcode, ...) case Op::opcode: dce(env, op.opcode); return;
@@ -1116,7 +1474,7 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 struct DceOutState {
   DceOutState() = default;
   enum Local {};
-  explicit DceOutState(Local) {
+  explicit DceOutState(Local) : isLocal(true) {
     locLive.set();
     locLiveExn.set();
     slotLive.set();
@@ -1147,6 +1505,11 @@ struct DceOutState {
    * successors.
    */
   folly::Optional<std::vector<UseInfo>>       slotUsage;
+
+  /*
+   * Whether this is for local_dce
+   */
+  bool                                        isLocal{false};
 };
 
 folly::Optional<DceState>
@@ -1175,6 +1538,7 @@ dce_visit(const Index& index,
   dceState.usedLocals = dceOutState.locLive;
   dceState.liveSlots  = dceOutState.slotLive;
   dceState.usedSlots  = dceOutState.slotLive;
+  dceState.isLocal    = dceOutState.isLocal;
 
   if (dceOutState.dceStack) {
     dceState.stack = *dceOutState.dceStack;
@@ -1202,8 +1566,10 @@ dce_visit(const Index& index,
       dceState,
       op,
       { blk->id, idx },
+      NoLocalId,
       states[idx].first,
-      states[idx].second
+      states[idx].second,
+      states[idx+1].first,
     };
     dispatch_dce(visit_env, op);
 
@@ -1290,13 +1656,24 @@ DceAnalysis analyze_dce(const Index& index,
 /*
  * Do the actual updates to the bytecodes.
  */
-void dce_perform(const php::Func& func, const DceActionMap& actionMap) {
+void dce_perform(const php::Func& func,
+                 const DceActionMap& actionMap,
+                 const DceReplaceMap& replaceMap) {
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
     auto const b = borrow(func.blocks[id.blk]);
-    FTRACE(1, "{}: {}:{} {}\n", show(elm.second),
-           id.blk, id.idx, show(func, b->hhbcs[id.idx]));
+    FTRACE(1, "{} {}\n", show(elm), show(func, b->hhbcs[id.idx]));
     switch (elm.second) {
+      case DceAction::PopInputs:
+        // we want to replace the bytecode with pops of its inputs
+        if (auto const numToPop = numPop(b->hhbcs[id.idx])) {
+          b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+          b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                          numToPop,
+                          bc::PopC {});
+          break;
+        }
+        // Fall through
       case DceAction::Kill:
         if (b->hhbcs.size() == 1) {
           // we don't allow empty blocks
@@ -1307,10 +1684,35 @@ void dce_perform(const php::Func& func, const DceActionMap& actionMap) {
         break;
       case DceAction::PopOutputs:
       {
-        auto const numPop = b->hhbcs[id.idx].numPush();
+        // we want to pop the things that the bytecode pushed
+        auto const numToPop = numPush(b->hhbcs[id.idx]);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx + 1,
-                        numPop,
+                        numToPop,
                         bc::PopC {});
+        break;
+      }
+      case DceAction::Replace:
+      {
+        auto it = replaceMap.find(id);
+        always_assert(it != end(replaceMap) && !it->second.empty());
+        b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                        begin(it->second), end(it->second));
+        break;
+      }
+      case DceAction::PopAndReplace:
+      {
+        auto it = replaceMap.find(id);
+        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const numToPop = numPop(b->hhbcs[id.idx]);
+        b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                        begin(it->second), end(it->second));
+        if (numToPop) {
+          b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                          numToPop,
+                          bc::PopC {});
+        }
         break;
       }
     }
@@ -1321,6 +1723,7 @@ struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
+  DceReplaceMap replaceMap;
 };
 
 DceOptResult
@@ -1339,7 +1742,8 @@ optimize_dce(const Index& index,
   return {
     std::move(dceState->usedLocals),
     std::move(dceState->usedSlots),
-    std::move(dceState->actionMap)
+    std::move(dceState->actionMap),
+    std::move(dceState->replaceMap)
   };
 }
 
@@ -1466,14 +1870,14 @@ void local_dce(const Index& index,
   auto const ret = optimize_dce(index, ainfo, blk, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
-  dce_perform(*ainfo.ctx.func, ret.actionMap);
+  dce_perform(*ainfo.ctx.func, ret.actionMap, ret.replaceMap);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void global_dce(const Index& index, const FuncAnalysis& ai) {
-  auto rpoId = [&] (borrowed_ptr<php::Block> blk) {
-    return ai.bdata[blk->id].rpoId;
+  auto rpoId = [&] (BlockId blk) {
+    return ai.bdata[blk].rpoId;
   };
 
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
@@ -1508,7 +1912,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   auto incompleteQ = dataflow_worklist<uint32_t,std::less<uint32_t>>(
     ai.rpoBlocks.size()
   );
-  for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b));
+  for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b->id));
 
   auto const normalPreds   = computeNormalPreds(ai.rpoBlocks);
   auto const factoredPreds = computeFactoredPreds(ai.rpoBlocks);
@@ -1518,9 +1922,23 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * paths, one of which could be killed, but the other can't. We have
    * to prevent either, so any time we find a non-used stack slot that
    * can't be killed, we add it to this set (via markUisLive, and the
-   * DceAnalysis).
+   * DceAnalysis), and schedule its block for re-analysis.
    */
   std::set<LocationId> forcedLiveLocations;
+
+  /*
+   * Temporary set used to collect locations that were forced live by
+   * block merging/linked locations etc.
+   */
+  std::set<LocationId> forcedLiveTemp;
+
+  auto checkLive = [&] (std::vector<UseInfo>& uis, uint32_t i,
+                        LocationId location) {
+    if (forcedLiveLocations.count(location)) return true;
+    if (!isLinked(uis[i])) return false;
+    assert(i);
+    return uis[i - 1].usage == Use::Used;
+  };
 
   auto fixupUseInfo = [&] (std::vector<UseInfo>& uis,
                            BlockId blk,
@@ -1528,31 +1946,30 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     for (uint32_t i = 0; i < uis.size(); i++) {
       auto& out = uis[i];
       if (out.location.blk == NoBlockId) out.location = { blk, i, isSlot };
-      if (forcedLiveLocations.count(out.location)) {
-        out.usage = Use::Used;
-        out.actions.clear();
+      if (checkLive(uis, i, out.location)) {
+        use(forcedLiveTemp, uis, i);
       }
     }
   };
 
-  auto mergeUIs = [&] (UseInfo& out, const UseInfo& in,
+  auto mergeUIs = [&] (std::vector<UseInfo>& outBase, const UseInfo& in,
                        uint32_t i, BlockId blk, bool isSlot) {
+    auto& out = outBase[i];
     if (out.usage == Use::Used) {
       return false;
     }
+
+    if (in.usage == Use::Used || out.usage != in.usage) {
+      use(forcedLiveTemp, outBase, i);
+      return true;
+    }
     auto location = in.location;
     if (location.blk == NoBlockId) location = { blk, i, isSlot };
-    if (in.usage == Use::Used ||
-        forcedLiveLocations.count(location)) {
-      out.usage = Use::Used;
-      out.actions.clear();
+    if (checkLive(outBase, i, location)) {
+      use(forcedLiveTemp, outBase, i);
       return true;
     }
-    if (out.usage != in.usage) {
-      out.usage = Use::Used;
-      out.actions.clear();
-      return true;
-    }
+
     auto ret = false;
     for (auto const& id : in.actions) {
       ret |= out.actions.insert(id).second;
@@ -1579,9 +1996,31 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto ret = false;
     assert(stkOut->size() == stkIn.size());
     for (uint32_t i = 0; i < stkIn.size(); i++) {
-      mergeUIs(stkOut.value()[i], stkIn[i], i, blk, isSlot);
+      if (mergeUIs(*stkOut, stkIn[i], i, blk, isSlot)) ret = true;
     }
     return ret;
+  };
+
+  /*
+   * If we weren't able to take advantage of any unused entries
+   * on the dceStack that originated from another block, mark
+   * them used to prevent other paths from trying to delete them.
+   *
+   * Also, merge the entries into our global forcedLiveLocations, to
+   * make sure they always get marked Used.
+   */
+  auto processForcedLive = [&] (const std::set<LocationId>& forcedLive) {
+    for (auto const& id : forcedLive) {
+      if (forcedLiveLocations.insert(id).second) {
+        // This is slightly inefficient; we know exactly how this will
+        // affect the analysis, so we could get away with just
+        // reprocessing the affected predecessors of id.blk; but this
+        // is much simpler, and less error prone. We can revisit if it
+        // turns out to be a performance issue.
+        FTRACE(5, "Forcing {} live\n", show(id));
+        incompleteQ.push(rpoId(id.blk));
+      }
+    }
   };
 
   /*
@@ -1622,44 +2061,8 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
               slot_bits_string(ai.ctx.func, blockState.slotLiveExn),
               slot_bits_string(ai.ctx.func, result.slotLiveIn));
 
-    /*
-     * If we weren't able to take advantage of any unused entries
-     * on the dceStack that originated from another block, mark
-     * them used to prevent other paths from trying to delete them.
-     *
-     * Also, merge the entries into our global forcedLiveLocations, to
-     * make sure they always get marked Used.
-     */
-    for (auto const& id : result.forcedLiveLocations) {
-      if (forcedLiveLocations.insert(id).second) {
-        for (auto& pred : normalPreds[id.blk]) {
-          FTRACE(2, "  {} force-live {}:{}{}\n",
-                 id.blk, pred->id, id.id, id.isSlot ? "S" : "");
-          auto& pbs = blockStates[pred->id];
-          if (id.isSlot) {
-            if (!pbs.slotLive[id.id]) {
-              pbs.slotLive[id.id] = true;
-              if (pred != blk) {
-                incompleteQ.push(rpoId(pred));
-              }
-            }
-            continue;
-          }
-          auto& dceStack = pbs.dceStack;
-          if (!dceStack) continue;
-          auto& ui = dceStack.value()[id.id];
-          if (ui.usage != Use::Used) {
-            ui.actions.clear();
-            ui.usage = Use::Used;
-            // no need to reprocess *this* block, since this is the
-            // one that reported the problem.
-            if (pred != blk) {
-              incompleteQ.push(rpoId(pred));
-            }
-          }
-        }
-      }
-    }
+
+    processForcedLive(result.forcedLiveLocations);
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
@@ -1676,7 +2079,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
           changed ||
           pbs.locLive != oldPredLocLive ||
           pbs.slotLive != oldPredSlotLive) {
-        incompleteQ.push(rpoId(pred));
+        incompleteQ.push(rpoId(pred->id));
       }
     }
 
@@ -1692,8 +2095,13 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       pbs.slotLiveExn |= result.slotLiveIn;
       if (pbs.locLiveExn != oldPredLocLiveExn ||
           pbs.slotLiveExn != oldPredSlotLiveExn) {
-        incompleteQ.push(rpoId(pred));
+        incompleteQ.push(rpoId(pred->id));
       }
+    }
+
+    while (!forcedLiveTemp.empty()) {
+      auto t = std::move(forcedLiveTemp);
+      processForcedLive(t);
     }
   }
 
@@ -1705,6 +2113,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
+  DceReplaceMap replaceMap;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
     auto ret = optimize_dce(
@@ -1720,14 +2129,23 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       if (!actionMap.size()) {
         actionMap = std::move(ret.actionMap);
       } else {
-        for (auto const& elm : ret.actionMap) {
-          actionMap.insert(elm);
+        for (auto& elm : ret.actionMap) {
+          actionMap.insert(std::move(elm));
+        }
+      }
+    }
+    if (ret.replaceMap.size()) {
+      if (!replaceMap.size()) {
+        replaceMap = std::move(ret.replaceMap);
+      } else {
+        for (auto& elm : ret.replaceMap) {
+          replaceMap.insert(std::move(elm));
         }
       }
     }
   }
 
-  dce_perform(*ai.ctx.func, actionMap);
+  dce_perform(*ai.ctx.func, actionMap, replaceMap);
 
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);

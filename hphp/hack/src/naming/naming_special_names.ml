@@ -197,6 +197,7 @@ module Typehints = struct
   let array   = "array"
   let darray  = "darray"
   let varray  = "varray"
+  let darray_or_varray = "darray_or_varray"
   let integer = "integer"
   let boolean = "boolean"
   let double  = "double"

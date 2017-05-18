@@ -22,7 +22,9 @@ let global_opts = GlobalOptions.make
   ~tco_safe_vector_array: false
   ~tco_user_attrs: None
   ~tco_experimental_features: GlobalOptions.tco_experimental_all
+  ~tco_migration_flags: SSet.empty
   ~po_auto_namespace_map: []
+  ~ignored_fixme_codes: ISet.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options
@@ -56,7 +58,7 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     TestClientProvider.mock_new_client_type Non_persistent;
     TestClientProvider.mock_client_request x
   | ConnectPersistent ->
-    TestClientProvider.mock_new_client_type Persistent);
+    TestClientProvider.mock_new_client_type Persistent_hard);
 
   Option.iter inputs.persistent_client_request
     TestClientProvider.mock_persistent_client_request;
@@ -88,7 +90,8 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.({ env with last_notifier_check_time = 0.0 }) in
 
-  let env = ServerMain.serve_one_iteration genv env client_provider in
+  let env, _needs_flush = ServerMain.serve_one_iteration
+    ~force_flush:false genv env client_provider in
   SearchServiceRunner.run_completely genv;
   env, {
     did_read_disk_changes = !did_read_disk_changes_ref;
@@ -97,7 +100,7 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     new_client_response =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =
-      TestClientProvider.get_client_response Persistent;
+      TestClientProvider.get_client_response Persistent_hard;
     push_message = TestClientProvider.get_push_message ();
   }
 

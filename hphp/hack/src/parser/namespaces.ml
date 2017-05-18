@@ -211,13 +211,16 @@ module ElaborateDefs = struct
       The default namespace in php is the global namespace specified by
       the empty string. In the case of an empty string, we model it as
       the global namespace.
+
+      We remove namespace and use nodes and replace them with
+      SetNamespaceEnv nodes that contain the namespace environment
     *)
     | Namespace ((_, nsname), prog) -> begin
         let nsname = match nsname with
           | "" -> None
           | _ -> Some nsname in
         let new_nsenv = {nsenv with ns_name = nsname} in
-        nsenv, program new_nsenv prog
+        nsenv, SetNamespaceEnv new_nsenv :: program new_nsenv prog
       end
     | NamespaceUse l -> begin
         let nsenv =
@@ -236,7 +239,7 @@ module ElaborateDefs = struct
                 {nsenv with ns_const_uses = m}
               end
           end in
-        nsenv, []
+        nsenv, [SetNamespaceEnv nsenv]
       end
     | Class c -> nsenv, [Class {c with
         c_name = elaborate_id_no_autos nsenv NSClass c.c_name;
@@ -254,7 +257,11 @@ module ElaborateDefs = struct
         t_namespace = nsenv;
       }]
     | Constant cst -> nsenv, [Constant {cst with
-        cst_name = elaborate_id_no_autos nsenv NSConst cst.cst_name;
+        cst_name =
+          (* Leave literal name in place if from `define('name', ...)` *)
+(*          if cst.cst_kind = Ast.Cst_define
+          then cst.cst_name
+          else *) elaborate_id_no_autos nsenv NSConst cst.cst_name;
         cst_namespace = nsenv;
       }]
     | other -> nsenv, [other]

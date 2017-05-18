@@ -11,7 +11,7 @@ import tempfile
 
 import common_tests
 
-from hh_paths import hh_server, hh_client
+from hh_paths import hh_server
 
 
 def write_echo_json(f, obj):
@@ -58,7 +58,7 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
-watchman_subscribe = true
+watchman_subscribe_v2 = true
 """)
 
     def write_hhconfig(self, script_name):
@@ -99,29 +99,16 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig('server_options.sh')
         self.write_watchman_config()
 
-    def run_check(self, stdin=None, options=None):
-        options = [] if options is None else options
-        root = self.repo_dir + os.path.sep
-        return self.proc_call(
-            [
-                hh_client,
-                'check',
-                '--retries',
-                '20',
-                self.repo_dir
-            ] + list(map(lambda x: x.format(root=root), options)),
-            stdin=stdin)
-
     def check_cmd(self, expected_output, stdin=None, options=None):
-        (output, err, _) = self.run_check(stdin, options)
+        result = super(MiniStateTestDriver, self).check_cmd(
+            expected_output,
+            stdin,
+            options
+        )
         logs = self.get_server_logs()
         self.assertIn('Using watchman', logs)
         self.assertIn('Successfully loaded mini-state', logs)
-        root = self.repo_dir + os.path.sep
-        self.assertCountEqual(
-            map(lambda x: x.format(root=root), expected_output),
-            output.splitlines())
-        return err
+        return result
 
     def assertEqualString(self, first, second, msg=None):
         root = self.repo_dir + os.path.sep

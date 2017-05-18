@@ -278,7 +278,7 @@ final class Map implements \MutableMap {
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            This
            Clone
            SetL $res
@@ -286,7 +286,7 @@ final class Map implements \MutableMap {
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -296,20 +296,15 @@ final class Map implements \MutableMap {
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -339,7 +334,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            This
            Clone
            SetL $res
@@ -347,7 +342,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
             FPassL 0 $k
             FPassL 1 $v
@@ -358,20 +353,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -401,7 +391,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -410,7 +400,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -422,20 +412,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -465,7 +450,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -474,7 +459,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
             FPassL 0 $k
             FPassL 1 $v
@@ -487,20 +472,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -562,7 +542,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -571,7 +551,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -585,20 +565,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -898,7 +873,7 @@ final class ImmMap implements \ConstMap {
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
            FCall 0
@@ -908,7 +883,7 @@ final class ImmMap implements \ConstMap {
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -918,20 +893,15 @@ final class ImmMap implements \ConstMap {
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -964,7 +934,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
            FCall 0
@@ -974,7 +944,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
             FPassL 0 $k
             FPassL 1 $v
@@ -985,20 +955,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -1031,7 +996,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -1040,7 +1005,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -1052,20 +1017,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -1098,7 +1058,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -1107,7 +1067,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
             FPassL 0 $k
             FPassL 1 $v
@@ -1120,20 +1080,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0
@@ -1182,7 +1137,7 @@ EOT
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_catch kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
            FCall 0
            PopR
@@ -1191,7 +1146,7 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_catch kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
             FPassL 0 $v
             FCall 1
@@ -1205,20 +1160,15 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
-
-           Jmp endloop
-
-  kill_iter_1:
-           Catch
-           IterFree 1
-           Throw
-}
-
-kill_iter_0:
-           Catch
+} .catch {
            CIterFree 0
            Throw
+}
 
     endloop:
            CIterFree 0

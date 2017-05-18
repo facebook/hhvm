@@ -19,8 +19,10 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 
+#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -200,6 +202,101 @@ int32_t* MixedArray::findForNewInsert(hash_t h0) const {
   return findForNewInsert(hashTab(), mask(), h0);
 }
 
+ALWAYS_INLINE bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
+                                strhash_t hash) {
+  // hitStringKey() should only be called on an Elm that is referenced by a
+  // hash table entry. MixedArray guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!MixedArray::isTombstone(e.data.m_type));
+  return hash == e.hash() && (s == e.skey || s->same(e.skey));
+}
+
+ALWAYS_INLINE bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
+  // hitIntKey() should only be called on an Elm that is referenced by a
+  // hash table entry. MixedArray guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!e.isTombstone());
+  return e.ikey == ki && e.hasIntKey();
+}
+
+// Quadratic probe is:
+//
+//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
+//
+// Use 1/2 for c1 and c2.  In combination with a table size that is a power of
+// 2, this guarantees a probe sequence of length tableSize that probes all
+// table elements exactly once.
+
+template <class Hit> ALWAYS_INLINE
+ssize_t MixedArray::findImpl(hash_t h0, Hit hit) const {
+  uint32_t mask = this->mask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
+    auto pos = hashtable[probeIndex & mask];
+    if (validPos(pos)) {
+      if (hit(elms[pos])) return pos;
+    } else if (pos & 1) {
+      assert(pos == Empty);
+      return pos;
+    }
+    probeIndex += i;
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
+  }
+}
+
+template <class Hit> ALWAYS_INLINE
+int32_t* MixedArray::findForInsertImpl(hash_t h0, Hit hit) const {
+  uint32_t mask = this->mask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probeIndex & mask];
+    int32_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(elms[pos])) {
+        return ei;
+      }
+    } else if (pos & 1) {
+      assert(pos == Empty);
+      return ei;
+    }
+    probeIndex += i;
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
+  }
+}
+
+inline ssize_t MixedArray::find(int64_t ki, inthash_t h) const {
+  return findImpl(h, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+inline ssize_t MixedArray::find(const StringData* s, strhash_t h) const {
+  return findImpl(h, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
+inline int32_t* MixedArray::findForInsert(int64_t ki, inthash_t h) const {
+  return findForInsertImpl(h, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+inline int32_t*
+MixedArray::findForInsert(const StringData* s, strhash_t h) const {
+  return findForInsertImpl(h, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
 inline bool MixedArray::isTombstone(ssize_t pos) const {
   assert(size_t(pos) <= m_used);
   return isTombstone(data()[pos].data.m_type);
@@ -307,7 +404,7 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   e.setStrKey(key, h);
   // TODO(#3888164): we should restructure things so we don't have to check
   // KindOfUninit here.
-  initVal(e.data, data);
+  initElem(e.data, data);
   return this;
 }
 
@@ -327,16 +424,17 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
     tvBind(data.asRef(), &p.tv);
     return this;
   }
-  tvAsUninitializedVariant(&p.tv).constructRefHelper(data);
+  tvBoxIfNeeded(data.asTypedValue());
+  refDup(*data.asTypedValue(), p.tv);
   return this;
 }
 
 template <class K>
-ArrayLval MixedArray::addLvalImpl(K k) {
+member_lval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) tvWriteNull(&p.tv);
-  return {this, &tvAsVariant(&p.tv)};
+  return member_lval { this, &p.tv };
 }
 
 //////////////////////////////////////////////////////////////////////

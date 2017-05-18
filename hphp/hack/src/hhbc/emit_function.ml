@@ -12,37 +12,33 @@ open Instruction_sequence
 
 let from_ast : Ast.fun_ -> Hhas_function.t =
   fun ast_fun ->
-  let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
-  let default_instrs _ = gather [instr_null; instr_retc] in
-  let body_instrs,
-      function_decl_vars,
-      function_num_iters,
-      function_params,
-      function_return_type,
-      function_is_generator,
-      function_is_pair_generator =
-    Emit_body.from_ast
-      ~self:None
-      ast_fun.Ast.f_tparams
-      ast_fun.Ast.f_params
-      ast_fun.Ast.f_ret
-      ast_fun.Ast.f_body
-      default_instrs in
-  let function_body = instr_seq_to_list body_instrs in
-  let function_attributes =
-    Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in
+  let namespace = ast_fun.Ast.f_namespace in
+  let function_name, _ =
+    Hhbc_id.Function.elaborate_id namespace ast_fun.Ast.f_name in
   let function_is_async =
     ast_fun.Ast.f_fun_kind = Ast_defs.FAsync
-    || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator
-  in
+    || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator in
+  let default_dropthrough =
+    if function_is_async
+    then Some (gather [instr_null; instr_retc])
+    else None in
+  let function_body, function_is_generator, function_is_pair_generator =
+    Emit_body.emit_body
+      ~scope:[Ast_scope.ScopeItem.Function ast_fun]
+      ~is_closure_body:false
+      ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
+      ~default_dropthrough
+      ~return_value:instr_null
+      ~namespace
+      ast_fun.Ast.f_params
+      ast_fun.Ast.f_ret
+      [Ast.Stmt (Ast.Block ast_fun.Ast.f_body)] in
+  let function_attributes =
+    Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in
   Hhas_function.make
     function_attributes
     function_name
-    function_params
-    function_return_type
     function_body
-    function_decl_vars
-    function_num_iters
     function_is_async
     function_is_generator
     function_is_pair_generator

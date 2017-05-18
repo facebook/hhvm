@@ -72,14 +72,14 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     if (!reachable(blk->id)) continue;
     auto reachableTarget = NoBlockId;
     auto hasUnreachableTargets = false;
-    forEachTakenEdge(blk->hhbcs.back(), [&] (BlockId id) {
+    forEachNormalSuccessor(*blk, [&] (BlockId id) {
         if (reachable(id)) {
           reachableTarget = id;
         } else {
           hasUnreachableTargets = true;
         }
       });
-    if (!hasUnreachableTargets) continue;
+    if (!hasUnreachableTargets || reachableTarget == NoBlockId) continue;
     header();
     switch (blk->hhbcs.back().op) {
       case Op::JmpNZ:
@@ -90,7 +90,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
         break;
       default:
         FTRACE(2, "blk: {} -", blk->id, reachableTarget);
-        forEachTakenEdge(blk->hhbcs.back(), [&] (const BlockId& id) {
+        forEachNormalSuccessor(*blk, [&] (const BlockId& id) {
             if (!reachable(id)) {
               FTRACE(2, " {}->{}", id, reachableTarget);
               const_cast<BlockId&>(id) = reachableTarget;

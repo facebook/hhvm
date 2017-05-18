@@ -292,8 +292,8 @@ bool shouldTrySingletonInline(const RegionDesc& region,
                               TransFlags trflags) {
   if (!RuntimeOption::RepoAuthoritative) return false;
 
-  // I don't really want to inline my arm, thanks.
-  if (arch() != Arch::X64) return false;
+  // I don't really want to inline PPC64, yet.
+  if (arch() == Arch::PPC64) return false;
 
   // Don't inline if we're retranslating due to a side-exit from an
   // inlined call.
@@ -867,7 +867,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   auto result = TranslateResult::Retry;
 
   while (result == TranslateResult::Retry) {
-    unit = folly::make_unique<IRUnit>(context);
+    unit = std::make_unique<IRUnit>(context);
     unit->initLogEntry(context.func);
     irgen::IRGS irgs{*unit, &region};
 
@@ -942,7 +942,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   auto caller = ctx.srcKey().func();
 
   while (result == TranslateResult::Retry) {
-    unit = folly::make_unique<IRUnit>(ctx);
+    unit = std::make_unique<IRUnit>(ctx);
     irgen::IRGS irgs{*unit, &region};
     auto& irb = *irgs.irb;
     InliningDecider inl{caller};

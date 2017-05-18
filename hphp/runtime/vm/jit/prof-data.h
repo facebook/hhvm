@@ -95,9 +95,10 @@ struct ProfCounters {
   ProfCounters& operator=(const ProfCounters&) = delete;
 
   T get(uint32_t id) const {
+    assertx(kCountersPerChunk % 11);
     return id / kCountersPerChunk >= m_chunks.size()
       ? m_initVal
-      : m_chunks[id / kCountersPerChunk][id % kCountersPerChunk];
+      : m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk];
   }
 
   T* getAddr(uint32_t id) {
@@ -109,7 +110,8 @@ struct ProfCounters {
       m_chunks.emplace_back(chunk);
     }
     assertx(id / kCountersPerChunk < m_chunks.size());
-    return &(m_chunks[id / kCountersPerChunk][id % kCountersPerChunk]);
+    assertx(kCountersPerChunk % 11);
+    return &(m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk]);
   }
 
   T getDefault() const { return m_initVal; }
@@ -206,15 +208,21 @@ struct ProfTransRec {
    *
    * Precondition: kind() == TransKind::ProfPrologue
    */
-  const std::vector<TCA>& mainCallers() const {
+  std::vector<TCA>& mainCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers.lock.assertOwnedBySelf();
     return m_callers.main;
   }
-  const std::vector<TCA>& guardCallers() const {
+  const std::vector<TCA>& mainCallers() const {
+    return const_cast<ProfTransRec*>(this)->mainCallers();
+  }
+  std::vector<TCA>& guardCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
     m_callers.lock.assertOwnedBySelf();
     return m_callers.guard;
+  }
+  const std::vector<TCA>& guardCallers() const {
+    return const_cast<ProfTransRec*>(this)->guardCallers();
   }
   std::unique_lock<Mutex> lockCallerList() const {
     assertx(m_kind == TransKind::ProfPrologue);
@@ -325,6 +333,14 @@ struct ProfData {
   }
   const ProfTransRec* transRec(TransID id) const {
     return const_cast<ProfData*>(this)->transRec(id);
+  }
+
+  template<class L>
+  void forEachTransRec(L&& body) {
+    ReadLock{m_transLock};
+    for (auto& rec : m_transRecs) {
+      if (rec) body(rec.get());
+    }
   }
 
   TransIDVec funcProfTransIDs(FuncId funcId) const {

@@ -42,7 +42,7 @@ struct CGMeta;
  * When we don't, rather than calling straight into the func prologue, we call
  * the func guard instead.
  */
-void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups, TCA* watch);
 
 /*
  * Get the address of the guard preceding a `prologue' for `func'.

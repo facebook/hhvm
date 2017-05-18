@@ -78,7 +78,7 @@ struct stringHashCompare {
     return s1 == s2;
   }
   size_t hash(const std::string &s) const {
-    return hash_string_unsafe(s.c_str(), s.size());
+    return hash_string_cs_unsafe(s.c_str(), s.size());
   }
 };
 

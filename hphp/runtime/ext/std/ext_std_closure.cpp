@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -328,7 +329,7 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
     decRefObj(t);
   }
   for (; prop != stop; ++prop) {
-    tvRefcountedDecRef(prop);
+    tvDecRefGen(prop);
   }
   auto hdr = closure->hdr();
   MM().objFree(hdr, hdr->size());

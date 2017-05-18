@@ -154,8 +154,8 @@ struct PreClass : AtomicCountable {
     const StringData* name()     const { return m_name; }
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
-    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
-    bool isType()          const { return m_val.constModifiers().m_isType; }
+    bool isAbstract()      const { return m_val.constModifiers().isAbstract; }
+    bool isType()          const { return m_val.constModifiers().isType; }
 
     template<class SerDe> void serde(SerDe& sd);
 

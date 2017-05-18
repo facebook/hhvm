@@ -146,6 +146,10 @@ and constructor env cstr =
   match cstr with
     | None -> SSet.empty
     | Some cstr ->
+      let check_param_initializer = fun e -> ignore(expr env SSet.empty e) in
+      List.iter cstr.m_params (fun p ->
+        Option.iter p.param_expr check_param_initializer
+      );
       let b = Nast.assert_named_body cstr.m_body in
       toplevel env SSet.empty b.fnb_nast
 
@@ -171,6 +175,8 @@ and stmt env acc st =
       let acc = List.fold_left ~f:expr ~init:acc el in
       assign env acc DICheck.parent_init_prop
     | Expr e -> expr acc e
+    | GotoLabel _
+    | Goto _
     | Break _ -> acc
     | Continue _ -> acc
     | Throw (_, e) -> expr acc e
@@ -183,7 +189,9 @@ and stmt env acc st =
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-    | Static_var el -> List.fold_left ~f:expr ~init:acc el
+    | Static_var el
+    | Global_var el
+       -> List.fold_left ~f:expr ~init:acc el
     | If (e1, b1, b2) ->
       let acc = expr acc e1 in
       let is_term1 = Nast_terminality.Terminal.block env.tenv b1 in

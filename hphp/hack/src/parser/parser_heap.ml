@@ -50,39 +50,52 @@ let get_from_local_cache ~full popt file_name =
         ast
 
 let get_class defs class_name =
-  List.fold_left defs ~init:None ~f:begin fun acc def ->
+  let rec get acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
     | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
+    | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
-  end
+  end in
+  get None defs
 
 let get_fun defs fun_name =
-  List.fold_left defs ~init:None ~f:begin fun acc def ->
+  let rec get acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
     | Ast.Fun f when snd f.Ast.f_name = fun_name -> Some f
+    | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
-  end
+  end in
+  get None defs
 
 let get_typedef defs name =
-  List.fold_left defs ~init:None ~f:begin fun acc def ->
+  let rec get acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
     | Ast.Typedef typedef when snd typedef.Ast.t_id = name -> Some typedef
+    | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
-  end
+  end in
+  get None defs
 
 let get_const defs name =
-  List.fold_left defs ~init:None ~f:begin fun acc def ->
+  let rec get acc defs =
+  List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
     | Ast.Constant cst when snd cst.Ast.cst_name = name -> Some cst
+    | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
-  end
+  end in
+  get None defs
 
 (* Get top-level statements from definitions *)
-let get_statements defs =
-  List.filter_map defs begin fun def ->
+let rec get_statements defs =
+  List.concat @@ List.map defs begin fun def ->
     match def with
-    | Ast.Stmt st -> Some st
-    | _ -> None
+    | Ast.Stmt st -> [st]
+    | Ast.Namespace(_, defs) -> get_statements defs
+    | _ -> []
   end
 
 (* Get an AST directly from the parser heap. Will return empty AProgram

@@ -107,6 +107,7 @@ type token =
   | Tlt
   | Tgt
   | Tgte
+  | Tcmp
   | Tltlt
   | Tgtgt
   | Tsarrow
@@ -225,6 +226,7 @@ let token_to_string = function
   | Tlt           -> "<"
   | Tgt           -> ">"
   | Tgte          -> ">="
+  | Tcmp          -> "<=>"
   | Tltlt         -> "<<"
   | Tgtgt         -> ">>"
   | Tsarrow       -> "=>"
@@ -390,6 +392,7 @@ rule token file = parse
   | '['                { Tlb          }
   | ']'                { Trb          }
   | '.'                { Tdot         }
+  | "<=>"              { Tcmp         }
   | "<="               { Tlte         }
   | '<'                { Tlt          }
   | '>'                { Tgt          }

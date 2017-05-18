@@ -1166,7 +1166,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
                         !iskeyset);
   auto isSuitableHackKey = [&](const Type& k) {
     if (isvec) return k.couldBe(TInt);
-    if (isdict) return k.couldBe(TInt) || k.couldBe(TStr);
+    if (isdict) return k.couldBe(TArrKey);
     return false;
   };
 

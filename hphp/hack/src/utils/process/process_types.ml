@@ -20,6 +20,17 @@ type failure =
    * Tuple is the stdout and stderr from the process.
    *)
   | Process_exited_abnormally of (Unix.process_status * string * string)
+  | Process_aborted_input_too_large
+
+
+type abort_reason =
+  (*
+   * There is a limitation on the input size to exec a program
+   * to avoid filling the pipe buffer and the spawned program blocking.
+   * TODO: Remove this limitation by alternating between consuming the
+   * output of the program and writing more of the input.
+   *)
+  | Input_too_large
 
 type process_status =
   (** The process is still running. *)
@@ -28,6 +39,7 @@ type process_status =
    * in the pipes have been consumed, whether or not an EOF has been
    * reached. *)
   | Process_exited of Unix.process_status
+  | Process_aborted of abort_reason
 
 type t = {
   stdin_fd : Unix.file_descr option ref;

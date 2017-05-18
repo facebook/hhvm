@@ -12,8 +12,6 @@
 type report =
   (** Nothing to see here. *)
   | Move_along
-  (** Kill the server. *)
-  | Kill_server
   (** Kill the server (if one is running) and start a new one. *)
   | Restart_server
 
@@ -33,4 +31,10 @@ module type S = sig
   type init_env
   val init : init_env -> t
   val report : t -> server_state -> report
+  (**
+   * Returns true if the informant is actually running and will
+   * manage server lifetime.
+   *)
+  val is_managing : t -> bool
+  val should_start_first_server : t -> bool
 end

@@ -35,9 +35,16 @@ let accept_client_opt parent_in_fd =
     None
   end
 
-let sleep_and_check in_fd persistent_client_opt =
+(* sleep_and_check: waits up to 0.1 seconds and then returns either:        *)
+(* - If we should read from persistent_client, then (None, true)            *)
+(* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
+(* - If there's nothing to read, then (None, false)                         *)
+let sleep_and_check in_fd persistent_client_opt ~ide_idle =
   let l = match persistent_client_opt with
-    | Some (Persistent_client fd) -> [in_fd ; fd]
+    | Some (Persistent_client fd) ->
+      (* If we are not sure that there are no more IDE commands, do not even
+       * look at non-persistent client to avoid race conditions.*)
+      if not ide_idle then [fd] else [in_fd; fd;]
     | Some (Non_persistent_client _) ->
         (* The arguments for "sleep_and_check" are "the source of new clients"
          * and the "client we already store in the env". We only store
@@ -105,6 +112,12 @@ let read_client_msg ic =
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
   with End_of_file -> raise Client_went_away
+
+let client_has_message = function
+  | Non_persistent_client _ -> true
+  | Persistent_client fd ->
+    let ready, _, _ = Unix.select [fd] [] [] 0.0 in
+    ready <> []
 
 let read_client_msg = function
   | Non_persistent_client (ic, _) -> read_client_msg ic

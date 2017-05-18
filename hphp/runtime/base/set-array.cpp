@@ -21,8 +21,10 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hash.h"
@@ -220,7 +222,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    tvRefcountedIncRef(&elm.tv);
+    tvIncRefGen(&elm.tv);
   }
 
   assert(ad->m_kind == HeaderKind::Keyset);
@@ -300,7 +302,7 @@ void SetArray::Release(ArrayData* in) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       assert(!elm.isEmpty());
-      tvRefcountedDecRef(&elm.tv);
+      tvDecRefGen(&elm.tv);
     }
 
     /*
@@ -482,7 +484,7 @@ void SetArray::erase(uint32_t* loc) {
 
   auto& elm = elms[pos];
   assert(!elm.isInvalid());
-  tvRefcountedDecRef(&elm.tv);
+  tvDecRefGen(&elm.tv);
   elm.setTombstone();
   --m_size;
 
@@ -803,33 +805,33 @@ bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return a->find(k, k->hash()) != -1;
 }
 
-ArrayLval SetArray::LvalInt(ArrayData*, int64_t, bool) {
+member_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval int)"
   );
 }
 
-ArrayLval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
+member_lval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayLval SetArray::LvalStr(ArrayData*, StringData*, bool) {
+member_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval string)"
   );
 }
 
-ArrayLval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
+member_lval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayLval SetArray::LvalNew(ArrayData*, bool) {
+member_lval SetArray::LvalNew(ArrayData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval new)"
   );
 }
 
-ArrayLval SetArray::LvalNewRef(ArrayData* ad, bool) {
+member_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 

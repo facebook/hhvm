@@ -17,6 +17,7 @@
 #define incl_HPHP_PROXY_ARRAY_H
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/native.h"
@@ -146,12 +147,12 @@ public:
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static const TypedValue* NvTryGetStr(const ArrayData*, const StringData* k);
 
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static ArrayLval LvalNewRef(ArrayData*, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
@@ -179,6 +180,7 @@ public:
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
+  static ArrayData* ToVArray(ArrayData*, bool);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

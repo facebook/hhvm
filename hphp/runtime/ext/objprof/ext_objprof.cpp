@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"

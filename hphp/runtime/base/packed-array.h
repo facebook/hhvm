@@ -20,10 +20,11 @@
 #include <cstdint>
 #include <sys/types.h>
 
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -38,7 +39,6 @@ struct StringData;
 struct MArrayIter;
 struct MixedArray;
 struct APCArray;
-struct ArrayLval;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,6 @@ struct ArrayLval;
  * types.  The TypedValue's are placed right after the array header.
  */
 struct PackedArray final : type_scan::MarkCountable<PackedArray> {
-  static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static constexpr uint32_t SmallSize = 3;
 
   static void Release(ArrayData*);
@@ -67,12 +66,12 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static ArrayLval LvalNewRef(ArrayData*, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
@@ -120,17 +119,18 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   }
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ToPHPArray;
 
   static const TypedValue* NvTryGetIntVec(const ArrayData*, int64_t);
   static const TypedValue* NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
   static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
-  static ArrayLval LvalIntVec(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrVec(ArrayData*, StringData*, bool);
-  static ArrayLval LvalIntRefVec(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrRefVec(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNewRefVec(ArrayData*, bool);
+  static member_lval LvalIntVec(ArrayData*, int64_t, bool);
+  static member_lval LvalStrVec(ArrayData*, StringData*, bool);
+  static member_lval LvalIntRefVec(ArrayData*, int64_t, bool);
+  static member_lval LvalStrRefVec(ArrayData*, StringData*, bool);
+  static member_lval LvalNewRefVec(ArrayData*, bool);
   static ArrayData* SetRefIntVec(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrVec(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
@@ -177,12 +177,13 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArrayVec = &ToPHPArrayVec;
 
   //////////////////////////////////////////////////////////////////////
 
   // Like LvalInt, but silently does nothing if the element doesn't exist. Not
   // part of the ArrayData interface, but used in member operations.
-  static ArrayLval LvalSilentInt(ArrayData*, int64_t, bool);
+  static member_lval LvalSilentInt(ArrayData*, int64_t, bool);
   static constexpr auto LvalSilentIntVec = &LvalSilentInt;
 
   /////////////////////////////////////////////////////////////////////

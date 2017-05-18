@@ -36,7 +36,7 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
-  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;
+  if (idxVal < 0 || idxVal > MixedArray::MaxSize) return PackedBounds::Out;
 
   if (arrayType.hasConstVal()) {
     return idxVal < arrayType.arrVal()->size()

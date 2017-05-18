@@ -150,33 +150,39 @@ void init() {
   return;
 #elif defined(__linux__) || defined(__FreeBSD__)
 
-  // Find the shared object embedded within a custom section.
-  embedded_data data;
-  if (!get_embedded_data("type_scanners", &data)) {
-    // no embedded data was built; fall back to conservative scan.
-    return;
-  }
+  using init_func_t = const Metadata*(*)(std::size_t&);
 
-  // Link in the embedded object.
-  char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
-  auto const handle = dlopen_embedded_data(data, tmp_filename);
-  if (!handle) {
-    throw InitException{"Failed to dlopen embedded data"};
-  }
+  auto const scanner_init = [] () -> init_func_t {
+    auto const result = dlsym(RTLD_DEFAULT, kInitFuncName);
+    if (result != nullptr) return reinterpret_cast<init_func_t>(result);
 
-  // Find the initialization function.
-  auto scanner_init = reinterpret_cast<const Metadata*(*)(std::size_t&)>(
-    dlsym(handle, kInitFuncName)
-  );
-  if (!scanner_init) {
-    throw InitException{
-      folly::sformat("dlsym() fails: {}", dlerror())
-    };
-  }
+    // Find the shared object embedded within a custom section.
+    embedded_data data;
+    if (!get_embedded_data("type_scanners", &data)) {
+      // no embedded data was built; fall back to conservative scan.
+      return nullptr;
+    }
+
+    // Link in the embedded object.
+    char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
+    auto const handle = dlopen_embedded_data(data, tmp_filename);
+    if (!handle) {
+      throw InitException{"Failed to dlopen embedded data"};
+    }
+
+    // Find the initialization function.
+    auto const init = dlsym(handle, kInitFuncName);
+    if (!init) {
+      throw InitException { folly::sformat("dlsym() fails: {}", dlerror()) };
+    }
+    return reinterpret_cast<init_func_t>(init);
+  }();
+
+  if (!scanner_init) return;
 
   // And call it. The return value is a pointer to the new metadata table, and
   // the size of the table will be updated by passing by ref.
-  if (auto table = scanner_init(g_metadata_table_size)) {
+  if (auto const table = scanner_init(g_metadata_table_size)) {
     g_metadata_table = table;
   } else {
     throw InitException{"Failed to load scanner table"};

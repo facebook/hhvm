@@ -45,6 +45,8 @@ class virtual ['self] map =
     method on_Namespace env c0 c1 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_program env c1 in Namespace (r0, r1)
+    method on_SetNamespaceEnv env c0 =
+      let r0 = self#on_Namespace_env env c0 in SetNamespaceEnv r0
     method on_NamespaceUse env c0 =
       let r0 =
         self#on_list
@@ -63,6 +65,7 @@ class virtual ['self] map =
       | Constant c0 -> self#on_Constant env c0
       | Namespace (c0, c1) -> self#on_Namespace env c0 c1
       | NamespaceUse c0 -> self#on_NamespaceUse env c0
+      | SetNamespaceEnv c0 -> self#on_SetNamespaceEnv env c0
     method on_typedef env this =
       let r0 = self#on_id env this.t_id in
       let r1 = self#on_list self#on_tparam env this.t_tparams in
@@ -230,6 +233,45 @@ class virtual ['self] map =
     method on_XhpCategory env c0 =
       let r0 = self#on_list self#on_pstring env c0 in
       XhpCategory r0
+    method on_XhpChild env c0 =
+      let r0 = self#on_xhp_child env c0 in
+      XhpChild r0
+
+    method on_xhp_child env this =
+      match this with
+      | ChildName c0 -> self#on_ChildName env this c0
+      | ChildList c0 -> self#on_ChildList env this c0
+      | ChildUnary (c0, c1) -> self#on_ChildUnary env this c0 c1
+      | ChildBinary (c0, c1) -> self#on_ChildBinary env this c0 c1
+
+    method on_ChildName env this c0 =
+      let r0 = self#on_id env c0 in
+      ChildName r0
+
+    method on_ChildList env this c0 =
+      let r0 = self#on_list self#on_xhp_child env c0 in
+      ChildList r0
+
+    method on_ChildUnary env this c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child_op env c1 in
+      ChildUnary (r0, r1)
+
+    method on_ChildBinary env this c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child env c1 in
+      ChildBinary (r0, r1)
+
+    method on_xhp_child_op env this =
+      match this with
+      | ChildStar -> self#on_ChildStar env this
+      | ChildPlus -> self#on_ChildPlus env this
+      | ChildQuestion -> self#on_ChildQuestion env this
+
+    method on_ChildStar env this = this
+    method on_ChildPlus env this = this
+    method on_ChildQuestion env this = this
+
     method on_class_elt env this =
       match this with
       | Const (c0, c1) -> self#on_Const env c0 c1
@@ -244,6 +286,7 @@ class virtual ['self] map =
       | XhpAttr (c0, c1, c2, c3) -> self#on_XhpAttr env c0 c1 c2 c3
       | Method c0 -> self#on_Method env c0
       | XhpCategory c0 -> self#on_XhpCategory env c0
+      | XhpChild c0 -> self#on_XhpChild env c0
     method on_CA_name env c0 =
       let r0 = self#on_id env c0 in CA_name r0
     method on_CA_field env c0 =
@@ -426,6 +469,8 @@ class virtual ['self] map =
       let r1 = self#on_id env c1 in
       let r2 = self#on_list self#on_id env c2 in
       Haccess (r0, r1, r2)
+    method on_Hsoft env c0 =
+      let r0 = self#on_hint env c0 in Hsoft r0
     method on_hint_ env this =
       match this with
       | Hoption c0 -> self#on_Hoption env c0
@@ -434,6 +479,7 @@ class virtual ['self] map =
       | Happly (c0, c1) -> self#on_Happly env c0 c1
       | Hshape c0 -> self#on_Hshape env c0
       | Haccess (c0, c1, c2) -> self#on_Haccess env c0 c1 c2
+      | Hsoft c0 -> self#on_Hsoft env c0
     method on_SFlit env c0 =
       let r0 = self#on_pstring env c0 in SFlit r0
     method on_SFclass_const env c0 c1 =
@@ -470,6 +516,8 @@ class virtual ['self] map =
       Return (r0, r1)
     method on_Static_var env c0 =
       let r0 = self#on_list self#on_expr env c0 in Static_var r0
+    method on_Global_var env c0 =
+      let r0 = self#on_list self#on_expr env c0 in Global_var r0
     method on_If env c0 c1 c2 =
       let r0 = self#on_expr env c0 in
       let r1 = self#on_block env c1 in
@@ -497,6 +545,9 @@ class virtual ['self] map =
       let r0 = self#on_block env c0 in
       let r1 = self#on_list self#on_catch env c1 in
       let r2 = self#on_block env c2 in Try (r0, r1, r2)
+    method on_Def_inline env c0 =
+      let r0 = self#on_def env c0 in
+      Def_inline r0
     method on_Noop env = Noop
     method on_stmt env this =
       match this with
@@ -508,7 +559,10 @@ class virtual ['self] map =
       | Continue c0 -> self#on_Continue env c0
       | Throw c0 -> self#on_Throw env c0
       | Return (c0, c1) -> self#on_Return env c0 c1
+      | GotoLabel c0 -> self#on_GotoLabel env c0
+      | Goto c0 -> self#on_Goto env c0
       | Static_var c0 -> self#on_Static_var env c0
+      | Global_var c0 -> self#on_Global_var env c0
       | If (c0, c1, c2) -> self#on_If env c0 c1 c2
       | Do (c0, c1) -> self#on_Do env c0 c1
       | While (c0, c1) -> self#on_While env c0 c1
@@ -516,6 +570,8 @@ class virtual ['self] map =
       | Switch (c0, c1) -> self#on_Switch env c0 c1
       | Foreach (c0, c1, c2, c3) -> self#on_Foreach env c0 c1 c2 c3
       | Try (c0, c1, c2) -> self#on_Try env c0 c1 c2
+      | Def_inline c0 ->
+        self#on_Def_inline env c0
       | Noop -> self#on_Noop env
     method on_As_v env c0 =
       let r0 = self#on_expr env c0 in As_v r0
@@ -660,6 +716,12 @@ class virtual ['self] map =
     method on_Import env c0 c1 =
       let r0 = self#on_import_flavor env c0 in
       let r1 = self#on_expr env c1 in Import (r0, r1)
+    method on_GotoLabel env c0 =
+      let r0 = self#on_pstring env c0 in
+      GotoLabel r0
+    method on_Goto env c0 =
+      let r0 = self#on_pstring env c0 in
+      Goto r0
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env c0
@@ -735,6 +797,7 @@ class virtual ['self] map =
     method on_BArbar env = BArbar
     method on_Lt env = Lt
     method on_Lte env = Lte
+    method on_Cmp env = Cmp
     method on_Gt env = Gt
     method on_Gte env = Gte
     method on_Dot env = Dot
@@ -768,6 +831,7 @@ class virtual ['self] map =
       | Bar -> self#on_Bar env
       | Ltlt -> self#on_Ltlt env
       | Gtgt -> self#on_Gtgt env
+      | Cmp -> self#on_Cmp env
       | Percent -> self#on_Percent env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0
@@ -780,6 +844,7 @@ class virtual ['self] map =
     method on_Upincr env = Upincr
     method on_Updecr env = Updecr
     method on_Uref env = Uref
+    method on_Usplat env = Usplat
     method on_uop env this =
       match this with
       | Utild -> self#on_Utild env
@@ -791,6 +856,7 @@ class virtual ['self] map =
       | Upincr -> self#on_Upincr env
       | Updecr -> self#on_Updecr env
       | Uref -> self#on_Uref env
+      | Usplat -> self#on_Usplat env
     method on_Default env c0 =
       let r0 = self#on_block env c0 in Default r0
     method on_Case env c0 c1 =

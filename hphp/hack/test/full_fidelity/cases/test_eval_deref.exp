@@ -1,0 +1,10 @@
+(script(header((<))((?))((name)(end_of_line)))(list
+  (expression_statement(binary_expression
+    (variable((end_of_line)(variable)(whitespace)))
+    ((=)(whitespace))
+    (prefix_unary_expression(($))(braced_expression(({))
+      (binary_expression
+        (literal((double_quoted_string_literal)))
+        ((.))
+        (literal((double_quoted_string_literal))))
+    ((})))))((;)))))

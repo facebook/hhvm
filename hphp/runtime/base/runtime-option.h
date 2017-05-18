@@ -104,6 +104,7 @@ struct RuntimeOption {
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
+  static bool AllowRunAsRoot; // Allow running hhvm as root.
 
   static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;
@@ -139,6 +140,7 @@ struct RuntimeOption {
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
   static int ServerThreadJobMaxQueuingMilliSeconds;
+  static bool AlwaysDecodePostDataDefault;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
@@ -410,7 +412,6 @@ struct RuntimeOption {
   static bool PHP7_ScalarTypes;
   static bool PHP7_EngineExceptions;
   static bool PHP7_Substr;
-  static bool PHP7_InfNanFloatParse;
   static bool PHP7_UVS;
   static bool PHP7_DisallowUnsafeCurlUploads;
 
@@ -493,6 +494,7 @@ struct RuntimeOption {
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfPidMapIncludeFilePath,   true)                            \
   F(bool, PerfJitDump,                 false)                           \
   F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \
@@ -509,11 +511,13 @@ struct RuntimeOption {
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, ProfileHWExcludeKernel,      false)                           \
+  F(bool, ProfileHWStructLog,          false)                           \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \
   F(uint32_t, JitMaxProfileTranslations, 30)                            \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
+  F(int64_t, JitMaxRequestTranslationTime, -1)                          \
   F(uint32_t, JitMaxRegionInstrs,      1347)                            \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
@@ -538,7 +542,7 @@ struct RuntimeOption {
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWarmupMaxCodeGenRate, 100)                             \
-  F(uint32_t, JitWarmupRateSeconds,    15)                              \
+  F(uint32_t, JitWarmupRateSeconds,    64)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
   F(bool, HHIRLICM,                    false)                           \
@@ -589,6 +593,7 @@ struct RuntimeOption {
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \
+  F(bool, DisableHphpcOpts,            false)                           \
   F(bool, DumpTC,                      false)                           \
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \
@@ -616,6 +621,8 @@ struct RuntimeOption {
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(uint32_t, StaticContentsLogRate,   100)                             \
+  F(uint32_t, LogUnitLoadRate,         0)                               \
+  F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \

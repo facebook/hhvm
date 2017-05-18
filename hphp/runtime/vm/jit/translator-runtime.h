@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -82,6 +84,7 @@ inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
+template <bool intishWarn>
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
@@ -154,6 +157,8 @@ RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+
+template <bool intishWarn>
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
@@ -212,12 +217,16 @@ bool methodExistsHelper(Class*, StringData*);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
+template<bool intishWarn>
 TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
+template <bool intishWarn>
 void bindElemC(TypedValue*, TypedValue, RefData*);
+template <bool intishWarn>
 void setWithRefElem(TypedValue*, TypedValue, TypedValue);
+template<bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
 void bindNewElem(TypedValue* base, RefData* val);
 TypedValue* elemVecID(TypedValue* base, int64_t key);
@@ -228,6 +237,30 @@ TypedValue* elemVecIU(TypedValue* base, int64_t key);
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the current builtin function `func' was called in a strict context,
+ * verify that `tv' is the correct type for `argNum' or attempt to convert it
+ * to the correct type, fataling on failure.
+ *
+ * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
+ * nothing.
+ */
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
+
+/*
+ * Exception thrown to indicate that a parameter could not be coerced when
+ * calling an HNI builtin function.
+ */
+struct TVCoercionException : std::runtime_error {
+  TVCoercionException(const Func* func, int arg_num,
+                      DataType actual, DataType expected);
+  TypedValue tv() const { return m_tv; }
+private:
+  req::root<TypedValue> m_tv;
+};
 
 //////////////////////////////////////////////////////////////////////
 

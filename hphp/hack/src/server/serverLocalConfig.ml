@@ -103,7 +103,7 @@ let load_ fn =
     ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
     ~default:default.watchman_init_timeout config in
-  let watchman_subscribe = bool_ "watchman_subscribe"
+  let watchman_subscribe = bool_ "watchman_subscribe_v2"
     ~default:default.watchman_subscribe config in
   let watchman_sync_directory_opt =
     string_opt "watchman_sync_directory" config in

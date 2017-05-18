@@ -130,7 +130,11 @@ module WithExpressionAndStatementAndTypeParser
 
     let (parser, token) = next_token parser in
     let token = make_token token in
-    let (parser, name) = expect_name parser in
+    (* Not `expect_name` but `expect_name_allow_keywords`, because the parser
+     * must allow keywords in the place of identifiers; at least to parse .hhi
+     * files.
+     *)
+    let (parser, name) = expect_name_allow_keywords parser in
     let (parser, generic) = parse_generic_parameter_list_opt parser in
     let (parser, constr) = parse_type_constraint_opt parser in
     let (parser, equal) = expect_equal parser in
@@ -222,10 +226,11 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_namespace_body parser =
     let (parser, token) = next_token parser in
+    let full_token = make_token token in
     match Token.kind token with
-    | Semicolon -> (parser, make_token token)
+    | Semicolon -> (parser, make_namespace_empty_body full_token)
     | LeftBrace ->
-      let left = make_token token in
+      let left = full_token in
       let (parser, body) =
         parse_terminated_list parser parse_declaration RightBrace in
       let (parser, right) = expect_right_brace parser in
@@ -535,6 +540,7 @@ module WithExpressionAndStatementAndTypeParser
     | Use -> parse_trait_use parser
     | Const -> parse_const_or_type_const_declaration parser (make_missing ())
     | Abstract -> parse_methodish_or_const_or_type_const parser
+    | Async
     | Static
     | Public
     | Protected
@@ -599,17 +605,24 @@ module WithExpressionAndStatementAndTypeParser
   and parse_xhp_children_term parser =
     (* SPEC (Draft)
     xhp-children-term:
-      name
-      xhp-class-name
-      xhp-category-name
+      ( xhp-children-expressions ) trailing-opt
+      name trailing-opt
+      xhp-class-name trailing-opt
+      xhp-category-name trailing-opt
+    trailing: * ? +
+
+    Note that there may be only zero or one trailing unary operator.
+    "foo*?" is not a legal xhp child expression.
     *)
     let (parser1, token) = next_xhp_children_name_or_other parser in
     let name = make_token token in
     match Token.kind token with
     | Name
     | XHPClassName
-    | XHPCategoryName -> (parser1, name)
-    | LeftParen -> parse_xhp_children_paren parser
+    | XHPCategoryName -> parse_xhp_children_trailing parser1 name
+    | LeftParen ->
+      let (parser, term) = parse_xhp_children_paren parser in
+      parse_xhp_children_trailing parser term
     | _ ->
       (* ERROR RECOVERY: Eat the offending token, keep going. *)
       (with_error parser SyntaxError.error1053, name)
@@ -621,24 +634,28 @@ module WithExpressionAndStatementAndTypeParser
     | Plus
     | Question ->
       let result = make_postfix_unary_expression term (make_token token) in
-      parse_xhp_children_trailing parser1 result
-    | Bar ->
-      let (parser, right) = parse_xhp_children_expression parser1 in
-      let result = make_binary_expression term (make_token token) right in
-      (parser, result)
+      (parser1, result)
     | _ -> (parser, term)
+
+  and parse_xhp_children_bar parser left =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Bar ->
+      let (parser, right) = parse_xhp_children_term parser1 in
+      let result = make_binary_expression left (make_token token) right in
+      parse_xhp_children_bar parser result
+    | _ -> (parser, left)
 
   and parse_xhp_children_expression parser =
     (* SPEC (Draft)
     xhp-children-expression:
       xhp-children-term
-      xhp-children-expression *
-      xhp-children-expression +
-      xhp-children-expression ?
-      xhp-children-term | xhp-children-expression
-    *)
+      xhp-children-expression | xhp-children-term
+
+    Note that the bar operator is left-associative. (Not that it matters
+    semantically. *)
     let (parser, term) = parse_xhp_children_term parser in
-    parse_xhp_children_trailing parser term
+    parse_xhp_children_bar parser term
 
   and parse_xhp_children_declaration parser =
     (* SPEC (Draft)
@@ -834,6 +851,7 @@ module WithExpressionAndStatementAndTypeParser
     if is_missing attribute_spec then
       match peek_token_kind parser with
       | Async
+      | Coroutine
       | Function -> parse_methodish parser attribute_spec modifiers
       | _ -> parse_property_declaration parser modifiers
     else
@@ -1189,7 +1207,7 @@ module WithExpressionAndStatementAndTypeParser
   and parse_function_declaration_header parser =
     (* SPEC
       function-definition-header:
-        attribute-specification-opt  async-opt  function  name  /
+        attribute-specification-opt  async-opt  coroutine-opt  function  name  /
         generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
         return-type   where-clause-opt
 
@@ -1202,6 +1220,7 @@ module WithExpressionAndStatementAndTypeParser
       TODO: Produce an error if this occurs in strict mode, or if it
       TODO: appears before a special name like __construct, and so on. *)
     let (parser, async_token) = optional_token parser Async in
+    let (parser, coroutine_token) = optional_token parser Coroutine in
     let (parser, function_token) = expect_function parser in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
@@ -1213,10 +1232,20 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let (parser, where_clause) = parse_where_clause_opt parser in
-    let syntax = make_function_declaration_header async_token
-      function_token ampersand_token label generic_type_parameter_list
-      left_paren_token parameter_list right_paren_token colon_token
-      return_type where_clause in
+    let syntax =
+      make_function_declaration_header
+        async_token
+        coroutine_token
+        function_token
+        ampersand_token
+        label
+        generic_type_parameter_list
+        left_paren_token
+        parameter_list
+        right_paren_token
+        colon_token
+        return_type
+        where_clause in
     (parser, syntax)
 
   (* A function label is either a function name, a __construct label, or a
@@ -1313,7 +1342,7 @@ module WithExpressionAndStatementAndTypeParser
     | Enum -> parse_enum_declaration parser attribute_specification
     | Type | Newtype ->
       parse_alias_declaration parser attribute_specification
-    | Async | Function ->
+    | Async | Coroutine | Function ->
       parse_function_declaration parser attribute_specification
     | Abstract
     | Final
@@ -1345,6 +1374,7 @@ module WithExpressionAndStatementAndTypeParser
     | Final
     | Class -> parse_classish_declaration parser(make_missing())
     | Async
+    | Coroutine
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
       parse_enum_or_classish_or_function_declaration parser

@@ -22,7 +22,7 @@
  * abstraction when we need some of them.
  *)
 
-module OffsetMap = Full_fidelity_offset_map
+module OffsetMap = Line_break_map
 
 type t = {
   text : string;

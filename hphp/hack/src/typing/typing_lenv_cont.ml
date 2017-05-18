@@ -40,4 +40,4 @@ let add_to_cont name key value m =
 
 let drop_cont = CMap.remove
 
-let replace_cont = CMap.add
+let replace_cont key value map = CMap.add key value map

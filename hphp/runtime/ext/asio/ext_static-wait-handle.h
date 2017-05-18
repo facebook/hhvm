@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
@@ -41,7 +43,7 @@ struct c_StaticWaitHandle final : c_WaitHandle {
   {}
   ~c_StaticWaitHandle() {
     assert(isFinished());
-    tvRefcountedDecRef(&m_resultOrException);
+    tvDecRefGen(&m_resultOrException);
   }
 
  public:

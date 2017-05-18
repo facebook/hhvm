@@ -14,13 +14,9 @@ INFILE=hphp.y
 
 if [ -z "${INSTALL_DIR}" ]; then
   INSTALL_DIR="${DIR}"
-  BISON=$(which bison)
-else
-  BISON=$(readlink -f $(ls -t "${FBCODE_DIR}"/third-party2/bison/2.4.1/centos5.2-native/*/bin/bison | head -1))
-  BISON_DIR=$(dirname $(dirname "${BISON}"))
-  export BISON_PKGDATADIR="${BISON_DIR}/share/bison"
 fi
 
+BISON=$(which bison)
 if [ ! -x "${BISON}" ]; then
   echo "bison not found" 1>&2
   exit 1
@@ -122,6 +118,13 @@ sed -i \
     -e "s/YYSTACK_FREE (yyss)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
     -e "s/\".*hphp\\.\\(.\\)\\.tab\\.cpp\"/\"hphp.\\1.tab.cpp\"/" \
     "${OUTFILE5}" "${OUTFILE7}"
+
+# Renaming some stuff in the cpp file.
+GUARD_NAME=$(echo "${INFILE}" | awk '{print toupper($0)}' | sed 's|[./-]|_|g')
+sed -i \
+    -e "s|YY_.*_INCLUDED|YY_YY_${GUARD_NAME}_INCLUDED|g" \
+    "${OUTFILE5}" \
+    "${OUTFILE7}"
 
 # We still want the files in our tree since they are checked in.
 if [ "${INSTALL_DIR}" != "${DIR}" ]; then

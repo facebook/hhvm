@@ -44,6 +44,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
@@ -1009,9 +1010,8 @@ bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
 }
 
 bool is_dangerous_varenv_function(const StringData* name) {
-  auto const f = Unit::lookupFunc(name);
-  // Functions can which can access the caller's frame are always builtin, so if
-  // its not already defined, we know it can't be one.
+  auto const f = Unit::lookupBuiltin(name);
+  // Functions can which can access the caller's frame are always builtin.
   return f && f->accessesCallerFrame();
 }
 

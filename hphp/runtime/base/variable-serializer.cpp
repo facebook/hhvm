@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -70,7 +71,7 @@ static void throwNestingException() {
 
 VariableSerializer::SavedRefMap::~SavedRefMap() {
   for (auto& i : m_mapping) {
-    tvRefcountedDecRef(const_cast<TypedValue*>(&i.first));
+    tvDecRefGen(const_cast<TypedValue*>(&i.first));
   }
 }
 

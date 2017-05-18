@@ -1,0 +1,7 @@
+(script(header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
+  (list(expression_statement(binary_expression
+    (variable((end_of_line)(variable)(whitespace)))
+    ((=)(whitespace))
+    (prefix_unary_expression(($))(variable((variable))))
+  )((;))))
+)

@@ -196,6 +196,16 @@ module Symbol_information = struct
 end
 
 
+(* For showing messages (not diagnostics) in the user interface. *)
+module Message_type = struct
+  type t =
+    | ErrorMessage  (* 1 *)
+    | WarningMessage  (* 2 *)
+    | InfoMessage  (* 3 *)
+    | LogMessage  (* 4 *)
+end
+
+
 (* Cancellation notification, method="$/cancelRequest" *)
 module CancelRequest = struct
   type params = cancel_params
@@ -613,8 +623,47 @@ module Document_on_type_formatting = struct
 end
 
 
+(* LogMessage notification, method="window/logMessage" *)
+module Log_message = struct
+  type params = log_message_params
+
+  and log_message_params = {
+    type_: Message_type.t;
+    message: string;
+  }
+end
+
+
+(* ShowMessage notification, method="window/showMessage" *)
+module Show_message = struct
+  type params = show_message_params
+
+  and show_message_params = {
+    type_: Message_type.t;
+    message: string;
+  }
+end
+
+
+(* ShowMessage request, method="window/showMessageRequest" *)
+module Show_message_request = struct
+  type params = show_message_request_params
+
+  and show_message_request_params = {
+    type_: Message_type.t;
+    message: string;
+    actions: message_action_item list;
+  }
+
+  and message_action_item = {
+    title: string;
+  }
+end
+
+
 (* ErrorResponse *)
 module Error = struct
+  (* Defined by JSON-RPC. *)
   exception Parse of string (* -32700 *)
   exception Invalid_request of string (* -32600 *)
   exception Method_not_found of string (* -32601 *)
@@ -622,6 +671,9 @@ module Error = struct
   exception Internal_error of string (* -32603 *)
   exception Server_error_start of string * Initialize.error_data (* -32099 *)
   exception Server_error_end of string (* -32000 *)
-  exception Server_not_initialized of string (* -32002*)
+  exception Server_not_initialized of string (* -32002 *)
   exception Unknown of string (* -32001 *)
+
+  (* Defined by the protocol. *)
+  exception Request_cancelled of string (* -32800 *)
 end

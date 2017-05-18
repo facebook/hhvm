@@ -140,20 +140,20 @@ struct Repo::GlobalData {
     sd(UsedHHBBC)
       (EnableHipHopSyntax)
       (HardTypeHints)
+      (HardReturnTypeHints)
       (HardPrivatePropInference)
-      (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
       (ElideAutoloadInvokes)
-      (HardReturnTypeHints)
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
       (PHP7_Substr)
       (PHP7_Builtins)
       (AutoprimeGenerators)
-      (APCProfile)
       (PromoteEmptyObject)
       (EnableRenameFunction)
       (HackArrCompatNotices)
+      (APCProfile)
+      (arrayTypeTable)
       ;
   }
 };

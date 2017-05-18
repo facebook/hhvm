@@ -282,7 +282,6 @@ module ServerInitCommon = struct
 
   let type_check genv env fast t =
     if ServerArgs.ai_mode genv.options = None
-      || not (is_check_mode genv.options)
     then begin
       let count = Relative_path.Map.cardinal fast in
       let errorl, err_info =
@@ -573,9 +572,7 @@ module ServerLazyInit : InitKind = struct
     ~f: (fun fn names ->
       SearchServiceRunner.update (fn, (SearchServiceRunner.Fast names));
     );
-    HackEventLogger.update_search_end t;
-    Hh_logger.log_duration "Updating search indices" t
-
+    Hh_logger.log_duration "Loading search indices" t
 
 
   let init ~load_mini_approach genv lazy_level env root =
@@ -706,6 +703,15 @@ let ai_check genv files_info env t =
     end
   | None -> env, t
 
+let run_search genv t =
+  if SearchServiceRunner.should_run_completely genv
+  then begin
+    (* The duration is already logged by SearchServiceRunner *)
+    SearchServiceRunner.run_completely genv;
+    HackEventLogger.update_search_end t
+  end
+  else ()
+
 let save_state env fn =
   let t = Unix.gettimeofday () in
   if not (Errors.is_empty env.errorl)
@@ -743,9 +749,8 @@ let init ?load_mini_approach genv =
     else
       ServerEagerInit.init ~load_mini_approach genv lazy_lev env root
   in
-  let env, _t = ai_check genv env.files_info env t in
-  if SearchServiceRunner.should_run_completely genv
-    then SearchServiceRunner.run_completely genv;
+  let env, t = ai_check genv env.files_info env t in
+  run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
   env, Result.is_ok state

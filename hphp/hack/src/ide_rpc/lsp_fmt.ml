@@ -235,6 +235,14 @@ let print_symbol_information (info: Symbol_information.t) : json =
     "containerName", Option.map info.container_name string_;
   ]
 
+let print_message_type (type_: Message_type.t) : json =
+  let open Message_type in
+  match type_ with
+    | ErrorMessage -> int_ 1
+    | WarningMessage -> int_ 2
+    | InfoMessage -> int_ 3
+    | LogMessage -> int_ 4
+
 
 (************************************************************************)
 (** shutdown request                                                   **)
@@ -251,7 +259,7 @@ let print_shutdown (_r: Shutdown.result) : json =
 let parse_did_open (params: json option) : Did_open.params =
   let open Did_open in
   {
-    text_document = Jget.obj_exn params "text_document"
+    text_document = Jget.obj_exn params "textDocument"
                       |> parse_text_document_item;
   }
 
@@ -263,7 +271,7 @@ let parse_did_open (params: json option) : Did_open.params =
 let parse_did_close (params: json option) : Did_close.params =
   let open Did_close in
   {
-    text_document = Jget.obj_exn params "text_document"
+    text_document = Jget.obj_exn params "textDocument"
                       |> parse_text_document_identifier;
   }
 
@@ -314,6 +322,57 @@ let print_diagnostics (r: Publish_diagnostics.params) : json =
     "uri", JSON_String r.uri;
     "diagnostics", JSON_Array (List.map r.diagnostics ~f:print_diagnostic)
   ]
+
+
+(************************************************************************)
+(** window/logMessage notification                                     **)
+(************************************************************************)
+
+let print_log_message (type_: Message_type.t) (message: string) : json =
+  let open Log_message in
+  let r = { type_; message; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
+  ]
+
+
+(************************************************************************)
+(** window/showMessage notification                                    **)
+(************************************************************************)
+
+let print_show_message (type_: Message_type.t) (message: string) : json =
+  let open Show_message in
+  let r = { type_; message; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
+  ]
+
+
+(************************************************************************)
+(** window/showMessage request                                         **)
+(************************************************************************)
+
+let print_show_message_request
+  (type_: Message_type.t)
+  (message: string)
+  (titles: string list)
+  : json =
+  let open Show_message_request in
+  let print_action (action: message_action_item) : json =
+    JSON_Object [
+      "title", JSON_String action.title;
+    ]
+  in
+  let actions = List.map titles ~f:(fun title -> { title; }) in
+  let r = { type_; message; actions; } in
+  JSON_Object [
+    "type", print_message_type r.type_;
+    "message", JSON_String r.message;
+    "actions", JSON_Array (List.map r.actions ~f:print_action);
+  ]
+
 
 
 (************************************************************************)
@@ -610,7 +669,9 @@ let parse_initialize (params: json option) : Initialize.params =
 
 let print_initialize_error (r: Initialize.error_data) : json =
   let open Initialize in
-  JSON_Bool r.retry
+  JSON_Object [
+    "retry", JSON_Bool r.retry;
+  ]
 
 let print_initialize (r: Initialize.result) : json =
   let open Initialize in
@@ -686,29 +747,36 @@ let print_initialize (r: Initialize.result) : json =
 (** error response                                                     **)
 (************************************************************************)
 
+let get_error_info (e: exn) : int * string * json option =
+  (* returns (lspErrorCode, friendlyMessage, lspData) *)
+  match e with
+  | Error.Parse message -> (-32700, message, None)
+  | Error.Invalid_request message -> (-32600, message, None)
+  | Error.Method_not_found message -> (-32601, message, None)
+  | Error.Invalid_params message -> (-32602, message, None)
+  | Error.Internal_error message -> (-32603, message, None)
+  | Error.Server_error_start (message, data) ->
+      (-32603, message, Some (print_initialize_error data))
+  | Error.Server_error_end message -> (-32000, message, None)
+  | Error.Server_not_initialized message -> (-32002, message, None)
+  | Error.Unknown message -> (-32001, message, None)
+  | Error.Request_cancelled message -> (-32800, message, None)
+  | _ -> (-32001, Printexc.to_string e, None)
+
 let print_error (e: exn) : json =
   let open Hh_json in
-  let (code, message, data) = match e with
-    | Error.Parse message -> (-32700, message, None)
-    | Error.Invalid_request message -> (-32600, message, None)
-    | Error.Method_not_found message -> (-32601, message, None)
-    | Error.Invalid_params message -> (-32602, message, None)
-    | Error.Internal_error message -> (-32603, message, None)
-    | Error.Server_error_start (message, data) ->
-        (-32603, message, Some (print_initialize_error data))
-    | Error.Server_error_end message -> (-32000, message, None)
-    | Error.Server_not_initialized message -> (-32002, message, None)
-    | Error.Unknown message -> (-32001, message, None)
-    | _ -> (-32001, "Internal error", None)
+  let (code, message, original_data) = get_error_info e in
+  let stack = ("stack", string_ (Printexc.get_backtrace ())) in
+  (* We'd like to add a stack-trace. The only place we can fit it, that will *)
+  (* be respected by vscode-jsonrpc, is inside the 'data' field. And we can  *)
+  (* do that only if data is an object. We can synthesize one if needed.     *)
+  let data = match original_data with
+    | None -> JSON_Object [stack]
+    | Some (JSON_Object o) -> JSON_Object (stack :: o)
+    | Some primitive -> primitive
   in
-  (* TODO: move the backtrace into "data" once Nuclide can log it there. *)
-  let message = Printf.sprintf "%s - %s - %s"
-    message
-    (Printexc.to_string e)
-    (Printexc.get_backtrace ())
-    in
-  Jprint.object_opt [
-    "code", Some (int_ code);
-    "message", Some (string_ message);
+  JSON_Object [
+    "code", int_ code;
+    "message", string_ message;
     "data", data;
   ]

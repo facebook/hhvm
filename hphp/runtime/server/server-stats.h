@@ -56,6 +56,8 @@ public:
   static void StartRequest(const char *url, const char *clientIP,
                            const char *vhost);
   static void SetThreadMode(ThreadMode mode);
+  static ThreadMode GetThreadMode();
+  static const char* ThreadModeString(ThreadMode mode);
   static void ReportStatus(std::string& out, Writer::Format format);
 
   static void SetServerHealthLevel(HealthLevel new_health_level);

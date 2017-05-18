@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -98,6 +99,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
+  assert(type_scan::isKnownType(ndi->tyindex));
   node->initHeader(ndi->tyindex, HeaderKind::NativeData, 0);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
@@ -130,7 +132,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   auto prop = reinterpret_cast<TypedValue*>(obj + 1);
   auto const stop = prop + nProps;
   for (; prop != stop; ++prop) {
-    tvRefcountedDecRef(prop);
+    tvDecRefGen(prop);
   }
 
   auto ndi = cls->getNativeDataInfo();

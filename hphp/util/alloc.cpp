@@ -621,6 +621,13 @@ void* low_malloc_huge1g_impl(size_t size) {
   if (low_huge1g_arena == 0) return low_malloc(size);
   auto ret = mallocx(size, low_mallocx_huge1g_flags());
   if (ret) return ret;
+  if (size < size2m) {
+    // We are out of space in the 1G arena, I don't expect it to get more pages
+    // later, because we (should) rarely deallocate in that arena.  This is fine
+    // because the decallocation call to both arenas are the same.
+    static_assert(low_dallocx_huge1g_flags() == dallocx_huge1g_flags(), "");
+    low_huge1g_arena = 0;
+  }
   return low_malloc(size);
 }
 
@@ -655,9 +662,11 @@ int jemalloc_pprof_disable() {
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   if (!force) {
+    bool enabled = false;
     bool active = false;
-    // Check if profiling has been enabled before trying to dump.
-    int err = mallctlRead("opt.prof", &active, true);
+    // Check if profiling is active before trying to dump.
+    int err = mallctlRead("opt.prof", &enabled, true) ||
+      (enabled && mallctlRead("prof.active", &active, true));
     if (err || !active) {
       return 0; // nothing to do
     }

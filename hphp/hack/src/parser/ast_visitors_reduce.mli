@@ -86,6 +86,7 @@ class virtual ['b] reduce :
         on_Contravariant : 'c -> 'd; on_Covariant : 'c -> 'd;
         on_Cst_const : 'c -> 'd; on_Cst_define : 'c -> 'd;
         on_Ctrait : 'c -> 'd;
+        on_Def_inline : 'c -> Ast_visitors_ancestors.def -> 'd;
         on_Default : 'c -> Ast_visitors_ancestors.block -> 'd;
         on_Diff : 'c -> 'd; on_Diff2 : 'c -> 'd;
         on_Do : 'c ->
@@ -120,6 +121,8 @@ class virtual ['b] reduce :
                      Ast_visitors_ancestors.as_expr ->
                      Ast_visitors_ancestors.block -> 'd;
         on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> 'd; on_Gt : 'c -> 'd;
+        on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> 'd;
+        on_Goto : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_Gte : 'c -> 'd; on_Gtgt : 'c -> 'd;
         on_Haccess : 'c ->
                      Ast_visitors_ancestors.id ->
@@ -135,6 +138,7 @@ class virtual ['b] reduce :
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd;
         on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> 'd;
+        on_Hsoft : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_Id : 'c -> Ast_visitors_ancestors.id -> 'd;
         on_Id_type_arguments : 'c ->
                                Ast_visitors_ancestors.id ->
@@ -154,6 +158,7 @@ class virtual ['b] reduce :
         on_Invariant : 'c -> 'd;
         on_Lfun : 'c -> Ast_visitors_ancestors.fun_ -> 'd;
         on_List : 'c -> Ast_visitors_ancestors.expr list -> 'd;
+        on_Cmp : 'c -> 'd;
         on_Lt : 'c -> 'd; on_Lte : 'c -> 'd; on_Ltlt : 'c -> 'd;
         on_Lvar : 'c -> Ast_visitors_ancestors.id -> 'd;
         on_Lvarvar : 'c -> int -> Ast_visitors_ancestors.id -> 'd;
@@ -164,6 +169,8 @@ class virtual ['b] reduce :
         on_Namespace : 'c ->
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program -> 'd;
+        on_SetNamespaceEnv : 'c ->
+                       Ast_visitors_ancestors.nsenv -> 'd;
         on_NamespaceUse : 'c ->
                           (Ast_visitors_ancestors.ns_kind *
                            Ast_visitors_ancestors.id *
@@ -204,6 +211,7 @@ class virtual ['b] reduce :
         on_Slash : 'c -> 'd; on_Star : 'c -> 'd; on_Starstar : 'c -> 'd;
         on_Static : 'c -> 'd;
         on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> 'd;
+        on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd;
         on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd;
@@ -225,7 +233,7 @@ class virtual ['b] reduce :
         on_Unot : 'c -> 'd; on_Unsafe : 'c -> 'd;
         on_Unsafeexpr : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Updecr : 'c -> 'd; on_Upincr : 'c -> 'd; on_Uplus : 'c -> 'd;
-        on_Uref : 'c -> 'd; on_Utild : 'c -> 'd;
+        on_Uref : 'c -> 'd; on_Usplat : 'c -> 'd; on_Utild : 'c -> 'd;
         on_While : 'c ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.block -> 'd;
@@ -238,6 +246,21 @@ class virtual ['b] reduce :
                      option -> 'd;
         on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> 'd;
+
+
+        on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> 'd;
+        on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> 'd;
+        on_ChildName : 'c -> Ast_visitors_ancestors.id -> 'd;
+        on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> 'd;
+        on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child_op -> 'd;
+        on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child -> 'd;
+        on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> 'd;
+        on_ChildStar : 'c -> 'd;
+        on_ChildPlus : 'c -> 'd;
+        on_ChildQuestion : 'c -> 'd;
+
         on_Xml : 'c ->
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
@@ -372,6 +395,7 @@ class virtual ['b] reduce :
     method on_Class_get :
       'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> 'd
     method on_Clone : 'c -> Ast_visitors_ancestors.expr -> 'd
+    method on_Cmp : 'c -> 'd
     method on_Cnormal : 'c -> 'd
     method on_Collection :
       'c ->
@@ -390,6 +414,7 @@ class virtual ['b] reduce :
     method on_Cst_const : 'c -> 'd
     method on_Cst_define : 'c -> 'd
     method on_Ctrait : 'c -> 'd
+    method on_Def_inline : 'c -> Ast_visitors_ancestors.def -> 'd
     method on_Default : 'c -> Ast_visitors_ancestors.block -> 'd
     method on_Diff : 'c -> 'd
     method on_Diff2 : 'c -> 'd
@@ -432,6 +457,8 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.pos_t option ->
       Ast_visitors_ancestors.as_expr -> Ast_visitors_ancestors.block -> 'd
     method on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> 'd
+    method on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> 'd
+    method on_Goto : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_Gt : 'c -> 'd
     method on_Gte : 'c -> 'd
     method on_Gtgt : 'c -> 'd
@@ -450,6 +477,7 @@ class virtual ['b] reduce :
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd
     method on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> 'd
+    method on_Hsoft : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_Id : 'c -> Ast_visitors_ancestors.id -> 'd
     method on_Id_type_arguments :
       'c ->
@@ -484,6 +512,9 @@ class virtual ['b] reduce :
     method on_NSFun : 'c -> 'd
     method on_Namespace :
       'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.program -> 'd
+    method on_SetNamespaceEnv :
+      'c ->
+      Ast_visitors_ancestors.nsenv -> 'd
     method on_NamespaceUse :
       'c ->
       (Ast_visitors_ancestors.ns_kind * Ast_visitors_ancestors.id *
@@ -534,6 +565,7 @@ class virtual ['b] reduce :
     method on_Starstar : 'c -> 'd
     method on_Static : 'c -> 'd
     method on_Static_var : 'c -> Ast_visitors_ancestors.expr list -> 'd
+    method on_Global_var : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_Stmt : 'c -> Ast_visitors_ancestors.stmt -> 'd
     method on_String : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_String2 : 'c -> Ast_visitors_ancestors.expr list -> 'd
@@ -560,6 +592,7 @@ class virtual ['b] reduce :
     method on_Upincr : 'c -> 'd
     method on_Uplus : 'c -> 'd
     method on_Uref : 'c -> 'd
+    method on_Usplat : 'c -> 'd
     method on_Utild : 'c -> 'd
     method on_While :
       'c -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.block -> 'd
@@ -572,6 +605,18 @@ class virtual ['b] reduce :
       option -> 'd
     method on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> 'd
+    method on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> 'd
+    method on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> 'd
+    method on_ChildName : 'c -> Ast_visitors_ancestors.id -> 'd
+    method on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> 'd
+    method on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op -> 'd
+    method on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child -> 'd
+    method on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> 'd
+    method on_ChildStar : 'c -> 'd
+    method on_ChildPlus : 'c -> 'd
+    method on_ChildQuestion : 'c -> 'd
     method on_Xml :
       'c ->
       Ast_visitors_ancestors.id ->

@@ -84,7 +84,6 @@ class Redis {
   }
 
   public function close() {
-    $this->processCommand('QUIT');
     fclose($this->connection);
     $this->connection = null;
   }
@@ -835,6 +834,7 @@ class Redis {
     'popen' => [ 'alias' => 'pconnect' ],
     'ping' => [ 'return' => 'Raw' ],
     'echo' => [ 'format' => 's', 'return' => 'String' ],
+    'quit' => [ 'return' => 'Boolean' ],
 
     // Server
     'bgrewriteaof' => [ 'return' => 'Boolean' ],

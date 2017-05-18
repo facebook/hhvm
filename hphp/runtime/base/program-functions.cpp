@@ -105,6 +105,7 @@
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
 #include <folly/portability/Stdlib.h>
+#include <folly/portability/Unistd.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
@@ -939,8 +940,14 @@ static int start_server(const std::string &username, int xhprof) {
         Cronolog::changeOwner(username, el.second.symLink);
       }
     }
-    Capability::ChangeUnixUser(username);
+    if (!Capability::ChangeUnixUser(username, RuntimeOption::AllowRunAsRoot)) {
+      _exit(1);
+    }
     LightProcess::ChangeUser(username);
+  } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
+    Logger::Error("hhvm not allowed to run as root unless "
+                  "-vServer.AllowRunAsRoot=1 is used.");
+    _exit(1);
   }
   Capability::SetDumpable();
 #endif
@@ -986,7 +993,7 @@ static int start_server(const std::string &username, int xhprof) {
   if (RuntimeOption::RepoLocalReadaheadRate > 0 &&
       !RuntimeOption::RepoLocalPath.empty()) {
     HttpServer::CheckMemAndWait();
-    readaheadThread = folly::make_unique<std::thread>([&] {
+    readaheadThread = std::make_unique<std::thread>([&] {
         BootStats::Block timer("Readahead Repo");
         auto path = RuntimeOption::RepoLocalPath.c_str();
         Logger::Info("readahead %s", path);
@@ -2456,19 +2463,23 @@ void hphp_session_exit(const Transport* transport) {
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();
+  jit::tc::requestExit();
   // Similarly, apc strings could be in the ServerNote array, and
-  // its possible they are scheduled to be destroyed after this request
+  // it's possible they are scheduled to be destroyed after this request
   // finishes.
   Treadmill::finishRequest();
-
-  // The treadmill must be flushed before profData is reset as the data may
-  // be read during cleanup if EvalEnableReuseTC = true
-  jit::tc::requestExit();
 
   TI().onSessionExit();
 
   if (transport) {
-    HardwareCounter::UpdateServiceData(transport->getCpuTime());
+    std::unique_ptr<StructuredLogEntry> entry;
+    if (RuntimeOption::EvalProfileHWStructLog) {
+      entry = std::make_unique<StructuredLogEntry>();
+      entry->setInt("response_code", transport->getResponseCode());
+    }
+    HardwareCounter::UpdateServiceData(transport->getCpuTime(), entry.get(),
+                                       true /*psp*/);
+    if (entry) StructuredLog::log("hhvm_request_perf", *entry);
   }
 
   // We might have events from after the final surprise flag check of the

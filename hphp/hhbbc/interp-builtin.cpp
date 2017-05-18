@@ -47,7 +47,7 @@ folly::Optional<Type> const_fold(ISS& env,
     args[op.arg1 - i - 1] = *val;
   }
 
-  auto const func = Unit::lookupFunc(rfunc.name());
+  auto const func = Unit::lookupBuiltin(rfunc.name());
   always_assert_flog(
     func,
     "func not found for builtin {}\n",
@@ -218,24 +218,62 @@ bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_function_exists(env, op.arg1, true);
 }
 
-#define SPECIAL_BUILTINS                        \
-  X(abs)                                        \
-  X(ceil)                                       \
-  X(floor)                                      \
-  X(get_class)                                  \
-  X(max2)                                       \
-  X(min2)                                       \
-  X(mt_rand)                                    \
-  X(strlen)                                     \
-  X(defined)                                    \
-  X(function_exists)                            \
+bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = topC(env);
 
-#define X(x) const StaticString s_##x(#x);
+  if (ty.subtypeOf(TNum) || ty.subtypeOf(TBool) || ty.subtypeOf(TRes)) {
+    reduce(env, bc::CastInt {}, bc::RGetCNop {});
+    return true;
+  }
+
+  auto retTy = TBottom;
+  if (ty.couldBe(TNull)) {
+    retTy |= sval(staticEmptyString());
+  }
+  if (ty.couldBe(TNum) || ty.couldBe(TBool) || ty.couldBe(TRes)) {
+    retTy |= TInt;
+  }
+  if (ty.couldBe(TStr)) {
+    retTy |= TInt;
+    if (ty.couldBe(TSStr)) retTy |= TSStr;
+    if (ty.couldBe(TCStr)) retTy |= TCStr;
+  }
+
+  if (!ty.couldBe(TObj) && !ty.couldBe(TArr) &&
+      !ty.couldBe(TVec) && !ty.couldBe(TDict) &&
+      !ty.couldBe(TKeyset)) {
+    constprop(env);
+    nothrow(env);
+  }
+
+  popC(env);
+  push(env, retTy);
+
+  if (retTy == TBottom) unreachable(env);
+
+  return true;
+}
+
+#define SPECIAL_BUILTINS                                                \
+  X(abs, abs)                                                           \
+  X(ceil, ceil)                                                         \
+  X(floor, floor)                                                       \
+  X(get_class, get_class)                                               \
+  X(max2, max2)                                                         \
+  X(min2, min2)                                                         \
+  X(mt_rand, mt_rand)                                                   \
+  X(strlen, strlen)                                                     \
+  X(defined, defined)                                                   \
+  X(function_exists, function_exists)                                   \
+  X(array_key_cast, HH\\array_key_cast)                                 \
+
+#define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS
 #undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
+#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
   SPECIAL_BUILTINS
 #undef X
 

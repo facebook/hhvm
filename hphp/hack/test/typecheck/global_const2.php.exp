@@ -1,2 +1,4 @@
+File "global_const2.php", line 3, characters 7-9:
+This is an int (Typing[4110])
 File "global_const2.php", line 3, characters 15-19:
-Illegal constant value (Naming[2023])
+It is incompatible with an empty array

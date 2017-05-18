@@ -332,14 +332,29 @@ let applied_fixmes = M.applied_fixmes
 let ignored_fixme_files = ref None
 let set_ignored_fixmes files = ignored_fixme_files := files
 
-let is_ignored_fixme pos = match !ignored_fixme_files with
+let ignored_fixme_codes = ref ISet.empty
+
+let is_in_ignored_file pos = match !ignored_fixme_files with
 (* No fixme is ignored *)
 | None -> false
 (* Only the fixmes in gives files are ignored *)
 | Some l ->
   List.exists l ~f:(fun x -> x = (Pos.filename pos))
 
+let is_ignored_code code = ISet.mem code !ignored_fixme_codes
+
+let is_ignored_fixme pos code =
+  is_in_ignored_file pos || is_ignored_code code
+
 let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
+let (get_hh_fixme_pos: (Pos.t -> error_code -> Pos.t option) ref) =
+  ref (fun _ _ -> None)
+
+let add_ignored_fixme_code_error pos code =
+  if !is_hh_fixme pos code && is_ignored_code code then
+    let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
+    M.add_error (M.make_error code
+      [pos, Printf.sprintf "HH_FIXME cannot be used for error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)
@@ -350,15 +365,18 @@ let add_applied_fixme code pos =
 
 let rec add_error = M.add_error
 
-and add code pos msg =
-  if not (is_ignored_fixme pos) && !is_hh_fixme pos code
+and add code ?mode pos msg =
+  if not (is_ignored_fixme pos code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
-  else add_error (M.make_error code [pos, msg])
+  else add_error (M.make_error code [pos, msg]);
+  add_ignored_fixme_code_error pos code
 
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
-  if !is_hh_fixme pos code then add_applied_fixme code pos else
-  add_error (make_error code pos_msg_l)
+  if not (is_ignored_fixme pos code) && !is_hh_fixme pos code
+  then add_applied_fixme code pos
+  else add_error (make_error code pos_msg_l);
+  add_ignored_fixme_code_error pos code
 
 and merge (err',fixmes') (err,fixmes) =
   (List.rev_append err' err, List.rev_append fixmes' fixmes)
@@ -405,6 +423,8 @@ module Temporary = struct
   let darray_not_supported = 1
   let varray_not_supported = 2
   let unknown_fields_not_supported = 3
+  let darray_or_varray_not_supported = 4
+  (* DEPRECATED let goto_not_supported = 5 *)
 end
 
 module Parsing = struct
@@ -489,6 +509,10 @@ module Naming                               = struct
   let dollardollar_unused                   = 2069 (* DONT MODIFY!!!! *)
   let illegal_member_variable_class         = 2070 (* DONT MODIFY!!!! *)
   let too_few_type_arguments                = 2071 (* DONT MODIFY!!!! *)
+  let goto_label_already_defined            = 2072 (* DONT MODIFY!!!! *)
+  let goto_label_undefined                  = 2073 (* DONT MODIFY!!!! *)
+  let goto_label_defined_in_finally         = 2074 (* DONT MODIFY!!!! *)
+  let goto_invoked_in_finally               = 2075 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -527,6 +551,7 @@ module NastCheck                            = struct
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
   let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
+  let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -718,6 +743,12 @@ let varray_not_supported pos =
 let unknown_fields_not_supported pos =
   add Temporary.unknown_fields_not_supported pos
     "The Unknown shape fields feature (i.e., \"shape(...)\") is not supported."
+
+let darray_or_varray_not_supported pos =
+  add
+    Temporary.darray_or_varray_not_supported
+    pos
+    "darray_or_varray is not supported."
 
 (*****************************************************************************)
 (* Parsing errors. *)
@@ -1089,6 +1120,31 @@ let using_internal_class pos name =
    add Naming.too_few_type_arguments p
      ("Too few type arguments for this type")
 
+let goto_label_already_defined
+    label_name
+    redeclaration_pos
+    original_delcaration_pos =
+  add_list
+    Naming.goto_label_already_defined
+    [
+      redeclaration_pos, "Cannot redeclare the goto label '" ^ label_name ^ "'";
+      original_delcaration_pos, "Declaration is here";
+    ]
+
+let goto_label_undefined pos label_name =
+  add Naming.goto_label_undefined pos ("Undefined goto label: " ^ label_name)
+
+let goto_label_defined_in_finally pos label_name =
+  add Naming.goto_label_defined_in_finally
+    pos
+    "It is illegal to define a goto label within a finally block."
+
+let goto_invoked_in_finally pos label_name =
+  add Naming.goto_invoked_in_finally
+    pos
+    "It is illegal to invoke goto within a finally block."
+
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)
@@ -1206,6 +1262,11 @@ let continue_in_switch p =
 let await_in_sync_function p =
   add NastCheck.await_in_sync_function p
     "await can only be used inside async functions"
+
+let await_not_allowed p =
+  add NastCheck.await_not_allowed p
+    "await is only permitted as a statement, expression in a return statement \
+      or as a right hand side in top level assignment."
 
 let magic (p, s) =
   add NastCheck.magic p
@@ -1613,7 +1674,7 @@ let protected_class_meth pos1 pos2 =
 
 let array_cast pos =
   add Typing.array_cast pos
-    "(array) cast forbidden in strict mode; arrays with unspecified \
+    "(array) cast forbidden; arrays with unspecified \
     key and value types are not allowed"
 
 let anonymous_recursive pos =

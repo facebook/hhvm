@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/func-guard-x64.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -53,6 +52,9 @@ namespace x64 { struct ImmFolder; }
 
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
+
+static_assert(folly::kIsLittleEndian,
+  "Code contains little-endian specific optimizations.");
 
 struct Vgen {
   explicit Vgen(Venv& env)
@@ -184,6 +186,7 @@ struct Vgen {
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
   void emit(const loadb& i) { a.loadb(i.s, i.d); }
   void emit(const loadw& i) { a.loadw(i.s, i.d); }
+  void emit(const loadtql& i) { a.loadl(i.s, i.d); }
   void emit(const loadl& i) { a.loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
@@ -234,7 +237,6 @@ struct Vgen {
   void emit(const storesd& i) { a.movsd(i.s, i.m); }
   void emit(const storew& i) { a.storew(i.s, i.m); }
   void emit(const storewi& i) { a.storew(i.s, i.m); }
-  void emit(subbi i) { binary(i); a.subb(i.s0, i.d); }
   void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }

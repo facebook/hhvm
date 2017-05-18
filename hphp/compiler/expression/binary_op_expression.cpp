@@ -289,6 +289,8 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   Variant v1;
   Variant v2;
 
+  if (RuntimeOption::EvalDisableHphpcOpts) return ExpressionPtr();
+
   if (!m_exp2->getScalarValue(v2)) {
     if ((ar->getPhase() != AnalysisResult::ParseAllFiles) &&
         m_exp1->isScalar() && m_exp1->getScalarValue(v1)) {
@@ -578,6 +580,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
 ExpressionPtr
 BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp1;
+
+  if (RuntimeOption::EvalDisableHphpcOpts) return ExpressionPtr();
+
   switch (m_op) {
   case '.':
   case '+':

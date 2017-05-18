@@ -19,26 +19,27 @@
   FCall 1
   PopR
 
-  .try_catch handler {
+  .try {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall 0
     UnboxR
     RetC
+  } .catch {
+    SetL _1
+    PopC
+    String "Received exception:  "
+    PushL _1
+    FPushObjMethodD 0 "getMessage" NullThrows
+    FCall 0
+    UnboxR
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+    Int 1
+    RetC
   }
-
-handler:
-  String "Received exception:  "
-  Catch
-  FPushObjMethodD 0 "getMessage" NullThrows
-  FCall 0
-  UnboxR
-  Concat
-  String "\n"
-  Concat
-  Print
-  PopC
-  Int 1
-  RetC
 }
 
 .function thrower() {

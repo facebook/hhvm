@@ -20,13 +20,13 @@ void deepCopy(TypedValue*);
  * c_-prefixed child classes.
  */
 struct BaseMap : HashCollection {
- protected:
+protected:
   // BaseMap is an abstract class, with no additional member needing
   // initialization.
   using HashCollection::HashCollection;
   ~BaseMap();
 
- public:
+public:
   // init(), used by Map::__construct()
   // expects an iterable of key=>value
   void init(const Variant& t) {
@@ -52,35 +52,37 @@ struct BaseMap : HashCollection {
     std::is_base_of<BaseMap, TMap>::value, TMap*>::type
   static Clone(ObjectData* obj);
 
-  void add(const TypedValue* val);
-  void add(const Variant& val) { add(val.asCell()); }
+  /*
+   * Append `v' to the Map and incref it if it's refcounted.
+   */
+  void add(TypedValue v);
+  void add(const Variant& v) { add(*v.asCell()); }
 
-  void set(int64_t k, const TypedValue* data);
-  void set(StringData* key, const TypedValue* data);
-  void set(int64_t k, const Variant& data) {
-    set(k, data.asCell());
-  }
-  void set(StringData* key, const Variant& data) {
-    set(key, data.asCell());
-  }
-  void set(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      set(key->m_data.num, data);
-    } else if (isStringType(key->m_type)) {
-      set(key->m_data.pstr, data);
+  /*
+   * Add `k' => `v' to the Map, increffing each if it's refcounted.
+   */
+  void set(int64_t k, TypedValue v);
+  void set(StringData* k, TypedValue v);
+  void set(int64_t k, const Variant& v) { set(k, *v.asCell()); }
+  void set(StringData* k, const Variant& v) { set(k, *v.asCell()); }
+  void set(TypedValue k, TypedValue v) {
+    assert(k.m_type != KindOfRef);
+    if (k.m_type == KindOfInt64) {
+      set(k.m_data.num, v);
+    } else if (isStringType(k.m_type)) {
+      set(k.m_data.pstr, v);
     } else {
       throwBadKeyType();
     }
   }
-  void set(const Variant& key, const Variant& data) {
-    set(key.asCell(), data.asCell());
+  void set(const Variant& k, const Variant& v) {
+    set(*k.asCell(), *v.asCell());
   }
 
   Variant pop();
   Variant popFront();
 
- public:
+public:
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
@@ -109,7 +111,7 @@ struct BaseMap : HashCollection {
 
   [[noreturn]] static void throwBadKeyType();
 
- protected:
+protected:
   Variant php_at(const Variant& key) const {
     if (key.isInteger()) {
       return tvAsCVarRef(atImpl<true>(key.toInt64()));
@@ -175,34 +177,29 @@ struct BaseMap : HashCollection {
   void addAllImpl(const Variant& iterable);
   void setAllImpl(const Variant& iterable);
 
-  template<bool raw>
-  void setImpl(int64_t k, const TypedValue* val);
-  template<bool raw>
-  void setImpl(StringData* key, const TypedValue* data);
+  template<bool raw> void setImpl(int64_t k, TypedValue v);
+  template<bool raw> void setImpl(StringData* k, TypedValue v);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
   // check for an immutable buffer and doesn't increment m_version, so it's
   // only safe to use in some cases. If you're not sure, use set() instead.
-  void setRaw(int64_t k, const TypedValue* data);
-  void setRaw(StringData* key, const TypedValue* data);
-  void setRaw(int64_t k, const Variant& data) {
-    setRaw(k, data.asCell());
-  }
-  void setRaw(StringData* key, const Variant& data) {
-    setRaw(key, data.asCell());
-  }
-  void setRaw(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      setRaw(key->m_data.num, data);
-    } else if (isStringType(key->m_type)) {
-      setRaw(key->m_data.pstr, data);
+  void setRaw(int64_t k, TypedValue v);
+  void setRaw(StringData* key, TypedValue v);
+  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.asCell()); }
+  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asCell()); }
+
+  void setRaw(TypedValue k, TypedValue v) {
+    assert(k.m_type != KindOfRef);
+    if (k.m_type == KindOfInt64) {
+      setRaw(k.m_data.num, v);
+    } else if (isStringType(k.m_type)) {
+      setRaw(k.m_data.pstr, v);
     } else {
       throwBadKeyType();
     }
   }
-  void setRaw(const Variant& key, const Variant& data) {
-    setRaw(key.asCell(), data.asCell());
+  void setRaw(const Variant& k, const Variant& v) {
+    setRaw(*k.asCell(), *v.asCell());
   }
 
   template<class TMap>
@@ -288,7 +285,7 @@ struct BaseMap : HashCollection {
     return Object{std::move(vec)};
   }
 
- private:
+private:
   friend void collections::deepCopy(TypedValue*);
 
   friend struct collections::CollectionsExtension;

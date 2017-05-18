@@ -478,6 +478,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
+  case FuncGuard:
+    break;
+
   case DefFP:
   case FreeActRec:
     cur().fpValue = inst->dst();

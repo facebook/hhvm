@@ -94,3 +94,32 @@ function v() {
   return
     <aaaaaaaaaaaa href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" name="watttttt"/>;
 }
+
+function w() {
+  return
+    <p>
+      <my:example:tag />
+      <my:exampel:tag:param param={"Hello, World!"} />
+    </p>;
+}
+
+function x() {
+  return $this->:is-active
+    ? <span class={cx('myComponent/root', 'myComponent/active')}>
+      {$this->getChildren()}
+    </span>
+    : <a class={cx('myComponent/root')} href={$this->:href}>
+      {$this->getChildren()}
+    </a>;
+}
+
+function y() {
+  return
+    <div class={cx(Map {
+      'linkWrap' => true,
+      'hasCount' => $has_count,
+      'noCount' => !$has_count,
+    })}>
+      foo
+    </div>;
+}

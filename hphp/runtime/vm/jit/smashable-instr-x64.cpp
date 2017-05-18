@@ -24,6 +24,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
+#include <folly/MicroSpinLock.h>
+
 namespace HPHP { namespace jit { namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,45 +101,57 @@ void smashCmpq(TCA inst, uint32_t imm) {
 
 void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
-  /*
-   * TODO(#7889486): We'd like this just to be:
-   *
-   *    X64Assembler::patchCall(inst, inst, target);
-   *
-   * but presently this causes asserts to fire in MCGenerator because of a bug
-   * with PGO and relocation.
-   */
-  CodeBlock cb;
-  cb.init(inst, smashableCallLen(), "Smashable Call");
-  X64Assembler a { cb };
-  a.call(target);
+  X64Assembler::patchCall(inst, inst, target);
 }
 
 void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
 
-  CodeBlock cb;
-  cb.init(inst, smashableJmpLen(), "Smashable Jmp");
-  X64Assembler a { cb };
+  // Smashing jmps can be tricky because we sometimes override the entire five
+  // byte instruction with a nop rather than updating the four byte immediate.
+  // In order to both leave the instruction in a valid state and avoid writing
+  // to someone else's bytes we perform a four and a one byte write. This should
+  // generally be safe (see below), but can be racy with multiple threads
+  // writing to the same jmp. Grab a spin lock to serialize smashJmp calls.
+  static folly::MicroSpinLock s_lock;
+  folly::MSLGuard g{s_lock};
 
   if (target > inst && target - inst <= smashableJmpLen()) {
-    a.emitNop(target - inst);
+    // Using emitNop here would write eight bytes to smash the 5 byte Jmp,
+    // unfortunately this is racy without the codeLock, so instead emit the
+    // nop using a single machine instruction writing four bytes (the final
+    // two bytes of the nop aren't required to be anything specific).
+    *reinterpret_cast<uint32_t*>(inst) = 0x00441f0f;
+
+    // While zeroing the final bytes is not a requirement intel does recommend
+    // that this canonical form be used. So as this is not required for
+    // correctness, it's okay for it to not be atomic with the above operation.
+    *reinterpret_cast<uint8_t*>(inst + 4) = 0x00;
   } else {
-    a.jmp(target);
+    // We may be unsmashing a nop. We have to be careful here, to ensure that
+    // we always leave the instruction in a consistent state.
+    auto const imm = safe_cast<int32_t>(target - (inst + 5));
+    if (inst[0] != 0xe9) {
+      assert(inst[0] == 0x0f && inst[1] == 0x1f && inst[2] == 0x44);
+
+      auto const last = 0xff & (imm >> 24);
+      auto const first = 0xe9 | ((size_t(imm) & 0xffffffULL) << 8);
+
+      // As noted above, storing to the final two bytes of our five byte nop
+      // will still allow it to remain a nop, so we can write to the final byte
+      // and then atomically set the remaining four bytes, smashing in our new
+      // jmp instruction.
+      *reinterpret_cast<uint8_t*>(inst + 4) = last;
+      *reinterpret_cast<uint32_t*>(inst) = first;
+    } else {
+      *reinterpret_cast<uint32_t*>(inst + 1) = imm;
+    }
   }
 }
 
-void smashJcc(TCA inst, TCA target, ConditionCode cc) {
+void smashJcc(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
-
-  if (cc == CC_None) {
-    X64Assembler::patchJcc(inst, inst, target);
-  } else {
-    CodeBlock cb;
-    cb.init(inst, smashableJccLen(), "Smashable Jcc");
-    X64Assembler a { cb };
-    a.jcc(cc, target);
-  }
+  X64Assembler::patchJcc(inst, inst, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

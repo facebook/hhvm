@@ -156,6 +156,9 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
+  // Any TTL > TTLMaxFinite will be made infinite. NB: Applied *after* TTLLimit.
+  Config::Bind(TTLMaxFinite, ini, config, "Server.APC.TTLMaxFinite",
+               std::numeric_limits<int64_t>::max());
   Config::Bind(HotPrefix, ini, config, "Server.APC.HotPrefix");
   Config::Bind(HotSize, ini, config, "Server.APC.HotSize", 30000);
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
@@ -280,6 +283,7 @@ int apcExtension::PurgeFrequency = 4096;
 int apcExtension::PurgeRate = -1;
 bool apcExtension::AllowObj = false;
 int apcExtension::TTLLimit = -1;
+int64_t apcExtension::TTLMaxFinite = std::numeric_limits<int64_t>::max();
 int apcExtension::HotSize = 30000;
 double apcExtension::HotLoadFactor = 0.5;
 std::vector<std::string> apcExtension::HotPrefix;

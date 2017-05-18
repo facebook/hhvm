@@ -121,6 +121,7 @@ class virtual ['c] map :
         on_Clone : 'd ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
+        on_Cmp : 'd -> Ast_visitors_ancestors.bop;
         on_Cnormal : 'd -> Ast_visitors_ancestors.class_kind;
         on_Collection : 'd ->
                         Ast_visitors_ancestors.id ->
@@ -144,6 +145,9 @@ class virtual ['c] map :
         on_Cst_const : 'd -> Ast_visitors_ancestors.cst_kind;
         on_Cst_define : 'd -> Ast_visitors_ancestors.cst_kind;
         on_Ctrait : 'd -> Ast_visitors_ancestors.class_kind;
+        on_Def_inline : 'd ->
+                        Ast_visitors_ancestors.def ->
+                        Ast_visitors_ancestors.stmt;
         on_Default : 'd ->
                      Ast_visitors_ancestors.block ->
                      Ast_visitors_ancestors.case;
@@ -196,6 +200,12 @@ class virtual ['c] map :
                      Ast_visitors_ancestors.stmt;
         on_Fun : 'd ->
                  Ast_visitors_ancestors.fun_ -> Ast_visitors_ancestors.def;
+        on_GotoLabel : 'd ->
+                       Ast_visitors_ancestors.pstring ->
+                       Ast_visitors_ancestors.stmt;
+        on_Goto : 'd ->
+                  Ast_visitors_ancestors.pstring ->
+                  Ast_visitors_ancestors.stmt;
         on_Gt : 'd -> Ast_visitors_ancestors.bop;
         on_Gte : 'd -> Ast_visitors_ancestors.bop;
         on_Gtgt : 'd -> Ast_visitors_ancestors.bop;
@@ -221,8 +231,11 @@ class virtual ['c] map :
         on_Htuple : 'd ->
                     Ast_visitors_ancestors.hint list ->
                     Ast_visitors_ancestors.hint_;
+        on_Hsoft : 'd ->
+                     Ast_visitors_ancestors.hint ->
+                     Ast_visitors_ancestors.hint_;
         on_Id : 'd ->
-                Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
+                     Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
         on_Id_type_arguments : 'd ->
                                Ast_visitors_ancestors.id ->
                                Ast_visitors_ancestors.hint list ->
@@ -272,6 +285,9 @@ class virtual ['c] map :
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program ->
                        Ast_visitors_ancestors.def;
+        on_SetNamespaceEnv : 'd ->
+                            Ast_visitors_ancestors.nsenv ->
+                            Ast_visitors_ancestors.def;
         on_NamespaceUse : 'd ->
                           (Ast_visitors_ancestors.ns_kind *
                            Ast_visitors_ancestors.id *
@@ -330,6 +346,9 @@ class virtual ['c] map :
         on_Static_var : 'd ->
                         Ast_visitors_ancestors.expr list ->
                         Ast_visitors_ancestors.stmt;
+        on_Global_var : 'd ->
+                        Ast_visitors_ancestors.expr list ->
+                        Ast_visitors_ancestors.stmt;
         on_Stmt : 'd ->
                   Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def;
         on_String : 'd ->
@@ -370,6 +389,7 @@ class virtual ['c] map :
         on_Upincr : 'd -> Ast_visitors_ancestors.uop;
         on_Uplus : 'd -> Ast_visitors_ancestors.uop;
         on_Uref : 'd -> Ast_visitors_ancestors.uop;
+        on_Usplat : 'd -> Ast_visitors_ancestors.uop;
         on_Utild : 'd -> Ast_visitors_ancestors.uop;
         on_While : 'd ->
                    Ast_visitors_ancestors.expr ->
@@ -388,6 +408,53 @@ class virtual ['c] map :
         on_XhpCategory : 'd ->
                          Ast_visitors_ancestors.pstring list ->
                          Ast_visitors_ancestors.class_elt;
+         on_XhpChild : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.class_elt;
+          on_xhp_child : 'd ->
+                           Ast_visitors_ancestors.xhp_child ->
+                           Ast_visitors_ancestors.xhp_child;
+          on_ChildName : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.id ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildList : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child list ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildUnary : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child_op ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildBinary : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_xhp_child_op : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildStar : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildPlus : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildQuestion : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+
+
+
         on_Xml : 'd ->
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
@@ -665,6 +732,7 @@ class virtual ['c] map :
       Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
     method on_Clone :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Cmp : 'd -> Ast_visitors_ancestors.bop
     method on_Cnormal : 'd -> Ast_visitors_ancestors.class_kind
     method on_Collection :
       'd ->
@@ -764,6 +832,8 @@ class virtual ['c] map :
       Ast_visitors_ancestors.shape_info -> Ast_visitors_ancestors.hint_
     method on_Htuple :
       'd -> Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
+    method on_Hsoft :
+      'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Id :
       'd -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_
     method on_Id_type_arguments :
@@ -812,6 +882,10 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.id ->
       Ast_visitors_ancestors.program -> Ast_visitors_ancestors.def
+    method on_SetNamespaceEnv :
+      'd ->
+      Ast_visitors_ancestors.nsenv ->
+      Ast_visitors_ancestors.def
     method on_NamespaceUse :
       'd ->
       (Ast_visitors_ancestors.ns_kind * Ast_visitors_ancestors.id *
@@ -876,6 +950,8 @@ class virtual ['c] map :
     method on_Static : 'd -> Ast_visitors_ancestors.kind
     method on_Static_var :
       'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
+    method on_Global_var :
+      'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
     method on_Stmt :
       'd -> Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def
     method on_String :
@@ -914,6 +990,7 @@ class virtual ['c] map :
     method on_Upincr : 'd -> Ast_visitors_ancestors.uop
     method on_Uplus : 'd -> Ast_visitors_ancestors.uop
     method on_Uref : 'd -> Ast_visitors_ancestors.uop
+    method on_Usplat : 'd -> Ast_visitors_ancestors.uop
     method on_Utild : 'd -> Ast_visitors_ancestors.uop
     method on_While :
       'd ->
@@ -931,6 +1008,58 @@ class virtual ['c] map :
     method on_XhpCategory :
       'd ->
       Ast_visitors_ancestors.pstring list -> Ast_visitors_ancestors.class_elt
+    method on_XhpChild :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.class_elt
+    method on_xhp_child :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildName :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildList :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child list ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildUnary :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildBinary :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_xhp_child_op : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildStar : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildPlus : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildQuestion : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+
     method on_Xml :
       'd ->
       Ast_visitors_ancestors.id ->

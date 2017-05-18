@@ -6,6 +6,8 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -44,8 +46,8 @@ static void HHVM_METHOD(PairIterator, rewind) {
 Class* c_Pair::s_cls;
 
 c_Pair::~c_Pair() {
-  tvRefcountedDecRef(&elm0);
-  tvRefcountedDecRef(&elm1);
+  tvDecRefGen(&elm0);
+  tvDecRefGen(&elm1);
 }
 
 int64_t c_Pair::linearSearch(const Variant& value) const {

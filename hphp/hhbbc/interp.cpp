@@ -347,12 +347,10 @@ void in(ISS& env, const bc::AddElemC& op) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return env.collect.trackConstantArrays ?
-        array_set(std::move(ty), k, v) : TArr;
+      return array_set(std::move(ty), k, v);
     }
     if (ty.subtypeOf(TDict)) {
-      return env.collect.trackConstantArrays ?
-        dict_set(std::move(ty), k, v).first : TDictN;
+      return dict_set(std::move(ty), k, v).first;
     }
     return folly::none;
   }(popC(env));
@@ -384,8 +382,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return env.collect.trackConstantArrays ?
-        array_newelem(std::move(ty), std::move(v)) : TArrN;
+      return array_newelem(std::move(ty), std::move(v));
     }
     return folly::none;
   }(popC(env));
@@ -743,6 +740,14 @@ void in(ISS& env, const bc::CastVec&)    {
 
 void in(ISS& env, const bc::CastKeyset&) {
   castImpl(env, TKeyset, tvCastToKeysetInPlace);
+}
+
+void in(ISS& env, const bc::CastVArray&)  {
+  castImpl(env, TArr, tvCastToVArrayInPlace);
+}
+
+void in(ISS& env, const bc::CastDArray&)  {
+  castImpl(env, TArr, tvCastToDArrayInPlace);
 }
 
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
@@ -1278,12 +1283,17 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // perform a more efficient memoization scheme. Note that this all needs to
   // stay in sync with the interpreter and JIT.
   using MK = MemoKeyConstraint;
-  auto const mkc = [&]{
+  auto const mkc = [&] {
     if (!options.HardTypeHints) return MK::None;
     if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
-    return memoKeyConstraintFromTC(
-      env.ctx.func->params[op.loc1].typeConstraint
-    );
+    auto tc = env.ctx.func->params[op.loc1].typeConstraint;
+    if (tc.type() == AnnotType::Object) {
+      auto res = env.index.resolve_type_name(tc.typeName());
+      if (res.type != AnnotType::Object) {
+        tc.resolveType(res.type, res.nullable || tc.isNullable());
+      }
+    }
+    return memoKeyConstraintFromTC(tc);
   }();
 
   switch (mkc) {
@@ -2653,8 +2663,8 @@ void in(ISS& env, const bc::OODeclExists& op) {
         // superclass of the current context.
         if (is_systemlib_part(*unit)) return true;
         if (!env.ctx.cls) return false;
-        auto thisClass = env.index.resolve_class(env.ctx, env.ctx.cls->name);
-        return thisClass && thisClass->subtypeOf(*rcls);
+        auto thisClass = env.index.resolve_class(env.ctx.cls);
+        return thisClass.subtypeOf(*rcls);
       };
       if (canConstProp()) {
         constprop(env);
@@ -2669,6 +2679,13 @@ void in(ISS& env, const bc::OODeclExists& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
+  if (env.ctx.func->isMemoizeImpl &&
+      !locCouldBeRef(env, op.loc1) &&
+      options.HardTypeHints) {
+    // a MemoizeImpl's params have already been checked by the wrapper
+    return reduce(env, bc::Nop {});
+  }
+
   locAsCell(env, op.loc1);
   if (!options.HardTypeHints) return;
 
@@ -2687,8 +2704,10 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
-    FTRACE(2, "     {}\n", constraint.fullName());
-    setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
+    auto t = env.index.lookup_constraint(env.ctx, constraint);
+    if (t.subtypeOf(TBottom)) unreachable(env);
+    FTRACE(2, "     {} ({})\n", constraint.fullName(), show(t));
+    setLoc(env, op.loc1, std::move(t));
   }
 }
 
@@ -2719,6 +2738,11 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // return type constraint.
   auto tcT =
     remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
+
+  if (tcT.subtypeOf(TBottom)) {
+    unreachable(env);
+    return;
+  }
 
   // Below we compute retT, which is a rough conservative approximate of the
   // intersection of stackT and tcT.
@@ -2751,8 +2775,6 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   push(env, std::move(retT));
 }
 
-// These only occur in traits, so we don't need to do better than
-// this.
 void in(ISS& env, const bc::Self& op) {
   auto self = selfClsExact(env);
   putClsRefSlot(env, op.slot, self ? *self : TCls);

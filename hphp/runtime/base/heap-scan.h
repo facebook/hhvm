@@ -86,8 +86,10 @@ inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
   assert(!wh->getAttribute(ObjectData::HasNativeData));
   // scan ResumableHeader before object
   auto r = Resumable::FromObj(wh);
-  scanFrameSlots(r->actRec(), scanner);
-  scanner.scan(*r);
+  if (!wh->isFinished()) {
+    scanFrameSlots(r->actRec(), scanner);
+    scanner.scan(*r);
+  }
   return wh->scan(scanner);
 }
 
@@ -186,12 +188,7 @@ inline void c_WaitHandle::scan(type_scan::Scanner& scanner) const {
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   auto props = propVec();
-  if (m_partially_inited) {
-    // we don't know which properties are initialized yet
-    scanner.conservative(props, m_cls->numDeclProperties() * sizeof(*props));
-  } else {
-    scanner.scan(*props, m_cls->numDeclProperties() * sizeof(*props));
-  }
+  scanner.scan(*props, m_cls->numDeclProperties() * sizeof(*props));
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
     // which is not marked as a root. Scan the entry pair, so both the key

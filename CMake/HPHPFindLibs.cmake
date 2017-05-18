@@ -124,7 +124,7 @@ endif ()
 
 # liblz4
 find_package(LZ4)
-if (LZ4_INCLUDE_DIR)
+if (LZ4_FOUND)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
@@ -497,13 +497,13 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  if (DOUBLE_CONVERSION_LIBRARY)
+  if (DOUBLE_CONVERSION_FOUND)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
   else()
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_LIBRARY)
+  if (LZ4_FOUND)
     target_link_libraries(${target} ${LZ4_LIBRARY})
   else()
     target_link_libraries(${target} lz4)

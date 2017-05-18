@@ -249,8 +249,12 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
   m_checkExistenceBeforeRewrite =
     Config::GetBool(ini, vh, "CheckExistenceBeforeRewrite", true, false);
 
-  m_alwaysDecodePostData =
-    Config::GetBool(ini, vh, "AlwaysDecodePostData", true, false);
+  m_alwaysDecodePostData = Config::GetBool(
+    ini,
+    vh,
+    "AlwaysDecodePostData",
+    RuntimeOption::AlwaysDecodePostDataDefault,
+    false);
 
   m_decodePostDataBlackList =
     Config::GetSetC(ini, vh, "DecodePostDataBlackList");

@@ -73,6 +73,7 @@ let new_file_from_link link =
   Sys_utils.make_link_of_timestamped link
 
 let start_daemon output_fn log_link =
+  let in_fd = Daemon.null_fd () in
   let log_fd = Daemon.fd_of_path @@ new_file_from_link log_link in
   let out_fd = Daemon.fd_of_path @@ new_file_from_link output_fn in
   let root_path = Path.make Relative_path.(path_of_prefix Root) in
@@ -91,6 +92,6 @@ let start_daemon output_fn log_link =
      * see EOF when the serve exits, and just ends up waiting forever. No
      * idea why. *)
     ~channel_mode:`pipe
-    (out_fd, log_fd)
+    (in_fd, out_fd, log_fd)
     entry
     init_env

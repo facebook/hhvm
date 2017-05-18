@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -93,6 +94,10 @@ struct MixedArray final : ArrayData,
 
     void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
+      setStrKeyNoIncRef(k, h);
+    }
+
+    void setStrKeyNoIncRef(StringData* k, strhash_t h) {
       skey = k;
       data.hash() = h;
     }
@@ -159,7 +164,7 @@ struct MixedArray final : ArrayData,
     int32_t hash;
 
     TYPE_SCAN_CUSTOM_FIELD(skey) {
-      if (hash < 0) scanner.scan(skey);
+      if (hash >= 0) scanner.scan(skey);
     }
   };
 
@@ -312,12 +317,12 @@ public:
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static ArrayLval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static ArrayLval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
-  static ArrayLval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static ArrayLval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static ArrayLval LvalNewRef(ArrayData*, bool copy);
+  static member_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
@@ -346,6 +351,7 @@ public:
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
 
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -403,9 +409,9 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static ArrayLval LvalIntRefDict(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrRefDict(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNewRefDict(ArrayData*, bool);
+  static member_lval LvalIntRefDict(ArrayData*, int64_t, bool);
+  static member_lval LvalStrRefDict(ArrayData*, StringData*, bool);
+  static member_lval LvalNewRefDict(ArrayData*, bool);
   static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
@@ -422,13 +428,14 @@ public:
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
 
   //////////////////////////////////////////////////////////////////////
 
   // Like Lval[Int,Str], but silently does nothing if the element does not
   // exist. Not part of the ArrayData interface, but used for member operations.
-  static ArrayLval LvalSilentInt(ArrayData*, int64_t, bool);
-  static ArrayLval LvalSilentStr(ArrayData*, const StringData*, bool);
+  static member_lval LvalSilentInt(ArrayData*, int64_t, bool);
+  static member_lval LvalSilentStr(ArrayData*, const StringData*, bool);
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
@@ -654,7 +661,7 @@ private:
 
   Elm& addKeyAndGetElem(StringData* key);
 
-  template <class K> ArrayLval addLvalImpl(K k);
+  template <class K> member_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
 

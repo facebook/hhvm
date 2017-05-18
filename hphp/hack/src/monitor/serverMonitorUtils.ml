@@ -28,12 +28,31 @@ module type Server_config = sig
 
   (** Start the server. Optionally takes in the exit code of the previously
    * running server that exited. *)
-  val start_server : server_start_options -> int option ->
+  val start_server :
+    informant_managed:bool ->
+    prior_exit_status:(int option) ->
+    server_start_options ->
     ServerProcess.process_data
 
   (** Callback to run when server exits *)
   val on_server_exit : monitor_config -> unit
 end
+
+type build_mismatch_info =
+  {
+    existing_version: string;
+    existing_build_commit_time: string;
+    existing_argv: string list;
+    existing_launch_time: float;
+  }
+
+let current_build_info =
+  {
+    existing_version = Build_id.build_revision;
+    existing_build_commit_time = Build_id.get_build_commit_time_string ();
+    existing_argv = Array.to_list Sys.argv;
+    existing_launch_time = Unix.gettimeofday ();
+  }
 
 type connection_error =
   | Server_missing
@@ -42,12 +61,13 @@ type connection_error =
   (** Server dormant and can't join the (now full) queue of connections
    * waiting for the next server. *)
   | Server_dormant
-  | Build_id_mismatched
+  | Build_id_mismatched of build_mismatch_info option
   | Monitor_connection_failure
 
 type connection_state =
   | Connection_ok
   | Build_id_mismatch
+  | Build_id_mismatch_ex of build_mismatch_info
 
 (** Result of a shutdown monitor RPC. *)
 type shutdown_result =

@@ -55,6 +55,11 @@ void cgExitPlaceholder(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgFuncGuard(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<FuncGuard>();
+  vmain(env) << funcguard{extra->func, extra->prologueAddrPtr};
+}
+
 void cgDefFP(IRLS&, const IRInstruction*) {}
 
 void cgDefSP(IRLS& env, const IRInstruction* inst) {

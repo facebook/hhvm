@@ -208,9 +208,6 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
   auto tDest = getTranslation(args);
   if (!tDest) return nullptr;
 
-  LeaseHolder writer(destSk.func(), TransKind::Profile);
-  if (!writer) return tDest;
-
   if (req == REQ_BIND_ADDR) {
     return tc::bindAddr(toSmash, destSk, trflags, smashed);
   }

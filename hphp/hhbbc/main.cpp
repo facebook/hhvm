@@ -238,34 +238,32 @@ void open_repo(const std::string& path) {
   Repo::get();
 }
 
-std::vector<std::unique_ptr<UnitEmitter>> load_input() {
-  std::vector<std::unique_ptr<UnitEmitter>> ret;
-
+std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
+          std::vector<SString>> load_input() {
   trace_time timer("load units");
 
   open_repo(input_repo);
   Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
 
-  RuntimeOption::EvalPromoteEmptyObject =
-    Repo::get().global().PromoteEmptyObject;
+  auto const& gd = Repo::get().global();
+  RuntimeOption::EvalPromoteEmptyObject      = gd.PromoteEmptyObject;
+  RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
+  RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
+  options.DisallowDynamicVarEnvFuncs         = gd.DisallowDynamicVarEnvFuncs;
 
-  RuntimeOption::EvalJitEnableRenameFunction =
-    Repo::get().global().EnableRenameFunction;
-
-  RuntimeOption::EvalHackArrCompatNotices =
-    Repo().get().global().HackArrCompatNotices;
-
-  return parallel::map(
-    Repo::get().enumerateUnits(RepoIdCentral, false, true),
-    [&] (const std::pair<std::string,MD5>& kv) {
-      return Repo::get().urp().loadEmitter(kv.first, kv.second);
-    }
-  );
+  return {
+    parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
+                  [&] (const std::pair<std::string,MD5>& kv) {
+                    return Repo::get().urp().loadEmitter(kv.first, kv.second);
+                  }),
+    Repo().get().global().APCProfile
+  };
 }
 
 void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
-                  std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
+                  std::unique_ptr<ArrayTypeTable::Builder> arrTable,
+                  std::vector<SString> apcProfile) {
   RuntimeOption::RepoCommit = true;
   RuntimeOption::RepoEvalMode = "local";
   open_repo(output_repo);
@@ -288,6 +286,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
   gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
+  gd.APCProfile               = std::move(apcProfile);
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
@@ -295,15 +294,17 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
 }
 
 void compile_repo() {
-  auto ues = load_input();
+  auto input = load_input();
   if (logging) {
-    std::cout << folly::format("{} units\n", ues.size());
+    std::cout << folly::format("{} units\n", input.first.size());
   }
 
-  auto pair = whole_program(std::move(ues));
+  auto pair = whole_program(std::move(input.first));
   {
     trace_time timer("writing output repo");
-    write_output(std::move(pair.first), std::move(pair.second));
+    write_output(std::move(pair.first),
+                 std::move(pair.second),
+                 std::move(input.second));
   }
 }
 

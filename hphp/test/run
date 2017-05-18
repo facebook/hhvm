@@ -260,6 +260,9 @@ function hh_codegen_cmd($options) {
   // get 100% test coverage this will need to be fixed
   $cmd = hh_codegen_path();
   $cmd .= ' -v Eval.EnableHipHopSyntax=1';
+  $cmd .= ' -v Hack.Compiler.ConstantFolding=0';
+  $cmd .= ' -v Hack.Compiler.OptimizeNullCheck=0';
+  $cmd .= ' -v Hack.Compiler.OptimizeCuf=0';
   return $cmd;
 }
 
@@ -829,6 +832,10 @@ function hhvm_cmd_impl() {
 
     if (isset($options['run-hh-codegen'])) {
       $args[] = '-vEval.AllowHhas=1';
+    }
+
+    if (isset($options['compare-hh-codegen'])) {
+      $args[] = '-vEval.DisableHphpcOpts=1';
     }
 
     if (!isset($options['cores'])) {
@@ -1852,8 +1859,14 @@ function run_config_post($outputs, $test, $options) {
     return 'skip';
   }
   if (!$passed) {
-    file_put_contents("$test.diff",
-                      generate_diff($wanted_re, $wanted_re, $output));
+    $diff = generate_diff($wanted_re, $wanted_re, $output);
+    if ($passed === false && $diff === "") {
+      // the preg match failed, probably because the regex was too complex,
+      // but since the line by line diff came up empty, we're fine
+      $passed = 1;
+    } else {
+      file_put_contents("$test.diff", $diff);
+    }
   }
   return $passed;
 }

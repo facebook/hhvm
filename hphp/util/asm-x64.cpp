@@ -458,16 +458,20 @@ bool DecodedInstruction::isNop() const {
   return m_opcode == 0x1f && m_map_select == 1;
 }
 
-bool DecodedInstruction::isBranch(bool allowCond /* = true */) const {
+bool DecodedInstruction::isBranch(BranchType branchType
+                               /* = Conditional |
+                                    Unconditional */) const {
   if (!m_flags.picOff) return false;
   if (m_map_select == 0) {
     // The one-byte opcode map
     return
-      ((m_opcode & 0xf0) == 0x70 && allowCond) /* 8-bit conditional branch */ ||
-      m_opcode == 0xe9 /* 32-bit unconditional branch */ ||
-      m_opcode == 0xeb /* 8-bit unconditional branch */;
+      ((m_opcode & 0xf0) == 0x70 /* 8-bit conditional branch */ &&
+       (branchType & Conditional)) ||
+      ((m_opcode == 0xe9 /* 32-bit unconditional branch */ ||
+        m_opcode == 0xeb /* 8-bit unconditional branch */) &&
+       (branchType & Unconditional));
   }
-  if (m_map_select == 1 && allowCond) {
+  if (m_map_select == 1 && (branchType & Conditional)) {
     // The two-byte opcode map (first byte is 0x0f)
     return (m_opcode & 0xf0) == 0x80 /* 32-bit conditional branch */;
   }
@@ -554,5 +558,135 @@ uint8_t DecodedInstruction::getModRm() const {
   assert(m_flags.hasModRm);
   return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
+
+#define FUSEABLE_INSTRUCTIONS \
+  TEST(0x84, 0xFF) \
+  TEST(0x85, 0xFF) \
+  TEST(0xA8, 0xFF) \
+  TEST(0xA9, 0xFF) \
+  TEST(0xF6,  0) \
+  TEST(0xF6,  1) \
+  TEST(0xF7,  0) \
+  TEST(0xF7,  1) \
+  AND(0x20,  0xFF, true) \
+  AND(0x21,  0xFF, true) \
+  AND(0x22,  0xFF, false) \
+  AND(0x23,  0xFF, false) \
+  AND(0x24,  0xFF, false) \
+  AND(0x25,  0xFF, false) \
+  AND(0x80,   4, true) \
+  AND(0x81,   4, true) \
+  AND(0x83,   4, true) \
+  CMP(0x38,  0xFF) \
+  CMP(0x39,  0xFF) \
+  CMP(0x3A,  0xFF) \
+  CMP(0x3B,  0xFF) \
+  CMP(0x3C,  0xFF) \
+  CMP(0x3D,  0xFF) \
+  CMP(0x80,   7) \
+  CMP(0x81,   7) \
+  CMP(0x83,   7) \
+  ADD(0x00,  0xFF, true) \
+  ADD(0x01,  0xFF, true) \
+  ADD(0x02,  0xFF, false) \
+  ADD(0x03,  0xFF, false) \
+  ADD(0x04,  0xFF, false) \
+  ADD(0x05,  0xFF, false) \
+  ADD(0x80,   0, true) \
+  ADD(0x81,   0, true) \
+  ADD(0x83,   0, true) \
+  SUB(0x28,  0xFF, true) \
+  SUB(0x29,  0xFF, true) \
+  SUB(0x2A,  0xFF, false) \
+  SUB(0x2B,  0xFF, false) \
+  SUB(0x2C,  0xFF, false) \
+  SUB(0x2D,  0xFF, false) \
+  SUB(0x80,   5, true) \
+  SUB(0x81,   5, true) \
+  SUB(0x83,   5, true) \
+  INC(0xFE,   0) \
+  INC(0xFF,   0) \
+  DEC(0xFE,   1) \
+  DEC(0xFF,   1)
+
+#define TEST(i, j) \
+  X(i, j, false, CC_O, CC_NO, CC_B, CC_NAE, CC_AE, CC_NB, CC_NC, CC_E, CC_Z, \
+    CC_NE, CC_NZ, CC_BE, CC_NA, CC_A, CC_NBE, CC_S, CC_NS, CC_P, CC_NP, CC_L, \
+    CC_NGE, CC_GE, CC_NL, CC_LE, CC_NG, CC_G, CC_NLE)
+#define AND(i, j, k) \
+  X(i, j, k, CC_O, CC_NO, CC_B, CC_NAE, CC_AE, CC_NB, CC_NC, CC_E, CC_Z, \
+    CC_NE, CC_NZ, CC_BE, CC_NA, CC_A, CC_NBE, CC_S, CC_NS, CC_P, CC_NP, CC_L, \
+    CC_NGE, CC_GE, CC_NL, CC_LE, CC_NG, CC_G, CC_NLE)
+#define CMP(i, j) \
+  X(i, j, false, CC_B, CC_NAE, CC_AE, CC_NB, CC_NC, CC_E, CC_Z, CC_NE, CC_NZ, \
+    CC_BE, CC_NA, CC_A, CC_NBE, CC_L, CC_NGE, CC_GE, CC_NL, CC_LE, CC_NG, \
+    CC_G, CC_NLE)
+#define ADD(i, j, k) \
+  X(i, j, k, CC_B, CC_NAE, CC_AE, CC_NB, CC_NC, CC_E, CC_Z, CC_NE, CC_NZ, \
+    CC_BE, CC_NA, CC_A, CC_NBE, CC_L, CC_NGE, CC_GE, CC_NL, CC_LE, CC_NG, \
+    CC_G, CC_NLE)
+#define SUB(i, j, k) \
+  X(i, j, k, CC_B, CC_NAE, CC_AE, CC_NB, CC_NC, CC_E, CC_Z, CC_NE, CC_NZ, \
+    CC_BE, CC_NA, CC_A, CC_NBE, CC_L, CC_NGE, CC_GE, CC_NL, CC_LE, CC_NG, \
+    CC_G, CC_NLE)
+#define INC(i, j) \
+  X(i, j, true, CC_E, CC_Z, CC_NE, CC_NZ, CC_L, CC_NGE, CC_GE, CC_NL, CC_LE, \
+    CC_NG, CC_G, CC_NLE)
+#define DEC(i, j) \
+  X(i, j, true, CC_E, CC_Z, CC_NE, CC_NZ, CC_L, CC_NGE, CC_GE, CC_NL, CC_LE, \
+    CC_NG, CC_G, CC_NLE)
+
+bool DecodedInstruction::isFuseable(const DecodedInstruction& next) const {
+  // Assumes no invalid instructions.
+  if (m_map_select != 0 || // No multibyte instructions are fuseable.
+      hasPicOffset() || // No rip relative addressing
+      !next.isBranch(Conditional)) {
+    return false;
+  }
+
+  // Find extra 3 bits of opcode in the modrm byte if this opcode has it.
+  uint32_t e = 0xFF;
+  switch (m_opcode) {
+    case 0xF6: case 0xF7: case 0x80: case 0x81: case 0x83: case 0xFE: case 0xFF:
+      e = m_flags.hasModRm ? (getModRm() & 0x38) >> 3 : -1;
+      break;
+    default:
+      break;
+  }
+
+  switch (e << 16 | m_opcode) {
+#define X(opcode, opExt, operand1IsDest, ...) \
+    case (opExt << 16 | opcode): { \
+      if ((operand1IsDest || hasImmediate()) && \
+          m_flags.hasModRm && (getModRm() & 0xC0) != 0xC0) { \
+        /* No fusing instruction with immediate and memory operands. */ \
+        /* Also cannot fuse instructions with destination memory operand. */ \
+        return false; \
+      } \
+      const ConditionCode ccs[] = { __VA_ARGS__ }; \
+      for (size_t i = 0; i < sizeof(ccs) / sizeof(ConditionCode); ++i) { \
+        if (next.jccCondCode() == ccs[i]) { \
+          return true; \
+        } \
+      } \
+      break; \
+    }
+FUSEABLE_INSTRUCTIONS
+#undef X
+    default:
+      break;
+  }
+  return false;
+}
+
+#undef TEST
+#undef AND
+#undef CMP
+#undef ADD
+#undef SUB
+#undef INC
+#undef DEC
+
+#undef FUSEABLE_INSTRUCTIONS
 
 }}}

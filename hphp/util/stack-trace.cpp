@@ -666,7 +666,7 @@ std::shared_ptr<BfdCache> get_bfd_cache(folly::StringPiece filename) {
 }
 
 BfdCache* get_bfd_cache(folly::StringPiece filename, NamedBfdRange bfds) {
-  auto probe = hash_string(filename.begin()) % bfds.size();
+  auto probe = hash_string_cs(filename.begin(), filename.size()) % bfds.size();
 
   // Match on the end of filename instead of the beginning, if necessary.
   if (filename.size() >= MaxKey) {

@@ -11,12 +11,14 @@
 open Core
 open Hhbc_ast
 open Instruction_sequence
+open Ast_class_expr
 
 module A = Ast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module CBR = Continue_break_rewriter
+module SU = Hhbc_string_utils
 
 (* When using the PassX instructions we need to emit the right kind *)
 module PassByRefKind = struct
@@ -33,18 +35,32 @@ module LValOp = struct
   | Unset
 end
 
-let self_name = ref (None : string option)
-let set_self n = self_name := n
+let special_functions =
+  ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"; "define"]
 
-let compiler_options = ref Hhbc_options.default
-let set_compiler_options o = compiler_options := o
+(* Context for code generation. It would be more elegant to pass this
+ * around in an environment parameter. *)
+let scope = ref Ast_scope.Scope.toplevel
+let set_scope s = scope := s
+let get_scope () = !scope
+
+let namespace = ref Namespace_env.empty_with_default_popt
+let get_namespace () = !namespace
+let set_namespace ns = namespace := ns
+
+let needs_local_this = ref false
+let get_needs_local_this () = !needs_local_this
+let set_needs_local_this n = needs_local_this := n
+
+let optimize_null_check () =
+  Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
+
+let optimize_cuf () =
+  Hhbc_options.optimize_cuf !Hhbc_options.compiler_options
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
-
-let strip_dollar id =
-  String.sub id 1 (String.length id - 1)
 
 let make_varray p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
 let make_kvarray p kvs =
@@ -53,7 +69,7 @@ let make_kvarray p kvs =
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Plus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
   | A.Minus -> instr (IOp (if ints_overflow_to_ints then Sub else  SubO))
@@ -73,6 +89,7 @@ let from_binop op =
   | A.Bar -> instr (IOp BitOr)
   | A.Ltlt -> instr (IOp Shl)
   | A.Gtgt -> instr (IOp Shr)
+  | A.Cmp -> instr (IOp Cmp)
   | A.Percent -> instr (IOp Mod)
   | A.Xor -> instr (IOp BitXor)
   | A.Eq _ -> emit_nyi "Eq"
@@ -82,7 +99,7 @@ let from_binop op =
 
 let binop_to_eqop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Plus -> Some (if ints_overflow_to_ints then PlusEqual else PlusEqualO)
   | A.Minus -> Some (if ints_overflow_to_ints then MinusEqual else MinusEqualO)
@@ -100,7 +117,7 @@ let binop_to_eqop op =
 
 let unop_to_incdec_op op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Uincr -> Some (if ints_overflow_to_ints then PreInc else PreIncO)
   | A.Udecr -> Some (if ints_overflow_to_ints then PreDec else PreDecO)
@@ -120,7 +137,7 @@ let collection_type = function
 
 let istype_op id =
   match id with
-  | "is_int" | "is_integer" -> Some OpInt
+  | "is_int" | "is_integer" | "is_long" -> Some OpInt
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
   | "is_string" -> Some OpStr
@@ -128,6 +145,9 @@ let istype_op id =
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar
+  | "is_keyset" -> Some OpKeyset
+  | "is_dict" -> Some OpDict
+  | "is_vec" -> Some OpVec
   | _ -> None
 
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
@@ -141,6 +161,7 @@ let get_passByRefKind expr =
     | A.Array_get(_, Some _) -> permissive_kind
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
     | A.Unop((A.Uincr | A.Udecr), _) -> WarnOnCell
+    | A.Unop((A.Usplat, _)) -> AllowCell
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
@@ -152,12 +173,16 @@ let get_queryMOpMode op =
 let is_special_function e =
   match e with
   | (_, A.Id(_, x))
-    when x = "isset" || x = "empty" || x = "tuple" -> true
+    when List.mem special_functions x -> true
   | _ -> false
 
+let is_local_this id =
+  let scope = get_scope () in
+  id = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
+
 let extract_shape_field_name_pstring = function
-  | A.SFlit p
-  | A.SFclass_const (_, p) ->  p
+  | A.SFlit p -> A.String p
+  | A.SFclass_const (id, p) -> A.Class_const (id, p)
 
 let extract_shape_field_name = function
   | A.SFlit (_, s)
@@ -172,27 +197,41 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
       instr_to_add
     ]
 
-and from_local x =
-  if x = SN.SpecialIdents.this then instr_this
+and emit_local x =
+  let scope = get_scope () in
+  if x = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
+    && not (get_needs_local_this ())
+  then instr (IMisc (BareThis Notice))
+  else
+  if x = SN.Superglobals.globals
+  then gather [
+    instr_string (SU.Locals.strip_dollar x);
+    instr (IGet CGetG)
+  ]
   else instr_cgetl (Local.Named x)
 
-and emit_two_exprs e1 e2 =
-  (* Special case to make use of CGetL2 *)
-  match e1 with
-  | (_, A.Lvar (_, local)) ->
-    gather [
-      from_expr e2;
-      instr_cgetl2 (Local.Named local);
-    ]
+(* Emit CGetL2 for local variables, and return true to indicate that
+ * the result will be just below the top of the stack *)
+and emit_first_expr e =
+  match e with
+  | (_, A.Lvar (_, local)) when not (is_local_this local) ->
+    instr_cgetl2 (Local.Named local), true
+
   | _ ->
-    gather [
-      from_expr e1;
-      from_expr e2;
-    ]
+    from_expr e, false
+
+(* Special case for binary operations to make use of CGetL2 *)
+and emit_two_exprs e1 e2 =
+  let instrs1, is_under_top = emit_first_expr e1 in
+  let instrs2 = from_expr e2 in
+  gather @@
+    if is_under_top
+    then [instrs2; instrs1]
+    else [instrs1; instrs2]
 
 and emit_is_null e =
   match e with
-  | (_, A.Lvar (_, id)) ->
+  | (_, A.Lvar (_, id)) when not (is_local_this id) ->
     instr_istypel (Local.Named id) OpNull
   | _ ->
     gather [
@@ -200,39 +239,44 @@ and emit_is_null e =
       instr_istypec OpNull
     ]
 
-and emit_binop op e1 e2 =
+and emit_binop expr op e1 e2 =
   match op with
-  | A.AMpamp -> emit_logical_and e1 e2
-  | A.BArbar -> emit_logical_or e1 e2
+  | A.AMpamp | A.BArbar -> emit_short_circuit_op expr
   | A.Eq None -> emit_lval_op LValOp.Set e1 (Some e2)
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> emit_nyi "illegal eq op"
     | Some op -> emit_lval_op (LValOp.SetOp op) e1 (Some e2)
     end
-  | A.EQeqeq when snd e2 = A.Null ->
-    emit_is_null e1
-  | A.EQeqeq when snd e1 = A.Null ->
-    emit_is_null e2
-  | A.Diff2 when snd e2 = A.Null ->
-    gather [
-      emit_is_null e1;
-      instr_not
-    ]
-  | A.Diff2 when snd e1 = A.Null ->
-    gather [
-      emit_is_null e2;
-      instr_not
-    ]
   | _ ->
-    gather [
-      emit_two_exprs e1 e2;
-      from_binop op
-    ]
+    if not (optimize_null_check ())
+    then gather [emit_two_exprs e1 e2; from_binop op]
+    else
+    match op with
+    | A.EQeqeq when snd e2 = A.Null ->
+      emit_is_null e1
+    | A.EQeqeq when snd e1 = A.Null ->
+      emit_is_null e2
+    | A.Diff2 when snd e2 = A.Null ->
+      gather [
+        emit_is_null e1;
+        instr_not
+      ]
+    | A.Diff2 when snd e1 = A.Null ->
+      gather [
+        emit_is_null e2;
+        instr_not
+      ]
+    | _ ->
+      gather [
+        emit_two_exprs e1 e2;
+        from_binop op
+      ]
 
 and emit_instanceof e1 e2 =
   match (e1, e2) with
-  | (_, (_, A.Id (_, id))) ->
+  | (_, (_, A.Id id)) ->
+    let id, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
     gather [
       from_expr e1;
       instr_instanceofd id ]
@@ -258,28 +302,21 @@ and emit_null_coalesce e1 e2 =
 and emit_cast hint expr =
   let op =
     begin match hint with
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.int
-        || id = SN.Typehints.integer ->
-      instr (IOp CastInt)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.bool
-        || id = SN.Typehints.boolean ->
-      instr (IOp CastBool)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.string ->
-      instr (IOp CastString)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.object_cast ->
-      instr (IOp CastObject)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.array ->
-      instr (IOp CastArray)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.real
-        || id = SN.Typehints.double
-        || id = SN.Typehints.float ->
-      instr (IOp CastDouble)
+    | A.Happly((_, id), []) ->
+      let id = String.lowercase_ascii id in
+      begin match id with
+      | _ when id = SN.Typehints.int
+            || id = SN.Typehints.integer -> instr (IOp CastInt)
+      | _ when id = SN.Typehints.bool
+            || id = SN.Typehints.boolean -> instr (IOp CastBool)
+      | _ when id = SN.Typehints.string -> instr (IOp CastString)
+      | _ when id = SN.Typehints.object_cast -> instr (IOp CastObject)
+      | _ when id = SN.Typehints.array -> instr (IOp CastArray)
+      | _ when id = SN.Typehints.real
+            || id = SN.Typehints.double
+            || id = SN.Typehints.float -> instr (IOp CastDouble)
+      | _ -> emit_nyi "cast type"
+      end
       (* TODO: unset *)
     | _ ->
       emit_nyi "cast type"
@@ -295,8 +332,7 @@ and emit_conditional_expression etest etrue efalse =
     let false_label = Label.next_regular () in
     let end_label = Label.next_regular () in
     gather [
-      from_expr etest;
-      instr_jmpz false_label;
+      emit_jmpz etest false_label;
       from_expr etrue;
       instr_jmp end_label;
       instr_label false_label;
@@ -314,29 +350,23 @@ and emit_conditional_expression etest etrue efalse =
       instr_label end_label;
     ]
 
-and emit_aget class_expr =
-  match class_expr with
-  | _, A.Lvar (_, id) ->
-    instr (IGet (ClsRefGetL (Local.Named id, 0)))
-
-  | _ ->
-    gather [
-      from_expr class_expr;
-      instr (IGet (ClsRefGetC 0))
-    ]
-
-and emit_new class_expr args uargs =
+and emit_new expr args uargs =
   let nargs = List.length args + List.length uargs in
-  match class_expr with
-  | _, A.Id (_, id) ->
+  let cexpr, _ = expr_to_class_expr (get_scope ()) expr in
+  match cexpr with
+    (* Special case for statically-known class *)
+  | Class_id id ->
+    let fq_id, _id_opt =
+      Hhbc_id.Class.elaborate_id (get_namespace ()) id in
+    let push_instr = instr (ICall (FPushCtorD (nargs, fq_id))) in
     gather [
-      instr_fpushctord nargs id;
+      push_instr;
       emit_args_and_call args uargs;
       instr_popr
     ]
   | _ ->
     gather [
-      emit_aget class_expr;
+      emit_class_expr cexpr;
       instr_fpushctor nargs 0;
       emit_args_and_call args uargs;
       instr_popr
@@ -349,25 +379,13 @@ and emit_clone expr =
   ]
 
 and emit_shape expr fl =
-  let are_values_all_literals =
-    List.for_all fl ~f:(fun (_, e) -> is_literal e)
-  in
   let p = fst expr in
-  if are_values_all_literals then
-    let fl =
-      List.map fl
-        ~f:(fun (fn, e) ->
-              A.AFkvalue ((p,
-                A.String (extract_shape_field_name_pstring fn)), e))
-    in
-    from_expr (fst expr, A.Array fl)
-  else
-    let es = List.map fl ~f:(fun (_, e) -> from_expr e) in
-    let keys = List.map fl ~f:(fun (fn, _) -> extract_shape_field_name fn) in
-    gather [
-      gather es;
-      instr_newstructarray keys;
-    ]
+  let fl =
+    List.map fl
+      ~f:(fun (fn, e) ->
+            A.AFkvalue ((p, extract_shape_field_name_pstring fn), e))
+  in
+  from_expr (p, A.Array fl)
 
 and emit_tuple p es =
   (* Did you know that tuples are functions? *)
@@ -382,51 +400,56 @@ and emit_call_expr expr =
     if flavor = Flavor.Ref then instr_unboxr else empty
   ]
 
-and emit_known_class_id cid =
+and emit_known_class_id id =
+  let fq_id, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
   gather [
-    instr_string (Utils.strip_ns cid);
-    instr (IGet (ClsRefGetC 0))
+    instr_string (Hhbc_id.Class.to_raw_string fq_id);
+    instr_clsrefgetc;
   ]
 
-and emit_class_id cid =
-  if cid = SN.Classes.cStatic
-  then instr (IMisc (LateBoundCls 0))
-  else
-  if cid = SN.Classes.cSelf
-  then match !self_name with
-  | None -> instr (IMisc Self)
-  | Some cid -> emit_known_class_id cid
-  else emit_known_class_id cid
+and emit_class_expr cexpr =
+  match cexpr with
+  | Class_static -> instr (IMisc (LateBoundCls 0))
+  | Class_parent -> instr (IMisc (Parent 0))
+  | Class_self -> instr (IMisc (Self 0))
+  | Class_id id -> emit_known_class_id id
+  | Class_expr (_, A.Lvar (_, id)) ->
+    instr (IGet (ClsRefGetL (Local.Named id, 0)))
+  | Class_expr expr -> gather [from_expr expr; instr_clsrefgetc]
 
-and emit_class_get param_num_opt cid id =
+and emit_class_get param_num_opt qop cid (_, id) =
+  let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
       (* We need to strip off the initial dollar *)
-      instr_string (strip_dollar id);
-      emit_class_id cid;
-      match param_num_opt with
-      | None -> instr (IGet (CGetS 0))
-      | Some i -> instr (ICall (FPassS (i, 0)))
+      instr_string (SU.Locals.strip_dollar id);
+      emit_class_expr cexpr;
+      match (param_num_opt, qop) with
+      | (None, QueryOp.CGet) -> instr_cgets
+      | (None, QueryOp.Isset) -> instr_issets
+      | (None, QueryOp.Empty) -> instr_emptys
+      | (Some i, _) -> instr (ICall (FPassS (i, 0)))
     ]
 
-and emit_class_const cid id =
-  if id = SN.Members.mClass then instr_string cid
-  else if cid = SN.Classes.cStatic
-  then
-    instrs [
-      IMisc (LateBoundCls 0);
-      ILitConst (ClsCns (id, 0));
+(* Class constant <cid>::<id>.
+ * We follow the logic for the Construct::KindOfClassConstantExpression
+ * case in emitter.cpp
+ *)
+and emit_class_const cid (_, id) =
+  let cexpr, _ = expr_to_class_expr (get_scope()) (id_to_expr cid) in
+  match cexpr with
+  | Class_id cid ->
+    let fq_id, _id_opt =
+      Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
+    if id = SN.Members.mClass
+    then instr_string (Hhbc_id.Class.to_raw_string fq_id)
+    else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
+  | _ ->
+    gather [
+      emit_class_expr cexpr;
+      if id = SN.Members.mClass
+      then instr (IMisc (ClsRefName 0))
+      else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
     ]
-  else if cid = SN.Classes.cSelf
-  then
-    match !self_name with
-    | None ->
-      instrs [
-        IMisc Self;
-        ILitConst (ClsCns (id, 0));
-      ]
-    | Some cid -> instr (ILitConst (ClsCnsD (id, cid)))
-  else
-    instr (ILitConst (ClsCnsD (id, cid)))
 
 and emit_await e =
   let after_await = Label.next_regular () in
@@ -452,12 +475,6 @@ and emit_yield = function
       instr_yieldk;
     ]
 
-and emit_yield_break () =
-  gather [
-    instr_null;
-    instr_retc;
-  ]
-
 and emit_string2 exprs =
   match exprs with
   | [e] ->
@@ -474,18 +491,26 @@ and emit_string2 exprs =
 
   | [] -> failwith "String2 with zero arguments is impossible"
 
+
 and emit_lambda fundef ids =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
   let class_num = int_of_string (snd fundef.A.f_name) in
+  (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
+  let explicit_use = match fundef.A.f_body with [] -> false | _ -> true in
   gather [
-    (* TODO: deal with explicit use (...) capture variables *)
     gather @@ List.map ids
-      (fun (x, _isref) -> instr (IGet (CUGetL (Local.Named (snd x)))));
+      (fun (x, isref) ->
+        instr (IGet (
+          let lid = Local.Named (snd x) in
+          if explicit_use
+          then
+            if isref then VGetL lid else CGetL lid
+          else CUGetL lid)));
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 
-and emit_id (p, s) =
+and emit_id (p, s as id) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
@@ -493,14 +518,19 @@ and emit_id (p, s) =
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
-  | "exit" -> emit_exit (p, A.Int (p, "0"))
-  | _ -> instr (ILitConst (Cns s))
+  | "__NAMESPACE__" ->
+    let ns = get_namespace () in
+    instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
+  | _ ->
+    let fq_id, id_opt, contains_backslash =
+      Hhbc_id.Const.elaborate_id (get_namespace ()) id in
+    begin match id_opt with
+    | Some id -> instr (ILitConst (CnsU (fq_id, id)))
+    | None -> instr (ILitConst
+        (if contains_backslash then CnsE fq_id else Cns fq_id))
+    end
 
-and rename_xhp (p, s) =
-  (* Translates given :name to xhp_name *)
-  if String_utils.string_starts_with s ":"
-  then (p, "xhp_" ^ (String_utils.lstrip s ":"))
-  else failwith "Incorrectly named xhp element"
+and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
 and emit_xhp p id attributes children =
   (* Translate into a constructor call. The arguments are:
@@ -541,15 +571,23 @@ and emit_lvarvar n (_, id) =
 
 and emit_call_isset_expr (_, expr_ as expr) =
   match expr_ with
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       from_expr e;
       instr (IIsset IssetG)
     ]
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Isset base_expr opt_elem_expr
+  | A.Class_get (cid, id)  ->
+    emit_class_get None QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Isset expr prop nullflavor
+  | A.Lvar(_, id) when is_local_this id ->
+    gather [
+      instr (IMisc (BareThis NoNotice));
+      instr_istypec OpNull;
+      instr_not
+    ]
   | A.Lvar(_, id) ->
     instr (IIsset (IssetL (Local.Named id)))
   | _ ->
@@ -568,9 +606,11 @@ and emit_call_empty_expr (_, expr_ as expr) =
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Empty base_expr opt_elem_expr
+  | A.Class_get (cid, id) ->
+    emit_class_get None QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Empty expr prop nullflavor
-  | A.Lvar(_, id) ->
+  | A.Lvar(_, id) when not (is_local_this id) ->
     instr (IIsset (EmptyL (Local.Named id)))
   | _ ->
     gather [
@@ -605,10 +645,22 @@ and emit_call_isset_exprs exprs =
         instr_label its_done
       ]
 
-and emit_exit expr =
+and emit_exit expr_opt =
   gather [
-    from_expr expr;
+    (match expr_opt with None -> instr_int 0 | Some e -> from_expr e);
     instr_exit;
+  ]
+
+and is_valid_idx ~is_array es =
+  let n = List.length es in
+  if is_array then n = 3 else n = 2 || n = 3
+
+and emit_idx ~is_array es =
+  let default = if List.length es = 2 then instr_null else empty in
+  gather [
+    from_exprs es;
+    default;
+    if is_array then instr_array_idx else instr_idx;
   ]
 
 and from_expr expr =
@@ -621,10 +673,10 @@ and from_expr expr =
   | A.Null -> instr_null
   | A.False -> instr_false
   | A.True -> instr_true
-  | A.Lvar (_, x) -> from_local x
-  | A.Class_const ((_, cid), (_, id)) -> emit_class_const cid id
+  | A.Lvar (_, x) -> emit_local x
+  | A.Class_const (cid, id) -> emit_class_const cid id
   | A.Unop (op, e) -> emit_unop op e
-  | A.Binop (op, e1, e2) -> emit_binop op e1 e2
+  | A.Binop (op, e1, e2) -> emit_binop expr op e1 e2
   | A.Pipe (e1, e2) -> emit_pipe e1 e2
   | A.Dollardollar -> instr_cgetl2 Local.Pipe
   | A.InstanceOf (e1, e2) -> emit_instanceof e1 e2
@@ -647,6 +699,16 @@ and from_expr expr =
   | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
     emit_call_empty_expr expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
+  | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx ~is_array:false es ->
+    emit_idx ~is_array:false es
+  | A.Call ((_, A.Id (_, "hphp_array_idx")), es, _)
+    when is_valid_idx ~is_array:true es -> emit_idx ~is_array:true es
+  | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
+    gather [
+      from_expr expr2;
+      instr (IIncludeEvalDefine
+        (DefCns (Hhbc_id.Const.from_raw_string (snd s))))
+    ]
   | A.Call _ -> emit_call_expr expr
   | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
   | A.Array es -> emit_collection expr es
@@ -664,11 +726,12 @@ and from_expr expr =
   | A.Shape fl -> emit_shape expr fl
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
-  | A.Yield_break -> emit_yield_break ()
+  | A.Yield_break ->
+    failwith "yield break should be in statement position"
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
-  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
+  | A.Class_get (cid, id)  -> emit_class_get None QueryOp.CGet cid id
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e -> from_expr e
   | A.Id id -> emit_id id
@@ -676,40 +739,18 @@ and from_expr expr =
     emit_xhp (fst expr) id attributes children
   | A.Import (flavor, e) -> emit_import flavor e
   | A.Lvarvar (n, id) -> emit_lvarvar n id
-  (* TODO *)
-  | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
-  | A.List _                    -> emit_nyi "list"
+  | A.Id_type_arguments (id, _) -> emit_id id
+  | A.List _ ->
+    failwith "List destructor can only be used as an lvar"
 
-and emit_static_collection ~transform_to_collection expr es =
-  let a_label = Label.get_next_data_label () in
-  (* Arrays can either contains values or key/value pairs *)
-  let need_index = match snd expr with
-    | A.Collection ((_, "vec"), _)
-    | A.Collection ((_, "keyset"), _) -> false
-    | _ -> true
-  in
-  let _, es =
-    List.fold_left
-      es
-      ~init:(0, [])
-      ~f:(fun (index, l) x ->
-            let open Constant_folder in
-            (index + 1, match x with
-            | A.AFvalue e when need_index ->
-              literal_from_expr e :: Int (Int64.of_int index) :: l
-            | A.AFvalue e ->
-              literal_from_expr e :: l
-            | A.AFkvalue (k,v) ->
-              literal_from_expr v :: literal_from_expr k :: l)
-          )
-  in
-  let es = List.rev es in
-  let lit_constructor = match snd expr with
-    | A.Array _ -> Array (a_label, es)
-    | A.Collection ((_, "dict"), _) -> Dict (a_label, es)
-    | A.Collection ((_, "vec"), _) -> Vec (a_label, es)
-    | A.Collection ((_, "keyset"), _) -> Keyset (a_label, es)
-    | _ -> failwith "impossible"
+and emit_static_collection ~transform_to_collection tv =
+  let lit_constructor =
+    match tv with
+    | Typed_value.Array _ -> Array tv
+    | Typed_value.Dict _ -> Dict tv
+    | Typed_value.Vec _ -> Vec tv
+    | Typed_value.Keyset _ -> Keyset tv
+    | _ -> failwith "emit_static_collection: unexpected collection type"
   in
   let transform_instr =
     match transform_to_collection with
@@ -727,13 +768,19 @@ and emit_dynamic_collection ~transform_to_collection expr es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
+  let are_all_keys_strings =
+    List.for_all es ~f:(function A.AFkvalue ((_, A.String (_, _)), _) -> true
+                               | _ -> false)
+  in
+  let is_array = match snd expr with A.Array _ -> true | _ -> false in
   let count = List.length es in
   if is_only_values && transform_to_collection = None then begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewPackedArray count
       | A.Collection ((_, "vec"), _) -> NewVecArray count
       | A.Collection ((_, "keyset"), _) -> NewKeysetArray count
-      | _ -> failwith "impossible"
+      | _ ->
+        failwith "emit_dynamic_collection (values only): unexpected expression"
     in
     gather [
       gather @@
@@ -741,11 +788,22 @@ and emit_dynamic_collection ~transform_to_collection expr es =
         ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
     ]
+  end else if are_all_keys_strings && is_array then begin
+    let es =
+      List.map es
+        ~f:(function A.AFkvalue ((_, A.String (_, s)), v) -> s, from_expr v
+                   | _ -> failwith "impossible")
+    in
+    gather [
+      gather @@ List.map es ~f:snd;
+      instr_newstructarray @@ List.map es ~f:fst;
+    ]
   end else begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewMixedArray count
-      | A.Collection ((_, "dict"), _) -> NewDictArray count
-      | _ -> failwith "impossible"
+      | A.Collection ((_, ("dict" | "Set" | "ImmSet" | "Map" | "ImmMap")), _) ->
+        NewDictArray count
+      | _ -> failwith "emit_dynamic_collection: unexpected expression"
     in
     let transform_instr =
       match transform_to_collection with
@@ -755,11 +813,13 @@ and emit_dynamic_collection ~transform_to_collection expr es =
     let add_elem_instr =
       if transform_to_collection = None
       then instr_add_new_elemc
-      else instr_col_add_new_elemc
+      else gather [instr_dup; instr_add_elemc]
     in
-    gather @@
-      (instr @@ ILitConst lit_constructor) :: transform_instr ::
-      (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc))
+    gather [
+      instr (ILitConst lit_constructor);
+      gather (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc));
+      transform_instr;
+    ]
   end
 
 and emit_named_collection expr pos name fields =
@@ -767,36 +827,44 @@ and emit_named_collection expr pos name fields =
   | "dict" | "vec" | "keyset" -> emit_collection expr fields
   | "Vector" | "ImmVector" ->
     let collection_type = collection_type name in
+    if fields = []
+    then instr_newcol collection_type
+    else
     gather [
       emit_collection (pos, A.Collection ((pos, "vec"), fields)) fields;
       instr_colfromarray collection_type;
     ]
-  | "Set" | "ImmSet" | "Map" | "ImmMap" ->
+  | "Set" | "ImmSet" ->
+    let collection_type = collection_type name in
+    if fields = []
+    then instr_newcol collection_type
+    else
+      emit_dynamic_collection
+        ~transform_to_collection:(Some collection_type)
+        expr
+        fields
+  | "Map" | "ImmMap" ->
     let collection_type = collection_type name in
     if fields = []
     then instr_newcol collection_type
     else
       emit_collection
         ~transform_to_collection:collection_type
-        (pos, A.Array fields)
+        expr
         fields
   | "Pair" ->
-    let collection_type = collection_type name in
-    let values = gather @@ List.map
-      fields
-      ~f:(fun x ->
-        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x)
-    in
     gather [
-      instr_newcol collection_type;
-      values;
+      gather (List.map fields (function A.AFvalue e -> from_expr e
+                                | _ -> failwith "impossible Pair argument"));
+      instr (ILitConst NewPair);
     ]
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and emit_collection ?(transform_to_collection) expr es =
-  if is_literal_afield_list es then
-    emit_static_collection ~transform_to_collection expr es
-  else
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace ()) expr with
+  | Some tv ->
+    emit_static_collection ~transform_to_collection tv
+  | None ->
     emit_dynamic_collection ~transform_to_collection expr es
 
 and emit_pipe e1 e2 =
@@ -812,30 +880,101 @@ and emit_pipe e1 e2 =
   rewrite_dollardollar (from_expr e2)
   end
 
-and emit_logical_and e1 e2 =
-  let left_is_false = Label.next_regular () in
-  let right_is_true = Label.next_regular () in
-  let its_done = Label.next_regular () in
-  gather [
-    from_expr e1;
-    instr_jmpz left_is_false;
-    from_expr e2;
-    instr_jmpnz right_is_true;
-    instr_label left_is_false;
-    instr_false;
-    instr_jmp its_done;
-    instr_label right_is_true;
-    instr_true;
-    instr_label its_done ]
+(* Emit code that is equivalent to
+ *   <code for expr>
+ *   JmpZ label
+ * Generate specialized code in case expr is statically known, and for
+ * !, && and || expressions
+ *)
+and emit_jmpz (_, expr_ as expr) label =
+  let opt = optimize_null_check () in
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace()) expr with
+  | Some v ->
+    if Typed_value.to_bool v then empty else instr_jmp label
+  | None ->
+    match expr_ with
+    | A.Unop(A.Unot, e) ->
+      emit_jmpnz e label
+    | A.Binop(A.BArbar, e1, e2) ->
+      let skip_label = Label.next_regular () in
+      gather [
+        emit_jmpnz e1 skip_label;
+        emit_jmpz e2 label;
+        instr_label skip_label;
+      ]
+    | A.Binop(A.AMpamp, e1, e2) ->
+      gather [
+        emit_jmpz e1 label;
+        emit_jmpz e2 label;
+      ]
+    | A.Binop(A.EQeqeq, e, (_, A.Null))
+    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
+      gather [
+        emit_is_null e;
+        instr_jmpz label
+      ]
+    | A.Binop(A.Diff2, e, (_, A.Null))
+    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
+      gather [
+        emit_is_null e;
+        instr_jmpnz label
+      ]
+    | _ ->
+      gather [
+        from_expr expr;
+        instr_jmpz label
+      ]
 
-and emit_logical_or e1 e2 =
+(* Emit code that is equivalent to
+ *   <code for expr>
+ *   JmpNZ label
+ * Generate specialized code in case expr is statically known, and for
+ * !, && and || expressions
+ *)
+and emit_jmpnz (_, expr_ as expr) label =
+  let opt = optimize_null_check () in
+  match Ast_constant_folder.expr_to_opt_typed_value (get_namespace ()) expr with
+  | Some v ->
+    if Typed_value.to_bool v then instr_jmp label else empty
+  | None ->
+    match expr_ with
+    | A.Unop(A.Unot, e) ->
+      emit_jmpz e label
+    | A.Binop(A.BArbar, e1, e2) ->
+      gather [
+        emit_jmpnz e1 label;
+        emit_jmpnz e2 label;
+      ]
+    | A.Binop(A.AMpamp, e1, e2) ->
+      let skip_label = Label.next_regular () in
+      gather [
+        emit_jmpz e1 skip_label;
+        emit_jmpnz e2 label;
+        instr_label skip_label;
+      ]
+    | A.Binop(A.EQeqeq, e, (_, A.Null))
+    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
+      gather [
+        emit_is_null e;
+        instr_jmpnz label
+      ]
+    | A.Binop(A.Diff2, e, (_, A.Null))
+    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
+      gather [
+        emit_is_null e;
+        instr_jmpz label
+      ]
+    | _ ->
+      gather [
+        from_expr expr;
+        instr_jmpnz label
+      ]
+
+and emit_short_circuit_op expr =
   let its_true = Label.next_regular () in
   let its_done = Label.next_regular () in
   gather [
-    from_expr e1;
-    instr_jmpnz its_true;
-    from_expr e2;
-    instr_jmpnz its_true;
+    emit_jmpnz expr its_true;
     instr_false;
     instr_jmp its_done;
     instr_label its_true;
@@ -844,7 +983,7 @@ and emit_logical_or e1 e2 =
 
 and emit_quiet_expr (_, expr_ as expr) =
   match expr_ with
-  | A.Lvar (_, x) ->
+  | A.Lvar (_, x) when not (is_local_this x) ->
     instr_cgetquietl (Local.Named x)
   | _ ->
     from_expr expr
@@ -900,14 +1039,16 @@ and emit_obj_get param_num_opt qop expr prop null_flavor =
 and emit_elem_instrs opt_elem_expr =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
-  | Some (_, (A.Lvar _ | A.Int _ | A.String _)) -> empty, 0
+  | Some (_, (A.Int _ | A.String _)) -> empty, 0
+  | Some (_, (A.Lvar (_, id))) when not (is_local_this id) -> empty, 0
   | Some expr -> from_expr expr, 1
   | None -> empty, 0
 
 and emit_prop_instrs (_, expr_ as expr) =
   match expr_ with
   (* These all have special inline versions of member keys *)
-  | A.Lvar _ | A.Id _ -> empty, 0
+  | A.Lvar (_, id) when not (is_local_this id) -> empty, 0
+  | A.Id _ -> empty, 0
   | _ -> from_expr expr, 1
 
 (* Get the member key for an array element expression: the `elem` in
@@ -917,7 +1058,8 @@ and emit_prop_instrs (_, expr_ as expr) =
 and get_elem_member_key stack_index opt_expr =
   match opt_expr with
   (* Special case for local *)
-  | Some (_, A.Lvar (_, x)) -> MemberKey.EL (Local.Named x)
+  | Some (_, A.Lvar (_, x)) when not (is_local_this x) ->
+    MemberKey.EL (Local.Named x)
   (* Special case for literal integer *)
   | Some (_, A.Int (_, str)) -> MemberKey.EI (Int64.of_string str)
   (* Special case for literal string *)
@@ -932,11 +1074,13 @@ and get_prop_member_key null_flavor stack_index prop_expr =
   match prop_expr with
   (* Special case for known property name *)
   | (_, A.Id (_, str)) ->
+    let pid = Hhbc_id.Prop.from_ast_name str in
     begin match null_flavor with
-    | Ast.OG_nullthrows -> MemberKey.PT str
-    | Ast.OG_nullsafe -> MemberKey.QT str
+    | Ast.OG_nullthrows -> MemberKey.PT pid
+    | Ast.OG_nullsafe -> MemberKey.QT pid
     end
-  | (_, A.Lvar (_, x)) -> MemberKey.PL (Local.Named x)
+  | (_, A.Lvar (_, x)) when not (is_local_this x) ->
+    MemberKey.PL (Local.Named x)
   (* General case *)
   | _ -> MemberKey.PC stack_index
 
@@ -976,8 +1120,12 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      | _ -> mode in
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
-     instr_string (strip_dollar x),
-     instr (IBase (BaseGC (base_offset, base_mode))),
+     instr_string (SU.Locals.strip_dollar x),
+     instr (IBase (
+     match param_num_opt with
+     | None -> BaseGC (base_offset, base_mode)
+     | Some i -> FPassBaseGC (i, base_offset)
+     )),
      1
 
    | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
@@ -994,15 +1142,25 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        )),
      0
 
+   | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar (_, y)))
+     when x = SN.Superglobals.globals ->
+     empty,
+     instr (IBase (
+       match param_num_opt with
+       | None -> BaseGL (Local.Named y, base_mode)
+       | Some i -> FPassBaseGL (i, Local.Named y)
+       )),
+     0
+
    | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
      let elem_expr_instrs = from_expr e in
      elem_expr_instrs,
      instr (IBase (
-       match param_num_opt with
-       | None -> BaseGC (base_offset, base_mode)
-       | Some i -> FPassBaseGC (i, base_offset)
-       )),
-     1
+     match param_num_opt with
+     | None -> BaseGC (base_offset, base_mode)
+     | Some i -> FPassBaseGC (i, base_offset)
+     )),
+   1
 
    | A.Array_get(base_expr, opt_elem_expr) ->
      let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
@@ -1046,14 +1204,16 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      ],
      total_stack_size
 
-   | A.Class_get((_, cid), (_, id)) ->
-     let prop_expr_instrs = instr_string (strip_dollar id) in
+   | A.Class_get(cid, (_, id)) ->
+     let prop_expr_instrs =
+       instr_string (SU.Locals.strip_dollar id) in
+     let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
      gather [
        prop_expr_instrs;
-       emit_class_id cid
+       emit_class_expr cexpr
      ],
      gather [
-       instr (IBase (BaseSC (base_offset, 0)))
+       instr_basesc base_offset
      ],
      1
 
@@ -1074,7 +1234,15 @@ and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
-  | A.Lvar (_, x) -> instr_fpassl i (Local.Named x)
+  | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
+    gather [
+      instr_string (SU.Locals.strip_dollar x);
+      instr (ICall (FPassG i))
+    ]
+
+  | A.Lvar (_, x)
+    when not (is_local_this x) || get_needs_local_this () ->
+    instr_fpassl i (Local.Named x)
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
@@ -1088,8 +1256,8 @@ and emit_arg i ((_, expr_) as e) =
   | A.Obj_get(e1, e2, nullflavor) ->
     emit_obj_get (Some i) QueryOp.CGet e1 e2 nullflavor
 
-  | A.Class_get((_, cid), (_, id)) ->
-    emit_class_get (Some i) cid id
+  | A.Class_get(cid, id) ->
+    emit_class_get (Some i) QueryOp.CGet cid id
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
@@ -1107,58 +1275,87 @@ and emit_ignored_expr e =
     instr_pop flavor;
   ]
 
+and is_splatted = function
+  | _, A.Unop (A.Usplat, _) -> true
+  | _ -> false
+
 (* Emit code to construct the argument frame and then make the call *)
 and emit_args_and_call args uargs =
   let all_args = args @ uargs in
+  let is_splatted = List.exists ~f:is_splatted args in
   let nargs = List.length all_args in
   gather [
     gather (List.mapi all_args emit_arg);
-    if uargs = []
+    if uargs = [] && not is_splatted
     then instr (ICall (FCall nargs))
     else instr (ICall (FCallUnpack nargs))
   ]
 
+(* Expression that appears in an object context, such as expr->meth(...) *)
+and emit_object_expr (_, expr_ as expr) =
+  match expr_ with
+  | A.Lvar(_, x) when is_local_this x ->
+    instr_this
+  | _ -> from_expr expr
+
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
+  | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) when id.[0] = '$' ->
+    gather [
+      emit_object_expr obj;
+      instr_cgetl (Local.Named id);
+      instr (ICall (FPushObjMethod (nargs, null_flavor)));
+    ]
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
-      from_expr obj;
-      instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
+      emit_object_expr obj;
+      instr (ICall (FPushObjMethodD
+        (nargs, Hhbc_id.Method.from_ast_name id, null_flavor)));
+    ]
+  | A.Obj_get(obj, method_expr, null_flavor) ->
+    gather [
+      emit_object_expr obj;
+      from_expr method_expr;
+      instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
 
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cSelf ->
-    gather [
-      instr_string id;
-      emit_class_id cid;
-      instr (ICall (FPushClsMethodF (nargs, 0)));
-    ]
-
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
-    gather [
-      instr_string id;
-      instr (IMisc (LateBoundCls 0));
-      instr (ICall (FPushClsMethod (nargs, 0)));
+  | A.Class_const (cid, (_, id)) ->
+    let cexpr, forward = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
+    let method_id = Hhbc_id.Method.from_ast_name id in
+    if forward then
+      gather [
+        instr_string (Hhbc_id.Method.to_raw_string method_id);
+        emit_class_expr cexpr;
+        instr (ICall (FPushClsMethodF (nargs, 0)));
       ]
-
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cParent ->
-    gather [
-      instr_string id;
-      instr (IMisc (Parent 0));
-      instr (ICall (FPushClsMethodF (nargs, 0)));
+    else begin match cexpr with
+    (* Statically known *)
+    | Class_id cid ->
+      let fq_cid, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
+      instr (ICall (FPushClsMethodD (nargs, method_id, fq_cid)))
+    | _ ->
+      gather [
+        instr_string (Hhbc_id.Method.to_raw_string method_id);
+        emit_class_expr cexpr;
+        instr (ICall (FPushClsMethod (nargs, 0)));
       ]
+    end
 
-  | A.Class_const ((_, cid), (_, id)) when cid.[0] = '$' ->
+  | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
+    let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
-      instr_string id;
-      instr (IGet (ClsRefGetL (Local.Named cid, 0)));
+      emit_local id;
+      emit_class_expr cexpr;
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
-  | A.Class_const ((_, cid),  (_, id)) ->
-    instr (ICall (FPushClsMethodD (nargs, id, cid)))
-
-  | A.Id (_, id) ->
-    instr (ICall (FPushFuncD (nargs, id)))
+  | A.Id id ->
+    let fq_id, id_opt =
+      Hhbc_id.Function.elaborate_id (get_namespace ()) id in
+    begin match id_opt with
+    | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
+    | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
+    end
 
   | _ ->
     gather [
@@ -1250,7 +1447,8 @@ and emit_call (_, expr_ as expr) args uargs =
          ] end in
     instrs, Flavor.Cell
 
-  | A.Id (_, id) when is_call_user_func id (List.length args)->
+  | A.Id (_, id) when
+    (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
     if List.length uargs != 0 then
     failwith "Using argument unpacking for a call_user_func is not supported";
     begin match args with
@@ -1259,13 +1457,91 @@ and emit_call (_, expr_ as expr) args uargs =
         emit_call_user_func id arg args
     end
 
-  | A.Id (_, "exit") when List.length args = 1 ->
+  | A.Id (_, "intval") when List.length args = 1 ->
     let e = List.hd_exn args in
-    emit_exit e, Flavor.Cell
+    gather [
+      from_expr e;
+      instr (IOp CastInt)
+    ], Flavor.Cell
+
+  | A.Id (_, "strval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastString)
+    ], Flavor.Cell
+
+  | A.Id (_, "boolval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastBool)
+    ], Flavor.Cell
+
+  | A.Id (_, "floatval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastDouble)
+    ], Flavor.Cell
+
+  | A.Id (_, "vec") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastVec)
+    ], Flavor.Cell
+
+  | A.Id (_, "keyset") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastKeyset)
+    ], Flavor.Cell
+
+  | A.Id (_, "dict") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastDict)
+    ], Flavor.Cell
+
+  | A.Id (_, "invariant") when List.length args > 0 ->
+    let e = List.hd_exn args in
+    let rest = List.tl_exn args in
+    let l = Label.next_regular () in
+    let p = Pos.none in
+    let id = p, A.Id (p, "hh\\invariant_violation") in
+    gather [
+      emit_jmpnz e l;
+      emit_ignored_expr (p, A.Call (id, rest, uargs));
+      instr_string "invariant_violation";
+      instr (IOp (Fatal FatalOp.Runtime));
+      instr_label l;
+      instr_null;
+    ], Flavor.Cell
+
+  | A.Id (_, "assert") ->
+    let l0 = Label.next_regular () in
+    let l1 = Label.next_regular () in
+    gather [
+      instr_string "zend.assertions";
+      instr_fcallbuiltin 1 1 "ini_get";
+      instr_unboxr_nop;
+      instr_int 0;
+      instr_gt;
+      instr_jmpz l0;
+      fst @@ default ();
+      instr_unboxr;
+      instr_jmp l1;
+      instr_label l0;
+      instr_true;
+      instr_label l1;
+    ], Flavor.Cell
 
   | A.Id (_, id) ->
     begin match args, istype_op id with
-    | [(_, A.Lvar (_, arg_id))], Some i ->
+    | [(_, A.Lvar (_, arg_id))], Some i when not (is_local_this arg_id) ->
       instr (IIsset (IsTypeL (Local.Named arg_id, i))),
       Flavor.Cell
     | [arg_expr], Some i ->
@@ -1287,25 +1563,6 @@ and emit_flavored_expr (_, expr_ as expr) =
     emit_call e args uargs
   | _ ->
     from_expr expr, Flavor.Cell
-
-and is_literal expr =
-  match snd expr with
-  | A.Array afl
-  | A.Collection ((_, "vec"), afl)
-  | A.Collection ((_, "keyset"), afl)
-  | A.Collection ((_, "dict"), afl) -> is_literal_afield_list afl
-  | A.Float _
-  | A.String _
-  | A.Int _
-  | A.Null
-  | A.False
-  | A.True -> true
-  | _ -> false
-
-and is_literal_afield_list afl =
-  List.for_all afl
-    ~f:(function A.AFvalue e -> is_literal e
-               | A.AFkvalue (k,v) -> is_literal k && is_literal v)
 
 and emit_final_member_op stack_index op mk =
   match op with
@@ -1391,25 +1648,44 @@ and emit_lval_op op expr1 opt_expr2 =
       let rhs_instrs, rhs_stack_size =
         match opt_expr2 with
         | None -> empty, 0
-      | Some e -> from_expr e, 1 in
+        | Some e -> from_expr e, 1 in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
   match expr_ with
-  | A.Lvar (_, id) ->
+  | A.Lvar (_, id) when SN.Superglobals.is_superglobal id ->
+    gather [
+      instr_string @@ SU.Locals.strip_dollar id;
+      rhs_instrs;
+      emit_final_global_op op;
+    ]
+
+  | A.Lvar (_, id) when not (is_local_this id) ->
     gather [
       rhs_instrs;
       emit_final_local_op op (Local.Named id)
     ]
 
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Lvarvar (n, (_, id)) ->
+    (* TODO: if the rhs is lvarvar then use cgetl2 *)
     gather [
-      from_expr e;
+      instr_cgetl (Local.Named id);
+      gather @@ List.replicate ~num:(n-1) instr_cgetn;
       rhs_instrs;
-      emit_final_global_op op
+      instr_setn;
     ]
 
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    let final_global_op_instrs = emit_final_global_op op in
+    if rhs_stack_size = 0
+    then gather [from_expr e; final_global_op_instrs]
+    else
+      let index_instrs, under_top = emit_first_expr e in
+      if under_top
+      then gather [rhs_instrs; index_instrs; final_global_op_instrs]
+      else gather [index_instrs; rhs_instrs; final_global_op_instrs]
+
+  | A.Array_get (base_expr, opt_elem_expr) ->
     let mode =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
@@ -1429,7 +1705,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | A.Obj_get(e1, e2, null_flavor) ->
+  | A.Obj_get (e1, e2, null_flavor) ->
     let mode =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
@@ -1449,14 +1725,23 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | A.Class_get((_, cid), (_, id)) ->
-    let prop_expr_instrs = instr_string (strip_dollar id) in
-    let final_instr = emit_final_static_op cid id op in
+  | A.Class_get (cid, (_, id)) ->
+    let prop_expr_instrs =
+      instr_string (SU.Locals.strip_dollar id) in
+    let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
+    let final_instr = emit_final_static_op (snd cid) id op in
     gather [
       prop_expr_instrs;
-      emit_class_id cid;
+      emit_class_expr cexpr;
       rhs_instrs;
       final_instr
+    ]
+
+  | A.Unop (uop, e) ->
+    gather [
+      rhs_instrs;
+      emit_lval_op_nonlist op e empty rhs_stack_size;
+      from_unop uop;
     ]
 
   | _ ->
@@ -1465,20 +1750,31 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       rhs_instrs;
     ]
 
-and emit_unop op e =
+and from_unop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
+  in
   match op with
-  | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
-  | A.Unot -> gather [from_expr e; instr (IOp Not)]
+  | A.Utild -> instr (IOp BitNot)
+  | A.Unot -> instr (IOp Not)
+  | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
+  | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
+  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat ->
+    emit_nyi "unop - probably does not need translation"
+
+and emit_unop op e =
+  let unop_instr = from_unop op in
+  match op with
+  | A.Utild -> gather [from_expr e; unop_instr]
+  | A.Unot -> gather [from_expr e; unop_instr]
   | A.Uplus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp (if ints_overflow_to_ints then Add else AddO))]
+    unop_instr]
   | A.Uminus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp (if ints_overflow_to_ints then Sub else SubO))]
+    unop_instr]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"
@@ -1487,17 +1783,29 @@ and emit_unop op e =
     end
   | A.Uref ->
     emit_nyi "references"
+  | A.Usplat ->
+    from_expr e
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
+(* Generate code to evaluate `e`, and, if necessary, store its value in a
+ * temporary local `temp` (unless it is itself a local). Then use `f` to
+ * generate code that uses this local and branches or drops through to
+ * `break_label`:
+ *    temp := e
+ *    <code generated by `f temp break_label`>
+ *  break_label:
+ *    push `temp` on stack if `leave_on_stack` is true.
+ *)
 and stash_in_local ?(leave_on_stack=false) e f =
   let break_label = Label.next_regular () in
   match e with
-  | (_, A.Lvar (_, id)) ->
+  | (_, A.Lvar (_, id)) when not (is_local_this id) ->
     gather [
       f (Local.Named id) break_label;
       instr_label break_label;
+      if leave_on_stack then instr_cgetl (Local.Named id) else empty;
     ]
   | _ ->
     let temp = Local.get_unnamed_local () in

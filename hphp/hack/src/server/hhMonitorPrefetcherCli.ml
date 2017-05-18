@@ -13,7 +13,7 @@
  * in a unit test is too tedious to set up.
  *
  * This is never used for anything anywhere - only manual testing to
- * demonstrate that the HhMonitorInformant.Prefetcher module does
+ * demonstrate that the State_prefetcher module does
  * what it claims to.
  *)
 
@@ -64,9 +64,9 @@ end;;
 let () =
   Daemon.check_entry_point ();
   let args = Args.parse () in
-  let prefetcher = Informant.Prefetcher.of_script
-    args.Args.prefetcher_script in
-  let process = Informant.Prefetcher.run
+  let prefetcher = State_prefetcher.of_script_opt
+    (Some args.Args.prefetcher_script) in
+  let process = State_prefetcher.run
     args.Args.svn_rev prefetcher in
   let wrap_text_block str = Printf.sprintf
     "\n%s\n%s\n%s\n"
@@ -77,6 +77,9 @@ let () =
   match Process.read_and_wait_pid ~timeout:30 process with
   | Result.Ok _ ->
     exit 0
+  | Result.Error Process_types.Process_aborted_input_too_large ->
+    Printf.eprintf "Process_aborted_input_too_large\n";
+    exit 1
   | Result.Error (Process_types.Process_exited_abnormally (_, _, stderr))
   | Result.Error (Process_types.Timed_out (_, stderr)) ->
     Printf.eprintf

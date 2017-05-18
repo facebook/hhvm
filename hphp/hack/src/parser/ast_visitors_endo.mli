@@ -166,7 +166,9 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.expr_ ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
-        on_Cnormal : 'c ->
+       on_Cmp : 'c ->
+                Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
+       on_Cnormal : 'c ->
                      Ast_visitors_ancestors.class_kind ->
                      Ast_visitors_ancestors.class_kind;
         on_Collection : 'c ->
@@ -211,6 +213,10 @@ class virtual ['b] endo :
         on_Ctrait : 'c ->
                     Ast_visitors_ancestors.class_kind ->
                     Ast_visitors_ancestors.class_kind;
+        on_Def_inline : 'c ->
+                        Ast_visitors_ancestors.stmt ->
+                        Ast_visitors_ancestors.def ->
+                        Ast_visitors_ancestors.stmt;
         on_Default : 'c ->
                      Ast_visitors_ancestors.case ->
                      Ast_visitors_ancestors.block ->
@@ -294,6 +300,14 @@ class virtual ['b] endo :
         on_Fun : 'c ->
                  Ast_visitors_ancestors.def ->
                  Ast_visitors_ancestors.fun_ -> Ast_visitors_ancestors.def;
+        on_GotoLabel : 'c ->
+                Ast_visitors_ancestors.stmt ->
+                Ast_visitors_ancestors.pstring ->
+                Ast_visitors_ancestors.stmt;
+        on_Goto : 'c ->
+                Ast_visitors_ancestors.stmt ->
+                Ast_visitors_ancestors.pstring ->
+                Ast_visitors_ancestors.stmt;
         on_Gt : 'c ->
                 Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_Gte : 'c ->
@@ -328,6 +342,10 @@ class virtual ['b] endo :
                     Ast_visitors_ancestors.hint_ ->
                     Ast_visitors_ancestors.hint list ->
                     Ast_visitors_ancestors.hint_;
+        on_Hsoft : 'c ->
+                     Ast_visitors_ancestors.hint_ ->
+                     Ast_visitors_ancestors.hint ->
+                     Ast_visitors_ancestors.hint_;
         on_Id : 'c ->
                 Ast_visitors_ancestors.expr_ ->
                 Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
@@ -411,12 +429,16 @@ class virtual ['b] endo :
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program ->
                        Ast_visitors_ancestors.def;
+        on_SetNamespaceEnv : 'c ->
+                      Ast_visitors_ancestors.def ->
+                      Ast_visitors_ancestors.nsenv ->
+                      Ast_visitors_ancestors.def;
         on_NamespaceUse : 'c ->
-                          Ast_visitors_ancestors.def ->
-                          (Ast_visitors_ancestors.ns_kind *
-                           Ast_visitors_ancestors.id *
-                           Ast_visitors_ancestors.id)
-                          list -> Ast_visitors_ancestors.def;
+                      Ast_visitors_ancestors.def ->
+                      (Ast_visitors_ancestors.ns_kind *
+                       Ast_visitors_ancestors.id *
+                       Ast_visitors_ancestors.id)
+                      list -> Ast_visitors_ancestors.def;
         on_New : 'c ->
                  Ast_visitors_ancestors.expr_ ->
                  Ast_visitors_ancestors.expr ->
@@ -505,6 +527,10 @@ class virtual ['b] endo :
                         Ast_visitors_ancestors.stmt ->
                         Ast_visitors_ancestors.expr list ->
                         Ast_visitors_ancestors.stmt;
+        on_Global_var : 'c ->
+                        Ast_visitors_ancestors.stmt ->
+                        Ast_visitors_ancestors.expr list ->
+                        Ast_visitors_ancestors.stmt;
         on_Stmt : 'c ->
                   Ast_visitors_ancestors.def ->
                   Ast_visitors_ancestors.stmt -> Ast_visitors_ancestors.def;
@@ -567,6 +593,8 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_Uref : 'c ->
                   Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
+        on_Usplat : 'c ->
+                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_Utild : 'c ->
                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_While : 'c ->
@@ -590,6 +618,51 @@ class virtual ['b] endo :
                          Ast_visitors_ancestors.class_elt ->
                          Ast_visitors_ancestors.pstring list ->
                          Ast_visitors_ancestors.class_elt;
+       on_XhpChild : 'c ->
+                        Ast_visitors_ancestors.class_elt ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.class_elt;
+        on_xhp_child : 'c ->
+                         Ast_visitors_ancestors.xhp_child ->
+                         Ast_visitors_ancestors.xhp_child;
+        on_ChildName : 'c ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.id ->
+                        Ast_visitors_ancestors.xhp_child;
+
+        on_ChildList : 'c ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child list ->
+                        Ast_visitors_ancestors.xhp_child;
+
+        on_ChildUnary : 'c ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child_op ->
+                        Ast_visitors_ancestors.xhp_child;
+
+        on_ChildBinary : 'c ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child ->
+                        Ast_visitors_ancestors.xhp_child;
+
+        on_xhp_child_op : 'c ->
+          Ast_visitors_ancestors.xhp_child_op ->
+          Ast_visitors_ancestors.xhp_child_op;
+
+        on_ChildStar : 'c ->
+          Ast_visitors_ancestors.xhp_child_op ->
+          Ast_visitors_ancestors.xhp_child_op;
+
+        on_ChildPlus : 'c ->
+          Ast_visitors_ancestors.xhp_child_op ->
+          Ast_visitors_ancestors.xhp_child_op;
+
+        on_ChildQuestion : 'c ->
+          Ast_visitors_ancestors.xhp_child_op ->
+          Ast_visitors_ancestors.xhp_child_op;
+
         on_Xml : 'c ->
                  Ast_visitors_ancestors.expr_ ->
                  Ast_visitors_ancestors.id ->
@@ -918,6 +991,8 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Cmp :
+      'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_Cnormal :
       'c ->
       Ast_visitors_ancestors.class_kind -> Ast_visitors_ancestors.class_kind
@@ -967,6 +1042,10 @@ class virtual ['b] endo :
     method on_Ctrait :
       'c ->
       Ast_visitors_ancestors.class_kind -> Ast_visitors_ancestors.class_kind
+    method on_Def_inline :
+      'c ->
+      Ast_visitors_ancestors.stmt ->
+      Ast_visitors_ancestors.def -> Ast_visitors_ancestors.stmt
     method on_Default :
       'c ->
       Ast_visitors_ancestors.case ->
@@ -1089,6 +1168,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.hint_ ->
       Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
+    method on_Hsoft :
+      'c ->
+      Ast_visitors_ancestors.hint_ ->
+      Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Id :
       'c ->
       Ast_visitors_ancestors.expr_ ->
@@ -1176,6 +1259,11 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.def ->
       Ast_visitors_ancestors.id ->
       Ast_visitors_ancestors.program -> Ast_visitors_ancestors.def
+    method on_SetNamespaceEnv :
+      'c ->
+      Ast_visitors_ancestors.def ->
+      Ast_visitors_ancestors.nsenv ->
+      Ast_visitors_ancestors.def
     method on_NamespaceUse :
       'c ->
       Ast_visitors_ancestors.def ->
@@ -1275,6 +1363,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
+    method on_Global_var :
+      'c ->
+      Ast_visitors_ancestors.stmt ->
+      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.stmt
     method on_Stmt :
       'c ->
       Ast_visitors_ancestors.def ->
@@ -1339,6 +1431,8 @@ class virtual ['b] endo :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
     method on_Uref :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
+    method on_Usplat :
+      'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
     method on_Utild :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
     method on_While :
@@ -1362,6 +1456,60 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.class_elt ->
       Ast_visitors_ancestors.pstring list -> Ast_visitors_ancestors.class_elt
+
+    method on_XhpChild :
+      'c ->
+      Ast_visitors_ancestors.class_elt ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.class_elt
+
+    method on_xhp_child :
+      'c ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildName :
+      'c ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildList :
+      'c ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child list ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildUnary :
+      'c ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildBinary :
+      'c ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_xhp_child_op : 'c ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildStar : 'c ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildPlus : 'c ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildQuestion : 'c ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
     method on_Xml :
       'c ->
       Ast_visitors_ancestors.expr_ ->

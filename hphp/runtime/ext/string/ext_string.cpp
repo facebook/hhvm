@@ -911,8 +911,7 @@ String HHVM_FUNCTION(str_repeat,
 
   auto size = multiplier * size_t(input.size());
   if (multiplier >= StringData::MaxSize || size > StringData::MaxSize) {
-    throw
-      FatalErrorException(0, "String length exceeded 2^31-2: %" PRIu64, size);
+    raiseStringLengthExceededError(size);
   }
 
   StringBuffer ret(input.size() * multiplier);

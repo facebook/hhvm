@@ -16,6 +16,7 @@
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -31,9 +32,7 @@ namespace {
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Variant& args) {
   Object inst{cls};
-  tvRefcountedDecRef(
-    g_context->invokeFunc(cls->getCtor(), args, inst.get())
-  );
+  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
   return inst;
 }
 
@@ -251,6 +250,32 @@ void mergePersistentUnits() {
     unit->merge();
   }
 }
+
+namespace {
+
+#define PHP7_ROOT_ALIAS(x) \
+  auto x##Ne = NamedEntity::get(makeStaticString(#x)); \
+  x##Ne->m_cachedClass.bind(rds::Mode::Persistent); \
+  x##Ne->setCachedClass(SystemLib::s_##x##Class)
+
+InitFiniNode aliasPhp7Classes(
+  []() {
+    if (!RuntimeOption::PHP7_EngineExceptions) {
+      return;
+    }
+    PHP7_ROOT_ALIAS(Throwable);
+    PHP7_ROOT_ALIAS(Error);
+    PHP7_ROOT_ALIAS(ArithmeticError);
+    PHP7_ROOT_ALIAS(AssertionError);
+    PHP7_ROOT_ALIAS(DivisionByZeroError);
+    PHP7_ROOT_ALIAS(ParseError);
+    PHP7_ROOT_ALIAS(TypeError);
+  },
+  InitFiniNode::When::ProcessInit
+);
+
+#undef PHP7_ROOT_ALIAS
+} // namespace
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

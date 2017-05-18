@@ -16,7 +16,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 #define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -97,8 +98,8 @@ Cell cellShr(Cell, Cell);
  * Mutates the first argument in place, by adding the second argument
  * to it in the sense of php's operator +=.
  *
- * Post: isTypedNum(c1), unless both arguments are KindOfArray, in
- * which case it will contain a Cell of KindOfArray.
+ * Post: c1 is a KindOfInt or KindOfDouble, unless both arguments are
+ * KindOfArray, in which case it will contain a Cell of KindOfArray.
  */
 void cellAddEq(Cell& c1, Cell);
 
@@ -108,7 +109,7 @@ void cellAddEq(Cell& c1, Cell);
  * Mutates the first argument in place, by combining the second
  * argument with it in the sense of either php operator -= or *=.
  *
- * Post: isTypedNum(c1)
+ * Post: c1 is a KindOfInt or KindOfDouble
  */
 void cellSubEq(Cell& c1, Cell);
 void cellMulEq(Cell& c1, Cell);
@@ -127,8 +128,8 @@ void cellMulEqO(Cell& c1, Cell c2);
  * Mutates the first argument in place, by combining the second
  * argument with it in the sense of either php operator /= or %=.
  *
- * Post: isTypedNum(c1), unless the second argument converts to zero,
- * in which case c1 will contain boolean false.
+ * Post: c1 is a KindOfInt or KindOfDouble, unless the second argument converts
+ * to zero, in which case c1 will contain boolean false.
  */
 void cellDivEq(Cell& c1, Cell);
 void cellModEq(Cell& c1, Cell);

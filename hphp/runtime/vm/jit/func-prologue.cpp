@@ -77,12 +77,6 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   IRUnit unit{context};
   irgen::IRGS env{unit, nullptr};
 
-  auto& cb = code.main();
-
-  // Dump the func guard in the TC before anything else.
-  emitFuncGuard(func, cb, fixups);
-  auto const start = cb.frontier();
-
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
 
@@ -91,7 +85,7 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
   emitVunit(*vunit, env.unit, code, fixups);
 
-  return start;
+  return unit.prologueStart;
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,

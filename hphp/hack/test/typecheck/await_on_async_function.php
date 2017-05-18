@@ -14,5 +14,6 @@ async function fetch_db_results(): Awaitable<string> {
 }
 
 async function return_db_results(): Awaitable<string> {
-  return "the results are".await fetch_db_results();
+  $a = await fetch_db_results();
+  return "the results are".$a;
 }

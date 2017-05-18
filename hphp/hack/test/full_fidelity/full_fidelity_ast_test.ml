@@ -162,24 +162,73 @@ let comment_scraper_expected =
       (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
-let test_data = [
-  {
-    name = "sanity_test_classic_parser";
-    source = simple_source_1;
-    expected = simple_expected_1;
-    test_function = sanity_test_classic_parser;
-  };
-  {
-    name = "Basic test full fidelity to classic AST";
-    source = simple_source_2;
-    expected = simple_expected_2;
-    test_function = full_fidelity_to_classic;
-  };
-  { name = "Comment scraper test"
-  ; source = comment_scraper_1
-  ; expected = comment_scraper_expected
-  ; test_function = comment_compare
-  }
+let type_annotated_function_call =
+"<?hh // strict
+
+foo(bar<TypesMakeThis,AnAnnotated>($function_call));
+baz(quz<ButThisShouldBe,Two($expressions));
+"
+
+let type_annotated_function_call_expected =
+"(AProgram
+ ((Stmt
+   (Expr
+    (p
+     (Call (p (Id (p foo)))
+      ((p
+        (Call
+         (p
+          (Id_type_arguments (p bar)
+           ((p (Happly (p TypesMakeThis) ()))
+            (p (Happly (p AnAnnotated) ())))))
+         ((p (Lvar (p $function_call)))) ())))
+      ()))))
+  (Stmt
+   (Expr
+    (p
+     (Call (p (Id (p baz)))
+      ((p (Binop Lt (p (Id (p quz))) (p (Id (p ButThisShouldBe)))))
+       (p (Call (p (Id (p Two))) ((p (Lvar (p $expressions)))) ())))"
+
+let global_keyword =
+"<?hh // strict
+function foo(): void {
+  global $x;
+}"
+
+let global_keyword_expected =
+"(AProgram
+ ((Fun
+   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
+    (f_body: ((Global_var ((p (Id (p $x))))))) (f_user_attributes: ())
+    (f_fun_kind: FSync)
+    (f_namespace:
+     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
+      (ns_const_uses: (SMap ()))))
+    (f_span: p)))))"
+
+let test_data =
+  [ { name = "sanity_test_classic_parser"
+    ; source = simple_source_1
+    ; expected = simple_expected_1
+    ; test_function = sanity_test_classic_parser
+    }
+  ; { name = "Basic test full fidelity to classic AST"
+    ; source = simple_source_2
+    ; expected = simple_expected_2
+    ; test_function = full_fidelity_to_classic
+    }
+  ; { name = "Comment scraper test"
+    ; source = comment_scraper_1
+    ; expected = comment_scraper_expected
+    ; test_function = comment_compare
+    }
+  ; { name = "Global keyword"
+    ; source = global_keyword
+    ; expected = global_keyword_expected
+    ; test_function = full_fidelity_to_classic
+    }
 ]
 
 let driver test () =

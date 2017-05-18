@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -121,13 +122,18 @@ buildCodeSizeCounters() {
   return counters;
 }
 
-const auto s_counters = buildCodeSizeCounters();
+static std::map<std::string, ServiceData::ExportedTimeSeries*> s_counters;
+
+static InitFiniNode initCodeSizeCounters([] {
+  s_counters = buildCodeSizeCounters();
+}, InitFiniNode::When::PostRuntimeOptions);
 
 ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
   assert(!s_counters.empty());
   return s_counters.at(name);
 }
 
+static std::atomic<bool> s_warmedUp{false};
 
 /*
  * If the jit maturity counter is enabled, update it with the current amount of
@@ -185,6 +191,11 @@ void reportJitMaturity(const CodeCache& code) {
   // Manually add code.data.
   auto codeUsed = s_counters.at("data");
   codeUsed->addValue(code.data().used() - codeUsed->getSum());
+
+  auto static jitWarmedUpCounter = ServiceData::createCounter("jit.warmed-up");
+  if (jitWarmedUpCounter) {
+    jitWarmedUpCounter->setValue(warmupStatusString().empty() ? 1 : 0);
+  }
 }
 
 void logTranslation(const TransEnv& env, const TransRange& range) {
@@ -239,6 +250,39 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
 
   // finish & log
   StructuredLog::log("hhvm_jit", cols);
+}
+
+std::string warmupStatusString() {
+  // This function is like a request-agnostic version of
+  // server_warmup_status().
+  // Three conditions necessary for the jit to qualify as "warmed-up":
+  std::string status_str;
+
+  if (!s_warmedUp.load(std::memory_order_relaxed)) {
+    // 1. Has HHVM evaluated enough requests?
+    if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
+      status_str += "PGO profiling translations are still enabled.\n";
+    }
+    // 2. Has retranslateAll happened yet?
+    if (jit::mcgen::retranslateAllPending()) {
+      status_str += "Waiting on retranslateAll().\n";
+    }
+    // 3. Has code size plateaued? Is the rate of new code emission flat?
+    auto codeSize = jit::tc::getCodeSizeCounter("main");
+    auto codeSizeRate = codeSize->getRateByDuration(
+        std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
+    if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+      folly::format(
+          &status_str,
+          "Code.main is still increasing at a rate of {}\n",
+          codeSizeRate
+          );
+    }
+
+    if (status_str.empty()) s_warmedUp.store(true, std::memory_order_relaxed);
+  }
+  // Empty string means "warmed up".
+  return status_str;
 }
 
 }}}

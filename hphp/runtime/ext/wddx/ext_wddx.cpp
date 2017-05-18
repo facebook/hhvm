@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/actrec-args.h"
+#include "hphp/runtime/base/tv-type.h"
 
 namespace HPHP {
 
@@ -216,7 +217,7 @@ String WddxPacket::wrapValue(const String& start,
 void find_var_recursive(const TypedValue* tv,
                         const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
-    String var_name{tvCastToString(tv)};
+    String var_name{tvCastToString(*tv)};
     wddxPacket->add_var(var_name, true);
   }
   if (isArrayLikeType(tv->m_type)) {

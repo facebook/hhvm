@@ -73,6 +73,10 @@ let with_exit_on_exception f =
     print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
+  | Watchman.Watchman_error s as e ->
+    Hh_logger.exc e;
+    Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
+    Exit_status.(exit Watchman_failed)
   | Worker.Worker_oomed as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_oomed)

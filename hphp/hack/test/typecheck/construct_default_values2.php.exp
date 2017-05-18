@@ -1,0 +1,2 @@
+File "construct_default_values2.php", line 12, characters 21-21:
+Read access to $this->b before initialization (Typing[4083])

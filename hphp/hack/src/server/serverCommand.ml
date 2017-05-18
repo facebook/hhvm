@@ -40,6 +40,7 @@ let rpc_command_needs_full_check : type a. a t -> bool = function
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
   | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
+  | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | _ -> false
 
 let full_recheck_if_needed genv env msg =
@@ -95,7 +96,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
   match cmd with
   | LIST_FILES ->
       ServerEnv.list_files env oc;
-      ServerUtils.shutdown_client (ic, oc)
+      ServerUtils.shutdown_client (ic, oc);
+      false
   | LIST_MODES ->
       Relative_path.Map.iter env.ServerEnv.files_info begin fun fn fileinfo ->
         match Relative_path.prefix fn with
@@ -109,7 +111,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
         | _ -> ()
       end;
       flush oc;
-      ServerUtils.shutdown_client (ic, oc)
+      ServerUtils.shutdown_client (ic, oc);
+      false
   | SHOW name ->
       output_string oc "starting\n";
       SharedMem.invalidate_caches();
@@ -175,7 +178,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           output_string oc (td_str^"\n")
       );
       flush oc;
-      ServerUtils.shutdown_client (ic, oc)
+      ServerUtils.shutdown_client (ic, oc);
+      false
   | BUILD build_opts ->
       let build_hook = BuildMain.go build_opts genv env oc in
       (match build_hook with
@@ -200,7 +204,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
             );
             ServerTypeCheck.hook_after_parsing := None
           )
-      end)
+      end);
+    true
 
 let handle genv env client =
   let msg = ClientProvider.read_client_msg client in
@@ -220,13 +225,13 @@ let handle genv env client =
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
       if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
-      new_env
+      new_env, false
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
-      stream_response genv env (ic, oc) ~cmd;
-      env
+      let needs_flush = stream_response genv env (ic, oc) ~cmd in
+      env, needs_flush
   | Debug ->
       let ic, oc = ClientProvider.get_channels client in
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
-      env
+      env, false

@@ -240,6 +240,16 @@ bool checkCfg(const IRUnit& unit) {
     for (auto& inst : blk->instrs()) {
       for (auto src : inst.srcs()) {
         if (src->inst()->is(DefConst)) continue;
+
+        always_assert_flog(
+          src->inst()->dsts().contains(src),
+          "src '{}' has '{}' as its instruction, "
+          "but the instruction does not have '{}' as a dst",
+          src->toString(),
+          src->inst()->toString(),
+          src->toString()
+        );
+
         auto const dom = findDefiningBlock(src, idoms);
         auto const locally_defined =
           src->inst()->block() == inst.block() && defined_set.contains(src);

@@ -82,14 +82,14 @@ type bop =
 | Minus | Star | Slash | Eqeq | EQeqeq | Starstar
 | Diff | Diff2 | AMpamp | BArbar | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
-| Gtgt | Percent | Xor
+| Gtgt | Percent | Xor | Cmp
 | Eq of bop option
 
 type uop =
 | Utild
 | Unot | Uplus | Uminus | Uincr
 | Udecr | Upincr | Updecr
-| Uref
+| Uref | Usplat
 
 (*****************************************************************************)
 (* Helpers *)

@@ -75,7 +75,7 @@ and expr_ f = function
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
 
 and afield f = function
-  | AFvalue e -> AFvalue e (* (expr f e) *)
+  | AFvalue e -> AFvalue (expr f e)
   | AFkvalue (e1, e2) ->
     let e1 : Nast.expr = expr f e1 in
     let e2 = expr f e2 in
@@ -125,6 +125,7 @@ and hint_ f = function
   | Hdarray (h1, h2) ->
     Hdarray (hint f h1, hint f h2)
   | Hvarray h -> Hvarray (hint f h)
+  | Hdarray_or_varray h -> Hdarray_or_varray (hint f h)
   | Hprim tprim -> Hprim tprim
   | Hoption h -> Hoption (hint f h)
   | Hfun (hl, b, h) ->

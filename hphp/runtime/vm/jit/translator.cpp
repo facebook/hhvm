@@ -187,6 +187,8 @@ static const struct {
   { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
   { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
+  { OpCastVArray,  {Stack1,           Stack1,       OutArray        }},
+  { OpCastDArray,  {Stack1,           Stack1,       OutArray        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
@@ -918,6 +920,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CastDict:
   case Op::CastKeyset:
   case Op::CastVec:
+  case Op::CastVArray:
+  case Op::CastDArray:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:
@@ -1222,7 +1226,7 @@ void translateInstr(
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {
     auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
-    builtinFunc = Unit::lookupFunc(str);
+    builtinFunc = Unit::lookupBuiltin(str);
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
@@ -1319,6 +1323,50 @@ const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
   }
 
   return func;
+}
+
+ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
+                                        const StringData* name) {
+  // Trust nothing if we can rename functions
+  if (RuntimeOption::EvalJitEnableRenameFunction) return {nullptr, true};
+
+  auto const ne = NamedEntity::get(name);
+  if (auto const f = ne->uniqueFunc()) {
+    // We have an unique function. However, it may be conditionally defined
+    // (!f->top()) or interceptable, which means we can't use it directly.
+    if (!f->top() || f->isInterceptable()) return {nullptr, true};
+    // We can use this function. If its persistent (which means its unit's
+    // pseudo-main is trivial), its safe to use unconditionally. If its defined
+    // in the same unit as the caller, its also safe to use unconditionally. By
+    // virtue of the fact that we're already in the unit, we know its already
+    // defined.
+    if (f->isPersistent() || f->unit() == unit) return {f, false};
+    // Use the function, but ensure its unit is loaded.
+    return {f, true};
+  }
+
+  // There's no unique function currently known for this name. However, if the
+  // current unit defines a single top-level function with this name, we can use
+  // it. Why? When this unit is loaded, either it successfully defined the
+  // function, in which case its the correct function, or it fataled, which
+  // means this code won't run anyways.
+
+  Func* found = nullptr;
+  for (auto& f : unit->funcs()) {
+    if (f->isPseudoMain()) continue;
+    if (!f->name()->isame(name)) continue;
+    if (found) {
+      // Function with duplicate name
+      found = nullptr;
+      break;
+    }
+    found = f;
+  }
+
+  if (found && found->top() && !found->isInterceptable()) {
+    return {found, false};
+  }
+  return {nullptr, true};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -98,6 +98,7 @@ static int getNextTokenType(int t) {
     case T_SR:
     case T_BOOLEAN_OR:
     case T_BOOLEAN_AND:
+    case T_COALESCE:
     case T_IS_EQUAL:
     case T_IS_NOT_EQUAL:
     case T_IS_IDENTICAL:
@@ -272,7 +273,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
-<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if" {RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_ELSEIF);
+}
 <ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
 <ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
 <ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}

@@ -44,8 +44,10 @@ let () =
     ~tco_safe_vector_array: false
     ~tco_user_attrs: None
     ~tco_experimental_features: GlobalOptions.tco_experimental_all
+    ~tco_migration_flags: SSet.empty
     ~po_auto_namespace_map:
       [("ShortName", "HH\\LongName\\EvenLonger\\ShortName")]
+    ~ignored_fixme_codes: ISet.empty
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_parser_options

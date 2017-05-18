@@ -14,11 +14,6 @@ open Lsp_fmt
 
 (* All hack-specific code relating to LSP goes in here. *)
 
-(* TODO: this file has a few things from ClientIde and Ide_api_types.
-   It didn't seem worth refactoring them into a common place shared by both
-   IDE and LSP, given that we hope to phase out IDE. *)
-
-
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
 (************************************************************************)
@@ -106,21 +101,338 @@ let hack_errors_to_lsp_diagnostic (filename: string)
   }
 
 (************************************************************************)
+(** Protocol orchestration & helpers                                   **)
+(************************************************************************)
+
+type server_conn = {
+  ic : Timeout.in_channel;
+  oc : out_channel;
+
+  (* Pending messages sent from the server. They need to be relayed to the
+     client. *)
+  pending_messages : ServerCommandTypes.push Queue.t;
+}
+
+type message_source =
+  | No_source
+  | From_client
+  | From_server
+
+type lsp_state_machine =
+  | Pre_init of bool (* is_retry, i.e. whether we rejected a previous init *)
+  | Main_loop
+  | Post_shutdown
+
+type state = {
+  mutable lsp_state : lsp_state_machine;
+  client : ClientMessageQueue.t;
+  mutable server_conn : server_conn option;
+}
+
+type event =
+  | Server_message of ServerCommandTypes.push
+  | Server_exit of Exit_status.t
+  | Client_message of ClientMessageQueue.client_message
+  | Client_error
+  | Client_exit (* client exited unceremoniously, without an exit message *)
+
+(* To handle requests, we use a global list of callbacks for when the *)
+(* response is received, and a global id counter for correlation...   *)
+module Callback = struct
+  type t = {
+    method_: string; (* name of the request *)
+    on_result: Hh_json.json option -> unit; (* takes the result *)
+    on_error: int -> string -> Hh_json.json option -> unit;
+    (* code, message, data *)
+  }
+end
+let requests_counter: IMap.key ref = ref 0
+let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
+
+
+let rec connect_persistent'
+  (root: Path.t)
+  ~(force_stop_existing_persistent_connection: bool)
+  (retries: int)
+  (start_time: float)
+  : Timeout.in_channel * out_channel =
+  let open Lsp.Error in
+  if retries <= 0
+  (* TODO: @ljw: should the client be charge of doing instead of the server? *)
+  then raise (Server_error_start
+    ("no more retries", Lsp.Initialize.{ retry = false; }));
+
+  let connect_once_start_t = Unix.time () in
+  let handoff_options = {
+    MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
+    force_dormant_start = false;
+    force_stop_existing_persistent_connection;
+  } in
+  let conn = ServerUtils.connect_to_monitor root handoff_options in
+  HackEventLogger.client_connect_once connect_once_start_t;
+  match conn with
+  | Result.Ok (ic, oc) ->
+      begin try
+        ClientConnect.wait_for_server_hello
+          ~ic
+          ~env:root
+          ~retries:(Some retries)
+          ~start_time
+          ~tail_env:None
+          ~first_call:true;
+        (ic, oc)
+      with
+      | ClientConnect.Server_hung_up ->
+        raise (Server_not_initialized "no server running")
+      end
+  | Result.Error e ->
+    let open ServerMonitorUtils in
+    match e with
+    | Monitor_connection_failure
+    | Server_busy ->
+      connect_persistent'
+        root ~force_stop_existing_persistent_connection (retries - 1) start_time
+    | Server_dormant
+    | Server_died
+    | Server_missing
+    | Build_id_mismatched _ ->
+      (* IDE mode doesn't handle (re-)starting the server - needs to be done
+       * separately with hh start or similar. *)
+      (* TODO: @ljw, @kasper: why doesn't the server handle? Shouldn't it? *)
+      raise (Server_not_initialized "server must be started manually")
+
+let connect_persistent
+  (root: Path.t)
+  ~(force_stop_existing_persistent_connection: bool)
+  ~(retries: int)
+  : server_conn =
+  let start_time = Unix.time () in
+  try
+    let (ic, oc) =
+      connect_persistent'
+        root ~force_stop_existing_persistent_connection retries start_time in
+    HackEventLogger.client_established_connection start_time;
+    let conn_type = if force_stop_existing_persistent_connection
+      then ServerCommandTypes.Persistent_hard
+      else ServerCommandTypes.Persistent_soft in
+    ServerCommand.send_connection_type oc conn_type;
+
+    let fd = Unix.descr_of_out_channel oc in
+    match Marshal_tools.from_fd_with_preamble fd with
+    | ServerCommandTypes.Denied_due_to_existing_persistent_connection ->
+        let message = "Cannot provide Hack language services while " ^
+                      "this project is active in another window" in
+        raise (Error.Server_error_start (message,
+          {Lsp.Initialize.retry = true;}))
+    | ServerCommandTypes.Connected ->
+        {
+          ic;
+          oc;
+          pending_messages = Queue.create ();
+        }
+  with
+  | e ->
+    HackEventLogger.client_establish_connection_exception e;
+    raise e
+
+let rpc
+  (server_conn: server_conn option)
+  (command: 'a ServerCommandTypes.t)
+  : 'a =
+  match server_conn with
+  | None -> failwith "expected server_conn"
+  | Some server_conn ->
+    let res, pending_messages =
+      ServerCommand.rpc_persistent (server_conn.ic, server_conn.oc) command in
+    List.iter pending_messages
+      ~f:(fun x -> Queue.push x server_conn.pending_messages);
+    res
+
+(* Determine whether to read a message from the client (the editor) or the
+   server (hh_server). *)
+let get_message_source
+  (server: server_conn)
+  (client: ClientMessageQueue.t)
+  : message_source =
+  let has_server_messages = not (Queue.is_empty server.pending_messages) in
+  if has_server_messages then From_server else
+  if ClientMessageQueue.has_message client then From_client else
+
+  let server_read_fd = Unix.descr_of_out_channel server.oc in
+  let client_read_fd = ClientMessageQueue.get_read_fd client in
+  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
+
+  (* Take action on server messages in preference to client messages, because
+     server messages are very easy and quick to service (just send a message to
+     the client), while client messages require us to launch a potentially
+     long-running RPC command. *)
+  if readable = [] then No_source
+  else if List.mem readable server_read_fd then From_server
+  else From_client
+
+(*  Read a message unmarshaled from the server's out_channel. *)
+let read_message_from_server (server: server_conn) : ServerCommandTypes.push =
+  let open ServerCommandTypes in
+  let fd = Unix.descr_of_out_channel server.oc in
+  match Marshal_tools.from_fd_with_preamble fd with
+  | Response _ ->
+    raise Lsp.Error.(Internal_error "unexpected response without a request")
+  | Push m -> m
+
+(* Read the next available message from the server. *)
+let get_next_message (server: server_conn) =
+  let has_messages = not (Queue.is_empty server.pending_messages) in
+  match has_messages with
+  | true -> Queue.take server.pending_messages
+  | false -> read_message_from_server server
+
+(* get_next_event: picks up the next available message from either client or
+   server. The way it's implemented, at the first character of a message
+   from either client or server, we block until that message is completely
+   received. Note: if server is None (meaning we haven't yet established
+   connection with server) then we'll just block waiting for client. *)
+let get_next_event (state: state) : event =
+  let from_server (server: server_conn) =
+    try Server_message (get_next_message server)
+    with _ -> Server_exit Exit_status.No_error (* TODO: failure? *)
+  in
+
+  let from_client (client: ClientMessageQueue.t) =
+    match ClientMessageQueue.get_message client with
+    | ClientMessageQueue.Message message -> Client_message message
+    | ClientMessageQueue.Error -> Client_error
+    | ClientMessageQueue.Exit -> Client_exit
+  in
+
+  let rec from_either server client =
+    match get_message_source server client with
+    | No_source -> from_either server client
+    | From_client -> from_client client
+    | From_server -> from_server server
+  in
+
+  match state.server_conn with
+  | Some server -> from_either server state.client
+  | None -> from_client state.client
+
+(* respond: produces either a Response or an Error message, according
+   to whether the json has an error-code or not. Note that JsonRPC and LSP
+   mandate id to be present. *)
+let respond
+  (outchan: out_channel)
+  (c: ClientMessageQueue.client_message)
+  (json: Hh_json.json)
+  : unit =
+  let open ClientMessageQueue in
+  let open Hh_json in
+  let is_error = (Jget.val_opt (Some json) "code" <> None) in
+  let response = JSON_Object (
+    ["jsonrpc", JSON_String "2.0"]
+    @
+    ["id", match c.id with Some id -> id | None -> JSON_Null]
+    @
+    (if is_error then ["error", json] else ["result", json])
+    )
+  in
+  response |> Hh_json.json_to_string |> Http_lite.write_message outchan
+
+(* notify: produces a Notify message *)
+let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
+  : unit =
+  let open Hh_json in
+  let message = JSON_Object [
+    "jsonrpc", JSON_String "2.0";
+    "method", JSON_String method_;
+    "params", json;
+  ]
+  in
+  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+
+(* request: produce a Request message *)
+let request
+  (outchan: out_channel)
+  (on_result: Hh_json.json option -> unit)
+  (on_error: int -> string -> Hh_json.json option -> unit)
+  (method_: string)
+  (json: Hh_json.json)
+  : unit =
+  incr requests_counter;
+  let callback = { Callback.method_; on_result; on_error; } in
+  let request_id = !requests_counter in
+  requests_outstanding := IMap.add request_id callback !requests_outstanding;
+
+  let open Hh_json in
+  let message = JSON_Object [
+    "jsonrpc", string_ "2.0";
+    "id", int_ request_id;
+    "method", string_ method_;
+    "params", json;
+  ]
+  in
+  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+
+let get_outstanding_request (id: Hh_json.json option) =
+  match id with
+  | Some (Hh_json.JSON_Number s) -> begin
+    try
+      let id = int_of_string s in
+      Option.map (IMap.get id !requests_outstanding) ~f:(fun v -> (id, v))
+    with Failure _ -> None
+    end
+  | _ -> None
+
+let get_outstanding_method_name (id: Hh_json.json option) : string =
+  let open Callback in
+  match (get_outstanding_request id) with
+  | Some (_, callback) -> callback.method_
+  | None -> ""
+
+let do_response
+  (id: Hh_json.json option)
+  (result: Hh_json.json option)
+  (error: Hh_json.json option)
+  : unit =
+  let open Callback in
+  let id, on_result, on_error = match (get_outstanding_request id) with
+    | Some (id, callback) -> (id, callback.on_result, callback.on_error)
+    | None -> raise (Error.Invalid_request "response to non-existent id")
+  in
+  requests_outstanding := IMap.remove id !requests_outstanding;
+  if Option.is_some error then
+    let code = Jget.int_exn error "code" in
+    let message = Jget.string_exn error "message" in
+    let data = Jget.val_opt error "data" in
+    on_error code message data
+  else
+    on_result result
+
+
+(* cancel_if_stale: If a message is stale, throw the necessary exception to
+   cancel it. A message is considered stale if it's sufficiently old and there
+   are other messages in the queue that are newer than it. *)
+let short_timeout = 2.5
+let long_timeout = 15.0
+
+let cancel_if_stale
+  (state: state)
+  (message: ClientMessageQueue.client_message)
+  (timeout: float)
+  : unit =
+  let message_received_time = message.ClientMessageQueue.timestamp in
+  let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
+  if time_elapsed >= timeout && ClientMessageQueue.has_message state.client
+  then raise (Error.Request_cancelled "request timed out")
+
+(************************************************************************)
 (** Protocol                                                           **)
 (************************************************************************)
 
-type conn = Timeout.in_channel * out_channel
-
-let rpc (conn: conn option) (command: 'a ServerCommandTypes.t) : 'a =
-  let conn = match conn with None -> failwith "expected conn" | Some c -> c in
-  ClientIde.rpc conn command
-
-let do_shutdown (conn: conn option) : Shutdown.result =
+let do_shutdown (conn: server_conn option) : Shutdown.result =
   rpc conn (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0);
   rpc conn (ServerCommandTypes.DISCONNECT);
   ()
 
-let do_did_open (conn: conn option) (params: Did_open.params) : unit =
+let do_did_open (conn: server_conn option) (params: Did_open.params) : unit =
   let open Did_open in
   let open Text_document_item in
   let filename = params.text_document.uri in
@@ -129,7 +441,7 @@ let do_did_open (conn: conn option) (params: Did_open.params) : unit =
   rpc conn command;
   ()
 
-let do_did_close (conn: conn option) (params: Did_close.params) : unit =
+let do_did_close (conn: server_conn option) (params: Did_close.params) : unit =
   let open Did_close in
   let open Text_document_identifier in
   let filename = params.text_document.uri in
@@ -137,7 +449,10 @@ let do_did_close (conn: conn option) (params: Did_close.params) : unit =
   rpc conn command;
   ()
 
-let do_did_change (conn: conn option) (params: Did_change.params) : unit =
+let do_did_change
+  (conn: server_conn option)
+  (params: Did_change.params)
+  : unit =
   let open Versioned_text_document_identifier in
   let open Lsp.Did_change in
   let lsp_change_to_ide (lsp: Did_change.text_document_content_change_event)
@@ -153,7 +468,7 @@ let do_did_change (conn: conn option) (params: Did_change.params) : unit =
   rpc conn command;
   ()
 
-let do_hover (conn: conn option) (params: Hover.params) : Hover.result =
+let do_hover (conn: server_conn option) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.INFER_TYPE (file, line, column) in
   let inferred_type = rpc conn command in
@@ -167,7 +482,7 @@ let do_hover (conn: conn option) (params: Hover.params) : Hover.result =
       range = None;
     }
 
-let do_definition (conn: conn option) (params: Definition.params)
+let do_definition (conn: server_conn option) (params: Definition.params)
   : Definition.result =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDENTIFY_FUNCTION (file, line, column) in
@@ -180,7 +495,7 @@ let do_definition (conn: conn option) (params: Definition.params)
   in
   hack_to_lsp results
 
-let do_completion (conn: conn option) (params: Completion.params)
+let do_completion (conn: server_conn option) (params: Completion.params)
   : Completion.result =
   let open Text_document_position_params in
   let open Text_document_identifier in
@@ -221,7 +536,9 @@ let do_completion (conn: conn option) (params: Completion.params)
     items = List.map results ~f:hack_completion_to_lsp;
   }
 
-let do_workspace_symbol (conn: conn option) (params: Workspace_symbol.params)
+let do_workspace_symbol
+  (conn: server_conn option)
+  (params: Workspace_symbol.params)
   : Workspace_symbol.result =
   let open Workspace_symbol in
   let open SearchUtils in
@@ -262,7 +579,9 @@ let do_workspace_symbol (conn: conn option) (params: Workspace_symbol.params)
   in
   List.map results ~f:hack_symbol_to_lsp
 
-let do_document_symbol (conn: conn option) (params: Document_symbol.params)
+let do_document_symbol
+  (conn: server_conn option)
+  (params: Document_symbol.params)
   : Document_symbol.result =
   let open Document_symbol in
   let open Text_document_identifier in
@@ -307,7 +626,9 @@ let do_document_symbol (conn: conn option) (params: Document_symbol.params)
   in
   hack_symbol_tree_to_lsp ~accu:[] ~container_name:None results
 
-let do_find_references (conn: conn option) (params: Find_references.params)
+let do_find_references
+  (conn: server_conn option)
+  (params: Find_references.params)
   : Find_references.result =
   let open Find_references in
 
@@ -324,7 +645,7 @@ let do_find_references (conn: conn option) (params: Find_references.params)
 
 
 let do_document_highlights
-  (conn: conn option)
+  (conn: server_conn option)
   (params: Document_highlights.params)
   : Document_highlights.result =
   let open Document_highlights in
@@ -342,7 +663,7 @@ let do_document_highlights
   List.map results ~f:hack_range_to_lsp_highlight
 
 
-let do_type_coverage (conn: conn option) (params: Type_coverage.params)
+let do_type_coverage (conn: server_conn option) (params: Type_coverage.params)
   : Type_coverage.result =
   let open Type_coverage in
 
@@ -385,287 +706,307 @@ let do_type_coverage (conn: conn option) (params: Type_coverage.params)
   }
 
 
+let do_formatting_common
+  (conn: server_conn option)
+  (args: ServerFormatTypes.ide_action)
+  : Text_edit.t list =
+  let open ServerFormatTypes in
+  let command = ServerCommandTypes.IDE_FORMAT args in
+  let response: ServerFormatTypes.ide_result = rpc conn command in
+  match response with
+  | Result.Error message ->
+      raise (Error.Internal_error message)
+  | Result.Ok r ->
+      let range = ide_range_to_lsp r.range in
+      let new_text = r.new_text in
+      [{Text_edit.range; new_text;}]
+
+
 let do_document_range_formatting
-  (conn: conn option)
+  (conn: server_conn option)
   (params: Document_range_formatting.params)
   : Document_range_formatting.result =
   let open Document_range_formatting in
   let open Text_document_identifier in
-
-  let args = { Ide_api_types.
+  let action = ServerFormatTypes.Range { Ide_api_types.
     range_filename = params.text_document.uri;
     file_range = lsp_range_to_ide params.range;
-  } in
-  let command = ServerCommandTypes.IDE_FORMAT args in
-  let response: ServerFormatTypes.ide_result = rpc conn command in
-  match response with
-    | Result.Error message -> raise (Error.Internal_error message)
-    | Result.Ok new_text -> [{Text_edit.range = params.range; new_text}]
+  }
+  in
+  do_formatting_common conn action
 
 
 let do_document_formatting
-  (_conn: conn option)
-  (_params: Document_formatting.params)
+  (conn: server_conn option)
+  (params: Document_formatting.params)
   : Document_formatting.result =
-  raise (Error.Method_not_found "textDocument/documentFormatting")
+  let open Document_formatting in
+  let open Text_document_identifier in
+  let action = ServerFormatTypes.Document params.text_document.uri in
+  do_formatting_common conn action
 
 
-let do_initialize (params: Initialize.params)
-  : (conn option * Initialize.result) =
+let do_initialize ~(is_retry: bool) (params: Initialize.params)
+  : (server_conn option * Initialize.result) =
   let open Initialize in
   let root = if Option.is_some params.root_uri
              then ClientArgsUtils.get_root params.root_uri
              else ClientArgsUtils.get_root params.root_path in
-  let env = { ClientIde.root = root }
-  in
-  try
-    let conn = ClientIde.connect_persistent env ~retries:800 in
-    rpc (Some conn) (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0);
-    let result = {
-      server_capabilities = {
-        text_document_sync = {
-          want_open_close = true;
-          want_change = IncrementalSync;
-          want_will_save = false;
-          want_will_save_wait_until = false;
-          want_did_save = { include_text = false }
-        };
-        hover_provider = false;
-        completion_provider = None;
-        signature_help_provider = None;
-        definition_provider = false;
-        references_provider = true;
-        document_highlight_provider = true;
-        document_symbol_provider = true;
-        workspace_symbol_provider = true;
-        code_action_provider = false;
-        code_lens_provider = None;
-        document_formatting_provider = false;
-        document_range_formatting_provider = true;
-        document_on_type_formatting_provider = None;
-        rename_provider = false;
-        document_link_provider = None;
-        execute_command_provider = None;
-        type_coverage_provider = true;
-      }
+
+  let force_stop_existing_persistent_connection = is_retry in
+  let server_conn = connect_persistent
+    root ~force_stop_existing_persistent_connection ~retries:800 in
+  rpc (Some server_conn) (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0);
+  let result = {
+    server_capabilities = {
+      text_document_sync = {
+        want_open_close = true;
+        want_change = IncrementalSync;
+        want_will_save = false;
+        want_will_save_wait_until = false;
+        want_did_save = { include_text = false }
+      };
+      hover_provider = true;
+      completion_provider = Some {
+        resolve_provider = true;
+        completion_trigger_characters = ["-"; ">"; "\\"];
+      };
+      signature_help_provider = None;
+      definition_provider = true;
+      references_provider = true;
+      document_highlight_provider = true;
+      document_symbol_provider = true;
+      workspace_symbol_provider = true;
+      code_action_provider = false;
+      code_lens_provider = None;
+      document_formatting_provider = true;
+      document_range_formatting_provider = true;
+      document_on_type_formatting_provider = None;
+      rename_provider = false;
+      document_link_provider = None;
+      execute_command_provider = None;
+      type_coverage_provider = true;
     }
+  }
+  in
+  (Some server_conn, result)
+
+
+(************************************************************************)
+(** Message handling                                                   **)
+(************************************************************************)
+
+(* handle_event: Process and respond to a message, and update the LSP state
+   machine accordingly. *)
+let handle_event (state: state) (event: event) : unit =
+  let open ClientMessageQueue in
+  let exit () = exit (if state.lsp_state = Post_shutdown then 0 else 1) in
+  match state.lsp_state, event with
+  (* response *)
+  | _, Client_message c when c.kind = ClientMessageQueue.Response ->
+    do_response c.id c.result c.error
+
+  (* exit notification *)
+  | _, Client_message c when c.method_ = "exit" -> exit ()
+  | _, Client_exit -> exit ()
+
+  (* initialize request*)
+  | Pre_init is_retry, Client_message c when c.method_ = "initialize" -> begin
+    (* We can't directly determine whether the initialization request is a *)
+    (* retry, since that's not a part of the protocol. However, if we went *)
+    (* through initialize once failed with an exception, the next time we  *)
+    (* try an initialize will be a retry. We set the retry flag here to be *)
+    (* true so the next initialization request is treated as a retry.      *)
+    state.lsp_state <- Pre_init true;
+    let (server_conn', result) =
+      parse_initialize c.params |> do_initialize ~is_retry in
+    print_initialize result |> respond stdout c;
+    state.lsp_state <- Main_loop;
+    state.server_conn <- server_conn'
+    end
+
+  (* any request/notification if we haven't yet initialized *)
+  | Pre_init _, Client_message _c ->
+    raise (Error.Server_not_initialized "init");
+
+  (* textDocument/hover request *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/hover" ->
+    cancel_if_stale state c short_timeout;
+    parse_hover c.params |> do_hover state.server_conn |> print_hover
+      |> respond stdout c;
+
+  (* textDocument/definition request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/definition" ->
+    cancel_if_stale state c short_timeout;
+    parse_definition c.params |> do_definition state.server_conn
+      |> print_definition |> respond stdout c
+
+  (* textDocument/completion request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/completion" ->
+    cancel_if_stale state c short_timeout;
+    parse_completion c.params |> do_completion state.server_conn
+      |> print_completion |> respond stdout c
+
+  (* workspace/symbol request *)
+  | Main_loop, Client_message c when c.method_ = "workspace/symbol" ->
+    parse_workspace_symbol c.params |> do_workspace_symbol state.server_conn
+      |> print_workspace_symbol |> respond stdout c
+
+  (* textDocument/documentSymbol request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/documentSymbol" ->
+    parse_document_symbol c.params |> do_document_symbol state.server_conn
+      |> print_document_symbol |> respond stdout c
+
+  (* textDocument/references requeset *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/references" ->
+    cancel_if_stale state c long_timeout;
+    parse_find_references c.params |> do_find_references state.server_conn
+      |> print_find_references |> respond stdout c
+
+  (* textDocument/documentHighlight *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/documentHighlight" ->
+    cancel_if_stale state c short_timeout;
+    parse_document_highlights c.params
+      |> do_document_highlights state.server_conn |> print_document_highlights
+      |> respond stdout c
+
+  (* textDocument/typeCoverage *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/typeCoverage" ->
+    parse_type_coverage c.params |> do_type_coverage state.server_conn
+      |> print_type_coverage |> respond stdout c
+
+  (* textDocument/formatting *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/formatting" ->
+    parse_document_formatting c.params
+      |> do_document_formatting state.server_conn |> print_document_formatting
+      |> respond stdout c
+
+  (* textDocument/formatting *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/rangeFormatting" ->
+    parse_document_range_formatting c.params
+      |> do_document_range_formatting state.server_conn
+      |> print_document_range_formatting |> respond stdout c
+
+  (* textDocument/didOpen notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didOpen" ->
+    parse_did_open c.params |> do_did_open state.server_conn;
+
+  (* textDocument/didClose notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didClose" ->
+    parse_did_close c.params |> do_did_close state.server_conn;
+
+  (* textDocument/didChange notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didChange" ->
+    parse_did_change c.params |> do_did_change state.server_conn;
+
+  (* shutdown request *)
+  | Main_loop, Client_message c when c.method_ = "shutdown" ->
+    do_shutdown state.server_conn |> print_shutdown |> respond stdout c;
+    state.lsp_state <- Post_shutdown;
+    state.server_conn <- None;
+
+  (* textDocument/publishDiagnostics notification *)
+  | Main_loop, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
+    let per_file uri errors = hack_errors_to_lsp_diagnostic uri errors
+        |> print_diagnostics
+        |> notify stdout "textDocument/publishDiagnostics"
     in
-    (Some conn, result)
-  with
-  | e ->
-    let message = Printexc.to_string e in
-    raise (Error.Server_error_start (message, {retry = false;}))
+    SMap.iter per_file errors
 
+  (* any server diagnostics that come after we've shut down *)
+  | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
+    ()
 
-(************************************************************************)
-(** Protocol orchestration & helpers                                   **)
-(************************************************************************)
+  (* ignore parsing errors *)
+  | _, Client_error -> ()
 
-type lsp_state_machine =
-  | Pre_init
-  | Main_loop
-  | Post_shutdown
+  (* catch-all for client reqs/notifications we haven't yet implemented *)
+  | Main_loop, Client_message _c ->
+    raise (Error.Method_not_found "not implemented")
 
-and event =
-  | Server of ServerCommandTypes.push
-  | Server_exit of Exit_status.t
-  | Client of client_message
+  (* catch-all for requests/notifications after shutdown request *)
+  | Post_shutdown, Client_message _c ->
+    raise (Error.Invalid_request "already received shutdown request")
 
-and client_message = {
-  method_ : string;
-  id : Hh_json.json option;
-  params : Hh_json.json option;
-  is_request : bool;
-}
+  (* server shut-down request *)
+  | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+    print_log_message Message_type.ErrorMessage "Another client has connected"
+      |> notify stdout "window/logMessage";
+    exit ()
 
-(* respond: produces either a Response or an Error message, according
-   to whether the json has an error-code or not. Note that JsonRPC and LSP
-   mandate id to be present. *)
-let respond (outchan: out_channel) (c: client_message) (json: Hh_json.json)
-  : unit =
-  let open Hh_json in
-  let is_error = (Jget.val_opt (Some json) "code" <> None) in
-  let response = JSON_Object (
-    ["jsonrpc", JSON_String "2.0"]
-    @
-    ["id", match c.id with Some id -> id | None -> JSON_Null]
-    @
-    (if is_error then ["error", json] else ["result", json])
-    )
+  (* TODO message from server *)
+  | _, Server_exit _ -> () (* todo *)
+
+(* respond_to_error: if we threw an exception during the handling of a request,
+   report the exception to the client as the response their request. *)
+let respond_to_error (event: event) (e: exn) : unit =
+  match event with
+  | Client_message c
+    when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
+    print_error e |> respond stdout c;
+  | _ -> ()
+
+let log_error (event: event) (e: exn) : unit =
+  let (error_code, _message, _data) = get_error_info e in
+  let (command, kind) = match event with
+    | Client_message c ->
+      let open ClientMessageQueue in
+      (Some c.method_, Some (kind_to_string c.kind))
+    | _ -> (None, None)
   in
-  response |> Hh_json.json_to_string |> Http_lite.write_message outchan
-
-(* notify: produces a Notify message *)
-let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
-  : unit =
-  let open Hh_json in
-  let message = JSON_Object [
-    "jsonrpc", JSON_String "2.0";
-    "method", JSON_String method_;
-    "params", json;
-  ]
-  in
-  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
-
-(* get_next_event: picks up the next available message from either client or
-   server. The way it's implemented, at the first character of a message
-   from either client or server, we block until that message is completely
-   received. Note: if server is None (meaning we haven't yet established
-   connection with server) then we'll just block waiting for client. *)
-let get_next_event
-  ~(server: conn option)
-  ~(client: Buffered_line_reader.t)
-  : event =
-  let from_server (server: Unix.file_descr) =
-    try Server (ClientIde.get_next_push_message server)
-    with _ -> Server_exit Exit_status.No_error (* TODO: failure? *)
-  in
-  let from_client (client: Buffered_line_reader.t) =
-    let json = try Some (Http_lite.read_message_utf8 client
-                         |> Hh_json.json_of_string)
-               with Http_lite.Malformed _ | Hh_json.Syntax_error _ -> None in
-    let id = Jget.val_opt json "id" in
-    Client {
-      method_ = Jget.string_exn json "method";
-      id = id;
-      params = Jget.obj_opt json "params";
-      is_request = (id <> None);
-    }
-  in
-  let rec from_either server client =
-  (* TODO: avoid use of global variable ClientIde.stdin_reader in following. *)
-    match ClientIde.get_ready_message server with
-    | `None -> from_either server client
-    | `Stdin -> from_client client
-    | `Server -> from_server server
-  in
-  match server with
-  | None -> from_client client
-  | Some conn -> let server = Unix.descr_of_out_channel (snd conn) in
-                 from_either server client
+  HackEventLogger.client_command_exception
+    ~command
+    ~kind
+    ~e
+    ~error_code
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. *)
 let main () : unit =
   Printexc.record_backtrace true;
-  let state: lsp_state_machine ref = ref Pre_init in
-  let conn: conn option ref = ref None in
+  let state = {
+    lsp_state = Pre_init false;
+    client = ClientMessageQueue.make ();
+    server_conn = None;
+  } in
   while true do
-    let event = get_next_event ~server:!conn ~client:ClientIde.stdin_reader in
+    let event = get_next_event state in
     try
-      match !state, event with
-
-      (* exit notification *)
-      | _, Client c when c.method_ = "exit" ->
-        exit (if !state = Post_shutdown then 0 else 1)
-
-      (* initialize request*)
-      | Pre_init, Client c when c.method_ = "initialize" -> begin
-        let (conn2, result) = parse_initialize c.params |> do_initialize in
-        print_initialize result |> respond stdout c;
-        state := Main_loop;
-        conn := conn2
+      handle_event state event;
+      match event with
+      | Client_message c -> begin
+          let open ClientMessageQueue in
+          (* Log to scuba the time the message arrived at hh_client and the *)
+          (* time we finished handling it. This includes any time it spent  *)
+          (* waiting in the queue...                                        *)
+          let command =
+            if c.kind = Response
+            then get_outstanding_method_name c.id
+            else c.method_ in
+          HackEventLogger.client_handled_command
+            ~command
+            ~start_t:c.timestamp
+            ~kind:(kind_to_string c.kind);
+          (* If we're connected to a server and have no more messages in   *)
+          (* the queue, then let the server know we're idle, so it will be *)
+          (* free to handle command-line requests. *)
+          if Option.is_some state.server_conn && not (has_message state.client)
+            then rpc state.server_conn ServerCommandTypes.IDE_IDLE
         end
-
-      (* any request/notification if we haven't yet initialized *)
-      | Pre_init, Client _c ->
-        raise (Error.Server_not_initialized "init");
-
-      (* textDocument/hover request *)
-      | Main_loop, Client c when c.method_ = "textDocument/hover" ->
-        parse_hover c.params |> do_hover !conn |> print_hover
-          |> respond stdout c;
-
-      (* textDocument/definition request *)
-      | Main_loop, Client c when c.method_ = "textDocument/definition" ->
-        parse_definition c.params |> do_definition !conn
-          |> print_definition |> respond stdout c
-
-      (* textDocument/completion request *)
-      | Main_loop, Client c when c.method_ = "textDocument/completion" ->
-        parse_completion c.params |> do_completion !conn |> print_completion
-          |> respond stdout c
-
-      (* workspace/symbol request *)
-      | Main_loop, Client c when c.method_ = "workspace/symbol" ->
-        parse_workspace_symbol c.params |> do_workspace_symbol !conn
-          |> print_workspace_symbol |> respond stdout c
-
-      (* textDocument/documentSymbol request *)
-      | Main_loop, Client c when c.method_ = "textDocument/documentSymbol" ->
-        parse_document_symbol c.params |> do_document_symbol !conn
-          |> print_document_symbol |> respond stdout c
-
-      (* textDocument/references requeset *)
-      | Main_loop, Client c when c.method_ = "textDocument/references" ->
-        parse_find_references c.params |> do_find_references !conn
-          |> print_find_references |> respond stdout c
-
-      (* textDocument/documentHighlight *)
-      | Main_loop, Client c when c.method_ = "textDocument/documentHighlight" ->
-        parse_document_highlights c.params |> do_document_highlights !conn
-          |> print_document_highlights |> respond stdout c
-
-      (* textDocument/typeCoverage *)
-      | Main_loop, Client c when c.method_ = "textDocument/typeCoverage" ->
-        parse_type_coverage c.params |> do_type_coverage !conn
-          |> print_type_coverage |> respond stdout c
-
-      (* textDocument/formatting *)
-      | Main_loop, Client c when c.method_ = "textDocument/formatting" ->
-        parse_document_formatting c.params |> do_document_formatting !conn
-          |> print_document_formatting |> respond stdout c
-
-      (* textDocument/formatting *)
-      | Main_loop, Client c when c.method_ = "textDocument/rangeFormatting" ->
-        parse_document_range_formatting c.params
-          |> do_document_range_formatting !conn
-          |> print_document_range_formatting |> respond stdout c
-
-      (* textDocument/didOpen notification *)
-      | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->
-        parse_did_open c.params |> do_did_open !conn;
-
-      (* textDocument/didClose notification *)
-      | Main_loop, Client c when c.method_ = "textDocument/didClose" ->
-        parse_did_close c.params |> do_did_close !conn;
-
-      (* textDocument/didChange notification *)
-      | Main_loop, Client c when c.method_ = "textDocument/didChange" ->
-        parse_did_change c.params |> do_did_change !conn;
-
-      (* shutdown request *)
-      | Main_loop, Client c when c.method_ = "shutdown" ->
-        do_shutdown !conn |> print_shutdown |> respond stdout c;
-        state := Post_shutdown;
-        conn := None;
-
-      (* textDocument/publishDiagnostics notification *)
-      | Main_loop, Server ServerCommandTypes.DIAGNOSTIC (_, errors) ->
-        let per_file uri errors = hack_errors_to_lsp_diagnostic uri errors
-            |> print_diagnostics
-            |> notify stdout "textDocument/publishDiagnostics"
-        in
-        SMap.iter per_file errors
-
-      (* any server diagnostics that come after we've shut down *)
-      | _, Server ServerCommandTypes.DIAGNOSTIC _ ->
-        ()
-
-      (* catch-all for client reqs/notifications we haven't yet implemented *)
-      | Main_loop, Client _c ->
-        raise (Error.Method_not_found "not implemented")
-
-      (* catch-all for requests/notifications after shutdown request *)
-      | Post_shutdown, Client _c ->
-        raise (Error.Invalid_request "already received shutdown request")
-
-      (* TODO message from server *)
-      | _, Server ServerCommandTypes.NEW_CLIENT_CONNECTED -> () (* todo *)
-      | _, Server_exit _ -> () (* todo *)
-
-    with
-    | e -> match event with
-           | Client c when c.is_request -> print_error e |> respond stdout c
-           | _ -> () (* todo: log this? *)
+      | _ -> ()
+    with e ->
+      respond_to_error event e;
+      log_error event e;
+      if e = Sys_error "Broken pipe" then exit 1
+      (* The reading/writing we do here is with hh_server, so this exception *)
+      (* means that our connection to hh_server has gone down, which is      *)
+      (* unrecoverable by us. We'll trust the LSP client to restart.         *)
   done

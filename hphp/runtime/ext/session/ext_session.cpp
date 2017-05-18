@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/zend-math.h"
@@ -362,7 +363,7 @@ const Object& SystemlibSessionModule::getObject() {
   }
   s_obj->setObject(Object{m_cls});
   const auto& obj = s_obj->getObject();
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFuncFew(m_ctor, obj.get())
   );
   return obj;

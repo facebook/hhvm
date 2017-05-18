@@ -72,7 +72,6 @@ IMPLEMENT_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
 
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
-    m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
     m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles) {
 }
 

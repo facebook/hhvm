@@ -484,17 +484,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   if (po.optimizeLevel == -1) {
-    po.optimizeLevel = 1;
+    po.optimizeLevel = RuntimeOption::EvalDisableHphpcOpts ? 0 : 1;
   }
 
   // we always do pre/post opt no matter the opt level
-  Option::PreOptimization = true;
+  Option::PreOptimization = !RuntimeOption::EvalDisableHphpcOpts;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;
   }
 
-  initialize_hhbbc_options();
+  HHBBC::options.DisallowDynamicVarEnvFuncs =
+    (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 
   return 0;
 }

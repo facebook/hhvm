@@ -10,6 +10,7 @@
 
 open Core
 open Coverage_level
+open Option.Monad_infix
 open Reordered_argument_collections
 open Utils
 open String_utils
@@ -81,8 +82,15 @@ let mk_trie acc fn_counts_l =
 (* Convert an absolute path to one relative to the given root.
  * Returns None if root is not a prefix of path. *)
 let relativize root path =
+  let root = Path.to_string root in
+  (* If we're provided a file instead of a directory as the path to filter, the
+     only valid value is the filename itself. *)
+  if FindUtils.is_php root && root = path
+  then Some (Filename.basename path)
+  else
+
   (* naive implementation *)
-  let root = Path.to_string root ^ Filename.dir_sep in
+  let root = root ^ Filename.dir_sep in
   if string_starts_with path root
   then
     let root_len = String.length root in
@@ -94,16 +102,11 @@ let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
   let files_info = FileInfoStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
-    let relativized_fn = relativize root (Relative_path.to_absolute fn) in
-    match relativized_fn with
-    | None -> None
-    | Some relativized_fn ->
-      match Relative_path.Map.get files_info fn with
-      | None -> None
-      | Some defs ->
-          let type_acc = accumulate_types fn defs tcopt in
-          let counts = count_exprs fn type_acc in
-          Some (relativized_fn, counts)
+    relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
+    Relative_path.Map.get files_info fn >>= fun defs ->
+    let type_acc = accumulate_types fn defs tcopt in
+    let counts = count_exprs fn type_acc in
+    Some (relativized_fn, counts)
   end in
   mk_trie neutral file_counts
 

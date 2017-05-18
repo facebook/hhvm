@@ -17,6 +17,7 @@ not how they look on the page. *)
 | IndexingOperator
 | FunctionCallOperator
 | AwaitOperator
+| SuspendOperator
 | PipeOperator
 | ConditionalQuestionOperator
 | ConditionalColonOperator
@@ -98,7 +99,7 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
   | IncludeOperator | IncludeOnceOperator | RequireOperator
-  | RequireOnceOperator | AwaitOperator -> 1
+  | RequireOnceOperator | AwaitOperator | SuspendOperator -> 1
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
@@ -145,6 +146,7 @@ let associativity operator =
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
   | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
+  | SuspendOperator
     -> NotAssociative
 
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -180,6 +182,7 @@ let associativity operator =
 
 let prefix_unary_from_token token =
   match token with
+  | Suspend -> SuspendOperator
   | Await -> AwaitOperator
   | Exclamation -> LogicalNotOperator
   | Tilde -> NotOperator
@@ -399,6 +402,7 @@ let to_string kind =
   | IndexingOperator -> "indexing"
   | FunctionCallOperator -> "function_call"
   | AwaitOperator -> "await"
+  | SuspendOperator -> "suspend"
   | PipeOperator -> "pipe"
   | ConditionalQuestionOperator -> "conditional"
   | ConditionalColonOperator -> "colon"

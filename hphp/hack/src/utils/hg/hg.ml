@@ -12,89 +12,143 @@
 
 open Core
 
-exception Malformed_result
+module Hg_actual = struct
 
-type hg_rev = string
-type svn_rev = string
+  include Hg_sig.Types
 
-(** Returns the closest SVN ancestor to the hg revision.
- *
- * hg log -r 'reverse(::<hg_rev>)' -T '{svnrev}\n' -l 150 --cwd <repo> *
- * Note: The output is a newline-separated list of corresponding SVN
- * revision numbers of the ancestors. For each ancestor that does NOT have
- * a corresponding SVN revision, a blankline is printed. So we use "-l 150"
- * to print up to 150 ancestors that might be newlines, filter away the blanks,
- * and return the first result.
- *)
-let get_closest_svn_ancestor hg_rev repo =
-  let process = Process.exec "hg" [
-    "log";
-    "-r";
-    Printf.sprintf "reverse(::%s)" hg_rev;
-    "-T";
-    "{svnrev}\n";
-    "-l";
-    "150";
-    "--cwd";
-    repo;
-  ]
-  in
-  Future.make process @@ fun result ->
-    let lines = Sys_utils.split_lines result in
-    let nonempty str = String.length str > 0 in
-    List.filter lines ~f:nonempty |> List.hd_exn
+  (** Returns the closest SVN ancestor to the hg revision.
+   *
+   * hg log -r 'reverse(::<hg_rev>)' -T '{svnrev}\n' -l 150 --cwd <repo> *
+   * Note: The output is a newline-separated list of corresponding SVN
+   * revision numbers of the ancestors. For each ancestor that does NOT have
+   * a corresponding SVN revision, a blankline is printed. So we use "-l 150"
+   * to print up to 150 ancestors that might be newlines, filter away the
+   * blanks, and return the first result.
+   *)
+  let get_closest_svn_ancestor hg_rev repo =
+    let process = Process.exec "hg" [
+      "log";
+      "-r";
+      Printf.sprintf "reverse(::%s)" hg_rev;
+      "-T";
+      "{svnrev}\n";
+      "-l";
+      "150";
+      "--cwd";
+      repo;
+    ]
+    in
+    Future.make process @@ fun result ->
+      let lines = Sys_utils.split_lines result in
+      let nonempty str = String.length str > 0 in
+      List.filter lines ~f:nonempty |> List.hd_exn
 
-(** Get the hg revision hash of the current working copy in the repo dir.
- *
- * hg id -i --cwd <repo> *)
-let current_working_copy_hg_rev repo =
-  let process = Process.exec "hg" ["id"; "-i"; "--cwd"; repo; ] in
-  Future.make process @@ fun result ->
-    let result = String.trim result in
-    if String.length result < 1 then
-      raise Malformed_result
-    else
-      if result.[(String.length result) - 1] = '+' then
-        (String.sub result 0 ((String.length result) - 1)), true
+  (** Get the hg revision hash of the current working copy in the repo dir.
+   *
+   * hg id -i --cwd <repo> *)
+  let current_working_copy_hg_rev repo =
+    let process = Process.exec "hg" ["id"; "-i"; "--cwd"; repo; ] in
+    Future.make process @@ fun result ->
+      let result = String.trim result in
+      if String.length result < 1 then
+        raise Malformed_result
       else
-        result, false
+        if result.[(String.length result) - 1] = '+' then
+          (String.sub result 0 ((String.length result) - 1)), true
+        else
+          result, false
 
-(** hg log -r 'ancestor(master,.)' -T '{svnrev}\n' *)
-let current_working_copy_base_rev repo =
-  let process = Process.exec "hg" [
-    "log";
-    "-r";
-    "ancestor(master,.)";
-    "-T";
-    "{svnrev}\n";
-    "--cwd";
-    repo;
-  ] in
-  Future.make process String.trim
+  (** hg log -r 'ancestor(master,.)' -T '{svnrev}\n' *)
+  let current_working_copy_base_rev repo =
+    let process = Process.exec "hg" [
+      "log";
+      "-r";
+      "ancestor(master,.)";
+      "-T";
+      "{svnrev}\n";
+      "--cwd";
+      repo;
+    ] in
+    Future.make process String.trim
 
-(** Returns the files changed between the hg_rev and the ancestor
- * SVN revision.
- *
- * hg status --rev r<svn_rev> --rev <hg_rev> --cwd <repo> *)
-let files_changed_since_svn_rev hg_rev svn_rev repo =
-  let process = Process.exec "hg" [
-    "status";
-    "--rev";
-    Printf.sprintf "r%s" svn_rev;
-    "--rev";
-    hg_rev;
-    "--cwd";
-    repo;
-  ] in
-  Future.make process String.trim
+  (** Returns the files changed between the hg_rev and the ancestor
+   * SVN revision.
+   *
+   * hg status --rev r<svn_rev> --rev <hg_rev> --cwd <repo> *)
+  let files_changed_since_svn_rev hg_rev svn_rev repo =
+    let process = Process.exec "hg" [
+      "status";
+      "--rev";
+      Printf.sprintf "r%s" svn_rev;
+      "--rev";
+      hg_rev;
+      "--cwd";
+      repo;
+    ] in
+    Future.make process String.trim
 
-(** hg update --rev r<svn_rev> --cwd <repo> *)
-let update_to_base_rev svn_rev repo =
-  let process = Process.exec "hg" [
-    "update";
-    "--rev";
-    Printf.sprintf "r%s" svn_rev;
-    "--cwd";
-    repo;
-  ] in
-  Future.make process ignore
+  (** hg update --rev r<svn_rev> --cwd <repo> *)
+  let update_to_base_rev svn_rev repo =
+    let process = Process.exec "hg" [
+      "update";
+      "--rev";
+      Printf.sprintf "r%s" svn_rev;
+      "--cwd";
+      repo;
+    ] in
+    Future.make process ignore
+
+    module Mocking = struct
+      exception Cannot_set_when_mocks_disabled
+
+      let current_working_copy_hg_rev_returns _ =
+        raise Cannot_set_when_mocks_disabled
+
+      let current_working_copy_base_rev_returns _ =
+        raise Cannot_set_when_mocks_disabled
+
+      let closest_svn_ancestor_bind_value _ _ =
+        raise Cannot_set_when_mocks_disabled
+
+      let files_changed_since_svn_rev_returns _ =
+        raise Cannot_set_when_mocks_disabled
+    end
+
+end;;
+
+module Hg_mock = struct
+
+  include Hg_sig.Types
+
+  module Mocking = struct
+    let current_working_copy_hg_rev = ref @@ Future.of_value ("", false)
+    let current_working_copy_base_rev = ref @@ Future.of_value ""
+    let closest_svn_ancestor = Hashtbl.create 10
+    let files_changed_since_svn_rev = ref @@ Future.of_value ""
+
+    let current_working_copy_hg_rev_returns v =
+      current_working_copy_hg_rev := v
+
+    let current_working_copy_base_rev_returns v =
+      current_working_copy_base_rev := v
+
+    let closest_svn_ancestor_bind_value hg_rev svn_rev =
+      Hashtbl.replace closest_svn_ancestor hg_rev svn_rev
+
+    let files_changed_since_svn_rev_returns v =
+      files_changed_since_svn_rev := v
+  end
+
+  let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
+  let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
+  let get_closest_svn_ancestor hg_rev _ =
+    Hashtbl.find Mocking.closest_svn_ancestor hg_rev
+  let files_changed_since_svn_rev _ _ _ = !Mocking.files_changed_since_svn_rev
+  let update_to_base_rev _ _ = Future.of_value ()
+
+end;;
+
+include (val (if Injector_config.use_test_stubbing
+  then (module Hg_mock : Hg_sig.S)
+  else (module Hg_actual : Hg_sig.S)
+))

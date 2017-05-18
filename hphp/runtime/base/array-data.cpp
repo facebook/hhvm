@@ -249,70 +249,70 @@ const ArrayFunctions g_array_funcs = {
   /*
    * const Variant& GetValueRef(const ArrayData*, ssize_t pos)
    *
-   *   Return a reference to the value at an iterator position.  `pos'
-   *   must be a valid position for this array.
+   *   Return a reference to the value at an iterator position.  `pos' must be
+   *   a valid position for this array.
    */
   DISPATCH(GetValueRef)
 
   /*
    * bool IsVectorData(const ArrayData*)
    *
-   *   Returns true if this array is empty, or if it has only
-   *   contiguous integer keys and the first key is zero.  Determining
-   *   this may be an O(N) operation.
+   *   Return true if this array is empty, or if it has only contiguous integer
+   *   keys and the first key is zero.  Determining this may be an O(N)
+   *   operation.
    */
   DISPATCH(IsVectorData)
 
   /*
    * bool ExistsInt(const ArrayData*, int64_t key)
    *
-   *   Returns true iff this array contains an element with the
-   *   supplied integer key.
+   *   Return true iff this array contains an element with the supplied integer
+   *   key.
    */
   DISPATCH(ExistsInt)
 
   /*
    * bool ExistsStr(const ArrayData*, const StringData*)
    *
-   *   Return true iff this array contains an element with the
-   *   supplied string key.  The string must not be an integer-like
-   *   string.
+   *   Return true iff this array contains an element with the supplied string
+   *   key.  The string will not undergo intish-key cast.
    */
   DISPATCH(ExistsStr)
 
   /*
-   * ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& out, bool copy)
-   * ArrayData* LvalIntRef(ArrayData*, int64_t k, Variant*& out, bool copy)
+   * member_lval LvalInt(ArrayData*, int64_t k, bool copy)
+   * member_lval LvalIntRef(ArrayData*, int64_t k, bool copy)
    *
-   *   Looks up a value in the array by the supplied integer key, creating it as
-   *   a KindOfNull if it doesn't exist, and sets `out' to point to it. Use the
-   *   ref variant if the retrieved value will be boxed. This function has
+   *   Look up a value in the array by the supplied integer key, creating it as
+   *   a KindOfNull if it doesn't exist, and return a reference to it.  Use the
+   *   ref variant if the retrieved value will be boxed.  This function has
    *   copy/grow semantics.
    */
   DISPATCH(LvalInt)
   DISPATCH(LvalIntRef)
 
   /*
-   * ArrayData* LvalStr(ArrayData*, StringData* key, Variant*& out, bool copy)
-   * ArrayData* LvalStrRef(ArrayData*, StringData* key, Variant*& out, bool copy)
+   * member_lval LvalStr(ArrayData*, StringData* key, bool copy)
+   * member_lval LvalStrRef(ArrayData*, StringData* key, bool copy)
    *
-   *   Looks up a value in the array by the supplied string key, creating it as
-   *   a KindOfNull if it doesn't exist, and sets `out' to point to it.  The
-   *   string `key' may not be an integer-like string. Use the ref variant if
-   *   the retrieved value will be boxed. This function has copy/grow semantics.
+   *   Look up a value in the array by the supplied string key, creating it as
+   *   a KindOfNull if it doesn't exist, and return a reference to it.  The
+   *   string `key' may not be an integer-like string.  Use the ref variant if
+   *   the retrieved value will be boxed.  This function has copy/grow
+   *   semantics.
    */
   DISPATCH(LvalStr)
   DISPATCH(LvalStrRef)
 
   /*
-   * ArrayData* LvalNew(ArrayData*, Variant*& out, bool copy)
-   * ArrayData* LvalNewRef(ArrayData*, Variant*& out, bool copy)
+   * member_lval LvalNew(ArrayData*, bool copy)
+   * member_lval LvalNewRef(ArrayData*, bool copy)
    *
-   *   This function inserts a new null value in the array at the next available
-   *   integer key, and then sets `out' to point to it.  In the case that there
-   *   is no next available integer key, this function sets out to point to the
-   *   lvalBlackHole. Use the ref variant if the retrieved value will be
-   *   boxed. This function has copy/grow semantics.
+   *   Insert a new null value in the array at the next available integer key,
+   *   and return a reference to it.  In the case that there is no next
+   *   available integer key, this function returns a reference to the
+   *   lvalBlackHole.  Use the ref variant if the retrieved value will be
+   *   boxed.  This function has copy/grow semantics.
    */
   DISPATCH(LvalNew)
   DISPATCH(LvalNewRef)
@@ -703,12 +703,24 @@ const ArrayFunctions g_array_funcs = {
    /*
    * ArrayData* ToKeyset(ArrayData*, bool)
    *
-   *   Convert to a keyset. Values will be discarded and the keyset will contain
-   *   just the keys. If already a keyset, it will be returned unchange (without
-   *   copying). If copy is false, it may be converted in place. If the input
-   *   array contains references, an exception will be thrown.
+   *   Convert to a keyset. Keys will be discarded and the keyset will contain
+   *   just the values in iteration order. If already a keyset, it will be
+   *   returned unchange (without copying). If copy is false, it may be
+   *   converted in place. If the input array contains references, or if the
+   *   input contains values that are neither integers or strings, an exception
+   *   will be thrown.
    */
   DISPATCH(ToKeyset)
+
+  /*
+   * ArrayData* ToVArray(ArrayData*, bool)
+   *
+   * Convert to a varray (vector-like array). The array will be converted to a
+   * packed (or empty) array, discarding keys. If already a packed or empty
+   * array, it will be returned unchanged (without copying). If copy is false,
+   * it may be converted in place.
+   */
+  DISPATCH(ToVArray)
 };
 
 #undef DISPATCH

@@ -211,12 +211,14 @@ Type thisTypeFromFunc(const Func* func) {
 namespace {
 
 Type unboxPtr(Type t) {
+  assertx(t <= TPtrToGen);
   auto const pcell = t & TPtrToCell;
   auto const pref = t & TPtrToBoxedInitCell;
   return pref.deref().inner().ptr(Ptr::Ref) | pcell;
 }
 
 Type boxPtr(Type t) {
+  assertx(t <= TPtrToGen);
   auto const rawBoxed = t.deref().unbox().box();
   auto const noNull = rawBoxed - TBoxedUninit;
   return noNull.ptr(t.ptrKind() - Ptr::Ref);

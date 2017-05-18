@@ -39,6 +39,8 @@
  *)
 
 let () =
+  (* no-op, needed at entry-point for Daemon hookup *)
+  Daemon.check_entry_point ();
   (* Ignore SIGPIPE since we might get a server hangup and don't care (can
    * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes
    * use that for the server to tell us when it's done initializing, but if we

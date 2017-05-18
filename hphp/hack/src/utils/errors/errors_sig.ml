@@ -14,8 +14,11 @@ module type S = sig
   type applied_fixme = Pos.t * int
   type error_flags
 
+  val ignored_fixme_codes : ISet.t ref
+
   val set_ignored_fixmes : Relative_path.t list option -> unit
   val is_hh_fixme : (Pos.t -> int -> bool) ref
+  val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
   val to_list : 'a error_ -> ('a * string) list
   val get_code : 'a error_ -> int
   val get_pos : error -> Pos.t
@@ -237,6 +240,7 @@ module type S = sig
   val toplevel_continue: Pos.t -> unit
   val continue_in_switch: Pos.t -> unit
   val await_in_sync_function : Pos.t -> unit
+  val await_not_allowed : Pos.t -> unit
   val magic : Pos.t * string -> unit
   val non_interface : Pos.t -> string -> string -> unit
   val toString_returns_string : Pos.t -> unit
@@ -360,4 +364,9 @@ module type S = sig
   val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
   val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
   val unknown_fields_not_supported : Pos.t -> unit
+  val goto_label_already_defined : string -> Pos.t -> Pos.t -> unit
+  val goto_label_undefined : Pos.t -> string -> unit
+  val goto_label_defined_in_finally : Pos.t -> string -> unit
+  val goto_invoked_in_finally : Pos.t -> string -> unit
+  val darray_or_varray_not_supported : Pos.t -> unit
 end

@@ -24,7 +24,6 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/word-mem.h"
 
-#include "hphp/runtime/base/cap-code.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -73,15 +72,19 @@ enum CopyStringMode { CopyString };
 struct StringData final : MaybeCountable,
                           type_scan::MarkCountable<StringData> {
   friend struct APCString;
-  friend StringData* allocFlatSmallImpl(size_t len);
-  friend StringData* allocFlatSlowImpl(size_t len);
+  friend StringData* allocFlat(size_t len);
 
   /*
    * Max length of a string, not counting the terminal 0.
    *
-   * This is smaller than MAX_INT, and we want a CapCode to precisely encode it.
+   * This is smaller than MAX_INT, and it plus StringData overhead should
+   * exactly equal a size class.
    */
-  static constexpr uint32_t MaxSize = 0x7ff00000; // 11 bits of 1's
+#ifdef NO_M_DATA
+  static constexpr uint32_t MaxSize = 0x80000000U - 16 - 1;
+#else
+  static constexpr uint32_t MaxSize = 0x80000000U - 24 - 1;
+#endif
 
   /*
    * Creates an empty request-local string with an unspecified amount of
@@ -313,7 +316,7 @@ struct StringData final : MaybeCountable,
 
   /*
    * Return the capacity of this string's buffer, not including the space
-   * for the null terminator.
+   * for the null terminator. Always 0 for static/uncounted strings.
    */
   uint32_t capacity() const;
 
@@ -409,6 +412,8 @@ struct StringData final : MaybeCountable,
    */
   strhash_t hash() const;
   NEVER_INLINE strhash_t hashHelper() const;
+  static strhash_t hash(const char* s, size_t len);
+  static strhash_t hash_unsafe(const char* s, size_t len);
 
   /*
    * Equality comparison, in the sense of php's string == operator.
@@ -460,6 +465,8 @@ struct StringData final : MaybeCountable,
 
   bool checkSane() const;
 
+  void unProxy();
+
 private:
   struct Proxy {
     StringDataNode node;
@@ -469,7 +476,6 @@ private:
 private:
   template<bool trueStatic>
   static StringData* MakeShared(folly::StringPiece sl);
-  static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
@@ -487,7 +493,7 @@ private:
   bool isFlat() const;
 #endif
 
-  void releaseDataSlowPath();
+  void releaseProxy();
   int numericCompare(const StringData *v2) const;
   StringData* escalate(size_t cap);
   void enlist();
@@ -515,10 +521,40 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A reasonable length to reserve for small strings.  This is the
- * default reserve size for StringData::Make(), also.
+ * The allocation overhead of a StringData: the struct plus the null byte
  */
-constexpr uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
+auto constexpr kStringOverhead = sizeof(StringData) + 1;
+static_assert(StringData::MaxSize + kStringOverhead == kSizeIndex2Size[103],
+              "max allocation size is a valid size class");
+
+/*
+ * A reasonable length to reserve for small strings.  This is also the
+ * default reserve size for StringData::Make().
+ */
+constexpr uint32_t SmallStringReserve = 64 - kStringOverhead;
+
+/* this only exists so that clang won't warn on the subtraction */
+inline constexpr uint32_t sizeClassParams2StringCapacity(
+  uint32_t lg_grp,
+  uint32_t lg_delta,
+  uint32_t ndelta
+) {
+  return ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) > kStringOverhead
+    ? ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) - kStringOverhead
+    : 0;
+}
+
+alignas(64) constexpr uint32_t kSizeIndex2StringCapacity[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  sizeClassParams2StringCapacity(lg_grp, lg_delta, ndelta),
+  SIZE_CLASSES
+#undef SIZE_CLASS
+};
+
+/*
+ * Call this if we tried to make a string longer than StringData::MaxSize
+ */
+void raiseStringLengthExceededError(size_t len);
 
 /*
  * DecRef a string s, calling release if its reference count goes to
@@ -541,7 +577,7 @@ struct string_data_lti;
 //////////////////////////////////////////////////////////////////////
 
 extern std::aligned_storage<
-  sizeof(StringData) + 1,
+  kStringOverhead,
   alignof(StringData)
 >::type s_theEmptyString;
 

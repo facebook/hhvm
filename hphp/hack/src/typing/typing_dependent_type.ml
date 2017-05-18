@@ -68,10 +68,17 @@ module ExprDepTy = struct
   (* Takes the given list of dependent types and applies it to the given
    * locl ty to create a new locl ty
    *)
-  let apply dep_tys ty =
-    List.fold_left dep_tys ~f:begin fun ty (r, dep_ty) ->
-      r, Tabstract (AKdependent dep_ty, Some ty)
-    end ~init:ty
+  let apply env dep_tys ty =
+    let apply_single dep_tys ty =
+      List.fold_left dep_tys ~f:begin fun ty (r, dep_ty) ->
+        r, Tabstract (AKdependent dep_ty, Some ty)
+      end ~init:ty in
+
+    let _, ety = Env.expand_type env ty in
+    match ety with
+    | r, Tunresolved tyl ->
+      r, Tunresolved (List.map tyl ~f:(apply_single dep_tys))
+    | _ -> apply_single dep_tys ety
 
   (* We do not want to create a new expression dependent type if the type is
    * already expression dependent. However if the type is Tunresolved that
@@ -142,7 +149,7 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env cid cid_ty =
     if should_apply env cid_ty then
-      apply [from_cid env (fst cid_ty) cid] cid_ty
+      apply env [from_cid env (fst cid_ty) cid] cid_ty
     else
       cid_ty
 end

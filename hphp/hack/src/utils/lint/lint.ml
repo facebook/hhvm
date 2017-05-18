@@ -87,6 +87,7 @@ module Codes = struct
   let lowercase_constant                    = 5001 (* DONT MODIFY!!!! *)
   let use_collection_literal                = 5002 (* DONT MODIFY!!!! *)
   let static_string                         = 5003 (* DONT MODIFY!!!! *)
+  let shape_idx_missing_optional_field      = 5004 (* DONT MODIFY!!!! *)
 
   (* Values 5501 - 5999 are reserved for FB-internal use *)
 
@@ -115,6 +116,18 @@ let static_string ?(no_consts=false) pos =
       "This should be a string literal or string constant so that lint can "^
       "analyze it."
   end
+
+(* Emitted when Shapes::idx($s, key) is called and it is possible for $s to
+  contain a mapping for key that disagrees with the return type of Shapes::idx.
+  This occurs when the type of $s is partial, does not contain key, and key
+  is not unset.
+*)
+let shape_idx_access_unknown_field field_pos name =
+  add Codes.shape_idx_missing_optional_field Lint_warning field_pos
+    ("The field '"^name^"' may be set to an unknown type that conflicts with \
+    the return type of Shapes::idx. To avoid bugs, either add the field to \
+    the shape, remove the field (with Shapes::removeKey), or do not allow \
+    unknown fields in the shape.")
 
 let do_ f =
   let list_copy = !lint_list in

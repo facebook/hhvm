@@ -22,6 +22,7 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -122,9 +123,9 @@ void discardMemberTVRefs(PC pc) {
    */
   if (UNLIKELY(isMemberDimOp(throwOp) || isMemberFinalOp(throwOp))) {
     auto& mstate = vmMInstrState();
-    tvRefcountedDecRef(mstate.tvRef);
+    tvDecRefGen(mstate.tvRef);
     tvWriteUninit(&mstate.tvRef);
-    tvRefcountedDecRef(mstate.tvRef2);
+    tvDecRefGen(mstate.tvRef2);
     tvWriteUninit(&mstate.tvRef2);
   }
 }
@@ -337,7 +338,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
     if (top_tv->m_type != KindOfObject ||
         !top_tv->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
       // Since we are overwriting, decref.
-      tvRefcountedDecRef(top_tv);
+      tvDecRefGen(top_tv);
       // Objects held in m_faults are not refcounted, therefore we need to
       // increase the ref count here.
       top_tv->m_type = KindOfObject;

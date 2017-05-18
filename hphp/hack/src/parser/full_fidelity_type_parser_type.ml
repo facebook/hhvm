@@ -19,4 +19,6 @@ module type TypeParserType = sig
   val parse_type_constraint_opt : t -> t * Full_fidelity_minimal_syntax.t
   val parse_generic_type_parameter_list: t -> t * Full_fidelity_minimal_syntax.t
   val parse_generic_parameter_list_opt: t -> t * Full_fidelity_minimal_syntax.t
+  val parse_generic_type_argument_list_opt: t ->
+    t * Full_fidelity_minimal_syntax.t
 end

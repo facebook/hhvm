@@ -413,7 +413,8 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   VMProtect _;
 
   auto sr = tc::findSrcRec(args.sk);
-  always_assert(sr);
+  auto const initialNumTrans = sr->numTrans();
+
   if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
@@ -459,6 +460,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   }
 
   const auto numTrans = sr->numTrans();
+  if (numTrans != initialNumTrans) return sr->getTopTranslation();
   if (args.kind == TransKind::Profile) {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
       always_assert(numTrans ==

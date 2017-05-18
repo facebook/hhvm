@@ -76,8 +76,8 @@ void smashCall(TCA inst, TCA target) {
 void smashJmp(TCA inst, TCA target) {
   return ARCH_SWITCH_CALL(smashJmp, inst, target);
 }
-void smashJcc(TCA inst, TCA target, ConditionCode cc) {
-  return ARCH_SWITCH_CALL(smashJcc, inst, target, cc);
+void smashJcc(TCA inst, TCA target) {
+  return ARCH_SWITCH_CALL(smashJcc, inst, target);
 }
 
 uint64_t smashableMovqImm(TCA inst) {

@@ -39,6 +39,7 @@ SOFTWARE.
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -317,7 +318,7 @@ NEVER_INLINE
 static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
   assert(begin <= end);
   for (auto tv = begin; tv != end; ++tv) {
-    tvRefcountedDecRef(tv);
+    tvDecRefGen(tv);
   }
 }
 
@@ -471,8 +472,11 @@ struct SimpleParser {
         if (!parseString()) return false;
         TypedValue& tv = top[-1];
         // PHP array semantics: integer-like keys are converted.
-        if (tv.m_data.pstr->isStrictlyInteger(tv.m_data.num)) {
+        int64_t num;
+        if (tv.m_data.pstr->isStrictlyInteger(num)) {
           tv.m_type = KindOfInt64;
+          tv.m_data.pstr->release();
+          tv.m_data.num = num;
         }
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
         if (!matchSeparator(':')) return false;

@@ -92,7 +92,7 @@ struct strintern_hash {
   }
 
   size_t operator()(folly::StringPiece slice) const {
-    return hash_string(slice.data(), slice.size());
+    return StringData::hash(slice.data(), slice.size());
   }
 };
 

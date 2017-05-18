@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -26,7 +27,7 @@ struct VectorIterator;
 //// c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
 struct BaseVector : ObjectData {
- protected:
+protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
     : ObjectData(cls, collections::objectFlags, kind)
@@ -45,7 +46,7 @@ struct BaseVector : ObjectData {
   explicit BaseVector(Class* cls, HeaderKind, uint32_t cap);
   ~BaseVector();
 
- public:
+public:
   Variant firstValue() const {
     if (!m_size) return init_null_variant;
     return tvAsCVarRef(&data()[0]);
@@ -201,7 +202,7 @@ struct BaseVector : ObjectData {
   void keys(BaseVector* bvec);
   int64_t linearSearch(const Variant& search_value);
   void zip(BaseVector* bvec, const Variant& iterable);
-  void addFront(const TypedValue* val);
+  void addFront(TypedValue v);
   Variant popFront();
 
   int getVersion() const { return m_version; }
@@ -219,9 +220,15 @@ struct BaseVector : ObjectData {
     return offsetof(BaseVector, m_immCopy);
   }
 
-  void add(const TypedValue* val) { addImpl<false>(val); }
-  void add(const Variant& val) { add(val.asCell()); }
+  /*
+   * Append `v' to the Vector and incref it if it's refcounted.
+   */
+  void add(TypedValue v) { addImpl<false>(v); }
+  void add(const Variant& v) { add(*v.asCell()); }
 
+  /*
+   * Add `k' => `v' to the Vector, increffing `v' if it's refcounted.
+   */
   void set(int64_t key, const TypedValue* val) {
     mutate();
     setRaw(key, val);
@@ -286,7 +293,7 @@ struct BaseVector : ObjectData {
   [[noreturn]] static void throwBadKeyType();
 
   static constexpr uint64_t MaxCapacity() {
-    return PackedArray::MaxSize;
+    return MixedArray::MaxSize;
   }
 
   void scan(type_scan::Scanner& scanner) const {
@@ -294,7 +301,7 @@ struct BaseVector : ObjectData {
     scanner.scan(m_immCopy);
   }
 
- protected:
+protected:
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
@@ -306,10 +313,9 @@ struct BaseVector : ObjectData {
 
   void addAllImpl(const Variant& t);
 
-  template <bool raw>
-  ALWAYS_INLINE
-  void addImpl(const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
+  template<bool raw> ALWAYS_INLINE
+  void addImpl(TypedValue tv) {
+    assert(tv.m_type != KindOfRef);
     if (m_capacity <= m_size) {
       grow();
     }
@@ -317,15 +323,15 @@ struct BaseVector : ObjectData {
       mutateAndBump();
     }
     assert(canMutateBuffer());
-    cellDup(*val, data()[m_size]);
+    cellDup(tv, data()[m_size]);
     incSize();
   }
 
   // addRaw() adds a new element to this Vector but doesn't check for an
   // immutable buffer and doesn't increment m_version, so it's only safe
   // to use in some cases. If you're not sure, use add() instead.
-  void addRaw(const TypedValue* val) { addImpl<true>(val); }
-  void addRaw(const Variant& val) { addRaw(val.asCell()); }
+  void addRaw(TypedValue v) { addImpl<true>(v); }
+  void addRaw(const Variant& v) { addRaw(*v.asCell()); }
 
   // setRaw() assigns a value to the specified key in this Vector but
   // doesn't increment m_version, so it's only safe to use in some cases.
@@ -338,12 +344,9 @@ struct BaseVector : ObjectData {
       return;
     }
     TypedValue* tv = &data()[key];
-    DataType oldType = tv->m_type;
-    uint64_t oldDatum = tv->m_data.num;
+    auto const oldTV = *tv;
     cellDup(*val, *tv);
-    if (isRefcountedType(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvDecRefGen(oldTV);
   }
   void setRaw(int64_t key, const Variant& val) {
     setRaw(key, val.asCell());
@@ -391,7 +394,7 @@ struct BaseVector : ObjectData {
     return Object{std::move(vec)};
   }
 
- protected:
+  /////////////////////////////////////////////////////////////////////////////
 
   // Fields
 #ifndef USE_LOWPTR
@@ -422,7 +425,7 @@ struct BaseVector : ObjectData {
   // with freeing the buffer at the right time.
   Object m_immCopy;
 
- private:
+private:
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
@@ -502,7 +505,7 @@ struct c_Vector : BaseVector {
   }
 
   Object php_add(const Variant& value) {
-    add(value.asCell());
+    add(value);
     return Object{this};
   }
   Object php_addAll(const Variant& it) {

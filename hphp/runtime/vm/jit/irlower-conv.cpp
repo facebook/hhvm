@@ -300,6 +300,153 @@ IMPL_OPCODE_CALL(ConvResToDbl);
 IMPL_OPCODE_CALL(ConvCellToDbl);
 
 ///////////////////////////////////////////////////////////////////////////////
+// ConvToVArray
+
+static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
+  assertx(adIn->isPHPArray());
+  auto a = adIn->toVArray(adIn->cowCheck());
+  assertx(a->isVArray());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
+  assertx(a->isVArray());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
+  assertx(adIn->isDict());
+  auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
+  assertx(a != adIn);
+  assertx(a->isVArray());
+  decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = SetArray::ToVArray(adIn, adIn->cowCheck());
+  assertx(a != adIn);
+  assertx(a->isVArray());
+  decRefArr(adIn);
+  return a;
+}
+
+static ArrayData* convObjToVArrImpl(ObjectData* obj) {
+  if (obj->isCollection()) {
+    auto a = [&]{
+      if (auto ad = collections::asArray(obj)) {
+        return ArrNR{ad}.asArray().toVArray();
+      }
+      return collections::toArray(obj).toVArray();
+    }();
+    assertx(a->isVArray());
+    decRefObj(obj);
+    return a.detach();
+  }
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    // This assumes that appending to an initially empty array will never
+    // promote to mixed.
+    auto arr = Array::Create();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.append(iter.second());
+    }
+    decRefObj(obj);
+    assertx(arr->isVArray());
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to varray");
+  decRefObj(obj);
+  return staticEmptyArray();
+}
+
+namespace {
+
+void convToVArrHelper(IRLS& env, const IRInstruction* inst,
+                      CallSpec call, bool sync) {
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(
+    vmain(env),
+    env,
+    call,
+    callDest(env, inst),
+    sync ? SyncOptions::Sync : SyncOptions::None,
+    args
+  );
+}
+
+}
+
+void cgConvArrToVArr(IRLS& env, const IRInstruction* inst) {
+  convToVArrHelper(env, inst, CallSpec::direct(convArrToVArrImpl), false);
+}
+
+void cgConvVecToVArr(IRLS& env, const IRInstruction* inst) {
+  convToVArrHelper(env, inst, CallSpec::direct(convVecToVArrImpl), false);
+}
+
+void cgConvDictToVArr(IRLS& env, const IRInstruction* inst) {
+  convToVArrHelper(env, inst, CallSpec::direct(convDictToVArrImpl), false);
+}
+
+void cgConvKeysetToVArr(IRLS& env, const IRInstruction* inst) {
+  convToVArrHelper(env, inst, CallSpec::direct(convKeysetToVArrImpl), false);
+}
+
+void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
+  convToVArrHelper(env, inst, CallSpec::direct(convObjToVArrImpl), true);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ConvToDArray
+
+static ArrayData* convObjToDArrImpl(ObjectData* obj) {
+  if (obj->isCollection()) {
+    auto a = [&]{
+      if (auto ad = collections::asArray(obj)) {
+        return ArrNR{ad}.asArray().toPHPArray();
+      }
+      return collections::toArray(obj).toPHPArray();
+    }();
+    assertx(a->isPHPArray());
+    decRefObj(obj);
+    return a.detach();
+  }
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::Create();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.set(iter.first(), iter.second());
+    }
+    decRefObj(obj);
+    assertx(arr->isPHPArray());
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to darray");
+  decRefObj(obj);
+  return staticEmptyArray();
+}
+
+void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(convObjToDArrImpl),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // ConvToStr
 
 IMPL_OPCODE_CALL(ConvIntToStr);
@@ -336,6 +483,29 @@ IMPL_OPCODE_CALL(ConvDictToKeyset);
 IMPL_OPCODE_CALL(ConvObjToKeyset);
 
 IMPL_OPCODE_CALL(ConvCellToObj);
+
+///////////////////////////////////////////////////////////////////////////////
+
+static TypedValue strictlyIntegerConvImpl(StringData* str) {
+  int64_t n;
+  if (str->isStrictlyInteger(n)) {
+    return make_tv<KindOfInt64>(n);
+  }
+  str->incRefCount();
+  return make_tv<KindOfString>(str);
+}
+
+void cgStrictlyIntegerConv(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(strictlyIntegerConvImpl),
+    callDestTV(env, inst),
+    SyncOptions::None,
+    args
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

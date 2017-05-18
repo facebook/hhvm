@@ -10,14 +10,13 @@
 
 open Utils
 
-(* 800s was chosen because it was above most of the historical p95 of
- * hack server startup times as observed here:
- * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
-let num_build_retries = 800
-
 type env = {
+  (** Number of times to retry establishing a connection to the server. *)
+  retries : int;
   root : Path.t;
   wait : bool;
+  (** Force the monitor to start a server if one isn't running. *)
+  force_dormant_start : bool;
   build_opts : ServerBuild.build_opts;
 }
 
@@ -62,8 +61,15 @@ let main env =
   let ic, oc = ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
-    force_dormant_start = false;
-    retries = if env.wait then None else Some num_build_retries;
+    (** When running Hack Build, we want to force the monitor to start
+     * a Hack server if one isn't running. This is for the case where
+     * Hack was not running, a 3-way merge occurs triggering Mercurial's
+     * merge driver, the merge driver calls Hack build. During Hack startup,
+     * it won't start a server because it is waiting for repo settling (for
+     * the update/rebase to complete); but since need Hack to finish the
+     * update/rebase, we need to force it to be started. *)
+    force_dormant_start = env.force_dormant_start;
+    retries = if env.wait then None else Some env.retries;
     retry_if_init = true;
     expiry = None;
     no_load = false;

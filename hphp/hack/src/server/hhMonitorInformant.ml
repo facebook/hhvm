@@ -10,47 +10,6 @@
 
 include HhMonitorInformant_sig.Types
 
-module Prefetcher = struct
-  type t = Path.t option
-  type svn_rev = int
-  let dummy = None
-  let of_script script = Some script
-
-  let run_and_log (script, svn_rev) _ic_oc =
-    HackEventLogger.init_informant_prefetcher_runner (Unix.time ());
-    let start_t = Unix.time () in
-    let process = Process.exec
-      (Path.to_string script) [(string_of_int svn_rev)] in
-    (** We can block since this is already daemonized in a separate process. *)
-    match Process.read_and_wait_pid ~timeout:30 process with
-    | Result.Ok _ ->
-      Hh_logger.log "Prefetcher finished successfully.";
-      HackEventLogger.informant_prefetcher_success start_t;
-      exit 0
-    | Result.Error (Process_types.Process_exited_abnormally (es, _, stderr)) ->
-      let exit_kind, exit_code = Exit_status.unpack es in
-      let msg = Printf.sprintf "%s %d. stderr: %s" exit_kind exit_code stderr in
-      Hh_logger.log "Prefetcher failed. %s" msg;
-      HackEventLogger.informant_prefetcher_failed start_t msg;
-      exit exit_code
-    | Result.Error (Process_types.Timed_out (_, stderr)) ->
-      let msg = Printf.sprintf "Timed out. stderr: %s" stderr in
-      Hh_logger.log "Prefetcher timed out. %s" msg;
-      HackEventLogger.informant_prefetcher_failed start_t msg;
-      exit 1
-
-  let run_and_log_entry = Daemon.register_entry_point
-    "Prefetcher_run_and_log" run_and_log
-
-  let run svn_rev t  = match t with
-    | None -> Process_types.dummy
-    | Some script ->
-      Process.run_daemon run_and_log_entry
-        (script, svn_rev)
-
-end
-
-
 
 (**
  * The Revision tracker tracks the latest known SVN Revision of the repo,
@@ -101,7 +60,7 @@ module Revision_tracker = struct
   type env = {
     watchman : Watchman.watchman_instance ref;
     root : Path.t;
-    prefetcher : Prefetcher.t;
+    prefetcher : State_prefetcher.t;
     (** The 'current' base revision (from the tracker's perspective of the
      * repo. This is used to make calculations on distance. This is changed
      * when a State_leave is handled. *)
@@ -138,7 +97,7 @@ module Revision_tracker = struct
 
   type instance =
     | Initializing of Watchman.watchman_instance *
-      Prefetcher.t * Path.t * (Hg.svn_rev Future.t)
+      State_prefetcher.t * Path.t * (Hg.svn_rev Future.t)
     | Tracking of env
 
   type change =
@@ -148,6 +107,10 @@ module Revision_tracker = struct
   (** Revision_tracker has lots of mutable state anyway, so might as well
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
+
+  let get_root t = match !t with
+    | Initializing (_, _, path, _) -> path
+    | Tracking env -> env.root
 
   let init watchman prefetcher root =
     ref @@ Initializing (watchman, prefetcher, root,
@@ -231,7 +194,7 @@ module Revision_tracker = struct
       | Some (significant, svn_rev) ->
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
-        let _ = Prefetcher.run svn_rev env.prefetcher in
+        let _ = State_prefetcher.run svn_rev env.prefetcher in
         if transition = State_leave
           (** Repo has been moved to a new SVN Rev, so we set this mutable
            * reference. This must be done after computing distance. *)
@@ -248,10 +211,7 @@ module Revision_tracker = struct
     | false, _, _ ->
       Move_along
     | true, State_enter, _ ->
-      (** We don't want a server to be running while transitioning to a
-       * distant revision. Kill it, and start a fresh one when the
-       * transition is done (State_leave below). *)
-      Kill_server
+      Move_along
     | true, State_leave, _ ->
       Restart_server
 
@@ -319,7 +279,7 @@ module Revision_tracker = struct
       None
     | Some (significant, svn_rev) ->
       if significant
-        then ignore @@ Prefetcher.run svn_rev env.prefetcher;
+        then ignore @@ State_prefetcher.run svn_rev env.prefetcher;
       let decision = form_decision significant transition server_state in
       Some (decision, svn_rev)
 
@@ -367,13 +327,6 @@ module Revision_tracker = struct
      *
      * Otherwise, we continue as per usual. *)
     match early_decision with
-    | Some (Kill_server, _svn_rev) ->
-      (** Early decision to kill the server, so prior state changes don't
-       * matter anymore. We go to a dead state awaiting the following
-       * state_leave to trigger a restart. *)
-      Hh_logger.log "Informant early decision: kill server";
-      Queue.clear env.state_changes;
-      Kill_server
     | Some (Restart_server, svn_rev) ->
       (** Early decision to restart, so the prior state changes don't
        * matter anymore. *)
@@ -415,7 +368,7 @@ type t =
    * or if the informant is disabled in the hhconfig. *)
   | Resigned
 
-let init { root; allow_subscriptions; use_dummy } =
+let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
   if use_dummy then
     Resigned
   (** Active informant requires Watchman subscriptions. *)
@@ -436,40 +389,32 @@ let init { root; allow_subscriptions; use_dummy } =
         revision_tracker = Revision_tracker.init
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
-          Prefetcher.dummy root;
+          state_prefetcher root;
       }
+
+(** Returns true if we believe the repo is in the middle of an update/rebase. *)
+let repo_is_mid_update root =
+  let sc_path = Path.concat root ".hg" in
+  Sys.file_exists ((Path.to_string sc_path) ^ "/updatestate")
+
+let should_start_first_server t = match t with
+  | Resigned ->
+    (** If Informant doesn't control the server lifetime, then the first server
+     * instance should always be started during startup. *)
+    true
+  | Active env ->
+    if repo_is_mid_update (Revision_tracker.get_root env.revision_tracker) then
+      (** We shouldn't start the server until we observe that the repo has
+       * settled, via a state-leave event. *)
+      false
+    else
+      true
+
+let is_managing = function
+  | Resigned -> false
+  | Active _ -> true
 
 let report informant server_state = match informant with
   | Resigned -> Informant_sig.Move_along
   | Active env ->
     Revision_tracker.make_report server_state env.revision_tracker
-
-
-(** This is useful only for testing.
- *
- * It oscillates between Move_along, Kill_server and Restart_server
- * every 6 seconds.
- * TODO: Consider injecting this version when injector config is improved. *)
-module Fake_informant = struct
-  type t = {
-    init_time : float;
-  }
-
-  include HhMonitorInformant_sig.Types
-
-  let init _ = {
-    init_time = Unix.time ();
-  }
-
-  let report env _server_state =
-    let elapsed = Unix.time () -. env.init_time in
-    let multiple = int_of_float @@ floor @@ elapsed /. 6.0 in
-    let bucket = multiple mod 3 in
-    match bucket with
-      | 0 -> Informant_sig.Move_along
-      | 1 -> Informant_sig.Kill_server
-      | 2 -> Informant_sig.Restart_server
-      | _ ->
-        (* Actually unreachable by modulus. *)
-        Informant_sig.Move_along
-end

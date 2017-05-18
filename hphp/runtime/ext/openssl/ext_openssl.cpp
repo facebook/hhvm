@@ -2507,7 +2507,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
     return (time_t)-1;
   }
 
-  if (ASN1_STRING_length(timestr) < 13) {
+  if (ASN1_STRING_length(timestr) < 13 && ASN1_STRING_length(timestr) != 11) {
     raise_warning("unable to parse time string %s correctly",
                     timestr->data);
     return (time_t)-1;
@@ -2520,7 +2520,11 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
 
   /* we work backwards so that we can use atoi more easily */
   char *thestr = strbuf + ASN1_STRING_length(timestr) - 3;
-  thetime.tm_sec  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
+  if (ASN1_STRING_length(timestr) == 11) {
+    thetime.tm_sec = 0;
+  } else {
+    thetime.tm_sec  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
+  }
   thetime.tm_min  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_hour = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_mday = atoi(thestr);   *thestr = '\0';  thestr -= 2;
@@ -2547,9 +2551,10 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
    * and set the adjustment to the main timezone + 3600 seconds.
    */
   gmadjust = -(thetime.tm_isdst ?
-               (long)timezone - 3600 : (long)timezone + 3600);
+               (long)timezone - 3600 : (long)timezone);
 #endif
-  ret += gmadjust;
+  /* no adjustment for UTC */
+  if (timezone) ret += gmadjust;
   free(strbuf);
   return ret;
 }

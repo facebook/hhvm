@@ -183,7 +183,11 @@ bool isArrayScalar(ExpressionPtr exp) {
     assertx(nameIsScalar);
     assertx(pair->getValue() && pair->getValue()->isScalar());
 
-    if (!val.isString() && !val.isInteger()) return false;
+    if (val.isInteger()) continue;
+    if (!val.isString()) return false;
+
+    int64_t dummy;
+    if (val.toCStrRef().get()->isStrictlyInteger(dummy)) return false;
   }
 
   return true;
@@ -196,7 +200,7 @@ bool UnaryOpExpression::isScalar() const {
   case '-':
   case '~':
   case '@':
-    return m_exp->isScalar();
+    return !RuntimeOption::EvalDisableHphpcOpts && m_exp->isScalar();
   case T_ARRAY:
     return isArrayScalar(m_exp);
   case T_VEC:
@@ -254,28 +258,6 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
     if (m_op == T_ARRAY) {
-      // If HackArrCompatNotices is enabled, we'll notice on trying to use
-      // anything other than an int or string as a key, so don't create static
-      // arrays with such keys.
-      if (RuntimeOption::EvalHackArrCompatNotices) {
-        auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
-        if (!exp_list) return false;
-        ArrayInit init(exp_list->getCount(), ArrayInit::Mixed{});
-        auto const result = exp_list->getListScalars(
-          [&](const Variant& n, const Variant& v) {
-            if (n.isInitialized()) {
-              if (!n.isInteger() && !n.isString()) return false;
-              init.setValidKey(n, v);
-            } else {
-              init.append(v);
-            }
-            return true;
-          }
-        );
-        if (!result) return false;
-        value = init.toVariant();
-        return true;
-      }
       return m_exp->getScalarValue(value);
     }
     if (m_op == T_DICT) {
@@ -369,6 +351,8 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
+  if (RuntimeOption::EvalDisableHphpcOpts) return false;
+
   bool ret = true;
   try {
     ThrowAllErrorsSetter taes;

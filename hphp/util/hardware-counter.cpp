@@ -22,6 +22,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #define _GNU_SOURCE 1
@@ -85,6 +86,7 @@ struct HardwareCounterImpl {
     : m_desc(desc ? desc : "")
     , m_err(0)
     , m_timeSeries(createTimeSeries(m_desc))
+    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp"))
     , m_fd(-1)
     , inited(false) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
@@ -104,11 +106,15 @@ struct HardwareCounterImpl {
     close();
   }
 
-  void updateServiceData() {
-    if (m_timeSeries == nullptr) return;
+  void updateServiceData(StructuredLogEntry* entry, bool includingPsp) {
+    auto& timeSeries = includingPsp ? m_timeSeries : m_timeSeriesNonPsp;
+    if (timeSeries == nullptr) return;
 
     auto const value = read();
-    if (value != 0) m_timeSeries->addValue(value);
+    if (value != 0) {
+      if (entry) entry->setInt(m_desc, value);
+      timeSeries->addValue(value);
+    }
   }
 
   void init_if_not() {
@@ -203,6 +209,7 @@ public:
   int m_err;
 private:
   ServiceData::ExportedTimeSeries* m_timeSeries;
+  ServiceData::ExportedTimeSeries* m_timeSeriesNonPsp;
   int m_fd;
   struct perf_event_attr pe;
   bool inited;
@@ -219,16 +226,16 @@ private:
 
 HardwareCounter::HardwareCounter()
   : m_countersSet(false) {
-  m_instructionCounter = folly::make_unique<HardwareCounterImpl>(
+  m_instructionCounter = std::make_unique<HardwareCounterImpl>(
     PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS, "instructions"
   );
   if (s_profileHWEvents.empty()) {
-    m_loadCounter = folly::make_unique<HardwareCounterImpl>(
+    m_loadCounter = std::make_unique<HardwareCounterImpl>(
       PERF_TYPE_HW_CACHE,
       PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8),
       "loads"
     );
-    m_storeCounter = folly::make_unique<HardwareCounterImpl>(
+    m_storeCounter = std::make_unique<HardwareCounterImpl>(
       PERF_TYPE_HW_CACHE,
       PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8),
       "stores"
@@ -427,7 +434,7 @@ bool HardwareCounter::addPerfEvent(const char* event) {
     Logger::Warning("failed to find perf event: %s", event);
     return false;
   }
-  auto hwc = folly::make_unique<HardwareCounterImpl>(type, config, event);
+  auto hwc = std::make_unique<HardwareCounterImpl>(type, config, event);
   if (hwc->m_err) {
     Logger::Warning("failed to set perf event: %s", event);
     return false;
@@ -484,13 +491,16 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-void HardwareCounter::updateServiceData() {
-  forEachCounter([](HardwareCounterImpl& counter) {
-    counter.updateServiceData();
+void HardwareCounter::updateServiceData(StructuredLogEntry* entry,
+                                        bool includingPsp) {
+  forEachCounter([entry,includingPsp](HardwareCounterImpl& counter) {
+    counter.updateServiceData(entry, includingPsp);
   });
 }
 
-void HardwareCounter::UpdateServiceData(const timespec& begin) {
+void HardwareCounter::UpdateServiceData(const timespec& begin,
+                                        StructuredLogEntry* entry,
+                                        bool includingPsp) {
   // The begin timespec should be what was recorded at the beginning of the
   // request, so we subtract that out from the current measurement. The
   // perf-based counters owned by this file are reset to 0 at the same time as
@@ -499,13 +509,17 @@ void HardwareCounter::UpdateServiceData(const timespec& begin) {
   struct timespec now;
   gettime(CLOCK_THREAD_CPUTIME_ID, &now);
 
-  s_counter->updateServiceData();
+  s_counter->updateServiceData(entry, includingPsp);
 
   static auto cpuTimeSeries = createTimeSeries("cpu-time-us");
+  static auto cpuTimeNonPspSeries = createTimeSeries("cpu-time-us-nonpsp");
+  auto& series = includingPsp ? cpuTimeSeries : cpuTimeNonPspSeries;
   auto const cpuTimeUs = gettime_diff_us(begin, now);
   if (cpuTimeUs > 0) {
-    cpuTimeSeries->addValue(cpuTimeUs);
+    if (entry) entry->setInt("cpu-time-us", cpuTimeUs);
+    series->addValue(cpuTimeUs);
   }
+  if (entry) entry->setInt("includingPsp", includingPsp);
 }
 
 void HardwareCounter::getPerfEvents(PerfEventCallback f, void* data) {

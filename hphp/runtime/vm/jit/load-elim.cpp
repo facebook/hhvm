@@ -100,6 +100,13 @@ struct State {
    * Currently available indexes in tracked.
    */
   ALocBits avail;
+
+  /*
+   * If we know a class' sprops or props are already initialized at this
+   * position.
+   */
+  jit::flat_set<const Class*> initSProps{};
+  jit::flat_set<const Class*> initProps{};
 };
 
 struct BlockInfo {
@@ -201,6 +208,29 @@ DEBUG_ONLY std::string show(const State& state) {
       folly::format(&ret, "  {: >3} = {}\n", idx, show(state.tracked[idx]));
     }
   }
+
+  folly::format(
+    &ret,
+    "  initSProps: {}\n",
+    [&] {
+      using namespace folly::gen;
+      return from(state.initSProps)
+        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
+        | unsplit<std::string>(",");
+    }()
+  );
+
+  folly::format(
+    &ret,
+    "  initProps: {}\n",
+    [&] {
+      using namespace folly::gen;
+      return from(state.initProps)
+        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
+        | unsplit<std::string>(",");
+    }()
+  );
+
   return ret;
 }
 
@@ -230,15 +260,37 @@ struct FRedundant { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 
 /*
+ * The instruction is a load which can be refined to a better type than its
+ * type-parameter currently has.
+ */
+struct FRefinableLoad { Type refinedType; };
+
+/*
  * The instruction can be legally replaced with a Jmp to either its next or
  * taken edge.
  */
 struct FJmpNext {};
 struct FJmpTaken {};
 
-using Flags = boost::variant<FNone,FRedundant,FReducible,FJmpNext,FJmpTaken>;
+using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
+                             FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
+
+// Conservative list of instructions which have type-parameters safe to refine.
+bool refinable_load_eligible(const IRInstruction& inst) {
+  switch (inst.op()) {
+    case LdLoc:
+    case LdStk:
+    case LdMBase:
+    case LdClsRef:
+    case LdMem:
+      assertx(inst.hasTypeParam());
+      return true;
+    default:
+      return false;
+  }
+}
 
 void clear_everything(Local& env) {
   FTRACE(3, "      clear_everything\n");
@@ -278,8 +330,7 @@ Flags load(Local& env,
     tracked.knownType &= inst.dst()->type();
   }
 
-  if (tracked.knownType.hasConstVal() ||
-      tracked.knownType.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
+  if (tracked.knownType.admitsSingleVal()) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
 
     FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
@@ -298,16 +349,27 @@ Flags load(Local& env,
       [] (SSATmp* tmp) { return tmp->inst()->block(); },
       [] (Block* blk)  { return blk; }
     );
-    if (inst.block() != block && inst.block()->hint() == Block::Hint::Unused) {
-      return FNone{};
+    if (inst.block() == block || inst.block()->hint() != Block::Hint::Unused) {
+      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
     }
-    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
+  } else {
+    // Only set a new known value if we previously didn't have one. If we had a
+    // known value already, we would have made the load redundant above, unless
+    // we're in an Hint::Unused block. In that case, we want to keep any old
+    // known value to avoid disturbing the main trace in case we merge back.
+    tracked.knownValue = inst.dst();
+    FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
+    FTRACE(5, "       av: {}\n", show(env.state.avail));
   }
 
-  tracked.knownValue = inst.dst();
+  // Even if we can't make this load redundant, we might be able to refine its
+  // type parameter.
+  if (refinable_load_eligible(inst)) {
+    if (tracked.knownType < inst.typeParam()) {
+      return FRefinableLoad { tracked.knownType };
+    }
+  }
 
-  FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
-  FTRACE(5, "       av: {}\n", show(env.state.avail));
   return FNone{};
 }
 
@@ -405,6 +467,28 @@ Flags handle_general_effects(Local& env,
       }
     }
     break;
+
+  case CheckInitSProps:
+  case InitSProps: {
+    auto cls = inst.extra<ClassData>()->cls;
+    if (env.state.initSProps.count(cls) > 0) return FJmpNext{};
+    do {
+      // If we initialized a class' sprops, then it implies that all of its
+      // parent's sprops are initialized as well.
+      env.state.initSProps.insert(cls);
+      cls = cls->parent();
+    } while (cls);
+    break;
+  }
+
+  case CheckInitProps:
+  case InitProps: {
+    auto cls = inst.extra<ClassData>()->cls;
+    if (env.state.initProps.count(cls) > 0) return FJmpNext{};
+    // Unlike InitSProps, InitProps implies nothing about the class' parent.
+    env.state.initProps.insert(cls);
+    break;
+  }
 
   default:
     break;
@@ -713,6 +797,20 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
          resolved->toString());
 }
 
+void refine_load(Global& env,
+                 IRInstruction& inst,
+                 const FRefinableLoad& flags) {
+  assertx(refinable_load_eligible(inst));
+  assertx(flags.refinedType < inst.typeParam());
+
+  FTRACE(2, "      refinable: {} :: {} -> {}\n",
+         inst.toString(),
+         inst.typeParam(),
+         flags.refinedType);
+
+  inst.setTypeParam(flags.refinedType);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -737,6 +835,8 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     },
 
     [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
+
+    [&] (FRefinableLoad flags) { refine_load(env, inst, flags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
@@ -859,6 +959,23 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
       }
     }
   );
+
+  // Properties must be initialized along both paths
+  for (auto it = dst.initSProps.begin(); it != dst.initSProps.end();) {
+    if (!src.initSProps.count(*it)) {
+      it = dst.initSProps.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for (auto it = dst.initProps.begin(); it != dst.initProps.end();) {
+    if (!src.initProps.count(*it)) {
+      it = dst.initProps.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -915,14 +1032,27 @@ void analyze(Global& genv) {
       auto const oldState = targetInfo.stateIn;
       targetInfo.stateIn.initialized = false; // re-merge of all pred states
       target->forEachPred([&] (Block* pred) {
+        auto const merge = [&](const State& predState) {
+          if (predState.initialized) {
+            FTRACE(7, "pulling state from pred B{}:\n{}\n",
+                   pred->id(), show(predState));
+            merge_into(genv, target, targetInfo.stateIn, predState);
+          }
+        };
+
         auto const& predInfo = genv.blockInfo[pred];
-        auto const& predState = pred->next() == target
-          ? predInfo.stateOutNext
-          : predInfo.stateOutTaken;
-        if (predState.initialized) {
-          FTRACE(7, "pulling state from pred B{}:\n{}\n",
-                 pred->id(), show(predState));
-          merge_into(genv, target, targetInfo.stateIn, predState);
+        if (pred->next() != pred->taken()) {
+          auto const& predState = pred->next() == target
+            ? predInfo.stateOutNext
+            : predInfo.stateOutTaken;
+          merge(predState);
+        } else {
+          // The predecessor jumps to this block along both its next and taken
+          // branches. We can't distinguish the two paths, so just merge both
+          // in.
+          assertx(pred->next() == target);
+          merge(predInfo.stateOutNext);
+          merge(predInfo.stateOutTaken);
         }
       });
       if (oldState != targetInfo.stateIn) {

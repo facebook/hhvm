@@ -28,6 +28,7 @@ void EHEntEmitter::serde(SerDe& sd) {
     (m_past)
     (m_iterId)
     (m_handler)
+    (m_end)
     (m_itRef)
     (m_parentIndex)
     ;

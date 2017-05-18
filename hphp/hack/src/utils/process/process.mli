@@ -15,7 +15,8 @@ open Process_types
 (** exec program ?env args
  *
  * Shells out the program with the given args. *)
-val exec : string -> ?env:string list -> string list -> Process_types.t
+val exec : string -> ?input:string -> ?env:string list -> string list ->
+  Process_types.t
 
 (** Wraps a Daemon entry point inside a Process, so we get Process's
  * goodness for free (read_and_wait_pid and is_ready). The daemon_entry
@@ -35,6 +36,8 @@ val run_daemon : ('a, 'b, 'c) Daemon.entry -> 'a -> Process_types.t
 val read_and_wait_pid :
   timeout: int -> Process_types.t ->
   ((string * string), failure) Result.t
+
+val failure_msg : failure -> string
 
 (** Returns true if read_and_close_pid would be nonblocking. *)
 val is_ready : Process_types.t -> bool

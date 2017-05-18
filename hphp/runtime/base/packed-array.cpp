@@ -23,11 +23,15 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-helpers.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-comparisons.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
@@ -64,6 +68,7 @@ inline ArrayData* alloc_packed_static(size_t cap) {
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->hasPackedLayout());
   assert(arr->checkCount());
+  assert(arr->m_size <= MixedArray::MaxSize);
   assert(arr->m_size <= arr->cap());
   assert(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);
   static_assert(ArrayData::kPackedKind == 0, "");
@@ -163,7 +168,7 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDupFlattenVars(&srcData[i], &dstData->data, old);
+    tvDupWithRef(srcData[i], dstData->data, old);
     ++dstData;
   }
 
@@ -193,7 +198,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDupFlattenVars(&srcData[i], &dstData->data, old);
+    tvDupWithRef(srcData[i], dstData->data, old);
     ++dstData;
   }
 
@@ -348,7 +353,7 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
         throwRefInvalidArrayValueException(ad);
       }
     }
-    tvRefcountedIncRef(pTv);
+    tvIncRefGen(pTv);
   }
 }
 
@@ -440,7 +445,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++data) {
-    tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
+    tvDupWithRef(*arr->getValueRef(pos).asTypedValue(), *data, arr);
   }
   assert(ad->m_pos == arr->m_pos);
   assert(ad->isStatic());
@@ -636,7 +641,7 @@ void PackedArray::Release(ArrayData* ad) {
   auto const data = packedData(ad);
   auto const stop = data + size;
   for (auto ptr = data; ptr != stop; ++ptr) {
-    tvRefcountedDecRef(ptr);
+    tvDecRefGen(ptr);
   }
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
@@ -722,13 +727,13 @@ bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
   return false;
 }
 
-ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
 
   if (LIKELY(size_t(k) < adIn->m_size)) {
     auto const ad = copy ? Copy(adIn) : adIn;
-    return {ad, &tvAsVariant(&packedData(ad)[k])};
+    return member_lval { ad, &packedData(ad)[k] };
   }
 
   // We can stay packed if the index is m_size, and the operation does
@@ -741,27 +746,27 @@ ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return mixed->addLvalImpl(k);
 }
 
-ArrayLval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   return LvalInt(adIn, k, copy);
 }
 
-ArrayLval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   auto const ad = copy ? Copy(adIn) : adIn;
-  return {ad, &tvAsVariant(&packedData(ad)[k])};
+  return member_lval { ad, &packedData(ad)[k] };
 }
 
-ArrayLval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
   auto const ad = copy ? Copy(adIn) : adIn;
-  return {ad, &tvAsVariant(&packedData(ad)[k])};
+  return member_lval { ad, &packedData(ad)[k] };
 }
 
-ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
+member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   // We have to promote.  We know the key doesn't exist, but aren't
   // making use of that fact yet.  TODO(#2606310).
   assert(checkInvariants(adIn));
@@ -770,47 +775,48 @@ ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   return mixed->addLvalImpl(key);
 }
 
-ArrayLval PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
+member_lval
+PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
   return LvalStr(adIn, key, copy);
 }
 
-ArrayLval
+member_lval
 PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayLval
+member_lval
 PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayLval
+member_lval
 PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayLval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
+member_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
-  return {ad, &tvAsVariant(&tv)};
+  return member_lval { ad, &tv };
 }
 
-ArrayLval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
+member_lval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   return LvalNew(adIn, copy);
 }
 
-ArrayLval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
+member_lval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
@@ -828,7 +834,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
     auto const ad = copy ? Copy(adIn) : adIn;
     // TODO(#3888164): we should restructure things so we don't have
     // to check KindOfUninit here.
-    setVal(packedData(ad)[k], v);
+    setElem(packedData(ad)[k], v);
     return ad;
   }
 
@@ -850,7 +856,7 @@ PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   auto const ad = copy ? Copy(adIn) : adIn;
   // TODO(#3888164): we should restructure things so we don't have
   // to check KindOfUninit here.
-  setVal(packedData(ad)[k], v);
+  setElem(packedData(ad)[k], v);
   return ad;
 }
 
@@ -964,11 +970,10 @@ PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
     if (UNLIKELY(strong_iterators_exist())) {
       adjustMArrayIter(ad, oldSize - 1);
     }
-    auto const oldType = tv.m_type;
-    auto const oldDatum = tv.m_data.num;
+    auto const oldTV = tv;
     ad->m_size = oldSize - 1;
     ad->m_pos = 0;
-    tvRefcountedDecRefHelper(oldType, oldDatum);
+    tvDecRefGen(oldTV);
     return ad;
   }
   throwVecUnsetException();
@@ -1138,11 +1143,10 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   if (UNLIKELY(strong_iterators_exist())) {
     adjustMArrayIter(ad, oldSize - 1);
   }
-  auto const oldType = tv.m_type;
-  auto const oldDatum = tv.m_data.num;
+  auto const oldTV = tv;
   ad->m_size = oldSize - 1;
   ad->m_pos = 0;
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldTV);
   return ad;
 }
 

@@ -1,0 +1,20 @@
+
+def get_fbcode_platform():
+    return read_config('cxx', 'default_platform')
+
+def get_compiler_type(platform):
+    if read_config('cxx#{}'.format(platform), 'cc_type') == 'clang':
+        return 'clang'
+    else:
+        return 'gcc'
+
+def is_opt_hhvm_build():
+    buck_out = read_config('project', 'buck_out')
+    return '/opt' in buck_out
+
+def is_dev_hhvm_build():
+    return '/dev' in read_config('project', 'buck_out')
+
+def is_lto_build(platform):
+    flags = read_config('cxx#{}'.format(platform), 'cxxflags')
+    return " -flto " in flags

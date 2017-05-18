@@ -56,7 +56,7 @@ folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
     HdfAsyncMysqlClientPoolSize = 2;
   }
   return new AsyncMysqlClientPool(
-      folly::make_unique<am::AsyncMysqlClientFactory>(),
+      std::make_unique<am::AsyncMysqlClientFactory>(),
       HdfAsyncMysqlClientPoolSize);
 });
 }
@@ -200,7 +200,7 @@ static void HHVM_METHOD(
 
   IterateKV(attrs.get(), [&](const TypedValue* k, const TypedValue* v) {
     data->m_conn_opts.setConnectionAttribute(
-        tvCastToString(k)->toCppString(), tvCastToString(v)->toCppString());
+        tvCastToString(*k)->toCppString(), tvCastToString(*v)->toCppString());
   });
 }
 
@@ -1098,7 +1098,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
                                    db::ClientPerfStats stats,
                                    am::QueryResult query_result) {
   AsyncMysqlResult::create(std::move(op), std::move(stats));
-  m_query_result = folly::make_unique<am::QueryResult>(std::move(query_result));
+  m_query_result = std::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index = req::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 

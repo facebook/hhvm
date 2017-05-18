@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/util/alloc.h"
 
 #include <vector>
@@ -29,12 +30,12 @@
 
 namespace HPHP {
 
-template<class Fn>
-void conservativeScan(const void* start, size_t len, Fn fn) {
+template<class Fn> void FOLLY_DISABLE_ADDRESS_SANITIZER
+conservativeScan(const void* start, size_t len, Fn fn) {
   const uintptr_t M{7}; // word size - 1
   auto s = (const void**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (const void**)((uintptr_t(start) + len) & ~M); // round down
-  for (; s < e; s++) fn(s);
+  for (; s < e; s++) fn(s, *s);
 }
 
 namespace {
@@ -81,8 +82,8 @@ void addRootNode(HeapGraph& g, const PtrMap& blocks,
       }
     },
     [&](const void* p, std::size_t size) {
-      conservativeScan(p, size, [&](const void** addr) {
-        if (auto r = blocks.region(*addr)) {
+      conservativeScan(p, size, [&](const void** addr, const void* ptr) {
+        if (auto r = blocks.region(ptr)) {
           auto to = blocks.index(r);
           auto offset = uintptr_t(addr) - uintptr_t(h);
           auto e = addPtr(g, from, to, HeapGraph::Ambiguous, offset);
@@ -181,8 +182,8 @@ HeapGraph makeHeapGraph(bool include_free) {
         }
       },
       [&](const void* p, std::size_t size) {
-        conservativeScan(p, size, [&](const void** addr) {
-          if (auto r = blocks.region(*addr)) {
+        conservativeScan(p, size, [&](const void** addr, const void* ptr) {
+          if (auto r = blocks.region(ptr)) {
             auto to = blocks.index(r);
             auto offset = uintptr_t(addr) - uintptr_t(h);
             addPtr(g, from, to, HeapGraph::Ambiguous, offset);

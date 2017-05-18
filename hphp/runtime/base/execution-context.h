@@ -373,10 +373,9 @@ public:
     std::string error;
   };
 
-  // Compiles the passed string and evaluates it in the given frame.
+  // Evaluates the given unit in the Nth frame from the current frame (ignoring
+  // skip-frames).
   EvaluationResult evalPHPDebugger(StringData* code, int frame);
-
-  // Evaluates the a unit compiled via compile_string in the given frame.
   EvaluationResult evalPHPDebugger(Unit* unit, int frame);
 
   void enterDebuggerDummyEnv();
@@ -481,6 +480,8 @@ public:
                             ObjectData* exception);
 
   bool setHeaderCallback(const Variant& callback);
+
+  template<class Fn> void sweepDynPropTable(Fn);
 
 private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>

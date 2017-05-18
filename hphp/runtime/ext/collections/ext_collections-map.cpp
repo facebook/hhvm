@@ -6,6 +6,8 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -197,14 +199,14 @@ Object BaseMap::getIterator() {
   return iter;
 }
 
-void BaseMap::add(const TypedValue* val) {
-  if (UNLIKELY(val->m_type != KindOfObject ||
-               val->m_data.pobj->getVMClass() != c_Pair::classof())) {
+void BaseMap::add(TypedValue tv) {
+  if (UNLIKELY(tv.m_type != KindOfObject ||
+               tv.m_data.pobj->getVMClass() != c_Pair::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be an instance of Pair");
   }
-  auto pair = static_cast<c_Pair*>(val->m_data.pobj);
-  set(&pair->elm0, &pair->elm1);
+  auto pair = static_cast<c_Pair*>(tv.m_data.pobj);
+  set(pair->elm0, pair->elm1);
 }
 
 Variant BaseMap::pop() {
@@ -245,11 +247,11 @@ Variant BaseMap::popFront() {
 
 template <bool raw>
 ALWAYS_INLINE
-void BaseMap::setImpl(int64_t k, const TypedValue* val) {
+void BaseMap::setImpl(int64_t k, TypedValue tv) {
   if (!raw) {
     mutate();
   }
-  assert(val->m_type != KindOfRef);
+  assert(tv.m_type != KindOfRef);
   assert(canMutateBuffer());
   auto h = hash_int64(k);
 retry:
@@ -257,9 +259,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = data()[*p];
-    TypedValue old = e.data;
-    cellDup(*val, e.data);
-    tvRefcountedDecRef(old);
+    auto const old = e.data;
+    cellDup(tv, e.data);
+    tvDecRefGen(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -270,18 +272,18 @@ retry:
     ++m_version;
   }
   auto& e = allocElm(p);
-  cellDup(*val, e.data);
+  cellDup(tv, e.data);
   e.setIntKey(k, h);
   updateNextKI(k);
 }
 
 template <bool raw>
 ALWAYS_INLINE
-void BaseMap::setImpl(StringData* key, const TypedValue* val) {
+void BaseMap::setImpl(StringData* key, TypedValue tv) {
   if (!raw) {
     mutate();
   }
-  assert(val->m_type != KindOfRef);
+  assert(tv.m_type != KindOfRef);
   assert(canMutateBuffer());
 retry:
   strhash_t h = key->hash();
@@ -289,9 +291,9 @@ retry:
   assert(p);
   if (validPos(*p)) {
     auto& e = data()[*p];
-    TypedValue old = e.data;
-    cellDup(*val, e.data);
-    tvRefcountedDecRef(old);
+    auto const old = e.data;
+    cellDup(tv, e.data);
+    tvDecRefGen(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -302,25 +304,14 @@ retry:
     ++m_version;
   }
   auto& e = allocElm(p);
-  cellDup(*val, e.data);
+  cellDup(tv, e.data);
   e.setStrKey(key, h);
 }
 
-void BaseMap::setRaw(int64_t k, const TypedValue* val) {
-  setImpl<true>(k, val);
-}
-
-void BaseMap::setRaw(StringData* key, const TypedValue* val) {
-  setImpl<true>(key, val);
-}
-
-void BaseMap::set(int64_t k, const TypedValue* val) {
-  setImpl<false>(k, val);
-}
-
-void BaseMap::set(StringData* key, const TypedValue* val) {
-  setImpl<false>(key, val);
-}
+void BaseMap::setRaw(int64_t k, TypedValue val) { setImpl<true>(k, val); }
+void BaseMap::setRaw(StringData* k, TypedValue val) { setImpl<true>(k, val); }
+void BaseMap::set(int64_t k, TypedValue val) { setImpl<false>(k, val); }
+void BaseMap::set(StringData* k, TypedValue val) { setImpl<false>(k, val); }
 
 Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
@@ -333,7 +324,7 @@ bool BaseMap::ToBool(const ObjectData* obj) {
 
 void BaseMap::OffsetSet(ObjectData* obj, const TypedValue* key,
                         const TypedValue* val) {
-  static_cast<BaseMap*>(obj)->set(key, val);
+  static_cast<BaseMap*>(obj)->set(*key, *val);
 }
 
 bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
@@ -504,14 +495,12 @@ BaseMap::php_zip(const Variant& iterable) {
     const Elm& e = data()[i];
     Variant v = iter.second();
     auto pair = req::make<c_Pair>(e.data, *v.asCell());
-    TypedValue tv;
-    tv.m_data.pobj = pair.detach();
-    tv.m_type = KindOfObject;
+    auto const tv = make_tv<KindOfObject>(pair.get());
     if (e.hasIntKey()) {
-      map->setRaw(e.ikey, &tv);
+      map->setRaw(e.ikey, tv);
     } else {
       assert(e.hasStrKey());
-      map->setRaw(e.skey, &tv);
+      map->setRaw(e.skey, tv);
     }
     ++iter;
   }
@@ -635,10 +624,10 @@ BaseMap::php_skipWhile(const Variant& fn) {
     auto e = iter_elm(pos);
     for (; e != eLimit; e = nextElm(e, eLimit)) {
       if (e->hasIntKey()) {
-        map->set(e->ikey, &e->data);
+        map->set(e->ikey, e->data);
       } else {
         assert(e->hasStrKey());
-        map->set(e->skey, &e->data);
+        map->set(e->skey, e->data);
       }
     }
   }
@@ -730,7 +719,7 @@ BaseMap::FromItems(const Class*, const Variant& iterable) {
                  "Parameter must be an instance of Iterable<Pair>");
     }
     auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
-    target->setRaw(&pair->elm0, &pair->elm1);
+    target->setRaw(pair->elm0, pair->elm1);
   }
   return Object{std::move(target)};
 }
@@ -752,10 +741,10 @@ BaseMap::FromArray(const Class*, const Variant& arr) {
     Variant k = ad->getKey(pos);
     auto tv = ad->getValueRef(pos).asCell();
     if (k.isInteger()) {
-      map->setRaw(k.toInt64(), tv);
+      map->setRaw(k.toInt64(), *tv);
     } else {
       assert(k.isString());
-      map->setRaw(k.getStringData(), tv);
+      map->setRaw(k.getStringData(), *tv);
     }
   }
   return Object(std::move(map));

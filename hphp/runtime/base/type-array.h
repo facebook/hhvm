@@ -131,6 +131,7 @@ public:
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
+  Array toVArray() const { COPY_BODY(toVArray(true), Array{}) }
 
   #undef COPY_BODY
 
@@ -182,6 +183,8 @@ public:
   bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
+
+  bool isVArray() const { return !m_arr || m_arr->isVArray(); }
 
   bool useWeakKeys() const {
     // If array isn't set we may implicitly create a mixed array. We never
@@ -506,19 +509,19 @@ public:
   template<typename T>
   Variant& lvalAtImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lval(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
+    auto const lval = m_arr->lval(key, m_arr->cowCheck());
+    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+    assert(lval.tv());
+    return reinterpret_cast<Variant&>(*lval.tv());
   }
 
   template<typename T>
   Variant& lvalAtRefImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lvalRef(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
+    auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
+    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+    assert(lval.tv());
+    return reinterpret_cast<Variant&>(*lval.tv());
   }
 
   static void compileTimeAssertions();

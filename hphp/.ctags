@@ -1,0 +1,17 @@
+--exclude=*.js
+--exclude=*.ml
+--exclude=*.mli
+--exclude=*.php
+--exclude=*.py
+--exclude=*.sql
+
+--exclude=public_tld/*
+--exclude=test/*
+--exclude=facebook/push/*
+
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_FUNCTION\((\w+)/\2/f,function,function definitions/
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_FUNCTION\((\w+)/f_\2/f,function,function definitions/
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_METHOD\((\w+)\s*,\s*(\w+)/\3/f,function,function definitions/
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_METHOD\((\w+)\s*,\s*(\w+)/c_\2_ni_\3/f,function,function definitions/
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_STATIC_METHOD\((\w+)\s*,\s*(\w+)/\3/f,function,function definitions/
+--regex-c++=/^\s*(static)?\s*\w+\s+HHVM_STATIC_METHOD\((\w+)\s*,\s*(\w+)/c_\2_ni_\3/f,function,function definitions/

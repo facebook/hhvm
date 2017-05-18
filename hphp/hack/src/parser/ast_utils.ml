@@ -16,7 +16,8 @@ let get_defs ast =
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
-  List.fold_right ast ~init:([], [], [], [])
+  let rec get_defs ast acc =
+  List.fold_right ast ~init:acc
     ~f:begin fun def (acc1, acc2, acc3, acc4 as acc) ->
       match def with
       | Ast.Fun f ->
@@ -27,14 +28,15 @@ let get_defs ast =
         acc1, acc2, (FileInfo.pos_full t.Ast.t_id) :: acc3, acc4
       | Ast.Constant cst ->
         acc1, acc2, acc3, (FileInfo.pos_full cst.Ast.cst_name) :: acc4
-      (* namespace nodes will never appear as long as elaborate_namespaces is
-       * set to true when the parser is invoked *)
-      | Ast.Namespace _
-      | Ast.NamespaceUse _ -> assert false
+      | Ast.Namespace(_, defs) ->
+        get_defs defs acc
+      | Ast.NamespaceUse _ | Ast.SetNamespaceEnv _ ->
+        acc
        (* toplevel statements are ignored *)
       | Ast.Stmt _ -> acc
     end
-
+in
+  get_defs ast ([],[],[],[])
 
 let class_elt_type_to_string = function
   | Ast.Const _ -> "const"
@@ -48,6 +50,7 @@ let class_elt_type_to_string = function
   | Ast.XhpAttr _ -> "xhpAttr"
   | Ast.Method _ -> "method"
   | Ast.XhpCategory _ -> "xhpCategory"
+  | Ast.XhpChild _ -> "xhpChild"
 
 (* Utility functions for getting all nodes of a particular type *)
 class ast_get_defs_visitor = object (this)
@@ -60,10 +63,11 @@ end
 let get_def_nodes ast =
   List.rev ((new ast_get_defs_visitor)#on_program [] ast)
 
-let get_classes ast =
-  List.filter_map (get_def_nodes ast) ~f:(function
-    | Ast.Class c -> Some c
-    | _ -> None
+let rec get_classes ast =
+  List.concat_map (get_def_nodes ast) ~f:(function
+    | Ast.Class c -> [c]
+    | Ast.Namespace(_, ast) -> get_classes ast
+    | _ -> []
   )
 
 class ast_get_class_elts_visitor = object (this)

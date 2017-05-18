@@ -459,7 +459,6 @@ void analyze_virt_disp(Env& env, RegState& state,
       V(addli)    \
       V(addqi)
 #define VASM_SUBS \
-      V(subbi)    \
       V(subli)    \
       V(subqi)
 

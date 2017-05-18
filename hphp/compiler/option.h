@@ -105,12 +105,6 @@ struct Option {
    */
   static bool PreOptimization;
 
-  /*
-   * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for
-   * description.
-   */
-  static bool HardConstProp;
-
   /**
    * CodeGenerator options for PHP.
    */
@@ -201,17 +195,6 @@ private:
                           const std::string& name,
                           std::map<std::string, std::string> &map);
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Hook called after Option is set up to propagate various options to
- * HHBBC's option structure.
- *
- * This exists this way because we don't want to have libhhbbc depend
- * on all of libhphp_analysis---the dependency goes the other way.
- */
-void initialize_hhbbc_options();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

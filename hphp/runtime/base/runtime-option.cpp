@@ -33,6 +33,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/cpuid.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
@@ -164,6 +165,7 @@ int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
+bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
@@ -258,6 +260,8 @@ std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
 std::vector<std::shared_ptr<SatelliteServerInfo>>
   RuntimeOption::SatelliteServerInfos;
+
+bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
 
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
@@ -421,7 +425,6 @@ bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_Builtins = false;
 bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
-bool RuntimeOption::PHP7_InfNanFloatParse = false;
 bool RuntimeOption::PHP7_UVS = false;
 bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
@@ -468,6 +471,20 @@ static inline bool eagerGcDefault() {
 
 static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
+}
+
+static inline bool alignMacroFusionPairs() {
+  switch (getProcessorFamily()) {
+    case ProcessorFamily::Intel_SandyBridge:
+    case ProcessorFamily::Intel_IvyBridge:
+    case ProcessorFamily::Intel_Haswell:
+    case ProcessorFamily::Intel_Broadwell:
+    case ProcessorFamily::Intel_Skylake:
+      return true;
+    case ProcessorFamily::Unknown:
+      return false;
+  }
+  return false;
 }
 
 static inline bool evalJitDefault() {
@@ -1318,8 +1335,6 @@ void RuntimeOption::Load(
                  s_PHP7_master);
     Config::Bind(PHP7_Substr, ini, config, "PHP7.Substr",
                  s_PHP7_master);
-    Config::Bind(PHP7_InfNanFloatParse, ini, config, "PHP7.InfNanFloatParse",
-                 s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
     Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
                  "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
@@ -1329,6 +1344,9 @@ void RuntimeOption::Load(
     Config::Bind(Host, ini, config, "Server.Host");
     Config::Bind(DefaultServerNameSuffix, ini, config,
                  "Server.DefaultServerNameSuffix");
+    Config::Bind(AlwaysDecodePostDataDefault, ini, config,
+                 "Server.AlwaysDecodePostDataDefault",
+                 AlwaysDecodePostDataDefault);
     Config::Bind(ServerType, ini, config, "Server.Type", ServerType);
     Config::Bind(ServerIP, ini, config, "Server.IP");
     Config::Bind(ServerFileSocket, ini, config, "Server.FileSocket");
@@ -1580,6 +1598,7 @@ void RuntimeOption::Load(
                  "Server.AllowDuplicateCookies", !EnableHipHopSyntax);
     Config::Bind(PathDebug, ini, config, "Server.PathDebug", false);
     Config::Bind(ServerUser, ini, config, "Server.User", "");
+    Config::Bind(AllowRunAsRoot, ini, config, "Server.AllowRunAsRoot", false);
   }
 
   VirtualHost::SortAllowedDirectories(AllowedDirectories);

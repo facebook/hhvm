@@ -16,19 +16,30 @@ module Env    = Typing_env
 module TUtils = Typing_utils
 module SN     = Naming_special_names
 
-let enforce_not_awaitable env p ty =
+let rec can_be_null env ty =
+  let _, (_, ety) = Env.expand_type env ty in
+  match ety with
+  | Toption _ -> true
+  | Tunresolved tyl -> List.exists tyl (can_be_null env)
+    | Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Tvar _
+    | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
+    | Tanon (_, _) | Tobject | Tshape _ -> false
+
+let rec enforce_not_awaitable env p ty =
   let _, ety = Env.expand_type env ty in
   match ety with
-  (* Match only a single unresolved -- this isn't typically how you
-   * look into an unresolved, but the single list case is all we care
-   * about since that's all you can get in this case (I think). *)
-  | _, Tunresolved [r, Tclass ((_, awaitable), _)]
+  | _, Tunresolved tyl ->
+    List.iter tyl (enforce_not_awaitable env p)
   | r, Tclass ((_, awaitable), _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
   | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) -> ()
+    | Tanon (_, _) | Tobject | Tshape _) -> ()
+
+let enforce_nullable_or_not_awaitable env p ty =
+  if can_be_null env ty then ()
+  else enforce_not_awaitable env p ty
 
 (* We would like to pretend that the wait_for*() functions are overloaded like
  * function wait_for<T>(Awaitable<T> $a): _AsyncWaitHandle<T>

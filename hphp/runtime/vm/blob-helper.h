@@ -28,7 +28,8 @@
 #include <folly/Varint.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -167,6 +168,17 @@ struct BlobEncoder {
     const bool some = opt.hasValue();
     encode(some);
     if (some) encode(*opt);
+  }
+
+  template<size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& val) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& val) {
+    encode(std::get<I>(val));
+    encode<I + 1, Ts...>(val);
   }
 
   template<class K, class V>
@@ -311,6 +323,17 @@ struct BlobDecoder {
       decode(value);
       opt = value;
     }
+  }
+
+  template<size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& val) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& val) {
+    decode(std::get<I>(val));
+    decode<I + 1, Ts...>(val);
   }
 
   template<class K, class V>

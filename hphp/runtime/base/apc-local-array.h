@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/member-lval.h"
 
 namespace HPHP {
 
@@ -42,18 +43,18 @@ struct MArrayIter;
  */
 struct APCLocalArray final : ArrayData,
                              type_scan::MarkCountable<APCLocalArray> {
-  template<class... Args> static APCLocalArray* Make(Args&&...);
+  static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static ArrayLval LvalNewRef(ArrayData*, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
@@ -104,6 +105,7 @@ struct APCLocalArray final : ArrayData,
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
 
 public:
   using ArrayData::decRefCount;
@@ -126,6 +128,9 @@ public:
   static APCLocalArray* asApcArray(ArrayData*);
   static const APCLocalArray* asApcArray(const ArrayData*);
 
+  void scan(type_scan::Scanner& scanner) const;
+  size_t heapSize() const;
+
 private:
   explicit APCLocalArray(const APCArray* source);
   ~APCLocalArray();
@@ -136,16 +141,10 @@ private:
   ArrayData* loadElems() const;
   Variant getKey(ssize_t pos) const;
   void sweep();
-
-public:
-  void reap();
-  void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(m_localCache);
-  }
+  TypedValue* localCache() const;
 
 private:
   const APCArray* m_arr;
-  mutable TypedValue* m_localCache;
   unsigned m_sweep_index;
   friend struct MemoryManager; // access to m_sweep_index
 };

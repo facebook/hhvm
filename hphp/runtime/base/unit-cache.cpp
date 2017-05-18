@@ -29,6 +29,8 @@
 #include "hphp/util/rank.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -59,6 +61,30 @@ namespace HPHP {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+using OptLog = folly::Optional<StructuredLogEntry>;
+
+struct LogTimer {
+  LogTimer(const char* name, OptLog& ent)
+    : m_name(name)
+    , m_ent(ent)
+    , m_start(m_ent ? Timer::GetThreadCPUTimeNanos() : -1)
+  {}
+  ~LogTimer() { stop(); }
+
+  void stop() {
+    if (m_start == -1) return;
+
+    auto const elapsed = Timer::GetThreadCPUTimeNanos() - m_start;
+    m_ent->setInt(m_name, elapsed / 1000);
+    m_start = -1;
+  }
+
+private:
+  const char* m_name;
+  OptLog& m_ent;
+  int64_t m_start;
+};
 
 struct CachedUnit {
   CachedUnit() = default;
@@ -220,12 +246,14 @@ folly::Optional<String> readFileAsString(Stream::Wrapper* w,
 
 CachedUnit createUnitFromString(const char* path,
                                 const String& contents,
-                                Unit** releaseUnit) {
+                                Unit** releaseUnit,
+                                OptLog& ent) {
   auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5)) {
     return CachedUnit { unit.release(), rds::allocBit() };
   }
+  LogTimer compileTimer("compile_ms", ent);
   auto const unit = compile_file(contents.data(), contents.size(), md5, path,
                                  releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
@@ -238,14 +266,17 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   if (!f) return CachedUnit{};
   StringBuffer sb;
   sb.read(f.get());
-  return createUnitFromString(requestedPath->data(), sb.detach(), nullptr);
+  OptLog ent;
+  return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent);
 }
 
 CachedUnit createUnitFromFile(const StringData* const path,
-                              Unit** releaseUnit, Stream::Wrapper* w) {
+                              Unit** releaseUnit, Stream::Wrapper* w,
+                              OptLog& ent) {
   auto const contents = readFileAsString(w, path);
-  return contents ? createUnitFromString(path->data(), *contents, releaseUnit)
-                  : CachedUnit{};
+  return contents
+    ? createUnitFromString(path->data(), *contents, releaseUnit, ent)
+    : CachedUnit{};
 }
 
 // When running via the CLI server special access checks may need to be
@@ -304,7 +335,9 @@ NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
 }
 
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
-                               const struct stat& statInfo) {
+                               const struct stat& statInfo,
+                               OptLog& ent) {
+  LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
     // caches them on disk.
@@ -355,8 +388,12 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
     if (!cache.insert(rpathAcc, rpath)) {
       if (!isChanged(rpathAcc->second, statInfo)) {
+        if (ent) ent->setStr("type", "cache_hit_writelock");
         return rpathAcc->second.cachedUnit;
       }
+      if (ent) ent->setStr("type", "cache_stale");
+    } else {
+      if (ent) ent->setStr("type", "cache_miss");
     }
 
     /*
@@ -369,7 +406,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      * expected to be low contention).
      */
 
-    auto const cu = createUnitFromFile(rpath, &releaseUnit, w);
+    auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
 #ifdef _MSC_VER
     rpathAcc->second.mtime      = statInfo.st_mtime;
@@ -401,17 +438,19 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
-                                 const struct stat& statInfo) {
+                                 const struct stat& statInfo,
+                                 OptLog& ent) {
   // Steady state, its probably already in the cache. Try that first
   {
     NonRepoUnitCache::const_accessor acc;
     if (s_nonRepoUnitCache.find(acc, requestedPath)) {
       if (!isChanged(acc->second, statInfo)) {
+        if (ent) ent->setStr("type", "cache_hit_readlock");
         return acc->second.cachedUnit->cu;
       }
     }
   }
-  return loadUnitNonRepoAuth(requestedPath, statInfo);
+  return loadUnitNonRepoAuth(requestedPath, statInfo, ent);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -505,12 +544,62 @@ bool findFileWrapper(const String& file, void* ctx) {
   return false;
 }
 
+void logLoad(
+  StructuredLogEntry& ent,
+  StringData* path,
+  const char* cwd,
+  String rpath,
+  const CachedUnit& cu
+) {
+  ent.setStr("include_path", path->data());
+  ent.setStr("current_dir", cwd);
+  ent.setStr("resolved_path", rpath.data());
+  if (auto const u = cu.unit) {
+    const StringData* err;
+    int line;
+    if (u->compileTimeFatal(err, line)) {
+      ent.setStr("result", "compile_fatal");
+      ent.setStr("error", err->data());
+    } else if (u->parseFatal(err, line)) {
+      ent.setStr("result", "parse_fatal");
+      ent.setStr("error", err->data());
+    } else {
+      ent.setStr("result", "success");
+    }
+
+    ent.setStr("md5", u->md5().toString());
+    ent.setStr("repo_sn", folly::to<std::string>(u->sn()));
+    ent.setStr("repo_id", folly::to<std::string>(u->repoID()));
+
+    ent.setInt("bc_len", u->bclen());
+    ent.setInt("num_litstrs", u->numLitstrs());
+    ent.setInt("num_funcs", u->funcs().size());
+    ent.setInt("num_classes", u->preclasses().size());
+    ent.setInt("num_type_aliases", u->typeAliases().size());
+  } else {
+    ent.setStr("result", "file_not_found");
+  }
+
+  switch (requestKind) {
+  case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
+  case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
+  case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
+  }
+  ent.setInt("request_count", requestCount());
+
+  StructuredLog::log("hhvm_unit_cache", ent);
+}
+
 //////////////////////////////////////////////////////////////////////
 
-CachedUnit checkoutFile(StringData* path, const struct stat& statInfo) {
+CachedUnit checkoutFile(
+  StringData* path,
+  const struct stat& statInfo,
+  OptLog& ent
+) {
   return RuntimeOption::RepoAuthoritative
     ? lookupUnitRepoAuth(path)
-    : lookupUnitNonRepoAuth(path, statInfo);
+    : lookupUnitNonRepoAuth(path, statInfo, ent);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -588,6 +677,14 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
 
+  OptLog ent;
+  if (!RuntimeOption::RepoAuthoritative &&
+      StructuredLog::coinflip(RuntimeOption::EvalLogUnitLoadRate)) {
+    ent.emplace();
+  }
+
+  LogTimer lookupTimer("lookup_ms", ent);
+
   /*
    * NB: the m_evaledFiles map is only for the debugger, and could be omitted
    * in RepoAuthoritative mode, but currently isn't.
@@ -613,7 +710,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   }
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(spath.get(), s);
+  auto const cunit = checkoutFile(spath.get(), s, ent);
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -636,6 +733,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }
 
+  lookupTimer.stop();
+  if (ent) logLoad(*ent, path, currentDir, spath, cunit);
   return cunit.unit;
 }
 

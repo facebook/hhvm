@@ -6,32 +6,32 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
-*)
+ *)
 
 open Core
 open Ast
+open Ast_scope
 
 module ULS = Unique_list_string
+module SN = Naming_special_names
+module SU = Hhbc_string_utils
 
-let strip_dollar id =
-  String.sub id 1 (String.length id - 1)
+let constant_folding () =
+  Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
 type env = {
-  (* Prefix used to name closure classes in form
-   *   Closure$ (top-level statements)
-   *   Closure$fun (top-level function called fun)
-   *   Closure$cls::meth (method)
-   *)
-  prefix : string;
-  (* Are we in a static or top-level function or statement?
-   *)
-  outer_is_static : bool;
+  (* What is the current context? *)
+  scope : Scope.t;
+}
+
+type state = {
   (* Number of closures created in the current function *)
   per_function_count : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
-  (* Variables that are *defined* in current scope (e.g. lambda parameters)
-   * and so should not be added to capture set
+  captured_this : bool;
+  (* Variables that are *defined* in current scope (e.g. lambda parameters,
+   * locals) and so should not be added to capture set
    *)
   defined_vars : SSet.t;
   (* Total number of closures created *)
@@ -40,73 +40,100 @@ type env = {
   class_num : int;
   (* The closure classes themselves *)
   closures : class_ list;
+  (* The current namespace environment *)
+  namespace: Namespace_env.env;
 }
 
-let initial_env initial_class_num =
+let initial_state initial_class_num =
 {
-  prefix = "Closure$";
-  outer_is_static = true;
   per_function_count = 0;
   captured_vars = ULS.empty;
+  captured_this = false;
   defined_vars = SSet.empty;
   total_count = 0;
   class_num = initial_class_num;
   closures = [];
+  namespace = Namespace_env.empty_with_default_popt;
 }
 
 (* Add a variable to the captured variables *)
-let add_var env var =
+let add_var st var =
   (* If it's bound as a parameter or definite assignment, don't add it *)
-  if SSet.mem var env.defined_vars
-  then env
+  if SSet.mem var st.defined_vars
+  then st
   else
   (* Don't bother if it's $this, as this is captured implicitly *)
   if var = Naming_special_names.SpecialIdents.this
-  then env
-  else { env with captured_vars = ULS.add env.captured_vars var }
+  then { st with captured_this = true; }
+  else { st with captured_vars = ULS.add st.captured_vars var }
+
+let env_with_lambda env =
+  { scope = ScopeItem.Lambda :: env.scope }
+
+let env_with_longlambda env is_static =
+  { scope = ScopeItem.LongLambda is_static :: env.scope }
+
+let strip_id id = Utils.strip_ns (snd id)
+
+let rec make_scope_name scope =
+  match scope with
+  | [] -> ""
+  | ScopeItem.Function fd :: _ -> strip_id fd.f_name
+  | ScopeItem.Method md :: scope ->
+    make_scope_name scope ^ "::" ^ strip_id md.m_name
+  | ScopeItem.Class cd :: _ -> strip_id cd.c_name
+  | _ :: scope -> make_scope_name scope
+
+let env_with_function env fd =
+  { scope = ScopeItem.Function fd :: env.scope; }
+
+let env_toplevel =
+  { scope = Scope.toplevel; }
+
+let env_with_method env md =
+  { scope = ScopeItem.Method md :: env.scope; }
+
+let env_with_class cd =
+  { scope = [ScopeItem.Class cd]; }
 
 (* Clear the variables, upon entering a lambda *)
-let enter_lambda env fd =
-  { env with
+let enter_lambda st fd =
+  { st with
     captured_vars = ULS.empty;
+    captured_this = false;
     defined_vars =
       SSet.of_list (List.map fd.f_params (fun param -> snd param.param_id));
    }
 
-let add_defined_var env var =
-  { env with defined_vars = SSet.add var env.defined_vars }
+let add_defined_var st var =
+  { st with defined_vars = SSet.add var st.defined_vars }
 
-(* Set the prefix name, upon entering a top-level function *)
-let set_function env fd =
-  { env with
-    prefix = "Closure$" ^ Utils.strip_ns (snd fd.f_name);
-    outer_is_static = true;
-    per_function_count = 0; }
+let set_namespace st ns =
+  { st with namespace = ns }
 
-(* Set the prefix name, upon entering a top-level function *)
-let set_method env cd md =
-  { env with
-    prefix = "Closure$" ^
-      Utils.strip_ns (snd cd.c_name) ^
-      "::" ^
-      Utils.strip_ns (snd md.m_name);
-    outer_is_static = List.mem md.m_kind Static;
-    per_function_count = 0; }
+let reset_function_count st =
+  { st with per_function_count = 0; }
 
 (* Retrieve the closure classes in the order that they were generated *)
-let get_closure_classes env =
-  List.rev env.closures
+let get_closure_classes st =
+  List.rev st.closures
 
-let make_closure_name total_count env =
-  let name = if env.per_function_count = 1
-               then env.prefix
-               else env.prefix ^ "#" ^ string_of_int env.per_function_count in
-  name ^ ";" ^ string_of_int (total_count + 1)
+let make_closure_name total_count env st =
+  SU.Closures.mangle_closure
+    (make_scope_name env.scope) st.per_function_count total_count
 
-let make_closure p total_count class_num env fd body =
-  let unique_var_names = ULS.items env.captured_vars in
+let make_closure ~explicit_use
+  p total_count class_num env st lambda_vars tparams fd body =
+  let rec is_scope_static scope =
+    match scope with
+    | ScopeItem.LongLambda is_static :: _ -> is_static
+    | ScopeItem.Function _ :: _ -> true
+    | ScopeItem.Method md :: _ -> List.mem md.m_kind Static
+    | ScopeItem.Lambda :: scope -> is_scope_static scope || not st.captured_this
+    | [] -> true
+    | _ -> false in
   let md = {
-    m_kind = [Public] @ (if env.outer_is_static then [Static] else []);
+    m_kind = [Public] @ (if is_scope_static env.scope then [Static] else []);
     m_tparams = fd.f_tparams;
     m_constrs = [];
     m_name = (fst fd.f_name, "__invoke");
@@ -119,151 +146,186 @@ let make_closure p total_count class_num env fd body =
     m_span = fd.f_span;
   } in
   let cvl =
-    List.map unique_var_names (fun name -> (p, (p, strip_dollar name), None)) in
+    List.map lambda_vars
+    (fun name -> (p, (p, Hhbc_string_utils.Locals.strip_dollar name), None)) in
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];
     c_final = false;
     c_kind = Cnormal;
     c_is_xhp = false;
-    c_name = (p, make_closure_name total_count env);
-    c_tparams = [];
+    c_name = (p, make_closure_name total_count env st);
+    c_tparams = tparams;
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
-    c_body = [Method md; ClassVars ([Private], None, cvl)];
+    c_body = [ClassVars ([Private], None, cvl); Method md];
     c_namespace = Namespace_env.empty_with_default_popt;
     c_enum = None;
     c_span = p;
   } in
+  (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
   let inline_fundef =
-    { fd with f_body = [];
+    { fd with f_body = if explicit_use then [Noop] else [];
               f_name = (p, string_of_int class_num) } in
-  inline_fundef, unique_var_names, cd
+  inline_fundef, cd
 
-let rec convert_expr env (p, expr_ as expr) =
+(* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
+ * literal strings. It's necessary to do this before closure conversion
+ * because the enclosing class will be changed. *)
+let convert_id (env:env) p (pid, str as id) =
+  let return newstr = (p, String (pid, newstr)) in
+  let get_class_name () =
+    match Scope.get_class env.scope with
+    | None -> ""
+    | Some cd -> strip_id cd.c_name in
+  match str with
+  | "__CLASS__" ->
+    return (get_class_name ())
+  | "__METHOD__" ->
+    let prefix =
+      match Scope.get_class env.scope with
+      | None -> ""
+      | Some cd -> strip_id cd.c_name ^ "::" in
+    begin match env.scope with
+      | ScopeItem.Function fd :: _ -> return (prefix ^ strip_id fd.f_name)
+      | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)
+      | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ ->
+        return (prefix ^ "{closure}")
+      | _ -> return ""
+    end
+  | "__FUNCTION__" ->
+    begin match env.scope with
+    | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
+    | ScopeItem.Method md :: _ -> return (strip_id md.m_name)
+    | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ -> return "{closure}"
+    | _ -> return ""
+    end
+  | _ ->
+    (p, Id id)
+
+let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Array afl ->
-    let env, afl = List.map_env env afl convert_afield in
-    env, (p, Array afl)
+    let st, afl = List.map_env st afl (convert_afield env) in
+    st, (p, Array afl)
   | Shape pairs ->
-    let env, pairs = List.map_env env pairs (fun env (n, e) ->
-      let env, e = convert_expr env e in
-      env, (n, e)) in
-    env, (p, Shape pairs)
+    let st, pairs = List.map_env st pairs (fun st (n, e) ->
+      let st, e = convert_expr env st e in
+      st, (n, e)) in
+    st, (p, Shape pairs)
   | Collection (id, afl) ->
-    let env, afl = List.map_env env afl convert_afield in
-    env, (p, Collection (id, afl))
+    let st, afl = List.map_env st afl (convert_afield env) in
+    st, (p, Collection (id, afl))
   | Lvar id ->
-    let env = add_var env (snd id) in
-    env, (p, Lvar id)
+    let st = add_var st (snd id) in
+    st, (p, Lvar id)
   | Clone e ->
-    let env, e = convert_expr env e in
-    env, (p, Clone e)
+    let st, e = convert_expr env st e in
+    st, (p, Clone e)
   | Obj_get (e1, e2, flavor) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, Obj_get (e1, e2, flavor))
-  | Array_get(e1, Some e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, Array_get (e1, Some e2))
-  | Array_get (e, None) ->
-    let env, e = convert_expr env e in
-    env, (p, Array_get (e, None))
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, (p, Obj_get (e1, e2, flavor))
+  | Array_get(e1, opt_e2) ->
+    let st, e1 = convert_expr env st e1 in
+    let st, opt_e2 = convert_opt_expr env st opt_e2 in
+    st, (p, Array_get (e1, opt_e2))
   | Call (e, el1, el2) ->
-    let env, e = convert_expr env e in
-    let env, el1 = convert_exprs env el1 in
-    let env, el2 = convert_exprs env el2 in
-    env, (p, Call(e, el1, el2))
+    let st, e = convert_expr env st e in
+    let st, el1 = convert_exprs env st el1 in
+    let st, el2 = convert_exprs env st el2 in
+    st, (p, Call(e, el1, el2))
   | String2 el ->
-    let env, el = convert_exprs env el in
-    env, (p, String2 el)
+    let st, el = convert_exprs env st el in
+    st, (p, String2 el)
   | Yield af ->
-    let env, af = convert_afield env af in
-    env, (p, Yield af)
+    let st, af = convert_afield env st af in
+    st, (p, Yield af)
   | Await e ->
-    let env, e = convert_expr env e in
-    env, (p, Await e)
+    let st, e = convert_expr env st e in
+    st, (p, Await e)
   | List el ->
-    let env, el = convert_exprs env el in
-    env, (p, List el)
+    let st, el = convert_exprs env st el in
+    st, (p, List el)
   | Expr_list el ->
-    let env, el = convert_exprs env el in
-    env, (p, Expr_list el)
+    let st, el = convert_exprs env st el in
+    st, (p, Expr_list el)
   | Cast (h, e) ->
-    let env, e = convert_expr env e in
-    env, (p, Cast (h, e))
+    let st, e = convert_expr env st e in
+    st, (p, Cast (h, e))
   | Unop (op, e) ->
-    let env, e = convert_expr env e in
-    env, (p, Unop (op, e))
+    let st, e = convert_expr env st e in
+    st, (p, Unop (op, e))
   | Binop (op, e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, Binop (op, e1, e2))
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, (p, Binop (op, e1, e2))
   | Pipe (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, Pipe (e1, e2))
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, (p, Pipe (e1, e2))
   | Eif (e1, opt_e2, e3) ->
-    let env, e1 = convert_expr env e1 in
-    let env, opt_e2 = convert_opt_expr env opt_e2 in
-    let env, e3 = convert_expr env e3 in
-    env, (p, Eif(e1, opt_e2, e3))
+    let st, e1 = convert_expr env st e1 in
+    let st, opt_e2 = convert_opt_expr env st opt_e2 in
+    let st, e3 = convert_expr env st e3 in
+    st, (p, Eif(e1, opt_e2, e3))
   | NullCoalesce (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, NullCoalesce (e1, e2))
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, (p, NullCoalesce (e1, e2))
   | InstanceOf (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, (p, InstanceOf (e1, e2))
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, (p, InstanceOf (e1, e2))
   | New (e, el1, el2) ->
-    let env, e = convert_expr env e in
-    let env, el1 = convert_exprs env el1 in
-    let env, el2 = convert_exprs env el2 in
-    env, (p, New(e, el1, el2))
+    let st, e = convert_expr env st e in
+    let st, el1 = convert_exprs env st el1 in
+    let st, el2 = convert_exprs env st el2 in
+    st, (p, New(e, el1, el2))
   | Efun (fd, use_vars) ->
-    convert_lambda env p fd (Some use_vars)
+    convert_lambda env st p fd (Some use_vars)
   | Lfun fd ->
-    convert_lambda env p fd None
+    convert_lambda env st p fd None
   | Xml(id, pairs, el) ->
-    let env, pairs = List.map_env env pairs
-      (fun env (id, e) ->
-        let env, e = convert_expr env e in
-        env, (id, e)) in
-    let env, el = convert_exprs env el in
-    env, (p, Xml(id, pairs, el))
+    let st, pairs = List.map_env st pairs
+      (fun st (id, e) ->
+        let st, e = convert_expr env st e in
+        st, (id, e)) in
+    let st, el = convert_exprs env st el in
+    st, (p, Xml(id, pairs, el))
   | Unsafeexpr e ->
-    let env, e = convert_expr env e in
-    env, (p, Unsafeexpr e)
+    let st, e = convert_expr env st e in
+    st, (p, Unsafeexpr e)
   | Import(flavor, e) ->
-    let env, e = convert_expr env e in
-    env, (p, Import(flavor, e))
+    let st, e = convert_expr env st e in
+    st, (p, Import(flavor, e))
+  | Id id ->
+    st, convert_id env p id
   | _ ->
-    env, expr
+    st, expr
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.
  *)
-and convert_lambda env p fd use_vars_opt =
+and convert_lambda env st p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
-  let captured_vars = env.captured_vars in
-  let defined_vars = env.defined_vars in
-  let total_count = env.total_count + 1 in
-  let class_num = env.class_num in
-  let closures_until_now = env.closures in
-  let env = { env with
-    total_count = total_count;
+  let captured_vars = st.captured_vars in
+  let captured_this = st.captured_this in
+  let defined_vars = st.defined_vars in
+  let total_count = st.total_count in
+  let class_num = st.class_num in
+  let closures_until_now = st.closures in
+  let st = { st with
+    total_count = total_count + 1;
     closures = [];
-    class_num = env.class_num + 1 } in
-  let env = enter_lambda env fd in
-  let env, block = convert_block env fd.f_body in
-  let env = { env with per_function_count = env.per_function_count + 1 } in
-  let inline_fundef, lambda_vars, cd =
-    make_closure p total_count class_num env fd block in
-  (* Restore capture and defined set *)
-  let env = { env with captured_vars = captured_vars;
-                       defined_vars = defined_vars } in
+    class_num = st.class_num + 1 } in
+  let st = enter_lambda st fd in
+  let env = if Option.is_some use_vars_opt
+            then env_with_longlambda env false
+            else env_with_lambda env in
+  let st, block = convert_block env st fd.f_body in
+  let st = { st with per_function_count = st.per_function_count + 1 } in
+  let lambda_vars = ULS.items st.captured_vars in
   (* For lambdas without  explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
@@ -272,162 +334,219 @@ and convert_lambda env p fd use_vars_opt =
       lambda_vars, List.map lambda_vars (fun var -> (p, var), false)
     | Some use_vars ->
       List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
+  let tparams = Scope.get_tparams env.scope in
+  let inline_fundef, cd =
+    make_closure ~explicit_use:(Option.is_some use_vars_opt)
+      p total_count class_num env st lambda_vars tparams fd block in
+  (* Restore capture and defined set *)
+  let st = { st with captured_vars = captured_vars;
+                     captured_this = captured_this;
+                     defined_vars = defined_vars; } in
   (* Add lambda captured vars to current captured vars *)
-  let env = List.fold_left lambda_vars ~init:env ~f:add_var in
-  let env = { env with closures = env.closures @ cd :: closures_until_now } in
-  env, (p, Efun (inline_fundef, use_vars))
+  let st = List.fold_left lambda_vars ~init:st ~f:add_var in
+  let st = { st with closures = st.closures @ cd :: closures_until_now } in
+  st, (p, Efun (inline_fundef, use_vars))
 
-and convert_exprs env el =
-  List.map_env env el convert_expr
+and convert_exprs env st el =
+  List.map_env st el (convert_expr env)
 
-and convert_opt_expr env oe =
+and convert_opt_expr env st oe =
   match oe with
-  | None -> env, None
+  | None -> st, None
   | Some e ->
-    let env, e = convert_expr env e in
-    env, Some e
+    let st, e = convert_expr env st e in
+    st, Some e
 
-and convert_stmt env stmt =
+and convert_stmt env st stmt =
   match stmt with
   | Expr e ->
-    let env, e = convert_expr env e in
-    env, Expr e
+    let st, e = convert_expr env st e in
+    st, Expr e
   | Block b ->
-    let env, b = convert_block env b in
-    env, Block b
+    let st, b = convert_block env st b in
+    st, Block b
   | Throw e ->
-    let env, e = convert_expr env e in
-    env, Throw e
+    let st, e = convert_expr env st e in
+    st, Throw e
   | Return (p, opt_e) ->
-    let env, opt_e = convert_opt_expr env opt_e in
-    env, Return (p, opt_e)
+    let st, opt_e = convert_opt_expr env st opt_e in
+    st, Return (p, opt_e)
   | Static_var el ->
-    let env, el = convert_exprs env el in
-    env, Static_var el
+    let st, el = convert_exprs env st el in
+    st, Static_var el
   | If (e, b1, b2) ->
-    let env, e = convert_expr env e in
-    let env, b1 = convert_block env b1 in
-    let env, b2 = convert_block env b2 in
-    env, If(e, b1, b2)
+    let st, e = convert_expr env st e in
+    let st, b1 = convert_block env st b1 in
+    let st, b2 = convert_block env st b2 in
+    st, If(e, b1, b2)
   | Do (b, e) ->
-    let env, b = convert_block env b in
-    let env, e = convert_expr env e in
-    env, Do (b, e)
+    let st, b = convert_block env st b in
+    let st, e = convert_expr env st e in
+    st, Do (b, e)
   | While (e, b) ->
-    let env, e = convert_expr env e in
-    let env, b = convert_block env b in
-    env, While (e, b)
+    let st, e = convert_expr env st e in
+    let st, b = convert_block env st b in
+    st, While (e, b)
   | For (e1, e2, e3, b) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    let env, e3 = convert_expr env e3 in
-    let env, b = convert_block env b in
-    env, For(e1, e2, e3, b)
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    let st, e3 = convert_expr env st e3 in
+    let st, b = convert_block env st b in
+    st, For(e1, e2, e3, b)
   | Switch (e, cl) ->
-    let env, e = convert_expr env e in
-    let env, cl = List.map_env env cl convert_case in
-    env, Switch (e, cl)
+    let st, e = convert_expr env st e in
+    let st, cl = List.map_env st cl (convert_case env) in
+    st, Switch (e, cl)
   | Foreach (e, p, ae, b) ->
-    let env, e = convert_expr env e in
-    let env, ae = convert_as_expr env ae in
-    let env, b = convert_block env b in
-    env, Foreach (e, p, ae, b)
+    let st, e = convert_expr env st e in
+    let st, ae = convert_as_expr env st ae in
+    let st, b = convert_block env st b in
+    st, Foreach (e, p, ae, b)
   | Try (b1, cl, b2) ->
-    let env, b1 = convert_block env b1 in
-    let env, cl = List.map_env env cl convert_catch in
-    let env, b2 = convert_block env b2 in
-    env, Try (b1, cl, b2)
+    let st, b1 = convert_block env st b1 in
+    let st, cl = List.map_env st cl (convert_catch env) in
+    let st, b2 = convert_block env st b2 in
+    st, Try (b1, cl, b2)
   | _ ->
-    env, stmt
+    st, stmt
 
-and convert_block env stmts =
-  List.map_env env stmts convert_sequential_stmt
+and convert_block env st stmts =
+  List.map_env st stmts (convert_sequential_stmt env)
 
 (* Special case for definitely assigned locals in straight-line code *)
-and convert_sequential_stmt env stmt =
+and convert_sequential_stmt env st stmt =
   match stmt with
-  | Expr (p1, Binop (Ast.Eq None, (p2, Lvar id), e2)) ->
-    let env, e2 = convert_expr env e2 in
-    let env = add_defined_var env (snd id) in
-    env, Expr (p1, Binop (Ast.Eq None, (p2, Lvar id), e2))
+  | Expr (p1, Binop (Ast.Eq None, e1, e2)) ->
+    let st, e2 = convert_expr env st e2 in
+    let st, e1 = convert_lvalue_expr env st e1 in
+    st, Expr (p1, Binop (Ast.Eq None, e1, e2))
 
   | _ ->
-    convert_stmt env stmt
+    convert_stmt env st stmt
 
-and convert_catch env (id1, id2, b) =
-  let env, b = convert_block env b in
-  env, (id1, id2, b)
+and convert_catch env st (id1, id2, b) =
+  let st = add_defined_var st (snd id2) in
+  let st, b = convert_block env st b in
+  st, (id1, id2, b)
 
-and convert_case env case =
+and convert_case env st case =
   match case with
   | Default b ->
-    let env, b = convert_block env b in
-    env, Default b
+    let st, b = convert_block env st b in
+    st, Default b
   | Case (e, b) ->
-    let env, e = convert_expr env e in
-    let env, b = convert_block env b in
-    env, Case (e, b)
+    let st, e = convert_expr env st e in
+    let st, b = convert_block env st b in
+    st, Case (e, b)
 
-and convert_as_expr env aexpr =
+and convert_lvalue_expr env st (p, expr_ as expr) =
+  match expr_ with
+  | Lvar id ->
+    let st = add_defined_var st (snd id) in
+    st, expr
+  | List exprs ->
+    let st, exprs = List.map_env st exprs (convert_lvalue_expr env) in
+    st, (p, List exprs)
+  | _ ->
+    convert_expr env st expr
+
+(* Everything here is an l-value *)
+and convert_as_expr env st aexpr =
   match aexpr with
   | As_v e ->
-    let env, e = convert_expr env e in
-    env, As_v e
+    let st, e = convert_lvalue_expr env st e in
+    st, As_v e
   | As_kv (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, As_kv (e1, e2)
+    let st, e1 = convert_lvalue_expr env st e1 in
+    let st, e2 = convert_lvalue_expr env st e2 in
+    st, As_kv (e1, e2)
 
-and convert_afield env afield =
+and convert_afield env st afield =
   match afield with
   | AFvalue e ->
-    let env, e = convert_expr env e in
-    env, AFvalue e
+    let st, e = convert_expr env st e in
+    st, AFvalue e
   | AFkvalue (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
-    env, AFkvalue (e1, e2)
+    let st, e1 = convert_expr env st e1 in
+    let st, e2 = convert_expr env st e2 in
+    st, AFkvalue (e1, e2)
 
-let convert_fun env fd =
-  let env = set_function env fd in
-  let env, block = convert_block env fd.f_body in
-  env, { fd with f_body = block }
+let convert_params env st param_list =
+  let convert_param env st param = match param.param_expr with
+    | None -> st, param
+    | Some e ->
+      let st, e = convert_expr env st e in
+      st, { param with param_expr = Some e }
+  in
+  List.map_env st param_list (convert_param env)
 
-let rec convert_class env cd =
-  let env, c_body = List.map_env env cd.c_body (convert_class_elt cd) in
-  env, { cd with c_body = c_body }
+let convert_fun st fd =
+  let fd =
+    if constant_folding ()
+    then Ast_constant_folder.fold_function fd else fd in
+  let env = env_with_function env_toplevel fd in
+  let st = reset_function_count st in
+  let st, block = convert_block env st fd.f_body in
+  let st, params = convert_params env st fd.f_params in
+  st, { fd with f_body = block; f_params = params }
 
-and convert_class_elt cd env ce =
+let rec convert_class st cd =
+  let env = env_with_class cd in
+  let st = reset_function_count st in
+  let st, c_body = List.map_env st cd.c_body
+    (convert_class_elt cd.Ast.c_namespace env) in
+  st, { cd with c_body = c_body }
+
+and convert_class_elt ns env st ce =
+  let ce =
+    if constant_folding ()
+    then Ast_constant_folder.fold_class_elt ns ce else ce in
   match ce with
   | Method md ->
-    let env = set_method env cd md in
-    let env, block = convert_block env md.m_body in
-    env, Method { md with m_body = block }
+    let env = env_with_method env md in
+    let st = reset_function_count st in
+    let st, block = convert_block env st md.m_body in
+    st, Method { md with m_body = block }
 
-  (* TODO Const, other elements containing expressions *)
   | _ ->
-    env, ce
+    st, ce
 
-let rec convert_def env d =
+let convert_toplevel st stmt =
+  let stmt =
+    if constant_folding ()
+    then Ast_constant_folder.fold_stmt st.namespace stmt else stmt in
+  convert_stmt env_toplevel st stmt
+
+and convert_gconst st gconst =
+  let gconst =
+    if constant_folding ()
+    then Ast_constant_folder.fold_gconst gconst
+    else gconst in
+  let st, expr = convert_expr env_toplevel st gconst.Ast.cst_value in
+  st, { gconst with Ast.cst_value = expr }
+
+(* Convert *only* top level definitions, not classes and functions *)
+let rec convert_toplevel_def st d =
   match d with
   | Fun fd ->
-    let env, fd = convert_fun env fd in
-    env, Fun fd
+    st, Fun fd
   | Class cd ->
-    let env, cd = convert_class env cd in
-    env, Class cd
-  | Stmt st ->
-    let env, st = convert_stmt env st in
-    env, Stmt st
+    st, Class cd
+  | Stmt stmt ->
+    let st, stmt = convert_toplevel st stmt in
+    st, Stmt stmt
   | Typedef td ->
-    env, Typedef td
+    st, Typedef td
   | Constant c ->
-    env, Constant c
+    let st, c = convert_gconst st c in
+    st, Constant c
   | Namespace(id, dl) ->
-    let env, dl = convert_prog env dl in
-    env, Namespace(id, dl)
+    let st, dl = convert_toplevel_prog st dl in
+    st, Namespace(id, dl)
   | NamespaceUse x ->
-    env, NamespaceUse x
+    st, NamespaceUse x
+  | SetNamespaceEnv ns ->
+    set_namespace st ns, SetNamespaceEnv ns
 
-and convert_prog env dl =
-  List.map_env env dl convert_def
+and convert_toplevel_prog st dl =
+  List.map_env st dl convert_toplevel_def

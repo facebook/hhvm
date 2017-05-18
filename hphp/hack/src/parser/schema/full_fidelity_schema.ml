@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-04-05-0001"
+let full_fidelity_schema_version_number = "2017-04-26-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -187,6 +187,11 @@ let schema = List.map from_list [
     "left_brace";
     "declarations";
     "right_brace" ];
+  [ "NamespaceEmptyBody";
+    "namespace_empty_body";
+    "namespace_empty_body";
+    "namespace";
+    "semicolon" ];
   [ "NamespaceUseDeclaration";
     "namespace_use_declaration";
     "namespace_use_declaration";
@@ -226,6 +231,7 @@ let schema = List.map from_list [
     "function_declaration_header";
     "function";
     "async";
+    "coroutine";
     "keyword";
     "ampersand";
     "name";
@@ -531,6 +537,19 @@ let schema = List.map from_list [
     "keyword";
     "expression";
     "semicolon" ];
+  [ "GotoLabel";
+    "goto_label";
+    "goto_label";
+    "goto_label";
+    "name";
+    "colon" ];
+  [ "GotoStatement";
+    "goto_statement";
+    "goto_statement";
+    "goto_statement";
+    "keyword";
+    "label_name";
+    "semicolon" ];
   [ "ThrowStatement";
     "throw_statement";
     "throw_statement";
@@ -590,6 +609,7 @@ let schema = List.map from_list [
     "anonymous_function";
     "anonymous";
     "async_keyword";
+    "coroutine_keyword";
     "function_keyword";
     "left_paren";
     "parameters";
@@ -611,6 +631,7 @@ let schema = List.map from_list [
     "lambda_expression";
     "lambda";
     "async";
+    "coroutine";
     "signature";
     "arrow";
     "body" ];
@@ -875,6 +896,7 @@ let schema = List.map from_list [
     "awaitable_creation_expression";
     "awaitable";
     "async";
+    "coroutine";
     "compound_statement" ];
   [ "XHPChildrenDeclaration";
     "xhp_children_declaration";
@@ -982,6 +1004,14 @@ let schema = List.map from_list [
     "keyword";
     "left_angle";
     "type";
+    "right_angle" ];
+  [ "TupleTypeExplicitSpecifier";
+    "tuple_type_explicit_specifier";
+    "tuple_type_explicit_specifier";
+    "tuple_type";
+    "keyword";
+    "left_angle";
+    "types";
     "right_angle" ];
   [ "VarrayTypeSpecifier";
     "varray_type_specifier";
@@ -1102,6 +1132,10 @@ let schema = List.map from_list [
     "left_paren";
     "items";
     "right_paren" ];
+  (* TODO: Rename this; generic type specifiers are also used for type-annotated
+   * method calls and for object creations with type annotations. This naming is
+   * now very misleading (e.g. class_type being any name).
+   *)
   [ "GenericTypeSpecifier";
     "generic_type_specifier";
     "generic_type_specifier";
@@ -1206,6 +1240,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Const"; "const" ];
   [ "Construct"; "__construct" ];
   [ "Continue"; "continue" ];
+  [ "Coroutine"; "coroutine" ];
   [ "Darray"; "darray" ];
   [ "Default"; "default" ];
   [ "Define"; "define"];
@@ -1228,6 +1263,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Foreach"; "foreach" ];
   [ "Function"; "function" ];
   [ "Global"; "global" ];
+  [ "Goto"; "goto" ];
   [ "If"; "if" ];
   [ "Implements"; "implements" ];
   [ "Include"; "include" ];
@@ -1262,6 +1298,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Static"; "static" ];
   [ "String"; "string" ];
   [ "Super"; "super" ];
+  [ "Suspend"; "suspend" ];
   [ "Switch"; "switch" ];
   [ "This"; "this" ];
   [ "Throw"; "throw" ];

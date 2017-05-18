@@ -93,10 +93,6 @@ struct APCArray {
     return isPacked() ? m_size : m.m_num;
   }
 
-  unsigned capacity() const {
-    return isPacked() ? m_size : m.m_capacity_mask + 1;
-  }
-
   Variant getKey(ssize_t pos) const {
     if (isPacked()) {
       assert(static_cast<size_t>(pos) < m_size);

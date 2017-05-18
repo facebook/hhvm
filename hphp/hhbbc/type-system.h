@@ -187,13 +187,11 @@ struct Type;
  *         *may* be contiguous integers, so for example Arr([InitPrim]) <:
  *         Arr([Int => InitPrim]).
  *
- *     Arr([InitCell:InitCell])
+ *     Arr([ArrKey:InitCell])
  *
  *         Map-like array with either integer or string keys, and InitCell
  *         values, or empty.  Essentially this is the most generic array that
  *         can't contain php references.
- *
- *  TODO(#3774082): we should have a Str|Int type.
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -303,6 +301,11 @@ enum trep : uint32_t {
   BOptKeysetE  = BInitNull | BKeysetE,
   BOptKeysetN  = BInitNull | BKeysetN,
   BOptKeyset   = BInitNull | BKeyset,
+
+  BUncArrKey    = BInt | BSStr,
+  BArrKey       = BUncArrKey | BCStr,
+  BOptUncArrKey = BInitNull | BUncArrKey,
+  BOptArrKey    = BInitNull | BArrKey,
 
   BInitPrim = BInitNull | BBool | BNum,
   BPrim     = BInitPrim | BUninit,
@@ -443,7 +446,15 @@ struct Type {
    */
   bool couldBe(const Type& o) const;
 
+  struct ArrayCat {
+    enum { None, Empty, Packed, Struct, Mixed } cat;
+    bool hasValue;
+  };
+
 private:
+  friend folly::Optional<int64_t> arr_size(const Type& t);
+  friend ArrayCat categorize_array(const Type& t);
+  friend CompactVector<LSString> get_string_keys(const Type& t);
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type& t);
@@ -607,124 +618,123 @@ struct DArrLikeMapN {
 
 //////////////////////////////////////////////////////////////////////
 
-#define X(y) const Type T##y = Type(B##y);
-
-X(Bottom)
-
-X(Uninit)
-X(InitNull)
-X(False)
-X(True)
-X(Int)
-X(Dbl)
-X(SStr)
-X(CStr)
-X(SArrE)
-X(CArrE)
-X(SArrN)
-X(CArrN)
-X(Obj)
-X(Res)
-X(Cls)
-X(Ref)
-X(SVecE)
-X(CVecE)
-X(SVecN)
-X(CVecN)
-X(SDictE)
-X(CDictE)
-X(SDictN)
-X(CDictN)
-X(SKeysetE)
-X(CKeysetE)
-X(SKeysetN)
-X(CKeysetN)
-
-X(Null)
-X(Bool)
-X(Num)
-X(Str)
-X(SArr)
-X(CArr)
-X(ArrE)
-X(ArrN)
-X(Arr)
-X(SVec)
-X(CVec)
-X(VecE)
-X(VecN)
-X(Vec)
-X(SDict)
-X(CDict)
-X(DictE)
-X(DictN)
-X(Dict)
-X(SKeyset)
-X(CKeyset)
-X(KeysetE)
-X(KeysetN)
-X(Keyset)
-
-X(InitPrim)
-X(Prim)
-X(InitUnc)
-X(Unc)
-
-X(OptTrue)
-X(OptFalse)
-X(OptBool)
-X(OptInt)
-X(OptDbl)
-X(OptNum)
-X(OptSStr)
-X(OptCStr)
-X(OptStr)
-X(OptSArrE)
-X(OptCArrE)
-X(OptSArrN)
-X(OptCArrN)
-X(OptSArr)
-X(OptCArr)
-X(OptArrE)
-X(OptArrN)
-X(OptArr)
-X(OptObj)
-X(OptRes)
-X(OptSVecE)
-X(OptCVecE)
-X(OptSVecN)
-X(OptCVecN)
-X(OptSVec)
-X(OptCVec)
-X(OptVecE)
-X(OptVecN)
-X(OptVec)
-X(OptSDictE)
-X(OptCDictE)
-X(OptSDictN)
-X(OptCDictN)
-X(OptSDict)
-X(OptCDict)
-X(OptDictE)
-X(OptDictN)
-X(OptDict)
-X(OptSKeysetE)
-X(OptCKeysetE)
-X(OptSKeysetN)
-X(OptCKeysetN)
-X(OptSKeyset)
-X(OptCKeyset)
-X(OptKeysetE)
-X(OptKeysetN)
-X(OptKeyset)
-
-X(InitCell)
-X(Cell)
-X(InitGen)
-X(Gen)
-
+#define TYPES(X)                                \
+X(Bottom)                                       \
+X(Uninit)                                       \
+X(InitNull)                                     \
+X(False)                                        \
+X(True)                                         \
+X(Int)                                          \
+X(Dbl)                                          \
+X(SStr)                                         \
+X(CStr)                                         \
+X(SArrE)                                        \
+X(CArrE)                                        \
+X(SArrN)                                        \
+X(CArrN)                                        \
+X(Obj)                                          \
+X(Res)                                          \
+X(Cls)                                          \
+X(Ref)                                          \
+X(SVecE)                                        \
+X(CVecE)                                        \
+X(SVecN)                                        \
+X(CVecN)                                        \
+X(SDictE)                                       \
+X(CDictE)                                       \
+X(SDictN)                                       \
+X(CDictN)                                       \
+X(SKeysetE)                                     \
+X(CKeysetE)                                     \
+X(SKeysetN)                                     \
+X(CKeysetN)                                     \
+X(Null)                                         \
+X(Bool)                                         \
+X(Num)                                          \
+X(Str)                                          \
+X(SArr)                                         \
+X(CArr)                                         \
+X(ArrE)                                         \
+X(ArrN)                                         \
+X(Arr)                                          \
+X(SVec)                                         \
+X(CVec)                                         \
+X(VecE)                                         \
+X(VecN)                                         \
+X(Vec)                                          \
+X(SDict)                                        \
+X(CDict)                                        \
+X(DictE)                                        \
+X(DictN)                                        \
+X(Dict)                                         \
+X(SKeyset)                                      \
+X(CKeyset)                                      \
+X(KeysetE)                                      \
+X(KeysetN)                                      \
+X(Keyset)                                       \
+X(UncArrKey)                                    \
+X(ArrKey)                                       \
+X(InitPrim)                                     \
+X(Prim)                                         \
+X(InitUnc)                                      \
+X(Unc)                                          \
+X(OptTrue)                                      \
+X(OptFalse)                                     \
+X(OptBool)                                      \
+X(OptInt)                                       \
+X(OptDbl)                                       \
+X(OptNum)                                       \
+X(OptSStr)                                      \
+X(OptCStr)                                      \
+X(OptStr)                                       \
+X(OptSArrE)                                     \
+X(OptCArrE)                                     \
+X(OptSArrN)                                     \
+X(OptCArrN)                                     \
+X(OptSArr)                                      \
+X(OptCArr)                                      \
+X(OptArrE)                                      \
+X(OptArrN)                                      \
+X(OptArr)                                       \
+X(OptObj)                                       \
+X(OptRes)                                       \
+X(OptSVecE)                                     \
+X(OptCVecE)                                     \
+X(OptSVecN)                                     \
+X(OptCVecN)                                     \
+X(OptSVec)                                      \
+X(OptCVec)                                      \
+X(OptVecE)                                      \
+X(OptVecN)                                      \
+X(OptVec)                                       \
+X(OptSDictE)                                    \
+X(OptCDictE)                                    \
+X(OptSDictN)                                    \
+X(OptCDictN)                                    \
+X(OptSDict)                                     \
+X(OptCDict)                                     \
+X(OptDictE)                                     \
+X(OptDictN)                                     \
+X(OptDict)                                      \
+X(OptSKeysetE)                                  \
+X(OptCKeysetE)                                  \
+X(OptSKeysetN)                                  \
+X(OptCKeysetN)                                  \
+X(OptSKeyset)                                   \
+X(OptCKeyset)                                   \
+X(OptKeysetE)                                   \
+X(OptKeysetN)                                   \
+X(OptKeyset)                                    \
+X(OptUncArrKey)                                 \
+X(OptArrKey)                                    \
+X(InitCell)                                     \
+X(Cell)                                         \
+X(InitGen)                                      \
+X(Gen)                                          \
 X(Top)
 
+#define X(y) extern const Type T##y;
+TYPES(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -915,21 +925,6 @@ Type objcls(const Type& t);
  * The returned Cell can only contain non-reference-counted types.
  */
 folly::Optional<Cell> tv(const Type& t);
-
-/*
- * Produce a packed-array like cell from a vector of types.
- * AInit can be PackedArrayInit to produce a PackedArray, or
- * VecArrayInit to produce a Vec.
- */
-template<typename AInit>
-folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems);
-
-/*
- * Produce a mixed-array like cell from an ArrayLikeMap of types.
- * AInit can be MixedArrayInit, or DictInit
- */
-template<typename AInit, typename Key>
-folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

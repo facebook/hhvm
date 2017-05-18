@@ -277,6 +277,16 @@ ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
   return prev;
 }
 
+template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
+  for (auto i = dynPropTable.begin(); i != dynPropTable.end();) {
+    if (fn(i->first)) {
+      i = dynPropTable.erase(i);
+    } else {
+      ++i;
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

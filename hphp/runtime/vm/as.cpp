@@ -99,6 +99,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -593,8 +594,18 @@ struct AsmState {
     currentStackDepth->setCurrentAbsolute(*this, stackDepth);
   }
 
+  bool isUnreachable() {
+    return currentStackDepth == nullptr;
+  }
+
   void enterUnreachableRegion() {
     currentStackDepth = nullptr;
+  }
+
+  void enterReachableRegion(int stackDepth) {
+    unnamedStackDepths.emplace_back(std::make_unique<StackDepth>());
+    currentStackDepth = unnamedStackDepths.back().get();
+    currentStackDepth->setBase(*this, stackDepth);
   }
 
   void addLabelDVInit(const std::string& name, int paramId) {
@@ -721,9 +732,27 @@ struct AsmState {
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
+    unnamedStackDepths.clear();
     fdescDepth = 0;
     maxUnnamed = -1;
     fpiToUpdate.clear();
+  }
+
+  void resolveDynCallWrappers() {
+    auto const& allFuncs = ue->fevec();
+    for (auto const& p : dynCallWrappers) {
+      auto const iter = std::find_if(
+        allFuncs.begin(),
+        allFuncs.end(),
+        [&](const FuncEmitter* f){ return f->name->isame(p.second); }
+      );
+      if (iter == allFuncs.end()) {
+        error("{} specifies unknown function {} as a dyncall wrapper",
+              p.first->name, p.second);
+      }
+      p.first->dynCallWrapperId = (*iter)->id();
+    }
+    dynCallWrappers.clear();
   }
 
   int getLocalId(const std::string& name) {
@@ -762,6 +791,7 @@ struct AsmState {
   bool emittedPseudoMain{false};
 
   std::map<std::string,ArrayData*> adataMap;
+  std::map<FuncEmitter*,const StringData*> dynCallWrappers;
 
   // When inside a class, this state is active.
   PreClassEmitter* pce;
@@ -775,6 +805,7 @@ struct AsmState {
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
+  std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
   int fdescDepth{0};
   int minStackDepth{0};
   int maxUnnamed{-1};
@@ -996,6 +1027,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?Str",     T::OptStr);
   X("Str",      T::Str);
   X("Unc",      T::Unc);
+  X("?UncArrKey", T::OptUncArrKey);
+  X("?ArrKey",  T::OptArrKey);
+  X("UncArrKey",T::UncArrKey);
+  X("ArrKey",   T::ArrKey);
   X("Uninit",   T::Uninit);
 
 #undef X
@@ -1039,6 +1074,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptObj:
   case T::InitUnc:
   case T::Unc:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
+  case T::UncArrKey:
+  case T::ArrKey:
   case T::InitCell:
   case T::Cell:
   case T::Ref:
@@ -1511,6 +1550,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
+  eh.m_end = kInvalidOffset;
 
   as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
@@ -1539,8 +1579,57 @@ void parse_catch(AsmState& as, int nestLevel) {
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
+  eh.m_end = kInvalidOffset;
 
   as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
+}
+
+/*
+ * directive-try-catch : integer? '{' function-body ".catch" '{' function-body
+ *                     ;
+ */
+void parse_try_catch(AsmState& as, int nestLevel) {
+  const Offset start = as.ue->bcPos();
+
+  int iterId = -1;
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    iterId = read_opcode_arg<int32_t>(as);
+  }
+
+  // Emit try body.
+  as.in.expectWs('{');
+  parse_function_body(as, nestLevel + 1);
+  if (!as.isUnreachable()) {
+    as.error("expected .try region to not fall-thru");
+  }
+
+  const Offset handler = as.ue->bcPos();
+
+  // Emit catch body.
+  as.enterReachableRegion(0);
+  as.ue->emitOp(OpCatch);
+  as.adjustStack(1);
+  as.enforceStackDepth(1);
+
+  std::string word;
+  as.in.skipWhitespace();
+  if (!as.in.readword(word) || word != ".catch") {
+    as.error("expected .catch directive after .try");
+  }
+  as.in.skipWhitespace();
+  as.in.expectWs('{');
+  parse_function_body(as, nestLevel + 1);
+
+  const Offset end = as.ue->bcPos();
+
+  auto& eh = as.fe->addEHEnt();
+  eh.m_type = EHEnt::Type::Catch;
+  eh.m_base = start;
+  eh.m_past = handler;
+  eh.m_iterId = iterId;
+  eh.m_handler = handler;
+  eh.m_end = end;
 }
 
 /*
@@ -1552,6 +1641,9 @@ void parse_catch(AsmState& as, int nestLevel) {
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
+ *            |  ".try" directive-try-catch
+ *            |  ".ismemoizewrapper"
+ *            |  ".dyncallwrapper" string-literal
  *            |  label-name
  *            |  opcode-line
  *            ;
@@ -1578,11 +1670,21 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       as.error("unexpected directive or opcode line in function body");
     }
     if (word[0] == '.') {
+      if (word == ".ismemoizewrapper") {
+        as.fe->isMemoizeWrapper = true;
+        continue;
+      }
+      if (word == ".dyncallwrapper") {
+        as.dynCallWrappers.emplace(as.fe, read_litstr(as));
+        as.in.expectWs(';');
+        continue;
+      }
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
       if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
       if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
+      if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {
@@ -2429,6 +2531,8 @@ void parse(AsmState& as) {
   if (!as.emittedPseudoMain) {
     as.error("no .main found in hhas unit");
   }
+
+  as.resolveDynCallWrappers();
 }
 
 }
@@ -2437,7 +2541,7 @@ void parse(AsmState& as) {
 
 UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5& md5) {
-  auto ue = folly::make_unique<UnitEmitter>(md5);
+  auto ue = std::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
   ue->m_useStrictTypes = true;

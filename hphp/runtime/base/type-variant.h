@@ -19,7 +19,9 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/ref-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
@@ -31,6 +33,14 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+// Forward declare these to avoid including tv-conversions.h which has a
+// circular dependency with this file.
+void tvCastToVecInPlace(TypedValue*);
+void tvCastToDictInPlace(TypedValue*);
+void tvCastToKeysetInPlace(TypedValue*);
+void tvCastToVArrayInPlace(TypedValue*);
+void tvCastToDArrayInPlace(TypedValue*);
 
 /*
  * This class predates HHVM.
@@ -117,8 +127,10 @@ struct Variant : private TypedValue {
   }
 
   Variant(const Variant& other, WithRefBind) {
-    constructWithRefHelper(other);
+    tvDupWithRef(*other.asTypedValue(), *asTypedValue());
+    if (m_type == KindOfUninit) m_type = KindOfNull;
   }
+
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
@@ -221,10 +233,14 @@ struct Variant : private TypedValue {
   Variant(const Variant& v, CellDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
-    tvRefcountedIncRef(asTypedValue());
+    tvIncRefGen(asTypedValue());
   }
 
-  Variant(StrongBind, Variant& v) { constructRefHelper(v); }
+  Variant(StrongBind, Variant& v) {
+    assert(tvIsPlausible(v));
+    tvBoxIfNeeded(v.asTypedValue());
+    refDup(*v.asTypedValue(), *asTypedValue());
+  }
 
   Variant& operator=(const Variant& v) noexcept {
     return assign(v);
@@ -331,7 +347,7 @@ struct Variant : private TypedValue {
   }
 
   ALWAYS_INLINE ~Variant() noexcept {
-    tvRefcountedDecRef(asTypedValue());
+    tvDecRefGen(asTypedValue());
     if (debug) {
       memset(this, kTVTrashFill2, sizeof(*this));
     }
@@ -351,15 +367,13 @@ struct Variant : private TypedValue {
 
   //////////////////////////////////////////////////////////////////////
 
- public:
   /**
    * Break bindings and set to uninit.
    */
   void unset() {
-    auto const d = m_data.num;
-    auto const t = m_type;
+    auto const old = *asTypedValue();
     m_type = KindOfUninit;
-    tvRefcountedDecRefHelper(t, d);
+    tvDecRefGen(old);
   }
 
   /**
@@ -372,10 +386,14 @@ struct Variant : private TypedValue {
   /**
    * Clear the original data, and set it to be the same as in v, and if
    * v is referenced, keep the reference.
-   * In order to correctly copy circular arrays, even if v is the only
-   * strong reference to arr, we still keep the reference.
    */
-  Variant& setWithRef(const Variant& v) noexcept;
+  Variant& setWithRef(const Variant& v) noexcept {
+    auto const old = *asTypedValue();
+    tvDupWithRef(*v.asTypedValue(), *asTypedValue());
+    if (m_type == KindOfUninit) m_type = KindOfNull;
+    tvDecRefGen(old);
+    return *this;
+  }
 
   static Variant attach(TypedValue tv) noexcept {
     return Variant{tv, Attach{}};
@@ -667,9 +685,17 @@ struct Variant : private TypedValue {
   /**
    * Operators
    */
-  Variant &assign(const Variant& v) noexcept;
-  Variant &assignRef(Variant& v) noexcept;
-  Variant &assignRef(VRefParam v) = delete;;
+  Variant& assign(const Variant& v) noexcept {
+    tvSet(tvToInitCell(v.asTypedValue()), *asTypedValue());
+    return *this;
+  }
+  Variant& assignRef(Variant& v) noexcept {
+    assert(&v != &uninit_variant);
+    tvBoxIfNeeded(v.asTypedValue());
+    tvBind(v.asTypedValue(), asTypedValue());
+    return *this;
+  }
+  Variant& assignRef(VRefParam v) = delete;
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
@@ -806,6 +832,46 @@ struct Variant : private TypedValue {
   Resource toResource() const {
     if (m_type == KindOfResource) return Resource{m_data.pres};
     return toResourceHelper();
+  }
+
+  Array toVecArray() const {
+    if (isVecType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToVecInPlace(copy.asTypedValue());
+    assertx(copy.isVecArray());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toDict() const {
+    if (isDictType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToDictInPlace(copy.asTypedValue());
+    assertx(copy.isDict());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toKeyset() const {
+    if (isKeysetType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToKeysetInPlace(copy.asTypedValue());
+    assertx(copy.isKeyset());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toVArray() const {
+    if (isArrayType(m_type)) return asCArrRef().toVArray();
+    auto copy = *this;
+    tvCastToVArrayInPlace(copy.asTypedValue());
+    assertx(copy.isPHPArray() && copy.asCArrRef().isVArray());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toDArray() const {
+    if (isArrayType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToDArrayInPlace(copy.asTypedValue());
+    assertx(copy.isPHPArray());
+    return Array::attach(copy.detach().m_data.parr);
   }
 
   template <typename T>
@@ -947,20 +1013,18 @@ struct Variant : private TypedValue {
    * KindOfUninit into KindOfNull.
    */
   Cell asInitCellTmp() const {
-    TypedValue tv = *this;
-    if (UNLIKELY(tv.m_type == KindOfRef)) {
-      tv.m_data = tv.m_data.pref->tv()->m_data;
-      return tv;
+    if (UNLIKELY(m_type == KindOfRef)) {
+      return *m_data.pref->tv();
     }
-    if (tv.m_type == KindOfUninit) tv.m_type = KindOfNull;
-    return tv;
+    if (m_type == KindOfUninit) return make_tv<KindOfNull>();
+    return *this;
   }
 
   /*
    * Access this Variant as a Ref, converting it to a Ref it isn't
    * one.
    */
-  Ref* asRef() { PromoteToRef(*this); return this; }
+  Ref* asRef() { tvBoxIfNeeded(asTypedValue()); return this; }
 
   TypedValue detach() noexcept {
     auto tv = *asTypedValue();
@@ -1149,113 +1213,18 @@ struct Variant : private TypedValue {
   void steal(ResourceHdr* v) noexcept;
   void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 
- public: // for unserializeVariant
-  static ALWAYS_INLINE
-  void AssignValHelper(Variant *self, const Variant *other) {
-    assert(tvIsPlausible(*self) && tvIsPlausible(*other));
-    if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
-    if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
-    // An early check for self == other here would be faster in that case, but
-    // slows down the frequent case of self != other.
-    // The following code is correct even if self == other.
-    const DataType stype = self->m_type;
-    const Value sdata = self->m_data;
-    const DataType otype = other->m_type;
-    if (UNLIKELY(otype == KindOfUninit)) {
-      self->m_type = KindOfNull;
-    } else {
-      const Value odata = other->m_data;
-      tvRefcountedIncRef(other);
-      self->m_data = odata;
-      self->m_type = otype;
-    }
-    tvRefcountedDecRefHelper(stype, sdata.num);
-  }
-
- private:
-  static ALWAYS_INLINE void PromoteToRef(Variant& v) {
-    assert(&v != &uninit_variant);
-    if (v.m_type != KindOfRef) {
-      auto const ref = RefData::Make(*v.asTypedValue());
-      v.m_type = KindOfRef;
-      v.m_data.pref = ref;
-    }
-  }
-
- public:
-  ALWAYS_INLINE void assignRefHelper(Variant& v) {
-    assert(tvIsPlausible(*this) && tvIsPlausible(v));
-
-    PromoteToRef(v);
-    RefData* r = v.m_data.pref;
-    r->incRefCount(); // in case destruct() triggers deletion of v
-    auto const d = m_data.num;
-    auto const t = m_type;
-    m_type = KindOfRef;
-    m_data.pref = r;
-    tvRefcountedDecRefHelper(t, d);
-  }
-
-  ALWAYS_INLINE void constructRefHelper(Variant& v) {
-    assert(tvIsPlausible(v));
-    PromoteToRef(v);
-    v.m_data.pref->incRefCount();
-    m_data.pref = v.m_data.pref;
-    m_type = KindOfRef;
-  }
-
-  ALWAYS_INLINE void constructValHelper(const Variant& v) {
-    assert(tvIsPlausible(v));
-
-    const Variant *other =
-      UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
-    assert(this != other);
-    if (other->m_type == KindOfUninit) {
-      m_type = KindOfNull;
-    } else {
-      tvRefcountedIncRef(other);
-      m_type = other->m_type;
-      m_data = other->m_data;
-    }
-  }
-
+private:
   void moveRefHelper(Variant&& v) {
     assert(tvIsPlausible(v));
 
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
-    tvRefcountedIncRef(asTypedValue());
+    tvIncRefGen(asTypedValue());
     decRefRef(v.m_data.pref);
     v.m_type = KindOfNull;
   }
 
-  ALWAYS_INLINE
-  void setWithRefHelper(const Variant& v, bool destroy) {
-    assert((!destroy || tvIsPlausible(*this)) && tvIsPlausible(v));
-    assert(this != &v);
-
-    const Variant& rhs =
-      v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
-        ? *v.m_data.pref->var() : v;
-    tvRefcountedIncRef(rhs.asTypedValue());
-    auto const d = m_data.num;
-    auto const t = m_type;
-    if (rhs.m_type == KindOfUninit) {
-      m_type = KindOfNull; // drop uninit
-    } else {
-      m_type = rhs.m_type;
-      m_data.num = rhs.m_data.num;
-    }
-    if (destroy) tvRefcountedDecRefHelper(t, d);
-  }
-
-  ALWAYS_INLINE
-  void constructWithRefHelper(const Variant& v) {
-    setWithRefHelper(v, false);
-  }
-
-private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
@@ -1348,7 +1317,12 @@ struct VarNR : private TypedValueAux {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
     int64_t n;
-    if (s.get()->isStrictlyInteger(n)) return VarNR(n);
+    if (UNLIKELY(s.get()->isStrictlyInteger(n))) {
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_intish_index_cast();
+      }
+      return VarNR(n);
+    }
     return VarNR(s);
   }
 

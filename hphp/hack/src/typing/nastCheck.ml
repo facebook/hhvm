@@ -37,13 +37,13 @@ module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
 
-module CheckFunctionType = struct
+module CheckFunctionBody = struct
   let rec stmt f_type st = match f_type, st with
     | Ast.FSync, Return (_, None)
     | Ast.FAsync, Return (_, None) -> ()
     | Ast.FSync, Return (_, Some e)
     | Ast.FAsync, Return (_, Some e) ->
-        expr f_type e;
+        expr_allow_await f_type e;
         ()
     | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
         (match e with
@@ -51,34 +51,41 @@ module CheckFunctionType = struct
         | Some _ -> Errors.return_in_gen p);
         ()
 
-    | _, Throw (_, e)
+    | _, Throw (_, e) ->
+        expr f_type e
     | _, Expr e ->
-        expr f_type e;
+        expr_allow_await f_type e;
         ()
-    | _, Noop
-    | _, Fallthrough
-    | _, Break _ | _, Continue _ -> ()
-    | _, Static_var _ -> ()
-    | _, If (_, b1, b2) ->
+    | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
+         | Static_var _ | Global_var _ ) -> ()
+    | _, If (cond, b1, b2) ->
+        expr f_type cond;
         block f_type b1;
         block f_type b2;
         ()
-    | _, Do (b, _) ->
+    | _, Do (b, e) ->
+        block f_type b;
+        expr f_type e;
+        ()
+    | _, While (e, b) ->
+        expr f_type e;
         block f_type b;
         ()
-    | _, While (_, b) ->
+    | _, For (init, cond, incr, b) ->
+        expr f_type init;
+        expr f_type cond;
+        expr f_type incr;
         block f_type b;
         ()
-    | _, For (_, _, _, b) ->
-        block f_type b;
-        ()
-    | _, Switch (_, cl) ->
+    | _, Switch (e, cl) ->
+        expr f_type e;
         List.iter cl (case f_type);
         ()
     | (Ast.FSync | Ast.FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_sync_function p;
         ()
-    | _, Foreach (_, _, b) ->
+    | _, Foreach (v, _, b) ->
+        expr f_type v;
         block f_type b;
         ()
     | _, Try (b, cl, fb) ->
@@ -92,7 +99,8 @@ module CheckFunctionType = struct
 
   and case f_type = function
     | Default b -> block f_type b
-    | Case (_, b) ->
+    | Case (cond, b) ->
+        expr f_type cond;
         block f_type b;
         ()
 
@@ -104,6 +112,16 @@ module CheckFunctionType = struct
 
   and expr f_type (p, e) =
     expr_ p f_type e
+
+  and expr_allow_await f_type (p, exp) = match f_type, exp with
+    | Ast.FAsync, Await e
+    | Ast.FAsyncGenerator, Await e -> expr f_type e; ()
+    | Ast.FAsync, Binop (Ast.Eq None, e1, (_, Await e))
+    | Ast.FAsyncGenerator, Binop (Ast.Eq None, e1, (_, Await e)) ->
+      expr f_type e1;
+      expr f_type e;
+      ()
+    | _ -> expr_ p f_type exp; ()
 
   and expr2 f_type (e1, e2) =
     expr f_type e1;
@@ -211,8 +229,8 @@ module CheckFunctionType = struct
     | Ast.FGenerator, Await _
     | Ast.FSync, Await _ -> Errors.await_in_sync_function p
 
-    | Ast.FAsync, Await e
-    | Ast.FAsyncGenerator, Await e -> expr f_type e; ()
+    | Ast.FAsync, Await _
+    | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
     | _, Special_func func ->
         (match func with
@@ -287,7 +305,7 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   List.iter f.f_params (fun_param env);
   block env named_body.fnb_nast;
-  CheckFunctionType.block f.f_fun_kind named_body.fnb_nast
+  CheckFunctionBody.block f.f_fun_kind named_body.fnb_nast
 
 and tparam env (_, _, cstrl) =
   List.iter cstrl (fun (_, h) -> hint env h)
@@ -304,6 +322,7 @@ and hint_ env p = function
   | Hdarray (ty1, ty2) ->
       hint env ty1;
       hint env ty2
+  | Hdarray_or_varray ty
   | Hvarray ty ->
       hint env ty
   | Htuple hl -> List.iter hl (hint env)
@@ -628,6 +647,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hdarray (ty1, ty2) ->
         check_tparams ty1;
         check_tparams ty2
+    | Hdarray_or_varray ty
     | Hvarray ty ->
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
@@ -686,7 +706,7 @@ and method_ (env, is_static) m =
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
-  CheckFunctionType.block m.m_fun_kind named_body.fnb_nast;
+  CheckFunctionBody.block m.m_fun_kind named_body.fnb_nast;
   if m.m_abstract && named_body.fnb_nast <> []
   then Errors.abstract_with_body m.m_name;
   if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fnb_nast = []
@@ -715,6 +735,8 @@ and stmt env = function
   | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
   | Return (_, None)
+  | GotoLabel _
+  | Goto _
   | Noop
   | Fallthrough -> ()
   | Break p -> begin
@@ -731,8 +753,9 @@ and stmt env = function
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
-  | Static_var el ->
-    List.iter el (expr env)
+  | Static_var el
+  | Global_var el
+    -> List.iter el (expr env)
   | If (e, b1, b2) ->
     expr env e;
     block env b1;

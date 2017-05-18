@@ -126,7 +126,13 @@ let print_wait_msg ?(first_call=false) start_time tail_env =
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
-let rec wait_for_server_hello ic env retries start_time tail_env first_call =
+let rec wait_for_server_hello
+  ~ic
+  ~env
+  ~retries
+  ~start_time
+  ~tail_env
+  ~first_call =
   match retries with
   | Some n when n < 0 ->
       (if Option.is_some tail_env then
@@ -138,8 +144,13 @@ let rec wait_for_server_hello ic env retries start_time tail_env first_call =
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
     Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
-    wait_for_server_hello ic env (Option.map retries (fun x -> x - 1))
-      start_time tail_env false
+    wait_for_server_hello
+      ~ic
+      ~env
+      ~retries:(Option.map retries (fun x -> x - 1))
+      ~start_time
+      ~tail_env
+      ~first_call:false
   ) else
     try
       let fd = Timeout.descr_of_in_channel ic in
@@ -179,6 +190,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let handoff_options = {
     MonitorRpc.server_name = server_name;
     force_dormant_start = env.force_dormant_start;
+    force_stop_existing_persistent_connection = false;
   } in
   let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
@@ -246,10 +258,25 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         (Tty.spinner());
       HackEventLogger.client_connect_once_busy start_time;
       connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
-    | SMUtils.Build_id_mismatched ->
-      Printf.eprintf begin
-        "hh_server's version doesn't match the client's, "^^
-        "so it will exit.\n%!"
+    | SMUtils.Build_id_mismatched mismatch_info_opt ->
+      let open ServerMonitorUtils in
+      Printf.eprintf
+        "hh_server's version doesn't match the client's, so it will exit.\n";
+      begin match mismatch_info_opt with
+        | None -> ()
+        | Some mismatch_info ->
+          let secs = int_of_float
+            ((Unix.gettimeofday ()) -. mismatch_info.existing_launch_time) in
+          let time =
+            if secs > 86400 then Printf.sprintf "%n days" (secs / 86400)
+            else if secs > 3600 then Printf.sprintf "%n hours" (secs / 3600)
+            else if secs > 60 then Printf.sprintf "%n minutes" (secs / 60)
+            else Printf.sprintf "%n seconds" (secs) in
+          Printf.eprintf
+            "  hh_server '%s' was launched %s ago.\n%!"
+            (String.concat " " mismatch_info.existing_argv)
+            time;
+          ()
       end;
       if env.autostart
       then
@@ -263,7 +290,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
            *)
           Tail.close_env tail_env;
           connect env retries start_time tail_env
-        end else raise Exit_status.(Exit_with Build_id_mismatch)
+        end else raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
 
 let connect env =
   let link_file = ServerFiles.log_link env.root in

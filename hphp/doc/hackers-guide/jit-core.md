@@ -135,7 +135,7 @@ types such as `Int`, `Obj`, and `Bool`, and runtime-internal types such as
 `FramePtr`, `Func`, and `Cls`. Primitive types also exist for PHP references and
 pointers to PHP values: for each primitive PHP type `T`, `BoxedT`, `PtrToT`, and
 `PtrToBoxedT` also exist. A number of types commonly thought of as primitives
-are actually unions: `Str` is the defined as `{PersistentStr+CountedStr}` and
+are actually unions: `Str` is defined as `{PersistentStr+CountedStr}` and
 `Arr` is defined as `{PersistentArr+CountedArr}`. Predefined `constexpr Type`
 objects are provided for primitive types and many common union types: simply
 prepend `T` to the name of the type (so `TInt` represents to `Int` type, `TCell`
@@ -167,17 +167,17 @@ PHP level).
   InitNull       | `KindOfNull`
   Null           | `{Uninit+InitNull}`
   Bool           | `false=0`, `true=1` (8 bits at runtime)
-  Int            | `int64_t` (64-bit twos compliment binary integer)
+  Int            | `int64_t` (64-bit two's complement binary integer)
   Dbl            | `double` (IEEE 754 64-bit binary floating point)
   StaticStr      | `StringData*` where `isStatic() == true`
   UncountedStr   | `StringData*` where `isUncounted() == true`
-  PersistentStr  | `StringData*` `{StaticStr+UncountedStr}``
+  PersistentStr  | `StringData*` `{StaticStr+UncountedStr}`
   CountedStr     | `StringData*` where `isRefCounted() == true`
   Str            | `StringData*` `{PersistentStr+CountedStr}`
   StaticArr      | `ArrayData*` where `isStatic() == true`
   UncountedArr   | `ArrayData*` where `isUncounted() == true`
   PersistentArr  | `ArrayData*` `{StaticArr+UncountedArr}`
-  CountedArr     | `ArrayData*` where `isRefCounted() == true``
+  CountedArr     | `ArrayData*` where `isRefCounted() == true`
   Arr            | `ArrayData*` `{PersistentArr+CountedArr}`
   UncountedInit  | `TypedValue`: `{Null+Bool+Int+Dbl+PersistentStr+PersistentArr}`
   Uncounted      | `TypedValue`: `{UncountedInit+Uninit}`
@@ -225,8 +225,8 @@ visible at the PHP level.
 
 ### Values, Instructions, and Blocks
 
-An HHIR program is made up of `Blocks`, each containing one or more
-`IRInstructions`, each of which produces and consumes zero or more `SSATmp`
+An HHIR program is made up of `Block`s, each containing one or more
+`IRInstruction`s, each of which produces and consumes zero or more `SSATmp`
 values. These structures are defined in
 [block.h](../../runtime/vm/jit/block.h),
 [ir-instruction.h](../../runtime/vm/jit/ir-instruction.h), and
@@ -238,8 +238,8 @@ defined it. Every `SSATmp` is defined by exactly one `IRInstruction`, though one
 `Opcode`, indicating the operation it represents, and a `BCMarker`, which
 contains information about the HHBC instruction it is part of. Depending on the
 opcode of the instruction, it may also have one or more `SSATmp*` sources, one
-or more `SSATmp*` dests, one or more `Edge*`s to other `Blocks`, a `Type`
-parameter (known as a typeParam), and an `IRExtraData` struct to hold
+or more `SSATmp*` dests, one or more `Edge*`s to other `Block`s, a `Type`
+parameter (known as a `typeParam`), and an `IRExtraData` struct to hold
 compile-time constants. `IRInstructions` are typically created with the
 `irgen::gen()` function, which takes an `Opcode`, `BCMarker`, and a variadic
 number of arguments representing the other properties of the instruction.
@@ -251,8 +251,8 @@ end" instructions, meaning they must be the last instruction in their `Block`
 and they contain one or more `Edge`s to other `Block`s. `Jmp` is the simplest
 block end instruction; it represents an unconditional jump to a destination
 block. `CheckType` is an example of an instruction with two `Edge`s: "taken"
-and "next". It compares the runtime type of its source value to its typeParam,
-jumping to taken block if the type doesn't match, and jumping the next block if
+and "next". It compares the runtime type of its source value to its `typeParam`,
+jumping to "taken" block if the type doesn't match, and jumping to the "next" block if
 it does.
 
 While block end instructions may only exist at the end of a `Block`, there are

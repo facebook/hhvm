@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -475,20 +476,18 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       if (vals64) cond = CC_E;
     } else {
       auto const bits = v.makeReg();
-      v << load{bitsPtr[bitsOff], bits};
-
-      auto const truncBits = v.makeReg();
       auto const maskedBits = v.makeReg();
 
       if (mask64 <= 0xff && vals64 <= 0xff) {
-        v << movtqb{bits, truncBits};
-        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << loadtqb{bitsPtr[bitsOff], bits};
+        v << andbi{(int8_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpbi{(int8_t)vals64, maskedBits, sf};
       } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
-        v << movtql{bits, truncBits};
-        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << loadtql{bitsPtr[bitsOff], bits};
+        v << andli{(int32_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpli{(int32_t)vals64, maskedBits, sf};
       } else {
+        v << load{bitsPtr[bitsOff], bits};
         v << andq{v.cns(mask64), bits, maskedBits, v.makeReg()};
         v << cmpq{v.cns(vals64), maskedBits, sf};
       }

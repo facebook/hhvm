@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/base/tv-type.h"
+
 #include <memory>
 
 namespace HPHP {
@@ -26,8 +28,8 @@ static EnumCache s_cache;
 
 const StaticString s_enumName("Enum");
 
-const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
-                                                  bool recurse) {
+const EnumValues* EnumCache::getValues(const Class* klass,
+                                       bool recurse) {
   if (UNLIKELY(klass->classVecLen() == 1 ||
                !s_enumName.get()->same(klass->classVec()[0]->name()))) {
     std::string msg;
@@ -35,11 +37,19 @@ const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
     msg += " must derive from Enum";
     EnumCache::failLookup(msg);
   }
+  if (LIKELY(!recurse)) {
+    if (auto values = klass->getEnumValues()) {
+      return values;
+    }
+  }
   return s_cache.getEnumValues(klass, recurse);
 }
 
-const EnumCache::EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
+const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
   assert(isEnum(klass));
+  if (auto values = klass->getEnumValues()) {
+    return values;
+  }
   return s_cache.getEnumValues(klass, false);
 }
 
@@ -62,15 +72,17 @@ EnumCache::~EnumCache() {
   m_enumValuesMap.clear();
 }
 
-const EnumCache::EnumValues* EnumCache::cachePersistentEnumValues(
+const EnumValues* EnumCache::cachePersistentEnumValues(
   const Class* klass,
   bool recurse,
   Array&& names,
   Array&& values) {
-  std::unique_ptr<EnumCache::EnumValues> enums(new EnumCache::EnumValues());
+  std::unique_ptr<EnumValues> enums(new EnumValues());
   enums->values = ArrayData::GetScalarArray(values.get());
   enums->names = ArrayData::GetScalarArray(names.get());
-
+  if (!recurse) {
+    return const_cast<Class*>(klass)->setEnumValues(enums.release());
+  }
   intptr_t key = getKey(klass, recurse);
   EnumValuesMap::accessor acc;
   if (!m_enumValuesMap.insert(acc, key)) {
@@ -81,7 +93,7 @@ const EnumCache::EnumValues* EnumCache::cachePersistentEnumValues(
   return acc->second;
 }
 
-const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
+const EnumValues* EnumCache::cacheRequestEnumValues(
   const Class* klass,
   bool recurse,
   Array&& names,
@@ -93,7 +105,7 @@ const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
   }
   auto& enumValuesData = *m_nonScalarEnumValuesMap;
 
-  auto enums = req::make_raw<EnumCache::EnumValues>();
+  auto enums = req::make_raw<EnumValues>();
   enums->values = std::move(values);
   enums->names = std::move(names);
 
@@ -103,8 +115,8 @@ const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
   return enums;
 }
 
-const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
-                                                       bool recurse) {
+const EnumValues* EnumCache::loadEnumValues(const Class* klass,
+                                            bool recurse) {
   auto const numConstants = klass->numConstants();
   auto values = Array::Create();
   auto names = Array::Create();
@@ -152,7 +164,7 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
       std::move(values));
 }
 
-const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
+const EnumValues* EnumCache::getEnumValuesIfDefined(
   intptr_t key) const {
   EnumValuesMap::const_accessor acc;
   if (m_enumValuesMap.find(acc, key)) {
@@ -170,9 +182,9 @@ const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
   return nullptr;
 }
 
-const EnumCache::EnumValues* EnumCache::getEnumValues(const Class* klass,
-                                                      bool recurse) {
-  const EnumCache::EnumValues* values =
+const EnumValues* EnumCache::getEnumValues(const Class* klass,
+                                           bool recurse) {
+  const EnumValues* values =
       getEnumValuesIfDefined(getKey(klass, recurse));
   if (values == nullptr) {
     values = loadEnumValues(klass, recurse);

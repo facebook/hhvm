@@ -70,6 +70,18 @@ let test_future_is_ready () =
     else
       false
 
+(** Send "hello" to stdin and use sed to replace hello to world. *)
+let test_stdin_input () =
+  let process = Process.exec "sed" ~input:"hello" [ "s/hello/world/g"; ] in
+  match Process.read_and_wait_pid ~timeout:3 process with
+  | Result.Ok (msg, _) ->
+    String_asserter.assert_equals "world" msg
+      "sed should replace hello with world";
+    true
+  | Result.Error failure ->
+    Printf.eprintf "Error %s" (Process.failure_msg failure);
+    false
+
 let tests = [
   ("test_echo", test_echo);
   ("test_process_read_idempotent", test_process_read_idempotent);
@@ -79,6 +91,7 @@ let tests = [
     test_process_finishes_within_timeout);
   ("test_future", test_future);
   ("test_future_is_ready", test_future_is_ready);
+  ("test_stdin_input", test_stdin_input);
 ]
 
 let () =

@@ -40,6 +40,7 @@ type t =
   | Const
   | Construct
   | Continue
+  | Coroutine
   | Darray
   | Default
   | Define
@@ -62,6 +63,7 @@ type t =
   | Foreach
   | Function
   | Global
+  | Goto
   | If
   | Implements
   | Include
@@ -96,6 +98,7 @@ type t =
   | Static
   | String
   | Super
+  | Suspend
   | Switch
   | This
   | Throw
@@ -232,6 +235,7 @@ let from_string keyword =
   | "const" -> Some Const
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
+  | "coroutine" -> Some Coroutine
   | "darray" -> Some Darray
   | "default" -> Some Default
   | "define" -> Some Define
@@ -254,6 +258,7 @@ let from_string keyword =
   | "foreach" -> Some Foreach
   | "function" -> Some Function
   | "global" -> Some Global
+  | "goto" -> Some Goto
   | "if" -> Some If
   | "implements" -> Some Implements
   | "include" -> Some Include
@@ -288,6 +293,7 @@ let from_string keyword =
   | "static" -> Some Static
   | "string" -> Some String
   | "super" -> Some Super
+  | "suspend" -> Some Suspend
   | "switch" -> Some Switch
   | "this" -> Some This
   | "throw" -> Some Throw
@@ -396,6 +402,7 @@ match kind with
   | Const -> "const"
   | Construct -> "__construct"
   | Continue -> "continue"
+  | Coroutine -> "coroutine"
   | Darray -> "darray"
   | Default -> "default"
   | Define -> "define"
@@ -418,6 +425,7 @@ match kind with
   | Foreach -> "foreach"
   | Function -> "function"
   | Global -> "global"
+  | Goto -> "goto"
   | If -> "if"
   | Implements -> "implements"
   | Include -> "include"
@@ -452,6 +460,7 @@ match kind with
   | Static -> "static"
   | String -> "string"
   | Super -> "super"
+  | Suspend -> "suspend"
   | Switch -> "switch"
   | This -> "this"
   | Throw -> "throw"

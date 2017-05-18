@@ -49,6 +49,7 @@ namespace HPHP {
 
 struct Class;
 struct ClassInfo;
+struct EnumValues;
 struct Func;
 struct StringData;
 struct c_WaitHandle;
@@ -169,8 +170,8 @@ struct Class : AtomicCountable {
     LowStringPtr name;
     TypedValueAux val;
 
-    bool isAbstract() const { return val.constModifiers().m_isAbstract; }
-    bool isType()     const { return val.constModifiers().m_isType; }
+    bool isAbstract() const { return val.constModifiers().isAbstract; }
+    bool isType()     const { return val.constModifiers().isType; }
   };
 
   /*
@@ -883,6 +884,11 @@ public:
    */
   const RequirementMap& allRequirements() const;
 
+  /*
+   * Store a cache of enum values. Takes ownership of 'values'.
+   */
+  EnumValues* setEnumValues(EnumValues* values);
+  EnumValues* getEnumValues() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Objects.                                                           [const]
@@ -1021,6 +1027,7 @@ public:
 private:
   struct ExtraData {
     ExtraData() {}
+    ~ExtraData();
 
     /*
      * Vector of (new name, original name) pairs, representing trait aliases.
@@ -1070,6 +1077,11 @@ private:
      * prior to the ObjectData structure itself.
      */
     const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+
+    /*
+     * Cache of persistent enum values, managed by EnumCache.
+     */
+    std::atomic<EnumValues*> m_enumValues{nullptr};
   };
 
   /*

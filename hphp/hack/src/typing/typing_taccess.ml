@@ -60,7 +60,7 @@ let rec expand_with_env ety_env env reason root ids =
     Reason.Rtype_access(reason, trail, r) in
   let ty = reason_func root_r, root_ty in
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
-  let ty = ExprDepTy.apply deps ty in
+  let ty = ExprDepTy.apply env.tenv deps ty in
   env.tenv, (env.ety_env, ty)
 
 and expand env r (root, ids) =
@@ -113,9 +113,14 @@ and expand_ env (root_reason, root_ty as root) =
       | Tunresolved tyl ->
           let env, tyl = List.map_env env tyl begin fun prev_env ty ->
             let env, ty = expand_ env ty in
+            (* If ty here involves a type access, we have to use
+              the current environment's dependent types. Otherwise,
+              we throw away type access information.
+            *)
+            let ty = ExprDepTy.apply env.tenv env.dep_tys ty in
             { prev_env with tenv = env.tenv }, ty
           end in
-          env, (root_reason, Tunresolved tyl)
+          { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
       | Tvar _ ->
           let tenv, ty =
             Env.expand_type env.tenv root in
@@ -150,7 +155,7 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
        *)
       let ety_env =
         { env.ety_env with
-          this_ty = ExprDepTy.apply env.dep_tys root_ty;
+          this_ty = ExprDepTy.apply env.tenv env.dep_tys root_ty;
           from_class = None; } in
       begin
         match typeconst with

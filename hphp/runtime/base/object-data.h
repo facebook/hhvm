@@ -147,10 +147,6 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
     m_weak_refed = flag;
   }
 
-  inline void setPartiallyInited(bool f) const {
-    m_partially_inited = f;
-  }
-
  public:
 
   /*

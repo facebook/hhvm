@@ -59,7 +59,6 @@ struct ScalarExpression : Expression {
   int64_t getLiteralInteger() const;
   std::string getIdentifier() const;
   Variant getVariant() const;
-  int64_t getHash() const;
 
   void setComment(const std::string &comment) override { m_comment = comment;}
   std::string getComment() override { return m_comment;}

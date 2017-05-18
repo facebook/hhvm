@@ -59,6 +59,8 @@ struct ArrayCommon {
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
 
+  static ArrayData* ToVArray(ArrayData*, bool);
+
   enum class RefCheckResult {
     Pass, // No refs
     Fail, // Referenced ref

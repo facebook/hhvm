@@ -852,11 +852,12 @@ let iconst_decl tcopt cst =
 
 (*****************************************************************************)
 
-let name_and_declare_types_program tcopt prog =
+let rec name_and_declare_types_program tcopt prog =
   List.iter prog begin fun def ->
     match def with
-    | Ast.Namespace _
-    | Ast.NamespaceUse _ -> assert false
+    | Ast.Namespace (_, prog) -> name_and_declare_types_program tcopt prog
+    | Ast.NamespaceUse _ -> ()
+    | Ast.SetNamespaceEnv _ -> ()
     | Ast.Fun f -> ifun_decl tcopt f
     | Ast.Class c ->
       let class_env = {

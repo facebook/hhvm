@@ -196,8 +196,10 @@ using LinkTable = tbb::concurrent_hash_map<
   Handle,
   HashCompare
 >;
-
 LinkTable s_linkTable;
+
+using RevLinkTable = tbb::concurrent_hash_map<Handle,Symbol>;
+RevLinkTable s_handleTable;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -395,13 +397,18 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   Guard g(s_allocMutex);
   if (s_linkTable.find(acc, key)) return acc->second;
 
-  auto const retval = alloc(mode, sizeBytes, align, tyIndex);
+  auto const handle = alloc(mode, sizeBytes, align, tyIndex);
+  recordRds(handle, sizeBytes, key);
 
-  recordRds(retval, sizeBytes, key);
-  if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
+  LinkTable::const_accessor insert_acc;
+  // insert_acc lives until after s_handleTable is updated
+  if (!s_linkTable.insert(insert_acc, LinkTable::value_type(key, handle))) {
     always_assert(0);
   }
-  return retval;
+  if (type_scan::hasScanner(tyIndex)) {
+    s_handleTable.insert(std::make_pair(handle, key));
+  }
+  return handle;
 }
 
 Handle attachImpl(Symbol key) {
@@ -422,6 +429,12 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
   }
 }
 
+}
+
+void unbind(Symbol key, Handle handle) {
+  Guard g(s_allocMutex);
+  s_linkTable.erase(key);
+  s_handleTable.erase(handle);
 }
 
 using namespace detail;
@@ -754,12 +767,12 @@ std::vector<void*> allTLBases() {
   return s_tlBaseList;
 }
 
-std::unordered_map<Handle,Symbol> reverseLinkTable() {
-  std::unordered_map<Handle,Symbol> reversed;
-  for (auto& e : s_linkTable) {
-    reversed.insert(std::make_pair(e.second, e.first));
+folly::Optional<Symbol> reverseLink(Handle handle) {
+  RevLinkTable::const_accessor acc;
+  if (s_handleTable.find(acc, handle)) {
+    return acc->second;
   }
-  return reversed;
+  return folly::none;
 }
 
 //////////////////////////////////////////////////////////////////////

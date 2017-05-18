@@ -133,9 +133,8 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
 
   // if it's not possible to reduce the output string's capacity by more
   // than 25%, then we can just return the string as is.
-  size_t estShrinkCap =
-    MemoryManager::estimateCap(sizeof(StringData) + s.size() + 1);
-  if (estShrinkCap * 4 >= (size_t)s.capacity() * 3) {
+  size_t estShrinkCap = MemoryManager::estimateCap(s.size() + kStringOverhead);
+  if (estShrinkCap * 4 >= s.get()->heapSize() * 3) {
     return s;
   }
   // reallocate into a smaller buffer so that we don't waste memory

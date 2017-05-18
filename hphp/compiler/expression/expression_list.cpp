@@ -27,6 +27,7 @@
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -200,20 +201,25 @@ bool ExpressionList::flattenLiteralStrings(
 
 bool ExpressionList::getScalarValue(Variant &value) {
   if (m_elems_kind != ElemsKind::None) {
-    ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
-    auto const result = getListScalars(
-      [&](const Variant& n, const Variant& v) {
-        if (n.isInitialized()) {
-          init.setUnknownKey(n, v);
-        } else {
-          init.append(v);
+    try {
+      ThrowAllErrorsSetter taes;
+      ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
+      auto const result = getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (n.isInitialized()) {
+            init.setUnknownKey(n, v);
+          } else {
+            init.append(v);
+          }
+          return true;
         }
-        return true;
-      }
-    );
-    if (!result) return false;
-    value = init.toVariant();
-    return true;
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
+    } catch (...) {
+      return false;
+    }
   }
   if (m_kind != ListKindParam && !hasEffect()) {
     ExpressionPtr v(listValue());

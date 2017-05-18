@@ -71,7 +71,7 @@ struct MockProxygenServer : ProxygenServer {
 };
 
 std::unique_ptr<HTTPMessage> getRequest(HTTPMethod type) {
-  auto req = folly::make_unique<HTTPMessage>();
+  auto req = std::make_unique<HTTPMessage>();
   req->setMethod(type);
   req->setHTTPVersion(1, 1);
   req->setURL("/");

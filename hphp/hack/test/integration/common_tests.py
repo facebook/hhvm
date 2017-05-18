@@ -38,6 +38,7 @@ class CommonTestDriver(object):
             'HH_TMPDIR': cls.hh_tmp_dir,
             'PATH': '%s:%s:/bin:/usr/bin:/usr/local/bin' %
                 (hh_server_dir, cls.bin_dir),
+            'HH_HOME': os.path.dirname(hh_client),
             'OCAMLRUNPARAM': 'b',
             'HH_LOCALCONF_PATH': cls.repo_dir,
             })
@@ -131,10 +132,28 @@ class CommonTestDriver(object):
                 time.sleep(1)
                 waited_time += 1
 
+    def run_check(self, stdin=None, options=None):
+        options = [] if options is None else options
+        root = self.repo_dir + os.path.sep
+        return self.proc_call(
+            [
+                hh_client,
+                'check',
+                '--retries',
+                '20',
+                self.repo_dir
+            ] + list(map(lambda x: x.format(root=root), options)),
+            stdin=stdin)
+
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.
     def check_cmd(self, expected_output, stdin=None, options=None):
-        raise NotImplementedError()
+        (output, err, _) = self.run_check(stdin, options)
+        root = self.repo_dir + os.path.sep
+        self.assertCountEqual(
+            map(lambda x: x.format(root=root), expected_output),
+            output.splitlines())
+        return err
 
     def check_cmd_and_json_cmd(
         self,

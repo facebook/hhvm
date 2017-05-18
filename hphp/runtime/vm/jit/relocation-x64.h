@@ -27,7 +27,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
 void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&);
 void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
-                TCA*);
+                TCA*, AreaIndex);
 
 }}}
 

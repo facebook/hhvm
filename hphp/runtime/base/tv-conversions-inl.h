@@ -14,16 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/type-conversions.h" // toInt64(double)
-
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 inline bool cellToBool(Cell cell) {
   assert(cellIsPlausible(cell));
@@ -93,6 +96,6 @@ inline TypedNum stringToNumeric(const StringData* sd) {
          make_tv<KindOfInt64>(0);
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }

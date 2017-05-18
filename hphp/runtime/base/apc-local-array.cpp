@@ -21,9 +21,11 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
@@ -60,14 +62,11 @@ struct EscalateHelper {
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
   assert(ad->checkCount());
-  DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
-  if (auto ptr = shared->m_localCache) {
-    auto const cap = shared->m_arr->capacity();
-    auto const stop = ptr + cap;
-    for (; ptr != stop; ++ptr) {
-      // Elements in the local cache must not be KindOfRef.
-      assert(cellIsPlausible(*ptr));
-    }
+  DEBUG_ONLY auto const local = static_cast<const APCLocalArray*>(ad);
+  DEBUG_ONLY auto p = local->localCache();
+  for (auto end = p + local->getSize(); p < end; ++p) {
+    // Elements in the local cache must not be KindOfRef.
+    assert(cellIsPlausible(*p));
   }
   return true;
 }
@@ -79,23 +78,18 @@ Variant APCLocalArray::getKey(ssize_t pos) const {
 
 void APCLocalArray::sweep() {
   m_arr->unreference();
+  m_arr = nullptr;
 }
 
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
   auto const ad = asApcArray(adIn);
-  auto const sv = ad->m_arr->getValue(pos);
-  if (LIKELY(ad->m_localCache != nullptr)) {
-    assert(unsigned(pos) < ad->m_arr->capacity());
-    TypedValue* tv = &ad->m_localCache[pos];
-    if (tv->m_type != KindOfUninit) {
-      return tvAsCVarRef(tv);
-    }
-  } else {
-    static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
-    unsigned cap = ad->m_arr->capacity();
-    ad->m_localCache = req::calloc_raw_array<TypedValue>(cap);
+  assert(unsigned(pos) < ad->getSize());
+  auto const elms = ad->localCache();
+  auto const tv = &elms[pos];
+  if (tv->m_type != KindOfUninit) {
+    return tvAsCVarRef(tv);
   }
-  auto const tv = &ad->m_localCache[pos];
+  auto const sv = ad->m_arr->getValue(pos);
   tvAsVariant(tv) = sv->toLocal();
   assert(tv->m_type != KindOfUninit);
   return tvAsCVarRef(tv);
@@ -103,12 +97,8 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
 
 ALWAYS_INLINE
 APCLocalArray::~APCLocalArray() {
-  if (m_localCache) {
-    for (TypedValue* tv = m_localCache, *end = tv + m_arr->capacity();
-         tv < end; ++tv) {
-      tvRefcountedDecRef(tv);
-    }
-    req::free(m_localCache);
+  for (auto tv = localCache(), end = tv + m_size; tv < end; ++tv) {
+    tvDecRefGen(tv);
   }
   m_arr->unreference();
   MM().removeApcArray(this);
@@ -117,16 +107,9 @@ APCLocalArray::~APCLocalArray() {
 void APCLocalArray::Release(ArrayData* ad) {
   assert(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
+  auto size = a->heapSize();
   a->~APCLocalArray();
-  MM().freeSmallSize(a, sizeof(APCLocalArray));
-}
-
-void APCLocalArray::reap() {
-  // free stuff without running destructor or decrefing contents
-  req::free(m_localCache);
-  sweep();
-  MM().removeApcArray(this);
-  MM().freeSmallSize(this, sizeof(APCLocalArray));
+  MM().objFree(a, size);
 }
 
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
@@ -180,40 +163,40 @@ ArrayData* APCLocalArray::loadElems() const {
   return elems;
 }
 
-ArrayLval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+member_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lval(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lval(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayLval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+member_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalRef(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayLval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lval(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lval(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayLval APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+member_lval APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalRef(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayLval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
+member_lval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalNew(false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalNew(false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayLval APCLocalArray::LvalNewRef(ArrayData* ad, bool copy) {
+member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalNewRef(false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalNewRef(false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayData*
@@ -320,7 +303,7 @@ Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
   auto const tv = k.asTypedValue();
-  tvRefcountedIncRef(tv);
+  tvIncRefGen(tv);
   return *tv;
 }
 

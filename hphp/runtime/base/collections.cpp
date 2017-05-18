@@ -144,62 +144,57 @@ ArrayData* asArray(ObjectData* obj) {
 
 ArrayData* deepCopyArray(ArrayData* arr) {
   assert(arr->isPHPArray());
-  ArrayInit ai(arr->size(), ArrayInit::Mixed{});
+  Array ar(arr);
   IterateKV(
     arr,
     [&](const TypedValue* k, const TypedValue* v) {
+      if (!isRefcountedType(v->m_type)) return false;
       Variant value{tvAsCVarRef(v)};
       deepCopy(value.asTypedValue());
-      ai.setValidKey(tvAsCVarRef(k), value);
+      if (value.asTypedValue()->m_data.num != v->m_data.num) {
+        ar.set(tvAsCVarRef(k), value, true);
+      }
       return false;
     }
   );
-  return ai.create();
+  return ar.detach();
 }
 
 ArrayData* deepCopyVecArray(ArrayData* arr) {
   assert(arr->isVecArray());
-  VecArrayInit ai{arr->size()};
-  PackedArray::IterateV(
+  Array ar(arr);
+  PackedArray::IterateKV(
     arr,
-    [&](const TypedValue* v) {
+    [&](const TypedValue* k, const TypedValue* v) {
+      if (!isRefcountedType(v->m_type)) return false;
       Variant value{tvAsCVarRef(v)};
       deepCopy(value.asTypedValue());
-      ai.append(value);
+      if (value.asTypedValue()->m_data.num != v->m_data.num) {
+        assert(k->m_type == KindOfInt64);
+        ar.set(k->m_data.num, value);
+      }
       return false;
     }
   );
-  return ai.create();
+  return ar.detach();
 }
 
 ArrayData* deepCopyDict(ArrayData* arr) {
   assert(arr->isDict());
-  DictInit ai{arr->size()};
+  Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),
     [&](const TypedValue* k, const TypedValue* v) {
+      if (!isRefcountedType(v->m_type)) return false;
       Variant value{tvAsCVarRef(v)};
       deepCopy(value.asTypedValue());
-      ai.setValidKey(tvAsCVarRef(k), value);
+      if (value.asTypedValue()->m_data.num != v->m_data.num) {
+        ar.set(tvAsCVarRef(k), value);
+      }
       return false;
     }
   );
-  return ai.create();
-}
-
-ArrayData* deepCopyKeyset(ArrayData* arr) {
-  assert(arr->isKeyset());
-  KeysetInit ai{arr->size()};
-  SetArray::Iterate(
-    SetArray::asSet(arr),
-    [&](const TypedValue* v) {
-      Variant value{tvAsCVarRef(v)};
-      deepCopy(value.asTypedValue());
-      ai.add(value);
-      return false;
-    }
-  );
-  return ai.create();
+  return ar.detach();
 }
 
 ObjectData* deepCopySet(c_Set* st) {
@@ -216,6 +211,7 @@ void deepCopy(TypedValue* tv) {
     case KindOfString:
     case KindOfResource:
     case KindOfRef:
+    case KindOfKeyset:
       return;
 
     case KindOfVec: {
@@ -232,13 +228,6 @@ void deepCopy(TypedValue* tv) {
       return;
     }
 
-    case KindOfKeyset: {
-      auto arr = deepCopyKeyset(tv->m_data.parr);
-      decRefArr(tv->m_data.parr);
-      tv->m_data.parr = arr;
-      return;
-    }
-
     case KindOfArray: {
       auto arr = deepCopyArray(tv->m_data.parr);
       decRefArr(tv->m_data.parr);
@@ -250,25 +239,27 @@ void deepCopy(TypedValue* tv) {
       auto obj = tv->m_data.pobj;
       if (!obj->isCollection()) return;
       const auto copyVector = [](BaseVector* vec) {
-        Object o = Object::attach(vec);
-        vec->mutate();
-        assertx(vec->canMutateBuffer());
-        auto sz = vec->m_size;
-        for (size_t i = 0; i < sz; ++i) {
-          deepCopy(&vec->data()[i]);
+        if (vec->size() > 0 && vec->arrayData()->isRefCounted()) {
+          vec->mutate();
+          assertx(vec->canMutateBuffer());
+          auto sz = vec->m_size;
+          for (size_t i = 0; i < sz; ++i) {
+            deepCopy(&vec->data()[i]);
+          }
         }
-        return o.detach();
+        return vec;
       };
       const auto copyMap = [](BaseMap* mp) {
-        Object o = Object::attach(mp);
-        mp->mutate();
-        auto used = mp->posLimit();
-        for (uint32_t i = 0; i < used; ++i) {
-          if (mp->isTombstone(i)) continue;
-          auto* e = &mp->data()[i];
-          deepCopy(&e->data);
+        if (mp->size() > 0 && mp->arrayData()->isRefCounted()) {
+          mp->mutate();
+          auto used = mp->posLimit();
+          for (uint32_t i = 0; i < used; ++i) {
+            if (mp->isTombstone(i)) continue;
+            auto* e = &mp->data()[i];
+            deepCopy(&e->data);
+          }
         }
-        return o.detach();
+        return mp;
       };
       switch (obj->collectionType()) {
         case CollectionType::Pair: {
@@ -494,13 +485,13 @@ void append(ObjectData* obj, TypedValue* val) {
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:
-      static_cast<c_Vector*>(obj)->add(val);
+      static_cast<c_Vector*>(obj)->add(*val);
       break;
     case CollectionType::Map:
-      static_cast<c_Map*>(obj)->add(val);
+      static_cast<c_Map*>(obj)->add(*val);
       break;
     case CollectionType::Set:
-      static_cast<c_Set*>(obj)->add(val);
+      static_cast<c_Set*>(obj)->add(*val);
       break;
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:

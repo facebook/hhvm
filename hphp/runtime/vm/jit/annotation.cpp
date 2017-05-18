@@ -52,11 +52,7 @@ const Func* lookupDirectFunc(SrcKey const sk,
         (isStatic || !(func->attrs() & AttrPrivate))) return nullptr;
     return func;
   }
-  auto const func = Unit::lookupFunc(fname);
-  if (func && func->isNameBindingImmutable(sk.unit())) {
-    return func;
-  }
-  return nullptr;
+  return lookupImmutableFunc(sk.unit(), fname).func;
 }
 
 const Func* lookupDirectCtor(SrcKey const sk, const StringData* clsName) {

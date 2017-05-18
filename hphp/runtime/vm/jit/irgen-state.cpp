@@ -43,6 +43,9 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region)
 {
   updateMarker(*this);
   auto const frame = gen(*this, DefFP);
+  if (context.prologue) {
+    gen(*this, FuncGuard, FuncGuardData { context.func, &unit.prologueStart });
+  }
   // Now that we've defined the FP, update the BC marker appropriately.
   updateMarker(*this);
   gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);

@@ -60,6 +60,7 @@ and hint_ =
   | Harray of hint option * hint option
   | Hdarray of hint * hint
   | Hvarray of hint
+  | Hdarray_or_varray of hint
   | Hprim of tprim
   | Hthis
 
@@ -138,7 +139,10 @@ type stmt =
   (* is_terminal is new *)
   | Throw of is_terminal * expr
   | Return of Pos.t * expr option
+  | GotoLabel of pstring
+  | Goto of pstring
   | Static_var of expr list
+  | Global_var of expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
@@ -486,7 +490,10 @@ class type ['a] visitor_type = object
   method on_noop : 'a -> 'a
   method on_fallthrough : 'a -> 'a
   method on_return : 'a -> Pos.t -> expr option -> 'a
+  method on_goto_label : 'a -> pstring -> 'a
+  method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
+  method on_global_var : 'a -> expr list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
@@ -554,6 +561,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_continue acc _ = acc
   method on_noop acc = acc
   method on_fallthrough acc = acc
+  method on_goto_label acc _ = acc
+  method on_goto acc _ = acc
 
   method on_throw acc _ e =
     let acc = this#on_expr acc e in
@@ -565,6 +574,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Some e -> this#on_expr acc e
 
   method on_static_var acc el = List.fold_left this#on_expr acc el
+
+  method on_global_var acc el = List.fold_left this#on_expr acc el
 
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
@@ -637,6 +648,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Continue p              -> this#on_continue acc p
     | Throw   (is_term, e)    -> this#on_throw acc is_term e
     | Return  (p, eopt)       -> this#on_return acc p eopt
+    | GotoLabel label         -> this#on_goto_label acc label
+    | Goto label              -> this#on_goto acc label
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
     | Do      (b, e)          -> this#on_do acc b e
     | While   (e, b)          -> this#on_while acc e b
@@ -647,6 +660,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
+    | Global_var el           -> this#on_global_var acc el
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

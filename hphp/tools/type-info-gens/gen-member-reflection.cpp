@@ -24,6 +24,7 @@
 #include <boost/program_options.hpp>
 
 #include <folly/Format.h>
+#include <folly/Singleton.h>
 
 #include <fstream>
 #include <iostream>
@@ -167,6 +168,7 @@ void generate(const std::string& source_executable, std::ostream& o) {
 }
 
 int main(int argc, char** argv) {
+  folly::SingletonVault::singleton()->registrationComplete();
   namespace po = boost::program_options;
 
   po::options_description desc{"Allowed options"};

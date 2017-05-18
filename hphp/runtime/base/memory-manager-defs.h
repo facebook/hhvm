@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -192,7 +193,7 @@ inline size_t Header::size() const {
     0, /* Packed */
     0, /* Mixed */
     sizeof(ArrayData), /* Empty */
-    sizeof(APCLocalArray),
+    0, /* APCLocalArray */
     sizeof(GlobalsArray),
     sizeof(ProxyArray),
     0, /* Dict */
@@ -225,7 +226,6 @@ inline size_t Header::size() const {
 #define CHECKSIZE(knd, size) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == size, #knd);
   CHECKSIZE(Empty, sizeof(ArrayData))
-  CHECKSIZE(Apc, sizeof(APCLocalArray))
   CHECKSIZE(Globals, sizeof(GlobalsArray))
   CHECKSIZE(AsyncFuncWH, sizeof(c_AsyncFunctionWaitHandle))
   CHECKSIZE(Vector, sizeof(c_Vector))
@@ -236,6 +236,7 @@ inline size_t Header::size() const {
   CHECKSIZE(ImmMap, sizeof(c_ImmMap))
   CHECKSIZE(ImmSet, sizeof(c_ImmSet))
   CHECKSIZE(Ref, sizeof(RefData))
+  CHECKSIZE(Apc, 0)
   CHECKSIZE(AsyncFuncFrame, 0)
   CHECKSIZE(AwaitAllWH, 0)
   CHECKSIZE(Closure, 0)
@@ -263,6 +264,8 @@ inline size_t Header::size() const {
       return mixed_.heapSize();
     case HeaderKind::Keyset:
       return set_.heapSize();
+    case HeaderKind::Apc:
+      return apc_.heapSize();
     case HeaderKind::String:
       return str_.heapSize();
     case HeaderKind::Closure:
@@ -302,7 +305,6 @@ inline size_t Header::size() const {
       return free_.size();
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
-    case HeaderKind::Apc:
     case HeaderKind::Globals:
     case HeaderKind::Proxy:
     case HeaderKind::Vector:
@@ -423,6 +425,31 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   });
   for (auto ptr : ptrs) {
     fn(ptr);
+  }
+}
+
+template<class Fn> void MemoryManager::sweepApcArrays(Fn fn) {
+  for (size_t i = 0; i < m_apc_arrays.size();) {
+    auto a = m_apc_arrays[i];
+    if (fn(a)) {
+      a->sweep();
+      removeApcArray(a);
+    } else {
+      ++i;
+    }
+  }
+}
+
+template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
+  auto& head = getStringList();
+  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    assert(next && uintptr_t(next) != kSmallFreeWord);
+    assert(next && uintptr_t(next) != kMallocFreeWord);
+    auto const s = StringData::node2str(n);
+    if (fn(s)) {
+      s->unProxy();
+    }
   }
 }
 

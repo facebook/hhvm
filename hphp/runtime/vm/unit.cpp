@@ -49,7 +49,9 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -593,6 +595,8 @@ void Unit::defFunc(Func* func, bool debugger) {
   }
   funcAddr = func;
 
+  if (func->isUnique()) func->getNamedEntity()->setUniqueFunc(func);
+
   if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
 }
 
@@ -603,6 +607,16 @@ Func* Unit::lookupFunc(const NamedEntity* ne) {
 Func* Unit::lookupFunc(const StringData* name) {
   const NamedEntity* ne = NamedEntity::get(name);
   return ne->getCachedFunc();
+}
+
+Func* Unit::lookupBuiltin(const StringData* name) {
+  // Builtins are either persistent (the normal case), or defined at the
+  // beginning of every request (if JitEnableRenameFunction or interception is
+  // enabled). In either case, they're unique, so they should be present in the
+  // NamedEntity.
+  auto const ne = NamedEntity::get(name);
+  auto const f = ne->uniqueFunc();
+  return (f && f->isBuiltin()) ? f : nullptr;
 }
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* name) {
@@ -1543,16 +1557,18 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
     if (LIKELY((m_mergeState & MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        assert(func->top());
+        assertx(func->top());
+        assertx(func->isUnique());
         auto const handle = func->funcHandle();
         getDataRef<LowPtr<Func>>(tcbase, handle) = func;
         if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+        func->getNamedEntity()->setUniqueFunc(func);
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
       do {
         Func* func = *it;
-        assert(func->top());
+        assertx(func->top());
         defFunc(func, debugger);
       } while (++it != fend);
     }
@@ -1751,7 +1767,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            tvRefcountedDecRef(
+            tvDecRefGen(
               g_context->invokeFunc(unit->getMain(nullptr),
                                     init_null_variant,
                                     nullptr, nullptr, ve)

@@ -61,7 +61,7 @@ void HostHealthMonitor::start() {
   if (UpdateFreq < 10) UpdateFreq = 10;
   if (UpdateFreq > 10000) UpdateFreq = 10000;
 
-  m_monitor_func = folly::make_unique<AsyncFunc<HostHealthMonitor>>(
+  m_monitor_func = std::make_unique<AsyncFunc<HostHealthMonitor>>(
     this,
     &HostHealthMonitor::monitor
   );

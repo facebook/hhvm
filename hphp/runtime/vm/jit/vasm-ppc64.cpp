@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/func-guard-ppc64.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -65,6 +64,9 @@ using namespace ppc64_asm;
 using Assembler = ppc64_asm::Assembler;
 
 namespace {
+
+static_assert(folly::kIsLittleEndian,
+  "Code contains little-endian specific optimizations.");
 
 struct Vgen {
   explicit Vgen(Venv& env)
@@ -393,6 +395,7 @@ struct Vgen {
   void emit(const loadtqb& i) { X(lbz, Reg64(i.d),  i.s); }
   void emit(const loadzbl& i) { X(lbz,  Reg64(i.d), i.s); }
   void emit(const loadzbq& i) { X(lbz,  i.d,        i.s); }
+  void emit(const loadtql& i) { X(lwz, Reg64(i.d),  i.s); }
   void emit(const loadzlq& i) { X(lwz,  i.d,        i.s); }
   void emit(const storeb& i)  { X(stb,  Reg64(i.s), i.m); }
   void emit(const storel& i)  { X(stw,  Reg64(i.s), i.m); }
@@ -1084,7 +1087,6 @@ void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
 }
 
 X(cmpbi,  cmpqi,  movzbq, NONE)
-X(subbi,  subqi,  extsb,  ONE_R64(d))
 X(subli,  subqi,  extsl,  ONE_R64(d))
 X(testbi, testqi, extsb,  NONE)
 X(testli, testqi, extsl,  NONE)

@@ -33,10 +33,8 @@ inline StringData* StringData::Make(const char* data, CopyStringMode) {
 // AttachString
 
 inline StringData* StringData::Make(char* data, AttachStringMode) {
-  auto const sd = Make(data, CopyString);
-  free(data);
-  assert(sd->checkSane());
-  return sd;
+  SCOPE_EXIT { free(data); };
+  return Make(data, CopyString);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -70,8 +68,8 @@ inline void StringData::invalidateHash() {
 }
 
 inline void StringData::setSize(int len) {
-  assert(len >= 0 && len <= capacity() && !isImmutable());
-  assert(!hasMultipleRefs());
+  assert(!isImmutable() && !hasMultipleRefs());
+  assert(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
   m_lenAndHash = len;
   assert(m_hash == 0);
@@ -100,12 +98,15 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return aux<CapCode>().decode();
+  return kSizeIndex2StringCapacity[m_aux16];
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat() ? sizeof(StringData) + 1 + capacity() :
-         sizeof(StringData) + sizeof(Proxy);
+  return isFlat()
+    ? isRefCounted()
+      ? MemoryManager::sizeIndex2Size(m_aux16)
+      : size() + kStringOverhead
+    : sizeof(StringData) + sizeof(Proxy);
 }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {
@@ -117,7 +118,7 @@ inline bool StringData::isStrictlyInteger(int64_t& res) const {
   if ((unsigned char)(data()[0] - '-') > ('9' - '-')) {
     return false;
   }
-  if (isStatic() && m_hash < 0) return false;
+  if (m_hash < 0) return false;
   auto const s = slice();
   return is_strictly_integer(s.data(), s.size(), res);
 }
@@ -134,6 +135,14 @@ inline StringData* StringData::modifyChar(int offset, char c) {
   sd->mutableData()[offset] = c;
   sd->m_hash = 0;
   return sd;
+}
+
+inline strhash_t StringData::hash_unsafe(const char* s, size_t len) {
+  return hash_string_i_unsafe(s, len);
+}
+
+inline strhash_t StringData::hash(const char* s, size_t len) {
+  return hash_string_i(s, len);
 }
 
 inline strhash_t StringData::hash() const {

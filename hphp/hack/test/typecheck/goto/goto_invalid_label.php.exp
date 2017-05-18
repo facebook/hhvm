@@ -1,0 +1,2 @@
+File "goto_invalid_label.php", line 4, characters 8-8:
+goto must use a label. (Parsing[1002])

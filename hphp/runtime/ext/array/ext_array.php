@@ -1282,7 +1282,7 @@ function uksort(mixed &$array, mixed $cmp_function): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
@@ -1296,7 +1296,7 @@ function natsort(mixed &$array): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
@@ -1384,4 +1384,23 @@ namespace HH {
 
   <<__Native, __IsFoldable>>
   function darray(mixed $arr): darray;
+
+  /**
+   * array_key_cast() can be used to convert a given value to the equivalent
+   * that would be used if that value was used as a key in an array.
+   *
+   * An integer is returned unchanged. A boolean, float, or resource is cast to
+   * an integer (using standard semantics). A null is converted to an empty
+   * string. A string is converted to an integer if it represents an integer
+   * value, returned unchanged otherwise.
+   *
+   * For object, array, vec, dict, or keyset values, an InvalidArgumentException
+   * is thrown (as these cannot be used as array keys).
+   *
+   * @param mixed $key - The value to be converted.
+   *
+   * @return arraykey - Returns the converted value.
+   */
+  <<__Native, __IsFoldable>>
+  function array_key_cast(mixed $key): arraykey;
 }

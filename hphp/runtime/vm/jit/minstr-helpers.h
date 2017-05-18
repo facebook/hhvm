@@ -17,6 +17,8 @@
 #define incl_HPHP_MINSTR_HELPERS_H_
 
 #include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 
@@ -124,14 +126,14 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
                                  const TypedValue* result) {
   if (LIKELY(result != &localTvRef)) {
     result = tvToCell(result);
-    tvRefcountedIncRef(result);
+    tvIncRefGen(result);
   } else {
     // If a magic getter or array access method returned by reference, we have
     // to incref the inner cell and drop our reference to the RefData.
     // Otherwise we do nothing, since we already own a reference to result.
     if (UNLIKELY(localTvRef.m_type == KindOfRef)) {
       auto inner = *localTvRef.m_data.pref->tv();
-      tvRefcountedIncRef(&inner);
+      tvIncRefGen(&inner);
       decRefRef(localTvRef.m_data.pref);
       return inner;
     }
@@ -245,7 +247,7 @@ void bindPropImpl(RefData* val, PropImpl prop_impl) {
   if (UNLIKELY(prop == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
   } else {
     tvBindRef(val, prop);
   }
@@ -442,56 +444,74 @@ PROFILE_KEYSET_OFFSET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, MOpMode mode>
+template <KeyType keyType, MOpMode mode, bool intishWarn>
 TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
                      TypedValue& tvRef) {
   if (mode == MOpMode::Unset) {
-    return ElemU<keyType>(tvRef, base, key);
+    return ElemU<intishWarn, keyType>(tvRef, base, key);
   }
   if (mode == MOpMode::Define) {
-    return ElemD<mode, false, keyType>(tvRef, base, key);
+    return ElemD<mode, false, intishWarn, keyType>(tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
-  return const_cast<TypedValue*>(Elem<mode, keyType>(tvRef, base, key));
+  return const_cast<TypedValue*>(
+    Elem<mode, intishWarn, keyType>(tvRef, base, key)
+  );
 }
 
-#define ELEM_HELPER_TABLE(m)                          \
-  /* name      keyType         mode   */              \
-  m(elemC,     KeyType::Any,   MOpMode::None)        \
-  m(elemCD,    KeyType::Any,   MOpMode::Define)      \
-  m(elemCU,    KeyType::Any,   MOpMode::Unset)       \
-  m(elemCW,    KeyType::Any,   MOpMode::Warn)        \
-  m(elemI,     KeyType::Int,   MOpMode::None)        \
-  m(elemID,    KeyType::Int,   MOpMode::Define)      \
-  m(elemIU,    KeyType::Int,   MOpMode::Unset)       \
-  m(elemIW,    KeyType::Int,   MOpMode::Warn)        \
-  m(elemS,     KeyType::Str,   MOpMode::None)        \
-  m(elemSD,    KeyType::Str,   MOpMode::Define)      \
-  m(elemSU,    KeyType::Str,   MOpMode::Unset)       \
-  m(elemSW,    KeyType::Str,   MOpMode::Warn)        \
+#define ELEM_HELPER_TABLE(m)                                   \
+  /* name      keyType         mode             intishWarn */  \
+  m(elemC,     KeyType::Any,   MOpMode::None,   false)         \
+  m(elemCD,    KeyType::Any,   MOpMode::Define, false)         \
+  m(elemCU,    KeyType::Any,   MOpMode::Unset,  false)         \
+  m(elemCW,    KeyType::Any,   MOpMode::Warn,   false)         \
+  m(elemI,     KeyType::Int,   MOpMode::None,   false)         \
+  m(elemID,    KeyType::Int,   MOpMode::Define, false)         \
+  m(elemIU,    KeyType::Int,   MOpMode::Unset,  false)         \
+  m(elemIW,    KeyType::Int,   MOpMode::Warn,   false)         \
+  m(elemS,     KeyType::Str,   MOpMode::None,   false)         \
+  m(elemSD,    KeyType::Str,   MOpMode::Define, false)         \
+  m(elemSU,    KeyType::Str,   MOpMode::Unset,  false)         \
+  m(elemSW,    KeyType::Str,   MOpMode::Warn,   false)         \
+  m(elemC_W,   KeyType::Any,   MOpMode::None,   true)          \
+  m(elemCD_W,  KeyType::Any,   MOpMode::Define, true)          \
+  m(elemCU_W,  KeyType::Any,   MOpMode::Unset,  true)          \
+  m(elemCW_W,  KeyType::Any,   MOpMode::Warn,   true)          \
+  m(elemI_W,   KeyType::Int,   MOpMode::None,   true)          \
+  m(elemID_W,  KeyType::Int,   MOpMode::Define, true)          \
+  m(elemIU_W,  KeyType::Int,   MOpMode::Unset,  true)          \
+  m(elemIW_W,  KeyType::Int,   MOpMode::Warn,   true)          \
+  m(elemS_W,   KeyType::Str,   MOpMode::None,   true)          \
+  m(elemSD_W,  KeyType::Str,   MOpMode::Define, true)          \
+  m(elemSU_W,  KeyType::Str,   MOpMode::Unset,  true)          \
+  m(elemSW_W,  KeyType::Str,   MOpMode::Warn,   true)          \
 
-#define X(nm, keyType, mode)                               \
-inline TypedValue* nm(TypedValue* base,                    \
-                      key_type<keyType> key,               \
-                      TypedValue& tvRef) {                 \
-  return elemImpl<keyType,mode>(base, key, tvRef);         \
+#define X(nm, keyType, mode, intishWarn)                      \
+inline TypedValue* nm(TypedValue* base,                       \
+                      key_type<keyType> key,                  \
+                      TypedValue& tvRef) {                    \
+  return elemImpl<keyType,mode,intishWarn>(base, key, tvRef); \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool warn>
+template<bool warn, bool intishWarn>
 inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ?
-    (warn ? a->nvTryGet(i) : a->nvGet(i)) :
-    (warn ? a->nvTryGet(key) : a->nvGet(key));
+  assert(a->isPHPArray());
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return warn ? a->nvTryGet(i) : a->nvGet(i);
+  } else {
+    return warn ? a->nvTryGet(key) : a->nvGet(key);
+  }
 }
 
-template<bool warn>
+template<bool warn, bool intishWarn>
 inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
@@ -516,56 +536,66 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
   return &immutable_uninit_base;
 }
 
-template<KeyType keyType, bool checkForInt, MOpMode mode>
+template<KeyType keyType, bool checkForInt, MOpMode mode, bool intishWarn>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto constexpr warn = mode == MOpMode::Warn;
   auto const ret = checkForInt ?
-    checkedGet<warn>(ad, key) :
+    checkedGet<warn, intishWarn>(ad, key) :
     (warn ? ad->nvTryGet(key) : ad->nvGet(key));
   if (!ret) return elemArrayNotFound<mode>(key);
   return ret;
 }
 
-#define ELEM_ARRAY_D_HELPER_TABLE(m) \
-  /* name                keyType */  \
-  m(elemArraySD,    KeyType::Str)    \
-  m(elemArrayID,    KeyType::Int)    \
+#define ELEM_ARRAY_D_HELPER_TABLE(m)              \
+  /* name                keyType   intishWarn */  \
+  m(elemArraySD,    KeyType::Str,  false)         \
+  m(elemArrayID,    KeyType::Int,  false)         \
+  m(elemArraySDW,   KeyType::Str,  true)          \
+  m(elemArrayIDW,   KeyType::Int,  true)          \
 
-#define X(nm, keyType)                                                 \
-inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
-  auto cbase = tvToCell(base);                                         \
-  assertx(isArrayType(cbase->m_type));                                 \
-  return ElemDArray<MOpMode::None, false, keyType>(cbase, key);       \
+#define X(nm, keyType, intishWarn)                                          \
+inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {            \
+  auto cbase = tvToCell(base);                                              \
+  assertx(isArrayType(cbase->m_type));                                      \
+  return ElemDArray<MOpMode::None, false, intishWarn, keyType>(cbase, key); \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_ARRAY_U_HELPER_TABLE(m) \
-  /* name        keyType */          \
-  m(elemArraySU, KeyType::Str)       \
-  m(elemArrayIU, KeyType::Int)       \
+#define ELEM_ARRAY_U_HELPER_TABLE(m)            \
+  /* name         keyType        intishWarn */  \
+  m(elemArraySU,  KeyType::Str,  false)         \
+  m(elemArrayIU,  KeyType::Int,  false)         \
+  m(elemArraySUW, KeyType::Str,  true)          \
+  m(elemArrayIUW, KeyType::Int,  true)          \
 
-#define X(nm, keyType)                                                 \
+#define X(nm, keyType, intishWarn)                                     \
 inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
   auto cbase = tvToCell(base);                                         \
   assertx(isArrayType(cbase->m_type));                                 \
-  return ElemUArray<keyType>(cbase, key);                              \
+  return ElemUArray<intishWarn, keyType>(cbase, key);                  \
 }
 ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                              \
-  /* name               keyType  checkForInt   mode */          \
-  m(elemArrayS,    KeyType::Str,       false,  MOpMode::None)  \
-  m(elemArraySi,   KeyType::Str,        true,  MOpMode::None)  \
-  m(elemArrayI,    KeyType::Int,       false,  MOpMode::None)  \
-  m(elemArraySW,   KeyType::Str,       false,  MOpMode::Warn)  \
-  m(elemArraySiW,  KeyType::Str,        true,  MOpMode::Warn)  \
-  m(elemArrayIW,   KeyType::Int,       false,  MOpMode::Warn)  \
+#define ELEM_ARRAY_HELPER_TABLE(m)                                           \
+  /* name               keyType   checkForInt   mode           intishWarn */ \
+  m(elemArrayS,     KeyType::Str,       false,  MOpMode::None, false)        \
+  m(elemArraySi,    KeyType::Str,        true,  MOpMode::None, false)        \
+  m(elemArrayI,     KeyType::Int,       false,  MOpMode::None, false)        \
+  m(elemArraySW,    KeyType::Str,       false,  MOpMode::Warn, false)        \
+  m(elemArraySiW,   KeyType::Str,        true,  MOpMode::Warn, false)        \
+  m(elemArrayIW,    KeyType::Int,       false,  MOpMode::Warn, false)        \
+  m(elemArrayS_W,   KeyType::Str,       false,  MOpMode::None, true)         \
+  m(elemArraySi_W,  KeyType::Str,        true,  MOpMode::None, true)         \
+  m(elemArrayI_W,   KeyType::Int,       false,  MOpMode::None, true)         \
+  m(elemArraySW_W,  KeyType::Str,       false,  MOpMode::Warn, true)         \
+  m(elemArraySiW_W, KeyType::Str,        true,  MOpMode::Warn, true)         \
+  m(elemArrayIW_W,  KeyType::Int,       false,  MOpMode::Warn, true)         \
 
-#define X(nm, keyType, checkForInt, mode)                           \
-inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, checkForInt, mode>(ad, key);       \
+#define X(nm, keyType, checkForInt, mode, intishWarn)                     \
+inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) {       \
+  return elemArrayImpl<keyType, checkForInt, mode, intishWarn>(ad, key);  \
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X
@@ -576,22 +606,26 @@ ELEM_ARRAY_HELPER_TABLE(X)
 TypedValue arrayGetNotFound(int64_t k);
 TypedValue arrayGetNotFound(const StringData* k);
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool intishWarn>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  auto ret = checkForInt ? checkedGet<true>(a, key) : a->nvTryGet(key);
+  auto ret = checkForInt
+    ? checkedGet<true, intishWarn>(a, key) : a->nvTryGet(key);
   if (ret) return *ret;
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)                           \
-  /* name        keyType     checkForInt */                \
-  m(arrayGetS,  KeyType::Str,   false)                     \
-  m(arrayGetSi, KeyType::Str,    true)                     \
-  m(arrayGetI,  KeyType::Int,   false)                     \
+#define ARRAYGET_HELPER_TABLE(m)                            \
+  /* name        keyType         checkForInt intishWarn */  \
+  m(arrayGetS,   KeyType::Str,   false,      false)         \
+  m(arrayGetSi,  KeyType::Str,    true,      false)         \
+  m(arrayGetI,   KeyType::Int,   false,      false)         \
+  m(arrayGetSW,  KeyType::Str,   false,      true)          \
+  m(arrayGetSiW, KeyType::Str,    true,      true)          \
+  m(arrayGetIW,  KeyType::Int,   false,      true)          \
 
-#define X(nm, keyType, checkForInt)                          \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return arrayGetImpl<keyType, checkForInt>(a, key);         \
+#define X(nm, keyType, checkForInt, intishWarn)                         \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) {             \
+  return arrayGetImpl<keyType, checkForInt, intishWarn>(a, key);        \
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X
@@ -704,69 +738,86 @@ KEYSETGET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, MOpMode mode>
+template <KeyType keyType, MOpMode mode, bool intishWarn>
 TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Elem<mode, keyType>(localTvRef, base, key);
+  auto result = Elem<mode, intishWarn, keyType>(localTvRef, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
-#define CGETELEM_HELPER_TABLE(m)                  \
-  /* name            key          mode  */       \
-  m(cGetElemCQuiet, KeyType::Any, MOpMode::None) \
-  m(cGetElemIQuiet, KeyType::Int, MOpMode::None) \
-  m(cGetElemSQuiet, KeyType::Str, MOpMode::None) \
-  m(cGetElemC,      KeyType::Any, MOpMode::Warn) \
-  m(cGetElemI,      KeyType::Int, MOpMode::Warn) \
-  m(cGetElemS,      KeyType::Str, MOpMode::Warn) \
+#define CGETELEM_HELPER_TABLE(m)                                   \
+  /* name            key           mode           intishWarn */    \
+  m(cGetElemCQuiet,  KeyType::Any, MOpMode::None, false)           \
+  m(cGetElemIQuiet,  KeyType::Int, MOpMode::None, false)           \
+  m(cGetElemSQuiet,  KeyType::Str, MOpMode::None, false)           \
+  m(cGetElemC,       KeyType::Any, MOpMode::Warn, false)           \
+  m(cGetElemI,       KeyType::Int, MOpMode::Warn, false)           \
+  m(cGetElemS,       KeyType::Str, MOpMode::Warn, false)           \
+  m(cGetElemCQuietW, KeyType::Any, MOpMode::None, true)            \
+  m(cGetElemIQuietW, KeyType::Int, MOpMode::None, true)            \
+  m(cGetElemSQuietW, KeyType::Str, MOpMode::None, true)            \
+  m(cGetElemCW,      KeyType::Any, MOpMode::Warn, true)            \
+  m(cGetElemIW,      KeyType::Int, MOpMode::Warn, true)            \
+  m(cGetElemSW,      KeyType::Str, MOpMode::Warn, true)            \
 
-#define X(nm, kt, mode)                                                \
+#define X(nm, kt, mode, intishWarn)                                     \
 inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \
-  return cGetElemImpl<kt, mode>(base, key);                            \
+  return cGetElemImpl<kt, mode, intishWarn>(base, key);                 \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType>
+template <KeyType keyType, bool intishWarn>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = ElemD<MOpMode::Define, true, keyType>(localTvRef, base, key);
+  auto result =
+    ElemD<MOpMode::Define, true, intishWarn, keyType>(localTvRef, base, key);
   return vGetRefShuffle(localTvRef, result);
 }
 
 #define VGETELEM_HELPER_TABLE(m)                \
-  /* name         keyType */                    \
-  m(vGetElemC,    KeyType::Any)                 \
-  m(vGetElemI,    KeyType::Int)                 \
-  m(vGetElemS,    KeyType::Str)
+  /* name         keyType        intishWarn */  \
+  m(vGetElemC,    KeyType::Any,  false)         \
+  m(vGetElemI,    KeyType::Int,  false)         \
+  m(vGetElemS,    KeyType::Str,  false)         \
+  m(vGetElemCW,   KeyType::Any,  true)          \
+  m(vGetElemIW,   KeyType::Int,  true)          \
+  m(vGetElemSW,   KeyType::Str,  true)
 
-#define X(nm, kt)                                                     \
+#define X(nm, kt, intishWarn)                                         \
 inline RefData* nm(TypedValue* base, key_type<kt> key) {              \
-  return vGetElemImpl<kt>(base, key);                                 \
+  return vGetElemImpl<kt, intishWarn>(base, key);                     \
 }
 VGETELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
+template <bool intishWarn>
 inline ArrayData* checkedSet(ArrayData* a,
                              StringData* key,
                              Cell value,
                              bool copy) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ? a->set(i, value, copy) :
-         a->set(key, value, copy);
+  assert(a->isPHPArray());
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return a->set(i, value, copy);
+  } else {
+    return a->set(key, value, copy);
+  }
 }
 
+template <bool intishWarn>
 inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
   not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType, bool checkForInt, bool setRef>
+template<KeyType keyType, bool checkForInt, bool setRef, bool intishWarn>
 typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
@@ -774,25 +825,33 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isPHPArray());
   const bool copy = a->cowCheck();
-  ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
+  ArrayData* ret = checkForInt ? checkedSet<intishWarn>(a, key, value, copy)
                                : a->set(key, value, copy);
   return arrayRefShuffle<setRef, KindOfArray>(a, ret,
                                               setRef ? ref->tv() : nullptr);
 }
 
-#define ARRAYSET_HELPER_TABLE(m)                             \
-  /* name        keyType        checkForInt  setRef */       \
-  m(arraySetS,   KeyType::Str,   false,      false)          \
-  m(arraySetSi,  KeyType::Str,    true,      false)          \
-  m(arraySetI,   KeyType::Int,   false,      false)          \
-  m(arraySetSR,  KeyType::Str,   false,      true)           \
-  m(arraySetSiR, KeyType::Str,    true,      true)           \
-  m(arraySetIR,  KeyType::Int,   false,      true)           \
+#define ARRAYSET_HELPER_TABLE(m)                                    \
+  /* name         keyType        checkForInt  setRef  intishWarn */ \
+  m(arraySetS,    KeyType::Str,   false,      false,  false)        \
+  m(arraySetSi,   KeyType::Str,    true,      false,  false)        \
+  m(arraySetI,    KeyType::Int,   false,      false,  false)        \
+  m(arraySetSR,   KeyType::Str,   false,      true,   false)        \
+  m(arraySetSiR,  KeyType::Str,    true,      true,   false)        \
+  m(arraySetIR,   KeyType::Int,   false,      true,   false)        \
+  m(arraySetSW,   KeyType::Str,   false,      false,  true)         \
+  m(arraySetSiW,  KeyType::Str,    true,      false,  true)         \
+  m(arraySetIW,   KeyType::Int,   false,      false,  true)         \
+  m(arraySetSRW,  KeyType::Str,   false,      true,   true)         \
+  m(arraySetSiRW, KeyType::Str,    true,      true,   true)         \
+  m(arraySetIRW,  KeyType::Int,   false,      true,   true)         \
 
-#define X(nm, keyType, checkForInt, setRef)                  \
-ShuffleReturn<setRef>::return_type                           \
+#define X(nm, keyType, checkForInt, setRef, intishWarn)                    \
+ShuffleReturn<setRef>::return_type                                         \
 inline nm(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) { \
-  return arraySetImpl<keyType, checkForInt, setRef>(a, key, value, ref);\
+  return arraySetImpl<keyType, checkForInt, setRef, intishWarn>(           \
+    a, key, value, ref                                                     \
+  );                                                                       \
 }
 ARRAYSET_HELPER_TABLE(X)
 #undef X
@@ -895,20 +954,23 @@ KEYSET_SETNEWELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
-template <KeyType keyType>
+template <KeyType keyType, bool intishWarn>
 StringData* setElemImpl(TypedValue* base, key_type<keyType> key, Cell val) {
-  return HPHP::SetElem<false, keyType>(base, key, &val);
+  return HPHP::SetElem<false, intishWarn, keyType>(base, key, &val);
 }
 
 #define SETELEM_HELPER_TABLE(m)                 \
-  /* name       keyType    */                   \
-  m(setElemC,   KeyType::Any)                   \
-  m(setElemI,   KeyType::Int)                   \
-  m(setElemS,   KeyType::Str)
+  /* name       keyType       intishWarn */     \
+  m(setElemC,   KeyType::Any, false)            \
+  m(setElemI,   KeyType::Int, false)            \
+  m(setElemS,   KeyType::Str, false)            \
+  m(setElemCW,  KeyType::Any, true)             \
+  m(setElemIW,  KeyType::Int, true)             \
+  m(setElemSW,  KeyType::Str, true)             \
 
-#define X(nm, kt)                                                     \
+#define X(nm, kt, intishWarn)                                         \
 inline StringData* nm(TypedValue* base, key_type<kt> key, Cell val) { \
-  return setElemImpl<kt>(base, key, val);                             \
+  return setElemImpl<kt, intishWarn>(base, key, val);                 \
 }
 SETELEM_HELPER_TABLE(X)
 #undef X
@@ -916,22 +978,26 @@ SETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool intishWarn>
 uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  auto const value = checkForInt ? checkedGet<false>(a, key) : a->nvGet(key);
+  auto const value = checkForInt
+    ? checkedGet<false, intishWarn>(a, key) : a->nvGet(key);
   return !value ? 0 :
          !tvAsCVarRef(value).isNull();
 }
 
-#define ARRAY_ISSET_HELPER_TABLE(m)                  \
-  /* name           keyType         checkForInt  */  \
-  m(arrayIssetS,    KeyType::Str,   false)           \
-  m(arrayIssetSi,   KeyType::Str,    true)           \
-  m(arrayIssetI,    KeyType::Int,   false)           \
+#define ARRAY_ISSET_HELPER_TABLE(m)                             \
+  /* name           keyType         checkForInt  intishWarn */  \
+  m(arrayIssetS,    KeyType::Str,   false,       false)         \
+  m(arrayIssetSi,   KeyType::Str,    true,       false)         \
+  m(arrayIssetI,    KeyType::Int,   false,       false)         \
+  m(arrayIssetSW,   KeyType::Str,   false,       true)          \
+  m(arrayIssetSiW,  KeyType::Str,    true,       true)          \
+  m(arrayIssetIW,   KeyType::Int,   false,       true)          \
 
-#define X(nm, keyType, checkForInt)                    \
-inline uint64_t nm(ArrayData* a, key_type<keyType> key) {\
-  return arrayIssetImpl<keyType, checkForInt>(a, key);\
+#define X(nm, keyType, checkForInt, intishWarn)                     \
+inline uint64_t nm(ArrayData* a, key_type<keyType> key) {           \
+  return arrayIssetImpl<keyType, checkForInt, intishWarn>(a, key);  \
 }
 ARRAY_ISSET_HELPER_TABLE(X)
 #undef X
@@ -980,42 +1046,51 @@ KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType>
+template<KeyType keyType, bool intishWarn>
 void unsetElemImpl(TypedValue* base, key_type<keyType> key) {
-  HPHP::UnsetElem<keyType>(base, key);
+  HPHP::UnsetElem<intishWarn, keyType>(base, key);
 }
 
 #define UNSET_ELEM_HELPER_TABLE(m)              \
-  /* name         keyType */                    \
-  m(unsetElemC,   KeyType::Any)                 \
-  m(unsetElemI,   KeyType::Int)                 \
-  m(unsetElemS,   KeyType::Str)
+  /* name         keyType       intishWarn */   \
+  m(unsetElemC,   KeyType::Any, false)          \
+  m(unsetElemI,   KeyType::Int, false)          \
+  m(unsetElemS,   KeyType::Str, false)          \
+  m(unsetElemCW,  KeyType::Any, true)           \
+  m(unsetElemIW,  KeyType::Int, true)           \
+  m(unsetElemSW,  KeyType::Str, true)           \
 
-#define X(nm, kt)                                     \
+#define X(nm, kt, intishWarn)                         \
 inline void nm(TypedValue* base, key_type<kt> key) {  \
-  unsetElemImpl<kt>(base, key);                       \
+  unsetElemImpl<kt, intishWarn>(base, key);           \
 }
 UNSET_ELEM_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
-template <KeyType keyType, bool isEmpty>
+template <KeyType keyType, bool isEmpty, bool intishWarn>
 bool issetEmptyElemImpl(TypedValue* base, key_type<keyType> key) {
-  return HPHP::IssetEmptyElem<isEmpty, keyType>(base, key);
+  return HPHP::IssetEmptyElem<isEmpty, intishWarn, keyType>(base, key);
 }
 
-#define ISSET_EMPTY_ELEM_HELPER_TABLE(m)        \
-  /* name         keyType     isEmpty */        \
-  m(issetElemC,   KeyType::Any, false)          \
-  m(issetElemCE,  KeyType::Any,  true)          \
-  m(issetElemI,   KeyType::Int, false)          \
-  m(issetElemIE,  KeyType::Int,  true)          \
-  m(issetElemS,   KeyType::Str, false)          \
-  m(issetElemSE,  KeyType::Str,  true)          \
+#define ISSET_EMPTY_ELEM_HELPER_TABLE(m)                  \
+  /* name         keyType       isEmpty  intishWarn */    \
+  m(issetElemC,   KeyType::Any, false,   false)           \
+  m(issetElemCE,  KeyType::Any,  true,   false)           \
+  m(issetElemI,   KeyType::Int, false,   false)           \
+  m(issetElemIE,  KeyType::Int,  true,   false)           \
+  m(issetElemS,   KeyType::Str, false,   false)           \
+  m(issetElemSE,  KeyType::Str,  true,   false)           \
+  m(issetElemCW,  KeyType::Any, false,   true)            \
+  m(issetElemCEW, KeyType::Any,  true,   true)            \
+  m(issetElemIW,  KeyType::Int, false,   true)            \
+  m(issetElemIEW, KeyType::Int,  true,   true)            \
+  m(issetElemSW,  KeyType::Str, false,   true)            \
+  m(issetElemSEW, KeyType::Str,  true,   true)            \
 
-#define X(nm, kt, isEmpty)                                \
-inline uint64_t nm(TypedValue* base, key_type<kt> key) {  \
-  return issetEmptyElemImpl<kt, isEmpty>(base, key);      \
+#define X(nm, kt, isEmpty, intishWarn)                               \
+inline uint64_t nm(TypedValue* base, key_type<kt> key) {             \
+  return issetEmptyElemImpl<kt, isEmpty, intishWarn>(base, key);     \
 }
 ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 #undef X
@@ -1025,7 +1100,7 @@ ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 template<KeyType keyType>
 TypedValue mapGetImpl(c_Map* map, key_type<keyType> key) {
   TypedValue* ret = map->at(key);
-  tvRefcountedIncRef(ret);
+  tvIncRefGen(ret);
   return *ret;
 }
 
@@ -1038,7 +1113,7 @@ uint64_t mapIssetImpl(c_Map* map, key_type<keyType> key) {
 template<KeyType keyType>
 void mapSetImpl(c_Map* map, key_type<keyType> key, Cell value) {
   // XXX: we should call this directly from the TC.
-  map->set(key, &value);
+  map->set(key, value);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -61,7 +61,7 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
   if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncU) {
     Id funcId = inst.imm[1].u_SA;
     auto const& nep = unit.lookupNamedEntityPairId(funcId);
-    func = Unit::lookupFunc(nep.second);
+    func = lookupImmutableFunc(&unit, nep.first).func;
   } else if (inst.op() == OpFPushCtorD) {
     Id clsId = inst.imm[1].u_SA;
     auto const ctxFunc = inst.func();
@@ -73,13 +73,12 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
     }
   }
 
-  if (func) func->validate();
-  if (func && func->isNameBindingImmutable(&unit)) {
+  if (func) {
+    func->validate();
     pushFuncD(func);
-    return;
+  } else {
+    pushDynFunc();
   }
-
-  pushDynFunc();
 }
 
 void

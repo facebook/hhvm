@@ -65,6 +65,9 @@ module WithExpressionAndDeclAndTypeParser
       the entire label, not the trailing colon. *)
       let parser = with_error parser SyntaxError.error2004 in
       (parser, result)
+    | Name when peek_token_kind ~lookahead:1 parser = Colon ->
+      parse_goto_label parser
+    | Goto -> parse_goto_statement parser
     | _ -> parse_expression_statement parser
 
   and parse_php_function parser =
@@ -527,6 +530,19 @@ module WithExpressionAndDeclAndTypeParser
       let (parser, expr) = parse_expression parser in
       let (parser, semi_token) = expect_semicolon parser in
       (parser, make_return_statement return_token expr semi_token)
+
+  and parse_goto_label parser =
+    let parser, goto_label_name = next_token_as_name parser in
+    let goto_label_name = make_token goto_label_name in
+    let parser, colon = assert_token parser Colon in
+    parser, make_goto_label goto_label_name colon
+
+  and parse_goto_statement parser =
+    let parser, goto = assert_token parser Goto in
+    let parser, goto_label_name = next_token_as_name parser in
+    let goto_label_name = make_token goto_label_name in
+    let parser, semicolon = assert_token parser Semicolon in
+    parser, make_goto_statement goto goto_label_name semicolon
 
   and parse_throw_statement parser =
     let (parser, throw_token) = assert_token parser Throw in

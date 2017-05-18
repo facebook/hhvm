@@ -42,6 +42,7 @@ module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module Conts        = Typing_continuations
+module TCO          = TypecheckerOptions
 
 (*****************************************************************************)
 (* Debugging *)
@@ -452,6 +453,8 @@ and block env stl =
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
+  | GotoLabel _
+  | Goto _
   | Noop ->
       env, T.Noop
   | Expr e ->
@@ -650,6 +653,15 @@ and stmt env = function
     end ~init:env in
     let env, tel, _ = exprs env el in
     env, T.Static_var tel
+  | Global_var el ->
+    let env = List.fold_left el ~f:begin fun env e ->
+      match e with
+        | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
+          Env.add_todo env (TGen.no_generic p x)
+        | _ -> env
+    end ~init:env in
+    let env, tel, _ = exprs env el in
+    env, T.Global_var tel
   | Throw (is_terminal, e) ->
     let p = fst e in
     let env, te, ty = expr env e in
@@ -1543,7 +1555,9 @@ and expr_
         new_object ~check_not_abstract p env c el uel in
       let env = Env.forget_members env p in
       make_result env (T.New(tc, tel, tuel)) (ExprDepTy.make env c ty)
-  | Cast ((_, Harray (None, None)), _) when Env.is_strict env ->
+  | Cast ((_, Harray (None, None)), _)
+    when Env.is_strict env
+    || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
       Errors.array_cast p;
       expr_error env (Reason.Rwitness p)
   | Cast (hint, e) ->
@@ -2315,6 +2329,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let env = if Env.is_strict env then
        (match el, uel with
+         | [(_, Array_get ((_, Class_const _), Some _))], [] ->
+           Errors.const_mutation p Pos.none "";
+           env
          | [(_, Array_get (ea, Some _))], [] ->
            let env, _te, ty = expr env ea in
            if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [
@@ -2661,9 +2678,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
     end
 
   (* Special function `parent::__construct` *)
-  | Class_const (CIparent, ((_, construct) as id))
+  | Class_const (CIparent, ((callee_pos, construct) as id))
     when construct = SN.Members.__construct ->
-      Typing_hooks.dispatch_parent_construct_hook env p;
+      Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty = call_parent_construct p env el uel in
       make_call env (T.make_implicitly_typed_expr fpos
         (T.Class_const (T.CIparent, id))) tel tuel ty
@@ -2965,7 +2982,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
           Errors.undefined_field
             p (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some { sft_optional = true; _ } ->
+        | Some { sft_optional = true; _ } when not is_lvalue ->
           let declared_field =
               List.find_exn
                 ~f:(fun x -> Ast.ShapeField.compare field x = 0)
@@ -2977,7 +2994,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
             declaration_pos
             (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some { sft_optional = false; sft_ty } -> env, sft_ty)
+        | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
   | Toption _ ->
       Errors.null_container p
@@ -3281,8 +3298,8 @@ and obj_get_concrete_ty ~is_method env concrete_ty class_id
               (fun _ -> Reason.Rwitness id_pos, Tany)
           else paraml in
         let member_info = Env.get_member is_method env class_info id_str in
-        Typing_hooks.dispatch_cmethod_hook class_info paraml id env None
-          ~is_method;
+        Typing_hooks.dispatch_cmethod_hook class_info paraml id env
+          (Some class_id) ~is_method;
 
         match member_info with
         | None when not is_method ->
@@ -3842,7 +3859,7 @@ and unop p env uop te ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   match uop with
   | Ast.Unot ->
-      Async.enforce_not_awaitable env p ty;
+      Async.enforce_nullable_or_not_awaitable env p ty;
       (* !$x (logical not) works with any type, so we just return Tbool *)
       make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
@@ -3864,6 +3881,9 @@ and unop p env uop te ty =
       (* We basically just ignore references in non-strict files *)
       if Env.is_strict env then
         Errors.reference_expr p;
+      make_result env te ty
+  | Ast.Usplat ->
+      (* TODO(13988978) Splat operator not supported at use sites yet. *)
       make_result env te ty
 
 and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
@@ -4030,7 +4050,8 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       if not in_cond
       then Typing_equality_check.assert_nontrivial p bop env ty1 ty2;
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
-  | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte ->
+  | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
+      let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
       let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
       let ty_datetime =
@@ -4043,7 +4064,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
        *   function(DateTime, DateTime): bool
        *)
       if both_sub ty_num || both_sub ty_string || both_sub ty_datetime
-      then make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
+      then make_result env te1 te2 (Reason.Rcomp p, ty_result)
       else
         (* TODO this is questionable; PHP's semantics for conversions with "<"
          * are pretty crazy and we may want to just disallow this? *)
@@ -4051,7 +4072,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
          *   function<T>(T, T): bool
          *)
         let env, _ = Type.unify p Reason.URnone env ty1 ty2 in
-        make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
+        make_result env te1 te2 (Reason.Rcomp p, ty_result)
   | Ast.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
@@ -4137,7 +4158,7 @@ and condition_isset env = function
 and condition env tparamet =
   let expr env x =
     let env, _te, ty = raw_expr ~in_cond:true env x in
-    Async.enforce_not_awaitable env (fst x) ty;
+    Async.enforce_nullable_or_not_awaitable env (fst x) ty;
     env, ty
   in function
   | _, Expr_list [] -> env
@@ -4285,7 +4306,7 @@ and condition env tparamet =
 
         if SubType.is_sub_type env obj_ty (
           Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
-        ) then () else Async.enforce_not_awaitable env (fst ivar) x_ty;
+        ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
 
       let safe_instanceof_enabled =
         TypecheckerOptions.experimental_feature_enabled

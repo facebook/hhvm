@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-containers.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/class.h"
 
 #include <boost/noncopyable.hpp>
@@ -143,7 +144,7 @@ private:
 
     MapData& operator[](const TypedValue& tv) {
       auto& elm = m_mapping[tv];
-      if (!elm.m_count) tvRefcountedIncRef(&tv);
+      if (!elm.m_count) tvIncRefGen(&tv);
       return elm;
     }
 

@@ -31,8 +31,8 @@ struct Capability {
    * This sets the  effective user ID of the current process, leaving
    * capability of binding to system ports (< 1024) to the user.
    */
-  static bool ChangeUnixUser(uid_t uid);
-  static bool ChangeUnixUser(const std::string &username);
+  static bool ChangeUnixUser(uid_t uid, bool allowRoot);
+  static bool ChangeUnixUser(const std::string &username, bool allowRoot);
   static bool SetDumpable();
 };
 

@@ -234,31 +234,6 @@ public:
     return m_outputPath;
   }
 
-  /**
-   * Literal string to String precomputation
-   */
-  std::string getLiteralStringName(int64_t hash, int index, bool iproxy = false);
-  std::string getLitVarStringName(int64_t hash, int index, bool iproxy = false);
-  int getLiteralStringId(const std::string &s, int &index);
-
-  /**
-   * Profiling runtime parameter type
-   */
-  std::string getFuncId(ClassScopePtr cls, FunctionScopePtr func);
-  std::vector<const char *> &getFuncTableBucket(FunctionScopePtr func);
-
-  std::set<std::string> m_variableTableFunctions;
-  std::set<int> m_concatLengths;
-  int m_arrayLitstrKeyMaxSize;
-  int m_arrayIntegerKeyMaxSize;
-
-  std::string getHashedName(int64_t hash, int index, const char *prefix,
-                            bool longName = false);
-  void addNamedLiteralVarString(const std::string &s);
-  void addNamedScalarVarArray(const std::string &s);
-  StringToClassScopePtrVecMap getExtensionClasses();
-  void addInteger(int64_t n);
-
   void addHhasFile(std::unique_ptr<UnitEmitter>&& ue);
   std::vector<std::unique_ptr<UnitEmitter>> getHhasFiles();
 private:

@@ -12,8 +12,8 @@
  */
 
 $_SERVER['PHP_ROOT'] = realpath(__DIR__.'/../../../../../../../www-hg');
-require_once $_SERVER['PHP_ROOT'].'/flib/__flib.php';
-flib_init(FlibContext::SCRIPT);
+require_once $_SERVER['PHP_ROOT'].'/flib/init/script.php';
+flib_init_script();
 require_once 'full_fidelity_parser.php';
 
 /*

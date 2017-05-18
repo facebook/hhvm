@@ -36,17 +36,15 @@ module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
  *)
 (*****************************************************************************)
 let () =
-  Errors.is_hh_fixme := begin fun err_pos err_code ->
+  Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
     let filename = Pos.filename err_pos in
     let err_line, _, _ = Pos.info_pos err_pos in
-    match HH_FIXMES.get filename with
-    | None -> false
-    | Some fixme_map ->
-        match IMap.get err_line fixme_map with
-        | None -> false
-        | Some code_map ->
-          IMap.mem err_code code_map
-    end
+    HH_FIXMES.get filename
+    |> Option.value_map ~f:(IMap.get err_line) ~default:None
+    |> Option.value_map ~f:(IMap.get err_code) ~default:None
+    end;
+  Errors.is_hh_fixme := fun err_pos err_code ->
+    Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code)
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
   match Relative_path.Map.get applied_fixmes fn with

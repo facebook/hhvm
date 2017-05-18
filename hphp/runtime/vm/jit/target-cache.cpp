@@ -130,11 +130,13 @@ void FuncCache::lookup(rds::Handle handle,
         ar->m_func = func;
         ar->setThis(this_);
         this_->incRefCount();
+        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
         return;
       }
       if (self_) {
         ar->m_func = func;
         ar->setClass(self_);
+        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
         return;
       }
     }

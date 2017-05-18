@@ -659,32 +659,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 
     if (cmd == "warmup-status") {
-      // This function is like a request-agnostic version of
-      // server_warmup_status().
-      // Three conditions necessary for the jit to qualify as "warmed-up":
-      std::string status_str;
-
-      // 1. Has HHVM evaluated enough requests?
-      if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
-        status_str += "PGO profiling translations are still enabled.\n";
-      }
-      // 2. Has retranslateAll happened yet?
-      if (jit::mcgen::retranslateAllPending()) {
-        status_str += "Waiting on retranslateAll().\n";
-      }
-      // 3. Has code size plateaued? Is the rate of new code emission flat?
-      auto codeSize = jit::tc::getCodeSizeCounter("main");
-      auto codeSizeRate = codeSize->getRateByDuration(
-        std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-      if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
-        folly::format(
-          &status_str,
-          "Code.main is still increasing at a rate of {}\n",
-          codeSizeRate
-        );
-      }
-      // Empty string means "warmed up".
-      transport->sendString(status_str);
+      transport->sendString(jit::tc::warmupStatusString());
       break;
     }
 

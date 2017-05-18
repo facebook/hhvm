@@ -539,6 +539,14 @@ public:
    */
   static void loadFunc(const Func* func);
 
+  /*
+   * Lookup the builtin in this request with name `name', or nullptr if none
+   * exists. This does not access RDS so it is safe to use from within the
+   * compiler. Note that does not mean imply that the name binding for the
+   * builtin is immutable. The builtin could be renamed or intercepted.
+   */
+  static Func* lookupBuiltin(const StringData* name);
+
   /////////////////////////////////////////////////////////////////////////////
   // Class lookup.                                                     [static]
 

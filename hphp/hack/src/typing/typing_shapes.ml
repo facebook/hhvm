@@ -43,28 +43,81 @@ let rec shrink_shape pos field_name env shape =
   | x ->
       env, x
 
+let experiment_enabled env experiment =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env)
+    experiment
+
+(* Helper function to create a temporary "fake" type for use by Shapes::idx,
+  which will be used as the supertype of the first argument passed to
+  Shapes::idx (arg_ty). In most cases, the returned supertype will be
+    shape(?field_name: res, ...)
+
+  If experimental_shape_idx_relaxed is enabled, then we will return shape(...)
+  for the case where field_name does not exist in the arg_ty and arg_ty is
+  partial but does not unset field_name.
+
+  If experimental_optional_shape_field is disabled, then a nullable type will be
+  used instead of an optional type in the returned supertype.
+*)
+let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
+  let optional_shape_field_enabled = experiment_enabled env
+    TypecheckerOptions.experimental_optional_shape_field in
+  let shape_idx_relaxed = experiment_enabled env
+    TypecheckerOptions.experimental_shape_idx_relaxed in
+  let fake_shape_field =
+    if optional_shape_field_enabled then
+      { sft_optional = true; sft_ty = res }
+    else
+      { sft_optional = false; sft_ty = (Reason.Rnone, Toption res) } in
+  if shape_idx_relaxed then
+    match arg_ty with
+    | Tshape (FieldsPartiallyKnown unset_fields, fdm)
+        when not (ShapeMap.mem field_name fdm
+                  || ShapeMap.mem field_name unset_fields) ->
+      (* Special logic for when arg_ty does not have field and does not
+        explicitly unset field. We want to relax Shapes::idx to allow accessing
+        field in this case, so we will only require that arg_ty be a shape. *)
+      (* This is dangerous because the shape may later be instantiated with a
+        field that conflicts with the return type of Shapes::idx. Programmers
+        should instead use direct accessing (i.e. shape[field]) when possible to
+        get stricter behavior. *)
+      Lint.shape_idx_access_unknown_field (Reason.to_pos arg_r)
+        (Env.get_shape_field_name field_name);
+      (* But we allow it anyhow *)
+      Nast.ShapeMap.empty
+    | _ -> Nast.ShapeMap.singleton field_name fake_shape_field
+  else
+    Nast.ShapeMap.singleton field_name fake_shape_field
+
+(* Typing rule for Shapes::idx($s, field, [default])
+
+  Shapes::idx has type res (or Toption res, if res is not already Toption _ and
+  default is not provided), where res is the inferred type of field (provided by
+  $s, or else Tmixed). If default is provided, then res must be a subtype of
+  Tunresolved[default].
+
+  Ensures that $s is a shape. $s must be a subtype of:
+  shape(...) -- if experimental_shape_idx_relaxed and $s does not contain field
+                and does not unset field; i.e. it is possible for an instance of
+                $s to provide the field with an arbitrary type.
+                (This will emit a lint warning)
+  shape(?field => Tmixed, ...)  -- if experimental_optional_shape_field
+  shape(field => ?Tmixed, ...)  -- otherwise
+*)
 let idx env fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env (fst field) (snd field) with
   | None -> env, (Reason.Rwitness (fst field), Tany)
   | Some field_name ->
-    let optional_shape_field_enabled =
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_optional_shape_field in
-    let fake_shape_field =
-      if optional_shape_field_enabled then
-        { sft_optional = true; sft_ty = res }
-      else
-        { sft_optional = false; sft_ty = (Reason.Rnone, Toption res) } in
     let fake_shape = (
       (* Rnone because we don't want the fake shape to show up in messages about
        * field non existing. Errors.missing_optional_field filters them out *)
       Reason.Rnone,
       Tshape (
         FieldsPartiallyKnown Nast.ShapeMap.empty,
-        Nast.ShapeMap.singleton field_name fake_shape_field
+        make_idx_fake_super_shape env shape_ty field_name res
       )
     ) in
     let env =

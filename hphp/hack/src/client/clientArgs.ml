@@ -13,6 +13,22 @@ open ClientCommand
 open ClientEnv
 open Utils
 
+(** Arg specs shared across more than 1 arg parser. *)
+module Common_argspecs = struct
+  let force_dormant_start value_ref =
+    ("--force-dormant-start",
+      Arg.Bool (fun x -> value_ref := x),
+      " If server is dormant, force start a new one instead of waiting for"^
+      " the next one to start up automatically (default: false)")
+
+  let retries value_ref =
+    ("--retries",
+      Arg.Set_int value_ref,
+      spf (" set the number of retries for connecting to server. " ^^
+        "Roughly 1 retry per second (default: %d)") !value_ref;)
+end
+
+
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
@@ -291,9 +307,7 @@ let parse_check_args cmd =
     "--json",
       Arg.Set output_json,
       " output json for machine consumption. (default: false)";
-    "--retries",
-      Arg.Set_int retries,
-      spf " set the number of retries. (default: %d)" !retries;
+    Common_argspecs.retries retries;
     "--retry-if-init",
       Arg.Bool (fun x -> retry_if_init := x),
       " retry if the server is initializing (default: true)";
@@ -309,10 +323,7 @@ let parse_check_args cmd =
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";
-    "--force-dormant-start",
-      Arg.Bool (fun x -> force_dormant_start := x),
-      " If server is dormant, force start a new one instead of waiting for"^
-      " the next one to start up automatically (default: false)";
+    Common_argspecs.force_dormant_start force_dormant_start;
     "--ai",
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
@@ -448,6 +459,11 @@ let parse_build_args () =
       "Usage: %s build [WWW-ROOT]\n\
       Generates build files\n"
       Sys.argv.(0) in
+  let force_dormant_start = ref false in
+  (* 800s was chosen because it was above most of the historical p95 of
+   * hack server startup times as observed here:
+   * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
+  let retries = ref 800 in
   let steps = ref None in
   let ignore_killswitch = ref false in
   let no_steps = ref None in
@@ -476,8 +492,10 @@ let parse_build_args () =
     " build autoload-map and arc-facts using FactsDB";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
+    Common_argspecs.retries retries;
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
+    Common_argspecs.force_dormant_start force_dormant_start;
     "--test-dir", Arg.String (fun x -> test_dir := Some x),
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
@@ -504,8 +522,10 @@ let parse_build_args () =
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
   CBuild { ClientBuild.
+    retries = !retries;
     root = root;
     wait = !wait;
+    force_dormant_start = !force_dormant_start;
     build_opts = { ServerBuild.
       steps = !steps;
       ignore_killswitch = !ignore_killswitch;

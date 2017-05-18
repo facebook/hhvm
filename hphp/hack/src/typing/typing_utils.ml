@@ -195,7 +195,33 @@ let rec find_pos p_default tyl =
 
 let get_printable_shape_field_name = Env.get_shape_field_name
 
-(* This is used in subtyping and unification. *)
+(* Traverses two shapes structurally, parameterized by functions to run on
+  common fields (on_common_field) and when the first shape has an optional
+  field that is missing in the second (on_missing_optional_field).
+
+  The unset fields of the first shape (empty if it is fully known) must be a
+  subset of the unset fields of the second shape. An error will be reported
+  otherwise.
+
+  If the first shape has an optional field that is not present and not
+  explicitly unset in the second shape (i.e. the second shape is partially known
+  and the field is not listed in its unset_fields), then
+  Error.missing_optional_field will be emitted.
+
+  This is used in subtyping and unification. When subtyping, the first and
+  second fields are respectively the supertype and subtype.
+
+  Example of Error.missing_optional_field for subtyping:
+    s = shape('x' => int, ...)
+    t = shape('x' => int, ?'z' => bool)
+    $s = shape('x' => 1, 'z' => 2)
+    $s is a subtype of s
+    $s is not a subtype of t
+    If s is a subtype of t, then by transitivity, $s is a subtype of t
+      --> contradiction
+    We prevent this by making sure that (apply_changes ... t s) fails because
+    t has an optional field 'z' that is not unset by s.
+*)
 let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
   (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) =
   begin match fields_known1, fields_known2 with
@@ -229,7 +255,7 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
           let pos2 = Reason.to_pos r2 in
           Errors.missing_optional_field pos2 pos1
             (get_printable_shape_field_name name);
-          (env, acc)
+        (env, acc)
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
@@ -325,11 +351,11 @@ let unresolved_tparam env (_, (pos, _), _) =
 (*****************************************************************************)
 
 (* Try to unify all the types in a intersection *)
-let fold_unresolved env ty =
+let rec fold_unresolved env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
   | r, Tunresolved [] -> env, (r, Tany)
-  | _, Tunresolved [x] -> env, x
+  | _, Tunresolved [x] -> fold_unresolved env x
   | _, Tunresolved (x :: rl) ->
       (try
         let env, acc =

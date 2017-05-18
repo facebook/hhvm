@@ -53,7 +53,7 @@ $ret = posix_getrlimit();
 VERIFY($ret != false);
 VERIFY(count((array)$ret) != 0);
 
-VERIFY(posix_getsid(posix_getpid()));
+VERIFY(posix_getsid(posix_getpid()) !== false);
 
 $tmpfifo = tempnam('/tmp', 'vmmkfifotest');
 unlink($tmpfifo);

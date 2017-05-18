@@ -300,6 +300,9 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
       m_tz = TimeZone::Current();
     }
     t->tz_info = m_tz->get();
+    if (!t->tz_info) {
+      raise_error("No tz info found for timezone check for tzdata package.");
+    }
     t->zone_type = TIMELIB_ZONETYPE_ID;
     timelib_unixtime2local(t, (timelib_sll)m_timestamp);
   }
@@ -314,13 +317,13 @@ void DateTime::sweep() {
 // informational
 
 int DateTime::beat() const {
-  int retval = (((((long)m_time->sse)-(((long)m_time->sse) -
+  int retval = ((((long)m_time->sse)-(((long)m_time->sse) -
                                        ((((long)m_time->sse) % 86400) +
-                                        3600))) * 10) / 864);
+                                        3600))) * 10);
   while (retval < 0) {
-    retval += 1000;
+    retval += 864000;
   }
-  retval = retval % 1000;
+  retval = (retval / 864) % 1000;
   return retval;
 }
 
@@ -658,6 +661,7 @@ String DateTime::rfcFormat(const String& format) const {
     case 'i': s.printf("%02d", (int)minute()); break;
     case 's': s.printf("%02d", (int)second()); break;
     case 'u': s.printf("%06d", (int)floor(fraction() * 1000000)); break;
+    case 'v': s.printf("%03d", (int)floor(fraction() * 1000)); break;
     case 'I': s.append(!utc() && m_tz->dst(toTimeStamp(error)) ? 1 : 0);
       break;
     case 'P': rfc_colon = true; /* break intentionally missing */

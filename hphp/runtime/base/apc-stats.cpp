@@ -210,7 +210,7 @@ size_t getMemSize(const ArrayData* arr) {
 std::unique_ptr<APCStats> APCStats::s_apcStats = nullptr;
 
 void APCStats::Create() {
-  s_apcStats = folly::make_unique<APCStats>();
+  s_apcStats = std::make_unique<APCStats>();
 }
 
 APCStats::APCStats() : m_valueSize(nullptr)

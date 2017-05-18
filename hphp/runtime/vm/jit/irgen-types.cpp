@@ -207,6 +207,9 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   assertx(result == AnnotAction::ObjectCheck);
 
   if (!(valType <= TObj)) {
+    if (tc.isResolved()) {
+      return genFail();
+    }
     // For RepoAuthoritative mode, if tc is a type alias we can optimize in
     // some cases
     if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
@@ -362,6 +365,10 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
     case T::Ref:
     case T::InitUnc:
     case T::Unc:
+    case T::OptUncArrKey:
+    case T::OptArrKey:
+    case T::UncArrKey:
+    case T::ArrKey:
       return typeFromRAT(rat, nullptr);
 
     case T::OptExactObj:

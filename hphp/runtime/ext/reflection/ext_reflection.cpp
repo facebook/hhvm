@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -690,7 +691,7 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(s_ReflectionExceptionClass->getCtor(),
                           make_packed_array(message),
                           inst.get())

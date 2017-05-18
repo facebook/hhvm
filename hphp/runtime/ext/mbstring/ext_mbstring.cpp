@@ -2263,7 +2263,7 @@ bool HHVM_FUNCTION(mb_parse_str,
                    VRefParam result /* = null */) {
   php_mb_encoding_handler_info_t info;
   info.data_type              = PARSE_STRING;
-  info.separator              = ";&";
+  info.separator              = "&";
   info.force_register_globals = false;
   info.report_errors          = 1;
   info.to_encoding            = MBSTRG(current_internal_encoding);

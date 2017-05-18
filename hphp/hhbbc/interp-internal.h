@@ -690,35 +690,21 @@ bool thisAvailable(ISS& env) { return env.state.thisAvailable; }
 // null.
 folly::Optional<Type> thisType(ISS& env) {
   if (!env.ctx.cls) return folly::none;
-  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
-    return subObj(*rcls);
-  }
-  return folly::none;
+  return subObj(env.index.resolve_class(env.ctx.cls));
 }
 
 folly::Optional<Type> selfCls(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
-  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
-    return subCls(*rcls);
-  }
+  if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
   return folly::none;
 }
 
 folly::Optional<Type> selfClsExact(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
-  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
-    return clsExact(*rcls);
-  }
+  if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
   return folly::none;
 }
 
 folly::Optional<Type> parentClsExact(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
-  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
-    if (auto const parent = rcls->parent()) {
-      return clsExact(*parent);
-    }
-  }
+  if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
   return folly::none;
 }
 

@@ -13,8 +13,23 @@ const PHP_ROUND_HALF_DOWN = 0;
 const PHP_ROUND_HALF_EVEN = 0;
 const PHP_ROUND_HALF_ODD = 0;
 
-const M_PI = 3.1415926535898;
-const M_E  = 2.718281828459;
+const M_PI = 0.0;
+const M_E  = 0.0;
+const M_LOG2E = 0.0;
+const M_LOG10E = 0.0;
+const M_LN2 = 0.0;
+const M_LN10 = 0.0;
+const M_PI_2 = 0.0;
+const M_PI_4 = 0.0;
+const M_1_PI = 0.0;
+const M_2_PI = 0.0;
+const M_SQRTPI = 0.0;
+const M_2_SQRTPI = 0.0;
+const M_SQRT2 = 0.0;
+const M_SQRT3 = 0.0;
+const M_SQRT1_2 = 0.0;
+const M_LNPI = 0.0;
+const M_EULER = 0.0;
 
 function pi();
 function min($value, ...);

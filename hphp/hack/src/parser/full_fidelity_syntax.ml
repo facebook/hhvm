@@ -168,6 +168,9 @@ module WithToken(Token: TokenType) = struct
       namespace_declarations: t;
       namespace_right_brace: t;
     }
+    and namespace_empty_body = {
+      namespace_semicolon: t;
+    }
     and namespace_use_declaration = {
       namespace_use_keyword: t;
       namespace_use_kind: t;
@@ -196,6 +199,7 @@ module WithToken(Token: TokenType) = struct
     }
     and function_declaration_header = {
       function_async: t;
+      function_coroutine: t;
       function_keyword: t;
       function_ampersand: t;
       function_name: t;
@@ -430,6 +434,15 @@ module WithToken(Token: TokenType) = struct
       return_expression: t;
       return_semicolon: t;
     }
+    and goto_label = {
+      goto_label_name: t;
+      goto_label_colon: t;
+    }
+    and goto_statement = {
+      goto_statement_keyword: t;
+      goto_statement_label_name: t;
+      goto_statement_semicolon: t;
+    }
     and throw_statement = {
       throw_keyword: t;
       throw_expression: t;
@@ -470,6 +483,7 @@ module WithToken(Token: TokenType) = struct
     }
     and anonymous_function = {
       anonymous_async_keyword: t;
+      anonymous_coroutine_keyword: t;
       anonymous_function_keyword: t;
       anonymous_left_paren: t;
       anonymous_parameters: t;
@@ -487,6 +501,7 @@ module WithToken(Token: TokenType) = struct
     }
     and lambda_expression = {
       lambda_async: t;
+      lambda_coroutine: t;
       lambda_signature: t;
       lambda_arrow: t;
       lambda_body: t;
@@ -681,6 +696,7 @@ module WithToken(Token: TokenType) = struct
     }
     and awaitable_creation_expression = {
       awaitable_async: t;
+      awaitable_coroutine: t;
       awaitable_compound_statement: t;
     }
     and xhp_children_declaration = {
@@ -759,6 +775,12 @@ module WithToken(Token: TokenType) = struct
       keyset_type_left_angle: t;
       keyset_type_type: t;
       keyset_type_right_angle: t;
+    }
+    and tuple_type_explicit_specifier = {
+      tuple_type_keyword: t;
+      tuple_type_left_angle: t;
+      tuple_type_types: t;
+      tuple_type_right_angle: t;
     }
     and varray_type_specifier = {
       varray_keyword: t;
@@ -905,6 +927,7 @@ module WithToken(Token: TokenType) = struct
     | PropertyDeclarator of property_declarator
     | NamespaceDeclaration of namespace_declaration
     | NamespaceBody of namespace_body
+    | NamespaceEmptyBody of namespace_empty_body
     | NamespaceUseDeclaration of namespace_use_declaration
     | NamespaceGroupUseDeclaration of namespace_group_use_declaration
     | NamespaceUseClause of namespace_use_clause
@@ -946,6 +969,8 @@ module WithToken(Token: TokenType) = struct
     | CaseLabel of case_label
     | DefaultLabel of default_label
     | ReturnStatement of return_statement
+    | GotoLabel of goto_label
+    | GotoStatement of goto_statement
     | ThrowStatement of throw_statement
     | BreakStatement of break_statement
     | ContinueStatement of continue_statement
@@ -1007,6 +1032,7 @@ module WithToken(Token: TokenType) = struct
     | TypeConstant of type_constant
     | VectorTypeSpecifier of vector_type_specifier
     | KeysetTypeSpecifier of keyset_type_specifier
+    | TupleTypeExplicitSpecifier of tuple_type_explicit_specifier
     | VarrayTypeSpecifier of varray_type_specifier
     | VectorArrayTypeSpecifier of vector_array_type_specifier
     | TypeParameter of type_parameter
@@ -1081,6 +1107,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.NamespaceDeclaration
       | NamespaceBody _ ->
         SyntaxKind.NamespaceBody
+      | NamespaceEmptyBody _ ->
+        SyntaxKind.NamespaceEmptyBody
       | NamespaceUseDeclaration _ ->
         SyntaxKind.NamespaceUseDeclaration
       | NamespaceGroupUseDeclaration _ ->
@@ -1163,6 +1191,10 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.DefaultLabel
       | ReturnStatement _ ->
         SyntaxKind.ReturnStatement
+      | GotoLabel _ ->
+        SyntaxKind.GotoLabel
+      | GotoStatement _ ->
+        SyntaxKind.GotoStatement
       | ThrowStatement _ ->
         SyntaxKind.ThrowStatement
       | BreakStatement _ ->
@@ -1285,6 +1317,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier _ ->
         SyntaxKind.KeysetTypeSpecifier
+      | TupleTypeExplicitSpecifier _ ->
+        SyntaxKind.TupleTypeExplicitSpecifier
       | VarrayTypeSpecifier _ ->
         SyntaxKind.VarrayTypeSpecifier
       | VectorArrayTypeSpecifier _ ->
@@ -1370,6 +1404,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.NamespaceDeclaration
     let is_namespace_body node =
       kind node = SyntaxKind.NamespaceBody
+    let is_namespace_empty_body node =
+      kind node = SyntaxKind.NamespaceEmptyBody
     let is_namespace_use_declaration node =
       kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_group_use_declaration node =
@@ -1452,6 +1488,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.DefaultLabel
     let is_return_statement node =
       kind node = SyntaxKind.ReturnStatement
+    let is_goto_label node =
+      kind node = SyntaxKind.GotoLabel
+    let is_goto_statement node =
+      kind node = SyntaxKind.GotoStatement
     let is_throw_statement node =
       kind node = SyntaxKind.ThrowStatement
     let is_break_statement node =
@@ -1574,6 +1614,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier node =
       kind node = SyntaxKind.KeysetTypeSpecifier
+    let is_tuple_type_explicit_specifier node =
+      kind node = SyntaxKind.TupleTypeExplicitSpecifier
     let is_varray_type_specifier node =
       kind node = SyntaxKind.VarrayTypeSpecifier
     let is_vector_array_type_specifier node =
@@ -1804,6 +1846,12 @@ module WithToken(Token: TokenType) = struct
       namespace_right_brace
     )
 
+    let get_namespace_empty_body_children {
+      namespace_semicolon;
+    } = (
+      namespace_semicolon
+    )
+
     let get_namespace_use_declaration_children {
       namespace_use_keyword;
       namespace_use_kind;
@@ -1858,6 +1906,7 @@ module WithToken(Token: TokenType) = struct
 
     let get_function_declaration_header_children {
       function_async;
+      function_coroutine;
       function_keyword;
       function_ampersand;
       function_name;
@@ -1870,6 +1919,7 @@ module WithToken(Token: TokenType) = struct
       function_where_clause;
     } = (
       function_async,
+      function_coroutine,
       function_keyword,
       function_ampersand,
       function_name,
@@ -2328,6 +2378,24 @@ module WithToken(Token: TokenType) = struct
       return_semicolon
     )
 
+    let get_goto_label_children {
+      goto_label_name;
+      goto_label_colon;
+    } = (
+      goto_label_name,
+      goto_label_colon
+    )
+
+    let get_goto_statement_children {
+      goto_statement_keyword;
+      goto_statement_label_name;
+      goto_statement_semicolon;
+    } = (
+      goto_statement_keyword,
+      goto_statement_label_name,
+      goto_statement_semicolon
+    )
+
     let get_throw_statement_children {
       throw_keyword;
       throw_expression;
@@ -2406,6 +2474,7 @@ module WithToken(Token: TokenType) = struct
 
     let get_anonymous_function_children {
       anonymous_async_keyword;
+      anonymous_coroutine_keyword;
       anonymous_function_keyword;
       anonymous_left_paren;
       anonymous_parameters;
@@ -2416,6 +2485,7 @@ module WithToken(Token: TokenType) = struct
       anonymous_body;
     } = (
       anonymous_async_keyword,
+      anonymous_coroutine_keyword,
       anonymous_function_keyword,
       anonymous_left_paren,
       anonymous_parameters,
@@ -2440,11 +2510,13 @@ module WithToken(Token: TokenType) = struct
 
     let get_lambda_expression_children {
       lambda_async;
+      lambda_coroutine;
       lambda_signature;
       lambda_arrow;
       lambda_body;
     } = (
       lambda_async,
+      lambda_coroutine,
       lambda_signature,
       lambda_arrow,
       lambda_body
@@ -2828,9 +2900,11 @@ module WithToken(Token: TokenType) = struct
 
     let get_awaitable_creation_expression_children {
       awaitable_async;
+      awaitable_coroutine;
       awaitable_compound_statement;
     } = (
       awaitable_async,
+      awaitable_coroutine,
       awaitable_compound_statement
     )
 
@@ -2986,6 +3060,18 @@ module WithToken(Token: TokenType) = struct
       keyset_type_left_angle,
       keyset_type_type,
       keyset_type_right_angle
+    )
+
+    let get_tuple_type_explicit_specifier_children {
+      tuple_type_keyword;
+      tuple_type_left_angle;
+      tuple_type_types;
+      tuple_type_right_angle;
+    } = (
+      tuple_type_keyword,
+      tuple_type_left_angle,
+      tuple_type_types,
+      tuple_type_right_angle
     )
 
     let get_varray_type_specifier_children {
@@ -3378,6 +3464,11 @@ module WithToken(Token: TokenType) = struct
         namespace_declarations;
         namespace_right_brace;
       ]
+      | NamespaceEmptyBody {
+        namespace_semicolon;
+      } -> [
+        namespace_semicolon;
+      ]
       | NamespaceUseDeclaration {
         namespace_use_keyword;
         namespace_use_kind;
@@ -3428,6 +3519,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionDeclarationHeader {
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -3440,6 +3532,7 @@ module WithToken(Token: TokenType) = struct
         function_where_clause;
       } -> [
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -3861,6 +3954,22 @@ module WithToken(Token: TokenType) = struct
         return_expression;
         return_semicolon;
       ]
+      | GotoLabel {
+        goto_label_name;
+        goto_label_colon;
+      } -> [
+        goto_label_name;
+        goto_label_colon;
+      ]
+      | GotoStatement {
+        goto_statement_keyword;
+        goto_statement_label_name;
+        goto_statement_semicolon;
+      } -> [
+        goto_statement_keyword;
+        goto_statement_label_name;
+        goto_statement_semicolon;
+      ]
       | ThrowStatement {
         throw_keyword;
         throw_expression;
@@ -3931,6 +4040,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | AnonymousFunction {
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -3941,6 +4051,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body;
       } -> [
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -3963,11 +4074,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | LambdaExpression {
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
@@ -4316,9 +4429,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | AwaitableCreationExpression {
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       ]
       | XHPChildrenDeclaration {
@@ -4459,6 +4574,17 @@ module WithToken(Token: TokenType) = struct
         keyset_type_left_angle;
         keyset_type_type;
         keyset_type_right_angle;
+      ]
+      | TupleTypeExplicitSpecifier {
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
+      } -> [
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
       ]
       | VarrayTypeSpecifier {
         varray_keyword;
@@ -4828,6 +4954,11 @@ module WithToken(Token: TokenType) = struct
         "namespace_declarations";
         "namespace_right_brace";
       ]
+      | NamespaceEmptyBody {
+        namespace_semicolon;
+      } -> [
+        "namespace_semicolon";
+      ]
       | NamespaceUseDeclaration {
         namespace_use_keyword;
         namespace_use_kind;
@@ -4878,6 +5009,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionDeclarationHeader {
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -4890,6 +5022,7 @@ module WithToken(Token: TokenType) = struct
         function_where_clause;
       } -> [
         "function_async";
+        "function_coroutine";
         "function_keyword";
         "function_ampersand";
         "function_name";
@@ -5311,6 +5444,22 @@ module WithToken(Token: TokenType) = struct
         "return_expression";
         "return_semicolon";
       ]
+      | GotoLabel {
+        goto_label_name;
+        goto_label_colon;
+      } -> [
+        "goto_label_name";
+        "goto_label_colon";
+      ]
+      | GotoStatement {
+        goto_statement_keyword;
+        goto_statement_label_name;
+        goto_statement_semicolon;
+      } -> [
+        "goto_statement_keyword";
+        "goto_statement_label_name";
+        "goto_statement_semicolon";
+      ]
       | ThrowStatement {
         throw_keyword;
         throw_expression;
@@ -5381,6 +5530,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | AnonymousFunction {
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -5391,6 +5541,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body;
       } -> [
         "anonymous_async_keyword";
+        "anonymous_coroutine_keyword";
         "anonymous_function_keyword";
         "anonymous_left_paren";
         "anonymous_parameters";
@@ -5413,11 +5564,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | LambdaExpression {
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         "lambda_async";
+        "lambda_coroutine";
         "lambda_signature";
         "lambda_arrow";
         "lambda_body";
@@ -5766,9 +5919,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | AwaitableCreationExpression {
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         "awaitable_async";
+        "awaitable_coroutine";
         "awaitable_compound_statement";
       ]
       | XHPChildrenDeclaration {
@@ -5909,6 +6064,17 @@ module WithToken(Token: TokenType) = struct
         "keyset_type_left_angle";
         "keyset_type_type";
         "keyset_type_right_angle";
+      ]
+      | TupleTypeExplicitSpecifier {
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
+      } -> [
+        "tuple_type_keyword";
+        "tuple_type_left_angle";
+        "tuple_type_types";
+        "tuple_type_right_angle";
       ]
       | VarrayTypeSpecifier {
         varray_keyword;
@@ -6347,6 +6513,12 @@ module WithToken(Token: TokenType) = struct
           namespace_declarations;
           namespace_right_brace;
         }
+      | (SyntaxKind.NamespaceEmptyBody, [
+          namespace_semicolon;
+        ]) ->
+        NamespaceEmptyBody {
+          namespace_semicolon;
+        }
       | (SyntaxKind.NamespaceUseDeclaration, [
           namespace_use_keyword;
           namespace_use_kind;
@@ -6401,6 +6573,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.FunctionDeclarationHeader, [
           function_async;
+          function_coroutine;
           function_keyword;
           function_ampersand;
           function_name;
@@ -6414,6 +6587,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         FunctionDeclarationHeader {
           function_async;
+          function_coroutine;
           function_keyword;
           function_ampersand;
           function_name;
@@ -6871,6 +7045,24 @@ module WithToken(Token: TokenType) = struct
           return_expression;
           return_semicolon;
         }
+      | (SyntaxKind.GotoLabel, [
+          goto_label_name;
+          goto_label_colon;
+        ]) ->
+        GotoLabel {
+          goto_label_name;
+          goto_label_colon;
+        }
+      | (SyntaxKind.GotoStatement, [
+          goto_statement_keyword;
+          goto_statement_label_name;
+          goto_statement_semicolon;
+        ]) ->
+        GotoStatement {
+          goto_statement_keyword;
+          goto_statement_label_name;
+          goto_statement_semicolon;
+        }
       | (SyntaxKind.ThrowStatement, [
           throw_keyword;
           throw_expression;
@@ -6949,6 +7141,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.AnonymousFunction, [
           anonymous_async_keyword;
+          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -6960,6 +7153,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         AnonymousFunction {
           anonymous_async_keyword;
+          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -6983,12 +7177,14 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.LambdaExpression, [
           lambda_async;
+          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
         ]) ->
         LambdaExpression {
           lambda_async;
+          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -7371,10 +7567,12 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_async;
+          awaitable_coroutine;
           awaitable_compound_statement;
         ]) ->
         AwaitableCreationExpression {
           awaitable_async;
+          awaitable_coroutine;
           awaitable_compound_statement;
         }
       | (SyntaxKind.XHPChildrenDeclaration, [
@@ -7530,6 +7728,18 @@ module WithToken(Token: TokenType) = struct
           keyset_type_left_angle;
           keyset_type_type;
           keyset_type_right_angle;
+        }
+      | (SyntaxKind.TupleTypeExplicitSpecifier, [
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
+        ]) ->
+        TupleTypeExplicitSpecifier {
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
         }
       | (SyntaxKind.VarrayTypeSpecifier, [
           varray_keyword;
@@ -7988,6 +8198,13 @@ module WithToken(Token: TokenType) = struct
         namespace_right_brace;
       ]
 
+    let make_namespace_empty_body
+      namespace_semicolon
+    =
+      from_children SyntaxKind.NamespaceEmptyBody [
+        namespace_semicolon;
+      ]
+
     let make_namespace_use_declaration
       namespace_use_keyword
       namespace_use_kind
@@ -8046,6 +8263,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_function_declaration_header
       function_async
+      function_coroutine
       function_keyword
       function_ampersand
       function_name
@@ -8059,6 +8277,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -8553,6 +8772,26 @@ module WithToken(Token: TokenType) = struct
         return_semicolon;
       ]
 
+    let make_goto_label
+      goto_label_name
+      goto_label_colon
+    =
+      from_children SyntaxKind.GotoLabel [
+        goto_label_name;
+        goto_label_colon;
+      ]
+
+    let make_goto_statement
+      goto_statement_keyword
+      goto_statement_label_name
+      goto_statement_semicolon
+    =
+      from_children SyntaxKind.GotoStatement [
+        goto_statement_keyword;
+        goto_statement_label_name;
+        goto_statement_semicolon;
+      ]
+
     let make_throw_statement
       throw_keyword
       throw_expression
@@ -8639,6 +8878,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_anonymous_function
       anonymous_async_keyword
+      anonymous_coroutine_keyword
       anonymous_function_keyword
       anonymous_left_paren
       anonymous_parameters
@@ -8650,6 +8890,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.AnonymousFunction [
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -8675,12 +8916,14 @@ module WithToken(Token: TokenType) = struct
 
     let make_lambda_expression
       lambda_async
+      lambda_coroutine
       lambda_signature
       lambda_arrow
       lambda_body
     =
       from_children SyntaxKind.LambdaExpression [
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
@@ -9098,10 +9341,12 @@ module WithToken(Token: TokenType) = struct
 
     let make_awaitable_creation_expression
       awaitable_async
+      awaitable_coroutine
       awaitable_compound_statement
     =
       from_children SyntaxKind.AwaitableCreationExpression [
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       ]
 
@@ -9272,6 +9517,19 @@ module WithToken(Token: TokenType) = struct
         keyset_type_left_angle;
         keyset_type_type;
         keyset_type_right_angle;
+      ]
+
+    let make_tuple_type_explicit_specifier
+      tuple_type_keyword
+      tuple_type_left_angle
+      tuple_type_types
+      tuple_type_right_angle
+    =
+      from_children SyntaxKind.TupleTypeExplicitSpecifier [
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
       ]
 
     let make_varray_type_specifier
@@ -9547,6 +9805,74 @@ module WithToken(Token: TokenType) = struct
       ]
 
 
+
+      (* Takes a node and a function from token to token and returns a node with
+      the function applied to the leading token, if there is one. *)
+      let modify_leading_token node f =
+        let rec aux nodes =
+          match nodes with
+          | [] -> (nodes, false)
+          | h :: t ->
+            begin
+            match get_token h with
+            | Some token ->
+              let new_token = f token in
+              let new_token = make_token new_token in
+              ((new_token :: t), true)
+            | None ->
+              let (new_children, success) = aux (children h) in
+              if success then
+                let new_head = from_children (kind h) new_children in
+                ((new_head :: t), true)
+              else
+                let (new_tail, success) = aux t in
+                if success then
+                  ((h :: new_tail), true)
+                else
+                  (nodes, false)
+              end in
+        let (results, _) = aux [node] in
+        match results with
+        | [] -> failwith
+          "how did we get a smaller list out than we started with?"
+        | h :: [] -> h
+        | _ -> failwith
+          "how did we get a larger list out than we started with?"
+
+      (* Takes a node and a function from token to token and returns a node with
+      the function applied to the trailing token, if there is one. *)
+      let modify_trailing_token node f =
+        (* We have a list of nodes, reversed, so the rightmost node is first. *)
+        let rec aux nodes =
+          match nodes with
+          | [] -> (nodes, false)
+          | h :: t ->
+            begin
+            match get_token h with
+            | Some token ->
+              let new_token = f token in
+              let new_token = make_token new_token in
+              ((new_token :: t), true)
+            | None ->
+              let (new_children, success) = aux (List.rev (children h)) in
+              if success then
+                let new_children = List.rev new_children in
+                let new_head = from_children (kind h) new_children in
+                ((new_head :: t), true)
+              else
+                let (new_tail, success) = aux t in
+                if success then
+                  ((h :: new_tail), true)
+                else
+                  (nodes, false)
+              end in
+        let (results, _) = aux [node] in
+        match results with
+        | [] -> failwith
+          "how did we get a smaller list out than we started with?"
+        | h :: [] -> h
+        | _ -> failwith
+          "how did we get a larger list out than we started with?"
 
     end (* WithValueBuilder *)
   end (* WithSyntaxValue *)

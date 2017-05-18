@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_EXT_WEAKREF_H_
 #define incl_HPHP_EXT_WEAKREF_H_
 
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/ext/extension.h"
@@ -42,10 +43,10 @@ struct WeakRefDataHandle final {
     acquire_count = other.acquire_count;
 
     if (acquire_count > 0 && wr_data->pointee.m_type != KindOfUninit) {
-      tvIncRef(&(wr_data->pointee));
+      tvIncRefCountable(&(wr_data->pointee));
     }
     if (old_acquire_count > 0 && old_wr_data->pointee.m_type != KindOfUninit) {
-      tvDecRef(&(old_wr_data->pointee));
+      tvDecRefCountable(&(old_wr_data->pointee));
     }
     return *this;
   }
@@ -54,7 +55,7 @@ struct WeakRefDataHandle final {
 
   ~WeakRefDataHandle() {
     if (acquire_count > 0 && wr_data->pointee.m_type != KindOfUninit) {
-      tvDecRef(&(wr_data->pointee));
+      tvDecRefCountable(&(wr_data->pointee));
     }
   }
 };
@@ -79,7 +80,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
   if (LIKELY(wr_data_handle->wr_data->pointee.m_type != KindOfUninit)) {
     wr_data_handle->acquire_count++;
     if (wr_data_handle->acquire_count == 1) {
-      tvIncRef(&(wr_data_handle->wr_data->pointee));
+      tvIncRefCountable(&(wr_data_handle->wr_data->pointee));
     }
     assert(wr_data_handle->acquire_count > 0);
     return true;
@@ -90,7 +91,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
 TypedValue HHVM_METHOD(WeakRef, get) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
   if (wr_data_handle->wr_data->pointee.m_type != KindOfUninit) {
-    tvIncRef(&(wr_data_handle->wr_data->pointee));
+    tvIncRefCountable(&(wr_data_handle->wr_data->pointee));
     return (wr_data_handle->wr_data->pointee);
   } else {
     return make_tv<KindOfNull>();
@@ -103,7 +104,7 @@ bool HHVM_METHOD(WeakRef, release) {
         && wr_data_handle->acquire_count > 0)) {
     wr_data_handle->acquire_count--;
     if (wr_data_handle->acquire_count == 0) {
-      tvDecRef(&(wr_data_handle->wr_data->pointee));
+      tvDecRefCountable(&(wr_data_handle->wr_data->pointee));
     }
     return true;
   }

@@ -28,9 +28,21 @@ module WithStatementAndDeclAndTypeParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
+  exception Cancel_attempt
+
   let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
+
+  let parse_generic_type_arguments_opt parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) =
+      TypeParser.parse_generic_type_argument_list_opt type_parser
+    in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
     let parser = { parser with lexer; errors } in
@@ -64,7 +76,9 @@ module WithStatementAndDeclAndTypeParser
 
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
-    parse_remaining_expression parser term
+    if kind term = SyntaxKind.QualifiedNameExpression
+    then parse_remaining_expression_or_specified_function_call parser term
+    else parse_remaining_expression parser term
 
   and parse_expression_with_reset_precedence parser =
     with_reset_precedence parser parse_expression
@@ -135,7 +149,10 @@ module WithStatementAndDeclAndTypeParser
     | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
-    | Dollar
+    | Dollar -> parse_dollar_expression parser
+    | Suspend
+      (* TODO: The operand to a suspend is required to be a call to a
+      coroutine. Give an error in a later pass if this isn't the case. *)
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -162,7 +179,8 @@ module WithStatementAndDeclAndTypeParser
     | Function -> parse_anon parser
     | DollarDollar ->
       (parser1, make_pipe_variable_expression (make_token token))
-    | Async -> parse_anon_or_lambda_or_awaitable parser
+    | Async
+    | Coroutine -> parse_anon_or_lambda_or_awaitable parser
     | Include
     | Include_once
     | Require
@@ -562,6 +580,19 @@ module WithStatementAndDeclAndTypeParser
       let operator = Operator.trailing_from_token kind in
       (Operator.precedence operator) < parser.precedence
 
+  and parse_remaining_expression_or_specified_function_call parser term =
+    try begin
+      let parser, type_arguments = parse_generic_type_arguments_opt parser in
+      if kind type_arguments <> SyntaxKind.TypeArguments
+      || List.exists is_missing @@ children type_arguments
+      then raise Cancel_attempt;
+      let term = make_generic_type_specifier term type_arguments in
+      let parser, function_call = parse_function_call parser term in
+      if kind function_call <> SyntaxKind.FunctionCallExpression
+      then raise Cancel_attempt;
+      parser, function_call
+    end with Cancel_attempt -> parse_remaining_expression parser term
+
   and parse_remaining_expression parser term =
     if next_is_lower_precedence parser then (parser, term)
     else match peek_token_kind parser with
@@ -861,6 +892,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Const
     | Construct
     | Continue
+    | Coroutine
     | Darray
     | Dict
     | Default
@@ -883,6 +915,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Foreach
     | Function
     | Global
+    | Goto
     | If
     | Implements
     | Include
@@ -915,6 +948,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Static
     | String
     | Super
+    | Suspend
     | Switch
     | This
     | Throw
@@ -1127,10 +1161,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
         async-opt  lambda-function-signature  ==>  lambda-body
     *)
     let (parser, async) = optional_token parser Async in
+    let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, signature) = parse_lambda_signature parser in
     let (parser, arrow) = expect_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
-    let result = make_lambda_expression async signature arrow body in
+    let result = make_lambda_expression async coroutine signature arrow body in
     (parser, result)
 
   and parse_lambda_signature parser =
@@ -1181,6 +1216,18 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, operand) = parse_expression_with_operator_precedence
       parser operator in
     let result = make_prefix_unary_expression token operand in
+    (parser, result)
+
+  and parse_dollar_expression parser =
+    let (parser, dollar) = assert_token parser Dollar in
+    let (parser, operand) =
+      if peek_token_kind parser = TokenKind.LeftBrace
+      then parse_braced_expression parser
+      else
+        parse_expression_with_operator_precedence parser
+          (Operator.prefix_unary_from_token TokenKind.Dollar)
+    in
+    let result = make_prefix_unary_expression dollar operand in
     (parser, result)
 
   and parse_instanceof_expression parser left =
@@ -1644,7 +1691,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_anon_or_lambda_or_awaitable parser =
     (* TODO: The original Hack parser accepts "async" as an identifier, and
     so we do too. We might consider making it reserved. *)
-    let (parser1, _) = assert_token parser Async in
+    (* Skip any async or coroutine declarations that may be present. When we
+       feed the original parser into the syntax parsers. they will take care of
+       them as appropriate. *)
+    let (parser1, _) = optional_token parser Async in
+    let (parser1, _) = optional_token parser1 Coroutine in
     match peek_token_kind parser1 with
     | Function -> parse_anon parser
     | LeftBrace -> parse_async_block parser
@@ -1656,13 +1707,14 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (*
      * grammar:
      *  awaitable-creation-expression :
-     *    async compound-statement
+     *    async-opt  coroutine-opt  compound-statement
      * TODO awaitable-creation-expression must not be used as the
      *      anonymous-function-body in a lambda-expression
      *)
-    let parser, async = assert_token parser Async in
+    let parser, async = optional_token parser Async in
+    let parser, coroutine = optional_token parser Coroutine in
     let parser, stmt = parse_compound_statement parser in
-    parser, make_awaitable_creation_expression async stmt
+    parser, make_awaitable_creation_expression async coroutine stmt
 
   and parse_anon_use_opt parser =
     (* SPEC:
@@ -1702,7 +1754,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_anon parser =
     (* SPEC
       anonymous-function-creation-expression:
-        async-opt  function
+        async-opt  coroutine-opt  function
         ( anonymous-function-parameter-list-opt  )
         anonymous-function-return-opt
         anonymous-function-use-clauseopt
@@ -1714,14 +1766,25 @@ TODO: This will need to be fixed to allow situations where the qualified name
        parse an optional parameter list; it already takes care of making the
        type annotations optional. *)
     let (parser, async) = optional_token parser Async in
+    let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, fn) = assert_token parser Function in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser in
     let (parser, colon, return_type) = parse_optional_return parser in
     let (parser, use_clause) = parse_anon_use_opt parser in
     let (parser, body) = parse_compound_statement parser in
-    let result = make_anonymous_function async fn left_paren params
-      right_paren colon return_type use_clause body in
+    let result =
+      make_anonymous_function
+        async
+        coroutine
+        fn
+        left_paren
+        params
+        right_paren
+        colon
+        return_type
+        use_clause
+        body in
     (parser, result)
 
   and parse_braced_expression parser =

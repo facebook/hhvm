@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -1023,17 +1024,15 @@ static int64_t iterInit(Iter* dest, Coll* coll,
   }
   (void) new (&dest->arr()) ArrayIter(coll, Style());
 
-  DataType vType = valOut->m_type;
-  assert(vType != KindOfRef);
-  uint64_t vDatum = valOut->m_data.num;
+  auto const oldVal = *valOut;
+  assert(oldVal.m_type != KindOfRef);
   iterValue<Coll, Style>(&dest->arr(), valOut);
-  tvRefcountedDecRefHelper(vType, vDatum);
+  tvDecRefGen(oldVal);
 
   if (keyOut) {
-    DataType kType = keyOut->m_type;
-    uint64_t kDatum = keyOut->m_data.num;
+    auto const oldKey = *keyOut;
     iterKey<Coll, Style>(&dest->arr(), keyOut);
-    tvRefcountedDecRefHelper(kType, kDatum);
+    tvDecRefGen(oldKey);
   }
   return 1LL;
 }
@@ -1046,17 +1045,15 @@ int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
     return 0LL;
   }
 
-  DataType vType = valOut->m_type;
-  assert(vType != KindOfRef);
-  uint64_t vDatum = valOut->m_data.num;
+  auto const oldVal = *valOut;
+  assert(oldVal.m_type != KindOfRef);
   iterValue<Coll, Style>(iter, valOut);
-  tvRefcountedDecRefHelper(vType, vDatum);
+  tvDecRefGen(oldVal);
 
   if (keyOut) {
-    DataType kType = keyOut->m_type;
-    uint64_t kDatum = keyOut->m_data.num;
+    auto const oldKey = *keyOut;
     iterKey<Coll, Style>(iter, keyOut);
-    tvRefcountedDecRefHelper(kType, kDatum);
+    tvDecRefGen(oldKey);
   }
   return 1LL;
 }
@@ -1069,9 +1066,8 @@ int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
 template <bool typeArray, bool withRef>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
-  DataType oldType = out->m_type;
-  assert(withRef || oldType != KindOfRef);
-  uint64_t oldDatum = out->m_data.num;
+  auto const oldVal = *out;
+  assert(withRef || oldVal.m_type != KindOfRef);
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
@@ -1093,14 +1089,13 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
     assert(val.getRawType() != KindOfRef);
     cellDup(*val.asTypedValue(), *out);
   }
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldVal);
 }
 
 template <bool typeArray, bool withRef>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
-  DataType oldType = out->m_type;
-  assert(withRef || oldType != KindOfRef);
-  uint64_t oldDatum = out->m_data.num;
+  auto const oldVal = *out;
+  assert(withRef || oldVal.m_type != KindOfRef);
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   assert((typeArray && iter->arr().getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
@@ -1111,7 +1106,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
     Variant key = arr.first();
     cellDup(*key.asTypedValue(), *out);
   }
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldVal);
 }
 
 static NEVER_INLINE
@@ -1515,10 +1510,9 @@ static int64_t iter_next_apc_array(Iter* iter,
   if (LIKELY(!keyOut)) return 1;
 
   auto const key = APCLocalArray::NvGetKey(ad, pos);
-  auto const keyType  = keyOut->m_type;
-  auto const keyDatum = keyOut->m_data.num;
+  auto const oldKey = *keyOut;
   cellCopy(key, *keyOut);
-  tvRefcountedDecRefHelper(keyType, keyDatum);
+  tvDecRefGen(oldKey);
 
   return 1;
 }
@@ -1563,8 +1557,8 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
           UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
         goto cold;
       }
-      tvDecRefOnly(valOut);
-      tvDecRefOnly(keyOut);
+      tvDecRefGenNZ(valOut);
+      tvDecRefGenNZ(keyOut);
 
       arrIter->setPos(pos);
       tvDupWithRef(packedData(ad)[pos], *valOut);
@@ -1593,8 +1587,8 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
       goto cold;
     }
-    tvDecRefOnly(valOut);
-    tvDecRefOnly(keyOut);
+    tvDecRefGenNZ(valOut);
+    tvDecRefGenNZ(keyOut);
 
     arrIter->setPos(pos);
     mixed->dupArrayElmWithRef(pos, valOut, keyOut);
@@ -1709,7 +1703,7 @@ int64_t iter_next_cold_inc_val(Iter* it,
    * So it's safe to just bump the refcount back up here, and pretend
    * like nothing ever happened.
    */
-  tvRefcountedIncRef(valOut);
+  tvIncRefGen(valOut);
   return iter_next_cold<false>(it, valOut, keyOut);
 }
 

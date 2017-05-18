@@ -1,0 +1,3 @@
+<?hh
+
+$foo[] = 'hello world this is a long string that makes this line go beyond 80 chars';

@@ -29,52 +29,52 @@ struct BaseSet : HashCollection {
     addAll(t);
   }
 
- protected:
-  template <bool raw>
-  void addImpl(int64_t k);
-  template <bool raw>
-  void addImpl(StringData* key);
+protected:
+  template<bool raw> void addImpl(int64_t k);
+  template<bool raw> void addImpl(StringData* k);
 
   void addRaw(int64_t k);
-  void addRaw(StringData* key);
-  void addRaw(const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    if (val->m_type == KindOfInt64) {
-      addRaw(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      addRaw(val->m_data.pstr);
+  void addRaw(StringData* k);
+  void addRaw(TypedValue tv) {
+    assert(tv.m_type != KindOfRef);
+    if (tv.m_type == KindOfInt64) {
+      addRaw(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      addRaw(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
   }
-  void addRaw(const Variant& val) {
-    addRaw(val.asCell());
-  }
+  void addRaw(const Variant& v) { addRaw(*v.asCell()); }
 
- public:
+public:
+  /*
+   * Append an element to the Set, increffing it if it's refcounted.
+   */
   void add(int64_t k);
-  void add(StringData* key);
-  void add(const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    if (val->m_type == KindOfInt64) {
-      add(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      add(val->m_data.pstr);
+  void add(StringData* k);
+  void add(TypedValue tv) {
+    assert(tv.m_type != KindOfRef);
+    if (tv.m_type == KindOfInt64) {
+      add(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      add(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
   }
-  void add(const Variant& val) {
-    add(val.asCell());
-  }
+  void add(const Variant& v) { add(*v.asCell()); }
 
+  /*
+   * Prepend an element to the Set, increffing it if it's refcounted.
+   */
   void addFront(int64_t k);
-  void addFront(StringData* key);
-  void addFront(const TypedValue* val) {
-    if (val->m_type == KindOfInt64) {
-      addFront(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      addFront(val->m_data.pstr);
+  void addFront(StringData* k);
+  void addFront(TypedValue tv) {
+    if (tv.m_type == KindOfInt64) {
+      addFront(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      addFront(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
@@ -125,7 +125,7 @@ struct BaseSet : HashCollection {
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
- protected:
+protected:
   template<class TVector>
   Object php_values() {
     auto vec = req::make<TVector>();
@@ -236,18 +236,18 @@ struct BaseSet : HashCollection {
     throwBadValueType();
   }
 
- public:
+public:
   [[noreturn]] static void throwNoMutableIndexAccess();
   [[noreturn]] static void throwBadValueType();
 
- protected:
+protected:
   // BaseSet is an abstract class with no additional member needing
   // initialization.
   using HashCollection::HashCollection;
 
   ~BaseSet();
 
- private:
+private:
 
   friend struct collections::CollectionsExtension;
   friend struct collections::SetIterator;

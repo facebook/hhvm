@@ -48,6 +48,9 @@ type genv = {
   (* are we in the body of a try statement? *)
   in_try: bool;
 
+  (* are we in the body of a finally statement? *)
+  in_finally: bool;
+
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -120,6 +123,10 @@ module Env : sig
   val fun_id : genv * lenv -> Ast.id -> Ast.id
   val bind_class_const : genv * lenv -> Ast.id -> unit
   val bind_prop : genv * lenv -> Ast.id -> unit
+  val goto_label : genv * lenv -> string -> Pos.t option
+  val new_goto_label : genv * lenv -> pstring -> unit
+  val new_goto_target : genv * lenv -> pstring -> unit
+  val check_goto_references : genv * lenv -> unit
 
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_all : genv * lenv -> (genv * lenv -> 'a) -> all_locals * 'a
@@ -180,6 +187,17 @@ end = struct
     (** Allows us to ban $$ appearances outside of pipe expressions and
      * equals expressions within pipes.  *)
     inside_pipe: bool ref;
+
+    (**
+     * A map from goto label strings to named labels.
+     *)
+    goto_labels: Pos.t SMap.t ref;
+
+    (**
+     * A map from goto label used in a goto statement to the position of that
+     * goto label usage.
+     *)
+    goto_targets: Pos.t SMap.t ref;
   }
 
   let empty_local unbound_mode = {
@@ -189,6 +207,8 @@ end = struct
     unbound_mode;
     has_unsafe = ref false;
     inside_pipe = ref false;
+    goto_labels = ref SMap.empty;
+    goto_targets = ref SMap.empty;
   }
 
   let make_class_genv tcopt tparams mode (cid, ckind) namespace = {
@@ -196,6 +216,7 @@ end = struct
       (if !Autocomplete.auto_complete then FileInfo.Mpartial else mode);
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = tparams;
     current_cls   = Some (cid, ckind);
     class_consts = Hashtbl.create 0;
@@ -215,6 +236,7 @@ end = struct
     in_mode       = FileInfo.(if !Ide.is_ide_mode then Mpartial else Mstrict);
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = cstrs;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -233,6 +255,7 @@ end = struct
     in_mode       = f_mode;
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = params;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -248,6 +271,7 @@ end = struct
     in_mode       = cst.cst_mode;
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = SMap.empty;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -524,6 +548,34 @@ end = struct
   let bind_prop (genv, _env) x =
     bind_class_member genv.class_props x
 
+  (**
+   * Returns the position of the goto label declaration, if it exists.
+   *)
+  let goto_label (_, { goto_labels; _ }) label =
+    SMap.get label !goto_labels
+
+  (**
+   * Adds a goto label and the position of its declaration to the known labels.
+   *)
+  let new_goto_label (_, { goto_labels; _ }) (pos, label) =
+    goto_labels := SMap.add label pos !goto_labels
+
+  (**
+   * Adds a goto target and its reference position to the known targets.
+   *)
+  let new_goto_target (_, { goto_targets; _ }) (pos, label) =
+    goto_targets := SMap.add label pos !goto_targets
+
+  (**
+   * Ensures that goto statements do not reference goto labels that are not
+   * known within the current lenv.
+   *)
+  let check_goto_references (_, { goto_labels; goto_targets; _ }) =
+    let check_label referenced_label referenced_label_pos =
+      if not (SMap.mem referenced_label !goto_labels) then
+        Errors.goto_label_undefined referenced_label_pos referenced_label in
+    SMap.iter check_label !goto_targets
+
   (* Scope, keep the locals, go and name the body, and leave the
    * local environment intact
    *)
@@ -719,6 +771,9 @@ module Make (GetLocals : GetLocals) = struct
     | Hoption h ->
       (* void/noreturn are permitted for Typing.option_return_only_typehint *)
       N.Hoption (hint ~allow_retonly env h)
+    | Hsoft h ->
+      let h = hint ~allow_retonly env h
+      in snd h
     | Hfun (hl, opt, h) ->
       N.Hfun (List.map hl (hint env), opt,
               hint ~allow_retonly:true env h)
@@ -875,7 +930,10 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_darray_and_varray in
         if not darray_and_varray_allowed then Errors.darray_not_supported p;
         Some (match hl with
-          | []
+          | [] ->
+              if (fst env).in_mode = FileInfo.Mstrict then
+                Errors.too_few_type_arguments p;
+              N.Hdarray ((p, N.Hany), (p, N.Hany))
           | [_] -> Errors.too_few_type_arguments p; N.Hany
           | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
@@ -886,8 +944,25 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_darray_and_varray in
         if not darray_and_varray_allowed then Errors.varray_not_supported p;
         Some (match hl with
-          | [] -> Errors.too_few_type_arguments p; N.Hany
+          | [] ->
+              if (fst env).in_mode = FileInfo.Mstrict then
+                Errors.too_few_type_arguments p;
+              N.Hvarray (p, N.Hany)
           | [val_] -> N.Hvarray (hint env val_)
+          | _ -> Errors.too_many_type_arguments p; N.Hany)
+      | nm when nm = SN.Typehints.darray_or_varray ->
+        let darray_and_varray_allowed =
+          TypecheckerOptions.experimental_feature_enabled
+            (fst env).tcopt
+            TypecheckerOptions.experimental_darray_and_varray in
+        if not darray_and_varray_allowed then
+          Errors.darray_or_varray_not_supported p;
+        Some (match hl with
+          | [] ->
+              if (fst env).in_mode = FileInfo.Mstrict then
+                Errors.too_few_type_arguments p;
+              N.Hdarray_or_varray (p, N.Hany)
+          | [val_] -> N.Hdarray_or_varray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.integer ->
         Errors.primitive_invalid_alias p nm SN.Typehints.int;
@@ -1106,6 +1181,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1121,6 +1197,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1138,6 +1215,7 @@ module Make (GetLocals : GetLocals) = struct
       (match acc with
       | Some _ -> Errors.multiple_xhp_category (fst (List.hd_exn cs)); acc
       | None -> Some cs)
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1164,6 +1242,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1177,6 +1256,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method ({ m_name = (p, name); _ } as m)
         when name = SN.Members.__construct ->
       (match acc with
@@ -1196,6 +1276,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1220,6 +1301,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1278,6 +1360,7 @@ module Make (GetLocals : GetLocals) = struct
       let cv = fill_prop [] h cv in
       cv :: acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1292,6 +1375,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
     | Method m when List.mem m.m_kind Static -> method_ (fst env) m :: acc
     | Method _ -> acc
@@ -1308,6 +1392,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
     | Method m when not (List.mem m.m_kind Static) ->
       let genv = fst env in
@@ -1326,32 +1411,53 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst t -> typeconst env t :: acc
 
-  and check_constant_expr (pos, e) =
+  and check_constant_expr env (pos, e) =
     match e with
     | Unsafeexpr _ | Id _ | Null | True | False | Int _
     | Float _ | String _ -> ()
     | Class_const ((_, cls), _) when cls <> "static" -> ()
-
-    | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr e
+    | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr env e
     | Binop (op, e1, e2) ->
       (* Only assignment is invalid *)
       (match op with
         | Eq _ -> Errors.illegal_constant pos
         | _ ->
-          check_constant_expr e1;
-          check_constant_expr e2)
+          check_constant_expr env e1;
+          check_constant_expr env e2)
     | Eif (e1, e2, e3) ->
-      check_constant_expr e1;
-      Option.iter e2 check_constant_expr;
-      check_constant_expr e3
+      check_constant_expr env e1;
+      Option.iter e2 (check_constant_expr env);
+      check_constant_expr env e3
+    | Array l -> List.iter l (check_afield_constant_expr env)
+    | Darray l -> List.iter l (fun (e1, e2) ->
+        check_constant_expr env e1;
+        check_constant_expr env e2)
+    | Varray l -> List.iter l (check_constant_expr env)
+    | Collection (id, l) ->
+      let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
+      (* Only vec/keyset/dict are allowed because they are value types *)
+      (match cn with
+        | _ when
+             cn = SN.Collections.cVec
+          || cn = SN.Collections.cKeyset
+          || cn = SN.Collections.cDict ->
+          List.iter l (check_afield_constant_expr env)
+        | _ -> Errors.illegal_constant p)
     | _ -> Errors.illegal_constant pos
+
+  and check_afield_constant_expr env = function
+    | AFvalue e -> check_constant_expr env e
+    | AFkvalue (e1, e2) ->
+        check_constant_expr env e1;
+        check_constant_expr env e2
 
   and constant_expr env e =
     Errors.try_with_error begin fun () ->
-      check_constant_expr e;
+      check_constant_expr env e;
       expr env e
     end (fun () -> fst e, N.Any)
 
@@ -1578,7 +1684,10 @@ module Make (GetLocals : GetLocals) = struct
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)
+    | GotoLabel label      -> name_goto_label env label
+    | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
+    | Global_var el        -> N.Global_var (global_varl env el)
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
@@ -1586,6 +1695,8 @@ module Make (GetLocals : GetLocals) = struct
     | Switch (e, cl)       -> switch_stmt env st e cl
     | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
     | Try (b, cl, fb)      -> try_stmt env st b cl fb
+    | Def_inline _ ->
+      failwith "Naming of inlined definitions not (yet) supported."
     | Expr (cp, Call ((p, Id (fp, fn)), el, uel))
         when fn = SN.SpecialFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM
@@ -1711,7 +1822,7 @@ module Make (GetLocals : GetLocals) = struct
       (* isolate finally from the rest of the try-catch: if the first
        * statement of the try is an uncaught exception, finally will
        * still be executed *)
-      let _all_finally, fb = branch env fb in
+      let _all_finally, fb = branch ({genv with in_finally = true}, lenv) fb in
       let all_locals_b, b = branch ({genv with in_try = true}, lenv) b in
       let all_locals_cl, cl = catchl env cl in
       List.iter all_locals_cl (Env.extend_all_locals env);
@@ -1736,8 +1847,47 @@ module Make (GetLocals : GetLocals) = struct
       List.map stmt_l (stmt env)
     end
 
+  (**
+   * Names a goto label.
+   *
+   * The goto label is added to the local labels if it is not already there.
+   * Otherwise, an error is produced.
+   *
+   * An error is produced if this is called within a finally block.
+   *)
+  and name_goto_label
+      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+    (match Env.goto_label env label_name with
+      | Some original_declaration_pos ->
+        Errors.goto_label_already_defined
+          label_name
+          label_pos
+          original_declaration_pos
+      | None -> Env.new_goto_label env label);
+    if in_finally then
+      Errors.goto_label_defined_in_finally label_pos label_name;
+    N.GotoLabel label
+
+  (**
+   * Names a goto target.
+   *
+   * The goto statement's target label is added to the local goto targets.
+   *
+   * An error is produced if this is called within a finally block.
+   *)
+  and name_goto
+      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+    Env.new_goto_target env label;
+    if in_finally then Errors.goto_invoked_in_finally label_pos label_name;
+    N.Goto label
+
   and static_varl env l = List.map l (static_var env)
   and static_var env = function
+    | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
+    | e -> expr env e
+
+  and global_varl env l = List.map l (global_var env)
+  and global_var env = function
     | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
     | e -> expr env e
 
@@ -2256,7 +2406,9 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in
-        let unsafe = func_body_had_unsafe env in {
+        let unsafe = func_body_had_unsafe env in
+        Env.check_goto_references env;
+        {
           N.fnb_nast = body;
           fnb_unsafe = unsafe;
         }
@@ -2276,6 +2428,7 @@ module Make (GetLocals : GetLocals) = struct
         in
         let body = block env fub_ast in
         let unsafe = func_body_had_unsafe env in
+        Env.check_goto_references env;
         N.NamedBody {
           N.fnb_nast = body;
           fnb_unsafe = unsafe;
@@ -2381,16 +2534,18 @@ module Make (GetLocals : GetLocals) = struct
   (* The entry point to CHECK the program, and transform the program *)
   (**************************************************************************)
 
-  let program tcopt ast = List.filter_map ast begin function
-    | Ast.Fun f -> Some (N.Fun (fun_ tcopt f))
-    | Ast.Class c -> Some (N.Class (class_ tcopt c))
-    | Ast.Typedef t -> Some (N.Typedef (typedef tcopt t))
-    | Ast.Constant cst -> Some (N.Constant (global_const tcopt cst))
-    | Ast.Stmt _ -> None
-    | Ast.Namespace _
-    | Ast.NamespaceUse _ -> assert false
-  end
-
+  let program tcopt ast =
+    let rec program ast =
+    List.concat @@ List.map ast begin function
+    | Ast.Fun f -> [N.Fun (fun_ tcopt f)]
+    | Ast.Class c -> [N.Class (class_ tcopt c)]
+    | Ast.Typedef t -> [N.Typedef (typedef tcopt t)]
+    | Ast.Constant cst -> [N.Constant (global_const tcopt cst)]
+    | Ast.Stmt _ -> []
+    | Ast.Namespace (_ns, ast) -> program ast
+    | Ast.NamespaceUse _ -> []
+    | Ast.SetNamespaceEnv _ -> []
+  end in program ast
 end
 
 include Make(struct

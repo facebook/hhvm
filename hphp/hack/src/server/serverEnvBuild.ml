@@ -101,11 +101,12 @@ let make_genv options config local_config handle =
       indexer, notifier_async, notifier, wait_until_ready
     | None ->
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in
+      let in_fd = Daemon.null_fd () in
       let log_link = ServerFiles.dfind_log root in
       let log_file = Sys_utils.make_link_of_timestamped log_link in
       let log_fd = Daemon.fd_of_path log_file in
       let dfind = DfindLib.init
-        (log_fd, log_fd) (GlobalConfig.scuba_table_name, [root]) in
+        (in_fd, log_fd, log_fd) (GlobalConfig.scuba_table_name, [root]) in
       let notifier () =
         let set = begin try
           Timeout.with_timeout ~timeout:120
@@ -162,6 +163,7 @@ let make_env config =
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
     persistent_client = None;
+    ide_idle = false;
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;
     last_idle_job_time = 0.0;

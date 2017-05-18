@@ -16,40 +16,38 @@
 }
 
 .function main($x = dv_init1, $y = dv_init2) {
-  main_entry:
-    CGetL $x
-    CGetL2 $y
-    Add
-    RetC
+main_entry:
+  CGetL $x
+  CGetL2 $y
+  Add
+  RetC
 
-  outer_handler:
-    Catch
-    PopC
-    Jmp out_of_catch
+dv_init1:
+  Int 0
+  SetL $x
+  PopC
+dv_init2:
+  .try {
+    .try {
+      Int 1
+      SetL $y
+      PopC
 
-  dv_init1:
-    Int 0
-    SetL $x
-    PopC
-  dv_init2:
-   .try_catch outer_handler {
-     .try_catch inner_handler {
-        Int 1
-        SetL $y
-        PopC
-
-        FPushCtorD 0 "Exception"
-        FCall 0
-        PopR
-        Throw
-     }
-    inner_handler: 
-      Catch
+      FPushCtorD 0 "Exception"
+      FCall 0
+      PopR
+      Throw
+    } .catch {
       Int 4321
       SetL $x
       PopC
       Throw
-   }
-  out_of_catch:
-    Jmp main_entry
+    }
+  } .catch {
+    PopC
+    Jmp out_of_catch
+  }
+
+out_of_catch:
+  Jmp main_entry
 }

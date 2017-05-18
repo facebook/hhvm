@@ -1428,6 +1428,16 @@ CastKeyset    [C]  ->  [C:Keyset]
 
   Cast to keyset. Pushes keyset($1) onto the stack.
 
+CastVArray    [C]  ->  [C:Arr]
+
+  Cast to vector-like array. Performs an array cast, but drops any keys from
+  the input.
+
+CastDArray    [C]  ->  [C:Arr]
+
+  Cast to dict-like array. Performs an array cast, but handles object inputs
+  like CastDict.
+
 InstanceOf    [C C]  ->  [C:Bool]
 
   Instance of (instanceof). If $1 is a string and it matches the name of a

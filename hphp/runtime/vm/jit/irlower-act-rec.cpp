@@ -24,7 +24,9 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -334,7 +336,7 @@ static void trimExtraArgsMayReenter(ActRec* ar,
                                     TypedValue* limit) {
   sync_regstate_to_caller(ar);
   do {
-    tvRefcountedDecRef(tvArgs); // may reenter for __destruct
+    tvDecRefGen(tvArgs); // may reenter for __destruct
     ++tvArgs;
   } while (tvArgs != limit);
   ar->setNumArgs(ar->m_func->numParams());
@@ -367,7 +369,7 @@ void trimExtraArgs(ActRec* ar) {
       trimExtraArgsMayReenter(ar, tvArgs, limit);
       return;
     }
-    tvDecRefOnly(tvArgs);
+    tvDecRefGenNZ(tvArgs);
     ++tvArgs;
   } while (tvArgs != limit);
 
@@ -414,7 +416,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   auto tvIncr = tvArgs;
   // An incref is needed to compensate for discarding from the stack.
   for (uint32_t i = 0; i < numExtra; ++i, ++tvIncr) {
-    tvRefcountedIncRef(tvIncr);
+    tvIncRefGen(tvIncr);
   }
   // Write into the last (variadic) param.
   auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;

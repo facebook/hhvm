@@ -341,6 +341,7 @@ public:
 private:
   bool tryParseShapeType(TokenStore::iterator& pos);
   bool tryParseShapeMemberList(TokenStore::iterator& pos);
+  bool tryParseClassConstant(TokenStore::iterator& pos);
 
   bool nextIfToken(TokenStore::iterator& pos, int tok);
 

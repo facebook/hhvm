@@ -147,6 +147,11 @@ inline const StringData* Func::fullDisplayName() const {
   return LIKELY(!target) ? fullName() : target->fullName();
 }
 
+inline NamedEntity* Func::getNamedEntity() {
+  assert(!shared()->m_preClass);
+  return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);
+}
+
 inline const NamedEntity* Func::getNamedEntity() const {
   assert(!shared()->m_preClass);
   return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
@@ -400,6 +405,10 @@ inline bool Func::isMemoizeWrapper() const {
   return shared()->m_isMemoizeWrapper;
 }
 
+inline bool Func::isMemoizeImpl() const {
+  return isMemoizeImplName(name());
+}
+
 inline const StringData* Func::memoizeImplName() const {
   assertx(isMemoizeWrapper());
   return genMemoizeImplName(name());
@@ -557,6 +566,10 @@ inline bool Func::isUnique() const {
 
 inline bool Func::isPersistent() const {
   return m_attrs & AttrPersistent;
+}
+
+inline bool Func::isInterceptable() const {
+  return m_attrs & AttrInterceptable;
 }
 
 inline bool Func::isNoInjection() const {

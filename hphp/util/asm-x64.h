@@ -2265,10 +2265,16 @@ struct DecodedInstruction {
   int64_t immediate() const;
   bool setImmediate(int64_t value);
   bool isNop() const;
-  bool isBranch(bool allowCond = true) const;
+  enum BranchType {
+    Conditional = 1,
+    Unconditional = 1 << 1,
+  };
+  bool isBranch(BranchType branchType = BranchType(Conditional |
+                                                   Unconditional)) const;
   bool isCall() const;
   bool isJmp() const;
   bool isLea() const;
+  bool isFuseable(const DecodedInstruction& next) const;
   ConditionCode jccCondCode() const;
   bool shrinkBranch();
   void widenBranch();
@@ -2335,6 +2341,20 @@ private:
   uint8_t       m_immSz;
   uint8_t       m_offSz;
 };
+
+constexpr DecodedInstruction::BranchType operator|(
+    DecodedInstruction::BranchType a,
+    DecodedInstruction::BranchType b
+  ) {
+  return DecodedInstruction::BranchType((int)a | (int)b);
+}
+
+inline DecodedInstruction::BranchType& operator|=(
+    DecodedInstruction::BranchType& a,
+    const DecodedInstruction::BranchType& b
+  ) {
+  return (a = DecodedInstruction::BranchType((int)a | (int)b));
+}
 
 #undef TRACEMOD
 #undef logical_const

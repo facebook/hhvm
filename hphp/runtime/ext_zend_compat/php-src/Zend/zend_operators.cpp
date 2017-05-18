@@ -28,7 +28,8 @@
 #include "zend_API.h"
 #include "zend_exceptions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_operators.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
 #include "hphp/runtime/base/comparisons.h"
 

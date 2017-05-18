@@ -58,7 +58,14 @@ inline bool IRInstruction::consumesReferences() const {
 }
 
 inline bool IRInstruction::mayRaiseError() const {
-  return opcodeHasFlags(op(), MayRaiseError);
+  if (opcodeHasFlags(op(), MayRaiseError)) {
+    // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
+    // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
+    // aren't.
+    return !is(AKExistsArr, ArrayIdx, ArrayIsset) ||
+      RuntimeOption::EvalHackArrCompatNotices;
+  }
+  return false;
 }
 
 inline bool IRInstruction::isTerminal() const {

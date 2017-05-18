@@ -99,6 +99,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::phidef:
     case Vinstr::phijcc:
     case Vinstr::phijmp:
+    case Vinstr::funcguard:
     // native function abi
     case Vinstr::vcall:
     case Vinstr::vinvoke:
@@ -203,8 +204,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::andbim:
     case Vinstr::notb:
     case Vinstr::orbim:
-    case Vinstr::subb:
-    case Vinstr::subbi:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::cmpb:
@@ -262,6 +261,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::movl:
     case Vinstr::loadl:
     case Vinstr::loadzbl:
+    case Vinstr::loadtql:
     case Vinstr::storel:
     case Vinstr::storeli:
       return Width::Long;

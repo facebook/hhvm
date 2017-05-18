@@ -94,6 +94,7 @@ struct Timer {
     int64_t total; // total CPU time, in nanoseconds
     int64_t count; // number of entries for this counter
     int64_t max;   // longest CPU time, in nanoseconds
+    int64_t wall_time_elapsed;   // Wall clock elapsed, in micros
 
     int64_t mean() const {
       return total / count;
@@ -120,6 +121,7 @@ struct Timer {
   Name m_name;
   bool m_finished;
   int64_t m_start;
+  int64_t m_start_wall;
   StructuredLogEntry* m_log_entry;
 };
 

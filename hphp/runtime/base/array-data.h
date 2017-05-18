@@ -22,11 +22,12 @@
 
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/cap-code.h"
+#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/util/md5.h"
 
 namespace HPHP {
@@ -37,12 +38,6 @@ struct String;
 struct TypedValue;
 struct MArrayIter;
 struct VariableSerializer;
-
-// tuple-pod result of lval-style apis.
-struct ArrayLval {
-  ArrayData* array; // new array, if cow happened.
-  Variant* val;     // pointer to lval within new array
-};
 
 struct ArrayData : MaybeCountable {
   // Runtime type tag of possible array types.  This is intentionally
@@ -145,13 +140,16 @@ public:
    */
   bool useWeakKeys() const { return isPHPArray(); }
 
-  bool convertKey(const StringData* key, int64_t& i) const;
+  bool convertKey(const StringData* key, int64_t& i,
+                  bool notice = RuntimeOption::EvalHackArrCompatNotices) const;
 
   /*
-   * Return the capacity stored in the header. Not to be confused
-   * with MixedArray::capacity
+   * Return the capacity stored in the header of a packed layout array. Not
+   * valid for arrays of other layouts, which have their own ways of measuring
+   * capacity (e.g. MixedArray::capacity).
    */
   uint32_t cap() const {
+    assert(kind() == kPackedKind || kind() == kVecKind);
     return aux<CapCode>().decode();
   }
 
@@ -201,6 +199,8 @@ public:
 
   bool isPHPArray() const { return kind() < kDictKind; }
   bool isHackArray() const { return kind() >= kDictKind; }
+
+  bool isVArray() const { return isPacked() || isEmptyArray(); }
 
   DataType toDataType() const {
     auto const k = kind();
@@ -270,10 +270,10 @@ public:
    * Getting l-value (that Variant pointer) at specified key. Return this if
    * escalation is not needed, or an escalated array data.
    */
-  ArrayLval lval(int64_t k, bool copy);
-  ArrayLval lval(StringData* k, bool copy);
-  ArrayLval lvalRef(int64_t k, bool copy);
-  ArrayLval lvalRef(StringData* k, bool copy);
+  member_lval lval(int64_t k, bool copy);
+  member_lval lval(StringData* k, bool copy);
+  member_lval lvalRef(int64_t k, bool copy);
+  member_lval lvalRef(StringData* k, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -282,8 +282,8 @@ public:
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see lvalBlackHole() for details).
    */
-  ArrayLval lvalNew(bool copy);
-  ArrayLval lvalNewRef(bool copy);
+  member_lval lvalNew(bool copy);
+  member_lval lvalNewRef(bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -329,10 +329,10 @@ public:
   const Variant& get(const StringData* k, bool error = false) const;
   const Variant& get(const String& k, bool error = false) const;
   const Variant& get(const Variant& k, bool error = false) const;
-  ArrayLval lval(const String& k, bool copy);
-  ArrayLval lval(const Variant& k, bool copy);
-  ArrayLval lvalRef(const String& k, bool copy);
-  ArrayLval lvalRef(const Variant& k, bool copy);
+  member_lval lval(const String& k, bool copy);
+  member_lval lval(const Variant& k, bool copy);
+  member_lval lvalRef(const String& k, bool copy);
+  member_lval lvalRef(const Variant& k, bool copy);
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
@@ -425,6 +425,8 @@ public:
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
+
+  ArrayData* toVArray(bool copy);
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
@@ -634,12 +636,12 @@ struct ArrayFunctions {
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
-  ArrayLval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
-  ArrayLval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
-  ArrayLval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
-  ArrayLval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
-  ArrayLval (*lvalNew[NK])(ArrayData*, bool copy);
-  ArrayLval (*lvalNewRef[NK])(ArrayData*, bool copy);
+  member_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
+  member_lval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
+  member_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  member_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
+  member_lval (*lvalNew[NK])(ArrayData*, bool copy);
+  member_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
@@ -681,6 +683,7 @@ struct ArrayFunctions {
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);
+  ArrayData* (*toVArray[NK])(ArrayData*, bool);
 };
 
 extern const ArrayFunctions g_array_funcs;

@@ -306,6 +306,8 @@ class ReflectionTypeAlias implements Reflector {
   public function getResolvedTypeStructure(): array;
   public function getAssignedTypeText(): string;
   public function getName(): string;
+  final public function getAttributes(): array;
+  final public function getAttribute(string $name);
 }
 
 class ReflectionType {

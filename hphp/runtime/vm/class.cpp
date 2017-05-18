@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
@@ -365,6 +366,23 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   return fermeture.get();
 }
 
+EnumValues* Class::setEnumValues(EnumValues* values) {
+  auto extra = m_extra.ensureAllocated();
+  EnumValues* expected = nullptr;
+  if (!extra->m_enumValues.compare_exchange_strong(
+        expected, values, std::memory_order_relaxed)) {
+    // Already set by someone else, use theirs.
+    delete values;
+    return expected;
+  } else {
+    return values;
+  }
+}
+
+Class::ExtraData::~ExtraData() {
+  delete m_enumValues.load(std::memory_order_relaxed);
+}
+
 void Class::destroy() {
   /*
    * If we were never put on NamedEntity::classList, or
@@ -389,6 +407,20 @@ void Class::destroy() {
    */
   auto const pcls = m_preClass.get();
   pcls->namedEntity()->removeClass(this);
+
+  if (m_sPropCache) {
+    // Other threads find this class via rds::s_handleTable.
+    // Remove our sprop entries before the treadmill delay.
+    for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+      if (m_staticProperties[i].cls == this) {
+        auto const &link = m_sPropCache[i];
+        if (link.bound()) {
+          rds::unbind(rds::SPropCache{this, i}, link.handle());
+        }
+      }
+    }
+  }
+
   Treadmill::enqueue(
     [this] {
       releaseRefs();
@@ -1145,7 +1177,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
   // The caller will inc-ref the returned value, so undo the inc-ref caused by
   // storing it in the cache.
-  tvDecRefOnly(&ret);
+  tvDecRefGenNZ(&ret);
   return ret;
 }
 

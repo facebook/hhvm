@@ -1,2 +1,9 @@
-Warning: Invalid State Error in %s on line 8
+
+Warning: Invalid State Error in %s/uninit_doc_guard.php on line 8
+
+Warning: Invalid State Error in %s/uninit_doc_guard.php on line 9
+NULL
+
+Warning: Invalid State Error in %s/uninit_doc_guard.php on line 10
+bool(false)
 ok

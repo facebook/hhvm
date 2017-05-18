@@ -35,6 +35,7 @@ type t =
 | PropertyDeclarator
 | NamespaceDeclaration
 | NamespaceBody
+| NamespaceEmptyBody
 | NamespaceUseDeclaration
 | NamespaceGroupUseDeclaration
 | NamespaceUseClause
@@ -76,6 +77,8 @@ type t =
 | CaseLabel
 | DefaultLabel
 | ReturnStatement
+| GotoLabel
+| GotoStatement
 | ThrowStatement
 | BreakStatement
 | ContinueStatement
@@ -137,6 +140,7 @@ type t =
 | TypeConstant
 | VectorTypeSpecifier
 | KeysetTypeSpecifier
+| TupleTypeExplicitSpecifier
 | VarrayTypeSpecifier
 | VectorArrayTypeSpecifier
 | TypeParameter
@@ -181,6 +185,7 @@ let to_string kind =
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"
   | NamespaceBody -> "namespace_body"
+  | NamespaceEmptyBody -> "namespace_empty_body"
   | NamespaceUseDeclaration -> "namespace_use_declaration"
   | NamespaceGroupUseDeclaration -> "namespace_group_use_declaration"
   | NamespaceUseClause -> "namespace_use_clause"
@@ -222,6 +227,8 @@ let to_string kind =
   | CaseLabel -> "case_label"
   | DefaultLabel -> "default_label"
   | ReturnStatement -> "return_statement"
+  | GotoLabel -> "goto_label"
+  | GotoStatement -> "goto_statement"
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"
   | ContinueStatement -> "continue_statement"
@@ -283,6 +290,7 @@ let to_string kind =
   | TypeConstant -> "type_constant"
   | VectorTypeSpecifier -> "vector_type_specifier"
   | KeysetTypeSpecifier -> "keyset_type_specifier"
+  | TupleTypeExplicitSpecifier -> "tuple_type_explicit_specifier"
   | VarrayTypeSpecifier -> "varray_type_specifier"
   | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"

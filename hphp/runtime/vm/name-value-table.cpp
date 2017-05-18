@@ -19,6 +19,7 @@
 #include <limits>
 #include <folly/Bits.h>
 
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -71,7 +72,7 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
         dst.m_tv.m_type = kNamedLocalDataType;
         dst.m_tv.m_data.num = src.m_tv.m_data.num;
       } else {
-        tvDupFlattenVars(&src.m_tv, &dst.m_tv);
+        tvDupWithRef(src.m_tv, dst.m_tv);
       }
     }
   }
@@ -83,7 +84,7 @@ NameValueTable::~NameValueTable() {
     if (elm->m_name) {
       decRefStr(const_cast<StringData*>(elm->m_name));
       if (elm->m_tv.m_type != kNamedLocalDataType) {
-        tvRefcountedDecRef(elm->m_tv);
+        tvDecRefGen(elm->m_tv);
       }
     }
   }
@@ -166,7 +167,7 @@ TypedValue* NameValueTable::bind(const StringData* name, TypedValue* val) {
 void NameValueTable::unset(const StringData* name) {
   Elm* elm = findElm(name);
   if (!elm) return;
-  tvUnset(derefNamedLocal(&elm->m_tv));
+  tvUnset(*derefNamedLocal(&elm->m_tv));
 }
 
 TypedValue* NameValueTable::lookup(const StringData* name) {

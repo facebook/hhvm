@@ -17,18 +17,19 @@ module Program = struct
   let ide_server = "ide"
 end
 
-let start_server_daemon options name log_link daemon_entry =
+let start_server_daemon ~informant_managed options name log_link daemon_entry =
   let log_fds =
+    let in_fd = Daemon.null_fd () in
     if ServerArgs.should_detach options then begin
       (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
       let log_file = Sys_utils.make_link_of_timestamped log_link in
       Hh_logger.log "About to spawn %s daemon. Logs will go to %s\n%!"
         name (if Sys.win32 then log_file else log_link);
       let fd = Daemon.fd_of_path log_file in
-      fd, fd
+      in_fd, fd, fd
     end else begin
       Hh_logger.log "About to spawn %s daemon. Logs will go here." name;
-      Unix.stdout, Unix.stderr
+      in_fd, Unix.stdout, Unix.stderr
     end
   in
   let start_t = Unix.time () in
@@ -38,7 +39,7 @@ let start_server_daemon options name log_link daemon_entry =
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      (state, options) in
+      (informant_managed, state, options) in
   Hh_logger.log "Just started %s server with pid: %d." name pid;
   let server =
     SP.({
@@ -51,9 +52,10 @@ let start_server_daemon options name log_link daemon_entry =
     }) in
   server
 
-let start_hh_server options  =
+let start_hh_server ~informant_managed options =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
-  start_server_daemon options Program.hh_server log_link ServerMain.entry
+  start_server_daemon ~informant_managed options
+    Program.hh_server log_link ServerMain.entry
 
 
 (*
@@ -80,12 +82,13 @@ module HhServerConfig = struct
 
   let on_server_exit = check_log_for_lazy_incremental
 
-  let start_server options = function
+  let start_server ~informant_managed ~prior_exit_status options =
+    match prior_exit_status with
     | Some c
       when c = Exit_status.(exit_code Sql_assertion_failure) ||
            c = Exit_status.(exit_code Sql_cantopen) ||
            c = Exit_status.(exit_code Sql_corrupt) ||
            c = Exit_status.(exit_code Sql_misuse) ->
-      start_hh_server (ServerArgs.set_no_load options true)
-    | _ -> start_hh_server options
+      start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
+    | _ -> start_hh_server ~informant_managed options
 end

@@ -29,10 +29,13 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/perf-warning.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
@@ -173,6 +176,15 @@ struct Global {
    * so if it's needed in more than one place we can reuse it.
    */
   jit::hash_map<PhiKey,SSATmp*,PhiKey::Hash> insertedPhis;
+
+  /*
+   * Stats
+   */
+  size_t instrsReduced = 0;
+  size_t loadsRemoved  = 0;
+  size_t loadsRefined  = 0;
+  size_t jumpsRemoved  = 0;
+  size_t callsResolved = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -268,7 +280,7 @@ struct FRefinableLoad { Type refinedType; };
 /*
  * The instruction is a call to a callee who's identity has been determined.
  */
-struct FSpecifiable { const Func* callee; };
+struct FResolvable { const Func* callee; };
 
 /*
  * The instruction can be legally replaced with a Jmp to either its next or
@@ -278,7 +290,7 @@ struct FJmpNext {};
 struct FJmpTaken {};
 
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FSpecifiable,FJmpNext,FJmpTaken>;
+                             FResolvable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -531,7 +543,7 @@ Flags handle_call_effects(Local& env,
         if (tracked.knownType.hasConstVal(TFunc)) {
           auto const callee = tracked.knownType.funcVal();
           if (writesLocals) writesLocals = funcWritesLocals(callee);
-          flags = FSpecifiable { callee };
+          flags = FResolvable { callee };
         }
       }
     }
@@ -839,6 +851,8 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
          opcodeName(oldOp),
          opcodeName(newOp),
          resolved->toString());
+
+  ++env.instrsReduced;
 }
 
 void refine_load(Global& env,
@@ -854,12 +868,13 @@ void refine_load(Global& env,
 
   inst.setTypeParam(flags.refinedType);
   retypeDests(&inst, &env.unit);
+  ++env.loadsRefined;
 }
 
-void specify_call(Global& env,
+void resolve_call(Global& env,
                   IRInstruction& inst,
-                  const FSpecifiable& flags) {
-  FTRACE(2, "      specifiable: {} -> {}\n",
+                  const FResolvable& flags) {
+  FTRACE(2, "      resolvable: {} -> {}\n",
          inst.toString(),
          flags.callee->fullName());
 
@@ -871,6 +886,7 @@ void specify_call(Global& env,
     extra.readLocals = funcReadsLocals(flags.callee);
     extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
     retypeDests(&inst, &env.unit);
+    ++env.callsResolved;
     return;
   }
 
@@ -881,6 +897,8 @@ void specify_call(Global& env,
     extra.writeLocals = funcWritesLocals(flags.callee);
     extra.readLocals = funcReadsLocals(flags.callee);
     retypeDests(&inst, &env.unit);
+    ++env.callsResolved;
+    return;
   }
 }
 
@@ -905,22 +923,26 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
       } else {
         env.unit.replace(&inst, Mov, resolved);
       }
+
+      ++env.loadsRemoved;
     },
 
     [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FRefinableLoad f) { refine_load(env, inst, f); },
 
-    [&] (FSpecifiable f) { specify_call(env, inst, f); },
+    [&] (FResolvable f) { resolve_call(env, inst, f); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.next());
+      ++env.jumpsRemoved;
     },
 
     [&] (FJmpTaken) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
+      ++env.jumpsRemoved;
     }
   );
 
@@ -1218,29 +1240,83 @@ void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
   Timer t(Timer::optimize_loads, unit.logEntry().get_pointer());
 
-  auto genv = Global { unit };
-  if (genv.ainfo.locations.size() == 0) {
-    FTRACE(1, "no memory accesses to possibly optimize\n");
-    return;
+  // Unfortunately load-elim may not reach a fixed-point after just one
+  // round. This is because the optimization stage can cause the types of
+  // SSATmps to change, which then can affect what we infer in the analysis
+  // stage. So, loop until we reach a fixed point. Bound the iterations at some
+  // max value for safety.
+  size_t iters = 0;
+  size_t instrsReduced = 0;
+  size_t loadsRemoved = 0;
+  size_t loadsRefined = 0;
+  size_t jumpsRemoved = 0;
+  size_t callsResolved = 0;
+  do {
+    auto genv = Global { unit };
+    if (genv.ainfo.locations.size() == 0) {
+      FTRACE(1, "no memory accesses to possibly optimize\n");
+      break;
+    }
+
+    ++iters;
+    FTRACE(1, "\nIteration #{}\n", iters);
+    FTRACE(1, "Locations:\n{}\n", show(genv.ainfo));
+
+    analyze(genv);
+
+    FTRACE(1, "\n\nFixed point:\n{}\n",
+           [&] () -> std::string {
+             auto ret = std::string{};
+             for (auto& blk : genv.rpoBlocks) {
+               folly::format(&ret, "B{}:\n{}", blk->id(),
+                             show(genv.blockInfo[blk].stateIn));
+             }
+             return ret;
+           }()
+          );
+
+    FTRACE(1, "\nOptimize:\n");
+    optimize(genv);
+
+    if (!genv.instrsReduced &&
+        !genv.loadsRemoved &&
+        !genv.loadsRefined &&
+        !genv.jumpsRemoved &&
+        !genv.callsResolved) {
+      // Nothing changed so we're done
+      break;
+    }
+    instrsReduced += genv.instrsReduced;
+    loadsRemoved += genv.loadsRemoved;
+    loadsRefined += genv.loadsRefined;
+    jumpsRemoved += genv.jumpsRemoved;
+    callsResolved += genv.callsResolved;
+
+    FTRACE(2, "reflowing types\n");
+    reflowTypes(genv.unit);
+
+    // Restore reachability invariants
+    mandatoryDCE(unit);
+
+    if (iters >= RuntimeOption::EvalHHIRLoadElimMaxIters) {
+      // We've iterated way more than usual without reaching a fixed
+      // point. Either there's some bug in load-elim, or this unit is especially
+      // pathological. Emit a perf warning so we're aware and stop iterating.
+      logPerfWarning(
+        "optimize_loads_max_iters", 1, [] (StructuredLogEntry&) {}
+      );
+      break;
+    }
+  } while (true);
+
+  if (auto& entry = unit.logEntry()) {
+    entry->setInt("optimize_loads_iters", iters);
+    entry->setInt("optimize_loads_instrs_reduced", instrsReduced);
+    entry->setInt("optimize_loads_loads_removed", loadsRemoved);
+    entry->setInt("optimize_loads_loads_refined", loadsRefined);
+    entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
+    entry->setInt("optimize_loads_calls_resolved", callsResolved);
   }
-  FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
-  analyze(genv);
-
-  FTRACE(1, "\n\nFixed point:\n{}\n",
-    [&] () -> std::string {
-      auto ret = std::string{};
-      for (auto& blk : genv.rpoBlocks) {
-        folly::format(&ret, "B{}:\n{}", blk->id(),
-          show(genv.blockInfo[blk].stateIn));
-      }
-      return ret;
-    }()
-  );
-
-  FTRACE(1, "\nOptimize:\n");
-  optimize(genv);
-  FTRACE(2, "reflowing types\n");
-  reflowTypes(genv.unit);
 }
 
 //////////////////////////////////////////////////////////////////////

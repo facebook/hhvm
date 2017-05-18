@@ -506,14 +506,17 @@ void handle_call_effects(Local& env, CallEffects effects) {
   }
 
   /*
-   * Keep types for stack, locals, and class-ref slots, and throw away the
-   * values.  We are just doing this to avoid extending lifetimes across php
-   * calls, which currently always leads to spilling.
+   * Keep types for stack, locals, class-ref slots, and iterators, and throw
+   * away the values.  We are just doing this to avoid extending lifetimes
+   * across php calls, which currently always leads to spilling.
    */
-  auto const stk_frame_cslot = env.global.ainfo.all_stack |
-                               env.global.ainfo.all_frame |
-                               env.global.ainfo.all_clsRefSlot;
-  env.state.avail &= stk_frame_cslot;
+  auto const keep = env.global.ainfo.all_stack       |
+                    env.global.ainfo.all_frame       |
+                    env.global.ainfo.all_clsRefSlot  |
+                    env.global.ainfo.all_cufIterFunc |
+                    env.global.ainfo.all_cufIterCtx  |
+                    env.global.ainfo.all_cufIterInvName;
+  env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
       ++aloc) {

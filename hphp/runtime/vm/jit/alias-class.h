@@ -89,6 +89,14 @@ struct AliasClass;
 struct AFrame { SSATmp* fp; AliasIdSet ids; };
 
 /*
+ * Iterator state. Note that iterator slots can contain different kinds of data
+ * (normal iterators, mutable iterators, or cuf "iterators"). However, in a well
+ * formed program, each iterator slot will always contain a known type at any
+ * given point without the possibility of aliasing. Therefore its safe to
+ * consider the different types as totally distinct alias classes.
+ */
+
+/*
  * A specific php iterator's position value (m_pos).
  */
 struct AIterPos  { SSATmp* fp; uint32_t id; };
@@ -103,6 +111,21 @@ struct AIterPos  { SSATmp* fp; uint32_t id; };
  * initialization state if it isn't also going to load/store the base pointer.
  */
 struct AIterBase { SSATmp* fp; uint32_t id; };
+
+/*
+ * A specific CufIter's func value (m_func).
+ */
+struct ACufIterFunc { SSATmp* fp; uint32_t id; };
+
+/*
+ * A specific CufIter's ctx value (m_ctx).
+ */
+struct ACufIterCtx { SSATmp* fp; uint32_t id; };
+
+/*
+ * A specific CufIter's invoke name value (m_name).
+ */
+struct ACufIterInvName { SSATmp* fp; uint32_t id; };
 
 /*
  * A location inside of an object property, with base `obj' and byte offset
@@ -175,28 +198,35 @@ struct AliasClass {
     BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame    = 1 << 0,
-    BIterPos  = 1 << 1,
-    BIterBase = 1 << 2,
-    BProp     = 1 << 3,
-    BElemI    = 1 << 4,
-    BElemS    = 1 << 5,
-    BStack    = 1 << 6,
-    BRef      = 1 << 7,
-    BClsRefSlot = 1 << 8,
+    BFrame          = 1 << 0,
+    BIterPos        = 1 << 1,
+    BIterBase       = 1 << 2,
+    BProp           = 1 << 3,
+    BElemI          = 1 << 4,
+    BElemS          = 1 << 5,
+    BStack          = 1 << 6,
+    BRef            = 1 << 7,
+    BClsRefSlot     = 1 << 8,
+    BCufIterFunc    = 1 << 9,
+    BCufIterCtx     = 1 << 10,
+    BCufIterInvName = 1 << 11,
 
     // Have no specialization, put them last.
-    BMITempBase = 1 << 9,
-    BMITvRef    = 1 << 10,
-    BMITvRef2   = 1 << 11,
-    BMIBase     = 1 << 12,
+    BMITempBase = 1 << 12,
+    BMITvRef    = 1 << 13,
+    BMITvRef2   = 1 << 14,
+    BMIBase     = 1 << 15,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
     BMIState   = BMIStateTV | BMIBase,
 
-    BUnknownTV = ~(BIterPos | BIterBase | BMIBase | BClsRefSlot),
+    BIter      = BIterPos | BIterBase,
+    BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName,
+    BIterSlot  = BIter | BCufIter,
+
+    BUnknownTV = ~(BIterSlot | BMIBase),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -219,6 +249,9 @@ struct AliasClass {
   /* implicit */ AliasClass(AFrame);
   /* implicit */ AliasClass(AIterPos);
   /* implicit */ AliasClass(AIterBase);
+  /* implicit */ AliasClass(ACufIterFunc);
+  /* implicit */ AliasClass(ACufIterCtx);
+  /* implicit */ AliasClass(ACufIterInvName);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -276,15 +309,18 @@ struct AliasClass {
    *
    * Returns folly::none if this alias class has no specialization in that way.
    */
-  folly::Optional<AFrame>    frame() const;
-  folly::Optional<AIterPos>  iterPos() const;
-  folly::Optional<AIterBase> iterBase() const;
-  folly::Optional<AProp>     prop() const;
-  folly::Optional<AElemI>    elemI() const;
-  folly::Optional<AElemS>    elemS() const;
-  folly::Optional<AStack>    stack() const;
-  folly::Optional<ARef>      ref() const;
-  folly::Optional<AClsRefSlot> clsRefSlot() const;
+  folly::Optional<AFrame>          frame() const;
+  folly::Optional<AIterPos>        iterPos() const;
+  folly::Optional<AIterBase>       iterBase() const;
+  folly::Optional<ACufIterFunc>    cufIterFunc() const;
+  folly::Optional<ACufIterCtx>     cufIterCtx() const;
+  folly::Optional<ACufIterInvName> cufIterInvName() const;
+  folly::Optional<AProp>           prop() const;
+  folly::Optional<AElemI>          elemI() const;
+  folly::Optional<AElemS>          elemS() const;
+  folly::Optional<AStack>          stack() const;
+  folly::Optional<ARef>            ref() const;
+  folly::Optional<AClsRefSlot>     clsRefSlot() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -294,15 +330,18 @@ struct AliasClass {
    *
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
-  folly::Optional<AFrame>    is_frame() const;
-  folly::Optional<AIterPos>  is_iterPos() const;
-  folly::Optional<AIterBase> is_iterBase() const;
-  folly::Optional<AProp>     is_prop() const;
-  folly::Optional<AElemI>    is_elemI() const;
-  folly::Optional<AElemS>    is_elemS() const;
-  folly::Optional<AStack>    is_stack() const;
-  folly::Optional<ARef>      is_ref() const;
-  folly::Optional<AClsRefSlot> is_clsRefSlot() const;
+  folly::Optional<AFrame>          is_frame() const;
+  folly::Optional<AIterPos>        is_iterPos() const;
+  folly::Optional<AIterBase>       is_iterBase() const;
+  folly::Optional<ACufIterFunc>    is_cufIterFunc() const;
+  folly::Optional<ACufIterCtx>     is_cufIterCtx() const;
+  folly::Optional<ACufIterInvName> is_cufIterInvName() const;
+  folly::Optional<AProp>           is_prop() const;
+  folly::Optional<AElemI>          is_elemI() const;
+  folly::Optional<AElemS>          is_elemS() const;
+  folly::Optional<AStack>          is_stack() const;
+  folly::Optional<ARef>            is_ref() const;
+  folly::Optional<AClsRefSlot>     is_clsRefSlot() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
@@ -317,6 +356,9 @@ private:
     Frame,
     IterPos,
     IterBase,
+    CufIterFunc,
+    CufIterCtx,
+    CufIterInvName,
     Prop,
     ElemI,
     ElemS,
@@ -325,9 +367,10 @@ private:
     ClsRefSlot,
 
     IterBoth,  // A union of base and pos for the same iter.
+    CufIterAll, // A union of all fields for the same CufIter.
   };
-  struct UIterBoth { SSATmp* fp; uint32_t id; };
-
+  struct UIterBoth   { SSATmp* fp; uint32_t id; };
+  struct UCufIterAll { SSATmp* fp; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
@@ -339,7 +382,9 @@ private:
   bool maybeData(AliasClass) const;
   bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
   folly::Optional<UIterBoth> asUIter() const;
+  folly::Optional<UCufIterAll> asUCufIter() const;
   bool refersToSameIterHelper(AliasClass) const;
+  bool refersToSameCufIterHelper(AliasClass) const;
   static folly::Optional<AliasClass>
     precise_diffSTag_unionData(rep newBits, AliasClass, AliasClass);
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
@@ -349,45 +394,53 @@ private:
   rep m_bits;
   STag m_stag{STag::None};
   union {
-    AFrame    m_frame;
-    AIterPos  m_iterPos;
-    AIterBase m_iterBase;
-    AProp     m_prop;
-    AElemI    m_elemI;
-    AElemS    m_elemS;
-    AStack    m_stack;
-    ARef      m_ref;
-    AClsRefSlot m_clsRefSlot;
+    AFrame          m_frame;
+    AIterPos        m_iterPos;
+    AIterBase       m_iterBase;
+    ACufIterFunc    m_cufIterFunc;
+    ACufIterCtx     m_cufIterCtx;
+    ACufIterInvName m_cufIterInvName;
+    AProp           m_prop;
+    AElemI          m_elemI;
+    AElemS          m_elemS;
+    AStack          m_stack;
+    ARef            m_ref;
+    AClsRefSlot     m_clsRefSlot;
 
-    UIterBoth m_iterBoth;
+    UIterBoth       m_iterBoth;
+    UCufIterAll     m_cufIterAll;
   };
 };
 
 //////////////////////////////////////////////////////////////////////
 
 /* General alias classes. */
-auto const AEmpty       = AliasClass{AliasClass::BEmpty};
-auto const AFrameAny    = AliasClass{AliasClass::BFrame};
-auto const AIterPosAny  = AliasClass{AliasClass::BIterPos};
-auto const AIterBaseAny = AliasClass{AliasClass::BIterBase};
-auto const APropAny     = AliasClass{AliasClass::BProp};
-auto const AHeapAny     = AliasClass{AliasClass::BHeap};
-auto const ARefAny      = AliasClass{AliasClass::BRef};
-auto const AStackAny    = AliasClass{AliasClass::BStack};
-auto const AClsRefSlotAny = AliasClass{AliasClass::BClsRefSlot};
-auto const AElemIAny    = AliasClass{AliasClass::BElemI};
-auto const AElemSAny    = AliasClass{AliasClass::BElemS};
-auto const AElemAny     = AliasClass{AliasClass::BElem};
-auto const AMIStateTV   = AliasClass{AliasClass::BMIStateTV};
-auto const AMIStateAny  = AliasClass{AliasClass::BMIState};
-auto const AUnknownTV   = AliasClass{AliasClass::BUnknownTV};
-auto const AUnknown     = AliasClass{AliasClass::BUnknown};
+auto const AEmpty             = AliasClass{AliasClass::BEmpty};
+auto const AFrameAny          = AliasClass{AliasClass::BFrame};
+auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
+auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
+auto const ACufIterFuncAny    = AliasClass{AliasClass::BCufIterFunc};
+auto const ACufIterCtxAny     = AliasClass{AliasClass::BCufIterCtx};
+auto const ACufIterInvNameAny = AliasClass{AliasClass::BCufIterInvName};
+auto const ACufIterAny        = AliasClass{AliasClass::BCufIter};
+auto const APropAny           = AliasClass{AliasClass::BProp};
+auto const AHeapAny           = AliasClass{AliasClass::BHeap};
+auto const ARefAny            = AliasClass{AliasClass::BRef};
+auto const AStackAny          = AliasClass{AliasClass::BStack};
+auto const AClsRefSlotAny     = AliasClass{AliasClass::BClsRefSlot};
+auto const AElemIAny          = AliasClass{AliasClass::BElemI};
+auto const AElemSAny          = AliasClass{AliasClass::BElemS};
+auto const AElemAny           = AliasClass{AliasClass::BElem};
+auto const AMIStateTV         = AliasClass{AliasClass::BMIStateTV};
+auto const AMIStateAny        = AliasClass{AliasClass::BMIState};
+auto const AUnknownTV         = AliasClass{AliasClass::BUnknownTV};
+auto const AUnknown           = AliasClass{AliasClass::BUnknown};
 
 /* Alias classes for specific MInstrState fields. */
-auto const AMIStateTempBase = AliasClass{AliasClass::BMITempBase};
-auto const AMIStateTvRef    = AliasClass{AliasClass::BMITvRef};
-auto const AMIStateTvRef2   = AliasClass{AliasClass::BMITvRef2};
-auto const AMIStateBase     = AliasClass{AliasClass::BMIBase};
+auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
+auto const AMIStateTvRef      = AliasClass{AliasClass::BMITvRef};
+auto const AMIStateTvRef2     = AliasClass{AliasClass::BMITvRef2};
+auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
 
 //////////////////////////////////////////////////////////////////////
 

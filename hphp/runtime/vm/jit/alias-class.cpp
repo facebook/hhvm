@@ -49,26 +49,32 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   using A = AliasClass;
 
   switch (bits) {
-  case A::BEmpty:      return "Empty";
-  case A::BHeap:       return "Heap";
-  case A::BUnknownTV:  return "UnkTV";
-  case A::BUnknown:    return "Unk";
-  case A::BElem:       return "Elem";
-  case A::BMIStateTV:  return "MisTV";
-  case A::BMIState:    return "Mis";
-  case A::BFrame:      break;
-  case A::BIterPos:    break;
-  case A::BIterBase:   break;
-  case A::BProp:       break;
-  case A::BElemI:      break;
-  case A::BElemS:      break;
-  case A::BStack:      break;
-  case A::BMITempBase: break;
-  case A::BMITvRef:    break;
-  case A::BMITvRef2:   break;
-  case A::BMIBase:     break;
-  case A::BRef:        break;
-  case A::BClsRefSlot: break;
+  case A::BEmpty:          return "Empty";
+  case A::BHeap:           return "Heap";
+  case A::BUnknownTV:      return "UnkTV";
+  case A::BUnknown:        return "Unk";
+  case A::BElem:           return "Elem";
+  case A::BMIStateTV:      return "MisTV";
+  case A::BMIState:        return "Mis";
+  case A::BIter:           return "Iter";
+  case A::BCufIter:        return "CufIter";
+  case A::BIterSlot:       return "IterSlot";
+  case A::BFrame:          break;
+  case A::BIterPos:        break;
+  case A::BIterBase:       break;
+  case A::BCufIterFunc:    break;
+  case A::BCufIterCtx:     break;
+  case A::BCufIterInvName: break;
+  case A::BProp:           break;
+  case A::BElemI:          break;
+  case A::BElemS:          break;
+  case A::BStack:          break;
+  case A::BMITempBase:     break;
+  case A::BMITvRef:        break;
+  case A::BMITvRef2:       break;
+  case A::BMIBase:         break;
+  case A::BRef:            break;
+  case A::BClsRefSlot:     break;
   }
 
   auto ret = std::string{};
@@ -84,20 +90,26 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BElem:
     case A::BMIStateTV:
     case A::BMIState:
+    case A::BIter:
+    case A::BCufIter:
+    case A::BIterSlot:
       always_assert(0);
-    case A::BFrame:      ret += "Fr"; break;
-    case A::BIterPos:    ret += "ItP"; break;
-    case A::BIterBase:   ret += "ItB"; break;
-    case A::BProp:       ret += "Pr"; break;
-    case A::BElemI:      ret += "Ei"; break;
-    case A::BElemS:      ret += "Es"; break;
-    case A::BStack:      ret += "St"; break;
-    case A::BMITempBase: ret += "MiTB"; break;
-    case A::BMITvRef:    ret += "MiT1"; break;
-    case A::BMITvRef2:   ret += "MiT2"; break;
-    case A::BMIBase:     ret += "MiB"; break;
-    case A::BRef:        ret += "Ref"; break;
-    case A::BClsRefSlot: ret += "Cls"; break;
+    case A::BFrame:          ret += "Fr"; break;
+    case A::BIterPos:        ret += "ItP"; break;
+    case A::BIterBase:       ret += "ItB"; break;
+    case A::BCufIterFunc:    ret += "CItF"; break;
+    case A::BCufIterCtx:     ret += "CItC"; break;
+    case A::BCufIterInvName: ret += "CItN"; break;
+    case A::BProp:           ret += "Pr"; break;
+    case A::BElemI:          ret += "Ei"; break;
+    case A::BElemS:          ret += "Es"; break;
+    case A::BStack:          ret += "St"; break;
+    case A::BMITempBase:     ret += "MiTB"; break;
+    case A::BMITvRef:        ret += "MiT1"; break;
+    case A::BMITvRef2:       ret += "MiT2"; break;
+    case A::BMIBase:         ret += "MiB"; break;
+    case A::BRef:            ret += "Ref"; break;
+    case A::BClsRefSlot:     ret += "Cls"; break;
     }
   }
   return ret;
@@ -169,9 +181,16 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
   switch (acls.m_stag) {
   case STag::None:
     return hash;
+
   case STag::IterPos:  return framelike_hash(hash, acls.m_iterPos);
   case STag::IterBase: return framelike_hash(hash, acls.m_iterBase);
   case STag::IterBoth: return framelike_hash(hash, acls.m_iterBoth);
+
+  case STag::CufIterFunc:    return framelike_hash(hash, acls.m_cufIterFunc);
+  case STag::CufIterCtx:     return framelike_hash(hash, acls.m_cufIterCtx);
+  case STag::CufIterInvName: return framelike_hash(hash, acls.m_cufIterInvName);
+  case STag::CufIterAll:     return framelike_hash(hash, acls.m_cufIterAll);
+
   case STag::Frame:
     return folly::hash::hash_combine(hash,
                                      acls.m_frame.fp,
@@ -221,6 +240,9 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
 X(Frame, frame)
 X(IterPos, iterPos)
 X(IterBase, iterBase)
+X(CufIterFunc, cufIterFunc)
+X(CufIterCtx, cufIterCtx)
+X(CufIterInvName, cufIterInvName)
 X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
@@ -262,6 +284,23 @@ X(IterBase, iterBase)
 
 #undef X
 
+#define X(What, what)                                       \
+  folly::Optional<A##What> AliasClass::what() const {       \
+    if (m_stag == STag::What) return m_##what;              \
+    if (m_stag == STag::CufIterAll) {                       \
+      auto const ui = asUCufIter();                         \
+      assertx(ui.hasValue());                               \
+      return A##What { ui->fp, ui->id };                    \
+    }                                                       \
+    return folly::none;                                     \
+  }
+
+X(CufIterFunc, cufIterFunc)
+X(CufIterCtx, cufIterCtx)
+X(CufIterInvName, cufIterInvName)
+
+#undef X
+
 folly::Optional<AliasClass> AliasClass::mis() const {
   auto const bits = static_cast<rep>(m_bits & BMIState);
 
@@ -276,29 +315,39 @@ folly::Optional<AliasClass> AliasClass::is_mis() const {
 
 AliasClass::rep AliasClass::stagBits(STag tag) {
   switch (tag) {
-  case STag::None:     return BEmpty;
-  case STag::Frame:    return BFrame;
-  case STag::IterPos:  return BIterPos;
-  case STag::IterBase: return BIterBase;
-  case STag::Prop:     return BProp;
-  case STag::ElemI:    return BElemI;
-  case STag::ElemS:    return BElemS;
-  case STag::Stack:    return BStack;
-  case STag::Ref:      return BRef;
-  case STag::ClsRefSlot: return BClsRefSlot;
-  case STag::IterBoth: return static_cast<rep>(BIterPos | BIterBase);
+  case STag::None:           return BEmpty;
+  case STag::Frame:          return BFrame;
+  case STag::IterPos:        return BIterPos;
+  case STag::IterBase:       return BIterBase;
+  case STag::CufIterFunc:    return BCufIterFunc;
+  case STag::CufIterCtx:     return BCufIterCtx;
+  case STag::CufIterInvName: return BCufIterInvName;
+  case STag::Prop:           return BProp;
+  case STag::ElemI:          return BElemI;
+  case STag::ElemS:          return BElemS;
+  case STag::Stack:          return BStack;
+  case STag::Ref:            return BRef;
+  case STag::ClsRefSlot:     return BClsRefSlot;
+  case STag::IterBoth:       return static_cast<rep>(BIterPos | BIterBase);
+  case STag::CufIterAll:     return static_cast<rep>(BCufIterFunc |
+                                                     BCufIterCtx  |
+                                                     BCufIterInvName);
   }
   always_assert(0);
 }
 
 bool AliasClass::checkInvariants() const {
   switch (m_stag) {
-  case STag::None:     break;
-  case STag::IterPos:  framelike_checkInvariants(m_iterPos);  break;
-  case STag::IterBase: framelike_checkInvariants(m_iterBase); break;
-  case STag::IterBoth: framelike_checkInvariants(m_iterBoth); break;
-  case STag::Prop:     break;
-  case STag::ElemI:    break;
+  case STag::None:           break;
+  case STag::IterPos:        framelike_checkInvariants(m_iterPos);        break;
+  case STag::IterBase:       framelike_checkInvariants(m_iterBase);       break;
+  case STag::IterBoth:       framelike_checkInvariants(m_iterBoth);       break;
+  case STag::CufIterFunc:    framelike_checkInvariants(m_cufIterFunc);    break;
+  case STag::CufIterCtx:     framelike_checkInvariants(m_cufIterCtx);     break;
+  case STag::CufIterInvName: framelike_checkInvariants(m_cufIterInvName); break;
+  case STag::CufIterAll:     framelike_checkInvariants(m_cufIterAll);     break;
+  case STag::Prop:           break;
+  case STag::ElemI:          break;
   case STag::Frame:
     assertx(m_frame.fp->isA(TFramePtr));
     assertx(!m_frame.ids.empty());
@@ -334,6 +383,14 @@ bool AliasClass::equivData(AliasClass o) const {
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
+  case STag::CufIterFunc:
+    return framelike_equal(m_cufIterFunc, o.m_cufIterFunc);
+  case STag::CufIterCtx:
+    return framelike_equal(m_cufIterCtx, o.m_cufIterCtx);
+  case STag::CufIterInvName:
+    return framelike_equal(m_cufIterInvName, o.m_cufIterInvName);
+  case STag::CufIterAll:
+    return framelike_equal(m_cufIterAll, o.m_cufIterAll);
   case STag::Prop:     return m_prop.obj == o.m_prop.obj &&
                               m_prop.offset == o.m_prop.offset;
   case STag::ElemI:    return m_elemI.arr == o.m_elemI.arr &&
@@ -360,11 +417,15 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
     break;
   case STag::IterPos:
   case STag::IterBase:
+  case STag::CufIterFunc:
+  case STag::CufIterCtx:
+  case STag::CufIterInvName:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
   case STag::Ref:
   case STag::IterBoth:
+  case STag::CufIterAll:
     assertx(!a.equivData(b));
     break;
   case STag::Frame:
@@ -439,6 +500,16 @@ AliasClass::precise_diffSTag_unionData(rep newBits,
     ret.m_stag = STag::IterBoth;
     return ret;
   }
+
+  auto const c1 = a.asUCufIter();
+  auto const c2 = b.asUCufIter();
+  if (c1 && c2 && framelike_equal(*c1, *c2)) {
+    auto ret = AliasClass{newBits};
+    new (&ret.m_cufIterAll) UCufIterAll(*c1);
+    ret.m_stag = STag::CufIterAll;
+    return ret;
+  }
+
   return folly::none;
 }
 
@@ -531,6 +602,18 @@ AliasClass AliasClass::operator|(AliasClass o) const {
                        break;
   case STag::IterBoth: new (&ret.m_iterBoth) UIterBoth(chosen->m_iterBoth);
                        break;
+  case STag::CufIterFunc:
+    new (&ret.m_cufIterFunc) ACufIterFunc(chosen->m_cufIterFunc);
+    break;
+  case STag::CufIterCtx:
+    new (&ret.m_cufIterCtx) ACufIterCtx(chosen->m_cufIterCtx);
+    break;
+  case STag::CufIterInvName:
+    new (&ret.m_cufIterInvName) ACufIterInvName(chosen->m_cufIterInvName);
+    break;
+  case STag::CufIterAll:
+    new (&ret.m_cufIterAll) UCufIterAll(chosen->m_cufIterAll);
+    break;
   case STag::Frame:    new (&ret.m_frame) AFrame(chosen->m_frame); break;
   case STag::ClsRefSlot:
     new (&ret.m_clsRefSlot) AClsRefSlot(chosen->m_clsRefSlot);
@@ -552,6 +635,10 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::IterPos:
   case STag::IterBase:
   case STag::IterBoth:
+  case STag::CufIterFunc:
+  case STag::CufIterCtx:
+  case STag::CufIterInvName:
+  case STag::CufIterAll:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
@@ -579,11 +666,39 @@ folly::Optional<AliasClass::UIterBoth> AliasClass::asUIter() const {
   case STag::Ref:
   case STag::Stack:
   case STag::ClsRefSlot:
+  case STag::CufIterFunc:
+  case STag::CufIterCtx:
+  case STag::CufIterInvName:
+  case STag::CufIterAll:
     return folly::none;
   case STag::IterPos:   return UIterBoth { m_iterPos.fp, m_iterPos.id };
   case STag::IterBase:  return UIterBoth { m_iterBase.fp, m_iterBase.id };
   case STag::IterBoth:  return m_iterBoth;
-    break;
+  }
+  not_reached();
+}
+
+folly::Optional<AliasClass::UCufIterAll> AliasClass::asUCufIter() const {
+  switch (m_stag) {
+  case STag::None:
+  case STag::Frame:
+  case STag::Prop:
+  case STag::ElemI:
+  case STag::ElemS:
+  case STag::Ref:
+  case STag::Stack:
+  case STag::ClsRefSlot:
+  case STag::IterPos:
+  case STag::IterBase:
+  case STag::IterBoth:
+    return folly::none;
+  case STag::CufIterFunc:
+    return UCufIterAll { m_cufIterFunc.fp, m_cufIterFunc.id };
+  case STag::CufIterCtx:
+    return UCufIterAll { m_cufIterCtx.fp, m_cufIterCtx.id };
+  case STag::CufIterInvName:
+    return UCufIterAll { m_cufIterInvName.fp, m_cufIterInvName.id };
+  case STag::CufIterAll: return m_cufIterAll;
   }
   not_reached();
 }
@@ -592,6 +707,12 @@ bool AliasClass::refersToSameIterHelper(AliasClass o) const {
   assertx(stagBits(m_stag) & stagBits(o.m_stag));
   assertx(m_stag == STag::IterBoth || o.m_stag == STag::IterBoth);
   return framelike_equal(*asUIter(), *o.asUIter());
+}
+
+bool AliasClass::refersToSameCufIterHelper(AliasClass o) const {
+  assertx(stagBits(m_stag) & stagBits(o.m_stag));
+  assertx(m_stag == STag::CufIterAll || o.m_stag == STag::CufIterAll);
+  return framelike_equal(*asUCufIter(), *o.asUCufIter());
 }
 
 /*
@@ -604,7 +725,13 @@ bool AliasClass::refersToSameIterHelper(AliasClass o) const {
  * relevant_bits only if they refer to the same iterator.
  */
 bool AliasClass::diffSTagSubclassData(rep relevant_bits, AliasClass o) const {
-  return refersToSameIterHelper(o);
+  if (m_stag == STag::IterBoth || o.m_stag == STag::IterBoth) {
+    return refersToSameIterHelper(o);
+  } else if (m_stag == STag::CufIterAll || o.m_stag == STag::CufIterAll) {
+    return refersToSameCufIterHelper(o);
+  } else {
+    return false;
+  }
 }
 
 /*
@@ -617,7 +744,13 @@ bool AliasClass::diffSTagSubclassData(rep relevant_bits, AliasClass o) const {
  * id.
  */
 bool AliasClass::diffSTagMaybeData(rep relevant_bits, AliasClass o) const {
-  return refersToSameIterHelper(o);
+  if (m_stag == STag::IterBoth || o.m_stag == STag::IterBoth) {
+    return refersToSameIterHelper(o);
+  } else if (m_stag == STag::CufIterAll || o.m_stag == STag::CufIterAll) {
+    return refersToSameCufIterHelper(o);
+  } else {
+    return false;
+  }
 }
 
 bool AliasClass::operator<=(AliasClass o) const {
@@ -670,6 +803,14 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
+  case STag::CufIterFunc:
+    return framelike_equal(m_cufIterFunc, o.m_cufIterFunc);
+  case STag::CufIterCtx:
+    return framelike_equal(m_cufIterCtx, o.m_cufIterCtx);
+  case STag::CufIterInvName:
+    return framelike_equal(m_cufIterInvName, o.m_cufIterInvName);
+  case STag::CufIterAll:
+    return framelike_equal(m_cufIterAll, o.m_cufIterAll);
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids.maybe(o.m_frame.ids);
   case STag::ClsRefSlot:
@@ -795,14 +936,18 @@ AliasClass mis_from_offset(size_t offset) {
 AliasClass canonicalize(AliasClass a) {
   using T = AliasClass::STag;
   switch (a.m_stag) {
-  case T::None:     return a;
-  case T::Frame:    return a;
-  case T::IterPos:  return a;
-  case T::IterBase: return a;
-  case T::IterBoth: return a;
-  case T::Stack:    return a;
-  case T::Ref:      return a;
-  case T::ClsRefSlot: return a;
+  case T::None:           return a;
+  case T::Frame:          return a;
+  case T::IterPos:        return a;
+  case T::IterBase:       return a;
+  case T::IterBoth:       return a;
+  case T::CufIterFunc:    return a;
+  case T::CufIterCtx:     return a;
+  case T::CufIterInvName: return a;
+  case T::CufIterAll:     return a;
+  case T::Stack:          return a;
+  case T::Ref:            return a;
+  case T::ClsRefSlot:     return a;
   case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:    a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
@@ -842,6 +987,22 @@ std::string show(AliasClass acls) {
   case A::STag::IterBoth:
     folly::format(&ret, "It* t{}:{}", acls.m_iterBoth.fp->id(),
       acls.m_iterBoth.id);
+    break;
+  case A::STag::CufIterFunc:
+    folly::format(&ret, "CItF t{}:{}", acls.m_cufIterFunc.fp->id(),
+                  acls.m_cufIterFunc.id);
+    break;
+  case A::STag::CufIterCtx:
+    folly::format(&ret, "CItC t{}:{}", acls.m_cufIterCtx.fp->id(),
+                  acls.m_cufIterCtx.id);
+    break;
+  case A::STag::CufIterInvName:
+    folly::format(&ret, "CItN t{}:{}", acls.m_cufIterInvName.fp->id(),
+                  acls.m_cufIterInvName.id);
+    break;
+  case A::STag::CufIterAll:
+    folly::format(&ret, "CIt* t{}:{}", acls.m_cufIterAll.fp->id(),
+                  acls.m_cufIterAll.id);
     break;
   case A::STag::Prop:
     folly::format(&ret, "Pr t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);

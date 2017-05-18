@@ -567,7 +567,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AClsRefSlotAny | AMIStateAny
+      AStackAny | AFrameAny | AClsRefSlotAny | ACufIterAny | AMIStateAny
     };
 
   case AsyncRetCtrl:
@@ -645,9 +645,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * stores must not be sunk past DefInlineFP where they could clobber a
        * local.
        */
-      AFrameAny | AClsRefSlotAny | stack_below(inst.dst(), FPRelOffset{0}) |
-                  inline_fp_frame(&inst),
-      AFrameAny | AClsRefSlotAny | stack_below(inst.dst(), FPRelOffset{0})
+      AFrameAny | AClsRefSlotAny | ACufIterAny  |
+        stack_below(inst.dst(), FPRelOffset{0}) |
+        inline_fp_frame(&inst),
+      AFrameAny | AClsRefSlotAny | ACufIterAny |
+        stack_below(inst.dst(), FPRelOffset{0})
     );
 
   /*
@@ -683,7 +685,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InlineReturn: {
     auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
-                        AMIStateAny | AFrameAny | AClsRefSlotAny;
+                        AMIStateAny | AFrameAny | AClsRefSlotAny |
+                        ACufIterAny;
     return may_load_store_kill(AEmpty, callee, callee);
   }
 
@@ -821,9 +824,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAFWHNoVV:
   case CreateCont:
     return may_load_store_move(
-      AFrameAny | AClsRefSlotAny,
+      AFrameAny | AClsRefSlotAny | ACufIterAny,
       AHeapAny,
-      AFrameAny | AClsRefSlotAny
+      AFrameAny | AClsRefSlotAny | ACufIterAny
     );
 
   // This re-enters to call extension-defined instance constructors.
@@ -934,6 +937,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store_kill(
       AEmpty, AEmpty,
       AClsRefSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
+    );
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that manipulate cuf-iter slots
+
+  case CufIterSpillFrame:
+    return may_load_store(ACufIterAny, AStackAny);
+
+  case DecodeCufIter:
+  case CIterFree:  // decrefs context object
+    return may_raise(
+      inst,
+      may_load_store(
+        AHeapAny | ACufIterAny,
+        AHeapAny | ACufIterAny
+      )
     );
 
   //////////////////////////////////////////////////////////////////////
@@ -1314,8 +1333,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStack { inst.src(0), inst.extra<CheckStk>()->offset, 1 },
       AEmpty
     );
-  case CufIterSpillFrame:
-    return may_load_store(AEmpty, AStackAny);
 
   // The following may re-enter, and also deal with a stack slot.
   case CastStk:
@@ -1745,7 +1762,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
-  case CIterFree:  // decrefs context object in iter
   case MIterFree:
   case IterFree:
   case GtObj:
@@ -1771,7 +1787,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CmpVec:
   case EqDict:
   case NeqDict:
-  case DecodeCufIter:
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src

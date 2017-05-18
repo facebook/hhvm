@@ -24,6 +24,9 @@ let get_original_class_name scope =
   match Ast_scope.Scope.get_class scope with
   | None ->  None
   | Some cd ->
+    if cd.Ast.c_kind = Ast.Ctrait
+    then None
+    else
     (* If we're in a closure we unmangle the name to get the original class *)
     match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
     | None -> Some (snd cd.Ast.c_name)

@@ -14,17 +14,45 @@ open Hhbc_ast.MemberOpMode
 let memoize_suffix = "$memoize_impl"
 let static_memoize_cache = "static$memoize_cache"
 let static_memoize_cache_guard = "static$memoize_cache$guard"
-let multi_memoize_cache = "$multi$memoize_cache"
-let shared_multi_memoize_cache =
-  Hhbc_id.Prop.from_raw_string "$shared$multi$memoize_cache"
-let single_memoize_cache = "$guarded_single$memoize_cache"
-let single_memoize_cache_guard = "$guarded_single$memoize_cache$guard"
-let shared_single_memoize_cache =
-  Hhbc_id.Prop.from_raw_string
-  "$shared$guarded_single$memoize_cache"
-let shared_single_memoize_cache_guard =
-  Hhbc_id.Prop.from_raw_string
-  "$shared$guarded_single$memoize_cache$guard"
+let trait_part cd =
+  if Hhas_class.is_trait cd
+  then "$" ^ String.lowercase_ascii
+    (Hhbc_id.Class.to_raw_string (Hhas_class.name cd))
+  else ""
+
+let multi_memoize_cache cd =
+  trait_part cd ^ "$multi$memoize_cache"
+let shared_multi_memoize_cache cd =
+  Hhbc_id.Prop.from_raw_string ("$shared" ^ multi_memoize_cache cd)
+let single_memoize_cache cd =
+  trait_part cd ^ "$guarded_single$memoize_cache"
+let single_memoize_cache_guard cd =
+  single_memoize_cache cd ^ "$guard"
+let shared_single_memoize_cache cd =
+  Hhbc_id.Prop.from_raw_string ("$shared" ^ single_memoize_cache cd)
+let shared_single_memoize_cache_guard cd =
+  Hhbc_id.Prop.from_raw_string ("$shared" ^ single_memoize_cache_guard cd)
+
+let get_self cd =
+  if Hhas_class.is_trait cd
+  then instr_self
+  else gather [
+    instr_string (Hhbc_id.Class.to_raw_string (Hhas_class.name cd));
+    instr_clsrefgetc;
+  ]
+
+let get_cls_method param_count cd md =
+  let method_id =
+    Hhbc_id.Method.add_suffix (Hhas_method.name md) memoize_suffix in
+  let class_id = Hhas_class.name cd in
+  if Hhas_class.is_trait cd
+  then gather [
+    instr_string (Hhbc_id.Method.to_raw_string method_id);
+    instr_self;
+    instr_fpushclsmethodf param_count;
+  ]
+  else
+    instr_fpushclsmethodd param_count method_id class_id
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -140,6 +168,21 @@ let memoized_function_body params renamed_name =
   else
     memoize_function_with_params params renamed_name
 
+(* Construct the wrapper function *)
+let make_wrapper body instrs =
+  let params = Hhas_body.params body in
+  let return_type = Hhas_body.return_type body in
+  let instrs = rewrite_class_refs instrs in
+  let num_cls_ref_slots = get_num_cls_ref_slots instrs in
+  Hhas_body.make
+    instrs
+    [] (* decl_vars *)
+    0 (* num_iters *)
+    num_cls_ref_slots
+    true (* is_memoize_wrapper *)
+    params
+    return_type
+
 let memoize_function compiled =
   let original_name = Hhas_function.name compiled in
   let renamed_name =
@@ -148,16 +191,9 @@ let memoize_function compiled =
   let body = Hhas_function.body compiled in
   let params = Hhas_body.params body in
   let body_instrs = memoized_function_body params renamed_name in
-  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
-  let memoized_body = Hhas_body.make
-    body_instrs
-    [] (* decl_vars *)
-    0 (* num_iters *)
-    num_cls_ref_slots
-    true (* is_memoize_wrapper *)
-    params
-    (Hhas_body.return_type body) in
+  let memoized_body = make_wrapper body body_instrs in
   let memoized = Hhas_function.with_body compiled memoized_body in
+  let memoized = Hhas_function.with_is_async memoized false in
   (renamed, memoized)
 
 let memoize_functions compiled_funcs =
@@ -169,9 +205,9 @@ let memoize_functions compiled_funcs =
       [ compiled ] in
   Core.List.bind compiled_funcs mapper
 
-let memoize_instance_method_no_params original_name =
+let memoize_instance_method_no_params cd md =
   let renamed_name =
-    Hhbc_id.Method.add_suffix original_name memoize_suffix in
+    Hhbc_id.Method.add_suffix (Hhas_method.name md) memoize_suffix in
   (* TODO: A lot of this codegen doesn't make a lot of sense to me.
   Try to understand it and see if it can be improved. *)
   let label_0 = Label.Regular 0 in
@@ -180,13 +216,15 @@ let memoize_instance_method_no_params original_name =
   let label_3 = Label.Regular 3 in
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
+  let ssmc = shared_single_memoize_cache cd in
+  let ssmcg = shared_single_memoize_cache_guard cd in
   gather [
     instr_checkthis;
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_0;
     instr_baseh;
-    instr_querym_cget_pt 0 shared_single_memoize_cache;
+    instr_querym_cget_pt 0 ssmc;
     instr_dup;
     instr_istypec Hhbc_ast.OpNull;
     instr_jmpnz label_1;
@@ -198,7 +236,7 @@ let memoize_instance_method_no_params original_name =
     instr_maybememotype;
     instr_jmpz label_2;
     instr_baseh;
-    instr_querym_cget_pt 0 shared_single_memoize_cache_guard;
+    instr_querym_cget_pt 0 ssmcg;
     instr_jmpz label_2;
     instr_null;
     instr_retc;
@@ -211,7 +249,7 @@ let memoize_instance_method_no_params original_name =
     instr_fcall 0;
     instr_unboxr;
     instr_baseh;
-    instr_setm_pt 0 shared_single_memoize_cache;
+    instr_setm_pt 0 ssmc;
     instr_jmp label_4;
     instr_label label_3;
     instr_this;
@@ -224,14 +262,14 @@ let memoize_instance_method_no_params original_name =
     instr_jmpz label_5;
     instr_true;
     instr_baseh;
-    instr_setm_pt 0 shared_single_memoize_cache_guard;
+    instr_setm_pt 0 ssmcg;
     instr_popc;
     instr_label label_5;
     instr_retc ]
 
-let memoize_instance_method_with_params params original_name total_count index =
+let memoize_instance_method_with_params cd md params total_count index =
   let renamed_name =
-    Hhbc_id.Method.add_suffix original_name memoize_suffix in
+    Hhbc_id.Method.add_suffix (Hhas_method.name md) memoize_suffix in
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
@@ -259,7 +297,7 @@ let memoize_instance_method_with_params params original_name total_count index =
     index_block;
     param_code_sets params first_parameter_local;
     instr_baseh;
-    instr_dim_warn_pt shared_multi_memoize_cache;
+    instr_dim_warn_pt (shared_multi_memoize_cache cd);
     instr_memoget 0 first_local local_count;
     instr_isuninit;
     instr_jmpnz label;
@@ -274,11 +312,11 @@ let memoize_instance_method_with_params params original_name total_count index =
     instr_fcall param_count;
     instr_unboxr;
     instr_baseh;
-    instr_dim_define_pt shared_multi_memoize_cache;
+    instr_dim_define_pt (shared_multi_memoize_cache cd);
     instr_memoset 0 first_local local_count;
     instr_retc ]
 
-let memoize_static_method_no_params original_name class_name =
+let memoize_static_method_no_params cd md =
   (* TODO: A lot of this codegen doesn't make a lot of sense to me.
   Try to understand it and see if it can be improved. *)
   let label_0 = Label.Regular 0 in
@@ -288,14 +326,13 @@ let memoize_static_method_no_params original_name class_name =
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
   let original_name_lc = String.lowercase_ascii
-    (Hhbc_id.Method.to_raw_string original_name) in
+    (Hhbc_id.Method.to_raw_string (Hhas_method.name md)) in
   gather [
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_0;
-    instr_string (original_name_lc ^ single_memoize_cache);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
+    instr_string (original_name_lc ^ single_memoize_cache cd);
+    get_self cd;
     instr_cgets;
     instr_dup;
     instr_istypec Hhbc_ast.OpNull;
@@ -307,9 +344,8 @@ let memoize_static_method_no_params original_name class_name =
     instr_null;
     instr_maybememotype;
     instr_jmpz label_2;
-    instr_string (original_name_lc ^ single_memoize_cache_guard);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
+    instr_string (original_name_lc ^ single_memoize_cache_guard cd);
+    get_self cd;
     instr_cgets;
     instr_jmpz label_2;
     instr_null;
@@ -318,49 +354,40 @@ let memoize_static_method_no_params original_name class_name =
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_3;
-    instr_string (original_name_lc ^ single_memoize_cache);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
-    instr_fpushclsmethodd 0
-      (Hhbc_id.Method.add_suffix original_name memoize_suffix)
-      class_name;
+    instr_string (original_name_lc ^ single_memoize_cache cd);
+    get_self cd;
+    get_cls_method 0 cd md;
     instr_fcall 0;
     instr_unboxr;
     instr_sets;
     instr_jmp label_4;
     instr_label label_3;
-    instr_fpushclsmethodd 0
-      (Hhbc_id.Method.add_suffix original_name memoize_suffix)
-      class_name;
+    get_cls_method 0 cd md;
     instr_fcall 0;
     instr_unboxr;
     instr_label label_4;
     instr_null;
     instr_maybememotype;
     instr_jmpz label_5;
-    instr_string (original_name_lc ^ single_memoize_cache_guard);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
+    instr_string (original_name_lc ^ single_memoize_cache_guard cd);
+    get_self cd;
     instr_true;
     instr_sets;
     instr_popc;
     instr_label label_5;
     instr_retc ]
 
-let memoize_static_method_with_params params original_name class_name =
-  let renamed_name =
-    Hhbc_id.Method.add_suffix original_name memoize_suffix in
+let memoize_static_method_with_params cd md params =
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
   let original_name_lc = String.lowercase_ascii
-    (Hhbc_id.Method.to_raw_string original_name) in
+    (Hhbc_id.Method.to_raw_string (Hhas_method.name md)) in
   gather [
     Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     param_code_sets params param_count;
-    instr_string (original_name_lc ^ multi_memoize_cache);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
+    instr_string (original_name_lc ^ multi_memoize_cache cd);
+    get_self cd;
     instr_basesc 0;
     instr_memoget 1 first_local param_count;
     instr_isuninit;
@@ -370,10 +397,9 @@ let memoize_static_method_with_params params original_name class_name =
     instr_label label;
     instr_ugetcunop;
     instr_popu;
-    instr_string (original_name_lc ^ multi_memoize_cache);
-    instr_string (Hhbc_id.Class.to_raw_string class_name);
-    instr_clsrefgetc;
-    instr_fpushclsmethodd param_count renamed_name class_name;
+    instr_string (original_name_lc ^ multi_memoize_cache cd);
+    get_self cd;
+    get_cls_method param_count cd md;
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
@@ -381,17 +407,17 @@ let memoize_static_method_with_params params original_name class_name =
     instr_memoset 1 first_local param_count;
     instr_retc ]
 
-let memoize_static_method_body class_name params original_name =
+let memoize_static_method_body cd md params =
   if params = [] then
-    memoize_static_method_no_params original_name class_name
+    memoize_static_method_no_params cd md
   else
-    memoize_static_method_with_params params original_name class_name
+    memoize_static_method_with_params cd md params
 
-let memoize_instance_method_body total_count index params original_name =
+let memoize_instance_method_body cd total_count index md params =
   if params = [] && total_count = 1 then
-    memoize_instance_method_no_params original_name
+    memoize_instance_method_no_params cd md
   else
-    memoize_instance_method_with_params params original_name total_count index
+    memoize_instance_method_with_params cd md params total_count index
 
 let memoize_method method_ memoizer =
   let original_name = Hhas_method.name method_ in
@@ -401,26 +427,17 @@ let memoize_method method_ memoizer =
   let renamed = Hhas_method.make_private renamed in
   let body = Hhas_method.body method_ in
   let params = Hhas_body.params body in
-  let instrs = memoizer params original_name in
-  let instrs = rewrite_class_refs instrs in
-  let num_cls_ref_slots = get_num_cls_ref_slots instrs in
-  let memoized_body = Hhas_body.make
-    instrs
-    [] (* decl_vars *)
-    0 (* num_iters *)
-    num_cls_ref_slots
-    true (* is_memoize_wrapper *)
-    params
-    (Hhas_body.return_type body) in
+  let instrs = memoizer method_ params in
+  let memoized_body = make_wrapper body instrs in
   let memoized = Hhas_method.with_body method_ memoized_body in
+  let memoized = Hhas_method.with_is_async memoized false in
   (renamed, memoized)
 
-let memoize_instance_method method_ total_count index =
-  memoize_method method_ (memoize_instance_method_body total_count index)
+let memoize_instance_method cd md total_count index =
+  memoize_method md (memoize_instance_method_body cd total_count index)
 
-let memoize_static_method class_ method_ =
-  let class_name = Hhas_class.name class_ in
-  memoize_method method_ (memoize_static_method_body class_name)
+let memoize_static_method cd md =
+  memoize_method md (memoize_static_method_body cd)
 
 let is_memoized_instance method_ =
   (not (Hhas_method.is_static method_)) &&
@@ -430,7 +447,7 @@ let empty_dict_init = Some (Typed_value.Dict [])
 let false_init = Some (Typed_value.Bool false)
 let null_init = Some (Typed_value.Null)
 
-let add_instance_properties class_ =
+let make_instance_properties class_ =
   let folder (count, zero_params) method_ =
     if is_memoized_instance method_ then
       (count + 1, zero_params ||
@@ -441,16 +458,15 @@ let add_instance_properties class_ =
   let (count, zero_params) =
     Core.List.fold_left methods ~init:(0, false) ~f:folder in
   if count = 1 && zero_params then
-    let property = Hhas_property.make true false false false false true
-      shared_single_memoize_cache null_init None in
-    let class_ = Hhas_class.with_property class_ property in
-    let property = Hhas_property.make true false false false false true
-      shared_single_memoize_cache_guard false_init None in
-    Hhas_class.with_property class_ property
+    let property2 = Hhas_property.make true false false false false true
+      (shared_single_memoize_cache class_) null_init None in
+    let property1 = Hhas_property.make true false false false false true
+      (shared_single_memoize_cache_guard class_) false_init None in
+    [property1; property2]
   else
     let property = Hhas_property.make true false false false false true
-      shared_multi_memoize_cache empty_dict_init None in
-    Hhas_class.with_property class_ property
+      (shared_multi_memoize_cache class_) empty_dict_init None in
+    [property]
 
 let is_memoized_static method_ =
   (Hhas_method.is_static method_) &&
@@ -467,7 +483,7 @@ let memoize_methods class_ =
       if is_memoized_instance method_
       then
         let (renamed, memoized) = memoize_instance_method
-          method_ memoized_count count in
+          class_ method_ memoized_count count in
         gather (count+1) methods (renamed::acc_renamed) (memoized::acc_memoized)
       else
       if is_memoized_static method_ then
@@ -477,10 +493,10 @@ let memoize_methods class_ =
         gather count methods (method_::acc_renamed) acc_memoized
   in
   let (count, methods) = gather 0 methods [] [] in
-  let class_ =
-    if count = 0 then class_
-    else add_instance_properties class_ in
-  Hhas_class.with_methods class_ methods
+  let properties = if count = 0 then [] else make_instance_properties class_ in
+  let class_ = Hhas_class.with_properties class_ properties in
+  let class_ = Hhas_class.with_methods class_ methods in
+  class_
 
 let make_static_properties class_ =
   let mapper method_ =
@@ -492,15 +508,15 @@ let make_static_properties class_ =
         @@ Hhas_method.name method_) in
       if params = [] then
         let property2 = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache)
+          (Hhbc_id.Prop.add_suffix original_name (single_memoize_cache class_))
           null_init None in
         let property1 = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix original_name single_memoize_cache_guard)
+          (Hhbc_id.Prop.add_suffix original_name (single_memoize_cache_guard class_))
           false_init None in
         [property1; property2]
       else
         let property = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix original_name multi_memoize_cache)
+          (Hhbc_id.Prop.add_suffix original_name (multi_memoize_cache class_))
           empty_dict_init None in
         [property]
     else
@@ -510,8 +526,9 @@ let make_static_properties class_ =
 
 let memoize_class class_ =
   let properties = make_static_properties class_ in
+  let class_ = Hhas_class.with_properties class_ properties in
   let class_ = memoize_methods class_ in
-  Hhas_class.with_properties class_ properties
+  class_
 
 let memoize_classes classes =
   List.map memoize_class classes

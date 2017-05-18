@@ -95,6 +95,8 @@ let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
 let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
+let instr_self =
+  instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -154,6 +156,8 @@ let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushclsmethodd num_params class_name method_name =
   instr (ICall (FPushClsMethodD (num_params, class_name, method_name)))
+let instr_fpushclsmethodf num_params =
+  instr (ICall (FPushClsMethodF (num_params, class_ref_rewrite_sentinel)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =
   instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
 let instr_querym num_params op key =

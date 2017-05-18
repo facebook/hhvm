@@ -75,3 +75,4 @@ let is_closure_body method_def = method_def.method_is_closure_body
 let with_body method_def method_body = { method_def with method_body }
 let params m = m.method_body.Hhas_body.body_params
 let return_type m = m.method_body.Hhas_body.body_return_type
+let with_is_async m method_is_async = { m with method_is_async }

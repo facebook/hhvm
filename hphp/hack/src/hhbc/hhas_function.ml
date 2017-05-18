@@ -41,5 +41,6 @@ let is_generator f = f.function_is_generator
 let is_pair_generator f = f.function_is_pair_generator
 let with_name f function_name = { f with function_name }
 let with_body f function_body = { f with function_body }
+let with_is_async f function_is_async = { f with function_is_async }
 let params f = f.function_body.Hhas_body.body_params
 let return_type f = f.function_body.Hhas_body.body_return_type

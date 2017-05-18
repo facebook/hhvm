@@ -3496,8 +3496,7 @@ array_typelist:
 hh_type:
     /* double-optional types will be rejected by the typechecker; we
      * already allow plenty of nonsense types anyway */
-    '?' hh_type                        { only_in_hh_syntax(_p);
-                                         _p->onTypeSpecialization($2, '?');
+    '?' hh_type                        { _p->onTypeSpecialization($2, '?');
                                          $$ = $2; }
   | '@' hh_type                        { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization($2, '@');

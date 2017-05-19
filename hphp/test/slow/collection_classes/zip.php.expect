@@ -1,0 +1,536 @@
+---- empty Vector zip with empty Vector
+HH\Vector
+---- empty Vector zip with short Vector
+HH\Vector
+---- empty Vector zip with long  Vector
+HH\Vector
+---- empty Vector zip with empty ImmVector
+HH\Vector
+---- empty Vector zip with short ImmVector
+HH\Vector
+---- empty Vector zip with long  ImmVector
+HH\Vector
+---- empty Vector zip with empty Map
+HH\Vector
+---- empty Vector zip with short Map
+HH\Vector
+---- empty Vector zip with long  Map
+HH\Vector
+---- empty Vector zip with empty ImmMap
+HH\Vector
+---- empty Vector zip with short ImmMap
+HH\Vector
+---- empty Vector zip with long  ImmMap
+HH\Vector
+---- empty Vector zip with IterableClass
+HH\Vector
+---- empty Vector zip with KeyedIterableClass
+HH\Vector
+---- short Vector zip with empty Vector
+HH\Vector
+---- short Vector zip with short Vector
+HH\Vector
+0 => Pair {1 => 1}
+1 => Pair {2 => 2}
+---- short Vector zip with long  Vector
+HH\Vector
+0 => Pair {1 => 3}
+1 => Pair {2 => 4}
+---- short Vector zip with empty ImmVector
+HH\Vector
+---- short Vector zip with short ImmVector
+HH\Vector
+0 => Pair {1 => 9}
+1 => Pair {2 => 8}
+---- short Vector zip with long  ImmVector
+HH\Vector
+0 => Pair {1 => 7}
+1 => Pair {2 => 6}
+---- short Vector zip with empty Map
+HH\Vector
+---- short Vector zip with short Map
+HH\Vector
+0 => Pair {1 => A}
+1 => Pair {2 => B}
+---- short Vector zip with long  Map
+HH\Vector
+0 => Pair {1 => C}
+1 => Pair {2 => D}
+---- short Vector zip with empty ImmMap
+HH\Vector
+---- short Vector zip with short ImmMap
+HH\Vector
+0 => Pair {1 => U}
+1 => Pair {2 => V}
+---- short Vector zip with long  ImmMap
+HH\Vector
+0 => Pair {1 => W}
+1 => Pair {2 => X}
+---- short Vector zip with IterableClass
+HH\Vector
+0 => Pair {1 => 11}
+1 => Pair {2 => 22}
+---- short Vector zip with KeyedIterableClass
+HH\Vector
+0 => Pair {1 => 44}
+1 => Pair {2 => 55}
+---- long  Vector zip with empty Vector
+HH\Vector
+---- long  Vector zip with short Vector
+HH\Vector
+0 => Pair {3 => 1}
+1 => Pair {4 => 2}
+---- long  Vector zip with long  Vector
+HH\Vector
+0 => Pair {3 => 3}
+1 => Pair {4 => 4}
+2 => Pair {5 => 5}
+3 => Pair {6 => 6}
+---- long  Vector zip with empty ImmVector
+HH\Vector
+---- long  Vector zip with short ImmVector
+HH\Vector
+0 => Pair {3 => 9}
+1 => Pair {4 => 8}
+---- long  Vector zip with long  ImmVector
+HH\Vector
+0 => Pair {3 => 7}
+1 => Pair {4 => 6}
+2 => Pair {5 => 5}
+3 => Pair {6 => 4}
+---- long  Vector zip with empty Map
+HH\Vector
+---- long  Vector zip with short Map
+HH\Vector
+0 => Pair {3 => A}
+1 => Pair {4 => B}
+---- long  Vector zip with long  Map
+HH\Vector
+0 => Pair {3 => C}
+1 => Pair {4 => D}
+2 => Pair {5 => E}
+3 => Pair {6 => F}
+---- long  Vector zip with empty ImmMap
+HH\Vector
+---- long  Vector zip with short ImmMap
+HH\Vector
+0 => Pair {3 => U}
+1 => Pair {4 => V}
+---- long  Vector zip with long  ImmMap
+HH\Vector
+0 => Pair {3 => W}
+1 => Pair {4 => X}
+2 => Pair {5 => Y}
+3 => Pair {6 => Z}
+---- long  Vector zip with IterableClass
+HH\Vector
+0 => Pair {3 => 11}
+1 => Pair {4 => 22}
+2 => Pair {5 => 33}
+---- long  Vector zip with KeyedIterableClass
+HH\Vector
+0 => Pair {3 => 44}
+1 => Pair {4 => 55}
+2 => Pair {5 => 66}
+---- empty ImmVector zip with empty Vector
+HH\ImmVector
+---- empty ImmVector zip with short Vector
+HH\ImmVector
+---- empty ImmVector zip with long  Vector
+HH\ImmVector
+---- empty ImmVector zip with empty ImmVector
+HH\ImmVector
+---- empty ImmVector zip with short ImmVector
+HH\ImmVector
+---- empty ImmVector zip with long  ImmVector
+HH\ImmVector
+---- empty ImmVector zip with empty Map
+HH\ImmVector
+---- empty ImmVector zip with short Map
+HH\ImmVector
+---- empty ImmVector zip with long  Map
+HH\ImmVector
+---- empty ImmVector zip with empty ImmMap
+HH\ImmVector
+---- empty ImmVector zip with short ImmMap
+HH\ImmVector
+---- empty ImmVector zip with long  ImmMap
+HH\ImmVector
+---- empty ImmVector zip with IterableClass
+HH\ImmVector
+---- empty ImmVector zip with KeyedIterableClass
+HH\ImmVector
+---- short ImmVector zip with empty Vector
+HH\ImmVector
+---- short ImmVector zip with short Vector
+HH\ImmVector
+0 => Pair {9 => 1}
+1 => Pair {8 => 2}
+---- short ImmVector zip with long  Vector
+HH\ImmVector
+0 => Pair {9 => 3}
+1 => Pair {8 => 4}
+---- short ImmVector zip with empty ImmVector
+HH\ImmVector
+---- short ImmVector zip with short ImmVector
+HH\ImmVector
+0 => Pair {9 => 9}
+1 => Pair {8 => 8}
+---- short ImmVector zip with long  ImmVector
+HH\ImmVector
+0 => Pair {9 => 7}
+1 => Pair {8 => 6}
+---- short ImmVector zip with empty Map
+HH\ImmVector
+---- short ImmVector zip with short Map
+HH\ImmVector
+0 => Pair {9 => A}
+1 => Pair {8 => B}
+---- short ImmVector zip with long  Map
+HH\ImmVector
+0 => Pair {9 => C}
+1 => Pair {8 => D}
+---- short ImmVector zip with empty ImmMap
+HH\ImmVector
+---- short ImmVector zip with short ImmMap
+HH\ImmVector
+0 => Pair {9 => U}
+1 => Pair {8 => V}
+---- short ImmVector zip with long  ImmMap
+HH\ImmVector
+0 => Pair {9 => W}
+1 => Pair {8 => X}
+---- short ImmVector zip with IterableClass
+HH\ImmVector
+0 => Pair {9 => 11}
+1 => Pair {8 => 22}
+---- short ImmVector zip with KeyedIterableClass
+HH\ImmVector
+0 => Pair {9 => 44}
+1 => Pair {8 => 55}
+---- long  ImmVector zip with empty Vector
+HH\ImmVector
+---- long  ImmVector zip with short Vector
+HH\ImmVector
+0 => Pair {7 => 1}
+1 => Pair {6 => 2}
+---- long  ImmVector zip with long  Vector
+HH\ImmVector
+0 => Pair {7 => 3}
+1 => Pair {6 => 4}
+2 => Pair {5 => 5}
+3 => Pair {4 => 6}
+---- long  ImmVector zip with empty ImmVector
+HH\ImmVector
+---- long  ImmVector zip with short ImmVector
+HH\ImmVector
+0 => Pair {7 => 9}
+1 => Pair {6 => 8}
+---- long  ImmVector zip with long  ImmVector
+HH\ImmVector
+0 => Pair {7 => 7}
+1 => Pair {6 => 6}
+2 => Pair {5 => 5}
+3 => Pair {4 => 4}
+---- long  ImmVector zip with empty Map
+HH\ImmVector
+---- long  ImmVector zip with short Map
+HH\ImmVector
+0 => Pair {7 => A}
+1 => Pair {6 => B}
+---- long  ImmVector zip with long  Map
+HH\ImmVector
+0 => Pair {7 => C}
+1 => Pair {6 => D}
+2 => Pair {5 => E}
+3 => Pair {4 => F}
+---- long  ImmVector zip with empty ImmMap
+HH\ImmVector
+---- long  ImmVector zip with short ImmMap
+HH\ImmVector
+0 => Pair {7 => U}
+1 => Pair {6 => V}
+---- long  ImmVector zip with long  ImmMap
+HH\ImmVector
+0 => Pair {7 => W}
+1 => Pair {6 => X}
+2 => Pair {5 => Y}
+3 => Pair {4 => Z}
+---- long  ImmVector zip with IterableClass
+HH\ImmVector
+0 => Pair {7 => 11}
+1 => Pair {6 => 22}
+2 => Pair {5 => 33}
+---- long  ImmVector zip with KeyedIterableClass
+HH\ImmVector
+0 => Pair {7 => 44}
+1 => Pair {6 => 55}
+2 => Pair {5 => 66}
+---- empty Map zip with empty Vector
+HH\Map
+---- empty Map zip with short Vector
+HH\Map
+---- empty Map zip with long  Vector
+HH\Map
+---- empty Map zip with empty ImmVector
+HH\Map
+---- empty Map zip with short ImmVector
+HH\Map
+---- empty Map zip with long  ImmVector
+HH\Map
+---- empty Map zip with empty Map
+HH\Map
+---- empty Map zip with short Map
+HH\Map
+---- empty Map zip with long  Map
+HH\Map
+---- empty Map zip with empty ImmMap
+HH\Map
+---- empty Map zip with short ImmMap
+HH\Map
+---- empty Map zip with long  ImmMap
+HH\Map
+---- empty Map zip with IterableClass
+HH\Map
+---- empty Map zip with KeyedIterableClass
+HH\Map
+---- short Map zip with empty Vector
+HH\Map
+---- short Map zip with short Vector
+HH\Map
+a => Pair {A => 1}
+b => Pair {B => 2}
+---- short Map zip with long  Vector
+HH\Map
+a => Pair {A => 3}
+b => Pair {B => 4}
+---- short Map zip with empty ImmVector
+HH\Map
+---- short Map zip with short ImmVector
+HH\Map
+a => Pair {A => 9}
+b => Pair {B => 8}
+---- short Map zip with long  ImmVector
+HH\Map
+a => Pair {A => 7}
+b => Pair {B => 6}
+---- short Map zip with empty Map
+HH\Map
+---- short Map zip with short Map
+HH\Map
+a => Pair {A => A}
+b => Pair {B => B}
+---- short Map zip with long  Map
+HH\Map
+a => Pair {A => C}
+b => Pair {B => D}
+---- short Map zip with empty ImmMap
+HH\Map
+---- short Map zip with short ImmMap
+HH\Map
+a => Pair {A => U}
+b => Pair {B => V}
+---- short Map zip with long  ImmMap
+HH\Map
+a => Pair {A => W}
+b => Pair {B => X}
+---- short Map zip with IterableClass
+HH\Map
+a => Pair {A => 11}
+b => Pair {B => 22}
+---- short Map zip with KeyedIterableClass
+HH\Map
+a => Pair {A => 44}
+b => Pair {B => 55}
+---- long  Map zip with empty Vector
+HH\Map
+---- long  Map zip with short Vector
+HH\Map
+c => Pair {C => 1}
+d => Pair {D => 2}
+---- long  Map zip with long  Vector
+HH\Map
+c => Pair {C => 3}
+d => Pair {D => 4}
+e => Pair {E => 5}
+f => Pair {F => 6}
+---- long  Map zip with empty ImmVector
+HH\Map
+---- long  Map zip with short ImmVector
+HH\Map
+c => Pair {C => 9}
+d => Pair {D => 8}
+---- long  Map zip with long  ImmVector
+HH\Map
+c => Pair {C => 7}
+d => Pair {D => 6}
+e => Pair {E => 5}
+f => Pair {F => 4}
+---- long  Map zip with empty Map
+HH\Map
+---- long  Map zip with short Map
+HH\Map
+c => Pair {C => A}
+d => Pair {D => B}
+---- long  Map zip with long  Map
+HH\Map
+c => Pair {C => C}
+d => Pair {D => D}
+e => Pair {E => E}
+f => Pair {F => F}
+---- long  Map zip with empty ImmMap
+HH\Map
+---- long  Map zip with short ImmMap
+HH\Map
+c => Pair {C => U}
+d => Pair {D => V}
+---- long  Map zip with long  ImmMap
+HH\Map
+c => Pair {C => W}
+d => Pair {D => X}
+e => Pair {E => Y}
+f => Pair {F => Z}
+---- long  Map zip with IterableClass
+HH\Map
+c => Pair {C => 11}
+d => Pair {D => 22}
+e => Pair {E => 33}
+---- long  Map zip with KeyedIterableClass
+HH\Map
+c => Pair {C => 44}
+d => Pair {D => 55}
+e => Pair {E => 66}
+---- empty ImmMap zip with empty Vector
+HH\ImmMap
+---- empty ImmMap zip with short Vector
+HH\ImmMap
+---- empty ImmMap zip with long  Vector
+HH\ImmMap
+---- empty ImmMap zip with empty ImmVector
+HH\ImmMap
+---- empty ImmMap zip with short ImmVector
+HH\ImmMap
+---- empty ImmMap zip with long  ImmVector
+HH\ImmMap
+---- empty ImmMap zip with empty Map
+HH\ImmMap
+---- empty ImmMap zip with short Map
+HH\ImmMap
+---- empty ImmMap zip with long  Map
+HH\ImmMap
+---- empty ImmMap zip with empty ImmMap
+HH\ImmMap
+---- empty ImmMap zip with short ImmMap
+HH\ImmMap
+---- empty ImmMap zip with long  ImmMap
+HH\ImmMap
+---- empty ImmMap zip with IterableClass
+HH\ImmMap
+---- empty ImmMap zip with KeyedIterableClass
+HH\ImmMap
+---- short ImmMap zip with empty Vector
+HH\ImmMap
+---- short ImmMap zip with short Vector
+HH\ImmMap
+u => Pair {U => 1}
+v => Pair {V => 2}
+---- short ImmMap zip with long  Vector
+HH\ImmMap
+u => Pair {U => 3}
+v => Pair {V => 4}
+---- short ImmMap zip with empty ImmVector
+HH\ImmMap
+---- short ImmMap zip with short ImmVector
+HH\ImmMap
+u => Pair {U => 9}
+v => Pair {V => 8}
+---- short ImmMap zip with long  ImmVector
+HH\ImmMap
+u => Pair {U => 7}
+v => Pair {V => 6}
+---- short ImmMap zip with empty Map
+HH\ImmMap
+---- short ImmMap zip with short Map
+HH\ImmMap
+u => Pair {U => A}
+v => Pair {V => B}
+---- short ImmMap zip with long  Map
+HH\ImmMap
+u => Pair {U => C}
+v => Pair {V => D}
+---- short ImmMap zip with empty ImmMap
+HH\ImmMap
+---- short ImmMap zip with short ImmMap
+HH\ImmMap
+u => Pair {U => U}
+v => Pair {V => V}
+---- short ImmMap zip with long  ImmMap
+HH\ImmMap
+u => Pair {U => W}
+v => Pair {V => X}
+---- short ImmMap zip with IterableClass
+HH\ImmMap
+u => Pair {U => 11}
+v => Pair {V => 22}
+---- short ImmMap zip with KeyedIterableClass
+HH\ImmMap
+u => Pair {U => 44}
+v => Pair {V => 55}
+---- long  ImmMap zip with empty Vector
+HH\ImmMap
+---- long  ImmMap zip with short Vector
+HH\ImmMap
+w => Pair {W => 1}
+x => Pair {X => 2}
+---- long  ImmMap zip with long  Vector
+HH\ImmMap
+w => Pair {W => 3}
+x => Pair {X => 4}
+y => Pair {Y => 5}
+z => Pair {Z => 6}
+---- long  ImmMap zip with empty ImmVector
+HH\ImmMap
+---- long  ImmMap zip with short ImmVector
+HH\ImmMap
+w => Pair {W => 9}
+x => Pair {X => 8}
+---- long  ImmMap zip with long  ImmVector
+HH\ImmMap
+w => Pair {W => 7}
+x => Pair {X => 6}
+y => Pair {Y => 5}
+z => Pair {Z => 4}
+---- long  ImmMap zip with empty Map
+HH\ImmMap
+---- long  ImmMap zip with short Map
+HH\ImmMap
+w => Pair {W => A}
+x => Pair {X => B}
+---- long  ImmMap zip with long  Map
+HH\ImmMap
+w => Pair {W => C}
+x => Pair {X => D}
+y => Pair {Y => E}
+z => Pair {Z => F}
+---- long  ImmMap zip with empty ImmMap
+HH\ImmMap
+---- long  ImmMap zip with short ImmMap
+HH\ImmMap
+w => Pair {W => U}
+x => Pair {X => V}
+---- long  ImmMap zip with long  ImmMap
+HH\ImmMap
+w => Pair {W => W}
+x => Pair {X => X}
+y => Pair {Y => Y}
+z => Pair {Z => Z}
+---- long  ImmMap zip with IterableClass
+HH\ImmMap
+w => Pair {W => 11}
+x => Pair {X => 22}
+y => Pair {Y => 33}
+---- long  ImmMap zip with KeyedIterableClass
+HH\ImmMap
+w => Pair {W => 44}
+x => Pair {X => 55}
+y => Pair {Y => 66}

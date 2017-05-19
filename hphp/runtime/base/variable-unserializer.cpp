@@ -1375,7 +1375,6 @@ void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
   if (type != 'V') throwBadFormat(obj, type);
   auto bvec = static_cast<BaseVector*>(obj);
   bvec->reserve(sz);
-  assert(bvec->canMutateBuffer());
   reserveForAdd(sz);
   for (int64_t i = 0; i < sz; ++i) {
     auto tv = bvec->appendForUnserialize(i);

@@ -1,0 +1,56 @@
+---- from 0 to 0
+---- from 0 to 1
+int(0)
+---- from 0 to 3
+int(0)
+int(0)
+int(0)
+---- from 0 to 6
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+---- from 1 to 0
+---- from 1 to 1
+int(1)
+---- from 1 to 3
+int(1)
+int(0)
+int(0)
+---- from 1 to 6
+int(1)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+---- from 2 to 0
+---- from 2 to 1
+int(1)
+---- from 2 to 3
+int(1)
+int(2)
+int(0)
+---- from 2 to 6
+int(1)
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+---- from 5 to 0
+---- from 5 to 1
+int(1)
+---- from 5 to 3
+int(1)
+int(2)
+int(3)
+---- from 5 to 6
+int(1)
+int(2)
+int(3)
+int(4)
+int(5)
+int(0)

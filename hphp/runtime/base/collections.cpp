@@ -241,9 +241,8 @@ void deepCopy(TypedValue* tv) {
       const auto copyVector = [](BaseVector* vec) {
         if (vec->size() > 0 && vec->arrayData()->isRefCounted()) {
           vec->mutate();
-          assertx(vec->canMutateBuffer());
           auto sz = vec->m_size;
-          for (size_t i = 0; i < sz; ++i) {
+          for (uint32_t i = 0; i < sz; ++i) {
             deepCopy(&vec->data()[i]);
           }
         }

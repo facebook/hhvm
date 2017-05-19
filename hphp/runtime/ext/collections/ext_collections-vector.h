@@ -31,19 +31,21 @@ protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
     : ObjectData(cls, collections::objectFlags, kind)
-    , m_size(0)
-    , m_versionAndCap(0)
+    , m_versionAndSize(0)
     , m_arr(staticEmptyVecArray())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, collections::objectFlags, kind)
-    , m_size(arr->size())
-    , m_versionAndCap(arr->cap())
+    , m_versionAndSize(arr->m_size)
     , m_arr(arr)
   {
     assertx(arr->isVecArray());
   }
-  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap);
+  explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
+    : ObjectData(cls, collections::objectFlags, kind)
+    , m_versionAndSize(0)
+    , m_arr(PackedArray::MakeReserveVec(cap))
+  {}
   ~BaseVector();
 
 public:
@@ -106,21 +108,20 @@ public:
     return m_arr;
   }
   void setSize(uint32_t sz) {
-    assert(sz <= m_capacity);
-    if (sz == m_size) return;
-    assert(!arrayData()->cowCheck());
+    assert(canMutateBuffer());
+    assert(sz <= arrayData()->cap());
     m_size = sz;
     arrayData()->m_size = sz;
   }
   void incSize() {
-    assert(m_size + 1 <= m_capacity);
-    assert(!arrayData()->cowCheck());
+    assert(canMutateBuffer());
+    assert(m_size + 1 <= arrayData()->cap());
     ++m_size;
     arrayData()->m_size = m_size;
   }
   void decSize() {
+    assert(canMutateBuffer());
     assert(m_size > 0);
-    assert(!arrayData()->cowCheck());
     --m_size;
     arrayData()->m_size = m_size;
   }
@@ -199,7 +200,6 @@ public:
     addAllImpl(it);
   }
 
-  void keys(BaseVector* bvec);
   int64_t linearSearch(const Variant& search_value);
   void zip(BaseVector* bvec, const Variant& iterable);
   void addFront(TypedValue v);
@@ -208,7 +208,14 @@ public:
   int getVersion() const { return m_version; }
   int64_t size() const { return m_size; }
   bool toBoolImpl() const { return (m_size != 0); }
-  void reserve(int64_t sz);
+  /**
+   * mutate() or reserve() must be called before any doing anything that mutates
+   * this Vector's buffer, unless it can be proven that canMutateBuffer() is
+   * true. reserve() takes care of dropping m_immCopy and making a copy of
+   * this Vector's buffer if needed, and ensures that there is room for at least
+   * sz items in the Vector.
+   */
+  void reserve(uint32_t sz);
   Array toArray() {
     if (!m_size) return empty_array();
     return Array::attach(const_cast<ArrayData*>(arrayData()->toPHPArray(true)));
@@ -216,9 +223,6 @@ public:
 
   static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
   static constexpr size_t arrOffset() { return offsetof(BaseVector, m_arr); }
-  static constexpr size_t immCopyOffset() {
-    return offsetof(BaseVector, m_immCopy);
-  }
 
   /*
    * Append `v' to the Vector and incref it if it's refcounted.
@@ -254,30 +258,28 @@ public:
 
   /**
    * canMutateBuffer() indicates whether it is currently safe to directly
-   * modify this Vector's buffer. canMutateBuffer() is vacuously true for
-   * buffers with zero capacity (i.e. the staticEmptyVecArray() case) because
-   * you can't meaningfully mutate zero-capacity buffer without first doing
-   * a grow. This may seem weird, but its actually much smoother in practice
-   * than the alternative of returning false for such cases.
+   * modify this Vector's buffer.
    */
   bool canMutateBuffer() const {
     assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
-    return m_capacity == 0 || !arrayData()->cowCheck();
+    assert(m_size == arrayData()->m_size);
+    return !arrayData()->cowCheck();
   }
 
   /**
-   * mutate() must be called before any doing anything that mutates this
-   * Vector's buffer, unless it can be proven that canMutateBuffer() is
-   * true. mutate() takes care of updating m_immCopy and making a copy
+   * mutate() or reserve() must be called before any doing anything that mutates
+   * this Vector's buffer, unless it can be proven that canMutateBuffer() is
+   * true. mutate() takes care of dropping m_immCopy and making a copy of
    * this Vector's buffer if needed.
    */
   void mutate() {
-    if (arrayData()->cowCheck()) {
-      // mutateImpl() does two things for us. First it drops the the
-      // immutable collection held by m_immCopy (if m_immCopy is not
-      // null). Second, it takes care of copying the buffer if needed.
-      mutateImpl();
+    if (!canMutateBuffer()) {
+      dropImmCopy();
+      if (!canMutateBuffer()) {
+        mutateImpl();
+      }
     }
+    assert(canMutateBuffer());
   }
 
   void mutateAndBump() { mutate(); ++m_version; }
@@ -285,8 +287,8 @@ public:
   Object getImmutableCopy();
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
-           (data() == ((BaseVector*)m_immCopy.get())->data() &&
-            arrayData()->cowCheck()));
+           (arrayData() == ((BaseVector*)m_immCopy.get())->arrayData() &&
+            !canMutateBuffer()));
     m_immCopy.reset();
   }
 
@@ -308,7 +310,6 @@ protected:
   static Clone(ObjectData* obj);
 
   Cell* data() const { return packedData(m_arr); }
-  void grow();
   void reserveImpl(uint32_t newCap);
 
   void addAllImpl(const Variant& t);
@@ -316,15 +317,19 @@ protected:
   template<bool raw> ALWAYS_INLINE
   void addImpl(TypedValue tv) {
     assert(tv.m_type != KindOfRef);
-    if (m_capacity <= m_size) {
-      grow();
+    auto* oldAd = arrayData();
+    if (raw) {
+      assert(canMutateBuffer());
+      m_arr = PackedArray::AppendVec(oldAd, tv, false);
+    } else {
+      ++m_version;
+      dropImmCopy();
+      m_arr = PackedArray::AppendVec(oldAd, tv, oldAd->cowCheck());
     }
-    if (!raw) {
-      mutateAndBump();
+    if (m_arr != oldAd) {
+      decRefArr(oldAd);
     }
-    assert(canMutateBuffer());
-    cellDup(tv, data()[m_size]);
-    incSize();
+    m_size = arrayData()->m_size;
   }
 
   // addRaw() adds a new element to this Vector but doesn't check for an
@@ -380,35 +385,21 @@ protected:
 
   template<class TVector> typename
     std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_keys() {
-    auto vec = req::make<TVector>();
-    keys(vec.get());
-    return Object{std::move(vec)};
-  }
+  php_keys();
 
   template<class TVector> typename
     std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_zip(const Variant& it) {
-    auto vec = req::make<TVector>();
-    zip(vec.get(), it);
-    return Object{std::move(vec)};
-  }
+  php_zip(const Variant& it);
 
   /////////////////////////////////////////////////////////////////////////////
 
   // Fields
-#ifndef USE_LOWPTR
-  // Keep `m_size' aligned at the same offset for all collection classes.
-  UNUSED uint32_t dummy;
-#endif
-  uint32_t m_size;
-
   union {
     struct {
-      uint32_t m_capacity;
+      uint32_t m_size;
       int32_t m_version;
     };
-    int64_t m_versionAndCap;
+    int64_t m_versionAndSize;
   };
 
 
@@ -470,7 +461,7 @@ struct c_Vector : BaseVector {
   void addAllKeysOf(const Variant& val);
   void clear();
   Variant pop();
-  void resize(int64_t sz, const Cell* val);
+  void resize(uint32_t sz, const Cell* val);
   void removeKey(int64_t k);
   void reverse();
   void shuffle();
@@ -487,7 +478,7 @@ struct c_Vector : BaseVector {
   static Object fromArray(const Class*, const Variant&);
 
  protected:
-  int64_t checkRequestedSize(const Variant& sz) {
+  uint32_t checkRequestedSize(const Variant& sz) {
     int64_t intSz = sz.isInteger() ? sz.toInt64() : -1;
     if (intSz < 0) {
       SystemLib::throwInvalidArgumentExceptionObject(

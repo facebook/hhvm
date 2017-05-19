@@ -198,15 +198,12 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
       instr_to_add
     ]
 
-and emit_local need_ref x =
-  let scope = get_scope () in
-  if x = SN.SpecialIdents.this &&
-    Ast_scope.Scope.has_this scope &&
-    not (get_needs_local_this ()) then
+and emit_local ~notice ~need_ref x =
+  if is_local_this x && not (get_needs_local_this ()) then
     if need_ref then
       instr_vgetl (Local.Named x)
     else
-      instr (IMisc (BareThis Notice))
+      instr (IMisc (BareThis notice))
   else
   if SN.Superglobals.is_superglobal x
   then gather [
@@ -619,7 +616,7 @@ and emit_call_isset_expr (_, expr_ as expr) =
     emit_obj_get false None QueryOp.Isset expr prop nullflavor
   | A.Lvar(_, id) when is_local_this id ->
     gather [
-      instr (IMisc (BareThis NoNotice));
+      emit_local ~notice:NoNotice ~need_ref:false id;
       instr_istypec OpNull;
       instr_not
     ]
@@ -717,7 +714,7 @@ and from_expr expr ~need_ref =
   | A.True ->
     emit_box_if_necessary need_ref @@ instr_true
   | A.Lvar (_, x) ->
-    emit_local need_ref x
+    emit_local ~notice:Notice ~need_ref x
   | A.Class_const (cid, id) ->
     emit_class_const cid id
   | A.Unop (op, e) ->
@@ -1096,7 +1093,9 @@ and emit_array_get need_ref param_num_opt qop base_expr opt_elem_expr =
   let mode = get_queryMOpMode need_ref qop in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base mode elem_stack_size param_num_opt base_expr in
+    emit_base ~is_object:false
+      ~notice:(match qop with QueryOp.Isset -> NoNotice | _ -> Notice)
+      mode elem_stack_size param_num_opt base_expr in
   let mk = get_elem_member_key 0 opt_elem_expr in
   let total_stack_size = elem_stack_size + base_stack_size in
   let final_instr =
@@ -1124,7 +1123,7 @@ and emit_obj_get need_ref param_num_opt qop expr prop null_flavor =
   let mode = get_queryMOpMode need_ref qop in
   let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base mode prop_stack_size param_num_opt expr in
+    emit_base ~is_object:true ~notice:Notice mode prop_stack_size param_num_opt expr in
   let mk = get_prop_member_key null_flavor 0 prop in
   let total_stack_size = prop_stack_size + base_stack_size in
   let final_instr =
@@ -1221,7 +1220,7 @@ and get_prop_member_key null_flavor stack_index prop_expr =
  *   # Section 3, indexing the array using the value at stack position 0 (EC:0)
  *   QueryM 1 CGet EC:0
  *)
-and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
+and emit_base ~is_object ~notice mode base_offset param_num_opt (_, expr_ as expr) =
    let base_mode =
      match mode with
      | MemberOpMode.Unset -> MemberOpMode.ModeNone
@@ -1236,12 +1235,13 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      )),
      1
 
-   | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
+   | A.Lvar (_, x) when is_object && x = SN.SpecialIdents.this ->
      instr (IMisc CheckThis),
      instr (IBase BaseH),
      0
 
-   | A.Lvar (_, x) ->
+   | A.Lvar (_, x)
+     when not (is_local_this x) || get_needs_local_this () ->
      empty,
      instr (IBase (
        match param_num_opt with
@@ -1249,6 +1249,12 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        | Some i -> FPassBaseL (i, Local.Named x)
        )),
      0
+
+   | A.Lvar (_, x) ->
+     emit_local ~notice ~need_ref:false x,
+     instr (IBase (BaseC base_offset)),
+     1
+
    | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar (_, y)))
      when x = SN.Superglobals.globals ->
      empty,
@@ -1272,7 +1278,8 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
    | A.Array_get(base_expr, opt_elem_expr) ->
      let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
      let base_expr_instrs, base_setup_instrs, base_stack_size =
-       emit_base mode (base_offset + elem_stack_size) param_num_opt base_expr in
+       emit_base ~notice ~is_object:false
+         mode (base_offset + elem_stack_size) param_num_opt base_expr in
      let mk = get_elem_member_key base_offset opt_elem_expr in
      let total_stack_size = base_stack_size + elem_stack_size in
      gather [
@@ -1292,7 +1299,8 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
    | A.Obj_get(base_expr, prop_expr, null_flavor) ->
      let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop_expr in
      let base_expr_instrs, base_setup_instrs, base_stack_size =
-       emit_base mode (base_offset + prop_stack_size) param_num_opt base_expr in
+       emit_base ~notice:Notice ~is_object:true
+         mode (base_offset + prop_stack_size) param_num_opt base_expr in
      let mk = get_prop_member_key null_flavor base_offset prop_expr in
      let total_stack_size = prop_stack_size + base_stack_size in
      let final_instr =
@@ -1463,7 +1471,7 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
     let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
-      emit_local false id;
+      emit_local ~notice:Notice ~need_ref:false id;
       emit_class_expr cexpr;
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
@@ -1812,7 +1820,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
     let base_offset = elem_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base mode base_offset None base_expr in
+      emit_base ~notice:Notice ~is_object:false mode base_offset None base_expr in
     let mk = get_elem_member_key rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
     let final_instr = emit_final_member_op total_stack_size op mk in
@@ -1832,7 +1840,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     let prop_expr_instrs, prop_stack_size = emit_prop_instrs e2 in
       let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base mode base_offset None e1 in
+      emit_base ~notice:Notice ~is_object:true mode base_offset None e1 in
     let mk = get_prop_member_key null_flavor rhs_stack_size e2 in
     let total_stack_size = prop_stack_size + base_stack_size in
     let final_instr = emit_final_member_op total_stack_size op mk in

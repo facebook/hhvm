@@ -57,12 +57,19 @@ and array_to_typed_value ns fields =
     List.fold_left fields ~init:([], Int64.zero)
       ~f:(fun (pairs, maxindex) afield ->
         match afield with
-          (* Special treatment for explicit integer key *)
-        | A.AFkvalue ((_, A.Int (_, s)), value) ->
-          let newindex = Int64.of_string s in
-          (TV.Int newindex, expr_to_typed_value ns value) :: pairs,
-            Int64.add (if Int64.compare newindex maxindex > 0
-            then newindex else maxindex) Int64.one
+          (* Special treatment for explicit integer key, or string that
+           * parses successfully as integer *)
+        | A.AFkvalue (((_, (A.Int (_, s) | A.String (_, s))) as key), value) ->
+          begin match Int64.of_string s with
+          | newindex ->
+            (TV.Int newindex, expr_to_typed_value ns value) :: pairs,
+              Int64.add (if Int64.compare newindex maxindex > 0
+              then newindex else maxindex) Int64.one
+          | exception Failure _ ->
+          (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
+            :: pairs,
+          maxindex
+          end
         | A.AFkvalue (key, value) ->
           (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
             :: pairs,
@@ -105,7 +112,9 @@ let literals_from_exprs_with_index ns exprs =
     [TV.Int (Int64.of_int index); literal_from_expr ns e])
 
 let expr_to_opt_typed_value ns e =
-  try Some (expr_to_typed_value ns e) with Failure _ -> None
+  match expr_to_typed_value ns e with
+  | x -> Some x
+  | exception Failure _ -> None
 
 (* Any value can be converted into a literal expression *)
 let rec value_to_expr_ p v =

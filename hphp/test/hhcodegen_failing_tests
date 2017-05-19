@@ -6,6 +6,7 @@ quick/FPushCtor.php
 quick/FPushObjMethod.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
+quick/IterInitM.php
 quick/SetOpProp.php
 quick/UnsetM.php
 quick/UnsetProp.php
@@ -23,7 +24,6 @@ quick/bool_types.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
 quick/catch-order.php
-quick/cgetm_ne.php
 quick/chdir_posix.php
 quick/class_abstract_final1.php
 quick/class_abstract_final2.php
@@ -159,7 +159,6 @@ quick/interface11.php
 quick/interface4.php
 quick/interface8.php
 quick/invoke.php
-quick/IterInitM.php
 quick/keyref_error.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-setters.php

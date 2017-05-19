@@ -636,7 +636,7 @@ bool TestServer::TestTakeoverServer() {
   // Wait for the server to actually start
   HttpClient http;
   StringBuffer response;
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   auto url = "http://127.0.0.1:" + folly::to<std::string>(s_server_port) +
     "/status.php";
   HeaderMap headers;
@@ -723,7 +723,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    std::vector<String> responseHeaders;
+    req::vector<String> responseHeaders;
     int code = http.get(url.c_str(), response, &headers, &responseHeaders);
     VS(code, 200);
     VS(response.data(),
@@ -747,7 +747,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    std::vector<String> responseHeaders;
+    req::vector<String> responseHeaders;
     int code = http.post(url.c_str(), "postdata", 8, response, &headers,
                          &responseHeaders);
     VS(code, 200);

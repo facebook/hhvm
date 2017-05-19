@@ -1012,7 +1012,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     data = (const char *)transport->getPostData(size);
   }
 
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   HttpClient http;
   code = http.request(transport->getMethodName(),
                       url.c_str(), data, size, response, &requestHeaders,

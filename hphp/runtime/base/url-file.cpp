@@ -112,7 +112,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
 
   int code;
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   if (m_get) {
     code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
   } else {

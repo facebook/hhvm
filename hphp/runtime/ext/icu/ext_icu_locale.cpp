@@ -584,7 +584,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                                  bool canonicalize, const String& def) {
   String locname(localeOrDefault(locale), CopyString);
   CHECK_LOCALELEN_OR_RETURN(locale, def);
-  std::vector<std::pair<String,String>> cur_arr;
+  req::vector<std::pair<String,String>> cur_arr;
   for (ArrayIter iter(langtag); iter; ++iter) {
     auto val = iter.second();
     if (!val.isString()) {

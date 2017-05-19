@@ -2765,7 +2765,7 @@ Variant HHVM_METHOD(SoapClient, __gettypes) {
 }
 
 static bool content_type_is_xml(const String& response,
-                                const std::vector<String>& responseHeaders) {
+                                const req::vector<String>& responseHeaders) {
   if (response.empty()) return false;
   for (auto header : responseHeaders) {
     auto cheader = header.c_str();
@@ -2888,7 +2888,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   }
 
   StringBuffer responseBuffer;
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   int code = http.post(location.data(), buffer.data(), buffer.size(),
                        responseBuffer, &headers, &responseHeaders);
   String response = responseBuffer.detach();

@@ -91,7 +91,7 @@ void HttpClient::proxy(const std::string &host, int port,
 
 int HttpClient::get(const char *url, StringBuffer &response,
                     const HeaderMap *requestHeaders /* = NULL */,
-                    std::vector<String> *responseHeaders /* = NULL */) {
+                    req::vector<String> *responseHeaders /* = NULL */) {
   return request(nullptr,
                  url, nullptr, 0, response, requestHeaders, responseHeaders);
 }
@@ -99,7 +99,7 @@ int HttpClient::get(const char *url, StringBuffer &response,
 int HttpClient::post(const char *url, const char *data, size_t size,
                      StringBuffer &response,
                      const HeaderMap *requestHeaders /* = NULL */,
-                     std::vector<String> *responseHeaders /* = NULL */) {
+                     req::vector<String> *responseHeaders /* = NULL */) {
   return request(nullptr,
                  url, data, size, response, requestHeaders, responseHeaders);
 }
@@ -119,7 +119,7 @@ const StaticString
 int HttpClient::request(const char* verb,
                      const char *url, const char *data, size_t size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
-                     std::vector<String> *responseHeaders) {
+                     req::vector<String> *responseHeaders) {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "curl", url);
 
   m_response = &response;

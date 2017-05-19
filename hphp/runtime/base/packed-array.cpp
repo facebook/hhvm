@@ -78,7 +78,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   // This loop is too slow for normal use, but can be enabled to debug
   // packed arrays.
   if (false) {
-    auto ptr = reinterpret_cast<const TypedValue*>(arr + 1);
+    auto ptr = packedData(arr);
     auto const stop = ptr + arr->m_size;
     for (; ptr != stop; ptr++) {
       assert(ptr->m_type != KindOfUninit);
@@ -334,18 +334,16 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
   ad->initHeader(adIn->aux<CapCode>(), dest_hk, initial_count);
 
   // Copy counted types correctly, especially RefData.
-  auto data = packedData(ad);
-  for (uint32_t i = 0; i < size; ++i) {
-    auto pTv = data + i;
-    if (UNLIKELY(pTv->m_type == KindOfRef)) {
+  for (auto elm = packedData(ad), end = elm + size; elm < end; ++elm) {
+    if (UNLIKELY(elm->m_type == KindOfRef)) {
       assert(!adIn->isVecArray());
-      auto ref = pTv->m_data.pref;
+      auto ref = elm->m_data.pref;
       // See also tvDupFlatternVars()
       if (!ref->isReferenced() && ref->tv()->m_data.parr != adIn) {
-        cellDup(*ref->tv(), *pTv);
+        cellDup(*ref->tv(), *elm);
         continue;
       } else if (dest_hk == HeaderKind::VecArray) {
-        ad->m_size = i;
+        ad->m_size = elm - packedData(ad);
         SCOPE_EXIT {
           if (ad->isRefCounted()) Release(ad);
           else if (ad->isUncounted()) ReleaseUncounted(ad);
@@ -353,7 +351,7 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
         throwRefInvalidArrayValueException(ad);
       }
     }
-    tvIncRefGen(pTv);
+    tvIncRefGen(elm);
   }
 }
 
@@ -441,7 +439,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   } else {
     ad = ConvertStaticHelper(arr);
   }
-  auto data = reinterpret_cast<TypedValue*>(ad + 1);
+  auto data = packedData(ad);
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++data) {
@@ -550,13 +548,14 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   }
 
   // Append values by moving; this function takes ownership of them.
-  auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto i = uint32_t{0}; i < size; ++i) {
-    auto const& src = values[reverse ? size - i - 1 : i];
-    assert(hk != HeaderKind::VecArray || src.m_type != KindOfRef);
-    ptr->m_type = src.m_type;
-    ptr->m_data = src.m_data;
-    ++ptr;
+  if (reverse) {
+    auto elm = packedData(ad) + size - 1;
+    for (auto end = values + size; values < end; ++values, --elm) {
+      assert(hk != HeaderKind::VecArray || values->m_type != KindOfRef);
+      tvCopy(*values, *elm);
+    }
+  } else {
+    memcpy16_inline(packedData(ad), values, sizeof(TypedValue) * size);
   }
 
   assert(ad->m_size == size);
@@ -1344,13 +1343,14 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   } else {
     ad = MakeUncountedHelper(array, extra);
   }
-  auto const srcData = packedData(array);
-  auto targetData = reinterpret_cast<TypedValue*>(ad + 1);
+
   // Do a raw copy without worrying about refcounts, and convert the values to
   // uncounted later.
-  memcpy16_inline(targetData, srcData, sizeof(TypedValue) * size);
-  for (uint32_t i = 0; i < size; ++i) {
-    ConvertTvToUncounted(targetData + i);
+  auto src = packedData(array);
+  auto dst = packedData(ad);
+  memcpy16_inline(dst, src, sizeof(TypedValue) * size);
+  for (auto end = dst + size; dst < end; ++dst) {
+    ConvertTvToUncounted(dst);
   }
 
   assert(ad->m_pos == array->m_pos);
@@ -1391,20 +1391,16 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  auto data1 = packedData(ad1);
-  auto data2 = packedData(ad2);
-  auto const size = ad1->m_size;
-  for (uint32_t i = 0; i < size; ++i) {
-    if (strict) {
-      if (!cellSame(*tvAssertCell(data1 + i),
-                    *tvAssertCell(data2 + i))) {
-        return false;
-      }
-    } else {
-      if (!cellEqual(*tvAssertCell(data1 + i),
-                     *tvAssertCell(data2 + i))) {
-        return false;
-      }
+  auto elm1 = packedData(ad1);
+  auto end = elm1 + ad1->m_size;
+  auto elm2 = packedData(ad2);
+  if (strict) {
+    for (; elm1 < end; ++elm1, ++elm2) {
+      if (!cellSame(*elm1, *elm2)) return false;
+    }
+  } else {
+    for (; elm1 < end; ++elm1, ++elm2) {
+      if (!cellEqual(*elm1, *elm2)) return false;
     }
   }
 
@@ -1427,11 +1423,11 @@ int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  auto data1 = packedData(ad1);
-  auto data2 = packedData(ad2);
-  for (uint32_t i = 0; i < size1; ++i) {
-    auto const cmp = cellCompare(*tvAssertCell(data1 + i),
-                                 *tvAssertCell(data2 + i));
+  auto elm1 = packedData(ad1);
+  auto end = elm1 + size1;
+  auto elm2 = packedData(ad2);
+  for (; elm1 < end; ++elm1, ++elm2) {
+    auto const cmp = cellCompare(*elm1, *elm2);
     if (cmp != 0) return cmp;
   }
 

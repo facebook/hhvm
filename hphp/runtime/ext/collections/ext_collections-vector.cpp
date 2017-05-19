@@ -638,15 +638,29 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
   if (sz == m_size) {
     return;
   }
-  if (m_size > sz) {
-    mutateAndBump();
-    auto elm = data() + m_size - 1;
-    auto end = data() + sz;
+  if (sz == 0) {
+    ++m_version;
+    dropImmCopy();
+    decRefArr(arrayData());
+    m_arr = staticEmptyVecArray();
+    m_size = 0;
+  } else if (m_size > sz) {
+    // If there were any objects in the part that's being resized away, their
+    // desctuctors may mutate this Vector (and need to see it in the fully
+    // resized state). The easiest way to do this is to copy the part we're
+    // keeping into a new vec, swap them, and decref the old one.
+    ++m_version;
+    dropImmCopy();
+    auto oldAd = arrayData();
+    auto from = data();
+    auto end = from + sz;
+    m_arr = PackedArray::MakeReserveVec(sz);
+    auto to = data();
     do {
-      auto const old = *elm;
-      decSize();
-      tvDecRefGen(old);
-    } while (--elm >= end);
+      cellDup(*from++, *to++);
+    } while (from < end);
+    arrayData()->m_size = m_size = sz;
+    decRefArr(oldAd);
   } else {
     reserve(sz);
     auto elm = data() + m_size;
@@ -670,21 +684,28 @@ void c_Vector::reverse() {
 }
 
 void c_Vector::splice(int64_t startPos, int64_t endPos) {
-  assert(startPos >= 0 && endPos <= m_size);
-  mutateAndBump();
-  // Null out each element before decreffing it. We need to do this in case
-  // a __destruct method reenters and accesses this Vector object.
-  for (auto elm = data() + startPos, end = data() + endPos; elm < end; ++elm) {
-    auto const old = *elm;
-    tvWriteNull(elm);
-    tvDecRefGen(old);
+  // If there were any objects in the part that's being spliced away, their
+  // desctuctors may mutate this Vector (and need to see it in the fully
+  // spliced state). The easiest way to do this is to copy the part we're
+  // keeping into a new vec, swap them, and decref the old one.
+  assert(0 <= startPos && startPos < endPos && endPos <= m_size);
+  uint32_t sz = m_size - (endPos - startPos);
+  ++m_version;
+  dropImmCopy();
+  auto oldBuf = data();
+  auto oldAd = arrayData();
+  m_arr = PackedArray::MakeReserveVec(sz);
+  auto to = data();
+  for (auto from = oldBuf, end = from + startPos; from < end; ++from, ++to) {
+    cellDup(*from, *to);
   }
-  // Move elements that came after the deleted elements (if there are any)
-  if (endPos < m_size) {
-    memmove(&data()[startPos], &data()[endPos],
-            (m_size - endPos) * sizeof(TypedValue));
+  auto from = oldBuf + endPos;
+  auto end = oldBuf + m_size;
+  for (; from < end; ++from, ++to) {
+    cellDup(*from, *to);
   }
-  setSize(m_size - (endPos - startPos));
+  arrayData()->m_size = m_size = sz;
+  decRefArr(oldAd);
 }
 
 void c_Vector::php_splice(const Variant& offset,
@@ -704,7 +725,7 @@ void c_Vector::php_splice(const Variant& offset,
   }
   auto sz = size();
   auto start = offset.toInt64();
-  if (UNLIKELY(start > sz)) return;
+  if (UNLIKELY(start >= sz)) return;
   if (start < 0) {
     start += sz;
     if (start < 0) { start = 0; }
@@ -718,7 +739,7 @@ void c_Vector::php_splice(const Variant& offset,
     } else {
       if (!end) return;
       end += sz;
-      if (end < start) return;
+      if (end <= start) return;
     }
   } else {
     end = sz;

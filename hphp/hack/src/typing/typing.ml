@@ -205,7 +205,14 @@ let rec check_memoizable env param ty =
   | _, Tarraykind AKany
   | _, Tarraykind AKempty ->
       ()
-  | _, Tarraykind (AKvarray ty | AKvec ty | AKdarray(_, ty) | AKmap(_, ty)) ->
+  | _,
+    Tarraykind (
+      AKvarray ty
+      | AKvec ty
+      | AKdarray(_, ty)
+      | AKdarray_or_varray ty
+      | AKmap(_, ty)
+    ) ->
       check_memoizable env param ty
   | _, Tarraykind (AKshape fdm) ->
       ShapeMap.iter begin fun _ (_, tv) ->
@@ -2244,6 +2251,7 @@ and call_parent_construct pos env el uel =
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
+        | Tdarray_or_varray _
         | Tgeneric _
         | Toption _
         | Tprim _
@@ -2825,6 +2833,10 @@ and array_get is_lvalue p env ty1 e2 ty2 =
       env, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
+      let env = Type.sub_type p Reason.index_array env ty2 ty1 in
+      env, ty
+  | Tarraykind (AKdarray_or_varray ty) ->
+      let ty1 = Reason.Rdarray_or_varray_key p, Tprim Tarraykey in
       let env = Type.sub_type p Reason.index_array env ty2 ty1 in
       env, ty
   | Tclass ((_, cn) as id, argl)
@@ -4715,6 +4727,7 @@ and check_extend_abstract_const ~is_final p smap =
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
+        | Tdarray_or_varray _
         | Toption _
         | Tprim _
         | Tfun _

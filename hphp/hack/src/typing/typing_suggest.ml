@@ -133,6 +133,7 @@ let get_implements tcopt (_, x) =
             | Tarray (_, _)
             | Tdarray (_, _)
             | Tvarray _
+            | Tdarray_or_varray _
             | Tprim _
             | Tgeneric _
             | Tfun _
@@ -200,6 +201,7 @@ and normalize_ tcopt = function
         | AKvec tk -> AKvec (normalize tcopt tk)
         | AKdarray (tk, tv) -> AKdarray (normalize tcopt tk, normalize tcopt tv)
         | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
+        | AKdarray_or_varray tv -> AKdarray_or_varray (normalize tcopt tv)
         (* fully_expand_tvars_downcast_aktypes should have removed those *)
         | AKshape _ | AKtuple _ -> raise Exit
       )

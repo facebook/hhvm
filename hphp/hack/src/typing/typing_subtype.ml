@@ -86,6 +86,7 @@ let rec decompose_subtype env ty_sub ty_super fail =
       | AKvarray tv
       | AKvec tv
       | AKdarray (_, tv)
+      | AKdarray_or_varray tv
       | AKmap (_, tv) -> decompose_subtype env tv tv_super fail
       | AKshape fdm ->
         Typing_arrays.fold_akshape_as_akmap again env r fdm
@@ -103,6 +104,12 @@ let rec decompose_subtype env ty_sub ty_super fail =
       | AKvarray tv
       | AKvec tv ->
         let env' = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
+        decompose_subtype env' tv tv_super fail
+      | AKdarray_or_varray tv ->
+        let tk_sub =
+          Reason.Rdarray_or_varray_key (Reason.to_pos r),
+          Tprim Nast.Tarraykey in
+        let env' = decompose_subtype env tk_sub tk_super fail in
         decompose_subtype env' tv tv_super fail
       | AKdarray (tk, tv)
       | AKmap (tk, tv) ->
@@ -699,6 +706,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | AKvarray tv
       | AKvec tv
       | AKdarray (_, tv)
+      | AKdarray_or_varray tv
       | AKmap (_, tv) ->
           sub_type env tv tv_super
       | AKshape fdm ->
@@ -720,6 +728,12 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | AKvarray tv
       | AKvec tv ->
         let env = sub_type env (r, Tprim Nast.Tint) tk_super in
+        sub_type env tv tv_super
+      | AKdarray_or_varray tv ->
+        let tk_sub =
+          Reason.Rdarray_or_varray_key (Reason.to_pos r),
+          Tprim Nast.Tarraykey in
+        let env = sub_type env tk_sub tk_super in
         sub_type env tv tv_super
       | AKdarray (tk, tv)
       | AKmap (tk, tv) ->
@@ -743,12 +757,32 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, (Tarraykind _)), (_, (Tarraykind AKany)) ->
       (* An array of any kind is a subtype of an array of Tany. *)
       env
-  | (_, Tarraykind (AKvarray ty_sub | AKvec ty_sub)),
-    (_, Tarraykind (AKvarray ty_super | AKvec ty_super)) ->
+  | (* darray_or_varray<ty1> <: darray_or_varray<ty2> if t1 <: ty2
+       But, darray_or_varray<ty1> is never a subtype of a vect-like array *)
+    (
+      (_, Tarraykind (AKdarray_or_varray ty_sub)),
+      (_, Tarraykind (AKdarray_or_varray ty_super))
+      | (_, Tarraykind (AKvarray ty_sub | AKvec ty_sub)),
+        (
+          _,
+          Tarraykind (
+            AKvarray ty_super
+            | AKvec ty_super
+            | AKdarray_or_varray ty_super
+          )
+        )
+    ) ->
       sub_type env ty_sub ty_super
   | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
     (_, Tarraykind (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)))
     ->
+      let env = sub_type env tk_sub tk_super in
+      sub_type env tv_sub tv_super
+  | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
+    (r, Tarraykind (AKdarray_or_varray tv_super)) ->
+      let tk_super =
+        Reason.Rdarray_or_varray_key (Reason.to_pos r),
+        Tprim Nast.Tarraykey in
       let env = sub_type env tk_sub tk_super in
       sub_type env tv_sub tv_super
   | (reason, Tarraykind (AKvarray elt_ty | AKvec elt_ty)),

@@ -133,16 +133,37 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
       let env, ty1 = unify env ty1 ty3 in
       let env, ty2 = unify env ty2 ty4 in
       env, Tarraykind (AKmap (ty1, ty2))
-  | Tarraykind (AKvarray _ | AKvec _ | AKdarray _ | AKmap _),
+  | Tarraykind (AKdarray_or_varray ty1) , Tarraykind (AKdarray_or_varray ty2) ->
+      let env, ty = unify env ty1 ty2 in
+      env, Tarraykind (AKdarray_or_varray ty)
+  | Tarraykind (
+      AKvarray _
+      | AKvec _
+      | AKdarray _
+      | AKdarray_or_varray _
+      | AKmap _
+    ),
     Tarraykind (AKshape _ | AKtuple _)->
     unify_ ~follow_bounds env r2 ty2 r1 ty1
   | Tarraykind AKshape fdm1,
-    Tarraykind (AKvarray _ | AKvec _ | AKdarray _ | AKmap _) ->
+    Tarraykind (
+      AKvarray _
+      | AKvec _
+      | AKdarray _
+      | AKdarray_or_varray _
+      | AKmap _
+    ) ->
     Typing_arrays.fold_akshape_as_akmap_with_acc begin fun env ty2 (r1, ty1) ->
       unify_ env r1 ty1 r2 ty2
     end env ty2 r1 fdm1
   | Tarraykind AKtuple fields,
-    Tarraykind (AKvarray _ | AKvec _ | AKdarray _ | AKmap _) ->
+    Tarraykind (
+      AKvarray _
+      | AKvec _
+      | AKdarray _
+      | AKdarray_or_varray _
+      | AKmap _
+    ) ->
     Typing_arrays.fold_aktuple_as_akvec_with_acc begin fun env ty2 (r1, ty1) ->
       unify_ env r1 ty1 r2 ty2
     end env ty2 r1 fields

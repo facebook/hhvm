@@ -130,6 +130,10 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, tv = localize ~ety_env env tv in
       let ty = Tarraykind (AKvarray tv) in
       env, (ety_env, (r, ty))
+  | r, Tdarray_or_varray tv ->
+      let env, tv = localize ~ety_env env tv in
+      let ty = Tarraykind (AKdarray_or_varray tv) in
+      env, (ety_env, (r, ty))
   | r, Tgeneric x ->
       begin match SMap.get x ety_env.substs with
       | Some x_ty ->

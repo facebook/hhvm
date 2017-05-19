@@ -44,6 +44,7 @@ module ErrorString = struct
 
   let varray = "a varray"
   let darray = "a darray"
+  let darray_or_varray = "a darray_or_varray"
 
   let rec type_: type a. a ty_ -> _ = function
     | Tany               -> "an untyped value"
@@ -52,6 +53,8 @@ module ErrorString = struct
     | Tarray (x, y)      -> array (x, y)
     | Tdarray (_, _)     -> darray
     | Tvarray _          -> varray
+    | Tarraykind (AKdarray_or_varray _) -> darray_or_varray
+    | Tdarray_or_varray _ -> darray_or_varray
     | Tarraykind AKempty -> "an empty array"
     | Tarraykind AKany   -> array (None, None)
     | Tarraykind AKvarray _
@@ -164,6 +167,7 @@ module Suggest = struct
     | Tarray _               -> "array"
     | Tdarray _              -> "darray"
     | Tvarray _              -> "varray"
+    | Tdarray_or_varray _    -> "darray_or_varray"
     | Tarraykind AKdarray (_, _)
                              -> "darray"
     | Tarraykind AKvarray _  -> "varray"
@@ -271,6 +275,8 @@ module Full = struct
     | Tmixed -> o "mixed"
     | Tdarray (x, y) -> o "darray<"; k x; o ", "; k y; o ">"
     | Tvarray x -> o "varray<"; k x; o ">"
+    | Tdarray_or_varray x -> o "darray_or_varray<"; k x; o ">"
+    | Tarraykind (AKdarray_or_varray x) -> o "darray_or_varray<"; k x; o ">"
     | Tarraykind AKany -> o "array"
     | Tarraykind AKempty -> o "array (empty)"
     | Tarray (None, None) -> o "array"
@@ -550,6 +556,10 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "darray" @ args [ty1; ty2]
   | Tvarray ty ->
     obj @@ kind "varray" @ args [ty]
+  | Tdarray_or_varray ty ->
+    obj @@ kind "darray_or_varray" @ args [ty]
+  | Tarraykind (AKdarray_or_varray ty) ->
+    obj @@ kind "darray_or_varray" @ args [ty]
     (* Is it worth distinguishing these X-like arrays from X? *)
   | Tarraykind AKany ->
     obj @@ kind "array" @ args []

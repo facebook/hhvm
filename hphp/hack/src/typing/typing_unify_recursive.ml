@@ -69,6 +69,7 @@ and occurs_ak env n ak =
 and occurs_array env n ak =
   match ak with
   | AKany -> false
+  | AKdarray_or_varray t
   | AKvarray t
   | AKvec t -> occurs env n t
   | AKdarray (t1, t2)

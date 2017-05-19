@@ -33,6 +33,7 @@ let unwrap_class_type = function
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _
+      | Tdarray_or_varray _
       | Tgeneric _
       | Toption _
       | Tprim _

@@ -1078,13 +1078,13 @@ and emit_quiet_expr (_, expr_ as expr) =
     instr_cgetquietl (Local.Named x)
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
-      from_expr e;
+      from_expr ~need_ref:false e;
       instr (IGet CGetQuietG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get None QueryOp.CGetQuiet base_expr opt_elem_expr
+    emit_array_get false None QueryOp.CGetQuiet base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get None QueryOp.CGetQuiet expr prop nullflavor
+    emit_obj_get false None QueryOp.CGetQuiet expr prop nullflavor
   | _ ->
     from_expr ~need_ref:false expr
 

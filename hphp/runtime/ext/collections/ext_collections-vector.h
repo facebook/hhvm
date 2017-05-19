@@ -317,7 +317,7 @@ protected:
   template<bool raw> ALWAYS_INLINE
   void addImpl(TypedValue tv) {
     assert(tv.m_type != KindOfRef);
-    auto* oldAd = arrayData();
+    auto oldAd = arrayData();
     if (raw) {
       assert(canMutateBuffer());
       m_arr = PackedArray::AppendVec(oldAd, tv, false);

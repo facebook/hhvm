@@ -72,17 +72,21 @@ class TestStruct {
 }
 
 function test($name, $list, $map, $set) {
-  echo "---- $name ----\n";
-
   $s = new TestStruct();
   $s->aList = $list;
   $s->aMap = $map;
   $s->aSet = $set;
 
+  echo "---- $name: compact ----\n";
   $p = new DummyProtocol();
   thrift_protocol_write_compact($p, 'foo', 1, $s, 20);
   $p->getTransport()->buff[1] = pack('C', 0x42);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+
+  echo "---- $name: binary ----\n";
+  $p = new DummyProtocol();
+  thrift_protocol_write_binary($p, 'foo', 1, $s, 20, true);
+  var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
 
 function main() {

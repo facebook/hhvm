@@ -957,12 +957,18 @@ struct CompactReader {
         readCollectionEnd();
         return arr.toVariant();
       } else if (format.equal(s_collection)) {
-        auto const pvec(req::make<c_Vector>(size));
-        for (uint32_t i = 0; i < size; i++) {
-          pvec->add(readField(valueSpec, valueType));
+        if (size == 0) {
+          readCollectionEnd();
+          return Variant(req::make<c_Vector>());
         }
+        auto vec = req::make<c_Vector>(size);
+        int64_t i = 0;
+        do {
+          auto val = readField(valueSpec, valueType);
+          cellDup(*val.asCell(), *vec->appendForUnserialize(i));
+        } while (++i < size);
         readCollectionEnd();
-        return Variant(std::move(pvec));
+        return Variant(std::move(vec));
       } else {
         PackedArrayInit pai(size);
         for (auto i = uint32_t{0}; i < size; ++i) {

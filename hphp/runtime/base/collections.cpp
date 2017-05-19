@@ -241,10 +241,11 @@ void deepCopy(TypedValue* tv) {
       const auto copyVector = [](BaseVector* vec) {
         if (vec->size() > 0 && vec->arrayData()->isRefCounted()) {
           vec->mutate();
-          auto sz = vec->m_size;
-          for (uint32_t i = 0; i < sz; ++i) {
-            deepCopy(&vec->data()[i]);
-          }
+          auto elm = vec->data();
+          auto end = vec->data() + vec->size();
+          do {
+            deepCopy(elm);
+          } while (++elm < end);
         }
         return vec;
       };

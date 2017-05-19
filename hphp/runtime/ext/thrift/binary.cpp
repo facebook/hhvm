@@ -272,11 +272,16 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         }
         return arr.toVariant();
       } else if (format.equal(s_collection)) {
-        auto const pvec(req::make<c_Vector>(size));
-        for (uint32_t s = 0; s < size; ++s) {
-          pvec->add(binary_deserialize(type, transport, elemspec));
+        if (size == 0) {
+          return Variant(req::make<c_Vector>());
         }
-        return Variant(std::move(pvec));
+        auto vec = req::make<c_Vector>(size);
+        int64_t i = 0;
+        do {
+          auto val = binary_deserialize(type, transport, elemspec);
+          cellDup(*val.asCell(), *vec->appendForUnserialize(i));
+        } while (++i < size);
+        return Variant(std::move(vec));
       } else {
         PackedArrayInit pai(size);
         for (auto s = uint32_t{0}; s < size; ++s) {

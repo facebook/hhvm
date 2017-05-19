@@ -96,11 +96,13 @@ unconditional jumps to the right place. *)
 
   let add_iterator lst =
     match opt_iterator with
-      | Some it -> it :: lst
+      | Some (_, it) -> it :: lst
       | None -> lst in
   let wrap_return ret =
     match opt_iterator with
-      | Some it -> instrs [(IIterator (IterFree it)); ret]
+      | Some (is_mutable, it) ->
+        let iter_free = if is_mutable then MIterFree it else IterFree it in
+        instrs [(IIterator iter_free); ret]
       | _ -> instr ret in
   let rewriter i =
     match i with

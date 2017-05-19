@@ -656,7 +656,8 @@ and emit_foreach _has_await collection iterator block =
   ] in
   Iterator.free_iterator ();
   CBR.rewrite_in_loop
-    result loop_continue_label loop_break_label (Some iterator_number)
+    result loop_continue_label loop_break_label
+    (Some (mutable_iter, iterator_number))
 
 and emit_stmts stl =
   let results = List.map stl emit_stmt in

@@ -856,7 +856,7 @@ void ExecutionContext::handleError(const std::string& msg,
           )
         );
       } else if (!deferred.empty()) {
-        auto& last = deferred.lvalAt(deferred.size() - 1);
+        auto& last = deferred.lvalAt(int64_t{deferred.size() - 1});
         if (last.isDict()) last.asArrRef().set(s_overflow, true);
       }
     }

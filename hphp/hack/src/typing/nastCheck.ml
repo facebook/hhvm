@@ -142,8 +142,10 @@ module CheckFunctionBody = struct
     | _, Lvar _
     | _, Lvarvar _
     | _, Lplaceholder _
-    | _, Pipe _
     | _, Dollardollar _ -> ()
+    | _, Pipe (_, l, r) ->
+        expr f_type l;
+        expr f_type r;
     | _, Array afl ->
         List.iter afl (afield f_type);
         ()

@@ -1695,10 +1695,10 @@ class Redis {
         $conn    = stream_socket_client(
           $sok, $errno, $errstr, $timeout, 2, $context);
       } else {
-        $conn = pfsockopen($host, $port, $errno, $errstr, $timeout);
+        $conn = @pfsockopen($host, $port, $errno, $errstr, $timeout);
       }
     } else {
-        $conn = fsockopen($host, $port, $errno, $errstr, $timeout);
+        $conn = @fsockopen($host, $port, $errno, $errstr, $timeout);
     }
     $this->last_connect = time();
     $this->host = $host;
@@ -1714,9 +1714,8 @@ class Redis {
     $this->mode = self::ATOMIC;
 
     if (!$this->connection) {
-      trigger_error(
-        "Failed connecting to redis server at {$host}: {$errstr}",
-        E_WARNING);
+      throw new RedisException(
+        "Failed connecting to redis server at {$host}: {$errstr}");
       return false;
     }
     stream_set_blocking($this->connection, true);

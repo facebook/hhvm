@@ -18,6 +18,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "hphp/util/hash.h"
+
 namespace HPHP {
 
 template<size_t NBITS> struct BloomFilter {

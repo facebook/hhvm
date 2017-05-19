@@ -582,7 +582,8 @@ Variant php_mysql_do_connect(
     bool persistent,
     bool async,
     int connect_timeout_ms,
-    int query_timeout_ms) {
+    int query_timeout_ms,
+    const Array* conn_attrs) {
   return php_mysql_do_connect_on_link(
       nullptr,
       server,
@@ -593,7 +594,8 @@ Variant php_mysql_do_connect(
       persistent,
       async,
       connect_timeout_ms,
-      query_timeout_ms);
+      query_timeout_ms,
+      conn_attrs);
 }
 
 Variant php_mysql_do_connect_with_ssl(
@@ -604,6 +606,7 @@ Variant php_mysql_do_connect_with_ssl(
     int client_flags,
     int connect_timeout_ms,
     int query_timeout_ms,
+    const Array* conn_attrs /* = nullptr */,
     const Variant& sslContextProvider /* = null */) {
   std::shared_ptr<SSLOptionsProviderBase> ssl_provider;
   if (!sslContextProvider.isNull()) {
@@ -623,6 +626,7 @@ Variant php_mysql_do_connect_with_ssl(
       false,
       connect_timeout_ms,
       query_timeout_ms,
+      conn_attrs,
       ssl_provider);
 }
 
@@ -634,6 +638,47 @@ static void mysql_set_ssl_options(
   }
   ssl_provider->setMysqlSSLOptions(mySQL->get());
 }
+
+static void mysql_set_conn_attr(MYSQL* mysql, const String& key,
+                                const String& value) {
+  if (key.empty()) {
+    raise_warning("MySQL: Invalid connection attribute - empty key");
+  }
+  else if (value.empty()) {
+    raise_warning(
+        std::string("MySQL: Invalid connection attribute - empty value for ") +
+        key.toCppString());
+  }
+  else {
+    mysql_options4(mysql, MYSQL_OPT_CONNECT_ATTR_ADD, key.c_str(),
+                   value.c_str());
+  }
+}
+
+static void mysql_set_conn_attrs(
+    std::shared_ptr<MySQL> mySQL,
+    const Array* conn_attrs) {
+  assert(mySQL != nullptr && mySQL->get() != nullptr);
+
+  for (auto itr = conn_attrs->begin(); !itr.end(); itr.next()) {
+    const auto& key = itr.first();
+    const auto& value = itr.secondRef();
+    if (!key.isString()) {
+      raise_warning(
+          "MySQL: Invalid connection attribute - key is not a string");
+    }
+    else if (!value.isString()) {
+      raise_warning(
+          std::string("MySQL: Invalid connection attribute - "
+                      "value is not a string for key '") +
+          key.asCStrRef().toCppString() + "'");
+    }
+    else {
+      mysql_set_conn_attr(mySQL->get(), key.asCStrRef(), value.asCStrRef());
+    }
+  }
+}
+
 
 static void mysql_store_ssl_session(
     std::shared_ptr<MySQL> mySQL,
@@ -655,6 +700,7 @@ Variant php_mysql_do_connect_on_link(
     bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
+    const Array *conn_attrs,
     std::shared_ptr<SSLOptionsProviderBase> ssl_provider) {
   if (connect_timeout_ms < 0) {
     connect_timeout_ms = mysqlExtension::ConnectTimeout;
@@ -712,6 +758,11 @@ Variant php_mysql_do_connect_on_link(
         username.c_str(),
         password.c_str(),
         database.c_str());
+  }
+
+  // Set any connection attributes
+  if (conn_attrs != nullptr && conn_attrs->size() > 0) {
+    mysql_set_conn_attrs(mySQL, conn_attrs);
   }
 
   // set SSL Options

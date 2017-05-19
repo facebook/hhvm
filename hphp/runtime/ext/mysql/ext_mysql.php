@@ -73,6 +73,7 @@ function mysql_close(?resource $link_identifier = NULL): bool;
  *   MYSQL_CLIENT_IGNORE_SPACE or MYSQL_CLIENT_INTERACTIVE. Read the
  *   section about  for further information. In , this parameter is
  *   ignored.
+ * @param array $conn_attrs - connection attribute associative array
  *
  * @return resource - Returns a MySQL link identifier on success.
  */
@@ -83,7 +84,8 @@ function mysql_connect(string $server = "",
                        bool $new_link = false,
                        int $client_flags = 0,
                        int $connect_timeout_ms = -1,
-                       int $query_timeout_ms = -1): mixed;
+                       int $query_timeout_ms = -1,
+                       array<string, string> $conn_attrs = []): mixed;
 
 <<__Native, __HipHopSpecific>>
 function mysql_connect_with_db(string $server = "",
@@ -93,7 +95,8 @@ function mysql_connect_with_db(string $server = "",
                                bool $new_link = false,
                                int $client_flags = 0,
                                int $connect_timeout_ms = -1,
-                               int $query_timeout_ms = -1): mixed;
+                               int $query_timeout_ms = -1,
+                               array<string, string> $conn_attrs = []): mixed;
 
 <<__Native>>
 function mysql_connect_with_ssl(string $server,
@@ -103,7 +106,8 @@ function mysql_connect_with_ssl(string $server,
                                int $client_flags = 0,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
-                               ?MySSLContextProvider $ssl_context = null): mixed;
+                               ?MySSLContextProvider $ssl_context = null,
+                               array<string, string> $conn_attrs = []): mixed;
 
 /**
  * Create a MySQL database
@@ -679,7 +683,8 @@ function mysql_pconnect(string $server = '',
                         string $password = '',
                         int $client_flags = 0,
                         int $connect_timeout_ms = -1,
-                        int $query_timeout_ms = -1): mixed;
+                        int $query_timeout_ms = -1,
+                        array<string, string> $conn_attrs = []): mixed;
 
 <<__Native, __HipHopSpecific>>
 function mysql_pconnect_with_db(string $server = '',
@@ -688,7 +693,8 @@ function mysql_pconnect_with_db(string $server = '',
                                 string $database = '',
                                 int $client_flags = 0,
                                 int $connect_timeout_ms = -1,
-                                int $query_timeout_ms = -1): mixed;
+                                int $query_timeout_ms = -1,
+                                array<string, string> $conn_attrs = []): mixed;
 
 /**
  * Ping a server connection or reconnect if there is no connection

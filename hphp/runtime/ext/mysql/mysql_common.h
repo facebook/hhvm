@@ -451,6 +451,7 @@ Variant php_mysql_do_connect_on_link(
     bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
+    const Array* conn_attrs = nullptr,
     std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
         ssl_opts = nullptr);
 
@@ -463,7 +464,8 @@ Variant php_mysql_do_connect(
     bool persistent,
     bool async,
     int connect_timeout_ms,
-    int query_timeout_ms);
+    int query_timeout_ms,
+    const Array* conn_attrs = nullptr);
 
 Variant php_mysql_do_connect_with_ssl(
     const String& server,
@@ -473,6 +475,7 @@ Variant php_mysql_do_connect_with_ssl(
     int client_flags,
     int connect_timeout_ms,
     int query_timeout_ms,
+    const Array* conn_attrs,
     const Variant& sslContextProvider /* = null */);
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };

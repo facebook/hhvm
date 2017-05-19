@@ -16,11 +16,16 @@ const int MYSQL_CLIENT_IGNORE_SPACE = 256;
 const int MYSQL_CLIENT_INTERACTIVE = 1024;
 const int MYSQL_CLIENT_SSL = 2048;
 
-function mysql_connect($server = null, $username = null, $password = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
-function mysql_pconnect($server = null, $username = null, $password = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
-function mysql_connect_with_db($server = null, $username = null, $password = null, $database = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
-function mysql_connect_with_ssl($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null);
-function mysql_pconnect_with_db($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
+// Note: mysql_connect() and mysql_pconnect() are upstream functions and should
+// not have been modified.  However, the addition of $connect_timeout_ms and
+// $query_timeout_ms happened sometime in the past, so the damage is done.
+// Since no further damage is possible, I added the $conn_attrs parameter
+// instead of creating new functions - jkedgar@fb.com
+function mysql_connect($server = null, $username = null, $password = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, $conn_attrs = []);
+function mysql_pconnect($server = null, $username = null, $password = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, $conn_attrs = []);
+function mysql_connect_with_db($server = null, $username = null, $password = null, $database = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, $conn_attrs = []);
+function mysql_connect_with_ssl($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null, $conn_attrs = []);
+function mysql_pconnect_with_db($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, $conn_attrs = []);
 function mysql_set_charset($charset, $link_identifier = null);
 function mysql_ping($link_identifier = null);
 function mysql_escape_string($unescaped_string);

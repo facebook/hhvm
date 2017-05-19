@@ -120,8 +120,10 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
   });
 }
 
-// Fold a cmov of a certain width into a copy if both values are the same
-// register or have the same known constant value.
+/*
+ * Fold a cmov of a certain width into a copy if both values are the same
+ * register or have the same known constant value.
+ */
 template <typename Inst>
 bool cmov_fold_impl(Env& env, const Inst& inst, Vlabel b, size_t i) {
   auto const equivalent = [&]{

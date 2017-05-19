@@ -65,23 +65,19 @@ bool cmov_fold_one(Env& env, const Inst& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
-  if (cmov_fold_one<csincb>(env, inst, b, i)) return true;
-  return false;
+  return cmov_fold_one<csincb>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
-  if (cmov_fold_one<csincw>(env, inst, b, i)) return true;
-  return false;
+  return cmov_fold_one<csincw>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
-  if (cmov_fold_one<csincl>(env, inst, b, i)) return true;
-  return false;
+  return cmov_fold_one<csincl>(env, inst, b, i);
 }
 
 bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
-  if (cmov_fold_one<csincq>(env, inst, b, i)) return true;
-  return false;
+  return cmov_fold_one<csincq>(env, inst, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -246,6 +246,7 @@ struct RuntimeOption {
   static std::string SSLCertificateDir;
   static bool TLSDisableTLS1_2;
   static std::string TLSClientCipherSpec;
+  static bool EnableSSLWithPlainText;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;

@@ -117,6 +117,7 @@ struct ProxygenServer : Server,
   }
   virtual int getLibEventConnectionCount() override;
   virtual bool enableSSL(int port) override;
+  virtual bool enableSSLWithPlainText() override;
 
   folly::EventBase *getEventBase() {
     return m_eventBaseManager.getEventBase();
@@ -212,6 +213,8 @@ struct ProxygenServer : Server,
 
   bool sniNoMatchHandler(const char *server_name);
 
+  wangle::SSLContextConfig createContextConfig();
+
   // Forbidden copy constructor and assignment operator
   ProxygenServer(ProxygenServer const &) = delete;
   ProxygenServer& operator=(ProxygenServer const &) = delete;
@@ -228,7 +231,6 @@ struct ProxygenServer : Server,
   HPHPWorkerThread m_worker;
   proxygen::AcceptorConfiguration m_httpConfig;
   proxygen::AcceptorConfiguration m_httpsConfig;
-  wangle::SSLContextConfig m_sslCtxConfig;
   std::unique_ptr<HPHPSessionAcceptor> m_httpAcceptor;
   std::unique_ptr<HPHPSessionAcceptor> m_httpsAcceptor;
 

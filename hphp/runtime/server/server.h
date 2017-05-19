@@ -286,6 +286,13 @@ public:
    */
   virtual bool enableSSL(int port) = 0;
 
+  /**
+   * To enable SSL in addition to plaintext of the current server.
+   */
+  virtual bool enableSSLWithPlainText() {
+    return false;
+  }
+
 protected:
   std::string m_address;
   int m_port;

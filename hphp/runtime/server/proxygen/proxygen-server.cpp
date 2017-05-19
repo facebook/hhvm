@@ -250,6 +250,18 @@ void ProxygenServer::start() {
 
   m_httpAcceptor.reset(new HPHPSessionAcceptor(m_httpConfig, this));
   m_httpAcceptor->init(m_httpServerSocket.get(), m_worker.getEventBase());
+
+  if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
+    if (!RuntimeOption::SSLCertificateDir.empty()) {
+      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
+                                 std::bind(&ProxygenServer::initialCertHandler,
+                                           this,
+                                           std::placeholders::_1,
+                                           std::placeholders::_2,
+                                           std::placeholders::_3,
+                                           std::placeholders::_4));
+    }
+  }
   if (m_httpsConfig.isSSL()) {
     m_httpsServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
     try {
@@ -588,7 +600,12 @@ bool ProxygenServer::initialCertHandler(const std::string &server_name,
       std::begin(RuntimeOption::ServerNextProtocols),
       std::end(RuntimeOption::ServerNextProtocols)
     });
-    m_httpsConfig.sslContextConfigs.emplace_back(sslCtxConfig);
+    if (m_httpsConfig.isSSL()) {
+      m_httpsConfig.sslContextConfigs.emplace_back(sslCtxConfig);
+    }
+    if (m_httpConfig.isSSL()) {
+      m_httpConfig.sslContextConfigs.emplace_back(sslCtxConfig);
+    }
     return true;
   } catch (const std::exception &ex) {
     Logger::Error(folly::to<std::string>(
@@ -611,7 +628,12 @@ bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
       std::begin(RuntimeOption::ServerNextProtocols),
       std::end(RuntimeOption::ServerNextProtocols)
     });
-    m_httpsAcceptor->addSSLContextConfig(sslCtxConfig);
+    if (m_httpsAcceptor) {
+      m_httpsAcceptor->addSSLContextConfig(sslCtxConfig);
+    }
+    if (m_httpConfig.isSSL()) {
+      m_httpAcceptor->addSSLContextConfig(sslCtxConfig);
+    }
     return true;
   } catch (const std::exception &ex) {
     Logger::Error("Invalid certificate file or key file: %s", ex.what());
@@ -652,39 +674,41 @@ bool ProxygenServer::enableSSL(int port) {
 
   m_httpsConfig.bindAddress = address;
   m_httpsConfig.strictSSL = false;
+  m_httpsConfig.sslContextConfigs.emplace_back(createContextConfig());
+  m_https = true;
+  return true;
+}
+
+bool ProxygenServer::enableSSLWithPlainText() {
+  m_httpConfig.strictSSL = false;
+  m_httpConfig.sslContextConfigs.emplace_back(createContextConfig());
+  m_httpConfig.allowInsecureConnectionsOnSecureServer = true;
+  return true;
+}
+
+wangle::SSLContextConfig ProxygenServer::createContextConfig() {
+  wangle::SSLContextConfig cfg;
   if (RuntimeOption::SSLCertificateFile != "" &&
       RuntimeOption::SSLCertificateKeyFile != "") {
     try {
-      m_sslCtxConfig.setCertificate(RuntimeOption::SSLCertificateFile,
+      cfg.setCertificate(RuntimeOption::SSLCertificateFile,
                                     RuntimeOption::SSLCertificateKeyFile, "");
-      m_sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
-      m_sslCtxConfig.isDefault = true;
-      m_sslCtxConfig.sniNoMatchFn =
+      cfg.sslVersion = folly::SSLContext::TLSv1;
+      cfg.isDefault = true;
+      cfg.sniNoMatchFn =
         std::bind(&ProxygenServer::sniNoMatchHandler, this,
                   std::placeholders::_1);
-      m_sslCtxConfig.setNextProtocols({
+      cfg.setNextProtocols({
         std::begin(RuntimeOption::ServerNextProtocols),
         std::end(RuntimeOption::ServerNextProtocols)
       });
     } catch (const std::exception &ex) {
       Logger::Error("Invalid certificate file or key file: %s", ex.what());
     }
-    if (!RuntimeOption::SSLCertificateDir.empty()) {
-      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
-                                 std::bind(&ProxygenServer::initialCertHandler,
-                                           this,
-                                           std::placeholders::_1,
-                                           std::placeholders::_2,
-                                           std::placeholders::_3,
-                                           std::placeholders::_4));
-    }
   } else {
     Logger::Error("Invalid certificate file or key file");
   }
-
-  m_httpsConfig.sslContextConfigs.emplace_back(m_sslCtxConfig);
-  m_https = true;
-  return true;
+  return cfg;
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {

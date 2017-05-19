@@ -127,6 +127,12 @@ HttpServer::HttpServer()
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
+  if (RuntimeOption::EnableSSLWithPlainText) {
+    assert(SSLInit::IsInited());
+    m_pageServer->enableSSLWithPlainText();
+  }
+
+
   ServerOptions admin_options(RuntimeOption::AdminServerIP,
                               RuntimeOption::AdminServerPort,
                               RuntimeOption::AdminThreadCount);

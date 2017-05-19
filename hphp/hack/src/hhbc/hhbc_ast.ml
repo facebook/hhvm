@@ -61,12 +61,14 @@ end (* of MemberOpMode *)
 module QueryOp = struct
   type t =
   | CGet
+  | CGetQuiet
   | Isset
   | Empty
 
   let to_string op =
   match op with
   | CGet -> "CGet"
+  | CGetQuiet -> "CGetQuiet"
   | Isset -> "Isset"
   | Empty -> "Empty"
 

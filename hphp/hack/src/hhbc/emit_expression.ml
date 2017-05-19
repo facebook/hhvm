@@ -208,7 +208,7 @@ and emit_local need_ref x =
     else
       instr (IMisc (BareThis Notice))
   else
-  if x = SN.Superglobals.globals
+  if SN.Superglobals.is_superglobal x
   then gather [
     instr_string (SU.Locals.strip_dollar x);
     instr (IGet CGetG)
@@ -448,6 +448,7 @@ and emit_class_get param_num_opt qop cid (_, id) =
       emit_class_expr cexpr;
       match (param_num_opt, qop) with
       | (None, QueryOp.CGet) -> instr_cgets
+      | (None, QueryOp.CGetQuiet) -> failwith "emit_class_get: CGetQuiet"
       | (None, QueryOp.Isset) -> instr_issets
       | (None, QueryOp.Empty) -> instr_emptys
       | (Some i, _) -> instr (ICall (FPassS (i, 0)))
@@ -1075,6 +1076,15 @@ and emit_quiet_expr (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (_, x) when not (is_local_this x) ->
     instr_cgetquietl (Local.Named x)
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      instr (IGet CGetQuietG)
+    ]
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get None QueryOp.CGetQuiet base_expr opt_elem_expr
+  | A.Obj_get (expr, prop, nullflavor) ->
+    emit_obj_get None QueryOp.CGetQuiet expr prop nullflavor
   | _ ->
     from_expr ~need_ref:false expr
 

@@ -257,7 +257,6 @@ quick/trailing_comma_bad4.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
 quick/trait_property_init.php
-quick/trait_self.php
 quick/traits.php
 quick/traits2.php
 quick/typechecks-obj.php

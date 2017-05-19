@@ -463,6 +463,7 @@ let queryopofiarg arg =
 match arg with
   | IAId s -> (match s with
                 | "CGet" -> QueryOp.CGet
+                | "CGetQuiet" -> QueryOp.CGetQuiet
                 | "Isset" -> QueryOp.Isset
                 | "Empty" -> QueryOp.Empty
                 | _ -> report_error "unknown queryop")

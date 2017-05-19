@@ -130,12 +130,15 @@ and emit_global_vars es =
   let emit_global_var (_, e) =
     match e with
     | A.Id (_, name) when name.[0] = '$' ->
-      gather [
-        instr_string (SU.Locals.strip_dollar name);
-        instr (IGet VGetG);
-        instr (IMutator (BindL (Local.Named name)));
-        instr (IBasic PopV);
-      ]
+      if SN.Superglobals.is_superglobal name
+      then empty
+      else
+        gather [
+          instr_string (SU.Locals.strip_dollar name);
+          instr (IGet VGetG);
+          instr (IMutator (BindL (Local.Named name)));
+          instr (IBasic PopV);
+        ]
     | _ ->
       emit_nyi "global expression"
   in gather (List.map es emit_global_var)

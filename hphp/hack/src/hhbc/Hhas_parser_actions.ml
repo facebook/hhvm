@@ -13,7 +13,8 @@ open Parsing
 (*
   TODO: proper error handling...
 *)
-let report_error s = (print_endline s; raise Parse_error)
+let report_error s = (Printf.eprintf "%s\n" s;
+  raise Parse_error)
 
 (* Just because parameter default values contain chunks of php
  source code, we have to lex triplequoted strings as strings. We
@@ -22,13 +23,12 @@ let report_error s = (print_endline s; raise Parse_error)
  by hand, 'cos it's not very complex *)
 exception Pkv
 let pair_key_values l =
- let rec pkv l sofar =
- match l with
-  | [] -> List.rev sofar
-  | k::(v::rest) -> pkv rest ((k,v)::sofar)
-  | _ -> raise Pkv
- in
- pkv l []
+  let rec pkv l sofar =
+    match l with
+    | [] -> List.rev sofar
+    | k::(v::rest) -> pkv rest ((k,v)::sofar)
+    | _ -> raise Pkv
+  in pkv l []
 
 let rec unpack_key_values l =
 match l with
@@ -101,7 +101,11 @@ let my_unescape s =
                   | 't' -> Buffer.add_char buf '\t'
                   | '?' -> Buffer.add_char buf '?'
                   | '"' -> Buffer.add_char buf '"'
-                  | _ -> report_error "bad escaped character in triplequoted"
+                  | _ ->
+                    report_error
+                      @@ Printf.sprintf
+                        "bad escaped character in triplequoted ('%c')"
+                        s.[i+1]
                   );
                   copy_from (i+2)
       | c -> Buffer.add_char buf c ; copy_from (i+1) in
@@ -109,45 +113,52 @@ let my_unescape s =
 
 let attribute_from_string s =
   match parse_attribute (Scanf.Scanning.from_string (my_unescape s)) with
-   | Some a -> a
-   | None -> report_error "attribute from string failed"
+  | Some a -> a
+  | None -> report_error "attribute from string failed"
 
 type decl =
- | Main_decl of Hhas_body.t
- | Fun_decl of Hhas_function.t
- | Class_decl of Hhas_class.t
- | Data_decl of (int*Typed_value.t)
- | Alias_decl of Hhas_typedef.t
+  | Main_decl of Hhas_body.t
+  | Fun_decl of Hhas_function.t
+  | Class_decl of Hhas_class.t
+  | Data_decl of (int*Typed_value.t)
+  | Alias_decl of Hhas_typedef.t
 
 (* Fixing up code streams to deal with data declarations. This is pretty ugly *)
 let rec lookupdd n dds =
-match dds with
- | [] -> None
- | (num,args) :: rest -> if n=num then Some args
-                              else lookupdd n rest
+  match dds with
+  | [] -> None
+  | (num,args) :: rest ->
+    if n=num
+    then Some args
+    else lookupdd n rest
 
 let rewriteinstr dds i =
-match i with
- | ILitConst (Array (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
-                    | Some (Typed_value.Array args) ->
-                              ILitConst (Array(Typed_value.Array args))
-                    | Some _ -> report_error "expected an array in data decl"
-                    | None -> report_error "array name missing")
- | ILitConst (Vec (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
-                    | Some (Typed_value.Vec args) ->
-                                  ILitConst (Vec(Typed_value.Vec args))
-                    | Some _ -> report_error "expected a vector in data decl"
-                    | None -> report_error "vec name missing")
- | ILitConst (Dict (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
-                    | Some (Typed_value.Dict args) ->
-                                  ILitConst (Dict(Typed_value.Dict args))
-                    | Some _ -> report_error "expected dictionary in data decl"
-                    | None -> report_error "dict name missing")
- | ILitConst (Keyset (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
-                    | Some (Typed_value.Keyset args) ->
-                                ILitConst (Keyset(Typed_value.Keyset args))
-                    | Some _ -> report_error "expected a keyset in data decl"
-                    | None -> report_error "keyset name missing")
+  match i with
+  | ILitConst (Array (Typed_value.Int n)) -> (
+    match lookupdd (Int64.to_int n) dds with
+    | Some (Typed_value.Array args) -> ILitConst (Array(Typed_value.Array args))
+    | Some _ -> report_error "expected an array in data decl"
+    | None -> report_error "array name missing"
+  )
+  | ILitConst (Vec (Typed_value.Int n)) -> (
+    match lookupdd (Int64.to_int n) dds with
+    | Some (Typed_value.Vec args) -> ILitConst (Vec(Typed_value.Vec args))
+    | Some _ -> report_error "expected a vector in data decl"
+    | None -> report_error "vec name missing"
+  )
+  | ILitConst (Dict (Typed_value.Int n)) -> (
+    match lookupdd (Int64.to_int n) dds with
+    | Some (Typed_value.Dict args) -> ILitConst (Dict(Typed_value.Dict args))
+    | Some _ -> report_error "expected dictionary in data decl"
+    | None -> report_error "dict name missing"
+  )
+  | ILitConst (Keyset (Typed_value.Int n)) -> (
+    match lookupdd (Int64.to_int n) dds with
+    | Some (Typed_value.Keyset args) ->
+      ILitConst (Keyset(Typed_value.Keyset args))
+    | Some _ -> report_error "expected a keyset in data decl"
+    | None -> report_error "keyset name missing"
+  )
  | _ -> i
 
 let rewrite_instrs_in_body dds body =
@@ -207,8 +218,10 @@ let makelabel s =
     | 'F' -> (Label.Fault (int_of_string (String.sub s 1 (len-1))))
     | 'D' -> if s.[1] = 'V'
              then (Label.DefaultArg (int_of_string (String.sub s 2 (len-2))))
-             else report_error "bad label"
-    | _ -> report_error "bad label"
+             else report_error "bad label: 'D', s.[1] <> 'V'"
+    | _ ->
+      report_error
+      @@ Printf.sprintf "bad label: '%c'" s.[0]
 let makelabelinst s = ILabel (makelabel s)
 
 (* TODO: replace stupidly big match with a hash table. Bootcampable? *)
@@ -439,139 +452,157 @@ match arg with
   | _ -> report_error "bad arg to istype_op"
 
 let eqopofiarg arg =
-match arg with
- | IAId s -> (match s with
-               | "PlusEqual" -> PlusEqual
-               | "MinusEqual" -> MinusEqual
-               | "MulEqual" -> MulEqual
-               | "ConcatEqual" -> ConcatEqual
-               | "DivEqual" -> DivEqual
-               | "PowEqual" -> PowEqual
-               | "ModEqual" -> ModEqual
-               | "AndEqual" -> AndEqual
-               | "OrEqual" -> OrEqual
-               | "XorEqual" -> XorEqual
-               | "SlEqual" -> SlEqual
-               | "SrEqual" -> SrEqual
-               | "PlusEqualO" -> PlusEqualO
-               | "MinusEqualO" -> MinusEqualO
-               | "MulEqualO" -> MulEqualO
-               | _ -> report_error "bad eqop")
+  match arg with
+  | IAId s -> (match s with
+    | "PlusEqual" -> PlusEqual
+    | "MinusEqual" -> MinusEqual
+    | "MulEqual" -> MulEqual
+    | "ConcatEqual" -> ConcatEqual
+    | "DivEqual" -> DivEqual
+    | "PowEqual" -> PowEqual
+    | "ModEqual" -> ModEqual
+    | "AndEqual" -> AndEqual
+    | "OrEqual" -> OrEqual
+    | "XorEqual" -> XorEqual
+    | "SlEqual" -> SlEqual
+    | "SrEqual" -> SrEqual
+    | "PlusEqualO" -> PlusEqualO
+    | "MinusEqualO" -> MinusEqualO
+    | "MulEqualO" -> MulEqualO
+    | _ ->
+      report_error
+      @@ Printf.sprintf "bad eqop: '%s'" s
+  )
   | _ -> report_error "wrong kind of eqop arg"
 
 let queryopofiarg arg =
-match arg with
-  | IAId s -> (match s with
-                | "CGet" -> QueryOp.CGet
-                | "CGetQuiet" -> QueryOp.CGetQuiet
-                | "Isset" -> QueryOp.Isset
-                | "Empty" -> QueryOp.Empty
-                | _ -> report_error "unknown queryop")
+  match arg with
+  | IAId s -> (
+    match s with
+    | "CGet" -> QueryOp.CGet
+    | "CGetQuiet" -> QueryOp.CGetQuiet
+    | "Isset" -> QueryOp.Isset
+    | "Empty" -> QueryOp.Empty
+    | _ ->
+      report_error
+      @@ Printf.sprintf "unknown queryop: '%s'" s
+  )
   | _ -> report_error "bad query op arg type"
 
 let memberkeyofiarg arg =
-match arg with
+  match arg with
   | IAMemberkey (s',arg') -> (
-     match s' with
-       | "EC" -> MemberKey.EC (intofiarg arg')
-       | "EL" -> MemberKey.EL (localidofiarg arg')
-       | "ET" -> MemberKey.ET (stringofiarg arg')
-       | "EI" -> MemberKey.EI (int64ofiarg arg')
-       | "PC" -> MemberKey.PC (intofiarg arg')
-       | "PL" -> MemberKey.PL (localidofiarg arg')
-       | "PT" -> MemberKey.PT (prop_id_of_iarg arg')
-       | "QT" -> MemberKey.QT (prop_id_of_iarg arg')
-       | _ -> report_error "unknown memberkey string"
+    match s' with
+    | "EC" -> MemberKey.EC (intofiarg arg')
+    | "EL" -> MemberKey.EL (localidofiarg arg')
+    | "ET" -> MemberKey.ET (stringofiarg arg')
+    | "EI" -> MemberKey.EI (int64ofiarg arg')
+    | "PC" -> MemberKey.PC (intofiarg arg')
+    | "PL" -> MemberKey.PL (localidofiarg arg')
+    | "PT" -> MemberKey.PT (prop_id_of_iarg arg')
+    | "QT" -> MemberKey.QT (prop_id_of_iarg arg')
+    | _ ->
+      report_error
+      @@ Printf.sprintf "unknown memberkey string: '%s'" s'
     )
   | IAId s' -> if s'="W" then MemberKey.W else report_error "bad memberkey"
   | _ -> report_error "bad memberkey"
 
 let incdecopofiarg arg =
-match arg with
- | IAId s -> (match s with
-              | "PreInc" -> PreInc
-              | "PostInc" -> PostInc
-              | "PreDec" -> PreDec
-              | "PostDec" -> PostDec
-              | "PreIncO" -> PreIncO
-              | "PostIncO" -> PostIncO
-              | "PreDecO" -> PreDecO
-              | "PostDecO" -> PostDecO
-              | _ -> report_error "bad incdecop")
+  match arg with
+  | IAId s -> (
+    match s with
+    | "PreInc" -> PreInc
+    | "PostInc" -> PostInc
+    | "PreDec" -> PreDec
+    | "PostDec" -> PostDec
+    | "PreIncO" -> PreIncO
+    | "PostIncO" -> PostIncO
+    | "PreDecO" -> PreDecO
+    | "PostDecO" -> PostDecO
+    | _ ->
+      report_error
+      @@ Printf.sprintf "bad incdecop: '%s'" s
+  )
   | _ -> report_error "wrong kind of incdecop arg"
 
 let paramidofiarg arg =
-match arg with
- | IAId s -> Param_named s
- | IAInt64 n -> Param_unnamed (Int64.to_int n)
- | _ -> report_error "bad param id to instruction"
+  match arg with
+  | IAId s -> Param_named s
+  | IAInt64 n -> Param_unnamed (Int64.to_int n)
+  | _ -> report_error "bad param id to instruction"
 
 let barethisopofiarg arg =
-match arg with
- | IAId "Notice" -> Notice
- | IAId "NoNotice" -> NoNotice
- | _ -> report_error "bad bare this op"
+  match arg with
+  | IAId "Notice" -> Notice
+  | IAId "NoNotice" -> NoNotice
+  | _ ->
+    report_error "bad bare this op"
 
 let classkindofiarg arg =
-match arg with
+  match arg with
   | IAId "Class" -> KClass
   | IAId "Interface" -> KInterface
   | IAId "Trait" -> KTrait
   | _ -> report_error "bad class kind"
 
 let listofshapefieldsofiarg arg =
-match arg with
+  match arg with
   | IAArglist args -> List.map stringofiarg args
   | _ -> report_error "expected list of shape fields"
 
 let initpropopofiarg arg =
-match arg with
+  match arg with
   | IAId "Static" -> Static
   | IAId "NonStatic" -> NonStatic
   | _ -> report_error "bad initprop_op"
 
 let nullflavorofiarg arg =
-match arg with
+  match arg with
   | IAId "NullThrows" -> Ast.OG_nullthrows
   | IAId "NullSafe" -> Ast.OG_nullsafe
   | _ -> report_error "bad null flavor"
 
 let labelofiarg arg =
-match arg with
+  match arg with
   | IAId l -> makelabel l
   | _ -> report_error "bad label"
 
 let iterofiarg arg = Iterator.Id (intofiarg arg)
 
 let memberopmodeofiarg arg =
-match stringofiarg arg with
- | "None" -> MemberOpMode.ModeNone
- | "Warn" -> MemberOpMode.Warn
- | "Define" -> MemberOpMode.Define
- | "Unset" -> MemberOpMode.Unset
- | _ -> report_error ("bad member op mode" ^ stringofiarg arg)
+  match stringofiarg arg with
+  | "None" -> MemberOpMode.ModeNone
+  | "Warn" -> MemberOpMode.Warn
+  | "Define" -> MemberOpMode.Define
+  | "Unset" -> MemberOpMode.Unset
+  | _ -> report_error ("bad member op mode" ^ stringofiarg arg)
 
  let listofiteratorsofiarg arg =
- match arg with
- | IAArglist l -> List.map iterofiarg l
- | _ -> report_error "bad list of iterators"
+   match arg with
+   | IAArglist l -> List.map iterofiarg l
+   | _ -> report_error "bad list of iterators"
 
 let listoflabelsofiarg arg =
- match arg with
- | IAArglist l -> List.map labelofiarg l
- | _ -> report_error "bad list of labels"
+  match arg with
+  | IAArglist l -> List.map labelofiarg l
+  | _ -> report_error "bad list of labels"
 
 let opsilenceofiarg arg =
- match stringofiarg arg with
+  match stringofiarg arg with
   | "Start" -> Start
   | "End" -> End
-  | _ -> report_error "bad op_silence"
+  | _ ->
+    report_error
+    @@ Printf.sprintf "bad op_silence: '%s'" @@ stringofiarg arg
 
 let switchkindofiarg arg =
-match stringofiarg arg with
- | "Bounded" -> Bounded
- | "Unbounded" -> Unbounded
- | _ -> report_error "bad switch kind"
+  match stringofiarg arg with
+  | "Bounded" -> Bounded
+  | "Unbounded" -> Unbounded
+  | _ ->
+    report_error
+    @@ Printf.sprintf "bad switch kind: '%s'" @@ stringofiarg arg
 
 let doubleofiarg arg =
  match arg with

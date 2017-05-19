@@ -50,7 +50,7 @@ let parse_file program_parser filename =
   let (data_decls, prog) =
     try program_parser lexer
       with Parsing.Parse_error -> (
-        print_endline "Parsing of file failed";
+        Printf.eprintf "Parsing of file failed\n";
         raise Parsing.Parse_error
         )
   in

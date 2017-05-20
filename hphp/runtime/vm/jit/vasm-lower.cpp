@@ -316,7 +316,7 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
       // from the type. That allows to use the resulting
       // register values to be used in type comparisons
       // without the need for truncation there.
-      env.unit.blocks[b].code[i] = movtqb{rret_type(), inst.type};
+      env.unit.blocks[b].code[i] = andqi64{0xffffffff000000ff, rret_type(), inst.type, env.unit.makeReg()};
       break;
   }
 }
@@ -334,7 +334,7 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
       // without the need for truncation there.
       lower_impl(env.unit, b, i, [&] (Vout& v) {
         v << copy{inst.data, rret_data()};
-        v << movtqb{inst.type, rret_type()};
+        v << andqi64{0xffffffff000000ff, inst.type, rret_type(), v.makeReg()};
       });
       break;
   }

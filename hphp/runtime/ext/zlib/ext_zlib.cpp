@@ -126,7 +126,7 @@ inline size_t hhvm_zlib_buffer_size_guess(size_t inlen) {
 }
 
 static voidpf hhvm_zlib_alloc(voidpf opaque, uInt items, uInt size) {
-  return (voidpf)req::malloc(items * size);
+  return (voidpf)req::malloc_noptrs(items * size);
 }
 
 static void hhvm_zlib_free(voidpf opaque, voidpf address) {

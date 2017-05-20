@@ -2718,11 +2718,11 @@ static xmlNodePtr to_xml_datetime_ex(encodeType* type, const Variant& data,
     ta = localtime_r(&timestamp, &tmbuf);
     /*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 
-    buf = (char *)req::malloc(buf_len);
+    buf = (char *)req::malloc_noptrs(buf_len);
     while ((real_len = strftime(buf, buf_len, format, ta)) == buf_len ||
            real_len == 0) {
       buf_len *= 2;
-      buf = (char *)req::realloc(buf, buf_len);
+      buf = (char *)req::realloc_noptrs(buf, buf_len);
       if (!--max_reallocs) break;
     }
 
@@ -2740,7 +2740,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeType* type, const Variant& data,
 #endif
 
     if (real_len >= buf_len) {
-      buf = (char *)req::realloc(buf, real_len+1);
+      buf = (char *)req::realloc_noptrs(buf, real_len+1);
     }
     strncat(buf, tzbuf, real_len);
 

@@ -48,11 +48,6 @@ namespace HPHP { namespace req {
 void* malloc(size_t nbytes,
              type_scan::Index tyindex = type_scan::kIndexUnknown);
 
-// Unknown type-index, but assert there's no pointers within.
-inline void* malloc_noptrs(size_t nbytes) {
-  return malloc(nbytes, type_scan::kIndexUnknownNoPtrs);
-}
-
 void* calloc(size_t count, size_t bytes,
              type_scan::Index tyindex = type_scan::kIndexUnknown);
 
@@ -61,6 +56,12 @@ void* realloc(void* ptr,
               type_scan::Index tyindex = type_scan::kIndexUnknown);
 
 // Unknown type-index, but assert there's no pointers within.
+inline void* malloc_noptrs(size_t nbytes) {
+  return malloc(nbytes, type_scan::kIndexUnknownNoPtrs);
+}
+inline void* calloc_noptrs(size_t count, size_t bytes) {
+  return calloc(count, bytes, type_scan::kIndexUnknownNoPtrs);
+}
 inline void* realloc_noptrs(void* ptr, size_t nbytes) {
   return realloc(ptr, nbytes, type_scan::kIndexUnknownNoPtrs);
 }

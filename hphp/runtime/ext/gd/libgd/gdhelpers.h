@@ -18,9 +18,9 @@ inline bool precheckOOM(size_t allocsz) {
   in gd.h, where callers can utilize it to correctly
   free memory allocated by these functions with the
   right version of free(). */
-#define gdCalloc(nmemb, size) HPHP::req::calloc(nmemb, size)
-#define gdMalloc(size)        HPHP::req::malloc(size)
-#define gdRealloc(ptr, size)  HPHP::req::realloc(ptr, size)
+#define gdCalloc(nmemb, size) HPHP::req::calloc_noptrs(nmemb, size)
+#define gdMalloc(size)        HPHP::req::malloc_noptrs(size)
+#define gdRealloc(ptr, size)  HPHP::req::realloc_noptrs(ptr, size)
 #define gdFree(ptr)           HPHP::req::free(ptr)
 #define gdPMalloc(ptr)        malloc(ptr)
 #define gdPFree(ptr)          free(ptr)
@@ -28,7 +28,7 @@ inline bool precheckOOM(size_t allocsz) {
 
 inline char *gdEstrdup(const char *s) {
   auto length = strlen(s);
-  char* ret = (char*)HPHP::req::malloc(length + 1);
+  char* ret = (char*)HPHP::req::malloc_noptrs(length + 1);
   memcpy(ret, s, length);
   ret[length] = '\0';
   return ret;

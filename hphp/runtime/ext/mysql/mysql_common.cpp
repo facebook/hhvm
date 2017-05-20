@@ -1069,7 +1069,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
     }
 
     if (b->buffer_length > 0) {
-      b->buffer = req::calloc(b->buffer_length, 1);
+      b->buffer = req::calloc_untyped(b->buffer_length, 1);
     }
   }
   mysql_free_result(res);

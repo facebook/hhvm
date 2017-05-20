@@ -22,7 +22,7 @@ ZendCustomElement::ZendCustomElement(void* data_, unsigned data_size,
                                      DtorFunc destructor)
   : m_destructor(destructor)
 {
-  m_data = req::malloc(data_size);
+  m_data = req::malloc_untyped(data_size);
   memcpy(m_data, data_, data_size);
 }
 

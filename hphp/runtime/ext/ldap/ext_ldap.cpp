@@ -1071,7 +1071,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
         /* allocate space for the values as part of this modification */
         ssize_t num_modvals = vals.size();
         ldap_mods[i]->mod_bvalues =
-          (struct berval **)req::malloc((num_modvals + 1) *
+          (struct berval **)req::malloc_untyped((num_modvals + 1) *
                                         sizeof(struct berval *));
 
         /* for each value */

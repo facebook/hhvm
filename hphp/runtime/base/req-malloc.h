@@ -41,19 +41,39 @@ namespace HPHP { namespace req {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Plain malloc-style allocation in the request heap is not available;
+ * please choose one of the variants below. Memory obtained through any
+ * of these will be freed at end-of-request, unless passed back to req::free().
+ *
+ * 1. malloc_noptrs, if you know the memory will not contain heap pointers,
+ * e.g. c-strings, pixels, compressed or encrypted data, etc.
+ *
+ * 2. make_raw<T>(...) or make_raw_array<T>(count), if you know the type,
+ * whether or not it contains pointers. These are analogs of C++ new.
+ *
+ * 3. malloc(type_scan::Index) like make_raw<T>, but you provide the type id,
+ * which must not be type_scan::kIndexUnknown; intended for implementing
+ * templated apis.
+ *
+ * 4. malloc_unk() memory will be treated as root and conservative scanned,
+ * because we don't know whether or not it will have pointers.
+ */
+void* malloc(size_t nbytes) = delete;
+void* calloc(size_t count, size_t bytes) = delete;
+void* realloc(void* ptr, size_t nbytes) = delete;
+
+/*
  * Interfaces to receive raw memory. Whenever possible, prefer the typed
  * interfaces below, such as make_raw<T>.
  */
+void* malloc(size_t nbytes, type_scan::Index);
+void* calloc(size_t count, size_t bytes, type_scan::Index);
+void* realloc(void* ptr, size_t nbytes, type_scan::Index);
 
-void* malloc(size_t nbytes,
-             type_scan::Index tyindex = type_scan::kIndexUnknown);
-
-void* calloc(size_t count, size_t bytes,
-             type_scan::Index tyindex = type_scan::kIndexUnknown);
-
-void* realloc(void* ptr,
-              size_t nbytes,
-              type_scan::Index tyindex = type_scan::kIndexUnknown);
+// Unknown type-index, conservative scan contents and treat as root.
+void* malloc_untyped(size_t nbytes);
+void* calloc_untyped(size_t count, size_t bytes);
+void* realloc_untyped(void* ptr, size_t nbytes);
 
 // Unknown type-index, but assert there's no pointers within.
 inline void* malloc_noptrs(size_t nbytes) {

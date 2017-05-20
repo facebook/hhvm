@@ -938,17 +938,27 @@ static void* allocate(size_t nbytes, type_scan::Index ty) {
 }
 
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
+  assert(type_scan::isKnownType(tyindex));
   return allocate<false>(nbytes, tyindex);
 }
 
 void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
+  assert(type_scan::isKnownType(tyindex));
   return allocate<true>(count * nbytes, tyindex);
 }
 
-void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
+void* malloc_untyped(size_t nbytes) {
+  return allocate<false>(nbytes, type_scan::kIndexUnknown);
+}
+
+void* calloc_untyped(size_t count, size_t nbytes) {
+  return allocate<true>(count * nbytes, type_scan::kIndexUnknown);
+}
+
+static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   // first handle corner cases that degenerate to malloc() or free()
   if (!ptr) {
-    return req::malloc(nbytes, tyindex);
+    return allocate<false>(nbytes, tyindex);
   }
   if (!nbytes) {
     req::free(ptr);
@@ -959,7 +969,7 @@ void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->nbytes <= kMaxSmallSize)) {
     // old block was small, cannot resize.
-    auto newmem = req::malloc(nbytes, tyindex);
+    auto newmem = allocate<false>(nbytes, tyindex);
     auto copy_size = std::min(n->nbytes - sizeof(MallocNode), nbytes);
     newmem = memcpy(newmem, ptr, copy_size);
     MM().freeSmallSize(n, n->nbytes);
@@ -968,6 +978,15 @@ void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   // Ok, it's a big allocation.
   auto block = MM().resizeBig(n, nbytes);
   return block.ptr;
+}
+
+void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
+  assert(type_scan::isKnownType(tyindex));
+  return reallocate(ptr, nbytes, tyindex);
+}
+
+void* realloc_untyped(void* ptr, size_t nbytes) {
+  return reallocate(ptr, nbytes, type_scan::kIndexUnknown);
 }
 
 char* strndup(const char* str, size_t len) {

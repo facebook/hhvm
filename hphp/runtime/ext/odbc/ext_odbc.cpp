@@ -392,7 +392,7 @@ bool ODBCCursor::exec_prepared_query(const Array params)
     num_rows = cur_array.size();
 
     // allocate buffer we'll pass to odbc
-    input.push_back((SQLCHAR*)req::malloc(num_rows * param->col_size));
+    input.push_back((SQLCHAR*)req::malloc_untyped(num_rows * param->col_size));
 
     // copy each element of our input array to the buffer
     for (int j=0; j < num_rows; j++) {
@@ -439,7 +439,7 @@ bool ODBCCursor::bind_buffer()
     row_size += column->total_column_size();
     columns_.append(Variant(std::move(column)));
   }
-  buffer_ = (SQLPOINTER)req::malloc(row_size * per_fetch_rows);
+  buffer_ = (SQLPOINTER)req::malloc_untyped(row_size * per_fetch_rows);
 
   // since this buffer can be quite big
   if (buffer_ == nullptr) {

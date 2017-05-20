@@ -608,8 +608,9 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
     /* the first <len> slots are filled by the one short ops
      * we now extend our array and jump to the new added structs */
-    opts =
-      (opt_struct *)req::realloc(opts, sizeof(opt_struct) * (len + count + 1));
+    opts = (opt_struct *)req::realloc_untyped(
+        opts, sizeof(opt_struct) * (len + count + 1)
+    );
     orig_opts = opts;
     opts += len;
 
@@ -633,7 +634,9 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       opts++;
     }
   } else {
-    opts = (opt_struct*) req::realloc(opts, sizeof(opt_struct) * (len + 1));
+    opts = (opt_struct*) req::realloc_untyped(
+        opts, sizeof(opt_struct) * (len + 1)
+    );
     orig_opts = opts;
     opts += len;
   }
@@ -646,8 +649,8 @@ static Array HHVM_FUNCTION(getopt, const String& options,
   static const StaticString s_argv("argv");
   Array vargv = php_global(s_argv).toArray();
   int argc = vargv.size();
-  char **argv = (char **)req::malloc((argc+1) * sizeof(char*));
-  std::vector<String> holders;
+  char **argv = (char **)req::malloc_untyped((argc+1) * sizeof(char*));
+  req::vector<String> holders;
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {
     String arg = iter.second().toString();

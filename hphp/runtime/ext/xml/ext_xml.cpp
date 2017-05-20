@@ -230,11 +230,11 @@ xml_encoding xml_encodings[] = {
 };
 
 static void *php_xml_malloc_wrapper(size_t sz) {
-  return req::malloc(sz);
+  return req::malloc_untyped(sz);
 }
 
 static void *php_xml_realloc_wrapper(void *ptr, size_t sz) {
-  return req::realloc(ptr, sz);
+  return req::realloc_untyped(ptr, sz);
 }
 
 static void php_xml_free_wrapper(void *ptr) {

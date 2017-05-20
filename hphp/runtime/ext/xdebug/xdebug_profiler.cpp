@@ -32,6 +32,7 @@ void XDebugProfiler::ensureBufferSpace() {
     return;
   }
 
+  // XXX refactor this to use req::make_raw_array<FrameData> or req::vector<>
   // The initial buffer size is 0
   int64_t new_buf_size = (m_frameBufferSize == 0)?
     XDEBUG_GLOBAL(FramebufSize) :
@@ -39,8 +40,8 @@ void XDebugProfiler::ensureBufferSpace() {
 
   try {
     int64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
-    m_frameBuffer = (FrameData*) req::realloc((void*) m_frameBuffer,
-                                               new_buf_bytes);
+    m_frameBuffer = (FrameData*) req::realloc_untyped((void*) m_frameBuffer,
+                                                      new_buf_bytes);
     m_frameBufferSize = new_buf_size;
   } catch (const OutOfMemoryException& e) {
     raise_error("Cannot allocate more memory for the xdebug profiler. Consider "

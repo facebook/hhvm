@@ -56,7 +56,7 @@ extern "C" {
 void php_gd_error_ex(int type, const char *format, ...);
 
 inline void *safe_emalloc(size_t nmemb, size_t size, size_t offset) {
-  return HPHP::req::malloc(nmemb * size + offset);
+  return HPHP::req::malloc_untyped(nmemb * size + offset);
 }
 
 void php_gd_error(const char *format, ...);

@@ -3005,7 +3005,7 @@ void Generator::genScannerFunc(std::ostream& os,
     if (begin_offset > 0) {
       os << "  assert((size - " << begin_offset << ") % "
          << layout.size << " == 0);\n";
-    } else {
+    } else if (!layout.suffix) {
       os << "  assert(size % " << layout.size << " == 0);\n";
     }
   }

@@ -118,13 +118,17 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
       // native objects should hit the NativeData case below.
       assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
       return h->obj_.scan(scanner);
-    case HeaderKind::WaitHandle:
+    case HeaderKind::WaitHandle: {
+      // scan C++ properties after [ObjectData] header. should pick up
+      // unioned and bit-packed fields
+      assert(!h->wh_.getAttribute(ObjectData::HasNativeData));
+      return h->wh_.scan(scanner);
+    }
     case HeaderKind::AwaitAllWH: {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      auto wh = &h->wh_;
-      assert(!wh->getAttribute(ObjectData::HasNativeData));
-      return wh->scan(scanner);
+      assert(!h->awaitall_.getAttribute(ObjectData::HasNativeData));
+      return h->awaitall_.scan(scanner);
     }
     case HeaderKind::AsyncFuncWH:
       return scanAFWH(&h->wh_, scanner);
@@ -175,12 +179,15 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
   always_assert(false && "corrupt header in worklist");
 }
 
+inline void c_AwaitAllWaitHandle::scan(type_scan::Scanner& scanner) const {
+  scanner.scanByIndex(m_tyindex, this, heapSize());
+  ObjectData::scan(scanner); // in case of dynprops
+}
+
 inline void c_WaitHandle::scan(type_scan::Scanner& scanner) const {
-  // for the purposes of scanning, we just want the ordinary sizeof.
-  auto size = kind() == HeaderKind::AsyncFuncWH ?
-                sizeof(c_AsyncFunctionWaitHandle) :
-              kind() == HeaderKind::AwaitAllWH ?
-                sizeof(c_AwaitAllWaitHandle) :
+  assert(kind() != HeaderKind::AwaitAllWH);
+  auto const size =
+    kind() == HeaderKind::AsyncFuncWH ? sizeof(c_AsyncFunctionWaitHandle) :
               asio_object_size(this);
   scanner.scanByIndex(m_tyindex, this, size);
   ObjectData::scan(scanner);

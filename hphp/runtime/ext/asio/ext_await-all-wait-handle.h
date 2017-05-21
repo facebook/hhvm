@@ -44,7 +44,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
   explicit c_AwaitAllWaitHandle(unsigned cap = 0)
     : c_WaitableWaitHandle(classof(), HeaderKind::AwaitAllWH,
-                         type_scan::getIndexForMalloc<c_AwaitAllWaitHandle>())
+        type_scan::getIndexForMalloc<
+          c_AwaitAllWaitHandle,
+          type_scan::Action::WithSuffix<Node>
+        >())
     , m_cap(cap)
     , m_unfinished(cap - 1)
   {}
@@ -96,6 +99,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static size_t heapSize(unsigned count) {
     return sizeof(c_AwaitAllWaitHandle) + count * sizeof(Node);
   }
+  void scan(type_scan::Scanner&) const;
 
  private:
   template<typename T, typename F1, typename F2>
@@ -124,9 +128,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
   Node m_children[0]; // allocated off the end
-  TYPE_SCAN_CUSTOM_FIELD(m_children) {
-    scanner.scan(m_children[0], m_cap * sizeof(Node));
-  }
+  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_children);
 
  public:
   static const int8_t STATE_BLOCKED = 2;

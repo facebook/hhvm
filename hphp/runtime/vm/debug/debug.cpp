@@ -344,9 +344,16 @@ std::string lookupFunction(const Func* f,
     }
     return fname;
   }
-  fname += f->fullName()->data();
-  if (inPrologue)
+  if (f->isClosureBody()) {
+    fname += f->baseCls()->name()->toCppString();
+    fname = fname.substr(0, fname.find(';'));
+    fname += "::__invoke";
+  } else {
+    fname += f->fullName()->data();
+  }
+  if (inPrologue) {
     fname += "$prologue";
+  }
   return fname;
 }
 

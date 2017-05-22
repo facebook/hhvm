@@ -173,7 +173,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
   auto &usedTraits = cls->preClass()->usedTraits();
   ArrayInit ret(usedTraits.size(), ArrayInit::Map{});
   for (auto const& traitName : usedTraits) {
-    ret.set(StrNR(traitName), VarNR(traitName));
+    ret.set(StrNR(traitName), VarNR(traitName).tv());
   }
   return ret.toArray();
 }

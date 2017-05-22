@@ -106,17 +106,26 @@ inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
                         : lvalRef(getStringKey(cell), copy);
 }
 
-inline ArrayData* ArrayData::set(const String& k, const Variant& v,
-                                 bool copy) {
+inline ArrayData* ArrayData::set(const String& k, Cell v, bool copy) {
   assert(IsValidKey(k));
   return set(k.get(), v, copy);
 }
 
-inline ArrayData* ArrayData::set(const Variant& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::set(const Variant& k, Cell v, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? set(getIntKey(cell), v, copy)
                         : set(getStringKey(cell), v, copy);
+}
+
+inline ArrayData* ArrayData::set(const String& k, const Variant& v,
+                                 bool copy) {
+  return set(k, *v.asCell(), copy);
+}
+
+inline ArrayData* ArrayData::set(const Variant& k, const Variant& v,
+                                 bool copy) {
+  return set(k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
@@ -131,16 +140,26 @@ inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
                         : setRef(getStringKey(cell), v, copy);
 }
 
-inline ArrayData* ArrayData::add(const String& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::add(const String& k, Cell v, bool copy) {
   assert(IsValidKey(k));
   return add(k.get(), v, copy);
 }
 
-inline ArrayData* ArrayData::add(const Variant& k, const Variant& v, bool copy) {
+inline ArrayData* ArrayData::add(const Variant& k, Cell v, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? add(getIntKey(cell), v, copy)
                         : add(getStringKey(cell), v, copy);
+}
+
+inline ArrayData* ArrayData::add(const String& k, const Variant& v,
+                                 bool copy) {
+  return add(k, *v.asCell(), copy);
+}
+
+inline ArrayData* ArrayData::add(const Variant& k, const Variant& v,
+                                 bool copy) {
+  return add(k, *v.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::remove(const String& k, bool copy) {
@@ -295,6 +314,14 @@ inline ArrayData* ArrayData::add(int64_t k, const Variant& v, bool copy) {
 
 inline ArrayData* ArrayData::add(StringData* k, const Variant& v, bool copy) {
   return g_array_funcs.addStr[kind()](this, k, *v.asCell(), copy);
+}
+
+inline ArrayData* ArrayData::add(int64_t k, Cell v, bool copy) {
+  return g_array_funcs.addInt[kind()](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::add(StringData* k, Cell v, bool copy) {
+  return g_array_funcs.addStr[kind()](this, k, v, copy);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k, bool copy) {

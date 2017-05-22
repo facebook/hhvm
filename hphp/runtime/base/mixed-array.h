@@ -183,6 +183,7 @@ struct MixedArray final : ArrayData,
    */
   static ArrayData* MakeReserveMixed(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
+  static constexpr auto MakeReserve = &MakeReserveMixed;
 
   /*
    * Convert mixed-layout array to dict in-place. This function doesn't check

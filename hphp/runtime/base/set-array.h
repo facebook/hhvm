@@ -118,6 +118,7 @@ public:
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveSet(uint32_t size);
+  static constexpr auto MakeReserve = &MakeReserveSet;
 
   static ArrayData* MakeSet(uint32_t size, const TypedValue* values);
 

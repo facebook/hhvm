@@ -117,7 +117,7 @@ Array HashCollection::toKeysArray() {
       ai.append(int64_t{e->ikey});
     } else {
       assert(e->hasStrKey());
-      ai.append(VarNR(e->skey));
+      ai.append(VarNR(e->skey).tv());
     }
   }
   return ai.toArray();

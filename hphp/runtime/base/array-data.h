@@ -309,6 +309,8 @@ public:
    */
   ArrayData *add(int64_t k, const Variant& v, bool copy);
   ArrayData *add(StringData* k, const Variant& v, bool copy);
+  ArrayData *add(int64_t k, Cell v, bool copy);
+  ArrayData *add(StringData* k, Cell v, bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
@@ -336,11 +338,16 @@ public:
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
+  ArrayData *set(const String& k, Cell v, bool copy);
+  ArrayData *set(const Variant& k, Cell v, bool copy);
+  ArrayData *set(const StringData*, Cell, bool) = delete;
   ArrayData *setRef(const String& k, Variant& v, bool copy);
   ArrayData *setRef(const Variant& k, Variant& v, bool copy);
   ArrayData *setRef(const StringData*, Variant&, bool) = delete;
   ArrayData *add(const String& k, const Variant& v, bool copy);
   ArrayData *add(const Variant& k, const Variant& v, bool copy);
+  ArrayData *add(const String& k, Cell v, bool copy);
+  ArrayData *add(const Variant& k, Cell v, bool copy);
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
 

@@ -1087,7 +1087,7 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
       auto const key = elm.strKey();
       int64_t n;
       if (key->isStrictlyInteger(n)) {
-        init.set(n, VarNR{n});
+        init.set(n, make_tv<KindOfInt64>(n));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));
       }

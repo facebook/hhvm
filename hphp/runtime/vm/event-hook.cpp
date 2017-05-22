@@ -283,7 +283,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   Variant intArgs =
     PackedArrayInit(5)
-      .append(VarNR(ar->func()->fullName()))
+      .append(VarNR(ar->func()->fullName()).tv())
       .append(called_on)
       .append(get_frame_args_with_ref(ar))
       .append(h->asCArrRef()[1])

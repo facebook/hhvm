@@ -95,13 +95,16 @@ ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
  *  - returns a KindOfNull when `cell' is KindOfUninit.
  *  - is the identity otherwise.
  */
-ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
-  if (UNLIKELY(tv->m_type == KindOfRef)) {
-    assertx(tv->m_data.pref->tv()->m_type != KindOfUninit);
-    return *tv->m_data.pref->tv();
+ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
+  if (UNLIKELY(tv.m_type == KindOfRef)) {
+    assertx(tv.m_data.pref->tv()->m_type != KindOfUninit);
+    return *tv.m_data.pref->tv();
   }
-  if (tv->m_type == KindOfUninit) return make_tv<KindOfNull>();
-  return *tv;
+  if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
+  return tv;
+}
+ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
+  return tvToInitCell(*tv);
 }
 
 /*

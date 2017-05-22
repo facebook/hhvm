@@ -1367,6 +1367,8 @@ struct VarNR : private TypedValueAux {
     }
   }
 
+  TypedValue tv() const { return *this; }
+
   operator const Variant&() const { return *asVariant(); }
 
   bool isNull() const {

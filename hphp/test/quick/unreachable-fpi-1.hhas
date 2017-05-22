@@ -1,0 +1,13 @@
+.main {
+  FPushCtorD 1 "Exception"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  Throw
+  FPushFuncD 0 "bar"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}

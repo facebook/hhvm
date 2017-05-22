@@ -572,14 +572,11 @@ struct AsmState {
   void addLabelJump(const std::string& name, Offset immOff, Offset opcodeOff) {
     auto& label = labelMap[name];
 
-    if (currentStackDepth == nullptr) {
-      // Jump is unreachable, nothing to do here
-      return;
+    if (currentStackDepth != nullptr) {
+      // The stack depth at the target must be the same as the current depth
+      // (whatever this may be: it may still be unknown)
+      currentStackDepth->addListener(*this, &label.stackDepth);
     }
-
-    // The stack depth at the target must be the same as the current depth
-    // (whatever this may be: it may still be unknown)
-    currentStackDepth->addListener(*this, &label.stackDepth);
 
     label.sources.emplace_back(immOff, opcodeOff);
   }
@@ -624,7 +621,7 @@ struct AsmState {
 
   void beginFpi(Offset fpushOff) {
     if (currentStackDepth == nullptr) {
-      error("beginFpi called from unreachable instruction");
+      enterReachableRegion(0);
     }
 
     fpiRegs.push_back(FPIReg{

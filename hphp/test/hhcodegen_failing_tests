@@ -1,6 +1,5 @@
 quick/Cls.php
 quick/Empty.php
-quick/FPassC.php
 quick/FPassR.php
 quick/FPushCtor.php
 quick/FPushObjMethod.php
@@ -20,10 +19,8 @@ quick/array_packed.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
 quick/backtick.php
-quick/bool_types.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
-quick/catch-order.php
 quick/chdir_posix.php
 quick/class_abstract_final1.php
 quick/class_abstract_final2.php
@@ -78,7 +75,6 @@ quick/eval_noreturn.php
 quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php
-quick/exceptions8.php
 quick/exit.php
 quick/fail_self.php
 quick/fb_intercept.php
@@ -91,7 +87,6 @@ quick/foreach-bad.php
 quick/foreach-superglobals.php
 quick/fsc01.php
 quick/fsc02.php
-quick/fun_catch_block.php
 quick/func2.php
 quick/func3.php
 quick/func_slice_args.php
@@ -184,8 +179,6 @@ quick/list-assign-ref-param.php
 quick/list-assignment.php
 quick/magic-get-set.php
 quick/method_param_promotion_error.php
-quick/nested_vm_exceptions.php
-quick/nested_vm_exceptions2.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
 quick/nonstrict_hashbang_start.php

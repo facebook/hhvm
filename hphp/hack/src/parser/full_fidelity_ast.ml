@@ -138,6 +138,8 @@ let pos_name node =
   lowerer_state.ignorePos := local_ignore_pos;
   p, name
 
+let is_ret_by_ref node = not @@ is_missing node
+
 let couldMap : 'a . f:'a parser -> 'a list parser = fun ~f -> fun node env ->
   let rec synmap : 'a . 'a parser -> 'a list parser = fun f node env ->
     match syntax node with
@@ -484,6 +486,7 @@ type fun_hdr =
   ; fh_return_type     : hint option
   ; fh_param_modifiers : fun_param list
   ; fh_keep_noop       : bool
+  ; fh_ret_by_ref      : bool
   }
 
 let empty_fun_hdr =
@@ -494,6 +497,7 @@ let empty_fun_hdr =
   ; fh_return_type     = None
   ; fh_param_modifiers = []
   ; fh_keep_noop       = false
+  ; fh_ret_by_ref      = false
   }
 
 let rec pSimpleInitializer node env =
@@ -1168,6 +1172,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
   | FunctionDeclarationHeader
     { function_async
     ; function_coroutine
+    ; function_ampersand
     ; function_name
     ; function_type_parameter_list
     ; function_parameter_list
@@ -1194,6 +1199,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
       ; fh_param_modifiers =
         List.filter (fun p -> Option.is_some p.param_modifier) fh_parameters
       ; fh_keep_noop
+      ; fh_ret_by_ref      = is_ret_by_ref function_ampersand
       }
   | LambdaSignature { lambda_parameters; lambda_type; _ } ->
     { empty_fun_hdr with
@@ -1414,6 +1420,7 @@ and pDef : def parser = fun node env ->
       ; f_ret             = hdr.fh_return_type
       ; f_name            = hdr.fh_name
       ; f_params          = hdr.fh_parameters
+      ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
         if !(lowerer_state.quickMode)
         then [Noop]

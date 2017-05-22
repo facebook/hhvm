@@ -34,11 +34,15 @@ type collection_type = int
 
 (* These are the three flavors of value that can live on the stack:
  *   C = cell
- *   R = ref
- *   A = classref
+ *   V = ref
+ *   R = return value
+ *   F = function argument
+ *   U = uninit
+ * Note: Function argument and uninit are not added to the type
+ *       as they are handled separately
  *)
 module Flavor = struct
-  type t = Cell | Ref | Classref
+  type t = Cell | Ref | ReturnVal
 end
 
 module MemberOpMode = struct
@@ -104,7 +108,6 @@ end (* Of MemberKey *)
 type instruct_basic =
   | Nop
   | EntryNop
-  | PopA
   | PopC
   | PopV
   | PopR

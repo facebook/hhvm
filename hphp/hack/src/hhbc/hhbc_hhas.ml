@@ -73,7 +73,6 @@ let string_of_basic instruction =
   match instruction with
     | Nop         -> "Nop"
     | EntryNop    -> "EntryNop"
-    | PopA        -> "PopA"
     | PopC        -> "PopC"
     | PopV        -> "PopV"
     | PopR        -> "PopR"

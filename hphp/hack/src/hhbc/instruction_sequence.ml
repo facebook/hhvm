@@ -103,12 +103,12 @@ let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
 let instr_popc = instr (IBasic PopC)
-let instr_popa = instr (IBasic PopA)
+let instr_popv = instr (IBasic PopV)
 let instr_pop flavor =
   match flavor with
-  | Flavor.Ref -> instr_popr
+  | Flavor.Ref -> instr_popv
   | Flavor.Cell -> instr_popc
-  | Flavor.Classref -> instr_popa
+  | Flavor.ReturnVal -> instr_popr
 
 let instr_pushl local = instr (IGet (PushL local))
 let instr_throw = instr (IContFlow Throw)

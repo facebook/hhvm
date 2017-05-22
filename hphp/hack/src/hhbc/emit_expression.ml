@@ -411,7 +411,7 @@ and emit_call_expr need_ref expr =
   gather [
     instrs;
     (* If the instruction has produced a ref then unbox it *)
-    if flavor = Flavor.Ref then
+    if flavor = Flavor.ReturnVal then
       if need_ref then
         instr_boxr
       else
@@ -1347,7 +1347,7 @@ and emit_base ~is_object ~notice mode base_offset param_num_opt (_, expr_ as exp
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr expr in
      base_expr_instrs,
-     instr (IBase (if flavor = Flavor.Ref
+     instr (IBase (if flavor = Flavor.ReturnVal
                    then BaseR base_offset else BaseC base_offset)),
      1
 
@@ -1390,7 +1390,7 @@ and emit_arg i ((_, expr_) as e) =
     let instrs, flavor = emit_flavored_expr e in
     gather [
       instrs;
-      if flavor = Flavor.Ref
+      if flavor = Flavor.ReturnVal
       then instr_fpassr i
       else instr_fpass (get_passByRefKind e) i
     ]
@@ -1547,7 +1547,7 @@ and emit_call_user_func id arg args =
   let flavor = match id with
     | "fb_call_user_func_safe"
     | "fb_call_user_func_array_safe" -> Flavor.Cell
-    | _ -> Flavor.Ref
+    | _ -> Flavor.ReturnVal
   in
   gather [
     from_expr ~need_ref:false arg;
@@ -1563,7 +1563,7 @@ and emit_call (_, expr_ as expr) args uargs =
     gather [
       emit_call_lhs expr nargs;
       emit_args_and_call args uargs;
-    ], Flavor.Ref in
+    ], Flavor.ReturnVal in
   match expr_ with
   | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->

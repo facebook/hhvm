@@ -230,7 +230,6 @@ let makenullaryinst s =
  (* instruct_basic *)
  | "Nop" -> IBasic (Nop)
  | "EntryNop"-> IBasic (EntryNop)
- | "PopA" -> IBasic (PopA)
  | "PopC" -> IBasic (PopC)
  | "PopV" -> IBasic (PopV)
  | "PopR" -> IBasic (PopR)

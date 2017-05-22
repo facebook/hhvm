@@ -1,0 +1,6 @@
+File "shape_constant_missing_field.php", line 9, characters 18-20:
+Wrong type hint (Typing[4057])
+File "shape_constant_missing_field.php", line 9, characters 24-28:
+The field 'bar' is missing
+File "shape_constant_missing_field.php", line 9, characters 9-16:
+The field 'bar' is defined

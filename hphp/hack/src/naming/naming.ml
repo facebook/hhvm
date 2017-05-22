@@ -1437,6 +1437,9 @@ module Make (GetLocals : GetLocals) = struct
         check_constant_expr env e1;
         check_constant_expr env e2)
     | Varray l -> List.iter l (check_constant_expr env)
+    | Shape fdl ->
+        (* Only check the values because shape field names are always legal *)
+        List.iter fdl (fun (_, e) -> check_constant_expr env e)
     | Collection (id, l) ->
       let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
       (* Only vec/keyset/dict are allowed because they are value types *)

@@ -6353,6 +6353,14 @@ bool(true)
 bool(true)
 bool(true)
 ====
+bool(true)
+bool(true)
+int(1)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+====
 array(3) {
   [0]=>
   int(1)

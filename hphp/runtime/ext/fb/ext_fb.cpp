@@ -357,7 +357,7 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
       return false;
     }
     int64_t index = key.toInt64();
-    if (index < 0) {
+    if (index < max_index) {
       return false;
     }
     if (index > max_index) {

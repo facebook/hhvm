@@ -52,6 +52,7 @@ function main() {
   fb_cs_test(array(1 => "a", 2 => "b", 3 => "c"));
   fb_cs_test(array(0 => "a", 2 => "b", 3 => "c"));
   fb_cs_test(array(3 => "a"));
+  fb_cs_test(array(2 => 2, 1 => 1, 3 => 3));
   // Test for overflow (1ull << 63) - 1
   fb_cs_test(array(9223372036854775807, 'a'));
 

@@ -200,6 +200,35 @@ let expand_to_line_boundaries ?ranges source_text range =
     st, ed
   ) (start_char, end_char) ranges
 
+let get_split_boundaries solve_states =
+  List.fold solve_states
+    ~init:[]
+    ~f:begin fun boundaries solve_state ->
+      let {Solve_state.rvm; chunk_group; _} = solve_state in
+      let chunks = chunk_group.Chunk_group.chunks in
+      match chunks with
+      | [] -> boundaries
+      | hd :: tl ->
+        let boundaries, last_range = List.fold tl
+          ~init:(boundaries, Chunk.get_range hd)
+          ~f:begin fun (boundaries, curr_range) chunk ->
+            let chunk_range = Chunk.get_range chunk in
+            if Solve_state.has_split_before_chunk chunk rvm
+              then curr_range :: boundaries, chunk_range
+              else boundaries, (fst curr_range, snd chunk_range)
+          end
+        in
+        last_range :: boundaries
+    end
+  |> List.rev
+
+let expand_to_split_boundaries boundaries range =
+  List.fold boundaries ~init:range ~f:(fun (st, ed) (b_st, b_ed) ->
+    let st = if st > b_st && st < b_ed then b_st else st in
+    let ed = if ed > b_st && ed < b_ed then b_ed else ed in
+    st, ed
+  )
+
 let format ?range ?ranges parsed_file =
   let source_text, _, editable = parsed_file in
   let range =
@@ -256,15 +285,17 @@ let format_intervals intervals parsed_file =
   let text = SourceText.text source_text in
   let lines = String_utils.split_on_newlines text in
   let chunk_groups = Hack_format.transform editable |> Chunk_builder.build in
+  let solve_states = Line_splitter.find_solve_states chunk_groups in
   let line_ranges = get_char_ranges lines in
+  let split_boundaries = get_split_boundaries solve_states in
   let ranges = intervals
     |> List.map ~f:(line_interval_to_char_range line_ranges)
-    |> List.map ~f:(expand_to_line_boundaries ~ranges:line_ranges source_text)
+    |> List.map ~f:(expand_to_split_boundaries split_boundaries)
     |> Interval.union_list
     |> List.sort ~cmp:Interval.comparator
   in
   let formatted_intervals = List.map ranges (fun range ->
-    range, Line_splitter.solve ~range chunk_groups
+    range, Line_splitter.print ~range solve_states
   ) in
   let length = SourceText.length source_text in
   let buf = Buffer.create (length + 256) in

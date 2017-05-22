@@ -58,3 +58,6 @@ let finalize chunk rule ra space comma end_char =
 
 let get_nesting_id chunk =
   chunk.nesting.Nesting.id
+
+let get_range chunk =
+  (chunk.start_char, chunk.end_char)

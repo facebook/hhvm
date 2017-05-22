@@ -1,0 +1,11 @@
+diff --git a/fibonacci.php b/fibonacci.php
+--- a/fibonacci.php
++++ b/fibonacci.php
+@@ -4,6 +4,6 @@
+   $arr = array(0, 1);
+   for ($i = 2; $i <= $pos; ++$i)
+     $arr[$i] =
+-      $arr[$i-1] + $arr[$i-2];
++      $arr[ $i - 1 ] + $arr[ $i - 2 ];
+   return $arr[$pos];
+ }

@@ -1927,7 +1927,10 @@ and transform_trivia ~is_leading trivia =
           if !whitespace_followed_last_comment then Space
           else if !newline_followed_last_comment then Newline
           else Nothing
-        end else Nothing;
+        end
+        else if Option.is_some !last_comment
+          then Newline (* Always add a newline after a single-line comment *)
+          else Nothing;
       ])
       :: !comments;
     last_comment := None;
@@ -1996,7 +1999,6 @@ and transform_trivia ~is_leading trivia =
       last_comment := Some (Fmt [
         if !currently_leading then Newline else Space;
         Comment ((Trivia.text triv), (Trivia.width triv));
-        Newline;
       ]);
       last_comment_was_delimited := false;
       currently_leading := false;

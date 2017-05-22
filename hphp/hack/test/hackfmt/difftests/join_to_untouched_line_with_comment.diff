@@ -1,0 +1,9 @@
+diff --git a/line_joining.php b/line_joining.php
+--- a/line_joining.php
++++ b/line_joining.php
+@@ -2,4 +2,4 @@
+
+ // These lines will be joined:
+ $foo =
+-  'bar';
++  'baz';

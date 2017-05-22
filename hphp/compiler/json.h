@@ -155,7 +155,7 @@ struct _OutputStream {
     return *this;
   }
 
-  // TODO: std::map and __gnu_cxx::hash_map should share
+  // TODO: std::map and std::unordered_map should share
   // the same function...
 
   template<typename K, typename T, typename C>

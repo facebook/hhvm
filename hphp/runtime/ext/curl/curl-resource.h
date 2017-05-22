@@ -114,7 +114,7 @@ struct CurlResource : SweepableResourceData {
   static bool isNonCurlOption(long option);
   bool setNonCurlOption(long option, const Variant& value);
 
-  Variant do_callback(const Variant& cb, const Array& args);
+  void handle_exception();
   static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx);
   static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx);
   static size_t curl_write_header(char *data,

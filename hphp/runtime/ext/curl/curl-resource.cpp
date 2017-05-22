@@ -1025,16 +1025,24 @@ int64_t CurlResource::minTimeoutMS(int64_t timeout) {
   return minTimeoutImpl(timeout, 1000);
 }
 
-Variant CurlResource::do_callback(const Variant& cb, const Array& args) {
+void CurlResource::handle_exception() {
   assertx(!m_exception);
   try {
-    return vm_call_user_func(cb, args);
-  } catch (const Object &e) {
+    throw;
+  } catch (const Object& e) {
     m_exception.assign(e);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     m_exception.assign(e.clone());
+  } catch (std::exception& e) {
+    m_exception.assign(
+      new FatalErrorException(0,
+                              "Unexpected error in curl callback: %s",
+                              e.what())
+    );
+  } catch (...) {
+    m_exception.assign(
+      new FatalErrorException("Unknown error in curl callback"));
   }
-  return init_null();
 }
 
 size_t CurlResource::curl_read(char *data,
@@ -1043,29 +1051,34 @@ size_t CurlResource::curl_read(char *data,
   ReadHandler *t  = &ch->m_read;
 
   int length = -1;
-  switch (t->method) {
-    case PHP_CURL_DIRECT:
-      if (t->fp) {
-        int data_size = size * nmemb;
-        String ret = t->fp->read(data_size);
-        length = ret.size();
-        if (length) {
-          memcpy(data, ret.data(), length);
+  try {
+    switch (t->method) {
+      case PHP_CURL_DIRECT:
+        if (t->fp) {
+          int data_size = size * nmemb;
+          String ret = t->fp->read(data_size);
+          length = ret.size();
+          if (length) {
+            memcpy(data, ret.data(), length);
+          }
         }
+        break;
+      case PHP_CURL_USER: {
+        int data_size = size * nmemb;
+        Variant ret = vm_call_user_func(
+          t->callback,
+          make_packed_array(Resource(ch), Resource(t->fp), data_size));
+        if (ret.isString()) {
+          String sret = ret.toString();
+          length = data_size < sret.size() ? data_size : sret.size();
+          memcpy(data, sret.data(), length);
+        }
+        break;
       }
-      break;
-    case PHP_CURL_USER: {
-      int data_size = size * nmemb;
-      Variant ret = ch->do_callback(
-        t->callback,
-        make_packed_array(Resource(ch), Resource(t->fp), data_size));
-      if (ret.isString()) {
-        String sret = ret.toString();
-        length = data_size < sret.size() ? data_size : sret.size();
-        memcpy(data, sret.data(), length);
-      }
-      break;
     }
+  } catch (...) {
+    ch->handle_exception();
+    return CURL_READFUNC_ABORT;
   }
   return length;
 }
@@ -1076,26 +1089,30 @@ size_t CurlResource::curl_write(char *data,
   WriteHandler *t  = &ch->m_write;
   size_t length = size * nmemb;
 
-  switch (t->method) {
-    case PHP_CURL_STDOUT:
-      g_context->write(data, length);
-      break;
-    case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
-    case PHP_CURL_RETURN:
-      if (length > 0) {
-        t->buf.append(data, (int)length);
+  try {
+    switch (t->method) {
+      case PHP_CURL_STDOUT:
+        g_context->write(data, length);
+        break;
+      case PHP_CURL_FILE:
+        return t->fp->write(String(data, length, CopyString), length);
+      case PHP_CURL_RETURN:
+        if (length > 0) {
+          t->buf.append(data, (int)length);
+        }
+        break;
+      case PHP_CURL_USER: {
+        Variant ret = vm_call_user_func(
+          t->callback,
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
+        length = ret.toInt64();
+        break;
       }
-      break;
-    case PHP_CURL_USER: {
-      Variant ret = ch->do_callback(
-        t->callback,
-        make_packed_array(Resource(ch), String(data, length, CopyString)));
-      length = ret.toInt64();
-      break;
     }
+  } catch (...) {
+    ch->handle_exception();
+    return 0;
   }
-
   return length;
 }
 
@@ -1105,30 +1122,34 @@ size_t CurlResource::curl_write_header(char *data,
   WriteHandler *t  = &ch->m_write_header;
   size_t length = size * nmemb;
 
-  switch (t->method) {
-    case PHP_CURL_STDOUT:
-      // Handle special case write when we're returning the entire transfer
-      if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
-        ch->m_write.buf.append(data, (int)length);
-      } else {
-        g_context->write(data, length);
-      }
-      break;
-    case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
-    case PHP_CURL_USER: {
-        Variant ret = ch->do_callback(
+  try {
+    switch (t->method) {
+      case PHP_CURL_STDOUT:
+        // Handle special case write when we're returning the entire transfer
+        if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
+          ch->m_write.buf.append(data, (int)length);
+        } else {
+          g_context->write(data, length);
+        }
+        break;
+      case PHP_CURL_FILE:
+        return t->fp->write(String(data, length, CopyString), length);
+      case PHP_CURL_USER: {
+        Variant ret = vm_call_user_func(
           t->callback,
           make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
-      break;
+        break;
+      }
+      case PHP_CURL_IGNORE:
+        return length;
+      default:
+        return (size_t)-1;
     }
-    case PHP_CURL_IGNORE:
-      return length;
-    default:
-      return (size_t)-1;
+  } catch (...) {
+    ch->handle_exception();
+    return 0;
   }
-
   return length;
 }
 
@@ -1154,13 +1175,18 @@ int CurlResource::curl_progress(void* p,
   pai.append(ultotal);
   pai.append(ulnow);
 
-  Variant result = vm_call_user_func(
-    curl->m_progress_callback,
-    pai.toArray()
-  );
-  // Both PHP and libcurl are documented as return 0 to continue, non-zero
-  // to abort, however this is what Zend actually implements
-  return result.toInt64() == 0 ? 0 : 1;
+  try {
+    Variant result = vm_call_user_func(
+      curl->m_progress_callback,
+      pai.toArray()
+    );
+    // Both PHP and libcurl are documented as return 0 to continue, non-zero
+    // to abort, however this is what Zend actually implements
+    return result.toInt64() == 0 ? 0 : 1;
+  } catch (...) {
+    curl->handle_exception();
+    return 1;
+  }
 }
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {

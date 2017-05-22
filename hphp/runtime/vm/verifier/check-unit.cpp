@@ -25,7 +25,7 @@ namespace HPHP {
 namespace Verifier {
 
 struct UnitChecker {
-  UnitChecker(const Unit*, bool verbose);
+  UnitChecker(const Unit*, ErrorMode mode);
   ~UnitChecker() {}
   bool verify();
 
@@ -42,19 +42,25 @@ struct UnitChecker {
  private:
   template<class... Args>
   void error(const char* const fmt, Args&&... args) {
-    verify_error(m_unit, nullptr, fmt, std::forward<Args>(args)...);
+    verify_error(
+      m_unit,
+      nullptr,
+      m_errmode == kThrow,
+      fmt,
+      std::forward<Args>(args)...
+    );
   }
 
  private:
   const Unit* m_unit;
-  bool m_verbose;
+  ErrorMode m_errmode;
 };
 
-bool checkUnit(const Unit* unit, bool verbose) {
-  if (verbose) {
+bool checkUnit(const Unit* unit, ErrorMode mode) {
+  if (mode == kVerbose) {
     printf("verifying unit from %s\n", unit->filepath()->data());
   }
-  return UnitChecker(unit, verbose).verify();
+  return UnitChecker(unit, mode).verify();
 }
 
 // Unit contents to check:
@@ -66,8 +72,8 @@ bool checkUnit(const Unit* unit, bool verbose) {
 //   o Classes
 //   o Functions
 
-UnitChecker::UnitChecker(const Unit* unit, bool verbose)
-: m_unit(unit), m_verbose(verbose) {
+UnitChecker::UnitChecker(const Unit* unit, ErrorMode mode)
+: m_unit(unit), m_errmode(mode) {
 }
 
 bool UnitChecker::verify() {
@@ -207,10 +213,10 @@ bool UnitChecker::checkFuncs() {
     }
 
     if (func->isCPPBuiltin()) {
-      ok &= checkNativeFunc(func, m_verbose);
+      ok &= checkNativeFunc(func, m_errmode);
     }
 
-    ok &= checkFunc(func, m_verbose);
+    ok &= checkFunc(func, m_errmode);
   });
 
   if (!multi && m_unit->getMain(nullptr) != pseudo) {

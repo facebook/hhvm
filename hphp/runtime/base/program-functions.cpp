@@ -70,6 +70,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/hack-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -1756,6 +1757,11 @@ static int execute_program_impl(int argc, char** argv) {
                              RuntimeOption::LightProcessCount,
                              RuntimeOption::EvalRecordSubprocessTimes,
                              inherited_fds);
+
+    // HackC initialization should happen immediately prior to LightProcess
+    // configuration as it will create a private delegate process to deal with
+    // hackc instances.
+    hackc_init();
   }
 #endif
 
@@ -2515,6 +2521,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(Eval::Debugger::Stop())
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
+  LOG_AND_IGNORE(hackc_shutdown())
 #ifndef _MSC_VER
   LOG_AND_IGNORE(LightProcess::Close())
 #endif

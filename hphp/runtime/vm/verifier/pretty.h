@@ -71,8 +71,8 @@ void printGml(const Unit*);
  *
  * The Func* may be nullptr.
  */
-void verify_error(const Unit*, const Func*,
-  ATTRIBUTE_PRINTF_STRING const char* fmt, ...) ATTRIBUTE_PRINTF(3,4);
+void verify_error(const Unit*, const Func*, bool throws,
+  ATTRIBUTE_PRINTF_STRING const char* fmt, ...) ATTRIBUTE_PRINTF(4,5);
 
 }}
 

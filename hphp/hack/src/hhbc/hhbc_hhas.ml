@@ -1289,5 +1289,8 @@ let add_program buf hhas_prog =
 let to_string hhas_prog =
   let buf = Buffer.create 1024 in
   class_counter := 0;
+  typedef_counter := 0;
+  array_identifier_map := TVMap.empty;
+  array_identifier_counter := 0;
   add_program buf hhas_prog;
   B.contents buf

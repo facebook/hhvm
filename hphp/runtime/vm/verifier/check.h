@@ -28,6 +28,12 @@ struct Func;
 
 namespace Verifier {
 
+enum ErrorMode {
+  kStderr,
+  kVerbose,
+  kThrow
+};
+
 /**
  * Check one whole unit, including its internal string, array, sourceLoc,
  * preClass, and func tables.
@@ -45,7 +51,7 @@ namespace Verifier {
  * -- PreClasses
  * -- Metadata
  */
-bool checkUnit(const Unit*, bool verbose = false);
+bool checkUnit(const Unit*, ErrorMode mode = kStderr);
 
 /**
  * Checker for one Func.  Rules from doc/bytecode.specification:
@@ -95,7 +101,7 @@ bool checkUnit(const Unit*, bool verbose = false);
  *    certian attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
-bool checkFunc(const Func*, bool verbose = false);
+bool checkFunc(const Func*, ErrorMode mode = kStderr);
 
 /**
  * Checker for HNI native function signatures. Verifies that argument types
@@ -115,7 +121,7 @@ bool checkFunc(const Func*, bool verbose = false);
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */
-bool checkNativeFunc(const Func*, bool verbose = false);
+bool checkNativeFunc(const Func*, ErrorMode mode = kStderr);
 
 }} // HPHP::Verifier
 

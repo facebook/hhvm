@@ -2539,8 +2539,13 @@ void parse(AsmState& as) {
 
 //////////////////////////////////////////////////////////////////////
 
-UnitEmitter* assemble_string(const char* code, int codeLen,
-                             const char* filename, const MD5& md5) {
+std::unique_ptr<UnitEmitter> assemble_string(
+  const char* code,
+  int codeLen,
+  const char* filename,
+  const MD5& md5,
+  bool swallowErrors
+) {
   auto ue = std::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
@@ -2552,21 +2557,11 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
     as.ue = ue.get();
     parse(as);
   } catch (const std::exception& e) {
-    ue.reset(new UnitEmitter(md5));
-    ue->m_filepath = sd;
-    ue->initMain(1, 1);
-    ue->emitOp(OpString);
-    ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));
-    ue->emitOp(OpFatal);
-    ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
-    FuncEmitter* fe = ue->getMain();
-    fe->maxStackCells = 1;
-    // XXX line numbers are bogus
-    fe->finish(ue->bcPos(), false);
-    ue->recordFunction(fe);
+    if (!swallowErrors) throw;
+    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   }
 
-  return ue.release();
+  return ue;
 }
 
 AsmResult assemble_expression(UnitEmitter& ue, FuncEmitter* fe,

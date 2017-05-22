@@ -73,7 +73,7 @@ struct BlockInfo {
 };
 
 struct FuncChecker {
-  FuncChecker(const Func* func, bool verbose);
+  FuncChecker(const Func* func, ErrorMode mode);
   bool checkOffsets();
   bool checkFlow();
 
@@ -137,11 +137,17 @@ struct FuncChecker {
  private:
   template<class... Args>
   void error(const char* fmt, Args&&... args) {
-    verify_error(unit(), m_func, fmt, std::forward<Args>(args)...);
+    verify_error(
+      unit(),
+      m_func,
+      m_errmode == kThrow,
+      fmt,
+      std::forward<Args>(args)...
+    );
   }
   template<class... Args>
   void ferror(Args&&... args) {
-    verify_error(unit(), m_func, "%s",
+    verify_error(unit(), m_func, m_errmode == kThrow, "%s",
                  folly::sformat(std::forward<Args>(args)...).c_str());
   }
 
@@ -151,11 +157,11 @@ struct FuncChecker {
   const Func* const m_func;
   Graph* m_graph;
   Bits m_instrs;
-  bool m_verbose;
+  ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
 };
 
-bool checkNativeFunc(const Func* func, bool verbose) {
+bool checkNativeFunc(const Func* func, ErrorMode mode) {
   auto const funcname = func->displayName();
   auto const pc = func->preClass();
   auto const clsname = pc ? pc->name() : nullptr;
@@ -165,7 +171,7 @@ bool checkNativeFunc(const Func* func, bool verbose) {
   if (func->builtinFuncPtr() == Native::unimplementedWrapper) return true;
 
   if (func->isAsync()) {
-    verify_error(func->unit(), func,
+    verify_error(func->unit(), func, mode == kThrow,
       "<<__Native>> function %s%s%s is declared async; <<__Native>> functions "
       "can return Awaitable<T>, but can not be declared async.\n",
       clsname ? clsname->data() : "",
@@ -182,7 +188,7 @@ bool checkNativeFunc(const Func* func, bool verbose) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
                                         funcname->data());
 
-    verify_error(func->unit(), func,
+    verify_error(func->unit(), func, mode == kThrow,
       "<<__Native>> function %s%s%s does not match C++ function "
       "signature (%s): %s\n",
       clsname ? clsname->data() : "",
@@ -197,24 +203,24 @@ bool checkNativeFunc(const Func* func, bool verbose) {
   return true;
 }
 
-bool checkFunc(const Func* func, bool verbose) {
-  if (verbose) {
+bool checkFunc(const Func* func, ErrorMode mode) {
+  if (mode == kVerbose) {
     func->prettyPrint(std::cout);
     if (func->cls() || !func->preClass()) {
       printf("  FuncId %d\n", func->getFuncId());
     }
     printFPI(func);
   }
-  FuncChecker v(func, verbose);
+  FuncChecker v(func, mode);
   return v.checkOffsets() &&
          v.checkFlow();
 }
 
-FuncChecker::FuncChecker(const Func* f, bool verbose)
+FuncChecker::FuncChecker(const Func* f, ErrorMode mode)
 : m_func(f)
 , m_graph(0)
 , m_instrs(m_arena, f->past() - f->base() + 1)
-, m_verbose(verbose) {
+, m_errmode(mode) {
 }
 
 // Needs to be a sorted map so we can divide funcs into contiguous sections.
@@ -1136,12 +1142,12 @@ bool FuncChecker::checkFlow() {
   }
   for (Block* b = m_graph->first_rpo; b; b = b->next_rpo) {
     copyState(&cur, &m_info[b->id].state_in);
-    if (m_verbose) {
+    if (m_errmode == kVerbose) {
       std::cout << blockToString(b, m_graph, unit()) << std::endl;
     }
     for (InstrRange i = blockInstrs(b); !i.empty(); ) {
       PC pc = i.popFront();
-      if (m_verbose) {
+      if (m_errmode == kVerbose) {
         std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                      stateToString(cur) << " " <<
                      instrToString(pc, unit()) << std::endl;
@@ -1195,13 +1201,13 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
        last_op == OpWIterNext || last_op == OpWIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
-    if (m_verbose) {
+    if (m_errmode == kVerbose) {
       std::cout << "        " << stateToString(*cur) <<
         " -> B" << b->succs[1]->id << std::endl;
     }
     ok &= checkEdge(b, *cur, b->succs[1]);
     cur->iters[id] = !taken_state;
-    if (m_verbose) {
+    if (m_errmode == kVerbose) {
       std::cout << "        " << stateToString(*cur) <<
                    " -> B" << b->succs[0]->id << std::endl;
     }
@@ -1209,7 +1215,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     cur->iters[id] = save;
   } else {
     // Other branch instructions send the same state to all successors.
-    if (m_verbose) {
+    if (m_errmode == kVerbose) {
       std::cout << "        " << stateToString(*cur) << std::endl;
     }
     for (BlockPtrRange i = succBlocks(b); !i.empty(); ) {

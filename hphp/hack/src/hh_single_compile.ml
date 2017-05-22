@@ -21,6 +21,10 @@ type parser =
   | Legacy
   | FFP
 
+type mode =
+  | CLI
+  | DAEMON
+
 type options = {
   filename        : string;
   fallback        : bool;
@@ -29,6 +33,7 @@ type options = {
   parser          : parser;
   output_file     : string;
   quiet_mode      : bool;
+  mode            : mode;
 }
 
 (*****************************************************************************)
@@ -64,6 +69,7 @@ let parse_options () =
   let debug_time = ref false in
   let parser = ref FFP in
   let config = ref [] in
+  let mode = ref CLI in
   let output_file = ref "" in
   let quiet_mode = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -94,13 +100,17 @@ let parse_options () =
                 | "legacy" -> parser := Legacy
                 | p -> failwith @@ p ^ " is an invalid parser")
       , " Parser: ffp or legacy [def: ffp]"
+      );
+      ("--daemon"
+      , Arg.Unit (fun () -> mode := DAEMON)
+      , " Run a daemon which processes Hack source from standard input"
       )
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
-    | Some fn -> fn
-    | None -> die usage in
+    | Some fn -> if !mode == CLI then fn else die usage
+    | None -> if !mode == CLI then die usage else read_line () in
   { filename    = fn
   ; fallback    = !fallback
   ; config      = !config
@@ -108,6 +118,7 @@ let parse_options () =
   ; parser      = !parser
   ; output_file = !output_file
   ; quiet_mode  = !quiet_mode
+  ; mode        = !mode
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -124,6 +135,14 @@ let rec make_files = function
       let filename = Str.global_replace pattern "" header in
       (filename, content) :: make_files rl
   | _ -> assert false
+
+let load_file_stdin file =
+  let _ = read_line () in (* md5 *)
+  let len = read_int () in
+  let ic = stdin in
+  let code = Bytes.create len in
+  let _ = really_input ic code 0 len in
+  Relative_path.Map.singleton file code
 
 (* We have some hacky "syntax extensions" to have one file contain multiple
  * files, which can be located at arbitrary paths. This is useful e.g. for
@@ -272,12 +291,18 @@ end
 let process_single_file compiler_options popt tcopt filename outputfile =
   try
     let t = Unix.gettimeofday () in
-    let files_contents = file_to_files filename in
+    let load_file =
+       if compiler_options.mode = DAEMON
+       then load_file_stdin
+       else file_to_files in
+    let files_contents = load_file filename in
     let _, files_info, _ = parse_name compiler_options popt files_contents in
     let debug_time = new_debug_time() in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
     let text =
       do_compile filename compiler_options tcopt files_info debug_time in
+    if compiler_options.mode = DAEMON then
+      Printf.printf "%i\n" (String.length text);
     match outputfile with
     | None ->
       if not compiler_options.quiet_mode
@@ -286,9 +311,13 @@ let process_single_file compiler_options popt tcopt filename outputfile =
     | Some outputfile -> Sys_utils.write_file ~file:outputfile text
   with e ->
     if not compiler_options.quiet_mode
-    then
-      let f = Relative_path.to_absolute filename in
-      P.fprintf stderr "Error in file %s: %s\n" f (Printexc.to_string e)
+    then begin
+      if compiler_options.mode = DAEMON then
+        Printf.printf "ERROR: %s\n" (Printexc.to_string e)
+      else
+        let f = Relative_path.to_absolute filename in
+        Printf.eprintf "Error in file %s: %s\n" f (Printexc.to_string e)
+    end
     else ()
 
 let compile_files_recursively compiler_options f =
@@ -325,7 +354,15 @@ let decl_and_run_mode compiler_options popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
   let process_single_file = process_single_file compiler_options popt tcopt in
-  if Sys.is_directory compiler_options.filename then
+  if compiler_options.mode = DAEMON then
+    let rec process_next fn = begin
+      let fname = Relative_path.create Relative_path.Dummy fn in
+      process_single_file fname None;
+      let filename = read_line () in
+      process_next filename
+    end in
+      process_next compiler_options.filename
+  else if Sys.is_directory compiler_options.filename then
     compile_files_recursively compiler_options process_single_file
   else
     let filename =

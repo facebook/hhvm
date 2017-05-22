@@ -143,6 +143,7 @@ void printGml(const Unit* unit) {
 
 void verify_error(const Unit* unit,
                   const Func* func,
+                  bool throws,
                   const char* fmt,
                   ...) {
   char buf[1024];
@@ -150,13 +151,17 @@ void verify_error(const Unit* unit,
   va_start(args, fmt);
   vsnprintf(buf, sizeof buf, fmt, args);
   va_end(args);
-  fprintf(stderr,
-          "Verification Error (unit %s%s): %s",
-          unit->filepath()->data(),
-          func != nullptr
-            ? folly::format(" func {}", func->fullName()->data()).str().c_str()
-            : "",
-          buf);
+  auto out = folly::sformat(
+    "Verification Error (unit {}{}{}): {}",
+    unit->filepath()->data(),
+    func ? " func " : "",
+    func ? func->fullName()->data() : "",
+    buf
+  );
+  if (throws) {
+    throw std::runtime_error(out);
+  }
+  fprintf(stderr, "%s", out.c_str());
 }
 
 }} // namespace HPHP::VM

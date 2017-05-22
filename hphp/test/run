@@ -263,6 +263,7 @@ function hh_codegen_cmd($options) {
   $cmd .= ' -v Hack.Compiler.ConstantFolding=0';
   $cmd .= ' -v Hack.Compiler.OptimizeNullCheck=0';
   $cmd .= ' -v Hack.Compiler.OptimizeCuf=0';
+  if (isset($options['hackc'])) $cmd .= ' --daemon';
   return $cmd;
 }
 
@@ -454,6 +455,7 @@ function get_options($argv) {
     'compare-hh-codegen' => '',
     'run-hh-codegen' => '',
     'record-failures:' => '',
+    'hackc' => '',
   );
   $options = array();
   $files = array();
@@ -816,6 +818,11 @@ function hhvm_cmd_impl() {
 
       extra_args($options),
     );
+
+    if (isset($options['hackc'])) {
+      $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
+      $args[] = '-vEval.HackCompilerDefault=true';
+    }
 
     if (isset($options['relocate'])) {
       $args[] = '--count='.($options['relocate'] * 2);

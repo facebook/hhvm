@@ -546,6 +546,13 @@ private:
   RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
 };
 
+std::unique_ptr<UnitEmitter> createFatalUnit(
+  StringData* filename,
+  const MD5& md5,
+  FatalOp op,
+  StringData* err
+);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

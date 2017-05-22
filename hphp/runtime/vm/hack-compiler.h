@@ -14,46 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHVM_AS_H_
-#define incl_HPHP_HHVM_AS_H_
+#pragma once
 
-#include <memory>
-#include <string>
+#include "hphp/runtime/vm/unit-emitter.h"
+
+#include <boost/variant.hpp>
 
 namespace HPHP {
 
-struct UnitEmitter;
-struct FuncEmitter;
 struct MD5;
 
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Assemble the contents of `filename' and return a UnitEmitter.
- *
- * If swallowErrors is true then emit a fataling unit for any assembler errors.
- *
- * Minimal documentation is available in as.cpp.
- */
-std::unique_ptr<UnitEmitter> assemble_string(
-  const char* code,
-  int codeLen,
-  const char* filename,
-  const MD5&,
-  bool swallowErrors = true
-);
-
-enum class AsmResult {
-  NoResult,
-  ValuePushed,
-  Unreachable
+enum class HackcMode {
+  kNever,
+  kFallback,
+  kFatal
 };
 
-AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,
-                              const std::string&);
+HackcMode hackc_mode();
 
-//////////////////////////////////////////////////////////////////////
+void hackc_init();
+void hackc_shutdown();
+
+// On success return a verified unit, and on failure return a string stating the
+// type of error encountered
+using HackcResult = boost::variant<std::unique_ptr<Unit>,std::string>;
+
+HackcResult hackc_compile(const char* code, int len,
+                          const char* filename, const MD5& md5);
 
 }
-
-#endif

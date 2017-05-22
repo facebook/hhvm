@@ -697,7 +697,10 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
     auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
-    auto const ok = Verifier::checkUnit(u.get(), verbose);
+    auto const ok = Verifier::checkUnit(
+      u.get(),
+      verbose ? Verifier::kVerbose : Verifier::kStderr
+    );
 
     if (!ok && !verbose) {
       std::cerr << folly::format(
@@ -1201,6 +1204,27 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
     return RepoStatus::error;
   }
   return RepoStatus::success;
+}
+
+std::unique_ptr<UnitEmitter> createFatalUnit(
+  StringData* filename,
+  const MD5& md5,
+  FatalOp op,
+  StringData* err
+) {
+  auto ue = std::make_unique<UnitEmitter>(md5);
+  ue->m_filepath = filename;
+  ue->initMain(1, 1);
+  ue->emitOp(OpString);
+  ue->emitInt32(ue->mergeLitstr(err));
+  ue->emitOp(OpFatal);
+  ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
+  FuncEmitter* fe = ue->getMain();
+  fe->maxStackCells = 1;
+  // XXX line numbers are bogus
+  fe->finish(ue->bcPos(), false);
+  ue->recordFunction(fe);
+  return ue;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

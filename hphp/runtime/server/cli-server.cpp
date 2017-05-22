@@ -936,7 +936,7 @@ void CLIWorker::doJob(int client) {
         envArr.reset();
         g_context->setStdout(nullptr, nullptr);
         clearThreadLocalIO();
-        LightProcess::clearThreadLocalAfdtOverride();
+        LightProcess::setThreadLocalAfdtOverride(nullptr);
         Logger::SetThreadHook(nullptr, nullptr);
         Stream::setThreadLocalFileHandler(nullptr);
         execute_command_line_end(xhprofFlags, true, args[0].c_str());
@@ -1540,7 +1540,7 @@ void run_command_on_cli_server(const char* sock_path,
     env_vec.emplace_back(*env);
   }
 
-  int delegate = LightProcess::createCLIDelegate();
+  int delegate = LightProcess::createDelegate();
   if (delegate < 0) {
     Logger::Warning("Could not create delegate for CLI server: %s",
                     folly::errnoStr(errno).c_str());

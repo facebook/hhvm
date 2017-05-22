@@ -462,15 +462,25 @@ struct RuntimeOption {
   F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
-  F(string, UseExternalEmitter,        "")                              \
-  /* ExternalEmitterFallback:
-     0 - No fallback; fail when external emitter fails
-     1 - Fallback to builtin emitter if external emitter fails,
-         but log a diagnostic
-     2 - Fallback to builtin emitter if external emitter fails and
-         don't log anything */                                          \
-  F(int, ExternalEmitterFallback,      0)                               \
-  F(bool, ExternalEmitterAllowPartial, false)                           \
+  /* Whether to use hh_single_compile by default if available. */       \
+  F(bool, HackCompilerDefault,         false)                           \
+  /* The command to invoke to spawn hh_single_compile in server mode. */\
+  F(string, HackCompilerCommand,       "")                              \
+  /* The number of hh_single_compile daemons to keep alive. */          \
+  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount() / 2)      \
+  /* The number of times to retry after an infra failure communicating
+     with a compiler process. */                                        \
+  F(uint64_t, HackCompilerMaxRetries,  0)                               \
+  /* Whether or not to fallback to hphpc if hh_single_compile fails for
+     any reason. */                                                     \
+  F(bool, HackCompilerFallback,        false)                           \
+  /* Whether to run the verifier on units produced by
+     hh_single_compile. */                                              \
+  F(bool, HackCompilerVerify,          true)                            \
+  /* Whether to write verbose log messages to the error log and include
+     the hhas from failing units in the fatal error messages produced by
+     bad hh_single_compile units. */                                    \
+  F(bool, HackCompilerVerboseErrors,   true)                            \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \

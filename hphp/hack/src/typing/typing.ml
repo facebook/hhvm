@@ -2398,7 +2398,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | (_, Tarraykind (AKtuple _)) ->
             let env, ty = Typing_arrays.downcast_aktypes env ty in
             get_array_filter_return_type env ty
-        | (r, Tarraykind (AKvec tv)) ->
+        | (r, Tarraykind (AKvec tv | AKvarray tv)) ->
             let env, tv = get_value_type env tv in
             env, (r, Tarraykind (AKvec tv))
         | (r, Tunresolved x) ->
@@ -2526,7 +2526,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
               | (_, Tarraykind (AKtuple _ )) ->
                 let env, x = Typing_arrays.downcast_aktypes env x in
                 build_output_container env x
-              | (r, Tarraykind AKvec _) ->
+              | (r, Tarraykind (AKvec _ | AKvarray _)) ->
                 env, (fun tr -> (r, Tarraykind (AKvec(tr))) )
               | ((_, Tany) as any) ->
                 env, (fun _ -> any)

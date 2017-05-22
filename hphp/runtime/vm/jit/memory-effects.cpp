@@ -780,6 +780,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto stores = mayCoerce ? AHeapAny | AStackAny : AHeapAny;
     return may_raise(inst, may_load_store(AHeapAny | AStackAny, stores));
   }
+  case VerifyRetFailHard:
+    return may_raise(inst, may_load_store(AHeapAny | AStackAny, AHeapAny));
 
   case CallArray:
     {

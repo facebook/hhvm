@@ -1887,6 +1887,11 @@ To string conversions:
 
   Failure to verify a return type hint.
 
+| VerifyRetFailHard, ND, S(PtrToGen), Er|T
+
+  Terminal version of VerifyRetFail, to be used when the compiler can prove
+  that this failure will result in a fatal error.
+
 | RaiseUninitLoc<localId>, ND, S(Str), Er
 
   Raise a notice for an uninitialized local variable.

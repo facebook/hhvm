@@ -290,6 +290,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {TV, 3}}},
     {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync, {{TV, 0}}},
     {VerifyRetFail,      VerifyRetTypeFail, DNone, SSync, {{SSA, 0}}},
+    {VerifyRetFailHard,  VerifyRetTypeFail, DNone, SSync, {{SSA, 0}}},
     {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},

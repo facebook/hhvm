@@ -1352,6 +1352,38 @@ enum NEONLoadStoreSingleStructPostIndexOp {
   NEON_ST4_d_post = NEON_ST4_d | NEONLoadStoreSingleStructPostIndex
 };
 
+enum LSELoadOp {
+  LSELoadOPMask = 0x00007000,
+  LDADD  = 0x00000000,
+  LDBIC  = 0x00001000,
+  LDEOR  = 0x00002000,
+  LDORR  = 0x00003000,
+  LDSMAX = 0x00004000,
+  LDSMIN = 0x00005000,
+  LDUMAX = 0x00006000,
+  LDUMIN = 0x00007000
+};
+
+#define LSELD_OP_LIST(V) \
+  V(ADD),                \
+  V(BIC),                \
+  V(EOR),                \
+  V(ORR),                \
+  V(SMAX),               \
+  V(SMIN),               \
+  V(UMAX),               \
+  V(UMIN)
+
+enum LSELd {
+  LseLdOpFMask = 0x38200000,
+  LseLdOpFixed = 0x38200000,
+  #define LSELD(A)       \
+  LD##A##_w = LseLdOpFixed | LD##A, \
+  LD##A##_x = LseLdOpFixed | LD##A | SixtyFourBits
+  LSELD_OP_LIST(LSELD)
+  #undef LSELD
+};
+
 // Unimplemented and unallocated instructions. These are defined to make fixed
 // bit assertion easier.
 enum UnimplementedOp {

@@ -1134,6 +1134,18 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
   LoadLiteral(ft, rawbits, op);
 }
 
+#define LDADD_w 0xb8e00000
+#define LDADD_x 0xf8e00000
+
+void Assembler::ldadd(const Register& rt, const MemOperand& src) {
+  assert(src.IsImmediateOffset() && (src.offset() == 0));
+  uint32_t op = rt.Is64Bits() ? LDADD_x : LDADD_w;
+  // HERE
+  Emit(op | Rs(rt) | Rt(rt) | RnSP(src.base()));
+}
+
+#undef LDADD_w
+#undef LDADD_x
 
 void Assembler::ldxr(const Register& rt, const MemOperand& src) {
   assert(src.IsImmediateOffset() && (src.offset() == 0));

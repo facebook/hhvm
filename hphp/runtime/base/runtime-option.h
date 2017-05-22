@@ -673,6 +673,10 @@ struct RuntimeOption {
   F(std::vector<std::string>, UnixServerAllowedGroups,                  \
                                             std::vector<std::string>()) \
   /******************                                                   \
+   | ARM   Options. |                                                   \
+   *****************/                                                   \
+  F(bool, JitArmLse, armLseDefault())                                   \
+  /******************                                                   \
    | PPC64 Options. |                                                   \
    *****************/                                                   \
   /* Minimum immediate size to use TOC */                               \

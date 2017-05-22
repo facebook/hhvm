@@ -61,6 +61,7 @@
   V(LoadStoreUnsignedOffset)        \
   V(LoadStoreExclusive)             \
   V(LogicalShifted)                 \
+  V(LseLdOp)                        \
   V(AddSubShifted)                  \
   V(AddSubExtended)                 \
   V(AddSubWithCarry)                \

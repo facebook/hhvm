@@ -751,6 +751,26 @@ void Disassembler::VisitMoveWideImmediate(Instruction* instr) {
 }
 
 
+void Disassembler::VisitLseLdOp(Instruction* instr) {
+  const char *mnemonic = "";
+  const char *form = "'Rs, 'Rt, ['Xns]";
+
+  // TODO: accType = {a,l}, and size = {b, h}
+  switch (instr->Mask(LSELoadOPMask)) {
+    case LDADD: mnemonic = "ldadd"; break; 
+    case LDBIC: mnemonic = "ldbic"; break; 
+    case LDEOR: mnemonic = "ldeor"; break; 
+    case LDORR: mnemonic = "ldorr"; break; 
+    case LDSMAX: mnemonic = "ldsmax"; break; 
+    case LDSMIN: mnemonic = "ldsmin"; break; 
+    case LDUMAX: mnemonic = "ldumax"; break; 
+    case LDUMIN: mnemonic = "ldumin"; break; 
+    default: not_reached();
+  }
+  Format(instr, mnemonic, form);
+}
+
+
 #define LOAD_STORE_LIST(V)    \
   V(STRB_w, "strb", "'Wt")    \
   V(STRH_w, "strh", "'Wt")    \

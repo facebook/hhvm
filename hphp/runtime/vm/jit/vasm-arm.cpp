@@ -671,24 +671,24 @@ void Vgen::emit(const imul& i) {
   }
 }
 
-#define Y(vasm_opc, arm_opc)                             \
-void Vgen::emit(const vasm_opc& i) {                     \
-  auto adr = M(i.m);                                     \
-  /* Use VIXL's macroassembler scratch regs. */          \
-  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);      \
-  vixl::Label again;                                     \
-  a->bind(&again);                                       \
-  a->ldxr(rAsm, adr);                                    \
-  a->arm_opc(rAsm, rAsm, 1, SetFlags);                   \
-  a->stxr(rVixlScratch0, rAsm, adr);                     \
-  a->Cbnz(rVixlScratch0, &again);                        \
-  /* Restore VIXL's scratch regs. */                     \
-  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);  \
+void Vgen::emit(const decqmlock& i) {
+  auto adr = M(i.m);
+  /* Use VIXL's macroassembler scratch regs. */
+  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+  if (RuntimeOption::EvalJitArmLse) {
+    a->Mov(rVixlScratch0, -1);
+    a->ldadd(rVixlScratch0, adr);
+  } else {
+    vixl::Label again;
+    a->bind(&again);
+    a->ldxr(rAsm, adr);
+    a->Sub(rAsm, rAsm, 1, SetFlags);
+    a->stxr(rVixlScratch0, rAsm, adr);
+    a->Cbnz(rVixlScratch0, &again);
+  }
+  /* Restore VIXL's scratch regs. */
+  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
-
-Y(decqmlock, Sub)
-
-#undef Y
 
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {

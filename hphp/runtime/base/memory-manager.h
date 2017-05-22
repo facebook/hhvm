@@ -833,12 +833,19 @@ struct MemoryManager {
   bool isGCEnabled();
   void setGCEnabled(bool isGCEnabled);
 
+  struct FreeList {
+    void* maybePop();
+    void push(void*, size_t size);
+    FreeNode* head{nullptr};
+  };
+  using FreelistArray = std::array<FreeList,kNumSmallSizes>;
+
   /*
    * beginQuarantine() swaps out the normal freelists. endQuarantine()
    * fills everything freed with holes, then restores the original freelists.
    */
-  void beginQuarantine();
-  void endQuarantine();
+  FreelistArray beginQuarantine();
+  void endQuarantine(FreelistArray&&);
 
   /*
    * Run an integrity check on the heap
@@ -849,12 +856,6 @@ struct MemoryManager {
 
 private:
   friend struct req::root_handle; // access m_root_handles
-
-  struct FreeList {
-    void* maybePop();
-    void push(void*, size_t size);
-    FreeNode* head = nullptr;
-  };
 
   // head node of the doubly-linked list of Sweepables
   struct SweepableList : Sweepable {
@@ -916,7 +917,7 @@ private:
 
   void* m_front{nullptr};
   void* m_limit{nullptr};
-  std::array<FreeList,kNumSmallSizes> m_freelists;
+  FreelistArray m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGc; // request gc when heap usage reaches this size
@@ -955,9 +956,6 @@ private:
 #endif
 
   int64_t m_req_start_micros;
-
-  // freelists to use when quarantine is active
-  std::array<FreeList,kNumSmallSizes> m_quarantine;
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MM fields itself.
 };

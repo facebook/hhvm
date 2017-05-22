@@ -482,9 +482,6 @@ void MemoryManager::resetAllocator() {
 
   // zero out freelists
   for (auto& list : m_freelists) list.head = nullptr;
-  if (RuntimeOption::EvalQuarantine) {
-    for (auto& list : m_quarantine) list.head = nullptr;
-  }
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;
@@ -592,20 +589,26 @@ void MemoryManager::initFree() {
   m_heap.sortBigs();
 }
 
-void MemoryManager::beginQuarantine() {
-  std::swap(m_freelists, m_quarantine);
+MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
+  FreelistArray list;
+  for (auto i = 0; i < kNumSmallSizes; ++i) {
+    list[i].head = m_freelists[i].head;
+    m_freelists[i].head = nullptr;
+  }
+  return list;
 }
 
 // turn free blocks into holes, restore original freelists
-void MemoryManager::endQuarantine() {
+void MemoryManager::endQuarantine(FreelistArray&& list) {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = sizeIndex2Size(i);
     while (auto n = m_freelists[i].maybePop()) {
       memset(n, 0x8a, size);
       initHole(n, size);
     }
+    m_freelists[i].head = list[i].head;
+    list[i].head = nullptr;
   }
-  std::swap(m_freelists, m_quarantine);
 }
 
 // test iterating objects in slabs

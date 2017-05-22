@@ -270,9 +270,10 @@ NEVER_INLINE void Marker::sweep() {
   auto& mm = MM();
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();
-  if (RuntimeOption::EvalQuarantine) mm.beginQuarantine();
+  MemoryManager::FreelistArray quarantine;
+  if (RuntimeOption::EvalQuarantine) quarantine = mm.beginQuarantine();
   SCOPE_EXIT {
-    if (RuntimeOption::EvalQuarantine) mm.endQuarantine();
+    if (RuntimeOption::EvalQuarantine) mm.endQuarantine(std::move(quarantine));
     freed_bytes_ = usage0 - mm.currentUsage();
     sweep_ns_ = cpu_ns() - t0;
     assert(freed_bytes_ >= 0);

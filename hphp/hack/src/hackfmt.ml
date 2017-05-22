@@ -32,6 +32,7 @@ let parse_options () =
   let files = ref [] in
   let start_char = ref None in
   let end_char = ref None in
+  let at_char = ref None in
   let inplace = ref false in
   let diff = ref false in
   let root = ref None in
@@ -46,6 +47,11 @@ let parse_options () =
         Arg.Int (fun x -> end_char := Some x);
       ]),
       "[start end]  Range of character positions to be formatted (1 indexed)";
+
+    "--at-char",
+      Arg.Int (fun x -> at_char := Some x),
+      "[idx]  Format the smallest possible range around this character" ^
+      " (0 indexed)";
 
     "-i", Arg.Set inplace, " Format file in-place";
     "--in-place", Arg.Set inplace, " Format file in-place";
@@ -75,7 +81,8 @@ let parse_options () =
     | Some s, Some e -> Some (s - 1, e - 1)
     | _ -> None
   in
-  (!files, range, !inplace, !diff, !root, !diff_dry), (!debug, !test)
+  (!files, range, !at_char, !inplace, !diff, !root, !diff_dry),
+  (!debug, !test)
 
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
@@ -87,6 +94,7 @@ type filename = string
 type format_options =
   | Print of filename option * range option
   | InPlace of filename
+  | AtChar of filename option * int
   | Diff of root option * dry
 
 let mode_string format_options =
@@ -96,10 +104,12 @@ let mode_string format_options =
   | Print (None, None) -> "STDIN"
   | Print (None, Some _) -> "STDIN_RANGE"
   | InPlace _ -> "IN_PLACE"
+  | AtChar (_, _) -> "AT_CHAR"
   | Diff (_, false) -> "DIFF"
   | Diff (_, true) -> "DIFF_DRY"
 
-let validate_options env (files, range, inplace, diff, root, diff_dry) =
+let validate_options env
+    (files, range, at_char, inplace, diff, root, diff_dry) =
   let fail msg = raise (InvalidCliArg msg) in
   let filename =
     match files with
@@ -119,19 +129,23 @@ let validate_options env (files, range, inplace, diff, root, diff_dry) =
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
 
-  match diff, inplace, filename, range with
+  match diff, inplace, filename, range, at_char with
   | _ when env.debug && diff -> fail "Can't format diff in debug mode"
 
-  | true, _, Some _, _ -> fail "--diff mode expects no files"
-  | true, _, _, Some _ -> fail "--diff mode expects no range"
+  | true, _, Some _, _, _ -> fail "--diff mode expects no files"
+  | true, _, _, Some _, _ -> fail "--diff mode expects no range"
+  | true, _, _, _, Some _ -> fail "--diff mode can't format at-char"
 
-  (* TODO: Allow formatting a range in-place. *)
-  | _, true, _, Some _ -> fail "Can't format a range in-place"
-  | _, true, None, _ -> fail "Provide a filename to format in-place"
+  | _, true, None, _, _ -> fail "Provide a filename to format in-place"
+  | _, true, _, Some _, _ -> fail "Can't format a range in-place"
+  | _, true, _, _, Some _ -> fail "Can't format at-char in-place"
 
-  | false, false, _, _ -> Print (filename, range)
-  | false, true, Some filename, None -> InPlace filename
-  | true, _, None, None -> Diff (root, diff_dry)
+  | false, false, _, Some _, Some _ -> fail "--at-char expects no range"
+
+  | false, false, _, _, None -> Print (filename, range)
+  | false, true, Some filename, None, _ -> InPlace filename
+  | false, false, _, None, Some pos -> AtChar (filename, pos)
+  | true, _, None, None, _ -> Diff (root, diff_dry)
 
 let read_stdin () =
   let buf = Buffer.create 256 in
@@ -294,6 +308,24 @@ let main (env: env) (options: format_options) =
       |> parse
       |> format
       |> output ?filename
+  | AtChar (filename, pos) ->
+    let _, _, editable = parse filename in
+    let chunk_groups = editable
+      |> Hack_format.transform
+      |> Chunk_builder.build
+    in
+    let range = List.fold chunk_groups ~init:None ~f:(fun range cg ->
+      let st, ed = Chunk_group.get_char_range cg in
+      if st <= pos && ed > pos then Some (st, ed) else range
+    ) in
+    (match range with
+    | None -> raise (InvalidCliArg "No formattable text at given position")
+    | Some (st, ed) ->
+      Printf.printf "%d %d\n" st ed;
+      chunk_groups
+      |> Line_splitter.solve ~range:(st, ed)
+      |> output
+    )
   | Diff (root, dry) ->
     let root = get_root root in
     env.root <- Path.to_string root;

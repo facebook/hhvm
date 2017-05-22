@@ -146,7 +146,6 @@ struct Vunit;
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), U(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -894,7 +893,6 @@ struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
-struct andqi64 { Immed64 s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
 struct decl { Vreg32 s, d; VregSF sf; Vflags fl; };
 struct declm { Vptr m; VregSF sf; Vflags fl; };

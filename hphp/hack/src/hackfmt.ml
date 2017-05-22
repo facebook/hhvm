@@ -312,6 +312,34 @@ let format_diff_intervals intervals parsed_file =
   try format_intervals intervals parsed_file with
   | Invalid_argument s -> raise (InvalidDiff s)
 
+let format_at_char parsed_file pos =
+  let source_text, tree, editable = parsed_file in
+  let chunk_groups = editable
+    |> Hack_format.transform
+    |> Chunk_builder.build in
+  let module PS = Full_fidelity_positioned_syntax in
+  let positioned = PS.from_tree tree in
+  (* Grab the node which is the direct parent of the token at pos *)
+  let node = match List.nth (PS.parentage positioned pos) 1 with
+    | Some node -> node
+    | None -> invalid_arg "Invalid offset" in
+  let solve_states = Line_splitter.find_solve_states chunk_groups in
+  (* Take a range which starts at the beginning of the parent node *)
+  let range = (PS.leading_start_offset node, pos + 1) in
+  (* Expand the start offset to the nearest line boundary in the original
+   * source, since we want to add a leading newline before the node we're
+   * formatting if one should be there and isn't already present. Then, expand
+   * to split boundaries (line boundaries in the formatted source), since the
+   * line_splitter requires it. *)
+  let range = (fst (expand_to_line_boundaries source_text range), snd range)
+    |> expand_to_split_boundaries (get_split_boundaries solve_states) in
+  let formatted = Line_splitter.print solve_states ~range in
+  (* We don't want a trailing newline here (in as-you-type-formatting, it would
+   * place the cursor on the next line). So, we remove it. *)
+  let st, ed = range in
+  let ed = if SourceText.get source_text (ed - 1) = '\n' then ed - 1 else ed in
+  (st, ed), String.sub formatted 0 (String.length formatted - 1)
+
 let debug_print ?range filename =
   let source_text, syntax_tree, editable = parse filename in
   let range = Option.map range (expand_to_line_boundaries source_text) in
@@ -340,23 +368,14 @@ let main (env: env) (options: format_options) =
       |> format
       |> output ?filename
   | AtChar (filename, pos) ->
-    let _, _, editable = parse filename in
-    let chunk_groups = editable
-      |> Hack_format.transform
-      |> Chunk_builder.build
-    in
-    let range = List.fold chunk_groups ~init:None ~f:(fun range cg ->
-      let st, ed = Chunk_group.get_char_range cg in
-      if st <= pos && ed > pos then Some (st, ed) else range
-    ) in
-    (match range with
-    | None -> raise (InvalidCliArg "No formattable text at given position")
-    | Some (st, ed) ->
-      Printf.printf "%d %d\n" st ed;
-      chunk_groups
-      |> Line_splitter.solve ~range:(st, ed)
-      |> output
-    )
+    env.file <- filename;
+    if env.debug then debug_print filename;
+    let parsed_file = parse filename in
+    let range, formatted =
+      try format_at_char parsed_file pos with
+      | Invalid_argument s -> raise (InvalidCliArg s) in
+    Printf.printf "%d %d\n" (fst range) (snd range);
+    output formatted;
   | Diff (root, dry) ->
     let root = get_root root in
     env.root <- Path.to_string root;

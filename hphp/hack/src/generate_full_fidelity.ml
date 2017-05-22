@@ -2359,6 +2359,20 @@ let trailing_text node =
 let text node =
   SourceText.sub (source_text node) (start_offset node) (width node)
 
+(* Takes a node and an offset; produces the descent through the parse tree
+   to that position. *)
+let parentage node position =
+  let rec aux nodes position acc =
+    match nodes with
+    | [] -> acc
+    | h :: t ->
+      let width = full_width h in
+      if position < width then
+        aux (children h) position (h :: acc)
+      else
+        aux t (position - width) acc in
+  aux [node] position []
+
 module FromMinimal = struct
   module SyntaxKind = Full_fidelity_syntax_kind
   module M = Full_fidelity_minimal_syntax

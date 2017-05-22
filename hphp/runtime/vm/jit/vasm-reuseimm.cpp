@@ -139,11 +139,6 @@ void reuseImmq(Vunit& unit) {
 
   auto const labels = sortBlocks(unit);
 
-  // required for initial size of vector
-  for (auto i = 0; i < RuntimeOption::EvalJitLdimmqSpan; i++) {
-    env.immStateVec.push_back(ImmState{});
-  }
-
   for (auto const b : labels) {
     for (auto& elem : env.immStateVec) elem.reset();
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {

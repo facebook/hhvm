@@ -219,7 +219,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(HHBBC::options.HardTypeHints, ini, config,
                "HardTypeHints", true);
   Config::Bind(HHBBC::options.HardReturnTypeHints, ini, config,
-               "HardReturnTypeHints", false);
+               "HardReturnTypeHints", true);
   Config::Bind(HHBBC::options.HardConstProp, ini, config,
                "HardConstProp", true);
   Config::Bind(HHBBC::options.ElideAutoloadInvokes, ini, config,

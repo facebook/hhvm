@@ -195,12 +195,12 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
             v << copy2{rret(0), rret(1), dests[0], dests[1]};
             break;
           case Arch::ARM:
-            // For ARM64 we are truncating the aux data
-            // from the type. That allows to use the resulting
-            // register values to be used in type comparisons
-            // without the need for truncation there.
+            // For ARM64 we need to clear the bits 8..31 from the type value.
+            // That allows to use the resulting register values to be used
+            // in type comparisons without the need for truncation there.
             v << copy{rret(0), dests[0]};
-            v << movtqb{rret(1), dests[1]};
+            v << andq{v.cns(0xffffffff000000ff),
+                      rret(1), dests[1], v.makeReg()};
             break;
         }
       } else {
@@ -312,11 +312,12 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
       env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
       break;
     case Arch::ARM:
-      // For ARM64 we are truncating the aux data
-      // from the type. That allows to use the resulting
-      // register values to be used in type comparisons
-      // without the need for truncation there.
-      env.unit.blocks[b].code[i] = andqi64{0xffffffff000000ff, rret_type(), inst.type, env.unit.makeReg()};
+      // For ARM64 we need to clear the bits 8..31 from the type value.
+      // That allows to use the resulting register values to be used
+      // in type comparisons without the need for truncation there.
+      env.unit.blocks[b].code[i] = andq{
+        env.unit.makeConst(Vconst{0xffffffff000000ff}),
+        rret_type(), inst.type, env.unit.makeReg()};
       break;
   }
 }
@@ -328,13 +329,13 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
                                          rret_data(), rret_type()};
       break;
     case Arch::ARM:
-      // For ARM64 we are truncating the aux data
-      // from the type. That allows to use the resulting
-      // register values to be used in type comparisons
-      // without the need for truncation there.
+      // For ARM64 we need to clear the bits 8..31 from the type value.
+      // That allows to use the resulting register values to be used
+      // in type comparisons without the need for truncation there.
       lower_impl(env.unit, b, i, [&] (Vout& v) {
         v << copy{inst.data, rret_data()};
-        v << andqi64{0xffffffff000000ff, inst.type, rret_type(), v.makeReg()};
+        v << andq{v.cns(0xffffffff000000ff),
+                  inst.type, rret_type(), v.makeReg()};
       });
       break;
   }

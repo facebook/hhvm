@@ -1030,9 +1030,9 @@ Variant ArrayData::each() {
 
 const Variant& ArrayData::get(const Variant& k, bool error) const {
   assert(IsValidKey(k));
-  auto const cell = k.asCell();
-  return isIntKey(cell) ? get(getIntKey(cell), error)
-                        : get(getStringKey(cell), error);
+  auto const cell = *k.asCell();
+  return detail::isIntKey(cell) ? get(detail::getIntKey(cell), error)
+                                : get(detail::getStringKey(cell), error);
 }
 
 const Variant& ArrayData::getNotFound(int64_t k) {

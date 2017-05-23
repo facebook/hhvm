@@ -28,7 +28,9 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
     MM().forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  auto const allocsz = MixedArray::computeAllocBytes(
+                         MixedArray::computeScaleFromSize(n)
+                       );
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -44,7 +46,9 @@ DictInit::DictInit(size_t n, CheckAllocation)
     MM().forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  auto const allocsz = MixedArray::computeAllocBytes(
+                         MixedArray::computeScaleFromSize(n)
+                       );
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -60,7 +64,9 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
     MM().forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  auto const allocsz = SetArray::computeAllocBytes(
+                         SetArray::computeScaleFromSize(n)
+                       );
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }

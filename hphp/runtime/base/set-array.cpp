@@ -37,7 +37,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-static_assert(SetArray::ComputeAllocBytes(SetArray::SmallScale) ==
+static_assert(SetArray::computeAllocBytes(SetArray::SmallScale) ==
               kEmptySetArraySize, "");
 
 std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
@@ -45,7 +45,7 @@ std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 struct SetArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
-    auto const hash = SetHashTab(ad, SetArray::SmallScale);
+    auto const hash = SetArray::HashTab(ad, SetArray::SmallScale);
     InitHash(hash, SetArray::SmallScale);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
@@ -55,29 +55,6 @@ struct SetArray::Initializer {
 SetArray::Initializer SetArray::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
-
-namespace {
-
-inline uint32_t keysetComputeScaleFromSize(uint32_t n) {
-  assert(n <= 0x7fffffffU);
-  auto scale = SetArray::SmallScale;
-  while (SetArray::Capacity(scale) < n) scale *= 2;
-  return scale;
-}
-
-SetArray* keysetReqAllocSet(uint32_t scale) {
-  auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(MM().objMalloc(allocBytes));
-}
-
-SetArray* keysetStaticAllocSet(uint32_t scale) {
-  auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(RuntimeOption::EvalLowStaticArrays ?
-                                low_malloc_data(allocBytes) :
-                                malloc(allocBytes));
-}
-
-} // namespace
 
 SetArray* SetArray::asSet(ArrayData* ad) {
   assert(ad->isKeyset());
@@ -93,18 +70,6 @@ const SetArray* SetArray::asSet(const ArrayData* ad) {
   return a;
 }
 
-void SetArray::InitHash(uint32_t* table, uint32_t scale) {
-  // wordfill(table, Empty, HashSize(scale));
-  // wordfill does not work here because we use uint32_t...
-  memset(table, -1, HashSize(scale) * sizeof(uint32_t));
-}
-
-void SetArray::CopyHash(uint32_t* dest, uint32_t* src, uint32_t scale) {
-  uint64_t bytes = HashSize(scale) * sizeof(uint32_t);
-  assert(bytes % 16 == 0);
-  memcpy16_inline(dest, src, bytes);
-}
-
 bool SetArray::ClearElms(Elm* elms, uint32_t count) {
   static_assert(static_cast<uint32_t>(Elm::kEmpty) == 0,
                 "ClearElms zeroes elements.");
@@ -112,19 +77,14 @@ bool SetArray::ClearElms(Elm* elms, uint32_t count) {
   return true;
 }
 
-bool SetArray::isFull() const {
-  assert(m_used <= capacity());
-  return m_used == capacity();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* SetArray::MakeReserveSet(uint32_t size) {
-  auto const scale = keysetComputeScaleFromSize(size);
-  auto const ad    = keysetReqAllocSet(scale);
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = reqAlloc(scale);
 
-  auto const hash = SetHashTab(ad, scale);
-  assert(ClearElms(SetData(ad), Capacity(scale)));
+  auto const hash = HashTab(ad, scale);
+  assert(ClearElms(Data(ad), Capacity(scale)));
   InitHash(hash, scale);
 
   ad->initHeader(HeaderKind::Keyset, 1);
@@ -172,15 +132,15 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto const scale = a->scale();
   auto const used = a->m_used;
   char* mem =
-    static_cast<char*>(malloc_huge(extra + ComputeAllocBytes(scale)));
+    static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
   auto const ad = reinterpret_cast<SetArray*>(mem + extra);
 
   assert((extra % 16) == 0);
   assert(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(a) % 16 == 0);
   memcpy16_inline(ad, a, sizeof(SetArray) + sizeof(Elm) * used);
-  assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
-  CopyHash(SetHashTab(ad, scale), a->hashTab(), scale);
+  assert(ClearElms(Data(ad) + used, Capacity(scale) - used));
+  CopyHash(HashTab(ad, scale), a->hashTab(), scale);
   ad->m_count = UncountedValue;
 
   // Make sure all strings are uncounted.
@@ -206,14 +166,14 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   auto const scale = other.m_scale;
   auto const used = other.m_used;
   auto const ad = mode == AllocMode::Request
-    ? keysetReqAllocSet(scale)
-    : keysetStaticAllocSet(scale);
+    ? reqAlloc(scale)
+    : staticAlloc(scale);
 
   assert(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
   memcpy16_inline(ad, &other, sizeof(SetArray) + sizeof(Elm) * used);
-  assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
-  CopyHash(SetHashTab(ad, scale), other.hashTab(), scale);
+  assert(ClearElms(Data(ad) + used, Capacity(scale) - used));
+  CopyHash(HashTab(ad, scale), other.hashTab(), scale);
   RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
   ad->initHeader(HeaderKind::Keyset, count);
 
@@ -247,7 +207,7 @@ SetArray* SetArray::CopyReserve(const SetArray* src, size_t expectedSize) {
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
     auto const loc = ad->findForNewInsert(elm.hash());
-    auto const newElm = ad->allocElm(loc);
+    auto newElm = ad->allocElm(loc);
     if (elm.hasIntKey()) {
       newElm->setIntKey(elm.intKey(), elm.hash());
     } else {
@@ -352,76 +312,6 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
 
 //////////////////////////////////////////////////////////////////////
 
-template <SetArray::FindType type, class Hit>
-typename std::conditional<
-  type == SetArray::FindType::Lookup,
-  ssize_t,
-  uint32_t*
->::type SetArray::findImpl(hash_t h0, Hit hit) const {
-  static_assert(
-    static_cast<int>(FindType::Lookup) == 0 &&
-    static_cast<int>(FindType::Insert) == 1 &&
-    static_cast<int>(FindType::Remove) == 2,
-    "Update the tuple accessing code below."
-  );
-  auto const mask = this->mask();
-  auto const hash = hashTab();
-  auto const elms = data();
-
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    uint32_t idx = probeIndex & mask;
-    auto const ei = hash[idx];
-
-    if (ei == Empty) {
-      return std::get<static_cast<int>(type)>(
-        std::make_tuple(ssize_t(-1), &hash[idx], nullptr)
-      );
-    }
-
-    if (LIKELY(ei != Tombstone)) {
-      assert(0 <= ei && ei < m_used);
-      auto& elm = elms[ei];
-      assert(!elm.isInvalid());
-      if (hit(elm)) {
-        return std::get<static_cast<int>(type)>(
-          std::make_tuple(ssize_t(ei), nullptr, &hash[idx])
-        );
-      }
-    }
-
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i * (i + 1)) / 2);
-  }
-}
-
-static bool hitIntKey(const SetArray::Elm& e, int64_t ki) {
-  assert(!e.isInvalid());
-  return e.hasIntKey() && e.intKey() == ki;
-}
-
-static bool hitStrKey(const SetArray::Elm& e, const StringData* s,
-                      strhash_t h) {
-  assert(!e.isInvalid());
-  /*
-   * We do not have to check e.hasStrKey() because it is
-   * implicitely done by the check on the hash.
-   */
-  return e.hash() == h && (s == e.strKey() || s->same(e.strKey()));
-}
-
-ssize_t SetArray::find(int64_t ki, inthash_t h) const {
-  return findImpl<FindType::Lookup>(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-ssize_t SetArray::find(const StringData* ks, strhash_t h) const {
-  return findImpl<FindType::Lookup>(h, [ks, h] (const Elm& e) {
-    return hitStrKey(e, ks, h);
-  });
-}
-
 ssize_t SetArray::findElm(const Elm& e) const {
   assert(!e.isInvalid());
   return e.hasIntKey()
@@ -429,36 +319,11 @@ ssize_t SetArray::findElm(const Elm& e) const {
     : find(e.strKey(), e.hash());
 }
 
-template<SetArray::FindType t>
-uint32_t* SetArray::findHash(int64_t ki, inthash_t h) const {
-  return findImpl<t>(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-template<SetArray::FindType t>
-uint32_t* SetArray::findHash(const StringData* ks, strhash_t h) const {
-  return findImpl<t>(h, [ks, h] (const Elm& e) {
-    return hitStrKey(e, ks, h);
-  });
-}
-
-uint32_t* SetArray::findForNewInsert(hash_t h) const {
-  return findImpl<FindType::Insert>(h, [](const Elm&) {
-    return false;
-  });
-}
-
-SetArray::Elm* SetArray::allocElm(uint32_t* loc) {
-  assert(m_used < capacity());
-  ++m_size;
-  return &data()[*loc = m_used++];
-}
-
 void SetArray::insert(int64_t k, inthash_t h) {
   assert(!isFull());
-  if (auto const loc = findHash<FindType::Insert>(k, h)) {
-    auto const elm = allocElm(loc);
+  auto const loc = findForInsert(k, h);
+  if (isValidIns(loc)) {
+    auto elm = allocElm(loc);
     elm->setIntKey(k, h);
   }
 }
@@ -466,17 +331,17 @@ void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
 void SetArray::insert(StringData* k, strhash_t h) {
   assert(!isFull());
-  if (auto const loc = findHash<FindType::Insert>(k, h)) {
-    auto const elm = allocElm(loc);
+  auto const loc = findForInsert(k, h);
+  if (isValidIns(loc)) {
+    auto elm = allocElm(loc);
     elm->setStrKey(k, h);
   }
 }
 void SetArray::insert(StringData* k) { return insert(k, k->hash()); }
 
-void SetArray::erase(uint32_t* loc) {
-  auto const pos = *loc;
-  *loc = Tombstone;
+void SetArray::erase(int32_t pos) {
   assert(pos < m_used);
+  assert(0 <= pos);
   auto const elms = data();
 
   if (m_pos == pos) {
@@ -499,48 +364,9 @@ void SetArray::erase(uint32_t* loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-ssize_t SetArray::getIterBegin() const {
-  return nextElm(data(), -1);
-}
-
-ssize_t SetArray::getIterLast() const {
-  auto elms = data();
-  ssize_t ei = m_used;
-  while (--ei >= 0) {
-    if (!elms[ei].isTombstone()) {
-      return ei;
-    }
-  }
-  return m_used;
-}
-
 Cell SetArray::getElm(ssize_t ei) const {
   assert(0 <= ei && ei < m_used);
-  auto& elm = data()[ei];
-  assert(!elm.isInvalid());
-  Cell out;
-  tvDup(elm.tv, out);
-  return out;
-}
-
-ssize_t SetArray::nextElm(Elm* elms, ssize_t ei) const {
-  assert(-1 <= ei && ei < m_used);
-  while (++ei < m_used) {
-    assert(!elms[ei].isEmpty());
-    if (LIKELY(!elms[ei].isTombstone())) return ei;
-  }
-  assert(ei == m_used);
-  return m_used;
-}
-
-ssize_t SetArray::prevElm(Elm* elms, ssize_t ei) const {
-  assert(0 <= ei && ei < m_used);
-  while (--ei >= 0) {
-    assert(!elms[ei].isEmpty());
-    if (LIKELY(!elms[ei].isTombstone())) return ei;
-  }
-  assert(ei == -1);
-  return m_used;
+  return data()[ei].getKey();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -550,17 +376,17 @@ SetArray* SetArray::grow(uint32_t newScale) {
   assert(Capacity(newScale) >= m_size);
   assert(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
-  auto ad            = keysetReqAllocSet(newScale);
+  auto ad            = reqAlloc(newScale);
   auto const oldData = data();
   auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
   ad->initHeader(*this, 1);
-  assert(reinterpret_cast<uintptr_t>(SetData(ad)) % 16 == 0);
+  assert(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
-  memcpy16_inline(SetData(ad), data(), sizeof(Elm) * oldUsed);
-  assert(ClearElms(SetData(ad) + oldUsed, Capacity(newScale) - oldUsed));
-  InitHash(SetHashTab(ad, newScale), newScale);
+  memcpy16_inline(Data(ad), data(), sizeof(Elm) * oldUsed);
+  assert(ClearElms(Data(ad) + oldUsed, Capacity(newScale) - oldUsed));
+  InitHash(HashTab(ad, newScale), newScale);
   setZombie();
 
   for (uint32_t i = 0; i < oldUsed; ++i) {
@@ -741,29 +567,6 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-const TypedValue* SetArray::NvGetInt(const ArrayData* ad, int64_t ki) {
-  auto a = asSet(ad);
-  auto i = a->find(ki, hash_int64(ki));
-  if (LIKELY(i >= 0)) {
-    return a->tvOfPos(i);
-  } else {
-    assert(i == -1);
-    return nullptr;
-  }
-}
-
-const TypedValue* SetArray::NvGetStr(const ArrayData* ad,
-                                     const StringData* ks) {
-  auto a = asSet(ad);
-  auto i = a->find(ks, ks->hash());
-  if (LIKELY(i >= 0)) {
-    return a->tvOfPos(i);
-  } else {
-    assert(i == -1);
-    return nullptr;
-  }
-}
-
 const TypedValue* SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
   auto const tv = SetArray::NvGetInt(ad, ki);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
@@ -775,13 +578,6 @@ const TypedValue* SetArray::NvTryGetStr(const ArrayData* ad,
   auto const tv = SetArray::NvGetStr(ad, ks);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(ks, ad);
   return tv;
-}
-
-Cell SetArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
-  auto a = asSet(ad);
-  assert(0 <= pos  && pos < a->m_used);
-  assert(!a->data()[pos].isInvalid());
-  return a->getElm(pos);
 }
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
@@ -860,7 +656,8 @@ ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();
   auto const h = hash_int64(k);
-  if (auto const loc = a->findHash<FindType::Remove>(k, h)) {
+  auto const loc = a->findForRemove(k, h);
+  if (validPos(loc)) {
     a->erase(loc);
   }
   return a;
@@ -870,37 +667,11 @@ ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();
   auto const h = k->hash();
-  if (auto const loc = a->findHash<FindType::Remove>(k, h)) {
+  auto const loc = a->findForRemove(k, h);
+  if (validPos(loc)) {
     a->erase(loc);
   }
   return a;
-}
-
-ssize_t SetArray::IterBegin(const ArrayData* ad) {
-  auto a = asSet(ad);
-  return a->getIterBegin();
-}
-
-ssize_t SetArray::IterLast(const ArrayData* ad) {
-  auto a = asSet(ad);
-  return a->getIterLast();
-}
-
-ssize_t SetArray::IterEnd(const ArrayData* ad) {
-  auto a = asSet(ad);
-  return a->getIterEnd();
-}
-
-ssize_t SetArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
-  auto a = asSet(ad);
-  if (pos == a->getIterEnd()) return pos;
-  return a->nextElm(pos);
-}
-
-ssize_t SetArray::IterRewind(const ArrayData* ad, ssize_t pos) {
-  auto a = asSet(ad);
-  if (pos == a->getIterEnd()) return pos;
-  return a->prevElm(a->data(), pos);
 }
 
 bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {
@@ -977,10 +748,10 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
     ssize_t pos = a->getIterLast();
     cellCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findImpl<FindType::Remove>(pelm->hash(),
+    auto loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assert(loc);
+    assert(loc != Empty);
     a->erase(loc);
   } else {
     value = uninit_null();
@@ -1000,10 +771,10 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
     ssize_t pos = a->getIterBegin();
     cellCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findImpl<FindType::Remove>(pelm->hash(),
+    auto loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assert(loc);
+    assert(loc != Empty);
     a->erase(loc);
   } else {
     value = uninit_null();

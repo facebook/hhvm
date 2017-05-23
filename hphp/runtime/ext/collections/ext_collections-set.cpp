@@ -115,8 +115,8 @@ void BaseSet::addImpl(int64_t k) {
   }
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(p);
-  if (validPos(*p)) {
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
     // existing element with the new element in place. However since Sets
     // currently only support integer and string elements, there is no way
@@ -146,8 +146,8 @@ void BaseSet::addImpl(StringData *key) {
   }
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(p);
-  if (validPos(*p)) {
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -184,8 +184,8 @@ void BaseSet::addFront(int64_t k) {
   mutate();
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(p);
-  if (validPos(*p)) {
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
     // the existing element with the new element in place. However since
     // Sets currently only support integer and string elements, there is
@@ -209,8 +209,8 @@ void BaseSet::addFront(StringData *key) {
   mutate();
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(p);
-  if (validPos(*p)) {
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     return;
   }
   if (UNLIKELY(isFull())) {

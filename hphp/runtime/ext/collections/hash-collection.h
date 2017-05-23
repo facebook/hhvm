@@ -3,6 +3,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
@@ -141,9 +142,10 @@ struct HashCollection : ObjectData {
     }
   }
 
-  HashCollection::Elm& allocElm(int32_t* ei) {
+  HashCollection::Elm& allocElm(MixedArray::Inserter ei) {
     assert(canMutateBuffer());
-    assert(ei && !validPos(*ei) && m_size <= posLimit() && posLimit() < cap());
+    assert(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei)
+           && m_size <= posLimit() && posLimit() < cap());
     size_t i = posLimit();
     *ei = i;
     setPosLimit(i + 1);
@@ -151,7 +153,7 @@ struct HashCollection : ObjectData {
     return data()[i];
   }
 
-  HashCollection::Elm& allocElmFront(int32_t* ei);
+  HashCollection::Elm& allocElmFront(MixedArray::Inserter ei);
 
   // This method will grow or compact as needed in preparation for
   // repeatedly adding new elements until m_size >= sz.
@@ -277,7 +279,7 @@ struct HashCollection : ObjectData {
   TypedValue* findForUnserialize(int64_t k) {
     auto h = hash_int64(k);
     auto p = findForInsert(k, h);
-    if (UNLIKELY(validPos(*p))) return nullptr;
+    if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setIntKey(k, h);
     updateNextKI(k);
@@ -287,7 +289,7 @@ struct HashCollection : ObjectData {
   TypedValue* findForUnserialize(StringData* key) {
     auto h = key->hash();
     auto p = findForInsert(key, h);
-    if (UNLIKELY(validPos(*p))) return nullptr;
+    if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setStrKey(key, h);
     return &e->data;
@@ -309,7 +311,7 @@ struct HashCollection : ObjectData {
     auto h = key->hash();
     // Not hashing yet, so position is unused for now.
     int32_t unusedPos = -1;
-    auto e = &allocElm(&unusedPos);
+    auto e = &allocElm(MixedArray::Inserter(&unusedPos));
     e->setStrKey(key, h);
     return &e->data;
   }
@@ -325,7 +327,7 @@ struct HashCollection : ObjectData {
       auto p = e.hasStrKey() ?
         findForInsert(e.skey, h) :
         findForInsert(e.ikey, h);
-      if (UNLIKELY(validPos(*p))) {
+      if (UNLIKELY(MixedArray::isValidPos(*p))) {
         batchInsertAbort(begin);
         return false;
       }
@@ -413,15 +415,18 @@ struct HashCollection : ObjectData {
     return m_arr->findForRemove(s, h);
   }
 
-  int32_t* findForInsert(int64_t ki, inthash_t h) const {
-    return m_arr->findForInsert(ki, h);
+  MixedArray::Inserter findForInsert(int64_t ki,
+                                                 inthash_t h) const {
+    return m_arr->findForInsertUpdate(ki, h);
   }
 
-  int32_t* findForInsert(const StringData* s, strhash_t h) const {
-    return m_arr->findForInsert(s, h);
+  MixedArray::Inserter findForInsert(const StringData* s,
+                                                 strhash_t h) const {
+    return m_arr->findForInsertUpdate(s, h);
   }
 
-  int32_t* findForNewInsert(int32_t* table, size_t mask, hash_t h0) const {
+  MixedArray::Inserter findForNewInsert(int32_t* table, size_t mask,
+                                                    hash_t h0) const {
     return m_arr->findForNewInsert(table, mask, h0);
   }
 

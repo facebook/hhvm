@@ -184,7 +184,7 @@ void HashCollection::reserve(int64_t sz) {
     }
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
-    grow(computeScaleFromSize(sz));
+    grow(MixedArray::computeScaleFromSize(sz));
     assert(canMutateBuffer());
     return;
   }
@@ -329,8 +329,9 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   assert(!isCapacityTooHigh() || newCap == oldCap);
 }
 
-HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
-  assert(ei && !validPos(*ei) && m_size <= posLimit() && posLimit() < cap());
+HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
+  assert(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei));
+  assert(m_size <= posLimit() && posLimit() < cap());
   // Move the existing elements to make element slot 0 available.
   memmove(data() + 1, data(), posLimit() * sizeof(Elm));
   incPosLimit();

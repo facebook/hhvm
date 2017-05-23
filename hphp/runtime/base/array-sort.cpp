@@ -111,7 +111,7 @@ SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
 void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   assert(m_size > 0);
   auto const ht = hashTab();
-  initHash(ht, m_scale);
+  InitHash(ht, m_scale);
   auto mask = this->mask();
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {

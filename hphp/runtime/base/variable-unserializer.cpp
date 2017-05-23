@@ -1137,8 +1137,8 @@ Array VariableUnserializer::unserializeArray() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = computeScaleFromSize(size);
-  auto const allocsz = computeAllocBytes(scale);
+  auto const scale = MixedArray::computeScaleFromSize(size);
+  auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
@@ -1191,8 +1191,8 @@ Array VariableUnserializer::unserializeDict() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = computeScaleFromSize(size);
-  auto const allocsz = computeAllocBytes(scale);
+  auto const scale = MixedArray::computeScaleFromSize(size);
+  auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
@@ -1249,8 +1249,8 @@ Array VariableUnserializer::unserializeVec() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = computeScaleFromSize(size);
-  auto const allocsz = computeAllocBytes(scale);
+  auto const scale = MixedArray::computeScaleFromSize(size);
+  auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
@@ -1290,8 +1290,8 @@ Array VariableUnserializer::unserializeKeyset() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = computeScaleFromSize(size);
-  auto const allocsz = computeAllocBytes(scale);
+  auto const scale = SetArray::computeScaleFromSize(size);
+  auto const allocsz = SetArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {

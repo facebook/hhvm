@@ -1207,7 +1207,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   if (LIKELY(ad->hasMixedLayout())) {
     auto const mixed = MixedArray::asMixed(ad);
-    aiter.m_pos = mixed->getIterBegin();
+    aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
     assert(aiter.m_itype == ArrayIter::TypeArray);
@@ -1263,7 +1263,7 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (ad->hasMixedLayout()) {
     auto const mixed = MixedArray::asMixed(ad);
-    aiter.m_pos = mixed->getIterBegin();
+    aiter.m_pos = mixed->getIterBeginNotEmpty();
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
     assert(aiter.m_itype == ArrayIter::TypeArray);

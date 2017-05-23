@@ -60,98 +60,15 @@ inline ArrayData::~ArrayData() {
   }
 }
 
-inline bool validPos(ssize_t pos) {
-  return pos >= 0;
-}
-
-inline bool validPos(int32_t pos) {
-  return pos >= 0;
-}
-
-ALWAYS_INLINE
-bool MixedArray::isFull() const {
-  assert(m_used <= capacity());
-  return m_used == capacity();
-}
-
 ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
                            int64_t nextIntKey) {
   assert(count != 0);
-  // Intentionally initialize hash table before header.
-#ifdef __x86_64__
-  static_assert(MixedArray::Empty == -1, "");
-  static_assert(MixedArray::SmallSize == 3, "");
-  static_assert(sizeof(MixedArray) +
-                MixedArray::SmallSize * sizeof(MixedArray::Elm) == 104, "");
-  __asm__ __volatile__(
-    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
-    "movdqu     %%xmm0, 104(%0)\n"
-    : : "r"(a) : "xmm0"
-  );
-#elif defined __aarch64__
-  static_assert(MixedArray::Empty == -1, "");
-  static_assert(MixedArray::SmallSize == 3, "");
-  static_assert(sizeof(MixedArray) +
-                MixedArray::SmallSize * sizeof(MixedArray::Elm) == 104, "");
-  auto const emptyVal = int64_t{MixedArray::Empty};
-  //Use a2 since writeback == true for stp instruction
-  auto a2 = a;
-  __asm__ __volatile__(
-    "stp        %x1, %x1, [%x0, #104]!\n"
-    : "+r"(a2) : "r"(emptyVal)
-  );
-#else
-  auto const hash = mixedHash(mixedData(a), MixedArray::SmallScale);
-  auto const emptyVal = int64_t{MixedArray::Empty};
-  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
-  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
-#endif
+  InitSmallHash(a);
   a->m_sizeAndPos = size; // pos=0
   a->initHeader(HeaderKind::Mixed, count);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
-}
-
-inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
-#if defined(__x86_64__)
-  static_assert(Empty == -1, "The following fills with all 1's.");
-  assertx(HashSize(scale) == scale * 4);
-
-  uint64_t offset = scale * 16;
-  __asm__ __volatile__(
-    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
-    ".l%=:\n"
-    "sub        $0x10, %0\n"
-    "movdqu     %%xmm0, (%1, %0)\n"
-    "ja         .l%=\n"
-    : "+r"(offset) : "r"(hash) : "xmm0"
-  );
-#elif defined(__aarch64__)
-  static_assert(Empty == -1, "The following fills with all 1's.");
-  assertx(HashSize(scale) == scale * 4);
-
-  uint64_t offset = scale * 16;
-  uint64_t ones = -1;
-  auto hash2 = hash;
-  __asm__ __volatile__(
-    ".l%=:\n"
-    "stp        %x2, %x2, [%x1], #16\n"
-    "subs       %x0, %x0, #16\n"
-    "bhi        .l%=\n"
-    : "+r"(offset), "+r"(hash2) : "r"(ones)
-  );
-#else
-  static_assert(Empty == -1, "Cannot use wordfillones().");
-  wordfillones(hash, HashSize(scale));
-#endif
-}
-
-inline void
-MixedArray::copyHash(int32_t* to, const int32_t* from, uint32_t scale) {
-  assertx(HashSize(scale) == scale * 4);
-  uint64_t nBytes = scale * 16;
-  memcpy16_inline(to, from, nBytes);
 }
 
 inline void
@@ -170,132 +87,6 @@ MixedArray::copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
 }
 
 extern int32_t* warnUnbalanced(MixedArray*, size_t n, int32_t* ei);
-
-ALWAYS_INLINE int32_t*
-MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
-                                            hash_t h0) {
-  uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
-  for (uint32_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
-    if (!validPos(*ei)) {
-      return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(this, i, ei);
-    }
-    probe += i;
-    assertx(i <= mask);
-    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-ALWAYS_INLINE int32_t*
-MixedArray::findForNewInsert(int32_t* table, size_t mask, hash_t h0) const {
-  for (uint32_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
-    if (!validPos(*ei)) return ei;
-    probe += i;
-    assertx(i <= mask);
-    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-ALWAYS_INLINE
-int32_t* MixedArray::findForNewInsert(hash_t h0) const {
-  return findForNewInsert(hashTab(), mask(), h0);
-}
-
-ALWAYS_INLINE bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
-                                strhash_t hash) {
-  // hitStringKey() should only be called on an Elm that is referenced by a
-  // hash table entry. MixedArray guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!MixedArray::isTombstone(e.data.m_type));
-  return hash == e.hash() && (s == e.skey || s->same(e.skey));
-}
-
-ALWAYS_INLINE bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
-  // hitIntKey() should only be called on an Elm that is referenced by a
-  // hash table entry. MixedArray guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!e.isTombstone());
-  return e.ikey == ki && e.hasIntKey();
-}
-
-// Quadratic probe is:
-//
-//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
-//
-// Use 1/2 for c1 and c2.  In combination with a table size that is a power of
-// 2, this guarantees a probe sequence of length tableSize that probes all
-// table elements exactly once.
-
-template <class Hit> ALWAYS_INLINE
-ssize_t MixedArray::findImpl(hash_t h0, Hit hit) const {
-  uint32_t mask = this->mask();
-  auto elms = data();
-  auto hashtable = hashTab();
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto pos = hashtable[probeIndex & mask];
-    if (validPos(pos)) {
-      if (hit(elms[pos])) return pos;
-    } else if (pos & 1) {
-      assert(pos == Empty);
-      return pos;
-    }
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-template <class Hit> ALWAYS_INLINE
-int32_t* MixedArray::findForInsertImpl(hash_t h0, Hit hit) const {
-  uint32_t mask = this->mask();
-  auto elms = data();
-  auto hashtable = hashTab();
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probeIndex & mask];
-    int32_t pos = *ei;
-    if (validPos(pos)) {
-      if (hit(elms[pos])) {
-        return ei;
-      }
-    } else if (pos & 1) {
-      assert(pos == Empty);
-      return ei;
-    }
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-inline ssize_t MixedArray::find(int64_t ki, inthash_t h) const {
-  return findImpl(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-inline ssize_t MixedArray::find(const StringData* s, strhash_t h) const {
-  return findImpl(h, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
-
-inline int32_t* MixedArray::findForInsert(int64_t ki, inthash_t h) const {
-  return findForInsertImpl(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-inline int32_t*
-MixedArray::findForInsert(const StringData* s, strhash_t h) const {
-  return findForInsertImpl(h, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
 
 inline bool MixedArray::isTombstone(ssize_t pos) const {
   assert(size_t(pos) <= m_used);
@@ -360,33 +151,18 @@ void MixedArray::dupArrayElmWithRef(ssize_t pos,
   cellCopy(getElmKey(elm), *keyOut);
 }
 
-ALWAYS_INLINE
-MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
-  assert(!validPos(*ei) && !isFull());
-  assert(m_size == 0 || m_used != 0);
-  ++m_size;
-  size_t i = m_used;
-  (*ei) = i;
-  m_used = i + 1;
-  return data()[i];
-}
-
-inline size_t MixedArray::hashSize() const {
-  return HashSize(m_scale);
-}
-
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assert(!exists(ki));
   assert(!isFull());
   auto h = hash_int64(ki);
   auto ei = findForNewInsert(h);
-  auto& e = allocElm(ei);
-  e.setIntKey(ki, h);
+  auto e = allocElm(ei);
+  e->setIntKey(ki, h);
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  cellDup(data, e.data);
+  cellDup(data, e->data);
   // TODO(#3888164): should avoid needing these KindOfUninit checks.
-  if (UNLIKELY(e.data.m_type == KindOfUninit)) {
-    e.data.m_type = KindOfNull;
+  if (UNLIKELY(e->data.m_type == KindOfUninit)) {
+    e->data.m_type = KindOfNull;
   }
   return this;
 }
@@ -400,20 +176,20 @@ inline ArrayData* MixedArray::addVal(StringData* key, Cell data) {
 inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   strhash_t h = key->hash();
   auto ei = findForNewInsert(h);
-  auto& e = allocElm(ei);
-  e.setStrKey(key, h);
+  auto e = allocElm(ei);
+  e->setStrKey(key, h);
   // TODO(#3888164): we should restructure things so we don't have to check
   // KindOfUninit here.
-  initElem(e.data, data);
+  initElem(e->data, data);
   return this;
 }
 
 inline MixedArray::Elm& MixedArray::addKeyAndGetElem(StringData* key) {
   strhash_t h = key->hash();
   auto ei = findForNewInsert(h);
-  auto& e = allocElm(ei);
-  e.setStrKey(key, h);
-  return e;
+  auto e = allocElm(ei);
+  e->setStrKey(key, h);
+  return *e;
 }
 
 template <class K>
@@ -520,35 +296,6 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
-
-ALWAYS_INLINE
-uint32_t computeScaleFromSize(uint32_t n) {
-  assert(n <= 0x7fffffffU);
-  auto scale = MixedArray::SmallScale;
-  while (MixedArray::Capacity(scale) < n) scale *= 2;
-  return scale;
-  static_assert(MixedArray::SmallHashSize >= 4,
-                "lower limit for 0.75 load factor");
-}
-
-ALWAYS_INLINE
-MixedArray* reqAllocArray(uint32_t scale) {
-  auto const allocBytes = computeAllocBytes(scale);
-  return static_cast<MixedArray*>(MM().objMalloc(allocBytes));
-}
-
-ALWAYS_INLINE
-MixedArray* staticAllocArray(uint32_t scale) {
-  auto const allocBytes = computeAllocBytes(scale);
-  return static_cast<MixedArray*>(RuntimeOption::EvalLowStaticArrays ?
-                                  low_malloc_data(allocBytes) :
-                                  malloc(allocBytes));
-}
-
-ALWAYS_INLINE
-size_t MixedArray::heapSize() const {
-  return computeAllocBytes(m_scale);
-}
 
 // Converts a TypedValue `source' to its uncounted form, so that its lifetime
 // can go beyond the current request.  It is used after doing a raw copy of the

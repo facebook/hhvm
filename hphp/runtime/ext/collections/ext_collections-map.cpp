@@ -256,9 +256,9 @@ void BaseMap::setImpl(int64_t k, TypedValue tv) {
   auto h = hash_int64(k);
 retry:
   auto p = findForInsert(k, h);
-  assert(p);
-  if (validPos(*p)) {
-    auto& e = data()[*p];
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
+    auto& e = data()[(int32_t)*p];
     auto const old = e.data;
     cellDup(tv, e.data);
     tvDecRefGen(old);
@@ -288,9 +288,9 @@ void BaseMap::setImpl(StringData* key, TypedValue tv) {
 retry:
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(p);
-  if (validPos(*p)) {
-    auto& e = data()[*p];
+  assert(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
+    auto& e = data()[(int32_t)*p];
     auto const old = e.data;
     cellDup(tv, e.data);
     tvDecRefGen(old);

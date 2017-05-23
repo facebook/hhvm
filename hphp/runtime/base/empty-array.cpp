@@ -154,7 +154,7 @@ member_lval EmptyArray::MakePacked(TypedValue tv) {
  */
 NEVER_INLINE
 member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
-  auto const ad = reqAllocArray(MixedArray::SmallScale);
+  auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
@@ -182,7 +182,7 @@ member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  * value is already incref'd.
  */
 member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
-  auto const ad = reqAllocArray(MixedArray::SmallScale);
+  auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);

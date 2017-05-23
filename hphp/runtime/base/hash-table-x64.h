@@ -14,14 +14,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MIXED_ARRAY_X64_H_
-#define incl_HPHP_MIXED_ARRAY_X64_H_
+#ifndef incl_HPHP_HASH_TABLE_X64_H_
+#define incl_HPHP_HASH_TABLE_X64_H_
 
-// Offsets of fields in MixedArray
-#define MA_SCALE  16
-#define MA_DATA   32
-#define ELM_HASH  20
-#define ELM_KEY   0
-#define ELM_DATA  8
+#define MixedArray_SCALE        16
+#define MixedArray_DATA         32
+#define MixedArrayElm_HASH      20
+#define MixedArrayElm_KEY       0
+#define MixedArrayElm_DATA      8
+#define MixedArrayElm_QUADWORDS 3
+
+#define SetArray_SCALE        16
+#define SetArray_DATA         32
+#define SetArrayElm_HASH      12
+#define SetArrayElm_KEY       0
+#define SetArrayElm_DATA      0
+#define SetArrayElm_QUADWORDS 2
 
 #endif

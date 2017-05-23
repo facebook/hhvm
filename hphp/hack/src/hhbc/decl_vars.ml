@@ -39,6 +39,12 @@ class declvar_visitor = object(this)
 
   method! on_lvar acc id = add_local false acc id
   method! on_lvarvar acc _ id = add_local false acc id
+  method! on_class_get acc id _ =
+  (* Only add if it is a variable *)
+  if String_utils.string_starts_with (snd id) "$"
+  then add_local false acc id
+  else acc
+  
   method! on_efun acc _fn use_list =
     List.fold_left use_list ~init:acc
       ~f:(fun acc (x, _isref) -> add_local false acc x)

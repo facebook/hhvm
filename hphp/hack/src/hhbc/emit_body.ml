@@ -93,6 +93,7 @@ let emit_body
   ~scope
   ~is_closure_body
   ~is_memoize_wrapper
+  ~is_return_by_ref
   ~skipawaitable
   ~default_dropthrough
   ~return_value
@@ -118,6 +119,7 @@ let emit_body
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
   Emit_expression.set_namespace namespace;
+  Emit_statement.set_return_by_ref is_return_by_ref;
   let params = Emit_param.from_asts ~namespace ~tparams ~params in
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =

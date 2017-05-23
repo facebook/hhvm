@@ -27,6 +27,7 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
       ~scope:[Ast_scope.ScopeItem.Function ast_fun]
       ~is_closure_body:false
       ~is_memoize_wrapper:false
+      ~is_return_by_ref:ast_fun.Ast.f_ret_by_ref
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~default_dropthrough
       ~return_value:instr_null

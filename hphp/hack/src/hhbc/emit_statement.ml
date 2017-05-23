@@ -24,21 +24,24 @@ module CBR = Continue_break_rewriter
 let verify_return = ref false
 let default_return_value = ref instr_null
 let default_dropthrough = ref None
+let return_by_ref = ref false
 let set_verify_return b = verify_return := b
 let set_default_return_value i = default_return_value := i
 let set_default_dropthrough i = default_dropthrough := i
+let set_return_by_ref b = return_by_ref := b
 
-let emit_return () =
+let emit_return ~need_ref =
+  let ret_instr = if need_ref then instr_retv else instr_retc in
   if !verify_return
-  then gather [instr_verifyRetTypeC; instr_retc]
-  else instr_retc
+  then gather [instr_verifyRetTypeC; ret_instr]
+  else ret_instr
 
 let rec emit_stmt st =
   match st with
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;
-      emit_return ();
+      emit_return ~need_ref:false;
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
     gather (List.map exprl emit_unset_expr)
@@ -51,12 +54,13 @@ let rec emit_stmt st =
   | A.Return (_, None) ->
     gather [
       instr_null;
-      emit_return ();
+      emit_return ~need_ref:false;
     ]
   | A.Return (_,  Some expr) ->
+    let need_ref = !return_by_ref in
     gather [
-      from_expr ~need_ref:false expr;
-      emit_return ();
+      from_expr ~need_ref expr;
+      emit_return ~need_ref;
     ]
   | A.GotoLabel (_, label) ->
     instr_label (Label.named label)
@@ -680,7 +684,7 @@ let emit_dropthrough_return () =
   match !default_dropthrough with
   | Some instrs -> instrs
   | _ ->
-    gather [!default_return_value; emit_return ()]
+    gather [!default_return_value; emit_return ~need_ref:false]
 
 let rec emit_final_statement s =
   match s with

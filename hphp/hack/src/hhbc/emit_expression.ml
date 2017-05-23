@@ -30,6 +30,7 @@ end
 module LValOp = struct
   type t =
   | Set
+  | SetRef
   | SetOp of eq_op
   | IncDec of incdec_op
   | Unset
@@ -189,13 +190,19 @@ let extract_shape_field_name = function
   | A.SFlit (_, s)
   | A.SFclass_const (_, (_, s)) -> s
 
-let rec expr_and_newc instr_to_add_new instr_to_add = function
+let rec expr_and_new instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
-    gather [from_expr ~need_ref:false e; instr_to_add_new]
+    let add_instr =
+      if expr_starts_with_ref e then instr_add_new_elemv else instr_to_add_new
+    in
+    gather [from_expr ~need_ref:false e; add_instr]
   | A.AFkvalue (k, v) ->
+    let add_instr =
+      if expr_starts_with_ref v then instr_add_elemv else instr_to_add
+    in
     gather [
       emit_two_exprs k v;
-      instr_to_add
+      add_instr;
     ]
 
 and emit_local ~notice ~need_ref x =
@@ -221,14 +228,13 @@ and emit_first_expr e =
   match e with
   | (_, A.Lvar (_, local)) when not (is_local_this local) ->
     instr_cgetl2 (Local.Named local), true
-
   | _ ->
-    from_expr ~need_ref:false e, false
+    emit_expr_and_unbox_if_necessary ~need_ref:false e, false
 
 (* Special case for binary operations to make use of CGetL2 *)
 and emit_two_exprs e1 e2 =
   let instrs1, is_under_top = emit_first_expr e1 in
-  let instrs2 = from_expr ~need_ref:false e2 in
+  let instrs2 = emit_expr_and_unbox_if_necessary ~need_ref:false e2 in
   gather @@
     if is_under_top
     then [instrs2; instrs1]
@@ -240,7 +246,7 @@ and emit_is_null e =
     instr_istypel (Local.Named id) OpNull
   | _ ->
     gather [
-      from_expr ~need_ref:false e;
+      emit_expr_and_unbox_if_necessary ~need_ref:false e;
       instr_istypec OpNull
     ]
 
@@ -437,14 +443,14 @@ and emit_class_expr cexpr =
     instr (IGet (ClsRefGetL (Local.Named id, 0)))
   | Class_expr expr -> gather [from_expr ~need_ref:false expr; instr_clsrefgetc]
 
-and emit_class_get param_num_opt qop cid (_, id) =
+and emit_class_get param_num_opt qop need_ref cid (_, id) =
   let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
       (* We need to strip off the initial dollar *)
       instr_string (SU.Locals.strip_dollar id);
       emit_class_expr cexpr;
       match (param_num_opt, qop) with
-      | (None, QueryOp.CGet) -> instr_cgets
+      | (None, QueryOp.CGet) -> if need_ref then instr_vgets else instr_cgets
       | (None, QueryOp.CGetQuiet) -> failwith "emit_class_get: CGetQuiet"
       | (None, QueryOp.Isset) -> instr_issets
       | (None, QueryOp.Empty) -> instr_emptys
@@ -611,7 +617,7 @@ and emit_call_isset_expr (_, expr_ as expr) =
   | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get false None QueryOp.Isset base_expr opt_elem_expr
   | A.Class_get (cid, id)  ->
-    emit_class_get None QueryOp.Isset cid id
+    emit_class_get None QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get false None QueryOp.Isset expr prop nullflavor
   | A.Lvar(_, id) when is_local_this id ->
@@ -639,7 +645,7 @@ and emit_call_empty_expr (_, expr_ as expr) =
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get false None QueryOp.Empty base_expr opt_elem_expr
   | A.Class_get (cid, id) ->
-    emit_class_get None QueryOp.Empty cid id
+    emit_class_get None QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get false None QueryOp.Empty expr prop nullflavor
   | A.Lvar(_, id) when not (is_local_this id) ->
@@ -793,7 +799,7 @@ and from_expr expr ~need_ref =
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
-  | A.Class_get (cid, id)  -> emit_class_get None QueryOp.CGet cid id
+  | A.Class_get (cid, id)  -> emit_class_get None QueryOp.CGet need_ref cid id
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e ->
     let instr = from_expr ~need_ref:false e in
@@ -837,9 +843,16 @@ and emit_dynamic_collection ~transform_to_collection expr es =
     List.for_all es ~f:(function A.AFkvalue ((_, A.String (_, _)), _) -> true
                                | _ -> false)
   in
+  let has_references =
+    (* Reference can only exist as a value *)
+    List.exists es
+      ~f:(function A.AFkvalue (_, e)
+                 | A.AFvalue e -> expr_starts_with_ref e)
+  in
   let is_array = match snd expr with A.Array _ -> true | _ -> false in
   let count = List.length es in
-  if is_only_values && transform_to_collection = None then begin
+  if is_only_values && transform_to_collection = None && not has_references
+  then begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewPackedArray count
       | A.Collection ((_, "vec"), _) -> NewVecArray count
@@ -886,7 +899,7 @@ and emit_dynamic_collection ~transform_to_collection expr es =
     in
     gather [
       instr (ILitConst lit_constructor);
-      gather (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc));
+      gather (List.map es ~f:(expr_and_new add_elem_instr instr_add_elemc));
       transform_instr;
     ]
   end
@@ -1328,7 +1341,9 @@ and emit_base ~is_object ~notice mode base_offset param_num_opt (_, expr_ as exp
 
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr expr in
-     base_expr_instrs,
+     (if binary_assignment_rhs_starts_with_ref expr
+     then gather [base_expr_instrs; instr_unbox]
+     else base_expr_instrs),
      instr (IBase (if flavor = Flavor.ReturnVal
                    then BaseR base_offset else BaseC base_offset)),
      1
@@ -1366,7 +1381,7 @@ and emit_arg i ((_, expr_) as e) =
     emit_obj_get false (Some i) QueryOp.CGet e1 e2 nullflavor
 
   | A.Class_get(cid, id) ->
-    emit_class_get (Some i) QueryOp.CGet cid id
+    emit_class_get (Some i) QueryOp.CGet false cid id
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
@@ -1665,11 +1680,17 @@ and emit_flavored_expr (_, expr_ as expr) =
   | A.Call (e, args, uargs) when not (is_special_function e) ->
     emit_call e args uargs
   | _ ->
-    from_expr ~need_ref:false expr, Flavor.Cell
+    let flavor =
+      if binary_assignment_rhs_starts_with_ref expr
+      then Flavor.Ref
+      else Flavor.Cell
+    in
+    from_expr ~need_ref:false expr, flavor
 
 and emit_final_member_op stack_index op mk =
   match op with
   | LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
+  | LValOp.SetRef -> instr (IFinal (BindM (stack_index, mk)))
   | LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
   | LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
   | LValOp.Unset -> instr (IFinal (UnsetM (stack_index, mk)))
@@ -1677,6 +1698,7 @@ and emit_final_member_op stack_index op mk =
 and emit_final_local_op op lid =
   match op with
   | LValOp.Set -> instr (IMutator (SetL lid))
+  | LValOp.SetRef -> instr (IMutator (BindL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
   | LValOp.Unset -> instr (IMutator (UnsetL lid))
@@ -1684,6 +1706,7 @@ and emit_final_local_op op lid =
 and emit_final_global_op op =
   match op with
   | LValOp.Set -> instr (IMutator SetG)
+  | LValOp.SetRef -> instr (IMutator BindG)
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> instr (IMutator UnsetG)
@@ -1691,6 +1714,7 @@ and emit_final_global_op op =
 and emit_final_static_op cid id op =
   match op with
   | LValOp.Set -> instr (IMutator (SetS 0))
+  | LValOp.SetRef -> instr (IMutator (BindS 0))
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
   | LValOp.Unset ->
@@ -1738,8 +1762,29 @@ and emit_array_get_fixed local indices =
       instr_popc
     ]
 
+and expr_starts_with_ref = function
+  | _, A.Unop (A.Uref, _) -> true
+  | _ -> false
+
+and binary_assignment_rhs_starts_with_ref = function
+  | _, A.Binop (A.Eq None, _, e) when expr_starts_with_ref e -> true
+  | _ -> false
+
+and emit_expr_and_unbox_if_necessary ~need_ref e =
+  let unboxing_instr =
+    if binary_assignment_rhs_starts_with_ref e
+    then instr_unbox
+    else empty
+  in
+  gather [from_expr ~need_ref e; unboxing_instr]
+
 (* Emit code for an l-value operation *)
 and emit_lval_op op expr1 opt_expr2 =
+  let op =
+    match op, opt_expr2 with
+    | LValOp.Set, Some e when expr_starts_with_ref e -> LValOp.SetRef
+    | _ -> op
+  in
   match op, expr1, opt_expr2 with
     (* Special case for list destructuring, only on assignment *)
     | LValOp.Set, (_, A.List _), Some expr2 ->
@@ -1751,7 +1796,8 @@ and emit_lval_op op expr1 opt_expr2 =
       let rhs_instrs, rhs_stack_size =
         match opt_expr2 with
         | None -> empty, 0
-        | Some e -> from_expr ~need_ref:false e, 1 in
+        | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false e, 1
+      in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
@@ -1893,9 +1939,7 @@ and emit_unop need_ref op e =
       let instr = emit_lval_op (LValOp.IncDec incdec_op) e None in
       emit_box_if_necessary need_ref instr
     end
-  | A.Uref ->
-    (*TODO: add support for references e*)
-    emit_nyi "references"
+  | A.Uref -> from_expr ~need_ref:true e
   | A.Usplat ->
     from_expr ~need_ref:false e
 

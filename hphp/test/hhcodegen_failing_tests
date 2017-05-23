@@ -1,10 +1,13 @@
+quick/CGetMVar.php
 quick/Cls.php
+quick/ClsCases.php
 quick/Empty.php
-quick/FPassR.php
 quick/FPushCtor.php
 quick/FPushObjMethod.php
+quick/GetVar.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
+quick/Isset.php
 quick/IterInitM.php
 quick/SetOpProp.php
 quick/UnsetM.php
@@ -15,10 +18,12 @@ quick/abs_codegen.php
 quick/actrec.php
 quick/all_type_comparison_test.php
 quick/apc.php
+quick/array_misc.php
 quick/array_packed.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
 quick/backtick.php
+quick/bad_iter_warning.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
 quick/chdir_posix.php
@@ -30,6 +35,7 @@ quick/class_constant.php
 quick/class_constant_array.php
 quick/closure_class.php
 quick/closure_get_class.php
+quick/closure_noscope_arg_use_ctx.php
 quick/closure_static.php
 quick/closure_static_vars.php
 quick/closure_use_this.php
@@ -49,9 +55,11 @@ quick/debug_backtrace_continuation.php
 quick/defaultVals.php
 quick/dict/basic-getters.php
 quick/dict/basic-setters.php
+quick/dict/invalid-key.php
 quick/dict/invalid-scalar.php
 quick/dict/oob-key.php
 quick/dict/reflect.php
+quick/dict/refs.php
 quick/dict/static.php
 quick/dict/type-hint.php
 quick/do-while-continue.php
@@ -75,6 +83,7 @@ quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php
 quick/exit.php
+quick/extract.php
 quick/fail_self.php
 quick/fb_intercept.php
 quick/fc_enum_1.php
@@ -96,6 +105,7 @@ quick/generator_varargs.php
 quick/generator_vars.php
 quick/get_class.php
 quick/get_class_methods2.php
+quick/get_defined_vars.php
 quick/hh_async_closure_return_type_0.php
 quick/hh_async_closure_return_type_1.php
 quick/hh_async_closure_return_type_2.php
@@ -156,8 +166,10 @@ quick/invoke.php
 quick/keyref_error.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-setters.php
+quick/keyset/invalid-key.php
 quick/keyset/invalid-scalar.php
 quick/keyset/reflect.php
+quick/keyset/refs.php
 quick/keyset/static.php
 quick/keyset/type-hint.php
 quick/lambda3.php
@@ -205,6 +217,7 @@ quick/profile/setprofile-this.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/properties-dynamic.php
+quick/reassign_this1.php
 quick/reassign_this2.php
 quick/reassign_this3.php
 quick/recursive-getter.php
@@ -219,7 +232,6 @@ quick/reflection_static_vars.php
 quick/regpressure.php
 quick/reserved_class1.php
 quick/reserved_class2.php
-quick/return-from-foreach.php
 quick/selfparent.php
 quick/serialize.php
 quick/setop-magic4.php
@@ -260,8 +272,10 @@ quick/varenv_extra_args.php
 quick/vec/basic-getters.php
 quick/vec/basic-setters.php
 quick/vec/reflect.php
+quick/vec/refs.php
 quick/vec/static.php
 quick/vec/type-hint.php
+quick/weird-isset-empty.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php
@@ -270,5 +284,6 @@ quick/xhp-malformed.php
 quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
+quick/zend_closure_020.php
 quick/zend_indirect_method_call_005.php
 quick/zero_eval_stack_depth.php

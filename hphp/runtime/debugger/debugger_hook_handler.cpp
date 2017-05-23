@@ -64,8 +64,6 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
         phpAddBreakPointFuncEntry(f);
         break;
       }
-      // TODO(#2527229): what about superclass methods accessed via the derived
-      // class?
       continue;
     }
     auto funcName = bp->getFuncName();

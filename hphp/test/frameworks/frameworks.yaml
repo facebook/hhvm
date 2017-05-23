@@ -420,22 +420,14 @@
     test_root: stash
   symfony:
     url: https://github.com/symfony/symfony.git
-    branch: v2.4.8
-    commit: 3da923989cce41c149c6f20b7723c052ac251b16
+    branch: v2.7.3
+    commit: a9af4708b4bb650c4897e9b8dfbfbdb2ea5f0486
     install_root: symfony
     test_root: symfony
-    blacklist:
-      - symfony/src/Symfony/Component/Console/Tests/Helper/DialogHelperTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SigchildDisabledProcessTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SigchildEnabledProcessTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
-    clowns:
-      # Broken test. Fixed in symfony master, but not yet in release.
-      - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
   twig:
-    url: https://github.com/fabpot/Twig.git
-    branch: v1.16.0
-    commit: 8ce37115802e257a984a82d38254884085060024
+    url: https://github.com/twigphp/Twig.git
+    branch: v1.21.0
+    commit: 913d282caca9ee0e8d05940c6caa486d58810dd4
     install_root: twig
     test_root: twig
     clowns:
@@ -519,12 +511,8 @@
     test_root: twital
     test_find_mode: token
   silex:
-    # There are currently some broken tests and warnings caused by
-    # vendors deprecating some classes. An issue has been opened in github
-    # at https://github.com/silexphp/Silex/issues/1085 and is currently
-    # waiting for a decision on what the proper fix should be
     url: https://github.com/silexphp/Silex.git
-    branch: "v1.2.2"
-    commit: 8c5e86eb97f3eee633729b22e950082fb5591328
+    branch: v1.3.2
+    commit: 833d399eeaa449786d3fa2e533ada293b4e533c9
     install_root: silex
     test_root: silex

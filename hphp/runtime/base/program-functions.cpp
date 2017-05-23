@@ -2483,7 +2483,9 @@ void hphp_session_exit(const Transport* transport) {
       entry = std::make_unique<StructuredLogEntry>();
       entry->setInt("response_code", transport->getResponseCode());
     }
-    HardwareCounter::UpdateServiceData(transport->getCpuTime(), entry.get(),
+    HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                       transport->getWallTime(),
+                                       entry.get(),
                                        true /*psp*/);
     if (entry) StructuredLog::log("hhvm_request_perf", *entry);
   }

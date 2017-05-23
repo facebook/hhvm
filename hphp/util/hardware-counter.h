@@ -55,7 +55,8 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
-  static void UpdateServiceData(const timespec& begin,
+  static void UpdateServiceData(const timespec& cpu_begin,
+                                const timespec& wall_begin,
                                 StructuredLogEntry* entry,
                                 bool includingPsp);
   static void Init(bool enable,
@@ -110,7 +111,8 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void UpdateServiceData(const timespec& begin,
+  static void UpdateServiceData(const timespec& cpu_begin,
+                                const timespec& wall_begin,
                                 StructuredLogEntry* entry,
                                 bool includingPsp) { }
   static void Init(bool enable,

@@ -527,8 +527,14 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   if (RuntimeOption::EvalProfileHWStructLog) {
     entry = std::make_unique<StructuredLogEntry>();
     entry->setInt("response_code", code);
+    auto queueBegin = transport->getQueueTime();
+    auto const queueTimeUs = gettime_diff_us(queueBegin,
+                                             transport->getWallTime());
+    entry->setInt("queue-time-us", queueTimeUs);
   }
-  HardwareCounter::UpdateServiceData(transport->getCpuTime(), entry.get(),
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(),
+                                     transport->getWallTime(),
+                                     entry.get(),
                                      false /*psp*/);
   if (entry) StructuredLog::log("hhvm_request_perf", *entry);
 

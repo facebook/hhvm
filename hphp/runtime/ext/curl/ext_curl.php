@@ -380,6 +380,37 @@ function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
                              mixed &$write_fd_set, mixed &$exc_fd_set,
                              ?int &$max_fd = null): mixed;
 
+/**
+* Returns a new cURL share handle
+*
+* @return resource - Returns a cURL share handle resource on success,
+*/
+<<__Native>>
+function curl_share_init(): resource;
+
+/**
+* Set an option for a cURL share handle.
+*
+* @param resource $sh -
+* @param int $option - One of the CURLSHOPT_* constants.
+* @param mixed $value - One of the [CURL_LOCK_DATA_DNS,
+*                      CURL_LOCK_DATA_COOKIE, CURL_LOCK_DATA_SSL_SESSION]
+*
+* @return Returns TRUE on success or FALSE on failure.
+*/
+<<__Native>>
+function curl_share_setopt(resource $sh, int $option, mixed $value) : bool;
+
+/**
+ * Close a set of cURL share handles
+ *
+ * @param resource $sh -
+ *
+ * @return void -
+ */
+<<__Native>>
+function curl_share_close(resource $sh): void;
+
 } // root namespace
 
 namespace HH {

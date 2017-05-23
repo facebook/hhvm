@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
+#include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -616,6 +617,30 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh) {
   curlm->close();
   return init_null();
 }
+
+static std::string CURL_SHARE_Warning
+  = "expects parameter 1 to be cURL share resource";
+
+Resource HHVM_FUNCTION(curl_share_init) {
+  return Resource(req::make<CurlShareResource>());
+}
+
+void HHVM_FUNCTION(curl_share_close, const Resource& sh) {
+  auto curlsh = dyn_cast_or_null<CurlShareResource>(sh);
+  if (!curlsh || curlsh->isInvalid()) {
+    raise_warning(CURL_SHARE_Warning);
+  }
+  curlsh->close();
+}
+
+bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
+                   int option, const Variant& value) {
+  auto curlsh = dyn_cast_or_null<CurlShareResource>(sh);
+  if (!curlsh || curlsh->isInvalid())
+    SystemLib::throwExceptionObject(CURL_SHARE_Warning);
+  return curlsh->setOption(option, value);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1366,6 +1391,9 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_multi_info_read);
     HHVM_FE(curl_multi_close);
     HHVM_FE(curl_strerror);
+    HHVM_FE(curl_share_init);
+    HHVM_FE(curl_share_setopt);
+    HHVM_FE(curl_share_close);
 
     Extension* ext = ExtensionRegistry::get("curl");
     assert(ext);

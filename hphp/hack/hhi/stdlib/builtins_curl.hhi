@@ -480,6 +480,14 @@ const int CURLOPT_PROXYHEADER = 0;
 const int CURLHEADER_UNIFIED = 0;
 const int CURLHEADER_SEPARATE = 0;
 
+const int CURL_LOCK_DATA_COOKIE = 0;
+const int CURL_LOCK_DATA_DNS = 0;
+const int CURL_LOCK_DATA_SSL_SESSION = 0;
+const int CURLSHE_OK = 0;
+const int CURLSHOPT_SHARE = 0;
+const int CURLSHOPT_UNSHARE = 0;
+
+
 function curl_init($url = null);
 function curl_init_pooled($pool_name, $url = null);
 function curl_copy_handle($ch);
@@ -502,6 +510,9 @@ function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
 function curl_multi_getcontent($ch);
 function curl_multi_info_read($mh, &$msgs_in_queue = null);
 function curl_multi_close($mh);
+function curl_share_init();
+function curl_share_close($sh);
+function curl_share_setopt($sh, $option, $value);
 
 namespace HH\Asio {
   function curl_exec(mixed $url_or_handle): Awaitable<string>;

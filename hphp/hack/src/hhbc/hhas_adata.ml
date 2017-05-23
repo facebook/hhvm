@@ -8,7 +8,13 @@
  *
 *)
 
-val adata_to_string_seq : Typed_value.t -> String_sequence.t
-val attributes_to_strings : Hhas_attribute.t list -> string list
-val get_adata : unit -> Hhas_adata.t list
-val rewrite_typed_value : Typed_value.t -> Hhbc_ast.instruct
+type t = {
+  adata_id : Hhbc_ast.adata_id;
+  adata_value : Typed_value.t;
+}
+
+let make adata_id adata_value =
+  { adata_id; adata_value }
+
+let id adata = adata.adata_id
+let value adata = adata.adata_value

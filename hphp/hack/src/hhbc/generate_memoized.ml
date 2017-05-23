@@ -49,7 +49,7 @@ let get_cls_method param_count cd md =
   then gather [
     instr_string (Hhbc_id.Method.to_raw_string method_id);
     instr_self;
-    instr_fpushclsmethodf param_count;
+    instr_fpushclsmethod ~forward:true param_count;
   ]
   else
     instr_fpushclsmethodd param_count method_id class_id
@@ -141,7 +141,7 @@ let memoize_function_with_params params renamed_name =
   let first_local = Local.Unnamed (param_count + 1) in
   gather [
     Emit_body.emit_method_prolog ~params ~needs_local_this:false;
-    instr_dict (Typed_value.Dict []);
+    instr_typedvalue (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
     instr_basel static_local Warn;
@@ -172,13 +172,9 @@ let memoized_function_body params renamed_name =
 let make_wrapper body instrs =
   let params = Hhas_body.params body in
   let return_type = Hhas_body.return_type body in
-  let instrs = rewrite_class_refs instrs in
-  let num_cls_ref_slots = get_num_cls_ref_slots instrs in
-  Hhas_body.make
+  Emit_body.make_body
     instrs
     [] (* decl_vars *)
-    0 (* num_iters *)
-    num_cls_ref_slots
     true (* is_memoize_wrapper *)
     params
     return_type

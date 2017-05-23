@@ -10,6 +10,8 @@
 
 open Hhbc_ast
 open Parsing
+module TV = Typed_value
+
 (*
   TODO: proper error handling...
 *)
@@ -120,88 +122,30 @@ type decl =
   | Main_decl of Hhas_body.t
   | Fun_decl of Hhas_function.t
   | Class_decl of Hhas_class.t
-  | Data_decl of (int*Typed_value.t)
+  | Data_decl of Hhas_adata.t
   | Alias_decl of Hhas_typedef.t
 
-(* Fixing up code streams to deal with data declarations. This is pretty ugly *)
-let rec lookupdd n dds =
-  match dds with
-  | [] -> None
-  | (num,args) :: rest ->
-    if n=num
-    then Some args
-    else lookupdd n rest
-
-let rewriteinstr dds i =
-  match i with
-  | ILitConst (Array (Typed_value.Int n)) -> (
-    match lookupdd (Int64.to_int n) dds with
-    | Some (Typed_value.Array args) -> ILitConst (Array(Typed_value.Array args))
-    | Some _ -> report_error "expected an array in data decl"
-    | None -> report_error "array name missing"
-  )
-  | ILitConst (Vec (Typed_value.Int n)) -> (
-    match lookupdd (Int64.to_int n) dds with
-    | Some (Typed_value.Vec args) -> ILitConst (Vec(Typed_value.Vec args))
-    | Some _ -> report_error "expected a vector in data decl"
-    | None -> report_error "vec name missing"
-  )
-  | ILitConst (Dict (Typed_value.Int n)) -> (
-    match lookupdd (Int64.to_int n) dds with
-    | Some (Typed_value.Dict args) -> ILitConst (Dict(Typed_value.Dict args))
-    | Some _ -> report_error "expected dictionary in data decl"
-    | None -> report_error "dict name missing"
-  )
-  | ILitConst (Keyset (Typed_value.Int n)) -> (
-    match lookupdd (Int64.to_int n) dds with
-    | Some (Typed_value.Keyset args) ->
-      ILitConst (Keyset(Typed_value.Keyset args))
-    | Some _ -> report_error "expected a keyset in data decl"
-    | None -> report_error "keyset name missing"
-  )
- | _ -> i
-
-let rewrite_instrs_in_body dds body =
-  let instrs = Hhas_body.instrs body in
-  let newinstrs = Instruction_sequence.InstrSeq.map instrs (rewriteinstr dds) in
-  Hhas_body.with_instrs body newinstrs
-
-let rewritefundecl dds fd =
-  Hhas_function.with_body fd
-    (rewrite_instrs_in_body dds (Hhas_function.body fd))
-
-let rewritemethoddecl dds md =
-  Hhas_method.with_body md
-    (rewrite_instrs_in_body dds (Hhas_method.body md))
-
-let rewriteclassdecl dds cd =
-  Hhas_class.with_methods cd
-                    (List.map (rewritemethoddecl dds) (Hhas_class.methods cd))
-
-let rec splitdecllist ds funs classes optmain datadecls aliasdecls =
+let rec split_decl_list ds funs classes optmain datadecls aliasdecls =
  match ds with
-  | [] -> (match optmain with
-           | None -> report_error "missing main"
-           | Some m -> (datadecls, Hhas_program.make funs classes aliasdecls m))
+  | [] ->
+    begin match optmain with
+    | None -> report_error "missing main"
+    | Some m -> Hhas_program.make datadecls funs classes aliasdecls m
+    end
   | Main_decl md :: rest ->
-   (match optmain with
-    | None -> splitdecllist rest funs classes
-                  (Some (rewrite_instrs_in_body datadecls md))
-                  datadecls aliasdecls
-    | Some _ -> report_error "duplicate main")
-  (* We rewrite functions according to current datadecls.
-     Order is a bit dubious, but it seems to work ok when decls are at the top,
-     which they are *)
-  | Fun_decl fd :: rest -> splitdecllist rest
-                                         (rewritefundecl datadecls fd :: funs)
-                                         classes optmain datadecls aliasdecls
-  | Class_decl cd :: rest -> splitdecllist rest funs
-                                     (rewriteclassdecl datadecls cd :: classes)
-                                     optmain datadecls aliasdecls
-  | Data_decl dd :: rest -> splitdecllist rest funs classes optmain
-                            (dd::datadecls) aliasdecls
-  | Alias_decl ad :: rest -> splitdecllist rest funs classes optmain datadecls
-                             (ad :: aliasdecls)
+    begin match optmain with
+    | None ->
+      split_decl_list rest funs classes (Some md) datadecls aliasdecls
+    | Some _ -> report_error "duplicate main"
+    end
+  | Fun_decl fd :: rest ->
+    split_decl_list rest (fd :: funs) classes optmain datadecls aliasdecls
+  | Class_decl cd :: rest ->
+    split_decl_list rest funs (cd :: classes) optmain datadecls aliasdecls
+  | Data_decl dd :: rest ->
+    split_decl_list rest funs classes optmain (dd :: datadecls) aliasdecls
+  | Alias_decl ad :: rest ->
+    split_decl_list rest funs classes optmain datadecls (ad :: aliasdecls)
 
 (* This is a pretty poor way to deal with these flags on functions, and
    doesn't Throw if there's an illegal one in the list, but it'll do for now.
@@ -372,7 +316,7 @@ type iarg =
   | IAString of string
   | IAId of string
   | IADouble of string (* seems we don't parse these *)
-  | IAArrayno of int
+  | IAArrayno of adata_id
   | IAMemberkey of string*iarg (* these are not seriously recursive *)
   | IAArglist of iarg list
 
@@ -618,20 +562,20 @@ let makeunaryinst s arg = match s with
     (match arg with | IAString sa -> ILitConst (String sa)
                       | _ -> report_error "bad string lit cst")
    | "Array" -> (match arg with
-       | IAArrayno n -> ILitConst (Array (Typed_value.Int (Int64.of_int n)))
+       | IAArrayno n -> ILitConst (Array n)
        | _ -> report_error "bad array lit cst")
                                 (* Q: where's the real data?
                                    A: it's in the adata declaration, which
                                     we'll splice in here in a later pass.
                                 *)
    | "Vec" -> (match arg with
-       | IAArrayno n -> ILitConst (Vec (Typed_value.Int (Int64.of_int n)))
+       | IAArrayno n -> ILitConst (Vec n)
        | _ -> report_error "bad vec lit cst")
    | "Dict" -> (match arg with
-       | IAArrayno n -> ILitConst (Dict (Typed_value.Int (Int64.of_int n)))
+       | IAArrayno n -> ILitConst (Dict n)
        | _ -> report_error "bad dict lit cst")
    | "Keyset" -> (match arg with
-       | IAArrayno n -> ILitConst (Keyset (Typed_value.Int (Int64.of_int n)))
+       | IAArrayno n -> ILitConst (Keyset n)
        | _ -> report_error "bad keyset lit cst")
    | "NewArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewArray (Int64.to_int n))

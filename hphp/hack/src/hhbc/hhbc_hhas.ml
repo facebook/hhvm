@@ -14,7 +14,6 @@ module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
 module TV = Typed_value
-module TVMap = Typed_value.TVMap
 open H
 
 (* State associated with an entire file *)
@@ -29,27 +28,6 @@ let next_typedef_counter () =
   let c = !typedef_counter in
   typedef_counter := c + 1;
   c
-
-(* Array identifier map *)
-let array_identifier_counter = ref 0
-let next_array_identifier () =
-  let c = !array_identifier_counter in
-  array_identifier_counter := c + 1;
-  c
-
-let array_identifier_map = ref TVMap.empty
-let should_create_adata_entry tval =
-  if TVMap.mem tval !array_identifier_map
-  then (false, -1)
-  else begin
-    let i = next_array_identifier () in
-    array_identifier_map := TVMap.add tval i !array_identifier_map;
-    (true, i)
-    end
-let get_array_identifier tv =
-  match TVMap.get tv !array_identifier_map with
-  | None -> failwith "Such array does not exist in adata?"
-  | Some i -> string_of_int i
 
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
@@ -92,6 +70,8 @@ let string_of_stack_index si = string_of_int si
 
 let string_of_classref id = string_of_int id
 
+let string_of_adata_id id = "@" ^ id
+
 let string_of_param_id x =
   match x with
   | Param_unnamed i -> string_of_int i
@@ -115,10 +95,11 @@ let string_of_lit_const instruction =
     | Double d    -> sep ["Double"; d]
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
-    | Array tv          -> sep ["Array"; "@A_" ^ get_array_identifier tv]
-    | Dict tv           -> sep ["Dict"; "@A_" ^ get_array_identifier tv]
-    | Keyset tv         -> sep ["Keyset"; "@A_" ^ get_array_identifier tv]
-    | Vec tv            -> sep ["Vec"; "@A_" ^ get_array_identifier tv]
+    | Array id          -> sep ["Array"; string_of_adata_id id]
+    | Dict id           -> sep ["Dict"; string_of_adata_id id]
+    | Keyset id         -> sep ["Keyset"; string_of_adata_id id]
+    | Vec id            -> sep ["Vec"; string_of_adata_id id]
+    | TypedValue _tv    -> failwith "string_of_lit_const: TypedValue"
     | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
     | NewCol i          -> sep ["NewCol"; string_of_int i]
     | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
@@ -1223,48 +1204,20 @@ let add_class_def buf class_def =
   B.add_string buf "\n}\n"
 
 let add_data_region_element buf argument =
-  let b, num = should_create_adata_entry argument in
-  if b then begin
-    B.add_string buf ".adata A_";
-    B.add_string buf @@ string_of_int num;
-    B.add_string buf " = \"\"\"";
-    SS.add_string_from_seq buf
-      @@ Emit_adata.adata_to_string_seq argument;
-    B.add_string buf "\"\"\";\n"
-  end
+  B.add_string buf ".adata ";
+  B.add_string buf @@ (Hhas_adata.id argument);
+  B.add_string buf " = \"\"\"";
+  SS.add_string_from_seq buf
+    @@ Emit_adata.adata_to_string_seq (Hhas_adata.value argument);
+  B.add_string buf "\"\"\";\n"
 
-let add_data_region buf top_level_body functions classes =
-  let rec add_data_region_list buf instrs =
-    List.iter (add_data_region_aux buf)
-    (Instruction_sequence.instr_seq_to_list instrs)
-  and add_data_region_aux buf = function
-    | ILitConst (Array argument
-                | Dict argument
-                | Vec argument
-                | Keyset argument
-                ) ->
-      add_data_region_element buf argument
-    | _ -> ()
-  and iter_aux_fun buf fun_def =
-    let function_body = Hhas_function.body fun_def in
-    let instrs = Hhas_body.instrs function_body in
-    add_data_region_list buf instrs
-  and iter_aux_class buf class_def =
-    let methods = Hhas_class.methods class_def in
-    List.iter (iter_aux_method buf) methods
-  and iter_aux_method buf method_def =
-    let method_body = Hhas_method.body method_def in
-    let instrs = Hhas_body.instrs method_body in
-    add_data_region_list buf instrs
-  in
-  add_data_region_list buf (Hhas_body.instrs top_level_body);
-  List.iter (iter_aux_fun buf) functions;
-  List.iter (iter_aux_class buf) classes;
+let add_data_region buf adata =
+  List.iter (add_data_region_element buf) adata;
   B.add_string buf "\n"
 
-let add_top_level buf hhas_prog =
+let add_top_level buf body =
   B.add_string buf ".main {\n";
-  add_body buf 2 (Hhas_program.main hhas_prog);
+  add_body buf 2 body;
   B.add_string buf "}\n"
 
 let add_typedef buf typedef =
@@ -1279,8 +1232,9 @@ let add_program buf hhas_prog =
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
-  add_data_region buf top_level_body functions classes;
-  add_top_level buf hhas_prog;
+  let adata = Hhas_program.adata hhas_prog in
+  add_data_region buf adata;
+  add_top_level buf top_level_body;
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) classes;
   List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
@@ -1290,7 +1244,5 @@ let to_string hhas_prog =
   let buf = Buffer.create 1024 in
   class_counter := 0;
   typedef_counter := 0;
-  array_identifier_map := TVMap.empty;
-  array_identifier_counter := 0;
   add_program buf hhas_prog;
   B.contents buf

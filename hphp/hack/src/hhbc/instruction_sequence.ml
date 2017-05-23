@@ -133,7 +133,7 @@ let instr_box = instr (IBasic Box)
 let instr_boxr = instr (IBasic BoxR)
 let instr_unboxr_nop = instr (IBasic UnboxRNop)
 let instr_entrynop = instr (IBasic EntryNop)
-let instr_dict xs = instr (ILitConst (Dict xs))
+let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
 let instr_basenl local mode = instr (IBase(BaseNL(local, mode)))
@@ -162,8 +162,11 @@ let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushclsmethodd num_params class_name method_name =
   instr (ICall (FPushClsMethodD (num_params, class_name, method_name)))
-let instr_fpushclsmethodf num_params =
-  instr (ICall (FPushClsMethodF (num_params, class_ref_rewrite_sentinel)))
+let instr_fpushclsmethod ~forward num_params =
+  instr (ICall (
+    if forward
+    then FPushClsMethodF (num_params, class_ref_rewrite_sentinel)
+    else FPushClsMethod (num_params, class_ref_rewrite_sentinel)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =
   instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
 let instr_querym num_params op key =
@@ -399,6 +402,7 @@ let rewrite_class_refs_instr num = function
   (num - 1, ICall (FPushClsMethodF (np, num)))
 | IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
 | IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
+| ILitConst (TypedValue tv) -> (num, Emit_adata.rewrite_typed_value tv)
 | i -> (num, i)
 
 (* Cannot use InstrSeq.fold_left since we want to maintain the exact

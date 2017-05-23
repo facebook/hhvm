@@ -31,6 +31,8 @@ type prop_id = Hhbc_id.Prop.t
 type num_params = int
 type classref_id = int
 type collection_type = int
+(* Conventionally this is "A_" followed by an integer *)
+type adata_id = string
 
 (* These are the three flavors of value that can live on the stack:
  *   C = cell
@@ -127,12 +129,15 @@ type instruct_lit_const =
   | False
   | NullUninit
   | Int of int64
-  | Double of Litstr.id
-  | String of Litstr.id
-  | Array of Typed_value.t
-  | Vec of Typed_value.t
-  | Dict of Typed_value.t
-  | Keyset of Typed_value.t
+  | Double of string
+  | String of string
+  (* Pseudo instruction that will get translated into appropraite literal
+   * bytecode, with possible reference to .adata *)
+  | TypedValue of Typed_value.t
+  | Array of adata_id
+  | Vec of adata_id
+  | Dict of adata_id
+  | Keyset of adata_id
   | NewArray of int (* capacity hint *)
   | NewMixedArray of int (* capacity hint *)
   | NewDictArray of int (* capacity hint *)

@@ -8,6 +8,14 @@
  *
 *)
 
+val make_body:
+  Instruction_sequence.t ->
+  string list -> (* Actually local_id list *)
+  bool ->
+  Hhas_param.t list ->
+  Hhas_type_info.t option ->
+  Hhas_body.t
+
 val emit_body:
   scope: Ast_scope.Scope.t ->
   is_closure_body: bool ->

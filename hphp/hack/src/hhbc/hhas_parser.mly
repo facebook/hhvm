@@ -34,7 +34,7 @@ open Hhas_parser_actions
 %token COMMA SEMI
 %token COLON EQUALS
 %token EOF DOLLAR NEWLINE AMPERSAND
-%token QUOTE ATAUNDERSCORE UNDERSCORE
+%token QUOTE AT UNDERSCORE
 %token PLUS
 %token TRYCATCHDIRECTIVE
 %token TRYDIRECTIVE
@@ -42,10 +42,10 @@ open Hhas_parser_actions
 %token ALIASDIRECTIVE
 
 %start program
-%type <((int*Typed_value.t) list) * Hhas_program.t> program
+%type <Hhas_program.t> program
 %%
 program:
-    nl decllist nl EOF { splitdecllist $2 [] [] None [] []}
+    nl decllist nl EOF { split_decl_list $2 [] [] None [] []}
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -73,11 +73,7 @@ numiters:
 ;
 datadecl:
     | DATADECLDIRECTIVE ID EQUALS nonclassattribute SEMI nl
-      {if $2.[0] = 'A' && $2.[1]='_' then
-        let num = int_of_string (String.sub $2 2 (String.length $2 - 2)) in
-        (num,$4) (* should just be a typed-value now *)
-       else report_error "datadecl variable should be A_n"
-        }
+      {  Hhas_adata.make $2 $4 }
 ;
 nonclassattribute:
     | TRIPLEQUOTEDSTRING {attribute_from_string $1}
@@ -415,7 +411,7 @@ iarg:
     | INT    {IAInt64 $1}
     | STRING {IAString $1}
     | DOUBLE {IADouble $1}
-    | ATAUNDERSCORE INT {IAArrayno (Int64.to_int $2)}
+    | AT ID  {IAArrayno $2}
     | ID COLON iarg {IAMemberkey ($1,$3)}
     | LANGLE iarglist RANGLE {IAArglist $2}
 ;

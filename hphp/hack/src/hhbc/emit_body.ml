@@ -73,6 +73,22 @@ let rec emit_defs defs =
     let i2 = emit_defs defs in
     gather [i1; i2]
 
+let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info =
+  let body_instrs = rewrite_user_labels body_instrs in
+  let body_instrs = rewrite_class_refs body_instrs in
+  let params, body_instrs =
+    Label_rewriter.relabel_function params body_instrs in
+  let num_iters = !Iterator.num_iterators in
+  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
+  Hhas_body.make
+    body_instrs
+    decl_vars
+    num_iters
+    num_cls_ref_slots
+    is_memoize_wrapper
+    params
+    return_type_info
+
 let emit_body
   ~scope
   ~is_closure_body
@@ -125,17 +141,9 @@ let emit_body
     default_value_setters;
     fault_instrs;
   ] in
-  let body_instrs = rewrite_user_labels body_instrs in
-  let body_instrs = rewrite_class_refs body_instrs in
-  let params, body_instrs =
-    Label_rewriter.relabel_function params body_instrs in
-  let num_iters = !Iterator.num_iterators in
-  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
-  Hhas_body.make
+  make_body
     body_instrs
     decl_vars
-    num_iters
-    num_cls_ref_slots
     is_memoize_wrapper
     params
     return_type_info,

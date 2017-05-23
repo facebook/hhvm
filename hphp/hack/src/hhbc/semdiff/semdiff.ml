@@ -47,7 +47,7 @@ let parse_file program_parser filename =
   let channel = open_in filename in (* TODO: error handling *)
 
   let lexer = Lexing.from_channel channel in
-  let (data_decls, prog) =
+  let prog =
     try program_parser lexer
       with Parsing.Parse_error -> (
         Printf.eprintf "Parsing of file failed\n";
@@ -55,19 +55,12 @@ let parse_file program_parser filename =
         )
   in
   close_in channel;
-  (data_decls, prog)
+  prog
 
 let run options =
   let program_parser = program Hhas_lexer.read in
-  let (data_decls1, prog1) = parse_file program_parser (fst options.files) in
-  let (data_decls2, prog2) = parse_file program_parser (snd options.files) in
-
-  (* This is an absolutely foul, and hopefully temporary, hack to get around
-  the fact that hhbc_hhas now uses a global ref to generate adata indices on the
-  fly, by looking up the data. That means you can't have two programs around
-  at once and print their instructions correctly *)
-  Diff.data_decls_ref1 := data_decls1;
-  Diff.data_decls_ref2 := data_decls2;
+  let prog1 = parse_file program_parser (fst options.files) in
+  let prog2 = parse_file program_parser (snd options.files) in
 
   let (d,(s,e)) = program_comparer.comparer prog1 prog2 in
   let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in

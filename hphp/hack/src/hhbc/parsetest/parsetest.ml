@@ -56,7 +56,7 @@ f(<\"HH\\\\int\" \"HH\\\\int\" hh_type > $x, <\"HH\\\\int\" \"HH\\\\int\" hh_typ
   QueryM 1 CGet EC:0\n\
   RetC\n}"
 
-let (data_decls, parsed) =  try  program_parser testlexer
+let parsed =  try program_parser testlexer
               with Parsing.Parse_error -> (
                 print_string "oops!\n"; raise Parsing.Parse_error
                 )

@@ -700,19 +700,9 @@ and emit_idx ~is_array es =
 and from_expr expr ~need_ref =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
-  | A.Float (_, litstr) ->
-    emit_box_if_necessary need_ref @@ instr_double litstr
-  | A.String (_, litstr) ->
-    emit_box_if_necessary need_ref @@ instr_string litstr
-  (* TODO deal with integer out of range *)
-  | A.Int (_, litstr) ->
-    emit_box_if_necessary need_ref @@ instr_int_of_string litstr
-  | A.Null ->
-    emit_box_if_necessary need_ref @@ instr_null
-  | A.False ->
-    emit_box_if_necessary need_ref @@ instr_false
-  | A.True ->
-    emit_box_if_necessary need_ref @@ instr_true
+  | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
+    let v = Ast_constant_folder.expr_to_typed_value (get_namespace ()) expr in
+    emit_box_if_necessary need_ref @@ instr (ILitConst (TypedValue v))
   | A.Lvar (_, x) ->
     emit_local ~notice:Notice ~need_ref x
   | A.Class_const (cid, id) ->
@@ -827,21 +817,13 @@ and from_expr expr ~need_ref =
     failwith "List destructor can only be used as an lvar"
 
 and emit_static_collection ~transform_to_collection tv =
-  let lit_constructor =
-    match tv with
-    | Typed_value.Array _ -> Array tv
-    | Typed_value.Dict _ -> Dict tv
-    | Typed_value.Vec _ -> Vec tv
-    | Typed_value.Keyset _ -> Keyset tv
-    | _ -> failwith "emit_static_collection: unexpected collection type"
-  in
   let transform_instr =
     match transform_to_collection with
     | Some n -> instr_colfromarray n
     | None -> empty
   in
   gather [
-    instr (ILitConst lit_constructor);
+    instr (ILitConst (TypedValue tv));
     transform_instr;
   ]
 
@@ -1449,31 +1431,25 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Class_const (cid, (_, id)) ->
     let cexpr, forward = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     let method_id = Hhbc_id.Method.from_ast_name id in
-    if forward then
-      gather [
-        instr_string (Hhbc_id.Method.to_raw_string method_id);
-        emit_class_expr cexpr;
-        instr (ICall (FPushClsMethodF (nargs, 0)));
-      ]
-    else begin match cexpr with
+    begin match cexpr with
     (* Statically known *)
-    | Class_id cid ->
+    | Class_id cid when not forward ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
-      instr (ICall (FPushClsMethodD (nargs, method_id, fq_cid)))
+      instr_fpushclsmethodd nargs method_id fq_cid
     | _ ->
       gather [
         instr_string (Hhbc_id.Method.to_raw_string method_id);
         emit_class_expr cexpr;
-        instr (ICall (FPushClsMethod (nargs, 0)));
+        instr_fpushclsmethod ~forward nargs
       ]
     end
 
   | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
-    let cexpr, _ = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
+    let cexpr, forward = expr_to_class_expr (get_scope ()) (id_to_expr cid) in
     gather [
       emit_local ~notice:Notice ~need_ref:false id;
       emit_class_expr cexpr;
-      instr (ICall (FPushClsMethod (nargs, 0)))
+      instr_fpushclsmethod ~forward nargs
     ]
 
   | A.Id id ->

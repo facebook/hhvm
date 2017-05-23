@@ -18,28 +18,24 @@ module SU = Hhbc_string_utils
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
 
-let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
+let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
   let method_attributes = [] in
-  let params, instrs =
-    Label_rewriter.relabel_function params body in
+  (* TODO: move this. We just know that there are no iterators in 86methods *)
+  Iterator.reset_iterator ();
   let method_is_final = false in
   let method_is_private = is_private in
   let method_is_protected = false in
   let method_is_public = not is_private in
   let method_return_type = None in
   let method_decl_vars = [] in
-  let method_num_iters = 0 in
-  let method_num_cls_ref_slots = 0 in
   let method_is_async = false in
   let method_is_generator = false in
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
-  let method_body = Hhas_body.make
+  let method_body = Emit_body.make_body
     instrs
     method_decl_vars
-    method_num_iters
-    method_num_cls_ref_slots
     method_is_memoize_wrapper
     params
     method_return_type in

@@ -13,6 +13,9 @@ module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
 module TV = Typed_value
+module TVMap = Typed_value.TVMap
+open Hhbc_ast
+open Core
 
 let rec adata_to_string_seq argument =
   match argument with
@@ -72,3 +75,42 @@ let attributes_to_strings al =
     (fun a1 a2 -> String.compare (Hhas_attribute.name a1)
       (Hhas_attribute.name a2)) al in
   Core.List.map al attribute_to_string
+
+
+(* Array identifier map. Maintain list as well, in generated order *)
+let array_identifier_counter = ref 0
+let adata = ref []
+let next_adata_id tv =
+  let c = !array_identifier_counter in
+  array_identifier_counter := c + 1;
+  let id = "A_" ^ string_of_int c in
+  adata := Hhas_adata.make id tv :: !adata;
+  id
+
+let array_identifier_map = ref TVMap.empty
+let get_array_identifier tv =
+  match TVMap.get tv !array_identifier_map with
+  | None ->
+    let id = next_adata_id tv in
+    array_identifier_map := TVMap.add tv id !array_identifier_map;
+    id
+  | Some id ->
+    id
+
+let rewrite_typed_value tv =
+  ILitConst (
+  match tv with
+  | TV.Uninit -> failwith "rewrite_typed_value: uninit"
+  | TV.Null -> Null
+  | TV.Bool false -> False
+  | TV.Bool true -> True
+  | TV.Int i -> Int i
+  | TV.Float f -> Double (SU.Float.to_string f)
+  | TV.String s -> String s
+  | TV.Array _ -> Array (get_array_identifier tv)
+  | TV.Vec _ -> Vec (get_array_identifier tv)
+  | TV.Keyset _ -> Keyset (get_array_identifier tv)
+  | TV.Dict _ -> Dict (get_array_identifier tv)
+  )
+
+let get_adata () = List.rev !adata

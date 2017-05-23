@@ -33,7 +33,6 @@ quick/closure_get_class.php
 quick/closure_static.php
 quick/closure_static_vars.php
 quick/closure_use_this.php
-quick/clsmethodf.php
 quick/cmp.php
 quick/constIntToString.php
 quick/const_cflow.php

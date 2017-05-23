@@ -86,7 +86,7 @@ rule read =
   | '>'         {RANGLE}
   | int as lxm  {INT (Int64.of_string lxm)}
   | float as lxm {DOUBLE lxm}
-  | "@A_"        {ATAUNDERSCORE}
+  | '@'        {AT}
   | '_'         {UNDERSCORE}
   | '{'         {LBRACE}
   | '}'         {RBRACE}

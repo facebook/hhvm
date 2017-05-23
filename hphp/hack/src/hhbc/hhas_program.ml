@@ -11,14 +11,15 @@
 open Core
 
 type t = {
+  hhas_adata   : Hhas_adata.t list;
   hhas_fun     : Hhas_function.t list;
   hhas_classes : Hhas_class.t list;
   hhas_typedefs: Hhas_typedef.t list;
   hhas_main    : Hhas_body.t;
 }
 
-let make hhas_fun hhas_classes hhas_typedefs hhas_main =
-  { hhas_fun; hhas_classes; hhas_typedefs; hhas_main }
+let make hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main =
+  { hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main }
 
 let functions hhas_prog =
   hhas_prog.hhas_fun
@@ -31,6 +32,9 @@ let typedefs hhas_prog =
 
 let main hhas_prog =
   hhas_prog.hhas_main
+
+let adata hhas_prog =
+  hhas_prog.hhas_adata
 
 open Instruction_sequence
 
@@ -61,10 +65,11 @@ let from_ast
   let st, parsed_classes = List.map_env st parsed_classes convert_class in
   let closure_classes = Closure_convert.get_closure_classes st in
   let all_classes = parsed_classes @ closure_classes in
+  let compiled_defs = emit_main parsed_defs in
   let compiled_funs = Emit_function.from_asts parsed_functions in
   let compiled_funs = Generate_memoized.memoize_functions compiled_funs in
   let compiled_classes = Emit_class.from_asts all_classes in
   let compiled_classes = Generate_memoized.memoize_classes compiled_classes in
   let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
-  let compiled_defs = emit_main parsed_defs in
-  make compiled_funs compiled_classes compiled_typedefs compiled_defs
+  let adata = Emit_adata.get_adata () in
+  make adata compiled_funs compiled_classes compiled_typedefs compiled_defs

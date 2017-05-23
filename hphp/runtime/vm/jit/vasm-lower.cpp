@@ -196,8 +196,9 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
             break;
           case Arch::ARM:
             // For ARM64 we need to clear the bits 8..31 from the type value.
-            // That allows to use the resulting register values to be used
-            // in type comparisons without the need for truncation there.
+            // That allows us to use the resulting register values in
+            // type comparisons without the need for truncation there.
+            // We must not touch bits 63..32 as they contain the AUX data.
             v << copy{rret(0), dests[0]};
             v << andq{v.cns(0xffffffff000000ff),
                       rret(1), dests[1], v.makeReg()};
@@ -313,8 +314,9 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
       break;
     case Arch::ARM:
       // For ARM64 we need to clear the bits 8..31 from the type value.
-      // That allows to use the resulting register values to be used
-      // in type comparisons without the need for truncation there.
+      // That allows us to use the resulting register values in
+      // type comparisons without the need for truncation there.
+      // We must not touch bits 63..32 as they contain the AUX data.
       env.unit.blocks[b].code[i] = andq{
         env.unit.makeConst(Vconst{0xffffffff000000ff}),
         rret_type(), inst.type, env.unit.makeReg()};
@@ -330,8 +332,9 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
       break;
     case Arch::ARM:
       // For ARM64 we need to clear the bits 8..31 from the type value.
-      // That allows to use the resulting register values to be used
-      // in type comparisons without the need for truncation there.
+      // That allows us to use the resulting register values in
+      // type comparisons without the need for truncation there.
+      // We must not touch bits 63..32 as they contain the AUX data.
       lower_impl(env.unit, b, i, [&] (Vout& v) {
         v << copy{inst.data, rret_data()};
         v << andq{v.cns(0xffffffff000000ff),

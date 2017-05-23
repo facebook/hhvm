@@ -2,6 +2,7 @@
 *.hhbc
 .mkdir
 .DS_Store
+.hhconfig
 hphp.log
 /build
 /_build

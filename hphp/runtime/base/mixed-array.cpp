@@ -832,10 +832,15 @@ MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
+MixedArray* MixedArray::initWithRef(TypedValue& tv, TypedValue v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
   return this;
+}
+
+ALWAYS_INLINE
+MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
+  return initWithRef(tv, *v.asTypedValue());
 }
 
 ALWAYS_INLINE
@@ -1088,7 +1093,7 @@ ArrayData* MixedArray::nextInsertRef(Variant& data) {
   return initRef(e.data, data);
 }
 
-ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
+ArrayData* MixedArray::nextInsertWithRef(TypedValue data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
@@ -1101,6 +1106,11 @@ ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
   e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   return initWithRef(e.data, data);
+}
+
+ALWAYS_INLINE
+ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
+  return nextInsertWithRef(*data.asTypedValue());
 }
 
 template <class K> ALWAYS_INLINE
@@ -1444,12 +1454,11 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   return a->nextInsertRef(v);
 }
 
-ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
-                                     bool copy) {
+ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
 
-  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
 
@@ -1944,14 +1953,11 @@ ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, Variant&, bool) {
 }
 
 ArrayData*
-MixedArray::AppendWithRefDict(ArrayData* adIn, const Variant& v, bool copy) {
+MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v, bool copy) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
-  if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
-  auto const cell = LIKELY(v.getType() != KindOfUninit)
-    ? *v.asCell()
-    : make_tv<KindOfNull>();
-  return Append(adIn, cell, copy);
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
+  return Append(adIn, tvToInitCell(v), copy);
 }
 
 //////////////////////////////////////////////////////////////////////

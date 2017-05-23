@@ -546,7 +546,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(AppendRef)
 
   /*
-   * ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy)
+   * ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy)
    *
    *   "With ref" append.  This function appends a new value to the
    *   array with the next available integer key, if there is a next

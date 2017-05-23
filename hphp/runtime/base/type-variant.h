@@ -387,12 +387,15 @@ struct Variant : private TypedValue {
    * Clear the original data, and set it to be the same as in v, and if
    * v is referenced, keep the reference.
    */
-  Variant& setWithRef(const Variant& v) noexcept {
+  Variant& setWithRef(TypedValue v) noexcept {
     auto const old = *asTypedValue();
-    tvDupWithRef(*v.asTypedValue(), *asTypedValue());
+    tvDupWithRef(v, *asTypedValue());
     if (m_type == KindOfUninit) m_type = KindOfNull;
     tvDecRefGen(old);
     return *this;
+  }
+  Variant& setWithRef(const Variant& v) noexcept {
+    return setWithRef(*v.asTypedValue());
   }
 
   static Variant attach(TypedValue tv) noexcept {

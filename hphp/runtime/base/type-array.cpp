@@ -954,11 +954,14 @@ const Variant& Array::appendRef(Variant& v) {
   return v;
 }
 
-const Variant& Array::appendWithRef(const Variant& v) {
+void Array::appendWithRef(TypedValue v) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   ArrayData *escalated = m_arr->appendWithRef(v, m_arr->cowCheck());
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  return v;
+}
+
+void Array::appendWithRef(const Variant& v) {
+  appendWithRef(*v.asTypedValue());
 }
 
 Variant Array::pop() {

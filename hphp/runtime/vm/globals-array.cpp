@@ -200,7 +200,7 @@ ArrayData* GlobalsArray::AppendRef(ArrayData*, Variant&, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendWithRef(ArrayData*, const Variant&, bool) {
+ArrayData* GlobalsArray::AppendWithRef(ArrayData*, TypedValue, bool) {
   throw_not_implemented("appendWithRef on $GLOBALS");
 }
 

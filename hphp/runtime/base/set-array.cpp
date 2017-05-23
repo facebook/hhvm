@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hash.h"
@@ -949,12 +950,9 @@ ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
   }
 }
 
-ArrayData* SetArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
-  if (v.isReferenced()) throwRefInvalidArrayValueException(ad);
-  auto const cell = LIKELY(v.getType() != KindOfUninit)
-    ? *v.asCell()
-    : make_tv<KindOfNull>();
-  return Append(ad, cell, copy);
+ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
+  return Append(ad, tvToInitCell(v), copy);
 }
 
 ArrayData* SetArray::AppendRef(ArrayData* ad, Variant&, bool) {

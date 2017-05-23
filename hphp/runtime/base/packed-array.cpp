@@ -30,8 +30,9 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-variant.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
@@ -1065,13 +1066,12 @@ ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, Variant&, bool) {
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
-                                      const Variant& v,
-                                      bool copy) {
+ArrayData*
+PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
 
-  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
 
@@ -1083,16 +1083,12 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
   return ad;
 }
 
-ArrayData* PackedArray::AppendWithRefVec(ArrayData* adIn,
-                                         const Variant& v,
-                                         bool copy) {
+ArrayData*
+PackedArray::AppendWithRefVec(ArrayData* adIn, TypedValue v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
-  if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
-  auto const cell = LIKELY(v.getType() != KindOfUninit)
-    ? *v.asCell()
-    : make_tv<KindOfNull>();
-  return Append(adIn, cell, copy);
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
+  return Append(adIn, tvToInitCell(v), copy);
 }
 
 ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {

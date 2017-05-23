@@ -470,7 +470,8 @@ public:
    */
   const Variant& append(const Variant& v);
   const Variant& appendRef(Variant& v);
-  const Variant& appendWithRef(const Variant& v);
+  void appendWithRef(TypedValue v);
+  void appendWithRef(const Variant& v);
 
   /*
    * Stack/queue-like functions.

@@ -342,7 +342,7 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -416,7 +416,7 @@ public:
   static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
+  static ArrayData* AppendWithRefDict(ArrayData*, TypedValue, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -655,6 +655,7 @@ private:
 
   bool nextInsert(Cell);
   ArrayData* nextInsertRef(Variant& data);
+  ArrayData* nextInsertWithRef(TypedValue data);
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
   ArrayData* addVal(StringData* key, Cell data);
@@ -685,6 +686,7 @@ private:
   Elm& allocElm(int32_t* ei);
 
   MixedArray* initRef(TypedValue& tv, Variant& v);
+  MixedArray* initWithRef(TypedValue& tv, TypedValue v);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 

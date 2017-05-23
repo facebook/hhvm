@@ -408,6 +408,7 @@ public:
   /**
    * Similar to append(v, copy), with reference in v preserved.
    */
+  ArrayData* appendWithRef(TypedValue v, bool copy);
   ArrayData* appendWithRef(const Variant& v, bool copy);
 
   ArrayData* plusEq(const ArrayData* elems);
@@ -678,7 +679,7 @@ struct ArrayFunctions {
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
-  ArrayData* (*appendWithRef[NK])(ArrayData*, const Variant& v, bool copy);
+  ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v, bool copy);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);

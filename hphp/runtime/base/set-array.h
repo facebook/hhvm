@@ -511,7 +511,7 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell, bool);
   static ArrayData* AppendRef(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant&, bool);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);

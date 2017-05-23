@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
 
@@ -288,8 +289,8 @@ ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
   return EmptyArray::MakePacked(ref).arr_base();
 }
 
-ArrayData* EmptyArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
-  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
   auto tv = make_tv<KindOfNull>();

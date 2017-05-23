@@ -231,8 +231,12 @@ inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
   return g_array_funcs.appendRef[kind()](this, v, copy);
 }
 
-inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
+inline ArrayData* ArrayData::appendWithRef(TypedValue v, bool copy) {
   return g_array_funcs.appendWithRef[kind()](this, v, copy);
+}
+
+inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
+  return g_array_funcs.appendWithRef[kind()](this, *v.asTypedValue(), copy);
 }
 
 inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {

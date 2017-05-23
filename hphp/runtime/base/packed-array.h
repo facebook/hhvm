@@ -103,7 +103,7 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static ArrayData* ZAppend(ArrayData*, RefData* v, int64_t* key_ptr);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -134,7 +134,7 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static ArrayData* SetRefIntVec(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrVec(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
+  static ArrayData* AppendWithRefVec(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);

@@ -18,6 +18,7 @@
 #define incl_HPHP_TV_TYPE_H_
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -51,6 +52,11 @@ ALWAYS_INLINE bool tvIsDict(const TypedValue* tv) {
 
 ALWAYS_INLINE bool tvIsKeyset(const TypedValue* tv) {
   return isKeysetType(tv->m_type);
+}
+
+ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
+  return tv.m_type == KindOfRef &&
+         tv.m_data.pref->isReferenced();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

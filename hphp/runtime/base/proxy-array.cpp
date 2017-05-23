@@ -285,7 +285,7 @@ ProxyArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
 }
 
 ArrayData*
-ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
+ProxyArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   if (copy) {
     return innerArr(ad)->appendWithRef(v, true);
   }

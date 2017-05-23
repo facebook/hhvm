@@ -255,7 +255,7 @@ APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
 }
 
 ArrayData*
-APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
+APCLocalArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->appendWithRef(v, false));
 }

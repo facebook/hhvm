@@ -532,9 +532,12 @@ struct PackedArrayInit : PackedArrayInitBase<PackedArray, KindOfArray> {
     return *this;
   }
 
-  PackedArrayInit& appendWithRef(const Variant& v) {
+  PackedArrayInit& appendWithRef(TypedValue v) {
     performOp([&]{ return PackedArray::AppendWithRef(m_arr, v, false); });
     return *this;
+  }
+  PackedArrayInit& appendWithRef(const Variant& v) {
+    return appendWithRef(*v.asTypedValue());
   }
 };
 

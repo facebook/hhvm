@@ -329,9 +329,10 @@ flaky_tests = (
     '/ext/soap/tests/schema/schema035.php',
     '/ext/standard/tests/network/http-stream.php',
 
-    # Socket based test that are possibly port clowny
+    # Socket based tests that are possibly port clowny
     # Github commit: 6ae44fc92acb63e7fa31b5fd4fcd4cf939c3ef54
     '/ext/sockets/tests/socket_getsockname.php',
+    '/ext/sockets/tests/socket_connect_params.php',
 
     # Rely on system service configuration being a particular way.
     '/ext/standard/tests/general_functions/getservbyname_variation9.php',

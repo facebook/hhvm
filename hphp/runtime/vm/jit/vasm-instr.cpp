@@ -72,6 +72,28 @@ bool isBlockEnd(const Vinstr& inst) {
   }
 }
 
+bool isCall(const Vinstr& inst) {
+  switch (inst.op) {
+    case Vinstr::call:
+    case Vinstr::callarray:
+    case Vinstr::callfaststub:
+    case Vinstr::callm:
+    case Vinstr::callphp:
+    case Vinstr::callr:
+    case Vinstr::calls:
+    case Vinstr::callstub:
+    case Vinstr::calltc:
+    case Vinstr::tailcallphp:
+    case Vinstr::tailcallstub:
+    case Vinstr::vcall:
+    case Vinstr::vcallarray:
+    case Vinstr::vinvoke:
+      return true;
+    default:
+      return false;
+  }
+}
+
 Width width(Vinstr::Opcode op) {
   switch (op) {
     // service requests

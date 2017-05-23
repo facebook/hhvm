@@ -1268,6 +1268,11 @@ VASM_OPCODES
 bool isBlockEnd(const Vinstr& inst);
 
 /*
+ * Whether `inst' is a call instruction.
+ */
+bool isCall(const Vinstr& inst);
+
+/*
  * The register width specification of `op'.
  *
  * If `op' is an instruction whose non-flags register arguments are all a

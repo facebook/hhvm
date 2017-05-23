@@ -2031,8 +2031,9 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
               env, te
             end in
             make_result env (T.List tel) ty2
-          (* array<t> *)
-          | (_, Tarraykind (AKvec elt_type)) ->
+          (* array<t> or varray<t> *)
+          | (_, Tarraykind (AKvec elt_type))
+          | (_, Tarraykind (AKvarray elt_type)) ->
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
               env, te

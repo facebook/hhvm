@@ -1,0 +1,6 @@
+File "list_varray.php", line 24, characters 10-11:
+Invalid return type (Typing[4110])
+File "list_varray.php", line 22, characters 33-36:
+This is a bool
+File "list_varray.php", line 22, characters 23-25:
+It is incompatible with an int

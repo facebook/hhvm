@@ -418,33 +418,6 @@
     commit: 4d76935edae27bd9ed9e87f839efd5af4a8015d1
     install_root: stash
     test_root: stash
-  symfony:
-    url: https://github.com/symfony/symfony.git
-    branch: v2.4.8
-    commit: 3da923989cce41c149c6f20b7723c052ac251b16
-    install_root: symfony
-    test_root: symfony
-    blacklist:
-      - symfony/src/Symfony/Component/Console/Tests/Helper/DialogHelperTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SigchildDisabledProcessTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SigchildEnabledProcessTest.php
-      - symfony/src/Symfony/Component/Process/Tests/SimpleProcessTest.php
-    clowns:
-      # Broken test. Fixed in symfony master, but not yet in release.
-      - symfony/src/Symfony/Component/ClassLoader/Tests/ApcUniversalClassLoaderTest.php
-  twig:
-    url: https://github.com/fabpot/Twig.git
-    branch: v1.16.0
-    commit: 8ce37115802e257a984a82d38254884085060024
-    install_root: twig
-    test_root: twig
-    clowns:
-	  # Dependent on system language settings.
-      - twig/test/Twig/Tests/CompilerTest.php
-    flakey:
-      # last data set intermittently fails, spent too long trying to get debug
-      # # data out of it and getting nowhere
-      - twig/test/Twig/Tests/IntegrationTest.php
   typo3:
     url: git://github.com/TYPO3/TYPO3.CMS.git
     branch: TYPO3_6-2
@@ -518,13 +491,3 @@
     install_root: twital
     test_root: twital
     test_find_mode: token
-  silex:
-    # There are currently some broken tests and warnings caused by
-    # vendors deprecating some classes. An issue has been opened in github
-    # at https://github.com/silexphp/Silex/issues/1085 and is currently
-    # waiting for a decision on what the proper fix should be
-    url: https://github.com/silexphp/Silex.git
-    branch: "v1.2.2"
-    commit: 8c5e86eb97f3eee633729b22e950082fb5591328
-    install_root: silex
-    test_root: silex

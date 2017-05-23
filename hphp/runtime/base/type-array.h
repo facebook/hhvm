@@ -441,8 +441,6 @@ public:
   /*
    * Membership functions.
    */
-  bool exists(char    key) const { return existsImpl((int64_t)key); }
-  bool exists(short   key) const { return existsImpl((int64_t)key); }
   bool exists(int     key) const { return existsImpl((int64_t)key); }
   bool exists(int64_t key) const { return existsImpl(key); }
   bool exists(double  key) const = delete;
@@ -452,8 +450,6 @@ public:
   /*
    * Remove an element.
    */
-  void remove(char    key) { removeImpl((int64_t)key); }
-  void remove(short   key) { removeImpl((int64_t)key); }
   void remove(int     key) { removeImpl((int64_t)key); }
   void remove(int64_t key) { removeImpl(key); }
   void remove(double  key) = delete;

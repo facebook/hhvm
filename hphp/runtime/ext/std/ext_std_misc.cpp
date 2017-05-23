@@ -155,9 +155,9 @@ static int get_user_token_id(int internal_id);
 #define PHP_VERSION_ID_5 50699
 
 #define PHP_MAJOR_VERSION_7 7
-#define PHP_MINOR_VERSION_7 0
-#define PHP_VERSION_7 "7.0.99-hhvm"
-#define PHP_VERSION_ID_7 70099
+#define PHP_MINOR_VERSION_7 1
+#define PHP_VERSION_7 "7.1.99-hhvm"
+#define PHP_VERSION_ID_7 70199
 
 #define PHP_RELEASE_VERSION 99
 #define PHP_EXTRA_VERSION "hhvm"

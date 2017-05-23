@@ -678,10 +678,7 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
     })
     .ensure([name] {
       // (ASYNC)
-      auto entry = s_activeSubscriptions.find(name);
-      if (entry != s_activeSubscriptions.end()) {
-        s_activeSubscriptions.erase(entry);
-      }
+      s_activeSubscriptions.erase(name);
     });
   return res_future;
 }
@@ -768,19 +765,14 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       })
       .onError([name] (std::exception const& e) -> folly::Unit {
         // (ASNYC) delete active subscription
-        auto sub_entry = s_activeSubscriptions.find(name);
-        if (sub_entry != s_activeSubscriptions.end()) {
-          s_activeSubscriptions.erase(sub_entry);
-        }
+        s_activeSubscriptions.erase(name);
         throw std::runtime_error(e.what());
       });
     return Object{
       (new FutureEvent<folly::Unit>(std::move(res_future)))->getWaitHandle()
     };
   } catch(...) {
-    // no need to search as we hold the global lock and just added the
-    // subscription to the start of s_activeSubscriptions
-    s_activeSubscriptions.erase(s_activeSubscriptions.begin());
+    s_activeSubscriptions.erase(name);
     throw;
   }
   not_reached();

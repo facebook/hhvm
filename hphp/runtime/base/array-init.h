@@ -255,9 +255,14 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Same as set(), but for the deleted double `const Variant&' overload.
    */
-  ArrayInit& setValidKey(const Variant& name, const Variant& v) {
-    performOp([&]{ return m_arr->set(name, v, false); });
+  ArrayInit& setValidKey(TypedValue name, TypedValue v) {
+    performOp([&]{
+      return m_arr->set(tvToInitCell(name), tvToInitCell(v), false);
+    });
     return *this;
+  }
+  ArrayInit& setValidKey(const Variant& name, const Variant& v) {
+    return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
 
   /*
@@ -269,9 +274,10 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
    * probably use toKey yourself.
    */
   ArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
-    VarNR k(name.toKey(m_arr));
-    if (UNLIKELY(k.isNull())) return *this;
-    performOp([&]{ return m_arr->set(k, v, false); });
+    auto const k = name.toKey(m_arr).tv();
+    if (LIKELY(!isNullType(k.m_type))) {
+      performOp([&]{ return m_arr->set(k, v.asInitCellTmp(), false); });
+    }
     return *this;
   }
 
@@ -294,7 +300,7 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
       });
     } else if (!name.isNull()) {
       performOp([&]{
-        return m_arr->add(VarNR::MakeKey(name), tvToInitCell(tv), false);
+        return m_arr->add(VarNR::MakeKey(name).tv(), tvToInitCell(tv), false);
       });
     }
     return *this;
@@ -303,10 +309,12 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   ArrayInit& add(const Variant& name, TypedValue tv,
                  bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
+      performOp([&]{
+        return m_arr->add(name.asInitCellTmp(), tvToInitCell(tv), false);
+      });
     } else {
-      VarNR k(name.toKey(m_arr));
-      if (!k.isNull()) {
+      auto const k = name.toKey(m_arr).tv();
+      if (!isNullType(k.m_type)) {
         performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
       }
     }
@@ -319,8 +327,8 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
     if (keyConverted) {
       performOp([&]{ return m_arr->add(name, tvToInitCell(tv), false); });
     } else {
-      VarNR k(Variant(name).toKey(m_arr));
-      if (!k.isNull()) {
+      auto const k = Variant(name).toKey(m_arr).tv();
+      if (!isNullType(k.m_type)) {
         performOp([&]{ return m_arr->add(k, tvToInitCell(tv), false); });
       }
     }
@@ -460,17 +468,19 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 
 #undef IMPL_SET
 
-  DictInit& setValidKey(const Variant& name, const Variant& v) {
-    assert(name.isInteger() || name.isString());
+  DictInit& setValidKey(TypedValue name, TypedValue v) {
     performOp([&]{
-      auto const cell = name.asCell();
-      return isIntType(cell->m_type)
-        ? MixedArray::SetIntDict(m_arr, cell->m_data.num,
-                                 v.asInitCellTmp(), false)
-        : MixedArray::SetStrDict(m_arr, cell->m_data.pstr,
-                                 v.asInitCellTmp(), false);
+      auto const k = tvToCell(name);
+      assert(isIntType(k.m_type) || isStringType(k.m_type));
+
+      return isIntType(k.m_type)
+        ? MixedArray::SetIntDict(m_arr, k.m_data.num, tvToInitCell(v), false)
+        : MixedArray::SetStrDict(m_arr, k.m_data.pstr, tvToInitCell(v), false);
     });
     return *this;
+  }
+  DictInit& setValidKey(const Variant& name, const Variant& v) {
+    return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
 };
 

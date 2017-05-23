@@ -102,15 +102,18 @@ public:
   /**
    * Create a new ArrayData with specified array element(s).
    */
-  static ArrayData *Create();
-  static ArrayData *Create(const Variant& value);
-  static ArrayData *Create(const Variant& name, const Variant& value);
-  static ArrayData *CreateRef(Variant& value);
-  static ArrayData *CreateRef(const Variant& name, Variant& value);
+  static ArrayData* Create();
+  static ArrayData* Create(TypedValue value);
+  static ArrayData* Create(const Variant& value);
+  static ArrayData* Create(TypedValue name, TypedValue value);
+  static ArrayData* Create(const Variant& name, TypedValue value);
+  static ArrayData* Create(const Variant& name, const Variant& value);
+  static ArrayData* CreateRef(Variant& value);
+  static ArrayData* CreateRef(const Variant& name, Variant& value);
 
-  static ArrayData *CreateVec();
-  static ArrayData *CreateDict();
-  static ArrayData *CreateKeyset();
+  static ArrayData* CreateVec();
+  static ArrayData* CreateDict();
+  static ArrayData* CreateKeyset();
 
   /*
    * Called to return an ArrayData to the request heap.  This is
@@ -335,19 +338,19 @@ public:
   member_lval lval(const Variant& k, bool copy);
   member_lval lvalRef(const String& k, bool copy);
   member_lval lvalRef(const Variant& k, bool copy);
+  ArrayData *set(Cell k, Cell v, bool copy);
+  ArrayData *set(const String& k, Cell v, bool copy);
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
-  ArrayData *set(const StringData*, const Variant&, bool) = delete;
-  ArrayData *set(const String& k, Cell v, bool copy);
-  ArrayData *set(const Variant& k, Cell v, bool copy);
   ArrayData *set(const StringData*, Cell, bool) = delete;
+  ArrayData *set(const StringData*, const Variant&, bool) = delete;
   ArrayData *setRef(const String& k, Variant& v, bool copy);
   ArrayData *setRef(const Variant& k, Variant& v, bool copy);
   ArrayData *setRef(const StringData*, Variant&, bool) = delete;
+  ArrayData *add(Cell k, Cell v, bool copy);
+  ArrayData *add(const String& k, Cell v, bool copy);
   ArrayData *add(const String& k, const Variant& v, bool copy);
   ArrayData *add(const Variant& k, const Variant& v, bool copy);
-  ArrayData *add(const String& k, Cell v, bool copy);
-  ArrayData *add(const Variant& k, Cell v, bool copy);
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
 
@@ -532,8 +535,9 @@ protected:
   static const Variant& getNotFound(const String& k);
   static const Variant& getNotFound(const Variant& k);
 
-  static bool IsValidKey(const String& k);
+  static bool IsValidKey(Cell k);
   static bool IsValidKey(const Variant& k);
+  static bool IsValidKey(const String& k);
   static bool IsValidKey(const StringData* k) { return k; }
 
 protected:

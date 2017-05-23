@@ -731,39 +731,46 @@ const ArrayFunctions g_array_funcs = {
 // access converts them to integers.  non-int-string assertions should go
 // upstream of the ArrayData api.
 
+bool ArrayData::IsValidKey(Cell k) {
+  return isIntType(k.m_type) ||
+        (isStringType(k.m_type) && IsValidKey(k.m_data.pstr));
+}
+
+bool ArrayData::IsValidKey(const Variant& k) {
+  return IsValidKey(*k.asCell());
+}
+
 bool ArrayData::IsValidKey(const String& k) {
   return IsValidKey(k.get());
 }
 
-bool ArrayData::IsValidKey(const Variant& k) {
-  return k.isInteger() ||
-         (k.isString() && IsValidKey(k.getStringData()));
-}
-
-ArrayData *ArrayData::Create(const Variant& value) {
+ArrayData* ArrayData::Create(TypedValue value) {
   PackedArrayInit pai(1);
   pai.append(value);
   return pai.create();
 }
 
-ArrayData *ArrayData::Create(const Variant& name, const Variant& value) {
-  ArrayInit init(1, ArrayInit::Map{});
-  DEBUG_ONLY int64_t unused;
-  assertx(name.isString() ?
-         !name.getStringData()->isStrictlyInteger(unused) :
-         name.isInteger());
+ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
+  if (debug) {
+    DEBUG_ONLY int64_t unused;
+    DEBUG_ONLY auto const k = tvToCell(name);
+    assertx(isStringType(k.m_type) ?
+              !k.m_data.pstr->isStrictlyInteger(unused) :
+              isIntType(k.m_type));
+  }
 
+  ArrayInit init(1, ArrayInit::Map{});
   init.setValidKey(name, value);
   return init.create();
 }
 
-ArrayData *ArrayData::CreateRef(Variant& value) {
+ArrayData* ArrayData::CreateRef(Variant& value) {
   PackedArrayInit pai(1);
   pai.appendRef(value);
   return pai.create();
 }
 
-ArrayData *ArrayData::CreateRef(const Variant& name, Variant& value) {
+ArrayData* ArrayData::CreateRef(const Variant& name, Variant& value) {
   ArrayInit init(1, ArrayInit::Map{});
   DEBUG_ONLY int64_t unused;
   assertx(name.isString() ?

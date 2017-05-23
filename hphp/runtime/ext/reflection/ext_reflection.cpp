@@ -978,7 +978,7 @@ static Array get_function_user_attributes(const Func* func) {
 
   ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(VarNR::MakeKey(String(StrNR(it->first))), tvAsCVarRef(&it->second));
+    ai.set(VarNR::MakeKey(StrNR(it->first).asString()).tv(), it->second);
   }
   return ai.toArray();
 }
@@ -1682,7 +1682,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
     Array info = Array::Create();
     set_dyn_prop_info(info, it.first(), cls->name());
-    ret.setValidKey(it.first(), VarNR(info));
+    ret.setValidKey(*it.first().asTypedValue(), VarNR(info).tv());
   }
   return ret.toArray();
 }

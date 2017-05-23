@@ -794,20 +794,18 @@ Variant &Array::lvalAtRef(const Variant& key, AccessFlags flags) {
   return lvalBlackHole();
 }
 
-template<typename T>
-ALWAYS_INLINE
-void Array::setImpl(const T &key, const Variant& v) {
+template<typename T> ALWAYS_INLINE
+void Array::setImpl(const T& key, const Variant& v) {
   if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, v));
+    m_arr = Ptr::attach(ArrayData::Create(key, *v.asTypedValue()));
   } else {
-    ArrayData *escalated = m_arr->set(key, v, m_arr->cowCheck());
+    ArrayData *escalated = m_arr->set(key, *v.asCell(), m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
 
-template<typename T>
-ALWAYS_INLINE
-void Array::setRefImpl(const T &key, Variant& v) {
+template<typename T> ALWAYS_INLINE
+void Array::setRefImpl(const T& key, Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
   } else {
@@ -817,13 +815,12 @@ void Array::setRefImpl(const T &key, Variant& v) {
   }
 }
 
-template<typename T>
-ALWAYS_INLINE
-void Array::addImpl(const T &key, const Variant& v) {
+template<typename T> ALWAYS_INLINE
+void Array::addImpl(const T& key, const Variant& v) {
   if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, v));
+    m_arr = Ptr::attach(ArrayData::Create(key, *v.asTypedValue()));
   } else {
-    ArrayData *escalated = m_arr->add(key, v, m_arr->cowCheck());
+    ArrayData *escalated = m_arr->add(key, *v.asCell(), m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -834,14 +831,14 @@ void Array::set(int64_t key, const Variant& v) {
 
 void Array::set(const String& key, const Variant& v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
-  setImpl(convertKey(key), v);
+  setImpl(convertKey(key).tv(), v);
 }
 
 void Array::set(const Variant& key, const Variant& v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) return setImpl(key.getNumData(), v);
-  if (isKey) return setImpl(key, v);
+  if (isKey) return setImpl(*key.asCell(), v);
   VarNR k(convertKey(key));
-  if (!k.isNull()) setImpl(k, v);
+  if (!k.isNull()) setImpl(k.tv(), v);
 }
 
 void Array::setRef(int64_t key, Variant& v) {
@@ -866,14 +863,14 @@ void Array::add(int64_t key, const Variant& v) {
 
 void Array::add(const String& key, const Variant& v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
-  addImpl(convertKey(key), v);
+  addImpl(convertKey(key).tv(), v);
 }
 
 void Array::add(const Variant& key, const Variant& v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) return addImpl(key.getNumData(), v);
-  if (isKey) return addImpl(key, v);
+  if (isKey) return addImpl(*key.asCell(), v);
   VarNR k(convertKey(key));
-  if (!k.isNull()) addImpl(k, v);
+  if (!k.isNull()) addImpl(k.tv(), v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

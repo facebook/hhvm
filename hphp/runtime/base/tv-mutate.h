@@ -80,6 +80,9 @@ ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue* tv) {
 /*
  * Return a reference to an unboxed `tv'.
  */
+ALWAYS_INLINE Cell tvToCell(TypedValue tv) {
+  return LIKELY(tv.m_type != KindOfRef) ? tv : *tv.m_data.pref->tv();
+}
 ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }

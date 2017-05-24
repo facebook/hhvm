@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
@@ -300,7 +301,7 @@ bool HHVM_FUNCTION(array_key_exists,
     if (obj->isCollection()) {
       return collections::contains(obj, key);
     }
-    return HHVM_FN(array_key_exists)(key, toArray(search));
+    return HHVM_FN(array_key_exists)(key, search.toArray());
   } else {
     throw_bad_type_exception("array_key_exists expects an array or an object; "
                              "false returned.");
@@ -1627,7 +1628,7 @@ TypedValue HHVM_FUNCTION(range,
         return tvReturn(ArrayUtil::Range(d1, d2, dstep));
       }
 
-      int64_t lstep = toInt64(dstep);
+      int64_t lstep = double_to_int64(dstep);
       if (type1 == KindOfInt64 || type2 == KindOfInt64) {
         if (type1 != KindOfInt64) n1 = slow.toInt64();
         if (type2 != KindOfInt64) n2 = shigh.toInt64();
@@ -1643,8 +1644,8 @@ TypedValue HHVM_FUNCTION(range,
     return tvReturn(ArrayUtil::Range(low.toDouble(), high.toDouble(), dstep));
   }
 
-  int64_t lstep = toInt64(dstep);
-  return tvReturn(ArrayUtil::Range(toInt64(low), toInt64(high), lstep));
+  int64_t lstep = double_to_int64(dstep);
+  return tvReturn(ArrayUtil::Range(low.toInt64(), high.toInt64(), lstep));
 }
 ///////////////////////////////////////////////////////////////////////////////
 // diff/intersect helpers
@@ -2849,7 +2850,7 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
       arrays.push_back(Array(sd.original->getArrayData()));
       sd.array = &arrays.back();
     } else {
-      int n = toInt32(getArg<KindOfInt64>(ar, i));
+      int n = getArg<KindOfInt64>(ar, i);
       if (n == SORT_ASC) {
       } else if (n == SORT_DESC) {
         ascending = false;

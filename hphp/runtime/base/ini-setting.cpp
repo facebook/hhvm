@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
 
 #include "hphp/runtime/base/ini-parser/zend-ini.h"

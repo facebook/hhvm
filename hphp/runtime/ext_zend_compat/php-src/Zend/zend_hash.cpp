@@ -22,7 +22,6 @@
 #include "zend.h"
 #include "zend_hash.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"

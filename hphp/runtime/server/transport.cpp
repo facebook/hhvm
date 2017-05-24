@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/tv-type.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
@@ -643,7 +642,7 @@ bool Transport::setCookie(const String& name, const String& value, int64_t expir
         toString(DateTime::DateFormat::Cookie);
       cookie += sdt.data();
       cookie += "; Max-Age=";
-      String sdelta = toString( expire - time(0) );
+      String sdelta = String(expire - time(0));
       cookie += sdelta.data();
     }
   }

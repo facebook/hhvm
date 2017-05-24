@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
 
@@ -361,7 +360,7 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
 
     switch(m_op) {
       case '!':
-        result = (!toBoolean(value)); break;
+        result = !value.toBoolean(); break;
       case '+':
         cellSet(add(make_tv<KindOfInt64>(0), *value.asCell()),
                 *result.asCell());
@@ -381,16 +380,16 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
         result = value.toInt64();
         break;
       case T_DOUBLE_CAST:
-        result = toDouble(value);
+        result = value.toDouble();
         break;
       case T_STRING_CAST:
-        result = toString(value);
+        result = value.toString();
         break;
       case T_BOOL_CAST:
-        result = toBoolean(value);
+        result = value.toBoolean();
         break;
       case T_EMPTY:
-        result = !toBoolean(value);
+        result = !value.toBoolean();
         break;
       case T_ISSET:
         result = is_not_null(value);

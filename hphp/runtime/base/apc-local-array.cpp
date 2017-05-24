@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
 

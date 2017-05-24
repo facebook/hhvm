@@ -18,7 +18,6 @@
 #define incl_HPHP_TEST_BASE_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/runtime/base/type-conversions.h"
 
 #include "hphp/test/ext/test.h"
 #include "hphp/util/text-util.h"
@@ -98,6 +97,33 @@ typedef WithOption<true>  WithOpt;
 typedef WithOption<false> WithNoOpt;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace test_detail {
+
+inline bool toBoolean(bool    v) { return v;}
+inline bool toBoolean(char    v) { return v;}
+inline bool toBoolean(short   v) { return v;}
+inline bool toBoolean(int     v) { return v;}
+inline bool toBoolean(int64_t v) { return v;}
+inline bool toBoolean(double  v) { return v;}
+inline bool toBoolean(const char* v) = delete;
+inline bool toBoolean(const StringData *v) {
+  return v ? v->toBoolean() : false;
+}
+inline bool toBoolean(const String& v) { return toBoolean(v.get());}
+inline bool toBoolean(const ArrayData *v) {
+  return v && !v->empty();
+}
+inline bool toBoolean(const Array& v) { return toBoolean(v.get());}
+inline bool toBoolean(const ObjectData *v) {
+  return v ? v->toBoolean() : false;
+}
+inline bool toBoolean(const Object& v) { return toBoolean(v.get());}
+inline bool toBoolean(const Variant& v) { return v.toBoolean();}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // macros
 
 #define RUN_TEST(test) do {                                             \
@@ -116,7 +142,7 @@ typedef WithOption<false> WithNoOpt;
   return CountSkip();                                                   \
 
 #define VERIFY(exp)                                                     \
-  if (!toBoolean(exp)) {                                                \
+  if (!test_detail::toBoolean(exp)) {                                   \
     LOG_TEST_ERROR("%s:%d: [%s] is false", __FILE__, __LINE__, #exp);   \
     return Count(false);                                                \
   }                                                                     \

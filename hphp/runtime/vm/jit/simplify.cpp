@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -25,7 +26,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -2085,7 +2085,7 @@ SSATmp* simplifyConvBoolToInt(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvDblToInt(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (src->hasConstVal()) return cns(env, toInt64(src->dblVal()));
+  if (src->hasConstVal()) return cns(env, double_to_int64(src->dblVal()));
   return nullptr;
 }
 

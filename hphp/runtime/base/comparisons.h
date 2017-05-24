@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-comparisons.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -182,7 +181,9 @@ inline bool equal(bool v1, bool    v2) { return v1 == v2; }
 inline bool equal(bool v1, int     v2) { return v1 == (v2 != 0); }
 inline bool equal(bool v1, int64_t v2) { return v1 == (v2 != 0); }
 inline bool equal(bool v1, double  v2) { return v1 == (v2 != 0.0); }
-inline bool equal(bool v1, const StringData *v2) { return v1 == toBoolean(v2); }
+inline bool equal(bool v1, const StringData *v2) {
+  return v1 == (v2 ? v2->toBoolean() : false);
+}
 inline bool equal(bool v1, const String& v2) { return v1 == v2.toBoolean(); }
 inline bool equal(bool v1, const char* v2) = delete;
 inline bool equal(bool v1, const Array& v2) {
@@ -198,7 +199,7 @@ inline bool less(bool v1, int     v2) { return less(v1,(v2 != 0)); }
 inline bool less(bool v1, int64_t v2) { return less(v1,(v2 != 0)); }
 inline bool less(bool v1, double  v2) { return less(v1,(v2 != 0.0)); }
 inline bool less(bool v1, const StringData *v2) {
-  return less(v1,toBoolean(v2));
+  return less(v1, (v2 ? v2->toBoolean() : false));
 }
 inline bool less(bool v1, const String& v2) { return less(v1,v2.toBoolean()); }
 inline bool less(bool v1, const char* v2) = delete;
@@ -223,7 +224,7 @@ inline bool more(bool v1, int     v2) { return more(v1,(v2 != 0)); }
 inline bool more(bool v1, int64_t v2) { return more(v1,(v2 != 0)); }
 inline bool more(bool v1, double  v2) { return more(v1,(v2 != 0.0)); }
 inline bool more(bool v1, const StringData *v2) {
-  return more(v1,toBoolean(v2));
+  return more(v1, (v2 ? v2->toBoolean() : false));
 }
 inline bool more(bool v1, const String& v2) { return more(v1,v2.toBoolean()); }
 inline bool more(bool v1, const char* v2)  = delete;
@@ -442,8 +443,8 @@ inline bool equal(double v1, bool    v2) { return equal(v2, v1); }
 inline bool equal(double v1, int     v2) { return equal(v2, v1); }
 inline bool equal(double v1, int64_t v2) { return equal(v2, v1); }
 inline bool equal(double v1, double  v2) { return v1 == v2; }
-inline bool equal(double v1, const StringData *v2) {
-  return v1 == toDouble(v2);
+inline bool equal(double v1, const StringData* v2) {
+  return v1 == (v2 ? v2->toDouble() : 0.0);
 }
 inline bool equal(double v1, const String& v2) { return v1 == v2.toDouble(); }
 inline bool equal(double v1, const char* v2) = delete;
@@ -464,7 +465,7 @@ inline bool less(double v1, int     v2) { return more(v2, v1); }
 inline bool less(double v1, int64_t v2) { return more(v2, v1); }
 inline bool less(double v1, double  v2) { return v1 < v2; }
 inline bool less(double v1, const StringData *v2) {
-  return less(v1,toDouble(v2));
+  return less(v1, (v2 ? v2->toDouble() : 0.0));
 }
 inline bool less(double v1, const String& v2) { return less(v1,v2.toDouble()); }
 inline bool less(double v1, const char* v2)  = delete;
@@ -493,7 +494,7 @@ inline bool more(double v1, int     v2) { return less(v2, v1); }
 inline bool more(double v1, int64_t v2) { return less(v2, v1); }
 inline bool more(double v1, double  v2) { return v1 > v2; }
 inline bool more(double v1, const StringData *v2) {
-  return more(v1,toDouble(v2));
+  return more(v1, (v2 ? v2->toDouble() : 0.0));
 }
 inline bool more(double v1, const String& v2) { return more(v1,v2.toDouble()); }
 inline bool more(double v1, const char* v2)  = delete;
@@ -565,14 +566,14 @@ inline bool equal(const StringData *v1, const char* v2) = delete;
 inline bool equal(const StringData *v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) {
     if (v1 == nullptr || v2.get() == nullptr) {
-      return equal(toBoolean(v1), v2.toBoolean());
+      return equal(v1 ? v1->toBoolean() : false, v2.toBoolean());
     }
   }
   return false;
 }
 inline bool equal(const StringData *v1, const Object& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
-    return equal(toBoolean(v1), v2.toBoolean());
+    return equal(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   if (v2->isCollection()) return false;
   if (!v2->hasToString()) return false;
@@ -581,7 +582,7 @@ inline bool equal(const StringData *v1, const Object& v2) {
 
 inline bool equal(const StringData *v1, const Resource& v2) {
   if (!v1 || !v2) {
-    return equal(toBoolean(v1), v2.toBoolean());
+    return equal(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   return false;
 }
@@ -613,7 +614,7 @@ inline bool less(const StringData *v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) {
     detail::hackArrCompatCheck(v2);
     if (v1 == nullptr || v2.get() == nullptr) {
-      return less(toBoolean(v1), v2.toBoolean());
+      return less(v1 ? v1->toBoolean() : false, v2.toBoolean());
     }
     return true;
   }
@@ -624,7 +625,7 @@ inline bool less(const StringData *v1, const Array& v2) {
 }
 inline bool less(const StringData *v1, const Object& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
-    return less(toBoolean(v1), v2.toBoolean());
+    return less(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   check_collection_compare(v2.get());
   if (!v2->hasToString()) return true;
@@ -632,7 +633,7 @@ inline bool less(const StringData *v1, const Object& v2) {
 }
 inline bool less(const StringData *v1, const Resource& v2)  {
   if (!v1 || !v2) {
-    return less(toBoolean(v1), v2.toBoolean());
+    return less(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   return true;
 }
@@ -666,7 +667,7 @@ inline bool more(const StringData *v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) {
     detail::hackArrCompatCheck(v2);
     if (v1 == nullptr || v2.get() == nullptr) {
-      return more(toBoolean(v1), v2.toBoolean());
+      return more(v1 ? v1->toBoolean() : false, v2.toBoolean());
     }
     return false;
   }
@@ -677,7 +678,7 @@ inline bool more(const StringData *v1, const Array& v2) {
 }
 inline bool more(const StringData *v1, const Object& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
-    return more(toBoolean(v1), v2.toBoolean());
+    return more(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   check_collection_compare(v2.get());
   if (!v2->hasToString()) return false;
@@ -685,7 +686,7 @@ inline bool more(const StringData *v1, const Object& v2) {
 }
 inline bool more(const StringData *v1, const Resource& v2)  {
   if (!v1 || !v2) {
-    return more(toBoolean(v1), v2.toBoolean());
+    return more(v1 ? v1->toBoolean() : false, v2.toBoolean());
   }
   return false;
 }

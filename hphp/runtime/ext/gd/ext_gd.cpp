@@ -2768,9 +2768,9 @@ static Variant php_imagettftext_common(int mode, int extended,
     Resource image = arg1.toResource();
     ptsize = arg2.toDouble();
     angle = arg3.toDouble();
-    x = toInt64(arg4);
-    y = toInt64(arg5);
-    col = toInt64(arg6);
+    x = arg4.toInt64();
+    y = arg5.toInt64();
+    col = arg6.toInt64();
     fontname = arg7.toString();
     str = arg8.toString();
     extrainfo = arg9;
@@ -2790,7 +2790,7 @@ static Variant php_imagettftext_common(int mode, int extended,
       Variant item = iter.second();
       if (equal(key, s_linespacing)) {
         strex.flags |= gdFTEX_LINESPACE;
-        strex.linespacing = toDouble(item);
+        strex.linespacing = item.toDouble();
       }
     }
   }
@@ -2953,9 +2953,9 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
     return false;
   }
   memcpy((void*)font, hdr.c_str(), hdr.length());
-  i = toInt64(f_tell(stream));
+  i = int64_t(f_tell(stream));
   stream->seek(0, SEEK_END);
-  body_size_check = toInt64(f_tell(stream)) - hdr_size;
+  body_size_check = int64_t(f_tell(stream)) - hdr_size;
   stream->seek(i, SEEK_SET);
 
   body_size = font->w * font->h * font->nchars;
@@ -4380,14 +4380,14 @@ bool HHVM_FUNCTION(imageconvolution, const Resource& image,
   }
   for (i=0; i<3; i++) {
     if (matrix.exists(i) && (v = matrix[i]).isArray()) {
-      if ((row = toArray(v)).size() != 3) {
+      if ((row = v.toArray()).size() != 3) {
         raise_warning("You must have 3x3 array");
         return false;
       }
 
       for (j=0; j<3; j++) {
         if (row.exists(j)) {
-          mtx[i][j] = toDouble(row[j]);
+          mtx[i][j] = row[j].toDouble();
         } else {
           raise_warning("You must have a 3x3 matrix");
           return false;

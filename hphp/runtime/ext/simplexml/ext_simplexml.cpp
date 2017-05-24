@@ -930,8 +930,8 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
 
   switch (type) {
     case KindOfString: return ret;
-    case KindOfInt64:  return toInt64(ret);
-    case KindOfDouble: return toDouble(ret);
+    case KindOfInt64:  return ret.toInt64();
+    case KindOfDouble: return ret.toDouble();
     default:           return init_null();
   }
 }

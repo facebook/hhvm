@@ -68,7 +68,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 

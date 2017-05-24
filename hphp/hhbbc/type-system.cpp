@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -2537,7 +2538,7 @@ ArrKey disect_array_key(const Type& keyTy) {
 
   if (!RuntimeOption::EvalHackArrCompatNotices) {
     if (keyTy.strictSubtypeOf(TDbl)) {
-      ret.i = toInt64(keyTy.m_data.dval);
+      ret.i = double_to_int64(keyTy.m_data.dval);
       ret.type = ival(*ret.i);
       return ret;
     }

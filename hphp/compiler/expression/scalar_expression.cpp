@@ -27,7 +27,6 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"

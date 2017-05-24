@@ -22,6 +22,7 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -714,7 +715,7 @@ void cellBitNot(Cell& cell) {
 
     case KindOfDouble:
       cell.m_type     = KindOfInt64;
-      cell.m_data.num = ~toInt64(cell.m_data.dbl);
+      cell.m_data.num = ~double_to_int64(cell.m_data.dbl);
       break;
 
     case KindOfString:

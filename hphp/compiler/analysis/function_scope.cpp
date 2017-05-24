@@ -38,7 +38,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/util/atomic.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/variable-serializer.h"

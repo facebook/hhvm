@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -32,7 +33,6 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -198,7 +198,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
         return;
 
       case KindOfDouble:
-        i = toInt64(tv->m_data.dbl);
+        i = double_to_int64(tv->m_data.dbl);
         continue;
 
       case KindOfPersistentString:

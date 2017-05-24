@@ -20,8 +20,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -33,6 +33,8 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/runtime/ext/extension.h"
 
 #include <unicode/coll.h> // icu
 #include <vector>
@@ -153,7 +155,7 @@ Array Array::intersect(const Variant& array, bool by_key, bool by_value,
 }
 
 static int CompareAsStrings(const Variant& v1, const Variant& v2, const void *data) {
-  return HPHP::same(HPHP::toString(v1), HPHP::toString(v2)) ? 0 : -1;
+  return HPHP::same(v1.toString(), v2.toString()) ? 0 : -1;
 }
 
 Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match,
@@ -709,7 +711,7 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
 
     case KindOfDouble:
       bad_key();
-      return m_arr->get(HPHP::toInt64(key.asTypedValue()->m_data.dbl),
+      return m_arr->get(double_to_int64(key.asTypedValue()->m_data.dbl),
                         any(flags & AccessFlags::Error));
 
     case KindOfPersistentString:

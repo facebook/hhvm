@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/runtime-option.h"

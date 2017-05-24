@@ -2595,7 +2595,7 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc, PC targetpc) {
     vmStack().popX();
     if (op == OpJmpZ ? n == 0 : n != 0) pc = targetpc;
   } else {
-    auto const cond = toBoolean(cellAsCVarRef(*c1));
+    auto const cond = cellAsCVarRef(*c1).toBoolean();
     vmStack().popC();
     if (op == OpJmpZ ? !cond : cond) pc = targetpc;
   }

@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -185,7 +184,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
+  assertx(val != nullptr);
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -199,7 +199,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
-      return op(!!cell.m_data.num, toBoolean(val));
+      return op(!!cell.m_data.num, val->toBoolean());
 
     case KindOfDouble: {
       auto const num = stringToNumeric(val);

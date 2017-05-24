@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -388,7 +389,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:         return m_data.num;
-    case KindOfDouble:        return HPHP::toInt64(m_data.dbl);
+    case KindOfDouble:        return double_to_int64(m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:        return m_data.pstr->toInt64(base);
     case KindOfPersistentVec:

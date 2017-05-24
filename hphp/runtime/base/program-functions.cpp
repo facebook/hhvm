@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/base/variable-serializer.h"

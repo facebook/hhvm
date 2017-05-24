@@ -101,16 +101,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | FORMAT (content, from, to_) ->
         env, ServerFormat.go genv content from to_
     | IDE_FORMAT action ->
-        let open ServerFormatTypes in
-        let open Ide_api_types in
-        let (filename, range_opt) = match action with
-          | Document filename -> (filename, None)
-          | Range range -> (range.range_filename, Some range.file_range)
-          | Position _ -> failwith "Not yet implemented: formatAtPosition"
-        in
-        let content = ServerFileSync.get_file_content
-          (ServerUtils.FileName filename) in
-        env, ServerFormat.go_ide genv content range_opt
+        env, ServerFormat.go_ide genv action
     | TRACE_AI action ->
         env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt

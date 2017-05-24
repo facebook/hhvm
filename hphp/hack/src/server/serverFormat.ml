@@ -7,17 +7,22 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
+ open Result.Monad_infix
 
 (* TODO t14922604: Further improve error handling *)
-let call_external_formatter path content from to_ =
-  let args = [|"hackfmt"; "--range"; string_of_int from; string_of_int to_|] in
+let call_external_formatter
+  (cmd : string)
+  (content : string)
+  (args : string list)
+  : (string list, string) Result.t =
+  let args = Array.of_list (cmd :: args) in
   let lines = ref [] in
   let status = ref None in
   let reader timeout ic oc =
     output_string oc content;
     close_out oc;
     try while true do lines := Timeout.input_line ~timeout ic :: !lines done
-      with End_of_file -> lines := "" :: !lines;
+      with End_of_file -> ();
     status := Some (Timeout.close_process_in ic);
   in
   try
@@ -25,11 +30,11 @@ let call_external_formatter path content from to_ =
       ~timeout:2
       ~on_timeout:(fun _ -> ())
       ~reader
-      path
+      cmd
       args;
     match !status with
       | Some (Unix.WEXITED 0) ->
-          Result.Ok (String.concat "\n" @@ List.rev !lines)
+          Result.Ok (List.rev !lines)
       | Some (Unix.WEXITED v) ->
           Result.Error (Hackfmt_error.get_error_string_from_exit_value v)
       | None -> Result.Error "Call to hackfmt never terminated"
@@ -39,15 +44,18 @@ let call_external_formatter path content from to_ =
     Result.Error "Call to hackfmt timed out"
   end
 
-let go_hackfmt genv content from to_ =
-  Hh_logger.log "--range %d %d" from to_;
+let range_offsets_to_args from to_ =
+  ["--range"; string_of_int from; string_of_int to_]
+
+let go_hackfmt genv content args =
+  Hh_logger.log "%s" (String.concat " " args);
   let path = match ServerConfig.formatter_override genv.ServerEnv.config with
     | None -> Path.make "/usr/local/bin/hackfmt"
     | Some p -> p
   in
   let path = Path.to_string path in
   if Sys.file_exists path
-  then call_external_formatter path content from to_
+  then call_external_formatter path content args
   else begin
     Hh_logger.log "Formatter not found";
     Result.Error ("Could not locate formatter on provided path: " ^ path)
@@ -69,7 +77,9 @@ let go_hh_format _ content from to_ =
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
 let go genv content from to_ =
   if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt
-  then go_hackfmt genv content from to_
+  then
+    go_hackfmt genv content (range_offsets_to_args from to_) >>| fun lines ->
+    (String.concat "\n" lines) ^ "\n"
   else go_hh_format genv content from to_
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
@@ -99,22 +109,85 @@ let expand_range_to_whole_rows content range =
     let from0, to0 = get_offsets content (range.st, range.ed) in
     (range, from0, to0)
 
-let go_ide genv content range_opt =
+(* Two integers separated by a space. *)
+let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
+
+let go_ide
+  (genv: ServerEnv.genv)
+  (action: ServerFormatTypes.ide_action)
+  : ServerFormatTypes.ide_result =
+  let open File_content in
   let open Ide_api_types in
   let open ServerFormatTypes in
-  let open File_content in
-  let range, from0, to0 = match range_opt with
-    | None ->
-        let from0 = 0 in
-        let to0 = String.length content in
-        let ed = offset_to_position content to0 in
-        let range = {st = {line = 1; column = 1;}; ed;} in
-        (range, from0, to0)
-    | Some range ->
-        expand_range_to_whole_rows content range
+  let filename = match action with
+    | Document filename -> filename
+    | Range range -> range.range_filename
+    | Position position -> position.filename
   in
-  (* get_offsets returns 0-based offsets, but we need 1-based. *)
-  let result = go genv content (from0 + 1) (to0 + 1) in
-  match result with
-    | Result.Ok new_text -> Result.Ok {new_text; range;}
-    | Result.Error e -> Result.Error e
+  let content =
+    ServerFileSync.get_file_content (ServerUtils.FileName filename)
+  in
+
+  let convert_to_ide_result
+    (old_format_result: ServerFormatTypes.result)
+    ~(range : Ide_api_types.range)
+    : ServerFormatTypes.ide_result =
+    old_format_result
+      |> Result.map ~f:(fun new_text -> {new_text; range;})
+  in
+
+  match action with
+  | Document _filename ->
+    (* `from0` and `to0` are zero-indexed, hence the name. *)
+    let from0 = 0 in
+    let to0 = String.length content in
+    let ed = offset_to_position content to0 in
+    let range = {st = {line = 1; column = 1;}; ed;} in
+    (* hackfmt currently takes one-indexed integers for range formatting. *)
+    go genv content (from0 + 1) (to0 + 1)
+      |> convert_to_ide_result ~range
+
+  | Range range ->
+    let (range, from0, to0) =
+      expand_range_to_whole_rows content range.file_range in
+    go genv content (from0 + 1) (to0 + 1)
+      |> convert_to_ide_result ~range
+
+  | Position {position; _} ->
+    (* `get_offset` returns a zero-based index, and `--at-char` takes a
+       zero-based index. *)
+    let offset = get_offset content position in
+    let args = ["--at-char"; string_of_int offset] in
+    go_hackfmt genv content args >>= fun lines ->
+
+    (* `hackfmt --at-char` returns the range that was formatted, as well as the
+       contents of that range. For example, it might return
+
+           10 12
+           }
+
+       signifying that we should replace the character under the cursor with the
+       following content, starting at index 10. We need to extract the range
+       from the first line and forward it to the client so that it knows where
+       to apply the edit. *)
+    begin match lines with
+    | range_line :: lines -> Result.Ok (range_line, lines)
+    | _ -> Result.Error "Got no lines in at-position formatting"
+    end >>= fun (range_line, lines) ->
+
+    (* Extract the offsets in the first line that form the range.
+       NOTE: `Str.string_match` sets global state to be consumed immediately
+       afterwards by `Str.matched_group`. *)
+    let does_range_match = Str.string_match range_regexp range_line 0 in
+    if not does_range_match
+    then Result.Error "Range not found on first line of --at-char output"
+    else
+
+    let from0 = int_of_string (Str.matched_group 1 range_line) in
+    let to0 = int_of_string (Str.matched_group 2 range_line) in
+    let range = {
+      st = offset_to_position content from0;
+      ed = offset_to_position content to0;
+    } in
+    let new_text = String.concat "\n" lines in
+    Result.Ok {new_text; range;}

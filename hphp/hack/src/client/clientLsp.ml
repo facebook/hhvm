@@ -736,6 +736,19 @@ let do_document_range_formatting
   do_formatting_common conn action
 
 
+let do_document_on_type_formatting
+  (conn: server_conn option)
+  (params: Document_on_type_formatting.params)
+  : Document_on_type_formatting.result =
+  let open Document_on_type_formatting in
+  let open Text_document_identifier in
+  let action = ServerFormatTypes.Position { Ide_api_types.
+    filename = params.text_document.uri;
+    position = lsp_position_to_ide params.position;
+  } in
+  do_formatting_common conn action
+
+
 let do_document_formatting
   (conn: server_conn option)
   (params: Document_formatting.params)
@@ -752,6 +765,7 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
   let root = if Option.is_some params.root_uri
              then ClientArgsUtils.get_root params.root_uri
              else ClientArgsUtils.get_root params.root_path in
+  let local_config = ServerLocalConfig.load () in
 
   let force_stop_existing_persistent_connection = is_retry in
   let server_conn = connect_persistent
@@ -781,7 +795,12 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
       code_lens_provider = None;
       document_formatting_provider = true;
       document_range_formatting_provider = true;
-      document_on_type_formatting_provider = None;
+      document_on_type_formatting_provider =
+        Option.some_if local_config.ServerLocalConfig.use_hackfmt
+        {
+          first_trigger_character = ";";
+          more_trigger_characters = ["}"];
+        };
       rename_provider = false;
       document_link_provider = None;
       execute_command_provider = None;
@@ -895,6 +914,14 @@ let handle_event (state: state) (event: event) : unit =
       |> do_document_range_formatting state.server_conn
       |> print_document_range_formatting |> respond stdout c
 
+  (* textDocument/onTypeFormatting *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/onTypeFormatting" ->
+    cancel_if_stale state c short_timeout;
+    parse_document_on_type_formatting c.params
+      |> do_document_on_type_formatting state.server_conn
+      |> print_document_on_type_formatting |> respond stdout c
+
   (* textDocument/didOpen notification *)
   | Main_loop, Client_message c when c.method_ = "textDocument/didOpen" ->
     parse_did_open c.params |> do_did_open state.server_conn;
@@ -929,8 +956,9 @@ let handle_event (state: state) (event: event) : unit =
   | _, Client_error -> ()
 
   (* catch-all for client reqs/notifications we haven't yet implemented *)
-  | Main_loop, Client_message _c ->
-    raise (Error.Method_not_found "not implemented")
+  | Main_loop, Client_message c ->
+    let message = Printf.sprintf "not implemented: %s" c.method_ in
+    raise (Error.Method_not_found message)
 
   (* catch-all for requests/notifications after shutdown request *)
   | Post_shutdown, Client_message _c ->

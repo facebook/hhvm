@@ -45,6 +45,16 @@ let rec emit_stmt st =
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
     gather (List.map exprl emit_unset_expr)
+  | A.Expr (_, A.Call ((_, A.Id (_, "declare")),
+      [
+        _, (
+        A.Binop (A.Eq None, (_, A.Id(_, "ticks")), (_, A.Int(_))) |
+        A.Binop (A.Eq None, (_, A.Id(_, "encoding")), (_, A.String(_))) |
+        A.Binop (A.Eq None, (_, A.Id(_, "strict_types")), (_, A.Int(_)))
+        )
+      ], []))
+      ->
+    empty
   | A.Expr (_, A.Id (_, "exit")) -> emit_exit None
   | A.Expr (_, A.Call ((_, A.Id (_, "exit")), args, []))
     when List.length args = 0 || List.length args = 1 ->

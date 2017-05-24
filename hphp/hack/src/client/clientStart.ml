@@ -112,7 +112,7 @@ let main env =
     start_server env;
     Exit_status.No_error
   end else begin
-    Printf.eprintf
+    if not env.silent then Printf.eprintf
       "Error: Server already exists for %s\n\
       Use hh_client restart if you want to kill it and start a new one\n%!"
       (Path.to_string env.root);

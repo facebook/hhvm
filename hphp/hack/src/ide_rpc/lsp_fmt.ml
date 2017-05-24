@@ -761,6 +761,7 @@ let get_error_info (e: exn) : int * string * json option =
   | Error.Server_not_initialized message -> (-32002, message, None)
   | Error.Unknown message -> (-32001, message, None)
   | Error.Request_cancelled message -> (-32800, message, None)
+  | Exit_status.Exit_with code -> (-32001, Exit_status.to_string code, None)
   | _ -> (-32001, Printexc.to_string e, None)
 
 let print_error (e: exn) : json =

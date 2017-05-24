@@ -166,7 +166,6 @@ let rec connect_persistent'
   let handoff_options = {
     MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
     force_dormant_start = false;
-    force_stop_existing_persistent_connection;
   } in
   let conn = ServerUtils.connect_to_monitor root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;

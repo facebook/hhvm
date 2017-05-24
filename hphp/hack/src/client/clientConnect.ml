@@ -188,7 +188,6 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let handoff_options = {
     MonitorRpc.server_name = server_name;
     force_dormant_start = env.force_dormant_start;
-    force_stop_existing_persistent_connection = false;
   } in
   let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;

@@ -1225,19 +1225,18 @@ void RuntimeOption::Load(
     using jit::CodeCache;
     Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize",
                  ahotDefault());
-    Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize",
-                 (arch() == Arch::ARM) ? (50 << 20) : (60 << 20));
+    Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
 
     if (RuntimeOption::EvalJitPGO) {
       Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
-                   (arch() == Arch::ARM) ? (54 << 20) : (64 << 20));
+                   64 << 20);
     } else {
       // Avoid "Possible bad confg node" warning for unused keys.
       config["Eval.JitAProfSize"].configGetUInt64();
       CodeCache::AProfSize = 0;
     }
     Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
-                 (arch() == Arch::ARM) ? (20 << 20) : (24 << 20));
+                 24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
                  40 << 20);
     Config::Bind(CodeCache::GlobalDataSize, ini, config,

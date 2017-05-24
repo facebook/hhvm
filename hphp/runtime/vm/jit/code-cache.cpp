@@ -80,7 +80,6 @@ CodeCache::CodeCache()
   m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
                 kAFrozenSize + kGDataSize + thread_local_size;
   m_codeSize = m_totalSize - kGDataSize;
-  auto kGCodeExeSize = kAHotSize + kASize + kAProfSize + kAColdSize;
 
   if ((kASize < (10 << 20)) ||
       (kAColdSize < (4 << 20)) ||
@@ -98,14 +97,7 @@ CodeCache::CodeCache()
     exit(1);
   }
 
-  if (arch() == Arch::ARM && kGCodeExeSize > (128 << 20)) {
-    fprintf(stderr,"Combined size of AHotSize, ASize, AProfSize, and "
-                    "AColdSize must be <= 128MB to support PC relative "
-                    "branches \n");
-    exit(1);
-  }
-
-auto enhugen = [&](void* base, int numMB) {
+  auto enhugen = [&](void* base, int numMB) {
     if (CodeCache::MapTCHuge) {
       assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
       hintHugeDeleteData((char*)base, numMB << 20,

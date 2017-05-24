@@ -2602,6 +2602,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       (* Directly call get_fun so that we can muck with the type before
        * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
        * trying to figure out which Tvar is which. *)
+      Typing_hooks.dispatch_fun_id_hook (p, SN.FB.idx);
       (match Env.get_fun env (snd id) with
       | Some fty ->
         let param1, (name2, (r2, _)), (name3, (r3, _)) =

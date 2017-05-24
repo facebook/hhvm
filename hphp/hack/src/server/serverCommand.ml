@@ -68,6 +68,7 @@ let rec wait_for_rpc_response fd push_messages =
   match Marshal_tools.from_fd_with_preamble fd with
   | Response r -> r, List.rev push_messages
   | Push m -> wait_for_rpc_response fd (m :: push_messages)
+  | Hello -> failwith "unexpected hello after connection already established"
 
 let rpc_persistent :
   type a. Timeout.in_channel * out_channel -> a t -> a * push list

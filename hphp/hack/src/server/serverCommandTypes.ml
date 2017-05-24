@@ -101,6 +101,11 @@ type push =
 type 'a persistent_connection_message_type =
   | Push of push
   | Response of 'a
+  | Hello
+  (* Hello is the first message sent after handoff. It's used for both *)
+  (* persistent and non-persistent connections. It's included in this  *)
+  (* type, though, because ocaml typing forces a single type to come   *)
+  (* Marshal.from_fd_with_preamble.                                    *)
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

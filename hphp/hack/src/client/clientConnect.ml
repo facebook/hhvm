@@ -162,7 +162,7 @@ let rec wait_for_server_hello
       let fd = Timeout.descr_of_in_channel ic in
       let msg = Marshal_tools.from_fd_with_preamble fd in
       (match msg with
-      | "Hello" ->
+      | ServerCommandTypes.Hello ->
         ()
       | _ ->
         Option.iter tail_env

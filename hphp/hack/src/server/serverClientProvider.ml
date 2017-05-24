@@ -63,7 +63,7 @@ let sleep_and_check in_fd persistent_client_opt ~ide_idle =
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.to_fd_with_preamble fd "Hello"
+  Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Hello
 
 let read_connection_type ic =
   Timeout.with_timeout

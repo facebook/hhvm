@@ -276,6 +276,8 @@ let read_message_from_server (server: server_conn) : ServerCommandTypes.push =
   | Response _ ->
     raise Lsp.Error.(Internal_error "unexpected response without a request")
   | Push m -> m
+  | ServerCommandTypes.Hello ->
+    failwith "unexpected hello after connection already established"
 
 (* Read the next available message from the server. *)
 let get_next_message (server: server_conn) =

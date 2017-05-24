@@ -99,6 +99,8 @@ let read_push_message_from_server fd : ServerCommandTypes.push =
   | ServerCommandTypes.Response _ ->
     failwith "unexpected response without a request"
   | Push m -> m
+  | ServerCommandTypes.Hello ->
+    failwith "unexpected hello after connection already established"
 
 let get_next_push_message fd =
   if Queue.is_empty pending_push_messages

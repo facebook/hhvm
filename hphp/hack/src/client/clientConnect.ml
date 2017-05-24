@@ -20,7 +20,6 @@ type env = {
   retry_if_init : bool;
   expiry : float option;
   no_load : bool;
-  to_ide : bool;
   ai_mode : string option;
 }
 
@@ -185,8 +184,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   end;
   let connect_once_start_t = Unix.time () in
 
-  let server_name = HhServerMonitorConfig.Program.
-    (if env.to_ide then ide_server else hh_server) in
+  let server_name = HhServerMonitorConfig.Program.hh_server in
   let handoff_options = {
     MonitorRpc.server_name = server_name;
     force_dormant_start = env.force_dormant_start;
@@ -197,7 +195,6 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let _, tail_msg = open_and_get_tail_msg start_time tail_env in
   match conn with
   | Result.Ok (ic, oc) ->
-      if env.to_ide then SMUtils.send_ide_client_type oc SMUtils.Request;
       (try begin
         wait_for_server_hello ic env retries start_time (Some tail_env) true;
         if Tty.spinner_used () then

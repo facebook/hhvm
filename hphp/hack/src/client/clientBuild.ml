@@ -73,7 +73,6 @@ let main env =
     retry_if_init = true;
     expiry = None;
     no_load = false;
-    to_ide = false;
     ai_mode = None;
   } in
   let old_svnrev = Option.try_with begin fun () ->

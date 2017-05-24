@@ -22,7 +22,6 @@ let main env =
     retry_if_init = true;
     expiry = None;
     no_load = false;
-    to_ide = false;
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

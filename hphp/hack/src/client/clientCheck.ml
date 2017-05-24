@@ -68,7 +68,6 @@ let connect args =
     retry_if_init = args.retry_if_init;
     expiry = args.timeout;
     no_load = args.no_load;
-    to_ide = false;
     ai_mode = args.ai_mode;
   }
 

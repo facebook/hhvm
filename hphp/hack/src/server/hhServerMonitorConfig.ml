@@ -14,7 +14,6 @@ module SP = ServerProcess
 
 module Program = struct
   let hh_server = "typechecker"
-  let ide_server = "ide"
 end
 
 let start_server_daemon ~informant_managed options name log_link daemon_entry =

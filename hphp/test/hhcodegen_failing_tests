@@ -8,7 +8,6 @@ quick/GetVar.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
-quick/IterInitM.php
 quick/SetOpProp.php
 quick/UnsetM.php
 quick/UnsetProp.php
@@ -17,13 +16,10 @@ quick/__isset.php
 quick/abs_codegen.php
 quick/actrec.php
 quick/all_type_comparison_test.php
-quick/apc.php
-quick/array_misc.php
 quick/array_packed.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
 quick/backtick.php
-quick/bad_iter_warning.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
 quick/chdir_posix.php
@@ -59,7 +55,6 @@ quick/dict/invalid-key.php
 quick/dict/invalid-scalar.php
 quick/dict/oob-key.php
 quick/dict/reflect.php
-quick/dict/refs.php
 quick/dict/static.php
 quick/dict/type-hint.php
 quick/do-while-continue.php
@@ -100,7 +95,6 @@ quick/func3.php
 quick/func_slice_args.php
 quick/function-static-init.php
 quick/function_varargs.php
-quick/generator_method.php
 quick/generator_varargs.php
 quick/generator_vars.php
 quick/get_class.php
@@ -169,7 +163,6 @@ quick/keyset/basic-setters.php
 quick/keyset/invalid-key.php
 quick/keyset/invalid-scalar.php
 quick/keyset/reflect.php
-quick/keyset/refs.php
 quick/keyset/static.php
 quick/keyset/type-hint.php
 quick/lambda3.php
@@ -196,7 +189,6 @@ quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names_class.php
 quick/null_constant.php
-quick/objiter.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
@@ -272,7 +264,6 @@ quick/varenv_extra_args.php
 quick/vec/basic-getters.php
 quick/vec/basic-setters.php
 quick/vec/reflect.php
-quick/vec/refs.php
 quick/vec/static.php
 quick/vec/type-hint.php
 quick/weird-isset-empty.php

@@ -265,21 +265,17 @@ let rec instr_seq_to_list_aux sl result =
 
 let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 
-let instr_try_fault_begin fault_label fault_body =
-  let try_begin = instr (ITry (TryFaultBegin (fault_label))) in
+let instr_try_fault fault_label try_body fault_body =
+  let instr_try_fault_body = gather [
+    instr (ITry (TryFaultBegin (fault_label)));
+    try_body;
+    instr (ITry TryFaultEnd)
+  ] in
   let fault_body = gather [
     instr_label fault_label;
     fault_body
   ] in
-  Instr_try_fault (try_begin, fault_body)
-
-let instr_try_fault_end = instr (ITry TryFaultEnd)
-let instr_try_fault fault_label try_body fault_body =
-  gather [
-    instr_try_fault_begin fault_label fault_body;
-    try_body;
-    instr_try_fault_end;
-  ]
+  Instr_try_fault (instr_try_fault_body, fault_body)
 
 let instr_try_catch_begin = instr (ITry TryCatchBegin)
 let instr_try_catch_middle = instr (ITry TryCatchMiddle)
@@ -307,11 +303,15 @@ let extract_fault_instructions instrseq =
   let rec aux instrseq acc =
     match instrseq with
     | Instr_try_fault (try_body, fault_body) ->
-      aux try_body (fault_body :: acc)
+    (* collect fault handlers in try body, then prepend
+       the outer fault handler *)
+      fault_body :: aux try_body acc
     | Instr_list _ -> acc
     | Instr_concat ([]) -> acc
     | Instr_concat (h :: t) -> aux (Instr_concat t) (aux h acc) in
-  gather (aux instrseq [])
+  (* fault handlers are accumulated in reverse so result list needs to
+     be reversed to get the correct order *)
+  gather (List.rev @@ aux instrseq [])
 
 (* Returns a tuple of is_generator and is_pair_generator *)
 let is_function_generator instrseq =

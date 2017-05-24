@@ -174,11 +174,10 @@ let rec connect_persistent'
       begin try
         ClientConnect.wait_for_server_hello
           ~ic
-          ~env:root
           ~retries:(Some retries)
+          ~progress_callback:ClientConnect.null_progress_reporter
           ~start_time
-          ~tail_env:None
-          ~first_call:true;
+          ~tail_env:None;
         (ic, oc)
       with
       | ClientConnect.Server_hung_up ->

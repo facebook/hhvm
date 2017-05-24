@@ -21,7 +21,17 @@ type env = {
   expiry : float option;
   no_load : bool;
   ai_mode : string option;
+  progress_callback: string option -> unit;
 }
+
+let tty_progress_reporter (status: string option) : unit =
+  if Tty.spinner_used () then Tty.print_clear_line stderr;
+  match status with
+  | None -> ()
+  | Some s -> Tty.eprintf "hh_server is busy: %s %s%!" s (Tty.spinner())
+
+let null_progress_reporter (_status: string option) : unit =
+  ()
 
 let running_load_script_re = Str.regexp_string "Running load script"
 
@@ -113,25 +123,21 @@ let open_and_get_tail_msg start_time tail_env =
   let tail_msg = msg_of_tail tail_env in
   load_state_not_found, tail_msg
 
-let print_wait_msg ?(first_call=false) start_time tail_env =
-  if (not first_call) && Tty.spinner_used () then
-    Tty.print_clear_line stderr;
+let print_wait_msg progress_callback start_time tail_env =
   let load_state_not_found, tail_msg =
     open_and_get_tail_msg start_time tail_env in
   if load_state_not_found then
     Printf.eprintf "%s\n%!" ClientMessages.load_state_not_found_msg;
-  Tty.eprintf "hh_server is busy: %s %s%!" tail_msg (Tty.spinner());
-  ()
+  progress_callback (Some tail_msg)
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
 let rec wait_for_server_hello
   ~ic
-  ~env
   ~retries
+  ~progress_callback
   ~start_time
-  ~tail_env
-  ~first_call =
+  ~tail_env =
   match retries with
   | Some n when n < 0 ->
       (if Option.is_some tail_env then
@@ -142,14 +148,14 @@ let rec wait_for_server_hello
   let readable, _, _  = Unix.select
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
-    Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
+    Option.iter tail_env
+      (fun t -> print_wait_msg progress_callback start_time t);
     wait_for_server_hello
       ~ic
-      ~env
       ~retries:(Option.map retries (fun x -> x - 1))
+      ~progress_callback
       ~start_time
       ~tail_env
-      ~first_call:false
   ) else
     try
       let fd = Timeout.descr_of_in_channel ic in
@@ -158,9 +164,10 @@ let rec wait_for_server_hello
       | "Hello" ->
         ()
       | _ ->
-        Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
-        wait_for_server_hello ic env (Option.map retries (fun x -> x - 1))
-          start_time tail_env false
+        Option.iter tail_env
+          (fun t -> print_wait_msg progress_callback start_time t);
+        wait_for_server_hello ic (Option.map retries (fun x -> x - 1))
+          progress_callback start_time tail_env
       )
     with
     | End_of_file
@@ -194,17 +201,17 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let _, tail_msg = open_and_get_tail_msg start_time tail_env in
   match conn with
   | Result.Ok (ic, oc) ->
-      (try begin
-        wait_for_server_hello ic env retries start_time (Some tail_env) true;
-        if Tty.spinner_used () then
-          Tty.print_clear_line stderr
-      end
-      with
-      | Server_hung_up ->
-        (Printf.eprintf "hh_server died unexpectedly. Maybe you recently \
-        launched a different version of hh_server. Now exiting hh_client.";
-        Exit_status.exit Exit_status.No_server_running)
-      );
+      begin
+        try
+          wait_for_server_hello ic retries env.progress_callback start_time
+            (Some tail_env);
+          env.progress_callback None
+        with
+        | Server_hung_up ->
+          (Printf.eprintf "hh_server died unexpectedly. Maybe you recently \
+          launched a different version of hh_server. Now exiting hh_client.";
+          Exit_status.exit Exit_status.No_server_running)
+      end;
       (ic, oc)
   | Result.Error e ->
     if first_attempt then
@@ -249,9 +256,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       * when the typechecker hasn't finished initializing and if one doesn't
       * exist then the client starts one and waits until the typechecker is
       * finished before attempting a connection. *)
-      if Tty.spinner_used () then Tty.print_clear_line stderr;
-      Tty.eprintf "hh_server is busy: %s %s\n%!" tail_msg
-        (Tty.spinner());
+      env.progress_callback (Some tail_msg);
       HackEventLogger.client_connect_once_busy start_time;
       connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
     | SMUtils.Build_id_mismatched mismatch_info_opt ->

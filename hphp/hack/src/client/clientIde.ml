@@ -37,8 +37,8 @@ let rec connect_persistent env retries start_time =
   match conn with
   | Result.Ok (ic, oc) ->
       (try
-        ClientConnect.wait_for_server_hello ic env (Some retries)
-          start_time None true;
+        ClientConnect.wait_for_server_hello ic (Some retries)
+          ClientConnect.tty_progress_reporter start_time None;
       with
       | ClientConnect.Server_hung_up ->
         Exit_status.exit Exit_status.No_server_running

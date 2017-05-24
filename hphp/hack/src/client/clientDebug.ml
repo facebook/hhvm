@@ -22,6 +22,7 @@ let main env =
     retry_if_init = true;
     expiry = None;
     no_load = false;
+    progress_callback = ClientConnect.tty_progress_reporter;
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

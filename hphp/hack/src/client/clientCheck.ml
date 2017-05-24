@@ -69,6 +69,7 @@ let connect args =
     expiry = args.timeout;
     no_load = args.no_load;
     ai_mode = args.ai_mode;
+    progress_callback = ClientConnect.tty_progress_reporter;
   }
 
 let rpc args command =

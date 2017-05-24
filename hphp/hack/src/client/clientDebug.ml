@@ -23,6 +23,7 @@ let main env =
     expiry = None;
     no_load = false;
     progress_callback = ClientConnect.tty_progress_reporter;
+    do_post_handoff_handshake = true;
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

@@ -70,6 +70,7 @@ let connect args =
     no_load = args.no_load;
     ai_mode = args.ai_mode;
     progress_callback = ClientConnect.tty_progress_reporter;
+    do_post_handoff_handshake = true;
   }
 
 let rpc args command =

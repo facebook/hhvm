@@ -75,6 +75,7 @@ let main env =
     no_load = false;
     ai_mode = None;
     progress_callback = ClientConnect.tty_progress_reporter;
+    do_post_handoff_handshake = true;
   } in
   let old_svnrev = Option.try_with begin fun () ->
     Sys_utils.read_file ServerBuild.svnrev_path

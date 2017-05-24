@@ -22,6 +22,7 @@ type env = {
   no_load : bool;
   ai_mode : string option;
   progress_callback: string option -> unit;
+  do_post_handoff_handshake: bool;
 }
 
 let tty_progress_reporter (status: string option) : unit =
@@ -201,7 +202,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let _, tail_msg = open_and_get_tail_msg start_time tail_env in
   match conn with
   | Result.Ok (ic, oc) ->
-      begin
+      if env.do_post_handoff_handshake then begin
         try
           wait_for_server_hello ic retries env.progress_callback start_time
             (Some tail_env);
@@ -303,7 +304,9 @@ let connect env =
       connect ~first_attempt:true env env.retries start_time tail_env in
     Tail.close_env tail_env;
     HackEventLogger.client_established_connection start_time;
-    ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
+    if env.do_post_handoff_handshake then begin
+      ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
+    end;
     (ic, oc)
   with
   | e ->

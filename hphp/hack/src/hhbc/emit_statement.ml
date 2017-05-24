@@ -36,6 +36,11 @@ let emit_return ~need_ref =
   then gather [instr_verifyRetTypeC; ret_instr]
   else ret_instr
 
+let emit_def_inline = function
+  | A.Fun _ -> instr_deffunc
+  | A.Class _ -> instr_defcls
+  | _ -> failwith "Define inline: Invalid inline definition"
+
 let rec emit_stmt st =
   match st with
   | A.Expr (_, A.Yield_break) ->
@@ -107,8 +112,8 @@ let rec emit_stmt st =
   | A.Foreach (collection, await_pos, iterator, block) ->
     emit_foreach (await_pos <> None) collection iterator
       (A.Block block)
-  | A.Def_inline _ ->
-    emit_nyi "Def_inline"
+  | A.Def_inline def ->
+    emit_def_inline def
   | A.Static_var es ->
     emit_static_var es
   | A.Global_var es ->

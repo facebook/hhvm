@@ -60,6 +60,9 @@ let from_ast
   parsed_classes,
   parsed_typedefs,
   parsed_defs) =
+  let inline_fn_defs, inline_class_defs = Inline_defs.from_ast parsed_defs in
+  let parsed_functions = inline_fn_defs @ parsed_functions in
+  let parsed_classes = inline_class_defs @ parsed_classes in
   let st = initial_state (List.length parsed_classes) in
   let st, parsed_defs = convert_toplevel_prog st parsed_defs in
   let st, parsed_functions = List.map_env st parsed_functions convert_fun in

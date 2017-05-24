@@ -201,6 +201,15 @@ let instr_array_idx = instr (IMisc ArrayIdx)
 
 let instr_fcallbuiltin n un s = instr (ICall (FCallBuiltin (n, un, s)))
 
+let instr_deffunc =
+  (* This id will not be used, code generator will use value from the counter *)
+  let id = Hhbc_id.Function.from_raw_string "" in
+  instr (IIncludeEvalDefine (DefFunc id))
+let instr_defcls =
+  (* This id will not be used, code generator will use value from the counter *)
+  let id = Hhbc_id.Class.from_raw_string "" in
+  instr (IIncludeEvalDefine (DefCls id))
+
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
 

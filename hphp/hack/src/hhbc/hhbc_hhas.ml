@@ -17,17 +17,20 @@ module TV = Typed_value
 open H
 
 (* State associated with an entire file *)
+let next_counter counter =
+  let current = !counter in
+  counter := current + 1;
+  current
+
+(* Functions start from 1. Assuming main is the function zero *)
+let function_counter = ref 1
+let next_function_counter () = next_counter function_counter
+
 let class_counter = ref 0
-let next_class_counter () =
-  let c = !class_counter in
-  class_counter := c + 1;
-  c
+let next_class_counter () = next_counter class_counter
 
 let typedef_counter = ref 0
-let next_typedef_counter () =
-  let c = !typedef_counter in
-  typedef_counter := c + 1;
-  c
+let next_typedef_counter () = next_counter typedef_counter
 
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
@@ -621,7 +624,7 @@ let string_of_include_eval_define = function
   | ReqOnce -> "ReqOnce"
   | ReqDoc -> "ReqDoc"
   | Eval -> "Eval"
-  | DefFunc id -> sep ["DefFunc"; string_of_function_id id]
+  | DefFunc _id -> sep ["DefFunc"; string_of_int (next_function_counter ())]
   | DefCls _id -> sep ["DefCls"; string_of_int (next_class_counter ())]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_id id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]

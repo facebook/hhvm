@@ -1071,6 +1071,8 @@ let rec skip_to_end_of_delimited_comment lexer =
     with_error lexer SyntaxError.error0007
   else if ch0 = '*' && ch1 = '/' then
     advance lexer 2
+  else if ch0 = '\n' then
+    skip_to_end_of_delimited_comment (advance_line (advance lexer 1) 1)
   else skip_to_end_of_delimited_comment (advance lexer 1)
 
 let scan_delimited_comment lexer =

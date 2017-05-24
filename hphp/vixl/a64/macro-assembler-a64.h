@@ -401,7 +401,6 @@ class MacroAssembler : public Assembler {
     assert(allow_macro_instructions_);
     assert(!rd.IsZero());
     assert(!rn.IsZero());
-    assert(!rm.IsZero());
     assert((cond != al) && (cond != nv));
     csel(rd, rn, rm, cond);
   }
@@ -421,8 +420,6 @@ class MacroAssembler : public Assembler {
              Condition cond) {
     assert(allow_macro_instructions_);
     assert(!rd.IsZero());
-    assert(!rn.IsZero());
-    assert(!rm.IsZero());
     assert((cond != al) && (cond != nv));
     csinc(rd, rn, rm, cond);
   }

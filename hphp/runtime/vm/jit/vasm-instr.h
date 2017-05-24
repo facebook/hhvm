@@ -295,6 +295,10 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
+  O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincw, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincl, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincq, I(cc), U(sf) U(f) U(t), D(d))\
   O(fcvtzs, Inone, U(s), D(d))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
@@ -1105,6 +1109,10 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 /*
  * arm intrinsics.
  */
+struct csincb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
+struct csincw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
+struct csincl { ConditionCode cc; VregSF sf; Vreg32 f, t, d; };
+struct csincq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };

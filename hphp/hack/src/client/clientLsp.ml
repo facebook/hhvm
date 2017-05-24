@@ -604,6 +604,8 @@ let do_document_symbol
     | SymbolDefinition.LocalVar -> Symbol_information.Variable
     | SymbolDefinition.Typeconst -> Symbol_information.Class
         (* e.g. "const type Ta = string;" -- absent from LSP *)
+    | SymbolDefinition.Typedef -> Symbol_information.Class
+        (* e.g. top level type alias -- absent from LSP *)
     | SymbolDefinition.Param -> Symbol_information.Variable
         (* We never return a param from a document-symbol-search *)
   in

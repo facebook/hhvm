@@ -218,6 +218,33 @@ let summarize_class class_ ~no_children =
     docblock = None;
   }
 
+let typedef_kind_pos tk =
+  begin match tk with
+  | Ast.Alias (pos,_) -> pos
+  | Ast.NewType (pos,_) -> pos
+  end
+
+let summarize_typedef tdef =
+  let kind = Typedef in
+  let name = Utils.strip_ns (snd tdef.Ast.t_id) in
+  let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
+  let pos = fst tdef.Ast.t_id in
+  let kind_pos = typedef_kind_pos tdef.Ast.t_kind in
+  let span = (Pos.btw pos kind_pos) in
+  {
+    kind;
+    name;
+    full_name;
+    id;
+    pos;
+    span;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock = None;
+  }
+
 let summarize_fun f =
   let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
   let params = Some (List.map f.Ast.f_params summarize_param) in
@@ -286,7 +313,7 @@ let outline_ast ast =
 
 let should_add_docblock = function
   | Function| Class | Method | Property | Const | Enum
-  | Interface | Trait | Typeconst -> true
+  | Interface | Trait | Typeconst | Typedef -> true
   | LocalVar | Param -> false
 
 let add_def_docblock finder previous_def_line def =

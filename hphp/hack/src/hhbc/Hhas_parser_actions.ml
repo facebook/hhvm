@@ -309,6 +309,10 @@ let makenullaryinst s =
  | "IsMemoType" -> IMisc(IsMemoType)
  | "MaybeMemoType" -> IMisc(MaybeMemoType)
 
+ (* async_functions *)
+ | "Await" -> IAsync Await
+ | "WHResult" -> IAsync WHResult
+
  | _ -> IComment ("NYI nullary: " ^ s)
 
 type iarg =

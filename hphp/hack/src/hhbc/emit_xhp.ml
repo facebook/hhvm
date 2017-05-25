@@ -74,7 +74,8 @@ let emit_xhp_attribute_array xal =
     let e = match expo with None -> (p, A.Null) | Some e -> e in
     let class_name, hint = match ho with
       | None when enumo = None
-        -> failwith "Xhp attribute must either have a type or be enum"
+      (* attribute declared with the var identifier - we treat it as mixed *)
+        -> get_attribute_array_values "mixed" enumo
       | None -> get_attribute_array_values "enum" enumo
       | Some (_, A.Happly ((_, id), [])) -> get_attribute_array_values id enumo
       | _ -> (p, A.Null), (p, A.String (p, "NYI - Xhp attribute hint"))

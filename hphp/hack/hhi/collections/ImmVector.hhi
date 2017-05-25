@@ -175,9 +175,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   /**
    * Creates an `ImmVector` from the keys of the specified container.
    *
-   * If a key of the specified container are not integers, then it adds
-   * the next available integer key in the current `ImmVector` and makes that
-   * key the value.
+   * Every key in the provided `KeyedContainer` will appear sequentially in the
+   * returned `ImmVector`, with the next available integer key assigned to each.
    *
    * @param $container - The container with the keys used to create the
    *                     current `ImmVector`.

@@ -523,9 +523,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
   /**
    * Adds the keys of the specified container to the current `Vector`.
    *
-   * If a key of the specified container are not integers, then it adds
-   * the next available integer key in this `Vector` and makes that key the
-   * value.
+   * For every key in the provided `KeyedContainer`, append that key into
+   * this `Vector`, assigning the next available integer key for each.
    *
    * Future changes made to the current `Vector` ARE reflected in the
    * returned `Vector`, and vice-versa.
@@ -670,9 +669,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
   /**
    * Creates a `Vector` from the keys of the specified container.
    *
-   * If a key of the specified container are not integers, then it adds
-   * the next available integer key in this `Vector` and makes that key the
-   * value.
+   * Every key in the provided `KeyedContainer` will appear sequentially in the
+   * returned `Vector`, with the next available integer key assigned to each.
    *
    * @param $container - The container with the keys used to create the
    *                     `Vector`.

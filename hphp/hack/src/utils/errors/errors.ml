@@ -1881,13 +1881,13 @@ let bad_call pos ty =
 let sketchy_null_check pos =
   add Typing.sketchy_null_check pos (
   "You are using a sketchy null check ...\n"^
-  "Use is_null, or $x === null instead"
+  "Use $x === null instead"
 )
 
 let sketchy_null_check_primitive pos =
   add Typing.sketchy_null_check_primitive pos (
   "You are using a sketchy null check on a primitive type ...\n"^
-  "Use is_null, or $x === null instead"
+  "Use $x === null instead"
  )
 
 let extend_final extend_pos decl_pos name =

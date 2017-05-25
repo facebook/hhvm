@@ -1,0 +1,28 @@
+# tests that .strict 2 does causes an error
+
+.strict 2;
+
+.main {
+  FPushFuncD 1 "var_dump"
+  FPushFuncD 2 "add"
+  String "1"
+  FPassCE 0
+  String "2"
+  FPassCE 1
+  FCall 2
+  FPassR 0
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function add($x, $y) {
+  VerifyParamType $x
+  VerifyParamType $y
+  CGetL $y
+  CGetL2 $x
+  AddO
+  VerifyRetTypeC
+  RetC
+}

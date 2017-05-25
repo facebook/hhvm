@@ -1,0 +1,28 @@
+# setting strict types without php7.ScalarTypes flag = true should fail
+
+.strict 1;
+
+.main {
+  FPushFuncD 1 "var_dump"
+  FPushFuncD 2 "add"
+  String "1"
+  FPassCE 0
+  String "2"
+  FPassCE 1
+  FCall 2
+  FPassR 0
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"HH\\int" "HH\\int" hh_type extended_hint > add(<"HH\\int" "HH\\int"  > $x, <"HH\\int" "HH\\int"  > $y) {
+  VerifyParamType $x
+  VerifyParamType $y
+  CGetL $y
+  CGetL2 $x
+  AddO
+  VerifyRetTypeC
+  RetC
+}

@@ -1,0 +1,27 @@
+# tests that .strict 0 sets weak types
+
+.strict 0;
+
+.main {
+  FPushFuncD 1 "var_dump"
+  FPushFuncD 2 "add"
+  String "1"
+  FPassCE 0
+  String "2"
+  FPassCE 1
+  FCall 2
+  FPassR 0
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > add(<"HH\\int" "HH\\int"  > $a, <"HH\\int" "HH\\int"  > $b) {
+  VerifyParamType $a
+  VerifyParamType $b
+  CGetL $b
+  CGetL2 $a
+  AddO
+  RetC
+}

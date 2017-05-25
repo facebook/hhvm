@@ -2488,6 +2488,27 @@ void parse_alias(AsmState& as) {
   as.in.expectWs(';');
 }
 
+void parse_strict(AsmState& as) {
+  as.in.skipWhitespace();
+  std::string word;
+  if (!as.in.readword(word)) {
+    as.error(".strict must have a value");
+  }
+  if (!RuntimeOption::PHP7_ScalarTypes) {
+    as.error("Cannot set .strict without PHP7 ScalarTypes");
+  }
+
+  as.ue->m_useStrictTypes = word == "1";
+  if (!as.ue->m_useStrictTypes && word != "0") {
+    as.error("Strict types must be either 1 or 0");
+  }
+  if (!as.ue->m_useStrictTypes && RuntimeOption::EnableHipHopSyntax) {
+    as.error("Cannot disable strict types with HipHopSyntax enabled");
+  }
+
+  as.in.expectWs(';');
+}
+
 /*
  * asm-file : asm-tld* <EOF>
  *          ;
@@ -2498,6 +2519,7 @@ void parse_alias(AsmState& as) {
  *         |    ".adata"       directive-adata
  *         |    ".class"       directive-class
  *         |    ".alias"       directive-alias
+ *         |    ".strict"      directive-strict
  *         ;
  */
 void parse(AsmState& as) {
@@ -2521,6 +2543,7 @@ void parse(AsmState& as) {
     if (directive == ".adata")       { parse_adata(as);    continue; }
     if (directive == ".class")       { parse_class(as);    continue; }
     if (directive == ".alias")       { parse_alias(as);    continue; }
+    if (directive == ".strict")      { parse_strict(as);   continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }
@@ -2546,7 +2569,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   auto ue = std::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
-  ue->m_useStrictTypes = true;
+  ue->m_useStrictTypes = RuntimeOption::EnableHipHopSyntax ||
+                         !RuntimeOption::PHP7_ScalarTypes;
 
   try {
     std::istringstream instr(std::string(code, codeLen));

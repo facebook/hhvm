@@ -715,6 +715,9 @@ void print_alias(Output& out, const TypeAlias& alias) {
 }
 
 void print_unit_metadata(Output& out, const Unit* unit) {
+  if (unit->useStrictTypes()) out.fmtln(".strict 1;");
+  else out.fmtln(".strict 0;");
+  out.nl();
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
     auto const ad = unit->lookupArrayId(i);

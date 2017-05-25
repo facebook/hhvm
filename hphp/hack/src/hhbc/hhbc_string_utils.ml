@@ -20,6 +20,21 @@ let strip_ns s =
   (* strip zero or more chars followed by a backslash *)
   Str.replace_first (Str.regexp {|.*\\|}) "" s
 
+(* Integers are represented as strings *)
+module Integer = struct
+  (* Dont accidentally convert 0 to 0o *)
+  let to_decimal s = Int64.to_string @@ Int64.of_string @@
+    if String.length s > 1 && s.[0] = '0' then
+    match s.[1] with
+    (* Binary *)
+    | 'b' | 'B'
+    (* Hex *)
+    | 'x' | 'X' -> s
+    (* Octal *)
+    | _ -> "0o" ^ String_utils.lstrip s "0"
+    else s
+end
+
 module Float = struct
   let to_string f = Printf.sprintf "%0.17g" f
 end

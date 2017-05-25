@@ -18,7 +18,7 @@ open Core
 (* Literal expressions can be converted into values *)
 let rec expr_to_typed_value ns (_, expr_) =
   match expr_ with
-  | A.Int (_, s) -> TV.Int (Int64.of_string s)
+  | A.Int (_, s) -> TV.Int (Int64.of_string @@ SU.Integer.to_decimal s)
   | A.True -> TV.Bool true
   | A.False -> TV.Bool false
   | A.Null -> TV.null

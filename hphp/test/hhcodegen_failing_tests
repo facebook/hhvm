@@ -12,7 +12,6 @@ quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
 quick/SetOpProp.php
-quick/UnsetM.php
 quick/UnsetProp.php
 quick/Xhp.php
 quick/__isset.php
@@ -27,7 +26,6 @@ quick/autoload6.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
-quick/chdir_posix.php
 quick/class_abstract_final1.php
 quick/class_abstract_final2.php
 quick/class_abstract_final4.php
@@ -264,7 +262,6 @@ quick/string-cse.php
 quick/switch.php
 quick/switch_special_cases.php
 quick/syntax-error.php
-quick/temparray.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php
 quick/trailing_comma_bad3.php

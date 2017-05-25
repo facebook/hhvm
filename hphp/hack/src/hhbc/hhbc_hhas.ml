@@ -858,8 +858,8 @@ and string_of_param_default_value expr =
   | A.Id (_, litstr)
   | A.Id_type_arguments ((_, litstr), _)
   | A.Lvar (_, litstr)
-  | A.Float (_, litstr)
-  | A.Int (_, litstr) -> litstr
+  | A.Float (_, litstr) -> litstr
+  | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
   | A.String (_, litstr) -> "\\\"" ^ litstr ^ "\\\""
   | A.Null -> "NULL"
   | A.True -> "true"

@@ -143,7 +143,7 @@ let falling_back_list_comparer value_comparer l1 l2 =
   let len1 = List.length l1 in
   let len2 = List.length l2 in
    if len1 * len2 < max_array_size then levenshtein value_comparer l1 l2
-   else (print_endline "\n****Falling back on dumb comparer";
+   else (prerr_endline "\n****Falling back on dumb comparer";
          dumb_compare value_comparer l1 l2 0 0 (Buffer.create len1))
 
 (* Now the default list comparer, which does levenshtein unless the input looks
@@ -591,22 +591,25 @@ let my_instruct_comparer = {
 
 let instruct_list_comparer = list_comparer my_instruct_comparer "\n"
 
-let propstostring props = concatstrs (List.map (fun (v,v') -> "(" ^
-(Hhbc_hhas.string_of_local_id v) ^ "," ^
-       (Hhbc_hhas.string_of_local_id v') ^ ")") props)
 
-let string_of_pc (hs,ip) = concatstrs (List.map Hhbc_hhas.string_of_label hs)
-                           ^ ";" ^ string_of_int ip
-let asntostring ((l1,l2),props) = "[" ^ (string_of_pc l1) ^ "," ^
-  (string_of_pc l2) ^ "->" ^ (propstostring props) ^ "]\n"
-let asnstostring asns = concatstrs (List.map asntostring asns)
 (* Try the semantic differ; if it fails, drop back to syntactic one *)
 let instruct_list_comparer_with_semdiff = {
   comparer = (fun l1 l2 ->
-               match Rhl.equiv l1 l2 with
-                | None -> 0, (List.length l1, "")
-                | Some (_, _, _, _, _) ->
-                  (instruct_list_comparer.comparer l1 l2)
+                  match Rhl.equiv l1 l2 with
+                | None -> (prerr_endline "semdiff succeeded";
+                           (0, (List.length l1, "")) )
+                | Some (pc,pc',asn,assumed,todo) ->
+                  (prerr_endline "semdiff failed";
+                  Printf.eprintf
+                  "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nassumed=%s\ntodo=%s"
+                  (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
+                  (my_string_of_instruction (* !data_decls_ref1 *)
+                    (List.nth l1 (Rhl.ip_of_pc pc)))
+                  (my_string_of_instruction (* !data_decls_ref2 *)
+                    (List.nth l2 (Rhl.ip_of_pc pc' )))
+                  (Rhl.asntostring asn) (Rhl.labasnsmaptostring assumed)
+                  (Rhl.labasnlisttostring todo);
+                  instruct_list_comparer.comparer l1 l2)
              );
   size_of = instruct_list_comparer.size_of;
   string_of = instruct_list_comparer.string_of;

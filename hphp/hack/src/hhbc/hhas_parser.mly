@@ -59,13 +59,11 @@ aliasdecl:
       {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4}
 ;
 maindecl:
-    | MAINDIRECTIVE LBRACE nl numiters declvars nl functionbody RBRACE nl
-      {Hhas_body.make $7(*instrs*)
-        $5(*declvars*) $4(*numiters*)
-        0(*numclsrefslots*) false(*ismemoizewrapper*)
-        [](*params*) None(*return type*)
-      (* TODO: This is currently wrong, as it includes defcls and type alias
-         instructions in the body. We strip the former later *)}
+    | MAINDIRECTIVE LBRACE nl numiters numclsrefslots declvars nl functionbody RBRACE nl
+      {Hhas_body.make $8(*instrs*)
+        $6(*declvars*) $4(*numiters*)
+        $5(*numclsrefslots*) false(*ismemoizewrapper*)
+        [](*params*) None(*return type*)}
 ;
 numiters:
     | /* empty */ {0}
@@ -80,14 +78,14 @@ nonclassattribute:
 ;
 fundecl:
     | FUNCTIONDIRECTIVE functionattributes typeinfooption ID fparams
-      functionflags LBRACE nl ismemoizewrapper numiters numclsrefslots declvars
+      functionflags LBRACE nl numiters ismemoizewrapper numclsrefslots declvars
       functionbody RBRACE
         {Hhas_function.make $2(*attributes*)
            (Hhbc_id.Function.from_raw_string $4)(*name*)
              (Hhas_body.make $13(*instrs*)
              $12(*declvars*)
-             $10 (*numiters*) $11 (*numclsrefslots *)
-             $9 (*ismemoizewrapper*)
+             $9 (*numiters*) $11 (*numclsrefslots *)
+             $10 (*ismemoizewrapper*)
              $5(*params*) $3(*typeinfo*))
             (isasync $6)
             (isgenerator $6)
@@ -174,7 +172,7 @@ methodname:
 ;
 methoddecl:
  | METHODDIRECTIVE classattributes typeinfooption methodname fparams idlist LBRACE nl
-    numclsrefslots numiters declvars ismemoizewrapper functionbody RBRACE nl
+    numiters ismemoizewrapper numclsrefslots declvars functionbody RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
     (List.mem "protected" (snd $2))
@@ -186,10 +184,10 @@ methoddecl:
     (Hhbc_id.Method.from_raw_string $4) (* name *)
     (Hhas_body.make
       $13 (* method instructions *)
-      $11 (* declvars *)
-      $10 (* numiters *)
-      $9 (* num cls ref slots *)
-      $12 (* ismemoizewrapper *)
+      $12 (* declvars *)
+      $9 (* numiters *)
+      $11 (* num cls ref slots *)
+      $10 (* ismemoizewrapper *)
       $5 (* params *)
       $3 (* return type *)
       )

@@ -609,7 +609,7 @@ let string_of_try instruction =
 
 let string_of_async = function
   | Await -> "Await"
-  | WHResult -> "# string of WHResult - NYI"
+  | WHResult -> "WHResult"
 
 let string_of_generator = function
   | CreateCont -> "CreateCont"

@@ -86,6 +86,7 @@ let instr_setl local = instr (IMutator (SetL local))
 let instr_setn = instr (IMutator SetN)
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
+let instr_issetn = instr (IIsset IssetN)
 let instr_issets = instr (IIsset (IssetS class_ref_rewrite_sentinel))
 let instr_emptys = instr (IIsset (EmptyS class_ref_rewrite_sentinel))
 let instr_cgets =

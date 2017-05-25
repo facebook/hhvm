@@ -11,7 +11,6 @@ quick/GetVar.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
-quick/SetOp.php
 quick/SetOpProp.php
 quick/UnsetM.php
 quick/UnsetProp.php
@@ -281,7 +280,6 @@ quick/typehint_lsb_self.php
 quick/undefined-bases.php
 quick/unset_static.php
 quick/unset_varenv.php
-quick/varenv_extra_args.php
 quick/vec/basic-getters.php
 quick/vec/basic-setters.php
 quick/vec/reflect.php

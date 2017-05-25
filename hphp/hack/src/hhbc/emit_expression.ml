@@ -620,14 +620,20 @@ and emit_call_isset_expr (_, expr_ as expr) =
     emit_class_get None QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get false None QueryOp.Isset expr prop nullflavor
-  | A.Lvar(_, id) when is_local_this id ->
+  | A.Lvar (_, id) when is_local_this id ->
     gather [
       emit_local ~notice:NoNotice ~need_ref:false id;
       instr_istypec OpNull;
       instr_not
     ]
-  | A.Lvar(_, id) ->
+  | A.Lvar (_, id) ->
     instr (IIsset (IssetL (Local.Named id)))
+  | A.Lvarvar (n, id) ->
+    gather [
+      (* Remove one cgetn since issetn takes care of it *)
+      emit_lvarvar false (n-1) id;
+      instr_issetn;
+    ]
   | _ ->
     gather [
       from_expr ~need_ref:false expr;
@@ -1703,6 +1709,14 @@ and emit_final_local_op op lid =
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
   | LValOp.Unset -> instr (IMutator (UnsetL lid))
 
+and emit_final_named_local_op op =
+  match op with
+  | LValOp.Set -> instr (IMutator SetN)
+  | LValOp.SetRef -> instr (IMutator BindN)
+  | LValOp.SetOp op -> instr (IMutator (SetOpN op))
+  | LValOp.IncDec op -> instr (IMutator (IncDecN op))
+  | LValOp.Unset -> instr (IMutator UnsetN)
+
 and emit_final_global_op op =
   match op with
   | LValOp.Set -> instr (IMutator SetG)
@@ -1816,13 +1830,21 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Lvarvar (n, (_, id)) ->
-    (* TODO: if the rhs is lvarvar then use cgetl2 *)
-    gather [
-      instr_cgetl (Local.Named id);
-      gather @@ List.replicate ~num:(n-1) instr_cgetn;
-      rhs_instrs;
-      instr_setn;
-    ]
+    let cgetns = gather @@ List.replicate ~num:(n-1) instr_cgetn in
+    if n = 1 then
+      gather [
+        rhs_instrs;
+        instr_cgetl2 (Local.Named id);
+        cgetns;
+        emit_final_named_local_op op;
+      ]
+    else
+      gather [
+        instr_cgetl (Local.Named id);
+        cgetns;
+        rhs_instrs;
+        emit_final_named_local_op op;
+      ]
 
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op op in

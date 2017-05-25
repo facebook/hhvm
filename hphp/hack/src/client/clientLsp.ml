@@ -423,6 +423,32 @@ let cancel_if_stale
   if time_elapsed >= timeout && ClientMessageQueue.has_message state.client
   then raise (Error.Request_cancelled "request timed out")
 
+
+(* respond_to_error: if we threw an exception during the handling of a request,
+   report the exception to the client as the response their request. *)
+let respond_to_error (event: event option) (e: exn) : unit =
+  match event with
+  | Some (Client_message c)
+    when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
+    print_error e |> respond stdout c;
+  | _ -> ()
+
+
+let log_error (event: event option) (e: exn) : unit =
+  let (error_code, _message, _data) = get_error_info e in
+  let (command, kind) = match event with
+    | Some (Client_message c) ->
+      let open ClientMessageQueue in
+      (Some c.method_, Some (kind_to_string c.kind))
+    | _ -> (None, None)
+  in
+  HackEventLogger.client_command_exception
+    ~command
+    ~kind
+    ~e
+    ~error_code
+
+
 (************************************************************************)
 (** Protocol                                                           **)
 (************************************************************************)
@@ -975,28 +1001,7 @@ let handle_event (state: state) (event: event) : unit =
   (* TODO message from server *)
   | _, Server_exit _ -> () (* todo *)
 
-(* respond_to_error: if we threw an exception during the handling of a request,
-   report the exception to the client as the response their request. *)
-let respond_to_error (event: event) (e: exn) : unit =
-  match event with
-  | Client_message c
-    when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
-    print_error e |> respond stdout c;
-  | _ -> ()
 
-let log_error (event: event) (e: exn) : unit =
-  let (error_code, _message, _data) = get_error_info e in
-  let (command, kind) = match event with
-    | Client_message c ->
-      let open ClientMessageQueue in
-      (Some c.method_, Some (kind_to_string c.kind))
-    | _ -> (None, None)
-  in
-  HackEventLogger.client_command_exception
-    ~command
-    ~kind
-    ~e
-    ~error_code
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. *)
@@ -1033,8 +1038,8 @@ let main () : unit =
         end
       | _ -> ()
     with e ->
-      respond_to_error event e;
-      log_error event e;
+      respond_to_error (Some event) e;
+      log_error (Some event) e;
       if e = Sys_error "Broken pipe" then exit 1
       (* The reading/writing we do here is with hh_server, so this exception *)
       (* means that our connection to hh_server has gone down, which is      *)

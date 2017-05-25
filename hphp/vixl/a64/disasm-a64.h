@@ -64,6 +64,7 @@ class Disassembler: public DecoderVisitor {
   int SubstituteBranchTargetField(Instruction* instr, const char* format);
   int SubstituteLSRegOffsetField(Instruction* instr, const char* format);
   int SubstitutePrefetchField(Instruction* instr, const char* format);
+  int SubstituteInstructionAttributes(Instruction* instr, const char* format);
 
   inline bool RdIsZROrSP(Instruction* instr) const {
     return (instr->Rd() == kZeroRegCode);

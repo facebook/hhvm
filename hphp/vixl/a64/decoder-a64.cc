@@ -308,26 +308,11 @@ void Decoder::DecodeLoadStore(Instruction* instr) {
           VisitLoadLiteral(instr);
         }
       } else {
-        if ((instr->Mask(0x84C00000) == 0x80C00000)) {
-          if (instr->Bits(29, 28) == 0x3) {
-            if (instr->Bits(11, 10) == 0x0) {
-              if (instr->Bit(21) == 0x1) {
-                if (instr->Bit(15) == 0x0) {
-                  VisitLseLdOp(instr);
-                } else {
-                  VisitUnallocated(instr);
-                }
-              } else {
-                VisitUnallocated(instr);
-              }
-            } else {
-              VisitUnallocated(instr);
-            }
-          } else {
-            VisitUnallocated(instr);
-          }
+        if (instr->Mask(0x3F208C00) == 0x38200000) {
+          VisitLseLdOp(instr);
         } else { 
-          if ((instr->Mask(0x44800000) == 0x44800000) ||
+          if ((instr->Mask(0x84C00000) == 0x80C00000) ||
+              (instr->Mask(0x44800000) == 0x44800000) ||
               (instr->Mask(0x84800000) == 0x84800000)) {
             VisitUnallocated(instr);
           } else {

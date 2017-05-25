@@ -753,20 +753,17 @@ void Disassembler::VisitMoveWideImmediate(Instruction* instr) {
 
 void Disassembler::VisitLseLdOp(Instruction* instr) {
   const char *mnemonic = "";
-  const char *form = "'Rs, 'Rt, ['Xns]";
+  const char *form = "";
 
-  // TODO: accType = {a,l}, and size = {b, h}
-  switch (instr->Mask(LSELoadOPMask)) {
-    case LDADD: mnemonic = "ldadd"; break; 
-    case LDBIC: mnemonic = "ldbic"; break; 
-    case LDEOR: mnemonic = "ldeor"; break; 
-    case LDORR: mnemonic = "ldorr"; break; 
-    case LDSMAX: mnemonic = "ldsmax"; break; 
-    case LDSMIN: mnemonic = "ldsmin"; break; 
-    case LDUMAX: mnemonic = "ldumax"; break; 
-    case LDUMIN: mnemonic = "ldumin"; break; 
-    default: not_reached();
+  if (instr->Rt() == 31) {
+    // alias when Rt is wzr/xzr
+    mnemonic = "st'lo'la'ls";
+    form = "'Rs, ['Xns]";
+  } else {
+    mnemonic = "ld'lo'la'ls";
+    form = "'Rs, 'Rt, ['Xns]";
   }
+
   Format(instr, mnemonic, form);
 }
 
@@ -1332,6 +1329,7 @@ int Disassembler::SubstituteField(Instruction* instr, const char* format) {
     case 'A': return SubstitutePCRelAddressField(instr, format);
     case 'B': return SubstituteBranchTargetField(instr, format);
     case 'O': return SubstituteLSRegOffsetField(instr, format);
+    case 'l': return SubstituteInstructionAttributes(instr, format);
     default: {
       not_reached();
       return 1;
@@ -1719,6 +1717,32 @@ int Disassembler::SubstitutePrefetchField(Instruction* instr,
   return 6;
 }
 
+
+int Disassembler::SubstituteInstructionAttributes(Instruction* instr,
+                                          const char* format) {
+  assert(format[0] == 'l');
+  const char* lse_op[] = { "add", "clr", "eor", "set", 
+                           "smax", "smin", "umax", "umin" };
+  const char* lse_size[] = { "b", "h", "", "" };
+  const char* lse_semantic[] = { "", "l", "a", "al" };
+
+  int idx;
+  switch (format[1]) {
+    case 'a':
+      idx = instr->Ar();
+      AppendToOutput("%s", lse_semantic[idx]);
+      break;
+    case 'o':
+      idx = instr->Opc();
+      AppendToOutput("%s", lse_op[idx]);
+      break;
+    case 's':
+      idx = instr->SizeLS();
+      AppendToOutput("%s", lse_size[idx]);
+      break;
+  }
+  return 2;
+}
 
 void Disassembler::ResetOutput() {
   buffer_pos_ = 0;

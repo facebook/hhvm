@@ -120,7 +120,11 @@ type message_source =
 
 type in_init_env = {
   is_retry : bool;
+  start_time : float;
+  last_progress_report_time : float;
+  has_shown_dialog : bool;
   file_edits : ClientMessageQueue.client_message list;
+  tail_env: Tail.env;
 }
 
 type lsp_state_machine =
@@ -145,6 +149,7 @@ type state = {
   mutable lsp_state : lsp_state_machine;
   client : ClientMessageQueue.t;
   mutable server_conn : server_conn option;
+  mutable needs_idle : bool;
 }
 
 type event =
@@ -154,6 +159,7 @@ type event =
   | Client_message of ClientMessageQueue.client_message
   | Client_error
   | Client_exit (* client exited unceremoniously, without an exit message *)
+  | Tick (* once per second, on idle, only generated when server is connected *)
 
 exception Denied_due_to_existing_persistent_connection
 
@@ -190,18 +196,18 @@ let get_message_source
   (server: server_conn)
   (client: ClientMessageQueue.t)
   : message_source =
-  let has_server_messages = not (Queue.is_empty server.pending_messages) in
-  if has_server_messages then From_server else
-  if ClientMessageQueue.has_message client then From_client else
-
-  let server_read_fd = Unix.descr_of_out_channel server.oc in
-  let client_read_fd = ClientMessageQueue.get_read_fd client in
-  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
-
   (* Take action on server messages in preference to client messages, because
      server messages are very easy and quick to service (just send a message to
      the client), while client messages require us to launch a potentially
      long-running RPC command. *)
+  let has_server_messages = not (Queue.is_empty server.pending_messages) in
+  if has_server_messages then From_server else
+  if ClientMessageQueue.has_message client then From_client else
+
+  (* If no immediate messages are available, then wait up to 1 second. *)
+  let server_read_fd = Unix.descr_of_out_channel server.oc in
+  let client_read_fd = ClientMessageQueue.get_read_fd client in
+  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
   if readable = [] then No_source
   else if List.mem readable server_read_fd then From_server
   else From_client
@@ -235,9 +241,9 @@ let get_next_event (state: state) : event =
     | ClientMessageQueue.Exit -> Client_exit
   in
 
-  let rec from_either server client =
+  let from_either server client =
     match get_message_source server client with
-    | No_source -> from_either server client
+    | No_source -> Tick
     | From_client -> from_client client
     | From_server -> from_server server
   in
@@ -718,6 +724,56 @@ let do_document_formatting
   do_formatting_common conn action
 
 
+let report_progress
+  (ienv: in_init_env)
+  : in_init_env =
+  (* Our goal behind progress reporting is to let the user know when things   *)
+  (* won't be instantaneous, and to show that things are working as expected. *)
+  (* We eagerly show a "please wait" dialog box after just 5 seconds into     *)
+  (* progress reporting. And we'll log to the console every 10 seconds. When  *)
+  (* it completes, if any progress has so far been shown to the user, then    *)
+  (* we'll log completion to the console. Except if it took a long time, like *)
+  (* 60 seconds or more, we'll show completion with a dialog box instead.     *)
+  (*                                                                          *)
+  let time = Unix.time () in
+  let ienv = ref ienv in
+
+  if (not !ienv.has_shown_dialog) then begin
+    ienv := {!ienv with has_shown_dialog = true};
+    print_show_message Message_type.InfoMessage
+      "Waiting for Hack server to be ready. See console for further details."
+      |> notify stdout "window/showMessage"
+  end;
+
+  let delay_in_secs = int_of_float (time -. !ienv.start_time) in
+  if (delay_in_secs mod 10 = 0 &&
+    time -. !ienv.last_progress_report_time >= 5.0) then begin
+    ienv := {!ienv with last_progress_report_time = time};
+    let _load_state_not_found, tail_msg =
+      ClientConnect.open_and_get_tail_msg !ienv.start_time !ienv.tail_env in
+    let msg = Printf.sprintf "Still waiting after %i seconds: %s..."
+      delay_in_secs tail_msg in
+    print_log_message Message_type.LogMessage msg
+      |> notify stdout "window/logMessage"
+  end;
+  !ienv
+
+
+let report_progress_end
+  (ienv: in_init_env)
+  : unit =
+  let time = Unix.time () in
+  let msg = Printf.sprintf "Hack is now ready, after %i seconds."
+    (int_of_float (time -. ienv.start_time)) in
+  if (time -. ienv.start_time >= 60.0) then begin
+    print_show_message Message_type.InfoMessage msg
+      |> notify stdout "window/showMessage"
+  end else begin
+    print_log_message Message_type.InfoMessage msg
+      |> notify stdout "window/logMessage";
+  end
+
+
 let do_initialize_after_hello
   (server_conn: server_conn option)
   ~(is_retry: bool)
@@ -853,6 +909,7 @@ let do_initialize_hello_attempt
 let do_initialize ~(is_retry: bool) (params: Initialize.params)
   : (server_conn option * Initialize.result * lsp_state_machine) =
   let open Initialize in
+  let start_time = Unix.time () in
   let root = if Option.is_some params.root_uri
              then ClientArgsUtils.get_root params.root_uri
              else ClientArgsUtils.get_root params.root_path in
@@ -874,7 +931,15 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
             "is active in another window.",
             { Lsp.Initialize.retry = true; }))
     end else begin
-      let ienv = { is_retry; file_edits = []; } in
+      let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
+      let ienv = {
+        is_retry;
+        start_time;
+        last_progress_report_time = start_time;
+        has_shown_dialog = false;
+        file_edits = [];
+        tail_env = Tail.create_env log_file;
+      } in
       In_init ienv
     end
 
@@ -976,6 +1041,11 @@ let handle_event (state: state) (event: event) : unit =
         (* error-response that won't produce logs/warnings on most clients. *)
     end
 
+  (* idle tick while waiting for server to complete initialization *)
+  | In_init ienv, Tick ->
+    let ienv' = report_progress ienv in
+    state.lsp_state <- In_init ienv'
+
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
     (* As above, if we get an exception while handling this, then we'll want *)
@@ -990,6 +1060,7 @@ let handle_event (state: state) (event: event) : unit =
       (* If we're denied at this stage, we can't recover: we'll just exit *)
       (* and trust the client to restart us. *)
     end;
+    report_progress_end ienv;
     state.lsp_state <- Main_loop;
     state.server_conn <- conn
 
@@ -1003,6 +1074,13 @@ let handle_event (state: state) (event: event) : unit =
       (Error.Internal_error "Received unexpected 'hello' from hh_server");
     exit ()
 
+  (* Tick when we're connected to the server and have empty queue *)
+  | Main_loop, Tick when state.needs_idle ->
+    state.needs_idle <- false;
+    rpc state.server_conn ServerCommandTypes.IDE_IDLE
+    (* If we're connected to a server and have no more messages in the queue, *)
+    (* then we must let the server know we're idle, so it will be free to     *)
+    (* handle command-line requests.                                          *)
 
   (* textDocument/hover request *)
   | Main_loop, Client_message c when c.method_ = "textDocument/hover" ->
@@ -1129,6 +1207,8 @@ let handle_event (state: state) (event: event) : unit =
   (* TODO message from server *)
   | _, Server_exit _ -> () (* todo *)
 
+  (* idle tick. No-op. *)
+  | _, Tick -> ()
 
 
 (* main: this is the main loop for processing incoming Lsp client requests,
@@ -1139,10 +1219,13 @@ let main () : unit =
     lsp_state = Pre_init false;
     client = ClientMessageQueue.make ();
     server_conn = None;
+    needs_idle = false;
   } in
   while true do
     let event = get_next_event state in
     try
+      let event = get_next_event state in
+      if event <> Tick then state.needs_idle <- true;
       handle_event state event;
       match event with
       | Client_message c -> begin
@@ -1158,11 +1241,6 @@ let main () : unit =
             ~command
             ~start_t:c.timestamp
             ~kind:(kind_to_string c.kind);
-          (* If we're connected to a server and have no more messages in   *)
-          (* the queue, then let the server know we're idle, so it will be *)
-          (* free to handle command-line requests. *)
-          if Option.is_some state.server_conn && not (has_message state.client)
-            then rpc state.server_conn ServerCommandTypes.IDE_IDLE
         end
       | _ -> ()
     with e ->

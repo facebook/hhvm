@@ -188,13 +188,16 @@ let emit_xhp_children_paren_expr c =
   let l, op_num = match c with
     | A.ChildList l -> l, xhp_child_op_to_int None
     | A.ChildUnary (A.ChildList l, op) -> l, xhp_child_op_to_int @@ Some op
-    | _ -> failwith "emit_xhp_children_paren_expr - NYI"
+    | _ ->
+      failwith @@ "Xhp children declarations cannot be plain id, " ^
+                  "plain binary or unary without an inside list"
   in
   let arr = emit_xhp_children_decl_expr ~unary:"0" l in
   get_array3 (A.Int (p, string_of_int op_num)) (A.Int (p, "5")) arr
 
 let emit_xhp_children_array = function
   | [] | [A.ChildName (_, "empty")] -> A.Int (Pos.none, "0")
+  | [A.ChildName (_, "any")] -> A.Int (Pos.none, "1")
   | [c] -> emit_xhp_children_paren_expr c
   | _ -> failwith "HHVM does not support multiple children declarations"
 

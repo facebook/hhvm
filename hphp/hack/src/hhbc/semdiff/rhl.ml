@@ -19,6 +19,19 @@ open Core
 open Hhbc_ast
 open Local
 
+(* Refs storing the adata for the two programs; they're written in semdiff
+   and accessed in equiv
+*)
+let adata1_ref = ref ([] : Hhas_adata.t list)
+let adata2_ref = ref ([] : Hhas_adata.t list)
+
+let rec lookup_adata id data_dict =
+match data_dict with
+ | [] -> failwith "adata lookup failed"
+ | ad :: rest -> if Hhas_adata.id ad = id
+                 then Hhas_adata.value ad
+                 else lookup_adata id rest
+
 (* an individual prop is an equation between local variables
   To start with this means that they are both defined and equal
   or that they are both undefined
@@ -578,6 +591,14 @@ let equiv prog prog' =
         | IBasic ins, IBasic ins' ->
            if ins = ins' then nextins()
            else try_specials ()
+        | ILitConst (Array id), ILitConst (Array id')
+        | ILitConst (Dict id), ILitConst (Dict id')
+        | ILitConst (Vec id), ILitConst (Vec id')
+        | ILitConst (Keyset id), ILitConst (Keyset id') ->
+          let tv = lookup_adata id (!adata1_ref) in
+          let tv' = lookup_adata id' (!adata2_ref) in
+          if tv = tv' then nextins()
+          else try_specials ()
         | ILitConst ins, ILitConst ins' ->
            if ins = ins' then nextins()
            else try_specials ()

@@ -347,6 +347,7 @@ let const_id_of_iarg arg =
 let function_id_of_iarg arg =
   match arg with
   | IAString s -> Hhbc_id.Function.from_raw_string s
+  | IAInt64 n -> Hhbc_id.Function.from_raw_string (Int64.to_string n)
   | _ -> report_error "expected quoted function identifier"
 
 let method_id_of_iarg arg =

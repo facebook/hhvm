@@ -61,6 +61,8 @@ let run options =
   let program_parser = program Hhas_lexer.read in
   let prog1 = parse_file program_parser (fst options.files) in
   let prog2 = parse_file program_parser (snd options.files) in
+  let _ = Rhl.adata1_ref := Hhas_program.adata prog1 in
+  let _ = Rhl.adata2_ref := Hhas_program.adata prog2 in
 
   let (d,(s,e)) = program_comparer.comparer prog1 prog2 in
   let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in

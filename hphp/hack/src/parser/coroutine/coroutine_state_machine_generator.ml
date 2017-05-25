@@ -419,7 +419,47 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_expression_statement ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
-    | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
+    (* The following construct:
+
+         while (suspend someCoroutine()) {
+           body
+         }
+
+       is rewritten into:
+
+         while (true) {
+           ...
+           prefix_statements
+           ...
+           if (!$coroutineResultData1) {
+             break;
+           }
+
+           body
+         }
+
+       There are other possible approaches that we could use here. This one
+       ensures that prefix_statements are computed in a single place. This is
+       useful to ensure that only one goto label per `suspend` is generated. *)
+    | WhileStatement ({ while_condition; while_body; _; } as node) ->
+        let (next_label, prefix_statements), while_condition =
+          extract_suspend_statements while_condition next_label in
+        let statements =
+          prefix_statements
+            @ [
+              make_if_syntax while_condition [ break_statement_syntax; ];
+              while_body;
+            ] in
+        let while_body = make_compound_statement_syntax statements in
+        let new_while =
+          make_syntax
+            (WhileStatement
+              { node with
+                while_condition = true_expression_syntax;
+                while_body;
+              }
+            ) in
+        next_label, Rewriter.Result.Replace new_while
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)

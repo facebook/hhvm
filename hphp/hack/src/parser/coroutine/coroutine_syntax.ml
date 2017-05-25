@@ -101,6 +101,9 @@ let void_syntax =
 let null_syntax =
   make_token_syntax TokenKind.NullLiteral "null"
 
+let true_expression_syntax =
+  make_literal_expression (make_token_syntax TokenKind.BooleanLiteral "true")
+
 let private_syntax =
   make_token_syntax ~space_after:true TokenKind.Private "private"
 
@@ -139,6 +142,12 @@ let return_keyword_syntax =
 
 let throw_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Throw "throw"
+
+let break_statement_syntax =
+  make_break_statement
+    (make_token_syntax TokenKind.Break "break")
+    (* break_level *) (make_missing ())
+    semicolon_syntax
 
 let new_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.New "new"

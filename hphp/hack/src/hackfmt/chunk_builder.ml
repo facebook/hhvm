@@ -376,7 +376,7 @@ let builder = object (this)
       end;
       seen_chars <- prev_seen + width;
     | DocLiteral node ->
-      this#set_next_split_rule (RuleKind (Rule.Simple Cost.Assignment));
+      this#set_next_split_rule (RuleKind (Rule.Simple Cost.Base));
       this#consume_fmt_node node;
       last_string_type <- DocStringClose;
     | NumericLiteral node ->

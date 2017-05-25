@@ -185,7 +185,7 @@ let rec transform node =
         | SyntaxList [declarator] ->
           Nest [
             Space;
-            SplitWith Cost.Assignment;
+            SplitWith Cost.Base;
             t declarator;
           ];
         | SyntaxList xs ->
@@ -733,7 +733,7 @@ let rec transform node =
       Space;
       t eq_kw;
       Space;
-      SplitWith Cost.Assignment;
+      SplitWith Cost.Base;
       Nest [t value];
     ]
   | AnonymousFunction x ->
@@ -1094,7 +1094,7 @@ let rec transform node =
     Span [
       t name;
       t eq;
-      SplitWith Cost.Assignment;
+      SplitWith Cost.Base;
       Nest [t expr];
     ]
   | XHPOpen x ->
@@ -1749,7 +1749,7 @@ and transform_mapish_entry key arrow value =
     Space;
     transform arrow;
     Space;
-    SplitWith Cost.Assignment;
+    SplitWith Cost.Base;
     Nest [transform value];
   ]
 
@@ -1820,7 +1820,7 @@ and transform_binary_expression ~is_nested expr =
       Space;
       transform operator;
       Space;
-      SplitWith Cost.Assignment;
+      SplitWith Cost.Base;
       Nest [transform right];
     ]
   else
@@ -1879,8 +1879,8 @@ and transform_binary_expression ~is_nested expr =
                      * remove it once we can return an expanded formatting
                      * range. *)
                     if op_has_spaces
-                      then Fmt [Space; SplitWith Cost.Assignment]
-                      else SplitWith Cost.Assignment
+                      then Fmt [Space; SplitWith Cost.Base]
+                      else SplitWith Cost.Base
                   end
                   else (if op_has_spaces then space_split () else Split);
                   transform_operand operand;

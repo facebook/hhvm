@@ -158,8 +158,6 @@ quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_sa.php
 quick/impl_abstract_dv_si.php
 quick/impl_abstract_dv_so.php
-quick/incdec-magic4.php
-quick/incdec-magic5.php
 quick/incdec-string.php
 quick/include2.php
 quick/include3.php
@@ -243,8 +241,6 @@ quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
 quick/serialize.php
-quick/setop-magic4.php
-quick/setop-magic5.php
 quick/short_array_syntax.php
 quick/silencer.php
 quick/simp-conv-to-int-dbl.php

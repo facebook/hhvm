@@ -1333,7 +1333,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_user_attributes = List.flatten @@
         couldMap ~f:pUserAttribute methodish_attribute env
       ; m_ret             = hdr.fh_return_type
-      ; m_ret_by_ref      = false
+      ; m_ret_by_ref      = hdr.fh_ret_by_ref
       ; m_span            = get_pos node
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       }]

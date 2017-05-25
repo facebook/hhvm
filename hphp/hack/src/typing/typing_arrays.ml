@@ -48,9 +48,23 @@ end
  * to just an array.*)
 class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method on_tabstract env r ak cstr =
-    match TUtils.get_as_constraints env ak cstr with
-    | None -> env, (r, Tabstract (ak, cstr))
-    | Some ty -> this#on_type env ty
+    let ty = (r, Tabstract(ak, cstr)) in
+    match TUtils.get_all_supertypes env ty with
+    | _, [] -> env, ty
+    | env, tyl ->
+      let is_array = function
+      | _, Tarraykind _ -> true
+      | _ -> false in
+      match List.filter tyl is_array with
+      | [] ->
+        env, ty
+      | x::_ ->
+        (* If the abstract type has multiple concrete supertypes
+        which are arrays, just take the first one.
+        TODO(jjwu): Try all of them and find one that works
+        *)
+        this#on_type env x
+
 
   method virtual on_type : env -> locl ty -> result
 end

@@ -33,6 +33,7 @@ type state_variables =
   ; popt      : ParserOptions.t ref
   ; ignorePos : bool ref
   ; quickMode : bool ref
+  ; suppress_output : bool ref
   }
 
 let lowerer_state =
@@ -42,6 +43,7 @@ let lowerer_state =
   ; popt      = ref ParserOptions.default
   ; ignorePos = ref false
   ; quickMode = ref false
+  ; suppress_output = ref false
   }
 
 let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
@@ -102,7 +104,8 @@ let handle_missing_syntax : string -> node -> env -> 'a = fun s n _ ->
   (text n)
   (SyntaxKind.to_string (kind n))
   in
-  Printf.eprintf "EXCEPTION\n---------\n%s\n" msg;
+  if not !(lowerer_state.suppress_output) then
+    Printf.eprintf "EXCEPTION\n---------\n%s\n" msg;
   raise (Failure msg)
 
 let runP : 'a parser -> node -> env -> 'a = fun pThing thing env ->
@@ -1712,14 +1715,26 @@ let scour_comments
             | `SawSlash    -> "SawSlash"
             | `EmbeddedCmt -> "EmbeddedCmt"
             | `EndEmbedded -> "EndEmbedded"
+            | `NonSourceText    -> "NonSourceText"
           in
-          Printf.eprintf "Error parsing trivia in state %s: '%s'\n" state str;
+          if not !(lowerer_state.suppress_output) then
+            Printf.eprintf "Error parsing trivia in state %s: '%s'\n" state str;
           raise (Malformed_trivia n)
         in
         let length = String.length str in
         let mk tag (start : int) (end_plus_one : int) acc : scoured_comments =
           match tag with
-          | `Line  -> acc
+          | `Line ->
+            (* Correct for the offset of the comment in the file *)
+            let start = offset + start in
+            let end_ = offset + end_plus_one in
+            let (p, c) as result =
+              Full_fidelity_source_text.
+              ( pos_of_offset start end_
+              , sub source_text start (end_ - start)
+              )
+            in
+            result :: acc
           | `Block ->
             (* Correct for the offset of the comment in the file *)
             let start = offset + start in
@@ -1733,16 +1748,40 @@ let scour_comments
             in
             result :: acc
         in
+        let text_at_pos_is_equal_to pos s =
+          let s_length = String.length s in
+          if pos + s_length >= length then false
+          else
+            let rec go i =
+              i = s_length || (str.[pos + i] = s.[i] && go (i + 1))
+            in
+            go 0
+        in
         let rec go start state idx : scoured_comments =
           if idx = length (* finished? *)
           then begin
             match state with
-            | `Free    -> acc
+            | `Free | `NonSourceText -> acc
             | `LineCmt -> mk `Line start length acc
             | _        -> fail state start
           end else begin
             let next = idx + 1 in
             match state, str.[idx] with
+            (* Found one of start tags - switch to the PHP mode *)
+            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?php" ->
+              let next = idx + (String.length "<?php") in
+              go next `Free next
+            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?==" ->
+              let next = idx + (String.length "<?==") in
+              go next `Free next
+            (* Skip non source text content *)
+            | `NonSourceText,    _ -> go next state next
+            (* End tag terminates line comment, collect it  *)
+            (* Then exit PHP section of the code and skip all non source
+               content *)
+            | `LineCmt,     '?' when text_at_pos_is_equal_to idx "?>" ->
+              let next = idx + (String.length "?>") in
+              mk `Line  start idx @@ go next `NonSourceText next
             (* Ending comments produces the comment just scanned *)
             | `LineCmt,     '\n' -> mk `Line  start idx @@ go next `Free next
             | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
@@ -1762,6 +1801,10 @@ let scour_comments
             (* When scanning comments, anything else is accepted *)
             | `LineCmt,     _             -> go start state        next
             | `EmbeddedCmt, _             -> go start state        next
+            | _,        '?' when text_at_pos_is_equal_to idx "?>" ->
+            (* Exit PHP section of the code and skip all markup content *)
+              let next = idx + (String.length "?>") in
+              go next `NonSourceText next
             (* Anything else; bail *)
             | _ -> fail state start
           end
@@ -1795,6 +1838,7 @@ let from_text
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
+  ?(suppress_output       = false)
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
@@ -1822,6 +1866,7 @@ let from_text
     lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;
     lowerer_state.quickMode := quick;
+    lowerer_state.suppress_output := suppress_output;
     let saw_yield = ref false in
     let errors = ref [] in (* The top-level error list. *)
     let max_depth = 42 in (* Filthy hack around OCaml bug *)

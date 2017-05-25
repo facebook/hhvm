@@ -118,6 +118,13 @@ let rec skip_to_end_of_line lexer =
   else if ch = invalid && at_end lexer then lexer
   else skip_to_end_of_line (advance lexer 1)
 
+let rec skip_to_end_of_line_or_end_tag lexer =
+  let ch = peek_char lexer 0 in
+  if is_newline ch then lexer
+  else if ch = invalid && at_end lexer then lexer
+  else if ch = '?' && peek_char lexer 1 = '>' then lexer
+  else skip_to_end_of_line_or_end_tag (advance lexer 1)
+
 let rec skip_name_end lexer =
   if is_name_letter (peek_char lexer 0) then
     skip_name_end (advance lexer 1)
@@ -1015,7 +1022,7 @@ let scan_single_line_comment lexer =
   *)
   let lexer = advance lexer 2 in
   let lexer_ws = skip_whitespace lexer in
-  let lexer = skip_to_end_of_line lexer_ws in
+  let lexer = skip_to_end_of_line_or_end_tag lexer_ws in
   let w = width lexer in
   let remainder = lexer.offset - lexer_ws.offset in
   let c =

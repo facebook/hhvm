@@ -913,7 +913,7 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
   let root = if Option.is_some params.root_uri
              then ClientArgsUtils.get_root params.root_uri
              else ClientArgsUtils.get_root params.root_path in
-  let local_config = ServerLocalConfig.load () in
+  let local_config = ServerLocalConfig.load ~silent:true in
 
   (* This code does the connection protocol. *)
   let _result_code = do_initialize_start root in

@@ -180,7 +180,7 @@ let prepare_ignored_fixme_codes config =
 
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
-  let local_config = ServerLocalConfig.load () in
+  let local_config = ServerLocalConfig.load ~silent:false in
   let load_script =
     Option.map (SMap.get config "load_script") maybe_relative_path in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means

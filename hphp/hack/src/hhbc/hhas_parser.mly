@@ -40,6 +40,7 @@ open Hhas_parser_actions
 %token TRYDIRECTIVE
 %token CATCHDIRECTIVE
 %token ALIASDIRECTIVE
+%token STRICTDIRECTIVE
 
 %start program
 %type <Hhas_program.t> program
@@ -421,4 +422,5 @@ decllist:
     /* empty */ { [] }
     | decl nl decllist {$1 :: $3}
     | FILEPATHDIRECTIVE STRING SEMI nl decllist {$5}
+    | STRICTDIRECTIVE INT SEMI nl decllist {$5}
 ;

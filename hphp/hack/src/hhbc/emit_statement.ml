@@ -154,10 +154,36 @@ and emit_global_vars es =
       else
         gather [
           instr_string (SU.Locals.strip_dollar name);
-          instr (IGet VGetG);
-          instr (IMutator (BindL (Local.Named name)));
-          instr (IBasic PopV);
+          instr_vgetg;
+          instr_bindl @@ Local.Named name;
+          instr_popv;
         ]
+    | A.Lvarvar (n, (_, id)) ->
+      let load_name =
+        if SN.Superglobals.is_superglobal id then
+          gather [
+            instr_string (SU.Locals.strip_dollar id);
+            instr_cgetg;
+          ]
+        else
+          instr_cgetl (Local.Named id)
+      in
+      gather [
+        load_name;
+        if n = 1 then empty else gather @@ List.replicate (n - 1) instr_cgetn;
+        instr_dup;
+        instr_vgetg;
+        instr_bindn;
+        instr_popv;
+      ]
+    | A.Unsafeexpr e ->
+      gather [
+        from_expr ~need_ref:false e;
+        instr_dup;
+        instr_vgetg;
+        instr_bindn;
+        instr_popv;
+      ]
     | _ ->
       emit_nyi "global expression"
   in gather (List.map es emit_global_var)

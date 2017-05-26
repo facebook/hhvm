@@ -25,8 +25,10 @@ class declvar_visitor = object(this)
   method! on_global_var acc exprs =
     List.fold_left exprs ~init:acc
       ~f:(fun acc (_, e) ->
-        match e with Ast.Id id -> add_local false acc id
-                  | _ -> acc)
+        match e with
+        | (Ast.Id id | Ast.Lvarvar(_, id)) -> add_local false acc id
+        | Ast.Unsafeexpr e -> this#on_expr acc e
+        | _ -> acc)
   method! on_foreach acc e pos iterator block =
     let acc =
       match snd e with

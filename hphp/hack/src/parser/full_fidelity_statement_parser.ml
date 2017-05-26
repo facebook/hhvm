@@ -604,9 +604,14 @@ module WithExpressionAndDeclAndTypeParser
       Hack file.
     *)
     let (parser1, keyword) = assert_token parser Global in
-    if peek_token_kind parser1 = TokenKind.Variable then
+    let is_global_statement =
+      match peek_token_kind parser1 with
+      | TokenKind.Variable | TokenKind.Dollar -> true
+      | _ -> false
+    in
+    if is_global_statement then
       let (parser, variables) = parse_comma_list
-        parser1 Semicolon SyntaxError.error1008 expect_variable in
+        parser1 Semicolon SyntaxError.error1008 parse_simple_variable in
       let (parser, semicolon) = expect_semicolon parser in
       let result = make_global_statement keyword variables semicolon in
       (parser, result)
@@ -709,9 +714,14 @@ module WithExpressionAndDeclAndTypeParser
       (parser, syntax)
 
   and parse_expression parser =
+    with_expression_parser parser ExpressionParser.parse_expression
+
+  and parse_simple_variable parser =
+    with_expression_parser parser ExpressionParser.parse_simple_variable
+
+  and with_expression_parser parser f =
     let expression_parser = ExpressionParser.make parser.lexer parser.errors in
-    let (expression_parser, node) =
-      ExpressionParser.parse_expression expression_parser in
+    let (expression_parser, node) = f expression_parser in
     let lexer = ExpressionParser.lexer expression_parser in
     let errors = ExpressionParser.errors expression_parser in
     let parser = make lexer errors in

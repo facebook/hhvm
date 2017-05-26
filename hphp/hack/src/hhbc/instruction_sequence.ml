@@ -93,12 +93,16 @@ let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
 let instr_vgets =
   instr (IGet (VGetS class_ref_rewrite_sentinel))
+let instr_vgetg = instr (IGet VGetG)
+let instr_cgetg = instr (IGet CGetG)
 let instr_cgetn = instr (IGet CGetN)
 let instr_cgetl local = instr (IGet (CGetL local))
 let instr_vgetl local = instr (IGet (VGetL local))
 let instr_vgetn = instr (IGet VGetN)
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
+let instr_bindn = instr (IMutator BindN)
+let instr_bindl local = instr (IMutator (BindL local))
 let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
 let instr_self =

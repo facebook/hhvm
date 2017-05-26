@@ -1291,6 +1291,14 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let result = make_prefix_unary_expression token operand in
     (parser, result)
 
+  and parse_simple_variable parser =
+    match peek_token_kind parser with
+    | Variable ->
+      let (parser1, variable) = next_token parser in
+      (parser1, make_token variable)
+    | Dollar -> parse_dollar_expression parser
+    | _ -> expect_variable parser
+
   and parse_dollar_expression parser =
     let (parser, dollar) = assert_token parser Dollar in
     let (parser, operand) =

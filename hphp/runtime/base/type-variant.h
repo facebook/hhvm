@@ -1441,19 +1441,19 @@ void clearBlackHole();
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
 
-inline const Variant Array::operator[](int     key) const {
+inline Variant Array::operator[](int key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](int64_t   key) const {
+inline Variant Array::operator[](int64_t key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](const String& key) const {
+inline Variant Array::operator[](const String& key) const {
   return rvalAt(key);
 }
 
-inline const Variant Array::operator[](const Variant& key) const {
+inline Variant Array::operator[](const Variant& key) const {
   return rvalAt(key);
 }
 

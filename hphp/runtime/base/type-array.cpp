@@ -41,6 +41,8 @@
 
 namespace HPHP {
 
+////////////////////////////////////////////////////////////////////////////////
+
 const Array null_array{};
 const Array empty_array_ref{staticEmptyArray()};
 const StaticString array_string("Array");
@@ -80,13 +82,11 @@ Array Array::Create(const Variant& name, const Variant& var) {
 Array::~Array() {}
 
 ///////////////////////////////////////////////////////////////////////////////
-// operators
 
-Array &Array::operator=(const Variant& var) {
+Array& Array::operator=(const Variant& var) {
   return operator=(var.toArray());
 }
 
-// Move assign
 Array& Array::operator=(Variant&& v) {
   if (isArrayLikeType(v.asTypedValue()->m_type)) {
     m_arr = req::ptr<ArrayData>::attach(v.asTypedValue()->m_data.parr);
@@ -97,6 +97,30 @@ Array& Array::operator=(Variant&& v) {
   return *this;
 }
 
+void Array::escalate() {
+  if (m_arr) {
+    auto escalated = m_arr->escalate();
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+Array Array::values() const {
+  PackedArrayInit ai(size());
+  for (ArrayIter iter(*this); iter; ++iter) {
+    ai.appendWithRef(iter.secondRef());
+  }
+  return ai.toArray();
+}
+
+ArrayIter Array::begin(const String& context /* = null_string */) const {
+  return ArrayIter(*this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PHP operations.
+
 Array Array::operator+(ArrayData *data) const {
   return Array(*this).plusImpl(data);
 }
@@ -105,7 +129,7 @@ Array Array::operator+(const Array& arr) const {
   return Array(*this).plusImpl(arr.get());
 }
 
-Array &Array::operator+=(ArrayData *data) {
+Array& Array::operator+=(ArrayData *data) {
   return plusImpl(data);
 }
 
@@ -115,14 +139,14 @@ static void throw_bad_array_merge() {
                           "merging an array with NULL or non-array.");
 }
 
-Array &Array::operator+=(const Variant& var) {
+Array& Array::operator+=(const Variant& var) {
   if (!var.isArray()) {
     throw_bad_array_merge();
   }
   return operator+=(var.getArrayData());
 }
 
-Array &Array::operator+=(const Array& arr) {
+Array& Array::operator+=(const Array& arr) {
   return plusImpl(arr.get());
 }
 
@@ -282,8 +306,43 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
   return ret;
 }
 
+Array& Array::merge(const Array& arr) {
+  return mergeImpl(arr.get());
+}
+
+Array& Array::plusImpl(ArrayData *data) {
+  if (m_arr == nullptr || data == nullptr) {
+    throw_bad_array_merge();
+  }
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+  if (!data->empty()) {
+    if (m_arr->empty()) {
+      m_arr = data;
+    } else if (m_arr != data) {
+      auto const escalated = m_arr->plusEq(data);
+      if (escalated != m_arr) {
+        m_arr = Ptr::attach(escalated);
+      }
+    }
+  }
+  return *this;
+}
+
+Array& Array::mergeImpl(ArrayData *data) {
+  if (m_arr == nullptr || data == nullptr) {
+    throw_bad_array_merge();
+  }
+  if (!data->empty()) {
+    auto const escalated = m_arr->merge(data);
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  } else {
+    m_arr->renumber();
+  }
+  return *this;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-// manipulations
+// Type conversions.
 
 String Array::toString() const {
   if (m_arr == nullptr) return empty_string();
@@ -305,43 +364,8 @@ String Array::toString() const {
   return keyset_string;
 }
 
-Array &Array::merge(const Array& arr) {
-  return mergeImpl(arr.get());
-}
-
-Array &Array::plusImpl(ArrayData *data) {
-  if (m_arr == nullptr || data == nullptr) {
-    throw_bad_array_merge();
-  }
-  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
-  if (!data->empty()) {
-    if (m_arr->empty()) {
-      m_arr = data;
-    } else if (m_arr != data) {
-      auto const escalated = m_arr->plusEq(data);
-      if (escalated != m_arr) {
-        m_arr = Ptr::attach(escalated);
-      }
-    }
-  }
-  return *this;
-}
-
-Array &Array::mergeImpl(ArrayData *data) {
-  if (m_arr == nullptr || data == nullptr) {
-    throw_bad_array_merge();
-  }
-  if (!data->empty()) {
-    auto const escalated = m_arr->merge(data);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  } else {
-    m_arr->renumber();
-  }
-  return *this;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// comparisons
+// Comparisons.
 
 bool Array::same(const Array& v2) const {
   if (!m_arr) return !v2.get();
@@ -623,21 +647,7 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// iterator
-
-ArrayIter Array::begin(const String& context /* = null_string */) const {
-  return ArrayIter(*this);
-}
-
-void Array::escalate() {
-  if (m_arr) {
-    auto escalated = m_arr->escalate();
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// offset functions
+// Element rval/lval.
 
 Variant Array::rvalAt(int key, AccessFlags flags) const {
   if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
@@ -788,12 +798,12 @@ Variant& Array::lvalAt(const Variant& key, AccessFlags flags) {
   return tvAsVariant(lvalAt(*key.asCell(), flags).tv());
 }
 
-Variant &Array::lvalAtRef(const String& key, AccessFlags flags) {
+Variant& Array::lvalAtRef(const String& key, AccessFlags flags) {
   if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
   return lvalAtRefImpl(convertKey(key), flags);
 }
 
-Variant &Array::lvalAtRef(const Variant& key, AccessFlags flags) {
+Variant& Array::lvalAtRef(const Variant& key, AccessFlags flags) {
   if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
   VarNR k(convertKey(key));
   if (!k.isNull()) {
@@ -801,6 +811,8 @@ Variant &Array::lvalAtRef(const Variant& key, AccessFlags flags) {
   }
   return lvalBlackHole();
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE
 void Array::setImpl(const T& key, const Variant& v) {
@@ -882,15 +894,7 @@ void Array::add(const Variant& key, const Variant& v, bool isKey /* = false */) 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// membership functions
-
-Array Array::values() const {
-  PackedArrayInit ai(size());
-  for (ArrayIter iter(*this); iter; ++iter) {
-    ai.appendWithRef(iter.secondRef());
-  }
-  return ai.toArray();
-}
+// Element access and mutation.
 
 bool Array::exists(const String& key, bool isKey /* = false */) const {
   if (isKey) return existsImpl(key);
@@ -913,12 +917,9 @@ bool Array::exists(const Variant& key, bool isKey /* = false */) const {
   return false;
 }
 
-void Array::remove(const String& key, bool isString /* = false */) {
-  if (isString) {
-    removeImpl(key);
-  } else {
-    removeImpl(convertKey(key));
-  }
+void Array::remove(const String& key, bool isKey /* = false */) {
+  if (isKey) return removeImpl(key);
+  return removeImpl(convertKey(key));
 }
 
 void Array::remove(const Variant& key) {
@@ -939,7 +940,7 @@ void Array::remove(const Variant& key) {
   }
 }
 
-const Variant& Array::append(const Variant& v) {
+void Array::append(const Variant& v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
 
@@ -948,18 +949,15 @@ const Variant& Array::append(const Variant& v) {
 
   auto escalated = m_arr->append(cell, m_arr->cowCheck());
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-
-  return v;
 }
 
-const Variant& Array::appendRef(Variant& v) {
+void Array::appendRef(Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(v));
   } else {
     ArrayData *escalated = m_arr->appendRef(v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
-  return v;
 }
 
 void Array::appendWithRef(TypedValue v) {
@@ -1004,7 +1002,7 @@ void Array::prepend(const Variant& v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// sorting
+// Sorting.
 
 static int array_compare_func(const void *n1, const void *n2, const void *op) {
   int index1 = *(int*)n1;

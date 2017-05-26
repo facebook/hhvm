@@ -1179,16 +1179,18 @@ and get_elem_member_key stack_index opt_expr =
 
 (* Get the member key for a property *)
 and get_prop_member_key null_flavor stack_index prop_expr =
-  match prop_expr with
+  match snd prop_expr with
+  | A.Id (_, id) when String_utils.string_starts_with id "$" ->
+    MemberKey.PL (Local.Named id)
   (* Special case for known property name *)
-  | (_, A.Id (_, str)) ->
-    let pid = Hhbc_id.Prop.from_ast_name str in
+  | A.Id (_, id) ->
+    let pid = Hhbc_id.Prop.from_ast_name id in
     begin match null_flavor with
     | Ast.OG_nullthrows -> MemberKey.PT pid
     | Ast.OG_nullsafe -> MemberKey.QT pid
     end
-  | (_, A.Lvar (_, x)) when not (is_local_this x) ->
-    MemberKey.PL (Local.Named x)
+  | A.Lvar (_, id) when not (is_local_this id) ->
+    MemberKey.PL (Local.Named id)
   (* General case *)
   | _ -> MemberKey.PC stack_index
 

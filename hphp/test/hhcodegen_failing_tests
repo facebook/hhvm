@@ -12,7 +12,6 @@ quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
 quick/SetOpProp.php
-quick/UnsetProp.php
 quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php
@@ -194,7 +193,6 @@ quick/lexer_nowdoc_many_buffers.php
 quick/libxml_suppress_errors.php
 quick/list-assign-ref-param.php
 quick/list-assignment.php
-quick/magic-get-set.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
@@ -221,7 +219,6 @@ quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php
 quick/prop_order.php
 quick/prop_order_parens.php
-quick/properties-dynamic.php
 quick/properties4.php
 quick/reassign_this1.php
 quick/reassign_this2.php
@@ -278,7 +275,6 @@ quick/vec/basic-setters.php
 quick/vec/reflect.php
 quick/vec/static.php
 quick/vec/type-hint.php
-quick/weird-isset-empty.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php

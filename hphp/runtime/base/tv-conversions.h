@@ -104,6 +104,12 @@ int64_t cellToInt(Cell);
 double cellToDouble(Cell);
 
 /*
+ * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
+ */
+Cell cellToKey(Cell cell, const ArrayData* ad);
+Cell tvToKey(TypedValue tv, const ArrayData* ad);
+
+/*
  * Convert a string to a TypedNum following PHP semantics, allowing strings
  * that have only a partial number in them (i.e. the string may have junk after
  * the number).

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/types.h"
 
 #include <algorithm>
@@ -195,6 +196,7 @@ public:
   /*
    * Converts k to a valid key for this array type
    */
+  Cell convertKey(Cell k) const;
   VarNR convertKey(const Variant& k) const;
 
   /*
@@ -389,11 +391,12 @@ public:
   /*
    * Get an lval reference to an element.
    */
+  member_lval lvalAt(Cell key, Flags = Flags::None);
   Variant& lvalAt(int key, Flags flags = Flags::None) {
-    return lvalAtImpl(key, flags);
+    return tvAsVariant(lvalAtImpl(key, flags).tv());
   }
   Variant& lvalAt(int64_t key, Flags flags = Flags::None) {
-    return lvalAtImpl(key, flags);
+    return tvAsVariant(lvalAtImpl(key, flags).tv());
   }
   Variant& lvalAt(double key, Flags = Flags::None) = delete;
   Variant& lvalAt(const String& key, Flags = Flags::None);
@@ -427,6 +430,7 @@ public:
   void setRef(const String& key, Variant& v, bool isKey = false);
   void setRef(const Variant& key, Variant& v, bool isKey = false);
 
+  void setWithRef(Cell key, TypedValue v, bool isKey = false);
   void setWithRef(const Variant& key, const Variant& v, bool isKey = false);
 
   /*
@@ -504,12 +508,12 @@ public:
   }
 
   template<typename T>
-  Variant& lvalAtImpl(const T& key, Flags = Flags::None) {
+  member_lval lvalAtImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     auto const lval = m_arr->lval(key, m_arr->cowCheck());
     if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
     assert(lval.tv());
-    return reinterpret_cast<Variant&>(*lval.tv());
+    return lval;
   }
 
   template<typename T>

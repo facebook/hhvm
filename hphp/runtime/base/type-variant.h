@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -1359,6 +1360,8 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(ObjectData *v);
   explicit VarNR(const ObjectData*) = delete;
 
+  explicit VarNR(TypedValue tv) { init(tv.m_type); m_data = tv.m_data; }
+
   VarNR(const VarNR &v) : TypedValueAux(v) {}
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
@@ -1454,9 +1457,14 @@ inline const Variant Array::operator[](const Variant& key) const {
   return rvalAt(key);
 }
 
-inline void Array::setWithRef(const Variant& k, const Variant& v,
-                              bool isKey /* = false */) {
-  lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).setWithRef(v);
+inline void Array::setWithRef(Cell k, TypedValue v, bool isKey) {
+  tvAsVariant(
+    lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).tv()
+  ).setWithRef(v);
+}
+
+inline void Array::setWithRef(const Variant& k, const Variant& v, bool isKey) {
+  setWithRef(*k.asCell(), *v.asTypedValue(), isKey);
 }
 
 ALWAYS_INLINE Variant uninit_null() {
@@ -1532,62 +1540,15 @@ inline bool isa_non_null(const Variant& v) {
 
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
+ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
+  return cellToKey(k, m_arr ? m_arr.get() : staticEmptyArray());
+}
 ALWAYS_INLINE VarNR Array::convertKey(const Variant& k) const {
   return k.toKey(m_arr ? m_arr.get() : staticEmptyArray());
 }
 
 inline VarNR Variant::toKey(const ArrayData* ad) const {
-  if (isStringType(m_type)) {
-    int64_t n;
-    if (ad->convertKey(m_data.pstr, n)) return VarNR(n);
-    return VarNR(m_data.pstr);
-  }
-  if (LIKELY(m_type == KindOfInt64)) {
-    return VarNR(m_data.num);
-  }
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->toKey(ad);
-  }
-
-  if (!ad->useWeakKeys()) {
-    throwInvalidArrayKeyException(asTypedValue(), ad);
-  }
-
-  if (RuntimeOption::EvalHackArrCompatNotices) {
-    raiseHackArrCompatImplicitArrayKey(asTypedValue());
-  }
-
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    return VarNR(staticEmptyString());
-
-  case KindOfBoolean:
-    return VarNR(m_data.num);
-
-  case KindOfDouble:
-  case KindOfResource:
-    return VarNR(toInt64());
-
-  case KindOfPersistentVec:
-  case KindOfVec:
-  case KindOfPersistentDict:
-  case KindOfDict:
-  case KindOfPersistentKeyset:
-  case KindOfKeyset:
-  case KindOfPersistentArray:
-  case KindOfArray:
-  case KindOfObject:
-    raise_warning("Invalid operand type was used: Invalid type used as key");
-    return null_varNR;
-
-  case KindOfRef:
-  case KindOfPersistentString:
-  case KindOfString:
-  case KindOfInt64:
-    break;
-  }
-  not_reached();
+  return VarNR(tvToKey(*this, ad));
 }
 
 //////////////////////////////////////////////////////////////////////

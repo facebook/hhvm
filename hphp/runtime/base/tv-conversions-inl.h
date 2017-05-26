@@ -20,8 +20,10 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -86,6 +88,67 @@ inline double cellToDouble(Cell cell) {
   tvCastToDoubleInPlace(&tmp);
   return tmp.m_data.dbl;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline Cell cellToKey(Cell cell, const ArrayData* ad) {
+  assertx(cellIsPlausible(cell));
+
+  if (isStringType(cell.m_type)) {
+    int64_t n;
+    if (ad->convertKey(cell.m_data.pstr, n)) {
+      return make_tv<KindOfInt64>(n);
+    }
+    return cell;
+  }
+  if (LIKELY(isIntType(cell.m_type))) return cell;
+
+  if (!ad->useWeakKeys()) {
+    throwInvalidArrayKeyException(&cell, ad);
+  }
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatImplicitArrayKey(&cell);
+  }
+
+  switch (cell.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return make_tv<KindOfPersistentString>(staticEmptyString());
+
+    case KindOfBoolean:
+      return make_tv<KindOfInt64>(cell.m_data.num);
+
+    case KindOfDouble:
+    case KindOfResource:
+      return make_tv<KindOfInt64>(cellToInt(cell));
+
+    case KindOfPersistentArray:
+    case KindOfArray:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfObject:
+      raise_warning("Invalid operand type was used: Invalid type used as key");
+      return make_tv<KindOfNull>();
+
+    case KindOfInt64:
+    case KindOfString:
+    case KindOfPersistentString:
+    case KindOfRef:
+      break;
+  }
+  not_reached();
+}
+
+inline Cell tvToKey(TypedValue tv, const ArrayData* ad) {
+  assertx(tvIsPlausible(tv));
+  return cellToKey(tvToCell(tv), ad);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline TypedNum stringToNumeric(const StringData* sd) {
   int64_t ival;

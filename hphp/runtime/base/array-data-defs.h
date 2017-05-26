@@ -105,11 +105,14 @@ inline member_lval ArrayData::lval(const String& k, bool copy) {
   return lval(k.get(), copy);
 }
 
-inline member_lval ArrayData::lval(const Variant& k, bool copy) {
+inline member_lval ArrayData::lval(Cell k, bool copy) {
   assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? lval(detail::getIntKey(cell), copy)
-                                : lval(detail::getStringKey(cell), copy);
+  return detail::isIntKey(k) ? lval(detail::getIntKey(k), copy)
+                             : lval(detail::getStringKey(k), copy);
+}
+
+inline member_lval ArrayData::lval(const Variant& k, bool copy) {
+  return lval(*k.asCell(), copy);
 }
 
 inline member_lval ArrayData::lvalRef(const String& k, bool copy) {

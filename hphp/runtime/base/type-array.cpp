@@ -752,7 +752,7 @@ Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
   return Array::rvalAtRef(key, flags);
 }
 
-Variant &Array::lvalAt() {
+Variant& Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
@@ -760,7 +760,7 @@ Variant &Array::lvalAt() {
   return tvAsVariant(lval.tv());
 }
 
-Variant &Array::lvalAtRef() {
+Variant& Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
@@ -768,18 +768,24 @@ Variant &Array::lvalAtRef() {
   return tvAsVariant(lval.tv());
 }
 
-Variant &Array::lvalAt(const String& key, AccessFlags flags) {
+member_lval Array::lvalAt(Cell key, AccessFlags flags) {
   if (any(flags & AccessFlags::Key)) return lvalAtImpl(key, flags);
-  return lvalAtImpl(convertKey(key), flags);
-}
-
-Variant &Array::lvalAt(const Variant& key, AccessFlags flags) {
-  if (any(flags & AccessFlags::Key)) return lvalAtImpl(key, flags);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) {
+  auto const k = convertKey(key);
+  if (!isNullType(k.m_type)) {
     return lvalAtImpl(k, flags);
   }
-  return lvalBlackHole();
+  return member_lval { nullptr, lvalBlackHole().asTypedValue() };
+}
+
+Variant& Array::lvalAt(const String& key, AccessFlags flags) {
+  return tvAsVariant(any(flags & AccessFlags::Key)
+    ? lvalAtImpl(key, flags).tv()
+    : lvalAtImpl(convertKey(key).tv(), flags).tv()
+  );
+}
+
+Variant& Array::lvalAt(const Variant& key, AccessFlags flags) {
+  return tvAsVariant(lvalAt(*key.asCell(), flags).tv());
 }
 
 Variant &Array::lvalAtRef(const String& key, AccessFlags flags) {

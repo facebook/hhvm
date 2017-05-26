@@ -275,6 +275,7 @@ public:
    */
   member_lval lval(int64_t k, bool copy);
   member_lval lval(StringData* k, bool copy);
+  member_lval lval(Cell k, bool copy);
   member_lval lvalRef(int64_t k, bool copy);
   member_lval lvalRef(StringData* k, bool copy);
 

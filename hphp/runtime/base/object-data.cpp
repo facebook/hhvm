@@ -556,7 +556,10 @@ size_t getPropertyIfAccessible(ObjectData* obj,
     } else if (mode == ObjectData::EraseRefs) {
       properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
     } else {
-      properties.setWithRef(VarNR(key), tvAsCVarRef(val), true /* isKey */);
+      properties.setWithRef(
+        make_tv<KindOfString>(const_cast<StringData*>(key)),
+        *val, true /* isKey */
+      );
     }
   }
   return propLeft;
@@ -658,7 +661,8 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       }
       case PreserveRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
-        retArray.setWithRef(VarNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        retArray.setWithRef(make_tv<KindOfString>(strKey),
+                            *val, true /* isKey */);
         break;
       }
       }

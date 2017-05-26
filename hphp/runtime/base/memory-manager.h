@@ -945,10 +945,14 @@ private:
   // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
+  size_t* m_cactive;
+
+  // previous values of *m_[de]allocated from last refreshStats()
   uint64_t m_prevAllocated;
   uint64_t m_prevDeallocated;
-  static bool s_statsEnabled;
+
   bool m_enableStatsSync;
+  static bool s_statsEnabled; // true if mallctlnametomib() setup succeeded.
 #endif
 
   int64_t m_req_start_micros;

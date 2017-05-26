@@ -275,55 +275,47 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
   if (m_enableStatsSync) {
-    uint64_t jeDeallocated = *m_deallocated;
-    uint64_t jeAllocated = *m_allocated;
-
     // We can't currently handle wrapping so make sure this isn't happening.
-    assert(jeAllocated >= 0 &&
-           jeAllocated <= std::numeric_limits<int64_t>::max());
-    assert(jeDeallocated >= 0 &&
-           jeDeallocated <= std::numeric_limits<int64_t>::max());
-
-    // This is the delta between the current and the previous jemalloc reading.
-    int64_t jeMMDeltaAllocated =
-      int64_t(jeAllocated) - int64_t(m_prevAllocated);
+    assert(*m_allocated <= uint64_t(std::numeric_limits<int64_t>::max()));
+    assert(*m_deallocated <= uint64_t(std::numeric_limits<int64_t>::max()));
+    const int64_t curAllocated = *m_allocated;
+    const int64_t curDeallocated = *m_deallocated;
 
     FTRACE(1, "Before stats sync:\n");
-    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
-      jeAllocated, m_prevAllocated, jeAllocated - m_prevAllocated);
-    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
-      jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
-    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
+    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\nchange: {}\n",
+      curAllocated, m_prevAllocated, curAllocated - m_prevAllocated);
+    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\nchange: {}\n",
+      curDeallocated, m_prevDeallocated, curDeallocated - m_prevDeallocated);
+    FTRACE(1, "usage: {}\ntotalAlloc: {}\nmallocDebt: {}\n",
       stats.usage(), stats.totalAlloc, stats.mallocDebt);
 
     // Since these deltas potentially include memory allocated from another
     // thread but deallocated on this one, it is possible for these numbers to
     // go negative.
-    int64_t jeDeltaAllocated =
-      int64_t(jeAllocated) - int64_t(jeDeallocated);
-    int64_t mmDeltaAllocated =
-      int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
-    FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
-        jeDeltaAllocated, mmDeltaAllocated);
+    int64_t curUsage = int64_t(curAllocated) - int64_t(curDeallocated);
+    int64_t prevUsage = int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
+    FTRACE(1, "je usage:\ncurrent: {}\nprevious: {}\n", curUsage, prevUsage);
 
-    // Subtract the old jemalloc adjustment (delta0) and add the current one
-    // (delta) to arrive at the new combined usage number.
-    stats.auxUsage += jeDeltaAllocated - mmDeltaAllocated;
-    // Remove the "debt" accrued from allocating the slabs so we don't double
-    // count the slab-based allocations.
+    // Subtract the old usage adjustment (prevUsage) and add the current one
+    // (curUsage) to arrive at the new combined usage number.
+    stats.auxUsage += curUsage - prevUsage;
+
+    // Remove the "debt" accrued from request-heap allocating slabs and big
+    // objects, so we don't double count them.
     stats.auxUsage -= stats.mallocDebt;
-
     stats.mallocDebt = 0;
-    // We need to do the calculation instead of just setting it to jeAllocated
+
+    // Accumulate the increase in allocation volume since the last refresh.
+    // We need to do the calculation instead of just setting it to curAllocated
     // because of the MaskAlloc capability.
-    stats.totalAlloc += jeMMDeltaAllocated;
+    stats.totalAlloc += int64_t(curAllocated) - int64_t(m_prevAllocated);
     if (live) {
-      m_prevAllocated = jeAllocated;
-      m_prevDeallocated = jeDeallocated;
+      m_prevAllocated = curAllocated;
+      m_prevDeallocated = curDeallocated;
     }
 
     FTRACE(1, "After stats sync:\n");
-    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
+    FTRACE(1, "usage: {}\ntotalAlloc: {}\n\n",
       stats.usage(), stats.totalAlloc);
   }
 #endif

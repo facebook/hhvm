@@ -2,7 +2,6 @@ quick/CGetMVar.php
 quick/Cls.php
 quick/ClsCases.php
 quick/EmitOO.php
-quick/Empty.php
 quick/FPassC-2.php
 quick/FPassC-eval.php
 quick/FPushCtor.php

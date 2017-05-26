@@ -655,7 +655,13 @@ and emit_call_empty_expr (_, expr_ as expr) =
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get false None QueryOp.Empty expr prop nullflavor
   | A.Lvar(_, id) when not (is_local_this id) ->
-    instr (IIsset (EmptyL (Local.Named id)))
+    instr_emptyl (Local.Named id)
+  | A.Lvarvar(n, (_, id)) ->
+    gather [
+      instr_cgetl (Local.Named id);
+      if n = 1 then empty else gather @@ List.replicate (n - 1) instr_cgetn;
+      instr_emptyn;
+    ]
   | _ ->
     gather [
       from_expr ~need_ref:false expr;

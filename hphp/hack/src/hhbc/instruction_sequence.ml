@@ -89,6 +89,8 @@ let instr_issetl local = instr (IIsset (IssetL local))
 let instr_issetn = instr (IIsset IssetN)
 let instr_issets = instr (IIsset (IssetS class_ref_rewrite_sentinel))
 let instr_emptys = instr (IIsset (EmptyS class_ref_rewrite_sentinel))
+let instr_emptyn = instr (IIsset EmptyN)
+let instr_emptyl local = instr (IIsset (EmptyL local))
 let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
 let instr_vgets =

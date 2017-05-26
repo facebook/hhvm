@@ -31,6 +31,19 @@ namespace HPHP {
 /**
  * An async generator wait handle represents one step of asynchronous execution
  * between two yield statements of an async generator.
+ *
+ * Unfinished AsyncGeneratorWaitHandles are always referenced by m_waitHandle
+ * property of AsyncGenerators. In addition, semi-implicit references may be
+ * implied based on the current state:
+ *
+ * SUCCEEDED, FAILED: no reference
+ * BLOCKED: referenced by child via its AsioBlockableChain
+ * READY: referenced once per each entry in AsioContext runnable queues
+ * RUNNING: referenced by being executed
+ *
+ * When transitioning between states, incref/decref pairs are simply avoided.
+ * The initial incref happens at the construction time and corresponding decref
+ * at transition to the SUCCEEDED or FAILED state.
  */
 struct AsyncGenerator;
 

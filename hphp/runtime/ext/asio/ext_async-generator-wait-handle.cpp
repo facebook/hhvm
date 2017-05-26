@@ -52,7 +52,8 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
       wh->m_blockable,
       AsioBlockable::Kind::AsyncGeneratorWaitHandle
   );
-  wh->incRefCount(); // on behalf of child->parent ptr in AsioBlockableChain
+  // Implied reference from child via its AsioBlockableChain.
+  wh->incRefCount();
   return wh;
 }
 
@@ -68,6 +69,7 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
 }
 
 void c_AsyncGeneratorWaitHandle::resume() {
+  // No refcnt: incref by being executed, decref by no longer in runnable queue.
   assert(getState() == STATE_READY);
   assert(m_child->isFinished());
   setState(STATE_RUNNING);
@@ -99,8 +101,10 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 void c_AsyncGeneratorWaitHandle::onUnblocked() {
   setState(STATE_READY);
   if (isInContext()) {
+    // No refcnt: incref by runnable queue, decref by no longer refd by child.
     getContext()->schedule(this);
   } else {
+    // Drop implied reference from child.
     decRefObj(this);
   }
 }
@@ -110,6 +114,7 @@ void c_AsyncGeneratorWaitHandle::await(c_WaitableWaitHandle* child) {
   prepareChild(child);
 
   // Set up the dependency.
+  // No refcnt: incref by ref from child, decref by no longer being executed.
   setState(STATE_BLOCKED);
   m_child = child;
   m_child->getParentChain()
@@ -122,6 +127,9 @@ void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
@@ -135,6 +143,9 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::failCpp() {
@@ -144,6 +155,9 @@ void c_AsyncGeneratorWaitHandle::failCpp() {
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 String c_AsyncGeneratorWaitHandle::getName() {

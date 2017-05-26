@@ -52,8 +52,8 @@ struct AsyncGenerator final : BaseGenerator {
     return Native::data<AsyncGenerator>(obj);
   }
 
-  c_AsyncGeneratorWaitHandle* await(Offset resumeOffset,
-                                    c_WaitableWaitHandle* child);
+  req::ptr<c_AsyncGeneratorWaitHandle> await(Offset resumeOffset,
+                                             c_WaitableWaitHandle* child);
   c_StaticWaitHandle* yield(Offset resumeOffset,
                             const Cell* key, Cell value);
   c_StaticWaitHandle* ret();

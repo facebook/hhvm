@@ -6007,12 +6007,12 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
   } else {
     // Async generator.
     auto const gen = frame_async_generator(fp);
-    auto const eagerResult = gen->await(resumeOffset, child);
+    auto eagerResult = gen->await(resumeOffset, child);
     vmStack().discard();
     if (eagerResult) {
       // Eager execution => return AsyncGeneratorWaitHandle.
       assert(fp->sfp());
-      vmStack().pushObjectNoRc(eagerResult);
+      vmStack().pushObjectNoRc(eagerResult.detach());
     } else {
       // Resumed execution => return control to the scheduler.
       assert(!fp->sfp());

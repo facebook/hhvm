@@ -197,7 +197,7 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
   if (arr.size() != 2 || !arr.exists(0) || !arr.exists(1)) {
     raise_error("Error decoding xbox call message");
   }
-  Variant fn = arr.rvalAt(0);
+  Variant fn = arr[0];
   if (fn.isArray()) {
     Array farr = fn.toArray();
     if (!array_is_valid_callback(farr)) {
@@ -206,7 +206,7 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
   } else if (!fn.isString()) {
     raise_error("Error decoding xbox call message");
   }
-  Variant args = arr.rvalAt(1);
+  Variant args = arr[1];
   if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }

@@ -423,7 +423,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       raise_warning("'query' missing from xpath array");
       return false;
     }
-    Variant tmp = arr.rvalAt(s_query);
+    auto const& tmp = arr.rvalAt(s_query);
     if (!tmp.isString()) {
       raise_warning("'query' is not a string");
       return false;

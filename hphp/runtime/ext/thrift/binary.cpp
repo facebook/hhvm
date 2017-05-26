@@ -121,7 +121,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       return init_null();
     case T_STRUCT: {
       Variant val;
-      if ((val = fieldspec.rvalAt(s_class)).isNull()) {
+      if ((val = fieldspec[s_class]).isNull()) {
         throw_tprotocolexception("no class type in spec", INVALID_DATA);
         skip_element(T_STRUCT, transport);
         return init_null();
@@ -430,7 +430,7 @@ void binary_deserialize_slow(const Object& zthis, const Array& spec,
   INC_TPC(thrift_read_slow);
   while (ttype != T_STOP) {
     Variant val;
-    if (!(val = spec.rvalAt(fieldno)).isNull()) {
+    if (!(val = spec[fieldno]).isNull()) {
       Array fieldspec = val.toArray();
       // pull the field name
       String varname = fieldspec.rvalAt(s_var).toString();

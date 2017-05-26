@@ -398,25 +398,18 @@ public:
   Variant operator[](const char*) const = delete; // use const String&
 
   /*
-   * Same as operator[].
+   * Get an rval to the element at `key'.
+   *
+   * TODO(#9077255): Return member_rval instead.
    */
-  Variant rvalAt(int key, Flags = Flags::None) const;
-  Variant rvalAt(int64_t key, Flags = Flags::None) const;
-  Variant rvalAt(double key, Flags = Flags::None) const = delete;
-  Variant rvalAt(const String& key, Flags = Flags::None) const;
-  Variant rvalAt(const Variant& key, Flags = Flags::None) const;
+  const Variant& rvalAt(int key, Flags = Flags::None) const;
+  const Variant& rvalAt(int64_t key, Flags = Flags::None) const;
+  const Variant& rvalAt(const String& key, Flags = Flags::None) const;
+  const Variant& rvalAt(const Variant& key, Flags = Flags::None) const;
+  const Variant& rvalAt(double key, Flags = Flags::None) const = delete;
 
   /*
-   * Same as operator[], but returns the element by const reference.
-   */
-  const Variant& rvalAtRef(int key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(int64_t key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(double key, Flags = Flags::None) const = delete;
-  const Variant& rvalAtRef(const Variant& key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(const String& key, Flags = Flags::None) const;
-
-  /*
-   * Get an lval to an element.
+   * Get an lval to the element at `key'.
    *
    * These are ArrayData::lval() and ArrayData::lvalRef(), with CoW and
    * escalation.  As with those functions, the Ref versions should be used if
@@ -429,9 +422,9 @@ public:
   Variant& lvalAt(int64_t key, Flags flags = Flags::None) {
     return tvAsVariant(lvalAtImpl(key, flags).tv());
   }
-  Variant& lvalAt(double key, Flags = Flags::None) = delete;
   Variant& lvalAt(const String& key, Flags = Flags::None);
   Variant& lvalAt(const Variant& key, Flags = Flags::None);
+  Variant& lvalAt(double key, Flags = Flags::None) = delete;
 
   Variant& lvalAtRef(int key, Flags flags = Flags::None) {
     return lvalAtRefImpl(key, flags);
@@ -439,9 +432,9 @@ public:
   Variant& lvalAtRef(int64_t key, Flags flags = Flags::None) {
     return lvalAtRefImpl(key, flags);
   }
-  Variant& lvalAtRef(double key, Flags = Flags::None) = delete;
   Variant& lvalAtRef(const String& key, Flags = Flags::None);
   Variant& lvalAtRef(const Variant& key, Flags = Flags::None);
+  Variant& lvalAtRef(double key, Flags = Flags::None) = delete;
 
   /*
    * Get an lval to a newly created element.

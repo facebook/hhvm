@@ -204,7 +204,7 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
-  auto tv = ArrNR(base).asArray().rvalAtRef(cellAsCVarRef(key)).asTypedValue();
+  auto tv = ArrNR(base).asArray().rvalAt(cellAsCVarRef(key)).asTypedValue();
   return tv->m_type != KindOfUninit ? tv : nullptr;
 }
 

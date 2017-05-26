@@ -642,7 +642,7 @@ static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
       return empty_array();
     }
 
-    auto conn = cast<MySQLResource>(entry.rvalAt(0))->mysql()->get();
+    auto conn = cast<MySQLResource>(entry[0])->mysql()->get();
 
     if (conn->async_op_status == ASYNC_OP_UNSET) {
       raise_warning("runtime/ext_mysql: no pending async operation in "
@@ -682,7 +682,7 @@ static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
       return empty_array();
     }
 
-    auto conn = cast<MySQLResource>(entry.rvalAt(0))->mysql()->get();
+    auto conn = cast<MySQLResource>(entry[0])->mysql()->get();
 
     pollfd* fd = &fds[nfds++];
     if (fd->fd != mysql_get_file_descriptor(conn)) {

@@ -1021,8 +1021,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           error = true;
           return SimpleFunctionCallPtr();
         }
-        Variant classname = arr.rvalAt(int64_t(0));
-        Variant methodname = arr.rvalAt(int64_t(1));
+        Variant classname = arr[0];
+        Variant methodname = arr[1];
         if (!methodname.isString()) {
           error = true;
           return SimpleFunctionCallPtr();

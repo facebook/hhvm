@@ -95,11 +95,11 @@ bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  Variant elem0 = arr.rvalAt(int64_t(0));
+  auto const& elem0 = arr.rvalAt(0);
   if (!elem0.isString() && !elem0.isObject()) {
     return false;
   }
-  Variant elem1 = arr.rvalAt(int64_t(1));
+  auto const& elem1 = arr.rvalAt(1);
   if (!elem1.isString()) {
     return false;
   }
@@ -138,8 +138,8 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
 
   if (isArrayType(tv_func->m_type)) {
     const Array& arr = Array(tv_func->m_data.parr);
-    const Variant& clsname = arr.rvalAtRef(int64_t(0));
-    const Variant& mthname = arr.rvalAtRef(int64_t(1));
+    const Variant& clsname = arr.rvalAt(int64_t(0));
+    const Variant& mthname = arr.rvalAt(int64_t(1));
     if (arr.size() != 2 ||
         &clsname == &uninit_variant ||
         !mthname.isString()) {
@@ -223,12 +223,12 @@ vm_decode_function(const Variant& function,
         }
         return nullptr;
       }
-      Variant elem1 = arr.rvalAt(int64_t(1));
+      Variant elem1 = arr[1];
       name = elem1.toString();
       pos = name.find("::");
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
-      Variant elem0 = arr.rvalAt(int64_t(0));
+      Variant elem0 = arr[0];
       if (elem0.isString()) {
         String sclass = elem0.toString();
         if (sclass.get()->isame(s_self.get())) {

@@ -974,10 +974,10 @@ struct StackGetCmd : XDebugCommand {
         // We need the function name in the parent frame, because in this
         // data structure, a frame's function name is actually the function
         // being called in that frame.
-        const auto parent_frame = backtrace.rvalAt(depth + 1);
-        const auto func_name = parent_frame.getArrayData()->get(s_function);
-        const auto frame = backtrace.rvalAt(depth);
-        const auto xdebug_frame = getFrame(
+        auto const& parent_frame = backtrace.rvalAt(depth + 1);
+        auto const& func_name = parent_frame.getArrayData()->get(s_function);
+        auto const& frame = backtrace.rvalAt(depth);
+        auto const xdebug_frame = getFrame(
           frame.getArrayData(),
           depth,
           func_name.toString()

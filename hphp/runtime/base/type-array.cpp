@@ -649,27 +649,17 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Element rval/lval.
 
-Variant Array::rvalAt(int key, AccessFlags flags) const {
-  if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
-  return init_null();
-}
-
-const Variant& Array::rvalAtRef(int key, AccessFlags flags) const {
+const Variant& Array::rvalAt(int key, AccessFlags flags) const {
   if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
   return uninit_variant;
 }
 
-Variant Array::rvalAt(int64_t key, AccessFlags flags) const {
-  if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
-  return init_null();
-}
-
-const Variant& Array::rvalAtRef(int64_t key, AccessFlags flags) const {
+const Variant& Array::rvalAt(int64_t key, AccessFlags flags) const {
   if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
   return uninit_variant;
 }
 
-const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
+const Variant& Array::rvalAt(const String& key, AccessFlags flags) const {
   if (!m_arr) return uninit_variant;
   auto const error = any(flags & AccessFlags::Error);
 
@@ -693,11 +683,7 @@ const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
   return m_arr->get(key, error);
 }
 
-Variant Array::rvalAt(const String& key, AccessFlags flags) const {
-  return Array::rvalAtRef(key, flags);
-}
-
-const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
+const Variant& Array::rvalAt(const Variant& key, AccessFlags flags) const {
   if (!m_arr) return uninit_variant;
   auto const error = any(flags & AccessFlags::Error);
 
@@ -707,10 +693,6 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
     return m_arr->get(k, error);
   }
   return uninit_variant;
-}
-
-Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
-  return Array::rvalAtRef(key, flags);
 }
 
 Variant& Array::lvalAt() {

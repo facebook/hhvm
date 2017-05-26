@@ -331,7 +331,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         gpc_elements.back().assignRef(val);
       } else {
         String key(index, index_len, CopyString);
-        Variant v = symtable->rvalAt(key);
+        auto const& v = symtable->rvalAt(key);
         if (v.isNull() || !v.isArray()) {
           symtable->set(key, Array::Create());
         }

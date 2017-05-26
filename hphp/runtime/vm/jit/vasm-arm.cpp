@@ -1529,12 +1529,11 @@ void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
 }
 
 template<typename load_op, typename cmp_op, typename cmpm>
-void lower_cmpm(const VLS&e, cmpm& i, Vlabel b, size_t z) {
+void lower_cmpm(const VLS& e, cmpm& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     lowerVptr(i.s1, v);
-    auto tmp0 = v.makeReg();
+    Vreg tmp0 = i.s0;
     auto tmp1 = v.makeReg();
-    v << copy{i.s0, tmp0};
     v << load_op{i.s1, tmp1};
     v << cmp_op{tmp0, tmp1, i.sf};
   });

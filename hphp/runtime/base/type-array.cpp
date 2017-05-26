@@ -670,27 +670,27 @@ const Variant& Array::rvalAtRef(int64_t key, AccessFlags flags) const {
 }
 
 const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
-  if (m_arr) {
-    auto const error = any(flags & AccessFlags::Error);
-    if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
-    if (key.isNull()) {
-      if (!useWeakKeys()) {
-        throwInvalidArrayKeyException(uninit_variant.asTypedValue(),
-                                      m_arr.get());
-      }
-      if (RuntimeOption::EvalHackArrCompatNotices) {
-        raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
-      }
-      return m_arr->get(staticEmptyString(), error);
+  if (!m_arr) return uninit_variant;
+  auto const error = any(flags & AccessFlags::Error);
+
+  if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
+
+  if (key.isNull()) {
+    if (!useWeakKeys()) {
+      throwInvalidArrayKeyException(uninit_variant.asTypedValue(),
+                                    m_arr.get());
     }
-    int64_t n;
-    if (!m_arr->convertKey(key.get(), n)) {
-      return m_arr->get(key, error);
-    } else {
-      return m_arr->get(n, error);
+    if (RuntimeOption::EvalHackArrCompatNotices) {
+      raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
     }
+    return m_arr->get(staticEmptyString(), error);
   }
-  return uninit_variant;
+
+  int64_t n;
+  if (m_arr->convertKey(key.get(), n)) {
+    return m_arr->get(n, error);
+  }
+  return m_arr->get(key, error);
 }
 
 Variant Array::rvalAt(const String& key, AccessFlags flags) const {
@@ -699,63 +699,14 @@ Variant Array::rvalAt(const String& key, AccessFlags flags) const {
 
 const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
   if (!m_arr) return uninit_variant;
-  auto const bad_key = [&] {
-    if (!useWeakKeys()) {
-      throwInvalidArrayKeyException(key.asTypedValue(), m_arr.get());
-    }
-    if (RuntimeOption::EvalHackArrCompatNotices) {
-      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
-    }
-  };
-  switch (key.getRawType()) {
-    case KindOfUninit:
-    case KindOfNull:
-      bad_key();
-      return m_arr->get(staticEmptyString(), any(flags & AccessFlags::Error));
+  auto const error = any(flags & AccessFlags::Error);
 
-    case KindOfBoolean:
-      bad_key();
-    case KindOfInt64:
-      return m_arr->get(key.asTypedValue()->m_data.num,
-                        any(flags & AccessFlags::Error));
-
-    case KindOfDouble:
-      bad_key();
-      return m_arr->get(double_to_int64(key.asTypedValue()->m_data.dbl),
-                        any(flags & AccessFlags::Error));
-
-    case KindOfPersistentString:
-    case KindOfString:
-      {
-        int64_t n;
-        if (!any(flags & AccessFlags::Key) &&
-            m_arr->convertKey(key.asTypedValue()->m_data.pstr, n)) {
-          return m_arr->get(n, any(flags & AccessFlags::Error));
-        }
-      }
-      return m_arr->get(key.asCStrRef(), any(flags & AccessFlags::Error));
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
-    case KindOfObject:
-      bad_key();
-      throw_bad_type_exception("Invalid type used as key");
-      return uninit_variant;
-
-    case KindOfResource:
-      bad_key();
-      return m_arr->get(key.toInt64(), any(flags & AccessFlags::Error));
-
-    case KindOfRef:
-      return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
+  if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
+  auto const k = convertKey(key);
+  if (!k.isNull()) {
+    return m_arr->get(k, error);
   }
-  not_reached();
+  return uninit_variant;
 }
 
 Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {

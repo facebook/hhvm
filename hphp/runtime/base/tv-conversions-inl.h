@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -119,8 +120,10 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
       return make_tv<KindOfInt64>(cell.m_data.num);
 
     case KindOfDouble:
+      return make_tv<KindOfInt64>(double_to_int64(cell.m_data.dbl));
+
     case KindOfResource:
-      return make_tv<KindOfInt64>(cellToInt(cell));
+      return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
 
     case KindOfPersistentArray:
     case KindOfArray:

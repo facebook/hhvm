@@ -396,7 +396,17 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
   for (ArrayIter it(bt.get()); it; ++it) {
     Array frame = it.second().toArray();
     files.emplace_back(frame[s_file].toString().data());
-    functions.emplace_back(frame[s_function].toString().data());
+    if (frame.exists(s_class)) {
+      functions.emplace_back(
+        folly::sformat("{}{}{}",
+          frame[s_class].toString().data(),
+          frame[s_type].toString().data(),
+          frame[s_function].toString().data()
+          )
+        );
+    } else {
+      functions.emplace_back(frame[s_function].toString().data());
+    }
     lines.emplace_back(frame[s_line].toString().data());
   }
   cols.setVec("php_files", files);

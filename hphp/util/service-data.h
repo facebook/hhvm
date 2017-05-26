@@ -29,6 +29,8 @@
 #include <folly/stats/MultiLevelTimeSeries.h>
 #include <folly/Optional.h>
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,6 +112,62 @@ enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
  * already been created.
  */
 ExportedCounter* createCounter(const std::string& name);
+
+/*
+ * Callback-based counters
+ *
+ * Some counters have values that are updated much more frequently than data is
+ * requested from ServiceData, or there may not be a good location in the code
+ * to periodically update the value. For these cases, a callback-based counter
+ * may be used instead.
+ *
+ * registerCounterCallback() returns a unique handle that may be passed to
+ * deregisterCounterCallback() if the callback should be deregistered.
+ *
+ * The CounterCallback struct is provided as a convenience wrapper to manage
+ * the handle. The callback may be provided to its constructor, or to the
+ * init() function, if the callback isn't safe to call at CounterCallback's
+ * construction. Similarly, deinit() may be be called if the callback should be
+ * deregistered before CounterCallback's destruction.
+ *
+ * Once registered, callbacks must be safe to call at any time, from any
+ * thread, and may even be called before registerCounterCallback()
+ * returns. Callbacks are passed a reference to the std::map<std::string,
+ * int64_t> being populated, so one callback can add many counters (callbacks
+ * can also remove or modify existing counters, but this is discouraged).
+ */
+using CounterFunc = std::function<void(std::map<std::string, int64_t>&)>;
+using CounterHandle = uint32_t;
+
+CounterHandle registerCounterCallback(CounterFunc func);
+void deregisterCounterCallback(CounterHandle key);
+
+struct CounterCallback {
+  CounterCallback() = default;
+
+  explicit CounterCallback(CounterFunc func) {
+    init(std::move(func));
+  }
+
+  ~CounterCallback() {
+    deinit();
+  }
+
+  void init(CounterFunc func) {
+    assertx(!m_key);
+    m_key = registerCounterCallback(std::move(func));
+  }
+
+  void deinit() {
+    if (m_key) {
+      deregisterCounterCallback(*m_key);
+      m_key = folly::none;
+    }
+  }
+
+private:
+  folly::Optional<CounterHandle> m_key;
+};
 
 /*
  * Create a timeseries counter named 'name'. Return an existing one if it

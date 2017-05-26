@@ -176,6 +176,12 @@ ProxygenServer::ProxygenServer(
                                   levels, 10);
 }
 
+ProxygenServer::~ProxygenServer() {
+  Logger::Verbose("%p: destroying ProxygenServer", this);
+  waitForEnd();
+  Logger::Verbose("%p: ProxygenServer destroyed", this);
+}
+
 int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
   if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
     // Subsequent calls to ProxygenServer::stop() won't do anything.

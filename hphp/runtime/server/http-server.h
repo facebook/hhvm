@@ -20,7 +20,9 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/shutdown-stats.h"
+
 #include "hphp/util/async-func.h"
+#include "hphp/util/service-data.h"
 
 #include <folly/MicroSpinLock.h>
 
@@ -142,6 +144,7 @@ private:
   ServerPtr m_adminServer;
   std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
   AsyncFunc<HttpServer> m_watchDog;
+  ServiceData::CounterCallback m_counterCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

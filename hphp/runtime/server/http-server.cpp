@@ -161,6 +161,18 @@ HttpServer::HttpServer()
 
   StaticContentCache::TheCache.load();
 
+  m_counterCallback.init(
+    [this](std::map<std::string, int64_t>& counters) {
+      counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
+      counters["inflight_requests"] = m_pageServer->getActiveWorker();
+      counters["queued_requests"] = m_pageServer->getQueuedJobs();
+
+      auto const sat_requests = getSatelliteRequestCount();
+      counters["satellite_inflight_requests"] = sat_requests.first;
+      counters["satellite_queued_requests"] = sat_requests.second;
+    }
+  );
+
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);
   signal(SIGHUP, on_kill);
@@ -233,6 +245,8 @@ void HttpServer::playShutdownRequest(const std::string& fileName) {
 }
 
 HttpServer::~HttpServer() {
+  m_counterCallback.deinit();
+
   // XXX: why should we have to call stop here?  If we haven't already
   // stopped (and joined all the threads), watchDog could still be
   // running and leaving this destructor without a wait would be

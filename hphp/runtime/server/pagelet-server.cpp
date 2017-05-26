@@ -348,6 +348,12 @@ IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 
 static JobQueueDispatcher<PageletWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
+static ServiceData::CounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    counters["pagelet_inflight_requests"] = PageletServer::GetActiveWorker();
+    counters["pagelet_queued_requests"] = PageletServer::GetQueuedJobs();
+  }
+);
 
 bool PageletServer::Enabled() {
   return s_dispatcher;

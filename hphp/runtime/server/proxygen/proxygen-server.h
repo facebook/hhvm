@@ -94,12 +94,7 @@ struct ProxygenServer : Server,
                         folly::AsyncTimeout,
                         TakeoverAgent::Callback {
   explicit ProxygenServer(const ServerOptions& options);
-
-  ~ProxygenServer() {
-    Logger::Verbose("%p: destroying ProxygenServer", this);
-    waitForEnd();
-    Logger::Verbose("%p: ProxygenServer destroyed", this);
-  }
+  ~ProxygenServer();
 
   void addTakeoverListener(TakeoverListener* listener) override;
   void removeTakeoverListener(TakeoverListener* listener) override;

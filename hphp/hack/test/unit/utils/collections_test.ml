@@ -27,8 +27,32 @@ let test_myMap_union () =
   in
   true
 
+let test_ImmQueue () =
+  let queue = ImmQueue.empty in
+  if not (ImmQueue.is_empty queue) then failwith "not empty";
+  let queue = ImmQueue.push queue 4 in
+  if ImmQueue.is_empty queue then failwith "empty";
+  let queue = ImmQueue.push queue 5 in
+  if ImmQueue.length queue <> 2 then failwith "wrong length";
+  let queue = ImmQueue.push queue 6 in
+  let (x, queue) = ImmQueue.pop queue in
+  (match x with Some 4 -> () | _ -> (failwith "wrong value"));
+  let (x, queue) = ImmQueue.pop_unsafe queue in
+  if x <> 5 then failwith "wrong value";
+  let (x, queue) = ImmQueue.pop_unsafe queue in
+  if x <> 6 then failwith "wrong value";
+  let did_throw =
+    try ignore (ImmQueue.pop_unsafe queue); false
+    with ImmQueue.Empty -> true
+  in
+  if not did_throw then failwith "expected an exception";
+  let (x, _) = ImmQueue.pop queue in
+  match x with Some _ -> failwith "expected none" | None -> ();
+  true
+
 let tests = [
   "test_myMap_union", test_myMap_union;
+  "test_ImmQueue", test_ImmQueue;
 ]
 
 let () =

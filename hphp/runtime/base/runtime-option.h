@@ -161,7 +161,6 @@ struct RuntimeOption {
   static int PspTimeoutSeconds;
   static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
-  static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ServerGracefulShutdownWait;

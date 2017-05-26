@@ -895,11 +895,10 @@ private:
   static uint32_t bsr(uint32_t x);
 
   static void threadStatsInit();
-  static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);
+  static void threadStats(uint64_t*&, uint64_t*&);
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
-  void refreshStatsHelperStop();
 
   void resetStatsImpl(bool isInternalCall);
 
@@ -948,10 +947,7 @@ private:
   uint64_t* m_deallocated;
   uint64_t m_prevAllocated;
   uint64_t m_prevDeallocated;
-  size_t* m_cactive;
-  mutable size_t m_cactiveLimit;
   static bool s_statsEnabled;
-  static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
 

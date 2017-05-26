@@ -58,11 +58,9 @@ std::atomic<MemoryManager::ReqProfContext*>
 
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
-size_t MemoryManager::s_cactiveLimitCeiling = 0;
 
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
-static size_t statsCactiveMib[2];
 static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
 
 void MemoryManager::threadStatsInit() {
@@ -75,45 +73,11 @@ void MemoryManager::threadStatsInit() {
   if (mallctlnametomib("thread.deallocatedp", threadDeallocatedpMib, &miblen)) {
     return;
   }
-  miblen = sizeof(statsCactiveMib) / sizeof(size_t);
-  if (mallctlnametomib("stats.cactive", statsCactiveMib, &miblen)) {
-    return;
-  }
   MemoryManager::s_statsEnabled = true;
-
-  // In threadStats() we wish to solve for cactiveLimit in:
-  //
-  //   footprint + cactiveLimit + headRoom == MemTotal
-  //
-  // However, headRoom comes from RuntimeOption::ServerMemoryHeadRoom, which
-  // isn't initialized until after the code here runs.  Therefore, compute
-  // s_cactiveLimitCeiling here in order to amortize the cost of introspecting
-  // footprint and MemTotal.
-  //
-  //   cactiveLimit == (MemTotal - footprint) - headRoom
-  //
-  //   cactiveLimit == s_cactiveLimitCeiling - headRoom
-  // where
-  //   s_cactiveLimitCeiling == MemTotal - footprint
-  size_t footprint = Process::GetCodeFootprint(getpid());
-  size_t MemTotal  = 0;
-#ifndef __APPLE__
-  size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
-  MemTotal = size_t(sysconf(_SC_PHYS_PAGES)) * pageSize;
-#else
-  int mib[2] = { CTL_HW, HW_MEMSIZE };
-  u_int namelen = sizeof(mib) / sizeof(mib[0]);
-  size_t len = sizeof(MemTotal);
-  sysctl(mib, namelen, &MemTotal, &len, nullptr, 0);
-#endif
-  if (MemTotal > footprint) {
-    MemoryManager::s_cactiveLimitCeiling = MemTotal - footprint;
-  }
 }
 
 inline
-void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
-                                size_t*& cactive, size_t& cactiveLimit) {
+void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated) {
   pthread_once(&threadStatsOnce, threadStatsInit);
   if (!MemoryManager::s_statsEnabled) return;
 
@@ -129,22 +93,6 @@ void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
                    sizeof(threadDeallocatedpMib) / sizeof(size_t),
                    &deallocated, &len, nullptr, 0)) {
     not_reached();
-  }
-
-  len = sizeof(cactive);
-  if (mallctlbymib(statsCactiveMib,
-                   sizeof(statsCactiveMib) / sizeof(size_t),
-                   &cactive, &len, nullptr, 0)) {
-    not_reached();
-  }
-
-  int64_t headRoom = RuntimeOption::ServerMemoryHeadRoom;
-  // Compute cactiveLimit based on s_cactiveLimitCeiling, as computed in
-  // threadStatsInit().
-  if (headRoom != 0 && headRoom < MemoryManager::s_cactiveLimitCeiling) {
-    cactiveLimit = MemoryManager::s_cactiveLimitCeiling - headRoom;
-  } else {
-    cactiveLimit = std::numeric_limits<size_t>::max();
   }
 }
 #endif
@@ -176,7 +124,7 @@ void MemoryManager::OnThreadExit(MemoryManager* mm) {
 
 MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
-  threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
+  threadStats(m_allocated, m_deallocated);
 #endif
   resetStatsImpl(true);
   setMemoryLimit(std::numeric_limits<int64_t>::max());
@@ -300,15 +248,6 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
   m_memThresholdCallbackPeakUsage = threshold;
 }
 
-#ifdef USE_JEMALLOC
-void MemoryManager::refreshStatsHelperStop() {
-  HttpServer::Server->stop();
-  // Increase the limit to the maximum possible value, so that this method
-  // won't be called again.
-  m_cactiveLimit = std::numeric_limits<size_t>::max();
-}
-#endif
-
 /*
  * Refresh stats to reflect directly malloc()ed memory, and determine
  * whether the request memory limit has been exceeded.
@@ -393,28 +332,10 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     refreshStatsHelperExceeded();
   }
   if (stats.usage() > stats.peakUsage) {
-    // Check whether the process's active memory limit has been exceeded, and
-    // if so, stop the server.
-    //
-    // Only check whether the total memory limit was exceeded if this request
-    // is at a new high water mark.  This check could be performed regardless
-    // of this request's current memory usage (because other request threads
-    // could be to blame for the increased memory usage), but doing so would
-    // measurably increase computation for little benefit.
-#ifdef USE_JEMALLOC
-    // (*m_cactive) consistency is achieved via atomic operations.  The fact
-    // that we do not use an atomic operation here means that we could get a
-    // stale read, but in practice that poses no problems for how we are
-    // using the value.
-    if (live && s_statsEnabled && *m_cactive > m_cactiveLimit) {
-      refreshStatsHelperStop();
-    }
-#endif
     if (live && stats.usage() > m_memThresholdCallbackPeakUsage) {
       m_memThresholdCallbackPeakUsage = SIZE_MAX;
       setSurpriseFlag(MemThresholdFlag);
     }
-
     stats.peakUsage = stats.usage();
   }
   if (live && m_statsIntervalActive) {

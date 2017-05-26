@@ -185,7 +185,6 @@ int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
 int RuntimeOption::PspCpuTimeoutSeconds = 0;
 int64_t RuntimeOption::MaxRequestAgeFactor = 0;
-int64_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
 int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
@@ -1402,7 +1401,6 @@ void RuntimeOption::Load(
     Config::Bind(PspTimeoutSeconds, ini, config, "Server.PspTimeoutSeconds", 0);
     Config::Bind(PspCpuTimeoutSeconds, ini, config,
                  "Server.PspCpuTimeoutSeconds", 0);
-    Config::Bind(ServerMemoryHeadRoom, ini, config, "Server.MemoryHeadRoom", 0);
     Config::Bind(RequestMemoryMaxBytes, ini, config,
                  "Server.RequestMemoryMaxBytes", (16LL << 30)); // 16GiB
     Config::Bind(ServerGracefulShutdownWait, ini,

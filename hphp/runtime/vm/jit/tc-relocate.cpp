@@ -615,7 +615,8 @@ void liveRelocate(int time) {
   case Arch::PPC64:
     break;
   case Arch::ARM:
-    // Relocation is not supported on arm.
+    // Live (Dynamic) Relocation is not supported on ARM until smashable
+    // locations are tracked and rebuilt using debug info.
     return;
   }
 
@@ -630,7 +631,10 @@ void liveRelocate(int time) {
   fseek(relocMap, 0, SEEK_SET);
 
   std::vector<TransRelocInfo> relocs;
-  if (time == -1) {
+  if (time == -2) {
+    readRelocations(relocMap, nullptr, readRelocsIntoVector, &relocs);
+    if (!relocs.size()) return;
+  } else if (time == -1) {
     readRelocations(relocMap, nullptr, readRelocsIntoVector, &relocs);
     if (!relocs.size()) return;
 
@@ -798,6 +802,12 @@ void relocateTranslation(
   }
   memset(main.base(), 0xcc, main.frontier() - main.base());
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
+  if (arch() == Arch::ARM) {
+    __builtin___clear_cache(reinterpret_cast<char*>(main.base()),
+                            reinterpret_cast<char*>(main.frontier()));
+    __builtin___clear_cache(reinterpret_cast<char*>(cold.base()),
+                            reinterpret_cast<char*>(cold.frontier()));
+  }
 #endif
 }
 

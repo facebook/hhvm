@@ -21,26 +21,13 @@
 
 namespace HPHP { namespace jit { namespace arm {
 
-void adjustForRelocation(RelocationInfo&) {
-  not_implemented();
-}
-void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
-  not_implemented();
-}
-void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
-  not_implemented();
-}
-void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&) {
-  not_implemented();
-}
-void findFixups(TCA start, TCA end, CGMeta& fixups) {
-  not_implemented();
-}
+void adjustForRelocation(RelocationInfo&);
+void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
+void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&);
+void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
-                TCA*, AreaIndex) {
-  not_implemented();
-  return 0;
-}
+                TCA*, AreaIndex);
 
 }}}
 

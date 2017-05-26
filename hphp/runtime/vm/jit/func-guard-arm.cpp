@@ -80,8 +80,17 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
-  if (isPrologueStub(prologue)) return prologue;
-  return prologue - (smashableMovqLen() + (5 * 4) + 8);
+  if (!isPrologueStub(prologue)) {
+    // Typically a func guard is a smashable movq followed by an ldr, cmp, b,
+    // br, and a 64 bit target. However, relocation can shorten the sequence,
+    // so search backwards until the smashable movq is found.
+    for (int length = 0; length < (5 * 4) + 8; length += 4) {
+      TCA inst = prologue - (smashableMovqLen() + length);
+      if (isSmashableMovq(inst)) return inst;
+    }
+    always_assert(false);
+  }
+  return prologue;
 }
 
 bool funcGuardMatches(TCA guard, const Func* func) {

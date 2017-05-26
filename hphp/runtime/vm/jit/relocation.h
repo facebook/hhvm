@@ -25,6 +25,34 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Support for relocation involves implementing the following:
+ *
+ *   adjustForRelocation - Adjusts a range of instructions which may
+ *                         contain addresses which have been moved.
+ *   adjustCodeForRelocation - Similar to adjustForRelocation, but is
+ *                             reserved for ranges which may still
+ *                             hold live instructions.
+ *   adjustMetaDataForRelocation - Adjusts the affected metadata
+ *                                 following a relocation.
+ *   findFixups - Finds the affected fixups following a relocation.
+ *   relocate - Relocates a range of instructions to a new
+ *              destination. Critically, relocation is a chance
+ *              to grow/shrink the region which is advantageous
+ *              when moving a far branch to simple near relative
+ *              branch for instance.
+ *
+ * adjustForRelocation and adjustCodeForRelocation both search for
+ * addresses in instruction ranges that need to be updated following
+ * a relocation. This involves finding instructions which might
+ * be loading an address and then determining if that target is
+ * actually an address for an instruction which has been moved.
+ */
+
+//////////////////////////////////////////////////////////////////////
+
 struct AsmInfo;
 struct CGMeta;
 using TcaRange = folly::Range<TCA>;

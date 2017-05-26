@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -48,6 +49,7 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
   vixl::Label after_data;
 
   auto const start = cb.frontier();
+  meta.smashableLocations.insert(start);
 
   a.    Ldr  (x2a(d), &imm_data);
   a.    B    (&after_data);
@@ -76,6 +78,7 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
   vixl::Label after_data;
 
   auto const start = cb.frontier();
+  meta.smashableLocations.insert(start);
 
   // Jump over the data
   a.    B    (&after_data);
@@ -101,6 +104,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
   vixl::Label target_data;
 
   auto const start = cb.frontier();
+  meta.smashableLocations.insert(start);
 
   a.    Ldr  (rAsm, &target_data);
   a.    Br   (rAsm);
@@ -126,15 +130,23 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
   align(cb, &meta, Alignment::SmashJcc, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
+  vixl::Label target_data;
   vixl::Label after_data;
 
   auto const start = cb.frontier();
+  meta.smashableLocations.insert(start);
 
   // Emit the conditional branch
   a.    B    (&after_data, InvertCondition(arm::convertCC(cc)));
 
   // Emit the smashable jump
-  emitSmashableJmp(cb, meta, target);
+  a.    Ldr  (rAsm, &target_data);
+  a.    Br   (rAsm);
+
+  // Emit the jmp target into the instruction stream.
+  a.    bind (&target_data);
+  a.    dc64 (target);
+
   a.    bind (&after_data);
 
   __builtin___clear_cache(reinterpret_cast<char*>(start),
@@ -185,20 +197,27 @@ void smashJcc(TCA inst, TCA target) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-uint64_t smashableMovqImm(TCA inst) {
+bool isSmashableMovq(TCA inst) {
   using namespace vixl;
 
   Instruction* ldr = Instruction::Cast(inst);
   Instruction* b = ldr->NextInstruction();
   Instruction* target = b->NextInstruction();
-  DEBUG_ONLY Instruction* after = target->NextInstruction()->NextInstruction();
+  Instruction* after = target->NextInstruction()->NextInstruction();
 
-  assertx(ldr->IsLoadLiteral() &&
+  return (ldr->IsLoadLiteral() &&
           ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
           ldr->ImmPCOffsetTarget() == target &&
           b->Mask(UnconditionalBranchMask) == B &&
           b->ImmPCOffsetTarget() == after);
+}
 
+uint64_t smashableMovqImm(TCA inst) {
+  using namespace vixl;
+
+  assertx(isSmashableMovq(inst));
+  Instruction* target =
+    Instruction::Cast(inst)->NextInstruction()->NextInstruction();
   return *reinterpret_cast<uint64_t*>(target);
 }
 
@@ -288,7 +307,36 @@ ConditionCode smashableJccCond(TCA inst) {
           br->Rn() == rd);
 
   return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
+}
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Helper function which determines if a target literal belongs to a smashable
+ * sequence. Takes the address of the target literal and analyzes the
+ * instructions around the literal to determine if the sequence is a smashable
+ * jcc, jmp, or a call. If it is, then the TCA at the start of the sequence is
+ * returned. Otherwise a nullptr is returned.
+ *
+ * Note: The analysis is performed such that a jmp is not returned when the
+ *       sequence is a full jcc even though a jcc actually uses the same
+ *       sequence as a jmp in its implementation.
+ */
+TCA getSmashableFromTargetAddr(TCA addr) {
+  using namespace vixl;
+
+  auto target = *reinterpret_cast<TCA*>(addr);
+
+  auto inst = addr - 3 * kInstructionSize;
+  if (smashableJccTarget(inst) == target) return inst;
+
+  inst = addr - 2 * kInstructionSize;
+  if (smashableJmpTarget(inst) == target) return inst;
+
+  inst = addr - 1 * kInstructionSize;
+  if (smashableCallTarget(inst) == target) return inst;
+
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

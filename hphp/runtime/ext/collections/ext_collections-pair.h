@@ -49,8 +49,6 @@ struct c_Pair : ObjectData {
     return 2;
   }
 
-  void reserve(int64_t sz) const { assertx(sz == 2); }
-
   TypedValue* at(int64_t key) const {
     if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
       collections::throwOOB(key);

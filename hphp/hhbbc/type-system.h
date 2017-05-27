@@ -526,8 +526,6 @@ private:
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
-  template<trep t> friend Type dict_n_impl(Type, Type);
-  template<trep t> friend Type keyset_n_impl(Type);
 
 private:
   union Data {

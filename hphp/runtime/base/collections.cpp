@@ -67,16 +67,6 @@ COLLECTIONS_PAIRED_TYPES(X)
   not_reached();
 }
 
-void reserve(ObjectData* obj, int64_t sz) {
-  switch (obj->collectionType()) {
-#define X(type) case CollectionType::type: \
-                  static_cast<c_##type*>(obj)->reserve(sz); \
-                  break;
-COLLECTIONS_ALL_TYPES(X)
-#undef X
-  }
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Misc
 

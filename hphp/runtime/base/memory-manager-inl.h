@@ -137,40 +137,40 @@ inline void MemoryManager::FreeList::push(void* val, size_t size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline uint32_t MemoryManager::estimateCap(uint32_t requested) {
+inline size_t MemoryManager::estimateCap(size_t requested) {
   return requested <= kMaxSmallSize ? smallSizeClass(requested)
                                     : requested;
 }
 
-inline uint32_t MemoryManager::bsr(uint32_t x) {
-#if defined(__i386__) || defined(__x86_64__)
-  uint32_t ret;
-  __asm__ ("bsr %1, %0"
+inline size_t MemoryManager::bsrq(size_t x) {
+#if defined(__x86_64__)
+  size_t ret;
+  __asm__ ("bsrq %1, %0"
            : "=r"(ret) // Outputs.
            : "r"(x)    // Inputs.
            );
   return ret;
 #elif defined(__powerpc64__)
-  uint32_t ret;
-  __asm__ ("cntlzw %0, %1"
+  size_t ret;
+  __asm__ ("cntlzd %0, %1"
            : "=r"(ret) // Outputs.
            : "r"(x)    // Inputs.
            );
-  return 31 - ret;
+  return 63 - ret;
 #elif defined(__aarch64__)
-  uint32_t ret;
-  __asm__ ("clz %w0, %w1"
+  size_t ret;
+  __asm__ ("clz %x0, %x1"
            : "=r"(ret) // Outputs.
            : "r"(x)    // Inputs.
            );
-  return 31 - ret;
+  return 63 - ret;
 #else
   // Equivalent (but incompletely strength-reduced by gcc):
-  return 31 - __builtin_clz(x);
+  return 63 - __builtin_clzl(x);
 #endif
 }
 
-inline size_t MemoryManager::computeSize2Index(uint32_t size) {
+inline size_t MemoryManager::computeSize2Index(size_t size) {
   assert(size > 1);
   assert(size <= kMaxSizeClass);
   // We want to round size up to the nearest size class, and return the index
@@ -189,27 +189,27 @@ inline size_t MemoryManager::computeSize2Index(uint32_t size) {
   //   (1 << kLgSizeClassesPerDoubling + mantissa - 1)
   // This lets us skip taking the leading 1 off of the mantissa, and skip
   // adding 1 to the exponent.
-  uint32_t nBits = bsr(--size);
+  size_t nBits = bsrq(--size);
   if (UNLIKELY(nBits < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)) {
     // denormal sizes
     // UNLIKELY because these normally go through lookupSmallSize2Index
     return size >> kLgSmallSizeQuantum;
   }
-  uint32_t exp = nBits - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
-  uint32_t rawMantissa = size >> (nBits - kLgSizeClassesPerDoubling);
-  uint32_t index = (exp << kLgSizeClassesPerDoubling) + rawMantissa;
+  size_t exp = nBits - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
+  size_t rawMantissa = size >> (nBits - kLgSizeClassesPerDoubling);
+  size_t index = (exp << kLgSizeClassesPerDoubling) + rawMantissa;
   assert(index < kNumSizeClasses);
   return index;
 }
 
-inline size_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
+inline size_t MemoryManager::lookupSmallSize2Index(size_t size) {
   assert(size > 0);
   assert(size <= kMaxSmallSizeLookup);
   auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
   return index;
 }
 
-inline size_t MemoryManager::smallSize2Index(uint32_t size) {
+inline size_t MemoryManager::smallSize2Index(size_t size) {
   assert(size > 0);
   assert(size <= kMaxSmallSize);
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
@@ -218,7 +218,7 @@ inline size_t MemoryManager::smallSize2Index(uint32_t size) {
   return computeSize2Index(size);
 }
 
-inline size_t MemoryManager::size2Index(uint32_t size) {
+inline size_t MemoryManager::size2Index(size_t size) {
   assert(size > 0);
   assert(size <= kMaxSizeClass);
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
@@ -227,25 +227,25 @@ inline size_t MemoryManager::size2Index(uint32_t size) {
   return computeSize2Index(size);
 }
 
-inline uint32_t MemoryManager::sizeIndex2Size(size_t index) {
+inline size_t MemoryManager::sizeIndex2Size(size_t index) {
   return kSizeIndex2Size[index];
 }
 
-inline uint32_t MemoryManager::smallSizeClass(uint32_t size) {
+inline size_t MemoryManager::smallSizeClass(size_t size) {
   assert(size > 1);
   assert(size <= kMaxSmallSize);
   // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
   // or to the nearest kLgSmallSizeQuantum, whichever is greater.
-  int32_t nInsignificantBits = bsr(--size) - kLgSizeClassesPerDoubling;
-  uint32_t roundTo = (nInsignificantBits < int32_t(kLgSmallSizeQuantum))
+  ssize_t nInsignificantBits = bsrq(--size) - kLgSizeClassesPerDoubling;
+  size_t roundTo = (nInsignificantBits < ssize_t(kLgSmallSizeQuantum))
     ? kLgSmallSizeQuantum : nInsignificantBits;
-  uint32_t ret = ((size >> roundTo) + 1) << roundTo;
+  size_t ret = ((size >> roundTo) + 1) << roundTo;
   assert(ret >= kSmallSizeAlign);
   assert(ret <= kMaxSmallSize);
   return ret;
 }
 
-inline void* MemoryManager::mallocSmallSizeFast(uint32_t bytes, size_t index) {
+inline void* MemoryManager::mallocSmallSizeFast(size_t bytes, size_t index) {
   if (debug) requestEagerGC();
 
   m_stats.mmUsage += bytes;
@@ -264,7 +264,7 @@ inline void* MemoryManager::mallocSmallIndex(size_t index) {
   return mallocSmallSizeFast(sizeIndex2Size(index), index);
 }
 
-inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
+inline void* MemoryManager::mallocSmallSize(size_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
   return mallocSmallSizeFast(bytes, smallSize2Index(bytes));
@@ -273,7 +273,7 @@ inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   assert(index < kNumSmallSizes);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-  uint32_t bytes = sizeIndex2Size(index);
+  size_t bytes = sizeIndex2Size(index);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
     return freeBigSize(ptr, bytes);
@@ -287,7 +287,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   FTRACE(3, "freeSmallIndex: {} ({} bytes)\n", ptr, bytes);
 }
 
-inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
+inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);

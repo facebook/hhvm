@@ -144,11 +144,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
     MM().removeNativeObject(node);
   }
 
-  size_t size = ObjectData::sizeForNProps(nProps) + ndsize(obj, ndi);
-  if (LIKELY(size <= kMaxSmallSize)) {
-    return MM().freeSmallSize(node, size);
-  }
-  MM().freeBigSize(node, size);
+  MM().objFree(node, ObjectData::sizeForNProps(nProps) + ndsize(obj, ndi));
 }
 
 Variant nativeDataSleep(const ObjectData* obj) {

@@ -733,7 +733,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, size_t index) {
   return ptr;
 }
 
-void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, size_t index) {
+void* MemoryManager::mallocSmallSizeSlow(size_t bytes, size_t index) {
   size_t nbytes = sizeIndex2Size(index);
   unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;
@@ -749,8 +749,8 @@ void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, size_t index) {
                 nbytes, index, contigMin, contigInd, i, sizeIndex2Size(i),
                 p);
       // Split tail into preallocations and store them back into freelists.
-      uint32_t availBytes = sizeIndex2Size(i);
-      uint32_t tailBytes = availBytes - nbytes;
+      size_t availBytes = sizeIndex2Size(i);
+      size_t tailBytes = availBytes - nbytes;
       if (tailBytes > 0) {
         void* tail = (void*)(uintptr_t(p) + nbytes);
         splitTail(tail, tailBytes, nContig - 1, nbytes, index);

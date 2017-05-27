@@ -238,9 +238,90 @@ MemoryManager& MM();
   \
   SIZE_CLASS(104,     31,       29,      1, no,               1) \
   SIZE_CLASS(105,     31,       29,      2, no,               1) \
-  SIZE_CLASS(106,     31,       29,      3, no,               1) /* 3.5G */\
+  SIZE_CLASS(106,     31,       29,      3, no,               1) \
+  SIZE_CLASS(107,     31,       29,      4, no,               1) /* 4G */\
+  \
+  SIZE_CLASS(108,     32,       30,      1, no,               1) \
+  SIZE_CLASS(109,     32,       30,      2, no,               1) \
+  SIZE_CLASS(110,     32,       30,      3, no,               1) \
+  SIZE_CLASS(111,     32,       30,      4, no,               1) /* 8G */\
+  \
+  SIZE_CLASS(112,     33,       31,      1, no,               1) \
+  SIZE_CLASS(113,     33,       31,      2, no,               1) \
+  SIZE_CLASS(114,     33,       31,      3, no,               1) \
+  SIZE_CLASS(115,     33,       31,      4, no,               1) /* 16G */\
+  \
+  SIZE_CLASS(116,     34,       32,      1, no,               1) \
+  SIZE_CLASS(117,     34,       32,      2, no,               1) \
+  SIZE_CLASS(118,     34,       32,      3, no,               1) \
+  SIZE_CLASS(119,     34,       32,      4, no,               1) /* 32G */\
+  \
+  SIZE_CLASS(120,     35,       33,      1, no,               1) \
+  SIZE_CLASS(121,     35,       33,      2, no,               1) \
+  SIZE_CLASS(122,     35,       33,      3, no,               1) \
+  SIZE_CLASS(123,     35,       33,      4, no,               1) /* 64G */\
+  \
+  SIZE_CLASS(124,     36,       34,      1, no,               1) \
+  SIZE_CLASS(125,     36,       34,      2, no,               1) \
+  SIZE_CLASS(126,     36,       34,      3, no,               1) \
+  SIZE_CLASS(127,     36,       34,      4, no,               1) /* 128G */\
+  \
+  SIZE_CLASS(128,     37,       35,      1, no,               1) \
+  SIZE_CLASS(129,     37,       35,      2, no,               1) \
+  SIZE_CLASS(130,     37,       35,      3, no,               1) \
+  SIZE_CLASS(131,     37,       35,      4, no,               1) /* 256G */\
+  \
+  SIZE_CLASS(132,     38,       36,      1, no,               1) \
+  SIZE_CLASS(133,     38,       36,      2, no,               1) \
+  SIZE_CLASS(134,     38,       36,      3, no,               1) \
+  SIZE_CLASS(135,     38,       36,      4, no,               1) /* 512G */\
+  \
+  SIZE_CLASS(136,     39,       37,      1, no,               1) \
+  SIZE_CLASS(137,     39,       37,      2, no,               1) \
+  SIZE_CLASS(138,     39,       37,      3, no,               1) \
+  SIZE_CLASS(139,     39,       37,      4, no,               1) /* 1T */\
+  \
+  SIZE_CLASS(140,     40,       38,      1, no,               1) \
+  SIZE_CLASS(141,     40,       38,      2, no,               1) \
+  SIZE_CLASS(142,     40,       38,      3, no,               1) \
+  SIZE_CLASS(143,     40,       38,      4, no,               1) /* 2T */\
+  \
+  SIZE_CLASS(144,     41,       39,      1, no,               1) \
+  SIZE_CLASS(145,     41,       39,      2, no,               1) \
+  SIZE_CLASS(146,     41,       39,      3, no,               1) \
+  SIZE_CLASS(147,     41,       39,      4, no,               1) /* 4T */\
+  \
+  SIZE_CLASS(148,     42,       40,      1, no,               1) \
+  SIZE_CLASS(149,     42,       40,      2, no,               1) \
+  SIZE_CLASS(150,     42,       40,      3, no,               1) \
+  SIZE_CLASS(151,     42,       40,      4, no,               1) /* 8T */\
+  \
+  SIZE_CLASS(152,     43,       41,      1, no,               1) \
+  SIZE_CLASS(153,     43,       41,      2, no,               1) \
+  SIZE_CLASS(154,     43,       41,      3, no,               1) \
+  SIZE_CLASS(155,     43,       41,      4, no,               1) /* 16T */\
+  \
+  SIZE_CLASS(156,     44,       42,      1, no,               1) \
+  SIZE_CLASS(157,     44,       42,      2, no,               1) \
+  SIZE_CLASS(158,     44,       42,      3, no,               1) \
+  SIZE_CLASS(159,     44,       42,      4, no,               1) /* 32T */\
+  \
+  SIZE_CLASS(160,     45,       43,      1, no,               1) \
+  SIZE_CLASS(161,     45,       43,      2, no,               1) \
+  SIZE_CLASS(162,     45,       43,      3, no,               1) \
+  SIZE_CLASS(163,     45,       43,      4, no,               1) /* 64T */\
+  \
+  SIZE_CLASS(164,     46,       44,      1, no,               1) \
+  SIZE_CLASS(165,     46,       44,      2, no,               1) \
+  SIZE_CLASS(166,     46,       44,      3, no,               1) \
+  SIZE_CLASS(167,     46,       44,      4, no,               1) /* 128T */\
+  \
+  SIZE_CLASS(168,     47,       45,      1, no,               1) \
+  SIZE_CLASS(169,     47,       45,      2, no,               1) \
+  SIZE_CLASS(170,     47,       45,      3, no,               1) \
+  SIZE_CLASS(171,     47,       45,      4, no,               1) /* 256T */\
 
-constexpr uint32_t kNumSizeClasses = 107;
+constexpr size_t kNumSizeClasses = 172;
 
 alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #define S2I_4(i)  i,
@@ -263,9 +344,9 @@ alignas(64) constexpr uint8_t kSmallSize2Index[] = {
 #undef SIZE_CLASS
 };
 
-alignas(64) constexpr uint32_t kSizeIndex2Size[] = {
+constexpr size_t kSizeIndex2Size[] = {
 #define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-  ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)),
+  ((size_t{1}<<lg_grp) + (size_t{ndelta}<<lg_delta)),
   SIZE_CLASSES
 #undef SIZE_CLASS
 };
@@ -277,13 +358,13 @@ alignas(64) constexpr unsigned kNContigTab[] = {
 #undef SIZE_CLASS
 };
 
-constexpr uint32_t kMaxSmallSizeLookup = 4096;
+constexpr size_t kMaxSmallSizeLookup = 4096;
 
 constexpr unsigned kLgSlabSize = 21;
 constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
 constexpr unsigned kLgSmallSizeQuantum = 4;
-constexpr uint32_t kSmallSizeAlign = 1u << kLgSmallSizeQuantum;
-constexpr uint32_t kSmallSizeAlignMask = kSmallSizeAlign - 1;
+constexpr size_t kSmallSizeAlign = 1u << kLgSmallSizeQuantum;
+constexpr size_t kSmallSizeAlignMask = kSmallSizeAlign - 1;
 
 constexpr unsigned kLgSizeClassesPerDoubling = 2;
 
@@ -296,20 +377,20 @@ constexpr unsigned kLgSizeClassesPerDoubling = 2;
  *
  * We want kMaxSmallSize to be the largest size-class less than kSlabSize.
  */
-constexpr uint32_t kNumSmallSizes = 63;
+constexpr size_t kNumSmallSizes = 63;
 static_assert(kNumSmallSizes <= (1 << 6),
               "only 6 bits available in HeapObject");
 static_assert(kNumSmallSizes < kNumSizeClasses,
               "small sizes should be a proper subset of all sizes");
-static_assert(kNumSizeClasses <= (sizeof(kSizeIndex2Size) / sizeof(uint32_t)),
+static_assert(kNumSizeClasses <= (sizeof(kSizeIndex2Size) / sizeof(size_t)),
               "Extend SIZE_CLASSES macro");
 
-constexpr uint32_t kMaxSmallSize = kSizeIndex2Size[kNumSmallSizes-1];
+constexpr size_t kMaxSmallSize = kSizeIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
               "Too few size classes");
 static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
 
-constexpr uint32_t kMaxSizeClass = kSizeIndex2Size[kNumSizeClasses-1];
+constexpr size_t kMaxSizeClass = kSizeIndex2Size[kNumSizeClasses-1];
 static_assert(kMaxSmallSize < kMaxSizeClass,
               "largest small size should be smaller than largest overall size");
 
@@ -506,13 +587,13 @@ struct MemoryManager {
    *
    * Pre: requested <= kMaxSmallSize
    */
-  static uint32_t smallSizeClass(uint32_t requested);
+  static size_t smallSizeClass(size_t requested);
 
   /*
    * Return a lower bound estimate of the capacity that will be returned for
    * the requested size.
    */
-  static uint32_t estimateCap(uint32_t requested);
+  static size_t estimateCap(size_t requested);
 
   /*
    * Allocate/deallocate a small memory block in a given small size class.
@@ -528,14 +609,14 @@ struct MemoryManager {
    *
    * Pre: size > 0 && size <= kMaxSmallSize
    */
-  void* mallocSmallSize(uint32_t size);
-  void freeSmallSize(void* p, uint32_t size);
+  void* mallocSmallSize(size_t size);
+  void freeSmallSize(void* p, size_t size);
 
   /*
    * Allocate/deallocate memory that is too big for the small size classes.
    *
    * Returns a pointer and the actual size of the allocation, which
-   * amay be larger than the requested size.  The returned pointer is
+   * may be larger than the requested size.  The returned pointer is
    * guaranteed to be 16-byte aligned.
    *
    * The size passed to freeBigSize must either be the requested size that was
@@ -588,11 +669,11 @@ struct MemoryManager {
    * Note that we intentionally use size_t for size class index here, so that
    * gcc would not generate inefficient code.
    */
-  static size_t computeSize2Index(uint32_t size);
-  static size_t lookupSmallSize2Index(uint32_t size);
-  static size_t smallSize2Index(uint32_t size);
-  static size_t size2Index(uint32_t size);
-  static uint32_t sizeIndex2Size(size_t index);
+  static size_t computeSize2Index(size_t size);
+  static size_t lookupSmallSize2Index(size_t size);
+  static size_t smallSize2Index(size_t size);
+  static size_t size2Index(size_t size);
+  static size_t sizeIndex2Size(size_t index);
 
   /////////////////////////////////////////////////////////////////////////////
   // Cleanup.
@@ -891,11 +972,11 @@ private:
                  uint32_t splitUsable, unsigned splitInd);
   void* slabAlloc(uint32_t bytes, size_t index);
   void* newSlab(uint32_t nbytes);
-  void* mallocSmallSizeFast(uint32_t bytes, size_t index);
-  void* mallocSmallSizeSlow(uint32_t bytes, size_t index);
+  void* mallocSmallSizeFast(size_t bytes, size_t index);
+  void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
 
-  static uint32_t bsr(uint32_t x);
+  static size_t bsrq(size_t x);
 
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);

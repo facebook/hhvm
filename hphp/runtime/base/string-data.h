@@ -535,12 +535,14 @@ constexpr uint32_t SmallStringReserve = 64 - kStringOverhead;
 
 /* this only exists so that clang won't warn on the subtraction */
 inline constexpr uint32_t sizeClassParams2StringCapacity(
-  uint32_t lg_grp,
-  uint32_t lg_delta,
-  uint32_t ndelta
+  size_t lg_grp,
+  size_t lg_delta,
+  size_t ndelta
 ) {
-  return ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) > kStringOverhead
-    ? ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) - kStringOverhead
+  return ((size_t{1} << lg_grp) + (ndelta << lg_delta)) > kStringOverhead
+      && ((size_t{1} << lg_grp) + (ndelta << lg_delta))
+        <= StringData::MaxSize + kStringOverhead
+    ? ((size_t{1} << lg_grp) + (ndelta << lg_delta)) - kStringOverhead
     : 0;
 }
 

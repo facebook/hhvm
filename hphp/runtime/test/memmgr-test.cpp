@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -42,6 +42,103 @@ TEST(MemoryManager, OnThreadExit) {
   EXPECT_DEATH(allocAndJoin(42, false), "");
   EXPECT_DEATH(allocAndJoin(kMaxSmallSize + 1, false), "");
 #endif
+}
+
+TEST(MemoryManager, ComputeSize2Index) {
+  // this test starts by requesting 2 bytes because computeSize2Index does not
+  // support inputs < 2; the others support inputs >= 1
+  EXPECT_EQ(MemoryManager::computeSize2Index(2), 0);
+  for (size_t index = 0; index < kNumSizeClasses - 1; index++) {
+    auto allocSize = kSizeIndex2Size[index];
+    EXPECT_EQ(MemoryManager::computeSize2Index(allocSize - 1), index);
+    EXPECT_EQ(MemoryManager::computeSize2Index(allocSize), index);
+    EXPECT_EQ(MemoryManager::computeSize2Index(allocSize + 1), index + 1);
+  }
+  EXPECT_EQ(
+    MemoryManager::computeSize2Index(kSizeIndex2Size[kNumSizeClasses - 1] - 1),
+    kNumSizeClasses - 1
+  );
+  EXPECT_EQ(
+    MemoryManager::computeSize2Index(kSizeIndex2Size[kNumSizeClasses - 1]),
+    kNumSizeClasses - 1
+  );
+}
+
+TEST(MemoryManager, LookupSmallSize2Index) {
+  constexpr size_t kNumLookupIndices = 28;
+  EXPECT_EQ(kMaxSmallSizeLookup, kSizeIndex2Size[kNumLookupIndices - 1]);
+
+  EXPECT_EQ(MemoryManager::lookupSmallSize2Index(1), 0);
+  for (size_t index = 0; index < kNumLookupIndices - 1; index++) {
+    auto allocSize = kSizeIndex2Size[index];
+    EXPECT_EQ(MemoryManager::lookupSmallSize2Index(allocSize - 1), index);
+    EXPECT_EQ(MemoryManager::lookupSmallSize2Index(allocSize), index);
+    EXPECT_EQ(MemoryManager::lookupSmallSize2Index(allocSize + 1), index + 1);
+  }
+  EXPECT_EQ(
+    MemoryManager::lookupSmallSize2Index(kMaxSmallSizeLookup - 1),
+    kNumLookupIndices - 1
+  );
+  EXPECT_EQ(
+    MemoryManager::lookupSmallSize2Index(kMaxSmallSizeLookup),
+    kNumLookupIndices - 1
+  );
+}
+
+TEST(MemoryManager, SmallSize2Index) {
+  EXPECT_EQ(MemoryManager::smallSize2Index(1), 0);
+  for (size_t index = 0; index < kNumSmallSizes - 1; index++) {
+    auto allocSize = kSizeIndex2Size[index];
+    EXPECT_EQ(MemoryManager::smallSize2Index(allocSize - 1), index);
+    EXPECT_EQ(MemoryManager::smallSize2Index(allocSize), index);
+    EXPECT_EQ(MemoryManager::smallSize2Index(allocSize + 1), index + 1);
+  }
+  EXPECT_EQ(
+    MemoryManager::smallSize2Index(kSizeIndex2Size[kNumSmallSizes - 1] - 1),
+    kNumSmallSizes - 1
+  );
+  EXPECT_EQ(
+    MemoryManager::smallSize2Index(kSizeIndex2Size[kNumSmallSizes - 1]),
+    kNumSmallSizes - 1
+  );
+}
+
+TEST(MemoryManager, Size2Index) {
+  EXPECT_EQ(MemoryManager::size2Index(1), 0);
+  for (size_t index = 0; index < kNumSizeClasses - 1; index++) {
+    auto allocSize = kSizeIndex2Size[index];
+    EXPECT_EQ(MemoryManager::size2Index(allocSize - 1), index);
+    EXPECT_EQ(MemoryManager::size2Index(allocSize), index);
+    EXPECT_EQ(MemoryManager::size2Index(allocSize + 1), index + 1);
+  }
+  EXPECT_EQ(
+    MemoryManager::size2Index(kSizeIndex2Size[kNumSizeClasses - 1] - 1),
+    kNumSizeClasses - 1
+  );
+  EXPECT_EQ(
+    MemoryManager::size2Index(kSizeIndex2Size[kNumSizeClasses - 1]),
+    kNumSizeClasses - 1
+  );
+}
+
+TEST(MemoryManager, SmallSizeClass) {
+  // this test starts by requesting 2 bytes because smallSizeClass does not
+  // support inputs < 2; the others support inputs >= 1
+  EXPECT_EQ(MemoryManager::smallSizeClass(2), kSmallSizeAlign);
+  for (size_t index = 0; index < kNumSmallSizes - 1; index++) {
+    auto allocSize = kSizeIndex2Size[index];
+    EXPECT_EQ(MemoryManager::smallSizeClass(allocSize - 1), allocSize);
+    EXPECT_EQ(MemoryManager::smallSizeClass(allocSize), allocSize);
+    EXPECT_GT(MemoryManager::smallSizeClass(allocSize + 1), allocSize);
+  }
+  EXPECT_EQ(
+    MemoryManager::smallSizeClass(kSizeIndex2Size[kNumSmallSizes - 1] - 1),
+    kSizeIndex2Size[kNumSmallSizes - 1]
+  );
+  EXPECT_EQ(
+    MemoryManager::smallSizeClass(kSizeIndex2Size[kNumSmallSizes - 1]),
+    kSizeIndex2Size[kNumSmallSizes - 1]
+  );
 }
 
 }

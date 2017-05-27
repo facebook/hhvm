@@ -367,6 +367,9 @@ struct FreeNode : HeapObject {
   static FreeNode* UninitFrom(void* addr, FreeNode* next);
 };
 
+static_assert(sizeof(FreeNode) <= kSmallSizeAlign,
+              "FreeNode must fit into the smallest size class");
+
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
 struct NativeNode : HeapObject,

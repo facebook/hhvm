@@ -98,12 +98,6 @@ void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated) {
 #endif
 
 static void* MemoryManagerInit() {
-  // We store the free list pointers right at the start of each
-  // object (overlapping whatever it's first word holds), and we also clobber
-  // _count as a free-object flag when the object is deallocated. This
-  // assert just makes sure they don't overflow.
-  assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
-    MemoryManager::smallSizeClass(1));
   MemoryManager::TlsWrapper tls;
   return (void*)tls.getNoCheck;
 }

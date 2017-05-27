@@ -171,27 +171,41 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
 }
 
 inline size_t MemoryManager::computeSize2Index(uint32_t size) {
-  uint32_t x = bsr((size<<1)-1);
-  uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)
-                   ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
-  uint32_t grp = shift << kLgSizeClassesPerDoubling;
-
-  int32_t lgReduced = x - kLgSizeClassesPerDoubling
-                      - 1; // Counteract left shift of bsr() argument.
-  uint32_t lgDelta = (lgReduced < int32_t(kLgSmallSizeQuantum))
-                     ? kLgSmallSizeQuantum : lgReduced;
-  uint32_t deltaInverseMask = -1 << lgDelta;
-  constexpr uint32_t kModMask = (1u << kLgSizeClassesPerDoubling) - 1;
-  uint32_t mod = ((((size-1) & deltaInverseMask) >> lgDelta)) & kModMask;
-
-  auto const index = grp + mod;
+  assert(size > 1);
+  assert(size <= kMaxSizeClass);
+  // We want to round size up to the nearest size class, and return the index
+  // of that size class. The first 1 << kLgSizeClassesPerDoubling size classes
+  // are denormal; their sizes are (class + 1) << kLgSmallSizeQuantum.
+  // After that we have the normal size classes, whose size is
+  // (1 << kLgSizeClassesPerDoubling + mantissa) << (exp + kLgSmallSizeQuantum)
+  // where (mantissa - 1) is stored in the kLgSizeClassesPerDoubling low bits
+  // of the class index, and (exp + 1) is stored in the bits above that; for
+  // denormal sizes, the bits above the mantissa are stored as 0.
+  // In the normal case, if we do the math naively, we need to calculate
+  // the class index as
+  // (exp + 1) << kLgSizeClassesPerDoubling + (mantissa - 1)
+  // but conveniently, that's equivalent to
+  // (exp << kLgSizeClassesPerDoubling) +
+  //   (1 << kLgSizeClassesPerDoubling + mantissa - 1)
+  // This lets us skip taking the leading 1 off of the mantissa, and skip
+  // adding 1 to the exponent.
+  uint32_t nBits = bsr(--size);
+  if (UNLIKELY(nBits < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)) {
+    // denormal sizes
+    // UNLIKELY because these normally go through lookupSmallSize2Index
+    return size >> kLgSmallSizeQuantum;
+  }
+  uint32_t exp = nBits - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
+  uint32_t rawMantissa = size >> (nBits - kLgSizeClassesPerDoubling);
+  uint32_t index = (exp << kLgSizeClassesPerDoubling) + rawMantissa;
   assert(index < kNumSizeClasses);
   return index;
 }
 
 inline size_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
+  assert(size > 0);
+  assert(size <= kMaxSmallSizeLookup);
   auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
-  assert(index == computeSize2Index(size));
   return index;
 }
 
@@ -217,15 +231,16 @@ inline uint32_t MemoryManager::sizeIndex2Size(size_t index) {
   return kSizeIndex2Size[index];
 }
 
-inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
-  uint32_t x = bsr((reqBytes<<1)-1);
-  int32_t lgReduced = x - kLgSizeClassesPerDoubling
-                      - 1; // Counteract left shift of bsr() argument.
-  uint32_t lgDelta = (lgReduced < int32_t(kLgSmallSizeQuantum))
-                      ? kLgSmallSizeQuantum : lgReduced;
-  uint32_t delta = 1u << lgDelta;
-  uint32_t deltaMask = delta - 1;
-  auto const ret = (reqBytes + deltaMask) & ~deltaMask;
+inline uint32_t MemoryManager::smallSizeClass(uint32_t size) {
+  assert(size > 1);
+  assert(size <= kMaxSmallSize);
+  // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
+  // or to the nearest kLgSmallSizeQuantum, whichever is greater.
+  int32_t nInsignificantBits = bsr(--size) - kLgSizeClassesPerDoubling;
+  uint32_t roundTo = (nInsignificantBits < int32_t(kLgSmallSizeQuantum))
+    ? kLgSmallSizeQuantum : nInsignificantBits;
+  uint32_t ret = ((size >> roundTo) + 1) << roundTo;
+  assert(ret >= kSmallSizeAlign);
   assert(ret <= kMaxSmallSize);
   return ret;
 }

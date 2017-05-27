@@ -167,7 +167,6 @@ let update_files fileInfo =
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
          file_mode = _;
-         consider_names_just_for_autoload = _;
         } = info in
     let funs = List.fold_left funs ~f:begin fun acc (_, fun_id) ->
       DepSet.add acc (Dep.make (Dep.Fun fun_id))

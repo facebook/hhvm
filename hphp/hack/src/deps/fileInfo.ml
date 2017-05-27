@@ -56,7 +56,6 @@ type t = {
   typedefs : id list;
   consts : id list;
   comments : (Pos.t * string) list option; (* None if loaded from saved state *)
-  consider_names_just_for_autoload: bool;
 }
 
 let empty_t = {
@@ -66,7 +65,6 @@ let empty_t = {
   typedefs = [];
   consts = [];
   comments = Some [];
-  consider_names_just_for_autoload = false;
 }
 
 let pos_full (p, name) =
@@ -91,7 +89,6 @@ type names = {
 type saved = {
   s_names : names;
   s_mode: mode option;
-  s_autoload: bool;
 }
 
 
@@ -120,15 +117,13 @@ let saved_to_fast fast =
 
 (* Filter out all PHP files from saved fileInfo object. *)
 let saved_to_hack_files fast =
-  let fast = Relative_path.Map.filter fast
-    (fun _ {s_autoload; _} -> not s_autoload) in
   saved_to_fast fast
 
 
 let saved_to_info fast =
   Relative_path.Map.fold fast ~init:Relative_path.Map.empty
   ~f:(fun fn saved acc ->
-    let {s_names; s_mode; s_autoload} = saved in
+    let {s_names; s_mode} = saved in
     let {n_funs; n_classes; n_types; n_consts;} = s_names in
     let funs = List.map (SSet.elements n_funs)
       (fun x -> File (Fun, fn), x) in
@@ -145,7 +140,6 @@ let saved_to_info fast =
       typedefs;
       consts;
       comments = None;
-      consider_names_just_for_autoload = s_autoload;
     } in
     Relative_path.Map.add acc fn fileinfo
   )
@@ -153,18 +147,17 @@ let saved_to_info fast =
 let info_to_saved fileinfo =
   Relative_path.Map.map fileinfo
     (fun info ->
-      let {funs; classes; typedefs; consts; file_mode= s_mode; comments = _;
-           consider_names_just_for_autoload = s_autoload } = info in
+      let {funs; classes; typedefs; consts; file_mode= s_mode; comments = _; } = info in
       let n_funs    = name_set_of_idl funs in
       let n_classes = name_set_of_idl classes in
       let n_types   = name_set_of_idl typedefs in
       let n_consts  = name_set_of_idl consts in
       let s_names = { n_funs; n_classes; n_types; n_consts; } in
-      { s_names; s_mode; s_autoload })
+      { s_names; s_mode })
 
 let simplify info =
   let {funs; classes; typedefs; consts; file_mode = _; comments = _;
-       consider_names_just_for_autoload = _ } = info in
+      } = info in
   let n_funs    = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
   let n_types   = name_set_of_idl typedefs in

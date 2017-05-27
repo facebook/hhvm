@@ -288,11 +288,10 @@ let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
 
 let ndecl_file popt fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
-                    consider_names_just_for_autoload; comments = _} =
+                comments = _} =
   let errors, _, _ = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
-    if not consider_names_just_for_autoload then
-      make_env popt ~funs ~classes ~typedefs ~consts
+    make_env popt ~funs ~classes ~typedefs ~consts
   end in
   if Errors.is_empty errors
   then errors, Relative_path.Set.empty

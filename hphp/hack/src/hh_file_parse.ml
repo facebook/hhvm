@@ -27,8 +27,7 @@ let parse_with_regular file content =
     Ast_utils.get_defs parser_ret.Parser_hack.ast in
   let defs =
     {FileInfo.funs; classes; typedefs; consts;
-     comments = Some []; file_mode = None;
-     consider_names_just_for_autoload = false}
+     comments = Some []; file_mode = None}
   in
     Printf.printf "FileInfo with regular parser:\n";
     if not (Errors.is_empty errorl) then

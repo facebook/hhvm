@@ -203,7 +203,7 @@ let parse_name compiler_options popt files_contents =
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
-          consider_names_just_for_autoload = false }, ast
+        }, ast
       end parsed_files in
 
     files_info

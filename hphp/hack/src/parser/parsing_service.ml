@@ -26,7 +26,6 @@ let empty_file_info : FileInfo.t = {
   typedefs = [];
   consts = [];
   comments = Some [];
-  consider_names_just_for_autoload = false;
 }
 
 let legacy_php_file_info = ref (fun fn ->
@@ -53,8 +52,7 @@ let process_parse_result
     Parser_heap.ParserHeap.write_through fn (ast, mode);
     let comments = Some comments in
     let defs =
-      {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
-       consider_names_just_for_autoload = false}
+      {FileInfo.funs; classes; typedefs; consts; comments; file_mode}
     in
     let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
     let errorl = Errors.merge errorl' errorl in

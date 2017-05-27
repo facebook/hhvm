@@ -139,7 +139,6 @@ let set_of_idl l =
 let add_old_decls old_files_info fast =
   Relative_path.Map.fold fast ~f:begin fun filename info_names acc ->
     match Relative_path.Map.get old_files_info filename with
-    | Some {FileInfo.consider_names_just_for_autoload = true; _}
     | None -> acc
     | Some old_info ->
       let old_info_names = FileInfo.simplify old_info in
@@ -151,7 +150,6 @@ let reparse_infos files_info fast =
   Relative_path.Map.fold fast ~f:begin fun x _y acc ->
     try
       let info = Relative_path.Map.find_unsafe files_info x in
-      if info.FileInfo.consider_names_just_for_autoload then acc else
       Relative_path.Map.add acc ~key:x ~data:info
     with Not_found -> acc
   end ~init:Relative_path.Map.empty
@@ -163,7 +161,6 @@ let reparse_infos files_info fast =
 let remove_decls env fast_parsed =
   Relative_path.Map.iter fast_parsed begin fun fn _ ->
     match Relative_path.Map.get env.files_info fn with
-    | Some {FileInfo.consider_names_just_for_autoload = true; _}
     | None -> ()
     | Some {FileInfo.
              funs = funl;
@@ -172,7 +169,7 @@ let remove_decls env fast_parsed =
              consts = constl;
              file_mode = _;
              comments = _;
-             consider_names_just_for_autoload = _} ->
+           } ->
       let funs = set_of_idl funl in
       let classes = set_of_idl classel in
       let typedefs = set_of_idl typel in

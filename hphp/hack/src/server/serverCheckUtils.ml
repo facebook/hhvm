@@ -14,7 +14,6 @@ let extend_fast fast files_info additional_files =
     | None ->
         (try
            let info = Relative_path.Map.find_unsafe files_info x in
-           if info.FileInfo.consider_names_just_for_autoload then acc else
            let info_names = FileInfo.simplify info in
            Relative_path.Map.add acc ~key:x ~data:info_names
          with Not_found ->

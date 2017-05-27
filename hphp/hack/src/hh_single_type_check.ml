@@ -470,7 +470,7 @@ let parse_name_and_decl popt files_contents tcopt =
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
-          consider_names_just_for_autoload = false }
+        }
       end parsed_files in
 
     Relative_path.Map.iter files_info begin fun fn fileinfo ->

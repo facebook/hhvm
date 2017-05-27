@@ -49,7 +49,6 @@ type t = {
   typedefs : id list;
   consts : id list;
   comments : (Pos.t * string) list option;
-  consider_names_just_for_autoload: bool;
 }
 
 val empty_t: t

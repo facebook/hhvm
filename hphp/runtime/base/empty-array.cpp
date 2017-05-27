@@ -122,17 +122,14 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
  */
 ALWAYS_INLINE
 member_lval EmptyArray::MakePackedInl(TypedValue tv) {
-  auto const cap = PackedArray::SmallSize;
   auto const ad = static_cast<ArrayData*>(
-    MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    MM().mallocSmallIndex(PackedArray::SmallSizeIndex)
   );
-  assert(cap == CapCode::ceil(cap).code);
+  ad->initHeader(uint16_t(PackedArray::SmallSizeIndex), HeaderKind::Packed, 1);
   ad->m_sizeAndPos = 1; // size=1, pos=0
-  ad->initHeader(CapCode::exact(cap), HeaderKind::Packed, 1);
 
-  auto const elem = reinterpret_cast<TypedValue*>(ad + 1);
-  elem->m_data = tv.m_data;
-  elem->m_type = tv.m_type;
+  auto const elem = packedData(ad);
+  *elem = tv;
 
   assert(ad->kind() == ArrayData::kPackedKind);
   assert(ad->m_size == 1);

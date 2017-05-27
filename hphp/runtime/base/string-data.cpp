@@ -48,17 +48,10 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
   if (UNLIKELY(len > StringData::MaxSize)) {
     raiseStringLengthExceededError(len);
   }
-  auto const sizeClass = MemoryManager::size2Index(len + kStringOverhead);
-  StringData* sd;
-  if (LIKELY(sizeClass < kNumSmallSizes)) {
-    sd = static_cast<StringData*>(MM().mallocSmallIndex(sizeClass));
-  } else {
-    auto const request = MemoryManager::sizeIndex2Size(sizeClass);
-    auto const blck = MM().mallocBigSize<MemoryManager::FreeRequested>(request);
-    sd = static_cast<StringData*>(blck.ptr);
-  }
+  auto const sizeIndex = MemoryManager::size2Index(len + kStringOverhead);
+  auto sd = static_cast<StringData*>(MM().objMallocIndex(sizeIndex));
   // Refcount initialized to 1.
-  sd->initHeader(uint16_t(sizeClass), HeaderKind::String, 1);
+  sd->initHeader(uint16_t(sizeIndex), HeaderKind::String, 1);
   assert(sd->capacity() >= len);
 #ifndef NO_M_DATA
   sd->m_data = reinterpret_cast<char*>(sd + 1);
@@ -397,11 +390,7 @@ void StringData::release() noexcept {
   assert(isRefCounted());
   assert(checkSane());
   if (UNLIKELY(!isFlat())) return releaseProxy();
-  if (LIKELY(m_aux16 < kNumSmallSizes)) {
-    MM().freeSmallIndex(this, m_aux16);
-  } else {
-    MM().freeBigSize(this, MemoryManager::sizeIndex2Size(m_aux16));
-  }
+  MM().objFreeIndex(this, m_aux16);
 }
 
 //////////////////////////////////////////////////////////////////////

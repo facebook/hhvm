@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/packed-array.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
@@ -43,9 +44,56 @@ ptrdiff_t PackedArray::entriesOffset() {
     packedData(reinterpret_cast<ArrayData*>(0x0)));
 }
 
+/* this only exists to make compilers happy about types in the below macro */
+inline constexpr uint32_t sizeClassParams2PackedArrayCapacity(
+  size_t index,
+  size_t lg_grp,
+  size_t lg_delta,
+  size_t ndelta
+) {
+  static_assert(sizeof(ArrayData) <= kSizeIndex2Size[0],
+    "this math only works if ArrayData fits in the smallest size class");
+  return index <= PackedArray::MaxSizeIndex
+    ? (((size_t{1} << lg_grp) + (ndelta << lg_delta)) - sizeof(ArrayData))
+      / sizeof(TypedValue)
+    : 0;
+}
+
+/* We can use uint32_t safely because capacity is in units of array elements,
+ * and arrays can't have more than 32 bits worth of elements.
+ */
+alignas(64) constexpr uint32_t kSizeIndex2PackedArrayCapacity[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  sizeClassParams2PackedArrayCapacity(index, lg_grp, lg_delta, ndelta),
+  SIZE_CLASSES
+#undef SIZE_CLASS
+};
+
+static_assert(
+  kSizeIndex2PackedArrayCapacity[PackedArray::SmallSizeIndex]
+    == PackedArray::SmallSize,
+  "SmallSizeIndex must be MM size class index for array of SmallSize"
+);
+
+// MaxSizeIndex corresponds to HashTableCommon::MaxSize - 1 (which is the same
+// as MixedArray::MaxSize - 1) because HashTableCommon::MaxSize - 1 exactly fits
+// into a MM size class, PackedArray::capacity is a function of MM size class,
+// and we can't allow a capacity > MaxSize since most operations only check
+// that size <= capacity stays true (and don't explicitly check size <= MaxSize)
+static_assert(
+  kSizeIndex2PackedArrayCapacity[PackedArray::MaxSizeIndex]
+    == array::HashTableCommon::MaxSize - 1,
+  "MaxSizeIndex must be the largest possible size class index for PackedArrays"
+);
+
+ALWAYS_INLINE
+uint32_t PackedArray::capacity(const ArrayData* ad) {
+  return kSizeIndex2PackedArrayCapacity[ad->m_aux16];
+}
+
 ALWAYS_INLINE
 size_t PackedArray::heapSize(const ArrayData* ad) {
-  return sizeof(ArrayData) + sizeof(TypedValue) * ad->cap();
+  return kSizeIndex2Size[ad->m_aux16];
 }
 
 inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {

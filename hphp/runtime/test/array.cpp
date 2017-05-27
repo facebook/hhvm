@@ -25,33 +25,6 @@
 
 namespace HPHP {
 
-TEST(ARRAY, Capacity) {
-  EXPECT_TRUE(CapCode::Threshold == 0x7ff);
-
-#define MP(a, b) std::make_pair(a, b)
-  // Update the numbers if we change CapCode::Threshold
-  std::pair<uint32_t, uint32_t> caps [] = {
-    MP(3, 0),
-    MP(4, 0),
-    MP(5, 0),
-    MP(6, 0),
-    MP(7, 0),
-    MP(8, 9),
-    MP(12, 13),
-    MP(127, 0),
-    MP(128, 159),
-    MP(0xFFFF, 0),
-    MP(0x10000, 0),
-    MP(0x10001, 0)
-  };
-#undef MP
-
-  for (size_t i = 0; i != sizeof(caps) / sizeof(caps[0]); ++i) {
-    EXPECT_TRUE(PackedArray::getMaxCapInPlaceFast(caps[i].first) ==
-                caps[i].second);
-  }
-}
-
 TEST(ARRAY, Constructors) {
   const String s_name("name");
 

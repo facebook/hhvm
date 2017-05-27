@@ -109,13 +109,13 @@ public:
   }
   void setSize(uint32_t sz) {
     assert(canMutateBuffer());
-    assert(sz <= arrayData()->cap());
+    assert(sz <= PackedArray::capacity(arrayData()));
     m_size = sz;
     arrayData()->m_size = sz;
   }
   void incSize() {
     assert(canMutateBuffer());
-    assert(m_size + 1 <= arrayData()->cap());
+    assert(m_size < PackedArray::capacity(arrayData()));
     ++m_size;
     arrayData()->m_size = m_size;
   }

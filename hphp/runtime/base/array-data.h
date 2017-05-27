@@ -22,7 +22,6 @@
 
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/cap-code.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -145,16 +144,6 @@ public:
 
   bool convertKey(const StringData* key, int64_t& i,
                   bool notice = RuntimeOption::EvalHackArrCompatNotices) const;
-
-  /*
-   * Return the capacity stored in the header of a packed layout array. Not
-   * valid for arrays of other layouts, which have their own ways of measuring
-   * capacity (e.g. MixedArray::capacity).
-   */
-  uint32_t cap() const {
-    assert(kind() == kPackedKind || kind() == kVecKind);
-    return aux<CapCode>().decode();
-  }
 
   /**
    * Number of elements this array has.

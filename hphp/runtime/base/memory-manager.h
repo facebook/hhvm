@@ -367,6 +367,7 @@ constexpr size_t kSmallSizeAlign = 1u << kLgSmallSizeQuantum;
 constexpr size_t kSmallSizeAlignMask = kSmallSizeAlign - 1;
 
 constexpr unsigned kLgSizeClassesPerDoubling = 2;
+constexpr size_t kSizeClassesPerDoubling = (1u << kLgSizeClassesPerDoubling);
 
 /*
  * The maximum size where we use our custom allocator for request-local memory.
@@ -661,6 +662,17 @@ struct MemoryManager {
    */
   void* mallocSmallIndex(size_t index);
   void freeSmallIndex(void* ptr, size_t index);
+
+  /*
+   * Allocate/deallocate by size class index, when the index is not known to
+   * be < kNumSmallSizes This is useful when size class is already calculated
+   * at the call site, but might not be a small size class.
+   *
+   * The index passed to objFreeIndex must be the same one passed to
+   * objMallocIndex.
+   */
+  void* objMallocIndex(size_t index);
+  void objFreeIndex(void* ptr, size_t index);
 
   /*
    * These functions are useful when working directly with size classes outside

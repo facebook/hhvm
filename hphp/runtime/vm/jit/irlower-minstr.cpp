@@ -918,17 +918,19 @@ void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
   v << loadzlq{sizePtr, size};
 
   { // Bail out unless size < cap
-    auto const codew = v.makeReg();
-    v << loadw{arrayData[HeaderAuxOffset], codew};
-    auto const code = v.makeReg();
-    v << movzwq{codew, code};
-
-    auto const mant = v.makeReg();
-    v << andqi{CapCode::M, code, mant, v.makeReg()};
-    auto const exp = v.makeReg();
-    v << shrqi{(int)CapCode::B, code, exp, v.makeReg()};
+    auto const indexw = v.makeReg();
+    v << loadw{arrayData[HeaderAuxOffset], indexw};
+    auto const index = v.makeReg();
+    v << movzwq{indexw, index};
     auto const cap = v.makeReg();
-    v << shl{exp, mant, cap, v.makeReg()};
+    auto const table =
+      reinterpret_cast<uintptr_t>(kSizeIndex2PackedArrayCapacity);
+    if (table < std::numeric_limits<int>::max()) {
+      v << loadzlq{baseless(index * 4 + table), cap};
+    } else {
+      auto const base = v.cns(table);
+      v << loadzlq{base[index * 4], cap};
+    }
 
     auto const sf = v.makeReg();
     v << cmpq{size, cap, sf};

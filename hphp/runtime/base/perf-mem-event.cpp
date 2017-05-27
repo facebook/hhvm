@@ -149,20 +149,16 @@ void fill_record(const ArrayData* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
 
-  auto const data = reinterpret_cast<const TypedValue*>(arr + 1);
-  auto const idx = (uintptr_t(addr) - uintptr_t(data)) / sizeof(TypedValue);
+  auto const tv = reinterpret_cast<const TypedValue*>(addr);
+  auto const idx = tv - packedData(arr);
 
-  if (idx < arr->cap()) {
-    record.setInt("ikey", idx);
+  record.setInt("ikey", idx);
 
-    if (idx < arr->size()) {
-      auto const tv = &data[idx];
-
-      if (auto const memb = nameof_member(tv, addr)) {
-        record.setStr("value_memb", memb);
-      }
-      record.setStr("value_type", tname(tv->m_type));
+  if (idx < arr->size()) {
+    if (auto const memb = nameof_member(tv, addr)) {
+      record.setStr("value_memb", memb);
     }
+    record.setStr("value_type", tname(tv->m_type));
   }
 }
 

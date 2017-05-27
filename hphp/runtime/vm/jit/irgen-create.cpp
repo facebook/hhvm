@@ -249,10 +249,6 @@ void emitNewArray(IRGS& env, int32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, staticEmptyArray()));
   } else {
-    if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
-      assertx(newCap > static_cast<uint32_t>(capacity));
-      capacity = newCap;
-    }
     push(env, gen(env, NewArray, cns(env, capacity)));
   }
 }
@@ -302,10 +298,6 @@ namespace {
 
 ALWAYS_INLINE
 void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
-  if (numArgs > CapCode::Threshold) {
-    PUNT(NewPackedLayoutArray-UnrealisticallyHuge);
-  }
-
   auto const array = gen(
     env,
     op,

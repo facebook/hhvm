@@ -509,7 +509,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
 void BaseVector::reserve(uint32_t sz) {
   ++m_version;
   dropImmCopy();
-  if (sz > arrayData()->cap()) {
+  if (sz > PackedArray::capacity(arrayData())) {
     reserveImpl(sz);
   } else if (!canMutateBuffer()) {
     mutateImpl();

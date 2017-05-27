@@ -155,9 +155,9 @@ size_t getMemSize(const ArrayData* arr) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind:
   case ArrayData::ArrayKind::kVecKind: {
-    auto size = sizeof(ArrayData) +
-                sizeof(TypedValue) * (arr->cap() - arr->m_size);
-    auto const values = reinterpret_cast<const TypedValue*>(arr + 1);
+    // we want to measure just the overhead of the array
+    auto size = PackedArray::heapSize(arr) - (sizeof(TypedValue) * arr->m_size);
+    auto const values = packedData(arr);
     auto const last = values + arr->m_size;
     for (auto ptr = values; ptr != last; ++ptr) {
       size += getMemSize(ptr);

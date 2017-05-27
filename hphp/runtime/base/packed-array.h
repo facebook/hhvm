@@ -49,6 +49,9 @@ struct APCArray;
  */
 struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr uint32_t SmallSize = 3;
+  // the smallest and largest MM size classes we use for allocating PackedArrays
+  static constexpr size_t SmallSizeIndex = 3;
+  static constexpr size_t MaxSizeIndex = 121;
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*, size_t extra = 0);
@@ -195,8 +198,8 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static ArrayData* ConvertStatic(const ArrayData*);
 
   static ptrdiff_t entriesOffset();
-  static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
+  static uint32_t capacity(const ArrayData*);
   static size_t heapSize(const ArrayData*);
   static void scan(const ArrayData*, type_scan::Scanner&);
 
@@ -241,7 +244,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
 
 private:
   static ArrayData* Grow(ArrayData*);
-  static ArrayData* GrowHelper(ArrayData*);
   static MixedArray* ToMixedHeader(const ArrayData*, size_t);
   static MixedArray* ToMixed(ArrayData*);
   static MixedArray* ToMixedCopy(const ArrayData*);
@@ -252,7 +254,6 @@ private:
   static SortFlavor preSort(ArrayData*);
 
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
-  static ArrayData* MakeReserveSlow(uint32_t, HeaderKind);
 
   template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);

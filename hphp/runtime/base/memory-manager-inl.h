@@ -319,6 +319,18 @@ void MemoryManager::objFree(void* vp, size_t size) {
   freeBigSize(vp, size);
 }
 
+ALWAYS_INLINE
+void* MemoryManager::objMallocIndex(size_t index) {
+  if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
+  return mallocBigSize<MemoryManager::FreeRequested>(sizeIndex2Size(index)).ptr;
+}
+
+ALWAYS_INLINE
+void MemoryManager::objFreeIndex(void* ptr, size_t index) {
+  if (LIKELY(index < kNumSmallSizes)) return freeSmallIndex(ptr, index);
+  return freeBigSize(ptr, sizeIndex2Size(index));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline int64_t MemoryManager::getAllocated() const {

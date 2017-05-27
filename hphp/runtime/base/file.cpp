@@ -202,8 +202,11 @@ void File::sweep() {
   // sweep() is responsible for closing m_fd and any other non-request
   // resources it might have allocated.
   assert(!valid());
-  File::closeImpl();
+
+  // Do not call close. We need any persistent objects to remain open.
+  // If this is the last reference to the data, close will be called for us.
   m_data.reset();
+
   m_wrapperType = nullptr;
   m_streamType = nullptr;
 }

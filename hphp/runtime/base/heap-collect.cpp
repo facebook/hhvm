@@ -324,7 +324,7 @@ StructuredLogEntry logCommon() {
   sample.setInt("memory_limit", t_pre_stats.limit);
   sample.setInt("usage", t_pre_stats.usage());
   sample.setInt("mm_usage", t_pre_stats.mmUsage);
-  sample.setInt("aux_usage", t_pre_stats.auxUsage);
+  sample.setInt("aux_usage", t_pre_stats.auxUsage());
   sample.setInt("mm_capacity", t_pre_stats.capacity);
   sample.setInt("peak_usage", t_pre_stats.peakUsage);
   sample.setInt("peak_capacity", t_pre_stats.peakCap);
@@ -447,7 +447,7 @@ void MemoryManager::requestGC() {
 }
 
 void MemoryManager::updateNextGc() {
-  auto mm_limit = m_stats.limit - m_stats.auxUsage;
+  auto mm_limit = m_stats.limit - m_stats.auxUsage();
   int64_t delta = (mm_limit - m_stats.mmUsage) *
                   RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);

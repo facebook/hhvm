@@ -34,6 +34,10 @@ inline char *gdEstrdup(const char *s) {
   return ret;
 }
 
+inline void *safe_emalloc(size_t nmemb, size_t size, size_t offset) {
+  return HPHP::req::malloc_noptrs(nmemb * size + offset);
+}
+
 /* Returns nonzero if multiplying the two quantities will
   result in integer overflow. Also returns nonzero if
   either quantity is negative. By Phil Knirsch based on

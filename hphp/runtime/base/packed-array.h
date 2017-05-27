@@ -86,8 +86,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
-                               RefCount initial_count, HeaderKind dest_hk);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
@@ -195,7 +193,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
    * static packed copy, like CopyStatic().
    */
   static ArrayData* ConvertStatic(const ArrayData*);
-  static ArrayData* ConvertStaticHelper(const ArrayData*);
 
   static ptrdiff_t entriesOffset();
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
@@ -223,7 +220,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static ArrayData* MakeUninitializedVec(uint32_t size);
 
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
-  static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);
 
@@ -261,9 +257,8 @@ private:
   template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
 
-  static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);
-
-  static ArrayData* CopyStaticHelper(const ArrayData*);
+  template<bool convertingPackedToVec>
+  static bool CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
 
   static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);

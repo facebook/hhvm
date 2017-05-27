@@ -219,23 +219,23 @@ let from_ast : A.class_ -> Hhas_class.t =
     if not class_is_xhp || class_xhp_categories = []
     then additional_methods
     else additional_methods
-      @ [Emit_xhp.from_category_declaration ast_class class_xhp_categories]
+      @ Emit_xhp.from_category_declaration ast_class class_xhp_categories
   in
   let additional_methods =
     if not class_is_xhp || class_xhp_children = []
     then additional_methods
     else additional_methods
-      @ [Emit_xhp.from_children_declaration ast_class class_xhp_children]
+      @ Emit_xhp.from_children_declaration ast_class class_xhp_children
   in
   let additional_methods =
     if not class_is_xhp ||
       (class_xhp_attributes = [] && class_xhp_use_attributes = [])
     then additional_methods
     else additional_methods
-      @ [Emit_xhp.from_attribute_declaration
+      @ Emit_xhp.from_attribute_declaration
           ast_class
           class_xhp_attributes
-          class_xhp_use_attributes]
+          class_xhp_use_attributes
   in
   Label.reset_label ();
   let class_properties = List.concat_map class_body from_class_elt_classvars in
@@ -332,11 +332,14 @@ let from_ast : A.class_ -> Hhas_class.t =
   let additional_methods =
     additional_methods @
     ctor_methods @ pinit_methods @ sinit_methods @ cinit_methods in
-  let class_methods =
-    Emit_method.from_asts ast_class (ast_methods class_body) in
+  let methods = ast_methods class_body in
+  let class_methods = Emit_method.from_asts ast_class methods in
   let class_methods = class_methods @ additional_methods in
   let class_type_constants =
     List.filter_map class_body from_class_elt_typeconsts in
+  let info = Emit_memoize_method.make_info ast_class class_name methods in
+  let additional_properties = Emit_memoize_method.emit_properties info methods in
+  let additional_methods = Emit_memoize_method.emit_wrapper_methods info ast_class methods in
   Hhas_class.make
     class_attributes
     class_base
@@ -349,8 +352,8 @@ let from_ast : A.class_ -> Hhas_class.t =
     class_is_xhp
     class_uses
     class_enum_type
-    class_methods
-    class_properties
+    (class_methods @ List.rev additional_methods)
+    (class_properties @ additional_properties)
     class_constants
     class_type_constants
 

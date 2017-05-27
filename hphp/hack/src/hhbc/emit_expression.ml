@@ -1647,8 +1647,7 @@ and emit_call (_, expr_ as expr) args uargs =
     gather [
       emit_jmpnz e l;
       emit_ignored_expr (p, A.Call (id, rest, uargs));
-      instr_string "invariant_violation";
-      instr (IOp (Fatal FatalOp.Runtime));
+      Emit_fatal.emit_fatal_runtime "invariant_violation";
       instr_label l;
       instr_null;
     ], Flavor.Cell
@@ -1739,11 +1738,8 @@ and emit_final_static_op cid id op =
   | LValOp.SetRef -> instr (IMutator (BindS 0))
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
-  | LValOp.Unset ->
-    gather [
-      instr_string ("Attempt to unset static property " ^ cid ^ "::" ^ id);
-      instr (IOp (Fatal FatalOp.Runtime))
-    ]
+  | LValOp.Unset -> Emit_fatal.emit_fatal_runtime
+      ("Attempt to unset static property " ^ cid ^ "::" ^ id)
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:

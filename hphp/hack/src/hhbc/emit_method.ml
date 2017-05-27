@@ -10,40 +10,43 @@
 
 open Core
 open Instruction_sequence
-open Hhbc_ast
 
-let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
-  fun ast_class ast_method ->
+let from_ast_wrapper : bool -> _ -> _ ->
+  Ast.class_ -> Ast.method_ -> Hhas_method.t =
+  fun privatize make_name emit_body ast_class ast_method ->
   let method_is_abstract =
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
-  let method_is_private = List.mem ast_method.Ast.m_kind Ast.Private in
-  let method_is_protected = List.mem ast_method.Ast.m_kind Ast.Protected in
-    let method_is_public =
-    List.mem ast_method.Ast.m_kind Ast.Public ||
-    (not method_is_private && not method_is_protected) in
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
     Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
+  let method_is_private =
+    privatize || List.mem ast_method.Ast.m_kind Ast.Private in
+  let method_is_protected =
+    not privatize && List.mem ast_method.Ast.m_kind Ast.Protected in
+  let method_is_public =
+    not privatize && (
+    List.mem ast_method.Ast.m_kind Ast.Public ||
+    (not method_is_private && not method_is_protected)) in
+  let is_memoize =
+    Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+  let (_, original_name) = ast_method.Ast.m_name in
   let (_,class_name) = ast_class.Ast.c_name in
-  let (_,method_name) = ast_method.Ast.m_name in
   let ret =
-    if method_name = Naming_special_names.Members.__construct
-    || method_name = Naming_special_names.Members.__destruct
+    if original_name = Naming_special_names.Members.__construct
+    || original_name = Naming_special_names.Members.__destruct
     then None
     else ast_method.Ast.m_ret in
-  let method_id = Hhbc_id.Method.from_ast_name method_name in
+  let method_id = make_name ast_method.Ast.m_name in
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
-    then Some (gather [
-      instr_string ("Cannot call abstract method " ^ Utils.strip_ns class_name
-        ^ "::" ^ method_name ^ "()");
-      instr (IOp (Fatal FatalOp.RuntimeOmitFrame))
-    ])
+    then Some (Emit_fatal.emit_fatal_runtimeomitframe
+      ("Cannot call abstract method " ^ Utils.strip_ns class_name
+        ^ "::" ^ original_name ^ "()"))
     else
     if method_is_async
     then Some (gather [instr_null; instr_retc])
@@ -53,18 +56,18 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
      Ast_scope.ScopeItem.Class ast_class] in
   (* TODO: use something that can't be faked in user code *)
   let method_is_closure_body =
-   snd ast_method.Ast.m_name = "__invoke"
-   && String_utils.string_starts_with (snd ast_class.Ast.c_name) "Closure$" in
+   original_name = "__invoke"
+   && String_utils.string_starts_with class_name "Closure$" in
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
   let namespace = ast_class.Ast.c_namespace in
   let method_body, method_is_generator, method_is_pair_generator =
-    Emit_body.emit_body
+    emit_body
       ~scope:scope
-      ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ~is_closure_body:method_is_closure_body
-      ~is_memoize_wrapper:false
+      ~is_memoize
+      ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref:ast_method.Ast.m_ret_by_ref
       ~default_dropthrough
       ~return_value:instr_null
@@ -101,7 +104,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   Hhas_method.make
     method_attributes
     method_is_protected
-    method_is_public
+  method_is_public
     method_is_private
     method_is_static
     method_is_final
@@ -112,6 +115,17 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     method_is_generator
     method_is_pair_generator
     method_is_closure_body
+
+let from_ast ast_class ast_method =
+  let is_memoize = Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+  let make_name (_, name) =
+    if is_memoize
+    then Hhbc_id.Method.from_ast_name (name ^ Emit_memoize_helpers.memoize_suffix)
+    else Hhbc_id.Method.from_ast_name name
+  in
+  from_ast_wrapper is_memoize make_name
+  Emit_body.emit_body ast_class ast_method
+
 
 let from_asts ast_class ast_methods =
   List.map ast_methods (from_ast ast_class)

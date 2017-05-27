@@ -18,10 +18,13 @@ val make_body:
 
 val emit_body:
   scope: Ast_scope.Scope.t ->
+  (* True if this is the body of a closure method *)
   is_closure_body: bool ->
-  is_memoize_wrapper:bool ->
+  (* True if this is the body of a <<__Memoize>> method *)
+  is_memoize: bool ->
+  skipawaitable:bool ->
+  (* True if the return type is a ref *)
   is_return_by_ref: bool ->
-  skipawaitable: bool ->
   default_dropthrough: Instruction_sequence.t option ->
   return_value: Instruction_sequence.t ->
   namespace: Namespace_env.env ->
@@ -36,3 +39,10 @@ val emit_method_prolog :
   params:Hhas_param.t list ->
   needs_local_this:bool ->
   Instruction_sequence.t
+
+val emit_return_type_info :
+  scope: Ast_scope.Scope.t ->
+  skipawaitable: bool ->
+  namespace: Namespace_env.env ->
+  Ast.hint option ->
+  Hhas_type_info.t option

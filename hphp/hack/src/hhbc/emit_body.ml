@@ -89,12 +89,22 @@ let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info =
     params
     return_type_info
 
+let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
+  let tparams =
+    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
+  match ret with
+  | None ->
+    Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
+  | Some h ->
+    Some (hint_to_type_info
+      ~skipawaitable ~always_extended:true ~tparams ~namespace h)
+
 let emit_body
   ~scope
   ~is_closure_body
-  ~is_memoize_wrapper
-  ~is_return_by_ref
+  ~is_memoize
   ~skipawaitable
+  ~is_return_by_ref
   ~default_dropthrough
   ~return_value
   ~namespace params ret body =
@@ -104,12 +114,7 @@ let emit_body
   Iterator.reset_iterator ();
   Emit_expression.set_scope scope;
   let return_type_info =
-    match ret with
-    | None ->
-      Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
-    | Some h ->
-      Some (hint_to_type_info
-        ~skipawaitable ~always_extended:true ~tparams ~namespace h) in
+    emit_return_type_info ~scope ~skipawaitable ~namespace ret in
   let verify_return =
     match return_type_info with
     | None -> false
@@ -120,7 +125,8 @@ let emit_body
   Emit_statement.set_default_return_value return_value;
   Emit_expression.set_namespace namespace;
   Emit_statement.set_return_by_ref is_return_by_ref;
-  let params = Emit_param.from_asts ~namespace ~tparams ~params in
+  let params =
+    Emit_param.from_asts ~namespace ~tparams ~generate_defaults:(not is_memoize) params in
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params body in
@@ -128,8 +134,7 @@ let emit_body
   Emit_expression.set_needs_local_this needs_local_this;
   let stmt_instrs = emit_defs body in
   let fault_instrs = extract_fault_instructions stmt_instrs in
-  let begin_label, default_value_setters =
-    Emit_param.emit_param_default_value_setter params
+  let begin_label, default_value_setters = Emit_param.emit_param_default_value_setter params
   in
   let (is_generator, is_pair_generator) = is_function_generator stmt_instrs in
   let generator_instr =
@@ -146,7 +151,7 @@ let emit_body
   make_body
     body_instrs
     decl_vars
-    is_memoize_wrapper
+    false (*is_memoize_wrapper*)
     params
     return_type_info,
     is_generator,

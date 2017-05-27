@@ -43,9 +43,9 @@ let emit_main defs =
     Emit_body.emit_body
       ~namespace:Namespace_env.empty_with_default_popt
       ~is_closure_body:false
-      ~is_memoize_wrapper:false
-      ~is_return_by_ref:false
+      ~is_memoize:false
       ~skipawaitable:false
+      ~is_return_by_ref:false
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(instr_int 1)
       ~default_dropthrough:None
@@ -69,11 +69,18 @@ let from_ast
   let st, parsed_classes = List.map_env st parsed_classes convert_class in
   let closure_classes = Closure_convert.get_closure_classes st in
   let all_classes = parsed_classes @ closure_classes in
-  let compiled_defs = emit_main parsed_defs in
-  let compiled_funs = Emit_function.from_asts parsed_functions in
-  let compiled_funs = Generate_memoized.memoize_functions compiled_funs in
-  let compiled_classes = Emit_class.from_asts all_classes in
-  let compiled_classes = Generate_memoized.memoize_classes compiled_classes in
-  let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
-  let adata = Emit_adata.get_adata () in
-  make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
+  try
+    let compiled_defs = emit_main parsed_defs in
+    let compiled_funs = Emit_function.from_asts parsed_functions in
+    let compiled_classes = Emit_class.from_asts all_classes in
+    let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
+    let adata = Emit_adata.get_adata () in
+    make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
+  with Emit_fatal.IncludeTimeFatalException (op, message) ->
+    let body = Emit_body.make_body (Emit_fatal.emit_fatal op message)
+      [] (* decl_vars *)
+      false (*is_memoize_wrapper*)
+      [] (* params *)
+      None (* return_type_info *)
+    in
+      make [] [] [] [] body

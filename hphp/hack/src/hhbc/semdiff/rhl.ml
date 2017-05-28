@@ -718,6 +718,20 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
              let newasn = (newprops, vs, VarSet.remove l1 vs') in
                check pc (succ (succ (succ pc'))) newasn
                         (add_assumption (pc,pc') asn assumed) todo
+
+         (* Peephole equations for negation combined with conditional jumps *)
+         | (IContFlow (JmpZ lab) :: _), (IOp Not :: IContFlow (JmpNZ lab') :: _)
+         | (IContFlow (JmpNZ lab) :: _), (IOp Not :: IContFlow (JmpZ lab') :: _)
+         -> check (succ pc) (succ (succ pc')) asn
+           (add_assumption (pc,pc') asn assumed)
+           (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
+              (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
+         | (IOp Not :: IContFlow (JmpNZ lab) :: _), (IContFlow (JmpZ lab') :: _)
+         | (IOp Not :: IContFlow (JmpZ lab) :: _), (IContFlow (JmpNZ lab') :: _)
+         -> check (succ (succ pc)) (succ pc') asn
+           (add_assumption (pc,pc') asn assumed)
+           (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
+              (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
         (* OK, we give up *)
          | _, _ -> Some (pc, pc', asn, assumed, todo)
      )

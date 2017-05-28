@@ -386,6 +386,13 @@ let param_name_reference_comparer = join (fun s1 s2 -> s1 ^ s2)
 let param_ti_name_reference_comparer = join (fun s1 s2 -> s1 ^ s2)
                                             param_type_info_comparer
                                             param_name_reference_comparer
+(* Lifting the above to work on the first component of a pair *)
+let param_ti_name_reference_comparer_lifted =
+ wrap fst (fun (_param, (_instrs : Hhbc_ast.instruct list)) s -> s)
+          param_ti_name_reference_comparer
+
+
+(* fix this *)
 let params_comparer = list_comparer param_ti_name_reference_comparer ", "
 
 let function_params_comparer =
@@ -573,29 +580,16 @@ let body_iters_cls_ref_slots_decl_vars_comparer =
 
 (* string_of_instruction already appends a newline, so remove it *)
 let droplast s = String.sub s 0 (String.length s - 1)
-let instruct_comparer = primitive_comparer
-                        (fun i -> droplast (Hhbc_hhas.string_of_instruction i))
+let my_string_of_instruction i = droplast (Hhbc_hhas.string_of_instruction i)
+let instruct_comparer = primitive_comparer my_string_of_instruction
 
-
-let my_string_of_instruction i =
-  droplast (Hhbc_hhas.string_of_instruction i)
-
-let my_instruct_comparer = {
-  comparer = (fun i1 i2 ->
-     if i1=i2 then (0,(1,""))
-     else (1,(1,subststring (my_string_of_instruction i1)
-                            (my_string_of_instruction i2))));
-  size_of = (fun _n -> 1);
-  string_of = my_string_of_instruction;
-}
-
-let instruct_list_comparer = list_comparer my_instruct_comparer "\n"
+let instruct_list_comparer = list_comparer instruct_comparer "\n"
 
 
 (* Try the semantic differ; if it fails, drop back to syntactic one *)
 let instruct_list_comparer_with_semdiff = {
   comparer = (fun l1 l2 ->
-                  match Rhl.equiv l1 l2 with
+                  match Rhl.equiv l1 l2 [] with
                 | None -> (prerr_endline "semdiff succeeded";
                            (0, (List.length l1, "")) )
                 | Some (pc,pc',asn,assumed,todo) ->
@@ -603,9 +597,9 @@ let instruct_list_comparer_with_semdiff = {
                   Printf.eprintf
                   "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nassumed=%s\ntodo=%s"
                   (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
-                  (my_string_of_instruction (* !data_decls_ref1 *)
+                  (my_string_of_instruction
                     (List.nth l1 (Rhl.ip_of_pc pc)))
-                  (my_string_of_instruction (* !data_decls_ref2 *)
+                  (my_string_of_instruction
                     (List.nth l2 (Rhl.ip_of_pc pc' )))
                   (Rhl.asntostring asn) (Rhl.labasnsmaptostring assumed)
                   (Rhl.labasnlisttostring todo);
@@ -615,13 +609,51 @@ let instruct_list_comparer_with_semdiff = {
   string_of = instruct_list_comparer.string_of;
 }
 
+let option_get o = match o with | Some v -> v | None -> failwith "option"
+let option_is_some o = match o with Some _ -> true | None -> false
+
+(* compare two bodies' instructions, with extra entry points added for
+   default parameter values
+*)
+let body_instrs_comparer = {
+  comparer = (fun b b' ->
+      let todo = match Core.List.zip (Hhas_body.params b) (Hhas_body.params b') with
+        | None -> [] (* different lengths so just look at start *)
+        | Some pps ->
+          let havedefs = List.filter
+           (fun (p,p') -> option_is_some (Hhas_param.default_value p) &&
+                          option_is_some (Hhas_param.default_value p')) pps in
+          List.map  (fun (p,p') ->
+           (fst (option_get (Hhas_param.default_value p)),
+            fst (option_get (Hhas_param.default_value p')))) havedefs
+      in
+      let inss = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b) in
+      let inss' = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b') in
+        match Rhl.equiv inss inss' todo with
+           | None -> (prerr_endline "semdiff succeeded";
+                      (0, (List.length inss, "")) )
+           | Some (pc,pc',asn,assumed,todo) ->
+             (prerr_endline "semdiff failed";
+             Printf.eprintf
+             "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nassumed=%s\ntodo=%s"
+             (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
+             (my_string_of_instruction
+               (List.nth inss (Rhl.ip_of_pc pc)))
+             (my_string_of_instruction
+               (List.nth inss' (Rhl.ip_of_pc pc' )))
+             (Rhl.asntostring asn) (Rhl.labasnsmaptostring assumed)
+             (Rhl.labasnlisttostring todo);
+             instruct_list_comparer.comparer inss inss'));
+    size_of = (fun b -> instruct_list_comparer.size_of
+      (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b)));
+    string_of = (fun b -> instruct_list_comparer.string_of
+                 (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b)));
+}
+
 let body_comparer =
  join (fun s1 s2 -> s1 ^ "\n" ^ s2)
       body_iters_cls_ref_slots_decl_vars_comparer
-      (wrap
-        (fun b -> Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b))
-        (fun _f s -> s)
-            instruct_list_comparer_with_semdiff)
+      body_instrs_comparer
 
 let function_body_comparer =
   wrap Hhas_function.body (fun _ s -> s) body_comparer

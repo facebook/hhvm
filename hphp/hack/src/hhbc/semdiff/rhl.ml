@@ -70,6 +70,7 @@ module PcpMap = MyMap.Make(struct type t = epc*epc let compare=compare end)
     \forall v'\in Vars\vs', s' v' = unset
    *)
 type assertion = PropSet.t * VarSet.t * VarSet.t
+let (entry_assertion : assertion) = (PropSet.empty,VarSet.empty,VarSet.empty)
 module AsnSet = Set.Make(struct type t = assertion let compare=compare end)
 
 exception Labelexn
@@ -444,7 +445,7 @@ let add_assumption (pc,pc') asn assumed =
   let updated = AsnSet.add asn prev in (* this is a clumsy union *)
   PcpMap.add (pc,pc') updated assumed
 
-let equiv prog prog' =
+let equiv prog prog' startlabelpairs =
  let (labelmap, trymap) = make_label_try_maps prog in
  let (exnmap, exnparents) = make_exntable prog labelmap trymap in
  let (labelmap', trymap') = make_label_try_maps prog' in
@@ -736,4 +737,11 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
          | _, _ -> Some (pc, pc', asn, assumed, todo)
      )
 in
- check ([],0) ([],0) (PropSet.empty,VarSet.empty,VarSet.empty) PcpMap.empty []
+ (* We always start from ip,ip'=0 for the top entry to the function/method, but
+  also take startlabelpairs, which is  list of pairs of labels from the two
+  programs, as alternative entry points. These are used for default param
+  values *)
+  let initialtodo = List.map ~f:(fun (lab,lab') ->
+   ((([],LabelMap.find lab labelmap), ([],LabelMap.find lab' labelmap')),
+     entry_assertion )) startlabelpairs in
+ check ([],0) ([],0)  entry_assertion PcpMap.empty initialtodo

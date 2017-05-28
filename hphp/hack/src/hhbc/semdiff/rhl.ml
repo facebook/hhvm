@@ -733,6 +733,17 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
            (add_assumption (pc,pc') asn assumed)
            (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
               (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
+              
+        (* associativity of concatenation, restricted to the case
+           where the last thing concatenated is a literal constant
+        *)
+        | (ILitConst (String s) :: IOp Concat :: IOp Concat :: _),
+          (IOp Concat :: ILitConst (String s') :: IOp Concat :: _)
+        | (IOp Concat :: ILitConst (String s') :: IOp Concat :: _),
+          (ILitConst (String s) :: IOp Concat :: IOp Concat :: _)
+          when s = s' ->
+          check (succ (succ (succ pc))) (succ (succ (succ pc'))) asn
+                (add_assumption (pc,pc') asn assumed) todo
         (* OK, we give up *)
          | _, _ -> Some (pc, pc', asn, assumed, todo)
      )

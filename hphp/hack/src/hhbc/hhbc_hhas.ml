@@ -333,6 +333,12 @@ let string_of_null_flavor nf =
   | Ast.OG_nullthrows -> "NullThrows"
   | Ast.OG_nullsafe -> "NullSafe"
 
+let string_of_class_kind ck =
+  match ck with
+  | KClass -> "Class"
+  | KInterface -> "Interface"
+  | KTrait -> "Trait"
+
 let string_of_isset instruction =
   match instruction with
   | IssetC -> "IssetC"
@@ -534,6 +540,8 @@ let string_of_misc instruction =
     | Idx -> "Idx"
     | ArrayIdx -> "ArrayIdx"
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
+    | AKExists -> "AKExists"
+    | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let iterator_instruction_name_prefix instruction =

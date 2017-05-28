@@ -37,7 +37,7 @@ module LValOp = struct
 end
 
 let special_functions =
-  ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"; "define"]
+  ["isset"; "empty"; "tuple"; "idx"; "define"]
 
 (* Context for code generation. It would be more elegant to pass this
  * around in an environment parameter. *)
@@ -703,16 +703,16 @@ and emit_exit expr_opt =
     instr_exit;
   ]
 
-and is_valid_idx ~is_array es =
+and is_valid_idx es =
   let n = List.length es in
-  if is_array then n = 3 else n = 2 || n = 3
+  n = 2 || n = 3
 
-and emit_idx ~is_array es =
+and emit_idx es =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
     from_exprs es;
     default;
-    if is_array then instr_array_idx else instr_idx;
+    instr_idx;
   ]
 
 and from_expr expr ~need_ref =
@@ -774,11 +774,8 @@ and from_expr expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_call_empty_expr expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) ->
     emit_box_if_necessary need_ref @@ emit_tuple p es
-  | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx ~is_array:false es ->
-    emit_box_if_necessary need_ref @@ emit_idx ~is_array:false es
-  | A.Call ((_, A.Id (_, "hphp_array_idx")), es, _)
-    when is_valid_idx ~is_array:true es ->
-    emit_box_if_necessary need_ref @@  emit_idx ~is_array:true es
+  | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx es ->
+    emit_box_if_necessary need_ref @@ emit_idx es
   | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
     emit_box_if_necessary need_ref @@ gather [
       from_expr ~need_ref:false expr2;
@@ -1511,6 +1508,18 @@ and is_call_user_func id num_args =
   let (is_fn, min_args, max_args) = get_call_user_func_info id in
   is_fn && num_args >= min_args && num_args <= max_args
 
+and get_call_builtin_func_info = function
+  | "array_key_exists" -> Some (2, IMisc AKExists)
+  | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
+  | "intval" -> Some (1, IOp CastInt)
+  | "boolval" -> Some (1, IOp CastBool)
+  | "strval" -> Some (1, IOp CastString)
+  | "floatval" -> Some (1, IOp CastDouble)
+  | "vec" -> Some (1, IOp CastVec)
+  | "keyset" -> Some (1, IOp CastKeyset)
+  | "dict" -> Some (1, IOp CastDict)
+  | _ -> None
+
 and emit_call_user_func_args i expr =
   gather [
     from_expr ~need_ref:false expr;
@@ -1562,6 +1571,10 @@ and emit_call_user_func id arg args =
     end_instr;
   ], flavor
 
+(* TODO: work out what HHVM does special here *)
+and emit_name_string e =
+  from_expr ~need_ref:false e
+
 and emit_call (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
   let default () =
@@ -1588,55 +1601,6 @@ and emit_call (_, expr_ as expr) args uargs =
       | arg :: args ->
         emit_call_user_func id arg args
     end
-
-  | A.Id (_, "intval") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastInt)
-    ], Flavor.Cell
-
-  | A.Id (_, "strval") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastString)
-    ], Flavor.Cell
-
-  | A.Id (_, "boolval") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastBool)
-    ], Flavor.Cell
-
-  | A.Id (_, "floatval") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastDouble)
-    ], Flavor.Cell
-
-  | A.Id (_, "vec") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastVec)
-    ], Flavor.Cell
-
-  | A.Id (_, "keyset") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastKeyset)
-    ], Flavor.Cell
-
-  | A.Id (_, "dict") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    gather [
-      from_expr ~need_ref:false e;
-      instr (IOp CastDict)
-    ], Flavor.Cell
 
   | A.Id (_, "invariant") when List.length args > 0 ->
     let e = List.hd_exn args in
@@ -1670,7 +1634,34 @@ and emit_call (_, expr_ as expr) args uargs =
       instr_label l1;
     ], Flavor.Cell
 
+  | A.Id (_, ("class_exists" | "interface_exists" | "trait_exists" as id))
+    when nargs = 1 || nargs = 2 ->
+    let class_kind =
+      match id with
+      | "class_exists" -> KClass
+      | "interface_exists" -> KInterface
+      | "trait_exists" -> KTrait
+      | _ -> failwith "class_kind" in
+    gather [
+      emit_name_string (List.hd_exn args);
+      instr (IOp CastString);
+      if nargs = 1 then instr_true
+      else gather [
+        from_expr ~need_ref:false (List.nth_exn args 1);
+        instr (IOp CastBool)
+      ];
+      instr (IMisc (OODeclExists class_kind))
+    ], Flavor.Cell
+
   | A.Id (_, id) ->
+    begin match get_call_builtin_func_info id with
+    | Some (nargs, i) when nargs = List.length args ->
+      gather [
+        from_exprs args;
+        instr i
+      ], Flavor.Cell
+
+    | _ ->
     begin match args, istype_op id with
     | [(_, A.Lvar (_, arg_id))], Some i when not (is_local_this arg_id) ->
       instr (IIsset (IsTypeL (Local.Named arg_id, i))),
@@ -1681,6 +1672,7 @@ and emit_call (_, expr_ as expr) args uargs =
         instr (IIsset (IsTypeC i))
       ], Flavor.Cell
     | _ -> default ()
+    end
     end
   | _ -> default ()
 

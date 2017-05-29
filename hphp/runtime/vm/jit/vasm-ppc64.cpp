@@ -1120,6 +1120,18 @@ X(andli,  andqi,  ONE_R64(d))
 
 #undef X
 
+// Replacing all cmov flavors to cmovq
+#define X(vasm_src, vasm_dst, oper1, oper2)                             \
+void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
+  v << vasm_dst{oper1 oper2 Reg64(inst.d)};                             \
+}
+
+X(cmovb,  cmovq,  TWO(cc, sf), TWO_R64(f, t))
+X(cmovw,  cmovq,  TWO(cc, sf), TWO_R64(f, t))
+X(cmovl,  cmovq,  TWO(cc, sf), TWO_R64(f, t))
+
+#undef X
+
 #undef NONE
 #undef ONE
 #undef TWO
@@ -1287,10 +1299,6 @@ void lowerForPPC64(const VLS& e, Vout& v, cmpli& inst) {
   Vreg tmp;
   if (patchImm(inst.s0, v, tmp)) v << cmpl {tmp,     inst.s1, inst.sf};
   else                           v << cmpli{inst.s0, inst.s1, inst.sf};
-}
-
-void lowerForPPC64(const VLS& e, Vout& v, cmovb& inst) {
-  v << cmovq{inst.cc, inst.sf, Reg64(inst.f), Reg64(inst.t), Reg64(inst.d)};
 }
 
 void lowerForPPC64(const VLS& e, Vout& v, cloadq& inst) {

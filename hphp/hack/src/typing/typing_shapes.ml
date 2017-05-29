@@ -61,12 +61,10 @@ let experiment_enabled env experiment =
   used instead of an optional type in the returned supertype.
 *)
 let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
-  let optional_shape_field_enabled = experiment_enabled env
-    TypecheckerOptions.experimental_optional_shape_field in
   let shape_idx_relaxed = experiment_enabled env
     TypecheckerOptions.experimental_shape_idx_relaxed in
   let fake_shape_field = {
-    sft_optional = optional_shape_field_enabled;
+    sft_optional = true;
     sft_ty = Reason.Rnone, Toption res;
   } in
   if shape_idx_relaxed then

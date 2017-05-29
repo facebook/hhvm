@@ -21,10 +21,6 @@ type t = {
 
 let tco_experimental_instanceof = "instanceof"
 
-(* Whether opetional shape fields are enabled. Please see t16016001 for more
-   background on this feature. *)
-let tco_experimental_optional_shape_field = "optional_shape_field"
-
 (* Whether darray and varray are enabled. *)
 let tco_experimental_darray_and_varray = "darray_and_varray"
 
@@ -39,7 +35,6 @@ let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
      tco_experimental_instanceof;
-     tco_experimental_optional_shape_field;
      tco_experimental_darray_and_varray;
      tco_experimental_goto;
      tco_experimental_shape_idx_relaxed;

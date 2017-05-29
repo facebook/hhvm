@@ -1,7 +1,10 @@
 File "type_structure_abstract.php", line 10, characters 5-60:
-  ?classname<<static>::T as this::T as P::T>
+  _
 File "type_structure_abstract.php", line 17, characters 5-60:
   classname<<static>::T as this::T as C::T as IBase>
 File "type_structure_abstract.php", line 24, characters 5-60:
   classname<IChild>
-No errors
+File "type_structure_abstract.php", line 10, characters 48-58:
+Invalid index operation: 'classname' is marked as an optional shape field. It may not be present in the shape. Use Shapes::idx instead. (Typing[4165])
+File "builtins.hhi", line 92, characters 3-13:
+This is where the field was declared as optional.

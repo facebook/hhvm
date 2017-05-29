@@ -550,7 +550,8 @@ module NastCheck                            = struct
   let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
-  let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
+  (* DEPRECATED let optional_shape_fields_not_supported
+      = 3033 (* DONT MODIFY!!!! *) *)
   let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1316,10 +1317,6 @@ let dangerous_method_name pos =
   "if you want to define a constructor, use "^
   "__construct"
 )
-
-let optional_shape_fields_not_supported pos =
-  add NastCheck.optional_shape_fields_not_supported pos
-    "Optional shape fields are not supported."
 
 (*****************************************************************************)
 (* Nast terminality *)

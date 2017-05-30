@@ -312,11 +312,11 @@ class Instruction {
 
   // Find the target of this instruction. 'this' may be a branch or a
   // PC-relative addressing instruction.
-  Instruction* ImmPCOffsetTarget();
+  Instruction* ImmPCOffsetTarget(Instruction* from = nullptr);
 
   // Patch a PC-relative offset to refer to 'target'. 'this' may be a branch or
   // a PC-relative addressing instruction.
-  void SetImmPCOffsetTarget(Instruction* target);
+  void SetImmPCOffsetTarget(Instruction* target, Instruction* from = nullptr);
   // Patch a literal load instruction to load from 'source'.
   void SetImmLLiteral(Instruction* source);
 

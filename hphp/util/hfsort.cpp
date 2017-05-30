@@ -83,6 +83,7 @@ void TargetGraph::normalizeArcWeights() {
     for (auto src : func.preds) {
       auto& arc = *arcs.find(Arc(src, f));
       arc.normalizedWeight = arc.weight / func.samples;
+      if (arc.weight == 0) continue;
       arc.avgCallOffset = arc.avgCallOffset / arc.weight;
       assert(arc.avgCallOffset < targets[src].size);
     }

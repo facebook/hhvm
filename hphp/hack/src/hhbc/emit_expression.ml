@@ -20,11 +20,6 @@ module SN = Naming_special_names
 module CBR = Continue_break_rewriter
 module SU = Hhbc_string_utils
 
-(* When using the PassX instructions we need to emit the right kind *)
-module PassByRefKind = struct
-  type t = AllowCell | WarnOnCell | ErrorOnCell
-end
-
 (* Locals, array elements, and properties all support the same range of l-value
  * operations. *)
 module LValOp = struct
@@ -1359,14 +1354,6 @@ and emit_base ~is_object ~notice mode base_offset param_num_opt (_, expr_ as exp
                    then BaseR base_offset else BaseC base_offset)),
      1
 
-and instr_fpass kind i =
-  match kind with
-  | PassByRefKind.AllowCell -> instr (ICall (FPassC i))
-  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW i))
-  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE i))
-
-and instr_fpassr i = instr (ICall (FPassR i))
-
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
@@ -1379,28 +1366,38 @@ and emit_arg i ((_, expr_) as e) =
     when not (is_local_this x) || get_needs_local_this () ->
     instr_fpassl i (Local.Named x)
 
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       from_expr ~need_ref:false e;
       instr (ICall (FPassG i))
     ]
 
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get false (Some i) QueryOp.CGet base_expr opt_elem_expr
 
-  | A.Obj_get(e1, e2, nullflavor) ->
+  | A.Obj_get (e1, e2, nullflavor) ->
     emit_obj_get false (Some i) QueryOp.CGet e1 e2 nullflavor
 
-  | A.Class_get(cid, id) ->
+  | A.Class_get (cid, id) ->
     emit_class_get (Some i) QueryOp.CGet false cid id
+
+  | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar (_, id))) ->
+    let id = Local.Named id in
+    gather [
+      emit_lval_op_list id [] e;
+      instr_fpassl i id;
+    ]
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
+    let fpass_kind = match flavor with
+      | Flavor.Cell -> instr_fpass (get_passByRefKind e) i
+      | Flavor.Ref -> instr_fpassv i
+      | Flavor.ReturnVal -> instr_fpassr i
+    in
     gather [
       instrs;
-      if flavor = Flavor.ReturnVal
-      then instr_fpassr i
-      else instr_fpass (get_passByRefKind e) i
+      fpass_kind;
     ]
 
 and emit_ignored_expr e =

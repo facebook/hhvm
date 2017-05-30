@@ -47,6 +47,11 @@ module Flavor = struct
   type t = Cell | Ref | ReturnVal
 end
 
+(* When using the PassX instructions we need to emit the right kind *)
+module PassByRefKind = struct
+  type t = AllowCell | WarnOnCell | ErrorOnCell
+end
+
 module MemberOpMode = struct
 
   type t =

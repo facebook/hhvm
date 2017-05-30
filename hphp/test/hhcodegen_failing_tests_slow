@@ -408,7 +408,6 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
-slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php
@@ -793,7 +792,6 @@ slow/object_property/694.php
 slow/object_property/696.php
 slow/object_property/698.php
 slow/object_property/699.php
-slow/object_property/717.php
 slow/object_property/718.php
 slow/object_property/basesc-input.php
 slow/object_property/deepinit_file_dir.php
@@ -1058,9 +1056,6 @@ slow/redeclared_classes/1481.php
 slow/redeclared_classes/1482.php
 slow/reference/1070.php
 slow/reference/1088.php
-slow/reference/1091.php
-slow/reference/1102.php
-slow/reference/1103.php
 slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php

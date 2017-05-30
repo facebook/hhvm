@@ -110,6 +110,14 @@ let instr_clsrefgetc =
 let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
+let instr_fpassr i = instr (ICall (FPassR i))
+let instr_fpassv i = instr (ICall (FPassV i))
+and instr_fpass kind i =
+  match kind with
+  | PassByRefKind.AllowCell -> instr (ICall (FPassC i))
+  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW i))
+  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE i))
+
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
 let instr_popc = instr (IBasic PopC)

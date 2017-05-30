@@ -181,10 +181,13 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       if (!Func::isFuncIdValid(callerFuncId)) continue;
       const auto callerTargetId = targetID[callerFuncId];
       const auto callCount = pd->transCounter(callerTransId);
-      cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
-      totalCalls += callCount;
-      FTRACE(3, "  - adding arc @ {} : {} => {} [weight = {}] \n",
-             callAddr, callerTargetId, calleeTargetId, callCount);
+      // Don't create arcs with zero weight
+      if (callCount) {
+        cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
+        totalCalls += callCount;
+        FTRACE(3, "  - adding arc @ {} : {} => {} [weight = {}] \n",
+               callAddr, callerTargetId, calleeTargetId, callCount);
+      }
     }
   };
 
@@ -195,7 +198,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     const auto calleeTargetId = targetID[fid];
     const auto transIds = pd->funcProfTransIDs(fid);
     uint32_t totalCalls = 0;
-    uint32_t profCount  = 0;
+    uint32_t profCount  = 1; // avoid zero sample counts
     for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
       auto transId = pd->proflogueTransId(func, nargs);
       if (transId == kInvalidTransID) continue;

@@ -2700,7 +2700,7 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
     data->m_soap_fault = create_soap_fault("Client", "Unknown Error");
   }
   if (!data->m_soap_fault.isNull()) {
-    throw data->m_soap_fault.toObject();
+    throw_object(data->m_soap_fault.toObject());
   }
   return return_value;
 }

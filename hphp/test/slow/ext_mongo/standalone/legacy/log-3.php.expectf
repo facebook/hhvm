@@ -1,3 +1,0 @@
-PARSE   INFO: Parsing mongodb://%s:%d
-PARSE   INFO: - Found node: %s:%d
-PARSE   INFO: - Connection type: STANDALONE

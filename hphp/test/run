@@ -1648,7 +1648,6 @@ function can_run_server_test($test) {
     strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
     strpos($test, 'slow/streams/') === false &&
-    strpos($test, 'slow/ext_mongo/') === false &&
     strpos($test, 'slow/ext_oauth/') === false &&
     strpos($test, 'slow/ext_yaml/') === false &&
     strpos($test, 'slow/debugger/') === false &&

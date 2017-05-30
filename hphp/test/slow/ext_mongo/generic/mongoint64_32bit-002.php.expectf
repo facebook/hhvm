@@ -1,4 +1,0 @@
-float(1)
-MongoCursorException: Can not natively represent the long 1 on this platform
-MongoInt64(1)
-MongoInt64(1)

@@ -1,3 +1,0 @@
-<?php
-new MongoBinData("data");
-?>

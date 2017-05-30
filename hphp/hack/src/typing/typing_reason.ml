@@ -320,6 +320,7 @@ type ureason =
   | URsubsume_tconst_cstr
   | URsubsume_tconst_assign
   | URfinal_property
+  | URclone
 
 let index_array = URindex "array"
 let index_tuple = URindex "tuple"
@@ -366,6 +367,7 @@ let string_of_ureason = function
      "The assigned type of this type constant is inconsistent with its parent"
   | URfinal_property ->
       "Property cannot be declared final"
+  | URclone -> "Clone cannot be called on non-object"
 
 let compare r1 r2 =
   let get_pri = function

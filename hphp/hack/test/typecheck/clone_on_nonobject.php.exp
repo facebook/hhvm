@@ -1,0 +1,6 @@
+File "clone_on_nonobject.php", line 24, characters 12-27:
+Clone cannot be called on non-object (Typing[4110])
+File "clone_on_nonobject.php", line 24, characters 12-27:
+This is an object
+File "clone_on_nonobject.php", line 4, characters 11-13:
+It is incompatible with an int

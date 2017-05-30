@@ -4211,11 +4211,11 @@ and hint_shape_info env shape_keyword_pos =
     L.back env.lb;
     error_at env shape_keyword_pos "\"shape\" is an invalid type; you need to \
     declare and use a specific shape type.";
-    { si_allows_unknown_fields=true; si_shape_field_list=[]; }
+    { si_allows_unknown_fields=false; si_shape_field_list=[]; }
 
 and hint_shape_info_remain env =
   match L.token env.file env.lb with
-  | Trp -> { si_allows_unknown_fields=true; si_shape_field_list=[] }
+  | Trp -> { si_allows_unknown_fields=false; si_shape_field_list=[] }
   | Tellipsis ->
       expect env Trp;
       { si_allows_unknown_fields=true; si_shape_field_list=[] }
@@ -4225,10 +4225,10 @@ and hint_shape_info_remain env =
       let fd = hint_shape_field env in
       match L.token env.file env.lb with
       | Trp ->
-          { si_allows_unknown_fields=true; si_shape_field_list=[fd] }
+          { si_allows_unknown_fields=false; si_shape_field_list=[fd] }
       | Tcomma ->
           if !(env.errors) != error_state
-          then { si_allows_unknown_fields=true; si_shape_field_list=[fd] }
+          then { si_allows_unknown_fields=false; si_shape_field_list=[fd] }
           else
             let { si_shape_field_list; _ } as shape_info =
               hint_shape_info_remain env in
@@ -4236,12 +4236,9 @@ and hint_shape_info_remain env =
             { shape_info with si_shape_field_list }
       | _ ->
           error_expect env ")";
-          { si_allows_unknown_fields=true; si_shape_field_list=[fd] }
+          { si_allows_unknown_fields=false; si_shape_field_list=[fd] }
 
 and hint_shape_field env =
-  let is_nullable = function
-    | _, Hoption _ -> true
-    | _ -> false in
   (* Consume the next token to determine if we're creating an optional field. *)
   let sf_optional =
     if L.token env.file env.lb = Tqm then
@@ -4254,8 +4251,6 @@ and hint_shape_field env =
   let sf_name = shape_field_name env in
   expect env Tsarrow;
   let sf_hint = hint env in
-  (* TODO(t17492233): Remove this line once shapes use new syntax. *)
-  let sf_optional = sf_optional || is_nullable sf_hint in
   { sf_optional; sf_name; sf_hint }
 
 (*****************************************************************************)

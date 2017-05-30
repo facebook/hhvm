@@ -5,5 +5,5 @@ File "shape_type_structure_with_optional_and_required_fields.php", line 10, char
 File "shape_type_structure_with_optional_and_required_fields.php", line 11, characters 3-34:
   ?string
 File "shape_type_structure_with_optional_and_required_fields.php", line 12, characters 3-36:
-  shape(unset fields:)(a => shape(optional => true, type => TypeStructure<int>), b => shape(type => TypeStructure<bool>))
+  shape(a => shape(optional => true, type => TypeStructure<int>), b => shape(type => TypeStructure<bool>))
 No errors

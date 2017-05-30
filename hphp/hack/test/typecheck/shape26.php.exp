@@ -3,7 +3,7 @@ File "shape26.php", line 25, characters 3-13:
 File "shape26.php", line 33, characters 3-13:
   ^(shape(x => shape(type => ^(string | int))))
 File "shape26.php", line 41, characters 3-13:
-  ^(shape(unset fields:)(x => shape(type => int)) | shape(unset fields:)(x => shape(type => int), y => shape(optional => true, type => ?string)))
+  ^(shape(unset fields:)(x => shape(type => int)) | shape(unset fields:)(x => shape(type => int), y => shape(type => ?string)))
 File "shape26.php", line 49, characters 3-13:
-  ^(shape(x => shape(type => ^(int))) | shape(unset fields:)(x => shape(type => int), y => shape(optional => true, type => ?string)))
+  ^(shape(x => shape(type => ^(int))) | shape(unset fields:)(x => shape(type => int), y => shape(type => ?string)))
 No errors

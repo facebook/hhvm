@@ -350,7 +350,14 @@ and hint_ env p = function
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-      let compute_hint_for_shape_field_info _ { sfi_hint; _ } =
+      let optional_shape_field_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env.tenv)
+          TypecheckerOptions.experimental_optional_shape_field in
+
+      let compute_hint_for_shape_field_info _ { sfi_optional; sfi_hint } =
+        (if sfi_optional && not optional_shape_field_enabled
+        then Errors.optional_shape_fields_not_supported p);
         hint env sfi_hint in
 
       ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map

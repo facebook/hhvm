@@ -1,21 +1,21 @@
-File "as_generic.php", line 5, characters 3-35:
-  ?^(int)
-File "as_generic.php", line 6, characters 3-36:
-  ?^(string)
-File "as_generic.php", line 7, characters 3-35:
-  ?^(string)
-File "as_generic.php", line 8, characters 3-40:
-  ?^(classname<T>)
-File "as_generic.php", line 9, characters 3-42:
-  ?^(array)
-File "as_generic.php", line 10, characters 3-42:
-  ?^(array)
-File "as_generic.php", line 11, characters 3-39:
-  ?^(bool)
-File "as_generic.php", line 12, characters 3-41:
-  ?^(array)
-File "as_generic.php", line 13, characters 3-37:
-  ?^(array)
-File "as_generic.php", line 14, characters 3-44:
-  ?^(array)
+File "as_generic.php", line 5, characters 3-22:
+  int
+File "as_generic.php", line 6, characters 3-23:
+  ?string
+File "as_generic.php", line 7, characters 3-22:
+  ?string
+File "as_generic.php", line 8, characters 3-27:
+  ?classname<T>
+File "as_generic.php", line 9, characters 3-29:
+  ?array
+File "as_generic.php", line 10, characters 3-29:
+  ?array
+File "as_generic.php", line 11, characters 3-26:
+  ?bool
+File "as_generic.php", line 12, characters 3-28:
+  ?array
+File "as_generic.php", line 13, characters 3-24:
+  ?array
+File "as_generic.php", line 14, characters 3-31:
+  ?array
 No errors

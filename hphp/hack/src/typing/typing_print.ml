@@ -351,15 +351,26 @@ module Full = struct
         end
       end;
       o "(";
+      let optional_shape_field_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env)
+          TypecheckerOptions.experimental_optional_shape_field in
       let o_field (shape_map_key, { sft_optional; sft_ty }) =
-        begin
-          o (Env.get_shape_field_name shape_map_key);
-          o " => shape(";
-          if sft_optional then o "optional => true, ";
-          o "type => ";
-          k sft_ty;
-          o ")"
-        end in
+        if optional_shape_field_enabled then
+          begin
+            o (Env.get_shape_field_name shape_map_key);
+            o " => shape(";
+            if sft_optional then o "optional => true, ";
+            o "type => ";
+            k sft_ty;
+            o ")"
+          end
+        else
+          begin
+            o (Env.get_shape_field_name shape_map_key);
+            o " => ";
+            k sft_ty
+          end in
       shape_map o fdm o_field;
       o ")"
 

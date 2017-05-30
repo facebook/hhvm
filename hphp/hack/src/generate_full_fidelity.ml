@@ -30,6 +30,121 @@ let type_name_fmt   = align_fmt (fun x -> x.type_name  ) schema
 let trivia_kind_fmt = align_fmt (fun x -> x.trivia_kind) trivia_kinds
 let token_kind_fmt  = align_fmt (fun x -> x.token_kind ) all_tokens
 
+module GenerateFFSyntaxType = struct
+  let to_parse_tree x =
+    let field_width = 50 - String.length x.prefix in
+    let fmt = sprintf "%s_%%-%ds: t\n" x.prefix field_width in
+    let mapper (f,_) = sprintf (Scanf.format_from_string fmt "%-1s") f in
+    let fields = map_and_concat_separated "    ; " mapper x.fields in
+    sprintf "  and %s =\n    { %s    }\n"
+      x.type_name fields
+
+  let to_syntax x =
+    sprintf ("  | " ^^ kind_name_fmt ^^ " of %s\n")
+      x.kind_name x.type_name
+
+  let full_fidelity_syntax_template =
+"(**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the \"hack\" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ *
+ * THIS FILE IS @generated; DO NOT EDIT IT
+ * To regenerate this file, run
+ *
+ *   buck run //hphp/hack/src:generate_full_fidelity
+ *
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ * The structure of the syntax tree is described by the collection of recursive
+ * types that makes up the bulk of this file. The type `t` is the type of a node
+ * in the syntax tree; each node has associated with it an arbitrary value of
+ * type `SyntaxValue.t`, and syntax node proper, which has structure given by
+ * the `syntax` type.
+ *
+ * Note that every child in the syntax tree is of type `t`, except for the
+ * `Token.t` type. This should be the *only* child of a type other than `t`.
+ * We are explicitly NOT attempting to impose a type structure on the parse
+ * tree beyond what is already implied by the types here. For example,
+ * we are not attempting to put into the type system here the restriction that
+ * the children of a binary operator must be expressions. The reason for this
+ * is because we are potentially parsing code as it is being typed, and we
+ * do not want to restrict our ability to make good error recovery by imposing
+ * a restriction that will only be valid in correct program text.
+ *
+ * That said, it would of course be ideal if the only children of a compound
+ * statement were statements, and so on. But those invariants should be
+ * imposed by the design of the parser, not by the type system of the syntax
+ * tree code.
+ *
+ * We want to be able to use different kinds of tokens, with different
+ * performance characteristics. Moreover, we want to associate arbitrary values
+ * with the syntax nodes, so that we can construct syntax trees with various
+ * properties -- trees that only know their widths and are thereby cheap to
+ * serialize, trees that have full position data for each node, trees where the
+ * tokens know their text and can therefore be edited, trees that have name
+ * annotations or type annotations, and so on.
+ *
+ * We wish to associate arbitrary values with the syntax nodes so that we can
+ * construct syntax trees with various properties -- trees that only know
+ * their widths and are thereby cheap to serialize, trees that have full
+ * position data for each node, trees where the tokens know their text and
+ * can therefore be edited, trees that have name annotations or type
+ * annotations, and so on.
+ *
+ * Therefore this module is functorized by the types for token and value to be
+ * associated with the node.
+ *)
+
+module type TokenType = sig
+  type t
+  val kind: t -> Full_fidelity_token_kind.t
+  val to_json: t -> Hh_json.json
+end
+
+module type SyntaxValueType = sig
+  type t
+end
+
+(* This functor describe the shape of a parse tree that has a particular kind of
+ * token in the leaves, and a particular kind of value associated with each
+ * node.
+ *)
+module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
+  type t = {
+    syntax : syntax ;
+    value : SyntaxValue.t
+  }
+PARSE_TREE
+  and syntax =
+  | Token                             of Token.t
+  | Missing
+  | SyntaxList                        of t list
+SYNTAX
+end (* MakeSyntaxType *)
+"
+
+  let full_fidelity_syntax_type =
+  {
+    filename = full_fidelity_path_prefix ^ "full_fidelity_syntax_type.ml";
+    template = full_fidelity_syntax_template;
+    transformations = [
+      { pattern = "PARSE_TREE"; func = to_parse_tree };
+      { pattern = "SYNTAX"; func = to_syntax };
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = []
+  }
+end (* GenerateFFSyntaxType *)
+
+
 module GenerateFFSyntax = struct
 
   let to_parse_tree x =
@@ -105,99 +220,36 @@ module GenerateFFSyntax = struct
  * grant of patent rights can be found in the PATENTS file in the same
  * directory.
  *
- *)
-(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
-(* @" ^ "generated *)
-(**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*)
-(**
- * This module contains the code describing the structure of a syntax tree.
  *
- * The relationships between the various functors and signatures here needs
- * some explanation.
+ * THIS FILE IS @generated; DO NOT EDIT IT
+ * To regenerate this file, run
  *
- * First off, the structure of the syntax tree is described by the collection
- * of recursive types that makes up the bulk of this file. The type \"t\" is
- * the type of a node in the syntax tree; each node has associated with it
- * an arbitrary value of type SyntaxValue.t, and syntax node proper, which
- * has structure given by the \"syntax\" type.
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
- * Note that every child in the syntax tree is of type t, except for the
- * \"Token\" type. This should be the *only* child of a type other than t.
- * We are explicitly NOT attempting to impose a type structure on the parse
- * tree beyond what is already implied by the types here. For example,
- * we are not attempting to put into the type system here the restriction that
- * the children of a binary operator must be expressions. The reason for this
- * is because we are potentially parsing code as it is being typed, and we
- * do not want to restrict our ability to make good error recovery by imposing
- * a restriction that will only be valid in correct program text.
+ * This module provides factory methods for the types making up the syntax trees
+ * (see `Full_fidelity_syntax_type`).
  *
- * That said, it would of course be ideal if the only children of a compound
- * statement were statements, and so on. But those invariants should be
- * imposed by the design of the parser, not by the type system of the syntax
- * tree code.
- *
- * We want to be able to use different kinds of tokens, with different
- * performance characteristics. Therefore this module is first functorized by
- * token type.
- *
- * We wish to associate arbitrary values with the syntax nodes so that we can
- * construct syntax trees with various properties -- trees that only know
- * their widths and are thereby cheap to serialize, trees that have full
- * position data for each node, trees where the tokens know their text and
- * can therefore be edited, trees that have name annotations or type
- * annotations, and so on.
- *
- * Therefore this module is functorized again with the value type to be
- * associated with the node.
- *
- * We also wish to provide factory methods, so that nodes can be built up
- * from their child nodes. A factory method must not just know all the
- * children and the kind of node it is constructing; it also must know how
- * to construct the value that this node is going to be tagged with. For
- * that reason, a third, optional functor is provided. This functor requires
- * that methods be provided to construct the values associated with a token
- * or with any arbitrary node, given its children. If this functor is used
- * then the resulting module contains factory methods.
+ * With these factory methods, nodes can be built up from their child nodes. A
+ * factory method must not just know all the children and the kind of node it is
+ * constructing; it also must know how to construct the value that this node is
+ * going to be tagged with. For that reason, an optional functor is provided.
+ * This functor requires that methods be provided to construct the values
+ * associated with a token or with any arbitrary node, given its children. If
+ * this functor is used then the resulting module contains factory methods.
  *
  * This module also provides some useful helper functions, like an iterator,
  * a rewriting visitor, and so on.
  *
  *)
 
+open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
 module Operator = Full_fidelity_operator
 
-module type TokenType = sig
-  type t
-  val kind: t -> Full_fidelity_token_kind.t
-  val to_json: t -> Hh_json.json
-end
-
-module type SyntaxValueType = sig
-  type t
-end
-
-(* These functors describe the shape of a parse tree that has a particular
-   kind of token in the leaves, and a particular kind of value associated
-   with each node. *)
 module WithToken(Token: TokenType) = struct
   module WithSyntaxValue(SyntaxValue: SyntaxValueType) = struct
 
-    type t = {
-      syntax : syntax ;
-      value : SyntaxValue.t
-    }
-PARSE_TREE
-    and syntax =
-    | Token                             of Token.t
-    | Missing
-    | SyntaxList                        of t list
-SYNTAX
+    include MakeSyntaxType(Token)(SyntaxValue)
 
     let make syntax value =
       { syntax; value }
@@ -470,8 +522,6 @@ end (* WithToken *)
     filename = full_fidelity_path_prefix ^ "full_fidelity_syntax.ml";
     template = full_fidelity_syntax_template;
     transformations = [
-      { pattern = "PARSE_TREE"; func = to_parse_tree };
-      { pattern = "SYNTAX"; func = to_syntax };
       { pattern = "TO_KIND"; func = to_to_kind };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
       { pattern = "CHILD_LIST_FROM_TYPE"; func = to_child_list_from_type };
@@ -2550,6 +2600,7 @@ end
 end (* GenerateFFPositionedSyntax *)
 
 let () =
+  generate_file GenerateFFSyntaxType.full_fidelity_syntax_type;
   generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;

@@ -228,12 +228,8 @@ slow/constant/true_false_null.php
 slow/constant_function/1621.php
 slow/constant_function/1622.php
 slow/constructor/1719.php
-slow/constructor/1721.php
-slow/constructor/1722.php
 slow/constructor/ctor-compat-1.php
 slow/constructor/ctor-compat-2.php
-slow/constructor/ctor-compat-case-insensitve.php
-slow/constructor/ctor_name_clash.php
 slow/continue_statement/1416.php
 slow/continue_statement/badexp.php
 slow/continue_statement/zero.php
@@ -267,7 +263,6 @@ slow/dom_document/1674.php
 slow/dom_document/1675.php
 slow/dom_document/1676.php
 slow/dom_document/1677.php
-slow/dom_document/1678.php
 slow/dom_document/classnames.php
 slow/dom_document/copy_props.php
 slow/dom_document/import_simlexml.php
@@ -532,7 +527,6 @@ slow/general_functions/mkdir-recursive.php
 slow/get_class/1455.php
 slow/get_class/1456.php
 slow/get_defined_functions-IDLvsHNI.php
-slow/get_parent_class/1457.php
 slow/global_vars/global_vars.php
 slow/goto/1912.php
 slow/goto/1914.php
@@ -686,7 +680,6 @@ slow/keyset/memoize.php
 slow/labels/73.php
 slow/labels/74.php
 slow/labels/75.php
-slow/lang/FPushClsMethod.php
 slow/lang/async_generators.php
 slow/lang/bitop_types.php
 slow/lang/cuf.php
@@ -757,7 +750,6 @@ slow/namespace/hashbang.php
 slow/namespace/hashbang_2.php
 slow/namespace/instanceof.php
 slow/namespace/nested-ns.php
-slow/new_object_expression/780.php
 slow/non-string-sprop.php
 slow/now_doc/1906.php
 slow/now_doc/1907.php
@@ -786,7 +778,6 @@ slow/object_invoke_method/773.php
 slow/object_magic_method/748.php
 slow/object_magic_method/750.php
 slow/object_magic_method/754.php
-slow/object_magic_method/call_class.php
 slow/object_magic_method/override_magic2.php
 slow/object_method/724.php
 slow/object_method/732.php
@@ -1055,8 +1046,6 @@ slow/reassign_this/1495.php
 slow/reassign_this/1496.php
 slow/redeclared_classes/1462.php
 slow/redeclared_classes/1463.php
-slow/redeclared_classes/1464.php
-slow/redeclared_classes/1465.php
 slow/redeclared_classes/1466.php
 slow/redeclared_classes/1467.php
 slow/redeclared_classes/1469.php
@@ -1084,7 +1073,6 @@ slow/reflection/ReflectionType-detailed-explicit-php7.php
 slow/reflection/ReflectionType-detailed.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/child_parent_property_ordering.php
-slow/reflection/class_constructors.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
 slow/reflection/closure_static_locals.php
@@ -1202,7 +1190,6 @@ slow/traits/1989.php
 slow/traits/1990.php
 slow/traits/1991.php
 slow/traits/1992.php
-slow/traits/1997.php
 slow/traits/2003.php
 slow/traits/2004.php
 slow/traits/2006.php
@@ -1219,7 +1206,6 @@ slow/traits/2021.php
 slow/traits/2023.php
 slow/traits/2024.php
 slow/traits/2025.php
-slow/traits/2026.php
 slow/traits/2027.php
 slow/traits/2028.php
 slow/traits/2029.php
@@ -1272,7 +1258,6 @@ slow/traits/2112.php
 slow/traits/2606_simple.php
 slow/traits/__class__.php
 slow/traits/abstract-final-override.php
-slow/traits/constructor_reflection6.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
 slow/traits/self_resolution.php
@@ -1385,7 +1370,6 @@ slow/vec/bad-type-conversion.php
 slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/vec/memoize.php
-slow/volatile/1215.php
 slow/volatile/1216.php
 slow/volatile/1221.php
 slow/volatile/1222.php
@@ -1400,7 +1384,6 @@ slow/xhp/enum_trailing_comma.php
 slow/xhp/nullable_types.php
 slow/xhp/xhp-attr-array-with-typeargs.php
 slow/xhp/xhpchild.php
-slow/xml/1667.php
 slow/xml/print_r.php
 slow/yield/2145.php
 slow/yield/2156.php

@@ -139,7 +139,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   fun ast_class ->
   let class_attributes =
     Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
-  let class_name, _ =
+  let class_id, _ =
     Hhbc_id.Class.elaborate_id
     ast_class.Ast.c_namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
@@ -208,11 +208,18 @@ let from_ast : A.class_ -> Hhas_class.t =
   let is_closure_class =
     String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let has_constructor_or_invoke = List.exists class_body
-    (fun elt -> match elt with
-                | A.Method { A.m_name; _} ->
-                  snd m_name = SN.Members.__construct ||
-                  snd m_name = "__invoke" && is_closure_class
-                | _ -> false)
+    (fun elt ->
+      match elt with
+      | A.Method m ->
+        let method_name = snd m.A.m_name in
+        (* HasConstructor in HHVM *)
+        method_name = SN.Members.__construct ||
+        (* ClassNameConstructor in HHVM *)
+        not class_is_trait
+          && method_name = Hhbc_id.Class.to_raw_string class_id ||
+        is_closure_class
+          && method_name = "__invoke"
+      | _ -> false)
   in
   let additional_methods = [] in
   let additional_methods =
@@ -337,14 +344,14 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_methods = class_methods @ additional_methods in
   let class_type_constants =
     List.filter_map class_body from_class_elt_typeconsts in
-  let info = Emit_memoize_method.make_info ast_class class_name methods in
+  let info = Emit_memoize_method.make_info ast_class class_id methods in
   let additional_properties = Emit_memoize_method.emit_properties info methods in
   let additional_methods = Emit_memoize_method.emit_wrapper_methods info ast_class methods in
   Hhas_class.make
     class_attributes
     class_base
     class_implements
-    class_name
+    class_id
     class_is_final
     class_is_abstract
     class_is_interface

@@ -4,8 +4,6 @@ quick/ClsCases.php
 quick/EmitOO.php
 quick/FPassC-2.php
 quick/FPassC-eval.php
-quick/FPushCtor.php
-quick/FPushObjMethod.php
 quick/GetVar.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
@@ -212,7 +210,6 @@ quick/parse_type_not_typedef.php
 quick/pcre-crash.php
 quick/pinit.php
 quick/post_try_error.php
-quick/priv5.php
 quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php
 quick/prop_order.php

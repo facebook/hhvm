@@ -99,7 +99,17 @@ TypedValue* zend_wrap_func(ActRec* ar) {
     );
   } catch (...) {
     zend_wrap_func_cleanup();
-    throw;
+    try {
+      throw;
+    } catch (const Exception& e) {
+      throw;
+    } catch (const Object& o) {
+      throw;
+    } catch (std::exception& e) {
+      throw FatalErrorException(0, "Unexpected exception: %s", e.what());
+    } catch (...) {
+      throw FatalErrorException(0, "Unexpected exception");
+    }
   }
   zend_wrap_func_cleanup();
 

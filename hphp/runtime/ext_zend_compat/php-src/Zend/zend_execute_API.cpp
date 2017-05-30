@@ -125,8 +125,6 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, 
 namespace {
   static void zend_handle_cpp_exception(TSRMLS_D)
   {
-    HPHP::ZendExceptionStore::getInstance().setPointer(std::current_exception());
-
     try {
       throw;
     }
@@ -162,6 +160,8 @@ namespace {
           )
         );
     }
+    HPHP::ZendExceptionStore::getInstance().set(
+      HPHP::Object(EG(exception)->tv()->m_data.pobj));
   }
 }
 

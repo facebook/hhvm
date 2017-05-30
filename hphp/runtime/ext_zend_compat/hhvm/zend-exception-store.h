@@ -20,6 +20,7 @@
 #include <exception>
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 namespace HPHP {
 
@@ -28,38 +29,28 @@ struct ZendExceptionStore final : RequestEventHandler {
     return *tl_instance;
   }
 
-  template <class E> void set(E e) {
-    m_ptr = std::make_exception_ptr(e);
-  }
-  void setPointer(std::exception_ptr ptr) {
-    m_ptr = ptr;
+  void set(Object&& e) {
+    m_obj = std::move(e);
   }
   void clear() {
-    m_ptr = nullptr;
+    m_obj.reset();
   }
   void requestInit() override {
   }
   void requestShutdown() override {
     clear();
   }
-  std::exception_ptr get() {
-    return m_ptr;
-  }
   bool empty() {
-    return !m_ptr;
+    return !m_obj;
   }
   void rethrow() {
-    if (m_ptr) {
-      std::exception_ptr p = get();
-      clear();
-      std::rethrow_exception(p);
+    if (m_obj) {
+      throw_object(std::move(m_obj));
     }
   }
 
 private:
-  std::exception_ptr m_ptr;
-  TYPE_SCAN_IGNORE_FIELD(m_ptr); // if a ptr-rich exn is thrown,
-  // it should already have been registered as root with req::root<T>
+  Object m_obj;
   DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
 };
 

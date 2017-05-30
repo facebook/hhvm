@@ -6,9 +6,6 @@ slow/arithmetic/edge_cases.php
 slow/arithmetic/power-grid.php
 slow/array/empty.php
 slow/array_access/436.php
-slow/array_access/foreach.php
-slow/array_access/ratchet_decref_order.php
-slow/array_assignment/510.php
 slow/array_cse/534.php
 slow/array_cse/538.php
 slow/array_cse/543.php
@@ -287,9 +284,6 @@ slow/eval/syntaxerror_string.php
 slow/eval_order/1502.php
 slow/eval_order/1504.php
 slow/eval_order/1505.php
-slow/eval_order/1519.php
-slow/eval_order/1520.php
-slow/eval_order/1522.php
 slow/eval_order/1530.php
 slow/eval_order/1531.php
 slow/eval_order/1532.php
@@ -380,6 +374,7 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
+slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php

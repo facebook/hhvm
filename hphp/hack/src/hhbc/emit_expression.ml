@@ -872,7 +872,7 @@ and emit_dynamic_collection ~transform_to_collection expr es =
           | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
     ]
-  end else if are_all_keys_strings && is_array then begin
+  end else if are_all_keys_strings && is_array && not has_references then begin
     let es =
       List.map es
         ~f:(function

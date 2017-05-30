@@ -10,7 +10,6 @@ slow/array/set_bad_key_dtor2.php
 slow/array_access/436.php
 slow/array_access/foreach.php
 slow/array_access/ratchet_decref_order.php
-slow/array_assignment/510.php
 slow/array_cse/534.php
 slow/array_cse/538.php
 slow/array_cse/543.php
@@ -36,8 +35,6 @@ slow/array_for_each/464.php
 slow/array_for_each/499.php
 slow/array_for_each/501.php
 slow/array_for_each/variable-variable-foreach.php
-slow/array_functions/518.php
-slow/array_functions/519.php
 slow/array_functions/ake-object.php
 slow/array_init/248.php
 slow/array_iterator/439.php
@@ -293,8 +290,6 @@ slow/dynamic_variables/1137.php
 slow/dynamic_variables/1138.php
 slow/dynamic_variables/1139.php
 slow/dynamic_variables/1142.php
-slow/dynamic_variables/1152.php
-slow/dynamic_variables/1153.php
 slow/dynamic_variables/1162.php
 slow/dynamic_variables/1164.php
 slow/dynamic_variables/1165.php
@@ -313,7 +308,6 @@ slow/eval_order/1504.php
 slow/eval_order/1505.php
 slow/eval_order/1519.php
 slow/eval_order/1520.php
-slow/eval_order/1522.php
 slow/eval_order/1530.php
 slow/eval_order/1531.php
 slow/eval_order/1532.php
@@ -333,10 +327,7 @@ slow/ext_apc_iterator/iterator_002.php
 slow/ext_apc_iterator/iterator_003.php
 slow/ext_apc_iterator/iterator_004.php
 slow/ext_apc_iterator/iterator_005.php
-slow/ext_array/array_merge.php
-slow/ext_array/array_merge_recursive.php
 slow/ext_array/array_rand.php
-slow/ext_array/array_replace.php
 slow/ext_array/count-opts.php
 slow/ext_asio/backtrace.php
 slow/ext_bzip2/wrapper.php
@@ -1054,8 +1045,6 @@ slow/redeclared_classes/1478.php
 slow/redeclared_classes/1480.php
 slow/redeclared_classes/1481.php
 slow/redeclared_classes/1482.php
-slow/reference/1070.php
-slow/reference/1088.php
 slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php

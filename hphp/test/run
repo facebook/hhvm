@@ -1604,7 +1604,8 @@ function strip_hhas_file($file) {
       fclose($h);
       return false;
     }
-    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath ") {
+    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath "
+        || substr($s, 0, 7) === ".strict") {
       continue;
     }
     $buf .= $s;
@@ -1980,6 +1981,7 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
+  // Run the Hack code generator
   if (isset($options['run-hh-codegen'])) {
     if (substr($test, -5) === ".hhas") return 'skip';
 
@@ -1992,6 +1994,7 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
+  // Compare the output of Hack code gen with that of HHVM
   if (isset($options['compare-hh-codegen'])) {
     $diff = $test.'.diff';
 
@@ -2004,6 +2007,19 @@ function run_test($options, $test) {
       return false;
     }
     if (contains_nyi_line($hhcg) === true) return 'skip';
+    // Diff the immediate output of the Hack compiler against HHVM
+    strip_hhas_file($hhas);
+    strip_hhas_file($hhcg);
+
+    system("diff -B $hhcg $hhas > $diff", $ret);
+
+    // If identical, don't bother dropping through to roundtrip stage
+    if ($ret === 0) {
+      unlink($diff);
+      return true;
+    }
+
+    // If it failed, do a round-trip through HHVM and try again
     list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $hhcg);
     $hhcg2 = dump_hhas_to_temp($hhvm2, $hhcg);
     $rv = true;
@@ -2019,7 +2035,7 @@ function run_test($options, $test) {
     strip_hhas_file($hhas);
     strip_hhas_file($hhcg2);
 
-    system("diff $hhcg2 $hhas > $diff", $ret);
+    system("diff -B $hhcg2 $hhas > $diff", $ret);
     if ($ret === 0) {
       if ($rv) unlink($diff);
       return $rv;

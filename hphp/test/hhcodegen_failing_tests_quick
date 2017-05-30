@@ -1,14 +1,10 @@
 quick/CGetMVar.php
-quick/Cls.php
 quick/ClsCases.php
 quick/EmitOO.php
 quick/FPassC-2.php
 quick/FPassC-eval.php
 quick/GetVar.php
-quick/IncDecProp.php
-quick/IncDecProp_nopt.php
 quick/Isset.php
-quick/SetOpProp.php
 quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php
@@ -27,7 +23,6 @@ quick/class_abstract_final2.php
 quick/class_abstract_final4.php
 quick/class_abstract_final5.php
 quick/class_constant.php
-quick/class_constant_array.php
 quick/class_constants.php
 quick/class_exists_throw.php
 quick/class_interface_trait_exists.php
@@ -59,11 +54,8 @@ quick/dict/basic-setters.php
 quick/dict/invalid-key.php
 quick/dict/invalid-scalar.php
 quick/dict/oob-key.php
-quick/dict/reflect.php
-quick/dict/static.php
 quick/dict/type-hint.php
 quick/do-while-continue.php
-quick/dv.php
 quick/dv_ab.php
 quick/dv_af.php
 quick/dv_ai.php
@@ -156,7 +148,6 @@ quick/impl_abstract_dv_so.php
 quick/incdec-string.php
 quick/include2.php
 quick/include3.php
-quick/init-basic.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface10.php
@@ -170,8 +161,6 @@ quick/keyset/basic-setters.php
 quick/keyset/invalid-key.php
 quick/keyset/invalid-scalar.php
 quick/keyset/oob-key.php
-quick/keyset/reflect.php
-quick/keyset/static.php
 quick/keyset/type-hint.php
 quick/lambda3.php
 quick/lambda8.php
@@ -224,14 +213,12 @@ quick/redeclared_function.php
 quick/redeclared_method.php
 quick/refcount-static.php
 quick/reflect-default.php
-quick/reflect.php
 quick/reflection2.php
 quick/reflection_static_vars.php
 quick/regpressure.php
 quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
-quick/serialize.php
 quick/short_array_syntax.php
 quick/silencer.php
 quick/simp-conv-to-int-dbl.php
@@ -255,7 +242,6 @@ quick/trailing_comma_bad3.php
 quick/trailing_comma_bad4.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
-quick/trait_property_init.php
 quick/traits.php
 quick/traits2.php
 quick/typechecks-obj.php
@@ -266,8 +252,6 @@ quick/unset_static.php
 quick/unset_varenv.php
 quick/vec/basic-getters.php
 quick/vec/basic-setters.php
-quick/vec/reflect.php
-quick/vec/static.php
 quick/vec/type-hint.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
@@ -278,5 +262,4 @@ quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
 quick/zend_closure_020.php
-quick/zend_indirect_method_call_005.php
 quick/zero_eval_stack_depth.php

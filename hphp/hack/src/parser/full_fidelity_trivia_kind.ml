@@ -17,26 +17,26 @@
   buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
 *)
 type t =
-| WhiteSpace
-| EndOfLine
-| DelimitedComment
-| SingleLineComment
-| Unsafe
-| UnsafeExpression
-| FixMe
-| IgnoreError
-| FallThrough
-| Markup
+  | WhiteSpace
+  | EndOfLine
+  | DelimitedComment
+  | SingleLineComment
+  | Unsafe
+  | UnsafeExpression
+  | FixMe
+  | IgnoreError
+  | FallThrough
+  | Markup
 
 let to_string kind =
   match kind with
-  | WhiteSpace -> "whitespace"
-  | EndOfLine -> "end_of_line"
-  | DelimitedComment -> "delimited_comment"
+  | WhiteSpace        -> "whitespace"
+  | EndOfLine         -> "end_of_line"
+  | DelimitedComment  -> "delimited_comment"
   | SingleLineComment -> "single_line_comment"
-  | Unsafe -> "unsafe"
-  | UnsafeExpression -> "unsafe_expression"
-  | FixMe -> "fix_me"
-  | IgnoreError -> "ignore_error"
-  | FallThrough -> "fall_through"
-  | Markup -> "markup"
+  | Unsafe            -> "unsafe"
+  | UnsafeExpression  -> "unsafe_expression"
+  | FixMe             -> "fix_me"
+  | IgnoreError       -> "ignore_error"
+  | FallThrough       -> "fall_through"
+  | Markup            -> "markup"

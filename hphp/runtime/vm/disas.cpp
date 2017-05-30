@@ -714,9 +714,13 @@ void print_alias(Output& out, const TypeAlias& alias) {
             type_constraint(constraint));
 }
 
-void print_unit_metadata(Output& out, const Unit* unit) {
+void print_unit_strict_types(Output& out, const Unit* unit) {
+  if (!RuntimeOption::PHP7_ScalarTypes) return;
   if (unit->useStrictTypes()) out.fmtln(".strict 1;");
   else out.fmtln(".strict 0;");
+}
+
+void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   for (auto i = size_t{0}; i < unit->numArrays(); ++i) {
@@ -729,6 +733,7 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->filepath());
   out.nl();
+  print_unit_strict_types(out, unit);
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());

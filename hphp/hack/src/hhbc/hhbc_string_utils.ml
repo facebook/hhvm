@@ -37,6 +37,12 @@ end
 
 module Float = struct
   let to_string f = Printf.sprintf "%0.17g" f
+  (* Unfortunately the g flag does not provide enough of a match with hhvm,
+   * hence we go for manual manipulation *)
+  let with_scientific_notation f =
+    if String.contains f 'E' || String.contains f 'e'
+    then Printf.sprintf "%0.1E" (float_of_string f)
+    else f
 end
 
 module Locals = struct

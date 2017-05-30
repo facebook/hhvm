@@ -865,10 +865,10 @@ and string_of_param_default_value expr =
   match snd expr with
   | A.Id (_, litstr)
   | A.Id_type_arguments ((_, litstr), _)
-  | A.Lvar (_, litstr)
-  | A.Float (_, litstr) -> litstr
+  | A.Lvar (_, litstr) -> litstr
+  | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
   | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
-  | A.String (_, litstr) -> "\\\"" ^ litstr ^ "\\\""
+  | A.String (_, litstr) -> SU.quote_string_with_escape litstr
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"

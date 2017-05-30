@@ -15,7 +15,7 @@ let full_fidelity_path_prefix = "hphp/hack/src/parser/"
 module GenerateFFSyntax = struct
 
   let to_parse_tree x =
-    let mapper f = Printf.sprintf "      %s_%s: t;\n" x.prefix f in
+    let mapper (f,_) = Printf.sprintf "      %s_%s: t;\n" x.prefix f in
     let fields = map_and_concat mapper x.fields in
     Printf.sprintf "    and %s = {\n%s    }\n"
       x.type_name fields
@@ -33,29 +33,29 @@ module GenerateFFSyntax = struct
       x.type_name x.kind_name
 
   let to_child_list_from_type x =
-    let mapper1 f = Printf.sprintf "      %s_%s;\n" x.prefix f in
-    let mapper2 f = Printf.sprintf "      %s_%s" x.prefix f in
+    let mapper1 (f,_) = Printf.sprintf "      %s_%s;\n" x.prefix f in
+    let mapper2 (f,_) = Printf.sprintf "      %s_%s" x.prefix f in
     let fields1 = map_and_concat mapper1 x.fields in
     let fields2 = String.concat ",\n" (List.map mapper2 x.fields) in
     Printf.sprintf "    let get_%s_children {\n%s    } = (\n%s\n    )\n\n"
       x.type_name fields1 fields2
 
   let to_children x =
-    let mapper f = Printf.sprintf "        %s_%s;\n" x.prefix f in
+    let mapper (f,_) = Printf.sprintf "        %s_%s;\n" x.prefix f in
     let fields = map_and_concat mapper x.fields in
     Printf.sprintf "      | %s {\n%s      } -> [\n%s      ]\n"
       x.kind_name fields fields
 
   let to_children_names x =
-    let mapper1 f = Printf.sprintf "        %s_%s;\n" x.prefix f in
-    let mapper2 f = Printf.sprintf "        \"%s_%s\";\n" x.prefix f in
+    let mapper1 (f,_) = Printf.sprintf "        %s_%s;\n" x.prefix f in
+    let mapper2 (f,_) = Printf.sprintf "        \"%s_%s\";\n" x.prefix f in
     let fields1 = map_and_concat mapper1 x.fields in
     let fields2 = map_and_concat mapper2 x.fields in
     Printf.sprintf "      | %s {\n%s      } -> [\n%s      ]\n"
       x.kind_name fields1 fields2
 
   let to_syntax_from_children x =
-    let mapper f = Printf.sprintf "          %s_%s;\n" x.prefix f in
+    let mapper (f,_) = Printf.sprintf "          %s_%s;\n" x.prefix f in
     let fields = map_and_concat mapper x.fields in
     Printf.sprintf "      | (SyntaxKind.%s, [
 %s        ]) ->
@@ -65,8 +65,8 @@ module GenerateFFSyntax = struct
       x.kind_name fields x.kind_name fields
 
   let to_constructor_methods x =
-    let mapper1 f = Printf.sprintf "      %s_%s\n" x.prefix f in
-    let mapper2 f = Printf.sprintf "        %s_%s;\n" x.prefix f in
+    let mapper1 (f,_) = Printf.sprintf "      %s_%s\n" x.prefix f in
+    let mapper2 (f,_) = Printf.sprintf "        %s_%s;\n" x.prefix f in
     let fields1 = map_and_concat mapper1 x.fields in
     let fields2 = map_and_concat mapper2 x.fields in
     Printf.sprintf "    let make_%s
@@ -603,36 +603,36 @@ module GenerateFFJavaScript = struct
 " trivia_kind trivia_text trivia_kind
 
   let to_editable_syntax x =
-    let ctor_mapper f = f in
+    let ctor_mapper (f,_) = f in
     let ctor = map_and_concat_separated ",\n    " ctor_mapper x.fields in
     let ctor2 = map_and_concat_separated ",\n        " ctor_mapper x.fields in
-    let children_mapper f = Printf.sprintf "%s: %s" f f in
+    let children_mapper (f,_) = Printf.sprintf "%s: %s" f f in
     let children =
       map_and_concat_separated ",\n      " children_mapper x.fields in
-    let props_mapper f =
+    let props_mapper (f,_) =
       Printf.sprintf "get %s() { return this.children.%s; }" f f in
     let props = map_and_concat_separated "\n  " props_mapper x.fields in
-    let withs_mapper f =
-      let inner_mapper f_inner =
+    let withs_mapper (f,_) =
+      let inner_mapper (f_inner,_) =
         let prefix = if f_inner = f then "" else "this." in
         Printf.sprintf "%s%s" prefix f_inner in
       let inner = map_and_concat_separated ",\n      " inner_mapper x.fields in
       Printf.sprintf "with_%s(%s){\n    return new %s(\n      %s);\n  }"
         f f x.kind_name inner in
     let withs = map_and_concat_separated "\n  " withs_mapper x.fields in
-    let rewriter_mapper f =
+    let rewriter_mapper (f,_) =
       Printf.sprintf "var %s = this.%s.rewrite(rewriter, new_parents);" f f in
     let rewriter =
       map_and_concat_separated "\n    " rewriter_mapper x.fields in
-    let condition_mapper f = Printf.sprintf "%s === this.%s" f f in
+    let condition_mapper (f,_) = Printf.sprintf "%s === this.%s" f f in
     let condition =
       map_and_concat_separated " &&\n      " condition_mapper x.fields in
-    let json_mapper f = Printf.sprintf
+    let json_mapper (f,_) = Printf.sprintf
       "let %s = EditableSyntax.from_json(
       json.%s_%s, position, source);
     position += %s.width;" f x.prefix f f in
     let json = map_and_concat_separated "\n    " json_mapper x.fields in
-    let keys_mapper f = Printf.sprintf "'%s'" f in
+    let keys_mapper (f,_) = Printf.sprintf "'%s'" f in
     let keys = map_and_concat_separated ",\n        " keys_mapper x.fields in
     Printf.sprintf
 "class %s extends EditableSyntax
@@ -1304,25 +1304,25 @@ module GenerateFFHack = struct
 
 
   let to_editable_syntax x =
-    let ctor_mapper f = Printf.sprintf "EditableSyntax $%s" f in
+    let ctor_mapper (f,_) = Printf.sprintf "EditableSyntax $%s" f in
     let ctor = map_and_concat_separated ",\n    " ctor_mapper x.fields in
-    let ctor2_mapper f = Printf.sprintf "$%s" f in
+    let ctor2_mapper (f,_) = Printf.sprintf "$%s" f in
     let ctor2 = map_and_concat_separated ",\n        " ctor2_mapper x.fields in
-    let props_mapper f =
+    let props_mapper (f,_) =
       Printf.sprintf "private EditableSyntax $_%s;" f in
     let props = map_and_concat_separated "\n  " props_mapper x.fields in
-    let getters_mapper f =
+    let getters_mapper (f,_) =
       Printf.sprintf "public function %s(): EditableSyntax {
     return $this->_%s;
   }" f f in
     let getters = map_and_concat_separated "\n  " getters_mapper x.fields in
 
-    let assignments_mapper f =
+    let assignments_mapper (f,_) =
       Printf.sprintf "$this->_%s = $%s;" f f in
     let assignments = map_and_concat_separated
       "\n    " assignments_mapper x.fields in
-    let withs_mapper f =
-      let inner_mapper f_inner =
+    let withs_mapper (f,_) =
+      let inner_mapper (f_inner,_) =
         let prefix = if f_inner = f then "$" else "$this->_" in
         Printf.sprintf "%s%s" prefix f_inner in
       let inner = map_and_concat_separated ",\n      " inner_mapper x.fields in
@@ -1332,19 +1332,19 @@ module GenerateFFHack = struct
   }"
         f f x.kind_name x.kind_name inner in
     let withs = map_and_concat_separated "\n  " withs_mapper x.fields in
-    let rewriter_mapper f =
+    let rewriter_mapper (f,_) =
       Printf.sprintf "$%s = $this->%s()->rewrite($rewriter, $new_parents);" f f in
     let rewriter =
       map_and_concat_separated "\n    " rewriter_mapper x.fields in
-    let condition_mapper f = Printf.sprintf "$%s === $this->%s()" f f in
+    let condition_mapper (f,_) = Printf.sprintf "$%s === $this->%s()" f f in
     let condition =
       map_and_concat_separated " &&\n      " condition_mapper x.fields in
-    let json_mapper f = Printf.sprintf
+    let json_mapper (f,_) = Printf.sprintf
       "$%s = EditableSyntax::from_json(
       $json->%s_%s, $position, $source);
     $position += $%s->width();" f x.prefix f f in
     let json = map_and_concat_separated "\n    " json_mapper x.fields in
-    let children_mapper f = Printf.sprintf "yield $this->_%s;" f in
+    let children_mapper (f,_) = Printf.sprintf "yield $this->_%s;" f in
     let children =
       map_and_concat_separated "\n    " children_mapper x.fields in
     Printf.sprintf
@@ -2458,13 +2458,13 @@ end
   let to_convert_cases x =
     let open Printf in
     let fields, first, other =
-      match List.map (sprintf "%s_%s" x.prefix) x.fields with
+      match List.map (fun (f,_) -> sprintf "%s_%s" x.prefix f) x.fields with
       | (first :: other) as fields -> fields, first, other
       | _ -> raise (No_fields_in_schema_node x)
     in
     let fields =
       String.concat "\n        ; " @@
-        List.map (sprintf "M.%s_%s" x.prefix) x.fields
+        List.map (fun (f,_) -> sprintf "M.%s_%s" x.prefix f) x.fields
     in
     let todos =
       String.concat "" @@
@@ -2485,7 +2485,7 @@ end
 
   let to_build_cases x =
     let open Printf in
-    let fields = List.map (sprintf "%s_%s" x.prefix) x.fields in
+    let fields = List.map (fun (f,_) -> sprintf "%s_%s" x.prefix f) x.fields in
     sprintf
 "      | SyntaxKind.%s
       , (  %s

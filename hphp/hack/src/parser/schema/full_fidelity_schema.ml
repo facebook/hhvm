@@ -16,13 +16,7 @@ hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
 and use that standard. *)
 
-type schema_node = {
-  kind_name : string;
-  type_name : string;
-  description : string;
-  prefix : string;
-  fields : string list
-}
+include Schema_definition
 
 type trivia_node = {
   trivia_kind : string;
@@ -63,12 +57,6 @@ type template_file =
   trivia_transformations : trivia_transformation list;
 }
 
-let from_list l =
-  match l with
-  | kind_name :: type_name :: description :: prefix :: fields ->
-    { kind_name; type_name; description; prefix; fields }
-  | _ -> failwith "bad schema"
-
 let token_node_from_list l =
   match l with
   | [ token_kind; token_text ] ->
@@ -80,9 +68,6 @@ let trivia_node_from_list l =
   | [ trivia_kind; trivia_text ] ->
     { trivia_kind; trivia_text }
   | _ -> failwith "bad trivia schema"
-
-include Schema_definition
-let schema = List.map from_list schema
 
 let variable_text_tokens = List.map token_node_from_list [
   [ "ErrorToken"; "error_token" ];
@@ -359,7 +344,7 @@ module GenerateFFJSONSchema = struct
     x.token_kind
 
   let to_json_ast_nodes x =
-    let mapper f = Printf.sprintf
+    let mapper (f,_) = Printf.sprintf
 "{ \"field_name\" : \"%s\" }" f in
     let fields = String.concat ",\n        " (List.map mapper x.fields) in
     Printf.sprintf

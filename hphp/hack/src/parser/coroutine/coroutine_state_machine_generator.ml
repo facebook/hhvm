@@ -643,13 +643,23 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_echo_statement; ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    | UnsetStatement ({ unset_variables; _; } as node) ->
+        let next_label, prefix_statements, unset_variables =
+          extract_suspend_statements_and_gather_rewrite_data_for_expressions
+            next_label
+            unset_variables in
+        let unset_variables = make_delimited_list comma_syntax unset_variables in
+        let new_unset_statement =
+          make_syntax (UnsetStatement { node with unset_variables; }) in
+        let statements = prefix_statements @ [ new_unset_statement; ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     (* while-condition constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | WhileStatement _
     (* for constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | ForStatement _
-    | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
     (* Suspends will be handled recursively by compound statement's children. *)
     | CompoundStatement _
     (* Suspends will be handled recursively by try statements's children. *)

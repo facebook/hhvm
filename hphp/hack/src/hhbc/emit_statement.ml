@@ -730,6 +730,7 @@ let emit_dropthrough_return () =
 let rec emit_final_statement env s =
   match s with
   | A.Throw _ | A.Return _ | A.Goto _
+  | A.Expr (_, A.Yield_break)
   | A.Expr (_, A.Call ((_, A.Id (_, "exit")), _, _))
   | A.Expr (_, A.Id (_, "exit")) ->
     emit_stmt env s

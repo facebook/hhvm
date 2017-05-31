@@ -722,9 +722,9 @@ and emit_define env s e =
     instr_defcns s;
   ]
 
-and emit_eval s =
+and emit_eval env e =
   gather [
-    instr_string s;
+    emit_expr ~need_ref:false env e;
     instr_eval;
   ]
 
@@ -786,8 +786,8 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_idx env es
   | A.Call ((_, A.Id (_, "define")), [(_, A.String (_, s)); e], _) ->
     emit_box_if_necessary need_ref @@ emit_define env s e
-  | A.Call ((_, A.Id (_, "eval")), [(_, A.String (_, s))], _) ->
-    emit_box_if_necessary need_ref @@ emit_eval s
+  | A.Call ((_, A.Id (_, "eval")), [expr], _)->
+    emit_box_if_necessary need_ref @@ emit_eval env expr
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
@@ -1813,6 +1813,14 @@ and emit_lval_op env op expr1 opt_expr2 =
       let rhs_instrs, rhs_stack_size =
         match opt_expr2 with
         | None -> empty, 0
+        | Some (_, A.Yield af) ->
+          let temp = Local.get_unnamed_local () in
+          gather [
+            emit_yield env af;
+            instr_setl temp;
+            instr_popc;
+            instr_pushl temp;
+          ], 1
         | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
       in
       emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size

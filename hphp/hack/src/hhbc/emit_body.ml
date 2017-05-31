@@ -125,7 +125,9 @@ let emit_body
   Emit_statement.set_default_return_value return_value;
   Emit_statement.set_return_by_ref is_return_by_ref;
   let params =
-    Emit_param.from_asts ~namespace ~tparams ~generate_defaults:(not is_memoize) params in
+    Emit_param.from_asts
+      ~namespace ~tparams ~generate_defaults:(not is_memoize) params
+  in
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params body in
@@ -140,7 +142,7 @@ let emit_body
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter env params
   in
-  let (is_generator, is_pair_generator) = is_function_generator stmt_instrs in
+  let is_generator, is_pair_generator = Generator.is_function_generator body in
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in

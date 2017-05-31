@@ -340,15 +340,6 @@ let extract_fault_instructions instrseq =
      be reversed to get the correct order *)
   gather (List.rev @@ aux instrseq [])
 
-(* Returns a tuple of is_generator and is_pair_generator *)
-let is_function_generator instrseq =
-  InstrSeq.fold_left
-    instrseq
-    ~init:(false, false)
-    ~f:(fun (b, b_p) i ->
-      ((b || i = IGenerator Yield || i = IGenerator YieldK),
-      b_p || i = IGenerator YieldK))
-
 let get_num_cls_ref_slots instrseq =
   InstrSeq.fold_left
     instrseq

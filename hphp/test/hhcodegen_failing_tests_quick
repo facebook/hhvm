@@ -46,7 +46,6 @@ quick/ctor_param_promotion_generic1.php
 quick/ctor_param_promotion_interface.php
 quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
-quick/debug_backtrace_continuation.php
 quick/defaultVals.php
 quick/dict/basic-getters.php
 quick/dict/basic-setters.php
@@ -70,7 +69,6 @@ quick/dv_if.php
 quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
-quick/eval.php
 quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php

@@ -564,9 +564,7 @@ slow/hhbbc/func_family_009.php
 slow/hhbbc/func_family_012.php
 slow/hhbbc/instanceof_obj.php
 slow/hhbbc/jmp_local_001.php
-slow/hhbbc/jmp_local_005.php
 slow/hhbbc/jmp_local_006.php
-slow/hhbbc/jmp_type_003.php
 slow/hhbbc/magic_builtin_interfaces.php
 slow/hhbbc/magic_call_012.php
 slow/hhbbc/magic_call_014.php
@@ -591,7 +589,6 @@ slow/hhbbc/static_props_007.php
 slow/hhbbc/static_props_011.php
 slow/hhbbc/trait_generator_closure_002.php
 slow/hint/2187.php
-slow/hint/2191.php
 slow/hint/2193.php
 slow/hni/coerce_dtor_order.php
 slow/if_statement/else-if-greedy-parse.php
@@ -963,7 +960,6 @@ slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/ReflectionClass_toString_001.php
 slow/reflection/ReflectionMethod_getPrototype2.php
-slow/reflection/ReflectionParameter-basic.php
 slow/reflection/ReflectionParameter-isDefaultConstantValue.php
 slow/reflection/ReflectionType-basic-explicit-php7.php
 slow/reflection/ReflectionType-detailed-explicit-php7.php

@@ -16,6 +16,7 @@ val fmt_hint :
 
 val hint_to_type_info :
   skipawaitable: bool ->
+  nullable: bool ->
   always_extended: bool ->
   tparams: string list ->
   namespace: Namespace_env.env ->

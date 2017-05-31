@@ -122,13 +122,18 @@ match h with
     ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
   TC.make tc_name tc_flags
 
-let hint_to_type_info ~skipawaitable ~always_extended ~tparams ~namespace h =
+let hint_to_type_info
+  ~skipawaitable ~nullable ~always_extended ~tparams ~namespace h =
   let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace h in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags =
     if always_extended && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
+    else tc_flags in
+  let tc_flags =
+    if nullable
+    then List.dedup (TC.Nullable :: tc_flags)
     else tc_flags in
   let type_info_user_type = Some (fmt_hint ~tparams ~namespace h) in
   let type_info_type_constraint = TC.make tc_name tc_flags in

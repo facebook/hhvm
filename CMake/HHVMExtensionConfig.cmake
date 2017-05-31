@@ -951,7 +951,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${MYSQL_CLIENT_LIBS})
     endif()
   elseif (${libraryName} STREQUAL "pgsql")
-    FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
+    FIND_PATH(PGSQL_INCLUDE_DIR NAMES pg_config.h
       PATHS
         /usr/include
         /usr/include/postgresql

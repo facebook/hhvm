@@ -71,7 +71,6 @@ slow/async/simple_blocked.php
 slow/async/simple_func.php
 slow/async/simple_meth.php
 slow/async/simple_meth_static.php
-slow/authmode/eval.php
 slow/autoload/autoload_set_paths_maps.php
 slow/autoload/spl_autoload_register_class_private_array_object.php
 slow/autoload/spl_autoload_register_class_private_array_string.php
@@ -269,13 +268,8 @@ slow/dynamic_variables/1165.php
 slow/error_handler/1369.php
 slow/error_handler/1371.php
 slow/error_handler/1500.php
-slow/eval/exit.php
-slow/eval/no_exit.php
-slow/eval/return_null.php
-slow/eval/return_true.php
 slow/eval/silenced_exit.php
 slow/eval/silenced_no_exit.php
-slow/eval/syntaxerror_string.php
 slow/eval_order/1502.php
 slow/eval_order/1504.php
 slow/eval_order/1505.php
@@ -369,7 +363,6 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
-slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php
@@ -392,9 +385,7 @@ slow/ext_wddx/bug37587.php
 slow/ext_wddx/bug41527.php
 slow/ext_wddx/malformed.php
 slow/ext_weakref/weakref_destroy_in_dtor.php
-slow/ext_xdebug/call_line.php
 slow/ext_xdebug/get_code_coverage.php
-slow/ext_xdebug/get_declared_vars.php
 slow/ext_xdebug/get_function_stack.php
 slow/ext_xdebug/get_function_stack_noparams.php
 slow/ext_xdebug/max_nesting_level_0.php

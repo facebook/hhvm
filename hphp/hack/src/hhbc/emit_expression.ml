@@ -32,7 +32,7 @@ module LValOp = struct
 end
 
 let special_functions =
-  ["isset"; "empty"; "tuple"; "idx"; "define"]
+  ["isset"; "empty"; "tuple"; "idx"; "define"; "eval"]
 
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
@@ -716,6 +716,18 @@ and emit_idx env es =
     instr_idx;
   ]
 
+and emit_define env s e =
+  gather [
+    emit_expr ~need_ref:false env e;
+    instr_defcns s;
+  ]
+
+and emit_eval s =
+  gather [
+    instr_string s;
+    instr_eval;
+  ]
+
 and emit_expr env expr ~need_ref =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -772,12 +784,10 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_tuple env p es
   | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx es ->
     emit_box_if_necessary need_ref @@ emit_idx env es
-  | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
-    emit_box_if_necessary need_ref @@ gather [
-      emit_expr ~need_ref:false env expr2;
-      instr (IIncludeEvalDefine
-        (DefCns (Hhbc_id.Const.from_raw_string (snd s))))
-    ]
+  | A.Call ((_, A.Id (_, "define")), [(_, A.String (_, s)); e], _) ->
+    emit_box_if_necessary need_ref @@ emit_define env s e
+  | A.Call ((_, A.Id (_, "eval")), [(_, A.String (_, s))], _) ->
+    emit_box_if_necessary need_ref @@ emit_eval s
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs

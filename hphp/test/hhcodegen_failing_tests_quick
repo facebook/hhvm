@@ -71,7 +71,6 @@ quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
 quick/eval.php
-quick/eval_noreturn.php
 quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php
@@ -143,7 +142,6 @@ quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_so.php
 quick/incdec-string.php
 quick/include2.php
-quick/include3.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface11.php

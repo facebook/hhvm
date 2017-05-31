@@ -224,6 +224,9 @@ let instr_defcls =
   (* This id will not be used, code generator will use value from the counter *)
   let id = Hhbc_id.Class.from_raw_string "" in
   instr (IIncludeEvalDefine (DefCls id))
+let instr_defcns s =
+  instr (IIncludeEvalDefine (DefCns (Hhbc_id.Const.from_raw_string s)))
+let instr_eval = instr (IIncludeEvalDefine Eval)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

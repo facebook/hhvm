@@ -17,6 +17,24 @@ module TokenKind = Full_fidelity_token_kind
 open EditableSyntax
 open CoroutineSyntax
 
+type label =
+  | StateLabel of int
+  | ErrorStateLabel
+
+let get_label_string = function
+  | StateLabel number -> Printf.sprintf "state_label_%d" number
+  | ErrorStateLabel -> "state_label_error"
+
+let get_label_name label =
+  make_token_syntax TokenKind.Name (get_label_string label)
+
+let make_label_declaration_syntax label =
+  CoroutineSyntax.make_label_declaration_syntax (get_label_name label)
+
+let make_goto_statement_syntax label =
+  CoroutineSyntax.make_goto_statement_syntax (get_label_name label)
+
+
 (*
 Consider a coroutine such as
 coroutine function foo() : void {
@@ -266,7 +284,8 @@ let extract_suspend_statements node next_label =
             coroutine_data_variable
             call_get_result_syntax in
 
-        let declare_next_label_syntax = goto_label_syntax next_label in
+        let declare_next_label_syntax =
+          make_label_declaration_syntax (StateLabel next_label) in
 
         let coroutine_result_data_variable =
           make_coroutine_result_data_variable next_label in
@@ -473,12 +492,41 @@ let rewrite_suspends node =
         next_label, Rewriter.Result.Keep in
   Rewriter.aggregating_rewrite_post rewrite_statements node 1
 
+(* case 0: goto state_label_0; *)
+let make_switch_section_syntax number =
+  let label = make_int_case_label_syntax number in
+  let statement = make_goto_statement_syntax (StateLabel number) in
+  let fallthrough = make_missing() in
+  make_switch_section label statement fallthrough
+
+let default_section_syntax =
+  let statement = make_goto_statement_syntax ErrorStateLabel in
+  make_switch_section default_label_syntax statement (make_missing())
+
+let make_switch_sections number =
+  let rec aux n acc =
+    if n < 0 then acc
+    else aux (n - 1) ((make_switch_section_syntax n) :: acc) in
+  make_list (aux number [ default_section_syntax ])
+
+(*
+  switch($closure->nextLabel) {
+    case 0: goto state_label_0;
+    ...
+    default: goto labelerror;
+  } *)
+let make_coroutine_switch label_count =
+  let sections = make_switch_sections label_count in
+  make_switch_statement switch_keyword_syntax left_paren_syntax
+    label_syntax right_paren_syntax left_brace_syntax sections
+    right_brace_syntax
+
 let add_switch (next_label, body) =
   make_compound_statement_syntax [
     make_coroutine_switch (next_label - 1);
-    goto_label_syntax 0;
+    make_label_declaration_syntax (StateLabel 0);
     body;
-    error_label_syntax;
+    make_label_declaration_syntax ErrorStateLabel;
     throw_unimplemented_syntax "A completed coroutine was resumed.";
   ]
 

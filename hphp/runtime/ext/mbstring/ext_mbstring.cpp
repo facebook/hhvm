@@ -28,12 +28,13 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+#include <map>
+
 extern "C" {
 #include <mbfl/mbfl_convert.h>
 #include <mbfl/mbfilter.h>
 #include <mbfl/mbfilter_pass.h>
 #include <oniguruma.h>
-#include <map>
 }
 
 #define php_mb_re_pattern_buffer   re_pattern_buffer
@@ -218,8 +219,8 @@ struct MBGlobals final : RequestEventHandler {
     strict_detection(0),
     illegalchars(0),
     outconv(nullptr),
-    default_mbctype(ONIG_ENCODING_EUC_JP),
-    current_mbctype(ONIG_ENCODING_EUC_JP),
+    default_mbctype(ONIG_ENCODING_UTF8),
+    current_mbctype(ONIG_ENCODING_UTF8),
     search_pos(0),
     search_re((php_mb_regex_t*)nullptr),
     search_regs((OnigRegion*)nullptr),

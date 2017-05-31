@@ -150,6 +150,49 @@ let rewrite_locals_and_params_into_closure_variables node =
   body, locals_and_params
 
 (**
+ * Recursively rewrites do-while constructs into while constructs.
+ *
+ *   do {
+ *     body
+ *   } while (condition);
+ *
+ * Becomes
+ *
+ *   goto loop_label_#;
+ *   while (condition) {
+ *     loop_label_#:
+ *     body
+ *   }
+ *)
+let rewrite_do next_loop_label node =
+  let rewrite node next_loop_label =
+    match syntax node with
+    | DoStatement { do_condition; do_body; _; } ->
+        let loop_label = LoopLabel next_loop_label in
+        let next_loop_label = next_loop_label + 1 in
+
+        let goto_statement_syntax = make_goto_statement_syntax loop_label in
+
+        let new_while_statement_syntax =
+          make_while_syntax
+            do_condition
+            [
+              make_label_declaration_syntax loop_label;
+              do_body;
+            ] in
+
+        let statements =
+          make_compound_statement_syntax
+            [
+              goto_statement_syntax;
+              new_while_statement_syntax;
+            ] in
+        next_loop_label, Rewriter.Result.Replace statements
+    | _ ->
+        next_loop_label, Rewriter.Result.Keep in
+  Rewriter.aggregating_rewrite_post rewrite node next_loop_label
+
+(**
  * Recursively rewrites while-condition statements into
  * while-true-with-if-condition constructs.
  *
@@ -583,18 +626,6 @@ let rewrite_suspends node =
     | IfStatement node ->
       let (next_label, statements) = rewrite_if_statement next_label node in
       next_label, Rewriter.Result.Replace statements
-
-    (* The suspension result(s) are made into variable(s) that occur at the end
-       of the do_statement's body. The do_condition checks against that
-      variable. *)
-    | DoStatement ({ do_body; do_condition; _; } as node) ->
-        let (next_label, prefix_statements), do_condition =
-          extract_suspend_statements do_condition next_label in
-        let do_body =
-          make_compound_statement_syntax (do_body :: prefix_statements) in
-        let new_do =
-          make_syntax (DoStatement { node with do_condition; do_body; }) in
-        next_label, Rewriter.Result.Replace new_do
     | ExpressionStatement ({ expression_statement_expression; _; } as node) ->
         let (next_label, prefix_statements), expression_statement_expression =
           extract_suspend_statements
@@ -660,6 +691,9 @@ let rewrite_suspends node =
     (* for constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | ForStatement _
+    (* do-while constructs should have already been rewritten into
+       while-true-with-if-condition constructs. *)
+    | DoStatement _
     (* Suspends will be handled recursively by compound statement's children. *)
     | CompoundStatement _
     (* Suspends will be handled recursively by try statements's children. *)
@@ -742,10 +776,14 @@ let unnest_compound_statements node =
   Rewriter.rewrite_post rewrite node
 
 let lower_body body =
+  let next_loop_label, body =
+    body
+      |> add_missing_return
+      |> rewrite_do 0 in
+
   body
-    |> add_missing_return
     |> rewrite_while
-    |> rewrite_for 0
+    |> rewrite_for next_loop_label
     |> snd
     |> rewrite_suspends
     |> add_switch

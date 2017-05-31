@@ -8,7 +8,7 @@
  *
  *)
 
-type aggregate_types =
+type aggregate_type =
   | TopLevelDeclaration
   | Expression
   | Specifier
@@ -21,36 +21,10 @@ type aggregate_types =
   | NamespaceInternals
   | TODO
 
-let string_of_aggregate_type = function
-  | TopLevelDeclaration    -> "TopLevelDeclaration"
-  | Expression             -> "Expression"
-  | Specifier              -> "Specifier"
-  | Parameter              -> "Parameter"
-  | ClassBodyDeclaration   -> "ClassBodyDeclaration"
-  | Statement              -> "Statement"
-  | SwitchLabel            -> "SwitchLabel"
-  | LambdaBody             -> "LambdaBody"
-  | ConstructorExpression  -> "ConstructorExpression"
-  | NamespaceInternals     -> "NamespaceInternals"
-  | TODO                   -> "TODO"
-
-let aggregate_type_name = function
-  | TopLevelDeclaration    -> "top_level_declaration"
-  | Expression             -> "expression"
-  | Specifier              -> "specifier"
-  | Parameter              -> "parameter"
-  | ClassBodyDeclaration   -> "class_body_declaration"
-  | Statement              -> "statement"
-  | SwitchLabel            -> "switch_label"
-  | LambdaBody             -> "lambda_body"
-  | ConstructorExpression  -> "constructor_expression"
-  | NamespaceInternals     -> "namespace_internals"
-  | TODO                   -> "todo_aggregate"
-
 type child_spec =
   | Token (* Special case, since it's so common, synonym of `Just "Token"` *)
   | Just       of string
-  | Aggregate  of aggregate_types
+  | Aggregate  of aggregate_type
   | ZeroOrMore of child_spec
   | ZeroOrOne  of child_spec
 
@@ -60,7 +34,7 @@ type schema_node =
   ; func_name   : string
   ; description : string
   ; prefix      : string
-  ; aggregates  : aggregate_types list
+  ; aggregates  : aggregate_type list
   ; fields      : (string * child_spec) list
   }
 
@@ -1865,6 +1839,106 @@ let schema : schema_node list =
       ]
     }
   ]
+
+(******************************************************************************(
+ * Utilities for aggregate types
+)******************************************************************************)
+let generated_aggregate_types =
+  [ TopLevelDeclaration
+  ; Expression
+  ; Specifier
+  ; Parameter
+  ; ClassBodyDeclaration
+  ; Statement
+  ; SwitchLabel
+  ; LambdaBody
+  ; ConstructorExpression
+  ; NamespaceInternals
+  ; TODO
+  ]
+
+let string_of_aggregate_type = function
+  | TopLevelDeclaration    -> "TopLevelDeclaration"
+  | Expression             -> "Expression"
+  | Specifier              -> "Specifier"
+  | Parameter              -> "Parameter"
+  | ClassBodyDeclaration   -> "ClassBodyDeclaration"
+  | Statement              -> "Statement"
+  | SwitchLabel            -> "SwitchLabel"
+  | LambdaBody             -> "LambdaBody"
+  | ConstructorExpression  -> "ConstructorExpression"
+  | NamespaceInternals     -> "NamespaceInternals"
+  | TODO                   -> "TODO"
+
+module AggregateKey = struct
+  type t = aggregate_type
+  let compare (x: t) (y: t) = compare x y
+  let to_string = string_of_aggregate_type
+end
+module AggMap = MyMap.Make(AggregateKey)
+
+let aggregation_of_top_level_declaration =
+  List.filter (fun x -> List.mem TopLevelDeclaration   x.aggregates) schema
+let aggregation_of_expression =
+  List.filter (fun x -> List.mem Expression            x.aggregates) schema
+let aggregation_of_specifier =
+  List.filter (fun x -> List.mem Specifier             x.aggregates) schema
+let aggregation_of_parameter =
+  List.filter (fun x -> List.mem Parameter             x.aggregates) schema
+let aggregation_of_class_body_declaration =
+  List.filter (fun x -> List.mem ClassBodyDeclaration  x.aggregates) schema
+let aggregation_of_statement =
+  List.filter (fun x -> List.mem Statement             x.aggregates) schema
+let aggregation_of_switch_label =
+  List.filter (fun x -> List.mem SwitchLabel           x.aggregates) schema
+let aggregation_of_lambda_body =
+  List.filter (fun x -> List.mem LambdaBody            x.aggregates) schema
+let aggregation_of_constructor_expression =
+  List.filter (fun x -> List.mem ConstructorExpression x.aggregates) schema
+let aggregation_of_namespace_internals =
+  List.filter (fun x -> List.mem NamespaceInternals    x.aggregates) schema
+let aggregation_of_todo_aggregate =
+  List.filter (fun x -> List.mem TODO                  x.aggregates) schema
+
+let aggregation_of = function
+  | TopLevelDeclaration    -> aggregation_of_top_level_declaration
+  | Expression             -> aggregation_of_expression
+  | Specifier              -> aggregation_of_specifier
+  | Parameter              -> aggregation_of_parameter
+  | ClassBodyDeclaration   -> aggregation_of_class_body_declaration
+  | Statement              -> aggregation_of_statement
+  | SwitchLabel            -> aggregation_of_switch_label
+  | LambdaBody             -> aggregation_of_lambda_body
+  | ConstructorExpression  -> aggregation_of_constructor_expression
+  | NamespaceInternals     -> aggregation_of_namespace_internals
+  | TODO                   -> aggregation_of_todo_aggregate
+
+let aggregate_type_name = function
+  | TopLevelDeclaration    -> "top_level_declaration"
+  | Expression             -> "expression"
+  | Specifier              -> "specifier"
+  | Parameter              -> "parameter"
+  | ClassBodyDeclaration   -> "class_body_declaration"
+  | Statement              -> "statement"
+  | SwitchLabel            -> "switch_label"
+  | LambdaBody             -> "lambda_body"
+  | ConstructorExpression  -> "constructor_expression"
+  | NamespaceInternals     -> "namespace_internals"
+  | TODO                   -> "todo_aggregate"
+
+let aggregate_type_pfx_trim = function
+  | TopLevelDeclaration    -> "TLD",    "\\(Declaration\\|Statement\\)$"
+  | Expression             -> "Expr",   "Expression$"
+  | Specifier              -> "Spec",   "\\(Type\\)?Specifier$"
+  | Parameter              -> "Param",  ""
+  | ClassBodyDeclaration   -> "Body",   "Declaration"
+  | Statement              -> "Stmt",   "Statement$"
+  | SwitchLabel            -> "Switch", "Label$"
+  | LambdaBody             -> "Lambda", "Expression$"
+  | ConstructorExpression  -> "CExpr",  "Expression$"
+  | NamespaceInternals     -> "NSI",    ""
+  | TODO                   -> "TODO",   ""
+
 
 (******************************************************************************(
  * Useful for debugging / schema alterations

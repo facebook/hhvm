@@ -13,10 +13,48 @@ open Full_fidelity_schema
 
 let full_fidelity_path_prefix = "hphp/hack/src/parser/"
 
-(*
-type ('a, 'b, 'c, 'd) format4 = ('a, 'b, 'c, 'c, 'c, 'd) format6
-type ('a, 'b, 'c) format = ('a, 'b, 'c, 'c) format4
-*)
+type comment_style =
+  | CStyle
+  | MLStyle
+  | HHStyle
+
+let make_header comment_style (header_comment : string) : string =
+  let open_char, close_char = match comment_style with
+  | CStyle -> "/", '/'
+  | MLStyle -> "(", ')'
+  | HHStyle -> "<?hh // strict\n/", '/'
+  in
+  sprintf
+"%s**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the \"hack\" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ **
+ *
+ * THIS FILE IS @%s; DO NOT EDIT IT
+ * To regenerate this file, run
+ *
+ *   buck run //hphp/hack/src:generate_full_fidelity
+ *
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ **
+ *%s
+ *%c"
+  open_char
+  (* Any file containing '@' followed by the word 'generated' is considered a
+   * generated file in Phabricator. Cheeky trick to avoid making this script
+   * being seen as generated. *)
+  "generated"
+  header_comment
+  close_char
+
+
 type valign =
   (string -> string -> string, unit, string, string -> string) format4
 
@@ -43,22 +81,51 @@ module GenerateFFSyntaxType = struct
     sprintf ("  | " ^^ kind_name_fmt ^^ " of %s\n")
       x.kind_name x.type_name
 
-  let full_fidelity_syntax_template =
-"(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- *
- * THIS FILE IS @generated; DO NOT EDIT IT
- * To regenerate this file, run
- *
- *   buck run //hphp/hack/src:generate_full_fidelity
- *
+  let to_aggregate_type x =
+    let aggregated_types = aggregation_of x in
+    let prefix, trim = aggregate_type_pfx_trim x in
+    let compact = Str.global_replace (Str.regexp trim) "" in
+    let valign = align_fmt (fun x -> compact x.kind_name) aggregated_types in
+    let type_name = aggregate_type_name x in
+    let make_constructor ty =
+      sprintf ("%s" ^^ valign ^^ " of %s")
+        prefix (compact ty.kind_name)
+        ty.type_name
+    in
+    let type_body = List.map make_constructor aggregated_types in
+    sprintf "  and %s =\n  | %s\n" type_name (String.concat "\n  | " type_body)
+
+  let to_validated_syntax x =
+    (* Not proud of this, but we have to exclude these things that don't occur
+     * in validated syntax. Their absence being the point of the validated
+     * syntax
+     *)
+    if x.kind_name = "ErrorSyntax" || x.kind_name = "ListItem" then "" else
+    begin
+      let open Printf in
+      let mapper (f,c) =
+        let rec make_type_string : child_spec -> string = function
+        | Aggregate t -> aggregate_type_name t
+        | Token -> "Token.t"
+        | Just t ->
+          (match SMap.get t schema_map with
+          | None   -> failwith @@ sprintf "Unknown type: %s" t
+          | Some t -> t.type_name
+          )
+        | ZeroOrMore ((Just _ | Aggregate _ | Token) as c) ->
+          sprintf "%s listesque" (make_type_string c)
+        | ZeroOrOne  ((Just _ | Aggregate _ | Token) as c) ->
+          sprintf "%s option" (make_type_string c)
+        | ZeroOrMore c -> sprintf "(%s) listesque" (make_type_string c)
+        | ZeroOrOne  c -> sprintf "(%s) option"    (make_type_string c)
+        in
+        sprintf "%s_%s: %s value" x.prefix f (make_type_string c)
+      in
+      let fields = map_and_concat_separated "\n    ; " mapper x.fields in
+      sprintf "  and %s =\n    { %s\n    }\n" x.type_name fields
+    end
+
+  let full_fidelity_syntax_template : string = make_header MLStyle "
  * This module contains the type describing the structure of a syntax tree.
  *
  * The structure of the syntax tree is described by the collection of recursive
@@ -98,8 +165,7 @@ module GenerateFFSyntaxType = struct
  * annotations, and so on.
  *
  * Therefore this module is functorized by the types for token and value to be
- * associated with the node.
- *)
+ * associated with the node." ^ "
 
 module type TokenType = sig
   type t
@@ -120,13 +186,25 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     syntax : syntax ;
     value : SyntaxValue.t
   }
-PARSE_TREE
-  and syntax =
+PARSE_TREE  and syntax =
   | Token                             of Token.t
   | Missing
   | SyntaxList                        of t list
 SYNTAX
 end (* MakeSyntaxType *)
+
+module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
+  type 'a value = SyntaxValue.t * 'a
+  (* TODO: Different styles of list seem to only happen in predetermined places,
+   * so split this out again into specific variants
+   *)
+  type 'a listesque =
+  | Syntactic of ('a value * Token.t option value) value list
+  | NonSyntactic of 'a value list
+  | MissingList
+  | SingletonList of 'a value
+AGGREGATE_TYPESVALIDATED_SYNTAX
+end (* MakeValidated *)
 "
 
   let full_fidelity_syntax_type =
@@ -136,11 +214,15 @@ end (* MakeSyntaxType *)
     transformations = [
       { pattern = "PARSE_TREE"; func = to_parse_tree };
       { pattern = "SYNTAX"; func = to_syntax };
+      { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax };
     ];
     token_no_text_transformations = [];
     token_given_text_transformations = [];
     token_variable_text_transformations = [];
-    trivia_transformations = []
+    trivia_transformations = [];
+    aggregate_transformations = [
+      { aggregate_pattern = "AGGREGATE_TYPES"; aggregate_func = to_aggregate_type };
+    ];
   }
 end (* GenerateFFSyntaxType *)
 
@@ -210,25 +292,7 @@ module GenerateFFSyntax = struct
 "
       x.type_name fields1 x.kind_name fields2
 
-  let full_fidelity_syntax_template =
-"(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- *
- * THIS FILE IS @generated; DO NOT EDIT IT
- * To regenerate this file, run
- *
- *   buck run //hphp/hack/src:generate_full_fidelity
- *
- * This module provides factory methods for the types making up the syntax trees
- * (see `Full_fidelity_syntax_type`).
- *
+  let full_fidelity_syntax_template = make_header MLStyle "
  * With these factory methods, nodes can be built up from their child nodes. A
  * factory method must not just know all the children and the kind of node it is
  * constructing; it also must know how to construct the value that this node is
@@ -238,9 +302,7 @@ module GenerateFFSyntax = struct
  * this functor is used then the resulting module contains factory methods.
  *
  * This module also provides some useful helper functions, like an iterator,
- * a rewriting visitor, and so on.
- *
- *)
+ * a rewriting visitor, and so on." ^ "
 
 open Full_fidelity_syntax_type
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -533,7 +595,8 @@ end (* WithToken *)
     token_no_text_transformations = [];
     token_given_text_transformations = [];
     token_variable_text_transformations = [];
-    trivia_transformations = []
+    trivia_transformations = [];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFSyntax *)
@@ -547,25 +610,8 @@ module GenerateFFTriviaKind = struct
     sprintf ("  | " ^^ trivia_kind_fmt ^^ " -> \"%s\"\n")
       trivia_kind trivia_text
 
-  let full_fidelity_trivia_kind_template =
-"(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- *)
-(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
-(* @" ^ "generated *)
-(**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*)
+  let full_fidelity_trivia_kind_template = make_header MLStyle "" ^ "
+
 type t =
 TRIVIA
 let to_string kind =
@@ -584,7 +630,8 @@ let full_fidelity_trivia_kind =
     { trivia_pattern = "TRIVIA";
       trivia_func = map_and_concat to_trivia };
     { trivia_pattern = "TO_STRING";
-      trivia_func = map_and_concat to_to_string }]
+      trivia_func = map_and_concat to_to_string }];
+  aggregate_transformations = [];
 }
 
 end (* GenerateFFSyntaxKind *)
@@ -598,25 +645,8 @@ module GenerateFFSyntaxKind = struct
     sprintf ("  | " ^^ kind_name_fmt ^^ " -> \"%s\"\n")
       x.kind_name x.description
 
-  let full_fidelity_syntax_kind_template =
-"(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- *)
-(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
-(* @" ^ "generated *)
-(**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*)
+  let full_fidelity_syntax_kind_template = make_header MLStyle "" ^ "
+
 type t =
   | Token
   | Missing
@@ -641,7 +671,8 @@ let full_fidelity_syntax_kind =
   token_no_text_transformations = [];
   token_given_text_transformations = [];
   token_variable_text_transformations = [];
-  trivia_transformations = []
+  trivia_transformations = [];
+  aggregate_transformations = [];
 }
 
 end (* GenerateFFTriviaKind *)
@@ -814,25 +845,7 @@ let to_editable_given_text x =
   let to_export_trivia x =
     sprintf "exports.%s = %s;\n" x.trivia_kind x.trivia_kind
 
-  let full_fidelity_javascript_template =
-"/**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the 'hack' directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- */
-/* THIS FILE IS GENERATED; DO NOT EDIT IT */
-/* @" ^ "generated */
-/**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*/
+  let full_fidelity_javascript_template = make_header CStyle "" ^ "
 
 \"use strict\";
 
@@ -1341,7 +1354,8 @@ EXPORTS_SYNTAX"
         trivia_func = map_and_concat trivia_classes };
       { trivia_pattern = "EXPORTS_TRIVIA";
         trivia_func = map_and_concat to_export_trivia }
-    ]
+    ];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFJavaScript *)
@@ -1539,26 +1553,7 @@ let to_editable_given_text x =
 "
       x.token_text x.token_kind
 
-  let full_fidelity_hack_template =
-"<?hh // strict
-/**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the 'hack' directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- */
-/* THIS FILE IS GENERATED; DO NOT EDIT IT */
-/* @" ^ "generated */
-/**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*/
+  let full_fidelity_hack_template = make_header HHStyle "" ^ "
 
 require_once 'full_fidelity_parser.php';
 
@@ -2193,7 +2188,8 @@ function from_json(mixed $json): EditableSyntax {
       { trivia_pattern = "STATIC_FROM_JSON_TRIVIA";
         trivia_func = map_and_concat to_static_from_json_trivia };
       { trivia_pattern = "TRIVIA_CLASSES";
-        trivia_func = map_and_concat to_classes_trivia }]
+        trivia_func = map_and_concat to_classes_trivia }];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFHack *)
@@ -2217,24 +2213,7 @@ module GenerateFFTokenKind = struct
     sprintf ("  | " ^^ token_kind_fmt ^^ " -> \"%s\"\n")
       x.token_kind x.token_text
 
-  let full_fidelity_token_kind_template = "(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- *)
-(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
-(* @" ^ "generated *)
-(**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*)
+  let full_fidelity_token_kind_template = make_header MLStyle "" ^ "
 
 type t =
   (* No text tokens *)
@@ -2277,7 +2256,8 @@ TO_STRING_VARIABLE_TEXT
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
         token_func = map_and_concat to_to_string }];
-    trivia_transformations = []
+    trivia_transformations = [];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFTokenKind *)
@@ -2294,30 +2274,14 @@ module GenerateFFPositionedSyntax = struct
   let to_to_string x =
     sprintf "  | %s -> \"%s\"\n" x.token_kind x.token_text
 
-  let full_fidelity_positioned_syntax_template = begin "(**
- * Copyright (c) 2016, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the \"hack\" directory of this source tree. An additional
- * grant of patent rights can be found in the PATENTS file in the same
- * directory.
- *
- * @" ^ "generated THIS FILE IS GENERATED; DO NOT EDIT IT
- * To regenerate this file:
- *   buck run hphp/hack/src:generate_full_fidelity
- *)
-
-(**
+  let full_fidelity_positioned_syntax_template = make_header MLStyle "
  * Positioned syntax tree
  *
  * A positioned syntax tree stores the original source text,
  * the offset of the leading trivia, the width of the leading trivia,
  * node proper, and trailing trivia. From all this information we can
  * rapidly compute the absolute position of any portion of the node,
- * or the text.
- *
- *)
+ * or the text." ^ "
 
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
@@ -2536,7 +2500,6 @@ let from_tree tree =
   from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree)
 
 "
-end
 
   let to_convert_cases x =
     let open Printf in
@@ -2594,7 +2557,8 @@ end
     token_no_text_transformations = [];
     token_given_text_transformations = [];
     token_variable_text_transformations = [];
-    trivia_transformations = []
+    trivia_transformations = [];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFPositionedSyntax *)

@@ -7,14 +7,16 @@
  * grant of patent rights can be found in the PATENTS file in the same
  * directory.
  *
+ **
  *
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
  *   buck run //hphp/hack/src:generate_full_fidelity
  *
- * This module provides factory methods for the types making up the syntax trees
- * (see `Full_fidelity_syntax_type`).
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ **
  *
  * With these factory methods, nodes can be built up from their child nodes. A
  * factory method must not just know all the children and the kind of node it is
@@ -26,7 +28,6 @@
  *
  * This module also provides some useful helper functions, like an iterator,
  * a rewriting visitor, and so on.
- *
  *)
 
 open Full_fidelity_syntax_type

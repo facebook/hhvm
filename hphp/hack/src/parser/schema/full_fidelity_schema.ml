@@ -17,6 +17,28 @@ hash of a file rather than relying on people remembering to update it. *)
 and use that standard. *)
 
 include Schema_definition
+let schema_map =
+  let add map ({ kind_name; _ } as schema_node) =
+    SMap.add kind_name schema_node map
+  in
+  List.fold_left add SMap.empty @@
+    { kind_name   = "Token"
+    ; type_name   = "Token.t"
+    ; func_name   = "token"
+    ; description = "token"
+    ; prefix      = "token"
+    ; aggregates  = [ Expression ]
+    ; fields      = []
+    } ::
+    { kind_name   = "error"
+    ; type_name   = "error"
+    ; func_name   = "error"
+    ; description = "error"
+    ; prefix      = "error"
+    ; aggregates  = []
+    ; fields      = []
+    } ::
+    schema
 
 type trivia_node = {
   trivia_kind : string;
@@ -46,6 +68,12 @@ type trivia_transformation =
   trivia_func : trivia_node list -> string
 }
 
+type aggregate_transformation =
+{
+  aggregate_pattern : string;
+  aggregate_func : aggregate_type -> string
+}
+
 type template_file =
 {
   filename : string;
@@ -55,6 +83,7 @@ type template_file =
   token_variable_text_transformations : token_transformation list;
   token_given_text_transformations : token_transformation list;
   trivia_transformations : trivia_transformation list;
+  aggregate_transformations : aggregate_transformation list;
 }
 
 let token_node_from_list l =
@@ -291,6 +320,9 @@ let transform_tokens token_list f =
 let transform_trivia trivia_list f =
   map_and_concat f trivia_list
 
+let transform_aggregate f =
+  map_and_concat f generated_aggregate_types
+
 let replace pattern new_text source =
   Str.replace_first (Str.regexp pattern) new_text source
 
@@ -301,6 +333,9 @@ let generate_string template =
     replace x.token_pattern (x.token_func token_list) s in
   let trivia_folder trivia_list s x =
     replace x.trivia_pattern (x.trivia_func trivia_list) s in
+  let aggregate_folder s x =
+    replace x.aggregate_pattern (transform_aggregate x.aggregate_func) s in
+
   let result = List.fold_left
     syntax_folder template.template template.transformations in
 
@@ -312,6 +347,8 @@ let generate_string template =
     result template.token_given_text_transformations in
   let result = List.fold_left (trivia_folder trivia_kinds)
     result template.trivia_transformations in
+  let result = List.fold_left
+    aggregate_folder result template.aggregate_transformations in
 
   result
 
@@ -405,7 +442,8 @@ AST_NODES
     trivia_transformations = [
       { trivia_pattern = "TRIVIA_KINDS";
         trivia_func = map_and_concat_separated ",\n" to_json_trivia }
-    ]
+    ];
+    aggregate_transformations = [];
   }
 
 end (* GenerateFFJSONSchema *)

@@ -7,12 +7,17 @@
  * grant of patent rights can be found in the PATENTS file in the same
  * directory.
  *
- * @generated THIS FILE IS GENERATED; DO NOT EDIT IT
- * To regenerate this file:
- *   buck run hphp/hack/src:generate_full_fidelity
- *)
-
-(**
+ **
+ *
+ * THIS FILE IS @generated; DO NOT EDIT IT
+ * To regenerate this file, run
+ *
+ *   buck run //hphp/hack/src:generate_full_fidelity
+ *
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ **
+ *
  * Positioned syntax tree
  *
  * A positioned syntax tree stores the original source text,
@@ -20,7 +25,6 @@
  * node proper, and trailing trivia. From all this information we can
  * rapidly compute the absolute position of any portion of the node,
  * or the text.
- *
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree

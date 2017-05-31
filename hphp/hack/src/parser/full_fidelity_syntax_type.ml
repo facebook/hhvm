@@ -7,11 +7,16 @@
  * grant of patent rights can be found in the PATENTS file in the same
  * directory.
  *
+ **
  *
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
  *   buck run //hphp/hack/src:generate_full_fidelity
+ *
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ **
  *
  * This module contains the type describing the structure of a syntax tree.
  *
@@ -65,8 +70,8 @@ module type SyntaxValueType = sig
   type t
 end
 
-(* This functors describe the shape of a parse tree that has a particular kind
- * of token in the leaves, and a particular kind of value associated with each
+(* This functor describe the shape of a parse tree that has a particular kind of
+ * token in the leaves, and a particular kind of value associated with each
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
@@ -887,7 +892,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { list_item                                          : t
     ; list_separator                                     : t
     }
-
   and syntax =
   | Token                             of Token.t
   | Missing
@@ -1037,3 +1041,1056 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ListItem                          of list_item
 
 end (* MakeSyntaxType *)
+
+module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
+  type 'a value = SyntaxValue.t * 'a
+  (* TODO: Different styles of list seem to only happen in predetermined places,
+   * so split this out again into specific variants
+   *)
+  type 'a listesque =
+  | Syntactic of ('a value * Token.t option value) value list
+  | NonSyntactic of 'a value list
+  | MissingList
+  | SingletonList of 'a value
+  and top_level_declaration =
+  | TLDEndOfFile          of end_of_file
+  | TLDEnum               of enum_declaration
+  | TLDAlias              of alias_declaration
+  | TLDNamespace          of namespace_declaration
+  | TLDNamespaceUse       of namespace_use_declaration
+  | TLDNamespaceGroupUse  of namespace_group_use_declaration
+  | TLDFunction           of function_declaration
+  | TLDClassish           of classish_declaration
+  | TLDConst              of const_declaration
+  | TLDInclusionDirective of inclusion_directive
+  | TLDCompound           of compound_statement
+  | TLDExpression         of expression_statement
+  | TLDUnset              of unset_statement
+  | TLDWhile              of while_statement
+  | TLDIf                 of if_statement
+  | TLDTry                of try_statement
+  | TLDDo                 of do_statement
+  | TLDFor                of for_statement
+  | TLDForeach            of foreach_statement
+  | TLDSwitchFallthrough  of switch_fallthrough
+  | TLDReturn             of return_statement
+  | TLDGotoLabel          of goto_label
+  | TLDGoto               of goto_statement
+  | TLDThrow              of throw_statement
+  | TLDBreak              of break_statement
+  | TLDContinue           of continue_statement
+  | TLDFunctionStatic     of function_static_statement
+  | TLDEcho               of echo_statement
+  | TLDGlobal             of global_statement
+  and expression =
+  | ExprLiteral                      of literal_expression
+  | ExprVariable                     of variable_expression
+  | ExprQualifiedName                of qualified_name_expression
+  | ExprPipeVariable                 of pipe_variable_expression
+  | ExprDecorated                    of decorated_expression
+  | ExprInclusion                    of inclusion_expression
+  | ExprAnonymousFunction            of anonymous_function
+  | ExprLambda                       of lambda_expression
+  | ExprCast                         of cast_expression
+  | ExprScopeResolution              of scope_resolution_expression
+  | ExprMemberSelection              of member_selection_expression
+  | ExprSafeMemberSelection          of safe_member_selection_expression
+  | ExprEmbeddedMemberSelection      of embedded_member_selection_expression
+  | ExprYield                        of yield_expression
+  | ExprPrint                        of print_expression
+  | ExprPrefixUnary                  of prefix_unary_expression
+  | ExprPostfixUnary                 of postfix_unary_expression
+  | ExprBinary                       of binary_expression
+  | ExprInstanceof                   of instanceof_expression
+  | ExprConditional                  of conditional_expression
+  | ExprEval                         of eval_expression
+  | ExprEmpty                        of empty_expression
+  | ExprDefine                       of define_expression
+  | ExprIsset                        of isset_expression
+  | ExprFunctionCall                 of function_call_expression
+  | ExprParenthesized                of parenthesized_expression
+  | ExprBraced                       of braced_expression
+  | ExprEmbeddedBraced               of embedded_braced_expression
+  | ExprList                         of list_expression
+  | ExprCollectionLiteral            of collection_literal_expression
+  | ExprObjectCreation               of object_creation_expression
+  | ExprArrayCreation                of array_creation_expression
+  | ExprArrayIntrinsic               of array_intrinsic_expression
+  | ExprDarrayIntrinsic              of darray_intrinsic_expression
+  | ExprDictionaryIntrinsic          of dictionary_intrinsic_expression
+  | ExprKeysetIntrinsic              of keyset_intrinsic_expression
+  | ExprVarrayIntrinsic              of varray_intrinsic_expression
+  | ExprVectorIntrinsic              of vector_intrinsic_expression
+  | ExprSubscript                    of subscript_expression
+  | ExprEmbeddedSubscript            of embedded_subscript_expression
+  | ExprAwaitableCreation            of awaitable_creation_expression
+  | ExprXHPChildrenParenthesizedList of xhp_children_parenthesized_list
+  | ExprXHP                          of xhp_expression
+  | ExprShape                        of shape_expression
+  | ExprTuple                        of tuple_expression
+  and specifier =
+  | SpecSimple            of simple_type_specifier
+  | SpecVariadicParameter of variadic_parameter
+  | SpecLambdaSignature   of lambda_signature
+  | SpecXHPEnumType       of xhp_enum_type
+  | SpecVector            of vector_type_specifier
+  | SpecKeyset            of keyset_type_specifier
+  | SpecTupleTypeExplicit of tuple_type_explicit_specifier
+  | SpecVarray            of varray_type_specifier
+  | SpecVectorArray       of vector_array_type_specifier
+  | SpecDarray            of darray_type_specifier
+  | SpecMapArray          of map_array_type_specifier
+  | SpecDictionary        of dictionary_type_specifier
+  | SpecClosure           of closure_type_specifier
+  | SpecClassname         of classname_type_specifier
+  | SpecField             of field_specifier
+  | SpecShape             of shape_type_specifier
+  | SpecGeneric           of generic_type_specifier
+  | SpecNullable          of nullable_type_specifier
+  | SpecSoft              of soft_type_specifier
+  | SpecTuple             of tuple_type_specifier
+  and parameter =
+  | ParamParameterDeclaration of parameter_declaration
+  | ParamVariadicParameter    of variadic_parameter
+  and class_body_declaration =
+  | BodyProperty          of property_declaration
+  | BodyMethodish         of methodish_declaration
+  | BodyRequireClause     of require_clause
+  | BodyConst             of const_declaration
+  | BodyTypeConst         of type_const_declaration
+  | BodyXHPChildren       of xhp_children_declaration
+  | BodyXHPCategory       of xhp_category_declaration
+  | BodyXHPClassAttribute of xhp_class_attribute_declaration
+  and statement =
+  | StmtInclusionDirective of inclusion_directive
+  | StmtCompound           of compound_statement
+  | StmtExpression         of expression_statement
+  | StmtUnset              of unset_statement
+  | StmtWhile              of while_statement
+  | StmtIf                 of if_statement
+  | StmtTry                of try_statement
+  | StmtDo                 of do_statement
+  | StmtFor                of for_statement
+  | StmtForeach            of foreach_statement
+  | StmtSwitch             of switch_statement
+  | StmtSwitchFallthrough  of switch_fallthrough
+  | StmtReturn             of return_statement
+  | StmtGotoLabel          of goto_label
+  | StmtGoto               of goto_statement
+  | StmtThrow              of throw_statement
+  | StmtBreak              of break_statement
+  | StmtContinue           of continue_statement
+  | StmtFunctionStatic     of function_static_statement
+  | StmtEcho               of echo_statement
+  | StmtGlobal             of global_statement
+  | StmtTypeConstant       of type_constant
+  and switch_label =
+  | SwitchCase    of case_label
+  | SwitchDefault of default_label
+  and lambda_body =
+  | LambdaLiteral                      of literal_expression
+  | LambdaVariable                     of variable_expression
+  | LambdaQualifiedName                of qualified_name_expression
+  | LambdaPipeVariable                 of pipe_variable_expression
+  | LambdaDecorated                    of decorated_expression
+  | LambdaInclusion                    of inclusion_expression
+  | LambdaCompoundStatement            of compound_statement
+  | LambdaAnonymousFunction            of anonymous_function
+  | LambdaLambda                       of lambda_expression
+  | LambdaCast                         of cast_expression
+  | LambdaScopeResolution              of scope_resolution_expression
+  | LambdaMemberSelection              of member_selection_expression
+  | LambdaSafeMemberSelection          of safe_member_selection_expression
+  | LambdaEmbeddedMemberSelection      of embedded_member_selection_expression
+  | LambdaYield                        of yield_expression
+  | LambdaPrint                        of print_expression
+  | LambdaPrefixUnary                  of prefix_unary_expression
+  | LambdaPostfixUnary                 of postfix_unary_expression
+  | LambdaBinary                       of binary_expression
+  | LambdaInstanceof                   of instanceof_expression
+  | LambdaConditional                  of conditional_expression
+  | LambdaEval                         of eval_expression
+  | LambdaEmpty                        of empty_expression
+  | LambdaDefine                       of define_expression
+  | LambdaIsset                        of isset_expression
+  | LambdaFunctionCall                 of function_call_expression
+  | LambdaParenthesized                of parenthesized_expression
+  | LambdaBraced                       of braced_expression
+  | LambdaEmbeddedBraced               of embedded_braced_expression
+  | LambdaList                         of list_expression
+  | LambdaCollectionLiteral            of collection_literal_expression
+  | LambdaObjectCreation               of object_creation_expression
+  | LambdaArrayCreation                of array_creation_expression
+  | LambdaArrayIntrinsic               of array_intrinsic_expression
+  | LambdaDarrayIntrinsic              of darray_intrinsic_expression
+  | LambdaDictionaryIntrinsic          of dictionary_intrinsic_expression
+  | LambdaKeysetIntrinsic              of keyset_intrinsic_expression
+  | LambdaVarrayIntrinsic              of varray_intrinsic_expression
+  | LambdaVectorIntrinsic              of vector_intrinsic_expression
+  | LambdaSubscript                    of subscript_expression
+  | LambdaEmbeddedSubscript            of embedded_subscript_expression
+  | LambdaAwaitableCreation            of awaitable_creation_expression
+  | LambdaXHPChildrenParenthesizedList of xhp_children_parenthesized_list
+  | LambdaXHP                          of xhp_expression
+  | LambdaShape                        of shape_expression
+  | LambdaTuple                        of tuple_expression
+  and constructor_expression =
+  | CExprLiteral                      of literal_expression
+  | CExprVariable                     of variable_expression
+  | CExprQualifiedName                of qualified_name_expression
+  | CExprPipeVariable                 of pipe_variable_expression
+  | CExprDecorated                    of decorated_expression
+  | CExprInclusion                    of inclusion_expression
+  | CExprAnonymousFunction            of anonymous_function
+  | CExprLambda                       of lambda_expression
+  | CExprCast                         of cast_expression
+  | CExprScopeResolution              of scope_resolution_expression
+  | CExprMemberSelection              of member_selection_expression
+  | CExprSafeMemberSelection          of safe_member_selection_expression
+  | CExprEmbeddedMemberSelection      of embedded_member_selection_expression
+  | CExprYield                        of yield_expression
+  | CExprPrint                        of print_expression
+  | CExprPrefixUnary                  of prefix_unary_expression
+  | CExprPostfixUnary                 of postfix_unary_expression
+  | CExprBinary                       of binary_expression
+  | CExprInstanceof                   of instanceof_expression
+  | CExprConditional                  of conditional_expression
+  | CExprEval                         of eval_expression
+  | CExprEmpty                        of empty_expression
+  | CExprDefine                       of define_expression
+  | CExprIsset                        of isset_expression
+  | CExprFunctionCall                 of function_call_expression
+  | CExprParenthesized                of parenthesized_expression
+  | CExprBraced                       of braced_expression
+  | CExprEmbeddedBraced               of embedded_braced_expression
+  | CExprList                         of list_expression
+  | CExprCollectionLiteral            of collection_literal_expression
+  | CExprObjectCreation               of object_creation_expression
+  | CExprArrayCreation                of array_creation_expression
+  | CExprArrayIntrinsic               of array_intrinsic_expression
+  | CExprDarrayIntrinsic              of darray_intrinsic_expression
+  | CExprDictionaryIntrinsic          of dictionary_intrinsic_expression
+  | CExprKeysetIntrinsic              of keyset_intrinsic_expression
+  | CExprVarrayIntrinsic              of varray_intrinsic_expression
+  | CExprVectorIntrinsic              of vector_intrinsic_expression
+  | CExprElementInitializer           of element_initializer
+  | CExprSubscript                    of subscript_expression
+  | CExprEmbeddedSubscript            of embedded_subscript_expression
+  | CExprAwaitableCreation            of awaitable_creation_expression
+  | CExprXHPChildrenParenthesizedList of xhp_children_parenthesized_list
+  | CExprXHP                          of xhp_expression
+  | CExprShape                        of shape_expression
+  | CExprTuple                        of tuple_expression
+  and namespace_internals =
+  | NSINamespaceBody      of namespace_body
+  | NSINamespaceEmptyBody of namespace_empty_body
+  and todo_aggregate =
+  | TODOEndOfFile of end_of_file
+  and end_of_file =
+    { end_of_file_token: Token.t value
+    }
+  and script_header =
+    { header_less_than: Token.t value
+    ; header_question: Token.t value
+    ; header_language: Token.t value
+    }
+  and script =
+    { script_header: script_header value
+    ; script_declarations: top_level_declaration listesque value
+    }
+  and simple_type_specifier =
+    { simple_type_specifier: Token.t value
+    }
+  and literal_expression =
+    { literal_expression: expression listesque value
+    }
+  and variable_expression =
+    { variable_expression: Token.t value
+    }
+  and qualified_name_expression =
+    { qualified_name_expression: Token.t value
+    }
+  and pipe_variable_expression =
+    { pipe_variable_expression: Token.t value
+    }
+  and enum_declaration =
+    { enum_attribute_spec: attribute_specification option value
+    ; enum_keyword: Token.t value
+    ; enum_name: Token.t value
+    ; enum_colon: Token.t value
+    ; enum_base: specifier value
+    ; enum_type: type_constraint option value
+    ; enum_left_brace: Token.t value
+    ; enum_enumerators: enumerator listesque value
+    ; enum_right_brace: Token.t value
+    }
+  and enumerator =
+    { enumerator_name: Token.t value
+    ; enumerator_equal: Token.t value
+    ; enumerator_value: expression value
+    ; enumerator_semicolon: Token.t value
+    }
+  and alias_declaration =
+    { alias_attribute_spec: attribute_specification option value
+    ; alias_keyword: Token.t value
+    ; alias_name: Token.t option value
+    ; alias_generic_parameter: type_parameters option value
+    ; alias_constraint: type_constraint option value
+    ; alias_equal: Token.t option value
+    ; alias_type: specifier value
+    ; alias_semicolon: Token.t value
+    }
+  and property_declaration =
+    { property_modifiers: Token.t listesque value
+    ; property_type: specifier option value
+    ; property_declarators: property_declarator listesque value
+    ; property_semicolon: Token.t value
+    }
+  and property_declarator =
+    { property_name: Token.t value
+    ; property_initializer: simple_initializer option value
+    }
+  and namespace_declaration =
+    { namespace_keyword: Token.t value
+    ; namespace_name: Token.t option value
+    ; namespace_body: namespace_internals value
+    }
+  and namespace_body =
+    { namespace_left_brace: Token.t value
+    ; namespace_declarations: top_level_declaration listesque value
+    ; namespace_right_brace: Token.t value
+    }
+  and namespace_empty_body =
+    { namespace_semicolon: Token.t value
+    }
+  and namespace_use_declaration =
+    { namespace_use_keyword: Token.t value
+    ; namespace_use_kind: Token.t option value
+    ; namespace_use_clauses: (namespace_use_clause option) listesque value
+    ; namespace_use_semicolon: Token.t option value
+    }
+  and namespace_group_use_declaration =
+    { namespace_group_use_keyword: Token.t value
+    ; namespace_group_use_kind: Token.t option value
+    ; namespace_group_use_prefix: Token.t value
+    ; namespace_group_use_left_brace: Token.t value
+    ; namespace_group_use_clauses: namespace_use_clause listesque value
+    ; namespace_group_use_right_brace: Token.t value
+    ; namespace_group_use_semicolon: Token.t value
+    }
+  and namespace_use_clause =
+    { namespace_use_clause_kind: Token.t option value
+    ; namespace_use_name: Token.t value
+    ; namespace_use_as: Token.t option value
+    ; namespace_use_alias: Token.t option value
+    }
+  and function_declaration =
+    { function_attribute_spec: attribute_specification option value
+    ; function_declaration_header: function_declaration_header value
+    ; function_body: compound_statement value
+    }
+  and function_declaration_header =
+    { function_async: Token.t option value
+    ; function_coroutine: Token.t option value
+    ; function_keyword: Token.t value
+    ; function_ampersand: Token.t option value
+    ; function_name: Token.t value
+    ; function_type_parameter_list: type_parameters option value
+    ; function_left_paren: Token.t value
+    ; function_parameter_list: (parameter option) listesque value
+    ; function_right_paren: Token.t value
+    ; function_colon: Token.t option value
+    ; function_type: specifier option value
+    ; function_where_clause: where_clause option value
+    }
+  and where_clause =
+    { where_clause_keyword: Token.t value
+    ; where_clause_constraints: where_constraint listesque value
+    }
+  and where_constraint =
+    { where_constraint_left_type: specifier value
+    ; where_constraint_operator: Token.t value
+    ; where_constraint_right_type: specifier value
+    }
+  and methodish_declaration =
+    { methodish_attribute: attribute_specification option value
+    ; methodish_modifiers: Token.t listesque value
+    ; methodish_function_decl_header: function_declaration_header value
+    ; methodish_function_body: compound_statement option value
+    ; methodish_semicolon: Token.t option value
+    }
+  and classish_declaration =
+    { classish_attribute: attribute_specification option value
+    ; classish_modifiers: Token.t listesque value
+    ; classish_keyword: Token.t value
+    ; classish_name: Token.t value
+    ; classish_type_parameters: type_parameters option value
+    ; classish_extends_keyword: Token.t option value
+    ; classish_extends_list: specifier listesque value
+    ; classish_implements_keyword: Token.t option value
+    ; classish_implements_list: specifier listesque value
+    ; classish_body: classish_body value
+    }
+  and classish_body =
+    { classish_body_left_brace: Token.t value
+    ; classish_body_elements: class_body_declaration listesque value
+    ; classish_body_right_brace: Token.t value
+    }
+  and trait_use =
+    { trait_use_keyword: Token.t value
+    ; trait_use_names: specifier listesque value
+    ; trait_use_semicolon: Token.t value
+    }
+  and require_clause =
+    { require_keyword: Token.t value
+    ; require_kind: Token.t value
+    ; require_name: specifier value
+    ; require_semicolon: Token.t value
+    }
+  and const_declaration =
+    { const_abstract: Token.t option value
+    ; const_keyword: Token.t value
+    ; const_type_specifier: specifier option value
+    ; const_declarators: constant_declarator listesque value
+    ; const_semicolon: Token.t value
+    }
+  and constant_declarator =
+    { constant_declarator_name: Token.t value
+    ; constant_declarator_initializer: simple_initializer option value
+    }
+  and type_const_declaration =
+    { type_const_abstract: Token.t option value
+    ; type_const_keyword: Token.t value
+    ; type_const_type_keyword: Token.t value
+    ; type_const_name: Token.t value
+    ; type_const_type_constraint: type_constraint option value
+    ; type_const_equal: Token.t option value
+    ; type_const_type_specifier: specifier option value
+    ; type_const_semicolon: Token.t value
+    }
+  and decorated_expression =
+    { decorated_expression_decorator: Token.t value
+    ; decorated_expression_expression: expression value
+    }
+  and parameter_declaration =
+    { parameter_attribute: attribute_specification option value
+    ; parameter_visibility: Token.t option value
+    ; parameter_type: specifier option value
+    ; parameter_name: expression value
+    ; parameter_default_value: simple_initializer option value
+    }
+  and variadic_parameter =
+    { variadic_parameter_ellipsis: Token.t value
+    }
+  and attribute_specification =
+    { attribute_specification_left_double_angle: Token.t value
+    ; attribute_specification_attributes: attribute listesque value
+    ; attribute_specification_right_double_angle: Token.t value
+    }
+  and attribute =
+    { attribute_name: Token.t value
+    ; attribute_left_paren: Token.t option value
+    ; attribute_values: expression listesque value
+    ; attribute_right_paren: Token.t option value
+    }
+  and inclusion_expression =
+    { inclusion_require: Token.t value
+    ; inclusion_filename: expression value
+    }
+  and inclusion_directive =
+    { inclusion_expression: inclusion_expression value
+    ; inclusion_semicolon: Token.t value
+    }
+  and compound_statement =
+    { compound_left_brace: Token.t value
+    ; compound_statements: statement listesque value
+    ; compound_right_brace: Token.t value
+    }
+  and expression_statement =
+    { expression_statement_expression: expression option value
+    ; expression_statement_semicolon: Token.t value
+    }
+  and unset_statement =
+    { unset_keyword: Token.t value
+    ; unset_left_paren: Token.t value
+    ; unset_variables: expression listesque value
+    ; unset_right_paren: Token.t value
+    ; unset_semicolon: Token.t value
+    }
+  and while_statement =
+    { while_keyword: Token.t value
+    ; while_left_paren: Token.t value
+    ; while_condition: expression value
+    ; while_right_paren: Token.t value
+    ; while_body: statement value
+    }
+  and if_statement =
+    { if_keyword: Token.t value
+    ; if_left_paren: Token.t value
+    ; if_condition: expression value
+    ; if_right_paren: Token.t value
+    ; if_statement: statement value
+    ; if_elseif_clauses: elseif_clause listesque value
+    ; if_else_clause: else_clause option value
+    }
+  and elseif_clause =
+    { elseif_keyword: Token.t value
+    ; elseif_left_paren: Token.t value
+    ; elseif_condition: expression value
+    ; elseif_right_paren: Token.t value
+    ; elseif_statement: statement value
+    }
+  and else_clause =
+    { else_keyword: Token.t value
+    ; else_statement: statement value
+    }
+  and try_statement =
+    { try_keyword: Token.t value
+    ; try_compound_statement: compound_statement value
+    ; try_catch_clauses: catch_clause listesque value
+    ; try_finally_clause: finally_clause option value
+    }
+  and catch_clause =
+    { catch_keyword: Token.t value
+    ; catch_left_paren: Token.t value
+    ; catch_type: simple_type_specifier value
+    ; catch_variable: Token.t value
+    ; catch_right_paren: Token.t value
+    ; catch_body: compound_statement value
+    }
+  and finally_clause =
+    { finally_keyword: Token.t value
+    ; finally_body: compound_statement value
+    }
+  and do_statement =
+    { do_keyword: Token.t value
+    ; do_body: statement value
+    ; do_while_keyword: Token.t value
+    ; do_left_paren: Token.t value
+    ; do_condition: expression value
+    ; do_right_paren: Token.t value
+    ; do_semicolon: Token.t value
+    }
+  and for_statement =
+    { for_keyword: Token.t value
+    ; for_left_paren: Token.t value
+    ; for_initializer: expression listesque value
+    ; for_first_semicolon: Token.t value
+    ; for_control: expression listesque value
+    ; for_second_semicolon: Token.t value
+    ; for_end_of_loop: expression listesque value
+    ; for_right_paren: Token.t value
+    ; for_body: statement value
+    }
+  and foreach_statement =
+    { foreach_keyword: Token.t value
+    ; foreach_left_paren: Token.t value
+    ; foreach_collection: expression value
+    ; foreach_await_keyword: Token.t option value
+    ; foreach_as: Token.t value
+    ; foreach_key: expression option value
+    ; foreach_arrow: Token.t option value
+    ; foreach_value: expression value
+    ; foreach_right_paren: Token.t value
+    ; foreach_body: statement value
+    }
+  and switch_statement =
+    { switch_keyword: Token.t value
+    ; switch_left_paren: Token.t value
+    ; switch_expression: expression value
+    ; switch_right_paren: Token.t value
+    ; switch_left_brace: Token.t value
+    ; switch_sections: switch_section listesque value
+    ; switch_right_brace: Token.t value
+    }
+  and switch_section =
+    { switch_section_labels: switch_label listesque value
+    ; switch_section_statements: top_level_declaration listesque value
+    ; switch_section_fallthrough: switch_fallthrough option value
+    }
+  and switch_fallthrough =
+    { fallthrough_keyword: Token.t value
+    ; fallthrough_semicolon: Token.t value
+    }
+  and case_label =
+    { case_keyword: Token.t value
+    ; case_expression: expression value
+    ; case_colon: Token.t value
+    }
+  and default_label =
+    { default_keyword: Token.t value
+    ; default_colon: Token.t value
+    }
+  and return_statement =
+    { return_keyword: Token.t value
+    ; return_expression: expression option value
+    ; return_semicolon: Token.t option value
+    }
+  and goto_label =
+    { goto_label_name: Token.t value
+    ; goto_label_colon: Token.t value
+    }
+  and goto_statement =
+    { goto_statement_keyword: Token.t value
+    ; goto_statement_label_name: Token.t value
+    ; goto_statement_semicolon: Token.t value
+    }
+  and throw_statement =
+    { throw_keyword: Token.t value
+    ; throw_expression: expression value
+    ; throw_semicolon: Token.t value
+    }
+  and break_statement =
+    { break_keyword: Token.t value
+    ; break_level: literal_expression option value
+    ; break_semicolon: Token.t value
+    }
+  and continue_statement =
+    { continue_keyword: Token.t value
+    ; continue_level: literal_expression option value
+    ; continue_semicolon: Token.t value
+    }
+  and function_static_statement =
+    { static_static_keyword: Token.t value
+    ; static_declarations: static_declarator listesque value
+    ; static_semicolon: Token.t value
+    }
+  and static_declarator =
+    { static_name: Token.t value
+    ; static_initializer: simple_initializer option value
+    }
+  and echo_statement =
+    { echo_keyword: Token.t value
+    ; echo_expressions: expression listesque value
+    ; echo_semicolon: Token.t value
+    }
+  and global_statement =
+    { global_keyword: Token.t value
+    ; global_variables: Token.t listesque value
+    ; global_semicolon: Token.t value
+    }
+  and simple_initializer =
+    { simple_initializer_equal: Token.t value
+    ; simple_initializer_value: expression value
+    }
+  and anonymous_function =
+    { anonymous_async_keyword: Token.t option value
+    ; anonymous_coroutine_keyword: Token.t option value
+    ; anonymous_function_keyword: Token.t value
+    ; anonymous_left_paren: Token.t value
+    ; anonymous_parameters: parameter listesque value
+    ; anonymous_right_paren: Token.t value
+    ; anonymous_colon: Token.t option value
+    ; anonymous_type: specifier option value
+    ; anonymous_use: anonymous_function_use_clause option value
+    ; anonymous_body: compound_statement value
+    }
+  and anonymous_function_use_clause =
+    { anonymous_use_keyword: Token.t value
+    ; anonymous_use_left_paren: Token.t value
+    ; anonymous_use_variables: expression listesque value
+    ; anonymous_use_right_paren: Token.t value
+    }
+  and lambda_expression =
+    { lambda_async: Token.t option value
+    ; lambda_coroutine: Token.t option value
+    ; lambda_signature: specifier value
+    ; lambda_arrow: Token.t value
+    ; lambda_body: lambda_body value
+    }
+  and lambda_signature =
+    { lambda_left_paren: Token.t value
+    ; lambda_parameters: parameter listesque value
+    ; lambda_right_paren: Token.t value
+    ; lambda_colon: Token.t option value
+    ; lambda_type: specifier option value
+    }
+  and cast_expression =
+    { cast_left_paren: Token.t value
+    ; cast_type: Token.t value
+    ; cast_right_paren: Token.t value
+    ; cast_operand: expression value
+    }
+  and scope_resolution_expression =
+    { scope_resolution_qualifier: expression value
+    ; scope_resolution_operator: Token.t value
+    ; scope_resolution_name: Token.t value
+    }
+  and member_selection_expression =
+    { member_object: expression value
+    ; member_operator: Token.t value
+    ; member_name: Token.t value
+    }
+  and safe_member_selection_expression =
+    { safe_member_object: expression value
+    ; safe_member_operator: Token.t value
+    ; safe_member_name: Token.t value
+    }
+  and embedded_member_selection_expression =
+    { embedded_member_object: variable_expression value
+    ; embedded_member_operator: Token.t value
+    ; embedded_member_name: Token.t value
+    }
+  and yield_expression =
+    { yield_keyword: Token.t value
+    ; yield_operand: constructor_expression value
+    }
+  and print_expression =
+    { print_keyword: Token.t value
+    ; print_expression: expression value
+    }
+  and prefix_unary_expression =
+    { prefix_unary_operator: Token.t value
+    ; prefix_unary_operand: expression value
+    }
+  and postfix_unary_expression =
+    { postfix_unary_operand: expression value
+    ; postfix_unary_operator: Token.t value
+    }
+  and binary_expression =
+    { binary_left_operand: expression value
+    ; binary_operator: Token.t value
+    ; binary_right_operand: expression value
+    }
+  and instanceof_expression =
+    { instanceof_left_operand: expression value
+    ; instanceof_operator: Token.t value
+    ; instanceof_right_operand: expression value
+    }
+  and conditional_expression =
+    { conditional_test: expression value
+    ; conditional_question: Token.t value
+    ; conditional_consequence: expression option value
+    ; conditional_colon: Token.t value
+    ; conditional_alternative: expression value
+    }
+  and eval_expression =
+    { eval_keyword: Token.t value
+    ; eval_left_paren: Token.t value
+    ; eval_argument: expression value
+    ; eval_right_paren: Token.t value
+    }
+  and empty_expression =
+    { empty_keyword: Token.t value
+    ; empty_left_paren: Token.t value
+    ; empty_argument: expression value
+    ; empty_right_paren: Token.t value
+    }
+  and define_expression =
+    { define_keyword: Token.t value
+    ; define_left_paren: Token.t value
+    ; define_argument_list: expression listesque value
+    ; define_right_paren: Token.t value
+    }
+  and isset_expression =
+    { isset_keyword: Token.t value
+    ; isset_left_paren: Token.t value
+    ; isset_argument_list: expression listesque value
+    ; isset_right_paren: Token.t value
+    }
+  and function_call_expression =
+    { function_call_receiver: expression value
+    ; function_call_left_paren: Token.t value
+    ; function_call_argument_list: expression listesque value
+    ; function_call_right_paren: Token.t value
+    }
+  and parenthesized_expression =
+    { parenthesized_expression_left_paren: Token.t value
+    ; parenthesized_expression_expression: expression value
+    ; parenthesized_expression_right_paren: Token.t value
+    }
+  and braced_expression =
+    { braced_expression_left_brace: Token.t value
+    ; braced_expression_expression: expression value
+    ; braced_expression_right_brace: Token.t value
+    }
+  and embedded_braced_expression =
+    { embedded_braced_expression_left_brace: Token.t value
+    ; embedded_braced_expression_expression: expression value
+    ; embedded_braced_expression_right_brace: Token.t value
+    }
+  and list_expression =
+    { list_keyword: Token.t value
+    ; list_left_paren: Token.t value
+    ; list_members: (expression option) listesque value
+    ; list_right_paren: Token.t value
+    }
+  and collection_literal_expression =
+    { collection_literal_name: Token.t value
+    ; collection_literal_left_brace: Token.t value
+    ; collection_literal_initializers: constructor_expression listesque value
+    ; collection_literal_right_brace: Token.t value
+    }
+  and object_creation_expression =
+    { object_creation_new_keyword: Token.t value
+    ; object_creation_type: todo_aggregate value
+    ; object_creation_left_paren: Token.t option value
+    ; object_creation_argument_list: expression listesque value
+    ; object_creation_right_paren: Token.t option value
+    }
+  and array_creation_expression =
+    { array_creation_left_bracket: Token.t value
+    ; array_creation_members: constructor_expression listesque value
+    ; array_creation_right_bracket: Token.t value
+    }
+  and array_intrinsic_expression =
+    { array_intrinsic_keyword: Token.t value
+    ; array_intrinsic_left_paren: Token.t value
+    ; array_intrinsic_members: constructor_expression listesque value
+    ; array_intrinsic_right_paren: Token.t value
+    }
+  and darray_intrinsic_expression =
+    { darray_intrinsic_keyword: Token.t value
+    ; darray_intrinsic_left_bracket: Token.t value
+    ; darray_intrinsic_members: element_initializer listesque value
+    ; darray_intrinsic_right_bracket: Token.t value
+    }
+  and dictionary_intrinsic_expression =
+    { dictionary_intrinsic_keyword: Token.t value
+    ; dictionary_intrinsic_left_bracket: Token.t value
+    ; dictionary_intrinsic_members: element_initializer listesque value
+    ; dictionary_intrinsic_right_bracket: Token.t value
+    }
+  and keyset_intrinsic_expression =
+    { keyset_intrinsic_keyword: Token.t value
+    ; keyset_intrinsic_left_bracket: Token.t value
+    ; keyset_intrinsic_members: expression listesque value
+    ; keyset_intrinsic_right_bracket: Token.t value
+    }
+  and varray_intrinsic_expression =
+    { varray_intrinsic_keyword: Token.t value
+    ; varray_intrinsic_left_bracket: Token.t value
+    ; varray_intrinsic_members: expression listesque value
+    ; varray_intrinsic_right_bracket: Token.t value
+    }
+  and vector_intrinsic_expression =
+    { vector_intrinsic_keyword: Token.t value
+    ; vector_intrinsic_left_bracket: Token.t value
+    ; vector_intrinsic_members: expression listesque value
+    ; vector_intrinsic_right_bracket: Token.t value
+    }
+  and element_initializer =
+    { element_key: expression value
+    ; element_arrow: Token.t value
+    ; element_value: expression value
+    }
+  and subscript_expression =
+    { subscript_receiver: expression value
+    ; subscript_left_bracket: Token.t value
+    ; subscript_index: expression option value
+    ; subscript_right_bracket: Token.t value
+    }
+  and embedded_subscript_expression =
+    { embedded_subscript_receiver: variable_expression value
+    ; embedded_subscript_left_bracket: Token.t value
+    ; embedded_subscript_index: expression value
+    ; embedded_subscript_right_bracket: Token.t value
+    }
+  and awaitable_creation_expression =
+    { awaitable_async: Token.t value
+    ; awaitable_coroutine: Token.t option value
+    ; awaitable_compound_statement: compound_statement value
+    }
+  and xhp_children_declaration =
+    { xhp_children_keyword: Token.t value
+    ; xhp_children_expression: expression value
+    ; xhp_children_semicolon: Token.t value
+    }
+  and xhp_children_parenthesized_list =
+    { xhp_children_list_left_paren: Token.t value
+    ; xhp_children_list_xhp_children: expression listesque value
+    ; xhp_children_list_right_paren: Token.t value
+    }
+  and xhp_category_declaration =
+    { xhp_category_keyword: Token.t value
+    ; xhp_category_categories: Token.t listesque value
+    ; xhp_category_semicolon: Token.t value
+    }
+  and xhp_enum_type =
+    { xhp_enum_keyword: Token.t value
+    ; xhp_enum_left_brace: Token.t value
+    ; xhp_enum_values: literal_expression listesque value
+    ; xhp_enum_right_brace: Token.t value
+    }
+  and xhp_required =
+    { xhp_required_at: Token.t value
+    ; xhp_required_keyword: Token.t value
+    }
+  and xhp_class_attribute_declaration =
+    { xhp_attribute_keyword: Token.t value
+    ; xhp_attribute_attributes: todo_aggregate listesque value
+    ; xhp_attribute_semicolon: Token.t value
+    }
+  and xhp_class_attribute =
+    { xhp_attribute_decl_type: specifier value
+    ; xhp_attribute_decl_name: Token.t value
+    ; xhp_attribute_decl_initializer: simple_initializer option value
+    ; xhp_attribute_decl_required: xhp_required option value
+    }
+  and xhp_simple_class_attribute =
+    { xhp_simple_class_attribute_type: simple_type_specifier value
+    }
+  and xhp_attribute =
+    { xhp_attribute_name: Token.t value
+    ; xhp_attribute_equal: Token.t value
+    ; xhp_attribute_expression: expression value
+    }
+  and xhp_open =
+    { xhp_open_left_angle: Token.t value
+    ; xhp_open_name: Token.t value
+    ; xhp_open_attributes: xhp_attribute listesque value
+    ; xhp_open_right_angle: Token.t value
+    }
+  and xhp_expression =
+    { xhp_open: xhp_open value
+    ; xhp_body: expression listesque value
+    ; xhp_close: xhp_close option value
+    }
+  and xhp_close =
+    { xhp_close_left_angle: Token.t value
+    ; xhp_close_name: Token.t value
+    ; xhp_close_right_angle: Token.t value
+    }
+  and type_constant =
+    { type_constant_left_type: specifier value
+    ; type_constant_separator: Token.t value
+    ; type_constant_right_type: Token.t value
+    }
+  and vector_type_specifier =
+    { vector_type_keyword: Token.t value
+    ; vector_type_left_angle: Token.t value
+    ; vector_type_type: specifier value
+    ; vector_type_right_angle: Token.t value
+    }
+  and keyset_type_specifier =
+    { keyset_type_keyword: Token.t value
+    ; keyset_type_left_angle: Token.t value
+    ; keyset_type_type: specifier value
+    ; keyset_type_right_angle: Token.t value
+    }
+  and tuple_type_explicit_specifier =
+    { tuple_type_keyword: Token.t value
+    ; tuple_type_left_angle: Token.t value
+    ; tuple_type_types: simple_type_specifier value
+    ; tuple_type_right_angle: Token.t value
+    }
+  and varray_type_specifier =
+    { varray_keyword: Token.t value
+    ; varray_left_angle: Token.t value
+    ; varray_type: simple_type_specifier value
+    ; varray_optional_comma: Token.t option value
+    ; varray_right_angle: Token.t value
+    }
+  and vector_array_type_specifier =
+    { vector_array_keyword: Token.t value
+    ; vector_array_left_angle: Token.t value
+    ; vector_array_type: specifier value
+    ; vector_array_right_angle: Token.t value
+    }
+  and type_parameter =
+    { type_variance: Token.t option value
+    ; type_name: Token.t value
+    ; type_constraints: type_constraint listesque value
+    }
+  and type_constraint =
+    { constraint_keyword: Token.t value
+    ; constraint_type: specifier value
+    }
+  and darray_type_specifier =
+    { darray_keyword: Token.t value
+    ; darray_left_angle: Token.t value
+    ; darray_key: simple_type_specifier value
+    ; darray_comma: Token.t value
+    ; darray_value: simple_type_specifier value
+    ; darray_optional_comma: Token.t option value
+    ; darray_right_angle: Token.t value
+    }
+  and map_array_type_specifier =
+    { map_array_keyword: Token.t value
+    ; map_array_left_angle: Token.t value
+    ; map_array_key: specifier value
+    ; map_array_comma: Token.t value
+    ; map_array_value: specifier value
+    ; map_array_right_angle: Token.t value
+    }
+  and dictionary_type_specifier =
+    { dictionary_type_keyword: Token.t value
+    ; dictionary_type_left_angle: Token.t value
+    ; dictionary_type_members: specifier listesque value
+    ; dictionary_type_right_angle: Token.t value
+    }
+  and closure_type_specifier =
+    { closure_outer_left_paren: Token.t value
+    ; closure_function_keyword: Token.t value
+    ; closure_inner_left_paren: Token.t value
+    ; closure_parameter_types: specifier listesque value
+    ; closure_inner_right_paren: Token.t value
+    ; closure_colon: Token.t value
+    ; closure_return_type: specifier value
+    ; closure_outer_right_paren: Token.t value
+    }
+  and classname_type_specifier =
+    { classname_keyword: Token.t value
+    ; classname_left_angle: Token.t value
+    ; classname_type: specifier value
+    ; classname_right_angle: Token.t value
+    }
+  and field_specifier =
+    { field_question: Token.t option value
+    ; field_name: expression value
+    ; field_arrow: Token.t value
+    ; field_type: specifier value
+    }
+  and field_initializer =
+    { field_initializer_name: expression value
+    ; field_initializer_arrow: Token.t value
+    ; field_initializer_value: expression value
+    }
+  and shape_type_specifier =
+    { shape_type_keyword: Token.t value
+    ; shape_type_left_paren: Token.t value
+    ; shape_type_fields: field_specifier listesque value
+    ; shape_type_ellipsis: Token.t option value
+    ; shape_type_right_paren: Token.t value
+    }
+  and shape_expression =
+    { shape_expression_keyword: Token.t value
+    ; shape_expression_left_paren: Token.t value
+    ; shape_expression_fields: field_initializer listesque value
+    ; shape_expression_right_paren: Token.t value
+    }
+  and tuple_expression =
+    { tuple_expression_keyword: Token.t value
+    ; tuple_expression_left_paren: Token.t value
+    ; tuple_expression_items: expression listesque value
+    ; tuple_expression_right_paren: Token.t value
+    }
+  and generic_type_specifier =
+    { generic_class_type: Token.t value
+    ; generic_argument_list: type_arguments value
+    }
+  and nullable_type_specifier =
+    { nullable_question: Token.t value
+    ; nullable_type: specifier value
+    }
+  and soft_type_specifier =
+    { soft_at: Token.t value
+    ; soft_type: specifier value
+    }
+  and type_arguments =
+    { type_arguments_left_angle: Token.t value
+    ; type_arguments_types: specifier listesque value
+    ; type_arguments_right_angle: Token.t value
+    }
+  and type_parameters =
+    { type_parameters_left_angle: Token.t value
+    ; type_parameters_parameters: type_parameter listesque value
+    ; type_parameters_right_angle: Token.t value
+    }
+  and tuple_type_specifier =
+    { tuple_left_paren: Token.t value
+    ; tuple_types: (specifier option) listesque value
+    ; tuple_right_paren: Token.t value
+    }
+
+end (* MakeValidated *)

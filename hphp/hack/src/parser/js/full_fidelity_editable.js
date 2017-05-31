@@ -3,19 +3,22 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the 'hack' directory of this source tree. An additional
+ * LICENSE file in the "hack" directory of this source tree. An additional
  * grant of patent rights can be found in the PATENTS file in the same
  * directory.
  *
+ **
+ *
+ * THIS FILE IS @generated; DO NOT EDIT IT
+ * To regenerate this file, run
+ *
+ *   buck run //hphp/hack/src:generate_full_fidelity
+ *
+ * This module contains the type describing the structure of a syntax tree.
+ *
+ **
+ *
  */
-/* THIS FILE IS GENERATED; DO NOT EDIT IT */
-/* @generated */
-/**
-  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
-  the binary.
-  buck build hphp/hack/src:generate_full_fidelity
-  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
-*/
 
 "use strict";
 

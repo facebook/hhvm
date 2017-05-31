@@ -32,6 +32,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -141,6 +142,15 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
     break;
   case 'I':
     out = folly::to<T>(transport->getRequestSize());
+    break;
+  case 'j':
+    {
+      auto static jitMaturityCounter =
+        ServiceData::createCounter("jit.maturity");
+      if (jitMaturityCounter) {
+        out = folly::to<T>(jitMaturityCounter->getValue());
+      }
+    }
     break;
   case 'n':
     if (arg.empty()) return false;

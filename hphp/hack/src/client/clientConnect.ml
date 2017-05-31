@@ -229,6 +229,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           root = env.root;
           no_load = env.no_load;
           silent = false;
+          exit_on_failure = true;
           ai_mode = env.ai_mode;
           debug_port = None;
         };

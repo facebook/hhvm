@@ -155,11 +155,17 @@ type state = {
 type event =
   | Server_hello
   | Server_message of ServerCommandTypes.push
-  | Server_exit of Exit_status.t
   | Client_message of ClientMessageQueue.client_message
-  | Client_error
+  | Client_error (* recoverable parsing error from client *)
   | Client_exit (* client exited unceremoniously, without an exit message *)
   | Tick (* once per second, on idle, only generated when server is connected *)
+
+(* Here are some exit points. The "exit_fail_delay" is in case the user    *)
+(* restarted hh_server themselves: we'll give them a chance to start it up *)
+(* rather than letting our client aggressively start it up first.          *)
+let exit_ok () = exit 0
+let exit_fail () = exit 1
+let exit_fail_delay () = Unix.sleep 2; exit 1
 
 exception Denied_due_to_existing_persistent_connection
 
@@ -823,6 +829,7 @@ let do_initialize_start
     no_load = false;
     ai_mode = None;
     silent = true;
+    exit_on_failure = false;
     debug_port = None;
   } in
   ClientStart.main env_start
@@ -992,15 +999,16 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
    machine accordingly. *)
 let handle_event (state: state) (event: event) : unit =
   let open ClientMessageQueue in
-  let exit () = exit (if state.lsp_state = Post_shutdown then 0 else 1) in
   match state.lsp_state, event with
   (* response *)
   | _, Client_message c when c.kind = ClientMessageQueue.Response ->
     do_response c.id c.result c.error
 
   (* exit notification *)
-  | _, Client_message c when c.method_ = "exit" -> exit ()
-  | _, Client_exit -> exit ()
+  | _, Client_exit ->
+    exit_fail ()
+  | _, Client_message c when c.method_ = "exit" ->
+    if state.lsp_state = Post_shutdown then exit_ok () else exit_fail ()
 
   (* initialize request*)
   | Pre_init is_retry, Client_message c when c.method_ = "initialize" -> begin
@@ -1056,7 +1064,7 @@ let handle_event (state: state) (event: event) : unit =
     begin try
       do_initialize_after_hello conn ienv.is_retry (List.rev ienv.file_edits)
     with
-      Denied_due_to_existing_persistent_connection -> exit ()
+      Denied_due_to_existing_persistent_connection -> exit_fail ()
       (* If we're denied at this stage, we can't recover: we'll just exit *)
       (* and trust the client to restart us. *)
     end;
@@ -1072,7 +1080,7 @@ let handle_event (state: state) (event: event) : unit =
     log_error
       (Some event)
       (Error.Internal_error "Received unexpected 'hello' from hh_server");
-    exit ()
+    exit_fail ()
 
   (* Tick when we're connected to the server and have empty queue *)
   | Main_loop, Tick when state.needs_idle ->
@@ -1186,8 +1194,9 @@ let handle_event (state: state) (event: event) : unit =
   | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
     ()
 
-  (* ignore parsing errors *)
-  | _, Client_error -> ()
+  (* Recoverable errors, e.g. malformed json, which we ignore *)
+  | _, Client_error ->
+    ()
 
   (* catch-all for client reqs/notifications we haven't yet implemented *)
   | Main_loop, Client_message c ->
@@ -1202,10 +1211,7 @@ let handle_event (state: state) (event: event) : unit =
   | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     print_log_message Message_type.ErrorMessage "Another client has connected"
       |> notify stdout "window/logMessage";
-    exit ()
-
-  (* TODO message from server *)
-  | _, Server_exit _ -> () (* todo *)
+    exit_fail ()
 
   (* idle tick. No-op. *)
   | _, Tick -> ()
@@ -1247,8 +1253,8 @@ let main () : unit =
     with e ->
       respond_to_error !ref_event e;
       log_error !ref_event e;
-      if e = Sys_error "Broken pipe" then exit 1
-      (* The reading/writing we do here is with hh_server, so this exception *)
-      (* means that our connection to hh_server has gone down, which is      *)
-      (* unrecoverable by us. We'll trust the LSP client to restart.         *)
+      let is_eof = (e = Sys_error "Broken pipe" || e = End_of_file) in
+      if is_eof then exit_fail_delay ()
+      (* Whether we get an EOF with the client or with the server, they're    *)
+      (* both unrecoverable. We must exit and trust the LSP client to restart *)
   done

@@ -425,6 +425,7 @@ let parse_start_env command =
     no_load = !no_load;
     ai_mode = !ai_mode;
     silent = false;
+    exit_on_failure = true;
     debug_port = None;
   }
 

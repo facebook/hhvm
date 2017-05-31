@@ -23,6 +23,7 @@ type env = {
   root: Path.t;
   no_load : bool;
   silent : bool;
+  exit_on_failure : bool;
   ai_mode : string option;
   debug_port: Unix.file_descr option;
 }
@@ -60,9 +61,14 @@ let start_server env =
       (String.concat " "
          (Array.to_list (Array.map Filename.quote hh_server_args)));
 
+  let stdin, stdout, stderr = if env.silent then
+    let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in nfd, nfd, nfd
+  else
+    Unix.(stdin, stdout, stderr) in
+
   try
     let server_pid =
-      Unix.(create_process hh_server hh_server_args stdin stdout stderr) in
+      Unix.create_process hh_server hh_server_args stdin stdout stderr in
     Unix.close out_fd;
 
     match Unix.waitpid [] server_pid with
@@ -70,15 +76,15 @@ let start_server env =
       assert (input_line ic = ServerMonitorUtils.ready);
       close_in ic
     | _, Unix.WEXITED i ->
-      Printf.eprintf
-        "Starting hh_server failed. Exited with status code: %d!\n" i;
-      exit 77
+      if not env.silent then Printf.eprintf
+          "Starting hh_server failed. Exited with status code: %d!\n" i;
+      if env.exit_on_failure then exit 77
     | _ ->
-      Printf.eprintf "Could not start hh_server!\n";
-      exit 77
+      if not env.silent then Printf.eprintf "Could not start hh_server!\n";
+      if env.exit_on_failure then exit 77
   with _ ->
-    Printf.eprintf "Could not start hh_server!\n";
-    exit 77
+    if not env.silent then Printf.eprintf "Could not start hh_server!\n";
+    if env.exit_on_failure then exit 77
 
 
 let should_start env =

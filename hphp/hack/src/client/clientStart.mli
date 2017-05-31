@@ -12,6 +12,7 @@ type env = {
   root: Path.t;
   no_load: bool;
   silent: bool;
+  exit_on_failure: bool;
   ai_mode: string option;
   debug_port: Unix.file_descr option;
 }

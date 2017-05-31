@@ -16,9 +16,7 @@ function g() {
     <div
       data-fooooooooooooooooo={$a}
       data-baaaaaaaaaaaaaaaaaaaaar={$a}
-      baaaaz={$a}>
-      hi
-    </div>;
+      baaaaz={$a}>hi</div>;
 }
 
 function h() {
@@ -67,9 +65,11 @@ function o() {
 
 function p() {
   return
-    <aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa href="a" href2="a" href3="a" href4="a">
-      1 1 1
-    </aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>;
+    <aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      href="a"
+      href2="a"
+      href3="a"
+      href4="a">1 1 1</aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>;
 }
 
 function q() {
@@ -121,11 +121,8 @@ function u($x, $y) {
 function v() {
   return
     <a>
-      <aaaaaaaaaaa href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">
-        1
-      </aaaaaaaaaaa>
-      !
-    </a>;
+      <aaaaaaaaaaa
+        href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</aaaaaaaaaaa>!</a>;
 }
 
 function v() {
@@ -163,5 +160,13 @@ function y() {
         'noCount' => !$has_count,
       })}>
       foo
+    </div>;
+}
+
+function z() {
+  return
+    <div>foooooooooooooooooooo{$baaaaaaaaaaaaaaaaaar}
+    <span>baaaaaaaaaaaaaaaaaaz</span>
+    <span>qux</span>
     </div>;
 }

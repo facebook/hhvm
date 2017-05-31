@@ -12,6 +12,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module Syntax = Full_fidelity_editable_syntax
 module TriviaKind = Full_fidelity_trivia_kind
 module Trivia = Full_fidelity_editable_trivia
+module Token = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
 open Core
@@ -1119,90 +1120,111 @@ let rec transform node =
         ]
     ]
   | XHPExpression x ->
-    (**
-     * XHP breaks the normal rules of trivia. If there is a newline after the
-     * XHPOpen tag then it becomes leading trivia for the first token in the
-     * XHPBody instead of trailing trivia for the open tag.
-     *
-     * To deal with this we remove the body's leading trivia, split it after the
-     * first newline, and treat the first half as trailing trivia. We don't use
-     * transform_xhp_leading_trivia because we want the split after the
-     * XHPOpen's trailing trivia to be optional, so that small XHPExpressions
-     * can be joined onto one line.
-     *
-     * BracedExpressions and XHPComments don't have trailing trivia either, so
-     * we keep track of whether the previous token had trailing trivia so we can
-     * handle the next token's leading trivia appropriately.
-     *)
     let handle_xhp_body body =
       match syntax body with
-      | Missing -> Nothing
-      | SyntaxList (hd :: tl) ->
-        let leading, hd = remove_leading_trivia hd in
-        let (up_to_first_newline, after_newline, _) =
-          List.fold leading
-            ~init:([], [], false)
-            ~f:(fun (upto, after, seen) t ->
-              if seen then upto, t :: after, true
-              else t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine
-            )
-        in
-        Fmt [
-          transform_trailing_trivia up_to_first_newline;
-          Split;
-          transform_leading_trivia after_newline;
-          let prev_token_had_trailing_trivia = ref false in
-          Fmt (List.map (hd :: tl) ~f:(fun node -> Fmt [
-            begin
-              let leading, node = remove_leading_trivia node in
-              let result = Fmt [
-                if !prev_token_had_trailing_trivia
-                  then transform_leading_trivia leading
-                  else transform_xhp_leading_trivia leading;
-                t node;
-              ] in
-              let open EditableToken in
-              prev_token_had_trailing_trivia := begin match syntax node with
-                | BracedExpression _ -> false
-                | Token t when kind t = TokenKind.XHPComment -> false
-                | _ -> true
+      | Missing -> Nothing, true
+      | SyntaxList xs ->
+        (* XHP breaks the normal rules of trivia. All trailing trivia (except on
+         * XHPBody tokens) is lexed as leading trivia for the next token.
+         *
+         * To deal with this, we keep track of whether the last token we added
+         * was one that trailing trivia is scanned for. If it wasn't, we handle
+         * the next token's leading trivia with transform_xhp_leading_trivia,
+         * which treats all trivia up to the first newline as trailing trivia.
+         *)
+        let prev_token_scanned_trailing_trivia = ref false in
+        let prev_token_was_xhpbody = ref false in
+        let transformed_body = Fmt (List.map xs ~f:begin fun node ->
+          let leading, node = remove_leading_trivia node in
+          let transformed_node = Fmt [
+            (* Whitespace in an XHPBody is only significant when adjacent to an
+             * XHPBody token, so we are free to add splits between other nodes
+             * (like XHPExpressions and BracedExpressions). We can also safely
+             * add splits before XHPBody tokens, but only if they already have
+             * whitespace in their leading trivia.
+             *
+             * Splits *after* XHPBody tokens are handled below by
+             * trailing_whitespace, so if the previous token was an XHPBody
+             * token, we don't need to do anything. *)
+            if !prev_token_was_xhpbody
+              then Nothing
+              else begin
+                match syntax node with
+                | Token _ -> if has_invisibles leading then Split else Nothing
+                | _ -> Split
               end;
-              result
-            end;
-            let has_trailing_whitespace =
-              List.exists (Syntax.trailing_trivia node)
-                ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.WhiteSpace)
-            in
-            let has_trailing_newline =
-              List.exists (Syntax.trailing_trivia node)
-                ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.EndOfLine)
-            in
+            if !prev_token_scanned_trailing_trivia
+              then transform_leading_trivia leading
+              else transform_xhp_leading_trivia leading;
+            t node;
+          ] in
+          (* XHPExpressions currently have trailing trivia when in an
+           * XHPBody, but they shouldn't--see T16787398.
+           * Once that issue is resolved, prev_token_scanned_trailing_trivia and
+           * prev_token_was_xhpbody will be equivalent and one can be removed.
+           *)
+          let open EditableToken in
+          prev_token_scanned_trailing_trivia := begin
             match syntax node with
-            | XHPExpression _ ->
-              if has_trailing_whitespace then space_split () else Split
-            | Token _ when has_trailing_newline ->
-              Newline
-            | _ ->
-              if has_trailing_whitespace then Space else Nothing
-          ]))
-        ]
+            | XHPExpression _ -> true
+            | Token t -> kind t = TokenKind.XHPBody
+            | _ -> false
+          end;
+          prev_token_was_xhpbody := begin
+            match syntax node with
+            | Token t -> kind t = TokenKind.XHPBody
+            | _ -> false
+          end;
+          (* Here, we preserve newlines after XHPBody tokens and don't add
+           * splits between them. This means that we don't reflow paragraphs in
+           * XHP to fit in the column limit.
+           *
+           * If we were to split between XHPBody tokens, we'd need a new Rule
+           * type to govern word-wrap style splitting, since using independent
+           * splits (e.g. SplitWith Cost.Base) between every token would make
+           * solving too expensive. *)
+          let trailing = Syntax.trailing_trivia node in
+          let trailing_whitespace =
+            match syntax node with
+            | Token _ when has_newline trailing -> Newline
+            | _ when has_whitespace trailing -> Space
+            | _ -> Nothing
+          in
+          Fmt [transformed_node; trailing_whitespace]
+        end) in
+        let leading_token =
+          match Syntax.leading_token (List.hd_exn xs) with
+          | None -> failwith "Expected token"
+          | Some token -> token
+        in
+        let can_split_before_first_token =
+          let open EditableToken in
+          kind leading_token <> TokenKind.XHPBody ||
+          has_invisibles (leading leading_token)
+        in
+        let transformed_body = Fmt [
+          if can_split_before_first_token then Split else Nothing;
+          transformed_body;
+        ] in
+        let can_split_before_close = not !prev_token_was_xhpbody in
+        transformed_body, can_split_before_close
       | _ -> failwith "Expected SyntaxList"
     in
 
     let (xhp_open, body, close) = get_xhp_expression_children x in
-    WithPossibleLazyRule (Rule.XHPExpression, t xhp_open, Fmt [
-      Nest [
-        handle_xhp_body body
-      ];
-      when_present close (fun () ->
-        let leading, close = remove_leading_trivia close in Fmt [
-          (* Ignore extra newlines by treating this as trailing trivia *)
-          ignore_trailing_invisibles leading;
-          Split;
-          t close;
-        ]
-      );
-    ])
+    WithPossibleLazyRule (Rule.XHPExpression, t xhp_open,
+      let transformed_body, can_split_before_close = handle_xhp_body body in
+      Fmt [
+        Nest [transformed_body];
+        when_present close begin fun () ->
+          let leading, close = remove_leading_trivia close in Fmt [
+            (* Ignore extra newlines by treating this as trailing trivia *)
+            ignore_trailing_invisibles leading;
+            if can_split_before_close then Split else Nothing;
+            t close;
+          ]
+        end;
+      ])
   | VarrayTypeSpecifier x ->
     let (kw, left_a, varray_type, _, right_a) =
       get_varray_type_specifier_children x in
@@ -1895,6 +1917,25 @@ and transform_binary_expression ~is_nested expr =
         failwith "Expected non empty list of binary expression pieces"
     ]
 
+(* True if the trivia list contains WhiteSpace trivia.
+ * Note that WhiteSpace includes spaces and tabs, but not newlines. *)
+and has_whitespace trivia_list =
+  List.exists trivia_list
+    ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.WhiteSpace)
+
+(* True if the trivia list contains EndOfLine trivia. *)
+and has_newline trivia_list =
+  List.exists trivia_list
+    ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.EndOfLine)
+
+(* True if the trivia list contains any "invisible" trivia, meaning spaces,
+ * tabs, or newlines. *)
+and has_invisibles trivia_list =
+  List.exists trivia_list ~f:begin fun trivia ->
+    Trivia.kind trivia = TriviaKind.WhiteSpace ||
+    Trivia.kind trivia = TriviaKind.EndOfLine
+  end
+
 and transform_leading_trivia t = transform_trivia ~is_leading:true t
 and transform_trailing_trivia t = transform_trivia ~is_leading:false t
 
@@ -1909,10 +1950,6 @@ and transform_trivia ~is_leading trivia =
   let whitespace_followed_last_comment = ref false in
   let trailing_invisibles = ref [] in
   let comments = ref [] in
-  let has_newline l =
-    List.exists l ~f:(fun t -> Trivia.kind t = TriviaKind.EndOfLine) in
-  let has_whitespace l =
-    List.exists l ~f:(fun t -> Trivia.kind t = TriviaKind.WhiteSpace) in
   let make_comment _ =
     if Option.is_some !last_comment then begin
       newline_followed_last_comment := has_newline !trailing_invisibles;
@@ -2051,17 +2088,15 @@ and ignore_trailing_invisibles triv =
   Fmt (List.map triv ~f:(fun t -> Ignore ((Trivia.text t), (Trivia.width t))))
 
 and transform_xhp_leading_trivia triv =
-  let newlines = ref 0 in
-  Fmt (List.map triv ~f:(fun t ->
-    let ignored = Ignore ((Trivia.text t), (Trivia.width t)) in
-    match Trivia.kind t with
-    | TriviaKind.EndOfLine ->
-      newlines := !newlines + 1;
-      Fmt [
-        ignored;
-        if !newlines = 1 then Newline
-        else if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES + 1 then BlankLine
-        else Nothing
-      ]
-    | _ -> ignored;
-  ))
+  let (up_to_first_newline, after_newline, _) =
+    List.fold triv
+      ~init:([], [], false)
+      ~f:begin fun (upto, after, seen) t ->
+        if seen then upto, t :: after, true
+        else t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine
+      end
+  in
+  Fmt [
+    ignore_trailing_invisibles up_to_first_newline;
+    transform_leading_invisibles after_newline;
+  ]

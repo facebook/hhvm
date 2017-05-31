@@ -5,9 +5,7 @@ final class :MyFancyXHPClass extends :OtherXHPThing {
 
   protected async function genXHP(): Awaitable<:xhp> {
     $button =
-      <x:button use="primary">
-        Click This Extra Extra Extra Long Text
-      </x:button>;
+      <x:button use="primary">Click This Extra Extra Extra Long Text</x:button>;
     $link = <x:link href="#">Click This</x:link>;
 
     $clickable_sq =
@@ -31,9 +29,8 @@ final class :MyFancyXHPClass extends :OtherXHPThing {
           <x:form id="form" method="post">
             <x:text-input name="input" placeholder="Type a message." />
             <x:button use="primary">Submit Form</x:button>
-            <x:button use="other">
-              This is a decoy button meant to confuse you
-            </x:button>
+            <x:button
+              use="other">This is a decoy button meant to confuse you</x:button>
           </x:form>
         </x:div>
       </x:column-layout-component>;

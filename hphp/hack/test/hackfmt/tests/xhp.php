@@ -123,3 +123,8 @@ function y() {
       foo
     </div>;
 }
+
+function z() {
+  return
+    <div>foooooooooooooooooooo{$baaaaaaaaaaaaaaaaaar}<span>baaaaaaaaaaaaaaaaaaz</span><span>qux</span></div>;
+}

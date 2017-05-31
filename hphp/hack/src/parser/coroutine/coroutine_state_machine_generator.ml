@@ -643,6 +643,36 @@ let add_switch (next_label, body) =
     throw_unimplemented_syntax "A completed coroutine was resumed.";
   ]
 
+(**
+ * Recurively unnests compound_statements that are *direct* children of another
+ * compound_statement. To be conservative, we only collapse when both the
+ * compound_statement and its parent have curly braces.
+ *)
+let unnest_compound_statements node =
+  let get_braced_statements node =
+    match syntax node with
+    | CompoundStatement {
+        compound_left_brace;
+        compound_statements;
+        compound_right_brace;
+      } when (
+        not (is_missing compound_left_brace) &&
+        not (is_missing compound_right_brace)
+      ) ->
+        Some (syntax_node_to_list compound_statements)
+    | _ -> None in
+  let rewrite node =
+    match get_braced_statements node with
+    | Some statements ->
+        statements
+          |> Core_list.concat_map
+            ~f:(fun node ->
+              Option.value (get_braced_statements node) ~default:[ node ])
+          |> make_compound_statement_syntax
+          |> fun statements -> Rewriter.Result.Replace statements
+    | None -> Rewriter.Result.Keep in
+  Rewriter.rewrite_post rewrite node
+
 let lower_body body =
   body
     |> add_missing_return
@@ -651,6 +681,7 @@ let lower_body body =
     |> snd
     |> rewrite_suspends
     |> add_switch
+    |> unnest_compound_statements
     |> rewrite_locals_and_params_into_closure_variables
 
 let make_function_decl_header

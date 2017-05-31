@@ -74,56 +74,82 @@ let parameter_list_to_arg_list function_parameter_list =
   List.map parameter_to_arg function_parameter_list
 
 (**
+ * One of the following, depending on whether the coroutine method is static or
+ * not:
+ *
+ *   - inst_meth($this, "methodName_GeneratedStateMachine")
+ *   - class_meth("ClassName", "methodName_GeneratedStateMachine")
+ *)
+let make_state_machine_method_reference_syntax
+    classish_name
+    function_name
+    method_node =
+  let method_name =
+    make_string_literal_syntax (make_state_machine_method_name function_name) in
+  if is_static_method method_node then
+    make_function_call_expression_syntax
+      class_meth_syntax
+      [ make_string_literal_syntax classish_name; method_name; ]
+  else
+    make_function_call_expression_syntax
+      inst_meth_syntax
+      [ this_syntax; method_name; ]
+
+(**
  * Rewrites a coroutine body to instantiate the closure corresponding to the
  * coroutine, pass in or set any necessary variables, and return the result from
  * invoking resume (with a null argument).
  *)
-  let rewrite_coroutine_body
-    classish_name function_name function_parameter_list =
-    let arg_list = parameter_list_to_arg_list function_parameter_list in
-    let call_inst_method_on_state_machine_syntax =
-      make_function_call_expression_syntax
-        inst_meth_syntax
-        [
-          this_syntax;
-          make_string_literal_syntax
-            (make_state_machine_method_name function_name);
-        ] in
-    let classname = make_closure_classname classish_name function_name in
-    let parameters =
-      continuation_variable_syntax ::
-      call_inst_method_on_state_machine_syntax ::
-      arg_list in
-    let new_closure_syntax = make_object_creation_expression_syntax
-      classname parameters in
-    let select_resume_member_syntax =
-      make_member_selection_expression_syntax
-        new_closure_syntax
-        resume_member_name_syntax in
-    let call_resume_with_null_syntax =
-      make_function_call_expression_syntax
-        select_resume_member_syntax
-        [null_syntax] in
-    let resume_statement_syntax =
-      make_expression_statement_syntax call_resume_with_null_syntax in
-    let suspended_marker_expression =
-      make_static_function_call_expression_syntax
-        suspended_coroutine_result_classname
-        suspended_member_name
-        [] in
-    let return_syntax =
-      make_return_statement_syntax suspended_marker_expression in
-    make_list [resume_statement_syntax; return_syntax]
+let rewrite_coroutine_body
+    classish_name
+    function_name
+    method_node
+    function_parameter_list =
+  let arg_list = parameter_list_to_arg_list function_parameter_list in
+  let state_machine_method_reference_syntax =
+    make_state_machine_method_reference_syntax
+      classish_name
+      function_name
+      method_node in
+  let classname = make_closure_classname classish_name function_name in
+  let parameters =
+    continuation_variable_syntax ::
+    state_machine_method_reference_syntax ::
+    arg_list in
+  let new_closure_syntax = make_object_creation_expression_syntax
+    classname parameters in
+  let select_resume_member_syntax =
+    make_member_selection_expression_syntax
+      new_closure_syntax
+      resume_member_name_syntax in
+  let call_resume_with_null_syntax =
+    make_function_call_expression_syntax
+      select_resume_member_syntax
+      [null_syntax] in
+  let resume_statement_syntax =
+    make_expression_statement_syntax call_resume_with_null_syntax in
+  let suspended_marker_expression =
+    make_static_function_call_expression_syntax
+      suspended_coroutine_result_classname
+      suspended_member_name
+      [] in
+  let return_syntax =
+    make_return_statement_syntax suspended_marker_expression in
+  make_list [resume_statement_syntax; return_syntax]
 
 let try_to_rewrite_coroutine_body
     classish_name
     function_name
-    { methodish_function_body; _; }
+    ({ methodish_function_body; _; } as method_node)
     function_parameter_list =
   match syntax methodish_function_body with
   | CompoundStatement node ->
-      let compound_statements = rewrite_coroutine_body classish_name
-        function_name function_parameter_list in
+      let compound_statements =
+        rewrite_coroutine_body
+          classish_name
+          function_name
+          method_node
+          function_parameter_list in
       Some (make_syntax (CompoundStatement { node with compound_statements }))
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)

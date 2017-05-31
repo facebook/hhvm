@@ -113,6 +113,9 @@ let private_syntax =
 let public_syntax =
   make_token_syntax ~space_after:true TokenKind.Public "public"
 
+let static_syntax =
+  make_token_syntax ~space_after:true TokenKind.Static "static"
+
 let if_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.If "if"
 
@@ -186,6 +189,10 @@ let get_list_item node =
   | ListItem { list_item; _; } -> list_item
   | _ -> failwith "Was not a ListItem"
 
+let is_static_method { methodish_modifiers; _; } =
+  methodish_modifiers
+    |> syntax_node_to_list
+    |> Core_list.exists ~f:is_static
 
 (* Syntax creation functions *)
 
@@ -346,19 +353,22 @@ let make_classish_declaration_syntax classname implements_list classish_body =
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
 let make_methodish_declaration_with_body_syntax
+    ?(methodish_modifiers = [])
     function_decl_header_syntax
     function_body =
   make_methodish_declaration
     (* methodish_attribute *) (make_missing ())
-    (* methodish_modifiers *) (make_missing ())
+    (make_list methodish_modifiers)
     function_decl_header_syntax
     function_body
     (* methodish_semicolon *) (make_missing ())
 
 let make_methodish_declaration_syntax
+    ?methodish_modifiers
     function_decl_header_syntax
     function_body =
   make_methodish_declaration_with_body_syntax
+    ?methodish_modifiers
     function_decl_header_syntax
     (make_compound_statement_syntax function_body)
 
@@ -616,6 +626,9 @@ let make_state_machine_parameter_syntax enclosing_classname function_name =
 
 let inst_meth_syntax =
   make_qualified_name_syntax "inst_meth"
+
+let class_meth_syntax =
+  make_qualified_name_syntax "class_meth"
 
 let make_member_with_unknown_type_declaration_syntax variable_syntax =
   let declaration_syntax =

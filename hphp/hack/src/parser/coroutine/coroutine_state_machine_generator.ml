@@ -775,13 +775,13 @@ let unnest_compound_statements node =
     | None -> Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
 
-let lower_body body =
-  let next_loop_label, body =
-    body
+let lower_body { methodish_function_body; _; } =
+  let next_loop_label, methodish_function_body =
+    methodish_function_body
       |> add_missing_return
       |> rewrite_do 0 in
 
-  body
+  methodish_function_body
     |> rewrite_while
     |> rewrite_for next_loop_label
     |> snd
@@ -849,13 +849,16 @@ let compute_state_machine_data locals_and_params function_node =
 let generate_coroutine_state_machine
     classish_name
     function_name
-    { methodish_function_body; _; }
+    method_node
     function_node =
-  let body, locals_and_params = lower_body methodish_function_body in
+  let body, locals_and_params = lower_body method_node in
   let state_machine_data =
     compute_state_machine_data locals_and_params function_node in
+  let methodish_modifiers =
+    Utils.singleton_if (is_static_method method_node) static_syntax in
   let state_machine_method =
     make_methodish_declaration_with_body_syntax
+      ~methodish_modifiers
       (make_function_decl_header classish_name function_name function_node)
       body in
   state_machine_method, state_machine_data

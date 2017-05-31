@@ -581,6 +581,14 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_expression_statement ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    | SwitchStatement ({ switch_expression; _; } as node) ->
+        let (next_label, prefix_statements), switch_expression =
+          extract_suspend_statements switch_expression next_label in
+        let new_switch_statement =
+          make_syntax (SwitchStatement { node with switch_expression; }) in
+        let statements = prefix_statements @ [ new_switch_statement; ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     (* while-condition constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | WhileStatement _
@@ -589,7 +597,6 @@ let rewrite_suspends node =
     | ForStatement _
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
-    | SwitchStatement _ (* TODO(t17335630): Support suspends here. *)
     | ThrowStatement _ (* TODO(t17335630): Support suspends here. *)
     | EchoStatement _ (* TODO(t17335630): Support suspends here. *)
     (* Suspends will be handled recursively by compound statement's children. *)

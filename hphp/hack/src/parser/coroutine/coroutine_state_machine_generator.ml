@@ -20,10 +20,12 @@ open CoroutineSyntax
 type label =
   | StateLabel of int
   | ErrorStateLabel
+  | LoopLabel of int
 
 let get_label_string = function
   | StateLabel number -> Printf.sprintf "state_label_%d" number
   | ErrorStateLabel -> "state_label_error"
+  | LoopLabel number -> Printf.sprintf "loop_label_%d" number
 
 let get_label_name label =
   make_token_syntax TokenKind.Name (get_label_string label)
@@ -178,6 +180,115 @@ let rewrite_while node =
     | _ ->
         Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
+
+(**
+ * Extracts expressions from a for statement as expression statement syntaxes.
+ *
+ * A for loop has the following format:
+ *
+ *   for (
+ *     initializer_exprs;
+ *     control_exprs_and_condition_expr;
+ *     end_of_loop_exprs
+ *   ) {
+ *     body
+ *   }
+ *
+ * initializer_exprs, control_exprs_and_condition_expr, and end_of_loop_exprs
+ * are each comma-delimited lists of expressions.
+ * control_exprs_and_condition_expr is a glob that represents one of the
+ * following:
+ *
+ *   1) Zero or more control_exprs followed by one condition_expr; or
+ *   2) Zero control_exprs followed by an empty condition_expr, which is
+ *      implicitly considered to be an expression that always evaluates to true.
+ *
+ * This function extracts the following:
+ *
+ *   1) initializer_exprs as a list of ExpressionStatements
+ *   2) control_exprs as a list of ExpressionStatements
+ *   3) condition_expr as an ExpressionStatement
+ *   4) end_of_loop_exprs as a list of ExpressionStatements
+ *)
+let extract_expressions_from_for_statement
+    { for_initializer; for_control; for_end_of_loop; _; } =
+  let make_expression_statement_from_list_item node =
+    make_expression_statement_syntax (get_list_item node) in
+  let make_expression_statements list_syntax =
+    list_syntax
+      |> syntax_node_to_list
+      |> Core_list.map ~f:make_expression_statement_from_list_item in
+
+  let initializer_exprs = make_expression_statements for_initializer in
+  let control_exprs, condition_expr =
+    match Core_list.rev (syntax_node_to_list for_control) with
+    | [] -> [], true_expression_syntax
+    | condition_expr :: rev_control_exprs ->
+      Core_list.rev_map
+        ~f:make_expression_statement_from_list_item rev_control_exprs,
+      condition_expr in
+  let end_of_loop_exprs = make_expression_statements for_end_of_loop in
+  initializer_exprs, control_exprs, condition_expr, end_of_loop_exprs
+
+(**
+ * Re-expresses for statements as while statements.
+ *
+ *   for (
+ *     initializer_exprs;
+ *     [control_exprs...,] condition_expr;
+ *     end_of_loop_exprs
+ *   ) {
+ *     body
+ *   }
+ *
+ * Becomes
+ *
+ *   initializer_exprs
+ *   goto loop_label_#;
+ *   while (true) {
+ *     end_of_loop_exprs
+ *
+ *     loop_label_#:
+ *     control_exprs
+ *     if (!condition_expr) {
+ *      break;
+ *     }
+ *     body
+ *   }
+ *)
+let rewrite_for next_loop_label node =
+  let rewrite node next_loop_label =
+    match syntax node with
+    | ForStatement ({ for_body; _; } as node) ->
+        let
+          initializer_exprs,
+          control_exprs,
+          condition_expr,
+          end_of_loop_exprs =
+            extract_expressions_from_for_statement node in
+        let loop_label = LoopLabel next_loop_label in
+        let next_loop_label = next_loop_label + 1 in
+
+        let goto_statement_syntax = make_goto_statement_syntax loop_label in
+
+        let while_statements =
+          end_of_loop_exprs @
+          make_label_declaration_syntax loop_label ::
+          control_exprs @
+          make_break_unless_syntax condition_expr ::
+          for_body ::
+          [] in
+        let while_syntax = make_while_true_syntax while_statements in
+        let statements =
+          initializer_exprs @
+          goto_statement_syntax ::
+          while_syntax ::
+          [] in
+        let statements = make_compound_statement_syntax statements in
+        next_loop_label, Rewriter.Result.Replace statements
+    | _ ->
+        next_loop_label, Rewriter.Result.Keep in
+  Rewriter.aggregating_rewrite_post rewrite node next_loop_label
 
 (**
  * Transforms suspend expressions recursively.
@@ -473,8 +584,10 @@ let rewrite_suspends node =
     (* while-condition constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | WhileStatement _
+    (* for constructs should have already been rewritten into
+       while-true-with-if-condition constructs. *)
+    | ForStatement _
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
-    | ForStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
     | SwitchStatement _ (* TODO(t17335630): Support suspends here. *)
     | ThrowStatement _ (* TODO(t17335630): Support suspends here. *)
@@ -534,6 +647,8 @@ let lower_body body =
   body
     |> add_missing_return
     |> rewrite_while
+    |> rewrite_for 0
+    |> snd
     |> rewrite_suspends
     |> add_switch
     |> rewrite_locals_and_params_into_closure_variables

@@ -171,7 +171,7 @@ let exception_type_syntax =
   make_token_syntax ~space_after:true TokenKind.Classname "Exception"
 
 
-(* Syntax creation functions *)
+(* Syntax helper functions *)
 
 let rec delimit delimit_syntax = function
   | [] -> []
@@ -181,6 +181,13 @@ let rec delimit delimit_syntax = function
 let make_delimited_list delimit_syntax items =
   make_list (delimit delimit_syntax items)
 
+let get_list_item node =
+  match syntax node with
+  | ListItem { list_item; _; } -> list_item
+  | _ -> failwith "Was not a ListItem"
+
+
+(* Syntax creation functions *)
 
 let make_parenthesized_expression_syntax expression_syntax =
   make_parenthesized_expression

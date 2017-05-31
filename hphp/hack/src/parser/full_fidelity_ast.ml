@@ -1119,8 +1119,10 @@ and pStmt : stmt parser = fun node env ->
         , couldMap ~f:pExpr exprs env
         , []
       ))
-  | BreakStatement _ -> Break (get_pos node)
-  | ContinueStatement _ -> Continue (get_pos node)
+  | BreakStatement { break_level=level; _ } ->
+    Break (get_pos node, pBreak_or_continue_level env level)
+  | ContinueStatement { continue_level=level; _ } ->
+    Continue (get_pos node, pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
     Global_var (couldMap ~f:pExpr global_variables env)
   | _ when env.max_depth > 0 ->
@@ -1131,6 +1133,11 @@ and pStmt : stmt parser = fun node env ->
      *)
     Def_inline (pDef node { env with max_depth = env.max_depth - 1 })
   | _ -> missing_syntax "statement" node env
+
+and pBreak_or_continue_level env level =
+  match mpOptional pExpr level env with
+  | Some (_, Int(_, s)) -> Some (int_of_string s)
+  | _ -> None
 
 and pTConstraintTy : hint parser = fun node ->
   match syntax node with

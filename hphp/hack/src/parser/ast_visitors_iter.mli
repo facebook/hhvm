@@ -38,7 +38,7 @@ class virtual ['b] iter :
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr -> unit;
         on_Block : 'c -> Ast_visitors_ancestors.block -> unit;
-        on_Break : 'c -> Ast_visitors_ancestors.pos_t -> unit;
+        on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> unit;
         on_CA_enum : 'c -> string list -> unit;
         on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> unit;
         on_CA_hint : 'c -> Ast_visitors_ancestors.hint -> unit;
@@ -82,7 +82,7 @@ class virtual ['b] iter :
         on_Constant : 'c -> Ast_visitors_ancestors.gconst -> unit;
         on_Constraint_as : 'c -> unit; on_Constraint_eq : 'c -> unit;
         on_Constraint_super : 'c -> unit;
-        on_Continue : 'c -> Ast_visitors_ancestors.pos_t -> unit;
+        on_Continue : 'c -> Ast_visitors_ancestors.pos_t -> int option -> unit;
         on_Contravariant : 'c -> unit; on_Covariant : 'c -> unit;
         on_Cst_const : 'c -> unit; on_Cst_define : 'c -> unit;
         on_Ctrait : 'c -> unit;
@@ -369,7 +369,7 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.bop ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> unit
     method on_Block : 'c -> Ast_visitors_ancestors.block -> unit
-    method on_Break : 'c -> Ast_visitors_ancestors.pos_t -> unit
+    method on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> unit
     method on_CA_enum : 'c -> string list -> unit
     method on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> unit
     method on_CA_hint : 'c -> Ast_visitors_ancestors.hint -> unit
@@ -419,7 +419,10 @@ class virtual ['b] iter :
     method on_Constraint_as : 'c -> unit
     method on_Constraint_eq : 'c -> unit
     method on_Constraint_super : 'c -> unit
-    method on_Continue : 'c -> Ast_visitors_ancestors.pos_t -> unit
+    method on_Continue :
+      'c ->
+      Ast_visitors_ancestors.pos_t ->
+      int option -> unit
     method on_Contravariant : 'c -> unit
     method on_Covariant : 'c -> unit
     method on_Cst_const : 'c -> unit

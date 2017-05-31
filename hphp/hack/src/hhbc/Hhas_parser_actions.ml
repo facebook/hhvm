@@ -324,6 +324,7 @@ type iarg =
   | IAArrayno of adata_id
   | IAMemberkey of string*iarg (* these are not seriously recursive *)
   | IAArglist of iarg list
+  | IAIteratorid of string*int64
 
 let class_id_of_iarg arg =
   match arg with
@@ -519,6 +520,11 @@ let labelofiarg arg =
 
 let iterofiarg arg = Iterator.Id (intofiarg arg)
 
+let iterwithkindofiarg arg =
+  match arg with
+  | IAIteratorid (kind, id) -> kind = "MIter", Iterator.Id (Int64.to_int id)
+  | _ -> report_error "bad iterator"
+
 let memberopmodeofiarg arg =
   match stringofiarg arg with
   | "None" -> MemberOpMode.ModeNone
@@ -529,7 +535,7 @@ let memberopmodeofiarg arg =
 
  let listofiteratorsofiarg arg =
    match arg with
-   | IAArglist l -> List.map iterofiarg l
+   | IAArglist l -> List.map iterwithkindofiarg l
    | _ -> report_error "bad list of iterators"
 
 let listoflabelsofiarg arg =

@@ -86,10 +86,10 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
-  | A.Break _ ->
-    instr_break 1 (* TODO: Break takes an argument *)
-  | A.Continue _ ->
-    instr_continue 1 (* TODO: Continue takes an argument *)
+  | A.Break (_, level_opt) ->
+    instr_break (Option.value level_opt ~default:1)
+  | A.Continue (_, level_opt) ->
+    instr_continue (Option.value level_opt ~default:1)
   | A.Do (b, e) ->
     emit_do env (A.Block b) e
   | A.For (e1, e2, e3, b) ->

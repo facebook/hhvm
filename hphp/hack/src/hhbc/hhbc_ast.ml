@@ -239,7 +239,7 @@ type instruct_control_flow =
 
 type instruct_special_flow =
   | Continue of int * int  (* This will be rewritten *)
-  | Break of int * int * Iterator.t list (* This will be rewritten *)
+  | Break of int * int * (bool * Iterator.t) list (* This will be rewritten *)
 
 type instruct_get =
   | CGetL of local_id
@@ -423,7 +423,7 @@ type instruct_iterator =
   | IterFree of Iterator.t
   | MIterFree of Iterator.t
   | CIterFree of Iterator.t
-  | IterBreak of Label.t * Iterator.t list
+  | IterBreak of Label.t * (bool * Iterator.t) list
 
 type instruct_include_eval_define =
   | Incl

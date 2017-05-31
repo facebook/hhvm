@@ -390,8 +390,8 @@ class virtual ['self] reduce =
     method on_Fallthrough _ = self#e
     method on_Expr = self#on_expr
     method on_Block = self#on_block
-    method on_Break = self#on_Pos_t
-    method on_Continue = self#on_Pos_t
+    method on_Break env pos level_opt = self#on_Pos_t env pos
+    method on_Continue env pos level_opt = self#on_Pos_t env pos
     method on_Throw = self#on_expr
     method on_Return env c0 c1 =
       let r0 = self#on_Pos_t env c0 in
@@ -440,8 +440,8 @@ class virtual ['self] reduce =
       | Fallthrough -> self#on_Fallthrough env
       | Expr c0 -> self#on_Expr env c0
       | Block c0 -> self#on_Block env c0
-      | Break c0 -> self#on_Break env c0
-      | Continue c0 -> self#on_Continue env c0
+      | Break (c0, level_opt) -> self#on_Break env c0 level_opt
+      | Continue (c0, level_opt) -> self#on_Continue env c0 level_opt
       | Throw c0 -> self#on_Throw env c0
       | Return (c0, c1) -> self#on_Return env c0 c1
       | GotoLabel c0 -> self#on_GotoLabel env c0

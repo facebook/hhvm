@@ -30,7 +30,7 @@ class type ['a] ast_visitor_type = object
   method on_binop : 'a -> bop -> expr -> expr -> 'a
   method on_pipe : 'a -> expr -> expr -> 'a
   method on_block : 'a -> block -> 'a
-  method on_break : 'a -> Pos.t -> 'a
+  method on_break : 'a -> Pos.t -> int option -> 'a
   method on_call : 'a -> expr -> expr list -> expr list -> 'a
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
@@ -39,7 +39,7 @@ class type ['a] ast_visitor_type = object
   method on_class_get : 'a -> id -> pstring -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_collection: 'a -> id -> afield list -> 'a
-  method on_continue : 'a -> Pos.t -> 'a
+  method on_continue : 'a -> Pos.t -> int option -> 'a
   method on_darray : 'a -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
@@ -138,8 +138,8 @@ end
 
 class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
-  method on_break acc _ = acc
-  method on_continue acc _ = acc
+  method on_break acc _ _ = acc
+  method on_continue acc _ _ = acc
   method on_noop acc = acc
   method on_fallthrough acc = acc
   method on_unsafe acc = acc
@@ -233,9 +233,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_stmt acc = function
     | Unsafe                  -> this#on_unsafe acc
     | Expr e                  -> this#on_expr acc e
-    | Break p                 -> this#on_break acc p
+    | Break (p, level_opt)    -> this#on_break acc p level_opt
     | Block b                 -> this#on_block acc b
-    | Continue p              -> this#on_continue acc p
+    | Continue (p, level_opt) -> this#on_continue acc p level_opt
     | Throw   (e)             -> this#on_throw acc e
     | Return  (p, eopt)       -> this#on_return acc p eopt
     | GotoLabel label         -> this#on_goto_label acc label

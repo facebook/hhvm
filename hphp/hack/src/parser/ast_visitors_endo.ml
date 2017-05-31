@@ -668,12 +668,12 @@ class virtual ['self] endo =
     method on_Block env this c0 =
       let r0 = self#on_block env c0 in
       if c0 == r0 then this else Block r0
-    method on_Break env this c0 =
+    method on_Break env this c0 level_opt =
       let r0 = self#on_Pos_t env c0 in
-      if c0 == r0 then this else Break r0
-    method on_Continue env this c0 =
+      if c0 == r0 then this else Break (r0, level_opt)
+    method on_Continue env this c0 level_opt =
       let r0 = self#on_Pos_t env c0 in
-      if c0 == r0 then this else Continue r0
+      if c0 == r0 then this else Continue(r0, level_opt)
     method on_Throw env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else Throw r0
@@ -745,8 +745,8 @@ class virtual ['self] endo =
       | Fallthrough -> self#on_Fallthrough env this
       | Expr c0 -> self#on_Expr env this c0
       | Block c0 -> self#on_Block env this c0
-      | Break c0 -> self#on_Break env this c0
-      | Continue c0 -> self#on_Continue env this c0
+      | Break (c0, level_opt) -> self#on_Break env this c0 level_opt
+      | Continue (c0, level_opt) -> self#on_Continue env this c0 level_opt
       | Throw c0 -> self#on_Throw env this c0
       | Return (c0, c1) -> self#on_Return env this c0 c1
       | GotoLabel c0 -> self#on_GotoLabel env this c0

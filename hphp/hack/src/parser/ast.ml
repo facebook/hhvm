@@ -254,8 +254,8 @@ and stmt =
   | Fallthrough
   | Expr of expr
   | Block of block
-  | Break of Pos.t
-  | Continue of Pos.t
+  | Break of Pos.t * int option
+  | Continue of Pos.t * int option
   | Throw of expr
   | Return of Pos.t * expr option
   | GotoLabel of pstring

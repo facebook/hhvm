@@ -1682,8 +1682,8 @@ module Make (GetLocals : GetLocals) = struct
     | Unsafe               -> assert false
     | Fallthrough          -> N.Fallthrough
     | Noop                 -> N.Noop
-    | Break p              -> N.Break p
-    | Continue p           -> N.Continue p
+    | Break (p, _)              -> N.Break p
+    | Continue (p, _)           -> N.Continue p
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)

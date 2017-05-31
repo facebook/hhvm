@@ -70,6 +70,7 @@ class virtual ['c] map :
                    Ast_visitors_ancestors.stmt;
         on_Break : 'd ->
                    Ast_visitors_ancestors.pos_t ->
+                   int option ->
                    Ast_visitors_ancestors.stmt;
         on_CA_enum : 'd -> string list -> Ast_visitors_ancestors.ca_type;
         on_CA_field : 'd ->
@@ -139,6 +140,7 @@ class virtual ['c] map :
         on_Constraint_super : 'd -> Ast_visitors_ancestors.constraint_kind;
         on_Continue : 'd ->
                       Ast_visitors_ancestors.pos_t ->
+                      int option ->
                       Ast_visitors_ancestors.stmt;
         on_Contravariant : 'd -> Ast_visitors_ancestors.variance;
         on_Covariant : 'd -> Ast_visitors_ancestors.variance;
@@ -682,7 +684,7 @@ class virtual ['c] map :
     method on_Block :
       'd -> Ast_visitors_ancestors.block -> Ast_visitors_ancestors.stmt
     method on_Break :
-      'd -> Ast_visitors_ancestors.pos_t -> Ast_visitors_ancestors.stmt
+      'd -> Ast_visitors_ancestors.pos_t -> int option -> Ast_visitors_ancestors.stmt
     method on_CA_enum : 'd -> string list -> Ast_visitors_ancestors.ca_type
     method on_CA_field :
       'd ->
@@ -748,7 +750,7 @@ class virtual ['c] map :
     method on_Constraint_eq : 'd -> Ast_visitors_ancestors.constraint_kind
     method on_Constraint_super : 'd -> Ast_visitors_ancestors.constraint_kind
     method on_Continue :
-      'd -> Ast_visitors_ancestors.pos_t -> Ast_visitors_ancestors.stmt
+      'd -> Ast_visitors_ancestors.pos_t -> int option -> Ast_visitors_ancestors.stmt
     method on_Contravariant : 'd -> Ast_visitors_ancestors.variance
     method on_Covariant : 'd -> Ast_visitors_ancestors.variance
     method on_Cst_const : 'd -> Ast_visitors_ancestors.cst_kind

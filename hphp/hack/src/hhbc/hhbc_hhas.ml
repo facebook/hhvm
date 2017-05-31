@@ -593,13 +593,13 @@ let string_of_iterator instruction =
     (iterator_instruction_name_prefix instruction) ^
     (string_of_iterator_id id)
   | IterBreak (label, iterlist) ->
-      "IterBreak " ^
-      (string_of_label label) ^
-      "<" ^
-      (let list_item = (fun id -> "(Iter) " ^ (string_of_iterator_id id)) in
-      let mapped_list = List.map list_item iterlist in
-        String.concat ", " mapped_list) ^
-      ">"
+      let map_item (is_mutable, id) =
+        (if is_mutable then "(MIter) " else "(Iter) ") ^
+        (string_of_iterator_id id)
+      in
+      let values =
+        String.concat ", " (List.rev_map map_item iterlist) in
+      "IterBreak " ^ (string_of_label label) ^ " <" ^ values ^ ">"
   | _ -> "### string_of_iterator instruction not implemented"
 
 let string_of_try instruction =

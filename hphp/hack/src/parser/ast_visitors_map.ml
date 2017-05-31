@@ -504,10 +504,10 @@ class virtual ['self] map =
       let r0 = self#on_expr env c0 in Expr r0
     method on_Block env c0 =
       let r0 = self#on_block env c0 in Block r0
-    method on_Break env c0 =
-      let r0 = self#on_Pos_t env c0 in Break r0
-    method on_Continue env c0 =
-      let r0 = self#on_Pos_t env c0 in Continue r0
+    method on_Break env c0 level_opt =
+      let r0 = self#on_Pos_t env c0 in Break (r0, level_opt)
+    method on_Continue env c0 level_opt =
+      let r0 = self#on_Pos_t env c0 in Continue (r0, level_opt)
     method on_Throw env c0 =
       let r0 = self#on_expr env c0 in Throw r0
     method on_Return env c0 c1 =
@@ -555,8 +555,8 @@ class virtual ['self] map =
       | Fallthrough -> self#on_Fallthrough env
       | Expr c0 -> self#on_Expr env c0
       | Block c0 -> self#on_Block env c0
-      | Break c0 -> self#on_Break env c0
-      | Continue c0 -> self#on_Continue env c0
+      | Break (c0, level_opt) -> self#on_Break env c0 level_opt
+      | Continue (c0, level_opt) -> self#on_Continue env c0 level_opt
       | Throw c0 -> self#on_Throw env c0
       | Return (c0, c1) -> self#on_Return env c0 c1
       | GotoLabel c0 -> self#on_GotoLabel env c0

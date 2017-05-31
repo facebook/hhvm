@@ -96,7 +96,7 @@ unconditional jumps to the right place. *)
 
   let add_iterator lst =
     match opt_iterator with
-      | Some (_, it) -> it :: lst
+      | Some x -> x :: lst
       | None -> lst in
   let wrap_return ret =
     match opt_iterator with
@@ -113,7 +113,7 @@ unconditional jumps to the right place. *)
       | ISpecialFlow (Break (level, original, itrs)) when level > 1 ->
         instr (ISpecialFlow (Break ((level - 1), original, add_iterator itrs)))
       | ISpecialFlow (Break (_, _, itrs)) ->
-        (match itrs with
+        (match add_iterator itrs with
         | [] -> instr (IContFlow (Jmp break_label))
         | itrs -> instr (IIterator (IterBreak (break_label, itrs))))
       | IContFlow (RetC) -> wrap_return (IContFlow (RetC))

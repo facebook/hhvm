@@ -2092,7 +2092,7 @@ and statement_word env = function
 (*****************************************************************************)
 
 and statement_break env =
-  let stmt = Break (Pos.make env.file env.lb) in
+  let stmt = Break (Pos.make env.file env.lb, None) in
   check_continue env;
   stmt
 
@@ -2101,7 +2101,7 @@ and statement_break env =
 (*****************************************************************************)
 
 and statement_continue env =
-  let stmt = Continue (Pos.make env.file env.lb) in
+  let stmt = Continue (Pos.make env.file env.lb, None) in
   check_continue env;
   stmt
 

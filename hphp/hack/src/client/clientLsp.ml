@@ -931,12 +931,12 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
       try
         do_initialize_after_hello (Some server_conn) ~is_retry [];
         Main_loop
-        with Denied_due_to_existing_persistent_connection ->
-          (* How should the user react? - by retrying, to kick off our rival. *)
-          raise (Lsp.Error.Server_error_start (
-            "Cannot provide Hack language services while this project is " ^
-            "is active in another window.",
-            { Lsp.Initialize.retry = true; }))
+      with Denied_due_to_existing_persistent_connection ->
+        (* How should the user react? - by retrying, to kick off our rival. *)
+        raise (Lsp.Error.Server_error_start (
+          "Cannot provide Hack language services while this project is " ^
+          "is active in another window.",
+          { Lsp.Initialize.retry = true; }))
     end else begin
       let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
       let ienv = {

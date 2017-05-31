@@ -130,7 +130,8 @@ let rec split_decl_list ds funs classes optmain datadecls aliasdecls =
   | [] ->
     begin match optmain with
     | None -> report_error "missing main"
-    | Some m -> Hhas_program.make datadecls funs classes aliasdecls m
+    | Some m -> Hhas_program.make (List.rev datadecls)
+          (List.rev funs) (List.rev classes) (List.rev aliasdecls) m
     end
   | Main_decl md :: rest ->
     begin match optmain with

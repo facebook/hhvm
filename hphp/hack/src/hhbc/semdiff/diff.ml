@@ -350,9 +350,11 @@ let methods_alist_of_class c =
  List.map (fun m -> (Hhbc_id.Method.to_raw_string (Hhas_method.name m), m))
           (Hhas_class.methods c)
 
+(* changing this to only look at non-closure classes *)
 let classes_alist_of_program p =
   List.map (fun c -> (Hhbc_id.Class.to_raw_string (Hhas_class.name c),c))
-          (Hhas_program.classes p)
+          (List.filter (fun c -> not (Hhas_class.is_closure_class c))
+          (Hhas_program.classes p))
 
 let name_comparer = string_comparer
 let param_name_comparer = wrap Hhas_param.name
@@ -442,8 +444,11 @@ let class_attributes_comparer =
   wrap Hhas_class.attributes (fun _ s -> s)
     (list_comparer attribute_comparer " ")
 
+let unmangled_name_comparer =
+ wrap Hhbc_string_utils.Closures.unmangle_closure (fun _ s -> s) (option_comparer string_comparer)
+
 let class_comparer =
-  wrap Hhbc_id.Class.to_raw_string (fun _ s -> s) string_comparer
+  wrap Hhbc_id.Class.to_raw_string (fun _ s -> s) unmangled_name_comparer
 
 let class_base_comparer =
  wrap Hhas_class.base (fun _ s -> "extends " ^ s)
@@ -613,7 +618,7 @@ let option_get o = match o with | Some v -> v | None -> failwith "option"
 let option_is_some o = match o with Some _ -> true | None -> false
 
 (* compare two bodies' instructions, with extra entry points added for
-   default parameter values
+   default parameter values, dropping back to syntactic diff on failure
 *)
 let body_instrs_comparer = {
   comparer = (fun b b' ->
@@ -697,8 +702,42 @@ let class_comparer = class_header_properties_methods_comparer
 let classes_alist_comparer =
  alist_comparer class_comparer (fun cname -> cname)
 
-let program_classes_comparer = wrap classes_alist_of_program
+(* Previous simple-minded comparison of classes by matching names doesn't
+ really do the right thing for anonymous closure classes. So we fall back on
+ some foul hackery. This could be avoided by refactoring the combinators to
+ carry a bit more context around, but a dirty ref is quicker :-(
+ *)
+
+let program_named_classes_comparer = wrap classes_alist_of_program
                        (fun _p s -> s) classes_alist_comparer
+
+let todosplitter s = if Rhl.IntIntSet.is_empty s then None
+else let iip = Rhl.IntIntSet.choose s in
+     Some (iip, Rhl.IntIntSet.remove iip s)
+
+let compare_classes_of_programs p p' =
+ let _ = Rhl.anon_classes_to_check := Rhl.IntIntSet.empty in (* clear here to be on the safe side *)
+ let (dist, (size,edits)) = program_named_classes_comparer.comparer p p' in
+ let rec loop d s e =
+  let td = !Rhl.anon_classes_to_check in
+   match todosplitter td with
+    | None -> (d,(s,e))
+    | Some ((ac,ac'), newtodo) ->
+    let actual_class = List.nth (Hhas_program.classes p) ac in
+    let actual_class' = List.nth (Hhas_program.classes p') ac' in
+    let _ = Printf.eprintf "closure classes %d=%s and %d=%s\n"
+     ac (Hhbc_id.Class.to_raw_string @@ Hhas_class.name actual_class) ac'
+     (Hhbc_id.Class.to_raw_string @@ Hhas_class.name actual_class') in
+    let _ = Rhl.anon_classes_to_check := newtodo in (* We've done this pair *)
+    let (dc, (sc,ec)) = class_comparer.comparer actual_class actual_class' in
+    loop (d+dc) (s+sc) (edits ^ ec)
+in loop dist size edits
+
+let program_classes_comparer = {
+  comparer = compare_classes_of_programs;
+  size_of = program_named_classes_comparer.size_of; (* WRONG *)
+  string_of = program_named_classes_comparer.string_of; (* WRONG *)
+}
 
 let program_functions_comparer = wrap functions_alist_of_program
                             (fun _p s -> s) functions_alist_comparer

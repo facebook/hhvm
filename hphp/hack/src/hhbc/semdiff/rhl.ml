@@ -25,6 +25,11 @@ open Local
 let adata1_ref = ref ([] : Hhas_adata.t list)
 let adata2_ref = ref ([] : Hhas_adata.t list)
 
+(* Ref keeping to-do set for pairs of anonymous closure classes that
+   need to be compared *)
+module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
+let anon_classes_to_check = ref (IntIntSet.empty)
+
 let rec lookup_adata id data_dict =
 match data_dict with
  | [] -> failwith "adata lookup failed"
@@ -426,6 +431,11 @@ let check_instruct_misc asn i i' =
    (* yes, I did just copy-paste there. Should combine patterns !*)
   | MemoGet (_,_,_), _
   | _, MemoGet(_,_,_) -> None (* wimp out again *)
+  | CreateCl(npars,cln), CreateCl(npars',cln') ->
+   if npars = npars' then
+     (anon_classes_to_check := IntIntSet.add (cln,cln') (!anon_classes_to_check);
+     Some asn)
+   else None (* fail in this case *)
   | _, _ -> if i=i' then Some asn else None
 
 
@@ -733,7 +743,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
            (add_assumption (pc,pc') asn assumed)
            (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
               (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
-              
+
         (* associativity of concatenation, restricted to the case
            where the last thing concatenated is a literal constant
         *)

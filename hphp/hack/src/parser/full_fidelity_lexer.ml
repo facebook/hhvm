@@ -1043,10 +1043,10 @@ let rec skip_to_end_of_markup_comment lexer =
   if ch0 = invalid && at_end lexer then
     (* It's not an error to run off the end of one of these. *)
     lexer
-  else if ch0 = '<' && ch1 = '?' && ch2 = 'p' && ch3 = 'h' && ch4 = 'p' then
-    advance lexer 5
-  else
-    skip_to_end_of_markup_comment (advance lexer 1)
+  else match ch0, ch1, ch2, ch3, ch4 with
+  | '<', '?', 'p', 'h', 'p' -> advance lexer 5
+  | '<', '?', '=', _, _ -> advance lexer 3
+  | _ -> skip_to_end_of_markup_comment (advance lexer 1)
 
 let scan_markup_comment lexer =
   let lexer = skip_to_end_of_markup_comment lexer in

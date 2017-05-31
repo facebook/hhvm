@@ -1771,8 +1771,8 @@ let scour_comments
             | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?php" ->
               let next = idx + (String.length "<?php") in
               go next `Free next
-            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?==" ->
-              let next = idx + (String.length "<?==") in
+            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?=" ->
+              let next = idx + (String.length "<?=") in
               go next `Free next
             (* Skip non source text content *)
             | `NonSourceText,    _ -> go next state next

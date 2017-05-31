@@ -38,19 +38,20 @@ const RegSet kGPCallerSaved =
 
 const RegSet kGPCalleeSaved =
   reg::r14 | reg::r15 | reg::r16 | reg::r17 | reg::r18 | reg::r19 | reg::r20 |
-  reg::r21 | reg::r22 | reg::r23 | reg::r24 | reg::r25 | reg::r26;
+  reg::r21 | reg::r22 | reg::r23 | reg::r24 | reg::r25;
 
   // r27 is used as rsp
   // r29 is used as rvmsp
-  // r30 is used as rvmtl
+  // r26 is used as rvmtl
+  // r30 is reserved as a PIC register
   // r31 is used as rvmfp
   // r28 is used as rone
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
-  rtoc() | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | rsfp() |
-  rfuncln() | rfuncentry() | rthreadptr() | rone() | r_svcreq_stub();
+  rtoc() | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | rsfp() | rfuncln() |
+  rfuncentry() | rthreadptr() | rone() | r_svcreq_stub() | reg::r30;
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 

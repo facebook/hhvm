@@ -597,6 +597,14 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_throw_statement; ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    | ForeachStatement ({ foreach_collection; _; } as node) ->
+        let (next_label, prefix_statements), foreach_collection =
+          extract_suspend_statements foreach_collection next_label in
+        let new_foreach_collection=
+          make_syntax (ForeachStatement { node with foreach_collection; }) in
+        let statements = prefix_statements @ [ new_foreach_collection; ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     (* while-condition constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | WhileStatement _
@@ -604,7 +612,6 @@ let rewrite_suspends node =
        while-true-with-if-condition constructs. *)
     | ForStatement _
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
-    | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
     | EchoStatement _ (* TODO(t17335630): Support suspends here. *)
     (* Suspends will be handled recursively by compound statement's children. *)
     | CompoundStatement _

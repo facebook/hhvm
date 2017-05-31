@@ -204,7 +204,7 @@ let make_int_literal_syntax value =
 let make_qualified_name_syntax name =
   make_qualified_name_expression (make_token_syntax TokenKind.Name name)
 
-let make_expression_statement expression_syntax =
+let make_expression_statement_syntax expression_syntax =
   make_expression_statement expression_syntax semicolon_syntax
 
 let make_compound_statement_syntax compound_statements =
@@ -228,7 +228,7 @@ let make_assignment_syntax_variable left assignment_expression_syntax =
       left
       assignment_operator_syntax
       assignment_expression_syntax in
-  make_expression_statement assignment_binary_expression
+  make_expression_statement_syntax assignment_binary_expression
 
 let make_not_null_syntax operand =
   make_binary_expression operand not_identical_syntax null_syntax

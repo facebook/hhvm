@@ -66,7 +66,7 @@ let generate_resume_body { methodish_function_body; _; } =
       [ this_syntax; coroutine_data_variable_syntax; null_syntax ] in
   [
     assign_state_machine_syntax;
-    make_expression_statement call_state_machine_syntax;
+    make_expression_statement_syntax call_state_machine_syntax;
   ]
 
 let generate_resume_method method_node =
@@ -92,7 +92,7 @@ let generate_resume_with_exception_body _ =
       [ this_syntax; null_syntax; exception_variable_syntax ] in
   [
     assign_state_machine_syntax;
-    make_expression_statement call_state_machine_syntax;
+    make_expression_statement_syntax call_state_machine_syntax;
   ]
 
 let generate_resume_with_exception_method method_node =

@@ -105,7 +105,7 @@ let parameter_list_to_arg_list function_parameter_list =
         select_resume_member_syntax
         [null_syntax] in
     let resume_statement_syntax =
-      make_expression_statement call_resume_with_null_syntax in
+      make_expression_statement_syntax call_resume_with_null_syntax in
     let suspended_marker_expression =
       make_static_function_call_expression_syntax
         suspended_coroutine_result_classname

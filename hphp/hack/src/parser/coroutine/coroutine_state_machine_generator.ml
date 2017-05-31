@@ -528,6 +528,32 @@ let rec rewrite_if_statement next_label if_stmt =
     end
 
 (**
+ * Given a syntax representing a syntax_list of list_items of expressions,
+ * this function runs extract_suspend_statements on each of those syntaxes. It
+ * gathers the prefix_statements into a single list of all of the
+ * prefix_statements concatenated together, and gathers all of the expressions
+ * to use in place of the original expressions into a single list. It also
+ * returns the next_label.
+ *)
+let extract_suspend_statements_and_gather_rewrite_data_for_expressions
+    next_label
+    expressions_syntax_list =
+  let extract_suspend_statements_and_gather_rewrite_data
+      expression
+      (next_label, prefix_statements_acc, expressions_acc) =
+    let (next_label, prefix_statements), expression =
+      extract_suspend_statements expression next_label in
+    next_label,
+    prefix_statements @ prefix_statements_acc,
+    expression :: expressions_acc in
+  expressions_syntax_list
+    |> syntax_node_to_list
+    |> Core_list.map ~f:get_list_item
+    |> Core_list.fold_right
+      ~f:extract_suspend_statements_and_gather_rewrite_data
+      ~init:(next_label, [], [])
+
+(**
  * Processes statements that support the suspend keyword.
  *
  * Each statement has a notion of where expressions may exist. For each of these
@@ -605,6 +631,18 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_foreach_collection; ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    | EchoStatement ({ echo_expressions; _; } as node) ->
+        let next_label, prefix_statements, echo_expressions =
+          extract_suspend_statements_and_gather_rewrite_data_for_expressions
+            next_label
+            echo_expressions in
+        let echo_expressions =
+          make_delimited_list comma_syntax echo_expressions in
+        let new_echo_statement =
+          make_syntax (EchoStatement { node with echo_expressions; }) in
+        let statements = prefix_statements @ [ new_echo_statement; ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     (* while-condition constructs should have already been rewritten into
        while-true-with-if-condition constructs. *)
     | WhileStatement _
@@ -612,7 +650,6 @@ let rewrite_suspends node =
        while-true-with-if-condition constructs. *)
     | ForStatement _
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
-    | EchoStatement _ (* TODO(t17335630): Support suspends here. *)
     (* Suspends will be handled recursively by compound statement's children. *)
     | CompoundStatement _
     (* Suspends will be handled recursively by try statements's children. *)

@@ -19,8 +19,9 @@ let from_ast_wrapper : bool -> _ -> _ ->
     ast_class.Ast.c_kind = Ast.Cinterface in
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
+  let namespace = ast_class.Ast.c_namespace in
   let method_attributes =
-    Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
+    Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
   let method_is_private =
     privatize || List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
@@ -61,7 +62,6 @@ let from_ast_wrapper : bool -> _ -> _ ->
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
-  let namespace = ast_class.Ast.c_namespace in
   let method_body, method_is_generator, method_is_pair_generator =
     emit_body
       ~scope:scope

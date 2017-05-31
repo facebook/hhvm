@@ -457,7 +457,6 @@ class virtual ['self] iter =
     method on_Lvarvar env c0 c1 =
       self#on_int env c0;
       self#on_id env c1;
-    method on_Dollardollar env = ()
     method on_Clone = self#on_expr
     method on_Obj_get env c0 c1 c2 =
       self#on_expr env c0;
@@ -549,7 +548,6 @@ class virtual ['self] iter =
       | Id_type_arguments (c0, c1) -> self#on_Id_type_arguments env c0 c1
       | Lvar c0 -> self#on_Lvar env c0
       | Lvarvar (c0, c1) -> self#on_Lvarvar env c0 c1
-      | Dollardollar -> self#on_Dollardollar env
       | Clone c0 -> self#on_Clone env c0
       | Obj_get (c0, c1, c2) -> self#on_Obj_get env c0 c1 c2
       | Array_get (c0, c1) -> self#on_Array_get env c0 c1

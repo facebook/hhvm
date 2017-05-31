@@ -94,7 +94,6 @@ class virtual ['b] iter :
         on_Do : 'c ->
                 Ast_visitors_ancestors.block ->
                 Ast_visitors_ancestors.expr -> unit;
-        on_Dollardollar : 'c -> unit; on_Dot : 'c -> unit;
         on_EQeqeq : 'c -> unit;
         on_Efun : 'c ->
                   Ast_visitors_ancestors.fun_ ->
@@ -435,7 +434,6 @@ class virtual ['b] iter :
     method on_Do :
       'c ->
       Ast_visitors_ancestors.block -> Ast_visitors_ancestors.expr -> unit
-    method on_Dollardollar : 'c -> unit
     method on_Dot : 'c -> unit
     method on_EQeqeq : 'c -> unit
     method on_Efun :

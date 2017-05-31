@@ -41,7 +41,7 @@ let emit_def_inline = function
   | A.Class _ -> instr_defcls
   | _ -> failwith "Define inline: Invalid inline definition"
 
-let rec emit_stmt st =
+let rec emit_stmt env st =
   match st with
   | A.Expr (_, A.Yield_break) ->
     gather [
@@ -49,7 +49,7 @@ let rec emit_stmt st =
       emit_return ~need_ref:false;
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
-    gather (List.map exprl emit_unset_expr)
+    gather (List.map exprl (emit_unset_expr env))
   | A.Expr (_, A.Call ((_, A.Id (_, "declare")),
       [
         _, (
@@ -60,12 +60,12 @@ let rec emit_stmt st =
       ], []))
       ->
     empty
-  | A.Expr (_, A.Id (_, "exit")) -> emit_exit None
+  | A.Expr (_, A.Id (_, "exit")) -> emit_exit env None
   | A.Expr (_, A.Call ((_, A.Id (_, "exit")), args, []))
     when List.length args = 0 || List.length args = 1 ->
-    emit_exit (List.hd args)
+    emit_exit env (List.hd args)
   | A.Expr expr ->
-    emit_ignored_expr expr
+    emit_ignored_expr env expr
   | A.Return (_, None) ->
     gather [
       instr_null;
@@ -74,78 +74,78 @@ let rec emit_stmt st =
   | A.Return (_,  Some expr) ->
     let need_ref = !return_by_ref in
     gather [
-      from_expr ~need_ref expr;
+      emit_expr ~need_ref env expr;
       emit_return ~need_ref;
     ]
   | A.GotoLabel (_, label) ->
     instr_label (Label.named label)
   | A.Goto (_, label) ->
     instr_jmp (Label.named label)
-  | A.Block b -> emit_stmts b
+  | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
-    emit_if condition (A.Block consequence) (A.Block alternative)
+    emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
-    emit_while e (A.Block b)
+    emit_while env e (A.Block b)
   | A.Break _ ->
     instr_break 1 (* TODO: Break takes an argument *)
   | A.Continue _ ->
     instr_continue 1 (* TODO: Continue takes an argument *)
   | A.Do (b, e) ->
-    emit_do (A.Block b) e
+    emit_do env (A.Block b) e
   | A.For (e1, e2, e3, b) ->
-    emit_for e1 e2 e3 (A.Block b)
+    emit_for env e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
-      from_expr ~need_ref:false e;
+      emit_expr ~need_ref:false env e;
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
     if catch_list <> [] && finally_block <> [] then
-      emit_stmt (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
+      emit_stmt env (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
     else if catch_list <> [] then
-      emit_try_catch (A.Block try_block) catch_list
+      emit_try_catch env (A.Block try_block) catch_list
     else
-      emit_try_finally (A.Block try_block) (A.Block finally_block)
+      emit_try_finally env (A.Block try_block) (A.Block finally_block)
 
   | A.Switch (e, cl) ->
-    emit_switch e cl
+    emit_switch env e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    emit_foreach (await_pos <> None) collection iterator
+    emit_foreach env (await_pos <> None) collection iterator
       (A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
   | A.Static_var es ->
-    emit_static_var es
+    emit_static_var env es
   | A.Global_var es ->
-    emit_global_vars es
+    emit_global_vars env es
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty
 
-and emit_if condition consequence alternative =
+and emit_if env condition consequence alternative =
   match alternative with
   | A.Block []
   | A.Block [A.Noop] ->
     let done_label = Label.next_regular () in
     gather [
-      emit_jmpz condition done_label;
-      emit_stmt consequence;
+      emit_jmpz env condition done_label;
+      emit_stmt env consequence;
       instr_label done_label;
     ]
   | _ ->
     let alternative_label = Label.next_regular () in
     let done_label = Label.next_regular () in
     gather [
-      emit_jmpz condition alternative_label;
-      emit_stmt consequence;
+      emit_jmpz env condition alternative_label;
+      emit_stmt env consequence;
       instr_jmp done_label;
       instr_label alternative_label;
-      emit_stmt alternative;
+      emit_stmt env alternative;
       instr_label done_label;
     ]
 
-and emit_global_vars es =
+and emit_global_vars env es =
   let emit_global_var (_, e) =
     match e with
     | A.Id (_, name) when name.[0] = '$' ->
@@ -170,7 +170,7 @@ and emit_global_vars es =
       in
       gather [
         load_name;
-        if n = 1 then empty else gather @@ List.replicate (n - 1) instr_cgetn;
+        gather @@ List.replicate (n - 1) instr_cgetn;
         instr_dup;
         instr_vgetg;
         instr_bindn;
@@ -178,7 +178,7 @@ and emit_global_vars es =
       ]
     | A.Unsafeexpr e ->
       gather [
-        from_expr ~need_ref:false e;
+        emit_expr ~need_ref:false env e;
         instr_dup;
         instr_vgetg;
         instr_bindn;
@@ -188,7 +188,7 @@ and emit_global_vars es =
       emit_nyi "global expression"
   in gather (List.map es emit_global_var)
 
-and emit_static_var es =
+and emit_static_var env es =
   let emit_static_var_single e =
     match snd e with
     | A.Lvar (_, name) ->
@@ -202,57 +202,57 @@ and emit_static_var es =
       gather [
         instr_static_loc name;
         instr_jmpnz l;
-        from_expr ~need_ref:false e;
+        emit_expr ~need_ref:false env e;
         instr_setl @@ Local.Named name;
         instr_popc;
         instr_label l;
       ]
     | A.Binop (A.Eq _, (_, A.Lvar (_, name)), e) ->
       gather [
-        from_expr ~need_ref:false e;
+        emit_expr ~need_ref:false env e;
         instr_static_loc_init name;
       ]
     | _ -> failwith "Static var - impossible"
   in
   gather @@ List.map es ~f:emit_static_var_single
 
-and emit_while e b =
+and emit_while env e b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
   (* TODO: This is *bizarre* codegen for a while loop.
   It would be better to generate this as
   instr_label continue_label;
-  from_expr e;
+  emit_expr e;
   instr_jmpz break_label;
   body;
   instr_jmp continue_label;
   instr_label break_label;
   *)
   let instrs = gather [
-    emit_jmpz e break_label;
+    emit_jmpz env e break_label;
     instr_label start_label;
-    emit_stmt b;
+    emit_stmt env b;
     instr_label cont_label;
-    emit_jmpnz e start_label;
+    emit_jmpnz env e start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and emit_do b e =
+and emit_do env b e =
   let cont_label = Label.next_regular () in
   let break_label = Label.next_regular () in
   let start_label = Label.next_regular () in
   let instrs = gather [
     instr_label start_label;
-    emit_stmt b;
+    emit_stmt env b;
     instr_label cont_label;
-    emit_jmpnz e start_label;
+    emit_jmpnz env e start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and emit_for e1 e2 e3 b =
+and emit_for env e1 e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
@@ -269,19 +269,19 @@ and emit_for e1 e2 e3 b =
      instr_label break_label;
   *)
   let instrs = gather [
-    emit_ignored_expr e1;
-    emit_jmpz e2 break_label;
+    emit_ignored_expr env e1;
+    emit_jmpz env e2 break_label;
     instr_label start_label;
-    emit_stmt b;
+    emit_stmt env b;
     instr_label cont_label;
-    emit_ignored_expr e3;
-    emit_jmpnz e2 start_label;
+    emit_ignored_expr env e3;
+    emit_jmpnz env e2 start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and emit_switch scrutinee_expr cl =
-  stash_in_local scrutinee_expr
+and emit_switch env scrutinee_expr cl =
+  stash_in_local env scrutinee_expr
   begin fun local break_label ->
   (* If there is no default clause, add an empty one at the end *)
   let is_default c = match c with A.Default _ -> true | _ -> false in
@@ -290,7 +290,7 @@ and emit_switch scrutinee_expr cl =
     then cl
     else cl @ [A.Default []] in
   (* "continue" in a switch in PHP has the same semantics as break! *)
-  let cl = List.map cl ~f:emit_case in
+  let cl = List.map cl ~f:(emit_case env) in
   let bodies = gather @@ List.map cl ~f:snd in
   let init = gather @@ List.map cl
     ~f: begin fun x ->
@@ -303,7 +303,7 @@ and emit_switch scrutinee_expr cl =
             match scrutinee_expr with
             | (_, A.Lvar _) ->
               gather [
-                from_expr ~need_ref:false e;
+                emit_expr ~need_ref:false env e;
                 instr_cgetl2 local;
                 instr_eq;
                 instr_jmpnz l
@@ -311,7 +311,7 @@ and emit_switch scrutinee_expr cl =
             | _ ->
               gather [
                 instr_cgetl local;
-                from_expr ~need_ref:false e;
+                emit_expr ~need_ref:false env e;
                 instr_eq;
                 instr_jmpnz l]
         end
@@ -323,40 +323,40 @@ and emit_switch scrutinee_expr cl =
 CBR.rewrite_in_switch instrs break_label
   end
 
-and emit_catch end_label (catch_type, (_, catch_local), b) =
+and emit_catch env end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
     let next_catch = Label.next_regular () in
     let id, _ = Hhbc_id.Class.elaborate_id
-      (Emit_expression.get_namespace ()) catch_type in
+      (Emit_env.get_namespace env) catch_type in
     gather [
       instr_dup;
       instr_instanceofd id;
       instr_jmpz next_catch;
       instr_setl (Local.Named catch_local);
       instr_popc;
-      emit_stmt (A.Block b);
+      emit_stmt env (A.Block b);
       instr_jmp end_label;
       instr_label next_catch;
     ]
 
-and emit_catches catch_list end_label =
-  gather (List.map catch_list ~f:(emit_catch end_label))
+and emit_catches env catch_list end_label =
+  gather (List.map catch_list ~f:(emit_catch env end_label))
 
-and emit_try_catch try_block catch_list =
+and emit_try_catch env try_block catch_list =
   let end_label = Label.next_regular () in
   gather [
     instr_try_catch_begin;
-    emit_stmt try_block;
+    emit_stmt env try_block;
     instr_jmp end_label;
     instr_try_catch_middle;
-    emit_catches catch_list end_label;
+    emit_catches env catch_list end_label;
     instr_throw;
     instr_try_catch_end;
     instr_label end_label;
   ]
 
-and emit_try_finally try_block finally_block =
+and emit_try_finally env try_block finally_block =
   (*
   We need to generate four things:
   (1) the try-body, which will be followed by
@@ -378,7 +378,7 @@ and emit_try_finally try_block finally_block =
   what action the finally must perform when it is finished, followed by a
   jump directly to the finally.
   *)
-  let try_body = emit_stmt try_block in
+  let try_body = emit_stmt env try_block in
   let temp_local = Local.get_unnamed_local () in
   let finally_start = Label.next_regular () in
   let finally_end = Label.next_regular () in
@@ -404,7 +404,7 @@ and emit_try_finally try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let finally_body = emit_stmt finally_block in
+  let finally_body = emit_stmt env finally_block in
   let finally_body = CBR.rewrite_in_finally finally_body in
 
   (* (3) Finally epilogue *)
@@ -623,7 +623,7 @@ and wrap_non_empty_block_in_fault prefix block fault_block =
       (gather @@ prefix::block)
       fault_block
 
-and emit_foreach _has_await collection iterator block =
+and emit_foreach env _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
   let iterator_number = Iterator.get_iterator () in
@@ -677,10 +677,10 @@ and emit_foreach _has_await collection iterator block =
     in
     init, cont, preamble
   in
-  let body = emit_stmt block in
+  let body = emit_stmt env block in
 
   let result = gather [
-    from_expr ~need_ref:mutable_iter collection;
+    emit_expr ~need_ref:mutable_iter env collection;
     init;
     instr_try_fault
       fault_label
@@ -704,16 +704,16 @@ and emit_foreach _has_await collection iterator block =
     result loop_continue_label loop_break_label
     (Some (mutable_iter, iterator_number))
 
-and emit_stmts stl =
-  let results = List.map stl emit_stmt in
+and emit_stmts env stl =
+  let results = List.map stl (emit_stmt env) in
   gather results
 
-and emit_case c =
+and emit_case env c =
   let l = Label.next_regular () in
   let b = match c with
     | A.Default b
     | A.Case (_, b) ->
-        emit_stmt (A.Block b)
+        emit_stmt env (A.Block b)
   in
   let e = match c with
     | A.Case (e, _) -> Some e
@@ -727,25 +727,25 @@ let emit_dropthrough_return () =
   | _ ->
     gather [!default_return_value; emit_return ~need_ref:false]
 
-let rec emit_final_statement s =
+let rec emit_final_statement env s =
   match s with
   | A.Throw _ | A.Return _ | A.Goto _
   | A.Expr (_, A.Call ((_, A.Id (_, "exit")), _, _))
   | A.Expr (_, A.Id (_, "exit")) ->
-    emit_stmt s
+    emit_stmt env s
   | A.Block b ->
-    emit_final_statements b
+    emit_final_statements env b
   | _ ->
     gather [
-      emit_stmt s;
+      emit_stmt env s;
       emit_dropthrough_return ()
     ]
 
-and emit_final_statements b =
+and emit_final_statements env b =
   match b with
   | [] -> emit_dropthrough_return ()
-  | [s] -> emit_final_statement s
+  | [s] -> emit_final_statement env s
   | s::b ->
-    let i1 = emit_stmt s in
-    let i2 = emit_final_statements b in
+    let i1 = emit_stmt env s in
+    let i2 = emit_final_statements env b in
     gather [i1; i2]

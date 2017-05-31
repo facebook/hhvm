@@ -10,12 +10,13 @@
 open Core
 
 module ULS = Unique_list_string
+module SN = Naming_special_names
 
 let add_local bareparam (needs_local_this, locals) (_, name) =
-  if name = "$GLOBALS"
+  if name = SN.Superglobals.globals || name = SN.SpecialIdents.dollardollar
   then needs_local_this, locals
   else
-  if name = "$this"
+  if name = SN.SpecialIdents.this
   then (bareparam || needs_local_this), ULS.add locals name
   else needs_local_this, ULS.add locals name
 

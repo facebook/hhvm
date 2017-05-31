@@ -835,7 +835,6 @@ class virtual ['self] endo =
       let r1 = self#on_id env c1 in if c0 == r0 && c1 == r1
       then this
       else Lvarvar (r0, r1)
-    method on_Dollardollar env this = this
     method on_Clone env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else Clone r0
@@ -999,7 +998,6 @@ class virtual ['self] endo =
       | Id_type_arguments (c0, c1) -> self#on_Id_type_arguments env this c0 c1
       | Lvar c0 -> self#on_Lvar env this c0
       | Lvarvar (c0, c1) -> self#on_Lvarvar env this c0 c1
-      | Dollardollar -> self#on_Dollardollar env this
       | Clone c0 -> self#on_Clone env this c0
       | Obj_get (c0, c1, c2) as this ->
           self#on_Obj_get env this c0 c1 c2

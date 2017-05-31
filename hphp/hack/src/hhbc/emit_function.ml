@@ -28,7 +28,7 @@ let from_ast : A.fun_ -> Hhas_function.t list =
     then Some (gather [instr_null; instr_retc])
     else None in
   let function_attributes =
-    Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in
+    Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
   let renamed_id =
     if is_memoize

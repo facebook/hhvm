@@ -1951,7 +1951,7 @@ module Make (GetLocals : GetLocals) = struct
       (* Shouldn't happen: parser only allows this in New *)
       failwith "Unexpected Id with type arguments"
     | Lvar (_, x) when x = SN.SpecialIdents.this -> N.This
-    | Dollardollar ->
+    | Lvar (_, x) when x = SN.SpecialIdents.dollardollar ->
       N.Dollardollar (Env.found_dollardollar env p)
     | Lvar (pos, x) when x = SN.SpecialIdents.placeholder ->
       N.Lplaceholder pos

@@ -156,7 +156,6 @@ class virtual ['c] map :
         on_Do : 'd ->
                 Ast_visitors_ancestors.block ->
                 Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt;
-        on_Dollardollar : 'd -> Ast_visitors_ancestors.expr_;
         on_Dot : 'd -> Ast_visitors_ancestors.bop;
         on_EQeqeq : 'd -> Ast_visitors_ancestors.bop;
         on_Efun : 'd ->
@@ -763,7 +762,6 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.block ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt
-    method on_Dollardollar : 'd -> Ast_visitors_ancestors.expr_
     method on_Dot : 'd -> Ast_visitors_ancestors.bop
     method on_EQeqeq : 'd -> Ast_visitors_ancestors.bop
     method on_Efun :

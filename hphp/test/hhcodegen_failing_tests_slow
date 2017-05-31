@@ -6,7 +6,6 @@ slow/arithmetic/edge_cases.php
 slow/arithmetic/power-grid.php
 slow/array/empty.php
 slow/array_access/436.php
-slow/array_cse/534.php
 slow/array_cse/538.php
 slow/array_cse/543.php
 slow/array_double_key_conv.php
@@ -88,11 +87,7 @@ slow/class_constant/1606.php
 slow/class_constant/1607.php
 slow/class_constant/1608.php
 slow/class_constant/1619.php
-slow/class_constant/abstract_const.php
 slow/class_constant/abstract_const2.php
-slow/class_constant/abstract_const3.php
-slow/class_constant/abstract_const5.php
-slow/class_constant/abstract_const6.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/bad-arrays.php
 slow/class_constant/globals-array.php
@@ -589,7 +584,6 @@ slow/hhbbc/static_props_007.php
 slow/hhbbc/static_props_011.php
 slow/hhbbc/trait_generator_closure_002.php
 slow/hint/2187.php
-slow/hint/2193.php
 slow/hni/coerce_dtor_order.php
 slow/if_statement/else-if-greedy-parse.php
 slow/include/hashbang.php
@@ -924,13 +918,10 @@ slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
-slow/pipe_expr/bad-pipevar-1.php
-slow/pipe_expr/bad-pipevar-2.php
 slow/pipe_expr/pipevar-1.php
 slow/pipe_expr/pipevar-2.php
 slow/pipe_expr/pipevar-3.php
 slow/pipe_expr/pipevar-4.php
-slow/pipe_expr/pipevar-5.php
 slow/predefined/71.php
 slow/print/1442.php
 slow/print/1444.php
@@ -982,7 +973,6 @@ slow/reflection/whitespace_reflectionmethod_arraydefault.php
 slow/reflection_classes/1354.php
 slow/reflection_classes/1356.php
 slow/reflection_classes/1360.php
-slow/reflection_classes/ReflectionClass_getDefaultProperties.php
 slow/reflection_classes/ReflectionClass_isIterateable.php
 slow/reflection_classes/ReflectionClass_isOptional.php
 slow/reflection_classes/default_value_with_namespace.php
@@ -1222,7 +1212,6 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/volatile/1216.php
 slow/volatile/1221.php
-slow/volatile/1222.php
 slow/volatile/1223.php
 slow/volatile/1227.php
 slow/volatile/1232.php

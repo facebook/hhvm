@@ -264,7 +264,7 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
-  | Xml _ | Import _ | Pipe _ | Dollardollar) ->
+  | Xml _ | Import _ | Pipe _) ->
       error_at env pos "Invalid lvalue"
 
 (* The bound variable of a foreach can be a reference (but not inside
@@ -2995,7 +2995,7 @@ and expr_atomic ~allow_class ~class_const env =
       "followed by any number of letters, numbers, or underscores");
     expr env
   | Tdollardollar ->
-      pos, Dollardollar
+      pos, Lvar (pos, "$$")
   | Tunsafeexpr ->
       (* Consume the rest of the comment. *)
       ignore (L.comment (Buffer.create 256) env.file env.lb);
@@ -3152,9 +3152,6 @@ and expr_colcol env e1 =
     | _, Lvar cname ->
         (* ... but get_class($x) should be used instead of $x::class ... *)
         expr_colcol_remain ~allow_class:false env e1 cname
-    | pos, Dollardollar ->
-        (* ... and $$ is a special "variable" that resolves while naming. *)
-        expr_colcol_remain ~allow_class:false env e1 (pos, "$$")
     | pos, _ ->
         error_at env pos "Expected class name";
         e1

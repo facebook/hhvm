@@ -33,9 +33,9 @@ let emit_method_prolog ~params ~needs_local_this =
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
 
-let rec emit_def def =
+let rec emit_def env def =
   match def with
-  | Ast.Stmt s -> Emit_statement.emit_stmt s
+  | Ast.Stmt s -> Emit_statement.emit_stmt env s
   | Ast.Constant c ->
     let cns_name = snd c.Ast.cst_name in
     let cns_id =
@@ -43,7 +43,7 @@ let rec emit_def def =
       then Hhbc_id.Const.from_raw_string cns_name
       else Hhbc_id.Const.from_ast_name cns_name in
     gather [
-      Emit_expression.from_expr ~need_ref:false c.Ast.cst_value;
+      Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
       instr (IIncludeEvalDefine (DefCns cns_id));
       instr_popc;
     ]
@@ -55,22 +55,22 @@ let rec emit_def def =
       (DefTypeAlias (Hhbc_id.Class.from_ast_name (snd td.Ast.t_id))))
     (* We assume that SetNamespaceEnv does namespace setting *)
   | Ast.Namespace(_, defs) ->
-    gather (List.map defs emit_def)
-  | Ast.SetNamespaceEnv nsenv ->
-    Emit_expression.set_namespace nsenv;
-    empty
+    gather (List.map defs (emit_def env))
   | _ ->
     empty
 
-let rec emit_defs defs =
+let rec emit_defs env defs =
   match defs with
+  | Ast.SetNamespaceEnv ns :: defs ->
+    let env = Emit_env.with_namespace ns env in
+    emit_defs env defs
   | [] -> Emit_statement.emit_dropthrough_return ()
-  | [Ast.Stmt s] -> Emit_statement.emit_final_statement s
+  | [Ast.Stmt s] -> Emit_statement.emit_final_statement env s
   | [d] ->
-    gather [emit_def d; Emit_statement.emit_dropthrough_return ()]
+    gather [emit_def env d; Emit_statement.emit_dropthrough_return ()]
   | d::defs ->
-    let i1 = emit_def d in
-    let i2 = emit_defs defs in
+    let i1 = emit_def env d in
+    let i2 = emit_defs env defs in
     gather [i1; i2]
 
 let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info =
@@ -113,7 +113,6 @@ let emit_body
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
   Iterator.reset_iterator ();
-  Emit_expression.set_scope scope;
   let return_type_info =
     emit_return_type_info ~scope ~skipawaitable ~namespace ret in
   let verify_return =
@@ -124,7 +123,6 @@ let emit_body
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
-  Emit_expression.set_namespace namespace;
   Emit_statement.set_return_by_ref is_return_by_ref;
   let params =
     Emit_param.from_asts ~namespace ~tparams ~generate_defaults:(not is_memoize) params in
@@ -132,10 +130,15 @@ let emit_body
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params body in
   Local.reset_local (List.length params + List.length decl_vars);
-  Emit_expression.set_needs_local_this needs_local_this;
-  let stmt_instrs = emit_defs body in
+  let env = Emit_env.(
+    empty |>
+    with_namespace namespace |>
+    with_needs_local_this needs_local_this |>
+    with_scope scope) in
+  let stmt_instrs = emit_defs env body in
   let fault_instrs = extract_fault_instructions stmt_instrs in
-  let begin_label, default_value_setters = Emit_param.emit_param_default_value_setter params
+  let begin_label, default_value_setters =
+    Emit_param.emit_param_default_value_setter env params
   in
   let (is_generator, is_pair_generator) = is_function_generator stmt_instrs in
   let generator_instr =

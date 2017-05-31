@@ -86,7 +86,6 @@ let string_of_local_id x =
   match x with
   | Local.Unnamed i -> "_" ^ (string_of_int i)
   | Local.Named s -> s
-  | Local.Pipe -> failwith "$$ should not have survived to codegen"
 
 let string_of_lit_const instruction =
   match instruction with
@@ -967,7 +966,6 @@ and string_of_param_default_value expr =
   | A.Efun (f, use_list) -> string_of_fun f use_list
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
-  | A.Dollardollar
   | A.Yield _
   | A.Yield_break
   | A.Await _

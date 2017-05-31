@@ -47,14 +47,14 @@ let from_ast ~tparams ~namespace ~generate_defaults p =
 let from_asts ~namespace ~tparams ~generate_defaults params =
   List.filter_map params (from_ast ~tparams ~namespace ~generate_defaults)
 
-let emit_param_default_value_setter params =
+let emit_param_default_value_setter env params =
   let setters = List.filter_map params (fun p ->
     let param_name = Hhas_param.name p in
     let dvo = Hhas_param.default_value p in
     Option.map dvo (fun (l, e) ->
       gather [
         instr_label l;
-        Emit_expression.from_expr ~need_ref:false e;
+        Emit_expression.emit_expr ~need_ref:false env e;
         instr_setl (Local.Named param_name);
         instr_popc;
       ]) )

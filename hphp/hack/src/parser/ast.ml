@@ -290,6 +290,7 @@ and expr_ =
   | False
   | Id of id
   | Id_type_arguments of id * hint list
+  (* Special case: the pipe variable $$ *)
   | Lvar of id
   (**
    * PHP's Variable variable. The int is number of variable indirections
@@ -299,7 +300,6 @@ and expr_ =
      * $$$sample has int = 2.
    * *)
   | Lvarvar of int * id
-  | Dollardollar
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option

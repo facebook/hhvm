@@ -24,7 +24,7 @@ let rec expr_requires_deep_init (_, expr_) =
   | A.Float _ | A.String _ -> false
   | _ -> true
 
-let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
+let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   (* TODO: Deal with type hint *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
@@ -35,12 +35,20 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
     List.mem cv_kind_list Ast.Public
     || (not is_private && not is_protected) in
   let is_static = Core.List.mem cv_kind_list Ast.Static in
+  if not is_static
+    && ast_class.Ast.c_final
+    && ast_class.Ast.c_kind = Ast.Cabstract
+  then Emit_fatal.raise_fatal_parse
+    ("Class " ^ Utils.strip_ns (snd ast_class.Ast.c_name) ^
+      " contains non-static property declaration"
+     ^ " and therefore cannot be declared 'abstract final'");
+  let env = Emit_env.make_class_env ast_class in
   let initial_value, is_deep_init, initializer_instrs =
     match initial_value with
     | None -> None, false, None
     | Some expr ->
       match Ast_constant_folder.expr_to_opt_typed_value
-        (Emit_expression.get_namespace ()) expr with
+        ast_class.Ast.c_namespace expr with
       | Some v ->
         Some v, false, None
       | None ->
@@ -62,7 +70,7 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
         Some Typed_value.Uninit, not is_static && expr_requires_deep_init expr,
           Some (gather [
             prolog;
-            Emit_expression.from_expr ~need_ref:false expr;
+            Emit_expression.emit_expr ~need_ref:false env expr;
             epilog]) in
   Hhas_property.make
     is_private

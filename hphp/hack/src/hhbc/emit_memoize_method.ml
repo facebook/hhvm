@@ -143,7 +143,7 @@ let make_memoize_instance_method_no_params_code info method_id =
     instr_retc ]
 
 (* md is the already-renamed memoize method that must be wrapped *)
-let make_memoize_instance_method_with_params_code info method_id params index =
+let make_memoize_instance_method_with_params_code env info method_id params index =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   let param_count = List.length params in
@@ -169,7 +169,7 @@ let make_memoize_instance_method_with_params_code info method_id params index =
   in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper method not in the original method *)
-    Emit_param.emit_param_default_value_setter params
+    Emit_param.emit_param_default_value_setter env params
   in
   (* The index of the first local that represents a formal is the number of
   parameters, plus one for the optional index. This is equal to the count
@@ -298,10 +298,10 @@ let make_memoize_static_method_code info method_id params =
   else
     make_memoize_static_method_with_params_code info method_id params
 
-let make_memoize_instance_method_code info index method_id params =
+let make_memoize_instance_method_code env info index method_id params =
   if List.is_empty params && info.memoize_instance_method_count <= 1
   then make_memoize_instance_method_no_params_code info method_id
-  else make_memoize_instance_method_with_params_code info method_id params index
+  else make_memoize_instance_method_with_params_code env info method_id params index
 
 (* Construct the wrapper function *)
 let make_wrapper return_type params instrs =
@@ -312,15 +312,15 @@ let make_wrapper return_type params instrs =
     params
     return_type
 
-let emit info index return_type_info params is_static method_id =
+let emit env info index return_type_info params is_static method_id =
   let instrs =
     if is_static
     then make_memoize_static_method_code info method_id params
-    else make_memoize_instance_method_code info index method_id params
+    else make_memoize_instance_method_code env info index method_id params
   in
   make_wrapper return_type_info params instrs
 
-let emit_memoize_wrapper_body memoize_info index ast_method
+let emit_memoize_wrapper_body env memoize_info index ast_method
     ~scope ~namespace params ret =
     let is_static =List.mem ast_method.Ast.m_kind Ast.Static in
     let tparams =
@@ -332,9 +332,9 @@ let emit_memoize_wrapper_body memoize_info index ast_method
     let method_id =
       Hhbc_id.Method.from_ast_name original_name in
     (*let method_id = Hhbc_id.Method.add_suffix method_id Generate_memoized.memoize_suffix in*)
-    emit memoize_info index return_type_info params is_static method_id
+    emit env memoize_info index return_type_info params is_static method_id
 
-let make_memoize_wrapper_method info index ast_class ast_method =
+let make_memoize_wrapper_method env info index ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
    * wrappers *)
   let method_is_abstract =
@@ -342,7 +342,7 @@ let make_memoize_wrapper_method info index ast_class ast_method =
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
-    Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
+    Emit_attribute.from_asts (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
   let method_is_private =
     List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
@@ -362,7 +362,7 @@ let make_memoize_wrapper_method info index ast_class ast_method =
      Ast_scope.ScopeItem.Class ast_class] in
   let namespace = ast_class.Ast.c_namespace in
   let method_body =
-    emit_memoize_wrapper_body info index ast_method
+    emit_memoize_wrapper_body env info index ast_method
       ~scope ~namespace ast_method.Ast.m_params ret in
   Hhas_method.make
     method_attributes
@@ -379,13 +379,13 @@ let make_memoize_wrapper_method info index ast_class ast_method =
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
 
-let emit_wrapper_methods info ast_class ast_methods =
+let emit_wrapper_methods env info ast_class ast_methods =
   let _, hhas_methods =
     List.fold_left ast_methods ~init:(0, []) ~f:(fun (count,acc) ast_method ->
       if Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes
       then
         let hhas_method =
-          make_memoize_wrapper_method info count ast_class ast_method in
+          make_memoize_wrapper_method env info count ast_class ast_method in
         let newcount =
           if Hhas_method.is_static hhas_method then count else count+1 in
         newcount, hhas_method::acc

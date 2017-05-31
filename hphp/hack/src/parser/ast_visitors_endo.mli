@@ -229,9 +229,6 @@ class virtual ['b] endo :
                 Ast_visitors_ancestors.stmt ->
                 Ast_visitors_ancestors.block ->
                 Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt;
-        on_Dollardollar : 'c ->
-                          Ast_visitors_ancestors.expr_ ->
-                          Ast_visitors_ancestors.expr_;
         on_Dot : 'c ->
                  Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_EQeqeq : 'c ->
@@ -1059,8 +1056,6 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.stmt ->
       Ast_visitors_ancestors.block ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt
-    method on_Dollardollar :
-      'c -> Ast_visitors_ancestors.expr_ -> Ast_visitors_ancestors.expr_
     method on_Dot :
       'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_EQeqeq :

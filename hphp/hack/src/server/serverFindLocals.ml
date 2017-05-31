@@ -305,15 +305,10 @@ end (* End of module LocalMap *)
   *)
 
 class local_finding_visitor = object(this)
-  inherit [LocalMap.t] Ast_visitor.ast_visitor as super
+  inherit [LocalMap.t] Ast_visitor.ast_visitor as _super
 
   method! on_lvar localmap (pos, name) =
     LocalMap.add name pos localmap
-
-  method! on_expr localmap (pos, e) =
-    match e with
-    | Dollardollar -> LocalMap.add "$$" pos localmap
-    | _ -> super#on_expr localmap (pos, e)
 
   method! on_pipe localmap left right =
     (**

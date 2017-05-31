@@ -92,7 +92,6 @@ class virtual ['b] reduce :
         on_Do : 'c ->
                 Ast_visitors_ancestors.block ->
                 Ast_visitors_ancestors.expr -> 'd;
-        on_Dollardollar : 'c -> 'd; on_Dot : 'c -> 'd; on_EQeqeq : 'c -> 'd;
         on_Efun : 'c ->
                   Ast_visitors_ancestors.fun_ ->
                   (Ast_visitors_ancestors.id *
@@ -420,7 +419,6 @@ class virtual ['b] reduce :
     method on_Diff2 : 'c -> 'd
     method on_Do :
       'c -> Ast_visitors_ancestors.block -> Ast_visitors_ancestors.expr -> 'd
-    method on_Dollardollar : 'c -> 'd
     method on_Dot : 'c -> 'd
     method on_EQeqeq : 'c -> 'd
     method on_Efun :

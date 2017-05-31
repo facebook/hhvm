@@ -20,6 +20,7 @@ val make_info :
 
 (* Emit wrapper methods for <<__Memoize>> methods in the list *)
 val emit_wrapper_methods :
+  Emit_env.t ->
   memoize_info ->
   Ast.class_ ->
   Ast.method_ list ->

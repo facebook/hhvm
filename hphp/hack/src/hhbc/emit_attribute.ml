@@ -15,19 +15,19 @@ let ast_attribute_name: A.user_attribute -> Litstr.id =
   fun ast_attr ->
   Litstr.to_string @@ snd ast_attr.Ast.ua_name
 
-let from_attribute_base attribute_name arguments =
+let from_attribute_base namespace attribute_name arguments =
   let attribute_arguments =
     Ast_constant_folder.literals_from_exprs_with_index
-      (Emit_expression.get_namespace ()) arguments in
+      namespace arguments in
   Hhas_attribute.make attribute_name attribute_arguments
 
-let from_ast : A.user_attribute -> Hhas_attribute.t =
-  fun ast_attr ->
+let from_ast : Namespace_env.env -> A.user_attribute -> Hhas_attribute.t =
+  fun namespace ast_attr ->
   let attribute_name = ast_attribute_name ast_attr in
-  from_attribute_base attribute_name ast_attr.A.ua_params
+  from_attribute_base namespace attribute_name ast_attr.A.ua_params
 
-let from_asts ast_attributes =
-  List.map ast_attributes from_ast
+let from_asts namespace ast_attributes =
+  List.map ast_attributes (from_ast namespace)
 
 let ast_is_memoize : A.user_attribute -> bool =
   fun ast_attr ->

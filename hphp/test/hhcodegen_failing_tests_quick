@@ -20,7 +20,6 @@ quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
 quick/class_abstract_final1.php
 quick/class_abstract_final2.php
-quick/class_abstract_final4.php
 quick/class_abstract_final5.php
 quick/class_constant.php
 quick/class_constants.php
@@ -191,7 +190,6 @@ quick/parse_shapes.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
 quick/pcre-crash.php
-quick/pinit.php
 quick/post_try_error.php
 quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php

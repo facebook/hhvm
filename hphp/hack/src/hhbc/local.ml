@@ -8,14 +8,15 @@
  *
 *)
 
+(* Type of locals as they appear in instructions.
+ * Named variables are those appearing in the .declvars declaration. These
+ * can also be referenced by number (0 to n-1), but we use Unnamed only for
+ * variables n and above not appearing in .declvars
+ *)
 type t =
-  (* Unnamed local, numbered from 0, and rebased above named locals
-   * at the last moment when writing out the assembly file *)
  | Unnamed of int
    (* Named local, necessarily starting with `$` *)
  | Named of string
-   (* Will be rewritten to an unnamed local. *)
- | Pipe
 
 let next_local = ref 0
 

@@ -648,7 +648,8 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | VariableExpression { variable_expression } ->
       Lvar (pos_name variable_expression)
 
-    | PipeVariableExpression _ -> Dollardollar
+    | PipeVariableExpression _ ->
+      Lvar (pos, "$$")
 
     | InclusionExpression { inclusion_require; inclusion_filename } ->
       Import

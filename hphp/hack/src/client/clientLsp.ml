@@ -1222,9 +1222,10 @@ let main () : unit =
     needs_idle = false;
   } in
   while true do
-    let event = get_next_event state in
+    let ref_event = ref None in
     try
       let event = get_next_event state in
+      ref_event := Some event;
       if event <> Tick then state.needs_idle <- true;
       handle_event state event;
       match event with
@@ -1244,8 +1245,8 @@ let main () : unit =
         end
       | _ -> ()
     with e ->
-      respond_to_error (Some event) e;
-      log_error (Some event) e;
+      respond_to_error !ref_event e;
+      log_error !ref_event e;
       if e = Sys_error "Broken pipe" then exit 1
       (* The reading/writing we do here is with hh_server, so this exception *)
       (* means that our connection to hh_server has gone down, which is      *)

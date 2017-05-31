@@ -70,6 +70,9 @@ let colon_syntax =
 let assignment_operator_syntax =
   make_token_syntax TokenKind.Equal "="
 
+let not_syntax =
+  make_token_syntax TokenKind.Exclamation "!"
+
 let not_identical_syntax =
   make_token_syntax TokenKind.ExclamationEqualEqual "!=="
 
@@ -115,6 +118,9 @@ let if_keyword_syntax =
 
 let else_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Else "else"
+
+let while_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.While "while"
 
 let switch_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Switch "switch"
@@ -175,6 +181,12 @@ let rec delimit delimit_syntax = function
 let make_delimited_list delimit_syntax items =
   make_list (delimit delimit_syntax items)
 
+
+let make_parenthesized_expression_syntax expression_syntax =
+  make_parenthesized_expression
+    left_paren_syntax
+    expression_syntax
+    right_paren_syntax
 
 let make_nullable_type_specifier_syntax type_syntax =
   make_nullable_type_specifier nullable_syntax type_syntax
@@ -382,6 +394,37 @@ let make_if_syntax condition_syntax true_statements =
     (make_compound_statement_syntax true_statements)
     (make_missing ())
     (make_missing ())
+
+let make_while_syntax condition_syntax body_statements =
+  make_while_statement
+    while_keyword_syntax
+    left_paren_syntax
+    condition_syntax
+    right_paren_syntax
+    (make_compound_statement_syntax body_statements)
+
+(**
+ * while (true) {
+ *   body
+ * }
+ *)
+let make_while_true_syntax =
+  make_while_syntax true_expression_syntax
+
+let make_not_syntax operand_syntax =
+  make_prefix_unary_expression
+    not_syntax
+    (make_parenthesized_expression_syntax operand_syntax)
+
+(**
+ * if (!condition_syntax) {
+ *   break;
+ * }
+ *)
+let make_break_unless_syntax do_not_break_condition_syntax =
+  make_if_syntax
+    (make_not_syntax do_not_break_condition_syntax)
+    [ break_statement_syntax; ]
 
 
 (* Coroutine-specific syntaxes *)

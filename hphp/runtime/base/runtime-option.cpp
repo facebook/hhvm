@@ -44,7 +44,7 @@
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
 
-#ifdef __linux__
+#if defined (__linux__) && defined (__aarch64__)
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
 #endif
@@ -492,7 +492,7 @@ static inline bool alignMacroFusionPairs() {
 }
 
 static inline bool armLseDefault() {
-#ifdef __linux__
+#if defined (__linux__) && defined (__aarch64__) && defined (HWCAP_ATOMICS)
   return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
 #else
   return false;

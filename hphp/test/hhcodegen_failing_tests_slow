@@ -101,7 +101,6 @@ slow/closure/clone.php
 slow/closure/lambda_implicit_this.php
 slow/closure/lambda_uninit_capture.php
 slow/closure/late_bound_class.php
-slow/closure/late_static_binding_keywords.php
 slow/closure/name.php
 slow/closure/reflection.php
 slow/closure/return_types.php

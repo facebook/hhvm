@@ -410,7 +410,7 @@ let rewrite_class_refs_instr num = function
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
 | IMisc (LateBoundCls _) -> (num + 1, IMisc (LateBoundCls (num + 1)))
 | IMisc (Self _) -> (num + 1, IMisc (Self (num + 1)))
-| IMisc (ClsRefName _) -> (num + 1, IMisc (ClsRefName (num + 1)))
+| IMisc (ClsRefName _) -> (num - 1, IMisc (ClsRefName num))
 | ILitConst (ClsCns (id, _)) -> (num - 1, ILitConst (ClsCns (id, num)))
 | IGet (CGetS _) -> (num - 1, IGet (CGetS num))
 | IGet (VGetS _) -> (num - 1, IGet (VGetS num))

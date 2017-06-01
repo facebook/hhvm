@@ -175,9 +175,16 @@ let handle_persistent_connection_ genv env client =
    | ServerClientProvider.Client_went_away ->
      shutdown_persistent_client env client, false
    | e ->
-     let msg = Printexc.to_string e in
+     let open Marshal_tools in
+     let stack = Printexc.get_backtrace () in
+     let message = Printexc.to_string e in
+     begin try
+       ClientProvider.send_push_message_to_client
+         client (ServerCommandTypes.FATAL_EXCEPTION { message; stack; })
+     with _ -> ()
+     end;
      EventLogger.master_exception e;
-     Printf.fprintf stderr "Error: %s\n%!" msg;
+     Printf.eprintf "Error: %s\n%!" message;
      Printexc.print_backtrace stderr;
      shutdown_persistent_client env client, false
 

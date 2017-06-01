@@ -223,7 +223,8 @@ let assert_no_diagnostics loop_output =
 let assert_has_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) -> ()
-  | Some NEW_CLIENT_CONNECTED ->
+  | Some NEW_CLIENT_CONNECTED
+  | Some FATAL_EXCEPTION _ ->
     fail "Unexpected push message"
   | None -> fail "Expected to receive push diagnostics."
 

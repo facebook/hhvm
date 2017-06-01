@@ -25,8 +25,8 @@ type client_message = {
 
 type result =
   | Message of client_message
-  | Error (* A recoverable error occurred (such as a parse error). *)
-  | Exit (* A fatal error occurred, or the client has hung up. *)
+  | Fatal_exception of Marshal_tools.remote_exception_data
+  | Recoverable_exception of Marshal_tools.remote_exception_data
 
 (* Under the hood, this uses the Daemon module, so you must be sure to have
 called `Daemon.entry_point` before trying to make a queue. *)

@@ -156,8 +156,6 @@ type event =
   | Server_hello
   | Server_message of ServerCommandTypes.push
   | Client_message of ClientMessageQueue.client_message
-  | Client_error (* recoverable parsing error from client *)
-  | Client_exit (* client exited unceremoniously, without an exit message *)
   | Tick (* once per second, on idle, only generated when server is connected *)
 
 (* Here are some exit points. The "exit_fail_delay" is in case the user    *)
@@ -243,8 +241,9 @@ let get_next_event (state: state) : event =
   let from_client (client: ClientMessageQueue.t) =
     match ClientMessageQueue.get_message client with
     | ClientMessageQueue.Message message -> Client_message message
-    | ClientMessageQueue.Error -> Client_error
-    | ClientMessageQueue.Exit -> Client_exit
+    | ClientMessageQueue.Fatal_exception _
+    | ClientMessageQueue.Recoverable_exception _ ->
+        failwith "unable to read jsonrpc message"
   in
 
   let from_either server client =
@@ -1005,8 +1004,6 @@ let handle_event (state: state) (event: event) : unit =
     do_response c.id c.result c.error
 
   (* exit notification *)
-  | _, Client_exit ->
-    exit_fail ()
   | _, Client_message c when c.method_ = "exit" ->
     if state.lsp_state = Post_shutdown then exit_ok () else exit_fail ()
 
@@ -1194,10 +1191,6 @@ let handle_event (state: state) (event: event) : unit =
   | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
     ()
 
-  (* Recoverable errors, e.g. malformed json, which we ignore *)
-  | _, Client_error ->
-    ()
-
   (* catch-all for client reqs/notifications we haven't yet implemented *)
   | Main_loop, Client_message c ->
     let message = Printf.sprintf "not implemented: %s" c.method_ in
@@ -1212,6 +1205,10 @@ let handle_event (state: state) (event: event) : unit =
     print_log_message Message_type.ErrorMessage "Another client has connected"
       |> notify stdout "window/logMessage";
     exit_fail ()
+
+  (* server fatal shutdown *)
+  | _, Server_message ServerCommandTypes.FATAL_EXCEPTION _ ->
+    exit_fail_delay ()
 
   (* idle tick. No-op. *)
   | _, Tick -> ()

@@ -57,6 +57,9 @@ let full_recheck_if_needed genv env msg =
 (****************************************************************************)
 (* Called by the client *)
 (****************************************************************************)
+
+exception Remote_exception of Marshal_tools.remote_exception_data
+
 let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
 = fun (_, oc) cmd ->
   Marshal.to_channel oc (Rpc cmd) [];
@@ -67,6 +70,8 @@ let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
 let rec wait_for_rpc_response fd push_messages =
   match Marshal_tools.from_fd_with_preamble fd with
   | Response r -> r, List.rev push_messages
+  | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
+    raise (Remote_exception remote_e_data)
   | Push m -> wait_for_rpc_response fd (m :: push_messages)
   | Hello -> failwith "unexpected hello after connection already established"
 

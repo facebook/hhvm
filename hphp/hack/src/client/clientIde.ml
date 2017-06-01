@@ -161,6 +161,9 @@ let handle_push_message = function
         diagnostics;
       }
     end errors
+  | ServerCommandTypes.FATAL_EXCEPTION _ ->
+    Printf.eprintf "Fatal server error. Exiting.\n";
+    raise Exit_status.(Exit_with Uncaught_exception)
   | ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     Printf.eprintf "Another persistent client have connected. Exiting.\n";
     raise Exit_status.(Exit_with IDE_new_client_connected)

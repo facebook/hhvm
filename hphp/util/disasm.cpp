@@ -25,6 +25,8 @@
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-color.h"
 
+#include "hphp/vixl/a64/disasm-a64.h"
+
 namespace HPHP {
 
 static uintptr_t excludeLow, excludeLen;
@@ -83,7 +85,7 @@ static const xed_syntax_enum_t s_xed_syntax =
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                     uint8_t* codeEndAddr) {
 
-#ifdef HAVE_LIBXED
+#if (defined __x86_64__) && (defined HAVE_LIBXED)
   auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
@@ -156,6 +158,26 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     frontier += instrLen;
     ip       += instrLen;
   }
+
+#elif (defined __aarch64__)
+
+  vixl::Decoder * decoder = new vixl::Decoder();
+  vixl::Disassembler * disasm = new vixl::Disassembler();
+
+  decoder->AppendVisitor(disasm);
+
+  auto i = reinterpret_cast<vixl::Instruction*>(codeStartAddr);
+  auto end = reinterpret_cast<vixl::Instruction*>(codeEndAddr);
+
+  while (i <= end) {
+    decoder->Decode(i);
+    out << "  " << disasm->GetOutput() << std::endl;
+    i = i->NextInstruction();
+  }
+
+  delete decoder;
+  delete disasm;
+
 #else
   out << "This binary was compiled without disassembly support\n";
 #endif // HAVE_LIBXED

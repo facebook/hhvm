@@ -219,7 +219,7 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
     : "r"(emptyVal)
   );
 #else
-  auto const hash = HashTab(Data(a), SmallScale);
+  auto const hash = HashTab(a, SmallScale);
   auto const emptyVal = int64_t{Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;

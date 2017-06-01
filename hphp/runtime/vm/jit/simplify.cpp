@@ -2277,12 +2277,27 @@ SSATmp* simplifyConvCellToObj(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+namespace {
+
+ALWAYS_INLINE bool isSimplifyOkay(const IRInstruction* inst) {
+  // We want to be able to simplify the coerce calls away if possible.
+  // These serve as huristics to help remove CoerceCell* IT ops.
+  // We will let tvCoerceIfStrict handle the exact checking at runtime.
+  auto f = inst->marker().func();
+
+  return !RuntimeOption::PHP7_ScalarTypes ||
+         (f && !f->unit()->useStrictTypes() && !f->isBuiltin());
+}
+
+}
+
 SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
-  if (srcType.subtypeOfAny(TBool, TNull, TDbl,
-                           TInt, TStr)) {
+  if (srcType <= TBool ||
+       (isSimplifyOkay(inst)
+        && srcType.subtypeOfAny(TNull, TDbl, TInt, TStr))) {
     return gen(env, ConvCellToBool, src);
   }
 
@@ -2296,8 +2311,8 @@ SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType.subtypeOfAny(TInt, TBool, TNull, TDbl,
-                           TBool)) {
+  if (srcType <= TInt ||
+       (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl))) {
     return gen(env, ConvCellToInt, inst->taken(), src);
   }
 
@@ -2314,8 +2329,8 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType.subtypeOfAny(TInt, TBool, TNull, TDbl,
-                           TBool)) {
+  if (srcType.subtypeOfAny(TInt, TDbl) ||
+       (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull))) {
     return gen(env, ConvCellToDbl, inst->taken(), src);
   }
 

@@ -1,0 +1,95 @@
+Boolean
+No Error
+[user] Argument 1 passed to Strict\fBool() must be of the type boolean, integer given
+[user] Argument 1 passed to Strict\fBool() must be of the type boolean, float given
+[user] Argument 1 passed to Strict\fBool() must be of the type boolean, string given
+[user] Argument 1 passed to Strict\fBool() must be of the type boolean, array given
+[user] Argument 1 passed to Strict\fBool() must be of the type boolean, null given
+
+Int64
+[user] Argument 1 passed to Strict\fInt() must be of the type integer, boolean given
+No Error
+[user] Argument 1 passed to Strict\fInt() must be of the type integer, float given
+[user] Argument 1 passed to Strict\fInt() must be of the type integer, string given
+[user] Argument 1 passed to Strict\fInt() must be of the type integer, array given
+[user] Argument 1 passed to Strict\fInt() must be of the type integer, null given
+
+Double
+[user] Argument 1 passed to Strict\fFloat() must be of the type float, boolean given
+No Error
+No Error
+[user] Argument 1 passed to Strict\fFloat() must be of the type float, string given
+[user] Argument 1 passed to Strict\fFloat() must be of the type float, array given
+[user] Argument 1 passed to Strict\fFloat() must be of the type float, null given
+
+String
+[user] Argument 1 passed to Strict\fString() must be of the type string, boolean given
+[user] Argument 1 passed to Strict\fString() must be of the type string, integer given
+[user] Argument 1 passed to Strict\fString() must be of the type string, float given
+No Error
+[user] Argument 1 passed to Strict\fString() must be of the type string, array given
+[user] Argument 1 passed to Strict\fString() must be of the type string, null given
+
+Array
+[user] Argument 1 passed to Strict\fArray() must be of the type array, boolean given
+[user] Argument 1 passed to Strict\fArray() must be of the type array, integer given
+[user] Argument 1 passed to Strict\fArray() must be of the type array, float given
+[user] Argument 1 passed to Strict\fArray() must be of the type array, string given
+No Error
+[user] Argument 1 passed to Strict\fArray() must be of the type array, null given
+
+Object
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, boolean given
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, integer given
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, float given
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, string given
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, array given
+[user] Argument 1 passed to Strict\fObject() must be an instance of Strict\object, null given
+
+Boolean
+No Error
+[user] Argument 1 passed to Weak\fBool() must be of the type boolean, integer given
+[user] Argument 1 passed to Weak\fBool() must be of the type boolean, float given
+[user] Argument 1 passed to Weak\fBool() must be of the type boolean, string given
+[user] Argument 1 passed to Weak\fBool() must be of the type boolean, array given
+[user] Argument 1 passed to Weak\fBool() must be of the type boolean, null given
+
+Int64
+[user] Argument 1 passed to Weak\fInt() must be of the type integer, boolean given
+No Error
+[user] Argument 1 passed to Weak\fInt() must be of the type integer, float given
+[user] Argument 1 passed to Weak\fInt() must be of the type integer, string given
+[user] Argument 1 passed to Weak\fInt() must be of the type integer, array given
+[user] Argument 1 passed to Weak\fInt() must be of the type integer, null given
+
+Double
+[user] Argument 1 passed to Weak\fFloat() must be of the type float, boolean given
+No Error
+No Error
+[user] Argument 1 passed to Weak\fFloat() must be of the type float, string given
+[user] Argument 1 passed to Weak\fFloat() must be of the type float, array given
+[user] Argument 1 passed to Weak\fFloat() must be of the type float, null given
+
+String
+[user] Argument 1 passed to Weak\fString() must be of the type string, boolean given
+[user] Argument 1 passed to Weak\fString() must be of the type string, integer given
+[user] Argument 1 passed to Weak\fString() must be of the type string, float given
+No Error
+[user] Argument 1 passed to Weak\fString() must be of the type string, array given
+[user] Argument 1 passed to Weak\fString() must be of the type string, null given
+
+Array
+[user] Argument 1 passed to Weak\fArray() must be of the type array, boolean given
+[user] Argument 1 passed to Weak\fArray() must be of the type array, integer given
+[user] Argument 1 passed to Weak\fArray() must be of the type array, float given
+[user] Argument 1 passed to Weak\fArray() must be of the type array, string given
+No Error
+[user] Argument 1 passed to Weak\fArray() must be of the type array, null given
+
+Object
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, boolean given
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, integer given
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, float given
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, string given
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, array given
+[user] Argument 1 passed to Weak\fObject() must be an instance of Weak\object, null given

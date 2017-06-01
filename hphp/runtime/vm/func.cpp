@@ -1144,7 +1144,7 @@ bool funcNeedsCallerFrame(const Func* callee) {
 
   return
     (callee->isCPPBuiltin() &&
-     s_ignores_frame.count(callee->name()->data()) == 0) ||
+      s_ignores_frame.count(callee->name()->data()) == 0) ||
     funcReadsLocals(callee) ||
     funcWritesLocals(callee);
 }

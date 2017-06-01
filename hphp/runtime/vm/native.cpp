@@ -265,19 +265,20 @@ void callFunc(const Func* func, void *ctx,
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define COERCE_OR_CAST(kind, warn_kind)                 \
-  if (paramCoerceMode) {                                \
-    if (!tvCoerceParamTo##kind##InPlace(&args[-i])) {   \
-      raise_param_type_warning(                         \
-        func->displayName()->data(),                    \
-        i+1,                                            \
-        KindOf##warn_kind,                              \
-        args[-i].m_type                                 \
-      );                                                \
-      return false;                                     \
-    }                                                   \
-  } else {                                              \
-    tvCastTo##kind##InPlace(&args[-i]);                 \
+#define COERCE_OR_CAST(kind, warn_kind)                         \
+  if (paramCoerceMode) {                                        \
+    if (!tvCoerceParamTo##kind##InPlace(&args[-i],              \
+                                        func->isBuiltin())) {   \
+      raise_param_type_warning(                                 \
+        func->displayName()->data(),                            \
+        i+1,                                                    \
+        KindOf##warn_kind,                                      \
+        args[-i].m_type                                         \
+      );                                                        \
+      return false;                                             \
+    }                                                           \
+  } else {                                                      \
+    tvCastTo##kind##InPlace(&args[-i]);                         \
   }
 
 #define CASE(kind)                                      \

@@ -1,0 +1,29 @@
+
+Boolean
+WARNING: sha1() expects parameter 2 to be boolean, array given
+
+Int64
+WARNING: str_pad() expects parameter 2 to be integer, string given
+WARNING: str_pad() expects parameter 2 to be integer, array given
+
+Double
+WARNING: number_format() expects parameter 1 to be double, string given
+WARNING: number_format() expects parameter 1 to be double, array given
+
+String
+WARNING: rtrim() expects parameter 1 to be string, array given
+
+Array
+WARNING: array_count_values() expects parameter 1 to be array, boolean given
+WARNING: array_count_values() expects parameter 1 to be array, integer given
+WARNING: array_count_values() expects parameter 1 to be array, double given
+WARNING: array_count_values() expects parameter 1 to be array, string given
+WARNING: array_count_values() expects parameter 1 to be array, null given
+
+Object
+WARNING: get_object_vars() expects parameter 1 to be object, boolean given
+WARNING: get_object_vars() expects parameter 1 to be object, integer given
+WARNING: get_object_vars() expects parameter 1 to be object, double given
+WARNING: get_object_vars() expects parameter 1 to be object, string given
+WARNING: get_object_vars() expects parameter 1 to be object, array given
+WARNING: get_object_vars() expects parameter 1 to be object, null given

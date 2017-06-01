@@ -461,22 +461,24 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
         // scalar type hints
         if (tv->m_type == KindOfRef) {
           auto inner = tv->m_data.pref->var()->asTypedValue();
-          if (tvCoerceParamInPlace(inner, *dt)) {
+          if (tvCoerceParamInPlace(inner, *dt, func->isBuiltin())) {
             tvAsVariant(tv) = tvAsVariant(inner);
             return;
           }
         } else {
-          if (tvCoerceParamInPlace(tv, *dt)) return;
+          if (tvCoerceParamInPlace(tv, *dt, func->isBuiltin())) {
+            return;
+          }
         }
       }
     }
-  } else if (UNLIKELY(!func->unit()->isHHFile() &&
+  } else if (UNLIKELY((!func->unit()->isHHFile() || func->isBuiltin()) &&
                       !RuntimeOption::EnableHipHopSyntax)) {
     // PHP 7 allows for a widening conversion from Int to Float. We still ban
     // this in HH files.
     if (auto dt = underlyingDataType()) {
       if (*dt == KindOfDouble && tv->m_type == KindOfInt64 &&
-          tvCoerceParamToDoubleInPlace(tv)) {
+          tvCoerceParamToDoubleInPlace(tv, func->isBuiltin())) {
         return;
       }
     }

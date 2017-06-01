@@ -1,0 +1,135 @@
+Boolean
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, boolean given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, integer given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, float given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, string given
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, array given
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, array given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be boolean, null given
+
+Int64
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be integer, boolean given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be integer, integer given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be integer, float given
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, string given
+User:
+WARNING: {closure}() expects parameter 1 to be integer, string given
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, array given
+User:
+WARNING: {closure}() expects parameter 1 to be integer, array given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be integer, null given
+
+Double
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be float, boolean given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be float, integer given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be float, float given
+Builtin:
+WARNING: number_format() expects parameter 1 to be float, string given
+User:
+WARNING: {closure}() expects parameter 1 to be float, string given
+Builtin:
+WARNING: number_format() expects parameter 1 to be float, array given
+User:
+WARNING: {closure}() expects parameter 1 to be float, array given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be float, null given
+
+String
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be string, boolean given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be string, integer given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be string, float given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be string, string given
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, array given
+User:
+WARNING: {closure}() expects parameter 1 to be string, array given
+Builtin:
+User:
+WARNING: {closure}() expects parameter 1 to be string, null given
+
+Array
+Builtin:
+WARNING: array_count_values() expects parameter 1 to be array, boolean given
+User:
+WARNING: {closure}() expects parameter 1 to be array, boolean given
+Builtin:
+WARNING: array_count_values() expects parameter 1 to be array, integer given
+User:
+WARNING: {closure}() expects parameter 1 to be array, integer given
+Builtin:
+WARNING: array_count_values() expects parameter 1 to be array, float given
+User:
+WARNING: {closure}() expects parameter 1 to be array, float given
+Builtin:
+WARNING: array_count_values() expects parameter 1 to be array, string given
+User:
+WARNING: {closure}() expects parameter 1 to be array, string given
+Builtin:
+User:
+Builtin:
+WARNING: array_count_values() expects parameter 1 to be array, null given
+User:
+WARNING: {closure}() expects parameter 1 to be array, null given
+
+Object
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, boolean given
+User:
+WARNING: {closure}() expects parameter 1 to be object, boolean given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, integer given
+User:
+WARNING: {closure}() expects parameter 1 to be object, integer given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, float given
+User:
+WARNING: {closure}() expects parameter 1 to be object, float given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, string given
+User:
+WARNING: {closure}() expects parameter 1 to be object, string given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, array given
+User:
+WARNING: {closure}() expects parameter 1 to be object, array given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, null given
+User:
+WARNING: {closure}() expects parameter 1 to be object, null given

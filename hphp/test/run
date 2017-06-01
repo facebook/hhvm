@@ -724,15 +724,11 @@ function list_tests($files, $options) {
   }
 }
 
-function find_test_ext($test, $ext) {
+function find_test_ext($test, $ext, $configName='config') {
   if (is_file("{$test}.{$ext}")) {
     return "{$test}.{$ext}";
   }
-  return find_file_for_dir(dirname($test), "config.{$ext}");
-}
-
-function find_file($test, $name) {
-  return find_file_for_dir(dirname($test), $name);
+  return find_file_for_dir(dirname($test), "{$configName}.{$ext}");
 }
 
 function find_file_for_dir($dir, $name) {
@@ -965,7 +961,7 @@ function hphp_cmd($options, $test) {
     hhvm_path(),
     '--hphp',
     '--config',
-    find_file($test, 'hphp_config.ini'),
+    find_test_ext($test, 'ini', 'hphp_config'),
     read_opts_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o \"$test.repo\" \"$test\"",
     $extra_args

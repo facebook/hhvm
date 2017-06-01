@@ -36,6 +36,9 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/assertions.h"
@@ -1154,22 +1157,23 @@ void tvCastToResourceInPlace(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
 }
 
-bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
+bool tvCoerceParamToBooleanInPlace(TypedValue* tv,
+                                   bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    case KindOfUninit:
     case KindOfNull:
+      // In PHP 7 mode handling of null types is stricter
+      if (RuntimeOption::PHP7_ScalarTypes && !builtin) return false;
+      // fall-through
+
+    case KindOfUninit:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-      // In PHP 7 mode handling of null types is stricter
-      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
-        return false;
-      }
       tvCastToBooleanInPlace(tv);
       return true;
 
@@ -1191,7 +1195,8 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
   not_reached();
 }
 
-static bool tvCanBeCoercedToNumber(const TypedValue* tv) {
+static bool tvCanBeCoercedToNumber(const TypedValue* tv,
+                                   bool builtin) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfBoolean:
@@ -1201,7 +1206,7 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv) {
 
     case KindOfNull:
       // In PHP 7 mode handling of null types is stricter
-      return !RuntimeOption::PHP7_ScalarTypes;
+      return !RuntimeOption::PHP7_ScalarTypes || builtin;
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -1240,10 +1245,11 @@ static bool tvCanBeCoercedToNumber(const TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
+bool tvCoerceParamToInt64InPlace(TypedValue* tv,
+                                 bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  if (!tvCanBeCoercedToNumber(tv)) {
+  if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
   }
   // In PHP 7 mode doubles only convert to integers when the conversion is non-
@@ -1257,32 +1263,36 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
   return true;
 }
 
-bool tvCoerceParamToDoubleInPlace(TypedValue* tv) {
+bool tvCoerceParamToDoubleInPlace(TypedValue* tv,
+                                  bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  if (!tvCanBeCoercedToNumber(tv)) {
+  if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
   }
   tvCastToDoubleInPlace(tv);
   return true;
 }
 
-bool tvCoerceParamToStringInPlace(TypedValue* tv) {
+bool tvCoerceParamToStringInPlace(TypedValue* tv,
+                                  bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    case KindOfUninit:
     case KindOfNull:
+      // In PHP 7 mode handling of null types is stricter
+      if (RuntimeOption::PHP7_ScalarTypes && !builtin) {
+        return false;
+      }
+      // fall-through
+
+    case KindOfUninit:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-      // In PHP 7 mode handling of null types is stricter
-      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
-        return false;
-      }
       tvCastToStringInPlace(tv);
       return true;
 
@@ -1312,7 +1322,8 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
+bool tvCoerceParamToArrayInPlace(TypedValue* tv,
+                                 bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1351,7 +1362,8 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToVecInPlace(TypedValue* tv) {
+bool tvCoerceParamToVecInPlace(TypedValue* tv,
+                               bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1383,7 +1395,8 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToDictInPlace(TypedValue* tv) {
+bool tvCoerceParamToDictInPlace(TypedValue* tv,
+                                bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1415,7 +1428,8 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToKeysetInPlace(TypedValue* tv) {
+bool tvCoerceParamToKeysetInPlace(TypedValue* tv,
+                                  bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1447,13 +1461,15 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCoerceParamToObjectInPlace(TypedValue* tv) {
+bool tvCoerceParamToObjectInPlace(TypedValue* tv,
+                                  bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfObject;
 }
 
-bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv) {
+bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv,
+                                          bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (isNullType(tv->m_type)) {
@@ -1464,7 +1480,8 @@ bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv) {
   return tv->m_type == KindOfObject;
 }
 
-bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
+bool tvCoerceParamToResourceInPlace(TypedValue* tv,
+                                    bool builtin) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfResource;

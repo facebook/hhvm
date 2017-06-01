@@ -99,7 +99,7 @@ struct FuncChecker {
   ARGTYPES
 #undef ARGTYPE
 #undef ARGTYPEVEC
-  bool checkOp(State*, PC, Op);
+  bool checkOp(State*, PC, Op, Block*);
   template<typename Subop> bool checkImmOAImpl(PC& pc, PC instr);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
@@ -944,7 +944,7 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
   return ok;
 }
 
-bool FuncChecker::checkOp(State* cur, PC pc, Op op) {
+bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
   switch (op) {
     case Op::GetMemoKeyL:
     case Op::MemoGet:
@@ -955,7 +955,14 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op) {
         return false;
       }
       break;
-    case Op::AssertRATStk:
+    case Op::AssertRATL:
+    case Op::AssertRATStk: {
+      if (pc == b->last){
+        ferror("{} cannot appear at the end of a block\n", opcodeToName(op));
+        return false;
+      }
+      if (op == Op::AssertRATL) break;
+    }
     case Op::BaseNC:
     case Op::BaseGC:
     case Op::BaseSC:
@@ -1153,7 +1160,7 @@ bool FuncChecker::checkFlow() {
                      instrToString(pc, unit()) << std::endl;
       }
       auto const op = peek_op(pc);
-      ok &= checkOp(&cur, pc, op);
+      ok &= checkOp(&cur, pc, op, b);
       ok &= checkInputs(&cur, pc, b);
       auto const flags = instrFlags(op);
       if (flags & TF) ok &= checkTerminal(&cur, pc);

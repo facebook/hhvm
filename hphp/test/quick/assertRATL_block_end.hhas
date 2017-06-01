@@ -1,0 +1,23 @@
+# tests that AssertRATL cannot appear at the end of a block
+
+.main {
+    FPushFuncD 1 "foo"
+    Int 9
+    FPassCE 0
+    FCall 1
+    PopR
+    Int 1
+    RetC
+}
+
+.function foo($x){
+    Int 2
+    JmpNZ target_label
+    AssertRATL $x Int
+    target_label: FPushFuncD 1 "var_dump"
+    Int 42
+    FPassCE 0
+    FCall 1
+    UnboxR
+    RetC
+}

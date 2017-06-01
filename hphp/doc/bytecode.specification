@@ -840,6 +840,10 @@ initialized before being read and becomes uninitialized after being read. A
 classref slot must be uninitialized before being written to and becomes
 initialized after being written.
 
+17) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+from the following instruction by control flow. Practically speaking, this means
+that the instruction immediately following an assertion cannot be a jump target.
+
 Instruction set
 ---------------
 

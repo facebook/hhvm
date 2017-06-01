@@ -1147,7 +1147,7 @@ uintptr_t tlsBaseNoInline() {
  * If no ActRec was pushed for the builtin function, inspect the caller to
  * determine if the call used strict types.
  */
-bool useStrictTypes(const Func* callee) {
+bool useStrictTypesHelper(const Func* callee) {
   return liveFunc() == callee
     ? !liveFrame()->useWeakTypes()
     : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
@@ -1160,7 +1160,7 @@ void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
   }
 
   VMRegAnchor _;
-  if (!useStrictTypes(func)) return;
+  if (!useStrictTypesHelper(func)) return;
 
   auto const& tc = func->params()[argNum - 1].typeConstraint;
   tc.verifyParam(&tv, func, argNum - 1, true);

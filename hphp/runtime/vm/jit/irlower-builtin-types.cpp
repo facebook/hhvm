@@ -45,18 +45,19 @@ TRACE_SET_MOD(irlower);
  * Attempt to convert `tv' to a given type, raising a warning and throwing a
  * TVCoercionException on failure.
  */
-#define XX(kind, expkind)                                         \
-void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
-                                    const Func* callee,           \
-                                    unsigned int arg_num) {       \
-  tvCoerceIfStrict(*tv, arg_num, callee);                         \
-  if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
-    return;                                                       \
-  }                                                               \
-  raise_param_type_warning(callee->displayName()->data(),         \
-                           arg_num, KindOf##expkind, tv->m_type); \
-  throw TVCoercionException(callee, arg_num, tv->m_type,          \
-                            KindOf##expkind);                     \
+#define XX(kind, expkind)                                             \
+void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
+                                    const Func* callee,               \
+                                    unsigned int arg_num) {           \
+  tvCoerceIfStrict(*tv, arg_num, callee);                             \
+  if (LIKELY(tvCoerceParamTo##kind##InPlace(tv,                       \
+                                            callee->isBuiltin()))) {  \
+    return;                                                           \
+  }                                                                   \
+  raise_param_type_warning(callee->displayName()->data(),             \
+                           arg_num, KindOf##expkind, tv->m_type);     \
+  throw TVCoercionException(callee, arg_num, tv->m_type,              \
+                            KindOf##expkind);                         \
 }
 #define X(kind) XX(kind, kind)
 X(Boolean)

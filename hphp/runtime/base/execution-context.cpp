@@ -1305,7 +1305,8 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit) {
 
   auto const func = unit->getMain(nullptr);
   return invokeFunc(func, init_null_variant, nullptr, nullptr,
-                    m_globalVarEnv, nullptr, InvokePseudoMain);
+                    m_globalVarEnv, nullptr, InvokePseudoMain,
+                    !unit->useStrictTypes());
 }
 
 void ExecutionContext::syncGdbState() {

@@ -39,7 +39,8 @@ struct StringData;
 
 #define X(kind) \
 void tvCastTo##kind##InPlace(TypedValue* tv); \
-bool tvCoerceParamTo##kind##InPlace(TypedValue* tv);
+bool tvCoerceParamTo##kind##InPlace(TypedValue* tv, \
+                                    bool builtin);
 X(Boolean)
 X(Int64)
 X(Double)
@@ -73,9 +74,12 @@ ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
   not_reached();
 }
 
-ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
+ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
+                                        bool builtin) {
 #define X(kind) \
-  if (DType == KindOf##kind) return tvCoerceParamTo##kind##InPlace(tv);
+  if (DType == KindOf##kind) \
+    return tvCoerceParamTo##kind##InPlace(tv, \
+                                          builtin);
   X(Boolean)
   X(Int64)
   X(Double)

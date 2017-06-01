@@ -1,0 +1,101 @@
+
+Boolean
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+WARNING: sha1() expects parameter 2 to be boolean, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type boolean, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type boolean, null given
+
+Int64
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+WARNING: str_pad() expects parameter 2 to be integer, string given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type integer, string given
+WARNING: str_pad() expects parameter 2 to be integer, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type integer, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type integer, null given
+
+Double
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+WARNING: number_format() expects parameter 1 to be float, string given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type float, string given
+WARNING: number_format() expects parameter 1 to be float, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type float, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type float, null given
+
+String
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+No Error
+WARNING: rtrim() expects parameter 1 to be string, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type string, array given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type string, null given
+
+Array
+WARNING: array_count_values() expects parameter 1 to be array, boolean given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type array, boolean given
+WARNING: array_count_values() expects parameter 1 to be array, integer given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type array, integer given
+WARNING: array_count_values() expects parameter 1 to be array, float given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type array, float given
+WARNING: array_count_values() expects parameter 1 to be array, string given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type array, string given
+No Error
+No Error
+WARNING: array_count_values() expects parameter 1 to be array, null given
+No Error
+[user] Argument 1 passed to {closure}() must be of the type array, null given
+
+Object
+WARNING: get_object_vars() expects parameter 1 to be object, boolean given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, boolean given
+WARNING: get_object_vars() expects parameter 1 to be object, integer given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, integer given
+WARNING: get_object_vars() expects parameter 1 to be object, float given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, float given
+WARNING: get_object_vars() expects parameter 1 to be object, string given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, string given
+WARNING: get_object_vars() expects parameter 1 to be object, array given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, array given
+WARNING: get_object_vars() expects parameter 1 to be object, null given
+No Error
+[user] Argument 1 passed to {closure}() must be an instance of object, null given

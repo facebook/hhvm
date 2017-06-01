@@ -1317,8 +1317,8 @@ static const yytype_uint16 yyrline[] =
     3376,  3377,  3381,  3382,  3386,  3387,  3390,  3395,  3396,  3400,
     3403,  3405,  3409,  3415,  3416,  3417,  3421,  3425,  3433,  3438,
     3450,  3452,  3456,  3459,  3461,  3466,  3471,  3477,  3480,  3485,
-    3490,  3492,  3499,  3502,  3505,  3506,  3509,  3512,  3513,  3518,
-    3520,  3524,  3530,  3540,  3541
+    3490,  3492,  3499,  3501,  3504,  3505,  3508,  3511,  3512,  3517,
+    3519,  3523,  3529,  3539,  3540
 };
 #endif
 
@@ -13131,105 +13131,104 @@ yyreduce:
 
   case 1062:
 #line 3499 "hphp.y" /* yacc.c:1646  */
-    { only_in_hh_syntax(_p);
-                                         _p->onTypeSpecialization((yyvsp[0]), '?');
+    { _p->onTypeSpecialization((yyvsp[0]), '?');
                                          (yyval) = (yyvsp[0]); }
-#line 13136 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13135 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1063:
-#line 3502 "hphp.y" /* yacc.c:1646  */
+#line 3501 "hphp.y" /* yacc.c:1646  */
     { only_in_hh_syntax(_p);
                                          _p->onTypeSpecialization((yyvsp[0]), '@');
                                          (yyval) = (yyvsp[0]); }
-#line 13144 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13143 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1064:
-#line 3505 "hphp.y" /* yacc.c:1646  */
+#line 3504 "hphp.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]); }
-#line 13150 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13149 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1065:
-#line 3506 "hphp.y" /* yacc.c:1646  */
+#line 3505 "hphp.y" /* yacc.c:1646  */
     { Token t; t.reset();
                                          (yyvsp[0]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[0]), t); }
-#line 13158 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13157 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1066:
-#line 3509 "hphp.y" /* yacc.c:1646  */
+#line 3508 "hphp.y" /* yacc.c:1646  */
     { Token t; t.reset();
                                          (yyvsp[0]).setText("callable");
                                          _p->onTypeAnnotation((yyval), (yyvsp[0]), t); }
-#line 13166 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13165 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1067:
-#line 3512 "hphp.y" /* yacc.c:1646  */
+#line 3511 "hphp.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]); }
-#line 13172 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13171 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1068:
-#line 3515 "hphp.y" /* yacc.c:1646  */
+#line 3514 "hphp.y" /* yacc.c:1646  */
     { only_in_hh_syntax(_p);
                                          _p->onTypeAnnotation((yyval), (yyvsp[-2]), (yyvsp[0]));
                                          _p->onTypeSpecialization((yyval), 'a'); }
-#line 13180 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13179 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1069:
-#line 3518 "hphp.y" /* yacc.c:1646  */
+#line 3517 "hphp.y" /* yacc.c:1646  */
     { (yyvsp[-1]).setText("array");
                                          _p->onTypeAnnotation((yyval), (yyvsp[-1]), (yyvsp[0])); }
-#line 13187 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13186 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1070:
-#line 3520 "hphp.y" /* yacc.c:1646  */
+#line 3519 "hphp.y" /* yacc.c:1646  */
     { (yyvsp[0]).xhpLabel();
                                          Token t; t.reset();
                                          _p->onTypeAnnotation((yyval), (yyvsp[0]), t);
                                          _p->onTypeSpecialization((yyval), 'x'); }
-#line 13196 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13195 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1071:
-#line 3526 "hphp.y" /* yacc.c:1646  */
+#line 3525 "hphp.y" /* yacc.c:1646  */
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[-1]), (yyvsp[-4]));
                                         _p->onTypeAnnotation((yyval), (yyvsp[-6]), (yyvsp[-1]));
                                         _p->onTypeSpecialization((yyval), 'f'); }
-#line 13205 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13204 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1072:
-#line 3532 "hphp.y" /* yacc.c:1646  */
+#line 3531 "hphp.y" /* yacc.c:1646  */
     { only_in_hh_syntax(_p);
                                         _p->onTypeList((yyvsp[-4]), (yyvsp[-2]));
                                         Token t; t.reset(); t.setText("array");
                                         _p->onTypeAnnotation((yyval), t, (yyvsp[-4]));
                                         _p->onTypeSpecialization((yyval), 't'); }
-#line 13215 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13214 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1073:
-#line 3540 "hphp.y" /* yacc.c:1646  */
+#line 3539 "hphp.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]); }
-#line 13221 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13220 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 1074:
-#line 3541 "hphp.y" /* yacc.c:1646  */
+#line 3540 "hphp.y" /* yacc.c:1646  */
     { (yyval).reset(); }
-#line 13227 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13226 "hphp.7.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 13231 "hphp.7.tab.cpp" /* yacc.c:1646  */
+#line 13230 "hphp.7.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -13465,7 +13464,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 3544 "hphp.y" /* yacc.c:1906  */
+#line 3543 "hphp.y" /* yacc.c:1906  */
 
 /* !PHP5_ONLY*/
 /* REMOVED */

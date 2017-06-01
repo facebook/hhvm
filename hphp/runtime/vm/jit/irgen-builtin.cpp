@@ -789,7 +789,7 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
       pi.defaultValue.m_type == KindOfNull) {
     return TNullableObj;
   }
-  return pi.builtinType ? Type(*pi.builtinType) : TBottom;
+  return Type(*pi.builtinType);
 }
 
 //////////////////////////////////////////////////////////////////////

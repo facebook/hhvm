@@ -969,7 +969,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
   Variant v(ascii);
   auto tv = v.asTypedValue();
   char c = 0;
-  if (tvCoerceParamToInt64InPlace(tv)) {
+  if (tvCoerceParamToInt64InPlace(tv, true)) {
     c = tv->m_data.num & 0xFF;
   }
   return String::FromChar(c);

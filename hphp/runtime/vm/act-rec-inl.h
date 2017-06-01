@@ -95,13 +95,17 @@ inline void ActRec::setLocalsDecRefd() {
 }
 
 inline void ActRec::setResumed() {
-  assert((flags() & ~IsFCallAwait) == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
+  assert((flags() & ~(IsFCallAwait | UseWeakTypes)) == Flags::None);
+  m_numArgsAndFlags = encodeNumArgsAndFlags(
+    numArgs(),
+    static_cast<Flags>(InResumed | (flags() & UseWeakTypes)));
 }
 
 inline void ActRec::setFCallAwait() {
-  assert(flags() == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), IsFCallAwait);
+  assert((flags() & ~UseWeakTypes) == Flags::None);
+  m_numArgsAndFlags = encodeNumArgsAndFlags(
+    numArgs(),
+    static_cast<Flags>(IsFCallAwait | (flags() & UseWeakTypes)));
 }
 
 inline void ActRec::setMagicDispatch(StringData* invName) {

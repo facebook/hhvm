@@ -1124,6 +1124,9 @@ slow/type_assertions/1860.php
 slow/type_assertions/1862.php
 slow/type_assertions/param-self.php
 slow/type_constraint/parse_super_constraint_bad.php
+slow/typecheck/type_coersion_5.php
+slow/typecheck/type_coersion_7.php
+slow/typecheck/type_coersion_7strict.php
 slow/typedef/typedef_duplicate.php
 slow/typedef/typedef_duplicate2.php
 slow/typedef/typedef_mixed_case.php

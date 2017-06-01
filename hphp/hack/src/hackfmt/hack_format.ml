@@ -941,18 +941,7 @@ let rec transform node =
     Fmt [
       t name;
       Space;
-      t left_b;
-      if is_missing initializers then t right_b
-      else Fmt [
-        Space;
-        Split;
-        WithRule (Rule.Argument, Fmt [
-          Nest [
-            handle_possible_list ~after_each:after_each_literal initializers
-          ];
-          t right_b;
-        ])
-      ]
+      transform_argish ~spaces:true left_b initializers right_b;
     ]
   | ObjectCreationExpression x ->
     let (kw, obj_type, left_p, arg_list, right_p) =
@@ -1376,6 +1365,9 @@ and when_present node f =
   | Missing -> Nothing
   | _ -> f ()
 
+and is_present node =
+  not (is_missing node)
+
 and transform_simple node =
   Fmt (List.map (children node) transform)
 
@@ -1655,10 +1647,12 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
     ])
   ]
 
-and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
+and transform_argish ?(allow_trailing=true) ?(spaces=false)
+    left_p arg_list right_p =
   Fmt [
     transform left_p;
     when_present arg_list split;
+    if spaces && is_present arg_list then Space else Nothing;
     let rule = match syntax arg_list with
       | SyntaxList [x]
         when List.is_empty (trailing_trivia left_p)
@@ -1667,7 +1661,7 @@ and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
       | _ -> Rule.Argument
     in
     WithRule (rule, Span [
-      transform_possible_comma_list ~allow_trailing arg_list right_p
+      transform_possible_comma_list ~allow_trailing ~spaces arg_list right_p
     ])
   ]
 
@@ -1688,7 +1682,8 @@ and transform_braced_item left_p item right_p =
     ]);
   ]
 
-and transform_possible_comma_list ?(allow_trailing=true) items right_p =
+and transform_possible_comma_list ?(allow_trailing=true) ?(spaces=false)
+    items right_p =
   (* Remove the right paren's leading trivia and handle it inside the Nest, so
    * that comments will be indented correctly. *)
   let leading, right_p = match syntax right_p with
@@ -1703,6 +1698,7 @@ and transform_possible_comma_list ?(allow_trailing=true) items right_p =
       transform_leading_trivia leading;
     ];
     when_present items split;
+    if spaces && is_present items then Space else Nothing;
     transform right_p;
   ]
 

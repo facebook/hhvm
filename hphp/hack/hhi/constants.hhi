@@ -21,6 +21,9 @@ const int PHP_RELEASE_VERSION = 99;
 const int PHP_VERSION_ID = 50699;
 const string PHP_EXTRA_VERSION = 'hhvm';
 
+const string HHVM_VERSION = 'typechecker placeholder, see runtime';
+const int HHVM_VERSION_ID = 0;
+
 const int PHP_INT_MAX = (1 << 63) - 1;
 const int PHP_INT_MIN = -1 << 63;
 const int PHP_INT_SIZE = 8;

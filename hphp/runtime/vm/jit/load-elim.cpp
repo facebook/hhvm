@@ -1303,7 +1303,13 @@ void optimizeLoads(IRUnit& unit) {
       // point. Either there's some bug in load-elim, or this unit is especially
       // pathological. Emit a perf warning so we're aware and stop iterating.
       logPerfWarning(
-        "optimize_loads_max_iters", 1, [] (StructuredLogEntry&) {}
+        "optimize_loads_max_iters", 1,
+        [&](StructuredLogEntry& cols) {
+          auto const func = unit.context().func;
+          cols.setStr("func", func->fullName()->slice());
+          cols.setStr("filename", func->unit()->filepath()->slice());
+          cols.setStr("hhir_unit", show(unit));
+        }
       );
       break;
     }

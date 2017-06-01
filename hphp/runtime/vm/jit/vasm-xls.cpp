@@ -2387,9 +2387,16 @@ void optimize(Vunit& unit, Inst& inst, Vlabel b, size_t i, F sf_live) {}
 template<typename xor_op, typename ldimm_op, typename F>
 void optimize_ldimm(Vunit& unit, ldimm_op& ldimm,
                     Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && ldimm.s.q() == 0 && ldimm.d.isGP()) {
-    decltype(xor_op::d) d = ldimm.d;
-    unit.blocks[b].code[i] = xor_op{d, d, d, RegSF{0}};
+  switch (arch()) {
+    case Arch::X64:
+    case Arch::PPC64:
+      if (!sf_live() && ldimm.s.q() == 0 && ldimm.d.isGP()) {
+        decltype(xor_op::d) d = ldimm.d;
+        unit.blocks[b].code[i] = xor_op{d, d, d, RegSF{0}};
+      }
+      break;
+    case Arch::ARM:
+      break;
   }
 }
 

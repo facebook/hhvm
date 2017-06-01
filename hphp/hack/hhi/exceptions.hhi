@@ -70,3 +70,5 @@ class OverflowException extends RuntimeException {}
 class RangeException extends RuntimeException {}
 class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
+
+class InvariantException extends Exception {}

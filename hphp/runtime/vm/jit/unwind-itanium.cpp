@@ -39,6 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/unwind-itanium.h"
 
@@ -63,6 +64,34 @@ rds::Link<UnwindRDS,true> g_unwind_rds(rds::kInvalidHandle);
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+enum class ExceptionKind {
+  StdException,
+  NonStdException,
+  PhpException,
+  CppException,
+  InvalidSetMException,
+  TVCoercionException,
+};
+
+struct TIHash {
+  std::size_t operator()(const std::type_info* ti) const {
+    return ti->hash_code();
+  }
+};
+
+struct TIEqual {
+  bool operator()(const std::type_info* lhs, const std::type_info* rhs) const {
+    if (intptr_t(lhs) < 0) return false;
+    return *lhs == *rhs;
+  }
+};
+
+using TypeInfoMap = folly::AtomicHashArray<const std::type_info*,
+                                           ExceptionKind,
+                                           TIHash, TIEqual>;
+
+TypeInfoMap::SmartPtr typeInfoMap;
 
 /*
  * Sync VM regs for the TC frame represented by `context'.
@@ -189,18 +218,62 @@ tc_unwind_personality(int version,
   assertx(version == 1);
 
   auto const& ti = typeinfoFromUE(ue);
-  auto const std_exception = static_cast<std::exception*>(exceptionFromUE(ue));
+  auto const it = typeInfoMap->find(&ti);
+  if (it == typeInfoMap->end()) {
+    if (actions & _UA_SEARCH_PHASE) {
+      FTRACE(1,
+             "Unclassified exception was thrown, "
+             "returning _URC_HANDLER_FOUND\n");
+      return _URC_HANDLER_FOUND;
+    }
+#ifndef _MSC_VER
+    __cxxabiv1::__cxa_begin_catch(ue);
+#endif
+    auto exn = std::current_exception();
+#ifndef _MSC_VER
+    __cxxabiv1::__cxa_end_catch();
+#endif
+    ExceptionKind ek;
+    try {
+      try {
+        std::rethrow_exception(exn);
+      } catch (const InvalidSetMException&) {
+        ek = ExceptionKind::InvalidSetMException;
+        throw;
+      } catch (const TVCoercionException&) {
+        ek = ExceptionKind::InvalidSetMException;
+        throw;
+      } catch (const req::root<Object>&) {
+        ek = ExceptionKind::PhpException;
+        throw;
+      } catch (const Object&) {
+        ek = ExceptionKind::PhpException;
+        Logger::Error("Throwing an unwrapped Object");
+        throw;
+      } catch (const BaseException&) {
+        ek = ExceptionKind::CppException;
+        throw;
+      } catch (const std::exception& e) {
+        ek = ExceptionKind::CppException;
+        throw FatalErrorException(
+          0, "Invalid exception with message `%s'", e.what());
+      } catch (...) {
+        ek = ExceptionKind::CppException;
+        throw FatalErrorException("Unknown invalid exception");
+      }
+    } catch (...) {
+      typeInfoMap->emplace(&ti, ek);
+      throw;
+    };
+  }
+
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
-  bool badException = false;
 
-  if (ti == typeid(InvalidSetMException)) {
-    ism = static_cast<InvalidSetMException*>(std_exception);
-  } else if (ti == typeid(TVCoercionException)) {
-    tce = static_cast<TVCoercionException*>(std_exception);
-  } else if (ti != typeid(req::root<Object>) &&
-             !dynamic_cast<BaseException*>(std_exception)) {
-    badException = true;
+  if (it->second == ExceptionKind::InvalidSetMException) {
+    ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
+  } else if (it->second == ExceptionKind::TVCoercionException) {
+    tce = static_cast<TVCoercionException*>(exceptionFromUE(ue));
   }
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
@@ -237,11 +310,6 @@ tc_unwind_personality(int version,
       FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
       return _URC_HANDLER_FOUND;
     }
-    if (badException) {
-      FTRACE(1,
-             "Bad exception was thrown, returning _URC_HANDLER_FOUND\n");
-      return _URC_HANDLER_FOUND;
-    }
   }
 
   /*
@@ -253,16 +321,6 @@ tc_unwind_personality(int version,
   else if (actions & _UA_CLEANUP_PHASE) {
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
-    }
-
-    if (badException) {
-      auto rethrow = new FatalErrorException(
-        0, "Invalid exception with message `%s'", std_exception->what());
-#ifndef _MSC_VER
-      __cxxabiv1::__cxa_begin_catch(ue);
-      __cxxabiv1::__cxa_end_catch();
-#endif
-      rethrow->throwException();
     }
 
     TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
@@ -441,6 +499,7 @@ void initUnwinder(TCA base, size_t size) {
   ehfw.end_fde(size);
   ehfw.null_fde();
   s_ehFrames.push_back(ehfw.register_and_release());
+  typeInfoMap = TypeInfoMap::create(512, {});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

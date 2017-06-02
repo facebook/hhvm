@@ -847,9 +847,6 @@ PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
     auto const ad = copy ? Copy(adIn) : adIn;
     auto const oldSize = ad->m_size;
     auto& tv = packedData(ad)[oldSize - 1];
-    if (UNLIKELY(strong_iterators_exist())) {
-      adjustMArrayIter(ad, oldSize - 1);
-    }
     auto const oldTV = tv;
     ad->m_size = oldSize - 1;
     ad->m_pos = 0;

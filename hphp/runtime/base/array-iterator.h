@@ -404,6 +404,7 @@ private:
  * If m_ref points to a non-array value, iteration terminates.
  */
 struct MArrayIter {
+  // this constructor only exists for the benefit of ext_zend_compat
   MArrayIter()
     : m_data(nullptr)
     , m_pos(0)
@@ -493,7 +494,7 @@ struct MArrayIter {
 private:
   ArrayData* getData() const {
     assert(hasRef());
-    return isArrayLikeType(m_ref->tv()->m_type)
+    return isArrayType(m_ref->tv()->m_type)
       ? m_ref->tv()->m_data.parr
       : nullptr;
   }

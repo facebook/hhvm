@@ -34,6 +34,7 @@ let from_ast_wrapper : bool -> _ -> _ ->
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
   let (_, original_name) = ast_method.Ast.m_name in
   let (_,class_name) = ast_class.Ast.c_name in
+  let class_name = Utils.strip_ns class_name in
   let ret =
     if original_name = Naming_special_names.Members.__construct
     || original_name = Naming_special_names.Members.__destruct
@@ -43,10 +44,16 @@ let from_ast_wrapper : bool -> _ -> _ ->
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
+  if not method_is_static
+    && ast_class.Ast.c_final
+    && ast_class.Ast.c_kind = Ast.Cabstract
+  then Emit_fatal.raise_fatal_parse
+    ("Class " ^ class_name ^ " contains non-static method " ^ original_name
+     ^ " and therefore cannot be declared 'abstract final'");
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
     then Some (Emit_fatal.emit_fatal_runtimeomitframe
-      ("Cannot call abstract method " ^ Utils.strip_ns class_name
+      ("Cannot call abstract method " ^ class_name
         ^ "::" ^ original_name ^ "()"))
     else
     if method_is_async

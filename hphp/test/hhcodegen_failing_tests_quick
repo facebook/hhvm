@@ -17,9 +17,6 @@ quick/autoload6.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
-quick/class_abstract_final1.php
-quick/class_abstract_final2.php
-quick/class_abstract_final5.php
 quick/class_constant.php
 quick/class_constants.php
 quick/class_exists_throw.php

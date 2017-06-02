@@ -497,6 +497,14 @@ let rec convert_class st cd =
     (convert_class_elt cd.Ast.c_namespace env) in
   st, { cd with c_body = c_body }
 
+and convert_class_var env st (pos, id, expr_opt) =
+  match expr_opt with
+  | None ->
+    st, (pos, id, expr_opt)
+  | Some expr ->
+    let st, expr = convert_expr env st expr in
+    st, (pos, id, Some expr)
+
 and convert_class_elt ns env st ce =
   let ce =
     if constant_folding ()
@@ -507,6 +515,10 @@ and convert_class_elt ns env st ce =
     let st = reset_function_count st in
     let st, block = convert_block env st md.m_body in
     st, Method { md with m_body = block }
+
+  | ClassVars (kinds, hint, cvl) ->
+    let st, cvl = List.map_env st cvl (convert_class_var env) in
+    st, ClassVars (kinds, hint, cvl)
 
   | _ ->
     st, ce

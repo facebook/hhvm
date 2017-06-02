@@ -88,13 +88,15 @@ end
 (* XHP name mangling *)
 module Xhp = struct
 
-  let clean s =
-    if String.length s = 0 || s.[0] <> ':'
-    then s else String_utils.lstrip s ":"
+  let is_xhp s = String.length s <> 0 && s.[0] = ':'
+
+  let strip_colon s = String_utils.lstrip s ":"
+
+  let clean s = if not (is_xhp s) then s else strip_colon s
 
   (* Mangle an unqualified ID *)
   let mangle_id s =
-    if String.length s = 0 || s.[0] <> ':' then s else
+    if not (is_xhp s) then s else
       "xhp_" ^
         String_utils.lstrip s ":" |>
         Str.global_replace (Str.regexp ":") "__" |>

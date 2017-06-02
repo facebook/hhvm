@@ -728,6 +728,12 @@ and emit_eval env e =
     instr_eval;
   ]
 
+and emit_xhp_obj_get env e s nullflavor =
+  let p = Pos.none in
+  let fn_name = p, A.Obj_get (e, (p, A.Id (p, "getAttribute")), nullflavor) in
+  let fn = p, A.Call (fn_name, [p, A.String (p, SU.Xhp.clean s)], []) in
+  emit_call_expr ~need_ref:false env fn
+
 and emit_expr env expr ~need_ref =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -773,6 +779,8 @@ and emit_expr env expr ~need_ref =
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_array_get ~need_ref env None query_op base_expr opt_elem_expr
+  | A.Obj_get (expr, (_, A.Id (_, s)), nullflavor) when SU.Xhp.is_xhp s ->
+    emit_xhp_obj_get env expr s nullflavor
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env None query_op expr prop nullflavor

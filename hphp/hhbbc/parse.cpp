@@ -568,30 +568,26 @@ void populate_block(ParseUnitState& puState,
 #define FLAGS_ARG_CF_TF
 #define FLAGS_ARG_CF_FF
 
-#define O(opcode, imms, inputs, outputs, flags)         \
-  case Op::opcode:                                      \
-    {                                                   \
-      if (Op::opcode == Op::AssertRATL ||               \
-          Op::opcode == Op::AssertRATStk) {             \
-        break;                                          \
-      }                                                 \
-      auto b = Bytecode {};                             \
-      b.op = Op::opcode;                                \
-      b.srcLoc = srcLocIx;                              \
-      IMM_##imms                                        \
-      FLAGS_##flags                                     \
-      new (&b.opcode) bc::opcode { IMM_ARG_##imms       \
-                                   FLAGS_ARG_##flags }; \
-      if (Op::opcode == Op::DefCns) defcns();           \
-      if (Op::opcode == Op::AddElemC ||                 \
-          Op::opcode == Op::AddNewElemC) addelem();     \
-      if (Op::opcode == Op::DefCls)    defcls(b);       \
-      if (Op::opcode == Op::DefClsNop) defclsnop(b);    \
-      if (Op::opcode == Op::AliasCls) aliascls(b);      \
-      if (Op::opcode == Op::CreateCl)  createcl(b);     \
-      blk.hhbcs.push_back(std::move(b));                \
-      assert(pc == next);                               \
-    }                                                   \
+#define O(opcode, imms, inputs, outputs, flags)                    \
+  case Op::opcode:                                                 \
+    {                                                              \
+      auto b = [&] () -> Bytecode {                                \
+        IMM_##imms /*these two macros advance the pc as required*/ \
+        FLAGS_##flags                                              \
+        if (isTypeAssert(op)) bc::Nop {};                          \
+        return bc::opcode { IMM_ARG_##imms FLAGS_ARG_##flags };    \
+      }();                                                         \
+      b.srcLoc = srcLocIx;                                         \
+      if (Op::opcode == Op::DefCns) defcns();                      \
+      if (Op::opcode == Op::AddElemC ||                            \
+          Op::opcode == Op::AddNewElemC) addelem();                \
+      if (Op::opcode == Op::DefCls)    defcls(b);                  \
+      if (Op::opcode == Op::DefClsNop) defclsnop(b);               \
+      if (Op::opcode == Op::AliasCls) aliascls(b);                 \
+      if (Op::opcode == Op::CreateCl)  createcl(b);                \
+      blk.hhbcs.push_back(std::move(b));                           \
+      assert(pc == next);                                          \
+    }                                                              \
     break;
 
   assert(pc != past);

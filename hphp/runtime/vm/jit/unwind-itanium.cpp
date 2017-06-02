@@ -189,13 +189,18 @@ tc_unwind_personality(int version,
   assertx(version == 1);
 
   auto const& ti = typeinfoFromUE(ue);
-  auto const std_exception = exceptionFromUE(ue);
+  auto const std_exception = static_cast<std::exception*>(exceptionFromUE(ue));
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
+  bool badException = false;
+
   if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(std_exception);
   } else if (ti == typeid(TVCoercionException)) {
     tce = static_cast<TVCoercionException*>(std_exception);
+  } else if (ti != typeid(req::root<Object>) &&
+             !dynamic_cast<BaseException*>(std_exception)) {
+    badException = true;
   }
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
@@ -232,6 +237,11 @@ tc_unwind_personality(int version,
       FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
       return _URC_HANDLER_FOUND;
     }
+    if (badException) {
+      FTRACE(1,
+             "Bad exception was thrown, returning _URC_HANDLER_FOUND\n");
+      return _URC_HANDLER_FOUND;
+    }
   }
 
   /*
@@ -241,11 +251,21 @@ tc_unwind_personality(int version,
    * which is an exit trace from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
-    TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
     }
 
+    if (badException) {
+      auto rethrow = new FatalErrorException(
+        0, "Invalid exception with message `%s'", std_exception->what());
+#ifndef _MSC_VER
+      __cxxabiv1::__cxa_begin_catch(ue);
+      __cxxabiv1::__cxa_end_catch();
+#endif
+      rethrow->throwException();
+    }
+
+    TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
     // If we have a catch trace at the IP in the frame given by `context',
     // install it.
     if (install_catch_trace(context, ue, ism || tce, tv)) {

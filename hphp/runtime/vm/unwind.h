@@ -68,7 +68,7 @@ template<class Action> void exception_handler(Action action);
  * This exception is thrown when executing an Unwind bytecode, which
  * will reraise the current fault and resume propagating it.
  */
-struct VMPrepareUnwind : std::exception {
+struct VMPrepareUnwind : BaseException {
   const char* what() const noexcept override { return "VMPrepareUnwind"; }
 };
 
@@ -77,7 +77,7 @@ struct VMPrepareUnwind : std::exception {
  * invocation.  For example, if we need to break for the debugger, or
  * enable code coverage mode.
  */
-struct VMSwitchMode : std::exception {
+struct VMSwitchMode : BaseException {
   const char* what() const noexcept override { return "VMSwitchMode"; }
 };
 
@@ -85,14 +85,14 @@ struct VMSwitchMode : std::exception {
  * Similar to VMSwitchMode, but when we were in the middle of a
  * suspendStack operation.
  */
-struct VMSuspendStack : std::exception {
+struct VMSuspendStack : BaseException {
   const char* what() const noexcept override { return "VMSuspendStack"; }
 };
 
 /*
  * Thrown for stack overflow in a jitted prologue.
  */
-struct VMStackOverflow : std::exception {
+struct VMStackOverflow : BaseException {
   const char* what() const noexcept override {
     return "VMStackOverflow";
   }
@@ -102,7 +102,7 @@ struct VMStackOverflow : std::exception {
  * Same as VMSwitchMode, except for use from a builtin---the frame for
  * the builtin function should be unwound before resuming the VM.
  */
-struct VMSwitchModeBuiltin : std::exception {
+struct VMSwitchModeBuiltin : BaseException {
   const char* what() const noexcept override { return "VMSwitchModeBuiltin"; }
 };
 

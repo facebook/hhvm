@@ -27,7 +27,9 @@ namespace HPHP {
 
 struct IMarker;
 
-struct Exception : std::exception {
+struct BaseException : std::exception {};
+
+struct Exception : BaseException {
   explicit Exception() = default;
   explicit Exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);

@@ -8,7 +8,6 @@ quick/Isset.php
 quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php
-quick/actrec.php
 quick/all_type_comparison_test.php
 quick/array_packed.php
 quick/arrayidx.php
@@ -197,7 +196,6 @@ quick/reassign_this2.php
 quick/reassign_this3.php
 quick/recursive-getter.php
 quick/recursive-isset.php
-quick/recursive_iterator_iterator_empty.php
 quick/redeclared_function.php
 quick/redeclared_method.php
 quick/refcount-static.php

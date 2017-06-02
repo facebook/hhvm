@@ -1419,11 +1419,14 @@ and emit_arg env i ((_, expr_) as e) =
     ]
 
 and emit_ignored_expr env e =
-  let instrs, flavor = emit_flavored_expr env e in
-  gather [
-    instrs;
-    instr_pop flavor;
-  ]
+  match snd e with
+  | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env) es
+  | _ ->
+    let instrs, flavor = emit_flavored_expr env e in
+    gather [
+      instrs;
+      instr_pop flavor;
+    ]
 
 and is_splatted = function
   | _, A.Unop (A.Usplat, _) -> true

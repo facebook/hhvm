@@ -182,7 +182,6 @@ slow/continue_statement/1416.php
 slow/continue_statement/badexp.php
 slow/continue_statement/zero.php
 slow/control-flow/bug-4976291.php
-slow/control-flow/bug-xls-liveness.php
 slow/copy_prop/1845.php
 slow/ctor_param_promotion_bad_mod.php
 slow/data-rfc2397/more-tests.php
@@ -299,7 +298,6 @@ slow/ext_imagick/pixel_color.php
 slow/ext_imagick/pixel_exception.php
 slow/ext_imagick/pixel_issimilar.php
 slow/ext_ipc/message_queue.php
-slow/ext_iterator/1804.php
 slow/ext_json/emptydict.php
 slow/ext_json/error_depth.php
 slow/ext_json/json_decode_collections.php
@@ -344,12 +342,10 @@ slow/ext_socket/issue2601error.php
 slow/ext_socket/persistent_socket.php
 slow/ext_spl_datastructures/DoublyLinkedList_it_mode.php
 slow/ext_spl_datastructures/SplPriorityQueueClone.php
-slow/ext_spl_iterators/append_iterator_skips_empty_iterators.php
 slow/ext_spl_iterators/iterator_endChildren_rewind.php
 slow/ext_std/lchown_wronguser.php
 slow/ext_stream/ext_stream.php
 slow/ext_string/1764.php
-slow/ext_string/count_chars.php
 slow/ext_string/setlocale-threaded.php
 slow/ext_variable/ext_variable.php
 slow/ext_variable/parse_str.php
@@ -452,7 +448,6 @@ slow/general_functions/mkdir-recursive.php
 slow/get_class/1455.php
 slow/get_class/1456.php
 slow/global_vars/global_vars.php
-slow/goto/1912.php
 slow/goto/1914.php
 slow/goto/1915.php
 slow/goto/1917.php
@@ -1198,11 +1193,6 @@ slow/yield/2177.php
 slow/yield/2182.php
 slow/yield/2229.php
 slow/yield/clone/g10.php
-slow/yield/clone/g12.php
-slow/yield/clone/g2.php
-slow/yield/clone/g4.php
-slow/yield/clone/g6.php
-slow/yield/clone/g8.php
 slow/yield/clone/g9.php
 slow/yield/throw/throw_already_closed.php
 slow/yield/throw/throw_caught.php

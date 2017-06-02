@@ -1496,7 +1496,16 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
       instr_fpushclsmethod ~forward nargs
     ]
 
-  | A.Id id ->
+  | A.Id (p, s as id)->
+    let id =
+      match s with
+      | "min" when nargs = 2 ->
+        p, "__SystemLib\\min2"
+      | "max" when nargs = 2 ->
+        p, "__SystemLib\\max2"
+      | _ ->
+        id
+    in
     let fq_id, id_opt =
       Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id in
     begin match id_opt with

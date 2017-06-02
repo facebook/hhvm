@@ -304,9 +304,6 @@ slow/ext_json/json_decode_collections.php
 slow/ext_mailparse/ext_uudecode.php
 slow/ext_math/intdiv.php
 slow/ext_math/max_and_min.php
-slow/ext_math/min_max_allow_degenerate_off.php
-slow/ext_math/min_max_allow_degenerate_on.php
-slow/ext_math/min_max_allow_degenerate_warn.php
 slow/ext_misc/ext_misc.php
 slow/ext_misc/idx-1.php
 slow/ext_misc/idx-2.php

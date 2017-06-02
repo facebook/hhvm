@@ -73,8 +73,6 @@ module Function = struct
     | "meth_caller"
     | "class_meth"
     | "inst_meth" -> SU.prefix_namespace "HH" s, Some s
-    | "min"
-    | "max" -> SU.prefix_namespace "__SystemLib" (s ^ "2"), None
     | "func_get_args" | "func_num_args" ->
       s, None
     | _ ->

@@ -413,7 +413,7 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
 }
 
 ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
   return high_huge1g_arena && RuntimeOption::EvalUncountedMixedArrayHuge;
 #else
   return false;

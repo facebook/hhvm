@@ -16,7 +16,7 @@
 
 #include "hphp/util/managed-arena.h"
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
 
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
@@ -27,6 +27,7 @@
 
 namespace HPHP {
 
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
 // jemalloc chunk hooks
 static bool chunk_dalloc(void* chunk, size_t size,
                          bool committed, unsigned arena_ind) {
@@ -57,6 +58,60 @@ static bool chunk_merge(void* chunka, size_t sizea, void* chunkb, size_t sizeb,
                         bool committed, unsigned arena_ind) {
   return false;
 }
+#elif defined USE_JEMALLOC_EXTENT_HOOKS
+// jemalloc extent hooks
+static bool extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                          bool committed, unsigned arena_ind) {
+  return true;
+}
+
+static void extent_destroy(extent_hooks_t* extent_hooks, void* addr,
+                           size_t size, bool committed, unsigned arena_ind) {
+  return;
+}
+
+static bool extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                          size_t offset, size_t length, unsigned arena_ind) {
+  return false;
+}
+
+static bool extent_decommit(extent_hooks_t* extent_hooks, void* addr,
+                            size_t size, size_t offset, size_t length,
+                            unsigned arena_ind) {
+  return true;
+}
+
+static bool extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                         size_t offset, size_t length, unsigned arena_ind) {
+  return true;
+}
+
+static bool extent_split(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                         size_t sizea, size_t sizeb, bool comitted,
+                         unsigned arena_ind) {
+  return false;
+}
+
+static bool extent_merge(extent_hooks_t* extent_hooks, void* addra,
+                         size_t sizea, void* addrb, size_t sizeb,
+                         bool committed, unsigned arena_ind) {
+  return false;
+}
+
+static extent_hooks_t custom_extent_hooks {
+  ManagedArena::extent_alloc,
+  extent_dalloc,
+  extent_destroy,
+  extent_commit,
+  extent_decommit,
+  extent_purge, // purge_lazy
+  extent_purge, // purge_forced
+  extent_split,
+  extent_merge
+};
+#else
+# error "Missing jemalloc custom hook definitions."
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -83,6 +138,7 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
     always_assert(false);               // testing
     throw std::runtime_error{"too many arenas, check MAX_HUGE_ARENA_COUNT"};
   }
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
   chunk_hooks_t hooks {
     ManagedArena::chunk_alloc,
     chunk_dalloc,
@@ -98,13 +154,28 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
   if (mallctl(command, nullptr, nullptr, &hooks, sz) != 0) {
     throw std::runtime_error("error in setting chunk hooks");
   }
-
+#else
+  char command[32];
+  std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
+  extent_hooks_t *hooks_ptr = &custom_extent_hooks;
+  sz = sizeof(hooks_ptr);
+  if (mallctl(command, nullptr, nullptr, &hooks_ptr, sz) != 0) {
+    throw std::runtime_error("error in setting extent hooks");
+  }
+#endif
   s_arenas[m_arenaId] = this;
 }
 
-void* ManagedArena::chunk_alloc(void* chunk, size_t size, size_t alignment,
-                                bool* zero, bool* commit, unsigned arena_ind) {
-  if (chunk != nullptr) return nullptr;
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+void* ManagedArena::chunk_alloc(void* addr, size_t size,
+                                size_t alignment, bool* zero, bool* commit,
+                                unsigned arena_ind) {
+#else
+void* ManagedArena::extent_alloc(extent_hooks_t* extent_hooks, void *addr,
+                                size_t size, size_t alignment, bool* zero,
+                                bool* commit, unsigned arena_ind) {
+#endif
+  if (addr != nullptr) return nullptr;
   if (size > size1g) return nullptr;
 
   ManagedArena* arena = s_arenas[arena_ind];
@@ -220,4 +291,4 @@ std::string ManagedArena::reportStats() {
 }
 
 }
-#endif // USE_JEMALLOC_CHUNK_HOOKS
+#endif // USE_JEMALLOC_CUSTOM_HOOKS

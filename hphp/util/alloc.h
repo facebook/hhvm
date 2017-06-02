@@ -51,6 +51,12 @@
 # include <jemalloc/jemalloc.h>
 # if (JEMALLOC_VERSION_MAJOR == 4) && defined(__linux__)
 #  define USE_JEMALLOC_CHUNK_HOOKS 1
+# elif (JEMALLOC_VERSION_MAJOR == 5) && defined(__linux__)
+#  define USE_JEMALLOC_EXTENT_HOOKS 1
+# endif
+// Enable with either chunk_hooks or extent_hooks
+# if defined(USE_JEMALLOC_CHUNK_HOOKS) || defined(USE_JEMALLOC_EXTENT_HOOKS)
+#  define USE_JEMALLOC_CUSTOM_HOOKS 1
 # endif
 #endif
 
@@ -142,7 +148,7 @@ inline int low_dallocx_flags() {
 #endif
 }
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
 extern unsigned low_huge1g_arena;
 extern unsigned high_huge1g_arena;
 
@@ -193,7 +199,7 @@ inline void low_malloc_huge_pages(int pages) {
 void low_malloc_skip_huge(void* start, void* end);
 
 inline void* low_malloc_data(size_t size) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
+#ifndef USE_JEMALLOC_CUSTOM_HOOKS
   return low_malloc(size);
 #else
   extern void* low_malloc_huge1g_impl(size_t);
@@ -202,7 +208,7 @@ inline void* low_malloc_data(size_t size) {
 }
 
 inline void low_free_data(void* ptr) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
+#ifndef USE_JEMALLOC_CUSTOM_HOOKS
   low_free(ptr);
 #else
   if (ptr) dallocx(ptr, low_dallocx_huge1g_flags());
@@ -210,7 +216,7 @@ inline void low_free_data(void* ptr) {
 }
 
 inline void* malloc_huge(size_t size) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
+#ifndef USE_JEMALLOC_CUSTOM_HOOKS
   return malloc(size);
 #else
   extern void* malloc_huge1g_impl(size_t);
@@ -219,7 +225,7 @@ inline void* malloc_huge(size_t size) {
 }
 
 inline void free_huge(void* ptr) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
+#ifndef USE_JEMALLOC_CUSTOM_HOOKS
   free(ptr);
 #else
   if (ptr) dallocx(ptr, dallocx_huge1g_flags());

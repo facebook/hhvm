@@ -253,7 +253,13 @@ static bool purge_decay_hard() {
   // (pre-4.1.0), or because ratio-based purging is no longer present
   // (likely post-4.x).
   ssize_t decay_time;
-  return (mallctlRead("opt.decay_time", &decay_time, true) == 0);
+  // 4.x decay time API
+  int ret = mallctlRead("opt.decay_time", &decay_time, true);
+  if (ret != 0) {
+    // 5.x decay time API
+    ret = mallctlRead("opt.dirty_decay_ms", &decay_time, true);
+  }
+  return (ret == 0);
 }
 
 static bool purge_decay() {
@@ -384,7 +390,7 @@ void set_numa_binding(int node) {
 static void numa_purge_arena() {}
 #endif
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
 /*
  * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
  * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
@@ -504,7 +510,7 @@ struct JEMallocInitializer {
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
 
-#if defined USE_JEMALLOC_CHUNK_HOOKS && defined __linux__
+#if defined USE_JEMALLOC_CUSTOM_HOOKS && defined __linux__
     // Number of 1G huge pages for data in low memeory
     int low_1g_pages = 0;
     if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
@@ -615,7 +621,7 @@ void low_malloc_skip_huge(void* start, void* end) {
   }
 }
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
 void* low_malloc_huge1g_impl(size_t size) {
   if (size == 0) return nullptr;
   if (low_huge1g_arena == 0) return low_malloc(size);

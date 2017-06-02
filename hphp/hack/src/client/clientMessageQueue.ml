@@ -122,16 +122,16 @@ let run_daemon' (oc : daemon_message Daemon.out_channel) : unit =
           let message = read_message reader in
           Queue.push message messages_to_send;
           true
-        with
-          | e ->
-            let message = Printexc.to_string e in
-            let stack = Printexc.get_backtrace () in
-            let edata = { Marshal_tools.message; stack; } in
-            let (should_continue, marshal) = match e with
-              | Hh_json.Syntax_error _ -> true, Daemon_recoverable_exception edata
-              | _ -> false, Daemon_fatal_exception edata in
-            Marshal_tools.to_fd_with_preamble out_fd marshal;
-            should_continue
+        with e ->
+          let message = Printexc.to_string e in
+          let stack = Printexc.get_backtrace () in
+          let edata = { Marshal_tools.message; stack; } in
+          let (should_continue, marshal) = match e with
+            | Hh_json.Syntax_error _ -> true, Daemon_recoverable_exception edata
+            | _ -> false, Daemon_fatal_exception edata
+          in
+          Marshal_tools.to_fd_with_preamble out_fd marshal;
+          should_continue
         end
       | Write ->
         assert (not (Queue.is_empty messages_to_send));
@@ -223,8 +223,8 @@ let rec read_messages_into_queue_nonblocking (message_queue : t) : unit =
        infinite loop as a result of `Unix.select` returning that a file
        descriptor is available to read on. *)
     match message with
-      | Fatal_exception _ -> ()
-      | _ -> read_messages_into_queue_nonblocking message_queue;
+    | Fatal_exception _ -> ()
+    | _ -> read_messages_into_queue_nonblocking message_queue;
   end
 
 let has_message (queue : t) : bool =

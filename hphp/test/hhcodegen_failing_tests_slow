@@ -336,6 +336,7 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
+slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php
@@ -614,7 +615,6 @@ slow/memoize/refargs.php
 slow/memoize/reset.php
 slow/memoize/serialize.php
 slow/memoize/traits.php
-slow/memoize/type-hint.php
 slow/memoize/unreachable.php
 slow/memoize/untyped.php
 slow/memoize/varargs.php

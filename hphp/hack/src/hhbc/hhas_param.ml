@@ -22,3 +22,5 @@ let name p = p.param_name
 let is_reference p = p.param_is_reference
 let type_info p = p.param_type_info
 let default_value p = p.param_default_value
+
+let with_name name p = { p with param_name = name }

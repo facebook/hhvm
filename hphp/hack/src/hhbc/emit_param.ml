@@ -44,8 +44,27 @@ let from_ast ~tparams ~namespace ~generate_defaults p =
   Some (Hhas_param.make param_name p.A.param_is_reference
         param_type_info param_default_value)
 
-let from_asts ~namespace ~tparams ~generate_defaults params =
-  List.filter_map params (from_ast ~tparams ~namespace ~generate_defaults)
+let rename_params params =
+  let names = Core.List.fold_left params
+    ~init:SSet.empty ~f:(fun n p -> SSet.add (Hhas_param.name p) n) in
+  let rec rename param_counts param =
+    let name = Hhas_param.name param in
+    match SMap.get name param_counts with
+    | None ->
+      (SMap.add name 0 param_counts, param)
+    | Some count ->
+      let param_counts = SMap.add name (count + 1) param_counts in
+      let newname = name ^ string_of_int count in
+      if SSet.mem newname names
+      then rename param_counts param
+      else param_counts, Hhas_param.with_name newname param
+  in
+    List.rev (snd (Core.List.map_env SMap.empty (List.rev params) rename))
+
+let from_asts ~namespace ~tparams ~generate_defaults ast_params =
+  let hhas_params = List.filter_map ast_params
+    (from_ast ~tparams ~namespace ~generate_defaults) in
+  rename_params hhas_params
 
 let emit_param_default_value_setter env params =
   let setters = List.filter_map params (fun p ->

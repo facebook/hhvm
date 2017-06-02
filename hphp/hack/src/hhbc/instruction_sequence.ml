@@ -103,6 +103,7 @@ let instr_vgetl local = instr (IGet (VGetL local))
 let instr_vgetn = instr (IGet VGetN)
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
+let instr_cgetn_seq n = gather @@ List.replicate ~num:n instr_cgetn
 let instr_bindn = instr (IMutator BindN)
 let instr_bindl local = instr (IMutator (BindL local))
 let instr_clsrefgetc =
@@ -112,6 +113,8 @@ let instr_self =
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_fpassr i = instr (ICall (FPassR i))
 let instr_fpassv i = instr (ICall (FPassV i))
+let instr_fpassn i = instr (ICall (FPassN i))
+let instr_fpassg i = instr (ICall (FPassG i))
 and instr_fpass kind i =
   match kind with
   | PassByRefKind.AllowCell -> instr (ICall (FPassC i))

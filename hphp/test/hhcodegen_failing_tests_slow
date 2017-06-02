@@ -231,15 +231,8 @@ slow/dynamic_constants/1132.php
 slow/dynamic_constants/1133.php
 slow/dynamic_constants/1134.php
 slow/dynamic_methods/1214.php
-slow/dynamic_variables/1135.php
-slow/dynamic_variables/1136.php
-slow/dynamic_variables/1137.php
-slow/dynamic_variables/1138.php
-slow/dynamic_variables/1139.php
-slow/dynamic_variables/1142.php
 slow/dynamic_variables/1162.php
 slow/dynamic_variables/1164.php
-slow/dynamic_variables/1165.php
 slow/error_handler/1369.php
 slow/error_handler/1371.php
 slow/error_handler/1500.php
@@ -642,7 +635,6 @@ slow/nullsafe/nullsafe-prop-6.php
 slow/nullsafe/nullsafe-prop-7.php
 slow/nullsafe/nullsafe-prop-8.php
 slow/nullsafe/nullsafe-prop-9.php
-slow/object/654.php
 slow/object/667.php
 slow/object/672.php
 slow/object/static_inits.php
@@ -654,7 +646,6 @@ slow/object_invoke_method/769.php
 slow/object_invoke_method/773.php
 slow/object_magic_method/override_magic2.php
 slow/object_method/724.php
-slow/object_method/732.php
 slow/object_method/735.php
 slow/object_method/736.php
 slow/object_property/681.php

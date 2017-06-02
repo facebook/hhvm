@@ -596,15 +596,12 @@ and emit_lvarvar ~need_ref n (_, id) =
   gather [
     instr_cgetl (get_non_pipe_local id);
     if need_ref then
-      let prefix =
-        gather @@ List.replicate ~num:(n - 1) instr_cgetn
-      in
       gather [
-        prefix;
+        instr_cgetn_seq (n - 1);
         instr_vgetn
       ]
     else
-      gather @@ List.replicate ~num:n instr_cgetn
+      instr_cgetn_seq n
   ]
 
 and emit_call_isset_expr env (_, expr_ as expr) =
@@ -660,7 +657,7 @@ and emit_call_empty_expr env (_, expr_ as expr) =
     let local = get_non_pipe_local id in
     gather [
       instr_cgetl local;
-      gather @@ List.replicate (n - 1) instr_cgetn;
+      instr_cgetn_seq (n - 1);
       instr_emptyn;
     ]
   | _ ->
@@ -770,7 +767,7 @@ and emit_expr env expr ~need_ref =
     gather [
       emit_expr ~need_ref:false env e;
       instr (IGet CGetG);
-      gather @@ List.replicate (n - 1) instr_cgetn;
+      instr_cgetn_seq (n - 1);
       if need_ref then
         instr_vgetn
       else
@@ -1355,11 +1352,12 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      instr_basenl (get_non_pipe_local id) base_mode,
      0
    | A.Lvarvar (n, (_, id)) ->
-     let base_expr_instrs =
-       instr_cgetl (get_non_pipe_local id)::
-       List.replicate (n - 1) instr_cgetn
+     let base_expr_instrs = gather [
+       instr_cgetl (get_non_pipe_local id);
+       instr_cgetn_seq (n - 1)
+     ]
      in
-     gather base_expr_instrs,
+     base_expr_instrs,
      instr_basenc base_offset base_mode,
      1
 
@@ -1377,17 +1375,22 @@ and emit_arg env i ((_, expr_) as e) =
   | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
     gather [
       instr_string (SU.Locals.strip_dollar x);
-      instr (ICall (FPassG i))
+      instr_fpassg i
     ]
 
   | A.Lvar (_, x)
     when not (is_local_this env x) || Emit_env.get_needs_local_this env ->
     instr_fpassl i (get_local env x)
-
+  | A.Lvarvar (n, (_, id)) ->
+    gather [
+      instr_cgetl (get_non_pipe_local id);
+      instr_cgetn_seq (n - 1);
+      instr_fpassn i
+    ]
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      instr (ICall (FPassG i))
+      instr_fpassg i
     ]
 
   | A.Array_get (base_expr, opt_elem_expr) ->
@@ -1861,18 +1864,17 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Lvarvar (n, (_, id)) ->
-    let cgetns = gather @@ List.replicate ~num:(n-1) instr_cgetn in
     if n = 1 then
       gather [
         rhs_instrs;
         instr_cgetl2 (get_local env id);
-        cgetns;
+        instr_cgetn_seq (n - 1);
         emit_final_named_local_op op;
       ]
     else
       gather [
         instr_cgetl (get_local env id);
-        cgetns;
+        instr_cgetn_seq (n - 1);
         rhs_instrs;
         emit_final_named_local_op op;
       ]

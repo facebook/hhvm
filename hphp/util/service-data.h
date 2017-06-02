@@ -231,7 +231,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap);
 /*
  * Export a specific counter by key name.
  */
-folly::Optional<int64_t> exportCounterByKey(std::string& key);
+folly::Optional<int64_t> exportCounterByKey(const std::string& key);
 
 // Interface for a flat counter. All methods are thread safe.
 struct ExportedCounter {

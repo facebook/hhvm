@@ -267,12 +267,19 @@ struct Impl {
     }
   }
 
-  folly::Optional<int64_t> exportCounterByKey(std::string& key) {
-    ExportedCounterMap::const_iterator it = m_counterMap.find(key);
+  folly::Optional<int64_t> exportCounterByKey(const std::string& key) {
+    auto const it = m_counterMap.find(key);
     if (it != m_counterMap.end()) {
-      return folly::Optional<int64_t>(it->second->getValue());
+      return it->second->getValue();
     } else {
-      return folly::Optional<int64_t>();
+      std::map<std::string, int64_t> statsMap;
+      SYNCHRONIZED_CONST(m_counterFuncs) {
+        for (auto& pair : m_counterFuncs) {
+          pair.second(statsMap);
+        }
+      }
+
+      return folly::get_optional(statsMap, key);
     }
   }
 
@@ -371,7 +378,7 @@ void exportAll(std::map<std::string, int64_t>& statsMap) {
   return getServiceDataInstance().exportAll(statsMap);
 }
 
-folly::Optional<int64_t> exportCounterByKey(std::string& key) {
+folly::Optional<int64_t> exportCounterByKey(const std::string& key) {
   return getServiceDataInstance().exportCounterByKey(key);
 }
 

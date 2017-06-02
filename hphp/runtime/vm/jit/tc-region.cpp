@@ -322,7 +322,6 @@ void publishOptFunctionInternal(FuncMetaInfo info,
 
   invalidateFuncProfSrcKeys(func);
 
-  mcgen::ReadThreadLocalTC localTC(info.tcBuf);
   for (auto& trans : info.translations) {
     auto const regionSk = trans.sk;
     auto& range = trans.range;
@@ -516,12 +515,15 @@ void publishOptFunction(FuncMetaInfo info) {
 }
 
 void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
+  // Do this first to ensure that the code and metadata locks have been dropped
+  // before running the treadmill
+  ProfData::Session pds;
+
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
   size_t failedBytes = 0;
   bool hasSpace = checkTCLimits();
-  ProfData::Session pds;
 
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {

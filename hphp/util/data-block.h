@@ -77,15 +77,23 @@ struct DataBlock {
    * Addresses returned by DataBlock will be in the range [start, start + sz),
    * while writes and reads will happen from the range [dest, dest + sz).
    */
-  void init(Address start, Address dest, size_t sz, const char* name) {
+  void init(Address start, Address dest, size_t sz, size_t maxGrow,
+            const char* name) {
+    assertx(dest != start || sz == maxGrow);
+
     m_base = m_frontier = start;
     m_destBase = dest;
     m_size = sz;
+    m_maxGrow = maxGrow;
     m_name = name;
   }
 
+  void init(Address start, Address dest, size_t sz, const char* name) {
+    init(start, dest, sz, sz, name);
+  }
+
   void init(Address start, size_t sz, const char* name) {
-    init(start, start, sz, name);
+    init(start, start, sz, sz, name);
   }
 
   /*
@@ -98,10 +106,12 @@ struct DataBlock {
   void* allocRaw(size_t sz, size_t align = 16) {
     // Round frontier up to a multiple of align
     align = folly::nextPowTwo(align) - 1;
-    setFrontier((uint8_t*)(((uintptr_t)m_frontier + align) & ~align));
+    auto const nf = (uint8_t*)(((uintptr_t)m_frontier + align) & ~align);
+    assertCanEmit(nf - m_frontier + sz);
+    setFrontier(nf);
     auto data = m_frontier;
     m_frontier += sz;
-    assertx(m_frontier < m_base + m_size);
+    assertx(m_frontier <= m_base + m_size);
     return data;
   }
 
@@ -115,12 +125,34 @@ struct DataBlock {
     return m_frontier + nBytes <= m_base + m_size;
   }
 
+  bool grow(size_t nBytes) {
+    if (m_maxGrow == m_size) return false;
+    assertx(m_destBase != m_base);
+
+    auto const need = nBytes - available();
+    auto const amt = std::min(std::max(m_size + need, 2 * m_size), m_maxGrow);
+    if (amt < m_size + need) return false;
+    if (!m_destBuf) {
+      m_destBuf.reset((Address)::malloc(amt));
+      ::memcpy(m_destBuf.get(), m_destBase, used());
+    } else {
+      m_destBuf.reset((Address)::realloc(m_destBuf.release(), amt));
+    }
+    if (!m_destBuf) reportMallocError(amt);
+    m_destBase = m_destBuf.get();
+    m_size = amt;
+    return true;
+  }
+
   void assertCanEmit(size_t nBytes) {
-    if (!canEmit(nBytes)) reportFull(nBytes);
+    if (!canEmit(nBytes) && !grow(nBytes)) reportFull(nBytes);
   }
 
   [[noreturn]]
   void reportFull(size_t nbytes) const;
+
+  [[noreturn]]
+  void reportMallocError(size_t nbytes) const;
 
   bool isValidAddress(const CodeAddress tca) const {
     return tca >= m_base && tca < (m_base + m_size);
@@ -149,10 +181,13 @@ struct DataBlock {
 
   void bytes(size_t n, const uint8_t *bs) {
     assertCanEmit(n);
-    if (n <= 8) {
+    if (n <= 8 && m_destBase == m_base) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be
-      // appear idempotent on other CPUs.
+      // appear idempotent on other CPUs. If m_destBase != m_base then the
+      // current block is a temporary buffer and this write is neither required
+      // nor safe, as we may override an adjacent buffer or write off the end
+      // of an allocation.
       union {
         uint64_t qword;
         uint8_t bytes[8];
@@ -173,7 +208,6 @@ struct DataBlock {
   }
 
   void skip(size_t nbytes) {
-    assertCanEmit(nbytes);
     alloc<uint8_t>(1, nbytes);
   }
 
@@ -242,6 +276,14 @@ private:
   using Offset = uint32_t;
   using Size = uint32_t;
 
+  // DataBlock can optionally be growable. The initial expansion of DataBlock
+  // will allocate a new buffer that is owned by the DataBlock, subsequent
+  // expansions will use realloc to expand this block until m_maxGrow has been
+  // reached. Only DataBlocks which have a different m_base from m_destBase may
+  // be grown, as expansion may move the location of m_destBase.
+  struct Deleter final { void operator()(uint8_t* a) const { ::free(a); } };
+  std::unique_ptr<uint8_t, Deleter> m_destBuf{nullptr};
+
   Address dest() const { return m_destBase + (m_frontier - m_base); }
 
   // DataBlock can track an alternate pseudo-frontier to support clients that
@@ -252,6 +294,7 @@ private:
   Address m_base{nullptr};
   Address m_frontier{nullptr};
   size_t  m_size{0};
+  size_t  m_maxGrow{0};
   std::string m_name;
 
   size_t m_nfree{0};

@@ -109,7 +109,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, nArgs)) return false;
 
-  if (RuntimeOption::EvalEnableOptTCBuffer || retranslateAllEnabled()) {
+  if (retranslateAllEnabled()) {
     info.prologues.emplace_back(rec);
   } else {
     tc::emitFuncPrologueOpt(rec);

@@ -249,8 +249,6 @@ void CodeCache::unprotect() {
 }
 
 CodeCache::View CodeCache::view(TransKind kind) {
-  assertx(!mcgen::isLocalTCEnabled());
-
   auto view = [&] {
     if (isProfiling(kind)) {
       return View{m_prof, m_frozen, m_frozen, m_data, false};

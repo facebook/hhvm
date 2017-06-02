@@ -66,6 +66,8 @@ void emit_svcreq(CodeBlock& cb,
 
   auto const is_reused = start != cb.frontier();
 
+  if (!is_reused) cb.assertCanEmit(stub_size());
+
   CodeBlock stub;
   auto const realAddr = is_reused ? start : cb.toDestAddress(start);
   stub.init(start, realAddr, stub_size(), "svcreq_stub");

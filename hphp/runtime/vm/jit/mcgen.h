@@ -33,7 +33,7 @@ namespace jit {
 struct IRUnit;
 struct Vunit;
 
-namespace tc { struct ThreadTCBuffer; }
+namespace tc { struct LocalTCBuffer; }
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -89,36 +89,6 @@ struct TransEnv {
 
 namespace mcgen {
 
-struct UseThreadLocalTC {
-  UseThreadLocalTC(UseThreadLocalTC&&) = delete;
-  UseThreadLocalTC& operator=(UseThreadLocalTC&&) = delete;
-
-#ifdef NDEBUG
-  explicit UseThreadLocalTC(tc::ThreadTCBuffer&) {}
-#else
-  explicit UseThreadLocalTC(tc::ThreadTCBuffer& buf);
-  ~UseThreadLocalTC();
-
-private:
-  tc::ThreadTCBuffer& m_buf;
-#endif
-};
-
-struct ReadThreadLocalTC {
-  ReadThreadLocalTC(ReadThreadLocalTC&&) = delete;
-  ReadThreadLocalTC& operator=(ReadThreadLocalTC&&) = delete;
-
-#ifdef NDEBUG
-  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer&) {}
-#else
-  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer& m_buf);
-  ~ReadThreadLocalTC();
-
-private:
-  const tc::ThreadTCBuffer& m_buf;
-#endif
-};
-
 /*
  * Look up or translate a func prologue or func body.
  */
@@ -171,21 +141,6 @@ int64_t jitInitTime();
  * `transKind'.
  */
 bool dumpTCAnnotation(const Func& func, TransKind transKind);
-
-/*
- * Is the thread local TC in use
- */
-bool isLocalTCEnabled();
-
-/*
- * Expected size of all thread local TC buffers
- */
-size_t localTCSize();
-
-/*
- * Per-thread cached TC buffer
- */
-TCA cachedLocalTCBuffer();
 
 /*
  * Is still a pending call to retranslateAll()

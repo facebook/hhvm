@@ -338,14 +338,14 @@ bool profileFunc(const Func* func) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ThreadTCBuffer::ThreadTCBuffer(TCA start) : m_start(start) {
-  if (!start) return;
-
+LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
   TCA fakeStart = code().threadLocalStart();
-  size_t off = 0;
-  auto initBlock = [&] (DataBlock& block, size_t sz, const char* nm) {
-    block.init(&fakeStart[off], &start[off], sz, nm);
-    off += sz;
+  auto const sz = initialSize / 4;
+  auto initBlock = [&] (DataBlock& block, size_t mxSz, const char* nm) {
+    always_assert(sz <= mxSz);
+    block.init(fakeStart, start, sz, mxSz, nm);
+    fakeStart += mxSz;
+    start += sz;
   };
   initBlock(m_main, RuntimeOption::EvalThreadTCMainBufferSize,
             "thread local main");
@@ -355,19 +355,9 @@ ThreadTCBuffer::ThreadTCBuffer(TCA start) : m_start(start) {
             "thread local frozen");
   initBlock(m_data, RuntimeOption::EvalThreadTCDataBufferSize,
             "thread local data");
-
-#ifndef NDEBUG
-  mprotect(m_start, mcgen::localTCSize(), PROT_NONE);
-#endif
 }
 
-#ifndef NDEBUG
-ThreadTCBuffer::~ThreadTCBuffer() {
-  mprotect(m_start, mcgen::localTCSize(), PROT_READ | PROT_WRITE);
-}
-#endif
-
-OptView ThreadTCBuffer::view() {
+OptView LocalTCBuffer::view() {
   if (!valid()) return folly::none;
   return CodeCache::View(m_main, m_cold, m_frozen, m_data, true);
 }

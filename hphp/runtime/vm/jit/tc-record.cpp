@@ -135,6 +135,12 @@ ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
 
 static std::atomic<bool> s_warmedUp{false};
 
+static ServiceData::CounterCallback s_warmedUpCounter(
+  [](std::map<std::string, int64_t>& counters) {
+    counters["jit.warmed-up"] = warmupStatusString().empty() ? 1 : 0;
+  }
+);
+
 /*
  * If the jit maturity counter is enabled, update it with the current amount of
  * emitted code.
@@ -191,11 +197,6 @@ void reportJitMaturity(const CodeCache& code) {
   // Manually add code.data.
   auto codeUsed = s_counters.at("data");
   codeUsed->addValue(code.data().used() - codeUsed->getSum());
-
-  auto static jitWarmedUpCounter = ServiceData::createCounter("jit.warmed-up");
-  if (jitWarmedUpCounter) {
-    jitWarmedUpCounter->setValue(warmupStatusString().empty() ? 1 : 0);
-  }
 }
 
 void logTranslation(const TransEnv& env, const TransRange& range) {
@@ -259,25 +260,28 @@ std::string warmupStatusString() {
   std::string status_str;
 
   if (!s_warmedUp.load(std::memory_order_relaxed)) {
-    // 1. Has HHVM evaluated enough requests?
-    if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
-      status_str += "PGO profiling translations are still enabled.\n";
+    // 1. Are we still profiling new functions?
+    if (shouldProfileNewFuncs()) {
+      status_str += "New functions are still being profiled.\n";
     }
     // 2. Has retranslateAll happened yet?
     if (jit::mcgen::retranslateAllPending()) {
       status_str += "Waiting on retranslateAll().\n";
     }
-    // 3. Has code size plateaued? Is the rate of new code emission flat?
-    auto codeSize = jit::tc::getCodeSizeCounter("main");
-    auto codeSizeRate = codeSize->getRateByDuration(
+    // 3. Has code size in both main and hot plateaued?
+    auto checkCodeSize = [&](ServiceData::ExportedTimeSeries* series) {
+      auto const codeSizeRate = series->getRateByDuration(
         std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-    if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
-      folly::format(
+      if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+        folly::format(
           &status_str,
           "Code.main is still increasing at a rate of {}\n",
           codeSizeRate
-          );
-    }
+        );
+      }
+    };
+    checkCodeSize(getCodeSizeCounter("main"));
+    checkCodeSize(getCodeSizeCounter("hot"));
 
     if (status_str.empty()) s_warmedUp.store(true, std::memory_order_relaxed);
   }

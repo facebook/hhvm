@@ -186,6 +186,11 @@ bool shouldTranslateNoSizeLimit(const Func* func);
 bool shouldTranslate(const Func* func, TransKind kind);
 
 /*
+ * Whether we are still profiling new functions.
+ */
+bool shouldProfileNewFuncs();
+
+/*
  * Whether we should try profile-guided optimization when translating `func'.
  */
 bool profileFunc(const Func* func);

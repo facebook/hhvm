@@ -474,6 +474,10 @@ struct ProfData {
     auto const func = Func::fromFuncId(funcId);
     auto const bcSize = func->past() - func->base();
     m_profilingBCSize.fetch_add(bcSize, std::memory_order_relaxed);
+
+    static auto const bcSizeCounter =
+      ServiceData::createCounter("jit.profile-bc-size");
+    bcSizeCounter->setValue(profilingBCSize());
   }
 
   /*

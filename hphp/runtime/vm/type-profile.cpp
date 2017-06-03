@@ -281,6 +281,12 @@ static void checkRFH(int64_t finished) {
 void profileRequestEnd() {
   if (warmingUp) return;
   auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
+  static auto const requestSeries = ServiceData::createTimeSeries(
+    "vm.requests",
+    {ServiceData::StatsType::RATE, ServiceData::StatsType::SUM},
+    {std::chrono::seconds(60), std::chrono::seconds(0)}
+  );
+  requestSeries->addValue(1);
   checkRFH(finished);
 
   if (acquiredSingleJit || acquiredSingleJitConcurrent) {

@@ -298,6 +298,28 @@ void checkFreeProfData() {
   }
 }
 
+bool shouldProfileNewFuncs() {
+  // Don't start profiling new functions if the size of either main or
+  // prof is already above Eval.JitAMaxUsage and we already filled hot.
+  auto tcUsage = std::max(code().main().used(), code().prof().used());
+  if (tcUsage >= CodeCache::AMaxUsage && !code().hotEnabled()) {
+    return false;
+  }
+
+  // We have two knobs to control the number of functions we're allowed to
+  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
+  // functions until either of these limits is exceeded. In practice, we expect
+  // to hit the bytecode size limit first, but we keep the request limit around
+  // as a safety net.
+  if (RuntimeOption::EvalJitProfileBCSize > 0 &&
+      profData() &&
+      profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
+    return false;
+  }
+
+  return requestCount() <= RuntimeOption::EvalJitProfileRequests;
+}
+
 bool profileFunc(const Func* func) {
   if (!shouldPGOFunc(func)) return false;
 
@@ -316,24 +338,7 @@ bool profileFunc(const Func* func) {
   // other checks below.
   if (profData()->profiling(func->getFuncId())) return true;
 
-  // Don't start profiling new functions if the size of either main or
-  // prof is already above Eval.JitAMaxUsage and we already filled hot.
-  auto tcUsage = std::max(code().main().used(), code().prof().used());
-  if (tcUsage >= CodeCache::AMaxUsage && !code().hotEnabled()) {
-    return false;
-  }
-
-  // We have two knobs to control the number of functions we're allowed to
-  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
-  // functions until either of these limits is exceeded. In practice, we expect
-  // to hit the bytecode size limit first, but we keep the request limit around
-  // as a safety net.
-  if (RuntimeOption::EvalJitProfileBCSize > 0 &&
-      profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
-    return false;
-  }
-
-  return requestCount() <= RuntimeOption::EvalJitProfileRequests;
+  return shouldProfileNewFuncs();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

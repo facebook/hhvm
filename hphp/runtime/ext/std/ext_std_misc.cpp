@@ -87,7 +87,7 @@ String HHVM_FUNCTION(server_warmup_status) {
     return "Warmup is still in progress.";
   }
 
-  if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
+  if (jit::tc::shouldProfileNewFuncs()) {
     return "PGO profiling translations are still enabled.";
   }
 

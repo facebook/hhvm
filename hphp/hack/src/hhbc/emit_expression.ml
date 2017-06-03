@@ -1865,10 +1865,15 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
 
   | A.Lvarvar (n, (_, id)) ->
     if n = 1 then
+      let instruction =
+        let local = (get_local env id) in
+        match op with
+        | LValOp.Unset | LValOp.IncDec _ -> instr_cgetl local
+        | _ -> instr_cgetl2 local
+      in
       gather [
         rhs_instrs;
-        instr_cgetl2 (get_local env id);
-        instr_cgetn_seq (n - 1);
+        instruction;
         emit_final_named_local_op op;
       ]
     else

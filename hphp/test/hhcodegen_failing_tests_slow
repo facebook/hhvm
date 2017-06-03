@@ -975,7 +975,6 @@ slow/string/issue_3160.php
 slow/string/str_offset_isset_empty.php
 slow/stringish.php
 slow/super_globals/1387.php
-slow/switch_statement/1753.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
@@ -1128,7 +1127,6 @@ slow/unpack_args/unpack_call_invalid_arg.php
 slow/unpack_args/unpack_call_multi.php
 slow/unset/1114.php
 slow/unset/1117.php
-slow/unset/order.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
 slow/use_function/realias.php

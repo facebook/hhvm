@@ -253,7 +253,7 @@ match i, i' with
  | VGetL (Local.Named s), VGetL (Local.Named s')
    when s=s' -> Some asn
  | VGetL _, _
- | _, VGetL _ -> None (* can't handle the possible aliasing here, so bail *)
+ | _, VGetL _ -> None (* can't handle the possible  aliasing here, so bail *)
  (* default case, require literally equal instructions *)
  | _, _ -> if i = i' then Some asn else None
 
@@ -542,6 +542,15 @@ let equiv prog prog' startlabelpairs =
         | _, ILabel _
         | _, IComment _ ->
               check pc (succ pc') asn (add_assumption (pc,pc') asn assumed) todo
+        (* For IterBreak, the lists have to be the same as we're not tracking correspondences
+           between iterators at the moment, and need the same freeing behaviour so exceptions
+           match up if we try to use them later *)
+        | IIterator (IterBreak (lab, it_list)), IIterator (IterBreak (lab', it_list')) ->
+              if it_list = it_list'
+              then check (hs_of_pc pc, LabelMap.find lab labelmap)
+                         (hs_of_pc pc', LabelMap.find lab' labelmap') asn
+                         (add_assumption (pc,pc') asn assumed) todo
+              else try_specials ()
         | IContFlow (JmpZ lab), IContFlow (JmpZ lab')
         | IContFlow (JmpNZ lab), IContFlow (JmpNZ lab') ->
            check (succ pc) (succ pc') asn
@@ -594,6 +603,20 @@ let equiv prog prog' startlabelpairs =
                     (add_assumption (pc,pc') asn assumed)
                     todo
              | _,_ -> try_specials ()) (* leaves/stays -> mismatch *)
+        | IContFlow (Switch (kind, offset, labs)), IContFlow (Switch (kind', offset', labs'))
+          when kind=kind' && offset=offset' ->
+           (match List.zip labs labs' with
+             | None -> try_specials () (* feebly, give up if different lengths *)
+             | Some lab_pairs ->
+                let hs = hs_of_pc pc in
+                let hs' = hs_of_pc pc' in
+                let newtodo = List.fold_right ~f:(fun (lab,lab') accum ->
+                 add_todo ((hs, LabelMap.find lab labelmap), (hs', LabelMap.find lab' labelmap'))
+                          asn accum) ~init:todo lab_pairs in
+                donext (add_assumption (pc,pc') asn assumed) newtodo)
+        | IContFlow (SSwitch _), _
+        | _, IContFlow (SSwitch _) ->
+          failwith "SSwitch not implemented"
         | IContFlow _, IContFlow _ -> try_specials ()
         (* next block have no interesting controls flow or local
            variable effects

@@ -413,12 +413,19 @@ iarg:
     | AT ID  {IAArrayno $2}
     | ID COLON iarg {IAMemberkey ($1,$3)}
     | LANGLE iarglist RANGLE {IAArglist $2}
-    | LPAR ID RPAR INT {IAIteratorid ($2,$4)}
+    | LANGLE iterbreaklist RANGLE {IAArglist $2}
 ;
 iarglist:
     | /* empty */ {[]}
     | iarg iarglist {$1 :: $2}
     | iarg COMMA iarglist {$1 :: $3}
+;
+iterbreaklist:
+    | iterbreak {[$1]}
+    | iterbreak COMMA iterbreaklist {$1 :: $3}
+;
+iterbreak:
+    | LPAR ID RPAR INT {IAIteratorid ($2,$4)}
 ;
 decllist:
     /* empty */ { [] }

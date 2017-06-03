@@ -565,6 +565,45 @@ and pAField : afield parser = fun node env ->
   | ElementInitializer { element_key; element_value; _ } ->
     AFkvalue (pExpr element_key env, pExpr element_value env)
   | _ -> AFvalue (pExpr node env)
+and pString2: node list -> env -> expr list =
+  let rec aux l env acc =
+    (* in PHP "${x}" in strings is treated as if it was written "$x",
+       here we recognize pattern: Dollar; EmbeddedBracedExpression { QName (Token.Name) }
+       produced by FFP and lower it into Lvar.
+    *)
+    match l with
+    | [] -> List.rev acc
+    | ({ syntax = Token { PT.kind = TK.Dollar; _ }; _ } as l)::
+      ({ syntax = EmbeddedBracedExpression {
+          embedded_braced_expression_expression = {
+            syntax = QualifiedNameExpression {
+              qualified_name_expression = {
+                syntax = Token { PT.kind = TK.Name; _ }
+                ; _ } as name
+              ; _ }
+            ; _ }
+          ; _ }
+       ; _ } as r)
+      ::tl ->
+        let pos, name = pos_name name in
+        let id = Lvar (pos, "$" ^ name) in
+        let left_pos = get_pos l in
+        let right_pos = get_pos r in
+        let pos =
+          if left_pos = Pos.none || right_pos = Pos.none then Pos.none
+          else
+            (* build final position as:
+            start_pos = start position of Dollar token
+            end_pos = end position pof embedded brace expression *)
+            let pos_file = Pos.filename left_pos in
+            let pos_start = Pos.pos_start left_pos in
+            let pos_end = Pos.pos_end right_pos in
+            Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+        in
+        aux tl env ((pos, id)::acc)
+    | x::xs -> aux xs env ((pExpr ~top_level:false x env)::acc)
+  in
+  fun l env -> aux l env []
 and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
   let rec pExpr_ : expr_ parser = fun node env ->
     let pos = get_pos node in
@@ -835,8 +874,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | _ -> missing_syntax "literal" expr env
         )
 
-      | SyntaxList ts -> String2
-          (List.map (fun x -> pExpr ~top_level:false x env) (prepString2 ts))
+      | SyntaxList ts -> String2 (pString2 (prepString2 ts) env)
       | _ -> missing_syntax "literal expression" expr env
       )
 

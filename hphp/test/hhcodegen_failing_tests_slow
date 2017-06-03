@@ -10,7 +10,6 @@ slow/array_cse/538.php
 slow/array_cse/543.php
 slow/array_double_key_conv.php
 slow/array_for_each/499.php
-slow/array_for_each/variable-variable-foreach.php
 slow/array_functions/ake-object.php
 slow/array_init/248.php
 slow/array_iterator/442.php

@@ -131,8 +131,8 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
 
   // Create a special arena to manage this piece of memory.
   size_t sz = sizeof(m_arenaId);
-  if (mallctl("arenas.extend", &m_arenaId, &sz, nullptr, 0) != 0) {
-    throw std::runtime_error{"error in arenas.extend"};
+  if (mallctl(JEMALLOC_NEW_ARENA_CMD, &m_arenaId, &sz, nullptr, 0) != 0) {
+    throw std::runtime_error{"error when creating new arena."};
   }
   if (m_arenaId >= MAX_HUGE_ARENA_COUNT) {
     always_assert(false);               // testing

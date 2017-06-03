@@ -321,7 +321,7 @@ void enable_numa(bool local) {
     base_arena = arenas;
     for (int i = 0; i < numa_num_nodes; i++) {
       int arena;
-      if (mallctlRead("arenas.extend", &arena, true) != 0) {
+      if (mallctlRead(JEMALLOC_NEW_ARENA_CMD, &arena, true) != 0) {
         return;
       }
       if (arena != arenas) {
@@ -491,7 +491,7 @@ struct JEMallocInitializer {
     initNuma();
 
     // Create a special arena to be used for allocating objects in low memory.
-    if (mallctlRead("arenas.extend", &low_arena, true) != 0) {
+    if (mallctlRead(JEMALLOC_NEW_ARENA_CMD, &low_arena, true) != 0) {
       // Error; bail out.
       return;
     }

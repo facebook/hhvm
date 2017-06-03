@@ -58,6 +58,11 @@
 # if defined(USE_JEMALLOC_CHUNK_HOOKS) || defined(USE_JEMALLOC_EXTENT_HOOKS)
 #  define USE_JEMALLOC_CUSTOM_HOOKS 1
 # endif
+# if (JEMALLOC_VERSION_MAJOR > 4)
+#  define JEMALLOC_NEW_ARENA_CMD "arenas.create"
+# else
+#  define JEMALLOC_NEW_ARENA_CMD "arenas.extend"
+# endif
 #endif
 
 #include "hphp/util/maphuge.h"

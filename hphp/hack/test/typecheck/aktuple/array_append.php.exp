@@ -1,5 +1,5 @@
 File "array_append.php", line 9, characters 3-13:
-  array<^(string | bool | int)>
+  array<^(int | bool | string)>
 File "array_append.php", line 13, characters 3-16:
-  ^(array<^(string | bool | int)>)
+  ^(array<^(int | bool | string)>)
 No errors

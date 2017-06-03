@@ -987,11 +987,19 @@ and expr_
     let env, supertype = compute_supertype env tys in
     env, exprs, supertype in
 
+  let shape_and_tuple_arrays_enabled =
+    not @@
+      TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
+
   match e with
   | Any -> expr_error env (Reason.Rwitness p)
   | Array [] ->
     make_result env (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
-  | Array l when Typing_arrays.is_shape_like_array env l ->
+  | Array l
+    when Typing_arrays.is_shape_like_array env l &&
+      shape_and_tuple_arrays_enabled ->
       let env, (tafl, fdm) = List.fold_left_env env l
         ~init:([], ShapeMap.empty)
         ~f:begin fun env (tafl,fdm) x ->
@@ -1007,14 +1015,21 @@ and expr_
         | Nast.AFvalue _ -> true
         | Nast.AFkvalue _ -> false in
       if fields_consistent && is_vec then
-        let env, tel, fields =
-          List.foldi l ~f:begin fun index (env, tel, acc) e ->
-            let env, te, ty = aktuple_field env e in
-            env, te::tel, IMap.add index ty acc
-          end ~init:(env, [], IMap.empty) in
-         make_result env
-           (T.Array (List.map (List.rev tel) (fun e -> T.AFvalue e)))
-           (Reason.Rwitness p, Tarraykind (AKtuple fields))
+        let env, tel, arraykind =
+          if shape_and_tuple_arrays_enabled then
+            let env, tel, fields =
+              List.foldi l ~f:begin fun index (env, tel, acc) e ->
+                let env, te, ty = aktuple_field env e in
+                env, te::tel, IMap.add index ty acc
+              end ~init:(env, [], IMap.empty) in
+            env, tel, AKtuple fields
+          else
+            let env, tel, value_ty =
+              compute_exprs_and_supertype env l array_field_value in
+            env, tel, AKvec value_ty in
+        make_result env
+          (T.Array (List.map (List.rev tel) (fun e -> T.AFvalue e)))
+          (Reason.Rwitness p, Tarraykind arraykind)
       else
       let env, value_exprs_and_tys = List.rev_map_env env l array_field_value in
       let tvl, value_tys = List.unzip value_exprs_and_tys in

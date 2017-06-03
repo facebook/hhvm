@@ -28,5 +28,7 @@ let experimental_darray_and_varray =
 let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_shape_idx_relaxed =
   GlobalOptions.tco_experimental_shape_idx_relaxed
+let experimental_disable_shape_and_tuple_arrays =
+  GlobalOptions.tco_experimental_disable_shape_and_tuple_arrays
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

@@ -35,6 +35,12 @@ let tco_experimental_goto = "goto"
 let tco_experimental_shape_idx_relaxed =
   "shape_idx_relaxed"
 
+(**
+ * Prevents arraus from being promoted to shape-like or tuple-like arrays.
+ *)
+let tco_experimental_disable_shape_and_tuple_arrays =
+  "disable_shape_and_tuple_arrays"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -43,6 +49,7 @@ let tco_experimental_all =
      tco_experimental_darray_and_varray;
      tco_experimental_goto;
      tco_experimental_shape_idx_relaxed;
+     tco_experimental_disable_shape_and_tuple_arrays;
    ]
 
 let tco_migration_flags_all =

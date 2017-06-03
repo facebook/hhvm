@@ -90,6 +90,7 @@ val tco_experimental_optional_shape_field : string
 val tco_experimental_darray_and_varray : string
 val tco_experimental_goto : string
 val tco_experimental_shape_idx_relaxed : string
+val tco_experimental_disable_shape_and_tuple_arrays : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

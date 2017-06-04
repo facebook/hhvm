@@ -67,7 +67,7 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
     Tests in this class are specific to saved state; would not make sense
     for them to run on a fresh init
     """
-    template_repo = 'hphp/hack/test/integration/data/simple_repo'
+    template_repo = '../test/integration/data/simple_repo'
 
     def test_no_state_found(self):
         error_msg = 'No such rev'
@@ -121,7 +121,9 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
         restarts itself
         """
         self.write_load_config()
-        self.check_cmd(['No errors!'])
+        (output, _, _) = self.run_check()
+        self.assertEqual(output.strip(), 'No errors!')
+
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
             f.write(
                 r"""
@@ -135,7 +137,8 @@ load_mini_script = %s
         time.sleep(2)
 
         # this should start a new server
-        self.check_cmd(['No errors!'])
+        (output, _, _) = self.run_check()
+        self.assertEqual(output.strip(), 'No errors!')
         # check how the old one exited
         log_file = self.proc_call([
             hh_client, '--logname', self.repo_dir

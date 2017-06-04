@@ -356,7 +356,7 @@ class IdeConnection(object):
 
 class CommonTests(object):
 
-    template_repo = 'hphp/hack/test/integration/data/simple_repo'
+    template_repo = '../test/integration/data/simple_repo'
 
     # hh should should work with 0 retries.
     def test_responsiveness(self):

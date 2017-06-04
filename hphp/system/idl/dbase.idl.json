@@ -1,0 +1,253 @@
+{
+    "preamble": "",
+    "consts": [
+    ],
+    "funcs": [
+        {
+            "name": "dbase_add_record",
+            "desc": "Adds the given data to the database.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                },
+                {
+                    "name": "record",
+                    "type": "Variant",
+                    "desc": "An indexed array of data. The number of items must be equal to the number of fields in the database, otherwise dbase_add_record() will fail."
+                }
+            ]
+        },
+        {
+            "name": "dbase_close",
+            "desc": "Closes the given database link identifier.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                }
+            ]
+        },
+        {
+            "name": "dbase_create",
+            "desc": "dbase_create() creates a dBase database with the given definition.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a database link identifier if the database is successfully created, or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The name of the database. It can be a relative or absolute path to the file where dBase will store your data."
+                },
+                {
+                    "name": "fields",
+                    "type": "Variant",
+                    "desc": "An array of arrays, each array describing the format of one field of the database. Each field consists of a name, a character indicating the field type, and optionally, a length, and a precision."
+                }
+            ]
+        },
+        {
+            "name": "dbase_delete_record",
+            "desc": "Marks the given record to be deleted from the database.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                },
+                {
+                    "name": "record_number",
+                    "type": "Int32",
+                    "desc": "An integer which spans from 1 to the number of records in the database (as returned by dbase_numrecords())."
+                }
+            ]
+        },
+        {
+            "name": "dbase_get_header_info",
+            "desc": "Returns information on the column structure of the given database link identifier.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An indexed array with an entry for each column in the database. The array index starts at 0. If the database header information cannot be read, FALSE is returned."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                }
+            ]
+        },
+        {
+            "name": "dbase_get_record_with_names",
+            "desc": "Gets a record from a dBase database as an associative array.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An associative array with the record. This will also include a key named deleted which is set to 1 if the record has been marked for deletion (see dbase_delete_record()). On error, dbase_get_record_with_names() will return FALSE."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                },
+                {
+                    "name": "record_number",
+                    "type": "Int32",
+                    "desc": "An integer which spans from 1 to the number of records in the database (as returned by dbase_numrecords())."
+                }
+            ]
+        },
+        {
+            "name": "dbase_get_record",
+            "desc": "Gets a record from a database as an indexed array.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "An indexed array with the record. This array will also include an associative key named deleted which is set to 1 if the record has been marked for deletion (see dbase_delete_record()). On error, dbase_get_record() will return FALSE."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                },
+                {
+                    "name": "record_number",
+                    "type": "Int32",
+                    "desc": "An integer which spans from 1 to the number of records in the database (as returned by dbase_numrecords())."
+                }                
+            ]
+        },
+        {
+            "name": "dbase_numfields",
+            "desc": "Gets the number of fields (columns) in the specified database.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of fields in the database, or FALSE if an error occurs."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                }                
+            ]
+        },
+        {
+            "name": "dbase_numrecords",
+            "desc": "Gets the number of records (rows) in the specified database.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "The number of fields in the database, or FALSE if an error occurs."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                }                
+            ]
+        },
+        {
+            "name": "dbase_open",
+            "desc": "dbase_open() opens a dBase database with the given access mode.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns a database link identifier if the database is successfully opened, or FALSE if an error occurred."
+            },
+            "args": [
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "The name of the database. It can be a relative or absolute path to the file where dBase will store your data."
+                },
+                {
+                    "name": "mode",
+                    "type": "Int32",
+                    "desc": "An integer which correspond to those for the open() system call (Typically 0 means read-only, 1 means write-only, and 2 means read and write)."
+                }
+            ]
+        },
+        {
+            "name": "dbase_pack",
+            "desc": "Packs the specified database by permanently deleting all records marked for deletion using dbase_delete_record().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                }
+            ]
+        },
+        {
+            "name": "dbase_replace_record",
+            "desc": "Replaces the given record in the database with the given data.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "dbase_identifier",
+                    "type": "Int32",
+                    "desc": "The database link identifier, returned by dbase_open() or dbase_create()."
+                },
+                {
+                    "name": "record",
+                    "type": "Variant",
+                    "desc": "An indexed array of data. The number of items must be equal to the number of fields in the database, otherwise dbase_replace_record() will fail."
+                },
+                {
+                    "name": "record_number",
+                    "type": "Int32",
+                    "desc": "An integer which spans from 1 to the number of records in the database (as returned by dbase_numrecords())."
+                }
+            ]
+        }
+    ],
+    "classes": [
+    ]
+}

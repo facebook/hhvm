@@ -615,7 +615,7 @@ struct RuntimeOption {
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
-  F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
+  F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 8 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(bool, LowStaticArrays,             true)                            \
   F(bool, UncountedMixedArrayHuge,     true)                            \

@@ -776,8 +776,9 @@ struct MemoryManager {
 
   /*
    * Get most recent stats data, as one would with getStats(), but without
-   * altering the underlying data stored in the MemoryManager.
-   * Used for obtaining debug info.
+   * altering the underlying data stored in the MemoryManager, triggering
+   * OOM, or triggering the memory threshold callback. Used for obtaining
+   * allocation counters passively.
    */
   MemoryUsageStats getStatsCopy();
 

@@ -918,6 +918,19 @@ static int64_t HHVM_FUNCTION(memory_get_usage, bool real_usage /*=false */) {
   return std::max<int64_t>(ret, 0);
 }
 
+static int64_t HHVM_FUNCTION(hphp_memory_heap_usage) {
+  // This corresponds to PHP memory_get_usage(false), only counting
+  // allocations via MemoryManager.
+  return MM().getStatsCopy().mmUsage;
+}
+
+static int64_t HHVM_FUNCTION(hphp_memory_heap_capacity) {
+  // this happens to match HHVM memory_get_usage(false), but without the
+  // possibility of triggering OOM. capacity is updated eagerly, not by
+  // refreshStats. It also matches PHP memory_get_usage(true).
+  return MM().getStatsCopy().capacity;
+}
+
 static bool HHVM_FUNCTION(hphp_memory_start_interval) {
   return MM().startStatsInterval();
 }
@@ -1313,6 +1326,9 @@ void StandardExtension::initOptions() {
   HHVM_FE(ini_set);
   HHVM_FE(memory_get_peak_usage);
   HHVM_FE(memory_get_usage);
+  // HHVM-specific stateless accessors for memory stats
+  HHVM_FE(hphp_memory_heap_usage);
+  HHVM_FE(hphp_memory_heap_capacity);
   // This is HH-specific as well but code depends on the old name.
   HHVM_FE(memory_get_allocation);
   HHVM_FE(hphp_memory_get_interval_peak_usage);

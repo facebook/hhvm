@@ -61,8 +61,8 @@ struct ManagedArena {
   // Report usage.
   static std::string reportStats();
 
- private:
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
+ private:
   static void* chunk_alloc(void* chunk, size_t size, size_t alignment,
                            bool* zero, bool* commit, unsigned arena_ind);
 #else

@@ -147,6 +147,11 @@ bool dumpTCAnnotation(const Func& func, TransKind transKind);
  */
 bool retranslateAllPending();
 
+/*
+ * How many JIT worker threads are active.
+ */
+int getActiveWorker();
+
 }}}
 
 #endif

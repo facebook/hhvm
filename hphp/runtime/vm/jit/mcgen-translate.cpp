@@ -555,4 +555,14 @@ bool retranslateAllPending() {
     !s_retranslateAllComplete.load(std::memory_order_acquire);
 }
 
+int getActiveWorker() {
+  if (s_retranslateAllComplete.load(std::memory_order_relaxed)) {
+    return 0;
+  }
+  if (auto disp = s_dispatcher.load(std::memory_order_relaxed)) {
+    return disp->getActiveWorker();
+  }
+  return 0;
+}
+
 }}}

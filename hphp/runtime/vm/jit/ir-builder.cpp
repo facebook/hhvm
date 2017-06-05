@@ -236,11 +236,11 @@ SSATmp* IRBuilder::preOptimizeHintMBaseInner(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
-                                           const IRInstruction* typeSrc) {
+                                           const IRInstruction* srcInst) {
   ITRACE(3, "preOptimizeAssertTypeOp({}, {}, {}, {})\n",
          *inst, oldType,
          oldVal ? oldVal->toString() : "nullptr",
-         typeSrc ? typeSrc->toString() : "nullptr");
+         srcInst ? srcInst->toString() : "nullptr");
 
   auto const newType = oldType & inst->typeParam();
 
@@ -251,14 +251,15 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   //      c) oldType.hasConstVal()
   //    The AssertType will never be useful for guard constraining in these
   //     situations.
-  // 2) The type source is another assert that's at least as good as this one.
+  // 2) The source instruction is known to be another assert that's at least
+  //    as good as this one.
   if ((oldType <= newType &&
        (inst->typeParam() == TGen ||
         (oldVal && oldVal->inst()->is(DefConst)) ||
         oldType.hasConstVal())) ||
-      (typeSrc &&
-       typeSrc->is(AssertType, AssertLoc, AssertStk, AssertMBase) &&
-       typeSrc->typeParam() <= inst->typeParam())) {
+      (srcInst &&
+       srcInst->is(AssertType, AssertLoc, AssertStk, AssertMBase) &&
+       srcInst->typeParam() <= inst->typeParam())) {
     return fwdGuardSource(inst);
   }
 
@@ -284,26 +285,11 @@ SSATmp* IRBuilder::preOptimizeAssertLocation(IRInstruction* inst,
     return nullptr;
   }
 
-  // If the location has a single type-source instruction, pass it along to
-  // preOptimizeAssertTypeOp(), which may be able to use it to optimize away
-  // the Assert*.
-  auto const typeSrcInst = [&]() -> const IRInstruction* {
-    auto const& typeSrcs = m_state.typeSrcsOf(l);
-
-    if (typeSrcs.size() == 1) {
-      auto typeSrc = *typeSrcs.begin();
-      return typeSrc.isValue() ? typeSrc.value->inst() :
-             typeSrc.isGuard() ? typeSrc.guard :
-                                 nullptr;
-    }
-    return nullptr;
-  }();
-
   return preOptimizeAssertTypeOp(
     inst,
     typeOf(l, DataTypeGeneric),
     valueOf(l, DataTypeGeneric),
-    typeSrcInst
+    nullptr
   );
 }
 

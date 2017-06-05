@@ -10,7 +10,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # package information
 SET(PACKAGE_NAME      "hhvm")
-SET(PACKAGE_VERSION   "3.20.0")
+SET(PACKAGE_VERSION   "3.20.1-dev")
 SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")

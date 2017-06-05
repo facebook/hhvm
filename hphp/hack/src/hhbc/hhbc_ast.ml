@@ -432,6 +432,7 @@ type instruct_include_eval_define =
   | ReqOnce
   | ReqDoc
   | Eval
+  | AliasCls of Litstr.id * Litstr.id
   | DefFunc of function_id
   | DefCls of class_id
   | DefClsNop of class_id

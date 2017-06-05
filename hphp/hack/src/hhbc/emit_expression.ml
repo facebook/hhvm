@@ -31,8 +31,28 @@ module LValOp = struct
   | Unset
 end
 
-let special_functions =
-  ["isset"; "empty"; "tuple"; "idx"; "define"; "eval"]
+let is_special_function e args =
+  match snd e with
+  | A.Id (_, s) ->
+  begin
+    let n = List.length args in
+    match s with
+    | "isset" -> n > 0
+    | "empty" -> n = 1
+    | "tuple" -> true
+    | "define" -> n = 2
+    | "eval" -> n = 1
+    | "idx" -> n = 2 || n = 3
+    | "class_alias" ->
+      begin
+        match args with
+        | [_, A.String _; _, A.String _]
+        | [_, A.String _; _, A.String _; _] -> true
+        | _ -> false
+      end
+   | _ -> false
+  end
+  | _ -> false
 
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
@@ -152,12 +172,6 @@ let get_queryMOpMode need_ref op =
   | QueryOp.CGet -> MemberOpMode.Warn
   | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
-
-let is_special_function e =
-  match e with
-  | (_, A.Id(_, x))
-    when List.mem special_functions x -> true
-  | _ -> false
 
 let is_local_this env id =
   let scope = Emit_env.get_scope env in
@@ -701,10 +715,6 @@ and emit_exit env expr_opt =
     instr_exit;
   ]
 
-and is_valid_idx es =
-  let n = List.length es in
-  n = 2 || n = 3
-
 and emit_idx env es =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
@@ -730,6 +740,17 @@ and emit_xhp_obj_get env e s nullflavor =
   let fn_name = p, A.Obj_get (e, (p, A.Id (p, "getAttribute")), nullflavor) in
   let fn = p, A.Call (fn_name, [p, A.String (p, SU.Xhp.clean s)], []) in
   emit_call_expr ~need_ref:false env fn
+
+and emit_class_alias es =
+  let c1, c2 = match es with
+    | (_, A.String (_, c1)) :: (_, A.String (_, c2)) :: _ -> c1, c2
+    | _ -> failwith "emit_class_alias: impossible"
+  in
+  let default = if List.length es = 2 then instr_true else instr_string c2 in
+  gather [
+    default;
+    instr_alias_cls c1 c2
+  ]
 
 and emit_expr env expr ~need_ref =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
@@ -787,12 +808,14 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) ->
     emit_box_if_necessary need_ref @@ emit_tuple env p es
-  | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx es ->
+  | A.Call ((_, A.Id (_, "idx")), es, _) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
   | A.Call ((_, A.Id (_, "define")), [(_, A.String (_, s)); e], _) ->
     emit_box_if_necessary need_ref @@ emit_define env s e
-  | A.Call ((_, A.Id (_, "eval")), [expr], _)->
+  | A.Call ((_, A.Id (_, "eval")), [expr], _) ->
     emit_box_if_necessary need_ref @@ emit_eval env expr
+  | A.Call ((_, A.Id (_, "class_alias")), es, _) ->
+    emit_box_if_necessary need_ref @@ emit_class_alias es
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
@@ -1712,7 +1735,7 @@ and emit_call env (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr env (_, expr_ as expr) =
   match expr_ with
-  | A.Call (e, args, uargs) when not (is_special_function e) ->
+  | A.Call (e, args, uargs) when not (is_special_function e args) ->
     emit_call env e args uargs
   | _ ->
     let flavor =

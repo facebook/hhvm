@@ -322,7 +322,6 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
-slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php
@@ -819,16 +818,12 @@ slow/php7_backported/scalar-types/scalar_none.php
 slow/php7_backported/scalar-types/scalar_null.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/php7_backported/scalar-types/scalar_reserved2.php
-slow/php7_backported/scalar-types/scalar_reserved2_class_alias.php
 slow/php7_backported/scalar-types/scalar_reserved2_use.php
 slow/php7_backported/scalar-types/scalar_reserved3.php
-slow/php7_backported/scalar-types/scalar_reserved3_class_alias.php
 slow/php7_backported/scalar-types/scalar_reserved3_use.php
 slow/php7_backported/scalar-types/scalar_reserved4.php
-slow/php7_backported/scalar-types/scalar_reserved4_class_alias.php
 slow/php7_backported/scalar-types/scalar_reserved4_use.php
 slow/php7_backported/scalar-types/scalar_reserved6.php
-slow/php7_backported/scalar-types/scalar_reserved6_class_alias.php
 slow/php7_backported/scalar-types/scalar_reserved6_use.php
 slow/php7_backported/scalar-types/scalar_reserved7.php
 slow/php7_backported/scalar-types/scalar_return_basic.php
@@ -1190,6 +1185,4 @@ slow/yield/yieldfrom/yield_from_multiple_iterators.php
 slow/yield/yieldfrom/yield_from_null.php
 slow/yield/yieldfrom/yield_from_return_values.php
 slow/yield/yieldfrom/yield_from_unwind_generator.php
-slow/zend/class_alias1.php
-slow/zend/class_alias2.php
 slow/zlib/zlib_wrapper_flock_basic.php

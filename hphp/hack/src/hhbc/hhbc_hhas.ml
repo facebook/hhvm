@@ -631,6 +631,8 @@ let string_of_include_eval_define = function
   | ReqOnce -> "ReqOnce"
   | ReqDoc -> "ReqDoc"
   | Eval -> "Eval"
+  | AliasCls (c1, c2) ->
+    sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
   | DefFunc _id -> sep ["DefFunc"; string_of_int (next_function_counter ())]
   | DefCls _id -> sep ["DefCls"; string_of_int (next_class_counter ())]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_id id]

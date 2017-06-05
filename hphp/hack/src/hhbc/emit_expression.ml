@@ -1833,20 +1833,21 @@ and emit_lval_op env op expr1 opt_expr2 =
         emit_lval_op_list env local [] expr1
       end
     | _ ->
-      let rhs_instrs, rhs_stack_size =
-        match opt_expr2 with
-        | None -> empty, 0
-        | Some (_, A.Yield af) ->
-          let temp = Local.get_unnamed_local () in
-          gather [
-            emit_yield env af;
-            instr_setl temp;
-            instr_popc;
-            instr_pushl temp;
-          ], 1
-        | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
-      in
-      emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size
+      Local.scope @@ fun () ->
+        let rhs_instrs, rhs_stack_size =
+          match opt_expr2 with
+          | None -> empty, 0
+          | Some (_, A.Yield af) ->
+            let temp = Local.get_unnamed_local () in
+            gather [
+              emit_yield env af;
+              instr_setl temp;
+              instr_popc;
+              instr_pushl temp;
+            ], 1
+          | Some e -> emit_expr_and_unbox_if_necessary ~need_ref:false env e, 1
+        in
+        emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
   match expr_ with
@@ -2025,20 +2026,21 @@ and stash_in_local ?(leave_on_stack=false) env e f =
       if leave_on_stack then instr_cgetl (get_local env id) else empty;
     ]
   | _ ->
-    let temp = Local.get_unnamed_local () in
-    let fault_label = Label.next_fault () in
-    gather [
-      emit_expr ~need_ref:false env e;
-      instr_setl temp;
-      instr_popc;
-      instr_try_fault
-        fault_label
-        (* try block *)
-        (f temp break_label)
-        (* fault block *)
-        (gather [
-          instr_unsetl temp;
-          instr_unwind ]);
-      instr_label break_label;
-      if leave_on_stack then instr_pushl temp else instr_unsetl temp
-    ]
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let fault_label = Label.next_fault () in
+      gather [
+        emit_expr ~need_ref:false env e;
+        instr_setl temp;
+        instr_popc;
+        instr_try_fault
+          fault_label
+          (* try block *)
+          (f temp break_label)
+          (* fault block *)
+          (gather [
+            instr_unsetl temp;
+            instr_unwind ]);
+        instr_label break_label;
+        if leave_on_stack then instr_pushl temp else instr_unsetl temp
+      ]

@@ -279,8 +279,6 @@ slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-exit.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_gd/imageaffine.php
-slow/ext_gd/imagescale.php
-slow/ext_gmp/mostInOne.php
 slow/ext_imagick/draw_vector_graphics.php
 slow/ext_imagick/iterator_exception.php
 slow/ext_imagick/iterator_test.php
@@ -291,7 +289,6 @@ slow/ext_imagick/pixel_exception.php
 slow/ext_imagick/pixel_issimilar.php
 slow/ext_ipc/message_queue.php
 slow/ext_json/emptydict.php
-slow/ext_json/error_depth.php
 slow/ext_json/json_decode_collections.php
 slow/ext_mailparse/ext_uudecode.php
 slow/ext_math/intdiv.php
@@ -485,7 +482,6 @@ slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector4.php
 slow/hh_namespace_migration/hh_vector5.php
-slow/hhbbc/array_005.php
 slow/hhbbc/array_011.php
 slow/hhbbc/array_access_004.php
 slow/hhbbc/async_await_001.php
@@ -790,7 +786,6 @@ slow/parser/val_colon_colon_class_method.php
 slow/parser/xhp-ambiguity.php
 slow/parser/xhp_keyword.php
 slow/parser/xhp_keyword_hh.php
-slow/parser/yield-parens.php
 slow/perfect_virtual/79.php
 slow/perfect_virtual/80.php
 slow/php7_backported/engine-exceptions/throwable_namespace_002.php
@@ -1170,7 +1165,6 @@ slow/xhp/nullable_types.php
 slow/xhp/xhp-attr-array-with-typeargs.php
 slow/xhp/xhpchild.php
 slow/xml/print_r.php
-slow/yield/2156.php
 slow/yield/2165.php
 slow/yield/2167.php
 slow/yield/2174.php

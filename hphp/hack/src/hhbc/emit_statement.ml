@@ -357,6 +357,10 @@ and emit_try_catch env try_block catch_list =
   ]
 
 and emit_try_finally env try_block finally_block =
+  Local.scope @@ fun () ->
+    emit_try_finally_ env try_block finally_block
+
+and emit_try_finally_ env try_block finally_block =
   (*
   We need to generate four things:
   (1) the try-body, which will be followed by
@@ -624,6 +628,10 @@ and wrap_non_empty_block_in_fault prefix block fault_block =
       fault_block
 
 and emit_foreach env _has_await collection iterator block =
+  Local.scope @@ fun () ->
+    emit_foreach_ env _has_await collection iterator block
+
+and emit_foreach_ env _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
   let iterator_number = Iterator.get_iterator () in

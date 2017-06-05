@@ -25,5 +25,11 @@ let get_unnamed_local () =
   next_local := current + 1;
   Unnamed current
 
+let scope f =
+  let current = !next_local in
+  let result = f () in
+  next_local := current;
+  result
+
 let reset_local base =
   next_local := base

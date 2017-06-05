@@ -86,7 +86,6 @@ quick/func_slice_args.php
 quick/function-static-init.php
 quick/function_varargs.php
 quick/generator_varargs.php
-quick/generator_vars.php
 quick/get_class.php
 quick/get_class_methods2.php
 quick/get_defined_vars.php
@@ -160,7 +159,6 @@ quick/lexer_nowdoc_buffer_boundary_65494.php
 quick/lexer_nowdoc_label_cornercases.php
 quick/lexer_nowdoc_many_buffers.php
 quick/libxml_suppress_errors.php
-quick/list-assignment.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
@@ -215,7 +213,6 @@ quick/static_prop_eval_order.php
 quick/static_vars.php
 quick/strict_hashbang_start.php
 quick/string-cse.php
-quick/switch.php
 quick/switch_special_cases.php
 quick/syntax-error.php
 quick/trailing_comma_bad1.php

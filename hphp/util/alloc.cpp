@@ -693,8 +693,10 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
 
 extern "C" {
-  const char* malloc_conf = "narenas:1,lg_tcache_max:16,"
-    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
+  const char* malloc_conf = "narenas:1,lg_tcache_max:16"
+#if (JEMALLOC_VERSION_MAJOR < 5)
+    ",lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
+#endif
 #ifdef ENABLE_HHPROF
     ",prof:true,prof_active:false,prof_thread_active_init:false"
 #endif

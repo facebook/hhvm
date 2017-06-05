@@ -41,6 +41,18 @@ let tco_experimental_shape_idx_relaxed =
 let tco_experimental_disable_shape_and_tuple_arrays =
   "disable_shape_and_tuple_arrays"
 
+(**
+ * If enabled, the following promotions will be applied at parse time:
+ *
+ *   1. A shape field whose type is nullable will also have the field considered
+ *      as optional. I.e., shape('x' => ?int) will be interpreted as
+ *      shape(?'x' => ?int).
+ *   2. All shapes will be considered to support unknown fields. I.e.,
+ *      shape('x' => int) will be interpreted as shape('x' => int, ...).
+ *)
+let tco_experimental_promote_nullable_to_optional_in_shapes =
+  "promote_nullable_to_optional_in_shapes"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -50,6 +62,7 @@ let tco_experimental_all =
      tco_experimental_goto;
      tco_experimental_shape_idx_relaxed;
      tco_experimental_disable_shape_and_tuple_arrays;
+     tco_experimental_promote_nullable_to_optional_in_shapes;
    ]
 
 let tco_migration_flags_all =

@@ -7,7 +7,7 @@ interface IChild extends IBase {}
 abstract class P {
   abstract const type T;
   public static function foo(): void {
-    hh_show(type_structure(static::class, 'T')['classname']);
+    hh_show(Shapes::idx(type_structure(static::class, 'T'), 'classname'));
   }
 }
 

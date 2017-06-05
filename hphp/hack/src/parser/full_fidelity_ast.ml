@@ -395,9 +395,20 @@ let mpShapeField : ('a, shape_field) metaparser =
   fun hintParser node env ->
     match syntax node with
     | FieldSpecifier { field_question; field_name; field_type; _ } ->
+        let promote_nullable_to_optional_in_shapes =
+          TypecheckerOptions.experimental_feature_enabled
+            !(lowerer_state.popt)
+            TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes in
+        let is_nullable = function
+        | _, Hoption _ -> true
+        | _ -> false in
         let sf_optional = not (is_missing field_question) in
         let sf_name = pShapeFieldName field_name env in
         let sf_hint = hintParser field_type env in
+        (* TODO(t17492233): Remove this line once shapes use new syntax. *)
+        let sf_optional =
+          sf_optional ||
+          (promote_nullable_to_optional_in_shapes && is_nullable sf_hint) in
         { sf_optional; sf_name; sf_hint }
     | _ ->
         let sf_name, sf_hint = mpShapeExpressionField hintParser node env in

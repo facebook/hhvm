@@ -241,7 +241,7 @@ tc_unwind_personality(int version,
         ek = ExceptionKind::InvalidSetMException;
         throw;
       } catch (const TVCoercionException&) {
-        ek = ExceptionKind::InvalidSetMException;
+        ek = ExceptionKind::TVCoercionException;
         throw;
       } catch (const req::root<Object>&) {
         ek = ExceptionKind::PhpException;

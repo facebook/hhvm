@@ -598,23 +598,47 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
 
-  for (size_t i = 0, n = m_extra->m_usedTraits.size(); i < n; ++i) {
-    auto usedTrait = m_extra->m_usedTraits.at(i).get();
-    const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
-    PreClass* ptrait = usedTrait->m_preClass.get();
-    Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
-                                  tryAutoload);
-    if (trait != usedTrait) {
-      if (trait == nullptr) {
-        parent = usedTrait;
-        return Avail::Fail;
+  if (RuntimeOption::RepoAuthoritative) {
+    if (m_preClass->usedTraits().size()) {
+      int numIfaces = m_interfaces.size();
+      for (int i = 0; i < numIfaces; i++) {
+        auto di = m_interfaces[i].get();
+
+        PreClass *pint = di->m_preClass.get();
+        Class* interface = Unit::getClass(pint->namedEntity(), pint->name(),
+                                          tryAutoload);
+        if (interface != di) {
+          if (interface == nullptr) {
+            parent = di;
+            return Avail::Fail;
+          }
+          if (UNLIKELY(di->isZombie())) {
+            const_cast<Class*>(this)->destroy();
+          }
+          return Avail::False;
+        }
       }
-      if (UNLIKELY(usedTrait->isZombie())) {
-        const_cast<Class*>(this)->destroy();
+    }
+  } else {
+    for (size_t i = 0, n = m_extra->m_usedTraits.size(); i < n; ++i) {
+      auto usedTrait = m_extra->m_usedTraits.at(i).get();
+      const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
+      PreClass* ptrait = usedTrait->m_preClass.get();
+      Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
+                                    tryAutoload);
+      if (trait != usedTrait) {
+        if (trait == nullptr) {
+          parent = usedTrait;
+          return Avail::Fail;
+        }
+        if (UNLIKELY(usedTrait->isZombie())) {
+          const_cast<Class*>(this)->destroy();
+        }
+        return Avail::False;
       }
-      return Avail::False;
     }
   }
+
   return Avail::True;
 }
 
@@ -1227,8 +1251,9 @@ bool Class::verifyPersistent() const {
   if (m_parent.get() && !classHasPersistentRDS(m_parent.get())) {
     return false;
   }
-  for (auto const& declInterface : declInterfaces()) {
-    if (!classHasPersistentRDS(declInterface.get())) {
+  int numIfaces = m_interfaces.size();
+  for (int i = 0; i < numIfaces; i++) {
+    if (!classHasPersistentRDS(m_interfaces[i])) {
       return false;
     }
   }
@@ -1881,13 +1906,19 @@ void Class::setConstants() {
       }
 
       if (existingConst.cls != iConst.cls) {
-        raise_error("%s cannot inherit the %sconstant %s from %s, because it "
-                    "was previously inherited from %s",
-                    m_preClass->name()->data(),
-                    iConst.isType() ? "type " : "",
-                    iConst.name->data(),
-                    iConst.cls->name()->data(),
-                    existingConst.cls->name()->data());
+        // It's only an error if the constant comes from the declared
+        // interfaces.
+        for (auto const& interface : declInterfaces()) {
+          if (interface.get() == iface) {
+            raise_error("%s cannot inherit the %sconstant %s from %s, because "
+                        "it was previously inherited from %s",
+                        m_preClass->name()->data(),
+                        iConst.isType() ? "type " : "",
+                        iConst.name->data(),
+                        iConst.cls->name()->data(),
+                        existingConst.cls->name()->data());
+          }
+        }
       }
     }
   }
@@ -2557,7 +2588,9 @@ void Class::checkInterfaceMethods() {
  */
 void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
-  for (auto const& trait : m_extra->m_usedTraits) {
+  for (auto const& traitName : m_preClass->usedTraits()) {
+    auto const trait = Unit::lookupClass(traitName);
+    assert(trait->attrs() & AttrTrait);
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {

@@ -764,16 +764,16 @@ let get_error_info (e: exn) : int * string * json option =
   | Exit_status.Exit_with code -> (-32001, Exit_status.to_string code, None)
   | _ -> (-32001, Printexc.to_string e, None)
 
-let print_error (e: exn) : json =
+let print_error (e: exn) (stack: string): json =
   let open Hh_json in
   let (code, message, original_data) = get_error_info e in
-  let stack = ("stack", string_ (Printexc.get_backtrace ())) in
+  let stack_json_property = ("stack", string_ stack) in
   (* We'd like to add a stack-trace. The only place we can fit it, that will *)
   (* be respected by vscode-jsonrpc, is inside the 'data' field. And we can  *)
   (* do that only if data is an object. We can synthesize one if needed.     *)
   let data = match original_data with
-    | None -> JSON_Object [stack]
-    | Some (JSON_Object o) -> JSON_Object (stack :: o)
+    | None -> JSON_Object [stack_json_property]
+    | Some (JSON_Object o) -> JSON_Object (stack_json_property :: o)
     | Some primitive -> primitive
   in
   JSON_Object [

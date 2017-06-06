@@ -167,6 +167,17 @@ let exit_fail_delay () = Unix.sleep 2; exit 1
 
 exception Denied_due_to_existing_persistent_connection
 
+(* The following connection exceptions inform the main LSP event loop how to  *)
+(* respond to an exception: was the exception a connection-related exception  *)
+(* (one of these) or did it arise during other logic (not one of these)? Can  *)
+(* we report the exception to the LSP client? Can we continue handling        *)
+(* further LSP messages or must we quit? If we quit, can we do so immediately *)
+(* or must we delay?  --  Separately, they also help us marshal callstacks    *)
+(* across daemon- and process-boundaries.                                     *)
+exception Client_fatal_connection_exception of Marshal_tools.remote_exception_data
+exception Client_recoverable_connection_exception of Marshal_tools.remote_exception_data
+exception Server_fatal_connection_exception of Marshal_tools.remote_exception_data
+
 (* To handle requests, we use a global list of callbacks for when the *)
 (* response is received, and a global id counter for correlation...   *)
 module Callback = struct
@@ -188,11 +199,19 @@ let rpc
   match server_conn with
   | None -> failwith "expected server_conn"
   | Some server_conn ->
-    let res, pending_messages =
-      ServerCommand.rpc_persistent (server_conn.ic, server_conn.oc) command in
-    List.iter pending_messages
-      ~f:(fun x -> Queue.push x server_conn.pending_messages);
-    res
+    try
+      let res, pending_messages =
+        ServerCommand.rpc_persistent (server_conn.ic, server_conn.oc) command in
+      List.iter pending_messages
+        ~f:(fun x -> Queue.push x server_conn.pending_messages);
+      res
+    with
+    | ServerCommand.Remote_exception remote_e_data ->
+      raise (Server_fatal_connection_exception remote_e_data)
+    | e ->
+      let message = Printexc.to_string e in
+      let stack = Printexc.get_backtrace () in
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
 (* Determine whether to read a message from the client (the editor) or the
    server (hh_server). *)
@@ -219,12 +238,17 @@ let get_message_source
 (*  Read a message unmarshaled from the server's out_channel. *)
 let read_message_from_server (server: server_conn) : event =
   let open ServerCommandTypes in
-  let fd = Unix.descr_of_out_channel server.oc in
-  match Marshal_tools.from_fd_with_preamble fd with
+  try
+    let fd = Unix.descr_of_out_channel server.oc in
+    match Marshal_tools.from_fd_with_preamble fd with
     | Response _ ->
-      raise Lsp.Error.(Internal_error "unexpected response without a request")
+      failwith "unexpected response without request"
     | Push m -> Server_message m
     | Hello -> Server_hello
+  with e ->
+    let message = Printexc.to_string e in
+    let stack = Printexc.get_backtrace () in
+    raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
 (* get_next_event: picks up the next available message from either client or
    server. The way it's implemented, at the first character of a message
@@ -241,9 +265,10 @@ let get_next_event (state: state) : event =
   let from_client (client: ClientMessageQueue.t) =
     match ClientMessageQueue.get_message client with
     | ClientMessageQueue.Message message -> Client_message message
-    | ClientMessageQueue.Fatal_exception _
-    | ClientMessageQueue.Recoverable_exception _ ->
-        failwith "unable to read jsonrpc message"
+    | ClientMessageQueue.Fatal_exception edata ->
+      raise (Client_fatal_connection_exception edata)
+    | ClientMessageQueue.Recoverable_exception edata ->
+      raise (Client_recoverable_connection_exception edata)
   in
 
   let from_either server client =
@@ -367,17 +392,20 @@ let cancel_if_stale
 
 
 (* respond_to_error: if we threw an exception during the handling of a request,
-   report the exception to the client as the response their request. *)
-let respond_to_error (event: event option) (e: exn) : unit =
+   report the exception to the client as the response to their request. *)
+let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   match event with
   | Some (Client_message c)
     when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
-    print_error e |> respond stdout c;
+    print_error e stack |> respond stdout c;
   | _ -> ()
 
 
-let log_error (event: event option) (e: exn) : unit =
-  let (error_code, _message, _data) = get_error_info e in
+let log_error
+  (event: event option)
+  (message: string)
+  (_stack: string)
+  : unit =
   let (command, kind) = match event with
     | Some (Client_message c) ->
       let open ClientMessageQueue in
@@ -387,8 +415,7 @@ let log_error (event: event option) (e: exn) : unit =
   HackEventLogger.client_command_exception
     ~command
     ~kind
-    ~e
-    ~error_code
+    ~message
 
 
 (************************************************************************)
@@ -1074,10 +1101,9 @@ let handle_event (state: state) (event: event) : unit =
   | Pre_init _, Server_hello
   | Main_loop, Server_hello
   | Post_shutdown, Server_hello ->
-    log_error
-      (Some event)
-      (Error.Internal_error "Received unexpected 'hello' from hh_server");
-    exit_fail ()
+    let message = "Unexpected hello" in
+    let stack = "" in
+    raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
   (* Tick when we're connected to the server and have empty queue *)
   | Main_loop, Tick when state.needs_idle ->
@@ -1217,6 +1243,7 @@ let handle_event (state: state) (event: event) : unit =
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. *)
 let main () : unit =
+  let open Marshal_tools in
   Printexc.record_backtrace true;
   let state = {
     lsp_state = Pre_init false;
@@ -1247,11 +1274,18 @@ let main () : unit =
             ~kind:(kind_to_string c.kind);
         end
       | _ -> ()
-    with e ->
-      respond_to_error !ref_event e;
-      log_error !ref_event e;
-      let is_eof = (e = Sys_error "Broken pipe" || e = End_of_file) in
-      if is_eof then exit_fail_delay ()
-      (* Whether we get an EOF with the client or with the server, they're    *)
-      (* both unrecoverable. We must exit and trust the LSP client to restart *)
+    with
+    | Server_fatal_connection_exception edata ->
+      log_error !ref_event edata.message edata.stack;
+      exit_fail_delay ()
+    | Client_fatal_connection_exception edata ->
+      log_error !ref_event edata.message edata.stack;
+      exit_fail ()
+    | Client_recoverable_connection_exception edata ->
+      log_error !ref_event edata.message edata.stack;
+    | e ->
+      let message = Printexc.to_string e in
+      let stack = Printexc.get_backtrace () in
+      respond_to_error !ref_event e stack;
+      log_error !ref_event message stack;
   done

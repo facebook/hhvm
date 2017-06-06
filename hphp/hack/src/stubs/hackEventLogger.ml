@@ -43,7 +43,7 @@ let client_build_finish
   ~rev_changed:_ ~build_type:_ ~request_id:_ ~exit_status:_ = ()
 let client_check_finish _ = ()
 let client_handled_command ~command:_ ~kind:_ ~start_t:_ = ()
-let client_command_exception ~command:_ ~kind:_ ~e:_ ~error_code:_ = ()
+let client_command_exception ~command:_ ~kind:_ ~message:_ = ()
 let client_bad_exit _ = ()
 let monitor_dead_but_typechecker_alive () = ()
 let client_connect_to_monitor_timeout () = ()

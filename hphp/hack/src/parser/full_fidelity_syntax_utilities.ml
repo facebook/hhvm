@@ -30,12 +30,31 @@ module WithSyntax(Syntax: SyntaxType) = struct
     let acc = (f acc node) in
     List.fold_left (fold f) acc (Syntax.children node)
 
+  (* This is fold, except that nodes which do not match a predicate are
+  skipped. Children of skipped nodes are also skipped. *)
+  let rec fold_where folder predicate acc node =
+    if predicate node then
+      let acc = (folder acc node) in
+      List.fold_left (fold_where folder predicate) acc (Syntax.children node)
+    else
+      acc
+
   (* This depth-first traversal applies the function to the parent node,
      updating the accumulator, *after* recursing on the children
      left-to-right. *)
   let rec fold_post f acc node =
     let acc = List.fold_left (fold_post f) acc (Syntax.children node) in
     f acc node
+
+  (* This is fold_post, except that nodes which do not match a predicate are
+  skipped. Children of skipped nodes are also skipped. *)
+  let rec fold_post_where folder predicate acc node =
+    if predicate node then
+      let acc = List.fold_left
+        (fold_post_where folder predicate) acc (Syntax.children node) in
+      folder acc node
+    else
+      acc
 
   (* These are versions of the depth-first traversals above which have the
      context of the parents of the node being processed. *)

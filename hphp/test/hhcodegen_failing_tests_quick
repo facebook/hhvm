@@ -66,7 +66,6 @@ quick/exceptions7.php
 quick/exit.php
 quick/fail_self.php
 quick/fatality.php
-quick/fb_intercept.php
 quick/fc_enum_1.php
 quick/fib_gen.php
 quick/finally_break.php
@@ -179,7 +178,6 @@ quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
 quick/pcre-crash.php
 quick/post_try_error.php
-quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php
 quick/prop_order.php
 quick/prop_order_parens.php
@@ -201,7 +199,6 @@ quick/short_array_syntax.php
 quick/silencer.php
 quick/simp-conv-to-int-dbl.php
 quick/sp.php
-quick/stack_overflow_variadic_capture.php
 quick/static_array.php
 quick/static_closure.php
 quick/static_closure_gen.php

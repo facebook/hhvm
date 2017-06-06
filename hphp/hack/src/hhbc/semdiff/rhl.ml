@@ -642,6 +642,12 @@ let equiv prog prog' startlabelpairs =
           let tv' = lookup_adata id' (!adata2_ref) in
           if tv = tv' then nextins()
           else try_specials ()
+        | ILitConst (Double s), ILitConst (Double s') ->
+          (match Scanf.sscanf s "%f" (fun x -> Some x),
+                 Scanf.sscanf s' "%f" (fun x -> Some x) with
+           Some f, Some f' -> if f = f' then nextins() else try_specials ()
+           | exception _ -> try_specials ()
+           | _ -> try_specials ())
         | ILitConst ins, ILitConst ins' ->
            if ins = ins' then nextins()
            else try_specials ()

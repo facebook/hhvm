@@ -31,7 +31,6 @@ slow/async/fcallawait-interp.php
 slow/async/foreach_await_as.php
 slow/async/foreach_await_as_fail.php
 slow/async/hh-async-matrix.php
-slow/async/immed_lambda2.php
 slow/async/lambda5.php
 slow/async/null.php
 slow/async/pass_wh.php
@@ -292,7 +291,6 @@ slow/ext_json/emptydict.php
 slow/ext_json/json_decode_collections.php
 slow/ext_mailparse/ext_uudecode.php
 slow/ext_math/intdiv.php
-slow/ext_math/max_and_min.php
 slow/ext_misc/ext_misc.php
 slow/ext_misc/idx-1.php
 slow/ext_misc/idx-2.php
@@ -321,6 +319,7 @@ slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/accept_block.php
 slow/ext_socket/cleanup_persistent_socket.php
+slow/ext_socket/client_float_timeout_open_port.php
 slow/ext_socket/client_zero_timeout_open_port.php
 slow/ext_socket/ext_socket.php
 slow/ext_socket/issue2601error.php
@@ -425,6 +424,7 @@ slow/foreach_target_variables.php
 slow/function/anonymous-default.php
 slow/function/classname-default.php
 slow/function/closure-default.php
+slow/function/instance-default.php
 slow/function/short-lambda.php
 slow/function/ternary-default.php
 slow/function_no_param_modifier.php
@@ -542,7 +542,6 @@ slow/inline-hhas/if.php
 slow/inline-hhas/mixed.php
 slow/inline-hhas/param.php
 slow/inlining/1836.php
-slow/inlining/nullthrows1.php
 slow/integer/bin-format.php
 slow/intercept/intercept_func_families.php
 slow/intercept/intercept_methods.php
@@ -611,6 +610,7 @@ slow/memoize/variadics.php
 slow/memory/uninit-leak.php
 slow/namespace/2227.php
 slow/namespace/alias/alias.php
+slow/namespace/const_param.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php
@@ -910,7 +910,6 @@ slow/reflection/deprecation.php
 slow/reflection/dynamic_property2.php
 slow/reflection/get_closure_scope_class.php
 slow/reflection/isCallable.php
-slow/reflection/is_optional.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php
@@ -1119,10 +1118,7 @@ slow/types/interface_typehint_fail.php
 slow/types/ref_type_fail.php
 slow/types/scalar_names.php
 slow/unary_operators/1437.php
-slow/unpack_args/unpack_call.php
-slow/unpack_args/unpack_call_builtin.php
 slow/unpack_args/unpack_call_error.php
-slow/unpack_args/unpack_call_invalid_arg.php
 slow/unpack_args/unpack_call_multi.php
 slow/unset/1114.php
 slow/unset/1117.php
@@ -1133,22 +1129,10 @@ slow/use_function/use_function.php
 slow/user_attributes/2198.php
 slow/var_export/1450.php
 slow/variable_argument/27.php
-slow/variadic_args/async_and_gen.php
 slow/variadic_args/by_reference.php
 slow/variadic_args/by_reference_typehints.php
-slow/variadic_args/closures.php
 slow/variadic_args/constructors.php
-slow/variadic_args/cufa.php
-slow/variadic_args/hack_typehints.php
 slow/variadic_args/magic_call.php
-slow/variadic_args/method_compat/bad_add_required.php
-slow/variadic_args/method_compat/bad_make_non_var.php
-slow/variadic_args/method_compat/bad_make_non_var2.php
-slow/variadic_args/method_compat/bad_remove_prevar_optionals.php
-slow/variadic_args/method_compat/good_add_optional.php
-slow/variadic_args/method_compat/good_make_var.php
-slow/variadic_args/profile.php
-slow/variadic_args/reentry.php
 slow/variadic_args/typehints.php
 slow/variant/616.php
 slow/vec/bad-init1.php
@@ -1191,6 +1175,4 @@ slow/yield/yieldfrom/yield_from_multiple_iterators.php
 slow/yield/yieldfrom/yield_from_null.php
 slow/yield/yieldfrom/yield_from_return_values.php
 slow/yield/yieldfrom/yield_from_unwind_generator.php
-slow/zend/class_alias1.php
-slow/zend/class_alias2.php
 slow/zlib/zlib_wrapper_flock_basic.php

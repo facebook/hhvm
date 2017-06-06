@@ -725,14 +725,16 @@ let string_of_type_info_option tio =
   | Some ti -> string_of_type_info ti ^ " "
 
 let rec string_of_afield = function
-  | A.AFvalue e -> string_of_param_default_value e
+  | A.AFvalue e ->
+    " " ^ string_of_param_default_value e
   | A.AFkvalue (k, v) ->
-    string_of_param_default_value k ^ " => " ^ string_of_param_default_value v
+    " " ^ string_of_param_default_value k ^
+    " => " ^ string_of_param_default_value v
 
 and string_of_afield_list afl =
   if List.length afl = 0
   then ""
-  else String.concat ", " @@ List.map string_of_afield afl
+  else String.concat "," @@ List.map string_of_afield afl
 
 and shape_field_name_to_expr = function
   | A.SFlit (pos, s)
@@ -873,7 +875,7 @@ and string_of_param_default_value expr =
   | A.Collection ((_, name), afl) when
     name = "Set" || name = "Pair" || name = "Vector" || name = "Map" ||
     name = "ImmSet" || name = "ImmVector" || name = "ImmMap" ->
-    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list afl ^ "}"
+    "HH\\\\" ^ name ^ " {" ^ string_of_afield_list afl ^ "}"
   | A.Collection ((_, name), _) ->
     "NYI - Default value for an unknown collection - " ^ name
   | A.Shape fl ->

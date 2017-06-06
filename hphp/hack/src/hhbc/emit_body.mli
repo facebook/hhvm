@@ -36,7 +36,8 @@ val emit_body:
 val tparams_to_strings : Ast.tparam list -> string list
 
 val emit_method_prolog :
-  params:Hhas_param.t list ->
+  (* Boolean is true if this is the variadic parameter *)
+  params:(bool * Hhas_param.t) list ->
   needs_local_this:bool ->
   Instruction_sequence.t
 

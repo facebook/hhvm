@@ -666,29 +666,33 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   }
 
   const auto mode = RuntimeOption::EvalInlineRegionMode;
-  if (mode == "tracelet" || mode == "both") {
-    auto region = selectCalleeTracelet(
-      callee,
-      numArgs,
-      ctx,
-      argTypes,
-      maxBCInstrs
-    );
-    auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
-    if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                   callee, *region, maxCost)) {
-      return region;
+
+  if (mode == "cfg" || mode == "both") {
+    if (profData()) {
+      auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes,
+                                    maxBCInstrs);
+      auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
+      if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
+                                     callee, *region, maxCost)) {
+        return region;
+      }
     }
-    if (mode == "tracelet") return nullptr;
+
+    if (mode == "cfg") return nullptr;
   }
 
-  if (profData()) {
-    auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes, maxBCInstrs);
-    auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
-    if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                   callee, *region, maxCost)) {
-      return region;
-    }
+  auto region = selectCalleeTracelet(
+    callee,
+    numArgs,
+    ctx,
+    argTypes,
+    maxBCInstrs
+  );
+
+  auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
+  if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
+                                 callee, *region, maxCost)) {
+    return region;
   }
 
   return nullptr;

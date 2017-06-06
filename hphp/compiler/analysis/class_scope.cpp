@@ -664,12 +664,10 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
     findTraitMethodsToImport(ar, tCls, tmid);
 
-    importClassRequirements(ar, tCls);
+    // Import any interfaces implemented.
+    tCls->getInterfaces(ar, m_bases, /* recursive */ false);
 
-    // Don't import interfaces here. Interfaces from traits are
-    // treated differently from directly declared interfaces. We'll
-    // explicitly pull in the trait interfaces when constructing the
-    // class.
+    importClassRequirements(ar, tCls);
   }
 
   // Apply rules.

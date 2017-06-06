@@ -372,12 +372,6 @@ struct ClassInfo {
   std::unordered_map<SString,borrowed_ptr<const php::Const>> clsConstants;
 
   /*
-   * A vector of the used traits, in class order, mirroring the
-   * php::Class usedTraitNames vector.
-   */
-  CompactVector<borrowed_ptr<const ClassInfo>> usedTraits;
-
-  /*
    * A (case-insensitive) map from class method names to the php::Func
    * associated with it.  This map is flattened across the inheritance
    * hierarchy.
@@ -885,50 +879,15 @@ void find_deps(IndexData& data,
 }
 
 bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
-                        borrowed_ptr<const ClassInfo> rparent,
-                        bool directIface) {
+                        borrowed_ptr<const ClassInfo> rparent) {
   if (!rparent) return true;
 
+  if (!build_cls_info_rec(rleaf, rparent->parent)) return false;
+  for (auto& iface : rparent->declInterfaces) {
+    if (!build_cls_info_rec(rleaf, iface)) return false;
+  }
+
   auto const isIface = rparent->cls->attrs & AttrInterface;
-
-  /*
-   * Make a table of all the constants on this class.
-   *
-   * Duplicate class constants override parent class constants, but
-   * its an error for two different interfaces to define the same
-   * constant, or for a class to override a constant thats defined in
-   * one of its declared interfaces.
-   *
-   */
-  for (auto& c : rparent->cls->constants) {
-    auto& cptr = rleaf->clsConstants[c.name];
-    if (!cptr) {
-      cptr = &c;
-      continue;
-    }
-
-    if (isIface &&
-        cptr->val.hasValue() &&
-        c.val.hasValue() &&
-        cptr->cls != rparent->cls) {
-      if ((cptr->cls->attrs & AttrInterface) || directIface) {
-        ITRACE(2,
-               "build_cls_info_rec failed for `{}' because "
-               "`{}' was defined by both `{}' and `{}'",
-               rleaf->cls->name, c.name,
-               rparent->cls->name, cptr->cls->name);
-        return false;
-      }
-    }
-  }
-
-  if (!build_cls_info_rec(rleaf, rparent->parent, false)) return false;
-  for (auto const iface : rparent->declInterfaces) {
-    if (!build_cls_info_rec(rleaf, iface, rparent == rleaf)) return false;
-  }
-  for (auto const trait : rparent->usedTraits) {
-    if (!build_cls_info_rec(rleaf, trait, false)) return false;
-  }
 
   /*
    * Make a flattened table of all the interfaces implemented by the class.
@@ -938,9 +897,32 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   }
 
   /*
-   * Make a table of the methods on this class, excluding interface
-   * methods (and trait methods, since they've already been
-   * flattenned).
+   * Make a table of all the constants on this class.
+   *
+   * Duplicate class constants override parent class constants, but
+   * for interfaces it's an error to have a duplicate constant, unless
+   * it just happens from implementing the same interface more than
+   * once, or the constant is abstract.
+   *
+   * Note: hphpc doesn't actually check for this case, but since with
+   * HardConstProp we're potentially doing propagation of these
+   * constants without autoload, it seems like it could be potentially
+   * surprising to propagate incorrect constants from mis-declared
+   * classes that would fatal if they were ever defined.
+   */
+  for (auto& c : rparent->cls->constants) {
+    auto& cptr = rleaf->clsConstants[c.name];
+    if (isIface && cptr) {
+      if (cptr->val.hasValue() && c.val.hasValue() &&
+          cptr->cls != rparent->cls) {
+        return false;
+      }
+    }
+    cptr = &c;
+  }
+
+  /*
+   * Make a table of the methods on this class, excluding interface methods.
    *
    * Duplicate method names override parent methods, unless the parent method
    * is final and the class is not a __MockClass, in which case this class
@@ -951,8 +933,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * fatal, but note that resolve_method needs to be pretty careful about
    * privates and overriding in general.
    */
-  if (!isIface &&
-      (rparent == rleaf || !(rparent->cls->attrs & AttrTrait))) {
+  if (!isIface) {
     for (auto& m : rparent->cls->methods) {
       auto& ent = rleaf->methods[m->name];
       if (ent.func) {
@@ -961,14 +942,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
           continue;
         }
         if (ent.func->attrs & AttrFinal) {
-          if (!is_mock_class(rleaf->cls)) {
-            ITRACE(2,
-                   "build_cls_info_rec failed for `{}' because "
-                   "`{}' tried to override final method `{}'",
-                   rleaf->cls->name, rparent->cls->name,
-                   ent.func->name);
-            return false;
-          }
+          if (!is_mock_class(rleaf->cls)) return false;
         }
         if (ent.func->attrs & AttrPrivate) {
           ent.hasPrivateAncestor =
@@ -1027,7 +1001,7 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
  * would be a fatal at runtime.
  */
 bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
-  if (!build_cls_info_rec(cinfo, cinfo, false)) return false;
+  if (!build_cls_info_rec(cinfo, cinfo)) return false;
 
   cinfo->ctor = find_constructor(cinfo);
 
@@ -1166,12 +1140,11 @@ private:
 };
 
 struct NamingEnv::Define {
-  explicit Define(NamingEnv& env, SString n, borrowed_ptr<ClassInfo> ci,
-                  borrowed_ptr<const php::Class> cls)
+  explicit Define(NamingEnv& env, SString n, borrowed_ptr<ClassInfo> ci)
     : env(env)
     , n(n)
   {
-    ITRACE(2, "defining {} for {}\n", n, cls->name);
+    ITRACE(2, "defining {}\n", n->data());
     always_assert(!env.names.count(n));
     env.names[n] = ci;
   }
@@ -1191,34 +1164,25 @@ private:
 void resolve_combinations(IndexData& index,
                           NamingEnv& env,
                           borrowed_ptr<const php::Class> cls) {
-
-  auto resolve_one = [&] (SString name) {
-    if (env.try_lookup(name)) return true;
-    auto any = false;
-    for (auto& kv : copy_range(index.classInfo, name)) {
-      NamingEnv::Define def{env, name, kv.second, cls};
-      resolve_combinations(index, env, cls);
-      any = true;
-    }
-    if (!any) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because "
-             "there were no resolutions of `{}'\n",
-             cls->name, name);
-    }
-    return false;
-  };
-
   // Recurse with all combinations of bases and interfaces in the
   // naming environment.
   if (cls->parentName) {
-    if (!resolve_one(cls->parentName)) return;
+    if (!env.try_lookup(cls->parentName)) {
+      for (auto& kv : copy_range(index.classInfo, cls->parentName)) {
+        NamingEnv::Define def{env, cls->parentName, kv.second};
+        resolve_combinations(index, env, cls);
+      }
+      return;
+    }
   }
   for (auto& iname : cls->interfaceNames) {
-    if (!resolve_one(iname)) return;
-  }
-  for (auto& tname : cls->usedTraitNames) {
-    if (!resolve_one(tname)) return;
+    if (!env.try_lookup(iname)) {
+      for (auto& kv : copy_range(index.classInfo, iname)) {
+        NamingEnv::Define def{env, iname, kv.second};
+        resolve_combinations(index, env, cls);
+      }
+      return;
+    }
   }
 
   // Everything is defined in the naming environment here.  (We
@@ -1229,48 +1193,19 @@ void resolve_combinations(IndexData& index,
   if (cls->parentName) {
     cinfo->parent   = env.lookup(cls->parentName);
     cinfo->baseList = cinfo->parent->baseList;
-    if (cinfo->parent->cls->attrs & AttrInterface) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because "
-             "its parent `{}' is not a class\n",
-             cls->name, cls->parentName);
-      return;
-    }
+    if (cinfo->parent->cls->attrs & AttrInterface) return;
   }
   cinfo->baseList.push_back(borrow(cinfo));
 
   for (auto& iname : cls->interfaceNames) {
     auto const iface = env.lookup(iname);
-    if (!(iface->cls->attrs & AttrInterface)) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because `{}' "
-             "is not an interface\n",
-             cls->name, iname);
-      return;
-    }
+    if (!(iface->cls->attrs & AttrInterface)) return;
     cinfo->declInterfaces.push_back(iface);
-  }
-
-  for (auto& tname : cls->usedTraitNames) {
-    auto const trait = env.lookup(tname);
-    if (!(trait->cls->attrs & AttrTrait)) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because `{}' "
-             "is not a trait\n",
-             cls->name, tname);
-      return;
-    }
-    cinfo->usedTraits.push_back(trait);
   }
 
   if (!build_cls_info(borrow(cinfo))) return;
 
   ITRACE(2, "  resolved: {}\n", cls->name);
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
-    for (auto const DEBUG_ONLY& iface : cinfo->implInterfaces) {
-      ITRACE(3, "    implements: {}\n", iface.second->cls->name);
-    }
-  }
   index.allClassInfos.push_back(std::move(cinfo));
   index.classInfo.emplace(cls->name, borrow(index.allClassInfos.back()));
 }
@@ -1282,23 +1217,15 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   // after hphpc is fixed not to just remove them.
 
   ITRACE(2, "preresolve: {}\n", clsName);
-  {
-    Trace::Indent indent;
-    for (auto& kv : find_range(index.classes, clsName)) {
-      if (kv.second->parentName) {
-        preresolve(index, env, kv.second->parentName);
-      }
-      for (auto& i : kv.second->interfaceNames) {
-        preresolve(index, env, i);
-      }
-      for (auto& t : kv.second->usedTraitNames) {
-        preresolve(index, env, t);
-      }
-      resolve_combinations(index, env, kv.second);
+  for (auto& kv : find_range(index.classes, clsName)) {
+    if (kv.second->parentName) {
+      preresolve(index, env, kv.second->parentName);
     }
+    for (auto& i : kv.second->interfaceNames) {
+      preresolve(index, env, i);
+    }
+    resolve_combinations(index, env, kv.second);
   }
-  ITRACE(3, "preresolve: {} ({} resolutions)\n",
-         clsName, index.classInfo.count(clsName));
 }
 
 void compute_subclass_list(IndexData& index) {

@@ -1881,18 +1881,13 @@ void Class::setConstants() {
       }
 
       if (existingConst.cls != iConst.cls) {
-        // It's only an error if the constant comes from the declared interfaces.
-        for (auto const& interface : declInterfaces()) {
-          if (interface.get() == iface) {
-            raise_error("%s cannot inherit the %sconstant %s from %s, because "
-                        "it was previously inherited from %s",
-                        m_preClass->name()->data(),
-                        iConst.isType() ? "type " : "",
-                        iConst.name->data(),
-                        iConst.cls->name()->data(),
-                        existingConst.cls->name()->data());
-          }
-        }
+        raise_error("%s cannot inherit the %sconstant %s from %s, because it "
+                    "was previously inherited from %s",
+                    m_preClass->name()->data(),
+                    iConst.isType() ? "type " : "",
+                    iConst.name->data(),
+                    iConst.cls->name()->data(),
+                    existingConst.cls->name()->data());
       }
     }
   }
@@ -2562,9 +2557,7 @@ void Class::checkInterfaceMethods() {
  */
 void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
-  for (auto const& traitName : m_preClass->usedTraits()) {
-    auto const trait = Unit::lookupClass(traitName);
-    assert(trait->attrs() & AttrTrait);
+  for (auto const& trait : m_extra->m_usedTraits) {
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {

@@ -1131,7 +1131,6 @@ slow/var_export/1450.php
 slow/variable_argument/27.php
 slow/variadic_args/by_reference.php
 slow/variadic_args/by_reference_typehints.php
-slow/variadic_args/constructors.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php
 slow/variant/616.php

@@ -1368,7 +1368,7 @@ and pClassElt : class_elt list parser = fun node env ->
       let pBody = fun node env ->
         if is_missing node then [] else
           (* TODO: Give parse error when not abstract, but body is missing *)
-          member_init @
+          List.rev member_init @
           match pStmt node env with
           | Block []    -> [Noop]
           | Block stmtl -> stmtl

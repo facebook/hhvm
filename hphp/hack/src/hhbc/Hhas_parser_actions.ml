@@ -331,10 +331,20 @@ let class_id_of_iarg arg =
   | IAString s -> Hhbc_id.Class.from_raw_string s
   | _ -> report_error "expected quoted class identifier"
 
-let class_id_of_int_iarg arg =
+let class_num_of_iarg arg =
   match arg with
-  | IAInt64 i -> Hhbc_id.Class.from_raw_string (Int64.to_string i)
-  | _ -> report_error "expected quoted class identifier"
+  | IAInt64 i -> Int64.to_int i
+  | _ -> report_error "expected class number"
+
+let function_num_of_iarg arg =
+  match arg with
+  | IAInt64 i -> Int64.to_int i
+  | _ -> report_error "expected function number"
+
+let typedef_num_of_iarg arg =
+  match arg with
+  | IAInt64 i -> Int64.to_int i
+  | _ -> report_error "expected typedef number"
 
 let prop_id_of_iarg arg =
   match arg with
@@ -710,13 +720,13 @@ let makeunaryinst s arg = match s with
    | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
 
    (* instruct_include_eval_define *)
-   | "DefFunc" -> IIncludeEvalDefine(DefFunc (function_id_of_iarg arg))
-   | "DefCls" -> IIncludeEvalDefine(DefCls (class_id_of_int_iarg arg))
+   | "DefFunc" -> IIncludeEvalDefine(DefFunc (function_num_of_iarg arg))
+   | "DefCls" -> IIncludeEvalDefine(DefCls (class_num_of_iarg arg))
       (* TODO: Mismatch - that should be an integer, not a string *)
-   | "DefClsNop" -> IIncludeEvalDefine(DefClsNop (class_id_of_int_iarg arg))
+   | "DefClsNop" -> IIncludeEvalDefine(DefClsNop (class_num_of_iarg arg))
    | "DefCns" -> IIncludeEvalDefine(DefCns (const_id_of_iarg arg))
    | "DefTypeAlias" ->
-     IIncludeEvalDefine(DefTypeAlias(class_id_of_int_iarg arg))
+     IIncludeEvalDefine(DefTypeAlias(typedef_num_of_iarg arg))
      (* TODO: Mismatch here too *)
 
    (* instruct_misc *)

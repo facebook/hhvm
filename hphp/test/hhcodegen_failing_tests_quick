@@ -11,19 +11,15 @@ quick/all_type_comparison_test.php
 quick/array_packed.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
-quick/autoload3.php
-quick/autoload6.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
 quick/class_constant.php
 quick/class_constants.php
-quick/class_exists_throw.php
 quick/class_interface_trait_exists.php
-quick/clone.php
 quick/closure_class.php
 quick/closure_get_class.php
-quick/closure_noscope_arg_use_ctx.php
+quick/closure_recursive.php
 quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_static_vars.php
@@ -111,7 +107,9 @@ quick/hh_softtype3.php
 quick/hh_type_args2.php
 quick/hh_type_args3.php
 quick/hh_typehint3.php
+quick/hoistable_a.php
 quick/hoistable_c.php
+quick/hoistable_e.php
 quick/hopt-add1.php
 quick/hopt-add2.php
 quick/hopt-add3.php
@@ -146,6 +144,8 @@ quick/keyset/invalid-scalar.php
 quick/keyset/oob-key.php
 quick/keyset/type-hint.php
 quick/lambda3.php
+quick/lambda5.php
+quick/lambda6.php
 quick/lambda8.php
 quick/lexer_heredoc_buffer_boundary_65492.php
 quick/lexer_heredoc_buffer_boundary_65493.php
@@ -183,7 +183,6 @@ quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php
 quick/prop_order.php
 quick/prop_order_parens.php
-quick/properties4.php
 quick/reassign_this1.php
 quick/reassign_this2.php
 quick/reassign_this3.php
@@ -193,7 +192,6 @@ quick/redeclared_function.php
 quick/redeclared_method.php
 quick/refcount-static.php
 quick/reflect-default.php
-quick/reflection2.php
 quick/reflection_static_vars.php
 quick/regpressure.php
 quick/reserved_class1.php
@@ -204,7 +202,6 @@ quick/silencer.php
 quick/simp-conv-to-int-dbl.php
 quick/sp.php
 quick/stack_overflow_variadic_capture.php
-quick/static-closure-ctx.php
 quick/static_array.php
 quick/static_closure.php
 quick/static_closure_gen.php
@@ -238,5 +235,4 @@ quick/xhp-malformed.php
 quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
-quick/zend_closure_020.php
 quick/zero_eval_stack_depth.php

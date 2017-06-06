@@ -219,14 +219,12 @@ let instr_array_idx = instr (IMisc ArrayIdx)
 
 let instr_fcallbuiltin n un s = instr (ICall (FCallBuiltin (n, un, s)))
 
-let instr_deffunc =
-  (* This id will not be used, code generator will use value from the counter *)
-  let id = Hhbc_id.Function.from_raw_string "" in
-  instr (IIncludeEvalDefine (DefFunc id))
-let instr_defcls =
-  (* This id will not be used, code generator will use value from the counter *)
-  let id = Hhbc_id.Class.from_raw_string "" in
-  instr (IIncludeEvalDefine (DefCls id))
+let instr_defcls n =
+  instr (IIncludeEvalDefine (DefCls n))
+let instr_deftypealias n =
+  instr (IIncludeEvalDefine (DefTypeAlias n))
+let instr_deffunc n =
+  instr (IIncludeEvalDefine (DefFunc n))
 let instr_defcns s =
   instr (IIncludeEvalDefine (DefCns (Hhbc_id.Const.from_raw_string s)))
 let instr_eval = instr (IIncludeEvalDefine Eval)

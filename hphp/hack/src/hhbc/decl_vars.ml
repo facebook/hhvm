@@ -21,7 +21,7 @@ let add_local bareparam (needs_local_this, locals) (_, name) =
   else needs_local_this, ULS.add locals name
 
 class declvar_visitor = object(this)
-  inherit [bool * ULS.t] Ast_visitor.ast_visitor as _super
+  inherit [bool * ULS.t] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
     List.fold_left exprs ~init:acc
@@ -38,7 +38,12 @@ class declvar_visitor = object(this)
       | _ ->
         acc
     in
-    _super#on_foreach acc e pos iterator block
+    super#on_foreach acc e pos iterator block
+
+  method! on_unop acc unop expr =
+    match unop, expr with
+    | Ast.Uref, (_, Ast.Lvar id) -> add_local true acc id
+    | _, _ -> super#on_unop acc unop expr
 
   method! on_lvar acc id = add_local false acc id
   method! on_lvarvar acc _ id = add_local false acc id

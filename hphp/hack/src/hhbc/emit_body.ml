@@ -11,6 +11,7 @@ open Core
 open Hhbc_ast
 open Instruction_sequence
 open Emit_type_hint
+module SU = Hhbc_string_utils
 
 let has_type_constraint ti =
   match ti with
@@ -47,19 +48,13 @@ let rec emit_def env def =
       instr (IIncludeEvalDefine (DefCns cns_id));
       instr_popc;
     ]
-  | Ast.Class cd ->
-    instr (IIncludeEvalDefine
-      (DefCls (Hhbc_id.Class.from_ast_name (snd cd.Ast.c_name))))
-  | Ast.Typedef td ->
-    instr (IIncludeEvalDefine
-      (DefTypeAlias (Hhbc_id.Class.from_ast_name (snd td.Ast.t_id))))
     (* We assume that SetNamespaceEnv does namespace setting *)
   | Ast.Namespace(_, defs) ->
-    gather (List.map defs (emit_def env))
+    emit_defs env defs
   | _ ->
     empty
 
-let rec emit_defs env defs =
+and emit_defs env defs =
   match defs with
   | Ast.SetNamespaceEnv ns :: defs ->
     let env = Emit_env.with_namespace ns env in

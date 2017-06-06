@@ -11,9 +11,9 @@
 open Core
 open Instruction_sequence
 
-let from_ast_wrapper : bool -> _ -> _ ->
+let from_ast_wrapper : bool -> _ ->
   Ast.class_ -> Ast.method_ -> Hhas_method.t =
-  fun privatize make_name emit_body ast_class ast_method ->
+  fun privatize make_name ast_class ast_method ->
   let method_is_abstract =
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
@@ -70,7 +70,7 @@ let from_ast_wrapper : bool -> _ -> _ ->
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
   let method_body, method_is_generator, method_is_pair_generator =
-    emit_body
+    Emit_body.emit_body
       ~scope:scope
       ~is_closure_body:method_is_closure_body
       ~is_memoize
@@ -130,8 +130,7 @@ let from_ast ast_class ast_method =
     then Hhbc_id.Method.from_ast_name (name ^ Emit_memoize_helpers.memoize_suffix)
     else Hhbc_id.Method.from_ast_name name
   in
-  from_ast_wrapper is_memoize make_name
-  Emit_body.emit_body ast_class ast_method
+  from_ast_wrapper is_memoize make_name ast_class ast_method
 
 
 let from_asts ast_class ast_methods =

@@ -15,7 +15,7 @@ open Core
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
-let from_ast : A.fun_ -> Hhas_function.t list =
+let emit_function : A.fun_ -> Hhas_function.t list =
   fun ast_fun ->
   let namespace = ast_fun.A.f_namespace in
   let original_id, _ =
@@ -61,5 +61,7 @@ let from_ast : A.fun_ -> Hhas_function.t list =
     Emit_memoize_function.emit_wrapper_function ~original_id ~renamed_id ast_fun]
   else [normal_function]
 
-let from_asts ast_functions =
-  List.concat_map ast_functions from_ast
+let emit_functions_from_program ast =
+  List.concat_map ast
+  (fun d ->
+    match d with Ast.Fun fd -> emit_function fd | _ -> [])

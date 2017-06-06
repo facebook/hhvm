@@ -445,7 +445,8 @@ let class_attributes_comparer =
     (list_comparer attribute_comparer " ")
 
 let unmangled_name_comparer =
- wrap Hhbc_string_utils.Closures.unmangle_closure (fun _ s -> s) (option_comparer string_comparer)
+ wrap Hhbc_string_utils.Closures.unmangle_closure
+   (fun _ s -> s) (option_comparer string_comparer)
 
 let class_comparer =
   wrap Hhbc_id.Class.to_raw_string (fun _ s -> s) unmangled_name_comparer

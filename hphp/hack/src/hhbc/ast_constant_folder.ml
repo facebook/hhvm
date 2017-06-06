@@ -268,3 +268,5 @@ let fold_gconst c =
   folder_visitor#on_gconst c.Ast.cst_namespace c
 let fold_class_elt ns ce =
   folder_visitor#on_class_elt ns ce
+let fold_program p =
+  folder_visitor#on_program Namespace_env.empty_with_default_popt p

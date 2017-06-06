@@ -16,22 +16,6 @@ module SU = Hhbc_string_utils
 module TV = Typed_value
 open H
 
-(* State associated with an entire file *)
-let next_counter counter =
-  let current = !counter in
-  counter := current + 1;
-  current
-
-(* Functions start from 1. Assuming main is the function zero *)
-let function_counter = ref 1
-let next_function_counter () = next_counter function_counter
-
-let class_counter = ref 0
-let next_class_counter () = next_counter class_counter
-
-let typedef_counter = ref 0
-let next_typedef_counter () = next_counter typedef_counter
-
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
@@ -45,6 +29,12 @@ let string_of_const_id id =
   SU.quote_string (Hhbc_id.Const.to_raw_string id)
 let string_of_prop_id id =
   SU.quote_string (Hhbc_id.Prop.to_raw_string id)
+let string_of_class_num id =
+  string_of_int id
+let string_of_function_num id =
+  string_of_int id
+let string_of_typedef_num id =
+  string_of_int id
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -633,12 +623,11 @@ let string_of_include_eval_define = function
   | Eval -> "Eval"
   | AliasCls (c1, c2) ->
     sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
-  | DefFunc _id -> sep ["DefFunc"; string_of_int (next_function_counter ())]
-  | DefCls _id -> sep ["DefCls"; string_of_int (next_class_counter ())]
-  | DefClsNop id -> sep ["DefClsNop"; string_of_class_id id]
+  | DefFunc id -> sep ["DefFunc"; string_of_function_num id]
+  | DefCls id -> sep ["DefCls"; string_of_class_num id]
+  | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]
-  | DefTypeAlias _id ->
-    sep ["DefTypeAlias"; string_of_int (next_typedef_counter ())]
+  | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
 
 let string_of_instruction instruction =
@@ -1253,7 +1242,5 @@ let add_program buf hhas_prog =
 
 let to_string hhas_prog =
   let buf = Buffer.create 1024 in
-  class_counter := 0;
-  typedef_counter := 0;
   add_program buf hhas_prog;
   B.contents buf

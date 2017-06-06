@@ -24,6 +24,8 @@ type param_num = int
 type stack_index = int
 type class_id = Hhbc_id.Class.t
 type class_num = int
+type function_num = int
+type typedef_num = int
 type function_id = Hhbc_id.Function.t
 type method_id = Hhbc_id.Method.t
 type const_id = Hhbc_id.Const.t
@@ -433,11 +435,11 @@ type instruct_include_eval_define =
   | ReqDoc
   | Eval
   | AliasCls of Litstr.id * Litstr.id
-  | DefFunc of function_id
-  | DefCls of class_id
-  | DefClsNop of class_id
+  | DefFunc of function_num
+  | DefCls of class_num
+  | DefClsNop of class_num
   | DefCns of const_id
-  | DefTypeAlias of class_id
+  | DefTypeAlias of typedef_num
 
 type bare_this_op =
   | Notice

@@ -17,7 +17,7 @@ let kind_to_type_info ~tparams ~namespace k =
       ~skipawaitable:false ~nullable:false
       ~always_extended:false ~tparams ~namespace h
 
-let from_ast : Ast.typedef -> Hhas_typedef.t =
+let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->
   let namespace = ast_typedef.Ast.t_namespace in
   let typedef_name, _ =
@@ -29,5 +29,6 @@ let from_ast : Ast.typedef -> Hhas_typedef.t =
     typedef_name
     typedef_type_info
 
-let from_asts ast_typedefs =
-  List.map ast_typedefs from_ast
+let emit_typedefs_from_program ast =
+  List.filter_map ast
+  (fun d -> match d with Ast.Typedef td -> Some (emit_typedef td) | _ -> None)

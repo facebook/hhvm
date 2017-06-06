@@ -241,28 +241,10 @@ let print_debug_time_info filename debug_time =
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
   P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
 
-let do_compile filename compiler_options opts files_info debug_time = begin
+let do_compile filename compiler_options files_info debug_time = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
-  let get_nast_from_fileinfo tcopt fn (fileinfo, ast) =
-    (* Functions *)
-    let funs = fileinfo.FileInfo.funs in
-    let parse_function (_, fun_) =
-        Parser_heap.find_fun_in_file ~full:true tcopt fn fun_ in
-    let parsed_functions = List.filter_map funs parse_function in
-    (* Classes *)
-    let classes = fileinfo.FileInfo.classes in
-    let parse_class (_, class_) =
-        Parser_heap.find_class_in_file ~full:true tcopt fn class_ in
-    let parsed_classes = List.filter_map classes parse_class in
-    (* Typedefs *)
-    let typedefs = fileinfo.FileInfo.typedefs in
-    let parse_typedef (_, typedef_) =
-        Parser_heap.find_typedef_in_file ~full:true tcopt fn typedef_ in
-    let parsed_typedefs = List.filter_map typedefs parse_typedef in
-    (parsed_functions, parsed_classes, parsed_typedefs, ast) in
-  let f_fold fn fileinfo text = begin
+  let f_fold fn (_fileinfo, ast) text = begin
     let t = Unix.gettimeofday () in
-    let ast = get_nast_from_fileinfo opts fn fileinfo in
     let t = add_to_time_ref debug_time.parsing_t t in
     let options = Hhbc_options.get_options_from_config
       compiler_options.config in
@@ -288,7 +270,7 @@ end
 (* Main entry point *)
 (*****************************************************************************)
 
-let process_single_file compiler_options popt tcopt filename outputfile =
+let process_single_file compiler_options popt filename outputfile =
   try
     let t = Unix.gettimeofday () in
     let load_file =
@@ -300,7 +282,7 @@ let process_single_file compiler_options popt tcopt filename outputfile =
     let debug_time = new_debug_time() in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
     let text =
-      do_compile filename compiler_options tcopt files_info debug_time in
+      do_compile filename compiler_options files_info debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n" (String.length text);
     match outputfile with
@@ -350,10 +332,10 @@ let compile_files_recursively compiler_options f =
   end
   in loop [compiler_options.filename]
 
-let decl_and_run_mode compiler_options popt tcopt =
+let decl_and_run_mode compiler_options popt =
   Local_id.track_names := true;
   Ident.track_names := true;
-  let process_single_file = process_single_file compiler_options popt tcopt in
+  let process_single_file = process_single_file compiler_options popt in
   if compiler_options.mode = DAEMON then
     let rec process_next fn = begin
       let fname = Relative_path.create Relative_path.Dummy fn in
@@ -376,12 +358,11 @@ let decl_and_run_mode compiler_options popt tcopt =
 
 let main_hack opts =
   let popt = ParserOptions.default in
-  let tcopt = TypecheckerOptions.default in
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
-  decl_and_run_mode opts popt tcopt
+  decl_and_run_mode opts popt
 
 (* command line driver *)
 let _ =

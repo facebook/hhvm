@@ -136,7 +136,7 @@ let from_enum_type ~namespace opt =
     Some (Hhas_type_info.make type_info_user_type type_info_type_constraint)
   | _ -> None
 
-let from_ast : A.class_ -> Hhas_class.t =
+let emit_class : A.class_ -> Hhas_class.t =
   fun ast_class ->
   let namespace = ast_class.Ast.c_namespace in
   let class_attributes =
@@ -367,5 +367,6 @@ let from_ast : A.class_ -> Hhas_class.t =
     class_constants
     class_type_constants
 
-let from_asts ast_classes =
-  List.map ast_classes from_ast
+let emit_classes_from_program ast =
+  List.filter_map ast
+      (fun d -> match d with Ast.Class cd -> Some (emit_class cd) | _ -> None)

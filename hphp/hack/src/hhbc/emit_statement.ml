@@ -37,9 +37,14 @@ let emit_return ~need_ref =
   else ret_instr
 
 let emit_def_inline = function
-  | A.Fun _ -> instr_deffunc
-  | A.Class _ -> instr_defcls
-  | _ -> failwith "Define inline: Invalid inline definition"
+  | A.Fun fd ->
+    instr_deffunc (int_of_string (snd fd.Ast.f_name))
+  | A.Class cd ->
+    instr_defcls (int_of_string (snd cd.Ast.c_name))
+  | A.Typedef td ->
+    instr_deftypealias (int_of_string (snd td.Ast.t_id))
+  | _ ->
+    failwith "Define inline: Invalid inline definition"
 
 let rec emit_stmt env st =
   match st with

@@ -8,8 +8,6 @@
  *
 *)
 
-open Core
-
 type t = {
   hhas_adata   : Hhas_adata.t list;
   hhas_fun     : Hhas_function.t list;
@@ -55,25 +53,13 @@ let emit_main defs =
 
 open Closure_convert
 
-let from_ast
-  (parsed_functions,
-  parsed_classes,
-  parsed_typedefs,
-  parsed_defs) =
-  let inline_fn_defs, inline_class_defs = Inline_defs.from_ast parsed_defs in
-  let parsed_functions = inline_fn_defs @ parsed_functions in
-  let parsed_classes = inline_class_defs @ parsed_classes in
-  let st = initial_state (List.length parsed_classes) in
-  let st, parsed_defs = convert_toplevel_prog st parsed_defs in
-  let st, parsed_functions = List.map_env st parsed_functions convert_fun in
-  let st, parsed_classes = List.map_env st parsed_classes convert_class in
-  let closure_classes = Closure_convert.get_closure_classes st in
-  let all_classes = parsed_classes @ closure_classes in
+let from_ast ast =
+  let closed_ast = convert_toplevel_prog ast in
   try
-    let compiled_defs = emit_main parsed_defs in
-    let compiled_funs = Emit_function.from_asts parsed_functions in
-    let compiled_classes = Emit_class.from_asts all_classes in
-    let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
+    let compiled_defs = emit_main closed_ast in
+    let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
+    let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
+    let compiled_typedefs = Emit_typedef.emit_typedefs_from_program closed_ast in
     let adata = Emit_adata.get_adata () in
     make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
   with Emit_fatal.IncludeTimeFatalException (op, message) ->

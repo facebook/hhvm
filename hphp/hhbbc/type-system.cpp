@@ -950,8 +950,8 @@ struct DualDispatchSubtype {
   }
 
   bool operator()(const DArrLikeMap& a, const DArrLikeMapN& b) const {
-    if (!TSStr.subtypeOf(b.key)) return false;
     for (auto& kv : a.map) {
+      if (!from_cell(kv.first).subtypeOf(b.key)) return false;
       if (!kv.second.subtypeOf(b.val)) return false;
     }
     return true;

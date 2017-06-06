@@ -374,6 +374,7 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     method_is_static
     method_is_final
     method_is_abstract
+    false (*method_no_injection*)
     method_id
     method_body
     false (*method_is_async*)

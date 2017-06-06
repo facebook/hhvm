@@ -1045,6 +1045,7 @@ let add_fun_def buf fun_def =
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in

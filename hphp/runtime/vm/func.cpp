@@ -628,6 +628,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrWritesCallerFrame) { out << " (writes_caller_frame)"; }
   if (attrs & AttrSkipFrame) { out << " (skip_frame)"; }
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
+  if (attrs & AttrNoInjection) { out << " (no_injection)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {

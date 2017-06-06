@@ -59,10 +59,11 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverrideMagicIsset, C,       "nov_isset");        \
   X(AttrNoOverrideMagicUnset, C,       "nov_unset");        \
   X(AttrSkipFrame,            F,       "skip_frame");       \
-  X(AttrNoSerialize,          P,       "no_serialize")      \
-  X(AttrIsFoldable,           F,       "foldable")          \
-  X(AttrReadsCallerFrame,     F,       "reads_frame")       \
-  X(AttrWritesCallerFrame,    F,       "writes_frame")
+  X(AttrNoSerialize,          P,       "no_serialize");     \
+  X(AttrIsFoldable,           F,       "foldable");         \
+  X(AttrReadsCallerFrame,     F,       "reads_frame");      \
+  X(AttrWritesCallerFrame,    F,       "writes_frame");     \
+  X(AttrNoInjection,          F,       "no_injection");
 
   /* */
 

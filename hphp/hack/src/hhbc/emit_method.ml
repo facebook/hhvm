@@ -111,11 +111,12 @@ let from_ast_wrapper : bool -> _ ->
   Hhas_method.make
     method_attributes
     method_is_protected
-  method_is_public
+    method_is_public
     method_is_private
     method_is_static
     method_is_final
     method_is_abstract
+    false (*method_no_injection*)
     method_id
     method_body
     method_is_async

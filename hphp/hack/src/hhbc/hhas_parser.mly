@@ -184,6 +184,7 @@ methoddecl:
     (List.mem "static" (snd $2))
     (List.mem "final" (snd $2))
     (List.mem "abstract" (snd $2))
+    (List.mem "no_injection" (snd $2))
     (Hhbc_id.Method.from_raw_string $4) (* name *)
     (Hhas_body.make
       $13 (* method instructions *)

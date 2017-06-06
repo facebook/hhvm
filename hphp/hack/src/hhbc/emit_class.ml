@@ -33,6 +33,7 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
+  let method_no_injection = true in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
@@ -47,6 +48,7 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
     is_static
     method_is_final
     is_abstract
+    method_no_injection
     (Hhbc_id.Method.from_ast_name name)
     method_body
     method_is_async

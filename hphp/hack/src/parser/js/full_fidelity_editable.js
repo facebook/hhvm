@@ -137,6 +137,10 @@ class EditableSyntax
       return ClassishDeclaration.from_json(json, position, source);
     case 'classish_body':
       return ClassishBody.from_json(json, position, source);
+    case 'trait_use_conflict_resolution_item':
+      return TraitUseConflictResolutionItem.from_json(json, position, source);
+    case 'trait_use_conflict_resolution':
+      return TraitUseConflictResolution.from_json(json, position, source);
     case 'trait_use':
       return TraitUse.from_json(json, position, source);
     case 'require_clause':
@@ -5524,6 +5528,216 @@ class ClassishBody extends EditableSyntax
         'elements',
         'right_brace'];
     return ClassishBody._children_keys;
+  }
+}
+class TraitUseConflictResolutionItem extends EditableSyntax
+{
+  constructor(
+    aliasing_name,
+    aliasing_keyword,
+    aliased_name)
+  {
+    super('trait_use_conflict_resolution_item', {
+      aliasing_name: aliasing_name,
+      aliasing_keyword: aliasing_keyword,
+      aliased_name: aliased_name });
+  }
+  get aliasing_name() { return this.children.aliasing_name; }
+  get aliasing_keyword() { return this.children.aliasing_keyword; }
+  get aliased_name() { return this.children.aliased_name; }
+  with_aliasing_name(aliasing_name){
+    return new TraitUseConflictResolutionItem(
+      aliasing_name,
+      this.aliasing_keyword,
+      this.aliased_name);
+  }
+  with_aliasing_keyword(aliasing_keyword){
+    return new TraitUseConflictResolutionItem(
+      this.aliasing_name,
+      aliasing_keyword,
+      this.aliased_name);
+  }
+  with_aliased_name(aliased_name){
+    return new TraitUseConflictResolutionItem(
+      this.aliasing_name,
+      this.aliasing_keyword,
+      aliased_name);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var aliasing_name = this.aliasing_name.rewrite(rewriter, new_parents);
+    var aliasing_keyword = this.aliasing_keyword.rewrite(rewriter, new_parents);
+    var aliased_name = this.aliased_name.rewrite(rewriter, new_parents);
+    if (
+      aliasing_name === this.aliasing_name &&
+      aliasing_keyword === this.aliasing_keyword &&
+      aliased_name === this.aliased_name)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new TraitUseConflictResolutionItem(
+        aliasing_name,
+        aliasing_keyword,
+        aliased_name), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let aliasing_name = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_item_aliasing_name, position, source);
+    position += aliasing_name.width;
+    let aliasing_keyword = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_item_aliasing_keyword, position, source);
+    position += aliasing_keyword.width;
+    let aliased_name = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_item_aliased_name, position, source);
+    position += aliased_name.width;
+    return new TraitUseConflictResolutionItem(
+        aliasing_name,
+        aliasing_keyword,
+        aliased_name);
+  }
+  get children_keys()
+  {
+    if (TraitUseConflictResolutionItem._children_keys == null)
+      TraitUseConflictResolutionItem._children_keys = [
+        'aliasing_name',
+        'aliasing_keyword',
+        'aliased_name'];
+    return TraitUseConflictResolutionItem._children_keys;
+  }
+}
+class TraitUseConflictResolution extends EditableSyntax
+{
+  constructor(
+    keyword,
+    names,
+    left_brace,
+    clauses,
+    right_brace)
+  {
+    super('trait_use_conflict_resolution', {
+      keyword: keyword,
+      names: names,
+      left_brace: left_brace,
+      clauses: clauses,
+      right_brace: right_brace });
+  }
+  get keyword() { return this.children.keyword; }
+  get names() { return this.children.names; }
+  get left_brace() { return this.children.left_brace; }
+  get clauses() { return this.children.clauses; }
+  get right_brace() { return this.children.right_brace; }
+  with_keyword(keyword){
+    return new TraitUseConflictResolution(
+      keyword,
+      this.names,
+      this.left_brace,
+      this.clauses,
+      this.right_brace);
+  }
+  with_names(names){
+    return new TraitUseConflictResolution(
+      this.keyword,
+      names,
+      this.left_brace,
+      this.clauses,
+      this.right_brace);
+  }
+  with_left_brace(left_brace){
+    return new TraitUseConflictResolution(
+      this.keyword,
+      this.names,
+      left_brace,
+      this.clauses,
+      this.right_brace);
+  }
+  with_clauses(clauses){
+    return new TraitUseConflictResolution(
+      this.keyword,
+      this.names,
+      this.left_brace,
+      clauses,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new TraitUseConflictResolution(
+      this.keyword,
+      this.names,
+      this.left_brace,
+      this.clauses,
+      right_brace);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var names = this.names.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var clauses = this.clauses.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      names === this.names &&
+      left_brace === this.left_brace &&
+      clauses === this.clauses &&
+      right_brace === this.right_brace)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new TraitUseConflictResolution(
+        keyword,
+        names,
+        left_brace,
+        clauses,
+        right_brace), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_keyword, position, source);
+    position += keyword.width;
+    let names = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_names, position, source);
+    position += names.width;
+    let left_brace = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_left_brace, position, source);
+    position += left_brace.width;
+    let clauses = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_clauses, position, source);
+    position += clauses.width;
+    let right_brace = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_right_brace, position, source);
+    position += right_brace.width;
+    return new TraitUseConflictResolution(
+        keyword,
+        names,
+        left_brace,
+        clauses,
+        right_brace);
+  }
+  get children_keys()
+  {
+    if (TraitUseConflictResolution._children_keys == null)
+      TraitUseConflictResolution._children_keys = [
+        'keyword',
+        'names',
+        'left_brace',
+        'clauses',
+        'right_brace'];
+    return TraitUseConflictResolution._children_keys;
   }
 }
 class TraitUse extends EditableSyntax
@@ -17414,6 +17628,8 @@ exports.WhereConstraint = WhereConstraint;
 exports.MethodishDeclaration = MethodishDeclaration;
 exports.ClassishDeclaration = ClassishDeclaration;
 exports.ClassishBody = ClassishBody;
+exports.TraitUseConflictResolutionItem = TraitUseConflictResolutionItem;
+exports.TraitUseConflictResolution = TraitUseConflictResolution;
 exports.TraitUse = TraitUse;
 exports.RequireClause = RequireClause;
 exports.ConstDeclaration = ConstDeclaration;

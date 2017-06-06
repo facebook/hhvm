@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-04-26-0001",
+  "version" : "2017-05-30-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -656,6 +656,26 @@
       "fields" : [
         { "field_name" : "left_brace" },
         { "field_name" : "elements" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "TraitUseConflictResolutionItem",
+      "type_name" : "trait_use_conflict_resolution_item",
+      "description" : "trait_use_conflict_resolution_item",
+      "prefix" : "trait_use_conflict_resolution_item",
+      "fields" : [
+        { "field_name" : "aliasing_name" },
+        { "field_name" : "aliasing_keyword" },
+        { "field_name" : "aliased_name" }
+      ] },
+    { "kind_name" : "TraitUseConflictResolution",
+      "type_name" : "trait_use_conflict_resolution",
+      "description" : "trait_use_conflict_resolution",
+      "prefix" : "trait_use_conflict_resolution",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "names" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "clauses" },
         { "field_name" : "right_brace" }
       ] },
     { "kind_name" : "TraitUse",

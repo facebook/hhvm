@@ -200,6 +200,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return ClassishDeclaration::from_json($json, $position, $source);
     case 'classish_body':
       return ClassishBody::from_json($json, $position, $source);
+    case 'trait_use_conflict_resolution_item':
+      return TraitUseConflictResolutionItem::from_json($json, $position, $source);
+    case 'trait_use_conflict_resolution':
+      return TraitUseConflictResolution::from_json($json, $position, $source);
     case 'trait_use':
       return TraitUse::from_json($json, $position, $source);
     case 'require_clause':
@@ -7294,6 +7298,226 @@ final class ClassishBody extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_left_brace;
     yield $this->_elements;
+    yield $this->_right_brace;
+    yield break;
+  }
+}
+final class TraitUseConflictResolutionItem extends EditableSyntax {
+  private EditableSyntax $_aliasing_name;
+  private EditableSyntax $_aliasing_keyword;
+  private EditableSyntax $_aliased_name;
+  public function __construct(
+    EditableSyntax $aliasing_name,
+    EditableSyntax $aliasing_keyword,
+    EditableSyntax $aliased_name) {
+    parent::__construct('trait_use_conflict_resolution_item');
+    $this->_aliasing_name = $aliasing_name;
+    $this->_aliasing_keyword = $aliasing_keyword;
+    $this->_aliased_name = $aliased_name;
+  }
+  public function aliasing_name(): EditableSyntax {
+    return $this->_aliasing_name;
+  }
+  public function aliasing_keyword(): EditableSyntax {
+    return $this->_aliasing_keyword;
+  }
+  public function aliased_name(): EditableSyntax {
+    return $this->_aliased_name;
+  }
+  public function with_aliasing_name(EditableSyntax $aliasing_name): TraitUseConflictResolutionItem {
+    return new TraitUseConflictResolutionItem(
+      $aliasing_name,
+      $this->_aliasing_keyword,
+      $this->_aliased_name);
+  }
+  public function with_aliasing_keyword(EditableSyntax $aliasing_keyword): TraitUseConflictResolutionItem {
+    return new TraitUseConflictResolutionItem(
+      $this->_aliasing_name,
+      $aliasing_keyword,
+      $this->_aliased_name);
+  }
+  public function with_aliased_name(EditableSyntax $aliased_name): TraitUseConflictResolutionItem {
+    return new TraitUseConflictResolutionItem(
+      $this->_aliasing_name,
+      $this->_aliasing_keyword,
+      $aliased_name);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $aliasing_name = $this->aliasing_name()->rewrite($rewriter, $new_parents);
+    $aliasing_keyword = $this->aliasing_keyword()->rewrite($rewriter, $new_parents);
+    $aliased_name = $this->aliased_name()->rewrite($rewriter, $new_parents);
+    if (
+      $aliasing_name === $this->aliasing_name() &&
+      $aliasing_keyword === $this->aliasing_keyword() &&
+      $aliased_name === $this->aliased_name()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new TraitUseConflictResolutionItem(
+        $aliasing_name,
+        $aliasing_keyword,
+        $aliased_name), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $aliasing_name = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_item_aliasing_name, $position, $source);
+    $position += $aliasing_name->width();
+    $aliasing_keyword = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_item_aliasing_keyword, $position, $source);
+    $position += $aliasing_keyword->width();
+    $aliased_name = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_item_aliased_name, $position, $source);
+    $position += $aliased_name->width();
+    return new TraitUseConflictResolutionItem(
+        $aliasing_name,
+        $aliasing_keyword,
+        $aliased_name);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_aliasing_name;
+    yield $this->_aliasing_keyword;
+    yield $this->_aliased_name;
+    yield break;
+  }
+}
+final class TraitUseConflictResolution extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_names;
+  private EditableSyntax $_left_brace;
+  private EditableSyntax $_clauses;
+  private EditableSyntax $_right_brace;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $names,
+    EditableSyntax $left_brace,
+    EditableSyntax $clauses,
+    EditableSyntax $right_brace) {
+    parent::__construct('trait_use_conflict_resolution');
+    $this->_keyword = $keyword;
+    $this->_names = $names;
+    $this->_left_brace = $left_brace;
+    $this->_clauses = $clauses;
+    $this->_right_brace = $right_brace;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function names(): EditableSyntax {
+    return $this->_names;
+  }
+  public function left_brace(): EditableSyntax {
+    return $this->_left_brace;
+  }
+  public function clauses(): EditableSyntax {
+    return $this->_clauses;
+  }
+  public function right_brace(): EditableSyntax {
+    return $this->_right_brace;
+  }
+  public function with_keyword(EditableSyntax $keyword): TraitUseConflictResolution {
+    return new TraitUseConflictResolution(
+      $keyword,
+      $this->_names,
+      $this->_left_brace,
+      $this->_clauses,
+      $this->_right_brace);
+  }
+  public function with_names(EditableSyntax $names): TraitUseConflictResolution {
+    return new TraitUseConflictResolution(
+      $this->_keyword,
+      $names,
+      $this->_left_brace,
+      $this->_clauses,
+      $this->_right_brace);
+  }
+  public function with_left_brace(EditableSyntax $left_brace): TraitUseConflictResolution {
+    return new TraitUseConflictResolution(
+      $this->_keyword,
+      $this->_names,
+      $left_brace,
+      $this->_clauses,
+      $this->_right_brace);
+  }
+  public function with_clauses(EditableSyntax $clauses): TraitUseConflictResolution {
+    return new TraitUseConflictResolution(
+      $this->_keyword,
+      $this->_names,
+      $this->_left_brace,
+      $clauses,
+      $this->_right_brace);
+  }
+  public function with_right_brace(EditableSyntax $right_brace): TraitUseConflictResolution {
+    return new TraitUseConflictResolution(
+      $this->_keyword,
+      $this->_names,
+      $this->_left_brace,
+      $this->_clauses,
+      $right_brace);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $names = $this->names()->rewrite($rewriter, $new_parents);
+    $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
+    $clauses = $this->clauses()->rewrite($rewriter, $new_parents);
+    $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $names === $this->names() &&
+      $left_brace === $this->left_brace() &&
+      $clauses === $this->clauses() &&
+      $right_brace === $this->right_brace()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new TraitUseConflictResolution(
+        $keyword,
+        $names,
+        $left_brace,
+        $clauses,
+        $right_brace), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_keyword, $position, $source);
+    $position += $keyword->width();
+    $names = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_names, $position, $source);
+    $position += $names->width();
+    $left_brace = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_left_brace, $position, $source);
+    $position += $left_brace->width();
+    $clauses = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_clauses, $position, $source);
+    $position += $clauses->width();
+    $right_brace = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_right_brace, $position, $source);
+    $position += $right_brace->width();
+    return new TraitUseConflictResolution(
+        $keyword,
+        $names,
+        $left_brace,
+        $clauses,
+        $right_brace);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_names;
+    yield $this->_left_brace;
+    yield $this->_clauses;
     yield $this->_right_brace;
     yield break;
   }

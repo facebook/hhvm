@@ -109,6 +109,9 @@ class type ['a] ast_visitor_type = object
   method on_class_elt: 'a -> class_elt -> 'a
   method on_classTraitRequire: 'a -> trait_req_kind -> hint -> 'a
   method on_classUse: 'a -> hint -> 'a
+  method on_cu_alias_type: 'a -> cu_alias_type -> 'a
+  method on_classUseAlias: 'a ->
+                           (id * pstring option) -> id -> cu_alias_type -> 'a
   method on_classVars: 'a -> kind list -> hint option -> class_var list -> 'a
   method on_const: 'a -> hint option -> (id * expr) list -> 'a
   method on_constant: 'a -> gconst -> 'a
@@ -584,12 +587,17 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       | None -> acc in
     acc
 
+  method on_cu_alias_type acc = function
+    | CU_as
+    | CU_insteadof -> acc
+
   method on_class_elt acc = function
     | Const (hopt, iel) -> this#on_const acc hopt iel
     | AbsConst (h, a) -> this#on_absConst acc h a
     | Attributes cl -> this#on_attributes acc cl
     | TypeConst t -> this#on_typeConst acc t
     | ClassUse h -> this#on_classUse acc h
+    | ClassUseAlias (id1, id2, at) -> this#on_classUseAlias acc id1 id2 at
     | XhpAttrUse h -> this#on_xhpAttrUse acc h
     | XhpCategory cs -> this#on_xhpCategory acc cs
     | XhpChild c -> this#on_xhp_child acc c
@@ -626,6 +634,14 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     acc
   method on_classUse acc h =
     let acc = this#on_hint acc h in
+    acc
+  method on_classUseAlias acc (id1, po) id2 at =
+    let acc = this#on_id acc id1 in
+    let acc = match po with
+      | Some p -> this#on_pstring acc p
+      | None -> acc in
+    let acc = this#on_id acc id2 in
+    let acc = this#on_cu_alias_type acc at in
     acc
   method on_xhpAttrUse acc h =
     let acc = this#on_hint acc h in

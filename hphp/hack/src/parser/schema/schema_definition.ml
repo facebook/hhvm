@@ -358,6 +358,32 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
+  ; { kind_name   = "TraitUseConflictResolutionItem"
+    ; type_name   = "trait_use_conflict_resolution_item"
+    ; func_name   = "trait_use_conflict_resolution_item"
+    ; description = "trait_use_conflict_resolution_item"
+    ; prefix      = "trait_use_conflict_resolution_item"
+    ; aggregates  = []
+    ; fields =
+      [ "aliasing_name", Aggregate Specifier
+      ; "aliasing_keyword", Token
+      ; "aliased_name", Token
+      ]
+    }
+  ; { kind_name   = "TraitUseConflictResolution"
+    ; type_name   = "trait_use_conflict_resolution"
+    ; func_name   = "trait_use_conflict_resolution"
+    ; description = "trait_use_conflict_resolution"
+    ; prefix      = "trait_use_conflict_resolution"
+    ; aggregates  = []
+    ; fields =
+      [ "keyword", Token
+      ; "names", ZeroOrMore (Aggregate Specifier)
+      ; "left_brace", Token
+      ; "clauses", ZeroOrMore (Aggregate Specifier)
+      ; "right_brace", Token
+      ]
+    }
   ; { kind_name   = "TraitUse"
     ; type_name   = "trait_use"
     ; func_name   = "trait_use"
@@ -367,7 +393,7 @@ let schema : schema_node list =
     ; fields =
       [ "keyword", Token
       ; "names", ZeroOrMore (Aggregate Specifier)
-      ; "semicolon", Token
+      ; "semicolon", ZeroOrOne Token
       ]
     }
   ; { kind_name   = "RequireClause"

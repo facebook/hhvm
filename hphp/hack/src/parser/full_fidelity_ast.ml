@@ -1398,6 +1398,43 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_span            = get_pos node
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       }]
+  | TraitUseConflictResolution {
+      trait_use_conflict_resolution_names;
+      trait_use_conflict_resolution_clauses;
+      _
+    } ->
+    let pTraitUseConflictResolutionItem node env =
+      match syntax node with
+      | TraitUseConflictResolutionItem
+        { trait_use_conflict_resolution_item_aliasing_name = aliasing_name;
+          trait_use_conflict_resolution_item_aliasing_keyword = alias_kw;
+          trait_use_conflict_resolution_item_aliased_name = aliased_name;
+          _
+        } ->
+        let aliasing_name, opt_scope_resolution_name =
+          match syntax aliasing_name with
+          | ScopeResolutionExpression
+            { scope_resolution_qualifier; scope_resolution_name; _ } ->
+            pos_name scope_resolution_qualifier,
+            Some (pos_name scope_resolution_name)
+          | _ -> pos_name aliasing_name, None
+        in
+        let alias_type =
+          match token_kind alias_kw with
+          | Some TK.As -> CU_as
+          | Some TK.Insteadof -> CU_insteadof
+          | _ ->
+            missing_syntax "trait use conflict resolution item" alias_kw env
+        in
+        ClassUseAlias ((aliasing_name, opt_scope_resolution_name),
+                        pos_name aliased_name,
+                        alias_type)
+      | _ -> missing_syntax "trait use conflict resolution item" node env
+    in
+    (couldMap ~f:(fun n e ->
+        ClassUse (pHint n e)) trait_use_conflict_resolution_names env)
+    @ (couldMap ~f:pTraitUseConflictResolutionItem
+                    trait_use_conflict_resolution_clauses env)
   | TraitUse { trait_use_names; _ } ->
     couldMap ~f:(fun n e -> ClassUse (pHint n e)) trait_use_names env
   | RequireClause { require_kind; require_name; _ } ->

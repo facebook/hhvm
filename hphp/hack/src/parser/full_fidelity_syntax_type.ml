@@ -229,6 +229,18 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_body_elements                             : t
     ; classish_body_right_brace                          : t
     }
+  and trait_use_conflict_resolution_item =
+    { trait_use_conflict_resolution_item_aliasing_name   : t
+    ; trait_use_conflict_resolution_item_aliasing_keyword: t
+    ; trait_use_conflict_resolution_item_aliased_name    : t
+    }
+  and trait_use_conflict_resolution =
+    { trait_use_conflict_resolution_keyword              : t
+    ; trait_use_conflict_resolution_names                : t
+    ; trait_use_conflict_resolution_left_brace           : t
+    ; trait_use_conflict_resolution_clauses              : t
+    ; trait_use_conflict_resolution_right_brace          : t
+    }
   and trait_use =
     { trait_use_keyword                                  : t
     ; trait_use_names                                    : t
@@ -922,6 +934,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MethodishDeclaration              of methodish_declaration
   | ClassishDeclaration               of classish_declaration
   | ClassishBody                      of classish_body
+  | TraitUseConflictResolutionItem    of trait_use_conflict_resolution_item
+  | TraitUseConflictResolution        of trait_use_conflict_resolution
   | TraitUse                          of trait_use
   | RequireClause                     of require_clause
   | ConstDeclaration                  of const_declaration
@@ -1436,10 +1450,22 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_body_elements: class_body_declaration listesque value
     ; classish_body_right_brace: Token.t value
     }
+  and trait_use_conflict_resolution_item =
+    { trait_use_conflict_resolution_item_aliasing_name: specifier value
+    ; trait_use_conflict_resolution_item_aliasing_keyword: Token.t value
+    ; trait_use_conflict_resolution_item_aliased_name: Token.t value
+    }
+  and trait_use_conflict_resolution =
+    { trait_use_conflict_resolution_keyword: Token.t value
+    ; trait_use_conflict_resolution_names: specifier listesque value
+    ; trait_use_conflict_resolution_left_brace: Token.t value
+    ; trait_use_conflict_resolution_clauses: specifier listesque value
+    ; trait_use_conflict_resolution_right_brace: Token.t value
+    }
   and trait_use =
     { trait_use_keyword: Token.t value
     ; trait_use_names: specifier listesque value
-    ; trait_use_semicolon: Token.t value
+    ; trait_use_semicolon: Token.t option value
     }
   and require_clause =
     { require_keyword: Token.t value

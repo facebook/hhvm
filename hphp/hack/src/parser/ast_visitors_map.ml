@@ -205,7 +205,13 @@ class virtual ['self] map =
     method on_TypeConst env c0 =
       let r0 = self#on_typeconst env c0 in TypeConst r0
     method on_ClassUse env c0 =
-      let r0 = self#on_hint env c0 in ClassUse r0
+        let r0 = self#on_hint env c0 in ClassUse r0
+    method on_ClassUseAlias env (c0, c1) c2 c3 =
+      let r0 = self#on_id env c0 in
+      let r1 = self#on_option self#on_pstring env c1 in
+      let r2 = self#on_id env c2 in
+      let r3 = self#on_cu_alias_type env c3 in
+      ClassUseAlias ((r0, r1), r2, r3)
     method on_XhpAttrUse env c0 =
       let r0 = self#on_hint env c0 in XhpAttrUse r0
     method on_ClassTraitRequire env c0 c1 =
@@ -272,6 +278,8 @@ class virtual ['self] map =
     method on_ChildPlus env this = this
     method on_ChildQuestion env this = this
 
+    method on_cu_alias_type env this = this
+
     method on_class_elt env this =
       match this with
       | Const (c0, c1) -> self#on_Const env c0 c1
@@ -279,6 +287,7 @@ class virtual ['self] map =
       | Attributes c0 -> self#on_Attributes env c0
       | TypeConst c0 -> self#on_TypeConst env c0
       | ClassUse c0 -> self#on_ClassUse env c0
+      | ClassUseAlias (c0, c1, c2) -> self#on_ClassUseAlias env c0 c1 c2
       | XhpAttrUse c0 -> self#on_XhpAttrUse env c0
       | ClassTraitRequire (c0, c1) ->
           self#on_ClassTraitRequire env c0 c1

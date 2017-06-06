@@ -85,6 +85,8 @@ module WithToken(Token: TokenType) = struct
       | MethodishDeclaration              _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration               _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody                      _ -> SyntaxKind.ClassishBody
+      | TraitUseConflictResolutionItem    _ -> SyntaxKind.TraitUseConflictResolutionItem
+      | TraitUseConflictResolution        _ -> SyntaxKind.TraitUseConflictResolution
       | TraitUse                          _ -> SyntaxKind.TraitUse
       | RequireClause                     _ -> SyntaxKind.RequireClause
       | ConstDeclaration                  _ -> SyntaxKind.ConstDeclaration
@@ -242,6 +244,8 @@ module WithToken(Token: TokenType) = struct
     let is_methodish_declaration                = has_kind SyntaxKind.MethodishDeclaration
     let is_classish_declaration                 = has_kind SyntaxKind.ClassishDeclaration
     let is_classish_body                        = has_kind SyntaxKind.ClassishBody
+    let is_trait_use_conflict_resolution_item   = has_kind SyntaxKind.TraitUseConflictResolutionItem
+    let is_trait_use_conflict_resolution        = has_kind SyntaxKind.TraitUseConflictResolution
     let is_trait_use                            = has_kind SyntaxKind.TraitUse
     let is_require_clause                       = has_kind SyntaxKind.RequireClause
     let is_const_declaration                    = has_kind SyntaxKind.ConstDeclaration
@@ -695,6 +699,30 @@ module WithToken(Token: TokenType) = struct
       classish_body_left_brace,
       classish_body_elements,
       classish_body_right_brace
+    )
+
+    let get_trait_use_conflict_resolution_item_children {
+      trait_use_conflict_resolution_item_aliasing_name;
+      trait_use_conflict_resolution_item_aliasing_keyword;
+      trait_use_conflict_resolution_item_aliased_name;
+    } = (
+      trait_use_conflict_resolution_item_aliasing_name,
+      trait_use_conflict_resolution_item_aliasing_keyword,
+      trait_use_conflict_resolution_item_aliased_name
+    )
+
+    let get_trait_use_conflict_resolution_children {
+      trait_use_conflict_resolution_keyword;
+      trait_use_conflict_resolution_names;
+      trait_use_conflict_resolution_left_brace;
+      trait_use_conflict_resolution_clauses;
+      trait_use_conflict_resolution_right_brace;
+    } = (
+      trait_use_conflict_resolution_keyword,
+      trait_use_conflict_resolution_names,
+      trait_use_conflict_resolution_left_brace,
+      trait_use_conflict_resolution_clauses,
+      trait_use_conflict_resolution_right_brace
     )
 
     let get_trait_use_children {
@@ -2304,6 +2332,28 @@ module WithToken(Token: TokenType) = struct
         classish_body_elements;
         classish_body_right_brace;
       ]
+      | TraitUseConflictResolutionItem {
+        trait_use_conflict_resolution_item_aliasing_name;
+        trait_use_conflict_resolution_item_aliasing_keyword;
+        trait_use_conflict_resolution_item_aliased_name;
+      } -> [
+        trait_use_conflict_resolution_item_aliasing_name;
+        trait_use_conflict_resolution_item_aliasing_keyword;
+        trait_use_conflict_resolution_item_aliased_name;
+      ]
+      | TraitUseConflictResolution {
+        trait_use_conflict_resolution_keyword;
+        trait_use_conflict_resolution_names;
+        trait_use_conflict_resolution_left_brace;
+        trait_use_conflict_resolution_clauses;
+        trait_use_conflict_resolution_right_brace;
+      } -> [
+        trait_use_conflict_resolution_keyword;
+        trait_use_conflict_resolution_names;
+        trait_use_conflict_resolution_left_brace;
+        trait_use_conflict_resolution_clauses;
+        trait_use_conflict_resolution_right_brace;
+      ]
       | TraitUse {
         trait_use_keyword;
         trait_use_names;
@@ -3793,6 +3843,28 @@ module WithToken(Token: TokenType) = struct
         "classish_body_left_brace";
         "classish_body_elements";
         "classish_body_right_brace";
+      ]
+      | TraitUseConflictResolutionItem {
+        trait_use_conflict_resolution_item_aliasing_name;
+        trait_use_conflict_resolution_item_aliasing_keyword;
+        trait_use_conflict_resolution_item_aliased_name;
+      } -> [
+        "trait_use_conflict_resolution_item_aliasing_name";
+        "trait_use_conflict_resolution_item_aliasing_keyword";
+        "trait_use_conflict_resolution_item_aliased_name";
+      ]
+      | TraitUseConflictResolution {
+        trait_use_conflict_resolution_keyword;
+        trait_use_conflict_resolution_names;
+        trait_use_conflict_resolution_left_brace;
+        trait_use_conflict_resolution_clauses;
+        trait_use_conflict_resolution_right_brace;
+      } -> [
+        "trait_use_conflict_resolution_keyword";
+        "trait_use_conflict_resolution_names";
+        "trait_use_conflict_resolution_left_brace";
+        "trait_use_conflict_resolution_clauses";
+        "trait_use_conflict_resolution_right_brace";
       ]
       | TraitUse {
         trait_use_keyword;
@@ -5363,6 +5435,30 @@ module WithToken(Token: TokenType) = struct
           classish_body_left_brace;
           classish_body_elements;
           classish_body_right_brace;
+        }
+      | (SyntaxKind.TraitUseConflictResolutionItem, [
+          trait_use_conflict_resolution_item_aliasing_name;
+          trait_use_conflict_resolution_item_aliasing_keyword;
+          trait_use_conflict_resolution_item_aliased_name;
+        ]) ->
+        TraitUseConflictResolutionItem {
+          trait_use_conflict_resolution_item_aliasing_name;
+          trait_use_conflict_resolution_item_aliasing_keyword;
+          trait_use_conflict_resolution_item_aliased_name;
+        }
+      | (SyntaxKind.TraitUseConflictResolution, [
+          trait_use_conflict_resolution_keyword;
+          trait_use_conflict_resolution_names;
+          trait_use_conflict_resolution_left_brace;
+          trait_use_conflict_resolution_clauses;
+          trait_use_conflict_resolution_right_brace;
+        ]) ->
+        TraitUseConflictResolution {
+          trait_use_conflict_resolution_keyword;
+          trait_use_conflict_resolution_names;
+          trait_use_conflict_resolution_left_brace;
+          trait_use_conflict_resolution_clauses;
+          trait_use_conflict_resolution_right_brace;
         }
       | (SyntaxKind.TraitUse, [
           trait_use_keyword;
@@ -7058,6 +7154,32 @@ module WithToken(Token: TokenType) = struct
         classish_body_left_brace;
         classish_body_elements;
         classish_body_right_brace;
+      ]
+
+    let make_trait_use_conflict_resolution_item
+      trait_use_conflict_resolution_item_aliasing_name
+      trait_use_conflict_resolution_item_aliasing_keyword
+      trait_use_conflict_resolution_item_aliased_name
+    =
+      from_children SyntaxKind.TraitUseConflictResolutionItem [
+        trait_use_conflict_resolution_item_aliasing_name;
+        trait_use_conflict_resolution_item_aliasing_keyword;
+        trait_use_conflict_resolution_item_aliased_name;
+      ]
+
+    let make_trait_use_conflict_resolution
+      trait_use_conflict_resolution_keyword
+      trait_use_conflict_resolution_names
+      trait_use_conflict_resolution_left_brace
+      trait_use_conflict_resolution_clauses
+      trait_use_conflict_resolution_right_brace
+    =
+      from_children SyntaxKind.TraitUseConflictResolution [
+        trait_use_conflict_resolution_keyword;
+        trait_use_conflict_resolution_names;
+        trait_use_conflict_resolution_left_brace;
+        trait_use_conflict_resolution_clauses;
+        trait_use_conflict_resolution_right_brace;
       ]
 
     let make_trait_use

@@ -326,10 +326,39 @@ let rec get_doc node =
     group_doc (t ^| n ^| i ^| r)
   | XHPSimpleClassAttribute { xhp_simple_class_attribute_type } ->
     get_doc xhp_simple_class_attribute_type
+  | TraitUseConflictResolutionItem {
+    trait_use_conflict_resolution_item_aliasing_name;
+    trait_use_conflict_resolution_item_aliasing_keyword;
+    trait_use_conflict_resolution_item_aliased_name;
+    } ->
+    let aliasing_name =
+      get_doc trait_use_conflict_resolution_item_aliasing_name
+    in
+    let keyword =
+      get_doc trait_use_conflict_resolution_item_aliasing_keyword
+    in
+    let aliased_name =
+      get_doc trait_use_conflict_resolution_item_aliased_name
+    in
+    aliasing_name ^| keyword ^| aliased_name
+  | TraitUseConflictResolution {
+    trait_use_conflict_resolution_keyword;
+    trait_use_conflict_resolution_names;
+    trait_use_conflict_resolution_left_brace;
+    trait_use_conflict_resolution_clauses;
+    trait_use_conflict_resolution_right_brace;
+    } ->
+    let use = get_doc trait_use_conflict_resolution_keyword in
+    let name_list = get_doc trait_use_conflict_resolution_names in
+    let lbrace = get_doc trait_use_conflict_resolution_left_brace in
+    let clauses = get_doc trait_use_conflict_resolution_clauses in
+    let rbrace = get_doc trait_use_conflict_resolution_right_brace in
+    use ^| name_list ^^^ lbrace ^| clauses ^^^ rbrace
   | TraitUse {
     trait_use_keyword;
     trait_use_names;
-    trait_use_semicolon } ->
+    trait_use_semicolon;
+    } ->
     let use = get_doc trait_use_keyword in
     let name_list = get_doc trait_use_names in
     let semi = get_doc trait_use_semicolon in

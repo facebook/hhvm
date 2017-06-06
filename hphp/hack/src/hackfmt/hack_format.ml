@@ -409,6 +409,35 @@ let rec transform node =
       ];
       Newline;
     ]
+  | TraitUseConflictResolutionItem x ->
+    let (aliasing_name, kw, aliased_name) =
+      get_trait_use_conflict_resolution_item_children x
+    in
+    Fmt [
+      t aliasing_name;
+      Space;
+      t kw;
+      Space;
+      t aliased_name;
+      Newline;
+    ]
+  | TraitUseConflictResolution x ->
+    let (kw, elements, lb, clauses, rb) =
+      get_trait_use_conflict_resolution_children x
+    in
+    Fmt [
+      t kw;
+      WithRule (Rule.Argument, Nest [
+        handle_possible_list ~before_each:space_split elements;
+      ]);
+      t lb;
+      Newline;
+      WithRule (Rule.Argument, Nest [
+        handle_possible_list ~before_each:space_split clauses;
+      ]);
+      Newline;
+      t rb;
+    ]
   | TraitUse x ->
     let (kw, elements, semi) = get_trait_use_children x in
     Fmt [

@@ -526,6 +526,32 @@ module FromMinimal = struct
           ; classish_body_elements
           ; classish_body_right_brace
           }, results
+      | SyntaxKind.TraitUseConflictResolutionItem
+      , (  trait_use_conflict_resolution_item_aliased_name
+        :: trait_use_conflict_resolution_item_aliasing_keyword
+        :: trait_use_conflict_resolution_item_aliasing_name
+        :: results
+        ) ->
+          TraitUseConflictResolutionItem
+          { trait_use_conflict_resolution_item_aliasing_name
+          ; trait_use_conflict_resolution_item_aliasing_keyword
+          ; trait_use_conflict_resolution_item_aliased_name
+          }, results
+      | SyntaxKind.TraitUseConflictResolution
+      , (  trait_use_conflict_resolution_right_brace
+        :: trait_use_conflict_resolution_clauses
+        :: trait_use_conflict_resolution_left_brace
+        :: trait_use_conflict_resolution_names
+        :: trait_use_conflict_resolution_keyword
+        :: results
+        ) ->
+          TraitUseConflictResolution
+          { trait_use_conflict_resolution_keyword
+          ; trait_use_conflict_resolution_names
+          ; trait_use_conflict_resolution_left_brace
+          ; trait_use_conflict_resolution_clauses
+          ; trait_use_conflict_resolution_right_brace
+          }, results
       | SyntaxKind.TraitUse
       , (  trait_use_semicolon
         :: trait_use_names
@@ -2303,6 +2329,30 @@ module FromMinimal = struct
         let todo = Convert (classish_body_right_brace, todo) in
         let todo = Convert (classish_body_elements, todo) in
         convert offset todo results classish_body_left_brace
+    | { M.syntax = M.TraitUseConflictResolutionItem
+        { M.trait_use_conflict_resolution_item_aliasing_name
+        ; M.trait_use_conflict_resolution_item_aliasing_keyword
+        ; M.trait_use_conflict_resolution_item_aliased_name
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (trait_use_conflict_resolution_item_aliased_name, todo) in
+        let todo = Convert (trait_use_conflict_resolution_item_aliasing_keyword, todo) in
+        convert offset todo results trait_use_conflict_resolution_item_aliasing_name
+    | { M.syntax = M.TraitUseConflictResolution
+        { M.trait_use_conflict_resolution_keyword
+        ; M.trait_use_conflict_resolution_names
+        ; M.trait_use_conflict_resolution_left_brace
+        ; M.trait_use_conflict_resolution_clauses
+        ; M.trait_use_conflict_resolution_right_brace
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (trait_use_conflict_resolution_right_brace, todo) in
+        let todo = Convert (trait_use_conflict_resolution_clauses, todo) in
+        let todo = Convert (trait_use_conflict_resolution_left_brace, todo) in
+        let todo = Convert (trait_use_conflict_resolution_names, todo) in
+        convert offset todo results trait_use_conflict_resolution_keyword
     | { M.syntax = M.TraitUse
         { M.trait_use_keyword
         ; M.trait_use_names

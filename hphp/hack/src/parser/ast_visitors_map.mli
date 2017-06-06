@@ -106,6 +106,14 @@ class virtual ['c] map :
         on_ClassUse : 'd ->
                       Ast_visitors_ancestors.hint ->
                       Ast_visitors_ancestors.class_elt;
+        on_cu_alias_type : 'd ->
+                           Ast_visitors_ancestors.cu_alias_type ->
+                           Ast_visitors_ancestors.cu_alias_type;
+        on_ClassUseAlias : 'd ->
+                           (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+                            Ast_visitors_ancestors.id ->
+                            Ast_visitors_ancestors.cu_alias_type ->
+                            Ast_visitors_ancestors.class_elt;
         on_ClassVars : 'd ->
                        Ast_visitors_ancestors.kind list ->
                        Ast_visitors_ancestors.hint option ->
@@ -717,6 +725,14 @@ class virtual ['c] map :
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.class_elt
     method on_ClassUse :
       'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.class_elt
+    method on_cu_alias_type:
+      'd -> Ast_visitors_ancestors.cu_alias_type ->
+      Ast_visitors_ancestors.cu_alias_type
+    method on_ClassUseAlias :
+      'd ->
+      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.cu_alias_type -> Ast_visitors_ancestors.class_elt
     method on_ClassVars :
       'd ->
       Ast_visitors_ancestors.kind list ->

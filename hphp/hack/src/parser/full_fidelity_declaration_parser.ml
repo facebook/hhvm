@@ -857,6 +857,71 @@ module WithExpressionAndStatementAndTypeParser
     else
       parse_methodish parser attribute_spec modifiers
 
+  and parse_trait_use_conflict_resolution_item parser =
+    let parser, aliasing_name = parse_qualified_name_type parser in
+    let parser, aliasing_name =
+      if (peek_token_kind parser) = ColonColon then
+        (* scope resolution expression case *)
+        let (parser, cc_token) = expect_coloncolon parser in
+        let (parser, name) = expect_name parser in
+        (parser, make_scope_resolution_expression aliasing_name cc_token name)
+      else
+        (* plain qualified name case *)
+        (parser, aliasing_name)
+    in
+    let (parser, aliasing_kw) =
+      if (peek_token_kind parser) = As then
+        assert_token parser As
+      else
+        assert_token parser Insteadof
+    in
+    let (parser, aliased_name) = parse_qualified_name_type parser in
+    let trait_use_conflict_resolution_item =
+      make_trait_use_conflict_resolution_item
+        aliasing_name
+        aliasing_kw
+        aliased_name
+    in
+    (parser, trait_use_conflict_resolution_item)
+
+  (*  SPEC:
+    trait-use-conflict-resolution:
+      use trait-name-list  {  trait-use-conflict-resolution-list  }
+
+    trait-use-conflict-resolution-list:
+      trait-use-conflict-resolution-item
+      trait-use-conflict-resolution-item  trait-use-conflict-resolution-list
+
+    trait-use-conflict-resolution-item:
+      trait-use-conflict-resolution-item-alising-name  as  qualified-name
+      trait-use-conflict-resolution-item-alising-name  insteadof  qualified-name
+
+    trait-use-conflict-resolution-item-alising-name:
+      qualified-name
+      scope-resolution-expression
+  *)
+  and parse_trait_use_conflict_resolution parser use_token trait_name_list =
+    let (parser, left_brace) = assert_token parser LeftBrace in
+    let (parser, clauses) =
+      parse_separated_list
+        parser
+        TokenKind.Semicolon
+        TrailingAllowed
+        RightBrace
+        SyntaxError.error1004
+        parse_trait_use_conflict_resolution_item
+    in
+    let (parser, right_brace) = assert_token parser RightBrace in
+    let trait_use_conflict_resolution =
+      make_trait_use_conflict_resolution
+        use_token
+        trait_name_list
+        left_brace
+        clauses
+        right_brace
+    in
+    (parser, trait_use_conflict_resolution)
+
   (* SPEC:
     trait-use-clause:
       use  trait-name-list  ;
@@ -867,10 +932,20 @@ module WithExpressionAndStatementAndTypeParser
   *)
   and parse_trait_use parser =
     let (parser, use_token) = assert_token parser Use in
-    let (parser, trait_name_list) = parse_comma_list
-      parser Semicolon SyntaxError.error1004 parse_qualified_name_type in
-    let (parser, semi) = expect_semicolon parser in
-    (parser, make_trait_use use_token trait_name_list semi)
+    let (parser, trait_name_list) =
+      parse_separated_list_opt_predicate
+        parser
+        Comma
+        NoTrailing
+        (function Semicolon | LeftBrace -> true | _ -> false)
+        SyntaxError.error1004
+        parse_qualified_name_type
+    in
+    if (peek_token_kind parser) = LeftBrace then
+      parse_trait_use_conflict_resolution parser use_token trait_name_list
+    else
+      let (parser, semi) = expect_semicolon parser in
+      (parser, make_trait_use use_token trait_name_list semi)
 
   and parse_const_or_type_const_declaration parser abstr =
     let (parser, const) = assert_token parser Const in

@@ -60,6 +60,12 @@ class virtual ['b] reduce :
                                Ast_visitors_ancestors.trait_req_kind ->
                                Ast_visitors_ancestors.hint -> 'd;
         on_ClassUse : 'c -> Ast_visitors_ancestors.hint -> 'd;
+        on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> 'd;
+        on_ClassUseAlias : 'c ->
+                           (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+                            Ast_visitors_ancestors.id ->
+                            Ast_visitors_ancestors.cu_alias_type ->
+                           'd;
         on_ClassVars : 'c ->
                        Ast_visitors_ancestors.kind list ->
                        Ast_visitors_ancestors.hint option ->
@@ -384,6 +390,13 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.trait_req_kind ->
       Ast_visitors_ancestors.hint -> 'd
     method on_ClassUse : 'c -> Ast_visitors_ancestors.hint -> 'd
+    method on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> 'd
+    method on_ClassUseAlias :
+      'c ->
+      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.cu_alias_type ->
+      'd
     method on_ClassVars :
       'c ->
       Ast_visitors_ancestors.kind list ->

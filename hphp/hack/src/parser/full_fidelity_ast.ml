@@ -674,7 +674,11 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
 
     | ListExpression { list_members = members; _ } ->
       (* TODO: Or tie in with other intrinsics and post-process to List *)
-      List (couldMap ~f:pExpr members env)
+      let pBinderOrIgnore node env =
+        Option.value ~default:(Pos.none, Lvar (Pos.none, "$_")) @@
+          mpOptional pExpr node env
+      in
+      List (couldMap ~f:pBinderOrIgnore members env)
 
     | EvalExpression  { eval_keyword  = recv; eval_argument       = args; _ }
     | EmptyExpression { empty_keyword = recv; empty_argument      = args; _ }

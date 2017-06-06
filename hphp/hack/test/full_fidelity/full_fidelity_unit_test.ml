@@ -115,6 +115,7 @@ let minimal_tests =
     "test_for_statements";
     "test_try_statement";
     "test_list_precedence";
+    "test_list_expression";
     "test_foreach_statements";
     "test_types_type_const";
     "test_function_call";

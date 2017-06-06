@@ -93,4 +93,4 @@ let from_ast ~is_closure_body ~has_this ~params b =
     if needs_local_this || is_closure_body || not has_this
     then decl_vars
     else ULS.remove "$this" decl_vars in
-  needs_local_this && has_this, List.rev (ULS.items decl_vars)
+  needs_local_this && has_this, ULS.items decl_vars

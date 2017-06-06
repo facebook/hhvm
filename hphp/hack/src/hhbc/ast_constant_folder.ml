@@ -33,7 +33,7 @@ let rec expr_to_typed_value ns (_, expr_) =
     let l = List.fold_left fields
       ~f:(fun l x -> TVL.add l (value_afield_to_typed_value ns x))
       ~init:TVL.empty in
-    TV.Keyset (List.rev (TVL.items l))
+    TV.Keyset (TVL.items l)
   | A.Collection ((_, ("dict" | "ImmMap" | "Map")), fields) ->
     (* TODO: avoid quadratic-time behaviour *)
     let d = List.fold_left fields

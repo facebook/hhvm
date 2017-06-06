@@ -570,10 +570,8 @@ slow/lang/hh_return_type_1.php
 slow/lang/hh_return_type_2.php
 slow/lang/hh_return_type_3.php
 slow/lang/hh_return_type_noreturn.php
-slow/lang/invariant.php
 slow/lang/invariant_cb.php
 slow/lang/invariant_cb_two.php
-slow/lang/invariant_vsprintf.php
 slow/lang/mixedbag.php
 slow/lang/php_errormsg.php
 slow/lang/redefine_function.php
@@ -910,6 +908,7 @@ slow/reflection/deprecation.php
 slow/reflection/dynamic_property2.php
 slow/reflection/get_closure_scope_class.php
 slow/reflection/isCallable.php
+slow/reflection/lambda_uninit_capture.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php

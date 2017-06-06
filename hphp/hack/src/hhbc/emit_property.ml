@@ -22,7 +22,20 @@ let rec expr_requires_deep_init (_, expr_) =
     expr_requires_deep_init e1 || expr_requires_deep_init e2
   | A.Lvar _ | A.Null | A.False | A.True | A.Int _
   | A.Float _ | A.String _ -> false
+  | A.Array fields | A.Collection ((_, ("keyset" | "vec" | "dict")), fields) ->
+    List.exists fields aexpr_requires_deep_init
+  | A.Varray fields -> List.exists fields expr_requires_deep_init
+  | A.Darray fields -> List.exists fields expr_pair_requires_deep_init
   | _ -> true
+
+and expr_pair_requires_deep_init (expr1, expr2) =
+  expr_requires_deep_init expr1 || expr_requires_deep_init expr2
+
+and aexpr_requires_deep_init aexpr =
+  match aexpr with
+  | A.AFvalue expr -> expr_requires_deep_init expr
+  | A.AFkvalue (expr1, expr2) ->
+    expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
 let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   (* TODO: Deal with type hint *)
@@ -47,11 +60,12 @@ let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) 
     match initial_value with
     | None -> None, false, None
     | Some expr ->
+      let deep_init = not is_static && expr_requires_deep_init expr in
       match Ast_constant_folder.expr_to_opt_typed_value
         ast_class.Ast.c_namespace expr with
-      | Some v ->
+      | Some v when not deep_init ->
         Some v, false, None
-      | None ->
+      | _ ->
         let label = Label.next_regular () in
         let prolog, epilog =
           if is_static
@@ -67,7 +81,7 @@ let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) 
               instr (IMutator (InitProp (pid, NonStatic)));
               instr_label label;
             ] in
-        Some Typed_value.Uninit, not is_static && expr_requires_deep_init expr,
+        Some Typed_value.Uninit, deep_init,
           Some (gather [
             prolog;
             Emit_expression.emit_expr ~need_ref:false env expr;

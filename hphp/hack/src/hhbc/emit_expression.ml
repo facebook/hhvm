@@ -1662,7 +1662,9 @@ and emit_call env (_, expr_ as expr) args uargs =
     let p = Pos.none in
     let id = p, A.Id (p, "hh\\invariant_violation") in
     gather [
-      emit_jmpnz env e l;
+      (* Could use emit_jmpnz for better code *)
+      emit_expr ~need_ref:false env e;
+      instr_jmpnz l;
       emit_ignored_expr env (p, A.Call (id, rest, uargs));
       Emit_fatal.emit_fatal_runtime "invariant_violation";
       instr_label l;

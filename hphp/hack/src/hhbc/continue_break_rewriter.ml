@@ -154,14 +154,12 @@ let get_continues_and_breaks instrseq =
   (* These can be in any old order; we're building a lookup table after all.
   However, the order should be (1) consistent from run to run, and (2) ideally
   should be in source-code order, so that if there is a continue followed by
-  a break, then the continue is zero and the break is one. Since this list
-  comes out in reverse source code order, we reverse it here to be more
-  compatible with the original HHVM emitter.
+  a break, then the continue is zero and the break is one.
   TODO: We might consider sorting the list using the comparator in ULCB.
   That way we know the list order will be stable even if the order in which
   we visit the instructions changes for some reason. It won't match HHVM then
-  though. For now, stick with reversing it. *)
-  List.rev (ULCB.items results)
+  though. For now, stick with the source-code order. *)
+  ULCB.items results
 
 (* TODO: We must have this already somewhere. *)
 let index_of items item =

@@ -353,7 +353,7 @@ and convert_lambda env st p fd use_vars_opt =
   let tparams = Scope.get_tparams env.scope in
   let class_num = List.length st.hoisted_classes + env.defined_class_count in
   let inline_fundef, cd =
-    make_closure
+      make_closure
       ~explicit_use:(Option.is_some use_vars_opt)
       ~class_num
       p total_count env st lambda_vars tparams fd block in

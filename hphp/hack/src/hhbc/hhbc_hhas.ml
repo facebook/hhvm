@@ -1179,13 +1179,38 @@ let add_enum_ty buf c =
     B.add_string buf ";"
   | _ -> ()
 
+let add_use_alias buf (id1, id_o, id2, flavor) =
+  let aliasing_id = match id_o with
+    | None -> id1
+    | Some id -> id1 ^ "::" ^ id
+  in
+  let flavor = match flavor with
+    | Ast.CU_as -> "as"
+    | Ast.CU_insteadof -> "insteadof"
+  in
+  B.add_string buf @@ Printf.sprintf "\n    %s %s %s;" aliasing_id flavor id2
+
 let add_uses buf c =
   let use_l = Hhas_class.class_uses c in
-  match use_l with
-  | [] -> ()
-  | _  ->
-    B.add_string buf @@ Printf.sprintf "\n  .use %s;"
-      @@ String.concat " " @@ List.map Utils.strip_ns use_l
+  let use_alias_list = Hhas_class.class_use_aliases c in
+  if use_l = [] then () else
+    begin
+      B.add_string buf @@ Printf.sprintf "\n  .use %s"
+        @@ String.concat " " @@ List.map Utils.strip_ns use_l;
+        if use_alias_list = [] then B.add_char buf ';' else
+          (* HHVM emits insteadof aliases in front of as aliases *)
+          let as_aliases, insteadof_aliases =
+            List.partition
+              (fun (_, _, _, flavor) -> flavor = Ast.CU_as)
+              use_alias_list
+          in
+          begin
+            B.add_string buf " {";
+            List.iter (add_use_alias buf) (insteadof_aliases @ as_aliases);
+            B.add_string buf "\n  }";
+
+          end
+    end
 
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in

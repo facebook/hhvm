@@ -27,6 +27,7 @@ open Hhas_parser_actions
 %token ISMEMOIZEWRAPPERDIRECTIVE
 %token LANGLE
 %token RANGLE
+%token COLONCOLON
 %token LPAR
 %token RPAR
 %token LBRACE LBRACK
@@ -159,7 +160,8 @@ classdecl:
         (List.mem "interface" (snd $2))(*isinterface*)
         (List.mem "trait" (snd $2))(*istrait*)
         false(*isxhp*)
-        $7(*uses*)
+        (fst $7)(*uses*)
+        (snd $7)(*use_alises*)
         $8(*enumtype*)
         $11(*methods*) $10(*properties*) (fst $9) (*constants*) (snd $9)(*typeconstants*)}
 ;
@@ -274,8 +276,23 @@ classenumty:
   | ENUMTYDIRECTIVE enumtypeinfo SEMI nl {Some $2}
 ;
 classuses:
+  | /* empty */ {[], []}
+  | USESDIRECTIVE idlist SEMI nl {$2, []}
+  | USESDIRECTIVE idlist LBRACE nl classaliaslist nl RBRACE nl {$2, $5}
+;
+classaliaslist:
   | /* empty */ {[]}
-  | USESDIRECTIVE idlist SEMI nl {$2}
+  | classalias nl classaliaslist {$1 :: $3}
+;
+classalias:
+  | ID classaliastype ID SEMI {($1, None, $3, $2)}
+  | ID COLONCOLON ID classaliastype ID SEMI {($1, Some $3, $5, $4)}
+;
+classaliastype:
+  | ID {match $1 with
+        | "as" -> Ast.CU_as
+        | "insteadof" -> Ast.CU_insteadof
+        | _ -> report_error "incorrect class alias type"}
 ;
 extendsimplements:
   | /* empty */ {(None,[])}

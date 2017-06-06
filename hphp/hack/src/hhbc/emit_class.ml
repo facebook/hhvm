@@ -151,6 +151,16 @@ let emit_class : A.class_ -> Hhas_class.t =
         | A.ClassUse (_, (A.Happly ((_, name), _))) -> Some name
         | _ -> None)
   in
+  let class_use_aliases =
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.ClassUseAlias (((_, id1), Some (_, id2)), (_, id3), flavor) ->
+          Some (id1, Some id2, id3, flavor)
+        | A.ClassUseAlias (((_, id1), None), (_, id3), flavor) ->
+          Some (id1, None, id3, flavor)
+        | _ -> None)
+  in
   let class_enum_type =
     if ast_class.A.c_kind = Ast.Cenum
     then from_enum_type ast_class.A.c_namespace ast_class.A.c_enum
@@ -361,6 +371,7 @@ let emit_class : A.class_ -> Hhas_class.t =
     class_is_trait
     class_is_xhp
     class_uses
+    class_use_aliases
     class_enum_type
     (class_methods @ List.rev additional_methods)
     (class_properties @ additional_properties)

@@ -27,6 +27,8 @@ type t = {
   class_is_trait     : bool;
   class_is_xhp       : bool;
   class_uses         : Litstr.id list;
+  class_use_aliases  :
+    (Litstr.id * Litstr.id option * Litstr.id * Ast.cu_alias_type) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
   class_properties   : Hhas_property.t list;
@@ -45,6 +47,7 @@ let make
   class_is_trait
   class_is_xhp
   class_uses
+  class_use_aliases
   class_enum_type
   class_methods
   class_properties
@@ -61,6 +64,7 @@ let make
     class_is_trait;
     class_is_xhp;
     class_uses;
+    class_use_aliases;
     class_enum_type;
     class_methods;
     class_properties;
@@ -78,6 +82,7 @@ let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 let is_xhp hhas_class = hhas_class.class_is_xhp
 let class_uses hhas_class = hhas_class.class_uses
+let class_use_aliases hhas_class = hhas_class.class_use_aliases
 let enum_type hhas_class = hhas_class.class_enum_type
 let methods hhas_class = hhas_class.class_methods
 let with_methods hhas_class class_methods = { hhas_class with class_methods }

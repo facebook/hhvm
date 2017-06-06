@@ -45,9 +45,11 @@ let emit_xhp_attribute_array xal =
     | "string" -> 1
     | "bool" | "boolean" -> 2
     | "int" | "integer" -> 3
+    | "array" -> 4
     | "mixed" -> 6
     | "enum" -> 7
     | "real" | "float" | "double" -> 8
+    | "callable" -> 9
     (* Regular class names is type 5 *)
     | _ -> 5
   in
@@ -77,8 +79,11 @@ let emit_xhp_attribute_array xal =
       (* attribute declared with the var identifier - we treat it as mixed *)
         -> get_attribute_array_values "mixed" enumo
       | None -> get_attribute_array_values "enum" enumo
-      | Some (_, A.Happly ((_, id), [])) -> get_attribute_array_values id enumo
-      | _ -> (p, A.Null), (p, A.String (p, "NYI - Xhp attribute hint"))
+      (* As it turns out, if there is a type list, HHVM discards it *)
+      | Some (_, A.Happly ((_, id), _))
+      | Some (_, A.Hoption (_, A.Happly ((_, id), _)))
+        -> get_attribute_array_values id enumo
+      | _ -> failwith "There are no other possible xhp attribute hints"
     in
     let is_required = (p, A.Int (p, if is_req then "1" else "0")) in
     [A.AFkvalue ((p, A.Int (p, "0")), hint);

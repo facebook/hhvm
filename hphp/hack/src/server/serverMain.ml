@@ -500,7 +500,8 @@ let setup_server ~informant_managed options handle =
     use_sql
     search_chunk_size;
   let root_s = Path.to_string root in
-  if Sys_utils.is_nfs root_s && not enable_on_nfs then begin
+  let check_mode = ServerArgs.check_mode options in
+  if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;
     HackEventLogger.nfs_root ();
     Exit_status.(exit Nfs_root);

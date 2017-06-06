@@ -18,6 +18,7 @@ different uses of locals and some simple variations in control-flow
 open Core
 open Hhbc_ast
 open Local
+open Hhbc_destruct
 
 (* Refs storing the adata for the two programs; they're written in semdiff
    and accessed in equiv
@@ -438,10 +439,6 @@ let check_instruct_misc asn i i' =
    else None (* fail in this case *)
   | _, _ -> if i=i' then Some asn else None
 
-
-let rec drop n l =
- match n with | 0 -> l | _ -> drop (n-1) (List.tl_exn l)
-
 (* abstracting this out in case we want to change it from a list later *)
 let add_todo (pc,pc') asn todo = ((pc,pc'),asn) :: todo
 
@@ -455,13 +452,16 @@ let add_assumption (pc,pc') asn assumed =
   let updated = AsnSet.add asn prev in (* this is a clumsy union *)
   PcpMap.add (pc,pc') updated assumed
 
+(* Main entry point for equivalence checking *)
 let equiv prog prog' startlabelpairs =
  let (labelmap, trymap) = make_label_try_maps prog in
  let (exnmap, exnparents) = make_exntable prog labelmap trymap in
  let (labelmap', trymap') = make_label_try_maps prog' in
  let (exnmap', exnparents') = make_exntable prog' labelmap' trymap' in
+ let prog_array = Array.of_list prog in
+ let prog_array' = Array.of_list prog' in
 
- let rec check pc pc' asn assumed todo =
+ let rec check pc pc' ((props,vs,vs') as asn) assumed todo =
    let try_specials () = specials pc pc' asn assumed todo in
 
    (* This could be more one-sided, but can't allow one side to leave the
@@ -521,8 +521,8 @@ let equiv prog prog' startlabelpairs =
       then try_specials ()
       else
        (
-       let i = List.nth_exn prog (ip_of_pc pc) in
-       let i' = List.nth_exn prog' (ip_of_pc pc') in
+       let i = prog_array.(ip_of_pc pc) in
+       let i' = prog_array'.(ip_of_pc pc') in
        match i, i' with
         (* one-sided stuff for jumps, labels, comments *)
         | IContFlow(Jmp lab), _
@@ -618,9 +618,18 @@ let equiv prog prog' startlabelpairs =
         | _, IContFlow (SSwitch _) ->
           failwith "SSwitch not implemented"
         | IContFlow _, IContFlow _ -> try_specials ()
+        (* Special treatment for Unset instructions *)
+        | IMutator (UnsetL l), _ ->
+           let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l) props in
+           let newasn = (newprops, VarSet.remove l vs, vs') in
+             check (succ pc) pc' newasn (add_assumption (pc,pc') asn assumed) todo
+        | _, IMutator (UnsetL l') ->
+           let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l') props in
+           let newasn = (newprops, vs, VarSet.remove l' vs') in
+             check pc (succ pc') newasn (add_assumption (pc,pc') asn assumed) todo
         (* next block have no interesting controls flow or local
            variable effects
-           TODO: Some of these are not actually in this class!
+           TODO: Some of these may not actually be in this class!
         *)
         | IBasic ins, IBasic ins' ->
            if ins = ins' then nextins()
@@ -716,70 +725,72 @@ and donext assumed todo =
      an appropriate assumed assertion, and the instructions aren't the same
      *)
 and specials pc pc' ((props,vs,vs') as asn) assumed todo =
-  let i = List.nth_exn prog (ip_of_pc pc) in
-  let i' = List.nth_exn prog' (ip_of_pc pc') in
-  match i, i' with
-   (* first, special case of unset on one side *)
-   | IMutator (UnsetL l), _ ->
-      let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l) props in
-      let newasn = (newprops, VarSet.remove l vs, vs') in
-        check (succ pc) pc' newasn (add_assumption (pc,pc') asn assumed) todo
-   | _, IMutator (UnsetL l') ->
-      let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l') props in
-      let newasn = (newprops, vs, VarSet.remove l' vs') in
-      check pc (succ pc') newasn (add_assumption (pc,pc') asn assumed) todo
-   | _, _ -> (
-     (* having looked at individual instructions, try some known special
-        sequences. This is *really* hacky, and I should work out how
-        to do it more generally, but it'll do for now
-        Remark - really want a nicer way of doing rule-based programming
-        without nasty nested matches. Order of testing is annoyingly delicate
-        at the moment
-     *)
-        let prog_from_pc = drop (ip_of_pc pc) prog in
-        let prog_from_pc' = drop (ip_of_pc pc') prog' in
         (* a funny almost no-op that shows up sometimes *)
-        match prog_from_pc, prog_from_pc' with
-         | (IMutator (SetL l1) :: IBasic PopC :: IGet (PushL l2) :: _), _
-           when l1 = l2 ->
-             let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l1) props in
-             let newasn = (newprops, VarSet.remove l1 vs, vs') in
-               check (succ (succ (succ pc))) pc' newasn
-                     (add_assumption (pc,pc') asn assumed) todo
-         | _, (IMutator (SetL l1) :: IBasic PopC :: IGet (PushL l2) :: _)
-            when l1 = l2 ->
-             let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l1) props in
-             let newasn = (newprops, vs, VarSet.remove l1 vs') in
-               check pc (succ (succ (succ pc'))) newasn
-                        (add_assumption (pc,pc') asn assumed) todo
+        let set_pop_get_pattern =
+         (uSetL $$ uPopC $$ uPushL) $? (fun ((l1,_),l2) -> l1=l2) $> (fun ((l,_),_) -> l) in
 
-         (* Peephole equations for negation combined with conditional jumps *)
-         | (IContFlow (JmpZ lab) :: _), (IOp Not :: IContFlow (JmpNZ lab') :: _)
-         | (IContFlow (JmpNZ lab) :: _), (IOp Not :: IContFlow (JmpZ lab') :: _)
-         -> check (succ pc) (succ (succ pc')) asn
-           (add_assumption (pc,pc') asn assumed)
-           (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
-              (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
-         | (IOp Not :: IContFlow (JmpNZ lab) :: _), (IContFlow (JmpZ lab') :: _)
-         | (IOp Not :: IContFlow (JmpZ lab) :: _), (IContFlow (JmpNZ lab') :: _)
-         -> check (succ (succ pc)) (succ pc') asn
-           (add_assumption (pc,pc') asn assumed)
-           (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
-              (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
+        let set_pop_get_action_left =
+         (set_pop_get_pattern $*$ parse_any) $>> (fun (l, _) ((_,n),(_,n')) ->
+           let newprops = PropSet.filter (fun (x1,_x2) -> x1 != l) props in
+           let newasn = (newprops, VarSet.remove l vs, vs') in
+           let newpc = (hs_of_pc pc, n) in
+           let newpc' = (hs_of_pc pc', n') in (* always = pc' in fact *)
+             check newpc newpc' newasn
+                   (add_assumption (pc,pc') asn assumed) todo) in
 
-        (* associativity of concatenation, restricted to the case
-           where the last thing concatenated is a literal constant
-        *)
-        | (ILitConst (String s) :: IOp Concat :: IOp Concat :: _),
-          (IOp Concat :: ILitConst (String s') :: IOp Concat :: _)
-        | (IOp Concat :: ILitConst (String s') :: IOp Concat :: _),
-          (ILitConst (String s) :: IOp Concat :: IOp Concat :: _)
-          when s = s' ->
-          check (succ (succ (succ pc))) (succ (succ (succ pc'))) asn
-                (add_assumption (pc,pc') asn assumed) todo
-        (* OK, we give up *)
-         | _, _ -> Some (pc, pc', asn, assumed, todo)
-     )
+        let set_pop_get_action_right =
+         (parse_any $*$ set_pop_get_pattern) $>> (fun (_, l) ((_,n),(_,n')) ->
+         let newprops = PropSet.filter (fun (_x1,x2) -> x2 != l) props in
+         let newasn = (newprops, vs, VarSet.remove l vs') in
+         let newpc = (hs_of_pc pc, n) in
+         let newpc' = (hs_of_pc pc', n') in
+           check newpc newpc' newasn
+                    (add_assumption (pc,pc') asn assumed) todo) in
+
+        let not_jmpnz_pattern = uNot $$ uJmpNZ $> (fun (_,l) -> l) in
+        let not_jmpz_pattern = uNot $$ uJmpZ $> (fun (_,l) -> l) in
+        let jmpz_not_jmpnz_pattern = uJmpZ $*$ not_jmpnz_pattern in
+        let not_jmpnz_jmpz_pattern = not_jmpnz_pattern $*$ uJmpZ in
+        let jmpnz_not_jmpz_pattern = uJmpNZ $*$ not_jmpz_pattern in
+        let not_jmpz_jmpnz_pattern = not_jmpz_pattern $*$ uJmpNZ in
+        let notjmp_action =
+        ( jmpz_not_jmpnz_pattern $|
+          not_jmpnz_jmpz_pattern $|
+          not_jmpz_jmpnz_pattern $|
+          jmpnz_not_jmpz_pattern) $>> (fun (lab,lab') ((_,n),(_,n')) ->
+           let newpc = (hs_of_pc pc, n) in
+           let newpc' = (hs_of_pc pc', n') in
+           check newpc newpc' asn (add_assumption (pc,pc') asn assumed)
+                (add_todo ((hs_of_pc pc, LabelMap.find lab labelmap),
+                           (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)) in
+
+        let string_concat_concat_pattern =
+          (uString $$ uConcat $$ uConcat) $> (fun ((s,_),_) -> s) in
+        let concat_string_concat_pattern =
+          (uConcat $$ uString $$ uConcat) $> (fun ((_,s),_) -> s) in
+        let concat_string_either_pattern =
+          (string_concat_concat_pattern $*$ concat_string_concat_pattern) $|
+          (concat_string_concat_pattern $*$ string_concat_concat_pattern) $?
+          (fun (s,s') -> s=s') in
+        let concat_string_either_action =
+          concat_string_either_pattern $> (fun (s,_) -> s) $>>
+          (fun _s ((_,n), (_,n')) ->
+          let newpc = (hs_of_pc pc, n) in
+          let newpc' = (hs_of_pc pc', n') in
+           check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
+
+        (* last, failure, case for use in bigmatch *)
+        let failure_pattern_action =
+         parse_any $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
+
+        let bigmatch_action = bigmatch [
+          set_pop_get_action_left;
+          set_pop_get_action_right;
+          notjmp_action;
+          concat_string_either_action;
+          failure_pattern_action;
+         ] in
+        bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))
 in
  (* We always start from ip,ip'=0 for the top entry to the function/method, but
   also take startlabelpairs, which is  list of pairs of labels from the two

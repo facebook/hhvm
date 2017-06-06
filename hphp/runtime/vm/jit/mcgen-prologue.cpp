@@ -103,7 +103,9 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   // If we're regenerating a prologue, and we want to check shouldTranslate()
   // but ignore the code size limits.  We still want to respect the global
   // translation limit and other restrictions, though.
-  if (!tc::shouldTranslateNoSizeLimit(func)) return false;
+  if (!tc::shouldTranslateNoSizeLimit(func, TransKind::OptPrologue)) {
+    return false;
+  }
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
@@ -235,7 +237,7 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // profileFunc() changed.
   if (!writer.checkKind(kind)) return nullptr;
 
-  if (!tc::shouldTranslate(func, TransKind::LivePrologue)) return nullptr;
+  if (!tc::shouldTranslate(func, kind)) return nullptr;
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.

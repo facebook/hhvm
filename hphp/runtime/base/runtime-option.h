@@ -586,6 +586,7 @@ struct RuntimeOption {
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hotcfg")                        \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
+  F(bool,     JitPGOOnly,              false)                           \
   F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent, 5)                              \

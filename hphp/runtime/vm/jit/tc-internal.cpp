@@ -95,7 +95,7 @@ const StaticString
   s_php_errormsg("php_errormsg"),
   s_http_response_header("http_response_header");
 
-bool shouldTranslateNoSizeLimit(const Func* func) {
+bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) {
     return false;
@@ -106,12 +106,16 @@ bool shouldTranslateNoSizeLimit(const Func* func) {
     return false;
   }
 
-  /*
-   * We don't support JIT compiling functions that use some super-dynamic php
-   * variables.
-   */
+  // We don't support JIT compiling functions that use some super-dynamic php
+  // variables.
   if (func->lookupVarId(s_php_errormsg.get()) != -1 ||
       func->lookupVarId(s_http_response_header.get()) != -1) {
+    return false;
+  }
+
+  // Refuse to JIT Live translations if Eval.JitPGOOnly is enabled.
+  if (RuntimeOption::EvalJitPGOOnly &&
+      (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
     return false;
   }
 
@@ -121,7 +125,7 @@ bool shouldTranslateNoSizeLimit(const Func* func) {
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 
 bool shouldTranslate(const Func* func, TransKind kind) {
-  if (!shouldTranslateNoSizeLimit(func)) return false;
+  if (!shouldTranslateNoSizeLimit(func, kind)) return false;
 
   const auto serverMode = RuntimeOption::ServerExecutionMode();
   const auto maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;

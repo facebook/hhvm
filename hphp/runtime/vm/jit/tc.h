@@ -178,7 +178,7 @@ bool canTranslate();
  * Whether we should emit a translation of kind for func, ignoring the cap on
  * overall TC size.
  */
-bool shouldTranslateNoSizeLimit(const Func* func);
+bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind);
 
 /*
  * Whether we should emit a translation of kind for func.

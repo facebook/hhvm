@@ -22,6 +22,7 @@ module TNBody       = Typing_naming_body
 type mode =
   | Ai of Ai_options.t
   | Autocomplete
+  | Ffp_autocomplete
   | Color
   | Coverage
   | Dump_symbol_info
@@ -247,6 +248,9 @@ let parse_options () =
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
       " Produce autocomplete suggestions";
+    "--ffp-auto-complete",
+      Arg.Unit (set_mode Ffp_autocomplete),
+      " Produce autocomplete suggestions using the full-fidelity parse tree";
     "--colour",
       Arg.Unit (set_mode Color),
       " Produce colour output";
@@ -576,6 +580,12 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty
       end result
+  | Ffp_autocomplete ->
+      let filename_string = Relative_path.to_absolute filename in
+      let (keyword, row, col) =
+        FfpAutocompleteService.auto_complete filename_string
+      in
+      Printf.printf "Test type: %s\nRow: %d\nCol: %d\n" keyword row col
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin

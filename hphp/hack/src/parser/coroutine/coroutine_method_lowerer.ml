@@ -12,6 +12,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
 
 open EditableSyntax
 open CoroutineSyntax
+open Coroutine_state_machine_generator
 
 (**
  * To desguar a coroutine, a parameter representing the subsequent continuation
@@ -100,39 +101,53 @@ let make_state_machine_method_reference_syntax
  * coroutine, pass in or set any necessary variables, and return the result from
  * invoking resume (with a null argument).
  *)
-let rewrite_coroutine_body
-    classish_name
-    function_name
-    method_node
-    function_parameter_list =
-  let arg_list = parameter_list_to_arg_list function_parameter_list in
-  let state_machine_method_reference_syntax =
-    make_state_machine_method_reference_syntax
+
+ let rewrite_coroutine_body
+     classish_name
+     function_name
+     { function_parameter_list; function_type; _}
+     rewritten_body =
+   (* $param1, $param2 *)
+   let arg_list = parameter_list_to_arg_list function_parameter_list in
+
+  (* ($closure, $data, $exception) ==> { body } *)
+  let lambda_signature = make_closure_lambda_signature
       classish_name
       function_name
-      method_node in
+      function_type in
+  let lambda = make_lambda_syntax lambda_signature rewritten_body in
   let classname = make_closure_classname classish_name function_name in
+  (* $continuation,
+    ($closure, $data, $exception) ==> { body },
+    $param1, $param2 *)
   let parameters =
     continuation_variable_syntax ::
-    state_machine_method_reference_syntax ::
+    lambda ::
     arg_list in
+  (* new Closure($continuation, ...) *)
   let new_closure_syntax = make_object_creation_expression_syntax
     classname parameters in
+  (* new Closure($continuation, ...)->resume *)
   let select_resume_member_syntax =
     make_member_selection_expression_syntax
       new_closure_syntax
       resume_member_name_syntax in
+
+  (* new Closure($continuation, ...)->resume(null) *)
   let call_resume_with_null_syntax =
     make_function_call_expression_syntax
       select_resume_member_syntax
       [null_syntax] in
+  (* new Closure($continuation, ...)->resume(null); *)
   let resume_statement_syntax =
     make_expression_statement_syntax call_resume_with_null_syntax in
+  (* SuspendedCoroutineResult::create() *)
   let suspended_marker_expression =
     make_static_function_call_expression_syntax
       suspended_coroutine_result_classname
       suspended_member_name
       [] in
+  (* return SuspendedCoroutineResult::create(); *)
   let return_syntax =
     make_return_statement_syntax suspended_marker_expression in
   make_list [resume_statement_syntax; return_syntax]
@@ -140,16 +155,17 @@ let rewrite_coroutine_body
 let try_to_rewrite_coroutine_body
     classish_name
     function_name
-    ({ methodish_function_body; _; } as method_node)
-    function_parameter_list =
+    methodish_function_body
+    header_node
+    rewritten_body =
   match syntax methodish_function_body with
   | CompoundStatement node ->
-      let compound_statements =
-        rewrite_coroutine_body
-          classish_name
-          function_name
-          method_node
-          function_parameter_list in
+      let compound_statements = rewrite_coroutine_body
+        classish_name
+        function_name
+        header_node
+        rewritten_body in
+
       Some (make_syntax (CompoundStatement { node with compound_statements }))
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
@@ -163,14 +179,15 @@ let try_to_rewrite_coroutine_body
 let maybe_rewrite_methodish_declaration
     classish_name
     function_name
-    method_node
-    ({ function_parameter_list; _; } as header_node) =
+    ({ methodish_function_body; _; } as method_node)
+    header_node
+    rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
   Option.map2
     (rewrite_function_decl_header header_node)
-    (try_to_rewrite_coroutine_body
-        classish_name function_name method_node function_parameter_list)
+    (try_to_rewrite_coroutine_body classish_name function_name
+      methodish_function_body header_node rewritten_body)
     ~f:(fun methodish_function_decl_header methodish_function_body ->
       make_syntax
         { method_node with

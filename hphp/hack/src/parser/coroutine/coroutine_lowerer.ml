@@ -40,7 +40,7 @@ let maybe_generate_methods_and_closure
     method_node
     header_node
     function_name =
-  let state_machine_syntax, state_machine_data =
+  let rewritten_body, state_machine_data =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       classish_name
       function_name
@@ -58,9 +58,11 @@ let maybe_generate_methods_and_closure
       classish_name
       function_name
       method_node
-      header_node)
+      header_node
+      rewritten_body)
+    (* TODO: This need not be a list -- fix it. *)
     (fun rewritten_method_syntax ->
-      [ rewritten_method_syntax; state_machine_syntax ], closure_syntax)
+      [ rewritten_method_syntax ], closure_syntax)
 
 (* A void function becomes a unit function; if the annotation is missing it
 becomes mixed. *)

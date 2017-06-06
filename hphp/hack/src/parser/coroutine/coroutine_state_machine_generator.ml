@@ -794,8 +794,31 @@ let make_function_decl_header
     classish_name
     function_name
     { function_type; _; } =
+  (*
+  function foo_GeneratedStateMachine(
+    C_foo_GeneratedClosure $closure,
+    mixed $coroutineData,
+    ?Exception $exception) : CoroutineResult<Unit>
+  *)
   make_function_decl_header_syntax
     (make_state_machine_method_name function_name)
+    [
+      make_closure_parameter_syntax classish_name function_name;
+      coroutine_data_parameter_syntax;
+      nullable_exception_parameter_syntax;
+    ]
+    (make_coroutine_result_type_syntax function_type)
+
+let make_closure_lambda_signature
+    classish_name
+    function_name
+    function_type =
+  (*
+  ( C_foo_GeneratedClosure $closure,
+    mixed $coroutineData,
+    ?Exception $exception) : CoroutineResult<Unit>
+  *)
+  make_lambda_signature_syntax
     [
       make_closure_parameter_syntax classish_name function_name;
       coroutine_data_parameter_syntax;
@@ -854,11 +877,4 @@ let generate_coroutine_state_machine
   let body, locals_and_params = lower_body method_node in
   let state_machine_data =
     compute_state_machine_data locals_and_params function_node in
-  let methodish_modifiers =
-    Utils.singleton_if (is_static_method method_node) static_syntax in
-  let state_machine_method =
-    make_methodish_declaration_with_body_syntax
-      ~methodish_modifiers
-      (make_function_decl_header classish_name function_name function_node)
-      body in
-  state_machine_method, state_machine_data
+  body, state_machine_data

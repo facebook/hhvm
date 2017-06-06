@@ -133,6 +133,7 @@ let generate_coroutine_closure
     state_machine_data =
   make_classish_declaration_syntax
     (make_closure_classname classish_name function_name)
+    (* TODO "mixed" is wrong; it should be the same return type as the lambda.*)
     [ make_continuation_type_syntax mixed_syntax ]
     (generate_closure_body
       classish_name

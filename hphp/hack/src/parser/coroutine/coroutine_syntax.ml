@@ -61,6 +61,9 @@ let comma_syntax =
 let colon_colon_syntax =
   make_token_syntax TokenKind.ColonColon "::"
 
+let lambda_arrow_syntax =
+  make_token_syntax TokenKind.EqualEqualGreaterThan "==>"
+
 let semicolon_syntax =
   make_token_syntax TokenKind.Semicolon ";"
 
@@ -304,11 +307,17 @@ let make_parameter_declaration_syntax
     (* default value *)  (make_missing ())
 
 let make_simple_type_specifier_syntax classname =
-  let classname_syntax = make_token_syntax TokenKind.Classname classname in
+  (* TODO: This isn't right; the "classname" token should be just for the
+  keyword "classname". *)
+  let classname_syntax = make_token_syntax
+    ~space_after:true TokenKind.Classname classname in
   make_simple_type_specifier classname_syntax
 
 let make_generic_type_specifier_syntax classname generic_argument_list =
-  let classname_syntax = make_token_syntax TokenKind.Classname classname in
+  (* TODO: This isn't right; the "classname" token should be just for the
+  keyword "classname". *)
+  let classname_syntax = make_token_syntax
+    ~space_after:true TokenKind.Classname classname in
   let generic_argument_list_syntax =
     make_delimited_list comma_syntax generic_argument_list in
   let type_arguments_syntax =
@@ -362,6 +371,19 @@ let make_methodish_declaration_with_body_syntax
     function_decl_header_syntax
     function_body
     (* methodish_semicolon *) (make_missing ())
+
+let make_lambda_signature_syntax lambda_parameters lambda_type =
+  let lambda_parameters = make_delimited_list comma_syntax lambda_parameters in
+  make_lambda_signature left_paren_syntax lambda_parameters
+    right_paren_syntax colon_syntax lambda_type
+
+let make_lambda_syntax lambda_signature lambda_body =
+  make_lambda_expression
+    (make_missing()) (* async *)
+    (make_missing()) (* coroutine *)
+    lambda_signature
+    lambda_arrow_syntax
+    lambda_body
 
 let make_methodish_declaration_syntax
     ?methodish_modifiers

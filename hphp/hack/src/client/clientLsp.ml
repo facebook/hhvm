@@ -107,6 +107,7 @@ let hack_errors_to_lsp_diagnostic (filename: string)
 type server_conn = {
   ic : Timeout.in_channel;
   oc : out_channel;
+  root : Path.t;
 
   (* Pending messages sent from the server. They need to be relayed to the
      client. *)
@@ -402,20 +403,22 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
 
 
 let log_error
+  (state: state)
   (event: event option)
   (message: string)
-  (_stack: string)
+  (stack: string)
+  (source: string)
+  (start_handle_t: float)
   : unit =
-  let (command, kind) = match event with
-    | Some (Client_message c) ->
+  let root = Option.map state.server_conn ~f:(fun sc -> sc.root) in
+  match event with
+  | Some Client_message c ->
       let open ClientMessageQueue in
-      (Some c.method_, Some (kind_to_string c.kind))
-    | _ -> (None, None)
-  in
-  HackEventLogger.client_command_exception
-    ~command
-    ~kind
-    ~message
+      HackEventLogger.client_lsp_method_exception
+        root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t
+        message stack source
+  | _ ->
+    HackEventLogger.client_lsp_exception root message stack source
 
 
 (************************************************************************)
@@ -887,7 +890,7 @@ let do_initialize_connect
   try
     let (ic, oc) = ClientConnect.connect env_connect in
     let pending_messages = Queue.create () in
-    { ic; oc; pending_messages; }
+    { ic; oc; root; pending_messages; }
   with
   | Exit_with No_server_running ->
       (* Raised when (1) the connection was refused/timed-out and no lockfile *)
@@ -1253,6 +1256,9 @@ let main () : unit =
   } in
   while true do
     let ref_event = ref None in
+    let start_handle_t = Unix.gettimeofday () in
+    (* TODO: we should log how much of the "handling" time was spent *)
+    (* idle just waiting for an RPC response from hh_server.         *)
     try
       let event = get_next_event state in
       ref_event := Some event;
@@ -1264,28 +1270,34 @@ let main () : unit =
           (* Log to scuba the time the message arrived at hh_client and the *)
           (* time we finished handling it. This includes any time it spent  *)
           (* waiting in the queue...                                        *)
-          let command =
+          let method_ =
             if c.kind = Response
             then get_outstanding_method_name c.id
             else c.method_ in
-          HackEventLogger.client_handled_command
-            ~command
-            ~start_t:c.timestamp
-            ~kind:(kind_to_string c.kind);
+          let root = Option.map state.server_conn ~f:(fun sc -> sc.root) in
+          HackEventLogger.client_lsp_method_handled
+            ~root
+            ~method_
+            ~kind:(kind_to_string c.kind)
+            ~start_queue_t:c.timestamp
+            ~start_handle_t;
         end
       | _ -> ()
     with
     | Server_fatal_connection_exception edata ->
-      log_error !ref_event edata.message edata.stack;
+      let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
+      log_error state !ref_event edata.message stack "from_server" start_handle_t;
       exit_fail_delay ()
     | Client_fatal_connection_exception edata ->
-      log_error !ref_event edata.message edata.stack;
+      let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
+      log_error state !ref_event edata.message stack "from_client" start_handle_t;
       exit_fail ()
     | Client_recoverable_connection_exception edata ->
-      log_error !ref_event edata.message edata.stack;
+      let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
+      log_error state !ref_event edata.message stack "from_client" start_handle_t;
     | e ->
       let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
-      log_error !ref_event message stack;
+      log_error state !ref_event message stack "from_lsp" start_handle_t;
   done

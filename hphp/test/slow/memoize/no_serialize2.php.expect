@@ -1,0 +1,12 @@
+C1::func1
+int(123)
+C1::func1
+int(123)
+C2::func1
+string(3) "abc"
+C2::func2
+string(3) "def"
+C2::func1
+string(3) "abc"
+C2::func2
+string(3) "def"

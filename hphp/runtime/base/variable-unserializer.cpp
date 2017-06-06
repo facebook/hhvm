@@ -553,6 +553,15 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   } else {
+    // Ignore fields which are marked as NoSerialize
+    auto const cls = obj->getVMClass();
+    auto const propIdx = cls->getDeclPropIndex(ctx, key.get()).prop;
+    assertx(propIdx != kInvalidSlot);
+    if (UNLIKELY(cls->declProperties()[propIdx].attrs & AttrNoSerialize)) {
+      Variant temp;
+      return unserializePropertyValue(temp, nProp);
+    }
+
     t = &tvAsVariant(lookup.prop);
   }
 
@@ -999,6 +1008,15 @@ void VariableUnserializer::unserializeVariant(
                 mismatch = true;
                 break;
               }
+
+              // Ignore NoSerialize props if present
+              if (UNLIKELY(prop.attrs & AttrNoSerialize)) {
+                ++objProps;
+                Variant temp;
+                unserializePropertyValue(temp, remainingProps--);
+                continue;
+              }
+
               // don't need to worry about overwritten list, because
               // this is definitely the first time we're setting this
               // property.

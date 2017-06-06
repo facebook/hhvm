@@ -208,6 +208,7 @@ slow/dom_document/1676.php
 slow/dom_document/1677.php
 slow/dom_document/copy_props.php
 slow/dom_document/import_simlexml.php
+slow/dv_array/basic-parsing.php
 slow/dv_array/constants.php
 slow/dv_array/convert.php
 slow/dv_array/hh-only1.php

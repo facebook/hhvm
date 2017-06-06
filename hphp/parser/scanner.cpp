@@ -375,6 +375,8 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_DICT:
       case T_VEC:
       case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
       case T_FUNCTION:
       case T_DOUBLE_ARROW:
       case T_DOUBLE_COLON:
@@ -466,6 +468,8 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_DICT:
       case T_VEC:
       case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:
@@ -595,6 +599,8 @@ static bool isValidClassConstantName(int tokid) {
   case T_DICT:
   case T_VEC:
   case T_KEYSET:
+  case T_VARRAY:
+  case T_DARRAY:
     return true;
   default:
     return false;
@@ -621,6 +627,8 @@ bool Scanner::tryParseClassConstant(TokenStore::iterator& pos) {
       case T_DICT:
       case T_VEC:
       case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:

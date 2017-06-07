@@ -534,7 +534,8 @@ and convert_class_elt env st ce =
     let env = env_with_method env md in
     let st = reset_function_count st in
     let st, block = convert_block env st md.m_body in
-    st, Method { md with m_body = block }
+    let st, params = convert_params env st md.m_params in
+    st, Method { md with m_body = block; m_params = params }
 
   | ClassVars (kinds, hint, cvl) ->
     let st, cvl = List.map_env st cvl (convert_class_var env) in

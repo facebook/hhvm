@@ -338,7 +338,6 @@ slow/ext_wddx/bug35410_64bit.php
 slow/ext_wddx/bug37587.php
 slow/ext_wddx/bug41527.php
 slow/ext_wddx/malformed.php
-slow/ext_weakref/weakref_destroy_in_dtor.php
 slow/ext_xdebug/get_code_coverage.php
 slow/ext_xdebug/get_function_stack.php
 slow/ext_xdebug/get_function_stack_noparams.php

@@ -26,10 +26,12 @@ open Hhbc_destruct
 let adata1_ref = ref ([] : Hhas_adata.t list)
 let adata2_ref = ref ([] : Hhas_adata.t list)
 
-(* Ref keeping to-do set for pairs of anonymous closure classes that
-   need to be compared *)
+(* Ref keeping to-do set for pairs of classes that
+   need to be compared. Originally just for closure classes, now
+   for all corresponding pairs *)
 module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
-let anon_classes_to_check = ref (IntIntSet.empty)
+let classes_to_check = ref (IntIntSet.empty)
+let classes_checked = ref (IntIntSet.empty)
 
 let rec lookup_adata id data_dict =
 match data_dict with
@@ -434,7 +436,7 @@ let check_instruct_misc asn i i' =
   | _, MemoGet(_,_,_) -> None (* wimp out again *)
   | CreateCl(npars,cln), CreateCl(npars',cln') ->
    if npars = npars' then
-     (anon_classes_to_check := IntIntSet.add (cln,cln') (!anon_classes_to_check);
+     (classes_to_check := IntIntSet.add (cln,cln') (!classes_to_check);
      Some asn)
    else None (* fail in this case *)
   | _, _ -> if i=i' then Some asn else None
@@ -672,6 +674,9 @@ let equiv prog prog' startlabelpairs =
         | IGenerator ins, IGenerator ins' ->
            if ins = ins' then nextins()
            else try_specials ()
+        | IIncludeEvalDefine (DefCls cid), IIncludeEvalDefine (DefCls cid') ->
+            (classes_to_check := IntIntSet.add (cid,cid') (!classes_to_check);
+            nextins ())
         | IIncludeEvalDefine ins, IIncludeEvalDefine ins' ->
            if ins = ins' then nextins()
            else try_specials ()

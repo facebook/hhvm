@@ -350,12 +350,6 @@ let methods_alist_of_class c =
  List.map (fun m -> (Hhbc_id.Method.to_raw_string (Hhas_method.name m), m))
           (Hhas_class.methods c)
 
-(* changing this to only look at non-closure classes *)
-let classes_alist_of_program p =
-  List.map (fun c -> (Hhbc_id.Class.to_raw_string (Hhas_class.name c),c))
-          (List.filter (fun c -> not (Hhas_class.is_closure_class c))
-          (Hhas_program.classes p))
-
 let name_comparer = string_comparer
 let param_name_comparer = wrap Hhas_param.name
                                (fun _p s -> s) name_comparer
@@ -624,14 +618,14 @@ let option_is_some o = match o with Some _ -> true | None -> false
 let body_instrs_comparer = {
   comparer = (fun b b' ->
       let todo = match Core.List.zip (Hhas_body.params b) (Hhas_body.params b') with
-        | None -> [] (* different lengths so just look at start *)
-        | Some pps ->
-          let havedefs = List.filter
+        | None -> [] (* different lengths so just look at initial entry point *)
+        | Some param_pairs ->
+          let params_with_defaults = List.filter
            (fun (p,p') -> option_is_some (Hhas_param.default_value p) &&
-                          option_is_some (Hhas_param.default_value p')) pps in
+                          option_is_some (Hhas_param.default_value p')) param_pairs in
           List.map  (fun (p,p') ->
            (fst (option_get (Hhas_param.default_value p)),
-            fst (option_get (Hhas_param.default_value p')))) havedefs
+            fst (option_get (Hhas_param.default_value p')))) params_with_defaults
       in
       let inss = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b) in
       let inss' = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b') in
@@ -700,55 +694,51 @@ let class_header_properties_methods_comparer =
 (* TODO: add all the other bits to classes *)
 let class_comparer = class_header_properties_methods_comparer
 
-let classes_alist_comparer =
- alist_comparer class_comparer (fun cname -> cname)
+let program_functions_comparer = wrap functions_alist_of_program
+                           (fun _p s -> s) functions_alist_comparer
 
-(* Previous simple-minded comparison of classes by matching names doesn't
- really do the right thing for anonymous closure classes. So we fall back on
- some foul hackery. This could be avoided by refactoring the combinators to
- carry a bit more context around, but a dirty ref is quicker :-(
- *)
+let program_main_functions_comparer =
+join (fun s1 s2 -> s1 ^ s2) program_main_comparer program_functions_comparer
 
-let program_named_classes_comparer = wrap classes_alist_of_program
-                       (fun _p s -> s) classes_alist_comparer
-
-let todosplitter s = if Rhl.IntIntSet.is_empty s then None
-else let iip = Rhl.IntIntSet.choose s in
-     Some (iip, Rhl.IntIntSet.remove iip s)
+(* Refactoring so that all comparison of classes is triggered off the dynamic
+   use of DefCls etc. in main and top-level functions (and then recursively by
+   methods therein), rather than by a static association list.
+   This should even do the "right" thing in the case that there
+   are multiple classes with the same name that are dynamically registered *)
+let todosplitter s = if Rhl.IntIntSet.is_empty s
+                     then None
+                     else let iip = Rhl.IntIntSet.choose s in
+                          Some (iip, Rhl.IntIntSet.remove iip s)
 
 let compare_classes_of_programs p p' =
- let _ = Rhl.anon_classes_to_check := Rhl.IntIntSet.empty in (* clear here to be on the safe side *)
- let (dist, (size,edits)) = program_named_classes_comparer.comparer p p' in
+  let _ = Rhl.classes_to_check := Rhl.IntIntSet.empty in
+  let _ = Rhl.classes_checked := Rhl.IntIntSet.empty in
+ (* clear ref here to be on the safe side *)
+ let (dist, (size,edits)) = program_main_functions_comparer.comparer p p' in
  let rec loop d s e =
-  let td = !Rhl.anon_classes_to_check in
+  let td = !Rhl.classes_to_check in
    match todosplitter td with
     | None -> (d,(s,e))
     | Some ((ac,ac'), newtodo) ->
-    let actual_class = List.nth (Hhas_program.classes p) ac in
-    let actual_class' = List.nth (Hhas_program.classes p') ac' in
-    let _ = Printf.eprintf "closure classes %d=%s and %d=%s\n"
-     ac (Hhbc_id.Class.to_raw_string @@ Hhas_class.name actual_class) ac'
-     (Hhbc_id.Class.to_raw_string @@ Hhas_class.name actual_class') in
-    let _ = Rhl.anon_classes_to_check := newtodo in (* We've done this pair *)
-    let (dc, (sc,ec)) = class_comparer.comparer actual_class actual_class' in
-    loop (d+dc) (s+sc) (edits ^ ec)
-in loop dist size edits
+     (Rhl.classes_to_check := newtodo;
+      if Rhl.IntIntSet.mem (ac,ac') (!Rhl.classes_checked)
+      then loop d s e (* already done this pair *)
+      else
+       let actual_class = List.nth (Hhas_program.classes p) ac in
+       let actual_class' = List.nth (Hhas_program.classes p') ac' in
+       let _ = Rhl.classes_checked := Rhl.IntIntSet.add (ac,ac') (!Rhl.classes_checked) in
+       let (dc, (sc,ec)) = class_comparer.comparer actual_class actual_class' in
+       loop (d+dc) (s+sc) (e ^ ec))
+  in loop dist size edits
 
-let program_classes_comparer = {
+let program_main_functions_classes_comparer = {
   comparer = compare_classes_of_programs;
-  size_of = program_named_classes_comparer.size_of; (* WRONG *)
-  string_of = program_named_classes_comparer.string_of; (* WRONG *)
+  size_of = (fun p -> program_main_functions_comparer.size_of p
+                    + sumsize class_comparer.size_of (Hhas_program.classes p));
+  string_of = (fun p -> program_main_functions_comparer.string_of p  ^
+               String.concat "\n"
+               (List.map class_comparer.string_of (Hhas_program.classes p)));
 }
-
-let program_functions_comparer = wrap functions_alist_of_program
-                            (fun _p s -> s) functions_alist_comparer
-
-let program_main_functions_comparer =
- join (fun s1 s2 -> s1 ^ s2) program_main_comparer program_functions_comparer
-
-let program_main_functions_classes_comparer =
- join (fun s1 s2 -> s1 ^ s2) program_main_functions_comparer
-                             program_classes_comparer
 
 (* top level comparison for whole programs *)
 let program_comparer = program_main_functions_classes_comparer

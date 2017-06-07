@@ -72,6 +72,7 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  * 12. State of each iterator variable known everywhere.
  * 13. initialized state of iterators correct for Iter* instructions.
  * 17. Asserts not separated from following instruction by control flow
+ * 18. Member instruction sequences are consistent and continuous
  * -- All region and branch offsets must refer to valid instruction starts.
  * -- Every FPI region is wholly contained in one body/funclet section.
  * -- every string table index in-bounds

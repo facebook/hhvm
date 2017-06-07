@@ -3337,7 +3337,6 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
       assert(key.m_type == KindOfPersistentString);
       result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
-
     case MOpMode::Define:
       if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
     case MOpMode::Unset:

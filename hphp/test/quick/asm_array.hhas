@@ -84,7 +84,7 @@
   String "baz"
   SetL $key
   PopC
-  BaseL $arr None
+  BaseL $arr Unset
   UnsetM 0 EL:$key
 
   # Test that it's unset

@@ -1262,16 +1262,12 @@ and get_prop_member_key env null_flavor stack_index prop_expr =
  *   QueryM 1 CGet EC:0
  *)
 and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as expr) =
-   let base_mode =
-     match mode with
-     | MemberOpMode.Unset -> MemberOpMode.ModeNone
-     | _ -> mode in
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
      instr_string (SU.Locals.strip_dollar x),
      instr (IBase (
      match param_num_opt with
-     | None -> BaseGC (base_offset, base_mode)
+     | None -> BaseGC (base_offset, mode)
      | Some i -> FPassBaseGC (i, base_offset)
      )),
      1
@@ -1287,7 +1283,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseL (v, base_mode)
+       | None -> BaseL (v, mode)
        | Some i -> FPassBaseL (i, v)
        )),
      0
@@ -1303,7 +1299,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseGL (v, base_mode)
+       | None -> BaseGL (v, mode)
        | Some i -> FPassBaseGL (i, v)
        )),
      0
@@ -1313,7 +1309,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      elem_expr_instrs,
      instr (IBase (
      match param_num_opt with
-     | None -> BaseGC (base_offset, base_mode)
+     | None -> BaseGC (base_offset, mode)
      | Some i -> FPassBaseGC (i, base_offset)
      )),
    1
@@ -1377,7 +1373,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      1
    | A.Lvarvar (1, (_, id)) ->
      empty,
-     instr_basenl (get_non_pipe_local id) base_mode,
+     instr_basenl (get_non_pipe_local id) mode,
      0
    | A.Lvarvar (n, (_, id)) ->
      let base_expr_instrs = gather [
@@ -1386,7 +1382,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      ]
      in
      base_expr_instrs,
-     instr_basenc base_offset base_mode,
+     instr_basenc base_offset mode,
      1
 
    | _ ->

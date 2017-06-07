@@ -844,6 +844,13 @@ initialized after being written.
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
+18) Sequences of member instructions should be consistent and continuous. That
+is, only member instructions and asserts may appear in the sequence, control
+flow cannot interrupt the sequence, and the member op mode should be consistent
+across all instructions in the sequence. This is because in the case of
+exceptions the unwinder decides whether the member state is live by looking at
+the instruction that threw.
+
 Instruction set
 ---------------
 
@@ -3501,15 +3508,11 @@ BaseH    []  ->  []
 10.2 Intermediate operations
 -----------------------------
 
-Dim   <member key>    <prop/elem op> <member op mode>    []  ->  []
+Dim  <member op mode> <member key>     []  ->  []
 
-FPassDim   <param id> <member key> <prop/elem op>    []  ->  []
+FPassDim   <param id> <member key>    []  ->  []
 
   {Prop,Elem}{L,C,I,T}{W,D,U} member operation.
-
-DimNewElem <member op mode>    []  ->  []
-
-FPassDimNewElem <param id>    []  ->  []
 
   NewElem operation.
 

@@ -1,0 +1,22 @@
+Verification Error (unit %s func ): Member base register mode at QueryM is Warn when it should be None
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.
+
+Warning: Creating default object from empty value in /%s on line -1
+
+Warning: Creating default object from empty value in %s on line -1
+array(1) {
+  ["x"]=>
+  array(1) {
+    ["y"]=>
+    object(stdClass)#1 (1) {
+      ["bar"]=>
+      array(1) {
+        ["q"]=>
+        object(stdClass)#2 (1) {
+          ["a"]=>
+          int(12)
+        }
+      }
+    }
+  }
+}

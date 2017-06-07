@@ -6690,9 +6690,7 @@ size_t EmitterVisitor::emitMOp(
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
-  auto const baseMode = opts.fpass ? MOpMode::None :
-                        opts.mode == MOpMode::Unset ? MOpMode::None :
-                        opts.mode;
+  auto const baseMode = opts.fpass ? MOpMode::None : opts.mode;
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);

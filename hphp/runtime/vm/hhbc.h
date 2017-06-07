@@ -1077,6 +1077,31 @@ inline bool isMemberFinalOp(Op op) {
   }
 }
 
+inline bool isMemberOp(Op op) {
+  return isMemberBaseOp(op) || isMemberDimOp(op) || isMemberFinalOp(op);
+}
+
+inline MOpMode finalMemberOpMode(Op op) {
+  switch(op){
+    case Op::FPassM:
+    case Op::MemoGet:
+      return MOpMode::Warn;
+    case Op::SetM:
+    case Op::VGetM:
+    case Op::IncDecM:
+    case Op::SetOpM:
+    case Op::BindM:
+    case Op::SetWithRefLML:
+    case Op::SetWithRefRML:
+    case Op::MemoSet:
+      return MOpMode::Define;
+    case Op::UnsetM:
+      return MOpMode::Unset;
+    default:
+      return MOpMode::None;
+  }
+}
+
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
   return op == OpRetC || op == OpRetV || op == OpNativeImpl ||

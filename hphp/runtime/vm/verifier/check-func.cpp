@@ -63,6 +63,7 @@ struct State {
   int stklen;       // length of evaluation stack.
   int fpilen;       // length of FPI stack.
   bool mbr_live;    // liveness of member base register
+  folly::Optional<MOpMode> mbr_mode; // mode of member base register
 };
 
 /**
@@ -779,6 +780,31 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
           cur->mbr_live ? "live" : "dead", opcodeToName(op));
     ok = false;
   }
+  if (cur->mbr_live && isMemberOp(op)) {
+    folly::Optional<MOpMode> op_mode;
+    if (op == Op::QueryM) {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      decode_iva(new_pc);
+      op_mode = getQueryMOpMode(decode_oa<QueryMOp>(new_pc));
+    } else if (isMemberFinalOp(op)) {
+      op_mode = finalMemberOpMode(op);
+    } else if (op == Op::Dim) {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      op_mode = decode_oa<MOpMode>(new_pc);
+    }
+
+    if(cur->mbr_mode && cur->mbr_mode != op_mode){
+      error("Member base register mode at %s is %s when it should be %s\n",
+            opcodeToName(op),
+            op_mode ? subopToName(op_mode.value()) : "Unknown",
+            subopToName(cur->mbr_mode.value()));
+      ok = false;
+    }
+
+    cur->mbr_mode = op_mode;
+  }
   return ok;
 }
 
@@ -1047,8 +1073,19 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     }
   }
 
-  if (isMemberBaseOp(op))       cur->mbr_live = true;
-  else if (isMemberFinalOp(op)) cur->mbr_live = false;
+  if (isMemberBaseOp(op)) {
+    cur->mbr_live = true;
+    if (op == Op::BaseNC || op == Op::BaseNL || op == Op::BaseGC ||
+        op == Op::BaseGL || op == Op::BaseL)  {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      decode_iva(new_pc);
+      cur->mbr_mode = decode_oa<MOpMode>(new_pc);
+    }
+  } else if (isMemberFinalOp(op)) {
+    cur->mbr_live = false;
+    cur->mbr_mode.clear();
+  }
 
   return ok;
 }
@@ -1116,6 +1153,7 @@ void FuncChecker::initState(State* s) {
   s->stklen = 0;
   s->fpilen = 0;
   s->mbr_live = false;
+  s->mbr_mode.clear();
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1128,6 +1166,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
+  to->mbr_mode = from->mbr_mode;
 }
 
 /**

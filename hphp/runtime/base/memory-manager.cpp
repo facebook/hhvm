@@ -899,6 +899,8 @@ MemBlock MemoryManager::mallocBigSize<MemoryManager::ZeroFreeActual>(
 );
 
 MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
+  assert(n->kind() == HeaderKind::BigMalloc);
+  assert(nbytes + sizeof(MallocNode) > kMaxSmallSize);
   auto old_size = n->nbytes - sizeof(MallocNode);
   auto block = m_heap.resizeBig(n + 1, nbytes);
   m_stats.mmUsage += block.size - old_size;
@@ -970,15 +972,16 @@ static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
          ptr, nbytes, tyindex);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->nbytes <= kMaxSmallSize)) {
-    // old block was small, cannot resize.
+  if (LIKELY(n->nbytes <= kMaxSmallSize) ||
+      UNLIKELY(nbytes + sizeof(MallocNode) <= kMaxSmallSize)) {
+    // either the old or new block will be small; force a copy.
     auto newmem = allocate<false>(nbytes, tyindex);
     auto copy_size = std::min(n->nbytes - sizeof(MallocNode), nbytes);
     newmem = memcpy(newmem, ptr, copy_size);
-    MM().freeSmallSize(n, n->nbytes);
+    req::free(ptr);
     return newmem;
   }
-  // Ok, it's a big allocation.
+  // it's a big allocation.
   auto block = MM().resizeBig(n, nbytes);
   return block.ptr;
 }
@@ -1006,8 +1009,10 @@ void free(void* ptr) {
   if (!ptr) return;
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->nbytes <= kMaxSmallSize)) {
+    assert(n->kind() == HeaderKind::SmallMalloc);
     return MM().freeSmallSize(n, n->nbytes);
   }
+  assert(n->kind() == HeaderKind::BigMalloc);
   MM().freeBigSize(ptr, n->nbytes - sizeof(MallocNode));
 }
 

@@ -2452,7 +2452,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return    string  The name of the type alias
    */
   public function getName() {
-    return $name;
+    return $this->name;
   }
 
   // Prevent cloning

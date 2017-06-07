@@ -91,17 +91,25 @@ let builder = object (this)
 
     chunks <- (match chunks with
       | hd :: tl when hd.Chunk.is_appendable ->
-        let text = hd.Chunk.text ^ (if pending_space then " " else "") ^ s in
+        let text = hd.Chunk.text ^ (if pending_space then " " else "") in
         pending_space <- false;
         let indentable = hd.Chunk.indentable && not multiline in
         let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
+        let hd =
+          if is_trivia
+          then {hd with Chunk.text = text ^ s}
+          else Chunk.add_token hd s width seen_chars in
         hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
           pending_space <- false;
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
-            let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+            let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
+            let chunk =
+              if is_trivia
+              then {chunk with Chunk.text = s}
+              else Chunk.add_token chunk s width seen_chars in
             let chunk = {chunk with Chunk.indentable = not multiline} in
             let cs = chunk :: chunks in
             this#end_rule ();
@@ -110,7 +118,11 @@ let builder = object (this)
           in
           match next_split_rule with
             | NoRule ->
-              let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+              let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
+              let chunk =
+                if is_trivia
+                then {chunk with Chunk.text = s}
+                else Chunk.add_token chunk s width seen_chars in
               let chunk = {chunk with Chunk.indentable = not multiline} in
               chunk :: chunks
             | LazyRuleID rule_id ->
@@ -199,7 +211,7 @@ let builder = object (this)
     let nesting = nesting_alloc.Nesting_allocator.current_nesting in
     let create_empty_chunk () =
       let rule = this#create_rule Rule.Always in
-      let chunk = Chunk.make "" (Some rule) nesting last_chunk_end in
+      let chunk = Chunk.make (Some rule) nesting last_chunk_end in
       last_chunk_end <- seen_chars;
       Chunk.finalize chunk rule rule_alloc false None seen_chars
     in

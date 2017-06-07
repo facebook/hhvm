@@ -50,7 +50,7 @@ let parse_options () =
 
     "--at-char",
       Arg.Int (fun x -> at_char := Some x),
-      "[idx]  Format the smallest possible range around this character" ^
+      "[idx]  Format a node ending at the given character" ^
       " (0 indexed)";
 
     "-i", Arg.Set inplace, " Format file in-place";
@@ -318,27 +318,31 @@ let format_at_char parsed_file pos =
     |> Hack_format.transform
     |> Chunk_builder.build in
   let module PS = Full_fidelity_positioned_syntax in
-  let positioned = PS.from_tree tree in
   (* Grab the node which is the direct parent of the token at pos *)
-  let node = match List.nth (PS.parentage positioned pos) 1 with
-    | Some node -> node
-    | None -> invalid_arg "Invalid offset" in
-  let solve_states = Line_splitter.find_solve_states chunk_groups in
-  (* Take a range which starts at the beginning of the parent node *)
-  let range = (PS.leading_start_offset node, pos + 1) in
+  let token, node = match PS.parentage (PS.from_tree tree) pos with
+    | token :: node :: tl -> token, node
+    | _ -> invalid_arg "Invalid offset" in
+  (* Format up to the end of the token at the given offset. *)
+  let pos = PS.end_offset token in
+  (* Our ranges are half-open, so the range end is the token end offset + 1. *)
+  let ed = pos + 1 in
+  (* Take a half-open range which starts at the beginning of the parent node *)
+  let range = (PS.start_offset node, ed) in
   (* Expand the start offset to the nearest line boundary in the original
    * source, since we want to add a leading newline before the node we're
-   * formatting if one should be there and isn't already present. Then, expand
-   * to split boundaries (line boundaries in the formatted source), since the
-   * line_splitter requires it. *)
-  let range = (fst (expand_to_line_boundaries source_text range), snd range)
-    |> expand_to_split_boundaries (get_split_boundaries solve_states) in
+   * formatting if one should be there and isn't already present. *)
+  let range = (fst (expand_to_line_boundaries source_text range), ed) in
+  (* Find a solution for that range, then expand the range start to a split
+   * boundary (a line boundary in the formatted source). *)
+  let solve_states = Line_splitter.find_solve_states ~range chunk_groups in
+  let split_boundaries = get_split_boundaries solve_states in
+  let range = (fst (expand_to_split_boundaries split_boundaries range), ed) in
+  (* Produce the formatted text *)
   let formatted = Line_splitter.print solve_states ~range in
   (* We don't want a trailing newline here (in as-you-type-formatting, it would
-   * place the cursor on the next line). So, we remove it. *)
-  let st, ed = range in
-  let ed = if SourceText.get source_text (ed - 1) = '\n' then ed - 1 else ed in
-  (st, ed), String.sub formatted 0 (String.length formatted - 1)
+   * place the cursor on the next line), but the Line_splitter always prints one
+   * at the end of a formatted range. So, we remove it. *)
+  range, String.sub formatted 0 (String.length formatted - 1)
 
 let debug_print ?range filename =
   let source_text, syntax_tree, editable = parse filename in

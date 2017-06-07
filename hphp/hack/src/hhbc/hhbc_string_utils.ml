@@ -36,7 +36,12 @@ module Integer = struct
 end
 
 module Float = struct
-  let to_string f = Printf.sprintf "%0.17g" f
+  let to_string f =
+    match Printf.sprintf "%0.17g" f with
+    | "nan" -> "NAN"
+    | "inf" -> "INF"
+    | s -> s
+
   (* Unfortunately the g flag does not provide enough of a match with hhvm,
    * hence we go for manual manipulation *)
   let with_scientific_notation f =

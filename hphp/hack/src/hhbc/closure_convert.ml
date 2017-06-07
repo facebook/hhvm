@@ -63,7 +63,9 @@ let initial_state =
 (* Add a variable to the captured variables *)
 let add_var st var =
   (* If it's bound as a parameter or definite assignment, don't add it *)
+  (* Also don't add the pipe variable *)
   if SSet.mem var st.defined_vars
+  || var = Naming_special_names.SpecialIdents.dollardollar
   then st
   else
   (* Don't bother if it's $this, as this is captured implicitly *)
@@ -77,7 +79,7 @@ let env_with_lambda env =
 let env_with_longlambda env is_static =
   { env with scope = ScopeItem.LongLambda is_static :: env.scope }
 
-let strip_id id = Utils.strip_ns (snd id)
+let strip_id id = SU.strip_global_ns (snd id)
 
 let rec make_scope_name scope =
   match scope with
@@ -85,7 +87,8 @@ let rec make_scope_name scope =
   | ScopeItem.Function fd :: _ -> strip_id fd.f_name
   | ScopeItem.Method md :: scope ->
     make_scope_name scope ^ "::" ^ strip_id md.m_name
-  | ScopeItem.Class cd :: _ -> strip_id cd.c_name
+  | ScopeItem.Class cd :: _ ->
+    SU.Xhp.mangle_id (strip_id cd.c_name)
   | _ :: scope -> make_scope_name scope
 
 let env_with_function env fd =

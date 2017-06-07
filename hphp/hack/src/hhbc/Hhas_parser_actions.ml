@@ -128,7 +128,7 @@ let my_unescape s =
 let attribute_from_string s =
   match parse_attribute (Scanf.Scanning.from_string (my_unescape s)) with
   | Some a -> a
-  | None -> report_error "attribute from string failed"
+  | None -> report_error ("attribute from string failed on " ^ s)
 
 type decl =
   | Main_decl of Hhas_body.t

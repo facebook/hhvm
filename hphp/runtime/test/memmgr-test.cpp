@@ -141,4 +141,14 @@ TEST(MemoryManager, SmallSizeClass) {
   );
 }
 
+TEST(MemoryManager, realloc) {
+  auto p = req::malloc_noptrs(kMaxSmallSize*2);
+  auto const n = static_cast<MallocNode*>(p) - 1;
+  EXPECT_EQ(n->kind(), HeaderKind::BigMalloc);
+  auto p2 = req::realloc_noptrs(p, kMaxSmallSize/2);
+  auto const n2 = static_cast<MallocNode*>(p2) - 1;
+  EXPECT_EQ(n2->kind(), HeaderKind::SmallMalloc);
+  req::free(p2);
+}
+
 }

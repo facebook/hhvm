@@ -143,7 +143,8 @@ let make_memoize_instance_method_no_params_code info method_id =
     instr_retc ]
 
 (* md is the already-renamed memoize method that must be wrapped *)
-let make_memoize_instance_method_with_params_code env info method_id variadic_and_params index =
+let make_memoize_instance_method_with_params_code
+  env info method_id variadic_and_params index =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   let param_count = List.length variadic_and_params in
@@ -263,14 +264,20 @@ let make_memoize_static_method_no_params_code info method_id =
     instr_label label_5;
     instr_retc ]
 
-let make_memoize_static_method_with_params_code info method_id variadic_and_params =
+let make_memoize_static_method_with_params_code
+  env info method_id variadic_and_params =
   let param_count = List.length variadic_and_params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
   let original_name_lc = String.lowercase_ascii
     (Hhbc_id.Method.to_raw_string method_id) in
   let params = List.map variadic_and_params snd in
+  let begin_label, default_value_setters =
+    (* Default value setters belong in the wrapper method not in the original method *)
+    Emit_param.emit_param_default_value_setter env params
+  in
   gather [
+    begin_label;
     Emit_body.emit_method_prolog ~params:variadic_and_params ~needs_local_this:false;
     param_code_sets params param_count;
     instr_string (original_name_lc ^ multi_memoize_cache info.memoize_class_prefix);
@@ -292,13 +299,14 @@ let make_memoize_static_method_with_params_code info method_id variadic_and_para
     instr_unboxr;
     instr_basesc 1;
     instr_memoset 1 first_local param_count;
-    instr_retc ]
+    instr_retc;
+    default_value_setters ]
 
-let make_memoize_static_method_code info method_id params =
+let make_memoize_static_method_code env info method_id params =
   if List.is_empty params then
     make_memoize_static_method_no_params_code info method_id
   else
-    make_memoize_static_method_with_params_code info method_id params
+    make_memoize_static_method_with_params_code env info method_id params
 
 let make_memoize_instance_method_code env info index method_id params =
   if List.is_empty params && info.memoize_instance_method_count <= 1
@@ -317,7 +325,7 @@ let make_wrapper return_type params instrs =
 let emit env info index return_type_info params is_static method_id =
   let instrs =
     if is_static
-    then make_memoize_static_method_code info method_id params
+    then make_memoize_static_method_code env info method_id params
     else make_memoize_instance_method_code env info index method_id params
   in
   make_wrapper return_type_info (List.map params snd) instrs

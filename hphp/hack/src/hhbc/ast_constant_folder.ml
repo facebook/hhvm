@@ -15,6 +15,8 @@ module TVL = Unique_list_typed_value
 open Ast_class_expr
 open Core
 
+exception NotLiteral
+
 (* Literal expressions can be converted into values *)
 let rec expr_to_typed_value ns (_, expr_) =
   match expr_ with
@@ -47,10 +49,10 @@ let rec expr_to_typed_value ns (_, expr_) =
     | Class_id cid ->
       let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in
       TV.String (Hhbc_id.Class.to_raw_string fq_id)
-    | _ -> failwith "expr_to_typed_value: not a literal"
+    | _ -> raise NotLiteral
     end
   | _ ->
-    failwith "expr_to_typed_value: not a literal"
+    raise NotLiteral
 
 and array_to_typed_value ns fields =
   let pairs, _ =
@@ -105,16 +107,10 @@ and value_afield_to_typed_value ns afield =
   | A.AFkvalue (_key, _value) ->
     failwith "value_afield_to_typed_value: unexpected key=>value"
 
-let literal_from_expr ns expr = expr_to_typed_value ns expr
-
-let literals_from_exprs_with_index ns exprs =
-  List.concat @@ List.mapi exprs (fun index e ->
-    [TV.Int (Int64.of_int index); literal_from_expr ns e])
-
 let expr_to_opt_typed_value ns e =
   match expr_to_typed_value ns e with
   | x -> Some x
-  | exception Failure _ -> None
+  | exception NotLiteral -> None
 
 (* Any value can be converted into a literal expression *)
 let rec value_to_expr_ p v =
@@ -270,3 +266,10 @@ let fold_class_elt ns ce =
   folder_visitor#on_class_elt ns ce
 let fold_program p =
   folder_visitor#on_program Namespace_env.empty_with_default_popt p
+
+let literals_from_exprs_with_index ns exprs =
+  try
+    List.concat_mapi exprs (fun index e ->
+      [TV.Int (Int64.of_int index); expr_to_typed_value ns (fold_expr ns e)])
+  with
+  | NotLiteral -> failwith "literals_from_exprs_with_index: not literal"

@@ -127,14 +127,3 @@ and read_string buf =
               read_string buf lexbuf}
   | [^ '"' '\\']+
      {Buffer.add_string buf (Lexing.lexeme lexbuf); read_string buf lexbuf}
-and read_triplequoted_string buf =
-  parse
-  | '"' '"' '"' {TRIPLEQUOTEDSTRING (Buffer.contents buf)}
-  | '\\' '"'         {Buffer.add_char buf '"'; read_triplequoted_string buf lexbuf}
-  | '\\' '\\'   {Buffer.add_char buf '\\'; read_triplequoted_string buf lexbuf}
-  | '\\' 'n'    {Buffer.add_char buf '\n'; read_triplequoted_string buf lexbuf}
-  | '\\' 'r'    {Buffer.add_char buf '\r'; read_triplequoted_string buf lexbuf}
-  | '\\' 't'    {Buffer.add_char buf '\t'; read_triplequoted_string buf lexbuf}
-  | '\\' '?'    {Buffer.add_char buf '?'; read_triplequoted_string buf lexbuf}
-  | [^ '"' '\\']+
-     {Buffer.add_string buf (Lexing.lexeme lexbuf); read_triplequoted_string buf lexbuf}

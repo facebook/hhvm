@@ -90,26 +90,38 @@ let rec parse_attribute c =
    we use the length to decide how many characters to read in the 's' case.
    Note that match s[i+1] can throw if the string ends with a naked backslash.
 *)
+let is_octal_digit c = '0' <= c && c <= '7'
+let convert_octal_digit c = if is_octal_digit c
+                            then (int_of_char c - int_of_char '0')
+                            else invalid_arg "bad octal digit"
+let convert_octal_digits c1 c2 c3 =
+  64*(convert_octal_digit c1)+ 8*(convert_octal_digit c2)+(convert_octal_digit c3)
+
 let my_unescape s =
   let num_chars = String.length s in
   let buf = Buffer.create num_chars in
   let rec copy_from i =
+    let single_char_escape c = Buffer.add_char buf c; copy_from (i+2) in
     if i = num_chars then Buffer.contents buf
     else match s.[i] with
       | '\\' -> (match s.[i+1] with
-                  | '\\' -> Buffer.add_char buf '\\'
-                  | 'r' -> Buffer.add_char buf '\r'
-                  | 'n' -> Buffer.add_char buf '\n'
-                  | 't' -> Buffer.add_char buf '\t'
-                  | '?' -> Buffer.add_char buf '?'
-                  | '"' -> Buffer.add_char buf '"'
+                  | '\\' -> single_char_escape '\\'
+                  | 'r' -> single_char_escape '\r'
+                  | 'n' -> single_char_escape '\n'
+                  | 't' -> single_char_escape '\t'
+                  | '?' -> single_char_escape '?'
+                  | '"' -> single_char_escape '"'
+                  | c1 when is_octal_digit c1 ->
+                     (match convert_octal_digits s.[i+1] s.[i+2] s.[i+3] with
+                        | n -> Buffer.add_char buf (char_of_int n); copy_from (i+4)
+                        | exception _ -> report_error "bad octal in triplequoted")
                   | _ ->
                     report_error
                       @@ Printf.sprintf
                         "bad escaped character in triplequoted ('%c')"
                         s.[i+1]
-                  );
-                  copy_from (i+2)
+                  | exception _ -> report_error "partial escape in triplequoted"
+                  )
       | c -> Buffer.add_char buf c ; copy_from (i+1) in
   copy_from 0
 

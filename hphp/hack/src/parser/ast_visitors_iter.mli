@@ -113,6 +113,7 @@ class virtual ['b] iter :
         on_Eq : 'c -> Ast_visitors_ancestors.bop option -> unit;
         on_Eqeq : 'c -> unit;
         on_Expr : 'c -> Ast_visitors_ancestors.expr -> unit;
+        on_Omitted : 'c -> unit;
         on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> unit;
         on_FAsync : 'c -> unit; on_FAsyncGenerator : 'c -> unit;
         on_FGenerator : 'c -> unit; on_FSync : 'c -> unit;

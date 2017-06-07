@@ -109,6 +109,7 @@ class virtual ['b] reduce :
                  Ast_visitors_ancestors.expr -> 'd;
         on_Eq : 'c -> Ast_visitors_ancestors.bop option -> 'd;
         on_Eqeq : 'c -> 'd;
+        on_Omitted: 'c -> 'd;
         on_Expr : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_FAsync : 'c -> 'd; on_FAsyncGenerator : 'c -> 'd;
@@ -445,6 +446,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.expr option -> Ast_visitors_ancestors.expr -> 'd
     method on_Eq : 'c -> Ast_visitors_ancestors.bop option -> 'd
     method on_Eqeq : 'c -> 'd
+    method on_Omitted: 'c -> 'd
     method on_Expr : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_FAsync : 'c -> 'd

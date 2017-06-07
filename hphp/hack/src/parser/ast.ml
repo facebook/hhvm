@@ -293,6 +293,7 @@ and expr_ =
   | Null
   | True
   | False
+  | Omitted
   | Id of id
   | Id_type_arguments of id * hint list
   (* Special case: the pipe variable $$ *)

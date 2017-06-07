@@ -47,6 +47,7 @@ class type ['a] ast_visitor_type = object
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_nullCoalesce : 'a -> expr -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
+  method on_omitted: 'a -> 'a
   method on_expr_ : 'a -> expr_ -> 'a
   method on_expr_list : 'a -> expr list -> 'a
   method on_fallthrough : 'a -> 'a
@@ -272,6 +273,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_expr acc (_, e) =
     this#on_expr_ acc e
 
+  method on_omitted acc = acc
+
   method on_expr_ acc e =
     match e with
    | Unsafeexpr e-> this#on_expr acc e
@@ -314,6 +317,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | New         (e, el, uel) -> this#on_new acc e el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
+   | Omitted                     -> this#on_omitted  acc
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl

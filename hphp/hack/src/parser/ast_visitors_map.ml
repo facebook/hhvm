@@ -509,6 +509,7 @@ class virtual ['self] map =
       }
     method on_Unsafe env = Unsafe
     method on_Fallthrough env = Fallthrough
+    method on_Omitted env = Omitted
     method on_Expr env c0 =
       let r0 = self#on_expr env c0 in Expr r0
     method on_Block env c0 =
@@ -772,6 +773,7 @@ class virtual ['self] map =
       | Xml (c0, c1, c2) -> self#on_Xml env c0 c1 c2
       | Unsafeexpr c0 -> self#on_Unsafeexpr env c0
       | Import (c0, c1) -> self#on_Import env c0 c1
+      | Omitted         -> self#on_Omitted env
     method on_Include env = Include
     method on_Require env = Require
     method on_IncludeOnce env = IncludeOnce

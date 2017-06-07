@@ -48,7 +48,6 @@ slow/async/simple_func.php
 slow/async/simple_meth.php
 slow/async/simple_meth_static.php
 slow/autoload/autoload_set_paths_maps.php
-slow/break_statement/1415.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
 slow/bug-5127251.php
@@ -579,17 +578,8 @@ slow/lang/reflection.php
 slow/lang/tuple_non_hh.php
 slow/late_static_binding/1880.php
 slow/late_static_binding/1881.php
-slow/list_assignment/30.php
-slow/list_assignment/31.php
-slow/list_assignment/32.php
-slow/list_assignment/33.php
-slow/list_assignment/34.php
-slow/list_assignment/36.php
-slow/list_assignment/43.php
 slow/list_assignment/46.php
 slow/list_assignment/47.php
-slow/list_assignment/48.php
-slow/list_assignment/49.php
 slow/llvm/switch.php
 slow/logical_operators/1451.php
 slow/logical_operators/1454.php

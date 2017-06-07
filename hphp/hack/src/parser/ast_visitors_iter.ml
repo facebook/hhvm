@@ -365,6 +365,7 @@ class virtual ['self] iter =
     method on_Unsafe env = ()
     method on_Fallthrough env = ()
     method on_Expr = self#on_expr
+    method on_Omitted env = ()
     method on_Block = self#on_block
     method on_Break env pos level_opt = self#on_Pos_t env pos
     method on_Continue env pos level_opt = self#on_Pos_t env pos
@@ -586,6 +587,7 @@ class virtual ['self] iter =
       | Xml (c0, c1, c2) -> self#on_Xml env c0 c1 c2
       | Unsafeexpr c0 -> self#on_Unsafeexpr env c0
       | Import (c0, c1) -> self#on_Import env c0 c1
+      | Omitted         -> self#on_Omitted env
     method on_Include env = ()
     method on_Require env = ()
     method on_IncludeOnce env = ()

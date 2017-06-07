@@ -396,6 +396,7 @@ class virtual ['self] reduce =
       let r2 = self#on_hint env this.sf_hint in
       self#add (self#add r0 r1) r2
     method on_Unsafe _ = self#e
+    method on_Omitted _ = self#e
     method on_Fallthrough _ = self#e
     method on_Expr = self#on_expr
     method on_Block = self#on_block
@@ -654,6 +655,7 @@ class virtual ['self] reduce =
       | Xml (c0, c1, c2) -> self#on_Xml env c0 c1 c2
       | Unsafeexpr c0 -> self#on_Unsafeexpr env c0
       | Import (c0, c1) -> self#on_Import env c0 c1
+      | Omitted         -> self#on_Omitted env
     method on_Include _ = self#e
     method on_Require _ = self#e
     method on_IncludeOnce _ = self#e

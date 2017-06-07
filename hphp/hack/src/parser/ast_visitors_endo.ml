@@ -681,6 +681,7 @@ class virtual ['self] endo =
         }
     method on_Unsafe env this = this
     method on_Fallthrough env this = this
+    method on_Omitted env this = this
     method on_Expr env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else Expr r0
@@ -1049,6 +1050,7 @@ class virtual ['self] endo =
       | Xml (c0, c1, c2) -> self#on_Xml env this c0 c1 c2
       | Unsafeexpr c0 -> self#on_Unsafeexpr env this c0
       | Import (c0, c1) -> self#on_Import env this c0 c1
+      | Omitted         -> self#on_Omitted env this
     method on_Include env this = this
     method on_Require env this = this
     method on_IncludeOnce env this = this

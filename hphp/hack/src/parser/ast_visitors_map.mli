@@ -183,6 +183,7 @@ class virtual ['c] map :
         on_Eqeq : 'd -> Ast_visitors_ancestors.bop;
         on_Expr : 'd ->
                   Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt;
+        on_Omitted : 'd -> Ast_visitors_ancestors.expr_;
         on_Expr_list : 'd ->
                        Ast_visitors_ancestors.expr list ->
                        Ast_visitors_ancestors.expr_;
@@ -797,6 +798,7 @@ class virtual ['c] map :
     method on_Eqeq : 'd -> Ast_visitors_ancestors.bop
     method on_Expr :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.stmt
+    method on_Omitted: 'd -> Ast_visitors_ancestors.expr_
     method on_Expr_list :
       'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_FAsync : 'd -> Ast_visitors_ancestors.fun_kind

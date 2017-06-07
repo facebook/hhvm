@@ -866,6 +866,7 @@ and emit_expr env expr ~need_ref =
   | A.Import (flavor, e) -> emit_import env flavor e
   | A.Lvarvar (n, id) -> emit_lvarvar ~need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id env id
+  | A.Omitted -> empty
   | A.List _ ->
     failwith "List destructor can only be used as an lvar"
 
@@ -1432,7 +1433,7 @@ and emit_arg env i ((_, expr_) as e) =
   | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar (_, id))) ->
     let local = get_local env id in
     gather [
-      emit_lval_op_list env local [] e;
+      emit_lval_op_list env (Some local) [] e;
       instr_fpassl i local;
     ]
 
@@ -1811,6 +1812,35 @@ and emit_array_get_fixed local indices =
       else instr (IBase (Dim (MemberOpMode.Warn, mk))))
       )
 
+and can_use_as_rhs_in_list_assignment expr =
+  match expr with
+  | A.Lvar _
+  | A.Lvarvar _
+  | A.Array_get _
+  | A.Obj_get _
+  | A.Class_get _
+  | A.Call _
+  | A.New _
+  | A.Expr_list _
+  | A.Yield _
+  | A.NullCoalesce _
+  | A.Cast _
+  | A.Eif _
+  | A.Array _
+  | A.Varray _
+  | A.Darray _
+  | A.Collection _
+  | A.Clone _
+  | A.Unop _
+  | A.Await _ -> true
+  | A.Pipe (_, (_, r))
+  | A.Binop ((A.Eq None), (_, A.List _), (_, r)) ->
+    can_use_as_rhs_in_list_assignment r
+  | A.Binop (A.Plus, _, _)
+  | A.Binop (A.Eq _, _, _) -> true
+  | _ -> false
+
+
 (* Generate code for each lvalue assignment in a list destructuring expression.
  * Lvalues are assigned right-to-left, regardless of the nesting structure. So
  *     list($a, list($b, $c)) = $d
@@ -1825,7 +1855,11 @@ and emit_array_get_fixed local indices =
     List.mapi exprs (fun i expr -> emit_lval_op_list env local (i::indices) expr)
   | _ ->
     (* Generate code to access the element from the array *)
-    let access_instrs = emit_array_get_fixed local indices in
+    let access_instrs =
+      match local with
+      | Some local -> emit_array_get_fixed local indices
+      | None -> instr_null
+    in
     (* Generate code to assign to the lvalue *)
     let assign_instrs = emit_lval_op_nonlist env LValOp.Set expr access_instrs 1 in
     gather [
@@ -1858,11 +1892,32 @@ and emit_lval_op env op expr1 opt_expr2 =
   in
   match op, expr1, opt_expr2 with
     (* Special case for list destructuring, only on assignment *)
-    | LValOp.Set, (_, A.List _), Some expr2 ->
-      stash_in_local ~leave_on_stack:true env expr2
-      begin fun local _break_label ->
-        emit_lval_op_list env local [] expr1
-      end
+    | LValOp.Set, (_, A.List l), Some expr2 ->
+      let has_elements =
+        List.exists l ~f: (function
+          | _, A.Omitted -> false
+          | _ -> true)
+      in
+      if has_elements then
+        stash_in_local ~leave_on_stack:true env expr2
+        begin fun local _break_label ->
+          let local =
+            if can_use_as_rhs_in_list_assignment (snd expr2) then
+              Some local
+            else
+              None
+          in
+          emit_lval_op_list env local [] expr1
+        end
+      else
+        Local.scope @@ fun () ->
+          let local = Local.get_unnamed_local () in
+          gather [
+            emit_expr ~need_ref:false env expr2;
+            instr_setl local;
+            instr_popc;
+            instr_pushl local;
+          ]
     | _ ->
       Local.scope @@ fun () ->
         let rhs_instrs, rhs_stack_size =

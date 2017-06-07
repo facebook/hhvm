@@ -963,6 +963,7 @@ and string_of_param_default_value expr =
   | A.Yield_break
   | A.Await _
   | A.List _
+  | A.Omitted
   | A.Expr_list _ -> failwith "illegal default value"
 
 let string_of_param_default_value_option = function

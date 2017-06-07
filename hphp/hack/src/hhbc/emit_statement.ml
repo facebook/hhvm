@@ -525,9 +525,9 @@ and emit_load_list_element path i v =
    - key_preamble - list of instructions to populate foreach-key
    - value_preamble - list of instructions to populate foreach-value
    *)
-and emit_iterator_key_value_storage iterator =
+and emit_iterator_key_value_storage env iterator =
   match iterator with
-  | A.As_kv ((_, k), (_, v)) ->
+  | A.As_kv (((_, k) as expr_k), ((_, v) as expr_v)) ->
     begin match get_id_of_simple_lvar_opt k, get_id_of_simple_lvar_opt v with
     | Some key_id, Some value_id ->
       let key_local = Local.Named key_id in
@@ -537,9 +537,9 @@ and emit_iterator_key_value_storage iterator =
       let key_local = Local.get_unnamed_local () in
       let value_local = Local.get_unnamed_local () in
       let key_preamble, key_load =
-        emit_iterator_lvalue_storage k key_local in
+        emit_iterator_lvalue_storage env expr_k key_local in
       let value_preamble, value_load =
-        emit_iterator_lvalue_storage v value_local
+        emit_iterator_lvalue_storage env expr_v value_local
       in
 
       (* HHVM prepends code to initialize non-plain, non-list foreach-key
@@ -553,7 +553,7 @@ and emit_iterator_key_value_storage iterator =
       (gather key_preamble)::key_load,
       (gather value_preamble)::value_load
     end
-  | A.As_v (_, v) ->
+  | A.As_v ((_, v) as expr_v) ->
     begin match get_id_of_simple_lvar_opt v with
     | Some value_id ->
       let value_local = Local.Named value_id in
@@ -561,7 +561,7 @@ and emit_iterator_key_value_storage iterator =
     | None ->
       let value_local = Local.get_unnamed_local () in
       let value_preamble, value_load =
-        emit_iterator_lvalue_storage v value_local in
+        emit_iterator_lvalue_storage env expr_v value_local in
       None, value_local, value_preamble, value_load
     end
 
@@ -577,41 +577,11 @@ and emit_iterator_key_value_storage iterator =
   load_code will be executed assuming that stack is prepopulated:
     [$aa, $$c] <- top
   *)
-and emit_iterator_lvalue_storage v local =
+and emit_iterator_lvalue_storage env v local =
   match v with
-  | A.Lvar (_, id)
-  | A.Unop (A.Uref, (_, A.Lvar (_, id))) ->
-    let preamble = [] in
-    let load = [
-      instr_cgetl local;
-      instr_setl (Local.Named id);
-      instr_popc;
-      instr_unsetl local
-    ] in
-    preamble, load
-  | A.Lvarvar (n, (_, id)) ->
-    if n = 1 then
-      let preamble = [] in
-      let load = [
-        (* $$x case - can use cgetl2 to load cell for local*)
-        instr_cgetl local;
-        instr_cgetl2 (Local.Named id);
-        instr_setn;
-        instr_popc;
-        instr_unsetl local
-      ] in
-      preamble, load
-    else
-      let preamble = load_lvarvar n id in
-      let load = [
-        instr_cgetl local;
-        instr_setn;
-        instr_popc;
-        instr_unsetl local
-      ]
-      in
-      preamble, load
-  | A.List exprs ->
+  | _, A.Call _ ->
+    Emit_fatal.raise_fatal_parse "Can't use return value in write context"
+  | _, A.List exprs ->
     let preamble, load_values =
       emit_load_list_elements [instr_basel local MemberOpMode.Warn] exprs
     in
@@ -621,7 +591,28 @@ and emit_iterator_lvalue_storage v local =
     ]
     in
     preamble, load_values
-  | _ -> failwith "impossible: expected only variables and lists"
+  | x ->
+    match x with
+    | _, A.Unop (A.Uref, e) ->
+      let (lhs, rhs, set_op) =
+        emit_lval_op_nonlist_steps env LValOp.SetRef e (instr_vgetl local) 1
+      in
+      [lhs], [
+        rhs;
+        set_op;
+        instr_popv;
+        instr_unsetl local
+      ]
+    | x ->
+      let (lhs, rhs, set_op) =
+        emit_lval_op_nonlist_steps env LValOp.Set x (instr_cgetl local) 1
+      in
+      [lhs], [
+        rhs;
+        set_op;
+        instr_popc;
+        instr_unsetl local
+      ]
 
 and wrap_non_empty_block_in_fault prefix block fault_block =
   match block with
@@ -647,7 +638,7 @@ and emit_foreach_ env _has_await collection iterator block =
   let mutable_iter = is_mutable_iterator iterator in
   (* TODO: add support for mutable iterators *)
   let key_local_opt, value_local, key_preamble, value_preamble =
-    emit_iterator_key_value_storage iterator
+    emit_iterator_key_value_storage env iterator
   in
   let fault_block_local local = gather [
     instr_unsetl local;

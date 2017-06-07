@@ -8,7 +8,6 @@ slow/array_access/436.php
 slow/array_cse/538.php
 slow/array_cse/543.php
 slow/array_double_key_conv.php
-slow/array_for_each/499.php
 slow/array_functions/ake-object.php
 slow/array_init/248.php
 slow/array_iterator/442.php
@@ -681,13 +680,6 @@ slow/parser/constant-array.php
 slow/parser/dynamic-class-method.php
 slow/parser/empty-construct/empty-expr-with-parens.php
 slow/parser/empty-files/empty-invalid.php
-slow/parser/foreach-bad1.php
-slow/parser/foreach-bad2.php
-slow/parser/foreach-bad3.php
-slow/parser/foreach-bad4.php
-slow/parser/foreach-bad5.php
-slow/parser/foreach-bad6.php
-slow/parser/foreach-bad7.php
 slow/parser/hh-namespace-conflict-1.php
 slow/parser/hh-namespace-conflict-2.php
 slow/parser/hh-namespace-conflict-3.php

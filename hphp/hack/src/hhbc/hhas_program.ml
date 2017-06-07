@@ -63,6 +63,7 @@ let from_ast ast =
     let adata = Emit_adata.get_adata () in
     make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
   with Emit_fatal.IncludeTimeFatalException (op, message) ->
+    Iterator.reset_iterator ();
     let body = Emit_body.make_body (Emit_fatal.emit_fatal op message)
       [] (* decl_vars *)
       false (*is_memoize_wrapper*)

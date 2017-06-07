@@ -1880,20 +1880,27 @@ and emit_lval_op env op expr1 opt_expr2 =
         in
         emit_lval_op_nonlist env op expr1 rhs_instrs rhs_stack_size
 
-and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
+and emit_lval_op_nonlist env op e rhs_instrs rhs_stack_size =
+  let (lhs, rhs, setop) =
+    emit_lval_op_nonlist_steps env op e rhs_instrs rhs_stack_size
+  in
+  gather [
+    lhs;
+    rhs;
+    setop;
+  ]
+
+and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
   match expr_ with
   | A.Lvar (_, id) when SN.Superglobals.is_superglobal id ->
-    gather [
-      instr_string @@ SU.Locals.strip_dollar id;
-      rhs_instrs;
-      emit_final_global_op op;
-    ]
+    instr_string @@ SU.Locals.strip_dollar id,
+    rhs_instrs,
+    emit_final_global_op op
 
   | A.Lvar (_, id) when not (is_local_this env id) ->
-    gather [
-      rhs_instrs;
-      emit_final_local_op op (get_local env id)
-    ]
+    empty,
+    rhs_instrs,
+    emit_final_local_op op (get_local env id)
 
   | A.Lvarvar (n, (_, id)) ->
     if n = 1 then
@@ -1903,28 +1910,42 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
         | LValOp.Unset | LValOp.IncDec _ -> instr_cgetl local
         | _ -> instr_cgetl2 local
       in
+
+      empty,
+      rhs_instrs,
       gather [
-        rhs_instrs;
         instruction;
-        emit_final_named_local_op op;
+        emit_final_named_local_op op
       ]
     else
       gather [
         instr_cgetl (get_local env id);
         instr_cgetn_seq (n - 1);
-        rhs_instrs;
-        emit_final_named_local_op op;
-      ]
+      ],
+      rhs_instrs,
+      emit_final_named_local_op op
 
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op op in
     if rhs_stack_size = 0
-    then gather [emit_expr ~need_ref:false env e; final_global_op_instrs]
+    then
+      emit_expr ~need_ref:false env e,
+      empty,
+      final_global_op_instrs
     else
       let index_instrs, under_top = emit_first_expr env e in
       if under_top
-      then gather [rhs_instrs; index_instrs; final_global_op_instrs]
-      else gather [index_instrs; rhs_instrs; final_global_op_instrs]
+      then
+        empty,
+        gather [
+          rhs_instrs;
+          index_instrs
+        ],
+        final_global_op_instrs
+      else
+        index_instrs,
+        rhs_instrs,
+        final_global_op_instrs
 
   | A.Array_get (base_expr, opt_elem_expr) ->
     let mode =
@@ -1941,7 +1962,9 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
     gather [
       base_expr_instrs;
       elem_expr_instrs;
-      rhs_instrs;
+    ],
+    rhs_instrs,
+    gather [
       base_setup_instrs;
       final_instr
     ]
@@ -1961,7 +1984,9 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
     gather [
       base_expr_instrs;
       prop_expr_instrs;
-      rhs_instrs;
+    ],
+    rhs_instrs,
+    gather [
       base_setup_instrs;
       final_instr
     ]
@@ -1975,22 +2000,22 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
     gather [
       prop_expr_instrs;
       emit_class_expr env cexpr;
-      rhs_instrs;
-      final_instr
-    ]
+    ],
+    rhs_instrs,
+    final_instr
 
   | A.Unop (uop, e) ->
+    empty,
+    rhs_instrs,
     gather [
-      rhs_instrs;
       emit_lval_op_nonlist env op e empty rhs_stack_size;
       from_unop uop;
     ]
 
   | _ ->
-    gather [
-      emit_nyi "lval expression";
-      rhs_instrs;
-    ]
+    emit_nyi "lval expression",
+    rhs_instrs,
+    empty
 
 and from_unop op =
   let ints_overflow_to_ints =

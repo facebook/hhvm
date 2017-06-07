@@ -66,6 +66,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class ExceptionKind {
+  Unclassified,
   StdException,
   NonStdException,
   PhpException,
@@ -193,6 +194,8 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   return true;
 }
 
+__thread std::pair<const std::type_info*, ExceptionKind> cachedTypeInfo;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -217,9 +220,25 @@ tc_unwind_personality(int version,
           exn_cls == kLLVMMagicDependentClass);
   assertx(version == 1);
 
-  auto const& ti = typeinfoFromUE(ue);
-  auto const it = typeInfoMap->find(&ti);
-  if (it == typeInfoMap->end()) {
+  auto const ti = &typeinfoFromUE(ue);
+
+  // Note that cachedTypeInfo isn't just for performance.
+  // If the search phase doesn't find it in the map, it returns
+  // _URC_HANDLER_FOUND - so the cleanup phase must also fail to find
+  // it. Another thread might have added it to the map in the interim,
+  // however, so its important to use the cachedTypeInfo.
+  auto const exceptionKind = [&] () -> ExceptionKind {
+    if (ti != cachedTypeInfo.first) {
+      assert(actions & _UA_SEARCH_PHASE);
+      auto const it = typeInfoMap->find(ti);
+      cachedTypeInfo.first = ti;
+      cachedTypeInfo.second = it == typeInfoMap->end() ?
+        ExceptionKind::Unclassified : it->second;
+    }
+    return cachedTypeInfo.second;
+  }();
+
+  if (exceptionKind == ExceptionKind::Unclassified) {
     if (actions & _UA_SEARCH_PHASE) {
       FTRACE(1,
              "Unclassified exception was thrown, "
@@ -262,7 +281,8 @@ tc_unwind_personality(int version,
         throw FatalErrorException("Unknown invalid exception");
       }
     } catch (...) {
-      typeInfoMap->emplace(&ti, ek);
+      cachedTypeInfo.second = ek;
+      typeInfoMap->emplace(ti, ek);
       throw;
     };
   }
@@ -270,9 +290,9 @@ tc_unwind_personality(int version,
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
 
-  if (it->second == ExceptionKind::InvalidSetMException) {
+  if (exceptionKind == ExceptionKind::InvalidSetMException) {
     ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
-  } else if (it->second == ExceptionKind::TVCoercionException) {
+  } else if (exceptionKind == ExceptionKind::TVCoercionException) {
     tce = static_cast<TVCoercionException*>(exceptionFromUE(ue));
   }
 
@@ -281,11 +301,11 @@ tc_unwind_personality(int version,
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
 #ifndef _MSC_VER
     int status;
-    auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
+    auto* exnType = abi::__cxa_demangle(ti->name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assertx(status == 0);
 #else
-    auto* exnType = ti.name();
+    auto* exnType = ti->name();
 #endif
     FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
            unwindType, ue,

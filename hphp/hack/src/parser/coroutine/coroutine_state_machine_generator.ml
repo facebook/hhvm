@@ -108,17 +108,6 @@ let add_missing_return body =
   else
     body
 
-(**
- * The set of variable names that should not be hoisted.
- *)
-let unhoistable_variables =
-  SSet.of_list [
-    this_variable;
-    coroutine_data_variable;
-    coroutine_result_variable;
-    exception_variable;
-  ]
-
 (* This gives the names of all local variables and parameters in a body:
 * locals and parameters occurring only in lambdas are not included.
 * Unused parameters are not included.
@@ -131,7 +120,9 @@ let gather_locals_and_params node =
     match syntax node with
     | Token { EditableToken.kind = TokenKind.Variable; text; _; } ->
       let text = String_utils.lstrip text "$" in
-      SMap.add text node acc
+      (* "$this" is treated as a local, but obviously we don't want to copy
+      it in or out. *)
+      if text = "this" then acc else SMap.add text node acc
     | _ -> acc in
   Lambda_analyzer.fold_no_lambdas folder SMap.empty node
 

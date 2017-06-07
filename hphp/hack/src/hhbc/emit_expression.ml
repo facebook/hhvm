@@ -383,7 +383,8 @@ and emit_conditional_expression env etest etrue efalse =
 
 and emit_new env expr args uargs =
   let nargs = List.length args + List.length uargs in
-  let cexpr, _ = expr_to_class_expr (Emit_env.get_scope env) expr in
+  let cexpr, _ = expr_to_class_expr ~resolve_self:true
+    (Emit_env.get_scope env) expr in
   match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
@@ -459,7 +460,8 @@ and emit_class_expr env cexpr =
     ]
 
 and emit_class_get env param_num_opt qop need_ref cid (_, id) =
-  let cexpr, _ = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+  let cexpr, _ = expr_to_class_expr ~resolve_self:false
+    (Emit_env.get_scope env) (id_to_expr cid) in
     gather [
       (* We need to strip off the initial dollar *)
       instr_string (SU.Locals.strip_dollar id);
@@ -477,7 +479,8 @@ and emit_class_get env param_num_opt qop need_ref cid (_, id) =
  * case in emitter.cpp
  *)
 and emit_class_const env cid (_, id) =
-  let cexpr, _ = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+  let cexpr, _ = expr_to_class_expr ~resolve_self:true
+    (Emit_env.get_scope env) (id_to_expr cid) in
   match cexpr with
   | Class_id cid ->
     let fq_id, _id_opt =
@@ -1361,7 +1364,8 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
    | A.Class_get(cid, (_, id)) ->
      let prop_expr_instrs =
        instr_string (SU.Locals.strip_dollar id) in
-     let cexpr, _ = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+     let cexpr, _ = expr_to_class_expr ~resolve_self:false
+       (Emit_env.get_scope env) (id_to_expr cid) in
      gather [
        prop_expr_instrs;
        emit_class_expr env cexpr
@@ -1499,7 +1503,8 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     ]
 
   | A.Class_const (cid, (_, id)) ->
-    let cexpr, forward = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+    let cexpr, forward = expr_to_class_expr ~resolve_self:false
+      (Emit_env.get_scope env) (id_to_expr cid) in
     let method_id = Hhbc_id.Method.from_ast_name id in
     begin match cexpr with
     (* Statically known *)
@@ -1515,7 +1520,8 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     end
 
   | A.Class_get (cid, (_, id)) when id.[0] = '$' ->
-    let cexpr, forward = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+    let cexpr, forward = expr_to_class_expr ~resolve_self:false
+      (Emit_env.get_scope env) (id_to_expr cid) in
     gather [
       emit_local ~notice:Notice ~need_ref:false env id;
       emit_class_expr env cexpr;
@@ -1963,7 +1969,8 @@ and emit_lval_op_nonlist env op (_, expr_) rhs_instrs rhs_stack_size =
   | A.Class_get (cid, (_, id)) ->
     let prop_expr_instrs =
       instr_string (SU.Locals.strip_dollar id) in
-    let cexpr, _ = expr_to_class_expr (Emit_env.get_scope env) (id_to_expr cid) in
+    let cexpr, _ = expr_to_class_expr ~resolve_self:false
+      (Emit_env.get_scope env) (id_to_expr cid) in
     let final_instr = emit_final_static_op (snd cid) id op in
     gather [
       prop_expr_instrs;

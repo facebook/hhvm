@@ -20,7 +20,7 @@ type class_expr =
 | Class_id of Ast.id
 | Class_expr of Ast.expr
 
-let get_original_class_name scope =
+let get_original_class_name ~resolve_self scope =
   match Ast_scope.Scope.get_class scope with
   | None ->  None
   | Some cd ->
@@ -31,6 +31,9 @@ let get_original_class_name scope =
     match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
     | None -> Some (snd cd.Ast.c_name)
     | Some scope_name ->
+      if not resolve_self
+      then None
+      else
       match SU.Closures.split_scope_name scope_name with
       | [class_name] -> Some class_name
       | [class_name; _method_name] -> Some class_name
@@ -48,7 +51,7 @@ let get_original_parent_class_name scope =
       | _ -> None
 
 (* Return true in second component if this is a forwarding reference *)
-let expr_to_class_expr scope (_, expr_ as expr) =
+let expr_to_class_expr ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
   | A.Id (_, id) when id = SN.Classes.cStatic ->
     Class_static, false
@@ -58,7 +61,7 @@ let expr_to_class_expr scope (_, expr_ as expr) =
     | None -> Class_parent, true
     end
   | A.Id (pos, id) when id = SN.Classes.cSelf ->
-    begin match get_original_class_name scope with
+    begin match get_original_class_name ~resolve_self scope with
     | Some name -> Class_id (pos, name), true
     | None -> Class_self, true
     end

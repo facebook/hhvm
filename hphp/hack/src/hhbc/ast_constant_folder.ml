@@ -42,7 +42,7 @@ let rec expr_to_typed_value ns (_, expr_) =
         Typed_value.add_to_dict d k v) ~init:[] in
     TV.Dict d
   | A.Class_const(cid, (_, id)) when id = SN.Members.mClass ->
-    let cexpr, _ = expr_to_class_expr [] (id_to_expr cid) in
+    let cexpr, _ = expr_to_class_expr ~resolve_self:true [] (id_to_expr cid) in
     begin match cexpr with
     | Class_id cid ->
       let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in

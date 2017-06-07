@@ -732,6 +732,7 @@ class virtual ['self] reduce =
     method on_Updecr _ = self#e
     method on_Uref _ = self#e
     method on_Usplat _ = self#e
+    method on_Usilence _ = self#e
     method on_uop env = function
       | Utild -> self#on_Utild env
       | Unot -> self#on_Unot env
@@ -743,6 +744,7 @@ class virtual ['self] reduce =
       | Updecr -> self#on_Updecr env
       | Uref -> self#on_Uref env
       | Usplat -> self#on_Usplat env
+      | Usilence -> self#on_Usilence env
     method on_Default = self#on_block
     method on_Case env c0 c1 =
       let r0 = self#on_expr env c0 in

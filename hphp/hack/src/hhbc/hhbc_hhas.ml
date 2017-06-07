@@ -775,6 +775,7 @@ and string_of_uop = function
   | A.Uincr -> "++"
   | A.Udecr -> "--"
   | A.Uref -> "&"
+  | A.Usilence -> "@"
   | A.Upincr
   | A.Updecr
   | A.Usplat -> failwith "string_of_uop - should have been captures earlier"

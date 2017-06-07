@@ -2077,7 +2077,7 @@ and from_unop op =
   | A.Unot -> instr (IOp Not)
   | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
   | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
-  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat ->
+  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat | A.Usilence ->
     emit_nyi "unop - probably does not need translation"
 
 and emit_unop ~need_ref env op e =
@@ -2111,6 +2111,7 @@ and emit_unop ~need_ref env op e =
   | A.Uref -> emit_expr ~need_ref:true env e
   | A.Usplat ->
     emit_expr ~need_ref:false env e
+  | A.Usilence -> emit_nyi "silence"
 
 and emit_exprs env exprs =
   gather (List.map exprs (emit_expr ~need_ref:false env))

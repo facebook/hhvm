@@ -759,9 +759,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
         | Some TK.DotDotDot               -> Unop (Usplat, expr)
+        | Some TK.At                      -> Unop (Usilence, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Clone                   -> Clone expr
-        | Some TK.At                      -> snd expr
         | Some TK.Dollar                  ->
           (match expr with
           | _, Lvarvar (n, id) -> Lvarvar (n + 1, id)

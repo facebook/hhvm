@@ -1,7 +1,7 @@
 open ServerCommandTypes
 
 let debug_describe_t : type a. a t -> string = function
-  | STATUS                     -> "STATUS"
+  | STATUS                   _ -> "STATUS"
   | INFER_TYPE               _ -> "INFER_TYPE"
   | COVERAGE_LEVELS          _ -> "COVERAGE_LEVELS"
   | AUTOCOMPLETE             _ -> "AUTOCOMPLETE"

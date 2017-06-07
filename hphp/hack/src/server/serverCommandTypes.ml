@@ -31,7 +31,7 @@ end
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : Server_status.t t
+  | STATUS : bool -> Server_status.t t
   | INFER_TYPE : ServerUtils.file_input * int * int ->
       InferAtPosService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t

@@ -45,7 +45,7 @@ type command_response =
   | RpcCommand : ('a SCT.t * response_matcher) -> command_response
 
 let cmd_responses_case_0 root = [
-  (RpcCommand ((SCT.STATUS), StringMatcher ""));
+  (RpcCommand ((SCT.STATUS false), StringMatcher ""));
   (RpcCommand ((SCT.INFER_TYPE
     (ServerUtils.FileName
       ((Path.concat root "foo_1.php") |> Path.to_string), 4, 20 )),
@@ -63,7 +63,7 @@ let cmd_responses_case_1 root = [
         }
     |}
     )), StringMatcher ""));
-   (RpcCommand ((SCT.STATUS), RegexMatcher "^Undefined variable.*"));
+   (RpcCommand ((SCT.STATUS false), RegexMatcher "^Undefined variable.*"));
   ]
 
 exception Invalid_test_case
@@ -83,7 +83,7 @@ exception Response_doesnt_match_expected of string * response_matcher
  * in the GADT so we know the type of the response. *)
 let response_to_string : type a. a SCT.t -> a -> string = begin
   fun cmd response -> match cmd, response with
-    | SCT.STATUS, ({ SCT.Server_status.error_list = errors; _ }) ->
+    | SCT.STATUS _, ({ SCT.Server_status.error_list = errors; _ }) ->
       let errors = List.map (fun e -> Errors.to_string e) errors in
       let errors = String.concat "\n" errors in
       errors

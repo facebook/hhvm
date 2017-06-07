@@ -99,17 +99,24 @@ let get_file_content = function
       (* In case of errors, proceed with empty file contents *)
       |> Option.value ~default:""
 
+let get_unsaved_changes env =
+  Relative_path.Set.fold env.editor_open_files
+    ~init:Relative_path.Map.empty
+    ~f:begin fun path acc ->
+      match FileHeap.get path with
+      | Some Ide ide_contents ->
+        begin match get_file_content_from_disk path with
+        | Some disk_contents when ide_contents <> disk_contents ->
+          Relative_path.Map.add acc path (ide_contents, disk_contents)
+        | Some _ -> acc
+        | None ->
+          (* If one creates a new file, then there will not be corresponding
+          * disk contents, and we should consider there to be unsaved changes in
+          * the editor. *)
+          Relative_path.Map.add acc path (ide_contents, "")
+        end
+      | _ -> acc
+    end
+
 let has_unsaved_changes env =
-  Relative_path.Set.exists env.editor_open_files ~f:begin fun path ->
-    match FileHeap.get path with
-    | Some Ide contents ->
-      begin match get_file_content_from_disk path with
-      | Some disk_contents -> contents <> disk_contents
-      | None ->
-        (* If one creates a new file, then there will not be corresponding
-        * disk contents, and we should consider there to be unsaved changes in
-        * the editor. *)
-        true
-      end
-    | _ -> false
-  end
+  not @@ Relative_path.Map.is_empty (get_unsaved_changes env)

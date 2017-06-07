@@ -248,11 +248,12 @@ let main args =
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->
+      let ignore_ide = ClientMessages.ignore_ide_from args.from in
       let {
         Rpc.Server_status.liveness;
         has_unsaved_changes;
         error_list;
-      } = rpc args Rpc.STATUS in
+      } = rpc args (Rpc.STATUS ignore_ide) in
       let stale_msg = is_stale_msg liveness in
       if args.output_json || args.from <> "" || error_list = []
       then begin

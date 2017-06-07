@@ -14,7 +14,7 @@ open ServerCommandTypes
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
-    | STATUS ->
+    | STATUS _ ->
         HackEventLogger.check_response (Errors.get_error_list env.errorl);
         let error_list = Errors.get_sorted_error_list env.errorl in
         let error_list = List.map ~f:Errors.to_absolute error_list in

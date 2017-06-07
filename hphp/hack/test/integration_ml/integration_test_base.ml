@@ -207,9 +207,9 @@ let ide_autocomplete env (path, line, column) =
     )
   }
 
-let status env =
+let status ?(ignore_ide=false) env =
   run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse ServerCommandTypes.STATUS)
+    new_client = Some (RequestResponse (ServerCommandTypes.STATUS ignore_ide))
   }
 
 let assert_no_diagnostics loop_output =
@@ -275,3 +275,11 @@ let assert_autocomplete loop_output expected =
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
+
+let assert_status loop_output expected =
+  let {Server_status.error_list; _} = match loop_output.new_client_response with
+    | Some res -> res
+    | _ -> fail "Expected status response"
+  in
+  let results_as_string = errors_to_string error_list in
+  assertEqual expected results_as_string

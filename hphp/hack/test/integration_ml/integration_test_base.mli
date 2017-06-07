@@ -52,6 +52,7 @@ val ide_autocomplete :
   ServerEnv.env * ('a, AutocompleteService.result) loop_outputs
 
 val status :
+  ?ignore_ide: bool ->
   ServerEnv.env ->
   ServerEnv.env *
     (ServerCommandTypes.Server_status.t, 'a) loop_outputs
@@ -80,3 +81,6 @@ val assert_diagnostics : ('a, 'b) loop_outputs -> string -> unit
 
 val assert_autocomplete :
   ('a, AutocompleteService.result) loop_outputs -> string list -> unit
+
+val assert_status :
+  (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit

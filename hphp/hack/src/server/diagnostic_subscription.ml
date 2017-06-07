@@ -138,12 +138,13 @@ let throttle ds ide_files pending_errors =
 let update ds ide_files checked_files errors =
 
   let errors = errors_to_map errors in
-  let new_errors = filter_unchanged ds errors in
 
   (* Merge errors overwriting old ones with new ones *)
-  let pending_errors = Relative_path.Map.merge ds.pending_errors new_errors
+  let pending_errors = Relative_path.Map.merge ds.pending_errors errors
     begin fun _ x y -> Option.merge x y (fun _ y -> y) end
   in
+
+  let pending_errors = filter_unchanged ds pending_errors in
 
   (* If a file was checked, but is not in error list, it means that we are sure
    * that it has no errors now *)

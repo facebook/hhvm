@@ -119,6 +119,12 @@ let public_syntax =
 let static_syntax =
   make_token_syntax ~space_after:true TokenKind.Static "static"
 
+let try_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Try "try"
+
+let finally_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Finally "finally"
+
 let if_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.If "if"
 
@@ -229,6 +235,15 @@ let make_compound_statement_syntax compound_statements =
     left_brace_syntax
     (make_list compound_statements)
     right_brace_syntax
+
+let make_try_finally_statement_syntax try_compound_statement finally_body =
+  make_try_statement
+    try_keyword_syntax
+    try_compound_statement
+    (make_missing()) (* catches *)
+    (make_finally_clause
+      finally_keyword_syntax
+      finally_body)
 
 let make_return_statement_syntax expression_syntax =
   make_return_statement return_keyword_syntax expression_syntax semicolon_syntax
@@ -483,18 +498,6 @@ let default_label_syntax =
 
 (* Coroutine-specific syntaxes *)
 
-(* TODO: Either (1) rename this to something less likely to conflict with
-user variables or (2) put user variables in their own sub-closure.  *)
-
-let next_label =
-  "nextLabel"
-
-let label_syntax =
-  make_token_syntax ~space_after:true TokenKind.Variable ("$" ^ next_label)
-
-let label_name_syntax =
-  make_token_syntax ~space_after:true TokenKind.Name next_label
-
 let continuation_variable =
   "$coroutineContinuation_generated"
 
@@ -550,6 +553,11 @@ let closure_variable =
 (* $closure *)
 let closure_variable_syntax =
   make_token_syntax TokenKind.Variable closure_variable
+
+(* $closure->name *)
+let closure_name_syntax name =
+  let name_syntax = make_token_syntax TokenKind.Name name in
+  make_member_selection_expression_syntax closure_variable_syntax name_syntax
 
 let make_closure_parameter_syntax enclosing_classname function_name =
   make_parameter_declaration_syntax
@@ -661,6 +669,21 @@ let make_member_with_unknown_type_declaration_syntax variable_syntax =
 let coroutine_unit_call_syntax =
   let name = make_token_syntax TokenKind.Name "coroutine_unit" in
   make_function_call_expression_syntax name []
+
+let next_label =
+  "nextLabel"
+
+(* $closure->nextLabel *)
+let label_syntax =
+  closure_name_syntax next_label
+
+(* nextLabel *)
+let label_name_syntax =
+  make_token_syntax TokenKind.Name next_label
+
+(* $nextLabel *)
+let label_variable_syntax =
+  make_token_syntax TokenKind.Variable ("$" ^ next_label)
 
 (* $closure->nextLabel = x; *)
 let set_next_label_syntax number =

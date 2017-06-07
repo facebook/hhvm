@@ -13,6 +13,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
 module TokenKind = Full_fidelity_token_kind
+module Utils = Full_fidelity_syntax_utilities.WithSyntax(EditableSyntax)
 
 open EditableSyntax
 open CoroutineSyntax
@@ -118,36 +119,49 @@ let unhoistable_variables =
     exception_variable;
   ]
 
-(**
- * Converts references to parameters and locals into referenced to the hoisted
- * versions of these identifiers that are part of the generated closure.
- *
- * If a function refers to a local or parameter variable $foo, then $foo should
- * be made into a member on the closure.
- *
- * $this is not hoisted, since its state will be persisted between state machine
- * resumptions automatically.
- *)
-let rewrite_locals_and_params_into_closure_variables node =
-  let rewrite_and_gather_locals_and_params node acc =
+(* This gives the names of all local variables and parameters in a body:
+* locals and parameters occurring only in lambdas are not included.
+* Unused parameters are not included.
+* Locals are stripped of their initial $
+* TODO: We could further filter these down to only locals that are used
+        across a suspend.
+*)
+let gather_locals_and_params node =
+  let folder acc node =
     match syntax node with
-    | Token { EditableToken.kind = TokenKind.Variable; text; _; }
-      when not (SSet.mem text unhoistable_variables) ->
-        let local_as_name_syntax =
-          String_utils.lstrip text "$"
-            |> make_token_syntax TokenKind.Name in
-        SMap.add text node acc,
-        Rewriter.Result.Replace
-          (make_member_selection_expression_syntax
-            closure_variable_syntax
-            local_as_name_syntax)
-    | _ -> acc, Rewriter.Result.Keep in
-  let locals_and_params, body =
-    Rewriter.aggregating_rewrite_post
-      rewrite_and_gather_locals_and_params
-      node
-      SMap.empty in
-  body, locals_and_params
+    | Token { EditableToken.kind = TokenKind.Variable; text; _; } ->
+      let text = String_utils.lstrip text "$" in
+      SMap.add text node acc
+    | _ -> acc in
+  Lambda_analyzer.fold_no_lambdas folder SMap.empty node
+
+let make_local name =
+  make_token_syntax TokenKind.Variable ("$" ^ name)
+
+(* $closure->name = $name *)
+let copy_in_syntax variable =
+  make_assignment_syntax_variable
+    (closure_name_syntax variable)
+    (make_local variable)
+
+(* $name = $closure->name *)
+let copy_out_syntax variable =
+  make_assignment_syntax_variable
+    (make_local variable)
+    (closure_name_syntax variable)
+
+let add_try_finally locals_and_params body =
+  let copy_in = locals_and_params
+    |> SMap.keys (* TODO: Is this sorted? *)
+    |> Core_list.map ~f:copy_in_syntax in
+  let copy_out = locals_and_params
+    |> SMap.keys(* TODO: Is this sorted? *)
+    |> Core_list.map ~f:copy_out_syntax in
+  let copy_out = make_compound_statement_syntax copy_out in
+  let copy_in = make_compound_statement_syntax copy_in in
+  let try_body = make_compound_statement_syntax [ body ] in
+  let try_statement = make_try_finally_statement_syntax try_body copy_in in
+  make_compound_statement_syntax [ copy_out; try_statement ]
 
 (**
  * Recursively rewrites do-while constructs into while constructs.
@@ -775,20 +789,21 @@ let unnest_compound_statements node =
     | None -> Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
 
-let lower_body { methodish_function_body; _; } =
-  let next_loop_label, methodish_function_body =
-    methodish_function_body
-      |> add_missing_return
-      |> rewrite_do 0 in
+let lower_body { methodish_function_body; _} =
 
-  methodish_function_body
-    |> rewrite_while
-    |> rewrite_for next_loop_label
-    |> snd
-    |> rewrite_suspends
-    |> add_switch
-    |> unnest_compound_statements
-    |> rewrite_locals_and_params_into_closure_variables
+  (* TODO:
+  *)
+  let locals_and_params = gather_locals_and_params methodish_function_body in
+
+  let body = add_missing_return methodish_function_body in
+  let (next_loop_label, body) = rewrite_do 0 body in
+  let body = rewrite_while body in
+  let (next_loop_label, body) = rewrite_for next_loop_label body in
+  let (next_loop_label, body) = rewrite_suspends body in
+  let body = add_switch (next_loop_label, body) in
+  let body = add_try_finally locals_and_params body in
+  let body = unnest_compound_statements body in
+  (body, locals_and_params)
 
 let make_function_decl_header
     classish_name
@@ -860,7 +875,7 @@ let compute_state_machine_data locals_and_params function_node =
       |> SSet.of_list in
   let local_variables =
     SMap.filter
-      (fun k _ -> not (SSet.mem k parameter_names))
+      (fun k _ -> not (SSet.mem ("$" ^ k) parameter_names))
       locals_and_params in
   CoroutineStateMachineData.{ local_variables; parameters; }
 

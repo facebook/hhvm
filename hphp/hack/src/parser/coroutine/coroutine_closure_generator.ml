@@ -103,6 +103,10 @@ let generate_resume_with_exception_method method_node =
       void_syntax)
     (generate_resume_with_exception_body method_node)
 
+(* int $nextLabel; *)
+let generate_fields =
+  make_property_declaration_syntax int_type label_variable_syntax
+
 let generate_closure_body
     classish_name
     function_name
@@ -111,6 +115,7 @@ let generate_closure_body
     state_machine_data =
   generate_hoisted_locals state_machine_data
     @ [
+      generate_fields;
       generate_constructor_method
         classish_name
         function_name

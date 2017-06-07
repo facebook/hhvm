@@ -16,7 +16,7 @@ open Syntax
 open Utils
 
 (*
-We have a lambda in hand, and the chain of parents in its parse tree.
+ We have a lambda in hand, and the chain of parents in its parse tree.
 We wish to know all the local variables which appear immediately in any parent
 that are used anywhere inside the lambda. These are the "outer variables" of
 the lambda.

@@ -319,6 +319,32 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
   });
 }
 
+/*
+ * Optimize load followed by truncation
+ * loadq ; movtqb -> loadb (we could use loadtqb as well)
+ * loadq ; movtql -> loadl
+ */
+template<Vinstr::Opcode mov_op, typename loadt>
+bool simplify_load_truncate(Env& env, const load& load, Vlabel b, size_t i) {
+  if (env.use_counts[load.d] != 1) return false;
+  auto const& code = env.unit.blocks[b].code;
+  if (i + 1 >= code.size()) return false;
+
+  return if_inst<mov_op>(env, b, i + 1, [&] (const op_type<mov_op>& mov) {
+    if (load.d != mov.s) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << loadt{load.s, mov.d};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const load& load, Vlabel b, size_t i) {
+  return
+    simplify_load_truncate<Vinstr::movtqb, loadtqb>(env, load, b, i) ||
+    simplify_load_truncate<Vinstr::movtql, loadtql>(env, load, b, i);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

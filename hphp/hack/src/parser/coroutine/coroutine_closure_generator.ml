@@ -19,13 +19,18 @@ let generate_hoisted_locals { CoroutineStateMachineData.local_variables; _; } =
     |> SMap.values
     |> Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
 
-let make_parameters_public { CoroutineStateMachineData.parameters; _; } =
+let make_parameters_public_and_untyped
+    { CoroutineStateMachineData.parameters; _; } =
   parameters
     |> Core_list.map ~f:
       begin
       fun p ->
         make_syntax
-          (ParameterDeclaration { p with parameter_visibility = public_syntax })
+          (ParameterDeclaration {
+            p with
+              parameter_visibility = public_syntax;
+              parameter_type = make_missing ();
+          })
       end
 
 let make_invoke_do_resume_syntax
@@ -48,7 +53,7 @@ let generate_constructor_method
     { function_type; _; }
     state_machine_data =
   let function_parameter_list =
-    make_parameters_public state_machine_data in
+    make_parameters_public_and_untyped state_machine_data in
   let cont_param = make_continuation_parameter_syntax
     ~visibility_syntax:private_syntax function_type in
   let sm_param = make_state_machine_parameter_syntax

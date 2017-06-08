@@ -48,6 +48,14 @@ let test_ImmQueue () =
   if not did_throw then failwith "expected an exception";
   let (x, _) = ImmQueue.pop queue in
   match x with Some _ -> failwith "expected none" | None -> ();
+
+  let queue = ImmQueue.push (ImmQueue.push (ImmQueue.push ImmQueue.empty 1) 2) 3 in
+  let (_, queue) = ImmQueue.pop queue in
+  let queue = ImmQueue.push (ImmQueue.push queue 4) 5 in
+  let acc = ref [] in
+  ImmQueue.iter queue ~f:(fun i -> acc := !acc @ [i]);
+  if !acc <> [2; 3; 4; 5] then failwith "expected 2345 iter order";
+
   true
 
 let tests = [

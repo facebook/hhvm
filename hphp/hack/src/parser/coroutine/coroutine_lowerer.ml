@@ -205,7 +205,7 @@ let maybe_rewrite_class node =
  * directly. Generated closure nodes are collected and written alongside
  * of the class nodes.
  *)
-let rewrite_classes (node_acc, any_rewritten_acc) node =
+let rewrite_classes node (node_acc, any_rewritten_acc) =
   Option.value_map
     (maybe_rewrite_class node)
     ~default:(node :: node_acc, any_rewritten_acc)
@@ -220,7 +220,7 @@ let maybe_rewrite_syntax_list node =
   match syntax node with
   | SyntaxList syntax_list ->
       let rewritten_nodes, any_rewritten =
-        List.fold
+        List.fold_right
           ~f:rewrite_classes
           ~init:([], false)
           syntax_list in

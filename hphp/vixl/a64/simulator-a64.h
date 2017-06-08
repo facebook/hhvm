@@ -180,7 +180,7 @@ class Simulator : public DecoderVisitor {
   }
 
   // Declare all Visitor functions.
-  #define DECLARE(A)  void Visit##A(Instruction* instr);
+  #define DECLARE(A)  void Visit##A(Instruction* instr) override;
   VISITOR_LIST(DECLARE)
   #undef DECLARE
 

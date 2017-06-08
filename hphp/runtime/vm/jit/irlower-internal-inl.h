@@ -189,15 +189,14 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
   auto const cc = [&] {
 
-    auto const mask_cmp = [&] (int mask, int bits, ConditionCode cc) {
+    auto const mask_cmp = [&] (int mask, int kind, ConditionCode cc) {
       auto const masked = emitMaskTVType(v, mask, typeSrc);
-      emitCmpTVType(v, sf, bits, masked);
+      emitCmpTVType(v, sf, kind, masked);
       return cc;
     };
 
-    auto const cmp = [&] (DataType kind, ConditionCode cc) {
-      emitCmpTVType(v, sf, kind, typeSrc);
-      return cc;
+    auto const cmp = [&] (int kind, ConditionCode cc) {
+      return mask_cmp(kDataTypeMask, kind, cc);
     };
 
     auto const test = [&] (int bits, ConditionCode cc) {

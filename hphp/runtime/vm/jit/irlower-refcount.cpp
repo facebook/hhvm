@@ -88,7 +88,8 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
     cond = CC_E;
   } else {
     assert(ty <= TGen);
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
+    auto const masked = emitMaskTVType(v, (int)kDataTypeMask, loc.reg(1));
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, masked);
   }
   unlikelyIfThen(v, vtaken, cond, sf, then);
 }
@@ -435,7 +436,8 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
       auto const type = srcLoc(env, inst, 0).reg(1);
 
       auto const sf = v.makeReg();
-      emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+      auto const masked = emitMaskTVType(v, (int)kDataTypeMask, type);
+      emitCmpTVType(v, sf, KindOfRefCountThreshold, masked);
 
       unlikelyIfThen(v, vcold(env), CC_NLE, sf, [&] (Vout& v) {
         auto const stub = tc::ustubs().decRefGeneric;

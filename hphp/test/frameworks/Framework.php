@@ -501,6 +501,9 @@ class Framework {
 
     while (!feof($file)) {
       $line = fgets($file);
+      if ($line === false) {
+        break;
+      }
       if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
         break;
       }
@@ -539,7 +542,7 @@ class Framework {
     if ($handle) {
       while (!feof($handle)) {
         // trim out newline since Map doesn't like them in its keys
-        $test = rtrim(fgets($handle), PHP_EOL);
+        $test = rtrim((string) fgets($handle), PHP_EOL);
         if ($test !== "") {
           $status = rtrim(fgets($handle), PHP_EOL);
           $results[$test] = $status;

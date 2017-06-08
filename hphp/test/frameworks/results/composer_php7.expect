@@ -1103,9 +1103,9 @@ Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testManualExcludes
 Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testSkipExcludes
 .
 Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveCustomFileName
-E
+.
 Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar
-E
+.
 Composer\Test\Package\Archiver\ArchiveManagerTest::testUnknownFormat
 .
 Composer\Test\Package\Archiver\GitExcludeFilterTest::testPatternEscape with data set #0
@@ -1123,7 +1123,7 @@ Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data 
 Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #4
 .
 Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive
-E
+.
 Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive
 .
 Composer\Test\Package\Archiver\ZipArchiverTest::testZipArchive

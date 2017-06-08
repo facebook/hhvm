@@ -138,7 +138,7 @@ module In_init_env = struct
 end
 
 type state =
-  (* Pre_init: we haven't yet responded to the initialize request.       *)
+  (* Pre_init: we haven't yet received the initialize request.           *)
   | Pre_init
   (* In_init: we did respond to the initialize request, and now we're    *)
   (* waiting for a "Hello" from the server. When that comes we'll        *)
@@ -147,6 +147,9 @@ type state =
   | In_init of In_init_env.t
   (* Main_loop: we have a working connection to both server and client.  *)
   | Main_loop of Main_env.t
+  (* Lost_server: someone stole the persistent connection from us.       *)
+  (* We might choose to grab it back if prompted...                      *)
+  | Lost_server
   (* Post_shutdown: we received a shutdown request from the client, and  *)
   (* therefore shut down our connection to the server. We can't handle   *)
   (* any more requests from the client and will close as soon as it      *)
@@ -209,6 +212,7 @@ let state_to_string (state: state) : string =
   | Pre_init -> "Pre_init"
   | In_init _ienv -> "In_init"
   | Main_loop _menv -> "Main_loop"
+  | Lost_server -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
 
 
@@ -859,29 +863,32 @@ let do_initialize_after_hello
   (file_edits: ClientMessageQueue.client_message list)
   : unit =
   let open Marshal_tools in
-  let oc = server_conn.oc in
-  ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
-  let fd = Unix.descr_of_out_channel oc in
-  let response = Marshal_tools.from_fd_with_preamble fd in
-  if response <> ServerCommandTypes.Connected then begin
-    let message = "didn't get server Connected response" in
-    let stack = "" in
+  begin try
+    let oc = server_conn.oc in
+    ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
+    let fd = Unix.descr_of_out_channel oc in
+    let response = Marshal_tools.from_fd_with_preamble fd in
+    if response <> ServerCommandTypes.Connected then
+      failwith "Didn't get server Connected response";
+
+    let handle_file_edit (c: ClientMessageQueue.client_message) =
+      let open ClientMessageQueue in
+      match c.method_ with
+      | "textDocument/didOpen" ->
+        parse_did_open c.params |> do_did_open server_conn
+      | "textDocument/didChange" ->
+        parse_did_change c.params |> do_did_change server_conn
+      | "textDocument/didClose" ->
+        parse_did_close c.params |> do_did_close server_conn
+      | _ ->
+        failwith "should only buffer up didOpen/didChange/didClose"
+    in
+    List.iter file_edits ~f:handle_file_edit;
+  with e ->
+    let message = Printexc.to_string e in
+    let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { message; stack; })
   end;
-
-  let handle_file_edit (c: ClientMessageQueue.client_message) =
-    let open ClientMessageQueue in
-    match c.method_ with
-    | "textDocument/didOpen" ->
-      parse_did_open c.params |> do_did_open server_conn
-    | "textDocument/didChange" ->
-      parse_did_change c.params |> do_did_change server_conn
-    | "textDocument/didClose" ->
-      parse_did_close c.params |> do_did_close server_conn
-    | _ ->
-      failwith "should only buffer up didOpen/didChange/didClose"
-  in
-  List.iter file_edits ~f:handle_file_edit;
 
   rpc server_conn (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
 
@@ -1118,8 +1125,6 @@ let handle_event
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
-    (* If we get an exception while handling this, then we'll want           *)
-    (* to be in the "pre_init / no_connection" state for future messages.    *)
     do_initialize_after_hello ienv.In_init_env.conn (List.rev ienv.In_init_env.file_edits);
     report_progress_end ienv;
     state := Main_loop {
@@ -1243,10 +1248,15 @@ let handle_event
     raise (Error.Invalid_request "already received shutdown request")
 
   (* server shut-down request *)
+  | Main_loop _menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+    state := Lost_server
+
+  (* server shut-down request, unexpected *)
   | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-    print_log_message Message_type.ErrorMessage "Another client has connected"
-      |> notify stdout "window/logMessage";
-    exit_fail ()
+    let open Marshal_tools in
+    let message = "unexpected close of absent server" in
+    let stack = "" in
+    raise (Server_fatal_connection_exception { message; stack; })
 
   (* server fatal shutdown *)
   | _, Server_message ServerCommandTypes.FATAL_EXCEPTION _ ->
@@ -1254,6 +1264,10 @@ let handle_event
 
   (* idle tick. No-op. *)
   | _, Tick -> ()
+
+  (* client message when we've lost the server *)
+  | Lost_server, Client_message _c ->
+    raise (Error.Request_cancelled "server lost")
 
 
 (* main: this is the main loop for processing incoming Lsp client requests,

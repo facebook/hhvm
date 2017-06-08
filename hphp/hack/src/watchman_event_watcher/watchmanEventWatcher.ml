@@ -92,4 +92,5 @@ let () =
   | None ->
     Hh_logger.log "Error failed to initialize watchman"
   | Some wenv ->
+    Hh_logger.log "initialized";
     check_subscription (Watchman.Watchman_alive wenv)

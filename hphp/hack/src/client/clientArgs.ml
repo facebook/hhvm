@@ -26,6 +26,11 @@ module Common_argspecs = struct
       Arg.Set_int value_ref,
       spf (" set the number of retries for connecting to server. " ^^
         "Roughly 1 retry per second (default: %d)") !value_ref;)
+
+  let from value_ref =
+    ("--from",
+      Arg.Set_string value_ref,
+      " so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode")
 end
 
 
@@ -314,9 +319,7 @@ let parse_check_args cmd =
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
-    "--from",
-      Arg.Set_string from,
-      " set this so we know who is calling hh_client";
+    Common_argspecs.from from;
     "--timeout",
       Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
@@ -564,11 +567,17 @@ let parse_ide_args () =
   }
 
 let parse_lsp_args () =
-  let usage = Printf.sprintf "Usage: %s lsp\n" Sys.argv.(0) in
-  let options = [] in
+  let usage = Printf.sprintf
+    "Usage: %s lsp [OPTION]...\n\
+    [experimental] runs a persistent language service\n"
+    Sys.argv.(0) in
+  let from = ref "" in
+  let options = [
+    Common_argspecs.from from;
+  ] in
   let args = parse_without_command options usage "lsp" in
   match args with
-  | [] -> CLsp
+  | [] -> CLsp { ClientLsp.from = !from }
   | _ -> Printf.printf "%s\n" usage; exit 2
 
 let parse_debug_args () =
@@ -605,4 +614,4 @@ let root = function
   | CStop { ClientStop.root; _ }
   | CIde { ClientIde.root; _}
   | CDebug { ClientDebug.root } -> root
-  | CLsp -> Path.dummy_path
+  | CLsp _ -> Path.dummy_path

@@ -59,9 +59,8 @@ let () =
         | ClientCommand.CStop env -> ClientStop.main env
         | ClientCommand.CRestart env -> ClientRestart.main env
         | ClientCommand.CBuild env -> ClientBuild.main env
-        | ClientCommand.CIde env -> ClientIde.main env
-        | ClientCommand.CLsp -> ClientLsp.main (); (* never terminates *)
-                                Exit_status.exit Exit_status.No_error
+        | ClientCommand.CIde env -> ClientIde.main env (* never terminates *)
+        | ClientCommand.CLsp env -> ClientLsp.main env (* never terminates *)
         | ClientCommand.CDebug env -> ClientDebug.main env
     with Exit_status.Exit_with es ->
       HackEventLogger.client_bad_exit es;

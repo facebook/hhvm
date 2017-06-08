@@ -1324,11 +1324,16 @@ let handle_event
     raise (Server_fatal_connection_exception { message; stack; })
 
 
+type env = {
+  from: string;
+}
+
 (* main: this is the main loop for processing incoming Lsp client requests,
-   and incoming server notifications. *)
-let main () : unit =
+   and incoming server notifications. Never returns. *)
+let main (env: env) : 'a =
   let open Marshal_tools in
   Printexc.record_backtrace true;
+  HackEventLogger.client_set_from env.from;
   let client = ClientMessageQueue.make () in
   let state = ref Pre_init in
   while true do
@@ -1377,4 +1382,5 @@ let main () : unit =
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" start_handle_t;
-  done
+  done;
+  failwith "unreachable"

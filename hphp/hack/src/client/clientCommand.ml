@@ -15,7 +15,7 @@ type command =
   | CRestart of ClientStart.env
   | CBuild of ClientBuild.env
   | CIde of ClientIde.env
-  | CLsp
+  | CLsp of ClientLsp.env
   | CDebug of ClientDebug.env
 
 type command_keyword =

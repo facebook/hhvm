@@ -18,6 +18,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <folly/EventPortability.h>
 
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/runtime-option.h"

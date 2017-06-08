@@ -30,5 +30,5 @@ let is_void node =
 
 let rewrite_return_type return_type =
   if is_missing return_type then mixed_type
-  else if is_void return_type then unit_type
+  else if is_void return_type then unit_type_syntax
   else return_type

@@ -88,11 +88,10 @@ let mixed_syntax =
 let mixed_type =
   make_simple_type_specifier mixed_syntax
 
-(* TODO: Should be CoroutineUnit ? *)
 let unit_syntax =
-  make_token_syntax ~space_after:true TokenKind.Name "Unit"
+  make_token_syntax ~space_after:true TokenKind.Name "CoroutineUnit"
 
-let unit_type =
+let unit_type_syntax =
   make_simple_type_specifier unit_syntax
 
 let int_syntax =

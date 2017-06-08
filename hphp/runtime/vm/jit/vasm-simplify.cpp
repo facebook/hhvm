@@ -319,6 +319,29 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
   });
 }
 
+/*
+ * Eliminate masking values with -1 in andXi.
+ * andbi s0=0xff s1=val0 d=val1 -> copy s=val0 d=val1
+ * andli s0=0xffffffff s1=val0 d=val1 -> copy s=val0 d=val1
+ */
+template<typename andi>
+bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
+  if (inst.s0.l() != -1 ||
+      env.use_counts[inst.sf] != 0) return false;
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s1, inst.d};
+    return 1;
+  });
+}
+
+bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
+  return simplify_andi(env, andbi, b, i);
+}
+
+bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
+  return simplify_andi(env, andli, b, i);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

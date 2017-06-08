@@ -12,6 +12,8 @@
            ("Who watches the Watchmen?")
 ****************************************************)
 
+open Core
+
 (**
  * Watches a repo and logs state-leave and state-enter
  * events on it using a Watchman subscription.
@@ -22,6 +24,39 @@
  *)
 
 module J = Hh_json_helpers
+module Config = WatchmanEventWatcherConfig
+
+module Responses = struct
+
+  exception Invalid_response
+  exception Send_failure
+
+  type t =
+    | Unknown
+    | Mid_update
+    | Settled
+
+  let to_string = function
+    | Unknown -> "unknown"
+    | Mid_update -> "mid_update"
+    | Settled -> "settled"
+
+  let of_string s = match s with
+    | "unknown" -> Unknown
+    | "mid_update" -> Mid_update
+    | "settled" -> Settled
+    | _ -> raise Invalid_response
+
+  let send_to_fd v fd =
+    let str = Printf.sprintf "%s\n" (to_string v) in
+    let bytes = Unix.write fd str 0 (String.length str) in
+    if bytes = (String.length str) then
+      ()
+    else
+      raise Send_failure
+
+end
+
 
 type state =
   | Unknown
@@ -33,6 +68,7 @@ type state =
 type env = {
   watchman : Watchman.watchman_instance;
   state : state;
+  socket : Unix.file_descr;
 }
 
 let watchman_expression_terms = [
@@ -53,6 +89,7 @@ module Args = struct
   type t = {
     root : Path.t;
     daemonize : bool;
+    get_sockname : bool;
   }
 
   let usage = Printf.sprintf
@@ -62,8 +99,10 @@ module Args = struct
   let parse () =
     let root = ref None in
     let daemonize = ref false in
+    let get_sockname = ref false in
     let options = [
       "--daemonize", Arg.Set daemonize, "spawn watcher daemon";
+      "--get-sockname", Arg.Set get_sockname, "print socket and exit";
     ] in
     let () = Arg.parse options (fun s -> root := (Some s)) usage in
     match !root with
@@ -74,6 +113,7 @@ module Args = struct
       {
         root = Path.make root;
         daemonize = !daemonize;
+        get_sockname = !get_sockname;
       }
 
   let root args = args.root
@@ -93,6 +133,8 @@ let process_changes changes env =
   | Watchman_pushed (State_leave (name, _)) ->
     Hh_logger.log "State_leave %s" name;
     { env with state = Left_at name; }
+  | Watchman_pushed (Files_changed set) when (SSet.is_empty set)->
+    env
   | Watchman_pushed (Files_changed set) ->
     let files = SSet.fold (fun x acc ->
       let exists = Sys.file_exists x in
@@ -103,12 +145,64 @@ let process_changes changes env =
     Hh_logger.log "Watchman unexpectd synchronous response. Exiting";
     exit 1
 
-let rec check_subscription env =
-  let deadline = Unix.time () +. 1000.0 in
-  let w, changes = Watchman.get_changes ~deadline env.watchman in
+let check_subscription env =
+  let w, changes = Watchman.get_changes env.watchman in
   let env = { env with watchman = w; } in
   let env = process_changes changes env in
-  check_subscription env
+  env
+
+let sleep_and_check ?(wait_time=0.3) socket =
+  let ready_socket_l, _, _ = Unix.select [socket] [] [] wait_time in
+  ready_socket_l <> []
+
+(** Batch accept all new client connections. Return the list of them. *)
+let get_new_clients socket =
+  let rec get_all_clients_nonblocking socket acc =
+    let has_client = sleep_and_check ~wait_time:0.0 socket in
+    if not has_client then
+      acc
+    else
+      let acc = try
+        let fd, _ = Unix.accept socket in
+        fd :: acc
+      with
+        | Unix.Unix_error _ ->
+          acc
+      in
+      get_all_clients_nonblocking socket acc
+  in
+  let has_client = sleep_and_check socket in
+  if not has_client then
+    []
+  else
+    get_all_clients_nonblocking socket []
+
+let process_client_ env client =
+  (match env.state with
+  | Unknown ->
+    Responses.send_to_fd Responses.Unknown client
+  | Entering_to _ ->
+    Responses.send_to_fd Responses.Mid_update client
+  | Left_at _ ->
+    Responses.send_to_fd Responses.Settled client);
+  Unix.close client;
+  env
+
+let process_client env client =
+  try process_client_ env client with
+  | Unix.Unix_error (Unix.EBADF, _, _) ->
+    env
+  | Responses.Send_failure ->
+    env
+
+let check_new_connections env =
+  let new_clients = get_new_clients env.socket in
+  List.fold_left new_clients ~init:env ~f:process_client
+
+let rec serve env =
+  let env = check_subscription env in
+  let env = check_new_connections env in
+  serve env
 
 let init root =
   let init_id = Random_id.short_string () in
@@ -131,10 +225,13 @@ let init root =
     Hh_logger.log "Error failed to initialize watchman";
     Result.Error Failure_watchman_init
   | Some wenv ->
-    Hh_logger.log "initialized";
+    let socket = Socket.init_unix_socket (Config.socket_file root) in
+    Hh_logger.log "initialized and listening on %s"
+      (Config.socket_file root);
     Result.Ok {
       watchman = Watchman.Watchman_alive wenv;
       state = Unknown;
+      socket;
     }
 
 let to_channel_no_exn oc data =
@@ -145,8 +242,13 @@ let to_channel_no_exn oc data =
 let main args =
   let result = init args.Args.root in
   match result with
-  | Result.Ok env ->
-    check_subscription env
+  | Result.Ok env -> begin
+      try serve env with
+      | e ->
+        let () = Hh_logger.exc
+          ~prefix:"WatchmanEventWatcheer uncaught exception. exiting." e in
+        raise e
+    end
   | Result.Error Failure_daemon_already_running
   | Result.Error Failure_watchman_init ->
     exit 1
@@ -160,7 +262,7 @@ let daemon_main args (_ic, oc) =
   match init args.Args.root with
   | Result.Ok env ->
     to_channel_no_exn oc Init_success;
-    check_subscription env
+    serve env
   | Result.Error e ->
    to_channel_no_exn oc (Init_failure e)
 
@@ -178,7 +280,7 @@ let spawn_daemon args =
   let out_fd = Daemon.fd_of_path log_file_path in
   Printf.eprintf
     "Spawning daemon. Its logs will go to: %s\n%!" log_file_path;
-  let { Daemon.channels; _ } =
+  let {Daemon.channels; _; } =
     Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry args in
   let result = Daemon.from_channel (fst channels) in
   match result with
@@ -194,7 +296,9 @@ let spawn_daemon args =
 let () =
   Daemon.check_entry_point ();
   let args = Args.parse () in
-  if args.Args.daemonize then
+  if args.Args.get_sockname then
+    Printf.printf "%s%!" (Config.socket_file args.Args.root)
+  else if args.Args.daemonize then
     spawn_daemon args
   else
     main args

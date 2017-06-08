@@ -8,7 +8,6 @@
  *)
 
 module CoroutineMethodLowerer = Coroutine_method_lowerer
-module CoroutineClosureGenerator = Coroutine_closure_generator
 module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
@@ -40,19 +39,12 @@ let maybe_generate_methods_and_closure
     method_node
     header_node
     function_name =
-  let rewritten_body, state_machine_data =
+  let rewritten_body, closure_syntax =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       classish_name
       function_name
       method_node
       header_node in
-  let closure_syntax =
-    CoroutineClosureGenerator.generate_coroutine_closure
-      classish_name
-      function_name
-      method_node
-      header_node
-      state_machine_data in
   Option.map
     (CoroutineMethodLowerer.maybe_rewrite_methodish_declaration
       classish_name
@@ -60,7 +52,8 @@ let maybe_generate_methods_and_closure
       method_node
       header_node
       rewritten_body)
-    (* TODO: This need not be a list -- fix it. *)
+    (* TODO: The rewritten method syntax is a singleton, not a list, and
+    the set of closures generated could be a list, not a singleton. *)
     (fun rewritten_method_syntax ->
       [ rewritten_method_syntax ], closure_syntax)
 
@@ -83,6 +76,8 @@ let maybe_generate_methods_and_closure_from_header
   match syntax methodish_function_decl_header with
   | FunctionDeclarationHeader
     ({ function_coroutine; function_name; _; } as header_node)
+    (* TODO: We need to rewrite non-coroutine functions if they contain
+    coroutine lambdas. *)
     when not (is_missing function_coroutine) ->
       let header_node = fix_up_header_node header_node in
       option_flat_map
@@ -183,6 +178,9 @@ let maybe_rewrite_classish_body classish_name classish_body_node =
  * class is not transformed.
  *)
 let maybe_rewrite_class node =
+  (* TODO: We need to rewrite top-level coroutine methods *)
+  (* TODO: Do we need to rewrite top-level statements that contain coroutine
+  lambdas? *)
   let make_syntax node = make_syntax (ClassishDeclaration node) in
   match syntax node with
   | ClassishDeclaration ({ classish_body; classish_name; _; } as node) ->

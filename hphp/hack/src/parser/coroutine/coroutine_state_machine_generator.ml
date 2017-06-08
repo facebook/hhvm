@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
+module CoroutineClosureGenerator = Coroutine_closure_generator
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
@@ -802,11 +803,7 @@ let unnest_compound_statements node =
   Rewriter.rewrite_post rewrite node
 
 let lower_body { methodish_function_body; _} =
-
-  (* TODO:
-  *)
   let locals_and_params = gather_locals_and_params methodish_function_body in
-
   let body = add_missing_return methodish_function_body in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in
@@ -877,8 +874,8 @@ let extract_parameter_declarations { function_parameter_list; _; } =
       | _ -> failwith "Parameter had unexpected type."
       end
 
-let compute_state_machine_data locals_and_params function_node =
-  let parameters = extract_parameter_declarations function_node in
+let compute_state_machine_data locals_and_params header_node =
+  let parameters = extract_parameter_declarations header_node in
   let parameter_names =
     parameters
       |> Core_list.map ~f:
@@ -912,8 +909,15 @@ let generate_coroutine_state_machine
     classish_name
     function_name
     method_node
-    function_node =
+    header_node =
   let body, locals_and_params = lower_body method_node in
   let state_machine_data =
-    compute_state_machine_data locals_and_params function_node in
-  body, state_machine_data
+    compute_state_machine_data locals_and_params header_node in
+  let closure_syntax =
+    CoroutineClosureGenerator.generate_coroutine_closure
+      classish_name
+      function_name
+      method_node
+      header_node
+      state_machine_data in
+  body, closure_syntax

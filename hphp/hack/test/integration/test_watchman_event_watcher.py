@@ -29,6 +29,53 @@ def cat_file(filename):
         return f.read()
 
 
+def run_watcher(daemonize=False):
+    # Creates a decorator with named arguments. Runs the watcher
+    # and retrieves the socket name. Hands these as named arguments
+    # to the test function.
+    def wrap(fn):
+        def f(self=None):
+            self.write_watchman_config('{}')
+            self.init_hg_repo()
+            self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
+            sockname = self.get_sockname()
+            if daemonize:
+                proc = self.run_watchman_event_watcher(daemonize=True)
+                log_file = self.wait_init_get_log_file(proc)
+                self.assertIn(
+                    '.watchman_event_watcher_log',
+                    log_file,
+                    'expect extension in filename')
+                try:
+                    return fn(
+                        self,
+                        log_file=log_file,
+                        sockname=sockname,
+                        starter_process=proc,
+                    )
+                except Exception:
+                    err_print_ln('Test threw exception.')
+                    err_print_ln('See also event watcher logs:')
+                    logs = cat_file(log_file)
+                    err_print_ln(logs)
+                    raise
+            else:
+                try:
+                    proc = self.run_watchman_event_watcher(daemonize=False)
+                    result = fn(self, sockname=sockname, watcher_process=proc)
+                    proc.kill()
+                    return result
+                except Exception:
+                    err_print_ln('test threw exception.')
+                    err_print_ln('See also event watcher logs:')
+                    proc.kill()
+                    logs = proc.stderr.read().decode('UTF-8')
+                    err_print_ln(logs)
+                    raise
+        return f
+    return wrap
+
+
 class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     template_repo = 'hphp/hack/test/integration/data/simple_repo'
@@ -165,53 +212,39 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         return m.group(1)
 
     @flaky
-    def test_one_hg_update_daemonized(self):
-        self.write_watchman_config('{}')
-        self.init_hg_repo()
-        self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
-        w_proc = self.run_watchman_event_watcher(daemonize=True)
-        log_file = self.wait_init_get_log_file(w_proc)
-        self.assertIn(
-            '.watchman_event_watcher_log',
-            log_file,
-            'expect extension in filename')
-        try:
-            with open(log_file, 'r') as f:
-                initialized_msg = self.poll_line(f)
-                self.assertIn(
-                    'initialized',
-                    initialized_msg,
-                    'initialized message')
-                self.check_call(['hg', 'update', '.~1'])
-                state_enter = self.poll_line(f)
-                state_leave = self.poll_line(f)
-                sentinel_file = self.poll_line(f)
-                self.assertIn('State_enter hg.update', state_enter, 'state enter')
-                self.assertIn('State_leave hg.update', state_leave, 'state leave')
-                self.assertIn('Changes', sentinel_file, 'has changes')
-                self.assertIn(
-                    'updatestate',
-                    sentinel_file,
-                    'changes includes updatestate')
-        except Exception:
-            err_print_ln('Test threw exception.')
-            err_print_ln('See also event watcher logs:')
-            logs = cat_file(log_file)
-            err_print_ln(logs)
-            raise
-        return
+    @run_watcher(daemonize=True)
+    def test_one_hg_update_daemonized(
+        self,
+        log_file=None,
+        sockname=None,
+        starter_process=None
+    ):
+        with open(log_file, 'r') as f:
+            initialized_msg = self.poll_line(f)
+            self.assertIn(
+                'initialized',
+                initialized_msg,
+                'initialized message')
+            self.check_call(['hg', 'update', '.~1'])
+            state_enter = self.poll_line(f)
+            state_leave = self.poll_line(f)
+            sentinel_file = self.poll_line(f)
+            self.assertIn('State_enter hg.update', state_enter, 'state enter')
+            self.assertIn('State_leave hg.update', state_leave, 'state leave')
+            self.assertIn('Changes', sentinel_file, 'has changes')
+            self.assertIn(
+                'updatestate',
+                sentinel_file,
+                'changes includes updatestate')
 
-    def test_sockname(self):
-        self.write_watchman_config('{}')
-        self.init_hg_repo()
-        self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
-        w_proc = self.run_watchman_event_watcher(daemonize=True)
-        log_file = self.wait_init_get_log_file(w_proc)
-        sockname = self.get_sockname()
-        self.assertIn(
-            '.watchman_event_watcher_log',
-            log_file,
-            'expect extension in filename')
+    @flaky
+    @run_watcher(daemonize=True)
+    def test_sockname(
+        self,
+        log_file=None,
+        sockname=None,
+        starter_process=None
+    ):
         with open(log_file, 'r') as f:
             initialized_msg = self.poll_line(f)
             self.assertIn(
@@ -225,38 +258,23 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         return
 
     @flaky
-    def test_one_update_on_socket(self):
-        self.write_watchman_config('{}')
-        self.init_hg_repo()
-        self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
-        sockname = self.get_sockname()
-        self.assertIn('watchman_event_watcher_sock', sockname, 'getting sockname')
-        w_proc = self.run_watchman_event_watcher()
-        try:
-            result = self.connect_socket_get_output(sockname)
-            # Initially, watcher doesn't know the repo's state
-            self.assertIn('unknown', result, 'state enter')
-            update_proc = self.open_subprocess(['hg', 'update', '.~1'])
-            # We catch the repo in a mid-update state.
-            # This is kind of racy, but that's what the ignore_unknown=True is fore
-            result = self.connect_socket_get_output(
-                sockname,
-                ignore_unknown=True)
-            self.assertIn('mid_update', result, 'state enter')
-            update_proc.communicate()
-            # Give the watchman subscription time to catch up.
-            time.sleep(10)
-            result = self.connect_socket_get_output(
-                sockname,
-                ignore_unknown=True)
-            self.assertIn('settled', result, 'state enter')
-            w_proc.kill()
-            return
-        except Exception:
-            err_print_ln('test threw exception.')
-            err_print_ln('See also event watcher logs:')
-            w_proc.kill()
-            logs = w_proc.stderr.read().decode('UTF-8')
-            err_print_ln(logs)
-            raise
+    @run_watcher(daemonize=False)
+    def test_one_update_on_socket(self, sockname=None, watcher_process=None):
+        result = self.connect_socket_get_output(sockname)
+        # Initially, watcher doesn't know the repo's state
+        self.assertIn('unknown', result, 'state enter')
+        update_proc = self.open_subprocess(['hg', 'update', '.~1'])
+        # We catch the repo in a mid-update state.
+        # This is kind of racy, but that's what the ignore_unknown=True is fore
+        result = self.connect_socket_get_output(
+            sockname,
+            ignore_unknown=True)
+        self.assertIn('mid_update', result, 'state enter')
+        update_proc.communicate()
+        # Give the watchman subscription time to catch up.
+        time.sleep(10)
+        result = self.connect_socket_get_output(
+            sockname,
+            ignore_unknown=True)
+        self.assertIn('settled', result, 'state enter')
         return

@@ -992,10 +992,9 @@ let do_initialize_hello_attempt
         { Lsp.Initialize.retry = true; }))
 
 
-let do_initialize (params: Initialize.params)
+let do_initialize ()
   : (Initialize.result * state) =
   let open Initialize in
-  initialize_params := Some params;
   let start_time = Unix.time () in
   let local_config = ServerLocalConfig.load ~silent:true in
   let root = match get_root () with
@@ -1068,6 +1067,17 @@ let do_initialize (params: Initialize.params)
   (result, new_state)
 
 
+let regain_lost_server_if_necessary (state: state) (event: event) : state =
+  (* It's only necessary to regain a lost server if (1) we need it to handle  *)
+  (* a client message, and (2) we lost it in the first place.                 *)
+  match event, state with
+  | Client_message _, Lost_server ->
+    let (_result, new_state) = do_initialize () in
+    new_state
+  | _ ->
+    state
+
+
 (************************************************************************)
 (** Message handling                                                   **)
 (************************************************************************)
@@ -1090,12 +1100,11 @@ let handle_event
     if !state = Post_shutdown then exit_ok () else exit_fail ()
 
   (* initialize request*)
-  | Pre_init, Client_message c when c.method_ = "initialize" -> begin
-    let (result, new_state) =
-      parse_initialize c.params |> do_initialize in
+  | Pre_init, Client_message c when c.method_ = "initialize" ->
+    initialize_params := Some (parse_initialize c.params);
+    let (result, new_state) = do_initialize () in
     print_initialize result |> respond stdout c;
     state := new_state
-    end
 
   (* any request/notification if we haven't yet initialized *)
   | Pre_init, Client_message _c ->
@@ -1267,7 +1276,13 @@ let handle_event
 
   (* client message when we've lost the server *)
   | Lost_server, Client_message _c ->
-    raise (Error.Request_cancelled "server lost")
+    (* Our caller should have already transitioned away from this state if    *)
+    (* necessary before calling us, via regain_lost_server_if_necessary.      *)
+    (* If we get here, it's entirely unexpected! don't know how to recover... *)
+    let open Marshal_tools in
+    let message = "unexpected client message for lost server" in
+    let stack = "" in
+    raise (Server_fatal_connection_exception { message; stack; })
 
 
 (* main: this is the main loop for processing incoming Lsp client requests,
@@ -1290,6 +1305,7 @@ let main () : unit =
         | Main_loop menv -> state := Main_loop { menv with needs_idle = true; }
         | _ -> ()
       end;
+      state := regain_lost_server_if_necessary !state event;
       handle_event state client event;
       match event with
       | Client_message c -> begin

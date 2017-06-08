@@ -58,7 +58,7 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     TestClientProvider.mock_new_client_type Non_persistent;
     TestClientProvider.mock_client_request x
   | ConnectPersistent ->
-    TestClientProvider.mock_new_client_type Persistent_hard);
+    TestClientProvider.mock_new_client_type Persistent);
 
   Option.iter inputs.persistent_client_request
     TestClientProvider.mock_persistent_client_request;
@@ -100,7 +100,7 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     new_client_response =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =
-      TestClientProvider.get_client_response Persistent_hard;
+      TestClientProvider.get_client_response Persistent;
     push_message = TestClientProvider.get_push_message ();
   }
 

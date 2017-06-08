@@ -120,7 +120,6 @@ type message_source =
   | From_server
 
 type in_init_env = {
-  is_retry : bool;
   start_time : float;
   last_progress_report_time : float;
   has_shown_dialog : bool;
@@ -129,10 +128,8 @@ type in_init_env = {
 }
 
 type lsp_state_machine =
-  (* Pre_init: we haven't yet responded to the initialize request. The   *)
-  (* argument "Pre_init is_retry" says whether we're already dealt with  *)
-  (* (and rejected) a previous initialize request.                       *)
-  | Pre_init of bool
+  (* Pre_init: we haven't yet responded to the initialize request.       *)
+  | Pre_init
   (* In_init: we did respond to the initialize request, and now we're    *)
   (* waiting for a "Hello" from the server. When that comes we'll        *)
   (* request a permanent connection from the server, and process the     *)
@@ -165,8 +162,6 @@ type event =
 let exit_ok () = exit 0
 let exit_fail () = exit 1
 let exit_fail_delay () = Unix.sleep 2; exit 1
-
-exception Denied_due_to_existing_persistent_connection
 
 (* The following connection exceptions inform the main LSP event loop how to  *)
 (* respond to an exception: was the exception a connection-related exception  *)
@@ -811,20 +806,16 @@ let report_progress_end
 
 let do_initialize_after_hello
   (server_conn: server_conn option)
-  ~(is_retry: bool)
   (file_edits: ClientMessageQueue.client_message list)
   : unit =
   let oc = match server_conn with
     | None -> failwith "expected server_conn"
     | Some server_conn -> server_conn.oc in
-  let connection_type = if is_retry
-    then ServerCommandTypes.Persistent_hard
-    else ServerCommandTypes.Persistent_soft in
-  ServerCommand.send_connection_type oc connection_type;
+  ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
   let fd = Unix.descr_of_out_channel oc in
   let response = Marshal_tools.from_fd_with_preamble fd in
-  if response = ServerCommandTypes.Denied_due_to_existing_persistent_connection
-    then raise Denied_due_to_existing_persistent_connection;
+  if response <> ServerCommandTypes.Connected then
+    failwith "didn't connect to server";
 
   let handle_file_edit (c: ClientMessageQueue.client_message) =
     let open ClientMessageQueue in
@@ -942,7 +933,7 @@ let do_initialize_hello_attempt
         { Lsp.Initialize.retry = true; }))
 
 
-let do_initialize ~(is_retry: bool) (params: Initialize.params)
+let do_initialize (params: Initialize.params)
   : (server_conn option * Initialize.result * lsp_state_machine) =
   let open Initialize in
   let start_time = Unix.time () in
@@ -957,19 +948,11 @@ let do_initialize ~(is_retry: bool) (params: Initialize.params)
   let got_hello    = do_initialize_hello_attempt server_conn in
   let new_state =
     if got_hello then begin
-      try
-        do_initialize_after_hello (Some server_conn) ~is_retry [];
-        Main_loop
-      with Denied_due_to_existing_persistent_connection ->
-        (* How should the user react? - by retrying, to kick off our rival. *)
-        raise (Lsp.Error.Server_error_start (
-          "Cannot provide Hack language services while this project is " ^
-          "is active in another window.",
-          { Lsp.Initialize.retry = true; }))
+      do_initialize_after_hello (Some server_conn) [];
+      Main_loop
     end else begin
       let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
       let ienv = {
-        is_retry;
         start_time;
         last_progress_report_time = start_time;
         has_shown_dialog = false;
@@ -1038,23 +1021,16 @@ let handle_event (state: state) (event: event) : unit =
     if state.lsp_state = Post_shutdown then exit_ok () else exit_fail ()
 
   (* initialize request*)
-  | Pre_init is_retry, Client_message c when c.method_ = "initialize" -> begin
-    (* We can't directly determine whether the initialization request is a *)
-    (* retry, since that's not a part of the protocol. However, if we went *)
-    (* through initialize once and failed (with an exception), then the    *)
-    (* next time we're asked to initialize will necessarily be a retry.    *)
-    (* We set the retry flag to 'true' here now, so the next               *)
-    (* initialization request will be treated as a retry.                  *)
-    state.lsp_state <- Pre_init true;
+  | Pre_init, Client_message c when c.method_ = "initialize" -> begin
     let (server_conn', result, new_state) =
-      parse_initialize c.params |> do_initialize ~is_retry in
+      parse_initialize c.params |> do_initialize in
     print_initialize result |> respond stdout c;
     state.lsp_state <- new_state;
     state.server_conn <- server_conn'
     end
 
   (* any request/notification if we haven't yet initialized *)
-  | Pre_init _, Client_message _c ->
+  | Pre_init, Client_message _c ->
     raise (Error.Server_not_initialized "Server not yet initialized");
 
   (* any request/notification if we're not yet ready *)
@@ -1083,25 +1059,19 @@ let handle_event (state: state) (event: event) : unit =
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
-    (* As above, if we get an exception while handling this, then we'll want *)
+    (* If we get an exception while handling this, then we'll want           *)
     (* to be in the "pre_init / no_connection" state for future messages.    *)
     let conn = state.server_conn in
-    state.lsp_state <- Pre_init true;
+    state.lsp_state <- Pre_init;
     state.server_conn <- None;
-    begin try
-      do_initialize_after_hello conn ienv.is_retry (List.rev ienv.file_edits)
-    with
-      Denied_due_to_existing_persistent_connection -> exit_fail ()
-      (* If we're denied at this stage, we can't recover: we'll just exit *)
-      (* and trust the client to restart us. *)
-    end;
+    do_initialize_after_hello conn (List.rev ienv.file_edits);
     report_progress_end ienv;
     state.lsp_state <- Main_loop;
     state.server_conn <- conn
 
   (* any "hello" from the server when we weren't expecting it. This is so *)
   (* egregious that we can't trust anything more from the server.         *)
-  | Pre_init _, Server_hello
+  | Pre_init, Server_hello
   | Main_loop, Server_hello
   | Post_shutdown, Server_hello ->
     let message = "Unexpected hello" in
@@ -1249,7 +1219,7 @@ let main () : unit =
   let open Marshal_tools in
   Printexc.record_backtrace true;
   let state = {
-    lsp_state = Pre_init false;
+    lsp_state = Pre_init;
     client = ClientMessageQueue.make ();
     server_conn = None;
     needs_idle = false;

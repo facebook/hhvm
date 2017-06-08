@@ -84,19 +84,19 @@ let get_mocked_new_client_type () = Refs.get_new_client_type ()
 let get_mocked_client_request = function
   | Non_persistent ->
       Refs.get_client_request ()
-  | Persistent_hard | Persistent_soft ->
+  | Persistent ->
       Refs.get_persistent_client_request ()
 
 let record_client_response x = function
   | Non_persistent ->
       Refs.set_client_response (Some x)
-  | Persistent_hard | Persistent_soft ->
+  | Persistent ->
       Refs.set_persistent_client_response (Some x)
 
 let get_client_response = function
   | Non_persistent ->
       Refs.get_client_response ()
-  | Persistent_hard | Persistent_soft ->
+  | Persistent ->
       Refs.get_persistent_client_response ()
 
 let record_push_message x = Refs.set_push_message (Some x)
@@ -113,7 +113,7 @@ let provider_for_test _ = ()
 
 let sleep_and_check _ _ ~ide_idle:_ =
   get_mocked_new_client_type (),
-  Option.is_some (get_mocked_client_request Persistent_hard)
+  Option.is_some (get_mocked_client_request Persistent)
 
 let not_implemented () = failwith "not implemented"
 
@@ -128,16 +128,16 @@ let send_response_to_client c x = record_client_response x c
 let send_push_message_to_client _ x = record_push_message x
 
 let client_has_message _ = Option.is_some
-  (get_mocked_client_request Persistent_hard)
+  (get_mocked_client_request Persistent)
 
 let read_client_msg c = Rpc (Utils.unsafe_opt (get_mocked_client_request c))
 
 let get_channels _ = not_implemented ()
 
 let is_persistent = function
-  | Persistent_hard | Persistent_soft -> true
+  | Persistent -> true
   | Non_persistent -> false
 
-let make_persistent _ = ServerCommandTypes.Persistent_hard
+let make_persistent _ = ServerCommandTypes.Persistent
 
 let shutdown_client _ = ()

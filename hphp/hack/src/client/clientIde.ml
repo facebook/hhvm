@@ -64,16 +64,13 @@ let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
   match res with
   | ServerCommandTypes.Connected -> ()
-  | ServerCommandTypes.Denied_due_to_existing_persistent_connection ->
-      assert false
-      (* clientIde never uses Persistent_tentative, so will always connect *)
 
 let connect_persistent env ~retries =
   let start_time = Unix.time () in
   try
     let (ic, oc) = connect_persistent env retries start_time in
     HackEventLogger.client_established_connection start_time;
-    Cmd.send_connection_type oc ServerCommandTypes.Persistent_hard;
+    Cmd.send_connection_type oc ServerCommandTypes.Persistent;
     read_connection_response (Unix.descr_of_out_channel oc);
     (ic, oc)
   with

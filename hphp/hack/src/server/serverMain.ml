@@ -113,7 +113,7 @@ let handle_connection_ genv env client =
   let open ServerCommandTypes in
   try
     match ClientProvider.read_connection_type client with
-    | Persistent_hard ->
+    | Persistent ->
       let env = match env.persistent_client with
         | Some old_client ->
           ClientProvider.send_push_message_to_client old_client
@@ -124,17 +124,6 @@ let handle_connection_ genv env client =
       ClientProvider.send_response_to_client client Connected;
       { env with persistent_client =
           Some (ClientProvider.make_persistent client)}, false
-    | Persistent_soft ->
-      if Option.is_some env.persistent_client then begin
-        ClientProvider.send_response_to_client
-          client Denied_due_to_existing_persistent_connection;
-        ClientProvider.shutdown_client client;
-        env, false
-      end else begin
-        ClientProvider.send_response_to_client client Connected;
-        { env with persistent_client =
-            Some (ClientProvider.make_persistent client)}, false
-      end
     | Non_persistent ->
       ServerCommand.handle genv env client
   with

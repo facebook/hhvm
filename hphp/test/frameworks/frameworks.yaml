@@ -93,6 +93,10 @@
     flakey:
       # Depends on internet connection to example.com
       - composer_php7/tests/Composer/Test/Util/RemoteFilesystemTest.php
+      # ::testHgExcludes() diffs hg output against hhvm output; composer and
+      # hhvm are doing the right thing, but this fails at FB because of implicit
+      # global configuration for mercurial
+      - composer_php7/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.4, but need master since we have pull requests.

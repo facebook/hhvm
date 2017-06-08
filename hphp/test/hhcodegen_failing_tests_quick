@@ -10,7 +10,6 @@ quick/abs_codegen.php
 quick/all_type_comparison_test.php
 quick/array_packed.php
 quick/arrayidx.php
-quick/async_suspend_stack.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php
@@ -80,7 +79,6 @@ quick/function_varargs.php
 quick/generator_varargs.php
 quick/get_class.php
 quick/get_class_methods2.php
-quick/get_defined_vars.php
 quick/hh_async_closure_return_type_0.php
 quick/hh_async_closure_return_type_1.php
 quick/hh_async_closure_return_type_2.php

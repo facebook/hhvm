@@ -139,7 +139,6 @@ let emit_body
     with_needs_local_this needs_local_this |>
     with_scope scope) in
   let stmt_instrs = emit_defs env body in
-  let fault_instrs = extract_fault_instructions stmt_instrs in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter env (List.map params snd)
   in
@@ -153,8 +152,9 @@ let emit_body
     generator_instr;
     stmt_instrs;
     default_value_setters;
-    fault_instrs;
   ] in
+  let fault_instrs = extract_fault_instructions body_instrs in
+  let body_instrs = gather [body_instrs; fault_instrs] in
   make_body
     body_instrs
     decl_vars

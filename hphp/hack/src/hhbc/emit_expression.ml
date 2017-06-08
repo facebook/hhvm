@@ -162,7 +162,7 @@ let get_passByRefKind expr =
       from_non_list_assignment WarnOnCell e
     | A.Array_get(_, Some _) -> permissive_kind
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
-    | A.Unop((A.Uincr | A.Udecr), _) -> WarnOnCell
+    | A.Unop((A.Uincr | A.Udecr | A.Usilence), _) -> WarnOnCell
     | A.Unop((A.Usplat, _)) -> AllowCell
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
@@ -2111,7 +2111,18 @@ and emit_unop ~need_ref env op e =
   | A.Uref -> emit_expr ~need_ref:true env e
   | A.Usplat ->
     emit_expr ~need_ref:false env e
-  | A.Usilence -> emit_nyi "silence"
+  | A.Usilence ->
+    let fault_label = Label.next_fault () in
+    let temp_local = Local.get_unnamed_local () in
+    let body = emit_expr ~need_ref:false env e in
+    let start = instr_silence_start temp_local in
+    let cleanup = instr_silence_end temp_local in
+    let fault = gather [cleanup; instr_unwind] in
+    gather [
+      start;
+      instr_try_fault fault_label body fault;
+      cleanup;
+    ]
 
 and emit_exprs env exprs =
   gather (List.map exprs (emit_expr ~need_ref:false env))

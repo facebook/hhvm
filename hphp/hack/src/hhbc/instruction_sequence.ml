@@ -231,6 +231,11 @@ let instr_eval = instr (IIncludeEvalDefine Eval)
 let instr_alias_cls c1 c2 =
   instr (IIncludeEvalDefine (AliasCls (c1, c2)))
 
+let instr_silence_start local =
+  instr (IMisc (Silence (local, Start)))
+let instr_silence_end local =
+  instr (IMisc (Silence (local, End)))
+
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
 

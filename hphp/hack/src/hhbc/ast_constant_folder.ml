@@ -141,6 +141,7 @@ let unop_on_value unop v =
   | A.Uplus -> TV.add TV.zero v
   | A.Uminus -> TV.sub TV.zero v
   | A.Utild -> TV.bitwise_not v
+  | A.Usilence -> Some v
   | _ -> None
 
 (* Likewise for binary operations *)

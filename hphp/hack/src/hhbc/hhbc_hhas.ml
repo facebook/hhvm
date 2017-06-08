@@ -536,7 +536,8 @@ let string_of_misc instruction =
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
     | AKExists -> "AKExists"
     | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
-    | Silence (local, op) -> sep ["Silence"; string_of_local_id local; string_of_op_silence op]
+    | Silence (local, op) ->
+      sep ["Silence"; string_of_local_id local; string_of_op_silence op]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let iterator_instruction_name_prefix instruction =

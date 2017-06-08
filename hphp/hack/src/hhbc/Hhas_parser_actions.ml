@@ -45,11 +45,15 @@ let rec parse_attribute c =
            | 'N' -> Scanf.bscanf c "N;" (Some Typed_value.Null)
            | 'i' -> Scanf.bscanf c "i:%Ld;" (fun n -> Some (Typed_value.Int n))
            | 'b' -> Scanf.bscanf c "b:%d;"
-                     (fun n -> match n with
-                                | 0 -> Some (Typed_value.Bool false)
-                                | 1 -> Some (Typed_value.Bool true)
-                                | _ -> None)
-           | 'd' -> Scanf.bscanf c "d:%g;" (fun f -> Some (Typed_value.Float f))
+                   (fun n -> match n with
+                              | 0 -> Some (Typed_value.Bool false)
+                              | 1 -> Some (Typed_value.Bool true)
+                              | _ -> None)
+           | 'd' -> Scanf.bscanf c "d:%0c"
+                   (fun ch -> match ch with
+                               | 'N' -> Scanf.bscanf c "NAN;" (Some (Typed_value.Float nan))
+                               | 'I' -> Scanf.bscanf c "INF;" (Some (Typed_value.Float infinity))
+                               | _   -> Scanf.bscanf c "%g;" (fun f -> Some (Typed_value.Float f)))
            | 's' -> Scanf.bscanf c "s:%d:\""
                    (fun n -> let myfmt =
                                  Scanf.format_from_string

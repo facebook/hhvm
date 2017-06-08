@@ -16,6 +16,35 @@ open ServerEnv
 
 module SLC = ServerLocalConfig
 
+module J = Hh_json_helpers
+
+let watchman_expression_terms = [
+  J.strlist ["type"; "f"];
+  J.pred "anyof" @@ [
+    J.strlist ["name"; ".hhconfig"];
+    J.pred "anyof" @@ [
+      J.strlist ["suffix"; "php"];
+      J.strlist ["suffix"; "phpt"];
+      J.strlist ["suffix"; "hh"];
+      J.strlist ["suffix"; "hhi"];
+      J.strlist ["suffix"; "xhp"];
+      (* FIXME: This is clearly wrong, but we do it to match the
+       * behavior on the server-side. We need to investigate if
+       * tracking js files is truly necessary.
+       *)
+      J.strlist ["suffix"; "js"];
+    ];
+  ];
+  J.pred "not" @@ [
+    J.pred "anyof" @@ [
+      (** We don't exclude the .hg directory, because we touch unique
+       * files there to support synchronous queries. *)
+      J.strlist ["dirname"; ".git"];
+      J.strlist ["dirname"; ".svn"];
+    ]
+  ]
+]
+
 let make_genv options config local_config handle =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
@@ -34,6 +63,7 @@ let make_genv options config local_config handle =
         then Some Watchman.Defer_changes
         else None;
       sync_directory = local_config.SLC.watchman_sync_directory;
+      expression_terms = watchman_expression_terms;
       root = root;
     }
   in

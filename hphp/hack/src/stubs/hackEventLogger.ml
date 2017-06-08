@@ -97,3 +97,6 @@ let client_connection_sent _ = ()
 let malformed_build_id _ = ()
 let send_fd_failure _ = ()
 let typechecker_already_running _ = ()
+
+(** Watchman Event Watcher events *)
+let init_watchman_event_watcher _ = ()

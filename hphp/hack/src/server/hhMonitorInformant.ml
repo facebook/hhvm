@@ -379,6 +379,7 @@ let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
       Watchman.subscribe_mode = Some Watchman.Drop_changes;
       init_timeout = 30;
       sync_directory = "";
+      expression_terms = [];
       root;
     } in
     match watchman with

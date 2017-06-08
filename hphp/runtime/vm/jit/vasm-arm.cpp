@@ -286,8 +286,8 @@ struct Vgen {
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
-  void emit(const movb& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Sxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }

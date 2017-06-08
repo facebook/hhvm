@@ -576,6 +576,12 @@ let resume_member_name_syntax =
 let resume_with_exception_member_name =
   "resumeWithException"
 
+let do_resume_member_name =
+  "doResume"
+
+let do_resume_member_name_syntax =
+  make_token_syntax TokenKind.Name do_resume_member_name
+
 let coroutine_data_variable =
   "$coroutineData"
 

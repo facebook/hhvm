@@ -185,9 +185,6 @@ let parse_check_args cmd =
     "--get-method-name",
       Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x) ()),
       (* alias for --identify-function *) "";
-    "--get-definition-by-id",
-      Arg.String (fun x -> set_mode (MODE_GET_DEFINITION_BY_ID x) ()),
-      "";
     "--refactor", Arg.Tuple ([
         Arg.Symbol (
           ["Class"; "Function"; "Method"],

@@ -36,9 +36,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
-    | GET_DEFINITION_BY_ID id ->
-        env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
-          SymbolDefinition.to_absolute
     | METHOD_JUMP (class_, find_children) ->
       env, MethodJumps.get_inheritance env.tcopt class_ ~find_children
         env.files_info genv.workers

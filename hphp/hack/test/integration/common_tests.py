@@ -766,28 +766,6 @@ class CommonTests(object):
             stdin='<?hh function test() { '
                   'ClassToBeIdentified::methodToBeIdentified () }')
 
-    def test_ide_get_definition_by_id(self):
-        self.write_load_config()
-        self.check_cmd_and_json_cmd([
-            'f',
-            '  kind: function',
-            '  id: function::f',
-            '  position: File "{root}foo_1.php", line 3, characters 18-18:',
-            '  span: File "{root}foo_1.php", line 3, character 9 - '
-            'line 5, character 9:',
-            '  modifiers: ',
-            '  params:',
-            '',
-        ], [
-            '{{"kind":"function","name":"f","id":"function::f","position":'
-            '{{"filename":"{root}foo_1.php","line":3,"char_start":18,'
-            '"char_end":18}},"span":{{"filename":"{root}foo_1.php",'
-            '"line_start":3,"char_start":9,"line_end":5,"char_end":9}},'
-            '"modifiers":[],"params":[]}}'
-        ],
-            options=["--get-definition-by-id", "function::f"],
-        )
-
     def test_format(self):
         """
         Test --format

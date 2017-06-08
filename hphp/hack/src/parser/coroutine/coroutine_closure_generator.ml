@@ -43,7 +43,7 @@ let generate_constructor_method
   let cont_param = make_continuation_parameter_syntax
     ~visibility_syntax:private_syntax function_type in
   let sm_param = make_state_machine_parameter_syntax
-    classish_name function_name in
+    classish_name function_name function_type in
   let function_parameter_list =
     cont_param :: sm_param :: function_parameter_list in
   let ctor = make_constructor_decl_header_syntax

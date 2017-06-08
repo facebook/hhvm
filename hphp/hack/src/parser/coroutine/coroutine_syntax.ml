@@ -672,7 +672,10 @@ let state_machine_variable_name =
 let state_machine_variable_name_syntax =
   make_token_syntax TokenKind.Variable state_machine_variable_name
 
-let make_state_machine_parameter_syntax enclosing_classname function_name =
+let make_state_machine_parameter_syntax
+    enclosing_classname
+    function_name
+    return_type_syntax =
   let state_machine_type_syntax =
     make_functional_type_syntax
       [
@@ -680,7 +683,7 @@ let make_state_machine_parameter_syntax enclosing_classname function_name =
         mixed_syntax;
         nullable_exception_type_syntax;
       ]
-      (make_coroutine_result_type_syntax mixed_syntax) in
+      (make_coroutine_result_type_syntax return_type_syntax) in
   make_parameter_declaration_syntax
     ~visibility_syntax:private_syntax
     state_machine_type_syntax

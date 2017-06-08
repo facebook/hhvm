@@ -40,7 +40,7 @@ class FilesystemIterator extends DirectoryIterator {
    * @return     mixed   No value is returned.
    */
   public function __construct($path, $flags = null) {
-    parent::__construct($path);
+    parent::__construct((string) $path);
     if ($flags === null) {
       $flags = FilesystemIterator::KEY_AS_PATHNAME |
                FilesystemIterator::CURRENT_AS_FILEINFO |

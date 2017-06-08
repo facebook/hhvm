@@ -1095,13 +1095,13 @@ Composer\Test\Json\JsonValidationExceptionTest::testGetErrors with data set #1
 Composer\Test\Json\JsonValidationExceptionTest::testGetErrorsWhenNoErrorsProvided
 .
 Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testGitExcludes
-E
+.
 Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testHgExcludes
-E
+F
 Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testManualExcludes
-E
+.
 Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testSkipExcludes
-E
+.
 Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveCustomFileName
 E
 Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar
@@ -1125,9 +1125,9 @@ Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data 
 Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive
 E
 Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive
-E
+.
 Composer\Test\Package\Archiver\ZipArchiverTest::testZipArchive
-E
+.
 Composer\Test\Package\BasePackageTest::testFormatVersionForDevPackage with data set #0
 .
 Composer\Test\Package\BasePackageTest::testFormatVersionForDevPackage with data set #1

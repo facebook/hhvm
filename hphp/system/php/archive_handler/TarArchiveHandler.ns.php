@@ -159,8 +159,8 @@ namespace __SystemLib {
         // Checksum calculated as if the checksum field was spaces
         $to_checksum = $header.str_repeat(' ', 8).$header2;
         $sum = 0;
-        foreach (unpack('C*', $to_checksum) as $char) {
-          $sum += ord($char);
+        foreach (unpack('C*', $to_checksum) as $uint8) {
+          $sum += $uint8;
         }
         $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
         fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));
@@ -186,8 +186,8 @@ namespace __SystemLib {
       // Checksum calculated as if the checksum field was spaces
       $to_checksum = $header.str_repeat(' ', 8).$header2;
       $sum = 0;
-      foreach (unpack('C*', $to_checksum) as $char) {
-        $sum += ord($char);
+      foreach (unpack('C*', $to_checksum) as $uint8) {
+        $sum += $uint8;
       }
       $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
       fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));

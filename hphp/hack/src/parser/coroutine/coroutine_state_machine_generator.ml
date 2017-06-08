@@ -364,7 +364,7 @@ let rewrite_for next_loop_label node =
  * list. For demonstrative purposes, we assume that the next label number is 1.
  *
  *   $closure->nextLabel = 1;
- *   $coroutineResult = innerCoroutine();
+ *   $coroutineResult = innerCoroutine($closure);
  *   if ($coroutineResult->isSuspended()) {
  *     return $coroutineResult;
  *   }
@@ -376,6 +376,7 @@ let rewrite_for next_loop_label node =
  *   }
  *   $closure->nextLabel = 2;
  *   $coroutineResult = outerCoroutine(
+ *     $closure,
  *     $closure->coroutineResultData1,
  *     otherMethod(),
  *   );
@@ -404,16 +405,37 @@ let extract_suspend_statements node next_label =
       (next_label, prefix_statements_acc) =
     match syntax node with
     | PrefixUnaryExpression {
-        prefix_unary_operator =
-          { syntax = Token { EditableToken.kind = TokenKind.Suspend; _;}; _; };
-        prefix_unary_operand;
+        prefix_unary_operator = {
+          syntax = Token { EditableToken.kind = TokenKind.Suspend; _; };
+          _;
+        };
+        prefix_unary_operand = {
+          syntax = FunctionCallExpression ({
+            function_call_argument_list;
+            _;
+          } as function_call_expression);
+          _;
+        };
       } ->
         let update_next_label_syntax = set_next_label_syntax next_label in
+
+        let closure_variable_list_item =
+          make_list_item closure_variable_syntax comma_syntax in
+        let function_call_argument_list =
+          closure_variable_list_item
+            :: syntax_node_to_list function_call_argument_list in
+        let function_call_argument_list =
+          make_list function_call_argument_list in
+        let invoke_coroutine =
+          FunctionCallExpression {
+            function_call_expression with function_call_argument_list
+          } in
+        let invoke_coroutine_syntax = make_syntax invoke_coroutine in
 
         let assign_coroutine_result_syntax =
           make_assignment_syntax
             coroutine_result_variable
-            prefix_unary_operand in
+            invoke_coroutine_syntax in
 
         let select_is_suspended_member_syntax =
           make_member_selection_expression_syntax

@@ -197,12 +197,24 @@ let process_client env client =
 
 let check_new_connections env =
   let new_clients = get_new_clients env.socket in
-  List.fold_left new_clients ~init:env ~f:process_client
+  let env = List.fold_left new_clients ~init:env
+    ~f:process_client in
+  HackEventLogger.processed_clients (List.length new_clients);
+  env
 
 let rec serve env =
   let env = check_subscription env in
   let env = check_new_connections env in
   serve env
+
+let init_watchman root =
+  Watchman.init {
+    Watchman.subscribe_mode = Some Watchman.All_changes;
+    init_timeout = 30;
+    sync_directory = "";
+    expression_terms = watchman_expression_terms;
+    root;
+  }
 
 let init root =
   let init_id = Random_id.short_string () in
@@ -213,13 +225,7 @@ let init root =
     HackEventLogger.lock_stolen lock_file;
     Result.Error Failure_daemon_already_running
   end else
-  let watchman = Watchman.init {
-    Watchman.subscribe_mode = Some Watchman.All_changes;
-    init_timeout = 30;
-    sync_directory = "";
-    expression_terms = watchman_expression_terms;
-    root;
-  } in
+  let watchman = init_watchman root in
   match watchman with
   | None ->
     Hh_logger.log "Error failed to initialize watchman";
@@ -258,13 +264,25 @@ let log_file root =
   (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
   Sys_utils.make_link_of_timestamped log_link
 
-let daemon_main args (_ic, oc) =
+
+let daemon_main_ args oc =
   match init args.Args.root with
   | Result.Ok env ->
     to_channel_no_exn oc Init_success;
     serve env
-  | Result.Error e ->
-   to_channel_no_exn oc (Init_failure e)
+  | Result.Error Failure_watchman_init ->
+    to_channel_no_exn oc (Init_failure Failure_watchman_init);
+    Hh_logger.log "Watchman init failed. Exiting.";
+    HackEventLogger.init_watchman_failed ();
+    exit 1;
+  | Result.Error Failure_daemon_already_running ->
+    Hh_logger.log "Daemon already running. Exiting.";
+    exit 1
+
+let daemon_main args (_ic, oc) =
+  try daemon_main_ args oc with
+  | e ->
+    HackEventLogger.uncaught_exception e
 
 (** Typechecker canont infer this type since the input channel
  * is never used so its phantom type is never ineferred. We annotate
@@ -287,8 +305,8 @@ let spawn_daemon args =
   | Init_success ->
     ()
   | Init_failure Failure_daemon_already_running ->
-    Printf.eprintf "Daemon failed to spawn - one already running\n%!";
-    exit 1
+    Printf.eprintf "No need to spawn daemon. One already running";
+    exit 0
   | Init_failure Failure_watchman_init ->
     Printf.eprintf "Daemon failed to spawn - watchman failure\n%!";
     exit 1

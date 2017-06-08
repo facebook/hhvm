@@ -106,6 +106,8 @@ let with_exit_on_exception f =
       | _ -> Exit_status.Sql_assertion_failure
     in
     Exit_status.exit exit_code
+  | Exit_status.Exit_with ec ->
+    Exit_status.(exit ec)
   | e ->
     Hh_logger.exc e;
     Exit_status.(exit Uncaught_exception)

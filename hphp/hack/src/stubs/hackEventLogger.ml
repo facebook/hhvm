@@ -100,3 +100,7 @@ let typechecker_already_running _ = ()
 
 (** Watchman Event Watcher events *)
 let init_watchman_event_watcher _ _ = ()
+let init_watchman_failed _ = ()
+let restarting_watchman_subscription _ = ()
+let uncaught_exception _ = ()
+let processed_clients _ = ()

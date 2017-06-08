@@ -161,7 +161,6 @@ quick/no_return_function.php
 quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names_class.php
-quick/null_constant.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
@@ -188,7 +187,6 @@ quick/redeclared_method.php
 quick/refcount-static.php
 quick/reflect-default.php
 quick/reflection_static_vars.php
-quick/regpressure.php
 quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
@@ -212,7 +210,6 @@ quick/trailing_comma_bad3.php
 quick/trailing_comma_bad4.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
-quick/traits.php
 quick/traits2.php
 quick/typehint_lsb_parent.php
 quick/typehint_lsb_self.php

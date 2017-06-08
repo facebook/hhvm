@@ -43,7 +43,10 @@ let rec emit_def env def =
     let cns_name = snd c.Ast.cst_name in
     let cns_id =
       if c.Ast.cst_kind = Ast.Cst_define
-      then Hhbc_id.Const.from_raw_string cns_name
+      then
+        (* names of constants declared using 'define function' are always
+          prefixed with '\\', see 'def' function in 'namespaces.ml' *)
+        Hhbc_id.Const.from_raw_string (SU.strip_global_ns cns_name)
       else Hhbc_id.Const.from_ast_name cns_name in
     gather [
       Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;

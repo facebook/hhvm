@@ -258,10 +258,18 @@ module ElaborateDefs = struct
       }]
     | Constant cst -> nsenv, [Constant {cst with
         cst_name =
-          (* Leave literal name in place if from `define('name', ...)` *)
-(*          if cst.cst_kind = Ast.Cst_define
-          then cst.cst_name
-          else *) elaborate_id_no_autos nsenv NSConst cst.cst_name;
+          if cst.cst_kind = Ast.Cst_define
+          then
+            (* names in define are interpreted as-is:
+            prefix it with "\\" to mark it as elaborated. This prefix will be
+            stripped during emit phase.
+            In program this name of the constant can be accessed either
+            via identifier name or through 'constant' PHP function.
+            In the former case in Naming phase reference will be mangled in
+            the same way so name will be successfully resolved.*)
+            let (pos, n) = cst.cst_name in
+            pos, "\\" ^ n
+          else elaborate_id_no_autos nsenv NSConst cst.cst_name;
         cst_namespace = nsenv;
       }]
     | other -> nsenv, [other]

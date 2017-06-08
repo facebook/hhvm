@@ -117,7 +117,7 @@ let emit_xhp_use_attributes xual =
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_attribute_declaration ast_class xal xual =
   let var_dollar_ = p, A.Lvar (p, "$_") in
-  let neg_one = p, A.Int (p, "-1") in
+  let neg_one = p, A.Unop(A.Uminus, (p, A.Int (p, "1"))) in
   (* static $_ = -1; *)
   let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, neg_one)] in
   (* if ($_ === -1) {

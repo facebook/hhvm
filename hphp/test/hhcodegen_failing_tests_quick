@@ -94,7 +94,6 @@ quick/hh_closure_return_type_0.php
 quick/hh_closure_return_type_1.php
 quick/hh_closure_return_type_2.php
 quick/hh_closure_return_type_3.php
-quick/hh_extends.php
 quick/hh_functions3.php
 quick/hh_numbers.php
 quick/hh_softtype3.php
@@ -221,7 +220,6 @@ quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php
 quick/xenon/xenon_init.php
 quick/xhp-malformed.php
-quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
 quick/zero_eval_stack_depth.php

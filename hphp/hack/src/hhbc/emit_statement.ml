@@ -202,7 +202,8 @@ and emit_static_var env es =
         instr_static_loc_init name;
       ]
     | A.Binop (A.Eq _, (_, A.Lvar (_, name)), (_, A.Id (_, _) as e))
-    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), (_, A.Class_const (_, _) as e)) ->
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), (_, A.Class_const (_, _) as e))
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), ((_, A.Unop (_, _)) as e)) ->
       let l = Label.next_regular () in
       gather [
         instr_static_loc name;

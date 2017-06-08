@@ -281,12 +281,10 @@ slow/ext_preg/preg_replace_callback_array_use_tokens.php
 slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
 slow/ext_socket/cleanup_persistent_socket.php
-slow/ext_socket/ext_socket.php
 slow/ext_socket/persistent_socket.php
 slow/ext_spl_datastructures/DoublyLinkedList_it_mode.php
 slow/ext_spl_datastructures/SplPriorityQueueClone.php
 slow/ext_spl_iterators/iterator_endChildren_rewind.php
-slow/ext_stream/ext_stream.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
 slow/ext_variable/ext_variable.php
@@ -708,8 +706,6 @@ slow/parser/use-strict-hack.php
 slow/parser/use-strict.php
 slow/parser/val_colon_colon_class_method.php
 slow/parser/xhp-ambiguity.php
-slow/parser/xhp_keyword.php
-slow/parser/xhp_keyword_hh.php
 slow/perfect_virtual/79.php
 slow/perfect_virtual/80.php
 slow/php7_backported/engine-exceptions/throwable_namespace_002.php
@@ -856,7 +852,6 @@ slow/sanity/4.php
 slow/sanity/5.php
 slow/scalar_array/545.php
 slow/scalar_array/546.php
-slow/scalar_array/547.php
 slow/serialization/repo_types_002.php
 slow/session/session_start_undefined_scheme.php
 slow/shapes/type-param.php
@@ -876,16 +871,11 @@ slow/simple_xml/simplexml_import_dom_refcount.php
 slow/simple_xml/text_node_offsetset.php
 slow/simple_xml/xpath_node.php
 slow/skip-frame.php
-slow/static_statement/1400.php
-slow/static_statement/1402.php
-slow/static_statement/1403.php
 slow/static_statement/1407.php
 slow/static_statement/1408.php
-slow/streams/addr-junk.php
 slow/streams/stream_wrapper_register.php
 slow/streams/stream_wrapper_register_2.php
 slow/streams/stream_wrapper_register_metadata.php
-slow/streams/tcp-transport-is-assumed.php
 slow/streams/user_filter_autoload.php
 slow/string/164.php
 slow/string/heredoc_end_after_variable.php
@@ -1031,9 +1021,6 @@ slow/volatile/1226.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
 slow/xhp/attr_types.php
-slow/xhp/enum_trailing_comma.php
-slow/xhp/nullable_types.php
-slow/xhp/xhp-attr-array-with-typeargs.php
 slow/xhp/xhpchild.php
 slow/xml/print_r.php
 slow/yield/2165.php

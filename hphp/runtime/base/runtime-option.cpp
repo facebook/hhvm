@@ -321,6 +321,7 @@ int RuntimeOption::AdminThreadCount = 1;
 int RuntimeOption::AdminServerQueueToWorkerRatio = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
+std::set<std::string> RuntimeOption::HashedAdminPasswords;
 
 std::string RuntimeOption::ProxyOriginRaw;
 int RuntimeOption::ProxyPercentageRaw = 0;
@@ -1711,6 +1712,8 @@ void RuntimeOption::Load(
                  "AdminServer.QueueToWorkerRatio", 1);
     Config::Bind(AdminPassword, ini, config, "AdminServer.Password");
     Config::Bind(AdminPasswords, ini, config, "AdminServer.Passwords");
+    Config::Bind(HashedAdminPasswords, ini, config,
+                 "AdminServer.HashedPasswords");
   }
   {
     // Proxy

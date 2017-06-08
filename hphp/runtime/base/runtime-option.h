@@ -307,6 +307,7 @@ struct RuntimeOption {
   static int AdminServerQueueToWorkerRatio;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
+  static std::set<std::string> HashedAdminPasswords;
 
   /*
    * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw

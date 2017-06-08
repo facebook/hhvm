@@ -80,6 +80,10 @@
 #include <sstream>
 #include <iomanip>
 
+#if defined(FACEBOOK) || defined(HAVE_LIBSODIUM)
+#include <sodium.h>
+#endif
+
 #ifdef GOOGLE_CPU_PROFILER
 #include <gperftools/profiler.h>
 #include "hphp/runtime/base/file-util.h"
@@ -413,7 +417,24 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
                           ;
 
-    if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
+    if (needs_password && !RuntimeOption::HashedAdminPasswords.empty()) {
+      bool matched = false;
+#if defined(FACEBOOK) || defined(HAVE_LIBSODIUM)
+      const auto password = transport->getParam("auth");
+      for (const std::string& hash : RuntimeOption::HashedAdminPasswords) {
+        if (crypto_pwhash_str_verify(hash.data(),
+                                     password.data(),
+                                     password.size()) == 0) {
+          matched = true;
+          break;
+        }
+      }
+#endif
+      if (!matched) {
+        transport->sendString("Unauthorized", 401);
+        break;
+      }
+    } else if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
       std::set<std::string>::const_iterator iter =
         RuntimeOption::AdminPasswords.find(transport->getParam("auth"));
       if (iter == RuntimeOption::AdminPasswords.end()) {

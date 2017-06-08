@@ -144,7 +144,7 @@ let make_state_machine_method_reference_syntax
   (* SuspendedCoroutineResult::create() *)
   let suspended_marker_expression =
     make_static_function_call_expression_syntax
-      suspended_coroutine_result_classname
+      suspended_coroutine_result_classname_syntax
       suspended_member_name
       [] in
   (* return SuspendedCoroutineResult::create(); *)

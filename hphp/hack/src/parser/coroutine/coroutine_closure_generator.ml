@@ -33,20 +33,6 @@ let make_parameters_public_and_untyped
           })
       end
 
-let make_invoke_do_resume_syntax
-    coroutine_data_argument_syntax
-    exception_argument_syntax =
-  let select_do_resume_member_syntax =
-    make_member_selection_expression_syntax
-      this_syntax
-      do_resume_member_name_syntax in
-  let invoke_do_resume_expression_syntax =
-    make_function_call_expression_syntax
-      select_do_resume_member_syntax
-      [ coroutine_data_argument_syntax; exception_argument_syntax; ] in
-  make_expression_statement_syntax invoke_do_resume_expression_syntax
-
-
 let generate_constructor_method
     classish_name
     function_name
@@ -62,35 +48,9 @@ let generate_constructor_method
     cont_param :: sm_param :: function_parameter_list in
   let ctor = make_constructor_decl_header_syntax
     constructor_member_name function_parameter_list in
-  let select_next_label_syntax =
-    make_member_selection_expression_syntax this_syntax label_name_syntax in
-  let initialize_next_label_syntax =
-    make_assignment_syntax_variable
-      select_next_label_syntax
-      (make_int_literal_syntax 0) in
-  make_methodish_declaration_syntax ctor [ initialize_next_label_syntax; ]
-
-let resume_body =
-  make_invoke_do_resume_syntax coroutine_data_variable_syntax null_syntax
-
-let resume_method =
-  make_methodish_declaration_syntax
-    (make_function_decl_header_syntax
-      resume_member_name
-      [ coroutine_data_parameter_syntax ]
-      void_syntax)
-    [ resume_body; ]
-
-let resume_with_exception_body =
-  make_invoke_do_resume_syntax null_syntax exception_variable_syntax
-
-let resume_with_exception_method =
-  make_methodish_declaration_syntax
-    (make_function_decl_header_syntax
-      resume_with_exception_member_name
-      [ exception_parameter_syntax; ]
-      void_syntax)
-    [ resume_with_exception_body; ]
+  let call_parent_syntax =
+    make_construct_parent_syntax [ continuation_variable_syntax ] in
+  make_methodish_declaration_syntax ctor [ call_parent_syntax; ]
 
 let do_resume_body =
   let select_state_machine_syntax =
@@ -122,10 +82,6 @@ let do_resume_method =
       (make_coroutine_result_type_syntax mixed_syntax))
     do_resume_body
 
-(* int $nextLabel; *)
-let generate_fields =
-  make_property_declaration_syntax int_type label_variable_syntax
-
 let generate_closure_body
     classish_name
     function_name
@@ -134,14 +90,11 @@ let generate_closure_body
     state_machine_data =
   generate_hoisted_locals state_machine_data
     @ [
-      generate_fields;
       generate_constructor_method
         classish_name
         function_name
         header_node
         state_machine_data;
-      resume_method;
-      resume_with_exception_method;
       do_resume_method;
     ]
 
@@ -154,12 +107,11 @@ let generate_coroutine_closure
     classish_name
     function_name
     ({ methodish_function_decl_header; _; } as method_node)
-    header_node
+    ({ function_type; _; } as header_node)
     state_machine_data =
   make_classish_declaration_syntax
     (make_closure_classname classish_name function_name)
-    (* TODO "mixed" is wrong; it should be the same return type as the lambda.*)
-    [ make_continuation_type_syntax mixed_syntax ]
+    [ make_closure_base_type_syntax function_type ]
     (generate_closure_body
       classish_name
       function_name

@@ -446,11 +446,13 @@ let extract_suspend_statements node next_label =
         let declare_next_label_syntax =
           make_label_declaration_syntax (StateLabel next_label) in
 
-        let coroutine_result_data_variable =
-          make_coroutine_result_data_variable next_label in
+        let coroutine_result_data_variable_syntax =
+          make_member_selection_expression_syntax
+            closure_variable_syntax
+            (make_coroutine_result_data_member_name_syntax next_label) in
         let assign_coroutine_result_data_syntax =
-          make_assignment_syntax
-            coroutine_result_data_variable
+          make_assignment_syntax_variable
+            coroutine_result_data_variable_syntax
             coroutine_data_variable_syntax in
 
         let exception_not_null_syntax =
@@ -469,9 +471,6 @@ let extract_suspend_statements node next_label =
           assign_coroutine_result_data_syntax;
           throw_if_exception_not_null_syntax;
         ] in
-
-        let coroutine_result_data_variable_syntax =
-          make_token_syntax TokenKind.Variable coroutine_result_data_variable in
 
         (next_label + 1, prefix_statements_acc @ statements),
         Rewriter.Result.Replace coroutine_result_data_variable_syntax
@@ -794,6 +793,18 @@ let lower_body { methodish_function_body; _} =
   let body = add_switch (next_loop_label, body) in
   let body = add_try_finally locals_and_params body in
   let body = unnest_compound_statements body in
+
+  let coroutine_result_data_variables =
+    next_loop_label
+      |> Core_list.range 1
+      |> Core_list.map ~f:make_coroutine_result_data_variable
+      |> Core_list.fold
+        ~f:(fun acc name ->
+            SMap.add name (make_token_syntax TokenKind.Name name) acc)
+        ~init:SMap.empty in
+  let locals_and_params =
+    SMap.union locals_and_params coroutine_result_data_variables in
+
   (body, locals_and_params)
 
 let make_function_decl_header

@@ -11,6 +11,10 @@
 open Utils
 open String_utils
 
+(**
+ * Slash-escaped path in the system temp directory corresponding
+ * with this root directory for this extension.
+ *)
 let path_of_root root extension =
   (* TODO: move this to places that write this file *)
   Sys_utils.mkdir_no_fail GlobalConfig.tmp_dir;

@@ -99,4 +99,4 @@ let send_fd_failure _ = ()
 let typechecker_already_running _ = ()
 
 (** Watchman Event Watcher events *)
-let init_watchman_event_watcher _ = ()
+let init_watchman_event_watcher _ _ = ()

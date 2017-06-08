@@ -23,6 +23,18 @@
 
 module J = Hh_json_helpers
 
+type state =
+  | Unknown
+  (** State_enter heading towards. *)
+  | Entering_to of string
+  (** State_leave left at. *)
+  | Left_at of string
+
+type env = {
+  watchman : Watchman.watchman_instance;
+  state : state;
+}
+
 let watchman_expression_terms = [
   J.strlist ["type"; "f"];
   J.strlist ["name"; "updatestate";];
@@ -69,30 +81,34 @@ module Args = struct
 end;;
 
 
-let process_changes changes =
+let process_changes changes env =
   let open Watchman in
   match changes with
   | Watchman_unavailable ->
     Hh_logger.log "Watchman unavailable. Exiting";
     exit 1
   | Watchman_pushed (State_enter (name, _)) ->
-    Hh_logger.log "State_enter %s" name
+    Hh_logger.log "State_enter %s" name;
+    { env with state = Entering_to name; }
   | Watchman_pushed (State_leave (name, _)) ->
-    Hh_logger.log "State_leave %s" name
+    Hh_logger.log "State_leave %s" name;
+    { env with state = Left_at name; }
   | Watchman_pushed (Files_changed set) ->
     let files = SSet.fold (fun x acc ->
       let exists = Sys.file_exists x in
       acc ^ (Printf.sprintf "%s: %b" x exists) ^ "; ") set "" in
-    Hh_logger.log "Changes: %s" files
+    Hh_logger.log "Changes: %s" files;
+    env
   | Watchman_synchronous _ ->
     Hh_logger.log "Watchman unexpectd synchronous response. Exiting";
     exit 1
 
-let rec check_subscription w =
+let rec check_subscription env =
   let deadline = Unix.time () +. 1000.0 in
-  let w, changes = Watchman.get_changes ~deadline w in
-  process_changes changes;
-  check_subscription w
+  let w, changes = Watchman.get_changes ~deadline env.watchman in
+  let env = { env with watchman = w; } in
+  let env = process_changes changes env in
+  check_subscription env
 
 let init root =
   let init_id = Random_id.short_string () in
@@ -116,7 +132,10 @@ let init root =
     Result.Error Failure_watchman_init
   | Some wenv ->
     Hh_logger.log "initialized";
-    Result.Ok wenv
+    Result.Ok {
+      watchman = Watchman.Watchman_alive wenv;
+      state = Unknown;
+    }
 
 let to_channel_no_exn oc data =
   try Daemon.to_channel oc ~flush:true data with
@@ -126,8 +145,8 @@ let to_channel_no_exn oc data =
 let main args =
   let result = init args.Args.root in
   match result with
-  | Result.Ok wenv ->
-    check_subscription (Watchman.Watchman_alive wenv)
+  | Result.Ok env ->
+    check_subscription env
   | Result.Error Failure_daemon_already_running
   | Result.Error Failure_watchman_init ->
     exit 1
@@ -139,9 +158,9 @@ let log_file root =
 
 let daemon_main args (_ic, oc) =
   match init args.Args.root with
-  | Result.Ok wenv ->
+  | Result.Ok env ->
     to_channel_no_exn oc Init_success;
-    check_subscription (Watchman.Watchman_alive wenv)
+    check_subscription env
   | Result.Error e ->
    to_channel_no_exn oc (Init_failure e)
 

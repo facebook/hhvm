@@ -193,6 +193,25 @@ let requests_counter: IMap.key ref = ref 0
 let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
 
 
+let event_to_string (event: event) : string =
+  let open ClientMessageQueue in
+  match event with
+  | Server_hello -> "Server hello"
+  | Server_message ServerCommandTypes.DIAGNOSTIC _ -> "Server DIAGNOSTIC"
+  | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED -> "Server NEW_CLIENT_CONNECTED"
+  | Server_message ServerCommandTypes.FATAL_EXCEPTION _ -> "Server FATAL_EXCEPTION"
+  | Client_message c -> Printf.sprintf "Client %s %s" (kind_to_string c.kind) c.method_
+  | Tick -> "Tick"
+
+
+let state_to_string (state: state) : string =
+  match state with
+  | Pre_init -> "Pre_init"
+  | In_init _ienv -> "In_init"
+  | Main_loop _menv -> "Main_loop"
+  | Post_shutdown -> "Post_shutdown"
+
+
 let get_root () : Path.t option =
   let open Lsp.Initialize in
   match !initialize_params with
@@ -221,75 +240,6 @@ let rpc
     let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
-
-(* Determine whether to read a message from the client (the editor) or the
-   server (hh_server). *)
-let get_message_source
-  (server: server_conn)
-  (client: ClientMessageQueue.t)
-  : message_source =
-  (* Take action on server messages in preference to client messages, because
-     server messages are very easy and quick to service (just send a message to
-     the client), while client messages require us to launch a potentially
-     long-running RPC command. *)
-  let has_server_messages = not (Queue.is_empty server.pending_messages) in
-  if has_server_messages then From_server else
-  if ClientMessageQueue.has_message client then From_client else
-
-  (* If no immediate messages are available, then wait up to 1 second. *)
-  let server_read_fd = Unix.descr_of_out_channel server.oc in
-  let client_read_fd = ClientMessageQueue.get_read_fd client in
-  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
-  if readable = [] then No_source
-  else if List.mem readable server_read_fd then From_server
-  else From_client
-
-(*  Read a message unmarshaled from the server's out_channel. *)
-let read_message_from_server (server: server_conn) : event =
-  let open ServerCommandTypes in
-  try
-    let fd = Unix.descr_of_out_channel server.oc in
-    match Marshal_tools.from_fd_with_preamble fd with
-    | Response _ ->
-      failwith "unexpected response without request"
-    | Push m -> Server_message m
-    | Hello -> Server_hello
-  with e ->
-    let message = Printexc.to_string e in
-    let stack = Printexc.get_backtrace () in
-    raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
-
-(* get_next_event: picks up the next available message from either client or
-   server. The way it's implemented, at the first character of a message
-   from either client or server, we block until that message is completely
-   received. Note: if server is None (meaning we haven't yet established
-   connection with server) then we'll just block waiting for client. *)
-let get_next_event (state: state) (client: ClientMessageQueue.t) : event =
-  let from_server (server: server_conn) =
-    if Queue.is_empty server.pending_messages
-      then read_message_from_server server
-      else Server_message (Queue.take server.pending_messages)
-  in
-
-  let from_client (client: ClientMessageQueue.t) =
-    match ClientMessageQueue.get_message client with
-    | ClientMessageQueue.Message message -> Client_message message
-    | ClientMessageQueue.Fatal_exception edata ->
-      raise (Client_fatal_connection_exception edata)
-    | ClientMessageQueue.Recoverable_exception edata ->
-      raise (Client_recoverable_connection_exception edata)
-  in
-
-  let from_either server client =
-    match get_message_source server client with
-    | No_source -> Tick
-    | From_client -> from_client client
-    | From_server -> from_server server
-  in
-
-  match state with
-  | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> from_either conn client
-  | _ -> from_client client
 
 
 (* respond: produces either a Response or an Error message, according
@@ -384,6 +334,109 @@ let do_response
     on_result result
 
 
+let client_log (level: Lsp.Message_type.t) (message: string) : unit =
+  print_log_message level message |> notify stdout "telemetry/event"
+
+let hack_log_error
+  (event: event option)
+  (message: string)
+  (stack: string)
+  (source: string)
+  (start_handle_t: float)
+  : unit =
+  let root = get_root () in
+  match event with
+  | Some Client_message c ->
+      let open ClientMessageQueue in
+      HackEventLogger.client_lsp_method_exception
+        root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t
+        message stack source
+  | _ ->
+    HackEventLogger.client_lsp_exception root message stack source
+
+
+(* Determine whether to read a message from the client (the editor) or the
+   server (hh_server). *)
+let get_message_source
+  (server: server_conn)
+  (client: ClientMessageQueue.t)
+  : message_source =
+  (* Take action on server messages in preference to client messages, because
+     server messages are very easy and quick to service (just send a message to
+     the client), while client messages require us to launch a potentially
+     long-running RPC command. *)
+  let has_server_messages = not (Queue.is_empty server.pending_messages) in
+  if has_server_messages then From_server else
+  if ClientMessageQueue.has_message client then From_client else
+
+  (* If no immediate messages are available, then wait up to 1 second. *)
+  let server_read_fd = Unix.descr_of_out_channel server.oc in
+  let client_read_fd = ClientMessageQueue.get_read_fd client in
+  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
+  if readable = [] then No_source
+  else if List.mem readable server_read_fd then From_server
+  else From_client
+
+(*  Read a message unmarshaled from the server's out_channel. *)
+let read_message_from_server (server: server_conn) : event =
+  let open ServerCommandTypes in
+  try
+    let fd = Unix.descr_of_out_channel server.oc in
+    match Marshal_tools.from_fd_with_preamble fd with
+    | Response _ ->
+      failwith "unexpected response without request"
+    | Push m -> Server_message m
+    | Hello -> Server_hello
+  with e ->
+    let message = Printexc.to_string e in
+    let stack = Printexc.get_backtrace () in
+    raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
+
+(* get_next_event: picks up the next available message from either client or
+   server. The way it's implemented, at the first character of a message
+   from either client or server, we block until that message is completely
+   received. Note: if server is None (meaning we haven't yet established
+   connection with server) then we'll just block waiting for client. *)
+let get_next_event (state: state) (client: ClientMessageQueue.t) : event =
+  let from_server (server: server_conn) =
+    if Queue.is_empty server.pending_messages
+      then read_message_from_server server
+      else Server_message (Queue.take server.pending_messages)
+  in
+
+  let from_client (client: ClientMessageQueue.t) =
+    match ClientMessageQueue.get_message client with
+    | ClientMessageQueue.Message message -> Client_message message
+    | ClientMessageQueue.Fatal_exception edata ->
+        raise (Client_fatal_connection_exception edata)
+    | ClientMessageQueue.Recoverable_exception edata ->
+        raise (Client_recoverable_connection_exception edata)
+  in
+
+  let from_either server client =
+    match get_message_source server client with
+    | No_source -> Tick
+    | From_client -> from_client client
+    | From_server -> from_server server
+  in
+
+  let event = match state with
+    | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> from_either conn client
+    | _ -> from_client client
+  in
+
+  begin match event, !initialize_params with
+    | Tick, _ -> ()
+    | _, Some params when params.Lsp.Initialize.trace <> Lsp.Initialize.Off ->
+      let message = Printf.sprintf "Event '%s' in state %s"
+        (event_to_string event) (state_to_string state) in
+      client_log Lsp.Message_type.LogMessage message;
+    | _, _ -> ()
+  end;
+
+  event
+
+
 (* cancel_if_stale: If a message is stale, throw the necessary exception to
    cancel it. A message is considered stale if it's sufficiently old and there
    are other messages in the queue that are newer than it. *)
@@ -409,24 +462,6 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
     when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
     print_error e stack |> respond stdout c;
   | _ -> ()
-
-
-let log_error
-  (event: event option)
-  (message: string)
-  (stack: string)
-  (source: string)
-  (start_handle_t: float)
-  : unit =
-  let root = get_root () in
-  match event with
-  | Some Client_message c ->
-      let open ClientMessageQueue in
-      HackEventLogger.client_lsp_method_exception
-        root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t
-        message stack source
-  | _ ->
-    HackEventLogger.client_lsp_exception root message stack source
 
 
 (************************************************************************)
@@ -1256,18 +1291,21 @@ let main () : unit =
     with
     | Server_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      log_error !ref_event edata.message stack "from_server" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
+      client_log Lsp.Message_type.ErrorMessage (edata.message ^ ", from_server\n" ^ stack);
       exit_fail_delay ()
     | Client_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      log_error !ref_event edata.message stack "from_client" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
+      client_log Lsp.Message_type.ErrorMessage (edata.message ^ ", from_client\n" ^ stack);
       exit_fail ()
     | Client_recoverable_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      log_error !ref_event edata.message stack "from_client" start_handle_t;
+      hack_log_error !ref_event edata.message stack "from_client" start_handle_t;
+      client_log Lsp.Message_type.ErrorMessage (edata.message ^ ", from_client\n" ^ stack);
     | e ->
       let message = Printexc.to_string e in
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
-      log_error !ref_event message stack "from_lsp" start_handle_t;
+      hack_log_error !ref_event message stack "from_lsp" start_handle_t;
   done

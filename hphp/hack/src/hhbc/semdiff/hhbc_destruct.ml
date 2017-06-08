@@ -29,7 +29,23 @@ let uNot = pa (function | IOp Not -> Some () | _ -> None)
 let uJmpNZ = pa (function | IContFlow (JmpNZ lab) -> Some lab | _ -> None)
 let uString = pa (function | ILitConst (String s) -> Some s | _ -> None)
 let uConcat = pa (function | IOp Concat -> Some () | _ -> None)
-
+let uFPassL = pa (function | ICall (FPassL (param, local)) -> Some (param,local) | _ -> None)
+let uFPassC = pa (function | ICall (FPassC param) -> Some param | _ -> None)
+let uFPassCW = pa (function | ICall (FPassCW param) -> Some param | _ -> None)
+let uFPassCE = pa (function | ICall (FPassCE param) -> Some param | _ -> None)
+let uFPassV = pa (function | ICall (FPassV param) -> Some param | _ -> None)
+let uFPassVNop = pa (function | ICall (FPassVNop param) -> Some param | _ -> None)
+let uFPassR = pa (function | ICall (FPassR param) -> Some param | _ -> None)
+let uFPassN = pa (function | ICall (FPassN param) -> Some param | _ -> None)
+let uFPassG = pa (function | ICall (FPassG param) -> Some param | _ -> None)
+let uFPassS = pa (function | ICall (FPassS (param, cref)) -> Some (param, cref) | _ -> None)
+let uFCall = pa (function | ICall (FCall np) -> Some np | _ -> None)
+let uFCallD = pa (function | ICall (FCallD (np, clid, fid)) -> Some (np, clid, fid) | _ -> None)
+let uFCallAwait =
+  pa (function | ICall (FCallAwait (np, clid, fid)) -> Some (np, clid, fid) | _ -> None)
+let uFCallUnpack = pa (function | ICall (FCallUnpack np) -> Some np | _ -> None)
+let uFCallBuiltin =
+  pa (function | ICall (FCallBuiltin (np1, np2, str)) -> Some (np1, np2, str) | _ -> None)
 
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)
@@ -85,3 +101,12 @@ let ($*$) p p' (inp,inp') =
        | Some (v', newinp') -> Some ((v,v'), (newinp,newinp'))
        | None -> None)
   | None -> None
+
+(* this isn't tail recursive, but that should be OK *)
+let rec greedy_kleene p inp =
+ match p inp with
+  | Some (v,newinp) ->
+      (match greedy_kleene p newinp with
+        | Some (rest,endinp) -> Some (v::rest, endinp)
+        | None -> None) (* can't happen *)
+  | None -> Some ([],inp)

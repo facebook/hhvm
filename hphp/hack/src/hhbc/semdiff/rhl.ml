@@ -312,6 +312,8 @@ let check_instruct_mutator asn i i' =
 
 let check_instruct_call asn i i' =
  match i, i' with
+  | FPassL (param_id,Local.Named s), FPassL (param_id', Local.Named s')
+    when param_id=param_id' && s=s' -> Some asn
   | FPassL (_,_), _
   | _, FPassL (_,_) -> None (* if this is pass by reference, might get aliasing
                                so just wimp out for now *)
@@ -360,7 +362,6 @@ iteration to the locals given in the instruction. Since this is control-flow,
 we need to return further stuff to check, rather than just the newprops that
 will hold for the next instruction
 *)
-exception IterExn (* just a sanity check *)
 let check_instruct_iterator asn i i' =
  match i, i' with
   | IterInit (it,lab,l), IterInit (it',lab',l')
@@ -387,8 +388,8 @@ let check_instruct_iterator asn i i' =
               [((lab,lab'),asn)])
     else (None,[]) (* fail *)
   | IterBreak (_,_) , _
-  | _ , IterBreak (_,_) -> raise IterExn (* should have been dealt with
-                                            along with other control flow *)
+  | _ , IterBreak (_,_) -> (None,[]) (* should have been dealt with
+                                        along with other control flow *)
   | _ , _ -> if i=i' then (Some asn,[]) else (None,[])
 
 let check_instruct_misc asn i i' =
@@ -575,7 +576,7 @@ let equiv prog prog' startlabelpairs =
                  let leftside = match IMap.get h exnparents with
                    | None -> hs
                    | Some h2 -> h2::hs in
-                 let  rightside = match IMap.get h' exnparents' with
+                 let rightside = match IMap.get h' exnparents' with
                    | None -> hs'
                    | Some h2' -> h2'::hs' in
                  (match leftside, rightside with
@@ -665,9 +666,6 @@ let equiv prog prog' startlabelpairs =
         | ISpecialFlow ins, ISpecialFlow ins' ->
            if ins = ins' then nextins()
            else try_specials ()
-        | ICall ins, ICall ins' ->
-           if ins = ins' then nextins()
-           else try_specials ()
         | IAsync ins, IAsync ins' ->
            if ins = ins' then nextins()
            else try_specials ()
@@ -681,6 +679,10 @@ let equiv prog prog' startlabelpairs =
            if ins = ins' then nextins()
            else try_specials ()
 
+        | ICall ins, ICall ins' ->
+            (match check_instruct_call asn ins ins' with
+              | None -> try_specials()
+              | Some newasn -> nextinsnewasn newasn)
         | IGet ins, IGet ins' ->
            (match check_instruct_get asn ins ins' with
              | None -> try_specials ()
@@ -790,6 +792,34 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           let newpc' = (hs_of_pc pc', n') in
            check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
+        let fpassl_fpassl_pattern =
+          uFPassL $*$ uFPassL $? (fun ((pn,_l),(pn',_l')) -> pn=pn')
+                              $> (fun ((_pn,l),(_pn',l')) -> (l,l')) in
+        let any_pass_pattern =
+          uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR $|
+          uFPassN $| uFPassG $| (uFPassL $> (fun (param,_) -> param)) $|
+          (uFPassS $> (fun (param,_) -> param)) in
+        let any_pass_list_pattern = greedy_kleene any_pass_pattern in
+        let any_call_pattern =
+          uFCall $| (uFCallD $> (fun (np,_,_) -> np)) $|
+          (uFCallAwait $> (fun (np,_,_) -> np)) $| uFCallUnpack $|
+          (uFCallBuiltin $> (fun (_,np2,_) -> np2)) in
+        let passes_call_pattern = any_pass_list_pattern $$ any_call_pattern in
+        let two_passes_call_pattern =
+         (passes_call_pattern $*$ passes_call_pattern) $? (fun ((pass_list,np),(pass_list',np')) ->
+            pass_list = pass_list' && np = np' && np > List.length pass_list) in
+        let fpassl_action =
+        (fpassl_fpassl_pattern $$ two_passes_call_pattern) $>>
+          (fun ((l,l'),_) _ ->
+            match reads asn l l' with
+             | None -> Some (pc, pc', asn, assumed, todo) (* really bail, no subsequent patterns *)
+             | Some newasn ->
+               (match writes newasn l l' with
+                 | None -> Some (pc, pc', asn, assumed, todo)
+                 | Some newnewasn ->
+                    check (succ pc) (succ pc') newnewasn
+                          (add_assumption (pc,pc') asn assumed) todo)) in
+
         (* last, failure, case for use in bigmatch *)
         let failure_pattern_action =
          parse_any $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
@@ -799,6 +829,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           set_pop_get_action_right;
           notjmp_action;
           concat_string_either_action;
+          fpassl_action;
           failure_pattern_action;
          ] in
         bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

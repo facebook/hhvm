@@ -493,6 +493,11 @@ let string_of_barethis_op i =
   | Notice -> "Notice"
   | NoNotice -> "NoNotice"
 
+let string_of_op_silence op =
+  match op with
+  | Start -> "Start"
+  | End -> "End"
+
 let string_of_misc instruction =
   match instruction with
     | This -> "This"
@@ -531,6 +536,7 @@ let string_of_misc instruction =
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
     | AKExists -> "AKExists"
     | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
+    | Silence (local, op) -> sep ["Silence"; string_of_local_id local; string_of_op_silence op]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let iterator_instruction_name_prefix instruction =

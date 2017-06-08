@@ -122,6 +122,7 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle : bool;
+    files_with_diagnostics: SSet.t;
   }
 end
 open Main_env
@@ -806,6 +807,43 @@ let do_document_formatting
   do_formatting_common conn action
 
 
+(* do_diagnostics: sends notifications for all reported diagnostics; also     *)
+(* returns an updated "files_with_diagnostics" set of all files for which     *)
+(* our client currently has non-empty diagnostic reports.                     *)
+let do_diagnostics
+  (files_with_diagnostics: SSet.t)
+  (file_reports: Pos.absolute Errors.error_ list SMap.t)
+  : SSet.t =
+  let per_file uri errors =
+    hack_errors_to_lsp_diagnostic uri errors
+      |> print_diagnostics
+      |> notify stdout "textDocument/publishDiagnostics"
+  in
+  SMap.iter per_file file_reports;
+
+  let is_error_free _uri errors = List.is_empty errors in
+  let (reports_without, reports_with) = SMap.partition is_error_free file_reports in
+  (* reports_without/reports_with are maps of filename->ErrorList. *)
+  let files_without = SMap.bindings reports_without |> List.map ~f:fst |> SSet.of_list in
+  let files_with = SMap.bindings reports_with |> List.map ~f:fst |> SSet.of_list
+  (* files_without/files_with are sets of filenames *)
+  in
+  SSet.union (SSet.diff files_with_diagnostics files_without) files_with
+  (* this is "(file_diagnostics \ files_without) U files_with" *)
+
+
+(* do_diagnostics_flush: sends out "no more diagnostics for these files"      *)
+let do_diagnostics_flush
+  (diagnostic_files: SSet.t)
+  : unit =
+  let per_file uri =
+    { Lsp.Publish_diagnostics.uri; diagnostics = []; }
+      |> print_diagnostics
+      |> notify stdout "textDocument/publishDiagnostics"
+  in
+  SSet.iter per_file diagnostic_files
+
+
 let report_progress
   (ienv: In_init_env.t)
   : In_init_env.t =
@@ -1012,6 +1050,7 @@ let do_initialize ()
       Main_loop {
         conn = server_conn;
         needs_idle = true;
+        files_with_diagnostics = SSet.empty;
       }
     end else begin
       let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
@@ -1139,6 +1178,7 @@ let handle_event
     state := Main_loop {
       conn = ienv.In_init_env.conn;
       needs_idle = true;
+      files_with_diagnostics = SSet.empty;
     }
 
   (* any "hello" from the server when we weren't expecting it. This is so *)
@@ -1237,11 +1277,9 @@ let handle_event
     state := Post_shutdown;
 
   (* textDocument/publishDiagnostics notification *)
-  | Main_loop _menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
-    let per_file uri errors = hack_errors_to_lsp_diagnostic uri errors
-        |> print_diagnostics |> notify stdout "textDocument/publishDiagnostics"
-    in
-    SMap.iter per_file errors
+  | Main_loop menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
+    let files_with_diagnostics = do_diagnostics menv.files_with_diagnostics errors in
+    state := Main_loop { menv with files_with_diagnostics; }
 
   (* any server diagnostics that come after we've shut down *)
   | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
@@ -1257,7 +1295,8 @@ let handle_event
     raise (Error.Invalid_request "already received shutdown request")
 
   (* server shut-down request *)
-  | Main_loop _menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+  | Main_loop menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+    do_diagnostics_flush menv.files_with_diagnostics;
     state := Lost_server
 
   (* server shut-down request, unexpected *)

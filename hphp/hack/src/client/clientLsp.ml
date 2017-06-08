@@ -133,7 +133,7 @@ module In_init_env = struct
     start_time : float;
     last_progress_report_time : float;
     has_shown_dialog : bool;
-    file_edits : ClientMessageQueue.client_message list;
+    file_edits : ClientMessageQueue.client_message ImmQueue.t;
     tail_env: Tail.env;
   }
 end
@@ -898,7 +898,7 @@ let report_progress_end
 
 let do_initialize_after_hello
   (server_conn: server_conn)
-  (file_edits: ClientMessageQueue.client_message list)
+  (file_edits: ClientMessageQueue.client_message ImmQueue.t)
   : unit =
   let open Marshal_tools in
   begin try
@@ -921,7 +921,7 @@ let do_initialize_after_hello
       | _ ->
         failwith "should only buffer up didOpen/didChange/didClose"
     in
-    List.iter file_edits ~f:handle_file_edit;
+    ImmQueue.iter file_edits ~f:handle_file_edit;
   with e ->
     let message = Printexc.to_string e in
     let stack = Printexc.get_backtrace () in
@@ -1046,7 +1046,7 @@ let do_initialize ()
   let got_hello    = do_initialize_hello_attempt server_conn in
   let new_state =
     if got_hello then begin
-      do_initialize_after_hello server_conn [];
+      do_initialize_after_hello server_conn ImmQueue.empty;
       Main_loop {
         conn = server_conn;
         needs_idle = true;
@@ -1059,7 +1059,7 @@ let do_initialize ()
         start_time;
         last_progress_report_time = start_time;
         has_shown_dialog = false;
-        file_edits = [];
+        file_edits = ImmQueue.empty;
         tail_env = Tail.create_env log_file;
       } in
       In_init ienv
@@ -1156,7 +1156,7 @@ let handle_event
       | "textDocument/didOpen"
       | "textDocument/didChange"
       | "textDocument/didClose" ->
-        state := In_init { ienv with file_edits = c :: ienv.file_edits }
+        state := In_init { ienv with file_edits = ImmQueue.push ienv.file_edits c }
         (* These three crucial-for-correctness notifications will be buffered *)
         (* up so we'll be able to handle them when we're ready.               *)
       | "shutdown" ->
@@ -1173,7 +1173,7 @@ let handle_event
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
-    do_initialize_after_hello ienv.In_init_env.conn (List.rev ienv.In_init_env.file_edits);
+    do_initialize_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
     report_progress_end ienv;
     state := Main_loop {
       conn = ienv.In_init_env.conn;

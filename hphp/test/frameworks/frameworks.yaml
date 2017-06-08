@@ -84,6 +84,15 @@
     flakey:
       # Depends on internet connection to example.com
       - composer/tests/Composer/Test/Util/RemoteFilesystemTest.php
+  composer_php7:
+    url: https://github.com/composer/composer.git
+    branch: 1.4.2
+    commit: 489e09ee6c3ba431fbeeef9147afdaeb6f91b647
+    install_root: composer_php7
+    test_root: composer_php7
+    flakey:
+      # Depends on internet connection to example.com
+      - composer_php7/tests/Composer/Test/Util/RemoteFilesystemTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.4, but need master since we have pull requests.

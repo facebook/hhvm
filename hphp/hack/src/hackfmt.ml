@@ -373,11 +373,11 @@ let main (env: env) (options: format_options) =
       |> output ?filename
   | AtChar (filename, pos) ->
     env.file <- filename;
-    if env.debug then debug_print filename;
     let parsed_file = parse filename in
     let range, formatted =
       try format_at_char parsed_file pos with
       | Invalid_argument s -> raise (InvalidCliArg s) in
+    if env.debug then debug_print filename ~range;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted;
   | Diff (root, dry) ->

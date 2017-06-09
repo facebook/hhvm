@@ -103,7 +103,8 @@ let stop_server harness =
   | Result.Error failure ->
     raise @@ Process_failed failure
 
-let run_test config test_case =
+let run_test ?(stop_server_in_teardown=true)
+config test_case =
   let base_tmp_dir = Tempfile.mkdtemp () in
   let repo_dir = Path.concat base_tmp_dir "repo" in
   let () = Unix.mkdir (Path.to_string repo_dir) 0o740 in
@@ -156,7 +157,11 @@ let run_test config test_case =
     let tear_down () =
       let () = Printf.eprintf
         "Tearing down test, deleting temp directories\n%!" in
-      let _ = stop_server harness in
+      let () = if stop_server_in_teardown then
+        ignore @@ stop_server harness
+      else
+        ()
+      in
       let () = Sys_utils.rm_dir_tree (Path.to_string bin_dir) in
       let () = Sys_utils.rm_dir_tree (Path.to_string repo_dir) in
       let () = Sys_utils.rm_dir_tree (Path.to_string base_tmp_dir) in

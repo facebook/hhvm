@@ -90,14 +90,14 @@ module Responses = struct
     | Settled
 
   let to_string = function
-    | Unknown -> "unknown"
-    | Mid_update -> "mid_update"
-    | Settled -> "settled"
+    | Unknown -> Config.unknown_str
+    | Mid_update -> Config.mid_update_str
+    | Settled -> Config.settled_str
 
   let of_string s = match s with
-    | "unknown" -> Unknown
-    | "mid_update" -> Mid_update
-    | "settled" -> Settled
+    | str when String.equal str Config.unknown_str -> Unknown
+    | str when String.equal str Config.mid_update_str -> Mid_update
+    | str when String.equal str Config.settled_str -> Settled
     | _ -> raise Invalid_response
 
   let send_to_fd v fd =
@@ -139,43 +139,6 @@ type init_failure =
 type daemon_init_result =
   | Init_failure of init_failure
   | Init_success
-
-module Args = struct
-
-  type t = {
-    root : Path.t;
-    daemonize : bool;
-    get_sockname : bool;
-  }
-
-  let usage = Printf.sprintf
-    "Usage: %s [--daemonize] [REPO DIRECTORY]\n"
-    Sys.argv.(0)
-
-  let parse () =
-    let root = ref None in
-    let daemonize = ref false in
-    let get_sockname = ref false in
-    let options = [
-      "--daemonize", Arg.Set daemonize, "spawn watcher daemon";
-      "--get-sockname", Arg.Set get_sockname, "print socket and exit";
-    ] in
-    let () = Arg.parse options (fun s -> root := (Some s)) usage in
-    match !root with
-    | None ->
-      Printf.eprintf "%s" usage;
-      exit 1
-    | Some root ->
-      {
-        root = Path.make root;
-        daemonize = !daemonize;
-        get_sockname = !get_sockname;
-      }
-
-  let root args = args.root
-
-end;;
-
 
 let process_changes changes env =
   let notify_client client =
@@ -317,9 +280,9 @@ let to_channel_no_exn oc data =
   | e ->
     Hh_logger.exc ~prefix:"Warning: writing to channel failed" e
 
-let main args =
+let main root =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  let result = init args.Args.root in
+  let result = init root in
   match result with
   | Result.Ok env -> begin
       try serve env with
@@ -338,8 +301,8 @@ let log_file root =
   Sys_utils.make_link_of_timestamped log_link
 
 
-let daemon_main_ args oc =
-  match init args.Args.root with
+let daemon_main_ root oc =
+  match init root with
   | Result.Ok env ->
     to_channel_no_exn oc Init_success;
     serve env
@@ -352,28 +315,28 @@ let daemon_main_ args oc =
     Hh_logger.log "Daemon already running. Exiting.";
     exit 1
 
-let daemon_main args (_ic, oc) =
+let daemon_main root (_ic, oc) =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
-  try daemon_main_ args oc with
+  try daemon_main_ root oc with
   | e ->
     HackEventLogger.uncaught_exception e
 
 (** Typechecker canont infer this type since the input channel
  * is never used so its phantom type is never ineferred. We annotate
  * the type manually to "unit" here to help it out. *)
-let daemon_entry : (Args.t, unit, daemon_init_result) Daemon.entry =
+let daemon_entry : (Path.t, unit, daemon_init_result) Daemon.entry =
   Daemon.register_entry_point
   "Watchman_event_watcher_daemon_main"
   daemon_main
 
-let spawn_daemon args =
-  let log_file_path = log_file args.Args.root in
+let spawn_daemon root =
+  let log_file_path = log_file root in
   let in_fd = Daemon.null_fd () in
   let out_fd = Daemon.fd_of_path log_file_path in
   Printf.eprintf
     "Spawning daemon. Its logs will go to: %s\n%!" log_file_path;
   let {Daemon.channels; _; } =
-    Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry args in
+    Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry root in
   let result = Daemon.from_channel (fst channels) in
   match result with
   | Init_success ->
@@ -384,13 +347,3 @@ let spawn_daemon args =
   | Init_failure Failure_watchman_init ->
     Printf.eprintf "Daemon failed to spawn - watchman failure\n%!";
     exit 1
-
-let () =
-  Daemon.check_entry_point ();
-  let args = Args.parse () in
-  if args.Args.get_sockname then
-    Printf.printf "%s%!" (Config.socket_file args.Args.root)
-  else if args.Args.daemonize then
-    spawn_daemon args
-  else
-    main args

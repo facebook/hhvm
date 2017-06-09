@@ -15,6 +15,8 @@ end;;
 
 module Report_asserter = Asserter.Make_asserter (Report_comparator);;
 
+module WEWClient = WatchmanEventWatcherClient
+module WEWConfig = WatchmanEventWatcherConfig
 
 module Tools = struct
   let hg_rev_1 = "abc"
@@ -138,20 +140,12 @@ let test_informant_restarts_significant_move temp_dir =
     "state leave significant distance";
   true
 
-let touch_update_sentinel_file dir =
-  let hg_dir = Path.concat dir ".hg" in
-  Unix.mkdir (Path.to_string hg_dir) 0o760;
-  let sentinel = Path.concat hg_dir "updatestate" in
-  let sentinel = Unix.openfile (Path.to_string sentinel)
-    [Unix.O_WRONLY; Unix.O_CREAT; ] 0o760 in
-  Unix.close sentinel
-
-
 (** We emulate the repo being in a mid-update state when the informant
  * starts. i.e., the .hg/updatestate file is present. *)
 let test_repo_starts_midupdate temp_dir =
-  touch_update_sentinel_file temp_dir;
   Tools.set_hg_to_svn_map ();
+  (** Start by having the mock response Mid_update. *)
+  WEWClient.Mocking.get_status_returns (Some WEWConfig.Responses.Mid_update);
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.svn_1);
@@ -167,13 +161,37 @@ let test_repo_starts_midupdate temp_dir =
     HhMonitorInformant.should_start_first_server informant in
   Asserter.Bool_asserter.assert_equals false
     should_start_first_server "Shouldn't start when repo is in flux";
-  (** After getting state leave event, asks for server restart. *)
-  Tools.test_transition
-    informant Tools.State_leave Tools.hg_rev_1
-    Informant_sig.Server_dead Informant_sig.Restart_server
-    ("Should restart server since none is running " ^
-    "because repo was in flux during startup");
+  (** Set mock response to settled, then informant report should restart. *)
+  WEWClient.Mocking.get_status_returns (Some WEWConfig.Responses.Settled);
+  let report = HhMonitorInformant.report
+    informant Informant_sig.Server_not_yet_started in
+  Report_asserter.assert_equals
+    Informant_sig.Restart_server report
+    "Should report restart server since repo is settled";
   true
+
+(** When Watchman Event Watcher in unknown state, then we should start
+ * first server. *)
+let test_watcher_in_unknown_state temp_dir =
+  Tools.set_hg_to_svn_map ();
+  (** WEW status returns Unknown. *)
+  WEWClient.Mocking.get_status_returns (Some WEWConfig.Responses.Unknown);
+  Watchman.Mocking.init_returns @@ Some "test_mock_basic";
+  Hg.Mocking.current_working_copy_base_rev_returns
+    (Future.of_value Tools.svn_1);
+  Watchman.Mocking.get_changes_returns
+    (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
+  let informant = HhMonitorInformant.init {
+    HhMonitorInformant.root = temp_dir;
+    state_prefetcher = State_prefetcher.dummy;
+    allow_subscriptions = true;
+    use_dummy = false;
+  } in
+  let should_start_first_server =
+    HhMonitorInformant.should_start_first_server informant in
+  Asserter.Bool_asserter.assert_equals true
+    should_start_first_server "Should start when repo is in unknown state";
+    true
 
 let tests =
   [
@@ -181,6 +199,8 @@ let tests =
       Unit_test.Tempfile.with_tempdir test_informant_restarts_significant_move);
     "test_repo_starts_midupdate", (fun () ->
       Unit_test.Tempfile.with_tempdir test_repo_starts_midupdate);
+    "test_watcher_in_unknown_state", (fun () ->
+      Unit_test.Tempfile.with_tempdir test_watcher_in_unknown_state);
   ]
 
 let () =

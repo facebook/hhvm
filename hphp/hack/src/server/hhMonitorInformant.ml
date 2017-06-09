@@ -10,6 +10,9 @@
 
 include HhMonitorInformant_sig.Types
 
+module WEWClient = WatchmanEventWatcherClient
+module WEWConfig = WatchmanEventWatcherConfig
+
 
 (**
  * The Revision tracker tracks the latest known SVN Revision of the repo,
@@ -108,10 +111,6 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let get_root t = match !t with
-    | Initializing (_, _, path, _) -> path
-    | Tracking env -> env.root
-
   let init watchman prefetcher root =
     ref @@ Initializing (watchman, prefetcher, root,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -204,6 +203,14 @@ module Revision_tracker = struct
   let form_decision has_significant last_transition server_state =
     let open Informant_sig in
     match has_significant, last_transition, server_state with
+    | _, State_leave, Server_not_yet_started ->
+     (** This case should be unreachable since Server_not_yet_started
+      * should be handled by "should_start_first_server" and not by the
+      * revision tracker. Restart anyway which, at worst, could result in a
+      * slow init. *)
+      Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
+        "Revision_tracker.form_decision";
+      Restart_server
     | _, State_leave, Server_dead ->
       (** Regardless of whether we had a significant change or not, when the
        * server is not alive, we restart it on a state leave.*)
@@ -358,6 +365,7 @@ type env = {
   (** Reports for an Active informant are made by pinging the
    * revision_tracker. *)
   revision_tracker : Revision_tracker.t;
+  watchman_event_watcher : WEWClient.t;
 }
 
 type t =
@@ -391,12 +399,8 @@ let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
           state_prefetcher root;
+        watchman_event_watcher = WEWClient.init root;
       }
-
-(** Returns true if we believe the repo is in the middle of an update/rebase. *)
-let repo_is_mid_update root =
-  let sc_path = Path.concat root ".hg" in
-  Sys.file_exists ((Path.to_string sc_path) ^ "/updatestate")
 
 let should_start_first_server t = match t with
   | Resigned ->
@@ -404,18 +408,43 @@ let should_start_first_server t = match t with
      * instance should always be started during startup. *)
     true
   | Active env ->
-    if repo_is_mid_update (Revision_tracker.get_root env.revision_tracker) then
-      (** We shouldn't start the server until we observe that the repo has
-       * settled, via a state-leave event. *)
-      false
-    else
+    let status = WEWClient.get_status env.watchman_event_watcher in
+    begin match status with
+    | None ->
+      (**
+       * Watcher is not running, or connection to watcher collapsed.
+       * So we let the first server start up.
+       *)
       true
+    | Some WEWConfig.Responses.Unknown ->
+      (**
+       * Watcher doens't know what state the repo is. We don't
+       * know when the next "hg update" will happen, so we let the
+       * first Hack Server start up to avoid wedging.
+       *)
+      true
+    | Some WEWConfig.Responses.Mid_update ->
+      (** Wait until the update is finished  *)
+      false
+    | Some WEWConfig.Responses.Settled ->
+      true
+  end
 
 let is_managing = function
   | Resigned -> false
   | Active _ -> true
 
-let report informant server_state = match informant with
-  | Resigned -> Informant_sig.Move_along
-  | Active env ->
+let report informant server_state = match informant, server_state with
+  | Resigned, Informant_sig.Server_not_yet_started ->
+    (** Actually, this case should never happen. But we force a restart
+     * to avoid accidental wedged states anyway. *)
+    Informant_sig.Restart_server
+  | Resigned, _ ->
+    Informant_sig.Move_along
+  | Active _, Informant_sig.Server_not_yet_started ->
+    if should_start_first_server informant then
+      Informant_sig.Restart_server
+    else
+      Informant_sig.Move_along
+  | Active env, _ ->
     Revision_tracker.make_report server_state env.revision_tracker

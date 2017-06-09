@@ -18,6 +18,8 @@
 module Config = WatchmanEventWatcherConfig
 module Responses = WatchmanEventWatcherConfig.Responses
 
+module Client_actual = struct
+
 (**
  * We track the last known state of the Watcher so we can return a response
  * in get_status even when there's nothing to be read from the reader.
@@ -35,10 +37,12 @@ type state =
   (** Connection to the Watcher has failed. Cannot read further updates. *)
   | Failed
 
-type t = {
+type t_ = {
   state : state ref;
   root : Path.t
 }
+
+type t = t_ option
 
 let ignore_unix_error f x =
   try f x with
@@ -74,7 +78,7 @@ let init root =
   | Timeout.Timeout ->
     None
 
-let get_status instance =
+let get_status_ instance =
   match !(instance.state) with
   | Failed ->
     None
@@ -108,3 +112,32 @@ let get_status instance =
     Some Responses.Mid_update
   | Unknown _ ->
     Some Responses.Unknown
+
+    module Mocking = struct
+      exception Cannot_set_when_mocks_disabled
+      let get_status_returns _ =
+        raise Cannot_set_when_mocks_disabled
+    end
+
+  let get_status t =
+    let (>>=) = Option.(>>=) in
+    t >>= get_status_
+
+end
+
+module Client_mock = struct
+  type t = string option
+  module Mocking = struct
+    let status = ref None
+    let get_status_returns v =
+      status := v
+  end
+
+  let init _ = None
+  let get_status _ = !(Mocking.status)
+end
+
+include (val (if Injector_config.use_test_stubbing
+  then (module Client_mock : WatchmanEventWatcherClient_sig.S)
+  else (module Client_actual : WatchmanEventWatcherClient_sig.S)
+))

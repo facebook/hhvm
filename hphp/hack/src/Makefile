@@ -86,6 +86,7 @@ MODULES=\
   utils/hh_json\
   monitor\
   watchman\
+  watchman_event_watcher\
   $(FSNOTIFY)\
   $(INOTIFY)
 

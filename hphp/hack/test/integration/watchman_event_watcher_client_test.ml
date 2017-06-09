@@ -32,8 +32,8 @@ let rec init_watcher_client ~retries repo =
     raise Init_watcher_client_failed
   else
     let client = WEWClient.init repo in
-    match client with
-    | Some client ->
+    match WEWClient.get_status client with
+    | Some _ ->
       client
     | None ->
       let () = Sys_utils.sleep 1.0 in
@@ -97,9 +97,12 @@ let test_no_socket_file harness =
   let repo = harness.Test_harness.repo_dir in
   init_hg_repo repo;
   let watcher = WEWClient.init harness.Test_harness.repo_dir in
-  if watcher = None then
+  match WEWClient.get_status watcher with
+  | None ->
     true
-  else
+  | Some _ ->
+    Printf.eprintf
+      "We shoudln't be able to get messages when no socket file exists.\n";
     false
 
 let test_no_watcher_running harness =
@@ -107,9 +110,12 @@ let test_no_watcher_running harness =
   init_hg_repo repo;
   create_watcher_socket_file repo;
   let watcher = WEWClient.init harness.Test_harness.repo_dir in
-  if watcher = None then
+  match WEWClient.get_status watcher with
+  | None ->
     true
-  else
+  | Some _ ->
+    Printf.eprintf
+      "We shoudln't be able to get messages when no watcher is running.\n";
     false
 
 let test_watcher_unknown_then_settled harness =

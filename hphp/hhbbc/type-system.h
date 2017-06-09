@@ -505,14 +505,13 @@ private:
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
   friend Type arr_map_newelem(Type& map, const Type& val);
   friend Type array_elem(const Type&, const Type&);
-  friend Type arrayN_set(Type, const Type&, const Type&);
-  friend Type array_set(Type, const Type&, const Type&);
-  friend std::pair<Type,Type> arrayN_newelem_key(Type, const Type&);
+  friend std::pair<Type,bool> array_set(Type, const Type&, const Type&);
   friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
 
+  friend struct ArrKey disect_vec_key(const Type&);
   friend struct ArrKey disect_strict_key(const Type&);
 
   friend std::pair<Type, bool> vec_elem(const Type&, const Type&);
@@ -570,6 +569,7 @@ struct ArrKey {
   folly::Optional<int64_t> i;
   folly::Optional<SString> s;
   Type type;
+  bool mayThrow = false;
 
   folly::Optional<Cell> tv() const {
     assert(!i || !s);
@@ -1061,9 +1061,12 @@ Type array_elem(const Type& arr, const Type& key);
  * Perform an array set on types.  Returns a type that represents the
  * effects of arr[key] = val.
  *
+ * The returned type will be TBottom if the operation will always throw, and
+ * the bool will be true if the operation can never throw.
+ *
  * Pre arr.subtypeOf(TArr)
  */
-Type array_set(Type arr, const Type& key, const Type& val);
+std::pair<Type, bool> array_set(Type arr, const Type& key, const Type& val);
 
 /*
  * Perform a newelem operation on an array type.  Returns an array

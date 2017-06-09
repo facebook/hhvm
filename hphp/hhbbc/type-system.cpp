@@ -1481,8 +1481,10 @@ bool Type::checkInvariants() const {
   assert(isPredefined(m_bits));
   assert(!hasData() || mayHaveData(m_bits));
 
-  DEBUG_ONLY auto const& valType = (m_bits & BOptArr) == m_bits ?
-    TInitGen : TInitCell;
+  DEBUG_ONLY auto const& valType = (m_bits & BOptArr) == m_bits
+    ? TInitGen
+    : ((m_bits & BOptKeyset) == m_bits) ? TArrKey : TInitCell;
+
   /*
    * TODO(#3696042): for static arrays, we could enforce that all
    * inner-types are also static (this may would require changes to
@@ -1509,24 +1511,36 @@ bool Type::checkInvariants() const {
     assert(m_data.aval->isStatic());
     assert(!m_data.aval->empty());
     break;
-  case DataTag::ArrLikePacked:
+  case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());
+    DEBUG_ONLY size_t idx = 0;
     for (DEBUG_ONLY auto& v : m_data.packed->elems) {
       assert(v.subtypeOf(valType));
+      if ((m_bits & BOptKeyset) == m_bits) assert(v == ival(idx++));
     }
     break;
+  }
   case DataTag::ArrLikeMap:
     assert(!m_data.map->map.empty());
     for (DEBUG_ONLY auto& kv : m_data.map->map) {
       assert(kv.second.subtypeOf(valType));
+      if ((m_bits & BOptKeyset) == m_bits) {
+        assert(from_cell(kv.first) == kv.second);
+      }
     }
     break;
   case DataTag::ArrLikePackedN:
     assert(m_data.packedn->type.subtypeOf(valType));
+    if ((m_bits & BOptKeyset) == m_bits) {
+      assert(m_data.packedn->type.subtypeOf(TInt));
+    }
     break;
   case DataTag::ArrLikeMapN:
-    assert(m_data.mapn->key.subtypeOf(TInitCell));
+    assert(m_data.mapn->key.subtypeOf(TArrKey));
     assert(m_data.mapn->val.subtypeOf(valType));
+    if ((m_bits & BOptKeyset) == m_bits) {
+      assert(m_data.mapn->key == m_data.mapn->val);
+    }
     break;
   }
   return true;
@@ -1683,11 +1697,13 @@ Type counted_keyset_empty() { return Type { BCKeysetE }; }
 Type some_keyset_empty()    { return Type { BKeysetE }; }
 
 Type keyset_n(Type kv) {
+  if (!kv.subtypeOf(TArrKey)) kv = TArrKey;
   auto v = kv;
   return mapn_impl(BKeysetN, std::move(kv), std::move(v));
 }
 
 Type skeyset_n(Type kv) {
+  if (!kv.subtypeOf(TArrKey)) kv = TArrKey;
   auto v = kv;
   return mapn_impl(BSKeysetN, std::move(kv), std::move(v));
 }
@@ -1848,7 +1864,11 @@ Type sarr_map(MapElems m) {
 
 Type mapn_impl(trep bits, Type k, Type v) {
   auto r = Type { bits };
-  construct_inner(r.m_data.mapn, std::move(k), std::move(v));
+  construct_inner(
+    r.m_data.mapn,
+    k.subtypeOf(TArrKey) ? std::move(k) : TArrKey,
+    std::move(v)
+  );
   r.m_dataTag = DataTag::ArrLikeMapN;
   return r;
 }
@@ -2500,98 +2520,148 @@ Type remove_uninit(Type t) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * For known strings that are strictly integers, we'll set both the
- * known integer and string keys, so generally the int case should be
- * checked first below.
+ * For known strings that are strictly integers, we'll set both the known
+ * integer and string keys, so generally the int case should be checked first
+ * below.
  *
  * For keys that could be strings, we have to assume they could be
- * strictly-integer strings.  After disection, the effective type we
- * can assume for the array key is in `type'.
+ * strictly-integer strings. After disection, the effective type we can assume
+ * for the array key is in `type'. If the key might coerce to an integer, TInt
+ * will be unioned into `type'. So, if `type' is TStr, its safe to assume it
+ * will not coerce.
+ *
+ * `mayThrow' will be set if the key coercion could possibly throw.
+ *
+ * If the key might be strange (array or object), `type' will be unchanged so it
+ * can be detected later on.
  */
 
 ArrKey disect_array_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (keyTy.subtypeOf(TInt)) {
-    if (keyTy.strictSubtypeOf(TInt)) {
-      ret.i = keyTy.m_data.ival;
-    }
-    ret.type = keyTy;
-    return ret;
-  }
-
-  if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
-    int64_t i;
-    if (keyTy.m_data.sval->isStrictlyInteger(i)) {
-      if (RuntimeOption::EvalHackArrCompatNotices) {
-        ret.type = TInitCell;
-      } else {
-        ret.i = i;
-        ret.type = ival(i);
+  if (keyTy.subtypeOf(TOptInt)) {
+    if (keyTy.subtypeOf(TInt)) {
+      if (keyTy.strictSubtypeOf(TInt)) {
+        ret.i = keyTy.m_data.ival;
+        ret.type = ival(*ret.i);
+        return ret;
       }
-    } else {
-      ret.s = keyTy.m_data.sval;
       ret.type = keyTy;
+      return ret;
     }
+    // The key could be an integer or a null, which means it might become the
+    // empty string. Either way, its an uncounted value.
+    ret.type = TUncArrKey;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
 
-  if (!RuntimeOption::EvalHackArrCompatNotices) {
-    if (keyTy.strictSubtypeOf(TDbl)) {
-      ret.i = double_to_int64(keyTy.m_data.dval);
-      ret.type = ival(*ret.i);
+  if (keyTy.subtypeOf(TOptStr)) {
+    if (keyTy.subtypeOf(TStr)) {
+      if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
+        int64_t i;
+        if (keyTy.m_data.sval->isStrictlyInteger(i)) {
+          ret.i = i;
+          ret.type = ival(i);
+          ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+        } else {
+          ret.s = keyTy.m_data.sval;
+          ret.type = keyTy;
+        }
+        return ret;
+      }
+      // Might stay a string or become an integer. The effective type is
+      // uncounted if the string is static.
+      ret.type = keyTy.subtypeOf(TSStr) ? TUncArrKey : TArrKey;
+      ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
       return ret;
     }
-    if (keyTy.subtypeOf(TNum)) {
-      ret.type = TInt;
-      return ret;
+    // If we have an OptStr with a value, we can at least exclude the
+    // possibility of integer-like strings by looking at that value.
+    // But we can't use the value itself, because if it is null the key
+    // will act like the empty string.  In that case, the code uses the
+    // static empty string, so if it was an OptCStr it needs to
+    // incorporate SStr, but an OptSStr can stay as SStr.
+    if (keyTy.strictSubtypeOf(TOptStr) && keyTy.m_dataTag == DataTag::Str) {
+      int64_t ignore;
+      if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
+        ret.type = keyTy.strictSubtypeOf(TOptSStr) ? TSStr : TStr;
+        ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+        return ret;
+      }
     }
-
-    if (keyTy.subtypeOf(TNull)) {
-      ret.s = s_empty.get();
-      ret.type = sempty();
-      return ret;
-    }
-    if (keyTy.subtypeOf(TRes)) {
-      ret.type = TInt;
-      return ret;
-    }
-
-    if (keyTy.subtypeOf(TTrue)) {
-      ret.i = 1;
-      ret.type = TInt;
-      return ret;
-    }
-    if (keyTy.subtypeOf(TFalse)) {
-      ret.i = 0;
-      ret.type = TInt;
-      return ret;
-    }
-    if (keyTy.subtypeOf(TBool)) {
-      ret.type = TInt;
-      return ret;
-    }
+    // An optional string is fine because a null will just become the empty
+    // string. So, if the string is static, the effective type is uncounted
+    // still. The effective type is ArrKey because it might become an integer.
+    ret.type = keyTy.subtypeOf(TOptSStr) ? TUncArrKey : TArrKey;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
   }
 
-  // If we have an OptStr with a value, we can at least exclude the
-  // possibility of integer-like strings by looking at that value.
-  // But we can't use the value itself, because if it is null the key
-  // will act like the empty string.  In that case, the code uses the
-  // static empty string, so if it was an OptCStr it needs to
-  // incorporate SStr, but an OptSStr can stay as SStr.
-  if (keyTy.strictSubtypeOf(TOptStr) && keyTy.m_dataTag == DataTag::Str) {
-    int64_t ignore;
-    if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
-      ret.type = keyTy.strictSubtypeOf(TOptSStr) ? TSStr : TStr;
-      return ret;
-    }
+  if (keyTy.subtypeOf(TOptArrKey)) {
+    // The key is an integer, string, or null. The effective type is int or
+    // string because null will become the empty string.
+    ret.type = is_opt(keyTy) ? unopt(keyTy) : keyTy;
+    return ret;
   }
 
-  // Nothing we can do in other cases that could be strings (without
-  // statically known values)---they may behave like integers at
-  // runtime.
+  if (keyTy.strictSubtypeOf(TDbl)) {
+    ret.i = double_to_int64(keyTy.m_data.dval);
+    ret.type = ival(*ret.i);
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TNum)) {
+    ret.type = TInt;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TNull)) {
+    ret.s = s_empty.get();
+    ret.type = sempty();
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TRes)) {
+    ret.type = TInt;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TTrue)) {
+    ret.i = 1;
+    ret.type = ival(1);
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TFalse)) {
+    ret.i = 0;
+    ret.type = ival(0);
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TBool)) {
+    ret.type = TInt;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
+  if (keyTy.subtypeOf(TPrim)) {
+    ret.type = TUncArrKey;
+    ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+    return ret;
+  }
 
-  ret.type = TArrKey;
+  // The key could be something strange like an array or an object. This can
+  // raise warnings, so always assume it may throw. Keep the type as-is so that
+  // we can detect this case at the point of the set.
+
+  if (!keyTy.subtypeOf(TInitCell)) {
+    ret.type = TInitCell;
+    ret.mayThrow = true;
+    return ret;
+  }
+
+  ret.type = keyTy;
+  ret.mayThrow = true;
   return ret;
 }
 
@@ -2617,8 +2687,8 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
     return { isPhpArray ? TInitNull : TBottom, false };
   }
 
-  auto couldBeInt = isPhpArray || key.type.couldBe(TInt);
-  auto couldBeStr = key.type.couldBe(TStr);
+  auto const couldBeInt = key.type.couldBe(TInt);
+  auto const couldBeStr = key.type.couldBe(TStr);
   auto ty = isPhpArray ? TInitNull : TBottom;
   IterateKV(ad, [&] (const TypedValue* k, const TypedValue* v) {
       if (isStringType(k->m_type) ? couldBeStr : couldBeInt) {
@@ -2644,7 +2714,7 @@ std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
     if (r != map.m_data.map->map.end()) return { r->second, true };
     return { isPhpArray ? TInitNull : TBottom, false };
   }
-  auto couldBeInt = isPhpArray || key.type.couldBe(TInt);
+  auto couldBeInt = key.type.couldBe(TInt);
   auto couldBeStr = key.type.couldBe(TStr);
   auto ty = isPhpArray ? TInitNull : TBottom;
   for (auto& kv : map.m_data.map->map) {
@@ -2717,6 +2787,8 @@ bool arr_packedn_set(Type& pack,
                      const Type& val,
                      bool maybeEmpty) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
+  assert(key.type.subtypeOf(TArrKey));
+
   auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
   auto const isVecArray = (pack.m_bits & BOptVec) == pack.m_bits;
   auto& ty = pack.m_data.packedn.mutate()->type;
@@ -2763,7 +2835,9 @@ bool arr_map_set(Type& map,
                  const ArrKey& key,
                  const Type& val) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
-  if (auto const k = key.tv()) {
+  assert(key.type.subtypeOf(TArrKey));
+
+ if (auto const k = key.tv()) {
     auto r = map.m_data.map.mutate()->map.emplace_back(*k, val);
     // if the element existed, and was a ref, its still a ref after
     // assigning to it
@@ -2789,6 +2863,8 @@ bool arr_packed_set(Type& pack,
                     const ArrKey& key,
                     const Type& val) {
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
+  assert(key.type.subtypeOf(TArrKey));
+
   auto const isVecArray = pack.subtypeOf(TOptVec);
   if (key.i) {
     if (*key.i >= 0) {
@@ -2834,9 +2910,11 @@ bool arr_mapn_set(Type& map,
                   const ArrKey& key,
                   const Type& val) {
   assert(map.m_dataTag == DataTag::ArrLikeMapN);
+  assert(key.type.subtypeOf(TArrKey));
   auto& mapn = *map.m_data.mapn.mutate();
   mapn.val |= val;
   mapn.key |= key.type;
+  assert(map.checkInvariants());
   return true;
 }
 
@@ -2902,15 +2980,17 @@ std::pair<Type, bool> array_like_elem(const Type& arr, const ArrKey& key) {
     not_reached();
   }();
 
+  if (key.mayThrow) ret.second = false;
+
   if (!ret.first.subtypeOf(TInitCell)) {
     ret.first = TInitCell;
-  } else if (maybeEmpty) {
-    if (isPhpArray) {
-      ret.first |= TInitNull;
-    } else {
-      ret.second = false;
-    }
   }
+
+  if (maybeEmpty) {
+    if (isPhpArray) ret.first |= TInitNull;
+    ret.second = false;
+  }
+
   return ret;
 }
 
@@ -2947,8 +3027,15 @@ std::pair<Type,bool> array_like_set(Type arr,
   if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
 
   auto const fixRef  = !isPhpArray && valIn.couldBe(TRef);
-  auto const noThrow = !fixRef && validKey;
+  auto const noThrow = !fixRef && validKey && !key.mayThrow;
   auto const& val    = fixRef ? TInitCell : valIn;
+  // We don't want to store types more general than TArrKey into specialized
+  // array type keys. If the key was strange (array or object), it will be more
+  // general than TArrKey (this is needed so we can set validKey above), so
+  // force it to TArrKey.
+  auto const& fixedKey = validKey
+    ? key
+    : []{ ArrKey key; key.type = TArrKey; key.mayThrow = true; return key; }();
 
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);
@@ -2961,13 +3048,13 @@ std::pair<Type,bool> array_like_set(Type arr,
       m.emplace_back(*k, val);
       return { map_impl(bits, std::move(m)), noThrow };
     }
-    return { mapn_impl(bits, key.type, val), noThrow };
+    return { mapn_impl(bits, fixedKey.type, val), noThrow };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,bool> {
     return { mapn_impl(bits,
-                       union_of(inKey, key.type),
+                       union_of(inKey, fixedKey.type),
                        union_of(inVal, val)), noThrow };
   };
 
@@ -3005,7 +3092,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       auto ty = packed_values(*arr.m_data.packed);
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
-      auto const inRange = arr_packed_set(arr, key, val);
+      auto const inRange = arr_packed_set(arr, fixedKey, val);
       return { std::move(arr), inRange && noThrow };
     }
 
@@ -3013,7 +3100,7 @@ std::pair<Type,bool> array_like_set(Type arr,
     if (maybeEmpty && !isVector) {
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
-      auto const inRange = arr_packedn_set(arr, key, val, false);
+      auto const inRange = arr_packedn_set(arr, fixedKey, val, false);
       return { std::move(arr), inRange && noThrow };
     }
 
@@ -3023,7 +3110,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       auto mkv = map_key_values(*arr.m_data.map);
       return emptyHelper(std::move(mkv.first), std::move(mkv.second));
     } else {
-      auto const inRange = arr_map_set(arr, key, val);
+      auto const inRange = arr_map_set(arr, fixedKey, val);
       return { std::move(arr), inRange && noThrow };
     }
 
@@ -3032,7 +3119,7 @@ std::pair<Type,bool> array_like_set(Type arr,
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     } else {
-      auto const inRange = arr_mapn_set(arr, key, val);
+      auto const inRange = arr_mapn_set(arr, fixedKey, val);
       return { std::move(arr), inRange && noThrow };
     }
   }
@@ -3040,7 +3127,9 @@ std::pair<Type,bool> array_like_set(Type arr,
   not_reached();
 }
 
-Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
+std::pair<Type, bool> array_set(Type arr,
+                                const Type& undisectedKey,
+                                const Type& val) {
   assert(arr.subtypeOf(TArr));
 
   // Unless you know an array can't cow, you don't know if the TRef
@@ -3050,8 +3139,8 @@ Type array_set(Type arr, const Type& undisectedKey, const Type& val) {
          "You probably don't want to put Ref types into arrays ...");
 
   auto const key = disect_array_key(undisectedKey);
-  auto ret = array_like_set(std::move(arr), key, val);
-  return std::move(ret.first);
+  assert(key.type != TBottom);
+  return array_like_set(std::move(arr), key, val);
 }
 
 std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
@@ -3059,7 +3148,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
   if (arr.m_bits & BOptKeyset) {
     auto const key = disect_strict_key(val);
     if (key.type == TBottom) return { TBottom, TInitCell };
-    return { array_like_set(std::move(arr), key, val).first, val };
+    return { array_like_set(std::move(arr), key, key.type).first, val };
   }
 
   const bool maybeEmpty = arr.m_bits & BArrLikeE;
@@ -3266,13 +3355,32 @@ bool could_run_destructor(const Type& t) {
 
 ArrKey disect_vec_key(const Type& keyTy) {
   auto ret = ArrKey{};
-  if (!keyTy.couldBe(TInt)) return {folly::none, folly::none, TBottom};
-  if (keyTy.strictSubtypeOf(TInt)) {
-    ret.i = tv(keyTy)->m_data.num;
-    ret.type = keyTy;
-  } else {
-    ret.type = keyTy.subtypeOf(TInt) ? keyTy : TInitCell;
+
+  if (!keyTy.couldBe(TInt)) {
+    ret.type = TBottom;
+    ret.mayThrow = true;
+    return ret;
   }
+
+  // If the key is null, we'll throw, so we can assume its not for the effective
+  // type (and mark it as potentially throwing). We check for this explicitly
+  // here rather than falling through so we can take advantage of something like
+  // ?Int=123.
+  if (keyTy.subtypeOf(TOptInt)) {
+    if (keyTy.m_dataTag == DataTag::Int) {
+      ret.i = keyTy.m_data.ival;
+      ret.type = ival(*ret.i);
+    } else {
+      ret.type = TInt;
+    }
+    ret.mayThrow = !keyTy.subtypeOf(TInt);
+    return ret;
+  }
+
+  // Something else. Same reasoning as above. We can assume its an TInt because
+  // it will throw otherwise.
+  ret.type = TInt;
+  ret.mayThrow = true;
   return ret;
 }
 
@@ -3301,28 +3409,30 @@ std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
 
 ArrKey disect_strict_key(const Type& keyTy) {
   auto ret = ArrKey{};
+
   if (!keyTy.couldBe(TArrKey)) {
     ret.type = TBottom;
+    ret.mayThrow = true;
     return ret;
   }
 
-  if (keyTy.strictSubtypeOf(TInt)) {
-    ret.i = keyTy.m_data.ival;
-    ret.type = keyTy;
+  // If the key is null, we'll throw, so we can assume its not for the effective
+  // type (but mark it as potentially throwing).
+  if (keyTy.subtypeOf(TOptArrKey)) {
+    if (keyTy.m_dataTag == DataTag::Int) {
+      ret.i = keyTy.m_data.ival;
+    } else if (keyTy.m_dataTag == DataTag::Str) {
+      ret.s = keyTy.m_data.sval;
+    }
+    ret.type = is_opt(keyTy) ? unopt(keyTy) : keyTy;
+    ret.mayThrow = !keyTy.subtypeOf(TArrKey);
     return ret;
   }
 
-  if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
-    ret.s = keyTy.m_data.sval;
-    ret.type = keyTy;
-    return ret;
-  }
-
-  if (!keyTy.subtypeOf(TArrKey)) {
-    ret.type = TInitCell;
-    return ret;
-  }
-  ret.type = keyTy;
+  // Something else. Same reasoning as above. We can assume its an TArrKey
+  // because it will throw otherwise.
+  ret.type = TArrKey;
+  ret.mayThrow = true;
   return ret;
 }
 
@@ -3363,8 +3473,7 @@ keyset_set(Type keyset, const Type&, const Type&) {
 }
 
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val) {
-  return array_like_newelem(std::move(keyset),
-                            val.subtypeOf(TInitCell) ? val : TInitCell);
+  return array_like_newelem(std::move(keyset), val);
 }
 
 //////////////////////////////////////////////////////////////////////

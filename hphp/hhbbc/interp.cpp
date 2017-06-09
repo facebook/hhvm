@@ -345,12 +345,12 @@ void in(ISS& env, const bc::AddElemC& op) {
   auto const v = popC(env);
   auto const k = popC(env);
 
-  auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
+  auto const outTy = [&] (Type ty) -> folly::Optional<std::pair<Type,bool>> {
     if (ty.subtypeOf(TArr)) {
       return array_set(std::move(ty), k, v);
     }
     if (ty.subtypeOf(TDict)) {
-      return dict_set(std::move(ty), k, v).first;
+      return dict_set(std::move(ty), k, v);
     }
     return folly::none;
   }(popC(env));
@@ -359,12 +359,13 @@ void in(ISS& env, const bc::AddElemC& op) {
     return push(env, union_of(TArr, TDict));
   }
 
-  if (outTy->subtypeOf(TBottom)) {
+  if (outTy->first.subtypeOf(TBottom)) {
     unreachable(env);
-  } else {
+  } else if (outTy->second) {
+    nothrow(env);
     if (env.collect.trackConstantArrays) constprop(env);
   }
-  push(env, std::move(*outTy));
+  push(env, std::move(outTy->first));
 }
 
 void in(ISS& env, const bc::AddElemV& op) {

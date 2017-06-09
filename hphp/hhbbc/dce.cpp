@@ -1245,6 +1245,11 @@ void dce(Env& env, const bc::NewMixedArray&) {
 
 void dce(Env& env, const bc::AddElemC& op) {
   stack_ops(env, [&] (UseInfo& ui) {
+      // If the set might throw it needs to be kept.
+      if (env.flags.wasPEI) {
+        return PushFlags::MarkLive;
+      }
+
       if (allUnused(ui)) {
         return PushFlags::MarkUnused;
       }

@@ -135,8 +135,14 @@ void nothrow(ISS& env) {
   env.flags.wasPEI = false;
 }
 
-void unreachable(ISS& env)    { env.state.unreachable = true; }
-void constprop(ISS& env)      { env.flags.canConstProp = true; }
+void unreachable(ISS& env) {
+  FTRACE(2, "    unreachable\n");
+  env.state.unreachable = true;
+}
+void constprop(ISS& env) {
+  FTRACE(2, "    constprop\n");
+  env.flags.canConstProp = true;
+}
 
 void jmp_nofallthrough(ISS& env) {
   env.flags.jmpFlag = StepFlags::JmpFlags::Taken;

@@ -407,7 +407,7 @@ Type currentChainType(ISS& env, Type val) {
   while (it != env.state.arrayChain.begin()) {
     --it;
     if (it->first.subtypeOf(TArr)) {
-      val = array_set(it->first, it->second, val);
+      val = array_set(it->first, it->second, val).first;
     } else if (it->first.subtypeOf(TVec)) {
       val = vec_set(it->first, it->second, val).first;
       if (val == TBottom) val = TVec;
@@ -443,7 +443,7 @@ Type resolveArrayChain(ISS& env, Type val) {
       if (val == TBottom) val = TKeyset;
     } else {
       assert(arr.subtypeOf(TArr));
-      val = array_set(std::move(arr), key, val);
+      val = array_set(std::move(arr), key, val).first;
     }
   } while (!env.state.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));
@@ -1059,7 +1059,7 @@ void miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
 void pessimisticFinalElemD(ISS& env, const Type& key, const Type& ty) {
   if (mustBeInFrame(env.state.base)) {
     if (env.state.base.type.subtypeOf(TArr)) {
-      env.state.base.type = array_set(env.state.base.type, key, ty);
+      env.state.base.type = array_set(env.state.base.type, key, ty).first;
       return;
     }
     if (auto res = hack_array_do(env, false, set, key, ty)) {
@@ -1172,7 +1172,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
 
   if (mustBeInFrame(env.state.base)) {
     if (env.state.base.type.subtypeOf(TArr)) {
-      env.state.base.type = array_set(env.state.base.type, key, t1);
+      env.state.base.type = array_set(env.state.base.type, key, t1).first;
       push(env, isWeird ? TInitCell : t1);
       return;
     }

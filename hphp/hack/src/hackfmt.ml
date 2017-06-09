@@ -204,8 +204,7 @@ let get_split_boundaries solve_states =
   List.fold solve_states
     ~init:[]
     ~f:begin fun boundaries solve_state ->
-      let {Solve_state.rvm; chunk_group; _} = solve_state in
-      let chunks = chunk_group.Chunk_group.chunks in
+      let chunks = Solve_state.chunks solve_state in
       match chunks with
       | [] -> boundaries
       | hd :: tl ->
@@ -213,7 +212,7 @@ let get_split_boundaries solve_states =
           ~init:(boundaries, Chunk.get_range hd)
           ~f:begin fun (boundaries, curr_range) chunk ->
             let chunk_range = Chunk.get_range chunk in
-            if Solve_state.has_split_before_chunk chunk rvm
+            if Solve_state.has_split_before_chunk solve_state ~chunk
               then curr_range :: boundaries, chunk_range
               else boundaries, (fst curr_range, snd chunk_range)
           end

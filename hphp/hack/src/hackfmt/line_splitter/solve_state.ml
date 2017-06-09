@@ -26,20 +26,32 @@ type t = {
   rules_on_partially_bound_lines: ISet.t Lazy.t;
 }
 
-let has_split_before_chunk c rvm =
+let chunks t = t.chunk_group.Chunk_group.chunks
+
+let rvm_has_split_before_chunk c rvm =
   let rule_id = c.Chunk.rule in
   let value = IMap.get rule_id rvm in
   Rule.is_split rule_id value
 
-let has_comma_after_chunk c rvm =
+let rvm_has_comma_after_chunk c rvm =
   Option.value_map c.Chunk.comma_rule ~default:false ~f:(fun rule_id ->
     let value = IMap.get rule_id rvm in
     Rule.is_split rule_id value
   )
 
+let has_split_before_chunk t ~chunk =
+  rvm_has_split_before_chunk chunk t.rvm
+
+let has_comma_after_chunk t ~chunk =
+  rvm_has_comma_after_chunk chunk t.rvm
+
 let get_bound_ruleset rvm = ISet.of_list @@ IMap.keys rvm
 
 let get_overflow len = max (len - _LINE_WIDTH) 0
+
+let get_indent t ~chunk =
+  let block_indentation = t.chunk_group.Chunk_group.block_indentation in
+  block_indentation + Nesting.get_indent chunk.Chunk.nesting t.nesting_set
 
 (**
  * Create a list of lines
@@ -68,8 +80,8 @@ let build_lines chunk_group rvm nesting_set =
       | hd :: tl ->
         (* TODO: consider adding parent rules *)
         let rule = hd.Chunk.rule in
-        let is_split = has_split_before_chunk hd rvm in
-        let has_comma = has_comma_after_chunk hd rvm in
+        let is_split = rvm_has_split_before_chunk hd rvm in
+        let has_comma = rvm_has_comma_after_chunk hd rvm in
         let chunk_len = get_text_length hd ~has_comma +
           get_prefix_whitespace_length hd ~is_split in
 
@@ -142,7 +154,7 @@ let make chunk_group rvm =
         if ISet.mem nid idset then
           nset, idset
         else
-        if has_split_before_chunk c rvm then
+        if rvm_has_split_before_chunk c rvm then
           ISet.add nid nset, ISet.add nid idset
         else
           nset, ISet.add nid idset
@@ -156,7 +168,7 @@ let make chunk_group rvm =
 
   (* calculate cost of all of the spans that are split *)
   let span_cost_map = List.fold chunks ~init:IMap.empty ~f:(fun acc c ->
-    if has_split_before_chunk c rvm then
+    if rvm_has_split_before_chunk c rvm then
       List.fold ~init:acc c.Chunk.spans ~f:(fun acc s ->
         if IMap.mem s.Span.id acc
         then acc

@@ -46,9 +46,9 @@ struct DebuggerThriftBuffer : ThriftBuffer {
   }
 
 protected:
-  virtual String readImpl();
-  virtual void flushImpl(const String& data);
-  virtual void throwError(const char* msg, int code);
+ String readImpl() override;
+ void flushImpl(const String& data) override;
+ void throwError(const char* msg, int code) override;
 
 private:
   char m_buffer[BUFFER_SIZE + 1];

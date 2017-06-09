@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestExtApc : TestCppExt {
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
   bool test_apc_reserialize();
 };
 

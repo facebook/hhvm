@@ -21,7 +21,7 @@ namespace HPHP {
 struct FastCGIServerFactory : ServerFactory {
   FastCGIServerFactory() {}
 
-  virtual ServerPtr createServer(const ServerOptions& options) override {
+  ServerPtr createServer(const ServerOptions& options) override {
     // We currently do not support FastCGIServer with less-than-maximum
     // initial threads.
     assert(options.m_maxThreads == options.m_initThreads);

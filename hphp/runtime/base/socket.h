@@ -40,8 +40,8 @@ struct SocketData : FileData {
   SocketData() { }
   SocketData(int port, int type);
 
-  virtual bool closeImpl();
-  ~SocketData();
+  bool closeImpl() override;
+  ~SocketData() override;
 
  private:
   friend struct Socket;
@@ -61,7 +61,7 @@ struct SocketData : FileData {
 struct Socket : File {
   DECLARE_RESOURCE_ALLOCATION(Socket);
 
-  virtual ~Socket();
+  ~Socket() override;
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }

@@ -102,7 +102,7 @@ struct ProxygenTransport final
   , Synchronizable
 {
   explicit ProxygenTransport(ProxygenServer *server);
-  virtual ~ProxygenTransport();
+  ~ProxygenTransport() override;
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.

@@ -27,7 +27,7 @@ Array HHVM_FUNCTION(apache_request_headers);
 
 struct ApacheExtension final : Extension {
   ApacheExtension();
-  virtual ~ApacheExtension();
+  ~ApacheExtension() override;
   void moduleInit() override;
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
   static bool Enable;

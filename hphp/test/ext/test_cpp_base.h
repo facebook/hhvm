@@ -35,7 +35,7 @@
 struct TestCppBase : TestBase {
   TestCppBase();
 
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   // building blocks
   bool TestIpBlockMap();

@@ -26,7 +26,7 @@
 struct TestUtil : TestBase {
   TestUtil();
 
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   bool TestLFUTable();
   bool TestSharedString();

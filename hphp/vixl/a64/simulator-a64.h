@@ -122,7 +122,7 @@ class SimSystemRegister {
 class Simulator : public DecoderVisitor {
  public:
   explicit Simulator(Decoder* decoder, std::ostream& stream);
-  ~Simulator();
+  ~Simulator() override;
 
   void ResetState();
 

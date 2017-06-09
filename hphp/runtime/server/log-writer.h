@@ -42,7 +42,7 @@ struct ClassicWriter final : LogWriter {
     : LogWriter(chan)
     , m_logdata(alfd)
   {}
-  virtual ~ClassicWriter();
+  ~ClassicWriter() override;
   void init(const std::string& username,
             AccessLog::GetThreadDataFunc fn) override;
   void write(Transport* transport, const VirtualHost* vhost) override;

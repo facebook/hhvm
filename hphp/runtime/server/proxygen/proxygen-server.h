@@ -52,7 +52,7 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
     ProxygenServer *server);
-  virtual ~HPHPSessionAcceptor() {}
+  ~HPHPSessionAcceptor() override {}
 
   proxygen::HTTPTransaction::Handler* newHandler(
     proxygen::HTTPTransaction& txn,
@@ -84,9 +84,9 @@ using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
 struct HPHPWorkerThread : proxygen::WorkerThread {
   explicit HPHPWorkerThread(folly::EventBaseManager* ebm)
       : WorkerThread(ebm) {}
-  virtual ~HPHPWorkerThread() {}
-  virtual void setup() override;
-  virtual void cleanup() override;
+  ~HPHPWorkerThread() override {}
+  void setup() override;
+  void cleanup() override;
 };
 
 struct ProxygenServer : Server,
@@ -94,25 +94,25 @@ struct ProxygenServer : Server,
                         folly::AsyncTimeout,
                         TakeoverAgent::Callback {
   explicit ProxygenServer(const ServerOptions& options);
-  ~ProxygenServer();
+  ~ProxygenServer() override;
 
   void addTakeoverListener(TakeoverListener* listener) override;
   void removeTakeoverListener(TakeoverListener* listener) override;
-  virtual void addWorkers(int numWorkers) override {
+  void addWorkers(int numWorkers) override {
     m_dispatcher.addWorkers(numWorkers);
   }
-  virtual void start() override;
-  virtual void waitForEnd() override;
-  virtual void stop() override;
-  virtual int getActiveWorker() override {
+  void start() override;
+  void waitForEnd() override;
+  void stop() override;
+  int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
   }
-  virtual int getQueuedJobs() override {
+  int getQueuedJobs() override {
     return m_dispatcher.getQueuedJobs();
   }
-  virtual int getLibEventConnectionCount() override;
-  virtual bool enableSSL(int port) override;
-  virtual bool enableSSLWithPlainText() override;
+  int getLibEventConnectionCount() override;
+  bool enableSSL(int port) override;
+  bool enableSSLWithPlainText() override;
 
   folly::EventBase *getEventBase() {
     return m_eventBaseManager.getEventBase();

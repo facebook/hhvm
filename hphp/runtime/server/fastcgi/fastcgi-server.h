@@ -46,7 +46,7 @@ struct FastCGIAcceptor : public wangle::Acceptor {
     , m_server(server)
   {}
 
-  virtual ~FastCGIAcceptor() {}
+  ~FastCGIAcceptor() override {}
 
   bool canAccept(const folly::SocketAddress& address) override;
   void onNewConnection(folly::AsyncTransportWrapper::UniquePtr sock,
@@ -90,7 +90,7 @@ struct FastCGIServer : public Server,
                 int port,
                 int workers,
                 bool useFileSocket);
-  ~FastCGIServer() {
+  ~FastCGIServer() override {
     waitForEnd();
   }
 

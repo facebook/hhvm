@@ -65,7 +65,7 @@ struct Extension : IDebuggable {
                                const std::string &name);
 public:
   explicit Extension(const char* name, const char* version = "");
-  virtual ~Extension() {}
+  ~Extension() override {}
 
   const char* getVersion() const { return m_version.c_str();}
 

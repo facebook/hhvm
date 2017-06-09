@@ -47,15 +47,15 @@ struct ServerWorker
   : JobQueueWorker<JobPtr,Server*,true,false,JobQueueDropVMStack>
 {
   ServerWorker() {}
-  virtual ~ServerWorker() {}
+  ~ServerWorker() override {}
 
   /**
    * Request handler called by Server.
    */
-  virtual void doJob(JobPtr job) {
+  void doJob(JobPtr job) override {
     doJobImpl(job, false /*abort*/);
   }
-  virtual void abortJob(JobPtr job) {
+  void abortJob(JobPtr job) override {
     doJobImpl(job, true /*abort*/);
     m_requestsTimedOutOnQueue->addValue(1);
   }
@@ -63,7 +63,7 @@ struct ServerWorker
   /**
    * Called when thread enters and exits.
    */
-  virtual void onThreadEnter() {
+  void onThreadEnter() override {
     assert(this->m_context);
     m_handler = this->m_context->createRequestHandler();
     m_requestsTimedOutOnQueue =
@@ -71,7 +71,7 @@ struct ServerWorker
                                     {ServiceData::StatsType::COUNT});
   }
 
-  virtual void onThreadExit() {
+  void onThreadExit() override {
     assert(this->m_context);
     m_handler.reset();
   }

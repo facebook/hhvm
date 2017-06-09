@@ -25,7 +25,7 @@ namespace HPHP {
 struct StaticClassName : IParseHandler {
   explicit StaticClassName(ExpressionPtr classExp);
 
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
 
   bool isSelf() const { return m_self; }
   bool isParent() const { return m_parent; }

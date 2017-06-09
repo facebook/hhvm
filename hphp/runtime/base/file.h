@@ -120,7 +120,7 @@ struct File : SweepableResourceData {
   explicit File(bool nonblocking = true,
                 const String& wrapper_type = null_string,
                 const String& stream_type = empty_string_ref);
-  virtual ~File();
+  ~File() override;
 
   static StaticString& classnameof() {
     static StaticString result("File");
@@ -284,7 +284,7 @@ struct File : SweepableResourceData {
 protected:
   void invokeFiltersOnClose();
   bool closeImpl();
-  virtual void sweep() override;
+  void sweep() override;
 
   void setIsLocal(bool isLocal) { m_data->m_isLocal = isLocal; }
   void setIsClosed(bool closed) { m_data->m_closed = closed; }

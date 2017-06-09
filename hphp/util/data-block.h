@@ -50,7 +50,7 @@ struct DataBlockFull : std::runtime_error {
       , name(blockName)
     {}
 
-  ~DataBlockFull() noexcept {}
+  ~DataBlockFull() noexcept override {}
 };
 
 /**

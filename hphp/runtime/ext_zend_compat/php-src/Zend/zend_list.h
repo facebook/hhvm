@@ -41,7 +41,7 @@ namespace HPHP {
 // released.
 struct ZendResourceData : ResourceData {
   ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
-  ~ZendResourceData();
+  ~ZendResourceData() override;
 
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZendResourceData)
 

@@ -123,16 +123,16 @@ public:
          AnalysisResultPtr ar, int fileSize = 0);
 
   // implementing ParserBase
-  virtual bool parseImpl();
+  bool parseImpl() override;
   virtual bool parseImpl5();
   virtual bool parseImpl7();
   bool parse();
-  virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
-    ATTRIBUTE_PRINTF(2,3);
+  void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...) override
+      ATTRIBUTE_PRINTF(2, 3);
   IMPLEMENT_XHP_ATTRIBUTES;
 
-  virtual void fatal(const Location* loc, const char* msg);
-  virtual void parseFatal(const Location* loc, const char* msg);
+  void fatal(const Location* loc, const char* msg) override;
+  void parseFatal(const Location* loc, const char* msg) override;
   std::string errString();
 
   // result
@@ -393,10 +393,10 @@ public:
    */
   void onCompleteLabelScope(bool fresh);
 
-  virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
-  virtual void invalidateLabel(TStatementPtr stmt);
+  void invalidateGoto(TStatementPtr stmt, GotoError error) override;
+  void invalidateLabel(TStatementPtr stmt) override;
 
-  virtual TStatementPtr extractStatement(ScannerToken *stmt);
+  TStatementPtr extractStatement(ScannerToken* stmt) override;
 
   FileScopePtr getFileScope() { return m_file; }
 

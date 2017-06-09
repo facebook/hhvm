@@ -358,6 +358,12 @@
       # Breaks because of the weird way xdebug is enabled under hhvm, just
       # blacklist for now to stop sandcastle errors.
       - phpunit/tests/Framework/Constraint/ExceptionMessageTest.php
+  phpunit_php7:
+    url: https://github.com/sebastianbergmann/phpunit.git
+    branch: master
+    commit: 428999fdc2818a830a7443376ee65f2a2dfc9f32
+    install_root: phpunit_php7
+    test_root: phpunit_php7
   phpunit-mock-objects:
     url: https://github.com/sebastianbergmann/phpunit-mock-objects.git
     branch: "2.2.0"

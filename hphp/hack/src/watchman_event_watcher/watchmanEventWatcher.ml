@@ -21,15 +21,68 @@ open Core
  * This is useful to ask the question "is this repo mid-update
  * right now?", which isn't provided by the Mercurial or Watchman
  * APIs.
+ *
+ * Socket can be retrieved by invoking this command with --get-sockname
+ *
+ * Clients get the status by connecting to the socket and reading
+ * newline-terminated messages. The message can be:
+ *   'unknown' - watcher doesn't know what state the repo is in
+ *   'mid_update' - repo is currently undergoing an update
+ *   'settled' - repo is settled (not undergoing an update)
+ *
+ * After sending 'settled' message, the socket is closed.
+ * An 'unknown' or 'mid_updat' message is eventually followed by a
+ * 'settled' message when the repo is settled.
+ *
+ * The Hack Monitor uses the watcher when first starting up to delay
+ * initialization while a repo is in the middle of an update. Initialization
+ * mid-update is undesirable because the wrong saved state will be loaded
+ * (the one corresponding to the revision we are leaving) resulting in
+ * a slow recheck after init.
+ *
+ * Why do we need a socket with a 'settled' notification instead of just
+ * having the Hack Server tail the watcher's logs? Consider the following
+ * race:
+   *
+   * Watcher prints 'mid_update' to logs, Watchman has sent State_leave
+   * event to subscribers before the Hack Monitor's subscription started,
+   * and the Watcher crashes before processing this State_leave.
+   *
+ *
+ * If the Hack Monitor just tailed the watcher logs to see the state of the
+ * repo, it would not start a server, would never get the State_leave watchman
+ * event on its subscription, and would just wait indefinitely.
+ *
+ * The watcher must also be used as the source-of-truth for the repo's
+ * state during startup instead of the Hack Monitor's own subscription.
+ * Consider the following incorrect usage of the Watcher:
+   *
+   * Hack Monitor starts up, starts a Watchman subscription, checks watcher
+   * for repo state and sees 'mid_update', delays starting a server.
+   * Waits on its Watchman subscription for a State_leave before starting a
+   * server.
+   *
+ *
+ * The Monitor could potentially wait forever in this scenario due to a
+ * race condition - Watchman has already sent the State_leave to all
+ * subscriptions before the Monitor's subscription was started, but it
+ * was not yet processed by the Watcher.
+ *
+ * The Hack Monitor should instead be waiting for a 'settled' from the
+ * Watcher.
  *)
 
 module J = Hh_json_helpers
 module Config = WatchmanEventWatcherConfig
 
+let ignore_unix_epipe f x =
+  try f x with
+  | Unix.Unix_error (Unix.EPIPE, _, _) ->
+    ()
+
 module Responses = struct
 
   exception Invalid_response
-  exception Send_failure
 
   type t =
     | Unknown
@@ -49,11 +102,13 @@ module Responses = struct
 
   let send_to_fd v fd =
     let str = Printf.sprintf "%s\n" (to_string v) in
-    let bytes = Unix.write fd str 0 (String.length str) in
+    let bytes = Unix.single_write fd str 0 (String.length str) in
     if bytes = (String.length str) then
       ()
     else
-      raise Send_failure
+      (** We're only writing a few bytes. Not sure what to do here.
+       * Retry later when the pipe has been pumped? *)
+      Hh_logger.log "Failed to write all bytes"
 
 end
 
@@ -69,6 +124,7 @@ type env = {
   watchman : Watchman.watchman_instance;
   state : state;
   socket : Unix.file_descr;
+  waiting_clients : Unix.file_descr Queue.t;
 }
 
 let watchman_expression_terms = [
@@ -122,6 +178,16 @@ end;;
 
 
 let process_changes changes env =
+  let notify_client client =
+    (** Notify the client that the repo has settled. *)
+      ignore_unix_epipe (Responses.send_to_fd Responses.Settled) client;
+      Unix.close client
+  in
+  let notify_waiting_clients env =
+    let clients = Queue.create () in
+    let () = Queue.transfer env.waiting_clients clients in
+    Queue.fold (fun () client -> notify_client client) () clients
+  in
   let open Watchman in
   match changes with
   | Watchman_unavailable ->
@@ -132,7 +198,9 @@ let process_changes changes env =
     { env with state = Entering_to name; }
   | Watchman_pushed (State_leave (name, _)) ->
     Hh_logger.log "State_leave %s" name;
-    { env with state = Left_at name; }
+    let env = { env with state = Left_at name; } in
+    let () = notify_waiting_clients env in
+    env
   | Watchman_pushed (Files_changed set) when (SSet.is_empty set)->
     env
   | Watchman_pushed (Files_changed set) ->
@@ -178,21 +246,24 @@ let get_new_clients socket =
     get_all_clients_nonblocking socket []
 
 let process_client_ env client =
+  (** We allow this to throw Unix_error - this lets us ignore broken
+   * clients instead of adding them to the waiting_clients queue. *)
   (match env.state with
   | Unknown ->
-    Responses.send_to_fd Responses.Unknown client
+    Responses.send_to_fd Responses.Unknown client;
+    Queue.add client env.waiting_clients
   | Entering_to _ ->
-    Responses.send_to_fd Responses.Mid_update client
+    Responses.send_to_fd Responses.Mid_update client;
+    Queue.add client env.waiting_clients
   | Left_at _ ->
-    Responses.send_to_fd Responses.Settled client);
-  Unix.close client;
+    Responses.send_to_fd Responses.Settled client;
+    Unix.shutdown client Unix.SHUTDOWN_ALL;
+    Unix.close client);
   env
 
 let process_client env client =
   try process_client_ env client with
-  | Unix.Unix_error (Unix.EBADF, _, _) ->
-    env
-  | Responses.Send_failure ->
+  | Unix.Unix_error _ ->
     env
 
 let check_new_connections env =
@@ -238,6 +309,7 @@ let init root =
       watchman = Watchman.Watchman_alive wenv;
       state = Unknown;
       socket;
+      waiting_clients = Queue.create ();
     }
 
 let to_channel_no_exn oc data =
@@ -246,6 +318,7 @@ let to_channel_no_exn oc data =
     Hh_logger.exc ~prefix:"Warning: writing to channel failed" e
 
 let main args =
+  Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   let result = init args.Args.root in
   match result with
   | Result.Ok env -> begin
@@ -280,6 +353,7 @@ let daemon_main_ args oc =
     exit 1
 
 let daemon_main args (_ic, oc) =
+  Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   try daemon_main_ args oc with
   | e ->
     HackEventLogger.uncaught_exception e

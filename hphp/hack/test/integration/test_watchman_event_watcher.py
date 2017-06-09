@@ -4,9 +4,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import os
+import random
 import re
 import shutil
 import socket
+import string
 import subprocess
 import sys
 import time
@@ -35,6 +37,18 @@ def run_watcher(daemonize=False):
     # to the test function.
     def wrap(fn):
         def f(self=None):
+            # We have to do test case setup here instead of in the class method
+            # 'setup' because we want to recreate the hg repo on Flaky retries.
+            shutil.rmtree(self.repo_dir, ignore_errors=True)
+            random_name = ''.join(random.choices(
+                string.ascii_uppercase + string.digits, k=8)
+            )
+            self.repo_dir = os.path.join(self.base_tmp_dir, random_name)
+            print(
+                "copying %s to %s",
+                [self.template_repo, self.repo_dir],
+                file=sys.stderr)
+            shutil.copytree(self.template_repo, self.repo_dir)
             self.write_watchman_config('{}')
             self.init_hg_repo()
             self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
@@ -89,11 +103,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         super().tearDownClass()
 
     def setUp(self):
-        print(
-            "copying %s to %s",
-            [self.template_repo, self.repo_dir],
-            file=sys.stderr)
-        shutil.copytree(self.template_repo, self.repo_dir)
+        pass
 
     def tearDown(self):
         pass
@@ -152,11 +162,17 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         sockname = output.decode('UTF-8')
         return sockname
 
-    # Repeatedly poll for a newline from file f.
-    def poll_line(self, f, retry_wait=0.1, retries=100):
+    # Read a line from the file, ignoring all lines in 'ignore'
+    def poll_line(self, f, retry_wait=0.1, retries=100, retry_eof=False, ignore=None):
         while(retries > 0):
             line = f.readline()
-            if not line:
+            if retry_eof and not line:
+                err_print_ln('ignoring EOF. retrying.')
+                time.sleep(retry_wait)
+                retries -= 1
+                continue
+            elif ignore and line.strip() in ignore:
+                err_print_ln('ignoring from ignore list. retrying.')
                 time.sleep(retry_wait)
                 retries -= 1
                 continue
@@ -166,31 +182,64 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 return result
         raise TimeoutError
 
-    def connect_socket_get_output(
-        self, sockname,
-        ignore_unknown=False,
+    def connect_socket(
+        self,
+        sockname,
         retry_wait=0.1,
-        retries=100
+        retries=100,
     ):
         while(retries > 0):
             try:
                 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 sock.connect(sockname)
-                f = sock.makefile()
-                result = self.poll_line(f)
-                f.close()
-                sock.close()
-                if ignore_unknown and (result == 'unknown' or result == 'unknown\n'):
-                    err_print_ln('ignoring unknown result. retrying.')
-                    time.sleep(retry_wait)
-                    retries -= 1
-                    continue
-                return result
+                return (sock, retries)
             except IOError:
                 err_print_ln('failed to connect to socket. retrying.')
                 time.sleep(retry_wait)
                 retries -= 1
                 continue
+        raise TimeoutError
+
+    def connect_socket_get_output(
+        self,
+        sockname,
+        # If auto_close is False, keeps the socket open and returns
+        # a (result, socket) pair
+        auto_close=True,
+        ignore_unknown=False,
+        retry_wait=0.1,
+        retries=100
+    ):
+        # Connect to the socket and read a line.
+        # If connection fails, retry.
+        # If result is 'unknown' and ignore_unknown is True, then retry
+        # with a fresh connection.
+        # This is distinct from the 'ignore' list in poll_line, which is
+        # repeatedly polling from the same socket.
+        while(retries > 0):
+            (sock, retries) = self.connect_socket(
+                sockname,
+                retry_wait=retry_wait,
+                retries=retries
+            )
+            f = sock.makefile()
+            # TODO: Don't double-count retries. Meh.
+            result = self.poll_line(
+                f,
+                retry_wait=retry_wait,
+                retries=retries,
+            )
+            f.close()
+            if ignore_unknown and result == 'unknown':
+                sock.close()
+                time.sleep(retry_wait)
+                retries -= 1
+                continue
+            elif auto_close:
+                sock.close()
+                return result
+            else:
+                return (result, sock)
         raise TimeoutError
 
     def write_new_file_and_commit(self, filename, content, commit_msg):
@@ -226,9 +275,9 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 initialized_msg,
                 'initialized message')
             self.check_call(['hg', 'update', '.~1'])
-            state_enter = self.poll_line(f)
-            state_leave = self.poll_line(f)
-            sentinel_file = self.poll_line(f)
+            state_enter = self.poll_line(f, retry_eof=True)
+            state_leave = self.poll_line(f, retry_eof=True)
+            sentinel_file = self.poll_line(f, retries=300, retry_eof=True)
             self.assertIn('State_enter hg.update', state_enter, 'state enter')
             self.assertIn('State_leave hg.update', state_leave, 'state leave')
             self.assertIn('Changes', sentinel_file, 'has changes')
@@ -268,13 +317,76 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
         # This is kind of racy, but that's what the ignore_unknown=True is fore
         result = self.connect_socket_get_output(
             sockname,
+            retry_wait=0.05,
             ignore_unknown=True)
-        self.assertIn('mid_update', result, 'state enter')
+        self.assertIn('mid_update', result, 'catch the watcher in mid-update state')
         update_proc.communicate()
         # Give the watchman subscription time to catch up.
         time.sleep(10)
         result = self.connect_socket_get_output(
             sockname,
             ignore_unknown=True)
-        self.assertIn('settled', result, 'state enter')
+        self.assertIn('settled', result, 'settled after update finishes.')
+        return
+
+    @flaky
+    @run_watcher(daemonize=False)
+    def test_notify_waiting_client(self, sockname=None, watcher_process=None):
+        # After getting the 'unknown' message, the client should get the 'settled'
+        # notification after the repo settles.
+        (sock, _) = self.connect_socket(sockname)
+        f = sock.makefile()
+        result = self.poll_line(f)
+        self.assertIn('unknown', result, 'state enter')
+        update_proc = self.open_subprocess(['hg', 'update', '.~1'])
+        update_proc.communicate()
+        # The same socket above should now have a settled message
+        result = self.poll_line(f)
+        self.assertIn(
+            'settled',
+            result,
+            'Previously connected client gets notified of repo settling'
+        )
+        f.close()
+        sock.close()
+        return
+
+    @flaky
+    @run_watcher(daemonize=False)
+    def test_notify_waiting_client_after_midupdate(
+        self,
+        sockname=None,
+        watcher_process=None
+    ):
+        # Same as test above, but the client connected to the watcher while
+        # it was in mid_update state.
+        (sock, _) = self.connect_socket(sockname)
+        f = sock.makefile()
+        result = self.poll_line(f)
+        self.assertIn('unknown', result, 'state enter')
+        f.close()
+        sock.close()
+        update_proc = self.open_subprocess(['hg', 'update', '.~1'])
+        # Catch the watcher in mid-update state.
+        (result, sock) = self.connect_socket_get_output(
+            sockname,
+            auto_close=False,
+            ignore_unknown=True
+        )
+        self.assertIn(
+            'mid_update',
+            result,
+            'catch repo in midupdate'
+        )
+        update_proc.communicate()
+        # The same socket above should now have a settled message
+        f = sock.makefile()
+        result = self.poll_line(f)
+        self.assertIn(
+            'settled',
+            result,
+            'Previously connected client gets notified of repo settling'
+        )
+        f.close()
+        sock.close()
         return

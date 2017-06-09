@@ -634,6 +634,8 @@ struct RuntimeOption {
   F(double, GCTriggerPct,              0.5)                             \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
+  F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
+  F(bool, VerifyOnly,                  false)                           \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
   F(uint32_t, MaxDeferredErrors,       50)                              \

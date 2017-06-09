@@ -1,0 +1,41 @@
+#checks that mismatched FPush* and FCall* fails verification, and
+#that you can't jump backwards in an FPI region
+
+.main {
+  .declvars $foo $bar $baz;
+  Int 1
+  SetL $foo
+  PopC
+  Int 2
+  SetL $bar
+  PopC
+  FPushFuncD 2 "add"
+  FPushFuncD 2 "add"
+  Int 1
+  SetL $foo
+  target: PopC
+  FPassL 0 $foo
+  Int 2
+  SetL $bar
+  PopC
+  Int 0
+  JmpNZ target
+  FPassL 1 $bar
+  FCall 2
+  UnboxR
+  SetL $baz
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $baz
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > add($x, $y) {
+  CGetL $y
+  CGetL2 $x
+  AddO
+  RetC
+}

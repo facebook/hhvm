@@ -685,7 +685,8 @@ std::unique_ptr<Unit> UnitEmitter::create() {
 
   m_fMap.clear();
 
-  static const bool kVerify = debug || getenv("HHVM_VERIFY");
+  static const bool kVerify = debug || RuntimeOption::EvalVerify ||
+    RuntimeOption::EvalVerifyOnly;
   static const bool kVerifyVerboseSystem =
     getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
   static const bool kVerifyVerbose =
@@ -709,6 +710,11 @@ std::unique_ptr<Unit> UnitEmitter::create() {
         u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
       );
     }
+  }
+
+  if (RuntimeOption::EvalVerifyOnly) {
+    std::fflush(stdout);
+    _Exit(0);
   }
 
   if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {

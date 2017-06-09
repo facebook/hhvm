@@ -680,10 +680,10 @@ FPI regions overlap, one of the FPI regions must be completely enclosed by the
 other FPI region. An FPI region may not contain backward jumps, nor may it
 contain forward jumps that jump past the end of the FPI region.
 
-Exceptionally, an FPI region can terminate without an FCall*, and without
-including an FPass for each argument if they would be unreachable (eg passing a
-cell via FPassCE, or calling a function that never returns). In this case it is
-possible for multiple fpi regions to end at the same bytecode.
+In the case of an exception, an FPI region can terminate without an FCall*, and
+without including an FPass for each argument if they would be unreachable
+(eg passing a cell via FPassCE, or calling a function that never returns). In
+this case it is possible for multiple fpi regions to end at the same bytecode.
 
 Each function has an "FPI region table". Each row in the FPI region table
 consists of offset of the FPush* instruction that begins the region, the FCall
@@ -797,7 +797,7 @@ may not be used outside an FPI region.
 jumps that jump outside the end of the FPI region. Also, there may not be jumps
 anywhere in the function that transfer control from the outside of a given FPI
 region to the inside of that region. An FPI region may not contain the Ret*,
-Unwind, Throw, or Fatal instructions. Finally, an entry point may not point to
+Unwind or Throw instructions. Finally, an entry point may not point to
 an instruction inside an FPI region.
 
 11) The depth of the FPI stack at any given point in the bytecode must be the

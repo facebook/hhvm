@@ -780,6 +780,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
           cur->mbr_live ? "live" : "dead", opcodeToName(op));
     ok = false;
   }
+
   if (cur->mbr_live && isMemberOp(op)) {
     folly::Optional<MOpMode> op_mode;
     if (op == Op::QueryM) {
@@ -805,6 +806,15 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 
     cur->mbr_mode = op_mode;
   }
+
+  if (cur->fpilen > 0 && isJmp(op)) {
+    auto offset = getImm(pc, 0).u_BA;
+    if(offset < 0){
+      error("FPI contains backwards jump at %s\n",
+            opcodeToName(op));
+    }
+  }
+
   return ok;
 }
 
@@ -832,6 +842,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
   auto const op = peek_op(pc);
+
   if (isFCallStar(op)) {
     --cur->fpilen;
     int call_params = op == Op::FCallArray ? 1 : getImmIva(pc);
@@ -879,6 +890,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
     }
     fpi.next++;
   }
+
   return ok;
 }
 
@@ -1087,6 +1099,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->mbr_mode.clear();
   }
 
+  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV ||
+                          op == Op::Unwind || op == Op::Throw)) {
+    error("%s instruction encountered inside of FPI region\n",
+          opcodeToName(op));
+    ok = false;
+  }
+
   return ok;
 }
 
@@ -1273,6 +1292,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     error("Member base register live at end of B%d\n", b->id);
     ok = false;
   }
+
   return ok;
 }
 

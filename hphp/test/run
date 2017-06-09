@@ -873,6 +873,11 @@ function hhvm_cmd($options, $test, $test_run = null) {
 
   $cmd = "";
 
+  if (file_exists($test.'.verify')) {
+    $cmd .= " -m verify";
+
+  }
+
   if (isset($options['cli-server']) && can_run_server_test($test)) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
     $socket = $options['servers']['configs'][$config]['cli-socket'];

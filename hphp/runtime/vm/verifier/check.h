@@ -63,14 +63,18 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  * 3.  Empty stack at try-region starts (but not ends).
  * 5.  |stack| == 1 before Ret*, == 0 before Unwind.
  * 6.  no jumps between sections, where section is main body or any funclet.
- * 7.  each section must end with a terminal;  main body cannot contain Unwind;
+ * 8.  each section must end with a terminal;  main body cannot contain Unwind;
  *     Funclets may not contain Ret*.
- * 10. FPI depth same for all ctrl paths. every path must have N FPass's
+ * 9.  each fpi starts with FPush* and ends with FCall; each FPush must be
+ *     the first instr in exactly 1 fpi region; FPass* never outside FPI.
+ * 10. no back-jumps in FPI; no forward jumps out of FPI; no jumps into
+ *     FPI from outside; no terminals inside FPI region.
+ * 11. FPI depth same for all ctrl paths. every path must have N FPass's
  *     and params must be passed in forward order.
- * 11. stack depth @FPush == depth @FCall.  No instr can pop past depth of
+ * 12. stack depth @FPush == depth @FCall.  No instr can pop past depth of
  *     FPush.
- * 12. State of each iterator variable known everywhere.
- * 13. initialized state of iterators correct for Iter* instructions.
+ * 13. State of each iterator variable known everywhere.
+ * 14. initialized state of iterators correct for Iter* instructions.
  * 17. Asserts not separated from following instruction by control flow
  * 18. Member instruction sequences are consistent and continuous
  * -- All region and branch offsets must refer to valid instruction starts.
@@ -87,10 +91,6 @@ bool checkUnit(const Unit*, ErrorMode mode = kStderr);
  * 3.  empty stack at try-region ends (but starts are checked).  And what
  *     does this mean? -- linear-end or flow-end?
  * 4.  eval stack must be empty in blocks that come before all preds.
- * 8.  each fpi starts with FPush* and ends with FCall; each FPush must be
- *     the first instr in exactly 1 fpi region; FPass* never outside FPI.
- * 9.  no back-jumps in FPI; no forward jumps out of FPI; no jumps into
- *     FPI from outside; no terminals inside FPI region.
  * -- FuncVar entries must refer to valid local ids; no local can have
  *    2+ names.
  * -- FuncStaticVar not checked

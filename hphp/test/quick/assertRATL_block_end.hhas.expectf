@@ -1,3 +1,2 @@
 Verification Error (unit %s func foo): AssertRATL cannot appear at the end of a block
 Verification failed for unit %s Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.
-int(42)

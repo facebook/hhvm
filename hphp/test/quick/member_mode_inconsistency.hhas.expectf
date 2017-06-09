@@ -4,6 +4,3 @@ Verification Error (unit %s func ): Member base register mode at Dim is Unset wh
 Verification Error (unit %s func ): Member base register mode at Dim is None when it should be Unset
 Verification Error (unit %s func ): Member base register mode at Dim is Define when it should be None
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.
-
-Warning: Creating default object from empty value in %s on line -1
-NULL

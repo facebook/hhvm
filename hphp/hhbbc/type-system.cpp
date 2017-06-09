@@ -3265,11 +3265,23 @@ Type array_newelem(const Type& arr, const Type& val) {
 }
 
 std::pair<Type,Type> iter_types(const Type& iterable) {
-  if (!iterable.subtypeOf(TArr)) {
+  // Optional types are okay here because a null will not set any locals.
+  if (!iterable.subtypeOfAny(TOptArr, TOptVec, TOptDict, TOptKeyset)) {
     return { TInitCell, TInitCell };
   }
-  if (!is_specialized_array(iterable)) {
-    return { TArrKey, TInitCell };
+
+  if (!is_specialized_array_like(iterable)) {
+    if (iterable.subtypeOf(TOptSVec))    return { TInt, TInitUnc };
+    if (iterable.subtypeOf(TOptSDict))   return { TUncArrKey, TInitUnc };
+    if (iterable.subtypeOf(TOptSKeyset)) return { TUncArrKey, TUncArrKey };
+    if (iterable.subtypeOf(TOptSArr))    return { TUncArrKey, TInitUnc };
+
+    if (iterable.subtypeOf(TOptVec))     return { TInt, TInitCell };
+    if (iterable.subtypeOf(TOptDict))    return { TArrKey, TInitCell };
+    if (iterable.subtypeOf(TOptKeyset))  return { TArrKey, TArrKey };
+    if (iterable.subtypeOf(TOptArr))     return { TArrKey, TInitCell };
+
+    always_assert(false);
   }
 
   // Note: we don't need to handle possible emptiness explicitly,
@@ -3278,10 +3290,6 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
 
   switch (iterable.m_dataTag) {
   case DataTag::None:
-    if (iterable.subtypeOf(TSArr)) {
-      return { TUncArrKey, TInitUnc };
-    }
-    return { TArrKey, TInitCell };
   case DataTag::Str:
   case DataTag::Obj:
   case DataTag::Int:

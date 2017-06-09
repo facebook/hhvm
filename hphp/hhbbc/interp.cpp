@@ -2362,7 +2362,7 @@ void in(ISS& env, const bc::IterInit& op) {
   // below.
   freeIter(env, op.iter1);
   env.propagate(op.target, env.state);
-  if (t1.subtypeOf(TArrE)) {
+  if (t1.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
     nothrow(env);
     jmp_nofallthrough(env);
     return;
@@ -2383,7 +2383,7 @@ void in(ISS& env, const bc::IterInitK& op) {
   auto const t1 = popC(env);
   freeIter(env, op.iter1);
   env.propagate(op.target, env.state);
-  if (t1.subtypeOf(TArrE)) {
+  if (t1.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
     nothrow(env);
     jmp_nofallthrough(env);
     return;

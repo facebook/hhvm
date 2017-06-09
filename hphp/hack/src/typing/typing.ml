@@ -4876,6 +4876,12 @@ and user_attribute env ua =
     T.ua_params = typed_ua_params;
   }
 
+and make_default_return name
+  = if snd name = SN.Members.__destruct
+    || snd name = SN.Members.__construct
+    then (Reason.Rwitness (fst name), Tprim Tvoid)
+    else (Reason.Rwitness (fst name), Tany)
+
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
@@ -4894,7 +4900,7 @@ and method_def env m =
     localize_where_constraints ~ety_env env m.m_where_constraints in
   let env = Env.set_local env this (Env.get_self env) in
   let env, ret = match m.m_ret with
-    | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
+    | None -> env, make_default_return m.m_name
     | Some ret ->
       let ret = TI.instantiable_hint env ret in
       (* If a 'this' type appears it needs to be compatiable with the
@@ -4922,14 +4928,17 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env ret (fst m.m_name) nb m.m_fun_kind in
   let env =
     List.fold_left (Env.get_todo env) ~f:(fun env f -> f env) ~init:env in
-  (match m.m_ret with
-    | None when Env.is_strict env && snd m.m_name <> SN.Members.__destruct ->
-      (* if we are in strict mode, the only case where we don't want to enforce
-       * a return type is when the method is a destructor
-       *)
-      suggest_return env (fst m.m_name) ret
+  let m_ret =
+    match m.m_ret with
+    | None when
+         snd m.m_name = SN.Members.__destruct
+      || snd m.m_name = SN.Members.__construct ->
+      Some (fst m.m_name, Happly((fst m.m_name, "void"), []))
+    | None when Env.is_strict env ->
+      suggest_return env (fst m.m_name) ret; None
     | None
-    | Some _ -> ());
+    | Some _ -> m.m_ret in
+  let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;
   {
     T.m_final = m.m_final;

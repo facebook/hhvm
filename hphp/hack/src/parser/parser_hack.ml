@@ -1843,8 +1843,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
 
 and method_implicit_return env (pos, name) ret =
   match name, ret with
-  | ("__construct" | "__destruct"), None ->
-      Some (pos, Happly((pos, "void"), []))
+  | ("__construct" | "__destruct"), None -> ret
   | _, Some (_, Happly ((_, "void"), [])) -> ret
   | "__construct", Some _ ->
       error_at env pos "Constructor return type must be void or elided.";

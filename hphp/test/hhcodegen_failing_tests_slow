@@ -464,7 +464,6 @@ slow/hhbbc/static_props_011.php
 slow/hhbbc/static_props_018.php
 slow/hhbbc/trait_generator_closure_002.php
 slow/hint/2187.php
-slow/hni/coerce_dtor_order.php
 slow/if_statement/else-if-greedy-parse.php
 slow/include/hashbang.php
 slow/include_empty_files.php

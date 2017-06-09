@@ -499,7 +499,6 @@ type fun_hdr =
   ; fh_parameters      : fun_param list
   ; fh_return_type     : hint option
   ; fh_param_modifiers : fun_param list
-  ; fh_keep_noop       : bool
   ; fh_ret_by_ref      : bool
   }
 
@@ -510,7 +509,6 @@ let empty_fun_hdr =
   ; fh_parameters      = []
   ; fh_return_type     = None
   ; fh_param_modifiers = []
-  ; fh_keep_noop       = false
   ; fh_ret_by_ref      = false
   }
 
@@ -1242,16 +1240,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
     ; function_type
     ; _ } ->
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
-      let fh_return_type, fh_keep_noop =
-        match mpOptional pHint function_type env with
-        | Some x -> Some x, false
-        | None ->
-            let pos = get_pos function_type in
-            match text function_name with
-            | "__construct"
-            | "__destruct" -> Some (pos, Happly ((pos, "void"), [])), true
-            | _            -> None, false
-      in
+      let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
         mk_suspension_kind function_async function_coroutine in
       { fh_suspension_kind
@@ -1261,7 +1250,6 @@ and pFunHdr : fun_hdr parser = fun node env ->
       ; fh_return_type
       ; fh_param_modifiers =
         List.filter (fun p -> Option.is_some p.param_modifier) fh_parameters
-      ; fh_keep_noop
       ; fh_ret_by_ref      = is_ret_by_ref function_ampersand
       }
   | LambdaSignature { lambda_parameters; lambda_type; _ } ->

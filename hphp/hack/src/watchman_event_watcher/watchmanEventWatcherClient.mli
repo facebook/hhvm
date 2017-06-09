@@ -24,11 +24,15 @@ type t
  * Initiates a client.
  *
  * Connects to the Watcher that's watching the repo at this path.
+ *
+ * If a connection cannot be made to a Watcher, returns None.
  *)
 val init : Path.t -> t option
 
 (**
  * Non-blocking poll on the connection - returns true if the Watcher reports
  * settled state, or we have previously already read the settled message.
+ *
+ * If Watchman Event Watcher connection fails, None is returned.
  *)
-val is_settled : t -> bool
+val get_status : t -> WatchmanEventWatcherConfig.Responses.t option

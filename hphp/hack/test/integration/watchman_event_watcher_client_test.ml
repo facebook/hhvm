@@ -2,12 +2,21 @@ module Args = Test_harness_common_args
 module WEW = WatchmanEventWatcher
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
-
-module BA = Asserter.Bool_asserter
+module Responses = WEWConfig.Responses
 
 exception Process_failed
 exception Init_watcher_client_failed
+exception Watcher_connection_disconnected
 exception Retries_exhausted of string
+
+module Response_comparator = struct
+  type t = WEWConfig.Responses.t
+  let to_string = WEWConfig.Responses.to_string
+  let is_equal x y =
+    x = y
+end
+
+module RA = Asserter.Make_asserter(Response_comparator)
 
 let assert_process_completes_ok ?(timeout=30) ~msg p =
   match Process.read_and_wait_pid ~timeout p with
@@ -74,11 +83,15 @@ let rec poll_client_until_settled ?(retries=10) client =
   if retries < 0 then
     raise (Retries_exhausted "poll_client_until_settled")
   else
-    if WEWClient.is_settled client then
-      ()
-    else
+    match WEWClient.get_status client with
+    | None ->
+      raise Watcher_connection_disconnected
+    | Some Responses.Unknown
+    | Some Responses.Mid_update ->
       let () = Sys_utils.sleep 1.0 in
       poll_client_until_settled ~retries:(retries - 1) client
+    | Some Responses.Settled ->
+      ()
 
 let test_no_socket_file harness =
   let repo = harness.Test_harness.repo_dir in
@@ -107,11 +120,11 @@ let test_watcher_unknown_then_settled harness =
   hg_commit ~add_remove:true ~msg:"Add abcde" repo;
   WEW.spawn_daemon repo;
   let client = init_watcher_client ~retries:10 repo in
-  let settled = WEWClient.is_settled client in
-  BA.assert_equals false settled
+  let status = WEWClient.get_status client in
+  RA.assert_option_equals (Some Responses.Unknown) status
     "Should not be settled when watcher first starts";
-  let settled = WEWClient.is_settled client in
-  BA.assert_equals false settled
+  let status = WEWClient.get_status client in
+  RA.assert_option_equals (Some Responses.Unknown) status
     "Checking again, should still not be settled";
   hg_update ~dest:".~1" repo;
   poll_client_until_settled client;

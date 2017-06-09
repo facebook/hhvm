@@ -16,12 +16,24 @@
  *)
 
 module Config = WatchmanEventWatcherConfig
+module Responses = WatchmanEventWatcherConfig.Responses
 
+(**
+ * We track the last known state of the Watcher so we can return a response
+ * in get_status even when there's nothing to be read from the reader.
+ *
+ * This let's us differentiate between "The Watcher connection has gone down"
+ * (returning None) and "The Watcher has nothing to tell us right now"
+ * (returning the last known state).
+ *)
 type state =
-  | Unsettled of Buffered_line_reader.t
+  | Unknown of Buffered_line_reader.t
+  | Mid_update of Buffered_line_reader.t
   (** Settled message has been read. No further reads from
    * the File Descriptor are done (the FD is actually dropped entirely). *)
   | Settled
+  (** Connection to the Watcher has failed. Cannot read further updates. *)
+  | Failed
 
 type t = {
   state : state ref;
@@ -51,7 +63,7 @@ let init root =
     let reader = Buffered_line_reader.create
       @@ Timeout.descr_of_in_channel @@ tic in
     Some {
-      state = ref @@ Unsettled reader;
+      state = ref @@ Unknown reader;
       root;
     }
   with
@@ -62,20 +74,37 @@ let init root =
   | Timeout.Timeout ->
     None
 
-let is_settled instance =
+let get_status instance =
   match !(instance.state) with
+  | Failed ->
+    None
   | Settled ->
-    true
-  | Unsettled reader ->
-    if Buffered_line_reader.is_readable reader then
-      let result = Buffered_line_reader.get_next_line ~approx_size:25 reader in
-      let settled = String.equal result Config.settled_str in
-      if settled then
-        let () = instance.state := Settled in
-        let () = ignore_unix_error
-          Unix.close @@ ((Buffered_line_reader.get_fd reader)) in
-        true
-      else
-        false
-    else
-      false
+    Some Responses.Settled
+  | Mid_update reader
+  | Unknown reader when Buffered_line_reader.is_readable reader ->
+    begin try
+      let msg = Buffered_line_reader.get_next_line ~approx_size:25 reader in
+      let msg = Responses.of_string msg in
+      let response = begin match msg with
+      | Responses.Unknown ->
+        Responses.Unknown
+      | Responses.Mid_update ->
+        instance.state := Mid_update reader;
+        Responses.Mid_update
+      | Responses.Settled ->
+        instance.state := Settled;
+        ignore_unix_error
+          Unix.close @@ (Buffered_line_reader.get_fd reader);
+        Responses.Settled
+      end in
+      Some response
+    with
+    | Unix.Unix_error (Unix.EPIPE, _, _)
+    | End_of_file ->
+      instance.state := Failed;
+      None
+    end
+  | Mid_update _ ->
+    Some Responses.Mid_update
+  | Unknown _ ->
+    Some Responses.Unknown

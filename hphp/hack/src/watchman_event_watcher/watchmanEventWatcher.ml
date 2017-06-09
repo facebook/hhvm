@@ -74,44 +74,22 @@ open Core
 
 module J = Hh_json_helpers
 module Config = WatchmanEventWatcherConfig
+module Responses = Config.Responses
 
 let ignore_unix_epipe f x =
   try f x with
   | Unix.Unix_error (Unix.EPIPE, _, _) ->
     ()
 
-module Responses = struct
-
-  exception Invalid_response
-
-  type t =
-    | Unknown
-    | Mid_update
-    | Settled
-
-  let to_string = function
-    | Unknown -> Config.unknown_str
-    | Mid_update -> Config.mid_update_str
-    | Settled -> Config.settled_str
-
-  let of_string s = match s with
-    | str when String.equal str Config.unknown_str -> Unknown
-    | str when String.equal str Config.mid_update_str -> Mid_update
-    | str when String.equal str Config.settled_str -> Settled
-    | _ -> raise Invalid_response
-
-  let send_to_fd v fd =
-    let str = Printf.sprintf "%s\n" (to_string v) in
-    let bytes = Unix.single_write fd str 0 (String.length str) in
-    if bytes = (String.length str) then
-      ()
-    else
-      (** We're only writing a few bytes. Not sure what to do here.
-       * Retry later when the pipe has been pumped? *)
-      Hh_logger.log "Failed to write all bytes"
-
-end
-
+let send_to_fd v fd =
+  let str = Printf.sprintf "%s\n" (Responses.to_string v) in
+  let bytes = Unix.single_write fd str 0 (String.length str) in
+  if bytes = (String.length str) then
+    ()
+  else
+    (** We're only writing a few bytes. Not sure what to do here.
+     * Retry later when the pipe has been pumped? *)
+    Hh_logger.log "Failed to write all bytes"
 
 type state =
   | Unknown
@@ -143,7 +121,7 @@ type daemon_init_result =
 let process_changes changes env =
   let notify_client client =
     (** Notify the client that the repo has settled. *)
-      ignore_unix_epipe (Responses.send_to_fd Responses.Settled) client;
+      ignore_unix_epipe (send_to_fd Responses.Settled) client;
       Unix.close client
   in
   let notify_waiting_clients env =
@@ -213,13 +191,13 @@ let process_client_ env client =
    * clients instead of adding them to the waiting_clients queue. *)
   (match env.state with
   | Unknown ->
-    Responses.send_to_fd Responses.Unknown client;
+    send_to_fd Responses.Unknown client;
     Queue.add client env.waiting_clients
   | Entering_to _ ->
-    Responses.send_to_fd Responses.Mid_update client;
+    send_to_fd Responses.Mid_update client;
     Queue.add client env.waiting_clients
   | Left_at _ ->
-    Responses.send_to_fd Responses.Settled client;
+    send_to_fd Responses.Settled client;
     Unix.shutdown client Unix.SHUTDOWN_ALL;
     Unix.close client);
   env

@@ -121,7 +121,6 @@ slow/compilation/1322.php
 slow/compilation/aliased-namespaces.php
 slow/compilation/closure_static.php
 slow/compilation/dynamic_sprop.php
-slow/compilation/lval-pipe.php
 slow/compilation/refine_closure_crash.php
 slow/compilation/store-elim.php
 slow/compilation/switch-default-multiple.php

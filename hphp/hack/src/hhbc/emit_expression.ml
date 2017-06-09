@@ -1028,7 +1028,7 @@ and emit_collection ?(transform_to_collection) env expr es =
     emit_dynamic_collection ~transform_to_collection env expr es
 
 and emit_pipe env e1 e2 =
-  stash_in_local env e1
+  stash_in_local ~always_stash:true env e1
   begin fun temp _break_label ->
   let env = Emit_env.with_pipe_var temp env in
   emit_expr ~need_ref:false env e2
@@ -2168,10 +2168,10 @@ and emit_exprs env exprs =
  *  break_label:
  *    push `temp` on stack if `leave_on_stack` is true.
  *)
-and stash_in_local ?(leave_on_stack=false) env e f =
+and stash_in_local ?(always_stash=false) ?(leave_on_stack=false) env e f =
   let break_label = Label.next_regular () in
   match e with
-  | (_, A.Lvar (_, id)) when not (is_local_this env id) ->
+  | (_, A.Lvar (_, id)) when not always_stash && not (is_local_this env id) ->
     gather [
       f (get_local env id) break_label;
       instr_label break_label;

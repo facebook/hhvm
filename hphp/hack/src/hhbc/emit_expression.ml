@@ -744,6 +744,13 @@ and emit_xhp_obj_get env e s nullflavor =
   let fn = p, A.Call (fn_name, [p, A.String (p, SU.Xhp.clean s)], []) in
   emit_call_expr ~need_ref:false env fn
 
+and emit_get_class_no_args () =
+  gather [
+    instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "get_class");
+    instr_fcall 0;
+    instr_unboxr
+  ]
+
 and emit_class_alias es =
   let c1, c2 = match es with
     | (_, A.String (_, c1)) :: (_, A.String (_, c2)) :: _ -> c1, c2
@@ -819,6 +826,8 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_eval env expr
   | A.Call ((_, A.Id (_, "class_alias")), es, _) ->
     emit_box_if_necessary need_ref @@ emit_class_alias es
+  | A.Call ((_, A.Id (_, "get_class")), [], _) ->
+    emit_box_if_necessary need_ref @@ emit_get_class_no_args ()
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs

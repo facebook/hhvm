@@ -193,18 +193,25 @@ let make_closure ~explicit_use ~class_num
               f_name = (p, string_of_int class_num) } in
   inline_fundef, cd
 
+let inline_class_name_if_possible env ~fallback_to_empty_string p pe =
+  let make_get_class_call () = p, Call ((pe, Id (pe, "get_class")), [], [])
+  in
+  match Scope.get_class env.scope with
+  | Some c ->
+    if c.c_kind = Ctrait then make_get_class_call ()
+    else p, String (pe, strip_id c.c_name)
+  | None ->
+    if fallback_to_empty_string then p, String (pe, "")
+    else make_get_class_call ()
+
 (* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
  * literal strings. It's necessary to do this before closure conversion
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let return newstr = (p, String (pid, newstr)) in
-  let get_class_name () =
-    match Scope.get_class env.scope with
-    | None -> ""
-    | Some cd -> strip_id cd.c_name in
   match str with
   | "__CLASS__" ->
-    return (get_class_name ())
+    inline_class_name_if_possible ~fallback_to_empty_string:true env p pid
   | "__METHOD__" ->
     let prefix =
       match Scope.get_class env.scope with
@@ -254,6 +261,8 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e1 = convert_expr env st e1 in
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
+  | Call ((_, Id (pe, "get_class")), [], []) ->
+    st, inline_class_name_if_possible ~fallback_to_empty_string:false env p pe
   | Call (e, el1, el2) ->
     let st, e = convert_expr env st e in
     let st, el1 = convert_exprs env st el1 in

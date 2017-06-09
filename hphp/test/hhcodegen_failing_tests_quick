@@ -16,8 +16,6 @@ quick/call_nonstatic_this.php
 quick/class_constant.php
 quick/class_constants.php
 quick/class_interface_trait_exists.php
-quick/closure_class.php
-quick/closure_get_class.php
 quick/closure_recursive.php
 quick/closure_recursive_bad.php
 quick/closure_static.php
@@ -77,7 +75,6 @@ quick/func_slice_args.php
 quick/function-static-init.php
 quick/function_varargs.php
 quick/generator_varargs.php
-quick/get_class.php
 quick/get_class_methods2.php
 quick/hh_async_closure_return_type_0.php
 quick/hh_async_closure_return_type_1.php
@@ -171,7 +168,6 @@ quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
 quick/pcre-crash.php
 quick/post_try_error.php
-quick/profile/setprofile-this.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/reassign_this1.php

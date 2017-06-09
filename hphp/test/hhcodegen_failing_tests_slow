@@ -374,8 +374,6 @@ slow/function/ternary-default.php
 slow/function_no_param_modifier.php
 slow/general_functions/mkdir-recursive-file-exists.php
 slow/general_functions/mkdir-recursive.php
-slow/get_class/1455.php
-slow/get_class/1456.php
 slow/global_vars/global_vars.php
 slow/goto/1914.php
 slow/goto/1915.php
@@ -927,7 +925,6 @@ slow/traits/2025.php
 slow/traits/2027.php
 slow/traits/2028.php
 slow/traits/2029.php
-slow/traits/2030.php
 slow/traits/2031.php
 slow/traits/2032.php
 slow/traits/2033.php
@@ -947,14 +944,11 @@ slow/traits/2055.php
 slow/traits/2063.php
 slow/traits/2070.php
 slow/traits/2073.php
-slow/traits/2076.php
 slow/traits/2080.php
 slow/traits/2082.php
 slow/traits/2083.php
 slow/traits/2084.php
-slow/traits/2086.php
 slow/traits/2107.php
-slow/traits/2112.php
 slow/traits/__class__.php
 slow/traits/abstract-final-override.php
 slow/traits/duplicate_require.php

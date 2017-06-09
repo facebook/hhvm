@@ -255,10 +255,10 @@ void TestServer::KillServer() {
 struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport* transport) override {
     // do nothing
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport* transport) override {
     // do nothing
   }
 };

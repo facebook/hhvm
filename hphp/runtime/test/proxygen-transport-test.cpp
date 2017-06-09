@@ -50,7 +50,7 @@ struct MockProxygenServer : ProxygenServer {
   MOCK_METHOD1(onRequestError, void(Transport*));
 
   MOCK_METHOD1(onRequest, void(std::shared_ptr<ProxygenTransport>));
-  virtual void putResponseMessage(ResponseMessage&& message) {
+  void putResponseMessage(ResponseMessage&& message) override {
     m_messageQueue.emplace_back(std::move(message));
   }
 

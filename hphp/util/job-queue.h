@@ -371,7 +371,7 @@ struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
                                 healthStatus) {
     pthread_cond_init(&m_cond, nullptr);
   }
-  ~JobQueue() {
+  ~JobQueue() override {
     pthread_cond_destroy(&m_cond);
   }
   void waitEmpty() {
@@ -538,7 +538,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
 
   int32_t dispatcher_id = 0;
 
-  ~JobQueueDispatcher() {
+  ~JobQueueDispatcher() override {
     stop();
     for (auto func : m_funcs) delete func;
     for (auto worker : m_workers) delete worker;

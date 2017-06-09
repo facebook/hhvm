@@ -38,7 +38,7 @@ struct PlainFile : File {
                      bool nonblocking = false,
                      const String& wrapper = null_string,
                      const String& stream_type = null_string);
-  virtual ~PlainFile();
+  ~PlainFile() override;
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -77,7 +77,7 @@ protected:
 struct BuiltinFile : PlainFile {
   explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
   explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
-  virtual ~BuiltinFile();
+  ~BuiltinFile() override;
   bool close() override;
   void sweep() override;
 };

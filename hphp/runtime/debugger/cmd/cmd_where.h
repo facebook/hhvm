@@ -27,16 +27,16 @@ struct CmdWhere : DebuggerCommand {
   CmdWhere() : DebuggerCommand(KindOfWhere) {}
   explicit CmdWhere(Type type) : DebuggerCommand(type) {}
 
-  virtual void help(DebuggerClient &client);
+  void help(DebuggerClient& client) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy& proxy) override;
+  void onClient(DebuggerClient& client) override;
 
   Array fetchStackTrace(DebuggerClient &client); // client side
 
 protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+ void sendImpl(DebuggerThriftBuffer& thrift) override;
+ void recvImpl(DebuggerThriftBuffer& thrift) override;
 
 private:
   req::root<Array> m_stacktrace;

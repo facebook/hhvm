@@ -55,7 +55,7 @@ struct PlainDirectory : Directory {
 
   explicit PlainDirectory(const String& path);
   explicit PlainDirectory(int fd);
-  ~PlainDirectory();
+  ~PlainDirectory() override;
 
   void close() override;
   Variant read() override;

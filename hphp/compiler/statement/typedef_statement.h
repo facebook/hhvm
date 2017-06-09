@@ -33,7 +33,7 @@ struct TypedefStatement : Statement, IParseHandler {
                             const std::string& name,
                             const ExpressionListPtr& attrList,
                             const TypeAnnotationPtr& typeAnnotation);
-  ~TypedefStatement();
+  ~TypedefStatement() override;
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 

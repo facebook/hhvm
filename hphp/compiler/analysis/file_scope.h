@@ -67,7 +67,9 @@ struct FileScope : BlockScope, FunctionContainer,
 
 public:
   FileScope(const std::string &fileName, int fileSize, const MD5 &md5);
-  ~FileScope() { delete m_redeclaredFunctions; }
+  ~FileScope() override {
+    delete m_redeclaredFunctions;
+  }
   int getSize() const { return m_size;}
 
   const std::string &getName() const { return m_fileName;}
@@ -87,7 +89,7 @@ public:
   void setAttribute(Attribute attr);
   int popAttribute();
 
-  void serialize(JSON::DocTarget::OutputStream &out) const;
+  void serialize(JSON::DocTarget::OutputStream& out) const override;
 
   /**
    * Whether this file has top level non-declaration statements that

@@ -191,21 +191,28 @@ public:
                        const std::string& stopChar);
   };
   struct SectionParserCallback : ParserCallback {
-    virtual void onSection(const std::string &name, void *arg);
-    virtual void onLabel(const std::string &name, void *arg);
-    virtual void onEntry(const std::string &key, const std::string &value,
-                         void *arg);
-    virtual void onPopEntry(const std::string &key, const std::string &value,
-                            const std::string &offset, void *arg);
-  private:
+    void onSection(const std::string& name, void* arg) override;
+    void onLabel(const std::string& name, void* arg) override;
+    void onEntry(const std::string& key, const std::string& value, void* arg)
+        override;
+    void onPopEntry(
+        const std::string& key,
+        const std::string& value,
+        const std::string& offset,
+        void* arg) override;
+
+   private:
     Variant* activeArray(CallbackData* data);
   };
   struct SystemParserCallback : ParserCallback {
-    virtual void onEntry(const std::string &key, const std::string &value,
-                         void *arg);
-    virtual void onPopEntry(const std::string &key, const std::string &value,
-                            const std::string &offset, void *arg);
-    virtual void onConstant(std::string &result, const std::string &name);
+    void onEntry(const std::string& key, const std::string& value, void* arg)
+        override;
+    void onPopEntry(
+        const std::string& key,
+        const std::string& value,
+        const std::string& offset,
+        void* arg) override;
+    void onConstant(std::string& result, const std::string& name) override;
   };
 
   enum Mode {

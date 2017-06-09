@@ -113,7 +113,7 @@ struct AnalysisResult : BlockScope, FunctionContainer {
 
 public:
   AnalysisResult();
-  ~AnalysisResult();
+  ~AnalysisResult() override;
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}

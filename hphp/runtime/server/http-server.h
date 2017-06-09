@@ -43,7 +43,7 @@ private:
 
 public:
   explicit HttpServer();
-  ~HttpServer();
+  ~HttpServer() override;
 
   /*
    * Try to run the various servers that this class controls.

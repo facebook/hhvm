@@ -213,12 +213,12 @@ struct TickWorker
   , Tickable
 {
   TickWorker() : m_ticks(0) {}
-  virtual ~TickWorker() {}
+  ~TickWorker() override {}
 
-  virtual void onThreadEnter() {
+  void onThreadEnter() override {
     m_context->registerTickable(this);
   }
-  virtual void doJob(TickRequestPtr job) {
+  void doJob(TickRequestPtr job) override {
     job->setState(TickRequest::State::PROCESSING);
     std::unique_lock<std::mutex> lk(m_mutex);
     m_job = job;
@@ -227,10 +227,10 @@ struct TickWorker
     m_job->setState(TickRequest::State::COMPLETED);
     m_job.reset();
   }
-  virtual void abortJob(TickRequestPtr job) {
+  void abortJob(TickRequestPtr job) override {
     m_job->setState(TickRequest::State::ABORTED);
   }
-  virtual void tick() {
+  void tick() override {
     std::lock_guard<std::mutex> lk(m_mutex);
     ++m_ticks;
     if (!m_job) {
@@ -260,7 +260,7 @@ struct JobQueueStatsCollector : Tickable {
         m_maxQueued(0) {
   }
 
-  void tick() {
+  void tick() override {
     m_maxQueued = std::max(m_maxQueued, m_dispatcher->getQueuedJobs());
     m_maxLoad = std::max(m_maxLoad, m_dispatcher->getActiveWorker());
   }
@@ -272,8 +272,7 @@ struct JobQueueStatsCollector : Tickable {
 
 struct JobQueueTest : testing::Test {
  protected:
-
-  virtual void SetUp() {
+  void SetUp() override {
     m_clock.reset(new TickingClock());
     m_dispatcher.reset(
       new JobQueueDispatcher<TickWorker>(180, 0, true, m_clock.get()));

@@ -284,7 +284,7 @@ struct MySQLResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLResult);
 
   explicit MySQLResult(MYSQL_RES *res, bool localized = false);
-  virtual ~MySQLResult();
+  ~MySQLResult() override;
 
   CLASSNAME_IS("mysql result")
   // overriding ResourceData
@@ -385,7 +385,7 @@ struct MySQLStmt : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
 
   explicit MySQLStmt(MYSQL *mysql);
-  virtual ~MySQLStmt();
+  ~MySQLStmt() override;
 
   CLASSNAME_IS("mysql stmt")
 

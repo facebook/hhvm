@@ -164,8 +164,7 @@ private:
 };
 
 struct PageletServerTaskEvent final : AsioExternalThreadEvent {
-
-  ~PageletServerTaskEvent() {
+  ~PageletServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
   }
 
@@ -179,33 +178,32 @@ struct PageletServerTaskEvent final : AsioExternalThreadEvent {
   }
 
 protected:
+ void unserialize(Cell& result) final {
+   // Main string responses from pagelet thread.
+   Array responses = Array::Create();
 
-  void unserialize(Cell& result) override final {
-    // Main string responses from pagelet thread.
-    Array responses = Array::Create();
+   // Create an event for the next results that might be used.
+   PageletServerTaskEvent* event = new PageletServerTaskEvent();
 
-    // Create an event for the next results that might be used.
-    PageletServerTaskEvent *event = new PageletServerTaskEvent();
+   int code = 0;
+   // Fetch all results from the transport that are currently available.
+   bool done = m_job->getResults(responses, code, event);
 
-    int code = 0;
-    // Fetch all results from the transport that are currently available.
-    bool done = m_job->getResults(responses, code, event);
+   // Returned tuple/array.
+   Array ret = Array::Create();
+   ret.append(responses);
 
-    // Returned tuple/array.
-    Array ret = Array::Create();
-    ret.append(responses);
+   if (done) {
+     // If the whole thing is done, then we don't need a next event.
+     event->abandon();
+     ret.append(init_null_variant);
+   } else {
+     // The event was added to the job to be triggered next.
+     ret.append(Variant{event->getWaitHandle()});
+   }
+   ret.append(Variant{code});
 
-    if (done) {
-      // If the whole thing is done, then we don't need a next event.
-      event->abandon();
-      ret.append(init_null_variant);
-    } else {
-      // The event was added to the job to be triggered next.
-      ret.append(Variant{event->getWaitHandle()});
-    }
-    ret.append(Variant{code});
-
-    cellDup(*(Variant(ret)).asCell(), result);
+   cellDup(*(Variant(ret)).asCell(), result);
   }
 
 private:

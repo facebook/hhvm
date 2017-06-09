@@ -127,54 +127,54 @@ let make_label_try_maps prog =
    A fault handler can certainly have a catch handler as parent
    but I don't think catch handlers actually need parents...
 *)
+let rec first_fault_handler l = match l with
+ | [] -> None
+ | Fault_handler n :: _rest -> Some (Fault_handler n)
+ | Catch_handler _ :: rest -> first_fault_handler rest
 
 let make_exntable prog labelmap trymap =
  let rec loop p n trycatchstack exnmap parents =
   match p with
   | [] -> (exnmap,parents)
-  | i::is -> (match i with
-    | ITry (TryCatchLegacyBegin l)
-    | ITry (TryFaultBegin l) ->
-     let nl = LabelMap.find l labelmap in
-     let emv = match l with
-      | Label.Catch _ -> Catch_handler nl
-      | Label.Fault _ -> Fault_handler nl
-      | _ -> raise Labelexn in
-       (match trycatchstack with
-         | [] -> loop is (n+1) (emv :: trycatchstack) exnmap parents
-         | (Fault_handler _n2 | Catch_handler _n2 as h2) :: _hs ->
-            loop is (n+1) (emv :: trycatchstack)
-            (IMap.add n h2 exnmap)
-            (IMap.add nl h2 parents))
-              (* parent of l is l2 ONLY FOR FAULTS ?? *)
-     | ITry TryCatchBegin ->
+  | i::is ->
+    let newexnmap = match trycatchstack with
+                     | [] -> exnmap
+                     | (h::_) -> IMap.add n h exnmap in
+   (match i with
+    | ITry (TryCatchLegacyBegin (Label.Catch _ as l)) ->
+       let nl = LabelMap.find l labelmap in
+       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap parents
+
+    | ITry (TryCatchLegacyBegin _) -> raise Labelexn
+
+    | ITry (TryFaultBegin (Label.Fault _ as l)) ->
+       let nl = LabelMap.find l labelmap in
+       let newparents = match first_fault_handler trycatchstack with
+         | None -> parents
+         | Some fh -> IMap.add nl fh parents in
+       loop is (n+1) (Fault_handler nl :: trycatchstack) newexnmap newparents
+
+    | ITry (TryFaultBegin _) -> raise Labelexn
+
+    | ITry TryCatchBegin ->
        let nl = IMap.find n trymap in (* find corresponding middle *)
-       let emv = Catch_handler nl in
+       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap parents
+
+    | ITry TryCatchMiddle ->
         (match trycatchstack with
-          | [] -> loop is (n+1) (emv :: trycatchstack) exnmap parents
-          | (Fault_handler _n2 | Catch_handler _n2 as h2) :: _hs ->
-             loop is (n+1) (emv :: trycatchstack)
-             (IMap.add n h2 exnmap)
-             (IMap.add nl h2 parents))
-               (* parent of l is l2 I SUSPECT THIS IS UNNECESSARY *)
-      | ITry TryCatchMiddle ->
-        (match trycatchstack with
-          | Catch_handler _ :: rest -> loop is (n+1) rest exnmap parents
+          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap parents
           | _ -> raise Labelexn)
-      | ITry TryFaultEnd ->
+
+    | ITry TryFaultEnd ->
         (match trycatchstack with
-          | Fault_handler _ :: rest -> loop is (n+1) rest exnmap parents
+          | Fault_handler _ :: rest -> loop is (n+1) rest newexnmap parents
           | _ -> raise Labelexn)
-      | ITry TryCatchLegacyEnd ->
-       (match trycatchstack with
-         | Catch_handler _ :: rest -> loop is (n+1) rest exnmap parents
-         | _ -> raise Labelexn
-       )
-     | _ -> (match trycatchstack with
-             | [] -> loop is (n+1) trycatchstack exnmap parents
-             | h :: _hs ->
-              loop is (n+1) trycatchstack (IMap.add n h exnmap) parents)
-          )
+
+    | ITry TryCatchLegacyEnd ->
+        (match trycatchstack with
+          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap parents
+          | _ -> raise Labelexn)
+   | _ -> loop is (n+1) trycatchstack newexnmap parents)
    in loop prog 0 [] IMap.empty IMap.empty
 
 (* Moving string functions into rhl so that I can use them in debugging *)
@@ -570,20 +570,20 @@ let equiv prog prog' startlabelpairs =
             I'm only dealing with the matching case
             *)
             (match hs_of_pc pc, hs_of_pc pc' with
-               | [],[] -> try_specials () (* unwind not in handler! *)
-               | ((Fault_handler h | Catch_handler h) ::hs),
-                 ((Fault_handler h' | Catch_handler h') ::hs') ->
-                 let leftside = match IMap.get h exnparents with
+               | [],[] -> try_specials () (* unwind not in handler! should be hard failure? *)
+               | (Fault_handler h ::hs),
+                 (Fault_handler h' ::hs') ->
+                 let newstack = match IMap.get h exnparents with
                    | None -> hs
                    | Some h2 -> h2::hs in
-                 let rightside = match IMap.get h' exnparents' with
+                 let newstack' = match IMap.get h' exnparents' with
                    | None -> hs'
                    | Some h2' -> h2'::hs' in
-                 (match leftside, rightside with
+                 (match newstack, newstack' with
                    | [],[] -> donext assumed todo (* both jump out*)
                    | (hh::_), (hh'::_) ->
-                     check (leftside, ip_of_emv hh)
-                           (rightside,ip_of_emv hh')
+                     check (newstack, ip_of_emv hh)
+                           (newstack',ip_of_emv hh')
                            asn
                            (add_assumption (pc,pc') asn assumed)
                            todo

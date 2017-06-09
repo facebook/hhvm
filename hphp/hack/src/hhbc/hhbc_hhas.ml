@@ -508,6 +508,7 @@ let string_of_misc instruction =
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
+    | VerifyRetTypeV -> "VerifyRetTypeV"
     | Catch -> "Catch"
     | CheckThis -> "CheckThis"
     | IsUninit -> "IsUninit"

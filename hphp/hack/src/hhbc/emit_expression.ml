@@ -908,7 +908,17 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
   in
   let is_array = match snd expr with A.Array _ -> true | _ -> false in
   let count = List.length es in
-  if is_only_values && transform_to_collection = None && not has_references
+  let stack_limit =
+    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
+  in
+  let is_php_array =
+    transform_to_collection = None
+    && match snd expr with | A.Array _ -> true | _ -> false
+  in
+  if is_only_values
+     && transform_to_collection = None
+     && not has_references
+     && (not is_php_array || count <= stack_limit)
   then begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewPackedArray count
@@ -925,7 +935,10 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
           | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
     ]
-  end else if are_all_keys_strings && is_array && not has_references then begin
+  end else if are_all_keys_strings
+              && is_array
+              && not has_references
+  then begin
     let es =
       List.map es
         ~f:(function
@@ -939,8 +952,10 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
     ]
   end else begin
     let lit_constructor = match snd expr with
+      | A.Array _ when is_only_values && count > stack_limit -> NewArray count
       | A.Array _ -> NewMixedArray count
-      | A.Collection ((_, ("dict" | "Set" | "ImmSet" | "Map" | "ImmMap")), _) ->
+      | A.Collection ((_, ("dict" | "Set" | "ImmSet" | "Map" | "ImmMap"
+                  | "HH\\Set" | "HH\\ImmSet" | "HH\\Map" | "HH\\Immmap")), _) ->
         NewDictArray count
       | _ -> failwith "emit_dynamic_collection: unexpected expression"
     in
@@ -962,6 +977,7 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
   end
 
 and emit_named_collection env expr pos name fields =
+  let name = SU.strip_ns name in
   match name with
   | "dict" | "vec" | "keyset" -> emit_collection env expr fields
   | "Vector" | "ImmVector" ->
@@ -1121,6 +1137,11 @@ and emit_quiet_expr env (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (_, x) when not (is_local_this env x) ->
     instr_cgetquietl (get_local env x)
+  | A.Lvarvar (n, id) ->
+    gather [
+      emit_lvarvar ~need_ref:false (n-1) id;
+      instr_cgetquietn;
+    ]
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;

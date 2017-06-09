@@ -103,6 +103,7 @@ let instr_vgetl local = instr (IGet (VGetL local))
 let instr_vgetn = instr (IGet VGetN)
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
+let instr_cgetquietn = instr (IGet CGetQuietN)
 let instr_cgetn_seq n = gather @@ List.replicate ~num:n instr_cgetn
 let instr_bindn = instr (IMutator BindN)
 let instr_bindl local = instr (IMutator (BindL local))

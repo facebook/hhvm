@@ -2,7 +2,6 @@ slow/anon_class/anon_1.php
 slow/anon_class/extend_local.php
 slow/arithmetic/addo-member-key.php
 slow/arithmetic/edge_cases.php
-slow/arithmetic/power-grid.php
 slow/array/empty.php
 slow/array_access/436.php
 slow/array_cse/543.php
@@ -51,8 +50,6 @@ slow/break_statement/badexp.php
 slow/break_statement/zero.php
 slow/bug-5127251.php
 slow/call_static/maybe_has_this.php
-slow/cget_quiet.php
-slow/chr-invalid-type.php
 slow/class_constant/1608.php
 slow/class_constant/1618.php
 slow/class_constant/1619.php
@@ -106,8 +103,6 @@ slow/collection_classes/invalid-initializers.php
 slow/collection_classes/iterator-clone-bug.php
 slow/collection_classes/map-buffer-sharing.php
 slow/collection_classes/migration/unserialize-map.php
-slow/collection_classes/preg-replace.php
-slow/collection_classes/set-addall-bug.php
 slow/compilation/1237.php
 slow/compilation/1238.php
 slow/compilation/1247.php
@@ -225,7 +220,6 @@ slow/ext_apc_iterator/iterator_003.php
 slow/ext_apc_iterator/iterator_004.php
 slow/ext_apc_iterator/iterator_005.php
 slow/ext_array/array_rand.php
-slow/ext_array/count-opts.php
 slow/ext_asio/backtrace.php
 slow/ext_bzip2/wrapper.php
 slow/ext_class/is-subclass-of-opt.php
@@ -248,7 +242,6 @@ slow/ext_function/register_shutdown_function-simple.php
 slow/ext_imagick/draw_vector_graphics.php
 slow/ext_imagick/iterator_exception.php
 slow/ext_imagick/iterator_test.php
-slow/ext_imagick/php_imagick_tests/024_ispixelsimilar.php
 slow/ext_imagick/pixel_color.php
 slow/ext_imagick/pixel_exception.php
 slow/ext_imagick/pixel_issimilar.php
@@ -408,19 +401,16 @@ slow/hh_namespace_migration/hh_frozenset4.php
 slow/hh_namespace_migration/hh_frozenset6.php
 slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php
-slow/hh_namespace_migration/hh_frozenvector6.php
 slow/hh_namespace_migration/hh_frozenvector7.php
 slow/hh_namespace_migration/hh_map4.php
 slow/hh_namespace_migration/hh_map6.php
 slow/hh_namespace_migration/hh_map7.php
 slow/hh_namespace_migration/hh_pair4.php
-slow/hh_namespace_migration/hh_pair6.php
 slow/hh_namespace_migration/hh_pair7.php
 slow/hh_namespace_migration/hh_set4.php
 slow/hh_namespace_migration/hh_set6.php
 slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
-slow/hh_namespace_migration/hh_vector4.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/hhbbc/array_011.php
 slow/hhbbc/array_access_004.php
@@ -756,7 +746,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_004.php
 slow/php7_backported/scalar-types/scalar_weak_reference.php
 slow/php7_backported/scalar-types/self_on_closure_in_method.php
-slow/php7_backported/spaceship.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/issetOnTemp.php
 slow/php7_backported/varSyntax/staticMember.php
@@ -844,7 +833,6 @@ slow/sanity/2.php
 slow/sanity/3.php
 slow/sanity/4.php
 slow/sanity/5.php
-slow/scalar_array/545.php
 slow/scalar_array/546.php
 slow/serialization/repo_types_002.php
 slow/session/session_start_undefined_scheme.php
@@ -874,7 +862,6 @@ slow/streams/user_filter_autoload.php
 slow/string/164.php
 slow/string/heredoc_end_after_variable.php
 slow/string/issue_3160.php
-slow/string/str_offset_isset_empty.php
 slow/stringish.php
 slow/super_globals/1387.php
 slow/switch_statement/1754.php

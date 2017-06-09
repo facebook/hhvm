@@ -8,7 +8,6 @@ quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php
 quick/all_type_comparison_test.php
-quick/array_packed.php
 quick/arrayidx.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
@@ -187,7 +186,6 @@ quick/static_prop_eval_order.php
 quick/static_vars.php
 quick/strict_hashbang_start.php
 quick/string-cse.php
-quick/switch_special_cases.php
 quick/syntax-error.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php

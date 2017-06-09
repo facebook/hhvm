@@ -17,6 +17,7 @@ type t = {
   option_constant_folding : bool;
   option_optimize_null_check : bool;
   option_optimize_cuf : bool;
+  option_max_array_elem_size_on_the_stack : int;
 }
 
 (* Default, as with HHVM, is for Eval.EnableHipHopSyntax=0 *)
@@ -26,12 +27,15 @@ let default = {
   option_constant_folding = true;
   option_optimize_null_check = true;
   option_optimize_cuf = true;
+  option_max_array_elem_size_on_the_stack = 12;
 }
 
 let enable_hiphop_syntax options = options.option_enable_hiphop_syntax
 let constant_folding options = options.option_constant_folding
 let optimize_null_check options = options.option_optimize_null_check
 let optimize_cuf options = options.option_optimize_cuf
+let max_array_elem_size_on_the_stack options =
+  options.option_max_array_elem_size_on_the_stack
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)

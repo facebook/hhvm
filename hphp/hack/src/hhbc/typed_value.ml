@@ -90,6 +90,16 @@ let to_bool v =
   (* Non-empty collections cast to true *)
   | Dict _ | Array _ | Keyset _ | Vec _-> true
 
+(* try to convert numeric or leading numeric string to a number *)
+let string_to_int_opt s =
+  match (try Scanf.sscanf s "%Ld%s" (fun x _ -> Some x) with _ -> None) with
+  | None ->
+    begin
+      try Scanf.sscanf s "%f%s" (fun x _ -> Some (Int64.of_float x))
+      with _ -> None
+    end
+  | x -> x
+
 (* Cast to an integer: the (int) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_int v =
@@ -107,12 +117,8 @@ let to_int v =
       characters in leading-numeric strings are ignored. For any other string,
       the result value is 0.
     *)
-    match (try Scanf.sscanf s "%Ld%s" (fun x _ -> Some x) with _ -> None) with
-    | None ->
-      begin
-        try Scanf.sscanf s "%f%s" (fun x _ -> Some (Int64.of_float x))
-        with _ -> Some Int64.zero
-      end
+    match string_to_int_opt s with
+    | None -> Some Int64.zero
     | x -> x
     end
   | Int i -> Some i

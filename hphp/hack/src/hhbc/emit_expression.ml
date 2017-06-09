@@ -896,9 +896,11 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
-  let are_all_keys_strings =
-    List.for_all es ~f:(function A.AFkvalue ((_, A.String (_, _)), _) -> true
-                               | _ -> false)
+  let are_all_keys_non_numeric_strings =
+    List.for_all es ~f: (function
+        | A.AFkvalue ((_, A.String (_, s)), _) ->
+          Option.is_none @@ Typed_value.string_to_int_opt s
+        | _ -> false)
   in
   let has_references =
     (* Reference can only exist as a value *)
@@ -935,7 +937,7 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
           | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
     ]
-  end else if are_all_keys_strings
+  end else if are_all_keys_non_numeric_strings
               && is_array
               && not has_references
   then begin

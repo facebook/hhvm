@@ -280,6 +280,8 @@ struct RequestInjectionData {
   bool hasTrackErrors() const;
   bool hasHtmlErrors() const;
 
+  bool logFunctionCalls() const;
+
 private:
   RequestTimer m_timer;
   RequestTimer m_cpuTimer;
@@ -312,6 +314,7 @@ private:
   bool m_trackErrors{false};
   bool m_htmlErrors{false};
   bool m_safeFileAccess{false};
+  bool m_logFunctionCalls{false};
 
   /* Pointer to surprise flags stored in RDS. */
   std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};

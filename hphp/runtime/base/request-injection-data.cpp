@@ -25,12 +25,14 @@
 
 #include <boost/filesystem.hpp>
 #include <folly/Optional.h>
+#include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -554,6 +556,10 @@ void RequestInjectionData::onSessionInit() {
   if (open_basedir_val) {
     setAllowedDirectories(*open_basedir_val);
   }
+  m_logFunctionCalls = RuntimeOption::EvalFunctionCallSampleRate > 0 &&
+    folly::Random::rand32(
+      RuntimeOption::EvalFunctionCallSampleRate
+    ) == 0;
   reset();
 }
 

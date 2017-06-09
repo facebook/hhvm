@@ -228,5 +228,8 @@ inline bool RequestInjectionData::hasHtmlErrors() const {
   return m_htmlErrors;
 }
 
+inline bool RequestInjectionData::logFunctionCalls() const {
+  return m_logFunctionCalls;
+}
 ////////////////////////////////////////////////////////////////////////////////
 }

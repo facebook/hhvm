@@ -2307,6 +2307,11 @@ void hphp_session_init() {
   s_sessionInitialized = true;
   ExtensionRegistry::requestInit();
 
+  // Sample function calls for this request
+  if (RID().logFunctionCalls()) {
+    EventHook::Enable();
+  }
+
   auto const pme_freq = RuntimeOption::EvalPerfMemEventRequestFreq;
   if (pme_freq > 0 && folly::Random::rand32(pme_freq) == 0) {
     // Enable memory access sampling for this request.

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -27,12 +28,15 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
+#include "hphp/runtime/server/server-stats.h"
+
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
-
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/util/struct-log.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +53,8 @@ const StaticString
   s_exception("exception"),
   s_name("name"),
   s_return("return");
+
+__thread uint64_t tl_func_sequence_id;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,
@@ -338,12 +344,38 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
+static bool shouldLog(const Func* func) {
+  return RID().logFunctionCalls();
+}
+
+void logCommon(StructuredLogEntry sample, const ActRec* ar, ssize_t flags) {
+  sample.setInt("flags", flags);
+  sample.setInt("func_id", ar->func()->getFuncId());
+  sample.setStr("thread_mode",
+    ServerStats::ThreadModeString(ServerStats::GetThreadMode()));
+  sample.setStr("func_name", ar->func()->name()->data());
+  sample.setStr("func_full_name", ar->func()->fullName()->data());
+  sample.setStr("func_filename", ar->func()->filename()->data());
+  addBacktraceToStructLog(
+    createBacktrace(BacktraceArgs()), sample
+  );
+  sample.setInt("sequence_id", tl_func_sequence_id++);
+  StructuredLog::log("hhvm_function_calls2", sample);
+}
+
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
                                 ssize_t flags, bool isResume) {
   // User profiler
   if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar, isResume);
+    }
+    if (shouldLog(ar->func())) {
+      StructuredLogEntry sample;
+      sample.setStr("event_name", "function_enter");
+      sample.setInt("func_type", funcType);
+      sample.setInt("is_resume", isResume);
+      logCommon(sample, ar, flags);
     }
     auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
@@ -415,6 +447,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
+    }
+    if (shouldLog(ar->func())) {
+      StructuredLogEntry sample;
+      sample.setStr("event_name", "function_exit");
+      sample.setInt("is_suspend", isSuspend);
+      logCommon(sample, ar, flags);
     }
   }
 

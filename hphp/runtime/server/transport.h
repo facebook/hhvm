@@ -96,7 +96,7 @@ struct Transport : IDebuggable {
 
 public:
   Transport();
-  virtual ~Transport();
+  ~Transport() override;
 
   void onRequestStart(const timespec &queueTime);
   const timespec &getQueueTime() const { return m_queueTime; }
@@ -423,7 +423,7 @@ public:
   const char *getThreadTypeName() const;
 
   // implementing IDebuggable
-  virtual void debuggerInfo(InfoVec &info);
+  void debuggerInfo(InfoVec& info) override;
 
   void setSSL() {m_isSSL = true;}
   bool isSSL() const {return m_isSSL;}

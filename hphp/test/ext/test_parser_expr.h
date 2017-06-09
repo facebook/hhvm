@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestParserExpr : TestParser {
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   bool TestExpressionList();
   bool TestAssignmentExpression();

@@ -40,7 +40,7 @@ struct ZendUserIniData : UserIniData {
     : UserIniData(), p(p)
   {}
 
-  virtual ~ZendUserIniData () {
+  ~ZendUserIniData() override {
     if (p) {
       free(p->value);
       delete p;

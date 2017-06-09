@@ -154,7 +154,7 @@ struct AsyncMysqlResult {
 
 struct AsyncMysqlConnectResult : AsyncMysqlResult {
   AsyncMysqlConnectResult() = default;
-  virtual ~AsyncMysqlConnectResult() {}
+  ~AsyncMysqlConnectResult() override {}
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
@@ -172,7 +172,7 @@ struct AsyncMysqlConnectResult : AsyncMysqlResult {
 
 struct AsyncMysqlErrorResult : AsyncMysqlResult {
   AsyncMysqlErrorResult() = default;
-  virtual ~AsyncMysqlErrorResult() {}
+  ~AsyncMysqlErrorResult() override {}
 
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
@@ -242,7 +242,7 @@ struct FieldIndex {
 
 struct AsyncMysqlQueryResult : AsyncMysqlResult {
   AsyncMysqlQueryResult() = default;
-  virtual ~AsyncMysqlQueryResult() {}
+  ~AsyncMysqlQueryResult() override {}
   void sweep();
   void create(std::shared_ptr<am::Operation> op,
               db::ClientPerfStats values,
@@ -279,7 +279,7 @@ struct AsyncMysqlConnectEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::ConnectOperation> m_op;
@@ -300,7 +300,7 @@ struct AsyncMysqlQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::QueryOperation> m_query_op;
@@ -327,7 +327,7 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::MultiQueryOperation> m_multi_op;

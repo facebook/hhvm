@@ -92,8 +92,7 @@ protected:
 struct XMLWriter : Writer {
   explicit XMLWriter(std::ostream &out) : Writer(out) {}
 
-
-  virtual void writeFileHeader() {
+  void writeFileHeader() override {
     m_out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     if (!RuntimeOption::StatsXSL.empty()) {
       m_out << "<?xml-stylesheet type=\"text/xsl\" href=\""
@@ -103,32 +102,31 @@ struct XMLWriter : Writer {
     }
   }
 
-  virtual void writeFileFooter() {}
-
+  void writeFileFooter() override {}
 
   /**
    * In XML/HTML there is no distinction between creating a list, and creating
    * an object with keyed attributes. (unlike the JSON format).
    */
-  virtual void beginObject(const char *name) {
+  void beginObject(const char* name) override {
     writeIndent();
     m_out << '<' << name << ">\n";
     ++m_indent;
   }
 
-  virtual void endObject(const char *name) {
+  void endObject(const char* name) override {
     --m_indent;
     writeIndent();
     m_out << "</" << name << ">\n";
   }
 
-  virtual void writeEntry(const char *name, const std::string &value) {
+  void writeEntry(const char* name, const std::string& value) override {
     writeIndent();
     m_out << "<entry><key>" << Escape(name) << "</key>";
     m_out << "<value>" << Escape(value.c_str()) << "</value></entry>\n";
   }
 
-  virtual void writeEntry(const char *name, int64_t value) {
+  void writeEntry(const char* name, int64_t value) override {
     writeIndent();
     m_out << "<entry><key>" << Escape(name) << "</key>";
     m_out << "<value>" << value << "</value></entry>\n";
@@ -247,32 +245,31 @@ public:
     m_namelessContextStack.push(true);
   }
 
-  virtual void writeFileHeader() {
+  void writeFileHeader() override {
     beginContainer("root", false);
   }
 
-  virtual void writeFileFooter() {
+  void writeFileFooter() override {
     endContainer(false);
   }
 
-
-  virtual void beginObject(const char *name) {
+  void beginObject(const char* name) override {
     beginContainer(name, false);
   }
 
-  virtual void beginList(const char *name) {
+  void beginList(const char* name) override {
     beginContainer(name, true);
   }
 
-  void endObject(const char *name) {
+  void endObject(const char* name) override {
     endContainer(false);
   }
 
-  void endList(const char *name) {
+  void endList(const char* name) override {
     endContainer(true);
   }
 
-  virtual void writeEntry(const char *name, const std::string &value) {
+  void writeEntry(const char* name, const std::string& value) override {
     beginEntity(name);
 
     // Now write the actual value
@@ -282,7 +279,7 @@ public:
     }
   }
 
-  virtual void writeEntry(const char *name, int64_t value) {
+  void writeEntry(const char* name, int64_t value) override {
     beginEntity(name);
 
     // Now write the actual value
@@ -296,7 +293,7 @@ public:
 struct HTMLWriter : Writer {
   explicit HTMLWriter(std::ostream &out) : Writer(out) {}
 
-  virtual void writeFileHeader() {
+  void writeFileHeader() override {
     m_out << "<!doctype html>\n<html>\n<head>\n"
              "<meta http-equiv=\"content-type\" "
              "content=\"text/html; charset=UTF-8\">\n"
@@ -306,7 +303,7 @@ struct HTMLWriter : Writer {
              "</head>\n<body>\n<table>\n<tbody>\n";
   }
 
-  virtual void writeFileFooter() {
+  void writeFileFooter() override {
     m_out << "</tbody>\n</table>\n</body>\n</html>\n";
   }
 
@@ -315,26 +312,26 @@ struct HTMLWriter : Writer {
    * In XML/HTML there is no distinction between creating a list, and creating
    * an object with keyed attributes. (unlike the JSON format).
    */
-  virtual void beginObject(const char *name) {
+  void beginObject(const char* name) override {
     writeIndent();
     m_out << "<tr id='" << name << "'><td colspan=2>"
           << "<table><tbody><tr><th colspan=2>" << name << "</th></tr>\n";
     ++m_indent;
   }
 
-  virtual void endObject(const char *name) {
+  void endObject(const char* name) override {
     --m_indent;
     writeIndent();
     m_out << "</tbody></table></td></tr>\n";
   }
 
-  virtual void writeEntry(const char *name, const std::string &value) {
+  void writeEntry(const char* name, const std::string& value) override {
     writeIndent();
     m_out << "<tr><td>" << Escape(name) << "</td>";
     m_out << "<td>" << Escape(value.c_str()) << "</td></tr>\n";
   }
 
-  virtual void writeEntry(const char *name, int64_t value) {
+  void writeEntry(const char* name, int64_t value) override {
     writeIndent();
     m_out << "<tr><td>" << Escape(name) << "</td>";
     m_out << "<td>" << value << "</td></tr>\n";

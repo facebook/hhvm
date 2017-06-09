@@ -110,7 +110,7 @@ const StaticString s_fastcgi("fastcgi");
  */
 struct FastCGITransport final : Transport, private Synchronizable {
   explicit FastCGITransport(FastCGISession* session) : m_session(session) {}
-  virtual ~FastCGITransport() {}
+  ~FastCGITransport() override {}
 
   ///////////////////////////////////////////////////////////////////////////
   // FastCGISession callbacks

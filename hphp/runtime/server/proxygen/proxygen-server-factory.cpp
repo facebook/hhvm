@@ -21,7 +21,7 @@ namespace HPHP {
 struct ProxygenServerFactory : ServerFactory {
   ProxygenServerFactory() {}
 
-  virtual ServerPtr createServer(const ServerOptions& options) override {
+  ServerPtr createServer(const ServerOptions& options) override {
     return std::make_unique<ProxygenServer>(options);
   }
 };

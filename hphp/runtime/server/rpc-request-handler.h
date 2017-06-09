@@ -37,15 +37,15 @@ struct RPCRequestHandler : RequestHandler {
   };
 
   RPCRequestHandler(int timeout, bool info);
-  virtual ~RPCRequestHandler();
+  ~RPCRequestHandler() override;
 
   void setServerInfo(std::shared_ptr<SatelliteServerInfo> info) {
     m_serverInfo = info;
   }
 
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport);
-  virtual void abortRequest(Transport *transport);
+  void handleRequest(Transport* transport) override;
+  void abortRequest(Transport* transport) override;
 
   static void cleanupState();
 

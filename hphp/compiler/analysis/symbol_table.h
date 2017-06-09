@@ -226,7 +226,7 @@ struct SymParamWrapper : JSON::DocTarget::ISerializable {
   explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
-  virtual void serialize(JSON::DocTarget::OutputStream &out) const {
+  void serialize(JSON::DocTarget::OutputStream& out) const override {
     m_sym->serializeParam(out);
   }
 private:
@@ -237,7 +237,7 @@ struct SymClassVarWrapper : JSON::DocTarget::ISerializable {
   explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
-  virtual void serialize(JSON::DocTarget::OutputStream &out) const {
+  void serialize(JSON::DocTarget::OutputStream& out) const override {
     m_sym->serializeClassVar(out);
   }
 private:
@@ -258,7 +258,7 @@ public:
   SymbolTable(const SymbolTable&) = delete;
   explicit SymbolTable(BlockScope &blockScope);
   SymbolTable() = delete;
-  virtual ~SymbolTable();
+  ~SymbolTable() override;
 
   /**
    * Import system symbols into this.
@@ -291,7 +291,7 @@ public:
   /**
    * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
 
   /**
    * Find declaration construct.

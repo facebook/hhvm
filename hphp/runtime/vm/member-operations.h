@@ -51,7 +51,7 @@ struct InvalidSetMException : std::runtime_error {
     , m_tv(value)
   {}
 
-  ~InvalidSetMException() noexcept {}
+  ~InvalidSetMException() noexcept override {}
 
   const TypedValue& tv() const { return m_tv; };
 

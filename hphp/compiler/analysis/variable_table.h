@@ -113,7 +113,7 @@ public:
   bool hasNonStaticPrivate() const;
   bool hasStatic() const { return m_hasStatic; }
 
-  virtual bool isInherited(const std::string &name) const;
+  bool isInherited(const std::string& name) const override;
 
   void getLocalVariableNames(std::vector<std::string> &syms) const;
 

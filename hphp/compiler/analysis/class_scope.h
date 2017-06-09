@@ -139,7 +139,9 @@ public:
    * Whether this is a user-defined class.
    */
   bool isUserClass() const { return !getAttribute(System);}
-  bool isBuiltin() const { return !getStmt(); }
+  bool isBuiltin() const override {
+    return !getStmt();
+  }
 
   /**
    * Helpers for parsing class functions and variables.
@@ -248,7 +250,7 @@ public:
 
   UserAttributeMap& userAttributes() { return m_userAttributes;}
 
-  ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
+  ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const override;
 
   void addUsedTraits(const std::vector<std::string> &names) {
     for (unsigned i = 0; i < names.size(); i++) {
@@ -283,8 +285,8 @@ public:
   /**
    * Serialize the iface, not everything.
    */
-  void serialize(JSON::CodeError::OutputStream &out) const;
-  void serialize(JSON::DocTarget::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
+  void serialize(JSON::DocTarget::OutputStream& out) const override;
 
   bool isInterface() const { return m_kindOf == KindOf::Interface; }
   bool isFinal() const { return m_kindOf == KindOf::FinalClass ||

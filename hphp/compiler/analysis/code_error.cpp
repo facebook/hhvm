@@ -42,7 +42,7 @@ struct ErrorInfo : JSON::CodeError::ISerializable {
   /**
    * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ struct CodeErrors : JSON::CodeError::ISerializable {
   /**
    * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
 
   void record(ErrorInfoPtr errorInfo);
   bool exists(ErrorType type) const;

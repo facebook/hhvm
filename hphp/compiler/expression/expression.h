@@ -160,7 +160,9 @@ public:
   /**
     * For generic walks
     */
-  virtual int getKidCount() const { return 0; }
+  int getKidCount() const override {
+    return 0;
+  }
   ExpressionPtr getNthExpr(int n) const { return
       static_pointer_cast<Expression>(getNthKid(n)); }
 
@@ -189,7 +191,7 @@ public:
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
 
-  virtual void analyzeProgram(AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultPtr ar) override;
 
   /**
    * Called before type inference.

@@ -226,15 +226,17 @@ public:
    * IHostHealthObserver interface.  Note that m_status doesn't
    * contain server health information.
    */
-  virtual void notifyNewStatus(HealthLevel newLevel) override {
+  void notifyNewStatus(HealthLevel newLevel) override {
     m_healthLevel = newLevel;
   }
-  virtual HealthLevel getHealthLevel() override { return m_healthLevel; }
+  HealthLevel getHealthLevel() override {
+    return m_healthLevel;
+  }
 
   /**
    * Destructor.
    */
-  virtual ~Server() {}
+  ~Server() override {}
 
   /**
    * Start this web server. Note this is a non-blocking call.

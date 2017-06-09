@@ -145,7 +145,7 @@ struct IParseHandler {
  */
 struct Construct : std::enable_shared_from_this<Construct>,
                    JSON::CodeError::ISerializable {
-  virtual ~Construct() {}
+  ~Construct() override {}
 
 #define DEC_STATEMENT_ENUM(x) KindOf##x,
 #define DEC_EXPRESSION_ENUM(x,t) KindOf##x,
@@ -301,7 +301,7 @@ public:
   /**
    * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
 
   /**
    * Get canonicalized PHP source code for this construct.

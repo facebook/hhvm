@@ -38,7 +38,7 @@ class Disassembler: public DecoderVisitor {
  public:
   Disassembler();
   Disassembler(char* text_buffer, int buffer_size);
-  virtual ~Disassembler();
+  ~Disassembler() override;
   char* GetOutput();
 
   // Declare all Visitor functions.
@@ -104,10 +104,10 @@ class PrintDisassembler: public Disassembler {
       , showEncoding_(showEncoding)
       , color_(color) {
   }
-  ~PrintDisassembler() { }
+  ~PrintDisassembler() override {}
 
  protected:
-  virtual void ProcessOutput(Instruction* instr);
+  void ProcessOutput(Instruction* instr) override;
 
  private:
   std::ostream& stream_;

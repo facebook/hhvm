@@ -34,7 +34,7 @@ template<class TServer, class TTransport>
 struct ServerTaskEvent final : AsioExternalThreadEvent {
   ServerTaskEvent() {}
 
-  ~ServerTaskEvent() {
+  ~ServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
   }
 
@@ -48,7 +48,7 @@ struct ServerTaskEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final {
+  void unserialize(Cell& result) final {
     if (UNLIKELY(!m_job)) {
       SystemLib::throwInvalidOperationExceptionObject(
         "The async operation was incorrectly initialized.");

@@ -28,6 +28,7 @@ let instr x = Instr_list [x]
 let instrs x = Instr_list x
 let gather x = Instr_concat x
 let empty = Instr_list []
+let optional b instrs = if b then gather instrs else empty
 
 let class_ref_rewrite_sentinel = -100
 

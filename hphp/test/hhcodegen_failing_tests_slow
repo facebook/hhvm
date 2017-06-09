@@ -24,7 +24,6 @@ slow/async/cycle.php
 slow/async/cycle_debug_backtrace.php
 slow/async/exceptions.php
 slow/async/fail_callback_timeout.php
-slow/async/fcallawait-interp.php
 slow/async/foreach_await_as.php
 slow/async/foreach_await_as_fail.php
 slow/async/hh-async-matrix.php

@@ -19,16 +19,21 @@ let multi_memoize_cache class_prefix =
 let shared_multi_memoize_cache class_prefix =
   Hhbc_id.Prop.from_raw_string
     ("$shared" ^ multi_memoize_cache class_prefix)
-let single_memoize_cache class_prefix =
+let guarded_single_memoize_cache class_prefix =
   class_prefix ^ "$guarded_single$memoize_cache"
-let single_memoize_cache_guard class_prefix =
-  single_memoize_cache class_prefix ^ "$guard"
+let guarded_single_memoize_cache_guard class_prefix =
+  guarded_single_memoize_cache class_prefix ^ "$guard"
+let single_memoize_cache class_prefix =
+  class_prefix ^ "$single$memoize_cache"
 let shared_single_memoize_cache class_prefix =
   Hhbc_id.Prop.from_raw_string
     ("$shared" ^ single_memoize_cache class_prefix)
-let shared_single_memoize_cache_guard class_prefix =
+let guarded_shared_single_memoize_cache class_prefix =
   Hhbc_id.Prop.from_raw_string
-    ("$shared" ^ single_memoize_cache_guard class_prefix)
+    ("$shared" ^ guarded_single_memoize_cache class_prefix)
+let guarded_shared_single_memoize_cache_guard class_prefix =
+  Hhbc_id.Prop.from_raw_string
+    ("$shared" ^ guarded_single_memoize_cache_guard class_prefix)
 
 let param_code_sets params local =
   gather @@ List.concat_mapi params (fun index param ->
@@ -39,3 +44,13 @@ let param_code_sets params local =
 let param_code_gets params =
   gather @@ List.mapi params (fun index param ->
       instr_fpassl index (Local.Named (Hhas_param.name param)))
+
+(* Return true if method or function with this kind and return type
+ * definitely cannot return null *)
+let cannot_return_null fun_kind _ret =
+  fun_kind = Ast_defs.FAsync
+  (* Also in HHVM:
+  || (m_curFunc->retTypeConstraint.hasConstraint() &&
+   !m_curFunc->retTypeConstraint.isSoft() &&
+   !m_curFunc->retTypeConstraint.isNullable() &&
+   RuntimeOption::EvalCheckReturnTypeHints >= 3) *)

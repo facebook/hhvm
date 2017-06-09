@@ -16,14 +16,66 @@
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/resource-data.h"
+#include "hphp/util/low-ptr.h"
+
+#include <folly/small_vector.h>
+
 #include <stdint.h>
 
 namespace HPHP {
 
+struct ActRec;
 struct Array;
 struct VMParserFrame;
 struct c_WaitableWaitHandle;
+struct Class;
+struct Func;
+struct Resource;
 struct StructuredLogEntry;
+
+struct CompactTrace : SweepableResourceData {
+  Array extract() const;
+  void insert(const ActRec* fp, int32_t prevPc) { m_key.insert(fp, prevPc); }
+
+  DECLARE_RESOURCE_ALLOCATION(CompactTrace)
+
+  struct Frame final {
+    Frame() = default;
+    Frame(const Func* f, int32_t ppc, bool ht)
+      : func(f)
+      , prevPc(ppc)
+      , hasThis(ht)
+    {}
+
+    LowPtr<const Func> func;
+    union {
+      struct {
+        int32_t prevPc : 31;
+        bool hasThis   : 1;
+      };
+      uint32_t prevPcAndHasThis;
+    };
+  };
+
+  struct Key final {
+    Array extract() const;
+    void insert(const ActRec* fp, int32_t prevPc);
+
+    TYPE_SCAN_IGNORE_ALL;
+
+    int64_t m_hash{0x9e3779b9};
+    folly::small_vector<Frame, 16> m_frames;
+  };
+
+  const folly::small_vector<Frame, 16>& frames() const {
+    return m_key.m_frames;
+  }
+
+private:
+  Key m_key;
+};
 
 struct BacktraceArgs {
 
@@ -134,6 +186,22 @@ struct BacktraceArgs {
     return *this;
   }
 
+  bool isCompact() const {
+    return
+      RuntimeOption::EvalEnableCompactBacktrace &&
+      !m_skipTop &&
+      !m_skipInlined &&
+      !m_withSelf &&
+      !m_withThis &&
+      !m_withMetadata &&
+      !m_withPseudoMain &&
+      (!RuntimeOption::EnableArgsInBacktraces || !m_withArgValues) &&
+      !m_withArgNames &&
+      !m_limit &&
+      !m_parserFrame &&
+      !m_fromWaitHandle;
+  }
+
 private:
   bool m_skipTop{false};
   bool m_skipInlined{false};
@@ -151,6 +219,7 @@ private:
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash();
+req::ptr<CompactTrace> createCompactBacktrace();
 
 } // HPHP
 

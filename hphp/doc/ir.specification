@@ -1408,6 +1408,10 @@ To string conversions:
 
   Obtain stack trace by calling the debug_backtrace() method.
 
+| DebugBacktraceFast, D(Res), NA, PRc
+
+  Obtain compact stack trace resource that can be expanded lazily.
+
 | InitThrowableFileAndLine, ND, S(Obj), NF
 
   Initialize Throwable's file name and line number assuming the stack trace

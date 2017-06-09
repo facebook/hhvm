@@ -23,6 +23,7 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -53,6 +54,10 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
 
 ArrayData* debug_backtrace_jit(int64_t options) {
   return HHVM_FN(debug_backtrace)(options).detach();
+}
+
+ResourceHdr* debug_backtrace_fast() {
+  return createCompactBacktrace().detach()->hdr();
 }
 
 /**
@@ -321,6 +326,16 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
   return g_context->releaseDeferredErrors();
 }
 
+Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
+  auto bt = dyn_cast<CompactTrace>(handle);
+  if (!bt) {
+    throw_invalid_argument("__SystemLib\\extract_trace() expects parameter 1 "
+                           "to be a CompactTrace resource.");
+  }
+
+  return bt->extract();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initErrorFunc() {
@@ -342,6 +357,7 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
   HHVM_FALIAS(HH\\deferred_errors, HH_deferred_errors);
+  HHVM_FALIAS(__SystemLib\\extract_trace, SL_extract_trace);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,

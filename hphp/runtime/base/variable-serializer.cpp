@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -1423,6 +1424,8 @@ void VariableSerializer::serializeResource(const ResourceData* res) {
   TypedValue tv = make_tv<KindOfResource>(const_cast<ResourceHdr*>(res->hdr()));
   if (UNLIKELY(incNestedLevel(tv))) {
     writeOverflow(tv);
+  } else if (auto trace = dynamic_cast<const CompactTrace*>(res)) {
+    serializeArray(trace->extract());
   } else {
     serializeResourceImpl(res);
   }

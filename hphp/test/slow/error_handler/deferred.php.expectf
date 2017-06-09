@@ -23,40 +23,31 @@ vec(1) {
         int(4)
       }
       [1]=>
-      array(4) {
+      array(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
         int(9)
         ["function"]=>
         string(10) "make_error"
-        ["args"]=>
-        array(0) {
-        }
       }
       [2]=>
-      array(4) {
+      array(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
         int(4)
         ["function"]=>
         string(14) "error_handler1"
-        ["args"]=>
-        array(0) {
-        }
       }
       [3]=>
-      array(4) {
+      array(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
         int(41)
         ["function"]=>
         string(10) "make_error"
-        ["args"]=>
-        array(0) {
-        }
       }
     }
   }

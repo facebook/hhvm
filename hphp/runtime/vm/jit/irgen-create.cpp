@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -74,23 +75,50 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   // Load Exception::$traceOpts
   auto const sprop = ldClsPropAddrKnown(
     env, SystemLib::s_ExceptionClass, s_traceOpts.get());
-  auto const traceOpts = cond(
+
+  auto const trace = cond(
     env,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, TInt, taken, sprop);
     },
     [&] {
       // sprop is an integer, load it
-      return gen(env, LdMem, TInt, sprop);
+      auto const opts = gen(env, LdMem, TInt, sprop);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          if (!RuntimeOption::EnableArgsInBacktraces) {
+            auto const filterOpts =
+              gen(env, AndInt, opts, cns(env, ~k_DEBUG_BACKTRACE_IGNORE_ARGS));
+
+            gen(env, JmpNZero, taken, filterOpts);
+          } else {
+            auto const safe =
+              gen(env, EqInt, opts, cns(env, k_DEBUG_BACKTRACE_IGNORE_ARGS));
+            gen(env, JmpZero, taken, safe);
+          }
+        },
+        [&] {
+          // traceOpts is default value, use fast lazy construction
+          if (RuntimeOption::EvalEnableCompactBacktrace) {
+            return gen(env, DebugBacktraceFast);
+          }
+          return gen(env, DebugBacktrace, cns(env, 0));
+        },
+        [&] {
+          // Call debug_backtrace(traceOpts)
+          return gen(env, DebugBacktrace, opts);
+        });
     },
     [&] {
-      // sprop is a garbage, use default traceOpts value
-      return cns(env, 0);
+      // sprop is a garbage, use default traceOpts value (0)
+      if (!RuntimeOption::EnableArgsInBacktraces &&
+          RuntimeOption::EvalEnableCompactBacktrace) {
+        return gen(env, DebugBacktraceFast);
+      }
+      return gen(env, DebugBacktrace, cns(env, 0));
     }
   );
-
-  // Call debug_backtrace(traceOpts)
-  auto const trace = gen(env, DebugBacktrace, traceOpts);
 
   // $throwable->trace = $trace
   auto const traceIdx = rootCls->lookupDeclProp(s_trace.get());

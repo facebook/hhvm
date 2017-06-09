@@ -216,8 +216,43 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
   assertx(is_throwable(throwable));
   assertx(throwable_has_expected_props());
 
-  assertx(throwable->propVec()[s_traceIdx].m_type == KindOfArray);
-  auto const trace = throwable->propVec()[s_traceIdx].m_data.parr;
+  auto const traceTv = throwable->propVec()[s_traceIdx];
+
+  if (traceTv.m_type == KindOfResource) {
+    auto bt = dyn_cast<CompactTrace>(Resource(traceTv.m_data.pres));
+    assertx(bt);
+
+    for (auto& f : bt->frames()) {
+      if (!f.func || f.func->isBuiltin()) continue;
+
+      auto const opAtPrevPc = f.func->unit()->getOp(f.prevPc);
+      Offset pcAdjust = 0;
+      if (opAtPrevPc == Op::PopR ||
+          opAtPrevPc == Op::UnboxR ||
+          opAtPrevPc == Op::UnboxRNop) {
+        pcAdjust = 1;
+      }
+
+      auto const ln = f.func->unit()->getLineNumber(f.prevPc - pcAdjust);
+      tvSetIgnoreRef(make_tv<KindOfInt64>(ln), throwable->propVec()[s_lineIdx]);
+
+      if (auto fn = f.func->originalFilename()) {
+        tvSetIgnoreRef(
+          make_tv<KindOfPersistentString>(fn), throwable->propVec()[s_fileIdx]
+        );
+      } else {
+        tvSetIgnoreRef(
+          make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
+          throwable->propVec()[s_fileIdx]
+        );
+      }
+      return;
+    }
+    return;
+  }
+
+  assertx(isArrayType(traceTv.m_type));
+  auto const trace = traceTv.m_data.parr;
   for (ArrayIter iter(trace); iter; ++iter) {
     assertx(iter.second().asTypedValue()->m_type == KindOfArray);
     auto const frame = iter.second().asTypedValue()->m_data.parr;
@@ -239,9 +274,21 @@ void throwable_init(ObjectData* throwable) {
   assertx(is_throwable(throwable));
   assertx(throwable_has_expected_props());
 
-  auto trace = HHVM_FN(debug_backtrace)(exception_get_trace_options());
-  cellMove(
-    make_tv<KindOfArray>(trace.detach()), throwable->propVec()[s_traceIdx]);
+  auto& prop = throwable->propVec()[s_traceIdx];
+  auto opts = exception_get_trace_options();
+  auto const filterOpts = opts & ~k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  if (
+    !RuntimeOption::EvalEnableCompactBacktrace || filterOpts ||
+    (RuntimeOption::EnableArgsInBacktraces &&
+     opts != k_DEBUG_BACKTRACE_IGNORE_ARGS)
+    ) {
+    auto trace = HHVM_FN(debug_backtrace)(opts);
+    cellMove(make_tv<KindOfArray>(trace.detach()), prop);
+  } else {
+    cellMove(
+      make_tv<KindOfResource>(createCompactBacktrace().detach()->hdr()), prop
+    );
+  }
 
   VMRegAnchor _;
   auto const fp = vmfp();

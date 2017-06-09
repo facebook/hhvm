@@ -526,6 +526,7 @@ private:
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
+  friend bool could_run_destructor(const Type&);
 
 private:
   union Data {

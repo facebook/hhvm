@@ -3218,6 +3218,50 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
   not_reached();
 }
 
+bool could_run_destructor(const Type& t) {
+  if (t.couldBe(TObj)) return true;
+
+  auto const couldBeArr =
+    t.couldBe(TCArrN) || t.couldBe(TCVecN) || t.couldBe(TCDictN);
+
+  if (t.couldBe(TRef)) {
+    if (!couldBeArr && is_ref_with_inner(t)) {
+      return could_run_destructor(*t.m_data.inner);
+    }
+    return true;
+  }
+
+  if (!couldBeArr) return false;
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Obj:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+  case DataTag::RefInner:
+    return true;
+  case DataTag::ArrLikeVal: return false;
+  case DataTag::ArrLikePacked:
+    for (auto& e : t.m_data.packed->elems) {
+      if (could_run_destructor(e)) return true;
+    }
+    return false;
+  case DataTag::ArrLikePackedN:
+    return could_run_destructor(t.m_data.packedn->type);
+  case DataTag::ArrLikeMap:
+    for (auto& kv : t.m_data.map->map) {
+      if (could_run_destructor(kv.second)) return true;
+    }
+    return false;
+  case DataTag::ArrLikeMapN:
+    return could_run_destructor(t.m_data.mapn->val);
+  }
+
+  not_reached();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrKey disect_vec_key(const Type& keyTy) {

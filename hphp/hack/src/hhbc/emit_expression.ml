@@ -157,7 +157,8 @@ let get_passByRefKind expr =
   let open PassByRefKind in
   let rec from_non_list_assignment permissive_kind expr =
     match snd expr with
-    | A.New _ | A.Lvar _ | A.Clone _ -> AllowCell
+    | A.New _ | A.Lvar _ | A.Clone _
+    | A.Import ((A.Include | A.IncludeOnce), _) -> AllowCell
     | A.Binop(A.Eq None, (_, A.List _), e) ->
       from_non_list_assignment WarnOnCell e
     | A.Array_get(_, Some _) -> permissive_kind

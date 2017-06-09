@@ -34,11 +34,7 @@ quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
 quick/defaultVals.php
 quick/dict/basic-getters.php
-quick/dict/basic-setters.php
-quick/dict/invalid-key.php
 quick/dict/invalid-scalar.php
-quick/dict/oob-key.php
-quick/dict/type-hint.php
 quick/do-while-continue.php
 quick/dv_ab.php
 quick/dv_af.php
@@ -128,11 +124,7 @@ quick/interface4.php
 quick/invoke.php
 quick/keyref_error.php
 quick/keyset/basic-getters.php
-quick/keyset/basic-setters.php
-quick/keyset/invalid-key.php
 quick/keyset/invalid-scalar.php
-quick/keyset/oob-key.php
-quick/keyset/type-hint.php
 quick/lambda3.php
 quick/lambda5.php
 quick/lambda6.php
@@ -209,8 +201,6 @@ quick/typehint_lsb_self.php
 quick/undefined-bases.php
 quick/unset_static.php
 quick/vec/basic-getters.php
-quick/vec/basic-setters.php
-quick/vec/type-hint.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php

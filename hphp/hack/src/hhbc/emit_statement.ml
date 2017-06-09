@@ -350,6 +350,10 @@ and emit_catches env catch_list end_label =
   gather (List.map catch_list ~f:(emit_catch env end_label))
 
 and emit_try_catch env try_block catch_list =
+  Local.scope @@ fun () ->
+    emit_try_catch_ env try_block catch_list
+
+and emit_try_catch_ env try_block catch_list =
   let end_label = Label.next_regular () in
   gather [
     instr_try_catch_begin;

@@ -2155,11 +2155,12 @@ and stash_in_local ?(leave_on_stack=false) env e f =
       if leave_on_stack then instr_cgetl (get_local env id) else empty;
     ]
   | _ ->
+    let generate_value = Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let fault_label = Label.next_fault () in
       gather [
-        emit_expr ~need_ref:false env e;
+        generate_value;
         instr_setl temp;
         instr_popc;
         instr_try_fault

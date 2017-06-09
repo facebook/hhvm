@@ -774,10 +774,6 @@ slow/php7_bcbreak/5/uvs/array_indirect_ref.php
 slow/php7_bcbreak/5/uvs/dimmable_object_access.php
 slow/php7_bcbreak/5/uvs/dimmable_object_call.php
 slow/php7_bcbreak/5/uvs/static_dim_call.php
-slow/pipe_expr/pipevar-1.php
-slow/pipe_expr/pipevar-2.php
-slow/pipe_expr/pipevar-3.php
-slow/pipe_expr/pipevar-4.php
 slow/predefined/71.php
 slow/print/1442.php
 slow/print/1444.php

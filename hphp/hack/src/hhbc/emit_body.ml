@@ -146,6 +146,10 @@ let emit_body
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in
+  let stmt_instrs =
+    rewrite_static_instrseq (Static_var.make_static_map body)
+                    (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
+  in
   let body_instrs = gather [
     begin_label;
     emit_method_prolog ~params ~needs_local_this;

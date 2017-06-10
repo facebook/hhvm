@@ -11,6 +11,8 @@
 open Core
 open Hhbc_ast
 
+module A = Ast
+
 (* The various from_X functions below take some kind of AST (expression,
  * statement, etc.) and produce what is logically a sequence of instructions.
  * This could simply be represented by a list, but then we would need to
@@ -463,3 +465,36 @@ let rewrite_class_refs instrseq =
       Instr_list (List.rev l), num
   in
   fst @@ aux instrseq (-1)
+
+  let rewrite_static_instrseq static_var_map emit_expr env instrseq =
+    let rewrite_static_instr instruction =
+      match instruction with
+      | IMisc (StaticLocInit (Local.Named name, _)) ->
+        begin match (SMap.get name static_var_map) with
+              | None ->
+                failwith "rewrite_static_instr: No value in static map!"
+              | Some None -> gather [instr_null; instr_static_loc_init name;]
+              | Some (Some e) ->
+                begin
+                  match snd e with
+                  | A.Id _
+                  | A.Class_const _
+                  | A.Unop _ ->
+                    let l = Label.next_regular () in
+                    gather [
+                      instr_static_loc name;
+                      instr_jmpnz l;
+                      emit_expr env e;
+                      instr_setl @@ Local.Named name;
+                      instr_popc;
+                      instr_label l;
+                    ]
+                  | _ -> gather [
+                            emit_expr env e;
+                            instr_static_loc_init name;
+                          ]
+                end
+        end
+      | _ -> instr instruction
+    in
+    InstrSeq.flat_map_seq instrseq rewrite_static_instr

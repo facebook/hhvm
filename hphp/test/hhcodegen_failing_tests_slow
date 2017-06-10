@@ -850,8 +850,6 @@ slow/simple_xml/simplexml_import_dom_refcount.php
 slow/simple_xml/text_node_offsetset.php
 slow/simple_xml/xpath_node.php
 slow/skip-frame.php
-slow/static_statement/1407.php
-slow/static_statement/1408.php
 slow/streams/stream_wrapper_register.php
 slow/streams/stream_wrapper_register_2.php
 slow/streams/stream_wrapper_register_metadata.php

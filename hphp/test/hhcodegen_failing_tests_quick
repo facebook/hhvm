@@ -182,7 +182,6 @@ quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_closure_params.php
 quick/static_prop_eval_order.php
-quick/static_vars.php
 quick/strict_hashbang_start.php
 quick/string-cse.php
 quick/syntax-error.php

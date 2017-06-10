@@ -36,6 +36,21 @@ let adata hhas_prog =
 
 open Instruction_sequence
 
+let with_main hhas_prog hhas_main =
+  {hhas_prog with hhas_main}
+
+let with_fun hhas_prog hhas_fun =
+  {hhas_prog with hhas_fun}
+
+let with_classes hhas_prog hhas_classes =
+  {hhas_prog with hhas_classes}
+
+let with_typedefs hhas_prog hhas_typedefs =
+  {hhas_prog with hhas_typedefs}
+
+let with_adata hhas_prog hhas_adata =
+  {hhas_prog with hhas_adata}
+
 let emit_main defs =
   let body, _is_generator, _is_pair_generator =
     Emit_body.emit_body

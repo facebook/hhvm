@@ -396,24 +396,32 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 }
 
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
+  std::set<std::string> strings;
   std::vector<folly::StringPiece> files;
   std::vector<folly::StringPiece> functions;
   std::vector<folly::StringPiece> lines;
+  auto addString = [&] (std::string&& s) -> folly::StringPiece {
+    return *strings.insert(std::move(s)).first;
+  };
+  auto addVariant = [&] (const Variant& v) -> folly::StringPiece {
+    if (v.isString()) return v.toCStrRef().slice();
+    return addString(v.toString().toCppString());
+  };
   for (ArrayIter it(bt.get()); it; ++it) {
     Array frame = it.second().toArray();
-    files.emplace_back(frame[s_file].toString().data());
+    files.emplace_back(addVariant(frame[s_file]));
     if (frame.exists(s_class)) {
       functions.emplace_back(
-        folly::sformat("{}{}{}",
-          frame[s_class].toString().data(),
-          frame[s_type].toString().data(),
-          frame[s_function].toString().data()
-          )
-        );
+        addString(folly::sformat("{}{}{}",
+                                 frame[s_class].toString().data(),
+                                 frame[s_type].toString().data(),
+                                 frame[s_function].toString().data()
+                                )
+                 ));
     } else {
-      functions.emplace_back(frame[s_function].toString().data());
+      functions.emplace_back(addVariant(frame[s_function]));
     }
-    lines.emplace_back(frame[s_line].toString().data());
+    lines.emplace_back(addVariant(frame[s_line]));
   }
   cols.setVec("php_files", files);
   cols.setVec("php_functions", functions);

@@ -52,8 +52,10 @@ Array mockBacktrace() {
 
 TEST(Backtrace, FullFunctionNames) {
   StructuredLogEntry sample;
-  auto bt = mockBacktrace();
-  addBacktraceToStructLog(bt, sample);
+  {
+    auto bt = mockBacktrace();
+    addBacktraceToStructLog(bt, sample);
+  }
   auto const expectedDescription = "{\"vecs\":{\"php_lines\":[\"42\"],"
     "\"php_functions\":[\"Class::function_name\"],\"php_files\":[\"filename\"]}"
     ",\"sets\":{},\"ints\":{}}";
@@ -62,23 +64,53 @@ TEST(Backtrace, FullFunctionNames) {
 
 TEST(Backtrace, FunctionNameWithObject) {
   StructuredLogEntry sample;
-  auto bt = Array::Create();
-  bt.append(
-    make_map_array(
-      s_file, "filename",
-      s_line, "42",
-      s_function, "function_name",
-      s_type, s_arrow,
-      s_object, "this",
-      s_class, "Class"
-    )
-  );
-  addBacktraceToStructLog(bt, sample);
+  {
+    auto bt = Array::Create();
+    bt.append(
+      make_map_array(
+        s_file, "filename",
+        s_line, "42",
+        s_function, "function_name",
+        s_type, s_arrow,
+        s_object, "this",
+        s_class, "Class"
+      )
+    );
+    addBacktraceToStructLog(bt, sample);
+  }
   auto const expectedDescription = "{\"vecs\":{\"php_lines\":[\"42\"],"
     "\"php_functions\":[\"Class->function_name\"],\"php_files\":[\"filename\"]}"
     ",\"sets\":{},\"ints\":{}}";
   EXPECT_EQ(show(sample), expectedDescription);
 }
+
+TEST(Backtrace, LongFunctionNames) {
+  StructuredLogEntry sample;
+  {
+    auto bt = Array::Create();
+    bt.append(
+      make_map_array(
+        s_file, "filenameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        s_line, "42---------------------------------------------------------------------------------",
+        s_function, "function_name--------------------------------------------------------------------",
+        s_type, s_arrow,
+        s_object, "this-------------------------------------------------------------------------------",
+        s_class, "Class-----------------------------------------------------------------------------------------"
+      )
+    );
+    addBacktraceToStructLog(bt, sample);
+  }
+  auto const expectedDescription = "{\"vecs\":{\"php_lines\":[\"42-------------"
+    "--------------------------------------------------------------------\"],"
+    "\"php_functions\":[\"Class------------------------------------------------"
+    "------------------------------------------>function_name------------------"
+    "--------------------------------------------------\"],\"php_files\":[\"fil"
+    "enameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    "eeeeeee\"]}"
+    ",\"sets\":{},\"ints\":{}}";
+  EXPECT_EQ(show(sample), expectedDescription);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 

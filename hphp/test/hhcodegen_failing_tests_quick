@@ -1,4 +1,3 @@
-quick/CGetMVar.php
 quick/ClsCases.php
 quick/EmitOO.php
 quick/FPassC-eval.php
@@ -64,7 +63,6 @@ quick/fsc02.php
 quick/func2.php
 quick/func3.php
 quick/func_slice_args.php
-quick/function-static-init.php
 quick/function_varargs.php
 quick/generator_varargs.php
 quick/get_class_methods2.php

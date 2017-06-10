@@ -466,6 +466,24 @@ let rewrite_class_refs instrseq =
   in
   fst @@ aux instrseq (-1)
 
+  let rec can_initialize_static_var e =
+    match snd e with
+    | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True -> true
+    | A.Array es ->
+      List.for_all es ~f:(function
+        | A.AFvalue v ->
+          can_initialize_static_var v
+        | A.AFkvalue (k, v) ->
+          can_initialize_static_var k
+          && can_initialize_static_var v)
+    | A.Darray es ->
+      List.for_all es ~f:(fun (k, v) ->
+        can_initialize_static_var k
+        && can_initialize_static_var v)
+    | A.Varray es ->
+      List.for_all es ~f:can_initialize_static_var
+    | _ -> false
+
   let rewrite_static_instrseq static_var_map emit_expr env instrseq =
     let rewrite_static_instr instruction =
       match instruction with
@@ -475,25 +493,21 @@ let rewrite_class_refs instrseq =
                 failwith "rewrite_static_instr: No value in static map!"
               | Some None -> gather [instr_null; instr_static_loc_init name;]
               | Some (Some e) ->
-                begin
-                  match snd e with
-                  | A.Id _
-                  | A.Class_const _
-                  | A.Unop _ ->
-                    let l = Label.next_regular () in
-                    gather [
-                      instr_static_loc name;
-                      instr_jmpnz l;
-                      emit_expr env e;
-                      instr_setl @@ Local.Named name;
-                      instr_popc;
-                      instr_label l;
-                    ]
-                  | _ -> gather [
-                            emit_expr env e;
-                            instr_static_loc_init name;
-                          ]
-                end
+                if can_initialize_static_var e then
+                  gather [
+                    emit_expr env e;
+                    instr_static_loc_init name;
+                  ]
+                else
+                  let l = Label.next_regular () in
+                  gather [
+                    instr_static_loc name;
+                    instr_jmpnz l;
+                    emit_expr env e;
+                    instr_setl @@ Local.Named name;
+                    instr_popc;
+                    instr_label l;
+                  ]
         end
       | _ -> instr instruction
     in

@@ -641,7 +641,8 @@ and emit_call_isset_expr env (_, expr_ as expr) =
     emit_class_get env None QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~need_ref:false env None QueryOp.Isset expr prop nullflavor
-  | A.Lvar (_, id) when is_local_this env id ->
+  | A.Lvar (_, id)
+    when is_local_this env id && not (Emit_env.get_needs_local_this env)->
     gather [
       emit_local ~notice:NoNotice ~need_ref:false env id;
       instr_istypec OpNull;

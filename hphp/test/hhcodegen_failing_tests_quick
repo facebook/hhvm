@@ -9,7 +9,6 @@ quick/abs_codegen.php
 quick/all_type_comparison_test.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
-quick/call_nonstatic_this.php
 quick/class_constant.php
 quick/class_constants.php
 quick/class_interface_trait_exists.php

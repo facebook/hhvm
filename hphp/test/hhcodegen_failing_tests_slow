@@ -46,7 +46,6 @@ slow/autoload/autoload_set_paths_maps.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
 slow/bug-5127251.php
-slow/call_static/maybe_has_this.php
 slow/class_constant/1608.php
 slow/class_constant/1618.php
 slow/class_constant/1619.php
@@ -480,11 +479,9 @@ slow/keyset/hphpc-literal.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
 slow/lang/async_generators.php
-slow/lang/cuf.php
 slow/lang/deprecated.php
 slow/lang/deprecated_disabled.php
 slow/lang/deprecated_sampled.php
-slow/lang/fsc.php
 slow/lang/hh_return_type_0.php
 slow/lang/hh_return_type_1.php
 slow/lang/hh_return_type_2.php

@@ -165,6 +165,12 @@ let get_passByRefKind expr =
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
     | A.Unop((A.Uincr | A.Udecr | A.Usilence), _) -> WarnOnCell
     | A.Unop((A.Usplat, _)) -> AllowCell
+    | A.Call((_, A.Id (_, "array_key_exists")), [_; _], []) ->
+      AllowCell
+    | A.Call((_, A.Id (_, ("idx"))), ([_; _] | [_; _; _]), []) ->
+      AllowCell
+    | A.Call((_, A.Id (_, ("hphp_array_idx"))), [_; _; _], []) ->
+      AllowCell
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 

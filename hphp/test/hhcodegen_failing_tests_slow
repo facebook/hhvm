@@ -5,8 +5,6 @@ slow/arithmetic/edge_cases.php
 slow/array/empty.php
 slow/array_access/436.php
 slow/array_cse/543.php
-slow/array_double_key_conv.php
-slow/array_functions/ake-object.php
 slow/array_init/248.php
 slow/array_iterator/442.php
 slow/array_iterator/array-traversable-2.php
@@ -89,7 +87,6 @@ slow/closure/name.php
 slow/closure/return_types.php
 slow/closure/static_invoke.php
 slow/collection_classes/815.php
-slow/collection_classes/841.php
 slow/collection_classes/array-typehint.php
 slow/collection_classes/bool_cast.php
 slow/collection_classes/collection-isset.php
@@ -97,7 +94,6 @@ slow/collection_classes/deep_copy.php
 slow/collection_classes/frozen_map/api.php
 slow/collection_classes/frozen_map/constructors.php
 slow/collection_classes/frozen_map/equals.php
-slow/collection_classes/frozen_vector/array_key_exists.php
 slow/collection_classes/invalid-initializers.php
 slow/collection_classes/iterator-clone-bug.php
 slow/collection_classes/map-buffer-sharing.php
@@ -217,7 +213,6 @@ slow/ext_apc_iterator/iterator_002.php
 slow/ext_apc_iterator/iterator_003.php
 slow/ext_apc_iterator/iterator_004.php
 slow/ext_apc_iterator/iterator_005.php
-slow/ext_array/array_rand.php
 slow/ext_asio/backtrace.php
 slow/ext_bzip2/wrapper.php
 slow/ext_class/is-subclass-of-opt.php
@@ -253,7 +248,6 @@ slow/ext_mailparse/ext_uudecode.php
 slow/ext_math/intdiv.php
 slow/ext_misc/ext_misc.php
 slow/ext_misc/idx-1.php
-slow/ext_misc/idx-2.php
 slow/ext_misc/php_strip_whitespace_comment_outside.php
 slow/ext_misc/token_get_all_hashbang.php
 slow/ext_misc/token_get_all_inline_html.php
@@ -378,7 +372,6 @@ slow/guard-relaxation/await-predict.php
 slow/guard-relaxation/specialized-inner.php
 slow/hack-arrays-eval.php
 slow/hack_arr_compat/compare.php
-slow/hack_arr_compat/intlike.php
 slow/hack_arr_compat/scalars.php
 slow/hack_mode/2203.php
 slow/hack_mode/2204.php
@@ -502,7 +495,6 @@ slow/lang/invariant_cb_two.php
 slow/lang/mixedbag.php
 slow/lang/php_errormsg.php
 slow/lang/redefine_function.php
-slow/lang/ref_args.php
 slow/lang/reflection.php
 slow/lang/tuple_non_hh.php
 slow/late_static_binding/1880.php
@@ -802,7 +794,6 @@ slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
 slow/reflection/closure_static_locals.php
-slow/reflection/closure_use_vars.php
 slow/reflection/deprecation.php
 slow/reflection/dynamic_property2.php
 slow/reflection/get_closure_scope_class.php
@@ -970,7 +961,6 @@ slow/types/scalar_names.php
 slow/unary_operators/1437.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
-slow/unset/1114.php
 slow/unset/1117.php
 slow/use_function/double_alias.php
 slow/use_function/override.php

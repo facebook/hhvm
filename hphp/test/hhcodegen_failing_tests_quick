@@ -7,7 +7,6 @@ quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php
 quick/all_type_comparison_test.php
-quick/arrayidx.php
 quick/backtick.php
 quick/builtin_extension_DateTime.php
 quick/call_nonstatic_this.php

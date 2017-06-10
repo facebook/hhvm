@@ -1220,10 +1220,16 @@ MemberKey read_member_key(AsmState& as) {
 }
 
 LocalRange read_local_range(AsmState& as) {
-  auto const first = read_opcode_arg<std::string>(as);
+  auto first = read_opcode_arg<std::string>(as);
+  if (first.size() > 2 && first[0] == 'L' && first[1] == ':') {
+    first = "_" + first.substr(2);
+  }
+  auto const pos = first.find('+');
+  if (pos == std::string::npos) as.error("expecting `+' in local range");
+  auto const rest = first.substr(pos + 1);
+  first = first.substr(0, pos);
   auto const firstLoc = as.getLocalId(first);
-  as.in.expect('+');
-  auto const restCount = read_opcode_arg<uint32_t>(as);
+  auto const restCount = folly::to<uint32_t>(rest);
   if (firstLoc + restCount > as.maxUnnamed) {
     as.maxUnnamed = firstLoc + restCount;
   }
@@ -1669,6 +1675,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
     if (word[0] == '.') {
       if (word == ".ismemoizewrapper") {
         as.fe->isMemoizeWrapper = true;
+        as.in.expectWs(';');
         continue;
       }
       if (word == ".dyncallwrapper") {

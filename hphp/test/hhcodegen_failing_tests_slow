@@ -389,7 +389,6 @@ slow/hashbang_regression.php
 slow/here_doc/1234.php
 slow/here_doc/high_ascii_label.php
 slow/hh_namespace_migration/hh_frozenset4.php
-slow/hh_namespace_migration/hh_frozenset6.php
 slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php
 slow/hh_namespace_migration/hh_frozenvector7.php
@@ -399,7 +398,6 @@ slow/hh_namespace_migration/hh_map7.php
 slow/hh_namespace_migration/hh_pair4.php
 slow/hh_namespace_migration/hh_pair7.php
 slow/hh_namespace_migration/hh_set4.php
-slow/hh_namespace_migration/hh_set6.php
 slow/hh_namespace_migration/hh_set7.php
 slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
@@ -732,7 +730,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_002.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_004.php
 slow/php7_backported/scalar-types/scalar_weak_reference.php
-slow/php7_backported/scalar-types/self_on_closure_in_method.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/issetOnTemp.php
 slow/php7_backported/varSyntax/staticMember.php
@@ -787,7 +784,6 @@ slow/reflection/ReflectionClass_toString_001.php
 slow/reflection/ReflectionMethod_getPrototype2.php
 slow/reflection/ReflectionType-basic-explicit-php7.php
 slow/reflection/ReflectionType-detailed-explicit-php7.php
-slow/reflection/ReflectionType-detailed.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
@@ -927,18 +923,13 @@ slow/traits/static_closure_trait_generator.php
 slow/traits/traits_and_interfaces10.php
 slow/traits/traits_and_interfaces11.php
 slow/traits/traits_and_interfaces9.php
-slow/type_annotation/shape_typedef_with_known_and_unknown_fields.php
 slow/type_annotation/shape_typedef_with_multiple_optional_tokens.php
-slow/type_annotation/shape_typedef_with_optional_field.php
 slow/type_annotation/shape_typedef_with_question_mark.php
-slow/type_annotation/shape_typedef_with_unknown_fields.php
 slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
-slow/type_annotation/type_annotation1.php
 slow/type_annotation/type_annotation_classes4.php
-slow/type_annotation/type_annotation_parent1.php
-slow/type_annotation/type_annotation_parent2.php
 slow/type_annotation/type_annotation_self1.php
+slow/type_annotation/type_annotation_shape1.php
 slow/type_assertions/1857.php
 slow/type_assertions/1860.php
 slow/type_assertions/1862.php

@@ -964,9 +964,12 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
     let lit_constructor = match snd expr with
       | A.Array _ when is_only_values && count > stack_limit -> NewArray count
       | A.Array _ -> NewMixedArray count
-      | A.Collection ((_, ("dict" | "Set" | "ImmSet" | "Map" | "ImmMap"
-                  | "HH\\Set" | "HH\\ImmSet" | "HH\\Map" | "HH\\Immmap")), _) ->
-        NewDictArray count
+      | A.Collection ((_, name), _)
+        when SU.strip_ns name = "dict"
+          || SU.strip_ns name = "Set"
+          || SU.strip_ns name = "ImmSet"
+          || SU.strip_ns name = "Map"
+          || SU.strip_ns name = "ImmMap" -> NewDictArray count
       | _ -> failwith "emit_dynamic_collection: unexpected expression"
     in
     let transform_instr =

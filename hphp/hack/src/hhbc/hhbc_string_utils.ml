@@ -20,6 +20,19 @@ let strip_ns s =
   (* strip zero or more chars followed by a backslash *)
   Str.replace_first (Str.regexp {|.*\\|}) "" s
 
+
+module Types = struct
+  let fix_casing s = match String.lowercase_ascii s with
+    | "vector" -> "Vector"
+    | "immvector" -> "ImmVector"
+    | "set" -> "Set"
+    | "immset" -> "ImmSet"
+    | "map" -> "Map"
+    | "immmap" -> "ImmMap"
+    | "pair" -> "Pair"
+    | _ -> s
+end
+
 (* Integers are represented as strings *)
 module Integer = struct
   (* Dont accidentally convert 0 to 0o *)

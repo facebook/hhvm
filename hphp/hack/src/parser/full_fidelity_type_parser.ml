@@ -55,7 +55,8 @@ let rec parse_type_specifier parser =
   | Mixed -> (parser1, make_simple_type_specifier (make_token token))
   | This -> parse_simple_type_or_type_constant parser
   | Name -> parse_simple_type_or_type_constant_or_generic parser
-  | Self -> parse_remaining_type_constant parser1 (make_token token)
+  | Self
+  | Parent -> parse_simple_type_or_type_constant parser
   | XHPClassName
   | QualifiedName -> parse_possible_generic_specifier parser
   | Array -> parse_array_type_specifier parser
@@ -79,6 +80,7 @@ let rec parse_type_specifier parser =
     name  ::  name
     self  ::  name
     this  ::  name
+    parent  ::  name
     type-constant-type-name  ::  name
 *)
 
@@ -109,6 +111,16 @@ and parse_simple_type_or_type_constant parser =
   let token = peek_token parser in
   match Token.kind token with
   | ColonColon -> parse_remaining_type_constant parser (make_token name)
+  | Self | Parent ->
+    begin
+      match peek_token_kind ~lookahead:1 parser with
+      | ColonColon -> parse_remaining_type_constant parser (make_token name)
+      | _ ->
+        (parser, make_type_constant
+                   (make_token token)
+                   (make_missing())
+                   (make_missing()))
+    end
   | _ -> (parser, make_simple_type_specifier (make_token name))
 
 and parse_simple_type_or_type_constant_or_generic parser =

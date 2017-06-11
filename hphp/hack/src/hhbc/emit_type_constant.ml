@@ -70,19 +70,27 @@ let shape_field_name = function
 
 let rec shape_field_to_pair sf =
   let name, is_class_const = shape_field_name sf.A.sf_name in
-  (* TODO: Optional? *)
+  let is_optional = sf.A.sf_optional in
   let hint = sf.A.sf_hint in
   let class_const =
     if is_class_const then [(TV.String "is_cls_cns", TV.Bool true)] else []
   in
-  let inner_value =
-    class_const @ [(TV.String "value", hint_to_type_constant hint)]
+  let optional =
+    if is_optional
+    then [(TV.String "optional_shape_field", TV.Bool true)] else []
   in
+  let inner_value = [(TV.String "value", hint_to_type_constant hint)] in
+  let inner_value = class_const @ optional @ inner_value in
   let value = TV.Array inner_value in
   (TV.String name, value)
 
 and shape_info_to_typed_value si =
   TV.Array (List.map ~f:shape_field_to_pair si.A.si_shape_field_list)
+
+and shape_allows_unknown_fields { A.si_allows_unknown_fields; _ } =
+  if si_allows_unknown_fields then
+    [TV.String "allows_unknown_fields", TV.Bool true]
+  else []
 
 and type_constant_access_list sl =
   let l =
@@ -93,6 +101,7 @@ and type_constant_access_list sl =
 and resolve_classname s =
   if is_prim s || is_resolved_classname s then []
   else
+    let s = Types.fix_casing s in
     let classname = if in_HH_namespace s then prefix_namespace "HH" s else s in
      [TV.String "classname", TV.String classname]
 
@@ -114,7 +123,9 @@ and hint_to_type_constant_list h =
     let generic_types = get_generic_types l in
     kind @ classname @ generic_types
   | A.Hshape (si) ->
-    get_kind "shape" @ [TV.String "fields", shape_info_to_typed_value si]
+    shape_allows_unknown_fields si
+    @ get_kind "shape"
+    @ [TV.String "fields", shape_info_to_typed_value si]
   | A.Haccess ((_, s0), s1, sl) ->
     get_kind "typeaccess" @
      [TV.String "root_name", TV.String (root_to_string s0);

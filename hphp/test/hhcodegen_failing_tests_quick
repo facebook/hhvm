@@ -50,7 +50,6 @@ quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php
 quick/exit.php
-quick/fail_self.php
 quick/fatality.php
 quick/fc_enum_1.php
 quick/fib_gen.php
@@ -188,8 +187,6 @@ quick/trailing_comma_bad4.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
 quick/traits2.php
-quick/typehint_lsb_parent.php
-quick/typehint_lsb_self.php
 quick/undefined-bases.php
 quick/unset_static.php
 quick/vec/basic-getters.php

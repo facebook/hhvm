@@ -142,6 +142,11 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
   return name;
 }
 
+const StaticString s_array{"array"},
+  s_varray{"HH\\varray"},
+  s_darray{"HH\\darray"},
+  s_varray_or_darray{"HH\\varray_or_darray"};
+
 bool TypeConstraint::compat(const TypeConstraint& other) const {
   if (other.isExtended() || isExtended()) {
     /*
@@ -159,6 +164,16 @@ bool TypeConstraint::compat(const TypeConstraint& other) const {
 
   if (m_typeName && other.m_typeName) {
     if (m_typeName->isame(other.m_typeName)) {
+      return true;
+    }
+
+    auto const is_array = [](const StringData* str) {
+      return str->isame(s_array.get()) ||
+             str->isame(s_varray.get()) ||
+             str->isame(s_darray.get()) ||
+             str->isame(s_varray_or_darray.get());
+    };
+    if (is_array(m_typeName) && is_array(other.m_typeName)) {
       return true;
     }
 

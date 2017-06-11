@@ -183,6 +183,7 @@ slow/dv_array/hh-only1.php
 slow/dv_array/hh-only2.php
 slow/dv_array/is-a.php
 slow/dv_array/literal.php
+slow/dv_array/override.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php

@@ -167,7 +167,8 @@ function getmyuid(): mixed;
  */
 <<__Native>>
 function getopt(string $options,
-                mixed $longopts = null): array;
+                mixed $longopts = null,
+                int &$optind = null): array;
 
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.

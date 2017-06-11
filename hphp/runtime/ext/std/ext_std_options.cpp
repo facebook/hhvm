@@ -595,7 +595,8 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
 }
 
 static Array HHVM_FUNCTION(getopt, const String& options,
-                                   const Variant& longopts /*=null */) {
+                                   const Variant& longopts /*=null */,
+                                   OutputArg optind /*= null */) {
   auto opt_vec = parse_opts(options.data(), options.size());
 
   if (!longopts.isNull()) {
@@ -726,6 +727,9 @@ static Array HHVM_FUNCTION(getopt, const String& options,
     php_optarg = nullptr;
   }
 
+  if (optind.get()) {
+    *(optind->var()) = php_optind;
+  }
   return ret;
 }
 

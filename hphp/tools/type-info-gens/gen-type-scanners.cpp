@@ -15,6 +15,7 @@
 */
 
 #include <algorithm>
+#include <atomic>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -29,6 +30,9 @@
 
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
+
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/concurrent_vector.h>
 
 #include "hphp/tools/debug-parser/debug-parser.h"
 
@@ -253,8 +257,8 @@ struct Generator {
   void checkForLayoutErrors() const;
   void assignUniqueLayouts();
 
-  template <typename T, typename F> T extractFromMarkers(
-    const std::vector<ObjectType>&, F&&
+  template <typename T, typename F, typename C> T extractFromMarkers(
+    const C&, F&&
   ) const;
 
   size_t determineSize(const Type&) const;
@@ -276,9 +280,10 @@ struct Generator {
                                 size_t offset) const;
 
   IndexedType getIndexedType(const Object&) const;
-  std::vector<IndexedType> getIndexedTypes(
-    const std::vector<ObjectType>&
-  ) const;
+
+  template <typename C>
+  std::vector<IndexedType> getIndexedTypes(const C&) const;
+
   std::vector<IndexedType> mergeDupIndexedTypes(
     std::vector<Generator::IndexedType>
   ) const;
@@ -326,19 +331,9 @@ struct Generator {
    * They are marked mutable so that getObject() can remain const.
    */
 
-  mutable std::unordered_map<
-    CompileUnitId,
-    std::unordered_multimap<
-      ObjectTypeName,
-      ObjectTypeId,
-      ObjectNameHasher,
-      ObjectNameEquals
-    >
-  > m_objects_by_cu;
-
-  mutable std::unordered_map<
+  mutable tbb::concurrent_unordered_map<
     ObjectTypeName,
-    ObjectTypeKey,
+    tbb::concurrent_vector<ObjectTypeKey>,
     ObjectNameHasher,
     ObjectNameEquals
   > m_objects_by_name;
@@ -607,6 +602,8 @@ struct Generator::IndexedType {
   folly::Optional<LayoutError> errors;
 };
 
+constexpr size_t kNumThreads = 24;
+
 Generator::Generator(const std::string& filename, bool skip) {
   // Either this platform has no support for parsing debug information, or the
   // preprocessor symbol to enable actually building scanner isn't
@@ -617,32 +614,53 @@ Generator::Generator(const std::string& filename, bool skip) {
 
   m_parser = TypeParser::make(filename);
 
-  std::vector<ObjectType> indexer_types;
-  std::vector<ObjectType> countable_markers;
-  std::vector<ObjectType> scannable_countable_markers;
+  tbb::concurrent_vector<ObjectType> indexer_types;
+  tbb::concurrent_vector<ObjectType> countable_markers;
+  tbb::concurrent_vector<ObjectType> scannable_countable_markers;
 
   // Iterate through all the objects the debug info parser found, storing the
   // MarkCountable<> markers, and the Indexer<> instances. For everything, store
   // in the appropriate getObject() maps, which will allow us to do getObject()
   // lookups afterwards.
-  for (const auto& type : m_parser->getAllObjects()) {
-    if (isIndexerName(type.name.name)) {
-      indexer_types.emplace_back(type);
-    } else if (isMarkCountableName(type.name.name)) {
-      countable_markers.emplace_back(type);
-    } else if (isMarkScannableCountableName(type.name.name)) {
-      countable_markers.emplace_back(type);
-      scannable_countable_markers.emplace_back(type);
+  //
+  // There can be a lot of objects to iterate over, so do it concurrently.
+  {
+    auto const block_count = m_parser->getObjectBlockCount();
+    std::atomic<size_t> next_block{0};
+
+    auto const run = [&]{
+      while (true) {
+        auto const block = next_block++;
+        if (block >= block_count) break;
+
+        m_parser->forEachObjectInBlock(
+          block,
+          [&](const ObjectType& type) {
+            if (isIndexerName(type.name.name)) {
+              indexer_types.push_back(type);
+            } else if (isMarkCountableName(type.name.name)) {
+              countable_markers.push_back(type);
+            } else if (isMarkScannableCountableName(type.name.name)) {
+              countable_markers.push_back(type);
+              scannable_countable_markers.push_back(type);
+            }
+
+            // Incomplete types are useless for our purposes, so just ignore
+            // them.
+            if (type.incomplete) return;
+
+            m_objects_by_name[type.name].push_back(type.key);
+          }
+        );
+      }
+    };
+
+    std::vector<std::thread> threads;
+    // No point in creating more threads than there are blocks.
+    for (auto i = size_t{0}; i < std::min(block_count, kNumThreads); ++i) {
+      threads.emplace_back(std::thread(run));
     }
-
-    // Incomplete types are useless for our purposes, so just ignore them.
-    if (type.incomplete) continue;
-
-    m_objects_by_cu[type.key.compile_unit_id].emplace(
-      type.name,
-      type.key.object_id
-    );
-    m_objects_by_name.emplace(type.name, type.key);
+    for (auto& t : threads) t.join();
   }
 
   // Complain if it looks like we don't have any debug info enabled.
@@ -953,11 +971,8 @@ int Generator::compareIndexedTypes(const IndexedType& t1,
 // markers. Given a list of a specific marker object type, apply the given
 // callable f to it (which should extract the marked type out of it), sort and
 // uniquify the resultant list, and return it.
-template <typename T, typename F> T Generator::extractFromMarkers(
-  const std::vector<ObjectType>& types,
-  F&& f
-) const {
-
+template <typename T, typename F, typename C>
+T Generator::extractFromMarkers(const C& types, F&& f) const {
   std::vector<const Object*> objects;
   std::transform(
     types.begin(),
@@ -980,8 +995,9 @@ template <typename T, typename F> T Generator::extractFromMarkers(
 // Given a list of Indexer<> instantiation types, extract the marked types, and
 // create the appropriate IndexedType struct for them, merging duplicates
 // together.
+template <typename C>
 std::vector<Generator::IndexedType> Generator::getIndexedTypes(
-  const std::vector<ObjectType>& indexers
+  const C& indexers
 ) const {
   auto indexed = extractFromMarkers<std::vector<IndexedType>>(
     indexers,
@@ -2165,34 +2181,28 @@ const Object& Generator::getObject(const ObjectType& type) const {
   // only want to return an incomplete object as a last resort, so let's look
   // for any possible definitions of this type elsewhere.
 
-  // First look for a type with the same name in the same compilation unit. If
-  // there's one that's a complete definition, use that.
-  auto cu_iter = m_objects_by_cu.find(type.key.compile_unit_id);
-  if (cu_iter != m_objects_by_cu.end()) {
-    auto name_iter = cu_iter->second.equal_range(type.name);
-    while (name_iter.first != name_iter.second) {
-      const auto& other_object_id = name_iter.first->second;
-      if (other_object_id == type.key.object_id) continue;
-      auto other = m_parser->getObject(
-        ObjectTypeKey{other_object_id, type.key.compile_unit_id}
-      );
-      if (!other.incomplete) return insert(std::move(other));
-      ++name_iter.first;
+  auto const name_iter = m_objects_by_name.find(type.name);
+  if (name_iter != m_objects_by_name.end()) {
+    auto const& keys = name_iter->second;
+    // First look for a type with the same name in the same compilation unit. If
+    // there's one that's a complete definition, use that.
+    for (auto const& key : keys) {
+      if (key.object_id == type.key.object_id) continue;
+      if (key.compile_unit_id != type.key.compile_unit_id) continue;
+      auto other = m_parser->getObject(key);
+      if (other.incomplete) continue;
+      return insert(std::move(other));
     }
-  }
-
-  // Otherwise if the type has external linkage, look for any type elsewhere
-  // (with external linkage) with the same name and having a complete
-  // definition.
-  if (type.name.linkage != ObjectTypeName::Linkage::internal) {
-    auto name_iter = m_objects_by_name.equal_range(type.name);
-    while (name_iter.first != name_iter.second) {
-      if (name_iter.first->second.object_id == type.key.object_id) {
-        continue;
+    // Otherwise if the type has external linkage, look for any type in any
+    // compilation unit (with external linkage) with the same name and having a
+    // complete definition.
+    if (type.name.linkage != ObjectTypeName::Linkage::internal) {
+      for (auto const& key : keys) {
+        if (key.object_id == type.key.object_id) continue;
+        auto other = m_parser->getObject(key);
+        if (other.incomplete) continue;
+        return insert(std::move(other));
       }
-      auto other = m_parser->getObject(name_iter.first->second);
-      if (!other.incomplete) return insert(std::move(other));
-      ++name_iter.first;
     }
   }
 

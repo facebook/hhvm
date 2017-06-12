@@ -142,21 +142,23 @@ void generate(const std::string& source_executable, std::ostream& o) {
     auto const parser = TypeParser::make(source_executable);
     auto first = true;
 
-    for (auto const& type : parser->getAllObjects()) {
-      if (type.incomplete) continue;
-      if (type.name.linkage != ObjectTypeName::Linkage::external) continue;
+    parser->forEachObject(
+      [&](const ObjectType& type) {
+        if (type.incomplete) return;
+        if (type.name.linkage != ObjectTypeName::Linkage::external) return;
 
-      // Assume the first, complete, external definition is the canonical one.
-      if (!reflectables.count(type.name.name)) continue;
-      reflectables.erase(type.name.name);
+        // Assume the first, complete, external definition is the canonical one.
+        if (!reflectables.count(type.name.name)) return;
+        reflectables.erase(type.name.name);
 
-      if (first) {
-        first = false;
-      } else {
-        o << ",\n";
+        if (first) {
+          first = false;
+        } else {
+          o << ",\n";
+        }
+        generate_entry(parser->getObject(type.key), o, parser);
       }
-      generate_entry(parser->getObject(type.key), o, parser);
-    }
+    );
   }
 
   o << "\n};\n\n";

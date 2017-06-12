@@ -483,12 +483,33 @@ struct TypeParser {
   // supported debug info parser, this function will return null.
   static std::unique_ptr<TypeParser> make(const std::string& filename);
 
-  // Obtain a list of all object types defined in the file.
-  virtual const std::vector<ObjectType>& getAllObjects() const = 0;
+  // Iterate over the list of all object types defined in the file. This is safe
+  // to call from multiple threads concurrently.
+  template <typename F> void forEachObject(F f) const {
+    auto const count = getObjectBlockCount();
+    for (auto i = size_t{0}; i < count; ++i) {
+      for (auto const& obj : getObjectBlock(i)) f(obj);
+    }
+  }
+
+  // A parser implementation is allowed to store its list of object types in
+  // some number of disjoint "blocks" (the number may be 1). This returns the
+  // number of such blocks. This is safe to call from multiple thread
+  // concurrently.
+  virtual size_t getObjectBlockCount() const = 0;
+
+  // Iterate over the list of object types for one particular block. This is
+  // useful if you wish to consume the object list concurrently. This is safe to
+  // call from multiple threads concurrently.
+  template <typename F> void forEachObjectInBlock(size_t index, F f) const {
+    for (auto const& obj : getObjectBlock(index)) f(obj);
+  }
 
   // Given a particular object key, return the object description corresponding
-  // to it.
+  // to it. This is not safe to call concurrently and is not thread safe.
   virtual Object getObject(ObjectTypeKey key) = 0;
+ protected:
+  virtual const std::vector<ObjectType>& getObjectBlock(size_t index) const = 0;
 };
 
 /*

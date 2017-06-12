@@ -286,7 +286,8 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
      * forbid this, we have to be pessimistic. Imagine something like
      * Vector::map calling assert.
      */
-    if (!options.DisallowDynamicVarEnvFuncs) {
+    if (!options.DisallowDynamicVarEnvFuncs &&
+        (!ar.func || ar.func->mightBeSkipFrame())) {
       readUnknownLocals(env);
       killLocals(env);
       mayUseVV(env);

@@ -119,6 +119,7 @@ void imagickThrow(const char* fmt, ...) {
 // WandResource
 template<typename Wand>
 struct WandResource : SweepableResourceData {
+
 private:
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
@@ -129,6 +130,11 @@ public:
 
   ~WandResource() {
     clear();
+  }
+
+  CLASSNAME_IS("WandResource");
+  const String& o_getClassNameHook() const override {
+    return classnameof();
   }
 
   void clear() {

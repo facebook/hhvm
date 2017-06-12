@@ -21,21 +21,12 @@ type t = {
 
 let null_rule_id = -1
 
-let is_split _rule v =
-  match v with
-    | None
-    | Some 0 -> false
-    | _ -> true
-
 let get_cost kind =
   Cost.get_cost @@ match kind with
     | Simple cost -> cost
     | Always -> Cost.NoCost
     | Argument
     | XHPExpression -> Cost.Base
-
-let get_possible_values _id =
-  [1]
 
 let cares_about_children kind =
   match kind with

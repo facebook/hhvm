@@ -11,31 +11,28 @@
 open Core
 
 let expand_state state_queue state =
-  let { Solve_state.chunk_group; rvm; _ } = state in
+  let { Solve_state.chunk_group; rbm; _ } = state in
   let rule_ids = ISet.elements @@ Solve_state.get_candidate_rules state in
 
-  let _, next_rvms = List.map_env rvm rule_ids ~f:(fun env_rvm rule_id ->
+  let _, next_rbms = List.map_env rbm rule_ids ~f:(fun env_rbm rule_id ->
     if Solve_state.is_rule_bound state rule_id
-    then env_rvm, []
+    then env_rbm, None
     else begin
-      let possible_values = Rule.get_possible_values rule_id  in
-      let next_rvms = List.filter_map possible_values ~f:(fun v ->
-        let next_rvm = IMap.add rule_id v env_rvm in
-        if Chunk_group.is_rule_value_map_valid chunk_group next_rvm
-        then Some next_rvm
-        else None
-      ) in
-      let env_rvm = if List.length next_rvms = List.length possible_values
-        then IMap.add rule_id 0 env_rvm
-        else env_rvm
+      let next_rbm_opt =
+        Some (IMap.add rule_id true env_rbm)
+          |> Option.filter ~f:(Chunk_group.are_rule_bindings_valid chunk_group)
       in
-      env_rvm, next_rvms
+      let env_rbm = if Option.is_some next_rbm_opt
+        then IMap.add rule_id false env_rbm
+        else env_rbm
+      in
+      env_rbm, next_rbm_opt
     end
   ) in
-  let next_rvms = List.concat next_rvms in
+  let next_rbms = List.filter_opt next_rbms in
 
-  List.iter next_rvms ~f:(fun rvm ->
-    let st = Solve_state.make state.Solve_state.chunk_group rvm in
+  List.iter next_rbms ~f:(fun rbm ->
+    let st = Solve_state.make state.Solve_state.chunk_group rbm in
     State_queue.push state_queue st;
   );
   state_queue
@@ -68,8 +65,8 @@ let find_solve_states ?range chunk_groups =
       )
   in
   chunk_groups |> List.map ~f:(fun chunk_group ->
-    let rvm = Chunk_group.get_initial_rule_value_map chunk_group in
-    let init_state = Solve_state.make chunk_group rvm in
+    let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
+    let init_state = Solve_state.make chunk_group rbm in
     let state_queue = State_queue.make init_state in
     find_best_state state_queue
   )

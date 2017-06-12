@@ -15,11 +15,6 @@ end
 
 include PriorityQueue.Make(SolveStateKey)
 
-let make item =
-  let pq = make_empty 7 in
-  push pq item;
-  pq
-
 (**
  * This kind of defeats the purpose of having a priority queue in the first
  * place, since it degrades worst case performance back to O(n^2), but in

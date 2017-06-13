@@ -123,6 +123,7 @@ module Main_env = struct
     conn: server_conn;
     needs_idle : bool;
     files_with_diagnostics: SSet.t;
+    ready_dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
   }
 end
 open Main_env
@@ -132,7 +133,7 @@ module In_init_env = struct
     conn: server_conn;
     start_time : float;
     last_progress_report_time : float;
-    has_shown_dialog : bool;
+    busy_dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
     file_edits : ClientMessageQueue.client_message ImmQueue.t;
     tail_env: Tail.env;
   }
@@ -873,7 +874,7 @@ let report_progress
   : In_init_env.t =
   (* Our goal behind progress reporting is to let the user know when things   *)
   (* won't be instantaneous, and to show that things are working as expected. *)
-  (* We eagerly show a "please wait" dialog box after just 5 seconds into     *)
+  (* We eagerly show a "please wait" dialog box after a few seconds into      *)
   (* progress reporting. And we'll log to the console every 10 seconds. When  *)
   (* it completes, if any progress has so far been shown to the user, then    *)
   (* we'll log completion to the console. Except if it took a long time, like *)
@@ -882,13 +883,6 @@ let report_progress
   let open In_init_env in
   let time = Unix.time () in
   let ienv = ref ienv in
-
-  if (not !ienv.has_shown_dialog) then begin
-    ienv := {!ienv with has_shown_dialog = true};
-    print_show_message Message_type.InfoMessage
-      "Waiting for Hack server to be ready. See console for further details."
-    |> notify stdout "window/showMessage"
-  end;
 
   let delay_in_secs = int_of_float (time -. !ienv.start_time) in
   if (delay_in_secs mod 10 = 0 &&
@@ -906,17 +900,35 @@ let report_progress
 
 let report_progress_end
     (ienv: In_init_env.t)
-  : unit =
+  : state =
   let open In_init_env in
+  let menv =
+    { Main_env.
+      conn = ienv.In_init_env.conn;
+      needs_idle = true;
+      files_with_diagnostics = SSet.empty;
+      ready_dialog_cancel = None;
+    }
+  in
+  (* dismiss the "busy..." dialog if present *)
+  Option.call ~f:ienv.busy_dialog_cancel ();
+  (* and alert the user that hack is ready, either by console log or by dialog *)
   let time = Unix.time () in
-  let msg = Printf.sprintf "Hack is now ready, after %i seconds."
-      (int_of_float (time -. ienv.start_time)) in
-  if (time -. ienv.start_time >= 60.0) then begin
-    print_show_message Message_type.InfoMessage msg
-    |> notify stdout "window/showMessage"
+  let seconds = int_of_float (time -. ienv.start_time) in
+  let msg = Printf.sprintf "Hack is now ready, after %i seconds." seconds in
+  if (time -. ienv.start_time < 60.0) then begin
+    print_log_message Message_type.InfoMessage msg |> notify stdout "window/logMessage";
+    Main_loop menv
   end else begin
-    print_log_message Message_type.InfoMessage msg
-    |> notify stdout "window/logMessage";
+    let clear_cancel_flag state = match state with
+      | Main_loop menv -> Main_loop {menv with ready_dialog_cancel = None}
+      | _ -> state
+    in
+    let handle_result ~state ~result:_ = clear_cancel_flag state in
+    let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+    let req = print_show_message_request Message_type.InfoMessage msg [] in
+    let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+    Main_loop {menv with ready_dialog_cancel = Some cancel;}
   end
 
 
@@ -1077,15 +1089,24 @@ let do_initialize ()
         conn = server_conn;
         needs_idle = true;
         files_with_diagnostics = SSet.empty;
+        ready_dialog_cancel = None;
       }
     end else begin
       let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
+      let clear_cancel_flag state = match state with
+        | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
+        | _ -> state in
+      let handle_result ~state ~result:_ = clear_cancel_flag state in
+      let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+      let req = print_show_message_request Message_type.InfoMessage
+          "Waiting for Hack server to be ready. See console for further details." [] in
+      let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
       let ienv =
         { In_init_env.
           conn = server_conn;
           start_time;
           last_progress_report_time = start_time;
-          has_shown_dialog = false;
+          busy_dialog_cancel = Some cancel;
           file_edits = ImmQueue.empty;
           tail_env = Tail.create_env log_file;
         } in
@@ -1142,6 +1163,24 @@ let regain_lost_server_if_necessary (state: state) (event: event) : state =
     new_state
   | _ ->
     state
+
+
+let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
+  (* We'll auto-dismiss the ready dialog if it was up, in response to user    *)
+  (* actions like typing or hover, and in response to a lost server.          *)
+  let open ClientMessageQueue in
+  match state with
+  | Main_loop ({ready_dialog_cancel = Some cancel; _} as menv) -> begin
+      match event with
+      | Client_message {kind = ClientMessageQueue.Response; _} ->
+        state
+      | Client_message _
+      | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+        cancel (); Main_loop {menv with ready_dialog_cancel = None}
+      | _ ->
+        state
+    end
+  | _ -> state
 
 
 (************************************************************************)
@@ -1201,12 +1240,7 @@ let handle_event
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
     do_initialize_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
-    report_progress_end ienv;
-    state := Main_loop {
-      conn = ienv.In_init_env.conn;
-      needs_idle = true;
-      files_with_diagnostics = SSet.empty;
-    }
+    state := report_progress_end ienv
 
   (* any "hello" from the server when we weren't expecting it. This is so *)
   (* egregious that we can't trust anything more from the server.         *)
@@ -1324,6 +1358,7 @@ let handle_event
   (* server shut-down request *)
   | Main_loop menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     do_diagnostics_flush menv.files_with_diagnostics;
+    state := dismiss_ready_dialog_if_necessary !state event;
     state := Lost_server
 
   (* server shut-down request, unexpected *)
@@ -1377,6 +1412,7 @@ let main (env: env) : 'a =
         | _ -> ()
       end;
       state := regain_lost_server_if_necessary !state event;
+      state := dismiss_ready_dialog_if_necessary !state event;
       handle_event state client event;
       match event with
       | Client_message c -> begin

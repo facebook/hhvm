@@ -183,16 +183,23 @@ exception Client_fatal_connection_exception of Marshal_tools.remote_exception_da
 exception Client_recoverable_connection_exception of Marshal_tools.remote_exception_data
 exception Server_fatal_connection_exception of Marshal_tools.remote_exception_data
 
+
 (* To handle requests, we use a global list of callbacks for when the *)
 (* response is received, and a global id counter for correlation...   *)
+type on_result_callback =
+  state:state -> result:Hh_json.json option -> state
+
+type on_error_callback =
+  state:state -> code:int -> message:string -> data:Hh_json.json option -> state
+
 module Callback = struct
   type t = {
-    method_: string; (* name of the request *)
-    on_result: Hh_json.json option -> unit; (* takes the result *)
-    on_error: int -> string -> Hh_json.json option -> unit;
-    (* code, message, data *)
+    method_: string;
+    on_result: on_result_callback;
+    on_error: on_error_callback;
   }
 end
+
 let requests_counter: IMap.key ref = ref 0
 let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
 
@@ -283,8 +290,8 @@ let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
 (* request: produce a Request message; returns a method you can call to cancel it *)
 let request
     (outchan: out_channel)
-    (on_result: Hh_json.json option -> unit)
-    (on_error: int -> string -> Hh_json.json option -> unit)
+    (on_result: on_result_callback)
+    (on_error: on_error_callback)
     (method_: string)
     (json: Hh_json.json)
   : unit -> unit =
@@ -332,10 +339,11 @@ let get_outstanding_method_name (id: Hh_json.json option) : string =
   | None -> ""
 
 let do_response
+    (state: state)
     (id: Hh_json.json option)
     (result: Hh_json.json option)
     (error: Hh_json.json option)
-  : unit =
+  : state =
   let open Callback in
   let id, on_result, on_error = match (get_outstanding_request id) with
     | Some (id, callback) -> (id, callback.on_result, callback.on_error)
@@ -346,9 +354,9 @@ let do_response
     let code = Jget.int_exn error "code" in
     let message = Jget.string_exn error "message" in
     let data = Jget.val_opt error "data" in
-    on_error code message data
+    on_error state code message data
   else
-    on_result result
+    on_result state result
 
 
 let client_log (level: Lsp.Message_type.t) (message: string) : unit =
@@ -1151,7 +1159,7 @@ let handle_event
   match !state, event with
   (* response *)
   | _, Client_message c when c.kind = ClientMessageQueue.Response ->
-    do_response c.id c.result c.error
+    state := do_response !state c.id c.result c.error
 
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" ->

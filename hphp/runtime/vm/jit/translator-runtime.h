@@ -153,8 +153,6 @@ void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
-RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
-
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 

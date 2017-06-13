@@ -746,6 +746,12 @@ struct StaticLocName : IRExtraData {
     );
   }
 
+  bool equals(const StaticLocName& o) const {
+    return func == o.func && name == o.name;
+  }
+  size_t hash() const {
+    return hash_int64_pair((intptr_t)func, (intptr_t)name);
+  }
   const Func* func;
   const StringData* name;
 };
@@ -1297,7 +1303,9 @@ X(LdClsMethodCacheCls,          ClsMethodData);
 X(LdClsMethodFCacheFunc,        ClsMethodData);
 X(LookupClsMethodFCache,        ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
+X(LdClosureStaticLoc,           StaticLocName);
 X(LdStaticLoc,                  StaticLocName);
+X(CheckStaticLoc,               StaticLocName);
 X(InitStaticLoc,                StaticLocName);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);

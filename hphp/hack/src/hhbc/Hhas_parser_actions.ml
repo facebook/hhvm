@@ -828,7 +828,10 @@ match s with
     IIterator (IterBreak (labelofiarg arg1, listofiteratorsofiarg arg2))
 
  (* instruct_misc *)
- | "StaticLoc" -> IMisc (StaticLoc (localidofiarg arg1, stringofiarg arg2))
+ | "StaticLocCheck" ->
+    IMisc (StaticLocCheck (localidofiarg arg1, stringofiarg arg2))
+ | "StaticLocDef" ->
+    IMisc (StaticLocDef (localidofiarg arg1, stringofiarg arg2))
  | "StaticLocInit" ->
     IMisc (StaticLocInit (localidofiarg arg1, stringofiarg arg2))
  | "IncStat" -> IMisc (IncStat (intofiarg arg1, intofiarg arg2))

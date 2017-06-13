@@ -4445,14 +4445,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       } else {
         Label done;
         emitVirtualLocal(local);
-        e.StaticLoc(local, name);
+        e.StaticLocCheck(local, name);
         e.JmpNZ(done);
 
         emitVirtualLocal(local);
         visit(value);
         emitConvertToCell(e);
-        emitSet(e);
-        emitPop(e);
+        e.StaticLocDef(local, name);
 
         done.set(e);
       }

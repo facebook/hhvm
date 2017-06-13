@@ -391,9 +391,12 @@ SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
   }
 
   if (l.tag() == LTag::Local) {
-    // If FrameStateMgr's type for a local isn't as good as the type param,
-    // we're missing information in the IR.
-    assertx(inst->typeParam() >= type);
+    if (!inst->marker().func()->isClosureBody() ||
+        l.localId() != inst->marker().func()->numParams()) {
+      // If FrameStateMgr's type for a local isn't as good as the type param,
+      // we're missing information in the IR.
+      assertx(inst->typeParam() >= type);
+    }
   }
   inst->setTypeParam(std::min(type, inst->typeParam()));
 

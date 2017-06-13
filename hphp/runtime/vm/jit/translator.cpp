@@ -374,8 +374,10 @@ static const struct {
                    {None,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
-  { OpStaticLoc,
-                   {None,             Stack1,       OutBoolean      }},
+  { OpStaticLocCheck,
+                   {None,             Stack1|Local, OutBoolean      }},
+  { OpStaticLocDef,
+                   {Stack1,           Local,        OutVUnknown     }},
   { OpStaticLocInit,
                    {Stack1,           Local,        OutVUnknown     }},
   { OpCatch,       {None,             Stack1,       OutObject       }},
@@ -1004,7 +1006,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Shl:
   case Op::Shr:
   case Op::Silence:
-  case Op::StaticLoc:
+  case Op::StaticLocDef:
+  case Op::StaticLocCheck:
   case Op::StaticLocInit:
   case Op::String:
   case Op::This:

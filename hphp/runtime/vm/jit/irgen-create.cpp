@@ -455,123 +455,192 @@ void emitColFromArray(IRGS& env, int type) {
 }
 
 void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
-  if (curFunc(env)->isPseudoMain()) PUNT(StaticLocInit);
+  auto const func = curFunc(env);
+  if (func->isPseudoMain()) PUNT(StaticLocInit);
 
-  auto const ldPMExit = makePseudoMainExit(env);
   auto const value = popC(env);
 
   // Closures and generators from closures don't satisfy the "one static per
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
-    if (curFunc(env)->isClosureBody()) {
-      auto const theBox = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+    if (func->isClosureBody()) {
+      assertx(func->isClosureBody());
+      assertx(!func->hasVariadicCaptureParam());
+      auto const obj = gen(
+        env, LdLoc, TObj, LocalId(func->numParams()), fp(env));
+
+      auto const theStatic = gen(env,
+                                 LdClosureStaticLoc,
+                                 StaticLocName { func, name },
+                                 obj);
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, CheckClosureStaticLocInit, taken, theBox);
+          gen(env, CheckTypeMem, TBoxedCell, taken, theStatic);
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          gen(env, InitClosureStaticLoc, theBox, value);
+          gen(env, StMem, theStatic, value);
+          gen(env, BoxPtr, theStatic);
         }
       );
-      return theBox;
+      return gen(env, LdMem, TBoxedCell, theStatic);
     }
 
-    return cond(
+    ifThen(
       env,
       [&] (Block* taken) {
-        return gen(
+        gen(
           env,
-          LdStaticLoc,
-          StaticLocName { curFunc(env), name },
+          CheckStaticLoc,
+          StaticLocName { func, name },
           taken
         );
       },
-      [&] (SSATmp* theBox) { return theBox; },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        return gen(
+        gen(
           env,
           InitStaticLoc,
-          StaticLocName { curFunc(env), name },
+          StaticLocName { func, name },
           value
         );
       }
     );
+    return gen(env, LdStaticLoc, StaticLocName { func, name });
   }();
 
   gen(env, IncRef, box);
-  auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
+  auto const oldValue = ldLoc(env, locId, nullptr, DataTypeSpecific);
   stLocRaw(env, locId, fp(env), box);
   decRef(env, oldValue);
   // We don't need to decref value---it's a bytecode invariant that
   // our Cell was not ref-counted.
 }
 
-void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
-  if (curFunc(env)->isPseudoMain()) PUNT(StaticLoc);
+void emitStaticLocCheck(IRGS& env, int32_t locId, const StringData* name) {
+  auto const func = curFunc(env);
+  if (func->isPseudoMain()) PUNT(StaticLocCheck);
 
-  auto const ldPMExit = makePseudoMainExit(env);
+  auto bindLocal = [&] (SSATmp* box) {
+    gen(env, IncRef, box);
+    auto const oldValue = ldLoc(env, locId, nullptr, DataTypeGeneric);
+    stLocRaw(env, locId, fp(env), box);
+    decRef(env, oldValue);
+    return cns(env, true);
+  };
 
-  SSATmp* box;
-  SSATmp* inited;
-  std::tie(box, inited) = [&] {
-    if (curFunc(env)->isClosureBody()) {
-      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
-      auto const inited = cond(
+  auto const inited = [&] {
+    if (func->isClosureBody()) {
+      auto const obj = gen(
+        env, LdLoc, TObj, LocalId(func->numParams()), fp(env));
+      auto const theStatic = gen(env,
+                                 LdClosureStaticLoc,
+                                 StaticLocName { func, name },
+                                 obj);
+      return cond(
         env,
         [&] (Block* taken) {
-          gen(env, CheckClosureStaticLocInit, taken, box);
+          gen(env, CheckTypeMem, TBoxedCell, taken, theStatic);
         },
-        [&] { // Next: the static local is already initialized
-          return cns(env, true);
+        [&] {
+          return bindLocal(gen(env, LdMem, TInitCell, theStatic));
         },
-        [&] { // Taken: need to initialize the static local
-          /*
-           * Even though this path is "cold", we're not marking it
-           * unlikely because the size of the instructions this will
-           * generate is about 10 bytes, which is not much larger than the
-           * 5 byte jump to acold would be.
-           */
-          gen(env, InitClosureStaticLoc, box, cns(env, TInitNull));
+        [&] {
+          hint(env, Block::Hint::Unlikely);
           return cns(env, false);
         }
       );
-      return std::make_pair(box, inited);
     }
 
-    return condPair(
+    return cond(
       env,
       [&] (Block* taken) {
-        return gen(
+        gen(
           env,
-          LdStaticLoc,
-          StaticLocName { curFunc(env), name },
+          CheckStaticLoc,
+          StaticLocName { func, name },
           taken
         );
       },
-      [&] (SSATmp* box2) { // Next: the static local is already initialized
-        return std::make_pair(box2, cns(env, true));
+      [&] {
+        // Next: the static local is already initialized
+        return bindLocal(gen(env, LdStaticLoc, StaticLocName { func, name }));
       },
       [&] { // Taken: need to initialize the static local
-        hint(env, Block::Hint::Unlikely);
-        auto const inited = gen(
-          env,
-          InitStaticLoc,
-          StaticLocName { curFunc(env), name },
-          cns(env, TInitNull)
-        );
-        return std::make_pair(inited, cns(env, false));
+        return cns(env, false);
       }
     );
   }();
 
+  push(env, inited);
+}
+
+void emitStaticLocDef(IRGS& env, int32_t locId, const StringData* name) {
+  auto const func = curFunc(env);
+  if (func->isPseudoMain()) PUNT(StaticLocDef);
+
+  auto const value = popC(env);
+
+  auto const box = [&] {
+    if (func->isClosureBody()) {
+      auto const obj = gen(
+        env, LdLoc, TObj, LocalId(func->numParams()), fp(env));
+      auto const theStatic = gen(env,
+                                 LdClosureStaticLoc,
+                                 StaticLocName { func, name },
+                                 obj);
+      gen(env, StMem, theStatic, value);
+      auto const boxedStatic = gen(env, BoxPtr, theStatic);
+      return gen(env, LdMem, TBoxedInitCell, boxedStatic);
+    }
+
+    auto init = [&] {
+      gen(
+        env,
+        InitStaticLoc,
+        StaticLocName { func, name },
+        value
+      );
+    };
+
+    if (func->isMemoizeWrapper() && !func->numParams()) {
+      ifThenElse(
+        env,
+        [&] (Block* taken) {
+          gen(
+            env,
+            CheckStaticLoc,
+            StaticLocName { func, name },
+            taken
+          );
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          auto oldBox = gen(env, LdStaticLoc, StaticLocName { func, name });
+          auto oldVal = gen(env, LdRef, TInitCell, oldBox);
+          init();
+          decRef(env, oldVal);
+        },
+        [&] {
+          init();
+        }
+      );
+    } else {
+      init();
+    }
+
+    return gen(
+      env,
+      LdStaticLoc,
+      StaticLocName { func, name }
+    );
+  }();
+
   gen(env, IncRef, box);
-  auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeGeneric);
+  auto const oldValue = ldLoc(env, locId, nullptr, DataTypeGeneric);
   stLocRaw(env, locId, fp(env), box);
   decRef(env, oldValue);
-  push(env, inited);
 }
 
 //////////////////////////////////////////////////////////////////////

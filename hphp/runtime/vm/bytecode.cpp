@@ -5380,47 +5380,98 @@ OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
   }
 }
 
-static inline RefData* lookupStatic(const StringData* name,
-                                    const ActRec* fp,
-                                    bool& inited) {
+static inline TypedValue* lookupClosureStatic(const StringData* name,
+                                              const ActRec* fp) {
   auto const func = fp->m_func;
 
-  if (UNLIKELY(func->isClosureBody())) {
-    assert(!func->hasVariadicCaptureParam());
-    return lookupStaticFromClosure(
-      frame_local(fp, func->numParams())->m_data.pobj, name, inited);
-  }
+  assertx(func->isClosureBody());
+  assertx(!func->hasVariadicCaptureParam());
+  auto const obj = frame_local(fp, func->numParams())->m_data.pobj;
 
-  auto const staticLocalData = rds::bindStaticLocal(func, name);
-  inited = staticLocalData.isInit();
-  if (!inited) {
-    staticLocalData->ref.initInRDS();
-    staticLocalData.markInit();
-  }
-  return &staticLocalData.get()->ref;
+  return lookupStaticTvFromClosure(obj, name);
 }
 
-OPTBLD_INLINE void iopStaticLoc(local_var loc, const StringData* var) {
-  bool inited;
-  auto const refData = lookupStatic(var, vmfp(), inited);
-  if (!inited) {
-    refData->tv()->m_type = KindOfNull;
-  }
-  auto const tmpTV = make_tv<KindOfRef>(refData);
+OPTBLD_INLINE void iopStaticLocCheck(local_var loc, const StringData* var) {
+  auto const func = vmfp()->m_func;
+
+  auto ref = [&] () -> RefData* {
+    if (UNLIKELY(func->isClosureBody())) {
+      auto const val = lookupClosureStatic(var, vmfp());
+      if (val->m_type == KindOfUninit) {
+        return nullptr;
+      }
+      assert(val->m_type == KindOfRef);
+      return val->m_data.pref;
+    }
+
+    auto const staticLocalData = rds::bindStaticLocal(func, var);
+    if (!staticLocalData.isInit()) {
+      return nullptr;
+    }
+
+    return &staticLocalData->ref;
+  }();
+
+  if (!ref) return vmStack().pushBool(false);
+
+  auto const tmpTV = make_tv<KindOfRef>(ref);
   tvBind(&tmpTV, loc.ptr);
-  vmStack().pushBool(inited);
+  vmStack().pushBool(true);
+}
+
+OPTBLD_INLINE void iopStaticLocDef(local_var loc, const StringData* var) {
+  auto const func = vmfp()->m_func;
+  auto const initVal = vmStack().topC();
+
+  auto ref = [&] () -> RefData* {
+    if (UNLIKELY(func->isClosureBody())) {
+      auto const val = lookupClosureStatic(var, vmfp());
+      assertx(val->m_type == KindOfUninit);
+      cellCopy(*initVal, *val);
+      tvBox(val);
+      return val->m_data.pref;
+    }
+
+    auto const staticLocalData = rds::bindStaticLocal(func, var);
+    if (LIKELY(!staticLocalData.isInit())) {
+      staticLocalData->ref.initInRDS();
+      staticLocalData.markInit();
+      cellCopy(*initVal, *staticLocalData->ref.tv());
+    } else {
+      cellMove(*initVal, *staticLocalData->ref.tv());
+    }
+    return &staticLocalData->ref;
+  }();
+
+  auto const tmpTV = make_tv<KindOfRef>(ref);
+  tvBind(&tmpTV, loc.ptr);
+  vmStack().discard();
 }
 
 OPTBLD_INLINE void iopStaticLocInit(local_var loc, const StringData* var) {
-  bool inited;
-  auto const refData = lookupStatic(var, vmfp(), inited);
+  auto const func = vmfp()->m_func;
+  auto const initVal = vmStack().topC();
 
-  if (!inited) {
-    auto const initVal = vmStack().topC();
-    cellDup(*initVal, *refData->tv());
-  }
+  auto ref = [&] () -> RefData* {
+    if (UNLIKELY(func->isClosureBody())) {
+      auto const val = lookupClosureStatic(var, vmfp());
+      if (val->m_type == KindOfUninit) {
+        cellCopy(*initVal, *val);
+        tvBox(val);
+      }
+      return val->m_data.pref;
+    }
 
-  auto const tmpTV = make_tv<KindOfRef>(refData);
+    auto const staticLocalData = rds::bindStaticLocal(func, var);
+    if (!staticLocalData.isInit()) {
+      staticLocalData->ref.initInRDS();
+      staticLocalData.markInit();
+      cellCopy(*initVal, *staticLocalData->ref.tv());
+    }
+    return &staticLocalData->ref;
+  }();
+
+  auto const tmpTV = make_tv<KindOfRef>(ref);
   tvBind(&tmpTV, loc.ptr);
   vmStack().discard();
 }

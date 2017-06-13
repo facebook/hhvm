@@ -287,7 +287,6 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckMixedArrayOffset,
                    CheckDictOffset,
                    CheckKeysetOffset,
-                   CheckClosureStaticLocInit,
                    CheckRefInner,
                    CheckCtxThis,
                    CheckFuncStatic));
@@ -2464,11 +2463,6 @@ SSATmp* simplifyCheckMBase(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyCheckClosureStaticLocInit(State& env,
-                                          const IRInstruction* inst) {
-  return mergeBranchDests(env, inst);
-}
-
 SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   auto const type = inst->src(0)->type();
 
@@ -3461,7 +3455,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckRefs)
   X(CheckRefInner)
   X(CheckStk)
-  X(CheckClosureStaticLocInit)
   X(CheckType)
   X(CheckTypeMem)
   X(AssertType)

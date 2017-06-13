@@ -39,7 +39,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 
 #include "hphp/runtime/vm/act-rec.h"
@@ -65,32 +64,6 @@ namespace HPHP {
 TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
-
-const StaticString s_staticPrefix("86static_");
-
-// Defined here so it can be inlined below.
-RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 const StringData* name,
-                                 bool& inited) {
-  assertx(closure->instanceof(c_Closure::classof()));
-  auto str = String::attach(
-    StringData::Make(s_staticPrefix.slice(), name->slice())
-  );
-  auto const cls = closure->getVMClass();
-  auto const slot = cls->lookupDeclProp(str.get());
-  assertx(slot != kInvalidSlot);
-  auto const val = c_Closure::fromObject(closure)->getStaticVar(slot);
-
-  if (val->m_type == KindOfUninit) {
-    inited = false;
-    val->m_type = KindOfNull;
-    tvBox(val);
-    return val->m_data.pref;
-  }
-  inited = true;
-  assertx(val->m_type == KindOfRef);
-  return val->m_data.pref;
-}
 
 namespace jit {
 
@@ -725,18 +698,6 @@ void VerifyRetTypeFail(TypedValue* tv) {
     unit->useStrictTypes();
   assertx(!tc.check(tv, func));
   tc.verifyReturnFail(func, tv, useStrictTypes);
-}
-
-RefData* ldClosureStaticLoc(StringData* name, ActRec* fp) {
-  auto const func = fp->m_func;
-  assertx(func->isClosureBody());
-  auto const closureLoc = frame_local(fp, func->numParams());
-
-  bool inited;
-  auto const refData = lookupStaticFromClosure(
-    closureLoc->m_data.pobj, name, inited);
-  if (!inited) tvWriteUninit(refData->tv());
-  return refData;
 }
 
 namespace {

@@ -459,7 +459,8 @@ type instruct_misc =
   | BareThis of bare_this_op
   | CheckThis
   | InitThisLoc of local_id
-  | StaticLoc of local_id * Litstr.id
+  | StaticLocCheck of local_id * Litstr.id
+  | StaticLocDef of local_id * Litstr.id
   | StaticLocInit of local_id * Litstr.id
   | Catch
   | OODeclExists of class_kind

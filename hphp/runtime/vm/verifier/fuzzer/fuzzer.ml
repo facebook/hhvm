@@ -401,20 +401,21 @@ let mutate_immediate (input : HP.t) : mutation_monad =
    let mutate_silence op =
      if should_mutate() then [Start; End] |> rand_elt else op in
     match s with
-    | BareThis        b       -> BareThis        (mutate_bare            b)
-    | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
-    | StaticLoc     (id, str) -> StaticLoc       (mutate_local_id id  !mag, str)
-    | StaticLocInit (id, str) -> StaticLocInit   (mutate_local_id id  !mag, str)
-    | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
-    | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
-    | Self            i       -> Self            (mutate_int      i   !mag)
-    | Parent          i       -> Parent          (mutate_int      i   !mag)
-    | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
-    | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
-    | IncStat        (i,  i') -> IncStat         (mutate_int      i   !mag,
-                                                  mutate_int      i'  !mag)
-    | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
-                                                  mutate_int      i'  !mag)
+    | BareThis        b        -> BareThis        (mutate_bare            b)
+    | InitThisLoc    id        -> InitThisLoc     (mutate_local_id id  !mag)
+    | StaticLocCheck (id, str) -> StaticLocCheck  (mutate_local_id id  !mag, str)
+    | StaticLocDef   (id, str) -> StaticLocDef    (mutate_local_id id  !mag, str)
+    | StaticLocInit  (id, str) -> StaticLocInit   (mutate_local_id id  !mag, str)
+    | OODeclExists    k        -> OODeclExists    (mutate_kind            k)
+    | VerifyParamType p        -> VerifyParamType (mutate_param_id p   !mag)
+    | Self            i        -> Self            (mutate_int      i   !mag)
+    | Parent          i        -> Parent          (mutate_int      i   !mag)
+    | LateBoundCls    i        -> LateBoundCls    (mutate_int      i   !mag)
+    | ClsRefName      i        -> ClsRefName      (mutate_int      i   !mag)
+    | IncStat        (i,  i')  -> IncStat         (mutate_int      i   !mag,
+                                                   mutate_int      i'  !mag)
+    | CreateCl       (i,  i')  -> CreateCl        (mutate_int      i   !mag,
+                                                   mutate_int      i'  !mag)
       (*TODO: is it worth it to mutate asserts? They have no effect at runtime,
         so this will never generate a verifing program that crashes HHVM *)
     | AssertRATL    (id,   r) -> AssertRATL      (mutate_local_id id  !mag,   r)

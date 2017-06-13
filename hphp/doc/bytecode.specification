@@ -3930,14 +3930,21 @@ InitThisLoc <local variable id>    []  ->  []
   variable. If the current instance is null, or if this bytecode appears in a
   function body that is not a class method, this instruction does nothing.
 
-StaticLoc <local variable id> <litstr id>    []  ->  [C:Bool]
+StaticLocCheck  <local variable id> <litstr id> []  ->  [C:Bool]
 
   Static variable. This instruction first checks if the static variable named
   %2 has been marked as initialized. If the static variable has been marked as
   initialized, this instruction binds the static variable to the local variable
-  %1 and pushes true. Otherwise, this instruction binds the static variable to
-  the local variable %1, marks the static variable as initialized, and pushes
-  false.
+  %1 and pushes true. Otherwise, this instruction pushes false.
+
+StaticLocDef <local variable id> <litstr id>        [C]  ->  []
+
+  Initialize static variable. This instruction binds the static variable to
+  the local variable, assigns $1 to the local variable, and marks the static
+  variable as initialized.
+
+  Precondition: Except in memoized functions, the static local named %2 has
+  not been initialized
 
 StaticLocInit <local variable id> <litstr id>    [C]  ->  []
 

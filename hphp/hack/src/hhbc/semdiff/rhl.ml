@@ -396,7 +396,8 @@ let check_instruct_misc asn i i' =
  match i,i' with
   | InitThisLoc l, InitThisLoc l' ->
       writes asn l l'
-  | StaticLoc (l,str), StaticLoc (l',str')
+  | StaticLocCheck (l,str), StaticLocCheck (l',str')
+  | StaticLocDef (l,str), StaticLocDef (l',str')
   | StaticLocInit (l,str), StaticLocInit (l',str') ->
      if str=str' then writes asn l l'
      else None

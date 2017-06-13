@@ -514,8 +514,10 @@ let string_of_misc instruction =
     | IsUninit -> "IsUninit"
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
-    | StaticLoc (local, text) ->
-      sep ["StaticLoc"; string_of_local_id local; "\"" ^ text ^ "\""]
+    | StaticLocCheck (local, text) ->
+      sep ["StaticLocCheck"; string_of_local_id local; "\"" ^ text ^ "\""]
+    | StaticLocDef (local, text) ->
+      sep ["StaticLocDef"; string_of_local_id local; "\"" ^ text ^ "\""]
     | StaticLocInit (local, text) ->
       sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
     | MemoGet (count, Local.Unnamed first, local_count) ->

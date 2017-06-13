@@ -180,6 +180,14 @@ void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
   }
 }
 
+void maybeBindLocalStatic(ISS& env, LocalId id) {
+  if (is_volatile_local(env.ctx.func, id)) return;
+  if (env.state.localStaticBindings.size() <= id) return;
+  if (env.state.localStaticBindings[id] != LocalStaticBinding::None) return;
+  env.state.localStaticBindings[id] = LocalStaticBinding::Maybe;
+  return;
+}
+
 void unbindLocalStatic(ISS& env, LocalId id) {
   modifyLocalStatic(env, id, TUninit);
 }

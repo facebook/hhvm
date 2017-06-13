@@ -204,11 +204,6 @@ newInstance(Class* cls) {
   return inst;
 }
 
-// Returns a RefData* that is already incref'd.
-RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 const StringData* name,
-                                 bool& inited);
-
 /*
  * A few functions are exposed by libhphp_analysis and used in
  * VM-specific parts of the runtime.

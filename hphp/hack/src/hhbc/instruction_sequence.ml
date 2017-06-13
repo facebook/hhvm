@@ -209,8 +209,12 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 
-let instr_static_loc name =
-  instr (IMisc (StaticLoc (Local.Named name,
+let instr_static_loc_check name =
+  instr (IMisc (StaticLocCheck (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
+
+let instr_static_loc_def name =
+  instr (IMisc (StaticLocDef (Local.Named name,
     Hhbc_string_utils.Locals.strip_dollar name)))
 
 let instr_static_loc_init name =
@@ -501,11 +505,10 @@ let rewrite_class_refs instrseq =
                 else
                   let l = Label.next_regular () in
                   gather [
-                    instr_static_loc name;
+                    instr_static_loc_check name;
                     instr_jmpnz l;
                     emit_expr env e;
-                    instr_setl @@ Local.Named name;
-                    instr_popc;
+                    instr_static_loc_def name;
                     instr_label l;
                   ]
         end

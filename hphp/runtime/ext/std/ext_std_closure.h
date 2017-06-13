@@ -160,6 +160,10 @@ private:
   static void setAllocators(Class* cls);
 };
 
+TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
+                                      const StringData* name);
+Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

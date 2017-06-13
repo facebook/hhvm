@@ -583,7 +583,8 @@ constexpr int32_t kMaxConcatN = 4;
                                        NOV,             ONE(CV),    NF) \
   O(CheckThis,       NA,               NOV,             NOV,        NF) \
   O(InitThisLoc,     ONE(LA),          NOV,             NOV,        NF) \
-  O(StaticLoc,       TWO(LA,SA),       NOV,             ONE(CV),    NF) \
+  O(StaticLocCheck,  TWO(LA,SA),       NOV,             ONE(CV),    NF) \
+  O(StaticLocDef,    TWO(LA,SA),       ONE(CV),         NOV,        NF) \
   O(StaticLocInit,   TWO(LA,SA),       ONE(CV),         NOV,        NF) \
   O(Catch,           NA,               NOV,             ONE(CV),    NF) \
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \

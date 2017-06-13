@@ -34,7 +34,24 @@ const StaticString
   s_varprefix("$"),
   s_parameter("parameter"),
   s_required("<required>"),
-  s_optional("<optional>");
+  s_optional("<optional>"),
+  s_staticPrefix("86static_");
+
+Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name) {
+  auto str = String::attach(
+    StringData::Make(s_staticPrefix.slice(), name->slice())
+  );
+  auto const slot = cls->lookupDeclProp(str.get());
+  assertx(slot != kInvalidSlot);
+  return slot;
+}
+
+TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
+                                      const StringData* name) {
+  assertx(closure->instanceof(c_Closure::classof()));
+  auto const slot = lookupStaticSlotFromClosure(closure->getVMClass(), name);
+  return c_Closure::fromObject(closure)->getStaticVar(slot);
+}
 
 static Array HHVM_METHOD(Closure, __debugInfo) {
   auto closure = c_Closure::fromObject(this_);

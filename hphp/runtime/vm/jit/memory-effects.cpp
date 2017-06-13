@@ -1530,6 +1530,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsScalarType:
   case LdMIStateAddr:
   case LdPairBase:
+  case CheckStaticLoc:
   case LdStaticLoc:
   case LdClsCns:
   case CheckCtxThis:
@@ -1706,8 +1707,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
-  case CheckClosureStaticLocInit:
-  case InitClosureStaticLoc:
   case InitStaticLoc:
   case ColIsEmpty:
   case ColIsNEmpty:

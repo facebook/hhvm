@@ -18,7 +18,7 @@ if __name__ == '__main__':
     import test_fresh_init
 
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(
-            test_save_mini.MiniStateTests)
+            test_save_mini.TestSaveMiniState)
     test_fresh_suite = unittest.defaultTestLoader.loadTestsFromTestCase(
             test_fresh_init.TestFreshInit)
     suite.addTests(test_fresh_suite)

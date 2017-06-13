@@ -9,7 +9,6 @@
  *)
 
 open Core
-open String_utils
 open Sys_utils
 
 module P = Printf
@@ -121,93 +120,36 @@ let parse_options () =
   ; mode        = !mode
   }
 
-(* This allows one to fake having multiple files in one file. This
- * is used only in unit test files.
- * Indeed, there are some features that require mutliple files to be tested.
- * For example, newtype has a different meaning depending on the file.
- *)
-let rec make_files = function
-  | [] -> []
-  | Str.Delim header :: Str.Text content :: rl ->
-      let pattern = Str.regexp "////" in
-      let header = Str.global_replace pattern "" header in
-      let pattern = Str.regexp "[ ]*" in
-      let filename = Str.global_replace pattern "" header in
-      (filename, content) :: make_files rl
-  | _ -> assert false
-
-let load_file_stdin file =
+let load_file_stdin () =
   let _ = read_line () in (* md5 *)
   let len = read_int () in
-  let ic = stdin in
   let code = Bytes.create len in
-  let _ = really_input ic code 0 len in
-  Relative_path.Map.singleton file code
+  let _ = really_input stdin code 0 len in
+  code
 
-(* We have some hacky "syntax extensions" to have one file contain multiple
- * files, which can be located at arbitrary paths. This is useful e.g. for
- * testing lint rules, some of which activate only on certain paths. It's also
- * useful for testing abstract types, since the abstraction is enforced at the
- * file boundary.
- * Takes the path to a single file, returns a map of filenames to file contents.
- *)
-let file_to_files file =
+let load_file file =
   let abs_fn = Relative_path.to_absolute file in
   let content = cat abs_fn in
-  let delim = Str.regexp "////.*" in
-  if Str.string_match delim content 0
-  then
-    let contentl = Str.full_split delim content in
-    let files = make_files contentl in
-    List.fold_left ~f: begin fun acc (sub_fn, content) ->
-      let file =
-        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
-      Relative_path.Map.add acc ~key:file ~data:content
-    end ~init: Relative_path.Map.empty files
-  else if string_starts_with content "// @directory " then
-    let contentl = Str.split (Str.regexp "\n") content in
-    let first_line = List.hd_exn contentl in
-    let regexp = Str.regexp ("^// @directory *\\([^ ]*\\) \
-      *\\(@file *\\([^ ]*\\)*\\)?") in
-    let has_match = Str.string_match regexp first_line 0 in
-    assert has_match;
-    let dir = Str.matched_group 1 first_line in
-    let file_name =
-      try
-        Str.matched_group 3 first_line
-      with
-        Not_found -> abs_fn in
-    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
-    let content = String.concat "\n" (List.tl_exn contentl) in
-    Relative_path.Map.singleton file content
-  else
-    Relative_path.Map.singleton file content
+  content
 
-let parse_name compiler_options popt files_contents =
-  Errors.do_ begin fun () ->
-    let parsed_files =
-      if compiler_options.parser = FFP
-      then Relative_path.Map.mapi
-        ( Full_fidelity_ast.from_text_with_legacy
-            ~parser_options:popt
-            ~ignore_pos:true
-        )
-        files_contents
-      else Relative_path.Map.mapi (Parser_hack.program popt) files_contents
-    in
+let parse_text compiler_options popt fn text =
+  match compiler_options.parser with
+  | FFP ->
+    Full_fidelity_ast.from_text_with_legacy
+      ~parser_options:popt
+      ~ignore_pos:true
+      ~suppress_output:true
+      fn text
+  | Legacy ->
+    Parser_hack.program popt fn text
 
-    let files_info =
-      Relative_path.Map.mapi begin fun fn parsed_file ->
-        let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
-        Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
-        let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-        { FileInfo.
-          file_mode; funs; classes; typedefs; consts; comments = Some comments;
-        }, ast
-      end parsed_files in
+let parse_file compiler_options popt filename text =
+  try
+    Some (Errors.do_ begin fun () ->
+      (parse_text compiler_options popt filename text).Parser_hack.ast
+    end)
+  with Failure _ -> None
 
-    files_info
-  end
 
 let hhvm_unix_call config filename =
   P.printf "compiling: %s\n" filename;
@@ -241,30 +183,30 @@ let print_debug_time_info filename debug_time =
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
   P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
 
-let do_compile filename compiler_options files_info debug_time = begin
-  let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
-  let f_fold fn (_fileinfo, ast) text = begin
-    let t = Unix.gettimeofday () in
-    let t = add_to_time_ref debug_time.parsing_t t in
-    let options = Hhbc_options.get_options_from_config
-      compiler_options.config in
-    Hhbc_options.set_compiler_options options;
-    let hhas_prog = Hhas_program.from_ast ast in
-    let t = add_to_time_ref debug_time.codegen_t t in
-    let hhas_text = Hhbc_hhas.to_string hhas_prog in
-    let text =
-      if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
-      then text ^
-        hhvm_unix_call compiler_options.config (Relative_path.to_absolute fn)
-      else text ^ hhas_text
-    in
-    ignore @@ add_to_time_ref debug_time.printing_t t;
-    text
-  end in
-  let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
-  if compiler_options.debug_time then print_debug_time_info filename debug_time;
+let do_compile filename compiler_options opt_ast debug_time =
+  let t = Unix.gettimeofday () in
+  let t = add_to_time_ref debug_time.parsing_t t in
+  let options = Hhbc_options.get_options_from_config compiler_options.config in
+  Hhbc_options.set_compiler_options options;
+  let hhas_prog =
+    match opt_ast with
+    | None ->
+      Hhas_program.emit_fatal_program ~ignore_message:true
+        Hhbc_ast.FatalOp.Parse "Syntax error"
+    | Some (errors, ast, _) ->
+      List.iter (Errors.get_error_list errors) (fun e ->
+        Printf.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
+      if Errors.is_empty errors
+      then Hhas_program.from_ast ast
+      else Hhas_program.emit_fatal_program ~ignore_message:true
+        Hhbc_ast.FatalOp.Parse "Syntax error"
+      in
+  let t = add_to_time_ref debug_time.codegen_t t in
+  let hhas_text = Hhbc_hhas.to_string hhas_prog in
+  ignore @@ add_to_time_ref debug_time.printing_t t;
+  if compiler_options.debug_time
+  then print_debug_time_info filename debug_time;
   hhas_text
-end
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -273,16 +215,14 @@ end
 let process_single_file compiler_options popt filename outputfile =
   try
     let t = Unix.gettimeofday () in
-    let load_file =
+    let text =
        if compiler_options.mode = DAEMON
-       then load_file_stdin
-       else file_to_files in
-    let files_contents = load_file filename in
-    let _, files_info, _ = parse_name compiler_options popt files_contents in
+       then load_file_stdin ()
+       else load_file filename in
+    let opt_ast = parse_file compiler_options popt filename text in
     let debug_time = new_debug_time() in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text =
-      do_compile filename compiler_options files_info debug_time in
+    let text = do_compile filename compiler_options opt_ast debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n" (String.length text);
     match outputfile with

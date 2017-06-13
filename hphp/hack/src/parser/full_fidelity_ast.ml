@@ -2012,6 +2012,7 @@ let from_text_with_legacy
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
+  ?(suppress_output       = false)
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -2022,6 +2023,7 @@ let from_text_with_legacy
       ~keep_errors
       ~ignore_pos
       ~quick
+      ~suppress_output
       ~parser_options
       file
       (Full_fidelity_source_text.make content)

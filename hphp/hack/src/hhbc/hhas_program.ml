@@ -8,6 +8,9 @@
  *
 *)
 
+open Instruction_sequence
+open Hhbc_ast
+
 type t = {
   hhas_adata   : Hhas_adata.t list;
   hhas_fun     : Hhas_function.t list;
@@ -33,8 +36,6 @@ let main hhas_prog =
 
 let adata hhas_prog =
   hhas_prog.hhas_adata
-
-open Instruction_sequence
 
 let with_main hhas_prog hhas_main =
   {hhas_prog with hhas_main}
@@ -68,9 +69,28 @@ let emit_main defs =
 
 open Closure_convert
 
+let emit_fatal_program ~ignore_message op message =
+  Iterator.reset_iterator ();
+  let body = Emit_body.make_body
+    (
+      gather [
+        optional ignore_message
+          [instr (IComment "Ignore Fatal Parse message")];
+        Emit_fatal.emit_fatal op message
+      ]
+    )
+    [] (* decl_vars *)
+    false (*is_memoize_wrapper*)
+    [] (* params *)
+    None (* return_type_info *)
+  in
+    make [] [] [] [] body
+
 let from_ast ast =
-  let closed_ast = convert_toplevel_prog ast in
   try
+    (* Convert closures to top-level classes;
+     * also hoist inner classes and functions *)
+    let closed_ast = convert_toplevel_prog ast in
     let compiled_defs = emit_main closed_ast in
     let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
     let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
@@ -78,11 +98,4 @@ let from_ast ast =
     let adata = Emit_adata.get_adata () in
     make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
   with Emit_fatal.IncludeTimeFatalException (op, message) ->
-    Iterator.reset_iterator ();
-    let body = Emit_body.make_body (Emit_fatal.emit_fatal op message)
-      [] (* decl_vars *)
-      false (*is_memoize_wrapper*)
-      [] (* params *)
-      None (* return_type_info *)
-    in
-      make [] [] [] [] body
+    emit_fatal_program ~ignore_message:false op message

@@ -450,16 +450,6 @@ let get_next_event (state: state) (client: ClientMessageQueue.t) : event =
     | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> from_either conn client
     | _ -> from_client client
   in
-
-  begin match event, !initialize_params with
-    | Tick, _ -> ()
-    | _, Some params when params.Lsp.Initialize.trace <> Lsp.Initialize.Off ->
-      let message = Printf.sprintf "Event '%s' in state %s"
-          (event_to_string event) (state_to_string state) in
-      client_log Lsp.Message_type.LogMessage message;
-    | _, _ -> ()
-  end;
-
   event
 
 

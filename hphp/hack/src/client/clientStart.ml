@@ -106,7 +106,8 @@ let should_start env =
     Printf.eprintf
       "Server already exists but is dormant";
     false
-  | Result.Error SMUtils.Server_busy
+  | Result.Error SMUtils.Monitor_socket_not_ready
+  | Result.Error SMUtils.Monitor_establish_connection_timeout
   | Result.Error SMUtils.Monitor_connection_failure ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root;

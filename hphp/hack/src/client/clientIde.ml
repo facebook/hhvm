@@ -59,10 +59,11 @@ let rec connect_persistent env retries start_time =
   | Result.Error e ->
     match e with
     | SMUtils.Monitor_connection_failure
-    | SMUtils.Server_busy
+    | SMUtils.Monitor_socket_not_ready
       when retries > 0 -> connect_persistent env (retries-1) start_time
+    | SMUtils.Monitor_establish_connection_timeout
     | SMUtils.Monitor_connection_failure
-    | SMUtils.Server_busy ->
+    | SMUtils.Monitor_socket_not_ready ->
       raise Exit_status.(Exit_with IDE_out_of_retries)
     | SMUtils.Server_dormant
     | SMUtils.Server_died

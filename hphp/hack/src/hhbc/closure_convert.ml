@@ -231,6 +231,11 @@ let convert_id (env:env) p (pid, str as id) =
     | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ -> return "{closure}"
     | _ -> return ""
     end
+  | "__LINE__" ->
+    (* If the expression goes on multi lines, we return the last line *)
+    let pos, _ = id in
+    let _, line, _, _ = Pos.info_pos_extended pos in
+    p, Int (pos, string_of_int line)
   | _ ->
     (p, Id id)
 
@@ -540,6 +545,10 @@ and convert_class_var env st (pos, id, expr_opt) =
     let st, expr = convert_expr env st expr in
     st, (pos, id, Some expr)
 
+and convert_class_const env st (id, expr) =
+  let st, expr = convert_expr env st expr in
+  st, (id, expr)
+
 and convert_class_elt env st ce =
   match ce with
   | Method md ->
@@ -552,6 +561,10 @@ and convert_class_elt env st ce =
   | ClassVars (kinds, hint, cvl) ->
     let st, cvl = List.map_env st cvl (convert_class_var env) in
     st, ClassVars (kinds, hint, cvl)
+
+  | Const (ho, iel) ->
+    let st, iel = List.map_env st iel (convert_class_const env) in
+    st, Const (ho, iel)
 
   | _ ->
     st, ce

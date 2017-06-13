@@ -52,7 +52,6 @@ slow/class_constant/1619.php
 slow/class_constant/abstract_const2.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
-slow/class_constant/refcount.php
 slow/class_constant/reflective_constant.php
 slow/class_method/740.php
 slow/class_method/742.php
@@ -505,7 +504,6 @@ slow/memoize/refargs.php
 slow/memoize/reset.php
 slow/memoize/serialize.php
 slow/memoize/traits.php
-slow/memoize/unreachable.php
 slow/memoize/untyped.php
 slow/memoize/varargs.php
 slow/memoize/variadics.php
@@ -814,7 +812,6 @@ slow/sanity/2.php
 slow/sanity/3.php
 slow/sanity/4.php
 slow/sanity/5.php
-slow/scalar_array/546.php
 slow/serialization/repo_types_002.php
 slow/session/session_start_undefined_scheme.php
 slow/shapes/type-param.php

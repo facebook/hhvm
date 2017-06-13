@@ -1253,6 +1253,39 @@ void remove_helper(IRInstruction* inst) {
   }
 }
 
+// Helper to determine whether an inc/dec can be moved across
+// an instruction.
+bool irrelevant_inst(const IRInstruction& inst) {
+  auto const effects = memory_effects(inst);
+  return match<bool>(
+    effects,
+    // Pure loads, stores, and IrrelevantEffects do not read or write any
+    // object reference counts.
+    [&] (PureLoad) { return true; },
+    [&] (PureStore) { return true; },
+    [&] (PureSpillFrame) { return true; },
+    [&] (IrrelevantEffects) { return true; },
+
+    // Inlining related instructions can manipulate the frame but don't
+    // observe reference counts.
+    [&] (GeneralEffects) {
+      return inst.is(
+        BeginInlining,
+        DefInlineFP,
+        InlineReturn,
+        InlineReturnNoFrame,
+        SyncReturnBC
+      );
+    },
+
+    // Everything else may.
+    [&] (CallEffects)       { return false; },
+    [&] (ReturnEffects)     { return false; },
+    [&] (ExitEffects)       { return false; },
+    [&] (UnknownEffects)    { return false; }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1297,37 +1330,9 @@ void remove_trivial_incdecs(Env& env) {
         return;
       }
 
-      auto const effects = memory_effects(inst);
-      match<void>(
-        effects,
-        // Pure loads, stores, and IrrelevantEffects do not read or write any
-        // object reference counts.
-        [&] (PureLoad) {},
-        [&] (PureStore) {},
-        [&] (PureSpillFrame) {},
-        [&] (IrrelevantEffects) {},
-
-        // Inlining related instructions can manipulate the frame but don't
-        // observe reference counts.
-        [&] (GeneralEffects) {
-          auto const is_inlining_inst = inst.is(
-            BeginInlining,
-            DefInlineFP,
-            InlineReturn,
-            InlineReturnNoFrame,
-            SyncReturnBC
-          );
-          if (!is_inlining_inst) {
-            incs.clear();
-          }
-        },
-
-        // Everything else may.
-        [&] (CallEffects)       { incs.clear(); },
-        [&] (ReturnEffects)     { incs.clear(); },
-        [&] (ExitEffects)       { incs.clear(); },
-        [&] (UnknownEffects)    { incs.clear(); }
-      );
+      if (!irrelevant_inst(inst)) {
+        incs.clear();
+      }
     };
 
     incs.clear();
@@ -1343,10 +1348,23 @@ void remove_trivial_incdecs(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct LdStaticLocHashEqual {
+  size_t operator()(const IRInstruction* inst) const {
+    return inst->extra<LdStaticLoc>()->hash();
+  }
+  bool operator()(const IRInstruction* i1, const IRInstruction* i2) const {
+    return i1->extra<LdStaticLoc>()->equals(*i2->extra<LdStaticLoc>());
+  }
+};
+
 void find_alias_sets(Env& env) {
   FTRACE(2, "find_alias_sets --------------------------------------\n");
 
   auto frame_to_ctx = sparse_idptr_map<SSATmp,ASetID>(env.unit.numTmps());
+
+  std::unordered_set<IRInstruction*,
+                     LdStaticLocHashEqual,
+                     LdStaticLocHashEqual> ldStaticLocs;
 
   auto add = [&] (SSATmp* tmp) {
     if (!tmp->type().maybe(TCounted)) return;
@@ -1378,13 +1396,42 @@ void find_alias_sets(Env& env) {
       return;
     }
 
-    auto const canon = canonical(tmp);
+    auto canon = canonical(tmp);
+    if (canon->inst()->is(LdStaticLoc)) {
+      auto const res = ldStaticLocs.insert(canon->inst());
+      if (!res.second) canon = (*res.first)->dst();
+    }
+
+
     if (env.asetMap[canon] != -1) {
       id = env.asetMap[canon];
     } else {
-      id = env.asets.size();
-      env.asetMap[canon] = id;
-      env.asets.push_back(MustAliasSet { canon->type(), canon });
+      auto const cinst = canon->inst();
+      if (cinst->is(DefLabel) && cinst->numDsts() == 1) {
+        int pid = -2;
+        cinst->block()->forEachSrc(0, [&](IRInstruction*, SSATmp* src) {
+          if (pid == -1) return;
+          src = canonical(src);
+          if (src == cinst->dst(0)) return;
+          auto const srcId = env.asetMap[src];
+          if (srcId == -1) {
+            pid = -1;
+            return;
+          }
+          if (pid == -2) {
+            pid = srcId;
+          } else if (pid != srcId) {
+            pid = -1;
+            return;
+          }
+        });
+        if (pid >= 0) id = pid;
+      }
+      if (id == -1) {
+        id = env.asets.size();
+        env.asetMap[canon] = id;
+        env.asets.push_back(MustAliasSet { canon->type(), canon });
+      }
     }
 
     FTRACE(2,  "  t{} -> {} ({})\n", tmp->id(), id, canon->toString());
@@ -3177,7 +3224,7 @@ Node* rule_inc_pass_sig(Env& env, Node* node) {
  *     [ A ]  [ B ] ... |  all pred lower_bounds x, y, ... >= 1
  *       |      |       |  z >= 2
  *     inc-x  inc-y     |
- *        \   /         |  at least one tmp defined at join
+ *        \   /         |
  *        phi-z         |
  *          |           |
  *        [ C ]         |
@@ -3206,18 +3253,47 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
     node->lower_bound >= 2 &&
     all_preds_are_sinkable_incs(*to_phi(node));
   if (!applies) return node;
-  auto const sink = find_sinkable_pred(env, *to_phi(node));
-  if (!sink) return node;
+  auto const nphi = to_phi(node);
+  auto const* sink = find_sinkable_pred(env, *nphi);
+  auto block = nphi->block;
+  auto insertAt = block->skipHeader();
+  auto const src = [&] () -> SSATmp* {
+    if (sink) return sink->src(0);
+    // We need an SSATmp which is valid in this block; try to find one
+    // with the same id, which we determine from one of the preceding
+    // incs.
+    auto const id = env.asetMap[to_inc(nphi->pred_list[0])->inst->src(0)];
+    for (auto it = block->begin(); it != block->end(); ) {
+      auto& inst = *it;
+      for (auto const s : inst.srcs()) {
+        if (env.asetMap[s] == id) {
+          insertAt = it;
+          sink = &inst;
+          return s;
+        }
+      }
+      if (!irrelevant_inst(inst)) return nullptr;
+      ++it;
+      for (auto const d : inst.dsts()) {
+        if (env.asetMap[d] == id) {
+          insertAt = it;
+          sink = &inst;
+          return d;
+        }
+      }
+    }
+    return nullptr;
+  }();
+  if (!src) return node;
 
-  auto const nphi     = to_phi(node);
-  auto const new_inc  = env.unit.gen(IncRef, sink->bcctx(), sink->src(0));
+  auto const new_inc  = env.unit.gen(IncRef, sink->bcctx(), src);
   auto const nnew_inc = add_between(env, nphi, nphi->next, NInc{new_inc});
 
   nnew_inc->lower_bound = std::max(nphi->lower_bound - 1, 0);
   nphi->lower_bound     = std::max(nphi->lower_bound - 1, 0);
 
   FTRACE(2, "    ** inc_pass_phi: {}\n", *new_inc);
-  nphi->block->prepend(new_inc);
+  nphi->block->insert(insertAt, new_inc);
 
   assertx(nphi->prev == nullptr);
   for (auto i = uint32_t{0}; i < nphi->pred_list_sz; ++i) {

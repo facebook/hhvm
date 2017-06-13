@@ -36,6 +36,9 @@ bool use_numa = false;
 bool threads_bind_local = false;
 
 void initNuma() {
+  if (getenv("HHVM_DISABLE_NUMA")) {
+    return;
+  }
   // When linked dynamically numa_init() is called before JEMallocInitializer()
   // numa_init is not exported by libnuma.so so it will be NULL
   // however when linked statically numa_init() is not guaranteed to be called

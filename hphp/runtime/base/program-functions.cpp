@@ -1094,7 +1094,7 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
 
-  if (RuntimeOption::EvalEnableNuma) {
+  if (RuntimeOption::EvalEnableNuma && !getenv("HHVM_DISABLE_NUMA")) {
 #ifdef USE_JEMALLOC
     unsigned narenas;
     size_t mib[3];

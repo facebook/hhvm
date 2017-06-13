@@ -13,6 +13,7 @@ let kind_to_string = function
 
 type client_message = {
   timestamp : float;
+  message_json_for_logging : string; (* the json payload *)
   kind : client_message_kind;
   method_ : string; (* mandatory for request+notification; empty otherwise *)
   id : Hh_json.json option; (* mandatory for request+response *)
@@ -70,6 +71,7 @@ let read_message (reader : Buffered_line_reader.t) : client_message =
   in
   {
     timestamp = Unix.gettimeofday ();
+    message_json_for_logging = Hh_json.json_truncate_string message;
     id;
     method_ = Option.value method_ ~default:""; (* is easier to consume *)
     params;

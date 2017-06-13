@@ -14,6 +14,7 @@ type client_message = {
   (* The timestamp field is added when this message is read. It's not part of
      the JSON RPC spec. *)
   timestamp : float;
+  message_json_for_logging : string; (* the json payload *)
 
   kind : client_message_kind;
   method_ : string; (* mandatory for request+notification; empty otherwise *)

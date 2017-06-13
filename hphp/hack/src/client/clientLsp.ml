@@ -374,7 +374,7 @@ let hack_log_error
   | Some Client_message c ->
     let open ClientMessageQueue in
     HackEventLogger.client_lsp_method_exception
-      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t
+      root c.method_ (kind_to_string c.kind) c.timestamp start_handle_t c.message_json_for_logging
       message stack source
   | _ ->
     HackEventLogger.client_lsp_exception root message stack source
@@ -1386,7 +1386,8 @@ let main (env: env) : 'a =
             ~method_:(if c.kind = Response then get_outstanding_method_name c.id else c.method_)
             ~kind:(kind_to_string c.kind)
             ~start_queue_t:c.timestamp
-            ~start_handle_t;
+            ~start_handle_t
+            ~json:c.message_json_for_logging;
         end
       | _ -> ()
     with

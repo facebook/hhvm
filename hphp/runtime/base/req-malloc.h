@@ -87,6 +87,9 @@ inline void* realloc_noptrs(void* ptr, size_t nbytes) {
 }
 
 char* strndup(const char* str, size_t len);
+inline char* strdup(const char* str) {
+  return strndup(str, strlen(str));
+}
 
 void free(void* ptr);
 

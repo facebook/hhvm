@@ -280,14 +280,14 @@ let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
   in
   message |> Hh_json.json_to_string |> Http_lite.write_message outchan
 
-(* request: produce a Request message *)
+(* request: produce a Request message; returns a method you can call to cancel it *)
 let request
     (outchan: out_channel)
     (on_result: Hh_json.json option -> unit)
     (on_error: int -> string -> Hh_json.json option -> unit)
     (method_: string)
     (json: Hh_json.json)
-  : unit =
+  : unit -> unit =
   incr requests_counter;
   let callback = { Callback.method_; on_result; on_error; } in
   let request_id = !requests_counter in
@@ -301,7 +301,19 @@ let request
     "params", json;
   ]
   in
-  message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+  let cancel_message = JSON_Object [
+    "jsonrpc", string_ "2.0";
+    "method", string_ "$/cancelRequest";
+    "params", JSON_Object [
+      "id", int_ request_id;
+    ]
+  ]
+  in
+  message |> Hh_json.json_to_string |> Http_lite.write_message outchan;
+
+  let cancel () = cancel_message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+  in
+  cancel
 
 let get_outstanding_request (id: Hh_json.json option) =
   match id with

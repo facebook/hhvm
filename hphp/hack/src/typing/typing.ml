@@ -888,9 +888,9 @@ and bind_as_expr env ty aexpr =
 and expr env e =
   raw_expr ~in_cond:false env e
 
-and raw_expr ~in_cond ?valkind:(valkind=`other) env e =
+and raw_expr ~in_cond ?lhs_of_null_coalesce ?valkind:(valkind=`other) env e =
   debug_last_pos := fst e;
-  let env, te, ty = expr_ ~in_cond ~valkind env e in
+  let env, te, ty = expr_ ~in_cond ?lhs_of_null_coalesce ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -910,7 +910,8 @@ and is_pseudo_function s =
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
 and eif env ~coalesce ~in_cond p c e1 e2 =
-  let env, tc, tyc = raw_expr in_cond env c in
+  let condition = condition ~lhs_of_null_coalesce:coalesce in
+  let env, tc, tyc = raw_expr ~in_cond ~lhs_of_null_coalesce:coalesce env c in
   let parent_lenv = env.Env.lenv in
   let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
   let env = condition env true c in
@@ -953,6 +954,7 @@ and exprs env el =
 
 and expr_
   ~in_cond
+  ?lhs_of_null_coalesce
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   env (p, e) =
   let make_result env te ty =
@@ -1349,11 +1351,13 @@ and expr_
       let env, ty = array_append p env ty1 in
       make_result env (T.Array_get(te1, None)) ty
   | Array_get (e1, Some e2) ->
-      let env, te1, ty1 = update_array_type p env e1 (Some e2) valkind in
+      let env, te1, ty1 =
+        update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, te2, ty2 = expr env e2 in
       let is_lvalue = (valkind == `lvalue) in
-      let env, ty = array_get is_lvalue p env ty1 e2 ty2 in
+      let env, ty =
+        array_get ?lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2 in
       make_result env (T.Array_get(te1, Some te2)) ty
   | Call (Cnormal, (pos_id, Id ((_, s) as id)), el, [])
       when is_pseudo_function s ->
@@ -2833,7 +2837,7 @@ and fun_type_of_id env x =
  * side of an assignment (example: $x[...] = 0).
  *)
 (*****************************************************************************)
-and array_get is_lvalue p env ty1 e2 ty2 =
+and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
    * type parameter list is admitted). Basically the "omit type parameter"
@@ -3014,7 +3018,8 @@ and array_get is_lvalue p env ty1 e2 ty2 =
           Errors.undefined_field
             p (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some { sft_optional = true; _ } when not is_lvalue ->
+        | Some { sft_optional = true; _ }
+          when not is_lvalue && not lhs_of_null_coalesce ->
           let declared_field =
               List.find_exn
                 ~f:(fun x -> Ast.ShapeField.compare field x = 0)
@@ -4190,11 +4195,12 @@ and condition_isset env = function
  * Build an environment for the true or false branch of
  * conditional statements.
  *)
-and condition env tparamet =
+and condition ?lhs_of_null_coalesce env tparamet =
   let expr env x =
-    let env, _te, ty = raw_expr ~in_cond:true env x in
+    let env, _te, ty = raw_expr ?lhs_of_null_coalesce ~in_cond:true env x in
     Async.enforce_nullable_or_not_awaitable env (fst x) ty;
     env, ty
+  in let condition = condition ?lhs_of_null_coalesce
   in function
   | _, Expr_list [] -> env
   | _, Expr_list [x] ->
@@ -5042,7 +5048,7 @@ and overload_function p env class_id method_id el uel f =
    (* TODO TAST: do this right *)
    env, T.make_typed_expr p ty T.Any, ty
 
-and update_array_type p env e1 e2 valkind  =
+and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
   let access_type = Typing_arrays.static_array_access env e2 in
   let type_mapper =
     Typing_arrays.update_array_type p access_type in
@@ -5060,4 +5066,4 @@ and update_array_type p env e1 e2 valkind  =
         | _ -> env, te1, ty1
       end
     | _ ->
-      expr env e1
+      raw_expr ~in_cond:false ?lhs_of_null_coalesce env e1

@@ -376,7 +376,6 @@ and emit_try_finally_ env try_block finally_block =
   let try_body = emit_stmt env try_block in
   let temp_local = Local.get_unnamed_local () in
   let finally_start = Label.next_regular () in
-  let finally_end = Label.next_regular () in
   let cont_and_break = CBR.get_continues_and_breaks try_body in
   let try_body = CBR.rewrite_in_try_finally
     try_body cont_and_break temp_local finally_start in
@@ -399,8 +398,15 @@ and emit_try_finally_ env try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let finally_body = emit_stmt env finally_block in
-  let finally_body = CBR.rewrite_in_finally finally_body in
+  let emit_finally_body () =
+    let finally_body  = emit_stmt env finally_block in
+    CBR.rewrite_in_finally finally_body
+  in
+
+  let finally_body = emit_finally_body () in
+  let finally_body_for_fault = emit_finally_body () in
+
+  let finally_end = Label.next_regular () in
 
   (* (3) Finally epilogue *)
 
@@ -424,7 +430,7 @@ and emit_try_finally_ env try_block finally_block =
     if cont_and_break = [] then empty else instr_unsetl temp_local in
   let fault_body = gather [
       cleanup_local;
-      finally_body;
+      finally_body_for_fault;
       instr_unwind;
     ] in
   let fault_label = Label.next_fault () in

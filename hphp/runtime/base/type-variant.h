@@ -389,10 +389,8 @@ struct Variant : private TypedValue {
    * v is referenced, keep the reference.
    */
   Variant& setWithRef(TypedValue v) noexcept {
-    auto const old = *asTypedValue();
-    tvDupWithRef(v, *asTypedValue());
+    tvSetWithRef(v, *asTypedValue());
     if (m_type == KindOfUninit) m_type = KindOfNull;
-    tvDecRefGen(old);
     return *this;
   }
   Variant& setWithRef(const Variant& v) noexcept {
@@ -1462,16 +1460,6 @@ inline void Array::appendWithRef(const Variant& v) {
 }
 inline void Array::prepend(const Variant& v) {
   prepend(*v.asTypedValue());
-}
-
-inline void Array::setWithRef(Cell k, TypedValue v, bool isKey) {
-  tvAsVariant(
-    lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).tv()
-  ).setWithRef(v);
-}
-
-inline void Array::setWithRef(const Variant& k, const Variant& v, bool isKey) {
-  setWithRef(*k.asCell(), *v.asTypedValue(), isKey);
 }
 
 ALWAYS_INLINE Variant uninit_null() {

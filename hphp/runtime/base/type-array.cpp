@@ -868,6 +868,27 @@ FOR_EACH_KEY_TYPE(setRef, Variant&)
 #undef V
 #undef C
 
+#define C(key_t, name) \
+  void Array::name(key_t k, TypedValue v, bool isKey) {         \
+    auto lval = lvalAt(k, isKey ? Flags::Key : Flags::None);    \
+    tvSetWithRef(v, *lval.tv());                                \
+    if (lval.type() == KindOfUninit) lval.type() = KindOfNull;  \
+  }
+#define V(key_t, name) \
+  void Array::name(key_t k, TypedValue v, bool isKey) {         \
+    lvalAt(k, isKey ? Flags::Key : Flags::None).setWithRef(v);  \
+  }
+#define I(key_t, name) \
+  void Array::name(key_t k, TypedValue v) { \
+    lvalAt(k).setWithRef(v);                \
+  }
+
+FOR_EACH_KEY_TYPE(setWithRef)
+
+#undef I
+#undef V
+#undef C
+
 #define C(key_t, name)
 #define V(key_t, name)                                      \
   void Array::name(key_t k, const Variant& v, bool isKey) { \
@@ -879,6 +900,7 @@ FOR_EACH_KEY_TYPE(setRef, Variant&)
   }
 
 FOR_EACH_KEY_TYPE(set)
+FOR_EACH_KEY_TYPE(setWithRef)
 FOR_EACH_KEY_TYPE(add)
 
 #undef I

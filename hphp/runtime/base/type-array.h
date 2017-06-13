@@ -478,8 +478,7 @@ public:
   /*
    * Set an element to `v', preserving refs unless they are singly-referenced.
    */
-  void setWithRef(Cell key, TypedValue v, bool isKey = false);
-  void setWithRef(const Variant& key, const Variant& v, bool isKey = false);
+  FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 
   /*
    * Set an element to a reference to `v', boxing it if it's unboxed.
@@ -509,6 +508,7 @@ public:
    * Variant overloads.
    */
   FOR_EACH_KEY_TYPE(set, const Variant&)
+  FOR_EACH_KEY_TYPE(setWithRef, const Variant&)
   FOR_EACH_KEY_TYPE(add, const Variant&)
 
 #undef D

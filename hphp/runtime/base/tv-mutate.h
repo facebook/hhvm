@@ -375,6 +375,21 @@ ALWAYS_INLINE void cellSet(const Cell fr, Cell& to) {
 }
 
 /*
+ * Set `fr' to `to' with reference demotion semantics.
+ *
+ * This is just like tvDupWithRef(), except it decrefs the old value of `to'.
+ * Unlike the other Set functions, this accepts any TypedValue as `fr', since
+ * it is ref-preserving (modulo demotion).
+ */
+ALWAYS_INLINE void tvSetWithRef(const TypedValue fr, TypedValue& to) {
+  assert(tvIsPlausible(to));
+  auto const old = to;
+  tvDupWithRef(fr, to);
+  tvDecRefGen(old);
+  assert(tvIsPlausible(to));
+}
+
+/*
  * Binding assignment from `fr' to `to'.
  *
  * This behaves just like tvSetIgnoreRef(), in that we always overwrite `to'

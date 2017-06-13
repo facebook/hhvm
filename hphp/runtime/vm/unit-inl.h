@@ -355,5 +355,9 @@ inline bool Unit::useStrictTypes() const {
   return m_useStrictTypes;
 }
 
+inline bool Unit::useStrictTypesForBuiltins() const {
+  return m_useStrictTypesForBuiltins;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -45,7 +45,7 @@ inline bool builtinCallUsesStrictTypes(const Unit* caller) {
   if (!RuntimeOption::PHP7_ScalarTypes || RuntimeOption::EnableHipHopSyntax) {
     return false;
   }
-  return caller->useStrictTypes() && !caller->isHHFile();
+  return caller->useStrictTypesForBuiltins();
 }
 
 inline void setTypesFlag(ActRec* fp, ActRec* ar) {

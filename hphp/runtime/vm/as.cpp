@@ -2505,12 +2505,10 @@ void parse_strict(AsmState& as) {
     as.error("Cannot set .strict without PHP7 ScalarTypes");
   }
 
-  as.ue->m_useStrictTypes = word == "1";
+  as.ue->m_useStrictTypes = as.ue->m_useStrictTypesForBuiltins = word == "1";
+
   if (!as.ue->m_useStrictTypes && word != "0") {
     as.error("Strict types must be either 1 or 0");
-  }
-  if (!as.ue->m_useStrictTypes && RuntimeOption::EnableHipHopSyntax) {
-    as.error("Cannot disable strict types with HipHopSyntax enabled");
   }
 
   as.in.expectWs(';');

@@ -2848,6 +2848,7 @@ void Parser::onDeclareList(Token& out, Token& ident, Token& exp) {
     }
     if (val.toInt64Val() == 1) {
       m_file->setUseStrictTypes();
+      m_file->setUseStrictTypesForBuiltins();
     }
   }
 

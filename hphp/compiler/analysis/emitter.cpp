@@ -3766,6 +3766,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
   m_ue.m_filepath = makeStaticString(filename);
   m_ue.m_isHHFile = file->isHHFile();
   m_ue.m_useStrictTypes = file->useStrictTypes();
+  m_ue.m_useStrictTypesForBuiltins = file->useStrictTypesForBuiltins();
 
   FunctionScopePtr func(file->getPseudoMain());
   if (!func) return;

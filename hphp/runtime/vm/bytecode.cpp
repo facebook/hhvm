@@ -4865,6 +4865,13 @@ bool doFCall(ActRec* ar, PC& pc) {
 
 OPTBLD_INLINE void iopFCall(PC& pc, intva_t numArgs) {
   auto ar = arFromSp(numArgs);
+  if (ar->m_func->isBuiltin()) {
+    if (!builtinCallUsesStrictTypes(vmfp()->unit())) {
+      ar->setUseWeakTypes();
+    }
+  } else if (!callUsesStrictTypes(vmfp())) {
+    ar->setUseWeakTypes();
+  }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);

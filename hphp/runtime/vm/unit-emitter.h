@@ -375,6 +375,7 @@ public:
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
   bool m_useStrictTypes{false};
+  bool m_useStrictTypesForBuiltins{false};
   bool m_returnSeen{false};
   int m_preloadPriority{0};
   TypedValue m_mainReturn;

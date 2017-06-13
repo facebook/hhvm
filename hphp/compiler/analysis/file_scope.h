@@ -140,6 +140,8 @@ public:
 
   void setUseStrictTypes();
   bool useStrictTypes() const { return m_useStrictTypes; }
+  void setUseStrictTypesForBuiltins();
+  bool useStrictTypesForBuiltins() const { return m_useStrictTypesForBuiltins; }
 
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
@@ -167,6 +169,7 @@ private:
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
   unsigned m_useStrictTypes : 1;
+  unsigned m_useStrictTypesForBuiltins : 1;
   int m_preloadPriority;
 
   std::vector<int> m_attributes;

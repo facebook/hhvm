@@ -1098,6 +1098,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   ue->m_preloadPriority = unit.preloadPriority;
   ue->m_isHHFile = unit.isHHFile;
   ue->m_useStrictTypes = unit.useStrictTypes;
+  ue->m_useStrictTypesForBuiltins = unit.useStrictTypesForBuiltins;
 
   EmitUnitState state { index };
   state.defClsMap.resize(unit.classes.size(), kInvalidOffset);

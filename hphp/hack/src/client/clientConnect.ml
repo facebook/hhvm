@@ -197,9 +197,17 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
     MonitorRpc.server_name = server_name;
     force_dormant_start = env.force_dormant_start;
   } in
-  let conn = ServerUtils.connect_to_monitor env.root handoff_options in
+  let retries, conn =
+    let start_t = Unix.gettimeofday () in
+    let conn = ServerUtils.connect_to_monitor
+      ~timeout:(Option.value retries ~default:30) env.root
+      handoff_options in
+    let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
+    let retries = Option.map retries
+      ~f:(fun retries -> max 0 (retries - elapsed_t)) in
+    retries, conn
+  in
   HackEventLogger.client_connect_once connect_once_start_t;
-  let _, tail_msg = open_and_get_tail_msg start_time tail_env in
   match conn with
   | Result.Ok (ic, oc) ->
       if env.do_post_handoff_handshake then begin
@@ -250,17 +258,12 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       raise Exit_status.(Exit_with No_server_running)
 
     | SMUtils.Server_busy ->
-      (** This should only happen during the transition from old-world to
-      * new-world.
-      *
-      * In the monitor-typechecker split role world, this should never happen
-      * because if a monitor already exists, it readily accepts connections even
-      * when the typechecker hasn't finished initializing and if one doesn't
-      * exist then the client starts one and waits until the typechecker is
-      * finished before attempting a connection. *)
-      env.progress_callback (Some tail_msg);
+      (** This should only happen if the Monitor is being DDOSed or has
+       * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,
+       * we don't auto-retry a connection when the Monitor is busy .*)
       HackEventLogger.client_connect_once_busy start_time;
-      connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
+      Printf.eprintf "\nError: Monitor is busy. Giving up!\n%!";
+      raise Exit_status.(Exit_with Monitor_connection_failure)
     | SMUtils.Build_id_mismatched mismatch_info_opt ->
       let open ServerMonitorUtils in
       Printf.eprintf

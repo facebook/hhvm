@@ -94,6 +94,7 @@ let should_start env =
     force_dormant_start = false;
   } in
   match ServerUtils.connect_to_monitor
+    ~timeout:3
     env.root handoff_options with
   | Result.Ok _conn -> false
   | Result.Error

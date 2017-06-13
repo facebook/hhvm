@@ -32,8 +32,8 @@ let hh_monitor_config root = ServerMonitorUtils.({
 let shut_down_server root =
   MC.connect_and_shut_down (hh_monitor_config root)
 
-let connect_to_monitor root =
-  MC.connect_once (hh_monitor_config root)
+let connect_to_monitor ~timeout root =
+  MC.connect_once ~timeout (hh_monitor_config root)
 
 let die_nicely () =
   HackEventLogger.killed ();

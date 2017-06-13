@@ -20,6 +20,16 @@ type env = {
   root: Path.t;
 }
 
+(** For slow function call "f x", we want to consume some retries
+ * and return the number of retries remaning.*)
+let consume_retries ~retries f x =
+  let start_t = Unix.gettimeofday () in
+  let result = f x in
+  let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
+  let retries = retries - elapsed_t in
+  if retries < 0 then raise Exit_status.(Exit_with Out_of_retries)
+  else retries, result
+
 (* Configuration to use before / in absence of init request *)
 let did_init = ref false
 let init_version = ref Ide_rpc_protocol_parser_types.V0
@@ -32,7 +42,9 @@ let rec connect_persistent env retries start_time =
     MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
     force_dormant_start = false;
   } in
-  let conn = ServerUtils.connect_to_monitor env.root handoff_options in
+  let retries, conn = consume_retries ~retries
+    (ServerUtils.connect_to_monitor ~timeout:retries env.root) handoff_options
+  in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Result.Ok (ic, oc) ->

@@ -174,7 +174,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   Array params;
   params.append((isResume && isResumeAware()) ? s_resume : s_enter);
-  params.append(VarNR(ar->func()->fullName()));
+  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
 
   Array frameinfo;
   frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
@@ -195,7 +195,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   Array params;
   params.append((isSuspend && isResumeAware()) ? s_suspend : s_exit);
-  params.append(VarNR(ar->func()->fullName()));
+  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
 
   Array frameinfo;
   if (retval) {

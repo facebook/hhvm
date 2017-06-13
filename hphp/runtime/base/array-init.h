@@ -372,22 +372,28 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
         return MixedArray::SetRefStr(m_arr, name.get(), v, false);
       });
     } else {
-      performOp([&]{ return m_arr->setRef(VarNR::MakeKey(name), v, false); });
+      performOp([&]{
+        return m_arr->setRef(VarNR::MakeKey(name).tv(), v, false);
+      });
     }
     return *this;
   }
 
-  ArrayInit& setRef(const Variant& name, Variant& v,
+  ArrayInit& setRef(TypedValue name, Variant& v,
                     bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->setRef(name, v, false); });
+      performOp([&]{ return m_arr->setRef(tvToCell(name), v, false); });
     } else {
-      Variant key(name.toKey(m_arr));
-      if (!key.isNull()) {
-        performOp([&]{ return m_arr->setRef(key, v, false); });
+      auto const k = tvToKey(name, m_arr);
+      if (!isNullType(k.m_type)) {
+        performOp([&]{ return m_arr->setRef(k, v, false); });
       }
     }
     return *this;
+  }
+  ArrayInit& setRef(const Variant& name, Variant& v,
+                    bool keyConverted = false) {
+    return setRef(*name.asTypedValue(), v, keyConverted);
   }
 
   template<typename T>
@@ -396,9 +402,9 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
     if (keyConverted) {
       performOp([&]{ return m_arr->setRef(name, v, false); });
     } else {
-      VarNR key(Variant(name).toKey(m_arr));
-      if (!key.isNull()) {
-        performOp([&]{ return m_arr->setRef(key, v, false); });
+      auto const k = Variant(name).toKey(m_arr).tv();
+      if (!isNullType(k.m_type)) {
+        performOp([&]{ return m_arr->setRef(k, v, false); });
       }
     }
     return *this;

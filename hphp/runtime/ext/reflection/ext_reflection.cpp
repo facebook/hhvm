@@ -206,31 +206,31 @@ static Attr attrs_from_modifiers(int php_modifier, bool cls) {
 
 static void set_attrs(Array& ret, int modifiers) {
   if (modifiers & 0x100) {
-    ret.set(s_access, VarNR(s_public));
-    ret.set(s_accessible, true_varNR);
+    ret.set(s_access, VarNR(s_public).tv());
+    ret.set(s_accessible, true_varNR.tv());
   } else if (modifiers & 0x200) {
-    ret.set(s_access, VarNR(s_protected));
-    ret.set(s_accessible, false_varNR);
+    ret.set(s_access, VarNR(s_protected).tv());
+    ret.set(s_accessible, false_varNR.tv());
   } else if (modifiers & 0x400) {
-    ret.set(s_access, VarNR(s_private));
-    ret.set(s_accessible, false_varNR);
+    ret.set(s_access, VarNR(s_private).tv());
+    ret.set(s_accessible, false_varNR.tv());
   } else {
     assert(false);
   }
-  ret.set(s_modifiers, VarNR(modifiers));
+  ret.set(s_modifiers, make_tv<KindOfInt64>(modifiers));
   if (modifiers & 0x1) {
-    ret.set(s_static,    true_varNR);
+    ret.set(s_static, true_varNR.tv());
   }
   if (modifiers & 0x44) {
-    ret.set(s_final,     true_varNR);
+    ret.set(s_final, true_varNR.tv());
   }
   if (modifiers & 0x22) {
-    ret.set(s_abstract,  true_varNR);
+    ret.set(s_abstract, true_varNR.tv());
   }
 }
 
 static void set_empty_doc_comment(Array& ret) {
-  ret.set(s_doc, false_varNR);
+  ret.set(s_doc, false_varNR.tv());
 }
 
 static void set_doc_comment(Array& ret,
@@ -241,24 +241,25 @@ static void set_doc_comment(Array& ret,
   } else if (isBuiltin && !HHVM_FUNCTION(hphp_debugger_attached)) {
     set_empty_doc_comment(ret);
   } else {
-    ret.set(s_doc, VarNR(comment));
+    assertx(!comment->isRefCounted());
+    ret.set(s_doc, make_tv<KindOfPersistentString>(comment));
   }
 }
 
 static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
                                    const Variant& default_val) {
-  ret.set(s_name, VarNR(prop->name));
-  ret.set(s_default, true_varNR);
+  ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
+  ret.set(s_default, true_varNR.tv());
   ret.set(s_defaultValue, default_val);
   set_attrs(ret, get_modifiers(prop->attrs, false) & ~0x66);
-  ret.set(s_class, VarNR(prop->cls->name()));
+  ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
 
   if (prop->typeConstraint && prop->typeConstraint->size()) {
-    ret.set(s_type, VarNR(prop->typeConstraint));
+    ret.set(s_type, make_tv<KindOfPersistentString>(prop->typeConstraint));
   } else {
-    ret.set(s_type, false_varNR);
+    ret.set(s_type, false_varNR.tv());
   }
 }
 
@@ -268,22 +269,22 @@ static void set_dyn_prop_info(
     const StringData* className) {
   ret.set(s_name, name);
   set_attrs(ret, get_modifiers(AttrPublic, false) & ~0x66);
-  ret.set(s_class, VarNR(className));
+  ret.set(s_class, make_tv<KindOfPersistentString>(className));
   set_empty_doc_comment(ret);
-  ret.set(s_type, false_varNR);
+  ret.set(s_type, false_varNR.tv());
 }
 
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
-  ret.set(s_name, VarNR(prop->name));
-  ret.set(s_default, true_varNR);
-  ret.set(s_defaultValue, tvAsCVarRef(&prop->val));
+  ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
+  ret.set(s_default, true_varNR.tv());
+  ret.set(s_defaultValue, prop->val);
   set_attrs(ret, get_modifiers(prop->attrs, false) & ~0x66);
-  ret.set(s_class, VarNR(prop->cls->name()));
+  ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
   set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
   if (prop->typeConstraint && prop->typeConstraint->size()) {
-    ret.set(s_type, VarNR(prop->typeConstraint));
+    ret.set(s_type, make_tv<KindOfPersistentString>(prop->typeConstraint));
   } else {
-    ret.set(s_type, false_varNR);
+    ret.set(s_type, false_varNR.tv());
   }
 }
 
@@ -829,20 +830,21 @@ static Array get_function_param_info(const Func* func) {
     Array param = Array::Create();
     const Func::ParamInfo& fpi = params[i];
 
-    param.set(s_index, VarNR((int)i));
-    VarNR name(func->localNames()[i]);
-    param.set(s_name, name);
+    param.set(s_index, make_tv<KindOfInt64>(i));
+    param.set(s_name, make_tv<KindOfPersistentString>(func->localNames()[i]));
 
     auto const nonExtendedConstraint =
       fpi.typeConstraint.hasConstraint() &&
       !fpi.typeConstraint.isExtended();
-    auto const type = nonExtendedConstraint ? fpi.typeConstraint.typeName()
+    auto const type = nonExtendedConstraint
+      ? fpi.typeConstraint.typeName()
       : staticEmptyString();
 
-    param.set(s_type, VarNR(type));
-    const StringData* typeHint = fpi.userType ?
-      fpi.userType : staticEmptyString();
-    param.set(s_type_hint, VarNR(typeHint));
+    param.set(s_type, make_tv<KindOfPersistentString>(type));
+    const StringData* typeHint = fpi.userType
+      ? fpi.userType
+      : staticEmptyString();
+    param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
     // callable typehint considered builtin; stdclass typehint is not
     if (
       fpi.typeConstraint.isCallable() ||
@@ -850,7 +852,7 @@ static Array get_function_param_info(const Func* func) {
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
-      param.set(s_type_hint_builtin, true_varNR);
+      param.set(s_type_hint_builtin, true_varNR.tv());
       // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
       // the types to come back as PHP 7 style scalar types, not HH\ style
       // scalar types.
@@ -862,42 +864,44 @@ static Array get_function_param_info(const Func* func) {
         param.set(s_type_hint, no_hh_type_hint);
       }
     } else {
-      param.set(s_type_hint_builtin, false_varNR);
+      param.set(s_type_hint_builtin, false_varNR.tv());
     }
-    param.set(s_function, VarNR(func->name()));
+    param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
     if (func->preClass()) {
       param.set(
         s_class,
-        VarNR(func->implCls() ? func->implCls()->name()
-                              : func->preClass()->name())
+        make_tv<KindOfPersistentString>(
+          func->implCls() ? func->implCls()->name()
+                          : func->preClass()->name()
+        )
       );
     }
     if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
-      param.set(s_nullable, true_varNR);
-      param.set(s_type_hint_nullable, true_varNR);
+      param.set(s_nullable, true_varNR.tv());
+      param.set(s_type_hint_nullable, true_varNR.tv());
     } else {
-      param.set(s_type_hint_nullable, false_varNR);
+      param.set(s_type_hint_nullable, false_varNR.tv());
     }
 
     if (fpi.phpCode) {
       Variant v = default_arg_from_php_code(fpi, func);
       param.set(s_default, v);
-      param.set(s_defaultText, VarNR(fpi.phpCode));
+      param.set(s_defaultText, make_tv<KindOfPersistentString>(fpi.phpCode));
     }
 
     if (func->byRef(i)) {
-      param.set(s_ref, true_varNR);
+      param.set(s_ref, true_varNR.tv());
     }
     if (fpi.isVariadic()) {
-      param.set(s_is_variadic, true_varNR);
+      param.set(s_is_variadic, true_varNR.tv());
     }
     {
       Array userAttrs = Array::Create();
       for (auto it = fpi.userAttributes.begin();
            it != fpi.userAttributes.end(); ++it) {
-        userAttrs.set(StrNR(it->first), tvAsCVarRef(&it->second));
+        userAttrs.set(StrNR(it->first), it->second);
       }
-      param.set(s_attributes, VarNR(userAttrs));
+      param.set(s_attributes, VarNR(userAttrs).tv());
     }
     ai.append(VarNR(param).tv());
   }
@@ -941,9 +945,9 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
     auto retType = func->returnTypeConstraint();
     if (retType.isNullable()) {
-      retTypeInfo.set(s_type_hint_nullable, true_varNR);
+      retTypeInfo.set(s_type_hint_nullable, true_varNR.tv());
     } else {
-      retTypeInfo.set(s_type_hint_nullable, false_varNR);
+      retTypeInfo.set(s_type_hint_nullable, false_varNR.tv());
     }
     if (
       retType.isCallable() || // callable type hint is considered builtin
@@ -951,7 +955,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
        retType.underlyingDataType() != KindOfObject
       )
     ) {
-      retTypeInfo.set(s_type_hint_builtin, true_varNR);
+      retTypeInfo.set(s_type_hint_builtin, true_varNR.tv());
       // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
       // the types to come back as PHP 7 style scalar types, not HH\ style
       // scalar types.
@@ -961,12 +965,12 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
           name = name.substr(3);
       }
     } else {
-      retTypeInfo.set(s_type_hint_builtin, false_varNR);
+      retTypeInfo.set(s_type_hint_builtin, false_varNR.tv());
     }
   } else {
     name = staticEmptyString();
-    retTypeInfo.set(s_type_hint_nullable, false_varNR);
-    retTypeInfo.set(s_type_hint_builtin, false_varNR);
+    retTypeInfo.set(s_type_hint_nullable, false_varNR.tv());
+    retTypeInfo.set(s_type_hint_builtin, false_varNR.tv());
   }
   retTypeInfo.set(s_type_hint, name);
   return retTypeInfo;
@@ -1156,7 +1160,7 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       ai.setUnknownKey(VarNR(strippedName), *val);
     } else {
       if (val->isReferenced()) {
-        ai.setRef(VarNR(prop.name), *val, false /* = keyConverted */);
+        ai.setRef(StrNR(prop.name), *val, false /* = keyConverted */);
       } else {
         ai.setUnknownKey(VarNR(prop.name), *val);
       }
@@ -1635,13 +1639,13 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
     if ((prop.attrs & AttrPrivate) == AttrPrivate) {
       if (prop.cls == cls) {
         set_instance_prop_info(info, &prop, default_val);
-        arrPriv.set(StrNR(prop.name), VarNR(info));
+        arrPriv.set(StrNR(prop.name), VarNR(info).tv());
         arrPrivIdx.set(StrNR(prop.name), prop.idx);
       }
       continue;
     }
     set_instance_prop_info(info, &prop, default_val);
-    arrProp.set(StrNR(prop.name), VarNR(info));
+    arrProp.set(StrNR(prop.name), VarNR(info).tv());
     arrIdx.set(StrNR(prop.name), prop.idx);
   }
 
@@ -1650,13 +1654,13 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
     if ((prop.attrs & AttrPrivate) == AttrPrivate) {
       if (prop.cls == cls) {
         set_static_prop_info(info, &prop);
-        arrPriv.set(StrNR(prop.name), VarNR(info));
+        arrPriv.set(StrNR(prop.name), VarNR(info).tv());
         arrPrivIdx.set(StrNR(prop.name), prop.idx);
       }
       continue;
     }
     set_static_prop_info(info, &prop);
-    arrProp.set(StrNR(prop.name), VarNR(info));
+    arrProp.set(StrNR(prop.name), VarNR(info).tv());
     arrIdx.set(StrNR(prop.name), prop.idx);
   }
 
@@ -2096,16 +2100,17 @@ static bool set_debugger_source_info(Array &ret, const char *file, int line1,
   } else {
     ret.set(s_file, file);
   }
-  ret.set(s_line1, VarNR(line1));
-  ret.set(s_line2, VarNR(line2));
+  ret.set(s_line1, make_tv<KindOfInt64>(line1));
+  ret.set(s_line2, make_tv<KindOfInt64>(line2));
   return file && *file;
 }
 
 static void set_debugger_return_type_constraint(Array &ret, const StringData* retType) {
   if (retType && retType->size()) {
-    ret.set(s_return_type, VarNR(retType));
+    assertx(!retType->isRefCounted());
+    ret.set(s_return_type, make_tv<KindOfPersistentString>(retType));
   } else {
-    ret.set(s_return_type, false_varNR);
+    ret.set(s_return_type, false_varNR.tv());
   }
 }
 
@@ -2123,8 +2128,9 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
   }
   if (prototypeCls) {
     Array prototype = Array::Create();
-    prototype.set(s_class, VarNR(prototypeCls->name()));
-    prototype.set(s_name, VarNR(func->name()));
+    prototype.set(s_class,
+                  make_tv<KindOfPersistentString>(prototypeCls->name()));
+    prototype.set(s_name, make_tv<KindOfPersistentString>(func->name()));
     ret.set(s_prototype, prototype);
   }
 }
@@ -2133,10 +2139,10 @@ static void set_debugger_reflection_function_info(Array& ret,
                                                   const Func* func) {
   // return type
   if (func->attrs() & AttrReference) {
-    ret.set(s_ref,      true_varNR);
+    ret.set(s_ref,      true_varNR.tv());
   }
   if (func->isBuiltin()) {
-    ret.set(s_internal, true_varNR);
+    ret.set(s_internal, true_varNR.tv());
   }
   set_debugger_return_type_constraint(ret, func->returnUserType());
 
@@ -2159,11 +2165,11 @@ static void set_debugger_reflection_function_info(Array& ret,
 
 static void set_debugger_reflection_method_info(Array& ret, const Func* func,
                                                 const Class* cls) {
-  ret.set(s_name, VarNR(func->name()));
+  ret.set(s_name, make_tv<KindOfPersistentString>(func->name()));
   set_attrs(ret, get_modifiers(func->attrs(), false));
 
   if (isConstructor(func)) {
-    ret.set(s_constructor, true_varNR);
+    ret.set(s_constructor, true_varNR.tv());
   }
 
   // If Func* is from a PreClass, it doesn't know about base classes etc.
@@ -2176,7 +2182,8 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
     resolved_func = func;
   }
 
-  ret.set(s_class, VarNR(resolved_func->implCls()->name()));
+  ret.set(s_class,
+          make_tv<KindOfPersistentString>(resolved_func->implCls()->name()));
   set_debugger_reflection_function_info(ret, resolved_func);
   set_debugger_source_info(ret, func->unit()->filepath()->data(),
                            func->line1(), func->line2());
@@ -2188,7 +2195,7 @@ Array get_function_info(const String& name) {
   if (name.get() == nullptr) return ret;
   const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
-  ret.set(s_name,       VarNR(func->name()));
+  ret.set(s_name,       make_tv<KindOfPersistentString>(func->name()));
 
   // setting parameters and static variables
   set_debugger_reflection_function_info(ret, func);
@@ -2202,64 +2209,66 @@ Array get_class_info(const String& name) {
   if (!cls) return Array();
 
   Array ret;
-  ret.set(s_name,      VarNR(cls->name()));
+  ret.set(s_name, make_tv<KindOfPersistentString>(cls->name()));
   ret.set(s_extension, empty_string_variant_ref);
-  ret.set(s_parent,    VarNR(cls->parentStr()));
+  ret.set(s_parent, make_tv<KindOfPersistentString>(cls->preClass()->parent()));
 
   // interfaces
   {
     Array arr = Array::Create();
     for (auto const& interface: cls->declInterfaces()) {
-      arr.set(interface->nameStr(), VarNR(1));
+      arr.set(interface->nameStr(), make_tv<KindOfInt64>(1));
     }
     auto const& allIfaces = cls->allInterfaces();
     if (allIfaces.size() > cls->declInterfaces().size()) {
       for (int i = 0; i < allIfaces.size(); ++i) {
         auto const& interface = allIfaces[i];
-        arr.set(interface->nameStr(), VarNR(1));
+        arr.set(interface->nameStr(), make_tv<KindOfInt64>(1));
       }
     }
-    ret.set(s_interfaces, VarNR(arr));
+    ret.set(s_interfaces, VarNR(arr).tv());
   }
 
   // traits
   {
     Array arr = Array::Create();
     for (auto const& traitName : cls->preClass()->usedTraits()) {
-      arr.set(StrNR(traitName), VarNR(1));
+      arr.set(StrNR(traitName), make_tv<KindOfInt64>(1));
     }
-    ret.set(s_traits, VarNR(arr));
+    ret.set(s_traits, VarNR(arr).tv());
   }
 
   // trait aliases
   {
-    ret.set(s_trait_aliases, VarNR(get_trait_alias_info(cls)));
+    ret.set(s_trait_aliases, VarNR(get_trait_alias_info(cls)).tv());
   }
 
   // attributes
   {
     if (cls->attrs() & AttrBuiltin) {
-      ret.set(s_internal,  true_varNR);
+      ret.set(s_internal,  true_varNR.tv());
     }
     if (cls->attrs() & AttrFinal) {
-      ret.set(s_final,     true_varNR);
+      ret.set(s_final,     true_varNR.tv());
     }
     if (cls->attrs() & AttrAbstract) {
-      ret.set(s_abstract,  true_varNR);
+      ret.set(s_abstract,  true_varNR.tv());
     }
     if (cls->attrs() & AttrInterface) {
-      ret.set(s_interface, true_varNR);
+      ret.set(s_interface, true_varNR.tv());
     }
     if (cls->attrs() & AttrTrait) {
-      ret.set(s_trait,     true_varNR);
+      ret.set(s_trait,     true_varNR.tv());
     }
-    ret.set(s_modifiers, VarNR(get_modifiers(cls->attrs(), true)));
+    ret.set(s_modifiers, make_tv<KindOfInt64>(
+      get_modifiers(cls->attrs(), true))
+    );
 
     if (cls->getCtor()->attrs() & AttrPublic &&
         !(cls->attrs() & AttrAbstract) &&
         !(cls->attrs() & AttrInterface) &&
         !(cls->attrs() & AttrTrait)) {
-      ret.set(s_instantiable, true_varNR);
+      ret.set(s_instantiable, true_varNR.tv());
     }
   }
 
@@ -2280,7 +2289,7 @@ Array get_class_info(const String& name) {
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       set_debugger_reflection_method_info(info, m, cls);
-      arr.set(lowerName, VarNR(info));
+      arr.set(lowerName, VarNR(info).tv());
     }
 
     for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
@@ -2290,9 +2299,9 @@ Array get_class_info(const String& name) {
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       set_debugger_reflection_method_info(info, m, cls);
-      arr.set(lowerName, VarNR(info));
+      arr.set(lowerName, VarNR(info).tv());
     }
-    ret.set(s_methods, VarNR(arr));
+    ret.set(s_methods, VarNR(arr).tv());
   }
 
   // properties
@@ -2313,13 +2322,13 @@ Array get_class_info(const String& name) {
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_instance_prop_info(info, &prop, default_val);
-          arrPriv.set(StrNR(prop.name), VarNR(info));
+          arrPriv.set(StrNR(prop.name), VarNR(info).tv());
           arrPrivIdx.set(StrNR(prop.name), prop.idx);
         }
         continue;
       }
       set_instance_prop_info(info, &prop, default_val);
-      arr.set(StrNR(prop.name), VarNR(info));
+      arr.set(StrNR(prop.name), VarNR(info).tv());
       arrIdx.set(StrNR(prop.name), prop.idx);
     }
 
@@ -2328,19 +2337,19 @@ Array get_class_info(const String& name) {
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_static_prop_info(info, &prop);
-          arrPriv.set(StrNR(prop.name), VarNR(info));
+          arrPriv.set(StrNR(prop.name), VarNR(info).tv());
           arrPrivIdx.set(StrNR(prop.name), prop.idx);
         }
         continue;
       }
       set_static_prop_info(info, &prop);
-      arr.set(StrNR(prop.name), VarNR(info));
+      arr.set(StrNR(prop.name), VarNR(info).tv());
       arrIdx.set(StrNR(prop.name), prop.idx);
     }
-    ret.set(s_properties, VarNR(arr));
-    ret.set(s_private_properties, VarNR(arrPriv));
-    ret.set(s_properties_index, VarNR(arrIdx));
-    ret.set(s_private_properties_index, VarNR(arrPrivIdx));
+    ret.set(s_properties, VarNR(arr).tv());
+    ret.set(s_private_properties, VarNR(arrPriv).tv());
+    ret.set(s_properties_index, VarNR(arrIdx).tv());
+    ret.set(s_private_properties_index, VarNR(arrPrivIdx).tv());
   }
 
   // constants
@@ -2360,7 +2369,7 @@ Array get_class_info(const String& name) {
       }
     }
 
-    ret.set(s_constants, VarNR(arr));
+    ret.set(s_constants, VarNR(arr).tv());
   }
 
   { // source info
@@ -2378,7 +2387,7 @@ Array get_class_info(const String& name) {
          it != pcls->userAttributes().end(); ++it) {
       arr.set(StrNR(it->first), tvAsCVarRef(&it->second));
     }
-    ret.set(s_attributes, VarNR(arr));
+    ret.set(s_attributes, VarNR(arr).tv());
   }
 
   return ret;

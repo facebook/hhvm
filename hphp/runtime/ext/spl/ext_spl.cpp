@@ -120,7 +120,8 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
   Array ret(Array::Create());
   const Class::InterfaceMap& ifaces = cls->allInterfaces();
   for (int i = 0, size = ifaces.size(); i < size; i++) {
-    ret.set(ifaces[i]->nameStr(), VarNR(ifaces[i]->name()));
+    ret.set(ifaces[i]->nameStr(),
+            make_tv<KindOfPersistentString>(ifaces[i]->name()));
   }
   return ret;
 }
@@ -146,7 +147,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
   }
   Array ret(Array::Create());
   for (cls = cls->parent(); cls; cls = cls->parent()) {
-    ret.set(cls->nameStr(), VarNR(cls->name()));
+    ret.set(cls->nameStr(), make_tv<KindOfPersistentString>(cls->name()));
   }
   return ret;
 }

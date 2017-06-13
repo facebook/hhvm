@@ -2779,8 +2779,8 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();
-      VarNR index = key.toKey(arr);
-      if (!index.isNull()) {
+      auto const index = key.toKey(arr).tv();
+      if (!isNullType(index.m_type)) {
         const Variant& ret = arr->get(index, false);
         return tvReturn((&ret != &uninit_variant) ? ret : def);
       }

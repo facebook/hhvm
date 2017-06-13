@@ -1850,9 +1850,9 @@ Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   NamedEntity::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
-        a.prepend(VarNR(c->name()));
+        a.prepend(make_tv<KindOfPersistentString>(c->name()));
       } else {
-        a.append(VarNR(c->name()));
+        a.append(make_tv<KindOfPersistentString>(c->name()));
       }
     }
   });
@@ -1866,7 +1866,7 @@ Array getFunctions() {
   Array a = Array::Create();
   NamedEntity::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
-    a.append(VarNR(HHVM_FN(strtolower)(func->nameStr())));
+    a.append(HHVM_FN(strtolower)(func->nameStr()));
   });
   return a;
 }

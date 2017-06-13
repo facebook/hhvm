@@ -359,28 +359,30 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     auto ty = node.tyindex;
     if (ty > type_scan::kIndexUnknownNoPtrs) {
       auto type = type_scan::getName(ty);
-      node_arr.set(s_type, VarNR(makeStaticString(type)));
+      node_arr.set(s_type,
+                   make_tv<KindOfPersistentString>(makeStaticString(type)));
     }
   }
   if (!node.is_root) {
     if (auto cls = cnode.heap_object.cls) {
-      node_arr.set(s_class, VarNR(cls->nameStr()));
+      node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
   } else if (isStaticLocal(node)) {
-    node_arr.set(s_local, VarNR(cnode.static_local.name));
+    node_arr.set(s_local,
+                 make_tv<KindOfPersistentString>(cnode.static_local.name));
     auto func_id = cnode.static_local.funcId;
     if (func_id != InvalidFuncId) {
       auto func = Func::fromFuncId(cnode.static_local.funcId);
-      node_arr.set(s_func, VarNR(func->nameStr()));
+      node_arr.set(s_func, make_tv<KindOfPersistentString>(func->name()));
       if (auto cls = func->cls()) {
-        node_arr.set(s_class, VarNR(cls->nameStr()));
+        node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
       }
     }
   } else if (isStaticProp(node)) {
     if (auto cls = cnode.sprop_cache.cls) {
       auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
-      node_arr.set(s_class, VarNR(cls->nameStr()));
-      node_arr.set(s_prop, VarNR(sprop.name));
+      node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
+      node_arr.set(s_prop, make_tv<KindOfPersistentString>(sprop.name));
     }
   }
   return node_arr;
@@ -399,18 +401,18 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
   );
   switch (cptr.index_kind) {
     case CapturedPtr::Key:
-      ptr_arr.set(s_key, VarNR(int64_t(cptr.index)));
+      ptr_arr.set(s_key, make_tv<KindOfInt64>(cptr.index));
       break;
     case CapturedPtr::Value:
-      ptr_arr.set(s_value, VarNR(int64_t(cptr.index)));
+      ptr_arr.set(s_value, make_tv<KindOfInt64>(cptr.index));
       break;
     case CapturedPtr::Property: {
       auto& prop = cfrom.heap_object.cls->declProperties()[cptr.index];
-      ptr_arr.set(s_prop, VarNR(prop.name));
+      ptr_arr.set(s_prop, make_tv<KindOfPersistentString>(prop.name));
       break;
     }
     case CapturedPtr::Offset:
-      if (cptr.index) ptr_arr.set(s_offset, VarNR(int64_t(cptr.index)));
+      if (cptr.index) ptr_arr.set(s_offset, make_tv<KindOfInt64>(cptr.index));
       break;
   }
 

@@ -108,6 +108,7 @@ public:
   static ArrayData* Create(const Variant& name, TypedValue value);
   static ArrayData* Create(const Variant& name, const Variant& value);
   static ArrayData* CreateRef(Variant& value);
+  static ArrayData* CreateRef(TypedValue name, Variant& value);
   static ArrayData* CreateRef(const Variant& name, Variant& value);
 
   static ArrayData* CreateVec();
@@ -267,6 +268,7 @@ public:
   member_lval lval(Cell k, bool copy);
   member_lval lvalRef(int64_t k, bool copy);
   member_lval lvalRef(StringData* k, bool copy);
+  member_lval lvalRef(Cell k, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -318,8 +320,10 @@ public:
    * the virtual method.  Helpers that take a const Variant& key dispatch
    * to either the StringData* or int64_t key-type helpers.
    */
+  bool exists(Cell k) const;
   bool exists(const String& k) const;
   bool exists(const Variant& k) const;
+  const Variant& get(Cell k, bool error = false) const;
   const Variant& get(int64_t k, bool error = false) const;
   const Variant& get(const StringData* k, bool error = false) const;
   const Variant& get(const String& k, bool error = false) const;
@@ -334,6 +338,7 @@ public:
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, Cell, bool) = delete;
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
+  ArrayData *setRef(Cell k, Variant& v, bool copy);
   ArrayData *setRef(const String& k, Variant& v, bool copy);
   ArrayData *setRef(const Variant& k, Variant& v, bool copy);
   ArrayData *setRef(const StringData*, Variant&, bool) = delete;
@@ -341,6 +346,7 @@ public:
   ArrayData *add(const String& k, Cell v, bool copy);
   ArrayData *add(const String& k, const Variant& v, bool copy);
   ArrayData *add(const Variant& k, const Variant& v, bool copy);
+  ArrayData *remove(Cell k, bool copy);
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
 

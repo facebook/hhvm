@@ -2331,11 +2331,9 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
   if (key.m_type == KindOfInt64) {
     return UnsetElemArrayPre<false>(a, key.m_data.num, copy);
   }
-  VarNR varKey = tvAsCVarRef(&key).toKey(a);
-  if (varKey.isNull()) {
-    return a;
-  }
-  return a->remove(varKey, copy);
+  auto const k = tvToKey(key, a);
+  if (isNullType(k.m_type)) return a;
+  return a->remove(k, copy);
 }
 
 /**

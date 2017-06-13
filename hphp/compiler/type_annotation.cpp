@@ -370,13 +370,14 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
   auto shapeField = ta;
   while (shapeField) {
     assert(shapeField->m_typeArgs);
+
     auto field = Array::Create();
-    if (shapeField->isClsCnsShapeField()) field.add(s_is_cls_cns, true_varNR);
-
-    if (shapeField->isOptionalShapeField()) {
-      field.add(s_optional_shape_field, true_varNR);
+    if (shapeField->isClsCnsShapeField()) {
+      field.add(s_is_cls_cns, true_varNR.tv());
     }
-
+    if (shapeField->isOptionalShapeField()) {
+      field.add(s_optional_shape_field, true_varNR.tv());
+    }
     field.add(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
     fields.add(String(shapeField->m_name), Variant(field.get()));
     shapeField = shapeField->m_typeList;
@@ -389,12 +390,12 @@ Array TypeAnnotation::getScalarArrayRep() const {
 
   bool nullable = (bool) m_nullable;
   if (nullable) {
-    rep.add(s_nullable, true_varNR);
+    rep.add(s_nullable, true_varNR.tv());
   }
 
   bool allowsUnknownFields = (bool) m_allowsUnknownFields;
   if (allowsUnknownFields) {
-    rep.add(s_allows_unknown_fields, true_varNR);
+    rep.add(s_allows_unknown_fields, true_varNR.tv());
   }
 
   TypeStructure::Kind kind = getKind();

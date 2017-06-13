@@ -751,11 +751,11 @@ ArrayData* ArrayData::Create(TypedValue value) {
 
 ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
   if (debug) {
-    DEBUG_ONLY int64_t unused;
     DEBUG_ONLY auto const k = tvToCell(name);
-    assertx(isStringType(k.m_type) ?
-              !k.m_data.pstr->isStrictlyInteger(unused) :
-              isIntType(k.m_type));
+    DEBUG_ONLY int64_t unused;
+    assertx(isStringType(k.m_type)
+              ? !k.m_data.pstr->isStrictlyInteger(unused)
+              : isIntType(k.m_type));
   }
 
   ArrayInit init(1, ArrayInit::Map{});
@@ -769,13 +769,16 @@ ArrayData* ArrayData::CreateRef(Variant& value) {
   return pai.create();
 }
 
-ArrayData* ArrayData::CreateRef(const Variant& name, Variant& value) {
-  ArrayInit init(1, ArrayInit::Map{});
-  DEBUG_ONLY int64_t unused;
-  assertx(name.isString() ?
-         !name.getStringData()->isStrictlyInteger(unused) :
-         name.isInteger());
+ArrayData* ArrayData::CreateRef(TypedValue name, Variant& value) {
+  if (debug) {
+    DEBUG_ONLY auto const k = tvToCell(name);
+    DEBUG_ONLY int64_t unused;
+    assertx(isStringType(k.m_type)
+              ? !k.m_data.pstr->isStrictlyInteger(unused)
+              : isIntType(k.m_type));
+  }
 
+  ArrayInit init(1, ArrayInit::Map{});
   init.setRef(name, value, true);
   return init.create();
 }
@@ -1026,13 +1029,6 @@ Variant ArrayData::each() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
-
-const Variant& ArrayData::get(const Variant& k, bool error) const {
-  assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? get(detail::getIntKey(cell), error)
-                                : get(detail::getStringKey(cell), error);
-}
 
 const Variant& ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);

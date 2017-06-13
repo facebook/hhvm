@@ -229,7 +229,7 @@ public:
    * Converts `k' to a valid key for this array kind.
    */
   Cell convertKey(Cell k) const;
-  VarNR convertKey(const Variant& k) const;
+  Cell convertKey(const Variant& k) const;
 
   /*
    * Should int-like string keys be implicitly converted to integers before they
@@ -387,6 +387,14 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Element rval/lval.
 
+#define FOR_EACH_KEY_TYPE(...)    \
+  C(Cell, __VA_ARGS__)            \
+  I(int, __VA_ARGS__)             \
+  I(int64_t, __VA_ARGS__)         \
+  V(const String&, __VA_ARGS__)   \
+  V(const Variant&, __VA_ARGS__)  \
+  D(double, __VA_ARGS__)
+
   /*
    * Get a refcounted copy of the element at `key'.
    */
@@ -395,18 +403,22 @@ public:
   Variant operator[](const String& key) const;
   Variant operator[](const Variant& key) const;
   Variant operator[](double key) const = delete;
-  Variant operator[](const char*) const = delete; // use const String&
+  Variant operator[](const char*) const = delete;
+
+#define C(key_t, name, ret_t, var_ret_t, cns) \
+  ret_t name(key_t, Flags = Flags::None) cns;
+#define V(key_t, name, ret_t, var_ret_t, cns) \
+  var_ret_t name(key_t, Flags = Flags::None) cns;
+#define I V
+#define D(key_t, name, ret_t, var_ret_t, cns) \
+  var_ret_t name(key_t, Flags = Flags::None) cns = delete;
 
   /*
    * Get an rval to the element at `key'.
    *
    * TODO(#9077255): Return member_rval instead.
    */
-  const Variant& rvalAt(int key, Flags = Flags::None) const;
-  const Variant& rvalAt(int64_t key, Flags = Flags::None) const;
-  const Variant& rvalAt(const String& key, Flags = Flags::None) const;
-  const Variant& rvalAt(const Variant& key, Flags = Flags::None) const;
-  const Variant& rvalAt(double key, Flags = Flags::None) const = delete;
+  FOR_EACH_KEY_TYPE(rvalAt, const Variant&, const Variant&, const)
 
   /*
    * Get an lval to the element at `key'.
@@ -415,26 +427,13 @@ public:
    * escalation.  As with those functions, the Ref versions should be used if
    * the lval will be boxed, and the non-Ref versions should be used otherwise.
    */
-  member_lval lvalAt(Cell key, Flags = Flags::None);
-  Variant& lvalAt(int key, Flags flags = Flags::None) {
-    return tvAsVariant(lvalAtImpl(key, flags).tv());
-  }
-  Variant& lvalAt(int64_t key, Flags flags = Flags::None) {
-    return tvAsVariant(lvalAtImpl(key, flags).tv());
-  }
-  Variant& lvalAt(const String& key, Flags = Flags::None);
-  Variant& lvalAt(const Variant& key, Flags = Flags::None);
-  Variant& lvalAt(double key, Flags = Flags::None) = delete;
+  FOR_EACH_KEY_TYPE(lvalAt, member_lval, Variant&, )
+  FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, Variant&, )
 
-  Variant& lvalAtRef(int key, Flags flags = Flags::None) {
-    return lvalAtRefImpl(key, flags);
-  }
-  Variant& lvalAtRef(int64_t key, Flags flags = Flags::None) {
-    return lvalAtRefImpl(key, flags);
-  }
-  Variant& lvalAtRef(const String& key, Flags = Flags::None);
-  Variant& lvalAtRef(const Variant& key, Flags = Flags::None);
-  Variant& lvalAtRef(double key, Flags = Flags::None) = delete;
+#undef D
+#undef I
+#undef V
+#undef C
 
   /*
    * Get an lval to a newly created element.
@@ -445,32 +444,36 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.
 
+#define C(key_t, ret_t, name, cns)  ret_t name(key_t, bool isKey = false) cns;
+#define V C
+#define I(key_t, ret_t, name, cns)  ret_t name(key_t) cns;
+#define D(key_t, ret_t, name, cns)  ret_t name(key_t) cns = delete;
+
   /*
    * Membership.
    */
-  bool exists(int key) const { return existsImpl((int64_t)key); }
-  bool exists(int64_t key) const { return existsImpl(key); }
-  bool exists(const String& key, bool isKey = false) const;
-  bool exists(const Variant& key, bool isKey = false) const;
-  bool exists(double key) const = delete;
+  FOR_EACH_KEY_TYPE(bool, exists, const)
+
+  /*
+   * Remove an element.
+   */
+  FOR_EACH_KEY_TYPE(void, remove, )
+
+#undef D
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name, value_t) \
+  void name(key_t k, value_t v, bool isKey = false);
+#define V C
+#define I(key_t, name, value_t) void name(key_t k, value_t v);
+#define D(key_t, name, value_t) void name(key_t k, value_t v) = delete;
 
   /*
    * Set an element to `v', unboxing `v' if it's boxed.
    */
-  void set(int key, const Variant& v) { set(int64_t(key), v); }
-  void set(int64_t key, const Variant& v);
-  void set(const String& key, const Variant& v, bool isKey = false);
-  void set(const Variant& key, const Variant& v, bool isKey = false);
-  void set(double key, const Variant& v) = delete;
-
-  /*
-   * Set an element to a reference to `v', boxing it if it's unboxed.
-   */
-  void setRef(int key, Variant& v) { setRef(int64_t(key), v); }
-  void setRef(int64_t key, Variant& v);
-  void setRef(const String& key, Variant& v, bool isKey = false);
-  void setRef(const Variant& key, Variant& v, bool isKey = false);
-  void setRef(double key, Variant& v) = delete;
+  FOR_EACH_KEY_TYPE(set, TypedValue)
 
   /*
    * Set an element to `v', preserving refs unless they are singly-referenced.
@@ -479,34 +482,50 @@ public:
   void setWithRef(const Variant& key, const Variant& v, bool isKey = false);
 
   /*
+   * Set an element to a reference to `v', boxing it if it's unboxed.
+   */
+  FOR_EACH_KEY_TYPE(setRef, Variant&)
+
+  /*
    * Add an element.
    *
    * Like set(), but with the precondition that the key does not already exist
    * in the array.
    */
-  void add(int key, const Variant& v) { add(int64_t(key), v); }
-  void add(int64_t key, const Variant& v);
-  void add(const String& key, const Variant& v, bool isKey = false);
-  void add(const Variant& key, const Variant& v, bool isKey = false);
-  void add(double key, const Variant& v) = delete;
+  FOR_EACH_KEY_TYPE(add, TypedValue)
+
+#undef D
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name, value_t)
+#define V(key_t, name, value_t) \
+  void name(key_t k, value_t v, bool isKey = false);
+#define I(key_t, name, value_t) void name(key_t k, value_t v);
+#define D(key_t, name, value_t) void name(key_t k, value_t v) = delete;
+
+  /*
+   * Variant overloads.
+   */
+  FOR_EACH_KEY_TYPE(set, const Variant&)
+  FOR_EACH_KEY_TYPE(add, const Variant&)
+
+#undef D
+#undef I
+#undef V
+#undef C
 
   /*
    * Append or prepend an element, with semantics like set{,WithRef}().
    */
-  void prepend(const Variant& v);
+  void append(TypedValue v);
   void append(const Variant& v);
-  void appendRef(Variant& v);
   void appendWithRef(TypedValue v);
   void appendWithRef(const Variant& v);
-
-  /*
-   * Remove an element.
-   */
-  void remove(int key) { removeImpl((int64_t)key); }
-  void remove(int64_t key) { removeImpl(key); }
-  void remove(const String& key, bool isKey = false);
-  void remove(const Variant& key);
-  void remove(double key) = delete;
+  void appendRef(Variant& v);
+  void prepend(TypedValue v);
+  void prepend(const Variant& v);
 
   /*
    * Remove all elements.
@@ -519,6 +538,8 @@ public:
   Variant pop();
   Variant dequeue();
 
+#undef FOR_EACH_KEY_TYPE
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -530,41 +551,15 @@ private:
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> void setImpl(const T& key, const Variant& v);
+  template<typename T> const Variant& rvalAtImpl(const T& key, Flags) const;
+  template<typename T> member_lval lvalAtImpl(const T& key, Flags);
+  template<typename T> member_lval lvalAtRefImpl(const T& key, Flags);
+
+  template<typename T> bool existsImpl(const T& key) const;
+  template<typename T> void removeImpl(const T& key);
+  template<typename T> void setImpl(const T& key, TypedValue v);
   template<typename T> void setRefImpl(const T& key, Variant& v);
-  template<typename T> void addImpl(const T& key, const Variant& v);
-
-  template<typename T>
-  bool existsImpl(const T& key) const {
-    if (m_arr) return m_arr->exists(key);
-    return false;
-  }
-
-  template<typename T>
-  void removeImpl(const T& key) {
-    if (m_arr) {
-      ArrayData* escalated = m_arr->remove(key, m_arr->cowCheck());
-      if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-    }
-  }
-
-  template<typename T>
-  member_lval lvalAtImpl(const T& key, Flags = Flags::None) {
-    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const lval = m_arr->lval(key, m_arr->cowCheck());
-    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-    assert(lval.tv());
-    return lval;
-  }
-
-  template<typename T>
-  Variant& lvalAtRefImpl(const T& key, Flags = Flags::None) {
-    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
-    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-    assert(lval.tv());
-    return reinterpret_cast<Variant&>(*lval.tv());
-  }
+  template<typename T> void addImpl(const T& key, TypedValue v);
 
   static void compileTimeAssertions();
 

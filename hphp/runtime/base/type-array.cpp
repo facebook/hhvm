@@ -647,53 +647,248 @@ int Array::compare(const Array& v2, bool flip /* = false */) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Element rval/lval.
 
-const Variant& Array::rvalAt(int key, AccessFlags flags) const {
-  if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
-  return uninit_variant;
-}
-
-const Variant& Array::rvalAt(int64_t key, AccessFlags flags) const {
-  if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
-  return uninit_variant;
-}
-
-const Variant& Array::rvalAt(const String& key, AccessFlags flags) const {
+template<typename T> ALWAYS_INLINE
+const Variant& Array::rvalAtImpl(const T& key, AccessFlags flags) const {
   if (!m_arr) return uninit_variant;
-  auto const error = any(flags & AccessFlags::Error);
+  return m_arr->get(key, any(flags & AccessFlags::Error));
+}
 
-  if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
+template<typename T> ALWAYS_INLINE
+member_lval Array::lvalAtImpl(const T& key, AccessFlags) {
+  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+  auto const lval = m_arr->lval(key, m_arr->cowCheck());
+  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  assert(lval.has_ref());
+  return lval;
+}
 
+template<typename T> ALWAYS_INLINE
+member_lval Array::lvalAtRefImpl(const T& key, AccessFlags) {
+  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
+  auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
+  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  assert(lval.has_ref());
+  return lval;
+}
+
+template<typename T> ALWAYS_INLINE
+bool Array::existsImpl(const T& key) const {
+  if (m_arr) return m_arr->exists(key);
+  return false;
+}
+
+template<typename T> ALWAYS_INLINE
+void Array::removeImpl(const T& key) {
+  if (m_arr) {
+    ArrayData* escalated = m_arr->remove(key, m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+template<typename T> ALWAYS_INLINE
+void Array::setImpl(const T& key, TypedValue v) {
+  if (!m_arr) {
+    m_arr = Ptr::attach(ArrayData::Create(key, v));
+  } else {
+    auto const escalated = m_arr->set(key, tvToCell(v), m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+template<typename T> ALWAYS_INLINE
+void Array::setRefImpl(const T& key, Variant& v) {
+  if (!m_arr) {
+    m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
+  } else {
+    escalate();
+    auto const escalated = m_arr->setRef(key, v, m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+template<typename T> ALWAYS_INLINE
+void Array::addImpl(const T& key, TypedValue v) {
+  if (!m_arr) {
+    m_arr = Ptr::attach(ArrayData::Create(key, v));
+  } else {
+    auto const escalated = m_arr->add(key, tvToCell(v), m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+/*
+ * The "element not found" sentinel type for each type returned by an Array
+ * element access or mutation function.
+ */
+template<typename T> T not_found();
+template<> void not_found<void>() { return; }
+template<> bool not_found<bool>() { return false; }
+
+template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
+template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
+
+template<> member_lval not_found<member_lval>() {
+  return member_lval { nullptr, lvalBlackHole().asTypedValue() };
+}
+
+/*
+ * Implementation wrapper for Array element functions.
+ *
+ * These handle key conversion and value type canonicalization, and then
+ * dispatch to an Array::fooImpl() function.
+ */
+template<typename Fn, typename... Args> ALWAYS_INLINE
+decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
+                    const String& key, Args&&... args) {
+  if (is_key) return fn(key, std::forward<Args>(args)...);
+
+  auto const ad = arr.get() ? arr.get() : staticEmptyArray();
+
+  // The logic here is a specialization of cellToKey().
   if (key.isNull()) {
-    if (!useWeakKeys()) {
-      throwInvalidArrayKeyException(uninit_variant.asTypedValue(),
-                                    m_arr.get());
+    if (!ad->useWeakKeys()) {
+      throwInvalidArrayKeyException(uninit_variant.asTypedValue(), ad);
     }
     if (RuntimeOption::EvalHackArrCompatNotices) {
       raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
     }
-    return m_arr->get(staticEmptyString(), error);
+    return fn(make_tv<KindOfPersistentString>(staticEmptyString()),
+              std::forward<Args>(args)...);
   }
 
   int64_t n;
-  if (m_arr->convertKey(key.get(), n)) {
-    return m_arr->get(n, error);
+  if (ad->convertKey(key.get(), n)) {
+    return fn(n, std::forward<Args>(args)...);
   }
-  return m_arr->get(key, error);
+  return fn(key, std::forward<Args>(args)...);
 }
 
-const Variant& Array::rvalAt(const Variant& key, AccessFlags flags) const {
-  if (!m_arr) return uninit_variant;
-  auto const error = any(flags & AccessFlags::Error);
-
-  if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
-  auto const k = convertKey(key);
-  if (!k.isNull()) {
-    return m_arr->get(k, error);
+template<typename Fn, typename... Args> ALWAYS_INLINE
+decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
+                    Cell key, Args&&... args) {
+  if (isIntType(key.m_type)) {
+    return fn(key.m_data.num, std::forward<Args>(args)...);
   }
-  return uninit_variant;
+  if (is_key) {
+    return fn(key, std::forward<Args>(args)...);
+  }
+  auto const k = arr.convertKey(key);
+  if (!isNullType(k.m_type)) {
+    return fn(k, std::forward<Args>(args)...);
+  }
+  return not_found<decltype(fn(key, std::forward<Args>(args)...))>();
 }
+
+template<typename Fn, typename... Args> ALWAYS_INLINE
+decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
+                    const Variant& key, Args&&... args) {
+  return elem(arr, fn, is_key, *key.asCell(), std::forward<Args>(args)...);
+}
+
+/*
+ * Conversion helpers.
+ */
+Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv()); }
+
+}
+
+#define WRAP(name)                                              \
+  [&] (auto&&... ts) -> decltype(auto) {                        \
+    return this->name##Impl(std::forward<decltype(ts)>(ts)...); \
+  }
+
+#define FOR_EACH_KEY_TYPE(...)    \
+  C(Cell, __VA_ARGS__)            \
+  I(int, __VA_ARGS__)             \
+  I(int64_t, __VA_ARGS__)         \
+  V(const String&, __VA_ARGS__)   \
+  V(const Variant&, __VA_ARGS__)
+
+#define FK(flags) any(flags & AccessFlags::Key)
+
+#define C(key_t, name, ret_t, var_ret_t, conv, cns)         \
+  ret_t Array::name(key_t k, AccessFlags fl) cns {          \
+    return detail::elem(*this, WRAP(name), FK(fl), k, fl);  \
+  }
+#define V(key_t, name, ret_t, var_ret_t, conv, cns)               \
+  var_ret_t Array::name(key_t k, AccessFlags fl) cns {            \
+    return conv(detail::elem(*this, WRAP(name), FK(fl), k, fl));  \
+  }
+#define I(key_t, name, ret_t, var_ret_t, conv, cns)     \
+  var_ret_t Array::name(key_t k, AccessFlags fl) cns {  \
+    return conv(name##Impl(int64_t(k), fl));            \
+  }
+
+FOR_EACH_KEY_TYPE(rvalAt, const Variant&, const Variant&, identity, const)
+FOR_EACH_KEY_TYPE(lvalAt, member_lval, Variant&, detail::as_var, )
+FOR_EACH_KEY_TYPE(lvalAtRef, member_lval, Variant&, detail::as_var, )
+
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, ret_t, name, cns)                    \
+  ret_t Array::name(key_t k, bool isKey) cns {        \
+    return detail::elem(*this, WRAP(name), isKey, k); \
+  }
+#define V C
+#define I(key_t, ret_t, name, cns)  \
+  ret_t Array::name(key_t k) cns { return name##Impl(int64_t(k)); }
+
+FOR_EACH_KEY_TYPE(bool, exists, const)
+FOR_EACH_KEY_TYPE(void, remove, )
+
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name, value_t)                           \
+  void Array::name(key_t k, value_t v, bool isKey) {      \
+    return detail::elem(*this, WRAP(name), isKey, k, v);  \
+  }
+#define V(key_t, name, value_t)                           \
+  void Array::name(key_t k, value_t v, bool isKey) {      \
+    return detail::elem(*this, WRAP(name), isKey, k, v);  \
+  }
+#define I(key_t, name, value_t)           \
+  void Array::name(key_t k, value_t v) {  \
+    return name##Impl(int64_t(k), v);     \
+  }
+
+FOR_EACH_KEY_TYPE(set, TypedValue)
+FOR_EACH_KEY_TYPE(add, TypedValue)
+FOR_EACH_KEY_TYPE(setRef, Variant&)
+
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name)
+#define V(key_t, name)                                      \
+  void Array::name(key_t k, const Variant& v, bool isKey) { \
+    return name(k, *v.asTypedValue(), isKey);               \
+  }
+#define I(key_t, name)                          \
+  void Array::name(key_t k, const Variant& v) { \
+    return name(k, *v.asTypedValue());          \
+  }
+
+FOR_EACH_KEY_TYPE(set)
+FOR_EACH_KEY_TYPE(add)
+
+#undef I
+#undef V
+#undef C
+
+#undef FOR_EACH_KEY_TYPE
+#undef WRAP
+
+///////////////////////////////////////////////////////////////////////////////
 
 Variant& Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
@@ -711,176 +906,10 @@ Variant& Array::lvalAtRef() {
   return tvAsVariant(lval.tv());
 }
 
-member_lval Array::lvalAt(Cell key, AccessFlags flags) {
-  if (any(flags & AccessFlags::Key)) return lvalAtImpl(key, flags);
-  auto const k = convertKey(key);
-  if (!isNullType(k.m_type)) {
-    return lvalAtImpl(k, flags);
-  }
-  return member_lval { nullptr, lvalBlackHole().asTypedValue() };
-}
-
-Variant& Array::lvalAt(const String& key, AccessFlags flags) {
-  return tvAsVariant(any(flags & AccessFlags::Key)
-    ? lvalAtImpl(key, flags).tv()
-    : lvalAtImpl(convertKey(key).tv(), flags).tv()
-  );
-}
-
-Variant& Array::lvalAt(const Variant& key, AccessFlags flags) {
-  return tvAsVariant(lvalAt(*key.asCell(), flags).tv());
-}
-
-Variant& Array::lvalAtRef(const String& key, AccessFlags flags) {
-  if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
-  return lvalAtRefImpl(convertKey(key), flags);
-}
-
-Variant& Array::lvalAtRef(const Variant& key, AccessFlags flags) {
-  if (any(flags & AccessFlags::Key)) return lvalAtRefImpl(key, flags);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) {
-    return lvalAtRefImpl(k, flags);
-  }
-  return lvalBlackHole();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-template<typename T> ALWAYS_INLINE
-void Array::setImpl(const T& key, const Variant& v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, *v.asTypedValue()));
-  } else {
-    ArrayData *escalated = m_arr->set(key, *v.asCell(), m_arr->cowCheck());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
-template<typename T> ALWAYS_INLINE
-void Array::setRefImpl(const T& key, Variant& v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
-  } else {
-    escalate();
-    ArrayData *escalated = m_arr->setRef(key, v, m_arr->cowCheck());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
-template<typename T> ALWAYS_INLINE
-void Array::addImpl(const T& key, const Variant& v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::Create(key, *v.asTypedValue()));
-  } else {
-    ArrayData *escalated = m_arr->add(key, *v.asCell(), m_arr->cowCheck());
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
-void Array::set(int64_t key, const Variant& v) {
-  setImpl(key, v);
-}
-
-void Array::set(const String& key, const Variant& v, bool isKey /* = false */) {
-  if (isKey) return setImpl(key, v);
-  setImpl(convertKey(key).tv(), v);
-}
-
-void Array::set(const Variant& key, const Variant& v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) return setImpl(key.getNumData(), v);
-  if (isKey) return setImpl(*key.asCell(), v);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) setImpl(k.tv(), v);
-}
-
-void Array::setRef(int64_t key, Variant& v) {
-  setRefImpl(key, v);
-}
-
-void Array::setRef(const String& key, Variant& v, bool isKey /* = false */) {
-  if (isKey) return setRefImpl(key, v);
-  setRefImpl(convertKey(key), v);
-}
-
-void Array::setRef(const Variant& key, Variant& v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) return setRefImpl(key.getNumData(), v);
-  if (isKey) return setRefImpl(key, v);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) setRefImpl<Variant>(k, v);
-}
-
-void Array::add(int64_t key, const Variant& v) {
-  addImpl(key, v);
-}
-
-void Array::add(const String& key, const Variant& v, bool isKey /* = false */) {
-  if (isKey) return addImpl(key, v);
-  addImpl(convertKey(key).tv(), v);
-}
-
-void Array::add(const Variant& key, const Variant& v, bool isKey /* = false */) {
-  if (key.getRawType() == KindOfInt64) return addImpl(key.getNumData(), v);
-  if (isKey) return addImpl(*key.asCell(), v);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) addImpl(k.tv(), v);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Element access and mutation.
-
-bool Array::exists(const String& key, bool isKey /* = false */) const {
-  if (isKey) return existsImpl(key);
-  return existsImpl(convertKey(key));
-}
-
-bool Array::exists(const Variant& key, bool isKey /* = false */) const {
-  if (isIntType(key.getType())) return existsImpl(key.toInt64());
-  if (isBoolType(key.getType())) {
-    if (RuntimeOption::EvalHackArrCompatNotices && useWeakKeys()) {
-      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
-    }
-    return existsImpl(key.toInt64());
-  }
-  if (isKey) return existsImpl(key);
-  VarNR k(convertKey(key));
-  if (!k.isNull()) {
-    return existsImpl(k);
-  }
-  return false;
-}
-
-void Array::remove(const String& key, bool isKey /* = false */) {
-  if (isKey) return removeImpl(key);
-  return removeImpl(convertKey(key));
-}
-
-void Array::remove(const Variant& key) {
-  if (isBoolType(key.getType())) {
-    if (RuntimeOption::EvalHackArrCompatNotices && useWeakKeys()) {
-      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
-    }
-    removeImpl(key.toInt64());
-    return;
-  }
-  if (isIntType(key.getType())) {
-    removeImpl(key.toInt64());
-    return;
-  }
-  VarNR k(convertKey(key));
-  if (!k.isNull()) {
-    removeImpl(k);
-  }
-}
-
-void Array::append(const Variant& v) {
+void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-
-  auto cell = *v.asCell();
-  if (UNLIKELY(cell.m_type == KindOfUninit)) cell = make_tv<KindOfNull>();
-
-  auto escalated = m_arr->append(cell, m_arr->cowCheck());
+  auto const escalated = m_arr->append(tvToInitCell(v), m_arr->cowCheck());
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
@@ -888,19 +917,22 @@ void Array::appendRef(Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(v));
   } else {
-    ArrayData *escalated = m_arr->appendRef(v, m_arr->cowCheck());
+    auto const escalated = m_arr->appendRef(v, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
 
 void Array::appendWithRef(TypedValue v) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  ArrayData *escalated = m_arr->appendWithRef(v, m_arr->cowCheck());
+  auto const escalated = m_arr->appendWithRef(v, m_arr->cowCheck());
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
-void Array::appendWithRef(const Variant& v) {
-  appendWithRef(*v.asTypedValue());
+void Array::prepend(TypedValue v) {
+  if (!m_arr) operator=(Create());
+  assertx(m_arr);
+  auto const escalated = m_arr->prepend(tvToInitCell(v), m_arr->cowCheck());
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
 Variant Array::pop() {
@@ -921,17 +953,6 @@ Variant Array::dequeue() {
     return ret;
   }
   return init_null();
-}
-
-void Array::prepend(const Variant& v) {
-  if (!m_arr) operator=(Create());
-  assertx(m_arr);
-
-  auto cell = *v.asCell();
-  if (UNLIKELY(cell.m_type == KindOfUninit)) cell = make_tv<KindOfNull>();
-
-  auto escalated = m_arr->prepend(cell, m_arr->cowCheck());
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

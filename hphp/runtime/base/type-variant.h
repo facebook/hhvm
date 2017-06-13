@@ -1444,17 +1444,24 @@ void clearBlackHole();
 inline Variant Array::operator[](int key) const {
   return rvalAt(key);
 }
-
 inline Variant Array::operator[](int64_t key) const {
   return rvalAt(key);
 }
-
 inline Variant Array::operator[](const String& key) const {
   return rvalAt(key);
 }
-
 inline Variant Array::operator[](const Variant& key) const {
   return rvalAt(key);
+}
+
+inline void Array::append(const Variant& v) {
+  append(*v.asTypedValue());
+}
+inline void Array::appendWithRef(const Variant& v) {
+  appendWithRef(*v.asTypedValue());
+}
+inline void Array::prepend(const Variant& v) {
+  prepend(*v.asTypedValue());
 }
 
 inline void Array::setWithRef(Cell k, TypedValue v, bool isKey) {
@@ -1543,8 +1550,8 @@ inline bool isa_non_null(const Variant& v) {
 ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
   return cellToKey(k, m_arr ? m_arr.get() : staticEmptyArray());
 }
-ALWAYS_INLINE VarNR Array::convertKey(const Variant& k) const {
-  return k.toKey(m_arr ? m_arr.get() : staticEmptyArray());
+ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
+  return convertKey(*k.asCell());
 }
 
 inline VarNR Variant::toKey(const ArrayData* ad) const {

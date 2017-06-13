@@ -460,7 +460,7 @@ Array resolveShape(const Array& arr,
       resolveTS(valueArr, typeCns, typeCnsCls, generics, persistent);
 
     if (wrapper.exists(s_optional_shape_field)) {
-      value.add(s_optional_shape_field, true_varNR);
+      value.add(s_optional_shape_field, true_varNR.tv());
     }
 
     newfields.add(key, Variant(value));
@@ -512,11 +512,11 @@ Array resolveTS(const Array& arr,
     arr[s_kind].toInt64Val());
 
   auto newarr = Array::Create();
-  if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR);
+  if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR.tv());
   newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   if (arr.exists(s_allows_unknown_fields)) {
-    newarr.add(s_allows_unknown_fields, true_varNR);
+    newarr.add(s_allows_unknown_fields, true_varNR.tv());
   }
 
   switch (kind) {
@@ -585,7 +585,7 @@ Array resolveTS(const Array& arr,
           ts = TypeStructure::resolve(clsName, ts, persistent);
         }
         if (arr.exists(s_nullable)) {
-          ts.add(s_nullable, true_varNR);
+          ts.add(s_nullable, true_varNR.tv());
         }
 
         return ts;
@@ -655,7 +655,7 @@ Array resolveTS(const Array& arr,
       }
 
       if (arr.exists(s_nullable)) {
-        typeCnsVal.add(s_nullable, true_varNR);
+        typeCnsVal.add(s_nullable, true_varNR.tv());
       }
 
       return typeCnsVal;

@@ -65,6 +65,10 @@ inline ArrayData* ArrayData::Create(const Variant& name, const Variant& value) {
   return Create(*name.asTypedValue(), *value.asTypedValue());
 }
 
+inline ArrayData* ArrayData::CreateRef(const Variant& name, Variant& value) {
+  return CreateRef(*name.asTypedValue(), value);
+}
+
 ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
                                          int64_t& i,
                                          bool notice) const {
@@ -73,21 +77,25 @@ ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
   return result;
 }
 
+inline bool ArrayData::exists(Cell k) const {
+  assert(IsValidKey(k));
+  return detail::isIntKey(k) ? exists(detail::getIntKey(k))
+                             : exists(detail::getStringKey(k));
+}
+
 inline bool ArrayData::exists(const String& k) const {
   assert(IsValidKey(k));
   return exists(k.get());
 }
 
 inline bool ArrayData::exists(const Variant& k) const {
-  assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? exists(detail::getIntKey(cell))
-                                : exists(detail::getStringKey(cell));
+  return exists(*k.asCell());
 }
 
-inline const Variant& ArrayData::get(const String& k, bool error) const {
+inline const Variant& ArrayData::get(Cell k, bool error) const {
   assert(IsValidKey(k));
-  return get(k.get(), error);
+  return detail::isIntKey(k) ? get(detail::getIntKey(k), error)
+                             : get(detail::getStringKey(k), error);
 }
 
 inline const Variant& ArrayData::get(int64_t k, bool error) const {
@@ -95,9 +103,18 @@ inline const Variant& ArrayData::get(int64_t k, bool error) const {
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
+inline const Variant& ArrayData::get(const String& k, bool error) const {
+  assert(IsValidKey(k));
+  return get(k.get(), error);
+}
+
 inline const Variant& ArrayData::get(const StringData* k, bool error) const {
   auto tv = error ? nvTryGet(k) : nvGet(k);
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
+}
+
+inline const Variant& ArrayData::get(const Variant& k, bool error) const {
+  return get(*k.asCell(), error);
 }
 
 inline member_lval ArrayData::lval(const String& k, bool copy) {
@@ -120,11 +137,14 @@ inline member_lval ArrayData::lvalRef(const String& k, bool copy) {
   return lvalRef(k.get(), copy);
 }
 
-inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
+inline member_lval ArrayData::lvalRef(Cell k, bool copy) {
   assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? lvalRef(detail::getIntKey(cell), copy)
-                                : lvalRef(detail::getStringKey(cell), copy);
+  return detail::isIntKey(k) ? lvalRef(detail::getIntKey(k), copy)
+                             : lvalRef(detail::getStringKey(k), copy);
+}
+
+inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
+  return lvalRef(*k.asCell(), copy);
 }
 
 inline ArrayData* ArrayData::set(Cell k, Cell v, bool copy) {
@@ -152,16 +172,19 @@ inline ArrayData* ArrayData::set(const Variant& k, const Variant& v,
   return set(*k.asCell(), *v.asCell(), copy);
 }
 
+inline ArrayData* ArrayData::setRef(Cell k, Variant& v, bool copy) {
+  assert(IsValidKey(k));
+  return detail::isIntKey(k) ? setRef(detail::getIntKey(k), v, copy)
+                             : setRef(detail::getStringKey(k), v, copy);
+}
+
 inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
   assert(IsValidKey(k));
   return setRef(k.get(), v, copy);
 }
 
 inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
-  assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? setRef(detail::getIntKey(cell), v, copy)
-                                : setRef(detail::getStringKey(cell), v, copy);
+  return setRef(*k.asCell(), v, copy);
 }
 
 inline ArrayData* ArrayData::add(Cell k, Cell v, bool copy) {
@@ -189,16 +212,19 @@ inline ArrayData* ArrayData::add(const Variant& k, const Variant& v,
   return add(*k.asCell(), *v.asCell(), copy);
 }
 
+inline ArrayData* ArrayData::remove(Cell k, bool copy) {
+  assert(IsValidKey(k));
+  return detail::isIntKey(k) ? remove(detail::getIntKey(k), copy)
+                             : remove(detail::getStringKey(k), copy);
+}
+
 inline ArrayData* ArrayData::remove(const String& k, bool copy) {
   assert(IsValidKey(k));
   return remove(k.get(), copy);
 }
 
 inline ArrayData* ArrayData::remove(const Variant& k, bool copy) {
-  assert(IsValidKey(k));
-  auto const cell = *k.asCell();
-  return detail::isIntKey(cell) ? remove(detail::getIntKey(cell), copy)
-                                : remove(detail::getStringKey(cell), copy);
+  return remove(*k.asCell(), copy);
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {

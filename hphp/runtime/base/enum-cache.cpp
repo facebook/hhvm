@@ -146,7 +146,7 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
       EnumCache::failLookup(msg);
     }
     values.set(StrNR(consts[i].name), cellAsCVarRef(value));
-    names.set(cellAsCVarRef(value), VarNR(consts[i].name));
+    names.set(value, make_tv<KindOfPersistentString>(consts[i].name));
   }
 
   // If we saw dynamic constants we cannot cache the enum values across requests

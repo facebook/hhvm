@@ -23,6 +23,13 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename T>
+constexpr auto identity(T&& t) noexcept -> decltype(std::forward<T>(t)) {
+  return std::forward<T>(t);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Is `T' the same type as `U' or any type in `Tail...'?
  */

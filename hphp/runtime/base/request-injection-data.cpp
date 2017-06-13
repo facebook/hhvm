@@ -628,6 +628,7 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
 void RequestInjectionData::reset() {
   m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
   m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_coverageWithUnused = false;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
@@ -650,6 +651,7 @@ void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
+    !m_coverageWithUnused &&
     isStandardRequest() &&
     !getDebuggerForceIntr();
 }

@@ -19,6 +19,7 @@
 
 #include "hphp/util/hash-map-typedefs.h"
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -29,8 +30,11 @@ struct Array;
 
 struct CodeCoverage {
   static constexpr int kLineExecuted = 1;
+  static constexpr int kLineUnused = -1;
 
   void Record(const char* filename, int line0, int line1);
+
+  void RecordExecutable(const char* filename, std::set<int>&& lines);
 
   /*
    * Returns an array in this format,
@@ -40,6 +44,8 @@ struct CodeCoverage {
    * If sys is passed as false, systemlib files are not included.
    */
   Array Report(bool sys = true);
+
+  Array ReportExecutable();
 
   /*
    * Write JSON format into the file.
@@ -55,9 +61,14 @@ struct CodeCoverage {
    */
   void Reset();
 
+  bool IsRecordedExecutable(const char* filename);
+
 private:
   typedef hphp_const_char_map<std::vector<int>> CodeCoverageMap;
   CodeCoverageMap m_hits;
+
+  typedef hphp_const_char_map<std::set<int>> CodeCoverageSet;
+  CodeCoverageSet m_executables;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

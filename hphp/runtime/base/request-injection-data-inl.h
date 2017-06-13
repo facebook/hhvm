@@ -58,6 +58,15 @@ inline void RequestInjectionData::setCoverage(bool flag) {
   updateJit();
 }
 
+inline bool RequestInjectionData::getCoverageWithUnused() const {
+  return m_coverageWithUnused;
+}
+
+inline void RequestInjectionData::setCoverageWithUnused(bool flag) {
+  m_coverageWithUnused = flag;
+  updateJit();
+}
+
 inline bool RequestInjectionData::getDebuggerAttached() {
   return m_debuggerAttached;
 }

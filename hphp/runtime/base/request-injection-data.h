@@ -176,6 +176,12 @@ struct RequestInjectionData {
   void setCoverage(bool);
 
   /*
+   * Whether coverage is being collected with unused code.
+   */
+  bool getCoverageWithUnused() const;
+  void setCoverageWithUnused(bool);
+
+  /*
    * Whether there is a debugger attached to the request.  Controlled by
    * DebuggerHook.  This field gets read directly by JIT'd code.
    */
@@ -288,6 +294,7 @@ private:
 
   bool m_debuggerAttached{false};
   bool m_coverage{false};
+  bool m_coverageWithUnused{false};
   bool m_jit{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};

@@ -23,6 +23,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cinttypes>
+#include <set>
+#include <utility>
 
 #include <boost/filesystem.hpp>
 
@@ -6313,6 +6315,22 @@ void PrintTCCallerInfo() {
 static __thread Unit* s_prev_unit;
 static __thread int s_prev_line;
 
+static void recordExecutableLines(const Unit* unit, const char* filename) {
+  if (TI().m_coverage->IsRecordedExecutable(filename)) {
+    return;
+  }
+
+  auto const& sourceLocTable = getSourceLocTable(unit);
+  std::set<int> lines;
+  for (auto const& entry: sourceLocTable) {
+    auto const loc = entry.val();
+    for (int i = loc.line0; i <= loc.line1; ++i) {
+      lines.insert(i);
+    }
+  }
+  TI().m_coverage->RecordExecutable(filename, std::move(lines));
+}
+
 void recordCodeCoverage(PC /*pc*/) {
   Unit* unit = vmfp()->m_func->unit();
   assert(unit != nullptr);
@@ -6321,14 +6339,23 @@ void recordCodeCoverage(PC /*pc*/) {
       unit == SystemLib::s_hhas_unit) {
     return;
   }
+
+  const StringData* filepath = unit->filepath();
+  assert(filepath->isStatic());
+  const char* filename = filepath->data();
+
+  if (unit != s_prev_unit) {
+    s_prev_unit = unit;
+    if (RID().getCoverageWithUnused()) {
+      recordExecutableLines(unit, filename);
+    }
+  }
+
   int line = unit->getLineNumber(pcOff());
   assert(line != -1);
 
   if (unit != s_prev_unit || line != s_prev_line) {
-    s_prev_unit = unit;
     s_prev_line = line;
-    const StringData* filepath = unit->filepath();
-    assert(filepath->isStatic());
     TI().m_coverage->Record(filepath->data(), line, line);
   }
 }

@@ -949,7 +949,8 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_const_or_type_const_declaration parser abstr =
     let (parser, const) = assert_token parser Const in
-    if (peek_token_kind parser) = Type then
+    if (peek_token_kind parser) = Type
+       && (peek_token_kind ~lookahead:1 parser <> Equal) then
       parse_type_const_declaration parser abstr const
     else
       parse_const_declaration parser abstr const

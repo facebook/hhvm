@@ -219,6 +219,34 @@ let test_access_3_keys_one_object_wrong_type_middle () =
     Printf.eprintf "Expected failure, but successfully traversed json.\n";
     false
 
+let test_truncate () =
+  let s = {|{ "a":{"a1":{"a1x":"hello","a1y":42},"a2":true},"b":null}|} in
+
+  let actual = Hh_json.json_truncate_string s in
+  let exp = s in (* we expect it to preserve the leading space! *)
+  Asserter.String_asserter.assert_equals exp actual "unchanged truncate";
+
+  let actual = Hh_json.json_truncate_string s ~max_string_length:1 in
+  let exp = {|{"a":{"a1":{"a1x":"h...","a1y":42},"a2":true},"b":null}|} in
+  Asserter.String_asserter.assert_equals exp actual "max_string_length truncate";
+
+  let actual = Hh_json.json_truncate_string s ~max_child_count:1 in
+  let exp = {|{"a":{"a1":{"a1x":"hello"}}}|} in
+  Asserter.String_asserter.assert_equals exp actual "max_child_count truncate";
+
+  let actual = Hh_json.json_truncate_string s ~max_depth:1 in
+  let exp = {|{"a":{},"b":null}|} in
+  Asserter.String_asserter.assert_equals exp actual "max_depth truncate";
+
+  let actual = Hh_json.json_truncate_string s ~max_total_count:1 in
+  let exp = {|{"a":{}}|} in
+  Asserter.String_asserter.assert_equals exp actual "max_total_count truncate 1";
+
+  let actual = Hh_json.json_truncate_string s ~max_total_count:2 in
+  let exp = {|{"a":{"a1":{}}}|} in
+  Asserter.String_asserter.assert_equals exp actual "max_total_count truncate 2";
+  true
+
 let tests = [
   "test_escape_unescape", test_escape_unescape;
   "test_empty_string", test_empty_string;
@@ -233,6 +261,7 @@ let tests = [
   "test_access_3_keys_on_object", test_access_3_keys_one_object;
   "test_access_3_keys_one_object_wrong_type_middle",
     test_access_3_keys_one_object_wrong_type_middle;
+  "test_truncate", test_truncate;
 ]
 
 let () =

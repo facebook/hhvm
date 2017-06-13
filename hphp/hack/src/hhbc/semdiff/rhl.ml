@@ -821,6 +821,13 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                     check (succ pc) (succ pc') newnewasn
                           (add_assumption (pc,pc') asn assumed) todo)) in
 
+        let string_fatal_pattern = uString $$ uFatal in
+        let two_string_fatal_pattern =
+          (string_fatal_pattern $*$ string_fatal_pattern) $? (fun ((_s,fop),(_s',fop')) ->
+            fop = fop') in
+        let two_string_fatal_action = two_string_fatal_pattern $>>
+          (fun _ _ -> donext assumed todo) in (* success, nothing more to check here *)
+
         (* last, failure, case for use in bigmatch *)
         let failure_pattern_action =
          parse_any $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
@@ -831,6 +838,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           notjmp_action;
           concat_string_either_action;
           fpassl_action;
+          two_string_fatal_action;
           failure_pattern_action;
          ] in
         bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

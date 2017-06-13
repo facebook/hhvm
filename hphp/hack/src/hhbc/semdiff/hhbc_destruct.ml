@@ -46,6 +46,7 @@ let uFCallAwait =
 let uFCallUnpack = pa (function | ICall (FCallUnpack np) -> Some np | _ -> None)
 let uFCallBuiltin =
   pa (function | ICall (FCallBuiltin (np1, np2, str)) -> Some (np1, np2, str) | _ -> None)
+let uFatal = pa (function | IOp (Fatal fop) -> Some fop | _ -> None)
 
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)

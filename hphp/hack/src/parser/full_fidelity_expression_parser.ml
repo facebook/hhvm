@@ -604,6 +604,19 @@ module WithStatementAndDeclAndTypeParser
       parser, function_call
     end with Cancel_attempt -> parse_remaining_expression parser term
 
+  (* checks if t is a prefix unary expression where operator has expected kind
+     and and operand matched predicate *)
+  and check_prefix_unary_expression t expected_kind operand_predicate =
+    match syntax t with
+    | PrefixUnaryExpression {
+        prefix_unary_operator = {
+          syntax = Token t
+        ; _ };
+        prefix_unary_operand
+      } when Token.kind t = expected_kind ->
+        operand_predicate prefix_unary_operand
+    | _ -> false
+
   (* Checks if given expression is a PHP variable.
   per PHP grammar:
   https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#grammar-variable
@@ -612,18 +625,13 @@ module WithStatementAndDeclAndTypeParser
     is_variable_expression t ||
     is_subscript_expression t ||
     is_member_selection_expression t ||
-    is_scope_resolution_expression t
+    is_scope_resolution_expression t ||
+    check_prefix_unary_expression t Dollar can_be_used_as_lvalue
 
   (* checks if expression is a valid right hand side in by-ref assignment
    which is '&'PHP variable *)
   and is_byref_assignment_source t =
-    match syntax t with
-    | PrefixUnaryExpression {
-        prefix_unary_operator = { syntax = Token t; _ };
-        prefix_unary_operand = operand
-      } ->
-      Token.kind t = Ampersand && can_be_used_as_lvalue operand
-    | _ -> false
+    check_prefix_unary_expression t Ampersand can_be_used_as_lvalue
 
   (*detects if left_term and operator can be treated as a beginning of
    assignment (respecting the precedence of operator on the left of

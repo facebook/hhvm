@@ -1,7 +1,6 @@
 quick/ClsCases.php
 quick/EmitOO.php
 quick/FPassC-eval.php
-quick/GetVar.php
 quick/Xhp.php
 quick/__isset.php
 quick/abs_codegen.php

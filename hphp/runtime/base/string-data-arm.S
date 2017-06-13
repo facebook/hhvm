@@ -41,10 +41,9 @@ ETCH_LABEL(hheader):
         crc32cx w9, w9, x1
 
 ETCH_LABEL(hend):
-        lsr     w9, w9, #1
-        orr     w10, w10, w9
+        lsr     w0, w9, #1
+        orr     w10, w10, w0
         str     w10, [x13]
-        mov     w0, w9
         ret
         CFI(endproc)
 ETCH_SIZE(_ZNK4HPHP10StringData10hashHelperEv)

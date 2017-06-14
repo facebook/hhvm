@@ -415,6 +415,7 @@ let should_start_first_server t = match t with
        * Watcher is not running, or connection to watcher collapsed.
        * So we let the first server start up.
        *)
+      HackEventLogger.informant_watcher_not_available ();
       true
     | Some WEWConfig.Responses.Unknown ->
       (**
@@ -422,11 +423,14 @@ let should_start_first_server t = match t with
        * know when the next "hg update" will happen, so we let the
        * first Hack Server start up to avoid wedging.
        *)
+      HackEventLogger.informant_watcher_unknown_state ();
       true
     | Some WEWConfig.Responses.Mid_update ->
       (** Wait until the update is finished  *)
+      HackEventLogger.informant_watcher_mid_update_state ();
       false
     | Some WEWConfig.Responses.Settled ->
+      HackEventLogger.informant_watcher_settled_state ();
       true
   end
 
@@ -442,8 +446,10 @@ let report informant server_state = match informant, server_state with
   | Resigned, _ ->
     Informant_sig.Move_along
   | Active _, Informant_sig.Server_not_yet_started ->
-    if should_start_first_server informant then
+    if should_start_first_server informant then begin
+      HackEventLogger.informant_watcher_starting_server_from_settling ();
       Informant_sig.Restart_server
+    end
     else
       Informant_sig.Move_along
   | Active env, _ ->

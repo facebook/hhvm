@@ -89,6 +89,13 @@ let with_rechecked_stats _ _ _ f = f ()
 let with_init_type _ f = f ()
 let with_check_kind _ f = f ()
 
+(** Watchman Event Watcher client running in the informant *)
+let informant_watcher_not_available _ = ()
+let informant_watcher_unknown_state _ = ()
+let informant_watcher_mid_update_state _ = ()
+let informant_watcher_settled_state _ = ()
+let informant_watcher_starting_server_from_settling _ = ()
+
 (** Server Monitor events *)
 let accepting_on_socket_exception _ = ()
 let ack_and_handoff_exception _ = ()

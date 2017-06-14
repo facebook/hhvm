@@ -204,4 +204,5 @@ let tests =
   ]
 
 let () =
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
   Unit_test.run_all tests

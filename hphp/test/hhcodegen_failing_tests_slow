@@ -62,12 +62,8 @@ slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant4.php
 slow/class_type_constant/type_constant6.php
-slow/closure/1924.php
-slow/closure/1925.php
-slow/closure/1926.php
 slow/closure/1933.php
 slow/closure/1937.php
-slow/closure/1938.php
 slow/closure/1939.php
 slow/closure/1940.php
 slow/closure/bind-stress.php
@@ -904,9 +900,6 @@ slow/traits/2063.php
 slow/traits/2070.php
 slow/traits/2073.php
 slow/traits/2080.php
-slow/traits/2082.php
-slow/traits/2083.php
-slow/traits/2084.php
 slow/traits/2107.php
 slow/traits/__class__.php
 slow/traits/abstract-final-override.php

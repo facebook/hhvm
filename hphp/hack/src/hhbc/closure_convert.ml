@@ -359,14 +359,23 @@ and convert_lambda env st p fd use_vars_opt =
   let st, block = convert_block env st fd.f_body in
   let st = { st with per_function_count = st.per_function_count + 1 } in
   let lambda_vars = ULS.items st.captured_vars in
-  (* For lambdas without  explicit `use` variables, we ignore the computed
+  (* For lambdas without explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
     match use_vars_opt with
     | None ->
       lambda_vars, List.map lambda_vars (fun var -> (p, var), false)
     | Some use_vars ->
-      List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
+      (* Remove duplicates (not efficient, but unlikely to be large),
+       * remove variables that are actually just parameters *)
+      let use_vars =
+         (List.fold_right use_vars ~init:[]
+          ~f:(fun ((_, name), _ as use_var) use_vars ->
+            if List.exists use_vars (fun ((_, name'), _) -> name = name')
+            || List.exists fd.f_params (fun p -> name = snd p.param_id)
+            then use_vars else use_var :: use_vars))
+      in
+        List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
   let tparams = Scope.get_tparams env.scope in
   let class_num = List.length st.hoisted_classes + env.defined_class_count in
   let inline_fundef, cd =

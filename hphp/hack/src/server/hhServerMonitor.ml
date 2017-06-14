@@ -73,14 +73,18 @@ let monitor_daemon_main (options: ServerArgs.options) =
       allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
     } in
-    SM.start_monitoring ~waiting_client options informant_options
-    ServerMonitorUtils.({
-      socket_file = ServerFiles.socket_file www_root;
-      lock_file = ServerFiles.lock_file www_root;
-      server_log_file = ServerFiles.log_link www_root;
-      monitor_log_file = ServerFiles.monitor_log_link www_root;
-      load_script_log_file = ServerFiles.load_log www_root;
-    })
+    let max_purgatory_clients =
+      local_config.ServerLocalConfig.max_purgatory_clients in
+    SM.start_monitoring ~waiting_client
+      ~max_purgatory_clients
+      options informant_options
+      ServerMonitorUtils.({
+        socket_file = ServerFiles.socket_file www_root;
+        lock_file = ServerFiles.lock_file www_root;
+        server_log_file = ServerFiles.log_link www_root;
+        monitor_log_file = ServerFiles.monitor_log_link www_root;
+        load_script_log_file = ServerFiles.load_log www_root;
+      })
 
 let daemon_entry =
   Daemon.register_entry_point

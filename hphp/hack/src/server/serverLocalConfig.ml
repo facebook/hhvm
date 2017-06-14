@@ -26,6 +26,10 @@ type t = {
   enable_fuzzy_search: bool;
   lazy_parse: bool;
   lazy_init: bool;
+  (** Limit the number of clients that can sit in purgatory waiting
+   * for a server to be started because we don't want this to grow
+   * unbounded. *)
+  max_purgatory_clients: int;
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
@@ -50,6 +54,7 @@ let default = {
   enable_fuzzy_search = true;
   lazy_parse = false;
   lazy_init = false;
+  max_purgatory_clients = 400;
   search_chunk_size = 0;
   io_priority = 7;
   cpu_priority = 10;
@@ -89,6 +94,8 @@ let load_ fn ~silent =
     ~default:default.lazy_parse config in
   let lazy_init = bool_ "lazy_init2"
     ~default:default.lazy_init config in
+  let max_purgatory_clients = int_ "max_purgatory_clients"
+    ~default:default.max_purgatory_clients config in
   let search_chunk_size = int_ "search_chunk_size"
     ~default:default.search_chunk_size config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
@@ -132,6 +139,7 @@ let load_ fn ~silent =
     use_mini_state;
     use_hackfmt;
     load_mini_script_timeout;
+    max_purgatory_clients;
     type_decl_bucket_size;
     enable_on_nfs;
     enable_fuzzy_search;

@@ -122,6 +122,9 @@ let send_connection_type oc t =
 (****************************************************************************)
 (* Called by the server *)
 (****************************************************************************)
+
+(** Stream response for this command. Returns true if the command needs
+ * to force flush the notifier to complete.  *)
 let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
   match cmd with
   | LIST_FILES ->
@@ -255,13 +258,13 @@ let handle genv env client =
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
       if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
-      new_env, false
+      new_env, None
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
       let needs_flush = stream_response genv env (ic, oc) ~cmd in
-      env, needs_flush
+      env, if needs_flush then Some ServerEnv.Force_flush else None
   | Debug ->
       let ic, oc = ClientProvider.get_channels client in
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
-      env, false
+      env, None

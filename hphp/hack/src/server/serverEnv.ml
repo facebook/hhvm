@@ -31,6 +31,10 @@ let empty_recheck_loop_stats = {
   total_rechecked_count = 0;
 }
 
+type recheck_iteration_flag =
+  (** On next iteration of recheck loop, force a flush of the notififer. *)
+  | Force_flush
+
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
 (*****************************************************************************)

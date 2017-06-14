@@ -18,8 +18,8 @@ val entry:
 val run_once: ServerArgs.options -> SharedMem.handle -> 'a
 
 val serve_one_iteration:
-  force_flush:bool ->
+  iteration_flag:ServerEnv.recheck_iteration_flag option ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ClientProvider.t ->
-  ServerEnv.env * bool
+  ServerEnv.env * ServerEnv.recheck_iteration_flag option

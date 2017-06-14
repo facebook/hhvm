@@ -303,8 +303,7 @@ function get_runtime_build(bool $use_php = false): string {
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-      $command .= $repo_args.
-        " --config ".__DIR__."/php.ini";
+      $command .= $repo_args;
     }
   }
   invariant(

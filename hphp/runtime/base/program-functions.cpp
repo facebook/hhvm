@@ -1521,7 +1521,8 @@ static int execute_program_impl(int argc, char** argv) {
         cout << desc << "\n";
         return -1;
       }
-      if (po.config.empty() && !vm.count("no-config")) {
+      if (po.config.empty() && !vm.count("no-config")
+          && ::getenv("HHVM_NO_DEFAULT_CONFIGS") == nullptr) {
         auto file_callback = [&po] (const char *filename) {
           Logger::Verbose("Using default config file: %s", filename);
           po.config.push_back(filename);
@@ -1530,6 +1531,16 @@ static int execute_program_impl(int argc, char** argv) {
                                          file_callback);
         add_default_config_files_globbed(DEFAULT_CONFIG_DIR "/config*.hdf",
                                          file_callback);
+      }
+      const auto env_config = ::getenv("HHVM_CONFIG_FILE");
+      if (env_config != nullptr) {
+        add_default_config_files_globbed(
+          env_config,
+          [&po](const char* filename) {
+            Logger::Verbose("Using config file from environment: %s", filename);
+            po.config.push_back(filename);
+          }
+        );
       }
 // When we upgrade boost, we can remove this and also get rid of the parent
 // try statement and move opts back into the original try block

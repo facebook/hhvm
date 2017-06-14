@@ -18,6 +18,7 @@
 # test_file_regex: A custom regex for test file names beyond the normal default:
 #      /.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/
 # config_file: a specific phpunit config file to use beyond phpunit.xml[.dist]
+# hhvm_config_file: a specific hhvm config file to use instead of php.ini
 # bootstrap_file: a specific bootstrap file to use
 # test_find_mode: How to find the tests - reflection (default), token, or phpt
 # sequential: run the tests sequentially - slower, but needed for tests with
@@ -90,6 +91,7 @@
     commit: 489e09ee6c3ba431fbeeef9147afdaeb6f91b647
     install_root: composer_php7
     test_root: composer_php7
+    hhvm_config_file: php7.ini
     flakey:
       # Depends on internet connection to example.com
       - composer_php7/tests/Composer/Test/Util/RemoteFilesystemTest.php
@@ -362,6 +364,7 @@
     url: https://github.com/sebastianbergmann/phpunit.git
     branch: master
     commit: 428999fdc2818a830a7443376ee65f2a2dfc9f32
+    hhvm_config_file: php7.ini
     install_root: phpunit_php7
     test_root: phpunit_php7
   phpunit-mock-objects:
@@ -391,6 +394,7 @@
     branch: master
     commit: 006a9573cee3d30a721f137facd5467f4e63bed8
     install_root: ratchet
+    hhvm_config_file: php_notice.ini
     test_root: ratchet
     flakey:
       - ratchet/tests/unit/Server/IoServerTest.php
@@ -420,6 +424,7 @@
     # https://github.com/codeguy/Slim/pull/884
     branch: "v2.4.3-derace-testExpiresAsString"
     commit: 340e658aec0b51df58cab4605578acf4c90c479c
+    hhvm_config_file: php_notice.ini
     install_root: slim
     test_root: slim
   smarty:

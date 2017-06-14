@@ -424,6 +424,8 @@ class Runner {
     mkdir($temp_dir);
     $this->temp_dir = $temp_dir;
     $env['TMPDIR'] = $temp_dir;
+    $env['HHVM_NO_DEFAULT_CONFIGS'] = true;
+    $env['HHVM_CONFIG_FILE'] = $this->framework->getHHVMConfigFile();
 
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
                                $this->pipes, $this->framework->getTestPath(),

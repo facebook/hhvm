@@ -78,7 +78,7 @@ int emulate_zend(int argc, char** argv) {
   const char* program = nullptr;
 
   int cnt = 1;
-  bool ignore_default_configs = false;
+  bool ignore_default_configs = ::getenv("HHVM_NO_DEFAULT_CONFIGS") != nullptr;
   while (cnt < argc) {
     if (check_option(argv[cnt])) {
       newargv.push_back(argv[cnt++]);

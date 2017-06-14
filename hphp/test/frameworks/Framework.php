@@ -30,6 +30,7 @@ class Framework {
   private ?Set $individual_tests = null;
   private ?string $bootstrap_file = null;
   private ?string $config_file = null;
+  private string $hhvm_config_file = __DIR__.'/php.ini';
   private TestFindMode $test_find_mode;
   private bool $parallel;
 
@@ -126,6 +127,9 @@ class Framework {
     // Now that we have an install, we can safely set all possible
     // other framework information
     $this->setConfigFile(Options::getFrameworkInfo($name, "config_file"));
+    $this->setHHVMConfigFile(
+      Options::getFrameworkInfo($name, "hhvm_config_file"),
+    );
     $this->setBootstrapFile(Options::getFrameworkInfo($name, "bootstrap_file"));
     $this->setTestCommand(true);
     $this->findTests();
@@ -212,6 +216,10 @@ class Framework {
     }
 
     return $command;
+  }
+
+  public function getHHVMConfigFile(): string {
+    return $this->hhvm_config_file;
   }
 
   //********************
@@ -365,6 +373,17 @@ class Framework {
     }
   }
 
+  private function setHHVMConfigFile(?string $config): void {
+    if ($config === null) {
+      return;
+    }
+    if (substr($config, 0, 1) === '/') {
+      $this->hhvm_config_file = $config;
+    } else {
+      $this->hhvm_config_file = __DIR__.'/'.$config;
+    }
+  }
+
   //********************
   // Private getters
   //********************
@@ -378,10 +397,6 @@ class Framework {
 
   private function getPullRequests(): ?array<int, array> {
     return $this->pull_requests;
-  }
-
-  private function getConfigFile(): ?string {
-    return $this->config_file;
   }
 
   private function getTestFilePattern(): string {

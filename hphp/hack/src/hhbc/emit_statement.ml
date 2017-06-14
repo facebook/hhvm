@@ -398,14 +398,11 @@ and emit_try_finally_ env try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let emit_finally_body () =
-    let finally_body  = emit_stmt env finally_block in
-    CBR.rewrite_in_finally finally_body
+  let finally_body = emit_stmt env finally_block in
+  let finally_body = CBR.rewrite_in_finally finally_body in
+  let finally_body_for_fault =
+    Label_rewriter.clone_with_fresh_regular_labels finally_body
   in
-
-  let finally_body = emit_finally_body () in
-  let finally_body_for_fault = emit_finally_body () in
-
   let finally_end = Label.next_regular () in
 
   (* (3) Finally epilogue *)

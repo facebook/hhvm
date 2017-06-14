@@ -169,3 +169,61 @@ let relabel_function params body =
   let defs = create_label_to_offset_map body in
   let used, refs = create_label_ref_map defs params body in
   rewrite_params_and_body defs used refs params body
+
+let clone_with_fresh_regular_labels block =
+  let regular_labels =
+    InstrSeq.fold_left block ~init: IMap.empty ~f:(fun acc i ->
+      match i with
+      | ILabel ((Label.Regular _) as l) ->
+        IMap.add (Label.id l) (Label.next_regular ()) acc
+      | _ -> acc)
+  in
+  if IMap.is_empty regular_labels then
+    block
+  else
+  let relabel l = Option.value ~default:l @@
+    IMap.get (Label.id l) regular_labels
+  in
+  let rewrite_instr instr =
+    match instr with
+    | IIterator (IterInit (id, l, v)) ->
+      IIterator (IterInit (id, relabel l, v))
+    | IIterator (IterInitK (id, l, k, v)) ->
+      IIterator (IterInitK (id, relabel l, k, v))
+    | IIterator (WIterInit (id, l, v)) ->
+      IIterator (WIterInit (id, relabel l, v))
+    | IIterator (WIterInitK (id, l, k, v)) ->
+      IIterator (WIterInitK (id, relabel l, k, v))
+    | IIterator (MIterInit (id, l, v)) ->
+      IIterator (MIterInit (id, relabel l, v))
+    | IIterator (MIterInitK (id, l, k, v)) ->
+      IIterator (MIterInitK (id, relabel l, k, v))
+    | IIterator (IterNext (id, l, v)) ->
+      IIterator (IterNext (id, relabel l, v))
+    | IIterator (IterNextK (id, l, k, v)) ->
+      IIterator (IterNextK (id, relabel l, k, v))
+    | IIterator (WIterNext (id, l, v)) ->
+      IIterator (WIterNext (id, relabel l, v))
+    | IIterator (WIterNextK (id, l, k, v)) ->
+      IIterator (WIterNextK (id, relabel l, k, v))
+    | IIterator (MIterNext (id, l, v)) ->
+      IIterator (MIterNext (id, relabel l, v))
+    | IIterator (MIterNextK (id, l, k, v)) ->
+      IIterator (MIterNextK (id, relabel l, k, v))
+    | IIterator (IterBreak (l, x)) ->
+      IIterator (IterBreak (relabel l, x))
+    | ICall (DecodeCufIter (x, l)) ->
+      ICall (DecodeCufIter (x, relabel l))
+    | IContFlow (Jmp l)   -> IContFlow (Jmp (relabel l))
+    | IContFlow (JmpNS l) -> IContFlow (JmpNS (relabel l))
+    | IContFlow (JmpZ l)  -> IContFlow (JmpZ (relabel l))
+    | IContFlow (JmpNZ l) -> IContFlow (JmpNZ (relabel l))
+    | IContFlow (Switch (k, n, ll)) ->
+      IContFlow (Switch (k, n, List.map ll relabel))
+    | IContFlow (SSwitch pairs) ->
+      IContFlow (SSwitch
+        (List.map pairs (fun (id,l) -> (id, relabel l))))
+    | ILabel l -> ILabel (relabel l)
+    | _ -> instr
+  in
+  InstrSeq.map block rewrite_instr

@@ -181,22 +181,7 @@ let rec transform node =
     Fmt [
       handle_possible_list ~after_each:space modifiers;
       t prop_type;
-      begin match syntax declarators with
-        | Missing -> Nothing
-        | SyntaxList [declarator] ->
-          Nest [
-            Space;
-            SplitWith Cost.Base;
-            t declarator;
-          ];
-        | SyntaxList xs ->
-          WithRule (Rule.Argument, Nest (List.map xs (fun declarator -> Fmt [
-            Space;
-            Split;
-            t declarator;
-          ])));
-        | _ -> failwith "SyntaxList expected"
-      end;
+      handle_declarator_list declarators;
       t semi;
       Newline;
     ]
@@ -1466,6 +1451,33 @@ and handle_compound_statement cs =
     ];
   ]
 
+(**
+ * Special-case handling for lists of declarators, where we want the splits
+ * between declarators to break if their children break, but we want a single
+ * declarator to stay joined with the line preceding it if it fits, even when
+ * its children break.
+ *)
+and handle_declarator_list declarators =
+  match syntax declarators with
+  | Missing -> Nothing
+  | SyntaxList [declarator] ->
+    Nest [
+      Space;
+      (* Use an independent split, so we don't break just because a line break
+       * occurs in the declarator. *)
+      SplitWith Cost.Base;
+      transform declarator;
+    ];
+  | SyntaxList xs ->
+    (* Use Rule.Argument to break each declarator onto its own line if any line
+     * break occurs in a declarator, or if they can't all fit onto one line. *)
+    WithRule (Rule.Argument, Nest (List.map xs (fun declarator -> Fmt [
+      Space;
+      Split;
+      transform declarator;
+    ])));
+  | _ -> failwith "SyntaxList expected"
+
 and handle_possible_list
     ?(before_each=(fun () -> Nothing))
     ?(after_each=(fun is_last -> Nothing))
@@ -1815,9 +1827,7 @@ and transform_keyword_expression_statement kw expr semi =
 and transform_keyword_expr_list_statement kw expr_list semi =
   Fmt [
     transform kw;
-    WithRule (Rule.Argument, Nest [
-      handle_possible_list ~before_each:space_split expr_list;
-    ]);
+    handle_declarator_list expr_list;
     transform semi;
     Newline;
   ]

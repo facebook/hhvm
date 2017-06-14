@@ -153,3 +153,5 @@ let error2031 =
 let error2032 = "The array type is not allowed in strict mode."
 let error2033 = "A variadic argument ('...') may only appear at the end of " ^
   "an argument list."
+let error2034 = "A type alias declaration cannot both use 'type' and have a " ^
+  "constraint. Did you mean 'newtype'?"

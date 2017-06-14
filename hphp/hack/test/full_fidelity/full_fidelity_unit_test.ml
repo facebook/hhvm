@@ -148,6 +148,7 @@ let error_tests =
     make_test_case_from_files testname test_errors in
   List.map
   [
+    "test_alias_errors";
     "test_errors_not_strict";
     "test_errors_strict";
     "test_no_errors_strict";

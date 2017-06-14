@@ -123,11 +123,6 @@ module WithExpressionAndStatementAndTypeParser
             =  type-specifier  ;
     *)
 
-    (* ERROR RECOVERY: We allow the "type" version to have a constraint in the
-       initial parse.
-       TODO: Produce an error in a later pass if the "type" version has a
-       constraint. *)
-
     let (parser, token) = next_token parser in
     let token = make_token token in
     (* Not `expect_name` but `expect_name_allow_keywords`, because the parser

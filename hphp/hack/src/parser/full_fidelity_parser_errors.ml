@@ -531,6 +531,16 @@ let type_errors node parents is_strict =
       t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> [ ]
 
+let alias_errors node =
+  match syntax node with
+  | AliasDeclaration {alias_keyword; alias_constraint; _} when
+    token_kind alias_keyword = Some TokenKind.Type &&
+    not (is_missing alias_constraint) ->
+      let s = start_offset alias_keyword in
+      let e = end_offset alias_keyword in
+      [ SyntaxError.make s e SyntaxError.error2034 ]
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -543,9 +553,10 @@ let find_syntax_errors node is_strict =
     let require_errs = require_errors node parents in
     let classish_errors = classish_errors node parents in
     let type_errors = type_errors node parents is_strict in
+    let alias_errors = alias_errors node in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
-      expr_errs @ require_errs @ classish_errors @ type_errors in
+      expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

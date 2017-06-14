@@ -30,6 +30,8 @@ module Schema = Full_fidelity_schema
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
+module PositionedSyntax = Full_fidelity_positioned_syntax
+module ParserErrors = Full_fidelity_parser_errors
 
 module FullFidelityParseArgs = struct
 
@@ -154,10 +156,24 @@ let print_error error = error
   |> Errors.to_string
   |> output_string stdout
 
+(* Prints a single FFP error. *)
 let print_full_fidelity_error source_text error =
   let text = SyntaxError.to_positioned_string
     error (SourceText.offset_to_position source_text) in
   Printf.printf "%s\n" text
+
+(* Computes and prints list of all FFP errors from syntax pass and parser pass.
+ * Specifying all_errors=false will attempt to filter out duplicate errors. *)
+let print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors =
+  let is_strict = SyntaxTree.is_strict syntax_tree in
+  let root = PositionedSyntax.from_tree syntax_tree in
+  let errors1 =
+    if all_errors
+    then SyntaxTree.all_errors syntax_tree
+    else SyntaxTree.errors syntax_tree in
+  let errors2 = ParserErrors.find_syntax_errors root is_strict in
+  let errors = errors1 @ errors2 in
+  List.iter (print_full_fidelity_error source_text) errors
 
 (* returns a tuple of functions, classes, typedefs and consts *)
 let parse_file filename =
@@ -204,12 +220,12 @@ let handle_existing_file args filename =
     Printf.printf "%s\n" pretty
   end;
   if args.full_fidelity_errors then begin
-    let errors = (SyntaxTree.errors syntax_tree) in
-    List.iter (print_full_fidelity_error source_text) errors
+    let all_errors = false in
+    print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors
   end;
   if args.full_fidelity_errors_all then begin
-    let errors = (SyntaxTree.all_errors syntax_tree) in
-    List.iter (print_full_fidelity_error source_text) errors
+    let all_errors = true in
+    print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors
   end;
   if args.full_fidelity_s_expr then begin
     let str = Debug.dump_full_fidelity syntax_tree in

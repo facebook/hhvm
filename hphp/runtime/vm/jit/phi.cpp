@@ -220,7 +220,7 @@ bool optimizePhis(IRUnit& unit) {
     }
   } while (repeat);
 
-  return changed;
+  return false;
 }
 
 }}

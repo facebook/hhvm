@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <dwarf.h>
 #include <libdwarf.h>
@@ -311,6 +312,12 @@ DwarfState::DwarfState(std::string filename)
       )
     };
   }
+
+  // Ignore relocations for executable files as processing them takes
+  // a lot more time and memory but adds no value.
+  struct stat buf;
+  fstat(fd, &buf);
+  if (buf.st_mode & S_IXUSR) dwarf_set_reloc_application(0);
 
   Dwarf_Error error = nullptr;
   if (dwarf_init(

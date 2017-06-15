@@ -355,6 +355,15 @@ let produce_error_for_header acc check node error error_node =
   produce_error_parents acc (function_header_check_helper check) node
     error error_node
 
+(* Given a ClassishDeclaration node, test whether or not it contains
+ * an invalid use of 'implements'. *)
+let classish_invalid_implements_clause cd_node =
+  let classish_keyword = cd_node.classish_keyword in
+  let implements_keyword = cd_node.classish_implements_keyword in
+  (* Invalid if has 'implements' and isn't a class. *)
+  token_kind implements_keyword = Some TokenKind.Implements &&
+    token_kind classish_keyword <> Some TokenKind.Class
+
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -514,13 +523,15 @@ let require_errors node parents =
 
 let classish_errors node parents =
   match syntax node with
-  | ClassishDeclaration c ->
-    begin
-      let modifiers = c.classish_modifiers in
-      let acc = [] in
-      produce_error acc classish_duplicate_modifiers modifiers
-      SyntaxError.error2031 modifiers
-    end
+  | ClassishDeclaration cd ->
+    let errors = [] in
+    let errors =
+      produce_error errors classish_duplicate_modifiers cd.classish_modifiers
+      SyntaxError.error2031 cd.classish_modifiers in
+    let errors =
+      produce_error errors classish_invalid_implements_clause cd
+      SyntaxError.error2035 cd.classish_implements_keyword in
+    errors
   | _ -> [ ]
 
 let type_errors node parents is_strict =

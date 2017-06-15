@@ -155,3 +155,4 @@ let error2033 = "A variadic argument ('...') may only appear at the end of " ^
   "an argument list."
 let error2034 = "A type alias declaration cannot both use 'type' and have a " ^
   "constraint. Did you mean 'newtype'?"
+let error2035 = "Only classes may have an 'implements' clause."

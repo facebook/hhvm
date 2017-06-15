@@ -506,7 +506,7 @@ let rec transform node =
     t ellipsis;
   | AttributeSpecification x ->
     let (left_da, attrs, right_da) = get_attribute_specification_children x in
-    transform_argish left_da attrs right_da
+    transform_argish ~allow_trailing:false left_da attrs right_da
   | Attribute x ->
     let (name, left_p, values, right_p) = get_attribute_children x in
     Fmt [

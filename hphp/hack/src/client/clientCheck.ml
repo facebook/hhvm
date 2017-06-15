@@ -236,11 +236,19 @@ let main args =
       ClientOutline.go results args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_CHILDREN class_ ->
-      let results = rpc args @@ Rpc.METHOD_JUMP (class_, true) in
+      let filter = MethodJumps.No_filter in
+      let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, true) in
       ClientMethodJumps.go results true args.output_json;
       Exit_status.No_error
-    | MODE_METHOD_JUMP_ANCESTORS class_ ->
-      let results = rpc args @@ Rpc.METHOD_JUMP (class_, false) in
+    | MODE_METHOD_JUMP_ANCESTORS (class_, filter) ->
+      let filter =
+        match MethodJumps.string_filter_to_method_jump_filter filter with
+        | Some filter -> filter
+        | None ->
+          Printf.eprintf "Invalid method jump filter %s\n" filter;
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let results = rpc args @@ Rpc.METHOD_JUMP (class_, filter, false) in
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->

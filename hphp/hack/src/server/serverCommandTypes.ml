@@ -36,7 +36,8 @@ type _ t =
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : ServerUtils.file_input * int * int ->
       IdentifySymbolService.result t
-  | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
+  | METHOD_JUMP : (string * MethodJumps.filter * bool) ->
+      MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
   | IDE_FIND_REFS : ServerUtils.file_input * int * int * bool ->

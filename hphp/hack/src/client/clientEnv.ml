@@ -25,7 +25,7 @@ type client_mode =
 | MODE_OUTLINE
 | MODE_OUTLINE2
 | MODE_METHOD_JUMP_CHILDREN of string
-| MODE_METHOD_JUMP_ANCESTORS of string
+| MODE_METHOD_JUMP_ANCESTORS of string * string
 | MODE_REFACTOR of string * string * string
 | MODE_FIND_CLASS_REFS of string
 (* TODO figure out why we can't reference FuzzySearchService from here *)

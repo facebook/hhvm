@@ -36,8 +36,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
-    | METHOD_JUMP (class_, find_children) ->
-      env, MethodJumps.get_inheritance env.tcopt class_ ~find_children
+    | METHOD_JUMP (class_, filter, find_children) ->
+      env, MethodJumps.get_inheritance env.tcopt class_ ~filter ~find_children
         env.files_info genv.workers
     | FIND_DEPENDENT_FILES file_list ->
         env, Ai.ServerFindDepFiles.go genv.workers file_list

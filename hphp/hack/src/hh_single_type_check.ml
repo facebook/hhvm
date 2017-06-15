@@ -642,8 +642,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
-          let ancestors = MethodJumps.get_inheritance opts
-            class_ ~find_children:false files_info None in
+          let ancestors = MethodJumps.get_inheritance opts class_
+            ~filter:MethodJumps.No_filter ~find_children:false files_info
+            None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
           Printf.printf "\n";
         end;
@@ -651,8 +652,8 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
-          let children = MethodJumps.get_inheritance opts
-            class_ ~find_children:true files_info None in
+          let children = MethodJumps.get_inheritance opts class_
+            ~filter:MethodJumps.No_filter ~find_children:true files_info None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
         end;

@@ -220,9 +220,22 @@ let parse_check_args cmd =
       " (mode) prints a list of all related classes or methods \
        to the given class";
     "--inheritance-ancestors",
-      Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
+      Arg.String
+      (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "No_filter")) ()),
       " (mode) prints a list of all related classes or methods \
        to the given class";
+    "--inheritance-ancestor-classes",
+      Arg.String
+      (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Class")) ()),
+      " (mode) prints a list of classes that this class extends";
+    "--inheritance-ancestor-interfaces",
+      Arg.String
+      (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Interface")) ()),
+      " (mode) prints a list of interfaces that this class implements";
+    "--inheritance-ancestor-traits",
+      Arg.String
+      (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Trait")) ()),
+      " (mode) prints a list of traits that this class uses";
     "--show",
       Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
       " (mode) show human-readable type info for the given name; \

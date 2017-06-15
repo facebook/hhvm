@@ -33,6 +33,27 @@ class HierarchyTests(object):
         ],
             options=['--inheritance-ancestors', 'Baz'])
 
+    def test_inheritance_filter(self):
+        self.write_load_config()
+        self.check_cmd([
+            'File "{root}filter.php", line 15, characters 7-12: Filter',
+            '    inherited from File "{root}filter.php", line 3, characters 7-13: CFilter',
+            'File "{root}filter.php", line 18, characters 19-31: Filter::cfilterMethod',
+            '    inherited from File "{root}filter.php", line 4, characters 19-31: CFilter::cfilterMethod',
+        ], options=['--inheritance-ancestor-classes', 'Filter'])
+        self.check_cmd([
+            'File "{root}filter.php", line 15, characters 7-12: Filter',
+            '    inherited from File "{root}filter.php", line 7, characters 11-17: IFilter',
+            'File "{root}filter.php", line 19, characters 19-31: Filter::ifilterMethod',
+            '    inherited from File "{root}filter.php", line 8, characters 19-31: IFilter::ifilterMethod',
+        ], options=['--inheritance-ancestor-interfaces', 'Filter'])
+        self.check_cmd([
+            'File "{root}filter.php", line 15, characters 7-12: Filter',
+            '    inherited from File "{root}filter.php", line 11, characters 7-13: TFilter',
+            'File "{root}filter.php", line 20, characters 19-31: Filter::tfilterMethod',
+            '    inherited from File "{root}filter.php", line 12, characters 19-31: TFilter::tfilterMethod',
+        ], options=['--inheritance-ancestor-traits', 'Filter'])
+
     def test_method_signature_change(self):
         with open(os.path.join(self.repo_dir, 'qux.php'), 'w') as f:
             f.write('''<?hh

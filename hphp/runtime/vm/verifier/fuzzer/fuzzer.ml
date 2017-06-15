@@ -35,6 +35,7 @@ let insert_reps = ref 1
 let complete_reps = ref 0
 let mut_prob = ref 0.1
 let mag = ref 1
+let mut_stk = ref true
 
 let options =
   [("-o",         Arg.Set_string out_dir,
@@ -45,6 +46,8 @@ let options =
       "The probability of a mutation occuring each pass (must be <= 1)");
    ("-magnitude", Arg.Set_int mag,
       "The magnitude of possible change for integer mutations (default 1)");
+   ("-stack", Arg.Set mut_stk,
+      "Whether to allow mutations of stack offsets (default true)");
    ("-immediate", Arg.Set_int imm_reps,
       "Number of immediate mutations (default 1)");
    ("-duplicate", Arg.Set_int dup_reps,
@@ -126,9 +129,9 @@ let mutate_methods (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
 let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   p |> mutate_main mut |> mutate_functions mut |> mutate_methods mut
 
-let rec mutate (mut: IS.t -> IS.t) (prog : HP.t) n (acc: mutation_monad) =
-  if n = 0 then acc else
-  mutate mut prog (n - 1) (mutate_program mut prog |> Nondet.add_event acc)
+let mutate (mut: IS.t -> IS.t) (prog : HP.t) n (acc: mutation_monad) =
+  Instr_utils.num_fold
+    (fun a -> mutate_program mut prog |> Nondet.add_event a) n acc
 
 open Hhbc_ast
 
@@ -138,8 +141,9 @@ let rand_elt lst =
 
 let should_mutate () = Random.float 1.0 < !mut_prob
 
-let mutate_int n c =
-  if should_mutate () then n + (Random.int (2 * (c+1))) - c else n
+let mutate_int n c =    (*TODO: in what cases is it okay to generate negative
+                          numbers?*)
+  if should_mutate () then n + (Random.int (2 * (c+1))) - c |> max 0 else n
 
 let mutate_local_id (id : Local.t) c =
   match id with
@@ -148,8 +152,9 @@ let mutate_local_id (id : Local.t) c =
               create trivially non-verifying programs in almost all cases,
               so it wouldn't be that interesting *)
 
-let mutate_label (label : Label.t) c =
-  let new_label_type n =
+let mutate_label (label : Label.t) _ =
+  label (*TODO: uncomment and mutate labels in a non assembly-failing way*)
+  (*let new_label_type n =
     [Label.Regular n; Label.Catch n; Label.Fault n; Label.DefaultArg n] |>
     rand_elt in
   let swap_label l =
@@ -166,7 +171,7 @@ let mutate_label (label : Label.t) c =
   | Label.DefaultArg i   -> Label.DefaultArg (mutate_int i c)
   | _                    -> label (*TODO: These are probably worth mutating,
                                     we'll need to keep track of all valid
-                                    labels in the input program *)
+                                    labels in the input program *) *)
 
 let mutate_key (k : MemberKey.t) c =
   let new_key_type n =
@@ -203,13 +208,9 @@ let mutate_mode (m : MemberOpMode.t) =
         MemberOpMode.Unset] |> rand_elt
   else m
 
-(* Mutates the immediates of the opcodes in the input program. Currently
-   this is just naive, randomly changing integer values by a user specified
-   magnitude, and changing enum-style values by choosing a random new value
-   in the possiblity space. TODO: Improvements here could be to ensure that
-   at the end of the mutation the stack is balanced, or more generally that
-   this does not generate programs to fail assembly. *)
-let mutate_immediate (input : HP.t) : mutation_monad =
+let mut_imms (is : IS.t) : IS.t =
+  let stk = ref [] in (* we want to make sure that by the end of the function
+                      the stack is balanced *)
   let mutate_get s =
     match s with    (*TODO: clean this up if OCaml ever gets macros *)
     | CGetL       id     -> CGetL      (mutate_local_id id !mag)
@@ -312,7 +313,7 @@ let mutate_immediate (input : HP.t) : mutation_monad =
     | BaseC        idx      -> BaseC    (mutate_int idx !mag)
     | BaseR        idx      -> BaseR    (mutate_int idx !mag)
     | Dim       (mode, key) -> Dim      (mutate_mode  mode, mutate_key key !mag)
-    | FPassDim    (i,  key)-> FPassDim (mutate_int i !mag, mutate_key key !mag)
+    | FPassDim    (i,  key) -> FPassDim (mutate_int i !mag, mutate_key key !mag)
     | _ -> s in
   let mutate_ctrl_flow s =
     match s with
@@ -401,25 +402,20 @@ let mutate_immediate (input : HP.t) : mutation_monad =
    let mutate_silence op =
      if should_mutate() then [Start; End] |> rand_elt else op in
     match s with
-    | BareThis        b        -> BareThis        (mutate_bare            b)
-    | InitThisLoc    id        -> InitThisLoc     (mutate_local_id id  !mag)
-    | StaticLocCheck (id, str) -> StaticLocCheck  (mutate_local_id id  !mag, str)
-    | StaticLocDef   (id, str) -> StaticLocDef    (mutate_local_id id  !mag, str)
-    | StaticLocInit  (id, str) -> StaticLocInit   (mutate_local_id id  !mag, str)
-    | OODeclExists    k        -> OODeclExists    (mutate_kind            k)
-    | VerifyParamType p        -> VerifyParamType (mutate_param_id p   !mag)
-    | Self            i        -> Self            (mutate_int      i   !mag)
-    | Parent          i        -> Parent          (mutate_int      i   !mag)
-    | LateBoundCls    i        -> LateBoundCls    (mutate_int      i   !mag)
-    | ClsRefName      i        -> ClsRefName      (mutate_int      i   !mag)
-    | IncStat        (i,  i')  -> IncStat         (mutate_int      i   !mag,
-                                                   mutate_int      i'  !mag)
-    | CreateCl       (i,  i')  -> CreateCl        (mutate_int      i   !mag,
-                                                   mutate_int      i'  !mag)
-      (*TODO: is it worth it to mutate asserts? They have no effect at runtime,
-        so this will never generate a verifing program that crashes HHVM *)
-    | AssertRATL    (id,   r) -> AssertRATL      (mutate_local_id id  !mag,   r)
-    | AssertRATStk (idx,   r) -> AssertRATStk    (mutate_int      idx !mag,   r)
+    | BareThis        b       -> BareThis        (mutate_bare            b)
+    | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
+    | StaticLoc     (id, str) -> StaticLoc       (mutate_local_id id  !mag, str)
+    | StaticLocInit (id, str) -> StaticLocInit   (mutate_local_id id  !mag, str)
+    | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
+    | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
+    | Self            i       -> Self            (mutate_int      i   !mag)
+    | Parent          i       -> Parent          (mutate_int      i   !mag)
+    | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
+    | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
+    | IncStat        (i,  i') -> IncStat         (mutate_int      i   !mag,
+                                                  mutate_int      i'  !mag)
+    | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
+                                                  mutate_int      i'  !mag)
     | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)
     | Silence (id, op) -> Silence (mutate_local_id id !mag, mutate_silence op)
     | MemoSet     (i, id, i') ->
@@ -427,25 +423,46 @@ let mutate_immediate (input : HP.t) : mutation_monad =
     | MemoGet     (i, id, i') ->
         MemoGet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
     | _ -> s in
-  let change_imms (i : instruct) : instruct =
-    match i with
-    | IContFlow s -> IContFlow (mutate_ctrl_flow s)
-    | IMutator  s -> IMutator  (mutate_mutator   s)
-    | IGet      s -> IGet      (mutate_get       s)
-    | IIsset    s -> IIsset    (mutate_isset     s)
-    | ICall     s -> ICall     (mutate_call      s)
-    | IBase     s -> IBase     (mutate_base      s)
-    | IFinal    s -> IFinal    (mutate_final     s)
-    | IIterator s -> IIterator (mutate_iterator  s)
-    | IMisc     s -> IMisc     (mutate_misc      s)
-    | _ -> i (*no immediates, or none worth mutating*) in
-  let mut (is : IS.t) = IS.InstrSeq.map is change_imms in
-  mutate mut input !imm_reps (Nondet.return input)
+  let change_imms (i : instruct) : instruct list =
+    let new_instruct = match i with
+                       | IContFlow s -> [IContFlow (mutate_ctrl_flow s)]
+                       | IMutator  s -> [IMutator  (mutate_mutator   s)]
+                       | IGet      s -> [IGet      (mutate_get       s)]
+                       | IIsset    s -> [IIsset    (mutate_isset     s)]
+                       | ICall     s -> [ICall     (mutate_call      s)]
+                       | IBase     s -> [IBase     (mutate_base      s)]
+                       | IFinal    s -> [IFinal    (mutate_final     s)]
+                       | IIterator s -> [IIterator (mutate_iterator  s)]
+                       | IMisc     s -> [IMisc     (mutate_misc      s)]
+                       | _ -> [i] (*no immediates, or none worth mutating*) in
+    let stk_req, stk_prod = Instr_utils.stk_data (List.hd new_instruct) in
+    let num_req = List.length stk_req - List.length !stk in
+    let pre_buffer, stk_extra =
+      if num_req > 0 then Instr_utils.rebalance_stk num_req !stk stk_req
+      else [],[] in
+    let ctrl_buffer =
+      match List.hd new_instruct with
+      | IContFlow RetC   -> Instr_utils.empty_stk !stk 1
+      | IContFlow RetV   -> Instr_utils.empty_stk !stk 1
+      | IContFlow Unwind -> Instr_utils.empty_stk !stk 0
+      | IMisc NativeImpl -> Instr_utils.empty_stk !stk 0
+      | _ -> [] in
+    stk := stk_extra @ !stk;
+    stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
+    stk := List.fold_left (fun acc x -> x::acc) !stk stk_prod;
+    pre_buffer @ ctrl_buffer @ new_instruct in
+  IS.InstrSeq.flat_map is change_imms
+
+(* Mutates the immediates of the opcodes in the input program. Currently
+   this is just naive, randomly changing integer values by a user specified
+   magnitude, and changing enum-style values by choosing a random new value
+   in the possiblity space. *)
+let mutate_immediate (input : HP.t) : mutation_monad =
+  mutate mut_imms input !imm_reps (Nondet.return input)
 
 (* This will randomly duplicate an instruction by inserting another copy into
-   its instruction sequences. TODO: much like the immediate mutation, it would
-   be nice to have this ensure the stack is balanced, and potentially not
-   generate code that doesn't assembly *)
+   its instruction sequences. TODO: It would be nice to have this ensure the
+   stack is balanced, and potentially not generate code that doesn't assembly *)
 let mutate_duplicate (input : HP.t) : mutation_monad =
   let duplicate i = if should_mutate() then [i; i] else [i] in
   let mut (is : IS.t) = IS.InstrSeq.flat_map is duplicate in

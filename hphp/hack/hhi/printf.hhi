@@ -51,6 +51,7 @@ interface PlainSprintf {
   public function format_g(?float $s) : string;
   public function format_upcase_f(?float $s) : string;
   public function format_upcase_e(?float $s) : string;
+  public function format_e(?float $s) : string;
 
   public function format_x(mixed $s) : string;
   public function format_o(?int $s) : string;

@@ -31,8 +31,9 @@ let lsp_uri_to_path (uri: string) : string =
   else
     uri
 
-let path_to_lsp_uri (path: string) : string =
-  File_url.create path
+let path_to_lsp_uri (path: string) ~(default_path: string): string =
+  if path = "" then File_url.create default_path
+  else File_url.create path
 
 let lsp_text_document_identifier_to_filename
     (identifier: Lsp.Text_document_identifier.t)
@@ -61,10 +62,10 @@ let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
     end_ = {line = line2 - 1; character = col2 - 1;};
   }
 
-let hack_pos_to_lsp_location (pos: string Pos.pos) : Lsp.Location.t =
+let hack_pos_to_lsp_location (pos: string Pos.pos) ~(default_path: string): Lsp.Location.t =
   let open Lsp.Location in
   {
-    uri = path_to_lsp_uri (Pos.filename pos);
+    uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
     range = hack_pos_to_lsp_range pos;
   }
 
@@ -89,11 +90,13 @@ let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
 
 let hack_symbol_definition_to_lsp_location
     (symbol: string SymbolDefinition.t)
+    ~(default_path: string)
   : Lsp.Location.t =
   let open SymbolDefinition in
-  hack_pos_to_lsp_location symbol.pos
+  hack_pos_to_lsp_location symbol.pos ~default_path
 
-let hack_errors_to_lsp_diagnostic (filename: string)
+let hack_errors_to_lsp_diagnostic
+    (filename: string)
     (errors: Pos.absolute Errors.error_ list)
   : Publish_diagnostics.params =
   let open Lsp.Location in
@@ -102,7 +105,7 @@ let hack_errors_to_lsp_diagnostic (filename: string)
     let pos, message = List.hd_exn all_locations in
     (* TODO: investigate whether Hack ever gives multiline locations *)
     (* TODO: add to LSP protocol for multiple error locations *)
-    let {uri = _; range;} = hack_pos_to_lsp_location pos in
+    let {uri = _; range;} = hack_pos_to_lsp_location pos ~default_path:filename in
     { Lsp.Publish_diagnostics.
       range = range;
       severity = Some Publish_diagnostics.Error;
@@ -111,8 +114,11 @@ let hack_errors_to_lsp_diagnostic (filename: string)
       message = message;
     }
   in
+  (* The caller is required to give us a non-empty filename. If it is empty,  *)
+  (* the following path_to_lsp_uri will fall back to the default path - which *)
+  (* is also empty - and throw, logging appropriate telemetry.                *)
   { Lsp.Publish_diagnostics.
-    uri = path_to_lsp_uri filename;
+    uri = path_to_lsp_uri filename ~default_path:"";
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
@@ -138,7 +144,7 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle : bool;
-    files_with_diagnostics: SSet.t;
+    uris_with_diagnostics: SSet.t;
     ready_dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
   }
 end
@@ -564,8 +570,8 @@ let do_definition (conn: server_conn) (params: Definition.params)
   let rec hack_to_lsp = function
     | [] -> []
     | (_occurrence, None) :: l -> hack_to_lsp l
-    | (_occurrence, Some def) :: l ->
-      (hack_symbol_definition_to_lsp_location def) :: (hack_to_lsp l)
+    | (_occurrence, Some definition) :: l ->
+      (hack_symbol_definition_to_lsp_location definition ~default_path:file) :: (hack_to_lsp l)
   in
   hack_to_lsp results
 
@@ -643,11 +649,15 @@ let do_workspace_symbol
     | HackSearchService.ClassVar (_, scope) -> Some scope
     | _ -> None
   in
+  (* Hack sometimes gives us back items with an empty path, by which it       *)
+  (* intends "whichever path you asked me about". That would be meaningless   *)
+  (* here. If it does, then it'll pick up our default path (also empty),      *)
+  (* which will throw and go into our telemetry. That's the best we can do.   *)
   let hack_symbol_to_lsp (symbol: HackSearchService.symbol) =
     { Symbol_information.
       name = (Utils.strip_ns symbol.name);
       kind = hack_to_lsp_kind symbol.result_type;
-      location = hack_pos_to_lsp_location symbol.pos;
+      location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
       container_name = hack_to_lsp_container symbol.result_type;
     }
   in
@@ -683,11 +693,11 @@ let do_document_symbol
     | SymbolDefinition.Param -> Symbol_information.Variable
     (* We never return a param from a document-symbol-search *)
   in
-  let hack_symbol_to_lsp def container_name =
+  let hack_symbol_to_lsp definition container_name =
     { Symbol_information.
-      name = def.name;
-      kind = hack_to_lsp_kind def.kind;
-      location = hack_symbol_definition_to_lsp_location def;
+      name = definition.name;
+      kind = hack_to_lsp_kind definition.kind;
+      location = hack_symbol_definition_to_lsp_location definition ~default_path:filename;
       container_name;
     }
   in
@@ -717,7 +727,8 @@ let do_find_references
   (* TODO: respect params.context.include_declaration *)
   match results with
   | None -> []
-  | Some (_name, positions) -> List.map positions ~f:hack_pos_to_lsp_location
+  | Some (_name, positions) ->
+    List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
 
 
 let do_document_highlights
@@ -845,9 +856,21 @@ let do_document_formatting
 (* returns an updated "files_with_diagnostics" set of all files for which     *)
 (* our client currently has non-empty diagnostic reports.                     *)
 let do_diagnostics
-    (files_with_diagnostics: SSet.t)
+    (uris_with_diagnostics: SSet.t)
     (file_reports: Pos.absolute Errors.error_ list SMap.t)
   : SSet.t =
+  (* Hack sometimes reports a diagnostic on an empty file when it can't       *)
+  (* figure out which file to report. In this case we'll report on the root.  *)
+  (* Nuclide and VSCode both display this fine, though they obviously don't   *)
+  (* let you click-to-go-to-file on it.                                       *)
+  let default_path = match get_root () with
+    | None -> failwith "expected root"
+    | Some root -> Path.to_string root in
+  let file_reports = match SMap.get "" file_reports with
+    | None -> file_reports
+    | Some errors -> SMap.remove "" file_reports |> SMap.add ~combine:(@) default_path errors
+  in
+
   let per_file file errors =
     hack_errors_to_lsp_diagnostic file errors
     |> print_diagnostics
@@ -856,28 +879,31 @@ let do_diagnostics
   SMap.iter per_file file_reports;
 
   let is_error_free _uri errors = List.is_empty errors in
-  let (reports_without, reports_with) = SMap.partition is_error_free file_reports in
   (* reports_without/reports_with are maps of filename->ErrorList. *)
-  let files_without = SMap.bindings reports_without |> List.map ~f:fst |> SSet.of_list in
-  let files_with = SMap.bindings reports_with |> List.map ~f:fst |> SSet.of_list
+  let (reports_without, reports_with) = SMap.partition is_error_free file_reports in
   (* files_without/files_with are sets of filenames *)
+  let files_without = SMap.bindings reports_without |> List.map ~f:fst in
+  let files_with = SMap.bindings reports_with |> List.map ~f:fst in
+  (* uris_without/uris_with are sets of uris *)
+  let uris_without = List.map files_without ~f:(path_to_lsp_uri ~default_path) |> SSet.of_list in
+  let uris_with = List.map files_with ~f:(path_to_lsp_uri ~default_path) |> SSet.of_list
   in
-  SSet.union (SSet.diff files_with_diagnostics files_without) files_with
-(* this is "(file_diagnostics \ files_without) U files_with" *)
+  (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
+  SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
 
 (* do_diagnostics_flush: sends out "no more diagnostics for these files"      *)
 let do_diagnostics_flush
-    (diagnostic_files: SSet.t)
+    (diagnostic_uris: SSet.t)
   : unit =
-  let per_file file =
-    { Lsp.Publish_diagnostics.uri = path_to_lsp_uri file;
+  let per_uri uri =
+    { Lsp.Publish_diagnostics.uri = uri;
       diagnostics = [];
     }
     |> print_diagnostics
     |> notify stdout "textDocument/publishDiagnostics"
   in
-  SSet.iter per_file diagnostic_files
+  SSet.iter per_uri diagnostic_uris
 
 
 let report_progress
@@ -917,7 +943,7 @@ let report_progress_end
     { Main_env.
       conn = ienv.In_init_env.conn;
       needs_idle = true;
-      files_with_diagnostics = SSet.empty;
+      uris_with_diagnostics = SSet.empty;
       ready_dialog_cancel = None;
     }
   in
@@ -1099,7 +1125,7 @@ let do_initialize ()
       Main_loop {
         conn = server_conn;
         needs_idle = true;
-        files_with_diagnostics = SSet.empty;
+        uris_with_diagnostics = SSet.empty;
         ready_dialog_cancel = None;
       }
     end else begin
@@ -1350,8 +1376,8 @@ let handle_event
 
   (* textDocument/publishDiagnostics notification *)
   | Main_loop menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
-    let files_with_diagnostics = do_diagnostics menv.files_with_diagnostics errors in
-    state := Main_loop { menv with files_with_diagnostics; }
+    let uris_with_diagnostics = do_diagnostics menv.uris_with_diagnostics errors in
+    state := Main_loop { menv with uris_with_diagnostics; }
 
   (* any server diagnostics that come after we've shut down *)
   | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
@@ -1368,7 +1394,7 @@ let handle_event
 
   (* server shut-down request *)
   | Main_loop menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-    do_diagnostics_flush menv.files_with_diagnostics;
+    do_diagnostics_flush menv.uris_with_diagnostics;
     state := dismiss_ready_dialog_if_necessary !state event;
     state := Lost_server
 

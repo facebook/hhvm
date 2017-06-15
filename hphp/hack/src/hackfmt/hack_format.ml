@@ -1421,11 +1421,11 @@ and handle_lambda_body node =
   | CompoundStatement x ->
     handle_compound_statement x;
   | _ ->
-    WithRule (Rule.Argument, Fmt [
+    Fmt [
       Space;
-      Split;
+      SplitWith Cost.Base;
       Nest [transform node];
-    ])
+    ]
 
 and handle_possible_compound_statement ?space:(space=true) node =
   match syntax node with

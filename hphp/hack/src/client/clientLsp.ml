@@ -18,11 +18,27 @@ open Lsp_fmt
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
 (************************************************************************)
 
+let url_scheme_regex = Str.regexp "^\\([a-zA-Z][a-zA-Z0-9+.-]+\\):"
+(* this requires schemes with 2+ characters, so "c:\path" isn't considered a scheme *)
+
+let lsp_uri_to_path (uri: string) : string =
+  if Str.string_match url_scheme_regex uri 0 then
+    let scheme = Str.matched_group 1 uri in
+    if scheme = "file" then
+      File_url.parse uri
+    else
+      raise (Error.Invalid_params (Printf.sprintf "Not a valid file url '%s'" uri))
+  else
+    uri
+
+let path_to_lsp_uri (path: string) : string =
+  File_url.create path
+
 let lsp_text_document_identifier_to_hack
     (identifier: Lsp.Text_document_identifier.t)
   : ServerUtils.file_input =
   let open Lsp.Text_document_identifier in
-  ServerUtils.FileName identifier.uri
+  ServerUtils.FileName (lsp_uri_to_path identifier.uri)
 
 let lsp_position_to_ide (position: Lsp.position) : Ide_api_types.position =
   { Ide_api_types.
@@ -48,7 +64,7 @@ let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
 let hack_pos_to_lsp_location (pos: string Pos.pos) : Lsp.Location.t =
   let open Lsp.Location in
   {
-    uri = Pos.filename pos;
+    uri = path_to_lsp_uri (Pos.filename pos);
     range = hack_pos_to_lsp_range pos;
   }
 
@@ -96,7 +112,7 @@ let hack_errors_to_lsp_diagnostic (filename: string)
     }
   in
   { Lsp.Publish_diagnostics.
-    uri = filename;
+    uri = path_to_lsp_uri filename;
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
@@ -230,10 +246,11 @@ let get_root () : Path.t option =
   match !initialize_params with
   | None -> None
   | Some params ->
-    if Option.is_some params.root_uri then
-      Some (ClientArgsUtils.get_root params.root_uri)
-    else
-      Some (ClientArgsUtils.get_root params.root_path)
+    let path = match params.root_uri with
+      | Some uri -> Some (lsp_uri_to_path uri)
+      | None -> params.root_path
+    in
+    Some (ClientArgsUtils.get_root path)
 
 
 let rpc
@@ -492,7 +509,7 @@ let do_shutdown (conn: server_conn) : Shutdown.result =
 let do_did_open (conn: server_conn) (params: Did_open.params) : unit =
   let open Did_open in
   let open Text_document_item in
-  let filename = params.text_document.uri in
+  let filename = lsp_uri_to_path params.text_document.uri in
   let text = params.text_document.text in
   let command = ServerCommandTypes.OPEN_FILE (filename, text) in
   rpc conn command;
@@ -501,7 +518,7 @@ let do_did_open (conn: server_conn) (params: Did_open.params) : unit =
 let do_did_close (conn: server_conn) (params: Did_close.params) : unit =
   let open Did_close in
   let open Text_document_identifier in
-  let filename = params.text_document.uri in
+  let filename = lsp_uri_to_path params.text_document.uri in
   let command = ServerCommandTypes.CLOSE_FILE filename in
   rpc conn command;
   ()
@@ -519,7 +536,7 @@ let do_did_change
       text = lsp.text;
     }
   in
-  let filename = params.text_document.uri in
+  let filename = lsp_uri_to_path params.text_document.uri in
   let changes = List.map params.content_changes ~f:lsp_change_to_ide in
   let command = ServerCommandTypes.EDIT_FILE (filename, changes) in
   rpc conn command;
@@ -560,7 +577,7 @@ let do_completion (conn: server_conn) (params: Completion.params)
   let open Completion
   in
   let pos = lsp_position_to_ide params.position in
-  let filename = params.text_document.uri in
+  let filename = lsp_uri_to_path params.text_document.uri in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos) in
   let results = rpc conn command
   in
@@ -644,7 +661,7 @@ let do_document_symbol
   let open Text_document_identifier in
   let open SymbolDefinition in
 
-  let filename = params.text_document.uri in
+  let filename = lsp_uri_to_path params.text_document.uri in
   let command = ServerCommandTypes.OUTLINE filename in
   let results = rpc conn command in
 
@@ -791,10 +808,11 @@ let do_document_range_formatting
   : Document_range_formatting.result =
   let open Document_range_formatting in
   let open Text_document_identifier in
-  let action = ServerFormatTypes.Range { Ide_api_types.
-                                         range_filename = params.text_document.uri;
-                                         file_range = lsp_range_to_ide params.range;
-                                       }
+  let action = ServerFormatTypes.Range
+      { Ide_api_types.
+        range_filename = lsp_uri_to_path params.text_document.uri;
+        file_range = lsp_range_to_ide params.range;
+      }
   in
   do_formatting_common conn action
 
@@ -805,10 +823,11 @@ let do_document_on_type_formatting
   : Document_on_type_formatting.result =
   let open Document_on_type_formatting in
   let open Text_document_identifier in
-  let action = ServerFormatTypes.Position { Ide_api_types.
-                                            filename = params.text_document.uri;
-                                            position = lsp_position_to_ide params.position;
-                                          } in
+  let action = ServerFormatTypes.Position
+      { Ide_api_types.
+        filename = lsp_uri_to_path params.text_document.uri;
+        position = lsp_position_to_ide params.position;
+      } in
   do_formatting_common conn action
 
 
@@ -818,7 +837,7 @@ let do_document_formatting
   : Document_formatting.result =
   let open Document_formatting in
   let open Text_document_identifier in
-  let action = ServerFormatTypes.Document params.text_document.uri in
+  let action = ServerFormatTypes.Document (lsp_uri_to_path params.text_document.uri) in
   do_formatting_common conn action
 
 
@@ -829,8 +848,8 @@ let do_diagnostics
     (files_with_diagnostics: SSet.t)
     (file_reports: Pos.absolute Errors.error_ list SMap.t)
   : SSet.t =
-  let per_file uri errors =
-    hack_errors_to_lsp_diagnostic uri errors
+  let per_file file errors =
+    hack_errors_to_lsp_diagnostic file errors
     |> print_diagnostics
     |> notify stdout "textDocument/publishDiagnostics"
   in
@@ -851,8 +870,10 @@ let do_diagnostics
 let do_diagnostics_flush
     (diagnostic_files: SSet.t)
   : unit =
-  let per_file uri =
-    { Lsp.Publish_diagnostics.uri; diagnostics = []; }
+  let per_file file =
+    { Lsp.Publish_diagnostics.uri = path_to_lsp_uri file;
+      diagnostics = [];
+    }
     |> print_diagnostics
     |> notify stdout "textDocument/publishDiagnostics"
   in

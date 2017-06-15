@@ -10,6 +10,7 @@
 
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
+module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Logger = HackfmtEventLogger
 
@@ -166,11 +167,10 @@ let parse filename =
     | None ->
       SourceText.make @@ read_stdin ()
   in
-  let syntax_tree = SyntaxTree.make source_text in
-  if not (List.is_empty (SyntaxTree.all_errors syntax_tree)) then
-    raise Hackfmt_error.InvalidSyntax;
-  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  source_text, syntax_tree, editable
+  let tree = SyntaxTree.make source_text in
+  if List.is_empty (SyntaxTree.all_errors tree)
+    then tree
+    else raise Hackfmt_error.InvalidSyntax
 
 let get_char_ranges lines =
   let chars_seen = ref 0 in
@@ -228,12 +228,13 @@ let expand_to_split_boundaries boundaries range =
     st, ed
   )
 
-let format ?range ?ranges parsed_file =
-  let source_text, _, editable = parsed_file in
+let format ?range ?ranges tree =
+  let source_text = SyntaxTree.text tree in
   let range =
     Option.map range (expand_to_line_boundaries ?ranges source_text)
   in
-  editable
+  tree
+  |> EditableSyntax.from_tree
   |> Hack_format.transform
   |> Chunk_builder.build
   |> Line_splitter.solve ?range
@@ -279,11 +280,16 @@ let line_interval_to_char_range char_ranges (start_line, end_line) =
   let _, end_char = char_ranges.(end_line - 1) in
   start_char, end_char
 
-let format_intervals intervals parsed_file =
-  let source_text, _, editable = parsed_file in
+let format_intervals intervals tree =
+  let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
   let lines = String_utils.split_on_newlines text in
-  let chunk_groups = Hack_format.transform editable |> Chunk_builder.build in
+  let chunk_groups =
+    tree
+    |> EditableSyntax.from_tree
+    |> Hack_format.transform
+    |> Chunk_builder.build
+  in
   let solve_states = Line_splitter.find_solve_states chunk_groups in
   let line_ranges = get_char_ranges lines in
   let split_boundaries = get_split_boundaries solve_states in
@@ -311,9 +317,11 @@ let format_diff_intervals intervals parsed_file =
   try format_intervals intervals parsed_file with
   | Invalid_argument s -> raise (InvalidDiff s)
 
-let format_at_char parsed_file pos =
-  let source_text, tree, editable = parsed_file in
-  let chunk_groups = editable
+let format_at_char tree pos =
+  let source_text = SyntaxTree.text tree in
+  let chunk_groups =
+    tree
+    |> EditableSyntax.from_tree
     |> Hack_format.transform
     |> Chunk_builder.build in
   let module PS = Full_fidelity_positioned_syntax in
@@ -344,11 +352,12 @@ let format_at_char parsed_file pos =
   range, String.sub formatted 0 (String.length formatted - 1)
 
 let debug_print ?range filename =
-  let source_text, syntax_tree, editable = parse filename in
+  let tree = parse filename in
+  let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_to_line_boundaries source_text) in
-  let fmt_node = Hack_format.transform editable in
+  let fmt_node = Hack_format.transform (EditableSyntax.from_tree tree) in
   let chunk_groups = Chunk_builder.build fmt_node in
-  Hackfmt_debug.debug ~range source_text syntax_tree fmt_node chunk_groups
+  Hackfmt_debug.debug ~range source_text tree fmt_node chunk_groups
 
 let main (env: env) (options: format_options) =
   env.mode <- Some (mode_string options);
@@ -372,9 +381,9 @@ let main (env: env) (options: format_options) =
       |> output ?filename
   | AtChar (filename, pos) ->
     env.file <- filename;
-    let parsed_file = parse filename in
+    let tree = parse filename in
     let range, formatted =
-      try format_at_char parsed_file pos with
+      try format_at_char tree pos with
       | Invalid_argument s -> raise (InvalidCliArg s) in
     if env.debug then debug_print filename ~range;
     Printf.printf "%d %d\n" (fst range) (snd range);

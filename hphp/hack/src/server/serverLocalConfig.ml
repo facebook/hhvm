@@ -37,6 +37,7 @@ type t = {
   start_with_recorder_on : bool;
   (** See HhMonitorInformant. *)
   use_dummy_informant : bool;
+  informant_min_distance_restart: int;
   load_script_config: LoadScriptConfig.t;
 }
 
@@ -61,6 +62,7 @@ let default = {
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
   start_with_recorder_on = false;
   use_dummy_informant = true;
+  informant_min_distance_restart = 100;
   load_script_config = LoadScriptConfig.default;
 }
 
@@ -106,6 +108,8 @@ let load_ fn ~silent =
     ~default:default.start_with_recorder_on config in
   let use_dummy_informant = bool_ "use_dummy_informant"
     ~default:default.use_dummy_informant config in
+  let informant_min_distance_restart = int_ "informant_min_distance_restart"
+    ~default:default.informant_min_distance_restart config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
     ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
@@ -151,6 +155,7 @@ let load_ fn ~silent =
     shm_dirs;
     start_with_recorder_on;
     use_dummy_informant;
+    informant_min_distance_restart;
     load_script_config;
   }
 

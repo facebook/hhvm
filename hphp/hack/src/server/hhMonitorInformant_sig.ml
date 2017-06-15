@@ -9,6 +9,9 @@ module Types = struct
     state_prefetcher : State_prefetcher.t;
     (** Disable the informant - use the dummy instead. *)
     use_dummy : bool;
+    (** Don't trigger a server restart if the distance between two
+     * revisions we are moving between is less than this. *)
+    min_distance_restart : int;
   }
   type init_env = options
 end

@@ -80,6 +80,7 @@ let test_informant_restarts_significant_move temp_dir =
     HhMonitorInformant.root = temp_dir;
     state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
+    min_distance_restart = 100;
     use_dummy = false;
   } in
   let report = HhMonitorInformant.report
@@ -153,6 +154,7 @@ let test_repo_starts_midupdate temp_dir =
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
     HhMonitorInformant.root = temp_dir;
+    min_distance_restart = 100;
     state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
     use_dummy = false;
@@ -183,6 +185,7 @@ let test_watcher_in_unknown_state temp_dir =
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
     HhMonitorInformant.root = temp_dir;
+    min_distance_restart = 100;
     state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
     use_dummy = false;

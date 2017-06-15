@@ -49,21 +49,21 @@ module WEWConfig = WatchmanEventWatcherConfig
  *)
 module Revision_tracker = struct
 
-  (** This is just a heuristic taken by eye-balling some graphs. Can turn
-   * up the sensitivity as the advantage of a fresh server over incremental
-   * typechecking improves. *)
-  let restart_min_svn_distance = 100
-
   type timestamp = float
 
   type repo_transition =
     | State_enter
     | State_leave
 
-  type env = {
+  type init_settings = {
     watchman : Watchman.watchman_instance ref;
     root : Path.t;
     prefetcher : State_prefetcher.t;
+    min_distance_restart : int;
+  }
+
+  type env = {
+    inits : init_settings;
     (** The 'current' base revision (from the tracker's perspective of the
      * repo. This is used to make calculations on distance. This is changed
      * when a State_leave is handled. *)
@@ -99,8 +99,7 @@ module Revision_tracker = struct
   }
 
   type instance =
-    | Initializing of Watchman.watchman_instance *
-      State_prefetcher.t * Path.t * (Hg.svn_rev Future.t)
+    | Initializing of init_settings * (Hg.svn_rev Future.t)
     | Tracking of env
 
   type change =
@@ -111,8 +110,14 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let init watchman prefetcher root =
-    ref @@ Initializing (watchman, prefetcher, root,
+  let init ~min_distance_restart watchman prefetcher root =
+    let init_settings = {
+      watchman = ref watchman;
+      prefetcher;
+      root;
+      min_distance_restart;
+  } in
+    ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
 
   let set_base_revision svn_rev env =
@@ -133,11 +138,9 @@ module Revision_tracker = struct
     end with
     | Future_sig.Process_failure _ -> 0
 
-  let active_env watchman prefetcher root base_svn_rev =
+  let active_env init_settings base_svn_rev =
     {
-      watchman = ref @@ watchman;
-      root;
-      prefetcher;
+      inits = init_settings;
       current_base_revision = ref base_svn_rev;
       queries = Hashtbl.create 200;
       state_changes = Queue.create() ;
@@ -146,10 +149,10 @@ module Revision_tracker = struct
   let get_distance svn_rev env =
     abs @@ svn_rev - !(env.current_base_revision)
 
-  let is_significant distance elapsed_t =
+  let is_significant ~min_distance_restart distance elapsed_t =
     (** Allow up to 2 revisions per second for incremental. More than that,
      * prefer a server restart. *)
-    distance > (float_of_int restart_min_svn_distance)
+    distance > (float_of_int min_distance_restart)
       && (elapsed_t <= 0.0 || ((distance /. elapsed_t) > 2.0))
 
   let cached_svn_rev queries hg_rev =
@@ -172,7 +175,9 @@ module Revision_tracker = struct
     | Some svn_rev ->
       let distance = float_of_int @@ get_distance svn_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
-      let significant = is_significant distance elapsed_t in
+      let significant = is_significant
+        ~min_distance_restart:env.inits.min_distance_restart
+        distance elapsed_t in
       Some (significant, svn_rev)
 
   (**
@@ -193,7 +198,7 @@ module Revision_tracker = struct
       | Some (significant, svn_rev) ->
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
-        let _ = State_prefetcher.run svn_rev env.prefetcher in
+        let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
         if transition = State_leave
           (** Repo has been moved to a new SVN Rev, so we set this mutable
            * reference. This must be done after computing distance. *)
@@ -244,7 +249,7 @@ module Revision_tracker = struct
     with
     | Not_found ->
       let future = Hg.get_closest_svn_ancestor
-        hg_rev (Path.to_string env.root) in
+        hg_rev (Path.to_string env.inits.root) in
       Hashtbl.add env.queries hg_rev future
 
   let parse_json json = match json with
@@ -261,8 +266,8 @@ module Revision_tracker = struct
         | Result.Ok (v, _) -> Some v
 
   let get_change env =
-    let watchman, change = Watchman.get_changes !(env.watchman) in
-    env.watchman := watchman;
+    let watchman, change = Watchman.get_changes !(env.inits.watchman) in
+    env.inits.watchman := watchman;
     match change with
     | Watchman.Watchman_unavailable
     | Watchman.Watchman_synchronous _ ->
@@ -286,7 +291,7 @@ module Revision_tracker = struct
       None
     | Some (significant, svn_rev) ->
       if significant
-        then ignore @@ State_prefetcher.run svn_rev env.prefetcher;
+        then ignore @@ State_prefetcher.run svn_rev env.inits.prefetcher;
       let decision = form_decision significant transition server_state in
       Some (decision, svn_rev)
 
@@ -345,13 +350,13 @@ module Revision_tracker = struct
       handle_change_then_churn server_state change env
 
   let make_report server_state t = match !t with
-    | Initializing (watchman, prefetcher, root, future) ->
+    | Initializing (init_settings, future) ->
       if Future.is_ready future
       then
         let svn_rev = svn_rev_of_future future in
         let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
           svn_rev in
-        let env = active_env watchman prefetcher root svn_rev in
+        let env = active_env init_settings svn_rev in
         let () = t := Tracking env in
         process server_state env
       else
@@ -376,7 +381,13 @@ type t =
    * or if the informant is disabled in the hhconfig. *)
   | Resigned
 
-let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
+let init {
+  root;
+  allow_subscriptions;
+  state_prefetcher;
+  use_dummy;
+  min_distance_restart;
+} =
   if use_dummy then
     Resigned
   (** Active informant requires Watchman subscriptions. *)
@@ -396,6 +407,7 @@ let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
       Active
       {
         revision_tracker = Revision_tracker.init
+          ~min_distance_restart
           (Watchman.Watchman_alive watchman_env)
           (** TODO: Put the prefetcher here. *)
           state_prefetcher root;

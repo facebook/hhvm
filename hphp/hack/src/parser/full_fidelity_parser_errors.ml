@@ -357,12 +357,27 @@ let produce_error_for_header acc check node error error_node =
 
 (* Given a ClassishDeclaration node, test whether or not it contains
  * an invalid use of 'implements'. *)
-let classish_invalid_implements_clause cd_node =
-  let classish_keyword = cd_node.classish_keyword in
-  let implements_keyword = cd_node.classish_implements_keyword in
-  (* Invalid if has 'implements' and isn't a class. *)
-  token_kind implements_keyword = Some TokenKind.Implements &&
-    token_kind classish_keyword <> Some TokenKind.Class
+let classish_invalid_implements_keyword cd_node =
+  (* Invalid if uses 'implements' and isn't a class. *)
+  token_kind cd_node.classish_implements_keyword = Some TokenKind.Implements &&
+    token_kind cd_node.classish_keyword <> Some TokenKind.Class
+
+(* Given a ClassishDeclaration node, test whether or not it's a trait
+ * invoking the 'extends' keyword. *)
+let classish_invalid_extends_keyword cd_node =
+  (* Invalid if uses 'extends' and is a trait. *)
+  token_kind cd_node.classish_extends_keyword = Some TokenKind.Extends &&
+    token_kind cd_node.classish_keyword = Some TokenKind.Trait
+
+(* Given a ClassishDeclaration node, test whether or not length of
+ * extends_list is appropriate for the classish_keyword. *)
+let classish_invalid_extends_list cd_node =
+  (* Invalid if is a class and has list of length greater than one. *)
+  token_kind cd_node.classish_keyword = Some TokenKind.Class &&
+    token_kind cd_node.classish_extends_keyword = Some TokenKind.Extends &&
+    match syntax_to_list_no_separators cd_node.classish_extends_list with
+    | [x1] -> false
+    | _ -> true (* General bc empty list case is already caught by error1007 *)
 
 let methodish_errors node parents =
   match syntax node with
@@ -529,8 +544,14 @@ let classish_errors node parents =
       produce_error errors classish_duplicate_modifiers cd.classish_modifiers
       SyntaxError.error2031 cd.classish_modifiers in
     let errors =
-      produce_error errors classish_invalid_implements_clause cd
+      produce_error errors classish_invalid_implements_keyword cd
       SyntaxError.error2035 cd.classish_implements_keyword in
+    let errors =
+      produce_error errors classish_invalid_extends_keyword cd
+      SyntaxError.error2036 cd.classish_extends_keyword in
+    let errors =
+      produce_error errors classish_invalid_extends_list cd
+      SyntaxError.error2037 cd.classish_extends_list in
     errors
   | _ -> [ ]
 

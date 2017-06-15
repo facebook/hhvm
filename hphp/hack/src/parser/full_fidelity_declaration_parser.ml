@@ -375,24 +375,6 @@ module WithExpressionAndStatementAndTypeParser
       | _ -> (with_error parser SyntaxError.error1035, (make_missing()))
 
   and parse_classish_extends_opt parser =
-    (* In this routine we parse a list which starts with "extends" and then
-    consists of comma-separated types.
-
-    The rules for extends lists are:
-
-    * In an interface, the list, if it exists, can have one or more types.
-    * In a class, the list, if it exists, must have one type.
-    * In a trait, there is no extends clause.
-
-    However, we parse the clause in all three cases the same; this makes it
-    easier to report a good error later.
-
-    TODO: Report that error.
-
-
-
-    *)
-
     let (parser1, extends_token) = next_token parser in
     if (Token.kind extends_token) <> Extends then
       (parser, make_missing (), make_missing ())
@@ -401,16 +383,6 @@ module WithExpressionAndStatementAndTypeParser
     (parser, make_token extends_token, extends_list)
 
   and parse_classish_implements_opt parser =
-    (* The rules for implements are similar to those for extends; see above.
-
-    * In a class, the list, if it exists, can have one or more types.
-    * In an interface, there is no implements clause
-    * In a trait, there is no implements clause
-
-    But again, it is easier to simply parse it now and give an error later.
-
-    TODO: Give that error.
-    *)
     let (parser1, implements_token) = next_token parser in
     if (Token.kind implements_token) <> Implements then
       (parser, make_missing (), make_missing ())

@@ -393,23 +393,43 @@ let main (env: env) (options: format_options) =
     env.root <- Path.to_string root;
     read_stdin ()
       |> Parse_diff.go
-      |> List.map ~f:(fun (rel_path, intervals) ->
+      |> List.filter_map ~f:begin fun (rel_path, intervals) ->
+        (* Store the name of the file we're working with, so if we encounter an
+         * exception, this filename will be the one that is logged. *)
         env.file <- Some rel_path;
         let filename = Path.to_string (Path.concat root rel_path) in
+        (* We intentionally raise an exception here instead of printing a
+         * message and moving on--if a file is missing, it may be a signal that
+         * this diff is out of date and may lead us to format unexpected ranges
+         * (typically diffs will be directly piped from `hg diff`, and thus
+         * won't be out of date).
+         *
+         * Similarly, InvalidDiff exceptions thrown by format_diff_intervals
+         * (caused by out-of-bounds line numbers, etc) will cause us to bail
+         * before writing to any files. *)
         if not (file_exists filename) then
           raise (InvalidDiff ("No such file or directory: " ^ rel_path));
-        let contents = Some filename
-          |> parse
-          |> format_diff_intervals intervals
-        in
-        rel_path, filename, contents
-      )
-      |> List.iter ~f:(fun (rel_path, filename, contents) ->
+        try
+          let contents =
+            Some filename
+            |> parse
+            |> format_diff_intervals intervals in
+          Some (rel_path, filename, contents)
+        with
+        (* A parse error isn't a signal that there's something wrong with the
+         * diff--there's just something wrong with that file. We can leave that
+         * file alone and move on. *)
+        | InvalidSyntax ->
+          Printf.eprintf "Parse error in file: %s\n%!" rel_path;
+          None
+      end
+      |> List.iter ~f:begin fun (rel_path, filename, contents) ->
+        (* Log this filename in the event of an exception. *)
         env.file <- Some rel_path;
         if dry then printf "*** %s\n" rel_path;
         let filename = if dry then None else Some filename in
         output ?filename contents
-      )
+      end
 
 let () =
   let options, (debug, test) = parse_options () in

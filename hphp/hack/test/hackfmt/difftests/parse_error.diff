@@ -1,0 +1,27 @@
+diff --git a/parse_error.php b/parse_error.php
+--- a/parse_error.php
++++ b/parse_error.php
+@@ -1,5 +1,5 @@
+ <?hh // strict
+
+ function square(int $x): int {
+-  return $x*$x;
++  return $x*$x
+ }
+diff --git a/fibonacci.php b/fibonacci.php
+--- a/fibonacci.php
++++ b/fibonacci.php
+@@ -1,9 +1,9 @@
+ <?hh // strict
+
+ function fibonacci($pos){
+-  $a = array(0, 1);
++  $arr = array(0, 1);
+   for ($i = 2; $i <= $pos; ++$i)
+-    $a[$i] =
+-      $a[$i-1] + $a[$i-2];
+-  return $a[$pos];
++    $arr[$i] =
++      $arr[$i-1] + $arr[$i-2];
++  return $arr[$pos];
+ }

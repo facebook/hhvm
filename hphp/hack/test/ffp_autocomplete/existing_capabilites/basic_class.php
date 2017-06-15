@@ -1,7 +1,7 @@
 <?hh
-/* AUTOCOMPLETE 13 14 */
+/* AUTOCOMPLETE 10 14 */
 
-class C {
+public final class C {
   public function frob(): void {
   }
 }

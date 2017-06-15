@@ -578,10 +578,13 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       end result
   | Ffp_autocomplete ->
       let filename_string = Relative_path.to_absolute filename in
-      let (keyword, row, col) =
+      let result =
         FfpAutocompleteService.auto_complete filename_string
-      in
-      Printf.printf "Test type: %s\nRow: %d\nCol: %d\n" keyword row col
+      in begin
+        match result with
+        | Some result -> List.iter result ~f:(Printf.printf "%s\n")
+        | None -> Printf.printf "No result found\n"
+      end
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin

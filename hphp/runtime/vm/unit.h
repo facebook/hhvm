@@ -36,6 +36,7 @@
 
 #include <map>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -404,6 +405,11 @@ public:
    * Return -1 if not found.
    */
   int getNearestLineWithCode(int line) const;
+
+  /*
+   * Get lines with executable code.
+   */
+  std::set<int> getLinesWithCode() const;
 
   /*
    * Return the Func* for the code at offset `pc'.

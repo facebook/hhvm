@@ -31,10 +31,13 @@ struct Array;
 struct CodeCoverage {
   static constexpr int kLineExecuted = 1;
   static constexpr int kLineUnused = -1;
+  static constexpr int kLineDeadCode = -2;
 
   void Record(const char* filename, int line0, int line1);
 
   void RecordExecutable(const char* filename, std::set<int>&& lines);
+
+  void RecordAsNotDeadCode(const char* filename, std::set<int>&& lines);
 
   /*
    * Returns an array in this format,
@@ -46,6 +49,8 @@ struct CodeCoverage {
   Array Report(bool sys = true);
 
   Array ReportExecutable();
+
+  Array ReportDeadCode();
 
   /*
    * Write JSON format into the file.
@@ -63,12 +68,15 @@ struct CodeCoverage {
 
   bool IsRecordedExecutable(const char* filename);
 
+  bool IsRecordedDeadCode(const char* filename);
+
 private:
   typedef hphp_const_char_map<std::vector<int>> CodeCoverageMap;
   CodeCoverageMap m_hits;
 
   typedef hphp_const_char_map<std::set<int>> CodeCoverageSet;
   CodeCoverageSet m_executables;
+  CodeCoverageSet m_deads;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

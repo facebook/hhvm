@@ -477,6 +477,11 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
     executables = ti->m_coverage->ReportExecutable();
   }
 
+  auto deads = Array::Create();
+  if (ti->m_reqInjectionData.getCoverageWithDeadCode()) {
+    deads = ti->m_coverage->ReportDeadCode();
+  }
+
   auto const reports = ti->m_coverage->Report(false);
   auto coverage = Array::Create();
   for (ArrayIter report(reports); report; ++report) {
@@ -491,7 +496,9 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
     coverage.set(report.first(), tmp);
   }
 
-  auto const merged = HHVM_FN(array_replace_recursive)(executables, coverage);
+  auto arg = Array::Create();
+  arg.set(0, coverage);
+  auto const merged = HHVM_FN(array_replace_recursive)(executables, deads, arg);
   Array ret = Array::Create();
   for (ArrayIter iter(merged); iter; ++iter) {
     Array tmp = iter.second().toArray();
@@ -614,18 +621,11 @@ static void HHVM_FUNCTION(xdebug_print_function_stack,
 
   static void HHVM_FUNCTION(xdebug_start_code_coverage,
                             int64_t options /* = 0 */) {
-  // XDEBUG_CC_DEAD_CODE not supported right now primarily
-  // because the internal CodeCoverage class does support either unexecuted line
-  // tracking or dead code analysis
-  if (options != 0 && options != k_XDEBUG_CC_UNUSED) {
-    raise_error("XDEBUG_CC_DEAD_CODE constants are not currently supported.");
-    return;
-  }
-
   // If we get here, turn on coverage
-  auto ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_reqInjectionData.setCoverage(true);
-  ti->m_reqInjectionData.setCoverageWithUnused(options & k_XDEBUG_CC_UNUSED);
+  auto& rid = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  rid.setCoverage(true);
+  rid.setCoverageWithUnused(options & k_XDEBUG_CC_UNUSED);
+  rid.setCoverageWithDeadCode(options & k_XDEBUG_CC_DEAD_CODE);
   if (g_context->isNested()) {
     raise_notice("Calling xdebug_start_code_coverage from a nested VM instance "
                  "may cause unpredicable results");
@@ -674,6 +674,7 @@ static void HHVM_FUNCTION(xdebug_stop_code_coverage,
   auto ti = ThreadInfo::s_threadInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
   ti->m_reqInjectionData.setCoverageWithUnused(false);
+  ti->m_reqInjectionData.setCoverageWithDeadCode(false);
   if (cleanup) {
     ti->m_coverage->Reset();
   }

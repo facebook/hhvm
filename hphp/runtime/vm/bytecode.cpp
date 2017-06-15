@@ -6331,6 +6331,15 @@ static void recordExecutableLines(const Unit* unit, const char* filename) {
   TI().m_coverage->RecordExecutable(filename, std::move(lines));
 }
 
+static void recordNotDeadCode(const Unit* unit, const char* filename) {
+  if (TI().m_coverage->IsRecordedDeadCode(filename)) {
+    return;
+  }
+
+  auto lines = unit->getLinesWithCode();
+  TI().m_coverage->RecordAsNotDeadCode(filename, std::move(lines));
+}
+
 void recordCodeCoverage(PC /*pc*/) {
   Unit* unit = vmfp()->m_func->unit();
   assert(unit != nullptr);
@@ -6346,8 +6355,11 @@ void recordCodeCoverage(PC /*pc*/) {
 
   if (unit != s_prev_unit) {
     s_prev_unit = unit;
-    if (RID().getCoverageWithUnused()) {
+    if (RID().getCoverageWithUnused() || RID().getCoverageWithDeadCode()) {
       recordExecutableLines(unit, filename);
+    }
+    if (RID().getCoverageWithDeadCode()) {
+      recordNotDeadCode(unit, filename);
     }
   }
 

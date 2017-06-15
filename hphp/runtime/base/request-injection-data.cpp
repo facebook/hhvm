@@ -652,6 +652,7 @@ void RequestInjectionData::updateJit() {
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     !m_coverageWithUnused &&
+    !m_coverageWithDeadCode &&
     isStandardRequest() &&
     !getDebuggerForceIntr();
 }

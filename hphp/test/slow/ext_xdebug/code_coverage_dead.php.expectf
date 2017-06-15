@@ -1,1 +1,19 @@
-Fatal error: XDEBUG_CC_DEAD_CODE constants are not currently supported. in %s/test/slow/ext_xdebug/code_coverage_dead.php on line 2
+array(1) {
+  ["%s"]=>
+  array(7) {
+    [3]=>
+    int(1)
+    [7]=>
+    int(-2)
+    [8]=>
+    int(1)
+    [9]=>
+    int(1)
+    [12]=>
+    int(1)
+    [13]=>
+    int(1)
+    [14]=>
+    int(1)
+  }
+}

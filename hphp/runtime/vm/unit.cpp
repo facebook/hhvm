@@ -23,7 +23,9 @@
 #include <iomanip>
 #include <map>
 #include <ostream>
+#include <set>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
@@ -535,6 +537,17 @@ void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
   if (s_extendedLineInfo.insert(acc, unit)) {
     acc->second.sourceLocTable = std::move(table);
   }
+}
+
+std::set<int> Unit::getLinesWithCode() const {
+  auto start = 0;
+  auto stop = m_bclen;
+  std::set<int> lines;
+
+  for (auto* it = &m_bc[start]; it < &m_bc[stop]; it += instrLen(it)) {
+    lines.insert(getLineNumber(offsetOf(it)));
+  }
+  return std::move(lines);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

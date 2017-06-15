@@ -34,11 +34,11 @@ let lsp_uri_to_path (uri: string) : string =
 let path_to_lsp_uri (path: string) : string =
   File_url.create path
 
-let lsp_text_document_identifier_to_hack
+let lsp_text_document_identifier_to_filename
     (identifier: Lsp.Text_document_identifier.t)
-  : ServerUtils.file_input =
+  : string =
   let open Lsp.Text_document_identifier in
-  ServerUtils.FileName (lsp_uri_to_path identifier.uri)
+  lsp_uri_to_path identifier.uri
 
 let lsp_position_to_ide (position: Lsp.position) : Ide_api_types.position =
   { Ide_api_types.
@@ -47,10 +47,10 @@ let lsp_position_to_ide (position: Lsp.position) : Ide_api_types.position =
   }
 
 let lsp_file_position_to_hack (params: Lsp.Text_document_position_params.t)
-  : ServerUtils.file_input * int * int =
+  : string * int * int =
   let open Lsp.Text_document_position_params in
   let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
-  let filename = lsp_text_document_identifier_to_hack params.text_document
+  let filename = lsp_text_document_identifier_to_filename params.text_document
   in
   (filename, line, column)
 
@@ -544,7 +544,7 @@ let do_did_change
 
 let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.INFER_TYPE (file, line, column) in
+  let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column) in
   let inferred_type = rpc conn command in
   match inferred_type with
   | None -> { Hover.
@@ -559,7 +559,7 @@ let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
 let do_definition (conn: server_conn) (params: Definition.params)
   : Definition.result =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDENTIFY_FUNCTION (file, line, column) in
+  let command = ServerCommandTypes.IDENTIFY_FUNCTION (ServerUtils.FileName file, line, column) in
   let results = rpc conn command in
   let rec hack_to_lsp = function
     | [] -> []
@@ -709,10 +709,10 @@ let do_find_references
   let open Find_references in
 
   let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
-  let filename = lsp_text_document_identifier_to_hack params.text_document in
+  let filename = lsp_text_document_identifier_to_filename params.text_document in
   let include_defs = params.context.include_declaration in
   let command = ServerCommandTypes.IDE_FIND_REFS
-      (filename, line, column, include_defs) in
+      (ServerUtils.FileName filename, line, column, include_defs) in
   let results = rpc conn command in
   (* TODO: respect params.context.include_declaration *)
   match results with
@@ -727,7 +727,7 @@ let do_document_highlights
   let open Document_highlights in
 
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HIGHLIGHT_REFS (file, line, column) in
+  let command = ServerCommandTypes.IDE_HIGHLIGHT_REFS (ServerUtils.FileName file, line, column) in
   let results = rpc conn command in
 
   let hack_range_to_lsp_highlight range =
@@ -743,8 +743,8 @@ let do_type_coverage (conn: server_conn) (params: Type_coverage.params)
   : Type_coverage.result =
   let open Type_coverage in
 
-  let filename = lsp_text_document_identifier_to_hack params.text_document in
-  let command = ServerCommandTypes.COVERAGE_LEVELS filename in
+  let filename = lsp_text_document_identifier_to_filename params.text_document in
+  let command = ServerCommandTypes.COVERAGE_LEVELS (ServerUtils.FileName filename) in
   let results: Coverage_level.result = rpc conn command in
   let results = Coverage_level.merge_adjacent_results results in
 

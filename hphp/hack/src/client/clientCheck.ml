@@ -85,6 +85,9 @@ let is_stale_msg liveness =
     | Rpc.Live_status -> None
 
 let warn_unsaved_changes () =
+  (* Make sure any buffered diagnostics are printed before printing this
+     warning. *)
+  flush stdout;
   Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
   prerr_endline
 {|there is an editor connected to the Hack server.
@@ -267,9 +270,9 @@ let main args =
         ServerError.print_errorl
           stale_msg args.output_json error_list oc
       end else begin
-        if has_unsaved_changes then warn_unsaved_changes ();
         List.iter error_list ClientCheckStatus.print_error_color;
-        Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg)
+        Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
+        if has_unsaved_changes then warn_unsaved_changes ()
       end;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_SHOW classname ->
@@ -339,8 +342,8 @@ let main args =
         let oc = if args.output_json then stderr else stdout in
         ServerError.print_errorl None args.output_json error_list oc
       end else begin
-        if has_unsaved_changes then warn_unsaved_changes ();
-        List.iter error_list ClientCheckStatus.print_error_color
+        List.iter error_list ClientCheckStatus.print_error_color;
+        if has_unsaved_changes then warn_unsaved_changes ()
       end;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_FORMAT (from, to_) ->

@@ -10,9 +10,10 @@
 open Hhas_parser
 open Diff
 
+module Log = Semdiff_logging
+
 type options = {
   files : string * string;
-  similarity : bool;
 }
 
 let die str =
@@ -22,15 +23,21 @@ let die str =
   exit 2
 
 let parse_options () =
-  let similarity = ref false in
   let purpose = "Hhas differencing tool" in
   let usage =
     Printf.sprintf "%s\nUsage: %s file1 file2\n" purpose Sys.argv.(0)
   in
   let options =
-    [ ("--similarity"
-      , Arg.Set similarity
-      , " Only displays the similarity percentage on STDOUT"
+    [ ("--verbose"
+      , Arg.Int (fun i ->
+                  if i < 0 || 2 < i
+                  then raise (Arg.Bad "Verbosity level has to be 0, 1 or 2")
+                  else Log.verbosity_level := i)
+        (* Change the default logging level in Semdiff_logging.ml *)
+      , " Set verbosity level 0, 1 or 2 [default: 2]
+                  0: Only displays the similarity percentage on STDOUT
+                  1: Also displays differences on STDOUT
+                  2: Also displays debugging information on STDERR"
       );
     ] in
   let options = Arg.align ~limit:25 options in
@@ -38,9 +45,7 @@ let parse_options () =
   Arg.parse options (fun file -> files := file::!files) usage;
   match !files with
   | [x; y] ->
-    { files = (x, y)
-    ; similarity = !similarity
-    }
+    { files = (x, y) }
   | _ -> die usage
 
 let parse_file program_parser filename =
@@ -61,16 +66,18 @@ let run options =
   let program_parser = program Hhas_lexer.read in
   let prog1 = parse_file program_parser (fst options.files) in
   let prog2 = parse_file program_parser (snd options.files) in
-  let _ = Rhl.adata1_ref := Hhas_program.adata prog1 in
-  let _ = Rhl.adata2_ref := Hhas_program.adata prog2 in
+  Rhl.adata1_ref := Hhas_program.adata prog1;
+  Rhl.adata2_ref := Hhas_program.adata prog2;
 
-  let (d,(s,e)) = program_comparer.comparer prog1 prog2 in
+  let d, (s, e) = program_comparer.comparer prog1 prog2 in
   let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
-  if options.similarity
-  then Printf.printf "%.2f" similarity
-  else (Printf.printf
-    "distance = %d\nsize = %d\nsimilarity =%.2f%%\nedits=\n%s" d s similarity e;
-    print_endline defaultstring) (* make sure the colors are back to normal *)
+  Log.print ~level:1 @@ Printf.sprintf "Distance = %d" d;
+  Log.print ~level:1 @@ Printf.sprintf "Size = %d" s;
+  Log.print ~level:1 ~newline:false @@ "Similarity = ";
+  Log.print ~level:0 @@ Printf.sprintf "%.2f" similarity;
+  Log.print ~level:1 @@ Printf.sprintf "Edits = \n%s" e;
+  (* make sure the colors are back to normal *)
+  Log.print ~level:1 defaultstring
 
 (* command line driver *)
 let _ =

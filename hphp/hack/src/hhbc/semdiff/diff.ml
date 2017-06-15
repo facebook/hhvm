@@ -8,6 +8,8 @@
  *
 *)
 
+module Log = Semdiff_logging
+
 let rec concatstrs l = match l with
  | [] -> ""
  | x ::xs -> x ^ (concatstrs xs)
@@ -590,12 +592,12 @@ let instruct_list_comparer = list_comparer instruct_comparer "\n"
 let instruct_list_comparer_with_semdiff = {
   comparer = (fun l1 l2 ->
                   match Rhl.equiv l1 l2 [] with
-                | None -> (prerr_endline "semdiff succeeded";
-                           (0, (List.length l1, "")) )
+                | None -> (Log.debug "Semdiff succeeded";
+                           (0, (List.length l1, "")))
                 | Some (pc,pc',asn,assumed,todo) ->
-                  (prerr_endline "semdiff failed";
-                  Printf.eprintf
-                  "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nassumed=%s\ntodo=%s"
+                  (Log.debug "Semdiff failed";
+                  Log.debug @@ Printf.sprintf
+                  "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
                   (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
                   (my_string_of_instruction
                     (List.nth l1 (Rhl.ip_of_pc pc)))
@@ -630,12 +632,12 @@ let body_instrs_comparer = {
       let inss = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b) in
       let inss' = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b') in
         match Rhl.equiv inss inss' todo with
-           | None -> (prerr_endline "semdiff succeeded";
+           | None -> (Log.debug "Semdiff succeeded";
                       (0, (List.length inss, "")) )
            | Some (pc,pc',asn,assumed,todo) ->
-             (prerr_endline "semdiff failed";
-             Printf.eprintf
-             "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nassumed=%s\ntodo=%s"
+             (Log.debug "Semdiff failed";
+             Log.debug @@ Printf.sprintf
+             "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
              (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
              (my_string_of_instruction
                (List.nth inss (Rhl.ip_of_pc pc)))

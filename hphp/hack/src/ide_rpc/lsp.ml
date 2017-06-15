@@ -30,18 +30,19 @@
  *   request can have its own custom error type, although most don't.
  * - Most datatypes go in modules since there are so many name-clashes in
  *   the protocol and OCaml doesn't like name-clashes. Only exceptions are
- *   the really primitive types like location and document_uri.
+ *   the really primitive types like location and documentUri.
  *   The few places where we still had to rename fields to avoid OCaml name
  *   clashes I've noted in the comments with the word "wire" to indicate the
  *   over-the-wire form of the name.
- * - Names have been translated from jsonConvention into ocaml_convention.
+ * - Names have been translated from jsonConvention into ocaml convention
+ *   only where necessary, e.g. because ocaml uses lowercase for types.
  * - The spec has space for extra fields like "experimental". It obviously
  *   doesn't make sense to encode them in a type system. I've omitted them
  *   entirely.
 *)
 
 
-type document_uri = string
+type documentUri = string
 
 (* A position is between two characters like an 'insert' cursor in a editor *)
 type position = {
@@ -58,18 +59,18 @@ type range = {
 (* Represents a location inside a resource, such as a line inside a text file *)
 module Location = struct
   type t = {
-    uri: document_uri;
+    uri: documentUri;
     range: range;
   }
 end
 
-(* Marked_string can be used to render human readable text. It is either a
+(* markedString can be used to render human readable text. It is either a
  * markdown string or a code-block that provides a language and a code snippet.
  * Note that markdown strings will be sanitized by the client - including
  * escaping html *)
-type marked_string =
-  | Marked_string of string
-  | Marked_code of string * string (* lang, value *)
+type markedString =
+  | MarkedString of string
+  | MarkedCode of string * string (* lang, value *)
 
 (* Represents a reference to a command. Provides a title which will be used to
  * represent a command in the UI. Commands are identitifed using a string
@@ -83,57 +84,57 @@ module Command = struct
   }
 end
 
-(* A textual edit applicable to a text document. If n text_edits are applied
+(* A textual edit applicable to a text document. If n textEdits are applied
    to a text document all text edits describe changes to the initial document
    version. Execution wise text edits should applied from the bottom to the
    top of the text document. Overlapping text edits are not supported. *)
-module Text_edit = struct
+module TextEdit = struct
   type t = {
     range: range;  (* to insert text, use a range where start = end *)
-    new_text: string;  (* for delete operations, use an empty string *)
+    newText: string;  (* for delete operations, use an empty string *)
   }
 end
 
 (* Text documents are identified using a URI. *)
-module Text_document_identifier = struct
+module TextDocumentIdentifier = struct
   type t = {
-    uri: document_uri;  (* the text document's URI *)
+    uri: documentUri;  (* the text document's URI *)
   }
 end
 
 (* An identifier to denote a specific version of a text document. *)
-module Versioned_text_document_identifier = struct
+module VersionedTextDocumentIdentifier = struct
   type t = {
-    uri: document_uri;  (* the text document's URI *)
+    uri: documentUri;  (* the text document's URI *)
     version: int;  (* the version number of this document *)
   }
 end
 
 (* Describes textual changes on a single text document. The text document is
-   referred to as a versioned_text_document_identifier to allow clients to check
+   referred to as a VersionedTextDocumentIdentifier to allow clients to check
    the text document version before an edit is applied. *)
-module Text_document_edit = struct
+module TextDocumentEdit = struct
   type t = {
-    text_document: Versioned_text_document_identifier.t;
-    edits: Text_edit.t list;
+    textDocument: VersionedTextDocumentIdentifier.t;
+    edits: TextEdit.t list;
   }
 end
 
 (* A workspace edit represents changes to many resources managed in the
-   workspace. A workspace edit now consists of an array of text_document_edits
+   workspace. A workspace edit now consists of an array of TextDocumentEdits
    each describing a change to a single text document. *)
-module Workspace_edit = struct
+module WorkspaceEdit = struct
   type t = {
-    changes: Text_document_edit.t list;  (* holds changes to existing docs *)
+    changes: TextDocumentEdit.t list;  (* holds changes to existing docs *)
   }
 end
 
 (* An item to transfer a text document from the client to the server. The
    version number strictly increases after each change, including undo/redo. *)
-module Text_document_item = struct
+module TextDocumentItem = struct
   type t = {
-    uri: document_uri;  (* the text document's URI *)
-    language_id: string;  (* the text document's language identifier *)
+    uri: documentUri;  (* the text document's URI *)
+    languageId: string;  (* the text document's language identifier *)
     version: int;  (* the version of the document *)
     text: string;  (* the content of the opened text document *)
   }
@@ -141,9 +142,9 @@ end
 
 (* A parameter literal used in requests to pass a text document and a position
    inside that document. *)
-module Text_document_position_params = struct
+module TextDocumentPositionParams = struct
   type t = {
-    text_document: Text_document_identifier.t;  (* the text document *)
+    textDocument: TextDocumentIdentifier.t;  (* the text document *)
     position: position;  (* the position inside the text document *)
   }
 end
@@ -151,7 +152,7 @@ end
 (* A document filter denotes a document through properties like language,
    schema or pattern. E.g. language:"typescript",scheme:"file"
    or langauge:"json",pattern:"**/package.json" *)
-module Document_filter = struct
+module DocumentFilter = struct
   type t = {
     language: string option;  (* a language id, like "typescript" *)
     scheme: string option;  (* a uri scheme, like "file" or "untitled" *)
@@ -160,21 +161,21 @@ module Document_filter = struct
 end
 
 (* A document selector is the combination of one or many document filters. *)
-module Document_selector = struct
-  type t = Document_filter.t list
+module DocumentSelector = struct
+  type t = DocumentFilter.t list
 end
 
 
 (* Represents information about programming constructs like variables etc. *)
-module Symbol_information = struct
+module SymbolInformation = struct
   type t = {
     name: string;
-    kind: symbol_kind;
+    kind: symbolKind;
     location: Location.t;  (* the location of the symbol token itself *)
-    container_name: string option;  (* the symbol containing this symbol *)
+    containerName: string option;  (* the symbol containing this symbol *)
   }
 
-  and symbol_kind =
+  and symbolKind =
     | File  (* 1 *)
     | Module  (* 2 *)
     | Namespace  (* 3 *)
@@ -197,7 +198,7 @@ end
 
 
 (* For showing messages (not diagnostics) in the user interface. *)
-module Message_type = struct
+module MessageType = struct
   type t =
     | ErrorMessage  (* 1 *)
     | WarningMessage  (* 2 *)
@@ -208,9 +209,9 @@ end
 
 (* Cancellation notification, method="$/cancelRequest" *)
 module CancelRequest = struct
-  type params = cancel_params
+  type params = cancelParams
 
-  and cancel_params = {
+  and cancelParams = {
     id: string;  (* the request id to cancel *)
   }
 end
@@ -218,9 +219,9 @@ end
 (* Initialize request, method="initialize" *)
 module Initialize = struct
   type params = {
-    process_id: int option;  (* pid of parent process *)
-    root_path: string option;  (* deprecated *)
-    root_uri: document_uri option;  (* the root URI of the workspace *)
+    processId: int option;  (* pid of parent process *)
+    rootPath: string option;  (* deprecated *)
+    rootUri: documentUri option;  (* the root URI of the workspace *)
     (* omitted: initiaization_options *)
     client_capabilities: client_capabilities;  (* "capabilities" over wire *)
     trace: trace;  (* the initial trace setting, default="off" *)
@@ -230,7 +231,7 @@ module Initialize = struct
     server_capabilities: server_capabilities; (* "capabilities" over wire *)
   }
 
-  and error_data = {
+  and errorData = {
     retry: bool;  (* should client retry the initialize request *)
   }
 
@@ -240,22 +241,22 @@ module Initialize = struct
     | Verbose
 
   and client_capabilities = {
-    workspace: workspace_client_capabilities;
-    text_document: text_document_client_capabilities;
+    workspace: workspaceClientCapabilities;
+    textDocument: textDocumentClientCapabilities;
     (* omitted: experimental *)
   }
 
-  and workspace_client_capabilities = {
-    apply_edit: bool;  (* the client supports appling batch edits *)
-    workspace_edit: workspace_edit;
+  and workspaceClientCapabilities = {
+    applyEdit: bool;  (* the client supports appling batch edits *)
+    workspaceEdit: workspaceEdit;
     (* omitted: dynamic-registration fields *)
   }
 
-  and workspace_edit = {
-    document_changes: bool;  (* client supports versioned doc changes *)
+  and workspaceEdit = {
+    documentChanges: bool;  (* client supports versioned doc changes *)
   }
 
-  and text_document_client_capabilities = {
+  and textDocumentClientCapabilities = {
     synchronization: synchronization;
     completion: completion;  (* textDocument/completion *)
     (* omitted: dynamic-registration fields *)
@@ -265,87 +266,86 @@ module Initialize = struct
    * of sending, should be be so asked by the server.
    * We use the "can_" prefix for OCaml naming reasons; it's absent in LSP *)
   and synchronization = {
-    can_will_save: bool;  (* client can send textDocument/willSave *)
-    can_will_save_wait_until: bool;  (* textDoc.../willSaveWaitUntil *)
-    can_did_save: bool;  (* textDocument/didSave *)
+    can_willSave: bool;  (* client can send textDocument/willSave *)
+    can_willSaveWaitUntil: bool;  (* textDoc.../willSaveWaitUntil *)
+    can_didSave: bool;  (* textDocument/didSave *)
   }
 
   and completion = {
-    completion_item: completion_item;
+    completionItem: completionItem;
   }
 
-  and completion_item = {
-    snippet_support: bool;  (* client can do snippets as insert text *)
+  and completionItem = {
+    snippetSupport: bool;  (* client can do snippets as insert text *)
   }
 
   (* What capabilities the server provides *)
   and server_capabilities = {
-    text_document_sync: text_document_sync_options; (* how to sync *)
-    hover_provider: bool;
-    completion_provider: completion_options option;
-    signature_help_provider: signature_help_options option;
-    definition_provider: bool;
-    references_provider: bool;
-    document_highlight_provider: bool;
-    document_symbol_provider: bool;  (* ie. document outline *)
-    workspace_symbol_provider: bool;  (* ie. find-symbol-in-project *)
-    code_action_provider: bool;
-    code_lens_provider: code_lens_options option;
-    document_formatting_provider: bool;
-    document_range_formatting_provider: bool;
-    document_on_type_formatting_provider :
-      document_on_type_formatting_options option;
-    rename_provider: bool;
-    document_link_provider: document_link_options option;
-    execute_command_provider: execute_command_options option;
-    type_coverage_provider: bool;  (* Nuclide-specific feature *)
+    textDocumentSync: textDocumentSyncOptions; (* how to sync *)
+    hoverProvider: bool;
+    completionProvider: completionOptions option;
+    signatureHelpProvider: signatureHelpOptions option;
+    definitionProvider: bool;
+    referencesProvider: bool;
+    documentHighlightProvider: bool;
+    documentSymbolProvider: bool;  (* ie. document outline *)
+    workspaceSymbolProvider: bool;  (* ie. find-symbol-in-project *)
+    codeActionProvider: bool;
+    codeLensProvider: codeLensOptions option;
+    documentFormattingProvider: bool;
+    documentRangeFormattingProvider: bool;
+    documentOnTypeFormattingProvider: documentOnTypeFormattingOptions option;
+    renameProvider: bool;
+    documentLinkProvider: documentLinkOptions option;
+    executeCommandProvider: executeCommandOptions option;
+    typeCoverageProvider: bool;  (* Nuclide-specific feature *)
     (* omitted: experimental *)
   }
 
-  and completion_options = {
-    resolve_provider: bool;  (* server resolves extra info on demand *)
-    completion_trigger_characters: string list; (* wire "trigger_characters" *)
+  and completionOptions = {
+    resolveProvider: bool;  (* server resolves extra info on demand *)
+    completion_triggerCharacters: string list; (* wire "triggerCharacters" *)
   }
 
-  and signature_help_options = {
-    sighelp_trigger_characters: string list; (* wire "trigger_characters" *)
+  and signatureHelpOptions = {
+    sighelp_triggerCharacters: string list; (* wire "triggerCharacters" *)
   }
 
-  and code_lens_options = {
-    code_lens_resolve_provider: bool;  (* wire "resolve_provider" *)
+  and codeLensOptions = {
+    codelens_resolveProvider: bool;  (* wire "resolveProvider" *)
   }
 
-  and document_on_type_formatting_options = {
-    first_trigger_character: string;  (* e.g. "}" *)
-    more_trigger_characters: string list;
+  and documentOnTypeFormattingOptions = {
+    firstTriggerCharacter: string;  (* e.g. "}" *)
+    moreTriggerCharacter: string list;
   }
 
-  and document_link_options = {
-    document_link_resolve_provider: bool;  (* wire "resolve_provider" *)
+  and documentLinkOptions = {
+    doclink_resolveProvider: bool;  (* wire "resolveProvider" *)
   }
 
-  and execute_command_options = {
+  and executeCommandOptions = {
     commands: string list;  (* the commands to be executed on the server *)
   }
 
   (* text document sync options say what messages the server requests the
    * client to send. We use the "want_" prefix for OCaml naming reasons;
    * this prefix is absent in LSP. *)
-  and text_document_sync_options = {
-    want_open_close: bool;  (* textDocument/didOpen+didClose *)
-    want_change: text_document_sync_kind;
-    want_will_save: bool;  (* textDocument/willSave *)
-    want_will_save_wait_until: bool;  (* textDoc.../willSaveWaitUntil *)
-    want_did_save: save_options;  (* textDocument/didSave *)
+  and textDocumentSyncOptions = {
+    want_openClose: bool;  (* textDocument/didOpen+didClose *)
+    want_change: textDocumentSyncKind;
+    want_willSave: bool;  (* textDocument/willSave *)
+    want_willSaveWaitUntil: bool;  (* textDoc.../willSaveWaitUntil *)
+    want_didSave: saveOptions;  (* textDocument/didSave *)
   }
 
-  and text_document_sync_kind =
+  and textDocumentSyncKind =
     | NoSync (* 0 *)  (* docs should not be synced at all. Wire "None" *)
     | FullSync (* 1 *)  (* synced by always sending full content. Wire "Full" *)
     | IncrementalSync (* 2 *)  (* full only on open. Wire "Incremental" *)
 
-  and save_options = {
-    include_text: bool;  (* the client should include content on save *)
+  and saveOptions = {
+    includeText: bool;  (* the client should include content on save *)
   }
 end
 
@@ -360,32 +360,32 @@ end
 
 (* Hover request, method="textDocument/hover" *)
 module Hover = struct
-  type params = Text_document_position_params.t
+  type params = TextDocumentPositionParams.t
 
   and result = {
-    contents: marked_string list; (* wire: either a single one or an array *)
+    contents: markedString list; (* wire: either a single one or an array *)
     range: range option;
   }
 end
 
 (* PublishDiagnostics notification, method="textDocument/PublishDiagnostics" *)
-module Publish_diagnostics = struct
-  type params = publish_diagnostics_params
+module PublishDiagnostics = struct
+  type params = publishDiagnosticsParams
 
-  and publish_diagnostics_params = {
-    uri: document_uri;
+  and publishDiagnosticsParams = {
+    uri: documentUri;
     diagnostics: diagnostic list;
   }
 
   and diagnostic = {
     range: range;  (* the range at which the message applies *)
-    severity: diagnostic_severity option;  (* if omitted, client decides *)
+    severity: diagnosticSeverity option;  (* if omitted, client decides *)
     code: int option;  (* the diagnostic's code. Wire: can be string too *)
     source: string option;  (* human-readable string, eg. typescript/lint *)
     message: string;  (* the diagnostic's message *)
   }
 
-  and diagnostic_severity =
+  and diagnosticSeverity =
     | Error (* 1 *)
     | Warning (* 2 *)
     | Information (* 3 *)
@@ -393,72 +393,72 @@ module Publish_diagnostics = struct
 end
 
 (* DidOpenTextDocument notification, method="textDocument/didOpen" *)
-module Did_open = struct
-  type params = did_open_text_document_params
+module DidOpen = struct
+  type params = didOpenTextDocumentParams
 
-  and did_open_text_document_params = {
-    text_document: Text_document_item.t;  (* the document that was opened *)
+  and didOpenTextDocumentParams = {
+    textDocument: TextDocumentItem.t;  (* the document that was opened *)
   }
 end
 
 (* DidCloseTextDocument notification, method="textDocument/didClose" *)
-module Did_close = struct
-  type params = did_close_text_document_params
+module DidClose = struct
+  type params = didCloseTextDocumentParams
 
-  and did_close_text_document_params = {
-    text_document: Text_document_identifier.t; (* the doc that was closed *)
+  and didCloseTextDocumentParams = {
+    textDocument: TextDocumentIdentifier.t; (* the doc that was closed *)
   }
 end
 
 (* DidChangeTextDocument notification, method="textDocument/didChange" *)
-module Did_change = struct
-  type params = did_change_text_document_params
+module DidChange = struct
+  type params = didChangeTextDocumentParams
 
-  and did_change_text_document_params = {
-    text_document: Versioned_text_document_identifier.t;
-    content_changes: text_document_content_change_event list;
+  and didChangeTextDocumentParams = {
+    textDocument: VersionedTextDocumentIdentifier.t;
+    contentChanges: textDocumentContentChangeEvent list;
   }
 
-  and text_document_content_change_event = {
+  and textDocumentContentChangeEvent = {
     range: range option; (* the range of the document that changed *)
-    range_length: int option; (* the length that got replaced *)
+    rangeLength: int option; (* the length that got replaced *)
     text: string; (* the new text of the range/document *)
   }
 end
 
 (* Goto Definition request, method="textDocument/definition" *)
 module Definition = struct
-  type params = Text_document_position_params.t
+  type params = TextDocumentPositionParams.t
 
   and result = Location.t list  (* wire: either a single one or an array *)
 end
 
 (* Completion request, method="textDocument/completion" *)
 module Completion = struct
-  type params = Text_document_position_params.t
+  type params = TextDocumentPositionParams.t
 
-  and result = completion_list  (* wire: can also be 'completion_item list' *)
+  and result = completionList  (* wire: can also be 'completionItem list' *)
 
-  and completion_list = {
-    is_incomplete: bool; (* further typing should result in recomputing *)
-    items: completion_item list;
+  and completionList = {
+    isIncomplete: bool; (* further typing should result in recomputing *)
+    items: completionItem list;
   }
 
-  and completion_item = {
+  and completionItem = {
     label: string;  (* the label in the UI *)
-    kind: completion_item_kind option;  (* tells editor which icon to use *)
+    kind: completionItemKind option;  (* tells editor which icon to use *)
     detail: string option;  (* human-readable string like type/symbol info *)
     documentation: string option;  (* human-readable doc-comment *)
-    sort_text: string option;  (* used for sorting; if absent, uses label *)
-    filter_text: string option;  (* used for filtering; if absent, uses label *)
-    insert_text: string option;  (* used for inserting; if absent, uses label *)
-    insert_text_format: insert_text_format;
-    text_edits: Text_edit.t list;  (* wire: split into hd and tl *)
+    sortText: string option;  (* used for sorting; if absent, uses label *)
+    filterText: string option;  (* used for filtering; if absent, uses label *)
+    insertText: string option;  (* used for inserting; if absent, uses label *)
+    insertTextFormat: insertTextFormat;
+    textEdits: TextEdit.t list;  (* wire: split into hd and tl *)
     command: Command.t option;  (* if present, is executed after completion *)
     data: Hh_json.json option;
   }
 
-  and completion_item_kind =
+  and completionItemKind =
     | Text (* 1 *)
     | Method (* 2 *)
     | Function (* 3 *)
@@ -478,76 +478,76 @@ module Completion = struct
     | File (* 17 *)
     | Reference (* 18 *)
 
-  and insert_text_format =
-    | PlainText (* 1 *)  (* the insert_text/text_edits are just plain strings *)
+  and insertTextFormat =
+    | PlainText (* 1 *)  (* the insertText/textEdits are just plain strings *)
     | SnippetFormat (* 2 *)  (* wire: just "Snippet" *)
 end
 
 
 (* Completion Item Resolve request, method="completionItem/resolve" *)
-module Completion_item_resolve = struct
-  type params = Completion.completion_item
+module CompletionItemResolve = struct
+  type params = Completion.completionItem
 
-  and result = Completion.completion_item
+  and result = Completion.completionItem
 end
 
 
 (* Workspace Symbols request, method="workspace/symbol" *)
-module Workspace_symbol = struct
-  type params = workspace_symbol_params
+module WorkspaceSymbol = struct
+  type params = workspaceSymbolParams
 
-  and result = Symbol_information.t list
+  and result = SymbolInformation.t list
 
-  and workspace_symbol_params = {
+  and workspaceSymbolParams = {
     query: string;  (* a non-empty query string *)
   }
 end
 
 
 (* Document Symbols request, method="textDocument/documentSymbols" *)
-module Document_symbol = struct
-  type params = document_symbol_params
+module DocumentSymbol = struct
+  type params = documentSymbolParams
 
-  and result = Symbol_information.t list
+  and result = SymbolInformation.t list
 
-  and document_symbol_params = {
-    text_document: Text_document_identifier.t;
+  and documentSymbolParams = {
+    textDocument: TextDocumentIdentifier.t;
   }
 end
 
 
 (* Find References request, method="textDocument/references" *)
-module Find_references = struct
-  type params = reference_params
+module FindReferences = struct
+  type params = referenceParams
 
   and result = Location.t list
 
-  (* Following structure is an extension of Text_document_position_params.t *)
+  (* Following structure is an extension of TextDocumentPositionParams.t *)
   (* but we don't have nice inherantice in OCaml so we duplicate fields *)
-  and reference_params = {
-    text_document: Text_document_identifier.t;  (* the text document *)
+  and referenceParams = {
+    textDocument: TextDocumentIdentifier.t;  (* the text document *)
     position: position;  (* the position inside the text document *)
-    context: reference_context;
+    context: referenceContext;
   }
 
-  and reference_context = {
-    include_declaration: bool;  (* include declaration of current symbol *)
+  and referenceContext = {
+    includeDeclaration: bool;  (* include declaration of current symbol *)
   }
 end
 
 
 (* Document Highlights request, method="textDocument/documentHighlight" *)
-module Document_highlights = struct
-  type params = Text_document_position_params.t
+module DocumentHighlights = struct
+  type params = TextDocumentPositionParams.t
 
-  and result = document_highlight list
+  and result = documentHighlight list
 
-  and document_highlight = {
+  and documentHighlight = {
     range: range;  (* the range this highlight applies to *)
-    kind: document_highlight_kind option;
+    kind: documentHighlightKind option;
   }
 
-  and document_highlight_kind =
+  and documentHighlightKind =
     | Text (* 1 *)  (* a textual occurrence *)
     | Read (* 2 *)  (* read-access of a symbol, like reading a variable *)
     | Write (* 3 *)  (* write-access of a symbol, like writing a variable *)
@@ -556,19 +556,19 @@ end
 
 (* Type Coverage request, method="textDocument/typeCoverage" *)
 (* THIS IS A NUCLIDE-SPECIFIC EXTENSION TO LSP.              *)
-module Type_coverage = struct
-  type params = type_coverage_params
+module TypeCoverage = struct
+  type params = typeCoverageParams
 
   and result = {
-    covered_percent: int;
-    uncovered_ranges: uncovered_range list;
+    coveredPercent: int;
+    uncoveredRanges: uncoveredRange list;
   }
 
-  and type_coverage_params = {
-    text_document: Text_document_identifier.t;
+  and typeCoverageParams = {
+    textDocument: TextDocumentIdentifier.t;
   }
 
-  and uncovered_range = {
+  and uncoveredRange = {
     range: range;
     message: string;
   }
@@ -576,86 +576,86 @@ end
 
 
 (* Document Formatting request, method="textDocument/formatting" *)
-module Document_formatting = struct
-  type params = document_formatting_params
+module DocumentFormatting = struct
+  type params = documentFormattingParams
 
-  and result = Text_edit.t list
+  and result = TextEdit.t list
 
-  and document_formatting_params = {
-    text_document: Text_document_identifier.t;
-    options: formatting_options;
+  and documentFormattingParams = {
+    textDocument: TextDocumentIdentifier.t;
+    options: formattingOptions;
   }
 
-  and formatting_options = {
-    tab_size: int;  (* size of a tab in spaces *)
-    insert_spaces: bool;  (* prefer spaces over tabs *)
+  and formattingOptions = {
+    tabSize: int;  (* size of a tab in spaces *)
+    insertSpaces: bool;  (* prefer spaces over tabs *)
     (* omitted: signature for further properties *)
   }
 end
 
 
 (* Document Range Formatting request, method="textDocument/rangeFormatting" *)
-module Document_range_formatting = struct
-  type params = document_range_formatting_params
+module DocumentRangeFormatting = struct
+  type params = documentRangeFormattingParams
 
-  and result = Text_edit.t list
+  and result = TextEdit.t list
 
-  and document_range_formatting_params = {
-    text_document: Text_document_identifier.t;
+  and documentRangeFormattingParams = {
+    textDocument: TextDocumentIdentifier.t;
     range: range;
-    options: Document_formatting.formatting_options;
+    options: DocumentFormatting.formattingOptions;
   }
 end
 
 
 (* Document On Type Formatting req., method="textDocument/onTypeFormatting" *)
-module Document_on_type_formatting = struct
-  type params = document_on_type_formatting_params
+module DocumentOnTypeFormatting = struct
+  type params = documentOnTypeFormattingParams
 
-  and result = Text_edit.t list
+  and result = TextEdit.t list
 
-  and document_on_type_formatting_params = {
-    text_document: Text_document_identifier.t;
+  and documentOnTypeFormattingParams = {
+    textDocument: TextDocumentIdentifier.t;
     position: position;  (* the position at which this request was sent *)
     ch: string;  (* the character that has been typed *)
-    options: Document_formatting.formatting_options;
+    options: DocumentFormatting.formattingOptions;
   }
 end
 
 
 (* LogMessage notification, method="window/logMessage" *)
-module Log_message = struct
-  type params = log_message_params
+module LogMessage = struct
+  type params = logMessageParams
 
-  and log_message_params = {
-    type_: Message_type.t;
+  and logMessageParams = {
+    type_: MessageType.t;
     message: string;
   }
 end
 
 
 (* ShowMessage notification, method="window/showMessage" *)
-module Show_message = struct
-  type params = show_message_params
+module ShowMessage = struct
+  type params = showMessageParams
 
-  and show_message_params = {
-    type_: Message_type.t;
+  and showMessageParams = {
+    type_: MessageType.t;
     message: string;
   }
 end
 
 
 (* ShowMessage request, method="window/showMessageRequest" *)
-module Show_message_request = struct
-  type params = show_message_request_params
+module ShowMessageRequest = struct
+  type params = showMessageRequestParams
 
-  and show_message_request_params = {
-    type_: Message_type.t;
+  and showMessageRequestParams = {
+    type_: MessageType.t;
     message: string;
-    actions: message_action_item list;
+    actions: messageActionItem list;
   }
 
-  and message_action_item = {
+  and messageActionItem = {
     title: string;
   }
 end
@@ -665,15 +665,15 @@ end
 module Error = struct
   (* Defined by JSON-RPC. *)
   exception Parse of string (* -32700 *)
-  exception Invalid_request of string (* -32600 *)
-  exception Method_not_found of string (* -32601 *)
-  exception Invalid_params of string (* -32602 *)
-  exception Internal_error of string (* -32603 *)
-  exception Server_error_start of string * Initialize.error_data (* -32099 *)
-  exception Server_error_end of string (* -32000 *)
-  exception Server_not_initialized of string (* -32002 *)
+  exception InvalidRequest of string (* -32600 *)
+  exception MethodNotFound of string (* -32601 *)
+  exception InvalidParams of string (* -32602 *)
+  exception InternalError of string (* -32603 *)
+  exception ServerErrorStart of string * Initialize.errorData (* -32099 *)
+  exception ServerErrorEnd of string (* -32000 *)
+  exception ServerNotInitialized of string (* -32002 *)
   exception Unknown of string (* -32001 *)
 
   (* Defined by the protocol. *)
-  exception Request_cancelled of string (* -32800 *)
+  exception RequestCancelled of string (* -32800 *)
 end

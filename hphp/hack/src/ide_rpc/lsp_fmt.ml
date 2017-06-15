@@ -136,53 +136,53 @@ let parse_range_opt (json: json option) : range option =
   if json = None then None
   else Some (parse_range_exn json)
 
-let parse_text_document_identifier (json: json option)
-  : Text_document_identifier.t =
-  let open Text_document_identifier in
+let parse_textDocumentIdentifier (json: json option)
+  : TextDocumentIdentifier.t =
+  let open TextDocumentIdentifier in
   {
     uri = Jget.string_exn json "uri";
   }
 
-let parse_versioned_text_document_identifier (json: json option)
-  : Versioned_text_document_identifier.t =
-  let open Versioned_text_document_identifier in
+let parse_versionedTextDocumentIdentifier (json: json option)
+  : VersionedTextDocumentIdentifier.t =
+  let open VersionedTextDocumentIdentifier in
   {
     uri = Jget.string_exn json "uri";
     version = Jget.int_d json "version" 0;
   }
 
-let parse_text_document_item (json: json option) : Text_document_item.t =
-  let open Text_document_item in
+let parse_textDocumentItem (json: json option) : TextDocumentItem.t =
+  let open TextDocumentItem in
   {
     uri = Jget.string_exn json "uri";
-    language_id = Jget.string_d json "languageId" "";
+    languageId = Jget.string_d json "languageId" "";
     version = Jget.int_d json "version" 0;
     text = Jget.string_exn json "text";
   }
 
-let print_marked_item (item: marked_string) : json =
+let print_markedItem (item: markedString) : json =
   match item with
-  | Marked_string s -> JSON_String s
-  | Marked_code (language, value) -> JSON_Object
+  | MarkedString s -> JSON_String s
+  | MarkedCode (language, value) -> JSON_Object
       [
         "language", JSON_String language;
         "value", JSON_String value;
       ]
 
-let parse_text_document_position_params (params: json option)
-  : Text_document_position_params.t =
-  let open Text_document_position_params in
+let parse_textDocumentPositionParams (params: json option)
+  : TextDocumentPositionParams.t =
+  let open TextDocumentPositionParams in
   {
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
     position = Jget.obj_exn params "position" |> parse_position;
   }
 
-let print_text_edit (edit: Text_edit.t) : json =
-  let open Text_edit in
+let print_textEdit (edit: TextEdit.t) : json =
+  let open TextEdit in
   JSON_Object [
     "range", print_range edit.range;
-    "newText", JSON_String edit.new_text;
+    "newText", JSON_String edit.newText;
   ]
 
 let print_command (command: Command.t) : json =
@@ -201,15 +201,15 @@ let parse_command (json: json option) : Command.t =
     arguments = Jget.array_d json "arguments" ~default:[] |> List.filter_opt;
   }
 
-let parse_formatting_options (json: json option)
-  : Document_formatting.formatting_options =
-  { Document_formatting.
-    tab_size = Jget.int_d json "tabSize" 2;
-    insert_spaces = Jget.bool_d json "insertSpaces" false;
+let parse_formattingOptions (json: json option)
+  : DocumentFormatting.formattingOptions =
+  { DocumentFormatting.
+    tabSize = Jget.int_d json "tabSize" 2;
+    insertSpaces = Jget.bool_d json "insertSpaces" false;
   }
 
-let print_symbol_information (info: Symbol_information.t) : json =
-  let open Symbol_information in
+let print_symbolInformation (info: SymbolInformation.t) : json =
+  let open SymbolInformation in
   let print_symbol_kind = function
     | File -> int_ 1
     | Module -> int_ 2
@@ -234,11 +234,11 @@ let print_symbol_information (info: Symbol_information.t) : json =
     "name", Some (JSON_String info.name);
     "kind", Some (print_symbol_kind info.kind);
     "location", Some (print_location info.location);
-    "containerName", Option.map info.container_name string_;
+    "containerName", Option.map info.containerName string_;
   ]
 
-let print_message_type (type_: Message_type.t) : json =
-  let open Message_type in
+let print_messageType (type_: MessageType.t) : json =
+  let open MessageType in
   match type_ with
   | ErrorMessage -> int_ 1
   | WarningMessage -> int_ 2
@@ -258,11 +258,11 @@ let print_shutdown (_r: Shutdown.result) : json =
 (** textDocument/didOpen notification                                  **)
 (************************************************************************)
 
-let parse_did_open (params: json option) : Did_open.params =
-  let open Did_open in
+let parse_didOpen (params: json option) : DidOpen.params =
+  let open DidOpen in
   {
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_item;
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentItem;
   }
 
 
@@ -270,11 +270,11 @@ let parse_did_open (params: json option) : Did_open.params =
 (** textDocument/didClose notification                                 **)
 (************************************************************************)
 
-let parse_did_close (params: json option) : Did_close.params =
-  let open Did_close in
+let parse_didClose (params: json option) : DidClose.params =
+  let open DidClose in
   {
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
   }
 
 
@@ -282,20 +282,20 @@ let parse_did_close (params: json option) : Did_close.params =
 (** textDocument/didChange notification                                **)
 (************************************************************************)
 
-let parse_did_change (params: json option) : Did_change.params =
-  let open Did_change in
-  let parse_text_document_content_change_event json =
+let parse_didChange (params: json option) : DidChange.params =
+  let open DidChange in
+  let parse_textDocumentContentChangeEvent json =
     {
       range = Jget.obj_opt json "range" |> parse_range_opt;
-      range_length = Jget.int_opt json "rangeLength";
+      rangeLength = Jget.int_opt json "rangeLength";
       text = Jget.string_exn json "text";
     }
   in
   {
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_versioned_text_document_identifier;
-    content_changes = Jget.array_d params "contentChanges" ~default:[]
-                      |> List.map ~f:parse_text_document_content_change_event;
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_versionedTextDocumentIdentifier;
+    contentChanges = Jget.array_d params "contentChanges" ~default:[]
+                     |> List.map ~f:parse_textDocumentContentChangeEvent;
   }
 
 
@@ -303,18 +303,18 @@ let parse_did_change (params: json option) : Did_change.params =
 (** textDocument/publishDiagnostics notification                       **)
 (************************************************************************)
 
-let print_diagnostics (r: Publish_diagnostics.params) : json =
-  let open Publish_diagnostics in
-  let print_diagnostic_severity = function
-    | Publish_diagnostics.Error -> int_ 1
-    | Publish_diagnostics.Warning -> int_ 2
-    | Publish_diagnostics.Information -> int_ 3
-    | Publish_diagnostics.Hint -> int_ 4
+let print_diagnostics (r: PublishDiagnostics.params) : json =
+  let open PublishDiagnostics in
+  let print_diagnosticSeverity = function
+    | PublishDiagnostics.Error -> int_ 1
+    | PublishDiagnostics.Warning -> int_ 2
+    | PublishDiagnostics.Information -> int_ 3
+    | PublishDiagnostics.Hint -> int_ 4
   in
   let print_diagnostic (diagnostic: diagnostic) : json =
     Jprint.object_opt [
       "range", Some (print_range diagnostic.range);
-      "severity", Option.map diagnostic.severity print_diagnostic_severity;
+      "severity", Option.map diagnostic.severity print_diagnosticSeverity;
       "code", Option.map diagnostic.code int_;
       "source", Option.map diagnostic.source string_;
       "message", Some (JSON_String diagnostic.message);
@@ -330,11 +330,11 @@ let print_diagnostics (r: Publish_diagnostics.params) : json =
 (** window/logMessage notification                                     **)
 (************************************************************************)
 
-let print_log_message (type_: Message_type.t) (message: string) : json =
-  let open Log_message in
+let print_logMessage (type_: MessageType.t) (message: string) : json =
+  let open LogMessage in
   let r = { type_; message; } in
   JSON_Object [
-    "type", print_message_type r.type_;
+    "type", print_messageType r.type_;
     "message", JSON_String r.message;
   ]
 
@@ -343,11 +343,11 @@ let print_log_message (type_: Message_type.t) (message: string) : json =
 (** window/showMessage notification                                    **)
 (************************************************************************)
 
-let print_show_message (type_: Message_type.t) (message: string) : json =
-  let open Show_message in
+let print_showMessage (type_: MessageType.t) (message: string) : json =
+  let open ShowMessage in
   let r = { type_; message; } in
   JSON_Object [
-    "type", print_message_type r.type_;
+    "type", print_messageType r.type_;
     "message", JSON_String r.message;
   ]
 
@@ -356,13 +356,13 @@ let print_show_message (type_: Message_type.t) (message: string) : json =
 (** window/showMessage request                                         **)
 (************************************************************************)
 
-let print_show_message_request
-    (type_: Message_type.t)
+let print_showMessageRequest
+    (type_: MessageType.t)
     (message: string)
     (titles: string list)
   : json =
-  let open Show_message_request in
-  let print_action (action: message_action_item) : json =
+  let open ShowMessageRequest in
+  let print_action (action: messageActionItem) : json =
     JSON_Object [
       "title", JSON_String action.title;
     ]
@@ -370,7 +370,7 @@ let print_show_message_request
   let actions = List.map titles ~f:(fun title -> { title; }) in
   let r = { type_; message; actions; } in
   JSON_Object [
-    "type", print_message_type r.type_;
+    "type", print_messageType r.type_;
     "message", JSON_String r.message;
     "actions", JSON_Array (List.map r.actions ~f:print_action);
   ]
@@ -382,13 +382,13 @@ let print_show_message_request
 (************************************************************************)
 
 let parse_hover (params: json option) : Hover.params =
-  parse_text_document_position_params params
+  parse_textDocumentPositionParams params
 
 let print_hover (r: Hover.result) : json =
   let open Hover in
   Jprint.object_opt [
     "contents", Some (JSON_Array
-        (List.map r.Hover.contents ~f:print_marked_item));
+        (List.map r.Hover.contents ~f:print_markedItem));
     "range", Option.map r.range ~f:print_range;
   ]
 
@@ -398,7 +398,7 @@ let print_hover (r: Hover.result) : json =
 (************************************************************************)
 
 let parse_definition (params: json option) : Definition.params =
-  parse_text_document_position_params params
+  parse_textDocumentPositionParams params
 
 let print_definition (r: Definition.result) : json =
   JSON_Array (List.map r ~f:print_location)
@@ -409,28 +409,28 @@ let print_definition (r: Definition.result) : json =
 (************************************************************************)
 
 let parse_completion (params: json option) : Definition.params =
-  parse_text_document_position_params params
+  parse_textDocumentPositionParams params
 
 let print_completion (r: Completion.result) : json =
   let open Completion in
-  let rec print_completion_item (item: Completion.completion_item) : json =
+  let rec print_completionItem (item: Completion.completionItem) : json =
     Jprint.object_opt [
       "label", Some (JSON_String item.label);
-      "kind", Option.map item.kind print_completion_item_kind;
+      "kind", Option.map item.kind print_completionItemKind;
       "detail", Option.map item.detail string_;
       "documentation", Option.map item.documentation string_;
-      "sortText", Option.map item.sort_text string_;
-      "filterText", Option.map item.filter_text string_;
-      "insertText", Option.map item.insert_text string_;
-      "insertTextFormat", Some (print_insert_format item.insert_text_format);
-      "textEdit", Option.map (List.hd item.text_edits) print_text_edit;
-      "additionalTextEdit", (match (List.tl item.text_edits) with
+      "sortText", Option.map item.sortText string_;
+      "filterText", Option.map item.filterText string_;
+      "insertText", Option.map item.insertText string_;
+      "insertTextFormat", Some (print_insertFormat item.insertTextFormat);
+      "textEdit", Option.map (List.hd item.textEdits) print_textEdit;
+      "additionalTextEdit", (match (List.tl item.textEdits) with
         | None | Some [] -> None
-        | Some l -> Some (JSON_Array (List.map l ~f:print_text_edit)));
+        | Some l -> Some (JSON_Array (List.map l ~f:print_textEdit)));
       "command", Option.map item.command print_command;
       "data", item.data;
     ]
-  and print_completion_item_kind = function
+  and print_completionItemKind = function
     | Text -> int_ 1
     | Method -> int_ 2
     | Function -> int_ 3
@@ -449,13 +449,13 @@ let print_completion (r: Completion.result) : json =
     | Color -> int_ 16
     | File -> int_ 17
     | Reference -> int_ 18
-  and print_insert_format = function
+  and print_insertFormat = function
     | PlainText -> int_ 1
     | SnippetFormat -> int_ 2
   in
   JSON_Object [
-    "isIncomplete", JSON_Bool r.is_incomplete;
-    "items", JSON_Array (List.map r.items ~f:print_completion_item);
+    "isIncomplete", JSON_Bool r.isIncomplete;
+    "items", JSON_Array (List.map r.items ~f:print_completionItem);
   ]
 
 
@@ -464,49 +464,49 @@ let print_completion (r: Completion.result) : json =
 (************************************************************************)
 
 
-let parse_workspace_symbol (params: json option) : Workspace_symbol.params =
-  let open Workspace_symbol in
+let parse_workspaceSymbol (params: json option) : WorkspaceSymbol.params =
+  let open WorkspaceSymbol in
   {
     query = Jget.string_exn params "query";
   }
 
-let print_workspace_symbol (r: Workspace_symbol.result) : json =
-  JSON_Array (List.map r ~f:print_symbol_information)
+let print_workspaceSymbol (r: WorkspaceSymbol.result) : json =
+  JSON_Array (List.map r ~f:print_symbolInformation)
 
 
 (************************************************************************)
 (** textDocument/documentSymbol request                                **)
 (************************************************************************)
 
-let parse_document_symbol (params: json option) : Document_symbol.params =
-  let open Document_symbol in
+let parse_documentSymbol (params: json option) : DocumentSymbol.params =
+  let open DocumentSymbol in
   {
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
   }
 
-let print_document_symbol (r: Document_symbol.result) : json =
-  JSON_Array (List.map r ~f:print_symbol_information)
+let print_documentSymbol (r: DocumentSymbol.result) : json =
+  JSON_Array (List.map r ~f:print_symbolInformation)
 
 
 (************************************************************************)
 (** textDocument/references request                                    **)
 (************************************************************************)
 
-let parse_find_references (params: json option) : Find_references.params =
-  let open Text_document_position_params in
-  let as_position_params = parse_text_document_position_params params in
+let parse_findReferences (params: json option) : FindReferences.params =
+  let open TextDocumentPositionParams in
+  let as_positionParams = parse_textDocumentPositionParams params in
   let context = Jget.obj_opt params "context" in
-  { Find_references.
-    text_document = as_position_params.text_document;
-    position = as_position_params.position;
+  { FindReferences.
+    textDocument = as_positionParams.textDocument;
+    position = as_positionParams.position;
     context =
-      { Find_references.
-        include_declaration = Jget.bool_d context "includeDeclaration" true;
+      { FindReferences.
+        includeDeclaration = Jget.bool_d context "includeDeclaration" true;
       }
   }
 
-let print_find_references (r: Location.t list) : json =
+let print_findReferences (r: Location.t list) : json =
   JSON_Array (List.map r ~f:print_location)
 
 
@@ -514,13 +514,13 @@ let print_find_references (r: Location.t list) : json =
 (** textDocument/documentHighlights request                            **)
 (************************************************************************)
 
-let parse_document_highlights (params: json option)
-  : Document_highlights.params =
-  parse_text_document_position_params params
+let parse_documentHighlights (params: json option)
+  : DocumentHighlights.params =
+  parse_textDocumentPositionParams params
 
-let print_document_highlights (r: Document_highlights.result) : json =
-  let open Document_highlights in
-  let print_highlight_kind kind = match kind with
+let print_documentHighlights (r: DocumentHighlights.result) : json =
+  let open DocumentHighlights in
+  let print_highlightKind kind = match kind with
     | Text -> int_ 1
     | Read -> int_ 2
     | Write -> int_ 3
@@ -528,7 +528,7 @@ let print_document_highlights (r: Document_highlights.result) : json =
   let print_highlight highlight =
     Jprint.object_opt [
       "range", Some (print_range highlight.range);
-      "kind", Option.map highlight.kind ~f:print_highlight_kind
+      "kind", Option.map highlight.kind ~f:print_highlightKind
     ]
   in
   JSON_Array (List.map r ~f:print_highlight)
@@ -538,24 +538,24 @@ let print_document_highlights (r: Document_highlights.result) : json =
 (** textDocument/typeCoverage request                                  **)
 (************************************************************************)
 
-let parse_type_coverage (params: json option)
-  : Type_coverage.params =
-  { Type_coverage.
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+let parse_typeCoverage (params: json option)
+  : TypeCoverage.params =
+  { TypeCoverage.
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
   }
 
-let print_type_coverage (r: Type_coverage.result) : json =
-  let open Type_coverage in
-  let print_uncov (uncov: uncovered_range) : json =
+let print_typeCoverage (r: TypeCoverage.result) : json =
+  let open TypeCoverage in
+  let print_uncov (uncov: uncoveredRange) : json =
     JSON_Object [
       "range", print_range uncov.range;
       "message", string_ uncov.message;
     ]
   in
   JSON_Object [
-    "coveredPercent", int_ r.covered_percent;
-    "uncoveredRanges", JSON_Array (List.map r.uncovered_ranges ~f:print_uncov)
+    "coveredPercent", int_ r.coveredPercent;
+    "uncoveredRanges", JSON_Array (List.map r.uncoveredRanges ~f:print_uncov)
   ]
 
 
@@ -563,54 +563,54 @@ let print_type_coverage (r: Type_coverage.result) : json =
 (** textDocument/formatting request                                    **)
 (************************************************************************)
 
-let parse_document_formatting (params: json option)
-  : Document_formatting.params =
-  { Document_formatting.
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
-    options = Jget.obj_opt params "options" |> parse_formatting_options;
+let parse_documentFormatting (params: json option)
+  : DocumentFormatting.params =
+  { DocumentFormatting.
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
+    options = Jget.obj_opt params "options" |> parse_formattingOptions;
   }
 
-let print_document_formatting (r: Document_formatting.result)
+let print_documentFormatting (r: DocumentFormatting.result)
   : json =
-  JSON_Array (List.map r ~f:print_text_edit)
+  JSON_Array (List.map r ~f:print_textEdit)
 
 
 (************************************************************************)
 (** textDocument/rangeFormatting request                               **)
 (************************************************************************)
 
-let parse_document_range_formatting (params: json option)
-  : Document_range_formatting.params =
-  { Document_range_formatting.
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+let parse_documentRangeFormatting (params: json option)
+  : DocumentRangeFormatting.params =
+  { DocumentRangeFormatting.
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
     range = Jget.obj_exn params "range" |> parse_range_exn;
-    options = Jget.obj_opt params "options" |> parse_formatting_options;
+    options = Jget.obj_opt params "options" |> parse_formattingOptions;
   }
 
-let print_document_range_formatting (r: Document_range_formatting.result)
+let print_documentRangeFormatting (r: DocumentRangeFormatting.result)
   : json =
-  JSON_Array (List.map r ~f:print_text_edit)
+  JSON_Array (List.map r ~f:print_textEdit)
 
 
 (************************************************************************)
 (** textDocument/onTypeFormatting request                              **)
 (************************************************************************)
 
-let parse_document_on_type_formatting (params: json option)
-  : Document_on_type_formatting.params =
-  { Document_on_type_formatting.
-    text_document = Jget.obj_exn params "textDocument"
-                    |> parse_text_document_identifier;
+let parse_documentOnTypeFormatting (params: json option)
+  : DocumentOnTypeFormatting.params =
+  { DocumentOnTypeFormatting.
+    textDocument = Jget.obj_exn params "textDocument"
+                   |> parse_textDocumentIdentifier;
     position = Jget.obj_exn params "position" |> parse_position;
     ch = Jget.string_exn params "ch";
-    options = Jget.obj_opt params "options" |> parse_formatting_options;
+    options = Jget.obj_opt params "options" |> parse_formattingOptions;
   }
 
-let print_document_on_type_formatting (r: Document_on_type_formatting.result)
+let print_documentOnTypeFormatting (r: DocumentOnTypeFormatting.result)
   : json =
-  JSON_Array (List.map r ~f:print_text_edit)
+  JSON_Array (List.map r ~f:print_textEdit)
 
 
 (************************************************************************)
@@ -621,9 +621,9 @@ let parse_initialize (params: json option) : Initialize.params =
   let open Initialize in
   let rec parse_initialize json =
     {
-      process_id = Jget.int_opt json "processId";
-      root_path = Jget.string_opt json "rootPath";
-      root_uri = Jget.string_opt json "rootUri";
+      processId = Jget.int_opt json "processId";
+      rootPath = Jget.string_opt json "rootPath";
+      rootUri = Jget.string_opt json "rootUri";
       client_capabilities = Jget.obj_opt json "capabilities"
                             |> parse_capabilities;
       trace = Jget.string_opt json "trace" |> parse_trace;
@@ -635,19 +635,19 @@ let parse_initialize (params: json option) : Initialize.params =
   and parse_capabilities json =
     {
       workspace = Jget.obj_opt json "workspace" |> parse_workspace;
-      text_document = Jget.obj_opt json "textDocument" |> parse_text_document;
+      textDocument = Jget.obj_opt json "textDocument" |> parse_textDocument;
     }
   and parse_workspace json =
     {
-      apply_edit = Jget.bool_d json "applyEdit" ~default:false;
-      workspace_edit = Jget.obj_opt json "workspaceEdit"
-                       |> parse_workspace_edit;
+      applyEdit = Jget.bool_d json "applyEdit" ~default:false;
+      workspaceEdit = Jget.obj_opt json "workspaceEdit"
+                       |> parse_workspaceEdit;
     }
-  and parse_workspace_edit json =
+  and parse_workspaceEdit json =
     {
-      document_changes = Jget.bool_d json "documentChanges" ~default:false;
+      documentChanges = Jget.bool_d json "documentChanges" ~default:false;
     }
-  and parse_text_document json =
+  and parse_textDocument json =
     {
       synchronization =
         Jget.obj_opt json "synchronization" |> parse_synchronization;
@@ -655,22 +655,22 @@ let parse_initialize (params: json option) : Initialize.params =
     }
   and parse_synchronization json =
     {
-      can_will_save = Jget.bool_d json "willSave" ~default:false;
-      can_will_save_wait_until =
+      can_willSave = Jget.bool_d json "willSave" ~default:false;
+      can_willSaveWaitUntil =
         Jget.bool_d json "willSaveWaitUntil" ~default:false;
-      can_did_save = Jget.bool_d json "didSave" ~default:false;
+      can_didSave = Jget.bool_d json "didSave" ~default:false;
     }
   and parse_completion json =
-    { completion_item =
-        Jget.obj_opt json "completionItem" |> parse_completion_item;
+    { completionItem =
+        Jget.obj_opt json "completionItem" |> parse_completionItem;
     }
-  and parse_completion_item json =
-    { snippet_support = Jget.bool_d json "snippetSupport" ~default:false;
+  and parse_completionItem json =
+    { snippetSupport = Jget.bool_d json "snippetSupport" ~default:false;
     }
   in
   parse_initialize params
 
-let print_initialize_error (r: Initialize.error_data) : json =
+let print_initializeError (r: Initialize.errorData) : json =
   let open Initialize in
   JSON_Object [
     "retry", JSON_Bool r.retry;
@@ -678,59 +678,56 @@ let print_initialize_error (r: Initialize.error_data) : json =
 
 let print_initialize (r: Initialize.result) : json =
   let open Initialize in
-  let print_text_document_sync_kind = function
+  let print_textDocumentSyncKind = function
     | NoSync -> int_ 0
     | FullSync -> int_ 1
     | IncrementalSync -> int_ 2 in
   let cap = r.server_capabilities in
-  let sync = cap.text_document_sync
+  let sync = cap.textDocumentSync
   in
   JSON_Object [
     "capabilities", Jprint.object_opt [
       "textDocumentSync", Some (JSON_Object [
-        "openClose", JSON_Bool sync.want_open_close;
-        "change", print_text_document_sync_kind sync.want_change;
-        "willSave", JSON_Bool sync.want_will_save;
-        "willSaveWaitUntil", JSON_Bool sync.want_will_save_wait_until;
+        "openClose", JSON_Bool sync.want_openClose;
+        "change", print_textDocumentSyncKind sync.want_change;
+        "willSave", JSON_Bool sync.want_willSave;
+        "willSaveWaitUntil", JSON_Bool sync.want_willSaveWaitUntil;
         "save", JSON_Object [
-          "includeText", JSON_Bool sync.want_did_save.include_text;
+          "includeText", JSON_Bool sync.want_didSave.includeText;
         ];
       ]);
-      "hoverProvider", Some (JSON_Bool cap.hover_provider);
-      "completionProvider", Option.map cap.completion_provider ~f:(fun comp -> JSON_Object [
-        "resolveProvider", JSON_Bool comp.resolve_provider;
-        "triggerCharacters",
-        Jprint.string_array comp.completion_trigger_characters;
+      "hoverProvider", Some (JSON_Bool cap.hoverProvider);
+      "completionProvider", Option.map cap.completionProvider ~f:(fun comp -> JSON_Object [
+        "resolveProvider", JSON_Bool comp.resolveProvider;
+        "triggerCharacters", Jprint.string_array comp.completion_triggerCharacters;
       ]);
-      "signatureHelpProvider", Option.map cap.signature_help_provider ~f:(fun shp -> JSON_Object [
-        "triggerCharacters",
-        Jprint.string_array shp.sighelp_trigger_characters;
+      "signatureHelpProvider", Option.map cap.signatureHelpProvider ~f:(fun shp -> JSON_Object [
+        "triggerCharacters", Jprint.string_array shp.sighelp_triggerCharacters;
       ]);
-      "definitionProvider", Some (JSON_Bool cap.definition_provider);
-      "referencesProvider", Some (JSON_Bool cap.references_provider);
-      "documentHighlightProvider", Some (JSON_Bool cap.document_highlight_provider);
-      "documentSymbolProvider", Some (JSON_Bool cap.document_symbol_provider);
-      "workspaceSymbolProvider", Some (JSON_Bool cap.workspace_symbol_provider);
-      "codeActionProvider", Some (JSON_Bool cap.code_action_provider);
-      "codeLensProvider", Option.map cap.code_lens_provider ~f:(fun codelens -> JSON_Object [
-        "resolveProvider", JSON_Bool codelens.code_lens_resolve_provider;
+      "definitionProvider", Some (JSON_Bool cap.definitionProvider);
+      "referencesProvider", Some (JSON_Bool cap.referencesProvider);
+      "documentHighlightProvider", Some (JSON_Bool cap.documentHighlightProvider);
+      "documentSymbolProvider", Some (JSON_Bool cap.documentSymbolProvider);
+      "workspaceSymbolProvider", Some (JSON_Bool cap.workspaceSymbolProvider);
+      "codeActionProvider", Some (JSON_Bool cap.codeActionProvider);
+      "codeLensProvider", Option.map cap.codeLensProvider ~f:(fun codelens -> JSON_Object [
+        "resolveProvider", JSON_Bool codelens.codelens_resolveProvider;
       ]);
-      "documentFormattingProvider", Some (JSON_Bool cap.document_formatting_provider);
-      "documentRangeFormattingProvider", Some (JSON_Bool cap.document_range_formatting_provider);
+      "documentFormattingProvider", Some (JSON_Bool cap.documentFormattingProvider);
+      "documentRangeFormattingProvider", Some (JSON_Bool cap.documentRangeFormattingProvider);
       "documentOnTypeFormattingProvider", Option.map
-        cap.document_on_type_formatting_provider ~f:(fun o -> JSON_Object [
-          "firstTriggerCharacter", JSON_String o.first_trigger_character;
-          "moreTriggerCharacter",
-          Jprint.string_array o.more_trigger_characters;
+        cap.documentOnTypeFormattingProvider ~f:(fun o -> JSON_Object [
+          "firstTriggerCharacter", JSON_String o.firstTriggerCharacter;
+          "moreTriggerCharacter", Jprint.string_array o.moreTriggerCharacter;
         ]);
-      "renameProvider", Some (JSON_Bool cap.rename_provider);
-      "documentLinkProvider", Option.map cap.document_link_provider ~f:(fun dlp -> JSON_Object [
-        "resolveProvider", JSON_Bool dlp.document_link_resolve_provider;
+      "renameProvider", Some (JSON_Bool cap.renameProvider);
+      "documentLinkProvider", Option.map cap.documentLinkProvider ~f:(fun dlp -> JSON_Object [
+        "resolveProvider", JSON_Bool dlp.doclink_resolveProvider;
       ]);
-      "executeCommandProvider", Option.map cap.execute_command_provider ~f:(fun p -> JSON_Object [
+      "executeCommandProvider", Option.map cap.executeCommandProvider ~f:(fun p -> JSON_Object [
         "commands", Jprint.string_array p.commands;
       ]);
-      "typeCoverageProvider", Some (JSON_Bool cap.type_coverage_provider);
+      "typeCoverageProvider", Some (JSON_Bool cap.typeCoverageProvider);
     ];
   ]
 
@@ -743,16 +740,15 @@ let get_error_info (e: exn) : int * string * json option =
   (* returns (lspErrorCode, friendlyMessage, lspData) *)
   match e with
   | Error.Parse message -> (-32700, message, None)
-  | Error.Invalid_request message -> (-32600, message, None)
-  | Error.Method_not_found message -> (-32601, message, None)
-  | Error.Invalid_params message -> (-32602, message, None)
-  | Error.Internal_error message -> (-32603, message, None)
-  | Error.Server_error_start (message, data) ->
-    (-32603, message, Some (print_initialize_error data))
-  | Error.Server_error_end message -> (-32000, message, None)
-  | Error.Server_not_initialized message -> (-32002, message, None)
+  | Error.InvalidRequest message -> (-32600, message, None)
+  | Error.MethodNotFound message -> (-32601, message, None)
+  | Error.InvalidParams message -> (-32602, message, None)
+  | Error.InternalError message -> (-32603, message, None)
+  | Error.ServerErrorStart (message, data) -> (-32603, message, Some (print_initializeError data))
+  | Error.ServerErrorEnd message -> (-32000, message, None)
+  | Error.ServerNotInitialized message -> (-32002, message, None)
   | Error.Unknown message -> (-32001, message, None)
-  | Error.Request_cancelled message -> (-32800, message, None)
+  | Error.RequestCancelled message -> (-32800, message, None)
   | Exit_status.Exit_with code -> (-32001, Exit_status.to_string code, None)
   | _ -> (-32001, Printexc.to_string e, None)
 

@@ -1150,12 +1150,20 @@ module WithExpressionAndStatementAndTypeParser
   same data structure for a decorated expression as a declaration; one
   is a *use* and the other is a *definition*. *)
   and parse_decorated_variable parser =
-    (* TODO: We might consider parsing both &...$x and ...&$x and give an
-    appropriate error saying you can't mix ref and variadic.  The original
-    Hack and HHVM parsers do this for &...$x, but not ...&$x. *)
+    (* TODO: Error on
+          ... ... variable
+          & & variable
+          ... & variable
+       at a later pass
+     *)
     let (parser, decorator) = next_token parser in
-    let (parser, variable) = expect_variable parser in
     let decorator = make_token decorator in
+    let (parser, variable) =
+      match peek_token_kind parser with
+      | DotDotDot
+      | Ampersand -> parse_decorated_variable parser
+      | _ -> expect_variable parser
+    in
     parser, make_decorated_expression decorator variable
 
   and parse_visibility_modifier_opt parser =

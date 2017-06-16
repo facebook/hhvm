@@ -946,7 +946,6 @@ slow/use_function/realias.php
 slow/use_function/use_function.php
 slow/var_export/1450.php
 slow/variable_argument/27.php
-slow/variadic_args/by_reference.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php

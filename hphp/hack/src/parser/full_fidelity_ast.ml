@@ -526,16 +526,30 @@ and pFunParam : fun_param parser = fun node env ->
     ; parameter_name
     ; parameter_default_value
     } ->
-    let decoration, name =
+    let is_reference, is_variadic, name =
       match syntax parameter_name with
       | DecoratedExpression
         { decorated_expression_decorator; decorated_expression_expression } ->
-          text decorated_expression_decorator, decorated_expression_expression
-      | _ -> "", parameter_name
+          (* There is a chance that the expression might be nested with an
+           additional decorator, check this *)
+          begin match syntax decorated_expression_expression with
+          | DecoratedExpression
+            { decorated_expression_decorator = nested_decorator
+            ; decorated_expression_expression = nested_expression } ->
+            let decorator = text decorated_expression_decorator in
+            let nested_decorator = text nested_decorator in
+            decorator = "&" || nested_decorator = "&",
+            decorator = "..." || nested_decorator = "...",
+            nested_expression
+          | _ ->
+            let decorator = text decorated_expression_decorator in
+            decorator = "&", decorator = "...", decorated_expression_expression
+          end
+      | _ -> false, false, parameter_name
     in
     { param_hint            = mpOptional pHint parameter_type env
-    ; param_is_reference    = decoration = "&"
-    ; param_is_variadic     = decoration = "..."
+    ; param_is_reference    = is_reference
+    ; param_is_variadic     = is_variadic
     ; param_id              = pos_name name
     ; param_expr            =
       mpOptional pSimpleInitializer parameter_default_value env

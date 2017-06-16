@@ -180,6 +180,13 @@ function hh_codegen_binary_routes() {
   );
 }
 
+function hh_semdiff_binary_routes() {
+  return array(
+    "buck"    => "/buck-out/bin/hphp/hack/src/hhbc/semdiff/semdiff",
+    "cmake"   => "/hphp/hack/bin"
+  );
+}
+
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the fbmake one
@@ -267,6 +274,12 @@ function hh_codegen_cmd($options) {
   return $cmd;
 }
 
+function hh_semdiff_cmd($options) {
+  $cmd = hh_semdiff_path();
+  if (isset($options['hackc'])) $cmd .= ' --daemon';
+  return $cmd;
+}
+
 function bin_root() {
   if (getenv("HHVM_BIN") !== false) {
     return dirname(realpath(getenv("HHVM_BIN")));
@@ -339,10 +352,42 @@ function hh_codegen_path() {
   return rel_path($file);
 }
 
+function hh_semdiff_path() {
+  $file = "";
+  if (getenv("HH_SEMDIFF_BIN") !== false) {
+    $file = realpath(getenv("HH_SEMDIFF_BIN"));
+  } else {
+    $file = hh_semdiff_bin_root().'/semdiff.opt';
+  }
+  if (!is_file($file)) {
+    error("$file doesn't exist. Did you forget to build first?");
+  }
+  return rel_path($file);
+}
+
 function hh_codegen_bin_root() {
   $home = hphp_home();
   $env_tool = getenv("FBCODE_BUILD_TOOL");
   $routes = hh_codegen_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
+  }
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
+}
+
+function hh_semdiff_bin_root() {
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hh_semdiff_binary_routes();
 
   if ($env_tool !== false) {
     return $home . $routes[$env_tool];
@@ -453,6 +498,7 @@ function get_options($argv) {
     'typechecker' => '',
     'hhserver-binary-path:' => '',
     'compare-hh-codegen' => '',
+    'semdiff' => '',
     'run-hh-codegen' => '',
     'record-failures:' => '',
     'hackc' => '',
@@ -1557,6 +1603,17 @@ function dump_hh_codegen($options, $test) {
   return $ret === 0 ? $temp_file : false;
 }
 
+function semdiff_output($options, $test) {
+  $temp_file = $test.'.semdiff';
+  $msgs_file = $test.'.semdiff_messages';
+  $hhcodegen_output = $test.'.hhcodegen_output.hhas';
+  $hhvm_output = $test.'.round_trip.hhas';
+  $cmd = hh_semdiff_cmd($options);
+  $ret = false;
+  system("/usr/bin/timeout 300 $cmd $hhcodegen_output $hhvm_output > $temp_file 2> $msgs_file", $ret);
+  return $ret === 0 ? $temp_file : false;
+}
+
 function strip_hhas_file($file) {
   $h = fopen($file, "r");
   $buf = "";
@@ -2002,7 +2059,30 @@ function run_test($options, $test) {
     strip_hhas_file($hhas);
     strip_hhas_file($hhcg2);
 
-    system("diff -B $hhcg2 $hhas > $diff", $ret);
+    if (isset($options['semdiff'])) {
+      // Run semantic diff on outputs
+      $semdiff = semdiff_output($options, $test);
+      // If it fails completely (e.g. timeout or exception) then
+      // use vanilla diff
+      if ($semdiff) {
+        // Now we look for "distance = 0" in the file
+        // If we find it we "succeed" and don't drop through to vanilla diff
+        $h = fopen($semdiff, "r");
+        $buf = "";
+        if (($s = fgets($h)) !== false) {
+          if (substr($s, 0, 12) === "distance = 0") {
+            if ($rv) {
+              fclose($h);
+              unlink($semdiff);
+              return $rv;
+            }
+          }
+        }
+        fclose($h);
+      }
+    }
+
+    system("diff $hhcg2 $hhas > $diff", $ret);
     if ($ret === 0) {
       if ($rv) unlink($diff);
       return $rv;

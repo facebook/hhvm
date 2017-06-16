@@ -723,6 +723,7 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_002.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_004.php
 slow/php7_backported/scalar-types/scalar_weak_reference.php
+slow/php7_backported/scalar-types/weak_from_builtins.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/issetOnTemp.php
 slow/php7_backported/varSyntax/staticMember.php

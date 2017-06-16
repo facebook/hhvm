@@ -114,7 +114,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
   auto const caller = inst->marker().func();
   auto const baseFlags =
-    !caller->isBuiltin() && !caller->unit()->useStrictTypes()
+    caller->isBuiltin() || !caller->unit()->useStrictTypes()
       ? ActRec::Flags::UseWeakTypes
       : ActRec::Flags::None;
   auto const naaf = static_cast<int32_t>(

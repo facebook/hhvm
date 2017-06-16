@@ -29,16 +29,20 @@ namespace HPHP {
 
 // In PHP7 the caller specifies if parameter type-checking is strict in the
 // callee. NB: HH files ignore this preference and always use strict checking,
-// except in systemlib. Calls originating in systemlib are always strict.
+// except in systemlib. Calls originating in systemlib are never strict.
 inline bool callUsesStrictTypes(ActRec* caller) {
-  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
-    return true;
-  }
   if (!caller) {
+    // eg when being called from hhbbc
     return true;
   }
   auto func = caller->func();
-  return func->isBuiltin() || func->unit()->useStrictTypes();
+  if (func->isBuiltin()) {
+    return false;
+  }
+  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
+    return true;
+  }
+  return func->unit()->useStrictTypes();
 }
 
 inline bool builtinCallUsesStrictTypes(const Unit* caller) {

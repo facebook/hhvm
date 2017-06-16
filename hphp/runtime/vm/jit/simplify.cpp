@@ -2285,7 +2285,7 @@ ALWAYS_INLINE bool isSimplifyOkay(const IRInstruction* inst) {
   auto f = inst->marker().func();
 
   return !RuntimeOption::PHP7_ScalarTypes ||
-         (f && !f->unit()->useStrictTypes() && !f->isBuiltin());
+         (f && !f->unit()->useStrictTypes());
 }
 
 }

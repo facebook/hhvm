@@ -4865,7 +4865,9 @@ bool doFCall(ActRec* ar, PC& pc) {
 
 OPTBLD_INLINE void iopFCall(PC& pc, intva_t numArgs) {
   auto ar = arFromSp(numArgs);
-  if (ar->m_func->isBuiltin()) {
+  if (vmfp()->func()->isBuiltin()) {
+    ar->setUseWeakTypes();
+  } else if (ar->m_func->isBuiltin()) {
     if (!builtinCallUsesStrictTypes(vmfp()->unit())) {
       ar->setUseWeakTypes();
     }

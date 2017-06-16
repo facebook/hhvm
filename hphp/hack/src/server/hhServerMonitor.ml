@@ -109,8 +109,7 @@ let start_daemon options =
   let {Daemon.pid; _} =
     Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry options in
   Printf.eprintf "Spawned %s (child pid=%d)\n" Program.hh_server pid;
-  Printf.eprintf "Logs will go to %s\n%!"
-    (if Sys.win32 then log_file_path else log_link);
+  Printf.eprintf "Logs will go to %s\n%!" log_file_path;
   Exit_status.No_error
 
 (** Either starts a monitor daemon (which will spawn a typechecker daemon),

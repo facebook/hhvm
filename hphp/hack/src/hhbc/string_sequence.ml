@@ -31,7 +31,7 @@ let rec string_seq_to_list_aux sl result =
     match s with
     | String_list strl ->
       string_seq_to_list_aux sl (List.rev_append strl result)
-    | String_concat sl' -> string_seq_to_list_aux (sl' @ sl) result
+    | String_concat sl' -> string_seq_to_list_aux (List.append sl' sl) result
 
 let seq_to_string t = String.concat "" @@ string_seq_to_list_aux [t] []
 

@@ -66,12 +66,62 @@ class ['self] endo_base = object (self : 'self)
   method private on_list
     : 'env 'a . ('env -> 'a -> 'a) -> 'env -> 'a list -> 'a list
     = fun f env xs ->
+    let rec aux env xs counter =
       match xs with
-      | []    -> xs
-      | y::ys ->
-        let z  = f env y in
-        let zs = self#on_list f env ys in
-        if y == z && ys == zs then xs else z::zs
+      | [] -> xs
+      | [y1] ->
+        let z1 = f env y1 in
+        if y1 == z1 then xs
+        else [z1]
+      | [y1; y2] ->
+        let z1 = f env y1 in
+        let z2 = f env y2 in
+        if y1 == z1 && y2 == z2 then xs
+        else [z1; z2]
+      | [y1; y2; y3] ->
+        let z1 = f env y1 in
+        let z2 = f env y2 in
+        let z3 = f env y3 in
+        if y1 == z1 && y2 == z2 && y3 == z3 then xs
+        else [z1; z2; z3]
+      | [y1; y2; y3; y4] ->
+        let z1 = f env y1 in
+        let z2 = f env y2 in
+        let z3 = f env y3 in
+        let z4 = f env y4 in
+        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 then xs
+        else [z1; z2; z3; z4]
+      | [y1; y2; y3; y4; y5] ->
+        let z1 = f env y1 in
+        let z2 = f env y2 in
+        let z3 = f env y3 in
+        let z4 = f env y4 in
+        let z5 = f env y5 in
+        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 && y5 == z5 then xs
+        else [z1; z2; z3; z4; z5]
+      | y1::y2::y3::y4::y5::ys ->
+        let z1 = f env y1 in
+        let z2 = f env y2 in
+        let z3 = f env y3 in
+        let z4 = f env y4 in
+        let z5 = f env y5 in
+        let zs =
+          if counter > 1000 then
+            aux_slow env ys [] ys false
+          else
+            aux env ys (counter + 1)
+        in
+        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 && y5 == z5 && ys == zs
+        then xs
+        else z1::z2::z3::z4::z5::zs
+    and aux_slow env xs acc original_list has_new_elements =
+      match xs with
+      | [] -> if has_new_elements then List.rev acc else original_list
+      | y1::ys ->
+        let z1 = f env y1 in
+        aux_slow env ys (z1::acc) original_list (has_new_elements || y1 != z1)
+    in
+    aux env xs 0
 
   method private on_option
     : 'env 'a . ('env -> 'a -> 'a) -> 'env -> 'a option -> 'a option

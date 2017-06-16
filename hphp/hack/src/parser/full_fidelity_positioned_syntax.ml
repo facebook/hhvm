@@ -2027,7 +2027,9 @@ module FromMinimal = struct
       dispatch offset todo (node :: results)
     | { M.syntax = M.SyntaxList l; _ } as minimal_t ->
       let todo = Build (minimal_t, offset, todo) in
-      let todo = List.fold_right (fun n t -> Convert (n,t)) l todo in
+      let todo =
+        Core.List.fold_right l ~f:(fun n t -> Convert (n,t)) ~init:todo
+      in
       dispatch offset todo results
     | { M.syntax = M.EndOfFile
         { M.end_of_file_token
@@ -3687,4 +3689,3 @@ let from_minimal = FromMinimal.from_minimal
 
 let from_tree tree =
   from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree)
-

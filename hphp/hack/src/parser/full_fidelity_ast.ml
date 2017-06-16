@@ -981,6 +981,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       let aggregate_tokens node =
         let rec search = function (* scroll through non-token things *)
         | [] -> []
+        | t :: xs when token_kind t = Some TK.XHPComment -> search xs
         | { syntax = Token b; _ } as t :: xs -> track t b None xs
         | x :: xs -> x :: search xs
         and track t b oe = function (* keep going through consecutive tokens *)

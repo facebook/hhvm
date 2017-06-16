@@ -194,5 +194,4 @@ quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php
 quick/xenon/xenon_init.php
 quick/xhp-malformed.php
-quick/xhp_comment.php
 quick/zero_eval_stack_depth.php

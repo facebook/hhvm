@@ -36,6 +36,7 @@ let complete_reps = ref 0
 let mut_prob = ref 0.1
 let mag = ref 1
 let mut_stk = ref true
+let debug = ref false
 
 let options =
   [("-o",         Arg.Set_string out_dir,
@@ -48,6 +49,8 @@ let options =
       "The magnitude of possible change for integer mutations (default 1)");
    ("-stack", Arg.Set mut_stk,
       "Whether to allow mutations of stack offsets (default true)");
+  ("-debug", Arg.Set debug,
+      "Turn on debug prints (default false)");
    ("-immediate", Arg.Set_int imm_reps,
       "Number of immediate mutations (default 1)");
    ("-duplicate", Arg.Set_int dup_reps,
@@ -99,6 +102,7 @@ let read_input () : Hhas_program.t =
 
 module IS = Instruction_sequence
 module HP = Hhas_program
+open Instr_utils
 
 type mutation_monad = HP.t Nondet.m
 type mutation = HP.t -> mutation_monad
@@ -130,8 +134,7 @@ let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   p |> mutate_main mut |> mutate_functions mut |> mutate_methods mut
 
 let mutate (mut: IS.t -> IS.t) (prog : HP.t) n (acc: mutation_monad) =
-  Instr_utils.num_fold
-    (fun a -> mutate_program mut prog |> Nondet.add_event a) n acc
+  num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a) n acc
 
 open Hhbc_ast
 
@@ -152,26 +155,12 @@ let mutate_local_id (id : Local.t) c =
               create trivially non-verifying programs in almost all cases,
               so it wouldn't be that interesting *)
 
-let mutate_label (label : Label.t) _ =
-  label (*TODO: uncomment and mutate labels in a non assembly-failing way*)
-  (*let new_label_type n =
-    [Label.Regular n; Label.Catch n; Label.Fault n; Label.DefaultArg n] |>
-    rand_elt in
-  let swap_label l =
-    match l with
-    | Label.Regular n    -> if should_mutate() then new_label_type n else l
-    | Label.Catch n      -> if should_mutate() then new_label_type n else l
-    | Label.Fault n      -> if should_mutate() then new_label_type n else l
-    | Label.DefaultArg n -> if should_mutate() then new_label_type n else l
-    | _ -> l in
-  match swap_label label with
-  | Label.Regular i      -> Label.Regular    (mutate_int i c)
-  | Label.Catch i        -> Label.Catch      (mutate_int i c)
-  | Label.Fault i        -> Label.Fault      (mutate_int i c)
-  | Label.DefaultArg i   -> Label.DefaultArg (mutate_int i c)
-  | _                    -> label (*TODO: These are probably worth mutating,
-                                    we'll need to keep track of all valid
-                                    labels in the input program *) *)
+(* Changes the input label to another with the same stack height *)
+let mutate_label data (label : Label.t) =
+  if not (should_mutate()) then label else
+  let height l = data.stack_history |> List.assoc l |> List.length in
+  let init_height = height (ILabel label) in
+  List.filter (fun l -> init_height = height (ILabel l)) data.labels |> rand_elt
 
 let mutate_key (k : MemberKey.t) c =
   let new_key_type n =
@@ -208,9 +197,47 @@ let mutate_mode (m : MemberOpMode.t) =
         MemberOpMode.Unset] |> rand_elt
   else m
 
+let maintain_stack op data =
+  let pc, stk = ref 0, ref [] in (* This is a cool scoping trick that lets *)
+  fun (i : instruct) ->          (* these refs get defined before the instr *)
+  pc := !pc + 1;                 (* gets applied. Thus when this function is *)
+  let new_instructs = op data i in  (* is used later as an argument to *)
+  let helper instr buffer =    (* flat_map, the internal state is not exposed *)
+    let ctrl_buffer =
+      match instr with
+      | IContFlow RetC
+      | IContFlow RetV   ->
+          let old_stk = !stk in
+          stk := num_fold List.tl ((List.length !stk)-1) !stk;
+          empty_stk old_stk 1
+      | IContFlow Unwind
+      | IMisc NativeImpl -> let old_stk = !stk in
+                            stk := []; empty_stk old_stk 0
+      | ILabel _
+      | IIterator _
+      | IContFlow _      ->
+        let orig_stack = snd (List.nth data.stack_history (!pc - 1)) in
+        let res = equate_stk !stk orig_stack in
+        stk := orig_stack; res
+      | _ -> [] in
+    let stk_req, stk_prod = stk_data instr in
+    let num_req = List.length stk_req - List.length !stk in
+    let pre_buffer, stk_extra =
+      if num_req > 0 then rebalance_stk num_req stk_req
+      else [],[] in
+    if !debug then begin
+      Printf.printf "Instruction %s stack is [%s],
+                     consumed [%s], produced [%s]\n"
+      (Hhbc_hhas.string_of_instruction instr) (string_of_stack !stk)
+      (string_of_stack stk_req) (string_of_stack stk_prod)
+    end;
+    stk := stk_extra @ !stk;
+    stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
+    stk := List.fold_left (fun acc x -> x::acc) !stk stk_prod;
+    buffer @ pre_buffer @ ctrl_buffer @ [instr] in
+  List.fold_right helper new_instructs []
+
 let mut_imms (is : IS.t) : IS.t =
-  let stk = ref [] in (* we want to make sure that by the end of the function
-                      the stack is balanced *)
   let mutate_get s =
     match s with    (*TODO: clean this up if OCaml ever gets macros *)
     | CGetL       id     -> CGetL      (mutate_local_id id !mag)
@@ -253,7 +280,7 @@ let mut_imms (is : IS.t) : IS.t =
     | InitProp (p, NonStatic) ->
         InitProp(p, if should_mutate() then Static else NonStatic)
     | _ -> s in
-  let mutate_call s =
+  let mutate_call data s =
     match s with (*It's not worth mutating arg numbers for Push* or Call*,
                    because we already know it will fail the verifier/assembler*)
     | FPushObjMethod   (i, Ast_defs.OG_nullthrows)    ->
@@ -272,22 +299,22 @@ let mut_imms (is : IS.t) : IS.t =
         FPushObjMethodD(i, m, if should_mutate()
                               then Ast_defs.OG_nullthrows
                               else Ast_defs.OG_nullsafe)
-    | FPushCtor     (i, id) -> FPushCtor  (i, mutate_int      id !mag)
-    | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int      id !mag)
-    | DecodeCufIter (i, id) -> DecodeCufIter (mutate_int      i  !mag,
-                                              mutate_label    id !mag)
-    | FPassS        (i, id) -> FPassS        (mutate_int      i  !mag,
-                                              mutate_int      id !mag)
-    | FPassL        (i, id) -> FPassL        (mutate_int      i  !mag,
-                                              mutate_local_id id !mag)
-    | FPassC         i      -> FPassC        (mutate_int      i  !mag)
-    | FPassCW        i      -> FPassCW       (mutate_int      i  !mag)
-    | FPassCE        i      -> FPassCE       (mutate_int      i  !mag)
-    | FPassV         i      -> FPassV        (mutate_int      i  !mag)
-    | FPassVNop      i      -> FPassVNop     (mutate_int      i  !mag)
-    | FPassR         i      -> FPassR        (mutate_int      i  !mag)
-    | FPassN         i      -> FPassN        (mutate_int      i  !mag)
-    | FPassG         i      -> FPassG        (mutate_int      i  !mag)
+    | FPushCtor     (i, id) -> FPushCtor  (i, mutate_int        id !mag)
+    | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int        id !mag)
+    | DecodeCufIter (i, id) -> DecodeCufIter (mutate_int        i  !mag,
+                                              mutate_label data id)
+    | FPassS        (i, id) -> FPassS        (mutate_int        i  !mag,
+                                              mutate_int        id !mag)
+    | FPassL        (i, id) -> FPassL        (mutate_int        i  !mag,
+                                              mutate_local_id   id !mag)
+    | FPassC         i      -> FPassC        (mutate_int        i  !mag)
+    | FPassCW        i      -> FPassCW       (mutate_int        i  !mag)
+    | FPassCE        i      -> FPassCE       (mutate_int        i  !mag)
+    | FPassV         i      -> FPassV        (mutate_int        i  !mag)
+    | FPassVNop      i      -> FPassVNop     (mutate_int        i  !mag)
+    | FPassR         i      -> FPassR        (mutate_int        i  !mag)
+    | FPassN         i      -> FPassN        (mutate_int        i  !mag)
+    | FPassG         i      -> FPassG        (mutate_int        i  !mag)
     | _ -> s in
   let mutate_base s =
     match s with
@@ -315,7 +342,7 @@ let mut_imms (is : IS.t) : IS.t =
     | Dim       (mode, key) -> Dim      (mutate_mode  mode, mutate_key key !mag)
     | FPassDim    (i,  key) -> FPassDim (mutate_int i !mag, mutate_key key !mag)
     | _ -> s in
-  let mutate_ctrl_flow s =
+  let mutate_ctrl_flow data s =
     match s with
     | Switch (Bounded, n, v) ->
         Switch ((if should_mutate() then Unbounded else Bounded),
@@ -323,12 +350,12 @@ let mut_imms (is : IS.t) : IS.t =
     | Switch (Unbounded, n, v) ->
         Switch ((if should_mutate() then Bounded else Unbounded),
         mutate_int n !mag, v)
-    | Jmp   l -> Jmp   (mutate_label l !mag)
-    | JmpNS l -> JmpNS (mutate_label l !mag)
-    | JmpZ  l -> JmpZ  (mutate_label l !mag)
-    | JmpNZ l -> JmpNZ (mutate_label l !mag)
+    | Jmp   l -> Jmp   (mutate_label data l)
+    | JmpNS l -> JmpNS (mutate_label data l)
+    | JmpZ  l -> JmpZ  (mutate_label data l)
+    | JmpNZ l -> JmpNZ (mutate_label data l)
     | SSwitch lst ->
-        SSwitch (List.map (fun (id, l) -> (id, mutate_label l !mag)) lst)
+        SSwitch (List.map (fun (id, l) -> (id, mutate_label data l)) lst)
     | _ -> s in
   let mutate_final s =
     let mutate_op op =
@@ -351,41 +378,41 @@ let mut_imms (is : IS.t) : IS.t =
         SetWithRefLML (mutate_local_id id !mag, mutate_local_id id' !mag)
     | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag) in
 
-  let mutate_iterator s =
+  let mutate_iterator data s =
     let mutate_bool b = if should_mutate() then not b else b in
     match s with
     | IterInit   (i, l, id)      ->
-        IterInit   (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        IterInit   (i, mutate_label data l,      mutate_local_id id  !mag)
     | IterInitK  (i, l, id, id') ->
-        IterInitK  (i, mutate_label     l  !mag,
-                       mutate_local_id id  !mag, mutate_local_id id' !mag)
+        IterInitK  (i, mutate_label data l,
+                       mutate_local_id  id !mag, mutate_local_id id' !mag)
     | WIterInit  (i, l, id)      ->
-        WIterInit  (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        WIterInit  (i, mutate_label data l,      mutate_local_id id  !mag)
     | WIterInitK (i, l, id, id') ->
-        WIterInitK (i, mutate_label     l  !mag,
+        WIterInitK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | MIterInit  (i, l, id)      ->
-        MIterInit  (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        MIterInit  (i, mutate_label data l,      mutate_local_id id  !mag)
     | MIterInitK (i, l, id, id') ->
-        MIterInitK (i, mutate_label     l  !mag,
+        MIterInitK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterNext   (i, l, id)      ->
-        IterNext   (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        IterNext   (i, mutate_label data l,      mutate_local_id id  !mag)
     | IterNextK  (i, l, id, id') ->
-        IterNextK  (i, mutate_label     l  !mag,
+        IterNextK  (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | WIterNext  (i, l, id)      ->
-        WIterNext  (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        WIterNext  (i, mutate_label data l,      mutate_local_id id  !mag)
     | WIterNextK (i, l, id, id') ->
-        WIterNextK (i, mutate_label     l  !mag,
+        WIterNextK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | MIterNext  (i, l, id)      ->
-        MIterNext  (i, mutate_label     l  !mag, mutate_local_id id  !mag)
+        MIterNext  (i, mutate_label data l,      mutate_local_id id  !mag)
     | MIterNextK (i, l, id, id') ->
-        MIterNextK (i, mutate_label     l  !mag,
+        MIterNextK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterBreak  (l, lst)        ->
-        IterBreak     (mutate_label     l  !mag,
+        IterBreak     (mutate_label data l,
                        List.map (fun (b, i) -> (mutate_bool b, i)) lst)
     | _ -> s in
   let mutate_misc s =
@@ -402,75 +429,69 @@ let mut_imms (is : IS.t) : IS.t =
    let mutate_silence op =
      if should_mutate() then [Start; End] |> rand_elt else op in
     match s with
-    | BareThis        b       -> BareThis        (mutate_bare            b)
-    | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
-    | StaticLoc     (id, str) -> StaticLoc       (mutate_local_id id  !mag, str)
-    | StaticLocInit (id, str) -> StaticLocInit   (mutate_local_id id  !mag, str)
-    | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
-    | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
-    | Self            i       -> Self            (mutate_int      i   !mag)
-    | Parent          i       -> Parent          (mutate_int      i   !mag)
-    | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
-    | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
-    | IncStat        (i,  i') -> IncStat         (mutate_int      i   !mag,
-                                                  mutate_int      i'  !mag)
-    | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
-                                                  mutate_int      i'  !mag)
-    | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)
+    | BareThis        b        -> BareThis        (mutate_bare            b)
+    | InitThisLoc     id       -> InitThisLoc     (mutate_local_id id  !mag)
+    | StaticLocCheck (id, str) -> StaticLocCheck (mutate_local_id id  !mag, str)
+    | StaticLocInit  (id, str) -> StaticLocInit  (mutate_local_id id  !mag, str)
+    | StaticLocDef  (id, str)  -> StaticLocDef   (mutate_local_id id  !mag, str)
+    | OODeclExists    k        -> OODeclExists    (mutate_kind            k)
+    | VerifyParamType p        -> VerifyParamType (mutate_param_id p   !mag)
+    | Self            i        -> Self            (mutate_int      i   !mag)
+    | Parent          i        -> Parent          (mutate_int      i   !mag)
+    | LateBoundCls    i        -> LateBoundCls    (mutate_int      i   !mag)
+    | ClsRefName      i        -> ClsRefName      (mutate_int      i   !mag)
+    | IncStat        (i,  i') -> IncStat          (mutate_int      i   !mag,
+                                                   mutate_int      i'  !mag)
+    | CreateCl       (i,  i') -> CreateCl         (mutate_int      i   !mag,
+                                                   mutate_int      i'  !mag)
+    | GetMemoKeyL    id       -> GetMemoKeyL      (mutate_local_id id !mag)
     | Silence (id, op) -> Silence (mutate_local_id id !mag, mutate_silence op)
     | MemoSet     (i, id, i') ->
         MemoSet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
     | MemoGet     (i, id, i') ->
         MemoGet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
     | _ -> s in
-  let change_imms (i : instruct) : instruct list =
-    let new_instruct = match i with
-                       | IContFlow s -> [IContFlow (mutate_ctrl_flow s)]
-                       | IMutator  s -> [IMutator  (mutate_mutator   s)]
-                       | IGet      s -> [IGet      (mutate_get       s)]
-                       | IIsset    s -> [IIsset    (mutate_isset     s)]
-                       | ICall     s -> [ICall     (mutate_call      s)]
-                       | IBase     s -> [IBase     (mutate_base      s)]
-                       | IFinal    s -> [IFinal    (mutate_final     s)]
-                       | IIterator s -> [IIterator (mutate_iterator  s)]
-                       | IMisc     s -> [IMisc     (mutate_misc      s)]
-                       | _ -> [i] (*no immediates, or none worth mutating*) in
-    let stk_req, stk_prod = Instr_utils.stk_data (List.hd new_instruct) in
-    let num_req = List.length stk_req - List.length !stk in
-    let pre_buffer, stk_extra =
-      if num_req > 0 then Instr_utils.rebalance_stk num_req !stk stk_req
-      else [],[] in
-    let ctrl_buffer =
-      match List.hd new_instruct with
-      | IContFlow RetC   -> Instr_utils.empty_stk !stk 1
-      | IContFlow RetV   -> Instr_utils.empty_stk !stk 1
-      | IContFlow Unwind -> Instr_utils.empty_stk !stk 0
-      | IMisc NativeImpl -> Instr_utils.empty_stk !stk 0
-      | _ -> [] in
-    stk := stk_extra @ !stk;
-    stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
-    stk := List.fold_left (fun acc x -> x::acc) !stk stk_prod;
-    pre_buffer @ ctrl_buffer @ new_instruct in
-  IS.InstrSeq.flat_map is change_imms
+  let change_imms data (i : instruct) : instruct list =
+    [match i with
+     | IContFlow s -> IContFlow (mutate_ctrl_flow data s)
+     | IMutator  s -> IMutator  (mutate_mutator        s)
+     | IGet      s -> IGet      (mutate_get            s)
+     | IIsset    s -> IIsset    (mutate_isset          s)
+     | ICall     s -> ICall     (mutate_call      data s)
+     | IBase     s -> IBase     (mutate_base           s)
+     | IFinal    s -> IFinal    (mutate_final          s)
+     | IIterator s -> IIterator (mutate_iterator  data s)
+     | IMisc     s -> IMisc     (mutate_misc           s)
+     | _ -> i] (*no immediates, or none worth mutating*) in
+  IS.InstrSeq.flat_map is (maintain_stack change_imms (seq_data is))
 
 (* Mutates the immediates of the opcodes in the input program. Currently
    this is just naive, randomly changing integer values by a user specified
    magnitude, and changing enum-style values by choosing a random new value
    in the possiblity space. *)
 let mutate_immediate (input : HP.t) : mutation_monad =
+  if !debug then print_endline "Mutating immediates";
   mutate mut_imms input !imm_reps (Nondet.return input)
 
 (* This will randomly duplicate an instruction by inserting another copy into
-   its instruction sequences. TODO: It would be nice to have this ensure the
-   stack is balanced, and potentially not generate code that doesn't assembly *)
+   its instruction sequences. *)
 let mutate_duplicate (input : HP.t) : mutation_monad =
-  let duplicate i = if should_mutate() then [i; i] else [i] in
-  let mut (is : IS.t) = IS.InstrSeq.flat_map is duplicate in
+  if !debug then print_endline "Duplicating";
+  let mut (is : IS.t) =
+    let duplicate _ i =
+      match i with
+      | ILabel _
+      | ICall _
+      | ITry _
+      | IContFlow _ -> [i] (*duplicating control flow just breaks the stack*)
+      | _ -> if should_mutate() then [i; i] else [i] in
+    IS.InstrSeq.flat_map is (maintain_stack duplicate (seq_data is)) in
   mutate mut input !dup_reps (Nondet.return input)
 
 (* This will randomly swap the position of two instructions in sequence. TODO:
    same as above *)
 let mutate_reorder (input : HP.t) : mutation_monad =
+  if !debug then print_endline "Reordering";
   let rec flatten (lst : IS.t list) =
      match lst with
      | [] -> []
@@ -492,11 +513,18 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     | IS.Instr_try_fault (is1, is2) -> IS.Instr_try_fault (mut is1, mut is2) in
   mutate mut input !reorder_reps (Nondet.return input)
 
-(* This will randomly remove some of the instructions in a sequence.
-   TODO: same as above *)
+(* This will randomly remove some of the instructions in a sequence. *)
 let mutate_remove (input : HP.t) : mutation_monad =
-  let remove i = if should_mutate() then [] else [i] in
-  let mut (is : IS.t) = IS.InstrSeq.flat_map is remove in
+  if !debug then print_endline "Removing";
+  let remove _ i =
+    match i with
+    | ILabel _
+    | ICall _
+    | ITry _
+    | IContFlow _ -> [i] (*removing control flow just breaks the stack*)
+    | _ -> if should_mutate() then [] else [i] in
+  let mut (is : IS.t) =
+    IS.InstrSeq.flat_map is (maintain_stack remove (seq_data is)) in
   mutate mut input !remove_reps  (Nondet.return input)
 
 let mutate_replace (input : HP.t) : mutation_monad =

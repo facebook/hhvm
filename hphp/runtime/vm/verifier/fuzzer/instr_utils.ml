@@ -1,12 +1,13 @@
 open Hhbc_ast
 module IS = Instruction_sequence
+type stack = string list
 
 let rec num_fold f n acc =
   if n <= 0 then acc else num_fold f (n - 1) (f acc)
 
-let rec rebalance_stk n (stk : string list) (req : string list) =
+let rec rebalance_stk n (req : stack) : instruct list * stack =
   if n = 0 then ([], []) else
-  match List.hd req, rebalance_stk (n-1) stk (List.tl req) with
+  match List.hd req, rebalance_stk (n-1) (List.tl req) with
   | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1))::buf, "C"::extra
   | "V", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1))::IBasic (Box)::buf, "V"::extra
@@ -27,11 +28,21 @@ let rec empty_stk stk remaining =
   | "U" :: t -> IBasic PopU :: empty_stk t remaining
   | _ :: t -> empty_stk t (remaining - 1)
 
+(* Outputs a sequence of dummy instructions to make stk equal to target *)
+let equate_stk (stk : stack) (target : stack) =
+  let stklen, targetlen = List.length stk, List.length target in
+  if stklen = targetlen then []
+  else if stklen > targetlen then empty_stk stk (targetlen)
+  else rebalance_stk (targetlen - stklen) target |> fst
+
 let produce flavor n = num_fold (fun acc -> flavor::acc) n []
+
+let string_of_stack (stk : stack) : string =
+  (List.fold_right (fun x acc -> x^"; "^acc) stk "")
 
 (* Determines how an instruction changes the stack, and how many
    cells it consumes. Return format is (required, produced) *)
-let stk_data : instruct -> string list * string list = function
+let stk_data : instruct -> stack * stack = function
   | IMutator UnsetL _
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _
@@ -50,6 +61,7 @@ let stk_data : instruct -> string list * string list = function
   | IContFlow Switch _
   | IContFlow SSwitch _
   | IContFlow RetC
+  | IMisc StaticLocDef _
   | IContFlow Throw
   | IGet ClsRefGetC _
   | IMutator UnsetG
@@ -121,7 +133,7 @@ let stk_data : instruct -> string list * string list = function
   | IMutator CheckProp _
   | IMisc This
   | IMisc BareThis _
-  | IMisc StaticLoc _
+  | IMisc StaticLocCheck _
   | IMisc Catch
   | IMisc GetMemoKeyL _
   | IGenerator CreateCont
@@ -199,3 +211,35 @@ let stk_data : instruct -> string list * string list = function
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []
   | _ -> [], []
+
+type seq_data = {labels : Label.t list;
+                 stack_history : (instruct * stack) list; }
+
+(* produces the sequence of stacks corresponding to the input instruction
+   sequence. The nth value in the result is a pair of the nth instruction in the
+   input and the stack after that instruction. A Nop is placed at index 0 with
+   an empty stack. This way one can access the stack before a instruction n
+   safely by indexing into position n-1 in the list.
+
+   Input precondition: the input sequence would assemble in HHVM, meaning
+   the stack depth never goes negative, and stack height is the same across
+   control flow boundaries *)
+let stack_history (seq : IS.t) : (instruct * stack) list =
+  let f hist i =
+    let stk_req, stk_prod = stk_data i in
+    match hist with
+    | [] -> [(i, stk_prod)]
+    | (_, h)::_ ->
+      let removed = List.fold_left (fun acc _ -> List.tl acc) h stk_req in
+      let added = List.fold_left (fun acc x -> x::acc) removed stk_prod in
+      (i, added) :: hist in
+  (IBasic Nop, [])::(IS.InstrSeq.fold_left seq ~f:f ~init:[] |> List.rev)
+
+let collect_labels (seq : IS.t) : Label.t list =
+  let f labels = function
+  | ILabel l when not (List.mem l labels) -> l::labels
+  | _ -> labels in
+  IS.InstrSeq.fold_left seq ~f:f ~init:[]
+
+let seq_data (seq : IS.t) : seq_data =
+  {labels = collect_labels seq; stack_history = stack_history seq}

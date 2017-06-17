@@ -2764,7 +2764,8 @@ void fixupBlockJumps(Vunit& unit, Vlabel label) {
     insertBlock().code.emplace_back(inst);
 
     if (inst.op == Vinstr::jcc && !inst.jcc_.targets[0].isValid()) {
-      auto newLabel = unit.makeBlock(insertBlock().area_idx);
+      auto newLabel = unit.makeBlock(insertBlock().area_idx,
+                                     insertBlock().weight);
       insertBlock().code.back().jcc_.targets[0] = newLabel;
       label = newLabel;
     }
@@ -2810,7 +2811,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     }
 
     FTRACE(3, "Breaking out {}: {}\n", label, show(unit, inst));
-    auto target = unit.makeBlock(AreaIndex::Cold);
+    auto target = unit.makeBlock(AreaIndex::Cold, 0);
     // makeBlock might reallocate unit.blocks
     code = &unit.blocks[label].code;
 

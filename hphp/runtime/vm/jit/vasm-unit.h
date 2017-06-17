@@ -42,9 +42,12 @@ namespace HPHP { namespace jit {
  * should be emitted to.
  */
 struct Vblock {
-  explicit Vblock(AreaIndex area_idx) : area_idx(area_idx) {}
+  explicit Vblock(AreaIndex area_idx, uint64_t w)
+    : area_idx(area_idx)
+    , weight(w) {}
 
   AreaIndex area_idx;
+  uint64_t  weight;
   jit::vector<Vinstr> code;
 };
 
@@ -134,9 +137,9 @@ struct Vconst {
  */
 struct Vunit {
   /*
-   * Create a new block in the given area, returning its id.
+   * Create a new block in the given area and weight, returning its id.
    */
-  Vlabel makeBlock(AreaIndex area);
+  Vlabel makeBlock(AreaIndex area, uint64_t weight);
 
   /*
    * Create a block intended to be used temporarily, as part of modifying

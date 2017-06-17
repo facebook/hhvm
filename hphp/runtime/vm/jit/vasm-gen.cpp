@@ -60,7 +60,12 @@ bool Vout::closed() const {
 }
 
 Vout Vout::makeBlock() {
-  return {m_unit, m_unit.makeBlock(area()), m_irctx};
+  uint64_t weight = 0;
+  if (m_irctx.origin != nullptr) {
+    weight = m_irctx.origin->block()->profCount();
+  }
+  weight = weight * areaWeightFactor(area());
+  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +76,7 @@ Vout& Vasm::out(AreaIndex area) {
 
   // Initialize all streams up through `area'.
   for (auto i = m_outs.size(); i <= a; ++i) {
-    auto b = m_unit.makeBlock(static_cast<AreaIndex>(i));
+    auto b = m_unit.makeBlock(static_cast<AreaIndex>(i), 0);
     m_outs.emplace_back(m_unit, b);
   }
   return m_outs[a];

@@ -117,7 +117,8 @@ bool splitCriticalEdges(Vunit& unit) {
     for (auto& succ : succlist) {
       if (preds[succ] <= 1) continue;
       // split the critical edge.
-      auto middle = unit.makeBlock(unit.blocks[succ].area_idx);
+      auto middle = unit.makeBlock(unit.blocks[succ].area_idx,
+                                   unit.blocks[succ].weight);
       forwardJmp(unit, catch_blocks, middle, succ);
       succ = middle;
       changed = true;

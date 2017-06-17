@@ -104,7 +104,7 @@ struct Scale {
       : m_unit(unit)
       , m_blocks(sortBlocks(unit))
       , m_preds(computePreds(unit)) {
-    computeWeights();
+    computeArcWeights();
   }
   int64_t weight(Vlabel blk) const;
   int64_t weight(Vlabel src, Vlabel dst) const;
@@ -112,8 +112,6 @@ struct Scale {
   std::string toString() const;
 
  private:
-  void    computeWeights();
-  void    computeBlockWeights();
   void    computeArcWeights();
   TransID findProfTransID(Vlabel blk) const;
   int64_t findProfCount(Vlabel blk)   const;
@@ -123,12 +121,11 @@ struct Scale {
   const Vunit&                     m_unit;
   const jit::vector<Vlabel>        m_blocks;
   const PredVector                 m_preds;
-  jit::vector<int64_t>             m_blkWgts;
   jit::hash_map<uint64_t, int64_t> m_arcWgts; // keyed using arcId()
 };
 
 int64_t Scale::weight(Vlabel blk) const {
-  return m_blkWgts[blk];
+  return m_unit.blocks[blk].weight;
 }
 
 int64_t Scale::weight(Vlabel src, Vlabel dst) const {
@@ -154,29 +151,6 @@ int64_t Scale::findProfCount(Vlabel blk) const {
   return 1;
 }
 
-void Scale::computeBlockWeights() {
-  m_blkWgts.resize(m_unit.blocks.size(), 0);
-
-  // We multiply the corresponding region block's profile counter by the
-  // following factors, depending on the code area the block is assigned to.
-  static int areaWeightFactors[] = {
-    RuntimeOption::EvalJitLayoutMainFactor, // main
-    RuntimeOption::EvalJitLayoutColdFactor, // cold
-    1                                       // frozen
-  };
-
-  static_assert(
-    sizeof(areaWeightFactors) / sizeof(areaWeightFactors[0]) == kNumAreas,
-    "need to update areaWeightFactors");
-
-  for (auto b : m_blocks) {
-    auto a = unsigned(m_unit.blocks[b].area_idx);
-    assertx(a < 3);
-    m_blkWgts[b] = findProfCount(b) * areaWeightFactors[a];
-    if (m_blkWgts[b] < 0) m_blkWgts[b] = 0;
-  }
-}
-
 void Scale::computeArcWeights() {
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);
@@ -196,11 +170,6 @@ void Scale::computeArcWeights() {
              succSet.size(), m_preds[s].size(), weight(b), weight(s));
     }
   }
-}
-
-void Scale::computeWeights() {
-  computeBlockWeights();
-  computeArcWeights();
 }
 
 std::string Scale::toString() const {

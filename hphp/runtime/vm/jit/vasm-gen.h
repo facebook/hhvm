@@ -154,8 +154,8 @@ struct Vauto {
                  CGMeta& fixups, CodeKind kind = CodeKind::Helper)
     : m_text{main, cold, data}
     , m_fixups(fixups)
-    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
-    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
+    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main, 1)}
+    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold, 1)}
     , m_kind{kind}
   {
     m_unit.entry = Vlabel(this->main());

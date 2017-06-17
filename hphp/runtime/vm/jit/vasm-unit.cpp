@@ -21,14 +21,14 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-Vlabel Vunit::makeBlock(AreaIndex area) {
+Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   auto i = blocks.size();
-  blocks.emplace_back(area);
+  blocks.emplace_back(area, weight);
   return Vlabel{i};
 }
 
 Vlabel Vunit::makeScratchBlock() {
-  return makeBlock(AreaIndex::Main);
+  return makeBlock(AreaIndex::Main, 1);
 }
 
 void Vunit::freeScratchBlock(Vlabel l) {

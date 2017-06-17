@@ -131,8 +131,9 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
 
   // Create the initial set of vasm blocks, numbered the same as the
   // corresponding HHIR blocks.
+  // We initially create the blocks with 0 weight, and then set them below.
   for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
-    env.labels[i] = vunit->makeBlock(AreaIndex::Main);
+    env.labels[i] = vunit->makeBlock(AreaIndex::Main, 0);
   }
   vunit->entry = env.labels[unit.entry()];
 
@@ -148,6 +149,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
 
     auto b = env.labels[block];
     vunit->blocks[b].area_idx = v.area();
+    vunit->blocks[b].weight = block->profCount() * areaWeightFactor(v.area());
     v.use(b);
 
     genBlock(env, v, vasm.cold(), *block);

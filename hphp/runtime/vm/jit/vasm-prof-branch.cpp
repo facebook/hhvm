@@ -249,7 +249,7 @@ Vout vheader(Vunit& unit, Vlabel s, AreaIndex area_cap = AreaIndex::Main) {
       return static_cast<unsigned>(l) < static_cast<unsigned>(r);
     }
   );
-  auto const header = unit.makeBlock(aidx);
+  auto const header = unit.makeBlock(aidx, unit.blocks[s].weight);
 
   auto const& code = unit.blocks[s].code;
   assertx(!code.empty());
@@ -365,7 +365,7 @@ BranchID branch_id_for(Env& env, const jcci& from, Vlabel b) {
  */
 void sample_branch(Vout& v, Env& env, const BranchID& branch,
                    const Func* func, Vlabel b) {
-  auto const push_val = [&] (uint64_t val) {
+  auto const push_val = [&] (Vout& v, uint64_t val) {
     // This wacky nonsense is to try to force XLS to use the same register for
     // each immediate we want to push.
     v << copy{v.cns(val), rret()};
@@ -373,12 +373,12 @@ void sample_branch(Vout& v, Env& env, const BranchID& branch,
   };
 
   auto const rbranch = v.makeReg();
-  push_val(branch.taken.vasm_id.hi);
-  push_val(branch.taken.vasm_id.lo);
-  push_val(branch.next.hi);
-  push_val(branch.next.lo);
-  push_val(branch.from.hi);
-  push_val(branch.from.lo);
+  push_val(v, branch.taken.vasm_id.hi);
+  push_val(v, branch.taken.vasm_id.lo);
+  push_val(v, branch.next.hi);
+  push_val(v, branch.next.lo);
+  push_val(v, branch.from.hi);
+  push_val(v, branch.from.lo);
   v << copy{rsp(), rbranch};
 
   auto const rfunc = v.cns(func);

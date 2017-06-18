@@ -1304,7 +1304,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
                                 dbg));
 
   // These guys are required by a number of other stubs.
-  ADD(handleSRHelper, emitHandleSRHelper(cold, data));
+  ADD(handleSRHelper, emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
 
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
@@ -1314,10 +1314,10 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(functionSurprisedOrStackOverflow,
       emitFunctionSurprisedOrStackOverflow(cold, frozen, data, *this));
 
-  ADD(retHelper,                  emitInterpRet(cold, data));
+  ADD(retHelper,                  emitInterpRet(hot(), data));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold, data));
-  ADD(asyncGenRetHelper,          emitInterpGenRet<true>(cold, data));
-  ADD(retInlHelper,               emitInterpRet(cold, data));
+  ADD(asyncGenRetHelper,          emitInterpGenRet<true>(hot(), data));
+  ADD(retInlHelper,               emitInterpRet(hot(), data));
   ADD(debuggerRetHelper,          emitDebuggerInterpRet(cold, data));
   ADD(debuggerGenRetHelper,       emitDebuggerInterpGenRet<false>(cold, data));
   ADD(debuggerAsyncGenRetHelper,  emitDebuggerInterpGenRet<true>(cold, data));
@@ -1355,7 +1355,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ResumeHelperEntryPoints rh;
   add("resumeInterpHelpers",
-      emitResumeInterpHelpers(main, data, *this, rh),
+      emitResumeInterpHelpers(hot(), data, *this, rh),
       code, dbg);
   emitInterpOneCFHelpers(cold, data, *this, rh, code, dbg);
 }

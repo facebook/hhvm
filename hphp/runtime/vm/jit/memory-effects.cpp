@@ -804,7 +804,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case ContEnter:
-    return CallEffects { false, AMIStateAny, AStackAny, AFrameAny, AStackAny };
+    {
+      auto const extra = inst.extra<ContEnter>();
+      return CallEffects {
+        false,
+        // Kills. Everything on the stack below the sent value.
+        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
+        // Stack. The value being sent, and everything below.
+        stack_below(inst.src(0), extra->spOffset),
+        // Locals.
+        backtrace_locals(inst),
+        // Callee. Stored inside the generator object, not used by ContEnter.
+        AEmpty
+      };
+    }
 
   case Call:
     {

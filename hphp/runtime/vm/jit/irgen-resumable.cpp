@@ -142,11 +142,9 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
 }
 
 void yieldReturnControl(IRGS& env) {
-  auto const retVal = cns(env, TInitNull);
-  push(env, retVal);
-
-  gen(env, RetCtrl, RetCtrlData { spOffBCFromIRSP(env), true },
-      sp(env), fp(env), retVal);
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
+  gen(env, RetCtrl, RetCtrlData { spAdjust, true },
+      sp(env), fp(env), cns(env, TInitNull));
 }
 
 void yieldImpl(IRGS& env, Offset resumeOffset) {
@@ -369,15 +367,17 @@ void emitContEnter(IRGS& env) {
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
   auto returnBcOffset = returnOffset - curFunc(env)->base();
-  gen(
+  auto const retVal = gen(
     env,
     ContEnter,
-    ContEnterData { spOffBCFromIRSP(env), returnBcOffset },
+    ContEnterData { spOffBCFromIRSP(env), returnBcOffset, isAsync },
     sp(env),
     fp(env),
     genFp,
     resumeAddr
   );
+
+  push(env, retVal);
 }
 
 void emitContRaise(IRGS& env) { PUNT(ContRaise); }

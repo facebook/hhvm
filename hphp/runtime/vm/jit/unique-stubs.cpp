@@ -465,10 +465,10 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
   auto const start = vwrap(cb, data, [] (Vout& v) {
+    // Sync return regs before calling native assert function.
+    storeReturnRegs(v);
     assertNativeStackAligned(v);
-    // Note that we don't need to sync the return registers to memory.
-    // Generators pass return values through both the eval stack and the
-    // registers, so the memory location already contains the same value.
+
     loadGenFrame<async>(v, r_svcreq_arg(0));
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });

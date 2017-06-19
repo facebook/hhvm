@@ -2185,7 +2185,7 @@ To string conversions:
   cross-scheduler and intra-scheduler cycle detection. Throws if the
   dependency cannot be established.
 
-| ContEnter<spOffset,returnBCOffset>, ND,
+| ContEnter<spOffset,returnBCOffset>, DGenIter,
 |                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
 |                                     Er
 

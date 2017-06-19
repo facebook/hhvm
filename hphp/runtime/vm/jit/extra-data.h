@@ -1088,17 +1088,21 @@ struct GeneratorState : IRExtraData {
 };
 
 struct ContEnterData : IRExtraData {
-  explicit ContEnterData(IRSPRelOffset spOffset, Offset returnBCOffset)
+  explicit ContEnterData(IRSPRelOffset spOffset, Offset returnBCOffset,
+                         bool isAsync)
     : spOffset(spOffset)
     , returnBCOffset(returnBCOffset)
+    , isAsync(isAsync)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(spOffset.offset, ',', returnBCOffset);
+    return folly::to<std::string>(spOffset.offset, ',', returnBCOffset,
+                                  isAsync ? ",async" : "");
   }
 
   IRSPRelOffset spOffset;
   Offset returnBCOffset;
+  bool isAsync;
 };
 
 struct NewColData : IRExtraData {

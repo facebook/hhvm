@@ -67,6 +67,7 @@ TRACE_SET_MOD(hhir);
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
 #define DCall          HasDest
+#define DGenIter       HasDest
 #define DSubtract(n,t) HasDest
 #define DCns           HasDest
 #define DUnion(...)    HasDest
@@ -129,8 +130,9 @@ OpInfo g_opInfo[] = {
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam
-#undef DCall
 #undef DBuiltin
+#undef DCall
+#undef DGenIter
 #undef DSubtract
 #undef DCns
 #undef DUnion

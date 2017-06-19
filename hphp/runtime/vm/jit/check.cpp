@@ -517,6 +517,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define D(...)
 #define DBuiltin
 #define DCall
+#define DGenIter
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
@@ -569,6 +570,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef D
 #undef DBuiltin
 #undef DCall
+#undef DGenIter
 #undef DSubtract
 #undef DMulti
 #undef DSetElem

@@ -211,27 +211,14 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
       GeneratorState { BaseGenerator::State::Done },
       fp(env));
 
-  // Push the return value of next()/send()/raise().  Generators pass return
-  // values both through the eval stack and through the return registers, so we
-  // need to get it in both places.
-  //
-  // The reason we do this for now is that generator code in the TC may return
-  // to normal TC exits (enterTCHelper), so it should support returning in
-  // registers, and also it can (normally) return to a ContEnter translation,
-  // which isn't yet prepared for getting the yielded value out of the
-  // registers instead of the eval stack.
-  //
-  // So for now we just put it in both places.
-  auto const retVal = cns(env, TInitNull);
-  push(env, retVal);
-
+  auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   gen(
     env,
     RetCtrl,
-    RetCtrlData { spOffBCFromIRSP(env), true },
+    RetCtrlData { spAdjust, true },
     sp(env),
     fp(env),
-    retVal
+    cns(env, TInitNull)
   );
 }
 

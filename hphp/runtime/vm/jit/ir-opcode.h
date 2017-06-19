@@ -78,6 +78,8 @@ struct SSATmp;
  *                    types such as (TStr | TNull)
  *     DCall        single dst for non-builtin calls. This can return different
  *                     types depending on static analysis.
+ *     DGenIter     single dst for generator iteration. This can return
+ *                     different types based on whether the generator is async.
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants

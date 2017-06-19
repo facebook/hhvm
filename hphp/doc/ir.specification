@@ -2146,9 +2146,15 @@ To string conversions:
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-| CreateCont, D(Obj), S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
+| CreateGen, DAllocObj, S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
 
   Create a Generator object and suspend the ActRec provided by S0 into its
+  embedded ActRec, allocating S1 slots for locals/iterators. Set the native
+  resume address to S2 and resume offset to S3.
+
+| CreateAGen, DAllocObj, S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
+
+  Create an AsyncGenerator object and suspend the ActRec provided by S0 into its
   embedded ActRec, allocating S1 slots for locals/iterators. Set the native
   resume address to S2 and resume offset to S3.
 

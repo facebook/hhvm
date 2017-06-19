@@ -452,12 +452,16 @@ static CallMap s_callMap {
 
     /* Generator support helpers */
 #ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
-    {CreateCont,         Generator_Create_false, DSSA, SNone,
+    {CreateGen,          Generator_Create_false, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 #else
-    {CreateCont,         &Generator::Create<false>, DSSA, SNone,
+    {CreateGen,          &Generator::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 #endif
+
+    /* Async generator support helpers */
+    {CreateAGen,         &AsyncGenerator::Create, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Async function support helpers */
 #ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD

@@ -35,7 +35,9 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/arena.h"
 
@@ -237,12 +239,18 @@ Type allocObjReturn(const IRInstruction* inst) {
         ? Type::ExactObj(inst->src(0)->clsVal())
         : TObj;
 
-    case CreateSSWH:
-      return Type::ExactObj(c_StaticWaitHandle::classof());
+    case CreateGen:
+      return Type::ExactObj(Generator::getClass());
+
+    case CreateAGen:
+      return Type::ExactObj(AsyncGenerator::getClass());
 
     case CreateAFWH:
     case CreateAFWHNoVV:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
+
+    case CreateSSWH:
+      return Type::ExactObj(c_StaticWaitHandle::classof());
 
     default:
       always_assert(false && "Invalid opcode returning AllocObj");

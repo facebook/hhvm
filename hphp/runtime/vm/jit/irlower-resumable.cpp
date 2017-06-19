@@ -81,7 +81,8 @@ ptrdiff_t genOffset(bool isAsync) {
 
 }
 
-IMPL_OPCODE_CALL(CreateCont)
+IMPL_OPCODE_CALL(CreateGen)
+IMPL_OPCODE_CALL(CreateAGen)
 
 void cgContEnter(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();

@@ -313,8 +313,6 @@ void emitCreateCont(IRGS& env) {
   assertx(!resumed(env));
   assertx(curFunc(env)->isGenerator());
 
-  if (curFunc(env)->isAsync()) PUNT(CreateCont-AsyncGenerator);
-
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
@@ -323,7 +321,7 @@ void emitCreateCont(IRGS& env) {
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =
     gen(env,
-        CreateCont,
+        curFunc(env)->isAsync() ? CreateAGen : CreateGen,
         fp(env),
         cns(env, func->numSlotsInFrame()),
         resumeAddr,

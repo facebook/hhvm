@@ -162,3 +162,6 @@ let error2037 = "A class may extend at most one other class."
 let error2038 constructor_name =
   "A constructor initializing an object must be passed a (possibly empty) " ^
   "list of arguments. Did you mean 'new " ^ constructor_name ^ "()'?"
+let error2039 classish_keyword classish_name function_name = Printf.sprintf
+  ("Cannot define a class, interface, or trait inside a function. Currently " ^^
+  "%s '%s' is inside function '%s'.") classish_keyword classish_name function_name

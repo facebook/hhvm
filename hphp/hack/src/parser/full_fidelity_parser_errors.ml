@@ -379,6 +379,27 @@ let classish_invalid_extends_list cd_node =
     | [x1] -> false
     | _ -> true (* General bc empty list case is already caught by error1007 *)
 
+(* Return, as a string opt, the name of the function with the earliest
+ * declaration node in the list of parents. *)
+let first_function_name parents =
+  Core.List.find_map parents ~f:begin fun node ->
+    let extract_name header_node =
+      (* The '_' arm of this match will never be reached, but the type checker
+       * doesn't allow a direct extraction of function_name from
+       * function_declaration_header. *)
+       begin match syntax header_node with
+        | FunctionDeclarationHeader fdh ->
+            Some (PositionedSyntax.text fdh.function_name)
+        | _ -> None
+       end in
+    match syntax node with
+    | FunctionDeclaration {function_declaration_header ; _ } ->
+        extract_name function_declaration_header
+    | MethodishDeclaration {methodish_function_decl_header; _ } ->
+        extract_name methodish_function_decl_header
+    | _ -> None
+  end
+
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -562,6 +583,18 @@ let classish_errors node parents =
     let errors =
       produce_error errors classish_invalid_extends_list cd
       SyntaxError.error2037 cd.classish_extends_list in
+    let errors =
+      (* Extra setup for the the customized error message. *)
+      let keyword_str = Option.value_map (token_kind cd.classish_keyword)
+        ~default:"" ~f:TokenKind.to_string in
+      let declared_name_str = PositionedSyntax.text cd.classish_name in
+      let function_str = Option.value (first_function_name parents)
+        ~default: "" in
+      (* To avoid iterating through the whole parents list again, do a simple
+       * check on function_str rather than a harder one on cd or parents. *)
+      produce_error errors (fun str -> String.length str != 0) function_str
+      (SyntaxError.error2039 keyword_str declared_name_str function_str)
+      cd.classish_keyword in
     errors
   | _ -> [ ]
 

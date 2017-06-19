@@ -601,14 +601,19 @@ let rec transform node =
       t kw;
       Space;
       t left_p;
-      Split;
-      Nest [
-        t ex_type;
-        Space;
-        t var;
+      WithRule (Rule.Argument, Fmt [
         Split;
-      ];
-      t right_p;
+        Nest [
+          t ex_type;
+          Space;
+          SplitWith Cost.Base;
+          Nest [
+            t var;
+          ];
+        ];
+        Split;
+        t right_p;
+      ]);
       handle_possible_compound_statement body;
     ]
   | FinallyClause x ->

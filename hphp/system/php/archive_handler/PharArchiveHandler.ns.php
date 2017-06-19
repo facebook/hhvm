@@ -78,13 +78,15 @@ namespace __SystemLib {
         );
       }
       foreach ($this->fileInfo as $filename => $info) {
-        $this->fileOffsets[$filename] = [$pos, $info[2]];
+        $this->fileOffsets[$filename] = tuple($pos, $info[2]);
         $pos += $info[2];
         $this->entries[$filename] = new ArchiveEntryStat(
           $info[3],
           $info[0],
           $info[2],
-          $info[1]
+          $info[1],
+          /* mode = */ null,
+          ArchiveEntryType::FILE,
         );
       }
 

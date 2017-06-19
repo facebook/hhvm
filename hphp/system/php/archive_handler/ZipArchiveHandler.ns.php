@@ -50,6 +50,8 @@ namespace __SystemLib {
           $stat['size'],
           $stat['comp_size'] ?: $stat['size'],
           $stat['mtime'],
+          /* mode = */ null,
+          ArchiveEntryType::FILE,
         );
       }
     }

@@ -28,7 +28,10 @@ echo "-1" | sudo tee /proc/sys/kernel/perf_event_paranoid
 ### Collect data using oss-performance and hf-prod-collect.sh
 The hf-prod-collect script uses perf to collect data. The script creates a nm file (hhvm.nm) with HHVM symbols and a zip file containing the perf data (perf.pds.gz). Both these files are located in the directory /tmp/hp-prof.
 
-In this example we use the WordPress target to generate the file. The collection starts after the warmup is completed and it takes 60 seconds (equal to the time the benchmark runs). 
+In this example we use the WordPress target to generate the file. The collection starts after the warmup is completed. We need to set some environment variables in order to change the default behavior of `hf-prod-collect.sh`
+* `SLEEP_TIME`: time to profile (should be no more than the time the benchmark runs)
+* `HHVM_BIN_PATH`: path to HHVM binary
+* `HHVM_PID`: default behavior is to get the PID of the oldest running HHVM process. In our case, that will probably match the HHVM process running `perf.php` so we need to override that.
 
 ``` bash 
 cd hphp/tools/hfsort
@@ -37,9 +40,9 @@ cd hphp/tools/hfsort
                 --wordpress  \
                 --i-am-not-benchmarking \
                 --profBC \
-                --hhvm-extra-arguments -vEval.KeepPerfPidMap=true \
-                --exec-after-warmup="SLEEP_TIME=60 HHVM_BIN_PATH=${HHVM_BIN_PATH} hf-prod-collect.sh > dump_hfprod.txt 2>&1 &" \
-                --hhvm=${HHVM_BIN_PATH}
+                --exec-after-warmup="SLEEP_TIME=60 HHVM_BIN_PATH=${HHVM_BIN_PATH} HHVM_PID=\`pgrep -n hhvm\` hf-prod-collect.sh > dump_hfprod.txt 2>&1 &" \
+                --hhvm=${HHVM_BIN_PATH} \
+                --hhvm-extra-arguments "-vEval.KeepPerfPidMap=true -vEval.ProfleHWEnable=false"
 
 ```
 

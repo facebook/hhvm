@@ -159,3 +159,6 @@ let error2035 = "Only classes may implement interfaces."
 let error2036 = "Only interfaces and classes may extend other interfaces and "
   ^ "classes."
 let error2037 = "A class may extend at most one other class."
+let error2038 constructor_name =
+  "A constructor initializing an object must be passed a (possibly empty) " ^
+  "list of arguments. Did you mean 'new " ^ constructor_name ^ "()'?"

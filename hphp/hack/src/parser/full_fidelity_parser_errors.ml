@@ -516,7 +516,17 @@ let expression_errors node =
         [ SyntaxError.make s e SyntaxError.error2033 ]
       | None -> [ ]
     end
-  | _ -> []
+  | ObjectCreationExpression oce ->
+    if is_missing oce.object_creation_left_paren &&
+        is_missing oce.object_creation_right_paren
+    then
+      let s = start_offset oce.object_creation_new_keyword in
+      let e = end_offset oce.object_creation_type in
+      let constructor_name = PositionedSyntax.text oce.object_creation_type in
+      [ SyntaxError.make s e (SyntaxError.error2038 constructor_name)]
+    else
+      [ ]
+  | _ -> [ ] (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents =
   match syntax node with

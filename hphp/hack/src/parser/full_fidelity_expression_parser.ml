@@ -879,7 +879,10 @@ TODO: This will need to be fixed to allow situations where the qualified name
         new  class-type-designator  (  argument-expression-list-opt  )
     *)
     (* PHP allows the entire expression list to be omitted. *)
-    (* TODO: Give an error in a later pass if it is omitted in Hack. *)
+    (* TODO: SPEC ERROR: PHP allows the entire expression list to be omitted,
+     * but Hack disallows this behavior. (See SyntaxError.error2038.) However,
+     * the Hack spec still states that the argument expression list is optional.
+     * Update the spec to say that the argument expression list is required. *)
     let (parser, new_token) = assert_token parser New in
     let (parser, designator) = parse_designator parser in
     let (parser, left, args, right) =

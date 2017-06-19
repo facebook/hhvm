@@ -511,7 +511,10 @@ slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php
 slow/namespace/dynamic.php
+slow/namespace/dynamic_extra_slash.php
+slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php
+slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang.php
 slow/namespace/hashbang_2.php
 slow/namespace/instanceof.php

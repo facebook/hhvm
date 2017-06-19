@@ -10,14 +10,30 @@
 
 module SU = Hhbc_string_utils
 
+(* TODO: Remove this once we start reading this off of HHVM's config.hdf *)
+let auto_namespace_map =
+  [ "Arrays", "HH\\Lib\\Arrays"
+  ; "C", "HH\\Lib\\C"
+  ; "Dict", "HH\\Lib\\Dict"
+  ; "Keyset", "HH\\Lib\\Keyset"
+  ; "Math", "HH\\Lib\\Math"
+  ; "PHP", "HH\\Lib\\PHP"
+  ; "Str", "HH\\Lib\\Str"
+  ; "Vec", "HH\\Lib\\Vec"
+  ]
+
 let elaborate_id ns kind id =
-  let fq_id = snd (Namespaces.elaborate_id ns kind id) in
+  let fully_qualified_id = snd (Namespaces.elaborate_id ns kind id) in
+  let fully_qualified_id =
+    Namespaces.renamespace_if_aliased
+      ~reverse:true auto_namespace_map fully_qualified_id
+  in
   let need_fallback =
     ns.Namespace_env.ns_name <> None &&
     not (String.contains (snd id) '\\') in
   if need_fallback
-  then SU.strip_global_ns fq_id, Some (snd id)
-  else SU.strip_global_ns fq_id, None
+  then SU.strip_global_ns fully_qualified_id, Some (snd id)
+  else SU.strip_global_ns fully_qualified_id, None
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.

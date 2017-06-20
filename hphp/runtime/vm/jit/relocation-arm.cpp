@@ -591,9 +591,9 @@ size_t relocateImpl(Env& env) {
       }
 
       // If we just copied the first instruction of a smashableMovq, then it may
-      // with an internal reference that'll need to be adjusted below.
+      // have an internal reference that'll need to be adjusted below.
       if (!literals.count(src) && isSmashableMovq(srcAddr)) {
-	env.updateInternalRefs = true;
+        env.updateInternalRefs = true;
       }
 
       if (srcAddr == env.start) {

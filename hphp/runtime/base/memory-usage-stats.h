@@ -32,12 +32,14 @@ namespace HPHP {
  * totalAlloc will also be maintained, otherwise it will be 0.
  */
 struct MemoryUsageStats {
-  int64_t mmUsage;    // bytes currently in use via MM apis
-  int64_t threadUsage;// bytes currently in use via jemalloc apis
+  int64_t mmUsage;    // bytes are currently in use via MM apis
+  int64_t auxUsage;   // adjustment for allocations via jemalloc
 
   int64_t capacity;   // sum of slabs & big objects (MM's capacity)
   int64_t limit;      // the max bytes allowed for a request before it is
                       // terminated for exceeding the memory limit
+  int64_t mallocDebt; // how many bytes of malloced memory have not
+                      // been processed by MemoryManager::refreshStats
   int64_t peakUsage;  // how many bytes have been used at maximum
   int64_t peakCap;    // peak bytes owned by MemoryManager (slabs and big)
   int64_t peakIntervalUsage; // peakUsage during userland interval
@@ -46,18 +48,7 @@ struct MemoryUsageStats {
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
 
-  /*
-   * Current malloc usage for this thread, minus the large objects
-   * and slabs owned by MemoryManager.
-   */
-  int64_t auxUsage() const { return threadUsage - capacity; }
-
-  /*
-   * Current usage for this thread as the sum of MemoryManager usage
-   * (allocated but not yet freed) plus direct jemalloc usage
-   * (allocated-deallocated) that bypasses MemoryManager.
-   */
-  int64_t usage() const { return mmUsage + auxUsage(); }
+  int64_t usage() const { return mmUsage + auxUsage; }
 
   friend struct MemoryManager;
 };

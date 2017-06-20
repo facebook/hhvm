@@ -161,6 +161,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
+  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) pre:\n"
     "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
@@ -170,7 +171,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
-    m_stats.threadUsage = 0;
+    m_stats.auxUsage = 0;
     m_stats.capacity = 0;
     m_stats.peakUsage = 0;
     m_stats.peakCap = 0;
@@ -199,7 +200,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // Anything that was definitively allocated by the MemoryManager allocator
     // should be counted in this number even if we're otherwise zeroing out
     // the count for each thread.
-    m_stats.totalAlloc = s_statsEnabled ? m_stats.capacity : 0;
+    m_stats.totalAlloc = s_statsEnabled ? m_stats.mallocDebt : 0;
 
     m_enableStatsSync = s_statsEnabled;
 #else
@@ -208,6 +209,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   }
 #ifdef USE_JEMALLOC
   if (s_statsEnabled) {
+    m_stats.mallocDebt = 0;
     m_prevDeallocated = *m_deallocated;
     m_prevAllocated = *m_allocated;
   }
@@ -219,6 +221,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakCap);
   FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
     m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
+  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
 #else
   FTRACE(1, "resetStatsImpl({}) post:\n"
     "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
@@ -245,7 +248,7 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
  *
  * The stats parameter allows the updates to be applied to either
  * m_stats as in refreshStats() or to a separate MemoryUsageStats
- * struct as in getStatsCopy().
+ * struct as in getStatsSafe().
  *
  * The template variable live controls whether or not MemoryManager
  * member variables are updated and whether or not to call helper
@@ -261,9 +264,10 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   //
   //   int64 musage = delta - delta0;
   //
-  // This includes memory allocated by the request heap (BigHeap),
-  // which is recorded in m_stats.capacity, so it can be subtracted
-  // when necessary to avoid double-counting.
+  // Note however, the slab allocator adds to m_stats.mallocDebt
+  // when it calls malloc(), so that this function can avoid
+  // double-counting the malloced memory. Thus musage in the example
+  // code may well substantially exceed m_stats.usage.
   if (m_enableStatsSync) {
     // We can't currently handle wrapping so make sure this isn't happening.
     assert(*m_allocated <= uint64_t(std::numeric_limits<int64_t>::max()));
@@ -276,7 +280,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       curAllocated, m_prevAllocated, curAllocated - m_prevAllocated);
     FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\nchange: {}\n",
       curDeallocated, m_prevDeallocated, curDeallocated - m_prevDeallocated);
-    FTRACE(1, "usage: {}\ntotalAlloc: {}\n", stats.usage(), stats.totalAlloc);
+    FTRACE(1, "usage: {}\ntotalAlloc: {}\nmallocDebt: {}\n",
+      stats.usage(), stats.totalAlloc, stats.mallocDebt);
 
     // Since these deltas potentially include memory allocated from another
     // thread but deallocated on this one, it is possible for these numbers to
@@ -287,13 +292,17 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 
     // Subtract the old usage adjustment (prevUsage) and add the current one
     // (curUsage) to arrive at the new combined usage number.
-    stats.threadUsage += curUsage - prevUsage;
+    stats.auxUsage += curUsage - prevUsage;
+
+    // Remove the "debt" accrued from request-heap allocating slabs and big
+    // objects, so we don't double count them.
+    stats.auxUsage -= stats.mallocDebt;
+    stats.mallocDebt = 0;
 
     // Accumulate the increase in allocation volume since the last refresh.
     // We need to do the calculation instead of just setting it to curAllocated
     // because of the MaskAlloc capability.
     stats.totalAlloc += int64_t(curAllocated) - int64_t(m_prevAllocated);
-
     if (live) {
       m_prevAllocated = curAllocated;
       m_prevDeallocated = curDeallocated;
@@ -670,6 +679,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
+  m_stats.mallocDebt += slab.size;
   m_stats.capacity += slab.size;
   m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
   m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
@@ -773,6 +783,8 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = Mode == FreeRequested ? bytes : block.size;
   m_stats.mmUsage += delta;
+  // Adjust jemalloc otherwise we'll double count the direct allocation.
+  m_stats.mallocDebt += delta;
   m_stats.capacity += block.size + sizeof(MallocNode);
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
@@ -799,6 +811,7 @@ MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   auto old_size = n->nbytes - sizeof(MallocNode);
   auto block = m_heap.resizeBig(n + 1, nbytes);
   m_stats.mmUsage += block.size - old_size;
+  m_stats.mallocDebt += block.size - old_size;
   m_stats.capacity += block.size - old_size;
   updateBigStats();
   return block;
@@ -809,6 +822,7 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.mmUsage -= bytes;
+  m_stats.mallocDebt -= bytes;
   auto actual = static_cast<MallocNode*>(vp)[-1].nbytes;
   assert(bytes <= actual);
   m_stats.capacity -= actual;

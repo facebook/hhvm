@@ -90,8 +90,7 @@ let get_all_supertypes env ty =
       | _ ->
         iter seen env (ty::acc) tyl
   in
-   iter SSet.empty env [] [ty]
-
+    iter SSet.empty env [] [ty] 
 
 (*****************************************************************************
  * Get the "as" constraints from an abstract type or generic parameter, or

@@ -557,3 +557,41 @@ end
 
 (* Set to true when we are trying to infer the missing type hints. *)
 let is_suggest_mode = ref false
+
+
+let rec ty_equal ty1 ty2 =
+  let ty_1, ty_2 = (snd ty1, snd ty2) in
+  match  ty_1, ty_2 with
+    | Toption ty, Toption ty2 -> ty_equal ty ty2
+    | Tfun fty, Tfun fty2 -> fty.ft_pos = fty2.ft_pos
+    | Tunresolved tyl1, Tunresolved tyl2
+    | Ttuple tyl1, Ttuple tyl2 ->
+      tyl_equal tyl1 tyl2
+    | Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2) ->
+      abstract_kind_eq ak1 ak2 && Option.equal ty_equal opt_cstr1 opt_cstr2
+    (* An instance of a class or interface, ty list are the arguments *)
+    | Tclass (id, tyl), Tclass(id2, tyl2) ->
+      id = id2 && (tyl_equal tyl tyl2)
+    (* Localized version of Tarray *)
+    | Tarraykind ak1, Tarraykind ak2 ->
+      array_kind_eq ak1 ak2
+    | _ -> ty_1 = ty_2
+  and tyl_equal tyl1 tyl2 =
+    match tyl1, tyl2 with
+    | [], [] -> true
+    | x::xs, y::ys -> ty_equal x y && (tyl_equal xs ys)
+    | _ -> false
+  and array_kind_eq ak1 ak2 =
+    match ak1, ak2 with
+    | AKmap (ty1, ty2), AKmap (ty3, ty4)
+    | AKdarray (ty1, ty2), AKdarray (ty3, ty4) ->
+      ty_equal ty1 ty3 && ty_equal ty2 ty4
+    | AKvarray ty1, AKvarray ty2
+    | AKvec ty1, AKvec ty2 ->
+      ty_equal ty1 ty2
+    | _ -> ak1 = ak2
+  and abstract_kind_eq t1 t2 =
+    match t1, t2 with
+    | AKnewtype (id, tyl), AKnewtype (id2, tyl2) ->
+      id = id2 && tyl_equal tyl tyl2
+    | _ -> t1 = t2

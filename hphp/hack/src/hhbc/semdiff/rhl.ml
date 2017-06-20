@@ -340,6 +340,12 @@ let check_instruct_base asn i i' =
   | FPassBaseL (n,l), FPassBaseL (n',l') ->
     if n = n' then reads asn l l'
     else None
+  | Dim (mode,MemberKey.EL l), Dim (mode',MemberKey.EL l')
+  | Dim (mode,MemberKey.PL l), Dim (mode',MemberKey.PL l')
+    when mode=mode' -> reads asn l l'
+    | FPassDim(n,MemberKey.EL l), FPassDim(n',MemberKey.EL l')
+  | FPassDim(n,MemberKey.PL l), FPassDim(n',MemberKey.PL l')
+    when n=n' -> reads asn l l'
   | _, _ -> if i=i' then Some asn else None
 
 let check_instruct_final asn i i' =
@@ -348,7 +354,32 @@ let check_instruct_final asn i i' =
       (match reads asn l1 l1' with
         | None -> None
         | Some newasn -> reads newasn l2 l2')
-  (* I'm guessing wildly here! *)
+   (* TODO: abstraction, we've heard of it *)
+   | QueryM (n,op,MemberKey.EL l), QueryM (n',op',MemberKey.EL l')
+   | QueryM (n,op,MemberKey.PL l), QueryM (n',op',MemberKey.PL l')
+    when n=n' && op=op' -> reads asn l l'
+   | VGetM (n, MemberKey.EL l), VGetM (n', MemberKey.EL l')
+   | VGetM (n, MemberKey.PL l), VGetM (n', MemberKey.PL l')
+    when n=n' -> reads asn l l'
+   | FPassM (m,n,MemberKey.EL l), FPassM (m',n',MemberKey.EL l')
+   | FPassM (m,n,MemberKey.PL l), FPassM (m',n',MemberKey.PL l')
+    when m=m' && n=n' -> reads asn l l'
+   | SetM (n, MemberKey.EL l), SetM (n', MemberKey.EL l')
+   | SetM (n, MemberKey.PL l), SetM (n', MemberKey.PL l')
+    when n=n' -> reads asn l l'
+   | IncDecM (m,op,MemberKey.EL l), IncDecM (m',op',MemberKey.EL l')
+   | IncDecM (m,op,MemberKey.PL l), IncDecM (m',op',MemberKey.PL l')
+    when m=m' && op=op' -> reads asn l l'
+   | SetOpM (m,op,MemberKey.EL l), SetOpM (m',op',MemberKey.EL l')
+   | SetOpM (m,op,MemberKey.PL l), SetOpM (m',op',MemberKey.PL l')
+    when m=m' && op=op' -> reads asn l l'
+   | BindM (n, MemberKey.EL l), BindM (n', MemberKey.EL l')
+   | BindM (n, MemberKey.PL l), BindM (n', MemberKey.PL l')
+    when n=n' -> reads asn l l'
+   | UnsetM (n, MemberKey.EL l), UnsetM (n', MemberKey.EL l')
+   | UnsetM (n, MemberKey.PL l), UnsetM (n', MemberKey.PL l')
+    when n=n' -> reads asn l l'
+    (* I'm guessing a bit here! *)
    | SetWithRefRML l, SetWithRefRML l' -> reads asn l l'
    | _, _ -> if i=i' then Some asn else None
 

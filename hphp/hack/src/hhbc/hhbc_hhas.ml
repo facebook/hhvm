@@ -805,12 +805,16 @@ and string_of_import_flavor = function
   | A.IncludeOnce -> "include_once"
   | A.RequireOnce -> "require_once"
 
+and string_of_is_variadic b =
+  if b then "..." else ""
+and string_of_is_reference b =
+  if b then "&" else ""
+
 and string_of_fun f use_list =
   let string_of_args p =
     let hint =
       Option.value_map p.A.param_hint ~default:"" ~f:(string_of_hint ~ns:true)
     in
-    let is_ref = if p.A.param_is_reference then "&" else "" in
     let name = snd @@ p.A.param_id in
     let default_val =
       Option.value_map
@@ -818,7 +822,8 @@ and string_of_fun f use_list =
         ~default:""
         ~f:(fun e -> " = " ^ (string_of_param_default_value e))
     in
-    hint ^ " " ^ is_ref ^ name ^ default_val
+      string_of_is_variadic p.A.param_is_variadic ^ hint ^ " "
+      ^ string_of_is_reference p.A.param_is_reference ^ name ^ default_val
   in
   let args = String.concat ", " @@ List.map string_of_args f.A.f_params in
   let use_list_helper ((_, id), b) = (if b then "&" else "") ^ id in
@@ -990,8 +995,9 @@ let string_of_param p =
   let param_type_info = Hhas_param.type_info p in
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
-  string_of_type_info_option param_type_info
-  ^ (if Hhas_param.is_reference p then "&" else "")
+    string_of_is_variadic (Hhas_param.is_variadic p)
+  ^ string_of_type_info_option param_type_info
+  ^ string_of_is_reference (Hhas_param.is_reference p)
   ^ param_name
   ^ string_of_param_default_value_option param_default_value
 

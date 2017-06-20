@@ -28,6 +28,7 @@ open Hhas_parser_actions
 %token LANGLE
 %token RANGLE
 %token COLONCOLON
+%token DOTDOTDOT
 %token LPAR
 %token RPAR
 %token LBRACE LBRACK
@@ -135,13 +136,17 @@ paramdefaultvalueopt:
   | EQUALS ID LPAR TRIPLEQUOTEDSTRING RPAR
    {Some (makelabel $2, (Pos.none, Ast.String(Pos.none,$4)))}
 ;
+is_variadic:
+  | /* empty */ {false}
+  | DOTDOTDOT {true}
 param:
-    | typeinfooption possibleampersand vname paramdefaultvalueopt
+    | is_variadic typeinfooption possibleampersand vname paramdefaultvalueopt
       {Hhas_param.make
-        $3 (*name *)
-        $2(*isreference*)
-        $1 (* type info option *)
-        $4(*defaultvalue*)}
+        $4 (* name *)
+        $3 (* is_reference*)
+        $1 (* variadic *)
+        $2 (* type info option *)
+        $5 (* default_value *)}
 ;
 vname:
     | DOLLAR ID {"$" ^ $2}

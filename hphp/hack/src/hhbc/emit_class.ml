@@ -331,7 +331,7 @@ let emit_class : A.class_ -> Hhas_class.t =
               make_cinit_instrs cs;
             ] in
       let instrs = make_cinit_instrs initialized_class_constants in
-      let params = [Hhas_param.make "$constName" false None None] in
+      let params = [Hhas_param.make "$constName" false false None None] in
       [make_86method
         ~name:"86cinit"
         ~params

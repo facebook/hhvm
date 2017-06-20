@@ -155,10 +155,10 @@ let make_memoize_instance_method_no_params_code ~non_null_return info method_id 
 
 (* md is the already-renamed memoize method that must be wrapped *)
 let make_memoize_instance_method_with_params_code
-  env info method_id variadic_and_params index =
+  env info method_id params index =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
-  let param_count = List.length variadic_and_params in
+  let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
   (* All memoized methods in the same class share a cache. We distinguish the
@@ -179,7 +179,6 @@ let make_memoize_instance_method_with_params_code
       empty,
       param_count
   in
-  let params = List.map variadic_and_params snd in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper method not in the original method *)
     Emit_param.emit_param_default_value_setter env params
@@ -190,7 +189,7 @@ let make_memoize_instance_method_with_params_code
   let first_parameter_local = local_count in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:variadic_and_params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
     instr_checkthis;
     index_block;
     param_code_sets params first_parameter_local;
@@ -287,20 +286,19 @@ let make_memoize_static_method_no_params_code ~non_null_return info method_id =
     instr_retc ]
 
 let make_memoize_static_method_with_params_code
-  env info method_id variadic_and_params =
-  let param_count = List.length variadic_and_params in
+  env info method_id params =
+  let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
   let original_name_lc = String.lowercase_ascii
     (Hhbc_id.Method.to_raw_string method_id) in
-  let params = List.map variadic_and_params snd in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper method not in the original method *)
     Emit_param.emit_param_default_value_setter env params
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:variadic_and_params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
     param_code_sets params param_count;
     instr_string (original_name_lc ^ multi_memoize_cache info.memoize_class_prefix);
     get_self info;
@@ -350,7 +348,7 @@ let emit ~non_null_return env info index return_type_info params is_static metho
     then make_memoize_static_method_code ~non_null_return env info method_id params
     else make_memoize_instance_method_code ~non_null_return env info index method_id params
   in
-  make_wrapper return_type_info (List.map params snd) instrs
+  make_wrapper return_type_info params instrs
 
 let emit_memoize_wrapper_body env memoize_info index ast_method
     ~scope ~namespace params ret =

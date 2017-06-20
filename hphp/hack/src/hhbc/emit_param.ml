@@ -13,21 +13,14 @@ open Emit_type_hint
 open Instruction_sequence
 module A = Ast
 
-let from_variadic_param_hint_opt ho =
-  let p = Pos.none in
-  match ho with
-  | None -> Some (p, A.Happly ((p, "array"), []))
-  | Some h -> Some (p, A.Happly ((p, "array"), [h]))
-
 let from_ast ~tparams ~namespace ~generate_defaults p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
   let param_hint =
     if param_is_variadic
-    then from_variadic_param_hint_opt p.Ast.param_hint
+    then None
     else p.Ast.param_hint
   in
-  let tparams = if param_is_variadic then "array"::tparams else tparams in
   let nullable =
     match p.A.param_expr with
     | Some (_, A.Null) -> true
@@ -41,23 +34,23 @@ let from_ast ~tparams ~namespace ~generate_defaults p =
     else None
   in
   if param_is_variadic && param_name = "..." then None else
-  Some (param_is_variadic, Hhas_param.make
-    param_name p.A.param_is_reference param_type_info param_default_value)
+  Some (Hhas_param.make param_name p.A.param_is_reference param_is_variadic
+    param_type_info param_default_value)
 
 let rename_params params =
   let names = Core.List.fold_left params
-    ~init:SSet.empty ~f:(fun n (_, p) -> SSet.add (Hhas_param.name p) n) in
-  let rec rename param_counts (is_variadic, param) =
+    ~init:SSet.empty ~f:(fun n p -> SSet.add (Hhas_param.name p) n) in
+  let rec rename param_counts param =
     let name = Hhas_param.name param in
     match SMap.get name param_counts with
     | None ->
-      (SMap.add name 0 param_counts, (is_variadic, param))
+      (SMap.add name 0 param_counts, param)
     | Some count ->
       let param_counts = SMap.add name (count + 1) param_counts in
       let newname = name ^ string_of_int count in
       if SSet.mem newname names
-      then rename param_counts (is_variadic, param)
-      else param_counts, (is_variadic, Hhas_param.with_name newname param)
+      then rename param_counts param
+      else param_counts, (Hhas_param.with_name newname param)
   in
     List.rev (snd (Core.List.map_env SMap.empty (List.rev params) rename))
 

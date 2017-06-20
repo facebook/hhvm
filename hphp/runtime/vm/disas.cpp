@@ -501,8 +501,12 @@ std::string func_param_list(const FuncInfo& finfo) {
   for (auto i = uint32_t{0}; i < func->numParams(); ++i) {
     if (i != 0) ret += ", ";
 
-    ret += opt_type_info(func->params()[i].userType,
-                         func->params()[i].typeConstraint);
+    if (func->params()[i].variadic) {
+      ret += "...";
+    } else {
+      ret += opt_type_info(func->params()[i].userType,
+                           func->params()[i].typeConstraint);
+    }
     if (func->byRef(i)) ret += "&";
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {

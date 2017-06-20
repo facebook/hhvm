@@ -75,20 +75,18 @@ let make_memoize_function_no_params_code ~non_null_return renamed_function_id =
       ];
     instr_retc ]
 
-let make_memoize_function_with_params_code env
-  variadic_and_params renamed_method_id =
-  let param_count = List.length variadic_and_params in
+let make_memoize_function_with_params_code env params renamed_method_id =
+  let param_count = List.length params in
   let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed (param_count + 1) in
-  let params = List.map variadic_and_params snd in
   let begin_label, default_value_setters =
     (* Default value setters belong in the wrapper function not in the original function *)
     Emit_param.emit_param_default_value_setter env params
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:variadic_and_params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
     instr_typedvalue (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
@@ -149,7 +147,7 @@ let emit_wrapper_function ~original_id ~renamed_id ast_fun =
     cannot_return_null ast_fun.Ast.f_fun_kind ast_fun.Ast.f_ret in
   let body_instrs = make_memoize_function_code ~non_null_return env params renamed_id in
   let memoized_body =
-    make_wrapper_body return_type_info (List.map params snd) body_instrs in
+    make_wrapper_body return_type_info params body_instrs in
   Hhas_function.make
     function_attributes
     original_id

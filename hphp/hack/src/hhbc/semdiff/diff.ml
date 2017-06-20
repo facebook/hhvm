@@ -355,9 +355,13 @@ let methods_alist_of_class c =
 let name_comparer = string_comparer
 let param_name_comparer = wrap Hhas_param.name
                                (fun _p s -> s) name_comparer
-let param_reference_comparer = wrap Hhas_param.is_reference
+let param_is_reference_comparer = wrap Hhas_param.is_reference
                                (fun p _s -> if Hhas_param.is_reference p
                                             then "&" else "")
+                               bool_comparer
+let param_is_variadic_comparer = wrap Hhas_param.is_variadic
+                               (fun p _s -> if Hhas_param.is_variadic p
+                                            then "..." else "")
                                bool_comparer
 let tc_flags_comparer = wrap Hhas_type_constraint.flags (fun _c s -> s)
                              (primitive_set_comparer
@@ -378,12 +382,18 @@ let type_info_comparer = join (fun s1 s2 -> "<" ^ s1 ^ " " ^s2 ^ ">")
 let param_type_info_comparer = wrap Hhas_param.type_info
                                     (fun _p s -> s)
                                     (option_comparer type_info_comparer)
-let param_name_reference_comparer = join (fun s1 s2 -> s1 ^ s2)
-                                         param_reference_comparer
-                                         param_name_comparer
-let param_ti_name_reference_comparer = join (fun s1 s2 -> s1 ^ s2)
-                                            param_type_info_comparer
-                                            param_name_reference_comparer
+let param_variadic_type_info_comparer =
+  join (fun s1 s2 -> s1 ^ s2)
+  param_is_variadic_comparer
+  param_type_info_comparer
+let param_name_reference_comparer =
+  join (fun s1 s2 -> s1 ^ s2)
+  param_is_reference_comparer
+  param_name_comparer
+let param_ti_name_reference_comparer =
+  join (fun s1 s2 -> s1 ^ s2)
+  param_variadic_type_info_comparer
+  param_name_reference_comparer
 (* Lifting the above to work on the first component of a pair *)
 let param_ti_name_reference_comparer_lifted =
  wrap fst (fun (_param, (_instrs : Hhbc_ast.instruct list)) s -> s)

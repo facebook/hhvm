@@ -24,8 +24,8 @@ let emit_method_prolog ~params ~needs_local_this =
     then instr (IMisc (InitThisLoc (Local.Named "$this")))
     else empty)
     ::
-    List.filter_map params (fun (is_variadic, p) ->
-    if is_variadic
+    List.filter_map params (fun p ->
+    if Hhas_param.is_variadic p
     then None else
     let param_type_info = Hhas_param.type_info p in
     let param_name = Hhas_param.name p in
@@ -130,8 +130,7 @@ let emit_body
   in
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =
-    Decl_vars.from_ast ~is_closure_body ~has_this
-    ~params:(List.map params snd) body in
+    Decl_vars.from_ast ~is_closure_body ~has_this ~params:params body in
   Local.reset_local (List.length params + List.length decl_vars);
   let env = Emit_env.(
     empty |>
@@ -140,8 +139,7 @@ let emit_body
     with_scope scope) in
   let stmt_instrs = emit_defs env body in
   let begin_label, default_value_setters =
-    Emit_param.emit_param_default_value_setter env (List.map params snd)
-  in
+    Emit_param.emit_param_default_value_setter env params in
   let is_generator, is_pair_generator = Generator.is_function_generator body in
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
@@ -163,7 +161,7 @@ let emit_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)
-    (List.map params snd)
+    params
     return_type_info,
     is_generator,
     is_pair_generator

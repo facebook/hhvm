@@ -1643,7 +1643,7 @@ PHPUnit\Framework\Constraint\CountTest::testCountGeneratorsDoNotRewind
 PHPUnit\Framework\Constraint\CountTest::testCountTraversable
 E
 PHPUnit\Framework\Constraint\ExceptionMessageRegExpTest::testMessageXdebugScreamCompatibility
-E
+S
 PHPUnit\Framework\Constraint\ExceptionMessageRegExpTest::testRegexMessage
 .
 PHPUnit\Framework\Constraint\ExceptionMessageRegExpTest::testRegexMessageExtreme
@@ -1827,7 +1827,7 @@ PHPUnit\Framework\TestCaseTest::testIncomplete
 PHPUnit\Framework\TestCaseTest::testIsInIsolationReturnsFalse
 .
 PHPUnit\Framework\TestCaseTest::testIsInIsolationReturnsTrue
-F
+.
 PHPUnit\Framework\TestCaseTest::testNoArgTestCasePasses
 .
 PHPUnit\Framework\TestCaseTest::testNoException

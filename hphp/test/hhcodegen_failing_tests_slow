@@ -2,7 +2,6 @@ slow/anon_class/anon_1.php
 slow/anon_class/extend_local.php
 slow/arithmetic/addo-member-key.php
 slow/arithmetic/edge_cases.php
-slow/array/empty.php
 slow/array_access/436.php
 slow/array_cse/543.php
 slow/array_init/248.php

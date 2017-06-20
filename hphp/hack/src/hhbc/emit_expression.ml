@@ -668,7 +668,7 @@ and emit_call_empty_expr env (_, expr_ as expr) =
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      instr (IIsset EmptyG)
+      instr_emptyg
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get ~need_ref:false env None QueryOp.Empty base_expr opt_elem_expr
@@ -676,6 +676,11 @@ and emit_call_empty_expr env (_, expr_ as expr) =
     emit_class_get env None QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~need_ref:false env None QueryOp.Empty expr prop nullflavor
+  | A.Lvar(_, id) when id = SN.Superglobals.globals ->
+    gather [
+      instr_string @@ SU.Locals.strip_dollar SN.Superglobals.globals;
+      instr_emptyg
+    ]
   | A.Lvar(_, id) when not (is_local_this env id) ->
     instr_emptyl (get_local env id)
   | A.Lvarvar(n, (_, id)) ->

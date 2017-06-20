@@ -127,10 +127,6 @@ let make_label_try_maps prog =
    A fault handler can certainly have a catch handler as parent
    but I don't think catch handlers actually need parents...
 *)
-let rec first_fault_handler l = match l with
- | [] -> None
- | Fault_handler n :: _rest -> Some (Fault_handler n)
- | Catch_handler _ :: rest -> first_fault_handler rest
 
 let make_exntable prog labelmap trymap =
  let rec loop p n trycatchstack exnmap parents =
@@ -149,7 +145,7 @@ let make_exntable prog labelmap trymap =
 
     | ITry (TryFaultBegin (Label.Fault _ as l)) ->
        let nl = LabelMap.find l labelmap in
-       let newparents = match first_fault_handler trycatchstack with
+       let newparents = match List.hd trycatchstack with
          | None -> parents
          | Some fh -> IMap.add nl fh parents in
        loop is (n+1) (Fault_handler nl :: trycatchstack) newexnmap newparents
@@ -574,18 +570,22 @@ let equiv prog prog' startlabelpairs =
                | [],[] -> try_specials () (* unwind not in handler! should be hard failure? *)
                | (Fault_handler h ::hs),
                  (Fault_handler h' ::hs') ->
-                 let newstack = match IMap.get h exnparents with
-                   | None -> hs
-                   | Some h2 -> h2::hs in
-                 let newstack' = match IMap.get h' exnparents' with
-                   | None -> hs'
-                   | Some h2' -> h2'::hs' in
-                 (match newstack, newstack' with
-                   | [],[] -> donext assumed todo (* both jump out*)
-                   | (hh::_), (hh'::_) ->
-                     check (newstack, ip_of_emv hh)
-                           (newstack',ip_of_emv hh')
-                           asn
+                 let opt_newstack_pc = match IMap.get h exnparents with
+                   | None -> (match hs with
+                               | [] -> None
+                               | (hh :: _) -> Some (hs, ip_of_emv hh))
+                   | Some (Fault_handler h2) -> Some(Fault_handler h2::hs, h2)
+                   | Some (Catch_handler h2) -> Some(hs, h2) in
+                 let opt_newstack_pc' = match IMap.get h' exnparents' with
+                   | None -> (match hs' with
+                               | [] -> None
+                               | (hh' :: _) -> Some (hs', ip_of_emv hh'))
+                   | Some (Fault_handler h2') -> Some(Fault_handler h2'::hs', h2')
+                   | Some (Catch_handler h2') -> Some (hs',h2') in
+                 (match opt_newstack_pc, opt_newstack_pc' with
+                   | None, None -> donext assumed todo (* both jump out*)
+                   | Some(ns,npc), Some (ns',npc') ->
+                     check (ns, npc) (ns',npc') asn
                            (add_assumption (pc,pc') asn assumed)
                            todo
                    | _,_ -> try_specials ())

@@ -670,8 +670,12 @@ void castBoolImpl(ISS& env, bool negate) {
     return push(env, std::move(*cell));
   }
 
-  if (t.subtypeOf(TArrE)) return push(env, negate ? TTrue : TFalse);
-  if (t.subtypeOf(TArrN)) return push(env, negate ? TFalse : TTrue);
+  if (t.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
+    return push(env, negate ? TTrue : TFalse);
+  }
+  if (t.subtypeOfAny(TArrN, TVecN, TDictN, TKeysetN)) {
+    return push(env, negate ? TFalse : TTrue);
+  }
 
   push(env, TBool);
 }
@@ -744,7 +748,20 @@ void in(ISS& env, const bc::CastKeyset&) {
 }
 
 void in(ISS& env, const bc::CastVArray&)  {
-  castImpl(env, TArr, tvCastToVArrayInPlace);
+  auto const t = popC(env);
+  if (auto val = tv(t)) {
+    auto result = eval_cell(
+      [&] {
+        tvCastToVArrayInPlace(&*val);
+        return *val;
+      }
+    );
+    if (result) {
+      constprop(env);
+      return push(env, std::move(*result));
+    }
+  }
+  push(env, TArr);
 }
 
 void in(ISS& env, const bc::CastDArray&)  {
@@ -1313,10 +1330,18 @@ void in(ISS& env, const bc::ClsRefGetC& op) {
 void in(ISS& env, const bc::AKExists& op) {
   auto const t1   = popC(env);
   auto const t2   = popC(env);
-  auto const t1Ok = t1.subtypeOf(TObj) || t1.subtypeOf(TArr);
-  auto const t2Ok = t2.subtypeOf(TInt) || t2.subtypeOf(TNull) ||
-                    t2.subtypeOf(TStr);
-  if (t1Ok && t2Ok) nothrow(env);
+
+  auto const mayThrow = [&]{
+    if (!t1.subtypeOfAny(TObj, TArr, TVec, TDict, TKeyset)) return true;
+    if (t2.subtypeOfAny(TStr, TNull)) {
+      return t1.subtypeOfAny(TObj, TArr) &&
+        RuntimeOption::EvalHackArrCompatNotices;
+    }
+    if (t2.subtypeOf(TInt)) return false;
+    return true;
+  }();
+
+  if (!mayThrow) nothrow(env);
   push(env, TBool);
 }
 
@@ -1696,8 +1721,11 @@ void in(ISS& env, const bc::SetOpL& op) {
     // We may have inferred a TSStr or TSArr with a value here, but
     // at runtime it will not be static.  For now just throw that
     // away.  TODO(#3696042): should be able to loosen_statics here.
-    if (resultTy->subtypeOf(TStr))      resultTy = TStr;
+    if (resultTy->subtypeOf(TStr)) resultTy = TStr;
     else if (resultTy->subtypeOf(TArr)) resultTy = TArr;
+    else if (resultTy->subtypeOf(TVec)) resultTy = TVec;
+    else if (resultTy->subtypeOf(TDict)) resultTy = TDict;
+    else if (resultTy->subtypeOf(TKeyset)) resultTy = TKeyset;
 
     setLoc(env, op.loc1, *resultTy);
     push(env, *resultTy);

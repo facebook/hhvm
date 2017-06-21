@@ -740,9 +740,19 @@ module Make (GetLocals : GetLocals) = struct
       is_static_var env h
 
   and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
+    (* TODO(t17492233): Remove this line once shapes use new syntax. *)
+    let sfi_optional =
+      if TypecheckerOptions.experimental_feature_enabled
+           (fst env).tcopt
+           TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes
+      then
+        match sf_hint with
+        | _, Hoption _ -> true
+        | _ -> sf_optional
+      else sf_optional in
     {
-      N.sfi_optional=sf_optional;
-      sfi_hint=hint env sf_hint;
+      N.sfi_optional = sfi_optional;
+      sfi_hint = hint env sf_hint;
     }
 
   and ast_shape_info_to_nast_shape_info

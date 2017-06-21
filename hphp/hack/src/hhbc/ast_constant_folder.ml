@@ -43,7 +43,16 @@ let rec expr_to_typed_value ns (_, expr_) =
         let k, v = afield_to_typed_value_pair ns x in
         Typed_value.add_to_dict d k v) ~init:[] in
     TV.Dict d
-  | A.Class_const(cid, (_, id)) when id = SN.Members.mClass ->
+  | A.Shape fields ->
+    shape_to_typed_value ns fields
+  | A.Class_const (cid, id) ->
+    class_const_to_typed_value ns cid id
+  | _ ->
+    raise NotLiteral
+
+and class_const_to_typed_value ns cid id =
+  if snd id = SN.Members.mClass
+  then
     let cexpr, _ = expr_to_class_expr ~resolve_self:true [] (id_to_expr cid) in
     begin match cexpr with
     | Class_id cid ->
@@ -51,8 +60,7 @@ let rec expr_to_typed_value ns (_, expr_) =
       TV.String (Hhbc_id.Class.to_raw_string fq_id)
     | _ -> raise NotLiteral
     end
-  | _ ->
-    raise NotLiteral
+  else raise NotLiteral
 
 and array_to_typed_value ns fields =
   let pairs, _ =
@@ -80,6 +88,18 @@ and array_to_typed_value ns fields =
           (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
             Int64.add maxindex Int64.one)
   in TV.Array (List.rev pairs)
+
+and shape_to_typed_value ns fields =
+  TV.Array (
+  List.map fields (fun (sf, expr) ->
+    let key =
+      match sf with
+      | A.SFlit id ->
+        TV.String (snd id)
+      | A.SFclass_const (class_id, id) ->
+        class_const_to_typed_value ns class_id id in
+    (key, expr_to_typed_value ns expr))
+  )
 
 and key_expr_to_typed_value ns expr =
   let tv = expr_to_typed_value ns expr in

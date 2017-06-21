@@ -188,10 +188,6 @@ let extract_shape_field_name_pstring = function
   | A.SFlit p -> A.String p
   | A.SFclass_const (id, p) -> A.Class_const (id, p)
 
-let extract_shape_field_name = function
-  | A.SFlit (_, s)
-  | A.SFclass_const (_, (_, s)) -> s
-
 let rec expr_and_new env instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
     let add_instr =

@@ -922,7 +922,6 @@ slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_annotation/type_annotation_classes4.php
 slow/type_annotation/type_annotation_self1.php
-slow/type_annotation/type_annotation_shape1.php
 slow/type_assertions/1857.php
 slow/type_assertions/1860.php
 slow/type_assertions/1862.php

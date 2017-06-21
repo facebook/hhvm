@@ -4262,9 +4262,6 @@ and hint_shape_info_remain env =
           }
 
 and hint_shape_field env =
-  let is_nullable = function
-    | _, Hoption _ -> true
-    | _ -> false in
   (* Consume the next token to determine if we're creating an optional field. *)
   let sf_optional =
     if L.token env.file env.lb = Tqm then
@@ -4277,10 +4274,6 @@ and hint_shape_field env =
   let sf_name = shape_field_name env in
   expect env Tsarrow;
   let sf_hint = hint env in
-  (* TODO(t17492233): Remove this line once shapes use new syntax. *)
-  let sf_optional =
-    sf_optional ||
-      (promote_nullable_to_optional_in_shapes env && is_nullable sf_hint) in
   { sf_optional; sf_name; sf_hint }
 
 (*****************************************************************************)

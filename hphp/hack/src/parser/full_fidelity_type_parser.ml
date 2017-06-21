@@ -460,21 +460,24 @@ and parse_array_type_specifier parser =
 and parse_tuple_or_closure_type_specifier parser =
   let (parser1, _) = assert_token parser LeftParen in
   let token = peek_token parser1 in
-  if (Token.kind token) = Function then
+  match Token.kind token with
+  | Function
+  | Coroutine ->
     parse_closure_type_specifier parser
-  else
+  | _ ->
     parse_tuple_type_specifier parser
 
 and parse_closure_type_specifier parser =
 
   (* SPEC
       closure-type-specifier:
-          ( function ( type-specifier-listopt ) : type-specifier )
+          ( coroutine-opt function ( type-specifier-listopt ) : type-specifier )
   *)
 
   (* TODO: Error recovery is pretty weak here. We could be smarter. *)
   let (parser, olp) = next_token parser in
   let olp = make_token olp in
+  let (parser, coroutine) = optional_token parser Coroutine in
   let (parser, fnc) = next_token parser in
   let fnc = make_token fnc in
   let (parser, ilp) = expect_left_paren parser in
@@ -490,7 +493,8 @@ and parse_closure_type_specifier parser =
   let (parser, col) = expect_colon parser in
   let (parser, ret) = parse_type_specifier parser in
   let (parser, orp) = expect_right_paren parser in
-  let result = make_closure_type_specifier olp fnc ilp pts irp col ret orp in
+  let result =
+    make_closure_type_specifier olp coroutine fnc ilp pts irp col ret orp in
   (parser, result)
 
 and parse_tuple_type_specifier parser =

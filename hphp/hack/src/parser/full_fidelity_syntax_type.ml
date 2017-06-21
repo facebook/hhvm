@@ -826,6 +826,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and closure_type_specifier =
     { closure_outer_left_paren                           : t
+    ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
     ; closure_parameter_types                            : t
@@ -2047,6 +2048,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and closure_type_specifier =
     { closure_outer_left_paren: Token.t value
+    ; closure_coroutine: Token.t option value
     ; closure_function_keyword: Token.t value
     ; closure_inner_left_paren: Token.t value
     ; closure_parameter_types: specifier listesque value

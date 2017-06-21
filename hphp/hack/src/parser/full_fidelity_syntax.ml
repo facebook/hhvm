@@ -1893,6 +1893,7 @@ module WithToken(Token: TokenType) = struct
 
     let get_closure_type_specifier_children {
       closure_outer_left_paren;
+      closure_coroutine;
       closure_function_keyword;
       closure_inner_left_paren;
       closure_parameter_types;
@@ -1902,6 +1903,7 @@ module WithToken(Token: TokenType) = struct
       closure_outer_right_paren;
     } = (
       closure_outer_left_paren,
+      closure_coroutine,
       closure_function_keyword,
       closure_inner_left_paren,
       closure_parameter_types,
@@ -3420,6 +3422,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
+        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
@@ -3429,6 +3432,7 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         closure_outer_left_paren;
+        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
@@ -4932,6 +4936,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
+        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
@@ -4941,6 +4946,7 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         "closure_outer_left_paren";
+        "closure_coroutine";
         "closure_function_keyword";
         "closure_inner_left_paren";
         "closure_parameter_types";
@@ -6628,6 +6634,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
+          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_types;
@@ -6638,6 +6645,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         ClosureTypeSpecifier {
           closure_outer_left_paren;
+          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_types;
@@ -8452,6 +8460,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_closure_type_specifier
       closure_outer_left_paren
+      closure_coroutine
       closure_function_keyword
       closure_inner_left_paren
       closure_parameter_types
@@ -8462,6 +8471,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.ClosureTypeSpecifier [
         closure_outer_left_paren;
+        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;

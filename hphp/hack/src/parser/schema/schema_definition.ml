@@ -1685,6 +1685,7 @@ let schema : schema_node list =
     ; aggregates  = [ Specifier ]
     ; fields =
       [ "outer_left_paren", Token
+      ; "coroutine", ZeroOrOne Token
       ; "function_keyword", Token
       ; "inner_left_paren", Token
       ; "parameter_types", ZeroOrMore (Aggregate Specifier)

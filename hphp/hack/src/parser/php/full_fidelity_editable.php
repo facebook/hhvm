@@ -18208,6 +18208,7 @@ final class DictionaryTypeSpecifier extends EditableSyntax {
 }
 final class ClosureTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_outer_left_paren;
+  private EditableSyntax $_coroutine;
   private EditableSyntax $_function_keyword;
   private EditableSyntax $_inner_left_paren;
   private EditableSyntax $_parameter_types;
@@ -18217,6 +18218,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_outer_right_paren;
   public function __construct(
     EditableSyntax $outer_left_paren,
+    EditableSyntax $coroutine,
     EditableSyntax $function_keyword,
     EditableSyntax $inner_left_paren,
     EditableSyntax $parameter_types,
@@ -18226,6 +18228,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     EditableSyntax $outer_right_paren) {
     parent::__construct('closure_type_specifier');
     $this->_outer_left_paren = $outer_left_paren;
+    $this->_coroutine = $coroutine;
     $this->_function_keyword = $function_keyword;
     $this->_inner_left_paren = $inner_left_paren;
     $this->_parameter_types = $parameter_types;
@@ -18236,6 +18239,9 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   }
   public function outer_left_paren(): EditableSyntax {
     return $this->_outer_left_paren;
+  }
+  public function coroutine(): EditableSyntax {
+    return $this->_coroutine;
   }
   public function function_keyword(): EditableSyntax {
     return $this->_function_keyword;
@@ -18261,6 +18267,19 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_outer_left_paren(EditableSyntax $outer_left_paren): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $outer_left_paren,
+      $this->_coroutine,
+      $this->_function_keyword,
+      $this->_inner_left_paren,
+      $this->_parameter_types,
+      $this->_inner_right_paren,
+      $this->_colon,
+      $this->_return_type,
+      $this->_outer_right_paren);
+  }
+  public function with_coroutine(EditableSyntax $coroutine): ClosureTypeSpecifier {
+    return new ClosureTypeSpecifier(
+      $this->_outer_left_paren,
+      $coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18272,6 +18291,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_function_keyword(EditableSyntax $function_keyword): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18283,6 +18303,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_inner_left_paren(EditableSyntax $inner_left_paren): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $inner_left_paren,
       $this->_parameter_types,
@@ -18294,6 +18315,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_parameter_types(EditableSyntax $parameter_types): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $parameter_types,
@@ -18305,6 +18327,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_inner_right_paren(EditableSyntax $inner_right_paren): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18316,6 +18339,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_colon(EditableSyntax $colon): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18327,6 +18351,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_return_type(EditableSyntax $return_type): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18338,6 +18363,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   public function with_outer_right_paren(EditableSyntax $outer_right_paren): ClosureTypeSpecifier {
     return new ClosureTypeSpecifier(
       $this->_outer_left_paren,
+      $this->_coroutine,
       $this->_function_keyword,
       $this->_inner_left_paren,
       $this->_parameter_types,
@@ -18354,6 +18380,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $outer_left_paren = $this->outer_left_paren()->rewrite($rewriter, $new_parents);
+    $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
     $inner_left_paren = $this->inner_left_paren()->rewrite($rewriter, $new_parents);
     $parameter_types = $this->parameter_types()->rewrite($rewriter, $new_parents);
@@ -18363,6 +18390,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $outer_right_paren = $this->outer_right_paren()->rewrite($rewriter, $new_parents);
     if (
       $outer_left_paren === $this->outer_left_paren() &&
+      $coroutine === $this->coroutine() &&
       $function_keyword === $this->function_keyword() &&
       $inner_left_paren === $this->inner_left_paren() &&
       $parameter_types === $this->parameter_types() &&
@@ -18374,6 +18402,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     } else {
       return $rewriter(new ClosureTypeSpecifier(
         $outer_left_paren,
+        $coroutine,
         $function_keyword,
         $inner_left_paren,
         $parameter_types,
@@ -18388,6 +18417,9 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $outer_left_paren = EditableSyntax::from_json(
       $json->closure_outer_left_paren, $position, $source);
     $position += $outer_left_paren->width();
+    $coroutine = EditableSyntax::from_json(
+      $json->closure_coroutine, $position, $source);
+    $position += $coroutine->width();
     $function_keyword = EditableSyntax::from_json(
       $json->closure_function_keyword, $position, $source);
     $position += $function_keyword->width();
@@ -18411,6 +18443,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $position += $outer_right_paren->width();
     return new ClosureTypeSpecifier(
         $outer_left_paren,
+        $coroutine,
         $function_keyword,
         $inner_left_paren,
         $parameter_types,
@@ -18421,6 +18454,7 @@ final class ClosureTypeSpecifier extends EditableSyntax {
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_outer_left_paren;
+    yield $this->_coroutine;
     yield $this->_function_keyword;
     yield $this->_inner_left_paren;
     yield $this->_parameter_types;

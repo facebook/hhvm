@@ -1313,6 +1313,7 @@ let rec get_doc node =
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | ClosureTypeSpecifier
   { closure_outer_left_paren;
+    closure_coroutine;
     closure_function_keyword;
     closure_inner_left_paren;
     closure_parameter_types;
@@ -1321,6 +1322,7 @@ let rec get_doc node =
     closure_return_type;
     closure_outer_right_paren } ->
     let olp = get_doc closure_outer_left_paren in
+    let cor = get_doc closure_coroutine in
     let fnc = get_doc closure_function_keyword in
     let ilp = get_doc closure_inner_left_paren in
     let pts = get_doc closure_parameter_types in
@@ -1328,7 +1330,7 @@ let rec get_doc node =
     let col = get_doc closure_colon in
     let ret = get_doc closure_return_type in
     let orp = get_doc closure_outer_right_paren in
-    olp ^^^ fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
+    olp ^^^ cor ^| fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
   | ClassnameTypeSpecifier x ->
     let cn = get_doc x.classname_keyword in
     let la = get_doc x.classname_left_angle in

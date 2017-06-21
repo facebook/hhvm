@@ -16005,6 +16005,7 @@ class ClosureTypeSpecifier extends EditableSyntax
 {
   constructor(
     outer_left_paren,
+    coroutine,
     function_keyword,
     inner_left_paren,
     parameter_types,
@@ -16015,6 +16016,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   {
     super('closure_type_specifier', {
       outer_left_paren: outer_left_paren,
+      coroutine: coroutine,
       function_keyword: function_keyword,
       inner_left_paren: inner_left_paren,
       parameter_types: parameter_types,
@@ -16024,6 +16026,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       outer_right_paren: outer_right_paren });
   }
   get outer_left_paren() { return this.children.outer_left_paren; }
+  get coroutine() { return this.children.coroutine; }
   get function_keyword() { return this.children.function_keyword; }
   get inner_left_paren() { return this.children.inner_left_paren; }
   get parameter_types() { return this.children.parameter_types; }
@@ -16034,6 +16037,19 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_outer_left_paren(outer_left_paren){
     return new ClosureTypeSpecifier(
       outer_left_paren,
+      this.coroutine,
+      this.function_keyword,
+      this.inner_left_paren,
+      this.parameter_types,
+      this.inner_right_paren,
+      this.colon,
+      this.return_type,
+      this.outer_right_paren);
+  }
+  with_coroutine(coroutine){
+    return new ClosureTypeSpecifier(
+      this.outer_left_paren,
+      coroutine,
       this.function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16045,6 +16061,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_function_keyword(function_keyword){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16056,6 +16073,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_inner_left_paren(inner_left_paren){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       inner_left_paren,
       this.parameter_types,
@@ -16067,6 +16085,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_parameter_types(parameter_types){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
       parameter_types,
@@ -16078,6 +16097,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_inner_right_paren(inner_right_paren){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16089,6 +16109,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_colon(colon){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16100,6 +16121,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_return_type(return_type){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16111,6 +16133,7 @@ class ClosureTypeSpecifier extends EditableSyntax
   with_outer_right_paren(outer_right_paren){
     return new ClosureTypeSpecifier(
       this.outer_left_paren,
+      this.coroutine,
       this.function_keyword,
       this.inner_left_paren,
       this.parameter_types,
@@ -16126,6 +16149,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var outer_left_paren = this.outer_left_paren.rewrite(rewriter, new_parents);
+    var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
     var inner_left_paren = this.inner_left_paren.rewrite(rewriter, new_parents);
     var parameter_types = this.parameter_types.rewrite(rewriter, new_parents);
@@ -16135,6 +16159,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     var outer_right_paren = this.outer_right_paren.rewrite(rewriter, new_parents);
     if (
       outer_left_paren === this.outer_left_paren &&
+      coroutine === this.coroutine &&
       function_keyword === this.function_keyword &&
       inner_left_paren === this.inner_left_paren &&
       parameter_types === this.parameter_types &&
@@ -16149,6 +16174,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     {
       return rewriter(new ClosureTypeSpecifier(
         outer_left_paren,
+        coroutine,
         function_keyword,
         inner_left_paren,
         parameter_types,
@@ -16163,6 +16189,9 @@ class ClosureTypeSpecifier extends EditableSyntax
     let outer_left_paren = EditableSyntax.from_json(
       json.closure_outer_left_paren, position, source);
     position += outer_left_paren.width;
+    let coroutine = EditableSyntax.from_json(
+      json.closure_coroutine, position, source);
+    position += coroutine.width;
     let function_keyword = EditableSyntax.from_json(
       json.closure_function_keyword, position, source);
     position += function_keyword.width;
@@ -16186,6 +16215,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     position += outer_right_paren.width;
     return new ClosureTypeSpecifier(
         outer_left_paren,
+        coroutine,
         function_keyword,
         inner_left_paren,
         parameter_types,
@@ -16199,6 +16229,7 @@ class ClosureTypeSpecifier extends EditableSyntax
     if (ClosureTypeSpecifier._children_keys == null)
       ClosureTypeSpecifier._children_keys = [
         'outer_left_paren',
+        'coroutine',
         'function_keyword',
         'inner_left_paren',
         'parameter_types',

@@ -358,6 +358,7 @@ let make_functional_type_syntax argument_types return_type_syntax =
   let argument_types_syntax = make_delimited_list comma_syntax argument_types in
   make_closure_type_specifier
     left_paren_syntax
+    (* coroutine *) (make_missing ())
     function_keyword_syntax
     left_paren_syntax
     argument_types_syntax

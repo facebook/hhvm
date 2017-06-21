@@ -1305,10 +1305,21 @@ let rec transform node =
       transform_argish left_a members right_a;
     ]
   | ClosureTypeSpecifier x ->
-    let (outer_left_p, kw, inner_left_p, param_types, inner_right_p, colon,
-      ret_type, outer_right_p) = get_closure_type_specifier_children x in
+    let (
+      outer_left_p,
+      coroutine,
+      kw,
+      inner_left_p,
+      param_types,
+      inner_right_p,
+      colon,
+      ret_type,
+      outer_right_p
+    ) = get_closure_type_specifier_children x in
     Fmt [
       t outer_left_p;
+      t coroutine;
+      when_present coroutine space;
       t kw;
       transform_argish_with_return_type
         inner_left_p param_types inner_right_p colon ret_type;

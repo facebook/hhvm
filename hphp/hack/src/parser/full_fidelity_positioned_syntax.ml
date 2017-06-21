@@ -1828,11 +1828,13 @@ module FromMinimal = struct
         :: closure_parameter_types
         :: closure_inner_left_paren
         :: closure_function_keyword
+        :: closure_coroutine
         :: closure_outer_left_paren
         :: results
         ) ->
           ClosureTypeSpecifier
           { closure_outer_left_paren
+          ; closure_coroutine
           ; closure_function_keyword
           ; closure_inner_left_paren
           ; closure_parameter_types
@@ -3523,6 +3525,7 @@ module FromMinimal = struct
         convert offset todo results dictionary_type_keyword
     | { M.syntax = M.ClosureTypeSpecifier
         { M.closure_outer_left_paren
+        ; M.closure_coroutine
         ; M.closure_function_keyword
         ; M.closure_inner_left_paren
         ; M.closure_parameter_types
@@ -3540,6 +3543,7 @@ module FromMinimal = struct
         let todo = Convert (closure_parameter_types, todo) in
         let todo = Convert (closure_inner_left_paren, todo) in
         let todo = Convert (closure_function_keyword, todo) in
+        let todo = Convert (closure_coroutine, todo) in
         convert offset todo results closure_outer_left_paren
     | { M.syntax = M.ClassnameTypeSpecifier
         { M.classname_keyword

@@ -43,6 +43,23 @@ final class SuspendedCoroutineResult<T> implements CoroutineResult<T> {
 }
 
 /**
+ * Represents the return value from a coroutine that has finished by returning a
+ * value.
+ */
+final class ActualCoroutineResult<T> implements CoroutineResult<T> {
+
+  public function __construct(private T $result) {}
+
+  public function isSuspended(): bool {
+    return false;
+  }
+
+  public function getResult(): T {
+    return $this->result;
+  }
+}
+
+/**
  * Represents a unit type for the purposes of internal use with coroutines.
  *
  * It is difficult to deal with coroutines that are either void-returning, or if
@@ -64,6 +81,16 @@ final class CoroutineUnit {
       self::$unit = new CoroutineUnit();
     }
     return self::$unit;
+  }
+}
+
+/**
+ * Exception indicating that a completed coroutine was resumed erroneously.
+ */
+final class CoroutineAlreadyResumedException<T> extends Exception {
+
+  public function __construct(public CoroutineContinuation<T> $continuation) {
+    parent::__construct("The continuation was already resumed.");
   }
 }
 
@@ -134,4 +161,100 @@ abstract class ClosureBase<T> implements CoroutineContinuation<mixed> {
     mixed $data,
     ?Exception $ex,
   ): CoroutineResult<mixed>;
+}
+
+/**
+ * A wrapper continuation inserts an intermediary step into a coroutine
+ * workflow. We have a continuation that represents the continuation of a
+ * coroutine, and we have some method that produces a coroutine result. When
+ * this (void) continuation is resumed, we fetch the result and pass it along to
+ * the wrapped continuation.
+ */
+final class WrapperContinuation<T>
+  implements CoroutineContinuation<CoroutineUnit> {
+
+  public function __construct(
+    private CoroutineContinuation<T> $continuation,
+    private (function(): CoroutineResult<T>) $block,
+  ) {
+  }
+
+  public function resume(CoroutineUnit $unused): void {
+    CoroutineHelpers::processContinuation($this->continuation, $this->block);
+  }
+
+  public function resumeWithException(Exception $ex): void {
+    $this->continuation->resumeWithException($ex);
+  }
+}
+
+/**
+ * This class of static methods contains user-callable helper functions for
+ * creating coroutines.
+ */
+final class CreateCoroutine {
+
+  /**
+   * Creates a coroutine from a function that is parameterized with a
+   * "receiver".
+   *
+   * This function takes a completeion continuation, which is a callback that
+   * will be invoked when the coroutine completes. The passed-in coroutine is
+   * returned as a continuation which, when resumed (with null), will start the
+   * coroutine.
+   *
+   * Compared to CreateCoroutine::createWithReceiver, this function does not add
+   * any "safety layer" to the coroutine; no exception will be thrown if the
+   * coroutine is erronesouly resumed more than once.
+   */
+  public static function createWithReceiverUnchecked<TReceiver, TResult>(
+    // TODO(tingley): Sugar this as (coroutine function (TReceiver): TResult).
+    (
+      function(
+        CoroutineContinuation<TResult>,
+        TReceiver,
+      ): CoroutineResult<TResult>
+    ) $coroutineFunction,
+    TReceiver $receiver,
+    CoroutineContinuation<TResult> $completionContinuation,
+  ): CoroutineContinuation<CoroutineUnit> {
+    return new WrapperContinuation(
+      $completionContinuation,
+      () ==> $coroutineFunction($completionContinuation, $receiver),
+    );
+  }
+
+  // TODO(tingley): Work with ericlippert to implement SafeContinuation, and use
+  // it to implement createWithReceiver.
+}
+
+/**
+ * This class of static methods contains user-callable helper functions for
+ * suspending from within a coroutine.
+ */
+final class SuspendCoroutine {
+
+  /**
+   * Invokes the coroutine with the continuation of the coroutine. No safety is
+   * imposed; use SuspendCoroutine::suspend instead.
+   *
+   * This function has the following contract.
+   *
+   * * If the coroutine throws, it throws. It does not invoke
+   *   resumeWithException on the continuation.
+   * * If the coroutine returns a value, it returns a value. It does not invoke
+   *   resume on the continuation.
+   * * If the coroutine suspends, then the coroutine called is responsible for
+   *   arranging for the continuation to be resumed in the future.
+   */
+  public static function suspendUnchecked<T>(
+    CoroutineContinuation<T> $coroutineContinuation_generated,
+    // TODO(tingley): Resugar as (coroutine function (): T)
+    (function(CoroutineContinuation<T>):CoroutineResult<T>) $coroutine,
+  ): CoroutineResult<T> {
+    return $coroutine($coroutineContinuation_generated);
+  }
+
+  // TODO(tingley): Work with ericlippert to implement SafeContinuation, and use
+  // it to implement suspend.
 }

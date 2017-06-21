@@ -635,104 +635,112 @@ let extract_suspend_statements_and_gather_rewrite_data_for_expressions
  * expression node appropriately.
  *)
 let rewrite_suspends node =
-  let rewrite_statements node next_label =
-    match syntax node with
-    | ReturnStatement { return_expression; _; } ->
-        let (next_label, prefix_statements), return_expression =
-          extract_suspend_statements return_expression next_label in
-        let return_expression =
-          if is_missing return_expression then coroutine_unit_call_syntax
-          else return_expression in
-        let return_expression = make_object_creation_expression_syntax
-          "ActualCoroutineResult" [return_expression] in
-        let assignment = set_next_label_syntax (-1) in
-        let ret = make_return_statement_syntax return_expression in
-        let statements = prefix_statements @ [ assignment; ret ] in
-        let statements = make_compound_statement_syntax statements in
+  let rewrite_statements ancestors node next_label =
+    (* TODO(tingley/ericlippert): We don't want to rewrite lambdas. The Rewriter
+       does not have the capability to "rewrite_where" -- we should add it,
+       similarly to the lambda_analyzer. *)
+    if Core_list.exists
+        ~f:(fun node -> is_lambda_expression node || is_anonymous_function node)
+        ancestors then
+      next_label, Rewriter.Result.Keep
+    else
+      match syntax node with
+      | ReturnStatement { return_expression; _; } ->
+          let (next_label, prefix_statements), return_expression =
+            extract_suspend_statements return_expression next_label in
+          let return_expression =
+            if is_missing return_expression then coroutine_unit_call_syntax
+            else return_expression in
+          let return_expression = make_object_creation_expression_syntax
+            "ActualCoroutineResult" [return_expression] in
+          let assignment = set_next_label_syntax (-1) in
+          let ret = make_return_statement_syntax return_expression in
+          let statements = prefix_statements @ [ assignment; ret ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | IfStatement node ->
+        let (next_label, statements) = rewrite_if_statement next_label node in
         next_label, Rewriter.Result.Replace statements
-    | IfStatement node ->
-      let (next_label, statements) = rewrite_if_statement next_label node in
-      next_label, Rewriter.Result.Replace statements
-    | ExpressionStatement ({ expression_statement_expression; _; } as node) ->
-        let (next_label, prefix_statements), expression_statement_expression =
-          extract_suspend_statements
-            expression_statement_expression
-            next_label in
-        let new_expression_statement =
-          make_syntax
-            (ExpressionStatement
-              { node with expression_statement_expression; }) in
-        let statements = prefix_statements @ [ new_expression_statement ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    | SwitchStatement ({ switch_expression; _; } as node) ->
-        let (next_label, prefix_statements), switch_expression =
-          extract_suspend_statements switch_expression next_label in
-        let new_switch_statement =
-          make_syntax (SwitchStatement { node with switch_expression; }) in
-        let statements = prefix_statements @ [ new_switch_statement; ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    | ThrowStatement ({ throw_expression; _; } as node) ->
-        let (next_label, prefix_statements), throw_expression =
-          extract_suspend_statements throw_expression next_label in
-        let new_throw_statement =
-          make_syntax (ThrowStatement { node with throw_expression; }) in
-        let statements = prefix_statements @ [ new_throw_statement; ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    | ForeachStatement ({ foreach_collection; _; } as node) ->
-        let (next_label, prefix_statements), foreach_collection =
-          extract_suspend_statements foreach_collection next_label in
-        let new_foreach_collection=
-          make_syntax (ForeachStatement { node with foreach_collection; }) in
-        let statements = prefix_statements @ [ new_foreach_collection; ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    | EchoStatement ({ echo_expressions; _; } as node) ->
-        let next_label, prefix_statements, echo_expressions =
-          extract_suspend_statements_and_gather_rewrite_data_for_expressions
-            next_label
-            echo_expressions in
-        let echo_expressions =
-          make_delimited_list comma_syntax echo_expressions in
-        let new_echo_statement =
-          make_syntax (EchoStatement { node with echo_expressions; }) in
-        let statements = prefix_statements @ [ new_echo_statement; ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    | UnsetStatement ({ unset_variables; _; } as node) ->
-        let next_label, prefix_statements, unset_variables =
-          extract_suspend_statements_and_gather_rewrite_data_for_expressions
-            next_label
-            unset_variables in
-        let unset_variables = make_delimited_list comma_syntax unset_variables in
-        let new_unset_statement =
-          make_syntax (UnsetStatement { node with unset_variables; }) in
-        let statements = prefix_statements @ [ new_unset_statement; ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
-    (* while-condition constructs should have already been rewritten into
-       while-true-with-if-condition constructs. *)
-    | WhileStatement _
-    (* for constructs should have already been rewritten into
-       while-true-with-if-condition constructs. *)
-    | ForStatement _
-    (* do-while constructs should have already been rewritten into
-       while-true-with-if-condition constructs. *)
-    | DoStatement _
-    (* Suspends will be handled recursively by compound statement's children. *)
-    | CompoundStatement _
-    (* Suspends will be handled recursively by try statements's children. *)
-    | TryStatement _
-    | GotoStatement _ (* Suspends are invalid in goto statements. *)
-    | BreakStatement _ (* Suspends are impossible in break statements. *)
-    | ContinueStatement _ (* Suspends are impossible in continue statements. *)
-    | FunctionStaticStatement _ (* Suspends are impossible in these. *)
-    | GlobalStatement _ (* Suspends are impossible in global statements. *)
-    | _ ->
-        next_label, Rewriter.Result.Keep in
-  Rewriter.aggregating_rewrite_post rewrite_statements node 1
+      | ExpressionStatement ({ expression_statement_expression; _; } as node) ->
+          let (next_label, prefix_statements), expression_statement_expression =
+            extract_suspend_statements
+              expression_statement_expression
+              next_label in
+          let new_expression_statement =
+            make_syntax
+              (ExpressionStatement
+                { node with expression_statement_expression; }) in
+          let statements = prefix_statements @ [ new_expression_statement ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | SwitchStatement ({ switch_expression; _; } as node) ->
+          let (next_label, prefix_statements), switch_expression =
+            extract_suspend_statements switch_expression next_label in
+          let new_switch_statement =
+            make_syntax (SwitchStatement { node with switch_expression; }) in
+          let statements = prefix_statements @ [ new_switch_statement; ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | ThrowStatement ({ throw_expression; _; } as node) ->
+          let (next_label, prefix_statements), throw_expression =
+            extract_suspend_statements throw_expression next_label in
+          let new_throw_statement =
+            make_syntax (ThrowStatement { node with throw_expression; }) in
+          let statements = prefix_statements @ [ new_throw_statement; ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | ForeachStatement ({ foreach_collection; _; } as node) ->
+          let (next_label, prefix_statements), foreach_collection =
+            extract_suspend_statements foreach_collection next_label in
+          let new_foreach_collection=
+            make_syntax (ForeachStatement { node with foreach_collection; }) in
+          let statements = prefix_statements @ [ new_foreach_collection; ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | EchoStatement ({ echo_expressions; _; } as node) ->
+          let next_label, prefix_statements, echo_expressions =
+            extract_suspend_statements_and_gather_rewrite_data_for_expressions
+              next_label
+              echo_expressions in
+          let echo_expressions =
+            make_delimited_list comma_syntax echo_expressions in
+          let new_echo_statement =
+            make_syntax (EchoStatement { node with echo_expressions; }) in
+          let statements = prefix_statements @ [ new_echo_statement; ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      | UnsetStatement ({ unset_variables; _; } as node) ->
+          let next_label, prefix_statements, unset_variables =
+            extract_suspend_statements_and_gather_rewrite_data_for_expressions
+              next_label
+              unset_variables in
+          let unset_variables = make_delimited_list comma_syntax unset_variables in
+          let new_unset_statement =
+            make_syntax (UnsetStatement { node with unset_variables; }) in
+          let statements = prefix_statements @ [ new_unset_statement; ] in
+          let statements = make_compound_statement_syntax statements in
+          next_label, Rewriter.Result.Replace statements
+      (* while-condition constructs should have already been rewritten into
+         while-true-with-if-condition constructs. *)
+      | WhileStatement _
+      (* for constructs should have already been rewritten into
+         while-true-with-if-condition constructs. *)
+      | ForStatement _
+      (* do-while constructs should have already been rewritten into
+         while-true-with-if-condition constructs. *)
+      | DoStatement _
+      (* Suspends will be handled recursively by compound statement's children. *)
+      | CompoundStatement _
+      (* Suspends will be handled recursively by try statements's children. *)
+      | TryStatement _
+      | GotoStatement _ (* Suspends are invalid in goto statements. *)
+      | BreakStatement _ (* Suspends are impossible in break statements. *)
+      | ContinueStatement _ (* Suspends are impossible in continue statements. *)
+      | FunctionStaticStatement _ (* Suspends are impossible in these. *)
+      | GlobalStatement _ (* Suspends are impossible in global statements. *)
+      | _ ->
+          next_label, Rewriter.Result.Keep in
+  Rewriter.parented_aggregating_rewrite_post rewrite_statements node 1
 
 (* case 0: goto state_label_0; *)
 let make_switch_section_syntax number =

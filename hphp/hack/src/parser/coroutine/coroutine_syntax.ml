@@ -700,10 +700,15 @@ let make_member_with_unknown_type_declaration_syntax variable_syntax =
     make_property_declarator variable_syntax (make_missing ()) in
   make_property_declaration_syntax (make_missing ()) declaration_syntax
 
-(* coroutine_unit() *)
+let coroutine_unit_classname_syntax =
+  make_qualified_name_syntax "CoroutineUnit"
+
+(* CoroutineUnit::create() *)
 let coroutine_unit_call_syntax =
-  let name = make_token_syntax TokenKind.Name "coroutine_unit" in
-  make_function_call_expression_syntax name []
+  make_static_function_call_expression_syntax
+    coroutine_unit_classname_syntax
+    "create"
+    []
 
 let next_label =
   "nextLabel"

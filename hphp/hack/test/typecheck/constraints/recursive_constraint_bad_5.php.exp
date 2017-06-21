@@ -8,5 +8,5 @@ File "recursive_constraint_bad_5.php", line 4, characters 44-45:
 'Ty' is a constrained type
 File "recursive_constraint_bad_5.php", line 4, characters 66-68:
 This is an int
-File "recursive_constraint_bad_5.php", line 4, characters 54-55:
-It is incompatible with a value of generic type Tx
+File "recursive_constraint_bad_5.php", line 4, characters 44-45:
+It is incompatible with a value of generic type Ty

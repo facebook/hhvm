@@ -9,7 +9,7 @@
  *)
 
 open Typing_defs
-
+module TySet = Typing_set
 module type S = sig
 
 type fake_members = {
@@ -29,8 +29,8 @@ type local_history = locl ty list
 type old_local = locl ty list * locl ty * expression_id
 type tparam_bounds = locl ty list
 type tparam_info = {
-  lower_bounds : tparam_bounds;
-  upper_bounds : tparam_bounds;
+  lower_bounds : TySet.t;
+  upper_bounds : TySet.t;
 }
 type tpenv = tparam_info SMap.t
 type local_types = (local Local_id.Map.t) Typing_continuations.Map.t

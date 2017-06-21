@@ -16,6 +16,7 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
+module TySet = Typing_set
 
 (*****************************************************************************)
 (* Importing what is necessary *)
@@ -81,16 +82,17 @@ let get_all_supertypes env ty =
       let env, ty = Env.expand_type env ty in
       match snd ty with
       | Tabstract (_, Some ty) ->
-        iter seen env (ty::acc) (ty::tyl)
+        iter seen env (TySet.add ty acc) (ty::tyl)
 
       | Tabstract (AKgeneric n, _) ->
         if SSet.mem n seen
         then iter seen env acc tyl
         else iter (SSet.add n seen) env acc (Env.get_upper_bounds env n @ tyl)
       | _ ->
-        iter seen env (ty::acc) tyl
+        iter seen env (TySet.add ty acc) tyl
   in
-    iter SSet.empty env [] [ty] 
+   let env, resl = iter SSet.empty env TySet.empty [ty] in
+   env, TySet.elements resl
 
 (*****************************************************************************
  * Get the "as" constraints from an abstract type or generic parameter, or
@@ -109,7 +111,7 @@ let get_concrete_supertypes env ty =
       match snd ty with
       (* Don't expand enums or newtype; just return the type itself *)
       | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty) ->
-        iter seen env (ty::acc) tyl
+        iter seen env (TySet.add ty acc) tyl
 
       | Tabstract (_, Some ty) ->
         iter seen env acc (ty::tyl)
@@ -121,11 +123,11 @@ let get_concrete_supertypes env ty =
 
       | Tabstract (_, None) ->
         iter seen env acc tyl
-
       | _ ->
-        iter seen env (ty::acc) tyl
-  in iter SSet.empty env [] [ty]
-
+        iter seen env (TySet.add ty acc) tyl
+  in
+    let env, resl = iter SSet.empty env TySet.empty [ty] in
+    env, TySet.elements resl
 (*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)

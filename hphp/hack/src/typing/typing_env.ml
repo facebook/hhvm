@@ -20,6 +20,9 @@ module TLazyHeap = Typing_lazy_heap
 module LEnvC = Typing_lenv_cont
 module Cont = Typing_continuations
 
+
+let ( ++ ) x y = Typing_set.add x y
+
 let get_tcopt env = env.genv.tcopt
 let fresh () =
   Ident.tmp()
@@ -97,18 +100,18 @@ let get_shape_field_name = function
   | Ast.SFlit (_, s) -> s
   | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
-let empty_bounds = []
-let singleton_bound ty = [ty]
+let empty_bounds = TySet.empty
+let singleton_bound ty = TySet.singleton ty
 
 let get_lower_bounds env name =
   match SMap.get name env.lenv.tpenv with
-  | None -> empty_bounds
-  | Some {lower_bounds; _} -> lower_bounds
+  | None -> []
+  | Some {lower_bounds; _} -> TySet.elements lower_bounds
 
 let get_upper_bounds env name =
   match SMap.get name env.lenv.tpenv with
-  | None -> empty_bounds
-  | Some {upper_bounds; _} -> upper_bounds
+  | None -> []
+  | Some {upper_bounds; _} -> TySet.elements upper_bounds
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
@@ -118,7 +121,7 @@ let add_upper_bound_ tpenv name ty =
       {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tpenv
   | Some {lower_bounds; upper_bounds} ->
     SMap.add name
-      {lower_bounds; upper_bounds = ty::upper_bounds} tpenv
+      {lower_bounds; upper_bounds = ty++upper_bounds} tpenv
 
 (* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
 let add_lower_bound_ tpenv name ty =
@@ -128,7 +131,7 @@ let add_lower_bound_ tpenv name ty =
       {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds} tpenv
   | Some {lower_bounds; upper_bounds} ->
     SMap.add name
-      {lower_bounds = ty::lower_bounds; upper_bounds} tpenv
+      {lower_bounds = ty++lower_bounds; upper_bounds} tpenv
 
 let env_with_tpenv env tpenv =
   { env with lenv = { env.lenv with tpenv = tpenv } }
@@ -170,7 +173,7 @@ let get_generic_parameters env =
 
 let get_tpenv_size env =
   SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
-    count + List.length lower_bounds + List.length upper_bounds)
+    count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
     env.lenv.tpenv 0
 
 (* Generate a fresh generic parameter with a specified prefix but distinct

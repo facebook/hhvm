@@ -1641,7 +1641,7 @@ PHPUnit\Framework\Constraint\CountTest::testCountDoesNotChangeIteratorKey
 PHPUnit\Framework\Constraint\CountTest::testCountGeneratorsDoNotRewind
 .
 PHPUnit\Framework\Constraint\CountTest::testCountTraversable
-E
+F
 PHPUnit\Framework\Constraint\ExceptionMessageRegExpTest::testMessageXdebugScreamCompatibility
 S
 PHPUnit\Framework\Constraint\ExceptionMessageRegExpTest::testRegexMessage

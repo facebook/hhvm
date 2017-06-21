@@ -561,18 +561,19 @@ let do_didChange
   ()
 
 let do_hover (conn: server_conn) (params: Hover.params) : Hover.result =
+  (* TODO: should return MarkedCode, once Nuclide supports it *)
+  (* TODO: should return doc-comment as well *)
+  (* TODO: should return signature of what we hovered on, not just type. *)
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.INFER_TYPE (ServerUtils.FileName file, line, column) in
   let inferred_type = rpc conn command in
   match inferred_type with
-  | None -> { Hover.
-              contents = [MarkedString "nothing found"];
-              range = None;
-            }
-  | Some (s, _) -> { Hover.
-                     contents = [MarkedString s];
-                     range = None;
-                   }
+  (* Hack server uses both None and "_" to indicate absence of a result. *)
+  (* We're also catching the non-result "" just in case...               *)
+  | None
+  | Some ("_", _)
+  | Some ("", _) -> { Hover.contents = []; range = None; }
+  | Some (s, _) -> { Hover.contents = [MarkedString s]; range = None; }
 
 let do_definition (conn: server_conn) (params: Definition.params)
   : Definition.result =

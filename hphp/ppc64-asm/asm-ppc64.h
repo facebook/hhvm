@@ -782,11 +782,13 @@ struct Assembler {
   // generic template, for CodeAddress and Label
   template <typename T>
   void call(T& target, CallArg ca = CallArg::Internal) {
-    if ((CallArg::SmashInt == ca) || (CallArg::SmashExt == ca)) {
-      branchFar(target, BranchConditions::Always, LinkReg::Save);
-    } else {
+    if (CallArg::Internal == ca) {
       // tries best performance possible
       branchAuto(target, BranchConditions::Always, LinkReg::Save);
+    } else {
+      // branchFar is not only smashable but also it will use r12 so an
+      // external branch can correctly set its TOC address appropriately.
+      branchFar(target, BranchConditions::Always, LinkReg::Save);
     }
     callEpilogue(ca);
   }

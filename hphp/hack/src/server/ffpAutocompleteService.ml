@@ -23,37 +23,17 @@ module SourceText = Full_fidelity_source_text
 module ACKeyword = FfpAutocompleteKeywords
 
 let print_parse_tree_descent_debug node position =
-  let parents = PositionedSyntax.parentage node position in
+  let open PositionedSyntax in
+  let parents = parentage node position in
   let () = Printf.printf "%s\n"
-    (Hh_json.json_to_string @@ PositionedSyntax.to_json node) in
+    (Hh_json.json_to_string @@ to_json node) in
   let print_node idx node = Printf.printf "%d. %s\n" idx
-    (SyntaxKind.to_string @@ PositionedSyntax.kind node)
+    (SyntaxKind.to_string @@ kind node)
   in
   List.iteri ~f:print_node (List.rev parents)
 
-(* TODO: Figure out a better name for this helper function *)
-let get_child_and_predecessor_at_pos root pos =
-  (*let () = print_parse_tree_descent_debug root pos in*)
-  let rec get_child
-    ~current_level:nodes ~position:pos ~leaf_candidate:lc ~predecessor:pred =
-    match nodes, lc, pred with
-    | [], [], _ -> failwith "Could not get child at position"
-    | [], h :: _, p -> (h, p)
-    | h :: t, _, p ->
-      let width = PositionedSyntax.full_width h in
-      if pos < width then
-        get_child (PositionedSyntax.children h) pos [h] p
-      else
-        let prev = if PositionedSyntax.kind h = SyntaxKind.Missing
-          then pred
-          else (Some h)
-        in
-        get_child t (pos - width) lc prev
-  in
-  get_child ~current_level:[root] ~position:pos ~leaf_candidate:[]
-    ~predecessor:None
-
 let get_parentage_and_predecessor root position =
+  (*let () = print_parse_tree_descent_debug root position in*)
   let rec get_next_child ~current_level ~position ~parentage ~predecessor =
     match current_level with
     | [] -> (parentage, predecessor)
@@ -113,7 +93,6 @@ let auto_complete filename =
   let (parents, autocomplete_predecessor) =
     get_parentage_and_predecessor syntax_tree_root offset in
   let autocomplete_child = List.hd_exn parents in
-  let parents = List.map ~f:PositionedSyntax.kind parents in
   let autocomplete_target = PositionedSyntax.text autocomplete_child in
   autocomplete_word (List.rev parents)
     autocomplete_target autocomplete_predecessor

@@ -383,6 +383,7 @@ module PublishDiagnostics = struct
     code: int option;  (* the diagnostic's code. Wire: can be string too *)
     source: string option;  (* human-readable string, eg. typescript/lint *)
     message: string;  (* the diagnostic's message *)
+    relatedLocations: relatedLocation list;
   }
 
   and diagnosticSeverity =
@@ -390,6 +391,11 @@ module PublishDiagnostics = struct
     | Warning (* 2 *)
     | Information (* 3 *)
     | Hint (* 4 *)
+
+  and relatedLocation = {
+    relatedLocation: Location.t;  (* wire: just "location" *)
+    relatedMessage: string;  (* wire: just "message" *)
+  }
 end
 
 (* DidOpenTextDocument notification, method="textDocument/didOpen" *)

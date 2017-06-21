@@ -311,6 +311,12 @@ let print_diagnostics (r: PublishDiagnostics.params) : json =
     | PublishDiagnostics.Information -> int_ 3
     | PublishDiagnostics.Hint -> int_ 4
   in
+  let print_related (related: relatedLocation) : json =
+    Hh_json.JSON_Object [
+      "location", print_location related.relatedLocation;
+      "message", string_ related.relatedMessage;
+    ]
+  in
   let print_diagnostic (diagnostic: diagnostic) : json =
     Jprint.object_opt [
       "range", Some (print_range diagnostic.range);
@@ -318,6 +324,7 @@ let print_diagnostics (r: PublishDiagnostics.params) : json =
       "code", Option.map diagnostic.code int_;
       "source", Option.map diagnostic.source string_;
       "message", Some (JSON_String diagnostic.message);
+      "relatedLocations", Some (JSON_Array (List.map diagnostic.relatedLocations ~f:print_related));
     ]
   in
   JSON_Object [

@@ -100,18 +100,30 @@ let hack_errors_to_lsp_diagnostic
     (errors: Pos.absolute Errors.error_ list)
   : PublishDiagnostics.params =
   let open Lsp.Location in
-  let hack_error_to_lsp_diagnostic error =
-    let all_locations = Errors.to_list error in
-    let pos, message = List.hd_exn all_locations in
-    (* TODO: investigate whether Hack ever gives multiline locations *)
-    (* TODO: add to LSP protocol for multiple error locations *)
-    let {uri = _; range;} = hack_pos_to_lsp_location pos ~default_path:filename in
+  let location_message (error: Pos.absolute * string) : (Lsp.Location.t * string) =
+    let (pos, message) = error in
+    let {uri; range;} = hack_pos_to_lsp_location pos ~default_path:filename in
+    ({Location.uri; range;}, message)
+  in
+  let hack_error_to_lsp_diagnostic (error: Pos.absolute Errors.error_) =
+    let all_messages = Errors.to_list error |> List.map ~f:location_message in
+    let (first_message, additional_messages) = match all_messages with
+      | hd :: tl -> (hd, tl)
+      | [] -> failwith "Expected at least one error in the error list"
+    in
+    let ({range; _}, message) = first_message in
+    let relatedLocations = additional_messages |> List.map ~f:(fun (location, message) ->
+      { PublishDiagnostics.
+        relatedLocation = location;
+        relatedMessage = message;
+      }) in
     { Lsp.PublishDiagnostics.
-      range = range;
+      range;
       severity = Some PublishDiagnostics.Error;
       code = Some (Errors.get_code error);
       source = Some "Hack";
-      message = message;
+      message;
+      relatedLocations;
     }
   in
   (* The caller is required to give us a non-empty filename. If it is empty,  *)

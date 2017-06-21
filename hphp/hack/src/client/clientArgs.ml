@@ -341,6 +341,9 @@ let parse_check_args cmd =
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
       " run AI module with provided options\n";
+     "--dump-full-fidelity-editable-parse",
+        Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_EDITABLE_PARSE x) ()),
+        " same output as --dump-full-fidelity-parse, with additional content";
 
     (* deprecated *)
     "--from-vim",

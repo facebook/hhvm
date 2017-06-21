@@ -22,11 +22,12 @@ type t = {
   kind: TokenKind.t;
   text: string;
   leading: EditableTrivia.t list;
-  trailing: EditableTrivia.t list
+  trailing: EditableTrivia.t list;
+  line: int;
 }
 
-let make kind text leading trailing =
-  { kind; text; leading; trailing }
+let make kind text leading trailing line =
+  { kind; text; leading; trailing; line }
 
 let leading_width token =
   let folder sum t = sum + (EditableTrivia.width t) in
@@ -66,6 +67,9 @@ let prepend_trailing token trivia =
 let text token =
   token.text
 
+let line token =
+	token.line
+
 let with_text token text =
   { token with text }
 
@@ -91,7 +95,8 @@ let from_minimal source_text minimal_token offset =
   let text = SourceText.sub source_text (offset + lw) w in
   let trailing = EditableTrivia.from_minimal_list source_text
     (MinimalToken.trailing minimal_token) (offset + lw + w) in
-  make (MinimalToken.kind minimal_token) text leading trailing
+  let line = MinimalToken.line minimal_token in
+  make (MinimalToken.kind minimal_token) text leading trailing line
 
 let to_json token =
   let open Hh_json in
@@ -99,4 +104,5 @@ let to_json token =
     ("kind", JSON_String (TokenKind.to_string token.kind));
     ("text", JSON_String token.text);
     ("leading", JSON_Array (List.map EditableTrivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map EditableTrivia.to_json token.trailing)) ]
+    ("trailing", JSON_Array (List.map EditableTrivia.to_json token.trailing));
+    ("line", int_ token.line ) ]

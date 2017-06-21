@@ -407,7 +407,8 @@ module WithStatementAndDeclAndTypeParser
       let w = (Token.width head) + (Token.width token) in
       let l = Token.leading head in
       let t = Token.trailing token in
-      let result = Token.make k w l t in
+      let p = Token.line token in
+      let result = Token.make k w l t p in
       make_token result in
 
     let merge_head token acc =

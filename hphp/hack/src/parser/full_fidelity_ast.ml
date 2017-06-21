@@ -1940,12 +1940,18 @@ let from_text
   ?(ignore_pos            = false)
   ?(quick                 = false)
   ?(suppress_output       = false)
+  ?(lower_coroutines      = true)
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
   : result =
     let open Full_fidelity_syntax_tree in
     let tree   = make source_text in
+    let tree =
+      if lower_coroutines then
+        Coroutine_lowerer.lower_coroutines tree
+      else
+        tree in
     let script = Full_fidelity_positioned_syntax.from_tree tree in
     let fi_mode = if is_php tree then FileInfo.Mphp else
       let mode_string = String.trim (mode tree) in
@@ -1998,6 +2004,7 @@ let from_file
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
+  ?lower_coroutines
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
   : result =
@@ -2007,6 +2014,7 @@ let from_file
       ~keep_errors
       ~ignore_pos
       ~quick
+      ?lower_coroutines
       ~parser_options
       path
       (Full_fidelity_source_text.from_file path)
@@ -2029,6 +2037,7 @@ let from_text_with_legacy
   ?(ignore_pos            = false)
   ?(quick                 = false)
   ?(suppress_output       = false)
+  ?lower_coroutines
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -2040,6 +2049,7 @@ let from_text_with_legacy
       ~ignore_pos
       ~quick
       ~suppress_output
+      ?lower_coroutines
       ~parser_options
       file
       (Full_fidelity_source_text.make content)
@@ -2050,6 +2060,7 @@ let from_file_with_legacy
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
+  ?lower_coroutines
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
   : Parser_hack.parser_return =
@@ -2059,5 +2070,6 @@ let from_file_with_legacy
       ~keep_errors
       ~ignore_pos
       ~quick
+      ?lower_coroutines
       ~parser_options
       file

@@ -66,6 +66,7 @@ MODULES=\
   naming\
   options\
   parser\
+	parser/coroutine\
 	parser/schema\
   procs\
   recorder\

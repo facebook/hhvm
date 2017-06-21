@@ -15,7 +15,6 @@ quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_static_vars.php
 quick/closure_use_this.php
-quick/cmp.php
 quick/collection-initializer.php
 quick/constIntToString.php
 quick/const_cflow.php
@@ -92,10 +91,8 @@ quick/hopt-add1.php
 quick/hopt-add2.php
 quick/hopt-add3.php
 quick/hopt-exitslow.php
-quick/hopt-same-simp.php
 quick/hopt-true3.php
 quick/hopt-true4.php
-quick/hopt-xor-simp.php
 quick/hopt_sprop_accessibility.php
 quick/impl_abstract_default_vals.php
 quick/impl_abstract_dv_2a.php

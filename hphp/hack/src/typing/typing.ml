@@ -4120,6 +4120,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
       let env = SubType.sub_string p1 env ty1 in
       let env = SubType.sub_string p2 env ty2 in
       make_result env te1 te2 (Reason.Rconcat_ret p, Tprim Tstring)
+  | Ast.LogXor
   | Ast.AMpamp
   | Ast.BArbar ->
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)

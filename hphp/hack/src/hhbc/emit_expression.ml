@@ -94,6 +94,7 @@ let from_binop op =
   | A.Cmp -> instr (IOp Cmp)
   | A.Percent -> instr (IOp Mod)
   | A.Xor -> instr (IOp BitXor)
+  | A.LogXor -> instr (IOp Xor)
   | A.Eq _ -> emit_nyi "Eq"
   | A.AMpamp
   | A.BArbar ->

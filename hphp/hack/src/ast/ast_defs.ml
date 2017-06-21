@@ -80,7 +80,7 @@ type shape_field_name =
 type bop =
 | Plus
 | Minus | Star | Slash | Eqeq | EQeqeq | Starstar
-| Diff | Diff2 | AMpamp | BArbar | Lt
+| Diff | Diff2 | AMpamp | BArbar | LogXor | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
 | Gtgt | Percent | Xor | Cmp
 | Eq of bop option

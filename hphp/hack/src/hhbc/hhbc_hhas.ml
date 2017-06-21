@@ -774,6 +774,7 @@ and string_of_bop = function
   | A.Gtgt -> ">>"
   | A.Percent -> "%"
   | A.Xor -> "^"
+  | A.LogXor -> "xor"
   | A.Diff -> "!="
   | A.Diff2 -> "!=="
 

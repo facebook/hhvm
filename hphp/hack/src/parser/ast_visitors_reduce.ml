@@ -695,6 +695,7 @@ class virtual ['self] reduce =
     method on_Ltlt _ = self#e
     method on_Gtgt _ = self#e
     method on_Percent _ = self#e
+    method on_LogXor _ = self#e
     method on_Xor _ = self#e
     method on_Eq = self#on_option self#on_bop
     method on_bop env = function
@@ -720,6 +721,7 @@ class virtual ['self] reduce =
       | Ltlt -> self#on_Ltlt env
       | Gtgt -> self#on_Gtgt env
       | Percent -> self#on_Percent env
+      | LogXor -> self#on_LogXor env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0
     method on_Utild _ = self#e

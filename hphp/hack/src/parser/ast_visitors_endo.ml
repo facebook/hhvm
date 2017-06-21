@@ -1096,6 +1096,7 @@ class virtual ['self] endo =
     method on_Gtgt env this = this
     method on_Percent env this = this
     method on_Xor env this = this
+    method on_LogXor env this = this
     method on_Eq env this c0 =
       let r0 = self#on_option self#on_bop env c0 in
       if c0 == r0 then this else Eq r0
@@ -1124,6 +1125,7 @@ class virtual ['self] endo =
       | Cmp -> self#on_Cmp env this
       | Percent -> self#on_Percent env this
       | Xor -> self#on_Xor env this
+      | LogXor -> self#on_LogXor env this
       | Eq c0 -> self#on_Eq env this c0
     method on_Utild env this = this
     method on_Unot env this = this

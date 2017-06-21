@@ -272,6 +272,7 @@ class virtual ['b] reduce :
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
                  list -> Ast_visitors_ancestors.expr list -> 'd;
+        on_LogXor : 'c -> 'd;
         on_Xor : 'c -> 'd;
         on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd;
         on_Yield_break : 'c -> 'd;
@@ -637,6 +638,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.id ->
       (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr) list ->
       Ast_visitors_ancestors.expr list -> 'd
+    method on_LogXor : 'c -> 'd
     method on_Xor : 'c -> 'd
     method on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd
     method on_Yield_break : 'c -> 'd

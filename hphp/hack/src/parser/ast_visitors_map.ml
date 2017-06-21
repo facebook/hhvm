@@ -815,6 +815,7 @@ class virtual ['self] map =
     method on_Ltlt env = Ltlt
     method on_Gtgt env = Gtgt
     method on_Percent env = Percent
+    method on_LogXor env = LogXor
     method on_Xor env = Xor
     method on_Eq env c0 =
       let r0 = self#on_option self#on_bop env c0 in Eq r0
@@ -842,6 +843,7 @@ class virtual ['self] map =
       | Gtgt -> self#on_Gtgt env
       | Cmp -> self#on_Cmp env
       | Percent -> self#on_Percent env
+      | LogXor -> self#on_LogXor env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0
     method on_Utild env = Utild

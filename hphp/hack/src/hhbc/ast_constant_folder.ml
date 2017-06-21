@@ -175,6 +175,7 @@ let binop_on_values binop v1 v2 =
   | A.Percent -> TV.rem v1 v2
   | A.Amp -> TV.bitwise_and v1 v2
   | A.Bar -> TV.bitwise_or v1 v2
+  | A.LogXor -> TV.logical_xor v1 v2
   | A.Xor -> TV.bitwise_xor v1 v2
   | A.AMpamp -> TV.logical_and v1 v2
   | A.BArbar -> TV.logical_or v1 v2
@@ -271,8 +272,6 @@ object (self)
       end
     | _, _ -> default ()
 
-  method on_Goto _ parent _ = parent
-  method on_GotoLabel _ parent _ = parent
 end
 
 let fold_expr ns e =

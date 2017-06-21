@@ -287,6 +287,9 @@ let logical_or v1 v2 =
 let logical_and v1 v2 =
   Some (Bool (to_bool v1 && to_bool v2))
 
+let logical_xor v1 v2 =
+  Some (Bool (to_bool v1 <> to_bool v2))
+
 (*
   returns (t * t) option option
   None - one of operands was not literal

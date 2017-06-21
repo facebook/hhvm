@@ -626,6 +626,7 @@ class virtual ['self] iter =
     method on_Ltlt env = ()
     method on_Gtgt env = ()
     method on_Percent env = ()
+    method on_LogXor env = ()
     method on_Xor env = ()
     method on_Eq = self#on_option self#on_bop
     method on_bop env = function
@@ -651,6 +652,7 @@ class virtual ['self] iter =
       | Gtgt -> self#on_Gtgt env
       | Cmp -> self#on_Cmp env
       | Percent -> self#on_Percent env
+      | LogXor -> self#on_LogXor env
       | Xor -> self#on_Xor env
       | Eq c0 -> self#on_Eq env c0
     method on_Utild env = ()

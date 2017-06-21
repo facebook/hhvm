@@ -19,6 +19,7 @@ module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module CBR = Continue_break_rewriter
 module SU = Hhbc_string_utils
+module ULS = Unique_list_string
 
 (* Locals, array elements, and properties all support the same range of l-value
  * operations. *)
@@ -892,25 +893,71 @@ and emit_expr env expr ~need_ref =
 and emit_static_collection ~transform_to_collection tv =
   let transform_instr =
     match transform_to_collection with
-    | Some n -> instr_colfromarray n
-    | None -> empty
+    | Some collection_type -> instr_colfromarray collection_type
+    | _ -> empty
   in
   gather [
     instr (ILitConst (TypedValue tv));
     transform_instr;
   ]
 
-(* transform_to_collection argument keeps track of
- * what collection to transform to *)
-and emit_dynamic_collection ~transform_to_collection env expr es =
+and emit_value_only_collection env es constructor =
+  gather [
+    gather @@
+    List.map es
+      ~f:(function
+        (* Drop the keys *)
+        | A.AFkvalue (_, e)
+        | A.AFvalue e -> emit_expr ~need_ref:false env e);
+    instr @@ ILitConst constructor;
+  ]
+
+and emit_keyvalue_collection name env es constructor =
+  let name = SU.strip_ns name in
+  let transform_instr =
+    if name = "dict" || name = "array" then empty else
+      let collection_type = collection_type name in
+      instr_colfromarray collection_type
+  in
+  let add_elem_instr =
+    if name = "array" then instr_add_new_elemc
+    else gather [instr_dup; instr_add_elemc]
+  in
+  gather [
+    instr (ILitConst constructor);
+    gather (List.map es ~f:(expr_and_new env add_elem_instr instr_add_elemc));
+    transform_instr;
+  ]
+
+and emit_struct_array env es =
+  let es =
+    List.map es
+      ~f:(function A.AFkvalue ((_, A.String (_, s)), v) ->
+         s, emit_expr ~need_ref:false env v
+                 | _ -> failwith "impossible")
+  in
+  gather [
+    gather @@ List.map es ~f:snd;
+    instr_newstructarray @@ List.map es ~f:fst;
+  ]
+
+(* isPackedInit() returns true if this expression list looks like an
+ * array with no keys and no ref values *)
+and is_packed_init ?(check_size = true) es size =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
-  let are_all_keys_non_numeric_strings =
-    List.for_all es ~f: (function
-        | A.AFkvalue ((_, A.String (_, s)), _) ->
-          Option.is_none @@ Typed_value.string_to_int_opt s
-        | _ -> false)
+  let keys_are_zero_indexed_properly_formed =
+    List.foldi es ~init:true ~f:(fun i b f -> b && match f with
+      | A.AFkvalue ((_, A.Int (_, k)), _) -> int_of_string k = i
+      | A.AFvalue _ -> true
+      | _ -> false)
+  in
+  let stack_limit =
+    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
+  in
+  let should_check_size_positive =
+    if check_size then size <= stack_limit else true
   in
   let has_references =
     (* Reference can only exist as a value *)
@@ -918,78 +965,59 @@ and emit_dynamic_collection ~transform_to_collection env expr es =
       ~f:(function A.AFkvalue (_, e)
                  | A.AFvalue e -> expr_starts_with_ref e)
   in
-  let is_array = match snd expr with A.Array _ -> true | _ -> false in
+  (is_only_values || keys_are_zero_indexed_properly_formed)
+  && not has_references
+  && should_check_size_positive
+
+and is_struct_init es =
+  let has_references =
+    (* Reference can only exist as a value *)
+    List.exists es
+      ~f:(function A.AFkvalue (_, e)
+                 | A.AFvalue e -> expr_starts_with_ref e)
+  in
+  let keys = ULS.empty in
+  let are_all_keys_non_numeric_strings, keys =
+    List.fold_right es ~init:(true, keys) ~f:(fun field (b, keys) ->
+      match field with
+        | A.AFkvalue ((_, A.String (_, s)), _) ->
+          b && (Option.is_none @@ Typed_value.string_to_int_opt s),
+          ULS.add keys s
+        | _ -> false, keys)
+  in
+  let has_duplicate_keys =
+    ULS.cardinal keys <> List.length es
+  in
+  are_all_keys_non_numeric_strings
+  && not has_duplicate_keys
+  && not has_references
+
+(* transform_to_collection argument keeps track of
+ * what collection to transform to *)
+and emit_dynamic_collection env expr es =
   let count = List.length es in
-  let stack_limit =
-    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
-  in
-  let is_php_array =
-    transform_to_collection = None
-    && match snd expr with | A.Array _ -> true | _ -> false
-  in
-  if is_only_values
-     && transform_to_collection = None
-     && not has_references
-     && (not is_php_array || count <= stack_limit)
-  then begin
-    let lit_constructor = match snd expr with
-      | A.Array _ -> NewPackedArray count
-      | A.Collection ((_, "vec"), _) -> NewVecArray count
-      | A.Collection ((_, "keyset"), _) -> NewKeysetArray count
-      | _ ->
-        failwith "emit_dynamic_collection (values only): unexpected expression"
-    in
-    gather [
-      gather @@
-      List.map es
-        ~f:(function
-          | A.AFvalue e -> emit_expr ~need_ref:false env e
-          | _ -> failwith "impossible");
-      instr @@ ILitConst lit_constructor;
-    ]
-  end else if are_all_keys_non_numeric_strings
-              && is_array
-              && not has_references
-  then begin
-    let es =
-      List.map es
-        ~f:(function
-          | A.AFkvalue ((_, A.String (_, s)), v) ->
-            s, emit_expr ~need_ref:false env v
-          | _ -> failwith "impossible")
-    in
-    gather [
-      gather @@ List.map es ~f:snd;
-      instr_newstructarray @@ List.map es ~f:fst;
-    ]
-  end else begin
-    let lit_constructor = match snd expr with
-      | A.Array _ when is_only_values && count > stack_limit -> NewArray count
-      | A.Array _ -> NewMixedArray count
-      | A.Collection ((_, name), _)
-        when SU.strip_ns name = "dict"
-          || SU.strip_ns name = "Set"
-          || SU.strip_ns name = "ImmSet"
-          || SU.strip_ns name = "Map"
-          || SU.strip_ns name = "ImmMap" -> NewDictArray count
-      | _ -> failwith "emit_dynamic_collection: unexpected expression"
-    in
-    let transform_instr =
-      match transform_to_collection with
-      | Some n -> instr_colfromarray n
-      | None -> empty
-    in
-    let add_elem_instr =
-      if transform_to_collection = None
-      then instr_add_new_elemc
-      else gather [instr_dup; instr_add_elemc]
-    in
-    gather [
-      instr (ILitConst lit_constructor);
-      gather (List.map es ~f:(expr_and_new env add_elem_instr instr_add_elemc));
-      transform_instr;
-    ]
-  end
+  match snd expr with
+  | A.Collection ((_, "vec"), _) ->
+    emit_value_only_collection env es (NewVecArray count)
+  | A.Collection ((_, "keyset"), _) ->
+    emit_value_only_collection env es (NewKeysetArray count)
+  | A.Collection ((_, name), _)
+    when SU.strip_ns name = "dict"
+      || SU.strip_ns name = "Set"
+      || SU.strip_ns name = "ImmSet"
+      || SU.strip_ns name = "Map"
+      || SU.strip_ns name = "ImmMap" ->
+    emit_keyvalue_collection name env es (NewDictArray count)
+  | _ ->
+  (* From here on, we're only dealing with PHP arrays *)
+  if is_packed_init es count then
+    emit_value_only_collection env es (NewPackedArray count)
+  else if is_struct_init es then
+    emit_struct_array env es
+  else if is_packed_init es count ~check_size:false then
+    emit_keyvalue_collection "array" env es (NewArray count)
+  else
+    emit_keyvalue_collection "array" env es (NewMixedArray count)
 
 and emit_named_collection env expr pos name fields =
   let name = SU.strip_ns name in
@@ -1010,7 +1038,6 @@ and emit_named_collection env expr pos name fields =
     then instr_newcol collection_type
     else
       emit_dynamic_collection
-        ~transform_to_collection:(Some collection_type)
         env
         expr
         fields
@@ -1038,7 +1065,7 @@ and emit_collection ?(transform_to_collection) env expr es =
   | Some tv ->
     emit_static_collection ~transform_to_collection tv
   | None ->
-    emit_dynamic_collection ~transform_to_collection env expr es
+    emit_dynamic_collection env expr es
 
 and emit_pipe env e1 e2 =
   stash_in_local ~always_stash:true env e1

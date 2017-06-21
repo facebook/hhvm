@@ -40,4 +40,6 @@ module WithValue(Value: Set.OrderedType) = struct
 
   let diff s1 s2 =
     ValueSet.fold remove s2.unique_set s1
+
+  let cardinal uniq_set = ValueSet.cardinal uniq_set.unique_set
 end

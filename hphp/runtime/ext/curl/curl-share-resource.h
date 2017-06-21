@@ -37,6 +37,7 @@ struct CurlShareResource : SweepableResourceData {
   bool setOption(int option, const Variant& value);
   static bool isLongOption(long option);
   bool setLongOption(long option, long value);
+  CURLcode attachToCurlHandle(CURL *cp);
  private:
   CURLSH* m_share;
   // CURLSH is a typedef to void

@@ -73,5 +73,9 @@ bool CurlShareResource::setLongOption(long option, long value) {
   return error == CURLSHE_OK;
 }
 
+CURLcode CurlShareResource::attachToCurlHandle(CURL *cp) {
+  return curl_easy_setopt(cp, CURLOPT_SHARE, m_share);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 }

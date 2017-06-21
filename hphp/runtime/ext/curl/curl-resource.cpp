@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
+#include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
 #include "hphp/runtime/base/array-init.h"
@@ -261,6 +262,13 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = setNonCurlOption(option, value);
   } else if (option == CURLOPT_POSTFIELDS) {
     ret = setPostFieldsOption(value);
+  } else if (option == CURLOPT_SHARE) {
+    auto curlsh = dyn_cast_or_null<CurlShareResource>(value);
+    if (!curlsh || curlsh->isInvalid()) {
+      return false;
+    }
+    m_error_no = curlsh->attachToCurlHandle(m_cp);
+    ret = true;
   } else if (option == CURLINFO_HEADER_OUT) {
     if (value.toInt64() == 1) {
       curl_easy_setopt(m_cp, CURLOPT_DEBUGFUNCTION, curl_debug);

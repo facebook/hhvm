@@ -327,51 +327,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
   }
 
   switch (opt) {
-  case CURLINFO_PRIVATE:
-  case CURLINFO_EFFECTIVE_URL:
-  case CURLINFO_CONTENT_TYPE: {
-    char *s_code = nullptr;
-    if (curl_easy_getinfo(cp, (CURLINFO)opt, &s_code) == CURLE_OK &&
-        s_code) {
-      return String(s_code, CopyString);
-    }
-    return false;
-  }
-  case CURLINFO_HTTP_CODE:
-  case CURLINFO_HEADER_SIZE:
-  case CURLINFO_REQUEST_SIZE:
-  case CURLINFO_FILETIME:
-  case CURLINFO_SSL_VERIFYRESULT:
-#if LIBCURL_VERSION_NUM >= 0x071500
-  case CURLINFO_LOCAL_PORT:
-#endif
-  case CURLINFO_REDIRECT_COUNT: {
-    long code = 0;
-    if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
-      return code;
-    }
-    return false;
-  }
-  case CURLINFO_TOTAL_TIME:
-  case CURLINFO_NAMELOOKUP_TIME:
-  case CURLINFO_CONNECT_TIME:
-  case CURLINFO_PRETRANSFER_TIME:
-  case CURLINFO_SIZE_UPLOAD:
-  case CURLINFO_SIZE_DOWNLOAD:
-  case CURLINFO_SPEED_DOWNLOAD:
-  case CURLINFO_SPEED_UPLOAD:
-  case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-  case CURLINFO_CONTENT_LENGTH_UPLOAD:
-  case CURLINFO_STARTTRANSFER_TIME:
-  case CURLINFO_REDIRECT_TIME: {
-    double code = 0.0;
-    if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
-      return code;
-    }
-    return false;
-  }
-  case CURLINFO_HEADER_OUT:
-    {
+    case CURLINFO_HEADER_OUT: {
       String header = curl->getHeader();
       if (!header.empty()) {
         return header;
@@ -380,7 +336,47 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
     }
   }
 
-  return init_null();
+  switch (CURLINFO_TYPEMASK & opt) {
+    case CURLINFO_STRING: {
+      char *s_code = nullptr;
+      if (curl_easy_getinfo(cp, (CURLINFO)opt, &s_code) == CURLE_OK &&
+          s_code) {
+        return String(s_code, CopyString);
+      }
+      return false;
+    }
+    case CURLINFO_LONG: {
+      long code = 0;
+      if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
+        return code;
+      }
+      return false;
+    }
+    case CURLINFO_DOUBLE: {
+      double code = 0.0;
+      if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
+        return code;
+      }
+      return false;
+    }
+#if LIBCURL_VERSION_NUM >= 0x070c03 /* Available since 7.12.3 */
+    case CURLINFO_SLIST: {
+      struct curl_slist *slist;
+      Array ret = Array::Create();
+      if (curl_easy_getinfo(cp, (CURLINFO)opt, &slist) == CURLE_OK) {
+        while (slist) {
+          ret.append(slist->data);
+          slist = slist->next;
+        }
+        curl_slist_free_all(slist);
+        return ret;
+      }
+      return false;
+    }
+#endif
+    default:
+      return false;
+  }
 }
 
 Variant HHVM_FUNCTION(curl_errno, const Resource& ch) {

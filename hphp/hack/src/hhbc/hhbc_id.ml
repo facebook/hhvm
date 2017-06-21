@@ -11,7 +11,7 @@
 module SU = Hhbc_string_utils
 
 (* TODO: Remove this once we start reading this off of HHVM's config.hdf *)
-let auto_namespace_map =
+let auto_namespace_map () =
   [ "Arrays", "HH\\Lib\\Arrays"
   ; "C", "HH\\Lib\\C"
   ; "Dict", "HH\\Lib\\Dict"
@@ -20,13 +20,14 @@ let auto_namespace_map =
   ; "PHP", "HH\\Lib\\PHP"
   ; "Str", "HH\\Lib\\Str"
   ; "Vec", "HH\\Lib\\Vec"
-  ]
+  ] @
+  Hhbc_options.(aliased_namespaces !compiler_options)
 
 let elaborate_id ns kind id =
   let fully_qualified_id = snd (Namespaces.elaborate_id ns kind id) in
   let fully_qualified_id =
     Namespaces.renamespace_if_aliased
-      ~reverse:true auto_namespace_map fully_qualified_id
+      ~reverse:true (auto_namespace_map ()) fully_qualified_id
   in
   let need_fallback =
     ns.Namespace_env.ns_name <> None &&

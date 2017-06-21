@@ -27,10 +27,11 @@ type mode =
 type options = {
   filename        : string;
   fallback        : bool;
-  config          : string list;
+  config_list     : string list;
   debug_time      : bool;
   parser          : parser;
-  output_file     : string;
+  output_file     : string option;
+  config_file     : string option;
   quiet_mode      : bool;
   mode            : mode;
 }
@@ -67,9 +68,10 @@ let parse_options () =
   let fallback = ref false in
   let debug_time = ref false in
   let parser = ref FFP in
-  let config = ref [] in
+  let config_list = ref [] in
   let mode = ref CLI in
-  let output_file = ref "" in
+  let output_file = ref None in
+  let config_file = ref None in
   let quiet_mode = ref false in
   let usage = P.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
@@ -83,14 +85,22 @@ let parse_options () =
       );
       ("--quiet-mode"
       , Arg.Set quiet_mode
-      , " Runs very quietly, and ignore any result if invoked without -o (lower priority than the debug-time option)"
+      , " Runs very quietly, and ignore any result if invoked without -o "
+      ^ "(lower priority than the debug-time option)"
       );
       ("-v"
-      , Arg.String (fun str -> config := str :: !config)
-      , " Configuration: Eval.EnableHipHopSyntax=<value> or Hack.Lang.IntsOverflowToInts=<value>"
+      , Arg.String (fun str -> config_list := str :: !config_list)
+      , " Configuration: Eval.EnableHipHopSyntax=<value> "
+      ^ "or Hack.Lang.IntsOverflowToInts=<value>"
+      ^ "\n"
+      ^ "\t\tAllows overriding config options passed on a file"
+      );
+      ("-c"
+      , Arg.String (fun str -> config_file := Some str)
+      , " Config file in JSON format"
       );
       ("-o"
-      , Arg.String (fun str -> output_file := str)
+      , Arg.String (fun str -> output_file := Some str)
       , " Output file. Creates it if necessary"
       );
       ("--parser"
@@ -112,10 +122,11 @@ let parse_options () =
     | None -> if !mode == CLI then die usage else read_line () in
   { filename    = fn
   ; fallback    = !fallback
-  ; config      = !config
+  ; config_list = !config_list
   ; debug_time  = !debug_time
   ; parser      = !parser
   ; output_file = !output_file
+  ; config_file = !config_file
   ; quiet_mode  = !quiet_mode
   ; mode        = !mode
   }
@@ -125,7 +136,8 @@ let load_file_stdin () =
   let len = read_int () in
   let code = Bytes.create len in
   let _ = really_input stdin code 0 len in
-  code
+  (* TODO: Read config file from stdin and call Hh_json.json_of_string *)
+  Hh_json.JSON_Null, code
 
 let load_file file =
   let abs_fn = Relative_path.to_absolute file in
@@ -183,10 +195,12 @@ let print_debug_time_info filename debug_time =
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
   P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
 
-let do_compile filename compiler_options opt_ast debug_time =
+let do_compile config filename compiler_options opt_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
-  let options = Hhbc_options.get_options_from_config compiler_options.config in
+  let options =
+    Hhbc_options.get_options_from_config config compiler_options.config_list
+  in
   Hhbc_options.set_compiler_options options;
   let hhas_prog =
     match opt_ast with
@@ -208,6 +222,16 @@ let do_compile filename compiler_options opt_ast debug_time =
   then print_debug_time_info filename debug_time;
   hhas_text
 
+let load_config_and_file compiler_options filename =
+  match compiler_options.mode with
+  | CLI ->
+    Option.map ~f:Hh_json.json_of_file compiler_options.config_file,
+    load_file filename
+  | DAEMON ->
+    (* TODO: Read config file from stdin *)
+    let _config, file = load_file_stdin () in
+    None, file
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
@@ -215,14 +239,11 @@ let do_compile filename compiler_options opt_ast debug_time =
 let process_single_file compiler_options popt filename outputfile =
   try
     let t = Unix.gettimeofday () in
-    let text =
-       if compiler_options.mode = DAEMON
-       then load_file_stdin ()
-       else load_file filename in
+    let config, text = load_config_and_file compiler_options filename in
     let opt_ast = parse_file compiler_options popt filename text in
-    let debug_time = new_debug_time() in
+    let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text = do_compile filename compiler_options opt_ast debug_time in
+    let text = do_compile config filename compiler_options opt_ast debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n" (String.length text);
     match outputfile with
@@ -289,12 +310,9 @@ let decl_and_run_mode compiler_options popt =
   else
     let filename =
       Relative_path.create Relative_path.Dummy compiler_options.filename in
-    let outputfile = compiler_options.output_file in
     process_single_file
       filename
-      (if outputfile = ""
-      then None
-      else Some outputfile)
+      compiler_options.output_file
 
 let main_hack opts =
   let popt = ParserOptions.default in

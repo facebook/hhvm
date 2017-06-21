@@ -15,19 +15,23 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class SuspendedCoroutineResult<T> implements CoroutineResult<T> {
+/**
+ * Represents the reutrn value from a coroutine that has suspended.
+ */
+final class SuspendedCoroutineResult<T> implements CoroutineResult<T> {
 
   private static ?SuspendedCoroutineResult<T> $instance = null;
 
-  private function __construct() {}
-
-  public function getResult(): T {
-    throw new Exception(
-      "getResult() was called on a suspended CoroutineResult.");
+  private function __construct() {
   }
 
   public function isSuspended(): bool {
     return true;
+  }
+
+  public function getResult(): T {
+    throw
+      new Exception("getResult() was called on a suspended CoroutineResult.");
   }
 
   public static function create(): CoroutineResult<T> {
@@ -52,13 +56,39 @@ final class CoroutineUnit {
 
   private static ?CoroutineUnit $unit = null;
 
-  private function __construct() {}
+  private function __construct() {
+  }
 
   public static function create(): CoroutineUnit {
     if (self::$unit === null) {
       self::$unit = new CoroutineUnit();
     }
     return self::$unit;
+  }
+}
+
+final class CoroutineHelpers {
+
+  /**
+   * The continuation passed in is the continuation of the entire coroutine.
+   *
+   * The block is a function which executes some part of the workflow, and
+   * either throws, returns, or suspends. If it throws or returns, then
+   * the coroutine is done and we can call its continuation. If the block
+   * suspends then we do nothing, since we've suspended.
+   */
+  public static function processContinuation<T>(
+    CoroutineContinuation<T> $coroutineContinuation,
+    (function(): CoroutineResult<T>) $block,
+  ): void {
+    try {
+      $result = $block();
+      if (!$result->isSuspended()) {
+        $coroutineContinuation->resume($result->getResult());
+      }
+    } catch (Exception $ex) {
+      $coroutineContinuation->resumeWithException($ex);
+    }
   }
 }
 
@@ -82,20 +112,21 @@ abstract class ClosureBase<T> implements CoroutineContinuation<mixed> {
   public int $nextLabel = 0;
 
   protected function __construct(
-    private CoroutineContinuation<T> $coroutineContinuation_generated
-  ) {}
+    private CoroutineContinuation<T> $coroutineContinuation_generated,
+  ) {
+  }
 
   public function resume(mixed $value): void {
-    self::processContinuation(
+    CoroutineHelpers::processContinuation(
       $this->coroutineContinuation_generated,
-      () ==> $this->doResume($value, null)
+      () ==> $this->doResume($value, null),
     );
   }
 
   public function resumeWithException(Exception $ex): void {
-    self::processContinuation(
+    CoroutineHelpers::processContinuation(
       $this->coroutineContinuation_generated,
-      () ==> $this->doResume(null, $ex)
+      () ==> $this->doResume(null, $ex),
     );
   }
 
@@ -103,26 +134,4 @@ abstract class ClosureBase<T> implements CoroutineContinuation<mixed> {
     mixed $data,
     ?Exception $ex,
   ): CoroutineResult<mixed>;
-
-  /**
-   * The continuation passed in is the continuation of the entire coroutine.
-   *
-   * The block is a function which executes some part of the workflow, and
-   * either throws, returns, or suspends. If it throws or returns, then
-   * the coroutine is done and we can call its continuation. If the block
-   * suspends then we do nothing, since we've suspended.
-   */
-  private static function processContinuation<Tr>(
-    CoroutineContinuation<Tr> $coroutineContinuation,
-    (function(): CoroutineResult<Tr>) $block
-  ): void {
-    try {
-      $result = $block();
-      if (!$result->isSuspended()) {
-        $coroutineContinuation->resume($result->getResult());
-      }
-    } catch (Exception $ex) {
-      $coroutineContinuation->resumeWithException($ex);
-    }
-  }
 }

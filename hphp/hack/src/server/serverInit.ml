@@ -93,7 +93,7 @@ module ServerInitCommon = struct
           "%s %s %s %s"
           (Filename.quote (Path.to_string cmd))
           (Filename.quote (Path.to_string root))
-          (Filename.quote Build_id.build_revision)
+          ("ccc64daa18e9a10012cdbc158398c645c83503c2")
           (Filename.quote load_script_log_file) in
       Hh_logger.log "Running load_mini script: %s\n%!" cmd;
       let ic = Unix.open_process_in cmd in

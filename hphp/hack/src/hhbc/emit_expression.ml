@@ -2184,17 +2184,18 @@ and emit_unop ~need_ref env op e =
   | A.Usplat ->
     emit_expr ~need_ref:false env e
   | A.Usilence ->
-    let fault_label = Label.next_fault () in
-    let temp_local = Local.get_unnamed_local () in
-    let body = emit_expr ~need_ref:false env e in
-    let start = instr_silence_start temp_local in
-    let cleanup = instr_silence_end temp_local in
-    let fault = gather [cleanup; instr_unwind] in
-    gather [
-      start;
-      instr_try_fault fault_label body fault;
-      cleanup;
-    ]
+    Local.scope @@ fun () ->
+      let fault_label = Label.next_fault () in
+      let temp_local = Local.get_unnamed_local () in
+      let body = emit_expr ~need_ref:false env e in
+      let start = instr_silence_start temp_local in
+      let cleanup = instr_silence_end temp_local in
+      let fault = gather [cleanup; instr_unwind] in
+      gather [
+        start;
+        instr_try_fault fault_label body fault;
+        cleanup;
+      ]
 
 and emit_exprs env exprs =
   gather (List.map exprs (emit_expr ~need_ref:false env))

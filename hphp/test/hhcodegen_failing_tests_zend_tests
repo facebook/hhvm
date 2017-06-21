@@ -222,7 +222,6 @@ zend/good/tests/lang/this_assignment.php
 zend/good/tests/lang/type_hints_001.php
 zend/good/tests/lang/type_hints_002.php
 zend/good/tests/lang/type_hints_003.php
-zend/good/tests/output/bug60322.php
 zend/good/tests/output/bug60768.php
 zend/good/tests/output/ob_start_basic_004.php
 zend/good/tests/output/ob_start_basic_unerasable_001.php

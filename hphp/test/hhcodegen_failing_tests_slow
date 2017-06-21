@@ -95,10 +95,8 @@ slow/compilation/1247.php
 slow/compilation/1259.php
 slow/compilation/1282.php
 slow/compilation/1293.php
-slow/compilation/1294.php
 slow/compilation/1295.php
 slow/compilation/1301.php
-slow/compilation/1303.php
 slow/compilation/1310.php
 slow/compilation/1311.php
 slow/compilation/1316.php
@@ -131,7 +129,6 @@ slow/constant/globals-array-constant.php
 slow/constant/magic_constants.php
 slow/constant/multi_const.php
 slow/constant/realias.php
-slow/constant/shadow_alias.php
 slow/constant/true_false_null.php
 slow/constant_function/1621.php
 slow/constructor/1719.php
@@ -207,7 +204,6 @@ slow/ext_apc_iterator/iterator_004.php
 slow/ext_apc_iterator/iterator_005.php
 slow/ext_asio/backtrace.php
 slow/ext_bzip2/wrapper.php
-slow/ext_class/is-subclass-of-opt.php
 slow/ext_class/iteratoraggregate_iterator_both.php
 slow/ext_class/iteratoraggregate_iterator_both_indirect.php
 slow/ext_collator/getSortKey.php
@@ -217,7 +213,6 @@ slow/ext_datetime/strtotime_leak.php
 slow/ext_enum/enum-cache.php
 slow/ext_ezc_test/realpath_variation2.php
 slow/ext_factparse/ext_factparse.php
-slow/ext_file/param_coerce_mode.php
 slow/ext_function/register_postsend_function-exit.php
 slow/ext_function/register_postsend_function-nested.php
 slow/ext_function/register_postsend_function-simple.php
@@ -257,7 +252,6 @@ slow/ext_preg/preg_match_stack.php
 slow/ext_preg/preg_replace_callback_array_use_tokens.php
 slow/ext_process/bad_shell_exec.php
 slow/ext_session/serializing-multiple-session.php
-slow/ext_socket/cleanup_persistent_socket.php
 slow/ext_socket/persistent_socket.php
 slow/ext_spl_datastructures/DoublyLinkedList_it_mode.php
 slow/ext_spl_datastructures/SplPriorityQueueClone.php
@@ -349,8 +343,6 @@ slow/function/instance-default.php
 slow/function/short-lambda.php
 slow/function/ternary-default.php
 slow/function_no_param_modifier.php
-slow/general_functions/mkdir-recursive-file-exists.php
-slow/general_functions/mkdir-recursive.php
 slow/global_vars/global_vars.php
 slow/goto/1914.php
 slow/goto/1915.php
@@ -426,7 +418,6 @@ slow/hhbbc/method_resolution_001.php
 slow/hhbbc/method_resolution_002.php
 slow/hhbbc/method_resolution_003.php
 slow/hhbbc/method_resolution_004.php
-slow/hhbbc/minstr_weird_key.php
 slow/hhbbc/option_type_hint_001.php
 slow/hhbbc/private_ancestor_001.php
 slow/hhbbc/private_ancestor_002.php
@@ -447,7 +438,6 @@ slow/hhbbc/trait_generator_closure_002.php
 slow/hint/2187.php
 slow/if_statement/else-if-greedy-parse.php
 slow/include/hashbang.php
-slow/include_empty_files.php
 slow/ini/source_root_empty.php
 slow/inline-hhas/hello-world.php
 slow/inline-hhas/if.php
@@ -481,7 +471,6 @@ slow/lang/hh_return_type_noreturn.php
 slow/lang/invariant_cb.php
 slow/lang/invariant_cb_two.php
 slow/lang/mixedbag.php
-slow/lang/php_errormsg.php
 slow/lang/redefine_function.php
 slow/lang/reflection.php
 slow/lang/tuple_non_hh.php

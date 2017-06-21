@@ -105,7 +105,6 @@ quick/impl_abstract_dv_ia.php
 quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_so.php
 quick/incdec-string.php
-quick/include2.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface11.php
@@ -164,7 +163,6 @@ quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
 quick/short_array_syntax.php
-quick/silencer.php
 quick/simp-conv-to-int-dbl.php
 quick/sp.php
 quick/static_array.php

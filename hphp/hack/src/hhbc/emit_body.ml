@@ -97,7 +97,7 @@ let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
     Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
   | Some h ->
     Some (hint_to_type_info
-      ~nullable:false
+      ~return:true ~nullable:false
       ~skipawaitable ~always_extended:true ~tparams ~namespace h)
 
 let emit_body

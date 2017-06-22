@@ -15,6 +15,7 @@ val fmt_hint :
   string
 
 val hint_to_type_info :
+  return:bool ->
   skipawaitable: bool ->
   nullable: bool ->
   always_extended: bool ->

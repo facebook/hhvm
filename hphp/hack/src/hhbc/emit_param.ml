@@ -26,7 +26,7 @@ let from_ast ~tparams ~namespace ~generate_defaults p =
     | Some (_, A.Null) -> true
     | _ -> false in
   let param_type_info = Option.map param_hint
-    (hint_to_type_info ~skipawaitable:false
+    (hint_to_type_info ~return:false ~skipawaitable:false
       ~nullable ~always_extended:false ~namespace ~tparams) in
   let param_default_value =
     if generate_defaults

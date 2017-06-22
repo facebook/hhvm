@@ -2070,7 +2070,7 @@ function run_test($options, $test) {
         $h = fopen($semdiff, "r");
         $buf = "";
         if (($s = fgets($h)) !== false) {
-          if (substr($s, 0, 12) === "distance = 0") {
+          if (strtolower(substr($s, 0, 12)) === "distance = 0") {
             if ($rv) {
               fclose($h);
               unlink($semdiff);

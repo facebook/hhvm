@@ -242,7 +242,8 @@ and emit_local ~notice ~need_ref env x =
  * the result will be just below the top of the stack *)
 and emit_first_expr env (_, e as expr) =
   match e with
-  | A.Lvar (_, id) when not (is_local_this env id) ->
+  | A.Lvar (_, id)
+    when not (is_local_this env id || SN.Superglobals.is_superglobal id) ->
     instr_cgetl2 (get_local env id), true
   | _ ->
     emit_expr_and_unbox_if_necessary ~need_ref:false env expr, false

@@ -829,7 +829,6 @@ slow/super_globals/1387.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
-slow/switch_statement/1758.php
 slow/ternary/1736.php
 slow/thrift/unions.php
 slow/traits/1943.php

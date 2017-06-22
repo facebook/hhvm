@@ -220,7 +220,6 @@ const StaticString
   s_filetime("filetime"),
   s_ssl_verify_result("ssl_verify_result"),
   s_redirect_count("redirect_count"),
-  s_local_port("local_port"),
   s_total_time("total_time"),
   s_namelookup_time("namelookup_time"),
   s_connect_time("connect_time"),
@@ -233,6 +232,11 @@ const StaticString
   s_upload_content_length("upload_content_length"),
   s_starttransfer_time("starttransfer_time"),
   s_redirect_time("redirect_time"),
+  s_redirect_url("redirect_url"),
+  s_primary_ip("primary_ip"),
+  s_primary_port("primary_port"),
+  s_local_ip("local_ip"),
+  s_local_port("local_port"),
   s_request_header("request_header");
 
 Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
@@ -274,11 +278,6 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_COUNT, &l_code) == CURLE_OK) {
       ret.set(s_redirect_count, l_code);
     }
-#if LIBCURL_VERSION_NUM >= 0x071500
-    if (curl_easy_getinfo(cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
-      ret.set(s_local_port, l_code);
-    }
-#endif
     if (curl_easy_getinfo(cp, CURLINFO_TOTAL_TIME, &d_code) == CURLE_OK) {
       ret.set(s_total_time, d_code);
     }
@@ -319,6 +318,27 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_TIME, &d_code) == CURLE_OK) {
       ret.set(s_redirect_time, d_code);
     }
+#if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
+    if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_URL, &s_code) == CURLE_OK) {
+      ret.set(s_redirect_url, String(s_code, CopyString));
+    }
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+    if (curl_easy_getinfo(cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
+      ret.set(s_primary_ip, String(s_code, CopyString));
+    }
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+    if (curl_easy_getinfo(cp, CURLINFO_PRIMARY_PORT, &l_code) == CURLE_OK) {
+      ret.set(s_primary_port, l_code);
+    }
+    if (curl_easy_getinfo(cp, CURLINFO_LOCAL_IP, &s_code) == CURLE_OK) {
+      ret.set(s_local_ip, String(s_code, CopyString));
+    }
+    if (curl_easy_getinfo(cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
+      ret.set(s_local_port, l_code);
+    }
+#endif
     String header = curl->getHeader();
     if (!header.empty()) {
       ret.set(s_request_header, header);

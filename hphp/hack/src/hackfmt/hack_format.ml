@@ -179,7 +179,7 @@ let rec transform node =
     let (modifiers, prop_type, declarators, semi) =
       get_property_declaration_children x in
     Fmt [
-      handle_possible_list ~after_each:space modifiers;
+      handle_possible_list ~after_each:(fun _ -> Space) modifiers;
       t prop_type;
       handle_declarator_list declarators;
       t semi;
@@ -277,7 +277,7 @@ let rec transform node =
     Fmt [
       t where;
       Space;
-      handle_possible_list constraints ~after_each:space;
+      handle_possible_list constraints ~after_each:(fun _ -> Space);
     ]
   | WhereConstraint x ->
     let (left, op, right) = get_where_constraint_children x in
@@ -297,7 +297,7 @@ let rec transform node =
       when_present attr newline;
       (
         let mods =
-          handle_possible_list ~after_each:space modifiers
+          handle_possible_list ~after_each:(fun _ -> Space) modifiers
         in
         let fn_name, args_and_where = match syntax func_decl with
           | FunctionDeclarationHeader x ->
@@ -348,7 +348,7 @@ let rec transform node =
       t attr;
       when_present attr newline;
       Span [
-        handle_possible_list ~after_each:space modifiers;
+        handle_possible_list ~after_each:(fun _ -> Space) modifiers;
         t kw;
         Space;
         Split;
@@ -600,20 +600,14 @@ let rec transform node =
     Fmt [
       t kw;
       Space;
-      t left_p;
-      WithRule (Rule.Argument, Fmt [
-        Split;
+      delimited_nest left_p right_p [
+        t ex_type;
+        Space;
+        SplitWith Cost.Base;
         Nest [
-          t ex_type;
-          Space;
-          SplitWith Cost.Base;
-          Nest [
-            t var;
-          ];
+          t var;
         ];
-        Split;
-        t right_p;
-      ]);
+      ];
       handle_possible_compound_statement body;
     ]
   | FinallyClause x ->
@@ -1405,14 +1399,6 @@ and transform_simple_statement node =
   Fmt ((List.map (children node) transform) @ [Newline])
 
 and braced_block_nest open_b close_b nodes =
-  let () = match syntax open_b with
-    | Token open_b -> ()
-    | _ -> failwith "Expected Token"
-  in
-  let () = match syntax close_b with
-    | Token close_b -> ()
-    | _ -> failwith "Expected Token"
-  in
   (* Remove the closing brace's leading trivia and handle it inside the
    * BlockNest, so that comments will be indented correctly. *)
   let leading, close_b = remove_leading_trivia close_b in
@@ -1427,10 +1413,46 @@ and braced_block_nest open_b close_b nodes =
     transform close_b;
   ]
 
+and delimited_nest
+    ?(spaces=false)
+    ?(split_when_children_split=true)
+    left_delim
+    right_delim
+    nodes
+  =
+  let rule =
+    if split_when_children_split
+    then Rule.Argument
+    else Rule.Simple Cost.Base
+  in
+  Span [
+    transform left_delim;
+    WithRule (rule,
+      nest ~spaces right_delim nodes
+    );
+  ]
+
+and nest ?(spaces=false) right_delim nodes =
+  (* Remove the right delimiter's leading trivia and handle it inside the Nest,
+   * so that comments will be indented correctly. *)
+  let leading, right_delim = remove_leading_trivia right_delim in
+  let nested_contents = Nest [Fmt nodes; transform_leading_trivia leading] in
+  let content_present = has_printable_content nested_contents in
+  let maybe_split =
+    match content_present, spaces with
+    | false, _ -> Nothing
+    | true, false -> Split
+    | true, true -> space_split ()
+  in
+  Fmt [
+    maybe_split;
+    nested_contents;
+    maybe_split;
+    transform right_delim;
+  ]
+
 and after_each_argument is_last =
   if is_last then Split else space_split ()
-
-and after_each_literal = space_split
 
 and handle_lambda_body node =
   match syntax node with
@@ -1706,84 +1728,60 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
 
 and transform_argish ?(allow_trailing=true) ?(spaces=false)
     left_p arg_list right_p =
-  Fmt [
-    transform left_p;
-    when_present arg_list split;
-    if spaces && is_present arg_list then Space else Nothing;
-    let rule = match syntax arg_list with
-      | SyntaxList [x]
-        when List.is_empty (trailing_trivia left_p)
-          && List.is_empty (trailing_trivia x)
-        -> Rule.Simple Cost.Base
-      | _ -> Rule.Argument
-    in
-    WithRule (rule, Span [
-      transform_possible_comma_list ~allow_trailing ~spaces arg_list right_p
-    ])
+  (* When there is only one argument, with no surrounding whitespace in the
+   * original source, allow that style to be preserved even when there are line
+   * breaks within the argument (normally these would force the splits around
+   * the argument to break). *)
+  let split_when_children_split =
+    match spaces, syntax arg_list with
+    | false, SyntaxList [x] ->
+      not (
+        List.is_empty (trailing_trivia left_p) &&
+        List.is_empty (trailing_trivia x)
+      )
+    | _ -> true
+  in
+  delimited_nest ~spaces ~split_when_children_split left_p right_p [
+    transform_arg_list ~spaces ~allow_trailing arg_list
   ]
 
 and transform_braced_item left_p item right_p =
-  (* Remove the right paren's leading trivia and handle it inside the Nest, so
-   * that comments will be indented correctly. *)
-  let leading, right_p = remove_leading_trivia right_p in
-  Fmt [
-    transform left_p;
-    when_present item split;
-    WithRule (Rule.Argument, Span [
-      Nest [
-        transform item;
-        transform_leading_trivia leading;
-      ];
-      when_present item split;
-      transform right_p;
-    ]);
-  ]
+  delimited_nest left_p right_p [transform item]
+
+and transform_arg_list ?(allow_trailing=true) ?(spaces=false) items =
+  handle_possible_list items
+    ~after_each:after_each_argument
+    ~handle_last:(transform_last_arg ~allow_trailing)
 
 and transform_possible_comma_list ?(allow_trailing=true) ?(spaces=false)
     items right_p =
-  (* Remove the right paren's leading trivia and handle it inside the Nest, so
-   * that comments will be indented correctly. *)
-  let leading, right_p = match syntax right_p with
-    | Missing -> [], right_p
-    | _ -> remove_leading_trivia right_p
-  in
-  Fmt [
-    Nest [
-      handle_possible_list items
-        ~after_each:after_each_argument
-        ~handle_last:(transform_last_arg ~allow_trailing);
-      transform_leading_trivia leading;
-    ];
-    when_present items split;
-    if spaces && is_present items then Space else Nothing;
-    transform right_p;
+  nest ~spaces right_p [
+    transform_arg_list ~spaces ~allow_trailing items
   ]
 
 and remove_leading_trivia node =
-  let leading_token = match Syntax.leading_token node with
-    | Some t -> t
-    | None -> failwith "Expected leading token"
-  in
-  let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
-    match syntax rewrite_node with
-    | Token t when t == leading_token ->
-      Rewriter.Replace (Syntax.make_token {t with EditableToken.leading = []})
-    | _  -> Rewriter.Keep
-  ) node in
-  EditableToken.leading leading_token, rewritten_node
+  match Syntax.leading_token node with
+  | None -> [], node
+  | Some leading_token ->
+    let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
+      match syntax rewrite_node with
+      | Token t when t == leading_token ->
+        Rewriter.Replace (Syntax.make_token {t with EditableToken.leading = []})
+      | _  -> Rewriter.Keep
+    ) node in
+    EditableToken.leading leading_token, rewritten_node
 
 and remove_trailing_trivia node =
-  let trailing_token = match Syntax.trailing_token node with
-    | Some t -> t
-    | None -> failwith "Expected trailing token"
-  in
-  let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
-    match syntax rewrite_node with
-    | Token t when t == trailing_token ->
-      Rewriter.Replace (Syntax.make_token {t with EditableToken.trailing = []})
-    | _  -> Rewriter.Keep
-  ) node in
-  rewritten_node, EditableToken.trailing trailing_token
+  match Syntax.trailing_token node with
+  | None -> node, []
+  | Some trailing_token ->
+    let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
+      match syntax rewrite_node with
+      | Token t when t == trailing_token ->
+        Rewriter.Replace (Syntax.make_token {t with EditableToken.trailing = []})
+      | _  -> Rewriter.Keep
+    ) node in
+    rewritten_node, EditableToken.trailing trailing_token
 
 and transform_last_arg ~allow_trailing node =
   match syntax node with

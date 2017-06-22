@@ -77,10 +77,42 @@ type t =
   (* Add a comma only if the next split is broken on *)
   | TrailingComma
 
-let space _ = Space
-let split _ = Split
-let space_split _ = Fmt [Space; Split]
-let newline _ = Newline
+let space () = Space
+let split () = Split
+let space_split () = Fmt [Space; Split]
+let newline () = Newline
+
+let rec has_printable_content node =
+  match node with
+  | Text _
+  | Comment _
+  | MultilineString _
+  | DocLiteral _
+  | NumericLiteral _
+  | ConcatOperator _ -> true
+
+  | Fmt nodes
+  | Span nodes
+  | Nest nodes
+  | ConditionalNest nodes
+  | BlockNest nodes ->
+    List.exists nodes has_printable_content
+
+  | WithRule (_, action) ->
+    has_printable_content action
+
+  | WithLazyRule (_, before, action)
+  | WithPossibleLazyRule (_, before, action) ->
+    has_printable_content before || has_printable_content action
+
+  | Nothing
+  | Ignore _
+  | Split
+  | SplitWith _
+  | Newline
+  | BlankLine
+  | Space
+  | TrailingComma -> false
 
 (* Add "dump @@" before any fmt_node expression to dump it to stderr. *)
 let dump ?(ignored=false) node =

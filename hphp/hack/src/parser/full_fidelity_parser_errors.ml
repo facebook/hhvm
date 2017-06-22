@@ -400,6 +400,33 @@ let first_function_name parents =
     | _ -> None
   end
 
+(* Helper function for common code pattern *)
+  let is_token_kind node kind =
+    (token_kind node) = Some kind
+
+(* Test if (a list_expression is the left child of a binary_expression,
+ * and the operator is '=') *)
+let is_left_of_simple_assignment le_node p1 =
+  match syntax p1 with
+  | BinaryExpression { binary_left_operand; binary_operator; _ } ->
+    le_node == binary_left_operand  &&
+        is_token_kind binary_operator TokenKind.Equal
+  | _ -> false
+
+(* Test if a list_expression is the value clause of a foreach_statement *)
+let is_value_of_foreach le_node p1 =
+  match syntax p1 with
+  | ForeachStatement { foreach_value; _ } -> le_node == foreach_value
+  | _ -> false
+
+let is_invalid_list_expression le_node parents =
+  match parents with
+  | p1 :: _ when is_left_of_simple_assignment le_node p1 -> false
+  | p1 :: _ when is_value_of_foreach le_node p1 -> false
+  (* checking p3 is sufficient to test if le_node is a nested list_expression *)
+  | _ :: _ :: p3 :: _ when is_list_expression p3 -> false
+  | _ -> true (* All other deployments of list_expression are invalid *)
+
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -522,7 +549,7 @@ let property_errors node is_strict =
       [ SyntaxError.make s e SyntaxError.error2001 ]
   | _ -> [ ]
 
-let expression_errors node =
+let expression_errors node parents =
   match syntax node with
   | SubscriptExpression { subscript_left_bracket; _}
     when is_left_brace subscript_left_bracket ->
@@ -547,6 +574,10 @@ let expression_errors node =
       [ SyntaxError.make s e (SyntaxError.error2038 constructor_name)]
     else
       [ ]
+  | ListExpression le
+    when (is_invalid_list_expression node parents) ->
+    [ SyntaxError.make (start_offset node) (end_offset node)
+        SyntaxError.error2040 ]
   | _ -> [ ] (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents =
@@ -624,7 +655,7 @@ let find_syntax_errors node is_strict =
     let statement_errs = statement_errors node parents in
     let methodish_errs = methodish_errors node parents in
     let property_errs = property_errors node is_strict in
-    let expr_errs = expression_errors node in
+    let expr_errs = expression_errors node parents in
     let require_errs = require_errors node parents in
     let classish_errors = classish_errors node parents in
     let type_errors = type_errors node parents is_strict in

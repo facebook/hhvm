@@ -165,3 +165,6 @@ let error2038 constructor_name =
 let error2039 classish_keyword classish_name function_name = Printf.sprintf
   ("Cannot define a class, interface, or trait inside a function. Currently " ^^
   "%s '%s' is inside function '%s'.") classish_keyword classish_name function_name
+let error2040 = "Invalid use of 'list(...)'. A list expression may only be " ^
+  "used as the left side of a simple assignment, the value clause of a " ^
+  "foreach loop, or a list item nested inside another list expression."

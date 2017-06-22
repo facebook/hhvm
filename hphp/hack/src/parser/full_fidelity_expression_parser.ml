@@ -1667,9 +1667,6 @@ TODO: This will need to be fixed to allow situations where the qualified name
       an instance of the class types Vector, ImmVector, or Pair
       (the "source").
 
-      TODO: Produce an error later if the list is not on the left side of
-      an assignment.
-
       TODO: Produce an error later if the expressions in the list destructuring
       are not lvalues.
       *)

@@ -444,7 +444,13 @@ let () =
 
     let time_taken = Unix.gettimeofday () -. start_time in
     if not env.test then
-      Logger.exit time_taken None None env.mode env.file env.root;
+      Logger.exit
+        ~time_taken
+        ~error:None
+        ~exit_code:None
+        ~mode:env.mode
+        ~file:env.file
+        ~root:env.root;
   with exn ->
     let exit_code = get_exception_exit_value exn in
     if exit_code = 255 then Printexc.print_backtrace stderr;
@@ -460,7 +466,12 @@ let () =
     in
     let time_taken = Unix.gettimeofday () -. start_time in
     if not env.test then
-      Logger.exit time_taken (Some msg) (Some exit_code)
-        env.mode env.file env.root;
+      Logger.exit
+        ~time_taken
+        ~error:(Some msg)
+        ~exit_code:(Some exit_code)
+        ~mode:env.mode
+        ~file:env.file
+        ~root:env.root;
     eprintf "%s\n" msg;
     exit exit_code

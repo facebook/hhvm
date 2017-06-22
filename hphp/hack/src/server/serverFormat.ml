@@ -47,7 +47,11 @@ let call_external_formatter
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]
 
-let go_hackfmt genv content args =
+let go_hackfmt genv ?filename ~content args =
+  let args = match filename with
+    | Some filename -> args @ ["--filename-for-logging"; filename]
+    | None -> args
+  in
   Hh_logger.log "%s" (String.concat " " args);
   let path = match ServerConfig.formatter_override genv.ServerEnv.config with
     | None -> Path.make "/usr/local/bin/hackfmt"
@@ -75,10 +79,11 @@ let go_hh_format _ content from to_ =
       Format_hack.region modes Path.dummy_path from to_ content
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go genv content from to_ =
+let go genv ?filename ~content from to_ =
   if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt
   then
-    go_hackfmt genv content (range_offsets_to_args from to_) >>| fun lines ->
+    let args = range_offsets_to_args from to_ in
+    go_hackfmt genv ?filename ~content args >>| fun lines ->
     (String.concat "\n" lines) ^ "\n"
   else go_hh_format genv content from to_
 
@@ -144,13 +149,13 @@ let go_ide
     let ed = offset_to_position content to0 in
     let range = {st = {line = 1; column = 1;}; ed;} in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go genv content (from0 + 1) (to0 + 1)
+    go genv ~filename ~content (from0 + 1) (to0 + 1)
       |> convert_to_ide_result ~range
 
   | Range range ->
     let (range, from0, to0) =
       expand_range_to_whole_rows content range.file_range in
-    go genv content (from0 + 1) (to0 + 1)
+    go genv ~filename ~content (from0 + 1) (to0 + 1)
       |> convert_to_ide_result ~range
 
   | Position {position; _} ->
@@ -158,7 +163,7 @@ let go_ide
        zero-based index. *)
     let offset = get_offset content position in
     let args = ["--at-char"; string_of_int offset] in
-    go_hackfmt genv content args >>= fun lines ->
+    go_hackfmt genv ~filename ~content args >>= fun lines ->
 
     (* `hackfmt --at-char` returns the range that was formatted, as well as the
        contents of that range. For example, it might return

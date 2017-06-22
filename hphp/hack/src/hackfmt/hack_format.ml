@@ -1214,7 +1214,7 @@ let rec transform node =
     in
 
     let (xhp_open, body, close) = get_xhp_expression_children x in
-    WithPossibleLazyRule (Rule.XHPExpression, t xhp_open,
+    WithPossibleLazyRule (Rule.Argument, t xhp_open,
       let transformed_body, can_split_before_close = handle_xhp_body body in
       Fmt [
         Nest [transformed_body];

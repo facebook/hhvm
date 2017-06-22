@@ -31,7 +31,7 @@ def cat_file(filename):
         return f.read()
 
 
-def run_watcher(daemonize=False):
+def run_watcher(daemonize=False, enable_watchman_event_watcher=True):
     # Creates a decorator with named arguments. Runs the watcher
     # and retrieves the socket name. Hands these as named arguments
     # to the test function.
@@ -50,6 +50,8 @@ def run_watcher(daemonize=False):
                 file=sys.stderr)
             shutil.copytree(self.template_repo, self.repo_dir)
             self.write_watchman_config('{}')
+            if enable_watchman_event_watcher:
+                self.write_enable_watchman_event_watcher_file()
             self.init_hg_repo()
             self.write_new_file_and_commit("foo1", "hello", "foo1 contents")
             sockname = self.get_sockname()
@@ -132,6 +134,13 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     def write_watchman_config(self, contents):
         with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
             f.write(contents)
+
+    def write_enable_watchman_event_watcher_file(self):
+        with open(os.path.join(
+            self.repo_dir,
+            '.hh_enable_watchman_event_watcher'
+        ), 'w') as f:
+            f.write("")
 
     def init_hg_repo(self):
         cmd = ['hg', 'init']
@@ -304,6 +313,19 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 sockname,
                 initialized_msg,
                 'sockname')
+        return
+
+    @flaky
+    @run_watcher(daemonize=False, enable_watchman_event_watcher=False)
+    def test_always_get_settled_message_when_watcher_disabled(
+            self, sockname=None, watcher_process=None):
+        result = self.connect_socket_get_output(sockname)
+        # Initially, watcher doesn't know the repo's state
+        self.assertIn(
+            'settled',
+            result,
+            'With the event watcher disabled, it should always return a settled message'
+        )
         return
 
     @flaky

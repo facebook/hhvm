@@ -76,21 +76,6 @@ module J = Hh_json_helpers
 module Config = WatchmanEventWatcherConfig
 module Responses = Config.Responses
 
-let ignore_unix_epipe f x =
-  try f x with
-  | Unix.Unix_error (Unix.EPIPE, _, _) ->
-    ()
-
-let send_to_fd v fd =
-  let str = Printf.sprintf "%s\n" (Responses.to_string v) in
-  let bytes = Unix.single_write fd str 0 (String.length str) in
-  if bytes = (String.length str) then
-    ()
-  else
-    (** We're only writing a few bytes. Not sure what to do here.
-     * Retry later when the pipe has been pumped? *)
-    Hh_logger.log "Failed to write all bytes"
-
 type state =
   | Unknown
   (** State_enter heading towards. *)
@@ -100,10 +85,52 @@ type state =
 
 type env = {
   watchman : Watchman.watchman_instance;
+  (** Directory we are watching. *)
+  root : Path.t;
   state : state;
   socket : Unix.file_descr;
   waiting_clients : Unix.file_descr Queue.t;
 }
+
+let ignore_unix_epipe f x =
+  try f x with
+  | Unix.Unix_error (Unix.EPIPE, _, _) ->
+    ()
+
+(**
+ * This allows the repo itself to turn on-or-off this Watchman Event
+ * Watcher service (and send a fake Settled message instead).
+ *
+ * This service has its own deploy/release cycle independent of the
+ * Hack Server. Adding this toggle to the Hack Server wouldn't retroactively
+ * allow us to toggle off this service for older versions of the Hack Server.
+ * Putting it here instead allows us to turn off this service regardless of
+ * what version of the Hack server is running.
+ *)
+let is_enabled env =
+  let enabled_file = Path.concat env.root ".hh_enable_watchman_event_watcher" in
+  Sys.file_exists (Path.to_string enabled_file)
+
+let send_to_fd env v fd =
+  let v = if is_enabled env then
+    v
+  else
+    (Hh_logger.log "Service not enabled. Sending fake Settled message instead";
+    Responses.Settled)
+  in
+  let str = Printf.sprintf "%s\n" (Responses.to_string v) in
+  let bytes = Unix.single_write fd str 0 (String.length str) in
+  (if bytes = (String.length str) then
+    ()
+  else
+    (** We're only writing a few bytes. Not sure what to do here.
+     * Retry later when the pipe has been pumped? *)
+    Hh_logger.log "Failed to write all bytes");
+  match v with
+  | Responses.Settled ->
+    Unix.close fd
+  | Responses.Unknown | Responses.Mid_update ->
+    Queue.add fd env.waiting_clients
 
 let watchman_expression_terms = [
   J.strlist ["type"; "f"];
@@ -121,8 +148,7 @@ type daemon_init_result =
 let process_changes changes env =
   let notify_client client =
     (** Notify the client that the repo has settled. *)
-      ignore_unix_epipe (send_to_fd Responses.Settled) client;
-      Unix.close client
+      ignore_unix_epipe (send_to_fd env Responses.Settled) client
   in
   let notify_waiting_clients env =
     let clients = Queue.create () in
@@ -191,15 +217,11 @@ let process_client_ env client =
    * clients instead of adding them to the waiting_clients queue. *)
   (match env.state with
   | Unknown ->
-    send_to_fd Responses.Unknown client;
-    Queue.add client env.waiting_clients
+    send_to_fd env Responses.Unknown client
   | Entering_to _ ->
-    send_to_fd Responses.Mid_update client;
-    Queue.add client env.waiting_clients
+    send_to_fd env Responses.Mid_update client
   | Left_at _ ->
-    send_to_fd Responses.Settled client;
-    Unix.shutdown client Unix.SHUTDOWN_ALL;
-    Unix.close client);
+    send_to_fd env Responses.Settled client);
   env
 
 let process_client env client =
@@ -250,6 +272,7 @@ let init root =
       watchman = Watchman.Watchman_alive wenv;
       state = Unknown;
       socket;
+      root;
       waiting_clients = Queue.create ();
     }
 

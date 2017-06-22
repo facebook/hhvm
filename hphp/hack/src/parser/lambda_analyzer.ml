@@ -74,10 +74,12 @@ let token_to_string node =
   | Token t -> Some (Token.text t)
   | _ -> None
 
-let param_name node =
-  match syntax node with
-  | ParameterDeclaration { parameter_name; _ } -> token_to_string parameter_name
-  | _ -> None
+  let param_name node =
+    match syntax node with
+    | ListItem { list_item = {
+        syntax = ParameterDeclaration { parameter_name; _ }; _
+      }; _ } -> token_to_string parameter_name
+    | _ -> None
 
 let get_params node =
   let rec aux node =

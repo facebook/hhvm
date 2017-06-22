@@ -603,10 +603,10 @@ let do_completion (conn: server_conn) (params: Completion.params)
   let rec hack_completion_to_lsp (result: complete_autocomplete_result)
     : Completion.completionItem =
     {
-      label = result.res_name;
-      kind = None;
-      detail = Some (hack_to_string result);
-      documentation = None;
+      label = result.res_name; (* TODO: check that label replaces the right range *)
+      kind = hack_to_kind result;
+      detail = Some (hack_to_detail result);
+      documentation = None; (* TODO: provide doc-comments *)
       sortText = None;
       filterText = None;
       insertText = None;
@@ -615,15 +615,19 @@ let do_completion (conn: server_conn) (params: Completion.params)
       command = None;
       data = None;
     }
-  and hack_to_string (result: complete_autocomplete_result) : string =
-    match result.func_details with
-    | None -> result.res_ty
-    | Some f -> let pp = List.map f.params ~f:hack_param_to_string in
-      result.res_ty ^ " - " ^ (String.concat ", " pp) ^ " -> " ^ f.return_ty
-  and hack_param_to_string (p: func_param_result) : string =
-    p.param_name ^ ": " ^ p.param_ty
+  and hack_to_kind (result: complete_autocomplete_result) : Completion.completionItemKind option =
+    (* TODO: change hh_server to return richer 'kind' information *)
+    (* For now we just return either 'Function' or 'None'. *)
+    Option.map result.func_details ~f:(fun _ -> Completion.Function)
+  and hack_to_detail (result: complete_autocomplete_result) : string =
+    (* TODO: retrieve the actual signature including name+modifiers     *)
+    (* For now we just return the type of the completion. In the case   *)
+    (* of functions, their function-types have parentheses around them, *)
+    (* which we strip. *)
+    String_utils.rstrip (String_utils.lstrip result.res_ty "(") ")"
   in
   {
+    (* TODO: get isIncomplete flag from hh_server *)
     isIncomplete = false;
     items = List.map results ~f:hack_completion_to_lsp;
   }

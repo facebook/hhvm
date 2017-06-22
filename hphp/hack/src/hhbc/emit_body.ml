@@ -148,10 +148,29 @@ let emit_body
     rewrite_static_instrseq (Static_var.make_static_map body)
                     (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
   in
+  let first_instruction_is_label =
+    match Instruction_sequence.first stmt_instrs with
+    | Some (ILabel _) -> true
+    | _ -> false
+  in
+  let header = gather [
+        begin_label;
+        emit_method_prolog ~params ~needs_local_this;
+        generator_instr;
+      ]
+  in
+  (* per comment in emitter.cpp there should be no
+   * jumps to the base of the function - inject EntryNop
+   * if first instruction in the statement list is label
+   * and prologue is empty *)
+  let header =
+    if first_instruction_is_label
+      && Instruction_sequence.is_empty header
+    then instr_entrynop
+    else header
+  in
   let body_instrs = gather [
-    begin_label;
-    emit_method_prolog ~params ~needs_local_this;
-    generator_instr;
+    header;
     stmt_instrs;
     default_value_setters;
   ] in

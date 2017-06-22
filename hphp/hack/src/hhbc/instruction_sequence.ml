@@ -516,3 +516,21 @@ let rewrite_class_refs instrseq =
       | _ -> instr instruction
     in
     InstrSeq.flat_map_seq instrseq rewrite_static_instr
+
+let first instrs =
+  let rec aux instrs =
+    match instrs with
+    | Instr_list l -> List.hd l
+    | Instr_concat l -> List.find_map ~f:aux l
+    | Instr_try_fault (t, f) -> match aux t with None -> aux f | v -> v
+  in
+  aux instrs
+
+let is_empty instrs =
+  let rec aux instrs =
+    match instrs with
+    | Instr_list l -> List.is_empty l
+    | Instr_concat l -> List.for_all ~f:aux l
+    | Instr_try_fault (t, f) -> aux t && aux f
+  in
+  aux instrs

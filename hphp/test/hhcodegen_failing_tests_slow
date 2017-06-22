@@ -345,7 +345,6 @@ slow/function/ternary-default.php
 slow/function_no_param_modifier.php
 slow/global_vars/global_vars.php
 slow/goto/1914.php
-slow/goto/1915.php
 slow/goto/1917.php
 slow/goto/label_in_finally.php
 slow/goto/label_out_finally.php
@@ -830,7 +829,6 @@ slow/super_globals/1387.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
-slow/switch_statement/1757.php
 slow/switch_statement/1758.php
 slow/ternary/1736.php
 slow/thrift/unions.php

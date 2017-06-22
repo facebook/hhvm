@@ -288,13 +288,12 @@ and emit_switch env scrutinee_expr cl =
           | Some e ->
             (* Special case for simple scrutinee *)
             match scrutinee_expr with
-            | (_, A.Lvar _) ->
+            | _, A.Lvar _ ->
+              let eq_expr = Pos.none, A.Binop (A.Eqeq, scrutinee_expr, e) in
               gather [
-                emit_expr ~need_ref:false env e;
-                instr_cgetl2 local;
-                instr_eq;
+                emit_expr ~need_ref:false env eq_expr;
                 instr_jmpnz l
-                ]
+              ]
             | _ ->
               gather [
                 instr_cgetl local;

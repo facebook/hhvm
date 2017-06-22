@@ -2212,7 +2212,8 @@ and emit_exprs env exprs =
 and stash_in_local ?(always_stash=false) ?(leave_on_stack=false) env e f =
   let break_label = Label.next_regular () in
   match e with
-  | (_, A.Lvar (_, id)) when not always_stash && not (is_local_this env id) ->
+  | (_, A.Lvar (_, id)) when not always_stash
+    && not (is_local_this env id && Emit_env.get_needs_local_this env) ->
     gather [
       f (get_local env id) break_label;
       instr_label break_label;

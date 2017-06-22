@@ -11,7 +11,7 @@
 type kind =
   | Simple of Cost.t
   | Always
-  | Argument
+  | Parental
 
 type t = {
   id: int;
@@ -24,13 +24,13 @@ let get_cost kind =
   Cost.get_cost @@ match kind with
     | Simple cost -> cost
     | Always -> Cost.NoCost
-    | Argument -> Cost.Base
+    | Parental -> Cost.Base
 
 let cares_about_children kind =
   match kind with
     | Simple _ -> false
     | Always -> false
-    | Argument -> true
+    | Parental -> true
 
 let compare r1 r2 = Pervasives.compare r1.id r2.id
 
@@ -38,6 +38,6 @@ let to_string rule =
   let kind = match rule.kind with
     | Simple cost -> Printf.sprintf "Simple %d" @@ Cost.get_cost cost
     | Always -> "Always"
-    | Argument -> "Argument"
+    | Parental -> "Parental"
   in
   (string_of_int rule.id) ^ " - " ^ kind

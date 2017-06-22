@@ -213,7 +213,7 @@ let rec transform node =
       Space;
       t use_kind;
       when_present use_kind space;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list clauses ~after_each:after_each_argument;
       ]);
       t semi;
@@ -361,11 +361,11 @@ let rec transform node =
       when_present extends_kw (fun () -> Fmt [
         Space;
         Split;
-        WithRule (Rule.Argument, Nest [ Span [
+        WithRule (Rule.Parental, Nest [ Span [
           t extends_kw;
           Space;
           Split;
-          WithRule (Rule.Argument, Nest [
+          WithRule (Rule.Parental, Nest [
             handle_possible_list ~after_each:after_each_ancestor extends
           ])
         ]])
@@ -374,11 +374,11 @@ let rec transform node =
       when_present impl_kw (fun () -> Fmt [
         Space;
         Split;
-        WithRule (Rule.Argument, Nest [ Span [
+        WithRule (Rule.Parental, Nest [ Span [
           t impl_kw;
           Space;
           Split;
-          WithRule (Rule.Argument, Nest [
+          WithRule (Rule.Parental, Nest [
             handle_possible_list ~after_each:after_each_ancestor impls
           ])
         ]])
@@ -412,12 +412,12 @@ let rec transform node =
     in
     Fmt [
       t kw;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split elements;
       ]);
       t lb;
       Newline;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split clauses;
       ]);
       Newline;
@@ -427,7 +427,7 @@ let rec transform node =
     let (kw, elements, semi) = get_trait_use_children x in
     Fmt [
       t kw;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split elements;
       ]);
       t semi;
@@ -454,7 +454,7 @@ let rec transform node =
       t kw;
       when_present const_type space;
       t const_type;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split declarators;
       ]);
       t semi;
@@ -544,7 +544,7 @@ let rec transform node =
       Space;
       t x.while_left_paren;
       Split;
-      WithRule (Rule.Argument, Fmt [
+      WithRule (Rule.Parental, Fmt [
         Nest [t x.while_condition];
         Split;
         t x.while_right_paren;
@@ -637,7 +637,7 @@ let rec transform node =
       t kw;
       Space;
       t left_p;
-      WithRule (Rule.Argument, Fmt [
+      WithRule (Rule.Parental, Fmt [
         Split;
         Nest [
           handle_possible_list init;
@@ -687,7 +687,7 @@ let rec transform node =
       Space;
       t left_p;
       Split;
-      WithRule (Rule.Argument, Fmt [
+      WithRule (Rule.Parental, Fmt [
         Nest [t expr];
         t right_p;
       ]);
@@ -853,7 +853,7 @@ let rec transform node =
   | ConditionalExpression x ->
     let (test_expr, q_kw, true_expr, c_kw, false_expr) =
       get_conditional_expression_children x in
-    WithLazyRule (Rule.Argument,
+    WithLazyRule (Rule.Parental,
       t test_expr,
       Nest [
         Space;
@@ -904,7 +904,7 @@ let rec transform node =
     Fmt [
       t left_p;
       Split;
-      WithRule (Rule.Argument, Fmt [
+      WithRule (Rule.Parental, Fmt [
         Nest [ t expr; ];
         Split;
         t right_p
@@ -920,7 +920,7 @@ let rec transform node =
         if List.is_empty (trailing_trivia left_b)
         && List.is_empty (trailing_trivia expr)
           then Rule.Simple Cost.Base
-          else Rule.Argument
+          else Rule.Parental
       in
       WithRule (rule, Fmt [
         Nest [t expr];
@@ -1056,7 +1056,7 @@ let rec transform node =
     Fmt [
     t kw;
       (* TODO: Eliminate code duplication *)
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split categories;
       ]);
       t semi;
@@ -1074,7 +1074,7 @@ let rec transform node =
       get_xhp_class_attribute_declaration_children x in
     Fmt [
       t kw;
-      WithRule (Rule.Argument, Nest [
+      WithRule (Rule.Parental, Nest [
         handle_possible_list ~before_each:space_split xhp_attributes;
       ]);
       t semi;
@@ -1111,7 +1111,7 @@ let rec transform node =
         Fmt [
           Space;
           Split;
-          WithRule (Rule.Argument, Fmt [
+          WithRule (Rule.Parental, Fmt [
             Nest [
               handle_possible_list ~after_each:(fun is_last ->
                 if not is_last then space_split () else Nothing
@@ -1214,7 +1214,7 @@ let rec transform node =
     in
 
     let (xhp_open, body, close) = get_xhp_expression_children x in
-    WithPossibleLazyRule (Rule.Argument, t xhp_open,
+    WithPossibleLazyRule (Rule.Parental, t xhp_open,
       let transformed_body, can_split_before_close = handle_xhp_body body in
       Fmt [
         Nest [transformed_body];
@@ -1422,7 +1422,7 @@ and delimited_nest
   =
   let rule =
     if split_when_children_split
-    then Rule.Argument
+    then Rule.Parental
     else Rule.Simple Cost.Base
   in
   Span [
@@ -1507,9 +1507,9 @@ and handle_declarator_list declarators =
       transform declarator;
     ];
   | SyntaxList xs ->
-    (* Use Rule.Argument to break each declarator onto its own line if any line
+    (* Use Rule.Parental to break each declarator onto its own line if any line
      * break occurs in a declarator, or if they can't all fit onto one line. *)
-    WithRule (Rule.Argument, Nest (List.map xs (fun declarator -> Fmt [
+    WithRule (Rule.Parental, Nest (List.map xs (fun declarator -> Fmt [
       Space;
       Split;
       transform declarator;
@@ -1620,7 +1620,7 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
       Nest [transform_chain hd];
     ]
   | hd :: tl ->
-    WithLazyRule (Rule.Argument,
+    WithLazyRule (Rule.Parental,
       Fmt [
         transform obj;
         Split;
@@ -1705,7 +1705,7 @@ and transform_fn_decl_name async coroutine kw amp name type_params leftp =
   ]
 
 and transform_fn_decl_args params rightp colon ret_type where =
-  WithRule (Rule.Argument, Fmt [
+  WithRule (Rule.Parental, Fmt [
     transform_possible_comma_list params rightp;
     transform colon;
     when_present colon space;
@@ -1718,7 +1718,7 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
   Fmt [
     transform left_p;
     when_present params split;
-    WithRule (Rule.Argument, Span [
+    WithRule (Rule.Parental, Span [
       Span [ transform_possible_comma_list params right_p ];
       transform colon;
       when_present colon space;
@@ -1850,7 +1850,7 @@ and transform_condition left_p condition right_p =
   Fmt [
     transform left_p;
     Split;
-    WithRule (Rule.Argument, Fmt [
+    WithRule (Rule.Parental, Fmt [
       Nest [transform condition];
       Split;
       transform right_p;
@@ -1874,7 +1874,7 @@ and transform_binary_expression ~is_nested expr =
   let operator_t = get_operator_type operator in
 
   if Full_fidelity_operator.is_comparison operator_t then
-    WithLazyRule (Rule.Argument,
+    WithLazyRule (Rule.Parental,
       Fmt [
         transform left;
         Space;
@@ -1920,7 +1920,7 @@ and transform_binary_expression ~is_nested expr =
         flatten_expression (make_binary_expression left operator right) in
       match binary_expression_syntax_list with
       | hd :: tl ->
-        WithLazyRule (Rule.Argument,
+        WithLazyRule (Rule.Parental,
           transform_operand hd,
           let expression =
             let last_op = ref (List.hd_exn tl) in

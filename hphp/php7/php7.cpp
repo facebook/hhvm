@@ -15,7 +15,10 @@
 */
 
 #include <hphp/php7/ast_dump.h>
+#include <hphp/php7/compiler.h>
 #include <hphp/php7/zend/zend_language_scanner_defs.h>
+#include <hphp/php7/bytecode.h>
+#include <hphp/php7/hhas.h>
 
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
@@ -51,7 +54,7 @@ std::unique_ptr<folly::IOBuf> readAll(std::istream& in) {
   return buf;
 }
 
-void runParser(const folly::IOBuf& buffer) {
+zend_ast* runParser(const folly::IOBuf& buffer) {
   init_parser_state();
   startup_scanner();
 
@@ -63,16 +66,20 @@ void runParser(const folly::IOBuf& buffer) {
   LANG_SCNG(yy_state) = yycINITIAL;
   CG(ast_arena) = zend_arena_create(256);
 
-  // just dump the AST for now
-  std::cout << zendparse() << std::endl;
-  HPHP::PHP7::dump_ast(std::cout, CG(ast));
-  std::cout << std::endl;
-
-  destroy_parser_state();
+  zendparse();
+  // dump AST to stderr
+  HPHP::PHP7::dump_ast(std::cerr, CG(ast));
+  std::cerr << std::endl;
+  return CG(ast);
 }
 
 int main(int argc, const char** argv) {
   auto buf = readAll(std::cin);
-  runParser(*buf);
+  auto ast = runParser(*buf);
+  auto unit = HPHP::PHP7::Compiler::compile(ast);
+  auto hhas = HPHP::PHP7::dump_asm(*unit);
+
+  std::cout << hhas << std::endl;
+
   return 0;
 }

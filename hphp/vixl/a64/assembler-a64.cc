@@ -1135,6 +1135,14 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
 }
 
 
+void Assembler::stadd(const Register& rt, const MemOperand& src) {
+  assert(src.IsImmediateOffset() && (src.offset() == 0));
+  // ldadd alias
+  uint32_t op = rt.Is64Bits() ? LSELD_ADD_x : LSELD_ADD_w;
+  Emit(op | Rs(rt) | Rt(xzr) | RnSP(src.base()));
+}
+
+
 void Assembler::ldxr(const Register& rt, const MemOperand& src) {
   assert(src.IsImmediateOffset() && (src.offset() == 0));
   LoadStoreExclusive op = rt.Is64Bits() ? LDXR_x : LDXR_w;

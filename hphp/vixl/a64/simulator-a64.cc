@@ -492,6 +492,11 @@ void Simulator::VisitUnallocated(Instruction* instr) {
 }
 
 
+void Simulator::VisitLseLdOp(Instruction* instr) {
+  VisitUnimplemented(instr);
+}
+
+
 void Simulator::VisitPCRelAddressing(Instruction* instr) {
   switch (instr->Mask(PCRelAddressingMask)) {
     case ADR:

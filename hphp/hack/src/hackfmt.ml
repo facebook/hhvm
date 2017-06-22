@@ -109,6 +109,14 @@ let mode_string format_options =
   | Diff (_, false) -> "DIFF"
   | Diff (_, true) -> "DIFF_DRY"
 
+type validate_options_input = {
+  filename : filename option;
+  range : range option;
+  at_char : int option;
+  inplace : bool;
+  diff : bool;
+}
+
 let validate_options env
     (files, range, at_char, inplace, diff, root, diff_dry) =
   let fail msg = raise (InvalidCliArg msg) in
@@ -130,23 +138,28 @@ let validate_options env
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
 
-  match diff, inplace, filename, range, at_char with
+  match {diff; inplace; filename; range; at_char} with
   | _ when env.debug && diff -> fail "Can't format diff in debug mode"
 
-  | true, _, Some _, _, _ -> fail "--diff mode expects no files"
-  | true, _, _, Some _, _ -> fail "--diff mode expects no range"
-  | true, _, _, _, Some _ -> fail "--diff mode can't format at-char"
+  | {diff = true; filename = Some _; _} -> fail "--diff mode expects no files"
+  | {diff = true; range = Some _; _} -> fail "--diff mode expects no range"
+  | {diff = true; at_char = Some _; _} -> fail "--diff mode can't format at-char"
 
-  | _, true, None, _, _ -> fail "Provide a filename to format in-place"
-  | _, true, _, Some _, _ -> fail "Can't format a range in-place"
-  | _, true, _, _, Some _ -> fail "Can't format at-char in-place"
+  | {inplace = true; filename = None; _} -> fail "Provide a filename to format in-place"
+  | {inplace = true; range = Some _; _} -> fail "Can't format a range in-place"
+  | {inplace = true; at_char = Some _; _} -> fail "Can't format at-char in-place"
 
-  | false, false, _, Some _, Some _ -> fail "--at-char expects no range"
+  | {diff = false; inplace = false; range = Some _; at_char = Some _; _} ->
+    fail "--at-char expects no range"
 
-  | false, false, _, _, None -> Print (filename, range)
-  | false, true, Some filename, None, _ -> InPlace filename
-  | false, false, _, None, Some pos -> AtChar (filename, pos)
-  | true, _, None, None, _ -> Diff (root, diff_dry)
+  | {diff = false; inplace = false; at_char = None; _} ->
+    Print (filename, range)
+  | {diff = false; inplace = true; filename = Some filename; range = None; _} ->
+    InPlace filename
+  | {diff = false; inplace = false; range = None; at_char = Some pos; _} ->
+    AtChar (filename, pos)
+  | {diff = true; filename = None; range = None; _} ->
+    Diff (root, diff_dry)
 
 let read_stdin () =
   let buf = Buffer.create 256 in

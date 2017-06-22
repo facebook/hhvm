@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -211,6 +212,33 @@ Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
   return curl->execute();
 }
 
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
+Array create_certinfo(struct curl_certinfo *ci) {
+  Array ret = Array::Create();
+  if (ci) {
+    for (int i = 0; i < ci->num_of_certs; i++) {
+      struct curl_slist *slist = ci->certinfo[i];
+
+      Array certData = Array::Create();
+      while (slist) {
+        Array parts = StringUtil::Explode(
+          String(slist->data, CopyString),
+          ":",
+          2).toArray();
+        if (parts.size() == 2) {
+          certData.set(parts.rvalAt(0), parts.rvalAt(1));
+        } else {
+          raise_warning("Could not extract hash key from certificate info");
+        }
+        slist = slist->next;
+      }
+      ret.append(certData);
+    }
+  }
+  return ret;
+}
+#endif
+
 const StaticString
   s_url("url"),
   s_content_type("content_type"),
@@ -237,6 +265,7 @@ const StaticString
   s_primary_port("primary_port"),
   s_local_ip("local_ip"),
   s_local_port("local_port"),
+  s_certinfo("certinfo"),
   s_request_header("request_header");
 
 Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
@@ -247,6 +276,9 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
     char   *s_code;
     long    l_code;
     double  d_code;
+#if LIBCURL_VERSION_NUM >  0x071301 /* Available since 7.19.1 */
+    struct curl_certinfo *ci = nullptr;
+#endif
 
     Array ret;
     if (curl_easy_getinfo(cp, CURLINFO_EFFECTIVE_URL, &s_code) == CURLE_OK) {
@@ -328,6 +360,11 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
       ret.set(s_primary_ip, String(s_code, CopyString));
     }
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
+    if (curl_easy_getinfo(cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
+      ret.set(s_certinfo, create_certinfo(ci));
+    }
+#endif
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
     if (curl_easy_getinfo(cp, CURLINFO_PRIMARY_PORT, &l_code) == CURLE_OK) {
       ret.set(s_primary_port, l_code);
@@ -354,6 +391,15 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
       }
       return false;
     }
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
+    case CURLINFO_CERTINFO: {
+      struct curl_certinfo *ci = nullptr;
+      if (curl_easy_getinfo(cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
+        return create_certinfo(ci);
+      }
+      return false;
+    }
+#endif
   }
 
   switch (CURLINFO_TYPEMASK & opt) {

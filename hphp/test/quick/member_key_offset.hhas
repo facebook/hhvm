@@ -1,0 +1,30 @@
+#tests that verifier rejects illegal stack offsets in member keys
+
+.main {
+  .declvars $foo $baz $t;
+  Null
+  SetL $foo
+  PopC
+  String "abc"
+  SetL $baz
+  PopC
+  String "xyz"
+  SetL $t
+  PopC
+  BaseL $baz Warn
+  QueryM 0 CGet EL:$t
+  Int 12
+  BaseL $foo Define
+  Dim Define ET:"x"
+  Dim Define ET:"y"
+  Dim Define PT:"bar"
+  Dim Define ET:"q"
+  SetM 1 PC:5
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $foo
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}

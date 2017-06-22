@@ -1247,10 +1247,13 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
 
 // Some bytecodes need to know an iva imm for (PUSH|POP)_*.
-#define IMM_IVA do {                            \
-    int imm = read_opcode_arg<int32_t>(as);     \
-    as.ue->emitIVA(imm);                        \
-    immIVA[immIdx] = imm;                       \
+#define IMM_IVA do {                                      \
+    auto imm = read_opcode_arg<int32_t>(as);               \
+    if (imm < 0) {                                        \
+      as.error("IVA immediates may not be less than 0");  \
+    }                                                     \
+    as.ue->emitIVA(imm);                                  \
+    immIVA[immIdx] = imm;                                 \
   } while (0)
 
 #define IMM_VSA \

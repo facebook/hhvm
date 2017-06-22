@@ -108,6 +108,7 @@ struct FuncChecker {
 #undef ARGTYPEVEC
   bool checkOp(State*, PC, Op, Block*);
   template<typename Subop> bool checkImmOAImpl(PC& pc, PC instr);
+  bool checkMemberKey(State* cur, PC, Op);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
@@ -467,7 +468,7 @@ bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
     return k >= 2 && k <= kMaxConcatN;
   }
 
-  return true;
+  return k >= 0;
 }
 
 bool FuncChecker::checkImmI64A(PC& pc, PC const instr) {
@@ -794,6 +795,52 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   default:
     return &inputSigs[size_t(peek_op(pc))][0];
   }
+}
+
+bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
+  MemberKey key;
+
+  if(RuntimeOption::RepoAuthoritative) { //if the key mcode is ET, MT or QT
+    LitstrTable::get().setReading();     //we need to read from the LitstrTable
+  }
+
+  switch(op){
+    case Op::IncDecM:
+    case Op::SetOpM:
+    case Op::QueryM:  //THREE(IVA, OA, KA)
+      decode_op(pc);
+      decode_iva(pc);
+      decode_byte(pc);
+      key = decode_member_key(pc, unit());
+      break;
+    case Op::BindM:
+    case Op::UnsetM:
+    case Op::SetM:
+    case Op::VGetM:   //TWO(IVA, KA)
+      decode_op(pc);
+      decode_iva(pc);
+      key = decode_member_key(pc, unit());
+      break;
+    case Op::FPassM:  //THREE(IVA IVA, KA)
+    case Op::SetWithRefLML:
+    case Op::SetWithRefRML:
+    case Op::MemoGet:
+    case Op::MemoSet:
+      return true;
+
+    default:
+      always_assert(false);
+      return false;
+  }
+
+  if ((key.mcode == MemberCode::MEC || key.mcode == MemberCode::MPC) &&
+        key.iva > cur->stklen) {
+      error("Member Key %s in op %s has stack offset greater than stack"
+            " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
+      return false;
+  }
+
+  return true;
 }
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
@@ -1272,6 +1319,7 @@ bool FuncChecker::checkFlow() {
                      instrToString(pc, unit()) << std::endl;
       }
       auto const op = peek_op(pc);
+      if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
       ok &= checkOp(&cur, pc, op, b);
       ok &= checkInputs(&cur, pc, b);
       auto const flags = instrFlags(op);

@@ -334,6 +334,9 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Unsafeexpr e ->
     let st, e = convert_expr env st e in
     st, (p, Unsafeexpr e)
+  | BracedExpr e ->
+    let st, e = convert_expr env st e in
+    st, (p, BracedExpr e)
   | Import(flavor, e) ->
     let st, e = convert_expr env st e in
     st, (p, Import(flavor, e))

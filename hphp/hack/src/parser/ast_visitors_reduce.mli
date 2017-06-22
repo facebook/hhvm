@@ -38,6 +38,7 @@ class virtual ['b] reduce :
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr -> 'd;
         on_Block : 'c -> Ast_visitors_ancestors.block -> 'd;
+        on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd;
         on_CA_enum : 'c -> string list -> 'd;
         on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> 'd;
@@ -370,6 +371,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.bop ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> 'd
     method on_Block : 'c -> Ast_visitors_ancestors.block -> 'd
+    method on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> 'd
     method on_CA_enum : 'c -> string list -> 'd
     method on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> 'd

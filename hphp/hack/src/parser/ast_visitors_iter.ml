@@ -545,6 +545,7 @@ class virtual ['self] iter =
       self#on_import_flavor env c0;
       self#on_expr env c1;
     method on_GotoLabel = self#on_pstring
+    method on_BracedExpr = self#on_expr
     method on_Goto = self#on_pstring
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
@@ -581,6 +582,7 @@ class virtual ['self] iter =
       | Eif (c0, c1, c2) -> self#on_Eif env c0 c1 c2
       | NullCoalesce (c0, c1) -> self#on_NullCoalesce env c0 c1
       | InstanceOf (c0, c1) -> self#on_InstanceOf env c0 c1
+      | BracedExpr c0 -> self#on_BracedExpr env c0 
       | New (c0, c1, c2) -> self#on_New env c0 c1 c2
       | Efun (c0, c1) -> self#on_Efun env c0 c1
       | Lfun c0 -> self#on_Lfun env c0

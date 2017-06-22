@@ -328,6 +328,7 @@ and expr_ =
   | Eif of expr * expr option * expr
   | NullCoalesce of expr * expr
   | InstanceOf of expr * expr
+  | BracedExpr of expr
   | New of expr * expr list * expr list
   (* Traditional PHP-style closure with a use list. Each use element is
     a name and a bool indicating if its a reference or value *)

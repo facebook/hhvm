@@ -2291,20 +2291,22 @@ module Make (GetLocals : GetLocals) = struct
       N.Xml (Env.type_name env x ~allow_typedef:false, attrl env al,
         exprl env el)
     | Shape fdl ->
-        N.Shape begin List.fold_left fdl ~init:ShapeMap.empty
-          ~f:begin fun fdm (pname, value) ->
-            let pos, name = convert_shape_name env pname in
-            if ShapeMap.mem name fdm
-            then Errors.fd_name_already_bound pos;
-            ShapeMap.add name (expr env value) fdm
-          end
+      N.Shape begin List.fold_left fdl ~init:ShapeMap.empty
+        ~f:begin fun fdm (pname, value) ->
+          let pos, name = convert_shape_name env pname in
+          if ShapeMap.mem name fdm
+          then Errors.fd_name_already_bound pos;
+          ShapeMap.add name (expr env value) fdm
         end
+      end
     | Unsafeexpr _ ->
-        N.Any
+      N.Any
+    | BracedExpr _ ->
+      N.Any
     | Import _ ->
-        N.Any
+      N.Any
     | Omitted ->
-        N.Any
+      N.Any
 
   and expr_lambda env f =
     let h = Option.map f.f_ret (hint ~allow_retonly:true env) in

@@ -42,7 +42,7 @@ class declvar_visitor = object(this)
       ~f:(fun acc (_, e) ->
         match e with
         | (Ast.Id id | Ast.Lvarvar(_, id)) -> add_local ~bareparam:false acc id
-        | Ast.Unsafeexpr e -> this#on_expr acc e
+        | Ast.BracedExpr e -> this#on_expr acc e
         | _ -> acc)
   method! on_foreach acc e pos iterator block =
     let acc =

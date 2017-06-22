@@ -764,11 +764,10 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | Some TK.Await                   -> Await expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Dollar                  ->
-          (match expr with
-          | _, Lvarvar (n, id) -> Lvarvar (n + 1, id)
-          | _, Lvar id         -> Lvarvar (1, id)
-          (* TODO(17510521) Give ${<expr>} a proper representation. *)
-          | _ -> Unsafeexpr expr
+          (match snd expr with
+          | Lvarvar (n, id) -> Lvarvar (n + 1, id)
+          | Lvar id         -> Lvarvar (1, id)
+          | _ -> BracedExpr expr
           )
         | _ -> missing_syntax "unary operator" node env
         )

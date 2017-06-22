@@ -181,7 +181,7 @@ and emit_global_vars env es =
         instr_bindn;
         instr_popv;
       ]
-    | A.Unsafeexpr e ->
+    | A.BracedExpr e ->
       gather [
         emit_expr ~need_ref:false env e;
         instr_dup;

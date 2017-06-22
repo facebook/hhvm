@@ -869,7 +869,7 @@ and emit_expr env expr ~need_ref =
   | A.Efun (fundef, ids) -> emit_lambda env fundef ids
   | A.Class_get (cid, id)  -> emit_class_get env None QueryOp.CGet need_ref cid id
   | A.String2 es -> emit_string2 env es
-  | A.Unsafeexpr e ->
+  | A.BracedExpr e ->
     let instr = emit_expr ~need_ref:false env e in
     if need_ref then
       gather [
@@ -888,6 +888,7 @@ and emit_expr env expr ~need_ref =
   | A.Lvarvar (n, id) -> emit_lvarvar ~need_ref n id
   | A.Id_type_arguments (id, _) -> emit_id env id
   | A.Omitted -> empty
+  | A.Unsafeexpr e -> emit_expr ~need_ref env e
   | A.List _ ->
     failwith "List destructor can only be used as an lvar"
 
@@ -1457,7 +1458,11 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      base_expr_instrs,
      instr_basenc base_offset mode,
      1
-
+   | A.BracedExpr e ->
+     let base_expr_instrs = emit_expr ~need_ref:false env e in
+     base_expr_instrs,
+     instr_basenc base_offset mode,
+     1
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr env expr in
      (if binary_assignment_rhs_starts_with_ref expr

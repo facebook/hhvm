@@ -38,6 +38,7 @@ class virtual ['b] iter :
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr -> unit;
         on_Block : 'c -> Ast_visitors_ancestors.block -> unit;
+        on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> unit;
         on_CA_enum : 'c -> string list -> unit;
         on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> unit;
@@ -378,6 +379,7 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.bop ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr -> unit
     method on_Block : 'c -> Ast_visitors_ancestors.block -> unit
+    method on_BracedExpr : 'c -> Ast_visitors_ancestors.expr -> unit
     method on_Break : 'c -> Ast_visitors_ancestors.pos_t -> int option -> unit
     method on_CA_enum : 'c -> string list -> unit
     method on_CA_field : 'c -> Ast_visitors_ancestors.ca_field -> unit

@@ -187,7 +187,6 @@ slow/error_handler/1371.php
 slow/error_handler/1500.php
 slow/error_handler/set_error_handler_ctx.php
 slow/eval_order/1502.php
-slow/eval_order/1504.php
 slow/exceptions/52.php
 slow/exceptions/61.php
 slow/exceptions/62.php

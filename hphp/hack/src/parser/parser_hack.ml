@@ -253,7 +253,7 @@ let rec check_lvalue env = function
   | pos, Array_get ((_, Class_const _), _) ->
       error_at env pos "Array-like class consts are not valid lvalues"
   | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
-    Unsafeexpr _ | Omitted) -> ()
+    Unsafeexpr _ | Omitted | BracedExpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"

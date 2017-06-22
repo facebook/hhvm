@@ -997,6 +997,9 @@ class virtual ['self] endo =
       let r1 = self#on_expr env c1 in if c0 == r0 && c1 == r1
       then this
       else Import (r0, r1)
+    method on_BracedExpr env this c0 =
+      let r0 = self#on_expr env c0 in
+      if c0 == r0 then this else BracedExpr r0
     method on_GotoLabel env this c0 =
       let r0 = self#on_pstring env c0 in
       if c0 == r0 then this else GotoLabel r0
@@ -1044,6 +1047,7 @@ class virtual ['self] endo =
           self#on_NullCoalesce env this c0 c1
       | InstanceOf (c0, c1) as this ->
           self#on_InstanceOf env this c0 c1
+      | BracedExpr c0 -> self#on_BracedExpr env this c0 
       | New (c0, c1, c2) -> self#on_New env this c0 c1 c2
       | Efun (c0, c1) -> self#on_Efun env this c0 c1
       | Lfun c0 -> self#on_Lfun env this c0

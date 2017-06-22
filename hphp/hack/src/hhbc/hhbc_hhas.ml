@@ -953,7 +953,7 @@ and string_of_param_default_value expr =
     in
     let suffix = String.make n '}' in
     prefix ^ s ^ suffix
-  | A.Unsafeexpr e -> string_of_param_default_value e
+  | A.Unsafeexpr e | A.BracedExpr e -> string_of_param_default_value e
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns: false h in
     let e = string_of_param_default_value e in

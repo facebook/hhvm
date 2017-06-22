@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
+#include <folly/Range.h>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -73,6 +74,11 @@ struct BlockInfo {
   State state_in;  // state at the start of the block
 };
 
+struct IterKindId {
+  IterKind kind;
+  Id id;
+};
+
 struct FuncChecker {
   FuncChecker(const Func* func, ErrorMode mode);
   bool checkOffsets();
@@ -110,6 +116,7 @@ struct FuncChecker {
   bool checkFpi(State* cur, PC pc, Block* b);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
+  bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
   void reportStkUnderflow(Block*, const State& cur, PC);
@@ -134,6 +141,7 @@ struct FuncChecker {
   int numParams() const { return m_func->numParams(); }
   int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const Unit* unit() const { return m_func->unit(); }
+  folly::Range<const IterKindId*> iterBreakIds(PC pc) const;
 
  private:
   template<class... Args>
@@ -430,7 +438,27 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const instr) {
 }
 
 bool FuncChecker::checkImmILA(PC& pc, PC const instr) {
-  return checkImmVec(pc, sizeof(Id) + sizeof(Id));
+  auto ids = iterBreakIds(pc);
+  if (ids.size() < 1) {
+    error("invalid length of immediate vector %lu at Offset %d\n",
+          ids.size(), offset(pc));
+    return false;
+  }
+  auto ok = true;
+  for (auto& iter : ids) {
+    if (iter.kind < KindOfIter || iter.kind > KindOfCIter) {
+      error("invalid iterator kind %d in iter-vec at offset %d\n",
+      iter.kind, offset(pc));
+      ok = false;
+    }
+    if (iter.id < 0 || iter.id >= numIters()) {
+      error("invalid iterator variable id %d at %d\n",
+      iter.id, offset(pc));
+      ok = false;
+    }
+  }
+  // now skip the vec
+  return checkImmVec(pc, sizeof(IterKindId)) && ok;
 }
 
 bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
@@ -585,6 +613,12 @@ bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
     ok &= checkLocal(instr, range.first + i);
   }
   return ok;
+}
+
+folly::Range<const IterKindId*> FuncChecker::iterBreakIds(PC pc) const {
+  auto vec = reinterpret_cast<const int32_t*>(pc);
+  auto itervec = reinterpret_cast<const IterKindId*>(vec + 1);
+  return {itervec, itervec + vec[0]};
 }
 
 /**
@@ -894,6 +928,10 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
   return ok;
 }
 
+// Check that the initialization state of the iterator referenced by
+// the current iterator instruction is valid. For *IterInit and DecodeCufIter,
+// it must not already be initialized; for *IterNext and *IterFree, it must
+// be initialized.
 bool FuncChecker::checkIter(State* cur, PC const pc) {
   assert(isIter(pc));
   int id = getImmIva(pc);
@@ -1019,7 +1057,23 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     default:
       break;
   }
+  return true;
+}
 
+// Check that each of the iterators provided as arguments to IterBreak
+// are currently initialized.
+bool FuncChecker::checkIterBreak(State* cur, PC pc) {
+  pc += encoded_op_size(Op::IterBreak); // skip opcode
+  decode_raw<Offset>(pc); // skip target offset
+  for (auto& iter : iterBreakIds(pc)) {
+    if (!cur->iters[iter.id]) {
+      // TODO(#2608280): we produce incorrect bytecode for iterators still
+      //error("Cannot access un-initialized iter %d\n", iter.id);
+      //return false;
+    }
+    // IterBreak has no fall-through path, so don't change iter.id's current
+    // state; instead it will be done in checkSuccEdges.
+  }
   return true;
 }
 
@@ -1224,6 +1278,7 @@ bool FuncChecker::checkFlow() {
       if (flags & TF) ok &= checkTerminal(&cur, pc);
       if (flags & FF) ok &= checkFpi(&cur, pc, b);
       if (isIter(pc)) ok &= checkIter(&cur, pc);
+      if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
       ok &= checkClsRefSlots(&cur, pc);
       ok &= checkOutputs(&cur, pc, b);
     }
@@ -1278,6 +1333,13 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
     cur->iters[id] = save;
+  } else if (Op(*b->last) == Op::IterBreak) {
+    auto pc = b->last + encoded_op_size(Op::IterBreak);
+    decode_raw<Offset>(pc);
+    for (auto& iter : iterBreakIds(pc)) {
+      cur->iters[iter.id] = false;
+    }
+    ok &= checkEdge(b, *cur, b->succs[0]);
   } else {
     // Other branch instructions send the same state to all successors.
     if (m_errmode == kVerbose) {

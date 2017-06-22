@@ -95,7 +95,11 @@ inline bool isRet(PC pc) {
   return op == Op::RetC || op == Op::RetV;
 }
 
+// Return true if pc points to an Iter instruction whose first immedate
+// argument is an iterator id.
 inline bool isIter(PC pc) {
+  // IterBreak is not included, because it has a variable-length list of
+  // iterartor ids, rather than a single iterator id.
   switch (peek_op(pc)) {
   case Op::IterInit:
   case Op::MIterInit:
@@ -117,9 +121,6 @@ inline bool isIter(PC pc) {
   default:
     break;
   }
-  // TODO(#3882518): this function omits IterBreak, and it's unclear
-  // whether it is supposed to.  (It used to be implemented using
-  // ordered comparisons on the opcode enum, so it might be a mistake.
   return false;
 }
 

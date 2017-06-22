@@ -329,11 +329,19 @@ and emit_catch env end_label (catch_type, (_, catch_local), b) =
 and emit_catches env catch_list end_label =
   gather (List.map catch_list ~f:(emit_catch env end_label))
 
+and is_empty_block b =
+  match b with
+  | A.Block l -> List.for_all ~f:is_empty_block l
+  | A.Noop -> true
+  | _ -> false
+
 and emit_try_catch env try_block catch_list =
   Local.scope @@ fun () ->
     emit_try_catch_ env try_block catch_list
 
 and emit_try_catch_ env try_block catch_list =
+  if is_empty_block try_block then empty
+  else
   let end_label = Label.next_regular () in
   gather [
     instr_try_catch_begin;
@@ -351,6 +359,11 @@ and emit_try_finally env try_block finally_block =
     emit_try_finally_ env try_block finally_block
 
 and emit_try_finally_ env try_block finally_block =
+  let finally_body = emit_stmt env finally_block in
+  let finally_body = CBR.rewrite_in_finally finally_body in
+
+  if is_empty_block try_block then finally_body
+  else
   (*
   We need to generate four things:
   (1) the try-body, which will be followed by
@@ -397,8 +410,6 @@ and emit_try_finally_ env try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let finally_body = emit_stmt env finally_block in
-  let finally_body = CBR.rewrite_in_finally finally_body in
   let finally_body_for_fault =
     Label_rewriter.clone_with_fresh_regular_labels finally_body
   in

@@ -44,7 +44,6 @@ quick/dv_if.php
 quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
-quick/exception_bug_2080454.php
 quick/exceptions.php
 quick/exceptions7.php
 quick/exit.php

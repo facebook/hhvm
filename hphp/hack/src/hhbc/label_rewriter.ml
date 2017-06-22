@@ -172,18 +172,26 @@ let relabel_function params body =
   rewrite_params_and_body defs used refs params body
 
 let clone_with_fresh_regular_labels block =
-  let regular_labels =
-    InstrSeq.fold_left block ~init: IMap.empty ~f:(fun acc i ->
-      match i with
-      | ILabel ((Label.Regular _) as l) ->
-        IMap.add (Label.id l) (Label.next_regular ()) acc
-      | _ -> acc)
+  let regular_labels, named_labels =
+    InstrSeq.fold_left block ~init: (IMap.empty, SMap.empty) ~f:
+      begin fun ((regular, named) as acc) i ->
+        match i with
+        | ILabel ((Label.Regular _) as l) ->
+          IMap.add (Label.id l) (Label.next_regular ()) regular, named
+        | ILabel (Label.Named name) ->
+          regular, SMap.add name (Label.next_regular ()) named
+        | _ -> acc
+      end
   in
-  if IMap.is_empty regular_labels then
+  if IMap.is_empty regular_labels && SMap.is_empty named_labels then
     block
   else
-  let relabel l = Option.value ~default:l @@
-    IMap.get (Label.id l) regular_labels
+  let relabel l =
+    Option.value ~default:l @@
+      match l with
+      | Label.Regular id -> IMap.get id regular_labels
+      | Label.Named name -> SMap.get name named_labels
+      | _ -> None
   in
   let rewrite_instr instr =
     match instr with

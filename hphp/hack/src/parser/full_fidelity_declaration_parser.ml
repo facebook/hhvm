@@ -1440,15 +1440,21 @@ module WithExpressionAndStatementAndTypeParser
   let parse_script_header parser =
     (* The script header is
       < ? name
-      where the < may have leading trivia, such as a # comment before it,
-      but there must be no trailing trivia of the <.
+
+      In PHP files, the < may have leading trivia; a # comment is common.
+      Hack files may not have any text before the <.
+
+      There can be no trivia between the < and the ?
 
       The name is optional in PHP, but not in Hack, and the name, if there
       is one, must appear immediately after the ?, with no intervening trivia.
 
+      Note that we do not wish to lex <? as a token, because that then
+      complicates lexing generic types like Cage<?Tiger>.
     *)
     let original_parser = parser in
     let (parser, less_than) = next_token parser in
+    (* TODO: Give an error if there is leading trivia on the < in an hh file *)
     (* TODO: Give an error if there is trailing trivia on the < *)
     let (parser, question) = next_token parser in
     let (parser, language) = if Token.trailing question = [] then

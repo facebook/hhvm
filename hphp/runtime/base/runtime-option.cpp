@@ -44,6 +44,11 @@
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
 
+#if defined (__linux__) && defined (__aarch64__)
+#include <sys/auxv.h>
+#include <asm/hwcap.h>
+#endif
+
 #include "hphp/parser/scanner.h"
 
 #include "hphp/runtime/server/satellite-server.h"
@@ -485,6 +490,14 @@ static inline bool alignMacroFusionPairs() {
       return false;
   }
   return false;
+}
+
+static inline bool armLseDefault() {
+#if defined (__linux__) && defined (__aarch64__) && defined (HWCAP_ATOMICS)
+  return (getauxval(AT_HWCAP) & HWCAP_ATOMICS) != 0;
+#else
+  return false;
+#endif
 }
 
 static inline bool evalJitDefault() {

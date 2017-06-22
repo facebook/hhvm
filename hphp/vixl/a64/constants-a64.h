@@ -128,6 +128,11 @@ V_(SysOp1, 18, 16, Bits)                                                       \
 V_(SysOp2, 7, 5, Bits)                                                         \
 V_(CRn, 15, 12, Bits)                                                          \
 V_(CRm, 11, 8, Bits)                                                           \
+                                                                               \
+/* Large System Extension */                                                   \
+V_(Ar, 23, 22, Bits)                                                           \
+V_(Opc, 14, 12, Bits)                                                          \
+
 
 
 #define SYSTEM_REGISTER_FIELDS_LIST(V_, M_)                                    \
@@ -1350,6 +1355,66 @@ enum NEONLoadStoreSingleStructPostIndexOp {
   NEON_ST4_h_post = NEON_ST4_h | NEONLoadStoreSingleStructPostIndex,
   NEON_ST4_s_post = NEON_ST4_s | NEONLoadStoreSingleStructPostIndex,
   NEON_ST4_d_post = NEON_ST4_d | NEONLoadStoreSingleStructPostIndex
+};
+
+enum LSELoadOp {
+  LSELoadOPMask = 0x00007000,
+  LSE_LDADD  = 0x00000000,
+  LSE_LDBIC  = 0x00001000,
+  LSE_LDEOR  = 0x00002000,
+  LSE_LDORR  = 0x00003000,
+  LSE_LDSMAX = 0x00004000,
+  LSE_LDSMIN = 0x00005000,
+  LSE_LDUMAX = 0x00006000,
+  LSE_LDUMIN = 0x00007000
+};
+
+enum LSEAquireRelease {
+  LSEAquireReleaseN  = 0x00000000,
+  LSEAquireReleaseA  = 0x00800000,
+  LSEAquireReleaseL  = 0x00400000,
+  LSEAquireReleaseAL = 0x00C00000
+};
+
+enum LSESize {
+  LSESizeB = 0x00000000,
+  LSESizeH = 0x40000000,
+  LSESizeW = 0x80000000,
+  LSESizeX = 0xc0000000
+};
+
+#define LSELD_OP_LIST(V) \
+  V(ADD),                \
+  V(BIC),                \
+  V(EOR),                \
+  V(ORR),                \
+  V(SMAX),               \
+  V(SMIN),               \
+  V(UMAX),               \
+  V(UMIN)
+
+enum LSELd {
+  LseLdOpFixed = 0x38200000,
+  LseLdOpFMask = 0x3F208C00,
+  #define LSELD(A)       \
+  LSELD_##A##_b   = LseLdOpFixed | LSESizeB | LSEAquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ab  = LseLdOpFixed | LSESizeB | LSEAquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lb  = LseLdOpFixed | LSESizeB | LSEAquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alb = LseLdOpFixed | LSESizeB | LSEAquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_h   = LseLdOpFixed | LSESizeH | LSEAquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ah  = LseLdOpFixed | LSESizeH | LSEAquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lh  = LseLdOpFixed | LSESizeH | LSEAquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alh = LseLdOpFixed | LSESizeH | LSEAquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_w   = LseLdOpFixed | LSESizeW | LSEAquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_aw  = LseLdOpFixed | LSESizeW | LSEAquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lw  = LseLdOpFixed | LSESizeW | LSEAquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alw = LseLdOpFixed | LSESizeW | LSEAquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_x   = LseLdOpFixed | LSESizeX | LSEAquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ax  = LseLdOpFixed | LSESizeX | LSEAquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lx  = LseLdOpFixed | LSESizeX | LSEAquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alx = LseLdOpFixed | LSESizeX | LSEAquireReleaseAL | LSE_LD##A 
+  LSELD_OP_LIST(LSELD)
+  #undef LSELD
 };
 
 // Unimplemented and unallocated instructions. These are defined to make fixed

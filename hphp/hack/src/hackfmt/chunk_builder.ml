@@ -15,7 +15,6 @@ let __INDENT_WIDTH = 2
 
 type open_span = {
   open_span_start: int;
-  open_span_cost: Cost.t;
 }
 
 type rule_state =
@@ -23,9 +22,8 @@ type rule_state =
   | RuleKind of Rule.kind
   | LazyRuleID of int
 
-let open_span start cost = {
+let open_span start = {
   open_span_start = start;
-  open_span_cost = cost;
 }
 
 type string_type =
@@ -43,7 +41,7 @@ let builder = object (this)
 
   val mutable next_split_rule = NoRule;
   val mutable next_lazy_rules = ISet.empty;
-  val mutable pending_spans = [];
+  val mutable num_pending_spans = 0;
   val mutable space_if_not_split = false;
   val mutable pending_comma = None;
   val mutable pending_space = false;
@@ -69,7 +67,7 @@ let builder = object (this)
     chunks <- [];
     next_split_rule <- NoRule;
     next_lazy_rules <- ISet.empty;
-    pending_spans <- [];
+    num_pending_spans <- 0;
     space_if_not_split <- false;
     pending_comma <- None;
     pending_space <- false;
@@ -140,11 +138,10 @@ let builder = object (this)
       lazy_rules <- ISet.union next_lazy_rules lazy_rules;
       next_lazy_rules <- ISet.empty;
 
-      let rev_pending_spans_stack = List.rev pending_spans in
-      pending_spans <- [];
-      List.iter rev_pending_spans_stack ~f:(fun cost ->
-        Stack.push (open_span (List.length chunks - 1) cost) open_spans
-      );
+      for _ = 1 to num_pending_spans do
+        Stack.push (open_span (List.length chunks - 1)) open_spans
+      done;
+      num_pending_spans <- 0;
 
       if last_string_type = DocStringClose && s = ";" then begin
         (* Normally, we'd have already counted the newline in the semicolon's
@@ -289,15 +286,14 @@ let builder = object (this)
       (Rule_allocator.get_rule_kind rule_alloc id) = kind
     )
 
-  method private start_span ?(cost=Cost.Base) () =
-    pending_spans <- cost :: pending_spans;
+  method private start_span () =
+    num_pending_spans <- num_pending_spans + 1;
 
   method private end_span () =
-    pending_spans <- match pending_spans with
-      | hd :: tl -> tl
-      | [] ->
+    num_pending_spans <- match num_pending_spans with
+      | 0 ->
         let os = Stack.pop open_spans in
-        let sa, span = Span_allocator.make_span span_alloc os.open_span_cost in
+        let sa, span = Span_allocator.make_span span_alloc in
         span_alloc <- sa;
         let r_chunks = List.rev chunks in
         chunks <- List.rev_mapi r_chunks ~f:(fun n x ->
@@ -307,8 +303,8 @@ let builder = object (this)
           (* TODO: handle required hard splits *)
           {x with Chunk.spans = span :: x.Chunk.spans}
         );
-        []
-
+        0
+      | _ -> num_pending_spans - 1
   (*
     TODO: find a better way to represt the rules empty case
     for end chunks and block nesting

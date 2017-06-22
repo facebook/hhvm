@@ -10,5 +10,6 @@
 
 type t = {
   id: int;
-  cost: Cost.t;
 }
+
+let id t = t.id

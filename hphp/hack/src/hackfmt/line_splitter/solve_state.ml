@@ -170,17 +170,16 @@ let make chunk_group rbm =
   (* calculate the overflow of the last chunk *)
   let overflow = List.fold ~init:0 ~f:(+) @@ List.map ~f:fst lines in
 
-  (* calculate cost of all of the spans that are split *)
-  let span_cost_map = List.fold chunks ~init:IMap.empty ~f:(fun acc c ->
+  (* add to cost the number of spans that are split
+   * (implicitly giving each span a cost of 1) *)
+  let broken_spans = List.fold chunks ~init:ISet.empty ~f:begin fun acc c ->
     if rbm_has_split_before_chunk c rbm then
-      List.fold ~init:acc c.Chunk.spans ~f:(fun acc s ->
-        if IMap.mem s.Span.id acc
-        then acc
-        else IMap.add s.Span.id (Cost.get_cost s.Span.cost) acc
-      )
+      c.Chunk.spans
+      |> List.map ~f:Span.id
+      |> List.fold_right ~init:acc ~f:ISet.add
     else acc
-  ) in
-  let span_cost = IMap.fold (fun _k v acc -> acc + v) span_cost_map 0 in
+  end in
+  let span_cost = ISet.cardinal broken_spans in
 
   (* add to cost the cost of all rules that are split *)
   let rule_cost = (

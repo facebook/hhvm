@@ -503,13 +503,8 @@ void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       ReleaseUncountedTv(ptr->data);
     }
 
-    // We better not have strong iterators associated with uncounted
-    // arrays.
-    if (debug && UNLIKELY(strong_iterators_exist())) {
-      for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-        assert(miEnt.array != ad);
-      });
-    }
+    // We better not have strong iterators associated with uncounted arrays.
+    assert(!has_strong_iterator(ad));
   }
   if (UncountedMixedArrayOnHugePage()) {
     free_huge(reinterpret_cast<char*>(ad) - extra);

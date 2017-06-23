@@ -729,6 +729,15 @@ void free_strong_iterators(ArrayData* ad) {
   });
 }
 
+bool has_strong_iterator(ArrayData* ad) {
+  if (LIKELY(!strong_iterators_exist())) return false;
+  bool found = false;
+  for_each_strong_iterator([&] (MIterTable::Ent& ent) {
+    if (ent.array == ad) found = true;
+  });
+  return found;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 MArrayIter::MArrayIter(RefData* ref)

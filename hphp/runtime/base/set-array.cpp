@@ -266,14 +266,8 @@ void SetArray::Release(ArrayData* in) {
       tvDecRefGen(&elm.tv);
     }
 
-    /*
-     * We better not have strong iterators associated with keysets.
-     */
-    if (debug && UNLIKELY(strong_iterators_exist())) {
-      for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-        assert(miEnt.array != ad);
-      });
-    }
+    // We better not have strong iterators associated with keysets.
+    assert(!has_strong_iterator(ad));
   }
   MM().objFree(ad, ad->heapSize());
 }
@@ -298,14 +292,8 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       }
     }
 
-    /*
-     * We better not have strong iterators associated with keysets.
-     */
-    if (debug && UNLIKELY(strong_iterators_exist())) {
-      for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-        assert(miEnt.array != ad);
-      });
-    }
+    // We better not have strong iterators associated with keysets.
+    assert(!has_strong_iterator(ad));
   }
   free_huge(reinterpret_cast<char*>(ad) - extra);
 }

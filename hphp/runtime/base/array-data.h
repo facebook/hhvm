@@ -390,7 +390,6 @@ public:
    * into the static array list.
    */
   ArrayData* copy() const;
-  ArrayData* copyWithStrongIterators() const;
   ArrayData* copyStatic() const;
 
   /**
@@ -671,7 +670,6 @@ struct ArrayFunctions {
   bool (*usort[NK])(ArrayData* ad, const Variant& cmp_function);
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
-  ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);

@@ -207,7 +207,6 @@ public:
   static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
 
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
 
 private:

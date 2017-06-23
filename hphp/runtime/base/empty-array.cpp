@@ -91,12 +91,6 @@ ArrayData* EmptyArray::CopyStatic(const ArrayData* ad) { not_reached(); }
 NEVER_INLINE
 ArrayData* EmptyArray::Copy(const ArrayData*) { return staticEmptyArray(); }
 
-ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
-  // We can never have associated strong iterators, so we don't need
-  // to do anything extra.
-  return Copy(ad);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*

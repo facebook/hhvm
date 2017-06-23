@@ -237,11 +237,6 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
-  raise_fatal_error(
-    "Unimplemented ArrayData::copyWithStrongIterators");
-}
-
 ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool copy) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->append(v, false));

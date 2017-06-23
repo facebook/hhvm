@@ -676,11 +676,6 @@ ArrayData* SetArray::Copy(const ArrayData* ad) {
   return a->copySet();
 }
 
-ArrayData* SetArray::CopyWithStrongIterators(const ArrayData* ad) {
-  auto a = asSet(ad);
-  return a->copySet();
-}
-
 ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
   auto a = asSet(ad);
   return CopySet(*a, AllocMode::Static);

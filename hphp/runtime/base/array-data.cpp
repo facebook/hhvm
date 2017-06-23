@@ -504,16 +504,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Copy)
 
   /*
-   * ArrayData* CopyWithStrongIterators(const ArrayData*)
-   *
-   *   Explicitly request an array be copied, and that any associated
-   *   strong iterators are moved to the new array.  This API does
-   *   /not/ actually guarantee a copy occurs, but if it does any
-   *   assoicated strong iterators must be moved.
-   */
-  DISPATCH(CopyWithStrongIterators)
-
-  /*
    * ArrayData* CopyStatic(const ArrayData*)
    *
    *   Copy an array, allocating the new array with malloc() instead

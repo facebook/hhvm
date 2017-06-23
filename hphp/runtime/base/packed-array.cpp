@@ -345,15 +345,6 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   return ad;
 }
 
-ArrayData* PackedArray::CopyWithStrongIterators(const ArrayData* ad) {
-  auto const cpy = Copy(ad);
-  if (LIKELY(strong_iterators_exist())) {
-    // This returns its first argument just so we can tail call it.
-    return move_strong_iterators(cpy, const_cast<ArrayData*>(ad));
-  }
-  return cpy;
-}
-
 ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 

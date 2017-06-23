@@ -330,7 +330,6 @@ public:
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
@@ -399,7 +398,6 @@ public:
   static constexpr auto UsortDict = &Usort;
   static constexpr auto UasortDict = &Uasort;
   static constexpr auto CopyDict = &Copy;
-  static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
   static member_lval LvalIntRefDict(ArrayData*, int64_t, bool);

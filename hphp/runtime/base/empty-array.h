@@ -120,7 +120,6 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static constexpr auto Pop = &PopOrDequeue;
   static constexpr auto Dequeue = &PopOrDequeue;
   static ArrayData* Copy(const ArrayData* ad);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);

@@ -90,7 +90,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Copy(const ArrayData* ad);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
@@ -169,7 +168,6 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto UasortVec = &Uasort;
   static constexpr auto CopyVec = &Copy;
   static constexpr auto CopyStaticVec = &CopyStatic;
-  static constexpr auto CopyWithStrongIteratorsVec = &CopyWithStrongIterators;
   static constexpr auto AppendVec = &Append;
   static constexpr auto PopVec = &Pop;
   static constexpr auto DequeueVec = &Dequeue;

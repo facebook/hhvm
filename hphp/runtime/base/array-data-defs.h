@@ -453,10 +453,6 @@ inline ArrayData* ArrayData::copy() const {
   return g_array_funcs.copy[kind()](this);
 }
 
-inline ArrayData* ArrayData::copyWithStrongIterators() const {
-  return g_array_funcs.copyWithStrongIterators[kind()](this);
-}
-
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
   assert(ret != this && ret->isStatic());

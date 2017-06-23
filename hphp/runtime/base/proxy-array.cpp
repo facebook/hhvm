@@ -458,10 +458,6 @@ ArrayData* ProxyArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   return ad;
 }
 
-ArrayData* ProxyArray::CopyWithStrongIterators(const ArrayData* ad) {
-  return innerArr(ad)->copyWithStrongIterators();
-}
-
 ArrayData* ProxyArray::CopyStatic(const ArrayData* ad) {
   return innerArr(ad)->copyStatic();
 }

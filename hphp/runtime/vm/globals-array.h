@@ -104,7 +104,6 @@ public:
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);

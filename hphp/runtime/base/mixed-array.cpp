@@ -1248,15 +1248,6 @@ ArrayData* MixedArray::Copy(const ArrayData* ad) {
   return asMixed(ad)->copyMixed();
 }
 
-ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
-  auto a = asMixed(ad);
-  auto copied = a->copyMixed();
-  if (LIKELY(strong_iterators_exist())) {
-    move_strong_iterators(copied, const_cast<MixedArray*>(a));
-  }
-  return copied;
-}
-
 ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {

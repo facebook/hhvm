@@ -301,12 +301,6 @@ bool GlobalsArray::IsVectorData(const ArrayData*) {
   return false;
 }
 
-ArrayData*
-GlobalsArray::CopyWithStrongIterators(const ArrayData* ad) {
-  raise_fatal_error(
-    "Unimplemented ArrayData::copyWithStrongIterators");
-}
-
 ArrayData* GlobalsArray::CopyStatic(const ArrayData*) {
   raise_fatal_error("GlobalsArray::copyStatic "
     "not implemented.");

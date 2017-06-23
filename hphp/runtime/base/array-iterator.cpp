@@ -867,22 +867,21 @@ ArrayData* MArrayIter::cowCheck() {
   if (hasRef()) {
     auto data = getData();
     if (!data) return nullptr;
-    if (data->cowCheck() && !data->noCopyOnWrite()) {
-      data = data->copyWithStrongIterators();
-      cellMove(make_array_like_tv(data), *getRef()->tv());
-    }
-    return data;
+    if (!data->cowCheck() || data->noCopyOnWrite()) return data;
+    // This copy should not interrupt strong iteration. If there are nested
+    // strong iterators over the same array, we need to update all of them,
+    // so we have to move_strong_iterators, we can't just setContainer. We
+    // have to check if strong_iterators_exist because we may be in the process
+    // of creating the first one.
+    auto copy = data->copy();
+    if (strong_iterators_exist()) move_strong_iterators(copy, data);
+    cellMove(make_array_like_tv(copy), *getRef()->tv());
+    return copy;
   }
 
   assert(hasAd());
   auto const data = getAd();
-  if (data->cowCheck() && !data->noCopyOnWrite()) {
-    ArrayData* copied = data->copyWithStrongIterators();
-    assert(data != copied);
-    decRefArr(data);
-    setAd(copied);
-    return copied;
-  }
+  assert(!data->cowCheck());
   return data;
 }
 

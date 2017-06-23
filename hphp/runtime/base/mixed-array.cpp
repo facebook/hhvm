@@ -289,17 +289,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     tvIncRefGen(&e.data);
   }
 
-  // We need to assert this up here before we possibly call compact (which
-  // will cause m_used to change)
   assert(ad->m_used == other.m_used);
-
-  // If the element density dropped below 50% due to indirect elements
-  // being converted into tombstones, we should do a compaction
-  if (ad->m_size < ad->m_used / 2) {
-    always_assert(false);
-    ad->compact(false);
-  }
-
   assert(ad->m_kind == dest_hk);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
@@ -336,7 +326,7 @@ MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
   // now I'm just making use of copyMixed to do it for me before
   // GrowPacked happens.
   auto const copy = copyMixed();
-  auto const ret = copy->resize();
+  auto const ret = Grow(copy, copy->m_scale * 2);
   if (copy != ret) Release(copy);
   return ret;
 }
@@ -765,22 +755,7 @@ MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
 }
 
 ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
-  if (UNLIKELY(isFull())) return resize();
-  return this;
-}
-
-NEVER_INLINE MixedArray* MixedArray::resize() {
-  assert(isFull());
-  uint32_t cap = capacity();
-  // At a minimum, compaction is required.  If the load factor would be >0.5
-  // even after compaction, grow instead, in order to avoid the possibility
-  // of repeated compaction if the load factor were to hover at nearly 0.75.
-  if (m_size > cap / 2) {
-    assert(mask() <= 0x7fffffffU);
-    return Grow(this, m_scale * 2);
-  }
-  always_assert(false);
-  compact(false);
+  if (UNLIKELY(isFull())) return Grow(this, m_scale * 2);
   return this;
 }
 

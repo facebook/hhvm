@@ -315,19 +315,13 @@ private:
   void compact();
 
   /*
-   * resize() and resizeIfNeeded() will grow the array as necessary to
-   * ensure that there is room for a new element and a new hash entry.
+   * resizeIfNeeded() will grow the array as necessary to ensure that there is
+   * room for a new element and a new hash entry.
    *
-   * resize() assumes isFull().  resizeIfNeeded() will first check if
-   * there is room for a new element and hash entry before growing the
-   * array.
-   *
-   * Both functions return the new SetArray* to use (or the old one
-   * if they didn't need to grow).  The old SetArray is left in a
-   * zombie state where the only legal action is to decref and then
-   * throw it away.
+   * The function returns the new SetArray* to use (or the old one if it didn't
+   * need to grow). The old SetArray is left in a zombie state where the only
+   * legal action is to decref and then throw it away.
    */
-  SetArray* resize();
   SetArray* resizeIfNeeded();
 
   /*

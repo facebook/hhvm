@@ -438,30 +438,8 @@ void SetArray::compact() {
   assert(checkInvariants());
 }
 
-SetArray* SetArray::resize() {
-  assert(m_size <= capacity());
-
-  /*
-   * If after compaction the new load exceeds 0.5 we
-   * grow the array.  This threshold avoids repeated
-   * compactions if the load were to hover near 0.75.
-   */
-  if (m_size > capacity() / 2) {
-    /*
-     * FIXME: I stole the assert from mixed-array.cpp
-     * but don't really understand it.
-     */
-    assert(mask() <= 0x7fffffffU);
-    return grow(m_scale * 2);
-  } else {
-    always_assert(false);
-    compact();
-    return this;
-  }
-}
-
 SetArray* SetArray::resizeIfNeeded() {
-  if (UNLIKELY(isFull())) return resize();
+  if (UNLIKELY(isFull())) return grow(m_scale * 2);
   return this;
 }
 
@@ -470,7 +448,7 @@ SetArray* SetArray::copyAndResizeIfNeeded() const {
   if (LIKELY(!ad->isFull())) return ad;
 
   /* FIXME: This is kind of lame. */
-  auto const ret = ad->resize();
+  auto const ret = ad->grow(m_scale * 2);
   if (ad != ret) Release(ad);
   return ret;
 }

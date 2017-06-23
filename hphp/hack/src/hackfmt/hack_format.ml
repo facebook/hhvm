@@ -662,20 +662,27 @@ let rec transform node =
     Fmt [
       t kw;
       Space;
-      t left_p;
-      t collection;
-      Space;
-      t await_kw;
-      Space;
-      t as_kw;
-      Space;
-      t key;
-      Space;
-      t arrow;
-      Space;
-      t value;
-      Split;
-      t right_p;
+      delimited_nest left_p right_p [
+        t collection;
+        Space;
+        t await_kw;
+        Space;
+        t as_kw;
+        Space;
+        SplitWith Cost.Base;
+        Nest [
+          Span [
+            t key;
+            Space;
+            t arrow;
+            Space;
+            SplitWith Cost.Base;
+            Nest [
+              t value;
+            ];
+          ];
+        ];
+      ];
       handle_possible_compound_statement body;
       Newline;
     ]

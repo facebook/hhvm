@@ -17,12 +17,11 @@
 #ifndef _incl_HPHP_PHP7_BYTECODE_H
 #define _incl_HPHP_PHP7_BYTECODE_H
 
-#include <hphp/runtime/vm/hhbc.h>
-#include <boost/variant.hpp>
+#include "hphp/runtime/vm/hhbc.h"
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
-namespace BC {
+namespace bc {
 
 // void* immediate types just aren't being used right now
 #define IMM_TYPE_BLA void*
@@ -61,13 +60,13 @@ namespace BC {
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode { \
     static constexpr Op code = Op::opcode; \
-    static inline const char* name() { \
+    static const char* name() { \
       return #opcode; \
     }\
     IMM_ ## imms \
     \
     template<class Visitor> \
-    void inline visit_imms(Visitor&& v) const { \
+    void visit_imms(Visitor&& v) const { \
       IMM_VISIT_ ## imms \
     } \
   };
@@ -105,32 +104,26 @@ OPCODES
 #undef IMM_THREE
 #undef IMM_FOUR
 
-} // namespace BC
+} // namespace bc
 
 // too many opcodes for us to use boost::variant so we'll roll our own :)
 struct Bytecode {
   Bytecode()
     : code(Op::Nop) {
-      op.Nop = BC::Nop{};
+      op.Nop = bc::Nop{};
   }
 
 
 #define O(opcode, imms, inputs, outputs, flags) \
-  /* implicit */ Bytecode(const BC::opcode& data) \
+  /* implicit */ Bytecode(const bc::opcode& data) \
     : code(Op::opcode) { \
-    new (&op) BC::opcode(data); \
+    new (&op) bc::opcode(data); \
   }
 OPCODES
 #undef O
 
-  template<class Opcode>
-  inline Opcode get() const {
-    assert(Opcode::code == code);
-    return *static_cast<Opcode*>(&op);
-  }
-
   template<class Visitor>
-  inline void visit(Visitor&& visit) const {
+  void visit(Visitor&& visit) const {
     switch (code) {
 #define O(opcode, ...) case Op::opcode: visit.bytecode(op.opcode); break;
       OPCODES
@@ -142,13 +135,13 @@ OPCODES
   Op code;
   union {
 #define O(opcode, imms, inputs, outputs, flags) \
-  BC::opcode opcode;
+  bc::opcode opcode;
     OPCODES
 #undef O
   } op;
 };
 
 
-}}  // HPHP::PHP7
+}}  // HPHP::php7
 
 #endif // _incl_HPHP_PHP7_BYTECODE_H

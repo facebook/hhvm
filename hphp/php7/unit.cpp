@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include <hphp/php7/unit.h>
+#include "hphp/php7/unit.h"
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 Function::Function(Unit* parent, const std::string& name)
   : name(name),
@@ -44,4 +44,4 @@ Block* Function::getBlock(uint64_t id) {
   return blocks[id].get();
 }
 
-}} // HPHP::PHP7
+}} // HPHP::php7

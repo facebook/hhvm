@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_PHP_UNIT_H
 #define incl_HPHP_PHP_UNIT_H
 
-#include <hphp/php7/bytecode.h>
-#include <hphp/runtime/base/attr.h>
+#include "hphp/php7/bytecode.h"
+#include "hphp/runtime/base/attr.h"
 
 #include <vector>
 #include <string>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 struct Block;
 struct Function;
@@ -60,9 +60,8 @@ struct Function {
 };
 
 struct Unit {
-  explicit Unit() {
-    pseudomain = std::make_unique<Function>(this, "");
-  }
+  explicit Unit()
+    : pseudomain(std::make_unique<Function>(this, "")) {}
 
   Function* getPseudomain() const {
     return pseudomain.get();
@@ -74,6 +73,6 @@ struct Unit {
 };
 
 
-}} // HPHP::PHP7
+}} // HPHP::php7
 
 #endif // incl_HPHP_PHP_UNIT_H

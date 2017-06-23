@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include <hphp/php7/ast_dump.h>
-#include <hphp/php7/ast_info.h>
+#include "hphp/php7/ast_dump.h"
+#include "hphp/php7/ast_info.h"
 
 #include <folly/Format.h>
 
 #include <ostream>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 namespace {
 
@@ -140,4 +140,4 @@ void dump_ast(
   }
 }
 
-} } // HPHP::PHP7
+} } // HPHP::php7

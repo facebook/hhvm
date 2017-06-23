@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <hphp/php7/hhas.h>
+#include "hphp/php7/hhas.h"
 
 #include <folly/Format.h>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 namespace {
   std::string dump_pseudomain(const Function& func);
@@ -82,4 +82,4 @@ std::string dump_block(const Block& blk) {
 
 } // namespace
 
-}} // HPHP::PHP7
+}} // HPHP::php7

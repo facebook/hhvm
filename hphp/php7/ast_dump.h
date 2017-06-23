@@ -17,11 +17,11 @@
 #ifndef incl_HPHP_PHP7_AST_DUMP_H_
 #define incl_HPHP_PHP7_AST_DUMP_H_
 
-#include <hphp/php7/zend/zend.h>
+#include "hphp/php7/zend/zend.h"
 
 #include <ostream>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 void dump_ast(
     std::ostream& out,
@@ -29,6 +29,6 @@ void dump_ast(
     bool pretty = true,
     unsigned int indent = 0);
 
-}} // HPHP::PHP7
+}} // HPHP::php7
 
 #endif //incl_HPHP_PHP7_AST_DUMP_H_

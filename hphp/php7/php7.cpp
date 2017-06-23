@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <hphp/php7/ast_dump.h>
-#include <hphp/php7/compiler.h>
-#include <hphp/php7/zend/zend_language_scanner_defs.h>
-#include <hphp/php7/bytecode.h>
-#include <hphp/php7/hhas.h>
+#include "hphp/php7/ast_dump.h"
+#include "hphp/php7/compiler.h"
+#include "hphp/php7/zend/zend_language_scanner_defs.h"
+#include "hphp/php7/bytecode.h"
+#include "hphp/php7/hhas.h"
 
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
@@ -68,7 +68,7 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
 
   zendparse();
   // dump AST to stderr
-  HPHP::PHP7::dump_ast(std::cerr, CG(ast));
+  HPHP::php7::dump_ast(std::cerr, CG(ast));
   std::cerr << std::endl;
   return CG(ast);
 }
@@ -76,8 +76,8 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
 int main(int argc, const char** argv) {
   auto buf = readAll(std::cin);
   auto ast = runParser(*buf);
-  auto unit = HPHP::PHP7::Compiler::compile(ast);
-  auto hhas = HPHP::PHP7::dump_asm(*unit);
+  auto unit = HPHP::php7::Compiler::compile(ast);
+  auto hhas = HPHP::php7::dump_asm(*unit);
 
   std::cout << hhas << std::endl;
 

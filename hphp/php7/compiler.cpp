@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <hphp/php7/compiler.h>
+#include "hphp/php7/compiler.h"
 
 #include <iostream>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
-using namespace BC;
+using namespace bc;
 
 Compiler::Compiler() {
   unit = std::make_unique<Unit>();
@@ -45,7 +45,7 @@ void Compiler::compileProgram(zend_ast* ast) {
 }
 
 void Compiler::panic(const std::string& msg) {
-  std::cerr << "panic: " << msg <<std::endl;
+  std::cerr << "panic: " << msg << std::endl;
   std::abort();
 }
 
@@ -101,4 +101,4 @@ void Compiler::compileStatement(zend_ast* ast) {
   }
 }
 
-}} // HPHP::PHP7
+}} // HPHP::php7

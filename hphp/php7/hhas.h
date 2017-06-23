@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_PHP7_HHAS_H
 #define incl_HPHP_PHP7_HHAS_H
 
-#include <hphp/php7/unit.h>
+#include "hphp/php7/unit.h"
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 std::string dump_asm(const Unit& unit);
 
-}} // HPHP::PHP7
+}} // HPHP::php7
 
 #endif // incl_HPHP_PHP7_HHAS_H

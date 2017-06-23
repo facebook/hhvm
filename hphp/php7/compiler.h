@@ -17,13 +17,13 @@
 #ifndef incl_HPHP_PHP7_COMPILER_H_
 #define incl_HPHP_PHP7_COMPILER_H_
 
-#include <hphp/php7/zend/zend.h>
-#include <hphp/php7/ast_info.h>
-#include <hphp/php7/unit.h>
+#include "hphp/php7/zend/zend.h"
+#include "hphp/php7/ast_info.h"
+#include "hphp/php7/unit.h"
 
 #include <string>
 
-namespace HPHP { namespace PHP7 {
+namespace HPHP { namespace php7 {
 
 struct Compiler {
   explicit Compiler();
@@ -48,7 +48,7 @@ struct Compiler {
   Block* activeBlock;
 };
 
-}} // HPHP::PHP7
+}} // HPHP::php7
 
 
 #endif // incl_HPHP_PHP7_COMPILER_H_

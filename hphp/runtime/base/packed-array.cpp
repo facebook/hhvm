@@ -153,6 +153,12 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
   }
   old->m_sizeAndPos = 0;
 
+  // PHP does not have the concept of packed VS mixed, so packed to mixed
+  // promotion needs to be invisible to strong iteration in order to match
+  // PHP behavior; intentionally not doing the same in ToMixedCopy{,Reserve}
+  // because copies _are_ supposed to be visible to strong iteration
+  if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, old);
+
   assert(ad->checkInvariants());
   assert(!ad->isFull());
   assert(ad->hasExactlyOneRef());

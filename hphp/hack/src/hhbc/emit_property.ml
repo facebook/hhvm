@@ -60,10 +60,15 @@ let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) 
     match initial_value with
     | None -> None, false, None
     | Some expr ->
+      let is_collection_map =
+        match snd expr with
+        | A.Collection ((_, ("Map" | "ImmMap")), _) -> true
+        | _ -> false
+      in
       let deep_init = not is_static && expr_requires_deep_init expr in
       match Ast_constant_folder.expr_to_opt_typed_value
         ast_class.Ast.c_namespace expr with
-      | Some v when not deep_init ->
+      | Some v when not deep_init && not is_collection_map ->
         Some v, false, None
       | _ ->
         let label = Label.next_regular () in

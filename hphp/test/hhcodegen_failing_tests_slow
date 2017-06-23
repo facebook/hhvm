@@ -422,8 +422,6 @@ slow/hhbbc/private_props_001.php
 slow/hhbbc/private_props_006.php
 slow/hhbbc/public_static_props_002.php
 slow/hhbbc/public_static_props_004.php
-slow/hhbbc/public_static_props_006.php
-slow/hhbbc/public_static_props_007.php
 slow/hhbbc/public_static_props_012.php
 slow/hhbbc/public_static_props_019.php
 slow/hhbbc/static_props_001.php
@@ -518,7 +516,6 @@ slow/nullsafe/nullsafe-prop-8.php
 slow/nullsafe/nullsafe-prop-9.php
 slow/object/667.php
 slow/object/672.php
-slow/object/static_inits.php
 slow/object/tostring_invalid.php
 slow/object_invoke_method/766.php
 slow/object_invoke_method/769.php
@@ -826,7 +823,6 @@ slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
 slow/ternary/1736.php
-slow/thrift/unions.php
 slow/traits/1943.php
 slow/traits/1947.php
 slow/traits/1948.php

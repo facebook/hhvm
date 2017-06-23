@@ -101,7 +101,14 @@ end
 (* See decl_vars.mli for details *)
 let from_ast ~is_closure_body ~has_this ~params b =
   let visitor = new declvar_visitor in
-  let needs_local_this, decl_vars = visitor#on_program (false, ULS.empty) b in
+  let needs_local_this, decl_vars =
+    (* pull variables used in default values *)
+    let acc = List.fold_left params ~init:(false, ULS.empty) ~f:(
+      fun acc p -> Option.fold (Hhas_param.default_value p) ~init:acc ~f:(
+        fun acc (_, v) -> visitor#on_expr acc v)
+      )
+    in
+    visitor#on_program acc b in
   let param_names =
     List.fold_left
       params

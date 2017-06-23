@@ -454,6 +454,7 @@ SetArray* SetArray::resize() {
     assert(mask() <= 0x7fffffffU);
     return grow(m_scale * 2);
   } else {
+    always_assert(false);
     compact();
     return this;
   }

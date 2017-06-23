@@ -296,6 +296,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   // If the element density dropped below 50% due to indirect elements
   // being converted into tombstones, we should do a compaction
   if (ad->m_size < ad->m_used / 2) {
+    always_assert(false);
     ad->compact(false);
   }
 
@@ -769,7 +770,7 @@ ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
 }
 
 NEVER_INLINE MixedArray* MixedArray::resize() {
-  assert(m_used <= capacity());
+  assert(isFull());
   uint32_t cap = capacity();
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
@@ -778,6 +779,7 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
     assert(mask() <= 0x7fffffffU);
     return Grow(this, m_scale * 2);
   }
+  always_assert(false);
   compact(false);
   return this;
 }

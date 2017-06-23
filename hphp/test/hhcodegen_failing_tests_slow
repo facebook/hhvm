@@ -821,7 +821,6 @@ slow/streams/user_filter_autoload.php
 slow/string/164.php
 slow/string/heredoc_end_after_variable.php
 slow/string/issue_3160.php
-slow/stringish.php
 slow/super_globals/1387.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
@@ -846,7 +845,6 @@ slow/traits/1981.php
 slow/traits/1983.php
 slow/traits/1986.php
 slow/traits/1989.php
-slow/traits/1990.php
 slow/traits/1991.php
 slow/traits/2003.php
 slow/traits/2006.php
@@ -859,7 +857,6 @@ slow/traits/2016.php
 slow/traits/2017.php
 slow/traits/2019.php
 slow/traits/2021.php
-slow/traits/2023.php
 slow/traits/2024.php
 slow/traits/2025.php
 slow/traits/2027.php
@@ -869,7 +866,6 @@ slow/traits/2031.php
 slow/traits/2032.php
 slow/traits/2033.php
 slow/traits/2034.php
-slow/traits/2035.php
 slow/traits/2036.php
 slow/traits/2040.php
 slow/traits/2041.php
@@ -883,7 +879,6 @@ slow/traits/2053.php
 slow/traits/2055.php
 slow/traits/2063.php
 slow/traits/2070.php
-slow/traits/2073.php
 slow/traits/2080.php
 slow/traits/2107.php
 slow/traits/__class__.php

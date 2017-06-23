@@ -193,16 +193,20 @@ let make_closure ~explicit_use ~class_num
               f_name = (p, string_of_int class_num) } in
   inline_fundef, cd
 
-let inline_class_name_if_possible env ~fallback_to_empty_string p pe =
-  let make_get_class_call () = p, Call ((pe, Id (pe, "get_class")), [], [])
+let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
+  let get_class_call =
+    p, Call ((pe, Id (pe, "get_class")), [], [])
   in
+  let name c = p, String (pe, strip_id c.c_name) in
+  let empty_str = p, String (pe, "") in
   match Scope.get_class env.scope with
+  | Some c when trait ->
+    if c.c_kind = Ctrait then name c else empty_str
   | Some c ->
-    if c.c_kind = Ctrait then make_get_class_call ()
-    else p, String (pe, strip_id c.c_name)
+    if c.c_kind = Ctrait then get_class_call else name c
   | None ->
     if fallback_to_empty_string then p, String (pe, "")
-    else make_get_class_call ()
+    else get_class_call
 
 (* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
  * literal strings. It's necessary to do this before closure conversion
@@ -210,8 +214,11 @@ let inline_class_name_if_possible env ~fallback_to_empty_string p pe =
 let convert_id (env:env) p (pid, str as id) =
   let return newstr = (p, String (pid, newstr)) in
   match str with
-  | "__CLASS__" ->
-    inline_class_name_if_possible ~fallback_to_empty_string:true env p pid
+  | "__CLASS__" | "__TRAIT__"->
+    inline_class_name_if_possible
+      ~trait:(str = "__TRAIT__")
+      ~fallback_to_empty_string:true
+      env p pid
   | "__METHOD__" ->
     let prefix =
       match Scope.get_class env.scope with
@@ -267,7 +274,10 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
   | Call ((_, Id (pe, "get_class")), [], []) ->
-    st, inline_class_name_if_possible ~fallback_to_empty_string:false env p pe
+    st, inline_class_name_if_possible
+      ~trait:false
+      ~fallback_to_empty_string:false
+      env p pe
   | Call (e, el1, el2) ->
     let st, e = convert_expr env st e in
     let st, el1 = convert_exprs env st el1 in

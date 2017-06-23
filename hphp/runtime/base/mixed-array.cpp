@@ -820,32 +820,31 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
 void MixedArray::compact(bool renumber /* = false */) {
   bool updatePosAfterCompact = false;
   ElmKey mPos;
-  bool hasStrongIters;
+  bool updateStrongIters = false;
   req::TinyVector<ElmKey,3> siKeys;
 
   // Prep work before beginning the compaction process
   if (LIKELY(!renumber)) {
-    if ((updatePosAfterCompact = (m_pos != 0 && m_pos != m_used))) {
+    if (m_pos == m_used) {
+      // If m_pos is the canonical invalid position, we need to update it to
+      // what the new canonical invalid position will be after compaction
+      m_pos = m_size;
+    } else if (m_pos != 0) {
       // Cache key for element associated with m_pos in order to
       // update m_pos after the compaction has been performed.
       // We only need to do this if m_pos is nonzero and is not
       // the canonical invalid position.
+      updatePosAfterCompact = true;
       assert(size_t(m_pos) < m_used);
       auto& e = data()[m_pos];
       mPos.hash = e.hash();
       mPos.skey = e.skey;
-    } else {
-      if (m_pos == m_used) {
-        // If m_pos is the canonical invalid position, we need to update
-        // it to what the new canonical invalid position will be after
-        // compaction
-        m_pos = m_size;
-      }
     }
-    if (UNLIKELY((hasStrongIters = strong_iterators_exist()))) {
+    if (UNLIKELY(strong_iterators_exist())) {
       for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
         if (miEnt.array != this) return;
         if (miEnt.iter->getResetFlag()) return;
+        updateStrongIters = true;
         auto const ei = miEnt.iter->m_pos;
         if (ei == m_used) return;
         auto& e = data()[ei];
@@ -853,15 +852,13 @@ void MixedArray::compact(bool renumber /* = false */) {
       });
     }
   } else {
-    // To conform to PHP5 behavior, when array's integer keys are renumbered
+    // To conform to PHP behavior, when array's integer keys are renumbered
     // we invalidate all strong iterators and we reset the array's internal
     // cursor (even if the array is empty or has no integer keys).
     if (UNLIKELY(strong_iterators_exist())) {
       free_strong_iterators(this);
     }
     m_pos = 0;
-    updatePosAfterCompact = false;
-    hasStrongIters = false;
     // Set m_nextKI to 0 for now to prepare for renumbering integer keys
     m_nextKI = 0;
   }
@@ -894,9 +891,9 @@ void MixedArray::compact(bool renumber /* = false */) {
     assert(m_pos >= 0 && m_pos < m_size);
   }
 
-  if (LIKELY(!hasStrongIters)) {
-    // In the common case there aren't any strong iterators, so we
-    // can just update m_used and return
+  if (LIKELY(!updateStrongIters)) {
+    // In the common case there aren't any strong iterators that need updating,
+    // so we can just update m_used and return
     m_used = m_size;
     return;
   }

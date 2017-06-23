@@ -320,11 +320,6 @@ MixedArray* MixedArray::copyMixedAndResizeIfNeeded() const {
 NEVER_INLINE
 MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
   assert(isFull());
-
-  // Note: this path will have to handle splitting strong iterators
-  // later when we combine copyMixed & Grow into one operation.  For
-  // now I'm just making use of copyMixed to do it for me before
-  // GrowPacked happens.
   auto const copy = copyMixed();
   auto const ret = Grow(copy, copy->m_scale * 2);
   if (copy != ret) Release(copy);
@@ -755,8 +750,10 @@ MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
 }
 
 ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
-  if (UNLIKELY(isFull())) return Grow(this, m_scale * 2);
-  return this;
+  if (LIKELY(!isFull())) return this;
+  auto ad = Grow(this, m_scale * 2);
+  if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, this);
+  return ad;
 }
 
 NEVER_INLINE MixedArray*
@@ -791,10 +788,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
 
   auto table = mixedHash(ad->data(), newScale);
   ad->InitHash(table, newScale);
-
-  if (UNLIKELY(strong_iterators_exist())) {
-    move_strong_iterators(ad, old);
-  }
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;

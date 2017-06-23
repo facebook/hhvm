@@ -729,26 +729,6 @@ void free_strong_iterators(ArrayData* ad) {
   });
 }
 
-/*
- * This function returns its first argument so that in some cases we
- * can do tails calls (or maybe avoid spills).
- *
- * Note that in some cases reusing the return value can be (very
- * slightly) worse.  The compiler won't know that the return value is
- * going to be the same as the argument, so if it didn't already have
- * to spill to make the call, or it can't tail call for some other
- * reason, you can cause an extra move after the return.
- */
-ArrayData* move_strong_iterators(ArrayData* dst, ArrayData* src) {
-  for_each_strong_iterator([&] (MIterTable::Ent& ent) {
-    if (ent.array == src) {
-      ent.array = dst;
-      ent.iter->setContainer(dst);
-    }
-  });
-  return dst;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 MArrayIter::MArrayIter(RefData* ref)

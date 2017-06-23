@@ -66,6 +66,15 @@ void for_each_strong_iterator(Fn fn) {
   }
 }
 
+inline void move_strong_iterators(ArrayData* dst, ArrayData* src) {
+  for_each_strong_iterator([&] (MIterTable::Ent& ent) {
+    if (ent.array == src) {
+      ent.array = dst;
+      ent.iter->setContainer(dst);
+    }
+  });
+}
+
 //////////////////////////////////////////////////////////////////////
 }
 #endif

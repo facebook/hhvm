@@ -594,7 +594,7 @@ static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
 MIterTable& miter_table();
 
 void free_strong_iterators(ArrayData*);
-ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);
+void move_strong_iterators(ArrayData* dest, ArrayData* src);
 
 //////////////////////////////////////////////////////////////////////
 

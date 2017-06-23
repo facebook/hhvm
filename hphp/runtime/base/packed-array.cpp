@@ -236,10 +236,6 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
                     oldSize * sizeof(TypedValue));
   }
 
-  if (UNLIKELY(strong_iterators_exist())) {
-    move_strong_iterators(ad, old);
-  }
-
   assert(ad->m_size == old->m_size);
   assert(ad->m_pos == old->m_pos);
   old->m_sizeAndPos = 0;  // old is a zombie now
@@ -253,10 +249,6 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
 NEVER_INLINE
 ArrayData* PackedArray::CopyAndResizeIfNeededSlow(const ArrayData* adIn) {
   assert(adIn->m_size == capacity(adIn));
-  // Note: this path will have to handle splitting strong iterators
-  // later when we combine copy & grow into one operation.
-  // For now I'm just making use of copyPacked to do it for me before
-  // GrowPacked happens.
   auto const copy = PackedArray::Copy(adIn);
   auto const ret  = PackedArray::Grow(copy);
   assert(ret != copy);
@@ -275,10 +267,10 @@ ArrayData* PackedArray::CopyAndResizeIfNeeded(const ArrayData* adIn) {
 
 ALWAYS_INLINE
 ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
-  if (LIKELY(capacity(adIn) > adIn->m_size)) {
-    return adIn;
-  }
-  return Grow(adIn);
+  if (LIKELY(capacity(adIn) > adIn->m_size)) return adIn;
+  auto ad = Grow(adIn);
+  if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, adIn);
+  return ad;
 }
 
 //////////////////////////////////////////////////////////////////////

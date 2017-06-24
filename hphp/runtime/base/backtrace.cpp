@@ -493,6 +493,7 @@ struct CTKHasher final {
 
 struct CacheDeleter final {
   void operator()(ArrayData* ad) const {
+    if (!ad->isUncounted()) return;
     Treadmill::enqueue([ad] {
       PackedArray::ReleaseUncounted(ad, 0);
     });
@@ -610,7 +611,10 @@ Array CompactTrace::extract() const {
 
   auto arr = m_key.extract();
   auto ins = CachedArray(
-    PackedArray::MakeUncounted(arr.get(), 0), CacheDeleter()
+    arr.get()->empty()
+      ? staticEmptyArray()
+      : PackedArray::MakeUncounted(arr.get(), 0),
+    CacheDeleter()
   );
   if (!s_cache.insert(m_key, ins)) {
     return arr;

@@ -114,8 +114,8 @@ inline bool ExpressionList::getListScalars(F f) const {
     auto val = exp->getValue();
     if (!name) {
       Variant v;
-      bool ret = val->getScalarValue(v);
-      if (!ret) assert(false);
+      auto const ret = val->getScalarValue(v);
+      always_assert(ret);
       if (!f(Variant{}, v)) return false;
     } else {
       Variant n;

@@ -316,6 +316,15 @@ void publishOptFunctionInternal(FuncMetaInfo info,
                                 size_t* failedBytes = nullptr) {
   auto const func = info.func;
 
+  // If the function had a body dispatch emitted during profiling, then emit it
+  // again right before the optimized prologues.
+  if (func->getFuncBody() != tc::ustubs().funcBodyHelperThunk &&
+      (func->getDVFunclets().size() > 0 || func->hasThisVaries())) {
+    // NB: this already calls func->setFuncBody() with the new TCA
+    emitFuncBodyDispatchInternal(func, func->getDVFunclets(),
+                                 TransKind::OptPrologue);
+  }
+
   for (auto const rec : info.prologues) {
     emitFuncPrologueOptInternal(rec);
   }

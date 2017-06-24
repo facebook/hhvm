@@ -187,7 +187,9 @@ TCA getFuncBody(Func* func) {
 
   auto const dvs = func->getDVFunclets();
   if (dvs.size() || func->hasThisVaries()) {
-    tca = tc::emitFuncBodyDispatch(func, dvs);
+    auto const kind = tc::profileFunc(func) ? TransKind::Profile
+                                            : TransKind::Live;
+    tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
     SrcKey sk(func, func->base(), false, func->mayHaveThis());
     tca = getTranslation(TransArgs{sk});

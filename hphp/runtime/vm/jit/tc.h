@@ -163,9 +163,10 @@ TCA emitFuncPrologueOpt(ProfTransRec* rec);
 
 /*
  * Emit the prologue dispatch for func which contains dvs DV initializers, and
- * return its start address.
+ * return its start address.  The `kind' of translation argument is used to
+ * decide what area of the code cache will be used (hot, main, or prof).
  */
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs);
+TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
 
 ////////////////////////////////////////////////////////////////////////////////
 

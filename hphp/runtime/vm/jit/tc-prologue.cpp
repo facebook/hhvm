@@ -228,16 +228,16 @@ TCA emitFuncPrologueOpt(ProfTransRec* rec) {
   return emitFuncPrologueOptInternal(rec);
 }
 
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
-  VMProtect _;
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  auto const& view = code().view();
+TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
+                                 TransKind kind) {
+  auto const& view = code().view(kind);
   auto const tca = genFuncBodyDispatch(func, dvs, view);
 
   func->setFuncBody(tca);
+
+  TRACE(2, "emitFuncBodyDispatch: emitted code for %s (%s) at %p\n",
+        func->fullName()->data(), show(kind).c_str(), tca);
+
   if (!RuntimeOption::EvalJitNoGdb) {
     Debug::DebugInfo::Get()->recordStub(
       Debug::TCRange(tca, view.main().frontier(), false),
@@ -255,6 +255,15 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
   }
 
   return tca;
+}
+
+TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
+  VMProtect _;
+
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
+
+  return emitFuncBodyDispatchInternal(func, dvs, kind);;
 }
 
 }}}

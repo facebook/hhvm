@@ -508,8 +508,6 @@ bool retranslateOpt(FuncId funcId) {
   if (profData()->optimized(funcId)) return true;
   profData()->setOptimized(funcId);
 
-  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
-
   tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
   optimize(info);
   tc::publishOptFunction(std::move(info));

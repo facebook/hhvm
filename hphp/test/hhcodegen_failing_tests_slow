@@ -648,7 +648,6 @@ slow/parser/static_call_access.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/tuple-1.php
 slow/parser/tuple-2.php
-slow/parser/type_list_trailing_comma.php
 slow/parser/unicode-literal-error.php
 slow/parser/use-const.php
 slow/parser/use-strict-hack.php
@@ -758,7 +757,6 @@ slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/ReflectionClass_toString_001.php
-slow/reflection/ReflectionMethod_getPrototype2.php
 slow/reflection/ReflectionType-basic-explicit-php7.php
 slow/reflection/ReflectionType-detailed-explicit-php7.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php

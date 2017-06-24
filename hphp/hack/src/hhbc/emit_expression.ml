@@ -426,7 +426,6 @@ and emit_shape env expr fl =
   emit_expr ~need_ref:false env (p, A.Array fl)
 
 and emit_tuple env p es =
-  (* Did you know that tuples are functions? *)
   let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
   emit_expr ~need_ref:false env (p, A.Array af_list)
 
@@ -828,6 +827,7 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_call_isset_exprs env exprs
   | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
+  (* Did you know that tuples are functions? *)
   | A.Call ((p, A.Id (_, "tuple")), es, _) ->
     emit_box_if_necessary need_ref @@ emit_tuple env p es
   | A.Call ((_, A.Id (_, "idx")), es, _) ->

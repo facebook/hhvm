@@ -778,21 +778,23 @@ PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, Variant&, bool) {
   throwInvalidArrayKeyException(k, adIn);
 }
 
-static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
+namespace {
+
+static void adjustMArrayIterAfterPop(ArrayData* ad) {
   assert(ad->hasPackedLayout());
-  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
-    if (miEnt.array != ad) return;
-    auto const iter = miEnt.iter;
-    if (iter->getResetFlag()) return;
-    if (iter->m_pos == pos) {
-      if (pos <= 0) {
-        iter->m_pos = ad->getSize();
-        iter->setResetFlag(true);
-      } else {
-        iter->m_pos = pos - 1;
-      }
-    }
-  });
+  auto const size = ad->getSize();
+  if (size) {
+    for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
+      if (miEnt.array != ad) return;
+      auto const iter = miEnt.iter;
+      if (iter->getResetFlag()) return;
+      if (iter->m_pos >= size) iter->m_pos = size - 1;
+    });
+  } else {
+    reset_strong_iterators(ad);
+  }
+}
+
 }
 
 ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
@@ -985,12 +987,10 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   auto const oldSize = ad->m_size;
   auto& tv = packedData(ad)[oldSize - 1];
   value = tvAsCVarRef(&tv);
-  if (UNLIKELY(strong_iterators_exist())) {
-    adjustMArrayIter(ad, oldSize - 1);
-  }
   auto const oldTV = tv;
   ad->m_size = oldSize - 1;
   ad->m_pos = 0;
+  if (UNLIKELY(strong_iterators_exist())) adjustMArrayIterAfterPop(ad);
   tvDecRefGen(oldTV);
   return ad;
 }

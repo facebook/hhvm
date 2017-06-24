@@ -75,6 +75,12 @@ inline void move_strong_iterators(ArrayData* dst, ArrayData* src) {
   });
 }
 
+inline void reset_strong_iterators(ArrayData* ad) {
+  for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
+    if (miEnt.array == ad) miEnt.iter->setResetFlag(true);
+  });
+}
+
 //////////////////////////////////////////////////////////////////////
 }
 #endif

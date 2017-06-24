@@ -596,6 +596,7 @@ MIterTable& miter_table();
 void free_strong_iterators(ArrayData*);
 void move_strong_iterators(ArrayData* dest, ArrayData* src);
 bool has_strong_iterator(ArrayData*);
+void reset_strong_iterators(ArrayData* ad);
 
 //////////////////////////////////////////////////////////////////////
 

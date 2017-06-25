@@ -644,7 +644,6 @@ void newMArrayIter(MArrayIter* marr, ArrayData* ad) {
   slot->iter = marr;
   slot->array = ad;
   marr->setContainer(ad);
-  marr->m_pos = ad->getPosition();
   assert(strong_iterators_exist());
 }
 
@@ -743,36 +742,33 @@ bool has_strong_iterator(ArrayData* ad) {
 MArrayIter::MArrayIter(RefData* ref)
   : m_pos(0)
   , m_container(nullptr)
-  , m_resetFlag(false)
+  , m_resetFlag(true)
 {
   ref->incRefCount();
   setRef(ref);
   assert(hasRef());
   escalateCheck();
   auto const data = cowCheck();
-  if (!data) return;
+  assert(data);
   data->reset();
-  newMArrayIter(this, data);
-  setResetFlag(true);
   data->next();
+  newMArrayIter(this, data);
   assert(getContainer() == data);
 }
 
 MArrayIter::MArrayIter(ArrayData* data)
-  : m_ref(nullptr)
-  , m_pos(0)
+  : m_pos(0)
   , m_container(nullptr)
-  , m_resetFlag(false)
+  , m_resetFlag(true)
 {
-  if (!data) return;
-  assert(!data->isStatic());
+  // this constructor is only used for object iteration, so we always get in a
+  // mixed array with refcount 1
+  assert(data);
+  assert(data->isMixed() && data->hasExactlyOneRef());
   setAd(data);
-  escalateCheck();
-  data = cowCheck();
   data->reset();
-  newMArrayIter(this, data);
-  setResetFlag(true);
   data->next();
+  newMArrayIter(this, data);
   assert(getContainer() == data);
 }
 
@@ -794,7 +790,11 @@ bool MArrayIter::end() const {
 }
 
 bool MArrayIter::advance() {
-  ArrayData* data = getArray();
+  if (hasAd()) {
+    return getAd()->advanceMArrayIter(*this);
+  }
+
+  ArrayData* data = getData();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
@@ -817,7 +817,11 @@ bool MArrayIter::advance() {
 }
 
 bool MArrayIter::prepare() {
-  ArrayData* data = getArray();
+  if (hasAd()) {
+    return getAd()->validMArrayIter(*this);
+  }
+
+  ArrayData* data = getData();
   ArrayData* container = getContainer();
   if (!data) {
     if (container) {
@@ -833,57 +837,43 @@ bool MArrayIter::prepare() {
 }
 
 void MArrayIter::escalateCheck() {
-  if (hasRef()) {
-    auto const data = getData();
-    if (!data) return;
-    auto const esc = data->escalate();
-    if (data != esc) {
-      cellMove(make_array_like_tv(esc), *getRef()->tv());
-    }
-    return;
-  }
-
-  assert(hasAd());
-  auto const data = getAd();
+  assert(hasRef());
+  auto const data = getData();
+  if (!data) return;
   auto const esc = data->escalate();
   if (data != esc) {
-    decRefArr(data);
-    setAd(esc);
+    cellMove(make_array_like_tv(esc), *getRef()->tv());
   }
 }
 
 ArrayData* MArrayIter::cowCheck() {
-  if (hasRef()) {
-    auto data = getData();
-    if (!data) return nullptr;
-    if (!data->cowCheck() || data->noCopyOnWrite()) return data;
-    // This copy should not interrupt strong iteration. If there are nested
-    // strong iterators over the same array, we need to update all of them,
-    // so we have to move_strong_iterators, we can't just setContainer. We
-    // have to check if strong_iterators_exist because we may be in the process
-    // of creating the first one.
-    auto copy = data->copy();
-    if (strong_iterators_exist()) move_strong_iterators(copy, data);
-    cellMove(make_array_like_tv(copy), *getRef()->tv());
-    return copy;
-  }
-
-  assert(hasAd());
-  auto const data = getAd();
-  assert(!data->cowCheck());
-  return data;
+  assert(hasRef());
+  auto data = getData();
+  if (!data) return nullptr;
+  if (!data->cowCheck() || data->noCopyOnWrite()) return data;
+  // This copy should not interrupt strong iteration. If there are nested
+  // strong iterators over the same array, we need to update all of them,
+  // so we have to move_strong_iterators, we can't just setContainer. We
+  // have to check if strong_iterators_exist because we may be in the process
+  // of creating the first one.
+  auto copy = data->copy();
+  if (strong_iterators_exist()) move_strong_iterators(copy, data);
+  cellMove(make_array_like_tv(copy), *getRef()->tv());
+  return copy;
 }
 
 ArrayData* MArrayIter::reregister() {
+  assert(hasRef());
   ArrayData* container = getContainer();
-  assert(getArray() != nullptr && container != getArray());
+  assert(getData() != nullptr && container != getData());
   if (container != nullptr) {
     freeMArrayIter(this);
   }
-  setResetFlag(false);
   assert(getContainer() == nullptr);
+  setResetFlag(false);
   escalateCheck();
   ArrayData* data = cowCheck();
+  m_pos = data->getPosition();
   newMArrayIter(this, data);
   return data;
 }
@@ -1595,6 +1585,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, v1);
 
   TypedValue* rtv = v1->tv();
+  assert(isArrayLikeType(rtv->m_type));
   ArrayData* ad = rtv->m_data.parr;
 
   if (UNLIKELY(ad->isHackArray())) {

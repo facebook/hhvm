@@ -26,6 +26,7 @@ type t = {
   class_is_interface : bool;
   class_is_trait     : bool;
   class_is_xhp       : bool;
+  class_is_top       : bool;
   class_uses         : Litstr.id list;
   class_use_aliases  :
     (Litstr.id * Litstr.id option * Litstr.id * Ast.cu_alias_type) list;
@@ -34,6 +35,7 @@ type t = {
   class_properties   : Hhas_property.t list;
   class_constants    : Hhas_constant.t list;
   class_type_constants : Hhas_type_constant.t list;
+  class_requirements : (Ast.trait_req_kind * string) list;
 }
 
 let make
@@ -46,13 +48,15 @@ let make
   class_is_interface
   class_is_trait
   class_is_xhp
+  class_is_top
   class_uses
   class_use_aliases
   class_enum_type
   class_methods
   class_properties
   class_constants
-  class_type_constants =
+  class_type_constants
+  class_requirements =
   {
     class_attributes;
     class_base;
@@ -63,13 +67,15 @@ let make
     class_is_interface;
     class_is_trait;
     class_is_xhp;
+    class_is_top;
     class_uses;
     class_use_aliases;
     class_enum_type;
     class_methods;
     class_properties;
     class_constants;
-    class_type_constants
+    class_type_constants;
+    class_requirements;
   }
 
 let attributes hhas_class = hhas_class.class_attributes
@@ -81,6 +87,7 @@ let is_abstract hhas_class = hhas_class.class_is_abstract
 let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 let is_xhp hhas_class = hhas_class.class_is_xhp
+let is_top hhas_class = hhas_class.class_is_top
 let class_uses hhas_class = hhas_class.class_uses
 let class_use_aliases hhas_class = hhas_class.class_use_aliases
 let enum_type hhas_class = hhas_class.class_enum_type
@@ -91,5 +98,6 @@ let with_properties hhas_class properties = { hhas_class with
   class_properties = hhas_class.class_properties @ properties }
 let constants hhas_class = hhas_class.class_constants
 let type_constants hhas_class = hhas_class.class_type_constants
+let requirements hhas_class = hhas_class.class_requirements
 let is_closure_class hhas_class =
   List.exists Hhas_method.is_closure_body (methods hhas_class)

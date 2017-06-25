@@ -28,8 +28,12 @@
   JmpZ target_cond
 
   Jmp target
+  Int 0
   RetC
+  Int 0
   PopC
+empty_loop:
+  Jmp empty_loop
 
  label_before_its_jump:
   PopC

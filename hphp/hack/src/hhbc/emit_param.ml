@@ -13,14 +13,21 @@ open Emit_type_hint
 open Instruction_sequence
 module A = Ast
 
+let from_variadic_param_hint_opt ho =
+  let p = Pos.none in
+  match ho with
+  | None -> Some (p, A.Happly ((p, "array"), []))
+  | Some h -> Some (p, A.Happly ((p, "array"), [h]))
+
 let from_ast ~tparams ~namespace ~generate_defaults p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
   let param_hint =
     if param_is_variadic
-    then None
+    then from_variadic_param_hint_opt p.Ast.param_hint
     else p.Ast.param_hint
   in
+  let tparams = if param_is_variadic then "array"::tparams else tparams in
   let nullable =
     match p.A.param_expr with
     | Some (_, A.Null) -> true

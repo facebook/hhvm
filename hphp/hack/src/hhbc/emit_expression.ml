@@ -572,6 +572,7 @@ and emit_id env (p, s as id) =
   | "__NAMESPACE__" ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
+  | "exit" -> emit_exit env None
   | _ ->
     let fq_id, id_opt, contains_backslash =
       Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
@@ -1788,6 +1789,9 @@ and emit_call env (_, expr_ as expr) args uargs =
       ];
       instr (IMisc (OODeclExists class_kind))
     ], Flavor.Cell
+
+  | A.Id (_, "exit") when nargs = 0 || nargs = 1 ->
+    emit_exit env (List.hd args), Flavor.Cell
 
   | A.Id (_, id) ->
     begin match get_call_builtin_func_info id with

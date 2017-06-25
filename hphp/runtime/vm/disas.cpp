@@ -87,6 +87,12 @@ void indented(Output& out, Func f) {
   out.dec_indent();
 }
 
+template<class T>
+std::string format_line_pair(T* ptr) {
+  if (!RuntimeOption::EvalDisassemblerSourceMapping) return {};
+  return folly::sformat(" ({},{})", ptr->line1(), ptr->line2());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::string escaped(const StringData* sd) {
@@ -115,6 +121,11 @@ std::string escaped_long(Cell cell) {
   assert(cellIsPlausible(cell));
   auto const str = f_serialize(tvAsCVarRef(&cell));
   return escaped_long(str.get());
+}
+
+std::string opt_escaped_long(const StringData* sd) {
+  if (!sd || sd->empty()) return {};
+  return " " + escaped_long(sd);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -376,6 +387,11 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (func->docComment() && !func->docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(func->docComment()));
+    }
+  }
   if (func->isMemoizeWrapper()) {
     out.fmtln(".ismemoizewrapper;");
   }
@@ -395,7 +411,19 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
+  for (auto& info : func->staticVars()) {
+    out.fmtln(".static ${} = {};", info.name, escaped_long(info.phpCode));
+  }
+}
 
+void print_srcloc(Output& out, SourceLoc loc) {
+  if (!RuntimeOption::EvalDisassemblerSourceMapping) return;
+  if (!loc.valid()) {
+    out.fmtln(".srcloc -1:-1,-1:-1;");
+  } else {
+    out.fmtln(".srcloc {}:{},{}:{};",
+            loc.line0, loc.char0, loc.line1, loc.char1);
+  }
 }
 
 void print_func_body(Output& out, const FuncInfo& finfo) {
@@ -407,6 +435,8 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   auto const ehStop  = end(finfo.ehStarts);
   auto       bcIter  = func->unit()->at(func->base());
   auto const bcStop  = func->unit()->at(func->past());
+
+  SourceLoc srcLoc;
 
   min_priority_queue<Offset> ehEnds;
   min_priority_queue<Offset> ehHandlers;
@@ -471,6 +501,12 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
       out.inc_indent();
     }
 
+    SourceLoc newLoc;
+    finfo.unit->getSourceLoc(off, newLoc);
+    if (!(newLoc == srcLoc)) {
+      print_srcloc(out, newLoc);
+      srcLoc = newLoc;
+    }
     print_instr(out, finfo, bcIter);
 
     bcIter += instrLen(bcIter);
@@ -503,10 +539,9 @@ std::string func_param_list(const FuncInfo& finfo) {
 
     if (func->params()[i].variadic) {
       ret += "...";
-    } else {
-      ret += opt_type_info(func->params()[i].userType,
-                           func->params()[i].typeConstraint);
     }
+    ret += opt_type_info(func->params()[i].userType,
+                         func->params()[i].typeConstraint);
     if (func->byRef(i)) ret += "&";
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
@@ -549,11 +584,16 @@ std::string user_attrs(const UserAttributeMap* attrsMap) {
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
-                      const UserAttributeMap* userAttrs = nullptr) {
-  auto str = folly::trimWhitespace(folly::format(
+                      const UserAttributeMap* userAttrs = nullptr,
+                      bool isTop = true) {
+  auto str = folly::trimWhitespace(folly::sformat(
                "{} {}",
-               attrs_to_string(ctx, attrs), user_attrs(userAttrs)).str()).str();
-  if (!str.empty()) str = folly::format(" [{}]", str).str();
+               attrs_to_string(ctx, attrs), user_attrs(userAttrs))).str();
+  if (!str.empty()) {
+    str = folly::sformat(" [{}{}]", str, isTop ? "" : " nontop");
+  } else if (!isTop) {
+    str = " [nontop]";
+  }
   return str;
 }
 
@@ -561,10 +601,12 @@ void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
   if (func->isPseudoMain()) {
-    out.fmtln(".main {{");
+    out.fmtln(".main{} {{", format_line_pair(func));
   } else {
-    out.fmtln(".function{} {}{}({}){}{{",
-      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
+    out.fmtln(".function{}{} {}{}({}){}{{",
+      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes(),
+                func->top()),
+      format_line_pair(func),
       opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
       func->name(),
       func_param_list(finfo),
@@ -585,15 +627,23 @@ std::string member_tv_initializer(Cell cell) {
 }
 
 void print_constant(Output& out, const PreClass::Const* cns) {
-  if (cns->isAbstract()) { return; }
+  if (cns->isAbstract()) {
+    out.fmtln(".const {}{};", cns->name(),
+              cns->isType() ? " isType" : "");
+    return;
+  }
   out.fmtln(".const {}{} = {};", cns->name(),
     cns->isType() ? " isType" : "",
     member_tv_initializer(cns->val()));
 }
 
 void print_property(Output& out, const PreClass::Prop* prop) {
-  out.fmtln(".property{} {} =",
+  out.fmtln(".property{}{}{} {} =",
     opt_attrs(AttrContext::Prop, prop->attrs()),
+    RuntimeOption::EvalDisassemblerDocComments
+      ? opt_escaped_long(prop->docComment())
+      : std::string(""),
+    opt_type_info(prop->typeConstraint(), TypeConstraint{}),
     prop->name()->data());
   indented(out, [&] {
     out.fmtln("{};", member_tv_initializer(prop->val()));
@@ -602,8 +652,9 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{} {}{}({}){}{{",
+  out.fmtln(".method{}{} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
+    format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
     func->name(),
     func_param_list(finfo),
@@ -686,9 +737,20 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
   out.fmtln("}}");
 }
 
+void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
+  out.fmtln(".require {} <{}>;", req.is_extends() ? "extends" : "implements",
+            req.name()->data());
+}
+
 void print_cls_directives(Output& out, const PreClass* cls) {
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (cls->docComment() && !cls->docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(cls->docComment()));
+    }
+  }
   print_cls_enum_ty(out, cls);
   print_cls_used_traits(out, cls);
+  for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
   for (auto* m : cls->allMethods())    print_method(out, m);
@@ -696,9 +758,11 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
-  out.fmt(".class{} {}",
-    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
-    cls->name());
+  out.fmt(".class {}{}",
+    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
+              cls->hoistability() != PreClass::NotHoistable),
+    cls->name(),
+    format_line_pair(cls));
   print_cls_inheritance_list(out, cls);
   out.fmt(" {{");
   out.nl();
@@ -712,10 +776,11 @@ void print_alias(Output& out, const TypeAlias& alias) {
   if (alias.nullable) flags = flags | TypeConstraint::Nullable;
   TypeConstraint constraint(alias.value, flags);
 
-  out.fmtln(".alias{} {} = <{}>;",
+  out.fmtln(".alias{} {} = <{}> {};",
             opt_attrs(AttrContext::Alias, alias.attrs),
             (const StringData*)alias.name,
-            type_constraint(constraint));
+            type_constraint(constraint),
+            escaped_long(alias.typeStructure.get()));
 }
 
 void print_unit_strict_types(Output& out, const Unit* unit) {

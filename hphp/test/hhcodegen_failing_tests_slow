@@ -9,6 +9,7 @@ slow/array_offset/429.php
 slow/array_offset/433.php
 slow/array_trailing_comma.php
 slow/async/async-gen-0ref-on-retc.php
+slow/async/await_cpp_exception2.php
 slow/async/await_failure.php
 slow/async/await_statement.php
 slow/async/awaitable.php
@@ -58,6 +59,7 @@ slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant2.php
 slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant4.php
+slow/class_type_constant/type_constant5.php
 slow/class_type_constant/type_constant6.php
 slow/closure/1933.php
 slow/closure/1937.php
@@ -194,7 +196,6 @@ slow/exceptions/cuf_throw.php
 slow/exceptions/prepend_exception_trace.php
 slow/exceptions/timeout_init.php
 slow/exit/1560.php
-slow/exit/1561.php
 slow/exit/1563.php
 slow/ext_apc_iterator/iterator_001.php
 slow/ext_apc_iterator/iterator_002.php
@@ -235,6 +236,7 @@ slow/ext_math/intdiv.php
 slow/ext_misc/ext_misc.php
 slow/ext_misc/idx-1.php
 slow/ext_misc/php_strip_whitespace_comment_outside.php
+slow/ext_misc/php_strip_whitespace_xhp.php
 slow/ext_misc/token_get_all_hashbang.php
 slow/ext_misc/token_get_all_inline_html.php
 slow/ext_openssl/openssl_pkey_get_details.php
@@ -342,7 +344,6 @@ slow/function/instance-default.php
 slow/function/short-lambda.php
 slow/function/ternary-default.php
 slow/function_no_param_modifier.php
-slow/global_vars/global_vars.php
 slow/goto/1917.php
 slow/goto/label_in_finally.php
 slow/goto/label_out_finally.php
@@ -439,12 +440,15 @@ slow/inline-hhas/if.php
 slow/inline-hhas/mixed.php
 slow/inline-hhas/param.php
 slow/inlining/1836.php
+slow/inlining/singleton.php
 slow/integer/bin-format.php
 slow/intercept/intercept_func_families.php
 slow/intercept/intercept_methods.php
 slow/interpolated_function_call.php
 slow/invalid_argument/1383.php
 slow/ir_inlining/inline-decref.php
+slow/ir_inlining/ref_noref_methods.php
+slow/ir_inlining/singleton-fail.php
 slow/ir_refcount/refcount001.php
 slow/ir_refcount/refcount_decref_alias.php
 slow/ir_refcount/refcount_may_alias.php
@@ -480,8 +484,6 @@ slow/memoize/args.php
 slow/memoize/basic.php
 slow/memoize/refargs.php
 slow/memoize/reset.php
-slow/memoize/serialize.php
-slow/memoize/traits.php
 slow/memoize/untyped.php
 slow/memoize/varargs.php
 slow/memoize/variadics.php
@@ -654,6 +656,7 @@ slow/parser/use-const.php
 slow/parser/use-strict-hack.php
 slow/parser/use-strict.php
 slow/parser/val_colon_colon_class_method.php
+slow/parser/variance.php
 slow/parser/xhp-ambiguity.php
 slow/perfect_virtual/79.php
 slow/perfect_virtual/80.php
@@ -758,8 +761,10 @@ slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/ReflectionClass_toString_001.php
+slow/reflection/ReflectionFunction_getShortName.php
 slow/reflection/ReflectionType-basic-explicit-php7.php
 slow/reflection/ReflectionType-detailed-explicit-php7.php
+slow/reflection/ReflectionTypeAlias3.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
@@ -810,6 +815,10 @@ slow/simple_xml/simplexml_import_dom_refcount.php
 slow/simple_xml/text_node_offsetset.php
 slow/simple_xml/xpath_node.php
 slow/skip-frame.php
+slow/static_statement/1402.php
+slow/static_statement/1403.php
+slow/static_statement/1407.php
+slow/static_statement/1410.php
 slow/streams/stream_wrapper_register.php
 slow/streams/stream_wrapper_register_2.php
 slow/streams/stream_wrapper_register_metadata.php
@@ -892,6 +901,7 @@ slow/type_annotation/shape_typedef_with_question_mark.php
 slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_annotation/type_annotation_classes4.php
+slow/type_annotation/type_annotation_expand_typedef1.php
 slow/type_annotation/type_annotation_self1.php
 slow/type_assertions/1857.php
 slow/type_assertions/1860.php
@@ -902,8 +912,11 @@ slow/typecheck/type_coersion_5.php
 slow/typecheck/type_coersion_7.php
 slow/typecheck/type_coersion_7strict.php
 slow/typedef/typedef_mixed_case.php
+slow/typedef/typedef_non_class.php
+slow/typedef/typedef_non_class_fail2.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
+slow/typedef/typedef_typearg.php
 slow/types/1747.php
 slow/types/abstract_function_typehints.php
 slow/types/interface_typehint_fail.php
@@ -919,7 +932,9 @@ slow/use_function/realias.php
 slow/use_function/use_function.php
 slow/var_export/1450.php
 slow/variable_argument/27.php
+slow/variable_class_name/hack_classname_t_ns.php
 slow/variadic_args/by_reference_typehints.php
+slow/variadic_args/constructors.php
 slow/variadic_args/magic_call.php
 slow/variadic_args/typehints.php
 slow/vec/bad-init1.php

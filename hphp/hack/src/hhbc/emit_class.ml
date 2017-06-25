@@ -34,12 +34,14 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
   let method_is_closure_body = false in
   let method_is_memoize_wrapper = false in
   let method_no_injection = true in
+  let method_static_inits = [] in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
     method_is_memoize_wrapper
     params
-    method_return_type in
+    method_return_type
+    method_static_inits in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -68,38 +70,38 @@ let from_implements ~namespace implements =
 
 let from_constant env (_hint, name, const_init) =
   (* The type hint is omitted. *)
+  let constant_name = Litstr.to_string @@ snd name in
   match const_init with
-  | None -> None (* Abstract constants are omitted *)
+  | None -> Hhas_constant.make constant_name None None
   | Some init ->
-    let constant_name = Litstr.to_string @@ snd name in
     let constant_value, initializer_instrs =
       match Ast_constant_folder.expr_to_opt_typed_value
         (Emit_env.get_namespace env) init with
       | Some v ->
-        v, None
+        Some v, None
       | None ->
-        Typed_value.Uninit,
+        Some Typed_value.Uninit,
         Some (Emit_expression.emit_expr ~need_ref:false env init) in
-    Some (Hhas_constant.make constant_name constant_value initializer_instrs)
+    Hhas_constant.make constant_name constant_value initializer_instrs
 
 let from_constants env ast_constants =
-  List.filter_map ast_constants (from_constant env)
+  List.map ast_constants (from_constant env)
 
 let from_type_constant ast_type_constant =
+  let type_constant_name = Litstr.to_string @@
+    snd ast_type_constant.A.tconst_name
+  in
   match ast_type_constant.A.tconst_type with
-  | None -> None (* Abstract type constants are omitted *)
+  | None -> Hhas_type_constant.make type_constant_name None
   | Some init ->
     (* TODO: Deal with the constraint *)
-    let type_constant_name = Litstr.to_string @@
-      snd ast_type_constant.A.tconst_name
-    in
     let type_constant_initializer =
-      Emit_type_constant.hint_to_type_constant init
+      Some (Emit_type_constant.hint_to_type_constant init)
     in
-    Some (Hhas_type_constant.make type_constant_name type_constant_initializer)
+    Hhas_type_constant.make type_constant_name type_constant_initializer
 
 let from_type_constants ast_type_constants =
-  List.filter_map ast_type_constants from_type_constant
+  List.map ast_type_constants from_type_constant
 
 let ast_methods ast_class_body =
   let mapper elt =
@@ -108,21 +110,29 @@ let ast_methods ast_class_body =
     | _ -> None in
   List.filter_map ast_class_body mapper
 
-let from_class_elt_classvars ast_class elt =
+let from_class_elt_classvars ast_class tparams namespace elt =
   match elt with
   | A.ClassVars (kind_list, type_hint, cvl) ->
-    List.map cvl (Emit_property.from_ast ast_class kind_list type_hint)
+    List.map cvl
+      (Emit_property.from_ast ast_class kind_list type_hint tparams namespace)
   | _ -> []
 
 let from_class_elt_constants ns elt =
   match elt with
   | A.Const(hint_opt, l) ->
-    List.filter_map l (fun (id, e) -> from_constant ns (hint_opt, id, Some e))
+    List.map l (fun (id, e) -> from_constant ns (hint_opt, id, Some e))
+  | A.AbsConst(hint_opt, id) -> [from_constant ns (hint_opt, id, None)]
   | _ -> []
+
+let from_class_elt_requirements ns elt =
+  match elt with
+  | A.ClassTraitRequire (kind, h) ->
+      Some (kind, (Hhbc_id.Class.to_raw_string (hint_to_class ns h)))
+  | _ -> None
 
 let from_class_elt_typeconsts elt =
   match elt with
-  | A.TypeConst tc -> from_type_constant tc
+  | A.TypeConst tc -> Some (from_type_constant tc)
   | _ -> None
 
 let from_enum_type ~namespace opt =
@@ -138,8 +148,8 @@ let from_enum_type ~namespace opt =
     Some (Hhas_type_info.make type_info_user_type type_info_type_constraint)
   | _ -> None
 
-let emit_class : A.class_ -> Hhas_class.t =
-  fun ast_class ->
+let emit_class : A.class_ * bool -> Hhas_class.t =
+  fun (ast_class, is_top) ->
   let namespace = ast_class.Ast.c_namespace in
   let class_attributes =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
@@ -258,10 +268,14 @@ let emit_class : A.class_ -> Hhas_class.t =
   in
   Label.reset_label ();
   let class_properties =
-    List.concat_map class_body (from_class_elt_classvars ast_class) in
+    List.concat_map class_body
+    (from_class_elt_classvars ast_class tparams namespace) in
   let env = Emit_env.make_class_env ast_class in
   let class_constants =
     List.concat_map class_body (from_class_elt_constants env) in
+  let class_requirements =
+    List.filter_map class_body
+      (from_class_elt_requirements namespace) in
   let pinit_methods =
     if List.exists class_properties
       (fun p -> Option.is_some (Hhas_property.initializer_instrs p)
@@ -372,6 +386,7 @@ let emit_class : A.class_ -> Hhas_class.t =
     class_is_interface
     class_is_trait
     class_is_xhp
+    is_top
     class_uses
     class_use_aliases
     class_enum_type
@@ -379,7 +394,8 @@ let emit_class : A.class_ -> Hhas_class.t =
     (class_properties @ additional_properties)
     class_constants
     class_type_constants
+    class_requirements
 
 let emit_classes_from_program ast =
   List.filter_map ast
-      (fun d -> match d with Ast.Class cd -> Some (emit_class cd) | _ -> None)
+      (fun (is_top, d) -> match d with Ast.Class cd -> Some (emit_class (cd, is_top)) | _ -> None)

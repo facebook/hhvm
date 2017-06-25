@@ -664,6 +664,14 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
   }
 
+  /*
+   * Similarly if we plan to dump hhas we will need the extended line table
+   * information in the output.
+   */
+  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+    stashExtendedLineTable(u.get(), createSourceLocTable());
+  }
+
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     auto const past = m_feTab[i].first;
     auto const fe = m_feTab[i].second;
@@ -741,6 +749,11 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_useStrictTypes)
     (m_useStrictTypesForBuiltins)
     ;
+
+  if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
+    /* May be different than the unit origin: e.g. for hhas files. */
+    sd(m_filepath);
+  }
 }
 
 
@@ -808,7 +821,9 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
                                      const std::string& name,
                                      const MD5& md5) {
-  ue.m_filepath = makeStaticString(name);
+  if (!RuntimeOption::EvalLoadFilepathFromUnitCache) {
+    ue.m_filepath = makeStaticString(name);
+  }
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {

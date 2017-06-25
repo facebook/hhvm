@@ -73,7 +73,7 @@ and emit_defs env defs =
     let i2 = emit_defs env defs in
     gather [i1; i2]
 
-let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info =
+let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info static_inits =
   let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
@@ -88,6 +88,7 @@ let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info =
     is_memoize_wrapper
     params
     return_type_info
+    static_inits
 
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
@@ -144,8 +145,9 @@ let emit_body
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in
+  let svar_map = Static_var.make_static_map body in
   let stmt_instrs =
-    rewrite_static_instrseq (Static_var.make_static_map body)
+    rewrite_static_instrseq svar_map
                     (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
   in
   let first_instruction_is_label =
@@ -169,6 +171,7 @@ let emit_body
     then instr_entrynop
     else header
   in
+  let svar_instrs = SMap.fold (fun name e lst -> (name, e)::lst) svar_map [] in
   let body_instrs = gather [
     header;
     stmt_instrs;
@@ -181,6 +184,7 @@ let emit_body
     decl_vars
     false (*is_memoize_wrapper*)
     params
-    return_type_info,
+    return_type_info
+    svar_instrs,
     is_generator,
     is_pair_generator

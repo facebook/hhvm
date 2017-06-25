@@ -15,8 +15,8 @@ open Core
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
-let emit_function : A.fun_ -> Hhas_function.t list =
-  fun ast_fun ->
+let emit_function : A.fun_ * bool -> Hhas_function.t list =
+  fun (ast_fun, is_top) ->
   let namespace = ast_fun.A.f_namespace in
   let original_id, _ =
     Hhbc_id.Function.elaborate_id namespace ast_fun.A.f_name in
@@ -55,7 +55,8 @@ let emit_function : A.fun_ -> Hhas_function.t list =
       function_body
       function_is_async
       function_is_generator
-      function_is_pair_generator in
+      function_is_pair_generator
+      is_top in
   if is_memoize
   then [normal_function;
     Emit_memoize_function.emit_wrapper_function ~original_id ~renamed_id ast_fun]
@@ -63,5 +64,5 @@ let emit_function : A.fun_ -> Hhas_function.t list =
 
 let emit_functions_from_program ast =
   List.concat_map ast
-  (fun d ->
-    match d with Ast.Fun fd -> emit_function fd | _ -> [])
+  (fun (is_top, d) ->
+    match d with Ast.Fun fd -> emit_function (fd, is_top) | _ -> [])

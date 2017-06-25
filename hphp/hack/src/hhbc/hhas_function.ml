@@ -15,6 +15,7 @@ type t = {
   function_is_async      : bool;
   function_is_generator      : bool;
   function_is_pair_generator : bool;
+  function_is_top            : bool;
 }
 
 let make
@@ -23,7 +24,8 @@ let make
   function_body
   function_is_async
   function_is_generator
-  function_is_pair_generator =
+  function_is_pair_generator
+  function_is_top =
   {
     function_attributes;
     function_name;
@@ -31,6 +33,7 @@ let make
     function_is_async;
     function_is_generator;
     function_is_pair_generator;
+    function_is_top;
   }
 
 let attributes f = f.function_attributes
@@ -39,6 +42,7 @@ let body f = f.function_body
 let is_async f = f.function_is_async
 let is_generator f = f.function_is_generator
 let is_pair_generator f = f.function_is_pair_generator
+let is_top f = f.function_is_top
 let with_name f function_name = { f with function_name }
 let with_body f function_body = { f with function_body }
 let with_is_async f function_is_async = { f with function_is_async }

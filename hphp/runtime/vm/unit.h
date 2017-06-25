@@ -177,6 +177,7 @@ using FuncTable      = std::vector<FuncEntry>;
 int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
+void stashExtendedLineTable(const Unit* unit, SourceLocTable table);
 
 const SourceLocTable& getSourceLocTable(const Unit*);
 

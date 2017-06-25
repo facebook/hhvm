@@ -341,6 +341,7 @@ let make_wrapper return_type params instrs =
     true (* is_memoize_wrapper *)
     params
     return_type
+    [] (* static_inits *)
 
 let emit ~non_null_return env info index return_type_info params is_static method_id =
   let instrs =
@@ -440,18 +441,18 @@ let make_instance_properties info ast_methods =
     if needs_guard
     then
       let property2 = Hhas_property.make true false false false false true
-        (guarded_shared_single_memoize_cache info.memoize_class_prefix) null_init None in
+        (guarded_shared_single_memoize_cache info.memoize_class_prefix) null_init None None in
       let property1 = Hhas_property.make true false false false false true
-        (guarded_shared_single_memoize_cache_guard info.memoize_class_prefix) false_init None in
+        (guarded_shared_single_memoize_cache_guard info.memoize_class_prefix) false_init None None in
       [property1; property2]
     else
       let property = Hhas_property.make true false false false false true
-        (shared_single_memoize_cache info.memoize_class_prefix) null_init None in
+        (shared_single_memoize_cache info.memoize_class_prefix) null_init None None in
       [property]
 
   | _ ->
     let property = Hhas_property.make true false false false false true
-      (shared_multi_memoize_cache info.memoize_class_prefix) empty_dict_init None in
+      (shared_multi_memoize_cache info.memoize_class_prefix) empty_dict_init None None in
     [property]
 
 let make_static_properties info ast_methods =
@@ -471,20 +472,20 @@ let make_static_properties info ast_methods =
         if needs_guard then
         let property2 = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (guarded_single_memoize_cache info.memoize_class_prefix))
-          null_init None in
+          null_init None None in
         let property1 = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (guarded_single_memoize_cache_guard info.memoize_class_prefix))
-          false_init None in
+          false_init None None in
         [property1; property2]
         else
         let property = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (single_memoize_cache info.memoize_class_prefix))
-          null_init None in
+          null_init None None in
         [property]
       else
         let property = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (multi_memoize_cache info.memoize_class_prefix))
-          empty_dict_init None in
+          empty_dict_init None None in
         [property]
     else
       [] in

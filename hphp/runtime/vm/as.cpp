@@ -60,16 +60,7 @@
  *
  * Missing features (partial list):
  *
- *   - line number information. (It might make sense to do this via
- *     something like a .line directive at some point.)
- *
- *   - non-top functions
- *
- *   - static variables in a function/method
- *
  *   - builtinType (for native funcs) field on ParamInfo
- *
- *   - typeStructure fields on type aliases, etc
  *
  *   - while class/function names can contains ':', '$', and ';',
  *     .use declarations can't handle those names because of syntax
@@ -90,6 +81,7 @@
 #include <boost/bind.hpp>
 
 #include <folly/Conv.h>
+#include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/Range.h>
 #include <folly/String.h>
@@ -201,6 +193,16 @@ struct Input {
       return false;
     }
     return true;
+  }
+  int32_t readint() {
+    std::string buf;
+    skipWhitespace();
+    if (peek() == '-') buf += (char)getc();
+    consumePred(isdigit, std::back_inserter(buf));
+    if (buf.empty() || buf == "-") {
+      throw Error(m_lineNumber, "expected integral value");
+    }
+    return folly::to<int32_t>(buf);
   }
 
   // C-style character escapes, no support for unicode escapes or
@@ -385,7 +387,8 @@ private:
   struct is_extname {
     bool operator()(int i) const {
       is_bareword is_bw;
-      return is_bw(i) || i == ':' || i == ';' || i == '#';
+      return is_bw(i) || i == ':' || i == ';' || i == '#' || i =='@' ||
+        (i >= 0x7f && i <= 0xff) /* see hphp.ll :( */;
     }
   };
 
@@ -620,10 +623,6 @@ struct AsmState {
   }
 
   void beginFpi(Offset fpushOff) {
-    if (currentStackDepth == nullptr) {
-      enterReachableRegion(0);
-    }
-
     fpiRegs.push_back(FPIReg{
       fpushOff,
       currentStackDepth,
@@ -808,6 +807,8 @@ struct AsmState {
   int maxUnnamed{-1};
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
+  std::unordered_map<uint32_t,Offset> defClsOffsets;
+  Location::Range srcLoc{-1,-1,-1,-1};
 };
 
 void StackDepth::adjust(AsmState& as, int delta) {
@@ -1356,8 +1357,19 @@ std::map<std::string,ParserFunc> opcode_parsers;
       #name                                                            \
     );                                                                 \
                                                                        \
+    /* Pretend the stack is reachable and empty, same as hphpc */      \
+    if (as.currentStackDepth == nullptr) {                             \
+      as.enterReachableRegion(0);                                      \
+    }                                                                  \
+                                                                       \
     if (isFCallStar(Op##name)) {                                       \
       as.endFpi();                                                     \
+    }                                                                  \
+                                                                       \
+    /* Other FCall* functions perform their own bounds checking. */    \
+    if (Op##name == OpFCall || Op##name == OpFCallD ||                 \
+        Op##name == OpFCallAwait) {                                    \
+      as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \
     as.ue->emitOp(Op##name);                                           \
@@ -1388,7 +1400,16 @@ std::map<std::string,ParserFunc> opcode_parsers;
       as.enforceStackDepth(1);                                         \
     }                                                                  \
                                                                        \
-    if (instrFlags(thisOpcode) & InstrFlags::TF) {                     \
+    /* Record source location. */                                      \
+    as.ue->recordSourceLocation(as.srcLoc, curOpcodeOff);              \
+                                                                       \
+    if (Op##name == OpDefCls || Op##name == OpDefClsNop) {             \
+      as.defClsOffsets.emplace(immIVA[0], curOpcodeOff);               \
+    }                                                                  \
+                                                                       \
+    /* Retain stack depth after calls to exit */                       \
+    if ((instrFlags(thisOpcode) & InstrFlags::TF) &&                   \
+        (Op##name != OpExit)) {                                        \
       as.enterUnreachableRegion();                                     \
     }                                                                  \
   }
@@ -1472,6 +1493,28 @@ String parse_long_string(AsmState& as) {
 }
 
 /*
+ * maybe-long-string-literal : long-string-literal
+ *                           |
+ *                           ;
+ */
+String parse_maybe_long_string(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::vector<char> buffer;
+  if (!as.in.readLongString(buffer)) {
+    return StrNR(staticEmptyString());
+  }
+  if (buffer.empty()) {
+    return StrNR(staticEmptyString());
+  }
+
+  // String wants a null, and dereferences one past the size we give
+  // it.
+  buffer.push_back('\0');
+  return String(&buffer[0], buffer.size() - 1, CopyString);
+}
+
+/*
  * php-serialized : long-string-literal
  *                ;
  *
@@ -1483,6 +1526,16 @@ String parse_long_string(AsmState& as) {
  */
 Variant parse_php_serialized(AsmState& as) {
   return unserialize_from_string(parse_long_string(as));
+}
+
+/*
+ * maybe-php-serialized : maybe-long-string-literal
+ *                      ;
+ */
+Variant parse_maybe_php_serialized(AsmState& as) {
+  auto s = parse_maybe_long_string(as);
+  if (!s.empty()) return unserialize_from_string(s);
+  return Variant();
 }
 
 /*
@@ -1639,17 +1692,79 @@ void parse_try_catch(AsmState& as, int nestLevel) {
 }
 
 /*
+ * directive-srcloc : line_no ':' chr_no ',' line_no ':' chr_no ';'
+ *                  ;
+ * line_no : integer
+ *         ;
+ * chr_no  : integer
+ *         ;
+ *
+ * Record that subsequent bytecodes are at the source location indicated by the
+ * range of inline numbers and character positions specified.
+ */
+void parse_srcloc(AsmState& as, int nestLevel) {
+  auto const line0 = as.in.readint();
+  as.in.expectWs(':');
+  auto const char0 = as.in.readint();
+  as.in.expectWs(',');
+  auto const line1 = as.in.readint();
+  as.in.expectWs(':');
+  auto const char1 = as.in.readint();
+  as.in.expectWs(';');
+
+  as.srcLoc = Location::Range(line0, char0, line1, char1);
+}
+
+/*
+ * directive-static : '$' local_name = long-string-literal ';'
+ *                  ;
+ *
+ * Record that the function contains a static named local_name along with an
+ * associated initializer.
+ */
+void parse_static(AsmState& as) {
+  Func::SVInfo svInfo;
+  std::string name;
+  String init;
+
+  as.in.expectWs('$');
+  if (!as.in.readname(name)) {
+    as.error("Statics must be named");
+  }
+  as.in.expectWs('=');
+  svInfo.phpCode = makeStaticString(parse_long_string(as));
+  svInfo.name = makeStaticString(name);
+  as.fe->staticVars.push_back(svInfo);
+
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-doccomment : long-string-literal ';'
+ *                      ;
+ *
+ */
+void parse_func_doccomment(AsmState& as) {
+  auto const doc = parse_long_string(as);
+  as.in.expectWs(';');
+
+  as.fe->docComment = makeStaticString(doc);
+}
+
+/*
  * function-body :  fbody-line* '}'
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
-              |  ".numclsrefslots" directive-numclsrefslots
+ *            |  ".numclsrefslots" directive-numclsrefslots
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
  *            |  ".try" directive-try-catch
  *            |  ".ismemoizewrapper"
  *            |  ".dyncallwrapper" string-literal
+ *            |  ".srcloc" directive-srcloc
+ *            |  ".doc" directive-doccomment
  *            |  label-name
  *            |  opcode-line
  *            ;
@@ -1692,6 +1807,9 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
+      if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
+      if (word == ".static") { parse_static(as); continue; }
+      if (word == ".doc") { parse_func_doccomment(as); continue; }
       as.error("unrecognized directive `" + word + "' in function");
     }
     if (as.in.peek() == ':') {
@@ -1750,7 +1868,8 @@ void parse_user_attribute(AsmState& as,
  * if attributeMap is non null.
  */
 Attr parse_attribute_list(AsmState& as, AttrContext ctx,
-                          UserAttributeMap *userAttrs = nullptr) {
+                          UserAttributeMap *userAttrs = nullptr,
+                          bool* isTop = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
@@ -1774,6 +1893,10 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     auto const abit = string_to_attr(ctx, word);
     if (abit) {
       ret |= *abit;
+      continue;
+    }
+    if (isTop && word == "nontop") {
+      *isTop = false;
       continue;
     }
 
@@ -1851,10 +1974,6 @@ void parse_parameter_list(AsmState& as) {
   if (as.in.peek() != '(') return;
   as.in.getc();
 
-  // Once we see one dv-initializer, every parameter after that must
-  // have a dv-initializer.
-  bool inDVInits = false;
-
   bool seenVariadic = false;
 
   for (;;) {
@@ -1880,17 +1999,12 @@ void parse_parameter_list(AsmState& as) {
       as.fe->attrs |= AttrVariadicParam;
     }
 
-    if (!seenVariadic) {
-      std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    }
+    std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
 
     as.in.skipWhitespace();
     ch = as.in.getc();
 
     if (ch == '&') {
-      if (seenVariadic) {
-        as.error("variadic parameter cannot be by-ref");
-      }
       param.byRef = true;
       ch = as.in.getc();
     }
@@ -1905,8 +2019,6 @@ void parse_parameter_list(AsmState& as) {
     as.in.skipWhitespace();
     ch = as.in.getc();
     if (ch == '=') {
-      inDVInits = true;
-
       if (seenVariadic) {
         as.error("variadic parameter cannot have dv-initializer");
       }
@@ -1940,11 +2052,6 @@ void parse_parameter_list(AsmState& as) {
         as.in.skipWhitespace();
         ch = as.in.getc();
       }
-    } else {
-      if (inDVInits && !seenVariadic) {
-        as.error("all parameters after the first with a dv-initializer "
-                 "must have a dv-initializer");
-      }
     }
 
     as.fe->appendParam(makeStaticString(name), param);
@@ -1976,8 +2083,25 @@ void parse_function_flags(AsmState& as) {
 }
 
 /*
- * directive-function : attribute-list identifier parameter-list function-flags
- *                        '{' function-body
+ * line-range : "(" integer "," integer ")"
+ *            ;
+ */
+std::pair<int,int> parse_line_range(AsmState& as) {
+  as.in.skipWhitespace();
+  if (as.in.peek() != '(') {
+    return std::make_pair(as.in.getLineNumber(), as.in.getLineNumber() + 1);
+  }
+  as.in.getc();
+  int line0 = as.in.readint();
+  as.in.expectWs(',');
+  int line1 = as.in.readint();
+  as.in.expectWs(')');
+  return std::make_pair(line0, line1);
+}
+
+/*
+ * directive-function : attribute-list ?line-range type-info identifier
+ *                      parameter-list function-flags '{' function-body
  *                    ;
  */
 void parse_function(AsmState& as) {
@@ -1985,8 +2109,17 @@ void parse_function(AsmState& as) {
     as.error(".function blocks must all follow the .main block");
   }
 
+  as.in.skipWhitespace();
+
+  bool isTop = true;
+
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
+  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs, &isTop);
+
+  int line0;
+  int line1;
+  std::tie(line0, line1) = parse_line_range(as);
+
   auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
@@ -1994,8 +2127,7 @@ void parse_function(AsmState& as) {
   }
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
-  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
-              as.ue->bcPos(), attrs, true, 0);
+  as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
@@ -2004,12 +2136,13 @@ void parse_function(AsmState& as) {
 
   as.in.expectWs('{');
 
+  as.srcLoc = Location::Range{-1,-1,-1,-1};
   parse_function_body(as);
 }
 
 /*
- * directive-method : attribute-list identifier parameter-list function-flags
- *                      '{' function-body
+ * directive-method : attribute-list ?line-range type-info identifier
+ *                      parameter-list function-flags '{' function-body
  *                  ;
  */
 void parse_method(AsmState& as) {
@@ -2017,6 +2150,11 @@ void parse_method(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
+
+  int line0;
+  int line1;
+  std::tie(line0, line1) = parse_line_range(as);
+
   auto typeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
@@ -2025,7 +2163,7 @@ void parse_method(AsmState& as) {
 
   as.fe = as.ue->newMethodEmitter(makeStaticString(name), as.pce);
   as.pce->addMethod(as.fe);
-  as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
+  as.fe->init(line0, line1,
               as.ue->bcPos(), attrs, false, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
@@ -2035,6 +2173,7 @@ void parse_method(AsmState& as) {
 
   as.in.expectWs('{');
 
+  as.srcLoc = Location::Range{-1,-1,-1,-1};
   parse_function_body(as);
 }
 
@@ -2073,19 +2212,15 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     } else if (isArrayType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
       tvInit.m_type = KindOfPersistentArray;
-      as.ue->mergeArray(tvInit.m_data.parr);
     } else if (isVecType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
       tvInit.m_type = KindOfPersistentVec;
-      as.ue->mergeArray(tvInit.m_data.parr);
     } else if (isDictType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
       tvInit.m_type = KindOfPersistentDict;
-      as.ue->mergeArray(tvInit.m_data.parr);
     } else if (isKeysetType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
       tvInit.m_type = KindOfPersistentKeyset;
-      as.ue->mergeArray(tvInit.m_data.parr);
     } else if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
     } else if (tvInit.m_type == KindOfResource) {
@@ -2102,14 +2237,21 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
 }
 
 /*
- * directive-property : attribute-list identifier member-tv-initializer
+ * directive-property : attribute-list maybe-long-string-literal type-info
+ *                      identifier member-tv-initializer
  *                    ;
  *
+ * Define a property with an associated type and heredoc.
  */
 void parse_property(AsmState& as) {
   as.in.skipWhitespace();
 
   Attr attrs = parse_attribute_list(as, AttrContext::Prop);
+
+  auto const heredoc = makeStaticString(parse_maybe_long_string(as));
+  auto const userTy = parse_type_info(as, false).first;
+  auto const userTyStr = userTy ? userTy : staticEmptyString();
+
   std::string name;
   if (!as.in.readword(name)) {
     as.error("expected name for property");
@@ -2117,8 +2259,9 @@ void parse_property(AsmState& as) {
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addProperty(makeStaticString(name),
-                      attrs, staticEmptyString(),
-                      staticEmptyString(),
+                      attrs,
+                      userTyStr,
+                      heredoc,
                       &tvInit,
                       RepoAuthType{});
 }
@@ -2128,6 +2271,7 @@ void parse_property(AsmState& as) {
  *                 ;
  *
  * directive-const : identifier const-flags member-tv-initializer
+ *                 | identifier const-flags ';'
  *                 ;
  */
 void parse_constant(AsmState& as) {
@@ -2139,6 +2283,16 @@ void parse_constant(AsmState& as) {
   }
 
   bool isType = as.in.tryConsume("isType");
+  as.in.skipWhitespace();
+
+  if (as.in.peek() == ';') {
+    as.in.getc();
+    as.pce->addAbstractConstant(makeStaticString(name),
+                                staticEmptyString(),
+                                isType);
+    return;
+  }
+
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
@@ -2284,6 +2438,46 @@ void parse_enum_ty(AsmState& as) {
 }
 
 /*
+ * directive-require : 'extends' '<' indentifier '>' ';'
+ *                   | 'implements' '<' indentifier '>' ';'
+ *                   ;
+ *
+ */
+void parse_require(AsmState& as) {
+  as.in.skipWhitespace();
+
+  bool extends = as.in.tryConsume("extends");
+  if (!extends && !as.in.tryConsume("implements")) {
+    as.error(".require should be extends or implements");
+  }
+
+  as.in.expectWs('<');
+  std::string name;
+  if (!as.in.readname(name)) {
+    as.error(".require expects a class or interface name");
+  }
+  as.in.expectWs('>');
+
+  as.pce->addClassRequirement(PreClass::ClassRequirement(
+    makeStaticString(name), extends
+  ));
+
+  as.in.expectWs(';');
+}
+
+/*
+ * directive-doccomment : long-string-literal ';'
+ *                      ;
+ *
+ */
+void parse_cls_doccomment(AsmState& as) {
+  auto const doc = parse_long_string(as);
+  as.in.expectWs(';');
+
+  as.pce->setDocComment(makeStaticString(doc));
+}
+
+/*
  * class-body : class-body-line* '}'
  *            ;
  *
@@ -2293,6 +2487,8 @@ void parse_enum_ty(AsmState& as) {
  *                 | ".use"          directive-use
  *                 | ".default_ctor" directive-default-ctor
  *                 | ".enum_ty"      directive-enum-ty
+ *                 | ".require"      directive-require
+ *                 | ".doc"          directive-doccomment
  *                 ;
  */
 void parse_class_body(AsmState& as) {
@@ -2302,12 +2498,14 @@ void parse_class_body(AsmState& as) {
 
   std::string directive;
   while (as.in.readword(directive)) {
-    if (directive == ".method")       { parse_method(as);       continue; }
-    if (directive == ".property")     { parse_property(as);     continue; }
-    if (directive == ".const")        { parse_constant(as);     continue; }
-    if (directive == ".use")          { parse_use(as);          continue; }
-    if (directive == ".default_ctor") { parse_default_ctor(as); continue; }
-    if (directive == ".enum_ty")      { parse_enum_ty(as);      continue; }
+    if (directive == ".method")       { parse_method(as);         continue; }
+    if (directive == ".property")     { parse_property(as);       continue; }
+    if (directive == ".const")        { parse_constant(as);       continue; }
+    if (directive == ".use")          { parse_use(as);            continue; }
+    if (directive == ".default_ctor") { parse_default_ctor(as);   continue; }
+    if (directive == ".enum_ty")      { parse_enum_ty(as);        continue; }
+    if (directive == ".require")      { parse_require(as);        continue; }
+    if (directive == ".doc")          { parse_cls_doccomment(as); continue; }
 
     as.error("unrecognized directive `" + directive + "' in class");
   }
@@ -2341,8 +2539,8 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
 }
 
 /*
- * directive-class : attribute-list identifier extension-clause
- *                      implements-clause '{' class-body
+ * directive-class : ?"top" attribute-list identifier ?line-range
+ *                      extension-clause implements-clause '{' class-body
  *                 ;
  *
  * extension-clause : empty
@@ -2357,12 +2555,18 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
 void parse_class(AsmState& as) {
   as.in.skipWhitespace();
 
+  bool isTop = true;
+
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
+  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
   }
+
+  int line0;
+  int line1;
+  std::tie(line0, line1) = parse_line_range(as);
 
   std::string parentName;
   if (as.in.tryConsume("extends")) {
@@ -2381,10 +2585,13 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
+  auto off = folly::get_default(as.defClsOffsets, as.ue->numPreClasses(),
+                                as.ue->bcPos());
+
   as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
-  as.pce->init(as.in.getLineNumber(),
-               as.in.getLineNumber() + 1, // XXX
-               as.ue->bcPos(),
+  as.pce->init(line0,
+               line1,
+               off,
                attrs,
                makeStaticString(parentName),
                staticEmptyString());
@@ -2396,7 +2603,10 @@ void parse_class(AsmState& as) {
   as.in.expectWs('{');
   parse_class_body(as);
 
-  as.pce->setHoistable(compute_hoistable(as, name, parentName));
+  as.pce->setHoistable(
+    isTop ? compute_hoistable(as, name, parentName) : PreClass::NotHoistable
+  );
+
   as.finishClass();
 }
 
@@ -2411,7 +2621,7 @@ void parse_filepath(AsmState& as) {
 }
 
 /*
- * directive-main : '{' function-body
+ * directive-main : ?line-range '{' function-body
  *                ;
  */
 void parse_main(AsmState& as) {
@@ -2422,12 +2632,17 @@ void parse_main(AsmState& as) {
       as.error("Multiple .main directives found");
     }
   }
+
+  int line0;
+  int line1;
+  std::tie(line0, line1) = parse_line_range(as);
+
   as.in.expectWs('{');
 
-  as.ue->initMain(as.in.getLineNumber(),
-                  as.in.getLineNumber() + 1 /* XXX */);
+  as.ue->initMain(line0, line1);
   as.fe = as.ue->getMain();
   as.emittedPseudoMain = true;
+  as.srcLoc = Location::Range{-1,-1,-1,-1};
   parse_function_body(as);
 }
 
@@ -2459,13 +2674,17 @@ void parse_adata(AsmState& as) {
 }
 
 /*
- * directive-alias :  attribute-list identifier '=' type-constraint ';'
+ * directive-alias :  attribute-list identifier '=' type-constraint
+ *                    maybe-php-serialized ';'
  *                 ;
  *
  * We represent alias type information using the syntax for
  * TypeConstraints. We populate the name and nullable field of the
  * alias directly from the specified type constraint and derive the
  * AnnotType from the compute AnnotType in the constraint.
+ *
+ * Following the type-constraint we encode the serialized type structure
+ * corresponding to this alias.
  */
 void parse_alias(AsmState& as) {
   as.in.skipWhitespace();
@@ -2478,6 +2697,11 @@ void parse_alias(AsmState& as) {
   as.in.expectWs('=');
 
   TypeConstraint ty = parse_type_constraint(as);
+  Variant ts = parse_maybe_php_serialized(as);
+
+  if (ts.isInitialized() && !ts.isArray()) {
+    as.error(".alias must have an array type structure");
+  }
 
   const StringData* typeName = ty.typeName();
   if (!typeName) typeName = makeStaticString("");
@@ -2490,9 +2714,12 @@ void parse_alias(AsmState& as) {
   TypeAlias record;
   record.name = sname;
   record.value = typeName;
-  record.type = ty.type();
+  record.type = typeName->empty() ? AnnotType::Mixed : ty.type();
   record.nullable = (ty.flags() & TypeConstraint::Nullable) != 0;
   record.attrs = attrs;
+  if (ts.isInitialized()) {
+    record.typeStructure = ArrNR(ArrayData::GetScalarArray(ts.toArray().get()));
+  }
   as.ue->addTypeAlias(record);
 
   as.in.expectWs(';');
@@ -2581,7 +2808,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
                          !RuntimeOption::PHP7_ScalarTypes;
 
   try {
-    std::istringstream instr(std::string(code, codeLen));
+    auto const mode = std::istringstream::binary | std::istringstream::in;
+    std::istringstream instr(std::string(code, codeLen), mode);
     AsmState as(instr);
     as.ue = ue.get();
     parse(as);
@@ -2596,7 +2824,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
 AsmResult assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
                          int incomingStackDepth,
                          const std::string& expr) {
-  std::stringstream sstr(expr + '}');
+  auto const mode = std::istringstream::binary | std::istringstream::in;
+  std::stringstream sstr(expr + '}', mode);
   AsmState as(sstr);
   as.ue = &ue;
   as.fe = fe;

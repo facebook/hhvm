@@ -530,6 +530,13 @@ void stashLineTable(const Unit* unit, LineTable table) {
   }
 }
 
+void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, unit)) {
+    acc->second.sourceLocTable = std::move(table);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 

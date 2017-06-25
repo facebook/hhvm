@@ -731,7 +731,8 @@ public:
     return m_ue.bcPos() == m_curFunc->base ||
            isJumpTarget(m_ue.bcPos()) ||
            (m_prevOpcode.hasValue() &&
-            (instrFlags(m_prevOpcode.value()) & TF) == 0);
+            ((instrFlags(m_prevOpcode.value()) & TF) == 0 ||
+             m_prevOpcode.value() == OpExit));
   }
   FuncEmitter* getFuncEmitter() { return m_curFunc; }
   Id getStateLocal() {
@@ -6121,7 +6122,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     TypedValue uninit;
     tvWriteUninit(&uninit);
     for (auto& useVar : useVars) {
-      pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
+      pce->addProperty(useVar.first, AttrPrivate, staticEmptyString(), nullptr,
                        &uninit, RepoAuthType{});
     }
 
@@ -8182,7 +8183,7 @@ void EmitterVisitor::emitPostponedMeths() {
       for (auto& sv : m_curFunc->staticVars) {
         auto const str = makeStaticString(
           folly::format("86static_{}", sv.name->data()).str());
-        fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
+        fe->pce()->addProperty(str, AttrPrivate, staticEmptyString(), nullptr,
                                &uninit, RepoAuthType{});
       }
     }
@@ -8764,7 +8765,7 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
     Attr attrs = AttrPrivate | AttrNoSerialize;
     attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
     pce->addProperty(
-      name, attrs, nullptr, nullptr, &val, RepoAuthType{}
+      name, attrs, staticEmptyString(), nullptr, &val, RepoAuthType{}
     );
     return name;
   };

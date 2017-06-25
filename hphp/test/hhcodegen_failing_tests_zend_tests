@@ -1,7 +1,6 @@
 zend/good/tests/basic/006.php
 zend/good/tests/basic/007.php
 zend/good/tests/basic/009.php
-zend/good/tests/classes/__call_001.php
 zend/good/tests/classes/__call_002.php
 zend/good/tests/classes/__call_006.php
 zend/good/tests/classes/__set__get_001.php
@@ -123,6 +122,7 @@ zend/good/tests/lang/bug24054.php
 zend/good/tests/lang/bug24403.php
 zend/good/tests/lang/bug24658.php
 zend/good/tests/lang/bug26696.php
+zend/good/tests/lang/bug26869.php
 zend/good/tests/lang/bug27354.php
 zend/good/tests/lang/bug27535.php
 zend/good/tests/lang/bug28800.php

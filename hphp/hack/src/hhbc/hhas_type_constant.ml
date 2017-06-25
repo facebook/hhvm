@@ -10,7 +10,7 @@
 
 type t = {
   type_constant_name         : Litstr.id;
-  type_constant_initializer  : Typed_value.t;
+  type_constant_initializer  : Typed_value.t option;
   (* TODO: constraint? *)
 }
 

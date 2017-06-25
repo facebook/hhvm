@@ -14,6 +14,7 @@ val make_body:
   bool ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
+  (string * Ast.expr option) list ->
   Hhas_body.t
 
 val emit_body:

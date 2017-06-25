@@ -37,8 +37,8 @@ and aexpr_requires_deep_init aexpr =
   | A.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
-let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
-  (* TODO: Deal with type hint *)
+let from_ast ast_class cv_kind_list type_hint tparams namespace
+             (_, (_, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
@@ -55,6 +55,12 @@ let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) 
     ("Class " ^ Utils.strip_ns (snd ast_class.Ast.c_name) ^
       " contains non-static property declaration"
      ^ " and therefore cannot be declared 'abstract final'");
+  let tinfo =
+    match type_hint with
+    | Some hint -> Some (Emit_type_hint.hint_to_type_info
+       ~return:false ~skipawaitable:false ~nullable:false ~always_extended:false
+       ~namespace ~tparams hint)
+    | None -> None in
   let env = Emit_env.make_class_env ast_class in
   let initial_value, is_deep_init, initializer_instrs =
     match initial_value with
@@ -101,3 +107,4 @@ let from_ast ast_class cv_kind_list _type_hint (_, (_, cv_name), initial_value) 
     pid
     initial_value
     initializer_instrs
+    tinfo

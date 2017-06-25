@@ -173,6 +173,8 @@ struct PreClassEmitter {
   const StringData* docComment() const { return m_docComment; }
   const StringData* parentName() const { return m_parent; }
 
+  void setDocComment(const StringData* sd) { m_docComment = sd; }
+
   void addInterface(const StringData* n);
   const std::vector<LowStringPtr>& interfaces() const {
     return m_interfaces;

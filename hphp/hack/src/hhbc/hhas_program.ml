@@ -83,6 +83,7 @@ let emit_fatal_program ~ignore_message op message =
     false (*is_memoize_wrapper*)
     [] (* params *)
     None (* return_type_info *)
+    [] (* static_inits static_inits  *)
   in
     make [] [] [] [] body
 
@@ -91,10 +92,11 @@ let from_ast ast =
     (* Convert closures to top-level classes;
      * also hoist inner classes and functions *)
     let closed_ast = convert_toplevel_prog ast in
-    let compiled_defs = emit_main closed_ast in
+    let flat_closed_ast = List.map (fun (_, y) -> y) closed_ast in
+    let compiled_defs = emit_main flat_closed_ast in
     let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
     let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
-    let compiled_typedefs = Emit_typedef.emit_typedefs_from_program closed_ast in
+    let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
     let adata = Emit_adata.get_adata () in
     make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
   with Emit_fatal.IncludeTimeFatalException (op, message) ->

@@ -11,4 +11,4 @@
 (* Convert entire program *)
 val convert_toplevel_prog :
   Ast.program ->
-  Ast.program
+  (bool * Ast.def) list

@@ -463,6 +463,9 @@ struct RuntimeOption {
   F(int, JitLdimmqSpan,                8)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
+  F(bool, DisassemblerSourceMapping,   true)                            \
+  F(bool, DisassemblerDocComments,     true)                            \
+  F(bool, LoadFilepathFromUnitCache,   false)                           \
   /* Whether to use hh_single_compile by default if available. */       \
   F(bool, HackCompilerDefault,         false)                           \
   /* The command to invoke to spawn hh_single_compile in server mode. */\

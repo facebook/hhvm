@@ -647,6 +647,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalHackCompilerVerify ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
+    + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces();
   return string_md5(t);

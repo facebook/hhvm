@@ -65,10 +65,6 @@ let rec emit_stmt env st =
       ], []))
       ->
     empty
-  | A.Expr (_, A.Id (_, "exit")) -> emit_exit env None
-  | A.Expr (_, A.Call ((_, A.Id (_, "exit")), args, []))
-    when List.length args = 0 || List.length args = 1 ->
-    emit_exit env (List.hd args)
   | A.Expr expr ->
     emit_ignored_expr env expr
   | A.Return (_, None) ->
@@ -733,9 +729,7 @@ let emit_dropthrough_return () =
 let rec emit_final_statement env s =
   match s with
   | A.Throw _ | A.Return _ | A.Goto _
-  | A.Expr (_, A.Yield_break)
-  | A.Expr (_, A.Call ((_, A.Id (_, "exit")), _, _))
-  | A.Expr (_, A.Id (_, "exit")) ->
+  | A.Expr (_, A.Yield_break) ->
     emit_stmt env s
   | A.Block b ->
     emit_final_statements env b

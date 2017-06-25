@@ -122,6 +122,7 @@ let make_wrapper_body return_type params instrs =
     true (* is_memoize_wrapper *)
     params
     return_type
+    [] (* static_inits: this is intentionally empty *)
 
 let emit_wrapper_function ~original_id ~renamed_id ast_fun =
   if ast_fun.Ast.f_ret_by_ref
@@ -152,4 +153,4 @@ let emit_wrapper_function ~original_id ~renamed_id ast_fun =
     function_attributes
     original_id
     memoized_body
-    false false false
+    false false false true

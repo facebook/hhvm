@@ -1683,7 +1683,14 @@ static int execute_program_impl(int argc, char** argv) {
       std::cerr << "Nothing to do. Pass a php file to compile.\n";
       return 1;
     }
-    auto const file = po.file.empty() ? po.args[0].c_str() : po.file.c_str();
+
+    auto const file = [] (std::string file) -> std::string {
+      if (!FileUtil::isAbsolutePath(file)) {
+        return SourceRootInfo::GetCurrentSourceRoot() + std::move(file);
+      }
+      return file;
+    }(po.file.empty() ? po.args[0] : po.file);
+
     RuntimeOption::RepoCommit = false; // avoid initializing a repo
 
     std::fstream fs(file, std::ios::in);
@@ -1708,7 +1715,8 @@ static int execute_program_impl(int argc, char** argv) {
     else RuntimeOption::EvalVerifyOnly = true;
     SystemLib::s_inited = true;
 
-    auto compiled = compile_file(str.c_str(), str.size(), md5, file, nullptr);
+    auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
+                                 nullptr);
 
     if (po.mode == "verify") {
       return 0;

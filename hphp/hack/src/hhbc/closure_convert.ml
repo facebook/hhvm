@@ -601,36 +601,36 @@ and convert_defs env class_count typedef_count st dl =
   | Fun fd :: dl ->
     let st, fd = convert_fun env st fd in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, Fun fd :: dl
+    st, (true, Fun fd) :: dl
     (* Convert a top-level class definition into a true class definition and
      * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
     let st, cd = convert_class env st cd in
     let stub_class = make_defcls cd class_count in
     let st, dl = convert_defs env (class_count + 1) typedef_count st dl in
-    st, Class cd :: Stmt (Def_inline (Class stub_class)) :: dl
+    st, (true, Class cd) :: (true, Stmt (Def_inline (Class stub_class))) :: dl
   | Stmt stmt :: dl ->
     let st, stmt = convert_stmt env st stmt in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, Stmt stmt :: dl
+    st, (true, Stmt stmt) :: dl
   | Typedef td :: dl ->
     let st, dl = convert_defs env class_count (typedef_count + 1) st dl in
     let stub_td = { td with t_id =
       (fst td.t_id, string_of_int (typedef_count)) } in
-    st, Typedef td :: Stmt (Def_inline (Typedef stub_td)) :: dl
+    st, (true, Typedef td) :: (true, Stmt (Def_inline (Typedef stub_td))) :: dl
   | Constant c :: dl ->
     let st, c = convert_gconst env st c in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, Constant c :: dl
+    st, (true, Constant c) :: dl
   | Namespace(_id, dl) :: dl' ->
     convert_defs env class_count typedef_count st (dl @ dl')
   | NamespaceUse x :: dl ->
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, NamespaceUse x :: dl
+    st, (true, NamespaceUse x) :: dl
   | SetNamespaceEnv ns :: dl ->
     let st = set_namespace st ns in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, SetNamespaceEnv ns :: dl
+    st, (true, SetNamespaceEnv ns) :: dl
 
 let count_classes defs =
   List.count defs ~f:(function Class _ -> true | _ -> false)
@@ -658,6 +658,6 @@ let convert_toplevel_prog defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 in
   let st, p = convert_defs env 0 0 initial_state defs in
-  let fun_defs = List.rev_map st.hoisted_functions (fun fd -> Fun fd) in
-  let class_defs = List.rev_map st.hoisted_classes (fun cd -> Class cd) in
+  let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
+  let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
   fun_defs @ p @ class_defs

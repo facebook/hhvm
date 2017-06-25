@@ -59,14 +59,14 @@ decl:
 ;
 aliasdecl:
     | ALIASDIRECTIVE ID EQUALS aliastypeinfo SEMI nl
-      {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4}
+      {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4 None}
 ;
 maindecl:
     | MAINDIRECTIVE LBRACE nl numiters numclsrefslots declvars nl functionbody RBRACE nl
       {Hhas_body.make $8(*instrs*)
         $6(*declvars*) $4(*numiters*)
         $5(*numclsrefslots*) false(*ismemoizewrapper*)
-        [](*params*) None(*return type*)}
+        [](*params*) None(*return type*) [](*static_inits*)}
 ;
 numiters:
     | /* empty */ {0}
@@ -89,10 +89,10 @@ fundecl:
              $12(*declvars*)
              $9 (*numiters*) $11 (*numclsrefslots *)
              $10 (*ismemoizewrapper*)
-             $5(*params*) $3(*typeinfo*))
+             $5(*params*) $3(*typeinfo*) [](*static_inits*))
             (isasync $6)
             (isgenerator $6)
-            (ispairgenerator $6)  }
+            (ispairgenerator $6) true }
 ;
 nl:
     | /* empty */ {()}
@@ -165,10 +165,12 @@ classdecl:
         (List.mem "interface" (snd $2))(*isinterface*)
         (List.mem "trait" (snd $2))(*istrait*)
         false(*isxhp*)
+        true(*istop*)
         (fst $7)(*uses*)
         (snd $7)(*use_alises*)
         $8(*enumtype*)
-        $11(*methods*) $10(*properties*) (fst $9) (*constants*) (snd $9)(*typeconstants*)}
+        $11(*methods*) $10(*properties*) (fst $9) (*constants*) (snd $9)(*typeconstants*)
+        [] (* requirements *) }
 ;
 methods:
  | /* empty */ {[]}
@@ -199,6 +201,7 @@ methoddecl:
       $10 (* ismemoizewrapper *)
       $5 (* params *)
       $3 (* return type *)
+      [] (* static_inits *)
       )
     (List.mem "isAsync" $6)
     (List.mem "isGenerator" $6)
@@ -230,6 +233,7 @@ classproperty:
     (Hhbc_id.Prop.from_raw_string $3) (*name *)
     $6 (*initial value *)
     None (* initializer instructions. already been emitted elsewhere *)
+    None (* type_info *)
   }
 ;
 propertyattributes:
@@ -244,17 +248,17 @@ propertyvalue:
 classtypeconstants:
   | /* empty */ {([],[])}
   | CONSTDIRECTIVE ID EQUALS TRIPLEQUOTEDSTRING SEMI nl classtypeconstants
-     {( (Hhas_constant.make $2 (attribute_from_string $4) None) :: (fst $7),
+     {( (Hhas_constant.make $2 (Some (attribute_from_string $4)) None) :: (fst $7),
         snd $7)}
   | CONSTDIRECTIVE ID EQUALS ID SEMI nl classtypeconstants
      {if $4="uninit" then
-     ( (Hhas_constant.make $2 Typed_value.Uninit None) :: (fst $7),
+     ( (Hhas_constant.make $2 (Some Typed_value.Uninit) None) :: (fst $7),
        snd $7)
       else report_error "bad class constant"}
   | CONSTDIRECTIVE ID ID EQUALS TRIPLEQUOTEDSTRING SEMI nl classtypeconstants
     {if $3 = "isType" then
      (fst $8,
-      (Hhas_type_constant.make $2 (attribute_from_string $5)) :: (snd $8))
+      (Hhas_type_constant.make $2 (Some (attribute_from_string $5))) :: (snd $8))
      else report_error "expected type constant"}
 classconstants:
   | /* empty */ {[]}
@@ -262,9 +266,9 @@ classconstants:
 ;
 classconstant:
   | CONSTDIRECTIVE ID EQUALS TRIPLEQUOTEDSTRING SEMI
-     {Hhas_constant.make $2 (attribute_from_string $4) None}
+     {Hhas_constant.make $2 (Some (attribute_from_string $4)) None}
   | CONSTDIRECTIVE ID EQUALS ID SEMI
-     {if $4="uninit" then Hhas_constant.make $2 Typed_value.Uninit None
+     {if $4="uninit" then Hhas_constant.make $2 (Some Typed_value.Uninit) None
       else report_error "bad class constant"}
 ;
 typeconstants:
@@ -274,7 +278,7 @@ typeconstants:
 typeconstant:
   | CONSTDIRECTIVE ID ID EQUALS TRIPLEQUOTEDSTRING SEMI
     {if $3 = "isType" then
-     Hhas_type_constant.make $2 (attribute_from_string $5)
+     Hhas_type_constant.make $2 (Some (attribute_from_string $5))
      else report_error "expected type constant"}
 ;
 classenumty:

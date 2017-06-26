@@ -160,11 +160,21 @@ let process_changes changes env =
   | Watchman_unavailable ->
     Hh_logger.log "Watchman unavailable. Exiting";
     exit 1
-  | Watchman_pushed (State_enter (name, _)) ->
+  | Watchman_pushed (State_enter (name, json)) ->
     Hh_logger.log "State_enter %s" name;
+    let (>>=) = Option.(>>=) in
+    let (>>|) = Option.(>>|) in
+    ignore (json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev -> begin
+      Hh_logger.log "Revision: %s" hg_rev
+    end);
     { env with state = Entering_to name; }
-  | Watchman_pushed (State_leave (name, _)) ->
+  | Watchman_pushed (State_leave (name, json)) ->
     Hh_logger.log "State_leave %s" name;
+    let (>>=) = Option.(>>=) in
+    let (>>|) = Option.(>>|) in
+    ignore (json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev -> begin
+      Hh_logger.log "Revision: %s" hg_rev
+    end);
     let env = { env with state = Left_at name; } in
     let () = notify_waiting_clients env in
     env

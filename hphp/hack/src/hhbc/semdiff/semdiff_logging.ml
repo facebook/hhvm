@@ -20,4 +20,4 @@ let error ~level ?(newline = true) s =
   print ~level ~newline ~channel:stderr s
 
 let debug ?(newline = true) s =
-  print ~level:2 ~newline ~channel:stderr s
+  print ~level:2 ~newline ~channel:stdout s

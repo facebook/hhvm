@@ -571,6 +571,7 @@ class virtual ['self] map =
       | Return (c0, c1) -> self#on_Return env c0 c1
       | GotoLabel c0 -> self#on_GotoLabel env c0
       | Goto c0 -> self#on_Goto env c0
+      | Markup (c0, c1) -> self#on_Markup env c0 c1
       | Static_var c0 -> self#on_Static_var env c0
       | Global_var c0 -> self#on_Global_var env c0
       | If (c0, c1, c2) -> self#on_If env c0 c1 c2
@@ -733,6 +734,10 @@ class virtual ['self] map =
     method on_Goto env c0 =
       let r0 = self#on_pstring env c0 in
       Goto r0
+    method on_Markup env c0 c1 =
+      let r0 = self#on_pstring env c0 in
+      let r1 = self#on_option self#on_expr env c1 in
+      Markup (r0, r1)
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env c0

@@ -1195,16 +1195,16 @@ and pStmt : stmt parser = fun node env ->
 
 and pMarkup node env =
   match syntax node with
-  | MarkupSection { markup_expression; _ } ->
-    begin match syntax markup_expression with
-    | Missing ->
-      (*TODO: properly lower markup sections *)
-      Noop
-    | ExpressionStatement {
-        expression_statement_expression = e
-      ; _} -> Expr (pExpr e env)
-    | _ -> failwith "expression expected"
-    end
+  | MarkupSection { markup_text; markup_expression; _ } ->
+    let expr =
+      match syntax markup_expression with
+      | Missing -> None
+      | ExpressionStatement {
+          expression_statement_expression = e
+        ; _} -> Some (pExpr e env)
+      | _ -> failwith "expression expected"
+    in
+    Markup ((get_pos node, text markup_text), expr)
   | _ -> failwith "invalid node"
 
 and pBreak_or_continue_level env level =

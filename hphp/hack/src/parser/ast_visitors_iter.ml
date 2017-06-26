@@ -415,6 +415,7 @@ class virtual ['self] iter =
       | Return (c0, c1) -> self#on_Return env c0 c1
       | GotoLabel c0 -> self#on_GotoLabel env c0
       | Goto c0 -> self#on_Goto env c0
+      | Markup (c0, c1) -> self#on_Markup env c0 c1
       | Static_var c0 -> self#on_Static_var env c0
       | Global_var c0 -> self#on_Global_var env c0
       | If (c0, c1, c2) -> self#on_If env c0 c1 c2
@@ -547,6 +548,9 @@ class virtual ['self] iter =
     method on_GotoLabel = self#on_pstring
     method on_BracedExpr = self#on_expr
     method on_Goto = self#on_pstring
+    method on_Markup env c0 c1 =
+      self#on_pstring env c0;
+      self#on_option self#on_expr env c1;
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
       | Darray c0 -> self#on_Darray env c0

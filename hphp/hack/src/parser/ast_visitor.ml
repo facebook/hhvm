@@ -35,6 +35,7 @@ class type ['a] ast_visitor_type = object
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
   method on_catch : 'a -> catch -> 'a
+  method on_markup: 'a -> pstring -> expr option -> 'a
   method on_class_const : 'a -> id -> pstring -> 'a
   method on_class_get : 'a -> id -> pstring -> 'a
   method on_clone : 'a -> expr -> 'a
@@ -234,6 +235,12 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_block acc b in
     acc
 
+  method on_markup acc pstr e =
+    let acc = this#on_pstring acc pstr in
+    match e with
+    | Some e -> this#on_expr acc e
+    | None -> acc
+
   method on_stmt acc = function
     | Unsafe                  -> this#on_unsafe acc
     | Expr e                  -> this#on_expr acc e
@@ -257,6 +264,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
+    | Markup (s, e)           -> this#on_markup acc s e
 
   method on_def_inline acc d =
     this#on_def acc d

@@ -130,6 +130,9 @@ class virtual ['b] reduce :
         on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> 'd; on_Gt : 'c -> 'd;
         on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_Goto : 'c -> Ast_visitors_ancestors.pstring -> 'd;
+        on_Markup : 'c ->
+                    Ast_visitors_ancestors.pstring ->
+                    Ast_visitors_ancestors.expr option -> 'd;
         on_Gte : 'c -> 'd; on_Gtgt : 'c -> 'd;
         on_Haccess : 'c ->
                      Ast_visitors_ancestors.id ->

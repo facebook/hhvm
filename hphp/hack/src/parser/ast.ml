@@ -276,6 +276,7 @@ and stmt =
   | Try of block * catch list * block
   | Def_inline of def
   | Noop
+  | Markup of pstring * expr option
 
 and as_expr =
   | As_v of expr

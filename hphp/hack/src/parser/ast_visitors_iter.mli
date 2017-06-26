@@ -134,6 +134,9 @@ class virtual ['b] iter :
         on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> unit;
         on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> unit;
         on_Goto : 'c -> Ast_visitors_ancestors.pstring -> unit;
+        on_Markup : 'c ->
+                    Ast_visitors_ancestors.pstring ->
+                    Ast_visitors_ancestors.expr option -> unit;
         on_Gt : 'c -> unit; on_Gte : 'c -> unit; on_Gtgt : 'c -> unit;
         on_Haccess : 'c ->
                      Ast_visitors_ancestors.id ->

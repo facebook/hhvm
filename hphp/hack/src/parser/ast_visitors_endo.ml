@@ -759,6 +759,11 @@ class virtual ['self] endo =
       then this
       else Def_inline r0
     method on_Noop env this = this
+    method on_Markup env this c0 c1 =
+      let r0 = self#on_pstring env c0 in
+      let r1 = self#on_option self#on_expr env c1 in
+      if c0 = r0 && c1 = r1 then this
+      else Markup (r0, r1)
     method on_stmt env this =
       match this with
       | Unsafe -> self#on_Unsafe env this
@@ -784,6 +789,7 @@ class virtual ['self] endo =
       | Def_inline c0 ->
           self#on_Def_inline env this c0
       | Noop -> self#on_Noop env this
+      | Markup (c0, c1) -> self#on_Markup env this c0 c1
     method on_As_v env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else As_v r0

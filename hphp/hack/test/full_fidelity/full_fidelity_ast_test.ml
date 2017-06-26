@@ -117,7 +117,8 @@ function foo(int $a, int $b): void {
 
 (** Output from hh_single_parse. *)
 let simple_expected_2 = "(AProgram
- ((Fun
+ ((Stmt (Markup (p \"\") ()))
+  (Fun
    ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\"))
     (f_params:
@@ -152,7 +153,8 @@ let comment_scraper_expected =
      ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
       (ns_const_uses: (SMap ()))))
     (f_span: p)))))(AProgram
- ((Fun
+ ((Stmt (Markup (p \"\") ()))
+  (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
     (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
@@ -171,7 +173,8 @@ baz(quz<ButThisShouldBe,Two($expressions));
 
 let type_annotated_function_call_expected =
 "(AProgram
- ((Stmt
+ ((Stmt (Markup (p \"\") ()))
+  (Stmt
    (Expr
     (p
      (Call (p (Id (p foo)))
@@ -198,7 +201,8 @@ function foo(): void {
 
 let global_keyword_expected =
 "(AProgram
- ((Fun
+ ((Stmt (Markup (p \"\") ()))
+  (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
     (f_body: ((Global_var ((p (Id (p $x))))))) (f_user_attributes: ())

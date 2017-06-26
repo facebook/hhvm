@@ -95,8 +95,6 @@ quick/hopt-true3.php
 quick/hopt-true4.php
 quick/hopt_sprop_accessibility.php
 quick/impl_abstract_default_vals.php
-quick/impl_abstract_dv_2a.php
-quick/impl_abstract_dv_3a.php
 quick/impl_abstract_dv_b_Bool.php
 quick/impl_abstract_dv_b_boolean.php
 quick/impl_abstract_dv_i_Int.php
@@ -132,10 +130,7 @@ quick/libxml_suppress_errors.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
-quick/nonstrict_hashbang_start.php
-quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names_class.php
-quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
 quick/parse_fail_shapes.php
@@ -172,7 +167,6 @@ quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_closure_params.php
 quick/static_prop_eval_order.php
-quick/strict_hashbang_start.php
 quick/string-cse.php
 quick/syntax-error.php
 quick/temparray.php

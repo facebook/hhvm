@@ -57,6 +57,7 @@ and terminal_ tcopt nsenv ~in_try = function
     (* return is not allowed in finally, so we can ignore fb *)
     (terminal tcopt nsenv ~in_try:true b;
      List.iter catch_l (terminal_catch tcopt nsenv ~in_try))
+  | Markup _
   | Do _
   | While _
   | For _
@@ -133,6 +134,7 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
     lvalue tcopt acc lv
   | Unsafe
   | Fallthrough
+  | Markup _
   | Expr _ | Break _ | Continue _ | Throw _
   | Do _ | While _ | For _ | Foreach _
   | Return _ | GotoLabel _ | Goto _ | Static_var _

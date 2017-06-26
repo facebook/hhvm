@@ -60,18 +60,33 @@ let rec emit_def env def =
     empty
 
 and emit_defs env defs =
+  let rec aux env defs =
+    match defs with
+    | Ast.SetNamespaceEnv ns :: defs ->
+      let env = Emit_env.with_namespace ns env in
+      aux env defs
+    | [] -> Emit_statement.emit_dropthrough_return ()
+    (* emit last statement in the list as final statement *)
+    | [Ast.Stmt s]
+    (* emit statement as final if it is one before the last and last statement is
+       empty markup (which will be no-op) *)
+    | [Ast.Stmt s; Ast.Stmt (Ast.Markup ((_, ""), None))] ->
+      Emit_statement.emit_final_statement env s
+    | [d] ->
+      gather [emit_def env d; Emit_statement.emit_dropthrough_return ()]
+    | d::defs ->
+      let i1 = emit_def env d in
+      let i2 = aux env defs in
+      gather [i1; i2]
+  in
   match defs with
-  | Ast.SetNamespaceEnv ns :: defs ->
-    let env = Emit_env.with_namespace ns env in
-    emit_defs env defs
-  | [] -> Emit_statement.emit_dropthrough_return ()
-  | [Ast.Stmt s] -> Emit_statement.emit_final_statement env s
-  | [d] ->
-    gather [emit_def env d; Emit_statement.emit_dropthrough_return ()]
-  | d::defs ->
-    let i1 = emit_def env d in
-    let i2 = emit_defs env defs in
+  | Ast.Stmt (Ast.Markup ((_, s), echo_expr_opt))::defs ->
+    let i1 =
+      Emit_statement.emit_markup env s echo_expr_opt ~check_for_hashbang:true
+    in
+    let i2 = aux env defs in
     gather [i1; i2]
+  | defs -> aux env defs
 
 let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info static_inits =
   let body_instrs = rewrite_user_labels body_instrs in

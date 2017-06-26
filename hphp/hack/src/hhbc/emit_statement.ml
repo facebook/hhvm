@@ -46,6 +46,52 @@ let emit_def_inline = function
   | _ ->
     failwith "Define inline: Invalid inline definition"
 
+let emit_markup env s echo_expr_opt ~check_for_hashbang =
+  let emit_ignored_call_expr f e =
+    let p = Pos.none in
+    let call_expr = p, A.Call ((p, A.Id (p, f)), [e], []) in
+    emit_ignored_expr env call_expr
+  in
+  let emit_ignored_call_for_non_empty_string f s =
+    if String.length s = 0 then empty
+    else emit_ignored_call_expr f (Pos.none, A.String (Pos.none, s))
+  in
+  let markup =
+    if String.length s = 0
+    then empty
+    else
+      let hashbang, tail =
+        if check_for_hashbang
+        then
+          (* if markup text starts with #!
+          - extract a line with hashbang - it will be emitted as a call
+          to print_hashbang function
+          - emit remaining part of text as regular markup *)
+          let r = Str.regexp "^#!.*\n" in
+          if Str.string_match r s 0
+          then
+            let cmd = Str.matched_string s in
+            let tail = String_utils.lstrip s cmd in
+            cmd, tail
+          else "", s
+        else "", s
+      in
+      gather [
+        emit_ignored_call_for_non_empty_string
+          "__SystemLib\\print_hashbang" hashbang;
+        emit_ignored_call_for_non_empty_string SN.SpecialFunctions.echo tail
+      ]
+  in
+  let echo =
+    match echo_expr_opt with
+    | Some e -> emit_ignored_call_expr SN.SpecialFunctions.echo e
+    | None -> empty
+  in
+  gather [
+    markup;
+    echo
+  ]
+
 let rec emit_stmt env st =
   match st with
   | A.Expr (_, A.Yield_break) ->
@@ -119,7 +165,9 @@ let rec emit_stmt env st =
     emit_static_var es
   | A.Global_var es ->
     emit_global_vars env es
-  (* TODO: What do we do with unsafe? *)
+  | A.Markup ((_, s), echo_expr_opt) ->
+    emit_markup env s echo_expr_opt ~check_for_hashbang:false
+    (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty

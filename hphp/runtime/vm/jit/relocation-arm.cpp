@@ -590,6 +590,12 @@ size_t relocateImpl(Env& env) {
         // Do nothing, as the instruction word was initially copied above
       }
 
+      // If we just copied the first instruction of a smashableMovq, then it may
+      // have an internal reference that'll need to be adjusted below.
+      if (!literals.count(src) && isSmashableMovq(srcAddr)) {
+        env.updateInternalRefs = true;
+      }
+
       if (srcAddr == env.start) {
         /*
          * For the start of the range, we only want to overwrite the "after"

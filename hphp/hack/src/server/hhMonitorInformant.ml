@@ -252,19 +252,6 @@ module Revision_tracker = struct
         hg_rev (Path.to_string env.inits.root) in
       Hashtbl.add env.queries hg_rev future
 
-  let parse_json json = match json with
-    | None -> None
-    | Some json ->
-      let open Hh_json.Access in
-      (return json) >>=
-        get_string "rev" |> function
-        | Result.Error _ ->
-          let () = Hh_logger.log
-            "Revision_tracker failed to get rev in json: %s"
-            (Hh_json.json_to_string json) in
-          None
-        | Result.Ok (v, _) -> Some v
-
   let get_change env =
     let watchman, change = Watchman.get_changes !(env.inits.watchman) in
     env.inits.watchman := watchman;
@@ -275,13 +262,17 @@ module Revision_tracker = struct
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->
         let open Option in
-        parse_json json >>= fun hg_rev ->
+        json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
+          Hh_logger.log "State_enter: %s" hg_rev;
           Some (Hg_update_enter hg_rev)
+        end
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
         when state = "hg.update" ->
         let open Option in
-        parse_json json >>= fun hg_rev ->
+        json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
+          Hh_logger.log "State_leave: %s" hg_rev;
           Some (Hg_update_exit hg_rev)
+        end
     | Watchman.Watchman_pushed _ ->
       None
 

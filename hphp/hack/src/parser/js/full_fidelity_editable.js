@@ -80,15 +80,11 @@ class EditableSyntax
       return IgnoreError.from_json(json, position, source);
     case 'fall_through':
       return FallThrough.from_json(json, position, source);
-    case 'markup':
-      return Markup.from_json(json, position, source);
 
     case 'missing':
       return Missing.missing;
     case 'end_of_file':
       return EndOfFile.from_json(json, position, source);
-    case 'header':
-      return ScriptHeader.from_json(json, position, source);
     case 'script':
       return Script.from_json(json, position, source);
     case 'simple_type_specifier':
@@ -169,6 +165,10 @@ class EditableSyntax
       return CompoundStatement.from_json(json, position, source);
     case 'expression_statement':
       return ExpressionStatement.from_json(json, position, source);
+    case 'markup_section':
+      return MarkupSection.from_json(json, position, source);
+    case 'markup_suffix':
+      return MarkupSuffix.from_json(json, position, source);
     case 'unset_statement':
       return UnsetStatement.from_json(json, position, source);
     case 'while_statement':
@@ -986,6 +986,10 @@ class EditableToken extends EditableSyntax
        return new SlashGreaterThanToken(leading, trailing);
     case '</':
        return new LessThanSlashToken(leading, trailing);
+    case '<?':
+       return new LessThanQuestionToken(leading, trailing);
+    case '?>':
+       return new QuestionGreaterThanToken(leading, trailing);
 
     case 'error_token':
        return new ErrorTokenToken(leading, trailing, token_text);
@@ -1041,6 +1045,8 @@ class EditableToken extends EditableSyntax
        return new XHPBodyToken(leading, trailing, token_text);
     case 'XHP_comment':
        return new XHPCommentToken(leading, trailing, token_text);
+    case 'markup':
+       return new MarkupToken(leading, trailing, token_text);
 
       default: throw 'unexpected token kind; ' + token_kind;
       // TODO: Better error
@@ -2232,6 +2238,20 @@ class LessThanSlashToken extends EditableToken
     super('</', leading, trailing, '</');
   }
 }
+class LessThanQuestionToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('<?', leading, trailing, '<?');
+  }
+}
+class QuestionGreaterThanToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('?>', leading, trailing, '?>');
+  }
+}
 
 class ErrorTokenToken extends EditableToken
 {
@@ -2557,6 +2577,18 @@ class XHPCommentToken extends EditableToken
   }
 
 }
+class MarkupToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('markup', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new MarkupToken(this.leading, this.trailing, text);
+  }
+
+}
 
 
 class EditableTrivia extends EditableSyntax
@@ -2594,8 +2626,6 @@ class EditableTrivia extends EditableSyntax
         return new IgnoreError(trivia_text);
       case 'fall_through':
         return new FallThrough(trivia_text);
-      case 'markup':
-        return new Markup(trivia_text);
 
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
@@ -2692,15 +2722,6 @@ class FallThrough extends EditableTrivia
   }
 }
 
-class Markup extends EditableTrivia
-{
-  constructor(text) { super('markup', text); }
-  with_text(text)
-  {
-    return new Markup(text);
-  }
-}
-
 
 
 class Missing extends EditableSyntax
@@ -2773,109 +2794,17 @@ class EndOfFile extends EditableSyntax
     return EndOfFile._children_keys;
   }
 }
-class ScriptHeader extends EditableSyntax
-{
-  constructor(
-    less_than,
-    question,
-    language)
-  {
-    super('header', {
-      less_than: less_than,
-      question: question,
-      language: language });
-  }
-  get less_than() { return this.children.less_than; }
-  get question() { return this.children.question; }
-  get language() { return this.children.language; }
-  with_less_than(less_than){
-    return new ScriptHeader(
-      less_than,
-      this.question,
-      this.language);
-  }
-  with_question(question){
-    return new ScriptHeader(
-      this.less_than,
-      question,
-      this.language);
-  }
-  with_language(language){
-    return new ScriptHeader(
-      this.less_than,
-      this.question,
-      language);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var less_than = this.less_than.rewrite(rewriter, new_parents);
-    var question = this.question.rewrite(rewriter, new_parents);
-    var language = this.language.rewrite(rewriter, new_parents);
-    if (
-      less_than === this.less_than &&
-      question === this.question &&
-      language === this.language)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new ScriptHeader(
-        less_than,
-        question,
-        language), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let less_than = EditableSyntax.from_json(
-      json.header_less_than, position, source);
-    position += less_than.width;
-    let question = EditableSyntax.from_json(
-      json.header_question, position, source);
-    position += question.width;
-    let language = EditableSyntax.from_json(
-      json.header_language, position, source);
-    position += language.width;
-    return new ScriptHeader(
-        less_than,
-        question,
-        language);
-  }
-  get children_keys()
-  {
-    if (ScriptHeader._children_keys == null)
-      ScriptHeader._children_keys = [
-        'less_than',
-        'question',
-        'language'];
-    return ScriptHeader._children_keys;
-  }
-}
 class Script extends EditableSyntax
 {
   constructor(
-    header,
     declarations)
   {
     super('script', {
-      header: header,
       declarations: declarations });
   }
-  get header() { return this.children.header; }
   get declarations() { return this.children.declarations; }
-  with_header(header){
-    return new Script(
-      header,
-      this.declarations);
-  }
   with_declarations(declarations){
     return new Script(
-      this.header,
       declarations);
   }
   rewrite(rewriter, parents)
@@ -2884,10 +2813,8 @@ class Script extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
-    var header = this.header.rewrite(rewriter, new_parents);
     var declarations = this.declarations.rewrite(rewriter, new_parents);
     if (
-      header === this.header &&
       declarations === this.declarations)
     {
       return rewriter(this, parents);
@@ -2895,27 +2822,21 @@ class Script extends EditableSyntax
     else
     {
       return rewriter(new Script(
-        header,
         declarations), parents);
     }
   }
   static from_json(json, position, source)
   {
-    let header = EditableSyntax.from_json(
-      json.script_header, position, source);
-    position += header.width;
     let declarations = EditableSyntax.from_json(
       json.script_declarations, position, source);
     position += declarations.width;
     return new Script(
-        header,
         declarations);
   }
   get children_keys()
   {
     if (Script._children_keys == null)
       Script._children_keys = [
-        'header',
         'declarations'];
     return Script._children_keys;
   }
@@ -7024,6 +6945,174 @@ class ExpressionStatement extends EditableSyntax
         'expression',
         'semicolon'];
     return ExpressionStatement._children_keys;
+  }
+}
+class MarkupSection extends EditableSyntax
+{
+  constructor(
+    prefix,
+    text,
+    suffix,
+    expression)
+  {
+    super('markup_section', {
+      prefix: prefix,
+      text: text,
+      suffix: suffix,
+      expression: expression });
+  }
+  get prefix() { return this.children.prefix; }
+  get text() { return this.children.text; }
+  get suffix() { return this.children.suffix; }
+  get expression() { return this.children.expression; }
+  with_prefix(prefix){
+    return new MarkupSection(
+      prefix,
+      this.text,
+      this.suffix,
+      this.expression);
+  }
+  with_text(text){
+    return new MarkupSection(
+      this.prefix,
+      text,
+      this.suffix,
+      this.expression);
+  }
+  with_suffix(suffix){
+    return new MarkupSection(
+      this.prefix,
+      this.text,
+      suffix,
+      this.expression);
+  }
+  with_expression(expression){
+    return new MarkupSection(
+      this.prefix,
+      this.text,
+      this.suffix,
+      expression);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var prefix = this.prefix.rewrite(rewriter, new_parents);
+    var text = this.text.rewrite(rewriter, new_parents);
+    var suffix = this.suffix.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    if (
+      prefix === this.prefix &&
+      text === this.text &&
+      suffix === this.suffix &&
+      expression === this.expression)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new MarkupSection(
+        prefix,
+        text,
+        suffix,
+        expression), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let prefix = EditableSyntax.from_json(
+      json.markup_prefix, position, source);
+    position += prefix.width;
+    let text = EditableSyntax.from_json(
+      json.markup_text, position, source);
+    position += text.width;
+    let suffix = EditableSyntax.from_json(
+      json.markup_suffix, position, source);
+    position += suffix.width;
+    let expression = EditableSyntax.from_json(
+      json.markup_expression, position, source);
+    position += expression.width;
+    return new MarkupSection(
+        prefix,
+        text,
+        suffix,
+        expression);
+  }
+  get children_keys()
+  {
+    if (MarkupSection._children_keys == null)
+      MarkupSection._children_keys = [
+        'prefix',
+        'text',
+        'suffix',
+        'expression'];
+    return MarkupSection._children_keys;
+  }
+}
+class MarkupSuffix extends EditableSyntax
+{
+  constructor(
+    less_than_question,
+    name)
+  {
+    super('markup_suffix', {
+      less_than_question: less_than_question,
+      name: name });
+  }
+  get less_than_question() { return this.children.less_than_question; }
+  get name() { return this.children.name; }
+  with_less_than_question(less_than_question){
+    return new MarkupSuffix(
+      less_than_question,
+      this.name);
+  }
+  with_name(name){
+    return new MarkupSuffix(
+      this.less_than_question,
+      name);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var less_than_question = this.less_than_question.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    if (
+      less_than_question === this.less_than_question &&
+      name === this.name)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new MarkupSuffix(
+        less_than_question,
+        name), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let less_than_question = EditableSyntax.from_json(
+      json.markup_suffix_less_than_question, position, source);
+    position += less_than_question.width;
+    let name = EditableSyntax.from_json(
+      json.markup_suffix_name, position, source);
+    position += name.width;
+    return new MarkupSuffix(
+        less_than_question,
+        name);
+  }
+  get children_keys()
+  {
+    if (MarkupSuffix._children_keys == null)
+      MarkupSuffix._children_keys = [
+        'less_than_question',
+        'name'];
+    return MarkupSuffix._children_keys;
   }
 }
 class UnsetStatement extends EditableSyntax
@@ -17592,6 +17681,8 @@ exports.BarGreaterThanToken = BarGreaterThanToken;
 exports.NullLiteralToken = NullLiteralToken;
 exports.SlashGreaterThanToken = SlashGreaterThanToken;
 exports.LessThanSlashToken = LessThanSlashToken;
+exports.LessThanQuestionToken = LessThanQuestionToken;
+exports.QuestionGreaterThanToken = QuestionGreaterThanToken;
 
 exports.ErrorTokenToken = ErrorTokenToken;
 exports.NameToken = NameToken;
@@ -17620,6 +17711,7 @@ exports.XHPClassNameToken = XHPClassNameToken;
 exports.XHPStringLiteralToken = XHPStringLiteralToken;
 exports.XHPBodyToken = XHPBodyToken;
 exports.XHPCommentToken = XHPCommentToken;
+exports.MarkupToken = MarkupToken;
 
 exports.EditableTrivia = EditableTrivia;
 exports.WhiteSpace = WhiteSpace;
@@ -17631,10 +17723,8 @@ exports.UnsafeExpression = UnsafeExpression;
 exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;
-exports.Markup = Markup;
 
 exports.EndOfFile = EndOfFile;
-exports.ScriptHeader = ScriptHeader;
 exports.Script = Script;
 exports.SimpleTypeSpecifier = SimpleTypeSpecifier;
 exports.LiteralExpression = LiteralExpression;
@@ -17675,6 +17765,8 @@ exports.InclusionExpression = InclusionExpression;
 exports.InclusionDirective = InclusionDirective;
 exports.CompoundStatement = CompoundStatement;
 exports.ExpressionStatement = ExpressionStatement;
+exports.MarkupSection = MarkupSection;
+exports.MarkupSuffix = MarkupSuffix;
 exports.UnsetStatement = UnsetStatement;
 exports.WhileStatement = WhileStatement;
 exports.IfStatement = IfStatement;

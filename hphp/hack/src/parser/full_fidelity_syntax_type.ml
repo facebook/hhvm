@@ -82,14 +82,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and end_of_file =
     { end_of_file_token                                  : t
     }
-  and script_header =
-    { header_less_than                                   : t
-    ; header_question                                    : t
-    ; header_language                                    : t
-    }
   and script =
-    { script_header                                      : t
-    ; script_declarations                                : t
+    { script_declarations                                : t
     }
   and simple_type_specifier =
     { simple_type_specifier                              : t
@@ -314,6 +308,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and expression_statement =
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
+    }
+  and markup_section =
+    { markup_prefix                                      : t
+    ; markup_text                                        : t
+    ; markup_suffix                                      : t
+    ; markup_expression                                  : t
+    }
+  and markup_suffix =
+    { markup_suffix_less_than_question                   : t
+    ; markup_suffix_name                                 : t
     }
   and unset_statement =
     { unset_keyword                                      : t
@@ -910,7 +914,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | Missing
   | SyntaxList                        of t list
   | EndOfFile                         of end_of_file
-  | ScriptHeader                      of script_header
   | Script                            of script
   | SimpleTypeSpecifier               of simple_type_specifier
   | LiteralExpression                 of literal_expression
@@ -951,6 +954,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | InclusionDirective                of inclusion_directive
   | CompoundStatement                 of compound_statement
   | ExpressionStatement               of expression_statement
+  | MarkupSection                     of markup_section
+  | MarkupSuffix                      of markup_suffix
   | UnsetStatement                    of unset_statement
   | WhileStatement                    of while_statement
   | IfStatement                       of if_statement
@@ -1080,6 +1085,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDInclusionDirective of inclusion_directive
   | TLDCompound           of compound_statement
   | TLDExpression         of expression_statement
+  | TLDMarkupSection      of markup_section
+  | TLDMarkupSuffix       of markup_suffix
   | TLDUnset              of unset_statement
   | TLDWhile              of while_statement
   | TLDIf                 of if_statement
@@ -1180,6 +1187,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtInclusionDirective of inclusion_directive
   | StmtCompound           of compound_statement
   | StmtExpression         of expression_statement
+  | StmtMarkupSection      of markup_section
+  | StmtMarkupSuffix       of markup_suffix
   | StmtUnset              of unset_statement
   | StmtWhile              of while_statement
   | StmtIf                 of if_statement
@@ -1304,14 +1313,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and end_of_file =
     { end_of_file_token: Token.t value
     }
-  and script_header =
-    { header_less_than: Token.t value
-    ; header_question: Token.t value
-    ; header_language: Token.t value
-    }
   and script =
-    { script_header: script_header value
-    ; script_declarations: top_level_declaration listesque value
+    { script_declarations: top_level_declaration listesque value
     }
   and simple_type_specifier =
     { simple_type_specifier: Token.t value
@@ -1536,6 +1539,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and expression_statement =
     { expression_statement_expression: expression option value
     ; expression_statement_semicolon: Token.t value
+    }
+  and markup_section =
+    { markup_prefix: Token.t option value
+    ; markup_text: Token.t value
+    ; markup_suffix: markup_suffix option value
+    ; markup_expression: expression option value
+    }
+  and markup_suffix =
+    { markup_suffix_less_than_question: Token.t value
+    ; markup_suffix_name: Token.t option value
     }
   and unset_statement =
     { unset_keyword: Token.t value

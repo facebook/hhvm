@@ -20,6 +20,7 @@
 module SourceText = Full_fidelity_source_text
 module Parser = Full_fidelity_parser
 module SyntaxError = Full_fidelity_syntax_error
+module TK = Full_fidelity_token_kind
 open Full_fidelity_minimal_syntax
 
 type t = {
@@ -37,34 +38,47 @@ let strip_comment_start s =
   else
     s
 
-let analyze_header text header =
-  match syntax header with
-  | ScriptHeader h ->
-    let lt = h.header_less_than in
-    let qm = h.header_question in
-    let lang = h.header_language in
-    let lt_full_width = full_width lt in
-    let qm_full_width = full_width qm in
-    let lang_leading = leading_width lang in
-    let lang_width = width lang in
-    let lang_trailing = trailing_width lang in
-    let language = SourceText.sub text (lt_full_width +
-      qm_full_width) lang_width in
-    let mode = SourceText.sub text (lt_full_width + qm_full_width +
-      lang_leading + lang_width) lang_trailing in
-    let mode = String.trim mode in
-    let mode = strip_comment_start mode in
-    let mode = String.trim mode in
-    (language, mode)
-  | _ -> failwith "unexpected missing header"
-  (* The parser never produces a missing header; it fills one in with zero
+let analyze_header text script =
+  match syntax script.script_declarations with
+  | SyntaxList ({
+      syntax = MarkupSection { markup_prefix; markup_text; markup_suffix; _ }
+    ; _}::_) ->
+    begin match syntax markup_suffix with
+    | MarkupSuffix {
+        markup_suffix_name = {
+          syntax = Missing | Token { MinimalToken.kind = TK.Equal; _ }
+        ; _ }
+      ; _ } -> "", ""
+    | MarkupSuffix {
+        markup_suffix_less_than_question = ltq;
+        markup_suffix_name = name;
+        _
+      } ->
+      let prefix_width = full_width markup_prefix in
+      let text_width = full_width markup_text in
+      let ltq_width = full_width ltq in
+      let name_leading = leading_width name in
+      let name_width = width name in
+      let name_trailing = trailing_width name in
+      let language = SourceText.sub text (prefix_width + text_width +
+        ltq_width + name_leading) name_width
+      in
+      let mode = SourceText.sub text (prefix_width + text_width +
+        ltq_width + name_leading + name_width) name_trailing
+      in
+      let mode = String.trim mode in
+      let mode = strip_comment_start mode in
+      let mode = String.trim mode in
+      language, mode
+    | _ -> "", ""
+    end
+  | _ -> failwith "unexpected: script content should be list"
+  (* The parser never produces a leading markup section; it fills one in with zero
      width tokens if it needs to. *)
 
 let get_language_and_mode text root =
   match syntax root with
-  | Script s ->
-    let header = s.script_header in
-    analyze_header text header
+  | Script s -> analyze_header text s
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)
 

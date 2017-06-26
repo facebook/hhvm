@@ -47,28 +47,13 @@ let schema : schema_node list =
     ; aggregates  = [ TopLevelDeclaration; TODO ]
     ; fields      = [ "token", Token ]
     }
-  ; { kind_name   = "ScriptHeader"
-    ; type_name   = "script_header"
-    ; func_name   = "script_header"
-    ; description = "header"
-    ; prefix      = "header"
-    ; aggregates  = []
-    ; fields =
-      [ "less_than", Token
-      ; "question", Token
-      ; "language", Token
-      ]
-    }
   ; { kind_name   = "Script"
     ; type_name   = "script"
     ; func_name   = "script"
     ; description = "script"
     ; prefix      = "script"
     ; aggregates  = []
-    ; fields =
-      [ "header", Just "ScriptHeader"
-      ; "declarations", ZeroOrMore (Aggregate TopLevelDeclaration)
-      ]
+    ; fields = ["declarations", ZeroOrMore (Aggregate TopLevelDeclaration)]
     }
   ; { kind_name   = "SimpleTypeSpecifier"
     ; type_name   = "simple_type_specifier"
@@ -552,6 +537,30 @@ let schema : schema_node list =
     ; fields =
       [ "expression", ZeroOrOne (Aggregate Expression)
       ; "semicolon", Token
+      ]
+    }
+  ; { kind_name   = "MarkupSection"
+    ; type_name   = "markup_section"
+    ; func_name   = "markup_section"
+    ; description = "markup_section"
+    ; prefix      = "markup"
+    ; aggregates  = [ TopLevelDeclaration; Statement ]
+    ; fields =
+      [ "prefix", ZeroOrOne Token
+      ; "text", Token
+      ; "suffix", ZeroOrOne (Just "MarkupSuffix")
+      ; "expression", ZeroOrOne (Aggregate Expression)
+      ]
+    }
+  ; { kind_name   = "MarkupSuffix"
+    ; type_name   = "markup_suffix"
+    ; func_name   = "markup_suffix"
+    ; description = "markup_suffix"
+    ; prefix      = "markup_suffix"
+    ; aggregates  = [ TopLevelDeclaration; Statement ]
+    ; fields =
+      [ "less_than_question", Token
+      ; "name", ZeroOrOne Token
       ]
     }
   ; { kind_name   = "UnsetStatement"

@@ -1437,51 +1437,31 @@ module WithExpressionAndStatementAndTypeParser
       (* TODO: What if it's not a legal statement? Do we still make progress
       here? *)
 
-  let parse_script_header parser =
-    (* The script header is
-      < ? name
-
-      In PHP files, the < may have leading trivia; a # comment is common.
-      Hack files may not have any text before the <.
-
-      There can be no trivia between the < and the ?
-
-      The name is optional in PHP, but not in Hack, and the name, if there
-      is one, must appear immediately after the ?, with no intervening trivia.
-
-      Note that we do not wish to lex <? as a token, because that then
-      complicates lexing generic types like Cage<?Tiger>.
-    *)
-    let original_parser = parser in
-    let (parser, less_than) = next_token parser in
-    (* TODO: Give an error if there is leading trivia on the < in an hh file *)
-    (* TODO: Give an error if there is trailing trivia on the < *)
-    let (parser, question) = next_token parser in
-    let (parser, language) = if Token.trailing question = [] then
-    (* TODO: Handle the case where the langauge is not a Name. *)
-      let (parser, language) = next_token parser in
-      (parser, make_token language)
-    else
-      (parser, (make_missing())) in
-    let valid = (Token.kind less_than) == LessThan &&
-                (Token.kind question) == Question in
+  let parse_leading_markup_section parser =
+    let parser1, markup_section = parse_in_statement_parser parser
+      (StatementParser.parse_markup_section ~is_leading_section:true)
+    in
+    let valid =
+      match markup_section.syntax with
+      (* proceed successfully if we've consumed <?... *)
+      (* TODO: Give an error if there is leading trivia on the < in an hh file *)
+      (* TODO: Handle the case where the langauge is not a Name. *)
+      | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
+      | _ -> false
+    in
     if valid then
-      let less_than = make_token less_than in
-      let question = make_token question in
-      let script_header = make_script_header less_than question language in
-      (parser, script_header)
+      parser1, markup_section
     else
+      let parser = with_error parser SyntaxError.error1001 in
+      let markup_section =
+        make_markup_section (make_missing ()) (make_missing ())
+          (make_missing ()) (make_missing ())
+      in
       (* ERROR RECOVERY *)
       (* Make no progress; try parsing the file without a header *)
-      let parser = with_error original_parser SyntaxError.error1001 in
-      let less_than = make_missing() in
-      let question = make_missing() in
-      let language = make_missing() in
-      let script_header = make_script_header less_than question language in
-      (parser, script_header )
+      parser, markup_section
 
   let parse_script parser =
-    let (parser, script_header) = parse_script_header parser in
     let rec aux parser acc =
       let (parser, declaration) = parse_declaration parser in
       (* TODO: Assert that we either made progress, or we're at the end of
@@ -1495,9 +1475,12 @@ module WithExpressionAndStatementAndTypeParser
           else (parser, declaration :: acc)
         | _ -> (parser, acc)
       else aux parser (declaration :: acc) in
+    (* parse leading markup section *)
+    let (parser, header) = parse_leading_markup_section parser in
     let (parser, declarations) = aux parser [] in
-    let declarations = make_list (List.rev declarations) in
-    let result = make_script script_header declarations in
+    (* include leading markup section as a head of declaration list *)
+    let declarations = make_list (header :: List.rev declarations) in
+    let result = make_script declarations in
     (* If we are not at the end of the file, something is wrong. *)
     assert ((peek_token_kind parser) = TokenKind.EndOfFile);
     (parser, result)

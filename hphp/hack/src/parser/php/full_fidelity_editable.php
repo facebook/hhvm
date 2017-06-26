@@ -143,15 +143,11 @@ abstract class EditableSyntax implements ArrayAccess {
       return IgnoreError::from_json($json, $position, $source);
     case 'fall_through':
       return FallThrough::from_json($json, $position, $source);
-    case 'markup':
-      return Markup::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
     case 'end_of_file':
       return EndOfFile::from_json($json, $position, $source);
-    case 'header':
-      return ScriptHeader::from_json($json, $position, $source);
     case 'script':
       return Script::from_json($json, $position, $source);
     case 'simple_type_specifier':
@@ -232,6 +228,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return CompoundStatement::from_json($json, $position, $source);
     case 'expression_statement':
       return ExpressionStatement::from_json($json, $position, $source);
+    case 'markup_section':
+      return MarkupSection::from_json($json, $position, $source);
+    case 'markup_suffix':
+      return MarkupSuffix::from_json($json, $position, $source);
     case 'unset_statement':
       return UnsetStatement::from_json($json, $position, $source);
     case 'while_statement':
@@ -1091,6 +1091,10 @@ abstract class EditableToken extends EditableSyntax {
        return new SlashGreaterThanToken($leading, $trailing);
     case '</':
        return new LessThanSlashToken($leading, $trailing);
+    case '<?':
+       return new LessThanQuestionToken($leading, $trailing);
+    case '?>':
+       return new QuestionGreaterThanToken($leading, $trailing);
 
     case 'error_token':
        return new ErrorTokenToken($leading, $trailing, $token_text);
@@ -1146,6 +1150,8 @@ abstract class EditableToken extends EditableSyntax {
        return new XHPBodyToken($leading, $trailing, $token_text);
     case 'XHP_comment':
        return new XHPCommentToken($leading, $trailing, $token_text);
+    case 'markup':
+       return new MarkupToken($leading, $trailing, $token_text);
 
       default:
         throw new Exception('unexpected token kind: ' . $token_kind);
@@ -3639,6 +3645,36 @@ final class LessThanSlashToken extends EditableToken {
     return new LessThanSlashToken($this->leading(), $trailing);
   }
 }
+final class LessThanQuestionToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('<?', $leading, $trailing, '<?');
+  }
+
+  public function with_leading(EditableSyntax $leading): LessThanQuestionToken {
+    return new LessThanQuestionToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): LessThanQuestionToken {
+    return new LessThanQuestionToken($this->leading(), $trailing);
+  }
+}
+final class QuestionGreaterThanToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('?>', $leading, $trailing, '?>');
+  }
+
+  public function with_leading(EditableSyntax $leading): QuestionGreaterThanToken {
+    return new QuestionGreaterThanToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): QuestionGreaterThanToken {
+    return new QuestionGreaterThanToken($this->leading(), $trailing);
+  }
+}
 
 final class ErrorTokenToken extends EditableToken {
   public function __construct(
@@ -4180,6 +4216,26 @@ final class XHPCommentToken extends EditableToken {
     return new XHPCommentToken($this->leading(), $trailing, $this->text());
   }
 }
+final class MarkupToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('markup', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): MarkupToken {
+    return new MarkupToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): MarkupToken {
+    return new MarkupToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): MarkupToken {
+    return new MarkupToken($this->leading(), $trailing, $this->text());
+  }
+}
 
 
 abstract class EditableTrivia extends EditableSyntax {
@@ -4233,8 +4289,6 @@ abstract class EditableTrivia extends EditableSyntax {
         return new IgnoreError($trivia_text);
       case 'fall_through':
         return new FallThrough($trivia_text);
-      case 'markup':
-        return new Markup($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4331,15 +4385,6 @@ class FallThrough extends EditableTrivia {
   }
 }
 
-class Markup extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('markup', $text);
-  }
-  public function with_text(string $text): Markup {
-    return new Markup($text);
-  }
-}
-
 
 
 final class Missing extends EditableSyntax {
@@ -4429,115 +4474,18 @@ final class EndOfFile extends EditableSyntax {
     yield break;
   }
 }
-final class ScriptHeader extends EditableSyntax {
-  private EditableSyntax $_less_than;
-  private EditableSyntax $_question;
-  private EditableSyntax $_language;
-  public function __construct(
-    EditableSyntax $less_than,
-    EditableSyntax $question,
-    EditableSyntax $language) {
-    parent::__construct('header');
-    $this->_less_than = $less_than;
-    $this->_question = $question;
-    $this->_language = $language;
-  }
-  public function less_than(): EditableSyntax {
-    return $this->_less_than;
-  }
-  public function question(): EditableSyntax {
-    return $this->_question;
-  }
-  public function language(): EditableSyntax {
-    return $this->_language;
-  }
-  public function with_less_than(EditableSyntax $less_than): ScriptHeader {
-    return new ScriptHeader(
-      $less_than,
-      $this->_question,
-      $this->_language);
-  }
-  public function with_question(EditableSyntax $question): ScriptHeader {
-    return new ScriptHeader(
-      $this->_less_than,
-      $question,
-      $this->_language);
-  }
-  public function with_language(EditableSyntax $language): ScriptHeader {
-    return new ScriptHeader(
-      $this->_less_than,
-      $this->_question,
-      $language);
-  }
-
-  public function rewrite(
-    ( function
-      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
-    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
-    $new_parents = $parents ?? [];
-    array_push($new_parents, $this);
-    $less_than = $this->less_than()->rewrite($rewriter, $new_parents);
-    $question = $this->question()->rewrite($rewriter, $new_parents);
-    $language = $this->language()->rewrite($rewriter, $new_parents);
-    if (
-      $less_than === $this->less_than() &&
-      $question === $this->question() &&
-      $language === $this->language()) {
-      return $rewriter($this, $parents ?? []);
-    } else {
-      return $rewriter(new ScriptHeader(
-        $less_than,
-        $question,
-        $language), $parents ?? []);
-    }
-  }
-
-  public static function from_json(mixed $json, int $position, string $source) {
-    $less_than = EditableSyntax::from_json(
-      $json->header_less_than, $position, $source);
-    $position += $less_than->width();
-    $question = EditableSyntax::from_json(
-      $json->header_question, $position, $source);
-    $position += $question->width();
-    $language = EditableSyntax::from_json(
-      $json->header_language, $position, $source);
-    $position += $language->width();
-    return new ScriptHeader(
-        $less_than,
-        $question,
-        $language);
-  }
-  public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_less_than;
-    yield $this->_question;
-    yield $this->_language;
-    yield break;
-  }
-}
 final class Script extends EditableSyntax {
-  private EditableSyntax $_header;
   private EditableSyntax $_declarations;
   public function __construct(
-    EditableSyntax $header,
     EditableSyntax $declarations) {
     parent::__construct('script');
-    $this->_header = $header;
     $this->_declarations = $declarations;
-  }
-  public function header(): EditableSyntax {
-    return $this->_header;
   }
   public function declarations(): EditableSyntax {
     return $this->_declarations;
   }
-  public function with_header(EditableSyntax $header): Script {
-    return new Script(
-      $header,
-      $this->_declarations);
-  }
   public function with_declarations(EditableSyntax $declarations): Script {
     return new Script(
-      $this->_header,
       $declarations);
   }
 
@@ -4547,32 +4495,24 @@ final class Script extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
-    $header = $this->header()->rewrite($rewriter, $new_parents);
     $declarations = $this->declarations()->rewrite($rewriter, $new_parents);
     if (
-      $header === $this->header() &&
       $declarations === $this->declarations()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new Script(
-        $header,
         $declarations), $parents ?? []);
     }
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
-    $header = EditableSyntax::from_json(
-      $json->script_header, $position, $source);
-    $position += $header->width();
     $declarations = EditableSyntax::from_json(
       $json->script_declarations, $position, $source);
     $position += $declarations->width();
     return new Script(
-        $header,
         $declarations);
   }
   public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_header;
     yield $this->_declarations;
     yield break;
   }
@@ -8845,6 +8785,178 @@ final class ExpressionStatement extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_expression;
     yield $this->_semicolon;
+    yield break;
+  }
+}
+final class MarkupSection extends EditableSyntax {
+  private EditableSyntax $_prefix;
+  private EditableSyntax $_text;
+  private EditableSyntax $_suffix;
+  private EditableSyntax $_expression;
+  public function __construct(
+    EditableSyntax $prefix,
+    EditableSyntax $text,
+    EditableSyntax $suffix,
+    EditableSyntax $expression) {
+    parent::__construct('markup_section');
+    $this->_prefix = $prefix;
+    $this->_text = $text;
+    $this->_suffix = $suffix;
+    $this->_expression = $expression;
+  }
+  public function prefix(): EditableSyntax {
+    return $this->_prefix;
+  }
+  public function text(): EditableSyntax {
+    return $this->_text;
+  }
+  public function suffix(): EditableSyntax {
+    return $this->_suffix;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function with_prefix(EditableSyntax $prefix): MarkupSection {
+    return new MarkupSection(
+      $prefix,
+      $this->_text,
+      $this->_suffix,
+      $this->_expression);
+  }
+  public function with_text(EditableSyntax $text): MarkupSection {
+    return new MarkupSection(
+      $this->_prefix,
+      $text,
+      $this->_suffix,
+      $this->_expression);
+  }
+  public function with_suffix(EditableSyntax $suffix): MarkupSection {
+    return new MarkupSection(
+      $this->_prefix,
+      $this->_text,
+      $suffix,
+      $this->_expression);
+  }
+  public function with_expression(EditableSyntax $expression): MarkupSection {
+    return new MarkupSection(
+      $this->_prefix,
+      $this->_text,
+      $this->_suffix,
+      $expression);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $prefix = $this->prefix()->rewrite($rewriter, $new_parents);
+    $text = $this->text()->rewrite($rewriter, $new_parents);
+    $suffix = $this->suffix()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    if (
+      $prefix === $this->prefix() &&
+      $text === $this->text() &&
+      $suffix === $this->suffix() &&
+      $expression === $this->expression()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new MarkupSection(
+        $prefix,
+        $text,
+        $suffix,
+        $expression), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $prefix = EditableSyntax::from_json(
+      $json->markup_prefix, $position, $source);
+    $position += $prefix->width();
+    $text = EditableSyntax::from_json(
+      $json->markup_text, $position, $source);
+    $position += $text->width();
+    $suffix = EditableSyntax::from_json(
+      $json->markup_suffix, $position, $source);
+    $position += $suffix->width();
+    $expression = EditableSyntax::from_json(
+      $json->markup_expression, $position, $source);
+    $position += $expression->width();
+    return new MarkupSection(
+        $prefix,
+        $text,
+        $suffix,
+        $expression);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_prefix;
+    yield $this->_text;
+    yield $this->_suffix;
+    yield $this->_expression;
+    yield break;
+  }
+}
+final class MarkupSuffix extends EditableSyntax {
+  private EditableSyntax $_less_than_question;
+  private EditableSyntax $_name;
+  public function __construct(
+    EditableSyntax $less_than_question,
+    EditableSyntax $name) {
+    parent::__construct('markup_suffix');
+    $this->_less_than_question = $less_than_question;
+    $this->_name = $name;
+  }
+  public function less_than_question(): EditableSyntax {
+    return $this->_less_than_question;
+  }
+  public function name(): EditableSyntax {
+    return $this->_name;
+  }
+  public function with_less_than_question(EditableSyntax $less_than_question): MarkupSuffix {
+    return new MarkupSuffix(
+      $less_than_question,
+      $this->_name);
+  }
+  public function with_name(EditableSyntax $name): MarkupSuffix {
+    return new MarkupSuffix(
+      $this->_less_than_question,
+      $name);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $less_than_question = $this->less_than_question()->rewrite($rewriter, $new_parents);
+    $name = $this->name()->rewrite($rewriter, $new_parents);
+    if (
+      $less_than_question === $this->less_than_question() &&
+      $name === $this->name()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new MarkupSuffix(
+        $less_than_question,
+        $name), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $less_than_question = EditableSyntax::from_json(
+      $json->markup_suffix_less_than_question, $position, $source);
+    $position += $less_than_question->width();
+    $name = EditableSyntax::from_json(
+      $json->markup_suffix_name, $position, $source);
+    $position += $name->width();
+    return new MarkupSuffix(
+        $less_than_question,
+        $name);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_less_than_question;
+    yield $this->_name;
     yield break;
   }
 }

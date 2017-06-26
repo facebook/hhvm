@@ -25,7 +25,6 @@ type t =
   | Missing
   | SyntaxList
   | EndOfFile
-  | ScriptHeader
   | Script
   | SimpleTypeSpecifier
   | LiteralExpression
@@ -66,6 +65,8 @@ type t =
   | InclusionDirective
   | CompoundStatement
   | ExpressionStatement
+  | MarkupSection
+  | MarkupSuffix
   | UnsetStatement
   | WhileStatement
   | IfStatement
@@ -177,7 +178,6 @@ let to_string kind =
   | Token                             -> "token"
   | SyntaxList                        -> "list"
   | EndOfFile                         -> "end_of_file"
-  | ScriptHeader                      -> "header"
   | Script                            -> "script"
   | SimpleTypeSpecifier               -> "simple_type_specifier"
   | LiteralExpression                 -> "literal"
@@ -218,6 +218,8 @@ let to_string kind =
   | InclusionDirective                -> "inclusion_directive"
   | CompoundStatement                 -> "compound_statement"
   | ExpressionStatement               -> "expression_statement"
+  | MarkupSection                     -> "markup_section"
+  | MarkupSuffix                      -> "markup_suffix"
   | UnsetStatement                    -> "unset_statement"
   | WhileStatement                    -> "while_statement"
   | IfStatement                       -> "if_statement"

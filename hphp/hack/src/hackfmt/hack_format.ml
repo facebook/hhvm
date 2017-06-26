@@ -61,11 +61,18 @@ let rec transform node =
     let token = get_end_of_file_children x in
     t token
   | Script x ->
-    let (header, declarations) = get_script_children x in
-    Fmt [
-      t header;
-      handle_possible_list declarations;
-    ]
+    begin match x.script_declarations.syntax with
+    | SyntaxList (header::declarations) when is_markup_section header ->
+      Fmt [
+        t header;
+        Newline;
+        handle_list declarations;
+      ]
+    | _ ->
+      Fmt [
+        handle_possible_list (get_script_children x);
+      ]
+    end
   | LiteralExpression x ->
     (* Double quoted string literals can create a list *)
     let children = get_literal_expression_children x in
@@ -94,6 +101,35 @@ let rec transform node =
         end
       | _ -> failwith "Expected Token or SyntaxList"
     end
+  | MarkupSection x ->
+    let (prefix, text, suffix, _) = get_markup_section_children x in
+    if is_missing prefix
+    then
+      (* leading markup section
+         for hh files - strip leading whitespaces\newlines - they are not
+         emitted and having them in Hack file is illegal anyways *)
+      let is_hh_script = match suffix.syntax with
+        | MarkupSuffix { markup_suffix_name = {
+            syntax = Token t; _
+          }; _ } ->
+          (EditableToken.text t) = "hh"
+        | _ -> false
+      in
+      let rec all_whitespaces s i =
+        i >= String.length s
+        || (match String.get s i with
+            | ' ' | '\t' | '\r' | '\n' -> all_whitespaces s (i + 1)
+            | _ -> false)
+      in
+      let text_contains_only_whitespaces = match text.syntax with
+        | Token t -> all_whitespaces (EditableToken.text t) 0
+        | _ -> false
+      in
+      if is_hh_script && text_contains_only_whitespaces
+      then t suffix
+      else transform_simple node
+    else transform_simple node
+  | MarkupSuffix _
   | SimpleTypeSpecifier _
   | VariableExpression _
   | QualifiedNameExpression _
@@ -115,7 +151,6 @@ let rec transform node =
   | SoftTypeSpecifier _
   | ListItem _ ->
     transform_simple node
-  | ScriptHeader _
   | ExpressionStatement _ ->
     transform_simple_statement node
   | EnumDeclaration x ->
@@ -1523,11 +1558,11 @@ and handle_declarator_list declarators =
     ])));
   | _ -> failwith "SyntaxList expected"
 
-and handle_possible_list
+and handle_list
     ?(before_each=(fun () -> Nothing))
     ?(after_each=(fun is_last -> Nothing))
     ?(handle_last=transform)
-    node =
+    list =
   let rec aux l = (
     match l with
     | hd :: [] ->
@@ -1545,10 +1580,17 @@ and handle_possible_list
       ]
     | [] -> Nothing
   ) in
+  aux list
+
+and handle_possible_list
+    ?(before_each=(fun () -> Nothing))
+    ?(after_each=(fun is_last -> Nothing))
+    ?(handle_last=transform)
+    node =
   match syntax node with
   | Missing -> Nothing
-  | SyntaxList x -> aux x
-  | _ -> aux [node]
+  | SyntaxList x -> handle_list x ~before_each ~after_each ~handle_last
+  | _ -> handle_list [node] ~before_each ~after_each ~handle_last
 
 and handle_xhp_open_right_angle_token attrs t =
   match syntax t with
@@ -2035,7 +2077,6 @@ and transform_trivia ~is_leading trivia =
     | TriviaKind.UnsafeExpression
     | TriviaKind.FixMe
     | TriviaKind.IgnoreError
-    | TriviaKind.Markup
     | TriviaKind.DelimitedComment ->
       let preceded_by_whitespace =
         if !currently_leading

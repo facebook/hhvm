@@ -72,6 +72,12 @@ module WithParser(Parser : ParserType) = struct
     let (parser, _) = next_token parser in
     parser
 
+  let scan_markup parser ~is_leading_section =
+    let (lexer, markup, suffix) =
+      Parser.Lexer.scan_markup (Parser.lexer parser) ~is_leading_section
+    in
+    Parser.with_lexer parser lexer, markup, suffix
+
   let with_error parser message =
     (* TODO: Should be able to express errors on whole syntax node. *)
     (* TODO: Is this even right? Won't this put the error on the trivia? *)

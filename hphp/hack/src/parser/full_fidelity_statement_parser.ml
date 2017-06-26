@@ -68,7 +68,51 @@ module WithExpressionAndDeclAndTypeParser
     | Name when peek_token_kind ~lookahead:1 parser = Colon ->
       parse_goto_label parser
     | Goto -> parse_goto_statement parser
+    | QuestionGreaterThan ->
+      parse_markup_section parser ~is_leading_section:false
     | _ -> parse_expression_statement parser
+
+  and parse_markup_section parser ~is_leading_section =
+    let parser, prefix =
+      (* for markup section at the beginning of the file
+         treat ?> as a part of markup text *)
+      if not is_leading_section
+        && peek_token_kind parser = TokenKind.QuestionGreaterThan then
+        let (parser, prefix) = next_token parser in
+        parser, make_token prefix
+      else
+        parser, make_missing ()
+    in
+    let parser, markup, suffix_opt = scan_markup parser ~is_leading_section in
+    let markup = make_token markup in
+    let suffix, is_echo_tag =
+      match suffix_opt with
+      | Some (less_than_question, language_opt) ->
+        let less_than_question_token = make_token less_than_question in
+        (* if markup section ends with <?= tag
+           then script section embedded between tags should be treated as if it
+           will be an argument to 'echo'. Technically it should be restricted to
+           expression but since it permits trailing semicolons we parse it as
+           expression statement.
+           TODO: consider making it even more loose and parse it as declaration
+           for better error recovery in cases when user
+           accidentally type '<?=' instead of '<?php' so declaration in script
+           section won't throw parser off the rails. *)
+        let language, is_echo_tag =
+          match language_opt with
+          | Some language ->
+            make_token language, (Token.kind language = TokenKind.Equal)
+          | None -> make_missing (), false
+        in
+        make_markup_suffix less_than_question_token language,
+        is_echo_tag
+      | None -> make_missing (), false
+    in
+    let parser, expression =
+      if is_echo_tag then parse_statement parser else parser, make_missing()
+    in
+    let s = make_markup_section prefix markup suffix expression in
+    parser, s
 
   and parse_php_function parser =
     use_decl_parser DeclParser.parse_function parser

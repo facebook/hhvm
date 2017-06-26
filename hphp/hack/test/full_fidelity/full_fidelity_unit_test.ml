@@ -18,6 +18,24 @@ module TestUtils = Full_fidelity_test_utils
 open Core
 open OUnit
 
+let fix_output_text_header text =
+  (* patches the output of the test to  *)
+  (*TODO: will be removed in a diff that updates all test baselines *)
+  let replacements = [
+    "(script(list(markup_section(missing)((markup))(markup_suffix((<?))((name)\
+      (end_of_line)))(missing))",
+    "(script(header((<))((?))((name)(end_of_line)))(list";
+    "(script(list(markup_section(missing)((markup))(markup_suffix((<?))((name)\
+      (whitespace)(single_line_comment)(end_of_line)))(missing))",
+    "(script(header((<))((?))((name)(whitespace)(single_line_comment)\
+      (end_of_line)))(list"
+  ] in
+  let starts_with s = String_utils.string_starts_with text s in
+  match List.find ~f:(fun (s, _) -> starts_with s) replacements with
+  | Some (prefix, new_prefix) ->
+    new_prefix ^ (String_utils.lstrip text prefix)
+  | None -> text
+
 let test_files_dir = "./hphp/hack/test/full_fidelity/cases"
 
 type test_case = {
@@ -208,6 +226,7 @@ let test_data = minimal_tests @ error_tests @
 
 let driver test () =
   let actual = test.test_function test.source in
+  let actual = fix_output_text_header actual in
   assert_equal test.expected actual
 
 let run_test test =

@@ -185,6 +185,8 @@ type t =
   | NullLiteral
   | SlashGreaterThan
   | LessThanSlash
+  | LessThanQuestion
+  | QuestionGreaterThan
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -213,6 +215,7 @@ type t =
   | XHPStringLiteral
   | XHPBody
   | XHPComment
+  | Markup
 
 
 let from_string keyword =
@@ -380,6 +383,8 @@ let from_string keyword =
   | "null"         -> Some NullLiteral
   | "/>"           -> Some SlashGreaterThan
   | "</"           -> Some LessThanSlash
+  | "<?"           -> Some LessThanQuestion
+  | "?>"           -> Some QuestionGreaterThan
   | _              -> None
 
 let to_string kind =
@@ -548,6 +553,8 @@ let to_string kind =
   | NullLiteral                   -> "null"
   | SlashGreaterThan              -> "/>"
   | LessThanSlash                 -> "</"
+  | LessThanQuestion              -> "<?"
+  | QuestionGreaterThan           -> "?>"
   (* Variable text tokens *)
   | ErrorToken                    -> "error_token"
   | Name                          -> "name"
@@ -576,4 +583,5 @@ let to_string kind =
   | XHPStringLiteral              -> "XHP_string_literal"
   | XHPBody                       -> "XHP_body"
   | XHPComment                    -> "XHP_comment"
+  | Markup                        -> "markup"
 

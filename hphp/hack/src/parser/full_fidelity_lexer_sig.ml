@@ -17,6 +17,17 @@ module type Lexer_S = sig
   val next_token_as_name : t -> t * Full_fidelity_minimal_token.t
   val next_docstring_header : t -> t * Full_fidelity_minimal_token.t * string
   val next_token_in_string : t -> string -> t * Full_fidelity_minimal_token.t
+  val scan_markup: t ->
+    is_leading_section:bool ->
+    (* lexer *)
+    t *
+    (* markup text *)
+    Full_fidelity_minimal_token.t *
+    (* optional suffix that consist of mandatory '<?' and optional 'name'
+    which can be either
+    - language 'hh', 'php'
+    - '=' is case of short '<?=' tag *)
+    (Full_fidelity_minimal_token.t * Full_fidelity_minimal_token.t option) option
   val errors : t -> Full_fidelity_syntax_error.t list
   val next_xhp_class_name : t -> t * Full_fidelity_minimal_token.t
   val is_next_xhp_class_name : t -> bool

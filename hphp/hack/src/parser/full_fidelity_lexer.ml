@@ -938,6 +938,7 @@ let scan_token in_type lexer =
   | ('&', _, _) -> (advance lexer 1, TokenKind.Ampersand)
   | ('?', '-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
   | ('?', '?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
+  | ('?', '>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)
   | ('?', _, _) -> (advance lexer 1, TokenKind.Question)
   | (':', ':', _) -> (advance lexer 2, TokenKind.ColonColon)
   | (':', _, _) -> (advance lexer 1, TokenKind.Colon)
@@ -1034,26 +1035,6 @@ let scan_single_line_comment lexer =
       Trivia.make_single_line_comment w in
   (lexer, c)
 
-let rec skip_to_end_of_markup_comment lexer =
-  let ch0 = peek_char lexer 0 in
-  let ch1 = peek_char lexer 1 in
-  let ch2 = peek_char lexer 2 in
-  let ch3 = peek_char lexer 3 in
-  let ch4 = peek_char lexer 4 in
-  if ch0 = invalid && at_end lexer then
-    (* It's not an error to run off the end of one of these. *)
-    lexer
-  else match ch0, ch1, ch2, ch3, ch4 with
-  | '<', '?', 'p', 'h', 'p' -> advance lexer 5
-  | '<', '?', '=', _, _ -> advance lexer 3
-  | _ -> skip_to_end_of_markup_comment (advance lexer 1)
-
-let scan_markup_comment lexer =
-  let lexer = skip_to_end_of_markup_comment lexer in
-  let w = width lexer in
-  let c = Trivia.make_markup w in
-  (lexer, c)
-
 let rec skip_to_end_of_delimited_comment lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -1113,9 +1094,6 @@ TODO: Give an error if this appears in a Hack program.
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
-  | ('?', '>' ) ->
-    let (lexer, c) = scan_markup_comment lexer in
-    (lexer, Some c)
   | ('#', _) ->
     let (lexer, c) = scan_hash_comment lexer in
     (lexer, Some c)
@@ -1351,6 +1329,63 @@ let next_xhp_class_name lexer =
 
 let next_xhp_name lexer =
   scan_token_and_trivia scan_xhp_element_name false lexer
+
+let make_markup_token lexer =
+  Token.make TokenKind.Markup (width lexer) [] []
+
+let skip_to_end_of_markup lexer ~is_leading_section =
+  let make_markup_and_suffix lexer =
+    let markup_text = make_markup_token lexer in
+    let less_than_question_token =
+      Token.make TokenKind.LessThanQuestion 2 [] []
+    in
+    let make_long_tag lexer size =
+      (* skip name*)
+      let lexer = advance lexer size in
+      (* single line comments that follow the language in leading markup_text
+        determine the file check mode, read the trailing trivia and attach it
+        to the language token *)
+      let lexer, trailing =
+        if is_leading_section then scan_trailing_php_trivia lexer
+        else lexer, []
+      in
+      let name = Token.make TokenKind.Name size [] trailing in
+      lexer, markup_text, Some (less_than_question_token, Some name)
+    in
+    (* skip <? *)
+    let lexer = advance lexer 2 in
+    let ch0 = peek_char lexer 0 in
+    let ch1 = peek_char lexer 1 in
+    let ch2 = peek_char lexer 2 in
+    match ch0, ch1, ch2 with
+    | ('H' | 'h'), ('H' | 'h'), _ -> make_long_tag lexer 2
+    | ('P' | 'p'), ('H' | 'h'), ('P' | 'p') -> make_long_tag lexer 3
+    | '=', _, _ ->
+      begin
+        (* skip = *)
+        let lexer = advance lexer 1 in
+        let equal = Token.make TokenKind.Equal 1 [] [] in
+        lexer, markup_text, Some (less_than_question_token, Some equal)
+      end
+    | _ ->
+      lexer, markup_text, Some (less_than_question_token, None)
+  in
+  let rec aux lexer =
+    let ch0 = peek_char lexer 0 in
+    if ch0 = invalid && at_end lexer then
+      (* It's not an error to run off the end of one of these. *)
+      lexer, (make_markup_token lexer), None
+    else if ch0 = '<' && peek_char lexer 1 = '?' then
+      (* Found a beginning tag that delimits markup from the script *)
+      make_markup_and_suffix lexer
+    else
+      aux (advance lexer 1)
+  in
+  aux lexer
+
+let scan_markup lexer ~is_leading_section =
+  let lexer = start_new_lexeme lexer in
+  skip_to_end_of_markup lexer ~is_leading_section
 
 let is_next_xhp_category_name lexer =
   let (lexer, _) = scan_leading_php_trivia lexer in

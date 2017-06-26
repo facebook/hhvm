@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-06-16-0001"
+let full_fidelity_schema_version_number = "2017-06-25-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -125,7 +125,8 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "XHPClassName"; "XHP_class_name" ];
   [ "XHPStringLiteral"; "XHP_string_literal" ];
   [ "XHPBody"; "XHP_body" ];
-  [ "XHPComment"; "XHP_comment" ]]
+  [ "XHPComment"; "XHP_comment" ];
+  [ "Markup"; "markup" ]]
 
 let no_text_tokens = List.map token_node_from_list [
   [ "EndOfFile"; "end_of_file" ]]
@@ -291,7 +292,9 @@ let given_text_tokens = List.map token_node_from_list [
   [ "BarGreaterThan"; "|>" ];
   [ "NullLiteral"; "null" ];
   [ "SlashGreaterThan"; "/>" ];
-  [ "LessThanSlash"; "</" ]]
+  [ "LessThanSlash"; "</" ];
+  [ "LessThanQuestion";"<?" ];
+  [ "QuestionGreaterThan"; "?>" ]]
 
 let trivia_kinds = List.map trivia_node_from_list [
   [ "WhiteSpace"; "whitespace" ];
@@ -302,8 +305,7 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "UnsafeExpression"; "unsafe_expression" ];
   [ "FixMe"; "fix_me" ];
   [ "IgnoreError"; "ignore_error" ];
-  [ "FallThrough"; "fall_through" ];
-  [ "Markup"; "markup" ]]
+  [ "FallThrough"; "fall_through" ]]
 
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)

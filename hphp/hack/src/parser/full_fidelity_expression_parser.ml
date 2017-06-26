@@ -1144,6 +1144,9 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | StarStar
     | StarStarEqual -> false
     (* Misc *)
+    | Markup
+    | LessThanQuestion
+    | QuestionGreaterThan
     | ErrorToken
     | TokenKind.EndOfFile -> false
     (* TODO: Sort out rules for interactions between casts and XHP. *)

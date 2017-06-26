@@ -65,7 +65,11 @@ let get_pos : node -> Pos.t = fun node ->
     let pos_file = !(lowerer_state.filePath) in
     let text = source_text node in
     (* TODO(8086635) Figure out where this off-by-one comes from *)
-    let start_offset = start_offset node - 1 in
+    let start_offset =
+      (*should be removed after resolving TODO above *)
+      let start_offset = start_offset node in
+      if start_offset = 0 then 0 else start_offset - 1
+    in
     let end_offset = end_offset node in
     let s_line, s_column = SourceText.offset_to_position text start_offset in
     let e_line, e_column = SourceText.offset_to_position text end_offset in
@@ -1179,6 +1183,7 @@ and pStmt : stmt parser = fun node env ->
     Continue (get_pos node, pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
     Global_var (couldMap ~f:pExpr global_variables env)
+  | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
      *
@@ -1187,6 +1192,20 @@ and pStmt : stmt parser = fun node env ->
      *)
     Def_inline (pDef node { env with max_depth = env.max_depth - 1 })
   | _ -> missing_syntax "statement" node env
+
+and pMarkup node env =
+  match syntax node with
+  | MarkupSection { markup_expression; _ } ->
+    begin match syntax markup_expression with
+    | Missing ->
+      (*TODO: properly lower markup sections *)
+      Noop
+    | ExpressionStatement {
+        expression_statement_expression = e
+      ; _} -> Expr (pExpr e env)
+    | _ -> failwith "expression expected"
+    end
+  | _ -> failwith "invalid node"
 
 and pBreak_or_continue_level env level =
   match mpOptional pExpr level env with
@@ -1804,7 +1823,6 @@ let scour_comments
             | `SawSlash    -> "SawSlash"
             | `EmbeddedCmt -> "EmbeddedCmt"
             | `EndEmbedded -> "EndEmbedded"
-            | `NonSourceText    -> "NonSourceText"
           in
           if not !(lowerer_state.suppress_output) then
             Printf.eprintf "Error parsing trivia in state %s: '%s'\n" state str;
@@ -1837,40 +1855,16 @@ let scour_comments
             in
             result :: acc
         in
-        let text_at_pos_is_equal_to pos s =
-          let s_length = String.length s in
-          if pos + s_length >= length then false
-          else
-            let rec go i =
-              i = s_length || (str.[pos + i] = s.[i] && go (i + 1))
-            in
-            go 0
-        in
         let rec go start state idx : scoured_comments =
           if idx = length (* finished? *)
           then begin
             match state with
-            | `Free | `NonSourceText -> acc
+            | `Free -> acc
             | `LineCmt -> mk `Line start length acc
             | _        -> fail state start
           end else begin
             let next = idx + 1 in
             match state, str.[idx] with
-            (* Found one of start tags - switch to the PHP mode *)
-            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?php" ->
-              let next = idx + (String.length "<?php") in
-              go next `Free next
-            | `NonSourceText,    '<' when text_at_pos_is_equal_to idx "<?=" ->
-              let next = idx + (String.length "<?=") in
-              go next `Free next
-            (* Skip non source text content *)
-            | `NonSourceText,    _ -> go next state next
-            (* End tag terminates line comment, collect it  *)
-            (* Then exit PHP section of the code and skip all non source
-               content *)
-            | `LineCmt,     '?' when text_at_pos_is_equal_to idx "?>" ->
-              let next = idx + (String.length "?>") in
-              mk `Line  start idx @@ go next `NonSourceText next
             (* Ending comments produces the comment just scanned *)
             | `LineCmt,     '\n' -> mk `Line  start idx @@ go next `Free next
             | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
@@ -1890,10 +1884,6 @@ let scour_comments
             (* When scanning comments, anything else is accepted *)
             | `LineCmt,     _             -> go start state        next
             | `EmbeddedCmt, _             -> go start state        next
-            | _,        '?' when text_at_pos_is_equal_to idx "?>" ->
-            (* Exit PHP section of the code and skip all markup content *)
-              let next = idx + (String.length "?>") in
-              go next `NonSourceText next
             (* Anything else; bail *)
             | _ -> fail state start
           end

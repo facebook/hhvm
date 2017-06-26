@@ -23,10 +23,10 @@ type t = {
   option_aliased_namespaces : (string * string) list;
 }
 
-(* Default, as with HHVM, is for Eval.EnableHipHopSyntax=0 *)
+(* Default, unlike HHVM, is Eval.EnableHipHopSyntax=1 *)
 let default = {
   option_ints_overflow_to_ints = None;
-  option_enable_hiphop_syntax = false;
+  option_enable_hiphop_syntax = true;
   option_constant_folding = true;
   option_optimize_null_check = true;
   option_optimize_cuf = true;

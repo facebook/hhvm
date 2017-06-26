@@ -71,6 +71,11 @@ class declvar_visitor = object(this)
     List.fold_left use_list ~init:acc
       ~f:(fun acc (x, _isref) -> add_local ~bareparam:false acc x)
   method! on_call acc e el1 el2 =
+    let acc =
+      match e with
+      | (_, Ast.Id(p, "HH\\set_frame_metadata")) ->
+        add_local ~bareparam:false acc (p,"$86metadata")
+      | _ -> acc in
     let call_isset =
       match e with (_, Ast.Id(_, "isset")) -> true | _ -> false in
     let on_arg acc e =

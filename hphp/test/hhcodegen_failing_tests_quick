@@ -187,7 +187,6 @@ quick/unset_static.php
 quick/vec/basic-getters.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
-quick/xenon/xenon_frame_metadata.php
 quick/xenon/xenon_init.php
 quick/xhp-malformed.php
 quick/zero_eval_stack_depth.php

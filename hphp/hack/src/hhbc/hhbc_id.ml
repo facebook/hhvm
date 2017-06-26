@@ -8,6 +8,8 @@
  *
 *)
 
+open Core
+
 module SU = Hhbc_string_utils
 
 (* TODO: Remove this once we start reading this off of HHVM's config.hdf *)
@@ -77,23 +79,66 @@ end
 module Function = struct
   type t = string
 
+  (* See hphp/compiler/parser.cpp. *)
+  let builtins_in_hh =
+  [
+    "fun";
+    "meth_caller";
+    "class_meth";
+    "inst_meth";
+    "invariant_callback_register";
+    "invariant";
+    "invariant_violation";
+    "idx";
+    "type_structure";
+    "asio_get_current_context_idx";
+    "asio_get_running_in_context";
+    "asio_get_running";
+    "xenon_get_data";
+    "thread_memory_stats";
+    "thread_mark_stack";
+    "objprof_get_strings";
+    "objprof_get_data";
+    "objprof_get_paths";
+    "heapgraph_create";
+    "heapgraph_stats";
+    "heapgraph_foreach_node";
+    "heapgraph_foreach_edge";
+    "heapgraph_foreach_root";
+    "heapgraph_dfs_nodes";
+    "heapgraph_dfs_edges";
+    "heapgraph_node";
+    "heapgraph_edge";
+    "heapgraph_node_in_edges";
+    "heapgraph_node_out_edges";
+    "server_warmup_status";
+    "dict";
+    "vec";
+    "keyset";
+    "varray";
+    "darray";
+    "is_vec";
+    "is_dict";
+    "is_keyset";
+    "is_varray_or_darray";
+  ]
+
+  let builtins_at_top = [
+    "func_get_args";
+    "func_get_arg";
+    "func_num_args"
+  ]
+
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
   let elaborate_id ns (_, s as id) =
-    (* TODO: maintain set of builtin names *)
-    match s with
-    | "invariant_violation"
-    | "invariant"
-    | "type_structure"
-    | "fun"
-    | "meth_caller"
-    | "class_meth"
-    | "inst_meth" -> SU.prefix_namespace "HH" s, Some s
-    | "func_get_args" | "func_num_args" ->
-      s, None
-    | _ ->
-      elaborate_id ns Ast_defs.NSFun id
+    if List.mem builtins_in_hh s
+    && Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
+    then SU.prefix_namespace "HH" s, Some s
+    else if List.mem builtins_at_top s
+    then s, None
+    else elaborate_id ns Ast_defs.NSFun id
 
 end
 

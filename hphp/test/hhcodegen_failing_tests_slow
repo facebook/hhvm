@@ -144,10 +144,6 @@ slow/control-flow/bug-4976291.php
 slow/copy_prop/1845.php
 slow/ctor_param_promotion_bad_mod.php
 slow/debug_backtrace/backtrace_async_generators.php
-slow/debug_backtrace/metadata_async.php
-slow/debug_backtrace/metadata_async_block.php
-slow/debug_backtrace/metadata_decref_on_return.php
-slow/debug_backtrace/metadata_simple.php
 slow/defined/1627.php
 slow/defined/sid.php
 slow/dict/hh-only1.php
@@ -202,6 +198,7 @@ slow/ext_apc_iterator/iterator_002.php
 slow/ext_apc_iterator/iterator_003.php
 slow/ext_apc_iterator/iterator_004.php
 slow/ext_apc_iterator/iterator_005.php
+slow/ext_array/count-opts.php
 slow/ext_asio/backtrace.php
 slow/ext_bzip2/wrapper.php
 slow/ext_class/iteratoraggregate_iterator_both.php
@@ -234,7 +231,6 @@ slow/ext_json/json_decode_collections.php
 slow/ext_mailparse/ext_uudecode.php
 slow/ext_math/intdiv.php
 slow/ext_misc/ext_misc.php
-slow/ext_misc/idx-1.php
 slow/ext_misc/php_strip_whitespace_comment_outside.php
 slow/ext_misc/php_strip_whitespace_xhp.php
 slow/ext_misc/token_get_all_hashbang.php
@@ -467,8 +463,6 @@ slow/lang/hh_return_type_1.php
 slow/lang/hh_return_type_2.php
 slow/lang/hh_return_type_3.php
 slow/lang/hh_return_type_noreturn.php
-slow/lang/invariant_cb.php
-slow/lang/invariant_cb_two.php
 slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/reflection.php
@@ -538,14 +532,7 @@ slow/object_property/basesc-input.php
 slow/object_property/deepinit_file_dir.php
 slow/object_property_expression/798.php
 slow/objprof/dead-static-props.php
-slow/objprof/heapgraph.php
 slow/objprof/mem_threshold.php
-slow/objprof/objprof-props.php
-slow/objprof/objprof-user-types.php
-slow/objprof/objprof.php
-slow/objprof/objprof_paths.php
-slow/objprof/pair-construct.php
-slow/objprof/strings.php
 slow/parser/1851.php
 slow/parser/afl5934248.php
 slow/parser/async-constructor.php

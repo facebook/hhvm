@@ -1,0 +1,34 @@
+string(5) "hello"
+array(3) {
+  [0]=>
+  array(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(7) "profile"
+  }
+  [1]=>
+  array(5) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
+    ["line"]=>
+    int(18)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "X"
+    ["type"]=>
+    string(2) "::"
+  }
+  [2]=>
+  array(3) {
+    ["file"]=>
+    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
+    ["line"]=>
+    int(21)
+    ["function"]=>
+    string(4) "main"
+  }
+}

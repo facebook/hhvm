@@ -530,10 +530,17 @@ void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
     : (uintptr_t)fp->func();
   m_hash ^= funcHash + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
   m_hash ^= prevPc + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
+
+  auto const curUnit = fp->func()->unit();
+  auto const curOp = curUnit->getOp(prevPc);
+  auto const isReturning =
+    curOp == Op::RetC || curOp == Op::RetV ||
+    curOp == Op::CreateCont || curOp == Op::Await ||
+    fp->localsDecRefd();
   m_frames.push_back(Frame{
     fp->func(),
     prevPc,
-    arGetContextClass(fp) && fp->hasThis()
+    !isReturning && arGetContextClass(fp) && fp->hasThis()
   });
 }
 

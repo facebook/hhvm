@@ -146,6 +146,7 @@ struct Vunit;
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andzi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), U(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -1109,6 +1110,7 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 /*
  * arm intrinsics.
  */
+struct andzi { Immed64 s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct csincb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
 struct csincw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
 struct csincl { ConditionCode cc; VregSF sf; Vreg32 f, t, d; };

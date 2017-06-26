@@ -572,7 +572,8 @@ and emit_id env (p, s as id) =
   | "__NAMESPACE__" ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
-  | "exit" -> emit_exit env None
+  | ("exit" | "die") ->
+    emit_exit env None
   | _ ->
     let fq_id, id_opt, contains_backslash =
       Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
@@ -841,6 +842,8 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_class_alias es
   | A.Call ((_, A.Id (_, "get_class")), [], _) ->
     emit_box_if_necessary need_ref @@ emit_get_class_no_args ()
+  | A.Call ((_, A.Id (_, ("exit" | "die"))), es, _) ->
+    emit_exit env (List.hd es)
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
     emit_box_if_necessary need_ref @@ emit_new env typeexpr args uargs
@@ -1790,7 +1793,7 @@ and emit_call env (_, expr_ as expr) args uargs =
       instr (IMisc (OODeclExists class_kind))
     ], Flavor.Cell
 
-  | A.Id (_, "exit") when nargs = 0 || nargs = 1 ->
+  | A.Id (_, ("exit" | "die")) when nargs = 0 || nargs = 1 ->
     emit_exit env (List.hd args), Flavor.Cell
 
   | A.Id (_, id) ->

@@ -28,9 +28,13 @@ let adata2_ref = ref ([] : Hhas_adata.t list)
 
 (* Ref keeping to-do set for pairs of classes that
    need to be compared. Originally just for closure classes, now
-   for all corresponding pairs *)
+   for all corresponding pairs
+   Also comes with a permutation for matching up properties used in
+   closure classes*)
+type perm = (int * int) list
+module IntIntPermSet = Set.Make(struct type t = int*int*perm let compare = compare end)
 module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
-let classes_to_check = ref (IntIntSet.empty)
+let classes_to_check = ref (IntIntPermSet.empty)
 let classes_checked = ref (IntIntSet.empty)
 
 let rec lookup_adata id data_dict =
@@ -465,7 +469,7 @@ let check_instruct_misc asn i i' =
   | _, MemoGet(_,_,_) -> None (* wimp out again *)
   | CreateCl(npars,cln), CreateCl(npars',cln') ->
    if npars = npars' then
-     (classes_to_check := IntIntSet.add (cln,cln') (!classes_to_check);
+     (classes_to_check := IntIntPermSet.add (cln,cln',[]) (!classes_to_check);
      Some asn)
    else None (* fail in this case *)
   | _, _ -> if i=i' then Some asn else None
@@ -482,6 +486,18 @@ let add_assumption (pc,pc') asn assumed =
   let prev = lookup_assumption (pc,pc') assumed in
   let updated = AsnSet.add asn prev in (* this is a clumsy union *)
   PcpMap.add (pc,pc') updated assumed
+
+(* compute permutation, not very efficiently, but lists should always be very small *)
+let findperm l1 l2 =
+ if List.contains_dup l1 || (List.length l1 != List.length l2)
+ then None
+ else let rec loop n l p =
+        match l with
+         | [] -> Some p
+         | x :: xs -> (match List.findi l2 (fun _i y -> x = y) with
+                        | Some (j,_) -> loop (n+1) xs ((n,j)::p)
+                        | None -> None)
+      in loop 0 l1 []
 
 (* Main entry point for equivalence checking *)
 let equiv prog prog' startlabelpairs =
@@ -705,7 +721,7 @@ let equiv prog prog' startlabelpairs =
            if ins = ins' then nextins()
            else try_specials ()
         | IIncludeEvalDefine (DefCls cid), IIncludeEvalDefine (DefCls cid') ->
-            (classes_to_check := IntIntSet.add (cid,cid') (!classes_to_check);
+            (classes_to_check := IntIntPermSet.add (cid,cid',[]) (!classes_to_check);
             nextins ())
         | IIncludeEvalDefine ins, IIncludeEvalDefine ins' ->
            if ins = ins' then nextins()
@@ -852,6 +868,31 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                     check (succ pc) (succ pc') newnewasn
                           (add_assumption (pc,pc') asn assumed) todo)) in
 
+        let cugetl_named_pattern =
+           uCUGetL $? (function | Local.Unnamed _ -> false
+                                | Local.Named _ -> true)
+                   $> (function | Local.Unnamed _ -> failwith "unnamed can't happen"
+                                | Local.Named s -> s) in
+        let cugetl_list_pattern = greedy_kleene cugetl_named_pattern in
+        let cugetl_list_createcl_pattern = cugetl_list_pattern $$ uCreateCl
+          $? (fun (cugets,(np,_cn)) -> np >= List.length cugets) in
+        let two_cugetl_list_createcl_pattern =
+           cugetl_list_createcl_pattern $*$ cugetl_list_createcl_pattern $>
+             (fun ((cugets,(np,cn)), (cugets',(np',cn'))) ->
+               (findperm cugets cugets', np, cn, np', cn'))
+           $? (function | (Some _perm, np, _cn, np', _cn') -> np=np' | _ -> false)
+           $> (function | (Some perm,_np,cn,_np',cn') -> (perm,cn,cn')
+                        | _ -> failwith "perms can't happen") in
+        let two_cugetl_list_createcl_action =
+          two_cugetl_list_createcl_pattern $>>
+           (fun (perm,cn,cn') ((_,n),(_,n')) ->
+           ( let debug_string = Printf.sprintf "create cl pattern at lines %d, %d" n n' in
+             let _ = Semdiff_logging.debug debug_string in
+             let newpc = (hs_of_pc pc, n) in
+             let newpc' = (hs_of_pc pc', n') in
+               classes_to_check := IntIntPermSet.add (cn,cn',perm) (!classes_to_check);
+               check newpc newpc' asn assumed todo)) in
+
         let string_fatal_pattern = uString $$ uFatal in
         let two_string_fatal_pattern =
           (string_fatal_pattern $*$ string_fatal_pattern) $? (fun ((_s,fop),(_s',fop')) ->
@@ -870,6 +911,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           concat_string_either_action;
           fpassl_action;
           two_string_fatal_action;
+          two_cugetl_list_createcl_action;
           failure_pattern_action;
          ] in
         bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

@@ -131,6 +131,7 @@ let class_passes_filter ~filter cls =
   match filter, cls with
   | No_filter, _
   | Class, {tc_kind = Ast.Cnormal; _}
+  | Class, {tc_kind = Ast.Cabstract; _}
   | Interface, {tc_kind = Ast.Cinterface; _}
   | Trait, {tc_kind = Ast.Ctrait; _} ->
     true

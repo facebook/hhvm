@@ -56,12 +56,17 @@ struct UnwindRDS {
    * on the eval stack. When present, that value lives here. */
   TypedValue tv;
 
-  /* When returning from a frame that had its m_savedRip smashed by the
-   * debugger, the return stub stashes values here to be used after running the
-   * appropriate catch trace. In addition, a non-nullptr debuggerReturnSP is
-   * used as the flag to endCatchHelper that it should perform a
-   * REQ_POST_DEBUGGER_RET rather than resuming the unwind process. */
-  TypedValue* debuggerReturnSP;
+  union {
+    /* When returning from a frame that had its m_savedRip smashed by
+     * the debugger, the return stub stashes values here to be used
+     * after running the appropriate catch trace. In addition, a
+     * non-nullptr debuggerReturnSP is used as the flag to
+     * endCatchHelper that it should perform a REQ_POST_DEBUGGER_RET
+     * rather than resuming the unwind process. */
+    TypedValue* debuggerReturnSP;
+    void* originalRip;
+  };
+  TYPE_SCAN_IGNORE_FIELD(originalRip);
   Offset debuggerReturnOff;
 
   /* This will be true iff the currently executing catch trace should side exit
@@ -79,6 +84,7 @@ IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
 IMPLEMENT_OFF(DebuggerReturnOff, debuggerReturnOff)
 IMPLEMENT_OFF(DebuggerReturnSP, debuggerReturnSP)
+IMPLEMENT_OFF(OriginalRip, originalRip)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,6 +118,11 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp);
  * TC.
  */
 void initUnwinder(TCA base, size_t size);
+
+/*
+ * Handle unknown exceptions for tc_unwind_personality
+ */
+[[noreturn]] void unknownExceptionHandler();
 
 ///////////////////////////////////////////////////////////////////////////////
 

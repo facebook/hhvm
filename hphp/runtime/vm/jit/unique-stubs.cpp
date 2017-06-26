@@ -1257,6 +1257,22 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   });
 }
 
+TCA emitUnknownExceptionHandler(CodeBlock& cb,
+                                DataBlock& data,
+                                UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  CGMeta meta;
+  auto const ret = vwrap(cb, data, meta, [&] (Vout& v) {
+    v << call{
+      TCA(unknownExceptionHandler), {}, &us.unknownExceptionHandlerPast
+    };
+  });
+  meta.process(nullptr);
+
+  return ret;
+}
+
 TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
@@ -1306,6 +1322,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, emitEndCatchHelper(frozen, data, *this));
+  ADD(unknownExceptionHandler, emitUnknownExceptionHandler(cold, data, *this));
 
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold, frozen, data));

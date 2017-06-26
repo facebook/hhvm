@@ -97,11 +97,11 @@ TypeInfoMap::SmartPtr typeInfoMap;
 /*
  * Sync VM regs for the TC frame represented by `context'.
  */
-void sync_regstate(_Unwind_Context* context) {
+void sync_regstate(TCA rip, _Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
 
-  uintptr_t fp = _Unwind_GetGR(context, dw_reg::FP);
-  uintptr_t ip = _Unwind_GetIP(context);
+  auto const fp = _Unwind_GetGR(context, dw_reg::FP);
+  auto const ip = uintptr_t(rip);
   FTRACE(2, "syncing regstate for: fp {:#x}, ip {:#x}\n", fp, ip);
 
   // fixupWork() takes an `ar' argument and syncs VM regs for the first TC
@@ -152,9 +152,8 @@ TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
  * Look up the catch trace for the return address in `ctx', and install it by
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
-bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
+bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
                          bool do_side_exit, TypedValue unwinder_tv) {
-  auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTrace = lookup_catch_trace(rip, exn);
   if (!catchTrace) {
     FTRACE(1, "no catch trace entry for ip {}; bailing\n", rip);
@@ -200,6 +199,49 @@ __thread std::pair<const std::type_info*, ExceptionKind> cachedTypeInfo;
 
 }
 
+void unknownExceptionHandler() {
+#ifndef _MSC_VER
+  __cxxabiv1::__cxa_begin_catch(g_unwind_rds->exn);
+#endif
+  auto const exn = std::current_exception();
+#ifndef _MSC_VER
+  __cxxabiv1::__cxa_end_catch();
+#endif
+  ExceptionKind ek;
+  try {
+    try {
+      std::rethrow_exception(exn);
+    } catch (const InvalidSetMException&) {
+      ek = ExceptionKind::InvalidSetMException;
+      throw;
+    } catch (const TVCoercionException&) {
+      ek = ExceptionKind::TVCoercionException;
+      throw;
+    } catch (const req::root<Object>&) {
+      ek = ExceptionKind::PhpException;
+      throw;
+    } catch (const Object&) {
+      ek = ExceptionKind::PhpException;
+      Logger::Error("Throwing an unwrapped Object");
+      throw;
+    } catch (const BaseException&) {
+      ek = ExceptionKind::CppException;
+      throw;
+    } catch (const std::exception& e) {
+      ek = ExceptionKind::Unclassified;
+      throw FatalErrorException(
+        0, "Invalid exception with message `%s'", e.what());
+    } catch (...) {
+      ek = ExceptionKind::Unclassified;
+      throw FatalErrorException("Unknown invalid exception");
+    }
+  } catch (...) {
+    cachedTypeInfo.second = ek;
+    typeInfoMap->emplace(cachedTypeInfo.first, ek);
+    throw;
+  };
+}
+
 _Unwind_Reason_Code
 tc_unwind_personality(int version,
                       _Unwind_Action actions,
@@ -238,53 +280,22 @@ tc_unwind_personality(int version,
     return cachedTypeInfo.second;
   }();
 
-  if (exceptionKind == ExceptionKind::Unclassified) {
+  if (UNLIKELY(exceptionKind == ExceptionKind::Unclassified)) {
     if (actions & _UA_SEARCH_PHASE) {
       FTRACE(1,
              "Unclassified exception was thrown, "
              "returning _URC_HANDLER_FOUND\n");
       return _URC_HANDLER_FOUND;
     }
-#ifndef _MSC_VER
-    __cxxabiv1::__cxa_begin_catch(ue);
-#endif
-    auto exn = std::current_exception();
-#ifndef _MSC_VER
-    __cxxabiv1::__cxa_end_catch();
-#endif
-    ExceptionKind ek;
-    try {
-      try {
-        std::rethrow_exception(exn);
-      } catch (const InvalidSetMException&) {
-        ek = ExceptionKind::InvalidSetMException;
-        throw;
-      } catch (const TVCoercionException&) {
-        ek = ExceptionKind::TVCoercionException;
-        throw;
-      } catch (const req::root<Object>&) {
-        ek = ExceptionKind::PhpException;
-        throw;
-      } catch (const Object&) {
-        ek = ExceptionKind::PhpException;
-        Logger::Error("Throwing an unwrapped Object");
-        throw;
-      } catch (const BaseException&) {
-        ek = ExceptionKind::CppException;
-        throw;
-      } catch (const std::exception& e) {
-        ek = ExceptionKind::CppException;
-        throw FatalErrorException(
-          0, "Invalid exception with message `%s'", e.what());
-      } catch (...) {
-        ek = ExceptionKind::CppException;
-        throw FatalErrorException("Unknown invalid exception");
-      }
-    } catch (...) {
-      cachedTypeInfo.second = ek;
-      typeInfoMap->emplace(ti, ek);
-      throw;
-    };
+    auto const& stubs = tc::ustubs();
+    auto const ip = (TCA)_Unwind_GetIP(context);
+    if (tl_regState == VMRegState::DIRTY) {
+      sync_regstate(ip, context);
+    }
+    g_unwind_rds->originalRip = ip;
+    g_unwind_rds->exn = ue;
+    _Unwind_SetIP(context, (uint64_t)stubs.unknownExceptionHandler);
+    return _URC_INSTALL_CONTEXT;
   }
 
   InvalidSetMException* ism = nullptr;
@@ -339,14 +350,29 @@ tc_unwind_personality(int version,
    * which is an exit trace from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
+    auto const& stubs = tc::ustubs();
+    auto ip = TCA(_Unwind_GetIP(context));
+
+    if (ip == stubs.unknownExceptionHandlerPast) {
+      assertx(g_unwind_rds->originalRip);
+      assertx(exceptionKind != ExceptionKind::Unclassified);
+
+      ip = (TCA)g_unwind_rds->originalRip;
+      FTRACE(1,
+             "rip == unknownExceptionHandlerPast; setting rip = {:#x}\n",
+             ip);
+      g_unwind_rds->originalRip = nullptr;
+    } else {
+      assertx(!g_unwind_rds->originalRip);
+    }
     if (tl_regState == VMRegState::DIRTY) {
-      sync_regstate(context);
+      sync_regstate(ip, context);
     }
 
     TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
     // If we have a catch trace at the IP in the frame given by `context',
     // install it.
-    if (install_catch_trace(context, ue, ism || tce, tv)) {
+    if (install_catch_trace(context, ip, ue, ism || tce, tv)) {
       // Note that we should always have a catch trace for the special runtime
       // helper exceptions above.
       always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
@@ -354,11 +380,8 @@ tc_unwind_personality(int version,
     }
     always_assert(!(actions & _UA_HANDLER_FRAME));
 
-    auto const ip = TCA(_Unwind_GetIP(context));
-
     assert(g_unwind_rds.isInit());
 
-    auto& stubs = tc::ustubs();
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;

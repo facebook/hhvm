@@ -414,6 +414,12 @@ struct UniqueStubs {
   TCA endCatchHelperPast;
 
   /*
+   * Handle unknown exceptions that are thrown across php code
+   */
+  TCA unknownExceptionHandler;
+  TCA unknownExceptionHandlerPast;
+
+  /*
    * Service request helper.
    *
    * Packs service request arguments into a struct on the stack before calling

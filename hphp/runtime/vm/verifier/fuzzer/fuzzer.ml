@@ -32,6 +32,7 @@ let reorder_reps = ref 1
 let replace_reps = ref 1
 let remove_reps = ref 1
 let insert_reps = ref 1
+let metadata_reps = ref 1
 let complete_reps = ref 0
 let mut_prob = ref 0.1
 let mag = ref 1
@@ -63,6 +64,8 @@ let options =
       "Number of remove mutations (default 1)");
    ("-insert",    Arg.Set_int insert_reps,
       "Number of insert mutations (default 1)");
+   ("-metadata",  Arg.Set_int metadata_reps,
+      "Number of metadata mutations (default 1)");
    ("-complete", Arg.Set_int complete_reps,
       "Number of complete mutations (default 0,
       overrides other mutation parameters)")
@@ -138,11 +141,17 @@ let mutate (mut: IS.t -> IS.t) (prog : HP.t) n (acc: mutation_monad) =
 
 open Hhbc_ast
 
+let option_lift f = function
+| Some x -> Some (f x)
+| None -> None
+
 let rand_elt lst =
   let i = Random.int (List.length lst) in
   List.nth lst i
 
 let should_mutate () = Random.float 1.0 < !mut_prob
+
+let mutate_bool b = if should_mutate() then not b else b
 
 let mutate_int n c =    (*TODO: in what cases is it okay to generate negative
                           numbers?*)
@@ -379,7 +388,6 @@ let mut_imms (is : IS.t) : IS.t =
     | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag) in
 
   let mutate_iterator data s =
-    let mutate_bool b = if should_mutate() then not b else b in
     match s with
     | IterInit   (i, l, id)      ->
         IterInit   (i, mutate_label data l,      mutate_local_id id  !mag)
@@ -429,22 +437,22 @@ let mut_imms (is : IS.t) : IS.t =
    let mutate_silence op =
      if should_mutate() then [Start; End] |> rand_elt else op in
     match s with
-    | BareThis        b        -> BareThis        (mutate_bare            b)
-    | InitThisLoc     id       -> InitThisLoc     (mutate_local_id id  !mag)
+    | BareThis        b       -> BareThis        (mutate_bare            b)
+    | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
     | StaticLocCheck (id, str) -> StaticLocCheck (mutate_local_id id  !mag, str)
     | StaticLocInit  (id, str) -> StaticLocInit  (mutate_local_id id  !mag, str)
     | StaticLocDef  (id, str)  -> StaticLocDef   (mutate_local_id id  !mag, str)
-    | OODeclExists    k        -> OODeclExists    (mutate_kind            k)
-    | VerifyParamType p        -> VerifyParamType (mutate_param_id p   !mag)
-    | Self            i        -> Self            (mutate_int      i   !mag)
-    | Parent          i        -> Parent          (mutate_int      i   !mag)
-    | LateBoundCls    i        -> LateBoundCls    (mutate_int      i   !mag)
-    | ClsRefName      i        -> ClsRefName      (mutate_int      i   !mag)
-    | IncStat        (i,  i') -> IncStat          (mutate_int      i   !mag,
-                                                   mutate_int      i'  !mag)
-    | CreateCl       (i,  i') -> CreateCl         (mutate_int      i   !mag,
-                                                   mutate_int      i'  !mag)
-    | GetMemoKeyL    id       -> GetMemoKeyL      (mutate_local_id id !mag)
+    | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
+    | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
+    | Self            i       -> Self            (mutate_int      i   !mag)
+    | Parent          i       -> Parent          (mutate_int      i   !mag)
+    | LateBoundCls    i       -> LateBoundCls    (mutate_int      i   !mag)
+    | ClsRefName      i       -> ClsRefName      (mutate_int      i   !mag)
+    | IncStat        (i,  i') -> IncStat         (mutate_int      i   !mag,
+                                                  mutate_int      i'  !mag)
+    | CreateCl       (i,  i') -> CreateCl        (mutate_int      i   !mag,
+                                                  mutate_int      i'  !mag)
+    | GetMemoKeyL    id       -> GetMemoKeyL     (mutate_local_id id !mag)
     | Silence (id, op) -> Silence (mutate_local_id id !mag, mutate_silence op)
     | MemoSet     (i, id, i') ->
         MemoSet (mutate_int i !mag, mutate_local_id id !mag, mutate_int i' !mag)
@@ -534,6 +542,152 @@ let mutate_replace (input : HP.t) : mutation_monad =
 let mutate_insert (input : HP.t) : mutation_monad =
   let mut _ = failwith "TODO" in
   mutate mut input !insert_reps  (Nondet.return input)
+
+let mutate_metadata (input : HP.t)  =
+  if !debug then print_endline "Mutating metadata";
+  let rec delete_map f = function
+    | [] -> []
+    | h::t -> if should_mutate()
+              then delete_map f t
+              else (f h)::delete_map f t in
+  let mutate_option opt =
+    if not (should_mutate()) then opt else None in
+  let mutate_typed_value (v : Typed_value.t) : Typed_value.t =
+    if not (should_mutate()) then v else
+    [Typed_value.Uninit; Typed_value.Int (Int64.of_int 1);
+     Typed_value.Bool true; Typed_value.Float 0.1;
+     Typed_value.String ""; Typed_value.Null;
+     Typed_value.Array [Typed_value.Null, Typed_value.Null];
+     Typed_value.Vec [Typed_value.Null]; Typed_value.Keyset [Typed_value.Null];
+     Typed_value.Dict [Typed_value.Null, Typed_value.Null]] |> rand_elt in
+  let module HTC = Hhas_type_constraint in
+  let mutate_flag (f : HTC.type_constraint_flag) : HTC.type_constraint_flag =
+    if not (should_mutate()) then f else
+    [HTC.Nullable; HTC.HHType; HTC.ExtendedHint;
+     HTC.TypeVar;  HTC.Soft;   HTC.TypeConstant] |> rand_elt in
+  let mutate_constraint (const : HTC.t) : HTC.t =
+    HTC.make
+      (const |> HTC.name  |> mutate_option)
+      (const |> HTC.flags |> delete_map mutate_flag) in
+  let mutate_type_info (info : Hhas_type_info.t) : Hhas_type_info.t =
+    Hhas_type_info.make
+      (info |> Hhas_type_info.user_type       |> mutate_option)
+      (info |> Hhas_type_info.type_constraint |> mutate_constraint) in
+  let mutate_attribute (att : Hhas_attribute.t) : Hhas_attribute.t =
+    Hhas_attribute.make
+      (att |> Hhas_attribute.name)
+      (att |> Hhas_attribute.arguments |> delete_map mutate_typed_value) in
+  let mutate_param (param : Hhas_param.t) : Hhas_param.t =
+    Hhas_param.make
+      (param |> Hhas_param.name)
+      (param |> Hhas_param.is_reference |> mutate_bool)
+      (param |> Hhas_param.is_variadic |> mutate_bool)
+      (param |> Hhas_param.type_info |> option_lift mutate_type_info)
+      (param |> Hhas_param.default_value) in
+  let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
+    let mutate_static_init (s, opt) = (s, mutate_option opt) in
+    Hhas_body.make
+      (body |> Hhas_body.instrs)
+      (body |> Hhas_body.decl_vars)
+      (body |> Hhas_body.num_iters)
+      (body |> Hhas_body.num_cls_ref_slots  |> fun n -> mutate_int n !mag)
+      (body |> Hhas_body.is_memoize_wrapper |> mutate_bool)
+      (body |> Hhas_body.params             |> delete_map mutate_param)
+      (body |> Hhas_body.return_type        |> option_lift mutate_type_info)
+      (body |> Hhas_body.static_inits       |> delete_map mutate_static_init) in
+  let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =
+    let module HC = Hhas_class in
+    let mutate_cls_id (id : Hhbc_id.Class.t) : Hhbc_id.Class.t =
+       if not (should_mutate()) then id else rand_elt ids in
+    let mutate_method_data (m : Hhas_method.t) : Hhas_method.t =
+      Hhas_method.make
+        (m |> Hhas_method.attributes        |> delete_map mutate_attribute)
+        (m |> Hhas_method.is_protected      |> mutate_bool)
+        (m |> Hhas_method.is_public         |> mutate_bool)
+        (m |> Hhas_method.is_private        |> mutate_bool)
+        (m |> Hhas_method.is_static         |> mutate_bool)
+        (m |> Hhas_method.is_final          |> mutate_bool)
+        (m |> Hhas_method.is_abstract       |> mutate_bool)
+        (m |> Hhas_method.no_injection      |> mutate_bool)
+        (m |> Hhas_method.name)
+        (m |> Hhas_method.body              |> mutate_body_data)
+        (m |> Hhas_method.is_async          |> mutate_bool)
+        (m |> Hhas_method.is_generator      |> mutate_bool)
+        (m |> Hhas_method.is_pair_generator |> mutate_bool)
+        (m |> Hhas_method.is_closure_body   |> mutate_bool) in
+    let mutate_property (prop : Hhas_property.t) : Hhas_property.t =
+      Hhas_property.make
+        (prop |> Hhas_property.is_private         |> mutate_bool)
+        (prop |> Hhas_property.is_protected       |> mutate_bool)
+        (prop |> Hhas_property.is_public          |> mutate_bool)
+        (prop |> Hhas_property.is_static          |> mutate_bool)
+        (prop |> Hhas_property.is_deep_init       |> mutate_bool)
+        (prop |> Hhas_property.no_serialize       |> mutate_bool)
+        (prop |> Hhas_property.name)
+        (prop |> Hhas_property.initial_value |> option_lift mutate_typed_value)
+        (prop |> Hhas_property.initializer_instrs |> mutate_option)
+        (prop |> Hhas_property.type_info |> option_lift mutate_type_info) in
+    let mutate_constant (const : Hhas_constant.t) : Hhas_constant.t =
+      Hhas_constant.make
+        (const |> Hhas_constant.name)
+        (const |> Hhas_constant.value |> option_lift mutate_typed_value)
+        (const |> Hhas_constant.initializer_instrs |> mutate_option) in
+    let mutate_typed_constant (const : Hhas_type_constant.t) =
+      Hhas_type_constant.make
+        (const |> Hhas_type_constant.name)
+        (const |> Hhas_type_constant.initializer_t
+                                          |> option_lift mutate_typed_value) in
+    let mutate_req ((trait, str) as pair) =
+      if not (should_mutate()) then pair else
+      match trait with
+      | Ast.MustExtend -> Ast.MustImplement, str
+      | Ast.MustImplement -> Ast.MustExtend, str in
+    HC.make
+      (cls |> HC.attributes         |> delete_map mutate_attribute)
+      (cls |> HC.base               |> option_lift mutate_cls_id)
+      (cls |> HC.implements         |> delete_map mutate_cls_id)
+      (cls |> HC.name)
+      (cls |> HC.is_final           |> mutate_bool)
+      (cls |> HC.is_abstract        |> mutate_bool)
+      (cls |> HC.is_interface       |> mutate_bool)
+      (cls |> HC.is_trait           |> mutate_bool)
+      (cls |> HC.is_xhp             |> mutate_bool)
+      (cls |> HC.is_top             |> mutate_bool)
+      (cls |> HC.class_uses)
+      (cls |> HC.class_use_aliases)
+      (cls |> HC.enum_type          |> option_lift mutate_type_info)
+      (cls |> HC.methods            |> delete_map mutate_method_data)
+      (cls |> HC.properties         |> delete_map mutate_property)
+      (cls |> HC.constants          |> delete_map mutate_constant)
+      (cls |> HC.type_constants     |> delete_map mutate_typed_constant)
+      (cls |> HC.requirements       |> delete_map mutate_req) in
+  let mutate_fun_data (f : Hhas_function.t) : Hhas_function.t =
+    Hhas_function.make
+      (f |> Hhas_function.attributes        |> delete_map mutate_attribute)
+      (f |> Hhas_function.name)
+      (f |> Hhas_function.body              |> mutate_body_data)
+      (f |> Hhas_function.is_async          |> mutate_bool)
+      (f |> Hhas_function.is_generator      |> mutate_bool)
+      (f |> Hhas_function.is_pair_generator |> mutate_bool)
+      (f |> Hhas_function.is_top            |> mutate_bool) in
+  let mutate_typedef (typedef : Hhas_typedef.t) : Hhas_typedef.t =
+    Hhas_typedef.make
+      (typedef |> Hhas_typedef.name)
+      (typedef |> Hhas_typedef.type_info      |> mutate_type_info)
+      (typedef |> Hhas_typedef.type_structure |>
+                                            option_lift mutate_typed_value) in
+  let mut_data (prog : HP.t) : HP.t =
+    let ids = prog |> HP.classes |> delete_map Hhas_class.name in
+    HP.make
+      (prog |> HP.adata)
+      (prog |> HP.functions |> delete_map mutate_fun_data)
+      (prog |> HP.classes   |> delete_map (mutate_class_data ids))
+      (prog |> HP.typedefs  |> delete_map mutate_typedef)
+      (prog |> HP.main      |> mutate_body_data) in
+  let open Nondet in
+  Instr_utils.num_fold
+    (fun a -> mut_data input |> add_event a) !metadata_reps (return input)
+
 (*---------------------------------Execution----------------------------------*)
 
 open Nondet
@@ -549,10 +703,11 @@ let _ =
     set_binary_mode_out stdout true;
     let input = read_input () in
     let mutations = [mutate_immediate; mutate_duplicate; mutate_reorder;
-                     mutate_remove;    (*mutate_replace;   mutate_insert *)] in
+                     mutate_remove;    (*mutate_replace;   mutate_insert *)
+                     mutate_metadata] in
     if (!complete_reps > 0)
     then (imm_reps := 1; dup_reps := 1; reorder_reps := 1; remove_reps := 1;
-         replace_reps := 1; insert_reps := 1)
+         replace_reps := 1; insert_reps := 1; metadata_reps := 1)
     else complete_reps := 1;
     for n = 1 to !complete_reps do
       fuzz input mutations

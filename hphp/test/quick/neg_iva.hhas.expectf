@@ -1,2 +1,2 @@
 
-Fatal error: Assembler Error: line 22: IVA immediates may not be less than 0 in %s on line -1
+Fatal error: Assembler Error: line 22: couldn't convert input argument (-1) to proper type in %s on line -1

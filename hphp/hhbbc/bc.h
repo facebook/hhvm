@@ -300,7 +300,7 @@ namespace imm {
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
-#define IMM_TY_IVA      int32_t
+#define IMM_TY_IVA      uint32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
 #define IMM_TY_IA       IterId

@@ -210,7 +210,7 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void emitCreateCl(IRGS& env, int32_t numParams, int32_t clsIx) {
+void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
   auto cls = Unit::defClosure(preCls);
 
@@ -273,7 +273,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, int32_t clsIx) {
   push(env, closure);
 }
 
-void emitNewArray(IRGS& env, int32_t capacity) {
+void emitNewArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, staticEmptyArray()));
   } else {
@@ -281,7 +281,7 @@ void emitNewArray(IRGS& env, int32_t capacity) {
   }
 }
 
-void emitNewMixedArray(IRGS& env, int32_t capacity) {
+void emitNewMixedArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, staticEmptyArray()));
   } else {
@@ -289,11 +289,11 @@ void emitNewMixedArray(IRGS& env, int32_t capacity) {
   }
 }
 
-void emitNewDictArray(IRGS& env, int32_t capacity) {
+void emitNewDictArray(IRGS& env, uint32_t capacity) {
   push(env, gen(env, NewDictArray, cns(env, capacity)));
 }
 
-void emitNewKeysetArray(IRGS& env, int32_t numArgs) {
+void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
   auto const array = gen(
     env,
     NewKeysetArray,
@@ -307,7 +307,7 @@ void emitNewKeysetArray(IRGS& env, int32_t numArgs) {
   push(env, array);
 }
 
-void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
+void emitNewLikeArrayL(IRGS& env, int32_t id, uint32_t capacity) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -325,11 +325,11 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
 namespace {
 
 ALWAYS_INLINE
-void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
+void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
   auto const array = gen(
     env,
     op,
-    PackedArrayData { static_cast<uint32_t>(numArgs) }
+    PackedArrayData { numArgs }
   );
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
@@ -338,7 +338,7 @@ void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
       InitPackedLayoutArrayLoop,
       InitPackedArrayLoopData {
         spOffBCFromIRSP(env),
-        static_cast<uint32_t>(numArgs)
+        numArgs
       },
       array,
       sp(env)
@@ -362,11 +362,11 @@ void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
 
 }
 
-void emitNewPackedArray(IRGS& env, int32_t numArgs) {
+void emitNewPackedArray(IRGS& env, uint32_t numArgs) {
   emitNewPackedLayoutArray(env, numArgs, AllocPackedArray);
 }
 
-void emitNewVecArray(IRGS& env, int32_t numArgs) {
+void emitNewVecArray(IRGS& env, uint32_t numArgs) {
   emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
 }
 
@@ -435,7 +435,7 @@ void emitAddNewElemC(IRGS& env) {
   push(env, gen(env, AddNewElem, arr, val));
 }
 
-void emitNewCol(IRGS& env, int type) {
+void emitNewCol(IRGS& env, uint32_t type) {
   assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   push(env, gen(env, NewCol, NewColData{type}));
 }
@@ -448,7 +448,7 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitColFromArray(IRGS& env, int type) {
+void emitColFromArray(IRGS& env, uint32_t type) {
   assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   auto const arr = popC(env);
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));

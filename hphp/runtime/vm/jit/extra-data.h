@@ -577,7 +577,7 @@ struct SyncReturnBCData : IRExtraData {
 
 struct CallArrayData : IRExtraData {
   explicit CallArrayData(IRSPRelOffset spOffset,
-                         int32_t numParams,
+                         uint32_t numParams,
                          Offset pcOffset,
                          Offset after,
                          const Func* callee,
@@ -604,7 +604,7 @@ struct CallArrayData : IRExtraData {
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
-  int32_t numParams;
+  uint32_t numParams;
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   const Func* callee; // nullptr if not statically known
@@ -1106,7 +1106,7 @@ struct ContEnterData : IRExtraData {
 };
 
 struct NewColData : IRExtraData {
-  explicit NewColData(int itype)
+  explicit NewColData(uint32_t itype)
     : type(static_cast<CollectionType>(itype))
   {}
 

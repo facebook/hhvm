@@ -86,9 +86,14 @@ struct MemberKey {
     , iva{0}
   {}
 
-  MemberKey(MemberCode mcode, int32_t iva)
+  MemberKey(MemberCode mcode, uint32_t iva)
     : mcode{mcode}
     , iva{iva}
+  {}
+
+  MemberKey(MemberCode mcode, int32_t int64)
+    : mcode{mcode}
+    , int64{int64}
   {}
 
   MemberKey(MemberCode mcode, int64_t int64)

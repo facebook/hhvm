@@ -200,10 +200,10 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
 
 void finish_builtin(ISS& env,
                     borrowed_ptr<const php::Func> func,
-                    int numParams,
+                    uint32_t numParams,
                     bool unpack);
 
-void reduce_fpass_arg(ISS& env, const Bytecode&, int param, bool byRef);
+void reduce_fpass_arg(ISS& env, const Bytecode&, uint32_t param, bool byRef);
 
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
 

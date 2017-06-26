@@ -267,7 +267,7 @@ void emitAwait(IRGS& env) {
 }
 
 void emitFCallAwait(IRGS& env,
-                    int32_t numParams,
+                    uint32_t numParams,
                     const StringData*,
                     const StringData*) {
   auto const resumeOffset = nextBcOff(env);

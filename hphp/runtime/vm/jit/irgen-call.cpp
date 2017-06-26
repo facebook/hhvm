@@ -136,7 +136,7 @@ bool canInstantiateClass(const Class* cls) {
 void fpushObjMethodUnknown(IRGS& env,
                            SSATmp* obj,
                            const StringData* methodName,
-                           int32_t numParams,
+                           uint32_t numParams,
                            bool shouldFatal) {
   emitIncStat(env, Stats::ObjMethod_cached, 1);
   fpushActRec(env,
@@ -193,7 +193,7 @@ void fpushObjMethodExactFunc(
   const Class* exactClass,
   const Func* func,
   const StringData* methodName,
-  int32_t numParams
+  uint32_t numParams
 ) {
   /*
    * lookupImmutableMethod will return Funcs from AttrUnique classes, but in
@@ -262,7 +262,7 @@ void fpushObjMethodNonExactFunc(
   SSATmp* obj,
   const Class* baseClass,
   const Func* func,
-  int32_t numParams
+  uint32_t numParams
 ) {
   emitIncStat(env, Stats::ObjMethod_methodslot, 1);
   auto const clsTmp = gen(env, LdObjClass, obj);
@@ -290,7 +290,7 @@ void fpushObjMethodWithBaseClass(
   SSATmp* obj,
   const Class* baseClass,
   const StringData* methodName,
-  int32_t numParams,
+  uint32_t numParams,
   bool shouldFatal,
   bool exactClass
 ) {
@@ -399,7 +399,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
                                 SSATmp* objOrCls,
                                 Block* sideExit,
                                 const StringData* methodName,
-                                int32_t numParams) {
+                                uint32_t numParams) {
   if (!profile.optimizing()) return false;
   if (env.transFlags.noProfiledFPush && env.firstBcInst) return false;
 
@@ -505,7 +505,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
 void fpushObjMethod(IRGS& env,
                     SSATmp* obj,
                     const StringData* methodName,
-                    int32_t numParams,
+                    uint32_t numParams,
                     bool shouldFatal,
                     Block* sideExit) {
   emitIncStat(env, Stats::ObjMethod_total, 1);
@@ -546,7 +546,7 @@ void fpushObjMethod(IRGS& env,
   }
 }
 
-void fpushFuncObj(IRGS& env, int32_t numParams) {
+void fpushFuncObj(IRGS& env, uint32_t numParams) {
   auto const slowExit = makeExitSlow(env);
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
@@ -554,7 +554,7 @@ void fpushFuncObj(IRGS& env, int32_t numParams) {
   fpushActRec(env, func, obj, numParams, nullptr);
 }
 
-void fpushFuncArr(IRGS& env, int32_t numParams) {
+void fpushFuncArr(IRGS& env, uint32_t numParams) {
   auto const thisAR = fp(env);
 
   auto const arr = popC(env);
@@ -579,7 +579,7 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
 }
 
 // FPushCuf when the callee is not known at compile time.
-void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
+void fpushCufUnknown(IRGS& env, Op op, uint32_t numParams) {
   if (op != Op::FPushCuf) {
     PUNT(fpushCufUnknown-nonFPushCuf);
   }
@@ -650,7 +650,7 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
               });
 }
 
-void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
+void implFPushCufOp(IRGS& env, Op op, uint32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
   SSATmp* callable = topC(env, BCSPRelOffset{safe ? 1 : 0});
@@ -705,7 +705,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
 }
 
 void fpushFuncCommon(IRGS& env,
-                     int32_t numParams,
+                     uint32_t numParams,
                      const StringData* name,
                      const StringData* fallback) {
 
@@ -885,7 +885,7 @@ bool callNeedsCallerFrame(const NormalizedInstruction& inst,
 void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
-                 int32_t numArgs,
+                 uint32_t numArgs,
                  const StringData* invName) {
   ActRecInfo info;
   info.spOffset = offsetFromIRSP(
@@ -907,7 +907,7 @@ void fpushActRec(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
+void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
   auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
   auto const ctx = gen(
     env,
@@ -936,17 +936,17 @@ void emitFPushCufIter(IRGS& env, int32_t numParams, int32_t itId) {
   gen(env, SpillFrame, info, sp(env), func, ctx, invName);
 }
 
-void emitFPushCuf(IRGS& env, int32_t numArgs) {
+void emitFPushCuf(IRGS& env, uint32_t numArgs) {
   implFPushCufOp(env, Op::FPushCuf, numArgs);
 }
-void emitFPushCufF(IRGS& env, int32_t numArgs) {
+void emitFPushCufF(IRGS& env, uint32_t numArgs) {
   implFPushCufOp(env, Op::FPushCufF, numArgs);
 }
-void emitFPushCufSafe(IRGS& env, int32_t numArgs) {
+void emitFPushCufSafe(IRGS& env, uint32_t numArgs) {
   implFPushCufOp(env, Op::FPushCufSafe, numArgs);
 }
 
-void emitFPushCtor(IRGS& env, int32_t numParams, uint32_t slot) {
+void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
   auto const cls  = takeClsRef(env, slot);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
@@ -955,7 +955,7 @@ void emitFPushCtor(IRGS& env, int32_t numParams, uint32_t slot) {
 }
 
 void emitFPushCtorD(IRGS& env,
-                    int32_t numParams,
+                    uint32_t numParams,
                     const StringData* className) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
@@ -984,8 +984,8 @@ void emitFPushCtorD(IRGS& env,
 }
 
 void emitFPushCtorI(IRGS& env,
-                    int32_t numParams,
-                    int32_t clsIx) {
+                    uint32_t numParams,
+                    uint32_t clsIx) {
   auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
   auto const cls = [&] () -> Class* {
     auto const c = preClass->namedEntity()->clsList();
@@ -1028,18 +1028,18 @@ void emitFPushCtorI(IRGS& env,
   fpushActRec(env, ssaFunc, obj, numParams, nullptr);
 }
 
-void emitFPushFuncD(IRGS& env, int32_t nargs, const StringData* name) {
+void emitFPushFuncD(IRGS& env, uint32_t nargs, const StringData* name) {
   fpushFuncCommon(env, nargs, name, nullptr);
 }
 
 void emitFPushFuncU(IRGS& env,
-                    int32_t nargs,
+                    uint32_t nargs,
                     const StringData* name,
                     const StringData* fallback) {
   fpushFuncCommon(env, nargs, name, fallback);
 }
 
-void emitFPushFunc(IRGS& env, int32_t numParams) {
+void emitFPushFunc(IRGS& env, uint32_t numParams) {
   if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
   if (topC(env)->isA(TArr)) return fpushFuncArr(env, numParams);
 
@@ -1065,7 +1065,7 @@ void emitFPushFunc(IRGS& env, int32_t numParams) {
 }
 
 void emitFPushObjMethodD(IRGS& env,
-                         int32_t numParams,
+                         uint32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
   TransFlags trFlags;
@@ -1094,7 +1094,7 @@ void emitFPushObjMethodD(IRGS& env,
 }
 
 bool fpushClsMethodKnown(IRGS& env,
-                         int32_t numParams,
+                         uint32_t numParams,
                          const StringData* methodName,
                          SSATmp* ctxTmp,
                          const Class *baseClass,
@@ -1135,7 +1135,7 @@ bool fpushClsMethodKnown(IRGS& env,
 }
 
 void emitFPushClsMethodD(IRGS& env,
-                         int32_t numParams,
+                         uint32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
   if (auto const baseClass =
@@ -1179,7 +1179,7 @@ void emitFPushClsMethodD(IRGS& env,
 
 template<bool forward>
 ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
-                                        int32_t numParams,
+                                        uint32_t numParams,
                                         int32_t clsRefSlot) {
   TransFlags trFlags;
   trFlags.noProfiledFPush = true;
@@ -1255,11 +1255,11 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 }
 
-void emitFPushClsMethod(IRGS& env, int32_t numParams, uint32_t slot) {
+void emitFPushClsMethod(IRGS& env, uint32_t numParams, uint32_t slot) {
   fpushClsMethodCommon<false>(env, numParams, slot);
 }
 
-void emitFPushClsMethodF(IRGS& env, int32_t numParams, uint32_t slot) {
+void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot) {
   fpushClsMethodCommon<true>(env, numParams, slot);
 }
 
@@ -1278,7 +1278,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams, uint32_t slot) {
  * work around it easily.
  */
 
-void emitFPassL(IRGS& env, int32_t argNum, int32_t id) {
+void emitFPassL(IRGS& env, uint32_t argNum, int32_t id) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetL(env, id);
   } else {
@@ -1286,7 +1286,7 @@ void emitFPassL(IRGS& env, int32_t argNum, int32_t id) {
   }
 }
 
-void emitFPassS(IRGS& env, int32_t argNum, uint32_t slot) {
+void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetS(env, slot);
   } else {
@@ -1294,7 +1294,7 @@ void emitFPassS(IRGS& env, int32_t argNum, uint32_t slot) {
   }
 }
 
-void emitFPassG(IRGS& env, int32_t argNum) {
+void emitFPassG(IRGS& env, uint32_t argNum) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetG(env);
   } else {
@@ -1302,7 +1302,7 @@ void emitFPassG(IRGS& env, int32_t argNum) {
   }
 }
 
-void emitFPassR(IRGS& env, int32_t argNum) {
+void emitFPassR(IRGS& env, uint32_t argNum) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     PUNT(FPassR-byRef);
   }
@@ -1312,7 +1312,7 @@ void emitFPassR(IRGS& env, int32_t argNum) {
 
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
 
-void emitFPassV(IRGS& env, int32_t argNum) {
+void emitFPassV(IRGS& env, uint32_t argNum) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // FPassV is a no-op when the callee expects by ref.
     return;
@@ -1323,14 +1323,14 @@ void emitFPassV(IRGS& env, int32_t argNum) {
   decRef(env, tmp);
 }
 
-void emitFPassCE(IRGS& env, int32_t argNum) {
+void emitFPassCE(IRGS& env, uint32_t argNum) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
 }
 
-void emitFPassCW(IRGS& env, int32_t argNum) {
+void emitFPassCW(IRGS& env, uint32_t argNum) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);
@@ -1362,7 +1362,7 @@ void emitFCallArray(IRGS& env) {
   push(env, retVal);
 }
 
-void emitFCallUnpack(IRGS& env, int32_t numParams) {
+void emitFCallUnpack(IRGS& env, uint32_t numParams) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const writeLocals = callee
@@ -1386,13 +1386,13 @@ void emitFCallUnpack(IRGS& env, int32_t numParams) {
 }
 
 void emitFCallD(IRGS& env,
-                int32_t numParams,
+                uint32_t numParams,
                 const StringData*,
                 const StringData*) {
   emitFCall(env, numParams);
 }
 
-SSATmp* implFCall(IRGS& env, int32_t numParams) {
+SSATmp* implFCall(IRGS& env, uint32_t numParams) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
   auto const callee = env.currentNormalizedInstruction->funcd;
 
@@ -1431,11 +1431,11 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
   return retVal;
 }
 
-void emitFCall(IRGS& env, int32_t numParams) {
+void emitFCall(IRGS& env, uint32_t numParams) {
   implFCall(env, numParams);
 }
 
-void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
+void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
 

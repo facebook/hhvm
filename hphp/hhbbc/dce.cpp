@@ -1298,7 +1298,7 @@ void dce(Env& env, const bc::AddElemC& op) {
           bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
         } else if (cat.cat == Type::ArrayCat::Packed) {
           bcs.emplace_back(
-            bc::NewPackedArray { static_cast<int32_t>(*postSize) }
+            bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
           );
         } else {
           return PushFlags::MarkLive;

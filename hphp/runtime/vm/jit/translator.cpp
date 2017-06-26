@@ -727,7 +727,8 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
   if (flags & StackI) {
     inputs.emplace_back(Location::Stack {
-      BCSPRelOffset{ni.imm[0].u_IVA}.to<FPInvOffset>(bcSPOff)
+      BCSPRelOffset{safe_cast<int32_t>(ni.imm[0].u_IVA)}.
+        to<FPInvOffset>(bcSPOff)
     });
   }
   if (flags & StackN) {

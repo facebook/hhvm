@@ -396,7 +396,7 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
 
 void finish_builtin(ISS& env,
                     borrowed_ptr<const php::Func> func,
-                    int numArgs,
+                    uint32_t numArgs,
                     bool unpack) {
   std::vector<Bytecode> repl;
   assert(!unpack ||
@@ -419,7 +419,7 @@ void finish_builtin(ISS& env,
       func->params.back().isVariadic &&
       numArgs >= func->params.size()) {
 
-    const int32_t numToPack = numArgs - func->params.size() + 1;
+    const uint32_t numToPack = numArgs - func->params.size() + 1;
     repl.emplace_back(bc::NewPackedArray { numToPack });
     numArgs = func->params.size();
   }
@@ -428,14 +428,14 @@ void finish_builtin(ISS& env,
 
   repl.emplace_back(
     bc::FCallBuiltin {
-      static_cast<int32_t>(func->params.size()), numArgs, func->name }
+      static_cast<uint32_t>(func->params.size()), numArgs, func->name }
   );
 
   reduce(env, std::move(repl));
   fpiPop(env);
 }
 
-void reduce_fpass_arg(ISS& env, const Bytecode& bc, int param, bool byRef) {
+void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef){
   auto ar = fpiTop(env);
   if (ar.kind == FPIKind::Builtin) {
     return reduce(env, bc);

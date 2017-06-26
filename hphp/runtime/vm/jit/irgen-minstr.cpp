@@ -1838,7 +1838,7 @@ MOpMode fpassFlags(IRGS& env, int32_t idx) {
 
 }
 
-void emitBaseNC(IRGS& env, int32_t idx, MOpMode mode) {
+void emitBaseNC(IRGS& env, uint32_t idx, MOpMode mode) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
@@ -1846,17 +1846,17 @@ void emitBaseNL(IRGS& env, int32_t locId, MOpMode mode) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
-void emitFPassBaseNC(IRGS& env, int32_t arg, int32_t idx) {
+void emitFPassBaseNC(IRGS& env, uint32_t arg, uint32_t idx) {
   emitBaseNC(env, idx, fpassFlags(env, arg));
 }
 
-void emitFPassBaseNL(IRGS& env, int32_t arg, int32_t locId) {
+void emitFPassBaseNL(IRGS& env, uint32_t arg, int32_t locId) {
   emitBaseNL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseGC(IRGS& env, int32_t idx, MOpMode mode) {
+void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
-  auto name = top(env, BCSPRelOffset{idx});
+  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
   baseGImpl(env, name, mode);
 }
 
@@ -1867,17 +1867,17 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   baseGImpl(env, name, mode);
 }
 
-void emitFPassBaseGC(IRGS& env, int32_t arg, int32_t idx) {
+void emitFPassBaseGC(IRGS& env, uint32_t arg, uint32_t idx) {
   emitBaseGC(env, idx, fpassFlags(env, arg));
 }
 
-void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
+void emitFPassBaseGL(IRGS& env, uint32_t arg, int32_t locId) {
   emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseSC(IRGS& env, int32_t propIdx, uint32_t slot) {
+void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot) {
   initTvRefs(env);
-  auto name = top(env, BCSPRelOffset{propIdx});
+  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
   baseSImpl(env, name, slot);
 }
 
@@ -1903,14 +1903,14 @@ void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
   simpleBaseImpl(env, base, Location::Local { safe_cast<uint32_t>(locId) });
 }
 
-void emitFPassBaseL(IRGS& env, int32_t arg, int32_t locId) {
+void emitFPassBaseL(IRGS& env, uint32_t arg, int32_t locId) {
   emitBaseL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseC(IRGS& env, int32_t idx) {
+void emitBaseC(IRGS& env, uint32_t idx) {
   initTvRefs(env);
 
-  auto const bcOff = BCSPRelOffset{idx};
+  auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
   auto const irOff = offsetFromIRSP(env, bcOff);
   gen(env, StMBase, ldStkAddr(env, bcOff));
 
@@ -1918,7 +1918,7 @@ void emitBaseC(IRGS& env, int32_t idx) {
   simpleBaseImpl(env, base, Location::Stack { offsetFromFP(env, irOff) });
 }
 
-void emitBaseR(IRGS& env, int32_t idx) {
+void emitBaseR(IRGS& env, uint32_t idx) {
   emitBaseC(env, idx);
 }
 
@@ -1953,11 +1953,11 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   gen(env, StMBase, newBase);
 }
 
-void emitFPassDim(IRGS& env, int32_t arg, MemberKey mk) {
+void emitFPassDim(IRGS& env, uint32_t arg, MemberKey mk) {
   emitDim(env, fpassFlags(env, arg), mk);
 }
 
-void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
+void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   if (mk.mcode == MW) PUNT(QueryNewElem);
 
   auto const baseType = predictedBaseType(env);
@@ -2019,7 +2019,7 @@ void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitVGetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
 
   auto const result = [&] {
@@ -2038,14 +2038,14 @@ void emitVGetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitFPassM(IRGS& env, int32_t arg, int32_t nDiscard, MemberKey mk) {
+void emitFPassM(IRGS& env, uint32_t arg, uint32_t nDiscard, MemberKey mk) {
   if (fpassFlags(env, arg) == MOpMode::Warn) {
     return emitQueryM(env, nDiscard, QueryMOp::CGet, mk);
   }
   emitVGetM(env, nDiscard, mk);
 }
 
-void emitSetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const key = memberKey(env, mk);
   auto const result =
     mk.mcode == MW        ? setNewElemImpl(env) :
@@ -2056,7 +2056,7 @@ void emitSetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec, MemberKey mk) {
+void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   auto key = memberKey(env, mk);
 
   auto const result = [&] {
@@ -2143,7 +2143,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   return gen(env, SetOpProp, SetOpData{op}, base, key, rhs);
 }
 
-void emitSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
+void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto key = memberKey(env, mk);
   auto rhs = topC(env);
 
@@ -2161,7 +2161,7 @@ void emitSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitBindM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+void emitBindM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
   auto rhs = topV(env);
 
@@ -2177,7 +2177,7 @@ void emitBindM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, rhs);
 }
 
-void emitUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
+void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
 
   if (mcodeIsProp(mk.mcode)) {
@@ -2203,7 +2203,7 @@ void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitMemoGet(IRGS& env, int32_t ndiscard, LocalRange locals) {
+void emitMemoGet(IRGS& env, uint32_t ndiscard, LocalRange locals) {
   assertx(curFunc(env)->isMemoizeWrapper());
   assertx(!curFunc(env)->isReturnRef());
   assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
@@ -2223,7 +2223,7 @@ void emitMemoGet(IRGS& env, int32_t ndiscard, LocalRange locals) {
   mFinalImpl(env, ndiscard, gen(env, AssertType, retTy, ret));
 }
 
-void emitMemoSet(IRGS& env, int32_t ndiscard, LocalRange locals) {
+void emitMemoSet(IRGS& env, uint32_t ndiscard, LocalRange locals) {
   assertx(curFunc(env)->isMemoizeWrapper());
   assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
 

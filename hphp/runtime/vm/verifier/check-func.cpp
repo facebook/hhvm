@@ -468,7 +468,7 @@ bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
     return k >= 2 && k <= kMaxConcatN;
   }
 
-  return k >= 0;
+  return true;
 }
 
 bool FuncChecker::checkImmI64A(PC& pc, PC const instr) {
@@ -501,7 +501,7 @@ bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
   auto const slot = decode_iva(pc);
-  if (slot < 0 || slot >= numClsRefSlots()) {
+  if (slot >= numClsRefSlots()) {
     error("invalid class-ref slot %d at %d\n", slot, offset(instr));
     return false;
   }
@@ -510,7 +510,7 @@ bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
   auto const slot = decode_iva(pc);
-  if (slot < 0 || slot >= numClsRefSlots()) {
+  if (slot >= numClsRefSlots()) {
     error("invalid class-ref slot %d at %d\n", slot, offset(instr));
     return false;
   }

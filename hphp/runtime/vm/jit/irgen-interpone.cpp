@@ -442,7 +442,7 @@ void interpOne(IRGS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp) { INTERP }
 
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
@@ -464,7 +464,7 @@ void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
-void emitFPassN(IRGS& env, int32_t)           { INTERP }
+void emitFPassN(IRGS& env, uint32_t)          { INTERP }
 void emitCufSafeArray(IRGS& env)              { INTERP }
 void emitCufSafeReturn(IRGS& env)             { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }
@@ -473,13 +473,13 @@ void emitReq(IRGS& env)                       { INTERP }
 void emitReqDoc(IRGS& env)                    { INTERP }
 void emitReqOnce(IRGS& env)                   { INTERP }
 void emitEval(IRGS& env)                      { INTERP }
-void emitDefTypeAlias(IRGS& env, int32_t)     { INTERP }
+void emitDefTypeAlias(IRGS& env, uint32_t)    { INTERP }
 void emitDefCns(IRGS& env, const StringData*) { INTERP }
-void emitDefCls(IRGS& env, int32_t)           { INTERP }
+void emitDefCls(IRGS& env, uint32_t)          { INTERP }
 void emitAliasCls(IRGS& env,
                   const StringData*,
                   const StringData*)          { INTERP }
-void emitDefFunc(IRGS& env, int32_t)          { INTERP }
+void emitDefFunc(IRGS& env, uint32_t)         { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
 void emitContGetReturn(IRGS& env)             { INTERP }
 void emitContAssignDelegate(IRGS& env, int32_t)

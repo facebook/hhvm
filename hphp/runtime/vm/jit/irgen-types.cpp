@@ -611,9 +611,9 @@ void emitAssertRATL(IRGS& env, int32_t loc, RepoAuthType rat) {
   }
 }
 
-void emitAssertRATStk(IRGS& env, int32_t offset, RepoAuthType rat) {
+void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeStack(env, BCSPRelOffset{offset}, *t);
+    assertTypeStack(env, BCSPRelOffset{safe_cast<int32_t>(offset)}, *t);
   }
 }
 

@@ -1477,8 +1477,8 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallBuiltin(IRGS& env,
-                      int32_t numArgs,
-                      int32_t numNonDefault,
+                      uint32_t numArgs,
+                      uint32_t numNonDefault,
                       const StringData* funcName) {
   auto const callee = Unit::lookupBuiltin(funcName);
 

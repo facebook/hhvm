@@ -164,7 +164,7 @@ void ConcatPeephole::squash() {
   m_working.pop_back();
 
   // Concat counters.
-  int naccum = 1;
+  uint32_t naccum = 1;
   int ntotal = 0;
 
   assert(workstream.stream.front().first.op == Op::Concat);

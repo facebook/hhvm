@@ -60,25 +60,25 @@ std::string show(const LocalRange&);
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
  */
-#define ARGTYPES                                                          \
-  ARGTYPE(NA,     void*)         /* unused */                             \
-  ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */   \
-  ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */       \
-  ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */        \
-  ARGTYPE(IVA,    int32_t)       /* Variable size: 8 or 32-bit integer */ \
-  ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                     \
-  ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */ \
-  ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */       \
-  ARGTYPE(CAR,    int32_t)       /* Class-ref slot (read): 8 or 32-bit int */ \
+#define ARGTYPES                                                               \
+  ARGTYPE(NA,     void*)         /* unused */                                  \
+  ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
+  ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
+  ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
+  ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
+  ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
+  ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
+  ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \
+  ARGTYPE(CAR,    int32_t)       /* Class-ref slot (read): 8 or 32-bit int */  \
   ARGTYPE(CAW,    int32_t)       /* Class-ref slot (write): 8 or 32-bit int */ \
-  ARGTYPE(DA,     double)        /* Double */                             \
-  ARGTYPE(SA,     Id)            /* Static string ID */                   \
-  ARGTYPE(AA,     Id)            /* Static array ID */                    \
-  ARGTYPE(RATA,   RepoAuthType)  /* Statically inferred RepoAuthType */   \
-  ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
-  ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                \
-  ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */ \
-  ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */         \
+  ARGTYPE(DA,     double)        /* Double */                                  \
+  ARGTYPE(SA,     Id)            /* Static string ID */                        \
+  ARGTYPE(AA,     Id)            /* Static array ID */                         \
+  ARGTYPE(RATA,   RepoAuthType)  /* Statically inferred RepoAuthType */        \
+  ARGTYPE(BA,     Offset)        /* Bytecode offset */                         \
+  ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                     \
+  ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */      \
+  ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */              \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {
@@ -345,7 +345,7 @@ enum class CudOp : uint8_t {
 #undef CUD_OP
 };
 
-constexpr int32_t kMaxConcatN = 4;
+constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \

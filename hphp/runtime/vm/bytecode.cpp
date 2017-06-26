@@ -269,9 +269,9 @@ struct local_var {
 
 // wrapper for variable-size IVA operand
 struct intva_t {
-  int32_t n;
-  /* implicit */ operator int32_t() const { return n; }
-  intva_t& operator=(int32_t v) { n = v; return *this; }
+  uint32_t n;
+  /* implicit */ operator uint32_t() const { return n; }
+  intva_t& operator=(uint32_t v) { n = v; return *this; }
 };
 
 // wrapper for class-ref slot CA(R|W) operand
@@ -305,7 +305,7 @@ template<class T> struct imm_array {
 ALWAYS_INLINE local_var decode_local(PC& pc) {
   auto la = decode_iva(pc);
   assert(la < vmfp()->m_func->numLocals());
-  return local_var{frame_local(vmfp(), la), la};
+  return local_var{frame_local(vmfp(), la), safe_cast<int32_t>(la)};
 }
 
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
@@ -4925,7 +4925,7 @@ void iopFCallBuiltin(intva_t numArgs, intva_t numNonDefault, Id id) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func, strict)) {
     if (func->hasVariadicCaptureParam()) {
       assertx(numArgs > 0);
-      assertx(isArrayType(args[1-numArgs].m_type));
+      assertx(isArrayType(args[1 - safe_cast<int32_t>(numArgs.n)].m_type));
     }
     Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
   } else {

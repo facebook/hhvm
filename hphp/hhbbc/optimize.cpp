@@ -136,7 +136,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const op =
       makeAssert<bc::AssertRATStk>(
         arrTable,
-        static_cast<int32_t>(idx),
+        static_cast<uint32_t>(idx),
         realT
       );
     if (op) gen(*op);

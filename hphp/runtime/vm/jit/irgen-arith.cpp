@@ -1132,7 +1132,7 @@ void emitConcat(IRGS& env) {
   implConcat(env, c1, c2, [&] (SSATmp* r) { push(env, r); });
 }
 
-void emitConcatN(IRGS& env, int32_t n) {
+void emitConcatN(IRGS& env, uint32_t n) {
   if (n == 2) return emitConcat(env);
 
   auto const t1 = popC(env);

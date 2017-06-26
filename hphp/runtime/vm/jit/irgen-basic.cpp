@@ -551,7 +551,7 @@ void emitCastString(IRGS& env) {
   decRef(env, src);
 }
 
-void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
+void emitIncStat(IRGS& env, uint32_t counter, uint32_t value) {
   if (!Stats::enabled()) return;
   gen(env, IncStat, cns(env, counter), cns(env, value), cns(env, false));
 }
@@ -620,9 +620,9 @@ void emitUGetCUNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
 void emitRGetCNop(IRGS&)           {}
-void emitFPassC(IRGS&, int32_t)    {}
-void emitFPassVNop(IRGS&, int32_t) {}
-void emitDefClsNop(IRGS&, Id)      {}
+void emitFPassC(IRGS&, uint32_t)   {}
+void emitFPassVNop(IRGS&, uint32_t){}
+void emitDefClsNop(IRGS&, uint32_t){}
 void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////

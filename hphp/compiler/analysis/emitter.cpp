@@ -316,7 +316,7 @@ struct Emitter {
 #define IMM_BLA std::vector<Label*>&
 #define IMM_SLA std::vector<StrOff>&
 #define IMM_ILA std::vector<IterPair>&
-#define IMM_IVA int32_t
+#define IMM_IVA uint32_t
 #define IMM_LA int32_t
 #define IMM_IA int32_t
 #define IMM_CAR ClsRefSlotPlaceholder
@@ -1325,7 +1325,7 @@ struct OpEmitContext {
 #define DEC_BLA std::vector<Label*>&
 #define DEC_SLA std::vector<StrOff>&
 #define DEC_ILA std::vector<IterPair>&
-#define DEC_IVA int32_t
+#define DEC_IVA uint32_t
 #define DEC_LA int32_t
 #define DEC_IA int32_t
 #define DEC_CAR ClsRefSlotPlaceholder

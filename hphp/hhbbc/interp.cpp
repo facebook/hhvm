@@ -2223,7 +2223,7 @@ void in(ISS& env, const bc::FPassC& op) {
   nothrow(env);
 }
 
-void fpassCXHelper(ISS& env, int param, bool error) {
+void fpassCXHelper(ISS& env, uint32_t param, bool error) {
   auto const& fpi = fpiTop(env);
   if (fpi.kind == FPIKind::Builtin) {
     switch (prepKind(env, param)) {

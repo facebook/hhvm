@@ -152,6 +152,8 @@ let try_to_rewrite_coroutine_body
         rewritten_body in
 
       Some (make_syntax (CompoundStatement { node with compound_statements }))
+  | Missing ->
+      Some (methodish_function_body)
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
       None

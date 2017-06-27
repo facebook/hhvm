@@ -106,15 +106,22 @@ let generate_closure_body
 let generate_coroutine_closure
     classish_name
     function_name
-    ({ methodish_function_decl_header; _; } as method_node)
+    ({
+      methodish_function_decl_header;
+      methodish_function_body;
+      _;
+    } as method_node)
     ({ function_type; _; } as header_node)
     state_machine_data =
-  make_classish_declaration_syntax
-    (make_closure_classname classish_name function_name)
-    [ make_closure_base_type_syntax function_type ]
-    (generate_closure_body
-      classish_name
-      function_name
-      method_node
-      header_node
-      state_machine_data)
+  if is_missing methodish_function_body then
+    methodish_function_body
+  else
+    make_classish_declaration_syntax
+      (make_closure_classname classish_name function_name)
+      [ make_closure_base_type_syntax function_type ]
+      (generate_closure_body
+        classish_name
+        function_name
+        method_node
+        header_node
+        state_machine_data)

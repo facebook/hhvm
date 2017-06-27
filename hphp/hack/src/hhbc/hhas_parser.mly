@@ -24,7 +24,7 @@ open Hhas_parser_actions
 %token DATADECLDIRECTIVE NUMITERSDIRECTIVE NUMCLSREFSLOTSDIRECTIVE
 %token METHODDIRECTIVE CONSTDIRECTIVE ENUMTYDIRECTIVE USESDIRECTIVE
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
-%token ISMEMOIZEWRAPPERDIRECTIVE
+%token ISMEMOIZEWRAPPERDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
 %token LANGLE
 %token RANGLE
 %token COLONCOLON
@@ -58,15 +58,15 @@ decl:
     | aliasdecl {Alias_decl $1}
 ;
 aliasdecl:
-    | ALIASDIRECTIVE ID EQUALS aliastypeinfo SEMI nl
+    | ALIASDIRECTIVE ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
       {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4 None}
 ;
 maindecl:
-    | MAINDIRECTIVE LBRACE nl numiters numclsrefslots declvars nl functionbody RBRACE nl
-      {Hhas_body.make $8(*instrs*)
+    | MAINDIRECTIVE LBRACE nl numiters numclsrefslots declvars statics nl functionbody RBRACE nl
+      {Hhas_body.make $9(*instrs*)
         $6(*declvars*) $4(*numiters*)
         $5(*numclsrefslots*) false(*ismemoizewrapper*)
-        [](*params*) None(*return type*) [](*static_inits*)}
+        [](*params*) None(*return type*) $7(*static_inits*)}
 ;
 numiters:
     | /* empty */ {0}
@@ -80,19 +80,29 @@ nonclassattribute:
     | TRIPLEQUOTEDSTRING {attribute_from_string $1}
 ;
 fundecl:
-    | FUNCTIONDIRECTIVE functionattributes typeinfooption ID fparams
-      functionflags LBRACE nl numiters ismemoizewrapper numclsrefslots declvars
+    | FUNCTIONDIRECTIVE attributes typeinfooption ID fparams
+      functionflags LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics
       functionbody RBRACE
-        {Hhas_function.make $2(*attributes*)
-           (Hhbc_id.Function.from_raw_string $4)(*name*)
-             (Hhas_body.make $13(*instrs*)
-             $12(*declvars*)
-             $9 (*numiters*) $11 (*numclsrefslots *)
-             $10 (*ismemoizewrapper*)
-             $5(*params*) $3(*typeinfo*) [](*static_inits*))
+        {
+          let user_attrs, attrs = $2 in
+          Hhas_function.make
+            user_attrs (*attributes*)
+            (Hhbc_id.Function.from_raw_string $4) (*name*)
+            (Hhas_body.make
+              $14 (*instrs*)
+              $12 (*declvars*)
+              $9 (*numiters*)
+              $11 (*numclsrefslots *)
+              $10 (*ismemoizewrapper*)
+              $5 (*params*)
+              $3 (*typeinfo*)
+              $13 (*static_inits*)
+            )
             (isasync $6)
             (isgenerator $6)
-            (ispairgenerator $6) true }
+            (ispairgenerator $6)
+            (not (List.mem "nontop" attrs))
+        }
 ;
 nl:
     | /* empty */ {()}
@@ -101,6 +111,21 @@ nl:
 declvars:
     | /* empty */ {[]}
     | DECLVARSDIRECTIVE declvarlist SEMI nl {$2}
+;
+statics:
+    | /* empty */ { [] }
+    | STATICDIRECTIVE DOLLAR ID EQUALS TRIPLEQUOTEDSTRING SEMI nl statics
+      { ($3, Some (Pos.none, Ast.String(Pos.none, $5))) :: $8 }
+;
+requires:
+    | /* empty */ { [] }
+    | REQUIREDIRECTIVE ID LANGLE ID RANGLE SEMI nl requires
+      {
+        match $2 with
+        | "implements" -> (Ast.MustImplement, $4) :: $8
+        | "extends" -> (Ast.MustExtend, $4) :: $8
+        | _ -> report_error "expected `implements` or `extends`"
+      }
 ;
 ismemoizewrapper:
     | /* empty */ {false}
@@ -153,24 +178,30 @@ vname:
     | DOLLAR INT ID {"$" ^ (Int64.to_string $2) ^ $3 }
 ;
 classdecl:
-    | CLASSDIRECTIVE classattributes ID extendsimplements LBRACE
-     nl classuses classenumty classtypeconstants
+    | CLASSDIRECTIVE attributes ID extendsimplements LBRACE
+     nl classuses classenumty requires classtypeconstants
      classproperties methods nl RBRACE nl
-        {Hhas_class.make (fst $2)(*attributes*)
+        {
+          let user_attrs, attrs = $2 in
+          Hhas_class.make
+          user_attrs (*attributes*)
           (fst $4) (*base*)
           (snd $4) (*implements*)
           (Hhbc_id.Class.from_raw_string $3)(*name*)
-        (List.mem "final" (snd $2))(*isfinal*)
-        (List.mem "abstract" (snd $2))(*isabstract*)
-        (List.mem "interface" (snd $2))(*isinterface*)
-        (List.mem "trait" (snd $2))(*istrait*)
-        false(*isxhp*)
-        true(*istop*)
-        (fst $7)(*uses*)
-        (snd $7)(*use_alises*)
-        $8(*enumtype*)
-        $11(*methods*) $10(*properties*) (fst $9) (*constants*) (snd $9)(*typeconstants*)
-        [] (* requirements *) }
+          (List.mem "final"     attrs) (*isfinal*)
+          (List.mem "abstract"  attrs) (*isabstract*)
+          (List.mem "interface" attrs) (*isinterface*)
+          (List.mem "trait"     attrs) (*istrait*)
+          false (*isxhp*)
+          (not (List.mem "nontop" attrs)) (*istop*)
+          (fst $7)(*uses*)
+          (snd $7)(*use_alises*)
+          $8(*enumtype*)
+          $12(*methods*)
+          $11(*properties*)
+          (fst $10) (*constants*)
+          (snd $10) (*typeconstants*)
+          $9 (* requirements *) }
 ;
 methods:
  | /* empty */ {[]}
@@ -181,8 +212,8 @@ methodname:
  | INT ID {if Int64.to_int $1 = 86 then "86" ^ $2 else "bad 86xxx"}
 ;
 methoddecl:
- | METHODDIRECTIVE classattributes typeinfooption methodname fparams idlist LBRACE nl
-    numiters ismemoizewrapper numclsrefslots declvars functionbody RBRACE nl
+ | METHODDIRECTIVE attributes typeinfooption methodname fparams idlist LBRACE nl
+    numiters ismemoizewrapper numclsrefslots declvars statics functionbody RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
     (List.mem "protected" (snd $2))
@@ -194,14 +225,14 @@ methoddecl:
     (List.mem "no_injection" (snd $2))
     (Hhbc_id.Method.from_raw_string $4) (* name *)
     (Hhas_body.make
-      $13 (* method instructions *)
+      $14 (* method instructions *)
       $12 (* declvars *)
       $9 (* numiters *)
       $11 (* num cls ref slots *)
       $10 (* ismemoizewrapper *)
       $5 (* params *)
       $3 (* return type *)
-      [] (* static_inits *)
+      $13 (* static_inits *)
       )
     (List.mem "isAsync" $6)
     (List.mem "isGenerator" $6)
@@ -255,11 +286,21 @@ classtypeconstants:
      ( (Hhas_constant.make $2 (Some Typed_value.Uninit) None) :: (fst $7),
        snd $7)
       else report_error "bad class constant"}
+  | CONSTDIRECTIVE ID SEMI nl classtypeconstants
+    { (Hhas_constant.make $2 None None :: fst $5,
+       snd $5)
+    }
   | CONSTDIRECTIVE ID ID EQUALS TRIPLEQUOTEDSTRING SEMI nl classtypeconstants
     {if $3 = "isType" then
      (fst $8,
       (Hhas_type_constant.make $2 (Some (attribute_from_string $5))) :: (snd $8))
      else report_error "expected type constant"}
+  | CONSTDIRECTIVE ID ID SEMI nl classtypeconstants
+    {if $3 = "isType" then
+    (fst $6,
+     (Hhas_type_constant.make $2 None :: (snd $6)))
+    else report_error "expected type constant"}
+
 classconstants:
   | /* empty */ {[]}
   | classconstant NEWLINE classconstants {$1 :: $3}
@@ -320,30 +361,23 @@ idlist:
   | /* empty */ {[]}
   | ID idlist {$1 :: $2}
 ;
-classattributes:
+attributes:
    | /* empty */ {([],[])}
-   | LBRACK classattributelist RBRACK {$2}
+   | LBRACK attributelist RBRACK {$2}
 ;
-classattributelist:
-   | functionattribute {([$1],[])}
+attributelist:
+   | userattribute {([$1],[])}
    | ID {([],[$1])}
-   | functionattribute classattributelist {($1 :: fst $2, snd $2)}
-   | ID classattributelist {(fst $2, $1 :: snd $2)}
+   | userattribute attributelist {($1 :: fst $2, snd $2)}
+   | ID attributelist {(fst $2, $1 :: snd $2)}
 ;
-functionattributes:
-    /* empty */ { [] }
-    | LBRACK functionattributelist RBRACK
-      {$2}
-;
-functionattributelist:
-    | functionattribute {[$1]}
-    | functionattribute functionattributelist {$1 :: $2}
-;
-functionattribute:
+userattribute:
     | STRING LPAR TRIPLEQUOTEDSTRING RPAR
       {match attribute_from_string $3 with
-        | Typed_value.Array args -> Hhas_attribute.make $1 (unpack_key_values args)
-        | _ -> report_error "function attributes should be arrays"
+        | Typed_value.Array args ->
+          Hhas_attribute.make $1 (unpack_key_values args)
+        | _ ->
+          report_error "user attributes should be arrays"
       }
 ;
 typeinfooption:

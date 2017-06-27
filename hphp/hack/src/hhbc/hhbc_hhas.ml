@@ -1026,7 +1026,7 @@ let add_num_iters buf indent num_iters =
   then add_indented_line buf indent
     (Printf.sprintf ".numiters %d;" num_iters)
 
-let string_of_static_default_value_option label opt_expr =
+let add_static_default_value_option buf indent label opt_expr =
   let val_str = match opt_expr with
   | None ->
     " = \"\"\"null\"\"\""
@@ -1034,26 +1034,19 @@ let string_of_static_default_value_option label opt_expr =
     " = \"\"\""
     ^ (string_of_param_default_value expr)
     ^ "\"\"\"" in
-  ".static "
-  ^ label
-  ^ val_str
-  ^ ";\n"
+  add_indented_line buf indent (".static " ^ label ^ val_str ^ ";")
 
-let rec add_static_values buf indent lst =
-  match lst with
-  | (label, e) :: lst ->
-      let str = string_of_static_default_value_option label e in
-      add_indented_line buf indent str;
-      add_static_values buf indent lst
-  | [] -> ()
+let add_static_values buf indent lst =
+  Core.List.iter lst
+    (fun (label, e) -> add_static_default_value_option buf indent label e)
 
 let add_body buf indent body =
-  add_static_values buf indent (Hhas_body.static_inits body);
   add_num_iters buf indent (Hhas_body.num_iters body);
   if Hhas_body.is_memoize_wrapper body
   then add_indented_line buf indent ".ismemoizewrapper;";
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
+  add_static_values buf indent (Hhas_body.static_inits body);
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 

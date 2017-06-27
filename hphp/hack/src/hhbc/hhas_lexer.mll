@@ -78,6 +78,8 @@ rule read =
   | ".filepath" {FILEPATHDIRECTIVE}
   | ".alias"    {ALIASDIRECTIVE}
   | ".strict"   {STRICTDIRECTIVE}
+  | ".static"   {STATICDIRECTIVE}
+  | ".require"  {REQUIREDIRECTIVE}
   | id          {ID (Lexing.lexeme lexbuf)}
   | triplequoted as lxm {TRIPLEQUOTEDSTRING (String.sub lxm 3 (String.length lxm - 6))}
   | escapequote {read_php_escaped_string (Buffer.create 17) lexbuf}

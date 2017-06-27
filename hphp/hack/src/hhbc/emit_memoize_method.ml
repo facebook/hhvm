@@ -340,7 +340,7 @@ let make_wrapper return_type params instrs =
     [] (* decl_vars *)
     true (* is_memoize_wrapper *)
     params
-    return_type
+    (Some return_type)
     [] (* static_inits *)
 
 let emit ~non_null_return env info index return_type_info params is_static method_id =
@@ -429,6 +429,7 @@ let empty_dict_init = Some (Typed_value.Dict [])
 let false_init = Some (Typed_value.Bool false)
 let null_init = Some (Typed_value.Null)
 
+let notype = Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
 let make_instance_properties info ast_methods =
   let is_memoized_instance ast_method =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes &&
@@ -441,18 +442,18 @@ let make_instance_properties info ast_methods =
     if needs_guard
     then
       let property2 = Hhas_property.make true false false false false true
-        (guarded_shared_single_memoize_cache info.memoize_class_prefix) null_init None None in
+        (guarded_shared_single_memoize_cache info.memoize_class_prefix) null_init None notype in
       let property1 = Hhas_property.make true false false false false true
-        (guarded_shared_single_memoize_cache_guard info.memoize_class_prefix) false_init None None in
+        (guarded_shared_single_memoize_cache_guard info.memoize_class_prefix) false_init None notype in
       [property1; property2]
     else
       let property = Hhas_property.make true false false false false true
-        (shared_single_memoize_cache info.memoize_class_prefix) null_init None None in
+        (shared_single_memoize_cache info.memoize_class_prefix) null_init None notype in
       [property]
 
   | _ ->
     let property = Hhas_property.make true false false false false true
-      (shared_multi_memoize_cache info.memoize_class_prefix) empty_dict_init None None in
+      (shared_multi_memoize_cache info.memoize_class_prefix) empty_dict_init None notype in
     [property]
 
 let make_static_properties info ast_methods =
@@ -472,20 +473,20 @@ let make_static_properties info ast_methods =
         if needs_guard then
         let property2 = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (guarded_single_memoize_cache info.memoize_class_prefix))
-          null_init None None in
+          null_init None notype in
         let property1 = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (guarded_single_memoize_cache_guard info.memoize_class_prefix))
-          false_init None None in
+          false_init None notype in
         [property1; property2]
         else
         let property = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (single_memoize_cache info.memoize_class_prefix))
-          null_init None None in
+          null_init None notype in
         [property]
       else
         let property = Hhas_property.make true false false true false true
           (Hhbc_id.Prop.add_suffix prop_name (multi_memoize_cache info.memoize_class_prefix))
-          empty_dict_init None None in
+          empty_dict_init None notype in
         [property]
     else
       [] in

@@ -121,7 +121,7 @@ let make_wrapper_body return_type params instrs =
     [] (* decl_vars *)
     true (* is_memoize_wrapper *)
     params
-    return_type
+    (Some return_type)
     [] (* static_inits: this is intentionally empty *)
 
 let emit_wrapper_function ~original_id ~renamed_id ast_fun =

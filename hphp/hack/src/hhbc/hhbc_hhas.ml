@@ -1176,9 +1176,7 @@ let property_attributes p =
 
 let property_type_info p =
   let tinfo = Hhas_property.type_info p in
-  match tinfo with
-  | None -> ""
-  | Some t -> (string_of_type_info ~is_enum:false t) ^ " "
+  (string_of_type_info ~is_enum:false tinfo) ^ " "
 
 let add_property class_def buf property =
   B.add_string buf "\n  .property ";

@@ -46,4 +46,4 @@ val emit_return_type_info :
   skipawaitable: bool ->
   namespace: Namespace_env.env ->
   Ast.hint option ->
-  Hhas_type_info.t option
+  Hhas_type_info.t

@@ -14,11 +14,16 @@ val fmt_hint :
   Ast.hint ->
   string
 
+type type_hint_kind =
+| Property
+| Return
+| Param
+| TypeDef
+
 val hint_to_type_info :
-  return:bool ->
+  kind:type_hint_kind ->
   skipawaitable: bool ->
   nullable: bool ->
-  always_extended: bool ->
   tparams: string list ->
   namespace: Namespace_env.env ->
   Ast.hint ->

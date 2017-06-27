@@ -10,7 +10,6 @@
 open Core
 open Hhbc_ast
 open Instruction_sequence
-open Emit_type_hint
 module SU = Hhbc_string_utils
 
 let has_type_constraint ti =
@@ -110,11 +109,10 @@ let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   match ret with
   | None ->
-    Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
+    Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
   | Some h ->
-    Some (hint_to_type_info
-      ~return:true ~nullable:false
-      ~skipawaitable ~always_extended:true ~tparams ~namespace h)
+    Emit_type_hint.(hint_to_type_info
+      ~kind:Return ~nullable:false ~skipawaitable ~tparams ~namespace h)
 
 let emit_body
   ~scope
@@ -132,10 +130,8 @@ let emit_body
   let return_type_info =
     emit_return_type_info ~scope ~skipawaitable ~namespace ret in
   let verify_return =
-    match return_type_info with
-    | None -> false
-    | Some x when x. Hhas_type_info.type_info_user_type = Some "" -> false
-    | Some x -> Hhas_type_info.has_type_constraint x in
+    return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
+    Hhas_type_info.has_type_constraint return_type_info in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
@@ -199,7 +195,7 @@ let emit_body
     decl_vars
     false (*is_memoize_wrapper*)
     params
-    return_type_info
+    (Some return_type_info)
     svar_instrs,
     is_generator,
     is_pair_generator

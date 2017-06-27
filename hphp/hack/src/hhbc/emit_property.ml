@@ -58,10 +58,12 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace
      ^ " and therefore cannot be declared 'abstract final'");
   let tinfo =
     match type_hint with
-    | Some hint -> Some (Emit_type_hint.hint_to_type_info
-       ~return:false ~skipawaitable:false ~nullable:false ~always_extended:false
-       ~namespace ~tparams hint)
-    | None -> None in
+    | None ->
+      Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
+    | Some h ->
+      Emit_type_hint.(hint_to_type_info
+        ~kind:Property ~nullable:false
+        ~skipawaitable:false ~tparams ~namespace h) in
   let env = Emit_env.make_class_env ast_class in
   let initial_value, is_deep_init, initializer_instrs =
     match initial_value with

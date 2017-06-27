@@ -10,7 +10,6 @@
 
 open Core
 open Instruction_sequence
-open Emit_type_hint
 open Emit_expression
 
 module SU = Hhbc_string_utils
@@ -63,10 +62,10 @@ let from_extends ~namespace ~is_enum _tparams extends =
   then Some (Hhbc_id.Class.from_raw_string "HH\\BuiltinEnum") else
   match extends with
   | [] -> None
-  | h :: _ -> Some (hint_to_class ~namespace h)
+  | h :: _ -> Some (Emit_type_hint.hint_to_class ~namespace h)
 
 let from_implements ~namespace implements =
-  List.map implements (hint_to_class ~namespace)
+  List.map implements (Emit_type_hint.hint_to_class ~namespace)
 
 let from_constant env (_hint, name, const_init) =
   (* The type hint is omitted. *)
@@ -127,7 +126,7 @@ let from_class_elt_constants ns elt =
 let from_class_elt_requirements ns elt =
   match elt with
   | A.ClassTraitRequire (kind, h) ->
-      Some (kind, (Hhbc_id.Class.to_raw_string (hint_to_class ns h)))
+      Some (kind, (Hhbc_id.Class.to_raw_string (Emit_type_hint.hint_to_class ns h)))
   | _ -> None
 
 let from_class_elt_typeconsts elt =

@@ -626,7 +626,7 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.name)
         (prop |> Hhas_property.initial_value |> option_lift mutate_typed_value)
         (prop |> Hhas_property.initializer_instrs |> mutate_option)
-        (prop |> Hhas_property.type_info |> option_lift mutate_type_info) in
+        (prop |> Hhas_property.type_info |> mutate_type_info) in
     let mutate_constant (const : Hhas_constant.t) : Hhas_constant.t =
       Hhas_constant.make
         (const |> Hhas_constant.name)

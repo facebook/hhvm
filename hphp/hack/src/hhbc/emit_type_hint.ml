@@ -14,6 +14,12 @@ open Hhbc_string_utils
 module A = Ast
 module TC = Hhas_type_constraint
 
+type type_hint_kind =
+| Property
+| Return
+| Param
+| TypeDef
+
 let fmt_name_or_prim ~tparams ~namespace x =
   if List.mem tparams (snd x)
   then snd x
@@ -126,13 +132,20 @@ match h with
     ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
   TC.make tc_name tc_flags
 
-let hint_to_type_info
-  ~return ~skipawaitable ~nullable ~always_extended ~tparams ~namespace h =
-  let tc = hint_to_type_constraint ~return ~tparams ~skipawaitable ~namespace h in
+let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
+  let tc =
+    match kind with
+    | Property ->
+      TC.make None []
+    | Return ->
+      hint_to_type_constraint ~return:true ~tparams ~skipawaitable ~namespace h
+    | Param | TypeDef ->
+      hint_to_type_constraint ~return:false ~tparams ~skipawaitable ~namespace h
+    in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags =
-    if always_extended && tc_name <> None
+    if kind = Return && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
     else tc_flags in
   let tc_flags =

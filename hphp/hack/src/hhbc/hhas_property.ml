@@ -18,7 +18,7 @@ type t = {
   property_name         : Hhbc_id.Prop.t;
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
-  property_type_info : Hhas_type_info.t option;
+  property_type_info : Hhas_type_info.t;
   (* TODO: xhp *)
 }
 

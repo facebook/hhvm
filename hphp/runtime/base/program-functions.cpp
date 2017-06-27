@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -2088,10 +2089,12 @@ static void update_constants_and_options() {
   // have been now bound to their proper value.
   IniSettingMap ini = IniSettingMap();
   for (auto& filename: s_config_files) {
+    SuppressHackArrCompatNotices shacn;
     Config::ParseIniFile(filename, ini, true);
   }
   // Reset the INI settings from the CLI.
   for (auto& iniStr: s_ini_strings) {
+    SuppressHackArrCompatNotices shacn;
     Config::ParseIniString(iniStr, ini, true);
   }
 

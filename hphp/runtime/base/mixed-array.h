@@ -614,7 +614,7 @@ private:
 
   Elm& addKeyAndGetElem(StringData* key);
 
-  template <class K> member_lval addLvalImpl(K k);
+  template <bool warn, class K> member_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
 

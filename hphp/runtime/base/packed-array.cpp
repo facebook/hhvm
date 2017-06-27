@@ -601,7 +601,7 @@ member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   // Promote-to-mixed path, we know the key is new and should be using
   // findForNewInsert but aren't yet TODO(#2606310).
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl(k);
+  return mixed->addLvalImpl<true>(k);
 }
 
 member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
@@ -630,7 +630,7 @@ member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl(key);
+  return mixed->addLvalImpl<true>(key);
 }
 
 member_lval

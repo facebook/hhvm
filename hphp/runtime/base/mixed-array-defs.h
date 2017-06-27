@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/word-mem.h"
@@ -205,11 +206,16 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
   return this;
 }
 
-template <class K>
+template <bool warn, class K>
 member_lval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
-  if (!p.found) tvWriteNull(&p.tv);
+  if (!p.found) {
+    if (warn && RuntimeOption::EvalHackArrCompatNotices) {
+      raise_hackarr_compat_notice("Lval on missing array element");
+    }
+    tvWriteNull(&p.tv);
+  }
   return member_lval { this, &p.tv };
 }
 

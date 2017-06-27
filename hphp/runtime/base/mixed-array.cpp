@@ -1026,7 +1026,7 @@ member_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   } else {
     a = a->resizeIfNeeded();
   }
-  return a->addLvalImpl(k);
+  return a->addLvalImpl<true>(k);
 }
 
 member_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
@@ -1038,7 +1038,7 @@ member_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  return a->addLvalImpl(key);
+  return a->addLvalImpl<true>(key);
 }
 
 member_lval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
@@ -1450,7 +1450,7 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
       ret->nextInsertWithRef(value);
     } else {
       StringData* sd = key.getStringData();
-      auto const lval = ret->addLvalImpl(sd);
+      auto const lval = ret->addLvalImpl<false>(sd);
       tvAsVariant(lval.tv()).setWithRef(value);
     }
   }
@@ -1474,7 +1474,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (srcElem->hasIntKey()) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
-        auto const lval = ret->addLvalImpl(srcElem->skey);
+        auto const lval = ret->addLvalImpl<false>(srcElem->skey);
         tvAsVariant(lval.tv()).setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }

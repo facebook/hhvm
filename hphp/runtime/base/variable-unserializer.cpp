@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -1179,7 +1180,10 @@ Array VariableUnserializer::unserializeArray() {
     assert(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    Variant& value = arr.lvalAt(key, AccessFlags::Key);
+    auto& value = [&]() -> decltype(auto) {
+      SuppressHackArrCompatNotices shacn;
+      return arr.lvalAt(key, AccessFlags::Key);
+    }();
     if (UNLIKELY(isRefcountedType(value.getRawType()))) {
       putInOverwrittenList(value);
     }
@@ -1230,9 +1234,12 @@ Array VariableUnserializer::unserializeDict() {
     assert(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    auto const lval = key.isInteger()
-      ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
-      : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
+    auto const lval = [&] {
+      SuppressHackArrCompatNotices shacn;
+      return key.isInteger()
+        ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
+        : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
+    }();
     assertx(lval.arr_base() == arr.get());
 
     auto& val = tvAsVariant(lval.tv());

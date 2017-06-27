@@ -758,7 +758,7 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
-  out.fmt(".class {}{}",
+  out.fmt(".class{} {}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
               cls->hoistability() != PreClass::NotHoistable),
     cls->name(),

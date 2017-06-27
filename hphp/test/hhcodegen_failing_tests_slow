@@ -322,7 +322,6 @@ slow/foreach_target_variables.php
 slow/function/anonymous-default.php
 slow/function/classname-default.php
 slow/function/closure-default.php
-slow/function/instance-default.php
 slow/function/short-lambda.php
 slow/function/ternary-default.php
 slow/function_no_param_modifier.php
@@ -467,7 +466,6 @@ slow/memoize/variadics.php
 slow/memory/uninit-leak.php
 slow/namespace/2227.php
 slow/namespace/alias/alias.php
-slow/namespace/const_param.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php

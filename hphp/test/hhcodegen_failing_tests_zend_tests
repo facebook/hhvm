@@ -83,12 +83,10 @@ zend/good/tests/lang/045.php
 zend/good/tests/lang/bug18872.php
 zend/good/tests/lang/bug19943.php
 zend/good/tests/lang/bug21849.php
-zend/good/tests/lang/bug23524.php
 zend/good/tests/lang/bug24054.php
 zend/good/tests/lang/bug24403.php
 zend/good/tests/lang/bug24658.php
 zend/good/tests/lang/bug26696.php
-zend/good/tests/lang/bug26869.php
 zend/good/tests/lang/bug27354.php
 zend/good/tests/lang/bug28800.php
 zend/good/tests/lang/bug29893.php

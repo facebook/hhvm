@@ -736,15 +736,15 @@ let string_of_type_info_option tio =
 
 let rec string_of_afield = function
   | A.AFvalue e ->
-    " " ^ string_of_param_default_value e
+    string_of_param_default_value e
   | A.AFkvalue (k, v) ->
-    " " ^ string_of_param_default_value k ^
+    string_of_param_default_value k ^
     " => " ^ string_of_param_default_value v
 
 and string_of_afield_list afl =
   if List.length afl = 0
   then ""
-  else String.concat "," @@ List.map string_of_afield afl
+  else String.concat ", " @@ List.map string_of_afield afl
 
 and shape_field_name_to_expr = function
   | A.SFlit (pos, s)

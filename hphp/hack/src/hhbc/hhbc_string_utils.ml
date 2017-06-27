@@ -84,9 +84,9 @@ module Closures = struct
     if String_utils.string_starts_with s "Closure$"
     then
       let suffix = String_utils.lstrip s "Closure$" in
-      match String_utils.split ';' suffix with
+      match Str.split_delim (Str.regexp ";") suffix with
       | [prefix; _count] ->
-        begin match String_utils.split '#' prefix with
+        begin match Str.split_delim (Str.regexp "#") prefix with
         | [prefix; _] -> Some prefix
         | _ -> Some prefix
         end

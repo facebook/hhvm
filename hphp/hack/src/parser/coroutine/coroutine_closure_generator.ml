@@ -9,6 +9,7 @@
 
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
+module CoroutineTypeLowerer = Coroutine_type_lowerer
 module EditableSyntax = Full_fidelity_editable_syntax
 
 open EditableSyntax
@@ -74,12 +75,12 @@ let do_resume_body =
     make_return_statement_syntax call_state_machine_syntax;
   ]
 
-let do_resume_method =
+let generate_do_resume_method { function_type; _; } =
   make_methodish_declaration_syntax
     (make_function_decl_header_syntax
       do_resume_member_name
       [ coroutine_data_parameter_syntax; nullable_exception_parameter_syntax; ]
-      (make_coroutine_result_type_syntax mixed_syntax))
+      (make_coroutine_result_type_syntax function_type))
     do_resume_body
 
 let generate_closure_body
@@ -95,7 +96,7 @@ let generate_closure_body
         function_name
         header_node
         state_machine_data;
-      do_resume_method;
+      generate_do_resume_method header_node;
     ]
 
 (**

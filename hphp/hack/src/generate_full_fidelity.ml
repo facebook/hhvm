@@ -2318,6 +2318,8 @@ module PositionedSyntaxValue = struct
     value.trailing_width
 end
 
+open Core
+
 include SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)
 
 let source_text node =
@@ -2488,7 +2490,7 @@ BUILD_CASES
       dispatch offset todo (node :: results)
     | { M.syntax = M.SyntaxList l; _ } as minimal_t ->
       let todo = Build (minimal_t, offset, todo) in
-      let todo = List.fold_right (fun n t -> Convert (n,t)) l todo in
+      let todo = List.fold_right ~f:(fun n t -> Convert (n,t)) l ~init:todo in
       dispatch offset todo results
 CONVERT_CASES    in
     convert 0 Done [] node

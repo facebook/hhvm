@@ -868,7 +868,11 @@ pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
   return ret;
 }
 
-void LightProcess::ChangeUser(const std::string &username) {
+void LightProcess::ChangeUser(int afdt, const std::string& username) {
+  if (!username.empty()) lwp_write(afdt, "change_user", username);
+}
+
+void LightProcess::ChangeUser(const std::string& username) {
   if (username.empty()) return;
   for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);

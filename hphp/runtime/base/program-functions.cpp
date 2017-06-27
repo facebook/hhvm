@@ -944,6 +944,7 @@ static int start_server(const std::string &username, int xhprof) {
       _exit(1);
     }
     LightProcess::ChangeUser(username);
+    hackc_set_user(username);
   } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");

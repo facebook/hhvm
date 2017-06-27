@@ -475,6 +475,9 @@ struct RuntimeOption {
   /* The number of times to retry after an infra failure communicating
      with a compiler process. */                                        \
   F(uint64_t, HackCompilerMaxRetries,  0)                               \
+  /* The number of times to reuse a single hh_single_compile daemons
+     before forcing a restart */                                        \
+  F(uint32_t, HackCompilerReset,       10)                              \
   /* Whether or not to fallback to hphpc if hh_single_compile fails for
      any reason. */                                                     \
   F(bool, HackCompilerFallback,        false)                           \

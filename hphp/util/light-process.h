@@ -49,6 +49,7 @@ struct LightProcess {
                          bool trackProcessTimes,
                          const std::vector<int> &inherited_fds);
   static void ChangeUser(const std::string &username);
+  static void ChangeUser(int afdt, const std::string &username);
 
   typedef std::function<void(pid_t)> LostChildHandler;
   static void SetLostChildHandler(const LostChildHandler& handler);
@@ -85,6 +86,7 @@ struct LightProcess {
    * processes will delegate to a light process pool run by the client.
    */
   static int createDelegate();
+
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(int fd);
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(
     std::unique_ptr<LightProcess> p

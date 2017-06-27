@@ -34,6 +34,7 @@ HackcMode hackc_mode();
 
 void hackc_init();
 void hackc_shutdown();
+void hackc_set_user(const std::string& username);
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered

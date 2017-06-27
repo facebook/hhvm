@@ -57,11 +57,17 @@ struct HackCompiler {
     const MD5& md5,
     folly::StringPiece code
   ) {
+    if (RuntimeOption::EvalHackCompilerReset &&
+        m_compilations > RuntimeOption::EvalHackCompilerReset) {
+      stop();
+    }
+
     if (!isRunning()) start();
 
     std::string prog;
     std::unique_ptr<Unit> u;
     try {
+      m_compilations++;
       writeProgram(filename, md5, code);
       prog = readProgram();
       auto ue = assemble_string(
@@ -120,9 +126,13 @@ private:
   pid_t m_pid{-1};
   FILE* m_in{nullptr};
   FILE* m_out{nullptr};
+
+  unsigned m_compilations{0};
 };
 
 int s_delegate = -1;
+std::mutex s_delegateLock;
+
 std::atomic<size_t> s_freeCount{0};
 std::mutex s_compilerLock;
 std::condition_variable s_compilerCv;
@@ -215,19 +225,23 @@ void HackCompiler::writeProgram(
 
 struct UseLightDelegate final {
   UseLightDelegate()
-    : m_prev(LightProcess::setThreadLocalAfdtOverride(s_delegate))
+    : m_lock(s_delegateLock)
+    , m_prev(LightProcess::setThreadLocalAfdtOverride(s_delegate))
   {}
+
+  UseLightDelegate(UseLightDelegate&&) = delete;
+  UseLightDelegate& operator=(UseLightDelegate&&) = delete;
+
   ~UseLightDelegate() {
     LightProcess::setThreadLocalAfdtOverride(std::move(m_prev));
   }
 private:
+  std::unique_lock<std::mutex> m_lock;
   std::unique_ptr<LightProcess> m_prev;
 };
 
 void HackCompiler::stop() {
   if (m_pid == -1) return;
-
-  UseLightDelegate useDelegate;
 
   SCOPE_EXIT {
     if (m_in) fclose(m_in);
@@ -236,11 +250,18 @@ void HackCompiler::stop() {
     m_pid = -1;
   };
 
+  m_compilations = 0;
+
   int status, code;
   kill(m_pid, SIGTERM);
-  if (LightProcess::waitpid(m_pid, &status, 0, 2) != m_pid) {
-    Logger::FWarning("HackCompiler: unable to wait for compiler process");
-    return;
+
+  {
+    UseLightDelegate useDelegate;
+
+    if (LightProcess::waitpid(m_pid, &status, 0, 1) != m_pid) {
+      Logger::FWarning("HackCompiler: unable to wait for compiler process");
+      return;
+    }
   }
 
   if (WIFEXITED(status) && (code = WEXITSTATUS(status)) != 0) {
@@ -277,8 +298,6 @@ struct Pipe final {
 void HackCompiler::start() {
   if (m_pid != -1) return;
 
-  UseLightDelegate useDelegate;
-
   // For now we dump stderr to /dev/null, we should probably start logging this
   // at some point.
   auto const err = open("/dev/null", O_WRONLY);
@@ -289,13 +308,17 @@ void HackCompiler::start() {
   std::vector<int> wanted = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
   std::vector<std::string> env;
 
-  m_pid = LightProcess::proc_open(
-    RuntimeOption::EvalHackCompilerCommand.c_str(),
-    created,
-    wanted,
-    nullptr /* cwd */,
-    env
-  );
+  {
+    UseLightDelegate useDelegate;
+
+    m_pid = LightProcess::proc_open(
+      RuntimeOption::EvalHackCompilerCommand.c_str(),
+      created,
+      wanted,
+      nullptr /* cwd */,
+      env
+    );
+  }
 
   if (m_pid == -1) throwErrno("unable to start compiler");
 
@@ -329,7 +352,15 @@ void hackc_init() {
   for (int i = 0; i < nworkers; ++i) {
     s_compilers[i].store(new HackCompiler, std::memory_order_relaxed);
   }
+
   s_delegate = LightProcess::createDelegate();
+}
+
+void hackc_set_user(const std::string& username) {
+  if (s_delegate == -1) return;
+
+  std::unique_lock<std::mutex> lock(s_delegateLock);
+  LightProcess::ChangeUser(s_delegate, username);
 }
 
 void hackc_shutdown() {

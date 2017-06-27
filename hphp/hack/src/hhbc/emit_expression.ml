@@ -12,6 +12,7 @@ open Core
 open Hhbc_ast
 open Instruction_sequence
 open Ast_class_expr
+open Ast_scope
 
 module A = Ast
 module H = Hhbc_ast
@@ -224,7 +225,7 @@ and emit_local ~notice ~need_ref env x =
   if SN.Superglobals.is_superglobal x
   then gather [
     instr_string (SU.Locals.strip_dollar x);
-    instr (IGet CGetG)
+    instr (IGet (if need_ref then VGetG else CGetG))
   ]
   else
   let local = get_local env x in
@@ -310,13 +311,38 @@ and emit_box_if_necessary need_ref instr =
   else
     instr
 
+and emit_maybe_classname env (p,name) with_string with_instr =
+  let from_str s =
+    let e_id, _ =
+      Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p,s) in
+    with_string e_id in
+  if name = SN.Classes.cStatic then
+    let get_static =
+      gather [ instr_fcallbuiltin 0 0 "get_called_class"; instr_unboxr_nop ] in
+    with_instr get_static
+  else if name = SN.Classes.cSelf || name = SN.Classes.cParent then
+    let cls = Scope.get_class (Emit_env.get_scope env) in
+    match cls with
+    | Some c when c.A.c_kind = A.Ctrait ->
+      let get_cls =
+        if name = SN.Classes.cSelf then instr_self else instr_parent in
+      with_instr get_cls
+    | Some c when name = SN.Classes.cSelf -> from_str (snd c.A.c_name)
+    | Some c ->
+        begin match c.A.c_extends with
+        | (_, A.Happly ((_, parent), _)) :: _ -> from_str parent
+        | _ -> from_str name
+        end
+    | _ -> from_str name
+  else from_str name
+
 and emit_instanceof env e1 e2 =
   match (e1, e2) with
   | (_, (_, A.Id id)) ->
-    let id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
-    gather [
-      emit_expr ~need_ref:false env e1;
-      instr_instanceofd id ]
+    let lhs = emit_expr ~need_ref:false env e1 in
+    emit_maybe_classname env id
+      (fun id -> gather [ lhs; instr_instanceofd id ])
+      (fun instr -> gather [ lhs; instr; instr_instanceof ])
   | _ ->
     gather [
       emit_expr ~need_ref:false env e1;
@@ -456,13 +482,19 @@ and emit_class_expr env cexpr =
   | Class_parent -> instr (IMisc (Parent 0))
   | Class_self -> instr (IMisc (Self 0))
   | Class_id id -> emit_known_class_id env id
-  | Class_expr (_, A.Lvar (_, id)) ->
-    instr (IGet (ClsRefGetL (get_local env id, 0)))
   | Class_expr expr ->
-    gather [
-      emit_expr ~need_ref:false env expr;
-      instr_clsrefgetc
-    ]
+    begin match expr with
+    | (_, A.Lvar _) ->
+      stash_in_local ~always_stash_this:true env expr
+      begin fun temp _ ->
+      instr (IGet (ClsRefGetL (temp, 0)))
+      end
+    | _ ->
+      gather [
+        emit_expr ~need_ref:false env expr;
+        instr_clsrefgetc
+      ]
+    end
 
 and emit_class_get env param_num_opt qop need_ref cid (_, id) =
   let cexpr, _ = expr_to_class_expr ~resolve_self:false
@@ -500,17 +532,6 @@ and emit_class_const env cid (_, id) =
       then instr (IMisc (ClsRefName 0))
       else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
     ]
-
-and emit_await env e =
-  let after_await = Label.next_regular () in
-  gather [
-    emit_expr ~need_ref:false env e;
-    instr_dup;
-    instr_istypec OpNull;
-    instr_jmpnz after_await;
-    instr_await;
-    instr_label after_await;
-  ]
 
 and emit_yield env = function
   | A.AFvalue e ->
@@ -864,7 +885,7 @@ and emit_expr env expr ~need_ref =
     emit_box_if_necessary need_ref @@ emit_clone env e
   | A.Shape fl ->
     emit_box_if_necessary need_ref @@ emit_shape env expr fl
-  | A.Await e -> emit_await env e
+  | A.Await _ -> emit_nyi "complex await expression"
   | A.Yield e -> emit_yield env e
   | A.Yield_break ->
     failwith "yield break should be in statement position"
@@ -991,12 +1012,15 @@ and is_struct_init es =
           ULS.add keys s
         | _ -> false, keys)
   in
+  let num_keys = List.length es in
   let has_duplicate_keys =
-    ULS.cardinal keys <> List.length es
+    ULS.cardinal keys <> num_keys
   in
   are_all_keys_non_numeric_strings
   && not has_duplicate_keys
   && not has_references
+  && num_keys <= 64
+  && num_keys != 0
 
 (* transform_to_collection argument keeps track of
  * what collection to transform to *)
@@ -2213,6 +2237,21 @@ and emit_unop ~need_ref env op e =
 and emit_exprs env exprs =
   gather (List.map exprs (emit_expr ~need_ref:false env))
 
+and with_temp_local temp f =
+  let break_label = Label.next_regular () in
+  let fault_label = Label.next_fault () in
+  gather [
+    instr_try_fault
+      fault_label
+      (* try block *)
+      (f temp break_label)
+      (* fault block *)
+      (gather [
+        instr_unsetl temp;
+        instr_unwind ]);
+    instr_label break_label;
+  ]
+
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
  * temporary local `temp` (unless it is itself a local). Then use `f` to
  * generate code that uses this local and branches or drops through to
@@ -2222,33 +2261,27 @@ and emit_exprs env exprs =
  *  break_label:
  *    push `temp` on stack if `leave_on_stack` is true.
  *)
-and stash_in_local ?(always_stash=false) ?(leave_on_stack=false) env e f =
-  let break_label = Label.next_regular () in
+and stash_in_local ?(always_stash=false) ?(leave_on_stack=false)
+                   ?(always_stash_this=false) env e f =
   match e with
   | (_, A.Lvar (_, id)) when not always_stash
-    && not (is_local_this env id && Emit_env.get_needs_local_this env) ->
+    && not (is_local_this env id &&
+    ((Emit_env.get_needs_local_this env) || always_stash_this)) ->
+    let break_label = Label.next_regular () in
     gather [
       f (get_local env id) break_label;
       instr_label break_label;
       if leave_on_stack then instr_cgetl (get_local env id) else empty;
     ]
   | _ ->
-    let generate_value = Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+    let generate_value =
+      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
-      let fault_label = Label.next_fault () in
       gather [
         generate_value;
         instr_setl temp;
         instr_popc;
-        instr_try_fault
-          fault_label
-          (* try block *)
-          (f temp break_label)
-          (* fault block *)
-          (gather [
-            instr_unsetl temp;
-            instr_unwind ]);
-        instr_label break_label;
+        with_temp_local temp f;
         if leave_on_stack then instr_pushl temp else instr_unsetl temp
       ]

@@ -35,7 +35,6 @@ slow/async/return-annotation-4.php
 slow/async/return-annotation-5.php
 slow/async/return-annotation-6.php
 slow/async/return-annotation-7.php
-slow/async/return-annotation-8.php
 slow/async/simple_blocked.php
 slow/async/simple_func.php
 slow/async/simple_meth.php
@@ -64,7 +63,6 @@ slow/class_type_constant/type_constant6.php
 slow/closure/1933.php
 slow/closure/1937.php
 slow/closure/1939.php
-slow/closure/1940.php
 slow/closure/bind-stress.php
 slow/closure/bindscope.php
 slow/closure/call-and-bindTo-loop.php
@@ -105,7 +103,6 @@ slow/compilation/1317.php
 slow/compilation/1321.php
 slow/compilation/1322.php
 slow/compilation/aliased-namespaces.php
-slow/compilation/closure_static.php
 slow/compilation/dynamic_sprop.php
 slow/compilation/refine_closure_crash.php
 slow/compilation/store-elim.php
@@ -450,7 +447,6 @@ slow/lang/redefine_function.php
 slow/lang/reflection.php
 slow/lang/tuple_non_hh.php
 slow/late_static_binding/1880.php
-slow/late_static_binding/1881.php
 slow/list_assignment/46.php
 slow/list_assignment/47.php
 slow/llvm/switch.php
@@ -491,7 +487,6 @@ slow/nullsafe/nullsafe-prop-6.php
 slow/nullsafe/nullsafe-prop-7.php
 slow/nullsafe/nullsafe-prop-8.php
 slow/nullsafe/nullsafe-prop-9.php
-slow/object/667.php
 slow/object/672.php
 slow/object/tostring_invalid.php
 slow/object_invoke_method/766.php
@@ -733,7 +728,6 @@ slow/reflection/ReflectionTypeAlias3.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
-slow/reflection/closure_static_locals.php
 slow/reflection/deprecation.php
 slow/reflection/dynamic_property2.php
 slow/reflection/get_closure_scope_class.php
@@ -787,7 +781,6 @@ slow/streams/user_filter_autoload.php
 slow/string/164.php
 slow/string/heredoc_end_after_variable.php
 slow/string/issue_3160.php
-slow/super_globals/1387.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
@@ -876,12 +869,8 @@ slow/xhp/xhpchild.php
 slow/xml/print_r.php
 slow/yield/2165.php
 slow/yield/2167.php
-slow/yield/2174.php
-slow/yield/2177.php
 slow/yield/2182.php
 slow/yield/2229.php
-slow/yield/clone/g10.php
-slow/yield/clone/g9.php
 slow/yield/throw/throw_already_closed.php
 slow/yield/throw/throw_caught.php
 slow/yield/throw/throw_rethrow.php

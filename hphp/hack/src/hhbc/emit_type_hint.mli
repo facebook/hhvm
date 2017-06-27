@@ -11,6 +11,7 @@
 val fmt_hint :
   tparams: string list ->
   namespace: Namespace_env.env ->
+  ?strip_tparams: bool ->
   Ast.hint ->
   string
 

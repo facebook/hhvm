@@ -116,6 +116,8 @@ let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
 let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
+let instr_parent =
+  instr (IMisc (Parent class_ref_rewrite_sentinel))
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_fpassr i = instr (ICall (FPassR i))
 let instr_fpassv i = instr (ICall (FPassV i))
@@ -185,6 +187,7 @@ let instr_ismemotype = instr (IMisc IsMemoType)
 let instr_maybememotype = instr (IMisc MaybeMemoType)
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
+let instr_verifyRetTypeV = instr (IMisc VerifyRetTypeV)
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)

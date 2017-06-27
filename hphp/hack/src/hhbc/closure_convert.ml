@@ -46,6 +46,9 @@ type state = {
   hoisted_functions : fun_ list;
   (* The current namespace environment *)
   namespace: Namespace_env.env;
+  (* Static variables in closures have special properties with mangled names
+   * defined for them *)
+  static_vars : ULS.t;
 }
 
 let initial_state =
@@ -58,6 +61,7 @@ let initial_state =
   hoisted_classes = [];
   hoisted_functions = [];
   namespace = Namespace_env.empty_with_default_popt;
+  static_vars = ULS.empty;
 }
 
 (* Add a variable to the captured variables *)
@@ -112,10 +116,15 @@ let enter_lambda st fd =
     captured_this = false;
     defined_vars =
       SSet.of_list (List.map fd.f_params (fun param -> snd param.param_id));
+    static_vars = ULS.empty;
    }
 
 let add_defined_var st var =
   { st with defined_vars = SSet.add var st.defined_vars }
+
+let add_static_var st var =
+  let st = add_defined_var st var in
+  { st with static_vars = ULS.add st.static_vars var }
 
 let set_namespace st ns =
   { st with namespace = ns }
@@ -172,6 +181,9 @@ let make_closure ~explicit_use ~class_num
   let cvl =
     List.map lambda_vars
     (fun name -> (p, (p, Hhbc_string_utils.Locals.strip_dollar name), None)) in
+  let cvl = cvl @ (List.map (ULS.items st.static_vars)
+    (fun name -> (p, (p,
+     "86static_" ^ (Hhbc_string_utils.Locals.strip_dollar name)), None))) in
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];
@@ -352,6 +364,13 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, Import(flavor, e))
   | Id id ->
     st, convert_id env p id
+  | Class_get (cid, _)
+  | Class_const (cid, _) ->
+    let st = begin match (Ast_class_expr.id_to_expr cid) with
+    | _, Lvar (_, id) -> add_var st id
+    | _ -> st
+    end in
+    st, expr
   | _ ->
     st, expr
 
@@ -364,6 +383,7 @@ and convert_lambda env st p fd use_vars_opt =
   let captured_this = st.captured_this in
   let defined_vars = st.defined_vars in
   let total_count = st.total_count in
+  let static_vars = st.static_vars in
   let st = { st with total_count = total_count + 1; } in
   let st = enter_lambda st fd in
   let env = if Option.is_some use_vars_opt
@@ -399,7 +419,8 @@ and convert_lambda env st p fd use_vars_opt =
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
                      captured_this = captured_this;
-                     defined_vars = defined_vars; } in
+                     defined_vars = defined_vars;
+                     static_vars = static_vars; } in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:add_var in
   let st = { st with hoisted_classes = cd :: st.hoisted_classes } in
@@ -430,6 +451,13 @@ and convert_stmt env st stmt =
     let st, opt_e = convert_opt_expr env st opt_e in
     st, Return (p, opt_e)
   | Static_var el ->
+    let visit_static_var st e =
+      begin match snd e with
+      | Lvar (_, name)
+      | Binop (Eq None, (_, Lvar (_, name)), _) -> add_static_var st name
+      | _ -> failwith "Static var - impossible"
+      end in
+    let st = List.fold_left el ~init:st ~f:visit_static_var in
     let st, el = convert_exprs env st el in
     st, Static_var el
   | If (e, b1, b2) ->

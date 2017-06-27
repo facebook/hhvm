@@ -28,14 +28,15 @@ let fmt_name_or_prim ~tparams ~namespace x =
     Hhbc_id.Class.to_unmangled_string fq_id
 
 (* Produce the "userType" bit of the annotation *)
-let rec fmt_hint ~tparams ~namespace (_, h) =
+let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
   match h with
   | A.Happly (id, []) ->
     fmt_name_or_prim ~tparams ~namespace id
 
   | A.Happly (id, args) ->
-    fmt_name_or_prim ~tparams ~namespace id
-    ^ "<" ^ fmt_hints ~tparams ~namespace args ^ ">"
+    let name = fmt_name_or_prim ~tparams ~namespace id in
+    if strip_tparams then name
+    else name ^ "<" ^ fmt_hints ~tparams ~namespace args ^ ">"
 
   | A.Hfun (args, _, ret) ->
     "(function (" ^ fmt_hints ~tparams ~namespace args
@@ -88,14 +89,24 @@ match h with
     TC.make tc_name tc_flags
 
   (* Elide the Awaitable class for async return types only *)
+| A.Happly ((_, "WaitHandle"), [(_, A.Happly((_, "void"), []))])
 | A.Happly ((_, "Awaitable"), [(_, A.Happly((_, "void"), []))])
   when skipawaitable ->
   TC.make None []
 
+| A.Happly ((_, "WaitHandle"), [h])
+| A.Hoption (_, A.Happly ((_, "WaitHandle"), [h]))
 | A.Happly ((_, "Awaitable"), [h])
 | A.Hoption (_, A.Happly ((_, "Awaitable"), [h]))
   when skipawaitable ->
   hint_to_type_constraint ~return ~tparams ~skipawaitable:false ~namespace h
+
+| A.Happly ((_, "WaitHandle"), [])
+| A.Hoption (_, A.Happly ((_, "WaitHandle"), []))
+| A.Happly ((_, "Awaitable"), [])
+| A.Hoption (_, A.Happly ((_, "Awaitable"), []))
+  when skipawaitable ->
+  TC.make None []
 
 (* Need to differentiate between type params and classes *)
 | A.Happly (id, _) ->

@@ -73,7 +73,8 @@ class declvar_visitor = object(this)
   method! on_call acc e el1 el2 =
     let acc =
       match e with
-      | (_, Ast.Id(p, "HH\\set_frame_metadata")) ->
+      | (_, Ast.Id(p, "HH\\set_frame_metadata"))
+      | (_, Ast.Id(p, "\\HH\\set_frame_metadata")) ->
         add_local ~bareparam:false acc (p,"$86metadata")
       | _ -> acc in
     let call_isset =

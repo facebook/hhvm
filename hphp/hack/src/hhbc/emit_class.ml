@@ -138,7 +138,8 @@ let from_enum_type ~namespace opt =
   match opt with
   | Some e ->
     let type_info_user_type =
-      Some (Emit_type_hint.fmt_hint ~namespace ~tparams:[] e.A.e_base) in
+      Some (Emit_type_hint.fmt_hint
+      ~namespace ~tparams:[] ~strip_tparams:true e.A.e_base) in
     let type_info_type_constraint =
       Hhas_type_constraint.make
         None

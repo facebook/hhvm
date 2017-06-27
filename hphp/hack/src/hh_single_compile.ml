@@ -245,18 +245,18 @@ let process_single_file compiler_options popt filename outputfile =
     ignore @@ add_to_time_ref debug_time.parsing_t t;
     let text = do_compile config filename compiler_options opt_ast debug_time in
     if compiler_options.mode = DAEMON then
-      Printf.printf "%i\n" (String.length text);
+      Printf.printf "%i\n%!" (String.length text);
     match outputfile with
     | None ->
       if not compiler_options.quiet_mode
-      then P.printf "%s" text
+      then P.printf "%s%!" text
       else ()
     | Some outputfile -> Sys_utils.write_file ~file:outputfile text
   with e ->
     if not compiler_options.quiet_mode
     then begin
       if compiler_options.mode = DAEMON then
-        Printf.printf "ERROR: %s\n" (Printexc.to_string e)
+        Printf.printf "ERROR: %s\n%!" (Printexc.to_string e)
       else
         let f = Relative_path.to_absolute filename in
         Printf.eprintf "Error in file %s: %s\n" f (Printexc.to_string e)

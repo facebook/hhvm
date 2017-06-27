@@ -32,8 +32,10 @@ let set_return_by_ref b = return_by_ref := b
 
 let emit_return ~need_ref =
   let ret_instr = if need_ref then instr_retv else instr_retc in
+  let verify_instr =
+    if need_ref then instr_verifyRetTypeV else instr_verifyRetTypeC in
   if !verify_return
-  then gather [instr_verifyRetTypeC; ret_instr]
+  then gather [verify_instr; ret_instr]
   else ret_instr
 
 let emit_def_inline = function
@@ -111,6 +113,62 @@ let rec emit_stmt env st =
       ], []))
       ->
     empty
+  | A.Return (_, Some (_, A.Await e)) ->
+    gather [
+      emit_await env e;
+      emit_return ~need_ref:false;
+    ]
+  | A.Expr (_, A.Await e) ->
+    gather [
+      emit_await env e;
+      instr_popc;
+    ]
+  | A.Expr
+    (_, A.Binop ((A.Eq None), ((_, A.List l) as e1), (_, A.Await e_await))) ->
+    let has_elements =
+      List.exists l ~f: (function
+        | _, A.Omitted -> false
+        | _ -> true)
+    in
+    if has_elements then
+      Local.scope @@ fun () ->
+        let temp = Local.get_unnamed_local () in
+        gather [
+          emit_await env e_await;
+          instr_setl temp;
+          instr_popc;
+          with_temp_local temp
+          begin fun temp _ ->
+            emit_lval_op_list env (Some temp) [] e1
+          end;
+          instr_pushl temp;
+          instr_popc;
+        ]
+    else
+      Local.scope @@ fun () ->
+        let temp = Local.get_unnamed_local () in
+        gather [
+          emit_await env e_await;
+          instr_setl temp;
+          instr_popc;
+          instr_pushl temp;
+          instr_popc;
+        ]
+  | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Await e_await))) ->
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let rhs_instrs = instr_pushl temp in
+      let (lhs, rhs, setop) =
+        emit_lval_op_nonlist_steps env LValOp.Set e_lhs rhs_instrs 1 in
+      gather [
+        emit_await env e_await;
+        instr_setl temp;
+        instr_popc;
+        with_temp_local temp (fun _ _ -> lhs);
+        rhs;
+        setop;
+        instr_popc;
+      ]
   | A.Expr expr ->
     emit_ignored_expr env expr
   | A.Return (_, None) ->
@@ -171,6 +229,17 @@ let rec emit_stmt env st =
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty
+
+and emit_await env e =
+  let after_await = Label.next_regular () in
+  gather [
+    emit_expr ~need_ref:false env e;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_jmpnz after_await;
+    instr_await;
+    instr_label after_await;
+  ]
 
 and emit_if env condition consequence alternative =
   match alternative with

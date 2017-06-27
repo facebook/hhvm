@@ -26,6 +26,7 @@ let rec expr_requires_deep_init (_, expr_) =
     List.exists fields aexpr_requires_deep_init
   | A.Varray fields -> List.exists fields expr_requires_deep_init
   | A.Darray fields -> List.exists fields expr_pair_requires_deep_init
+  | A.Id(_, ("__FILE__" | "__DIR__")) -> false
   | _ -> true
 
 and expr_pair_requires_deep_init (expr1, expr2) =

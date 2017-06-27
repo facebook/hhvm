@@ -832,29 +832,9 @@ let lower_body { methodish_function_body; _} =
 
   (body, locals_and_params)
 
-let make_function_decl_header
-    classish_name
-    function_name
-    { function_type; _; } =
-  (*
-  function foo_GeneratedStateMachine(
-    C_foo_GeneratedClosure $closure,
-    mixed $coroutineData,
-    ?Exception $exception) : CoroutineResult<Unit>
-  *)
-  make_function_decl_header_syntax
-    (make_state_machine_method_name function_name)
-    [
-      make_closure_parameter_syntax classish_name function_name;
-      coroutine_data_parameter_syntax;
-      nullable_exception_parameter_syntax;
-    ]
-    (make_coroutine_result_type_syntax function_type)
-
 let make_closure_lambda_signature
-    classish_name
-    function_name
-    function_type =
+    class_node
+    ({ function_type; _; } as header_node) =
   (*
   ( C_foo_GeneratedClosure $closure,
     mixed $coroutineData,
@@ -862,7 +842,7 @@ let make_closure_lambda_signature
   *)
   make_lambda_signature_syntax
     [
-      make_closure_parameter_syntax classish_name function_name;
+      make_closure_parameter_syntax class_node header_node;
       coroutine_data_parameter_syntax;
       nullable_exception_parameter_syntax;
     ]
@@ -913,7 +893,6 @@ let compute_state_machine_data locals_and_params header_node =
  *)
 let generate_coroutine_state_machine
     classish_name
-    function_name
     method_node
     header_node =
   let body, locals_and_params = lower_body method_node in
@@ -922,7 +901,6 @@ let generate_coroutine_state_machine
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure
       classish_name
-      function_name
       method_node
       header_node
       state_machine_data in

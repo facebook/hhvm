@@ -22,16 +22,6 @@ open CoroutineSyntax
 open EditableSyntax
 open Coroutine_type_lowerer
 
-let option_flat_map o ~f =
-  match Option.map o ~f with
-  | Some ((Some _) as value) -> value
-  | _ -> None
-
-let maybe_get_token_text node =
-  match syntax node with
-  | Token token -> Some (EditableToken.text token)
-  | _ -> None
-
 (**
  * Rewrites coroutine annotations.
  *
@@ -93,20 +83,17 @@ let maybe_rewrite_coroutine_annotations node =
  * Returns the transformed method node and the generated closure's syntax.
  *)
 let maybe_generate_methods_and_closure
-    classish_name
+    class_node
     method_node
-    header_node
-    function_name =
+    header_node =
   let rewritten_body, closure_syntax =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
-      classish_name
-      function_name
+      class_node
       method_node
       header_node in
   Option.map
     (CoroutineMethodLowerer.maybe_rewrite_methodish_declaration
-      classish_name
-      function_name
+      class_node
       method_node
       header_node
       rewritten_body)
@@ -129,23 +116,18 @@ let fix_up_header_node ({ function_colon; function_type; _; } as node) =
  * Also extracts the coroutine's closure.
  *)
 let maybe_generate_methods_and_closure_from_header
-    classish_name
+    class_node
     ({ methodish_function_decl_header; _; } as method_node) =
   match syntax methodish_function_decl_header with
   | FunctionDeclarationHeader
-    ({ function_coroutine; function_name; _; } as header_node)
+    ({ function_coroutine; _; } as header_node)
     (* TODO: We need to rewrite non-coroutine functions if they contain
     coroutine lambdas. *)
     when not (is_missing function_coroutine) ->
-      let header_node = fix_up_header_node header_node in
-      option_flat_map
-        (maybe_get_token_text function_name)
-        ~f:
-          (maybe_generate_methods_and_closure
-            classish_name
-            method_node
-            header_node)
-
+      maybe_generate_methods_and_closure
+        class_node
+        method_node
+        (fix_up_header_node header_node)
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
       None
@@ -154,12 +136,10 @@ let maybe_generate_methods_and_closure_from_header
  * If the provided methodish declaration is for a coroutine, generates the
  * appropriate methods and state machine for the coroutine.
  *)
-let maybe_generate_methods_and_closure_from_method classish_name node =
+let maybe_generate_methods_and_closure_from_method class_node node =
   match syntax node with
   | MethodishDeclaration node ->
-      maybe_generate_methods_and_closure_from_header
-        classish_name
-        node
+      maybe_generate_methods_and_closure_from_header class_node node
   | _ ->
       (* Irrelevant input. *)
       None
@@ -171,12 +151,12 @@ let maybe_generate_methods_and_closure_from_method classish_name node =
  * one node has been transformed.
  *)
 let rewrite_classish_body_element
-    classish_name
+    class_node
     (classish_body_elements_acc, closures_acc, any_rewritten_acc)
     classish_body_element_node =
   Option.value_map
     (maybe_generate_methods_and_closure_from_method
-      classish_name
+      class_node
       classish_body_element_node)
     ~default:
       (classish_body_element_node :: classish_body_elements_acc,
@@ -192,12 +172,12 @@ let rewrite_classish_body_element
  * returns Some with all of the nodes. Otherwise, returns None.
  *)
 let maybe_rewrite_classish_body_elements
-    classish_name classish_body_elemenets_node =
+    class_node classish_body_elemenets_node =
   match syntax classish_body_elemenets_node with
   | SyntaxList syntax_list ->
       let rewritten_nodes, closure_nodes, any_rewritten =
         List.fold
-          ~f:(rewrite_classish_body_element classish_name)
+          ~f:(rewrite_classish_body_element class_node)
           ~init:([], [], false)
           syntax_list in
       if any_rewritten then
@@ -214,14 +194,14 @@ let maybe_rewrite_classish_body_elements
 (**
  * Rewrites the elements of the body.
  *)
-let maybe_rewrite_classish_body classish_name classish_body_node =
+let maybe_rewrite_classish_body ({ classish_body; _; } as class_node) =
   let make_syntax classish_body_node =
     make_syntax (ClassishBody classish_body_node) in
-  match syntax classish_body_node with
+  match syntax classish_body with
   | ClassishBody ({ classish_body_elements; _; } as classish_body_node) ->
       Option.map
         (maybe_rewrite_classish_body_elements
-          classish_name
+          class_node
           classish_body_elements)
         (fun (classish_body_elements, closure_nodes) ->
           make_syntax { classish_body_node with classish_body_elements; },
@@ -241,17 +221,12 @@ let maybe_rewrite_class node =
   lambdas? *)
   let make_syntax node = make_syntax (ClassishDeclaration node) in
   match syntax node with
-  | ClassishDeclaration ({ classish_body; classish_name; _; } as node) ->
-      (match maybe_get_token_text classish_name with
-      | Some classish_name ->
-          Option.map
-            (maybe_rewrite_classish_body classish_name classish_body)
-            ~f:(fun (classish_body, closure_nodes) ->
-              make_syntax { node with classish_body; },
-              closure_nodes)
-      | _ ->
-        (* Malformed class name. *)
-        None)
+  | ClassishDeclaration class_node ->
+      Option.map
+        (maybe_rewrite_classish_body class_node)
+        ~f:(fun (classish_body, closure_nodes) ->
+          make_syntax { class_node with classish_body; },
+          closure_nodes)
   | _ ->
       (* Irrelevant input. *)
       None

@@ -21,26 +21,24 @@ open Coroutine_state_machine_generator
  * To avoid conflicting with variadic function types, the contination parameter
  * is generated at the beginning rather than the end of the parameter list.
  *)
-let compute_parameter_list parameter_list return_type =
+let compute_parameter_list ({ function_parameter_list; _; } as header_node) =
   let coroutine_parameter_syntax =
-    make_continuation_parameter_syntax return_type in
+    make_continuation_parameter_syntax header_node in
   prepend_to_comma_delimited_syntax_list
     coroutine_parameter_syntax
-    parameter_list
+    function_parameter_list
 
 (**
  * If the provided function declaration header is for a coroutine, rewrites the
  * parameter list and return type as necessary to implement the coroutine.
  *)
-let rewrite_function_decl_header
-    ({ function_parameter_list; function_type; _; } as node) =
+let rewrite_function_decl_header ({ function_type; _; } as header_node) =
   let make_syntax node = make_syntax (FunctionDeclarationHeader node) in
   make_syntax
-    { node with
+    { header_node with
       function_coroutine = make_missing ();
       function_type = make_coroutine_result_type_syntax function_type;
-      function_parameter_list =
-        compute_parameter_list function_parameter_list function_type;
+      function_parameter_list = compute_parameter_list header_node;
     }
 
 let parameter_to_arg param =
@@ -68,10 +66,10 @@ let parameter_list_to_arg_list function_parameter_list =
  *)
 let make_state_machine_method_reference_syntax
     classish_name
-    function_name
+    header_node
     method_node =
   let method_name =
-    make_string_literal_syntax (make_state_machine_method_name function_name) in
+    make_string_literal_syntax (make_state_machine_method_name header_node) in
   if is_static_method method_node then
     make_function_call_expression_syntax
       class_meth_syntax
@@ -88,20 +86,16 @@ let make_state_machine_method_reference_syntax
  *)
 
  let rewrite_coroutine_body
-     classish_name
-     function_name
-     { function_parameter_list; function_type; _}
+     class_node
+     ({ function_parameter_list; _; } as header_node)
      rewritten_body =
    (* $param1, $param2 *)
    let arg_list = parameter_list_to_arg_list function_parameter_list in
 
   (* ($closure, $data, $exception) ==> { body } *)
-  let lambda_signature = make_closure_lambda_signature
-      classish_name
-      function_name
-      function_type in
+  let lambda_signature = make_closure_lambda_signature class_node header_node in
   let lambda = make_lambda_syntax lambda_signature rewritten_body in
-  let classname = make_closure_classname classish_name function_name in
+  let classname = make_closure_classname class_node header_node in
   (* $continuation,
     ($closure, $data, $exception) ==> { body },
     $param1, $param2 *)
@@ -132,16 +126,14 @@ let make_state_machine_method_reference_syntax
   make_list [resume_statement_syntax; return_syntax]
 
 let try_to_rewrite_coroutine_body
-    classish_name
-    function_name
+    class_node
     methodish_function_body
     header_node
     rewritten_body =
   match syntax methodish_function_body with
   | CompoundStatement node ->
       let compound_statements = rewrite_coroutine_body
-        classish_name
-        function_name
+        class_node
         header_node
         rewritten_body in
 
@@ -158,16 +150,18 @@ let try_to_rewrite_coroutine_body
  * implementation.
  *)
 let maybe_rewrite_methodish_declaration
-    classish_name
-    function_name
+    class_node
     ({ methodish_function_body; _; } as method_node)
     header_node
     rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
   Option.map
-    (try_to_rewrite_coroutine_body classish_name function_name
-      methodish_function_body header_node rewritten_body)
+    (try_to_rewrite_coroutine_body
+      class_node
+      methodish_function_body
+      header_node
+      rewritten_body)
     ~f:(fun methodish_function_body ->
       make_syntax
         { method_node with

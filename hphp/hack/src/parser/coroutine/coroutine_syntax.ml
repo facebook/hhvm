@@ -205,10 +205,25 @@ let get_list_item node =
   | ListItem { list_item; _; } -> list_item
   | _ -> failwith "Was not a ListItem"
 
+let get_type_parameter_list node =
+  match syntax node with
+  | TypeParameters { type_parameters_parameters; _; } ->
+      type_parameters_parameters
+        |> syntax_node_to_list
+        |> Core_list.map ~f:get_list_item
+  | Missing -> []
+  | _ -> failwith "Was not a TypeParameters"
+
 let is_static_method { methodish_modifiers; _; } =
   methodish_modifiers
     |> syntax_node_to_list
     |> Core_list.exists ~f:is_static
+
+let string_of_name_token node =
+  match syntax node with
+  | Token { EditableToken.kind = TokenKind.Name; text; _; } -> text
+  | _ -> failwith "Was not a Name Token"
+
 
 (* Syntax creation functions *)
 
@@ -338,26 +353,25 @@ let make_parameter_declaration_syntax
     parameter_variable_syntax
     (* default value *)  (make_missing ())
 
-let make_simple_type_specifier_syntax classname =
-  (* TODO: This isn't right; the "classname" token should be just for the
-  keyword "classname". *)
-  let classname_syntax = make_token_syntax
-    ~space_after:true TokenKind.Classname classname in
-  make_simple_type_specifier classname_syntax
+let make_type_parameters_syntax type_parameter_list =
+  match type_parameter_list with
+  | [] ->
+      make_missing ()
+  | _ ->
+      make_type_parameters
+        left_angle_syntax
+        (make_delimited_list comma_syntax type_parameter_list)
+        right_angle_syntax
 
-let make_generic_type_specifier_syntax classname generic_argument_list =
-  (* TODO: This isn't right; the "classname" token should be just for the
-  keyword "classname". *)
+let make_type_specifier_syntax classname type_parameter_list =
   let classname_syntax = make_token_syntax
-    ~space_after:true TokenKind.Classname classname in
-  let generic_argument_list_syntax =
-    make_delimited_list comma_syntax generic_argument_list in
-  let type_arguments_syntax =
-    make_type_arguments
-      left_angle_syntax
-      generic_argument_list_syntax
-      right_angle_syntax in
-  make_generic_type_specifier classname_syntax type_arguments_syntax
+    ~space_after:true TokenKind.Name classname in
+  let type_parameters_syntax =
+    make_type_parameters_syntax type_parameter_list in
+  if is_missing type_parameters_syntax then
+    make_simple_type_specifier classname_syntax
+  else
+    make_generic_type_specifier classname_syntax type_parameters_syntax
 
 let make_functional_type_syntax argument_types return_type_syntax =
   let argument_types_syntax = make_delimited_list comma_syntax argument_types in
@@ -373,7 +387,11 @@ let make_functional_type_syntax argument_types return_type_syntax =
     right_paren_syntax
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
-let make_classish_declaration_syntax classname extends_list classish_body =
+let make_classish_declaration_syntax
+    classname
+    type_parameter_list
+    extends_list
+    classish_body =
   let classname_syntax =
     make_token_syntax ~space_after:true TokenKind.Classname classname in
   let extends_list_syntax =
@@ -383,7 +401,7 @@ let make_classish_declaration_syntax classname extends_list classish_body =
     (* classish_modifiers *) (make_missing ())
     class_keyword_syntax
     classname_syntax
-    (* classish_type_parameters *) (make_missing ())
+    (make_type_parameters_syntax type_parameter_list)
     (if is_missing extends_list_syntax then
       make_missing ()
     else
@@ -526,28 +544,22 @@ let continuation_variable =
 let continuation_variable_syntax =
   make_token_syntax TokenKind.Variable continuation_variable
 
-let make_closure_base_type_syntax return_type_syntax =
-  make_generic_type_specifier_syntax
-    "ClosureBase"
-    [ return_type_syntax; ]
+let make_closure_base_type_syntax { function_type; _; } =
+  make_type_specifier_syntax "ClosureBase" [ function_type; ]
 
-let make_continuation_type_syntax return_type_syntax =
-  make_generic_type_specifier_syntax
-    "CoroutineContinuation"
-    [return_type_syntax]
+let make_continuation_type_syntax function_type =
+  make_type_specifier_syntax "CoroutineContinuation" [ function_type; ]
 
 let make_continuation_parameter_syntax
     ?visibility_syntax
-    return_type_syntax =
+    { function_type; _; } =
   make_parameter_declaration_syntax
     ?visibility_syntax
-    (make_continuation_type_syntax return_type_syntax)
+    (make_continuation_type_syntax function_type)
     continuation_variable
 
-let make_coroutine_result_type_syntax return_type_syntax =
-  make_generic_type_specifier_syntax
-    "CoroutineResult"
-    [return_type_syntax]
+let make_coroutine_result_type_syntax function_type =
+  make_type_specifier_syntax "CoroutineResult" [ function_type; ]
 
 let suspended_coroutine_result_classname_syntax =
   make_qualified_name_syntax "SuspendedCoroutineResult"
@@ -574,12 +586,26 @@ let create_suspended_coroutine_result_syntax =
     suspended_member_name
     []
 
-let make_closure_classname enclosing_classname function_name =
-  Printf.sprintf "%s_%s_GeneratedClosure" enclosing_classname function_name
+let make_closure_classname { classish_name; _; } { function_name; _; } =
+  Printf.sprintf
+    "%s_%s_GeneratedClosure"
+    (string_of_name_token classish_name)
+    (string_of_name_token function_name)
 
-let make_closure_type_syntax enclosing_classname function_name =
-  make_simple_type_specifier_syntax
-    (make_closure_classname enclosing_classname function_name)
+(**
+ * Given a list of TypeParameters syntaxes, combines them into a single
+ * list of type_parameters.
+ *)
+let make_closure_type_parameters
+    { classish_type_parameters; _; }
+    { function_type_parameter_list; _; } =
+  (get_type_parameter_list classish_type_parameters) @
+    (get_type_parameter_list function_type_parameter_list)
+
+let make_closure_type_syntax class_node header_node =
+  make_type_specifier_syntax
+    (make_closure_classname class_node header_node)
+    (make_closure_type_parameters class_node header_node)
 
 let closure_variable =
   "$closure"
@@ -593,9 +619,9 @@ let closure_name_syntax name =
   let name_syntax = make_token_syntax TokenKind.Name name in
   make_member_selection_expression_syntax closure_variable_syntax name_syntax
 
-let make_closure_parameter_syntax enclosing_classname function_name =
+let make_closure_parameter_syntax class_node function_name =
   make_parameter_declaration_syntax
-    (make_closure_type_syntax enclosing_classname function_name)
+    (make_closure_type_syntax class_node function_name)
     closure_variable
 
 let resume_member_name =
@@ -687,16 +713,15 @@ let state_machine_variable_name_syntax =
 
 let make_state_machine_parameter_syntax
     enclosing_classname
-    function_name
-    return_type_syntax =
+    ({ function_type; _; } as header_node) =
   let state_machine_type_syntax =
     make_functional_type_syntax
       [
-        make_closure_type_syntax enclosing_classname function_name;
+        make_closure_type_syntax enclosing_classname header_node;
         mixed_syntax;
         nullable_exception_type_syntax;
       ]
-      (make_coroutine_result_type_syntax return_type_syntax) in
+      (make_coroutine_result_type_syntax function_type) in
   make_parameter_declaration_syntax
     ~visibility_syntax:private_syntax
     state_machine_type_syntax

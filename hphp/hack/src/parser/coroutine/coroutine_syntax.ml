@@ -567,6 +567,13 @@ let get_result_member_name =
 let get_result_member_syntax =
   make_token_syntax TokenKind.Name get_result_member_name
 
+(* SuspendedCoroutineResult::create() *)
+let create_suspended_coroutine_result_syntax =
+  make_static_function_call_expression_syntax
+    suspended_coroutine_result_classname_syntax
+    suspended_member_name
+    []
+
 let make_closure_classname enclosing_classname function_name =
   Printf.sprintf "%s_%s_GeneratedClosure" enclosing_classname function_name
 

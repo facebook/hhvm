@@ -126,15 +126,9 @@ let make_state_machine_method_reference_syntax
   (* new Closure($continuation, ...)->resume(null); *)
   let resume_statement_syntax =
     make_expression_statement_syntax call_resume_with_null_syntax in
-  (* SuspendedCoroutineResult::create() *)
-  let suspended_marker_expression =
-    make_static_function_call_expression_syntax
-      suspended_coroutine_result_classname_syntax
-      suspended_member_name
-      [] in
   (* return SuspendedCoroutineResult::create(); *)
   let return_syntax =
-    make_return_statement_syntax suspended_marker_expression in
+    make_return_statement_syntax create_suspended_coroutine_result_syntax in
   make_list [resume_statement_syntax; return_syntax]
 
 let try_to_rewrite_coroutine_body

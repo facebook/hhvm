@@ -439,15 +439,16 @@ let extract_suspend_statements node next_label =
           make_member_selection_expression_syntax
             coroutine_result_variable_syntax
             is_suspended_member_syntax in
-        let call_is_selected_syntax =
+        let call_is_suspended_syntax =
           make_function_call_expression_syntax
             select_is_suspended_member_syntax
             [] in
         let return_coroutine_result_syntax =
-          make_return_statement_syntax coroutine_result_variable_syntax in
+          make_return_statement_syntax
+            create_suspended_coroutine_result_syntax in
         let return_if_suspended_syntax =
           make_if_syntax
-            call_is_selected_syntax
+            call_is_suspended_syntax
             [ return_coroutine_result_syntax ] in
 
         let select_coroutine_result_syntax =

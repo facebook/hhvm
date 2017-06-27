@@ -645,7 +645,7 @@ let coroutine_data_parameter_syntax =
     coroutine_data_variable
 
 let exception_variable =
-  "$exception"
+  "$exception_generated"
 
 let exception_variable_syntax =
   make_token_syntax TokenKind.Variable exception_variable

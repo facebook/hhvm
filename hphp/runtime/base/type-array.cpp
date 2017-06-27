@@ -253,7 +253,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
       ssize_t pos = opaque1.positions[perm1[mid]];
       int cmp_res =  cmp(target,
                          by_key ? array->getKey(pos)
-                                : array->getValueRef(pos),
+                                : VarNR(array->atPos(pos)),
                          cmp_data);
       if (cmp_res > 0) { // outer is bigger
         min = mid + 1;
@@ -274,8 +274,11 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
           if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
             break;
           }
-          if (value_cmp_as_string_function(val, array->getValueRef(pos),
-                                           value_data) == 0) {
+          if (value_cmp_as_string_function(
+                val,
+                VarNR(array->atPos(pos)),
+                value_data
+              ) == 0) {
             found = true;
             break;
           }
@@ -286,8 +289,11 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
             if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
               break;
             }
-            if (value_cmp_as_string_function(val, array->getValueRef(pos),
-                                             value_data) == 0) {
+            if (value_cmp_as_string_function(
+                  val,
+                  VarNR(array->atPos(pos)),
+                  value_data
+                ) == 0) {
               found = true;
               break;
             }
@@ -991,9 +997,11 @@ static int array_compare_func(const void *n1, const void *n2, const void *op) {
                             (*opaque->array)->getKey(pos2),
                             opaque->data);
   }
-  return opaque->cmp_func((*opaque->array)->getValueRef(pos1),
-                          (*opaque->array)->getValueRef(pos2),
-                          opaque->data);
+  return opaque->cmp_func(
+    VarNR((*opaque->array)->atPos(pos1)),
+    VarNR((*opaque->array)->atPos(pos2)),
+    opaque->data
+  );
 }
 
 static int multi_compare_func(const void *n1, const void *n2, const void *op) {
@@ -1011,9 +1019,11 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
                                 (*opaque->array)->getKey(pos2),
                                 opaque->data);
     } else {
-      result = opaque->cmp_func((*opaque->array)->getValueRef(pos1),
-                                (*opaque->array)->getValueRef(pos2),
-                                opaque->data);
+      result = opaque->cmp_func(
+        VarNR((*opaque->array)->atPos(pos1)),
+        VarNR((*opaque->array)->atPos(pos2)),
+        opaque->data
+      );
     }
     if (result != 0) return result;
   }
@@ -1057,9 +1067,9 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.appendWithRef(m_arr->getValueRef(pos));
+      sorted.appendWithRef(m_arr->atPos(pos));
     } else {
-      sorted.setWithRef(m_arr->getKey(pos), m_arr->getValueRef(pos), true);
+      sorted.setWithRef(m_arr->nvGetKey(pos), m_arr->atPos(pos), true);
     }
   }
   operator=(sorted);
@@ -1111,9 +1121,9 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
       ssize_t pos = opaque.positions[indices[i]];
       Variant k(arr->getKey(pos));
       if (renumber && k.isInteger()) {
-        sorted.append(arr->getValueRef(pos));
+        sorted.append(arr->atPos(pos));
       } else {
-        sorted.set(k, arr->getValueRef(pos));
+        sorted.set(k, arr->atPos(pos));
       }
     }
     if (opaque.original->getRawType() == KindOfRef) {

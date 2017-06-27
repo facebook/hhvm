@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_HPHP_ARRAY_H_
 #define incl_HPHP_HPHP_ARRAY_H_
 
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -291,23 +291,33 @@ struct MixedArray final : ArrayData,
   // from a const Variant& key to int64.
 private:
   using ArrayData::exists;
+  using ArrayData::at;
+  using ArrayData::rval;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
   using ArrayData::remove;
-  using ArrayData::nvGet;
   using ArrayData::release;
 
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
 
   static size_t Vsize(const ArrayData*);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
+  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static constexpr auto NvTryGetInt = &NvGetInt;
   static constexpr auto NvTryGetStr = &NvGetStr;
+  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetInt(ad, k) };
+  }
+  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvTryGetStr(ad, k) };
+  }
+  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return member_rval { ad, GetValueRef(ad, pos) };
+  }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static member_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
@@ -363,10 +373,24 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t);
+  static member_rval::ptr_u NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
+  static member_rval::ptr_u NvTryGetStrDict(const ArrayData*,
+                                            const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
+  static member_rval RvalIntDict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvGetIntDict(ad, k) };
+  }
+  static member_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetIntDict(ad, k) };
+  }
+  static member_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvGetStrDict(ad, k) };
+  }
+  static member_rval RvalStrStrictDict(const ArrayData* ad,
+                                       const StringData* k) {
+    return member_rval { ad, NvTryGetStrDict(ad, k) };
+  }
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
   static constexpr auto SetIntDict = &SetInt;

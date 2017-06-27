@@ -23,7 +23,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -167,12 +167,6 @@ public:
   size_t vsize() const;
 
   /*
-   * getValueRef() gets a reference to value at position "pos".  You
-   * must not change the returned Variant.
-   */
-  const Variant& getValueRef(ssize_t pos) const;
-
-  /*
    * Return true for array types that don't have COW semantics.
    */
   bool noCopyOnWrite() const;
@@ -238,6 +232,8 @@ public:
   bool isTail()            const { return m_pos == iter_last(); }
   bool isInvalid()         const { return m_pos == iter_end(); }
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /**
    * Testing whether a key exists.
    */
@@ -249,15 +245,20 @@ public:
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
    */
-  const TypedValue* nvGet(int64_t k) const;
-  const TypedValue* nvGet(const StringData* k) const;
-  const TypedValue* nvTryGet(int64_t k) const;
-  const TypedValue* nvTryGet(const StringData* k) const;
+  TypedValue at(int64_t k) const;
+  TypedValue at(const StringData* k) const;
+  TypedValue atPos(ssize_t pos) const;
   Cell nvGetKey(ssize_t pos) const;
 
-  // wrappers that call getValueRef()
+  // wrappers that call rvalPos()
   Variant getValue(ssize_t pos) const;
   Variant getKey(ssize_t pos) const;
+
+  member_rval rval(int64_t k) const;
+  member_rval rval(const StringData* k) const;
+  member_rval rvalPos(ssize_t pos) const;
+  member_rval rvalStrict(int64_t k) const;
+  member_rval rvalStrict(const StringData* k) const;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return this if
@@ -349,6 +350,8 @@ public:
   ArrayData *remove(Cell k, bool copy);
   ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(const Variant& k, bool copy);
+
+  /////////////////////////////////////////////////////////////////////////////
 
   // See the documentation for IterEnd, IterBegin, etc. in array-data.cpp
   ssize_t iter_begin() const;
@@ -630,16 +633,16 @@ struct ArrayFunctions {
   // NK stands for number of array kinds.
   static auto const NK = size_t{9};
   void (*release[NK])(ArrayData*);
-  const TypedValue* (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
-  const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
-  const TypedValue* (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
+  member_rval::ptr_u (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  member_rval::ptr_u (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
+  member_rval::ptr_u (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  member_rval::ptr_u (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
   size_t (*vsize[NK])(const ArrayData*);
-  const Variant& (*getValueRef[NK])(const ArrayData*, ssize_t pos);
+  member_rval::ptr_u (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);

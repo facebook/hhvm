@@ -225,7 +225,7 @@ void facts_parse_impl(
 ) {
   for (auto i = 0; i < pathList->size(); ++i) {
     Facts::ParseResult workerResult;
-    auto path = pathList->getValueRef(i).toString();
+    auto path = String::attach(tvCastToString(pathList->atPos(i)));
     try {
       parseFile(root, path.c_str(), workerResult, allowHipHopSyntax);
     } catch (...) {
@@ -256,7 +256,9 @@ void facts_parse_impl_threaded(
 
   std::vector<std::string> pathListCopy;
   for(auto i = 0; i < numPaths; i++) {
-    pathListCopy.push_back(pathList->getValueRef(i).toString().c_str());
+    pathListCopy.push_back(
+      String::attach(tvCastToString(pathList->atPos(i))).c_str()
+    );
   }
 
   for (auto worker = 0; worker < numWorkers; ++worker) {
@@ -302,7 +304,7 @@ void facts_parse_impl_threaded(
     buildOneResult(
       workerResults[i],
       outResArr,
-      pathList->getValueRef(i).toString());
+      String::attach(tvCastToString(pathList->atPos(i))));
   }
 
   for (auto& worker : workers) {

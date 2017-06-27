@@ -521,8 +521,8 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
         gen(env, RaiseArrayIndexNotice, key);
         return cns(env, TInitNull);
       }
-      auto const value = arr->nvGet(idx);
-      return cns(env, *value);
+      auto const value = arr->at(idx);
+      return cns(env, value);
     }
 
     switch (packedArrayBoundsStaticCheck(base->type(), idx)) {

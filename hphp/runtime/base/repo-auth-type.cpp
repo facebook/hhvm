@@ -63,8 +63,8 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
     if (!sizeMatches()) return false;
     if (use_slow_checks) {
       for (auto i = uint32_t{0}; i < ad->size(); ++i) {
-        auto const elem = ad->nvGet(i);
-        if (!tvMatchesRepoAuthType(*elem, arrTy->packedElem(i))) {
+        auto const elem = ad->at(i);
+        if (!tvMatchesRepoAuthType(elem, arrTy->packedElem(i))) {
           return false;
         }
       }
@@ -73,8 +73,8 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
   case A::Tag::PackedN:
     if (use_slow_checks) {
       for (auto i = uint32_t{0}; i < ad->size(); ++i) {
-        auto const elem = ad->nvGet(i);
-        if (!tvMatchesRepoAuthType(*elem, arrTy->elemType())) {
+        auto const elem = ad->at(i);
+        if (!tvMatchesRepoAuthType(elem, arrTy->elemType())) {
           return false;
         }
       }

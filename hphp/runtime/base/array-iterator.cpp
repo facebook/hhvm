@@ -432,7 +432,7 @@ const Variant& ArrayIter::secondRef() const {
   const ArrayData* ad = getArrayData();
   assert(ad);
   assert(m_pos != ad->iter_end());
-  return ad->getValueRef(m_pos);
+  return tvAsCVarRef(ad->rvalPos(m_pos).tv_ptr());
 }
 
 const Variant& ArrayIter::secondRefPlus() {
@@ -440,7 +440,7 @@ const Variant& ArrayIter::secondRefPlus() {
     const ArrayData* ad = getArrayData();
     assert(ad);
     assert(m_pos != ad->iter_end());
-    return ad->getValueRef(m_pos);
+    return tvAsCVarRef(ad->rvalPos(m_pos).tv_ptr());
   }
   auto obj = getObject();
   if (obj->isCollection()) {
@@ -1053,14 +1053,14 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
     auto const cur = arrIter.nvSecond();
-    if (cur->m_type == KindOfRef) {
-      if (!withRef || !cur->m_data.pref->isReferenced()) {
-        cellDup(*(cur->m_data.pref->tv()), *out);
+    if (cur.type() == KindOfRef) {
+      if (!withRef || !cur.val().pref->isReferenced()) {
+        cellDup(*(cur.val().pref->tv()), *out);
       } else {
-        refDup(*cur, *out);
+        refDup(cur.tv(), *out);
       }
     } else {
-      cellDup(*cur, *out);
+      cellDup(cur.tv(), *out);
     }
   } else {
     Variant val = arrIter.second();
@@ -1482,9 +1482,9 @@ static int64_t iter_next_apc_array(Iter* iter,
   arrIter->setPos(pos);
 
   // Note that APCLocalArray can never return KindOfRefs.
-  const Variant& var = APCLocalArray::GetValueRef(arr->asArrayData(), pos);
-  assert(var.asTypedValue()->m_type != KindOfRef);
-  cellSet(*var.asTypedValue(), *valOut);
+  auto const rval = APCLocalArray::RvalAtPos(arr->asArrayData(), pos);
+  assert(rval.type() != KindOfRef);
+  cellSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
   auto const key = APCLocalArray::NvGetKey(ad, pos);

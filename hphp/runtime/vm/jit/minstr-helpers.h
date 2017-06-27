@@ -500,19 +500,19 @@ ELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template<bool warn, bool intishWarn>
-inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
+inline member_rval checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
   assert(a->isPHPArray());
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
-    return warn ? a->nvTryGet(i) : a->nvGet(i);
+    return warn ? a->rvalStrict(i) : a->rval(i);
   } else {
-    return warn ? a->nvTryGet(key) : a->nvGet(key);
+    return warn ? a->rvalStrict(key) : a->rval(key);
   }
 }
 
 template<bool warn, bool intishWarn>
-inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
+inline member_rval checkedGet(ArrayData* a, int64_t key) {
   not_reached();
 }
 
@@ -540,8 +540,8 @@ template<KeyType keyType, bool checkForInt, MOpMode mode, bool intishWarn>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
   auto constexpr warn = mode == MOpMode::Warn;
   auto const ret = checkForInt ?
-    checkedGet<warn, intishWarn>(ad, key) :
-    (warn ? ad->nvTryGet(key) : ad->nvGet(key));
+    checkedGet<warn, intishWarn>(ad, key).tv_ptr() :
+    (warn ? ad->rvalStrict(key).tv_ptr() : ad->rval(key).tv_ptr());
   if (!ret) return elemArrayNotFound<mode>(key);
   return ret;
 }
@@ -609,8 +609,9 @@ TypedValue arrayGetNotFound(const StringData* k);
 template<KeyType keyType, bool checkForInt, bool intishWarn>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt
-    ? checkedGet<true, intishWarn>(a, key) : a->nvTryGet(key);
-  if (ret) return *ret;
+    ? checkedGet<true, intishWarn>(a, key)
+    : a->rvalStrict(key);
+  if (ret) return ret.tv();
   return arrayGetNotFound(key);
 }
 
@@ -667,9 +668,9 @@ ELEM_DICT_U_HELPER_TABLE(X)
   m(elemDictSW,    KeyType::Str,       MOpMode::Warn)          \
   m(elemDictIW,    KeyType::Int,       MOpMode::Warn)          \
 
-#define X(nm, keyType, mode)                                       \
+#define X(nm, keyType, mode) \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemDict<mode, keyType>(ad, key);                   \
+  return HPHP::ElemDict<mode, keyType>(ad, key).tv_ptr(); \
 }
 ELEM_DICT_HELPER_TABLE(X)
 #undef X
@@ -697,9 +698,9 @@ ELEM_KEYSET_U_HELPER_TABLE(X)
   m(elemKeysetSW,    KeyType::Str,       MOpMode::Warn)          \
   m(elemKeysetIW,    KeyType::Int,       MOpMode::Warn)          \
 
-#define X(nm, keyType, mode)                                       \
+#define X(nm, keyType, mode) \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemKeyset<mode, keyType>(ad, key);                 \
+  return HPHP::ElemKeyset<mode, keyType>(ad, key).tv_ptr(); \
 }
 ELEM_KEYSET_HELPER_TABLE(X)
 #undef X
@@ -713,9 +714,9 @@ ELEM_KEYSET_HELPER_TABLE(X)
   m(dictGetSQuiet, KeyType::Str,  MOpMode::None)                \
   m(dictGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, mode)                                \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return *HPHP::ElemDict<mode, keyType>(a, key);            \
+#define X(nm, keyType, mode) \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) { \
+  return HPHP::ElemDict<mode, keyType>(a, key).tv(); \
 }
 DICTGET_HELPER_TABLE(X)
 #undef X
@@ -729,9 +730,9 @@ DICTGET_HELPER_TABLE(X)
   m(keysetGetSQuiet, KeyType::Str,  MOpMode::None)                \
   m(keysetGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, mode)                                \
+#define X(nm, keyType, mode) \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return *HPHP::ElemKeyset<mode, keyType>(a, key);          \
+  return HPHP::ElemKeyset<mode, keyType>(a, key).tv(); \
 }
 KEYSETGET_HELPER_TABLE(X)
 #undef X
@@ -980,10 +981,12 @@ SETELEM_HELPER_TABLE(X)
 
 template<KeyType keyType, bool checkForInt, bool intishWarn>
 uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  auto const value = checkForInt
-    ? checkedGet<false, intishWarn>(a, key) : a->nvGet(key);
-  return !value ? 0 :
-         !tvAsCVarRef(value).isNull();
+  auto const rval = checkForInt
+    ? checkedGet<false, intishWarn>(a, key)
+    : a->rval(key);
+  return !rval
+    ? 0
+    : !isNullType(tvToCell(rval).type());
 }
 
 #define ARRAY_ISSET_HELPER_TABLE(m)                             \

@@ -1103,7 +1103,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          ref_array->asArrRef().prepend(args->getValueRef(pos));
+          ref_array->asArrRef().prepend(args->atPos(pos));
         }
       }
       ref_array->asArrRef().prepend(var);
@@ -1116,7 +1116,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
           auto pos_limit = args->iter_end();
           for (ssize_t pos = args->iter_begin(); pos != pos_limit;
                pos = args->iter_advance(pos)) {
-            newArray.append(args->getValueRef(pos));
+            newArray.append(args->atPos(pos));
           }
         }
         if (cell_array->m_data.parr->isKeyset()) {
@@ -1153,7 +1153,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          vec->addFront(*args->getValueRef(pos).asCell());
+          vec->addFront(tvToCell(args->atPos(pos)));
         }
       }
       vec->addFront(*var.asCell());
@@ -1165,7 +1165,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          st->addFront(*args->getValueRef(pos).asCell());
+          st->addFront(tvToCell(args->atPos(pos)));
         }
       }
       st->addFront(*var.asCell());

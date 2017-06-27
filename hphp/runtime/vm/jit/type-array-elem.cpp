@@ -72,7 +72,7 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx) {
   if (arr->hasConstVal() && idx->hasConstVal()) {
     auto const idxVal = idx->intVal();
     if (idxVal >= 0 && idxVal < arr->arrVal()->size()) {
-      return Type(arr->arrVal()->nvGet(idxVal)->m_type);
+      return Type(arr->arrVal()->at(idxVal).m_type);
     }
     return TInitNull;
   }
@@ -114,8 +114,8 @@ Type vecElemType(SSATmp* arr, SSATmp* idx) {
     if (idx && idx->hasConstVal()) {
       auto const idxVal = idx->intVal();
       if (idxVal >= 0 && idxVal < arr->vecVal()->size()) {
-        auto const val = PackedArray::NvGetIntVec(arr->vecVal(), idxVal);
-        return val ? Type(val->m_type) : TBottom;
+        auto const rval = PackedArray::RvalIntVec(arr->vecVal(), idxVal);
+        return rval ? Type(rval.type()) : TBottom;
       }
       return TBottom;
     }
@@ -143,14 +143,14 @@ Type dictElemType(SSATmp* arr, SSATmp* idx) {
     // precise type.
     if (idx && idx->hasConstVal(TInt)) {
       auto const idxVal = idx->intVal();
-      auto const val = MixedArray::NvGetIntDict(arr->dictVal(), idxVal);
-      return val ? Type(val->m_type) : TBottom;
+      auto const rval = MixedArray::RvalIntDict(arr->dictVal(), idxVal);
+      return rval ? Type(rval.type()) : TBottom;
     }
 
     if (idx && idx->hasConstVal(TStr)) {
       auto const idxVal = idx->strVal();
-      auto const val = MixedArray::NvGetStrDict(arr->dictVal(), idxVal);
-      return val ? Type(val->m_type) : TBottom;
+      auto const rval = MixedArray::RvalStrDict(arr->dictVal(), idxVal);
+      return rval ? Type(rval.type()) : TBottom;
     }
 
     // Otherwise we can constrain the type according to the union of all the
@@ -183,14 +183,14 @@ Type keysetElemType(SSATmp* arr, SSATmp* idx) {
     // precise type.
     if (idx && idx->hasConstVal(TInt)) {
       auto const idxVal = idx->intVal();
-      auto const val = SetArray::NvGetInt(arr->keysetVal(), idxVal);
-      return val ? Type(val->m_type) : TBottom;
+      auto const rval = SetArray::RvalInt(arr->keysetVal(), idxVal);
+      return rval ? Type(rval.type()) : TBottom;
     }
 
     if (idx && idx->hasConstVal(TStr)) {
       auto const idxVal = idx->strVal();
-      auto const val = SetArray::NvGetStr(arr->keysetVal(), idxVal);
-      return val ? Type(val->m_type) : TBottom;
+      auto const rval = SetArray::RvalStr(arr->keysetVal(), idxVal);
+      return rval ? Type(rval.type()) : TBottom;
     }
 
     // Otherwise we can constrain the type according to the union of all the

@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
@@ -588,13 +588,13 @@ bool MixedArray::checkInvariants() const {
 
 size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
 
-const Variant& MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+member_rval::ptr_u MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(a->checkInvariants());
   assert(pos != a->m_used);
-  auto& e = a->data()[pos];
+  auto const& e = a->data()[pos];
   assert(!e.isTombstone());
-  return tvAsCVarRef(&e.data);
+  return &e.data;
 }
 
 bool MixedArray::IsVectorData(const ArrayData* ad) {
@@ -1711,21 +1711,21 @@ bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
+member_rval::ptr_u MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t k) {
   assert(asMixed(ad)->checkInvariants());
   assert(ad->isDict());
-  auto const tv = MixedArray::NvGetInt(ad, ki);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
-  return tv;
+  auto const ptr = MixedArray::NvGetInt(ad, k);
+  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
+  return ptr;
 }
 
-const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
-                                              const StringData* k) {
+member_rval::ptr_u MixedArray::NvTryGetStrDict(const ArrayData* ad,
+                                               const StringData* k) {
   assert(asMixed(ad)->checkInvariants());
   assert(ad->isDict());
-  auto const tv = MixedArray::NvGetStr(ad, k);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
-  return tv;
+  auto const ptr = MixedArray::NvGetStr(ad, k);
+  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
+  return ptr;
 }
 
 member_lval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
@@ -1843,15 +1843,17 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
     auto elm = arr1->data();
     for (auto i = arr1->m_used; i--; elm++) {
       if (UNLIKELY(elm->isTombstone())) continue;
-      const TypedValue* other;
-      if (elm->hasIntKey()) {
-        other = NvGetIntDict(ad2, elm->ikey);
-      } else {
-        assertx(elm->hasStrKey());
-        other = NvGetStrDict(ad2, elm->skey);
-      }
-      if (!other ||
-          !cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+      auto const other_rval = [&] {
+        if (elm->hasIntKey()) {
+          return RvalIntDict(ad2, elm->ikey);
+        } else {
+          assertx(elm->hasStrKey());
+          return RvalStrDict(ad2, elm->skey);
+        }
+      }();
+      if (!other_rval ||
+          !cellEqual(tvAssertCell(elm->data),
+                     tvAssertCell(other_rval.tv()))) {
         return false;
       }
     }

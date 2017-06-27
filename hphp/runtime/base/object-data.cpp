@@ -631,13 +631,13 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
           break;
         }
         case EraseRefs: {
-          auto const val = dynProps->get()->nvGet(key.m_data.num);
-          retArray.set(key.m_data.num, tvAsCVarRef(val));
+          auto const val = dynProps->get()->at(key.m_data.num);
+          retArray.set(key.m_data.num, val);
           break;
         }
         case PreserveRefs: {
-          auto const val = dynProps->get()->nvGet(key.m_data.num);
-          retArray.setWithRef(key.m_data.num, tvAsCVarRef(val));
+          auto const val = dynProps->get()->at(key.m_data.num);
+          retArray.setWithRef(key.m_data.num, val);
           break;
         }
         }
@@ -652,14 +652,14 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         break;
       }
       case EraseRefs: {
-        auto const val = dynProps->get()->nvGet(strKey);
-        retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+        auto const val = dynProps->get()->at(strKey);
+        retArray.set(StrNR(strKey), val, true /* isKey */);
         break;
       }
       case PreserveRefs: {
-        auto const val = dynProps->get()->nvGet(strKey);
+        auto const val = dynProps->get()->at(strKey);
         retArray.setWithRef(make_tv<KindOfString>(strKey),
-                            *val, true /* isKey */);
+                            val, true /* isKey */);
         break;
       }
       }
@@ -981,12 +981,11 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   // We could not find a visible declared property. We need to check for a
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    if (auto prop = dynPropArray()->nvGet(key)) {
-      // If we may write to the property we need to allow the array to escalate
-      if (copyDynArray) {
-        prop = dynPropArray().lvalAt(StrNR(key),
-                                     AccessFlags::Key).asTypedValue();
-      }
+    if (auto const rval = dynPropArray()->rval(key)) {
+      // If we may write to the property we need to allow the array to escalate.
+      auto const prop = copyDynArray
+        ? dynPropArray().lvalAt(StrNR(key), AccessFlags::Key).asTypedValue()
+        : rval.tv_ptr();
 
       // Returning a non-declared property, we know that it is accessible since
       // all dynamic properties are.

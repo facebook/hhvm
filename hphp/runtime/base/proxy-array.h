@@ -17,7 +17,7 @@
 #define incl_HPHP_PROXY_ARRAY_H
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/native.h"
@@ -137,15 +137,31 @@ public:
 
   static size_t Vsize(const ArrayData*);
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
+  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
-  static const TypedValue* NvTryGetInt(const ArrayData*, int64_t k);
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
-  static const TypedValue* NvTryGetStr(const ArrayData*, const StringData* k);
+  static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t k);
+  static member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t k);
+  static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData* k);
+  static member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData* k);
+
+  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvGetInt(ad, k) };
+  }
+  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetInt(ad, k) };
+  }
+  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvGetStr(ad, k) };
+  }
+  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvTryGetStr(ad, k) };
+  }
+  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return member_rval { ad, GetValueRef(ad, pos) };
+  }
 
   static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
@@ -240,7 +256,7 @@ void ProxyArray::proxySet(K k,
     assert(data_size == sizeof(void*));
     r = innerArr(this)->zSet(k, *(RefData**)data);
     if (dest) {
-      *dest = (void*)(&r->nvGet(k)->m_data.pref);
+      *dest = (void*)(&r->rval(k).tv_ptr()->m_data.pref);
     }
   } else {
     auto elt = makeElementResource(data, data_size, dest);

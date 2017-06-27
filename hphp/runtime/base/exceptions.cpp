@@ -256,14 +256,16 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
   for (ArrayIter iter(trace); iter; ++iter) {
     assertx(iter.second().asTypedValue()->m_type == KindOfArray);
     auto const frame = iter.second().asTypedValue()->m_data.parr;
-    auto const file = frame->nvGet(s_file.get());
-    auto const line = frame->nvGet(s_line.get());
+    auto const file = frame->rval(s_file.get());
+    auto const line = frame->rval(s_line.get());
     if (file || line) {
       if (file) {
-        tvSetIgnoreRef(*tvAssertCell(file), throwable->propVec()[s_fileIdx]);
+        auto const tv = file.tv();
+        tvSetIgnoreRef(tvAssertCell(tv), throwable->propVec()[s_fileIdx]);
       }
       if (line) {
-        tvSetIgnoreRef(*tvAssertCell(line), throwable->propVec()[s_lineIdx]);
+        auto const tv = line.tv();
+        tvSetIgnoreRef(tvAssertCell(tv), throwable->propVec()[s_lineIdx]);
       }
       return;
     }

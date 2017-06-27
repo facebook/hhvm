@@ -702,8 +702,8 @@ void VerifyRetTypeFail(TypedValue* tv) {
 
 namespace {
 ALWAYS_INLINE
-TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
-  return UNLIKELY(tv == nullptr) ? def : *tv;
+TypedValue getDefaultIfNullCell(member_rval rval, const TypedValue& def) {
+  return UNLIKELY(!rval) ? def : rval.tv();
 }
 
 template <bool intishWarn>
@@ -713,16 +713,16 @@ TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
-    return getDefaultIfNullCell(a->nvGet(i), def);
+    return getDefaultIfNullCell(a->rval(i), def);
   } else {
-    return getDefaultIfNullCell(a->nvGet(key), def);
+    return getDefaultIfNullCell(a->rval(key), def);
   }
 }
 
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  return getDefaultIfNullCell(a->nvGet(key), def);
+  return getDefaultIfNullCell(a->rval(key), def);
 }
 
 }
@@ -730,7 +730,7 @@ TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
   if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
-  return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+  return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
 }
 
 template <bool intishWarn>
@@ -740,9 +740,9 @@ TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
-    return getDefaultIfNullCell(MixedArray::NvGetInt(a, i), def);
+    return getDefaultIfNullCell(MixedArray::RvalInt(a, i), def);
   } else {
-    return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+    return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
   }
 }
 
@@ -751,27 +751,27 @@ template TypedValue arrayIdxSi<true>(ArrayData*, StringData*, TypedValue);
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArray());
-  return getDefaultIfNullCell(a->nvGet(key), def);
+  return getDefaultIfNullCell(a->rval(key), def);
 }
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDict());
-  return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);
+  return getDefaultIfNullCell(MixedArray::RvalIntDict(a, key), def);
 }
 
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isDict());
-  return getDefaultIfNullCell(MixedArray::NvGetStrDict(a, key), def);
+  return getDefaultIfNullCell(MixedArray::RvalStrDict(a, key), def);
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(SetArray::NvGetInt(a, key), def);
+  return getDefaultIfNullCell(SetArray::RvalInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(SetArray::NvGetStr(a, key), def);
+  return getDefaultIfNullCell(SetArray::RvalStr(a, key), def);
 }
 
 int32_t arrayVsize(ArrayData* ad) {

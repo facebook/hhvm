@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -80,18 +80,17 @@ void APCLocalArray::sweep() {
   m_arr = nullptr;
 }
 
-const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
+member_rval::ptr_u APCLocalArray::GetValueRef(const ArrayData* adIn,
+                                              ssize_t pos) {
   auto const ad = asApcArray(adIn);
   assert(unsigned(pos) < ad->getSize());
   auto const elms = ad->localCache();
   auto const tv = &elms[pos];
-  if (tv->m_type != KindOfUninit) {
-    return tvAsCVarRef(tv);
-  }
+  if (tv->m_type != KindOfUninit) return tv;
   auto const sv = ad->m_arr->getValue(pos);
   tvAsVariant(tv) = sv->toLocal();
   assert(tv->m_type != KindOfUninit);
-  return tvAsCVarRef(tv);
+  return tv;
 }
 
 ALWAYS_INLINE
@@ -145,13 +144,13 @@ ArrayData* APCLocalArray::loadElems() const {
   if (m_arr->isPacked()) {
     PackedArrayInit ai(count);
     for (uint32_t i = 0; i < count; i++) {
-      ai.append(GetValueRef(this, i));
+      ai.append(RvalAtPos(this, i).tv());
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count, ArrayInit::Mixed{});
     for (uint32_t i = 0; i < count; i++) {
-      ai.add(getKey(i), GetValueRef(this, i), true);
+      ai.add(getKey(i), RvalAtPos(this, i).tv(), true);
     }
     elems = ai.create();
   }
@@ -278,19 +277,19 @@ ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   return ret;
 }
 
-const TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
+member_rval::ptr_u APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asApcArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
-  return GetValueRef(a, index).asTypedValue();
+  return GetValueRef(a, index);
 }
 
-const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
-                                    const StringData* key) {
+member_rval::ptr_u APCLocalArray::NvGetStr(const ArrayData* ad,
+                                           const StringData* key) {
   auto a = asApcArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
-  return GetValueRef(a, index).asTypedValue();
+  return GetValueRef(a, index);
 }
 
 Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {

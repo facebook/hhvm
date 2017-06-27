@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-helpers.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -371,7 +371,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++data) {
-    tvDupWithRef(*arr->getValueRef(pos).asTypedValue(), *data, arr);
+    tvDupWithRef(arr->atPos(pos), *data, arr);
   }
 
   assert(ad->isPacked());
@@ -531,28 +531,28 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
+member_rval::ptr_u PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   assert(checkInvariants(ad));
   auto const data = packedData(ad);
   return LIKELY(size_t(ki) < ad->m_size) ? &data[ki] : nullptr;
 }
 
-const TypedValue*
-PackedArray::NvGetStr(const ArrayData* ad, const StringData* s) {
+member_rval::ptr_u PackedArray::NvGetStr(const ArrayData* ad,
+                                         const StringData* s) {
   assert(checkInvariants(ad));
   return nullptr;
 }
 
-const TypedValue* PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t ki) {
+member_rval::ptr_u PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
   assert(checkInvariants(ad));
   assert(ad->isVecArray());
   auto const data = packedData(ad);
-  if (LIKELY(size_t(ki) < ad->m_size)) return &data[ki];
-  throwOOBArrayKeyException(ki, ad);
+  if (LIKELY(size_t(k) < ad->m_size)) return &data[k];
+  throwOOBArrayKeyException(k, ad);
 }
 
-const TypedValue* PackedArray::NvTryGetStrVec(const ArrayData* ad,
-                                              const StringData* s) {
+member_rval::ptr_u PackedArray::NvTryGetStrVec(const ArrayData* ad,
+                                               const StringData* s) {
   assert(checkInvariants(ad));
   assert(ad->isVecArray());
   throwInvalidArrayKeyException(s, ad);
@@ -569,10 +569,10 @@ size_t PackedArray::Vsize(const ArrayData*) {
   always_assert(false);
 }
 
-const Variant& PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+member_rval::ptr_u PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));
   assert(pos != ad->m_size);
-  return tvAsCVarRef(&packedData(ad)[pos]);
+  return &packedData(ad)[pos];
 }
 
 bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {

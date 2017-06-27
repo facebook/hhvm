@@ -187,10 +187,10 @@ struct ArrayIter {
   const Variant& secondRefPlus();
 
   // Inline version of secondRef.  Only for use in iterator helpers.
-  const TypedValue* nvSecond() const {
+  member_rval nvSecond() const {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ad->iter_end());
-    return ad->getValueRef(m_pos).asTypedValue();
+    return ad->rvalPos(m_pos);
   }
 
   bool hasArrayData() const {
@@ -439,10 +439,13 @@ struct MArrayIter {
     assert(!data->cowCheck() || data->noCopyOnWrite());
     assert(!getResetFlag());
     assert(data->validMArrayIter(*this));
-    // Normally it's not ok to modify the return value of getValueRef,
+    // Normally it's not ok to modify the return value of rvalPos,
     // but the whole point of mutable array iteration is that this is
     // allowed, so this const_cast is not actually evil.
-    return const_cast<Variant&>(data->getValueRef(m_pos));
+    // TODO(#9077255): Use member_lval for this somehow.
+    return tvAsVariant(const_cast<TypedValue*>(
+      data->rvalPos(m_pos).tv_ptr()
+    ));
   }
 
   void release() { delete this; }

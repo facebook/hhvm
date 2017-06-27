@@ -311,7 +311,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
 
   if (obj &&
       UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&
-      obj->dynPropArray()->nvGet(property.get())) {
+      obj->dynPropArray()->rval(property.get())) {
     return true;
   }
   auto const propInd = cls->lookupSProp(property.get());

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-custom-element.h"
 #include "hphp/util/hphp-config.h"
@@ -100,8 +100,8 @@ Cell ProxyArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   return innerArr(ad)->nvGetKey(pos);
 }
 
-const Variant& ProxyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
-  return innerArr(ad)->getValueRef(pos);
+member_rval::ptr_u ProxyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  return innerArr(ad)->rvalPos(pos).elem();
 }
 
 bool
@@ -114,22 +114,24 @@ ProxyArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return innerArr(ad)->exists(k);
 }
 
-const TypedValue*
+member_rval::ptr_u
 ProxyArray::NvGetStr(const ArrayData* ad, const StringData* k) {
-  return innerArr(ad)->nvGet(k);
+  return innerArr(ad)->rval(k).elem();
 }
 
-const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
-  return innerArr(ad)->nvGet(k);
+member_rval::ptr_u
+ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
+  return innerArr(ad)->rval(k).elem();
 }
 
-const TypedValue*
+member_rval::ptr_u
 ProxyArray::NvTryGetStr(const ArrayData* ad, const StringData* k) {
-  return innerArr(ad)->nvTryGet(k);
+  return innerArr(ad)->rvalStrict(k).elem();
 }
 
-const TypedValue* ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
-  return innerArr(ad)->nvTryGet(k);
+member_rval::ptr_u
+ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
+  return innerArr(ad)->rvalStrict(k).elem();
 }
 
 member_lval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
@@ -469,7 +471,7 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
     int64_t k = 0;
     r = innerArr(this)->zAppend(*(RefData**)data, &k);
     if (dest) {
-      *dest = (void*)(&r->nvGet(k)->m_data.pref);
+      *dest = (void*)(&r->rval(k).tv_ptr()->m_data.pref);
     }
   } else {
     auto v = Variant(makeElementResource(data, data_size, dest));

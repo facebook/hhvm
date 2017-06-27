@@ -19,11 +19,11 @@
 
 #include "hphp/runtime/base/array-data.h"
 
-#include <algorithm>
-
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-variant.h"
+
+#include <algorithm>
 
 namespace HPHP {
 
@@ -99,18 +99,18 @@ inline const Variant& ArrayData::get(Cell k, bool error) const {
 }
 
 inline const Variant& ArrayData::get(int64_t k, bool error) const {
-  auto tv = error ? nvTryGet(k) : nvGet(k);
-  return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
+  auto r = error ? rvalStrict(k) : rval(k);
+  return r ? tvAsCVarRef(r.tv_ptr()) : getNotFound(k, error);
+}
+
+inline const Variant& ArrayData::get(const StringData* k, bool error) const {
+  auto r = error ? rvalStrict(k) : rval(k);
+  return r ? tvAsCVarRef(r.tv_ptr()) : getNotFound(k, error);
 }
 
 inline const Variant& ArrayData::get(const String& k, bool error) const {
   assert(IsValidKey(k));
   return get(k.get(), error);
-}
-
-inline const Variant& ArrayData::get(const StringData* k, bool error) const {
-  auto tv = error ? nvTryGet(k) : nvGet(k);
-  return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
 inline const Variant& ArrayData::get(const Variant& k, bool error) const {
@@ -228,7 +228,7 @@ inline ArrayData* ArrayData::remove(const Variant& k, bool copy) {
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {
-  return getValueRef(pos);
+  return tvAsCVarRef(rvalPos(pos).tv_ptr());
 }
 
 inline Variant ArrayData::getKey(ssize_t pos) const {
@@ -260,20 +260,36 @@ inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
   return g_array_funcs.appendWithRef[kind()](this, *v.asTypedValue(), copy);
 }
 
-inline const TypedValue* ArrayData::nvGet(int64_t ikey) const {
-  return g_array_funcs.nvGetInt[kind()](this, ikey);
+inline member_rval ArrayData::rval(int64_t k) const {
+  return member_rval { this, g_array_funcs.nvGetInt[kind()](this, k) };
 }
 
-inline const TypedValue* ArrayData::nvTryGet(int64_t ikey) const {
-  return g_array_funcs.nvTryGetInt[kind()](this, ikey);
+inline member_rval ArrayData::rvalStrict(int64_t k) const {
+  return member_rval { this, g_array_funcs.nvTryGetInt[kind()](this, k) };
 }
 
-inline const TypedValue* ArrayData::nvGet(const StringData* skey) const {
-  return g_array_funcs.nvGetStr[kind()](this, skey);
+inline member_rval ArrayData::rval(const StringData* k) const {
+  return member_rval { this, g_array_funcs.nvGetStr[kind()](this, k) };
 }
 
-inline const TypedValue* ArrayData::nvTryGet(const StringData* skey) const {
-  return g_array_funcs.nvTryGetStr[kind()](this, skey);
+inline member_rval ArrayData::rvalStrict(const StringData* k) const {
+  return member_rval { this, g_array_funcs.nvTryGetStr[kind()](this, k) };
+}
+
+inline member_rval ArrayData::rvalPos(ssize_t pos) const {
+  return member_rval { this, g_array_funcs.nvGetPos[kind()](this, pos) };
+}
+
+inline TypedValue ArrayData::at(int64_t k) const {
+  return rval(k).tv();
+}
+
+inline TypedValue ArrayData::at(const StringData* k) const {
+  return rval(k).tv();
+}
+
+inline TypedValue ArrayData::atPos(ssize_t pos) const {
+  return rvalPos(pos).tv();
 }
 
 inline Cell ArrayData::nvGetKey(ssize_t pos) const {
@@ -312,10 +328,6 @@ inline ArrayData* ArrayData::zAppend(RefData* v, int64_t* key_ptr) {
 
 inline size_t ArrayData::vsize() const {
   return g_array_funcs.vsize[kind()](this);
-}
-
-inline const Variant& ArrayData::getValueRef(ssize_t pos) const {
-  return g_array_funcs.getValueRef[kind()](this, pos);
 }
 
 inline bool ArrayData::noCopyOnWrite() const {

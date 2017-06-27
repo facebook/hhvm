@@ -291,11 +291,11 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
-    Variant key(input->getKey(pos));
-    if (preserve_keys || key.isString()) {
-      ret.setWithRef(key, input->getValueRef(pos), true);
+    auto const key = input->nvGetKey(pos);
+    if (preserve_keys || isStringType(key.m_type)) {
+      ret.setWithRef(key, input->atPos(pos), true);
     } else {
-      ret.appendWithRef(input->getValueRef(pos));
+      ret.appendWithRef(input->atPos(pos));
     }
   }
   return ret;
@@ -335,28 +335,28 @@ Variant ArrayUtil::Shuffle(const Array& input) {
     VecArrayInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
-      ret.append(input->getValueRef(pos));
+      ret.append(input->atPos(pos));
     }
     return ret.toVariant();
   } else if (input.isDict()) {
     DictInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
-      ret.append(input->getValueRef(pos));
+      ret.append(input->atPos(pos));
     }
     return ret.toVariant();
   } else if (input.isKeyset()) {
     KeysetInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
-      ret.add(input->getValueRef(pos));
+      ret.add(input->atPos(pos));
     }
     return ret.toVariant();
   } else {
     PackedArrayInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
-      ret.appendWithRef(input->getValueRef(pos));
+      ret.appendWithRef(input->atPos(pos));
     }
     return ret.toVariant();
   }

@@ -173,35 +173,35 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Release)
 
   /*
-   * const TypedValue* NvGetInt(const ArrayData*, int64_t key)
+   * member_rval::ptr_u NvGetInt(const ArrayData*, int64_t key)
    *
    *   Lookup a value in an array using an integer key.  Returns nullptr if the
-   *   key is not in the array. Must not throw if key isn't present.
+   *   key is not in the array.  Must not throw if key isn't present.
    */
   DISPATCH(NvGetInt)
 
   /*
-   * const TypedValue* NvTryGetInt(const ArrayData*, int64_t key)
+   * member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t key)
    *
-   *   Lookup a value in an array using an integer key. Either throws, or
+   *   Lookup a value in an array using an integer key.  Either throws or
    *   returns nullptr if the key is not in the array.
    */
   DISPATCH(NvTryGetInt)
 
   /*
-   * const TypedValue* NvGetStr(const ArrayData*, const StringData*)
+   * member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*)
    *
-   *   Lookup a value in an array using a string key.  The string key
-   *   must not be an integer-like string.  Returns nullptr if the key
-   *   is not in the array.
+   *   Lookup a value in an array using a string key.  The string key must not
+   *   be an integer-like string.  Returns nullptr if the key is not in the
+   *   array.
    */
   DISPATCH(NvGetStr)
 
   /*
-   * const TypedValue* NvTryGetStr(const ArrayData*, const StringData*)
+   * member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData*)
    *
-   *   Lookup a value in an array using a string key. Either throws, or
-   *   returns nullptr if the key is not in the array.
+   *   Lookup a value in an array using a string key.  Either throws or returns
+   *   nullptr if the key is not in the array.
    */
   DISPATCH(NvTryGetStr)
 
@@ -246,7 +246,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Vsize)
 
   /*
-   * const Variant& GetValueRef(const ArrayData*, ssize_t pos)
+   * member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos)
    *
    *   Return a reference to the value at an iterator position.  `pos' must be
    *   a valid position for this array.

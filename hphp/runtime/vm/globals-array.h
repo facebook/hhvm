@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/vm/name-value-table.h"
 
 namespace HPHP {
@@ -70,14 +70,14 @@ public:
   }
   static size_t Vsize(const ArrayData*);
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
+  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t k);
   static constexpr auto NvTryGetInt = &NvGetInt;
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
 
   static member_lval LvalInt(ArrayData*, int64_t k, bool copy);

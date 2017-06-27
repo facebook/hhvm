@@ -364,25 +364,25 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
-    auto const elem0 = tvToCell(PackedArray::NvGetInt(arr, 0));
-    auto const elem1 = tvToCell(PackedArray::NvGetInt(arr, 1));
+    auto const elem0 = tvToCell(PackedArray::RvalInt(arr, 0));
+    auto const elem1 = tvToCell(PackedArray::RvalInt(arr, 1));
 
-    if (UNLIKELY(elem0->m_type != KindOfObject ||
-                 !isStringType(elem1->m_type))) {
+    if (UNLIKELY(elem0.type() != KindOfObject ||
+                 !isStringType(elem1.type()))) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
     // If the string contains a class name (e.g. Foo::bar), all kinds of weird
     // junk happens (w.r.t. forwarding class contexts and things).  We just do
     // a quick loop to try to bail out of this case.
-    if (UNLIKELY(strHasColon(elem1->m_data.pstr))) {
+    if (UNLIKELY(strHasColon(elem1.val().pstr))) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
-    auto const inst = elem0->m_data.pobj;
+    auto const inst = elem0.val().pobj;
     auto const func = lookupMethodCtx(
       inst->getVMClass(),
-      elem1->m_data.pstr,
+      elem1.val().pstr,
       fp->func()->cls(),
       CallType::ObjMethod
     );

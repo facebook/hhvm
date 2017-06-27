@@ -21,8 +21,9 @@
 #include <sys/types.h>
 
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -55,15 +56,30 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*, size_t extra = 0);
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
+  static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
+  static member_rval::ptr_u NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
+  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvGetInt(ad, k) };
+  }
+  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetInt(ad, k) };
+  }
+  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvGetStr(ad, k) };
+  }
+  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvTryGetStr(ad, k) };
+  }
+  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return member_rval { ad, GetValueRef(ad, pos) };
+  }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static size_t Vsize(const ArrayData*);
-  static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
+  static member_rval::ptr_u GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
     return true;
   }
@@ -121,8 +137,8 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ToPHPArray;
 
-  static const TypedValue* NvTryGetIntVec(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStrVec(const ArrayData*, const StringData*);
+  static member_rval::ptr_u NvTryGetIntVec(const ArrayData*, int64_t);
+  static member_rval::ptr_u NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
   static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
@@ -177,6 +193,13 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArrayVec = &ToPHPArrayVec;
+
+  static member_rval RvalIntVec(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvGetIntVec(ad, k) };
+  }
+  static member_rval RvalIntStrictVec(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetIntVec(ad, k) };
+  }
 
   //////////////////////////////////////////////////////////////////////
 

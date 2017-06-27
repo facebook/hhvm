@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -534,25 +534,25 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-const TypedValue* SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
+member_rval::ptr_u SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
   auto const tv = SetArray::NvGetInt(ad, ki);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
   return tv;
 }
 
-const TypedValue* SetArray::NvTryGetStr(const ArrayData* ad,
+member_rval::ptr_u SetArray::NvTryGetStr(const ArrayData* ad,
                                         const StringData* ks) {
-  auto const tv = SetArray::NvGetStr(ad, ks);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ks, ad);
-  return tv;
+  auto const ptr = SetArray::NvGetStr(ad, ks);
+  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(ks, ad);
+  return ptr;
 }
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
-const Variant& SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+member_rval::ptr_u SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assert(0 <= pos && pos < a->m_used);
-  return tvAsCVarRef(a->tvOfPos(pos));
+  return a->tvOfPos(pos);
 }
 
 bool SetArray::IsVectorData(const ArrayData*) {

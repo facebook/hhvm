@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
@@ -60,7 +60,8 @@ Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t pos) {
 
 size_t EmptyArray::Vsize(const ArrayData*) { not_reached(); }
 
-const Variant& EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+member_rval::ptr_u
+EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }

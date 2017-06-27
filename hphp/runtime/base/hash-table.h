@@ -137,6 +137,8 @@ protected:
   };
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 template <typename ArrayType, typename ElmType>
 struct HashTable : HashTableCommon {
   using Elm = ElmType;
@@ -226,9 +228,17 @@ struct HashTable : HashTableCommon {
   /////////////////////////////////////////////////////////////////////////////
   // Non variant interface
   /////////////////////////////////////////////////////////////////////////////
-  static const TypedValue* NvGetInt(const ArrayData* ad, int64_t ki);
-  static const TypedValue* NvGetStr(const ArrayData* ad,
-                                    const StringData* k);
+
+  static member_rval::ptr_u NvGetInt(const ArrayData* ad, int64_t k);
+  static member_rval::ptr_u NvGetStr(const ArrayData* ad, const StringData* k);
+
+  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvGetInt(ad, k) };
+  }
+  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvGetStr(ad, k) };
+  }
+
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
 
   /////////////////////////////////////////////////////////////////////////////

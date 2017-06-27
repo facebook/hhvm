@@ -227,10 +227,10 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
 }
 
 template<typename ArrayType, typename ElmType>
-const TypedValue* HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
-                                                          int64_t ki) {
+member_rval::ptr_u
+HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asArrayType(ad);
-  auto i = a->find(ki, hash_int64(ki));
+  auto i = a->find(k, hash_int64(k));
   return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;
 }
 
@@ -238,14 +238,12 @@ const TypedValue* HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
   defined(_MSC_VER)
 // This function is implemented directly in ASM in hash-table-x64.S otherwise.
 template<typename ArrayType, typename ElmType>
-const TypedValue* HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
-                                                          const StringData* k) {
+member_rval::ptr_u
+HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
+                                        const StringData* k) {
   auto a = asArrayType(ad);
   auto i = a->find(k, k->hash());
-  if (LIKELY(validPos(i))) {
-    return a->data()[i].datatv();
-  }
-  return nullptr;
+  return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;
 }
 #else
   // hash-table-x64.S depends on StringData and ArrayType layout.

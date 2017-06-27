@@ -138,7 +138,7 @@ const Cell* lookupCnsImpl(StringData* nm) {
   const Cell* cns = nullptr;
 
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    cns = rds::s_constants()->nvGet(nm);
+    cns = rds::s_constants()->rval(nm).tv_ptr();
   }
   if (!cns) {
     cns = Unit::loadCns(const_cast<StringData*>(nm));

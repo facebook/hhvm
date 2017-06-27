@@ -1109,12 +1109,12 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
    */
 
   if (m_nonScalarConstantCache.isInit()) {
-    if (auto cCns = clsCnsData->nvGet(clsCnsName)) {
+    if (auto cCns = clsCnsData->rval(clsCnsName)) {
       // There's an entry in the cache for this constant. If its the globals
       // array, this constant is recursively defined, so raise an
       // error. Otherwise just return it.
-      if (UNLIKELY(isArrayType(cCns->m_type) &&
-                   cCns->m_data.parr == get_global_variables())) {
+      if (UNLIKELY(isArrayType(cCns.type()) &&
+                   cCns.val().parr == get_global_variables())) {
         raise_error(
           folly::sformat(
             "Cannot declare self-referencing constant '{}::{}'",
@@ -1123,7 +1123,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
           )
         );
       }
-      return *cCns;
+      return cCns.tv();
     }
   }
 

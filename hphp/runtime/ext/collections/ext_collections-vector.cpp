@@ -780,7 +780,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   ssize_t pos = ad->iter_begin();
   do {
     assert(pos != ad->iter_end());
-    cellDup(*(ad->getValueRef(pos).asCell()), *elm);
+    cellDup(tvToCell(ad->atPos(pos)), *elm);
     pos = ad->iter_advance(pos);
   } while (++elm < end);
   return Object{std::move(target)};

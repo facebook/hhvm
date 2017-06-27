@@ -982,7 +982,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
     assertx(rds::isPersistentHandle(handle));
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    return rds::s_constants()->nvGet(cnsName);
+    return rds::s_constants()->rval(cnsName).tv_ptr();
   }
   return nullptr;
 }
@@ -1057,7 +1057,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
       rds::s_constants() =
         Array::attach(PackedArray::MakeReserve(PackedArray::SmallSize));
     }
-    auto const existed = !!rds::s_constants()->nvGet(cnsName);
+    auto const existed = !!rds::s_constants()->rval(cnsName);
     if (!existed) {
       rds::s_constants().set(StrNR(cnsName),
         tvAsCVarRef(value), true /* isKey */);

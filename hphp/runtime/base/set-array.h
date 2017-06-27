@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -367,13 +367,14 @@ public:
    */
 private:
   using ArrayData::exists;
+  using ArrayData::at;
+  using ArrayData::rval;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
   using ArrayData::setRef;
   using ArrayData::add;
   using ArrayData::remove;
-  using ArrayData::nvGet;
   using ArrayData::release;
 
 //////////////////////////////////////////////////////////////////////
@@ -405,10 +406,19 @@ private:
 // ArrayData API
 
 public:
-  static const TypedValue* NvTryGetInt(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStr(const ArrayData*, const StringData*);
+  static member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t);
+  static member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData*);
+  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return member_rval { ad, NvTryGetInt(ad, k) };
+  }
+  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return member_rval { ad, NvTryGetStr(ad, k) };
+  }
+  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return member_rval { ad, GetValueRef(ad, pos) };
+  }
   static size_t Vsize(const ArrayData*);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t);
+  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);

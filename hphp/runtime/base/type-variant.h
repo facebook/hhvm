@@ -1393,7 +1393,6 @@ private:
     return &tvAsVariant(static_cast<TypedValue*>(this));
   }
   void checkRefCount() {
-    assert(m_type != KindOfRef);
     assert(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
 
     switch (m_type) {
@@ -1415,7 +1414,8 @@ private:
         assert(m_data.pres->checkCount());
         return;
       case KindOfRef:
-        break;
+        assert(m_data.pref->checkCount());
+        return;
     }
     not_reached();
   }

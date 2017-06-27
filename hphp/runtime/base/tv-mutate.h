@@ -18,6 +18,7 @@
 #define incl_HPHP_TV_MUTATE_H_
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -89,6 +90,11 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
 }
+ALWAYS_INLINE member_rval tvToCell(member_rval tv) {
+  return LIKELY(tv.type() != KindOfRef)
+    ? tv
+    : member_rval { tv.val().pref, tv.val().pref->tv() };
+}
 
 /*
  * Return an unboxed and initialized `cell'.
@@ -113,6 +119,10 @@ ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
 /*
  * Assert that `tv' is a Cell; then just return it.
  */
+ALWAYS_INLINE Cell tvAssertCell(TypedValue tv) {
+  assert(cellIsPlausible(tv));
+  return tv;
+}
 ALWAYS_INLINE Cell* tvAssertCell(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
   return tv;

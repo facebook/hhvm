@@ -26,7 +26,7 @@ inline member_lval::member_lval()
   , m_ptr(nullptr)
 {}
 
-inline member_lval::member_lval(HeapObject* base, member_lval::ptr_union ptr)
+inline member_lval::member_lval(HeapObject* base, member_lval::ptr_u ptr)
   : m_base(base)
   , m_ptr(ptr)
 {}
@@ -45,8 +45,12 @@ inline ArrayData* member_lval::arr_base() const {
   return m_arr;
 }
 
+inline member_lval::operator bool() const {
+  return !!m_ptr;
+}
+
 inline bool member_lval::has_ref() const {
-  return m_ptr.val != nullptr;
+  return !!m_ptr;
 }
 
 inline const Value& member_lval::val() const {
@@ -67,7 +71,54 @@ inline TypedValue* member_lval::tv() const {
   return m_ptr.tv;
 }
 
-inline member_lval::ptr_union member_lval::elem() const {
+inline member_lval::ptr_u member_lval::elem() const {
+  return m_ptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline member_rval::member_rval()
+  : m_base(nullptr)
+  , m_ptr(nullptr)
+{}
+
+inline member_rval::member_rval(const HeapObject* base,
+                                member_rval::ptr_u ptr)
+  : m_base(base)
+  , m_ptr(ptr)
+{}
+
+inline member_rval::member_rval(const HeapObject* base,
+                                const TypedValue* elem)
+  : m_base(base)
+  , m_ptr(elem)
+{}
+
+inline member_rval::operator bool() const {
+  return !!m_ptr;
+}
+
+inline bool member_rval::has_val() const {
+  return !!m_ptr;
+}
+
+inline Value member_rval::val() const {
+  return *m_ptr.val;
+}
+
+inline DataType member_rval::type() const {
+  return m_ptr.tv->m_type;
+}
+
+inline const TypedValue* member_rval::tv_ptr() const {
+  return m_ptr.tv;
+}
+
+inline TypedValue member_rval::tv() const {
+  return *m_ptr.tv;
+}
+
+inline member_rval::ptr_u member_rval::elem() const {
   return m_ptr;
 }
 

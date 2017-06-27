@@ -2759,8 +2759,8 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TInt));
   assertx(arr->arrVal()->isPHPArray());
-  auto const value = arr->arrVal()->nvGet(idx->intVal());
-  return value ? cns(env, *value) : nullptr;
+  auto const rval = arr->arrVal()->rval(idx->intVal());
+  return rval ? cns(env, rval.tv()) : nullptr;
 }
 
 SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
@@ -2771,18 +2771,18 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   assertx(arr->arrVal()->isPHPArray());
 
   skip = false;
-  auto const value = [&] () -> const TypedValue* {
+  auto const rval = [&] {
     int64_t val;
     if (arr->arrVal()->convertKey(idx->strVal(), val, false)) {
       if (RuntimeOption::EvalHackArrCompatNotices) {
         skip = true;
-        return nullptr;
+        return member_rval{};
       }
-      return arr->arrVal()->nvGet(val);
+      return arr->arrVal()->rval(val);
     }
-    return arr->arrVal()->nvGet(idx->strVal());
+    return arr->arrVal()->rval(idx->strVal());
   }();
-  return value ? cns(env, *value) : nullptr;
+  return rval ? cns(env, rval.tv()) : nullptr;
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
@@ -2945,8 +2945,8 @@ SSATmp* hackArrGetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) {
-      if (tv) return cns(env, *tv);
+    [&] (member_rval rval) {
+      if (rval) return cns(env, rval.tv());
       gen(env, ThrowOutOfBounds, inst->taken(), inst->src(0), inst->src(1));
       return cns(env, TBottom);
     }
@@ -2959,8 +2959,8 @@ SSATmp* hackArrGetQuietImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) {
-      return tv ? cns(env, *tv) : cns(env, TInitNull);
+    [&] (member_rval rval) {
+      return rval ? cns(env, rval.tv()) : cns(env, TInitNull);
     }
   );
 }
@@ -2971,7 +2971,7 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) { return cns(env, tv && !cellIsNull(tv)); }
+    [&] (member_rval rval) { return cns(env, rval && !cellIsNull(rval.tv())); }
   );
 }
 
@@ -2981,7 +2981,7 @@ SSATmp* hackArrEmptyElemImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) { return cns(env, !tv || !cellToBool(*tv)); }
+    [&] (member_rval rval) { return cns(env, !rval || !cellToBool(rval.tv())); }
   );
 }
 
@@ -2991,7 +2991,7 @@ SSATmp* hackArrIdxImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) { return tv ? cns(env, *tv) : inst->src(2); }
+    [&] (member_rval rval) { return rval ? cns(env, rval.tv()) : inst->src(2); }
   );
 }
 
@@ -3001,7 +3001,7 @@ SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&](const TypedValue* tv) { return cns(env, !!tv); }
+    [&] (member_rval rval) { return cns(env, !!rval); }
   );
 }
 
@@ -3012,10 +3012,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::NvGetIntDict(a->Get(), k);                   \
+      return MixedArray::RvalIntDict(a->Get(), k);                    \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::NvGetStrDict(a->Get(), k);                   \
+      return MixedArray::RvalStrDict(a->Get(), k);                    \
     }                                                                 \
   );                                                                  \
 }
@@ -3034,10 +3034,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return SetArray::NvGetInt(a->Get(), k);                         \
+      return SetArray::RvalInt(a->Get(), k);                          \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return SetArray::NvGetStr(a->Get(), k);                         \
+      return SetArray::RvalStr(a->Get(), k);                          \
     }                                                                 \
   );                                                                  \
 }
@@ -3224,8 +3224,8 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
     auto const idx = src1->intVal();
     assertx(vec->isVecArray());
     if (idx >= 0) {
-      auto const tv = PackedArray::NvGetIntVec(vec, idx);
-      return tv ? cns(env, *tv) : nullptr;
+      auto const rval = PackedArray::RvalIntVec(vec, idx);
+      return rval ? cns(env, rval.tv()) : nullptr;
     }
   }
   return nullptr;

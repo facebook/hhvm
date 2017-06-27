@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -96,10 +96,10 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   return make_tv<KindOfUninit>();
 }
 
-const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+member_rval::ptr_u GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : uninit_variant;
+  return iter.valid() ? iter.curVal() : uninit_variant.asTypedValue();
 }
 
 bool
@@ -112,12 +112,12 @@ GlobalsArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k) != nullptr;
 }
 
-const TypedValue*
+member_rval::ptr_u
 GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k);
 }
 
-const TypedValue*
+member_rval::ptr_u
 GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }

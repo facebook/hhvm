@@ -1730,9 +1730,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
         if (!attrMask &&
             UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-          const TypedValue* prop = obj->dynPropArray()->nvGet(propName.get());
-          if (prop) {
-            wanted.set(propName, tvAsCVarRef(prop));
+          if (auto const prop = obj->dynPropArray()->rval(propName.get())) {
+            wanted.set(propName, prop.tv());
             continue;
           }
         }

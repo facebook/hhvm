@@ -35,7 +35,7 @@ protected:
 
   void addRaw(int64_t k);
   void addRaw(StringData* k);
-  void addRaw(TypedValue tv) {
+  void addRaw(Cell tv) {
     assert(tv.m_type != KindOfRef);
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
@@ -53,7 +53,7 @@ public:
    */
   void add(int64_t k);
   void add(StringData* k);
-  void add(TypedValue tv) {
+  void add(Cell tv) {
     assert(tv.m_type != KindOfRef);
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
@@ -218,7 +218,7 @@ protected:
     ssize_t pos_limit = ad->iter_end();
     for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
          pos = ad->iter_advance(pos)) {
-      set->addRaw(ad->getValueRef(pos));
+      set->addRaw(tvToCell(ad->atPos(pos)));
     }
     set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
     return Object(std::move(set));

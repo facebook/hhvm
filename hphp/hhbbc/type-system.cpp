@@ -2676,13 +2676,13 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
   auto ad = aval.m_data.aval;
   auto const isPhpArray = aval.subtypeOf(TOptArr);
   if (key.i) {
-    if (auto const r = ad->nvGet(*key.i)) {
-      return { from_cell(*r), true };
+    if (auto const r = ad->rval(*key.i)) {
+      return { from_cell(r.tv()), true };
     }
     return { isPhpArray ? TInitNull : TBottom, false };
   } else if (key.s) {
-    if (auto const r = ad->nvGet(*key.s)) {
-      return { from_cell(*r), true };
+    if (auto const r = ad->rval(*key.s)) {
+      return { from_cell(r.tv()), true };
     }
     return { isPhpArray ? TInitNull : TBottom, false };
   }

@@ -456,9 +456,9 @@ struct SimpleParser {
     }
     auto arr = top == fp ? staticEmptyArray() :
                            PackedArray::MakePackedNatural(top - fp, fp);
-    if (!arr) return false;
     top = fp;
     pushArrayData(arr);
+    check_non_safepoint_surprise();
     return true;
   }
 
@@ -487,9 +487,9 @@ struct SimpleParser {
     auto const arr = top == fp ?
       staticEmptyArray() :
       MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
-    if (!arr) return false;
     top = fp;
     pushArrayData(arr);
+    check_non_safepoint_surprise();
     return true;
   }
 

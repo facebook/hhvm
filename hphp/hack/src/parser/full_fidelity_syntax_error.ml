@@ -168,3 +168,4 @@ let error2039 classish_keyword classish_name function_name = Printf.sprintf
 let error2040 = "Invalid use of 'list(...)'. A list expression may only be " ^
   "used as the left side of a simple assignment, the value clause of a " ^
   "foreach loop, or a list item nested inside another list expression."
+let error2041 = "A method inside an interface may not have a body."

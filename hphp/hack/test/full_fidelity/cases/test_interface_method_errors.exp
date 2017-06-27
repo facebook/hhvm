@@ -1,0 +1,3 @@
+(5,22)-(5,24) A method inside an interface may not have a body.
+(9,22)-(9,22) A non-abstract method must have a body.
+(14,23)-(14,23) A non-abstract method must have a body.

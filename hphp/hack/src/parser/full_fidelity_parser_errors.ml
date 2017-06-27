@@ -140,6 +140,10 @@ let token_kind node =
   | Token t -> Some (PositionedToken.kind t)
   | _ -> None
 
+(* Helper function for common code pattern *)
+let is_token_kind node kind =
+  (token_kind node) = Some kind
+
 let rec containing_classish_kind parents =
   match parents with
   | [] -> None
@@ -258,6 +262,18 @@ let methodish_has_body node =
     not (is_missing body)
   | _ -> false
 
+(* By checking the third parent of a methodish node, tests whether the methodish
+ * node is inside an interface. *)
+let methodish_inside_interface parents =
+  match parents with
+  | _ :: _ :: p3 :: _ ->
+    begin match syntax p3 with
+    | ClassishDeclaration { classish_keyword; _ } ->
+      is_token_kind classish_keyword TokenKind.Interface
+    | _ -> false
+    end
+  | _ -> false
+
 (* Test whether node is an abstract method with a body.
  * Here node is the methodish node *)
 let methodish_abstract_with_body node =
@@ -266,11 +282,17 @@ let methodish_abstract_with_body node =
   is_abstract && has_body
 
 (* Test whether node is a non-abstract method without a body.
- * Here node is the methodish node *)
-let methodish_non_abstract_without_body node =
-  let non_abstract = not (methodish_contains_abstract node) in
+ * Here node is the methodish node
+ * And methods inside interfaces are inherently considered abstract *)
+let methodish_non_abstract_without_body node parents =
+  let non_abstract = not (methodish_contains_abstract node
+      || methodish_inside_interface parents) in
   let not_has_body = not (methodish_has_body node) in
   non_abstract && not_has_body
+
+let methodish_in_interface_has_body node parents =
+  methodish_inside_interface parents &&
+      not (is_missing node.methodish_function_body)
 
 (* Test whether node is a method that is both abstract and private
  *)
@@ -400,10 +422,6 @@ let first_function_name parents =
     | _ -> None
   end
 
-(* Helper function for common code pattern *)
-  let is_token_kind node kind =
-    (token_kind node) = Some kind
-
 (* Test if (a list_expression is the left child of a binary_expression,
  * and the operator is '=') *)
 let is_left_of_simple_assignment le_node p1 =
@@ -466,7 +484,7 @@ let methodish_errors node parents =
       SyntaxError.error2014 fun_body in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
-      produce_error errors methodish_non_abstract_without_body node
+      produce_error errors (methodish_non_abstract_without_body node) parents
       SyntaxError.error2015 fun_semicolon in
     let errors =
       produce_error errors methodish_abstract_conflict_with_private
@@ -474,6 +492,9 @@ let methodish_errors node parents =
     let errors =
       produce_error errors methodish_abstract_conflict_with_final
       node SyntaxError.error2019 modifiers in
+    let errors =
+      produce_error errors (methodish_in_interface_has_body md) parents
+      SyntaxError.error2041 md.methodish_function_body in
     errors
   | _ -> [ ]
 

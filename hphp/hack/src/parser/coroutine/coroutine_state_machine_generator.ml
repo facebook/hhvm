@@ -420,13 +420,10 @@ let extract_suspend_statements node next_label =
       } ->
         let update_next_label_syntax = set_next_label_syntax next_label in
 
-        let closure_variable_list_item =
-          make_list_item closure_variable_syntax comma_syntax in
         let function_call_argument_list =
-          closure_variable_list_item
-            :: syntax_node_to_list function_call_argument_list in
-        let function_call_argument_list =
-          make_list function_call_argument_list in
+          prepend_to_comma_delimited_syntax_list
+            closure_variable_syntax
+            function_call_argument_list in
         let invoke_coroutine =
           FunctionCallExpression {
             function_call_expression with function_call_argument_list

@@ -10,6 +10,7 @@
 module CoroutineMethodLowerer = Coroutine_method_lowerer
 module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
+module CoroutineTypeLowerer = Coroutine_type_lowerer
 module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
 module List = Core_list
@@ -30,6 +31,63 @@ let maybe_get_token_text node =
   match syntax node with
   | Token token -> Some (EditableToken.text token)
   | _ -> None
+
+(**
+ * Rewrites coroutine annotations.
+ *
+ * The following:
+ *
+ *   public function returnVoidVoidCoroutineLambda(
+ *   ): (coroutine function(): void) { ... }
+ *
+ * Will be rewritten into:
+ *
+ *   public function returnVoidVoidCoroutineLambda(
+ *   ): (function(
+ *     CoroutineContinuation<CoroutineUnit>
+ *   ): CoroutineResult<CoroutineUnit>) { ... }
+ *
+ * The following:
+ *
+ *   public function returnIntIntCoroutineLambda(
+ *   ): (coroutine function(int): int) { ... }
+ *
+ * Will be rewritten into:
+ *
+ *    public function returnIntIntCoroutineLambda(
+ *    ): (function(
+ *      CoroutineContinuation<int>,
+ *      int,
+ *    ): CoroutineResult<int>) { ... }
+ *)
+let maybe_rewrite_coroutine_annotations node =
+  match syntax node with
+  | ClosureTypeSpecifier ({
+      closure_coroutine = {
+        syntax = Token { EditableToken.kind = TokenKind.Coroutine; _; };
+        _;
+      };
+      closure_parameter_types;
+      closure_return_type;
+      _;
+    } as node) ->
+      Rewriter.Result.Replace (
+        let closure_return_type =
+          CoroutineTypeLowerer.rewrite_return_type closure_return_type in
+        make_syntax (
+          ClosureTypeSpecifier {
+            node with
+              closure_coroutine = make_missing ();
+              closure_parameter_types =
+                prepend_to_comma_delimited_syntax_list
+                  (make_continuation_type_syntax closure_return_type)
+                  closure_parameter_types;
+              closure_return_type =
+                make_coroutine_result_type_syntax closure_return_type;
+          }
+        )
+      )
+  | _ -> Rewriter.Result.Keep
 
 (**
  * Returns the transformed method node and the generated closure's syntax.
@@ -233,6 +291,7 @@ let maybe_rewrite_syntax_list node =
 let lower_coroutines syntax_tree =
   syntax_tree
     |> from_tree
+    |> Rewriter.rewrite_post maybe_rewrite_coroutine_annotations
     |> Rewriter.rewrite_post maybe_rewrite_syntax_list
     |> text
     |> SourceText.make

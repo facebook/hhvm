@@ -195,6 +195,11 @@ let rec delimit delimit_syntax = function
 let make_delimited_list delimit_syntax items =
   make_list (delimit delimit_syntax items)
 
+let prepend_to_comma_delimited_syntax_list prepend_syntax syntax_list_syntax =
+  let list_item = make_list_item prepend_syntax comma_syntax in
+  let syntax_list = list_item :: syntax_node_to_list syntax_list_syntax in
+  make_list syntax_list
+
 let get_list_item node =
   match syntax node with
   | ListItem { list_item; _; } -> list_item

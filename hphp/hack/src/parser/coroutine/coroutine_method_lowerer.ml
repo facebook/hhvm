@@ -22,22 +22,11 @@ open Coroutine_state_machine_generator
  * is generated at the beginning rather than the end of the parameter list.
  *)
 let compute_parameter_list parameter_list return_type =
-  match syntax parameter_list with
-  | Missing ->
-      (* No parameters *)
-      let coroutine_parameter_syntax =
-        make_continuation_parameter_syntax return_type in
-      Some [make_list_item coroutine_parameter_syntax (make_missing ())]
-  | SyntaxList syntax_list ->
-      (* One or more parameters *)
-      let coroutine_parameter_syntax =
-        make_continuation_parameter_syntax return_type in
-      Some (
-        make_list_item coroutine_parameter_syntax comma_syntax :: syntax_list
-      )
-  | _ ->
-      (* Unexpected or malformed input, so we won't transform the coroutine. *)
-      None
+  let coroutine_parameter_syntax =
+    make_continuation_parameter_syntax return_type in
+  prepend_to_comma_delimited_syntax_list
+    coroutine_parameter_syntax
+    parameter_list
 
 (**
  * If the provided function declaration header is for a coroutine, rewrites the
@@ -46,15 +35,13 @@ let compute_parameter_list parameter_list return_type =
 let rewrite_function_decl_header
     ({ function_parameter_list; function_type; _; } as node) =
   let make_syntax node = make_syntax (FunctionDeclarationHeader node) in
-  Option.map
-    (compute_parameter_list function_parameter_list function_type)
-    (fun function_parameter_list ->
-      make_syntax
-        { node with
-          function_coroutine = make_missing ();
-          function_type = make_coroutine_result_type_syntax function_type;
-          function_parameter_list = make_list function_parameter_list;
-        })
+  make_syntax
+    { node with
+      function_coroutine = make_missing ();
+      function_type = make_coroutine_result_type_syntax function_type;
+      function_parameter_list =
+        compute_parameter_list function_parameter_list function_type;
+    }
 
 let parameter_to_arg param =
   match syntax param with
@@ -63,9 +50,7 @@ let parameter_to_arg param =
     match syntax list_item with
     | ParameterDeclaration { parameter_name; _; } ->
       let variable_expression = parameter_name in
-      let list_item =
-        make_syntax (VariableExpression { variable_expression } ) in
-      make_syntax (ListItem { list_item; list_separator })
+      make_syntax (VariableExpression { variable_expression } )
     | _ -> failwith "expected parameter declaration in parameter list"
     end
   | _ -> failwith "expected parameter declaration in parameter list"
@@ -184,13 +169,13 @@ let maybe_rewrite_methodish_declaration
     rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
-  Option.map2
-    (rewrite_function_decl_header header_node)
+  Option.map
     (try_to_rewrite_coroutine_body classish_name function_name
       methodish_function_body header_node rewritten_body)
-    ~f:(fun methodish_function_decl_header methodish_function_body ->
+    ~f:(fun methodish_function_body ->
       make_syntax
         { method_node with
-          methodish_function_decl_header;
+          methodish_function_decl_header =
+            rewrite_function_decl_header header_node;
           methodish_function_body;
         })

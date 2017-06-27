@@ -53,7 +53,6 @@ quick/fib_gen.php
 quick/finally_break.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
-quick/foreach-superglobals.php
 quick/fsc01.php
 quick/fsc02.php
 quick/func2.php

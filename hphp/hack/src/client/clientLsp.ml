@@ -600,14 +600,14 @@ let do_completion (conn: server_conn) (params: Completion.params)
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos) in
   let result = rpc conn command
   in
-  let rec hack_completion_to_lsp (result: complete_autocomplete_result)
+  let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
     {
-      label = result.res_name; (* TODO: check that label replaces the right range *)
-      kind = hack_to_kind result;
-      detail = Some (hack_to_detail result);
-      inlineDetail = Some (hack_to_inline_detail result);
-      itemType = hack_to_itemType result;
+      label = completion.res_name; (* TODO: check that label replaces the right range *)
+      kind = hack_to_kind completion;
+      detail = Some (hack_to_detail completion);
+      inlineDetail = Some (hack_to_inline_detail completion);
+      itemType = hack_to_itemType completion;
       documentation = None; (* TODO: provide doc-comments *)
       sortText = None;
       filterText = None;
@@ -617,25 +617,26 @@ let do_completion (conn: server_conn) (params: Completion.params)
       command = None;
       data = None;
     }
-  and hack_to_kind (result: complete_autocomplete_result) : Completion.completionItemKind option =
+  and hack_to_kind (completion: complete_autocomplete_result)
+    : Completion.completionItemKind option =
     (* TODO: change hh_server to return richer 'kind' information *)
     (* For now we just return either 'Function' or 'None'. *)
-    Option.map result.func_details ~f:(fun _ -> Completion.Function)
-  and hack_to_itemType (result: complete_autocomplete_result) : string option =
+    Option.map completion.func_details ~f:(fun _ -> Completion.Function)
+  and hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
     (* the inlineDetail (right column) for variable/field types. Is that good? *)
-    Option.map result.func_details ~f:(fun details -> details.return_ty)
-  and hack_to_detail (result: complete_autocomplete_result) : string =
+    Option.map completion.func_details ~f:(fun details -> details.return_ty)
+  and hack_to_detail (completion: complete_autocomplete_result) : string =
     (* TODO: retrieve the actual signature including name+modifiers     *)
     (* For now we just return the type of the completion. In the case   *)
     (* of functions, their function-types have parentheses around them  *)
     (* which we want to strip. In other cases like tuples, no strip.    *)
-    match result.func_details with
-    | None ->  result.res_ty
-    | Some _ -> String_utils.rstrip (String_utils.lstrip result.res_ty "(") ")"
-  and hack_to_inline_detail (result: complete_autocomplete_result) : string =
-    match result.func_details with
-    | None -> hack_to_detail result
+    match completion.func_details with
+    | None -> completion.res_ty
+    | Some _ -> String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
+  and hack_to_inline_detail (completion: complete_autocomplete_result) : string =
+    match completion.func_details with
+    | None -> hack_to_detail completion
     | Some details ->
       (* "(type1 $param1, ...)" *)
       let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in

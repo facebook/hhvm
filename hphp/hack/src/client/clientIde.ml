@@ -27,7 +27,8 @@ let consume_retries ~retries f x =
   let result = f x in
   let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
   let retries = retries - elapsed_t in
-  if retries < 0 then raise Exit_status.(Exit_with Out_of_retries)
+  if retries < 0
+  then raise Exit_status.(Exit_with Out_of_retries)
   else retries, result
 
 (* Configuration to use before / in absence of init request *)

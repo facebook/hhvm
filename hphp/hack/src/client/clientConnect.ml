@@ -260,7 +260,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       let _, tail_msg = open_and_get_tail_msg start_time tail_env in
       env.progress_callback (Some tail_msg);
       HackEventLogger.client_connect_once_busy start_time;
-      connect env (Option.map retries (fun x -> x - 1)) start_time tail_env
+      connect env (Option.map retries pred) start_time tail_env
     | SMUtils.Monitor_establish_connection_timeout ->
       (** This should only happen if the Monitor is being DDOSed or has
        * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,

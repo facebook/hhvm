@@ -32,5 +32,7 @@ let experimental_disable_shape_and_tuple_arrays =
   GlobalOptions.tco_experimental_disable_shape_and_tuple_arrays
 let experimental_promote_nullable_to_optional_in_shapes =
   GlobalOptions.tco_experimental_promote_nullable_to_optional_in_shapes
+let experimental_stronger_shape_idx_ret =
+  GlobalOptions.tco_experimental_stronger_shape_idx_ret
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

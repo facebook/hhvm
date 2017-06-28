@@ -89,6 +89,15 @@ let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
   else
     Nast.ShapeMap.singleton field_name fake_shape_field
 
+let has_non_optional_field env field_name (_, ty) =
+  match ty with
+  | Tshape (_, fdm) ->
+    begin match ShapeMap.get field_name fdm with
+    | Some field_ty -> not (TUtils.is_shape_field_optional env field_ty)
+    | None -> false
+    end
+  | _ -> false
+
 (* Typing rule for Shapes::idx($s, field, [default])
 
   Shapes::idx has type res (or Toption res, if res is not already Toption _ and
@@ -121,11 +130,18 @@ let idx env fty shape_ty field default =
     ) in
     let env =
       Type.sub_type (fst field) Reason.URparam env shape_ty fake_shape in
+    let stronger_shape_idx_ret = experiment_enabled env
+      TypecheckerOptions.experimental_stronger_shape_idx_ret in
     match default with
       | None when TUtils.is_option env res -> env, res
+      | None when stronger_shape_idx_ret
+          && has_non_optional_field env field_name shape_ty ->
+          Lint.shape_idx_access_required_field (fst field)
+            (Env.get_shape_field_name field_name);
+          env, res
       | None ->
-        (* no default: result is nullable, point to
-         * Shapes::idx definition as reason*)
+        (* no default and we can't guarantee that the shape contains field:
+         * result is nullable, point to Shapes::idx definition as reason *)
         env, (fst fty, Toption res)
       | Some (default_pos, default_ty) ->
         let env, default_ty = Typing_utils.unresolved env default_ty in

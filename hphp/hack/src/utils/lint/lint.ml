@@ -88,6 +88,7 @@ module Codes = struct
   let use_collection_literal                = 5002 (* DONT MODIFY!!!! *)
   let static_string                         = 5003 (* DONT MODIFY!!!! *)
   let shape_idx_missing_optional_field      = 5004 (* DONT MODIFY!!!! *)
+  let shape_idx_required_field              = 5005 (* DONT MODIFY!!!! *)
 
   (* Values 5501 - 5999 are reserved for FB-internal use *)
 
@@ -128,6 +129,11 @@ let shape_idx_access_unknown_field field_pos name =
     the return type of Shapes::idx. To avoid bugs, either add the field to \
     the shape, remove the field (with Shapes::removeKey), or do not allow \
     unknown fields in the shape.")
+
+let shape_idx_access_required_field field_pos name =
+  add Codes.shape_idx_required_field Lint_warning field_pos
+    ("The field '"^name^"' is required to exist in the shape. Consider using a \
+    subscript-expression instead, such as $myshape['"^name^"']")
 
 let do_ f =
   let list_copy = !lint_list in

@@ -103,6 +103,7 @@ let precedence operator =
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
+  (* value 5 is reserved for print *)
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator | ExponentiationAssignmentOperator
@@ -110,39 +111,40 @@ let precedence operator =
   | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-    -> 5
-  | PipeOperator -> 6
-  | ConditionalQuestionOperator | ConditionalColonOperator -> 7
-  | CoalesceOperator -> 8
-  | LogicalOrOperator -> 9
-  | LogicalAndOperator -> 10
-  | OrOperator -> 11
-  | ExclusiveOrOperator -> 12
-  | AndOperator -> 13
+    -> 6
+  | PipeOperator -> 7
+  | ConditionalQuestionOperator | ConditionalColonOperator -> 8
+  | CoalesceOperator -> 9
+  | LogicalOrOperator -> 10
+  | LogicalAndOperator -> 11
+  | OrOperator -> 12
+  | ExclusiveOrOperator -> 13
+  | AndOperator -> 14
   | EqualOperator | StrictEqualOperator
-  | PhpNotEqualOperator | NotEqualOperator | StrictNotEqualOperator -> 14
+  | PhpNotEqualOperator | NotEqualOperator | StrictNotEqualOperator -> 15
   | SpaceshipOperator | LessThanOperator | LessThanOrEqualOperator
-  | GreaterThanOperator | GreaterThanOrEqualOperator -> 15
-  | LeftShiftOperator | RightShiftOperator -> 16
-  | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 17
-  | MultiplicationOperator | DivisionOperator | RemainderOperator -> 18
+  | GreaterThanOperator | GreaterThanOrEqualOperator -> 16
+  | LeftShiftOperator | RightShiftOperator -> 17
+  | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 18
+  | MultiplicationOperator | DivisionOperator | RemainderOperator -> 19
   | CastOperator
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
-  | UnaryPlusOperator | UnaryMinusOperator -> 19
-  | InstanceofOperator -> 20
-  | ExponentOperator -> 21
-  | PostfixIncrementOperator | PostfixDecrementOperator -> 22
-  | FunctionCallOperator -> 23
-  | NewOperator | CloneOperator -> 24
-  (* value 25 is reserved for assignment that appear in expressions *)
-  | IndexingOperator -> 26
-  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 27
-  | ScopeResolutionOperator -> 28
-  | DollarOperator -> 29
+  | UnaryPlusOperator | UnaryMinusOperator -> 20
+  | InstanceofOperator -> 21
+  | ExponentOperator -> 22
+  | PostfixIncrementOperator | PostfixDecrementOperator -> 23
+  | FunctionCallOperator -> 24
+  | NewOperator | CloneOperator -> 25
+  (* value 26 is reserved for assignment that appear in expressions *)
+  | IndexingOperator -> 27
+  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 28
+  | ScopeResolutionOperator -> 29
+  | DollarOperator -> 30
 
-let precedence_for_assignment_in_expressions = 25
+let precedence_for_print = 5
+let precedence_for_assignment_in_expressions = 26
 
 let associativity operator =
   match operator with

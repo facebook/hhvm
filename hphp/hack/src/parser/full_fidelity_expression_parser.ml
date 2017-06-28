@@ -934,7 +934,10 @@ TODO: This will need to be fixed to allow situations where the qualified name
       print expr
     *)
     let (parser, token) = assert_token parser Print in
-    let (parser, expr) = parse_expression parser in
+    let (parser, expr) =
+      with_numeric_precedence parser Operator.precedence_for_print
+        parse_expression
+    in
     let syntax = make_print_expression token expr in
     (parser, syntax)
 

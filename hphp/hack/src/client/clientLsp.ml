@@ -590,16 +590,25 @@ let do_definition (conn: server_conn) (params: Definition.params)
 
 let do_completion (conn: server_conn) (params: Completion.params)
   : Completion.result =
-  let open TextDocumentPositionParams in
   let open TextDocumentIdentifier in
   let open AutocompleteService in
-  let open Completion
+  let open Completion in
+  let open Initialize
   in
-  let pos = lsp_position_to_ide params.position in
-  let filename = lsp_uri_to_path params.textDocument.uri in
+  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
+  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos) in
-  let result = rpc conn command
-  in
+  let result = rpc conn command in
+
+  (* We use snippets to provide parentheses+arguments when autocompleting     *)
+  (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
+  (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
+  let is_caret_followed_by_whitespace = result.char_at_pos = ' ' || result.char_at_pos = '\n' in
+  let client_supports_snippets = Option.value_map !initialize_params
+      ~default:false ~f:(fun params ->
+      params.client_capabilities.textDocument.completion.completionItem.snippetSupport) in
+  let snippets_okay = is_caret_followed_by_whitespace && client_supports_snippets in
+
   let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
     {
@@ -611,8 +620,8 @@ let do_completion (conn: server_conn) (params: Completion.params)
       documentation = None; (* TODO: provide doc-comments *)
       sortText = None;
       filterText = None;
-      insertText = None;
-      insertTextFormat = PlainText;
+      insertText = Some (hack_to_snippet completion);
+      insertTextFormat = if snippets_okay then SnippetFormat else PlainText;
       textEdits = [];
       command = None;
       data = None;
@@ -642,6 +651,16 @@ let do_completion (conn: server_conn) (params: Completion.params)
       let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
       let params = String.concat ", " (List.map details.params ~f) in
       Printf.sprintf "(%s)" params
+  and hack_to_snippet (completion: complete_autocomplete_result) : string =
+    match completion.func_details with
+    | Some details when snippets_okay ->
+      (* "method(${1:arg1}, ...)" but for args we just use param names. *)
+      let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
+      let params = String.concat ", " (List.mapi details.params ~f) in
+      Printf.sprintf "%s(%s)" completion.res_name params
+    | _ ->
+      (* the name alone is a valid snippet and a valid plain-text *)
+      completion.res_name
   in
   {
     (* TODO: get isIncomplete flag from hh_server *)

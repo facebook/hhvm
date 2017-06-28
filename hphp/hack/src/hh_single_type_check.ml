@@ -38,6 +38,7 @@ type mode =
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
+  | Infer_return_types
 
 type options = {
   filename : string;
@@ -316,6 +317,9 @@ let parse_options () =
       Arg.Set safe_vector_array,
       " Enforce array subtyping relationships so that array<T> is not a \
       of array<int, T>.";
+    "--infer-return-types",
+      Arg.Unit (set_mode Infer_return_types),
+      " Infers return types of functions and methods."
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -333,7 +337,7 @@ let parse_options () =
     tcopt;
   }
 
-let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
+let suggest_and_print tcopt ~return_only fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let make_set =
     List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty in
   let n_funs = make_set funs in
@@ -343,13 +347,21 @@ let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
   let fast = Relative_path.Map.singleton fn names in
   let patch_map = Typing_suggest_service.go None fast tcopt in
+
   match Relative_path.Map.get patch_map fn with
     | None -> ()
     | Some l -> begin
       (* Sort so that the unit tests come out in a consistent order, normally
        * doesn't matter. *)
       let l = List.sort ~cmp: (fun (x, _, _) (y, _, _) -> x - y) l in
+      let l =
+        if return_only then
+          List.filter l
+            ~f:(fun (_, kind, _) -> kind = Typing_suggest.Kreturn)
+        else l
+      in
       List.iter ~f: (ServerConvert.print_patch fn tcopt) l
+
     end
 
 (* This allows one to fake having multiple files in one file. This
@@ -691,10 +703,13 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let results = ServerHighlightRefs.go (file, line, column) opts  in
     ClientHighlightRefs.go results ~output_json:false;
   | Suggest
+  | Infer_return_types
   | Errors ->
       let errors = check_errors opts errors files_info in
       if mode = Suggest
-      then Relative_path.Map.iter files_info (suggest_and_print opts);
+      then Relative_path.Map.iter files_info (suggest_and_print opts ~return_only:false);
+      if mode = Infer_return_types
+      then Relative_path.Map.iter files_info (suggest_and_print opts ~return_only:true);
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"

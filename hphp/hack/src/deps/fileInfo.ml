@@ -19,6 +19,7 @@
 (*****************************************************************************)
 
 open Core
+open Prim_defs
 
 (*****************************************************************************)
 (* Parsing modes *)
@@ -55,7 +56,8 @@ type t = {
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list option; (* None if loaded from saved state *)
+  comments : (Pos.t * comment) list option;
+    (* None if loaded from saved state *)
 }
 
 let empty_t = {

@@ -18,6 +18,8 @@
  *)
 (*****************************************************************************)
 
+open Prim_defs
+
 (*****************************************************************************)
 (* Parsing modes *)
 (*****************************************************************************)
@@ -48,7 +50,7 @@ type t = {
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list option;
+  comments : (Pos.t * comment) list option;
 }
 
 val empty_t: t

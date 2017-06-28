@@ -12,14 +12,16 @@
 (*****************************************************************************)
 (* Comments accumulator. *)
 (*****************************************************************************)
+open Prim_defs
 
-let (comment_list: (Pos.t * string) list ref) = ref []
+let (comment_list: (Pos.t * comment) list ref) = ref []
 let include_line_comments: bool ref = ref false
 
 let save_comment file lexbuf = function
   | None -> ()
   | Some buf ->
-    comment_list := (Pos.make file lexbuf, Buffer.contents buf) :: !comment_list
+    comment_list := (Pos.make file lexbuf, CmtLine (Buffer.contents buf)) ::
+      !comment_list
 
 let opt_buffer_add_string opt_buf str =
   match opt_buf with
@@ -486,13 +488,13 @@ and heredoc_token = parse
 and comment buf file = parse
   | eof                { let pos = Pos.make file lexbuf in
                          Errors.unterminated_comment pos;
-                         pos, Buffer.contents buf
+                         pos, CmtBlock (Buffer.contents buf)
                        }
   | '\n'               { Lexing.new_line lexbuf;
                          Buffer.add_char buf '\n';
                          comment buf file lexbuf
                        }
-  | "*/"               { Pos.make file lexbuf, Buffer.contents buf }
+  | "*/"               { Pos.make file lexbuf, CmtBlock (Buffer.contents buf) }
   | _                  { Buffer.add_string buf (Lexing.lexeme lexbuf);
                          comment buf file lexbuf
                        }

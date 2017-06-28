@@ -18,6 +18,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
 module SourceText = Full_fidelity_source_text
+open Prim_defs
 
 open Core
 
@@ -1808,7 +1809,7 @@ let pScript node env =
 
 exception Malformed_trivia of int
 
-type scoured_comment = Pos.t * string
+type scoured_comment = Pos.t * comment
 type scoured_comments = scoured_comment list
 
 let scour_comments
@@ -1847,7 +1848,7 @@ let scour_comments
             let (p, c) as result =
               Full_fidelity_source_text.
               ( pos_of_offset start end_
-              , sub source_text start (end_ - start)
+              , CmtLine (sub source_text start (end_ - start))
               )
             in
             result :: acc
@@ -1859,7 +1860,7 @@ let scour_comments
               Full_fidelity_source_text.
               (* Should be 'start end_', but keeping broken for fidelity. *)
               ( pos_of_offset (end_) (end_ + 1)
-              , sub source_text start (end_ - start)
+              , CmtBlock (sub source_text start (end_ - start))
               )
             in
             result :: acc
@@ -1917,7 +1918,7 @@ type result =
   ; ast      : Ast.program
   ; content  : string
   ; file     : Relative_path.t
-  ; comments : (Pos.t * string) list
+  ; comments : (Pos.t * comment) list
   }
 
 let from_text

@@ -33,15 +33,12 @@ type finder = {
   comments: comment array;
 }
 
-let make_docblock_finder (comments: (Pos.t * string) list) : finder =
+let make_docblock_finder (comments: (Pos.t * Prim_defs.comment) list) : finder =
   (* The Hack parser produces comments in reverse but sorted order. *)
-  let comments = List.rev comments in
-  (* Line comment positions always point to the newline.
-   * Conversely, block comment positions always point to "*/". *)
-  let is_line_comment pos = Pos.length pos = 1 in
   let comments = Array.of_list (
-    List.map comments ~f:begin fun (pos, str) ->
-      (File_pos.line (Pos.pos_end pos), str, is_line_comment pos)
+    List.rev_map comments ~f:begin fun (pos, cmt) ->
+      let str = Prim_defs.string_of_comment cmt in
+      (File_pos.line (Pos.pos_end pos), str, Prim_defs.is_line_comment cmt)
     end
   ) in
   { comments }

@@ -130,6 +130,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     end;
 
     let is_pragma_free (_, s) =
+      let s = Prim_defs.string_of_comment s in
       let regexp = Str.regexp "HH_\\(IGNORE_ERROR\\|FIXME\\)\\[[0-9]*\\]" in
       try ignore (Str.search_forward regexp s 0); false with
       | Not_found -> true
@@ -139,14 +140,16 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     let ffp_comments = List.filter is_pragma_free ffp_result.Lowerer.comments in
     let ffp_comments = List.sort by_pos ffp_comments in
     let only_exp (p,s) =
+      let s = Prim_defs.string_of_comment s in
       sprintf "  - Only in expected: '%s' (%s)\n" s (Pos.string_no_file p)
     in
     let only_act (p,s) =
+      let s = Prim_defs.string_of_comment s in
       sprintf "  - Only in actual: '%s' (%s)\n" s (Pos.string_no_file p)
     in
     let rec comments_diff
-      (xs : (Pos.t * string) list)
-      (ys : (Pos.t * string) list)
+      (xs : (Pos.t * Prim_defs.comment) list)
+      (ys : (Pos.t * Prim_defs.comment) list)
     : string list
     = match xs, ys with
     | [], [] -> []

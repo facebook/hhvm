@@ -10,6 +10,7 @@
 open Ast
 open Core
 open Lexer_hack
+open Prim_defs
 
 module L = Lexer_hack
 
@@ -41,7 +42,7 @@ let init_env file lb popt quick = {
 
 type parser_return = {
   file_mode  : FileInfo.mode option; (* None if PHP *)
-  comments   : (Pos.t * string) list;
+  comments   : (Pos.t * comment) list;
   ast        : Ast.program;
   content    : string;
 }

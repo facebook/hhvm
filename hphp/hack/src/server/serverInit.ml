@@ -355,6 +355,8 @@ module ServerInitCommon = struct
     let result = type_check genv env fast t in
     HackEventLogger.type_check_dirty start_time
       (Relative_path.Set.cardinal dirty_files);
+    Hh_logger.log "ServerInit type_check_dirty count: %d"
+      (Relative_path.Set.cardinal dirty_files);
     result
 
   let get_build_targets env =

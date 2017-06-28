@@ -1296,7 +1296,7 @@ and emit_prop_instrs env (_, expr_ as expr) =
   match expr_ with
   (* These all have special inline versions of member keys *)
   | A.Lvar (_, id) when not (is_local_this env id) -> empty, 0
-  | A.Id _ -> empty, 0
+  | A.String _ | A.Id _ -> empty, 0
   | _ -> emit_expr ~need_ref:false env expr, 1
 
 (* Get the member key for an array element expression: the `elem` in
@@ -1323,7 +1323,8 @@ and get_prop_member_key env null_flavor stack_index prop_expr =
   | A.Id (_, id) when String_utils.string_starts_with id "$" ->
     MemberKey.PL (get_local env id)
   (* Special case for known property name *)
-  | A.Id (_, id) ->
+  | A.Id (_, id)
+  | A.String (_, id) ->
     let pid = Hhbc_id.Prop.from_ast_name id in
     begin match null_flavor with
     | Ast.OG_nullthrows -> MemberKey.PT pid

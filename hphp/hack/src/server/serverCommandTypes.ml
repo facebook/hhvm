@@ -66,7 +66,7 @@ type _ t =
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
   | EDIT_FILE : string * (text_edit list) -> unit t
-  | IDE_AUTOCOMPLETE : string * position -> AutocompleteService.result t
+  | IDE_AUTOCOMPLETE : string * position -> AutocompleteService.ide_result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

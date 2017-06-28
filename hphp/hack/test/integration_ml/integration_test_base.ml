@@ -276,6 +276,17 @@ let assert_autocomplete loop_output expected =
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 
+let assert_ide_autocomplete loop_output expected =
+  let results = match loop_output.persistent_client_response with
+    | Some res -> res
+    | _ -> fail "Expected autocomplete response"
+  in
+  let results = List.map results.AutocompleteService.completions
+    ~f:(fun x -> x.AutocompleteService.res_name) in
+  let results_as_string = list_to_string results in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string
+
 let assert_status loop_output expected =
   let {Server_status.error_list; _} = match loop_output.new_client_response with
     | Some res -> res

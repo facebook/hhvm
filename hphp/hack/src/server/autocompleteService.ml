@@ -47,6 +47,11 @@ type autocomplete_result = {
   }
 
 (* The type returned to the client *)
+type ide_result = {
+  completions : complete_autocomplete_result list;
+  char_at_pos : char;
+}
+
 type result = complete_autocomplete_result list
 
 let ac_env = ref None
@@ -113,7 +118,7 @@ let autocomplete_result_to_ide_response res =
     callable_details = callable_details_to_ide_response res.func_details;
   } in
   Ide_message.Autocomplete_response
-    (List.map res ~f:autocomplete_result_to_ide_response)
+    (List.map res.completions ~f:autocomplete_result_to_ide_response)
 
 let get_result name ty =
   {

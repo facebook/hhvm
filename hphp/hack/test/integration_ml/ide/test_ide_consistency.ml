@@ -48,7 +48,7 @@ let run_and_check_autocomplete env expected_rechecked =
       (Printf.sprintf "Expected %d files to be rechecked" expected_rechecked);
 
   let env, loop_output = Test.ide_autocomplete env (bar_name, 3, 15) in
-  Test.assert_autocomplete loop_output ["foo"];
+  Test.assert_ide_autocomplete loop_output ["foo"];
   env, loop_output
 
 let () =

@@ -115,9 +115,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_AUTOCOMPLETE (path, pos) ->
         let open Ide_api_types in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
+        let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
+        let char_at_pos = File_content.get_char fc offset in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let content = File_content.edit_file_unsafe fc edits in
-        env, ServerAutoComplete.auto_complete env.tcopt content
+        let completions = ServerAutoComplete.auto_complete env.tcopt content in
+        env, { AutocompleteService.completions; char_at_pos; }
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->

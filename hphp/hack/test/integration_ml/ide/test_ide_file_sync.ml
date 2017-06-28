@@ -63,7 +63,7 @@ let () =
   let env, _ = Test.edit_file env bar_name bar_contents in
   (* Request completions *)
   let env, loop_output = Test.ide_autocomplete env (bar_name, 3, 5) in
-  Test.assert_autocomplete loop_output ["foo"];
+  Test.assert_ide_autocomplete loop_output ["foo"];
 
   (* Add a new definition to the file *)
   let env, _ = Test.(run_loop_once env { default_loop_input with
@@ -74,4 +74,4 @@ let () =
 
   (* Check that new definition is among the completions *)
   let _, loop_output = Test.ide_autocomplete env (bar_name, 4, 5) in
-  Test.assert_autocomplete loop_output ["foo"; "foo2"]
+  Test.assert_ide_autocomplete loop_output ["foo"; "foo2"]

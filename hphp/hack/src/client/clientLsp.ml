@@ -598,7 +598,7 @@ let do_completion (conn: server_conn) (params: Completion.params)
   let pos = lsp_position_to_ide params.position in
   let filename = lsp_uri_to_path params.textDocument.uri in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos) in
-  let results = rpc conn command
+  let result = rpc conn command
   in
   let rec hack_completion_to_lsp (result: complete_autocomplete_result)
     : Completion.completionItem =
@@ -645,7 +645,7 @@ let do_completion (conn: server_conn) (params: Completion.params)
   {
     (* TODO: get isIncomplete flag from hh_server *)
     isIncomplete = false;
-    items = List.map results ~f:hack_completion_to_lsp;
+    items = List.map result.completions ~f:hack_completion_to_lsp;
   }
 
 let do_workspaceSymbol

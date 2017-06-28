@@ -354,7 +354,7 @@ struct ImmFolder {
     return true;
   }
 
-  bool logical_BitMask(Vreg r, uint64_t& out) {
+  bool logical_bmsk(Vreg r, uint64_t& out) {
     if (!valid.test(r)) return false;
     auto imm64 = vals[r];
     if (!vixl::Assembler::IsImmLogical(imm64, vixl::kXRegSize)) return false;
@@ -422,13 +422,11 @@ struct ImmFolder {
 
   void fold(andq& in, Vinstr& out) {
     int val;
+    uint64_t bm;
     if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
     else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
-    else {
-      uint64_t bm;
-      if (logical_BitMask(in.s0, bm)) { out = andzi{bm, in.s1, in.d, in.sf}; }
-      else if (logical_BitMask(in.s1, bm)) { out = andzi{bm, in.s0, in.d, in.sf}; }
-    }
+    else if (logical_bmsk(in.s0, bm)) { out = andqi64{bm, in.s1, in.d, in.sf}; }
+    else if (logical_bmsk(in.s1, bm)) { out = andqi64{bm, in.s0, in.d, in.sf}; }
   }
 
   void fold(storeb& in, Vinstr& out) {

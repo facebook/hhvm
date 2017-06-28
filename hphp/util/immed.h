@@ -107,7 +107,6 @@ struct Immed64 {
   {}
 
   int64_t q() const { return m_long; }
-  uint64_t Q() const { return m_long; }
   int32_t l() const { return safe_cast<int32_t>(m_long); }
   int16_t w() const { return safe_cast<int16_t>(m_long); }
   int8_t  b() const { return safe_cast<int8_t>(m_long); }

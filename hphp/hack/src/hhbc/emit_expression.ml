@@ -1744,8 +1744,8 @@ and emit_call env (_, expr_ as expr) args uargs =
       emit_call_lhs env expr nargs;
       emit_args_and_call env args uargs;
     ], Flavor.ReturnVal in
-  match expr_ with
-  | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
+  match expr_, args with
+  | A.Id (_, id), _ when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
            emit_expr ~need_ref:false env arg;
@@ -1753,8 +1753,12 @@ and emit_call env (_, expr_ as expr) args uargs =
            if i = nargs-1 then empty else instr_popc
          ] end in
     instrs, Flavor.Cell
-
-  | A.Id (_, id) when
+  | A.Id (_, "array_slice"), [
+    _, A.Call ((_, A.Id (_, "func_get_args")), [], []); (_, A.Int _ as count)
+    ] ->
+    let p = Pos.none in
+    emit_call env (p, A.Id (p, "__SystemLib\\func_slice_args")) [count] []
+  | A.Id (_, id), _ when
     (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
     if List.length uargs != 0 then
     failwith "Using argument unpacking for a call_user_func is not supported";
@@ -1764,7 +1768,7 @@ and emit_call env (_, expr_ as expr) args uargs =
         emit_call_user_func env id arg args
     end
 
-  | A.Id (_, "invariant") when List.length args > 0 ->
+  | A.Id (_, "invariant"), _ when List.length args > 0 ->
     let e = List.hd_exn args in
     let rest = List.tl_exn args in
     let l = Label.next_regular () in
@@ -1780,7 +1784,7 @@ and emit_call env (_, expr_ as expr) args uargs =
       instr_null;
     ], Flavor.Cell
 
-  | A.Id (_, "assert") ->
+  | A.Id (_, "assert"), _ ->
     let l0 = Label.next_regular () in
     let l1 = Label.next_regular () in
     gather [
@@ -1798,7 +1802,7 @@ and emit_call env (_, expr_ as expr) args uargs =
       instr_label l1;
     ], Flavor.Cell
 
-  | A.Id (_, ("class_exists" | "interface_exists" | "trait_exists" as id))
+  | A.Id (_, ("class_exists" | "interface_exists" | "trait_exists" as id)), _
     when nargs = 1 || nargs = 2 ->
     let class_kind =
       match id with
@@ -1817,10 +1821,10 @@ and emit_call env (_, expr_ as expr) args uargs =
       instr (IMisc (OODeclExists class_kind))
     ], Flavor.Cell
 
-  | A.Id (_, ("exit" | "die")) when nargs = 0 || nargs = 1 ->
+  | A.Id (_, ("exit" | "die")), _ when nargs = 0 || nargs = 1 ->
     emit_exit env (List.hd args), Flavor.Cell
 
-  | A.Id (_, id) ->
+  | A.Id (_, id), _ ->
     begin match get_call_builtin_func_info id with
     | Some (nargs, i) when nargs = List.length args ->
       gather [

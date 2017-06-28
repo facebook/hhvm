@@ -16,17 +16,19 @@
 
 #include "hphp/runtime/base/perf-mem-event.h"
 
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/member-reflection.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/unit.h"
@@ -273,35 +275,36 @@ bool record_low_mem_event(const void* addr, StructuredLogEntry& record) {
  * Update `record' for an `addr' known to be in the request heap object given
  * by `hdr'.
  */
-bool record_request_heap_mem_event(const void* addr, const Header* hdr,
+bool record_request_heap_mem_event(const void* addr,
+                                   const HeapObject* hdr,
                                    StructuredLogEntry& record) {
   record.setStr("location", "request_heap");
   record.setStr("kind", header_names[uint8_t(hdr->kind())]);
 
   switch (hdr->kind()) {
     case HeaderKind::String:
-      fill_record(&hdr->str_, addr, record);
+      fill_record(static_cast<const StringData*>(hdr), addr, record);
       break;
 
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      fill_record(&hdr->arr_, addr, record);
+      fill_record(static_cast<const ArrayData*>(hdr), addr, record);
       break;
 
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
     case HeaderKind::Keyset:
-      fill_record(&hdr->mixed_, addr, record);
+      fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
 
     case HeaderKind::Apc:
-      try_member(&hdr->apc_, addr, record);
+      try_member(static_cast<const APCLocalArray*>(hdr), addr, record);
       break;
     case HeaderKind::Globals:
-      try_member(&hdr->globals_, addr, record);
+      try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
       break;
     case HeaderKind::Proxy:
-      try_member(&hdr->proxy_, addr, record);
+      try_member(static_cast<const ProxyArray*>(hdr), addr, record);
       break;
     case HeaderKind::Empty:
       break;

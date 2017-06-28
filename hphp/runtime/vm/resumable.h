@@ -30,8 +30,8 @@ namespace HPHP {
 /**
  * Header of the resumable frame used by async functions:
  *
- *     Header*     -> +--------------------------------+ low address
- *                    | NativeNode kind=AsyncFuncFrame |
+ *     NativeNode* -> +--------------------------------+ low address
+ *                    | kind=AsyncFuncFrame            |
  *                    +--------------------------------+
  *                    | Function locals and iterators  |
  *     Resumable*  -> +--------------------------------+
@@ -44,8 +44,8 @@ namespace HPHP {
  *
  * Header of the native frame used by generators:
  *
- *     Header*     -> +--------------------------------+ low address
- *                    | NativeNode NativeData          |
+ *     NativeNode* -> +--------------------------------+ low address
+ *                    | kind=NativeData                |
  *                    +--------------------------------+
  *                    | Function locals and iterators  |
  * BaseGenerator*  -> +--------------------------------+

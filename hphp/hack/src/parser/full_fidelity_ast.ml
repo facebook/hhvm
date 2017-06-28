@@ -429,12 +429,21 @@ let rec pHint : hint parser = fun node env ->
       { tuple_type_keyword = kw
       ; tuple_type_types   = ty
       ; _ }
+    | VarrayTypeSpecifier
+      { varray_keyword = kw
+      ; varray_type    = ty
+      ; _ }
     | VectorArrayTypeSpecifier
       { vector_array_keyword = kw
       ; vector_array_type    = ty
       ; _ }
       -> Happly (pos_name kw, couldMap ~f:pHint ty env)
 
+    | DarrayTypeSpecifier
+      { darray_keyword = kw
+      ; darray_key     = key
+      ; darray_value   = value
+      ; _ }
     | MapArrayTypeSpecifier
       { map_array_keyword = kw
       ; map_array_key     = key

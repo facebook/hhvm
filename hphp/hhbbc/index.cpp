@@ -1511,11 +1511,12 @@ void compute_iface_vtables(IndexData& index) {
   trace_time tracer("compute interface vtables");
 
   ConflictGraph cg;
-  std::vector<borrowed_ptr<const php::Class>> ifaces;
+  std::vector<borrowed_ptr<const php::Class>>             ifaces;
   std::unordered_map<borrowed_ptr<const php::Class>, int> iface_uses;
 
   // Build up the conflict sets.
   for (auto& cinfo : index.allClassInfos) {
+    // Gather interfaces.
     if (cinfo->cls->attrs & AttrInterface) {
       ifaces.emplace_back(cinfo->cls);
       // Make sure cg.map has an entry for every interface - this simplifies
@@ -1537,6 +1538,9 @@ void compute_iface_vtables(IndexData& index) {
     }
   }
 
+  if (ifaces.size() == 0) return;
+
+  // Sort interfaces by usage frequencies.
   // We assign slots greedily, so sort the interface list so the most
   // frequently implemented ones come first.
   auto iface_cmp = [&](const php::Class* a, const php::Class* b) {
@@ -1573,6 +1577,8 @@ void compute_iface_vtables(IndexData& index) {
 
   std::vector<Slot> slots_permute(max_slot + 1, 0);
   for (size_t i = 0; i <= max_slot; ++i) slots_permute[slots[i]] = i;
+
+  // re-map interfaces to permuted slots
   for (auto& pair : index.ifaceSlotMap) {
     pair.second = slots_permute[pair.second];
   }

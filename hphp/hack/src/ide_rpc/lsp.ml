@@ -454,6 +454,8 @@ module Completion = struct
     label: string;  (* the label in the UI *)
     kind: completionItemKind option;  (* tells editor which icon to use *)
     detail: string option;  (* human-readable string like type/symbol info *)
+    inlineDetail: string option; (* nuclide-specific, right column *)
+    itemType: string option; (* nuclide-specific, left column *)
     documentation: string option;  (* human-readable doc-comment *)
     sortText: string option;  (* used for sorting; if absent, uses label *)
     filterText: string option;  (* used for filtering; if absent, uses label *)

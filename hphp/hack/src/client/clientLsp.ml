@@ -606,6 +606,8 @@ let do_completion (conn: server_conn) (params: Completion.params)
       label = result.res_name; (* TODO: check that label replaces the right range *)
       kind = hack_to_kind result;
       detail = Some (hack_to_detail result);
+      inlineDetail = Some (hack_to_inline_detail result);
+      itemType = hack_to_itemType result;
       documentation = None; (* TODO: provide doc-comments *)
       sortText = None;
       filterText = None;
@@ -619,12 +621,26 @@ let do_completion (conn: server_conn) (params: Completion.params)
     (* TODO: change hh_server to return richer 'kind' information *)
     (* For now we just return either 'Function' or 'None'. *)
     Option.map result.func_details ~f:(fun _ -> Completion.Function)
+  and hack_to_itemType (result: complete_autocomplete_result) : string option =
+    (* TODO: we're using itemType (left column) for function return types, and *)
+    (* the inlineDetail (right column) for variable/field types. Is that good? *)
+    Option.map result.func_details ~f:(fun details -> details.return_ty)
   and hack_to_detail (result: complete_autocomplete_result) : string =
     (* TODO: retrieve the actual signature including name+modifiers     *)
     (* For now we just return the type of the completion. In the case   *)
-    (* of functions, their function-types have parentheses around them, *)
-    (* which we strip. *)
-    String_utils.rstrip (String_utils.lstrip result.res_ty "(") ")"
+    (* of functions, their function-types have parentheses around them  *)
+    (* which we want to strip. In other cases like tuples, no strip.    *)
+    match result.func_details with
+    | None ->  result.res_ty
+    | Some _ -> String_utils.rstrip (String_utils.lstrip result.res_ty "(") ")"
+  and hack_to_inline_detail (result: complete_autocomplete_result) : string =
+    match result.func_details with
+    | None -> hack_to_detail result
+    | Some details ->
+      (* "(type1 $param1, ...)" *)
+      let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
+      let params = String.concat ", " (List.map details.params ~f) in
+      Printf.sprintf "(%s)" params
   in
   {
     (* TODO: get isIncomplete flag from hh_server *)

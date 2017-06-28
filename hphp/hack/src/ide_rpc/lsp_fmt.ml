@@ -425,6 +425,8 @@ let print_completion (r: Completion.result) : json =
       "label", Some (JSON_String item.label);
       "kind", Option.map item.kind print_completionItemKind;
       "detail", Option.map item.detail string_;
+      "inlineDetail", Option.map item.inlineDetail string_;
+      "itemType", Option.map item.itemType string_;
       "documentation", Option.map item.documentation string_;
       "sortText", Option.map item.sortText string_;
       "filterText", Option.map item.filterText string_;

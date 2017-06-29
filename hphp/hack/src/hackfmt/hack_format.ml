@@ -1754,8 +1754,35 @@ and transform_fn_decl_name async coroutine kw amp name type_params leftp =
   ]
 
 and transform_fn_decl_args params rightp colon ret_type where =
+  (* It is a syntax error to follow a variadic parameter with a trailing comma,
+   * so suppress trailing commas in that case. *)
+  let allow_trailing =
+    match syntax params with
+    | SyntaxList params ->
+      let open EditableToken in
+      let open EditableToken.TokenKind in
+      let last_param =
+        match syntax (List.last_exn params) with
+        | ListItem { list_item; _ } -> list_item
+        | _ -> failwith "Expected ListItem"
+      in
+      begin
+        match syntax last_param with
+        | VariadicParameter _
+        | ParameterDeclaration {
+            parameter_name = { syntax = DecoratedExpression {
+              decorated_expression_decorator = {
+                syntax = Token { kind = DotDotDot; _ }; _
+              }; _
+            }; _ }; _
+          } ->
+          false
+        | _ -> true
+      end
+    | _ -> true
+  in
   WithRule (Rule.Parental, Fmt [
-    transform_possible_comma_list params rightp;
+    transform_possible_comma_list ~allow_trailing params rightp;
     transform colon;
     when_present colon space;
     transform ret_type;

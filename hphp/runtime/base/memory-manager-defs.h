@@ -57,22 +57,6 @@ struct Header {
     return hdr_.kind();
   }
 
-  public:
-  size_t allocSize() const {
-    auto const sz = size();
-    switch (kind()) {
-      case HeaderKind::Hole:
-      case HeaderKind::Free:
-      case HeaderKind::BigObj:
-      case HeaderKind::BigMalloc:
-        // these don't need rounding up to size classes.
-        assertx(sz % 16 == 0);
-        return sz;
-      default:
-        return MemoryManager::smallSizeClass(sz);
-    }
-  }
-
   const Resumable* resumable() const {
     assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<const Resumable*>(
@@ -168,14 +152,10 @@ public:
     ClosureHdr closure_hdr_;
     c_Closure closure_;
   };
-
-private:
-  size_t size() const;
-
 };
 
 // Return the size (in bytes) without rounding up to MM size class.
-inline size_t Header::size() const {
+inline size_t heapSize(const HeapObject* h) {
   // Ordering depends on ext_wait-handle.h.
   static const uint32_t waithandle_sizes[] = {
     sizeof(c_StaticWaitHandle),
@@ -252,57 +232,60 @@ inline size_t Header::size() const {
   CHECKSIZE(Free, 0)
 #undef CHECKSIZE
 
-  HeaderKind kindVar = kind();
-  if (auto size = kind_sizes[(int)kindVar]) return size;
+  auto kind = h->kind();
+  if (auto size = kind_sizes[(int)kind]) return size;
 
-  switch (kindVar) {
+  switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      return PackedArray::heapSize(&arr_);
+      return PackedArray::heapSize(static_cast<const ArrayData*>(h));
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-      return mixed_.heapSize();
+      return static_cast<const MixedArray*>(h)->heapSize();
     case HeaderKind::Keyset:
-      return set_.heapSize();
+      return static_cast<const SetArray*>(h)->heapSize();
     case HeaderKind::Apc:
-      return apc_.heapSize();
+      return static_cast<const APCLocalArray*>(h)->heapSize();
     case HeaderKind::String:
-      return str_.heapSize();
+      return static_cast<const StringData*>(h)->heapSize();
     case HeaderKind::Closure:
     case HeaderKind::Object:
       // [ObjectData][props]
-      return obj_.heapSize();
+      return static_cast<const ObjectData*>(h)->heapSize();
     case HeaderKind::ClosureHdr:
       // [ClosureHdr][ObjectData][use vars]
-      return closure_hdr_.size();
+      return static_cast<const ClosureHdr*>(h)->size();
     case HeaderKind::WaitHandle:
     {
       // [ObjectData][subclass]
-      auto whKind = wait_handle<c_WaitHandle>(&obj_)->getKind();
+      auto obj = static_cast<const ObjectData*>(h);
+      auto whKind = wait_handle<c_WaitHandle>(obj)->getKind();
       if (auto whSize = waithandle_sizes[(int)whKind]) return whSize;
-      return asio_object_size(&obj_);
+      return asio_object_size(obj);
     }
     case HeaderKind::AwaitAllWH:
       // [ObjectData][children...]
-      return awaitall_.heapSize();
+      return static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
     case HeaderKind::Resource:
       // [ResourceHdr][ResourceData subclass]
-      return res_.heapSize();
+      return static_cast<const ResourceHdr*>(h)->heapSize();
     case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
     case HeaderKind::BigMalloc:   // [MallocNode][bytes...]
     case HeaderKind::BigObj:      // [MallocNode][Header...]
-      return malloc_.nbytes;
+      return static_cast<const MallocNode*>(h)->nbytes;
     case HeaderKind::AsyncFuncFrame:
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
-      return native_.obj_offset + sizeof(c_AsyncFunctionWaitHandle);
+      return static_cast<const NativeNode*>(h)->obj_offset +
+             sizeof(c_AsyncFunctionWaitHandle);
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       // Generators -
       // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
-      return native_.obj_offset + nativeObj()->heapSize();
+      return static_cast<const NativeNode*>(h)->obj_offset +
+             ((Header*)h)->nativeObj()->heapSize();
     case HeaderKind::Free:
     case HeaderKind::Hole:
-      return free_.size();
+      return static_cast<const FreeNode*>(h)->size();
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
     case HeaderKind::Globals:
@@ -319,6 +302,21 @@ inline size_t Header::size() const {
               "Constant header sizes should be handled by the lookup table.");
   }
   return 0;
+}
+
+inline size_t allocSize(const HeapObject* h) {
+  auto const sz = heapSize(h);
+  switch (h->kind()) {
+    case HeaderKind::Hole:
+    case HeaderKind::Free:
+    case HeaderKind::BigObj:
+    case HeaderKind::BigMalloc:
+      // these don't need rounding up to size classes.
+      assertx(sz % 16 == 0);
+      return sz;
+    default:
+      return MemoryManager::smallSizeClass(sz);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,7 +344,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       ++big;
     }
     do {
-      auto size = h->allocSize();
+      auto size = allocSize((const HeapObject*)h);
       fn(h, size);
       h = (Header*)((char*)h + size);
     } while (h < end);

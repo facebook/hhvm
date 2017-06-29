@@ -1218,9 +1218,9 @@ Header* BigHeap::find(const void* p) {
     auto const slab_end = static_cast<char*>(slab->ptr) + slab->size;
     auto h = reinterpret_cast<char*>(slab->ptr);
     while (h < slab_end) {
-      auto const hdr = reinterpret_cast<Header*>(h);
-      auto const size = hdr->allocSize();
-      if (p < h + size) return hdr;
+      auto const hdr = reinterpret_cast<HeapObject*>(h);
+      auto const size = allocSize(hdr);
+      if (p < h + size) return reinterpret_cast<Header*>(h);
       h += size;
     }
     // We know `p' is in the slab, so it must belong to one of the headers.

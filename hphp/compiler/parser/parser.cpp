@@ -2606,14 +2606,14 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     SCALAR_TYPE(int),
     SCALAR_TYPE(float),
     SCALAR_TYPE(string),
+    SCALAR_TYPE(void),
 
-    // Hack-only primatives
+    // Hack-only primitives
     HH_ONLY_TYPE(num),
     HH_ONLY_TYPE(arraykey),
     HH_ONLY_TYPE(resource),
     HH_ONLY_TYPE(mixed),
     HH_ONLY_TYPE(noreturn),
-    HH_ONLY_TYPE(void),
     HH_ONLY_TYPE(this),
     HH_ONLY_TYPE(varray_or_darray),
     HH_ALIAS(classname, string),

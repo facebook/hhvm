@@ -539,7 +539,13 @@ static inline uint32_t resetProfCountersDefault() {
 }
 
 static inline int retranslateAllRequestDefault() {
+#define USE_IT_BUDDY 1
+#if USE_IT_BUDDY
   return RuntimeOption::ServerExecutionMode() ? 3000 : 0;
+#else
+  return RuntimeOption::ServerExecutionMode() &&
+    arch() != Arch::ARM ? 3000 : 0;
+#endif
 }
 
 uint64_t ahotDefault() {

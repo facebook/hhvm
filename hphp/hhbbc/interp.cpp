@@ -958,13 +958,7 @@ void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
   auto save = env.state;
 
   if (auto const v = staticLocHelper(env, slc.loc1, TBottom)) {
-    if (takenOnInit) {
-      jmp_nofallthrough(env);
-    } else {
-      jmp_nevertaken(env);
-    }
-    return impl(env, gen_constant(*v),
-                bc::SetL { slc.loc1 }, bc::PopC {});
+    return impl(env, slc, jmp);
   }
 
   if (env.collect.localStaticTypes.size() > slc.loc1 &&

@@ -195,6 +195,8 @@ and fun_decl_in_env env f =
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in
   let tparams = List.map f.f_tparams (type_param env) in
+  let where_constraints =
+    List.map f.f_where_constraints (where_constraint env) in
   let ft = {
     ft_pos         = fst f.f_name;
     ft_deprecated  =
@@ -202,7 +204,7 @@ and fun_decl_in_env env f =
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = tparams;
-    ft_where_constraints = [];
+    ft_where_constraints = where_constraints;
     ft_params      = params;
     ft_ret         = ret_ty;
   } in

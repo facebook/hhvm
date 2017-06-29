@@ -97,6 +97,7 @@ struct
     T.f_ret = fd.S.f_ret;
     T.f_name = fd.S.f_name;
     T.f_tparams = fd.S.f_tparams;
+    T.f_where_constraints = fd.S.f_where_constraints;
     T.f_variadic = map_fun_variadicity f fd.S.f_variadic;
     T.f_params = List.map fd.S.f_params (map_fun_param f);
     T.f_body = map_func_body f fd.S.f_body;

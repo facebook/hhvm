@@ -277,6 +277,7 @@ and fun_ = {
   f_ret      : hint option;
   f_name     : sid;
   f_tparams  : tparam list;
+  f_where_constraints : where_constraint list;
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : func_body;

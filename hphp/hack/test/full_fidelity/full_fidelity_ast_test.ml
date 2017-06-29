@@ -94,7 +94,7 @@ function foo(int $a, int $b): int {
 let simple_expected_1 = "(AProgram
  ((Fun
    ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p int) ())))) (f_name: (p \"\\\\foo\"))
+    (f_ret: ((p (Happly (p int) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
     (f_params:
      (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
@@ -120,7 +120,7 @@ let simple_expected_2 = "(AProgram
  ((Stmt (Markup (p \"\") ()))
   (Fun
    ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\"))
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
     (f_params:
      (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())
@@ -146,7 +146,8 @@ let comment_scraper_expected =
 "(AProgram
  ((Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
+    (f_params: ())
     (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
@@ -156,8 +157,8 @@ let comment_scraper_expected =
  ((Stmt (Markup (p \"\") ()))
   (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
-    (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
+    (f_params: ()) (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
@@ -204,9 +205,9 @@ let global_keyword_expected =
  ((Stmt (Markup (p \"\") ()))
   (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
-    (f_body: ((Global_var ((p (Id (p $x))))))) (f_user_attributes: ())
-    (f_fun_kind: FSync)
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
+    (f_params: ()) (f_body: ((Global_var ((p (Id (p $x)))))))
+    (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
       (ns_const_uses: (SMap ()))))

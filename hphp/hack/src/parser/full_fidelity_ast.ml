@@ -354,6 +354,7 @@ let fun_template yielding node suspension_kind =
   let p = get_pos node in
   { f_mode            = !(lowerer_state.mode)
   ; f_tparams         = []
+  ; f_constrs         = []
   ; f_ret             = None
   ; f_ret_by_ref      = false
   ; f_name            = p, ";anonymous"

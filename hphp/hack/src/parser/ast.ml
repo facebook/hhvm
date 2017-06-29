@@ -209,6 +209,7 @@ and fun_param = {
 and fun_ = {
   f_mode            : FileInfo.mode;
   f_tparams         : tparam list;
+  f_constrs         : (hint * constraint_kind * hint) list;
   f_ret             : hint option;
   f_ret_by_ref      : bool;
   f_name            : id;

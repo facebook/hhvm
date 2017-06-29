@@ -371,7 +371,9 @@ and fun_def tcopt f =
         Phase.localize_generic_parameters_with_bounds env f.f_tparams
                   ~ety_env:(Phase.env_with_self env) in
       let env = add_constraints (fst f.f_name) env constraints in
-
+      let env =
+        localize_where_constraints
+          ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
       let env, hret =
         match f.f_ret with
         | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
@@ -402,6 +404,7 @@ and fun_def tcopt f =
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
         T.f_tparams = f.f_tparams;
+        T.f_where_constraints = f.f_where_constraints;
         T.f_variadic = T.FVnonVariadic (* TAST: get this right *);
         T.f_params = tparams;
         T.f_fun_kind = f.f_fun_kind;

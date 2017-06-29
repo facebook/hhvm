@@ -236,15 +236,13 @@ ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
 }
 
 ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i, bool copy) {
-  auto a = asSet(ad);
-  a = copy ? a->copyAndResizeIfNeeded() : a->resizeIfNeeded();
+  auto a = asSet(ad)->prepareForInsert(copy);
   a->insert(i);
   return a;
 }
 
 ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
-  auto a = asSet(ad);
-  a = copy ? a->copyAndResizeIfNeeded() : a->resizeIfNeeded();
+  auto a = asSet(ad)->prepareForInsert(copy);
   a->insert(s);
   return a;
 }
@@ -359,39 +357,64 @@ Cell SetArray::getElm(ssize_t ei) const {
 
 //////////////////////////////////////////////////////////////////////
 
-SetArray* SetArray::grow(uint32_t newScale) {
+NEVER_INLINE
+SetArray* SetArray::grow(bool copy) {
   assert(m_size > 0);
+  auto const oldUsed = m_used;
+  auto const newScale = m_scale * 2;
   assert(Capacity(newScale) >= m_size);
   assert(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
   auto ad            = reqAlloc(newScale);
-  auto const oldData = data();
-  auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
   ad->initHeader(*this, 1);
+
   assert(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
   memcpy16_inline(Data(ad), data(), sizeof(Elm) * oldUsed);
   assert(ClearElms(Data(ad) + oldUsed, Capacity(newScale) - oldUsed));
-  InitHash(HashTab(ad, newScale), newScale);
-  setZombie();
 
-  for (uint32_t i = 0; i < oldUsed; ++i) {
-    auto& elm = oldData[i];
-    if (UNLIKELY(elm.isTombstone())) continue;
-    assert(!elm.isEmpty());
-    *ad->findForNewInsert(elm.hash()) = i;
+  auto table = HashTab(ad, newScale);
+  InitHash(table, newScale);
+  auto mask = ad->mask();
+  auto iter = data();
+  auto const stop = iter + oldUsed;
+  if (copy) {
+    // we need to bump refcounts and insert into the new hash
+    for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+      auto& e = *iter;
+      if (UNLIKELY(e.isTombstone())) continue;
+      tvIncRefGen(&e.tv);
+      *ad->findForNewInsert(table, mask, e.hash()) = i;
+    }
+  } else {
+    // we can make this a zombie (no need to adjust refcounts), but we still
+    // need to insert into the new hash
+    for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+      auto& e = *iter;
+      if (UNLIKELY(e.isTombstone())) continue;
+      *ad->findForNewInsert(table, mask, e.hash()) = i;
+    }
+    setZombie();
   }
 
-  assert(isZombie());
   assert(ad->hasExactlyOneRef());
   assert(ad->kind() == kind());
   assert(ad->m_size == m_size);
+  assert(ad->m_pos == m_pos);
   assert(ad->m_scale == newScale);
   assert(ad->m_used == oldUsed);
   assert(ad->checkInvariants());
   return ad;
+}
+
+ALWAYS_INLINE
+SetArray* SetArray::prepareForInsert(bool copy) {
+  assert(checkInvariants());
+  if (isFull()) return grow(copy);
+  if (copy) return copySet();
+  return this;
 }
 
 void SetArray::compact() {
@@ -424,21 +447,6 @@ void SetArray::compact() {
 
   assert(m_size == m_used);
   assert(checkInvariants());
-}
-
-SetArray* SetArray::resizeIfNeeded() {
-  if (UNLIKELY(isFull())) return grow(m_scale * 2);
-  return this;
-}
-
-SetArray* SetArray::copyAndResizeIfNeeded() const {
-  auto const ad = copySet();
-  if (LIKELY(!ad->isFull())) return ad;
-
-  /* FIXME: This is kind of lame. */
-  auto const ret = ad->grow(m_scale * 2);
-  if (ad != ret) Release(ad);
-  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -670,8 +678,7 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
 }
 
 ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
-  auto a = asSet(ad);
-  a = copy ? a->copyAndResizeIfNeeded() : a->resizeIfNeeded();
+  auto a = asSet(ad)->prepareForInsert(copy);
   if (isIntType(v.m_type)) {
     a->insert(v.m_data.num);
     return a;
@@ -763,7 +770,7 @@ ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
 
   auto elms = a->data();
   if (!elms[0].isTombstone()) {
-    a = a->resizeIfNeeded();
+    a = a->prepareForInsert(false);
     elms = a->data();
     memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
     ++a->m_used;

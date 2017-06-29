@@ -217,7 +217,6 @@ private:
   static SetArray* CopySet(const SetArray& other, AllocMode);
   static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
-  SetArray* copyAndResizeIfNeeded() const;
 
 private:
   SetArray() = delete;
@@ -301,28 +300,23 @@ private:
 
 
   /*
-   * Returns a new set containing all the elements of the current set
-   * with the new specified scale.  The original set must not be used
-   * afterwards.  If the passed scale is smaller than the original
-   * one, grow() can shrink too!
+   * Returns a copy of the set with twice the scale of the original. It
+   * rebuilds the hash table, but it does not compact the elements. If copy is
+   * true, it will copy elements instead of taking ownership of them.
    */
-  SetArray* grow(uint32_t newScale);
+  SetArray* grow(bool copy);
+
+  /*
+   * prepareForInsert ensures that the set has room to insert an element and
+   * has a refcount of 1, copying if requested and growing if needed.
+   */
+  SetArray* prepareForInsert(bool copy);
 
   /*
    * compact() removes all tombstones from the hash table by going
    * through the inner linked list.
    */
   void compact();
-
-  /*
-   * resizeIfNeeded() will grow the array as necessary to ensure that there is
-   * room for a new element and a new hash entry.
-   *
-   * The function returns the new SetArray* to use (or the old one if it didn't
-   * need to grow). The old SetArray is left in a zombie state where the only
-   * legal action is to decref and then throw it away.
-   */
-  SetArray* resizeIfNeeded();
 
   /*
    * Zombie arrays!

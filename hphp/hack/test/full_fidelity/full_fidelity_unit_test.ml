@@ -183,6 +183,7 @@ let error_tests =
     "test_classish_inside_function_errors";
     "test_list_expression_errors";
     "test_interface_method_errors";
+    "test_abstract_classish_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

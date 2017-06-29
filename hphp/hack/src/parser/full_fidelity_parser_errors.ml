@@ -401,6 +401,24 @@ let classish_invalid_extends_list cd_node =
     | [x1] -> false
     | _ -> true (* General bc empty list case is already caught by error1007 *)
 
+(* Given a particular TokenKind.(Trait/Interface/Class), tests if a given
+ * classish_declaration node is both of that kind and declared abstract. *)
+let is_classish_kind_declared_abstract classish_kind cd_node =
+  match syntax cd_node with
+  | ClassishDeclaration { classish_keyword; classish_modifiers; _ }
+    when is_token_kind classish_keyword classish_kind ->
+      list_contains_predicate is_abstract classish_modifiers
+  | _ -> false
+
+(* Given a classish_declaration node, returns the 'abstract' keyword node
+ * in its list of classish_modifiers, or None if there isn't one. *)
+let extract_abstract_keyword cd_node =
+  match syntax cd_node with
+  | ClassishDeclaration { classish_modifiers; _ } ->
+    Core.List.find ~f:is_abstract
+        (syntax_to_list_no_separators classish_modifiers)
+  | _ -> None
+
 (* Return, as a string opt, the name of the function with the earliest
  * declaration node in the list of parents. *)
 let first_function_name parents =
@@ -641,12 +659,26 @@ let classish_errors node parents =
         ~default:"" ~f:TokenKind.to_string in
       let declared_name_str = PositionedSyntax.text cd.classish_name in
       let function_str = Option.value (first_function_name parents)
-        ~default: "" in
+        ~default:"" in
       (* To avoid iterating through the whole parents list again, do a simple
        * check on function_str rather than a harder one on cd or parents. *)
       produce_error errors (fun str -> String.length str != 0) function_str
       (SyntaxError.error2039 keyword_str declared_name_str function_str)
       cd.classish_keyword in
+    let errors =
+      (* default will never be used, since existence of abstract_keyword is a
+       * necessary condition for the production of an error. *)
+      let abstract_keyword = Option.value (extract_abstract_keyword node)
+        ~default:node in
+      produce_error errors (is_classish_kind_declared_abstract TokenKind.Interface)
+      node SyntaxError.error2042 abstract_keyword in
+    let errors =
+      (* default will never be used, since existence of abstract_keyword is a
+       * necessary condition for the production of an error. *)
+      let abstract_keyword = Option.value (extract_abstract_keyword node)
+        ~default:node in
+      produce_error errors (is_classish_kind_declared_abstract TokenKind.Trait)
+      node SyntaxError.error2043 abstract_keyword in
     errors
   | _ -> [ ]
 

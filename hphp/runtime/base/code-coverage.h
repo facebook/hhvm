@@ -28,6 +28,8 @@ namespace HPHP {
 struct Array;
 
 struct CodeCoverage {
+  static constexpr int kLineExecuted = 1;
+
   void Record(const char* filename, int line0, int line1);
 
   /*

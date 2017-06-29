@@ -467,10 +467,24 @@ static void HHVM_FUNCTION(xdebug_enable) {
 
 static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
   auto ti = ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_reqInjectionData.getCoverage()) {
-    return ti->m_coverage->Report(false);
+  if (!ti->m_reqInjectionData.getCoverage()) {
+    return Array::Create();
   }
-  return Array::Create();
+
+  auto ret = Array::Create();
+  auto const reports = ti->m_coverage->Report(false);
+  for (ArrayIter report(reports); report; ++report) {
+    auto tmp = Array::Create();
+    auto const lines = report.second().toArray();
+    for (ArrayIter line(lines); line; ++line) {
+      auto const count = line.second().toInt64();
+      if (count > 0) {
+        tmp.set(line.first(), Variant(CodeCoverage::kLineExecuted));
+      }
+    }
+    ret.set(report.first(), tmp);
+  }
+  return ret;
 }
 
 // TODO(#3704) see xdebug_start_error_collection()

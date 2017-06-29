@@ -95,7 +95,8 @@ let from_type_constant ast_type_constant =
   | Some init ->
     (* TODO: Deal with the constraint *)
     let type_constant_initializer =
-      Some (Emit_type_constant.hint_to_type_constant init)
+      (* Type constants do not take type vars hence tparams:[] *)
+      Some (Emit_type_constant.hint_to_type_constant ~tparams:[] init)
     in
     Hhas_type_constant.make type_constant_name type_constant_initializer
 

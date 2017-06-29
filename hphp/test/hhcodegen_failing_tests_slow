@@ -615,7 +615,6 @@ slow/parser/use-const.php
 slow/parser/use-strict-hack.php
 slow/parser/use-strict.php
 slow/parser/val_colon_colon_class_method.php
-slow/parser/variance.php
 slow/parser/xhp-ambiguity.php
 slow/perfect_virtual/79.php
 slow/perfect_virtual/80.php
@@ -722,7 +721,6 @@ slow/reflection/ReflectionClass_toString_001.php
 slow/reflection/ReflectionFunction_getShortName.php
 slow/reflection/ReflectionType-basic-explicit-php7.php
 slow/reflection/ReflectionType-detailed-explicit-php7.php
-slow/reflection/ReflectionTypeAlias3.php
 slow/reflection/bug_3289_reflectionparameter_getclass_callable.php
 slow/reflection/closure_get_static_vars.php
 slow/reflection/closure_namespace.php
@@ -817,7 +815,6 @@ slow/type_annotation/shape_typedef_with_question_mark.php
 slow/type_annotation/shape_typedef_with_unknown_fields_not_at_end.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_annotation/type_annotation_classes4.php
-slow/type_annotation/type_annotation_expand_typedef1.php
 slow/type_annotation/type_annotation_self1.php
 slow/type_assertions/1857.php
 slow/type_assertions/1860.php
@@ -828,11 +825,8 @@ slow/typecheck/type_coersion_5.php
 slow/typecheck/type_coersion_7.php
 slow/typecheck/type_coersion_7strict.php
 slow/typedef/typedef_mixed_case.php
-slow/typedef/typedef_non_class.php
-slow/typedef/typedef_non_class_fail2.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
-slow/typedef/typedef_typearg.php
 slow/types/1747.php
 slow/types/abstract_function_typehints.php
 slow/types/interface_typehint_fail.php

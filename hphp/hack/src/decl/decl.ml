@@ -20,7 +20,6 @@ open Nast
 open Typing_defs
 open Typing_deps
 
-module DynamicYield = Decl_dynamic_yield
 module Reason = Typing_reason
 module Inst = Decl_instantiate
 module Attrs = Attributes
@@ -366,9 +365,6 @@ and class_decl tcopt c =
   in
   let req_ancestors, req_ancestors_extends =
     Decl_requirements.get_class_requirements env c in
-  let m = if DynamicYield.is_dynamic_yield (snd c.c_name)
-    then DynamicYield.clean_dynamic_yield m
-    else m in
   let ext_strict = List.fold_left c.c_uses
     ~f:(trait_exists env) ~init:ext_strict in
   if not ext_strict &&

@@ -459,8 +459,6 @@ public:
 
 private:
   MixedArray* copyMixed() const;
-  MixedArray* copyMixedAndResizeIfNeeded() const;
-  MixedArray* copyMixedAndResizeIfNeededSlow() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
@@ -650,11 +648,17 @@ private:
                                            uint32_t mask,
                                            Elm* iter, Elm* stop);
   /*
-   * grow() increases the hash table size and the number of slots for
-   * elements by a factor of 2. grow() rebuilds the hash table, but it
-   * does not compact the elements.
+   * Grow makes a copy of the array with scale = newScale. Grow rebuilds the
+   * hash table, but it does not compact the elements. If copy is true, it
+   * will copy elements instead of taking ownership of them.
    */
-  static MixedArray* Grow(MixedArray* old, uint32_t newScale);
+  static MixedArray* Grow(MixedArray* old, uint32_t newScale, bool copy);
+
+  /*
+   * prepareForInsert ensures that the array has room to insert an element and
+   * has a refcount of 1, copying if requested and growing if needed.
+   */
+  MixedArray* prepareForInsert(bool copy);
 
   /**
    * compact() does not change the hash table size or the number of slots
@@ -662,16 +666,6 @@ private:
    * elements into the slots with lower addresses.
    */
   void compact(bool renumber);
-
-  /*
-   * resizeIfNeeded() will grow the array as necessary to ensure that there is
-   * room for a new element and a new hash entry.
-   *
-   * The function returns the new MixedArray* to use (or the old one if it
-   * didn't need to grow). The old MixedArray is left in a zombie state where
-   * the only legal action is to decref and then throw it away.
-   */
-  MixedArray* resizeIfNeeded();
 
   uint32_t capacity() const { return Capacity(m_scale); }
   uint32_t mask() const { return Mask(m_scale); }

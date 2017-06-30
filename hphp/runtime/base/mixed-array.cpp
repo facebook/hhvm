@@ -311,21 +311,6 @@ NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   return CopyMixed(*this, AllocMode::Request, this->m_kind);
 }
 
-ALWAYS_INLINE
-MixedArray* MixedArray::copyMixedAndResizeIfNeeded() const {
-  if (LIKELY(!isFull())) return copyMixed();
-  return copyMixedAndResizeIfNeededSlow();
-}
-
-NEVER_INLINE
-MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
-  assert(isFull());
-  auto const copy = copyMixed();
-  auto const ret = Grow(copy, copy->m_scale * 2);
-  if (copy != ret) Release(copy);
-  return ret;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
@@ -744,13 +729,6 @@ MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
   return this;
 }
 
-ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
-  if (LIKELY(!isFull())) return this;
-  auto ad = Grow(this, m_scale * 2);
-  if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, this);
-  return ad;
-}
-
 NEVER_INLINE MixedArray*
 MixedArray::InsertCheckUnbalanced(MixedArray* ad,
                                   int32_t* table,
@@ -767,8 +745,9 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
   return ad;
 }
 
+NEVER_INLINE
 MixedArray*
-MixedArray::Grow(MixedArray* old, uint32_t newScale) {
+MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   assert(old->m_size > 0);
   assert(MixedArray::Capacity(newScale) >= old->m_size);
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
@@ -780,6 +759,25 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
+  if (copy) {
+    auto elm = ad->data();
+    for (auto const end = elm + ad->m_used; elm < end; ++elm) {
+      if (UNLIKELY(elm->isTombstone())) continue;
+      if (elm->hasStrKey()) elm->skey->incRefCount();
+      if (UNLIKELY(elm->data.m_type == KindOfRef)) {
+        auto ref = elm->data.m_data.pref;
+        // See also tvDupWithRef()
+        if (!ref->isReferenced() && ref->tv()->m_data.parr != old) {
+          cellDup(*ref->tv(), elm->data);
+          continue;
+        }
+      }
+      tvIncRefGen(&elm->data);
+    }
+  } else {
+    if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, old);
+    old->setZombie();
+  }
 
   auto table = mixedHash(ad->data(), newScale);
   ad->InitHash(table, newScale);
@@ -788,7 +786,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   auto const stop = iter + oldUsed;
   assert(newScale == ad->m_scale);
   auto mask = MixedArray::Mask(newScale);
-  old->setZombie();
 
   if (UNLIKELY(oldUsed >= 2000)) {
     // This should be a tail call in opt build.
@@ -801,7 +798,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
     }
   }
 
-  assert(old->isZombie());
   assert(ad->kind() == old->kind());
   assert(ad->m_size == old->m_size);
   assert(ad->hasExactlyOneRef());
@@ -810,6 +806,14 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(ad->m_scale == newScale);
   assert(ad->checkInvariants());
   return ad;
+}
+
+ALWAYS_INLINE
+MixedArray* MixedArray::prepareForInsert(bool copy) {
+  assert(checkInvariants());
+  if (isFull()) return Grow(this, m_scale * 2, copy);
+  if (copy) return copyMixed();
+  return this;
 }
 
 void MixedArray::compact(bool renumber /* = false */) {
@@ -1020,13 +1024,7 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
 }
 
 member_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
-  auto a = asMixed(ad);
-  if (copy) {
-    a = a->copyMixedAndResizeIfNeeded();
-  } else {
-    a = a->resizeIfNeeded();
-  }
-  return a->addLvalImpl<true>(k);
+  return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(k);
 }
 
 member_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
@@ -1035,10 +1033,7 @@ member_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
 }
 
 member_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
-  auto a = asMixed(ad);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->addLvalImpl<true>(key);
+  return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(key);
 }
 
 member_lval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
@@ -1071,8 +1066,7 @@ member_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
     return member_lval { a, lvalBlackHole().asTypedValue() };
   }
 
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
+  a = a->prepareForInsert(copy);
 
   if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
     return member_lval { a, lvalBlackHole().asTypedValue() };
@@ -1087,18 +1081,12 @@ member_lval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
-  auto a = asMixed(ad);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->update(k, v);
+  return asMixed(ad)->prepareForInsert(copy)->update(k, v);
 }
 
 ArrayData*
 MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
-  auto a = asMixed(ad);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->update(k, v);
+  return asMixed(ad)->prepareForInsert(copy)->update(k, v);
 }
 
 ArrayData*
@@ -1106,9 +1094,7 @@ MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->updateRef(k, v);
+  return a->prepareForInsert(copy)->updateRef(k, v);
 }
 
 ArrayData*
@@ -1116,48 +1102,34 @@ MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->updateRef(k, v);
+  return a->prepareForInsert(copy)->updateRef(k, v);
 }
 
 ArrayData*
 MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   assert(!ad->exists(k));
-  auto a = asMixed(ad);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->addVal(k, v);
+  return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 
 ArrayData*
 MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   assert(!ad->exists(k));
-  auto a = asMixed(ad);
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->addVal(k, v);
+  return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 
 ArrayData*
 MixedArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  auto a = asMixed(ad);
-  a = a->resizeIfNeeded();
-  return a->zSetImpl(k, v);
+  return asMixed(ad)->prepareForInsert(false)->zSetImpl(k, v);
 }
 
 ArrayData*
 MixedArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
-  auto a = asMixed(ad);
-  a = a->resizeIfNeeded();
-  return a->zSetImpl(k, v);
+  return asMixed(ad)->prepareForInsert(false)->zSetImpl(k, v);
 }
 
 ArrayData*
 MixedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
-  auto a = asMixed(ad);
-  a = a->resizeIfNeeded();
-  return a->zAppendImpl(v, key_ptr);
+  return asMixed(ad)->prepareForInsert(false)->zAppendImpl(v, key_ptr);
 }
 
 //=============================================================================
@@ -1240,8 +1212,7 @@ ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
                   "already occupied");
     return a;
   }
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
+  a = a->prepareForInsert(copy);
   a->nextInsert(v);
   return a;
 }
@@ -1252,19 +1223,14 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
 
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
 
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-
-  // Note: preserving behavior, but I think this can leak the copy if
-  // the user error handler throws.
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
     return a;
   }
 
-  // TODO: maybe inline manually (only caller).
-  return a->nextInsertRef(v);
+  // TODO: maybe inline nextInsertRef manually (this is the only caller).
+  return a->prepareForInsert(copy)->nextInsertRef(v);
 }
 
 ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
@@ -1275,9 +1241,7 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
     raiseHackArrCompatRefNew();
   }
 
-  a = copy ? a->copyMixedAndResizeIfNeeded()
-           : a->resizeIfNeeded();
-  return a->nextInsertWithRef(v);
+  return a->prepareForInsert(copy)->nextInsertWithRef(v);
 }
 
 /*
@@ -1546,15 +1510,11 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
 }
 
 ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
-  auto a = asMixed(adInput);
-  if (a->cowCheck()) a = a->copyMixedAndResizeIfNeeded();
+  // TODO: why is this ignoring the copy param and calling cowCheck?
+  auto a = asMixed(adInput)->prepareForInsert(adInput->cowCheck());
 
   auto elms = a->data();
-  if (a->m_used == 0 || !isTombstone(elms[0].data.m_type)) {
-    // Make sure there is room to insert an element.
-    a = a->resizeIfNeeded();
-    // Recompute elms, in case resizeIfNeeded() had side effects.
-    elms = a->data();
+  if (a->m_used > 0 && !isTombstone(elms[0].data.m_type)) {
     // Move the existing elements to make element 0 available.
     memmove(&elms[1], &elms[0], a->m_used * sizeof(*elms));
     ++a->m_used;
@@ -1945,9 +1905,7 @@ void MixedArray::MemoSet(TypedValue* startBase,
   // cache. However reflection can get copies of it, so its not guaranteed to
   // always have a ref-count of 1.
   auto const cow = [](bool copy, MixedArray* a, Cell& base) {
-    auto copied = copy
-      ? a->copyMixedAndResizeIfNeeded()
-      : a->resizeIfNeeded();
+    auto copied = a->prepareForInsert(copy);
     if (a != copied) {
       a = copied;
       cellMove(make_tv<KindOfDict>(a), base);

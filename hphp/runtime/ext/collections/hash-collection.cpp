@@ -240,9 +240,7 @@ void HashCollection::grow(uint32_t newScale) {
   auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->cowCheck()) {
-    // MixedArray::Grow can only handle non-empty cases where the
-    // buffer's refcount is 1.
-    m_arr = MixedArray::Grow(oldAd, newScale);
+    m_arr = MixedArray::Grow(oldAd, newScale, false);
     decRefArr(oldAd);
   } else {
     // For cases where m_size is zero or the buffer's refcount is

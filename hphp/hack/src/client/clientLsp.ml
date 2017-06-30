@@ -1408,6 +1408,10 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/didChange" ->
     parse_didChange c.params |> do_didChange menv.conn
 
+  (* textDocument/didSave notification *)
+  | Main_loop _menv, Client_message c when c.method_ = "textDocument/didSave" ->
+    ()
+
   (* shutdown request *)
   | Main_loop menv, Client_message c when c.method_ = "shutdown" ->
     do_shutdown menv.conn |> print_shutdown |> respond stdout c;

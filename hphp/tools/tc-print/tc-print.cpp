@@ -285,9 +285,11 @@ void parseOptions(int argc, char *argv[]) {
 
 void sortTrans() {
   for (uint32_t tid = 0; tid < NTRANS; tid++) {
-    if (TREC(tid)->isValid() &&
+    const auto trec = TREC(tid);
+    if (trec->isValid() &&
         (selectedFuncId == INVALID_ID ||
-         selectedFuncId == TREC(tid)->src.funcID())) {
+         selectedFuncId == trec->src.funcID()) &&
+        (kindFilter == "all" || kindFilter == show(trec->kind).c_str())) {
       transPrintOrder.push_back(tid);
     }
   }

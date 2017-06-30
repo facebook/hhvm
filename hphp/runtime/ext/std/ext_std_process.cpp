@@ -940,13 +940,19 @@ Variant HHVM_FUNCTION(proc_open,
                                     scwd.c_str(), envs);
     assert(child);
     return post_proc_open(cmd, pipes, enva, items, child);
-  } else {
+  }
+
+  std::vector<String> senvs; // holding those char *
+  auto const envp = build_envp(enva, senvs);
+
+  {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
     if (!pre_proc_open(descriptorspec, items)) return false;
     child = fork();
     if (child) {
       // the parent process
+      free(envp);
       return post_proc_open(cmd, pipes, enva, items, child);
     }
   }
@@ -963,8 +969,6 @@ Variant HHVM_FUNCTION(proc_open,
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
-  std::vector<String> senvs; // holding those char *
-  char **envp = build_envp(enva, senvs);
   execle("/bin/sh", "sh", "-c", cmd.data(), nullptr, envp);
   free(envp);
   _exit(127);

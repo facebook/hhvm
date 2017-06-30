@@ -111,11 +111,8 @@ slow/concat/1575.php
 slow/concat/1576.php
 slow/concat/1577.php
 slow/concat/1578.php
-slow/concat/1581.php
 slow/concat/1589.php
-slow/constant/1594.php
 slow/constant/1597.php
-slow/constant/1600.php
 slow/constant/alias.php
 slow/constant/casing.php
 slow/constant/casing2.php
@@ -139,8 +136,6 @@ slow/control-flow/bug-4976291.php
 slow/copy_prop/1845.php
 slow/ctor_param_promotion_bad_mod.php
 slow/debug_backtrace/backtrace_async_generators.php
-slow/defined/1627.php
-slow/defined/sid.php
 slow/dict/hh-only1.php
 slow/dict/hh-only2.php
 slow/dict/hhbbc-group.php
@@ -463,7 +458,6 @@ slow/namespace/alias/alias.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php
-slow/namespace/dynamic.php
 slow/namespace/dynamic_extra_slash.php
 slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php

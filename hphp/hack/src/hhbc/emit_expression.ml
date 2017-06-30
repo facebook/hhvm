@@ -42,7 +42,11 @@ let is_special_function e args =
     | "isset" -> n > 0
     | "empty" -> n = 1
     | "tuple" -> true
-    | "define" -> n = 2
+    | "define" ->
+      begin match args with
+      | [_, A.String _; _] -> true
+      | _ -> false
+      end
     | "eval" -> n = 1
     | "idx" -> n = 2 || n = 3
     | "class_alias" ->

@@ -1776,7 +1776,9 @@ let pProgram : program parser = fun node env ->
    *)
   | { syntax = ExpressionStatement
       { expression_statement_expression =
-        { syntax = DefineExpression { define_argument_list = args; _ } ; _ }
+        { syntax = DefineExpression
+          { define_keyword; define_argument_list = args; _ }
+        ; _ }
       ; _ }
     ; _ } :: nodel ->
       ( match List.map ~f:(fun x -> pExpr x env) (as_list args) with
@@ -1788,7 +1790,9 @@ let pProgram : program parser = fun node env ->
         ; cst_value     = e
         ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
         }
-      | _ -> missing_syntax "DefineExpression:inner" args env
+      | args ->
+        let name = pos_name define_keyword in
+        Stmt (Expr (fst name, Call ((fst name, Id name), args, [])))
       ) :: aux env nodel
   | node :: nodel -> pDef node env :: aux env nodel
   in

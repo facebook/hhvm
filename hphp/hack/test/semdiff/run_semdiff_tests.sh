@@ -25,6 +25,7 @@ DIFF_RESULT=/tmp/diff_tmp.result
 echo "compiling semdiff"
 "$BUCK" build @mode/dbgo //hphp/hack/src/hhbc/semdiff:semdiff 2> /dev/null
 SEMDIFF_PATH=$("$BUCK" targets --show-output //hphp/hack/src/hhbc/semdiff:semdiff 2> /dev/null | cut -d' ' -f2)
+SEMDIFF_PATH="$BASEDIR/$SEMDIFF_PATH"
 echo "retrieving path: $SEMDIFF_PATH"
 
 HHAS_FILES=$(find "$BASEDIR"/hphp/hack/test/semdiff -type f -name '*.1.hhas')

@@ -589,9 +589,19 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         Printf.printf "%s %s\n" r.res_name r.res_ty
       end result
   | Ffp_autocomplete ->
-      let filename_string = Relative_path.to_absolute filename in
+      let file_text = cat (Relative_path.to_absolute filename) in
+      let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [0-9]*" in
+      let (row, col) = try
+        let _ = Str.search_forward args_regex file_text 0 in
+        let raw_flags = Str.matched_string file_text in
+        match split ' ' raw_flags with
+        | [ _; row; column] -> (int_of_string row, int_of_string column)
+        | _ -> failwith "Invalid test file: no flags found"
+      with
+        Not_found -> failwith "Invalid test file: no flags found"
+      in
       let result =
-        FfpAutocompleteService.auto_complete filename_string
+        FfpAutocompleteService.auto_complete file_text (row, col)
       in begin
         match result with
         | Some result -> List.iter result ~f:(Printf.printf "%s\n")

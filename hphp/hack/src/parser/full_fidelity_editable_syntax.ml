@@ -70,6 +70,20 @@ let text node =
   List.iter aux (all_tokens node);
   Buffer.contents buffer
 
+(* Takes a node and an offset; produces the descent through the parse tree
+   to that position. *)
+let parentage root position =
+  let rec aux nodes position acc =
+    match nodes with
+    | [] -> acc
+    | h :: t ->
+      let width = String.length @@ text h in
+      if position < width then
+        aux (children h) position (h :: acc)
+      else
+        aux t (position - width) acc in
+  aux [root] position []
+
 let leading_trivia node =
   let token = leading_token node in
   match token with

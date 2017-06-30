@@ -97,21 +97,19 @@ static char* build_envp(const Array& envs) {
   return envpw;
 }
 #else
-static char **build_envp(const Array& envs, std::vector<String> &senvs) {
+static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
   char **envp = nullptr;
   int size = envs.size();
   if (size) {
     envp = (char **)malloc((size + 1) * sizeof(char *));
+    for (ArrayIter iter(envs); iter; ++iter) {
+      senvs.push_back(folly::sformat("{}={}",
+                                     iter.first().toString(),
+                                     iter.second().toString()));
+    }
     int i = 0;
-    for (ArrayIter iter(envs); iter; ++iter, ++i) {
-      StringBuffer nvpair;
-      nvpair.append(iter.first().toString());
-      nvpair.append('=');
-      nvpair.append(iter.second().toString());
-
-      String env = nvpair.detach();
-      senvs.push_back(env);
-      *(envp + i) = (char *)env.data();
+    for (auto& env : senvs) {
+      *(envp + i++) = (char *)env.data();
     }
     *(envp + i) = nullptr;
   }
@@ -942,13 +940,14 @@ Variant HHVM_FUNCTION(proc_open,
     return post_proc_open(cmd, pipes, enva, items, child);
   }
 
-  std::vector<String> senvs; // holding those char *
-  auto const envp = build_envp(enva, senvs);
+  std::vector<std::string> senvs; // holding those char *
+  char** envp = nullptr;
 
   {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
     if (!pre_proc_open(descriptorspec, items)) return false;
+    envp = build_envp(enva, senvs);
     child = fork();
     if (child) {
       // the parent process

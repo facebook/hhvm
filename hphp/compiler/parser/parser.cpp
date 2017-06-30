@@ -176,8 +176,10 @@ Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
-      m_nsAliasTable(getAutoAliasedClasses(),
-                     [&] { return getAliasFlags(); }) {
+      m_nsAliasTable(getAutoAliasedNamespaces(),
+                     [&] { return getAliasFlags(); }),
+      m_classAliasTable(getAutoAliasedClasses(),
+                        [&] { return getAliasFlags(); }) {
   auto const md5str = mangleUnitMd5(scanner.getMd5());
   auto const md5 = MD5{md5str};
 
@@ -1541,7 +1543,7 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     result = NEW_STMT0(StatementList);
   }
   m_clsContexts.pop();
-  registerAlias(name);
+  registerClassAlias(name);
 
   return result;
 }
@@ -2444,14 +2446,7 @@ void Parser::AliasTable::setFalseOracle() {
 }
 
 std::string Parser::AliasTable::getName(const std::string& alias,
-                                        int line_no,
-                                        bool forNs) {
-  if (forNs) {
-    auto it = RuntimeOption::AliasedNamespaces.find(alias);
-    if (it != RuntimeOption::AliasedNamespaces.end()) {
-      return it->second;
-    }
-  }
+                                        int line_no) {
   auto it = m_aliases.find(alias);
   if (it != m_aliases.end()) {
     return it->second.name;
@@ -2486,12 +2481,7 @@ int Parser::AliasTable::getLine(const std::string& alias) {
   return (it != m_aliases.end()) ? it->second.line_no : -1;
 }
 
-bool Parser::AliasTable::isAliased(const std::string& alias, bool forNs) {
-  if (forNs) {
-    if (RuntimeOption::AliasedNamespaces.count(alias)) {
-      return true;
-    }
-  }
+bool Parser::AliasTable::isAliased(const std::string& alias) {
   auto t = getType(alias);
   if (t == AliasType::USE || t == AliasType::AUTO_USE) {
     return true;
@@ -2519,12 +2509,17 @@ void Parser::AliasTable::clear() {
 
 
 /*
- * We auto-alias classes only on HH mode.
+ * We have three sets of auto aliases:
+ *
+ * - RuntimeOption::AliasedNamespaces: always used
+ * - HH aliases: `Vector`, `string` etc in <?hh files (or force_hh)
+ * - PHP7 aliases: `string` etc in PHP files in PHP7 mode
  */
 Parser::AliasFlags Parser::getAliasFlags() {
-  auto flags = AliasFlags::None;
+  auto flags = AliasFlags::RuntimeOption;
+
   if (m_scanner.isHHSyntaxEnabled()) {
-    flags = AliasFlags::HH;
+    flags = flags | AliasFlags::HH;
   }
 
   if (RuntimeOption::PHP7_ScalarTypes) {
@@ -2641,6 +2636,23 @@ const Parser::AutoAliasMap& Parser::getAutoAliasedClasses() {
   return autoAliases;
 }
 
+namespace {
+Parser::AutoAliasMap getAutoAliasedNamespacesHelper() {
+  using AutoAlias  = Parser::AliasTable::AutoAlias;
+  using AliasFlags = Parser::AliasTable::AliasFlags;
+
+  Parser::AutoAliasMap map;
+  for (const auto kv: RuntimeOption::AliasedNamespaces) {
+    map[kv.first] = AutoAlias { kv.second, AliasFlags::RuntimeOption };
+  }
+  return map;
+}}
+
+const Parser::AutoAliasMap& Parser::getAutoAliasedNamespaces() {
+  static auto autoAliases = getAutoAliasedNamespacesHelper();
+  return autoAliases;
+}
+
 void Parser::nns(int token, const std::string& text) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
@@ -2680,6 +2692,7 @@ void Parser::onNamespaceStart(const std::string &ns,
     m_namespace += ns;
   }
   m_nsAliasTable.clear();
+  m_classAliasTable.clear();
   m_fnAliasTable.clear();
   m_cnstAliasTable.clear();
 }
@@ -2757,20 +2770,20 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
   }
   auto const key = fully_qualified_name_as_alias_key(ns, as);
 
-  if (m_nsAliasTable.getType(key) == AliasType::AUTO_USE) {
+  if (m_classAliasTable.getType(key) == AliasType::AUTO_USE) {
     error("Cannot use %s as %s because the name was implicitly used "
           "on line %d; implicit use of names from the HH namespace can "
           "be suppressed by adding an explicit `use' statement earlier "
           "in the %s: %s",
-          ns.c_str(), key.c_str(), m_nsAliasTable.getLine(key),
+          ns.c_str(), key.c_str(), m_classAliasTable.getLine(key),
           (m_nsState == InsideNamespace ? "current namespace block" : "file"),
           getMessage(false,true).c_str());
     return;
-  } else if (m_nsAliasTable.getType(key) == AliasType::USE) {
+  } else if (m_classAliasTable.getType(key) == AliasType::USE) {
     if (m_scanner.isHHSyntaxEnabled()) {
       error("Cannot use %s as %s because the name was explicitly used "
             "earlier via a `use' statement on line %d: %s",
-            ns.c_str(), key.c_str(), m_nsAliasTable.getLine(key),
+            ns.c_str(), key.c_str(), m_classAliasTable.getLine(key),
             getMessage(false,true).c_str());
     } else {
       error("Cannot use %s as %s because the name is already in use: %s",
@@ -2779,8 +2792,8 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
     return;
   }
 
-  if (m_nsAliasTable.getType(key) == AliasType::DEF) {
-    if (strcasecmp(ns.c_str(), m_nsAliasTable.getNameRaw(key).c_str())) {
+  if (m_classAliasTable.getType(key) == AliasType::DEF) {
+    if (strcasecmp(ns.c_str(), m_classAliasTable.getNameRaw(key).c_str())) {
       error("Cannot use %s as %s because the name is already in use: %s",
             ns.c_str(), key.c_str(), getMessage(false,true).c_str());
       return;
@@ -2798,7 +2811,13 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
     }
   }
 
+  // If we get here, we don't have a class alias for it; there should currently
+  // no way for a user to set a class alias without also setting a namespace
+  // alias
+  always_assert(m_nsAliasTable.getType(key) != AliasType::USE);
+
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
+  m_classAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
 void Parser::useFunction(const std::string &fn, const std::string &as) {
@@ -2888,16 +2907,14 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
     return ns;
   }
 
-  if (m_nsAliasTable.isAliased(alias, forNs)) {
-    auto name = m_nsAliasTable.getName(alias, line1(), forNs);
-    // Was it a namespace alias?
-    if (pos != std::string::npos) {
-      return name + ns.substr(pos);
-    }
-    // Only classes can appear directly in "use" statements
-    if (cls) {
-      return name;
-    }
+  if (cls && !forNs && m_classAliasTable.isAliased(alias)) {
+    auto name = m_classAliasTable.getName(alias, line1());
+    return name;
+  }
+
+  if (forNs && m_nsAliasTable.isAliased(alias)) {
+    auto name = m_nsAliasTable.getName(alias, line1());
+    return name + ns.substr(pos);
   }
 
   // Classes don't fallback to the global namespace.
@@ -2906,7 +2923,7 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
   }
 
   // if qualified name, prepend current namespace
-  if (pos != std::string::npos) {
+  if (forNs) {
     return nsDecl(ns);
   }
 
@@ -2942,7 +2959,7 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Parser::registerAlias(std::string name) {
+void Parser::registerClassAlias(std::string name) {
   auto const pos = name.rfind(NAMESPACE_SEP);
   auto const key = (pos != std::string::npos) ? name.substr(pos + 1) : name;
   if (RuntimeOption::PHP7_ScalarTypes) {
@@ -2954,24 +2971,25 @@ void Parser::registerAlias(std::string name) {
       return;
     }
   }
-  if (m_nsAliasTable.getType(key) != AliasType::USE &&
-      m_nsAliasTable.getType(key) != AliasType::AUTO_USE) {
-    m_nsAliasTable.set(key, name, AliasType::DEF, line1());
+  if (m_classAliasTable.getType(key) != AliasType::USE &&
+      m_classAliasTable.getType(key) != AliasType::AUTO_USE) {
+    m_classAliasTable.set(key, name, AliasType::DEF, line1());
     return;
   }
-  if (m_nsAliasTable.getType(key) == AliasType::AUTO_USE) {
+  if (m_classAliasTable.getType(key) == AliasType::AUTO_USE) {
     error("Cannot declare class %s because the name was implicitly used "
           "on line %d; implicit use of names from the HH namespace can "
           "be suppressed by adding an explicit `use' statement earlier "
           "in the %s: %s",
-          name.c_str(), m_nsAliasTable.getLine(key),
+          name.c_str(), m_classAliasTable.getLine(key),
           (m_nsState == InsideNamespace ? "current namespace block" : "file"),
           getMessage(false,true).c_str());
-  } else if (strcasecmp(name.c_str(), m_nsAliasTable.getNameRaw(key).c_str())) {
+  } else if (strcasecmp(name.c_str(),
+             m_classAliasTable.getNameRaw(key).c_str())) {
     if (m_scanner.isHHSyntaxEnabled()) {
       error("Cannot declare class %s because the name was explicitly used "
             "earlier via a `use' statement on line %d: %s",
-            name.c_str(), m_nsAliasTable.getLine(key),
+            name.c_str(), m_classAliasTable.getLine(key),
             getMessage(false,true).c_str());
     } else {
       error("Cannot declare class %s because the name is already in use: %s",

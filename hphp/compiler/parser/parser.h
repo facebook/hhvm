@@ -529,9 +529,10 @@ public:
    */
   struct AliasTable {
     enum class AliasFlags {
-      None = 0,
+      None = 0x0,
       HH = 0x1,
       PHP7_ScalarTypes = 0x2,
+      RuntimeOption = 0x4,
     };
 
     struct AutoAlias {
@@ -555,11 +556,11 @@ public:
     AliasTable(const AutoAliasMap& aliases,
                std::function<AliasFlags ()> autoOracle);
 
-    std::string getName(const std::string& alias, int line_no, bool forNs);
+    std::string getName(const std::string& alias, int line_no);
     std::string getNameRaw(const std::string& alias);
     AliasType getType(const std::string& alias);
     int getLine(const std::string& alias);
-    bool isAliased(const std::string& alias, bool forNs);
+    bool isAliased(const std::string& alias);
     void set(const std::string& alias,
              const std::string& name,
              AliasType type,
@@ -590,20 +591,38 @@ private:
   NamespaceState m_nsState;
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
-  AliasTable m_nsAliasTable;
   std::vector<uint32_t> m_nsStack;
 
-  // Function aliases
+  /* Namespace aliases:
+   *  - RuntimeOption::AliasedNamespace
+   *  - `use Foo\bar`
+   *  - Potential future: `use namespace Foo\bar`
+   */
+  AliasTable m_nsAliasTable;
+
+  /* Class aliases:
+   * - auto-aliased classes, e.g. `Vector`, `vec`)
+   * - `use Foo\bar`
+   * - Potential future: `use type Foo\bar`
+   */
+  AliasTable m_classAliasTable;
+
+  /* Function aliases:
+   *  - `use function Foo\bar`
+   */
   hphp_string_iset m_fnTable;
   hphp_string_imap<std::string> m_fnAliasTable;
 
-  // Constant aliases
+  /* Constant aliases:
+   *  - `use const Foo\bar`
+   */
   hphp_string_set m_cnstTable;
   hphp_string_map<std::string> m_cnstAliasTable;
 
-  void registerAlias(std::string name);
+  void registerClassAlias(std::string name);
   AliasFlags getAliasFlags();
   const AutoAliasMap& getAutoAliasedClasses();
+  const AutoAliasMap& getAutoAliasedNamespaces();
 };
 
 inline Parser::AliasFlags operator|(const Parser::AliasFlags& lhs,

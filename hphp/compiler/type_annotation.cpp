@@ -89,7 +89,14 @@ MaybeDataType TypeAnnotation::dataType() const {
     return KindOfObject;
   }
   if (m_typeArgs) {
-    return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
+    if (!strcasecmp(m_name.c_str(), "array"))      return KindOfArray;
+    if (!strcasecmp(m_name.c_str(), "HH\\vec"))    return KindOfVec;
+    if (!strcasecmp(m_name.c_str(), "HH\\dict"))   return KindOfDict;
+    if (!strcasecmp(m_name.c_str(), "HH\\keyset")) return KindOfKeyset;
+    if (!strcasecmp(m_name.c_str(), "HH\\varray")) return KindOfArray;
+    if (!strcasecmp(m_name.c_str(), "HH\\darray")) return KindOfArray;
+    if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
+    return KindOfObject;
   }
   if (m_nullable || m_soft) {
     return folly::none;

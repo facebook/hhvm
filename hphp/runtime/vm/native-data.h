@@ -245,16 +245,22 @@ typename std::enable_if<
 
 // Return the ObjectData payload allocated after this NativeNode header
 inline ObjectData* obj(NativeNode* node) {
-  return reinterpret_cast<ObjectData*>(
+  auto obj = reinterpret_cast<ObjectData*>(
     reinterpret_cast<char*>(node) + node->obj_offset
   );
+  assert(isObjectKind(obj->headerKind()));
+  assert(obj->getAttribute(ObjectData::HasNativeData));
+  return obj;
 }
 
 // Return the ObjectData payload allocated after this NativeNode header
 inline const ObjectData* obj(const NativeNode* node) {
-  return reinterpret_cast<const ObjectData*>(
+  auto obj = reinterpret_cast<const ObjectData*>(
     reinterpret_cast<const char*>(node) + node->obj_offset
   );
+  assert(isObjectKind(obj->headerKind()));
+  assert(obj->getAttribute(ObjectData::HasNativeData));
+  return obj;
 }
 
 ObjectData* nativeDataInstanceCtor(Class* cls);

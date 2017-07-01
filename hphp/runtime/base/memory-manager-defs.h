@@ -89,21 +89,6 @@ struct Header {
     return obj;
   }
 
-  const ObjectData* nativeObj() const {
-    assert(kind() == HeaderKind::NativeData);
-    auto obj = Native::obj(&native_);
-    assert(isObjectKind(obj->headerKind()));
-    assert(obj->getAttribute(ObjectData::HasNativeData));
-    return obj;
-  }
-
-  ObjectData* nativeObj() {
-    assert(kind() == HeaderKind::NativeData);
-    auto obj = Native::obj(&native_);
-    assert(isObjectKind(obj->headerKind()));
-    return obj;
-  }
-
   const ObjectData* closureObj() const {
     assert(kind() == HeaderKind::ClosureHdr);
     auto obj = reinterpret_cast<const ObjectData*>(&closure_hdr_ + 1);
@@ -123,7 +108,8 @@ struct Header {
   const ObjectData* obj() const {
     return isObjectKind(kind()) ? &obj_ :
            kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH() :
-           kind() == HeaderKind::NativeData ? nativeObj() :
+           kind() == HeaderKind::NativeData ?
+             Native::obj(reinterpret_cast<const NativeNode*>(this)) :
            kind() == HeaderKind::ClosureHdr ? closureObj() :
            nullptr;
   }
@@ -277,12 +263,13 @@ inline size_t heapSize(const HeapObject* h) {
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
       return static_cast<const NativeNode*>(h)->obj_offset +
              sizeof(c_AsyncFunctionWaitHandle);
-    case HeaderKind::NativeData:
+    case HeaderKind::NativeData: {
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       // Generators -
       // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
-      return static_cast<const NativeNode*>(h)->obj_offset +
-             ((Header*)h)->nativeObj()->heapSize();
+      auto native = static_cast<const NativeNode*>(h);
+      return native->obj_offset + Native::obj(native)->heapSize();
+    }
     case HeaderKind::Free:
     case HeaderKind::Hole:
       return static_cast<const FreeNode*>(h)->size();
@@ -394,7 +381,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         ptrs.push_back(h->asyncFuncWH());
         break;
       case HeaderKind::NativeData:
-        ptrs.push_back(h->nativeObj());
+        ptrs.push_back(Native::obj(reinterpret_cast<NativeNode*>(h)));
         break;
       case HeaderKind::ClosureHdr:
         ptrs.push_back(h->closureObj());

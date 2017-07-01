@@ -54,6 +54,7 @@ bool            verboseStats    = false;
 folly::Optional<MD5> md5Filter;
 PerfEventType   sortBy          = EVENT_CYCLES;
 bool            sortByDensity   = false;
+bool            sortBySize      = false;
 double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
 std::string     kindFilter      = "all";
@@ -159,7 +160,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:bB:v:k:a:A:n:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -217,6 +218,8 @@ void parseOptions(int argc, char *argv[]) {
           exit(1);
         }
         break;
+      case 'S':
+        sortBySize = true;
       case 'T':
         if (sscanf(optarg, "%u", &nTopFuncs) != 1) {
           usage();
@@ -583,6 +586,34 @@ void printTopFuncs() {
                                     helpersMinPercentage);
 }
 
+void printTopFuncsBySize() {
+  std::unordered_map<FuncId,size_t> funcSize;
+  FuncId maxFuncId = 0;
+  for (TransID t = 0; t < NTRANS; t++) {
+    const auto trec = TREC(t);
+    if (trec->isValid()) {
+      const auto funcId = trec->src.funcID();
+      funcSize[funcId] += trec->aLen;
+      if (funcId > maxFuncId) {
+        maxFuncId = funcId;
+      }
+    }
+  }
+  std::vector<FuncId> funcIds(maxFuncId+1);
+  for (FuncId fid = 0; fid <= maxFuncId; fid++) {
+    funcIds[fid] = fid;
+  }
+  std::sort(funcIds.begin(), funcIds.end(),
+            [&](FuncId fid1, FuncId fid2) {
+              return funcSize[fid1] > funcSize[fid2];
+            });
+  printf("FuncID:   \tSize (total aLen in bytes):\n");
+  for (size_t i = 0; i < nTopFuncs; i++) {
+    const auto fid = funcIds[i];
+    printf("%10u\t%10lu\n", fid, funcSize[funcIds[i]]);
+  }
+}
+
 struct CompTrans {
 private:
   const PerfEventsMap<TransID>& transPerfEvents;
@@ -748,7 +779,11 @@ int main(int argc, char *argv[]) {
       warnTooFew("functions", nTopFuncs, NFUNCS);
       nTopFuncs = NFUNCS;
     }
-    printTopFuncs();
+    if (sortBySize) {
+      printTopFuncsBySize();
+    } else {
+      printTopFuncs();
+    }
   } else if (nTopTrans) {
     if (nTopTrans > NTRANS) {
       warnTooFew("translations", nTopTrans, NTRANS);

@@ -229,6 +229,16 @@ TCA getFuncPrologue(Func* func, int nPassed) {
     return tc::profileFunc(func) ? TransKind::ProfPrologue :
                                    TransKind::LivePrologue;
   };
+
+  const auto funcId = func->getFuncId();
+
+  // Avoid a race where we would create a LivePrologue while retranslateAll is
+  // in flight and we haven't generated an OptPrologue for the function yet.
+  if (retranslateAllPending() && computeKind() == TransKind::LivePrologue &&
+      profData() && profData()->profiling(funcId)) {
+    return nullptr;
+  }
+
   LeaseHolder writer(func, computeKind());
   if (!writer) return nullptr;
 

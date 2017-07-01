@@ -804,6 +804,14 @@ bool IRBuilder::constrainCheck(const IRInstruction* inst,
   return changed;
 }
 
+uint32_t IRBuilder::numGuards() const {
+  uint32_t count = 0;
+  for (auto& g : m_constraints.guards) {
+    if (g.second != DataTypeGeneric) count++;
+  }
+  return count;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const LocalState& IRBuilder::local(uint32_t id, TypeConstraint tc) {

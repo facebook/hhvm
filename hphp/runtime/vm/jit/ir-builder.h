@@ -177,6 +177,11 @@ struct IRBuilder {
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
   bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
 
+  /*
+   * Returns the number of instructions that have non-generic type constraints.
+   */
+  uint32_t numGuards() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode-level control flow helpers.
 

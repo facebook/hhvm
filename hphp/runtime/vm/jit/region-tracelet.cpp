@@ -595,6 +595,13 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
+    const auto numGuards = env.irgs.irb->numGuards();
+    if (numGuards >= RuntimeOption::EvalJitTraceletGuardsLimit) {
+      FTRACE(1, "selectTracelet: tracelet broken due to too many guards ({})\n",
+             numGuards);
+      break;
+    }
+
     if (isFCallStar(env.inst.op())) env.arStates.back().pop();
   }
 

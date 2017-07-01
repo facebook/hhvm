@@ -35,7 +35,10 @@ class type type_mapper_type = object
   method on_tarraykind_akany : env -> Reason.t -> result
   method on_tarraykind_akempty : env -> Reason.t -> result
   method on_tarraykind_akvec : env -> Reason.t -> locl ty -> result
+  method on_tarraykind_akvarray : env -> Reason.t -> locl ty -> result
   method on_tarraykind_akmap : env -> Reason.t -> locl ty -> locl ty -> result
+  method on_tarraykind_akdarray :
+    env -> Reason.t -> locl ty -> locl ty -> result
   method on_tarraykind_akshape :
     env -> Reason.t -> (locl ty * locl ty) ShapeMap.t -> result
   method on_tarraykind_aktuple :
@@ -72,8 +75,11 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tarraykind_akany env r = env, (r, Tarraykind AKany)
   method on_tarraykind_akempty env r = env, (r, Tarraykind AKempty)
   method on_tarraykind_akvec env r tv = env, (r, Tarraykind (AKvec tv))
+  method on_tarraykind_akvarray env r tv = env, (r, Tarraykind (AKvarray tv))
   method on_tarraykind_akmap  env r tk tv =
     env, (r, Tarraykind (AKmap (tk, tv)))
+  method on_tarraykind_akdarray env r tk tv =
+    env, (r, Tarraykind (AKdarray (tk, tv)))
   method on_tarraykind_akshape env r fdm = env, (r, Tarraykind (AKshape fdm))
   method on_tarraykind_aktuple env r fields =
     env, (r, Tarraykind (AKtuple fields))
@@ -97,9 +103,10 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tprim p -> this#on_tprim env r p
     | Tarraykind AKany -> this#on_tarraykind_akany env r
     | Tarraykind AKempty -> this#on_tarraykind_akempty env r
-    | Tarraykind (AKvarray tv | AKvec tv) -> this#on_tarraykind_akvec env r tv
-    | Tarraykind (AKdarray (tk, tv) | AKmap (tk, tv)) ->
-      this#on_tarraykind_akmap env r tk tv
+    | Tarraykind AKvec tv -> this#on_tarraykind_akvec env r tv
+    | Tarraykind AKvarray tv -> this#on_tarraykind_akvarray env r tv
+    | Tarraykind AKmap (tk, tv) -> this#on_tarraykind_akmap env r tk tv
+    | Tarraykind AKdarray (tk, tv) -> this#on_tarraykind_akdarray env r tk tv
     | Tarraykind (AKdarray_or_varray tv) ->
       this#on_tdarray_or_varray env r tv
     | Tarraykind (AKshape fdm) -> this#on_tarraykind_akshape env r fdm
@@ -135,10 +142,17 @@ class deep_type_mapper = object(this)
   method! on_tarraykind_akvec env r tv =
     let env, tv = this#on_type env tv in
     env, (r, Tarraykind (AKvec tv))
+  method! on_tarraykind_akvarray env r tv =
+    let env, tv = this#on_type env tv in
+    env, (r, Tarraykind (AKvarray tv))
   method! on_tarraykind_akmap env r tk tv =
     let env, tk = this#on_type env tk in
     let env, tv = this#on_type env tv in
     env, (r, Tarraykind (AKmap (tk, tv)))
+  method! on_tarraykind_akdarray env r tk tv =
+    let env, tk = this#on_type env tk in
+    let env, tv = this#on_type env tv in
+    env, (r, Tarraykind (AKdarray (tk, tv)))
   method! on_tarraykind_akshape env r fdm =
     let env, fdm = Nast.ShapeMap.map_env begin fun env (tk, tv) ->
       let env, tk = this#on_type env tk in

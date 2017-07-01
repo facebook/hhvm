@@ -3099,7 +3099,7 @@ and array_append p env ty1 =
                type parameters *)
             env, (Reason.Rmap_append p,
               Tclass ((p, SN.Collections.cPair), []))
-        | Tarraykind (AKvec ty) ->
+        | Tarraykind (AKvec ty | AKvarray ty) ->
             env, ty
         | Tobject ->
             if Env.is_strict env

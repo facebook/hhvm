@@ -67,6 +67,9 @@ void freeLocalsAndThis(IRGS& env) {
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->builtinFuncPtr()) return false;
 
+    if (localCount > RuntimeOption::EvalHHIRInliningMaxReturnLocals) {
+      return false;
+    }
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
       if (env.irb->local(i, DataTypeGeneric).type.maybe(TCounted)) {

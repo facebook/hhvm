@@ -55,12 +55,6 @@ inline void MixedArray::scan(type_scan::Scanner& scanner) const {
   scanner.scan(*data, m_used * sizeof(*data));
 }
 
-inline ArrayData::~ArrayData() {
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(this);
-  }
-}
-
 ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
                            int64_t nextIntKey) {

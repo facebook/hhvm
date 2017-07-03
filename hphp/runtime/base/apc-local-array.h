@@ -147,7 +147,7 @@ public:
 
 private:
   explicit APCLocalArray(const APCArray* source);
-  ~APCLocalArray();
+  ~APCLocalArray() = delete;
 
   static bool checkInvariants(const ArrayData*);
   ssize_t getIndex(int64_t k) const;

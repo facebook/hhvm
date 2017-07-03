@@ -80,13 +80,9 @@ protected:
   }
 
   /*
-   * NOTE: MixedArray no longer calls this destructor.  If you need to
-   * add logic, revisit MixedArray::Release{,Packed}.
-   *
-   * Include mixed-array-defs.h if you need the definition of this
-   * destructor.  It is inline only.
+   * We can't = delete this because we subclass ArrayData.
    */
-  ~ArrayData();
+  ~ArrayData() { always_assert(false); }
 
 public:
   ALWAYS_INLINE void decRefAndRelease() {

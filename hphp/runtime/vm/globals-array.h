@@ -55,7 +55,7 @@ namespace HPHP {
  */
 struct GlobalsArray final : ArrayData, type_scan::MarkCountable<GlobalsArray> {
   explicit GlobalsArray(NameValueTable* tab);
-  ~GlobalsArray() {}
+  ~GlobalsArray() = delete;
 
   // We only allow explicit conversions to ArrayData.  Generally you
   // should not be talking to the GlobalsArray directly (see

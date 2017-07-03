@@ -93,20 +93,16 @@ member_rval::ptr_u APCLocalArray::GetValueRef(const ArrayData* adIn,
   return tv;
 }
 
-ALWAYS_INLINE
-APCLocalArray::~APCLocalArray() {
-  for (auto tv = localCache(), end = tv + m_size; tv < end; ++tv) {
-    tvDecRefGen(tv);
-  }
-  m_arr->unreference();
-  MM().removeApcArray(this);
-}
-
 void APCLocalArray::Release(ArrayData* ad) {
   assert(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   auto size = a->heapSize();
-  a->~APCLocalArray();
+
+  for (auto tv = a->localCache(), end = tv + a->m_size; tv < end; ++tv) {
+    tvDecRefGen(tv);
+  }
+  a->m_arr->unreference();
+  MM().removeApcArray(a);
   MM().objFree(a, size);
 }
 

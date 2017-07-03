@@ -42,6 +42,7 @@ struct RefData;
  */
 struct ProxyArray final : ArrayData, type_scan::MarkCountable<ProxyArray> {
   static ProxyArray* Make(ArrayData*);
+  ~ProxyArray() = delete;
 
 public:
   //////////////////////////////////////////////////////////////////////

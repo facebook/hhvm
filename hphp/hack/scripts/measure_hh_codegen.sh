@@ -30,13 +30,11 @@ TIMEOUT_BIN='/usr/bin/timeout'
 TIMEOUT_DURATION='30s'
 
 # prepare HHVM
-export HHVM_USE_BUCK=1
-"$BUCK" build @mode/opt-hhvm -c cxx.extra_cxxppflags='-D USE_LOWPTR' \
-  //hphp/hhvm:hhvm
-HHVM_PATH="$(find buck-out -type f -name hhvm | grep -v outputs | grep opt | head -n 1)"
+"$BUCK" build @mode/dbgo //hphp/hhvm:hhvm
+HHVM_PATH="$(find buck-out -type f -name hhvm | grep -v outputs |  head -n 1)"
 
 # prepare hackc
-"$BUCK" build //hphp/hack/src:hh_single_compile
+"$BUCK" build @mode/dbgo //hphp/hack/src:hh_single_compile
 HACKC_PATH=$("$BUCK" targets --show-output //hphp/hack/src:hh_single_compile | cut -d' ' -f2)
 
 NUM_LINES_HHVM=0
@@ -47,14 +45,23 @@ for FILE in $PHP_FILES; do
   HHVM_TMP=$(mktemp /tmp/measure_hh_codegen.hhvm.XXXXXX)
   "$TIMEOUT_BIN" "$TIMEOUT_DURATION" \
      "$HHVM_PATH" \
-      -m dumphhas \
-      -v Eval.AllowHhas=1  \
-      -v Eval.EnableHipHopSyntax=1  \
+       -m dumphhas \
+       -v Eval.AllowHhas=1 \
+       -v Eval.EnableHipHopSyntax=1 \
+       -v Eval.DisableHphpcOpts=1 \
+       -v Eval.DisassemblerSourceMapping=0 \
+       -v Eval.DisassemblerDocComments=0 \
       "$FILE" > "$HHVM_TMP"
 
   # Hack
   HH_TMP=$(mktemp /tmp/measure_hh_codegen.hh.XXXXXX)
-  "$TIMEOUT_BIN" "$TIMEOUT_DURATION" "$HACKC_PATH" "$FILE" > "$HH_TMP"
+  "$TIMEOUT_BIN" "$TIMEOUT_DURATION" \
+    "$HACKC_PATH" \
+      -v Eval.EnableHipHopSyntax=1 \
+      -v Hack.Compiler.OptimizeNullCheck=0 \
+      -v Hack.Compiler.OptimizeCuf=0 \
+      -v Hack.Compiler.ConstantFolding=0 \
+      "$FILE" > "$HH_TMP"
 
   NUM_LINES_HHVM=$((NUM_LINES_HHVM + $(wc -l < "$HHVM_TMP")))
   NUM_LINES_HH=$((NUM_LINES_HH + $(wc -l < "$HH_TMP")))

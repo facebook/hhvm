@@ -488,6 +488,8 @@ struct RuntimeOption {
      the hhas from failing units in the fatal error messages produced by
      bad hh_single_compile units. */                                    \
   F(bool, HackCompilerVerboseErrors,   true)                            \
+  F(bool, PHP7CompilerEnabled,         false)                           \
+  F(string, PHP7CompilerCommand,       "")                              \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \

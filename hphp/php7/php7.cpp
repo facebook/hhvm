@@ -27,6 +27,16 @@
 #include <string>
 #include <iostream>
 
+namespace {
+
+using HPHP::php7::CompilerException;
+using HPHP::php7::Compiler;
+using HPHP::php7::dump_asm;
+
+struct Options {
+  bool daemonEnabled{false};
+};
+
 static constexpr size_t read_chunk = 1024;
 static constexpr size_t allocate_chunk = 4096;
 
@@ -73,13 +83,78 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
   return CG(ast);
 }
 
-int main(int argc, const char** argv) {
-  auto buf = readAll(std::cin);
-  auto ast = runParser(*buf);
-  auto unit = HPHP::php7::Compiler::compile(ast);
-  auto hhas = HPHP::php7::dump_asm(*unit);
+std::string runCompiler(const folly::IOBuf& buf) {
+  auto ast = runParser(buf);
+  auto unit = Compiler::compile(ast);
+  auto hhas = dump_asm(*unit);
+  return hhas;
+}
 
-  std::cout << hhas << std::endl;
+int runDaemon() {
+  while (true) {
+    try {
+      std::string filename;
+      std::string md5;
+      std::string length;
+
+      std::getline(std::cin, filename);
+      std::getline(std::cin, md5);
+      std::getline(std::cin, length);
+
+      size_t code_length;
+      try {
+        code_length = std::stoul(length);
+      } catch (...) {
+        throw std::runtime_error("Could not read code length from stdin");
+      }
+
+      auto buf = folly::IOBuf::create(code_length + ZEND_MMAP_AHEAD);
+      if (!std::cin.read(
+            reinterpret_cast<char*>(buf->writableData()),
+            code_length)) {
+        throw std::runtime_error("Could not read code from stdin");
+      }
+      memset(buf->writableData() + code_length, '\0', ZEND_MMAP_AHEAD);
+      buf->append(code_length + ZEND_MMAP_AHEAD);
+
+      auto hhas = runCompiler(*buf);
+      std::cout << hhas.length() << std::endl
+                << hhas << std::endl;
+    } catch (const CompilerException& e) {
+      std::cout << "ERROR: " << e.what() << std::endl;
+    }
+  }
+}
+
+void parseFlags(int argc, char** argv, Options& opts) {
+  for (int i = 1; i < argc; i++) {
+    const char* s = argv[i];
+    if (strcmp(s, "--daemon") == 0) {
+      opts.daemonEnabled = true;
+    } else {
+      throw std::runtime_error(folly::sformat("Unrecognized flag: {}", s));
+    }
+  }
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+  Options opts;
+
+  try {
+    parseFlags(argc, argv, opts);
+
+    if (opts.daemonEnabled) {
+      return runDaemon();
+    } else {
+      auto buf = readAll(std::cin);
+      std::cout << runCompiler(*buf) << std::endl;
+    }
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Fatal error: " << e.what() << std::endl;
+    return 2;
+  }
 
   return 0;
 }

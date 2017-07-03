@@ -114,7 +114,7 @@
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/hack-compiler.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -11318,13 +11318,23 @@ namespace {
 bool startsWith(const char* big, const char* small) {
   return strncmp(big, small, strlen(small)) == 0;
 }
-bool isFileHack(const char* code, int codeLen, bool allowPartial) {
-  if (allowPartial) {
-    return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
-  } else {
-    return codeLen > strlen("<?hh // strict") &&
-      (startsWith(code, "<?hh // strict") || startsWith(code, "<?hh //strict"));
+
+bool isFileHack(const char* code, size_t codeLen) {
+  // if the file starts with a shebang
+  if (codeLen > 2 && strncmp(code, "#!", 2) == 0) {
+    // reset code to the next char after the shebang line
+    const char* loc = reinterpret_cast<const char*>(
+        memchr(code, '\n', codeLen));
+    if (!loc) {
+      return false;
+    }
+
+    ptrdiff_t offset = loc - code;
+    code = loc + 1;
+    codeLen -= offset + 1;
   }
+
+  return codeLen > strlen("<?hh") && startsWith(code, "<?hh");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -11391,24 +11401,47 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       }
     }
 
-    auto const hcMode = hackc_mode();
-    if (hcMode != HackcMode::kNever && SystemLib::s_inited) {
-      auto res = hackc_compile(code, codeLen, filename, md5);
-      match<void>(
-        res,
-        [&] (std::unique_ptr<Unit>& u) {
-          unit = std::move(u);
-        },
-        [&] (std::string& err) {
-          if (hcMode == HackcMode::kFallback) return;
-          ue = createFatalUnit(
-            makeStaticString(filename),
-            md5,
-            FatalOp::Runtime,
-            makeStaticString(err)
-          );
-        }
-      );
+    // maybe run external compilers, but not until we've done all of systemlib
+    if (SystemLib::s_inited) {
+      auto const hcMode = hackc_mode();
+
+      // Use the PHP7 compiler if it is configured and the file is PHP
+      if (RuntimeOption::EvalPHP7CompilerEnabled &&
+          !RuntimeOption::EnableHipHopSyntax &&
+          !isFileHack(code, codeLen)) {
+        auto res = php7_compile(code, codeLen, filename, md5);
+        match<void>(res,
+          [&] (std::unique_ptr<Unit>& u) {
+            unit = std::move(u);
+          },
+          [&] (std::string& err) {
+            ue = createFatalUnit(
+              makeStaticString(filename),
+              md5,
+              FatalOp::Runtime,
+              makeStaticString(err)
+            );
+          }
+        );
+      // otherwise, use hackc if we're allowed to try
+      } else if (hcMode != HackcMode::kNever) {
+        auto res = hackc_compile(code, codeLen, filename, md5);
+        match<void>(
+          res,
+          [&] (std::unique_ptr<Unit>& u) {
+            unit = std::move(u);
+          },
+          [&] (std::string& err) {
+            if (hcMode == HackcMode::kFallback) return;
+            ue = createFatalUnit(
+              makeStaticString(filename),
+              md5,
+              FatalOp::Runtime,
+              makeStaticString(err)
+            );
+          }
+        );
+      }
     }
 
     if (!ue && !unit) {

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/hack-compiler.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/repo.h"
@@ -46,11 +46,20 @@ struct CompilerException : Exception {
   throw CompilerException("{}: {}", what, folly::errnoStr(errno));
 }
 
-struct HackCompiler {
-  HackCompiler() = default;
-  HackCompiler(HackCompiler&&) = default;
-  HackCompiler& operator=(HackCompiler&&) = default;
-  ~HackCompiler() { if (isRunning()) stop(); }
+struct CompilerOptions {
+  bool verboseErrors;
+  bool verifyUnit;
+  uint64_t maxRetries;
+  uint64_t workers;
+  std::string command;
+};
+
+struct ExternCompiler {
+  explicit ExternCompiler(const CompilerOptions& options)
+    : m_options(options) {}
+  ExternCompiler(ExternCompiler&&) = default;
+  ExternCompiler& operator=(ExternCompiler&&) = default;
+  ~ExternCompiler() { if (isRunning()) stop(); }
 
   std::unique_ptr<Unit> compile(
     const char* filename,
@@ -82,22 +91,22 @@ struct HackCompiler {
       Repo::get().commitUnit(ue.get(), origin);
 
       u = ue->create();
-      if (RuntimeOption::EvalHackCompilerVerify) {
+      if (m_options.verifyUnit) {
         Verifier::checkUnit(u.get(), Verifier::kThrow);
       }
 
       return u;
     } catch (CompilerException& ex) {
       stop();
-      if (RuntimeOption::EvalHackCompilerVerboseErrors) {
-        Logger::FError("HackCompiler Error: {}", ex.what());
+      if (m_options.verboseErrors) {
+        Logger::FError("ExternCompiler Error: {}", ex.what());
       }
       throw;
     } catch (std::runtime_error& ex) {
-      if (RuntimeOption::EvalHackCompilerVerboseErrors) {
+      if (m_options.verboseErrors) {
         auto const msg = folly::sformat(
           "{}\n"
-          "========== HackCompiler Result ==========\n"
+          "========== ExternCompiler Result ==========\n"
           "{}\n"
           "============ Assembler Result ===========\n"
           "{}\n",
@@ -105,7 +114,7 @@ struct HackCompiler {
           prog,
           u ? u->toString().c_str() : "No unit was produced."
         );
-        Logger::FError("HackCompiler Generated a bad unit: {}", msg);
+        Logger::FError("ExternCompiler Generated a bad unit: {}", msg);
 
         // Throw the extended message to ensure the fataling unit contains the
         // additional context
@@ -128,53 +137,130 @@ private:
   FILE* m_out{nullptr};
 
   unsigned m_compilations{0};
+  const CompilerOptions& m_options;
 };
 
 int s_delegate = -1;
 std::mutex s_delegateLock;
 
-std::atomic<size_t> s_freeCount{0};
-std::mutex s_compilerLock;
-std::condition_variable s_compilerCv;
-AtomicVector<HackCompiler*> s_compilers{0,nullptr};
+struct CompilerPool {
+  explicit CompilerPool(CompilerOptions&& options)
+    : m_options(options) {}
 
-std::pair<size_t, HackCompiler*> getCompiler() {
-  std::unique_lock<std::mutex> l(s_compilerLock);
+  std::pair<size_t, ExternCompiler*> getCompiler();
+  void releaseCompiler(size_t id, ExternCompiler* ptr);
+  void start();
+  void shutdown();
+  CompilerResult compile(const char* code, int len,
+      const char* filename, const MD5& md5);
 
-  s_compilerCv.wait(l, [] {
-    return s_freeCount.load(std::memory_order_relaxed) != 0;
+ private:
+  std::atomic<size_t> m_freeCount{0};
+  std::mutex m_compilerLock;
+  std::condition_variable m_compilerCv;
+  AtomicVector<ExternCompiler*> m_compilers{0, nullptr};
+  CompilerOptions m_options;
+};
+
+std::pair<size_t, ExternCompiler*> CompilerPool::getCompiler() {
+  std::unique_lock<std::mutex> l(m_compilerLock);
+
+  m_compilerCv.wait(l, [&] {
+    return m_freeCount.load(std::memory_order_relaxed) != 0;
   });
-  s_freeCount -= 1;
+  m_freeCount -= 1;
 
-  for (size_t id = 0; id < s_compilers.size(); ++id) {
-    auto ret = s_compilers.exchange(id, nullptr);
+  for (size_t id = 0; id < m_compilers.size(); ++id) {
+    auto ret = m_compilers.exchange(id, nullptr);
     if (ret) return std::make_pair(id, ret);
   }
 
   not_reached();
 }
 
-void releaseCompiler(size_t id, HackCompiler* ptr) {
-  std::unique_lock<std::mutex> l(s_compilerLock);
+void CompilerPool::releaseCompiler(size_t id, ExternCompiler* ptr) {
+  std::unique_lock<std::mutex> l(m_compilerLock);
 
-  s_compilers[id].store(ptr, std::memory_order_relaxed);
-  s_freeCount += 1;
+  m_compilers[id].store(ptr, std::memory_order_relaxed);
+  m_freeCount += 1;
 
   l.unlock();
-  s_compilerCv.notify_one();
+  m_compilerCv.notify_one();
 }
 
-struct HackCompilerGuard final {
-  HackCompilerGuard() { std::tie(m_index, m_ptr) = getCompiler(); }
-  ~HackCompilerGuard() { releaseCompiler(m_index, m_ptr); }
-  HackCompilerGuard(HackCompilerGuard&&) = delete;
-  HackCompilerGuard& operator=(HackCompilerGuard&&) = delete;
+void CompilerPool::start() {
+  auto const nworkers = m_options.workers;
+  m_freeCount.store(nworkers, std::memory_order_relaxed);
+  UnsafeReinitEmptyAtomicVector(m_compilers, nworkers);
+  for (int i = 0; i < nworkers; ++i) {
+    m_compilers[i].store(new ExternCompiler(m_options),
+        std::memory_order_relaxed);
+  }
+}
 
-  HackCompiler* operator->() const { return m_ptr; }
+void CompilerPool::shutdown() {
+  for (int i = 0; i < m_compilers.size(); ++i) {
+    auto c = m_compilers.exchange(i, nullptr);
+    delete c;
+  }
+}
+
+struct CompilerGuard final {
+  explicit CompilerGuard(CompilerPool& pool)
+    : m_pool(pool) {
+    std::tie(m_index, m_ptr) = m_pool.getCompiler();
+  }
+
+  ~CompilerGuard() {
+    m_pool.releaseCompiler(m_index, m_ptr);
+  }
+
+  CompilerGuard(CompilerGuard&&) = delete;
+  CompilerGuard& operator=(CompilerGuard&&) = delete;
+
+  ExternCompiler* operator->() const { return m_ptr; }
+
 private:
   size_t m_index;
-  HackCompiler* m_ptr;
+  ExternCompiler* m_ptr;
+  CompilerPool& m_pool;
 };
+
+CompilerResult CompilerPool::compile(const char* code, int len,
+    const char* filename, const MD5& md5) {
+  CompilerGuard compiler(*this);
+  std::stringstream err;
+
+  size_t retry = 0;
+  const size_t max = std::max<size_t>(
+    1, m_options.maxRetries + 1
+  );
+  while (retry++ < max) {
+    try {
+      return compiler->compile(filename, md5, folly::StringPiece(code, len));
+    } catch (CompilerException& ex) {
+      // Swallow and retry, we return infra errors in bulk once the retry limit
+      // is exceeded.
+      err << ex.what();
+      if (retry < max) err << '\n';
+    } catch (std::runtime_error& ex) {
+      // Nontransient, don't bother with a retry.
+      return ex.what();
+    }
+  }
+
+  if (m_options.verboseErrors) {
+    Logger::Error(
+      "ExternCompiler encountered too many communication errors, giving up."
+    );
+  }
+
+  return err.str();
+}
+
+std::unique_ptr<CompilerPool> s_hackc_pool = nullptr;
+std::unique_ptr<CompilerPool> s_php7_pool = nullptr;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -191,7 +277,7 @@ std::string readline(FILE* f) {
   return len ? std::string(line, len - 1) : std::string();
 }
 
-std::string HackCompiler::readProgram() const {
+std::string ExternCompiler::readProgram() const {
   auto const start = readline(m_out);
   if (start.compare(0, 7, "ERROR: ", 7) == 0) {
     // We don't need to restart the pipe-- the compiler just wasn't able to
@@ -208,7 +294,7 @@ std::string HackCompiler::readProgram() const {
   return program;
 }
 
-void HackCompiler::writeProgram(
+void ExternCompiler::writeProgram(
   const char* filename,
   MD5 md5,
   folly::StringPiece code
@@ -240,7 +326,7 @@ private:
   std::unique_ptr<LightProcess> m_prev;
 };
 
-void HackCompiler::stop() {
+void ExternCompiler::stop() {
   if (m_pid == -1) return;
 
   SCOPE_EXIT {
@@ -258,17 +344,17 @@ void HackCompiler::stop() {
   {
     UseLightDelegate useDelegate;
 
-    if (LightProcess::waitpid(m_pid, &status, 0, 1) != m_pid) {
-      Logger::FWarning("HackCompiler: unable to wait for compiler process");
+    if (LightProcess::waitpid(m_pid, &status, 0, 2) != m_pid) {
+      Logger::Warning("ExternCompiler: unable to wait for compiler process");
       return;
     }
   }
 
   if (WIFEXITED(status) && (code = WEXITSTATUS(status)) != 0) {
-    Logger::FWarning("HackCompiler: exited with status code {}", code);
+    Logger::FWarning("ExternCompiler: exited with status code {}", code);
   } else if (WIFSIGNALED(status) && (code = WTERMSIG(status)) != SIGTERM) {
     Logger::FWarning(
-      "HackCompiler: terminated by signal {}{}",
+      "ExternCompiler: terminated by signal {}{}",
       code,
       WCOREDUMP(status) ? " (code dumped)" : ""
     );
@@ -295,7 +381,7 @@ struct Pipe final {
   int fds[2];
 };
 
-void HackCompiler::start() {
+void ExternCompiler::start() {
   if (m_pid != -1) return;
 
   // For now we dump stderr to /dev/null, we should probably start logging this
@@ -312,7 +398,7 @@ void HackCompiler::start() {
     UseLightDelegate useDelegate;
 
     m_pid = LightProcess::proc_open(
-      RuntimeOption::EvalHackCompilerCommand.c_str(),
+      m_options.command.c_str(),
       created,
       wanted,
       nullptr /* cwd */,
@@ -324,6 +410,34 @@ void HackCompiler::start() {
 
   m_in = in.detach("w");
   m_out = out.detach("r");
+}
+
+folly::Optional<CompilerOptions> hackcConfiguration() {
+  if (hackc_mode() == HackcMode::kNever) {
+    return folly::none;
+  }
+
+  return CompilerOptions{
+    RuntimeOption::EvalHackCompilerVerboseErrors,
+    RuntimeOption::EvalHackCompilerVerify,
+    RuntimeOption::EvalHackCompilerMaxRetries,
+    RuntimeOption::EvalHackCompilerWorkers,
+    RuntimeOption::EvalHackCompilerCommand
+  };
+}
+
+folly::Optional<CompilerOptions> php7Configuration() {
+  if (!RuntimeOption::EvalPHP7CompilerEnabled) {
+    return folly::none;
+  }
+
+  return CompilerOptions{
+    true, // verboseErrors
+    true, // verifyUnit
+    0, // maxRetries
+    1, // workers
+    RuntimeOption::EvalPHP7CompilerCommand, // command
+  };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -343,72 +457,62 @@ HackcMode hackc_mode() {
   return HackcMode::kFatal;
 }
 
-void hackc_init() {
-  if (hackc_mode() == HackcMode::kNever) return;
+void compilers_init() {
+  auto php7Config = php7Configuration();
+  auto hackConfig = hackcConfiguration();
 
-  auto const nworkers = RuntimeOption::EvalHackCompilerWorkers;
-  s_freeCount.store(nworkers, std::memory_order_relaxed);
-  UnsafeReinitEmptyAtomicVector(s_compilers, nworkers);
-  for (int i = 0; i < nworkers; ++i) {
-    s_compilers[i].store(new HackCompiler, std::memory_order_relaxed);
+  if (php7Config || hackConfig) {
+    s_delegate = LightProcess::createDelegate();
   }
 
-  s_delegate = LightProcess::createDelegate();
+  if (hackConfig) {
+    s_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
+    s_hackc_pool->start();
+  }
+
+  if (php7Config) {
+    s_php7_pool = std::make_unique<CompilerPool>(std::move(*php7Config));
+    s_php7_pool->start();
+  }
 }
 
-void hackc_set_user(const std::string& username) {
+void compilers_set_user(const std::string& username) {
   if (s_delegate == -1) return;
 
   std::unique_lock<std::mutex> lock(s_delegateLock);
   LightProcess::ChangeUser(s_delegate, username);
 }
 
-void hackc_shutdown() {
-  if (hackc_mode() == HackcMode::kNever) return;
-
-  for (int i = 0; i < s_compilers.size(); ++i) {
-    auto c = s_compilers.exchange(i, nullptr);
-    delete c;
+void compilers_shutdown() {
+  if (s_hackc_pool) {
+    s_hackc_pool->shutdown();
   }
+
+  if (s_php7_pool) {
+    s_php7_pool->shutdown();
+  }
+
   close(s_delegate);
 }
 
-HackcResult hackc_compile(
+CompilerResult hackc_compile(
   const char* code,
   int len,
   const char* filename,
   const MD5& md5
 ) {
-  always_assert(hackc_mode() != HackcMode::kNever);
+  always_assert(s_hackc_pool);
+  return s_hackc_pool->compile(code, len, filename, md5);
+}
 
-  HackCompilerGuard compiler;
-  std::stringstream err;
-
-  size_t retry = 0;
-  const size_t mx = std::max<size_t>(
-    1, RuntimeOption::EvalHackCompilerMaxRetries + 1
-  );
-  while (retry++ < mx) {
-    try {
-      return compiler->compile(filename, md5, folly::StringPiece(code, len));
-    } catch (CompilerException& ex) {
-      // Swallow and retry, we return infra errors in bulk once the retry limit
-      // is exceeded.
-      err << ex.what();
-      if (retry < mx) err << '\n';
-    } catch(std::runtime_error& ex) {
-      // Nontransient, don't bother with a retry.
-      return ex.what();
-    }
-  }
-
-  if (RuntimeOption::EvalHackCompilerVerboseErrors) {
-    Logger::Error(
-      "HackCompiler encountered too many communication errors, giving up."
-    );
-  }
-
-  return err.str();
+CompilerResult php7_compile(
+  const char* code,
+  int len,
+  const char* filename,
+  const MD5& md5
+) {
+  always_assert(s_php7_pool);
+  return s_php7_pool->compile(code, len, filename, md5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

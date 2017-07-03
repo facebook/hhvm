@@ -70,7 +70,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/hack-compiler.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -945,7 +945,7 @@ static int start_server(const std::string &username, int xhprof) {
       _exit(1);
     }
     LightProcess::ChangeUser(username);
-    hackc_set_user(username);
+    compilers_set_user(username);
   } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");
@@ -1788,7 +1788,7 @@ static int execute_program_impl(int argc, char** argv) {
     // HackC initialization should happen immediately prior to LightProcess
     // configuration as it will create a private delegate process to deal with
     // hackc instances.
-    hackc_init();
+    compilers_init();
   }
 #endif
 
@@ -2557,7 +2557,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(Eval::Debugger::Stop())
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
-  LOG_AND_IGNORE(hackc_shutdown())
+  LOG_AND_IGNORE(compilers_shutdown())
 #ifndef _MSC_VER
   LOG_AND_IGNORE(LightProcess::Close())
 #endif

@@ -180,6 +180,13 @@ function hh_codegen_binary_routes() {
   );
 }
 
+function php7_codegen_binary_routes() {
+  return array(
+    "buck"    => "/buck-out/gen/hphp/php7/php7",
+  # "cmake"   => "/hphp/php7/bin"
+  );
+}
+
 function hh_semdiff_binary_routes() {
   return array(
     "buck"    => "/buck-out/bin/hphp/hack/src/hhbc/semdiff/semdiff",
@@ -279,6 +286,16 @@ function hh_semdiff_cmd($options) {
   if (isset($options['hackc'])) $cmd .= ' --daemon';
   return $cmd;
 }
+
+function php7_compile_cmd() {
+  $routes = php7_codegen_binary_routes();
+  $cmd = hphp_home() . $routes["buck"];
+  if (!is_file($cmd)) {
+    error("Could not find php7 compiler");
+  }
+  return $cmd . " --daemon";
+}
+
 
 function bin_root() {
   if (getenv("HHVM_BIN") !== false) {
@@ -502,6 +519,7 @@ function get_options($argv) {
     'run-hh-codegen' => '',
     'record-failures:' => '',
     'hackc' => '',
+    'php7' => '',
   );
   $options = array();
   $files = array();
@@ -596,6 +614,7 @@ function find_test_files($file) {
     'http'       => 'hphp/test/server/http/tests',
     'fastcgi'    => 'hphp/test/server/fastcgi/tests',
     'zend'       => 'hphp/test/zend/good',
+    'php7'       => 'hphp/test/php7-emitter',
     'facebook'   => 'hphp/facebook/test',
 
     // Subsets of zend tests.
@@ -864,6 +883,11 @@ function hhvm_cmd_impl() {
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
       $args[] = '-vEval.HackCompilerDefault=true';
+    }
+
+    if (isset($options['php7'])) {
+      $args[] = '-vEval.PHP7CompilerCommand="'.php7_compile_cmd($options).'"';
+      $args[] = '-vEval.PHP7CompilerEnabled=true';
     }
 
     if (isset($options['relocate'])) {

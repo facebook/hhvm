@@ -22,8 +22,14 @@
 #include "hphp/php7/unit.h"
 
 #include <string>
+#include <exception>
 
 namespace HPHP { namespace php7 {
+
+struct CompilerException : public std::logic_error {
+  explicit CompilerException(const std::string& what)
+    : std::logic_error(what) {}
+};
 
 struct Compiler {
   explicit Compiler();

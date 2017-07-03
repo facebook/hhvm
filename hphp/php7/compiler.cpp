@@ -16,6 +16,8 @@
 
 #include "hphp/php7/compiler.h"
 
+#include <folly/Format.h>
+
 #include <iostream>
 
 namespace HPHP { namespace php7 {
@@ -45,8 +47,7 @@ void Compiler::compileProgram(zend_ast* ast) {
 }
 
 void Compiler::panic(const std::string& msg) {
-  std::cerr << "panic: " << msg << std::endl;
-  std::abort();
+  throw CompilerException(folly::sformat("panic: {}", msg));
 }
 
 void Compiler::compileZvalLiteral(zval* zv) {

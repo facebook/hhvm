@@ -32,15 +32,17 @@ enum class HackcMode {
 
 HackcMode hackc_mode();
 
-void hackc_init();
-void hackc_shutdown();
-void hackc_set_user(const std::string& username);
+void compilers_init();
+void compilers_shutdown();
+void compilers_set_user(const std::string& username);
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered
-using HackcResult = boost::variant<std::unique_ptr<Unit>,std::string>;
+using CompilerResult = boost::variant<std::unique_ptr<Unit>,std::string>;
 
-HackcResult hackc_compile(const char* code, int len,
-                          const char* filename, const MD5& md5);
+CompilerResult hackc_compile(const char* code, int len,
+                             const char* filename, const MD5& md5);
+CompilerResult php7_compile(const char* code, int len,
+                            const char* filename, const MD5& md5);
 
 }

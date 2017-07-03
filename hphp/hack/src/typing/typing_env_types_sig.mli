@@ -59,6 +59,7 @@ type env = {
   decl_env: Decl_env.env;
   todo    : tfun list  ;
   in_loop : bool       ;
+  global_tpenv : tpenv ;
 }
 
 and genv = {

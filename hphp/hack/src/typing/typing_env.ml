@@ -104,14 +104,26 @@ let empty_bounds = TySet.empty
 let singleton_bound ty = TySet.singleton ty
 
 let get_lower_bounds env name =
+  let local =
   match SMap.get name env.lenv.tpenv with
-  | None -> []
-  | Some {lower_bounds; _} -> TySet.elements lower_bounds
+  | None -> empty_bounds
+  | Some {lower_bounds; _} -> lower_bounds in
+  let global =
+  match SMap.get name env.global_tpenv with
+  | None -> empty_bounds
+  | Some {lower_bounds; _} -> lower_bounds in
+  TySet.elements (TySet.union local global)
 
 let get_upper_bounds env name =
+  let local =
   match SMap.get name env.lenv.tpenv with
-  | None -> []
-  | Some {upper_bounds; _} -> TySet.elements upper_bounds
+  | None -> empty_bounds
+  | Some {upper_bounds; _} -> upper_bounds in
+  let global =
+  match SMap.get name env.global_tpenv with
+  | None -> empty_bounds
+  | Some {upper_bounds; _} -> upper_bounds in
+  TySet.elements (TySet.union local global)
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
@@ -135,6 +147,33 @@ let add_lower_bound_ tpenv name ty =
 
 let env_with_tpenv env tpenv =
   { env with lenv = { env.lenv with tpenv = tpenv } }
+
+let union_global_tpenv tp1 tp2 =
+  SMap.union tp1 tp2 ~combine:(fun _ v1 v2 ->
+    let {lower_bounds=low1; upper_bounds=up1} = v1 in
+    let {lower_bounds=low2; upper_bounds=up2} = v2 in
+    Some  {lower_bounds=TySet.union low1 low2; upper_bounds=TySet.union up1 up2}
+  )
+
+let add_upper_bound_global env name ty =
+  let tpenv =
+    begin match ty with
+    | (r, Tabstract (AKgeneric formal_super, _)) ->
+      add_lower_bound_ env.global_tpenv formal_super
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env.global_tpenv
+    end in
+   { env with global_tpenv=(add_upper_bound_ tpenv name ty) }
+
+let add_lower_bound_global env name ty =
+ let tpenv =
+   begin match ty with
+   | (r, Tabstract (AKgeneric formal_sub, _)) ->
+     add_upper_bound_ env.global_tpenv formal_sub
+       (r, Tabstract (AKgeneric name, None))
+   | _ -> env.global_tpenv
+   end in
+  { env with global_tpenv=(add_lower_bound_ tpenv name ty) }
 
 let add_upper_bound env name ty =
   let tpenv =
@@ -169,12 +208,15 @@ let is_generic_parameter env name =
   SMap.mem name env.lenv.tpenv
 
 let get_generic_parameters env =
-  SMap.keys env.lenv.tpenv
+  SMap.keys (SMap.union env.lenv.tpenv env.global_tpenv)
 
 let get_tpenv_size env =
-  SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
+  let local = SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
     count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
-    env.lenv.tpenv 0
+    env.lenv.tpenv 0 in
+    SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
+      count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
+      env.global_tpenv local
 
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
@@ -233,7 +275,8 @@ let empty tcopt file ~droot = {
     fun_kind = Ast.FSync;
     anons   = IMap.empty;
     file    = file;
-  }
+  };
+  global_tpenv = SMap.empty
 }
 
 let add_wclass env x =

@@ -1,0 +1,121 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/labels_in_finally2.php starts here
+
+
+.main {
+  FPushFuncD 0 "foo"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > foo() {
+  .numiters 1;
+  .declvars $x $e $coll $v $a;
+  .try_fault F8 {
+    .try_fault F9 {
+      .try {
+        FPushCtorD 2 "Exception"
+        String "Error Processing Request"
+        FPassCE 0
+        Int 1
+        FPassCE 1
+        FCall 2
+        PopR
+        Throw
+        Jmp L0
+      } .catch {
+        Dup
+        InstanceOfD "Exception"
+        JmpZ L1
+        SetL $e
+        PopC
+        String "handler"
+        Print
+        PopC
+        Jmp L0
+      L1:
+        Throw
+      }
+    }
+    .try_fault F10 {
+    L0:
+      String "inner finally"
+      Print
+      PopC
+      FPushCtorD 1 "Exception"
+      String "exn thrown after inner"
+      FPassCE 0
+      FCall 1
+      PopR
+      Throw
+    }
+    .try_fault F11 {
+    L3:
+      String "L3"
+      Print
+      PopC
+      Jmp L2
+    }
+  }
+L2:
+  String "finally"
+  Print
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $x
+  FCall 1
+  PopR
+  Null
+  RetC
+F11:
+  Unwind
+F10:
+  UnsetL _5
+  UnsetL _6
+  .try_fault F12 {
+  L5:
+    String "sillyx"
+    Print
+    PopC
+    Jmp L4
+  }
+L4:
+  Unwind
+F9:
+  UnsetL _5
+  UnsetL _6
+  .try_fault F10 {
+    String "inner finally"
+    Print
+    PopC
+    FPushCtorD 1 "Exception"
+    String "exn thrown after inner"
+    FPassCE 0
+    FCall 1
+    PopR
+    Throw
+  }
+  .try_fault F13 {
+  L7:
+    String "L7"
+    Print
+    PopC
+  }
+L6:
+  Unwind
+F8:
+  UnsetL _5
+  UnsetL _6
+  String "finally f8"
+  Print
+  PopC
+  String "handlerstack should be empty here"
+  Print
+  PopC
+  Unwind
+F12:
+  Unwind
+F13:
+  Unwind
+}

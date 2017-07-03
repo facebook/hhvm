@@ -1,0 +1,149 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/myexns.php starts here
+
+
+.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/myexns.php";
+
+.main {
+  FPushFuncD 0 "foo"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > foo($n) {
+  .declvars $e;
+  .try_fault F8 {
+    .try_fault F9 {
+      .try {
+        Int 1
+        CGetL2 $n
+        Eq
+        JmpZ L0
+        FPushCtorD 1 "Exception"
+        String "exception 1"
+        FPassCE 0
+        FCall 1
+        PopR
+        Throw
+      L0:
+        Jmp L1
+      } .catch {
+        Dup
+        InstanceOfD "Exception"
+        JmpZ L2
+        SetL $e
+        PopC
+        String "handler 1"
+        Print
+        PopC
+        .try_fault F10 {
+          .try {
+            Int 3
+            CGetL2 $n
+            Eq
+            JmpZ L3
+            FPushCtorD 1 "Exception"
+            String "exception 3"
+            FPassCE 0
+            FCall 1
+            PopR
+            Throw
+          L3:
+            Jmp L4
+          } .catch {
+            Dup
+            InstanceOfD "Exception"
+            JmpZ L5
+            SetL $e
+            PopC
+            String "handler 3"
+            Print
+            PopC
+            Jmp L4
+          L5:
+            Throw
+          }
+        }
+      L4:
+        String "finally 3"
+        Print
+        PopC
+        Jmp L1
+      L2:
+        Throw
+      }
+    }
+    .try_fault F11 {
+    L1:
+      String "inner finally"
+      Print
+      PopC
+      Int 2
+      CGetL2 $n
+      Eq
+      JmpZ L6
+      FPushCtorD 1 "Exception"
+      String "exception 2"
+      FPassCE 0
+      FCall 1
+      PopR
+      Throw
+    }
+  L6:
+    String "inner, inner finally "
+    Print
+    PopC
+  }
+  String "finally"
+  Print
+  PopC
+  Null
+  RetC
+F10:
+  UnsetL _2
+  UnsetL _3
+  String "finally 3"
+  Print
+  PopC
+  Unwind
+F11:
+  UnsetL _2
+  UnsetL _3
+  String "inner, inner finally "
+  Print
+  PopC
+  Unwind
+F9:
+  UnsetL _2
+  UnsetL _3
+  .try_fault F11 {
+    String "inner finally"
+    Print
+    PopC
+    Int 2
+    CGetL2 $n
+    Eq
+    JmpZ L7
+    FPushCtorD 1 "Exception"
+    String "exception 2"
+    FPassCE 0
+    FCall 1
+    PopR
+    Throw
+  }
+L7:
+  String "inner, inner finally "
+  Print
+  PopC
+  Unwind
+F8:
+  UnsetL _2
+  UnsetL _3
+  String "finally"
+  Print
+  PopC
+  Unwind
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/myexns.php ends here

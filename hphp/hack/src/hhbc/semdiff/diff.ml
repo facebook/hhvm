@@ -281,6 +281,7 @@ let alist_comparer value_comparer ktostring = {
              k2only in
   let diffs = joinmap (fun k -> let v1 = List.assoc k al1 in
                                 let v2 = List.assoc k al2 in
+                                Log.debug @@ Printf.sprintf "comparing key %s" (ktostring k);
                                 value_comparer.comparer v1 v2)
                      both in
    joindiffs [dels; adds; diffs]);
@@ -555,12 +556,11 @@ let property_list_comparer perm =
   comparer = (fun l1 l2 ->
   let permuted_l2 = permute_property_list perm l2 in
   (if perm = [] then ()
-   else let l1names =
-   concatstrs (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) l1) in
-        let l2names =
-   concatstrs (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) permuted_l2) in
-        let debug_string = Printf.sprintf "properties %s and %s" l1names l2names in
-        Semdiff_logging.debug debug_string);
+   else let l1names = concatstrs
+             (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) l1) in
+        let l2names = concatstrs
+             (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) permuted_l2) in
+        Log.debug @@ Printf.sprintf "properties %s and %s" l1names l2names);
    lc.comparer l1 permuted_l2);
   size_of = lc.size_of;
   string_of = lc.string_of;
@@ -606,8 +606,7 @@ let decl_list_comparer perm =
     (if perm = [] then ()
      else let l1names = concatstrs l1 in
           let l2names = concatstrs permuted_l2 in
-          let debug_string = Printf.sprintf "declvars %s and %s" l1names l2names in
-          Semdiff_logging.debug debug_string);
+          Log.debug @@ Printf.sprintf "declvars %s and %s" l1names l2names);
      lc.comparer l1 permuted_l2);
     size_of = lc.size_of;
     string_of = lc.string_of;
@@ -783,15 +782,13 @@ let compare_classes_of_programs p p' =
       else
        let actual_class = List.nth (Hhas_program.classes p) ac in
        let actual_class' = List.nth (Hhas_program.classes p') ac' in
-       let _ = Rhl.classes_checked := Rhl.IntIntSet.add (ac,ac') (!Rhl.classes_checked) in
+       Rhl.classes_checked := Rhl.IntIntSet.add (ac,ac') (!Rhl.classes_checked);
        let (dc, (sc,ec)) = (class_comparer perm).comparer actual_class actual_class' in
-       let _ = if perm = [] then () else
-               let debug_string =
-                Printf.sprintf "did perm comparison on classes %d and %d, distance was %d"
-                               ac ac' dc in
-               Semdiff_logging.debug debug_string in
+       (if perm = [] then ()
+        else Log.debug @@
+             Printf.sprintf "did perm comparison on classes %d and %d, distance was %d" ac ac' dc);
        loop (d+dc) (s+sc) (e ^ ec))
-  in loop dist size edits
+ in loop dist size edits
 
 let program_main_functions_classes_comparer = {
   comparer = compare_classes_of_programs;

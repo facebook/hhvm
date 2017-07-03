@@ -19,6 +19,7 @@ open Core
 open Hhbc_ast
 open Local
 open Hhbc_destruct
+module Log = Semdiff_logging
 
 (* Refs storing the adata for the two programs; they're written in semdiff
    and accessed in equiv
@@ -124,58 +125,53 @@ let make_label_try_maps prog =
      | _ -> loop is (n+1) trycatchstack labelmap trymap) in
   loop prog 0 [] LabelMap.empty IMap.empty
 
-(* Second pass constructs exception table, mapping instruction indices to
-   the index of their closest handler, together with an indication of what kind
-   that is, and also the parent relation
-   Not sure if we need the type of handlers in the parent relation
-   A fault handler can certainly have a catch handler as parent
-   but I don't think catch handlers actually need parents...
+(* Second pass constructs exception table. Revised version maps instruction indices to
+   a list of handler indices. Previous parent relation is removed, as it doesn't track
+   the right information.
+   Still a question mark over whether the whole stack needs to go into the handler lists
+   or if it should be somehow truncated when we reach a catch handler. For now, I'm trying
+   with remembering everything, though I suspect that might lead to runaway stacks.
 *)
 
 let make_exntable prog labelmap trymap =
- let rec loop p n trycatchstack exnmap parents =
+ let rec loop p n trycatchstack exnmap =
   match p with
-  | [] -> (exnmap,parents)
+  | [] -> exnmap
   | i::is ->
-    let newexnmap = match trycatchstack with
-                     | [] -> exnmap
-                     | (h::_) -> IMap.add n h exnmap in
+    let newexnmap = IMap.add n trycatchstack (* <- filter this? *) exnmap in
    (match i with
     | ITry (TryCatchLegacyBegin (Label.Catch _ as l)) ->
        let nl = LabelMap.find l labelmap in
-       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap parents
+       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap
 
     | ITry (TryCatchLegacyBegin _) -> raise Labelexn
 
     | ITry (TryFaultBegin (Label.Fault _ as l)) ->
        let nl = LabelMap.find l labelmap in
-       let newparents = match List.hd trycatchstack with
-         | None -> parents
-         | Some fh -> IMap.add nl fh parents in
-       loop is (n+1) (Fault_handler nl :: trycatchstack) newexnmap newparents
+       loop is (n+1) (Fault_handler nl :: trycatchstack) newexnmap
 
     | ITry (TryFaultBegin _) -> raise Labelexn
 
     | ITry TryCatchBegin ->
        let nl = IMap.find n trymap in (* find corresponding middle *)
-       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap parents
+       loop is (n+1) (Catch_handler nl :: trycatchstack) newexnmap
 
     | ITry TryCatchMiddle ->
         (match trycatchstack with
-          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap parents
+          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap
           | _ -> raise Labelexn)
 
     | ITry TryFaultEnd ->
         (match trycatchstack with
-          | Fault_handler _ :: rest -> loop is (n+1) rest newexnmap parents
+          | Fault_handler _ :: rest -> loop is (n+1) rest newexnmap
           | _ -> raise Labelexn)
 
     | ITry TryCatchLegacyEnd ->
         (match trycatchstack with
-          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap parents
+          | Catch_handler _ :: rest -> loop is (n+1) rest newexnmap
           | _ -> raise Labelexn)
-   | _ -> loop is (n+1) trycatchstack newexnmap parents)
-   in loop prog 0 [] IMap.empty IMap.empty
+   | _ -> loop is (n+1) trycatchstack newexnmap)
+   in loop prog 0 [] IMap.empty
 
 (* Moving string functions into rhl so that I can use them in debugging *)
 
@@ -502,9 +498,9 @@ let findperm l1 l2 =
 (* Main entry point for equivalence checking *)
 let equiv prog prog' startlabelpairs =
  let (labelmap, trymap) = make_label_try_maps prog in
- let (exnmap, exnparents) = make_exntable prog labelmap trymap in
+ let exnmap = make_exntable prog labelmap trymap in
  let (labelmap', trymap') = make_label_try_maps prog' in
- let (exnmap', exnparents') = make_exntable prog' labelmap' trymap' in
+ let exnmap' = make_exntable prog' labelmap' trymap' in
  let prog_array = Array.of_list prog in
  let prog_array' = Array.of_list prog' in
 
@@ -518,20 +514,18 @@ let equiv prog prog' startlabelpairs =
     *)
    let exceptional_todo () =
     match IMap.get (ip_of_pc pc) exnmap, IMap.get (ip_of_pc pc') exnmap' with
-     | None, None -> Some todo
-     | Some (Fault_handler h), Some (Fault_handler h') ->
-        let epc = (Fault_handler h :: hs_of_pc pc, h) in
-        let epc' = (Fault_handler h' :: hs_of_pc pc', h') in
+     | None, None -> Some todo (* should the imap be total? *)
+     | Some [], Some [] -> Some todo (* no local handlers, so nothing to do *)
+     | Some (Fault_handler h :: rest), Some (Fault_handler h' :: rest') ->
+        let epc = (Fault_handler h :: (rest @ hs_of_pc pc), h) in
+        let epc' = (Fault_handler h' :: (rest' @ hs_of_pc pc'), h') in
          Some (add_todo (epc,epc') asn todo)
-     | Some (Catch_handler h), Some (Catch_handler h') ->
-       (* So catches aren't going to be left with an unwind, so we don't
-          need to add them to the stack. What I'm not sure about is if the
-          catch handler code will always be covered by all the fault handlers
-          it needs to be, so that we could actually set the stack to []
-          here?
+     | Some (Catch_handler h :: _rest), Some (Catch_handler h' :: _rest') ->
+       (* TODO: I *think* dropping everything except the catch handler at this point is right
+                but am not entirely sure - hs_of_pc pc is just gone
        *)
-        let epc = (hs_of_pc pc, h) in
-        let epc' = (hs_of_pc pc', h') in
+        let epc = ([Catch_handler h], h) in
+        let epc' = ([Catch_handler h'], h') in
          Some (add_todo (epc,epc') asn todo)
      | _,_ -> None
       (* here we've got a mismatch between the handlers on the two sides
@@ -614,46 +608,34 @@ let equiv prog prog' startlabelpairs =
             I'm only dealing with the matching case
             *)
             (match hs_of_pc pc, hs_of_pc pc' with
-               | [],[] -> try_specials () (* unwind not in handler! should be hard failure? *)
-               | (Fault_handler h ::hs),
-                 (Fault_handler h' ::hs') ->
-                 let opt_newstack_pc = match IMap.get h exnparents with
-                   | None -> (match hs with
-                               | [] -> None
-                               | (hh :: _) -> Some (hs, ip_of_emv hh))
-                   | Some (Fault_handler h2) -> Some(Fault_handler h2::hs, h2)
-                   | Some (Catch_handler h2) -> Some(hs, h2) in
-                 let opt_newstack_pc' = match IMap.get h' exnparents' with
-                   | None -> (match hs' with
-                               | [] -> None
-                               | (hh' :: _) -> Some (hs', ip_of_emv hh'))
-                   | Some (Fault_handler h2') -> Some(Fault_handler h2'::hs', h2')
-                   | Some (Catch_handler h2') -> Some (hs',h2') in
-                 (match opt_newstack_pc, opt_newstack_pc' with
-                   | None, None -> donext assumed todo (* both jump out*)
-                   | Some(ns,npc), Some (ns',npc') ->
-                     check (ns, npc) (ns',npc') asn
-                           (add_assumption (pc,pc') asn assumed)
-                           todo
-                   | _,_ -> try_specials ())
-               | _,_ -> try_specials ()) (* mismatch *)
+               | [],[] -> (Log.debug "unwind not in handler"; try_specials ())
+                                               (* unwind not in handler! should be hard failure? *)
+               | [Fault_handler _h], [Fault_handler _h'] -> donext assumed todo (* both jump out *)
+               | (Fault_handler _h :: nexthandler :: hs),
+                 (Fault_handler _h' :: nexthandler' :: hs') ->
+                  let dest = ip_of_emv nexthandler in
+                  let dest' = ip_of_emv nexthandler' in
+                  check (nexthandler :: hs, dest) (nexthandler' :: hs', dest') asn
+                        (add_assumption (pc,pc') asn assumed) todo
+               | _, _ -> try_specials ())
         | IContFlow Throw, IContFlow Throw ->
             (match IMap.get (ip_of_pc pc) exnmap,
                    IMap.get (ip_of_pc pc') exnmap' with
              | None, None ->  donext assumed todo (* both leave *)
-             | Some (Fault_handler hip as h), Some (Fault_handler hip' as h') ->
-                  let hes = h :: (hs_of_pc pc) in
-                  let hes' = h' :: (hs_of_pc pc') in
-                   check (hes,hip) (hes',hip') asn
-                   (add_assumption (pc,pc') asn assumed)
-                   todo
-             | Some (Catch_handler hip), Some (Catch_handler hip') ->
-                   let hes = (hs_of_pc pc) in
-                   let hes' = (hs_of_pc pc') in
-                    check (hes,hip) (hes',hip') asn
-                    (add_assumption (pc,pc') asn assumed)
+             | Some [], Some [] -> donext assumed todo
+             | Some (Fault_handler h as handler :: rest),
+               Some (Fault_handler h' as handler' :: rest') ->
+              let newstack = handler :: (rest @ hs_of_pc pc) in
+              let newstack' = handler' :: (rest' @ hs_of_pc pc') in
+              check (newstack, h) (newstack', h')
+                    asn (add_assumption (pc,pc') asn assumed)
                     todo
-             | _,_ -> try_specials ()) (* leaves/stays -> mismatch *)
+             | Some (Catch_handler h as handler :: _rest),
+               Some (Catch_handler h' as handler' :: _rest') ->
+               check ([handler],h) ([handler'], h')
+                     asn (add_assumption (pc,pc') asn assumed)
+                     todo
+             | _,_ -> try_specials ())
         | IContFlow (Switch (kind, offset, labs)), IContFlow (Switch (kind', offset', labs'))
           when kind=kind' && offset=offset' ->
            (match List.zip labs labs' with
@@ -886,8 +868,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
         let two_cugetl_list_createcl_action =
           two_cugetl_list_createcl_pattern $>>
            (fun (perm,cn,cn') ((_,n),(_,n')) ->
-           ( let debug_string = Printf.sprintf "create cl pattern at lines %d, %d" n n' in
-             let _ = Semdiff_logging.debug debug_string in
+           ( Log.debug @@ Printf.sprintf "create cl pattern at lines %d, %d" n n';
              let newpc = (hs_of_pc pc, n) in
              let newpc' = (hs_of_pc pc', n') in
                classes_to_check := IntIntPermSet.add (cn,cn',perm) (!classes_to_check);

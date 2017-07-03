@@ -1,0 +1,7 @@
+\f: array<string, int> 
+\g: \Awaitable<array<string, int>> 
+\h: array<int> 
+\i: array<string, (int | bool)> 
+\j: array<(bool | int)> 
+\k: shape-like-array(a => int) 
+No errors

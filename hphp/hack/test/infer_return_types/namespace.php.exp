@@ -1,0 +1,7 @@
+\TestNS\f: \TestNS\C 
+\TestNS\g: \TestNS\C 
+\TestNS2\f: \TestNS2\D 
+\TestNS2\g: \TestNS\C 
+\TestNS3\f: \TestNS\C 
+\Foo\f: \Foo\Bar\C 
+No errors

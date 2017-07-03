@@ -777,7 +777,13 @@ top_statement:
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $5;}
   | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
     top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
-  | T_USE use_declarations ';'         { _p->onUse($2, &Parser::useClass);
+  | T_USE use_declarations ';'         { _p->onUse($2,
+                                           &Parser::useClassAndNamespace);
+                                         _p->nns(T_USE); $$.reset();}
+  | T_USE T_NAMESPACE
+    use_declarations ';'               {
+                                         only_in_hh_syntax(_p);
+                                         _p->onUse($3, &Parser::useNamespace);
                                          _p->nns(T_USE); $$.reset();}
   | T_USE T_FUNCTION
     use_declarations ';'               { _p->onUse($3, &Parser::useFunction);
@@ -933,7 +939,7 @@ mixed_use_declarations:
 
 mixed_use_declaration:
     use_declaration                    { _p->onMixedUseDeclaration($$, $1,
-                                           &Parser::useClass);}
+                                           &Parser::useClassAndNamespace);}
   | T_FUNCTION use_declaration         { _p->onMixedUseDeclaration($$, $2,
                                            &Parser::useFunction);}
   | T_CONST use_declaration            { _p->onMixedUseDeclaration($$, $2,

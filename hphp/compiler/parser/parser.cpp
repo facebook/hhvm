@@ -2758,7 +2758,8 @@ void Parser::onGroupUse(const std::string &prefix, const Token &tok,
   }
 }
 
-void Parser::useClass(const std::string &ns, const std::string &as) {
+void Parser::useClassAndNamespace(const std::string &ns,
+                                  const std::string &as) {
   if (ns == "strict") {
     if (m_scanner.isHHSyntaxEnabled()) {
       error("To use strict hack, place // strict after the open tag. "
@@ -2811,14 +2812,25 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
     }
   }
 
-  // If we get here, we don't have a class alias for it; there should currently
-  // no way for a user to set a class alias without also setting a namespace
-  // alias
-  always_assert(m_nsAliasTable.getType(key) != AliasType::USE);
-
-  m_nsAliasTable.set(key, ns, AliasType::USE, line1());
+  if (!m_nsAliasTable.isAliased(key)) {
+    m_nsAliasTable.set(key, ns, AliasType::USE, line1());
+  }
   m_classAliasTable.set(key, ns, AliasType::USE, line1());
 }
+
+void Parser::useNamespace(const std::string &ns, const std::string &as) {
+  auto const key = fully_qualified_name_as_alias_key(ns, as);
+
+  if (m_nsAliasTable.isAliased(key)
+      && m_nsAliasTable.getType(key) != AliasType::AUTO_USE) {
+    error("Cannot use namespace %s as %s because the name is already in use",
+          ns.c_str(), key.c_str());
+    return;
+  }
+
+  m_nsAliasTable.set(key, ns, AliasType::USE, line1());
+}
+
 
 void Parser::useFunction(const std::string &fn, const std::string &as) {
   auto const key = fully_qualified_name_as_alias_key(fn, as);

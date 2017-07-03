@@ -1,0 +1,6 @@
+dict(2) {
+  [1]=>
+  string(3) "foo"
+  [42]=>
+  string(3) "bar"
+}

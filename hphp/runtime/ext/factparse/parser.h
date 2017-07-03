@@ -375,7 +375,8 @@ struct Parser : ParserBase {
   void onGroupUse(const std::string &prefix, const Token &tok,
                   UseDeclarationConsumer f);
 
-  void useClass(const std::string &fn, const std::string &as);
+  void useClassAndNamespace(const std::string &fn, const std::string &as);
+  void useNamespace(const std::string &fn, const std::string &as);
   void useFunction(const std::string &fn, const std::string &as);
   void useConst(const std::string &cnst, const std::string &as);
 

@@ -31,7 +31,7 @@ struct Unit;
 
 struct Block {
   void emit(Bytecode&& bc) {
-    code.push_back(bc);
+    code.push_back(std::move(bc));
   }
 
   // identifies this block in its unit

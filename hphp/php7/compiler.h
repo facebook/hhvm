@@ -19,6 +19,7 @@
 
 #include "hphp/php7/zend/zend.h"
 #include "hphp/php7/ast_info.h"
+#include "hphp/php7/bytecode.h"
 #include "hphp/php7/unit.h"
 
 #include <string>
@@ -34,23 +35,30 @@ struct CompilerException : public std::logic_error {
 struct Compiler {
   explicit Compiler();
 
-  static std::unique_ptr<Unit> compile(zend_ast* ast) {
+  static std::unique_ptr<Unit> compile(const zend_ast* ast) {
     Compiler compiler;
     compiler.compileProgram(ast);
     return std::move(compiler.unit);
   }
 
  private:
-  void compileProgram(zend_ast* ast);
-  void compileStatement(zend_ast* ast);
-  void compileExpression(zend_ast* ast);
-  void compileZvalLiteral(zval* ast);
+  void compileProgram(const zend_ast* ast);
+  void compileStatement(const zend_ast* ast);
+  void compileExpression(const zend_ast* ast);
+
+  void compileZvalLiteral(const zval* ast);
+  void compileConstant(const zend_ast* ast);
+  void compileIf(const zend_ast* ast);
+
+  Bytecode opForBinaryOp(const zend_ast* op);
+  void compileUnaryOp(const zend_ast* op);
 
   [[noreturn]]
   void panic(const std::string& msg);
 
   std::unique_ptr<Unit> unit;
 
+  Function* activeFunction;
   Block* activeBlock;
 };
 

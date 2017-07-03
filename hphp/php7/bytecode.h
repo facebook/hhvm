@@ -21,6 +21,8 @@
 
 namespace HPHP { namespace php7 {
 
+struct Block;
+
 namespace bc {
 
 // void* immediate types just aren't being used right now
@@ -34,10 +36,10 @@ namespace bc {
 #define IMM_TYPE_CAR int32_t
 #define IMM_TYPE_CAW int32_t
 #define IMM_TYPE_DA double
-#define IMM_TYPE_SA int
+#define IMM_TYPE_SA std::string
 #define IMM_TYPE_AA int
 #define IMM_TYPE_RATA void*
-#define IMM_TYPE_BA uint64_t // offset (basic block id)
+#define IMM_TYPE_BA Block*
 #define IMM_TYPE_OA(subtype) subtype
 #define IMM_TYPE_KA void*
 #define IMM_TYPE_LAR void*
@@ -109,36 +111,89 @@ OPCODES
 // too many opcodes for us to use boost::variant so we'll roll our own :)
 struct Bytecode {
   Bytecode()
-    : code(Op::Nop) {
-      op.Nop = bc::Nop{};
-  }
-
+    : code(Op::Nop),
+      Nop() {}
 
 #define O(opcode, imms, inputs, outputs, flags) \
   /* implicit */ Bytecode(const bc::opcode& data) \
     : code(Op::opcode) { \
-    new (&op) bc::opcode(data); \
+    new (&opcode) bc::opcode(data); \
   }
 OPCODES
 #undef O
 
+  Bytecode(const Bytecode& b) {
+    code = b.code;
+    switch(code) {
+#define O(opcode, ...) \
+      case Op::opcode: new (&opcode) bc::opcode(b.opcode); break;
+      OPCODES
+#undef O
+    }
+  }
+
+  Bytecode(Bytecode&& b) {
+    code = b.code;
+    switch (code) {
+#define O(opcode, ...) \
+      case Op::opcode: new (&opcode) bc::opcode(std::move(b.opcode)); break;
+      OPCODES
+#undef O
+    }
+  }
+
+  Bytecode& operator=(const Bytecode& b) {
+    destroy_op();
+    code = b.code;
+    switch(code) {
+#define O(opcode, ...) case Op::opcode: opcode = b.opcode; break;
+      OPCODES
+#undef O
+    }
+    return *this;
+  }
+
+  Bytecode& operator=(Bytecode&& b) {
+    destroy_op();
+    code = b.code;
+    switch(code) {
+#define O(opcode, ...) case Op::opcode: opcode = std::move(b.opcode); break;
+      OPCODES
+#undef O
+    }
+    return *this;
+  }
+
+  ~Bytecode() {
+    destroy_op();
+  }
+
   template<class Visitor>
   void visit(Visitor&& visit) const {
     switch (code) {
-#define O(opcode, ...) case Op::opcode: visit.bytecode(op.opcode); break;
+#define O(opcode, ...) case Op::opcode: visit.bytecode(opcode); break;
       OPCODES
 #undef O
     }
   }
 
  private:
+  void destroy_op() {
+    using namespace bc;
+    switch(code) {
+#define O(opcode, ...) case Op::opcode: opcode.~opcode(); break;
+      OPCODES
+#undef O
+    }
+  }
+
   Op code;
   union {
 #define O(opcode, imms, inputs, outputs, flags) \
   bc::opcode opcode;
     OPCODES
 #undef O
-  } op;
+  };
 };
 
 

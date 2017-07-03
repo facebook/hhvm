@@ -17,6 +17,7 @@
 #include "hphp/php7/hhas.h"
 
 #include <folly/Format.h>
+#include <folly/String.h>
 
 namespace HPHP { namespace php7 {
 
@@ -53,6 +54,19 @@ struct InstrVisitor {
     folly::format(&out, " {}", intimm);
   }
 
+  void imm(double n) {
+    folly::format(&out, " {}", n);
+  }
+
+  void imm(const std::string& str) {
+    folly::format(&out, " \"{}\"", folly::cEscape<std::string>(str));
+  }
+
+  void imm(Block* blk) {
+    folly::format(&out, " L{}", blk->id);
+  }
+
+
   template<class T>
   void imm(const T& imm) {
     out.append(" <immediate>");
@@ -64,7 +78,9 @@ struct InstrVisitor {
 std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
-  out.append(dump_block(*func.entry));
+  for (const auto& blk : func.blocks) {
+    out.append(dump_block(*blk));
+  }
   out.append("}");
   return out;
 }

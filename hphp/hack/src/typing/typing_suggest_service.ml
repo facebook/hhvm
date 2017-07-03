@@ -194,6 +194,7 @@ let suggest_files tcopt fnl =
   SharedMem.invalidate_caches();
   Typing_defs.is_suggest_mode := true;
   Typing_suggest.types := [];
+  Typing_suggest.funs_and_methods := [];
   Typing_suggest.initialized_members := SMap.empty;
   List.iter fnl begin fun fn ->
     let tcopt = TypecheckerOptions.make_permissive tcopt in

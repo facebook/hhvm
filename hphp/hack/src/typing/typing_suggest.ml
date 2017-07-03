@@ -35,9 +35,15 @@ module Env = Typing_env
 module TUtils = Typing_utils
 
 (*****************************************************************************)
+(* List of functions or methods without return types  *)
+(*****************************************************************************)
+let (funs_and_methods : (Ast.id list ref)) =  ref []
+
+let save_fun_or_method name =
+  if !is_suggest_mode then funs_and_methods := name :: !funs_and_methods
+(*****************************************************************************)
 (* List of types found in a file. *)
 (*****************************************************************************)
-
 let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
 let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 

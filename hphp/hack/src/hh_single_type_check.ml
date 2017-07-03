@@ -337,9 +337,61 @@ let parse_options () =
     tcopt;
   }
 
-let suggest_and_print tcopt ~return_only fn { FileInfo.funs; classes; typedefs; consts; _ } =
+let infer_return tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
   let make_set =
-    List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty in
+    List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty
+  in
+  let n_funs = make_set funs in
+  let n_classes = make_set classes in
+  let n_types = make_set typedefs in
+  let n_consts = make_set consts in
+  let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
+  let fast = Relative_path.Map.singleton fn names in
+  let inferred_types =
+    Typing_suggest_service.suggest_files
+      tcopt (Typing_suggest_service.keys fast)
+  in
+  let funs_and_methods = !Typing_suggest.funs_and_methods in
+  let () = Typing_suggest.funs_and_methods := [] in
+  let funs_and_methods =
+    List.filter
+      ~f:(fun (pos, _) -> Relative_path.Map.mem fast (Pos.filename pos))
+      funs_and_methods
+  in
+  let inferred_types =
+    List.filter
+      ~f:(fun (_, pos, kind, _) ->
+        (Relative_path.Map.mem fast (Pos.filename pos))
+        && (kind == Typing_suggest.Kreturn))
+      inferred_types
+  in
+  let inferred_types =
+    List.sort
+      ~cmp: (fun (_, p1, _, _) (_ , p2, _, _) -> Pos.compare p1 p2)
+      inferred_types
+  in
+  let funs_and_methods =
+    List.sort
+      ~cmp: (fun (p1, _) (p2, _) -> Pos.compare p1 p2) funs_and_methods
+  in
+  let rec print_returns_with_funs ts fs  =
+    match ts, fs with
+    | [], _
+    | _, [] -> ()
+    | (tenv, p1, _, ty) :: ts_, (p2, id) :: fs_ ->
+      begin match Pos.compare p1 p2 with
+            | 0 -> Printf.printf "%s: %s \n" id (Typing_print.full tenv ty);
+                   print_returns_with_funs ts_ fs_
+            | x when x > 0 -> print_returns_with_funs ts_ fs
+            | _ -> print_returns_with_funs ts fs_
+      end
+in
+print_returns_with_funs inferred_types funs_and_methods
+
+let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
+  let make_set =
+    List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty
+  in
   let n_funs = make_set funs in
   let n_classes = make_set classes in
   let n_types = make_set typedefs in
@@ -347,18 +399,12 @@ let suggest_and_print tcopt ~return_only fn { FileInfo.funs; classes; typedefs; 
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
   let fast = Relative_path.Map.singleton fn names in
   let patch_map = Typing_suggest_service.go None fast tcopt in
-
   match Relative_path.Map.get patch_map fn with
     | None -> ()
     | Some l -> begin
       (* Sort so that the unit tests come out in a consistent order, normally
        * doesn't matter. *)
-      let l = List.sort ~cmp: (fun (x, _, _) (y, _, _) -> x - y) l in
-      let l =
-        if return_only then
-          List.filter l
-            ~f:(fun (_, kind, _) -> kind = Typing_suggest.Kreturn)
-        else l
+      let l = List.sort ~cmp: (fun (x, _, _) (y, _, _) -> x - y) l
       in
       List.iter ~f: (ServerConvert.print_patch fn tcopt) l
 
@@ -717,9 +763,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Errors ->
       let errors = check_errors opts errors files_info in
       if mode = Suggest
-      then Relative_path.Map.iter files_info (suggest_and_print opts ~return_only:false);
+      then Relative_path.Map.iter files_info (suggest_and_print opts);
       if mode = Infer_return_types
-      then Relative_path.Map.iter files_info (suggest_and_print opts ~return_only:true);
+      then Relative_path.Map.iter files_info (infer_return opts);
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"

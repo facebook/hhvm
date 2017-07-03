@@ -393,11 +393,12 @@ and fun_def tcopt f =
         bind_param in
       let env, tb = fun_ env hret (fst f.f_name) nb f.f_fun_kind in
       let env = fold_fun_list env env.Env.todo in
-      if Env.is_strict env then begin
-        List.iter2_exn f_params param_tys (check_param env);
-        match f.f_ret with
-          | None -> suggest_return env (fst f.f_name) hret
-          | Some _ -> ()
+      begin match f.f_ret with
+        | None when Env.is_strict env ->
+            List.iter2_exn f_params param_tys (check_param env);
+            suggest_return env (fst f.f_name) hret;
+        | None -> Typing_suggest.save_fun_or_method f.f_name
+        | Some _ -> ();
       end;
       {
         T.f_mode = f.f_mode;
@@ -4946,7 +4947,7 @@ and method_def env m =
       Some (fst m.m_name, Happly((fst m.m_name, "void"), []))
     | None when Env.is_strict env ->
       suggest_return env (fst m.m_name) ret; None
-    | None
+    | None -> Typing_suggest.save_fun_or_method m.m_name; m.m_ret
     | Some _ -> m.m_ret in
   let m = { m with m_ret = m_ret; } in
   Typing_hooks.dispatch_exit_method_def_hook m;

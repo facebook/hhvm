@@ -19,12 +19,11 @@
   Dim Define ET:"y"
   Dim Define PT:"bar"
   Dim Define ET:"q"
-  SetM 1 PC:5
+  SetM 0 PC:2
   PopC
   FPushFuncD 1 "var_dump"
   FPassL 0 $foo
   FCall 1
   PopR
-  Int 1
   RetC
 }

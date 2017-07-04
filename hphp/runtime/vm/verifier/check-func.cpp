@@ -821,7 +821,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_iva(pc);
       key = decode_member_key(pc, unit());
       break;
-    case Op::FPassM:  //THREE(IVA IVA, KA)
+    case Op::FPassM:  //THREE(IVA, IVA, KA)
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
     case Op::MemoGet:
@@ -834,7 +834,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
   }
 
   if ((key.mcode == MemberCode::MEC || key.mcode == MemberCode::MPC) &&
-        key.iva > cur->stklen) {
+        key.iva + 1 > cur->stklen) {
       error("Member Key %s in op %s has stack offset greater than stack"
             " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
       return false;

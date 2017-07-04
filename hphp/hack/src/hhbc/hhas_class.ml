@@ -36,6 +36,7 @@ type t = {
   class_constants    : Hhas_constant.t list;
   class_type_constants : Hhas_type_constant.t list;
   class_requirements : (Ast.trait_req_kind * string) list;
+  class_doc_comment : string option;
 }
 
 let make
@@ -56,7 +57,8 @@ let make
   class_properties
   class_constants
   class_type_constants
-  class_requirements =
+  class_requirements
+  class_doc_comment =
   {
     class_attributes;
     class_base;
@@ -76,6 +78,7 @@ let make
     class_constants;
     class_type_constants;
     class_requirements;
+    class_doc_comment;
   }
 
 let attributes hhas_class = hhas_class.class_attributes
@@ -101,3 +104,4 @@ let type_constants hhas_class = hhas_class.class_type_constants
 let requirements hhas_class = hhas_class.class_requirements
 let is_closure_class hhas_class =
   List.exists Hhas_method.is_closure_body (methods hhas_class)
+let doc_comment hhas_class = hhas_class.class_doc_comment

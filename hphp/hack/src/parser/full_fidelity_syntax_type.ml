@@ -769,6 +769,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
     ; vector_type_type                                   : t
+    ; vector_type_optional_comma                         : t
     ; vector_type_right_angle                            : t
     }
   and keyset_type_specifier =
@@ -843,6 +844,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { classname_keyword                                  : t
     ; classname_left_angle                               : t
     ; classname_type                                     : t
+    ; classname_optional_comma                           : t
     ; classname_right_angle                              : t
     }
   and field_specifier =
@@ -2000,6 +2002,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { vector_type_keyword: Token.t value
     ; vector_type_left_angle: Token.t value
     ; vector_type_type: specifier value
+    ; vector_type_optional_comma: Token.t option value
     ; vector_type_right_angle: Token.t value
     }
   and keyset_type_specifier =
@@ -2074,6 +2077,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { classname_keyword: Token.t value
     ; classname_left_angle: Token.t value
     ; classname_type: specifier value
+    ; classname_optional_comma: Token.t option value
     ; classname_right_angle: Token.t value
     }
   and field_specifier =

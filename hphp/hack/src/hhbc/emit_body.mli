@@ -15,6 +15,7 @@ val make_body:
   Hhas_param.t list ->
   Hhas_type_info.t option ->
   (string * Ast.expr option) list ->
+  string option ->
   Hhas_body.t
 
 val emit_body:
@@ -29,6 +30,7 @@ val emit_body:
   default_dropthrough: Instruction_sequence.t option ->
   return_value: Instruction_sequence.t ->
   namespace: Namespace_env.env ->
+  doc_comment: string option ->
   Ast.fun_param list ->
   Ast.hint option ->
   Ast.program ->

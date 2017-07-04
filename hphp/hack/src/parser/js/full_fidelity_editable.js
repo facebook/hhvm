@@ -14971,23 +14971,27 @@ class VectorTypeSpecifier extends EditableSyntax
     keyword,
     left_angle,
     type,
+    optional_comma,
     right_angle)
   {
     super('vector_type_specifier', {
       keyword: keyword,
       left_angle: left_angle,
       type: type,
+      optional_comma: optional_comma,
       right_angle: right_angle });
   }
   get keyword() { return this.children.keyword; }
   get left_angle() { return this.children.left_angle; }
   get type() { return this.children.type; }
+  get optional_comma() { return this.children.optional_comma; }
   get right_angle() { return this.children.right_angle; }
   with_keyword(keyword){
     return new VectorTypeSpecifier(
       keyword,
       this.left_angle,
       this.type,
+      this.optional_comma,
       this.right_angle);
   }
   with_left_angle(left_angle){
@@ -14995,6 +14999,7 @@ class VectorTypeSpecifier extends EditableSyntax
       this.keyword,
       left_angle,
       this.type,
+      this.optional_comma,
       this.right_angle);
   }
   with_type(type){
@@ -15002,6 +15007,15 @@ class VectorTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_angle,
       type,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_optional_comma(optional_comma){
+    return new VectorTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.type,
+      optional_comma,
       this.right_angle);
   }
   with_right_angle(right_angle){
@@ -15009,6 +15023,7 @@ class VectorTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_angle,
       this.type,
+      this.optional_comma,
       right_angle);
   }
   rewrite(rewriter, parents)
@@ -15020,11 +15035,13 @@ class VectorTypeSpecifier extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_angle = this.left_angle.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
+    var optional_comma = this.optional_comma.rewrite(rewriter, new_parents);
     var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_angle === this.left_angle &&
       type === this.type &&
+      optional_comma === this.optional_comma &&
       right_angle === this.right_angle)
     {
       return rewriter(this, parents);
@@ -15035,6 +15052,7 @@ class VectorTypeSpecifier extends EditableSyntax
         keyword,
         left_angle,
         type,
+        optional_comma,
         right_angle), parents);
     }
   }
@@ -15049,6 +15067,9 @@ class VectorTypeSpecifier extends EditableSyntax
     let type = EditableSyntax.from_json(
       json.vector_type_type, position, source);
     position += type.width;
+    let optional_comma = EditableSyntax.from_json(
+      json.vector_type_optional_comma, position, source);
+    position += optional_comma.width;
     let right_angle = EditableSyntax.from_json(
       json.vector_type_right_angle, position, source);
     position += right_angle.width;
@@ -15056,6 +15077,7 @@ class VectorTypeSpecifier extends EditableSyntax
         keyword,
         left_angle,
         type,
+        optional_comma,
         right_angle);
   }
   get children_keys()
@@ -15065,6 +15087,7 @@ class VectorTypeSpecifier extends EditableSyntax
         'keyword',
         'left_angle',
         'type',
+        'optional_comma',
         'right_angle'];
     return VectorTypeSpecifier._children_keys;
   }
@@ -16335,23 +16358,27 @@ class ClassnameTypeSpecifier extends EditableSyntax
     keyword,
     left_angle,
     type,
+    optional_comma,
     right_angle)
   {
     super('classname_type_specifier', {
       keyword: keyword,
       left_angle: left_angle,
       type: type,
+      optional_comma: optional_comma,
       right_angle: right_angle });
   }
   get keyword() { return this.children.keyword; }
   get left_angle() { return this.children.left_angle; }
   get type() { return this.children.type; }
+  get optional_comma() { return this.children.optional_comma; }
   get right_angle() { return this.children.right_angle; }
   with_keyword(keyword){
     return new ClassnameTypeSpecifier(
       keyword,
       this.left_angle,
       this.type,
+      this.optional_comma,
       this.right_angle);
   }
   with_left_angle(left_angle){
@@ -16359,6 +16386,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
       this.keyword,
       left_angle,
       this.type,
+      this.optional_comma,
       this.right_angle);
   }
   with_type(type){
@@ -16366,6 +16394,15 @@ class ClassnameTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_angle,
       type,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_optional_comma(optional_comma){
+    return new ClassnameTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.type,
+      optional_comma,
       this.right_angle);
   }
   with_right_angle(right_angle){
@@ -16373,6 +16410,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_angle,
       this.type,
+      this.optional_comma,
       right_angle);
   }
   rewrite(rewriter, parents)
@@ -16384,11 +16422,13 @@ class ClassnameTypeSpecifier extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_angle = this.left_angle.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
+    var optional_comma = this.optional_comma.rewrite(rewriter, new_parents);
     var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_angle === this.left_angle &&
       type === this.type &&
+      optional_comma === this.optional_comma &&
       right_angle === this.right_angle)
     {
       return rewriter(this, parents);
@@ -16399,6 +16439,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
         keyword,
         left_angle,
         type,
+        optional_comma,
         right_angle), parents);
     }
   }
@@ -16413,6 +16454,9 @@ class ClassnameTypeSpecifier extends EditableSyntax
     let type = EditableSyntax.from_json(
       json.classname_type, position, source);
     position += type.width;
+    let optional_comma = EditableSyntax.from_json(
+      json.classname_optional_comma, position, source);
+    position += optional_comma.width;
     let right_angle = EditableSyntax.from_json(
       json.classname_right_angle, position, source);
     position += right_angle.width;
@@ -16420,6 +16464,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
         keyword,
         left_angle,
         type,
+        optional_comma,
         right_angle);
   }
   get children_keys()
@@ -16429,6 +16474,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
         'keyword',
         'left_angle',
         'type',
+        'optional_comma',
         'right_angle'];
     return ClassnameTypeSpecifier._children_keys;
   }

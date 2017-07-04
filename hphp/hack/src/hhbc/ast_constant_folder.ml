@@ -18,7 +18,7 @@ open Core
 exception NotLiteral
 
 (* Literal expressions can be converted into values *)
-let rec expr_to_typed_value ns (_, expr_) =
+let rec expr_to_typed_value ?(allow_maps=false) ns (_, expr_) =
   match expr_ with
   | A.Int (_, s) -> TV.Int (Int64.of_string @@ SU.Integer.to_decimal s)
   | A.True -> TV.Bool true
@@ -36,7 +36,8 @@ let rec expr_to_typed_value ns (_, expr_) =
       ~f:(fun l x -> TVL.add l (value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
-  | A.Collection ((_, ("dict" | "ImmMap" | "Map")), fields) ->
+  | A.Collection ((_, (("dict" | "ImmMap" | "Map") as kind)), fields)
+    when allow_maps || kind = "dict" ->
     (* TODO: avoid quadratic-time behaviour *)
     let d = List.fold_left fields
       ~f:(fun d x ->
@@ -129,8 +130,8 @@ and value_afield_to_typed_value ns afield =
   | A.AFkvalue (_key, _value) ->
     failwith "value_afield_to_typed_value: unexpected key=>value"
 
-let expr_to_opt_typed_value ns e =
-  match expr_to_typed_value ns e with
+let expr_to_opt_typed_value ?(allow_maps=false) ns e =
+  match expr_to_typed_value ~allow_maps ns e with
   | x -> Some x
   | exception NotLiteral -> None
 

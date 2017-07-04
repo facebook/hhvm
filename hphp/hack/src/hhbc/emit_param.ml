@@ -10,6 +10,7 @@
 
 open Core
 open Instruction_sequence
+open Ast_class_expr
 module A = Ast
 
 let from_variadic_param_hint_opt ho =
@@ -18,7 +19,29 @@ let from_variadic_param_hint_opt ho =
   | None -> Some (p, A.Happly ((p, "array"), []))
   | Some h -> Some (p, A.Happly ((p, "array"), [h]))
 
-let from_ast ~tparams ~namespace ~generate_defaults p =
+let resolve_class_id ~scope cid =
+  let cexpr, _ = expr_to_class_expr ~resolve_self:true
+    scope (id_to_expr cid) in
+  match cexpr with
+  | Class_id cid -> cid
+  | Class_parent | Class_self | Class_static | Class_expr _ -> cid
+
+let resolver_visitor =
+object(_)
+  inherit [_] Ast_visitors.endo
+
+  method! on_Class_get scope _ cid id =
+    let cid = resolve_class_id ~scope cid in
+    A.Class_get (cid, id)
+
+  method! on_Class_const scope _ cid id =
+    let cid = resolve_class_id ~scope cid in
+    A.Class_const (cid, id)
+
+  method on_Markup _ parent _ _ = parent
+end
+
+let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
   let param_hint =
@@ -34,9 +57,12 @@ let from_ast ~tparams ~namespace ~generate_defaults p =
   let param_type_info = Option.map param_hint
     Emit_type_hint.(hint_to_type_info
       ~kind:Param ~skipawaitable:false ~nullable ~namespace ~tparams) in
+  let param_expr =
+    Option.map p.Ast.param_expr ~f:(resolver_visitor#on_expr scope)
+  in
   let param_default_value =
     if generate_defaults
-    then Option.map p.Ast.param_expr ~f:(fun e -> Label.next_default_arg (), e)
+    then Option.map param_expr ~f:(fun e -> Label.next_default_arg (), e)
     else None
   in
   if param_is_variadic && param_name = "..." then None else
@@ -60,9 +86,9 @@ let rename_params params =
   in
     List.rev (snd (Core.List.map_env SMap.empty (List.rev params) rename))
 
-let from_asts ~namespace ~tparams ~generate_defaults ast_params =
+let from_asts ~namespace ~tparams ~generate_defaults ~scope ast_params =
   let hhas_params = List.filter_map ast_params
-    (from_ast ~tparams ~namespace ~generate_defaults) in
+    (from_ast ~tparams ~namespace ~generate_defaults ~scope) in
   rename_params hhas_params
 
 let emit_param_default_value_setter env params =

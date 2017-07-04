@@ -377,8 +377,10 @@ and parse_array_type_specifier parser =
     else
       let (parser, left) = expect_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
+      let (parser, optional_comma) = optional_token parser Comma in
       let (parser, right) = expect_right_angle parser in
-      let result = make_vector_type_specifier keyword left t right in
+      let result =
+        make_vector_type_specifier keyword left t optional_comma right in
       (parser, result)
 
   and parse_keyset_type_specifier parser =
@@ -576,9 +578,10 @@ and parse_classname_type_specifier parser =
   let classname = make_token classname in
   let (parser, left_angle) = expect_left_angle parser in
   let (parser, classname_type) = parse_type_specifier parser in
+  let (parser, optional_comma) = optional_token parser Comma in
   let (parser, right_angle) = expect_right_angle parser in
   let result = make_classname_type_specifier
-    classname left_angle classname_type right_angle in
+    classname left_angle classname_type optional_comma right_angle in
   (parser, result)
 
 and parse_field_specifier parser =

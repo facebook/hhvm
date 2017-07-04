@@ -135,16 +135,17 @@ let precedence operator =
   | InstanceofOperator -> 21
   | ExponentOperator -> 22
   | PostfixIncrementOperator | PostfixDecrementOperator -> 23
-  | FunctionCallOperator -> 24
-  | NewOperator | CloneOperator -> 25
-  (* value 26 is reserved for assignment that appear in expressions *)
-  | IndexingOperator -> 27
-  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 28
-  | ScopeResolutionOperator -> 29
-  | DollarOperator -> 30
+  | CloneOperator -> 24
+  | FunctionCallOperator -> 25
+  | NewOperator -> 26
+  (* value 27 is reserved for assignment that appear in expressions *)
+  | IndexingOperator -> 28
+  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 29
+  | ScopeResolutionOperator -> 30
+  | DollarOperator -> 31
 
 let precedence_for_print = 5
-let precedence_for_assignment_in_expressions = 26
+let precedence_for_assignment_in_expressions = 27
 
 let associativity operator =
   match operator with

@@ -301,7 +301,17 @@ let prepString2 : node list -> node list =
 let mkStr : (string -> string) -> string -> string = fun unescaper content ->
   let no_quotes = try
       if String.sub content 0 3 = "<<<" (* The heredoc case *)
-      then String.sub content 3 (String.length content - 4)
+      then
+        (* These types of strings begin with an opening line containing <<<
+         * followed by a string to use as a terminator (which is optionally
+         * quoted) and end with a line containing only the terminator and a
+         * semicolon followed by a blank line. We need to drop the opening
+         * line as well as the blank line and preceding terminator line. *)
+        let len = String.length content in
+        let start = (String.index content '\n') + 1 in
+        let end_ = (String.rindex_from content (len - 2) '\n') in
+        let len = end_ - start in
+          String.sub content start len
       else String.sub content 1 (String.length content - 2)
     with
     | Invalid_argument _ -> content
@@ -364,6 +374,7 @@ let fun_template yielding node suspension_kind =
   ; f_fun_kind        = mk_fun_kind suspension_kind yielding
   ; f_namespace       = Namespace_env.empty !(lowerer_state.popt)
   ; f_span            = p
+  ; f_doc_comment     = None
   }
 
 let param_template node =
@@ -664,6 +675,14 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
       -> pExpr_ expr env
 
+   | VarrayIntrinsicExpression
+      { varray_intrinsic_keyword = kw
+      ; varray_intrinsic_members = members
+      ; _ }
+   | DarrayIntrinsicExpression
+      { darray_intrinsic_keyword = kw
+      ; darray_intrinsic_members = members
+      ; _ }
    | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw
       ; dictionary_intrinsic_members = members
@@ -1294,7 +1313,58 @@ and pFunHdr : fun_hdr parser = fun node env ->
   | Token _ -> empty_fun_hdr
   | _ -> missing_syntax "function header" node env
 
+and extract_docblock = fun node ->
+  let source_text = leading_text node in
+  let parse (str : string) : string option =
+      let length = String.length str in
+      let mk (start : int) (end_ : int) : string =
+        String.sub source_text start (end_ - start + 1)
+      in
+      let rec go start state idx : string option =
+        if idx = length (* finished? *)
+        then None
+        else begin
+          let next = idx + 1 in
+          match state, str.[idx] with
+          | `LineCmt,     '\n' -> go next `Free next
+          | `EndEmbedded, '/'  -> go next `Free next
+          | `EndDoc, '/' -> begin match go next `Free next with
+            | Some doc -> Some doc
+            | None -> Some (mk start idx)
+          end
+          (* PHP has line comments delimited by a # *)
+          | `Free,     '#'              -> go next `LineCmt      next
+          (* All other comment delimiters start with a / *)
+          | `Free,     '/'              -> go idx   `SawSlash    next
+          (* After a / in trivia, we must see either another / or a * *)
+          | `SawSlash, '/'              -> go next  `LineCmt     next
+          | `SawSlash, '*'              -> go start `MaybeDoc    next
+          | `MaybeDoc, '*'              -> go start `MaybeDoc2   next
+          | `MaybeDoc, _                -> go start `EmbeddedCmt next
+          | `MaybeDoc2, '/'             -> go next  `Free        next
+          | `MaybeDoc2, _               -> go start `DocComment  next
+          | `DocComment, '*'            -> go start `EndDoc      next
+          | `DocComment, _              -> go start `DocComment  next
+          | `EndDoc, _                  -> go start `DocComment  next
+          (* A * without a / does not end an embedded comment *)
+          | `EmbeddedCmt, '*'           -> go start `EndEmbedded next
+          | `EndEmbedded, '*'           -> go start `EndEmbedded next
+          | `EndEmbedded,  _            -> go start `EmbeddedCmt next
+          (* Whitespace skips everywhere else *)
+          | _, (' ' | '\t' | '\n')      -> go start state        next
+          (* When scanning comments, anything else is accepted *)
+          | `LineCmt,     _             -> go start state        next
+          | `EmbeddedCmt, _             -> go start state        next
+          (* Anything else; bail *)
+          | _ -> None
+        end
+      in
+      go 0 `Free 0
+  in (* Now that we have a parser *)
+  parse (leading_text node)
+
 and pClassElt : class_elt list parser = fun node env ->
+  let opt_doc_comment = extract_docblock node in
   match syntax node with
   | ConstDeclaration
     { const_abstract; const_type_specifier; const_declarators; _ } ->
@@ -1418,6 +1488,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_ret_by_ref      = hdr.fh_ret_by_ref
       ; m_span            = get_pos node
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
+      ; m_doc_comment     = opt_doc_comment
       }]
   | TraitUseConflictResolution {
       trait_use_conflict_resolution_names;
@@ -1531,6 +1602,7 @@ and pXhpChild : xhp_child parser = fun node env ->
  * Parsing definitions (AST's `def`)
 )*****************************************************************************)
 and pDef : def parser = fun node env ->
+  let opt_doc_comment = extract_docblock node in
   match syntax node with
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
@@ -1561,6 +1633,7 @@ and pDef : def parser = fun node env ->
         end
       ; f_user_attributes =
         List.concat @@ couldMap ~f:pUserAttribute function_attribute_spec env
+      ; f_doc_comment = opt_doc_comment
       }
   | ClassishDeclaration
     { classish_attribute       = attr
@@ -1590,7 +1663,7 @@ and pDef : def parser = fun node env ->
       ; c_namespace       = Namespace_env.empty !(lowerer_state.popt)
       ; c_enum            = None
       ; c_span            = get_pos node
-      ; c_kind            =
+      ; c_kind            = begin
         let is_abs = Str.(string_match (regexp ".*abstract.*") (text mods) 0) in
         match token_kind kw with
         | Some TK.Class when is_abs -> Cabstract
@@ -1599,6 +1672,8 @@ and pDef : def parser = fun node env ->
         | Some TK.Trait             -> Ctrait
         | Some TK.Enum              -> Cenum
         | _ -> missing_syntax "class kind" kw env
+        end
+      ; c_doc_comment = opt_doc_comment
       }
   | ConstDeclaration
     { const_type_specifier = ty
@@ -1671,6 +1746,7 @@ and pDef : def parser = fun node env ->
         { e_base       = pHint base env
         ; e_constraint = mpOptional pTConstraintTy constr env
         }
+      ; c_doc_comment = opt_doc_comment
       }
   | InclusionDirective
     { inclusion_expression =

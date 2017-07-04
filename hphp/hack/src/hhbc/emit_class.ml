@@ -34,13 +34,15 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
   let method_is_memoize_wrapper = false in
   let method_no_injection = true in
   let method_static_inits = [] in
+  let method_doc_comment = None in
   let method_body = Emit_body.make_body
     instrs
     method_decl_vars
     method_is_memoize_wrapper
     params
     method_return_type
-    method_static_inits in
+    method_static_inits
+    method_doc_comment in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -86,7 +88,7 @@ let from_constant env (_hint, name, const_init) =
 let from_constants env ast_constants =
   List.map ast_constants (from_constant env)
 
-let from_type_constant ast_type_constant =
+let from_type_constant ~namespace ast_type_constant =
   let type_constant_name = Litstr.to_string @@
     snd ast_type_constant.A.tconst_name
   in
@@ -96,12 +98,12 @@ let from_type_constant ast_type_constant =
     (* TODO: Deal with the constraint *)
     let type_constant_initializer =
       (* Type constants do not take type vars hence tparams:[] *)
-      Some (Emit_type_constant.hint_to_type_constant ~tparams:[] init)
+      Some (Emit_type_constant.hint_to_type_constant ~tparams:[] ~namespace init)
     in
     Hhas_type_constant.make type_constant_name type_constant_initializer
 
-let from_type_constants ast_type_constants =
-  List.map ast_type_constants from_type_constant
+let from_type_constants ~namespace ast_type_constants =
+  List.map ast_type_constants (from_type_constant ~namespace)
 
 let ast_methods ast_class_body =
   let mapper elt =
@@ -130,9 +132,9 @@ let from_class_elt_requirements ns elt =
       Some (kind, (Hhbc_id.Class.to_raw_string (Emit_type_hint.hint_to_class ns h)))
   | _ -> None
 
-let from_class_elt_typeconsts elt =
+let from_class_elt_typeconsts ~namespace elt =
   match elt with
-  | A.TypeConst tc -> Some (from_type_constant tc)
+  | A.TypeConst tc -> Some (from_type_constant ~namespace tc)
   | _ -> None
 
 let from_enum_type ~namespace opt =
@@ -372,11 +374,12 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_methods = Emit_method.from_asts ast_class methods in
   let class_methods = class_methods @ additional_methods in
   let class_type_constants =
-    List.filter_map class_body from_class_elt_typeconsts in
+    List.filter_map class_body (from_class_elt_typeconsts ~namespace) in
   let info = Emit_memoize_method.make_info ast_class class_id methods in
   let additional_properties = Emit_memoize_method.emit_properties info methods in
   let additional_methods =
     Emit_memoize_method.emit_wrapper_methods env info ast_class methods in
+  let doc_comment = ast_class.A.c_doc_comment in
   Hhas_class.make
     class_attributes
     class_base
@@ -396,6 +399,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_constants
     class_type_constants
     class_requirements
+    doc_comment
 
 let emit_classes_from_program ast =
   List.filter_map ast

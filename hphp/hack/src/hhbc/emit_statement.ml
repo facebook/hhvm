@@ -736,20 +736,73 @@ and wrap_non_empty_block_in_fault prefix block fault_block =
       (gather @@ prefix::block)
       fault_block
 
-and emit_foreach env _has_await collection iterator block =
+and emit_foreach env has_await collection iterator block =
   Local.scope @@ fun () ->
-    emit_foreach_ env _has_await collection iterator block
+    if not has_await then emit_foreach_ env collection iterator block
+    else emit_foreach_await env collection iterator block
 
-and emit_foreach_ env _has_await collection iterator block =
-  (* TODO: await *)
-  (* TODO: generate .numiters based on maximum nesting depth *)
+and emit_foreach_await env collection iterator block =
+  let next_label = Label.next_regular () in
+  let exit_label = Label.next_regular () in
+  let iter_temp_local = Local.get_unnamed_local () in
+  let collection_expr = emit_expr ~need_ref:false env collection in
+  let result_temp_local = Local.get_unnamed_local () in
+  let key_local_opt, value_local, key_preamble, value_preamble =
+    emit_iterator_key_value_storage env iterator in
+  let next_meth = Hhbc_id.Method.from_raw_string "next" in
+  let fault_block_local local = gather [
+    instr_unsetl local;
+    instr_unwind
+  ] in
+  let set_from_result idx local preamble = gather [
+    instr_basel result_temp_local MemberOpMode.Warn;
+    instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int idx));
+    instr_setl local;
+    instr_popc;
+    wrap_non_empty_block_in_fault empty preamble (fault_block_local local)
+  ] in
+  let set_key = match key_local_opt with
+  | Some (key_local) -> set_from_result 0 key_local key_preamble
+  | None -> empty in
+  let result = gather [
+    collection_expr;
+    instr_setl iter_temp_local;
+    with_temp_local iter_temp_local begin fun _ _ -> gather [
+      instr_instanceofd (Hhbc_id.Class.from_raw_string "HH\\AsyncIterator");
+      instr_jmpnz next_label;
+      Emit_fatal.emit_fatal_runtime
+        "Unable to iterate non-AsyncIterator asynchronously";
+      instr_label next_label;
+      instr_cgetl iter_temp_local;
+      instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
+      instr_fcall 0;
+      instr_unboxr;
+      instr_await;
+      instr_setl result_temp_local;
+      instr_popc;
+      instr_istypel result_temp_local OpNull;
+      instr_jmpnz exit_label;
+      with_temp_local result_temp_local begin fun _ _ -> gather [
+        set_key;
+        set_from_result 1 value_local value_preamble;
+      ] end;
+      instr_unsetl result_temp_local;
+      emit_stmt env block;
+      instr_jmp next_label;
+      instr_label exit_label;
+      instr_unsetl result_temp_local;
+    ] end;
+    instr_unsetl iter_temp_local;
+  ] in
+  CBR.rewrite_in_loop result next_label exit_label None
+
+and emit_foreach_ env collection iterator block =
   let iterator_number = Iterator.get_iterator () in
   let fault_label = Label.next_fault () in
   let loop_break_label = Label.next_regular () in
   let loop_continue_label = Label.next_regular () in
   let loop_head_label = Label.next_regular () in
   let mutable_iter = is_mutable_iterator iterator in
-  (* TODO: add support for mutable iterators *)
   let key_local_opt, value_local, key_preamble, value_preamble =
     emit_iterator_key_value_storage env iterator
   in

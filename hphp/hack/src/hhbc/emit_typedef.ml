@@ -16,10 +16,11 @@ let kind_to_type_info ~tparams ~namespace k =
     Emit_type_hint.(hint_to_type_info
       ~kind:TypeDef ~skipawaitable:false ~nullable:false ~tparams ~namespace h)
 
-let kind_to_type_structure ~tparams k =
+let kind_to_type_structure ~tparams ~namespace k =
   match k with
   | Ast.Alias h | Ast.NewType h ->
-    Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams h
+    Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams
+      ~namespace h
 
 let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->
@@ -30,7 +31,7 @@ let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   let typedef_type_info =
     kind_to_type_info ~tparams ~namespace ast_typedef.Ast.t_kind in
   let typedef_type_structure =
-    kind_to_type_structure ~tparams ast_typedef.Ast.t_kind
+    kind_to_type_structure ~tparams ~namespace ast_typedef.Ast.t_kind
   in
   Hhas_typedef.make
     typedef_name

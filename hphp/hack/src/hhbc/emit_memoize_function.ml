@@ -123,6 +123,7 @@ let make_wrapper_body return_type params instrs =
     params
     (Some return_type)
     [] (* static_inits: this is intentionally empty *)
+    None (* doc *)
 
 let emit_wrapper_function ~original_id ~renamed_id ast_fun =
   if ast_fun.Ast.f_ret_by_ref
@@ -137,7 +138,7 @@ let emit_wrapper_function ~original_id ~renamed_id ast_fun =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   let params = Emit_param.from_asts ~namespace ~tparams ~generate_defaults:true
-    ast_fun.Ast.f_params in
+    ~scope ast_fun.Ast.f_params in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in

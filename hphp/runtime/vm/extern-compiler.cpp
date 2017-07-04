@@ -106,11 +106,14 @@ struct ExternCompiler {
       if (m_options.verboseErrors) {
         auto const msg = folly::sformat(
           "{}\n"
+          "========== PHP Source ==========\n"
+          "{}\n"
           "========== ExternCompiler Result ==========\n"
           "{}\n"
           "============ Assembler Result ===========\n"
           "{}\n",
           ex.what(),
+          code,
           prog,
           u ? u->toString().c_str() : "No unit was produced."
         );

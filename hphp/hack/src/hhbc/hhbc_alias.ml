@@ -113,6 +113,7 @@ let rec normalize s =
 let opt_normalize s =
   match s with
   | "callable" -> Some "callable"
+  | "array" -> Some "array"
   | _ ->
     match SMap.get (String.lowercase_ascii s) alias_map with
     | None -> None

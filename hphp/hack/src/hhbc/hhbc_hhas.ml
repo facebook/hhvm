@@ -13,6 +13,7 @@ module H = Hhbc_ast
 module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
+module SN = Naming_special_names
 module TV = Typed_value
 open H
 
@@ -874,7 +875,7 @@ and string_of_param_default_value expr =
   match snd expr with
   | A.Id (_, litstr)
   | A.Id_type_arguments ((_, litstr), _)
-  | A.Lvar (_, litstr) -> litstr
+  | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float (_, litstr) -> SU.Float.with_scientific_notation litstr
   | A.Int (_, litstr) -> SU.Integer.to_decimal litstr
   | A.String (_, litstr) -> SU.quote_string_with_escape litstr
@@ -919,7 +920,14 @@ and string_of_param_default_value expr =
     ^ String.concat ", " es
     ^ ")"
   | A.Class_get ((_, s1), (_, s2))
-  | A.Class_const ((_, s1), (_, s2)) -> "\\\\" ^ s1 ^ "::" ^ s2
+  | A.Class_const ((_, s1), (_, s2))
+    when s1 = SN.Classes.cSelf ||
+         s1 = SN.Classes.cParent ||
+         s1 = SN.Classes.cStatic ->
+    s1 ^ "::" ^ s2
+  | A.Class_get ((_, s1), (_, s2))
+  | A.Class_const ((_, s1), (_, s2)) ->
+    "\\\\" ^ (Php_escaping.escape (SU.strip_global_ns s1)) ^ "::" ^ s2
   | A.Unop (uop, e) -> begin
     let e = string_of_param_default_value e in
     match uop with
@@ -1040,6 +1048,13 @@ let add_static_values buf indent lst =
   Core.List.iter lst
     (fun (label, e) -> add_static_default_value_option buf indent label e)
 
+let add_doc buf doc_comment =
+  match doc_comment with
+  | Some cmt ->
+    B.add_string buf @@
+      Printf.sprintf "\n.doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
+  | None -> ()
+
 let add_body buf indent body =
   add_num_iters buf indent (Hhas_body.num_iters body);
   if Hhas_body.is_memoize_wrapper body
@@ -1047,6 +1062,7 @@ let add_body buf indent body =
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
   add_static_values buf indent (Hhas_body.static_inits body);
+  add_doc buf (Hhas_body.doc_comment body);
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 
@@ -1280,6 +1296,7 @@ let add_class_def buf class_def =
   B.add_string buf " {";
   add_uses buf class_def;
   add_enum_ty buf class_def;
+  add_doc buf (Hhas_class.doc_comment class_def);
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter (add_requirement buf) (Hhas_class.requirements class_def);

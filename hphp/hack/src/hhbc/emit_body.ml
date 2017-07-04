@@ -87,7 +87,8 @@ and emit_defs env defs =
     gather [i1; i2]
   | defs -> aux env defs
 
-let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info static_inits =
+let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info
+              static_inits doc_comment =
   let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
@@ -103,6 +104,7 @@ let make_body body_instrs decl_vars is_memoize_wrapper params return_type_info s
     params
     return_type_info
     static_inits
+    doc_comment
 
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
@@ -122,28 +124,32 @@ let emit_body
   ~is_return_by_ref
   ~default_dropthrough
   ~return_value
-  ~namespace params ret body =
+  ~namespace
+  ~doc_comment params ret body =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
   Iterator.reset_iterator ();
   let return_type_info =
     emit_return_type_info ~scope ~skipawaitable ~namespace ret in
+  let is_generator, is_pair_generator = Generator.is_function_generator body in
   let verify_return =
     return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
-    Hhas_type_info.has_type_constraint return_type_info in
+    Hhas_type_info.has_type_constraint return_type_info && not is_generator in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
   Emit_statement.set_return_by_ref is_return_by_ref;
   let params =
     Emit_param.from_asts
-      ~namespace ~tparams ~generate_defaults:(not is_memoize) params
+      ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
   let has_this = Ast_scope.Scope.has_this scope in
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params:params body in
-  Local.reset_local (List.length params + List.length decl_vars);
+  let adjust_closure = if is_closure_body then 1 else 0 in
+  Local.reset_local
+    (List.length params + List.length decl_vars + adjust_closure);
   let env = Emit_env.(
     empty |>
     with_namespace namespace |>
@@ -152,7 +158,6 @@ let emit_body
   let stmt_instrs = emit_defs env body in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter env params in
-  let is_generator, is_pair_generator = Generator.is_function_generator body in
   let generator_instr =
     if is_generator then gather [instr_createcont; instr_popc] else empty
   in
@@ -196,6 +201,7 @@ let emit_body
     false (*is_memoize_wrapper*)
     params
     (Some return_type_info)
-    svar_instrs,
+    svar_instrs
+    doc_comment,
     is_generator,
     is_pair_generator

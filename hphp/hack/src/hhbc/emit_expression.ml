@@ -999,6 +999,7 @@ and is_packed_init ?(check_size = true) es size =
   (is_only_values || keys_are_zero_indexed_properly_formed)
   && not has_references
   && should_check_size_positive
+  && size > 0
 
 and is_struct_init es =
   let has_references =
@@ -1056,7 +1057,9 @@ and emit_dynamic_collection env expr es =
 and emit_named_collection env expr pos name fields =
   let name = SU.strip_ns name in
   match name with
-  | "dict" | "vec" | "keyset" -> emit_collection env expr fields
+  (* TODO (#19893791): It shouldn't be possible to get varray/darray here *)
+  | "dict" | "vec" | "keyset" | "varray" | "darray"
+    -> emit_collection env expr fields
   | "Vector" | "ImmVector" ->
     let collection_type = collection_type name in
     if fields = []
@@ -1095,7 +1098,8 @@ and emit_named_collection env expr pos name fields =
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and emit_collection ?(transform_to_collection) env expr es =
-  match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
+  match Ast_constant_folder.expr_to_opt_typed_value ~allow_maps:true
+    (Emit_env.get_namespace env) expr with
   | Some tv ->
     emit_static_collection ~transform_to_collection tv
   | None ->
@@ -1762,7 +1766,7 @@ and emit_call env (_, expr_ as expr) args uargs =
     _, A.Call ((_, A.Id (_, "func_get_args")), [], []); (_, A.Int _ as count)
     ] ->
     let p = Pos.none in
-    emit_call env (p, A.Id (p, "__SystemLib\\func_slice_args")) [count] []
+    emit_call env (p, A.Id (p, "\\__SystemLib\\func_slice_args")) [count] []
   | A.Id (_, id), _ when
     (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
     if List.length uargs != 0 then
@@ -2248,18 +2252,21 @@ and emit_exprs env exprs =
 
 and with_temp_local temp f =
   let break_label = Label.next_regular () in
-  let fault_label = Label.next_fault () in
-  gather [
-    instr_try_fault
-      fault_label
-      (* try block *)
-      (f temp break_label)
-      (* fault block *)
-      (gather [
-        instr_unsetl temp;
-        instr_unwind ]);
-    instr_label break_label;
-  ]
+  let block = f temp break_label in
+  if is_empty block then block
+  else
+    let fault_label = Label.next_fault () in
+    gather [
+      instr_try_fault
+        fault_label
+        (* try block *)
+        block
+        (* fault block *)
+        (gather [
+          instr_unsetl temp;
+          instr_unwind ]);
+      instr_label break_label;
+    ]
 
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
  * temporary local `temp` (unless it is itself a local). Then use `f` to

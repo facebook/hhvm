@@ -66,7 +66,7 @@ maindecl:
       {Hhas_body.make $9(*instrs*)
         $6(*declvars*) $4(*numiters*)
         $5(*numclsrefslots*) false(*ismemoizewrapper*)
-        [](*params*) None(*return type*) $7(*static_inits*)}
+        [](*params*) None(*return type*) $7(*static_inits*) None (* doc *)}
 ;
 numiters:
     | /* empty */ {0}
@@ -97,6 +97,7 @@ fundecl:
               $5 (*params*)
               $3 (*typeinfo*)
               $13 (*static_inits*)
+              None (* doc *)
             )
             (isasync $6)
             (isgenerator $6)
@@ -201,7 +202,8 @@ classdecl:
           $11(*properties*)
           (fst $10) (*constants*)
           (snd $10) (*typeconstants*)
-          $9 (* requirements *) }
+          $9 (* requirements *)
+          None (* doc *) }
 ;
 methods:
  | /* empty */ {[]}
@@ -233,6 +235,7 @@ methoddecl:
       $5 (* params *)
       $3 (* return type *)
       $13 (* static_inits *)
+      None (* doc *)
       )
     (List.mem "isAsync" $6)
     (List.mem "isGenerator" $6)

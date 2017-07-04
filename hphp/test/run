@@ -914,7 +914,7 @@ function hhvm_cmd_impl() {
 
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerSourceMapping=0';
-      $args[] = '-vEval.DisassemblerDocComments=0';
+      $args[] = '-vEval.DisassemblerPropDocComments=0';
     }
 
     if (!isset($options['cores'])) {

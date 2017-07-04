@@ -45,6 +45,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~default_dropthrough
       ~return_value:instr_null
       ~namespace
+      ~doc_comment:ast_fun.Ast.f_doc_comment
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       [Ast.Stmt (Ast.Block ast_fun.Ast.f_body)] in

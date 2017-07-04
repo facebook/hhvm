@@ -802,6 +802,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
     f_mode = env.mode;
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.btw fun_start fun_end;
+    f_doc_comment = None;
   }
 
 (*****************************************************************************)
@@ -832,7 +833,8 @@ and class_ class_start ~attr ~final ~kind env =
       c_body            = cbody;
       c_namespace       = Namespace_env.empty env.popt;
       c_enum            = None;
-      c_span         = span;
+      c_span            = span;
+      c_doc_comment     = None;
     }
   in
   class_implicit_fields result
@@ -870,6 +872,7 @@ and enum_ class_start ~attr env =
           e_constraint = constraint_;
         };
       c_span         = span;
+      c_doc_comment  = None;
     }
   in
   result
@@ -1838,6 +1841,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
     m_user_attributes = attrs;
     m_fun_kind = fun_kind sync is_generator;
     m_span = Pos.btw method_start method_end;
+    m_doc_comment = None;
   }
 
 (*****************************************************************************)
@@ -2861,6 +2865,7 @@ and lambda_body ~sync env params ret =
     f_mode = env.mode;
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
+    f_doc_comment = None;
   }
   in Lfun f
 
@@ -3379,6 +3384,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_mode = env.mode;
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
+    f_doc_comment = None;
   }
   in
   pos, Efun (f, use)

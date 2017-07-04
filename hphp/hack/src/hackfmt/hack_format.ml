@@ -1284,7 +1284,7 @@ let rec transform node =
       transform_braced_item left_a vec_type right_a;
     ]
   | VectorTypeSpecifier x ->
-    let (kw, left_a, vec_type, right_a) =
+    let (kw, left_a, vec_type, _, right_a) =
       get_vector_type_specifier_children x in
     Fmt [
       t kw;
@@ -1362,7 +1362,7 @@ let rec transform node =
       t outer_right_p;
     ]
   | ClassnameTypeSpecifier x ->
-    let (kw, left_a, class_type, right_a) =
+    let (kw, left_a, class_type, _, right_a) =
       get_classname_type_specifier_children x in
     Fmt [
       t kw;

@@ -1779,11 +1779,13 @@ module WithToken(Token: TokenType) = struct
       vector_type_keyword;
       vector_type_left_angle;
       vector_type_type;
+      vector_type_optional_comma;
       vector_type_right_angle;
     } = (
       vector_type_keyword,
       vector_type_left_angle,
       vector_type_type,
+      vector_type_optional_comma,
       vector_type_right_angle
     )
 
@@ -1927,11 +1929,13 @@ module WithToken(Token: TokenType) = struct
       classname_keyword;
       classname_left_angle;
       classname_type;
+      classname_optional_comma;
       classname_right_angle;
     } = (
       classname_keyword,
       classname_left_angle,
       classname_type,
+      classname_optional_comma,
       classname_right_angle
     )
 
@@ -3325,11 +3329,13 @@ module WithToken(Token: TokenType) = struct
         vector_type_keyword;
         vector_type_left_angle;
         vector_type_type;
+        vector_type_optional_comma;
         vector_type_right_angle;
       } -> [
         vector_type_keyword;
         vector_type_left_angle;
         vector_type_type;
+        vector_type_optional_comma;
         vector_type_right_angle;
       ]
       | KeysetTypeSpecifier {
@@ -3462,11 +3468,13 @@ module WithToken(Token: TokenType) = struct
         classname_keyword;
         classname_left_angle;
         classname_type;
+        classname_optional_comma;
         classname_right_angle;
       } -> [
         classname_keyword;
         classname_left_angle;
         classname_type;
+        classname_optional_comma;
         classname_right_angle;
       ]
       | FieldSpecifier {
@@ -4846,11 +4854,13 @@ module WithToken(Token: TokenType) = struct
         vector_type_keyword;
         vector_type_left_angle;
         vector_type_type;
+        vector_type_optional_comma;
         vector_type_right_angle;
       } -> [
         "vector_type_keyword";
         "vector_type_left_angle";
         "vector_type_type";
+        "vector_type_optional_comma";
         "vector_type_right_angle";
       ]
       | KeysetTypeSpecifier {
@@ -4983,11 +4993,13 @@ module WithToken(Token: TokenType) = struct
         classname_keyword;
         classname_left_angle;
         classname_type;
+        classname_optional_comma;
         classname_right_angle;
       } -> [
         "classname_keyword";
         "classname_left_angle";
         "classname_type";
+        "classname_optional_comma";
         "classname_right_angle";
       ]
       | FieldSpecifier {
@@ -6542,12 +6554,14 @@ module WithToken(Token: TokenType) = struct
           vector_type_keyword;
           vector_type_left_angle;
           vector_type_type;
+          vector_type_optional_comma;
           vector_type_right_angle;
         ]) ->
         VectorTypeSpecifier {
           vector_type_keyword;
           vector_type_left_angle;
           vector_type_type;
+          vector_type_optional_comma;
           vector_type_right_angle;
         }
       | (SyntaxKind.KeysetTypeSpecifier, [
@@ -6690,12 +6704,14 @@ module WithToken(Token: TokenType) = struct
           classname_keyword;
           classname_left_angle;
           classname_type;
+          classname_optional_comma;
           classname_right_angle;
         ]) ->
         ClassnameTypeSpecifier {
           classname_keyword;
           classname_left_angle;
           classname_type;
+          classname_optional_comma;
           classname_right_angle;
         }
       | (SyntaxKind.FieldSpecifier, [
@@ -8367,12 +8383,14 @@ module WithToken(Token: TokenType) = struct
       vector_type_keyword
       vector_type_left_angle
       vector_type_type
+      vector_type_optional_comma
       vector_type_right_angle
     =
       from_children SyntaxKind.VectorTypeSpecifier [
         vector_type_keyword;
         vector_type_left_angle;
         vector_type_type;
+        vector_type_optional_comma;
         vector_type_right_angle;
       ]
 
@@ -8526,12 +8544,14 @@ module WithToken(Token: TokenType) = struct
       classname_keyword
       classname_left_angle
       classname_type
+      classname_optional_comma
       classname_right_angle
     =
       from_children SyntaxKind.ClassnameTypeSpecifier [
         classname_keyword;
         classname_left_angle;
         classname_type;
+        classname_optional_comma;
         classname_right_angle;
       ]
 

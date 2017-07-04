@@ -16,7 +16,6 @@ quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_static_vars.php
 quick/closure_use_this.php
-quick/collection-initializer.php
 quick/constIntToString.php
 quick/const_cflow.php
 quick/continue.php
@@ -116,11 +115,7 @@ quick/lexer_heredoc_buffer_boundary_65494.php
 quick/lexer_heredoc_label_cornercases.php
 quick/lexer_heredoc_many_buffers.php
 quick/lexer_heredoc_var_newlines.php
-quick/lexer_nowdoc_buffer_boundary_65492.php
-quick/lexer_nowdoc_buffer_boundary_65493.php
-quick/lexer_nowdoc_buffer_boundary_65494.php
 quick/lexer_nowdoc_label_cornercases.php
-quick/lexer_nowdoc_many_buffers.php
 quick/libxml_suppress_errors.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php

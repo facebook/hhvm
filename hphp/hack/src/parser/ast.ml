@@ -67,6 +67,7 @@ and class_ = {
   c_namespace: Namespace_env.env;
   c_enum: enum_ option;
   c_span: Pos.t;
+  c_doc_comment : string option;
 }
 
 and enum_ = {
@@ -178,7 +179,8 @@ and method_ = {
   m_ret: hint option;
   m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
-  m_span: Pos.t
+  m_span: Pos.t;
+  m_doc_comment: string option;
 }
 
 and typeconst = {
@@ -218,7 +220,8 @@ and fun_ = {
   f_user_attributes : user_attribute list;
   f_fun_kind        : fun_kind;
   f_namespace       : Namespace_env.env;
-  f_span         : Pos.t;
+  f_span            : Pos.t;
+  f_doc_comment     : string option;
 }
 
 and hint = Pos.t * hint_

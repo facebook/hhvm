@@ -36,7 +36,8 @@ let xhp_attribute_declaration_method name kind body =
     A.m_ret = None;
     A.m_ret_by_ref = false;
     A.m_fun_kind = A.FSync;
-    A.m_span = Pos.none
+    A.m_span = Pos.none;
+    A.m_doc_comment = None;
   }
 
 let emit_xhp_attribute_array xal =
@@ -165,6 +166,16 @@ let rec emit_xhp_children_decl_expr ~unary = function
       (A.Int (p, unary))
       (A.Int (p, "5"))
       (emit_xhp_children_decl_expr ~unary:"0" l)
+  | [A.ChildName (_, "any")] ->
+    get_array3
+      (A.Int (p, unary))
+      (A.Int (p, "1"))
+      (A.Null)
+  | [A.ChildName (_, "pcdata")] ->
+    get_array3
+      (A.Int (p, unary))
+      (A.Int (p, "2"))
+      (A.Null)
   | [A.ChildName (_, s)] ->
     get_array3
       (A.Int (p, unary))

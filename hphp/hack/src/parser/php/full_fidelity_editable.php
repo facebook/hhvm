@@ -17138,16 +17138,19 @@ final class VectorTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
+  private EditableSyntax $_optional_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
+    EditableSyntax $optional_comma,
     EditableSyntax $right_angle) {
     parent::__construct('vector_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
+    $this->_optional_comma = $optional_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -17159,6 +17162,9 @@ final class VectorTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function optional_comma(): EditableSyntax {
+    return $this->_optional_comma;
+  }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
@@ -17167,6 +17173,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_optional_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): VectorTypeSpecifier {
@@ -17174,6 +17181,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
+      $this->_optional_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): VectorTypeSpecifier {
@@ -17181,6 +17189,15 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_optional_comma(EditableSyntax $optional_comma): VectorTypeSpecifier {
+    return new VectorTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $optional_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): VectorTypeSpecifier {
@@ -17188,6 +17205,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_optional_comma,
       $right_angle);
   }
 
@@ -17200,11 +17218,13 @@ final class VectorTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
+    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
+      $optional_comma === $this->optional_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -17212,6 +17232,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $optional_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -17226,6 +17247,9 @@ final class VectorTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->vector_type_type, $position, $source);
     $position += $type->width();
+    $optional_comma = EditableSyntax::from_json(
+      $json->vector_type_optional_comma, $position, $source);
+    $position += $optional_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->vector_type_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -17233,12 +17257,14 @@ final class VectorTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $optional_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
+    yield $this->_optional_comma;
     yield $this->_right_angle;
     yield break;
   }
@@ -18581,16 +18607,19 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
+  private EditableSyntax $_optional_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
+    EditableSyntax $optional_comma,
     EditableSyntax $right_angle) {
     parent::__construct('classname_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
+    $this->_optional_comma = $optional_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -18602,6 +18631,9 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function optional_comma(): EditableSyntax {
+    return $this->_optional_comma;
+  }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
@@ -18610,6 +18642,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_optional_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): ClassnameTypeSpecifier {
@@ -18617,6 +18650,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
+      $this->_optional_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): ClassnameTypeSpecifier {
@@ -18624,6 +18658,15 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_optional_comma(EditableSyntax $optional_comma): ClassnameTypeSpecifier {
+    return new ClassnameTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $optional_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): ClassnameTypeSpecifier {
@@ -18631,6 +18674,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_optional_comma,
       $right_angle);
   }
 
@@ -18643,11 +18687,13 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
+    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
+      $optional_comma === $this->optional_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -18655,6 +18701,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $optional_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -18669,6 +18716,9 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->classname_type, $position, $source);
     $position += $type->width();
+    $optional_comma = EditableSyntax::from_json(
+      $json->classname_optional_comma, $position, $source);
+    $position += $optional_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->classname_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -18676,12 +18726,14 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $optional_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
+    yield $this->_optional_comma;
     yield $this->_right_angle;
     yield break;
   }

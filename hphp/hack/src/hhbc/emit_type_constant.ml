@@ -31,7 +31,7 @@ let get_kind_num ~tparams p =
   | "mixed" -> 9
   | "tuple" -> 10
   | "fun" -> 11
-  | "array" -> 12
+  | "darray" | "varray" | "array" -> 12
   | "typevar" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
   | "class" -> 15
@@ -46,32 +46,25 @@ let get_kind_num ~tparams p =
   | "unresolved"
   | _ -> 101
 
-and in_HH_namespace = function
-  | "Vector" | "ImmVector"
-  | "Set" | "ImmSet"
-  | "Map" | "ImmMap"
-  | "Pair" | "this" -> true
+and is_prim = function
+  | "HH\\void" | "HH\\int"
+  | "HH\\bool" | "HH\\float"
+  | "HH\\string" | "HH\\resource"
+  | "HH\\num" | "HH\\noreturn"
+  | "HH\\arraykey" | "HH\\mixed" -> true
   | _ -> false
 
-and is_prim s = match String.lowercase_ascii s with
-  | "void" | "int" | "integer"
-  | "bool" | "boolean"
-  | "float" | "double" | "real"
-  | "string" | "resource"
-  | "num" | "noreturn"
-  | "arraykey" | "mixed" -> true
-  | _ -> false
-
-and is_resolved_classname s = match String.lowercase_ascii s with
-  | "array" | "vec"
-  | "dict" | "keyset" -> true
+and is_resolved_classname = function
+  | "HH\\darray" | "HH\\varray"
+  | "array" | "HH\\vec"
+  | "HH\\dict" | "HH\\keyset" -> true
   | _ -> false
 
 let shape_field_name = function
   | A.SFlit ((_, s)) -> s, false
   | A.SFclass_const ((_, id), (_, s)) -> id ^ "::" ^ s, true
 
-let rec shape_field_to_pair ~tparams sf =
+let rec shape_field_to_pair ~tparams ~namespace sf =
   let name, is_class_const = shape_field_name sf.A.sf_name in
   let is_optional = sf.A.sf_optional in
   let hint = sf.A.sf_hint in
@@ -83,14 +76,16 @@ let rec shape_field_to_pair ~tparams sf =
     then [(TV.String "optional_shape_field", TV.Bool true)] else []
   in
   let inner_value =
-    [(TV.String "value", hint_to_type_constant ~tparams hint)]
+    [(TV.String "value", hint_to_type_constant ~tparams ~namespace hint)]
   in
   let inner_value = class_const @ optional @ inner_value in
   let value = TV.Array inner_value in
   (TV.String name, value)
 
-and shape_info_to_typed_value ~tparams si =
-  TV.Array (List.map ~f:(shape_field_to_pair ~tparams) si.A.si_shape_field_list)
+and shape_info_to_typed_value ~tparams ~namespace si =
+  TV.Array (
+    List.map ~f:(shape_field_to_pair ~tparams ~namespace)
+    si.A.si_shape_field_list)
 
 and shape_allows_unknown_fields { A.si_allows_unknown_fields; _ } =
   if si_allows_unknown_fields then
@@ -103,17 +98,19 @@ and type_constant_access_list sl =
   in
   TV.Array l
 
-and resolve_classname ~tparams s =
+and resolve_classname ~tparams ~namespace (p, s) =
+  let s = Types.fix_casing s in
+  let classname, _ = Hhbc_id.Class.elaborate_id namespace (p, s) in
+  let s = Hhbc_id.Class.to_raw_string classname in
   if is_prim s || is_resolved_classname s then []
   else
-    let s = Types.fix_casing s in
-    let name = if in_HH_namespace s then prefix_namespace "HH" s else s in
-    let id = if List.mem tparams name then "name" else "classname" in
-    [TV.String id, TV.String name]
+    let id = if List.mem tparams s then "name" else "classname" in
+    [TV.String id, TV.String s]
 
-and get_generic_types ~tparams = function
+and get_generic_types ~tparams ~namespace = function
   | [] -> []
-  | l -> [TV.String "generic_types", hints_to_type_constant ~tparams l]
+  | l ->
+    [TV.String "generic_types", hints_to_type_constant ~tparams ~namespace l]
 
 and get_kind ~tparams s = [TV.String "kind", TV.Int (get_kind_num ~tparams s)]
 
@@ -125,17 +122,17 @@ and get_typevars = function
  | [] -> []
  | tparams -> [TV.String "typevars", TV.String (String.concat "," tparams)]
 
-and hint_to_type_constant_list ~tparams h =
+and hint_to_type_constant_list ~tparams ~namespace h =
   match snd h with
-  | A.Happly ((_, s), l) ->
-    let kind = get_kind ~tparams s in
-    let classname = resolve_classname ~tparams s in
-    let generic_types = get_generic_types ~tparams l in
+  | A.Happly (s, l) ->
+    let kind = get_kind ~tparams (snd s) in
+    let classname = resolve_classname ~tparams ~namespace s in
+    let generic_types = get_generic_types ~tparams ~namespace l in
     kind @ classname @ generic_types
   | A.Hshape (si) ->
     shape_allows_unknown_fields si
     @ get_kind ~tparams "shape"
-    @ [TV.String "fields", shape_info_to_typed_value ~tparams si]
+    @ [TV.String "fields", shape_info_to_typed_value ~tparams ~namespace si]
   | A.Haccess ((_, s0), s1, sl) ->
     get_kind ~tparams "typeaccess" @
      [TV.String "root_name", TV.String (root_to_string s0);
@@ -144,30 +141,30 @@ and hint_to_type_constant_list ~tparams h =
     (* TODO: Bool indicates variadic argument. What to do? *)
     let kind = get_kind ~tparams "fun" in
     let return_type =
-      [TV.String "return_type", hint_to_type_constant ~tparams h]
+      [TV.String "return_type", hint_to_type_constant ~tparams ~namespace h]
     in
     let param_types =
-      [TV.String "param_types", hints_to_type_constant ~tparams hl]
+      [TV.String "param_types", hints_to_type_constant ~tparams ~namespace hl]
     in
     kind @ return_type @ param_types
   | A.Hoption h ->
     [TV.String "nullable", TV.Bool true]
-    @ hint_to_type_constant_list ~tparams h
+    @ hint_to_type_constant_list ~tparams ~namespace h
   | A.Htuple hl ->
     let kind = get_kind ~tparams "tuple" in
     let elem_types =
-      [TV.String "elem_types", hints_to_type_constant ~tparams hl]
+      [TV.String "elem_types", hints_to_type_constant ~tparams ~namespace hl]
     in
     kind @ elem_types
-  | A.Hsoft h -> hint_to_type_constant_list ~tparams h
+  | A.Hsoft h -> hint_to_type_constant_list ~tparams ~namespace h
 
-and hint_to_type_constant ?(is_typedef = false) ~tparams h =
-  let l = hint_to_type_constant_list ~tparams h in
+and hint_to_type_constant ?(is_typedef = false) ~tparams ~namespace h =
+  let l = hint_to_type_constant_list ~tparams ~namespace h in
   TV.Array (l @ if is_typedef then get_typevars tparams else [])
 
-and hints_to_type_constant ~tparams l =
+and hints_to_type_constant ~tparams ~namespace l =
   TV.Array (
     List.mapi l
       ~f:(fun i h ->
             (TV.Int (Int64.of_int i),
-            hint_to_type_constant ~tparams h)))
+            hint_to_type_constant ~tparams ~namespace h)))

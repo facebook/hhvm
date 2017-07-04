@@ -1697,6 +1697,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.VectorTypeSpecifier
       , (  vector_type_right_angle
+        :: vector_type_optional_comma
         :: vector_type_type
         :: vector_type_left_angle
         :: vector_type_keyword
@@ -1706,6 +1707,7 @@ module FromMinimal = struct
           { vector_type_keyword
           ; vector_type_left_angle
           ; vector_type_type
+          ; vector_type_optional_comma
           ; vector_type_right_angle
           }, results
       | SyntaxKind.KeysetTypeSpecifier
@@ -1856,6 +1858,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.ClassnameTypeSpecifier
       , (  classname_right_angle
+        :: classname_optional_comma
         :: classname_type
         :: classname_left_angle
         :: classname_keyword
@@ -1865,6 +1868,7 @@ module FromMinimal = struct
           { classname_keyword
           ; classname_left_angle
           ; classname_type
+          ; classname_optional_comma
           ; classname_right_angle
           }, results
       | SyntaxKind.FieldSpecifier
@@ -3418,11 +3422,13 @@ module FromMinimal = struct
         { M.vector_type_keyword
         ; M.vector_type_left_angle
         ; M.vector_type_type
+        ; M.vector_type_optional_comma
         ; M.vector_type_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (vector_type_right_angle, todo) in
+        let todo = Convert (vector_type_optional_comma, todo) in
         let todo = Convert (vector_type_type, todo) in
         let todo = Convert (vector_type_left_angle, todo) in
         convert offset todo results vector_type_keyword
@@ -3566,11 +3572,13 @@ module FromMinimal = struct
         { M.classname_keyword
         ; M.classname_left_angle
         ; M.classname_type
+        ; M.classname_optional_comma
         ; M.classname_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (classname_right_angle, todo) in
+        let todo = Convert (classname_optional_comma, todo) in
         let todo = Convert (classname_type, todo) in
         let todo = Convert (classname_left_angle, todo) in
         convert offset todo results classname_keyword

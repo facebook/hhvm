@@ -1586,6 +1586,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
+        { "field_name" : "optional_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "KeysetTypeSpecifier",
@@ -1704,6 +1705,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
+        { "field_name" : "optional_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "FieldSpecifier",

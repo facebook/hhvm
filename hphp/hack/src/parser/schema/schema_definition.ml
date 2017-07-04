@@ -1563,6 +1563,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Aggregate Specifier
+      ; "optional_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }
@@ -1714,6 +1715,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Aggregate Specifier
+      ; "optional_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }

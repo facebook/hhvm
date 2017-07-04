@@ -214,7 +214,8 @@ class virtual ['self] endo =
           c_body = r9;
           c_namespace = r10;
           c_enum = r11;
-          c_span = r12
+          c_span = r12;
+          c_doc_comment = this.c_doc_comment
         }
     method on_enum_ env this =
       let r0 = self#on_hint env this.e_base in
@@ -492,7 +493,8 @@ class virtual ['self] endo =
           m_ret = r7;
           m_ret_by_ref = r8;
           m_fun_kind = r9;
-          m_span = r10
+          m_span = r10;
+          m_doc_comment = this.m_doc_comment
         }
     method on_typeconst env this =
       let r0 = self#on_bool env this.tconst_abstract in
@@ -598,7 +600,8 @@ class virtual ['self] endo =
           f_user_attributes = r8;
           f_fun_kind = r9;
           f_namespace = r10;
-          f_span = r11
+          f_span = r11;
+          f_doc_comment = this.f_doc_comment
         }
     method on_FSync env this = this
     method on_FAsync env this = this

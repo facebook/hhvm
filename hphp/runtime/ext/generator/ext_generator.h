@@ -64,7 +64,14 @@ struct BaseGenerator {
     assert(func->isGenerator());
     auto base = func->base();
 
+    // Skip past VerifyParamType and EntryNoop bytecodes
     auto pc = func->unit()->at(base);
+    auto past = func->unit()->at(func->past());
+    while (peek_op(pc) != OpCreateCont) {
+      pc += instrLen(pc);
+      always_assert(pc < past);
+    }
+
     auto DEBUG_ONLY op1 = decode_op(pc);
     auto DEBUG_ONLY op2 = decode_op(pc);
     assert(op1 == OpCreateCont);

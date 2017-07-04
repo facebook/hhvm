@@ -63,6 +63,7 @@ let emit_main defs =
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(instr_int 1)
       ~default_dropthrough:None
+      ~doc_comment:None
       [] None defs
   in
     body
@@ -84,6 +85,7 @@ let emit_fatal_program ~ignore_message op message =
     [] (* params *)
     None (* return_type_info *)
     [] (* static_inits static_inits  *)
+    None (* doc *)
   in
     make [] [] [] [] body
 

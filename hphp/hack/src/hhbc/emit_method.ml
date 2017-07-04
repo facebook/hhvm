@@ -75,6 +75,7 @@ let from_ast_wrapper : bool -> _ ->
       ~default_dropthrough
       ~return_value:instr_null
       ~namespace
+      ~doc_comment:ast_method.Ast.m_doc_comment
       ast_method.Ast.m_params
       ret
       [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]

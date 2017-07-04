@@ -1243,7 +1243,8 @@ let rec get_doc node =
       vector_type_keyword;
       vector_type_left_angle;
       vector_type_type;
-      vector_type_right_angle
+      vector_type_right_angle;
+      _;
     } ->
     let ar = get_doc vector_type_keyword in
     let la = get_doc vector_type_left_angle in

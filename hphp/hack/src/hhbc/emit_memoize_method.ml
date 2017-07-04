@@ -342,6 +342,7 @@ let make_wrapper return_type params instrs =
     params
     (Some return_type)
     [] (* static_inits *)
+    None (* doc *)
 
 let emit ~non_null_return env info index return_type_info params is_static method_id =
   let instrs =
@@ -359,7 +360,7 @@ let emit_memoize_wrapper_body env memoize_info index ast_method
     let return_type_info =
       Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret in
     let non_null_return = cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret in
-    let params = Emit_param.from_asts ~namespace ~tparams:tparams ~generate_defaults:true params in
+    let params = Emit_param.from_asts ~namespace ~tparams:tparams ~generate_defaults:true ~scope params in
     let (_,original_name) = ast_method.Ast.m_name in
     let method_id =
       Hhbc_id.Method.from_ast_name original_name in

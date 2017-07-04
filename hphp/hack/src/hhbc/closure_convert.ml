@@ -177,6 +177,7 @@ let make_closure ~explicit_use ~class_num
     m_ret_by_ref = fd.f_ret_by_ref;
     m_fun_kind = fd.f_fun_kind;
     m_span = fd.f_span;
+    m_doc_comment = fd.f_doc_comment;
   } in
   let cvl =
     List.map lambda_vars
@@ -198,6 +199,7 @@ let make_closure ~explicit_use ~class_num
     c_namespace = Namespace_env.empty_with_default_popt;
     c_enum = None;
     c_span = p;
+    c_doc_comment = None;
   } in
   (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
   let inline_fundef =
@@ -418,7 +420,7 @@ and convert_lambda env st p fd use_vars_opt =
       p total_count env st lambda_vars tparams fd block in
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
-                     captured_this = captured_this;
+                     captured_this = captured_this || st.captured_this;
                      defined_vars = defined_vars;
                      static_vars = static_vars; } in
   (* Add lambda captured vars to current captured vars *)

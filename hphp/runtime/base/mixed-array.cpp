@@ -215,7 +215,12 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
       auto k = kTv.m_data.pstr;
       auto h = k->hash();
       auto ei = ad->findForInsertUpdate(k, h);
-      if (isValidPos(ei)) return nullptr;
+      if (isValidPos(ei)) {
+        // it's the caller's responsibility to free keysAndValues
+        ad->setZombie();
+        Release(ad);
+        return nullptr;
+      }
       data[i].setStrKeyNoIncRef(k, h);
       *ei = i;
     } else {
@@ -223,7 +228,12 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
       auto k = kTv.m_data.num;
       auto h = hash_int64(k);
       auto ei = ad->findForInsertUpdate(k, h);
-      if (isValidPos(ei)) return nullptr;
+      if (isValidPos(ei)) {
+        // it's the caller's responsibility to free keysAndValues
+        ad->setZombie();
+        Release(ad);
+        return nullptr;
+      }
       data[i].setIntKey(k, h);
       *ei = i;
     }

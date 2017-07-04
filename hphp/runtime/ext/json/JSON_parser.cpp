@@ -487,6 +487,8 @@ struct SimpleParser {
     auto const arr = top == fp ?
       staticEmptyArray() :
       MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
+    // MixedArray::MakeMixed can return nullptr if there are duplicate keys
+    if (!arr) return false;
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();

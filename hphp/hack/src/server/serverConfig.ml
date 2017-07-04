@@ -39,7 +39,7 @@ type t = {
   formatter_override : Path.t option;
 }
 
-let filename = Relative_path.concat Relative_path.Root ".hhconfig"
+let filename = Relative_path.from_root ".hhconfig"
 
 let is_compatible c1 c2 =
   (* This comparison can eventually be made more complex; we may not always
@@ -149,7 +149,7 @@ let maybe_relative_path fn =
    * necessarily the same as hh_server's root!!! *)
   Path.make begin
     if Filename.is_relative fn
-    then Relative_path.(to_absolute (concat Root fn))
+    then Relative_path.(to_absolute (from_root fn))
     else fn
   end
 

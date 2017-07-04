@@ -96,7 +96,7 @@ let parse_mini_state_json (json, _keytrace) =
     json >>= get_array "changes" >>= fun (changes, _) ->
       let changes = List.fold_left
         (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
-      let changes = List.map Relative_path.(concat Root) changes in
+      let changes = List.map Relative_path.from_root changes in
       return {
         saved_state_fn = state;
         corresponding_base_revision = for_base_rev;

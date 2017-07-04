@@ -171,7 +171,7 @@ module ServerInitCommon = struct
             let chan = open_in fn in
             let old_saved = Marshal.from_channel chan in
             let dirty_files =
-            List.map dirty_files Relative_path.(concat Root) in
+            List.map dirty_files Relative_path.from_root in
             HackEventLogger.vcs_changed_files_end t (List.length dirty_files);
             let _ = Hh_logger.log_duration "Finding changed files" t in
             Result.Ok (
@@ -362,9 +362,9 @@ module ServerInitCommon = struct
   let get_build_targets env =
     let untracked, tracked = BuildMain.get_live_targets env in
     let untracked =
-      List.map untracked (Relative_path.(concat Root)) in
+      List.map untracked Relative_path.from_root in
     let tracked =
-      List.map tracked (Relative_path.(concat Root)) in
+      List.map tracked Relative_path.from_root in
     Relative_path.set_of_list untracked, Relative_path.set_of_list tracked
 
   let get_state_future genv root state_future timeout =

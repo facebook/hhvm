@@ -66,12 +66,13 @@ let () =
 
   (* Files with parsing errors are not redeclared during lazy recheck, so
    * failed_naming should remain unchanged *)
-  if not @@
-    (Relative_path.Set.mem
-      env.ServerEnv.failed_naming (Relative_path.(concat Root foo1_name)) ||
+  let found =
     Relative_path.Set.mem
-      env.ServerEnv.failed_naming (Relative_path.(concat Root foo2_name))) then
-    Test.fail "File missing from failed_naming";
+      env.ServerEnv.failed_naming (Relative_path.from_root foo1_name) ||
+    Relative_path.Set.mem
+      env.ServerEnv.failed_naming (Relative_path.from_root foo2_name)
+  in
+  if not found then Test.fail "File missing from failed_naming";
 
   (* Remove the parsing error - there should be no errors after that *)
   let env, _ = Test.edit_file env foo2_name "<?hh // strict" in

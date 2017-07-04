@@ -62,7 +62,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
       env, ServerRefactor.get_fixme_patches codes env
     | IGNORE_FIXMES files ->
-      let paths = List.map files (Relative_path.concat Relative_path.Root) in
+      let paths = List.map files Relative_path.from_root in
       let disk_needs_parsing =
         List.fold_left
           paths

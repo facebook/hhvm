@@ -1199,6 +1199,8 @@ class Redis {
       return true;
     }
 
+    $this->existsCommandAndConnect($cmd, $args[0]);
+
     $clen = strlen($cmd);
     $count = count($args) + 1;
     $cmd = "*{$count}\r\n\${$clen}\r\n{$cmd}\r\n";
@@ -1213,6 +1215,56 @@ class Redis {
       return false;
     }
     return (bool)fwrite($this->connection, $cmd);
+  }
+
+  /**
+   *  Support cluster  auto MOVED and ASK
+   *
+   *  Calculate the key position 
+   *  MOVED and ASK  reConnect
+   *
+   */
+  protected function existsCommandAndConnect($cmd, $key) {
+
+    //exclude command
+    $excludeCmd = [
+        'AUTH'=>1,'QUIT'=>1,'SELECT'=>1,'INFO'=>1,'CONFIG'=>1,'SLAVEOF'=>1,'CLIENT'=>1,'OBJECT'=>1,
+        'OBJECT'=>1,'HMGET'=>1,'HMSET'=>1,'MULTI'=>1,'EXEC'=>1,'DISCARD'=>1,'WATCH'=>1,'UNWATCH'=>1,
+        'SCRIPT'=>1, 'SCAN'=>1, 'MATCH'=>1,'COUNT'=>1,'ECHO'=>1,'PING'=>1, 'BGREWRITEAOF'=>1,'BGSAVE'=>1,
+        'DBSIZE'=>1,'DEBUG'=>1,'FLUSHALL'=>1,'FLUSHDB'=>1,'LASTSAVE'=>1,'MONITOR'=>1,'PSYNC'=>1,
+        'SAVE'=>1,'SHUTDOWN'=>1,'SLAVEOF'=>1,'SLOWLOG'=>1,'SYNC'=>1,'TIME'=>1,
+    ];
+    if(!empty($excludeCmd[$cmd])){
+      return ;
+    }
+
+    $cmd = 'EXISTS';
+    $clen = strlen($cmd);
+    $alen = strlen($key);
+    $cmd = "*2\r\n\${$clen}\r\n{$cmd}\r\n" . "\${$alen}\r\n{$key}\r\n";
+
+
+    fwrite($this->connection, $cmd);
+    $resp = $this->sockReadData($type);
+
+    //error response
+    if ( ($type === self::TYPE_ERR)  ){
+
+      $respArray  = explode(' ', $resp);
+      $errorMag = strtoupper($respArray[0]);
+      //Change position
+      if ( $errorMag  === 'MOVED' OR $errorMag  === 'ASK'){
+        list($host, $port) = explode(":",$respArray[2]); 
+        $this->doConnect($host,
+                        $port, 
+                        $this->timeout_connect,
+                        $this->persistent_id,
+                        $this->retry_interval,
+                        $this->persistent);
+      }
+     
+    }
+
   }
 
   protected function processCommand($cmd/* ... */) {

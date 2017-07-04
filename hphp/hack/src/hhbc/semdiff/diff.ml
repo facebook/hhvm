@@ -145,7 +145,7 @@ let falling_back_list_comparer value_comparer l1 l2 =
   let len1 = List.length l1 in
   let len2 = List.length l2 in
    if len1 * len2 < max_array_size then levenshtein value_comparer l1 l2
-   else (prerr_endline "\n****Falling back on dumb comparer";
+   else (Semdiff_logging.debug "****Falling back on dumb comparer";
          dumb_compare value_comparer l1 l2 0 0 (Buffer.create len1))
 
 (* Now the default list comparer, which does levenshtein unless the input looks
@@ -282,7 +282,10 @@ let alist_comparer value_comparer ktostring = {
   let diffs = joinmap (fun k -> let v1 = List.assoc k al1 in
                                 let v2 = List.assoc k al2 in
                                 Log.debug @@ Printf.sprintf "comparing key %s" (ktostring k);
-                                value_comparer.comparer v1 v2)
+                                let (d,(s,e)) = value_comparer.comparer v1 v2 in
+                                let expanded_edits = if d=0 then e
+                                                     else "for " ^ (ktostring k) ^ ":" ^ e in
+                                (d,(s,expanded_edits)))
                      both in
    joindiffs [dels; adds; diffs]);
    size_of = (fun l -> sumsize (fun (_k,v) -> value_comparer.size_of v) l);

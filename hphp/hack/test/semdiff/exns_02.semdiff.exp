@@ -98,7 +98,7 @@ Distance = 28
 Size = 150
 Similarity = 81.46
 Edits = 
-[31m- }
+for foo:[31m- }
 [31m- String "finally 3x"
 [32m+ }
 [32m+ String "finally 3"

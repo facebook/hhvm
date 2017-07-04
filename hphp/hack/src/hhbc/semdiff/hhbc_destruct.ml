@@ -49,6 +49,14 @@ let uFCallBuiltin =
 let uFatal = pa (function | IOp (Fatal fop) -> Some fop | _ -> None)
 let uCUGetL = pa (function | IGet (CUGetL loc) -> Some loc | _ -> None)
 let uCreateCl = pa (function | IMisc (CreateCl (np,cn)) -> Some (np,cn) | _ -> None)
+let uVGetL = pa (function | IGet (VGetL loc) -> Some loc | _ -> None)
+let uBaseL = pa (function | IBase (BaseL (loc, op)) -> Some (loc,op) | _ -> None)
+let uBindM = pa (function | IFinal (BindM (n,key)) -> Some (n,key) | _ -> None)
+let uUnsetL = pa (function | IMutator (UnsetL loc) -> Some loc | _ -> None)
+let uPopV = pa (function | IBasic PopV -> Some () | _ -> None)
+let uBindN = pa (function | IMutator BindN -> Some () | _ -> None)
+let uCGetL = pa (function | IGet (CGetL loc) -> Some loc | _ -> None)
+let uCGetL2 = pa (function | IGet (CGetL2 loc) -> Some loc | _ -> None)
 
 (* trivial parser, always succeds, reads nothing *)
 let parse_any inp = Some ((),inp)
@@ -113,3 +121,9 @@ let rec greedy_kleene p inp =
         | Some (rest,endinp) -> Some (v::rest, endinp)
         | None -> None) (* can't happen *)
   | None -> Some ([],inp)
+
+(* optional, always succeeds *)
+let maybe p inp =
+ match p inp with
+  | Some (v,newinp) -> Some(Some v,newinp)
+  | None -> Some(None,inp)

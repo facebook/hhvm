@@ -1,0 +1,73 @@
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/vget.php starts here
+
+
+.filepath "/data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/vget.php";
+.adata A_0 = """a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}""";
+
+.main {
+  FPushFuncD 0 "f"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f() {
+  .numiters 1;
+  .declvars $array $z $y $x;
+  Array @A_0
+  SetL $array
+  PopC
+  Int 7
+  SetL $z
+  PopC
+  String "z"
+  SetL $y
+  PopC
+  VGetL $array
+  MIterInitK 0 L0 _5 _4
+  .try_fault F2 {
+    .try_fault F3 {
+      .try_fault F4 {
+      L1:
+        VGetL _5
+        CGetL2 $y
+        BindN
+        PopV
+        UnsetL _5
+      }
+      CGetL _4
+      SetL $x
+      PopC
+      UnsetL _4
+    }
+    FPushFuncD 3 "var_dump"
+    FPassL 0 $x
+    FPassL 1 $y
+    FPassL 2 $z
+    FCall 3
+    PopR
+    Int 6
+    SetL $z
+    PopC
+    MIterNextK 0 L1 _5 _4
+  }
+L0:
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $array
+  FCall 1
+  PopR
+  Null
+  RetC
+F4:
+  UnsetL _5
+  Unwind
+F3:
+  UnsetL _4
+  Unwind
+F2:
+  MIterFree 0
+  Unwind
+}
+
+# /data/users/pnb/fbsource/fbcode/hphp/hack/test/facebook/hhbc/tests/vget.php ends here

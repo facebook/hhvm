@@ -186,6 +186,7 @@ let error_tests =
     "test_abstract_classish_errors";
     "test_abstract_methodish_errors";
     "test_async_errors";
+    "test_visibility_modifier_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

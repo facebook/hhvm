@@ -1,0 +1,4 @@
+(6,3)-(6,9) Methods inside of interfaces may not be marked 'private'; only 'public' visibility is allowed.
+(7,3)-(7,11) Methods inside of interfaces may not be marked 'protected'; only 'public' visibility is allowed.
+(10,16)-(10,22) Methods inside of interfaces may not be marked 'private'; only 'public' visibility is allowed.
+(11,16)-(11,24) Methods inside of interfaces may not be marked 'protected'; only 'public' visibility is allowed.

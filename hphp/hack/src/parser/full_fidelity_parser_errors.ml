@@ -477,20 +477,20 @@ let abstract_method_in_nonabstract_class md_node parents =
     | Some node -> not (is_abstract_declaration node) in
   is_abstract_method && is_in_nonabstract_class
 
+(* Given a list of parents, tests if the immediate classish parent is an
+ * interface. *)
+let is_inside_interface parents =
+  Option.is_some (first_parent_classish_node TokenKind.Interface parents)
+
 (* Given a methodish_declaration node and a list of parents, tests if that
  * node declares an abstract method inside of an interface. *)
 let abstract_method_in_interface md_node parents =
-  let is_abstract_method = is_abstract_declaration md_node in
-  let parent_interface_node =
-    first_parent_classish_node TokenKind.Interface parents in
-  is_abstract_method && Option.is_some parent_interface_node
+  is_abstract_declaration md_node && is_inside_interface parents
 
 (* Tests if md_node is either explicitly declared abstract or is
  * defined inside an interface *)
 let is_generalized_abstract_method md_node parents =
-  let is_inside_interface = Option.is_some (first_parent_classish_node
-      TokenKind.Interface parents) in
-  is_abstract_declaration md_node || is_inside_interface
+  is_abstract_declaration md_node || is_inside_interface parents
 
 (* Returns the 'async'-annotation syntax node from the methodish_declaration
  * node. The returned node may have syntax kind 'Missing', but it will only be
@@ -517,6 +517,36 @@ let is_abstract_and_async_method md_node parents =
   | Some async_node ->
     is_generalized_abstract_method md_node parents
         && not (is_missing async_node)
+
+(* Returns the visibility modifier node from a list, or None if the
+ * list doesn't contain one. *)
+let extract_visibility_node modifiers_list =
+  let is_visibility_modifier modifier =
+    match token_kind modifier with
+    | Some TokenKind.Public
+    | Some TokenKind.Private
+    | Some TokenKind.Protected -> true
+    | _ -> false in
+  Core.List.find ~f:is_visibility_modifier (syntax_to_list_no_separators
+    modifiers_list)
+
+(* Tests if visibility modifiers of the node are allowed on
+ * methods inside an interface. *)
+let has_valid_interface_visibility node =
+  match syntax node with
+  | MethodishDeclaration { methodish_modifiers; _ } ->
+    let visibility_kind = extract_visibility_node methodish_modifiers in
+    let is_valid_methodish_visibility kind =
+      (is_token_kind kind TokenKind.Public) in
+    (* Defaulting to 'true' allows omitting visibility in method_declarations *)
+    Option.value_map visibility_kind
+      ~f:is_valid_methodish_visibility ~default:true
+  | _ -> true (* If not a methodish declaration, is vacuously valid *)
+
+(* Tests if a given node is a method definition (inside an interface) with
+ * either private or protected visibility. *)
+let invalid_methodish_visibility_inside_interface node parents =
+  is_inside_interface parents && not (has_valid_interface_visibility node)
 
 (* Test if (a list_expression is the left child of a binary_expression,
  * and the operator is '=') *)
@@ -612,6 +642,12 @@ let methodish_errors node parents =
         ~default:node in
       produce_error errors (is_abstract_and_async_method node) parents
       SyntaxError.error2046 async_annotation in
+    let errors =
+      let visibility_node = Option.value (extract_visibility_node modifiers)
+        ~default:node in
+      let visibility_text = PositionedSyntax.text visibility_node in (* is this option? *)
+      produce_error errors (invalid_methodish_visibility_inside_interface node)
+      parents (SyntaxError.error2047 visibility_text) visibility_node in
     errors
   | _ -> [ ]
 

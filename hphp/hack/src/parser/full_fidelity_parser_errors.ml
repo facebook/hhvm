@@ -485,6 +485,39 @@ let abstract_method_in_interface md_node parents =
     first_parent_classish_node TokenKind.Interface parents in
   is_abstract_method && Option.is_some parent_interface_node
 
+(* Tests if md_node is either explicitly declared abstract or is
+ * defined inside an interface *)
+let is_generalized_abstract_method md_node parents =
+  let is_inside_interface = Option.is_some (first_parent_classish_node
+      TokenKind.Interface parents) in
+  is_abstract_declaration md_node || is_inside_interface
+
+(* Returns the 'async'-annotation syntax node from the methodish_declaration
+ * node. The returned node may have syntax kind 'Missing', but it will only be
+ * None if something other than a methodish_declaration node was provided as
+ * input. *)
+let extract_async_node md_node =
+  match syntax md_node with
+  | MethodishDeclaration { methodish_function_decl_header; _ } -> begin
+    match syntax methodish_function_decl_header with
+    | FunctionDeclarationHeader { function_async ; _ } -> Some function_async
+    | _ ->
+      failwith("Encountered an improperly defined methodish_function_decl_" ^
+      "header: expected it to match FunctionDeclarationHeader with field " ^
+      "function_async.")
+    end
+  | _ -> None (* Only method declarations have async nodes *)
+
+(* Given a node and its parents, tests if the node declares a method that is
+ * both abstract and async. *)
+let is_abstract_and_async_method md_node parents =
+  let async_node = extract_async_node md_node in
+  match async_node with
+  | None -> false
+  | Some async_node ->
+    is_generalized_abstract_method md_node parents
+        && not (is_missing async_node)
+
 (* Test if (a list_expression is the left child of a binary_expression,
  * and the operator is '=') *)
 let is_left_of_simple_assignment le_node p1 =
@@ -574,6 +607,11 @@ let methodish_errors node parents =
         ~default:node in
       produce_error errors (abstract_method_in_interface node) parents
       SyntaxError.error2045 abstract_keyword in
+    let errors =
+      let async_annotation = Option.value (extract_async_node node)
+        ~default:node in
+      produce_error errors (is_abstract_and_async_method node) parents
+      SyntaxError.error2046 async_annotation in
     errors
   | _ -> [ ]
 

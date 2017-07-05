@@ -176,3 +176,5 @@ let error2044 class_name method_name = Printf.sprintf ("Classes cannot both " ^^
   "contain abstract methods and be non-abstract. Either declare 'abstract " ^^
   "class %s', or make 'function %s' non-abstract.") class_name method_name
 let error2045 = "No method inside an interface may be declared 'abstract'."
+let error2046 = "The 'async' annotation cannot be used on 'abstract' methods " ^
+  "or methods inside of interfaces."

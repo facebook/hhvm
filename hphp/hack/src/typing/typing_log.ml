@@ -138,8 +138,7 @@ let log_history env =
       lnewline();
       lprintf (Bold Green) "%s[#%d]: "
         (Local_id.get_name id) (Local_id.to_int id);
-      log_type_list env all_types;
-      lprintf (Normal Green) "]" end
+      log_type_list env all_types end
     env.Env.lenv.Env.local_type_history)
 
 let log_local_types env =

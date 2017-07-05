@@ -113,6 +113,6 @@ val env_with_locals :
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
 val in_loop : env -> (env -> env * 'a) -> env * 'a
 val merge_locals_and_history : local_env -> old_local Local_id.Map.t
-val seperate_locals_and_history :
+val separate_locals_and_history :
   old_local Local_id.Map.t ->
   (local_types * local_history Local_id.Map.t)

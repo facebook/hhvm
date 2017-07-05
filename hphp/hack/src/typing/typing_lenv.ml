@@ -23,6 +23,11 @@ module LEnvC = Typing_lenv_cont
 (* Module dealing with local environments. *)
 (*****************************************************************************)
 
+let equiv env ty1 ty2 =
+   let _, ety1 = expand_type env ty1 in
+   let _, ety2 = expand_type env ty2 in
+   Typing_defs.ty_equal ety1 ety2
+
 (*****************************************************************************)
 (* Functions dealing with old style local environment *)
 (*****************************************************************************)
@@ -72,13 +77,13 @@ let intersect env parent_lenv lenv1 lenv2 =
             else (all_types2, all_types1) in
           let all_types =
             List.fold_left ~f:begin fun acc ty ->
-              if List.mem acc ty then acc else ty::acc
+              if List.exists acc (equiv env ty) then acc else ty::acc
             end ~init:all_large all_small in
           let env, ty = Type.unify env.Env.pos Reason.URnone env ty1 ty2 in
           env, LMap.add local_id (all_types, ty, eid) locals
     end lenv1_locals_with_hist (env, parent_locals_with_hist)
   in
-  let locals, history = Env.seperate_locals_and_history new_locals in
+  let locals, history = Env.separate_locals_and_history new_locals in
   { env with Env.lenv =
     { fake_members;
       local_types = locals;
@@ -135,12 +140,12 @@ let integrate env parent_lenv child_lenv =
       | Some (parent_all_types, _, parent_eid) ->
           let eid = if child_eid = parent_eid then child_eid else Ident.tmp() in
           let all_types = List.fold_left ~f:begin fun all_types ty ->
-            if List.exists all_types ((=) ty) then all_types else ty::all_types
+            if List.exists all_types (equiv env ty) then all_types else ty::all_types
           end ~init:child_all_types parent_all_types in
           LMap.add local_id (all_types, child_ty, eid) locals
     end child_locals_with_hist parent_locals_with_hist
   in
-  let locals, history = Env.seperate_locals_and_history new_locals in
+  let locals, history = Env.separate_locals_and_history new_locals in
   { env with Env.lenv =
     { fake_members = child_lenv.fake_members;
       local_types = locals;
@@ -208,10 +213,14 @@ let fully_integrate env parent_lenv =
                 Type.unify env.Env.pos Reason.URnone env ty_acc ty
               end ~init:(env, first) rest
         in
-        env, LMap.add local_id (ty :: parent_all_types, ty, eid) locals
+        let parent_all_types =
+          if List.exists parent_all_types (equiv env ty)
+          then parent_all_types
+          else ty :: parent_all_types in
+        env, LMap.add local_id (parent_all_types, ty, eid) locals
     end child_locals_with_hist (env, parent_locals_with_hist)
   in
-  let locals, history = Env.seperate_locals_and_history new_locals in
+  let locals, history = Env.separate_locals_and_history new_locals in
   { env with Env.lenv =
     { fake_members;
       local_types = locals;

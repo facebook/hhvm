@@ -656,7 +656,8 @@ end
 
 let rec unbind seen env ty =
   let env, ty = expand_type env ty in
-  if List.mem seen ty
+  if List.exists seen (fun ty' ->
+    let _, ty' = expand_type env ty' in Typing_defs.ty_equal ty ty')
   then env, ty
   else
     let seen = ty :: seen in
@@ -686,7 +687,8 @@ let set_local env x new_type =
     | _ -> Exit_status.(exit Local_type_env_stale)
   in
   let all_types =
-    if List.exists all_types (fun x -> x = new_type)
+    if List.exists all_types (fun ty' ->
+      let _, ty' = expand_type env ty' in Typing_defs.ty_equal new_type ty')
     then all_types
     else new_type :: all_types
   in
@@ -803,7 +805,7 @@ let merge_locals_and_history lenv =
 
 (* TODO: Right now the only continuation we have is next
  * so I'm putting everything in next *)
-let seperate_locals_and_history locals_and_history =
+let separate_locals_and_history locals_and_history =
   let conts = Typing_continuations.Map.empty in
   let next_cont = Local_id.Map.map
     (fun (_, type_, exp_id) -> type_, exp_id) locals_and_history

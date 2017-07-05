@@ -116,7 +116,6 @@ quick/lexer_heredoc_label_cornercases.php
 quick/lexer_heredoc_many_buffers.php
 quick/lexer_heredoc_var_newlines.php
 quick/lexer_nowdoc_label_cornercases.php
-quick/libxml_suppress_errors.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php

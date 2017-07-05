@@ -407,7 +407,6 @@ slow/namespace/nested-ns.php
 slow/non-string-sprop.php
 slow/now_doc/1906.php
 slow/now_doc/1907.php
-slow/nullsafe/nullsafe-prop-1.php
 slow/nullsafe/nullsafe-prop-11.php
 slow/nullsafe/nullsafe-prop-14.php
 slow/nullsafe/nullsafe-prop-15.php

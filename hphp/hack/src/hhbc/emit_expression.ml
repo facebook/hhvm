@@ -776,11 +776,14 @@ and emit_eval env e =
     instr_eval;
   ]
 
-and emit_xhp_obj_get env e s nullflavor =
+and emit_xhp_obj_get ~need_ref env param_num_opt e s nullflavor =
   let p = Pos.none in
   let fn_name = p, A.Obj_get (e, (p, A.Id (p, "getAttribute")), nullflavor) in
-  let fn = p, A.Call (fn_name, [p, A.String (p, SU.Xhp.clean s)], []) in
-  emit_call_expr ~need_ref:false env fn
+  let args = [p, A.String (p, SU.Xhp.clean s)] in
+  let call, _ = emit_call env fn_name args [] in
+  match param_num_opt with
+  | Some i -> gather [ call; instr_fpassr i ]
+  | None -> gather [ call; if need_ref then instr_boxr else instr_unboxr ]
 
 and emit_get_class_no_args () =
   gather [
@@ -845,8 +848,6 @@ and emit_expr env expr ~need_ref =
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_array_get ~need_ref env None query_op base_expr opt_elem_expr
-  | A.Obj_get (expr, (_, A.Id (_, s)), nullflavor) when SU.Xhp.is_xhp s ->
-    emit_xhp_obj_get env expr s nullflavor
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env None query_op expr prop nullflavor
@@ -1269,28 +1270,32 @@ and emit_array_get ~need_ref env param_num_opt qop base_expr opt_elem_expr =
  * then this is the i'th parameter to a function
  *)
 and emit_obj_get ~need_ref env param_num_opt qop expr prop null_flavor =
-  let mode = get_queryMOpMode need_ref qop in
-  let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
-  let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base ~is_object:true ~notice:Notice env mode prop_stack_size param_num_opt expr in
-  let mk = get_prop_member_key env null_flavor 0 prop in
-  let total_stack_size = prop_stack_size + base_stack_size in
-  let final_instr =
-    instr (IFinal (
-      match param_num_opt with
-      | None ->
-        if need_ref then
-          VGetM (total_stack_size, mk)
-        else
-          QueryM (total_stack_size, qop, mk)
-      | Some i -> FPassM (i, total_stack_size, mk)
-    )) in
-  gather [
-    base_expr_instrs;
-    prop_expr_instrs;
-    base_setup_instrs;
-    final_instr
-  ]
+  match snd prop with
+  | A.Id (_, s) when SU.Xhp.is_xhp s ->
+    emit_xhp_obj_get ~need_ref env param_num_opt expr s null_flavor
+  | _ ->
+    let mode = get_queryMOpMode need_ref qop in
+    let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
+    let base_expr_instrs, base_setup_instrs, base_stack_size =
+      emit_base ~is_object:true ~notice:Notice env mode prop_stack_size param_num_opt expr in
+    let mk = get_prop_member_key env null_flavor 0 prop in
+    let total_stack_size = prop_stack_size + base_stack_size in
+    let final_instr =
+      instr (IFinal (
+        match param_num_opt with
+        | None ->
+          if need_ref then
+            VGetM (total_stack_size, mk)
+          else
+            QueryM (total_stack_size, qop, mk)
+        | Some i -> FPassM (i, total_stack_size, mk)
+      )) in
+    gather [
+      base_expr_instrs;
+      prop_expr_instrs;
+      base_setup_instrs;
+      final_instr
+    ]
 
 and emit_elem_instrs env opt_elem_expr =
   match opt_elem_expr with

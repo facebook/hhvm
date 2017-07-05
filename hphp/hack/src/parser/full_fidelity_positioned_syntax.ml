@@ -63,8 +63,9 @@ module PositionedSyntaxValue = struct
 end
 
 open Core
-
 include SyntaxWithPositionedToken.WithSyntaxValue(PositionedSyntaxValue)
+module Validated =
+  Full_fidelity_validated_syntax.Make(PositionedToken)(PositionedSyntaxValue)
 
 let source_text node =
   PositionedSyntaxValue.source_text (value node)

@@ -9,6 +9,8 @@
  *)
 
 module Lowerer = Full_fidelity_ast
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
 
 let purpose = "Read a single Hack file and produce the resulting S-Expression."
 let extra   = "(Options for development / parser selection and comparisson.)"
@@ -32,6 +34,7 @@ let exit_code : result -> int = function
 type parser_config =
   | AST
   | FFP
+  | ValidatedFFP
   | Benchmark
   | Compare of string
 
@@ -55,6 +58,57 @@ let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
 
 let run_ffp : Relative_path.t -> Lowerer.result =
   Lowerer.from_file ~include_line_comments:true
+
+let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
+  let open Full_fidelity_syntax_tree in
+  let content =
+    try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
+  let source_text = Full_fidelity_source_text.make content in
+  let tree        = make source_text in
+  let language    = language tree in
+  let script      = Syntax.from_tree tree in
+  let validated   =
+    try
+      Syntax.Validated.validate_script script
+    with
+    | Syntax.Validated.Validation_failure (k,s) as e -> begin
+      Printf.eprintf "FAILURE: expected: %s  actual: %s\n"
+        (SyntaxKind.to_string k)
+        (SyntaxKind.to_string (Syntax.kind s));
+      raise e
+    end
+  in
+  let invalidated = Syntax.Validated.invalidate_script validated in
+  let revalidated = Syntax.Validated.validate_script invalidated in
+  assert (validated = revalidated); (* Idempotence *after* validation *)
+  assert (script = invalidated); (* Idempotence *of* validation *)
+  Lowerer.lower
+    ~elaborate_namespaces:true
+    ~include_line_comments:false
+    ~keep_errors:true
+    ~ignore_pos:false
+    ~quick:false
+    ~suppress_output:false
+    ~parser_options:ParserOptions.default
+    ~content
+    ~language
+    ~file
+    ~fi_mode:(if is_php tree then FileInfo.Mphp else
+        let mode_string = String.trim (mode tree) in
+        let mode_word =
+          try Some (List.hd (Str.split (Str.regexp " +") mode_string)) with
+          | _ -> None
+        in
+        Option.value_map mode_word ~default:FileInfo.Mpartial ~f:(function
+          | "decl"           -> FileInfo.Mdecl
+          | "strict"         -> FileInfo.Mstrict
+          | ("partial" | "") -> FileInfo.Mpartial
+          (* TODO: Come up with better mode detection *)
+          | _                -> FileInfo.Mpartial
+        )
+      )
+    ~source_text
+    ~script:invalidated
 
 let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast)
 
@@ -85,6 +139,8 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
   = match conf with
   | AST -> Printf.printf "%s" (dump_sexpr (run_ast file).Parser_hack.ast)
   | FFP -> Printf.printf "%s" (dump_sexpr (run_ffp file).Lowerer.ast)
+  | ValidatedFFP ->
+    Printf.printf "%s" (dump_sexpr (run_validated_ffp file).Lowerer.ast)
   | Compare diff_cmd ->
     let open Unix in
     let open Printf in
@@ -226,6 +282,7 @@ let () =
   let parse_function = match !use_parser with
     | "ast"       -> AST
     | "ffp"       -> FFP
+    | "validated" -> ValidatedFFP
     | "benchmark" -> Benchmark
     | "compare"   -> Compare !use_diff
     | s -> raise (Failure (Printf.sprintf "Unknown parser '%s'\n" s))

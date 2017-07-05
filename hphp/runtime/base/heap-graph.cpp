@@ -126,34 +126,34 @@ HeapGraph makeHeapGraph(bool include_free) {
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
-  MM().forEachHeader([&](Header* h, size_t alloc_size) {
+  MM().forEachHeader([&](HeapObject* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
-      blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
+      blocks.insert((Header*)h, alloc_size); // adds interval [h, h+alloc_size[
     }
   });
   blocks.prepare();
 
   // initialize nodes by iterating over PtrMap's regions
   g.nodes.reserve(blocks.size());
-  blocks.iterate([&](const Header* h, size_t size) {
+  blocks.iterate([&](const HeapObject* h, size_t size) {
     type_scan::Index ty;
     switch (h->kind()) {
       case HeaderKind::NativeData:
-        ty = h->native_.typeIndex();
+        ty = static_cast<const NativeNode*>(h)->typeIndex();
         break;
       case HeaderKind::Resource:
-        ty = h->res_.typeIndex();
+        ty = static_cast<const ResourceHdr*>(h)->typeIndex();
         break;
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
-        ty = h->malloc_.typeIndex();
+        ty = static_cast<const MallocNode*>(h)->typeIndex();
         break;
       default:
         ty = type_scan::kIndexUnknown;
         break;
     }
     g.nodes.push_back(
-      HeapGraph::Node{h, size, false, ty, -1, -1}
+      HeapGraph::Node{(const Header*)h, size, false, ty, -1, -1}
     );
   });
 

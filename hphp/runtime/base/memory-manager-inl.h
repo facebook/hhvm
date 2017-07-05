@@ -423,7 +423,7 @@ inline bool MemoryManager::checkContains(void* p) const {
   return true;
 }
 
-inline Header* MemoryManager::find(const void* p) {
+inline HeapObject* MemoryManager::find(const void* p) {
   initFree();
   return m_heap.find(p);
 }

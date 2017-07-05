@@ -136,10 +136,11 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
       scanNative(&h->native_, scanner);
       return Native::obj(&h->native_)->scan(scanner);
     case HeaderKind::AsyncFuncFrame:
-      return scanAFWH(h->asyncFuncWH(), scanner);
+      return scanAFWH(asyncFuncWH(reinterpret_cast<const HeapObject*>(h)),
+                      scanner);
     case HeaderKind::ClosureHdr:
       scanner.scan(h->closure_hdr_);
-      return h->closureObj()->scan(scanner); // ObjectData::scan
+      return closureObj(reinterpret_cast<const HeapObject*>(h))->scan(scanner);
     case HeaderKind::Pair:
       return h->pair_.scan(scanner);
     case HeaderKind::Vector:

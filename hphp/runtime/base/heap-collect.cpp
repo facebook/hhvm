@@ -208,18 +208,18 @@ NEVER_INLINE void Marker::init() {
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
   MM().initFree();
   initfree_ns_ = cpu_ns() - t0;
-  MM().iterate([&](Header* h, size_t allocSize) {
+  MM().iterate([&](HeapObject* h, size_t allocSize) {
     auto kind = h->kind();
     if (kind == HeaderKind::Free) return; // continue
-    h->hdr_.clearMarks();
+    h->clearMarks();
     allocd_ += allocSize;
-    ptrs_.insert(h, allocSize);
+    ptrs_.insert((Header*)h, allocSize);
     if ((kind == HeaderKind::SmallMalloc || kind == HeaderKind::BigMalloc) &&
-        !type_scan::isKnownType(h->malloc_.typeIndex())) {
+        !type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
       // unknown type for a req::malloc'd block. See rationale above.
       unknown_ += allocSize;
-      h->hdr_.mark(GCBits::Pin);
-      enqueue(h);
+      h->mark(GCBits::Pin);
+      enqueue((Header*)h);
     }
   });
   ptrs_.prepare();
@@ -294,12 +294,12 @@ NEVER_INLINE void Marker::sweep() {
 
   mm.initFree();
 
-  ptrs_.iterate([&](const Header* hdr, size_t h_size) {
+  ptrs_.iterate([&](const HeapObject* hdr, size_t h_size) {
     if (!marked(hdr) &&
         hdr->kind() != HeaderKind::Free &&
         hdr->kind() != HeaderKind::SmallMalloc &&
         hdr->kind() != HeaderKind::BigMalloc) {
-      mm.objFree(const_cast<Header*>(hdr), h_size);
+      mm.objFree(const_cast<HeapObject*>(hdr), h_size);
     }
   });
 }

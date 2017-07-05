@@ -50,6 +50,59 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline const Resumable* resumable(const HeapObject* h) {
+  assert(h->kind() == HeaderKind::AsyncFuncFrame);
+  auto native = static_cast<const NativeNode*>(h);
+  return reinterpret_cast<const Resumable*>(
+    (const char*)native + native->obj_offset - sizeof(Resumable)
+  );
+}
+
+inline Resumable* resumable(HeapObject* h) {
+  assert(h->kind() == HeaderKind::AsyncFuncFrame);
+  auto native = static_cast<NativeNode*>(h);
+  return reinterpret_cast<Resumable*>(
+    (char*)native + native->obj_offset - sizeof(Resumable)
+  );
+}
+
+inline const c_WaitHandle* asyncFuncWH(const HeapObject* h) {
+  assert(resumable(h)->actRec()->func()->isAsyncFunction());
+  auto native = static_cast<const NativeNode*>(h);
+  auto obj = reinterpret_cast<const c_WaitHandle*>(
+    (const char*)native + native->obj_offset
+  );
+  assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  return obj;
+}
+
+inline c_WaitHandle* asyncFuncWH(HeapObject* h) {
+  assert(resumable(h)->actRec()->func()->isAsyncFunction());
+  auto native = static_cast<NativeNode*>(h);
+  auto obj = reinterpret_cast<c_WaitHandle*>(
+    (char*)native + native->obj_offset
+  );
+  assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  return obj;
+}
+
+inline const ObjectData* closureObj(const HeapObject* h) {
+  assert(h->kind() == HeaderKind::ClosureHdr);
+  auto closure_hdr = static_cast<const ClosureHdr*>(h);
+  auto obj = reinterpret_cast<const ObjectData*>(closure_hdr + 1);
+  assert(obj->headerKind() == HeaderKind::Closure);
+  return obj;
+}
+
+inline ObjectData* closureObj(HeapObject* h) {
+  assert(h->kind() == HeaderKind::ClosureHdr);
+  auto closure_hdr = static_cast<ClosureHdr*>(h);
+  auto obj = reinterpret_cast<ObjectData*>(closure_hdr + 1);
+  assert(obj->headerKind() == HeaderKind::Closure);
+  return obj;
+}
+
+
 // union of all the possible header types, and some utilities
 struct Header {
   HeaderKind kind() const {
@@ -71,46 +124,17 @@ struct Header {
     );
   }
 
-  const c_WaitHandle* asyncFuncWH() const {
-    assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<const c_WaitHandle*>(
-      (const char*)this + native_.obj_offset
-    );
-    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
-    return obj;
-  }
-
-  c_WaitHandle* asyncFuncWH() {
-    assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<c_WaitHandle*>(
-      (char*)this + native_.obj_offset
-    );
-    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
-    return obj;
-  }
-
-  const ObjectData* closureObj() const {
-    assert(kind() == HeaderKind::ClosureHdr);
-    auto obj = reinterpret_cast<const ObjectData*>(&closure_hdr_ + 1);
-    assert(obj->headerKind() == HeaderKind::Closure);
-    return obj;
-  }
-
-  ObjectData* closureObj() {
-    assert(kind() == HeaderKind::ClosureHdr);
-    auto obj = reinterpret_cast<ObjectData*>(&closure_hdr_ + 1);
-    assert(obj->headerKind() == HeaderKind::Closure);
-    return obj;
-  }
-
   // if this header is one of the types that contains an ObjectData,
   // return the (possibly inner ptr) ObjectData*
   const ObjectData* obj() const {
-    return isObjectKind(kind()) ? &obj_ :
-           kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH() :
+    return isObjectKind(kind()) ?
+             reinterpret_cast<const ObjectData*>(this) :
+           kind() == HeaderKind::AsyncFuncFrame ?
+             asyncFuncWH(reinterpret_cast<const HeapObject*>(this)) :
            kind() == HeaderKind::NativeData ?
              Native::obj(reinterpret_cast<const NativeNode*>(this)) :
-           kind() == HeaderKind::ClosureHdr ? closureObj() :
+           kind() == HeaderKind::ClosureHdr ?
+            closureObj(reinterpret_cast<const HeapObject*>(this)) :
            nullptr;
   }
 
@@ -139,7 +163,6 @@ public:
     c_Closure closure_;
   };
 };
-
 // Return the size (in bytes) without rounding up to MM size class.
 inline size_t heapSize(const HeapObject* h) {
   // Ordering depends on ext_wait-handle.h.
@@ -310,19 +333,19 @@ inline size_t allocSize(const HeapObject* h) {
 
 template<class Fn> void BigHeap::iterate(Fn fn) {
   // slabs and bigs are sorted; walk through both in address order
-  const auto SENTINEL = (Header*) ~0LL;
+  const auto SENTINEL = (HeapObject*) ~0LL;
   auto slab = std::begin(m_slabs);
   auto big = std::begin(m_bigs);
   auto slabend = std::end(m_slabs);
   auto bigend = std::end(m_bigs);
   while (slab != slabend || big != bigend) {
-    Header* slab_hdr = slab != slabend ? (Header*)slab->ptr : SENTINEL;
-    Header* big_hdr = big != bigend ? (Header*)*big : SENTINEL;
+    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
+    HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
     assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
-    Header *h, *end;
+    HeapObject *h, *end;
     if (slab_hdr < big_hdr) {
       h = slab_hdr;
-      end = (Header*)((char*)h + slab->size);
+      end = (HeapObject*)((char*)h + slab->size);
       ++slab;
       assert(end <= big_hdr); // otherwise slab overlaps next big
     } else {
@@ -331,19 +354,19 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
       ++big;
     }
     do {
-      auto size = allocSize((const HeapObject*)h);
+      auto size = allocSize(h);
       fn(h, size);
-      h = (Header*)((char*)h + size);
+      h = (HeapObject*)((char*)h + size);
     } while (h < end);
     assert(!end || h == end); // otherwise, last object was truncated
   }
 }
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {
-  m_heap.iterate([&](Header* h, size_t allocSize) {
+  m_heap.iterate([&](HeapObject* h, size_t allocSize) {
     if (h->kind() == HeaderKind::BigObj) {
       // skip MallocNode
-      h = reinterpret_cast<Header*>((&h->malloc_) + 1);
+      h = static_cast<MallocNode*>(h) + 1;
       allocSize -= sizeof(MallocNode);
     } else if (h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
@@ -361,7 +384,7 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
-  forEachHeader([&](Header* h, size_t) {
+  forEachHeader([&](HeapObject* h, size_t) {
     switch (h->kind()) {
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
@@ -375,16 +398,16 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::ImmVector:
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
-        ptrs.push_back(&h->obj_);
+        ptrs.push_back(static_cast<ObjectData*>(h));
         break;
       case HeaderKind::AsyncFuncFrame:
-        ptrs.push_back(h->asyncFuncWH());
+        ptrs.push_back(asyncFuncWH(h));
         break;
       case HeaderKind::NativeData:
-        ptrs.push_back(Native::obj(reinterpret_cast<NativeNode*>(h)));
+        ptrs.push_back(Native::obj(static_cast<NativeNode*>(h)));
         break;
       case HeaderKind::ClosureHdr:
-        ptrs.push_back(h->closureObj());
+        ptrs.push_back(closureObj(h));
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
@@ -512,7 +535,7 @@ struct PtrMap {
 
   template<class Fn> void iterate(Fn fn) const {
     for (auto& r : regions_) {
-      fn(r.first, r.second);
+      fn((const HeapObject*)r.first, r.second);
     }
   }
 

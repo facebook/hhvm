@@ -189,13 +189,13 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
     // prop_offset relative to the inner ObjectData.
     const ObjectData* from_obj{nullptr};
     if (from_hdr->kind() == HeaderKind::AsyncFuncFrame) {
-      from_obj = from_hdr->asyncFuncWH();
+      from_obj = asyncFuncWH(reinterpret_cast<const HeapObject*>(from_hdr));
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (from_hdr->kind() == HeaderKind::NativeData) {
       from_obj = Native::obj(reinterpret_cast<const NativeNode*>(from_hdr));
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (from_hdr->kind() == HeaderKind::ClosureHdr) {
-      from_obj = from_hdr->closureObj();
+      from_obj = closureObj(reinterpret_cast<const HeapObject*>(from_hdr));
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (isObjectKind(from_hdr->kind())) {
       from_obj = &from_hdr->obj_;

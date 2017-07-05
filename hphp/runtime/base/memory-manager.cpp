@@ -134,7 +134,7 @@ MemoryManager::MemoryManager() {
 MemoryManager::~MemoryManager() {
   if (debug) {
     // Check that every allocation in heap has been freed before destruction.
-    forEachHeader([&](Header* h, size_t) {
+    forEachHeader([&](HeapObject* h, size_t) {
       assert(h->kind() == HeaderKind::Free);
     });
   }
@@ -145,7 +145,7 @@ void MemoryManager::resetRuntimeOptions() {
   if (debug) {
     checkHeap("resetRuntimeOptions");
     // check that every allocation in heap has been freed before reset
-    iterate([&](Header* h, size_t) {
+    iterate([&](HeapObject* h, size_t) {
       assert(h->kind() == HeaderKind::Free);
     });
   }
@@ -521,26 +521,29 @@ void MemoryManager::endQuarantine(FreelistArray&& list) {
 // test iterating objects in slabs
 void MemoryManager::checkHeap(const char* phase) {
   size_t bytes=0;
-  std::vector<Header*> hdrs;
+  std::vector<HeapObject*> hdrs;
   PtrMap free_blocks, apc_arrays, apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
-  forEachHeader([&](Header* h, size_t alloc_size) {
-    hdrs.push_back(&*h);
+  forEachHeader([&](HeapObject* h, size_t alloc_size) {
+    hdrs.push_back(h);
     bytes += alloc_size;
     auto kind = h->kind();
     counts[(int)kind]++;
     switch (kind) {
       case HeaderKind::Free:
-        free_blocks.insert(h, alloc_size);
+        free_blocks.insert((Header*)h, alloc_size);
         break;
       case HeaderKind::Apc:
-        if (h->apc_.m_sweep_index != kInvalidSweepIndex) {
-          apc_arrays.insert(h, alloc_size);
+        if (static_cast<APCLocalArray*>(h)->m_sweep_index !=
+            kInvalidSweepIndex) {
+          apc_arrays.insert((Header*)h, alloc_size);
         }
         break;
       case HeaderKind::String:
-        if (h->str_.isProxy()) apc_strings.insert(h, alloc_size);
+        if (static_cast<StringData*>(h)->isProxy()) {
+          apc_strings.insert((Header*)h, alloc_size);
+        }
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
@@ -1201,7 +1204,7 @@ void BigHeap::sortBigs() {
  *
  * If that fails, we return nullptr.
  */
-Header* BigHeap::find(const void* p) {
+HeapObject* BigHeap::find(const void* p) {
   sortSlabs();
   auto const slab = std::lower_bound(
     std::begin(m_slabs), std::end(m_slabs), p,
@@ -1220,7 +1223,7 @@ Header* BigHeap::find(const void* p) {
     while (h < slab_end) {
       auto const hdr = reinterpret_cast<HeapObject*>(h);
       auto const size = allocSize(hdr);
-      if (p < h + size) return reinterpret_cast<Header*>(h);
+      if (p < h + size) return hdr;
       h += size;
     }
     // We know `p' is in the slab, so it must belong to one of the headers.
@@ -1237,12 +1240,12 @@ Header* BigHeap::find(const void* p) {
   );
 
   if (big != std::end(m_bigs) && *big <= p) {
-    auto const hdr = reinterpret_cast<Header*>(*big);
+    auto const hdr = reinterpret_cast<HeapObject*>(*big);
     if (hdr->kind() != HeaderKind::BigObj) {
       // `p' is part of the MallocNode.
       return hdr;
     }
-    auto const sub = reinterpret_cast<Header*>(*big + 1);
+    auto const sub = reinterpret_cast<HeapObject*>(*big + 1);
     return p >= sub ? sub : hdr;
   }
   return nullptr;

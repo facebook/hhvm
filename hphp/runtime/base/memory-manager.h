@@ -43,7 +43,6 @@
 namespace HPHP {
 
 struct APCLocalArray;
-struct Header;
 struct MemoryManager;
 struct ObjectData;
 struct ResourceData;
@@ -524,10 +523,10 @@ struct BigHeap {
   template<class Fn> void iterate(Fn);
 
   /*
-   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * Find the HeapObject* which contains `p', else nullptr if `p' is
    * not contained in any heap allocation.
    */
-  Header* find(const void* p);
+  HeapObject* find(const void* p);
 
   /*
    * Sorting helpers
@@ -731,7 +730,7 @@ struct MemoryManager {
   bool checkContains(void* p) const;
 
   /*
-   * Heap iterator methods.  `fn' takes a Header* argument.
+   * Heap iterator methods.  `fn' takes a HeapObject* argument.
    *
    * initFree(): prepare to iterate by initializing free block headers.
    * iterate(): Raw iterator loop over the headers of everything in the heap.
@@ -755,10 +754,10 @@ struct MemoryManager {
   template<class Fn> void iterateRoots(Fn) const;
 
   /*
-   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * Find the HeapObject* which contains `p', else nullptr if `p' is
    * not contained in any heap allocation.
    */
-  Header* find(const void* p);
+  HeapObject* find(const void* p);
 
   /////////////////////////////////////////////////////////////////////////////
   // Stats.

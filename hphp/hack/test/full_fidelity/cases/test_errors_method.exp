@@ -1,10 +1,16 @@
 (4,3)-(4,16) A method declaration cannot have multiple visibility modifiers.
 (5,3)-(5,13) A method declaration cannot have duplicate modifiers.
 (6,3)-(6,23) A method cannot be both abstract and final.
+(6,10)-(6,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (7,3)-(7,18) A method cannot be both abstract and private.
+(7,11)-(7,18) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
+(8,10)-(8,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (8,47)-(8,48) An abstract method cannot have a method body.
+(9,10)-(9,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function f' non-abstract.
 (10,31)-(10,31) A non-abstract method must have a body.
 (11,3)-(11,15) A constructor cannot be static.
+(13,10)-(13,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function __construct' non-abstract.
+(14,10)-(14,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class E', or make 'function __construct' non-abstract.
 (14,43)-(14,44) An abstract method cannot have a method body.
 (15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
 (16,31)-(16,36) A destructor must have an empty parameter list.

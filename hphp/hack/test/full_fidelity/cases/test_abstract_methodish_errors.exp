@@ -1,0 +1,2 @@
+(5,10)-(5,17) No method inside an interface may be declared 'abstract'.
+(10,10)-(10,17) Classes cannot both contain abstract methods and be non-abstract. Either declare 'abstract class C1', or make 'function c3' non-abstract.

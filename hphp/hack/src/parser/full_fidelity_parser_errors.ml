@@ -410,35 +410,80 @@ let is_classish_kind_declared_abstract classish_kind cd_node =
       list_contains_predicate is_abstract classish_modifiers
   | _ -> false
 
-(* Given a classish_declaration node, returns the 'abstract' keyword node
- * in its list of classish_modifiers, or None if there isn't one. *)
-let extract_abstract_keyword cd_node =
-  match syntax cd_node with
-  | ClassishDeclaration { classish_modifiers; _ } ->
-    Core.List.find ~f:is_abstract
-        (syntax_to_list_no_separators classish_modifiers)
-  | _ -> None
+(* Given a function_declaration_header node, returns its function_name
+ * as a string opt. *)
+let extract_function_name header_node =
+  (* The '_' arm of this match will never be reached, but the type checker
+   * doesn't allow a direct extraction of function_name from
+   * function_declaration_header. *)
+   match syntax header_node with
+   | FunctionDeclarationHeader fdh ->
+     Some (PositionedSyntax.text fdh.function_name)
+   | _ -> None
 
 (* Return, as a string opt, the name of the function with the earliest
  * declaration node in the list of parents. *)
-let first_function_name parents =
+let first_parent_function_name parents =
   Core.List.find_map parents ~f:begin fun node ->
-    let extract_name header_node =
-      (* The '_' arm of this match will never be reached, but the type checker
-       * doesn't allow a direct extraction of function_name from
-       * function_declaration_header. *)
-       begin match syntax header_node with
-        | FunctionDeclarationHeader fdh ->
-            Some (PositionedSyntax.text fdh.function_name)
-        | _ -> None
-       end in
     match syntax node with
-    | FunctionDeclaration {function_declaration_header ; _ } ->
-        extract_name function_declaration_header
-    | MethodishDeclaration {methodish_function_decl_header; _ } ->
-        extract_name methodish_function_decl_header
+    | FunctionDeclaration {function_declaration_header = header; _ }
+    | MethodishDeclaration {methodish_function_decl_header = header; _ } ->
+      extract_function_name header
     | _ -> None
   end
+
+(* Returns the first ClassishDeclaration node in the list of parents,
+ * or None if there isn't one. *)
+let first_parent_classish_node classish_kind parents =
+  Core.List.find_map parents ~f:begin fun node ->
+  match syntax node with
+  | ClassishDeclaration cd
+    when is_token_kind cd.classish_keyword classish_kind -> Some node
+  | _ -> None
+  end
+
+(* Return, as a string opt, the name of the earliest Class in the list of
+ * parents. *)
+let first_parent_class_name parents =
+  let parent_class_decl = first_parent_classish_node TokenKind.Class parents in
+  Option.value_map parent_class_decl ~default:None ~f:begin fun node ->
+    match syntax node with
+    | ClassishDeclaration cd -> Some (PositionedSyntax.text cd.classish_name)
+    | _ -> None (* This arm is never reached  *)
+  end
+
+(* Given a classish_ or methodish_ declaration node, returns the 'abstract'
+ * keyword node from its list of modifiers, or None if there isn't one. *)
+let extract_abstract_keyword declaration_node =
+  match syntax declaration_node with
+  | ClassishDeclaration { classish_modifiers = modifiers_list ; _ }
+  | MethodishDeclaration { methodish_modifiers = modifiers_list ; _ } ->
+    Core.List.find ~f:is_abstract
+        (syntax_to_list_no_separators modifiers_list)
+  | _ -> None
+
+(* Wrapper function to convert output of the above function into boolean *)
+let is_abstract_declaration declaration_node =
+  not (Option.is_none (extract_abstract_keyword declaration_node))
+
+(* Given a methodish_declaration node and a list of parents, tests if that
+ * node declares an abstract method inside of a no-nabstract class. *)
+let abstract_method_in_nonabstract_class md_node parents =
+  let is_abstract_method = is_abstract_declaration md_node in
+  let parent_class_node = first_parent_classish_node TokenKind.Class parents in
+  let is_in_nonabstract_class =
+    match parent_class_node with
+    | None -> false
+    | Some node -> not (is_abstract_declaration node) in
+  is_abstract_method && is_in_nonabstract_class
+
+(* Given a methodish_declaration node and a list of parents, tests if that
+ * node declares an abstract method inside of an interface. *)
+let abstract_method_in_interface md_node parents =
+  let is_abstract_method = is_abstract_declaration md_node in
+  let parent_interface_node =
+    first_parent_classish_node TokenKind.Interface parents in
+  is_abstract_method && Option.is_some parent_interface_node
 
 (* Test if (a list_expression is the left child of a binary_expression,
  * and the operator is '=') *)
@@ -513,6 +558,22 @@ let methodish_errors node parents =
     let errors =
       produce_error errors (methodish_in_interface_has_body md) parents
       SyntaxError.error2041 md.methodish_function_body in
+    let errors =
+      let class_name = Option.value (first_parent_class_name parents)
+        ~default:"" in
+      let method_name = Option.value (extract_function_name
+        md.methodish_function_decl_header) ~default:"" in
+      (* default will never be used, since existence of abstract_keyword is a
+       * necessary condition for the production of an error. *)
+      let abstract_keyword = Option.value (extract_abstract_keyword node)
+        ~default:node in
+      produce_error errors (abstract_method_in_nonabstract_class node) parents
+      (SyntaxError.error2044 class_name method_name) abstract_keyword in
+    let errors =
+      let abstract_keyword = Option.value (extract_abstract_keyword node)
+        ~default:node in
+      produce_error errors (abstract_method_in_interface node) parents
+      SyntaxError.error2045 abstract_keyword in
     errors
   | _ -> [ ]
 
@@ -658,7 +719,7 @@ let classish_errors node parents =
       let keyword_str = Option.value_map (token_kind cd.classish_keyword)
         ~default:"" ~f:TokenKind.to_string in
       let declared_name_str = PositionedSyntax.text cd.classish_name in
-      let function_str = Option.value (first_function_name parents)
+      let function_str = Option.value (first_parent_function_name parents)
         ~default:"" in
       (* To avoid iterating through the whole parents list again, do a simple
        * check on function_str rather than a harder one on cd or parents. *)

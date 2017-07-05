@@ -184,6 +184,7 @@ let error_tests =
     "test_list_expression_errors";
     "test_interface_method_errors";
     "test_abstract_classish_errors";
+    "test_abstract_methodish_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

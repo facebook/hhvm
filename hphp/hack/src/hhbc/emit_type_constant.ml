@@ -19,28 +19,28 @@ let get_kind_num ~tparams p =
   let p = if List.mem tparams p then "typevar" else String.lowercase_ascii p in
   Int64.of_int @@
   match p with
-  | "void" -> 0
-  | "int" | "integer" -> 1
-  | "bool" | "boolean" -> 2
-  | "float" | "double" | "real" -> 3
-  | "string" -> 4
-  | "resource" -> 5
-  | "num" -> 6
-  | "noreturn" -> 8
-  | "arraykey" -> 7
-  | "mixed" -> 9
+  | "hh\\void" -> 0
+  | "hh\\int" -> 1
+  | "hh\\bool" -> 2
+  | "hh\\float" -> 3
+  | "hh\\string" -> 4
+  | "hh\\resource" -> 5
+  | "hh\\num" -> 6
+  | "hh\\noreturn" -> 8
+  | "hh\\arraykey" -> 7
+  | "hh\\mixed" -> 9
   | "tuple" -> 10
   | "fun" -> 11
-  | "darray" | "varray" | "array" -> 12
+  | "hh\\darray" | "hh\\varray" | "array" -> 12
   | "typevar" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
   | "class" -> 15
   | "interface" -> 16
   | "trait" -> 17
   | "enum" -> 18
-  | "dict" -> 19
-  | "vec" -> 20
-  | "keyset" -> 21
+  | "hh\\dict" -> 19
+  | "hh\\vec" -> 20
+  | "hh\\keyset" -> 21
   | "typeaccess" -> 102
   | "xhp" -> 103
   | "unresolved"
@@ -102,10 +102,10 @@ and resolve_classname ~tparams ~namespace (p, s) =
   let s = Types.fix_casing s in
   let classname, _ = Hhbc_id.Class.elaborate_id namespace (p, s) in
   let s = Hhbc_id.Class.to_raw_string classname in
-  if is_prim s || is_resolved_classname s then []
+  if is_prim s || is_resolved_classname s then [], s
   else
     let id = if List.mem tparams s then "name" else "classname" in
-    [TV.String id, TV.String s]
+    [TV.String id, TV.String s], s
 
 and get_generic_types ~tparams ~namespace = function
   | [] -> []
@@ -125,9 +125,11 @@ and get_typevars = function
 and hint_to_type_constant_list ~tparams ~namespace h =
   match snd h with
   | A.Happly (s, l) ->
-    let kind = get_kind ~tparams (snd s) in
-    let classname = resolve_classname ~tparams ~namespace s in
-    let generic_types = get_generic_types ~tparams ~namespace l in
+    let classname, s_res = resolve_classname ~tparams ~namespace s in
+    let kind = get_kind ~tparams s_res in
+    let generic_types =
+      if snd s = "classname" then []
+      else get_generic_types ~tparams ~namespace l in
     kind @ classname @ generic_types
   | A.Hshape (si) ->
     shape_allows_unknown_fields si

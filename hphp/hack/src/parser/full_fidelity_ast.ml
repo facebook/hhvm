@@ -2002,51 +2002,6 @@ type result =
   ; comments : (Pos.t * comment) list
   }
 
-let lower
-  ?(elaborate_namespaces  = true)
-  ?(include_line_comments = false)
-  ?(keep_errors           = true)
-  ?(ignore_pos            = false)
-  ?(quick                 = false)
-  ?(suppress_output       = false)
-  ?(parser_options        = ParserOptions.default)
-  ~content
-  ~language
-  ~file
-  ~fi_mode
-  ~source_text
-  ~script
-  : result =
-    lowerer_state.language  := language;
-    lowerer_state.filePath  := file;
-    lowerer_state.mode      := fi_mode;
-    lowerer_state.popt      := parser_options;
-    lowerer_state.ignorePos := ignore_pos;
-    lowerer_state.quickMode := quick;
-    lowerer_state.suppress_output := suppress_output;
-    let saw_yield = ref false in
-    let errors = ref [] in (* The top-level error list. *)
-    let max_depth = 42 in (* Filthy hack around OCaml bug *)
-    let ast = runP pScript script { saw_yield; errors; max_depth } in
-    let ast =
-      if elaborate_namespaces
-      then Namespaces.elaborate_defs parser_options ast
-      else ast
-    in
-    let comments, fixmes =
-      if not include_line_comments
-      then [], IMap.empty
-      else
-        let comments = scour_comments file source_text script in
-        let fixmes = IMap.empty (*TODO*) in
-        comments, fixmes
-    in
-    if keep_errors then begin
-      Fixmes.HH_FIXMES.add file fixmes;
-      Option.iter (Core.List.last !errors) Errors.parsing_error
-    end;
-    { fi_mode; ast; content; comments; file }
-
 let from_text
   ?(elaborate_namespaces  = true)
   ?(include_line_comments = false)
@@ -2081,20 +2036,36 @@ let from_text
         | _                -> FileInfo.Mpartial
       )
     in
-    lower
-      ~elaborate_namespaces
-      ~include_line_comments
-      ~keep_errors
-      ~ignore_pos
-      ~quick
-      ~suppress_output
-      ~parser_options
-      ~content:(Full_fidelity_source_text.text source_text)
-      ~language:(language tree)
-      ~file
-      ~fi_mode
-      ~source_text
-      ~script
+    lowerer_state.language  := language tree;
+    lowerer_state.filePath  := file;
+    lowerer_state.mode      := fi_mode;
+    lowerer_state.popt      := parser_options;
+    lowerer_state.ignorePos := ignore_pos;
+    lowerer_state.quickMode := quick;
+    lowerer_state.suppress_output := suppress_output;
+    let saw_yield = ref false in
+    let errors = ref [] in (* The top-level error list. *)
+    let max_depth = 42 in (* Filthy hack around OCaml bug *)
+    let ast = runP pScript script { saw_yield; errors; max_depth } in
+    let ast =
+      if elaborate_namespaces
+      then Namespaces.elaborate_defs parser_options ast
+      else ast
+    in
+    let content = Full_fidelity_source_text.text source_text in
+    let comments, fixmes =
+      if not include_line_comments
+      then [], IMap.empty
+      else
+        let comments = scour_comments file source_text script in
+        let fixmes = IMap.empty (*TODO*) in
+        comments, fixmes
+    in
+    if keep_errors then begin
+      Fixmes.HH_FIXMES.add file fixmes;
+      Option.iter (List.last !errors) Errors.parsing_error
+    end;
+    { fi_mode; ast; content; comments; file }
 
 let from_file
   ?(elaborate_namespaces  = true)
@@ -2102,7 +2073,6 @@ let from_file
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
-  ?(suppress_output       = false)
   ?lower_coroutines
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
@@ -2113,7 +2083,6 @@ let from_file
       ~keep_errors
       ~ignore_pos
       ~quick
-      ~suppress_output
       ?lower_coroutines
       ~parser_options
       path
@@ -2160,7 +2129,6 @@ let from_file_with_legacy
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
   ?(quick                 = false)
-  ?(suppress_output       = false)
   ?lower_coroutines
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
@@ -2171,7 +2139,6 @@ let from_file_with_legacy
       ~keep_errors
       ~ignore_pos
       ~quick
-      ~suppress_output
       ?lower_coroutines
       ~parser_options
       file

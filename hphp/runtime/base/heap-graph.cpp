@@ -35,17 +35,14 @@ conservativeScan(const void* start, size_t len, Fn fn) {
   const uintptr_t M{7}; // word size - 1
   auto s = (const void**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (const void**)((uintptr_t(start) + len) & ~M); // round down
-  for (; s < e; s++) fn(s, *s);
+  for (; s < e; s++) {
+    // Mask off the upper 16-bits to handle things like
+    // DiscriminatedPtr which stores things up there.
+    fn(s, (const void*)(uintptr_t(*s) & (-1ULL >> 16)));
+  }
 }
 
 namespace {
-template<class F>
-struct PtrFilter: F {
-  template <class... Args> explicit PtrFilter(Args&&... args)
-    : F(std::forward<Args>(args)...) {}
-
-  // end is a partial word, don't scan that word.
-};
 
 // When we don't know the offset. 0 is safe since offset 0 in real
 // objects is the header word, which never contains pointers.

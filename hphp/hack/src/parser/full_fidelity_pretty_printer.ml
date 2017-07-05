@@ -847,12 +847,6 @@ let rec get_doc node =
     let y = get_doc x.yield_keyword in
     let o = get_doc x.yield_operand in
     group_doc (y ^| o)
-  | PrintExpression {
-    print_keyword;
-    print_expression } ->
-    let t = get_doc print_keyword in
-    let e = get_doc print_expression in
-    group_doc (t ^| e)
   | CastExpression x ->
     let l = get_doc x.cast_left_paren in
     let t = get_doc x.cast_type in

@@ -306,8 +306,6 @@ abstract class EditableSyntax implements ArrayAccess {
       return EmbeddedMemberSelectionExpression::from_json($json, $position, $source);
     case 'yield_expression':
       return YieldExpression::from_json($json, $position, $source);
-    case 'print_expression':
-      return PrintExpression::from_json($json, $position, $source);
     case 'prefix_unary_expression':
       return PrefixUnaryExpression::from_json($json, $position, $source);
     case 'postfix_unary_expression':
@@ -13244,69 +13242,6 @@ final class YieldExpression extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_operand;
-    yield break;
-  }
-}
-final class PrintExpression extends EditableSyntax {
-  private EditableSyntax $_keyword;
-  private EditableSyntax $_expression;
-  public function __construct(
-    EditableSyntax $keyword,
-    EditableSyntax $expression) {
-    parent::__construct('print_expression');
-    $this->_keyword = $keyword;
-    $this->_expression = $expression;
-  }
-  public function keyword(): EditableSyntax {
-    return $this->_keyword;
-  }
-  public function expression(): EditableSyntax {
-    return $this->_expression;
-  }
-  public function with_keyword(EditableSyntax $keyword): PrintExpression {
-    return new PrintExpression(
-      $keyword,
-      $this->_expression);
-  }
-  public function with_expression(EditableSyntax $expression): PrintExpression {
-    return new PrintExpression(
-      $this->_keyword,
-      $expression);
-  }
-
-  public function rewrite(
-    ( function
-      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
-    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
-    $new_parents = $parents ?? [];
-    array_push($new_parents, $this);
-    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
-    $expression = $this->expression()->rewrite($rewriter, $new_parents);
-    if (
-      $keyword === $this->keyword() &&
-      $expression === $this->expression()) {
-      return $rewriter($this, $parents ?? []);
-    } else {
-      return $rewriter(new PrintExpression(
-        $keyword,
-        $expression), $parents ?? []);
-    }
-  }
-
-  public static function from_json(mixed $json, int $position, string $source) {
-    $keyword = EditableSyntax::from_json(
-      $json->print_keyword, $position, $source);
-    $position += $keyword->width();
-    $expression = EditableSyntax::from_json(
-      $json->print_expression, $position, $source);
-    $position += $expression->width();
-    return new PrintExpression(
-        $keyword,
-        $expression);
-  }
-  public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_keyword;
-    yield $this->_expression;
     yield break;
   }
 }

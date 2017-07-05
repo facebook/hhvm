@@ -859,14 +859,6 @@ let rec transform node =
       SplitWith Cost.Base;
       Nest [t operand];
     ]
-  | PrintExpression x ->
-    let (kw, expr) = get_print_expression_children x in
-    Fmt [
-      t kw;
-      Space;
-      SplitWith Cost.Base;
-      Nest [t expr];
-    ]
   | PrefixUnaryExpression x ->
     let (operator, operand) = get_prefix_unary_expression_children x in
     Fmt [
@@ -874,7 +866,9 @@ let rec transform node =
       (match syntax operator with
         | Token x ->
           let open EditableToken in
-          if kind x = TokenKind.Await || kind x = TokenKind.Clone then Space
+          if   kind x = TokenKind.Await
+            || kind x = TokenKind.Clone
+            || kind x = TokenKind.Print  then Space
           else Nothing
         | _ -> Nothing
       );

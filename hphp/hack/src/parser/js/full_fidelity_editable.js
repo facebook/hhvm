@@ -243,8 +243,6 @@ class EditableSyntax
       return EmbeddedMemberSelectionExpression.from_json(json, position, source);
     case 'yield_expression':
       return YieldExpression.from_json(json, position, source);
-    case 'print_expression':
-      return PrintExpression.from_json(json, position, source);
     case 'prefix_unary_expression':
       return PrefixUnaryExpression.from_json(json, position, source);
     case 'postfix_unary_expression':
@@ -11208,70 +11206,6 @@ class YieldExpression extends EditableSyntax
     return YieldExpression._children_keys;
   }
 }
-class PrintExpression extends EditableSyntax
-{
-  constructor(
-    keyword,
-    expression)
-  {
-    super('print_expression', {
-      keyword: keyword,
-      expression: expression });
-  }
-  get keyword() { return this.children.keyword; }
-  get expression() { return this.children.expression; }
-  with_keyword(keyword){
-    return new PrintExpression(
-      keyword,
-      this.expression);
-  }
-  with_expression(expression){
-    return new PrintExpression(
-      this.keyword,
-      expression);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var expression = this.expression.rewrite(rewriter, new_parents);
-    if (
-      keyword === this.keyword &&
-      expression === this.expression)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new PrintExpression(
-        keyword,
-        expression), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let keyword = EditableSyntax.from_json(
-      json.print_keyword, position, source);
-    position += keyword.width;
-    let expression = EditableSyntax.from_json(
-      json.print_expression, position, source);
-    position += expression.width;
-    return new PrintExpression(
-        keyword,
-        expression);
-  }
-  get children_keys()
-  {
-    if (PrintExpression._children_keys == null)
-      PrintExpression._children_keys = [
-        'keyword',
-        'expression'];
-    return PrintExpression._children_keys;
-  }
-}
 class PrefixUnaryExpression extends EditableSyntax
 {
   constructor(
@@ -17850,7 +17784,6 @@ exports.MemberSelectionExpression = MemberSelectionExpression;
 exports.SafeMemberSelectionExpression = SafeMemberSelectionExpression;
 exports.EmbeddedMemberSelectionExpression = EmbeddedMemberSelectionExpression;
 exports.YieldExpression = YieldExpression;
-exports.PrintExpression = PrintExpression;
 exports.PrefixUnaryExpression = PrefixUnaryExpression;
 exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;

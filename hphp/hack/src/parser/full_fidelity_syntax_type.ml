@@ -544,10 +544,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { yield_keyword                                      : t
     ; yield_operand                                      : t
     }
-  and print_expression =
-    { print_keyword                                      : t
-    ; print_expression                                   : t
-    }
   and prefix_unary_expression =
     { prefix_unary_operator                              : t
     ; prefix_unary_operand                               : t
@@ -995,7 +991,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SafeMemberSelectionExpression     of safe_member_selection_expression
   | EmbeddedMemberSelectionExpression of embedded_member_selection_expression
   | YieldExpression                   of yield_expression
-  | PrintExpression                   of print_expression
   | PrefixUnaryExpression             of prefix_unary_expression
   | PostfixUnaryExpression            of postfix_unary_expression
   | BinaryExpression                  of binary_expression
@@ -1121,7 +1116,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprSafeMemberSelection          of safe_member_selection_expression
   | ExprEmbeddedMemberSelection      of embedded_member_selection_expression
   | ExprYield                        of yield_expression
-  | ExprPrint                        of print_expression
   | ExprPrefixUnary                  of prefix_unary_expression
   | ExprPostfixUnary                 of postfix_unary_expression
   | ExprBinary                       of binary_expression
@@ -1229,7 +1223,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaSafeMemberSelection          of safe_member_selection_expression
   | LambdaEmbeddedMemberSelection      of embedded_member_selection_expression
   | LambdaYield                        of yield_expression
-  | LambdaPrint                        of print_expression
   | LambdaPrefixUnary                  of prefix_unary_expression
   | LambdaPostfixUnary                 of postfix_unary_expression
   | LambdaBinary                       of binary_expression
@@ -1275,7 +1268,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprSafeMemberSelection          of safe_member_selection_expression
   | CExprEmbeddedMemberSelection      of embedded_member_selection_expression
   | CExprYield                        of yield_expression
-  | CExprPrint                        of print_expression
   | CExprPrefixUnary                  of prefix_unary_expression
   | CExprPostfixUnary                 of postfix_unary_expression
   | CExprBinary                       of binary_expression
@@ -1776,10 +1768,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and yield_expression =
     { yield_keyword: Token.t value
     ; yield_operand: constructor_expression value
-    }
-  and print_expression =
-    { print_keyword: Token.t value
-    ; print_expression: expression value
     }
   and prefix_unary_expression =
     { prefix_unary_operator: Token.t value

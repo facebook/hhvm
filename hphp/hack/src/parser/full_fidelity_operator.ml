@@ -25,6 +25,7 @@ not how they look on the page. *)
 | PHPOrOperator
 | PHPExclusiveOrOperator
 | PHPAndOperator
+| PrintOperator
 | LogicalOrOperator
 | ExclusiveOrOperator
 | LogicalAndOperator
@@ -92,7 +93,6 @@ type assoc =
 let precedence operator =
   (* TODO: eval *)
   (* TODO: Comma *)
-  (* TODO: print *)
   (* TODO: elseif *)
   (* TODO: else *)
   (* TODO: endif *)
@@ -103,7 +103,7 @@ let precedence operator =
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
-  (* value 5 is reserved for print *)
+  | PrintOperator -> 5
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator | ExponentiationAssignmentOperator
@@ -144,7 +144,6 @@ let precedence operator =
   | ScopeResolutionOperator -> 30
   | DollarOperator -> 31
 
-let precedence_for_print = 5
 let precedence_for_assignment_in_expressions = 27
 
 let associativity operator =
@@ -184,7 +183,7 @@ let associativity operator =
   | RemainderAssignmentOperator | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-  (* print *)
+  | PrintOperator
     -> RightAssociative
 
 let prefix_unary_from_token token =
@@ -206,6 +205,7 @@ let prefix_unary_from_token token =
   | Include_once -> IncludeOnceOperator
   | Require -> RequireOperator
   | Require_once -> RequireOnceOperator
+  | Print -> PrintOperator
   | _ -> failwith "not a unary operator"
 
 (* Is this a token that can appear after an expression? *)
@@ -473,3 +473,4 @@ let to_string kind =
   | IncludeOnceOperator -> "include_once"
   | RequireOperator -> "require"
   | RequireOnceOperator -> "require_once"
+  | PrintOperator -> "print"

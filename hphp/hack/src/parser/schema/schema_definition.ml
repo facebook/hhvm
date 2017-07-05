@@ -1047,17 +1047,6 @@ let schema : schema_node list =
       ; "operand", Aggregate ConstructorExpression
       ]
     }
-  ; { kind_name   = "PrintExpression"
-    ; type_name   = "print_expression"
-    ; func_name   = "print_expression"
-    ; description = "print_expression"
-    ; prefix      = "print"
-    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
-    ; fields =
-      [ "keyword", Token
-      ; "expression", Aggregate Expression
-      ]
-    }
   ; { kind_name   = "PrefixUnaryExpression"
     ; type_name   = "prefix_unary_expression"
     ; func_name   = "prefix_unary_expression"

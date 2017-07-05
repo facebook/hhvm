@@ -727,10 +727,6 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       ; _ }
       -> Call (pExpr recv env, couldMap ~f:pExpr args  env, [])
 
-    | PrintExpression { print_keyword = _recv; print_expression = args } ->
-      (* TODO: Or tie in with FunctionCallExpression et al and post-process *)
-      Call ((pos, Id (pos, "echo")), couldMap ~f:pExpr args env, [])
-
     | QualifiedNameExpression { qualified_name_expression } ->
       Id (pos_name qualified_name_expression)
     | VariableExpression { variable_expression } ->
@@ -797,6 +793,8 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | Some TK.At                      -> Unop (Usilence, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Clone                   -> Clone expr
+        | Some TK.Print                   ->
+          Call ((pos, Id (pos, "echo")), [expr], [])
         | Some TK.Dollar                  ->
           (match snd expr with
           | Lvarvar (n, id) -> Lvarvar (n + 1, id)

@@ -151,7 +151,6 @@ module WithStatementAndDeclAndTypeParser
     | Parent
     | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
-    | Print -> parse_print_expression parser
     | Dollar -> parse_dollar_expression parser
     | Suspend
       (* TODO: The operand to a suspend is required to be a call to a
@@ -165,6 +164,7 @@ module WithStatementAndDeclAndTypeParser
     | Ampersand
     | Await
     | Clone
+    | Print
     | At -> parse_prefix_unary_expression parser
     | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
     | LessThan -> parse_possible_xhp_expression parser
@@ -925,21 +925,6 @@ TODO: This will need to be fixed to allow situations where the qualified name
       parse_array_element_init parser in
     let result = make_yield_expression token operand in
     (parser, result)
-
-  and parse_print_expression parser =
-    (* SPEC:
-      TODO: this is the php spec and the hhvm yac grammar,
-      update the github spec
-
-      print expr
-    *)
-    let (parser, token) = assert_token parser Print in
-    let (parser, expr) =
-      with_numeric_precedence parser Operator.precedence_for_print
-        parse_expression
-    in
-    let syntax = make_print_expression token expr in
-    (parser, syntax)
 
   and parse_cast_or_parenthesized_or_lambda_expression parser =
   (* We need to disambiguate between casts, lambdas and ordinary

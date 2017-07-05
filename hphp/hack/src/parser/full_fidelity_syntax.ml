@@ -139,7 +139,6 @@ module WithToken(Token: TokenType) = struct
       | SafeMemberSelectionExpression     _ -> SyntaxKind.SafeMemberSelectionExpression
       | EmbeddedMemberSelectionExpression _ -> SyntaxKind.EmbeddedMemberSelectionExpression
       | YieldExpression                   _ -> SyntaxKind.YieldExpression
-      | PrintExpression                   _ -> SyntaxKind.PrintExpression
       | PrefixUnaryExpression             _ -> SyntaxKind.PrefixUnaryExpression
       | PostfixUnaryExpression            _ -> SyntaxKind.PostfixUnaryExpression
       | BinaryExpression                  _ -> SyntaxKind.BinaryExpression
@@ -299,7 +298,6 @@ module WithToken(Token: TokenType) = struct
     let is_safe_member_selection_expression     = has_kind SyntaxKind.SafeMemberSelectionExpression
     let is_embedded_member_selection_expression = has_kind SyntaxKind.EmbeddedMemberSelectionExpression
     let is_yield_expression                     = has_kind SyntaxKind.YieldExpression
-    let is_print_expression                     = has_kind SyntaxKind.PrintExpression
     let is_prefix_unary_expression              = has_kind SyntaxKind.PrefixUnaryExpression
     let is_postfix_unary_expression             = has_kind SyntaxKind.PostfixUnaryExpression
     let is_binary_expression                    = has_kind SyntaxKind.BinaryExpression
@@ -1331,14 +1329,6 @@ module WithToken(Token: TokenType) = struct
     } = (
       yield_keyword,
       yield_operand
-    )
-
-    let get_print_expression_children {
-      print_keyword;
-      print_expression;
-    } = (
-      print_keyword,
-      print_expression
     )
 
     let get_prefix_unary_expression_children {
@@ -2924,13 +2914,6 @@ module WithToken(Token: TokenType) = struct
         yield_keyword;
         yield_operand;
       ]
-      | PrintExpression {
-        print_keyword;
-        print_expression;
-      } -> [
-        print_keyword;
-        print_expression;
-      ]
       | PrefixUnaryExpression {
         prefix_unary_operator;
         prefix_unary_operand;
@@ -4448,13 +4431,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "yield_keyword";
         "yield_operand";
-      ]
-      | PrintExpression {
-        print_keyword;
-        print_expression;
-      } -> [
-        "print_keyword";
-        "print_expression";
       ]
       | PrefixUnaryExpression {
         prefix_unary_operator;
@@ -6107,14 +6083,6 @@ module WithToken(Token: TokenType) = struct
         YieldExpression {
           yield_keyword;
           yield_operand;
-        }
-      | (SyntaxKind.PrintExpression, [
-          print_keyword;
-          print_expression;
-        ]) ->
-        PrintExpression {
-          print_keyword;
-          print_expression;
         }
       | (SyntaxKind.PrefixUnaryExpression, [
           prefix_unary_operator;
@@ -7894,15 +7862,6 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.YieldExpression [
         yield_keyword;
         yield_operand;
-      ]
-
-    let make_print_expression
-      print_keyword
-      print_expression
-    =
-      from_children SyntaxKind.PrintExpression [
-        print_keyword;
-        print_expression;
       ]
 
     let make_prefix_unary_expression

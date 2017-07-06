@@ -357,7 +357,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_abstract:false
         instrs] in
   let ctor_methods =
-    if has_constructor_or_invoke then []
+    if has_constructor_or_invoke ||(class_is_final && class_is_abstract) then []
     else
       let instrs = gather [instr_null; instr_retc] in
       [make_86method

@@ -1,0 +1,93 @@
+# tests various ways poorly defined classes should fail the verifier
+
+.main {
+  .declvars $x;
+
+  DefCls 0
+  FPushCtorD 1 "A"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  PopC
+
+  DefCls 0
+  FPushCtorD 1 "B"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  PopC
+
+  DefCls 0
+  FPushCtorD 1 "C"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  PopC
+
+  DefCls 0
+  FPushCtorD 1 "E"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  PopC
+
+  DefCls 0
+  FPushCtorD 1 "G"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  PopC
+
+  Int 1
+  RetC
+}
+
+.class [final interface] iface {
+
+}
+
+.class A extends A {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class B {
+
+}
+
+.class C {
+  .method [public abstract no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+
+.class [final] D {
+  .method [public no_injection] __construct() {
+    Null
+    RetC
+  }
+}
+
+.class E extends D {
+
+}
+
+.class [abstract] F {
+  .method [public abstract final no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class G extends F{
+
+}

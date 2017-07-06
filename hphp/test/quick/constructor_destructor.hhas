@@ -1,0 +1,65 @@
+# tests that constructors and destructors fail verification properly when
+# poorly defined
+
+.main {
+  .declvars $x;
+  DefCls 0
+  FPushCtorD 1 "A"
+  String "foo"
+  FPassCE 0
+  FCall 1
+  PopR
+  SetL $x
+  PopC
+  CGetL $x
+  FPushObjMethodD 1 "set" NullThrows
+  String "bar"
+  FPassCE 0
+  FCall 1
+  PopR
+  FPushFuncD 1 "var_dump"
+  CGetL $x
+  FPushObjMethodD 0 "get" NullThrows
+  FCall 0
+  FPassR 0
+  FCall 1
+  PopR
+  Int 1
+  RetC
+}
+
+.class A {
+  .property [public] attre =
+    """N;""";
+  .method [public] <"" N  > get() {
+    CheckThis
+    BaseH
+    QueryM 0 CGet PT:"attre"
+    RetC
+  }
+  .method [public] <"" N  > set($x) {
+    CheckThis
+    CGetL $x
+    BaseH
+    SetM 0 PT:"attre"
+    PopC
+    Null
+    RetC
+  }
+  .method [public static] <"" N  > __construct($attre) {
+    CGetL $attre
+    BaseH
+    SetM 0 PT:"attre"
+    PopC
+    Null
+    RetC
+  }
+  .method [public] <"" N  > __destruct() isClosureBody {
+    String ""
+    BaseH
+    SetM 0 PT:"attre"
+    PopC
+    Null
+    RetC
+  }
+}

@@ -60,9 +60,24 @@
   }
 }
 
-.class One extends Exception {}
-.class Two extends Exception {}
-.class Three extends Exception {}
+.class One extends Exception {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+.class Two extends Exception {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+.class Three extends Exception {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
 
 .function throw_various() {
            Int 0

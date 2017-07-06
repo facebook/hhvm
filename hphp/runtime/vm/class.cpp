@@ -1375,7 +1375,9 @@ const StaticString
 static Func* markNonStatic(Func* meth) {
   // Do not use isStaticInPrologue here, since that uses the
   // AttrRequiresThis flag.
-  if (meth && (!meth->isStatic() || meth->isClosureBody())) {
+  if (meth && (!meth->isStatic() || meth->isClosureBody() ||
+      s_construct.equal(meth->name()) ||
+      s_destruct.equal(meth->name()))) {
     meth->setAttrs(meth->attrs() | AttrRequiresThis);
   }
   return meth;
@@ -1459,19 +1461,25 @@ void Class::setSpecial() {
   }
 
   // Look for parent constructor other than 86ctor().
-  if (m_parent.get() != nullptr &&
+  if (m_parent.get() != nullptr && m_parent->m_ctor &&
       m_parent->m_ctor->name() != s_86ctor.get()) {
     m_ctor = m_parent->m_ctor;
     return;
   }
 
+  //no need to generate an 86ctor for an abstract final class
+  if((attrs() & AttrAbstract) && (attrs() & AttrFinal)) {
+    return;
+  }
+
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, s_86ctor.get());
+  m_ctor->setAttrs(m_ctor->attrs() | AttrRequiresThis);
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
   assert((m_ctor->attrs() & ~(AttrBuiltin | AttrAbstract |
                               AttrHot | AttrInterceptable |
-                              AttrMayUseVV | AttrRequiresThis)) ==
-         (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
+                              AttrMayUseVV)) ==
+         (AttrPublic|AttrNoInjection|AttrPhpLeafFn|AttrRequiresThis));
 }
 
 namespace {
@@ -1846,7 +1854,8 @@ void Class::setODAttributes() {
 
   markNonStatic(this, s_call);
   markNonStatic(this, s_debugInfo);
-  markNonStatic(m_ctor);
+  if(!((attrs() & AttrAbstract) && (attrs() & AttrFinal)))
+    markNonStatic(m_ctor);
 
   if (m_dtor == nullptr) m_ODAttrs |= ObjectData::NoDestructor;
 

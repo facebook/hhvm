@@ -15,6 +15,7 @@
 */
 
 #include <stdio.h>
+#include <algorithm>
 
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -38,6 +39,7 @@ struct UnitChecker {
   bool checkFuncs();
   bool checkBytecode();
   bool checkMetadata();
+  bool checkStructor(Func* structor, PreClass* preclass);
 
  private:
   template<class... Args>
@@ -80,9 +82,9 @@ bool UnitChecker::verify() {
   return checkStrings() &&
          checkArrays() &&
          //checkSourceLocs() &&
-         //checkPreClasses() &&
+         checkPreClasses() &&
          checkBytecode() &&
-         //checkMetadata() &&
+         checkMetadata() &&
          checkFuncs();
 }
 
@@ -131,6 +133,124 @@ bool UnitChecker::checkArrays() {
     ok &= checkLiteral(i, m_unit->lookupArrayId(i), "array");
   }
   return ok;
+}
+
+bool UnitChecker::checkStructor(Func* structor, PreClass* preclass) {
+  bool ok = true;
+
+  if (structor->isStatic()) {
+    error("%s in class %s cannot be static\n",
+           structor->name()->data(), preclass->name()->data());
+    ok = false;
+  }
+
+  if (structor->isClosureBody()) {
+    error("%s in class %s cannot be a closure body\n",
+           structor->name()->data(), preclass->name()->data());
+    ok = false;
+  }
+
+  return ok;
+}
+
+/* Check the following conditions:
+   - All constructors/destructors are non-static and not closure bodies
+   - Properties/Methods have exactly one access modifier
+   - Preclasses have at least one constructor
+   - Preclasses do not inherit from themselves
+   - Interfaces cannot be final
+   - Methods cannot be both abstract and final
+*/
+bool UnitChecker::checkPreClasses() {
+  bool ok = true;
+
+  for (auto preclass : m_unit->preclasses()) {
+    auto classAttrs = preclass->attrs();
+    bool hasConstructor = !preclass->parent()->empty() &&
+      preclass->parent()->toCppString() == std::string("Closure");
+      //Closures don't need constructors
+
+    if (!preclass->parent()->empty() &&
+          preclass->name()->equal(preclass->parent())) {
+        ok = false;
+        error("Class %s inherits from itself\n", preclass->name()->data());
+      }
+
+    if (classAttrs & AttrFinal && classAttrs & AttrInterface) {
+        ok = false;
+        error("Class %s is a final interface\n", preclass->name()->data());
+    }
+
+    for(auto prop : preclass->allProperties()) {
+      Attr attributes = prop.attrs();
+      int access_modifiers = (attributes & AttrPublic ? 1 : 0) +
+                             (attributes & AttrProtected ? 1 : 0) +
+                             (attributes & AttrPrivate ? 1 : 0);
+      if (access_modifiers > 1) {
+        ok = false;
+        error("Property %s in class %s has more than one access modifier\n",
+               prop.name()->data(), preclass->name()->data());
+      }
+      if (access_modifiers == 0) {
+        ok = false;
+        error("Property %s in class %s has no access modifier\n",
+               prop.name()->data(), preclass->name()->data());
+      }
+    }
+
+    for(auto method : preclass->allMethods()) {
+      Attr attributes = method->attrs();
+      auto name = method->name()->toCppString();
+      std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+      int access_modifiers = (attributes & AttrPublic ? 1 : 0) +
+                             (attributes & AttrProtected ? 1 : 0) +
+                             (attributes & AttrPrivate ? 1 : 0);
+      if (access_modifiers > 1) {
+        ok = false;
+        error("Method %s in class %s has more than one access modifier\n",
+               method->name()->data(), preclass->name()->data());
+      }
+      if (access_modifiers == 0) {
+        ok = false;
+        error("Method %s in class %s has no access modifier\n",
+               method->name()->data(), preclass->name()->data());
+      }
+
+      if ((attributes & AttrFinal) && (attributes & AttrAbstract)) {
+        ok = false;
+        error("Method %s in class %s is both abstract and final\n",
+               method->name()->data(), preclass->name()->data());
+      }
+
+      auto className = preclass->name()->toCppString();
+      std::transform(className.begin(), className.end(), className.begin(),
+                      ::tolower);
+
+      if(name == std::string("__construct") || name == std::string("86ctor") ||
+         name == className) {
+            hasConstructor = true;
+            ok &= checkStructor(method, preclass.get());
+      }
+
+      if(name == std::string("__destruct")) {
+        ok &= checkStructor(method, preclass.get());
+      }
+    }
+
+    if (!hasConstructor &&
+          !((classAttrs & AttrFinal) && (classAttrs & AttrAbstract))) {
+      ok = false;
+      error("Base class %s has no constructor\n", preclass->name()->data());
+    }
+  }
+
+  return ok;
+}
+
+//TODO: T19445287 implement this as the fuzzer finds more bugs
+bool UnitChecker::checkMetadata() {
+  return true;
 }
 
 /**

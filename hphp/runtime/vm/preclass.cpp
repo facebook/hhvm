@@ -79,7 +79,11 @@ const StringData* PreClass::manglePropName(const StringData* className,
       mangledName += propName->data();
       return makeStaticString(mangledName);
     }
-    default: not_reached();
+    default:
+      //Failing here will cause the VM to crash before the Verifier runs, so we
+      //defer the failure to runtime so the Verifier can report this problem to
+      //the user.
+      return makeStaticString("");
   }
 }
 

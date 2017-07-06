@@ -9832,7 +9832,8 @@ Id EmitterVisitor::emitClass(Emitter& e,
   }
 
   if (!cNode->getAttribute(ClassScope::HasConstructor) &&
-      !cNode->getAttribute(ClassScope::ClassNameConstructor)) {
+      !cNode->getAttribute(ClassScope::ClassNameConstructor) &&
+      !cNode->isStaticUtil()) {
     // cNode does not have a constructor; synthesize 86ctor() so that the class
     // will always have a method that can be called during construction.
     static const StringData* methName = makeStaticString("86ctor");

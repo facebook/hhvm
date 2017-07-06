@@ -60,6 +60,11 @@
 .class [interface] IDunno2 { .default_ctor; }
 
 .class Derived extends Base implements(IDunno IDunno2) {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+
   .method [public] some_junk {
     This
     FPushObjMethodD 0 "prot_method" NullThrows

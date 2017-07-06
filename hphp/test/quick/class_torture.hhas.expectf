@@ -1,0 +1,8 @@
+Verification Error (unit %s): Class iface is a final interface
+Verification Error (unit %s): Base class iface has no constructor
+Verification Error (unit %s): Class A inherits from itself
+Verification Error (unit %s): Base class B has no constructor
+Verification Error (unit %s): Base class E has no constructor
+Verification Error (unit %s): Method 86ctor in class F is both abstract and final
+Verification Error (unit %s): Base class G has no constructor
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

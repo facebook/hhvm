@@ -45,10 +45,10 @@ enum ErrorMode {
  * -- every byte of code must be in exactly one Func's range.
  * -- must have exactly 1 pseudo-main
  * -- checkFunc for each function in the unit
+ * -- PreClasses
  *
  * Not Checked:
- * -- SourceLocs
- * -- PreClasses
+ * -- SourceLoc
  * -- Metadata
  */
 bool checkUnit(const Unit*, ErrorMode mode = kStderr);

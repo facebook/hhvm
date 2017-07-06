@@ -2059,6 +2059,8 @@ module WithToken(Token: TokenType) = struct
 
 
 
+    (* The order that the children are returned in should match the order 
+       that they appear in the source text *)
     let children node =
       match node.syntax with
       | Missing -> []

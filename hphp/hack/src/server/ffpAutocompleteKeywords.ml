@@ -281,11 +281,17 @@ let validate_predecessor (predecessor:MinimalSyntax.t) : predecessor =
  * corresponds to the nth character of the original file. The parentage is
  * the descent through the syntax tree to the leaf node at position n.
  *
- * The predecessor is the node found immediately prior to the leaf we are interested in,
- * ignoring missing nodes. This predecessor corresponds to the chunk of text
- * immediately before the node at the position we are in. This is useful for
- * tasks such as determining if we are inside a class body or inside the class
- * header or if we are directly following an if statement.
+ * The predecessor of a node is the preceding sibling of the node according to
+ * the order defined by the children function in full_fidelity_syntax.ml. If a
+ * node is the first child of its parent node, then its predecessor is its
+ * parent's predecessor.
+ *
+ * TODO: Add a unit test to enforce children order
+ *
+ * This predecessor corresponds to the chunk of text immediately before the leaf
+ * node at the position we are in. This is useful for tasks such as determining
+ * if we are inside a class body or inside the class header or if we are directly
+ * following an if statement.
  *
  * The width function returns the span of the current node. At each level, we
  * see if we are inside the leftmost node's width. If not, we discard the left-

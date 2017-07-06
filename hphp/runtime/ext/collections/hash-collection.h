@@ -10,8 +10,6 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-struct Header;
-
 ALWAYS_INLINE MixedArray* staticEmptyDictArrayAsMixed() {
   return static_cast<MixedArray*>(staticEmptyDictArray());
 }

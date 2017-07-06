@@ -189,16 +189,16 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
     // prop_offset relative to the inner ObjectData.
     const ObjectData* from_obj{nullptr};
     if (from_hdr->kind() == HeaderKind::AsyncFuncFrame) {
-      from_obj = asyncFuncWH(reinterpret_cast<const HeapObject*>(from_hdr));
+      from_obj = asyncFuncWH(from_hdr);
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (from_hdr->kind() == HeaderKind::NativeData) {
-      from_obj = Native::obj(reinterpret_cast<const NativeNode*>(from_hdr));
+      from_obj = Native::obj(static_cast<const NativeNode*>(from_hdr));
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (from_hdr->kind() == HeaderKind::ClosureHdr) {
-      from_obj = closureObj(reinterpret_cast<const HeapObject*>(from_hdr));
+      from_obj = closureObj(from_hdr);
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (isObjectKind(from_hdr->kind())) {
-      from_obj = &from_hdr->obj_;
+      from_obj = static_cast<const ObjectData*>(from_hdr);
       prop_offset = edge.offset;
     }
 
@@ -211,7 +211,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
           using Elm = MixedArray::Elm;
           auto elm_offset = edge.offset - sizeof(MixedArray);
           uint32_t index = elm_offset / sizeof(Elm);
-          if (index < from_hdr->mixed_.iterLimit()) {
+          if (index < static_cast<const MixedArray*>(from_hdr)->iterLimit()) {
             auto field = elm_offset - index * sizeof(Elm);
             if (field == Elm::keyOff()) {
               return {CapturedPtr::Key, index};
@@ -229,7 +229,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         if (edge.offset >= sizeof(ArrayData)) {
           auto elm_offset = edge.offset - sizeof(ArrayData);
           uint32_t index = elm_offset / sizeof(TypedValue);
-          if (index < from_hdr->arr_.size()) {
+          if (index < static_cast<const ArrayData*>(from_hdr)->size()) {
             return {CapturedPtr::Value, index};
           }
         }
@@ -240,7 +240,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         if (edge.offset >= sizeof(APCLocalArray)) {
           auto elm_offset = edge.offset - sizeof(APCLocalArray);
           uint32_t index = elm_offset / sizeof(TypedValue);
-          if (index < from_hdr->apc_.size()) {
+          if (index < static_cast<const APCLocalArray*>(from_hdr)->size()) {
             return {CapturedPtr::Value, index};
           }
         }
@@ -455,7 +455,7 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
     auto& node = hg.nodes[i];
     auto& cnode = cnodes[i];
     if (!node.is_root) {
-      auto obj = node.h->obj();
+      auto obj = innerObj(node.h);
       cnode.heap_object.kind = node.h->kind();
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
     } else if (isStaticLocal(node)) {

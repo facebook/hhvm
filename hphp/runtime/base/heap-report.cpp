@@ -37,7 +37,9 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
   std::ostringstream out;
   auto h = g.nodes[n].h;
   out << n;
-  if (haveCount(h->kind())) out << "#" << h->hdr_.count();
+  if (haveCount(h->kind())) {
+    out << "#" << static_cast<const MaybeCountable*>(h)->count();
+  }
   out << ":" << header_names[int(h->kind())];
   switch (h->kind()) {
     case HeaderKind::Packed:
@@ -49,10 +51,10 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Apc:
     case HeaderKind::Globals:
     case HeaderKind::Proxy:
-      out << "[" << h->arr_.size() << "]";
+      out << "[" << static_cast<const ArrayData*>(h)->size() << "]";
       break;
     case HeaderKind::String:
-      out << "[" << h->str_.size() << "]";
+      out << "[" << static_cast<const StringData*>(h)->size() << "]";
       break;
     case HeaderKind::Resource:
     case HeaderKind::Ref:
@@ -62,7 +64,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
-      out << ":" << h->obj_.classname_cstr();
+      out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
     case HeaderKind::Vector:
     case HeaderKind::Map:
@@ -71,20 +73,22 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::ImmVector:
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet: {
-      auto obj = const_cast<ObjectData*>(&h->obj_);
+      auto obj = const_cast<ObjectData*>(
+          static_cast<const ObjectData*>(h)
+      );
       out << "[" << getContainerSize(make_tv<KindOfObject>(obj)) << "]";
       break;
     }
     case HeaderKind::BigMalloc:
     case HeaderKind::SmallMalloc:
-      out << "[" << h->malloc_.nbytes << "]";
+      out << "[" << static_cast<const MallocNode*>(h)->nbytes << "]";
       break;
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
       break;
     case HeaderKind::Free:
-      out << "[" << h->free_.size() << "]";
+      out << "[" << static_cast<const FreeNode*>(h)->size() << "]";
       break;
     case HeaderKind::BigObj:
     case HeaderKind::Hole:
@@ -219,7 +223,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
   for (size_t n = 0; n < g.nodes.size(); ++n) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
-    auto count = node.h->hdr_.count();
+    auto count = static_cast<const MaybeCountable*>(node.h)->count();
     assert(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {

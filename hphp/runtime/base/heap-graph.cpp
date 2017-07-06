@@ -150,7 +150,7 @@ HeapGraph makeHeapGraph(bool include_free) {
         break;
     }
     g.nodes.push_back(
-      HeapGraph::Node{(const Header*)h, size, false, ty, -1, -1}
+      HeapGraph::Node{h, size, false, ty, -1, -1}
     );
   });
 

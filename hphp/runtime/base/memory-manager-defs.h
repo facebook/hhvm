@@ -102,67 +102,17 @@ inline ObjectData* closureObj(HeapObject* h) {
   return obj;
 }
 
+// if this header is one of the types that contains an ObjectData,
+// return the (possibly inner ptr) ObjectData*
+inline const ObjectData* innerObj(const HeapObject* h) {
+  return isObjectKind(h->kind()) ? static_cast<const ObjectData*>(h) :
+         h->kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH(h) :
+         h->kind() == HeaderKind::NativeData ?
+           Native::obj(static_cast<const NativeNode*>(h)) :
+         h->kind() == HeaderKind::ClosureHdr ? closureObj(h) :
+         nullptr;
+}
 
-// union of all the possible header types, and some utilities
-struct Header {
-  HeaderKind kind() const {
-    assert(unsigned(hdr_.kind()) <= NumHeaderKinds);
-    return hdr_.kind();
-  }
-
-  const Resumable* resumable() const {
-    assert(kind() == HeaderKind::AsyncFuncFrame);
-    return reinterpret_cast<const Resumable*>(
-      (const char*)this + native_.obj_offset - sizeof(Resumable)
-    );
-  }
-
-  Resumable* resumable() {
-    assert(kind() == HeaderKind::AsyncFuncFrame);
-    return reinterpret_cast<Resumable*>(
-      (char*)this + native_.obj_offset - sizeof(Resumable)
-    );
-  }
-
-  // if this header is one of the types that contains an ObjectData,
-  // return the (possibly inner ptr) ObjectData*
-  const ObjectData* obj() const {
-    return isObjectKind(kind()) ?
-             reinterpret_cast<const ObjectData*>(this) :
-           kind() == HeaderKind::AsyncFuncFrame ?
-             asyncFuncWH(reinterpret_cast<const HeapObject*>(this)) :
-           kind() == HeaderKind::NativeData ?
-             Native::obj(reinterpret_cast<const NativeNode*>(this)) :
-           kind() == HeaderKind::ClosureHdr ?
-            closureObj(reinterpret_cast<const HeapObject*>(this)) :
-           nullptr;
-  }
-
-public:
-  union {
-    MaybeCountable hdr_;
-    StringData str_;
-    ArrayData arr_;
-    MixedArray mixed_;
-    SetArray set_;
-    APCLocalArray apc_;
-    ProxyArray proxy_;
-    GlobalsArray globals_;
-    ObjectData obj_;
-    c_Pair pair_;
-    BaseVector vector_;
-    HashCollection hashcoll_;
-    ResourceHdr res_;
-    RefData ref_;
-    MallocNode malloc_;
-    FreeNode free_;
-    NativeNode native_;
-    c_WaitHandle wh_;
-    c_AwaitAllWaitHandle awaitall_;
-    ClosureHdr closure_hdr_;
-    c_Closure closure_;
-  };
-};
 // Return the size (in bytes) without rounding up to MM size class.
 inline size_t heapSize(const HeapObject* h) {
   // Ordering depends on ext_wait-handle.h.

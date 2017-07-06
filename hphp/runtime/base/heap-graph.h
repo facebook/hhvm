@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-struct Header;
+struct HeapObject;
 
 // Graph representation of the heap. The heap consists of some objects
 // (Nodes), and directed pointers (Ptrs) from Node to Node. For each
@@ -52,7 +52,7 @@ struct HeapGraph {
   struct Node {
     union {
       const void* ptr;
-      const Header* h;
+      const HeapObject* h;
     };
     size_t size;
     bool is_root;

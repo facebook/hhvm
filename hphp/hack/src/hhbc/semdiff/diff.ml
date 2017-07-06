@@ -347,10 +347,12 @@ let function_flags_comparer =
 
 let params_to_string ps = "(" ^ (concatstrs (List.map Hhas_param.name ps)) ^ ")"
 
-(* map of function names to functions *)
-let functions_alist_of_program p =
+(* map of function names to functions
+   now only selects the top-level ones - others are compared dynamically
+*)
+let top_functions_alist_of_program p =
   List.map (fun f -> (Hhbc_id.Function.to_raw_string (Hhas_function.name f), f))
-           (Hhas_program.functions p)
+           (List.filter Hhas_function.is_top @@ Hhas_program.functions p)
 
 let methods_alist_of_class c =
  List.map (fun m -> (Hhbc_id.Method.to_raw_string (Hhas_method.name m), m))
@@ -753,31 +755,64 @@ let class_header_properties_methods_comparer perm =
 (* TODO: add all the other bits to classes *)
 let class_comparer perm = class_header_properties_methods_comparer perm
 
-let program_functions_comparer = wrap functions_alist_of_program
+let program_top_functions_comparer = wrap top_functions_alist_of_program
                            (fun _p s -> s) functions_alist_comparer
 
-let program_main_functions_comparer =
-join (fun s1 s2 -> s1 ^ s2) program_main_comparer program_functions_comparer
+let program_main_top_functions_comparer =
+ join (fun s1 s2 -> s1 ^ s2) program_main_comparer program_top_functions_comparer
 
 (* Refactoring so that all comparison of classes is triggered off the dynamic
    use of DefCls etc. in main and top-level functions (and then recursively by
    methods therein), rather than by a static association list.
    This should even do the "right" thing in the case that there
-   are multiple classes with the same name that are dynamically registered *)
-let todosplitter s = if Rhl.IntIntPermSet.is_empty s
-                     then None
-                     else let iip = Rhl.IntIntPermSet.choose s in
-                          Some (iip, Rhl.IntIntPermSet.remove iip s)
+   are multiple classes with the same name that are dynamically registered
+   Now doing the same kind of thing for nontop-level functions *)
+let classes_todosplitter s =
+  if Rhl.IntIntPermSet.is_empty s then None
+  else let iip = Rhl.IntIntPermSet.choose s in
+           Some (iip, Rhl.IntIntPermSet.remove iip s)
 
-let compare_classes_of_programs p p' =
-  let _ = Rhl.classes_to_check := Rhl.IntIntPermSet.empty in
-  let _ = Rhl.classes_checked := Rhl.IntIntSet.empty in
- (* clear ref here to be on the safe side *)
- let (dist, (size,edits)) = program_main_functions_comparer.comparer p p' in
+let functions_todosplitter s =
+  if Rhl.IntIntSet.is_empty s then None
+  else let ii = Rhl.IntIntSet.choose s in
+           Some (ii, Rhl.IntIntSet.remove ii s)
+
+let compare_classes_functions_of_programs p p' =
+ Rhl.classes_to_check := Rhl.IntIntPermSet.empty;
+ Rhl.classes_checked := Rhl.IntIntSet.empty;
+ Rhl.functions_to_check := Rhl.IntIntSet.empty;
+ Rhl.functions_checked := Rhl.IntIntSet.empty;
+ (* clear refs here again just to be on the safe side
+    start by comparing top-level stuff
+ *)
+ let (dist, (size,edits)) = program_main_top_functions_comparer.comparer p p' in
  let rec loop d s e =
   let td = !Rhl.classes_to_check in
-   match todosplitter td with
-    | None -> (d,(s,e))
+   match classes_todosplitter td with
+    | None -> (match functions_todosplitter !Rhl.functions_to_check with
+               | None -> (d,(s,e))
+               | Some ((fid,fid'),newftodo) ->
+                 Rhl.functions_to_check := newftodo;
+                 if Rhl.IntIntSet.mem (fid,fid') !Rhl.functions_checked
+                 then loop d s e (* already done *)
+                 else
+                  (* Note nasty subtraction of one here. Seems like we count .main as the
+                     zeroth function, which is OK provided that main is always there and
+                     always first. Since hhvm complains if main isn't first, I think this
+                     is OK *)
+                  let actual_function = List.nth (Hhas_program.functions p) (fid - 1) in
+                  let actual_function' = List.nth (Hhas_program.functions p') (fid' -1) in
+                  Rhl.functions_checked := Rhl.IntIntSet.add (fid,fid') !Rhl.functions_checked;
+                  Log.debug @@ Printf.sprintf "dynamic function comparison %d=%s and %d=%s"
+                    fid (Hhbc_id.Function.to_raw_string @@ Hhas_function.name actual_function)
+                    fid' (Hhbc_id.Function.to_raw_string @@ Hhas_function.name actual_function') ;
+                  if Hhas_function.is_top actual_function || Hhas_function.is_top actual_function'
+                  then failwith "dynamic comparison of top-level function"
+                  else ();
+                  let (df, (sf,ef)) = function_header_body_comparer.comparer
+                                       actual_function actual_function' in
+                  loop (d+df) (s+sf) (e ^ ef)
+              )
     | Some ((ac,ac',perm), newtodo) ->
      (Rhl.classes_to_check := newtodo;
       if Rhl.IntIntSet.mem (ac,ac') (!Rhl.classes_checked)
@@ -793,11 +828,13 @@ let compare_classes_of_programs p p' =
        loop (d+dc) (s+sc) (e ^ ec))
  in loop dist size edits
 
+(* TODO: sizes and printing are not quite right here,
+   as they don't take nontop functions into account *)
 let program_main_functions_classes_comparer = {
-  comparer = compare_classes_of_programs;
-  size_of = (fun p -> program_main_functions_comparer.size_of p
+  comparer = compare_classes_functions_of_programs;
+  size_of = (fun p -> program_main_top_functions_comparer.size_of p
                     + sumsize (class_comparer []).size_of (Hhas_program.classes p));
-  string_of = (fun p -> program_main_functions_comparer.string_of p  ^
+  string_of = (fun p -> program_main_top_functions_comparer.string_of p  ^
                String.concat "\n"
                (List.map (class_comparer []).string_of (Hhas_program.classes p)));
 }

@@ -37,7 +37,7 @@ let parse_options () =
       , " Set verbosity level 0, 1 or 2 [default: 2]
                   0: Only displays the similarity percentage on STDOUT
                   1: Also displays differences on STDOUT
-                  2: Also displays debugging information on STDERR"
+                  2: Also displays debugging information on STDOUT"
       );
     ] in
   let options = Arg.align ~limit:25 options in

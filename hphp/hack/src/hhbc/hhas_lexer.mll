@@ -53,11 +53,13 @@ let nonquote = [^ '"']
 let quote = '"'
 let nontriple = (nonquote | quote nonquote | quote quote nonquote)* quote? quote?
 let triplequoted = quote quote quote nontriple quote quote quote
+let doccomment = ".doc" white triplequoted ';'
 
 rule read =
   parse
   | white       { read lexbuf }
   | comment     {read lexbuf}
+  | doccomment   {read lexbuf}
   | ".function" {FUNCTIONDIRECTIVE}
   | ".main"     {MAINDIRECTIVE}
   | ".class"    {CLASSDIRECTIVE}

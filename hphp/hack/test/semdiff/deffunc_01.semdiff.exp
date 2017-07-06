@@ -1,0 +1,21 @@
+Semdiff succeeded
+comparing key f
+Semdiff succeeded
+comparing key g
+Semdiff succeeded
+dynamic function comparison 1=i and 5=i
+Semdiff succeeded
+dynamic function comparison 2=f1 and 1=f1
+Semdiff succeeded
+dynamic function comparison 3=f2 and 2=f2
+Semdiff succeeded
+dynamic function comparison 4=g1 and 4=g1
+Semdiff succeeded
+dynamic function comparison 5=g2 and 3=g2
+Semdiff succeeded
+Distance = 0
+Size = 76
+Similarity = 100.00
+Edits = 
+
+[0m

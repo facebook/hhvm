@@ -35,8 +35,11 @@ let adata2_ref = ref ([] : Hhas_adata.t list)
 type perm = (int * int) list
 module IntIntPermSet = Set.Make(struct type t = int*int*perm let compare = compare end)
 module IntIntSet = Set.Make(struct type t = int*int let compare = compare end)
-let classes_to_check = ref (IntIntPermSet.empty)
-let classes_checked = ref (IntIntSet.empty)
+let classes_to_check = ref IntIntPermSet.empty
+let classes_checked = ref IntIntSet.empty
+
+let functions_to_check = ref IntIntSet.empty
+let functions_checked = ref IntIntSet.empty
 
 let rec lookup_adata id data_dict =
 match data_dict with
@@ -703,8 +706,11 @@ let equiv prog prog' startlabelpairs =
            if ins = ins' then nextins()
            else try_specials ()
         | IIncludeEvalDefine (DefCls cid), IIncludeEvalDefine (DefCls cid') ->
-            (classes_to_check := IntIntPermSet.add (cid,cid',[]) (!classes_to_check);
-            nextins ())
+            classes_to_check := IntIntPermSet.add (cid,cid',[]) !classes_to_check;
+            nextins ()
+        | IIncludeEvalDefine (DefFunc fid), IIncludeEvalDefine (DefFunc fid') ->
+            functions_to_check := IntIntSet.add (fid,fid') !functions_to_check;
+            nextins ()
         | IIncludeEvalDefine ins, IIncludeEvalDefine ins' ->
            if ins = ins' then nextins()
            else try_specials ()

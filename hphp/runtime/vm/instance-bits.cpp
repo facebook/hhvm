@@ -35,6 +35,8 @@ namespace HPHP { namespace InstanceBits {
 
 //////////////////////////////////////////////////////////////////////
 
+using folly::SharedMutex;
+
 namespace {
 
 using InstanceCounts = tbb::concurrent_hash_map<const StringData*,
@@ -46,7 +48,7 @@ using InstanceBitsMap = hphp_hash_map<const StringData*,
                                       string_data_isame>;
 
 InstanceCounts s_instanceCounts;
-ReadWriteMutex s_instanceCountsLock(RankInstanceCounts);
+folly::SharedMutex s_instanceCountsLock;
 InstanceBitsMap s_instanceBitsMap;
 
 Mutex s_initLock(RankInstanceBitsInit);
@@ -60,7 +62,7 @@ std::atomic<pthread_t> s_initThread;
 
 //////////////////////////////////////////////////////////////////////
 
-ReadWriteMutex g_clsInitLock(RankInstanceBitsClsInit);
+SharedMutex g_clsInitLock;
 // True if initialization has been finished
 std::atomic<bool> g_initFlag{false};
 // True if profiling should no longer be done
@@ -84,7 +86,7 @@ void profile(const StringData* name) {
 
   // The extra layer of locking is here so that InstanceBits::init can safely
   // iterate over s_instanceCounts while building its map of names to bits.
-  ReadLock l(s_instanceCountsLock);
+  SharedMutex::ReadHolder l(s_instanceCountsLock);
   InstanceCounts::accessor acc;
   if (!s_instanceCounts.insert(acc, InstanceCounts::value_type(name, inc))) {
     acc->second += inc;
@@ -125,7 +127,7 @@ void init() {
     // makes more sense: it's safe to concurrently modify a
     // tbb::concurrent_hash_map, but iteration is not guaranteed to be safe
     // with concurrent insertions.
-    WriteLock l(s_instanceCountsLock);
+    SharedMutex::WriteHolder l(s_instanceCountsLock);
     for (auto& pair : s_instanceCounts) {
       counts.push_back(pair);
       total += pair.second;
@@ -177,7 +179,7 @@ void init() {
   // must be done while holding a lock that blocks insertion of new Classes
   // into their class lists, but in practice most Classes will already be
   // created by now and this process is very fast.
-  WriteLock clsLocker(g_clsInitLock);
+  SharedMutex::WriteHolder clsLocker(g_clsInitLock);
   NamedEntity::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
   });

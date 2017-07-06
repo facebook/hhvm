@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 #include <folly/AtomicHashMap.h>
+#include <folly/SharedMutex.h>
 
 #include <vector>
 #include <memory>
@@ -323,12 +324,12 @@ struct ProfData {
   TransID allocTransID();
 
   size_t numTransRecs() {
-    ReadLock lock{m_transLock};
+    folly::SharedMutex::ReadHolder lock{m_transLock};
     return m_transRecs.size();
   }
 
   ProfTransRec* transRec(TransID id) {
-    ReadLock lock{m_transLock};
+    folly::SharedMutex::ReadHolder lock{m_transLock};
     return m_transRecs.at(id).get();
   }
   const ProfTransRec* transRec(TransID id) const {
@@ -337,14 +338,14 @@ struct ProfData {
 
   template<class L>
   void forEachTransRec(L&& body) {
-    ReadLock{m_transLock};
+    folly::SharedMutex::ReadHolder lock{m_transLock};
     for (auto& rec : m_transRecs) {
       if (rec) body(rec.get());
     }
   }
 
   TransIDVec funcProfTransIDs(FuncId funcId) const {
-    ReadLock lock{m_funcProfTransLock};
+    folly::SharedMutex::ReadHolder lock{m_funcProfTransLock};
     auto it = m_funcProfTrans.find(funcId);
     if (it == m_funcProfTrans.end()) return TransIDVec{};
 
@@ -355,7 +356,7 @@ struct ProfData {
    * The absolute number of times that a translation executed.
    */
   int64_t transCounter(TransID id) const {
-    ReadLock lock{m_transLock};
+    folly::SharedMutex::ReadHolder lock{m_transLock};
     assertx(id < m_transRecs.size());
     auto const counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();
@@ -374,7 +375,7 @@ struct ProfData {
    */
   int64_t* transCounterAddr(TransID id) {
     // getAddr() can grow the slab list, so grab a write lock.
-    WriteLock lock{m_transLock};
+    folly::SharedMutex::WriteHolder lock{m_transLock};
     return m_counters.getAddr(id);
   }
 
@@ -587,7 +588,7 @@ private:
    * even by threads with the global write lease, to synchronize with threads
    * that don't have the write lease.
    */
-  mutable ReadWriteMutex m_transLock;
+  mutable folly::SharedMutex m_transLock;
   std::vector<std::unique_ptr<ProfTransRec>> m_transRecs;
   ProfCounters<int64_t> m_counters;
   std::atomic<bool> m_countersReset{false};
@@ -630,7 +631,7 @@ private:
   /*
    * Lists of profiling translations for each Func, and a lock to protect it.
    */
-  mutable ReadWriteMutex m_funcProfTransLock;
+  mutable folly::SharedMutex m_funcProfTransLock;
   std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
 
   /*
@@ -645,7 +646,7 @@ private:
   folly::AtomicHashMap<FuncId, const std::unordered_set<Offset>>
     m_blockEndOffsets;
 
-  mutable ReadWriteMutex m_targetProfilesLock;
+  mutable folly::SharedMutex m_targetProfilesLock;
   std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
 };
 

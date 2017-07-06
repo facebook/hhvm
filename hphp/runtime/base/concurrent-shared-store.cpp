@@ -36,6 +36,8 @@
 #include "hphp/runtime/ext/apc/snapshot.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+using folly::SharedMutex;
+
 namespace HPHP {
 
 TRACE_SET_MOD(apc);
@@ -385,7 +387,7 @@ bool HotCache::clearValueIdx(Idx idx) {
 //////////////////////////////////////////////////////////////////////
 
 bool ConcurrentTableSharedStore::clear() {
-  WriteLock l(m_lock);
+  SharedMutex::WriteHolder l(m_lock);
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     s_hotCache.clearValue(iter->second);
@@ -421,7 +423,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            ExpMap::accessor* expAcc) {
   assert(key);
 
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, key)) {
     return false;
@@ -596,7 +598,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   if (s_hotCache.get(keyStr.get(), value, hotIdx)) return true;
   const StoreValue *sval;
   APCHandle *svar = nullptr;
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
   bool expired = false;
   bool promoteObj = false;
   auto tag = tagStringData(keyStr.get());
@@ -671,7 +673,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
 int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
                                         bool& found) {
   found = false;
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
 
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -710,7 +712,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
 
 bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
                                      int64_t val) {
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
 
   Map::accessor acc;
   if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -746,7 +748,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
 bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   if (s_hotCache.hasValue(keyStr.get())) return true;
   const StoreValue *sval;
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
   bool expired = false;
   auto tag = tagStringData(keyStr.get());
   {
@@ -807,7 +809,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   auto keyLen = key.size();
   char* const kcp = strdup(key.data());
   {
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
   bool present;
   time_t expiry = 0;
   bool overwritePrime = false;
@@ -887,7 +889,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
 }
 
 void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
-  ReadLock l(m_lock);
+  SharedMutex::ReadHolder l(m_lock);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {
     const KeyValuePair &item = vars[i];
@@ -1062,7 +1064,7 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
   entries.reserve(m_vars.size() + 1000);
 
   {
-    WriteLock l(m_lock);
+    SharedMutex::WriteHolder l(m_lock);
     for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
       entries.push_back(
           makeEntryInfo(iter->first, &iter->second, curr_time));
@@ -1075,7 +1077,7 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
 }
 
 void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
-  WriteLock l(m_lock);
+  SharedMutex::WriteHolder l(m_lock);
   out << "Total " << m_vars.size() << std::endl;
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end(); ++iter) {
     const char *key = iter->first;
@@ -1148,7 +1150,7 @@ void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
 
 std::vector<EntryInfo>
 ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
-  WriteLock l(m_lock);
+  SharedMutex::WriteHolder l(m_lock);
   if (m_vars.empty()) {
     Logger::Warning("No APC entries sampled (empty store)");
     return std::vector<EntryInfo>();

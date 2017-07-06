@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/vm/jit/string-tag.h"
 
+#include <folly/SharedMutex.h>
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/mutex.h"
 #include "hphp/util/safe-cast.h"
 
 #include <string>
@@ -29,9 +29,11 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using folly::SharedMutex;
+
 namespace {
 
-ReadWriteMutex s_mutex;
+SharedMutex s_mutex;
 
 std::unordered_map<std::string,StringTag> s_string_to_tag;
 std::vector<const char*> s_tag_to_string;
@@ -40,12 +42,12 @@ std::vector<const char*> s_tag_to_string;
 
 StringTag tag_from_string(const char* str) {
   { // Return the tag if we've already cached this string.
-    ReadLock l(s_mutex, false);
+    SharedMutex::ReadHolder l(s_mutex);
     auto const it = s_string_to_tag.find(str);
     if (it != s_string_to_tag.end()) return it->second;
   }
   { // Check again with the write lock held.
-    WriteLock l(s_mutex, false);
+    SharedMutex::WriteHolder l(s_mutex);
     auto const it = s_string_to_tag.find(str);
     if (it != s_string_to_tag.end()) return it->second;
 
@@ -62,7 +64,7 @@ StringTag tag_from_string(const char* str) {
 const char* string_from_tag(StringTag tag) {
   if (tag == 0) return nullptr;
 
-  ReadLock l(s_mutex, false);
+  SharedMutex::ReadHolder l(s_mutex);
   assertx(tag <= s_tag_to_string.size());
   return s_tag_to_string[tag - 1];
 }

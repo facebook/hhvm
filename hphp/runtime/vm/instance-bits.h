@@ -20,6 +20,8 @@
 #include <bitset>
 #include <cinttypes>
 
+#include <folly/SharedMutex.h>
+
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 
@@ -45,7 +47,7 @@ using BitSet = std::bitset<128>;
  * These are only exposed in order to define ifInitElse() below, and probably
  * should not be accessed directly from anywhere else.
  */
-extern ReadWriteMutex g_clsInitLock;
+extern folly::SharedMutex g_clsInitLock;
 extern std::atomic<bool> g_initFlag;
 
 /*
@@ -60,7 +62,7 @@ template<class Init, class Uninit>
 void ifInitElse(Init init, Uninit uninit) {
   if (g_initFlag.load(std::memory_order_acquire)) return init();
 
-  ReadLock l(g_clsInitLock);
+  folly::SharedMutex::ReadHolder l(g_clsInitLock);
 
   if (g_initFlag.load(std::memory_order_acquire)) {
     init();

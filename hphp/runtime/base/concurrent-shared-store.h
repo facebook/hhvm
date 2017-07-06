@@ -23,6 +23,8 @@
 #include <string>
 #include <iosfwd>
 
+#include <folly/SharedMutex.h>
+
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
 
@@ -396,7 +398,7 @@ private:
 
 private:
   Map m_vars;
-  ReadWriteMutex m_lock;
+  folly::SharedMutex m_lock;
   /*
    * m_expQueue is a queue of keys to be expired. We purge items from
    * it every n (configurable) apc_stores.

@@ -462,7 +462,7 @@ const std::array<char*,NumHeaderKinds> header_names = {{
   "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "AsyncFuncFrame", "NativeData", "ClosureHdr",
   "SmallMalloc", "BigMalloc", "BigObj",
-  "Free", "Hole"
+  "Free", "Hole", "Slab"
 }};
 
 // initialize a Hole header in the unused memory between m_front and m_limit
@@ -575,6 +575,7 @@ void MemoryManager::checkHeap(const char* phase) {
         break;
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
+      case HeaderKind::Slab:
         assert(false && "forEachHeader skips these kinds");
         break;
     }
@@ -680,15 +681,19 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   }
   requestGC();
   storeTail(m_front, (char*)m_limit - (char*)m_front);
-  auto slab = m_heap.allocSlab(kSlabSize);
-  assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
-  m_stats.mallocDebt += slab.size;
-  m_stats.capacity += slab.size;
+  auto mem = m_heap.allocSlab(kSlabSize);
+  assert((uintptr_t(mem.ptr) & kSmallSizeAlignMask) == 0);
+  m_stats.mallocDebt += mem.size;
+  m_stats.capacity += mem.size;
   m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
-  m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
-  m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
-  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
-  return slab.ptr;
+  auto slab = static_cast<Slab*>(mem.ptr);
+  auto slab_start = slab->init();
+  m_front = (void*)(slab_start + nbytes); // allocate requested object
+  // we can't use any space after slab->end() even if the allocator allows
+  // (indiciated by mem.size), because of the fixed-sized crossing map.
+  m_limit = slab->end();
+  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
+  return slab_start;
 }
 
 /*

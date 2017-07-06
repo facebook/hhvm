@@ -176,6 +176,7 @@ inline void scanHeader(const HeapObject* h, type_scan::Scanner& scanner) {
       // scan them even if they aren't interesting.
       return;
     case HeaderKind::BigObj:
+    case HeaderKind::Slab:
     case HeaderKind::Hole:
       // these aren't legitimate headers, and heap iteration should skip them.
       break;

@@ -333,6 +333,7 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::BigObj:
+    case HeaderKind::Slab:
     case HeaderKind::Free:
     case HeaderKind::Hole:
       break;

@@ -302,6 +302,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::Free:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
+      case HeaderKind::Slab:
         // just provide raw prop_offset
         break;
     }

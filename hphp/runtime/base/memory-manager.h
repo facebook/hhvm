@@ -518,9 +518,16 @@ struct BigHeap {
   void flush();
 
   /*
-   * Iterate over all the slabs and bigs.
+   * Iterate over all the slabs and bigs, calling Fn on each block, including
+   * all of the blocks in each slab.
    */
   template<class Fn> void iterate(Fn);
+
+  /*
+   * call OnBig() on each BigObj & BigMalloc header, and OnSlab() on
+   * each slab, without iterating the blocks within each slab.
+   */
+  template<class OnBig, class OnSlab> void iterate(OnBig, OnSlab);
 
   /*
    * Find the HeapObject* which contains `p', else nullptr if `p' is
@@ -998,7 +1005,7 @@ private:
 
   void resetStatsImpl(bool isInternalCall);
 
-  void initHole(void* ptr, uint32_t size);
+  static void initHole(void* ptr, uint32_t size);
   void initHole();
 
   void requestEagerGC();

@@ -47,8 +47,9 @@ enum class HeaderKind : uint8_t {
   BigObj, // big size-tracked object (valid header follows MallocNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
+  Slab, // header for a contiguous "slab" of small objects
 };
-const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
+const unsigned NumHeaderKinds = unsigned(HeaderKind::Slab) + 1;
 extern const std::array<char*,NumHeaderKinds> header_names;
 
 inline bool haveCount(HeaderKind k) {
@@ -156,6 +157,10 @@ inline bool isObjectKind(HeaderKind k) {
 
 inline bool isArrayKind(HeaderKind k) {
   return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
+}
+
+inline bool isFreeKind(HeaderKind k) {
+  return k >= HeaderKind::Free;
 }
 
 inline bool isHackArrayKind(HeaderKind k) {

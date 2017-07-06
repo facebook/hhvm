@@ -50,6 +50,147 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct HdrBlock {
+  HeapObject* ptr;
+  size_t size;
+};
+
+/*
+ * Struct Slab encapsulates the header attached to each large block of memory
+ * used for allocating smaller blocks. The header contains a crossing map,
+ * used for quickly locating the start of an object, given an interior pointer
+ * (a pointer to somewhere in the body). The crossing map logically divides
+ * the kSlabSize bytes into equal sized LineSize-byte "lines". Optimal LineSize
+ * appears to be near average object size.
+ */
+template<size_t LineSize> struct SlabHeader: FreeNode {
+  static_assert((LineSize & (LineSize-1)) == 0, "LineSize must be power of 2");
+
+  char* init() {
+    initHeader(HeaderKind::Slab, sizeof(*this));
+    return start();
+    static_assert(sizeof(*this) % kSmallSizeAlign == 0, "");
+  }
+
+  /*
+   * call fn(h,size) on each object in the slab, return the first HdrBlock
+   * when fn returns true
+   */
+  template<class Fn> HdrBlock find_if(HeapObject* h, Fn fn) const;
+
+  /*
+   * initialize the whole crossing map by iterating the slab in address order,
+   * calling Fn after each non-free object is procesed.
+   */
+  template<class Fn> void initCrossingMap(Fn fn) {
+    // initialization algorithm:
+    // for each object h in address order:
+    //   1. let i = line index of h, j = line index of (h+size)
+    //   2. xmap[i] = offset of h within line i, in units of Q bytes
+    //   3. xmap[i+1..j] = -1 * no. of lines from line i+1..j back to h
+    //   4. call Fn(h,size) if h is not free space.
+    find_if((HeapObject*)this, [&](HeapObject* h, size_t size) {
+      auto s = pos(h);
+      // store positive offset to start of object h
+      xmap_[s.line] = s.off;
+      for (auto i = s.line + 1, e = pos((char*)h + size).line; i < e; ++i) {
+        // for objects that extend into subsequent lines, store number of lines
+        // back to object start, saturated to -128
+        xmap_[i] = std::max(ssize_t(s.line) - ssize_t(i), ssize_t(-128));
+      }
+      if (!isFreeKind(h->kind())) {
+        fn(h, size);
+      }
+      return false;
+    });
+  }
+
+  /*
+   * If ptr points within a non-free HeapObject, return the HeapObject* start
+   * and size. Otherwise, return {nullptr,0} indicating that ptr points within
+   * the slab header or free space.
+   */
+  HdrBlock find(const void* ptr) const {
+    // search algorithm:
+    // 1. let i = line containing ptr
+    // 2. if the last object in line i starts after ptr, back up 1 line
+    //    (and possibly fail)
+    // 3. while xmap[i] < 0, search backwards for the line containing a
+    //    nonnegagive offset, indicating an object start.
+    // 4. iterate over each object, forwards, until we find the object
+    //    enclosing ptr.
+    auto p = pos(ptr);
+    auto i = p.line;
+    auto d = xmap_[i];
+    if (d > p.off) {
+      // last object in line i starts after ptr; back up to previous line.
+      // if sizeof(*this) >= LineSize, then line 0 is fully covered by this
+      // slab header, and xmap_[i] == 0, so we can't get here.
+      if (sizeof(*this) < LineSize && i == 0) {
+        return {nullptr, 0}; // ptr is in the slab header
+      }
+      d = xmap_[--i];
+    }
+    // if d >= 0, then object at offset d contains ptr.
+    // if d < 0, search backwards for object start
+    while (d < 0) {
+      assert(i+d >= 0 && i+d < NumLines);
+      d = xmap_[i += d]; // back up, since d < 0
+    }
+    // compute object address, given line index i and offset d.
+    auto h0 = reinterpret_cast<HeapObject*>((char*)this + i * LineSize + d * Q);
+    // search forwards looking for the enclosing object.
+    auto r = find_if(h0, [&](HeapObject* h, size_t size) {
+      return ptr < (char*)h + size; // found it!
+    });
+    assert(r.ptr); // forward search can't fail without heap corruption.
+    return !isFreeKind(r.ptr->kind()) ? r : HdrBlock{nullptr, 0};
+  }
+
+  static SlabHeader<LineSize>* fromHeader(HeapObject* h) {
+    assert(h->kind() == HeaderKind::Slab);
+    return reinterpret_cast<SlabHeader<LineSize>*>(h);
+  }
+
+  char* start() { return (char*)(this + 1); }
+  char* end() { return (char*)this + kSlabSize; }
+  const char* start() const { return (const char*)(this + 1); }
+  const char* end() const { return (const char*)this + kSlabSize; }
+
+private:
+  // LineSize=128 would be the same overhead as 1 bit per 16 bytes
+  static const size_t Q = kSmallSizeAlign; // 16
+  static const size_t NumLines = kSlabSize / LineSize;
+  static_assert(kSlabSize % LineSize == 0, "NumLines cannot be fraction");
+
+  struct Pos { size_t line, off; };
+  Pos pos(const void* p) const {
+    assert(p >= (char*)this && p <= end());
+    auto off = (char*)p - (char*)this;
+    return {off / LineSize, (off % LineSize) / Q};
+    static_assert(LineSize/Q <= 128, "positive offset overflows int8_t");
+  }
+
+  // Crossing map state: each byte in the crossing map corresponds to
+  // LineSize bytes in the slab, both indexed from "this". A non-negative value
+  // d in slot i provides the offset of the last object beginning in the
+  // corresponding line i. A negative value d indicates no object starts in
+  // this line, but the object that covers this line begins d lines earlier,
+  // indexed from the start of this line. If d is -128, the start of the object
+  // is even further back.
+  //
+  // d=xmap[i]   meaning
+  // ---------   --------
+  // 0..127      d*Q is offset of last object starting on this line
+  // -127..-1    line i is inside last object starting on line i+d
+  // -128        saturation. object starts on or before i+d
+  int8_t xmap_[NumLines];
+} __attribute__((__aligned__(kSmallSizeAlign)));
+
+// LineSize of 256 was chosen experimentally as tradeoff between
+// SlabHeader overhead and lookup costs.
+using Slab = SlabHeader<256>;
+
 inline const Resumable* resumable(const HeapObject* h) {
   assert(h->kind() == HeaderKind::AsyncFuncFrame);
   auto native = static_cast<const NativeNode*>(h);
@@ -161,6 +302,7 @@ inline size_t heapSize(const HeapObject* h) {
     0, /* BigObj */
     0, /* Free */
     0, /* Hole */
+    0, /* Slab */
   };
 #define CHECKSIZE(knd, size) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == size, #knd);
@@ -189,6 +331,7 @@ inline size_t heapSize(const HeapObject* h) {
   CHECKSIZE(Object, 0)
   CHECKSIZE(Hole, 0)
   CHECKSIZE(Free, 0)
+  CHECKSIZE(Slab, 0)
 #undef CHECKSIZE
 
   auto kind = h->kind();
@@ -245,6 +388,7 @@ inline size_t heapSize(const HeapObject* h) {
     }
     case HeaderKind::Free:
     case HeaderKind::Hole:
+    case HeaderKind::Slab:
       return static_cast<const FreeNode*>(h)->size();
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
@@ -267,6 +411,7 @@ inline size_t heapSize(const HeapObject* h) {
 inline size_t allocSize(const HeapObject* h) {
   auto const sz = heapSize(h);
   switch (h->kind()) {
+    case HeaderKind::Slab:
     case HeaderKind::Hole:
     case HeaderKind::Free:
     case HeaderKind::BigObj:
@@ -280,6 +425,43 @@ inline size_t allocSize(const HeapObject* h) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// call fn(h,size) on each object in the slab, return the first HdrBlock
+// when fn returns true
+template<size_t LineSize> template<class Fn>
+HdrBlock SlabHeader<LineSize>::find_if(HeapObject* h, Fn fn) const {
+  auto end = (HeapObject*)this->end();
+  do {
+    auto size = allocSize(h);
+    if (fn(h, size)) return {h, size};
+    h = reinterpret_cast<HeapObject*>((char*)h + size);
+  } while (h < end);
+  assert(h == end); // otherwise, last object was truncated
+  return {nullptr, 0};
+}
+
+template<class OnBig, class OnSlab>
+void BigHeap::iterate(OnBig onBig, OnSlab onSlab) {
+  // slabs and bigs are sorted; walk through both in address order
+  const auto SENTINEL = (HeapObject*) ~0LL;
+  auto slab = std::begin(m_slabs);
+  auto big = std::begin(m_bigs);
+  auto slabend = std::end(m_slabs);
+  auto bigend = std::end(m_bigs);
+  while (slab != slabend || big != bigend) {
+    HeapObject* slab_hdr = slab != slabend ? (HeapObject*)slab->ptr : SENTINEL;
+    HeapObject* big_hdr = big != bigend ? *big : SENTINEL;
+    assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
+    if (slab_hdr < big_hdr) {
+      onSlab(slab_hdr, slab->size);
+      ++slab;
+    } else {
+      assert(big_hdr < slab_hdr);
+      onBig(big_hdr, allocSize(big_hdr));
+      ++big;
+    }
+  }
+}
 
 template<class Fn> void BigHeap::iterate(Fn fn) {
   // slabs and bigs are sorted; walk through both in address order
@@ -318,7 +500,8 @@ template<class Fn> void MemoryManager::iterate(Fn fn) {
       // skip MallocNode
       h = static_cast<MallocNode*>(h) + 1;
       allocSize -= sizeof(MallocNode);
-    } else if (h->kind() == HeaderKind::Hole) {
+    } else if (h->kind() >= HeaderKind::Hole) {
+      assert(unsigned(h->kind()) < NumHeaderKinds);
       // no valid pointer can point here.
       return; // continue iterating
     }
@@ -377,6 +560,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         break;
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
+      case HeaderKind::Slab:
         assert(false && "forEachHeader skips these kinds");
         break;
     }

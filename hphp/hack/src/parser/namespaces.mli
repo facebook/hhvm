@@ -8,8 +8,13 @@
  *
  *)
 
+type elaborate_kind =
+  | ElaborateFun
+  | ElaborateClass
+  | ElaborateConst
+
 val elaborate_id : Namespace_env.env ->
-                   Ast.ns_kind ->
+                   elaborate_kind ->
                    Ast.id ->
                    Ast.id
 val elaborate_defs : ParserOptions.t -> Ast.program -> Ast.program

@@ -22,6 +22,7 @@ open String_utils
 module N = Nast
 module ShapeMap = N.ShapeMap
 module SN = Naming_special_names
+module NS = Namespaces
 
 module GEnv = NamingGlobal.GEnv
 
@@ -427,7 +428,7 @@ end = struct
   (* For dealing with namespace fallback on constants *)
   let elaborate_and_get_name_with_fallback mk_dep genv get_pos x =
     let get_name x = get_name genv get_pos x in
-    let fq_x = Namespaces.elaborate_id genv.namespace NSConst x in
+    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
@@ -460,7 +461,7 @@ end = struct
       mk_dep genv get_pos get_canon x =
     let get_name x = get_name genv get_pos x in
     let canonicalize = canonicalize genv get_pos get_canon in
-    let fq_x = Namespaces.elaborate_id genv.namespace NSFun x in
+    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
     let need_fallback =
       genv.namespace.Namespace_env.ns_name <> None &&
       not (String.contains (snd x) '\\') in
@@ -503,7 +504,7 @@ end = struct
   let type_name (genv, _) x ~allow_typedef =
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
-    let (pos, name) as x = Namespaces.elaborate_id genv.namespace NSClass x in
+    let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
     match GEnv.type_info genv.tcopt name with
     | Some (_def_pos, `Class) ->
       (* Don't let people use strictly internal classes
@@ -1462,7 +1463,7 @@ module Make (GetLocals : GetLocals) = struct
         (* Only check the values because shape field names are always legal *)
         List.iter fdl (fun (_, e) -> check_constant_expr env e)
     | Collection (id, l) ->
-      let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
+      let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       (* Only vec/keyset/dict are allowed because they are value types *)
       (match cn with
         | _ when
@@ -1939,7 +1940,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Darray (List.map l (fun (e1, e2) -> expr env e1, expr env e2))
     | Varray l -> N.Varray (List.map l (expr env))
     | Collection (id, l) -> begin
-      let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
+      let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       match cn with
         | x when N.is_vc_kind x ->
           N.ValCollection ((N.get_vc_kind cn),
@@ -2001,7 +2002,7 @@ module Make (GetLocals : GetLocals) = struct
         N.Class_get (make_class_id env x1 [], x2)
     | Class_const (x1, x2) ->
       let (genv, _) = env in
-      let (_, name) = Namespaces.elaborate_id genv.namespace NSClass x1 in
+      let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       if GEnv.typedef_pos (genv.tcopt) name <> None && (snd x2) = "class" then
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
       else

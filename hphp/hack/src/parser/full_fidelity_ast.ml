@@ -1800,9 +1800,10 @@ and pDef : def parser = fun node env ->
           let key = drop_pstr x name in
           let kind =
             match syntax kind with
-            | Missing                            -> NSClass
-            | Token { PT.kind = TK.Function; _ } -> NSFun
-            | Token { PT.kind = TK.Const   ; _ } -> NSConst
+            | Token { PT.kind = TK.Namespace; _ } -> NSNamespace
+            | Token { PT.kind = TK.Function ; _ } -> NSFun
+            | Token { PT.kind = TK.Const    ; _ } -> NSConst
+            | Missing                             -> NSClassAndNamespace
             | _ -> missing_syntax "namespace use kind" kind env
           in
           ( kind

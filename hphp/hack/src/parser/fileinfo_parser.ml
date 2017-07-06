@@ -151,7 +151,7 @@ and toplevel acc env =
           let elaborated =
             Namespaces.elaborate_id
               (env.ns_env)
-              Ast.NSClass cname in
+              Namespaces.ElaborateClass cname in
           let newacc = {
             acc with
               classes = (FileInfo.pos_full elaborated)::acc.classes
@@ -162,7 +162,7 @@ and toplevel acc env =
           let elaborated =
             Namespaces.elaborate_id
               (env.ns_env)
-              Ast.NSFun fname in
+              Namespaces.ElaborateFun fname in
           let newacc = {
             acc with
               funs = (FileInfo.pos_full elaborated)::acc.funs

@@ -13,6 +13,7 @@ open Core
 open Utils
 
 module FuncTerm = Typing_func_terminality
+module NS = Namespaces
 
 (* Module calculating the locals for a statement
  * This is useful when someone uses $x on both sides
@@ -40,11 +41,11 @@ and terminal_ tcopt nsenv ~in_try = function
                  | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _, [])))
   | Return _ -> raise Exit
   | Expr (_, Call ((_, Id fun_id), _, _)) ->
-    let _, fun_name = Namespaces.elaborate_id nsenv NSFun fun_id in
+    let _, fun_name = NS.elaborate_id nsenv NS.ElaborateFun fun_id in
     FuncTerm.(raise_exit_if_terminal (get_fun tcopt fun_name))
   | Expr (_, Call ((_, Class_const (cls_id, (_, meth_name))), _, _))
     when (snd cls_id).[0] <> '$' ->
-    let _, cls_name = Namespaces.elaborate_id nsenv NSClass cls_id in
+    let _, cls_name = NS.elaborate_id nsenv NS.ElaborateClass cls_id in
     FuncTerm.(raise_exit_if_terminal
       (get_static_meth tcopt cls_name meth_name))
   | If (_, b1, b2) ->

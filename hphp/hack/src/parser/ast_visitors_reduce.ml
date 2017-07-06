@@ -23,11 +23,13 @@ class virtual ['self] reduce =
       | Covariant -> self#on_Covariant env
       | Contravariant -> self#on_Contravariant env
       | Invariant -> self#on_Invariant env
-    method on_NSClass _ = self#e
+    method on_NSNamespace _ = self#e
+    method on_NSClassAndNamespace _ = self#e
     method on_NSFun _ = self#e
     method on_NSConst _ = self#e
     method on_ns_kind env = function
-      | NSClass -> self#on_NSClass env
+      | NSNamespace -> self#on_NSNamespace env
+      | NSClassAndNamespace -> self#on_NSClassAndNamespace env
       | NSFun -> self#on_NSFun env
       | NSConst -> self#on_NSConst env
     method on_program env = self#on_list self#on_def env

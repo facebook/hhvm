@@ -31,7 +31,8 @@ type variance =
   | Invariant
 
 type ns_kind =
-  | NSClass
+  | NSNamespace
+  | NSClassAndNamespace
   | NSFun
   | NSConst
 

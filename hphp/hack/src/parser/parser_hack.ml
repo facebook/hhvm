@@ -4335,9 +4335,10 @@ and namespace_kind env =
       match Lexing.lexeme env.lb with
         | "function" -> NSFun
         | "const" -> NSConst
-        | _ -> (L.back env.lb; NSClass)
+        | "namespace" -> NSNamespace
+        | _ -> (L.back env.lb; NSClassAndNamespace)
     end
-    | _ -> (L.back env.lb; NSClass)
+    | _ -> (L.back env.lb; NSClassAndNamespace)
 
 and namespace_use env =
   let kind = namespace_kind env in
@@ -4394,7 +4395,7 @@ and namespace_group_use env kind prefix =
     then String.sub prefix 0 (prefix_len - 1)
     else (error_expect env "group use prefix to end with '\\'"; prefix) in
 
-  let allow_change_kind = (kind = NSClass) in
+  let allow_change_kind = (kind = NSClassAndNamespace) in
   let unprefixed = namespace_use_list env allow_change_kind Trcb kind [] in
   expect env Tsc;
   List.map unprefixed begin fun (kind, (p1, s1), id2) ->

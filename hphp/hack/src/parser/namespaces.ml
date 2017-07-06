@@ -124,6 +124,11 @@ let renamespace_if_aliased ?(reverse = false) ns_map id =
   (* If there is some matching problem, that means we are not aliasing *)
   with _ -> id
 
+type elaborate_kind =
+  | ElaborateFun
+  | ElaborateClass
+  | ElaborateConst
+
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
  *
@@ -152,10 +157,10 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
         with Not_found -> String.length id, false in
       (* "use function" and "use const" only apply if the id is completely
        * unqualified, otherwise the normal "use" imports apply. *)
-      let uses = if has_bslash then nsenv.ns_uses else match kind with
-        | NSClass -> nsenv.ns_uses
-        | NSFun -> nsenv.ns_fun_uses
-        | NSConst -> nsenv.ns_const_uses in
+      let uses = if has_bslash then nsenv.ns_ns_uses else match kind with
+        | ElaborateClass -> nsenv.ns_class_uses
+        | ElaborateFun -> nsenv.ns_fun_uses
+        | ElaborateConst -> nsenv.ns_const_uses in
       let prefix = String.sub id 0 bslash_loc in
       if prefix = "namespace" && id <> "namespace" then begin
         (* Strip off the 'namespace\' (including the slash) from id, then
@@ -198,7 +203,7 @@ let elaborate_id_no_autos = elaborate_id_impl ~autoimport:false
 module ElaborateDefs = struct
   let hint nsenv = function
     | p, Happly (id, args) ->
-        p, Happly (elaborate_id nsenv NSClass id, args)
+        p, Happly (elaborate_id nsenv ElaborateClass id, args)
     | other -> other
 
   let class_def nsenv = function
@@ -226,9 +231,14 @@ module ElaborateDefs = struct
         let nsenv =
           List.fold_left l ~init:nsenv ~f:begin fun nsenv (kind, id1, id2) ->
             match kind with
-              | NSClass -> begin
-                let m = SMap.add (snd id2) (snd id1) nsenv.ns_uses in
-                {nsenv with ns_uses = m}
+              | NSNamespace -> begin
+                let m = SMap.add (snd id2) (snd id1) nsenv.ns_ns_uses in
+                {nsenv with ns_ns_uses = m}
+              end
+              | NSClassAndNamespace -> begin
+                let m = SMap.add (snd id2) (snd id1) nsenv.ns_class_uses in
+                let n = SMap.add (snd id2) (snd id1) nsenv.ns_ns_uses in
+                {nsenv with ns_class_uses = m; ns_ns_uses = n}
               end
               | NSFun -> begin
                 let m = SMap.add (snd id2) (snd id1) nsenv.ns_fun_uses in
@@ -242,18 +252,18 @@ module ElaborateDefs = struct
         nsenv, [SetNamespaceEnv nsenv]
       end
     | Class c -> nsenv, [Class {c with
-        c_name = elaborate_id_no_autos nsenv NSClass c.c_name;
+        c_name = elaborate_id_no_autos nsenv ElaborateClass c.c_name;
         c_extends = List.map c.c_extends (hint nsenv);
         c_implements = List.map c.c_implements (hint nsenv);
         c_body = List.map c.c_body (class_def nsenv);
         c_namespace = nsenv;
       }]
     | Fun f -> nsenv, [Fun {f with
-        f_name = elaborate_id_no_autos nsenv NSFun f.f_name;
+        f_name = elaborate_id_no_autos nsenv ElaborateFun f.f_name;
         f_namespace = nsenv;
       }]
     | Typedef t -> nsenv, [Typedef {t with
-        t_id = elaborate_id_no_autos nsenv NSClass t.t_id;
+        t_id = elaborate_id_no_autos nsenv ElaborateClass t.t_id;
         t_namespace = nsenv;
       }]
     | Constant cst -> nsenv, [Constant {cst with
@@ -269,7 +279,7 @@ module ElaborateDefs = struct
             the same way so name will be successfully resolved.*)
             let (pos, n) = cst.cst_name in
             pos, "\\" ^ n
-          else elaborate_id_no_autos nsenv NSConst cst.cst_name;
+          else elaborate_id_no_autos nsenv ElaborateConst cst.cst_name;
         cst_namespace = nsenv;
       }]
     | other -> nsenv, [other]

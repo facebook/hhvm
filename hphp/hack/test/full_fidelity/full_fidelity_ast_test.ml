@@ -106,8 +106,8 @@ let simple_expected_1 = "(AProgram
      ((Return p ((p (Binop Plus (p (Lvar (p $a))) (p (Lvar (p $b)))))))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
 let simple_source_2 =
@@ -130,8 +130,8 @@ let simple_expected_2 = "(AProgram
        (param_modifier: ()) (param_user_attributes: ()))))
     (f_body: (\"\")) (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
 let comment_scraper_1 =
@@ -151,8 +151,8 @@ let comment_scraper_expected =
     (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))(AProgram
  ((Stmt (Markup (p \"\") ()))
   (Fun
@@ -161,8 +161,8 @@ let comment_scraper_expected =
     (f_params: ()) (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
 let type_annotated_function_call =
@@ -209,8 +209,8 @@ let global_keyword_expected =
     (f_params: ()) (f_body: ((Global_var ((p (Id (p $x)))))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
 let test_data =

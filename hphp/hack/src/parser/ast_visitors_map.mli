@@ -295,7 +295,8 @@ class virtual ['c] map :
         on_Minus : 'd -> Ast_visitors_ancestors.bop;
         on_MustExtend : 'd -> Ast_visitors_ancestors.trait_req_kind;
         on_MustImplement : 'd -> Ast_visitors_ancestors.trait_req_kind;
-        on_NSClass : 'd -> Ast_visitors_ancestors.ns_kind;
+        on_NSNamespace : 'd -> Ast_visitors_ancestors.ns_kind;
+        on_NSClassAndNamespace : 'd -> Ast_visitors_ancestors.ns_kind;
         on_NSConst : 'd -> Ast_visitors_ancestors.ns_kind;
         on_NSFun : 'd -> Ast_visitors_ancestors.ns_kind;
         on_Namespace : 'd ->
@@ -910,7 +911,8 @@ class virtual ['c] map :
     method on_Minus : 'd -> Ast_visitors_ancestors.bop
     method on_MustExtend : 'd -> Ast_visitors_ancestors.trait_req_kind
     method on_MustImplement : 'd -> Ast_visitors_ancestors.trait_req_kind
-    method on_NSClass : 'd -> Ast_visitors_ancestors.ns_kind
+    method on_NSNamespace : 'd -> Ast_visitors_ancestors.ns_kind
+    method on_NSClassAndNamespace : 'd -> Ast_visitors_ancestors.ns_kind
     method on_NSConst : 'd -> Ast_visitors_ancestors.ns_kind
     method on_NSFun : 'd -> Ast_visitors_ancestors.ns_kind
     method on_Namespace :

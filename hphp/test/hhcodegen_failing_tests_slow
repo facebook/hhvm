@@ -751,8 +751,6 @@ slow/use_function/double_alias.php
 slow/use_function/override.php
 slow/use_function/realias.php
 slow/use_function/use_function.php
-slow/use_namespace/namespace_and_class.php
-slow/use_namespace/namespace_no_class.php
 slow/var_export/1450.php
 slow/variable_argument/27.php
 slow/variadic_args/by_reference_typehints.php

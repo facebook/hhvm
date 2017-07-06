@@ -434,7 +434,10 @@ class virtual ['b] endo :
         on_MustImplement : 'c ->
                            Ast_visitors_ancestors.trait_req_kind ->
                            Ast_visitors_ancestors.trait_req_kind;
-        on_NSClass : 'c ->
+        on_NSNamespace: 'c ->
+                     Ast_visitors_ancestors.ns_kind ->
+                     Ast_visitors_ancestors.ns_kind;
+        on_NSClassAndNamespace : 'c ->
                      Ast_visitors_ancestors.ns_kind ->
                      Ast_visitors_ancestors.ns_kind;
         on_NSConst : 'c ->
@@ -1296,7 +1299,9 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.trait_req_kind ->
       Ast_visitors_ancestors.trait_req_kind
-    method on_NSClass :
+    method on_NSNamespace :
+      'c -> Ast_visitors_ancestors.ns_kind -> Ast_visitors_ancestors.ns_kind
+    method on_NSClassAndNamespace :
       'c -> Ast_visitors_ancestors.ns_kind -> Ast_visitors_ancestors.ns_kind
     method on_NSConst :
       'c -> Ast_visitors_ancestors.ns_kind -> Ast_visitors_ancestors.ns_kind

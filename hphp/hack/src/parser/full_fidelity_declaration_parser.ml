@@ -245,10 +245,12 @@ module WithExpressionAndStatementAndTypeParser
   and parse_namespace_use_kind_opt parser =
     (* SPEC
       namespace-use-kind:
+        namespace
         function
         const *)
     let (parser1, token) = next_token parser in
     match Token.kind token with
+    | Namespace
     | Function
     | Const -> (parser1, (make_token token))
     | _ -> (parser, (make_missing()))

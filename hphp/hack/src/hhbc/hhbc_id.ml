@@ -51,7 +51,7 @@ module Class = struct
   let elaborate_id ns id =
     let mangled_name = SU.Xhp.mangle (snd id) in
     match Hhbc_alias.opt_normalize (SU.strip_global_ns mangled_name) with
-    | None -> elaborate_id ns Ast_defs.NSClass (fst id, mangled_name)
+    | None -> elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name)
     | Some s -> s, None
 
   let to_unmangled_string s =
@@ -138,7 +138,7 @@ module Function = struct
     then SU.prefix_namespace "HH" s, Some s
     else if List.mem builtins_at_top s
     then s, None
-    else elaborate_id ns Ast_defs.NSFun id
+    else elaborate_id ns Namespaces.ElaborateFun id
 
 end
 
@@ -149,6 +149,6 @@ module Const = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
-    let fq_id, backoff_id = elaborate_id ns Ast_defs.NSConst id in
+    let fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
     fq_id, backoff_id, String.contains (snd id) '\\'
 end

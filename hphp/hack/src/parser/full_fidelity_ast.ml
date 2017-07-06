@@ -277,11 +277,11 @@ let syntax_of_token : PositionedToken.t -> node = fun t ->
 
 (* TODO: Clean up string escaping *)
 let prepString2 : node list -> node list =
-  let trimLeft t =
-    PT.({ t with leading_width = t.leading_width + 1; width = t.width - 1 })
+  let trimLeft ~n t =
+    PT.({ t with leading_width = t.leading_width + n; width = t.width - n })
   in
-  let trimRight t =
-    PT.({ t with trailing_width = t.trailing_width + 1; width = t.width - 1 })
+  let trimRight ~n t =
+    PT.({ t with trailing_width = t.trailing_width + n; width = t.width - n })
   in
   function
   | ({ syntax = Token t; _ }::ss)
@@ -289,12 +289,28 @@ let prepString2 : node list -> node list =
     let rec unwind = function
       | [{ syntax = Token t; _ }]
       when t.PT.width > 0 && (PT.text t).[t.PT.width - 1] = '"' ->
-        let s = syntax_of_token (trimRight t) in
+        let s = syntax_of_token (trimRight ~n:1 t) in
         if width s > 0 then [s] else []
       | x :: xs -> x :: unwind xs
       | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
     in
-    let s = syntax_of_token (trimLeft t) in
+    let s = syntax_of_token (trimLeft ~n:1 t) in
+    if width s > 0 then s :: unwind ss else unwind ss
+  | ({ syntax = Token t; _ }::ss)
+  when t.PT.width > 3 && String.sub (PT.text t) 0 3 = "<<<" ->
+    let rec unwind = function
+      | [{ syntax = Token t; _ }] when t.PT.width > 0 ->
+        let content = PT.text t in
+        let len = t.PT.width in
+        let n = len - (String.rindex_from content (len - 2) '\n') in
+        let s = syntax_of_token (trimRight ~n t) in
+        if width s > 0 then [s] else []
+      | x :: xs -> x :: unwind xs
+      | _ -> raise (Invalid_argument "Malformed String2 SyntaxList")
+    in
+    let content = PT.text t in
+    let n = (String.index content '\n') + 1 in
+    let s = syntax_of_token (trimLeft ~n t) in
     if width s > 0 then s :: unwind ss else unwind ss
   | x -> x (* unchanged *)
 

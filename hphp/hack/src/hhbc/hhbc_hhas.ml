@@ -688,6 +688,13 @@ let add_instruction_list buffer indent instructions =
   let rec aux instructions indent =
     match instructions with
     | [] -> ()
+    | ISpecialFlow _ :: t ->
+      let fatal =
+        Emit_fatal.emit_fatal_runtime "Cannot break/continue 1 level"
+      in
+      let fatal = Instruction_sequence.instr_seq_to_list fatal in
+      aux fatal indent;
+      aux t indent
     | instruction :: t ->
       begin
       let actual_indent = adjusted_indent instruction indent in

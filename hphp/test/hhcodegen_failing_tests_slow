@@ -693,7 +693,6 @@ slow/static_statement/1407.php
 slow/static_statement/1410.php
 slow/streams/user_filter_autoload.php
 slow/string/164.php
-slow/string/heredoc_end_after_variable.php
 slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php

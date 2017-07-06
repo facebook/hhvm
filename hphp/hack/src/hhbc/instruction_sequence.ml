@@ -173,6 +173,7 @@ let instr_basenc idx mode = instr (IBase(BaseNC(idx, mode)))
 let instr_basesc y =
   instr (IBase(BaseSC(y, class_ref_rewrite_sentinel)))
 let instr_baseh = instr (IBase BaseH)
+let instr_baser i = instr (IBase (BaseR i))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall count = instr (ICall(FCall count))
 let instr_isuninit = instr (IMisc IsUninit)

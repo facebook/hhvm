@@ -776,11 +776,14 @@ and emit_eval env e =
     instr_eval;
   ]
 
-and emit_xhp_obj_get ~need_ref env param_num_opt e s nullflavor =
+and emit_xhp_obj_get_raw env e s nullflavor =
   let p = Pos.none in
   let fn_name = p, A.Obj_get (e, (p, A.Id (p, "getAttribute")), nullflavor) in
   let args = [p, A.String (p, SU.Xhp.clean s)] in
-  let call, _ = emit_call env fn_name args [] in
+  fst (emit_call env fn_name args [])
+
+and emit_xhp_obj_get ~need_ref env param_num_opt e s nullflavor =
+  let call = emit_xhp_obj_get_raw env e s nullflavor in
   match param_num_opt with
   | Some i -> gather [ call; instr_fpassr i ]
   | None -> gather [ call; if need_ref then instr_boxr else instr_unboxr ]
@@ -1452,27 +1455,34 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      total_stack_size
 
    | A.Obj_get(base_expr, prop_expr, null_flavor) ->
-     let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop_expr in
-     let base_expr_instrs, base_setup_instrs, base_stack_size =
-       emit_base ~notice:Notice ~is_object:true env
-         mode (base_offset + prop_stack_size) param_num_opt base_expr in
-     let mk = get_prop_member_key env null_flavor base_offset prop_expr in
-     let total_stack_size = prop_stack_size + base_stack_size in
-     let final_instr =
-       instr (IBase (
-         match param_num_opt with
-         | None -> Dim (mode, mk)
-         | Some i -> FPassDim (i, mk)
-       )) in
-     gather [
-       base_expr_instrs;
-       prop_expr_instrs;
-     ],
-     gather [
-       base_setup_instrs;
-       final_instr
-     ],
-     total_stack_size
+     begin match snd prop_expr with
+     | A.Id (_, s) when SU.Xhp.is_xhp s ->
+       emit_xhp_obj_get_raw env base_expr s null_flavor,
+       gather [ instr_baser base_offset ],
+       base_offset + 1
+     | _ ->
+       let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop_expr in
+       let base_expr_instrs, base_setup_instrs, base_stack_size =
+         emit_base ~notice:Notice ~is_object:true env
+           mode (base_offset + prop_stack_size) param_num_opt base_expr in
+       let mk = get_prop_member_key env null_flavor base_offset prop_expr in
+       let total_stack_size = prop_stack_size + base_stack_size in
+       let final_instr =
+         instr (IBase (
+           match param_num_opt with
+           | None -> Dim (mode, mk)
+           | Some i -> FPassDim (i, mk)
+         )) in
+       gather [
+         base_expr_instrs;
+         prop_expr_instrs;
+       ],
+       gather [
+         base_setup_instrs;
+         final_instr
+       ],
+       total_stack_size
+     end
 
    | A.Class_get(cid, (_, id)) ->
      let prop_expr_instrs =

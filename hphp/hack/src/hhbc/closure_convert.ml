@@ -292,6 +292,13 @@ let rec convert_expr env st (p, expr_ as expr) =
       ~trait:false
       ~fallback_to_empty_string:false
       env p pe
+  | Call ((_, (Class_const ((_, cid), _) | Class_get ((_, cid), _))) as e, el1, el2)
+  when cid = "parent" ->
+    let st = add_var st "$this" in
+    let st, e = convert_expr env st e in
+    let st, el1 = convert_exprs env st el1 in
+    let st, el2 = convert_exprs env st el2 in
+    st, (p, Call(e, el1, el2))
   | Call (e, el1, el2) ->
     let st, e = convert_expr env st e in
     let st, el1 = convert_exprs env st el1 in
@@ -364,6 +371,9 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Import(flavor, e) ->
     let st, e = convert_expr env st e in
     st, (p, Import(flavor, e))
+  | Id (_, id) as ast_id when String_utils.string_starts_with id "$" ->
+    let st = add_var st id in
+    st, (p, ast_id)
   | Id id ->
     st, convert_id env p id
   | Class_get (cid, _)

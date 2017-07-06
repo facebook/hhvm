@@ -40,16 +40,16 @@ let xhp_attribute_declaration_method name kind body =
     A.m_doc_comment = None;
   }
 
-let emit_xhp_attribute_array xal =
+let emit_xhp_attribute_array ~ns xal =
   (* Taken from hphp/parser/hphp.y *)
   let hint_to_num = function
-    | "string" -> 1
-    | "bool" | "boolean" -> 2
-    | "int" | "integer" -> 3
+    | "HH\\string" -> 1
+    | "HH\\bool" -> 2
+    | "HH\\int" -> 3
     | "array" -> 4
-    | "mixed" -> 6
+    | "HH\\mixed" -> 6
     | "enum" -> 7
-    | "real" | "float" | "double" -> 8
+    | "HH\\float" -> 8
     | "callable" -> 9
     (* Regular class names is type 5 *)
     | _ -> 5
@@ -62,11 +62,13 @@ let emit_xhp_attribute_array xal =
       p, A.Array (List.mapi ~f:turn_to_kv es)
   in
   let get_attribute_array_values id enumo =
+    let id, _ = Hhbc_id.Class.elaborate_id ns (p, id) in
+    let id = Hhbc_id.Class.to_raw_string id in
     let type_ = hint_to_num id in
     let type_ident = (p, A.Int (p, string_of_int type_)) in
     let class_name = match type_ with
       (* regular class names is type 5 *)
-      | 5 -> (p, A.String (p, Hhbc_alias.normalize id))
+      | 5 -> (p, A.String (p, id))
       (* enums are type 7 *)
       | 7 -> get_enum_attributes enumo
       | _ -> (p, A.Null)
@@ -116,7 +118,7 @@ let emit_xhp_use_attributes xual =
   List.map ~f:aux xual
 
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_attribute_declaration ast_class xal xual =
+let from_attribute_declaration ~ns ast_class xal xual =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   let neg_one = p, A.Unop(A.Uminus, (p, A.Int (p, "1"))) in
   (* static $_ = -1; *)
@@ -135,7 +137,7 @@ let from_attribute_declaration ast_class xal xual =
       [])
   in
   let args =
-    arg1 :: emit_xhp_use_attributes xual @ [emit_xhp_attribute_array xal]
+    arg1 :: emit_xhp_use_attributes xual @ [emit_xhp_attribute_array ~ns xal]
   in
   let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), args, []) in
   let true_branch =
@@ -176,6 +178,11 @@ let rec emit_xhp_children_decl_expr ~unary = function
       (A.Int (p, unary))
       (A.Int (p, "2"))
       (A.Null)
+  | [A.ChildName (_, s)] when s.[0] = '%' ->
+    get_array3
+      (A.Int (p, unary))
+      (A.Int (p, "4"))
+      (A.String (p, SU.Xhp.mangle (String.sub s 1 ((String.length s) - 1))))
   | [A.ChildName (_, s)] ->
     get_array3
       (A.Int (p, unary))

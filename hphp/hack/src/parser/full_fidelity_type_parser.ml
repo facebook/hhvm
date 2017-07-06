@@ -58,7 +58,7 @@ let rec parse_type_specifier parser =
   | Self
   | Parent -> parse_simple_type_or_type_constant parser
   | XHPClassName
-  | QualifiedName -> parse_possible_generic_specifier parser
+  | QualifiedName -> parse_possible_generic_specifier_or_type_const parser
   | Array -> parse_array_type_specifier parser
   | Darray -> parse_darray_type_specifier parser
   | Varray -> parse_varray_type_specifier parser
@@ -126,8 +126,19 @@ and parse_simple_type_or_type_constant parser =
 and parse_simple_type_or_type_constant_or_generic parser =
   let (parser0, _) = next_xhp_class_name_or_other parser in
   match peek_token_kind parser0 with
-  | LessThan -> parse_possible_generic_specifier parser
+  | LessThan -> parse_possible_generic_specifier_or_type_const parser
   | _ -> parse_simple_type_or_type_constant parser
+
+and parse_possible_generic_specifier_or_type_const parser =
+  let (parser, name) = next_xhp_class_name_or_other parser in
+  let (parser, arguments) = parse_generic_type_argument_list_opt parser in
+  if (kind arguments) = SyntaxKind.Missing then
+    let token = peek_token parser in
+    match Token.kind token with
+    | ColonColon -> parse_remaining_type_constant parser (make_token name)
+    | _ -> (parser, make_simple_type_specifier (make_token name))
+  else
+    (parser, make_generic_type_specifier (make_token name) arguments)
 
 (* SPEC
   class-interface-trait-specifier:

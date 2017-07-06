@@ -368,14 +368,19 @@ and emit_for env e1 e2 e3 b =
      instr_jmp start_label;
      instr_label break_label;
   *)
+  let check_cond e inst =
+    match e with
+    | _, A.Expr_list [] -> empty
+    | _ -> inst
+  in
   let instrs = gather [
     emit_ignored_expr env e1;
-    emit_jmpz env e2 break_label;
+    check_cond e2 (emit_jmpz env e2 break_label);
     instr_label start_label;
     emit_stmt env b;
     instr_label cont_label;
     emit_ignored_expr env e3;
-    emit_jmpnz env e2 start_label;
+    check_cond e2 (emit_jmpnz env e2 start_label);
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None

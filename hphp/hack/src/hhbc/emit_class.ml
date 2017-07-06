@@ -265,6 +265,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     then additional_methods
     else additional_methods
       @ Emit_xhp.from_attribute_declaration
+          ~ns:namespace
           ast_class
           class_xhp_attributes
           class_xhp_use_attributes

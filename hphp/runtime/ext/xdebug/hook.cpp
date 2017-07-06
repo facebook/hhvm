@@ -406,7 +406,16 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
 
     auto const result = g_context->evalPHPDebugger(bp.conditionUnit, 0);
     g_context->m_dbgNoBreak = prev_disabled;
-    if (result.failed || !result.result.toBoolean()) {
+    if (result.failed) {
+      // If the condition evaluation fails, err on the side of breaking so
+      // that the bp is not missed, and the user can remove or update the hit
+      // condition.
+      //
+      // Note: in this case, the evaluation failure has already been printed to
+      // the error output stream and/or log.
+      return true;
+    } else if (!result.result.toBoolean()) {
+      // Expression evaluated successfully, but returned false.
       return false;
     }
   }

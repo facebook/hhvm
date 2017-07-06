@@ -482,30 +482,42 @@ let mutate_duplicate (input : HP.t) : mutation_monad =
     IS.InstrSeq.flat_map is (seq_data is |> maintain_stack duplicate) in
   Nondet.return input |> mutate mut input !dup_reps
 
-(* This will randomly swap the position of two instructions in sequence. TODO:
-   same as above *)
+(* This will randomly swap the position of instruction subsequences with
+   the same stack signatures. *)
 let mutate_reorder (input : HP.t) : mutation_monad =
   debug_print "Reordering";
-  let rec flatten (lst : IS.t list) =
-     match lst with
-     | [] -> []
-     | IS.Instr_list l1 :: IS.Instr_list l2 :: t ->
-        flatten (IS.instrs (l1@l2)::t)  (*TODO: this process seems less
-                                        efficient than it could be*)
-     | IS.Instr_concat l :: t -> flatten l @ flatten t |> flatten
-     | h :: t -> h::(flatten t) in
-  let rec mut (is : IS.t) =
-    let rec reorder = function  (* TODO: Make this tail recursive? *)
-    | [] -> []
-    | [h] -> [h]
-    | h1::h2::t -> if should_mutate()
-                   then h2::h1::reorder(t)
-                   else h1::reorder(h2::t) in
-    match is with
-    | IS.Instr_list lst -> IS.Instr_list (reorder lst)
-    | IS.Instr_concat lst -> IS.Instr_concat (List.map mut (flatten lst))
-    | IS.Instr_try_fault (is1, is2) -> IS.Instr_try_fault (mut is1, mut is2) in
-  mutate mut input !reorder_reps (Nondet.return input)
+  let with_height_after map h idx : int list =
+    if Hashtbl.mem map h
+    then Hashtbl.find map h |> List.filter ((<) idx)
+    else [] in
+  (* (i, k] *)
+  let slice lst i k = Core.List.take (Core.List.drop lst (i + 1)) (k - i) in
+  let mut (is : IS.t) =
+    if not (should_mutate()) then is else
+    let instrs = IS.instr_seq_to_list is in
+    if List.length instrs < 5 then is else
+    let subinstrs = slice instrs in
+    let heights, by_height = stack_history is |> height_map in
+    (*finds (start1, end1], (start2, end2] indices of same stack signature *)
+    let rec find_sequence lim runs =
+      if runs > lim then -1, -1, -1, -1 else begin
+        let next_pos h idx = with_height_after by_height h idx |> rand_elt in
+        try
+          let start_h = rand_elt heights in
+          let end_h   = rand_elt heights in
+          let start1  = Hashtbl.find by_height start_h |> rand_elt in
+          let end1    = next_pos end_h start1 in
+          let start2  = next_pos start_h end1 in
+          start1, end1, start2, next_pos end_h start2
+        with Invalid_argument _ -> find_sequence lim (runs + 1) end in
+    let start1, end1, start2, end2 = find_sequence 10 0 in
+    if start1 < 0 then is else
+    let newseq = subinstrs (-1) start1 @ subinstrs start2 end2 @
+                 subinstrs end1 start2 @ subinstrs start1 end1 @
+                 subinstrs end2 (List.length instrs - 1) in
+    IS.InstrSeq.flat_map (IS.Instr_list newseq)
+      (seq_data is |> maintain_stack (fun _ i -> [i])) in
+  Nondet.return input |> mutate mut input !reorder_reps
 
 (* This will randomly remove some of the instructions in a sequence. *)
 let mutate_remove (input : HP.t) : mutation_monad =
@@ -534,7 +546,7 @@ let mutate_replace (input : HP.t) : mutation_monad =
     try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
     with | Not_found | Invalid_argument _ -> i in
   let mut (is : IS.t) =
-    let replace _ i = if not (should_mutate()) then [i] else [equiv_instr i] in
+    let replace _ i = if should_mutate() then [equiv_instr i] else [i] in
     IS.InstrSeq.flat_map is (seq_data is |> maintain_stack replace) in
   Nondet.return input |> mutate mut input !replace_reps
 
@@ -551,11 +563,9 @@ let mutate_insert (input : HP.t) : mutation_monad =
 (* This will charge random aspects of the input program metadata *)
 let mutate_metadata (input : HP.t)  =
   debug_print "Mutating metadata";
-  let rec delete_map f = function
-    | []     -> []
-    | h :: t -> if should_mutate()
-                then delete_map f t
-                else f h :: delete_map f t in
+  let delete_map f l =
+    Core.List.filter_map l
+      ~f:(fun x -> if should_mutate() then None else Some (f x)) in
   let mutate_option opt =
     if should_mutate () then None else opt in
   let mutate_typed_value (v : Typed_value.t) : Typed_value.t =
@@ -685,7 +695,7 @@ let mutate_metadata (input : HP.t)  =
       (prog |> HP.typedefs  |> delete_map mutate_typedef)
       (prog |> HP.main      |> mutate_body_data) in
   let open Nondet in
-  return input |> Instr_utils.num_fold
+  return input |> num_fold
     (fun a -> mut_data input |> add_event a) !metadata_reps
 
 (*---------------------------------Execution----------------------------------*)

@@ -52,7 +52,7 @@ let equate_stk (stk : stack) (target : stack) =
   else if stklen > targetlen then empty_stk stk targetlen
   else rebalance_stk (targetlen - stklen) target |> fst
 
-let produce flavor n = num_fold (fun acc -> flavor::acc) n []
+let produce flavor n = num_fold (List.cons flavor) n []
 
 let string_of_stack (stk : stack) : string =
   List.fold_right (fun x acc -> x ^ "; " ^ acc) stk ""
@@ -251,6 +251,23 @@ let stack_history (seq : IS.t) : (instruct * stack) list =
       let added   = List.fold_left (fun acc x -> x :: acc) removed stk_prod in
       (i, added) :: hist in
   (IBasic Nop, []) :: IS.InstrSeq.fold_left seq ~f:f ~init:[] |> List.rev
+
+(* Produces a map from stack height to indices in the instruction sequence
+   with that height, as well as a list of all the heights in the table. This
+   map doesn't include the last instruction, since swapping the position of a
+   Ret* or Unwind instruction is not desirable. *)
+let height_map (lst : (instruct * stack) list) :
+    int list * (int, int list) Hashtbl.t =
+  let hist = List.tl lst in (*remove the nop beginning of default hists*)
+  let tbl = List.length hist |> Hashtbl.create in
+  let heights = ref [] in
+  let add tbl height idx : unit =
+    if idx = List.length hist - 1 then () else begin
+      if not (List.mem height !heights) then heights := height :: !heights;
+      if not (Hashtbl.mem tbl height) then Hashtbl.add tbl height [idx] else
+      Hashtbl.find tbl height |> List.cons idx |> Hashtbl.add tbl height end in
+  List.iteri (fun idx (_,stk) -> add tbl (List.length stk) idx) hist;
+  !heights, tbl
 
 let collect_labels (seq : IS.t) : Label.t list =
   let f labels = function

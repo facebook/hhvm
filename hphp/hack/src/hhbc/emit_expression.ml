@@ -1459,7 +1459,7 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      | A.Id (_, s) when SU.Xhp.is_xhp s ->
        emit_xhp_obj_get_raw env base_expr s null_flavor,
        gather [ instr_baser base_offset ],
-       base_offset + 1
+       1
      | _ ->
        let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop_expr in
        let base_expr_instrs, base_setup_instrs, base_stack_size =

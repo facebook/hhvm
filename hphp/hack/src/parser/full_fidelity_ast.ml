@@ -391,6 +391,7 @@ let fun_template yielding node suspension_kind =
   ; f_namespace       = Namespace_env.empty !(lowerer_state.popt)
   ; f_span            = p
   ; f_doc_comment     = None
+  ; f_static          = false
   }
 
 let param_template node =
@@ -954,7 +955,8 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       | e -> InstanceOf (e, ty)
       *)
     | AnonymousFunction
-      { anonymous_async_keyword
+      { anonymous_static_keyword
+      ; anonymous_async_keyword
       ; anonymous_coroutine_keyword
       ; anonymous_parameters
       ; anonymous_type
@@ -985,6 +987,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
             f_ret    = mpOptional pHint anonymous_type env
           ; f_params = couldMap ~f:pFunParam anonymous_parameters env
           ; f_body   = mk_noop body
+          ; f_static = not (is_missing anonymous_static_keyword)
           }
         , try pUse anonymous_use env with _ -> []
         )

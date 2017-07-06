@@ -439,6 +439,7 @@ class virtual ['self] map =
       let r9 = self#on_fun_kind env this.f_fun_kind in
       let r10 = self#on_Namespace_env env this.f_namespace in
       let r11 = self#on_Pos_t env this.f_span in
+      let r12 = self#on_bool env this.f_static in
       {
         f_mode = r0;
         f_tparams = r1;
@@ -452,7 +453,8 @@ class virtual ['self] map =
         f_fun_kind = r9;
         f_namespace = r10;
         f_span = r11;
-        f_doc_comment = this.f_doc_comment
+        f_doc_comment = this.f_doc_comment;
+        f_static = r12;
       }
     method on_FSync env = FSync
     method on_FAsync env = FAsync

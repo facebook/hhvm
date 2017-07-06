@@ -222,6 +222,7 @@ and fun_ = {
   f_namespace       : Namespace_env.env;
   f_span            : Pos.t;
   f_doc_comment     : string option;
+  f_static          : bool;
 }
 
 and hint = Pos.t * hint_

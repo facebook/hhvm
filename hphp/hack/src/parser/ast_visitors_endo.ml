@@ -574,6 +574,7 @@ class virtual ['self] endo =
       let r9 = self#on_fun_kind env this.f_fun_kind in
       let r10 = self#on_Namespace_env env this.f_namespace in
       let r11 = self#on_Pos_t env this.f_span in
+      let r12 = self#on_bool env this.f_static in
       if  this.f_mode == r0
        && this.f_tparams == r1
        && this.f_constrs == r2
@@ -586,6 +587,7 @@ class virtual ['self] endo =
        && this.f_fun_kind == r9
        && this.f_namespace == r10
        && this.f_span == r11
+       && this.f_static == r12
       then this
       else
         {
@@ -601,7 +603,8 @@ class virtual ['self] endo =
           f_fun_kind = r9;
           f_namespace = r10;
           f_span = r11;
-          f_doc_comment = this.f_doc_comment
+          f_doc_comment = this.f_doc_comment;
+          f_static = r12;
         }
     method on_FSync env this = this
     method on_FAsync env this = this

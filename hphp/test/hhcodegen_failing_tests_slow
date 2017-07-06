@@ -46,16 +46,13 @@ slow/class_type_constant/type_constant6.php
 slow/closure/1933.php
 slow/closure/1937.php
 slow/closure/1939.php
-slow/closure/bind-stress.php
 slow/closure/bindscope.php
 slow/closure/call-and-bindTo-loop.php
 slow/closure/call-and-bindTo.php
 slow/closure/call-detailed.php
-slow/closure/call-static.php
 slow/closure/clone.php
 slow/closure/lambda_implicit_this.php
 slow/closure/lambda_uninit_capture.php
-slow/closure/late_bound_class.php
 slow/closure/name.php
 slow/closure/return_types.php
 slow/closure/static_invoke.php

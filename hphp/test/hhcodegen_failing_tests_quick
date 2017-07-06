@@ -13,7 +13,6 @@ quick/class_constants.php
 quick/class_interface_trait_exists.php
 quick/closure_recursive.php
 quick/closure_recursive_bad.php
-quick/closure_static.php
 quick/closure_static_vars.php
 quick/closure_use_this.php
 quick/constIntToString.php
@@ -101,7 +100,6 @@ quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface11.php
 quick/interface4.php
-quick/invoke.php
 quick/keyref_error.php
 quick/keyset/basic-getters.php
 quick/keyset/invalid-scalar.php
@@ -146,7 +144,6 @@ quick/short_array_syntax.php
 quick/simp-conv-to-int-dbl.php
 quick/sp.php
 quick/static_array.php
-quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_prop_eval_order.php
 quick/string-cse.php

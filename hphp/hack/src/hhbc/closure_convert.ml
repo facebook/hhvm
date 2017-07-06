@@ -166,7 +166,7 @@ let make_closure ~explicit_use ~class_num
       not st.captured_this || is_scope_static scope
     | _ -> false in
   let md = {
-    m_kind = [Public] @ (if is_scope_static env.scope then [Static] else []);
+    m_kind = [Public] @ (if fd.f_static || is_scope_static env.scope then [Static] else []);
     m_tparams = fd.f_tparams;
     m_constrs = [];
     m_name = (fst fd.f_name, "__invoke");

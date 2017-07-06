@@ -803,6 +803,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.btw fun_start fun_end;
     f_doc_comment = None;
+    f_static = false;
   }
 
 (*****************************************************************************)
@@ -2866,6 +2867,7 @@ and lambda_body ~sync env params ret =
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
     f_doc_comment = None;
+    f_static = false;
   }
   in Lfun f
 
@@ -3385,6 +3387,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
     f_doc_comment = None;
+    f_static = false;
   }
   in
   pos, Efun (f, use)

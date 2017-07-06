@@ -36,7 +36,6 @@ let metadata_reps = ref 1
 let complete_reps = ref 0
 let mut_prob = ref 0.1
 let mag = ref 1
-let mut_stk = ref true
 let debug = ref false
 
 let options =
@@ -48,8 +47,6 @@ let options =
       "The probability of a mutation occuring each pass (must be <= 1)");
    ("-magnitude", Arg.Set_int mag,
       "The magnitude of possible change for integer mutations (default 1)");
-   ("-stack", Arg.Set mut_stk,
-      "Whether to allow mutations of stack offsets (default true)");
   ("-debug", Arg.Set debug,
       "Turn on debug prints (default false)");
    ("-immediate", Arg.Set_int imm_reps,
@@ -78,7 +75,7 @@ let print_output : Hhas_program.t -> unit =
       if !out_dir <> ""
       then open_out (!out_dir ^ "/mutation" ^ string_of_int(!m_no) ^ ".hhas")
       else stdout in
-    p |> Hhbc_hhas.to_string |> (Printf.fprintf out "#Mutation %d\n%s\n" !m_no);
+    p |> Hhbc_hhas.to_string |> (Printf.fprintf out "%s\n");
     if (!out_dir <> "") then close_out out;
     m_no := !m_no + 1
 
@@ -101,10 +98,13 @@ let read_input () : Hhas_program.t =
   let program_parser = Hhas_parser.program Hhas_lexer.read in
   parse_file program_parser !filename
 
+let debug_print str = if !debug then print_endline str
+
 (*---------------------------------Mutations----------------------------------*)
 
 module IS = Instruction_sequence
 module HP = Hhas_program
+open Random_utils
 open Instr_utils
 
 type mutation_monad = HP.t Nondet.m
@@ -136,46 +136,38 @@ let mutate_methods (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
 let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   p |> mutate_main mut |> mutate_functions mut |> mutate_methods mut
 
-let mutate (mut: IS.t -> IS.t) (prog : HP.t) n (acc: mutation_monad) =
-  num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a) n acc
+let mutate (mut: IS.t -> IS.t) (prog : HP.t) =
+  num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a)
 
 open Hhbc_ast
 
-let option_lift f = function
-| Some x -> Some (f x)
-| None -> None
-
-let rand_elt lst =
-  let i = Random.int (List.length lst) in
-  List.nth lst i
+let option_lift f opt = Option.map opt f
 
 let should_mutate () = Random.float 1.0 < !mut_prob
 
 let mutate_bool b = if should_mutate() then not b else b
 
-let mutate_int n c =    (*TODO: in what cases is it okay to generate negative
-                          numbers?*)
-  if should_mutate () then n + (Random.int (2 * (c+1))) - c |> max 0 else n
+let mutate_int n c =
+  if should_mutate () then n + Random.int (2 * (c + 1)) - c |> max 0 else n
 
 let mutate_local_id (id : Local.t) c =
   match id with
   | Local.Unnamed i -> Local.Unnamed (mutate_int i c)
-  | _ -> id (*TODO: is it worth it to mutate named locals? I think this would
-              create trivially non-verifying programs in almost all cases,
-              so it wouldn't be that interesting *)
+  | _ -> id
 
 (* Changes the input label to another with the same stack height *)
 let mutate_label data (label : Label.t) =
   if not (should_mutate()) then label else
   let height l = data.stack_history |> List.assoc l |> List.length in
   let init_height = height (ILabel label) in
-  List.filter (fun l -> init_height = height (ILabel l)) data.labels |> rand_elt
+  List.filter (fun l -> init_height = height @@ ILabel l) data.labels |>
+  rand_elt
 
 let mutate_key (k : MemberKey.t) c =
   let new_key_type n =
     [MemberKey.EC n; MemberKey.EL (Local.Unnamed n); MemberKey.PC n;
      MemberKey.EI (Int64.of_int n); MemberKey.PL (Local.Unnamed n)] |>
-    rand_elt in
+     rand_elt in
   let swap_key_type k =
     match k with
     | MemberKey.EC n -> if should_mutate() then new_key_type n else k
@@ -194,30 +186,25 @@ let mutate_key (k : MemberKey.t) c =
   | MemberKey.PL id  -> MemberKey.PL (mutate_local_id id c)
   | MemberKey.EI i   ->
       MemberKey.EI (Int64.of_int (mutate_int (Int64.to_int i) c))
-  | _ -> k (*TODO: mutate other kinds of member keys. Need to keep track of
-            valid prop ids*)
+  | _ -> k
 
 (* TODO: Given the fact that we explicitly check this in the verifier as of
    D5169792, is this even worth doing here? It will always produce non-verifying
    code*)
 let mutate_mode (m : MemberOpMode.t) =
-  if should_mutate()
-  then [MemberOpMode.ModeNone; MemberOpMode.Define; MemberOpMode.Warn;
-        MemberOpMode.Unset] |> rand_elt
-  else m
+  if should_mutate() then random_mode () else m
 
 let maintain_stack op data =
   let pc, stk = ref 0, ref [] in (* This is a cool scoping trick that lets *)
-  fun (i : instruct) ->          (* these refs get defined before the instr *)
-  pc := !pc + 1;                 (* gets applied. Thus when this function is *)
-  let new_instructs = op data i in  (* is used later as an argument to *)
-  let helper instr buffer =    (* flat_map, the internal state is not exposed *)
-    let ctrl_buffer =
+  fun (i : instruct) ->        (* these refs get defined before the instr *)
+  pc := !pc + 1;               (* gets applied. Thus when this function is *)
+  let helper instr buffer =    (* is used later as an argument to *)
+    let ctrl_buffer =          (* flat_map, the internal state is not exposed *)
       match instr with
       | IContFlow RetC
       | IContFlow RetV   ->
           let old_stk = !stk in
-          stk := num_fold List.tl ((List.length !stk)-1) !stk;
+          stk := num_fold List.tl (List.length !stk - 1) !stk;
           empty_stk old_stk 1
       | IContFlow Unwind
       | IMisc NativeImpl -> let old_stk = !stk in
@@ -225,15 +212,14 @@ let maintain_stack op data =
       | ILabel _
       | IIterator _
       | IContFlow _      ->
-        let orig_stack = snd (List.nth data.stack_history (!pc - 1)) in
+        let orig_stack = List.nth data.stack_history (!pc - 1) |> snd in
         let res = equate_stk !stk orig_stack in
         stk := orig_stack; res
       | _ -> [] in
     let stk_req, stk_prod = stk_data instr in
     let num_req = List.length stk_req - List.length !stk in
     let pre_buffer, stk_extra =
-      if num_req > 0 then rebalance_stk num_req stk_req
-      else [],[] in
+      if num_req > 0 then rebalance_stk num_req stk_req else [],[] in
     if !debug then begin
       Printf.printf "Instruction %s stack is [%s],
                      consumed [%s], produced [%s]\n"
@@ -242,9 +228,9 @@ let maintain_stack op data =
     end;
     stk := stk_extra @ !stk;
     stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
-    stk := List.fold_left (fun acc x -> x::acc) !stk stk_prod;
+    stk := List.fold_left (fun acc x -> x :: acc)      !stk stk_prod;
     buffer @ pre_buffer @ ctrl_buffer @ [instr] in
-  List.fold_right helper new_instructs []
+  List.fold_right helper (op data i) []
 
 let mut_imms (is : IS.t) : IS.t =
   let mutate_get s =
@@ -273,13 +259,20 @@ let mut_imms (is : IS.t) : IS.t =
     | IsTypeL (id, op)   -> IsTypeL (mutate_local_id id !mag, op)
     | _ -> s in
   let mutate_mutator s =
+    let mutate_eq_op op = if should_mutate () then random_eq_op () else op in
+    let mutate_inc_op op =
+      if should_mutate () then random_incdec_op () else op in
     match s with
     | SetL      id       -> SetL    (mutate_local_id id !mag)
     | SetS      i        -> SetS    (mutate_int      i  !mag)
-    | SetOpL   (id, op)  -> SetOpL  (mutate_local_id id !mag, op)
-    | SetOpS   (op, i )  -> SetOpS  (op, mutate_int  i  !mag)
-    | IncDecL  (id, op)  -> IncDecL (mutate_local_id id !mag, op)
-    | IncDecS  (op, i )  -> IncDecS (op, mutate_int  i  !mag)
+    | SetOpL   (id, op)  -> SetOpL  (mutate_local_id id !mag, mutate_eq_op op)
+    | SetOpN    op       -> SetOpN  (mutate_eq_op op)
+    | SetOpG    op       -> SetOpG  (mutate_eq_op op)
+    | SetOpS   (op, i )  -> SetOpS  (mutate_eq_op op,         mutate_int i !mag)
+    | IncDecL  (id, op)  -> IncDecL (mutate_local_id id !mag, mutate_inc_op op)
+    | IncDecN   op       -> IncDecN (mutate_inc_op op)
+    | IncDecG   op       -> IncDecG (mutate_inc_op op)
+    | IncDecS  (op, i )  -> IncDecS (mutate_inc_op op,        mutate_int i !mag)
     | BindL     id       -> BindL   (mutate_local_id id !mag)
     | BindS     i        -> BindS   (mutate_int      i  !mag)
     | UnsetL    id       -> UnsetL  (mutate_local_id id !mag)
@@ -294,7 +287,7 @@ let mut_imms (is : IS.t) : IS.t =
                    because we already know it will fail the verifier/assembler*)
     | FPushObjMethod   (i, Ast_defs.OG_nullthrows)    ->
          FPushObjMethod(i,    if should_mutate()
-                              then Ast_defs.OG_nullsafe  (*What do these do?*)
+                              then Ast_defs.OG_nullsafe
                               else Ast_defs.OG_nullthrows)
     | FPushObjMethod   (i, Ast_defs.OG_nullsafe)      ->
          FPushObjMethod(i,    if should_mutate()
@@ -367,11 +360,7 @@ let mut_imms (is : IS.t) : IS.t =
         SSwitch (List.map (fun (id, l) -> (id, mutate_label data l)) lst)
     | _ -> s in
   let mutate_final s =
-    let mutate_op op =
-      if should_mutate()
-      then [QueryOp.CGet; QueryOp.CGetQuiet; QueryOp.Isset; QueryOp.Empty] |>
-            rand_elt
-      else op in
+    let mutate_op op = if should_mutate () then random_query_op () else op in
     match s with
     | QueryM  (i, op, k) ->
         QueryM (mutate_int i !mag,   mutate_op      op,      mutate_key k !mag)
@@ -386,7 +375,6 @@ let mut_imms (is : IS.t) : IS.t =
     | SetWithRefLML (id, id') ->
         SetWithRefLML (mutate_local_id id !mag, mutate_local_id id' !mag)
     | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag) in
-
   let mutate_iterator data s =
     match s with
     | IterInit   (i, l, id)      ->
@@ -424,18 +412,16 @@ let mut_imms (is : IS.t) : IS.t =
                        List.map (fun (b, i) -> (mutate_bool b, i)) lst)
     | _ -> s in
   let mutate_misc s =
-    let mutate_bare op =
-      if should_mutate() then [Notice; NoNotice] |> rand_elt else op in
-    let mutate_kind k =
-      if should_mutate() then [KClass; KInterface; KTrait] |> rand_elt else k in
+    let mutate_bare op = if should_mutate() then random_bare_op    () else op in
+    let mutate_kind k =  if should_mutate() then random_class_kind () else k  in
     let mutate_param_id id c =
       match id with
       | Param_unnamed i -> Param_unnamed (mutate_int i c)
       | _ -> id in (*TODO: is it worth it to mutate named params? I think this
                      would create trivially non-verifying programs in almost all
                      cases, so it wouldn't be that interesting *)
-   let mutate_silence op =
-     if should_mutate() then [Start; End] |> rand_elt else op in
+     let mutate_silence op =
+        if should_mutate() then random_silence () else op in
     match s with
     | BareThis        b       -> BareThis        (mutate_bare            b)
     | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
@@ -471,20 +457,20 @@ let mut_imms (is : IS.t) : IS.t =
      | IIterator s -> IIterator (mutate_iterator  data s)
      | IMisc     s -> IMisc     (mutate_misc           s)
      | _ -> i] (*no immediates, or none worth mutating*) in
-  IS.InstrSeq.flat_map is (maintain_stack change_imms (seq_data is))
+  IS.InstrSeq.flat_map is (seq_data is |> maintain_stack change_imms)
 
 (* Mutates the immediates of the opcodes in the input program. Currently
    this is just naive, randomly changing integer values by a user specified
    magnitude, and changing enum-style values by choosing a random new value
    in the possiblity space. *)
 let mutate_immediate (input : HP.t) : mutation_monad =
-  if !debug then print_endline "Mutating immediates";
-  mutate mut_imms input !imm_reps (Nondet.return input)
+  debug_print "Mutating immediates";
+  Nondet.return input |> mutate mut_imms input !imm_reps
 
 (* This will randomly duplicate an instruction by inserting another copy into
    its instruction sequences. *)
 let mutate_duplicate (input : HP.t) : mutation_monad =
-  if !debug then print_endline "Duplicating";
+  debug_print "Duplicating";
   let mut (is : IS.t) =
     let duplicate _ i =
       match i with
@@ -493,13 +479,13 @@ let mutate_duplicate (input : HP.t) : mutation_monad =
       | ITry _
       | IContFlow _ -> [i] (*duplicating control flow just breaks the stack*)
       | _ -> if should_mutate() then [i; i] else [i] in
-    IS.InstrSeq.flat_map is (maintain_stack duplicate (seq_data is)) in
-  mutate mut input !dup_reps (Nondet.return input)
+    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack duplicate) in
+  Nondet.return input |> mutate mut input !dup_reps
 
 (* This will randomly swap the position of two instructions in sequence. TODO:
    same as above *)
 let mutate_reorder (input : HP.t) : mutation_monad =
-  if !debug then print_endline "Reordering";
+  debug_print "Reordering";
   let rec flatten (lst : IS.t list) =
      match lst with
      | [] -> []
@@ -523,7 +509,7 @@ let mutate_reorder (input : HP.t) : mutation_monad =
 
 (* This will randomly remove some of the instructions in a sequence. *)
 let mutate_remove (input : HP.t) : mutation_monad =
-  if !debug then print_endline "Removing";
+  debug_print "Removing";
   let remove _ i =
     match i with
     | ILabel _
@@ -532,39 +518,51 @@ let mutate_remove (input : HP.t) : mutation_monad =
     | IContFlow _ -> [i] (*removing control flow just breaks the stack*)
     | _ -> if should_mutate() then [] else [i] in
   let mut (is : IS.t) =
-    IS.InstrSeq.flat_map is (maintain_stack remove (seq_data is)) in
-  mutate mut input !remove_reps  (Nondet.return input)
+    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack remove) in
+  Nondet.return input |> mutate mut input !remove_reps
 
+(* This will replace random instructions with others of the
+   same stack signature *)
 let mutate_replace (input : HP.t) : mutation_monad =
-  let mut _ = failwith "TODO" in
-  mutate mut input !replace_reps (Nondet.return input)
+  debug_print "Replacing";
+  let equiv_instr (i : instruct) : instruct =
+    let equiv_map = match i with
+                    | IBase _ -> sig_map_base
+                    | IFinal _ -> sig_map_final
+                    | ICall _ -> sig_map_fpass
+                    | _ -> sig_map_all in
+    try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
+    with | Not_found | Invalid_argument _ -> i in
+  let mut (is : IS.t) =
+    let replace _ i = if not (should_mutate()) then [i] else [equiv_instr i] in
+    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack replace) in
+  Nondet.return input |> mutate mut input !replace_reps
 
+(* This will add random instructions, with arbitrary stack signatures, to the
+   input program, rebalancing the stack as it goes *)
 let mutate_insert (input : HP.t) : mutation_monad =
-  let mut _ = failwith "TODO" in
-  mutate mut input !insert_reps  (Nondet.return input)
+  debug_print "Inserting";
+  let new_instr () : instruct = rand_elt all_instrs @@ () in
+  let mut (is : IS.t) =
+    let insert _ i = if should_mutate() then [new_instr (); i] else [i] in
+    IS.InstrSeq.flat_map is (maintain_stack insert (seq_data is)) in
+  Nondet.return input |> mutate mut input !insert_reps
 
+(* This will charge random aspects of the input program metadata *)
 let mutate_metadata (input : HP.t)  =
-  if !debug then print_endline "Mutating metadata";
+  debug_print "Mutating metadata";
   let rec delete_map f = function
-    | [] -> []
-    | h::t -> if should_mutate()
-              then delete_map f t
-              else (f h)::delete_map f t in
+    | []     -> []
+    | h :: t -> if should_mutate()
+                then delete_map f t
+                else f h :: delete_map f t in
   let mutate_option opt =
-    if not (should_mutate()) then opt else None in
+    if should_mutate () then None else opt in
   let mutate_typed_value (v : Typed_value.t) : Typed_value.t =
-    if not (should_mutate()) then v else
-    [Typed_value.Uninit; Typed_value.Int (Int64.of_int 1);
-     Typed_value.Bool true; Typed_value.Float 0.1;
-     Typed_value.String ""; Typed_value.Null;
-     Typed_value.Array [Typed_value.Null, Typed_value.Null];
-     Typed_value.Vec [Typed_value.Null]; Typed_value.Keyset [Typed_value.Null];
-     Typed_value.Dict [Typed_value.Null, Typed_value.Null]] |> rand_elt in
+    if should_mutate () then random_typed_value () else v in
   let module HTC = Hhas_type_constraint in
   let mutate_flag (f : HTC.type_constraint_flag) : HTC.type_constraint_flag =
-    if not (should_mutate()) then f else
-    [HTC.Nullable; HTC.HHType; HTC.ExtendedHint;
-     HTC.TypeVar;  HTC.Soft;   HTC.TypeConstant] |> rand_elt in
+    if should_mutate () then random_flag () else f in
   let mutate_constraint (const : HTC.t) : HTC.t =
     HTC.make
       (const |> HTC.name  |> mutate_option)
@@ -581,8 +579,8 @@ let mutate_metadata (input : HP.t)  =
     Hhas_param.make
       (param |> Hhas_param.name)
       (param |> Hhas_param.is_reference |> mutate_bool)
-      (param |> Hhas_param.is_variadic |> mutate_bool)
-      (param |> Hhas_param.type_info |> option_lift mutate_type_info)
+      (param |> Hhas_param.is_variadic  |> mutate_bool)
+      (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
     let mutate_static_init (s, opt) = (s, mutate_option opt) in
@@ -599,7 +597,7 @@ let mutate_metadata (input : HP.t)  =
   let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =
     let module HC = Hhas_class in
     let mutate_cls_id (id : Hhbc_id.Class.t) : Hhbc_id.Class.t =
-       if not (should_mutate()) then id else rand_elt ids in
+       if should_mutate () then rand_elt ids else id in
     let mutate_method_data (m : Hhas_method.t) : Hhas_method.t =
       Hhas_method.make
         (m |> Hhas_method.attributes        |> delete_map mutate_attribute)
@@ -627,7 +625,7 @@ let mutate_metadata (input : HP.t)  =
         (prop |> Hhas_property.name)
         (prop |> Hhas_property.initial_value |> option_lift mutate_typed_value)
         (prop |> Hhas_property.initializer_instrs |> mutate_option)
-        (prop |> Hhas_property.type_info |> mutate_type_info) in
+        (prop |> Hhas_property.type_info          |> mutate_type_info) in
     let mutate_constant (const : Hhas_constant.t) : Hhas_constant.t =
       Hhas_constant.make
         (const |> Hhas_constant.name)
@@ -639,10 +637,10 @@ let mutate_metadata (input : HP.t)  =
         (const |> Hhas_type_constant.initializer_t
                                           |> option_lift mutate_typed_value) in
     let mutate_req ((trait, str) as pair) =
-      if not (should_mutate()) then pair else
-      match trait with
-      | Ast.MustExtend -> Ast.MustImplement, str
-      | Ast.MustImplement -> Ast.MustExtend, str in
+      if should_mutate() then match trait with
+                              | Ast.MustExtend -> Ast.MustImplement, str
+                              | Ast.MustImplement -> Ast.MustExtend, str
+                         else pair in
     HC.make
       (cls |> HC.attributes         |> delete_map mutate_attribute)
       (cls |> HC.base               |> option_lift mutate_cls_id)
@@ -687,8 +685,8 @@ let mutate_metadata (input : HP.t)  =
       (prog |> HP.typedefs  |> delete_map mutate_typedef)
       (prog |> HP.main      |> mutate_body_data) in
   let open Nondet in
-  Instr_utils.num_fold
-    (fun a -> mut_data input |> add_event a) !metadata_reps (return input)
+  return input |> Instr_utils.num_fold
+    (fun a -> mut_data input |> add_event a) !metadata_reps
 
 (*---------------------------------Execution----------------------------------*)
 
@@ -700,14 +698,14 @@ let fuzz (input : HP.t) (mutations : mutation list): unit =
 (* command line driver *)
 let _ =
   Random.self_init ();
-  if ! Sys.interactive then ()
+  if !Sys.interactive then ()
   else
     set_binary_mode_out stdout true;
     let input = read_input () in
     let mutations = [mutate_immediate; mutate_duplicate; mutate_reorder;
-                     mutate_remove;    (*mutate_replace;   mutate_insert *)
+                     mutate_remove;    mutate_replace;   mutate_insert;
                      mutate_metadata] in
-    if (!complete_reps > 0)
+    if !complete_reps > 0
     then (imm_reps := 1; dup_reps := 1; reorder_reps := 1; remove_reps := 1;
          replace_reps := 1; insert_reps := 1; metadata_reps := 1)
     else complete_reps := 1;

@@ -16,19 +16,19 @@
 
 type 'a m = 'a list
 
-let bind lst f = List.concat (List.map f lst)
+let return = Core.List.return
 
-let return x = [x]
+let join = Core.List.join
 
-let fmap lst f = List.map f lst
+let (>>|) = Core.List.(>>|)
 
-let lift = List.map
+let fmap = (>>|)
 
-let join = List.concat
+let lift f l = l >>| f
+
+let bind = Core.List.bind
 
 let (>>=) = bind
-
-let (>>|) = fmap
 
 let add_event lst x = x :: lst
 

@@ -31,6 +31,8 @@ end
 
 module Function : sig
   type t
+  (* See hphp/compiler/parser.cpp *)
+  val builtins_in_hh : string list
   (* For use only in assembler. Quotes have been removed already *)
   val from_raw_string : string -> t
   (* For use only at final stage of emitting assembler *)

@@ -1,22 +1,39 @@
+(*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*)
+
 open Hhbc_ast
 module IS = Instruction_sequence
 type stack = string list
+type stack_sig = stack * stack
 
 let rec num_fold f n acc =
   if n <= 0 then acc else num_fold f (n - 1) (f acc)
 
 let rec rebalance_stk n (req : stack) : instruct list * stack =
-  if n = 0 then ([], []) else
-  match List.hd req, rebalance_stk (n-1) (List.tl req) with
-  | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1))::buf, "C"::extra
+  if n = 0 then [], [] else
+  match List.hd req, List.tl req |> rebalance_stk (n - 1) with
+  | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1)) :: buf, "C" :: extra
   | "V", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1))::IBasic (Box)::buf, "V"::extra
+    ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
   | "F", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1))::ICall (FPassC n)::buf, "F"::extra
+    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassC n) :: buf, "F" :: extra
   | "R", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1))::IBasic (BoxR)::buf,"R"::extra
-  | "U", (buf, extra) -> ILitConst NullUninit::buf, "U"::extra
-  | _ -> ([], []) (*Impossible*)
+    ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
+  | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
+  | _ -> [], [] (*Impossible*)
 
 let rec empty_stk stk remaining =
   if List.length stk <= remaining then [] else
@@ -26,23 +43,23 @@ let rec empty_stk stk remaining =
   | "V" :: t -> IBasic PopV :: empty_stk t remaining
   | "R" :: t -> IBasic PopR :: empty_stk t remaining
   | "U" :: t -> IBasic PopU :: empty_stk t remaining
-  | _ :: t -> empty_stk t (remaining - 1)
+  | _   :: t -> remaining - 1 |> empty_stk t
 
 (* Outputs a sequence of dummy instructions to make stk equal to target *)
 let equate_stk (stk : stack) (target : stack) =
   let stklen, targetlen = List.length stk, List.length target in
   if stklen = targetlen then []
-  else if stklen > targetlen then empty_stk stk (targetlen)
+  else if stklen > targetlen then empty_stk stk targetlen
   else rebalance_stk (targetlen - stklen) target |> fst
 
 let produce flavor n = num_fold (fun acc -> flavor::acc) n []
 
 let string_of_stack (stk : stack) : string =
-  (List.fold_right (fun x acc -> x^"; "^acc) stk "")
+  List.fold_right (fun x acc -> x ^ "; " ^ acc) stk ""
 
 (* Determines how an instruction changes the stack, and how many
    cells it consumes. Return format is (required, produced) *)
-let stk_data : instruct -> stack * stack = function
+let stk_data : instruct -> stack_sig = function
   | IMutator UnsetL _
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _
@@ -138,7 +155,7 @@ let stk_data : instruct -> stack * stack = function
   | IMisc GetMemoKeyL _
   | IGenerator CreateCont
   | IGenerator ContValid
-  | IGenerator ConStarted
+  | IGenerator ContStarted
   | IGenerator ContKey
   | IGenerator ContGetReturn
   | ICall FPushCtor _
@@ -228,16 +245,16 @@ let stack_history (seq : IS.t) : (instruct * stack) list =
   let f hist i =
     let stk_req, stk_prod = stk_data i in
     match hist with
-    | [] -> [(i, stk_prod)]
-    | (_, h)::_ ->
-      let removed = List.fold_left (fun acc _ -> List.tl acc) h stk_req in
-      let added = List.fold_left (fun acc x -> x::acc) removed stk_prod in
+    | [] -> [i, stk_prod]
+    | (_, h) :: _ ->
+      let removed = List.fold_left (fun acc _ -> List.tl acc)    h stk_req  in
+      let added   = List.fold_left (fun acc x -> x :: acc) removed stk_prod in
       (i, added) :: hist in
-  (IBasic Nop, [])::(IS.InstrSeq.fold_left seq ~f:f ~init:[] |> List.rev)
+  (IBasic Nop, []) :: IS.InstrSeq.fold_left seq ~f:f ~init:[] |> List.rev
 
 let collect_labels (seq : IS.t) : Label.t list =
   let f labels = function
-  | ILabel l when not (List.mem l labels) -> l::labels
+  | ILabel l when List.mem l labels |> not -> l :: labels
   | _ -> labels in
   IS.InstrSeq.fold_left seq ~f:f ~init:[]
 

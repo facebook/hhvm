@@ -1459,22 +1459,12 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpMode::None, propInfo)) {
-    auto propAddr = emitPropSpecialized(
-      env, base, key, nullsafe, mode, propInfo
-    );
 
-    if (!RuntimeOption::RepoAuthoritative) {
-      auto const cellPtr = gen(env, UnboxPtr, base);
-      auto const result = gen(env, LdMem, TCell, cellPtr);
-      gen(env, IncRef, result);
-      return result;
-    }
-
+    auto propAddr =
+      emitPropSpecialized(env, base, key, nullsafe, mode, propInfo);
     auto const ty = propAddr->type().deref();
-    auto const cellPtr = ty.maybe(TBoxedCell)
-      ? gen(env, UnboxPtr, propAddr)
-      : propAddr;
-
+    auto const cellPtr =
+      ty.maybe(TBoxedCell) ? gen(env, UnboxPtr, propAddr) : propAddr;
     auto const result = gen(env, LdMem, ty.unbox(), cellPtr);
     gen(env, IncRef, result);
     return result;

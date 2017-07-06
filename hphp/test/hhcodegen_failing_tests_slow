@@ -435,7 +435,6 @@ slow/object_property/696.php
 slow/object_property/718.php
 slow/object_property/basesc-input.php
 slow/object_property_expression/798.php
-slow/objprof/dead-static-props.php
 slow/objprof/mem_threshold.php
 slow/parser/1851.php
 slow/parser/afl5934248.php

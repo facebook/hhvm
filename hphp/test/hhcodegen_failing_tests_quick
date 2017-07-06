@@ -109,11 +109,6 @@ quick/lambda3.php
 quick/lambda5.php
 quick/lambda6.php
 quick/lambda8.php
-quick/lexer_heredoc_buffer_boundary_65492.php
-quick/lexer_heredoc_buffer_boundary_65493.php
-quick/lexer_heredoc_buffer_boundary_65494.php
-quick/lexer_heredoc_label_cornercases.php
-quick/lexer_heredoc_many_buffers.php
 quick/lexer_nowdoc_label_cornercases.php
 quick/method_param_promotion_error.php
 quick/no_hh/nullsafe-call-no-hh.php

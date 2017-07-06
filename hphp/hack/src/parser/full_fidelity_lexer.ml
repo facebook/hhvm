@@ -652,7 +652,15 @@ let scan_docstring_name lexer =
       else
         (with_error lexer SyntaxError.error0010, name)
     else
-      scan_docstring_name_actual lexer in
+      (* Starting with PHP 5.3.0, the opening Heredoc identifier
+         may optionally be enclosed in double quotes:*)
+      let lexer = if ch = '"' then advance lexer 1 else lexer in
+      let lexer, name = scan_docstring_name_actual lexer in
+      let lexer =
+        if ch = '"' && peek_char lexer 0 = '\"' then advance lexer 1 else lexer
+      in
+      lexer, name
+  in
   (lexer, name, kind)
 
 let scan_docstring_header lexer =

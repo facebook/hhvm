@@ -24,10 +24,10 @@ namespace HPHP {
 
 TEST(PTRMAP, InsertAndQuery) {
 
-  PtrMap ptr;
+  PtrMap<const void*> ptr;
 
-  ptr.insert((Header*)100, 100);  //  [100,200)
-  ptr.insert((Header*)250, 100);  //  [250,350)
+  ptr.insert((void*)100, 100);  //  [100,200)
+  ptr.insert((void*)250, 100);  //  [250,350)
   ptr.prepare();
 
   EXPECT_EQ(ptr.size(),2);
@@ -37,8 +37,8 @@ TEST(PTRMAP, InsertAndQuery) {
   EXPECT_EQ(ptr.isHeader((void*)220), false); //  outside both intervals
   EXPECT_EQ(ptr.isHeader((void*)500), false); //  outside [100,350) range
 
-  EXPECT_EQ(ptr.index((const HPHP::Header *)120), 0);  //  inside [100,200)
-  EXPECT_EQ(ptr.index((const HPHP::Header *)260), 1);  //  inside [250,350)
+  EXPECT_EQ(ptr.index((const void*)120), 0);  //  inside [100,200)
+  EXPECT_EQ(ptr.index((const void*)260), 1);  //  inside [250,350)
 
   auto r = ptr.region((void*)150);
   EXPECT_EQ((void*)r->first, (void*)100);  //  [100,200)
@@ -47,7 +47,7 @@ TEST(PTRMAP, InsertAndQuery) {
 
   //  mask test
   auto bound = 0xffffffffffffULL; //  48 bit address space mask
-  ptr.insert((Header *)(bound-100), 1000);  //  [bound-100,bound+900)
+  ptr.insert((void*)(bound-100), 1000);  //  [bound-100,bound+900)
   ptr.prepare();
 
   EXPECT_EQ(uintptr_t(ptr.span().second), bound-100+1000-100);

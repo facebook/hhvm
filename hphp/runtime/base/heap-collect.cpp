@@ -49,6 +49,13 @@ struct Counter {
   }
 };
 
+bool hasNativeData(const HeapObject* h) {
+  assert(isObjectKind(h->kind()));
+  return static_cast<const ObjectData*>(h)->getAttribute(
+      ObjectData::HasNativeData
+  );
+}
+
 struct Marker {
   explicit Marker() {}
   void init();
@@ -63,17 +70,15 @@ struct Marker {
   void conservativeScan(const void* start, size_t len);
 
   static bool marked(const HeapObject* h) { return h->marks() & GCBits::Mark; }
-  static bool marked(const Header* h) { return marked(&h->hdr_); }
-  bool mark(const void*, GCBits = GCBits::Mark);
+  bool mark(const HeapObject*, GCBits = GCBits::Mark);
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
 
-  void enqueue(const Header* h) {
+  void enqueue(const HeapObject* h) {
     assert(h && h->kind() <= HeaderKind::BigMalloc &&
            h->kind() != HeaderKind::AsyncFuncWH &&
            h->kind() != HeaderKind::Closure);
-    assert(!isObjectKind(h->kind()) ||
-           !h->obj_.getAttribute(ObjectData::HasNativeData));
+    assert(!isObjectKind(h->kind()) || !hasNativeData(h));
     work_.push_back(h);
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
@@ -84,21 +89,20 @@ struct Marker {
   size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
   size_t max_worklist_{0}; // max size of work_
   size_t freed_bytes_{0};
-  PtrMap ptrs_;
+  PtrMap<const HeapObject*> ptrs_;
   type_scan::Scanner type_scanner_;
-  std::vector<const Header*> work_;
+  std::vector<const HeapObject*> work_;
 };
 
 // mark the object at p, return true if first time.
-inline bool Marker::mark(const void* p, GCBits marks) {
-  assert(p && ptrs_.isHeader(p));
-  auto h = static_cast<const Header*>(p);
+inline bool Marker::mark(const HeapObject* h, GCBits marks) {
+  assert(h);
   assert(h->kind() <= HeaderKind::BigMalloc &&
          h->kind() != HeaderKind::AsyncFuncWH);
-  return h->hdr_.mark(marks) == GCBits::Unmarked;
+  return h->mark(marks) == GCBits::Unmarked;
 }
 
-DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
+DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   switch (h->kind()) {
     case HeaderKind::Apc:
     case HeaderKind::Globals:
@@ -126,7 +130,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
     case HeaderKind::AwaitAllWH:
       // Object kinds. None of these should have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
-      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
+      assert(!hasNativeData(h));
       break;
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
@@ -213,13 +217,13 @@ NEVER_INLINE void Marker::init() {
     if (kind == HeaderKind::Free) return; // continue
     h->clearMarks();
     allocd_ += allocSize;
-    ptrs_.insert((Header*)h, allocSize);
+    ptrs_.insert(h, allocSize);
     if ((kind == HeaderKind::SmallMalloc || kind == HeaderKind::BigMalloc) &&
         !type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
       // unknown type for a req::malloc'd block. See rationale above.
       unknown_ += allocSize;
       h->mark(GCBits::Pin);
-      enqueue((Header*)h);
+      enqueue(h);
     }
   });
   ptrs_.prepare();

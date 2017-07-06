@@ -93,80 +93,83 @@ inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
   return wh->scan(scanner);
 }
 
-inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
+inline void scanHeader(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Proxy:
-      return h->proxy_.scan(scanner);
+      return static_cast<const ProxyArray*>(h)->scan(scanner);
     case HeaderKind::Empty:
       return;
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      return PackedArray::scan(&h->arr_, scanner);
+      return PackedArray::scan(static_cast<const ArrayData*>(h), scanner);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-      return h->mixed_.scan(scanner);
+      return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
-      return h->set_.scan(scanner);
+      return static_cast<const SetArray*>(h)->scan(scanner);
     case HeaderKind::Apc:
-      return h->apc_.scan(scanner);
+      return static_cast<const APCLocalArray*>(h)->scan(scanner);
     case HeaderKind::Globals:
-      return h->globals_.scan(scanner);
+      return static_cast<const GlobalsArray*>(h)->scan(scanner);
     case HeaderKind::Closure:
-      scanner.scan(*h->closure_.hdr());
-      return h->closure_.scan(scanner); // ObjectData::scan
-    case HeaderKind::Object:
+      scanner.scan(*static_cast<const c_Closure*>(h)->hdr());
+      return static_cast<const c_Closure*>(h)->scan(scanner);
+    case HeaderKind::Object: {
       // native objects should hit the NativeData case below.
-      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
-      return h->obj_.scan(scanner);
+      auto obj = static_cast<const ObjectData*>(h);
+      assert(!obj->getAttribute(ObjectData::HasNativeData));
+      return obj->scan(scanner);
+    }
     case HeaderKind::WaitHandle: {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      assert(!h->wh_.getAttribute(ObjectData::HasNativeData));
-      return h->wh_.scan(scanner);
+      auto wh = static_cast<const c_WaitHandle*>(h);
+      assert(!wh->getAttribute(ObjectData::HasNativeData));
+      return wh->scan(scanner);
     }
     case HeaderKind::AwaitAllWH: {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      assert(!h->awaitall_.getAttribute(ObjectData::HasNativeData));
-      return h->awaitall_.scan(scanner);
+      auto aawh = static_cast<const c_AwaitAllWaitHandle*>(h);
+      assert(!aawh->getAttribute(ObjectData::HasNativeData));
+      return aawh->scan(scanner);
     }
     case HeaderKind::AsyncFuncWH:
-      return scanAFWH(&h->wh_, scanner);
-    case HeaderKind::NativeData:
-      scanNative(&h->native_, scanner);
-      return Native::obj(&h->native_)->scan(scanner);
+      return scanAFWH(static_cast<const c_WaitHandle*>(h), scanner);
+    case HeaderKind::NativeData: {
+      auto native = static_cast<const NativeNode*>(h);
+      scanNative(native, scanner);
+      return Native::obj(native)->scan(scanner);
+    }
     case HeaderKind::AsyncFuncFrame:
-      return scanAFWH(asyncFuncWH(reinterpret_cast<const HeapObject*>(h)),
-                      scanner);
+      return scanAFWH(asyncFuncWH(h), scanner);
     case HeaderKind::ClosureHdr:
-      scanner.scan(h->closure_hdr_);
-      return closureObj(reinterpret_cast<const HeapObject*>(h))->scan(scanner);
+      scanner.scan(*static_cast<const ClosureHdr*>(h));
+      return closureObj(h)->scan(scanner);
     case HeaderKind::Pair:
-      return h->pair_.scan(scanner);
+      return static_cast<const c_Pair*>(h)->scan(scanner);
     case HeaderKind::Vector:
     case HeaderKind::ImmVector:
-      return h->vector_.scan(scanner);
+      return static_cast<const BaseVector*>(h)->scan(scanner);
     case HeaderKind::Map:
     case HeaderKind::ImmMap:
     case HeaderKind::Set:
     case HeaderKind::ImmSet:
-      return h->hashcoll_.scan(scanner);
-    case HeaderKind::Resource:
-      return scanner.scanByIndex(
-        h->res_.typeIndex(),
-        h->res_.data(),
-        h->res_.heapSize() - sizeof(ResourceHdr)
-      );
+      return static_cast<const HashCollection*>(h)->scan(scanner);
+    case HeaderKind::Resource: {
+      auto res = static_cast<const ResourceHdr*>(h);
+      return scanner.scanByIndex(res->typeIndex(), res->data(),
+                                 res->heapSize() - sizeof(ResourceHdr));
+    }
     case HeaderKind::Ref:
-      scanner.scan(*h->ref_.tv());
+      scanner.scan(*static_cast<const RefData*>(h)->tv());
       return;
     case HeaderKind::SmallMalloc:
-    case HeaderKind::BigMalloc:
-      return scanner.scanByIndex(
-        h->malloc_.typeIndex(),
-        (&h->malloc_)+1,
-        h->malloc_.nbytes - sizeof(MallocNode)
-      );
+    case HeaderKind::BigMalloc: {
+      auto n = static_cast<const MallocNode*>(h);
+      return scanner.scanByIndex(n->typeIndex(), n + 1,
+                                 n->nbytes - sizeof(MallocNode));
+    }
     case HeaderKind::String:
     case HeaderKind::Free:
       // these don't have pointers. some clients might generically
@@ -278,9 +281,9 @@ template<class T> struct EphemeralPtrWrapper {
 
 template<class Fn>
 void MemoryManager::iterateRoots(Fn fn) const {
-  using Wrapper = EphemeralPtrWrapper<Header*>;
+  using Wrapper = EphemeralPtrWrapper<HeapObject*>;
   for (auto s = m_sweepables.next(); s != &m_sweepables; s = s->next()) {
-    if (auto h = static_cast<Header*>(s->owner())) {
+    if (auto h = static_cast<HeapObject*>(s->owner())) {
       assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
       auto w = Wrapper{h};
       fn(&w, sizeof(w), type_scan::getIndexForScan<Wrapper>());

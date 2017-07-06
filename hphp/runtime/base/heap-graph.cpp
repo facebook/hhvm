@@ -61,7 +61,7 @@ size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
   return e;
 }
 
-void addRootNode(HeapGraph& g, const PtrMap& blocks,
+void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
                  type_scan::Scanner& scanner,
                  const void* h, size_t size, type_scan::Index ty) {
   auto from = g.nodes.size();
@@ -118,14 +118,14 @@ std::vector<int> makeParentTree(const HeapGraph& g) {
 // add edges for every known root pointer and every known obj->obj ptr.
 HeapGraph makeHeapGraph(bool include_free) {
   HeapGraph g;
-  PtrMap blocks;
+  PtrMap<const HeapObject*> blocks;
 
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
   MM().forEachHeader([&](HeapObject* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
-      blocks.insert((Header*)h, alloc_size); // adds interval [h, h+alloc_size[
+      blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
     }
   });
   blocks.prepare();
@@ -167,7 +167,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     if (g.nodes[i].is_root) continue;
-    auto h = g.nodes[i].h;
+    auto h = reinterpret_cast<const HeapObject*>(g.nodes[i].h);
     scanHeader(h, scanner);
     auto from = blocks.index(h);
     assert(from == i);

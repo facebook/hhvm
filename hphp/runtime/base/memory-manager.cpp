@@ -522,7 +522,7 @@ void MemoryManager::endQuarantine(FreelistArray&& list) {
 void MemoryManager::checkHeap(const char* phase) {
   size_t bytes=0;
   std::vector<HeapObject*> hdrs;
-  PtrMap free_blocks, apc_arrays, apc_strings;
+  PtrMap<HeapObject*> free_blocks, apc_arrays, apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
   forEachHeader([&](HeapObject* h, size_t alloc_size) {
@@ -532,17 +532,17 @@ void MemoryManager::checkHeap(const char* phase) {
     counts[(int)kind]++;
     switch (kind) {
       case HeaderKind::Free:
-        free_blocks.insert((Header*)h, alloc_size);
+        free_blocks.insert(h, alloc_size);
         break;
       case HeaderKind::Apc:
         if (static_cast<APCLocalArray*>(h)->m_sweep_index !=
             kInvalidSweepIndex) {
-          apc_arrays.insert((Header*)h, alloc_size);
+          apc_arrays.insert(h, alloc_size);
         }
         break;
       case HeaderKind::String:
         if (static_cast<StringData*>(h)->isProxy()) {
-          apc_strings.insert((Header*)h, alloc_size);
+          apc_strings.insert(h, alloc_size);
         }
         break;
       case HeaderKind::Packed:

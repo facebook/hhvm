@@ -464,10 +464,10 @@ template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // information about heap objects, indexed by valid object starts.
-struct PtrMap {
-  using Region = std::pair<const Header*, std::size_t>;
+template<class T> struct PtrMap {
+  using Region = std::pair<T, std::size_t>;
 
-  void insert(const Header* h, size_t size) {
+  void insert(T h, size_t size) {
     sorted_ &= regions_.empty() || h > regions_.back().first;
     regions_.emplace_back(h, size);
   }
@@ -491,7 +491,7 @@ struct PtrMap {
            nullptr;
   }
 
-  const Header* header(const void* p) const {
+  T header(const void* p) const {
     auto r = region(p);
     return r ? r->first : nullptr;
   }
@@ -506,7 +506,7 @@ struct PtrMap {
   }
 
   // where does this header sit in the regions_ vector?
-  size_t index(const Header* h) const {
+  size_t index(T h) const {
     assert(header(h));
     return region(h) - &regions_[0];
   }
@@ -533,7 +533,7 @@ struct PtrMap {
 
   template<class Fn> void iterate(Fn fn) const {
     for (auto& r : regions_) {
-      fn((const HeapObject*)r.first, r.second);
+      fn(r.first, r.second);
     }
   }
 
@@ -553,7 +553,7 @@ private:
   }
 
   Region span_{nullptr, 0};
-  std::vector<std::pair<const Header*, std::size_t>> regions_;
+  std::vector<Region> regions_;
   bool sorted_{true};
 };
 

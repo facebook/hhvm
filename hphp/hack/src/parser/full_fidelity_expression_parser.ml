@@ -163,8 +163,9 @@ module WithStatementAndDeclAndTypeParser
     | Name
     | QualifiedName -> parse_name_or_collection_literal_expression parser1 token
     | Self
-    | Parent
-    | Static -> parse_scope_resolution_or_name parser
+    | Parent -> parse_scope_resolution_or_name parser
+    | Static ->
+      parse_anon_or_awaitable_or_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Dollar -> parse_dollar_expression parser
     | Suspend
@@ -1865,7 +1866,8 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (* Skip any async or coroutine declarations that may be present. When we
        feed the original parser into the syntax parsers. they will take care of
        them as appropriate. *)
-    let (parser1, _) = optional_token parser Async in
+    let (parser1, _) = optional_token parser Static in
+    let (parser1, _) = optional_token parser1 Async in
     let (parser1, _) = optional_token parser1 Coroutine in
     match peek_token_kind parser1 with
     | Function -> parse_anon parser
@@ -1925,7 +1927,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_anon parser =
     (* SPEC
       anonymous-function-creation-expression:
-        async-opt  coroutine-opt  function
+        static-opt async-opt coroutine-opt  function
         ( anonymous-function-parameter-list-opt  )
         anonymous-function-return-opt
         anonymous-function-use-clauseopt
@@ -1936,6 +1938,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
        The "..." syntax and trailing commas are supported. We'll simply
        parse an optional parameter list; it already takes care of making the
        type annotations optional. *)
+    let (parser, static) = optional_token parser Static in
     let (parser, async) = optional_token parser Async in
     let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, fn) = assert_token parser Function in
@@ -1946,6 +1949,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, body) = parse_compound_statement parser in
     let result =
       make_anonymous_function
+        static
         async
         coroutine
         fn
@@ -2103,6 +2107,15 @@ TODO: This will need to be fixed to allow situations where the qualified name
       missing, give a missing node for the left side, and parse the
       remainder as the right side. We'll go for the former for now. *)
       (with_error parser SyntaxError.error1015, less_than)
+
+  and parse_anon_or_awaitable_or_scope_resolution_or_name parser =
+    (* static is a legal identifier, if next token is scope resolution operatpr
+      - parse expresson as scope resolution operator, otherwise try to interpret
+      it as anonymous function (will fallback to name in case of failure) *)
+    if peek_token_kind ~lookahead:1 parser = ColonColon then
+      parse_scope_resolution_or_name parser
+    else
+      parse_anon_or_lambda_or_awaitable parser
 
   and parse_scope_resolution_or_name parser =
     (* parent, self and static are legal identifiers.  If the next

@@ -794,6 +794,7 @@ let rec transform node =
     ]
   | AnonymousFunction x ->
     let (
+      static_kw,
       async_kw,
       coroutine_kw,
       fun_kw,
@@ -806,6 +807,8 @@ let rec transform node =
       body
     ) = get_anonymous_function_children x in
     Fmt [
+      t static_kw;
+      when_present static_kw space;
       t async_kw;
       when_present async_kw space;
       t coroutine_kw;

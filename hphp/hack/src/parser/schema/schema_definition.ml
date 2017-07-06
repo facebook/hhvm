@@ -922,7 +922,8 @@ let schema : schema_node list =
     ; prefix      = "anonymous"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "async_keyword", ZeroOrOne Token
+      [ "static_keyword", ZeroOrOne Token
+      ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
       ; "function_keyword", Token
       ; "left_paren", Token

@@ -876,7 +876,8 @@ let rec get_doc node =
     let ty = get_doc lambda_type in
     group_doc (left ^| params ^| right ^| colon ^| ty)
   | AnonymousFunction
-    { anonymous_async_keyword;
+    { anonymous_static_keyword;
+      anonymous_async_keyword;
       anonymous_coroutine_keyword;
       anonymous_function_keyword;
       anonymous_left_paren;
@@ -886,6 +887,7 @@ let rec get_doc node =
       anonymous_type;
       anonymous_use;
       anonymous_body } ->
+    let static = get_doc anonymous_static_keyword in
     let async = get_doc anonymous_async_keyword in
     let coroutine = get_doc anonymous_coroutine_keyword in
     let fn = get_doc anonymous_function_keyword in
@@ -894,7 +896,7 @@ let rec get_doc node =
     let right = get_doc anonymous_right_paren in
     let colon = get_doc anonymous_colon in
     let return_type = get_doc anonymous_type in
-    let preface = group_doc ( async ^| coroutine ^| fn ) in
+    let preface = group_doc ( static ^| async ^| coroutine ^| fn ) in
     let parameters = indent_block_no_space left params right indt in
     let type_declaration = group_doc (colon ^| return_type) in
     let uses = get_doc anonymous_use in

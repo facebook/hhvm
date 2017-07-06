@@ -483,7 +483,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; simple_initializer_value                           : t
     }
   and anonymous_function =
-    { anonymous_async_keyword                            : t
+    { anonymous_static_keyword                           : t
+    ; anonymous_async_keyword                            : t
     ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
     ; anonymous_left_paren                               : t
@@ -1708,7 +1709,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; simple_initializer_value: expression value
     }
   and anonymous_function =
-    { anonymous_async_keyword: Token.t option value
+    { anonymous_static_keyword: Token.t option value
+    ; anonymous_async_keyword: Token.t option value
     ; anonymous_coroutine_keyword: Token.t option value
     ; anonymous_function_keyword: Token.t value
     ; anonymous_left_paren: Token.t value

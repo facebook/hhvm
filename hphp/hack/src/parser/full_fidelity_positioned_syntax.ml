@@ -1089,10 +1089,12 @@ module FromMinimal = struct
         :: anonymous_function_keyword
         :: anonymous_coroutine_keyword
         :: anonymous_async_keyword
+        :: anonymous_static_keyword
         :: results
         ) ->
           AnonymousFunction
-          { anonymous_async_keyword
+          { anonymous_static_keyword
+          ; anonymous_async_keyword
           ; anonymous_coroutine_keyword
           ; anonymous_function_keyword
           ; anonymous_left_paren
@@ -2844,7 +2846,8 @@ module FromMinimal = struct
         let todo = Convert (simple_initializer_value, todo) in
         convert offset todo results simple_initializer_equal
     | { M.syntax = M.AnonymousFunction
-        { M.anonymous_async_keyword
+        { M.anonymous_static_keyword
+        ; M.anonymous_async_keyword
         ; M.anonymous_coroutine_keyword
         ; M.anonymous_function_keyword
         ; M.anonymous_left_paren
@@ -2866,7 +2869,8 @@ module FromMinimal = struct
         let todo = Convert (anonymous_left_paren, todo) in
         let todo = Convert (anonymous_function_keyword, todo) in
         let todo = Convert (anonymous_coroutine_keyword, todo) in
-        convert offset todo results anonymous_async_keyword
+        let todo = Convert (anonymous_async_keyword, todo) in
+        convert offset todo results anonymous_static_keyword
     | { M.syntax = M.AnonymousFunctionUseClause
         { M.anonymous_use_keyword
         ; M.anonymous_use_left_paren

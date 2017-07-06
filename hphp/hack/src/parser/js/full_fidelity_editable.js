@@ -10079,6 +10079,7 @@ class SimpleInitializer extends EditableSyntax
 class AnonymousFunction extends EditableSyntax
 {
   constructor(
+    static_keyword,
     async_keyword,
     coroutine_keyword,
     function_keyword,
@@ -10091,6 +10092,7 @@ class AnonymousFunction extends EditableSyntax
     body)
   {
     super('anonymous_function', {
+      static_keyword: static_keyword,
       async_keyword: async_keyword,
       coroutine_keyword: coroutine_keyword,
       function_keyword: function_keyword,
@@ -10102,6 +10104,7 @@ class AnonymousFunction extends EditableSyntax
       use: use,
       body: body });
   }
+  get static_keyword() { return this.children.static_keyword; }
   get async_keyword() { return this.children.async_keyword; }
   get coroutine_keyword() { return this.children.coroutine_keyword; }
   get function_keyword() { return this.children.function_keyword; }
@@ -10112,8 +10115,23 @@ class AnonymousFunction extends EditableSyntax
   get type() { return this.children.type; }
   get use() { return this.children.use; }
   get body() { return this.children.body; }
+  with_static_keyword(static_keyword){
+    return new AnonymousFunction(
+      static_keyword,
+      this.async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.colon,
+      this.type,
+      this.use,
+      this.body);
+  }
   with_async_keyword(async_keyword){
     return new AnonymousFunction(
+      this.static_keyword,
       async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10127,6 +10145,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_coroutine_keyword(coroutine_keyword){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       coroutine_keyword,
       this.function_keyword,
@@ -10140,6 +10159,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_function_keyword(function_keyword){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       function_keyword,
@@ -10153,6 +10173,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_left_paren(left_paren){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10166,6 +10187,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_parameters(parameters){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10179,6 +10201,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_right_paren(right_paren){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10192,6 +10215,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_colon(colon){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10205,6 +10229,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_type(type){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10218,6 +10243,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_use(use){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10231,6 +10257,7 @@ class AnonymousFunction extends EditableSyntax
   }
   with_body(body){
     return new AnonymousFunction(
+      this.static_keyword,
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
@@ -10248,6 +10275,7 @@ class AnonymousFunction extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
     var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
@@ -10259,6 +10287,7 @@ class AnonymousFunction extends EditableSyntax
     var use = this.use.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
+      static_keyword === this.static_keyword &&
       async_keyword === this.async_keyword &&
       coroutine_keyword === this.coroutine_keyword &&
       function_keyword === this.function_keyword &&
@@ -10275,6 +10304,7 @@ class AnonymousFunction extends EditableSyntax
     else
     {
       return rewriter(new AnonymousFunction(
+        static_keyword,
         async_keyword,
         coroutine_keyword,
         function_keyword,
@@ -10289,6 +10319,9 @@ class AnonymousFunction extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let static_keyword = EditableSyntax.from_json(
+      json.anonymous_static_keyword, position, source);
+    position += static_keyword.width;
     let async_keyword = EditableSyntax.from_json(
       json.anonymous_async_keyword, position, source);
     position += async_keyword.width;
@@ -10320,6 +10353,7 @@ class AnonymousFunction extends EditableSyntax
       json.anonymous_body, position, source);
     position += body.width;
     return new AnonymousFunction(
+        static_keyword,
         async_keyword,
         coroutine_keyword,
         function_keyword,
@@ -10335,6 +10369,7 @@ class AnonymousFunction extends EditableSyntax
   {
     if (AnonymousFunction._children_keys == null)
       AnonymousFunction._children_keys = [
+        'static_keyword',
         'async_keyword',
         'coroutine_keyword',
         'function_keyword',

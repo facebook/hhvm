@@ -1208,6 +1208,7 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_anonymous_function_children {
+      anonymous_static_keyword;
       anonymous_async_keyword;
       anonymous_coroutine_keyword;
       anonymous_function_keyword;
@@ -1219,6 +1220,7 @@ module WithToken(Token: TokenType) = struct
       anonymous_use;
       anonymous_body;
     } = (
+      anonymous_static_keyword,
       anonymous_async_keyword,
       anonymous_coroutine_keyword,
       anonymous_function_keyword,
@@ -2803,6 +2805,7 @@ module WithToken(Token: TokenType) = struct
         simple_initializer_value;
       ]
       | AnonymousFunction {
+        anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
@@ -2814,6 +2817,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
+        anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
@@ -4321,6 +4325,7 @@ module WithToken(Token: TokenType) = struct
         "simple_initializer_value";
       ]
       | AnonymousFunction {
+        anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
@@ -4332,6 +4337,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
+        "anonymous_static_keyword";
         "anonymous_async_keyword";
         "anonymous_coroutine_keyword";
         "anonymous_function_keyword";
@@ -5963,6 +5969,7 @@ module WithToken(Token: TokenType) = struct
           simple_initializer_value;
         }
       | (SyntaxKind.AnonymousFunction, [
+          anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
@@ -5975,6 +5982,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_body;
         ]) ->
         AnonymousFunction {
+          anonymous_static_keyword;
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
@@ -7733,6 +7741,7 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_anonymous_function
+      anonymous_static_keyword
       anonymous_async_keyword
       anonymous_coroutine_keyword
       anonymous_function_keyword
@@ -7745,6 +7754,7 @@ module WithToken(Token: TokenType) = struct
       anonymous_body
     =
       from_children SyntaxKind.AnonymousFunction [
+        anonymous_static_keyword;
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;

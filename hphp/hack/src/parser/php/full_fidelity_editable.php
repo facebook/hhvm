@@ -12060,6 +12060,7 @@ final class SimpleInitializer extends EditableSyntax {
   }
 }
 final class AnonymousFunction extends EditableSyntax {
+  private EditableSyntax $_static_keyword;
   private EditableSyntax $_async_keyword;
   private EditableSyntax $_coroutine_keyword;
   private EditableSyntax $_function_keyword;
@@ -12071,6 +12072,7 @@ final class AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_use;
   private EditableSyntax $_body;
   public function __construct(
+    EditableSyntax $static_keyword,
     EditableSyntax $async_keyword,
     EditableSyntax $coroutine_keyword,
     EditableSyntax $function_keyword,
@@ -12082,6 +12084,7 @@ final class AnonymousFunction extends EditableSyntax {
     EditableSyntax $use,
     EditableSyntax $body) {
     parent::__construct('anonymous_function');
+    $this->_static_keyword = $static_keyword;
     $this->_async_keyword = $async_keyword;
     $this->_coroutine_keyword = $coroutine_keyword;
     $this->_function_keyword = $function_keyword;
@@ -12092,6 +12095,9 @@ final class AnonymousFunction extends EditableSyntax {
     $this->_type = $type;
     $this->_use = $use;
     $this->_body = $body;
+  }
+  public function static_keyword(): EditableSyntax {
+    return $this->_static_keyword;
   }
   public function async_keyword(): EditableSyntax {
     return $this->_async_keyword;
@@ -12123,8 +12129,23 @@ final class AnonymousFunction extends EditableSyntax {
   public function body(): EditableSyntax {
     return $this->_body;
   }
+  public function with_static_keyword(EditableSyntax $static_keyword): AnonymousFunction {
+    return new AnonymousFunction(
+      $static_keyword,
+      $this->_async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $this->_use,
+      $this->_body);
+  }
   public function with_async_keyword(EditableSyntax $async_keyword): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12138,6 +12159,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_coroutine_keyword(EditableSyntax $coroutine_keyword): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $coroutine_keyword,
       $this->_function_keyword,
@@ -12151,6 +12173,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_function_keyword(EditableSyntax $function_keyword): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $function_keyword,
@@ -12164,6 +12187,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_left_paren(EditableSyntax $left_paren): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12177,6 +12201,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_parameters(EditableSyntax $parameters): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12190,6 +12215,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_right_paren(EditableSyntax $right_paren): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12203,6 +12229,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_colon(EditableSyntax $colon): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12216,6 +12243,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_type(EditableSyntax $type): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12229,6 +12257,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_use(EditableSyntax $use): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12242,6 +12271,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function with_body(EditableSyntax $body): AnonymousFunction {
     return new AnonymousFunction(
+      $this->_static_keyword,
       $this->_async_keyword,
       $this->_coroutine_keyword,
       $this->_function_keyword,
@@ -12260,6 +12290,7 @@ final class AnonymousFunction extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $static_keyword = $this->static_keyword()->rewrite($rewriter, $new_parents);
     $async_keyword = $this->async_keyword()->rewrite($rewriter, $new_parents);
     $coroutine_keyword = $this->coroutine_keyword()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
@@ -12271,6 +12302,7 @@ final class AnonymousFunction extends EditableSyntax {
     $use = $this->use()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
+      $static_keyword === $this->static_keyword() &&
       $async_keyword === $this->async_keyword() &&
       $coroutine_keyword === $this->coroutine_keyword() &&
       $function_keyword === $this->function_keyword() &&
@@ -12284,6 +12316,7 @@ final class AnonymousFunction extends EditableSyntax {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AnonymousFunction(
+        $static_keyword,
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
@@ -12298,6 +12331,9 @@ final class AnonymousFunction extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $static_keyword = EditableSyntax::from_json(
+      $json->anonymous_static_keyword, $position, $source);
+    $position += $static_keyword->width();
     $async_keyword = EditableSyntax::from_json(
       $json->anonymous_async_keyword, $position, $source);
     $position += $async_keyword->width();
@@ -12329,6 +12365,7 @@ final class AnonymousFunction extends EditableSyntax {
       $json->anonymous_body, $position, $source);
     $position += $body->width();
     return new AnonymousFunction(
+        $static_keyword,
         $async_keyword,
         $coroutine_keyword,
         $function_keyword,
@@ -12341,6 +12378,7 @@ final class AnonymousFunction extends EditableSyntax {
         $body);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_static_keyword;
     yield $this->_async_keyword;
     yield $this->_coroutine_keyword;
     yield $this->_function_keyword;

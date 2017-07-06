@@ -16,6 +16,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_lexer
 module Operator = Full_fidelity_operator
+module Context = Full_fidelity_parser_context
 module rec ExpressionParser :
   Full_fidelity_expression_parser_type.ExpressionParserType =
   Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser
@@ -34,19 +35,21 @@ and TypeParser :
 
 type t = {
   lexer : Lexer.t;
-  errors : SyntaxError.t list
+  errors : SyntaxError.t list;
+  context: Context.t
 }
 
 let make text =
-  { lexer = Lexer.make text; errors = [] }
+  { lexer = Lexer.make text; errors = []; context = Context.empty }
 
 let errors parser =
   parser.errors @ (Lexer.errors parser.lexer)
 
 let parse_script parser =
-  let decl_parser = DeclParser.make parser.lexer parser.errors in
+  let decl_parser = DeclParser.make parser.lexer
+    parser.errors parser.context in
   let (decl_parser, node) = DeclParser.parse_script decl_parser in
   let lexer = DeclParser.lexer decl_parser in
   let errors = DeclParser.errors decl_parser in
-  let parser = {lexer; errors} in
+  let parser = { parser with lexer; errors } in
   (parser, node)

@@ -27,11 +27,12 @@ include SimpleParser
 include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
 let parse_expression parser =
-  let expr_parser = ExpressionParser.make parser.lexer parser.errors in
+  let expr_parser = ExpressionParser.make parser.lexer
+    parser.errors parser.context in
   let (expr_parser, node) = ExpressionParser.parse_expression expr_parser in
   let lexer = ExpressionParser.lexer expr_parser in
   let errors = ExpressionParser.errors expr_parser in
-  let parser = { lexer; errors } in
+  let parser = { parser with lexer; errors } in
   (parser, node)
 
 (* TODO: What about something like for::for? Is that a legal

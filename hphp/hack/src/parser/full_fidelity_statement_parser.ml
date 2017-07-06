@@ -145,11 +145,12 @@ module WithExpressionAndDeclAndTypeParser
   and use_decl_parser
       (f : DeclParser.t -> DeclParser.t * Full_fidelity_minimal_syntax.t)
       parser =
-    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let decl_parser = DeclParser.make parser.lexer
+      parser.errors parser.context in
     let decl_parser, node = f decl_parser in
     let lexer = DeclParser.lexer decl_parser in
     let errors = DeclParser.errors decl_parser in
-    let parser = make lexer errors in
+    let parser = { parser with lexer; errors } in
     parser, node
 
   (* Helper: parses ( expr ) *)
@@ -740,6 +741,7 @@ module WithExpressionAndDeclAndTypeParser
     | Semicolon ->
       (parser1, make_expression_statement (make_missing ()) (make_token token))
     | _ ->
+      let parser = context_expect_semicolon parser in
       let (parser, expression) = parse_expression parser in
       let (parser, token) = expect_semicolon parser in
       (parser, make_expression_statement expression token)
@@ -764,20 +766,22 @@ module WithExpressionAndDeclAndTypeParser
     with_expression_parser parser ExpressionParser.parse_simple_variable
 
   and with_expression_parser parser f =
-    let expression_parser = ExpressionParser.make parser.lexer parser.errors in
+    let expression_parser = ExpressionParser.make parser.lexer
+      parser.errors parser.context in
     let (expression_parser, node) = f expression_parser in
     let lexer = ExpressionParser.lexer expression_parser in
     let errors = ExpressionParser.errors expression_parser in
-    let parser = make lexer errors in
+    let parser = { parser with lexer; errors } in
     (parser, node)
 
 and parse_type_specifier parser =
-  let type_parser = TypeParser.make parser.lexer parser.errors in
+  let type_parser = TypeParser.make parser.lexer
+    parser.errors parser.context in
   let (type_parser, node) =
     TypeParser.parse_type_specifier type_parser in
   let lexer = TypeParser.lexer type_parser in
   let errors = TypeParser.errors type_parser in
-  let parser = make lexer errors in
+  let parser = { parser with lexer; errors } in
   (parser, node)
 
 end

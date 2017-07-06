@@ -34,7 +34,8 @@ module WithStatementAndDeclAndTypeParser
     | Prefix_byref_assignment | Prefix_assignment | Prefix_none
 
   let parse_type_specifier parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let type_parser = TypeParser.make parser.lexer
+      parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -42,7 +43,8 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_generic_type_arguments_opt parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let type_parser = TypeParser.make parser.lexer
+      parser.errors parser.context in
     let (type_parser, node) =
       TypeParser.parse_generic_type_argument_list_opt type_parser
     in
@@ -52,7 +54,8 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_return_type parser =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let type_parser = TypeParser.make parser.lexer
+      parser.errors parser.context in
     let (type_parser, node) = TypeParser.parse_return_type type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
@@ -60,7 +63,8 @@ module WithStatementAndDeclAndTypeParser
     (parser, node)
 
   let parse_parameter_list_opt parser =
-    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let decl_parser = DeclParser.make parser.lexer parser.errors
+      parser.context in
     let (decl_parser, right, params, left ) =
       DeclParser.parse_parameter_list_opt decl_parser in
     let lexer = DeclParser.lexer decl_parser in
@@ -69,7 +73,8 @@ module WithStatementAndDeclAndTypeParser
     (parser, right, params, left)
 
   let parse_compound_statement parser =
-    let statement_parser = StatementParser.make parser.lexer parser.errors in
+    let statement_parser = StatementParser.make parser.lexer
+      parser.errors parser.context in
     let (statement_parser, node) =
       StatementParser.parse_compound_statement statement_parser in
     let lexer = StatementParser.lexer statement_parser in
@@ -118,6 +123,16 @@ module WithStatementAndDeclAndTypeParser
       TODO: Create a better error recovery system that does not eat tokens
       that might be eaten by the outer statement / declaration parser. *)
       let parser = with_error parser1 SyntaxError.error1015 in
+      (* D5365950 TESTING: The next few lines were for testing only--they'll
+       * be deleted before landing. (See 'test plan' for more details.) *)
+      (*let do_we_need_the_semicolon_later = PrecedenceParser.expects
+        parser Semicolon in
+      Printf.printf ("Previously, our no-context parser was unaware that " ^^
+        "the semicolon we encountered here was required later in the " ^^
+        "program, and it would therefore eat the semicolon. However, now " ^^
+        "our context knows it is\n %b \nthat we require the semicolon " ^^
+        "later, so in the future we can perform a simple boolean check " ^^
+        "to avoid prematurely eating it.\n") do_we_need_the_semicolon_later;*)
       (parser, make_token token)
 
   and parse_term parser =

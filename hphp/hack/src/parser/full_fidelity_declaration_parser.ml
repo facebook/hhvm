@@ -31,11 +31,12 @@ module WithExpressionAndStatementAndTypeParser
   (* Types *)
 
   let parse_in_type_parser parser type_parser_function =
-    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let type_parser = TypeParser.make parser.lexer
+      parser.errors parser.context in
     let (type_parser, node) = type_parser_function type_parser in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
-    let parser = { lexer; errors } in
+    let parser = { parser with lexer; errors } in
     (parser, node)
 
   let parse_generic_parameter_list_opt parser =
@@ -55,11 +56,12 @@ module WithExpressionAndStatementAndTypeParser
 
   (* Expressions *)
   let parse_in_expression_parser parser expression_parser_function =
-    let expr_parser = ExpressionParser.make parser.lexer parser.errors in
+    let expr_parser = ExpressionParser.make parser.lexer
+      parser.errors parser.context in
     let (expr_parser, node) = expression_parser_function expr_parser in
     let lexer = ExpressionParser.lexer expr_parser in
     let errors = ExpressionParser.errors expr_parser in
-    let parser = { lexer; errors } in
+    let parser = { parser with lexer; errors } in
     (parser, node)
 
   let parse_expression parser =
@@ -67,12 +69,13 @@ module WithExpressionAndStatementAndTypeParser
 
   (* Statements *)
   let parse_in_statement_parser parser statement_parser_function =
-    let statement_parser = StatementParser.make parser.lexer parser.errors in
+    let statement_parser = StatementParser.make parser.lexer
+      parser.errors parser.context in
     let (statement_parser, node) = statement_parser_function
        statement_parser in
     let lexer = StatementParser.lexer statement_parser in
     let errors = StatementParser.errors statement_parser in
-    let parser = { lexer; errors } in
+    let parser = { parser with lexer; errors } in
     (parser, node)
 
   let parse_compound_statement parser =
@@ -154,7 +157,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, name) = expect_name_allow_keywords parser in
     let (parser, equal) = expect_equal parser in
     let (parser, value) = parse_expression parser in
-    let (parser, semicolon) = expect_semicolon parser  in
+    let (parser, semicolon) = expect_semicolon parser in
     let result = make_enumerator name equal value semicolon in
     (parser, result)
 
@@ -1062,12 +1065,13 @@ module WithExpressionAndStatementAndTypeParser
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, open_angle) = next_token parser in
     if (Token.kind open_angle) = LessThan then
-        let type_parser = TypeParser.make parser.lexer parser.errors in
+        let type_parser = TypeParser.make parser.lexer
+          parser.errors parser.context in
         let (type_parser, node) =
           TypeParser.parse_generic_type_parameter_list type_parser in
         let lexer = TypeParser.lexer type_parser in
         let errors = TypeParser.errors type_parser in
-        let parser = { lexer; errors } in
+        let parser = { parser with lexer; errors } in
         (parser, node)
     else
       (parser, make_missing())

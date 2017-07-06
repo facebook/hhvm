@@ -21,6 +21,7 @@ module type ParserType = sig
   val with_errors : t -> SyntaxError.t list -> t
   val lexer : t -> Lexer.t
   val with_lexer : t -> Lexer.t -> t
+  val expect : t -> TokenKind.t -> t
 end
 
 module WithParser(Parser : ParserType) = struct
@@ -198,6 +199,9 @@ module WithParser(Parser : ParserType) = struct
 
   let expect_variable parser =
     expect_token parser TokenKind.Variable SyntaxError.error1008
+
+  let context_expect_semicolon parser =
+    Parser.expect parser TokenKind.Semicolon
 
   let expect_semicolon parser =
     expect_token parser TokenKind.Semicolon SyntaxError.error1010

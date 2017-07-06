@@ -787,7 +787,7 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   auto const delta = Mode == FreeRequested ? bytes : block.size;
   m_stats.mmUsage += delta;
   // Adjust jemalloc otherwise we'll double count the direct allocation.
-  m_stats.mallocDebt += delta;
+  m_stats.mallocDebt += block.size + sizeof(MallocNode);
   m_stats.capacity += block.size + sizeof(MallocNode);
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
@@ -825,9 +825,9 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.mmUsage -= bytes;
-  m_stats.mallocDebt -= bytes;
   auto actual = static_cast<MallocNode*>(vp)[-1].nbytes;
   assert(bytes <= actual);
+  m_stats.mallocDebt -= actual;
   m_stats.capacity -= actual;
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
@@ -1092,11 +1092,13 @@ void BigHeap::flush() {
 MemBlock BigHeap::allocSlab(size_t size) {
 #ifdef USE_JEMALLOC
   void* slab = mallocx(size, 0);
+  auto usable = sallocx(slab, 0);
 #else
   void* slab = safe_malloc(size);
+  auto usable = size;
 #endif
   m_slabs.push_back({slab, size});
-  return {slab, size};
+  return {slab, usable};
 }
 
 void BigHeap::enlist(MallocNode* n, HeaderKind kind,
@@ -1131,7 +1133,7 @@ MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
   auto const n = static_cast<MallocNode*>(safe_calloc(cap, 1));
 #endif
   enlist(n, kind, cap, tyindex);
-  return {n + 1, nbytes};
+  return {n + 1, cap - sizeof(MallocNode)};
 }
 
 bool BigHeap::contains(void* ptr) const {

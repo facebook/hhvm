@@ -1267,11 +1267,12 @@ let rec transform node =
         end;
       ])
   | VarrayTypeSpecifier x ->
-    let (kw, left_a, varray_type, _, right_a) =
+    let (kw, left_a, varray_type, trailing_comma, right_a) =
       get_varray_type_specifier_children x in
     Fmt [
       t kw;
-      transform_braced_item left_a varray_type right_a;
+      transform_braced_item_with_trailer
+        left_a varray_type trailing_comma right_a;
     ]
   | VectorArrayTypeSpecifier x ->
     let (kw, left_a, vec_type, right_a) =
@@ -1281,18 +1282,18 @@ let rec transform node =
       transform_braced_item left_a vec_type right_a;
     ]
   | VectorTypeSpecifier x ->
-    let (kw, left_a, vec_type, _, right_a) =
+    let (kw, left_a, vec_type, trailing_comma, right_a) =
       get_vector_type_specifier_children x in
     Fmt [
       t kw;
-      transform_braced_item left_a vec_type right_a;
+      transform_braced_item_with_trailer left_a vec_type trailing_comma right_a;
     ]
   | KeysetTypeSpecifier x ->
-    let (kw, left_a, ks_type, right_a) =
+    let (kw, left_a, ks_type, trailing_comma, right_a) =
       get_keyset_type_specifier_children x in
     Fmt [
       t kw;
-      transform_braced_item left_a ks_type right_a;
+      transform_braced_item_with_trailer left_a ks_type trailing_comma right_a;
     ]
   | TypeParameter x ->
     let (variance, name, constraints) = get_type_parameter_children x in
@@ -1310,10 +1311,10 @@ let rec transform node =
       t constraint_type;
     ]
   | DarrayTypeSpecifier x ->
-    let (kw, left_a, key, comma_kw, value, _, right_a) =
+    let (kw, left_a, key, comma_kw, value, trailing_comma, right_a) =
       get_darray_type_specifier_children x in
     let key_list_item = make_list_item key comma_kw in
-    let val_list_item = make_list_item value (make_missing ()) in
+    let val_list_item = make_list_item value trailing_comma in
     let args = make_list [key_list_item; val_list_item] in
     Fmt [
       t kw;
@@ -1359,11 +1360,12 @@ let rec transform node =
       t outer_right_p;
     ]
   | ClassnameTypeSpecifier x ->
-    let (kw, left_a, class_type, _, right_a) =
+    let (kw, left_a, class_type, trailing_comma, right_a) =
       get_classname_type_specifier_children x in
     Fmt [
       t kw;
-      transform_braced_item left_a class_type right_a;
+      transform_braced_item_with_trailer
+        left_a class_type trailing_comma right_a;
     ]
   | FieldSpecifier x ->
     let (question, name, arrow_kw, field_type) =
@@ -1821,6 +1823,37 @@ and transform_argish ?(allow_trailing=true) ?(spaces=false)
 and transform_braced_item left_p item right_p =
   delimited_nest left_p right_p [transform item]
 
+and transform_trailing_comma ~allow_trailing item comma =
+  let open EditableToken in
+  let item, item_trailing = remove_trailing_trivia item in
+  match syntax comma with
+  | Token tok ->
+    Fmt [
+      Fmt [
+        transform item;
+        if allow_trailing then TrailingComma else Nothing;
+        transform_trailing_trivia item_trailing;
+      ];
+      Fmt [
+        transform_leading_trivia (leading tok);
+        Ignore (text tok, width tok);
+        transform_trailing_trivia (trailing tok);
+      ]
+    ]
+  | Missing ->
+    Fmt [
+      transform item;
+      if allow_trailing then TrailingComma else Nothing;
+      transform_trailing_trivia item_trailing;
+    ]
+  | _ -> failwith "Expected Token"
+
+and transform_braced_item_with_trailer left_p item comma right_p =
+  delimited_nest left_p right_p
+    (* TODO: turn allow_trailing:true when HHVM versions that don't support
+       trailing commas in all these places reach end-of-life. *)
+    [transform_trailing_comma ~allow_trailing:false item comma]
+
 and transform_arg_list ?(allow_trailing=true) ?(spaces=false) items =
   handle_possible_list items
     ~after_each:after_each_argument
@@ -1860,34 +1893,9 @@ and transform_last_arg ~allow_trailing node =
   match syntax node with
   | ListItem x ->
     let (item, separator) = get_list_item_children x in
-    Fmt (match syntax separator with
-      | Token x -> [
-          begin
-            let item, trailing = remove_trailing_trivia item in
-            Fmt [
-              transform item;
-              if allow_trailing then TrailingComma else Nothing;
-              transform_trailing_trivia trailing;
-            ];
-          end;
-          let leading = EditableToken.leading x in
-          let trailing = EditableToken.trailing x in
-          Fmt [
-            transform_leading_trivia leading;
-            Ignore (EditableToken.text x, EditableToken.width x);
-            transform_trailing_trivia trailing;
-          ]
-        ]
-      | Missing ->
-        let item, trailing = remove_trailing_trivia item in [
-          transform item;
-          if allow_trailing then TrailingComma else Nothing;
-          transform_trailing_trivia trailing;
-        ]
-      | _ -> failwith "Expected separator to be a token"
-    );
-  | _ ->
-    failwith "Expected ListItem"
+    transform_trailing_comma ~allow_trailing item separator
+  | _ -> failwith "Expected ListItem"
+
 
 and transform_mapish_entry key arrow value =
   Fmt [

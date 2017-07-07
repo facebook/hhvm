@@ -1553,7 +1553,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Aggregate Specifier
-      ; "optional_comma", ZeroOrOne Token
+      ; "trailing_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }
@@ -1567,6 +1567,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Aggregate Specifier
+      ; "trailing_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }
@@ -1593,7 +1594,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Just "SimpleTypeSpecifier"
-      ; "optional_comma", ZeroOrOne Token
+      ; "trailing_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }
@@ -1645,7 +1646,7 @@ let schema : schema_node list =
       ; "key", Just "SimpleTypeSpecifier"
       ; "comma", Token
       ; "value", Just "SimpleTypeSpecifier"
-      ; "optional_comma", ZeroOrOne Token
+      ; "trailing_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }
@@ -1705,7 +1706,7 @@ let schema : schema_node list =
       [ "keyword", Token
       ; "left_angle", Token
       ; "type", Aggregate Specifier
-      ; "optional_comma", ZeroOrOne Token
+      ; "trailing_comma", ZeroOrOne Token
       ; "right_angle", Token
       ]
     }

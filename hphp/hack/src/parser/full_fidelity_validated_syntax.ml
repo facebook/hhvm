@@ -2704,7 +2704,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_vector_type_specifier : vector_type_specifier validator = function
   | { Syntax.syntax = Syntax.VectorTypeSpecifier x; value = v } -> v,
     { vector_type_right_angle = validate_token x.Syntax.vector_type_right_angle
-    ; vector_type_optional_comma = validate_option_with (validate_token) x.Syntax.vector_type_optional_comma
+    ; vector_type_trailing_comma = validate_option_with (validate_token) x.Syntax.vector_type_trailing_comma
     ; vector_type_type = validate_specifier x.Syntax.vector_type_type
     ; vector_type_left_angle = validate_token x.Syntax.vector_type_left_angle
     ; vector_type_keyword = validate_token x.Syntax.vector_type_keyword
@@ -2716,7 +2716,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { Syntax.vector_type_keyword = invalidate_token x.vector_type_keyword
       ; Syntax.vector_type_left_angle = invalidate_token x.vector_type_left_angle
       ; Syntax.vector_type_type = invalidate_specifier x.vector_type_type
-      ; Syntax.vector_type_optional_comma = invalidate_option_with (invalidate_token) x.vector_type_optional_comma
+      ; Syntax.vector_type_trailing_comma = invalidate_option_with (invalidate_token) x.vector_type_trailing_comma
       ; Syntax.vector_type_right_angle = invalidate_token x.vector_type_right_angle
       }
     ; Syntax.value = v
@@ -2724,6 +2724,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_keyset_type_specifier : keyset_type_specifier validator = function
   | { Syntax.syntax = Syntax.KeysetTypeSpecifier x; value = v } -> v,
     { keyset_type_right_angle = validate_token x.Syntax.keyset_type_right_angle
+    ; keyset_type_trailing_comma = validate_option_with (validate_token) x.Syntax.keyset_type_trailing_comma
     ; keyset_type_type = validate_specifier x.Syntax.keyset_type_type
     ; keyset_type_left_angle = validate_token x.Syntax.keyset_type_left_angle
     ; keyset_type_keyword = validate_token x.Syntax.keyset_type_keyword
@@ -2735,6 +2736,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { Syntax.keyset_type_keyword = invalidate_token x.keyset_type_keyword
       ; Syntax.keyset_type_left_angle = invalidate_token x.keyset_type_left_angle
       ; Syntax.keyset_type_type = invalidate_specifier x.keyset_type_type
+      ; Syntax.keyset_type_trailing_comma = invalidate_option_with (invalidate_token) x.keyset_type_trailing_comma
       ; Syntax.keyset_type_right_angle = invalidate_token x.keyset_type_right_angle
       }
     ; Syntax.value = v
@@ -2760,7 +2762,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_varray_type_specifier : varray_type_specifier validator = function
   | { Syntax.syntax = Syntax.VarrayTypeSpecifier x; value = v } -> v,
     { varray_right_angle = validate_token x.Syntax.varray_right_angle
-    ; varray_optional_comma = validate_option_with (validate_token) x.Syntax.varray_optional_comma
+    ; varray_trailing_comma = validate_option_with (validate_token) x.Syntax.varray_trailing_comma
     ; varray_type = validate_simple_type_specifier x.Syntax.varray_type
     ; varray_left_angle = validate_token x.Syntax.varray_left_angle
     ; varray_keyword = validate_token x.Syntax.varray_keyword
@@ -2772,7 +2774,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { Syntax.varray_keyword = invalidate_token x.varray_keyword
       ; Syntax.varray_left_angle = invalidate_token x.varray_left_angle
       ; Syntax.varray_type = invalidate_simple_type_specifier x.varray_type
-      ; Syntax.varray_optional_comma = invalidate_option_with (invalidate_token) x.varray_optional_comma
+      ; Syntax.varray_trailing_comma = invalidate_option_with (invalidate_token) x.varray_trailing_comma
       ; Syntax.varray_right_angle = invalidate_token x.varray_right_angle
       }
     ; Syntax.value = v
@@ -2828,7 +2830,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_darray_type_specifier : darray_type_specifier validator = function
   | { Syntax.syntax = Syntax.DarrayTypeSpecifier x; value = v } -> v,
     { darray_right_angle = validate_token x.Syntax.darray_right_angle
-    ; darray_optional_comma = validate_option_with (validate_token) x.Syntax.darray_optional_comma
+    ; darray_trailing_comma = validate_option_with (validate_token) x.Syntax.darray_trailing_comma
     ; darray_value = validate_simple_type_specifier x.Syntax.darray_value
     ; darray_comma = validate_token x.Syntax.darray_comma
     ; darray_key = validate_simple_type_specifier x.Syntax.darray_key
@@ -2844,7 +2846,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.darray_key = invalidate_simple_type_specifier x.darray_key
       ; Syntax.darray_comma = invalidate_token x.darray_comma
       ; Syntax.darray_value = invalidate_simple_type_specifier x.darray_value
-      ; Syntax.darray_optional_comma = invalidate_option_with (invalidate_token) x.darray_optional_comma
+      ; Syntax.darray_trailing_comma = invalidate_option_with (invalidate_token) x.darray_trailing_comma
       ; Syntax.darray_right_angle = invalidate_token x.darray_right_angle
       }
     ; Syntax.value = v
@@ -2920,7 +2922,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_classname_type_specifier : classname_type_specifier validator = function
   | { Syntax.syntax = Syntax.ClassnameTypeSpecifier x; value = v } -> v,
     { classname_right_angle = validate_token x.Syntax.classname_right_angle
-    ; classname_optional_comma = validate_option_with (validate_token) x.Syntax.classname_optional_comma
+    ; classname_trailing_comma = validate_option_with (validate_token) x.Syntax.classname_trailing_comma
     ; classname_type = validate_specifier x.Syntax.classname_type
     ; classname_left_angle = validate_token x.Syntax.classname_left_angle
     ; classname_keyword = validate_token x.Syntax.classname_keyword
@@ -2932,7 +2934,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { Syntax.classname_keyword = invalidate_token x.classname_keyword
       ; Syntax.classname_left_angle = invalidate_token x.classname_left_angle
       ; Syntax.classname_type = invalidate_specifier x.classname_type
-      ; Syntax.classname_optional_comma = invalidate_option_with (invalidate_token) x.classname_optional_comma
+      ; Syntax.classname_trailing_comma = invalidate_option_with (invalidate_token) x.classname_trailing_comma
       ; Syntax.classname_right_angle = invalidate_token x.classname_right_angle
       }
     ; Syntax.value = v

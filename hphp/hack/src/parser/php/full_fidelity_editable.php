@@ -17111,19 +17111,19 @@ final class VectorTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
-  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_trailing_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
-    EditableSyntax $optional_comma,
+    EditableSyntax $trailing_comma,
     EditableSyntax $right_angle) {
     parent::__construct('vector_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
-    $this->_optional_comma = $optional_comma;
+    $this->_trailing_comma = $trailing_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -17135,8 +17135,8 @@ final class VectorTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
-  public function optional_comma(): EditableSyntax {
-    return $this->_optional_comma;
+  public function trailing_comma(): EditableSyntax {
+    return $this->_trailing_comma;
   }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
@@ -17146,7 +17146,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): VectorTypeSpecifier {
@@ -17154,7 +17154,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): VectorTypeSpecifier {
@@ -17162,15 +17162,15 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
-  public function with_optional_comma(EditableSyntax $optional_comma): VectorTypeSpecifier {
+  public function with_trailing_comma(EditableSyntax $trailing_comma): VectorTypeSpecifier {
     return new VectorTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $optional_comma,
+      $trailing_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): VectorTypeSpecifier {
@@ -17178,7 +17178,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $right_angle);
   }
 
@@ -17191,13 +17191,13 @@ final class VectorTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
-    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $trailing_comma = $this->trailing_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
-      $optional_comma === $this->optional_comma() &&
+      $trailing_comma === $this->trailing_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -17205,7 +17205,7 @@ final class VectorTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -17220,9 +17220,9 @@ final class VectorTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->vector_type_type, $position, $source);
     $position += $type->width();
-    $optional_comma = EditableSyntax::from_json(
-      $json->vector_type_optional_comma, $position, $source);
-    $position += $optional_comma->width();
+    $trailing_comma = EditableSyntax::from_json(
+      $json->vector_type_trailing_comma, $position, $source);
+    $position += $trailing_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->vector_type_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -17230,14 +17230,14 @@ final class VectorTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
-    yield $this->_optional_comma;
+    yield $this->_trailing_comma;
     yield $this->_right_angle;
     yield break;
   }
@@ -17246,16 +17246,19 @@ final class KeysetTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
+  private EditableSyntax $_trailing_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
+    EditableSyntax $trailing_comma,
     EditableSyntax $right_angle) {
     parent::__construct('keyset_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
+    $this->_trailing_comma = $trailing_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -17267,6 +17270,9 @@ final class KeysetTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function trailing_comma(): EditableSyntax {
+    return $this->_trailing_comma;
+  }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
@@ -17275,6 +17281,7 @@ final class KeysetTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): KeysetTypeSpecifier {
@@ -17282,6 +17289,7 @@ final class KeysetTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): KeysetTypeSpecifier {
@@ -17289,6 +17297,15 @@ final class KeysetTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
+      $this->_trailing_comma,
+      $this->_right_angle);
+  }
+  public function with_trailing_comma(EditableSyntax $trailing_comma): KeysetTypeSpecifier {
+    return new KeysetTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $trailing_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): KeysetTypeSpecifier {
@@ -17296,6 +17313,7 @@ final class KeysetTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
+      $this->_trailing_comma,
       $right_angle);
   }
 
@@ -17308,11 +17326,13 @@ final class KeysetTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
+    $trailing_comma = $this->trailing_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
+      $trailing_comma === $this->trailing_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -17320,6 +17340,7 @@ final class KeysetTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $trailing_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -17334,6 +17355,9 @@ final class KeysetTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->keyset_type_type, $position, $source);
     $position += $type->width();
+    $trailing_comma = EditableSyntax::from_json(
+      $json->keyset_type_trailing_comma, $position, $source);
+    $position += $trailing_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->keyset_type_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -17341,12 +17365,14 @@ final class KeysetTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
+        $trailing_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
+    yield $this->_trailing_comma;
     yield $this->_right_angle;
     yield break;
   }
@@ -17464,19 +17490,19 @@ final class VarrayTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
-  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_trailing_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
-    EditableSyntax $optional_comma,
+    EditableSyntax $trailing_comma,
     EditableSyntax $right_angle) {
     parent::__construct('varray_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
-    $this->_optional_comma = $optional_comma;
+    $this->_trailing_comma = $trailing_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -17488,8 +17514,8 @@ final class VarrayTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
-  public function optional_comma(): EditableSyntax {
-    return $this->_optional_comma;
+  public function trailing_comma(): EditableSyntax {
+    return $this->_trailing_comma;
   }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
@@ -17499,7 +17525,7 @@ final class VarrayTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): VarrayTypeSpecifier {
@@ -17507,7 +17533,7 @@ final class VarrayTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): VarrayTypeSpecifier {
@@ -17515,15 +17541,15 @@ final class VarrayTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
-  public function with_optional_comma(EditableSyntax $optional_comma): VarrayTypeSpecifier {
+  public function with_trailing_comma(EditableSyntax $trailing_comma): VarrayTypeSpecifier {
     return new VarrayTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $optional_comma,
+      $trailing_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): VarrayTypeSpecifier {
@@ -17531,7 +17557,7 @@ final class VarrayTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $right_angle);
   }
 
@@ -17544,13 +17570,13 @@ final class VarrayTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
-    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $trailing_comma = $this->trailing_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
-      $optional_comma === $this->optional_comma() &&
+      $trailing_comma === $this->trailing_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -17558,7 +17584,7 @@ final class VarrayTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -17573,9 +17599,9 @@ final class VarrayTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->varray_type, $position, $source);
     $position += $type->width();
-    $optional_comma = EditableSyntax::from_json(
-      $json->varray_optional_comma, $position, $source);
-    $position += $optional_comma->width();
+    $trailing_comma = EditableSyntax::from_json(
+      $json->varray_trailing_comma, $position, $source);
+    $position += $trailing_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->varray_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -17583,14 +17609,14 @@ final class VarrayTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
-    yield $this->_optional_comma;
+    yield $this->_trailing_comma;
     yield $this->_right_angle;
     yield break;
   }
@@ -17858,7 +17884,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_key;
   private EditableSyntax $_comma;
   private EditableSyntax $_value;
-  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_trailing_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
@@ -17866,7 +17892,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
     EditableSyntax $key,
     EditableSyntax $comma,
     EditableSyntax $value,
-    EditableSyntax $optional_comma,
+    EditableSyntax $trailing_comma,
     EditableSyntax $right_angle) {
     parent::__construct('darray_type_specifier');
     $this->_keyword = $keyword;
@@ -17874,7 +17900,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
     $this->_key = $key;
     $this->_comma = $comma;
     $this->_value = $value;
-    $this->_optional_comma = $optional_comma;
+    $this->_trailing_comma = $trailing_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -17892,8 +17918,8 @@ final class DarrayTypeSpecifier extends EditableSyntax {
   public function value(): EditableSyntax {
     return $this->_value;
   }
-  public function optional_comma(): EditableSyntax {
-    return $this->_optional_comma;
+  public function trailing_comma(): EditableSyntax {
+    return $this->_trailing_comma;
   }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
@@ -17905,7 +17931,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $this->_key,
       $this->_comma,
       $this->_value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): DarrayTypeSpecifier {
@@ -17915,7 +17941,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $this->_key,
       $this->_comma,
       $this->_value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_key(EditableSyntax $key): DarrayTypeSpecifier {
@@ -17925,7 +17951,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $key,
       $this->_comma,
       $this->_value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_comma(EditableSyntax $comma): DarrayTypeSpecifier {
@@ -17935,7 +17961,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $this->_key,
       $comma,
       $this->_value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_value(EditableSyntax $value): DarrayTypeSpecifier {
@@ -17945,17 +17971,17 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $this->_key,
       $this->_comma,
       $value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
-  public function with_optional_comma(EditableSyntax $optional_comma): DarrayTypeSpecifier {
+  public function with_trailing_comma(EditableSyntax $trailing_comma): DarrayTypeSpecifier {
     return new DarrayTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
       $this->_key,
       $this->_comma,
       $this->_value,
-      $optional_comma,
+      $trailing_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): DarrayTypeSpecifier {
@@ -17965,7 +17991,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $this->_key,
       $this->_comma,
       $this->_value,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $right_angle);
   }
 
@@ -17980,7 +18006,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
     $key = $this->key()->rewrite($rewriter, $new_parents);
     $comma = $this->comma()->rewrite($rewriter, $new_parents);
     $value = $this->value()->rewrite($rewriter, $new_parents);
-    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $trailing_comma = $this->trailing_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
@@ -17988,7 +18014,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
       $key === $this->key() &&
       $comma === $this->comma() &&
       $value === $this->value() &&
-      $optional_comma === $this->optional_comma() &&
+      $trailing_comma === $this->trailing_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -17998,7 +18024,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
         $key,
         $comma,
         $value,
-        $optional_comma,
+        $trailing_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -18019,9 +18045,9 @@ final class DarrayTypeSpecifier extends EditableSyntax {
     $value = EditableSyntax::from_json(
       $json->darray_value, $position, $source);
     $position += $value->width();
-    $optional_comma = EditableSyntax::from_json(
-      $json->darray_optional_comma, $position, $source);
-    $position += $optional_comma->width();
+    $trailing_comma = EditableSyntax::from_json(
+      $json->darray_trailing_comma, $position, $source);
+    $position += $trailing_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->darray_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -18031,7 +18057,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
         $key,
         $comma,
         $value,
-        $optional_comma,
+        $trailing_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
@@ -18040,7 +18066,7 @@ final class DarrayTypeSpecifier extends EditableSyntax {
     yield $this->_key;
     yield $this->_comma;
     yield $this->_value;
-    yield $this->_optional_comma;
+    yield $this->_trailing_comma;
     yield $this->_right_angle;
     yield break;
   }
@@ -18580,19 +18606,19 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
-  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_trailing_comma;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
-    EditableSyntax $optional_comma,
+    EditableSyntax $trailing_comma,
     EditableSyntax $right_angle) {
     parent::__construct('classname_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
-    $this->_optional_comma = $optional_comma;
+    $this->_trailing_comma = $trailing_comma;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -18604,8 +18630,8 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
-  public function optional_comma(): EditableSyntax {
-    return $this->_optional_comma;
+  public function trailing_comma(): EditableSyntax {
+    return $this->_trailing_comma;
   }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
@@ -18615,7 +18641,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): ClassnameTypeSpecifier {
@@ -18623,7 +18649,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
   public function with_type(EditableSyntax $type): ClassnameTypeSpecifier {
@@ -18631,15 +18657,15 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $this->_right_angle);
   }
-  public function with_optional_comma(EditableSyntax $optional_comma): ClassnameTypeSpecifier {
+  public function with_trailing_comma(EditableSyntax $trailing_comma): ClassnameTypeSpecifier {
     return new ClassnameTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $optional_comma,
+      $trailing_comma,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): ClassnameTypeSpecifier {
@@ -18647,7 +18673,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_angle,
       $this->_type,
-      $this->_optional_comma,
+      $this->_trailing_comma,
       $right_angle);
   }
 
@@ -18660,13 +18686,13 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
-    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $trailing_comma = $this->trailing_comma()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
-      $optional_comma === $this->optional_comma() &&
+      $trailing_comma === $this->trailing_comma() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -18674,7 +18700,7 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle), $parents ?? []);
     }
   }
@@ -18689,9 +18715,9 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->classname_type, $position, $source);
     $position += $type->width();
-    $optional_comma = EditableSyntax::from_json(
-      $json->classname_optional_comma, $position, $source);
-    $position += $optional_comma->width();
+    $trailing_comma = EditableSyntax::from_json(
+      $json->classname_trailing_comma, $position, $source);
+    $position += $trailing_comma->width();
     $right_angle = EditableSyntax::from_json(
       $json->classname_right_angle, $position, $source);
     $position += $right_angle->width();
@@ -18699,14 +18725,14 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_angle,
         $type,
-        $optional_comma,
+        $trailing_comma,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
-    yield $this->_optional_comma;
+    yield $this->_trailing_comma;
     yield $this->_right_angle;
     yield break;
   }

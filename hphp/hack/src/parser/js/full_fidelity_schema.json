@@ -1579,7 +1579,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
-        { "field_name" : "optional_comma" },
+        { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "KeysetTypeSpecifier",
@@ -1590,6 +1590,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
+        { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "TupleTypeExplicitSpecifier",
@@ -1610,7 +1611,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
-        { "field_name" : "optional_comma" },
+        { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "VectorArrayTypeSpecifier",
@@ -1650,7 +1651,7 @@
         { "field_name" : "key" },
         { "field_name" : "comma" },
         { "field_name" : "value" },
-        { "field_name" : "optional_comma" },
+        { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "MapArrayTypeSpecifier",
@@ -1698,7 +1699,7 @@
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
-        { "field_name" : "optional_comma" },
+        { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
     { "kind_name" : "FieldSpecifier",

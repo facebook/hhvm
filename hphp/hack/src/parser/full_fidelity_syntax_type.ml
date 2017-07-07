@@ -766,13 +766,14 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
     ; vector_type_type                                   : t
-    ; vector_type_optional_comma                         : t
+    ; vector_type_trailing_comma                         : t
     ; vector_type_right_angle                            : t
     }
   and keyset_type_specifier =
     { keyset_type_keyword                                : t
     ; keyset_type_left_angle                             : t
     ; keyset_type_type                                   : t
+    ; keyset_type_trailing_comma                         : t
     ; keyset_type_right_angle                            : t
     }
   and tuple_type_explicit_specifier =
@@ -785,7 +786,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { varray_keyword                                     : t
     ; varray_left_angle                                  : t
     ; varray_type                                        : t
-    ; varray_optional_comma                              : t
+    ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
   and vector_array_type_specifier =
@@ -809,7 +810,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_key                                         : t
     ; darray_comma                                       : t
     ; darray_value                                       : t
-    ; darray_optional_comma                              : t
+    ; darray_trailing_comma                              : t
     ; darray_right_angle                                 : t
     }
   and map_array_type_specifier =
@@ -841,7 +842,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { classname_keyword                                  : t
     ; classname_left_angle                               : t
     ; classname_type                                     : t
-    ; classname_optional_comma                           : t
+    ; classname_trailing_comma                           : t
     ; classname_right_angle                              : t
     }
   and field_specifier =
@@ -1992,13 +1993,14 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { vector_type_keyword: Token.t value
     ; vector_type_left_angle: Token.t value
     ; vector_type_type: specifier value
-    ; vector_type_optional_comma: Token.t option value
+    ; vector_type_trailing_comma: Token.t option value
     ; vector_type_right_angle: Token.t value
     }
   and keyset_type_specifier =
     { keyset_type_keyword: Token.t value
     ; keyset_type_left_angle: Token.t value
     ; keyset_type_type: specifier value
+    ; keyset_type_trailing_comma: Token.t option value
     ; keyset_type_right_angle: Token.t value
     }
   and tuple_type_explicit_specifier =
@@ -2011,7 +2013,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { varray_keyword: Token.t value
     ; varray_left_angle: Token.t value
     ; varray_type: simple_type_specifier value
-    ; varray_optional_comma: Token.t option value
+    ; varray_trailing_comma: Token.t option value
     ; varray_right_angle: Token.t value
     }
   and vector_array_type_specifier =
@@ -2035,7 +2037,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_key: simple_type_specifier value
     ; darray_comma: Token.t value
     ; darray_value: simple_type_specifier value
-    ; darray_optional_comma: Token.t option value
+    ; darray_trailing_comma: Token.t option value
     ; darray_right_angle: Token.t value
     }
   and map_array_type_specifier =
@@ -2067,7 +2069,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { classname_keyword: Token.t value
     ; classname_left_angle: Token.t value
     ; classname_type: specifier value
-    ; classname_optional_comma: Token.t option value
+    ; classname_trailing_comma: Token.t option value
     ; classname_right_angle: Token.t value
     }
   and field_specifier =

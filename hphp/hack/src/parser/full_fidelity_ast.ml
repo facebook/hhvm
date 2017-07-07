@@ -1313,14 +1313,19 @@ and pFunHdr : fun_hdr parser = fun node env ->
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
         mk_suspension_kind function_async function_coroutine in
+      let fh_name = pos_name function_name in
+      let fh_type_parameters = pTParaml function_type_parameter_list env in
+      let fh_param_modifiers =
+        List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
+      in
+      let fh_ret_by_ref = is_ret_by_ref function_ampersand in
       { fh_suspension_kind
-      ; fh_name            = pos_name function_name
-      ; fh_type_parameters = pTParaml function_type_parameter_list env
+      ; fh_name
+      ; fh_type_parameters
       ; fh_parameters
       ; fh_return_type
-      ; fh_param_modifiers =
-        List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
-      ; fh_ret_by_ref      = is_ret_by_ref function_ampersand
+      ; fh_param_modifiers
+      ; fh_ret_by_ref
       }
   | LambdaSignature { lambda_parameters; lambda_type; _ } ->
     { empty_fun_hdr with

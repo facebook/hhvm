@@ -159,6 +159,7 @@ let minimal_tests =
     "test_literals";
     "test_variadic_type_hint";
     "test_tuple_type_keyword";
+    "test_trailing_commas";
   ] ~f:mapper
 
 let error_tests =

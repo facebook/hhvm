@@ -411,8 +411,9 @@ and parse_array_type_specifier parser =
     else
       let (parser, left) = expect_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
+      let (parser, comma) = optional_token parser Comma in
       let (parser, right) = expect_right_angle parser in
-      let result = make_keyset_type_specifier keyword left t right in
+      let result = make_keyset_type_specifier keyword left t comma right in
       (parser, result)
 
   and parse_tuple_type_explicit_specifier parser =
@@ -444,7 +445,6 @@ and parse_array_type_specifier parser =
       dict < type-specifier , type-specifier >
 
       TODO: Add this to the specification
-      TODO: Allow a trailing comma.
 
       Though we require there to be exactly two items, we actually parse
       an arbitrary comma-separated list here.

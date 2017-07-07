@@ -1215,13 +1215,13 @@ let rec get_doc node =
       varray_keyword;
       varray_left_angle;
       varray_type;
-      varray_optional_comma;
+      varray_trailing_comma;
       varray_right_angle
     } ->
     let ar = get_doc varray_keyword in
     let la = get_doc varray_left_angle in
     let ty = get_doc varray_type in
-    let oc = get_doc varray_optional_comma in
+    let oc = get_doc varray_trailing_comma in
     let ra = get_doc varray_right_angle in
     ar ^^^ la ^^^ ty ^^^ oc ^^^ ra
   | VectorArrayTypeSpecifier {
@@ -1239,25 +1239,28 @@ let rec get_doc node =
       vector_type_keyword;
       vector_type_left_angle;
       vector_type_type;
+      vector_type_trailing_comma;
       vector_type_right_angle;
-      _;
     } ->
     let ar = get_doc vector_type_keyword in
     let la = get_doc vector_type_left_angle in
     let ty = get_doc vector_type_type in
+    let tr = get_doc vector_type_trailing_comma in
     let ra = get_doc vector_type_right_angle in
-    ar ^^^ la ^^^ ty ^^^ ra
+    ar ^^^ la ^^^ ty ^^^ tr ^^^ ra
   | KeysetTypeSpecifier {
       keyset_type_keyword;
       keyset_type_left_angle;
       keyset_type_type;
+      keyset_type_trailing_comma;
       keyset_type_right_angle
     } ->
     let ar = get_doc keyset_type_keyword in
     let la = get_doc keyset_type_left_angle in
     let ty = get_doc keyset_type_type in
+    let tr = get_doc keyset_type_trailing_comma in
     let ra = get_doc keyset_type_right_angle in
-    ar ^^^ la ^^^ ty ^^^ ra
+    ar ^^^ la ^^^ ty ^^^ tr ^^^ ra
   | TupleTypeExplicitSpecifier {
       tuple_type_keyword;
       tuple_type_left_angle;
@@ -1286,7 +1289,7 @@ let rec get_doc node =
       darray_key;
       darray_comma;
       darray_value;
-      darray_optional_comma;
+      darray_trailing_comma;
       darray_right_angle
     } ->
     let ar = get_doc darray_keyword in
@@ -1294,7 +1297,7 @@ let rec get_doc node =
     let kt = get_doc darray_key in
     let co = get_doc darray_comma in
     let vt = get_doc darray_value in
-    let oc = get_doc darray_optional_comma in
+    let oc = get_doc darray_trailing_comma in
     let ra = get_doc darray_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ oc ^^^ ra
   | MapArrayTypeSpecifier {

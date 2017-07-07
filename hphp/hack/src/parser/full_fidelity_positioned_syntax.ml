@@ -1691,7 +1691,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.VectorTypeSpecifier
       , (  vector_type_right_angle
-        :: vector_type_optional_comma
+        :: vector_type_trailing_comma
         :: vector_type_type
         :: vector_type_left_angle
         :: vector_type_keyword
@@ -1701,11 +1701,12 @@ module FromMinimal = struct
           { vector_type_keyword
           ; vector_type_left_angle
           ; vector_type_type
-          ; vector_type_optional_comma
+          ; vector_type_trailing_comma
           ; vector_type_right_angle
           }, results
       | SyntaxKind.KeysetTypeSpecifier
       , (  keyset_type_right_angle
+        :: keyset_type_trailing_comma
         :: keyset_type_type
         :: keyset_type_left_angle
         :: keyset_type_keyword
@@ -1715,6 +1716,7 @@ module FromMinimal = struct
           { keyset_type_keyword
           ; keyset_type_left_angle
           ; keyset_type_type
+          ; keyset_type_trailing_comma
           ; keyset_type_right_angle
           }, results
       | SyntaxKind.TupleTypeExplicitSpecifier
@@ -1732,7 +1734,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.VarrayTypeSpecifier
       , (  varray_right_angle
-        :: varray_optional_comma
+        :: varray_trailing_comma
         :: varray_type
         :: varray_left_angle
         :: varray_keyword
@@ -1742,7 +1744,7 @@ module FromMinimal = struct
           { varray_keyword
           ; varray_left_angle
           ; varray_type
-          ; varray_optional_comma
+          ; varray_trailing_comma
           ; varray_right_angle
           }, results
       | SyntaxKind.VectorArrayTypeSpecifier
@@ -1780,7 +1782,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.DarrayTypeSpecifier
       , (  darray_right_angle
-        :: darray_optional_comma
+        :: darray_trailing_comma
         :: darray_value
         :: darray_comma
         :: darray_key
@@ -1794,7 +1796,7 @@ module FromMinimal = struct
           ; darray_key
           ; darray_comma
           ; darray_value
-          ; darray_optional_comma
+          ; darray_trailing_comma
           ; darray_right_angle
           }, results
       | SyntaxKind.MapArrayTypeSpecifier
@@ -1852,7 +1854,7 @@ module FromMinimal = struct
           }, results
       | SyntaxKind.ClassnameTypeSpecifier
       , (  classname_right_angle
-        :: classname_optional_comma
+        :: classname_trailing_comma
         :: classname_type
         :: classname_left_angle
         :: classname_keyword
@@ -1862,7 +1864,7 @@ module FromMinimal = struct
           { classname_keyword
           ; classname_left_angle
           ; classname_type
-          ; classname_optional_comma
+          ; classname_trailing_comma
           ; classname_right_angle
           }, results
       | SyntaxKind.FieldSpecifier
@@ -3410,13 +3412,13 @@ module FromMinimal = struct
         { M.vector_type_keyword
         ; M.vector_type_left_angle
         ; M.vector_type_type
-        ; M.vector_type_optional_comma
+        ; M.vector_type_trailing_comma
         ; M.vector_type_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (vector_type_right_angle, todo) in
-        let todo = Convert (vector_type_optional_comma, todo) in
+        let todo = Convert (vector_type_trailing_comma, todo) in
         let todo = Convert (vector_type_type, todo) in
         let todo = Convert (vector_type_left_angle, todo) in
         convert offset todo results vector_type_keyword
@@ -3424,11 +3426,13 @@ module FromMinimal = struct
         { M.keyset_type_keyword
         ; M.keyset_type_left_angle
         ; M.keyset_type_type
+        ; M.keyset_type_trailing_comma
         ; M.keyset_type_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (keyset_type_right_angle, todo) in
+        let todo = Convert (keyset_type_trailing_comma, todo) in
         let todo = Convert (keyset_type_type, todo) in
         let todo = Convert (keyset_type_left_angle, todo) in
         convert offset todo results keyset_type_keyword
@@ -3448,13 +3452,13 @@ module FromMinimal = struct
         { M.varray_keyword
         ; M.varray_left_angle
         ; M.varray_type
-        ; M.varray_optional_comma
+        ; M.varray_trailing_comma
         ; M.varray_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (varray_right_angle, todo) in
-        let todo = Convert (varray_optional_comma, todo) in
+        let todo = Convert (varray_trailing_comma, todo) in
         let todo = Convert (varray_type, todo) in
         let todo = Convert (varray_left_angle, todo) in
         convert offset todo results varray_keyword
@@ -3494,13 +3498,13 @@ module FromMinimal = struct
         ; M.darray_key
         ; M.darray_comma
         ; M.darray_value
-        ; M.darray_optional_comma
+        ; M.darray_trailing_comma
         ; M.darray_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (darray_right_angle, todo) in
-        let todo = Convert (darray_optional_comma, todo) in
+        let todo = Convert (darray_trailing_comma, todo) in
         let todo = Convert (darray_value, todo) in
         let todo = Convert (darray_comma, todo) in
         let todo = Convert (darray_key, todo) in
@@ -3560,13 +3564,13 @@ module FromMinimal = struct
         { M.classname_keyword
         ; M.classname_left_angle
         ; M.classname_type
-        ; M.classname_optional_comma
+        ; M.classname_trailing_comma
         ; M.classname_right_angle
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (classname_right_angle, todo) in
-        let todo = Convert (classname_optional_comma, todo) in
+        let todo = Convert (classname_trailing_comma, todo) in
         let todo = Convert (classname_type, todo) in
         let todo = Convert (classname_left_angle, todo) in
         convert offset todo results classname_keyword

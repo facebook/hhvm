@@ -606,12 +606,7 @@ std::string show(const Type& t) {
     );
     break;
   case DataTag::ArrLikePackedN:
-    if (t.m_data.packedn->len) {
-      folly::format(&ret, "([{}]:{})",
-                    show(t.m_data.packedn->type), *t.m_data.packedn->len);
-    } else {
-      folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
-    }
+    folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
     break;
   case DataTag::ArrLikeMap:
     folly::format(

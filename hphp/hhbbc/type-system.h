@@ -159,11 +159,6 @@ struct Type;
  *         Non-empty reference counted array with contiguous zero-based integer
  *         keys, unknown size, values all are subtypes of Bool.
  *
- *     CArrN([Int]:24)
- *
- *         Reference counted array with contiguous zero-based integer keys,
- *         size 24, values all are subtypes of Int.
- *
  *     ArrN(x:Int,y:Int)
  *
  *         Struct-like array with known fields "x" and "y" that have Int
@@ -472,7 +467,7 @@ private:
   friend Type clsExact(res::Class);
   friend Type ref_to(Type);
   friend Type packed_impl(trep, std::vector<Type>);
-  friend Type packedn_impl(trep, Type, folly::Optional<int64_t>);
+  friend Type packedn_impl(trep, Type);
   friend Type map_impl(trep, MapElems);
   friend Type mapn_impl(trep bits, Type k, Type v);
   friend DObj dobj_of(const Type&);
@@ -593,11 +588,7 @@ struct DArrLikePacked {
 
 struct DArrLikePackedN {
   explicit DArrLikePackedN(Type t) : type(std::move(t)) {}
-  DArrLikePackedN(Type t, int64_t l) : type(std::move(t)), len(l) {}
-  DArrLikePackedN(Type t, folly::Optional<int64_t> l) :
-      type(std::move(t)), len(l) {}
   Type type;
-  folly::Optional<int64_t> len;
 };
 
 struct DArrLikeMap {
@@ -809,9 +800,9 @@ Type carr_packed(std::vector<Type> v);
  *
  * Note that these types imply the arrays are non-empty.
  */
-Type arr_packedn(Type, folly::Optional<int64_t> = folly::none);
-Type sarr_packedn(Type, folly::Optional<int64_t> = folly::none);
-Type carr_packedn(Type, folly::Optional<int64_t> = folly::none);
+Type arr_packedn(Type);
+Type sarr_packedn(Type);
+Type carr_packedn(Type);
 
 /*
  * Struct-like arrays.
@@ -837,10 +828,10 @@ Type vec(std::vector<Type> v);
 Type svec(std::vector<Type> v);
 
 /*
- * Vec type of optionally known size.
+ * Vec type of unknown size.
  */
-Type vec_n(Type, folly::Optional<int64_t>);
-Type svec_n(Type, folly::Optional<int64_t>);
+Type vec_n(Type);
+Type svec_n(Type);
 
 /*
  * Dict with key/value types.

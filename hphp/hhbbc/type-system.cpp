@@ -512,7 +512,7 @@ folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
     t |= from_cell(*iter.secondRef().asTypedValue());
   }
 
-  return DArrLikePackedN { std::move(t), idx };
+  return DArrLikePackedN { std::move(t) };
 }
 
 DArrLikeMap toDArrLikeMap(std::vector<Type> elems) {
@@ -669,7 +669,7 @@ struct DualDispatchEqImpl {
 
   bool operator()(const DArrLikeMap& a, SArray b) const {
     if (a.map.size() != b->size()) return false;
-    for (auto& kv : a.map) {
+    for (auto const& kv : a.map) {
       auto bval = *b->get(tvAsCVarRef(&kv.first)).asTypedValue();
       if (bval.m_type == KindOfUninit) return false;
       auto aval = tv(kv.second);
@@ -688,7 +688,15 @@ struct DualDispatchEqImpl {
     return false;
   }
   bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
-    return false;
+    if (a.elems.size() != b.map.size()) return false;
+    auto idx = size_t{0};
+    for (auto const& kv : b.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (a.elems[idx] != kv.second) return false;
+      ++idx;
+    }
+    return true;
   }
   bool operator()(const DArrLikePacked&, const DArrLikeMapN&) const {
     return false;
@@ -732,7 +740,7 @@ struct DualDispatchCouldBeImpl {
   }
 
   bool operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
-    for (auto& t : a.elems) {
+    for (auto const& t : a.elems) {
       if (!t.couldBe(b.type)) return false;
     }
     return true;
@@ -743,21 +751,40 @@ struct DualDispatchCouldBeImpl {
   }
 
   bool operator()(const DArrLikeMap& a, const DArrLikeMapN& b) const {
-    if (!TSStr.couldBe(b.key)) return false;
-    for (auto& kv : a.map) {
+    for (auto const& kv : a.map) {
+      if (!from_cell(kv.first).couldBe(b.key)) return false;
       if (!kv.second.couldBe(b.val)) return false;
     }
     return true;
   }
 
-  bool operator()(const DArrLikePacked&, const DArrLikeMap&) const {
-    return false;
+  bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+    if (a.elems.size() != b.map.size()) return false;
+    auto idx = size_t{0};
+    for (auto const& kv : b.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (!a.elems[idx].couldBe(kv.second)) return false;
+      ++idx;
+    }
+    return true;
   }
-  bool operator()(const DArrLikePacked&, const DArrLikeMapN&) const {
-    return false;
+  bool operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
+    if (!TInt.couldBe(b.key)) return false;
+    for (auto const& t : a.elems) {
+      if (!t.couldBe(b.val)) return false;
+    }
+    return true;
   }
-  bool operator()(const DArrLikePackedN&, const DArrLikeMap&) const {
-    return false;
+  bool operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+    auto idx = size_t{0};
+    for (auto const& kv : b.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (!a.type.couldBe(kv.second)) return false;
+      ++idx;
+    }
+    return true;
   }
 };
 
@@ -775,8 +802,7 @@ struct DualDispatchUnionImpl {
 
   Type operator()(const DArrLikePacked& a, const DArrLikePacked& b) const {
     if (a.elems.size() != b.elems.size()) {
-      return packedn_impl(bits, union_of(packed_values(a), packed_values(b)),
-                          folly::none);
+      return packedn_impl(bits, union_of(packed_values(a), packed_values(b)));
     }
     auto ret = a.elems;
     for (auto i = size_t{0}; i < a.elems.size(); ++i) {
@@ -786,15 +812,11 @@ struct DualDispatchUnionImpl {
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikePackedN& b) const {
-    auto const len = a.len == b.len ? a.len : folly::none;
-    return packedn_impl(bits, union_of(a.type, b.type), len);
+    return packedn_impl(bits, union_of(a.type, b.type));
   }
 
   Type operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
-    return (*this)(
-      DArrLikePackedN {
-        packed_values(a), static_cast<int64_t>(a.elems.size())
-      }, b);
+    return (*this)(DArrLikePackedN { packed_values(a) }, b);
   }
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMap& b) const {
@@ -974,34 +996,78 @@ struct DualDispatchSubtype {
     return p && p->type.subtypeOf(b.type);
   }
 
-  bool operator()(const DArrLikePackedN& a, const DArrLikePacked& b) const {
+  bool operator()(const DArrLikePackedN&, const DArrLikePacked&) const {
+    // PackedN contains arrays with an arbitrary number of keys, while Packed
+    // contains arrays with a fixed number of keys, so there's always arrays in
+    // PackedN which aren't in Packed.
     return false;
   }
-  bool operator()(const DArrLikePackedN& a, SArray b) const {
+  bool operator()(const DArrLikePackedN&, SArray) const {
+    // PackedN contains arrays with an arbitrary number of keys, while SArray is
+    // just a single array.
     return false;
   }
   bool operator()(const DArrLikeMap& a, const DArrLikePacked& b) const {
-    return false;
+    // Map might actually contain nothing but packed arrays.
+    if (a.map.size() != b.elems.size()) return false;
+    auto idx = size_t{0};
+    for (auto const& kv : a.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (!kv.second.subtypeOf(b.elems[idx])) return false;
+      ++idx;
+    }
+    return true;
   }
   bool operator()(const DArrLikeMap& a, const DArrLikePackedN& b) const {
-    return false;
+    // Map might actually contain nothing but packed arrays.
+    auto idx = size_t{0};
+    for (auto const& kv : a.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (!kv.second.subtypeOf(b.type)) return false;
+      ++idx;
+    }
+    return true;
   }
   bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
-    return false;
+    // Map might actually contain nothing but packed arrays.
+    if (a.elems.size() != b.map.size()) return false;
+    auto idx = size_t{0};
+    for (auto const& kv : b.map) {
+      if (!isIntType(kv.first.m_type)) return false;
+      if (kv.first.m_data.num != idx) return false;
+      if (!a.elems[idx].subtypeOf(kv.second)) return false;
+      ++idx;
+    }
+    return true;
   }
-  bool operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+  bool operator()(const DArrLikePackedN&, const DArrLikeMap&) const {
+    // PackedN contains arrays with an arbitrary number of keys, while Map
+    // contains arrays with a fixed number of keys, so there's always arrays in
+    // PackedN which aren't in Map (regardless if the array is packed or not).
     return false;
   }
   bool operator()(const DArrLikeMapN&, const DArrLikePackedN&) const {
+    // MapN will always contain more arrays than PackedN because packed arrays
+    // are a subset of all possible arrays.
     return false;
   }
   bool operator()(const DArrLikeMapN&, const DArrLikePacked&) const {
+    // MapN contains arrays with an arbitrary number of keys, while Packed
+    // contains arrays with a fixed number of keys, so there's always arrays in
+    // MapN which aren't in Packed.
     return false;
   }
   bool operator()(const DArrLikeMapN&, const DArrLikeMap&) const {
+    // MapN contains arrays with an arbitrary number of keys, while Map contains
+    // arrays with a fixed number of keys, so there's always arrays in MapN
+    // which aren't in Map.
     return false;
   }
   bool operator()(const DArrLikeMapN&, SArray) const {
+    // MapN contains arrays with an arbitrary number of keys, while SArray is
+    // just a single array.
     return false;
   }
 };
@@ -1247,9 +1313,7 @@ bool Type::equivData(const Type& o) const {
   case DataTag::ArrLikePacked:
     return m_data.packed->elems == o.m_data.packed->elems;
   case DataTag::ArrLikePackedN:
-    return
-      m_data.packedn->type == o.m_data.packedn->type &&
-      m_data.packedn->len == o.m_data.packedn->len;
+    return m_data.packedn->type == o.m_data.packedn->type;
   case DataTag::ArrLikeMap:
     return m_data.map->map == o.m_data.map->map;
   case DataTag::ArrLikeMapN:
@@ -1296,9 +1360,7 @@ bool Type::subtypeData(const Type& o) const {
   case DataTag::ArrLikePacked:
     return subtypePacked(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
-    return
-      m_data.packedn->type.subtypeOf(o.m_data.packedn->type) &&
-      m_data.packedn->len == o.m_data.packedn->len;
+    return m_data.packedn->type.subtypeOf(o.m_data.packedn->type);
   case DataTag::ArrLikeMap:
     return subtypeMap(*m_data.map, *o.m_data.map);
   case DataTag::ArrLikeMapN:
@@ -1349,10 +1411,7 @@ bool Type::couldBeData(const Type& o) const {
   case DataTag::ArrLikePacked:
     return couldBePacked(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
-    return
-      m_data.packedn->type.couldBe(o.m_data.packedn->type) &&
-      (!m_data.packedn->len || !o.m_data.packedn->len ||
-       *m_data.packedn->len == *o.m_data.packedn->len);
+    return m_data.packedn->type.couldBe(o.m_data.packedn->type);
   case DataTag::ArrLikeMap:
     return couldBeMap(*m_data.map, *o.m_data.map);
   case DataTag::ArrLikeMapN:
@@ -1537,6 +1596,9 @@ bool Type::checkInvariants() const {
     break;
   case DataTag::ArrLikeMapN:
     assert(m_data.mapn->key.subtypeOf(TArrKey));
+    // MapN shouldn't have a specialized key. If it does, then that implies it
+    // only contains arrays of size 1, which means it should be Map instead.
+    assert(m_data.mapn->key.m_dataTag == DataTag::None);
     assert(m_data.mapn->val.subtypeOf(valType));
     if ((m_bits & BOptKeyset) == m_bits) {
       assert(m_data.mapn->key == m_data.mapn->val);
@@ -1624,10 +1686,9 @@ Type vec_empty()         { return Type { BSVecE }; }
 Type counted_vec_empty() { return Type { BCVecE }; }
 Type some_vec_empty()    { return Type { BVecE }; }
 
-Type packedn_impl(trep bits, Type t, folly::Optional<int64_t> n) {
-  assert(!n || *n);
+Type packedn_impl(trep bits, Type t) {
   auto r = Type { bits };
-  construct_inner(r.m_data.packedn, std::move(t), n);
+  construct_inner(r.m_data.packedn, std::move(t));
   r.m_dataTag = DataTag::ArrLikePackedN;
   return r;
 }
@@ -1640,12 +1701,12 @@ Type packed_impl(trep bits, std::vector<Type> elems) {
   return r;
 }
 
-Type vec_n(Type ty, folly::Optional<int64_t> count) {
-  return packedn_impl(BVecN, std::move(ty), std::move(count));
+Type vec_n(Type ty) {
+  return packedn_impl(BVecN, std::move(ty));
 }
 
-Type svec_n(Type ty, folly::Optional<int64_t> count) {
-  return packedn_impl(BSVecN, std::move(ty), std::move(count));
+Type svec_n(Type ty) {
+  return packedn_impl(BSVecN, std::move(ty));
 }
 
 Type vec(std::vector<Type> elems) {
@@ -1834,16 +1895,16 @@ Type carr_packed(std::vector<Type> elems) {
   return packed_impl(BCArrN, std::move(elems));
 }
 
-Type arr_packedn(Type t, folly::Optional<int64_t> n) {
-  return packedn_impl(BArrN, t, n);
+Type arr_packedn(Type t) {
+  return packedn_impl(BArrN, std::move(t));
 }
 
-Type sarr_packedn(Type t, folly::Optional<int64_t> n) {
-  return packedn_impl(BSArrN, std::move(t), n);
+Type sarr_packedn(Type t) {
+  return packedn_impl(BSArrN, std::move(t));
 }
 
-Type carr_packedn(Type t, folly::Optional<int64_t> n) {
-  return packedn_impl(BCArrN, std::move(t), n);
+Type carr_packedn(Type t) {
+  return packedn_impl(BCArrN, std::move(t));
 }
 
 Type map_impl(trep bits, MapElems m) {
@@ -1935,14 +1996,12 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::ArrLikePacked:
       return t.m_data.packed->elems.size();
 
-    case DataTag::ArrLikePackedN:
-      return t.m_data.packedn->len;
-
     case DataTag::None:
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
     case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
@@ -2757,16 +2816,8 @@ std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
 std::pair<Type,bool> arr_packedn_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
   auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
-  if (key.s ||
-      !key.type.couldBe(TInt) ||
-      (key.i &&
-       (*key.i < 0 ||
-        (pack.m_data.packedn->len && *key.i >= *pack.m_data.packedn->len)))) {
+  if (key.s || !key.type.couldBe(TInt) || (key.i && *key.i < 0)) {
     return {isPhpArray ? TInitNull : TBottom, false};
-  }
-
-  if (key.i && pack.m_data.packedn->len) {
-    return {pack.m_data.packedn->type, true};
   }
 
   if (isPhpArray) {
@@ -2794,23 +2845,6 @@ bool arr_packedn_set(Type& pack,
   auto& ty = pack.m_data.packedn.mutate()->type;
   ty |= val;
   if (key.i) {
-    if (pack.m_data.packedn->len) {
-      if (0 > *key.i ||
-          *key.i >= *pack.m_data.packedn->len + (int)isPhpArray) {
-        if (isPhpArray) {
-          pack = mapn_impl(pack.m_bits, TInt, std::move(ty));
-        } else {
-          pack = TBottom;
-        }
-        return false;
-      }
-      if (*key.i == *pack.m_data.packedn->len) {
-        assert(isPhpArray);
-        *pack.m_data.packedn.mutate()->len += 1;
-      }
-      return true;
-    }
-
     if (maybeEmpty ? isPhpArray && !*key.i :
         !*key.i || (isPhpArray && *key.i == 1)) {
       // The key is known to be in range - its still a packedn
@@ -2826,7 +2860,7 @@ bool arr_packedn_set(Type& pack,
 
 /*
  * Apply the effects of map[key] = val, when map is known to have
- * DataTag::ArrLikePacked.
+ * DataTag::ArrLikeMap.
  *
  * Returns true iff we hit a specific element (this matters for
  * hack-array types, since they may throw for other cases).
@@ -2901,7 +2935,7 @@ bool arr_packed_set(Type& pack,
   }
 
   auto ty = union_of(packed_values(*pack.m_data.packed), val);
-  pack = packedn_impl(pack.m_bits, std::move(ty), folly::none);
+  pack = packedn_impl(pack.m_bits, std::move(ty));
 
   return false;
 }
@@ -3040,10 +3074,10 @@ std::pair<Type,bool> array_like_set(Type arr,
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);
     if (isVector) return { TBottom, false };
-    if (key.i && !*key.i && !isKeyset) {
+    if (fixedKey.i && !*fixedKey.i && !isKeyset) {
       return { packed_impl(bits, { val }), noThrow };
     }
-    if (auto const k = key.tv()) {
+    if (auto const k = fixedKey.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
       return { map_impl(bits, std::move(m)), noThrow };
@@ -3053,6 +3087,14 @@ std::pair<Type,bool> array_like_set(Type arr,
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,bool> {
+    // We don't want a MapN with a constant key
+    auto const k1 = fixedKey.tv();
+    auto const k2 = tv(inKey);
+    if (k1 && k2 && cellSame(*k1, *k2)) {
+      MapElems m;
+      m.emplace_back(*k1, union_of(inVal, val));
+      return { map_impl(bits, std::move(m)), noThrow };
+    }
     return { mapn_impl(bits,
                        union_of(inKey, fixedKey.type),
                        union_of(inVal, val)), noThrow };
@@ -3166,7 +3208,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
                           const Type& inVal) -> std::pair<Type,Type> {
     if (isVector) {
       assert(inKey.subtypeOf(TInt));
-      return { packedn_impl(bits, union_of(inVal, val), folly::none), TInt };
+      return { packedn_impl(bits, union_of(inVal, val)), TInt };
     }
 
     return { mapn_impl(bits,
@@ -3217,10 +3259,8 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
     } else {
       arr.m_bits = bits;
       auto packedn = arr.m_data.packedn.mutate();
-      auto len = packedn->len;
-      if (len) *packedn->len += 1;
       packedn->type |= val;
-      return { std::move(arr), len ? ival(*len) : TInt };
+      return { std::move(arr), TInt };
     }
 
   case DataTag::ArrLikeMap:

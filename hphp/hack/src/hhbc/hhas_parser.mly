@@ -211,7 +211,6 @@ methods:
 ;
 methodname:
  | ID {$1}
- | INT ID {if Int64.to_int $1 = 86 then "86" ^ $2 else "bad 86xxx"}
 ;
 methoddecl:
  | METHODDIRECTIVE attributes typeinfooption methodname fparams idlist LBRACE nl

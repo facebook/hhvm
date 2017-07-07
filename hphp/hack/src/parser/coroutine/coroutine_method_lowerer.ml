@@ -125,7 +125,7 @@ let make_state_machine_method_reference_syntax
     make_return_statement_syntax create_suspended_coroutine_result_syntax in
   make_list [resume_statement_syntax; return_syntax]
 
-let try_to_rewrite_coroutine_body
+let rewrite_coroutine_body
     class_node
     methodish_function_body
     header_node
@@ -137,35 +137,34 @@ let try_to_rewrite_coroutine_body
         header_node
         rewritten_body in
 
-      Some (make_syntax (CompoundStatement { node with compound_statements }))
+      make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
-      Some (methodish_function_body)
+      methodish_function_body
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
-      None
+      failwith "methodish_function_body wasn't a CompoundStatement"
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
  * declaration header and the function body into a desugared coroutine
  * implementation.
  *)
-let maybe_rewrite_methodish_declaration
+let rewrite_methodish_declaration
     class_node
     ({ methodish_function_body; _; } as method_node)
     header_node
     rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
-  Option.map
-    (try_to_rewrite_coroutine_body
+  let methodish_function_body =
+    rewrite_coroutine_body
       class_node
       methodish_function_body
       header_node
-      rewritten_body)
-    ~f:(fun methodish_function_body ->
-      make_syntax
-        { method_node with
-          methodish_function_decl_header =
-            rewrite_function_decl_header header_node;
-          methodish_function_body;
-        })
+      rewritten_body in
+  make_syntax
+    { method_node with
+      methodish_function_decl_header =
+        rewrite_function_decl_header header_node;
+      methodish_function_body;
+    }

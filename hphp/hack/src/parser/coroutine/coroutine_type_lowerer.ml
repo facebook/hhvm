@@ -32,3 +32,13 @@ let rewrite_return_type return_type =
   if is_missing return_type then mixed_type
   else if is_void return_type then unit_type_syntax
   else return_type
+
+(**
+ * A void function becomes a unit function; if the annotation is missing it is
+ * added.
+ *)
+let rewrite_header_node ({ function_colon; function_type; _; } as node) =
+  let function_type = rewrite_return_type function_type in
+  let function_colon =
+    if is_missing function_colon then colon_syntax else function_colon in
+  { node with function_type; function_colon; }

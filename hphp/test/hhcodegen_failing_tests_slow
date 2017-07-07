@@ -192,7 +192,6 @@ slow/hack_mode/typedef_namespace.php
 slow/hash_not_bang.php
 slow/hashbang_regression.php
 slow/here_doc/1234.php
-slow/here_doc/high_ascii_label.php
 slow/hh_namespace_migration/hh_frozenset4.php
 slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php
@@ -569,7 +568,6 @@ slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
 slow/xhp/attr_types.php
-slow/xhp/xhpchild.php
 slow/yield/2167.php
 slow/yield/2229.php
 slow/yield/throw/throw_already_closed.php

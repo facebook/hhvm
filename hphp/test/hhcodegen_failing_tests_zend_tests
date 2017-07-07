@@ -5,8 +5,6 @@ zend/good/tests/classes/__call_002.php
 zend/good/tests/classes/__set__get_001.php
 zend/good/tests/classes/__set__get_002.php
 zend/good/tests/classes/__set__get_003.php
-zend/good/tests/classes/__set__get_004.php
-zend/good/tests/classes/__set__get_005.php
 zend/good/tests/classes/abstract_derived.php
 zend/good/tests/classes/abstract_final.php
 zend/good/tests/classes/abstract_not_declared.php
@@ -34,7 +32,6 @@ zend/good/tests/classes/incdec_property_003.php
 zend/good/tests/classes/incdec_property_004.php
 zend/good/tests/classes/inheritance.php
 zend/good/tests/classes/inheritance_006.php
-zend/good/tests/classes/interface_method.php
 zend/good/tests/classes/interface_method_final.php
 zend/good/tests/classes/interface_method_private.php
 zend/good/tests/classes/iterators_001.php
@@ -106,7 +103,6 @@ zend/good/tests/lang/foreachLoop.012.php
 zend/good/tests/lang/foreachLoop.016.php
 zend/good/tests/lang/foreachLoop.017.php
 zend/good/tests/lang/foreachLoopIterator.001.php
-zend/good/tests/lang/foreachLoopIterator.002.php
 zend/good/tests/lang/foreachLoopIteratorAggregate.001.php
 zend/good/tests/lang/foreachLoopIteratorAggregate.003.php
 zend/good/tests/lang/foreachLoopIteratorAggregate.004.php
@@ -158,7 +154,6 @@ zend/good/tests/lang/passByReference_002.php
 zend/good/tests/lang/returnByReference.001.php
 zend/good/tests/lang/script_tag.php
 zend/good/tests/lang/static_basic_001.php
-zend/good/tests/lang/static_variation_001.php
 zend/good/tests/lang/static_variation_002.php
 zend/good/tests/lang/type_hints_001.php
 zend/good/tests/lang/type_hints_002.php
@@ -166,7 +161,6 @@ zend/good/tests/lang/type_hints_003.php
 zend/good/tests/output/bug60768.php
 zend/good/tests/output/ob_start_basic_004.php
 zend/good/tests/output/ob_start_basic_unerasable_001.php
-zend/good/tests/output/ob_start_callbacks.php
 zend/good/tests/run-test/test001.php
 zend/good/tests/run-test/test002.php
 zend/good/tests/run-test/test003.php

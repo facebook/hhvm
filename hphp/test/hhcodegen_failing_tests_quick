@@ -1,6 +1,5 @@
 quick/ClsCases.php
 quick/EmitOO.php
-quick/FPassC-eval.php
 quick/Xhp.php
 quick/abs_codegen.php
 quick/all_type_comparison_test.php
@@ -52,17 +51,13 @@ quick/hh_async_return_type_2.php
 quick/hh_async_return_type_3.php
 quick/hh_bad_end.php
 quick/hh_bad_start.php
-quick/hh_classes2.php
 quick/hh_closure_return_type_0.php
 quick/hh_closure_return_type_1.php
 quick/hh_closure_return_type_2.php
 quick/hh_closure_return_type_3.php
-quick/hh_functions3.php
 quick/hh_numbers.php
-quick/hh_softtype3.php
 quick/hh_type_args2.php
 quick/hh_type_args3.php
-quick/hh_typehint3.php
 quick/impl_abstract_default_vals.php
 quick/impl_abstract_dv_b_Bool.php
 quick/impl_abstract_dv_b_boolean.php

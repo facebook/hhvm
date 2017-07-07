@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/zend/zend-string.h"
@@ -59,6 +60,10 @@ ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
 }
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
+  // FIXME: this function uses a lot of temporary memory, reimplement it without
+  //        serialization; do not count its memory towards OOM in meanwhile
+  MemoryManager::SuppressOOM so(MM());
+
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   auto s = vs.serializeValue(VarNR(arr), false /* limit */);
   return GetScalarArrayKey(s.data(), s.size());

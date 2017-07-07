@@ -24,6 +24,7 @@
 #include "hphp/util/stacktrace-profiler.h"
 
 #include "hphp/runtime/base/apc-handle-defs.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -118,6 +119,9 @@ StringData* StringData::MakeStatic(folly::StringPiece sl) {
 }
 
 StringData* StringData::MakeUncounted(folly::StringPiece sl) {
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
   return MakeShared<false>(sl);
 }
 
@@ -153,6 +157,10 @@ void StringData::destructStatic() {
 void StringData::destructUncounted() {
   assert(checkSane() && isUncounted());
   assert(isFlat());
+
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
+  }
   if (UncountedStringOnHugePage()) {
     free_huge(this);
   } else {

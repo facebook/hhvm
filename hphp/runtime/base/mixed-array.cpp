@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -434,6 +435,9 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
     }
     ConvertTvToUncounted(&te.data);
   }
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
   return ad;
 }
 
@@ -505,6 +509,9 @@ void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
     free_huge(reinterpret_cast<char*>(ad) - extra);
   } else {
     free(reinterpret_cast<char*>(ad) - extra);
+  }
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
   }
 }
 

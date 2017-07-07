@@ -22,6 +22,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/member-val.h"
@@ -525,6 +526,9 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
 
   // We better not have strong iterators associated with uncounted arrays.
   assert(!has_strong_iterator(ad));
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
+  }
 
   free_huge(reinterpret_cast<char*>(ad) - extra);
 }
@@ -1177,6 +1181,9 @@ ArrayData* PackedArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
 ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   assert(checkInvariants(array));
   assert(!array->empty());
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
 
   auto const size = array->m_size;
   auto const sizeIndex = packedArrayCapacityToSizeIndex(size);

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
@@ -159,6 +160,9 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
       }
     }
   }
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
   return ad;
 }
 
@@ -292,6 +296,9 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
 
     // We better not have strong iterators associated with keysets.
     assert(!has_strong_iterator(ad));
+  }
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
   }
   free_huge(reinterpret_cast<char*>(ad) - extra);
 }

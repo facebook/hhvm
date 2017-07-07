@@ -156,6 +156,9 @@ struct APCStats {
   static APCStats& getAPCStats() {
     return *s_apcStats.get();
   }
+  static bool IsCreated(){
+    return s_apcStats != nullptr;
+  }
 
   static void Create();
 
@@ -195,12 +198,25 @@ struct APCStats {
     m_inFileSize->addValue(size);
   }
 
+  // Only call this method from ::MakeUncounted()
+  void addAPCUncountedBlock() {
+    m_uncountedBlocks->increment();
+  }
+
+  // Only call this method from ::destructUncounted() or ::releaseUncounted()
+  void removeAPCUncountedBlock() {
+    m_uncountedBlocks->decrement();
+  }
+
   // A new value was added to APC. This is a fresh value not replacing
   // an existing value. However the key may exists already a be a primed
   // mapped to file entry
   void addAPCValue(APCHandle* handle, size_t size, bool livePrimed) {
     assert(handle && size > 0);
     m_valueSize->addValue(size);
+    if (handle->isUncounted()) {
+      m_uncountedEntries->increment();
+    }
     if (livePrimed) {
       m_livePrimedSize->addValue(size);
       m_livePrimedEntries->increment();
@@ -237,6 +253,9 @@ struct APCStats {
                       bool expired) {
     assert(size > 0);
     m_valueSize->addValue(-size);
+    if (handle->isUncounted()) {
+      m_uncountedEntries->decrement();
+    }
     if (livePrimed) {
       m_livePrimedSize->addValue(-size);
       m_livePrimedEntries->decrement();
@@ -285,6 +304,10 @@ private:
   ServiceData::ExportedCounter* m_primedEntries;
   // Number of live primed entries
   ServiceData::ExportedCounter* m_livePrimedEntries;
+  // Number of uncounted entries
+  ServiceData::ExportedCounter* m_uncountedEntries;
+  // Number of uncounted blocks
+  ServiceData::ExportedCounter* m_uncountedBlocks;
 
   // detailed info
   APCDetailedStats* m_detailedStats;

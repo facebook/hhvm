@@ -26,7 +26,14 @@
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
+#include "hphp/util/trace.h"
+
+
 namespace HPHP {
+
+TRACE_SET_MOD(apc);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -210,6 +217,8 @@ size_t getMemSize(const ArrayData* arr) {
 std::unique_ptr<APCStats> APCStats::s_apcStats = nullptr;
 
 void APCStats::Create() {
+  FTRACE(3, "APCStats::Create() called\n");
+
   s_apcStats = std::make_unique<APCStats>();
 }
 
@@ -221,6 +230,8 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_entries(nullptr)
                      , m_primedEntries(nullptr)
                      , m_livePrimedEntries(nullptr)
+                     , m_uncountedEntries(nullptr)
+                     , m_uncountedBlocks(nullptr)
                      , m_detailedStats(nullptr) {
   m_valueSize = ServiceData::createCounter("apc.value_size.sum");
   m_keySize = ServiceData::createCounter("apc.key_size.sum");
@@ -232,6 +243,9 @@ APCStats::APCStats() : m_valueSize(nullptr)
   m_primedEntries = ServiceData::createCounter("apc.primed_entries");
   m_livePrimedEntries =
       ServiceData::createCounter("apc.primed_live_entries");
+  m_uncountedEntries = ServiceData::createCounter("apc.uncounted_entries");
+  m_uncountedBlocks =
+    ServiceData::createCounter("apc.uncounted_blocks.mayNotBeAPCValues");
   if (RuntimeOption::EnableAPCStats) {
     m_detailedStats = new APCDetailedStats();
   }
@@ -255,7 +269,11 @@ std::string APCStats::getStatsInfo() const {
           "\nPrimed entries count: " +
           std::to_string(m_primedEntries->getValue()) +
           "\nIn memory primed entries count: " +
-          std::to_string(m_livePrimedEntries->getValue());
+          std::to_string(m_livePrimedEntries->getValue()) +
+          "\nIn total uncounted entries count: " +
+          std::to_string(m_uncountedEntries->getValue()) +
+          "\nIn memory uncounted blocks: " +
+          std::to_string(m_uncountedBlocks->getValue());
   if (apcExtension::UseUncounted) {
     info += "\nPending deletes via treadmill size: " +
             std::to_string(m_pendingDeleteSize->getValue());
@@ -274,6 +292,8 @@ const StaticString s_keysSize("keys_size");
 const StaticString s_primedInFileSize("primed_in_file_size");
 const StaticString s_primeLiveSize("primed_live_size");
 const StaticString s_pendingDeleteSize("pending_delete_size");
+const StaticString s_uncountedEntries("uncounted_entires");
+const StaticString s_uncountedBlocks("uncounted_blocks");
 
 void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
@@ -285,6 +305,12 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primedLiveEntries.get(),
                                             m_livePrimedEntries->getValue()));
+  stats.insert(
+      std::pair<const StringData*, int64_t>( s_uncountedEntries.get(),
+                                            m_uncountedEntries->getValue()));
+  stats.insert(
+    std::pair<const StringData*, int64_t> ( s_uncountedBlocks.get(),
+                                      m_uncountedBlocks->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_valuesSize.get(),
                                             m_valueSize->getValue()));

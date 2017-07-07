@@ -1623,6 +1623,36 @@ and pXhpChild : xhp_child parser = fun node env ->
 (*****************************************************************************(
  * Parsing definitions (AST's `def`)
 )*****************************************************************************)
+and pNamespaceUseClause ~prefix env kind node =
+  match syntax node with
+  | NamespaceUseClause
+    { namespace_use_name  = name
+    ; namespace_use_alias = alias
+    ; _ } ->
+    let p, n as name =
+      match prefix, pos_name name with
+      | None, (p, n) -> (p, n)
+      | Some prefix, (p, n) -> p, (snd @@ pos_name prefix) ^ n
+    in
+    let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
+    let key = drop_pstr x name in
+    let kind =
+      match syntax kind with
+      | Token { PT.kind = TK.Namespace; _ } -> NSNamespace
+      | Token { PT.kind = TK.Type     ; _ } -> NSClass
+      | Token { PT.kind = TK.Function ; _ } -> NSFun
+      | Token { PT.kind = TK.Const    ; _ } -> NSConst
+      | Missing                             -> NSClassAndNamespace
+      | _ -> missing_syntax "namespace use kind" kind env
+    in
+    ( kind
+    , (p, if n.[0] = '\\' then n else "\\" ^ n)
+    , if is_missing alias
+      then key
+      else pos_name alias
+    )
+  | _ -> missing_syntax "namespace use clause" node env
+
 and pDef : def parser = fun node env ->
   let opt_doc_comment = extract_docblock node in
   match syntax node with
@@ -1791,37 +1821,19 @@ and pDef : def parser = fun node env ->
       )
   | NamespaceDeclaration { namespace_name = name; _ } ->
     Namespace (pos_name name, [])
+  | NamespaceGroupUseDeclaration
+    { namespace_group_use_kind = kind
+    ; namespace_group_use_prefix = prefix
+    ; namespace_group_use_clauses = clauses
+    ; _ } ->
+      let f = pNamespaceUseClause env kind ~prefix:(Some prefix) in
+      NamespaceUse (List.map ~f (as_list clauses))
   | NamespaceUseDeclaration
     { namespace_use_kind    = kind
     ; namespace_use_clauses = clauses
     ; _ } ->
-      let f node = match syntax node with
-      | NamespaceUseClause
-        { namespace_use_name  = name
-        ; namespace_use_alias = alias
-        ; _ } ->
-          let (p, n) as name = pos_name name in
-          let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
-          let key = drop_pstr x name in
-          let kind =
-            match syntax kind with
-            | Token { PT.kind = TK.Namespace; _ } -> NSNamespace
-            | Token { PT.kind = TK.Type     ; _ } -> NSClass
-            | Token { PT.kind = TK.Function ; _ } -> NSFun
-            | Token { PT.kind = TK.Const    ; _ } -> NSConst
-            | Missing                             -> NSClassAndNamespace
-            | _ -> missing_syntax "namespace use kind" kind env
-          in
-          ( kind
-          , (p, if n.[0] = '\\' then n else "\\" ^ n)
-          , if is_missing alias
-            then key
-            else pos_name alias
-          )
-      | _ -> missing_syntax "namespace use clause" node env
-      in
+      let f = pNamespaceUseClause env kind ~prefix:None in
       NamespaceUse (List.map ~f (as_list clauses))
-  | NamespaceGroupUseDeclaration _ -> NamespaceUse []
   (* Fail open, assume top-level statement. Not too nice when reporting bugs,
    * but if this turns out prohibitive, just `try` this and catch-and-correct
    * the raised exception.

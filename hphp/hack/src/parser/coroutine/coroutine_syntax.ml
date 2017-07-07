@@ -25,161 +25,161 @@ let make_syntax syntax =
 
 let single_space = [EditableTrivia.make_whitespace " "]
 
-let make_token_syntax
-    ?(space_before=false) ?(space_after=false) token_kind text =
-  let before = if space_before then single_space else [] in
-  let after = if space_after then single_space else [] in
-  make_syntax @@ Token (EditableToken.make token_kind text before after)
+let make_token_syntax ?text token_kind =
+  let text = Option.value text ~default:(TokenKind.to_string token_kind) in
+  make_syntax @@
+    Token (EditableToken.make token_kind text single_space single_space)
+
+let make_name_syntax text =
+  make_token_syntax TokenKind.Name ~text
+
+let make_variable_syntax text =
+  make_token_syntax TokenKind.Variable ~text
 
 
 (* General syntaxes *)
 
 let left_brace_syntax =
-  make_token_syntax ~space_after:true TokenKind.LeftBrace "{"
+  make_token_syntax TokenKind.LeftBrace
 
 let right_brace_syntax =
-  make_token_syntax
-    ~space_before:true
-    ~space_after:true
-    TokenKind.RightBrace "}"
+  make_token_syntax TokenKind.RightBrace
 
 let left_paren_syntax =
-  make_token_syntax TokenKind.LeftParen "("
+  make_token_syntax TokenKind.LeftParen
 
 let right_paren_syntax =
-  make_token_syntax TokenKind.RightParen ")"
+  make_token_syntax TokenKind.RightParen
 
 let left_angle_syntax =
-  make_token_syntax TokenKind.LessThan "<"
+  make_token_syntax TokenKind.LessThan
 
 let right_angle_syntax =
-  make_token_syntax ~space_after:true TokenKind.GreaterThan ">"
+  make_token_syntax TokenKind.GreaterThan
 
 let comma_syntax =
-  make_token_syntax ~space_after:true TokenKind.Comma ","
+  make_token_syntax TokenKind.Comma
 
 let colon_colon_syntax =
-  make_token_syntax TokenKind.ColonColon "::"
+  make_token_syntax TokenKind.ColonColon
 
 let lambda_arrow_syntax =
-  make_token_syntax TokenKind.EqualEqualGreaterThan "==>"
+  make_token_syntax TokenKind.EqualEqualGreaterThan
 
 let semicolon_syntax =
-  make_token_syntax TokenKind.Semicolon ";"
+  make_token_syntax TokenKind.Semicolon
 
 let colon_syntax =
-  make_token_syntax ~space_after:true TokenKind.Colon ":"
+  make_token_syntax TokenKind.Colon
 
 let assignment_operator_syntax =
-  make_token_syntax TokenKind.Equal "="
+  make_token_syntax TokenKind.Equal
 
 let not_syntax =
-  make_token_syntax TokenKind.Exclamation "!"
+  make_token_syntax TokenKind.Exclamation
 
 let not_identical_syntax =
-  make_token_syntax TokenKind.ExclamationEqualEqual "!=="
+  make_token_syntax TokenKind.ExclamationEqualEqual
 
 let nullable_syntax =
-  make_token_syntax TokenKind.Question "?"
+  make_token_syntax TokenKind.Question
 
 let mixed_syntax =
-  make_token_syntax ~space_after:true TokenKind.Mixed "mixed"
+  make_token_syntax TokenKind.Mixed
 
 let mixed_type =
   make_simple_type_specifier mixed_syntax
 
 let unit_syntax =
-  make_token_syntax ~space_after:true TokenKind.Name "CoroutineUnit"
+  make_name_syntax "CoroutineUnit"
 
 let unit_type_syntax =
   make_simple_type_specifier unit_syntax
 
 let int_syntax =
-  make_token_syntax ~space_after:true TokenKind.Int "int"
+  make_token_syntax TokenKind.Int
 
 let void_syntax =
-  make_token_syntax ~space_after:true TokenKind.Void "void"
+  make_token_syntax TokenKind.Void
 
 let null_syntax =
-  make_token_syntax TokenKind.NullLiteral "null"
+  make_token_syntax TokenKind.NullLiteral
 
 let true_expression_syntax =
-  make_literal_expression (make_token_syntax TokenKind.BooleanLiteral "true")
+  make_token_syntax TokenKind.BooleanLiteral ~text:"true"
+    |> make_literal_expression
 
 let private_syntax =
-  make_token_syntax ~space_after:true TokenKind.Private "private"
+  make_token_syntax TokenKind.Private
 
 let public_syntax =
-  make_token_syntax ~space_after:true TokenKind.Public "public"
+  make_token_syntax TokenKind.Public
 
 let static_syntax =
-  make_token_syntax ~space_after:true TokenKind.Static "static"
+  make_token_syntax TokenKind.Static
 
 let try_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Try "try"
+  make_token_syntax TokenKind.Try
 
 let finally_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Finally "finally"
+  make_token_syntax TokenKind.Finally
 
 let if_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.If "if"
+  make_token_syntax TokenKind.If
 
 let else_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Else "else"
+  make_token_syntax TokenKind.Else
 
 let while_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.While "while"
+  make_token_syntax TokenKind.While
 
 let switch_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Switch "switch"
+  make_token_syntax TokenKind.Switch
 
 let case_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Case "case"
+  make_token_syntax TokenKind.Case
 
 let class_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Class "class"
+  make_token_syntax TokenKind.Class
 
 let default_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Default "default"
+  make_token_syntax TokenKind.Default
 
 let function_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Function "function"
+  make_token_syntax TokenKind.Function
 
 let goto_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Goto "goto"
+  make_token_syntax TokenKind.Goto
 
 let extends_syntax =
-  make_token_syntax ~space_after:true TokenKind.Extends "extends"
+  make_token_syntax TokenKind.Extends
 
 let parent_syntax =
-  make_token_syntax TokenKind.Parent "parent"
+  make_token_syntax TokenKind.Parent
 
 let return_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Return "return"
+  make_token_syntax TokenKind.Return
 
 let throw_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.Throw "throw"
+  make_token_syntax TokenKind.Throw
 
 let break_statement_syntax =
   make_break_statement
-    (make_token_syntax TokenKind.Break "break")
+    (make_token_syntax TokenKind.Break)
     (* break_level *) (make_missing ())
     semicolon_syntax
 
 let new_keyword_syntax =
-  make_token_syntax ~space_after:true TokenKind.New "new"
+  make_token_syntax TokenKind.New
 
 let member_selection_syntax =
-  make_token_syntax TokenKind.MinusGreaterThan "->"
-
-let this_variable =
-  "$this"
+  make_token_syntax TokenKind.MinusGreaterThan
 
 let this_syntax =
-  make_token_syntax TokenKind.Variable this_variable
+  make_variable_syntax "$this"
 
 let exception_type_syntax =
-  make_token_syntax ~space_after:true TokenKind.Classname "Exception"
+  make_name_syntax "Exception"
 
 let constructor_member_name =
   "__construct"
@@ -240,14 +240,14 @@ let make_string_literal_syntax string_literal =
   make_literal_expression
     (make_token_syntax
       TokenKind.DoubleQuotedStringLiteral
-      (Printf.sprintf "\"%s\"" string_literal))
+      ~text:(Printf.sprintf "\"%s\"" string_literal))
 
 let make_int_literal_syntax value =
   make_literal_expression
-    (make_token_syntax TokenKind.DecimalLiteral (string_of_int value))
+    (make_token_syntax TokenKind.DecimalLiteral ~text:(string_of_int value))
 
 let make_qualified_name_syntax name =
-  make_qualified_name_expression (make_token_syntax TokenKind.Name name)
+  make_qualified_name_expression (make_name_syntax name)
 
 let make_expression_statement_syntax expression_syntax =
   make_expression_statement expression_syntax semicolon_syntax
@@ -289,12 +289,12 @@ let make_not_null_syntax operand =
 
 let make_assignment_syntax receiver_variable assignment_expression_syntax =
   let receiver_variable_syntax =
-    make_token_syntax TokenKind.Variable receiver_variable in
+    make_variable_syntax receiver_variable in
   make_assignment_syntax_variable
     receiver_variable_syntax assignment_expression_syntax
 
 let make_object_creation_expression_syntax classname arguments =
-  let classname_syntax = make_token_syntax TokenKind.Name classname in
+  let classname_syntax = make_name_syntax classname in
   let arguments_syntax = make_delimited_list comma_syntax arguments in
   make_object_creation_expression
     new_keyword_syntax
@@ -315,7 +315,7 @@ let make_static_function_call_expression_syntax
     receiver_syntax
     member_name
     argument_list =
-  let member_syntax = make_token_syntax TokenKind.Name member_name in
+  let member_syntax = make_name_syntax member_name in
   let receiver_syntax =
     make_scope_resolution_expression
       receiver_syntax
@@ -345,7 +345,7 @@ let make_parameter_declaration_syntax
     parameter_type_syntax
     parameter_variable =
   let parameter_variable_syntax =
-    make_token_syntax TokenKind.Variable parameter_variable in
+    make_variable_syntax parameter_variable in
   make_parameter_declaration
     (* attribute *)  (make_missing ())
     visibility_syntax
@@ -364,8 +364,7 @@ let make_type_parameters_syntax type_parameter_list =
         right_angle_syntax
 
 let make_type_specifier_syntax classname type_parameter_list =
-  let classname_syntax = make_token_syntax
-    ~space_after:true TokenKind.Name classname in
+  let classname_syntax = make_name_syntax classname in
   let type_parameters_syntax =
     make_type_parameters_syntax type_parameter_list in
   if is_missing type_parameters_syntax then
@@ -392,8 +391,7 @@ let make_classish_declaration_syntax
     type_parameter_list
     extends_list
     classish_body =
-  let classname_syntax =
-    make_token_syntax ~space_after:true TokenKind.Classname classname in
+  let classname_syntax = make_name_syntax classname in
   let extends_list_syntax =
     make_delimited_list comma_syntax extends_list in
   make_classish_declaration
@@ -453,7 +451,7 @@ let make_function_decl_header_syntax
     name
     parameter_list
     return_type_syntax =
-  let name_syntax = make_token_syntax TokenKind.Name name in
+  let name_syntax = make_name_syntax name in
   let parameter_list_syntax = make_delimited_list comma_syntax parameter_list in
   make_function_declaration_header
     (* function_async *) (make_missing ())
@@ -542,7 +540,7 @@ let continuation_variable =
   "$coroutineContinuation_generated"
 
 let continuation_variable_syntax =
-  make_token_syntax TokenKind.Variable continuation_variable
+  make_variable_syntax continuation_variable
 
 let make_closure_base_type_syntax { function_type; _; } =
   make_type_specifier_syntax "ClosureBase" [ function_type; ]
@@ -571,13 +569,13 @@ let is_suspended_member_name =
   "isSuspended"
 
 let is_suspended_member_syntax =
-  make_token_syntax TokenKind.Name is_suspended_member_name
+  make_name_syntax is_suspended_member_name
 
 let get_result_member_name =
   "getResult"
 
 let get_result_member_syntax =
-  make_token_syntax TokenKind.Name get_result_member_name
+  make_name_syntax get_result_member_name
 
 (* SuspendedCoroutineResult::create() *)
 let create_suspended_coroutine_result_syntax =
@@ -612,11 +610,11 @@ let closure_variable =
 
 (* $closure *)
 let closure_variable_syntax =
-  make_token_syntax TokenKind.Variable closure_variable
+  make_variable_syntax closure_variable
 
 (* $closure->name *)
 let closure_name_syntax name =
-  let name_syntax = make_token_syntax TokenKind.Name name in
+  let name_syntax = make_name_syntax name in
   make_member_selection_expression_syntax closure_variable_syntax name_syntax
 
 let make_closure_parameter_syntax class_node function_name =
@@ -628,7 +626,7 @@ let resume_member_name =
   "resume"
 
 let resume_member_name_syntax =
-  make_token_syntax TokenKind.Name resume_member_name
+  make_name_syntax resume_member_name
 
 let resume_with_exception_member_name =
   "resumeWithException"
@@ -637,19 +635,19 @@ let do_resume_member_name =
   "doResume"
 
 let do_resume_member_name_syntax =
-  make_token_syntax TokenKind.Name do_resume_member_name
+  make_name_syntax do_resume_member_name
 
 let coroutine_data_variable =
   "$coroutineData"
 
 let coroutine_data_variable_syntax =
-  make_token_syntax TokenKind.Variable coroutine_data_variable
+  make_variable_syntax coroutine_data_variable
 
 let coroutine_result_variable =
   "$coroutineResult"
 
 let coroutine_result_variable_syntax =
-  make_token_syntax TokenKind.Variable coroutine_result_variable
+  make_variable_syntax coroutine_result_variable
 
 let make_coroutine_result_data_member_name index =
   Printf.sprintf "coroutineResultData%d" index
@@ -658,9 +656,7 @@ let make_coroutine_result_data_variable index =
   "$" ^ (make_coroutine_result_data_member_name index)
 
 let make_coroutine_result_data_member_name_syntax index =
-  make_token_syntax
-    TokenKind.Name
-    (make_coroutine_result_data_member_name index)
+  make_name_syntax (make_coroutine_result_data_member_name index)
 
 let coroutine_data_type_syntax =
   mixed_syntax
@@ -674,7 +670,7 @@ let exception_variable =
   "$exception_generated"
 
 let exception_variable_syntax =
-  make_token_syntax TokenKind.Variable exception_variable
+  make_variable_syntax exception_variable
 
 let nullable_exception_type_syntax =
   make_nullable_type_specifier_syntax exception_type_syntax
@@ -703,13 +699,13 @@ let state_machine_member_name =
   "stateMachineFunction"
 
 let state_machine_member_name_syntax =
-  make_token_syntax TokenKind.Name state_machine_member_name
+  make_name_syntax state_machine_member_name
 
 let state_machine_variable_name =
   "$" ^ state_machine_member_name
 
 let state_machine_variable_name_syntax =
-  make_token_syntax TokenKind.Variable state_machine_variable_name
+  make_variable_syntax state_machine_variable_name
 
 let make_state_machine_parameter_syntax
     enclosing_classname
@@ -757,7 +753,7 @@ let label_syntax =
 
 (* nextLabel *)
 let label_name_syntax =
-  make_token_syntax TokenKind.Name next_label
+  make_name_syntax next_label
 
 (* $closure->nextLabel = x; *)
 let set_next_label_syntax number =

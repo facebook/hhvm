@@ -35,14 +35,17 @@ struct AsmInfo {
   {}
 
   // Asm address info for each instruction and block
-  typedef StateMultiMap<IRInstruction, TcaRange> InstRanges;
+  struct OffsetInstRanges : StateMultiMap<IRInstruction, TcaRange> {
+    // the offset between logical and physical addresses.
+    ptrdiff_t offset{0};
+  };
   typedef StateMultiMap<Block, TcaRange> BlockRanges;
   // Map from IRInstruction to Block id.
   typedef StateVector<IRInstruction, uint32_t> InstBlockMap;
 
-  InstRanges mainInstRanges;
-  InstRanges coldInstRanges;
-  InstRanges frozenInstRanges;
+  OffsetInstRanges mainInstRanges;
+  OffsetInstRanges coldInstRanges;
+  OffsetInstRanges frozenInstRanges;
   BlockRanges mainBlockRanges;
   BlockRanges coldBlockRanges;
   BlockRanges frozenBlockRanges;
@@ -64,7 +67,7 @@ struct AsmInfo {
             instRangeExists(instRangesForArea(AreaIndex::Frozen), rng));
   }
 
-  InstRanges& instRangesForArea(AreaIndex area) {
+  OffsetInstRanges& instRangesForArea(AreaIndex area) {
     switch (area) {
     case AreaIndex::Main:
       return mainInstRanges;
@@ -76,7 +79,7 @@ struct AsmInfo {
     not_reached();
   }
 
-  const InstRanges& instRangesForArea(AreaIndex area) const {
+  const OffsetInstRanges& instRangesForArea(AreaIndex area) const {
     return const_cast<AsmInfo*>(this)->instRangesForArea(area);
   }
 
@@ -288,7 +291,8 @@ struct AsmInfo {
     return !sawBadBlock;
   }
 
-  void dumpInstructionRanges(const char* area, const InstRanges& rngs) const {
+  void dumpInstructionRanges(const char* area,
+                             const OffsetInstRanges& rngs) const {
     std::cout << area << " instructions:\n";
     for (auto& rng : rngs) {
       std::cout << rng.first << " = (" << (void*)rng.second.begin()

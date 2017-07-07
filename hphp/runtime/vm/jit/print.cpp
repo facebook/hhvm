@@ -419,12 +419,13 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
 
       for (auto i = 0; i < kNumAreas; ++i) {
         const auto instArea = static_cast<AreaIndex>(i);
-        auto rngs = asmInfo->instRangesForArea(instArea)[inst];
+        auto const& areaRanges = asmInfo->instRangesForArea(instArea);
+        auto const& rngs = areaRanges[inst];
         for (auto itr = rngs.first; itr != rngs.second; ++itr) {
-          instRanges.push_back(InstAreaRange(instIdx,
-                                             instArea,
-                                             itr->second));
-          lastRange[(int)instArea] = itr->second;
+          auto range = TcaRange { itr->second.start() + areaRanges.offset,
+                                  itr->second.end() + areaRanges.offset };
+          instRanges.push_back(InstAreaRange(instIdx, instArea, range));
+          lastRange[(int)instArea] = range;
         }
       }
 

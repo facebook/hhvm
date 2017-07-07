@@ -205,6 +205,14 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   }
 
   if (ai) {
+    if (code.isLocal()) {
+      ai->mainInstRanges.offset =
+        main.toDestAddress(main.frontier()) - main.frontier();
+      ai->coldInstRanges.offset =
+        cold.toDestAddress(cold.frontier()) - cold.frontier();
+      ai->frozenInstRanges.offset =
+        frozen->toDestAddress(frozen->frontier()) - frozen->frontier();
+    }
     printUnit(kCodeGenLevel, unit, " after code gen ",
               ai, nullptr, annotations);
   }

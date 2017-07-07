@@ -87,8 +87,6 @@ struct OptimizeData {
   tc::FuncMetaInfo info;
 };
 
-void enqueueRetranslateOptRequest(OptimizeData* d);
-
 struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
   void doJob(OptimizeData* d) override {
     hphp_session_init();
@@ -111,13 +109,10 @@ struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
 std::atomic<WorkerDispatcher*> s_dispatcher;
-std::mutex s_dispatcherCreate;
+std::mutex s_dispatcherMutex;
 
 WorkerDispatcher& dispatcher() {
   if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
-
-  std::lock_guard<std::mutex> lock{s_dispatcherCreate};
-  if (auto ptr = s_dispatcher.load(std::memory_order_relaxed)) return *ptr;
 
   auto dispatcher = new WorkerDispatcher(
     RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
@@ -281,20 +276,24 @@ void retranslateAll() {
   std::unique_ptr<uint8_t[]> codeBuffer(new uint8_t[ntargets * initialSize]);
 
   {
-    Treadmill::Session session;
-    auto bufp = codeBuffer.get();
-    for (int tid = 0; tid < cg.targets.size(); ++tid, bufp += initialSize) {
-      auto const fid = target2FuncId[tid];
-      auto const func = const_cast<Func*>(Func::fromFuncId(fid));
-      jobs.emplace_back(OptimizeData{
-        fid,
-        tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
-      });
-      enqueueRetranslateOptRequest(&jobs.back());
-    }
-  }
+    std::lock_guard<std::mutex> lock{s_dispatcherMutex};
 
-  dispatcher().waitEmpty();
+    {
+      Treadmill::Session session;
+      auto bufp = codeBuffer.get();
+      for (int tid = 0; tid < cg.targets.size(); ++tid, bufp += initialSize) {
+        auto const fid = target2FuncId[tid];
+        auto const func = const_cast<Func*>(Func::fromFuncId(fid));
+        jobs.emplace_back(OptimizeData{
+          fid,
+          tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
+        });
+        enqueueRetranslateOptRequest(&jobs.back());
+      }
+    }
+
+    dispatcher().waitEmpty();
+  }
 
   if (serverMode) {
     Logger::Info("retranslateAll: finished optimizing functions");
@@ -364,8 +363,11 @@ void retranslateAll() {
 }
 
 void joinWorkerThreads() {
-  if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
-    dispatcher->stop();
+  if (s_dispatcher.load(std::memory_order_acquire)) {
+    std::lock_guard<std::mutex> lock{s_dispatcherMutex};
+    if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+      dispatcher->stop();
+    }
   }
 
   if (s_retranslateAllThread.joinable()) {

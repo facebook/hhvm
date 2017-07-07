@@ -206,11 +206,13 @@ SetArray* SetArray::CopyReserve(const SetArray* src, size_t expectedSize) {
   auto const ad = asSet(MakeReserveSet(expectedSize));
   auto const used = src->m_used;
   auto const elms = src->data();
+  auto const table = ad->hashTab();
+  auto const mask = ad->mask();
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    auto const loc = ad->findForNewInsert(elm.hash());
+    auto const loc = ad->findForNewInsert(table, mask, elm.hash());
     auto newElm = ad->allocElm(loc);
     if (elm.hasIntKey()) {
       newElm->setIntKey(elm.intKey(), elm.hash());
@@ -431,7 +433,9 @@ void SetArray::compact() {
     posElm = elms[m_pos];
   }
 
-  InitHash(hashTab(), m_scale);
+  auto const table = hashTab();
+  InitHash(table, m_scale);
+  auto const mask = this->mask();
   uint32_t j = 0;
   auto const used = m_used;
   for (uint32_t i = 0; i < used; ++i) {
@@ -439,7 +443,7 @@ void SetArray::compact() {
     if (elm.isTombstone()) continue;
     assert(!elm.isEmpty());
     if (j != i) elms[j] = elms[i];
-    *findForNewInsert(elm.hash()) = j;
+    *findForNewInsert(table, mask, elm.hash()) = j;
     ++j;
   }
   assert(ClearElms(elms + j, m_used - j));

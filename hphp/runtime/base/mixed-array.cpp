@@ -157,15 +157,15 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  ad->InitHash(hash, scale);
-
   ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
+  auto const table = ad->hashTab();
+  InitHash(table, scale);
+  auto const mask = ad->mask();
+  auto const data = ad->data();
 
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
@@ -178,7 +178,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
     const auto& tv = values[size - i - 1];
     data[i].data.m_data = tv.m_data;
     data[i].data.m_type = tv.m_type;
-    auto ei = ad->findForNewInsert(h);
+    auto ei = ad->findForNewInsert(table, mask, h);
     *ei = i;
   }
 

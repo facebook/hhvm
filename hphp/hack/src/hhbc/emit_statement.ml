@@ -368,19 +368,28 @@ and emit_for env e1 e2 e3 b =
      instr_jmp start_label;
      instr_label break_label;
   *)
-  let check_cond e inst =
-    match e with
+  let emit_cond ~jmpz label =
+    let final cond =
+      if jmpz then emit_jmpz env cond label else emit_jmpnz env cond label
+    in
+    let rec expr_list h tl =
+      match tl with
+      | [] -> [final @@ (Pos.none, A.Expr_list [h])]
+      | h1 :: t1 -> emit_ignored_expr env h :: expr_list h1 t1
+    in
+    match e2 with
     | _, A.Expr_list [] -> empty
-    | _ -> inst
+    | _, A.Expr_list (h::t) -> gather @@ expr_list h t
+    | cond -> final cond
   in
   let instrs = gather [
     emit_ignored_expr env e1;
-    check_cond e2 (emit_jmpz env e2 break_label);
+    emit_cond ~jmpz:true break_label;
     instr_label start_label;
     emit_stmt env b;
     instr_label cont_label;
     emit_ignored_expr env e3;
-    check_cond e2 (emit_jmpnz env e2 start_label);
+    emit_cond ~jmpz:false start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None

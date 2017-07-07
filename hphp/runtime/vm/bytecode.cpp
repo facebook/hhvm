@@ -610,7 +610,7 @@ TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
 // Store actual stack elements array in a thread-local in order to amortize the
 // cost of allocation.
 struct StackElms {
-  ~StackElms() { flush(); }
+  ~StackElms() { free(m_elms); }
   TypedValue* elms() {
     if (m_elms == nullptr) {
       // RuntimeOption::EvalVMStackElms-sized and -aligned.
@@ -628,8 +628,8 @@ struct StackElms {
   }
   void flush() {
     if (m_elms != nullptr) {
-      free(m_elms);
-      m_elms = nullptr;
+      size_t algnSz = RuntimeOption::EvalVMStackElms * sizeof(TypedValue);
+      madvise(m_elms, algnSz, MADV_DONTNEED);
     }
   }
 private:

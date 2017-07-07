@@ -667,10 +667,6 @@ private:
    */
   void compact(bool renumber);
 
-  uint32_t capacity() const { return Capacity(m_scale); }
-  uint32_t mask() const { return Mask(m_scale); }
-  uint32_t scale() const { return m_scale; }
-
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }
 

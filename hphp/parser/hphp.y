@@ -785,6 +785,11 @@ top_statement:
                                          only_in_hh_syntax(_p);
                                          _p->onUse($3, &Parser::useNamespace);
                                          _p->nns(T_USE); $$.reset();}
+  | T_USE T_TYPE
+    use_declarations ';'               {
+                                         only_in_hh_syntax(_p);
+                                         _p->onUse($3, &Parser::useClass);
+                                         _p->nns(T_USE); $$.reset();}
   | T_USE T_FUNCTION
     use_declarations ';'               { _p->onUse($3, &Parser::useFunction);
                                          _p->nns(T_USE); $$.reset();}

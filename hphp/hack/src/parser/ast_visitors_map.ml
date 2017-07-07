@@ -23,12 +23,14 @@ class virtual ['self] map =
       | Covariant -> self#on_Covariant env
       | Contravariant -> self#on_Contravariant env
       | Invariant -> self#on_Invariant env
+    method on_NSClass env = NSClass
     method on_NSNamespace env = NSNamespace
     method on_NSClassAndNamespace env = NSClassAndNamespace
     method on_NSFun env = NSFun
     method on_NSConst env = NSConst
     method on_ns_kind env this =
       match this with
+      | NSClass -> self#on_NSClass env
       | NSNamespace -> self#on_NSNamespace env
       | NSClassAndNamespace -> self#on_NSClassAndNamespace env
       | NSFun -> self#on_NSFun env

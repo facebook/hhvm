@@ -797,6 +797,10 @@ void Parser::nns(int token /* = 0 */,
 void Parser::useClassAndNamespace(const std::string &fn,
                                   const std::string &as) {
 }
+
+void Parser::useClass(const std::string &fn, const std::string &as) {
+}
+
 void Parser::useNamespace(const std::string &fn, const std::string &as) {
 }
 

@@ -178,8 +178,8 @@ class virtual ['b] iter :
         on_Lvarvar : 'c -> int -> Ast_visitors_ancestors.id -> unit;
         on_Method : 'c -> Ast_visitors_ancestors.method_ -> unit;
         on_Minus : 'c -> unit; on_MustExtend : 'c -> unit;
-        on_MustImplement : 'c -> unit;
-        on_NSNamespace: 'c -> unit; on_NSClassAndNamespace : 'c -> unit;
+        on_MustImplement : 'c -> unit; on_NSNamespace: 'c -> unit;
+        on_NSClass: 'c -> unit; on_NSClassAndNamespace : 'c -> unit;
         on_NSConst : 'c -> unit; on_NSFun : 'c -> unit;
         on_Namespace : 'c ->
                        Ast_visitors_ancestors.id ->
@@ -546,6 +546,7 @@ class virtual ['b] iter :
     method on_Minus : 'c -> unit
     method on_MustExtend : 'c -> unit
     method on_MustImplement : 'c -> unit
+    method on_NSClass : 'c -> unit
     method on_NSNamespace: 'c -> unit
     method on_NSClassAndNamespace : 'c -> unit
     method on_NSConst : 'c -> unit

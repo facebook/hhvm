@@ -174,8 +174,8 @@ class virtual ['b] reduce :
         on_Lvarvar : 'c -> int -> Ast_visitors_ancestors.id -> 'd;
         on_Method : 'c -> Ast_visitors_ancestors.method_ -> 'd;
         on_Minus : 'c -> 'd; on_MustExtend : 'c -> 'd;
-        on_MustImplement : 'c -> 'd;
-        on_NSNamespace : 'c -> 'd; on_NSClassAndNamespace : 'c -> 'd;
+        on_MustImplement : 'c -> 'd; on_NSNamespace : 'c -> 'd;
+        on_NSClass : 'c -> 'd; on_NSClassAndNamespace : 'c -> 'd;
         on_NSConst : 'c -> 'd; on_NSFun : 'c -> 'd;
         on_Namespace : 'c ->
                        Ast_visitors_ancestors.id ->
@@ -528,6 +528,7 @@ class virtual ['b] reduce :
     method on_Minus : 'c -> 'd
     method on_MustExtend : 'c -> 'd
     method on_MustImplement : 'c -> 'd
+    method on_NSClass : 'c -> 'd
     method on_NSNamespace : 'c -> 'd
     method on_NSClassAndNamespace : 'c -> 'd
     method on_NSConst : 'c -> 'd

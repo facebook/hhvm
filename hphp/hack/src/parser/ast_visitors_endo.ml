@@ -27,6 +27,7 @@ class virtual ['self] endo =
       | Covariant -> self#on_Covariant env this
       | Contravariant -> self#on_Contravariant env this
       | Invariant -> self#on_Invariant env this
+    method on_NSClass env this = this
     method on_NSNamespace env this = this
     method on_NSClassAndNamespace env this = this
     method on_NSFun env this = this
@@ -34,6 +35,7 @@ class virtual ['self] endo =
     method on_ns_kind env this =
       match this with
       | NSClassAndNamespace -> self#on_NSClassAndNamespace env this
+      | NSClass -> self#on_NSClass env this
       | NSNamespace -> self#on_NSNamespace env this
       | NSFun -> self#on_NSFun env this
       | NSConst -> self#on_NSConst env this

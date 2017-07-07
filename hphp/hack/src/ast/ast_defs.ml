@@ -32,6 +32,7 @@ type variance =
 
 type ns_kind =
   | NSNamespace
+  | NSClass
   | NSClassAndNamespace
   | NSFun
   | NSConst

@@ -4335,6 +4335,7 @@ and namespace_kind env =
       match Lexing.lexeme env.lb with
         | "function" -> NSFun
         | "const" -> NSConst
+        | "type" -> NSClass
         | "namespace" -> NSNamespace
         | _ -> (L.back env.lb; NSClassAndNamespace)
     end

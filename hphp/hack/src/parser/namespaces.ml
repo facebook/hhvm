@@ -235,6 +235,10 @@ module ElaborateDefs = struct
                 let m = SMap.add (snd id2) (snd id1) nsenv.ns_ns_uses in
                 {nsenv with ns_ns_uses = m}
               end
+              | NSClass -> begin
+                let m = SMap.add (snd id2) (snd id1) nsenv.ns_class_uses in
+                {nsenv with ns_class_uses = m}
+              end
               | NSClassAndNamespace -> begin
                 let m = SMap.add (snd id2) (snd id1) nsenv.ns_class_uses in
                 let n = SMap.add (snd id2) (snd id1) nsenv.ns_ns_uses in

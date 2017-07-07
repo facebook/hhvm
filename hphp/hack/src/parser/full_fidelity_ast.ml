@@ -1801,6 +1801,7 @@ and pDef : def parser = fun node env ->
           let kind =
             match syntax kind with
             | Token { PT.kind = TK.Namespace; _ } -> NSNamespace
+            | Token { PT.kind = TK.Type     ; _ } -> NSClass
             | Token { PT.kind = TK.Function ; _ } -> NSFun
             | Token { PT.kind = TK.Const    ; _ } -> NSConst
             | Missing                             -> NSClassAndNamespace

@@ -250,6 +250,7 @@ module WithExpressionAndStatementAndTypeParser
         const *)
     let (parser1, token) = next_token parser in
     match Token.kind token with
+    | Type
     | Namespace
     | Function
     | Const -> (parser1, (make_token token))

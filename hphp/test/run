@@ -284,6 +284,7 @@ function hh_codegen_cmd($options) {
 function hh_semdiff_cmd($options) {
   $cmd = hh_semdiff_path();
   if (isset($options['hackc'])) $cmd .= ' --daemon';
+  $cmd .= ' --verbose 1';
   return $cmd;
 }
 

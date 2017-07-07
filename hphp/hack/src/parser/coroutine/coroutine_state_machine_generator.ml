@@ -829,7 +829,8 @@ let lower_body { methodish_function_body; _} =
   (body, locals_and_params)
 
 let make_closure_lambda_signature
-    class_node
+    classish_name
+    classish_type_parameters
     ({ function_type; _; } as header_node) =
   (*
   ( C_foo_GeneratedClosure $closure,
@@ -838,7 +839,8 @@ let make_closure_lambda_signature
   *)
   make_lambda_signature_syntax
     [
-      make_closure_parameter_syntax class_node header_node;
+      make_closure_parameter_syntax
+        classish_name classish_type_parameters header_node;
       coroutine_data_parameter_syntax;
       nullable_exception_parameter_syntax;
     ]
@@ -889,6 +891,7 @@ let compute_state_machine_data locals_and_params header_node =
  *)
 let generate_coroutine_state_machine
     classish_name
+    classish_type_parameters
     method_node
     header_node =
   let body, locals_and_params = lower_body method_node in
@@ -897,6 +900,7 @@ let generate_coroutine_state_machine
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure
       classish_name
+      classish_type_parameters
       method_node
       header_node
       state_machine_data in

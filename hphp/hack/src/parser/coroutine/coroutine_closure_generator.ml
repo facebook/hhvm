@@ -36,6 +36,7 @@ let make_parameters_public_and_untyped
 
 let generate_constructor_method
     classish_name
+    classish_type_parameters
     header_node
     state_machine_data =
   let function_parameter_list =
@@ -44,8 +45,8 @@ let generate_constructor_method
     make_continuation_parameter_syntax
       ~visibility_syntax:private_syntax
       header_node in
-  let sm_param =
-    make_state_machine_parameter_syntax classish_name header_node in
+  let sm_param = make_state_machine_parameter_syntax
+      classish_name classish_type_parameters header_node in
   let function_parameter_list =
     cont_param :: sm_param :: function_parameter_list in
   let ctor = make_constructor_decl_header_syntax
@@ -86,6 +87,7 @@ let generate_do_resume_method { function_type; _; } =
 
 let generate_closure_body
     classish_name
+    classish_type_parameters
     method_node
     header_node
     state_machine_data =
@@ -93,6 +95,7 @@ let generate_closure_body
     @ [
       generate_constructor_method
         classish_name
+        classish_type_parameters
         header_node
         state_machine_data;
       generate_do_resume_method header_node;
@@ -104,7 +107,8 @@ let generate_closure_body
  * implementation.
  *)
 let generate_coroutine_closure
-    class_node
+    classish_name
+    classish_type_parameters
     ({ methodish_function_body; _; } as method_node)
     header_node
     state_machine_data =
@@ -112,11 +116,12 @@ let generate_coroutine_closure
     methodish_function_body
   else
     make_classish_declaration_syntax
-      (make_closure_classname class_node header_node)
-      (make_closure_type_parameters class_node header_node)
+      (make_closure_classname classish_name header_node)
+      (make_closure_type_parameters classish_type_parameters header_node)
       [ make_closure_base_type_syntax header_node ]
       (generate_closure_body
-        class_node
+        classish_name
+        classish_type_parameters
         method_node
         header_node
         state_machine_data)

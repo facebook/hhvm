@@ -84,7 +84,10 @@ let maybe_rewrite_coroutine_annotations node =
  * header and the function body into a desugared coroutine implementation.
  * Also extracts the coroutine's closure.
  *)
-let maybe_rewrite_classish_body_element class_node classish_body_element_node =
+let maybe_rewrite_classish_body_element
+    classish_name
+    classish_type_parameters
+    classish_body_element_node =
   match syntax classish_body_element_node with
   | MethodishDeclaration ({
       methodish_function_decl_header = {
@@ -101,12 +104,14 @@ let maybe_rewrite_classish_body_element class_node classish_body_element_node =
       let header_node = rewrite_header_node header_node in
       let rewritten_body, closure_syntax =
         CoroutineStateMachineGenerator.generate_coroutine_state_machine
-          class_node
+          classish_name
+          classish_type_parameters
           method_node
           header_node in
       let rewritten_method_syntax =
         CoroutineMethodLowerer.rewrite_methodish_declaration
-          class_node
+          classish_name
+          classish_type_parameters
           method_node
           header_node
           rewritten_body in
@@ -115,13 +120,14 @@ let maybe_rewrite_classish_body_element class_node classish_body_element_node =
       (* Irrelevant input. *)
       None
 
-let compute_body_nodes class_node =
+let compute_body_nodes classish_name classish_type_parameters =
   let gather_rewritten_syntaxes
       classish_body_element_node
       (classish_body_elements_acc, closures_acc, any_rewritten_acc) =
     Option.value_map
       (maybe_rewrite_classish_body_element
-        class_node
+        classish_name
+        classish_type_parameters
         classish_body_element_node)
       ~default:
         (classish_body_element_node :: classish_body_elements_acc,
@@ -138,23 +144,25 @@ let compute_body_nodes class_node =
  * returns Some with all of the nodes. Otherwise, returns None.
  *)
 let maybe_rewrite_classish_body_elements
-    class_node
+    classish_name
+    classish_type_parameters
     classish_body_elements_node =
   let rewritten_nodes, closure_nodes, any_rewritten =
     classish_body_elements_node
       |> syntax_node_to_list
-      |> compute_body_nodes class_node in
+      |> compute_body_nodes classish_name classish_type_parameters in
   Option.some_if any_rewritten (make_list rewritten_nodes, closure_nodes)
 
 (**
  * If the class contains at least one coroutine method, then those methods are
  * rewritten, and closures are generated as necessary. Otherwise, the
  * class is not transformed.
+ * TODO: A class might not contain a coroutine method, but still could contain
+ * a method containing a coroutine lambda.
+ * TODO: Do we need to rewrite top-level statements that contain coroutine
+ * lambdas?
  *)
-let maybe_rewrite_class node =
-  (* TODO: We need to rewrite top-level coroutine methods *)
-  (* TODO: Do we need to rewrite top-level statements that contain coroutine
-  lambdas? *)
+let maybe_rewrite_class_or_function node =
   match syntax node with
   | ClassishDeclaration ({
       classish_body = {
@@ -164,10 +172,13 @@ let maybe_rewrite_class node =
         } as classish_body_node);
         _;
       };
+      classish_name;
+      classish_type_parameters;
       _;
     } as class_node) ->
       Option.map
-        (maybe_rewrite_classish_body_elements class_node classish_body_elements)
+        (maybe_rewrite_classish_body_elements
+          classish_name classish_type_parameters classish_body_elements)
         ~f:(fun (classish_body_elements, closure_nodes) ->
           make_syntax @@ ClassishDeclaration {
             class_node with classish_body = make_syntax @@ ClassishBody {
@@ -175,6 +186,7 @@ let maybe_rewrite_class node =
             };
           },
           closure_nodes)
+  | FunctionDeclaration _ -> None (* TODO *)
   | _ ->
       (* Irrelevant input. *)
       None
@@ -184,9 +196,9 @@ let maybe_rewrite_class node =
  * directly. Generated closure nodes are collected and written alongside
  * of the class nodes.
  *)
-let rewrite_classes node (node_acc, any_rewritten_acc) =
+let rewrite_classes_and_functions node (node_acc, any_rewritten_acc) =
   Option.value_map
-    (maybe_rewrite_class node)
+    (maybe_rewrite_class_or_function node)
     ~default:(node :: node_acc, any_rewritten_acc)
     ~f:(fun (node, closure_nodes) ->
       node :: (closure_nodes @ node_acc), true)
@@ -200,7 +212,7 @@ let maybe_rewrite_syntax_list node =
   | SyntaxList syntax_list ->
       let rewritten_nodes, any_rewritten =
         List.fold_right
-          ~f:rewrite_classes
+          ~f:rewrite_classes_and_functions
           ~init:([], false)
           syntax_list in
       if any_rewritten then

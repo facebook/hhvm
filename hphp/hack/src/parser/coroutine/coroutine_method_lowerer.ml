@@ -86,16 +86,18 @@ let make_state_machine_method_reference_syntax
  *)
 
  let rewrite_coroutine_body
-     class_node
+     classish_name
+     classish_type_parameters
      ({ function_parameter_list; _; } as header_node)
      rewritten_body =
    (* $param1, $param2 *)
    let arg_list = parameter_list_to_arg_list function_parameter_list in
 
   (* ($closure, $data, $exception) ==> { body } *)
-  let lambda_signature = make_closure_lambda_signature class_node header_node in
+  let lambda_signature = make_closure_lambda_signature classish_name
+      classish_type_parameters header_node in
   let lambda = make_lambda_syntax lambda_signature rewritten_body in
-  let classname = make_closure_classname class_node header_node in
+  let classname = make_closure_classname classish_name header_node in
   (* $continuation,
     ($closure, $data, $exception) ==> { body },
     $param1, $param2 *)
@@ -126,14 +128,16 @@ let make_state_machine_method_reference_syntax
   make_list [resume_statement_syntax; return_syntax]
 
 let rewrite_coroutine_body
-    class_node
+    classish_name
+    classish_type_parameters
     methodish_function_body
     header_node
     rewritten_body =
   match syntax methodish_function_body with
   | CompoundStatement node ->
       let compound_statements = rewrite_coroutine_body
-        class_node
+        classish_name
+        classish_type_parameters
         header_node
         rewritten_body in
 
@@ -150,7 +154,8 @@ let rewrite_coroutine_body
  * implementation.
  *)
 let rewrite_methodish_declaration
-    class_node
+    classish_name
+    classish_type_parameters
     ({ methodish_function_body; _; } as method_node)
     header_node
     rewritten_body =
@@ -158,7 +163,8 @@ let rewrite_methodish_declaration
     make_syntax (MethodishDeclaration method_node) in
   let methodish_function_body =
     rewrite_coroutine_body
-      class_node
+      classish_name
+      classish_type_parameters
       methodish_function_body
       header_node
       rewritten_body in

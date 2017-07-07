@@ -584,7 +584,7 @@ let create_suspended_coroutine_result_syntax =
     suspended_member_name
     []
 
-let make_closure_classname { classish_name; _; } { function_name; _; } =
+let make_closure_classname classish_name { function_name; _; } =
   Printf.sprintf
     "%s_%s_GeneratedClosure"
     (string_of_name_token classish_name)
@@ -595,15 +595,18 @@ let make_closure_classname { classish_name; _; } { function_name; _; } =
  * list of type_parameters.
  *)
 let make_closure_type_parameters
-    { classish_type_parameters; _; }
+    classish_type_parameters
     { function_type_parameter_list; _; } =
   (get_type_parameter_list classish_type_parameters) @
     (get_type_parameter_list function_type_parameter_list)
 
-let make_closure_type_syntax class_node header_node =
+let make_closure_type_syntax
+    classish_name
+    classish_type_parameters
+    header_node =
   make_type_specifier_syntax
-    (make_closure_classname class_node header_node)
-    (make_closure_type_parameters class_node header_node)
+    (make_closure_classname classish_name header_node)
+    (make_closure_type_parameters classish_type_parameters header_node)
 
 let closure_variable =
   "$closure"
@@ -617,9 +620,13 @@ let closure_name_syntax name =
   let name_syntax = make_name_syntax name in
   make_member_selection_expression_syntax closure_variable_syntax name_syntax
 
-let make_closure_parameter_syntax class_node function_name =
+let make_closure_parameter_syntax
+    classish_name
+    classish_type_parameters
+    function_name =
   make_parameter_declaration_syntax
-    (make_closure_type_syntax class_node function_name)
+    (make_closure_type_syntax
+        classish_name classish_type_parameters function_name)
     closure_variable
 
 let resume_member_name =
@@ -708,12 +715,14 @@ let state_machine_variable_name_syntax =
   make_variable_syntax state_machine_variable_name
 
 let make_state_machine_parameter_syntax
-    enclosing_classname
+    classish_name
+    classish_type_parameters
     ({ function_type; _; } as header_node) =
   let state_machine_type_syntax =
     make_functional_type_syntax
       [
-        make_closure_type_syntax enclosing_classname header_node;
+        make_closure_type_syntax
+          classish_name classish_type_parameters header_node;
         mixed_syntax;
         nullable_exception_type_syntax;
       ]

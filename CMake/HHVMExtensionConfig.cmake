@@ -916,7 +916,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
 
       if (${addPaths})
         HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
-          ${TP_DIR}/re2/src/
+          ${RE2_INCLUDE_DIR}
           ${TP_DIR}/squangle/src/
           ${TP_DIR}/webscalesqlclient/src/include/
         )

@@ -44,7 +44,7 @@ endif()
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
   include_directories(
-    ${TP_DIR}/re2/src/
+    ${RE2_INCLUDE_DIR}
     ${TP_DIR}/squangle/src/
     ${TP_DIR}/webscalesqlclient/src/include/
   )

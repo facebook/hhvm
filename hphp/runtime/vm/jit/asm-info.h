@@ -210,7 +210,9 @@ struct AsmInfo {
     }
 
     auto newRange = TcaRange{start, end};
-    if (itr == ranges.second || itr->second != newRange) {
+    if (itr == ranges.second ||
+        itr->second.start() != start ||
+        itr->second.end() != end) {
       stateMap.insert(id, newRange);
     }
     return newRange;

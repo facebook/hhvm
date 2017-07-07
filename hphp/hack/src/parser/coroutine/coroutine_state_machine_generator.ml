@@ -822,9 +822,7 @@ let lower_body { methodish_function_body; _} =
     next_loop_label
       |> Core_list.range 1
       |> Core_list.map ~f:make_coroutine_result_data_variable
-      |> Core_list.fold
-        ~f:(fun acc name -> SMap.add name (make_name_syntax name) acc)
-        ~init:SMap.empty in
+      |> SMap.from_keys ~f:make_name_syntax in
   let locals_and_params =
     SMap.union locals_and_params coroutine_result_data_variables in
 

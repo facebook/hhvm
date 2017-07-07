@@ -149,12 +149,12 @@ let fetch_file_contents_opt path =
 
 let files_with_contents files =
   let files = Relative_path.Set.elements files in
-  Relative_path.Map.from_keys files fetch_file_contents
+  Relative_path.Map.from_keys files ~f:fetch_file_contents
 
 (** Like files_with_contents but skips over non-existent files. *)
 let files_with_contents_opt files =
   let files = Relative_path.Set.elements files in
-  let contents = Relative_path.Map.from_keys files @@ fetch_file_contents_opt in
+  let contents = Relative_path.Map.from_keys files ~f:fetch_file_contents_opt in
   Relative_path.Map.fold contents ~init:Relative_path.Map.empty
     ~f:(fun key data acc ->
       match data with
@@ -186,7 +186,7 @@ let convert_event debug_event = match debug_event with
   | DE.Typecheck -> Typecheck
   | DE.HandleServerCommand cmd -> HandleServerCommand cmd
   | DE.Disk_files_modified files ->
-    let contents = Relative_path.Map.from_keys files fetch_file_contents in
+    let contents = Relative_path.Map.from_keys files ~f:fetch_file_contents in
     Disk_files_modified contents
   | DE.Stop_recording ->
     Stop_recording

@@ -998,7 +998,7 @@ let schema : schema_node list =
     ; fields =
       [ "qualifier", Aggregate Expression
       ; "operator", Token
-      ; "name", Token
+      ; "name", Aggregate Expression
       ]
     }
   ; { kind_name   = "MemberSelectionExpression"

@@ -6,7 +6,6 @@ slow/array_iterator/array-traversable-2.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/array_trailing_comma.php
-slow/async/closure.php
 slow/async/exceptions.php
 slow/async/foreach_await_as.php
 slow/async/return-annotation-1.php
@@ -31,14 +30,12 @@ slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant4.php
 slow/class_type_constant/type_constant6.php
 slow/closure/1937.php
-slow/closure/clone.php
 slow/closure/lambda_implicit_this.php
 slow/closure/lambda_uninit_capture.php
 slow/closure/return_types.php
 slow/collection_classes/815.php
 slow/collection_classes/invalid-initializers.php
 slow/collection_classes/iterator-clone-bug.php
-slow/compilation/1237.php
 slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1282.php
@@ -47,7 +44,6 @@ slow/compilation/1316.php
 slow/compilation/1317.php
 slow/compilation/1321.php
 slow/compilation/aliased-namespaces.php
-slow/compilation/dynamic_sprop.php
 slow/compilation/switch-default-multiple.php
 slow/compilation/unset_non_array.php
 slow/concat/1573.php
@@ -238,10 +234,6 @@ slow/hhbbc/private_props_001.php
 slow/hhbbc/public_static_props_002.php
 slow/hhbbc/public_static_props_004.php
 slow/hhbbc/public_static_props_012.php
-slow/hhbbc/public_static_props_019.php
-slow/hhbbc/static_props_001.php
-slow/hhbbc/static_props_007.php
-slow/hhbbc/static_props_011.php
 slow/hint/2187.php
 slow/ini/source_root_empty.php
 slow/inline-hhas/hello-world.php
@@ -295,7 +287,6 @@ slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang_2.php
 slow/namespace/instanceof.php
 slow/namespace/nested-ns.php
-slow/non-string-sprop.php
 slow/now_doc/1906.php
 slow/now_doc/1907.php
 slow/nullsafe/nullsafe-prop-11.php
@@ -313,9 +304,7 @@ slow/object_magic_method/override_magic2.php
 slow/object_method/724.php
 slow/object_method/735.php
 slow/object_method/736.php
-slow/object_property/694.php
 slow/object_property/696.php
-slow/object_property/718.php
 slow/object_property/basesc-input.php
 slow/object_property_expression/798.php
 slow/parser/1851.php
@@ -529,7 +518,6 @@ slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
 slow/traits/self_resolution.php
-slow/traits/static_closure_trait_generator.php
 slow/traits/traits_and_interfaces10.php
 slow/traits/traits_and_interfaces11.php
 slow/traits/traits_and_interfaces9.php

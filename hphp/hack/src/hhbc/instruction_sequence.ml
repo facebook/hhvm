@@ -172,6 +172,8 @@ let instr_basenl local mode = instr (IBase(BaseNL(local, mode)))
 let instr_basenc idx mode = instr (IBase(BaseNC(idx, mode)))
 let instr_basesc y =
   instr (IBase(BaseSC(y, class_ref_rewrite_sentinel)))
+let instr_basesl local =
+  instr (IBase(BaseSL(local, class_ref_rewrite_sentinel)))
 let instr_baseh = instr (IBase BaseH)
 let instr_baser i = instr (IBase (BaseR i))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
@@ -441,6 +443,7 @@ let rewrite_class_refs_instr num = function
 | IMutator (IncDecS (o, _)) -> (num - 1, IMutator (IncDecS (o, num)))
 | IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _)) -> (num - 1, IBase (BaseSC (si, num)))
+| IBase (BaseSL (l, _)) -> (num - 1, IBase (BaseSL (l, num)))
 | ICall (FPassS (np, _)) -> (num - 1, ICall (FPassS (np, num)))
 | ICall (FPushCtor (np, _)) -> (num - 1, ICall (FPushCtor (np, num)))
 | ICall (FPushClsMethod (np, _)) -> (num - 1, ICall (FPushClsMethod (np, num)))

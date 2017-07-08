@@ -257,7 +257,7 @@ module WithParser(Parser : ParserType) = struct
   let expect_coloncolon parser =
     expect_token parser TokenKind.ColonColon SyntaxError.error1047
 
-  let expect_name_or_variable parser =
+  let expect_name_or_variable_or_error parser error =
     let (parser1, token) = next_token_as_name parser in
     match Token.kind token with
     | TokenKind.Name
@@ -265,7 +265,10 @@ module WithParser(Parser : ParserType) = struct
     | _ ->
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
-      (with_error parser SyntaxError.error1050, (make_missing()))
+      (with_error parser error, (make_missing()))
+
+  let expect_name_or_variable parser =
+    expect_name_or_variable_or_error parser SyntaxError.error1050
 
   let expect_xhp_class_name_or_name_or_variable parser =
     if is_next_xhp_class_name parser then
@@ -288,20 +291,6 @@ module WithParser(Parser : ParserType) = struct
         (* ERROR RECOVERY: Create a missing token for the expected token,
            and continue on from the current token. Don't skip it. *)
         (with_error parser SyntaxError.error1050, (make_missing()))
-
-  let expect_name_variable_or_class parser =
-    let (parser1, token) = next_token parser in
-    if Token.kind token = TokenKind.Class then
-      (parser1, make_token token)
-    else
-      let (parser1, token) = next_token_as_name parser in
-      match Token.kind token with
-      | TokenKind.Name
-      | TokenKind.Variable -> (parser1, make_token token)
-      | _ ->
-        (* ERROR RECOVERY: Create a missing token for the expected token,
-           and continue on from the current token. Don't skip it. *)
-        (with_error parser SyntaxError.error1048, (make_missing()))
 
   let optional_token parser kind =
     let (parser1, token) = next_token parser in

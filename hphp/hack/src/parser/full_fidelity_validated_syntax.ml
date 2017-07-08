@@ -1951,7 +1951,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_scope_resolution_expression : scope_resolution_expression validator = function
   | { Syntax.syntax = Syntax.ScopeResolutionExpression x; value = v } -> v,
-    { scope_resolution_name = validate_token x.Syntax.scope_resolution_name
+    { scope_resolution_name = validate_expression x.Syntax.scope_resolution_name
     ; scope_resolution_operator = validate_token x.Syntax.scope_resolution_operator
     ; scope_resolution_qualifier = validate_expression x.Syntax.scope_resolution_qualifier
     }
@@ -1961,7 +1961,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ScopeResolutionExpression
       { Syntax.scope_resolution_qualifier = invalidate_expression x.scope_resolution_qualifier
       ; Syntax.scope_resolution_operator = invalidate_token x.scope_resolution_operator
-      ; Syntax.scope_resolution_name = invalidate_token x.scope_resolution_name
+      ; Syntax.scope_resolution_name = invalidate_expression x.scope_resolution_name
       }
     ; Syntax.value = v
     }

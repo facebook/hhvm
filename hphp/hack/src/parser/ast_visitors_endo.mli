@@ -174,7 +174,7 @@ class virtual ['b] endo :
         on_Class_get : 'c ->
                        Ast_visitors_ancestors.expr_ ->
                        Ast_visitors_ancestors.id ->
-                       Ast_visitors_ancestors.pstring ->
+                       Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr_;
         on_Clone : 'c ->
                    Ast_visitors_ancestors.expr_ ->
@@ -1030,7 +1030,7 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.id ->
-      Ast_visitors_ancestors.pstring -> Ast_visitors_ancestors.expr_
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Clone :
       'c ->
       Ast_visitors_ancestors.expr_ ->

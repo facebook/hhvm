@@ -2150,7 +2150,13 @@ TODO: This will need to be fixed to allow situations where the qualified name
     that the desired tree topology? Give this more thought; it might impact
     rename refactoring semantics. *)
     let (parser, op) = expect_coloncolon parser in
-    let (parser, name) = expect_name_variable_or_class parser in
+    let (parser, name) =
+      let parser1, token = next_token parser in
+      match Token.kind token with
+      | Class -> parser1, make_token token
+      | Dollar -> parse_dollar_expression parser
+      | _ -> expect_name_or_variable_or_error parser SyntaxError.error1048
+    in
     let result = make_scope_resolution_expression qualifier op name in
     (parser, result)
 end

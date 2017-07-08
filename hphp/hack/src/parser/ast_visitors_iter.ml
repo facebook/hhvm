@@ -483,7 +483,7 @@ class virtual ['self] iter =
       self#on_option self#on_expr env c1;
     method on_Class_get env c0 c1 =
       self#on_id env c0;
-      self#on_pstring env c1;
+      self#on_expr env c1;
     method on_Class_const env c0 c1 =
       self#on_id env c0;
       self#on_pstring env c1;

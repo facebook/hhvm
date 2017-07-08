@@ -37,7 +37,7 @@ class type ['a] ast_visitor_type = object
   method on_catch : 'a -> catch -> 'a
   method on_markup: 'a -> pstring -> expr option -> 'a
   method on_class_const : 'a -> id -> pstring -> 'a
-  method on_class_get : 'a -> id -> pstring -> 'a
+  method on_class_get : 'a -> id -> expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_collection: 'a -> id -> afield list -> 'a
   method on_continue : 'a -> Pos.t -> int option -> 'a
@@ -311,7 +311,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Expr_list el    -> this#on_expr_list acc el
    | Obj_get     (e1, e2, _) -> this#on_obj_get acc e1 e2
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
-   | Class_get   (id, pstr)   -> this#on_class_get acc id pstr
+   | Class_get   (id, p)   -> this#on_class_get acc id p
    | Class_const (id, pstr)   -> this#on_class_const acc id pstr
    | Call        (e, el, uel) -> this#on_call acc e el uel
    | String2     el           -> this#on_string2 acc el
@@ -369,9 +369,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     in
     acc
 
-  method on_class_get acc id pstr =
+  method on_class_get acc id p =
     let acc = this#on_id acc id in
-    let acc = this#on_pstring acc pstr in
+    let acc = this#on_expr acc p in
     acc
 
   method on_class_const acc id pstr =

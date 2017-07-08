@@ -845,12 +845,20 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
 
     | ScopeResolutionExpression
       { scope_resolution_qualifier; scope_resolution_name; _ } ->
-      let (_, n) as name = pos_name scope_resolution_name in
       let qual = pos_name scope_resolution_qualifier in
-      if String.length n > 0 && n.[0] = '$'
-      then Class_get   (qual, name)
-      else Class_const (qual, name)
-
+      begin match syntax scope_resolution_name with
+      | Token { PositionedToken.kind = TK.Variable; _ } ->
+        let name =
+          get_pos scope_resolution_name, Lvar (pos_name scope_resolution_name)
+        in
+        Class_get (qual, name)
+      | _ ->
+        let name = pExpr scope_resolution_name env in
+        begin match snd name with
+        | Id id -> Class_const (qual, id)
+        | _ -> Class_get (qual, name)
+        end
+      end
     | CastExpression { cast_type; cast_operand; _ } ->
       Cast (pHint cast_type env, pExpr cast_operand env)
     | ConditionalExpression

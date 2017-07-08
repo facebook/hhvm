@@ -34,6 +34,24 @@ let add_bare_expr this acc expr =
 let add_bare_exprs this acc exprs =
   List.fold_left exprs ~f:(add_bare_expr this) ~init:acc
 
+let is_lvar_like_id (_, id) = String_utils.string_starts_with id "$"
+
+let on_class_get this acc recv prop ~is_call_target =
+  let acc =
+    (* Only add if it is a variable *)
+    if is_lvar_like_id recv
+    then add_local ~bareparam:false acc recv
+    else acc
+  in
+  (* Distinguish between cases
+  - A::$b() - $b is a local variable
+  - A::$b = 1 - $b is a static field name *)
+  match snd prop with
+  | Ast.Lvar pid ->
+    if is_call_target then add_local ~bareparam:false acc pid
+    else acc
+  | _ -> this#on_expr acc prop
+
 class declvar_visitor = object(this)
   inherit [bool * ULS.t] Ast_visitor.ast_visitor as super
 
@@ -44,6 +62,14 @@ class declvar_visitor = object(this)
         | (Ast.Id id | Ast.Lvarvar(_, id)) -> add_local ~bareparam:false acc id
         | Ast.BracedExpr e -> this#on_expr acc e
         | _ -> acc)
+
+  method! on_obj_get acc e prop =
+    let acc = this#on_expr acc e in
+    match snd prop with
+    (* Only add if it is a variable *)
+    | Ast.Id id when is_lvar_like_id id -> add_local ~bareparam:false acc id
+    | _ -> this#on_expr acc prop
+
   method! on_foreach acc e pos iterator block =
     let acc =
       match snd e with
@@ -61,15 +87,14 @@ class declvar_visitor = object(this)
 
   method! on_lvar acc id = add_local ~bareparam:false acc id
   method! on_lvarvar acc _ id = add_local ~bareparam:false acc id
-  method! on_class_get acc id _ =
-  (* Only add if it is a variable *)
-  if String_utils.string_starts_with (snd id) "$"
-  then add_local ~bareparam:false acc id
-  else acc
-
+  method! on_class_get acc id prop =
+    on_class_get this acc id prop ~is_call_target:false
   method! on_efun acc _fn use_list =
     List.fold_left use_list ~init:acc
       ~f:(fun acc (x, _isref) -> add_local ~bareparam:false acc x)
+  method! on_class_const acc e _ =
+    if is_lvar_like_id e then add_local ~bareparam:false acc e
+    else acc
   method! on_call acc e el1 el2 =
     let acc =
       match e with
@@ -87,7 +112,12 @@ class declvar_visitor = object(this)
       | _ ->
         this#on_expr acc e
     in
-    let acc = this#on_expr acc e in
+    let acc =
+      match snd e with
+      | Ast.Class_get (id, prop) ->
+        on_class_get this acc id prop ~is_call_target:true
+      | _ -> this#on_expr acc e
+    in
     let acc = List.fold_left el1 ~f:on_arg ~init:acc in
     let acc = List.fold_left el2 ~f:on_arg ~init:acc in
     acc

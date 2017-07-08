@@ -1751,7 +1751,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and scope_resolution_expression =
     { scope_resolution_qualifier: expression value
     ; scope_resolution_operator: Token.t value
-    ; scope_resolution_name: Token.t value
+    ; scope_resolution_name: expression value
     }
   and member_selection_expression =
     { member_object: expression value

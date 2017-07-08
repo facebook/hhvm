@@ -76,7 +76,7 @@ class virtual ['b] iter :
                          Ast_visitors_ancestors.pstring -> unit;
         on_Class_get : 'c ->
                        Ast_visitors_ancestors.id ->
-                       Ast_visitors_ancestors.pstring -> unit;
+                       Ast_visitors_ancestors.expr -> unit;
         on_Clone : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Cnormal : 'c -> unit;
         on_Collection : 'c ->
@@ -425,7 +425,7 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> unit
     method on_Class_get :
       'c ->
-      Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> unit
+      Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr -> unit
     method on_Clone : 'c -> Ast_visitors_ancestors.expr -> unit
     method on_Cmp : 'c -> unit
     method on_Cnormal : 'c -> unit

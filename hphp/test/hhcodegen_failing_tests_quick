@@ -6,7 +6,6 @@ quick/all_type_comparison_test.php
 quick/backtick.php
 quick/class_constant.php
 quick/closure_recursive_bad.php
-quick/closure_static_vars.php
 quick/closure_use_this.php
 quick/constIntToString.php
 quick/continue.php
@@ -94,14 +93,11 @@ quick/reassign_this3.php
 quick/redeclared_function.php
 quick/redeclared_method.php
 quick/refcount-static.php
-quick/reflection_static_vars.php
 quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
 quick/simp-conv-to-int-dbl.php
-quick/sp.php
 quick/static_array.php
-quick/static_closure_gen.php
 quick/static_prop_eval_order.php
 quick/string-cse.php
 quick/syntax-error.php

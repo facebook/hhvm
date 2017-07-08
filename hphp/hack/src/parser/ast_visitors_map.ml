@@ -664,7 +664,7 @@ class virtual ['self] map =
       Array_get (r0, r1)
     method on_Class_get env c0 c1 =
       let r0 = self#on_id env c0 in
-      let r1 = self#on_pstring env c1 in Class_get (r0, r1)
+      let r1 = self#on_expr env c1 in Class_get (r0, r1)
     method on_Class_const env c0 c1 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_pstring env c1 in Class_const (r0, r1)

@@ -315,7 +315,7 @@ and expr_ =
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
-  | Class_get of id * pstring
+  | Class_get of id * expr
   | Class_const of id * pstring
   | Call of expr * expr list * expr list
   | Int of pstring

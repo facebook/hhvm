@@ -900,7 +900,7 @@ class virtual ['self] endo =
       else Array_get (r0, r1)
     method on_Class_get env this c0 c1 =
       let r0 = self#on_id env c0 in
-      let r1 = self#on_pstring env c1 in if c0 == r0 && c1 == r1
+      let r1 = self#on_expr env c1 in if c0 == r0 && c1 == r1
       then this
       else Class_get (r0, r1)
     method on_Class_const env this c0 c1 =

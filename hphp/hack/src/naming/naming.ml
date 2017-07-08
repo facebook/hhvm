@@ -1998,8 +1998,14 @@ module Make (GetLocals : GetLocals) = struct
         let id = p, N.Lvar (Env.lvar env x) in
         N.Array_get (id, None)
     | Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
-    | Class_get (x1, x2) ->
-        N.Class_get (make_class_id env x1 [], x2)
+    | Class_get (x1, (_, Id x2)) ->
+      N.Class_get (make_class_id env x1 [], x2)
+    | Class_get (x1, (_, Lvar x2)) ->
+      N.Class_get (make_class_id env x1 [], x2)
+    | Class_get _ ->
+      if (fst env).in_mode = FileInfo.Mstrict
+      then Errors.dynamic_class_property_name_in_strict_mode p;
+      N.Any
     | Class_const (x1, x2) ->
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in

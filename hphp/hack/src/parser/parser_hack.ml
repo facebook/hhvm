@@ -3170,8 +3170,8 @@ and expr_colcol env e1 =
 
 and expr_colcol_remain ~allow_class env e1 cname =
   match expr_atomic env ~allow_class ~class_const:true with
-  | _, Lvar x ->
-      btw e1 x, Class_get (cname, x)
+  | (_, Lvar x) as p ->
+      btw e1 x, Class_get (cname, p)
   | _, Id x ->
       btw e1 x, Class_const (cname, x)
   | pos, _ ->

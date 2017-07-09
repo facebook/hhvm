@@ -1467,8 +1467,9 @@ void Class::setSpecial() {
     return;
   }
 
-  //no need to generate an 86ctor for an abstract final class
-  if((attrs() & AttrAbstract) && (attrs() & AttrFinal)) {
+  // No need to generate an 86ctor for an abstract final class
+  if ((attrs() & AttrAbstract) && (attrs() & AttrFinal)) {
+    m_ctor = nullptr;
     return;
   }
 

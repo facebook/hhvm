@@ -62,9 +62,7 @@ std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 struct MixedArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
-    auto const data = mixedData(ad);
-    auto const hash = mixedHash(data, 1);
-    ad->InitHash(hash, 1);
+    InitHash(HashTab(ad, 1), 1);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
@@ -84,9 +82,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
 
   // Intialize the hash table first, because the header is already in L1 cache,
   // but the hash table may not be.  So let's issue the cache request ASAP.
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  ad->InitHash(hash, scale);
+  InitHash(HashTab(ad, scale), scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
   ad->initHeader(hk, 1);
@@ -200,9 +196,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  ad->InitHash(hash, scale);
+  InitHash(HashTab(ad, scale), scale);
 
   ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader(HeaderKind::Mixed, 1);
@@ -210,6 +204,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   ad->m_nextKI           = 0;
 
   // Append values by moving -- no refcounts are updated.
+  auto const data = ad->data();
   for (uint32_t i = 0; i < size; i++) {
     auto& kTv = keysAndValues[i * 2];
     if (kTv.m_type == KindOfString) {
@@ -796,8 +791,8 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     old->setZombie();
   }
 
-  auto table = mixedHash(ad->data(), newScale);
-  ad->InitHash(table, newScale);
+  auto const table = HashTab(ad, newScale);
+  InitHash(table, newScale);
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
@@ -1277,11 +1272,10 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
-  auto const data  = ad->data();
-  auto const table = mixedHash(data, scale);
-  ad->InitHash(table, scale);
+  auto const table = HashTab(ad, scale);
+  InitHash(table, scale);
 
-  auto dstElm = data;
+  auto dstElm = ad->data();
   auto srcElm = src->data();
   auto const srcStop = src->data() + oldUsed;
   uint32_t i = 0;
@@ -1328,14 +1322,14 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   }
 
   // Set new used value (we've removed any tombstones).
-  assert(i == dstElm - data);
+  assert(i == dstElm - ad->data());
   ad->m_used = i;
 
   assert(ad->kind() == src->kind());
   assert(ad->m_size == src->m_size);
   assert(ad->hasExactlyOneRef());
   assert(ad->m_used <= oldUsed);
-  assert(ad->m_used == dstElm - data);
+  assert(ad->m_used == dstElm - ad->data());
   assert(ad->m_scale == scale);
   assert(ad->m_nextKI == src->m_nextKI);
   assert(ad->checkInvariants());

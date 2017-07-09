@@ -292,6 +292,12 @@ protected:
     return &data()[i];
   }
 
+  ALWAYS_INLINE int32_t* initHash(uint32_t scale) {
+    auto table = HashTab(this, scale);
+    InitHash(table, scale);
+    return table;
+  }
+
   // Hash table should be initialized before the header.
   static void InitSmallHash(ArrayType* a);
 

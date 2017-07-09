@@ -46,8 +46,7 @@ std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 struct SetArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
-    auto const hash = SetArray::HashTab(ad, SetArray::SmallScale);
-    InitHash(hash, SetArray::SmallScale);
+    ad->initHash(SetArray::SmallScale);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
@@ -84,10 +83,9 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
-  auto const hash = HashTab(ad, scale);
   assert(ClearElms(Data(ad), Capacity(scale)));
-  InitHash(hash, scale);
 
+  ad->initHash(scale);
   ad->initHeader(HeaderKind::Keyset, 1);
   ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
   ad->m_scale_used   = scale;               // scale = scale, used = 0
@@ -384,9 +382,8 @@ SetArray* SetArray::grow(bool copy) {
   memcpy16_inline(Data(ad), data(), sizeof(Elm) * oldUsed);
   assert(ClearElms(Data(ad) + oldUsed, Capacity(newScale) - oldUsed));
 
-  auto table = HashTab(ad, newScale);
-  InitHash(table, newScale);
-  auto mask = ad->mask();
+  auto const table = ad->initHash(newScale);
+  auto const mask = ad->mask();
   auto iter = data();
   auto const stop = iter + oldUsed;
   if (copy) {
@@ -433,8 +430,7 @@ void SetArray::compact() {
     posElm = elms[m_pos];
   }
 
-  auto const table = hashTab();
-  InitHash(table, m_scale);
+  auto const table = initHash(m_scale);
   auto const mask = this->mask();
   uint32_t j = 0;
   auto const used = m_used;

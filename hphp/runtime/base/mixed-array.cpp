@@ -62,7 +62,7 @@ std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 struct MixedArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
-    InitHash(HashTab(ad, 1), 1);
+    ad->initHash(1);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
@@ -82,7 +82,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
 
   // Intialize the hash table first, because the header is already in L1 cache,
   // but the hash table may not be.  So let's issue the cache request ASAP.
-  InitHash(HashTab(ad, scale), scale);
+  ad->initHash(scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
   ad->initHeader(hk, 1);
@@ -158,8 +158,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
-  auto const table = ad->hashTab();
-  InitHash(table, scale);
+  auto const table = ad->initHash(scale);
   auto const mask = ad->mask();
   auto const data = ad->data();
 
@@ -196,7 +195,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
-  InitHash(HashTab(ad, scale), scale);
+  ad->initHash(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader(HeaderKind::Mixed, 1);
@@ -791,8 +790,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     old->setZombie();
   }
 
-  auto const table = HashTab(ad, newScale);
-  InitHash(table, newScale);
+  auto const table = ad->initHash(newScale);
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
@@ -876,9 +874,8 @@ void MixedArray::compact(bool renumber /* = false */) {
 
   // Perform compaction
   auto elms = data();
-  auto mask = this->mask();
-  auto table = hashTab();
-  InitHash(table, scale());
+  auto const mask = this->mask();
+  auto const table = initHash(m_scale);
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (elms[frPos].isTombstone()) {
       assert(frPos + 1 < m_used);
@@ -1272,8 +1269,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
-  auto const table = HashTab(ad, scale);
-  InitHash(table, scale);
+  auto const table = ad->initHash(scale);
 
   auto dstElm = ad->data();
   auto srcElm = src->data();

@@ -141,10 +141,9 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
   auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
-  auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  ad->InitHash(dstHash, ad->scale());
+  auto const dstHash = ad->initHash(ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
@@ -179,10 +178,9 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
   auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
-  auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  ad->InitHash(dstHash, ad->scale());
+  auto const dstHash = ad->initHash(ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
@@ -209,10 +207,9 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
   auto const oldSize = old->m_size;
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
-  auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
 
-  ad->InitHash(dstHash, ad->scale());
+  auto const dstHash = ad->initHash(ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;

@@ -302,12 +302,11 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldBuf = data();
     auto oldUsed = posLimit();
     auto oldNextKI = nextKI();
-    auto arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
-    auto data = mixedData(arr);
-    m_arr = arr;
-    auto table = (int32_t*)(data + size_t(newCap));
+    m_arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
+    m_arr->m_size = m_size;
+    auto data = this->data();
+    auto table = hashTab();
     auto table_mask = tableMask();
-    arr->m_size = m_size;
     setPosLimit(m_size);
     setNextKI(oldNextKI);
     for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
@@ -336,7 +335,7 @@ HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
   // Update the hashtable to reflect the fact that everything was
   // moved over one position
   auto* hash = hashTab();
-  auto* hashEnd = hash + hashSize();
+  auto* hashEnd = hash + arrayData()->hashSize();
   for (; hash != hashEnd; ++hash) {
     if (validPos(*hash)) {
       ++(*hash);

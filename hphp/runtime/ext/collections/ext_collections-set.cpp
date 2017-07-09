@@ -412,7 +412,6 @@ BaseSet::php_map(const Variant& callback) {
   auto set = req::make<TSet>();
   if (!m_size) return Object{std::move(set)};
   assert(posLimit() != 0);
-  assert(hashSize() > 0);
   assert(set->arrayData() == staticEmptyDictArrayAsMixed());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...

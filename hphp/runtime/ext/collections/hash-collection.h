@@ -77,7 +77,7 @@ struct HashCollection : ObjectData {
   bool isDensityTooLow() const {
     bool b = (m_size < posLimit() / 2);
     assert(IMPLIES(
-      data() == mixedData(staticEmptyDictArrayAsMixed()),
+      arrayData() == staticEmptyDictArrayAsMixed(),
       !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
@@ -89,7 +89,7 @@ struct HashCollection : ObjectData {
     bool b = ((uint64_t(cap()) >= uint64_t(m_size) * 8) &&
               (cap() >= HashCollection::SmallSize * 8));
     assert(IMPLIES(
-      data() == mixedData(staticEmptyDictArrayAsMixed()),
+      arrayData() == staticEmptyDictArrayAsMixed(),
       !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
@@ -269,7 +269,7 @@ struct HashCollection : ObjectData {
 
   void dropImmCopy() {
     assert(m_immCopy.isNull() ||
-           (data() == ((HashCollection*)m_immCopy.get())->data() &&
+           (arrayData() == ((HashCollection*)m_immCopy.get())->arrayData() &&
             arrayData()->hasMultipleRefs()));
     m_immCopy.reset();
   }
@@ -583,17 +583,8 @@ struct HashCollection : ObjectData {
 
   bool hasTombstones() const { return m_size != posLimit(); }
 
-  size_t hashSize() const {
-    return size_t(tableMask()) + 1;
-  }
-
   static uint32_t computeMaxElms(uint32_t tableMask) {
     return tableMask - tableMask / LoadScale;
-  }
-
-  static void initHash(int32_t* table, size_t tableSize) {
-    static_assert(Empty == -1, "Cannot use wordfillones().");
-    wordfillones(table, tableSize);
   }
 
   [[noreturn]] void throwTooLarge();

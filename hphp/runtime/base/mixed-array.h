@@ -302,8 +302,6 @@ private:
   using ArrayData::release;
 
 public:
-  static Variant CreateVarForUncountedArray(const Variant& source);
-
   static size_t Vsize(const ArrayData*);
   static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);

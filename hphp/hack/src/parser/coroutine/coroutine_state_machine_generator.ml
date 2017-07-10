@@ -807,9 +807,9 @@ let unnest_compound_statements node =
     | None -> Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
 
-let lower_body { methodish_function_body; _} =
-  let locals_and_params = gather_locals_and_params methodish_function_body in
-  let body = add_missing_return methodish_function_body in
+let lower_body body =
+  let locals_and_params = gather_locals_and_params body in
+  let body = add_missing_return body in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in
   let (next_loop_label, body) = rewrite_for next_loop_label body in
@@ -892,16 +892,16 @@ let compute_state_machine_data locals_and_params header_node =
 let generate_coroutine_state_machine
     classish_name
     classish_type_parameters
-    method_node
+    original_body
     header_node =
-  let body, locals_and_params = lower_body method_node in
+  let new_body, locals_and_params = lower_body original_body in
   let state_machine_data =
     compute_state_machine_data locals_and_params header_node in
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure
       classish_name
       classish_type_parameters
-      method_node
+      original_body
       header_node
       state_machine_data in
-  body, closure_syntax
+  new_body, closure_syntax

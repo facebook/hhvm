@@ -97,6 +97,7 @@ let maybe_rewrite_classish_body_element
         } as header_node);
         _;
       };
+      methodish_function_body;
       _;
     } as method_node) when not @@ is_missing function_coroutine ->
       (* TODO: We need to rewrite non-coroutine functions if they contain
@@ -106,7 +107,7 @@ let maybe_rewrite_classish_body_element
         CoroutineStateMachineGenerator.generate_coroutine_state_machine
           classish_name
           classish_type_parameters
-          method_node
+          methodish_function_body
           header_node in
       let rewritten_method_syntax =
         CoroutineMethodLowerer.rewrite_methodish_declaration

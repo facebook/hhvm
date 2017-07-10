@@ -88,7 +88,6 @@ let generate_do_resume_method { function_type; _; } =
 let generate_closure_body
     classish_name
     classish_type_parameters
-    method_node
     header_node
     state_machine_data =
   generate_hoisted_locals state_machine_data
@@ -109,11 +108,11 @@ let generate_closure_body
 let generate_coroutine_closure
     classish_name
     classish_type_parameters
-    ({ methodish_function_body; _; } as method_node)
+    body
     header_node
     state_machine_data =
-  if is_missing methodish_function_body then
-    methodish_function_body
+  if is_missing body then
+    body
   else
     make_classish_declaration_syntax
       (make_closure_classname classish_name header_node)
@@ -122,6 +121,5 @@ let generate_coroutine_closure
       (generate_closure_body
         classish_name
         classish_type_parameters
-        method_node
         header_node
         state_machine_data)

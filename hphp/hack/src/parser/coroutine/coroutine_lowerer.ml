@@ -114,8 +114,6 @@ let maybe_rewrite_classish_body_element
       methodish_function_body;
       _;
     } as method_node) when not @@ is_missing function_coroutine ->
-      (* TODO: We need to rewrite non-coroutine functions if they contain
-         coroutine lambdas. *)
       let (new_header_node, new_body, closure_syntax) =
         rewrite_method_or_function
           classish_name
@@ -171,12 +169,8 @@ let maybe_rewrite_classish_body_elements
  * If the class contains at least one coroutine method, then those methods are
  * rewritten, and closures are generated as necessary. Otherwise, the
  * class is not transformed.
- * TODO: A class might not contain a coroutine method, but still could contain
- * a method containing a coroutine lambda.
- * TODO: Do we need to rewrite top-level statements that contain coroutine
- * lambdas?
  *)
-let maybe_rewrite_class_or_function node =
+let maybe_rewrite_class node =
   match syntax node with
   | ClassishDeclaration ({
       classish_body = {
@@ -200,31 +194,6 @@ let maybe_rewrite_class_or_function node =
             };
           },
           closure_nodes)
-  | FunctionDeclaration ({
-      function_declaration_header = {
-        syntax = FunctionDeclarationHeader ({
-          function_coroutine;
-          _;
-        } as header_node);
-        _;
-      };
-      function_body;
-      _;
-    } as function_node) when not @@ is_missing function_coroutine ->
-      (* TODO: We need to rewrite non-coroutine functions if they contain
-         coroutine lambdas. *)
-      let (new_header_node, new_body, closure_syntax) =
-        rewrite_method_or_function
-          global_syntax
-          (make_missing ())
-          header_node
-          function_body in
-      let new_function_syntax =
-        CoroutineMethodLowerer.rewrite_function_declaration
-          function_node
-          new_header_node
-          new_body in
-      Some (new_function_syntax, [closure_syntax] )
   | _ ->
       (* Irrelevant input. *)
       None
@@ -234,9 +203,9 @@ let maybe_rewrite_class_or_function node =
  * directly. Generated closure nodes are collected and written alongside
  * of the class nodes.
  *)
-let rewrite_classes_and_functions node (node_acc, any_rewritten_acc) =
+let rewrite_classes node (node_acc, any_rewritten_acc) =
   Option.value_map
-    (maybe_rewrite_class_or_function node)
+    (maybe_rewrite_class node)
     ~default:(node :: node_acc, any_rewritten_acc)
     ~f:(fun (node, closure_nodes) ->
       node :: (closure_nodes @ node_acc), true)
@@ -250,7 +219,7 @@ let maybe_rewrite_syntax_list node =
   | SyntaxList syntax_list ->
       let rewritten_nodes, any_rewritten =
         List.fold_right
-          ~f:rewrite_classes_and_functions
+          ~f:rewrite_classes
           ~init:([], false)
           syntax_list in
       if any_rewritten then
@@ -261,9 +230,51 @@ let maybe_rewrite_syntax_list node =
       (* Irrelevant input. *)
       Rewriter.Result.Keep
 
+let lower_coroutine_functions
+    parents
+    current_node
+    ((closures, lambda_count) as current_acc) =
+  match syntax current_node with
+  | FunctionDeclaration ({
+      function_declaration_header = {
+        syntax = FunctionDeclarationHeader ({
+          function_coroutine;
+          _;
+        } as header_node);
+        _;
+      };
+      function_body;
+      _;
+    } as function_node) when not @@ is_missing function_coroutine ->
+     let (new_header_node, new_body, closure_syntax) =
+       rewrite_method_or_function
+         global_syntax
+         (make_missing ())
+         header_node
+         function_body in
+     let new_function_syntax =
+       CoroutineMethodLowerer.rewrite_function_declaration
+         function_node
+         new_header_node
+         new_body in
+     ((closure_syntax :: closures, lambda_count),
+      Rewriter.Result.Replace new_function_syntax)
+  | _ ->
+    (current_acc, Rewriter.Result.Keep)
+
+let append_to_root closures root =
+  match syntax root with
+    | Script { script_declarations } ->
+      let script_declarations = syntax_node_to_list script_declarations in
+      make_script (make_list (script_declarations @ closures))
+    | _ -> failwith "How did we get a root that is not a script?"
+
 let lower_coroutines syntax_tree =
-  syntax_tree
-    |> from_tree
+  let root = from_tree syntax_tree in
+  let ((closures, _), root) = Rewriter.parented_aggregating_rewrite_post
+    lower_coroutine_functions root ([], 0) in
+  root
+    |> append_to_root closures
     |> Rewriter.rewrite_post maybe_rewrite_coroutine_annotations
     |> Rewriter.rewrite_post maybe_rewrite_syntax_list
     |> text

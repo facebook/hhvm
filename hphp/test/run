@@ -516,7 +516,7 @@ function get_options($argv) {
     'typechecker' => '',
     'hhserver-binary-path:' => '',
     'compare-hh-codegen' => '',
-    'semdiff' => '',
+    'no-semdiff' => '',
     'run-hh-codegen' => '',
     'record-failures:' => '',
     'hackc' => '',
@@ -2096,7 +2096,7 @@ function run_test($options, $test) {
     strip_hhas_file($hhas);
     strip_hhas_file($hhcg2);
 
-    if (isset($options['semdiff'])) {
+    if (!isset($options['no-semdiff'])) {
       // Run semantic diff on outputs
       $semdiff = semdiff_output($options, $test);
       // If it fails completely (e.g. timeout or exception) then
@@ -2111,6 +2111,7 @@ function run_test($options, $test) {
             if ($rv) {
               fclose($h);
               unlink($semdiff);
+              unlink($semdiff . '_messages');
               return $rv;
             }
           }

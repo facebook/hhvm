@@ -415,11 +415,9 @@ slow/php7_backported/is_numeric.php
 slow/php7_backported/ns_088.php
 slow/php7_backported/ns_089.php
 slow/php7_backported/ns_090.php
-slow/php7_backported/ns_091.php
 slow/php7_backported/ns_092.php
 slow/php7_backported/ns_093.php
 slow/php7_backported/ns_094.php
-slow/php7_backported/ns_095.php
 slow/php7_backported/scalar-types/default_boolean_hint_values.php
 slow/php7_backported/scalar-types/inexistent_class_hint_with_scalar_arg.php
 slow/php7_backported/scalar-types/scalar_basic.php

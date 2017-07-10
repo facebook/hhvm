@@ -50,34 +50,27 @@ open Coroutine_type_lowerer
  *      int,
  *    ): CoroutineResult<int>) { ... }
  *)
-let maybe_rewrite_coroutine_annotations node =
-  match syntax node with
-  | ClosureTypeSpecifier ({
-      closure_coroutine = {
-        syntax = Token { EditableToken.kind = TokenKind.Coroutine; _; };
-        _;
-      };
+let rewrite_coroutine_annotation
+    ({
       closure_parameter_types;
       closure_return_type;
       _;
-    } as node) ->
-      Rewriter.Result.Replace (
-        let closure_return_type =
-          CoroutineTypeLowerer.rewrite_return_type closure_return_type in
-        make_syntax (
-          ClosureTypeSpecifier {
-            node with
-              closure_coroutine = make_missing ();
-              closure_parameter_types =
-                prepend_to_comma_delimited_syntax_list
-                  (make_continuation_type_syntax closure_return_type)
-                  closure_parameter_types;
-              closure_return_type =
-                make_coroutine_result_type_syntax closure_return_type;
-          }
-        )
-      )
-  | _ -> Rewriter.Result.Keep
+    } as original_type) =
+  let new_return_type =
+    CoroutineTypeLowerer.rewrite_return_type closure_return_type in
+  let continuation_type = make_continuation_type_syntax new_return_type in
+  let new_parameter_types = prepend_to_comma_delimited_syntax_list
+    continuation_type closure_parameter_types in
+  let coroutine_return_type =
+    make_coroutine_result_type_syntax new_return_type in
+  make_syntax (
+    ClosureTypeSpecifier {
+      original_type with
+        closure_coroutine = make_missing ();
+        closure_parameter_types = new_parameter_types;
+        closure_return_type = coroutine_return_type;
+    }
+  )
 
 let rewrite_method_or_function
     classish_name
@@ -230,7 +223,21 @@ let maybe_rewrite_syntax_list node =
       (* Irrelevant input. *)
       Rewriter.Result.Keep
 
-let lower_coroutine_functions
+let lower_coroutine_function original_header original_body original_function =
+  let (new_header_node, new_body, closure_syntax) =
+    rewrite_method_or_function
+      global_syntax
+      (make_missing ())
+      original_header
+      original_body in
+  let new_function_syntax =
+    CoroutineMethodLowerer.rewrite_function_declaration
+      original_function
+      new_header_node
+      new_body in
+  (closure_syntax, new_function_syntax)
+
+let lower_coroutine_functions_and_types
     parents
     current_node
     ((closures, lambda_count) as current_acc) =
@@ -246,19 +253,14 @@ let lower_coroutine_functions
       function_body;
       _;
     } as function_node) when not @@ is_missing function_coroutine ->
-     let (new_header_node, new_body, closure_syntax) =
-       rewrite_method_or_function
-         global_syntax
-         (make_missing ())
-         header_node
-         function_body in
-     let new_function_syntax =
-       CoroutineMethodLowerer.rewrite_function_declaration
-         function_node
-         new_header_node
-         new_body in
-     ((closure_syntax :: closures, lambda_count),
-      Rewriter.Result.Replace new_function_syntax)
+      let (closure_syntax, new_function_syntax) =
+        lower_coroutine_function header_node function_body function_node in
+      ((closure_syntax :: closures, lambda_count),
+        Rewriter.Result.Replace new_function_syntax)
+  | ClosureTypeSpecifier ({ closure_coroutine; _; } as type_node)
+    when not @@ is_missing closure_coroutine ->
+      let new_type_node = rewrite_coroutine_annotation type_node in
+      (current_acc, Rewriter.Result.Replace new_type_node)
   | _ ->
     (current_acc, Rewriter.Result.Keep)
 
@@ -272,10 +274,9 @@ let append_to_root closures root =
 let lower_coroutines syntax_tree =
   let root = from_tree syntax_tree in
   let ((closures, _), root) = Rewriter.parented_aggregating_rewrite_post
-    lower_coroutine_functions root ([], 0) in
+    lower_coroutine_functions_and_types root ([], 0) in
   root
     |> append_to_root closures
-    |> Rewriter.rewrite_post maybe_rewrite_coroutine_annotations
     |> Rewriter.rewrite_post maybe_rewrite_syntax_list
     |> text
     |> SourceText.make

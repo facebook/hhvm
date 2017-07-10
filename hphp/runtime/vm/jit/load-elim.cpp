@@ -595,13 +595,22 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
 
   auto const meta = env.global.ainfo.find(canonicalize(*acls));
   auto const tloc = find_tracked(env, meta);
-  if (!tloc) return FNone{};
+  if (!tloc) {
+    FTRACE(4, "      untracked assert\n");
+    return FNone{};
+  }
 
   tloc->knownType &= inst.typeParam();
-  if (tloc->knownValue != nullptr) {
+  if (tloc->knownValue != nullptr || tloc->knownType.admitsSingleVal()) {
+    if (tloc->knownValue == nullptr) {
+      tloc->knownValue = env.global.unit.cns(tloc->knownType);
+    }
+
+    FTRACE(4, "      reducible assert: {}\n", show(*tloc));
     return FReducible { tloc->knownValue, tloc->knownType, meta->index };
   }
 
+  FTRACE(4, "      non-reducible assert: {}\n", show(*tloc));
   return FNone{};
 }
 
@@ -847,7 +856,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   default: always_assert(false);
   }
 
-  FTRACE(2, "      reducible: {} = {} {}\n",
+  FTRACE(2, "      reduced: {} = {} {}\n",
          opcodeName(oldOp),
          opcodeName(newOp),
          resolved->toString());

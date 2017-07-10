@@ -527,14 +527,30 @@ void visit(Local& env, IRInstruction& inst) {
 
   match<void>(
     effects,
-    [&] (IrrelevantEffects) {},
+    [&] (IrrelevantEffects) {
+      switch (inst.op()) {
+      case AssertLoc:
+        load(env, AFrame { inst.src(0), inst.extra<AssertLoc>()->locId });
+        return;
+      case AssertStk:
+        load(env, AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 });
+        return;
+      default:
+        return;
+      }
+    },
     [&] (UnknownEffects)    { addAllLoad(env); env.mayStore.set(); },
-    [&] (PureLoad l)        {
+    [&] (PureLoad l) {
       if (auto bit = pure_store_bit(env, l.src)) {
         if (env.reStores[*bit]) {
-          FTRACE(4, "Killing self-store: {}\n",
-                 env.global.reStores[*bit]->toString());
-          removeDead(env, *env.global.reStores[*bit], false);
+          auto const st = memory_effects(*env.global.reStores[*bit]);
+          auto const pst = boost::get<PureStore>(&st);
+          if (pst && pst->value == inst.dst()) {
+            FTRACE(4, "Killing self-store: {}\n",
+                   env.global.reStores[*bit]->toString());
+            removeDead(env, *env.global.reStores[*bit], false);
+            env.reStores[*bit] = 0;
+          }
         }
       }
       load(env, l.src);

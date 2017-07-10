@@ -257,6 +257,31 @@ let lower_coroutine_functions_and_types
         lower_coroutine_function header_node function_body function_node in
       ((closure_syntax :: closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
+  | LambdaExpression {
+    lambda_coroutine;
+    _;
+    } when not @@ is_missing lambda_coroutine ->
+     (* TODO: rewrite lambdas *)
+     (current_acc, Rewriter.Result.Keep)
+  | AnonymousFunction {
+    anonymous_coroutine_keyword;
+    _;
+    }  when not @@ is_missing anonymous_coroutine_keyword ->
+     (* TODO: rewrite anonymous functions *)
+     (current_acc, Rewriter.Result.Keep)
+  | MethodishDeclaration {
+      methodish_function_decl_header = {
+          syntax = FunctionDeclarationHeader {
+          function_coroutine;
+          _;
+        };
+        _;
+      };
+      _;
+    } when not @@ is_missing function_coroutine ->
+      (* TODO: deduce class name and parameters from parents *)
+      (* TODO: rewrite methods *)
+      (current_acc, Rewriter.Result.Keep)
   | ClosureTypeSpecifier ({ closure_coroutine; _; } as type_node)
     when not @@ is_missing closure_coroutine ->
       let new_type_node = rewrite_coroutine_annotation type_node in

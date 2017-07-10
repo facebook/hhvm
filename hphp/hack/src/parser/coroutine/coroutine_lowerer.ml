@@ -79,6 +79,20 @@ let maybe_rewrite_coroutine_annotations node =
       )
   | _ -> Rewriter.Result.Keep
 
+let rewrite_method_or_function
+    classish_name
+    classish_type_parameters
+    original_header_node
+    original_body =
+  let new_header_node = rewrite_header_node original_header_node in
+  let new_body, closure_syntax =
+    CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      classish_name
+      classish_type_parameters
+      original_body
+      new_header_node in
+  (new_header_node, new_body, closure_syntax)
+
 (**
  * If the function declaration is for a coroutine, rewrites the declaration
  * header and the function body into a desugared coroutine implementation.
@@ -102,21 +116,20 @@ let maybe_rewrite_classish_body_element
     } as method_node) when not @@ is_missing function_coroutine ->
       (* TODO: We need to rewrite non-coroutine functions if they contain
          coroutine lambdas. *)
-      let header_node = rewrite_header_node header_node in
-      let rewritten_body, closure_syntax =
-        CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      let (new_header_node, new_body, closure_syntax) =
+        rewrite_method_or_function
           classish_name
           classish_type_parameters
-          methodish_function_body
-          header_node in
-      let rewritten_method_syntax =
+          header_node
+          methodish_function_body in
+      let new_method_syntax =
         CoroutineMethodLowerer.rewrite_methodish_declaration
           classish_name
           classish_type_parameters
           method_node
-          header_node
-          rewritten_body in
-      Some (rewritten_method_syntax, closure_syntax)
+          new_header_node
+          new_body in
+      Some (new_method_syntax, closure_syntax)
   | _ ->
       (* Irrelevant input. *)
       None
@@ -187,7 +200,31 @@ let maybe_rewrite_class_or_function node =
             };
           },
           closure_nodes)
-  | FunctionDeclaration _ -> None (* TODO *)
+  | FunctionDeclaration ({
+      function_declaration_header = {
+        syntax = FunctionDeclarationHeader ({
+          function_coroutine;
+          _;
+        } as header_node);
+        _;
+      };
+      function_body;
+      _;
+    } as function_node) when not @@ is_missing function_coroutine ->
+      (* TODO: We need to rewrite non-coroutine functions if they contain
+         coroutine lambdas. *)
+      let (new_header_node, new_body, closure_syntax) =
+        rewrite_method_or_function
+          global_syntax
+          (make_missing ())
+          header_node
+          function_body in
+      let new_function_syntax =
+        CoroutineMethodLowerer.rewrite_function_declaration
+          function_node
+          new_header_node
+          new_body in
+      Some (new_function_syntax, [closure_syntax] )
   | _ ->
       (* Irrelevant input. *)
       None

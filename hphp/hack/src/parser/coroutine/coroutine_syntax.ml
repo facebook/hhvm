@@ -90,6 +90,9 @@ let mixed_syntax =
 let mixed_type =
   make_simple_type_specifier mixed_syntax
 
+let global_syntax =
+  make_name_syntax "Global"
+
 let unit_syntax =
   make_name_syntax "CoroutineUnit"
 

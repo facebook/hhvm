@@ -174,3 +174,25 @@ let rewrite_methodish_declaration
         rewrite_function_decl_header header_node;
       methodish_function_body;
     }
+
+let rewrite_function_declaration
+    ({ function_body; _; } as function_node)
+    header_node
+    rewritten_body =
+  (* TODO:Would it be better to have no class name at all? *)
+  let classish_name = global_syntax in
+  let classish_type_parameters = make_missing () in
+  let make_syntax function_node =
+    make_syntax (FunctionDeclaration function_node) in
+  let function_body =
+    rewrite_coroutine_body
+      classish_name
+      classish_type_parameters
+      function_body
+      header_node
+      rewritten_body in
+  make_syntax
+    { function_node with
+      function_declaration_header = rewrite_function_decl_header header_node;
+      function_body;
+    }

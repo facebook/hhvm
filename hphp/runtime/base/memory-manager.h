@@ -740,18 +740,18 @@ struct MemoryManager {
    * Heap iterator methods.  `fn' takes a HeapObject* argument.
    *
    * initFree(): prepare to iterate by initializing free block headers.
-   * iterate(): Raw iterator loop over the headers of everything in the heap.
+   * iterate(): Raw iterator loop over every HeapObject in the heap.
    *            Skips BigObj because it's just a detail of which sub-heap we
    *            used to allocate something based on its size, and it can prefix
-   *            almost any other header kind.  (Also skips Hole.)  Clients can
+   *            almost any other header kind, and also skips Hole. Clients can
    *            call this directly to avoid unnecessary initFree()s.
-   * forEachHeader(): Like iterate(), but with an eager initFree().
+   * forEachHeapObject(): Like iterate(), but with an eager initFree().
    * forEachObject(): Iterate just the ObjectDatas, including the kinds with
-   *                  prefixes (NativeData and AsyncFuncFrame).
+   *                  prefixes (NativeData, AsyncFuncFrame, and ClosureHdr).
    */
   void initFree();
   template<class Fn> void iterate(Fn fn);
-  template<class Fn> void forEachHeader(Fn fn);
+  template<class Fn> void forEachHeapObject(Fn fn);
   template<class Fn> void forEachObject(Fn fn);
 
   /*

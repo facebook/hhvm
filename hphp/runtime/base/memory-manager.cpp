@@ -34,6 +34,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/ptr-map.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
@@ -134,7 +135,7 @@ MemoryManager::MemoryManager() {
 MemoryManager::~MemoryManager() {
   if (debug) {
     // Check that every allocation in heap has been freed before destruction.
-    forEachHeader([&](HeapObject* h, size_t) {
+    forEachHeapObject([&](HeapObject* h, size_t) {
       assert(h->kind() == HeaderKind::Free);
     });
   }
@@ -525,7 +526,7 @@ void MemoryManager::checkHeap(const char* phase) {
   PtrMap<HeapObject*> free_blocks, apc_arrays, apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
-  forEachHeader([&](HeapObject* h, size_t alloc_size) {
+  forEachHeapObject([&](HeapObject* h, size_t alloc_size) {
     hdrs.push_back(h);
     bytes += alloc_size;
     auto kind = h->kind();
@@ -576,7 +577,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
       case HeaderKind::Slab:
-        assert(false && "forEachHeader skips these kinds");
+        assert(false && "forEachHeapObject skips these kinds");
         break;
     }
   });
@@ -586,7 +587,7 @@ void MemoryManager::checkHeap(const char* phase) {
   size_t num_free_blocks = 0;
   for (auto i = 0; i < kNumSmallSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      assert(free_blocks.isHeader(n));
+      assert(free_blocks.isStart(n));
       ++num_free_blocks;
     }
   }
@@ -596,7 +597,7 @@ void MemoryManager::checkHeap(const char* phase) {
   assert(apc_arrays.size() == m_apc_arrays.size());
   apc_arrays.prepare();
   for (UNUSED auto a : m_apc_arrays) {
-    assert(apc_arrays.isHeader(a));
+    assert(apc_arrays.isStart(a));
   }
 
   // check the apc string list
@@ -606,7 +607,7 @@ void MemoryManager::checkHeap(const char* phase) {
     next = n->next;
     UNUSED auto const s = StringData::node2str(n);
     assert(s->isProxy());
-    assert(apc_strings.isHeader(s));
+    assert(apc_strings.isStart(s));
     ++num_apc_strings;
   }
   assert(num_apc_strings == apc_strings.size());

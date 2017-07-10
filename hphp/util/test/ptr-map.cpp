@@ -16,7 +16,7 @@
 
 #include <folly/portability/GTest.h>
 
-#include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/util/ptr-map.h"
 
 namespace HPHP {
 
@@ -31,11 +31,11 @@ TEST(PTRMAP, InsertAndQuery) {
   ptr.prepare();
 
   EXPECT_EQ(ptr.size(),2);
-  EXPECT_EQ(ptr.isHeader((void*)100), true);  //  the header of [100,200)
-  EXPECT_EQ(ptr.isHeader((void*)150), false); //  inside [100,200), not header
-  EXPECT_EQ(ptr.isHeader((void*)50), false);  //  outside [100,350) range
-  EXPECT_EQ(ptr.isHeader((void*)220), false); //  outside both intervals
-  EXPECT_EQ(ptr.isHeader((void*)500), false); //  outside [100,350) range
+  EXPECT_EQ(ptr.isStart((void*)100), true);  //  the header of [100,200)
+  EXPECT_EQ(ptr.isStart((void*)150), false); //  inside [100,200), not header
+  EXPECT_EQ(ptr.isStart((void*)50), false);  //  outside [100,350) range
+  EXPECT_EQ(ptr.isStart((void*)220), false); //  outside both intervals
+  EXPECT_EQ(ptr.isStart((void*)500), false); //  outside [100,350) range
 
   EXPECT_EQ(ptr.index((const void*)120), 0);  //  inside [100,200)
   EXPECT_EQ(ptr.index((const void*)260), 1);  //  inside [250,350)

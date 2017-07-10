@@ -509,7 +509,7 @@ template<class Fn> void MemoryManager::iterate(Fn fn) {
   });
 }
 
-template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
+template<class Fn> void MemoryManager::forEachHeapObject(Fn fn) {
   initFree();
   iterate(fn);
 }
@@ -517,7 +517,7 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
-  forEachHeader([&](HeapObject* h, size_t) {
+  forEachHeapObject([&](HeapObject* h, size_t) {
     switch (h->kind()) {
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
@@ -561,7 +561,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
       case HeaderKind::Slab:
-        assert(false && "forEachHeader skips these kinds");
+        assert(false && "forEachHeapObject skips these kinds");
         break;
     }
   });
@@ -596,103 +596,5 @@ template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// information about heap objects, indexed by valid object starts.
-template<class T> struct PtrMap {
-  using Region = std::pair<T, std::size_t>;
-
-  void insert(T h, size_t size) {
-    sorted_ &= regions_.empty() || h > regions_.back().first;
-    regions_.emplace_back(h, size);
-  }
-
-  const Region* region(const void* p) const {
-    assert(sorted_);
-    if (uintptr_t(p) - uintptr_t(span_.first) >= span_.second) {
-      return nullptr;
-    }
-    // Find the first region which begins beyond p.
-    auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
-      [](const void* p, const Region& region) {
-        return p < region.first;
-      });
-    // If it == first region, p is before any region, which we already
-    // checked above.
-    assert(it != regions_.begin());
-    --it; // backup to the previous region.
-    // p can only potentially point within this previous region, so check that.
-    return uintptr_t(p) - uintptr_t(it->first) < it->second ? &*it :
-           nullptr;
-  }
-
-  T header(const void* p) const {
-    auto r = region(p);
-    return r ? r->first : nullptr;
-  }
-
-  bool isHeader(const void* p) const {
-    auto h = header(p);
-    return h && h == p;
-  }
-
-  size_t index(const Region* r) const {
-    return r - &regions_[0];
-  }
-
-  // where does this header sit in the regions_ vector?
-  size_t index(T h) const {
-    assert(header(h));
-    return region(h) - &regions_[0];
-  }
-
-  void prepare() {
-    if (!sorted_) {
-      std::sort(regions_.begin(), regions_.end());
-      sorted_ = true;
-    }
-    if (!regions_.empty()) {
-      auto& front = regions_.front();
-      auto& back = regions_.back();
-      span_ = Region{
-        front.first,
-        (const char*)back.first + back.second - (const char*)front.first
-      };
-    }
-    assert(sanityCheck());
-  }
-
-  size_t size() const {
-    return regions_.size();
-  }
-
-  template<class Fn> void iterate(Fn fn) const {
-    for (auto& r : regions_) {
-      fn(r.first, r.second);
-    }
-  }
-
-  Region span() const {
-    return span_;
-  }
-
-private:
-  bool sanityCheck() const {
-    // Verify that all the regions are in increasing and non-overlapping order.
-    DEBUG_ONLY void* last = nullptr;
-    for (const auto& region : regions_) {
-      assert(!last || last <= region.first);
-      last = (void*)(uintptr_t(region.first) + region.second);
-    }
-    return true;
-  }
-
-  Region span_{nullptr, 0};
-  std::vector<Region> regions_;
-  bool sorted_{true};
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
-
 #endif

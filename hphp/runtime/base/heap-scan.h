@@ -93,7 +93,7 @@ inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
   return wh->scan(scanner);
 }
 
-inline void scanHeader(const HeapObject* h, type_scan::Scanner& scanner) {
+inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Proxy:
       return static_cast<const ProxyArray*>(h)->scan(scanner);

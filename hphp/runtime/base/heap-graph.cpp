@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/ptr-map.h"
 
 #include <vector>
 #include <folly/Range.h>
@@ -123,7 +124,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
-  MM().forEachHeader([&](HeapObject* h, size_t alloc_size) {
+  MM().forEachHeapObject([&](HeapObject* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
       blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
     }
@@ -167,8 +168,8 @@ HeapGraph makeHeapGraph(bool include_free) {
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     if (g.nodes[i].is_root) continue;
-    auto h = reinterpret_cast<const HeapObject*>(g.nodes[i].h);
-    scanHeader(h, scanner);
+    auto h = g.nodes[i].h;
+    scanHeapObject(h, scanner);
     auto from = blocks.index(h);
     assert(from == i);
     scanner.finish(

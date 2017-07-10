@@ -22,12 +22,13 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/bloom-filter.h"
+#include "hphp/util/cycles.h"
 #include "hphp/util/process.h"
+#include "hphp/util/ptr-map.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/type-scan.h"
-#include "hphp/util/cycles.h"
-#include "hphp/util/timer.h"
 
 #include <algorithm>
 #include <iterator>
@@ -309,7 +310,7 @@ NEVER_INLINE void Marker::trace() {
   while (!work_.empty()) {
     auto h = work_.back();
     work_.pop_back();
-    scanHeader(h, type_scanner_);
+    scanHeapObject(h, type_scanner_);
     finish_typescan();
   }
 }

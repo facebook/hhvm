@@ -1,5 +1,5 @@
 <?hh // strict
-final class MySQLShimSchemaDataType
+final class VarrayDarrayTypesTest {
   use DarrayTrait<darray<string,string>>;
   use VarrayTrait<varray<string>>;
 }

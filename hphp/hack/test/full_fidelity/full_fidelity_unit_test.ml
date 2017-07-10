@@ -138,6 +138,8 @@ let minimal_tests =
     "test_types_type_const";
     "test_function_call";
     "test_array_expression";
+    "test_varray_darray_expressions";
+    "test_varray_darray_types";
     "test_attribute_spec";
     "test_array_key_value_precedence";
     "test_enum";

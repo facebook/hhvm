@@ -692,14 +692,6 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
       -> pExpr_ expr env
 
-   | VarrayIntrinsicExpression
-      { varray_intrinsic_keyword = kw
-      ; varray_intrinsic_members = members
-      ; _ }
-   | DarrayIntrinsicExpression
-      { darray_intrinsic_keyword = kw
-      ; darray_intrinsic_members = members
-      ; _ }
    | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw
       ; dictionary_intrinsic_members = members
@@ -718,6 +710,16 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       ; _ }
       -> Collection (pos_name kw, couldMap ~f:pAField members env)
 
+    | VarrayIntrinsicExpression { varray_intrinsic_members = members; _ } ->
+      Varray (couldMap ~f:pExpr members env)
+    | DarrayIntrinsicExpression { darray_intrinsic_members = members; _ } ->
+      let pMember node env =
+        match syntax node with
+        | ElementInitializer { element_key; element_value; _ } ->
+          (pExpr element_key env, pExpr element_value env)
+        | _ -> missing_syntax "darray intrinsic expression element" node env
+      in
+      Darray (couldMap ~f:pMember members env)
     | ArrayIntrinsicExpression { array_intrinsic_members = members; _ }
     | ArrayCreationExpression  { array_creation_members  = members; _ }
     ->
@@ -1916,7 +1918,9 @@ let pProgram : program parser = fun node env ->
       ) :: aux env nodel
   | node :: nodel -> pDef node env :: aux env nodel
   in
-  post_process @@ aux env (as_list node)
+  let nodes = as_list node in
+  let nodes = aux env nodes in
+  post_process nodes
 
 let pScript node env =
   match syntax node with

@@ -380,10 +380,10 @@ let infer_return tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
     | _, [] -> ()
     | (tenv, p1, _, ty) :: ts_, (p2, id) :: fs_ ->
       begin match Pos.compare p1 p2 with
-            | 0 -> Printf.printf "%s: %s \n" id (Typing_print.full tenv ty);
-                   print_returns_with_funs ts_ fs_
-            | x when x > 0 -> print_returns_with_funs ts_ fs
-            | _ -> print_returns_with_funs ts fs_
+        | 0 -> Printf.printf "%s : %s \n" id (Typing_print.full tenv ty);
+               print_returns_with_funs ts_ fs_
+        | x when x > 0 -> print_returns_with_funs ts_ fs
+        | _ -> print_returns_with_funs ts fs_
       end
 in
 print_returns_with_funs inferred_types funs_and_methods

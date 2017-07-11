@@ -636,6 +636,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       end result
   | Ffp_autocomplete ->
       let file_text = cat (Relative_path.to_absolute filename) in
+      (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
       let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [0-9]*" in
       let (row, col) = try
         let _ = Str.search_forward args_regex file_text 0 in
@@ -650,8 +651,11 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         FfpAutocompleteService.auto_complete file_text (row, col)
       in begin
         match result with
-        | Some result -> List.iter result ~f:(Printf.printf "%s\n")
-        | None -> Printf.printf "No result found\n"
+        | [] -> Printf.printf "No result found\n"
+        | res -> List.iter res ~f:begin fun r ->
+            let open FfpAutocompleteService in
+            Printf.printf "%s\n" r.name
+          end
       end
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->

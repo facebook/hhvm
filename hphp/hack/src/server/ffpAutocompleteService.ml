@@ -19,6 +19,14 @@ module ACKeyword = FfpAutocompleteKeywords
 module ACLocal = FfpAutocompleteLocalNames
 module SyntaxKind = Full_fidelity_syntax_kind
 
+(* The type returned to the client *)
+(* TODO: Add all the additional autocomplete info to this, not just the autocomplete word *)
+type autocomplete_result = {
+  name : string;
+}
+
+type result = autocomplete_result list
+
 (*
  * TODO: The following types of completions are not yet implemented:
  * - Function Invocations
@@ -26,9 +34,8 @@ module SyntaxKind = Full_fidelity_syntax_kind
  *)
 let autocomplete_word (tree:SyntaxTree.t) offset stub =
   let open MinimalSyntax in
-  let autocomplete_child =
-    List.hd_exn @@ parentage (SyntaxTree.root tree) offset in
-  let result = match syntax autocomplete_child with
+  let autocomplete_child = List.hd_exn @@ parentage (SyntaxTree.root tree) offset in
+  match syntax autocomplete_child with
   (* TODO: Handle function invocation, class name, and other completions here *)
   (* TODO: Add test cases to make sure the right type of completion is taken for a given token *)
   | Token {
@@ -50,10 +57,6 @@ let autocomplete_word (tree:SyntaxTree.t) offset stub =
       MinimalToken.kind = TokenKind.NamespacePrefix; _
     } -> [] (* TODO: Not implemented yet *)
   | _ -> [] (* Unimplemented completion type *)
-  in
-  match result with
-  | [] -> None
-  | x -> Some x
 
 (* Get the token we wish to complete. This is necessary because the keyword autocompletion filters
    results based on what we have typed so far. This will potentially be removed in the future.*)
@@ -63,10 +66,16 @@ let get_autocomplete_stub (syntax_tree:SyntaxTree.t) offset =
   let autocomplete_child = List.hd_exn @@ parentage positioned_tree offset in
   text autocomplete_child
 
-let auto_complete (file:string) (row, col) =
-  let source_text = SourceText.make file in
+(* TODO: Return autocomplete_results from each type of autocomplete directly instead of wrapping
+   them here *)
+let make_result (res:string) : autocomplete_result =
+  { name = res }
+
+let auto_complete (file_content:string) (pos:int*int) : result =
+  let source_text = SourceText.make file_content in
   let syntax_tree = SyntaxTree.make source_text in
 
-  let offset = SourceText.position_to_offset source_text (row, col) in
+  let offset = SourceText.position_to_offset source_text pos in
   let stub = get_autocomplete_stub syntax_tree offset in
-  autocomplete_word syntax_tree offset stub
+  let results = autocomplete_word syntax_tree offset stub in
+  List.map ~f:make_result results

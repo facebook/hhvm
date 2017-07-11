@@ -585,12 +585,12 @@ function get_options($argv) {
  * Return the path to $test relative to __DIR__, or false if __DIR__ does not
  * contain test.
  */
-function canonical_path($test) {
+function canonical_path_from_base($test, $base) {
   $full = realpath($test);
-  if (substr($full, 0, strlen(__DIR__)) === __DIR__) {
-    return substr($full, strlen(__DIR__) + 1);
+  if (substr($full, 0, strlen($base)) === $base) {
+    return substr($full, strlen($base) + 1);
   }
-  $dirstat = stat(__DIR__);
+  $dirstat = stat($base);
   if (!is_array($dirstat)) return false;
   for ($p = dirname($full); $p && $p !== "/"; $p = dirname($p)) {
     $s = stat($p);
@@ -600,6 +600,15 @@ function canonical_path($test) {
     }
   }
   return false;
+}
+
+function canonical_path($test) {
+  $attempt = canonical_path_from_base($test,__DIR__);
+  if ($attempt === false) {
+   return canonical_path_from_base($test, hphp_home());
+  } else {
+   return $attempt;
+  }
 }
 
 /*
@@ -693,6 +702,10 @@ function find_tests($files, array $options = null) {
                 file_exists($test . '.hhconfig');
       }
     );
+  } else if (isset($options['compare-hh-codegen'])) {
+    $tests = explode("\n", shell_exec(
+      "find $files -name '*.php'"
+    ));
   } else {
     $tests = explode("\n", shell_exec(
       "find $files -name '*.php' -o -name '*.php.type-errors' " .
@@ -916,6 +929,8 @@ function hhvm_cmd_impl() {
       // TODO(paulbiss): support these
       $args[] = '-vEval.DisassemblerSourceMapping=0';
       $args[] = '-vEval.DisassemblerPropDocComments=0';
+      $args[] = '-vEval.JitEnableRenameFunction=0';
+      $args[] = '-vDisassemblerDocComments=0';
     }
 
     if (!isset($options['cores'])) {
@@ -2998,7 +3013,7 @@ function main($argv) {
       "There are %d new failing tests, and %d new passing tests.\n",
       count($failed_tests), $new_fails, $new_passes
     );
-    sort($failed_tests);
+    sort($failed_tests); 
     file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if (isset($options['fbmake']) || isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));

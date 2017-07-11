@@ -386,6 +386,7 @@ void StringData::releaseProxy() {
   MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }
 
+AARCH64_WALKABLE_FRAME
 void StringData::release() noexcept {
   assert(isRefCounted());
   assert(checkSane());

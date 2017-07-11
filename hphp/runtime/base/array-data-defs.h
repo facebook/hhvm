@@ -212,6 +212,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+AARCH64_WALKABLE_FRAME
 inline void ArrayData::release() noexcept {
   assert(hasExactlyOneRef());
   return g_array_funcs.release[kind()](this);

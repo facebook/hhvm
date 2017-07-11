@@ -515,6 +515,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   return init.create();
 }
 
+AARCH64_WALKABLE_FRAME
 void PackedArray::Release(ArrayData* ad) {
   assert(checkInvariants(ad));
   assert(ad->isRefCounted());

@@ -101,6 +101,19 @@
 # define DEBUG_ONLY UNUSED
 #endif
 
+
+/*
+ * AARCH64 flag which creates a walkable stack frame for
+ * getFrameRegs() when a FixupEntry isIndirect()
+ */
+#ifdef __AARCH64EL__
+#define AARCH64_WALKABLE_FRAME \
+  __attribute__ ((optimize("no-optimize-sibling-calls")))
+#else
+#define AARCH64_WALKABLE_FRAME
+#endif
+
+
 /*
  * We need to keep some unreferenced functions from being removed by
  * the linker. There is no compile time mechanism for doing this, but

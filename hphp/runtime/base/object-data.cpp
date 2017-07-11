@@ -192,6 +192,7 @@ static void tail_call_remove_live_bc_obj(ObjectData* obj) {
   return obj->releaseNoObjDestructCheck();
 }
 
+AARCH64_WALKABLE_FRAME
 void ObjectData::release() noexcept {
   assert(kindIsValid());
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {

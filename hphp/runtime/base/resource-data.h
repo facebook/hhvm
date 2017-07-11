@@ -163,6 +163,7 @@ struct ResourceData : type_scan::MarkCountable<ResourceData> {
                           req::ptr<T>>::type req::make(Args&&... args);
 };
 
+AARCH64_WALKABLE_FRAME
 inline void ResourceHdr::release() noexcept {
   assert(kindIsValid());
   delete data();

@@ -251,6 +251,7 @@ ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
 
 //////////////////////////////////////////////////////////////////////
 
+AARCH64_WALKABLE_FRAME
 void SetArray::Release(ArrayData* in) {
   assert(in->isRefCounted());
   assert(in->hasExactlyOneRef());

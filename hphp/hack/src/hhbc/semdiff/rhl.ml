@@ -985,6 +985,18 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
                 | Some new_asn2 -> continuation new_asn2)
               | _,_ -> failwith "vget cget can't happen") in
 
+        let vget_retv_pattern =
+          vget_unnamed_pattern $$ uRetV $> (fun (n,_) -> n) in
+        let two_vget_retv_pattern = vget_retv_pattern $*$ vget_retv_pattern in
+        let two_vget_retv_pattern_action =
+          two_vget_retv_pattern $>>
+         (fun (n,n') (_,_) ->
+           match reads asn (Local.Unnamed n) (Local.Unnamed n') with
+            | None -> Some(pc,pc',asn,assumed,todo)
+            | Some _new_asn ->
+               donext (add_assumption (pc,pc') asn assumed) todo
+         ) in
+
         (* last, failure, case for use in bigmatch *)
         let failure_pattern_action =
          parse_any $>> (fun _ _ -> Some (pc, pc', asn, assumed, todo)) in
@@ -999,6 +1011,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
           two_cugetl_list_createcl_action;
           two_vget_base_action;
           two_vget_cget_bind_action;
+          two_vget_retv_pattern_action;
           failure_pattern_action;
          ] in
         bigmatch_action ((prog_array, ip_of_pc pc),(prog_array', ip_of_pc pc'))

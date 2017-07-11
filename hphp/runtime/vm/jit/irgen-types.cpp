@@ -515,11 +515,12 @@ void emitVerifyParamType(IRGS& env, int32_t paramId) {
 }
 
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
-  auto const tAutoload = popC(env);
-  auto const tCls = popC(env);
+  auto const tAutoload = topC(env);
+  auto const tCls = topC(env);
 
-  assertx(tCls->isA(TStr)); // result of CastString
-  assertx(tAutoload->isA(TBool)); // result of CastBool
+  if (!tCls->isA(TStr) || !tAutoload->isA(TBool)){ // result of Cast
+    PUNT(OODeclExists-BadTypes);
+  }
 
   ClassKind kind;
   switch (subop) {
@@ -535,6 +536,7 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
     tCls,
     tAutoload
   );
+  discard(env, 2);
   push(env, val);
   decRef(env, tCls);
 }

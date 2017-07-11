@@ -89,9 +89,9 @@ class Disassembler: public DecoderVisitor {
 
   bool IsMovzMovnImm(unsigned reg_size, uint64_t value);
 
-  int64_t code_address_offset() const { return code_address_offset_; }
+  int64_t CodeAddressOffset() const { return code_address_offset_; }
 
-  void set_code_address_offset(int64_t code_address_offset) {
+  void SetCodeAddressOffset(int64_t code_address_offset) {
     code_address_offset_ = code_address_offset;
   }
 

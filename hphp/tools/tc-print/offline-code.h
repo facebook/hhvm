@@ -117,7 +117,6 @@ private:
   void closeFiles();
   void xedInit();
   void loadSymbolsMap();
-  void loadSymbolsMapNm();
 
   bool tcRegionContains(TCRegion tcr, TCA addr) const;
 

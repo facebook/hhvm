@@ -1288,11 +1288,11 @@ void Disassembler::ProcessOutput(Instruction* /*instr*/) {
 
 void Disassembler::MapCodeAddress(int64_t base_address,
                                   const Instruction *instr_address) {
-  set_code_address_offset(base_address -
+  SetCodeAddressOffset(base_address -
                           reinterpret_cast<intptr_t>(instr_address));
 }
 int64_t Disassembler::CodeRelativeAddress(const void *addr) {
-  return reinterpret_cast<intptr_t>(addr) + code_address_offset();
+  return reinterpret_cast<intptr_t>(addr) + CodeAddressOffset();
 }
 
 void Disassembler::AppendCodeRelativeAddressToOutput(const Instruction *instr,

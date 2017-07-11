@@ -135,6 +135,7 @@ void usage() {
          "    -n <level>      : level of verbosity for annotations. Use 0 for "
          "no annotations, 1 - for inline, 2 - to print all annotations "
          "including from a file (default: 2).\n"
+         "    -o              : print host opcodes\n"
          "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
          "when printing the top helpers (implies -i). The lower the percentage,"
          " the more helpers that will show up.\n"

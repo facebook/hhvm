@@ -400,6 +400,29 @@ DwarfState::getAttributeValueExprLoc(Dwarf_Attribute attr) {
   };
 }
 
+std::vector<Dwarf_Ranges> DwarfState::getRanges(Dwarf_Off offset) {
+  Dwarf_Error error = nullptr;
+  SCOPE_EXIT {
+    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
+  };
+  Dwarf_Ranges *ranges;
+  Dwarf_Signed cnt;
+  auto result = dwarf_get_ranges(dwarf, offset, &ranges, &cnt, nullptr, &error);
+  if (result != DW_DLV_OK) {
+    throw DwarfStateException{
+      folly::sformat(
+        "dwarf_get_ranges failed for offset({}) with error: {}",
+        offset,
+        dwarf_errmsg(error)
+      )
+    };
+  }
+  SCOPE_EXIT {
+    dwarf_ranges_dealloc(dwarf, ranges, cnt);
+  };
+  return std::vector<Dwarf_Ranges> {ranges, ranges + cnt};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

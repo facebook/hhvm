@@ -74,6 +74,7 @@ struct DwarfState {
   Dwarf_Off getAttributeValueRef(Dwarf_Attribute attr);
   Dwarf_Sig8 getAttributeValueSig8(Dwarf_Attribute attr);
   std::vector<Dwarf_Loc> getAttributeValueExprLoc(Dwarf_Attribute attr);
+  std::vector<Dwarf_Ranges> getRanges(Dwarf_Off offset);
 
   template <typename F> void forEachChild(Dwarf_Die die, F&& f);
   template <typename F> void forEachAttribute(Dwarf_Die die, F&& f);

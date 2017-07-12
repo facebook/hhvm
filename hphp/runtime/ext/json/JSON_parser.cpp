@@ -647,8 +647,16 @@ struct json_parser {
       size_t bufSize = length <= RuntimeOption::EvalSimpleJsonMaxLength ?
         SimpleParser::BufferBytesForLength(length) :
         sb_cap * 2;
-      if (tl_buffer.raw) delete[] tl_buffer.raw;
-      tl_buffer.raw = new char[bufSize];
+      if (tl_buffer.raw) {
+        free(tl_buffer.raw);
+        tl_buffer.raw = nullptr;
+      }
+      if (!MM().preAllocOOM(bufSize)) {
+        tl_buffer.raw = (char*)malloc(bufSize);
+        if (!tl_buffer.raw) MM().forceOOM();
+      }
+      check_non_safepoint_surprise();
+      always_assert(tl_buffer.raw);
       sb_buf.setBuf(tl_buffer.raw, sb_cap);
       sb_key.setBuf(tl_buffer.raw + sb_cap, sb_cap);
     } else {
@@ -658,7 +666,7 @@ struct json_parser {
   }
   void flushSb() {
     if (tl_buffer.raw) {
-      delete[] tl_buffer.raw;
+      free(tl_buffer.raw);
       tl_buffer.raw = nullptr;
     }
     sb_cap = 0;

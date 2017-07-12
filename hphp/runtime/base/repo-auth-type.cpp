@@ -300,7 +300,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::Unc:
     return !isRefcountedType(tv.m_type) ||
            (tv.m_type == KindOfString && tv.m_data.pstr->isStatic()) ||
-           (tv.m_type == KindOfArray && tv.m_data.parr->isStatic());
+           (isArrayLikeType(tv.m_type) && tv.m_data.parr->isStatic());
 
   case T::OptArrKey:
     if (initNull) return true;

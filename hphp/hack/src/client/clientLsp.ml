@@ -1468,6 +1468,7 @@ let handle_event
 
 type env = {
   from: string;
+  use_ffp_autocomplete: bool;
 }
 
 (* main: this is the main loop for processing incoming Lsp client requests,

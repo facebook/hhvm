@@ -582,12 +582,16 @@ let parse_lsp_args () =
     [experimental] runs a persistent language service\n"
     Sys.argv.(0) in
   let from = ref "" in
+  let use_ffp_autocomplete = ref false in
   let options = [
     Common_argspecs.from from;
+    "--ffp-autocomplete",
+    Arg.Set use_ffp_autocomplete,
+    " [experimental] (mode) use the full-fidelity parser based autocomplete ";
   ] in
   let args = parse_without_command options usage "lsp" in
   match args with
-  | [] -> CLsp { ClientLsp.from = !from }
+  | [] -> CLsp { ClientLsp.from = !from; ClientLsp.use_ffp_autocomplete = !use_ffp_autocomplete }
   | _ -> Printf.printf "%s\n" usage; exit 2
 
 let parse_debug_args () =

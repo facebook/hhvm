@@ -262,6 +262,17 @@ let convert_id (env:env) p (pid, str as id) =
 
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
+  | Varray es ->
+    let st, es = List.map_env st es (convert_expr env) in
+    st, (p, Varray es)
+  | Darray es ->
+    let convert_pair st (e1, e2) = begin
+      let st, e1 = convert_expr env st e1 in
+      let st, e2 = convert_expr env st e2 in
+      st, (e1, e2)
+    end in
+    let st, es =  List.map_env st es convert_pair in
+    st, (p, Darray es)
   | Array afl ->
     let st, afl = List.map_env st afl (convert_afield env) in
     st, (p, Array afl)

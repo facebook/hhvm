@@ -5,3 +5,4 @@
 *.reparse_out
 *.type_check_out
 *.hhvm_out
+*.round_trip.hhas

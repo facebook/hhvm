@@ -59,6 +59,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
 
+#include "hphp/parser/parser.h"
+
 namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc_index);
@@ -2006,6 +2008,11 @@ Index::Index(borrowed_ptr<php::Program> program)
       // mark_persistent pass; make sure everything starts off with
       // the attributes clear.
       attrSetter(c->attrs, false, AttrUnique | AttrPersistent);
+
+      // Manually set anonymous classes to be unique to maintain invariance.
+      if (ParserBase::IsAnonymousClassName(c->name->slice())) {
+        attrSetter(c->attrs, true, AttrUnique);
+      }
       preresolve(*m_data, env, c->name);
     }
   }

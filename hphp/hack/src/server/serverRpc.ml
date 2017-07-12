@@ -147,3 +147,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       FileOutline.outline env.popt
     | IDE_IDLE ->
       {env with ide_idle = true;}, ()
+    | INFER_RETURN_TYPE id_info ->
+      match id_info with
+      | ServerInferReturnType.Function fun_name ->
+        env, ServerInferReturnType.get_fun_return_ty env.popt fun_name
+      | ServerInferReturnType.Method (class_name, meth_name) ->
+        env, ServerInferReturnType.get_meth_return_ty env.popt class_name meth_name

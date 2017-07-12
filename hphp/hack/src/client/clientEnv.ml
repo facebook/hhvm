@@ -48,6 +48,7 @@ type client_mode =
 | MODE_AI_QUERY of string
 | MODE_FULL_FIDELITY_PARSE of string
 | MODE_FULL_FIDELITY_SCHEMA
+| MODE_INFER_RETURN_TYPE of string
 
 type client_check_env = {
   mode: client_mode;
@@ -101,3 +102,4 @@ let mode_to_string = function
   | MODE_AI_QUERY _ -> "MODE_AI_QUERY"
   | MODE_FULL_FIDELITY_PARSE _ -> "MODE_FULL_FIDELITY_PARSE"
   | MODE_FULL_FIDELITY_SCHEMA -> "MODE_FULL_FIDELITY_SCHEMA"
+  | MODE_INFER_RETURN_TYPE _ -> "MODE_INFER_RETURN_TYPE"

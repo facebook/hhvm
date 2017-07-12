@@ -282,6 +282,9 @@ let parse_check_args cmd =
     "--logname",
       Arg.Set logname,
       " (mode) show log filename and exit\n";
+    "--infer-return-type",
+      Arg.String (fun s -> set_mode (MODE_INFER_RETURN_TYPE s) ()),
+       " (mode) infers return type of given function or method\n";
     (* Create a checkpoint which can be used to retrieve changed files later *)
     "--create-checkpoint",
       Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),

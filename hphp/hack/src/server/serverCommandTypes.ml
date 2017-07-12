@@ -73,6 +73,8 @@ type _ t =
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
   | OUTLINE : string -> FileOutline.outline t
   | IDE_IDLE : unit t
+  | INFER_RETURN_TYPE : ServerInferReturnType.t ->
+      ServerInferReturnType.result t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

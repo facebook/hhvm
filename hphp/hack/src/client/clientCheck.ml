@@ -16,6 +16,17 @@ open ClientRefactor
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes
 
+let parse_function_or_method_id ~func_action ~meth_action name =
+  let pieces = Str.split (Str.regexp "::") name in
+  try
+    match pieces with
+    | class_name :: method_name :: _ -> meth_action class_name method_name
+    | fun_name :: _ -> func_action fun_name
+    | _ -> raise Exit
+  with _ ->
+    Printf.eprintf "Invalid input\n";
+    raise Exit_status.(Exit_with Input_error)
+
 let get_list_files conn: string list =
   let ic, oc = conn in
   Cmd.stream_request oc ServerCommandTypes.LIST_FILES;
@@ -137,18 +148,13 @@ let main args =
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
     | MODE_FIND_REFS name ->
-      let pieces = Str.split (Str.regexp "::") name in
       let action =
-        try
-          match pieces with
-          | class_name :: method_name :: _ ->
-              FindRefsService.Member
-                (class_name, FindRefsService.Method method_name)
-          | method_name :: _ -> FindRefsService.Function method_name
-          | _ -> raise Exit
-        with _ ->
-          Printf.eprintf "Invalid input\n";
-          raise Exit_status.(Exit_with Input_error)
+        parse_function_or_method_id
+          ~meth_action:(fun class_name method_name ->
+            FindRefsService.Member
+              (class_name, FindRefsService.Method method_name))
+          ~func_action:(fun fun_name -> FindRefsService.Function fun_name)
+          name
       in
       let results = rpc args @@ Rpc.FIND_REFS action in
       ClientFindRefs.go results args.output_json;
@@ -353,18 +359,13 @@ let main args =
       ClientFormat.go result args.output_json;
       Exit_status.No_error
     | MODE_TRACE_AI name ->
-      let pieces = Str.split (Str.regexp "::") name in
       let action =
-        try
-          match pieces with
-          | class_name :: method_name :: _ ->
-              Ai.TraceService.Member (class_name,
-                  Ai.TraceService.Method method_name)
-          | method_name :: _ -> Ai.TraceService.Function method_name
-          | _ -> raise Exit
-        with _ ->
-          Printf.eprintf "Invalid input\n";
-          raise Exit_status.(Exit_with Input_error)
+        parse_function_or_method_id
+          ~meth_action:(fun class_name method_name ->
+            Ai.TraceService.Member
+              (class_name, Ai.TraceService.Method method_name))
+          ~func_action:(fun fun_name -> Ai.TraceService.Function fun_name)
+          name
       in
       let results = rpc args @@ Rpc.TRACE_AI action in
       ClientTraceAi.go results args.output_json;
@@ -391,6 +392,25 @@ let main args =
       let schema = Full_fidelity_schema.schema_as_json() in
       print_string schema;
       Exit_status.No_error
+    | MODE_INFER_RETURN_TYPE name ->
+      let action =
+        parse_function_or_method_id
+          ~func_action:(fun fun_name -> ServerInferReturnType.Function fun_name)
+          ~meth_action:(fun class_name meth_name ->
+            ServerInferReturnType.Method (class_name, meth_name))
+          name
+      in
+      let result = rpc args @@ Rpc.INFER_RETURN_TYPE action in
+      match result with
+      | Result.Error error_str ->
+        Printf.eprintf "%s\n" error_str;
+        raise Exit_status.(Exit_with Input_error)
+      | Result.Ok ty ->
+        if args.output_json then
+          print_endline Hh_json.(json_to_string (JSON_String ty))
+        else
+          print_endline ty;
+        Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

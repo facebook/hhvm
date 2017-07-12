@@ -166,6 +166,9 @@ let emit_body
     rewrite_static_instrseq svar_map
                     (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
   in
+  let stmt_instrs =
+    Continue_break_rewriter.rewrite_special_flow_returns stmt_instrs
+  in
   let first_instruction_is_label =
     match Instruction_sequence.first stmt_instrs with
     | Some (ILabel _) -> true

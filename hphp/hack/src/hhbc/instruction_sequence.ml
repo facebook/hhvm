@@ -62,6 +62,8 @@ let instr_jmpns label = instr (IContFlow (JmpNS label))
 let instr_label label = instr (ILabel label)
 let instr_continue level = instr (ISpecialFlow (Continue (level, level)))
 let instr_break level = instr (ISpecialFlow (Break (level, level, [])))
+let instr_iter_break label itrs =
+  instr (IIterator (IterBreak (label, itrs)))
 let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)

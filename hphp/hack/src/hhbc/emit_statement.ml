@@ -514,10 +514,13 @@ and emit_try_finally_ env try_block finally_block =
   *)
   let try_body = emit_stmt env try_block in
   let temp_local = Local.get_unnamed_local () in
+  let ret_local = Local.get_unnamed_local () in
   let finally_start = Label.next_regular () in
-  let cont_and_break = CBR.get_continues_and_breaks try_body in
+  let special_flow_instrs, has_return =
+    CBR.collect_special_flow_instructions try_body
+  in
   let try_body = CBR.rewrite_in_try_finally
-    try_body cont_and_break temp_local finally_start in
+    try_body special_flow_instrs temp_local ret_local finally_start in
 
   (* (2) Finally body
 
@@ -545,7 +548,7 @@ and emit_try_finally_ env try_block finally_block =
   (* (3) Finally epilogue *)
 
   let finally_epilogue =
-    CBR.emit_finally_epilogue cont_and_break temp_local finally_end in
+    CBR.emit_finally_epilogue special_flow_instrs temp_local ret_local finally_end in
 
   (* (4) Fault body
 
@@ -561,7 +564,13 @@ and emit_try_finally_ env try_block finally_block =
   *)
 
   let cleanup_local =
-    if cont_and_break = [] then empty else instr_unsetl temp_local in
+    if special_flow_instrs = [] then empty
+    else
+      gather [
+        instr_unsetl temp_local;
+        if has_return then instr_unsetl ret_local else empty;
+      ]
+  in
   let fault_body = gather [
       cleanup_local;
       finally_body_for_fault;

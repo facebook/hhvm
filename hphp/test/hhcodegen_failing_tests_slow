@@ -134,7 +134,6 @@ slow/ext_xdebug/time_index.php
 slow/ext_xdebug/xdebug/xdebug_call.php
 slow/ext_xdebug/xdebug_var_dump_limitations.php
 slow/ext_yaml/yaml_emit_008.php
-slow/finally/async.php
 slow/finally/finally_break_003.php
 slow/finally/finally_break_004.php
 slow/finally/finally_break_005.php
@@ -148,7 +147,6 @@ slow/finally/finally_pseudomain_001.php
 slow/finally/finally_pseudomain_002.php
 slow/finally/finally_yield_001.php
 slow/finally/goto-bare.php
-slow/finally/kill_from_throw.php
 slow/finally/new_try_catch_002.php
 slow/finally/new_try_catch_004.php
 slow/finally/new_try_catch_005.php
@@ -159,8 +157,6 @@ slow/finally/new_try_catch_011.php
 slow/finally/new_try_catch_012.php
 slow/finally/new_try_catch_013.php
 slow/finally/new_try_catch_014.php
-slow/finally/new_try_catch_015.php
-slow/finally/return_through.php
 slow/finally/try_finally_004.php
 slow/finally/try_finally_005.php
 slow/finally/try_finally_007.php
@@ -405,7 +401,6 @@ slow/parser/xhp-ambiguity.php
 slow/perfect_virtual/80.php
 slow/php7_backported/engine-exceptions/throwable_namespace_002.php
 slow/php7_backported/generators/basic_yield_from_proxying.php
-slow/php7_backported/generators/get_return_and_finally.php
 slow/php7_backported/generators/get_return_errors.php
 slow/php7_backported/generators/recursive_yield_from.php
 slow/php7_backported/generators/yield_from_array.php

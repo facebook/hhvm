@@ -8,7 +8,7 @@
  *
  *)
 
-module ContBreak = struct
+module SpecialFlowInstr = struct
   open Hhbc_ast
   type t = instruct_special_flow
 
@@ -17,15 +17,20 @@ module ContBreak = struct
 
   let compare x y =
     match (x, y) with
+    (* permit only one ret* in the list *)
+    (* RetC > RetV > Continue > Break *)
+    | SF_RetC _, SF_RetC _
+    | SF_RetV _, SF_RetV _ -> 0
+    | SF_RetC _, _ -> 1
+    | _, SF_RetC _ -> -1
+    | SF_RetV _, _ -> 1
+    | _, SF_RetV _ -> -1
     | (Continue _, Break _) -> 1
     | (Break _, Continue _) -> -1
-    | (Continue (l1, _), Continue (l2, _)) when (l1 <> l2) ->
-      compare_ints l1 l2
-    | (Break (l1, _, _), Break (l2, _, _)) when (l1 <> l2) ->
-      compare_ints l1 l2
-    | (Continue (_, o1), Continue (_, o2))
-    | (Break (_, o1, _), Break (_, o2, _)) ->
-      compare_ints o1 o2
+    | (Continue (l1, o1), Continue (l2, o2))
+    | (Break (l1, o1, _), Break (l2, o2, _)) ->
+      if l1 <> l2 then compare_ints l1 l2
+      else compare_ints o1 o2
 end
 
-include Unique_list.WithValue (ContBreak)
+include Unique_list.WithValue (SpecialFlowInstr)

@@ -265,14 +265,15 @@ template <typename ArrayType, typename ElmType> ALWAYS_INLINE
 typename HashTable<ArrayType, ElmType>::Inserter
 HashTable<ArrayType, ElmType>::findForNewInsert(int32_t* table, size_t mask,
                                                 hash_t h0) const {
-  for (uint32_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
+  for (uint64_t i = 1, probe = (uint32_t)h0 & mask;; ++i) {
+    auto ei = &table[probe];
     if (!validPos(*ei)) {
       return Inserter(ei);
     }
     probe += i;
+    probe &= mask;
     assertx(i <= mask);
-    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
+    assertx(probe == ((static_cast<uint64_t>(h0) + (i + i * i) / 2) & mask));
   }
 }
 
@@ -281,9 +282,9 @@ typename HashTable<ArrayType, ElmType>::Inserter
 HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
                                                     size_t mask,
                                                     hash_t h0) const {
-  uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
-  for (uint32_t i = 1, probe = h0;; ++i) {
-    auto ei = &table[probe & mask];
+  uint64_t balanceLimit = RuntimeOption::MaxArrayChain;
+  for (uint64_t i = 1, probe = (uint32_t)h0 & mask;; ++i) {
+    auto ei = &table[probe];
     if (!validPos(*ei)) {
       return LIKELY(i <= balanceLimit)
              ? Inserter(ei)
@@ -298,8 +299,9 @@ HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
               );
     }
     probe += i;
+    probe &= mask;
     assertx(i <= mask);
-    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
+    assertx(probe == ((static_cast<uint64_t>(h0) + (i + i * i) / 2) & mask));
   }
 }
 
@@ -331,12 +333,12 @@ typename std::conditional<
     static_cast<int>(FindType::Remove) == 3,
     "Update the tuple accessing code below."
   );
-  uint32_t mask = this->mask();
+  uint64_t mask = this->mask();
   auto elms = data();
   auto hash = hashTab();
 
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto const ei = &hash[probeIndex & mask];
+  for (uint64_t probe = (uint32_t)h0 & mask, i = 1;; ++i) {
+    auto const ei = &hash[probe];
     int32_t pos = *ei;
 
     if (validPos(pos)) {
@@ -360,9 +362,10 @@ typename std::conditional<
       );
     }
 
-    probeIndex += i;
+    probe += i;
+    probe &= mask;
     assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i * (i + 1)) / 2);
+    assertx(probe == ((static_cast<uint64_t>(h0) + (i * (i + 1)) / 2) & mask));
   }
 }
 

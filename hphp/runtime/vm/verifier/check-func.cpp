@@ -1069,6 +1069,39 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
   switch (op) {
+    case Op::DefCls:
+    case Op::DefClsNop:
+    case Op::CreateCl: {
+      auto id = getImm(pc, 0).u_IVA;
+      if (op == Op::CreateCl) id = getImm(pc, 1).u_IVA;
+      if (id >= unit()->preclasses().size()) {
+        ferror("{} references nonexistent class ({})\n", opcodeToName(op), id);
+        return false;
+      }
+      break;
+    }
+    case Op::DefFunc: {
+      auto id = getImm(pc, 0).u_IVA;
+      if (id >= unit()->funcs().size()) {
+        ferror("{} references nonexistent function ({})\n",
+                opcodeToName(op), id);
+        return false;
+      }
+      if (id == 0) {
+        ferror("Cannot DefFunc main\n");
+        return false;
+      }
+      break;
+    }
+    case Op::DefTypeAlias: {
+      auto id = getImm(pc, 0).u_IVA;
+      if (id >= unit()->typeAliases().size()) {
+        ferror("{} references nonexistent type alias ({})\n",
+                opcodeToName(op), id);
+        return false;
+      }
+      break;
+    }
     case Op::GetMemoKeyL:
     case Op::MemoGet:
     case Op::MemoSet:

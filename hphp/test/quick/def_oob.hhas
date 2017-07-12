@@ -1,0 +1,43 @@
+#Checks that arguments to DefCls/DefFunc/DefTypeAlias exist
+
+.main {
+  DefCls 0
+  DefClsNop 1
+  CreateCl 0 2
+  DefCls 3
+  DefClsNop 4
+  CreateCl 0 5
+  DefFunc 0
+  DefFunc 1
+  DefFunc 2
+  DefTypeAlias 0
+  DefTypeAlias 1
+  PopC
+  PopC
+  Int 1
+  RetC
+}
+
+.class A {
+  .method [public] __construct() {
+    Int 1
+    RetC
+  }
+}
+.class B {
+  .method [public] __construct() {
+    Int 1
+    RetC
+  }
+}
+.class C extends Closure {
+  .method [public] __invoke() {
+    Int 1
+    RetC
+  }
+}
+.function foo() {
+  Int 1
+  RetC
+}
+.alias al = <"HH\\int">;

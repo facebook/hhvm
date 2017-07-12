@@ -81,5 +81,5 @@ and genv = {
  * the environment + the fun parameters + the captured identifiers
 *)
 and anon = env -> locl fun_params -> env * locl ty
-and tfun = env -> env
+and tfun = env -> env * bool
 end

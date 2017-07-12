@@ -46,7 +46,7 @@ val suggest_static_member :
 val get_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
 val get_construct : env -> class_type -> class_elt option * bool
-val get_todo : env -> tfun list
+val check_todo : env -> env
 val get_return : env -> locl ty
 val set_return : env -> locl ty -> env
 val with_return : env -> (env -> env * 'a) -> env * 'a

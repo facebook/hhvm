@@ -410,8 +410,13 @@ let get_construct env class_ =
   Option.iter (fst class_.tc_construct) (fun ce -> add_dep ce.ce_origin);
   class_.tc_construct
 
-let get_todo env =
-  env.todo
+let check_todo env =
+  let env, remaining =
+    List.fold_left env.todo ~f:(fun (env, remaining) f ->
+      let env, remove = f env in
+      if remove then env, remaining else env, f::remaining)
+      ~init:(env, []) in
+  { env with todo = List.rev remaining }
 
 let get_return env =
   env.genv.return
@@ -469,8 +474,8 @@ let set_fn_kind env fn_type =
   let tpenv_now = env.lenv.tpenv in
   let f' env =
     let old_tpenv = env.lenv.tpenv in
-    let env = f (env_with_tpenv env tpenv_now) in
-    env_with_tpenv env old_tpenv in
+    let env, remove = f (env_with_tpenv env tpenv_now) in
+    env_with_tpenv env old_tpenv, remove in
   { env with todo = f' :: env.todo }
 
 let add_anonymous env x =

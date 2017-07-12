@@ -392,7 +392,7 @@ and fun_def tcopt f =
       let env, tparams = List.map_env env (List.zip_exn param_tys f_params)
         bind_param in
       let env, tb = fun_ env hret (fst f.f_name) nb f.f_fun_kind in
-      let env = fold_fun_list env env.Env.todo in
+      let env = Env.check_todo env in
       begin match f.f_ret with
         | None when Env.is_strict env ->
             List.iter2_exn f_params param_tys (check_param env);
@@ -3756,7 +3756,7 @@ and call pos env fty el uel =
    * have different type depending on the branch that we are in.
    * When this is the case, a call could violate one of the constraints
    * in a branch. *)
-  let env = fold_fun_list env env.Env.todo in
+  let env = Env.check_todo env in
   env, tel, tuel, ty
 
 (* Enforces that e is unpackable. If e is a tuple, appends its unpacked types
@@ -4938,7 +4938,7 @@ and method_def env m =
   let env, tb =
     fun_ ~abstract:m.m_abstract env ret (fst m.m_name) nb m.m_fun_kind in
   let env =
-    List.fold_left (Env.get_todo env) ~f:(fun env f -> f env) ~init:env in
+    Env.check_todo env in
   let m_ret =
     match m.m_ret with
     | None when

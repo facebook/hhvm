@@ -27,7 +27,9 @@ final class Box<T as A> implements ISettable<T> {
 }
 
 function MakeIt(): ISettable<B> {
-  $x = new Box();
+  // If we write new Box() then Hack
+  // incorrectly accepts this: it doesn't check the on T
+  $x = new Box<B>();
   return $x;
 }
 

@@ -45,7 +45,7 @@ let add_check_constraint_todo (env_now:Env.env) reason generic ck cstr_ty ty =
       (fun l ->
        Reason.explain_generic_constraint env.Env.pos reason generic l;
        env
-      )
+      ), true
   end
 
 let add_check_where_constraint_todo (env_now:Env.env) pos ck cstr_ty ty =
@@ -56,5 +56,5 @@ let add_check_where_constraint_todo (env_now:Env.env) pos ck cstr_ty ty =
       (fun l ->
        Errors.explain_where_constraint env.Env.pos pos l;
        env
-      )
+      ), true
   end

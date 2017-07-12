@@ -35,7 +35,9 @@ class BBB {
 
 class DDD<T as BBB> {
   public function ddd(): CONTRA<T> {
-    $c = new CCC(
+    // If we write new CCC(...) then
+    // Hack incorrectly accepts this
+    $c = new CCC<T>(
       function(AAA $arg) {
         $arg->foo();
       },

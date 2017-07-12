@@ -86,7 +86,7 @@ let builtins =
   "  /* HH_FIXME[3007]: This is intentional; not a constructor */"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
   "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): Map<Tk, Tu>;"^
-  "  public function contains(Tk $k): bool;"^
+  "  public function contains<Tu super Tk>(Tu $k): bool;"^
   "}\n"^
   "final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ImmMap<Tk, Tu>;"^

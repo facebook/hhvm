@@ -57,7 +57,11 @@ let iterations: int Pos.Map.t ref = ref Pos.Map.empty
 
 (* Log all changes to subst *)
 let log_subst_diff oldSubst newSubst =
-  indentEnv "subst(changes)" (fun () ->
+  indentEnv (Printf.sprintf
+    "subst(changes; old size = %d; new size = %d; size change = %d)"
+    (IMap.cardinal oldSubst) (IMap.cardinal newSubst)
+    (IMap.cardinal newSubst - IMap.cardinal oldSubst))
+    (fun () ->
   begin
     IMap.iter (fun n n' ->
       match IMap.get n oldSubst with
@@ -82,7 +86,11 @@ let log_subst_diff oldSubst newSubst =
 
 (* Log all changes to tenv *)
 let log_tenv_diff oldEnv newEnv =
-  indentEnv "tenv(changes)" (fun () ->
+  indentEnv (Printf.sprintf
+    "tenv(changes; old size = %d; new size = %d; size change = %d)"
+    (IMap.cardinal oldEnv.Env.tenv) (IMap.cardinal newEnv.Env.tenv)
+    (IMap.cardinal newEnv.Env.tenv - IMap.cardinal oldEnv.Env.tenv))
+    (fun () ->
   begin
     IMap.iter (fun n t ->
       match IMap.get n oldEnv.Env.tenv with

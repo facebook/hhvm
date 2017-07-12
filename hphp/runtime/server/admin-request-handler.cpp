@@ -1018,6 +1018,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     appendStat("named-entities", NamedEntity::tableSize());
+    for (auto& pair : NamedEntity::tableStats()) {
+      appendStat(folly::sformat("named-entities-{}", pair.first), pair.second);
+    }
     appendStat("static-strings", makeStaticStringCount());
     appendStat("request-count", requestCount());
     appendStat("single-jit-requests", singleJitRequestCount());

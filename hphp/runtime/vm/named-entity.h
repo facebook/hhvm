@@ -201,6 +201,11 @@ struct NamedEntity {
    */
   static size_t tableSize();
 
+  /*
+   * Various stats about the global NamedEntity table, excluding its size.
+   */
+  static std::vector<std::pair<const char*, int64_t>> tableStats();
+
 private:
   template<class Fn> static void foreach_name(Fn);
   static Map* table();

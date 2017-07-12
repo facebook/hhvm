@@ -191,5 +191,15 @@ size_t NamedEntity::tableSize() {
   return s_namedDataMap ? s_namedDataMap->size() : 0;
 }
 
+std::vector<std::pair<const char*, int64_t>> NamedEntity::tableStats() {
+  std::vector<std::pair<const char*, int64_t>> stats;
+  if (!s_namedDataMap) return stats;
+
+  stats.emplace_back("submaps", s_namedDataMap->numSubMaps());
+  stats.emplace_back("capacity", s_namedDataMap->capacity());
+
+  return stats;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

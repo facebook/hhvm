@@ -184,6 +184,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
   MM().objFree(this, size);
+  AARCH64_WALKABLE_FRAME();
 }
 
 NEVER_INLINE
@@ -192,13 +193,15 @@ static void tail_call_remove_live_bc_obj(ObjectData* obj) {
   return obj->releaseNoObjDestructCheck();
 }
 
-AARCH64_WALKABLE_FRAME
 void ObjectData::release() noexcept {
   assert(kindIsValid());
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
-    return tail_call_remove_live_bc_obj(this);
+    tail_call_remove_live_bc_obj(this);
+    AARCH64_WALKABLE_FRAME();
+    return;
   }
   releaseNoObjDestructCheck();
+  AARCH64_WALKABLE_FRAME();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

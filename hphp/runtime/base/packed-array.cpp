@@ -515,7 +515,6 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   return init.create();
 }
 
-AARCH64_WALKABLE_FRAME
 void PackedArray::Release(ArrayData* ad) {
   assert(checkInvariants(ad));
   assert(ad->isRefCounted());
@@ -528,6 +527,7 @@ void PackedArray::Release(ArrayData* ad) {
     free_strong_iterators(ad);
   }
   MM().objFreeIndex(ad, ad->m_aux16);
+  AARCH64_WALKABLE_FRAME();
 }
 
 NEVER_INLINE

@@ -90,17 +90,18 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
   /*
    * Deallocate a RefData.
    */
-  AARCH64_WALKABLE_FRAME
   void release() noexcept {
     assert(kindIsValid());
     auto& bits = aux<RefBits>();
     if (UNLIKELY(bits.cow)) {
       m_count = 1;
       bits.cow = bits.z = 0;
+      AARCH64_WALKABLE_FRAME();
       return;
     }
     this->~RefData();
     MM().freeSmallSize(this, sizeof(RefData));
+    AARCH64_WALKABLE_FRAME();
   }
 
   void releaseMem() const {

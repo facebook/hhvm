@@ -103,14 +103,13 @@
 
 
 /*
- * AARCH64 flag which creates a walkable stack frame for
+ * AARCH64 needs to create a walkable stack frame for
  * getFrameRegs() when a FixupEntry isIndirect()
  */
-#ifdef __AARCH64EL__
-#define AARCH64_WALKABLE_FRAME \
-  __attribute__ ((optimize("no-optimize-sibling-calls")))
+#ifdef __aarch64__
+#define AARCH64_WALKABLE_FRAME() asm("" ::: "memory");
 #else
-#define AARCH64_WALKABLE_FRAME
+#define AARCH64_WALKABLE_FRAME()
 #endif
 
 

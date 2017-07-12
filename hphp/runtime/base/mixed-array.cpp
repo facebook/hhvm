@@ -468,7 +468,6 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
 
 //=============================================================================
 // Destruction
-AARCH64_WALKABLE_FRAME
 NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
   assert(in->isRefCounted());
@@ -495,6 +494,7 @@ void MixedArray::Release(ArrayData* in) {
     }
   }
   MM().objFree(ad, ad->heapSize());
+  AARCH64_WALKABLE_FRAME();
 }
 
 NEVER_INLINE

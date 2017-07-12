@@ -386,12 +386,16 @@ void StringData::releaseProxy() {
   MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }
 
-AARCH64_WALKABLE_FRAME
 void StringData::release() noexcept {
   assert(isRefCounted());
   assert(checkSane());
-  if (UNLIKELY(!isFlat())) return releaseProxy();
+  if (UNLIKELY(!isFlat())) {
+    releaseProxy();
+    AARCH64_WALKABLE_FRAME();
+    return;
+  }
   MM().objFreeIndex(this, m_aux16);
+  AARCH64_WALKABLE_FRAME();
 }
 
 //////////////////////////////////////////////////////////////////////

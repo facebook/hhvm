@@ -74,8 +74,6 @@ struct ExtendedException : Exception {
 
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);
-
-private:
   void computeBacktrace(bool skipFrame = false);
 
 private:

@@ -264,49 +264,6 @@ tc_unwind_personality(int version,
 
   auto const ti = &typeinfoFromUE(ue);
 
-  // Note that cachedTypeInfo isn't just for performance.
-  // If the search phase doesn't find it in the map, it returns
-  // _URC_HANDLER_FOUND - so the cleanup phase must also fail to find
-  // it. Another thread might have added it to the map in the interim,
-  // however, so its important to use the cachedTypeInfo.
-  auto const exceptionKind = [&] () -> ExceptionKind {
-    if (ti != cachedTypeInfo.first) {
-      assert(actions & _UA_SEARCH_PHASE);
-      auto const it = typeInfoMap->find(ti);
-      cachedTypeInfo.first = ti;
-      cachedTypeInfo.second = it == typeInfoMap->end() ?
-        ExceptionKind::Unclassified : it->second;
-    }
-    return cachedTypeInfo.second;
-  }();
-
-  if (UNLIKELY(exceptionKind == ExceptionKind::Unclassified)) {
-    if (actions & _UA_SEARCH_PHASE) {
-      FTRACE(1,
-             "Unclassified exception was thrown, "
-             "returning _URC_HANDLER_FOUND\n");
-      return _URC_HANDLER_FOUND;
-    }
-    auto const& stubs = tc::ustubs();
-    auto const ip = (TCA)_Unwind_GetIP(context);
-    if (tl_regState == VMRegState::DIRTY) {
-      sync_regstate(ip, context);
-    }
-    g_unwind_rds->originalRip = ip;
-    g_unwind_rds->exn = ue;
-    _Unwind_SetIP(context, (uint64_t)stubs.unknownExceptionHandler);
-    return _URC_INSTALL_CONTEXT;
-  }
-
-  InvalidSetMException* ism = nullptr;
-  TVCoercionException* tce = nullptr;
-
-  if (exceptionKind == ExceptionKind::InvalidSetMException) {
-    ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
-  } else if (exceptionKind == ExceptionKind::TVCoercionException) {
-    tce = static_cast<TVCoercionException*>(exceptionFromUE(ue));
-  }
-
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
@@ -325,22 +282,64 @@ tc_unwind_personality(int version,
            (TCA)_Unwind_GetIP(context), exnType);
   }
 
-  /*
-   * We don't do anything during the search phase---before attempting cleanup,
-   * we want all deeper frames to have run their object destructors (which can
-   * have side effects like setting tl_regState) and spilled any values they
-   * may have been holding in callee-saved regs.
-   */
-  if (actions & _UA_SEARCH_PHASE) {
-    if (ism) {
-      FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
-             ism->tv().pretty());
-      return _URC_HANDLER_FOUND;
+  auto const exceptionKind = [&] () -> ExceptionKind {
+    if (ti != cachedTypeInfo.first) {
+      auto const it = typeInfoMap->find(ti);
+      cachedTypeInfo.first = ti;
+      cachedTypeInfo.second = it == typeInfoMap->end() ?
+        ExceptionKind::Unclassified : it->second;
     }
-    if (tce) {
-      FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
-      return _URC_HANDLER_FOUND;
-    }
+    return cachedTypeInfo.second;
+  }();
+
+  InvalidSetMException* ism = nullptr;
+  TVCoercionException* tce = nullptr;
+
+  switch (exceptionKind) {
+    case ExceptionKind::InvalidSetMException:
+      ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
+      if (actions & _UA_SEARCH_PHASE) {
+        FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
+               ism->tv().pretty());
+        return _URC_HANDLER_FOUND;
+      }
+      break;
+    case ExceptionKind::TVCoercionException:
+      tce = static_cast<TVCoercionException*>(exceptionFromUE(ue));
+      if (actions & _UA_SEARCH_PHASE) {
+        FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
+        return _URC_HANDLER_FOUND;
+      }
+      break;
+    default:
+      if (!(actions & _UA_HANDLER_FRAME)) break;
+      // if we get here, we saw an unclassified exception in the search phase,
+      // returned _URC_HANDLER_FOUND to try to classify it, but during the
+      // unwind through the c++ portion of the stack, we could re-enter and
+      // classify it. But having said we'd handle it here, we *must* handle it,
+      // so the easiest thing is to just go through the classification again
+      // (which will rethrow the exception, and start a new search phase).
+      assertx(actions & _UA_CLEANUP_PHASE);
+    case ExceptionKind::Unclassified:
+      if (actions & _UA_SEARCH_PHASE) {
+        FTRACE(1,
+               "Unclassified exception was thrown, exn {}, ti {}, "
+               "returning _URC_HANDLER_FOUND\n", (void*)ue, (void*)ti);
+        return _URC_HANDLER_FOUND;
+      } else {
+        FTRACE(1,
+               "Unclassified exception was thrown, exn {}, ti {}, "
+               "Installing unknownExceptionHandler\n", (void*)ue, (void*)ti);
+        auto const& stubs = tc::ustubs();
+        auto const ip = (TCA)_Unwind_GetIP(context);
+        if (tl_regState == VMRegState::DIRTY) {
+          sync_regstate(ip, context);
+        }
+        g_unwind_rds->originalRip = ip;
+        g_unwind_rds->exn = ue;
+        _Unwind_SetIP(context, (uint64_t)stubs.unknownExceptionHandler);
+        return _URC_INSTALL_CONTEXT;
+      }
   }
 
   /*
@@ -349,7 +348,7 @@ tc_unwind_personality(int version,
    * here. We sync the VM registers here, then optionally use a landing pad,
    * which is an exit trace from hhir with a few special instructions.
    */
-  else if (actions & _UA_CLEANUP_PHASE) {
+  if (actions & _UA_CLEANUP_PHASE) {
     auto const& stubs = tc::ustubs();
     auto ip = TCA(_Unwind_GetIP(context));
 
@@ -359,8 +358,8 @@ tc_unwind_personality(int version,
 
       ip = (TCA)g_unwind_rds->originalRip;
       FTRACE(1,
-             "rip == unknownExceptionHandlerPast; setting rip = {:#x}\n",
-             ip);
+             "rip == unknownExceptionHandlerPast; setting rip = {} exn={}\n",
+             ip, (void*)ue);
       g_unwind_rds->originalRip = nullptr;
     } else {
       assertx(!g_unwind_rds->originalRip);
@@ -393,6 +392,12 @@ tc_unwind_personality(int version,
     return _URC_INSTALL_CONTEXT;
   }
 
+  /*
+   * We don't do anything during the search phase---before attempting cleanup,
+   * we want all deeper frames to have run their object destructors (which can
+   * have side effects like setting tl_regState) and spilled any values they
+   * may have been holding in callee-saved regs.
+   */
   always_assert(!(actions & _UA_HANDLER_FRAME));
 
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");

@@ -713,7 +713,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, size_t index) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; mallocBigSize() pulls stats from jemalloc.
     m_stats.mmUsage -= bytes;
-    return mallocBigSize<FreeRequested>(nbytes).ptr;
+    return mallocBigSize<FreeRequested>(nbytes);
   }
 
   void* ptr = m_front;
@@ -784,8 +784,8 @@ inline void MemoryManager::updateBigStats() {
 }
 
 template<MemoryManager::MBS Mode> NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
-                                      type_scan::Index ty) {
+void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
+                                   type_scan::Index ty) {
   if (debug) MM().requestEagerGC();
   auto block = Mode == ZeroFreeActual ? m_heap.callocBig(bytes, kind, ty) :
                m_heap.allocBig(bytes, kind, ty);
@@ -798,23 +798,23 @@ MemBlock MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
          block.ptr, bytes, block.size);
-  return block;
+  return block.ptr;
 }
 
 template NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize<MemoryManager::FreeRequested>(
+void* MemoryManager::mallocBigSize<MemoryManager::FreeRequested>(
     size_t, HeaderKind, type_scan::Index
 );
 template NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize<MemoryManager::FreeActual>(
+void* MemoryManager::mallocBigSize<MemoryManager::FreeActual>(
     size_t, HeaderKind, type_scan::Index
 );
 template NEVER_INLINE
-MemBlock MemoryManager::mallocBigSize<MemoryManager::ZeroFreeActual>(
+void* MemoryManager::mallocBigSize<MemoryManager::ZeroFreeActual>(
     size_t, HeaderKind, type_scan::Index
 );
 
-MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
+void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   assert(n->kind() == HeaderKind::BigMalloc);
   assert(nbytes + sizeof(MallocNode) > kMaxSmallSize);
   auto old_size = n->nbytes - sizeof(MallocNode);
@@ -823,7 +823,7 @@ MemBlock MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   m_stats.mallocDebt += block.size - old_size;
   m_stats.capacity += block.size - old_size;
   updateBigStats();
-  return block;
+  return block.ptr;
 }
 
 NEVER_INLINE
@@ -854,8 +854,7 @@ static void* allocate(size_t nbytes, type_scan::Index ty) {
   }
   auto constexpr mode = zero ? MemoryManager::ZeroFreeActual :
                         MemoryManager::FreeActual;
-  auto block = MM().mallocBigSize<mode>(nbytes, HeaderKind::BigMalloc, ty);
-  return block.ptr;
+  return MM().mallocBigSize<mode>(nbytes, HeaderKind::BigMalloc, ty);
 }
 
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
@@ -898,8 +897,7 @@ static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
     return newmem;
   }
   // it's a big allocation.
-  auto block = MM().resizeBig(n, nbytes);
-  return block.ptr;
+  return MM().resizeBig(n, nbytes);
 }
 
 void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {

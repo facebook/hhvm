@@ -466,10 +466,13 @@ struct NativeNode : HeapObject,
 };
 
 // POD type for tracking arbitrary memory ranges
-struct MemBlock {
-  void* ptr;
+template<class T> struct MemRange {
+  T ptr;
   size_t size; // bytes
 };
+
+using MemBlock = MemRange<void*>;
+using HdrBlock = MemRange<HeapObject*>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -640,10 +643,10 @@ struct MemoryManager {
     ZeroFreeActual // calloc & FreeActual
   };
   template<MBS Mode>
-  MemBlock mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
-                         type_scan::Index tyindex = 0);
+  void* mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
+                      type_scan::Index tyindex = 0);
   void freeBigSize(void* vp, size_t size);
-  MemBlock resizeBig(MallocNode* n, size_t nbytes);
+  void* resizeBig(MallocNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be

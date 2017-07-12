@@ -50,11 +50,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct HdrBlock {
-  HeapObject* ptr;
-  size_t size;
-};
-
 /*
  * Struct Slab encapsulates the header attached to each large block of memory
  * used for allocating smaller blocks. The header contains a crossing map,

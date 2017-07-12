@@ -310,7 +310,7 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<FreeRequested>(size).ptr;
+  return mallocBigSize<FreeRequested>(size);
 }
 
 ALWAYS_INLINE
@@ -322,7 +322,7 @@ void MemoryManager::objFree(void* vp, size_t size) {
 ALWAYS_INLINE
 void* MemoryManager::objMallocIndex(size_t index) {
   if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
-  return mallocBigSize<MemoryManager::FreeRequested>(sizeIndex2Size(index)).ptr;
+  return mallocBigSize<MemoryManager::FreeRequested>(sizeIndex2Size(index));
 }
 
 ALWAYS_INLINE

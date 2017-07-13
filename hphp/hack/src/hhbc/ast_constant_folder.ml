@@ -38,12 +38,21 @@ let rec expr_to_typed_value ?(allow_maps=false) ns (_, expr_) =
     TV.Keyset (TVL.items l)
   | A.Collection ((_, (("dict" | "ImmMap" | "Map") as kind)), fields)
     when allow_maps || kind = "dict" ->
-    (* TODO: avoid quadratic-time behaviour *)
-    let d = List.fold_left fields
-      ~f:(fun d x ->
-        let k, v = afield_to_typed_value_pair ns x in
-        Typed_value.add_to_dict d k v) ~init:[] in
-    TV.Dict d
+    let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
+    (* map key -> (the latest value for the given key) *)
+    let unique_values_map = List.fold_left values ~init:TV.TVMap.empty
+      ~f:(fun m (k, v) -> TV.TVMap.add k v m)
+    in
+    let d, _ = List.fold_left values ~init:([], unique_values_map)
+      ~f:(fun (result, uniq_map) (k, _) ->
+        (* map stores the latest value for a key
+           if map has an value for a given key, put value in the result list
+           and remove if from the map to ignore similar keys later *)
+        match TV.TVMap.get k uniq_map with
+        | Some v -> (k, v)::result, TV.TVMap.remove k uniq_map
+        | None -> result, uniq_map)
+    in
+    TV.Dict (List.rev d)
   | A.Shape fields ->
     shape_to_typed_value ns fields
   | A.Class_const (cid, id) ->

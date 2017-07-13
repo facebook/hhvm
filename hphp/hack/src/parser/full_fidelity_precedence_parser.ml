@@ -50,6 +50,10 @@ let expect parser token_kind =
 let expects parser token_kind =
   Context.expects parser.context token_kind
 
+(* Check if token_kind is next in the parser's list of expected token kinds. *)
+let expects_next parser token_kind =
+  Context.expects_next parser.context token_kind
+
 let with_precedence parser precedence =
   { parser with precedence }
 

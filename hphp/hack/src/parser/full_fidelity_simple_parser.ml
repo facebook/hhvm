@@ -50,4 +50,8 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
   let expects parser token_kind =
     Context.expects parser.context token_kind
 
+  (* Check if token_kind is next in the parser's list of expected token kinds. *)
+  let expects_next parser token_kind =
+    Context.expects_next parser.context token_kind
+
 end

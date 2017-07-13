@@ -118,21 +118,19 @@ module WithStatementAndDeclAndTypeParser
     let (parser1, token) = next_token_as_name parser in
     match (Token.kind token) with
     | Name -> parse_name_or_collection_literal_expression parser1 token
+    | kind when PrecedenceParser.expects_next parser kind ->
+      (* ERROR RECOVERY: If we're encountering a token that matches the next
+       * kind in the expected stack, don't eat it--just make the name missing,
+       * and continue parsing, starting from the offending token. *)
+      let parser = with_error parser SyntaxError.error1015 in
+      (parser, make_missing())
     | _ ->
-      (* ERROR RECOVERY: Eat the offending token.
-      TODO: Create a better error recovery system that does not eat tokens
-      that might be eaten by the outer statement / declaration parser. *)
+      (* ERROR RECOVERY: If we're encountering anything other than a Name
+       * or the next expected kind, eat the offending token.
+       * TODO: Increase the coverage of PrecedenceParser.expects_next, so that
+       * we wind up eating fewer of the tokens that'll be needed by the outer
+       * statement / declaration parsers. *)
       let parser = with_error parser1 SyntaxError.error1015 in
-      (* D5365950 TESTING: The next few lines were for testing only--they'll
-       * be deleted before landing. (See 'test plan' for more details.) *)
-      (*let do_we_need_the_semicolon_later = PrecedenceParser.expects
-        parser Semicolon in
-      Printf.printf ("Previously, our no-context parser was unaware that " ^^
-        "the semicolon we encountered here was required later in the " ^^
-        "program, and it would therefore eat the semicolon. However, now " ^^
-        "our context knows it is\n %b \nthat we require the semicolon " ^^
-        "later, so in the future we can perform a simple boolean check " ^^
-        "to avoid prematurely eating it.\n") do_we_need_the_semicolon_later;*)
       (parser, make_token token)
 
   and parse_term parser =

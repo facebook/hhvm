@@ -835,6 +835,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | YieldExpression { yield_operand; _ } when text yield_operand = "break" ->
       env.saw_yield := true;
       Yield_break
+    | YieldExpression { yield_operand; _ } when is_missing yield_operand ->
+      env.saw_yield := true;
+      Yield (AFvalue (pos, Null))
     | YieldExpression { yield_operand; _ } ->
       env.saw_yield := true;
       Yield (pAField yield_operand env)

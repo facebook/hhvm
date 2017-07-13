@@ -29,6 +29,12 @@ let expect context token_kind =
 let expects context token_kind =
   Core.List.exists context.expected ~f:(fun k -> (k = token_kind))
 
+(* Check if token_kind is next in the parser's list of expected token kinds. *)
+let expects_next context token_kind =
+  match context.expected with
+  | h :: t -> h = token_kind
+  | _ -> false
+
 (* Access the expected stack of a context. *)
 let expected context =
   context.expected

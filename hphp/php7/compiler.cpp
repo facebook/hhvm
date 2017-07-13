@@ -68,15 +68,12 @@ Compiler::Compiler() {
 
 void Compiler::compileProgram(const zend_ast* ast) {
   assert(ast->kind == ZEND_AST_STMT_LIST);
-  auto list = zend_ast_get_list(ast);
 
   auto pseudomain = unit->getPseudomain();
   activeFunction = pseudomain;
   activeBlock = pseudomain->entry;
 
-  for (uint32_t i = 0; i < list->children; i++) {
-    compileStatement(list->child[i]);
-  }
+  compileStatement(ast);
 
   if (activeBlock) {
     activeBlock->emit(Int{-1});
@@ -312,6 +309,9 @@ void Compiler::compileStatement(const zend_ast* ast) {
       // just a block, so recur please :)
       auto list = zend_ast_get_list(ast);
       for (uint32_t i = 0; i < list->children; i++) {
+        if (!list->child[i]) {
+          continue;
+        }
         compileStatement(list->child[i]);
       }
       break;

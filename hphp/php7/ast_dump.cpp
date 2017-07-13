@@ -122,7 +122,11 @@ void dump_ast(
         zend_ast_list* list = reinterpret_cast<zend_ast_list*>(ast);
         for (int i = 0; i < list->children; i++) {
           do_indent(out, pretty, indent);
-          dump_ast(out, list->child[i], pretty, indent + 1);
+          if (!list->child[i])  {
+            out << "<null>";
+          } else {
+            dump_ast(out, list->child[i], pretty, indent + 1);
+          }
         }
         out << ")";
       } else {

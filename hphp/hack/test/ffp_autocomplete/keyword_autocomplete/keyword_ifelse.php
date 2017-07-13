@@ -1,7 +1,7 @@
 <?hh
 
-// AUTOCOMPLETE 7 4
+// AUTOCOMPLETE 7 3
 
 function foo (bool $condition) {
   if($condition){}
-  el
+  

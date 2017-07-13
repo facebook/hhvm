@@ -2,8 +2,6 @@ async
 clone
 do
 echo
-else
-elseif
 for
 foreach
 if

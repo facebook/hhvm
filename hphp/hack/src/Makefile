@@ -120,7 +120,8 @@ NATIVE_LIBRARIES=\
 TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check \
 	_build/hh_format \
-	_build/hackfmt
+	_build/hackfmt \
+	_build/full_fidelity_parse
 
 TARGETS=$(foreach target,$(TARGETS_BASE),$(target).$(TARGET_EXT))
 
@@ -210,6 +211,7 @@ endif
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
+	cp _build/full_fidelity_parse.$(TARGET_EXT) ../bin/hh_parse
 
 copy-hack-files-ocp: build-hack-with-ocp
 	mkdir -p ../bin
@@ -222,6 +224,7 @@ endif
 	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
 	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
 	cp ../_obuild/hh_format/hh_format.asm ../bin/hh_format
+	cp ../_obuild/full_fidelity_parse.asm ../bin/hh_parse
 
 .PHONY: test test-ocp do-test
 test: build-hack copy-hack-files

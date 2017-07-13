@@ -169,3 +169,7 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hackfmt
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_format
   DESTINATION bin
   COMPONENT dev)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_parse
+  DESTINATION bin
+  COMPONENT dev)

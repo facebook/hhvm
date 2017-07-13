@@ -14,6 +14,12 @@ open Lsp_fmt
 
 (* All hack-specific code relating to LSP goes in here. *)
 
+(* The environment for hh_client with LSP *)
+type env = {
+  from: string; (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
+  use_ffp_autocomplete: bool; (* Flag to turn on the (experimental) FFP based autocomplete *)
+}
+
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
 (************************************************************************)
@@ -588,7 +594,40 @@ let do_definition (conn: server_conn) (params: Definition.params)
   in
   hack_to_lsp results
 
-let do_completion (conn: server_conn) (params: Completion.params)
+let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
+  let open FfpAutocompleteService in
+  let open TextDocumentIdentifier in
+
+  let open Completion in
+  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
+  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
+  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
+  let result = rpc conn command in
+  let hack_completion_to_lsp (completion: autocomplete_result)
+    : Completion.completionItem =
+    {
+      (* TODO: Actually fill out the rest of these fields *)
+      label = completion.name;
+      kind = None;
+      detail = None;
+      inlineDetail = None;
+      itemType = None;
+      documentation = None;
+      sortText = None;
+      filterText = None;
+      insertText = None;
+      insertTextFormat = PlainText;
+      textEdits = [];
+      command = None;
+      data = None;
+    }
+  in
+  {
+    isIncomplete = false;
+    items = List.map result ~f:hack_completion_to_lsp;
+  }
+
+let do_completion_legacy (conn: server_conn) (params: Completion.params)
   : Completion.result =
   let open TextDocumentIdentifier in
   let open AutocompleteService in
@@ -1270,9 +1309,10 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
 (* handle_event: Process and respond to a message, and update the LSP state
    machine accordingly. *)
 let handle_event
-    (state: state ref)
-    (client: ClientMessageQueue.t)
-    (event: event)
+    ~(env: env)
+    ~(state: state ref)
+    ~(client: ClientMessageQueue.t)
+    ~(event: event)
   : unit =
   let open ClientMessageQueue in
   match !state, event with
@@ -1349,6 +1389,8 @@ let handle_event
 
   (* textDocument/completion request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/completion" ->
+    let do_completion =
+      if env.use_ffp_autocomplete then do_completion_ffp else do_completion_legacy in
     cancel_if_stale client c short_timeout;
     parse_completion c.params |> do_completion menv.conn |> print_completion |> respond stdout c
 
@@ -1465,12 +1507,6 @@ let handle_event
     let stack = "" in
     raise (Server_fatal_connection_exception { message; stack; })
 
-
-type env = {
-  from: string;
-  use_ffp_autocomplete: bool;
-}
-
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
 let main (env: env) : 'a =
@@ -1494,7 +1530,7 @@ let main (env: env) : 'a =
       end;
       state := regain_lost_server_if_necessary !state event;
       state := dismiss_ready_dialog_if_necessary !state event;
-      handle_event state client event;
+      handle_event ~env ~state ~client ~event;
       match event with
       | Client_message c -> begin
           let open ClientMessageQueue in

@@ -34,6 +34,28 @@ inline const zend_ast_list* zend_ast_get_list(const zend_ast* ast) {
   return reinterpret_cast<const zend_ast_list*>(ast);
 }
 
+inline std::string zval_to_string(const zval* zv) {
+  std::string out;
+  switch (Z_TYPE_P(zv)) {
+    case IS_LONG:
+      folly::format(&out, "{}", Z_LVAL_P(zv));
+      break;
+    case IS_NULL:
+    case IS_FALSE:
+      break;
+    case IS_TRUE:
+      out.append("1");
+      break;
+    case IS_DOUBLE:
+      folly::format(&out, "{}", Z_DVAL_P(zv));
+      break;
+    case IS_STRING:
+      folly::format(&out, "{}", Z_STRVAL_P(zv));
+      break;
+  }
+  return out;
+}
+
 } // namespace
 
 
@@ -109,6 +131,10 @@ void Compiler::compileConstant(const zend_ast* ast) {
   }
 }
 
+void Compiler::compileVar(const zend_ast* ast) {
+  getLvalue(ast)->getC();
+}
+
 Bytecode Compiler::opForBinaryOp(const zend_ast* ast) {
   // NB: bizarrely, greater-than (>,>=) have their own AST type
   // and there is no ZEND_IS_GREATER since it doesn't correspond to a VM
@@ -171,6 +197,75 @@ void Compiler::compileUnaryOp(const zend_ast* ast) {
   panic("unknown unop");
 }
 
+IncDecOp Compiler::getIncDecOpForNode(zend_ast_kind kind) {
+  switch (kind) {
+    case ZEND_AST_PRE_INC:
+      return IncDecOp::PreInc;
+    case ZEND_AST_PRE_DEC:
+      return IncDecOp::PreDec;
+    case ZEND_AST_POST_INC:
+      return IncDecOp::PostInc;
+    case ZEND_AST_POST_DEC:
+      return IncDecOp::PostDec;
+    default:
+      panic("not a inc/dec node");
+  }
+}
+
+SetOpOp Compiler::getSetOpOp(zend_ast_attr attr) {
+  switch (attr) {
+    case ZEND_ASSIGN_ADD:
+      return SetOpOp::PlusEqual;
+    case ZEND_ASSIGN_SUB:
+      return SetOpOp::MinusEqual;
+    case ZEND_ASSIGN_MUL:
+      return SetOpOp::MulEqual;
+    case ZEND_ASSIGN_POW:
+      return SetOpOp::PowEqual;
+    case ZEND_ASSIGN_DIV:
+      return SetOpOp::DivEqual;
+    case ZEND_ASSIGN_CONCAT:
+      return SetOpOp::ConcatEqual;
+    case ZEND_ASSIGN_MOD:
+      return SetOpOp::ModEqual;
+    case ZEND_ASSIGN_BW_AND:
+      return SetOpOp::AndEqual;
+    case ZEND_ASSIGN_BW_OR:
+      return SetOpOp::OrEqual;
+    case ZEND_ASSIGN_BW_XOR:
+      return SetOpOp::XorEqual;
+    case ZEND_ASSIGN_SL:
+      return SetOpOp::SlEqual;
+    case ZEND_ASSIGN_SR:
+      return SetOpOp::SrEqual;
+    default:
+      panic("unsupported set-op");
+  }
+}
+
+void Compiler::compileIncDec(const zend_ast* ast) {
+  auto op = getIncDecOpForNode(ast->kind);
+  auto var = ast->child[0];
+
+  getLvalue(var)->incDec(op);
+}
+
+void Compiler::compileAssignment(const zend_ast* ast) {
+  auto rhs = ast->child[1];
+  auto lhs = ast->child[0];
+
+  getLvalue(lhs)->assign(rhs);
+}
+
+void Compiler::compileAssignOp(const zend_ast* ast) {
+  auto rhs = ast->child[1];
+  auto op = getSetOpOp(ast->attr);
+  auto lhs = ast->child[0];
+
+  getLvalue(lhs)->assignOp(op, rhs);
+}
+
+
 void Compiler::compileExpression(const zend_ast* ast) {
   switch (ast->kind) {
     case ZEND_AST_ZVAL:
@@ -190,6 +285,21 @@ void Compiler::compileExpression(const zend_ast* ast) {
       compileExpression(ast->child[0]);
       compileExpression(ast->child[1]);
       activeBlock->emit(opForBinaryOp(ast));
+      break;
+    case ZEND_AST_POST_INC:
+    case ZEND_AST_POST_DEC:
+    case ZEND_AST_PRE_INC:
+    case ZEND_AST_PRE_DEC:
+      compileIncDec(ast);
+      break;
+    case ZEND_AST_VAR:
+      compileVar(ast);
+      break;
+    case ZEND_AST_ASSIGN:
+      compileAssignment(ast);
+      break;
+    case ZEND_AST_ASSIGN_OP:
+      compileAssignOp(ast);
       break;
     default:
       panic("unsupported expression");
@@ -214,8 +324,15 @@ void Compiler::compileStatement(const zend_ast* ast) {
     case ZEND_AST_IF:
       compileIf(ast);
       break;
+    case ZEND_AST_WHILE:
+      compileWhile(ast->child[0], ast->child[1], false);
+      break;
+    case ZEND_AST_DO_WHILE:
+      compileWhile(ast->child[1], ast->child[0], true);
+      break;
     default:
-      panic("unsupported statement");
+      compileExpression(ast);
+      activeBlock->emit(PopC{});
   }
 }
 
@@ -235,13 +352,12 @@ void Compiler::compileIf(const zend_ast* ast) {
       break;
     } else {
       // otherwise, we have a conditional
-      auto mainBlock = activeBlock;
       auto branch = activeFunction->allocateBlock();
 
-      activeBlock = branch;
-      compileStatement(contents);
-      activeBlock->exit(Jmp{end});
-      activeBlock = mainBlock;
+      withBlock(branch, [&]() {
+        compileStatement(contents);
+        activeBlock->exit(Jmp{end});
+      });
 
       compileExpression(condition);
       branchTo<JmpNZ>(branch);
@@ -250,7 +366,115 @@ void Compiler::compileIf(const zend_ast* ast) {
 
   activeBlock->exit(Jmp{end});
   activeBlock = end;
+}
 
+void Compiler::compileWhile(const zend_ast* condition, const zend_ast* body,
+                            bool bodyFirst) {
+
+  auto continuation = activeFunction->allocateBlock();
+  auto bodyBlock = activeFunction->allocateBlock();
+  auto testBlock = activeFunction->allocateBlock();
+
+  withBlock(bodyBlock, [&]() {
+    activeLoops.push({continuation, testBlock});
+    compileStatement(body);
+    activeBlock->exit(Jmp{testBlock});
+    activeLoops.pop();
+  });
+
+  withBlock(testBlock, [&]() {
+    compileExpression(condition);
+    activeBlock->exit(JmpNZ{bodyBlock});
+    activeBlock->exit(Jmp{continuation});
+  });
+
+  if (bodyFirst) {
+    activeBlock->exit(Jmp{bodyBlock});
+  } else {
+    activeBlock->exit(Jmp{testBlock});
+  }
+
+  activeBlock = continuation;
+}
+
+struct Compiler::LocalLvalue : Compiler::Lvalue {
+  LocalLvalue(Compiler& c, std::string name)
+    : c(c)
+    , name(std::move(name)) {}
+
+  void getC() override {
+    c.activeFunction->locals.insert(name);
+    c.activeBlock->emit(CGetL{name});
+  }
+
+  void assign(const zend_ast* rhs) override {
+    c.activeFunction->locals.insert(name);
+    c.compileExpression(rhs);
+    c.activeBlock->emit(SetL{name});
+  }
+
+  void assignOp(SetOpOp op, const zend_ast* rhs) override {
+    c.activeFunction->locals.insert(name);
+    c.compileExpression(rhs);
+    c.activeBlock->emit(SetOpL{name, op});
+  }
+
+  void incDec(IncDecOp op) override {
+    c.activeFunction->locals.insert(name);
+    c.activeBlock->emit(IncDecL{name, op});
+  }
+
+  Compiler& c;
+  std::string name;
+};
+
+struct Compiler::DynamicLocalLvalue : Compiler::Lvalue {
+  DynamicLocalLvalue(Compiler& c, const zend_ast* nameExpr)
+    : c(c)
+    , nameExpr(nameExpr) {}
+
+  void getC() override {
+    c.compileExpression(nameExpr);
+    c.activeBlock->emit(CGetN{});
+  }
+
+  void assign(const zend_ast* rhs) override {
+    c.compileExpression(nameExpr);
+    c.compileExpression(rhs);
+    c.activeBlock->emit(SetN{});
+  }
+
+  void assignOp(SetOpOp op, const zend_ast* rhs) override {
+    c.compileExpression(nameExpr);
+    c.compileExpression(rhs);
+    c.activeBlock->emit(SetOpN{op});
+  }
+
+  void incDec(IncDecOp op) override {
+    c.compileExpression(nameExpr);
+    c.activeBlock->emit(IncDecN{op});
+  }
+
+  Compiler& c;
+  const zend_ast* nameExpr;
+};
+
+std::unique_ptr<Compiler::Lvalue> Compiler::getLvalue(const zend_ast* ast) {
+  if (ast->kind == ZEND_AST_VAR) {
+    auto name = ast->child[0];
+    switch (name->kind) {
+      case ZEND_AST_ZVAL:
+        return std::make_unique<Compiler::LocalLvalue>(
+            *this,
+            zval_to_string(zend_ast_get_zval(name)));
+      default:
+        return std::make_unique<Compiler::DynamicLocalLvalue>(
+            *this,
+            name);
+    }
+  }
+
+  panic("unsupported lvalue");
 }
 
 }} // HPHP::php7

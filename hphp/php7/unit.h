@@ -22,8 +22,9 @@
 
 #include <boost/variant.hpp>
 
-#include <vector>
 #include <string>
+#include <vector>
+#include <unordered_set>
 
 namespace HPHP { namespace php7 {
 
@@ -95,6 +96,7 @@ struct Function {
   Block* entry;
   Unit* parent;
   std::vector<std::unique_ptr<Block>> blocks;
+  std::unordered_set<std::string> locals;
 };
 
 struct Unit {

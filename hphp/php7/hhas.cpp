@@ -16,6 +16,8 @@
 
 #include "hphp/php7/hhas.h"
 
+#include "hphp/util/match.h"
+
 #include <folly/Format.h>
 #include <folly/String.h>
 
@@ -24,6 +26,8 @@ namespace HPHP { namespace php7 {
 namespace {
   std::string dump_pseudomain(const Function& func);
   std::string dump_blocks(std::vector<Block*> blocks);
+
+  std::string dump_declvars(const std::unordered_set<std::string>& locals);
 } // namespace
 
 std::string dump_asm(const Unit& unit) {
@@ -67,6 +71,27 @@ struct InstrVisitor {
     folly::format(&out, " L{}", blk->id);
   }
 
+  void imm(const bc::Local& local) {
+    folly::format(&out, " ${}", local.name);
+  }
+
+  void imm(IncDecOp op) {
+    out.append(" ");
+    switch (op) {
+#define INCDEC_OP(name) case IncDecOp::name: out.append( #name ); break;
+      INCDEC_OPS
+#undef INCDEC_OP
+    }
+  }
+
+  void imm(SetOpOp op) {
+    out.append(" ");
+    switch (op) {
+#define SETOP_OP(name, _) case SetOpOp::name: out.append( #name ); break;
+      SETOP_OPS
+#undef SETOP_OP
+    }
+  }
 
   template<class T>
   void imm(const T& imm) {
@@ -131,6 +156,7 @@ struct CFGVisitor : public boost::static_visitor<void> {
 std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
+  out.append(dump_declvars(func.locals));
   out.append(dump_blocks(serializeControlFlowGraph(func.entry)));
   out.append("}");
   return out;
@@ -151,6 +177,18 @@ std::string dump_blocks(std::vector<Block*> blocks) {
   }
 
   visitor.end();
+  return out;
+}
+
+std::string dump_declvars(const std::unordered_set<std::string>& locals) {
+  std::string out;
+
+  out.append("  .declvars");
+  for (const auto& local : locals) {
+    folly::format(&out, " ${}", local);
+  }
+  out.append(";\n");
+
   return out;
 }
 

@@ -22,8 +22,11 @@
 #include "hphp/php7/bytecode.h"
 #include "hphp/php7/unit.h"
 
-#include <string>
+#include <folly/ScopeGuard.h>
+
 #include <exception>
+#include <stack>
+#include <string>
 
 namespace HPHP { namespace php7 {
 
@@ -48,10 +51,19 @@ struct Compiler {
 
   void compileZvalLiteral(const zval* ast);
   void compileConstant(const zend_ast* ast);
+  void compileVar(const zend_ast* ast);
+  void compileAssignment(const zend_ast* ast);
+  void compileAssignOp(const zend_ast* ast);
+
   void compileIf(const zend_ast* ast);
+  void compileWhile(const zend_ast* cond, const zend_ast* body, bool bodyFirst);
 
   Bytecode opForBinaryOp(const zend_ast* op);
+  IncDecOp getIncDecOpForNode(zend_ast_kind kind);
+  SetOpOp getSetOpOp(zend_ast_attr attr);
+
   void compileUnaryOp(const zend_ast* op);
+  void compileIncDec(const zend_ast* op);
 
   [[noreturn]]
   void panic(const std::string& msg);
@@ -66,10 +78,40 @@ struct Compiler {
     activeBlock = continuation;
   }
 
+  template<class Function>
+  void withBlock(Block* blk, Function&& f) {
+    std::swap(blk, activeBlock);
+    SCOPE_EXIT { std::swap(blk, activeBlock); };
+    f();
+  }
+
+  struct Lvalue {
+    virtual ~Lvalue() = default;
+
+    virtual void getC() = 0;
+    virtual void assign(const zend_ast* rhs) = 0;
+    virtual void assignOp(SetOpOp op, const zend_ast* rhs) = 0;
+    virtual void incDec(IncDecOp op) = 0;
+  };
+
+  struct LocalLvalue;
+  struct DynamicLocalLvalue;
+
+  std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
+
+
   std::unique_ptr<Unit> unit;
 
   Function* activeFunction;
   Block* activeBlock;
+
+  // relevant block addresses for a loop
+  struct Loop {
+    Block* continuation; // label immediately after loop
+    Block* test;         // label at loop test (for continue)
+  };
+
+  std::stack<Loop> activeLoops;
 };
 
 }} // HPHP::php7

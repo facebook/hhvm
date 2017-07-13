@@ -4241,7 +4241,7 @@ and hint_shape_info_remain env =
   | Tellipsis ->
       expect env Trp;
       {
-        si_allows_unknown_fields = promote_nullable_to_optional_in_shapes env;
+        si_allows_unknown_fields = true;
         si_shape_field_list = [];
       }
   | _ ->

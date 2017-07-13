@@ -1902,8 +1902,8 @@ TEST(Type, ArrUnions) {
   EXPECT_EQ(union_of(sarr_packed({TInt, TDbl}), tstruct),
             sarr_mapn(union_of(TSStr, TInt), TNum));
 
-  EXPECT_EQ(union_of(arr_mapn(TInt, TTrue), arr_mapn(TDbl, TFalse)),
-            arr_mapn(TNum, TBool));
+  EXPECT_EQ(union_of(arr_mapn(TInt, TTrue), arr_mapn(TStr, TFalse)),
+            arr_mapn(TArrKey, TBool));
 
   auto const aval1 = aval(test_array_packed_value());
   auto const aval2 = aval(test_array_packed_value3());

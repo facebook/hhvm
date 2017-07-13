@@ -250,6 +250,7 @@ slow/keyset/hh-only2.php
 slow/keyset/hphpc-literal.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
+slow/keyset/unreachable.php
 slow/lang/deprecated.php
 slow/lang/deprecated_disabled.php
 slow/lang/deprecated_sampled.php

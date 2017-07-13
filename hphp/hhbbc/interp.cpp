@@ -316,23 +316,30 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
   auto map = MapElems{};
   auto ty = TBottom;
   auto useMap = true;
+  auto bad = false;
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto t = popC(env);
+    auto k = disect_strict_key(popC(env));
+    if (k.type == TBottom) {
+      bad = true;
+      useMap = false;
+    }
     if (useMap) {
-      auto const k = disect_strict_key(t);
       if (auto const v = k.tv()) {
         map.emplace_front(*v, k.type);
       } else {
         useMap = false;
       }
     }
-    ty |= std::move(t);
+    ty |= std::move(k.type);
   }
   if (useMap) {
     push(env, keyset_map(std::move(map)));
     constprop(env);
-  } else {
+  } else if (!bad) {
     push(env, keyset_n(ty));
+  } else {
+    unreachable(env);
+    push(env, TBottom);
   }
 }
 

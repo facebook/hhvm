@@ -19,15 +19,23 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include <unordered_map>
+#include <vector>
+
 namespace HPHP { namespace php7 {
 
 struct Block;
 
 namespace bc {
 
+struct StringOffsetVector {
+  std::unordered_map<std::string, Block*> branches;
+  Block* defaultBranch{nullptr};
+};
+
 // void* immediate types just aren't being used right now
-#define IMM_TYPE_BLA void*
-#define IMM_TYPE_SLA void*
+#define IMM_TYPE_BLA std::vector<Block*>
+#define IMM_TYPE_SLA StringOffsetVector
 #define IMM_TYPE_ILA void*
 #define IMM_TYPE_IVA void*
 #define IMM_TYPE_I64A int64_t

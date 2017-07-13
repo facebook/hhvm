@@ -56,6 +56,16 @@ struct Compiler {
   [[noreturn]]
   void panic(const std::string& msg);
 
+  template<class Branch>
+  void branchTo(Block* target) {
+    auto continuation = activeFunction->allocateBlock();
+
+    activeBlock->exit(Branch{target});
+    activeBlock->exit(bc::Jmp{continuation});
+
+    activeBlock = continuation;
+  }
+
   std::unique_ptr<Unit> unit;
 
   Function* activeFunction;

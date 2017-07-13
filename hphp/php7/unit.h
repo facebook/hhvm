@@ -20,6 +20,8 @@
 #include "hphp/php7/bytecode.h"
 #include "hphp/runtime/base/attr.h"
 
+#include <boost/variant.hpp>
+
 #include <vector>
 #include <string>
 
@@ -30,8 +32,41 @@ struct Function;
 struct Unit;
 
 struct Block {
+  // these are the last instructions in the block, they must be jumps or leave
+  // the current function i.e. only these instructions:
+  using ExitOp = boost::variant<
+    bc::Jmp,
+    bc::JmpNS,
+    bc::JmpZ,
+    bc::JmpNZ,
+    bc::Switch,
+    bc::SSwitch,
+    bc::RetC,
+    bc::RetV,
+    bc::Unwind,
+    bc::Throw
+  >;
+
+  void emit(bc::Jmp&&) = delete;
+  void emit(bc::JmpNS&&) = delete;
+  void emit(bc::JmpZ&&) = delete;
+  void emit(bc::JmpNZ&&) = delete;
+  void emit(bc::Switch&&) = delete;
+  void emit(bc::SSwitch&&) = delete;
+  void emit(bc::RetC&&) = delete;
+  void emit(bc::RetV&&) = delete;
+  void emit(bc::Unwind&&) = delete;
+  void emit(bc::Throw&&) = delete;
+  void emit(ExitOp&& op) = delete;
+
   void emit(Bytecode&& bc) {
+    assert(!exited);
     code.push_back(std::move(bc));
+  }
+
+  void exit(ExitOp&& op) {
+    exited = true;
+    exits.push_back(std::move(op));
   }
 
   // identifies this block in its unit
@@ -39,9 +74,12 @@ struct Block {
 
   // code associated with this block
   std::vector<Bytecode> code;
-
-  Block* fallthrough = nullptr;
+  std::vector<ExitOp> exits;
+  bool exited{false};
 };
+
+// get the series of block pointers in the control graph that starts at `entry`
+std::vector<Block*> serializeControlFlowGraph(Block* entry);
 
 struct Function {
   explicit Function(Unit* parent,

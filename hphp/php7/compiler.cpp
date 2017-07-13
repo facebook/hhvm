@@ -58,7 +58,7 @@ void Compiler::compileProgram(const zend_ast* ast) {
 
   if (activeBlock) {
     activeBlock->emit(Int{-1});
-    activeBlock->emit(RetC{});
+    activeBlock->exit(RetC{});
   }
 }
 
@@ -240,15 +240,15 @@ void Compiler::compileIf(const zend_ast* ast) {
 
       activeBlock = branch;
       compileStatement(contents);
-      activeBlock->emit(Jmp{end});
+      activeBlock->exit(Jmp{end});
       activeBlock = mainBlock;
 
       compileExpression(condition);
-      activeBlock->emit(JmpNZ{branch});
+      branchTo<JmpNZ>(branch);
     }
   }
 
-  activeBlock->emit(Jmp{end});
+  activeBlock->exit(Jmp{end});
   activeBlock = end;
 
 }

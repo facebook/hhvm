@@ -18,6 +18,7 @@ module SourceText = Full_fidelity_source_text
 module ACKeyword = FfpAutocompleteKeywords
 module ACLocal = FfpAutocompleteLocalNames
 module SyntaxKind = Full_fidelity_syntax_kind
+module ContextParser = FfpAutocompleteContextParser
 
 (* The type returned to the client *)
 (* TODO: Add all the additional autocomplete info to this, not just the autocomplete word *)
@@ -26,45 +27,6 @@ type autocomplete_result = {
 }
 
 type result = autocomplete_result list
-
-(*
- * TODO: The following types of completions are not yet implemented:
- * - Function Invocations
- * - :: and \ invocations
- *)
-let autocomplete_word (tree:SyntaxTree.t) offset stub =
-  let open MinimalSyntax in
-  let autocomplete_child = List.hd_exn @@ parentage (SyntaxTree.root tree) offset in
-  match syntax autocomplete_child with
-  (* TODO: Handle function invocation, class name, and other completions here *)
-  (* TODO: Add test cases to make sure the right type of completion is taken for a given token *)
-  | Token {
-      MinimalToken.kind = TokenKind.Name; _
-    } -> ACKeyword.autocomplete_keyword tree offset stub
-  | Token {
-      MinimalToken.kind = TokenKind.Variable; _
-    }
-  | Token {
-      MinimalToken.kind = TokenKind.Dollar; _
-    } -> ACLocal.autocomplete_local tree offset
-  | Token {
-      MinimalToken.kind = TokenKind.MinusGreaterThan (* This token: -> *); _
-    } -> [] (* TODO: Not implemented yet *)
-  | Token {
-      MinimalToken.kind = TokenKind.ColonColon (* This token: :: *); _
-    } -> [] (* TODO: Not implemented yet *)
-  | Token {
-      MinimalToken.kind = TokenKind.NamespacePrefix; _
-    } -> [] (* TODO: Not implemented yet *)
-  | _ -> [] (* Unimplemented completion type *)
-
-(* Get the token we wish to complete. This is necessary because the keyword autocompletion filters
-   results based on what we have typed so far. This will potentially be removed in the future.*)
-let get_autocomplete_stub (syntax_tree:SyntaxTree.t) offset =
-  let open PositionedSyntax in
-  let positioned_tree = from_tree syntax_tree in
-  let autocomplete_child = List.hd_exn @@ parentage positioned_tree offset in
-  text autocomplete_child
 
 (* TODO: Return autocomplete_results from each type of autocomplete directly instead of wrapping
    them here *)
@@ -76,6 +38,12 @@ let auto_complete (file_content:string) (pos:int*int) : result =
   let syntax_tree = SyntaxTree.make source_text in
 
   let offset = SourceText.position_to_offset source_text pos in
-  let stub = get_autocomplete_stub syntax_tree offset in
-  let results = autocomplete_word syntax_tree offset stub in
+  let (context, stub) = ContextParser.get_context_and_stub syntax_tree offset in
+  (* TODO: Delegate to each type of completion to determine whether or not that type is valid
+     in the current context *)
+  (* TODO: Implement completions for class member access *)
+  (* TODO: Implement namespace based completions *)
+  let keywords = ACKeyword.autocomplete_keyword context stub in
+  let local_vars = ACLocal.autocomplete_local context stub syntax_tree offset in
+  let results = keywords @ local_vars in
   List.map ~f:make_result results

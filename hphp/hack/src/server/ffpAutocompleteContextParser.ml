@@ -8,10 +8,11 @@
  *
  *)
 
-module MinimalSyntax = Full_fidelity_minimal_syntax
-module MinimalToken = Full_fidelity_minimal_token
-module TokenKind = Full_fidelity_token_kind
+module PositionedSyntax = Full_fidelity_positioned_syntax
+module PositionedToken = Full_fidelity_positioned_token
 module SyntaxKind = Full_fidelity_syntax_kind
+module SyntaxTree = Full_fidelity_syntax_tree
+module TokenKind = Full_fidelity_token_kind
 
 module Container = struct
   (* Set of mutually exclusive contexts. *)
@@ -49,9 +50,9 @@ let initial_context = {
   inside_async_function = false;
 }
 
-let is_function_async (function_object:MinimalSyntax.t) : bool =
-  let open MinimalSyntax in
-  let open MinimalToken in
+let is_function_async (function_object:PositionedSyntax.t) : bool =
+  let open PositionedSyntax in
+  let open PositionedToken in
   let open TokenKind in
   match function_object.syntax with
   | FunctionDeclaration {
@@ -68,21 +69,30 @@ let is_function_async (function_object:MinimalSyntax.t) : bool =
     } -> true
   | _ -> false
 
-let validate_predecessor (predecessor:MinimalSyntax.t) : predecessor =
-  let open MinimalSyntax in
-  match syntax predecessor with
-  | IfStatement { if_else_clause = {
-      syntax = Missing; _
-    }; _ } -> IfWithoutElse
-  | TryStatement { try_finally_clause = {
-      syntax = Missing; _
-    }; _ } -> TryWithoutFinally
-  | MethodishDeclaration _ -> Statement
-  | Token { MinimalToken.kind = TokenKind.LeftBrace; _ } -> OpenBrace
-  | _ -> NoPredecessor
+let validate_predecessor (predecessor:PositionedSyntax.t list) : predecessor =
+  let open PositionedSyntax in
+  let open PositionedToken in
+  let open TokenKind in
+  let rec aux path acc = match path with
+    | [] -> acc
+    | { syntax = IfStatement { if_else_clause = {
+          syntax = Missing; _
+      }; _ }; _ } :: t -> aux t IfWithoutElse
+    | { syntax = TryStatement { try_finally_clause = {
+          syntax = Missing; _
+      }; _ }; _ } :: t -> aux t TryWithoutFinally
+    | { syntax = MethodishDeclaration _; _ } :: t -> aux t Statement
+    | { syntax = Token { kind = LeftBrace; _ }; _ } :: t -> aux t OpenBrace
+    | _ :: t -> aux t acc
+  in
+  aux predecessor NoPredecessor
 
-let build_context_from_path (full_path:MinimalSyntax.t list) (predecessor:predecessor) : context =
-  let open MinimalSyntax in
+let make_context
+  ~(full_path:PositionedSyntax.t list)
+  ~(predecessor:PositionedSyntax.t list)
+  : context =
+  let predecessor = validate_predecessor predecessor in
+  let open PositionedSyntax in
   let rec aux path acc = match path with
     | [] -> acc
     | { syntax = SimpleTypeSpecifier _; _} :: _ ->
@@ -112,83 +122,46 @@ let build_context_from_path (full_path:MinimalSyntax.t list) (predecessor:predec
       }
       in
       aux t acc
-    | { syntax = MinimalSyntax.CompoundStatement _; _} :: t ->
+    | { syntax = PositionedSyntax.CompoundStatement _; _} :: t ->
       aux t { acc with closest_parent_container = Container.CompoundStatement }
     | _ :: t -> aux t acc
   in
   aux full_path { initial_context with predecessor }
 
-(**
- * Here's an example of a (simplified) syntax tree:
- *
- * `-- Script
- *    +-- Header
- *    |   `-- ...
- *    `-- Declarations
- *        `-- FunctionDeclaration
- *            +-- Header
- *            |   +-- ...
- *            |   `-- ...
- *            `-- Body
- *                +-- MISSING
- *                `-- QualifiedName
- *
- * This function takes the root of a syntax tree and a position n which
- * corresponds to the nth character of the original file. The parentage is
- * the descent through the syntax tree to the leaf node at position n.
- *
- * The predecessor of a node is the preceding sibling of the node according to
- * the order defined by the children function in full_fidelity_syntax.ml. If a
- * node is the first child of its parent node, then its predecessor is its
- * parent's predecessor.
- *
- * TODO: Add a unit test to enforce children order
- *
- * This predecessor corresponds to the chunk of text immediately before the leaf
- * node at the position we are in. This is useful for tasks such as determining
- * if we are inside a class body or inside the class header or if we are directly
- * following an if statement.
- *
- * The width function returns the span of the current node. At each level, we
- * see if we are inside the leftmost node's width. If not, we discard the left-
- * most node and continue looking at the other nodes in the level. If we *are*
- * inside the leftmost node, then we move to the next level, which is all the
- * children of the current node. Once we have no more children, we have reached
- * a leaf node.
- *
- * In this example, if position is inside the QualifiedName at the bottom,
- * we would expect the function to return:
- * Parentage: [QualifiedName, Body, FunctionDeclaration, Declarations, Script]
- * Predecessor: Some Header
- *
- * TODO: Add a unit test that reflects this example
- **)
-let get_parentage_and_predecessor (root:MinimalSyntax.t) (position:int)
- : MinimalSyntax.t list * MinimalSyntax.t option =
-  let rec get_next_child ~current_level ~position ~parentage ~predecessor =
-    match current_level with
-    | [] -> (parentage, predecessor)
-    | h :: t ->
-      let width = MinimalSyntax.full_width h in
-      if position < width then
-        get_next_child ~current_level:(MinimalSyntax.children h) ~position
-          ~parentage:(h :: parentage) ~predecessor
-      else
-        let prev = if MinimalSyntax.kind h = SyntaxKind.Missing
-          then predecessor
-          else (Some h)
-        in
-        get_next_child ~current_level:t ~position:(position - width) ~parentage
-          ~predecessor:prev
+let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int) : context * string =
+  let build_context
+    ~(parentage:PositionedSyntax.t list)
+    ~(predecessor:PositionedSyntax.t list)
+    =
+    let parentage = List.rev parentage in
+    let predecessor = List.rev predecessor in
+    make_context ~full_path:parentage ~predecessor
   in
-  get_next_child ~current_level:[root] ~position ~parentage:[] ~predecessor:None
 
-let make_context (tree:MinimalSyntax.t) (offset:int) : context =
-  let (parents, autocomplete_predecessor) =
-    get_parentage_and_predecessor tree offset in
-  let path = List.rev parents in
-  let predecessor = match autocomplete_predecessor with
-    | Some p -> validate_predecessor p
-    | None -> NoPredecessor
+  let open PositionedSyntax in
+  let positioned_tree = from_tree syntax_tree in
+  let offset = if offset == width positioned_tree then offset - 1 else offset in
+  let autocomplete_node_parentage = parentage positioned_tree offset in
+  let previous_offset = match autocomplete_node_parentage with
+    | [] -> offset - 1
+    | autocomplete_child :: _ -> leading_start_offset autocomplete_child - 1
   in
-  build_context_from_path path predecessor
+  let predecessor_parentage = parentage positioned_tree previous_offset in
+  match autocomplete_node_parentage with
+  | [] -> (* This case occurs iff the completion location is the last character in the file *)
+    (build_context ~parentage:predecessor_parentage ~predecessor:predecessor_parentage, "")
+  | autocomplete_child :: _ ->
+    let token_start_offset = start_offset autocomplete_child in
+    let token_end_offset = trailing_start_offset autocomplete_child in
+    if offset < token_start_offset then
+      (* This case handles when the completion location is in the leading trivia of a node *)
+      (build_context ~parentage:predecessor_parentage ~predecessor:predecessor_parentage, "")
+    else if offset <= token_end_offset then
+      (* This case handles when the completion location is in the main token of a node *)
+      (build_context ~parentage:autocomplete_node_parentage ~predecessor:predecessor_parentage,
+      text autocomplete_child)
+    else (* This case handles when the completion location is in the trailing trivia of a node *)
+      (build_context
+        ~parentage:autocomplete_node_parentage
+        ~predecessor:autocomplete_node_parentage,
+        "")

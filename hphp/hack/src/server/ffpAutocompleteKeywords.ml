@@ -152,19 +152,13 @@ let keyword_matches: (string list * (context -> bool)) list = [
   (async_func_body_keywords, async_func_body_context);
 ]
 
-let get_context_keywords (context:context) : string list =
-  let keywords = List.filter_map keyword_matches
+let autocomplete_keyword (context:context) (stub:string) : string list =
+  let possibilities = List.filter_map keyword_matches
     ~f:begin fun (keywords, is_valid) ->
     Option.some_if (is_valid context) keywords
   end in
-  List.concat keywords
-
-let autocomplete_keyword (syntax_tree:SyntaxTree.t) (offset:int) (stub:string) : string list =
-  let tree = SyntaxTree.root syntax_tree in
-
-  let context = make_context tree offset in
-  let possibilities = get_context_keywords context in
   possibilities
+    |> List.concat
     |> List.filter ~f:(fun x -> string_starts_with x stub)
     |> List.sort ~cmp:Pervasives.compare
     |> List.remove_consecutive_duplicates ~equal:(=)

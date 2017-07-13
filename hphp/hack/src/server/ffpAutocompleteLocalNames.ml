@@ -8,19 +8,37 @@
  *
  *)
 
-open Full_fidelity_editable_syntax
+module ContextParser = FfpAutocompleteContextParser
+module MinimalSyntax = Full_fidelity_minimal_syntax
+module EditableSyntax = Full_fidelity_editable_syntax
+module SyntaxTree = Full_fidelity_syntax_tree
+open ContextParser
 open Core
+open String_utils
+
+(* TODO: Ensure this covers all cases *)
+let local_variable_valid_in_context (context:context) (stub:string) : bool =
+  let open Container in
+  (context.closest_parent_container = LambdaBodyExpression ||
+  context.closest_parent_container = CompoundStatement ||
+  context.closest_parent_container = BinaryExpression) &&
+  (stub = "" || string_starts_with stub "$")
 
 (* As of June 2017, the lambda analyzer only works with editable syntax trees
    for no specific reason. In the future, if the lambda analyzer is
    functorized to accept any tree with the ability to get the text of a
    token, this may be able to accept something other than a minimal tree that
    is converted to an editable tree. *)
-let autocomplete_local minimal_tree offset =
-  let editable_tree = from_tree minimal_tree in
-  let parents = parentage editable_tree offset in
-  let local_vars = List.fold_left parents
-    ~f:Lambda_analyzer.local_variables
-    ~init:SSet.empty
-  in
-  SSet.elements local_vars
+let autocomplete_local (context:context) (stub:string) (tree:SyntaxTree.t) (offset:int)
+  : string list =
+  if local_variable_valid_in_context context stub then
+    let open EditableSyntax in
+    let editable_tree = from_tree tree in
+    let parents = parentage editable_tree offset in
+    let local_vars = List.fold_left parents
+      ~f:Lambda_analyzer.local_variables
+      ~init:SSet.empty
+    in
+    SSet.elements local_vars
+  else
+    []

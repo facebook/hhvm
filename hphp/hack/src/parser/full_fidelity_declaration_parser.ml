@@ -555,6 +555,10 @@ module WithExpressionAndStatementAndTypeParser
   and parse_classish_element_list_opt parser =
     (* TODO: ERROR RECOVERY: consider bailing if the token cannot possibly
              start a classish element. *)
+    (* ERROR RECOVERY: we're in the body of a classish, so we add visibility
+     * modifiers to our context. *)
+    let parser = SimpleParser.expect_in_new_scope parser
+      [Public; Protected; Private] in
     parse_terminated_list parser parse_classish_element RightBrace
 
   and parse_xhp_children_paren parser =

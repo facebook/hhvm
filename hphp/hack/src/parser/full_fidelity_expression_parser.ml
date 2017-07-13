@@ -85,8 +85,10 @@ module WithStatementAndDeclAndTypeParser
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
     if kind term = SyntaxKind.QualifiedNameExpression
-    then parse_remaining_expression_or_specified_function_call parser term
-    else parse_remaining_expression parser term
+    then
+      parse_remaining_expression_or_specified_function_call parser term
+    else
+      parse_remaining_expression parser term
 
   and parse_expression_with_reset_precedence parser =
     with_reset_precedence parser parse_expression

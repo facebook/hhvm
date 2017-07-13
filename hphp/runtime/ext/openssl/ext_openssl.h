@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_OPENSSL_H_
 #define incl_HPHP_EXT_OPENSSL_H_
 
+#include <folly/portability/OpenSSL.h>
+
 #include "hphp/runtime/ext/extension.h"
 
 #include <openssl/evp.h>

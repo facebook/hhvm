@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
@@ -24,16 +25,8 @@
 
 #include <folly/ScopeGuard.h>
 #include <openssl/conf.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
 #include <vector>
 
 namespace HPHP {
@@ -112,15 +105,20 @@ struct Key : SweepableResourceData {
 
   bool isPrivate() {
     assert(m_key);
-    switch (m_key->type) {
+    switch (EVP_PKEY_id(m_key)) {
 #ifndef NO_RSA
     case EVP_PKEY_RSA:
     case EVP_PKEY_RSA2:
-      assert(m_key->pkey.rsa);
-      if (!m_key->pkey.rsa->p || !m_key->pkey.rsa->q) {
-        return false;
+      {
+        const auto rsa = EVP_PKEY_get0_RSA(m_key);
+        assert(rsa);
+        const BIGNUM *p, *q;
+        RSA_get0_factors(rsa, &p, &q);
+        if (!p || !q) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
 #ifndef NO_DSA
     case EVP_PKEY_DSA:
@@ -128,28 +126,48 @@ struct Key : SweepableResourceData {
     case EVP_PKEY_DSA2:
     case EVP_PKEY_DSA3:
     case EVP_PKEY_DSA4:
-      assert(m_key->pkey.dsa);
-      if (!m_key->pkey.dsa->p || !m_key->pkey.dsa->q ||
-          !m_key->pkey.dsa->priv_key) {
-        return false;
+      {
+        const auto dsa = EVP_PKEY_get0_DSA(m_key);
+        assert(dsa);
+        const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+        DSA_get0_pqg(dsa, &p, &q, &g);
+        if (!p || !q || !g) {
+          return false;
+        }
+        DSA_get0_key(dsa, &pub_key, &priv_key);
+        if (!priv_key) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
 #ifndef NO_DH
     case EVP_PKEY_DH:
-      assert(m_key->pkey.dh);
-      if (!m_key->pkey.dh->p || !m_key->pkey.dh->priv_key) {
-        return false;
-      }
-      break;
+      {
+        const auto dh = EVP_PKEY_get0_DH(m_key);
+        assert(dh);
+        const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+        DH_get0_pqg(dh, &p, &q, &g);
+        if (!p) {
+          return false;
+        }
+        DH_get0_key(dh, &pub_key, &priv_key);
+        if (!priv_key) {
+          return false;
+        }
+        break;
+       }
 #endif
 #ifdef HAVE_EVP_PKEY_EC
     case EVP_PKEY_EC:
-      assert(m_key->pkey.ec);
-      if (EC_KEY_get0_private_key(m_key->pkey.ec) == nullptr) {
-        return false;
+      {
+        const auto ec_key = EVP_PKEY_get0_EC_KEY(m_key);
+        assert(ec_key);
+        if (EC_KEY_get0_private_key(ec_key) == nullptr) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
     default:
       raise_warning("key type not supported in this PHP build!");
@@ -1766,10 +1784,10 @@ openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
     }
     assert(bio_out);
 
-    switch (pkey->type) {
+    switch (EVP_PKEY_id(pkey)) {
 #ifdef HAVE_EVP_PKEY_EC
       case EVP_PKEY_EC:
-        ret = PEM_write_bio_ECPrivateKey(bio_out, pkey->pkey.ec,
+        ret = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get0_EC_KEY(pkey),
                                          cipher,
                                          (unsigned char *)passphrase.data(),
                                          passphrase.size(),
@@ -1852,7 +1870,7 @@ const StaticString
 
 static void add_bignum_as_string(Array &arr,
                                  StaticString key,
-                                 BIGNUM *bn) {
+                                 const BIGNUM *bn) {
   if (!bn) {
     return;
   }
@@ -1876,51 +1894,67 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   long ktype = -1;
 
   Array details;
-  RSA *rsa = pkey->pkey.rsa;
-  DSA *dsa = pkey->pkey.dsa;
-  DH *dh = pkey->pkey.dh;
-  switch (EVP_PKEY_type(pkey->type)) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    ktype = OPENSSL_KEYTYPE_RSA;
-    assert(rsa);
-    add_bignum_as_string(details, s_n, rsa->n);
-    add_bignum_as_string(details, s_e, rsa->e);
-    add_bignum_as_string(details, s_d, rsa->d);
-    add_bignum_as_string(details, s_p, rsa->p);
-    add_bignum_as_string(details, s_q, rsa->q);
-    add_bignum_as_string(details, s_dmp1, rsa->dmp1);
-    add_bignum_as_string(details, s_dmq1, rsa->dmq1);
-    add_bignum_as_string(details, s_iqmp, rsa->iqmp);
-    ret.set(s_rsa, details);
-    break;
+    {
+      ktype = OPENSSL_KEYTYPE_RSA;
+      RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+      assert(rsa);
+      const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+      RSA_get0_key(rsa, &n, &e, &d);
+      RSA_get0_factors(rsa, &p, &q);
+      RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+      add_bignum_as_string(details, s_n, n);
+      add_bignum_as_string(details, s_e, e);
+      add_bignum_as_string(details, s_d, d);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_q, q);
+      add_bignum_as_string(details, s_dmp1, dmp1);
+      add_bignum_as_string(details, s_dmq1, dmq1);
+      add_bignum_as_string(details, s_iqmp, iqmp);
+      ret.set(s_rsa, details);
+      break;
+  }
   case EVP_PKEY_DSA:
   case EVP_PKEY_DSA2:
   case EVP_PKEY_DSA3:
   case EVP_PKEY_DSA4:
-    ktype = OPENSSL_KEYTYPE_DSA;
-    assert(dsa);
-    add_bignum_as_string(details, s_p, dsa->p);
-    add_bignum_as_string(details, s_q, dsa->q);
-    add_bignum_as_string(details, s_g, dsa->g);
-    add_bignum_as_string(details, s_priv_key, dsa->priv_key);
-    add_bignum_as_string(details, s_pub_key, dsa->pub_key);
-    ret.set(s_dsa, details);
-    break;
+    {
+      ktype = OPENSSL_KEYTYPE_DSA;
+      DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+      assert(dsa);
+      const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+      DSA_get0_pqg(dsa, &p, &q, &g);
+      DSA_get0_key(dsa, &pub_key, &priv_key);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_q, q);
+      add_bignum_as_string(details, s_g, g);
+      add_bignum_as_string(details, s_priv_key, priv_key);
+      add_bignum_as_string(details, s_pub_key, pub_key);
+      ret.set(s_dsa, details);
+      break;
+    }
   case EVP_PKEY_DH:
-    ktype = OPENSSL_KEYTYPE_DH;
-    assert(dh);
-    add_bignum_as_string(details, s_p, dh->p);
-    add_bignum_as_string(details, s_g, dh->g);
-    add_bignum_as_string(details, s_priv_key, dh->priv_key);
-    add_bignum_as_string(details, s_pub_key, dh->pub_key);
-    ret.set(s_dh, details);
-    break;
+    {
+      ktype = OPENSSL_KEYTYPE_DH;
+      DH *dh = EVP_PKEY_get0_DH(pkey);
+      assert(dh);
+      const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+      DH_get0_pqg(dh, &p, &q, &g);
+      DH_get0_key(dh, &pub_key, &priv_key);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_g, g);
+      add_bignum_as_string(details, s_priv_key, priv_key);
+      add_bignum_as_string(details, s_pub_key, pub_key);
+      ret.set(s_dh, details);
+      break;
+    }
 #ifdef HAVE_EVP_PKEY_EC
   case EVP_PKEY_EC:
     {
       ktype = OPENSSL_KEYTYPE_EC;
-      auto const ec = pkey->pkey.ec;
+      auto const ec = EVP_PKEY_get0_EC_KEY(pkey);
       assert(ec);
 
       auto const ec_group = EC_KEY_get0_group(ec);
@@ -2015,13 +2049,13 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     cryptedlen = RSA_private_decrypt(data.size(),
                                      (unsigned char *)data.data(),
                                      cryptedbuf,
-                                     pkey->pkey.rsa,
+                                     EVP_PKEY_get0_RSA(pkey),
                                      padding);
     if (cryptedlen != -1) {
       successful = 1;
@@ -2055,13 +2089,13 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     successful = (RSA_private_encrypt(data.size(),
                                       (unsigned char *)data.data(),
                                       cryptedbuf,
-                                      pkey->pkey.rsa,
+                                      EVP_PKEY_get0_RSA(pkey),
                                       padding) == cryptedlen);
     break;
   default:
@@ -2091,13 +2125,13 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     cryptedlen = RSA_public_decrypt(data.size(),
                                     (unsigned char *)data.data(),
                                     cryptedbuf,
-                                    pkey->pkey.rsa,
+                                    EVP_PKEY_get0_RSA(pkey),
                                     padding);
     if (cryptedlen != -1) {
       successful = 1;
@@ -2131,13 +2165,13 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     successful = (RSA_public_encrypt(data.size(),
                                      (unsigned char *)data.data(),
                                      cryptedbuf,
-                                     pkey->pkey.rsa,
+                                     EVP_PKEY_get0_RSA(pkey),
                                      padding) == cryptedlen);
     break;
   default:
@@ -2285,7 +2319,9 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
 #ifdef HAVE_OPENSSL_MD2_H
   case OPENSSL_ALGO_MD2:  return EVP_md2();
 #endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
   case OPENSSL_ALGO_DSS1: return EVP_dss1();
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
   case OPENSSL_ALGO_SHA224: return EVP_sha224();
   case OPENSSL_ALGO_SHA256: return EVP_sha256();
@@ -2323,19 +2359,16 @@ bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
   String s = String(siglen, ReserveString);
   unsigned char *sigbuf = (unsigned char *)s.mutableData();
 
-  EVP_MD_CTX md_ctx;
-  EVP_SignInit(&md_ctx, mdtype);
-  EVP_SignUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
-  if (EVP_SignFinal(&md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
+  EVP_SignInit(md_ctx, mdtype);
+  EVP_SignUpdate(md_ctx, (unsigned char *)data.data(), data.size());
+  if (EVP_SignFinal(md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
     signature.assignIfRef(s.setSize(siglen));
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-    EVP_MD_CTX_cleanup(&md_ctx);
-#endif
     return true;
   }
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-  EVP_MD_CTX_cleanup(&md_ctx);
-#endif
   return false;
 }
 
@@ -2363,14 +2396,14 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
     return false;
   }
 
-  EVP_MD_CTX md_ctx;
-  EVP_VerifyInit(&md_ctx, mdtype);
-  EVP_VerifyUpdate(&md_ctx, (unsigned char*)data.data(), data.size());
-  err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature.data(),
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
+  EVP_VerifyInit(md_ctx, mdtype);
+  EVP_VerifyUpdate(md_ctx, (unsigned char*)data.data(), data.size());
+  err = EVP_VerifyFinal(md_ctx, (unsigned char *)signature.data(),
                          signature.size(), okey->m_key);
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-  EVP_MD_CTX_cleanup(&md_ctx);
-#endif
   return err;
 }
 
@@ -2577,8 +2610,9 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
     return -1;
   }
 
-  p = extension->value->data;
-  length = extension->value->length;
+  const auto data = X509_EXTENSION_get_data(extension);
+  p = data->data;
+  length = data->length;
   if (method->it) {
     names = (GENERAL_NAMES*)(ASN1_item_d2i(nullptr, &p, length,
                                           ASN1_ITEM_ptr(method->it)));
@@ -2638,11 +2672,11 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   assert(cert);
 
   Array ret;
-  if (cert->name) {
-    ret.set(s_name, String(cert->name, CopyString));
+  const auto sn = X509_get_subject_name(cert);
+  if (sn) {
+    ret.set(s_name, String(X509_NAME_oneline(sn, nullptr, 0), CopyString));
   }
-  add_assoc_name_entry(ret, "subject", X509_get_subject_name(cert),
-                       shortnames);
+  add_assoc_name_entry(ret, "subject", sn, shortnames);
   /* hash as used in CA directories to lookup cert by subject name */
   {
     char buf[32];
@@ -3191,11 +3225,15 @@ Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
   int siglen = EVP_MD_size(mdtype);
   String rv = String(siglen, ReserveString);
   unsigned char *sigbuf = (unsigned char *)rv.mutableData();
-  EVP_MD_CTX md_ctx;
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
 
-  EVP_DigestInit(&md_ctx, mdtype);
-  EVP_DigestUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
-  if (EVP_DigestFinal(&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
+  EVP_DigestInit(md_ctx, mdtype);
+
+  EVP_DigestUpdate(md_ctx, (unsigned char *)data.data(), data.size());
+  if (EVP_DigestFinal(md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
     if (raw_output) {
       rv.setSize(siglen);
       return rv;

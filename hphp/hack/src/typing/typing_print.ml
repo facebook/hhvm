@@ -477,9 +477,11 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   let result ty = ["result", from_type env ty] in
   let obj x = JSON_Object x in
   let name x = ["name", JSON_String x] in
+  let optional x = ["optional", JSON_Bool x] in
   let make_field (k, v) =
     obj @@
     name (Typing_env.get_shape_field_name k) @
+    optional v.sft_optional @
     typ v.sft_ty in
   let fields fl =
     ["fields", JSON_Array (List.map fl make_field)] in

@@ -41,28 +41,17 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
   let with_context parser context =
     { parser with context }
 
-  (** Wrapper functions for interfacing with parser context **)
-  (** (These functions are commented in Full_fidelity_parser_context) **)
-
+  (* Add a new expected token to 'parser''s context. *)
   let expect parser token_kind =
     let new_context = Context.expect parser.context token_kind in
     with_context parser new_context
 
-  let expect_in_new_scope parser token_kind_list =
-    let new_context = Context.expect_in_new_scope
-      parser.context token_kind_list in
-    with_context parser new_context
-
+  (* Check if token_kind is in the parser's list of expected token kinds. *)
   let expects parser token_kind =
     Context.expects parser.context token_kind
 
+  (* Check if token_kind is next in the parser's list of expected token kinds. *)
   let expects_next parser token_kind =
     Context.expects_next parser.context token_kind
-
-  let lowest_scope_expected parser =
-    Context.lowest_scope_expected parser.context
-
-  let lowest_scope_expects parser token_kind =
-    Context.lowest_scope_expects parser.context token_kind
 
 end

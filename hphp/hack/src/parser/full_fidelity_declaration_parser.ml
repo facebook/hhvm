@@ -555,10 +555,6 @@ module WithExpressionAndStatementAndTypeParser
   and parse_classish_element_list_opt parser =
     (* TODO: ERROR RECOVERY: consider bailing if the token cannot possibly
              start a classish element. *)
-    (* ERROR RECOVERY: we're in the body of a classish, so we add visibility
-     * modifiers to our context. *)
-    let parser = SimpleParser.expect_in_new_scope parser
-      [Public; Protected; Private] in
     parse_terminated_list parser parse_classish_element RightBrace
 
   and parse_xhp_children_paren parser =
@@ -826,29 +822,11 @@ module WithExpressionAndStatementAndTypeParser
        TODO: reasonably have an attribute. *)
     let (parser, modifiers) = parse_modifiers parser in
     if is_missing attribute_spec then
-      (* ERROR RECOVERY: match against two tokens, because if one token is
-       * in error but the next isn't, then it's likely that the user is
-       * simply still typing. Throw an error on what's being typed, then eat
-       * it and keep going. *)
-      let current_token_kind = peek_token_kind parser in
-      let next_token = peek_token ~lookahead:1 parser in
-      let next_token_kind = Token.kind next_token in
-      match current_token_kind, next_token_kind with
-      (* Detected the usual start to a method, so continue parsing as method. *)
-      | (Async | Coroutine | Function) , _ ->
-        parse_methodish parser attribute_spec modifiers
-      | LeftParen, _ ->
-        parse_property_declaration parser modifiers
-      (* We encountered one unexpected token, but the next still indicates that
-       * we should be parsing a methodish. Throw an error, eat the token,
-       * and keep parsing a methodish. *)
-      | _, (Async | Coroutine | Function)
-        when not (Token.has_leading_end_of_line next_token) ->
-        let parser = with_error parser SyntaxError.error1056 in
-        let parser = skip_token parser in
-        parse_methodish parser attribute_spec modifiers
-      (* Otherwise, continue parsing as a property (which might be a lambda). *)
-      | ( _ , _ ) -> parse_property_declaration parser modifiers
+      match peek_token_kind parser with
+      | Async
+      | Coroutine
+      | Function -> parse_methodish parser attribute_spec modifiers
+      | _ -> parse_property_declaration parser modifiers
     else
       parse_methodish parser attribute_spec modifiers
 

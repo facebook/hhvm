@@ -2623,6 +2623,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        */
       return TGen;
     case AnnotMetaType::Self:
+    case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return subObj(*s);
       break;
     case AnnotMetaType::Parent:

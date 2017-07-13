@@ -74,6 +74,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\mixed",    AnnotType::Mixed },
       { "HH\\num",      AnnotType::Number },
       { "HH\\arraykey", AnnotType::ArrayKey },
+      { "HH\\this",     AnnotType::This },
       { "self",         AnnotType::Self },
       { "parent",       AnnotType::Parent },
       { "callable",     AnnotType::Callable },

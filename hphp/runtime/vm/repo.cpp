@@ -190,6 +190,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     RuntimeOption::PHP7_Substr            = s_globalData.PHP7_Substr;
     RuntimeOption::PHP7_Builtins          = s_globalData.PHP7_Builtins;
     RuntimeOption::AutoprimeGenerators    = s_globalData.AutoprimeGenerators;
+    HHBBC::options.CheckThisTypeHints = s_globalData.CheckThisTypeHints;
     HHBBC::options.HardTypeHints          = s_globalData.HardTypeHints;
     HHBBC::options.HardReturnTypeHints    = s_globalData.HardReturnTypeHints;
     HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;

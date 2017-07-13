@@ -60,6 +60,15 @@ struct Repo::GlobalData {
   bool HardReturnTypeHints = false;
 
   /*
+   * Indicates whether a repo was compiled assumming that `this` types will be
+   * verified by Verify*Type instructions at runtime.
+   *
+   * This changes program behavior because this type hints that are checked
+   * at runtime will enable additional HHBBC optimizations.
+   */
+  bool CheckThisTypeHints = true;
+
+  /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
    */
   bool HardPrivatePropInference = false;
@@ -140,6 +149,7 @@ struct Repo::GlobalData {
     sd(UsedHHBBC)
       (EnableHipHopSyntax)
       (HardTypeHints)
+      (CheckThisTypeHints)
       (HardReturnTypeHints)
       (HardPrivatePropInference)
       (DisallowDynamicVarEnvFuncs)

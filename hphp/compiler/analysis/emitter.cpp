@@ -8385,7 +8385,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   // Ideally we should handle the void case in TypeConstraint::check. This
   // should however get done in a different diff, since it could impact
   // perf in a negative way (#3145038)
-  if (annot && !annot->isVoid() && !annot->isThis()) {
+  if (annot && !annot->isVoid()) {
     fe->retTypeConstraint = determine_type_constraint_from_annot(annot, true);
   }
 
@@ -11189,6 +11189,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.AutoprimeGenerators        = RuntimeOption::AutoprimeGenerators;
   gd.PromoteEmptyObject         = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction       = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.CheckThisTypeHints         = RuntimeOption::EvalCheckThisTypeHints;
   gd.HackArrCompatNotices       = RuntimeOption::EvalHackArrCompatNotices;
 
   for (auto a : Option::APCProfile) {

@@ -233,6 +233,15 @@ struct Options {
   bool HardReturnTypeHints = false;
 
   /*
+   * Whether to assume that `this` types will be verified by Verify*Type
+   * instructions at runtime.
+   *
+   * This changes program behavior because this type hints that are checked
+   * at runtime will enable additional HHBBC optimizations.
+   */
+  bool CheckThisTypeHints = true;
+
+  /*
    * If true, we'll try to infer the types of declared private class
    * properties.
    *

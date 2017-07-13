@@ -722,6 +722,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
         tc.isSoft() ||
         tc.isTypeVar() ||
         tc.isTypeConstant() ||
+        (tc.isThis() && !options.CheckThisTypeHints) ||
         tc.type() != AnnotType::Object) {
       return;
     }

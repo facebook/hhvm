@@ -97,7 +97,10 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
           strip = (!strcasecmp(stripped, "int") ||
                    !strcasecmp(stripped, "num"));
           break;
-        case 4: strip = !strcasecmp(stripped, "bool"); break;
+        case 4:
+          strip = (!strcasecmp(stripped, "bool") ||
+                   !strcasecmp(stripped, "this"));
+          break;
         case 5: strip = !strcasecmp(stripped, "float"); break;
         case 6: strip = !strcasecmp(stripped, "string"); break;
         case 8:
@@ -131,6 +134,7 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
       case AnnotType::Number:   str = "num"; break;
       case AnnotType::ArrayKey: str = "arraykey"; break;
       case AnnotType::Self:
+      case AnnotType::This:
       case AnnotType::Parent:
       case AnnotType::Object:
       case AnnotType::Mixed:
@@ -352,6 +356,7 @@ bool TypeConstraint::checkTypeAliasObj(const Class* cls) const {
     case AnnotMetaType::Parent:
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
+    case AnnotMetaType::This:
       // Self and Parent should never happen, because type
       // aliases are not allowed to use those MetaTypes
       return false;
@@ -386,6 +391,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     } else {
       switch (metaType()) {
         case MetaType::Self:
+        case MetaType::This:
           selfToClass(func, &c);
           break;
         case MetaType::Parent:
@@ -666,6 +672,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Mixed:
     case AnnotMetaType::Self:
+    case AnnotMetaType::This:
     case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:

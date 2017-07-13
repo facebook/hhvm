@@ -40,6 +40,7 @@ enum class AnnotMetaType : uint8_t {
   Callable = 4,
   Number = 5,
   ArrayKey = 6,
+  This = 7,
 };
 
 enum class AnnotType : uint16_t {
@@ -62,6 +63,7 @@ enum class AnnotType : uint16_t {
   Callable = (uint16_t)AnnotMetaType::Callable << 8 | (uint8_t)KindOfUninit,
   Number   = (uint16_t)AnnotMetaType::Number << 8   | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
+  This     = (uint16_t)AnnotMetaType::This << 8     | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -165,6 +167,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Self:
     case AnnotMetaType::Parent:
+    case AnnotMetaType::This:
       // For "self" and "parent", if `dt' is not an object we know
       // it's not compatible, otherwise more checks are required
       return (dt == KindOfObject)

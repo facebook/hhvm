@@ -141,7 +141,9 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   auto func = curFunc(env);
   auto const& tc = isReturnType ? func->returnTypeConstraint()
                                 : func->params()[id].typeConstraint;
-  if (tc.isMixed()) return;
+  if (tc.isMixed() || (!RuntimeOption::EvalCheckThisTypeHints && tc.isThis())) {
+    return;
+  }
 
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
@@ -259,7 +261,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       clsName = tc.typeName();
     }
   } else {
-    if (tc.isSelf()) {
+    if (tc.isSelf() || tc.isThis()) {
       tc.selfToClass(curFunc(env), &knownConstraint);
     } else {
       assertx(tc.isParent());
@@ -276,7 +278,8 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
 
   // For "self" and "parent", knownConstraint should always be
   // non-null at this point
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
+  assertx(IMPLIES(tc.isSelf() || tc.isThis() || tc.isParent(),
+        knownConstraint != nullptr));
 
   auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
   auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);

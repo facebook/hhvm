@@ -71,22 +71,18 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 and fmt_hints ~tparams ~namespace hints =
   String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))
 
-let rec hint_to_type_constraint ~return ~tparams ~skipawaitable ~namespace
-  (_, h) =
+let rec hint_to_type_constraint ~tparams ~skipawaitable ~namespace (_, h) =
 match h with
-| A.Happly ((_, ("mixed" | "this" | "void")), []) ->
+| A.Happly ((_, ("mixed" | "void")), []) ->
   TC.make None []
 
 | A.Hfun (_, _, _) ->
   TC.make None []
 
-| A.Haccess ((_, name), _, _) ->
-  if return && name = "this"
-  then TC.make None []
-  else
-    let tc_name = Some "" in
-    let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
-    TC.make tc_name tc_flags
+| A.Haccess _ ->
+  let tc_name = Some "" in
+  let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
+  TC.make tc_name tc_flags
 
   (* Elide the Awaitable class for async return types only *)
 | A.Happly ((_, "WaitHandle"), [(_, A.Happly((_, "void"), []))])
@@ -99,7 +95,7 @@ match h with
 | A.Happly ((_, "Awaitable"), [h])
 | A.Hoption (_, A.Happly ((_, "Awaitable"), [h]))
   when skipawaitable ->
-  hint_to_type_constraint ~return ~tparams ~skipawaitable:false ~namespace h
+  hint_to_type_constraint ~tparams ~skipawaitable:false ~namespace h
 
 | A.Happly ((_, "WaitHandle"), [])
 | A.Hoption (_, A.Happly ((_, "WaitHandle"), []))
@@ -128,7 +124,7 @@ match h with
   TC.make tc_name tc_flags
 
 | A.Hoption t ->
-  let tc = hint_to_type_constraint ~return ~tparams ~skipawaitable ~namespace t in
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags = List.dedup
@@ -136,7 +132,7 @@ match h with
   TC.make tc_name tc_flags
 
 | A.Hsoft t ->
-  let tc = hint_to_type_constraint ~return ~tparams ~skipawaitable ~namespace t in
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags = List.dedup
@@ -148,10 +144,8 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
     match kind with
     | Property ->
       TC.make None []
-    | Return ->
-      hint_to_type_constraint ~return:true ~tparams ~skipawaitable ~namespace h
-    | Param | TypeDef ->
-      hint_to_type_constraint ~return:false ~tparams ~skipawaitable ~namespace h
+    | Param | TypeDef | Return ->
+      hint_to_type_constraint ~tparams ~skipawaitable ~namespace h
     in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in

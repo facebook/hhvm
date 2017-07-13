@@ -1458,6 +1458,7 @@ void Parser::checkClassDeclName(const std::string& name) {
         // Fall though to the call to PARSE_ERROR() below
       case AnnotType::Array:
       case AnnotType::Self:
+      case AnnotType::This:
       case AnnotType::Parent:
       case AnnotType::Callable:
         PARSE_ERROR("Cannot use '%s' as class name as it is reserved",

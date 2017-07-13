@@ -274,6 +274,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.UsedHHBBC                = true;
   gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints            = options.HardTypeHints;
+  gd.CheckThisTypeHints       = options.CheckThisTypeHints;
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;

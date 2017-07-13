@@ -227,6 +227,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 
+  Config::Bind(HHBBC::options.CheckThisTypeHints, ini, config,
+               "CheckThisTypeHints", false);
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",
                RuntimeOption::EnableHipHopSyntax);

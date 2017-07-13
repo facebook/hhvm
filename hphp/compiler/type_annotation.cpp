@@ -50,8 +50,7 @@ std::string TypeAnnotation::vanillaName() const {
   if (m_nullable || m_soft || m_typevar || m_function || m_typeaccess) {
     return "";
   }
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
-      !strcasecmp(m_name.c_str(), "HH\\this")) {
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed")) {
     return "";
   }
   return m_name;

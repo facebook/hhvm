@@ -198,6 +198,7 @@ struct TypeConstraint {
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }
   bool isSelf()     const { return m_type == Type::Self; }
+  bool isThis()     const { return m_type == Type::This; }
   bool isParent()   const { return m_type == Type::Parent; }
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }

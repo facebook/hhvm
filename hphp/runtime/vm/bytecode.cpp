@@ -5512,18 +5512,24 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   bool useStrictTypes =
     func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
     !vmfp()->useWeakTypes();
+  if (UNLIKELY(!RuntimeOption::EvalCheckThisTypeHints && tc.isThis())) {
+    return;
+  }
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyParam(param.ptr, func, param.index, useStrictTypes);
   }
 }
 
 OPTBLD_INLINE void implVerifyRetType() {
-  if (LIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     return;
   }
 
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
+  if (UNLIKELY(!RuntimeOption::EvalCheckThisTypeHints && tc.isThis())) {
+    return;
+  }
   bool useStrictTypes = func->unit()->useStrictTypes();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
     tc.verifyReturn(vmStack().topTV(), func, useStrictTypes);

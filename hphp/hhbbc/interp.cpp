@@ -2789,6 +2789,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * on.
    */
   auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
+  if (!options.CheckThisTypeHints && constraint.isThis()) {
+    return;
+  }
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
     auto t = env.index.lookup_constraint(env.ctx, constraint);
@@ -2815,7 +2818,8 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // If HardReturnTypeHints is false OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
-  if (!options.HardReturnTypeHints || constraint.isSoft()) {
+  if (!options.HardReturnTypeHints || constraint.isSoft()
+      || (!options.CheckThisTypeHints && constraint.isThis())) {
     return;
   }
 

@@ -161,6 +161,115 @@ inline void bitset_for_each_set(const std::bitset<N>& bitset, F f) {
   }
 }
 
+
+template <size_t N>
+inline size_t findFirst1(const std::bitset<N>& bitset) {
+  return bitset_find_first(bitset);
+}
+
+// range from [s, e), if not found, return e
+template <size_t N>
+inline size_t findFirst1(const std::bitset<N>& bitset, size_t s, size_t e) {
+  assert(s <= e);
+  assert(e <= bitset.size());
+  for (size_t i = s; i < e; ++i) {
+    if (bitset[i]) return i;
+  }
+  return e;
+}
+
+template <size_t N>
+inline size_t findFirst0(const std::bitset<N>& bitset) {
+  for (size_t i = 0; i < bitset.size(); ++i) {
+    if (!bitset[i]) return i;
+  }
+  return bitset.size();
+}
+
+// range from [s, e), if not found, return e; if s == e, return e
+template <size_t N>
+inline size_t findFirst0(const std::bitset<N>& bitset, size_t s, size_t e) {
+  assert(s <= e);
+  assert(e <= bitset.size());
+  for (size_t i = s; i < e; ++i) {
+    if (!bitset[i]) return i;
+  }
+  return e;
+}
+
+template <size_t N>
+inline size_t findLast1(const std::bitset<N>& bitset) {
+  for (size_t i = bitset.size(); i-- > 0;) {
+    if (bitset[i]) return i;
+  }
+  return bitset.size();
+}
+
+// range from [s, e), if not found, return e; if s == e, return e
+template <size_t N>
+inline size_t findLast1(const std::bitset<N>& bitset, size_t s, size_t e) {
+  assert(s <= e);
+  assert(e <= bitset.size());
+  for (size_t i = e; i-- > s;) {
+    if (bitset[i]) return i;
+  }
+  return e;
+}
+
+template <size_t N>
+inline size_t findLast0(const std::bitset<N>& bitset) {
+  for (size_t i = bitset.size(); i-- > 0;) {
+    if (!bitset[i]) return i;
+  }
+  return bitset.size();
+}
+
+// range from [s, e), if not found, return e; if s == e, return e
+template <size_t N>
+inline size_t findLast0(const std::bitset<N>& bitset, size_t s, size_t e) {
+  assert(s <= e);
+  assert(e <= bitset.size());
+  for (size_t i = e; i-- > s;) {
+    if (!bitset[i]) return i;
+  }
+  return e;
+}
+
+
+template <size_t N>
+inline std::bitset<N>& fill1(std::bitset<N>& bitset) {
+  return bitset.set();
+}
+
+// range from [s, e)
+template <size_t N>
+inline std::bitset<N>& fill1(std::bitset<N>& bitset,
+                      size_t s, size_t e) {
+  assert(s < e);
+  assert(e <= bitset.size());
+  for(size_t i = s; i < e; ++i){
+    bitset.set(i);
+  }
+  return bitset;
+}
+
+template <size_t N>
+inline std::bitset<N>& fill0(std::bitset<N>& bitset) {
+  return bitset.reset();
+}
+
+// range from [s, e)
+template <size_t N>
+inline std::bitset<N>& fill0(std::bitset<N>& bitset,
+                      size_t s, size_t e) {
+  assert(s < e);
+  assert(e <= bitset.size());
+  for(size_t i = s; i < e; ++i){
+    bitset.reset(i);
+  }
+  return bitset;
+}
+
 } // HPHP
 
 #endif

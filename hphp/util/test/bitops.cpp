@@ -111,4 +111,115 @@ TEST(BitopsTest, BitsetForEachFull) {
   );
 }
 
+TEST(BitopsTest, findFirst1) {
+  std::bitset<64> bitset(1);
+  for (int i = 0; i < 63; i++) {
+    size_t out = findFirst1(bitset);
+    EXPECT_EQ(i, out);
+    out = findFirst1(bitset, i, bitset.size());
+    EXPECT_EQ(i, out);
+    out = findFirst1(bitset, i+1, bitset.size());
+    EXPECT_EQ(bitset.size(), out);
+    bitset <<= 1;
+  }
+}
+
+TEST(BitopsTest, findFirst0) {
+  std::bitset<64> bitset;
+  bitset.set();
+  bitset.reset(0);
+  for (int i = 0; i < 63; i++) {
+    size_t out = findFirst0(bitset);
+    EXPECT_EQ(i, out);
+    out = findFirst0(bitset, i , bitset.size());
+    EXPECT_EQ(i, out);
+    out = findFirst0(bitset, i+1, bitset.size());
+    EXPECT_EQ(bitset.size(), out);
+    bitset.set(i);
+    if(i + 1 < bitset.size()) bitset.reset(i+1);
+  }
+}
+
+TEST(BitopsTest, findLast1) {
+  std::bitset<64> bitset(1);
+  for (int i = 0; i < 63; i++) {
+    size_t out = findLast1(bitset);
+    EXPECT_EQ(i, out);
+    out = findLast1(bitset, i , bitset.size());
+    EXPECT_EQ(i, out);
+    out = findLast1(bitset, i+1, bitset.size());
+    EXPECT_EQ(bitset.size(), out);
+    bitset <<= 1;
+  }
+}
+
+TEST(BitopsTest, findLast0) {
+  std::bitset<64> bitset;
+  bitset.set();
+  bitset.reset(0);
+  for (int i = 0; i < 63; i++) {
+    size_t out = findLast0(bitset);
+    EXPECT_EQ(i, out);
+    out = findLast0(bitset, i , bitset.size());
+    EXPECT_EQ(i, out);
+    out = findLast0(bitset, i+1, bitset.size());
+    EXPECT_EQ(bitset.size(), out);
+    bitset.set(i);
+    if(i + 1 < bitset.size()) bitset.reset(i+1);
+  }
+}
+
+TEST(BitopsTest, cornercase) {
+  std::bitset<64> bitset;
+  bitset.set(0);
+  size_t out = findLast1(bitset, 0, 1);
+  EXPECT_EQ(0, out);
+  out = findFirst0(bitset, 0, 0);
+  EXPECT_EQ(0, out);
+  out = findFirst1(bitset, 1, 1);
+  EXPECT_EQ(1, out);
+  out = findLast0(bitset, 2, 2);
+  EXPECT_EQ(2, out);
+}
+
+TEST(BitopsTest, findLast1_cornercase) {
+  std::bitset<64> bitset;
+  size_t out = findLast1(bitset, 0, 5);
+  EXPECT_EQ(5, out);
+  out = findLast1(bitset, 0, 0);
+  EXPECT_EQ(0, out);
+}
+
+
+TEST(BitopsTest, fill0){
+  std::bitset<64> bitset;
+  bitset.set();
+  fill0(bitset);
+  EXPECT_TRUE(bitset.none());
+  bitset.set();
+  fill0(bitset, 20, 41);
+  for (size_t i = 0; i < bitset.size(); ++i) {
+    if (i >= 20 && i <= 40){
+      EXPECT_FALSE(bitset.test(i));
+    } else {
+      EXPECT_TRUE(bitset.test(i));
+    }
+  }
+}
+
+TEST(BitopsTest, fill1){
+  std::bitset<64> bitset;
+  fill1(bitset);
+  EXPECT_TRUE(bitset.all());
+  bitset.reset();
+  fill1(bitset, 20, 41);
+  for (size_t i = 0; i < bitset.size(); ++i) {
+    if (i >= 20 && i <= 40){
+      EXPECT_TRUE(bitset.test(i));
+    }else{
+      EXPECT_FALSE(bitset.test(i));
+    }
+  }
+}
+
 }

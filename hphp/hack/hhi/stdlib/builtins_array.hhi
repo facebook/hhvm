@@ -114,7 +114,7 @@ function array_keys<Tk, Tv>(
  * Container<X>          -> R = array<arraykey, Tr>
  * X (unknown type)      -> R = Y (other unknown type)
  */
-function array_map($callback, $arr1, ...);
+function array_map(?$callback, $arr1, ...);
 function array_merge_recursive($array1, ...);
 function array_merge($array1, ...);
 function array_replace_recursive($array1, ...);

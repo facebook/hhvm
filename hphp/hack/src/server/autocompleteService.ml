@@ -402,6 +402,22 @@ let compute_complete_global
     )
   in
 
+  let on_namespace name : autocomplete_result option =
+    (* name will have the form "Str" or "HH\\Lib\\Str" *)
+    (* Our autocomplete will show up in the list as "Str\\", including the *)
+    (* trailing slash, so users needn't type the ugly slash themselves.    *)
+    if not delimit_on_namespaces then None else
+    if not (does_fully_qualified_name_match_prefix name) then None else
+    Some (Complete {
+      res_pos = Pos.none |> Pos.to_absolute;
+      res_ty = "namespace";
+      res_name = (string_to_replace_prefix name) ^ "\\";
+      res_kind = Namespace_kind;
+      expected_ty = false;
+      func_details = None;
+    })
+  in
+
   (* Try using the names in local content buffer first *)
   List.iter
     (List.filter_map (SSet.elements content_classes) (on_class ~seen:SSet.empty))
@@ -409,6 +425,39 @@ let compute_complete_global
   List.iter
     (List.filter_map (SSet.elements content_funs) (on_function ~seen:SSet.empty))
       add_res;
+
+  (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
+  (* only stores names of functions and classes in fully qualified form, e.g. *)
+  (*   \\HH\\Lib\\Str\\length                                                 *)
+  (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
+  (* then the hack server will index the function just as                     *)
+  (*   \\Str\\length                                                          *)
+  (* The main index, having only a global list if functions/classes, doesn't  *)
+  (* actually offer any way for us to iterate over namespaces. And changing   *)
+  (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
+  (* to give an okay user-experience at least for the Hack standard library,  *)
+  (* we're just going to list all the possible standard namespaces right here *)
+  (* and see if any of them really exist in the current codebase/hhconfig!    *)
+  (* This will give a good experience only for codebases where users rarely   *)
+  (* define their own namespaces...                                           *)
+  let standard_namespaces =
+    ["C"; "Vec"; "Dict"; "Str"; "Keyset"; "Math"; "Regex"; "SecureRandom"; "PHP"; "JS"] in
+  let namespace_permutations ns = [
+     Printf.sprintf "%s" ns;
+     Printf.sprintf "%s\\fb" ns;
+     Printf.sprintf "HH\\Lib\\%s" ns;
+     Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+  ] in
+  let all_possible_namespaces =
+    List.map standard_namespaces ~f:namespace_permutations |> List.concat
+  in
+  List.iter all_possible_namespaces ~f:(fun ns ->
+    let ns_results = search_funs_and_classes (ns ^ "\\") ~limit:(Some 1)
+      ~on_class:(fun _className -> on_namespace ns)
+      ~on_function:(fun _functionName -> on_namespace ns)
+    in
+    List.iter ns_results add_res
+  );
 
   (* Use search results to look for matches, while excluding names we have
    * already seen in local content buffer *)

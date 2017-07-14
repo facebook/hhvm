@@ -62,6 +62,18 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
     "bhi        .l%=\n"
     : "+r"(offset), "+r"(hash2) : "r"(ones)
   );
+#elif defined(__powerpc__)
+  static_assert(Empty == -1, "The following fills with all 1's.");
+  assertx(HashSize(scale) == scale * 4);
+
+  uint64_t offset = scale * 16;
+  __asm__ __volatile__(
+    "vspltisw   0, -1       \n"
+    ".l%=:                  \n"
+    "subic.     %0, %0, 0x10\n"
+    "stxvd2x    32, %1, %0   \n"
+    "bgt        .l%=        \n"
+    : "+b"(offset) : "b"(hash) : "v0");
 #else
   static_assert(Empty == -1, "Cannot use wordfillones().");
   wordfillones(hash, HashSize(scale));
@@ -217,6 +229,15 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
     "stp        %x1, %x1, %x0\n"
     : "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
     : "r"(emptyVal)
+  );
+#elif defined(__powerpc__)
+  static_assert(Empty == -1, "");
+  static_assert(SmallSize == 3, "");
+  __asm__ __volatile__(
+    "vspltisw   0, -1\n"
+    "stxvd2x    32, 0, %0\n"
+    : : "r"((uint8_t*)a + (sizeof(ArrayType) + SmallSize * sizeof(Elm)))
+    : "v0"
   );
 #else
   auto const hash = HashTab(a, SmallScale);

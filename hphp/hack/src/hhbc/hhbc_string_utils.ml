@@ -20,6 +20,17 @@ let strip_ns s =
   (* strip zero or more chars followed by a backslash *)
   Str.replace_first (Str.regexp {|.*\\|}) "" s
 
+let cmp ?(case_sensitive=true) ?(ignore_ns=false) s1 s2 =
+  let s1, s2 =
+    if case_sensitive then s1, s2 else
+    String.lowercase_ascii s1, String.lowercase_ascii s2
+  in
+  let s1, s2 =
+    if not ignore_ns then s1, s2 else
+    strip_ns s1, strip_ns s2
+  in
+  s1 = s2
+
 
 module Types = struct
   let fix_casing s = match String.lowercase_ascii s with

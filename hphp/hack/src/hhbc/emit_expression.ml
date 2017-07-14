@@ -1087,7 +1087,7 @@ and emit_dynamic_collection env expr es =
     emit_keyvalue_collection "array" env es (NewMixedArray count)
 
 and emit_named_collection env expr pos name fields =
-  let name = SU.strip_ns name in
+  let name = SU.Types.fix_casing @@ SU.strip_ns name in
   match name with
   (* TODO (#19893791): It shouldn't be possible to get varray/darray here *)
   | "dict" | "vec" | "keyset" | "varray" | "darray"
@@ -1129,9 +1129,17 @@ and emit_named_collection env expr pos name fields =
     ]
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
+and is_php_array = function
+ | _, A.Array _ -> true
+ | _ -> false
+
 and emit_collection ?(transform_to_collection) env expr es =
-  match Ast_constant_folder.expr_to_opt_typed_value ~allow_maps:true
-    (Emit_env.get_namespace env) expr with
+  match Ast_constant_folder.expr_to_opt_typed_value
+          ~allow_maps:true
+          ~restrict_keys:(not @@ is_php_array expr)
+          (Emit_env.get_namespace env)
+          expr
+  with
   | Some tv ->
     emit_static_collection ~transform_to_collection tv
   | None ->

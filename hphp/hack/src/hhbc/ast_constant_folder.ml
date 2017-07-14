@@ -18,7 +18,11 @@ open Core
 exception NotLiteral
 
 (* Literal expressions can be converted into values *)
-let rec expr_to_typed_value ?(allow_maps=false) ns (_, expr_) =
+(* Restrict_keys flag forces keys to be only ints or strings *)
+let rec expr_to_typed_value
+  ?(allow_maps=false)
+  ?(restrict_keys=false)
+  ns (_, expr_) =
   match expr_ with
   | A.Int (_, s) -> TV.Int (Int64.of_string @@ SU.Integer.to_decimal s)
   | A.True -> TV.Bool true
@@ -36,9 +40,14 @@ let rec expr_to_typed_value ?(allow_maps=false) ns (_, expr_) =
       ~f:(fun l x -> TVL.add l (value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
-  | A.Collection ((_, (("dict" | "ImmMap" | "Map") as kind)), fields)
-    when allow_maps || kind = "dict" ->
-    let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
+  | A.Collection ((_, kind), fields)
+    when kind = "dict" ||
+         (allow_maps &&
+           (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map" ||
+            SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmMap")) ->
+    let values =
+      List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
+    in
     (* map key -> (the latest value for the given key) *)
     let unique_values_map = List.fold_left values ~init:TV.TVMap.empty
       ~f:(fun m (k, v) -> TV.TVMap.add k v m)
@@ -113,8 +122,12 @@ and shape_to_typed_value ns fields =
     (key, expr_to_typed_value ns expr))
   )
 
-and key_expr_to_typed_value ns expr =
+and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   let tv = expr_to_typed_value ns expr in
+  if restrict_keys then
+    begin match tv with
+    | TV.Int _ | TV.String _ -> ()
+    | _ -> raise NotLiteral end;
   match TV.cast_to_arraykey tv with
   | Some tv -> tv
   | None -> failwith "key_expr_to_typed_value: invalid key type"
@@ -126,12 +139,13 @@ and array_afield_to_typed_value_pair ns index afield =
   | A.AFkvalue (key, value) ->
     (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
 
-and afield_to_typed_value_pair ns afield =
+and afield_to_typed_value_pair ?(restrict_keys=false) ns afield =
   match afield with
-  | A.AFvalue (_key, _value) ->
+  | A.AFvalue (_value) ->
     failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
+    (key_expr_to_typed_value ~restrict_keys ns key,
+     expr_to_typed_value ns value)
 
 and value_afield_to_typed_value ns afield =
   match afield with
@@ -139,8 +153,8 @@ and value_afield_to_typed_value ns afield =
   | A.AFkvalue (_key, _value) ->
     failwith "value_afield_to_typed_value: unexpected key=>value"
 
-let expr_to_opt_typed_value ?(allow_maps=false) ns e =
-  match expr_to_typed_value ~allow_maps ns e with
+let expr_to_opt_typed_value ?(restrict_keys=false) ?(allow_maps=false) ns e =
+  match expr_to_typed_value ~restrict_keys ~allow_maps ns e with
   | x -> Some x
   | exception NotLiteral -> None
 

@@ -33,8 +33,6 @@ slow/closure/lambda_implicit_this.php
 slow/closure/lambda_uninit_capture.php
 slow/closure/return_types.php
 slow/collection_classes/815.php
-slow/collection_classes/invalid-initializers.php
-slow/collection_classes/iterator-clone-bug.php
 slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1282.php
@@ -72,7 +70,6 @@ slow/ctor_param_promotion_bad_mod.php
 slow/dict/hh-only1.php
 slow/dict/hh-only2.php
 slow/dict/hhbbc-group.php
-slow/dict/hphpc-literal.php
 slow/dict/init-parse-error1.php
 slow/dict/init-parse-error2.php
 slow/dict/init-parse-error3.php
@@ -178,7 +175,6 @@ slow/hh_namespace_migration/hh_frozenset7.php
 slow/hh_namespace_migration/hh_frozenvector4.php
 slow/hh_namespace_migration/hh_frozenvector7.php
 slow/hh_namespace_migration/hh_map4.php
-slow/hh_namespace_migration/hh_map6.php
 slow/hh_namespace_migration/hh_map7.php
 slow/hh_namespace_migration/hh_pair4.php
 slow/hh_namespace_migration/hh_pair7.php

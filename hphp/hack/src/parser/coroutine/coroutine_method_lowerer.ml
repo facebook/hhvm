@@ -108,18 +108,20 @@ let make_state_machine_method_reference_syntax
   (* new Closure($continuation, ...) *)
   let new_closure_syntax = make_object_creation_expression_syntax
     classname parameters in
-  (* new Closure($continuation, ...)->resume *)
+  (* (new Closure($continuation, ...)) *)
+  let new_closure_syntax =
+    make_parenthesized_expression_syntax new_closure_syntax in
+  (* (new Closure($continuation, ...))->resume *)
   let select_resume_member_syntax =
     make_member_selection_expression_syntax
       new_closure_syntax
       resume_member_name_syntax in
-
-  (* new Closure($continuation, ...)->resume(null) *)
+  (* (new Closure($continuation, ...))->resume(null) *)
   let call_resume_with_null_syntax =
     make_function_call_expression_syntax
       select_resume_member_syntax
       [null_syntax] in
-  (* new Closure($continuation, ...)->resume(null); *)
+  (* (new Closure($continuation, ...))->resume(null); *)
   let resume_statement_syntax =
     make_expression_statement_syntax call_resume_with_null_syntax in
   (* return SuspendedCoroutineResult::create(); *)

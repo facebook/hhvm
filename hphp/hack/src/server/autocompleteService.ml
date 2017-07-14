@@ -46,6 +46,10 @@ type partial_autocomplete_result = {
     desc : string option
   }
 
+type autocomplete_result =
+  | Partial of partial_autocomplete_result
+  | Complete of complete_autocomplete_result
+
 (* The type returned to the client *)
 type ide_result = {
   completions : complete_autocomplete_result list;
@@ -56,7 +60,7 @@ type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let ac_type = ref None
-let autocomplete_results : partial_autocomplete_result list ref = ref []
+let autocomplete_results : autocomplete_result list ref = ref []
 
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
@@ -120,28 +124,20 @@ let autocomplete_result_to_ide_response res =
   Ide_message.Autocomplete_response
     (List.map res.completions ~f:autocomplete_result_to_ide_response)
 
-let get_result name ty =
-  {
-    ty   = ty;
-    name = name;
-    desc = None;
-  }
+let get_partial_result name ty =
+  Partial { ty; name; desc = None; }
 
-let add_res (res: partial_autocomplete_result) : unit =
+let add_res (res: autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
-let add_result name ty =
-  add_res (get_result name ty)
+let add_partial_result name ty =
+  add_res (get_partial_result name ty)
 
-let get_result_with_desc name ty desc =
-  {
-    ty   = ty;
-    name = name;
-    desc = Some desc;
-  }
+let get_partial_result_with_desc name ty desc =
+  Partial { ty; name; desc = Some desc; }
 
-let add_result_with_desc name ty desc =
-  add_res (get_result_with_desc name ty desc)
+let add_partial_result_with_desc name ty desc =
+  add_res (get_partial_result_with_desc name ty desc)
 
 let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
@@ -187,7 +183,7 @@ let autocomplete_method is_static class_ ~targs:_ id env cid
         get_class_elt_types env class_ cid elts
     in
     SMap.iter results begin fun x ty ->
-      add_result x (Phase.decl ty)
+      add_partial_result x (Phase.decl ty)
     end;
   end
 
@@ -216,12 +212,12 @@ let autocomplete_lvar_typing id env =
     (* Get the types of all the variables in scope at this point *)
     SMap.iter !Autocomplete.auto_complete_vars begin fun x ident ->
       let _, ty = Typing_env.get_local env ident in
-      add_result x (Phase.locl ty)
+      add_partial_result x (Phase.locl ty)
     end;
     (* Add $this if we're in a instance method *)
     let ty = Typing_env.get_self env in
     if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then add_result
+    then add_partial_result
       Naming_special_names.SpecialIdents.this (Phase.locl ty)
   end
 
@@ -336,7 +332,7 @@ let compute_complete_global
         let s = Utils.strip_ns name in
         (match !ac_env with
           | Some _env when completion_type = Some Autocomplete.Acnew ->
-              Some (get_result s (Phase.decl (get_constructor_ty c)))
+              Some (get_partial_result s (Phase.decl (get_constructor_ty c)))
           | _ ->
               let desc = match c.Typing_defs.tc_kind with
                 | Ast.Cabstract -> "abstract class"
@@ -349,7 +345,7 @@ let compute_complete_global
                 Typing_reason.Rwitness c.Typing_defs.tc_pos,
                 Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), [])
               in
-              Some (get_result_with_desc s (Phase.decl ty) desc))
+              Some (get_partial_result_with_desc s (Phase.decl ty) desc))
     | _ -> None
   in
 
@@ -372,7 +368,7 @@ let compute_complete_global
             Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
             Typing_defs.Tfun fun_
           in
-          Some (get_result stripped_name (Phase.decl ty))
+          Some (get_partial_result stripped_name (Phase.decl ty))
         | _ -> None
       else None
     end else None
@@ -512,10 +508,14 @@ let get_results tcopt funs classes =
     let results = !autocomplete_results in
     let env = match !ac_env with
       | Some e -> e
-      | None ->
-        Typing_env.empty tcopt Relative_path.default ~droot:None
+      | None -> Typing_env.empty tcopt Relative_path.default ~droot:None
     in
-    results |> List.map ~f:(resolve_ty env) |> List.sort ~cmp:result_compare
+    let resolve (result: autocomplete_result) : complete_autocomplete_result =
+      match result with
+      | Partial res -> resolve_ty env res
+      | Complete res -> res
+    in
+    results |> List.map ~f:resolve |> List.sort ~cmp:result_compare
 end
 
 let reset () =

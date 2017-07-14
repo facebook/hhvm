@@ -553,19 +553,17 @@ let equiv prog prog' startlabelpairs =
    in
 
    if List.length (hs_of_pc pc) > 10 (* arbitrary limit *)
-   then (Semdiff_logging.error ~level:0 ("runaway: " ^ string_of_pc pc);
-         Some (pc, pc', asn, assumed, todo)) (* fail, dump state *)
+   then (Log.error ~level:0 (Tty.Normal Tty.Red) ("runaway: " ^ string_of_pc pc);
+        Some (pc, pc', asn, assumed, todo)) (* fail, dump state *)
    else
-   let previous_assumptions = lookup_assumption (pc,pc') assumed in
-    if AsnSet.exists (fun assasn -> entails_asns asn assasn)
-                     previous_assumptions
+    let previous_assumptions = lookup_assumption (pc,pc') assumed in
+    if AsnSet.exists (fun assasn -> entails_asns asn assasn) previous_assumptions
     (* that's a clumsy attempt at entailment asn => \bigcup prev_asses *)
     then donext assumed todo
     else
       if AsnSet.cardinal previous_assumptions > 2 (* arbitrary bound *)
       then try_specials ()
       else
-       (
        let i = prog_array.(ip_of_pc pc) in
        let i' = prog_array'.(ip_of_pc pc') in
        match i, i' with
@@ -612,7 +610,7 @@ let equiv prog prog' startlabelpairs =
             I'm only dealing with the matching case
             *)
             (match hs_of_pc pc, hs_of_pc pc' with
-               | [],[] -> (Log.debug "unwind not in handler"; try_specials ())
+               | [],[] -> (Log.debug (Tty.Normal Tty.Red) "unwind not in handler"; try_specials ())
                                                (* unwind not in handler! should be hard failure? *)
                | [Fault_handler _h], [Fault_handler _h'] -> donext assumed todo (* both jump out *)
                | (Fault_handler _h :: Fault_handler next :: hs),
@@ -762,7 +760,7 @@ let equiv prog prog' startlabelpairs =
                    ~f:(fun td ((pc,pc'),asn) -> add_todo (pc,pc') asn td)))
         (* if they're different classes altogether, give up *)
         | _, _ -> try_specials ()
-       )
+
 and donext assumed todo =
  match todo with
   | [] -> None (* success *)
@@ -879,11 +877,12 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
         let two_cugetl_list_createcl_action =
           two_cugetl_list_createcl_pattern $>>
            (fun (perm,cn,cn') ((_,n),(_,n')) ->
-           ( Log.debug @@ Printf.sprintf "create cl pattern at lines %d, %d" n n';
+             Log.debug (Tty.Normal Tty.Blue) @@
+               Printf.sprintf "create cl pattern at lines %d, %d" n n';
              let newpc = (hs_of_pc pc, n) in
              let newpc' = (hs_of_pc pc', n') in
                classes_to_check := IntIntPermSet.add (cn,cn',perm) (!classes_to_check);
-               check newpc newpc' asn assumed todo)) in
+               check newpc newpc' asn assumed todo) in
 
         let string_fatal_pattern = uString $$ uFatal in
         let two_string_fatal_pattern =
@@ -918,8 +917,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
          $> (fun ((n1,loc,_op,_n,key),(n1',loc',_op',_n',key')) ->((n1,loc,key),(n1',loc',key'))) in
         let two_vget_base_action = two_vget_base_pattern $>>
          (fun ((n1,loc,key),(n1',loc',key')) ((_,ip),(_,ip')) ->
-           let debug_string = Printf.sprintf "vget base pattern %d to %d" n1 n1' in
-           let _ = Semdiff_logging.debug debug_string in
+           Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "vget base pattern %d to %d" n1 n1';
            match reads asn (Local.Unnamed n1) (Local.Unnamed n1') with
             | None -> Some (pc, pc', asn, assumed, todo) (* fail *)
             | Some new_asn ->
@@ -966,8 +964,7 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
         let two_vget_cget_bind_action =
           two_vget_cget_bind_pattern $>>
          (fun ((n,optl),(n',optl')) ((_,ip),(_,ip')) ->
-           let debug_string = Printf.sprintf "vget cget pattern %d to %d" n n' in
-           let _ = Semdiff_logging.debug debug_string in
+           Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "vget cget pattern %d to %d" n n';
            match reads asn (Local.Unnamed n) (Local.Unnamed n') with
             | None -> Some(pc,pc',asn,assumed,todo)
             | Some new_asn ->

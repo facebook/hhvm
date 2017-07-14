@@ -71,13 +71,12 @@ let run options =
 
   let d, (s, e) = program_comparer.comparer prog1 prog2 in
   let similarity = (100.0 *. (1.0 -. float_of_int d /. float_of_int (s+1))) in
-  Log.print ~level:1 @@ Printf.sprintf "Distance = %d" d;
-  Log.print ~level:1 @@ Printf.sprintf "Size = %d" s;
-  Log.print ~level:1 ~newline:false @@ "Similarity = ";
-  Log.print ~level:0 @@ Printf.sprintf "%.2f" similarity;
-  Log.print ~level:1 @@ Printf.sprintf "Edits = \n%s" e;
-  (* make sure the colors are back to normal *)
-  Log.print ~level:1 defaultstring
+  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Distance = %d" d;
+  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Size = %d" s;
+  Log.print ~level:1 ~newline:false (Tty.Normal Tty.White) @@ "Similarity = ";
+  Log.print ~level:0 (Tty.Normal Tty.White) @@ Printf.sprintf "%.2f" similarity;
+  Log.print ~level:1 (Tty.Normal Tty.White) @@ Printf.sprintf "Edits = \n";
+  Log.print_edit_sequence ~level:1 e
 
 (* command line driver *)
 let _ =

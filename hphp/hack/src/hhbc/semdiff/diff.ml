@@ -14,16 +14,11 @@ module Log = Semdiff_logging
 
 let concatstrs = String.concat ""
 
-let addstring s = "\027[32m+ " ^ s ^ "\n"
-let deletestring s = "\027[31m- " ^ s ^ "\n"
-let bluestring s = "\027[34m" ^ s
-let subststring s1 s2 = deletestring s1 ^ addstring s2
-(* used to have something like
-  bluestring "S/" ^ deletestring s1 ^ bluestring "/" ^ addstring s2
-  ^ bluestring "/\n"
-  but decided to express substitution as addition/deletion instead
-  *)
-let defaultstring = "\027[0m"
+let substedit s1 s2 = [Log.Del s1; Log.Add s2]
+
+(* TODO: replace list with tree-type thingy for concatenation efficiency *)
+type edit_sequence = Log.tagged_string list
+
 let mymin (a,va) (b,vb) = if a<b then (a,va) else (b,vb)
 let keys_of al = List.map fst al
 let difference l1 l2 = List.filter (fun k -> not (List.mem k l2)) l1
@@ -32,7 +27,7 @@ let intersect l1 l2 = List.filter (fun k -> List.mem k l2) l1
 let sumsize elt_size l = List.fold_left (fun n e -> n + elt_size e) 0 l
 
 type 'a compare = {
-  comparer : 'a -> 'a -> int * (int * string);
+  comparer : 'a -> 'a -> int * (int * edit_sequence);
   size_of : 'a -> int;
   string_of : 'a -> string
 }
@@ -46,7 +41,7 @@ type 'a compare = {
 type action =
  | Delete
  | Insert
- | Subedit of string (* TODO: something more structured? *)
+ | Subedit of edit_sequence (* TODO: something more structured? *)
 
 let levenshtein value_comparer l1 l2 =
   let a1 = Array.of_list l1 in
@@ -58,12 +53,11 @@ let levenshtein value_comparer l1 l2 =
   if i = 0 && j=0 then sofar
   else
     match memo.(i).(j) with
-      | (_,Subedit edits) -> readback (i-1) (j-1) (edits ^ sofar)
+      | (_,Subedit edits) -> readback (i-1) (j-1) (edits @ sofar)
       | (_,Insert) ->
-       readback i (j-1) (addstring (value_comparer.string_of a2.(j-1)) ^ sofar)
+       readback i (j-1) ([Log.Add (value_comparer.string_of a2.(j-1))] @ sofar)
       | (_,Delete) ->
-       readback (i-1) j (deletestring (value_comparer.string_of a1.(i-1))
-                                                                 ^ sofar ) in
+       readback (i-1) j ([Log.Del (value_comparer.string_of a1.(i-1))] @ sofar) in
   for j = 1 to len2 do
     memo.(0).(j) <- let (sizesofar,_) = memo.(0).(j-1) in
                     (sizesofar + value_comparer.size_of a2.(j-1), Insert)
@@ -86,7 +80,7 @@ let levenshtein value_comparer l1 l2 =
   done;
   let (n,_) = memo.(len1).(len2) in
   let (totalsize,_) = memo.(len1).(0) in
-  (n, (totalsize, readback len1 len2 ""))
+  (n, (totalsize, readback len1 len2 []))
 
 (* In contrast to the above, a really stupid pointwise comparer for lists
    that runs in linear time and stops producing detailed diff outputs after
@@ -96,57 +90,56 @@ let levenshtein value_comparer l1 l2 =
 let max_array_size = 1000000
 let edit_cost_threshold = 20
 
-let rec dumb_compare value_comparer l1 l2 costsofar sizesofar buf =
+let rec dumb_compare value_comparer l1 l2 costsofar sizesofar edit_list =
  let possibly_remove x x_xsize =
    if costsofar < edit_cost_threshold then
-     (Buffer.add_string buf (deletestring (value_comparer.string_of x));
+      let new_list = edit_list @ [Log.Del (value_comparer.string_of x)] in
       if costsofar+x_xsize >= edit_cost_threshold then
-        Buffer.add_string buf "...truncated..."
-      else ())
-   else () in
+        new_list @ [Log.Def "...truncated..."]
+      else new_list
+   else edit_list in
+
   let possibly_add x x_xsize =
     if costsofar < edit_cost_threshold then
-       (Buffer.add_string buf (addstring (value_comparer.string_of x));
+       let new_list = edit_list @  [Log.Add (value_comparer.string_of x)] in
         if costsofar+x_xsize >= edit_cost_threshold then
-          Buffer.add_string buf "...truncated..."
-        else ())
-    else () in
+          new_list @ [Log.Def "...truncated..."]
+        else new_list
+    else edit_list in
+
   let possibly_edit edits size =
     if costsofar < edit_cost_threshold then
-      (Buffer.add_string buf edits;
+      let new_list = edit_list @ edits in
        if costsofar + size >= edit_cost_threshold then
-          Buffer.add_string buf "...truncated..."
-       else ())
-    else () in
+          new_list @ [Log.Def "...truncated..."]
+       else new_list
+    else edit_list in
+
  match l1, l2 with
-  | [], [] -> (costsofar, (sizesofar, Buffer.contents buf))
+  | [], [] -> (costsofar, (sizesofar, edit_list))
   | x::xs, [] -> let x_size = value_comparer.size_of x in
-                  possibly_remove x x_size;
                   dumb_compare value_comparer xs []
                     (costsofar + x_size)
                     (sizesofar + x_size)
-                    buf
+                    (possibly_remove x x_size)
   | [], y::ys -> let y_size = value_comparer.size_of y in
-                  possibly_add y y_size;
                   dumb_compare value_comparer [] ys
                     (costsofar + y_size)
                     (sizesofar + y_size)
-                    buf
+                    (possibly_add y y_size)
   | x::xs, y::ys ->
     let (editcost,(size,edits)) = value_comparer.comparer x y in
     if editcost = 0 then
-          dumb_compare value_comparer xs ys costsofar (size+sizesofar) buf
-    else
-          (possibly_edit edits editcost;
-           dumb_compare value_comparer xs ys (editcost+costsofar)
-            (size+sizesofar) buf)
+          dumb_compare value_comparer xs ys costsofar (size+sizesofar) edit_list
+    else  dumb_compare value_comparer xs ys (editcost+costsofar)
+            (size+sizesofar) (possibly_edit edits editcost)
 
 let falling_back_list_comparer value_comparer l1 l2 =
   let len1 = List.length l1 in
   let len2 = List.length l2 in
    if len1 * len2 < max_array_size then levenshtein value_comparer l1 l2
-   else (Semdiff_logging.debug "****Falling back on dumb comparer";
-         dumb_compare value_comparer l1 l2 0 0 (Buffer.create len1))
+   else (Log.debug (Tty.Normal Tty.Blue) "****Falling back on dumb comparer";
+         dumb_compare value_comparer l1 l2 0 0 [])
 
 (* Now the default list comparer, which does levenshtein unless the input looks
    too big for a quadratic algorithm, when it falls back to dumb_compare
@@ -159,8 +152,8 @@ let list_comparer elt_comparer inbetween = {
 }
 
 let primitive_comparer to_string = {
-  comparer = (fun n1 n2 -> if n1=n2 then (0,(1,""))
-                     else (1,(1,subststring (to_string n1) (to_string n2))));
+  comparer = (fun n1 n2 -> if n1=n2 then (0,(1,[]))
+                     else (1,(1,substedit (to_string n1) (to_string n2))));
   size_of = (fun _n -> 1);
   string_of = to_string;
 }
@@ -202,21 +195,21 @@ let join combinestrings c1 c2 = {
   comparer = (fun a b ->
      let (d1,(s1,e1)) = c1.comparer a b in
      let (d2,(s2,e2)) = c2.comparer a b in
-     (d1+d2, (s1+s2, e1 ^ e2))); (* definitely want better combinations here *)
+     (d1+d2, (s1+s2, e1 @ e2))); (* definitely want better combinations here *)
   size_of = (fun a -> (c1.size_of a) + (c2.size_of a));
   string_of = (fun a -> combinestrings (c1.string_of a) (c2.string_of a));
 }
 
 let rec joindiffs diffs = match diffs with
- | [] -> (0,(0,""))
+ | [] -> (0,(0,[]))
  | (d1,(s1,e1)) :: rest -> let (d,(s,e)) = joindiffs rest
-                           in (d+d1, (s+s1, e1^e))
+                           in (d+d1, (s+s1, e1 @ e))
 
 let joinmap f l = joindiffs (List.map f l)
 
 (* the comparer that says everything is equal *)
 let true_comparer vtostring = {
-  comparer = (fun _v1 _v2 -> (0,(0,"")));
+  comparer = (fun _v1 _v2 -> (0,(0,[])));
   size_of = (fun _v -> 0);
   string_of = vtostring
 }
@@ -228,12 +221,12 @@ let true_comparer vtostring = {
 let primitive_set_comparer vtostring = {
   comparer =
    (fun s1 s2 ->
-     let only1 = List.map (fun v -> deletestring (vtostring v) ^ " ")
+     let only1 = List.map (fun v -> Log.Del (vtostring v))
                           (difference s1 s2) in
-     let only2 = List.map (fun v -> addstring (vtostring v) ^ " ")
+     let only2 = List.map (fun v -> Log.Add (vtostring v))
                           (difference s2 s1) in
        (List.length only1 + List.length only2,
-         (List.length s1, concatstrs (only1 @ only2))));
+         (List.length s1, only1 @ only2)));
   size_of = List.length;
   string_of =
    (fun l -> "{" ^ concatstrs (List.map (fun v -> vtostring v ^ " ") l) ^ "}");
@@ -241,13 +234,13 @@ let primitive_set_comparer vtostring = {
 
 let option_comparer value_comparer = {
   comparer = (fun o1 o2 -> match o1, o2 with
-               | None, None -> (0,(1,""))
+               | None, None -> (0,(1,[]))
                | Some v1, None -> (value_comparer.size_of v1,
                                    (value_comparer.size_of v1,
-                                    deletestring (value_comparer.string_of v1)))
+                                    [Log.Del (value_comparer.string_of v1)]))
                | None, Some v2 ->(value_comparer.size_of v2,
                                    (value_comparer.size_of v2,
-                                     addstring (value_comparer.string_of v2)))
+                                     [Log.Add (value_comparer.string_of v2)]))
                | Some v1, Some v2 -> value_comparer.comparer v1 v2);
   size_of = (fun o -> match o with | None -> 1
                                    | Some v -> 1+(value_comparer.size_of v));
@@ -272,19 +265,21 @@ let alist_comparer value_comparer ktostring = {
     joinmap (fun k ->
                let v = List.assoc k al1 in
                let s = vsize v in
-               (s,(s, deletestring (ktostring k) ^ "->" ^ (vtostring v))))
+               (s,(s, [Log.Del ((ktostring k) ^ "->" ^ (vtostring v))])))
              k1only in
   let adds =
     joinmap (fun k -> let v = List.assoc k al2 in
                       let s = vsize v in
-                      (s,(s,addstring (ktostring k) ^ "->" ^ (vtostring v))))
+                      (s,(s, [Log.Add ((ktostring k) ^ "->" ^ (vtostring v))])))
              k2only in
   let diffs = joinmap (fun k -> let v1 = List.assoc k al1 in
                                 let v2 = List.assoc k al2 in
-                                Log.debug @@ Printf.sprintf "comparing key %s" (ktostring k);
+                                Log.debug (Tty.Normal Tty.Blue) @@
+                                   Printf.sprintf "comparing key %s" (ktostring k);
                                 let (d,(s,e)) = value_comparer.comparer v1 v2 in
-                                let expanded_edits = if d=0 then e
-                                                     else "for " ^ (ktostring k) ^ ":" ^ e in
+                                let expanded_edits =
+                                  if d=0 then e
+                                  else [Log.Def ("for " ^ (ktostring k) ^ ":")] @ e in
                                 (d,(s,expanded_edits)))
                      both in
    joindiffs [dels; adds; diffs]);
@@ -296,9 +291,9 @@ let alist_comparer value_comparer ktostring = {
 let flag_comparer name = {
   comparer = (fun b1 b2 -> match b1,b2 with
               | false, false
-              | true, true -> (0, (1,""))
-              | false, true -> (1,(1, addstring name))
-              | true, false -> (1,(1, deletestring name))
+              | true, true -> (0, (1,[]))
+              | false, true -> (1,(1, [Log.Add name]))
+              | true, false -> (1,(1, [Log.Del name]))
               );
   size_of = (fun _b -> 1);
   string_of = (fun b -> if b then name else "");
@@ -565,7 +560,7 @@ let property_list_comparer perm =
              (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) l1) in
         let l2names = concatstrs
              (List.map (fun p -> Hhbc_id.Prop.to_raw_string (Hhas_property.name p)) permuted_l2) in
-        Log.debug @@ Printf.sprintf "properties %s and %s" l1names l2names);
+        Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "properties %s and %s" l1names l2names);
    lc.comparer l1 permuted_l2);
   size_of = lc.size_of;
   string_of = lc.string_of;
@@ -611,7 +606,7 @@ let decl_list_comparer perm =
     (if perm = [] then ()
      else let l1names = concatstrs l1 in
           let l2names = concatstrs permuted_l2 in
-          Log.debug @@ Printf.sprintf "declvars %s and %s" l1names l2names);
+          Log.debug (Tty.Normal Tty.Blue) @@ Printf.sprintf "declvars %s and %s" l1names l2names);
      lc.comparer l1 permuted_l2);
     size_of = lc.size_of;
     string_of = lc.string_of;
@@ -649,11 +644,11 @@ let instruct_list_comparer = list_comparer instruct_comparer "\n"
 let instruct_list_comparer_with_semdiff = {
   comparer = (fun l1 l2 ->
                   match Rhl.equiv l1 l2 [] with
-                | None -> (Log.debug "Semdiff succeeded";
-                           (0, (List.length l1, "")))
+                | None -> (Log.debug (Tty.Normal Tty.White) "Semdiff succeeded";
+                           (0, (List.length l1, [])))
                 | Some (pc,pc',asn,assumed,todo) ->
-                  (Log.debug "Semdiff failed";
-                  Log.debug @@ Printf.sprintf
+                  (Log.debug (Tty.Normal Tty.White) "Semdiff failed";
+                  Log.debug (Tty.Normal Tty.White) @@ Printf.sprintf
                   "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
                   (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
                   (my_string_of_instruction
@@ -689,11 +684,11 @@ let body_instrs_comparer = {
       let inss = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b) in
       let inss' = Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b') in
         match Rhl.equiv inss inss' todo with
-           | None -> (Log.debug "Semdiff succeeded";
-                      (0, (List.length inss, "")) )
+           | None -> (Log.debug (Tty.Normal Tty.White) "Semdiff succeeded";
+                      (0, (List.length inss, [])) )
            | Some (pc,pc',asn,assumed,todo) ->
-             (Log.debug "Semdiff failed";
-             Log.debug @@ Printf.sprintf
+             (Log.debug (Tty.Normal Tty.White) "Semdiff failed";
+             Log.debug (Tty.Normal Tty.White) @@ Printf.sprintf
              "pc=%s, pc'=%s, i=%s i'=%s asn=%s\nAssumed=\n%s\nTodo=%s"
              (Rhl.string_of_pc pc) (Rhl.string_of_pc pc')
              (my_string_of_instruction
@@ -803,7 +798,8 @@ let compare_classes_functions_of_programs p p' =
                   let actual_function = List.nth (Hhas_program.functions p) (fid - 1) in
                   let actual_function' = List.nth (Hhas_program.functions p') (fid' -1) in
                   Rhl.functions_checked := Rhl.IntIntSet.add (fid,fid') !Rhl.functions_checked;
-                  Log.debug @@ Printf.sprintf "dynamic function comparison %d=%s and %d=%s"
+                  Log.debug (Tty.Normal Tty.Blue) @@
+                    Printf.sprintf "dynamic function comparison %d=%s and %d=%s"
                     fid (Hhbc_id.Function.to_raw_string @@ Hhas_function.name actual_function)
                     fid' (Hhbc_id.Function.to_raw_string @@ Hhas_function.name actual_function') ;
                   if Hhas_function.is_top actual_function || Hhas_function.is_top actual_function'
@@ -811,7 +807,7 @@ let compare_classes_functions_of_programs p p' =
                   else ();
                   let (df, (sf,ef)) = function_header_body_comparer.comparer
                                        actual_function actual_function' in
-                  loop (d+df) (s+sf) (e ^ ef)
+                  loop (d+df) (s+sf) (e @ ef)
               )
     | Some ((ac,ac',perm), newtodo) ->
      (Rhl.classes_to_check := newtodo;
@@ -823,9 +819,9 @@ let compare_classes_functions_of_programs p p' =
        Rhl.classes_checked := Rhl.IntIntSet.add (ac,ac') (!Rhl.classes_checked);
        let (dc, (sc,ec)) = (class_comparer perm).comparer actual_class actual_class' in
        (if perm = [] then ()
-        else Log.debug @@
+        else Log.debug (Tty.Normal Tty.Blue) @@
              Printf.sprintf "did perm comparison on classes %d and %d, distance was %d" ac ac' dc);
-       loop (d+dc) (s+sc) (e ^ ec))
+       loop (d+dc) (s+sc) (e @ ec))
  in loop dist size edits
 
 (* TODO: sizes and printing are not quite right here,

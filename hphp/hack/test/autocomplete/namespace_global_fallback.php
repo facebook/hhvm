@@ -23,7 +23,7 @@ namespace N2 {
   }
 
   function f(): void {
-    my_funAUTO332;
+    my_funAUTO332;  // autocomplete output has no defined order
   }
 
 }

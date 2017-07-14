@@ -49,7 +49,6 @@ type complete_autocomplete_result = {
     res_ty       : string;
     res_name     : string;
     res_kind     : autocomplete_kind;
-    expected_ty  : bool;
     func_details : func_details_result option;
   }
 
@@ -75,7 +74,6 @@ type ide_result = {
 type result = complete_autocomplete_result list
 
 let ac_env = ref None
-let ac_type = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
 let autocomplete_is_complete : bool ref = ref true
 
@@ -110,13 +108,12 @@ let autocomplete_result_to_json res =
   let name = res.res_name in
   let pos = res.res_pos in
   let ty = res.res_ty in
-  let expected_ty = res.expected_ty in
   Hh_json.JSON_Object [
       "name", Hh_json.JSON_String name;
       "type", Hh_json.JSON_String ty;
       "pos", Pos.json pos;
       "func_details", func_details_to_json res.func_details;
-      "expected_ty", Hh_json.JSON_Bool expected_ty;
+      "expected_ty", Hh_json.JSON_Bool false; (* legacy field, left here in case clients need it *)
   ]
 
 let autocomplete_result_to_ide_response res =
@@ -412,7 +409,6 @@ let compute_complete_global
       res_ty = "namespace";
       res_name = (string_to_replace_prefix name) ^ "\\";
       res_kind = Namespace_kind;
-      expected_ty = false;
       func_details = None;
     })
   in
@@ -480,52 +476,6 @@ let compute_complete_global
     List.iter gname_gns_results.With_complete_flag.value add_res;
   | _ -> ()
 
-let process_fun_call fun_args used_args _env =
-  let is_target target_pos p =
-    let line, char_pos, _ = Pos.info_pos target_pos in
-    let start_line, start_col, end_col = Pos.info_pos p in
-    start_line = line && start_col <= char_pos && char_pos - 1 <= end_col
-  in
-  match !Autocomplete.auto_complete_pos with
-    | Some pos when !ac_type = None ->
-        (* This function gets called on the 'way up' of the recursion that
-         * processes args. Therefore, inner arguments will hit this function
-         * first, so we only care when we don't have a result yet. This has to
-         * happen on the way up because autocomplete pos needs to get set
-         * before this is called *)
-        let argument_index = ref (-1) in
-        List.iteri used_args begin fun index arg ->
-          if is_target pos arg then argument_index := index;
-        end;
-        begin try
-          let _, arg_ty = List.nth_exn fun_args !argument_index in
-          ac_type := Some arg_ty
-        with
-          | Failure _ ->
-              (* They're specifying too many args, so we'll accept anything *)
-              ac_type := Some (Typing_reason.Rnone, Typing_defs.Tany)
-          | Invalid_argument _ ->
-              (* Never matched at all*)
-              ()
-        end
-    | _ -> ()
-
-let rec result_matches_expected_ty ty =
-  match !ac_type, !ac_env with
-    | Some goal_type, Some env ->
-        (match goal_type, ty with
-          | (_, Tany), _ | _, (_, Tany) ->
-              (* Everything will just be a match so this is pointless *)
-              false
-          | _, (_, Tfun fun_) ->
-              (* if this is a function, we'll check if the return type
-               * is a good result as well TODO: stop after enough levels
-               * and explore methods on the objects as well *)
-              if Typing_subtype.is_sub_type env ty goal_type then true
-              else result_matches_expected_ty fun_.Typing_defs.ft_ret
-          | _ -> Typing_subtype.is_sub_type env ty goal_type)
-    | _ -> false
-
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)
 let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
@@ -576,15 +526,9 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
     res_ty       = desc_string;
     res_name     = x.name;
     res_kind     = x.kind_;
-    expected_ty  = result_matches_expected_ty ty;
     func_details = func_details;
   }
 
-let result_compare a b =
-  if a.expected_ty = b.expected_ty then
-    String.compare a.res_name b.res_name
-  else if a.expected_ty then -1
-  else 1
 
 let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
   Errors.ignore_ begin fun () ->
@@ -593,7 +537,6 @@ let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
        completion_type = Some Autocomplete.Acnew ||
        completion_type = Some Autocomplete.Actype
     then compute_complete_global ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes;
-    let results = !autocomplete_results in
     let env = match !ac_env with
       | Some e -> e
       | None -> Typing_env.empty tcopt Relative_path.default ~droot:None
@@ -605,7 +548,7 @@ let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
     in
     {
       With_complete_flag.is_complete = !autocomplete_is_complete;
-      value = results |> List.map ~f:resolve |> List.sort ~cmp:result_compare;
+      value = !autocomplete_results |> List.map ~f:resolve;
     }
 end
 
@@ -615,7 +558,6 @@ let reset () =
   Autocomplete.auto_complete_pos := None;
   Autocomplete.auto_complete_vars := SMap.empty;
   ac_env := None;
-  ac_type := None;
   autocomplete_results := [];
   autocomplete_is_complete := true
 
@@ -626,7 +568,6 @@ let attach_hooks () =
   Typing_hooks.attach_smethod_hook autocomplete_smethod;
   Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
   Typing_hooks.attach_lvar_hook autocomplete_lvar_typing;
-  Typing_hooks.attach_fun_call_hook process_fun_call;
   Typing_hooks.attach_new_id_hook autocomplete_new;
   Naming_hooks.attach_hint_hook autocomplete_hint;
   Naming_hooks.attach_lvar_hook autocomplete_lvar_naming

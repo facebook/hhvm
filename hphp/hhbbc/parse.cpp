@@ -811,7 +811,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   func.staticLocals.reserve(fe.staticVars.size());
   for (auto& sv : fe.staticVars) {
     func.staticLocals.push_back(
-      php::StaticLocalInfo { sv.name, sv.phpCode }
+      php::StaticLocalInfo { sv.name }
     );
   }
 }

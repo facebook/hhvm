@@ -1728,11 +1728,9 @@ void parse_static(AsmState& as) {
   String init;
 
   as.in.expectWs('$');
-  if (!as.in.readname(name)) {
+  if (!as.in.readword(name)) {
     as.error("Statics must be named");
   }
-  as.in.expectWs('=');
-  svInfo.phpCode = makeStaticString(parse_long_string(as));
   svInfo.name = makeStaticString(name);
   as.fe->staticVars.push_back(svInfo);
 

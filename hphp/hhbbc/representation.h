@@ -248,7 +248,6 @@ struct Local {
  */
 struct StaticLocalInfo {
   LSString name;
-  LSString phpCode;
 };
 
 /*

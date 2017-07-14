@@ -4432,11 +4432,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       if (m_staticEmitted.insert(sv->getName()).second) {
         Func::SVInfo svInfo;
         svInfo.name = name;
-        std::ostringstream os;
-        CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-        auto ar = std::make_shared<AnalysisResult>();
-        value->outputPHP(cg, ar);
-        svInfo.phpCode = makeStaticString(os.str());
         m_curFunc->staticVars.push_back(svInfo);
       }
 

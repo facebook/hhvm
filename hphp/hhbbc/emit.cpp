@@ -584,7 +584,7 @@ void emit_locals_and_params(FuncEmitter& fe,
   fe.setNumClsRefSlots(func.numClsRefSlots);
 
   for (auto& sv : func.staticLocals) {
-    fe.staticVars.push_back(Func::SVInfo {sv.name, sv.phpCode});
+    fe.staticVars.push_back(Func::SVInfo {sv.name});
   }
 }
 

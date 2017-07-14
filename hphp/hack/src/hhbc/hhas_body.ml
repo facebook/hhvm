@@ -17,7 +17,7 @@ type t = {
   body_is_memoize_wrapper: bool;
   body_params            : Hhas_param.t list;
   body_return_type       : Hhas_type_info.t option;
-  body_static_inits      : (string * Ast.expr option) list;
+  body_static_inits      : string list;
   body_doc_comment       : string option;
 }
 

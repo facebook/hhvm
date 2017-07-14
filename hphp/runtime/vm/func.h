@@ -153,10 +153,9 @@ struct Func final {
    * Static variable info.
    */
   struct SVInfo {
-    template<class SerDe> void serde(SerDe& sd) { sd(name)(phpCode); }
+    template<class SerDe> void serde(SerDe& sd) { sd(name); }
 
     LowStringPtr name;
-    LowStringPtr phpCode; // Eval'able PHP code.
   };
 
   using ParamInfoVec = FixedVector<ParamInfo>;

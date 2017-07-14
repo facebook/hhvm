@@ -115,8 +115,8 @@ declvars:
 ;
 statics:
     | /* empty */ { [] }
-    | STATICDIRECTIVE DOLLAR ID EQUALS TRIPLEQUOTEDSTRING SEMI nl statics
-      { ($3, Some (Pos.none, Ast.String(Pos.none, $5))) :: $8 }
+    | STATICDIRECTIVE DOLLAR ID SEMI nl statics
+      { $3 :: $6 }
 ;
 requires:
     | /* empty */ { [] }

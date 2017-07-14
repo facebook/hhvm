@@ -1049,19 +1049,12 @@ let add_num_iters buf indent num_iters =
   then add_indented_line buf indent
     (Printf.sprintf ".numiters %d;" num_iters)
 
-let add_static_default_value_option buf indent label opt_expr =
-  let val_str = match opt_expr with
-  | None ->
-    " = \"\"\"null\"\"\""
-  | Some expr ->
-    " = \"\"\""
-    ^ (string_of_param_default_value expr)
-    ^ "\"\"\"" in
-  add_indented_line buf indent (".static " ^ label ^ val_str ^ ";")
+let add_static_default_value_option buf indent label =
+  add_indented_line buf indent (".static " ^ label ^ ";")
 
 let add_static_values buf indent lst =
   Core.List.iter lst
-    (fun (label, e) -> add_static_default_value_option buf indent label e)
+    (fun label -> add_static_default_value_option buf indent label)
 
 let add_doc buf doc_comment =
   match doc_comment with

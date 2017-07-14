@@ -593,7 +593,7 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
-    let mutate_static_init (s, opt) = (s, mutate_option opt) in
+    let mutate_static_init s = s in
     Hhas_body.make
       (body |> Hhas_body.instrs)
       (body |> Hhas_body.decl_vars)

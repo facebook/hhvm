@@ -70,7 +70,6 @@ slow/continue_statement/badexp.php
 slow/continue_statement/zero.php
 slow/control-flow/bug-4976291.php
 slow/ctor_param_promotion_bad_mod.php
-slow/debug_backtrace/backtrace_async_generators.php
 slow/dict/hh-only1.php
 slow/dict/hh-only2.php
 slow/dict/hhbbc-group.php
@@ -81,7 +80,6 @@ slow/dict/init-parse-error3.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
 slow/dv_array/arr_to_varray_cast.php
-slow/dv_array/basic-parsing.php
 slow/dv_array/constants.php
 slow/dv_array/convert.php
 slow/dv_array/hh-only1.php
@@ -89,7 +87,6 @@ slow/dv_array/hh-only2.php
 slow/dv_array/is-a.php
 slow/dv_array/literal.php
 slow/dv_array/nested_in_container.php
-slow/dv_array/override.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php
@@ -105,13 +102,7 @@ slow/eval_order/1502.php
 slow/exceptions/52.php
 slow/exceptions/62.php
 slow/exceptions/prepend_exception_trace.php
-slow/ext_apc_iterator/iterator_001.php
-slow/ext_apc_iterator/iterator_002.php
-slow/ext_apc_iterator/iterator_003.php
-slow/ext_apc_iterator/iterator_004.php
-slow/ext_apc_iterator/iterator_005.php
 slow/ext_array/count-opts.php
-slow/ext_datetime/strtotime_leak.php
 slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_mailparse/ext_uudecode.php
@@ -133,7 +124,6 @@ slow/ext_xdebug/max_nesting_level_1.php
 slow/ext_xdebug/time_index.php
 slow/ext_xdebug/xdebug/xdebug_call.php
 slow/ext_xdebug/xdebug_var_dump_limitations.php
-slow/ext_yaml/yaml_emit_008.php
 slow/finally/finally_break_003.php
 slow/finally/finally_break_004.php
 slow/finally/finally_break_005.php
@@ -402,7 +392,6 @@ slow/parser/xhp-ambiguity.php
 slow/perfect_virtual/80.php
 slow/php7_backported/engine-exceptions/throwable_namespace_002.php
 slow/php7_backported/generators/basic_yield_from_proxying.php
-slow/php7_backported/generators/get_return_errors.php
 slow/php7_backported/generators/recursive_yield_from.php
 slow/php7_backported/generators/yield_from_array.php
 slow/php7_backported/generators/yield_from_deep_recursion.php
@@ -552,9 +541,6 @@ slow/xhp/attr-syntax-3.php
 slow/xhp/attr_types.php
 slow/yield/2167.php
 slow/yield/2229.php
-slow/yield/throw/throw_already_closed.php
-slow/yield/throw/throw_caught.php
-slow/yield/throw/throw_rethrow.php
 slow/yield/yieldfrom/yield_from_advance_inner_generator.php
 slow/yield/yieldfrom/yield_from_advance_inner_iterator.php
 slow/yield/yieldfrom/yield_from_exception_handling_free_memory.php

@@ -79,6 +79,7 @@ let connect args =
     retry_if_init = args.retry_if_init;
     expiry = args.timeout;
     no_load = args.no_load;
+    profile_log = args.profile_log;
     ai_mode = args.ai_mode;
     progress_callback = ClientConnect.tty_progress_reporter;
     do_post_handoff_handshake = true;

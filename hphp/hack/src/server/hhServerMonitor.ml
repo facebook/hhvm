@@ -33,6 +33,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
   then EventLogger.init EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init_monitor (ServerArgs.root options) init_id
       (Unix.gettimeofday ());
+  Utils.profile := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
 
   let www_root = (ServerArgs.root options) in

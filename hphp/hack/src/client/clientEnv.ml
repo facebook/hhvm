@@ -61,6 +61,7 @@ type client_check_env = {
   autostart: bool;
   force_dormant_start: bool;
   no_load: bool;
+  profile_log: bool;
   ai_mode: string option;
 }
 

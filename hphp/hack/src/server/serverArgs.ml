@@ -23,6 +23,7 @@ type options = {
   convert          : Path.t option;
   max_procs        : int;
   no_load          : bool;
+  profile_log      : bool;
   with_mini_state  : mini_state_target option;
   save_filename    : string option;
   waiting_client   : Unix.file_descr option;
@@ -52,6 +53,7 @@ module Messages = struct
   let save_mini     = " save mini server state to file"
   let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
+  let profile_log   = " enable profile logging"
   let mini_state_json_descr =
     "Either\n" ^
     "   { \"data_dump\" : <mini_state_target json> }\n" ^
@@ -160,6 +162,7 @@ let parse_options () =
   let save          = ref None in
   let max_procs     = ref GlobalConfig.nbr_procs in
   let no_load       = ref false in
+  let profile_log   = ref false in
   let with_mini_state = ref None in
   let version       = ref false in
   let waiting_client= ref None in
@@ -175,20 +178,21 @@ let parse_options () =
   let set_debug = fun fd -> debug_client := Some fd in
   let set_with_mini_state = fun s -> with_mini_state := Some s in
   let options =
-    ["--debug"         , Arg.Set debug         , Messages.debug;
-     "--ai"            , Arg.String set_ai     , Messages.ai;
-     "--check"         , Arg.Set check_mode    , Messages.check;
-     "--json"          , Arg.Set json_mode     , Messages.json; (* CAREFUL!!! *)
-     "--daemon"        , Arg.Set should_detach , Messages.daemon;
-     "-d"              , Arg.Set should_detach , Messages.daemon;
-     "--from-vim"      , Arg.Set from_vim      , Messages.from_vim;
-     "--from-emacs"    , Arg.Set from_emacs    , Messages.from_emacs;
-     "--from-hhclient" , Arg.Set from_hhclient , Messages.from_hhclient;
-     "--convert"       , Arg.String cdir       , Messages.convert;
-     "--save"          , Arg.Unit set_save     , Messages.save;
+    ["--debug"         , Arg.Set debug           , Messages.debug;
+     "--ai"            , Arg.String set_ai       , Messages.ai;
+     "--check"         , Arg.Set check_mode      , Messages.check;
+     "--json"          , Arg.Set json_mode       , Messages.json; (*CAREFUL!!!*)
+     "--daemon"        , Arg.Set should_detach   , Messages.daemon;
+     "-d"              , Arg.Set should_detach   , Messages.daemon;
+     "--from-vim"      , Arg.Set from_vim        , Messages.from_vim;
+     "--from-emacs"    , Arg.Set from_emacs      , Messages.from_emacs;
+     "--from-hhclient" , Arg.Set from_hhclient   , Messages.from_hhclient;
+     "--convert"       , Arg.String cdir         , Messages.convert;
+     "--save"          , Arg.Unit set_save       , Messages.save;
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
-     "--max-procs"     , Arg.Int set_max_procs , Messages.max_procs;
-     "--no-load"       , Arg.Set no_load       , Messages.no_load;
+     "--max-procs"     , Arg.Int set_max_procs   , Messages.max_procs;
+     "--no-load"       , Arg.Set no_load         , Messages.no_load;
+     "--profile-log"   , Arg.Set profile_log     , Messages.profile_log;
      "--with-mini-state", Arg.String set_with_mini_state,
        Messages.with_mini_state;
      "--version"       , Arg.Set version       , "";
@@ -235,6 +239,7 @@ let parse_options () =
     convert       = convert;
     max_procs     = !max_procs;
     no_load       = !no_load;
+    profile_log   = !profile_log;
     with_mini_state = with_mini_state;
     save_filename = !save;
     waiting_client= !waiting_client;
@@ -251,6 +256,7 @@ let default_options ~root = {
   convert = None;
   max_procs = GlobalConfig.nbr_procs;
   no_load = true;
+  profile_log = false;
   with_mini_state = None;
   save_filename = None;
   waiting_client = None;
@@ -269,6 +275,7 @@ let should_detach options = options.should_detach
 let convert options = options.convert
 let max_procs options = options.max_procs
 let no_load options = options.no_load
+let profile_log options = options.profile_log
 let with_mini_state options = options.with_mini_state
 let save_filename options = options.save_filename
 let waiting_client options = options.waiting_client

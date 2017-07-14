@@ -8,15 +8,5 @@
  *
  *)
 
-type env = {
-  root: Path.t;
-  no_load: bool;
-  profile_log : bool;
-  silent: bool;
-  exit_on_failure: bool;
-  ai_mode: string option;
-  debug_port: Unix.file_descr option;
-}
-
-val main : env -> Exit_status.t
-val start_server : env -> unit
+let log_typing_time _ _ = ()
+let flush_buffer _ = ()

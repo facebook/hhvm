@@ -20,6 +20,7 @@ type env = {
   retry_if_init : bool;
   expiry : float option;
   no_load : bool;
+  profile_log : bool;
   ai_mode : string option;
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
@@ -236,6 +237,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         ClientStart.start_server { ClientStart.
           root = env.root;
           no_load = env.no_load;
+          profile_log = env.profile_log;
           silent = false;
           exit_on_failure = true;
           ai_mode = env.ai_mode;

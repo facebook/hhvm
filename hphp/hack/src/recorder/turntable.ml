@@ -30,6 +30,7 @@ let start_server root =
     autostart = true;
     force_dormant_start = false;
     no_load = false;
+    profile_log = false;
     ai_mode = None;
   } in
   match ClientCheck.main check_env with

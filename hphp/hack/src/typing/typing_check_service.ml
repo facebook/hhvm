@@ -115,14 +115,16 @@ let check_files opts (errors, err_info) fnl =
       let t = Unix.gettimeofday () in
       let result = check_file opts acc fn in
       let t' = Unix.gettimeofday () in
-      let msg =
-        Printf.sprintf "%f %s [type-check]" (t' -. t)
-          (Relative_path.suffix (fst fn)) in
-      !Utils.log msg;
-      result)
+      let duration = t' -. t in
+      let filepath = Relative_path.suffix (fst fn) in
+        TypingLogger.log_typing_time duration filepath;
+        !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
+        result)
     else check_file opts in
   let errors, failed, decl_failed = List.fold_left fnl
     ~f:check_file ~init:(errors, failed, decl_failed) in
+  let () = TypingLogger.flush_buffer () in
+
   let error_record = { Decl_service.
     errs = failed;
     lazy_decl_errs = decl_failed;

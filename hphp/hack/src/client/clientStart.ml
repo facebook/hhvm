@@ -22,6 +22,7 @@ let get_hhserver () =
 type env = {
   root: Path.t;
   no_load : bool;
+  profile_log : bool;
   silent : bool;
   exit_on_failure : bool;
   ai_mode : string option;
@@ -43,6 +44,7 @@ let start_server env =
     Array.concat [
       [|hh_server; "-d"; Path.to_string env.root|];
       if env.no_load then [| "--no-load" |] else [||];
+      if env.profile_log then [| "--profile-log" |] else [||];
       ai_options;
       (** If the client starts up a server monitor process, the output of that
        * bootup is passed to this FD - so this FD needs to be threaded

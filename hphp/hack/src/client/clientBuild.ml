@@ -73,6 +73,7 @@ let main env =
     retry_if_init = true;
     expiry = None;
     no_load = false;
+    profile_log = false;
     ai_mode = None;
     progress_callback = ClientConnect.tty_progress_reporter;
     do_post_handoff_handshake = true;

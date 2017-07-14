@@ -8,23 +8,41 @@
  *
  *)
 
-type t = Path.t * Path.t * bool * bool * ISet.t
+type t = {
+    saved_root : Path.t;
+    saved_hhi : Path.t;
+    trace : bool;
+    fuzzy : bool;
+    profile_log : bool;
+    fixme_codes : ISet.t;
+  }
 
-let save () =
-  Path.make (Relative_path.(path_of_prefix Root)),
-  Path.make (Relative_path.(path_of_prefix Hhi)),
-  !Typing_deps.trace,
-  !HackSearchService.fuzzy,
-  !Errors.ignored_fixme_codes
+let save () = {
+    saved_root = Path.make (Relative_path.(path_of_prefix Root));
+    saved_hhi = Path.make (Relative_path.(path_of_prefix Hhi));
+    trace = !Typing_deps.trace;
+    fuzzy = !HackSearchService.fuzzy;
+    profile_log = !Utils.profile;
+    fixme_codes = !Errors.ignored_fixme_codes;
+  }
 
-let restore (saved_root, saved_hhi, trace, fuzzy, fixme_codes) =
-  HackSearchService.fuzzy := fuzzy;
-  Relative_path.(set_path_prefix Root saved_root);
-  Relative_path.(set_path_prefix Hhi saved_hhi);
-  Typing_deps.trace := trace;
-  Errors.ignored_fixme_codes := fixme_codes
+let restore state =
+  Relative_path.(set_path_prefix Root state.saved_root);
+  Relative_path.(set_path_prefix Hhi state.saved_hhi);
+  Typing_deps.trace := state.trace;
+  HackSearchService.fuzzy := state.fuzzy;
+  Utils.profile := state.profile_log;
+  Errors.ignored_fixme_codes := state.fixme_codes
 
-let get_hhi_path (hhi_path, _, _, _, _) = hhi_path
-let get_root_path (_, root_path, _, _, _) = root_path
 
-let fake_state = Path.make ".", Path.make ".", false, false, ISet.empty
+let get_hhi_path state = state.saved_hhi
+let get_root_path state = state.saved_root
+
+let fake_state = {
+    saved_root = Path.make ".";
+    saved_hhi = Path.make ".";
+    trace = false;
+    fuzzy = false;
+    profile_log = false;
+    fixme_codes = ISet.empty;
+  }

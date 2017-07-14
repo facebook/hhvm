@@ -1102,6 +1102,7 @@ let do_initialize_start
     { ClientStart.
       root;
       no_load = false;
+      profile_log = false;
       ai_mode = None;
       silent = true;
       exit_on_failure = false;
@@ -1130,6 +1131,7 @@ let do_initialize_connect
       expiry = None; (* we can limit retries by time as well as by count *)
       retry_if_init = true; (* not actually used *)
       no_load = false; (* only relevant when autostart=true *)
+      profile_log = false; (* irrelevant *)
       ai_mode = None; (* only relevant when autostart=true *)
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;

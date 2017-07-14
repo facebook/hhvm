@@ -37,6 +37,7 @@ module type S = sig
   val convert             : options -> Path.t option
   val max_procs           : options -> int
   val no_load             : options -> bool
+  val profile_log         : options -> bool
   val with_mini_state     : options -> mini_state_target option
   val save_filename       : options -> string option
   val waiting_client      : options -> Unix.file_descr option

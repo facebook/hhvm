@@ -68,6 +68,7 @@ let parse_check_args cmd =
   let output_json = ref false in
   let retry_if_init = ref true in
   let no_load = ref false in
+  let profile_log = ref false in
   let timeout = ref None in
   let autostart = ref true in
   let force_dormant_start = ref false in
@@ -332,6 +333,9 @@ let parse_check_args cmd =
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
+    "--profile-log",
+      Arg.Set profile_log,
+      " enable profile logging";
     Common_argspecs.from from;
     "--timeout",
       Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
@@ -404,6 +408,7 @@ let parse_check_args cmd =
     autostart = !autostart;
     force_dormant_start = !force_dormant_start;
     no_load = !no_load;
+    profile_log = !profile_log;
     ai_mode = !ai_mode;
   }
 
@@ -415,6 +420,7 @@ let parse_start_env command =
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) command (String.capitalize_ascii command) in
   let no_load = ref false in
+  let profile_log = ref false in
   let ai_mode = ref None in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
@@ -424,6 +430,8 @@ let parse_start_env command =
     " this flag is deprecated and does nothing!";
     "--no-load", Arg.Set no_load,
     " start from a fresh state";
+    "--profile-log", Arg.Set profile_log,
+    " enable profile logging";
     "--ai", Arg.String (fun x -> ai_mode := Some x),
     "  run ai with options ";
   ] in
@@ -439,6 +447,7 @@ let parse_start_env command =
   { ClientStart.
     root = root;
     no_load = !no_load;
+    profile_log = !profile_log;
     ai_mode = !ai_mode;
     silent = false;
     exit_on_failure = true;

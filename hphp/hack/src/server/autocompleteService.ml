@@ -40,7 +40,7 @@ type complete_autocomplete_result = {
 
 (* Results that still need a typing environment to convert ty information
    into strings *)
-type autocomplete_result = {
+type partial_autocomplete_result = {
     ty   : Typing_defs.phase_ty;
     name : string;
     desc : string option
@@ -56,7 +56,7 @@ type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let ac_type = ref None
-let autocomplete_results = ref []
+let autocomplete_results : partial_autocomplete_result list ref = ref []
 
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
@@ -127,7 +127,7 @@ let get_result name ty =
     desc = None;
   }
 
-let add_res res =
+let add_res (res: partial_autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
 let add_result name ty =
@@ -450,6 +450,51 @@ let rec result_matches_expected_ty ty =
           | _ -> Typing_subtype.is_sub_type env ty goal_type)
     | _ -> false
 
+(* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
+(* by using typing environment to convert ty information into strings. *)
+let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
+    : complete_autocomplete_result =
+  let env, ty = match x.ty with
+    | DeclTy ty -> Phase.localize_with_self env ty
+    | LoclTy ty -> env, ty
+  in
+  let desc_string = match x.desc with
+    | Some s -> s
+    | None -> Typing_print.full_strip_ns env ty
+  in
+  let func_details = match ty with
+    | (_, Tfun ft) ->
+      let param_to_record ?(is_variadic=false) (name, pty) =
+        {
+          param_name     = (match name with
+                             | Some n -> n
+                             | None -> "");
+          param_ty       = Typing_print.full_strip_ns env pty;
+          param_variadic = is_variadic;
+        }
+      in
+      Some {
+        return_ty = Typing_print.full_strip_ns env ft.ft_ret;
+        min_arity = arity_min ft.ft_arity;
+        params    = List.map ft.ft_params param_to_record @
+          (match ft.ft_arity with
+             | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
+                              [param_to_record ~is_variadic:true empty]
+             | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+             | Fstandard _ -> [])
+      }
+    | _ -> None
+  in
+  let expected_ty = result_matches_expected_ty ty in
+  let pos = Typing_reason.to_pos (fst ty)
+  in
+  {
+    res_pos      = Pos.to_absolute pos;
+    res_ty       = desc_string;
+    res_name     = x.name;
+    expected_ty  = expected_ty;
+    func_details = func_details;
+  }
 
 let result_compare a b =
   if a.expected_ty = b.expected_ty then
@@ -470,51 +515,7 @@ let get_results tcopt funs classes =
       | None ->
         Typing_env.empty tcopt Relative_path.default ~droot:None
     in
-    (* Here we turn autocomplete_results into complete_autocomplete_results *)
-    (* by using typing environment to convert ty information into strings.  *)
-    let results = List.map results begin fun x ->
-      let env, ty = match x.ty with
-        | DeclTy ty -> Phase.localize_with_self env ty
-        | LoclTy ty -> env, ty
-      in
-      let desc_string = match x.desc with
-        | Some s -> s
-        | None -> Typing_print.full_strip_ns env ty
-      in
-      let func_details = match ty with
-        | (_, Tfun ft) ->
-          let param_to_record ?(is_variadic=false) (name, pty) =
-            {
-              param_name     = (match name with
-                                 | Some n -> n
-                                 | None -> "");
-              param_ty       = Typing_print.full_strip_ns env pty;
-              param_variadic = is_variadic;
-            }
-          in
-          Some {
-            return_ty = Typing_print.full_strip_ns env ft.ft_ret;
-            min_arity = arity_min ft.ft_arity;
-            params    = List.map ft.ft_params param_to_record @
-              (match ft.ft_arity with
-                 | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
-                                  [param_to_record ~is_variadic:true empty]
-                 | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
-                 | Fstandard _ -> [])
-          }
-        | _ -> None
-      in
-      let expected_ty = result_matches_expected_ty ty in
-      let pos = Typing_reason.to_pos (fst ty) in
-      {
-        res_pos      = Pos.to_absolute pos;
-        res_ty       = desc_string;
-        res_name     = x.name;
-        expected_ty  = expected_ty;
-        func_details = func_details;
-      }
-    end in
-    List.sort result_compare results
+    results |> List.map ~f:(resolve_ty env) |> List.sort ~cmp:result_compare
 end
 
 let reset () =

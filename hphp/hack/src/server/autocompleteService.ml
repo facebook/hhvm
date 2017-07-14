@@ -66,6 +66,7 @@ type autocomplete_result =
 type ide_result = {
   completions : complete_autocomplete_result list;
   char_at_pos : char;
+  is_complete : bool;
 }
 
 type result = complete_autocomplete_result list
@@ -73,6 +74,7 @@ type result = complete_autocomplete_result list
 let ac_env = ref None
 let ac_type = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
+let autocomplete_is_complete : bool ref = ref true
 
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
@@ -456,7 +458,7 @@ let compute_complete_global
       ~on_class:(fun _className -> on_namespace ns)
       ~on_function:(fun _functionName -> on_namespace ns)
     in
-    List.iter ns_results add_res
+    List.iter ns_results.With_complete_flag.value add_res
   );
 
   (* Use search results to look for matches, while excluding names we have
@@ -465,7 +467,9 @@ let compute_complete_global
     ~on_class:(on_class ~seen:content_classes)
     ~on_function:(on_function ~seen:content_funs)
   in
-  List.iter gname_results add_res;
+  autocomplete_is_complete :=
+    !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
+  List.iter gname_results.With_complete_flag.value add_res;
 
   (* Compute global namespace fallback results for functions, if applicable *)
   match gname_gns with
@@ -474,7 +478,9 @@ let compute_complete_global
       ~on_class:(fun _ -> None)
       ~on_function:(on_function ~seen:content_funs)
     in
-    List.iter gname_gns_results add_res;
+    autocomplete_is_complete :=
+      !autocomplete_is_complete && gname_gns_results.With_complete_flag.is_complete;
+    List.iter gname_gns_results.With_complete_flag.value add_res;
   | _ -> ()
 
 let process_fun_call fun_args used_args _env =
@@ -600,7 +606,10 @@ let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
       | Partial res -> resolve_ty env res
       | Complete res -> res
     in
-    results |> List.map ~f:resolve |> List.sort ~cmp:result_compare
+    {
+      With_complete_flag.is_complete = !autocomplete_is_complete;
+      value = results |> List.map ~f:resolve |> List.sort ~cmp:result_compare;
+    }
 end
 
 let reset () =
@@ -610,7 +619,8 @@ let reset () =
   Autocomplete.auto_complete_vars := SMap.empty;
   ac_env := None;
   ac_type := None;
-  autocomplete_results := []
+  autocomplete_results := [];
+  autocomplete_is_complete := true
 
 let attach_hooks () =
   reset();

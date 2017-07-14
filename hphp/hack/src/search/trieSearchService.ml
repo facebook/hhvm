@@ -10,6 +10,7 @@
 
 open Core
 open String_utils
+open Utils
 
 module Make(S : SearchUtils.Searchable) = struct
 
@@ -214,7 +215,7 @@ module Make(S : SearchUtils.Searchable) = struct
         end
       end
 
-    let query input ~filter_map ~limit =
+    let query input ~filter_map ~limit : 'a list With_complete_flag.t =
       let str = Utils.strip_ns input in
       let short_key = simplify_key str in
       (* get all the keys beneath short_key in the trie *)
@@ -229,7 +230,7 @@ module Make(S : SearchUtils.Searchable) = struct
       (* Go through set of filenames that contain results for those keys. We
        * accumulate results by reference to be able to early return from
        * computation by throwing an exception. *)
-      (try
+      try
         List.iter keys ~f:begin fun key ->
           let filenames = Hashtbl.find main_index key in
           List.iter filenames ~f:begin fun fn ->
@@ -238,9 +239,10 @@ module Make(S : SearchUtils.Searchable) = struct
               Hashtbl.add seen fn true
             end
           end
-        end
-      with Search_limit -> ());
-      !results
+        end;
+        { With_complete_flag.is_complete = true; value = !results; }
+      with Search_limit ->
+        { With_complete_flag.is_complete = false; value = !results; }
 
     let search_query input type_ =
       let input = String.lowercase input in
@@ -261,7 +263,7 @@ module Make(S : SearchUtils.Searchable) = struct
 
       let res = List.sort begin fun a b ->
         (snd a) - (snd b)
-      end results in
+      end results.With_complete_flag.value in
       List.take res 50
 
   end

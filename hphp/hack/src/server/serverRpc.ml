@@ -11,6 +11,7 @@
 open Core
 open ServerEnv
 open ServerCommandTypes
+open Utils
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
@@ -32,7 +33,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             Printexc.print_backtrace stderr;
             raise (Decl.Decl_not_found s)
         in
-        env, result
+        env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
@@ -114,14 +115,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces) ->
         let open Ide_api_types in
+        let open With_complete_flag in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char fc offset in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let content = File_content.edit_file_unsafe fc edits in
-        let completions =
+        let results =
           ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces content in
-        env, { AutocompleteService.completions; char_at_pos; }
+        let completions = results.value in
+        let is_complete = results.is_complete in
+        env, { AutocompleteService.completions; char_at_pos; is_complete; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
         let open Ide_api_types in
         let content = ServerFileSync.get_file_content (ServerUtils.FileName path) in

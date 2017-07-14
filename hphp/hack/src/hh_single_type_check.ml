@@ -633,7 +633,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       List.iter ~f: begin fun r ->
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty
-      end result
+      end result.Utils.With_complete_flag.value
   | Ffp_autocomplete ->
       let file_text = cat (Relative_path.to_absolute filename) in
       (* TODO: Use a magic word/symbol to identify autocomplete location instead *)

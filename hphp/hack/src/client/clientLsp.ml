@@ -711,8 +711,7 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
       completion.res_name
   in
   {
-    (* TODO: get isIncomplete flag from hh_server *)
-    isIncomplete = false;
+    isIncomplete = not result.is_complete;
     items = List.map result.completions ~f:hack_completion_to_lsp;
   }
 

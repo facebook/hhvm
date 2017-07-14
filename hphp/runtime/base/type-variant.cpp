@@ -561,6 +561,8 @@ Object Variant::toObjectHelper() const {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      return ObjectData::FromArray(toPHPArray().get());
+
     case KindOfPersistentArray:
     case KindOfArray:
       return ObjectData::FromArray(m_data.parr);

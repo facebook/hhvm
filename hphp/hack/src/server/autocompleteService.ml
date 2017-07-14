@@ -29,11 +29,23 @@ type func_details_result = {
     min_arity : int;
   }
 
+type autocomplete_kind =
+  | Abstract_class_kind
+  | Class_kind
+  | Method_kind
+  | Variable_kind
+  | Interface_kind
+  | Trait_kind
+  | Enum_kind
+  | Namespace_kind
+  | Constructor_kind
+
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
     res_pos      : Pos.absolute;
     res_ty       : string;
     res_name     : string;
+    res_kind     : autocomplete_kind;
     expected_ty  : bool;
     func_details : func_details_result option;
   }
@@ -43,7 +55,7 @@ type complete_autocomplete_result = {
 type partial_autocomplete_result = {
     ty   : Typing_defs.phase_ty;
     name : string;
-    desc : string option
+    kind_: autocomplete_kind;
   }
 
 type autocomplete_result =
@@ -124,20 +136,14 @@ let autocomplete_result_to_ide_response res =
   Ide_message.Autocomplete_response
     (List.map res.completions ~f:autocomplete_result_to_ide_response)
 
-let get_partial_result name ty =
-  Partial { ty; name; desc = None; }
+let get_partial_result name ty kind =
+  Partial { ty; name; kind_=kind; }
 
 let add_res (res: autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
-let add_partial_result name ty =
-  add_res (get_partial_result name ty)
-
-let get_partial_result_with_desc name ty desc =
-  Partial { ty; name; desc = Some desc; }
-
-let add_partial_result_with_desc name ty desc =
-  add_res (get_partial_result_with_desc name ty desc)
+let add_partial_result name ty kind =
+  add_res (get_partial_result name ty kind)
 
 let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
@@ -183,7 +189,7 @@ let autocomplete_method is_static class_ ~targs:_ id env cid
         get_class_elt_types env class_ cid elts
     in
     SMap.iter results begin fun x ty ->
-      add_partial_result x (Phase.decl ty)
+      add_partial_result x (Phase.decl ty) Method_kind
     end;
   end
 
@@ -212,13 +218,13 @@ let autocomplete_lvar_typing id env =
     (* Get the types of all the variables in scope at this point *)
     SMap.iter !Autocomplete.auto_complete_vars begin fun x ident ->
       let _, ty = Typing_env.get_local env ident in
-      add_partial_result x (Phase.locl ty)
+      add_partial_result x (Phase.locl ty) Variable_kind
     end;
     (* Add $this if we're in a instance method *)
     let ty = Typing_env.get_self env in
     if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
     then add_partial_result
-      Naming_special_names.SpecialIdents.this (Phase.locl ty)
+      Naming_special_names.SpecialIdents.this (Phase.locl ty) Variable_kind
   end
 
 let should_complete_class completion_type class_kind =
@@ -344,19 +350,19 @@ let compute_complete_global
       incr result_count;
       if completion_type = Some Autocomplete.Acnew then
         get_partial_result
-          (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c))
+          (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c)) Constructor_kind
       else
-        let desc = match c.Typing_defs.tc_kind with
-          | Ast.Cabstract -> "abstract class"
-          | Ast.Cnormal -> "class"
-          | Ast.Cinterface -> "interface"
-          | Ast.Ctrait -> "trait"
-          | Ast.Cenum -> "enum"
+        let kind = match c.Typing_defs.tc_kind with
+          | Ast.Cabstract -> Abstract_class_kind
+          | Ast.Cnormal -> Class_kind
+          | Ast.Cinterface -> Interface_kind
+          | Ast.Ctrait -> Trait_kind
+          | Ast.Cenum -> Enum_kind
         in
         let ty =
           Typing_reason.Rwitness c.Typing_defs.tc_pos,
           Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
-        get_partial_result_with_desc (string_to_replace_prefix name) (Phase.decl ty) desc
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind
     )
   in
 
@@ -367,7 +373,7 @@ let compute_complete_global
     Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
       incr result_count;
       let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-      get_partial_result (string_to_replace_prefix name) (Phase.decl ty)
+      get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Method_kind
     )
   in
 
@@ -451,9 +457,16 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
     | DeclTy ty -> Phase.localize_with_self env ty
     | LoclTy ty -> env, ty
   in
-  let desc_string = match x.desc with
-    | Some s -> s
-    | None -> Typing_print.full_strip_ns env ty
+  let desc_string = match x.kind_ with
+    | Method_kind
+    | Variable_kind
+    | Constructor_kind -> Typing_print.full_strip_ns env ty
+    | Abstract_class_kind -> "abstract class"
+    | Class_kind -> "class"
+    | Interface_kind -> "interface"
+    | Trait_kind -> "trait"
+    | Enum_kind -> "enum"
+    | Namespace_kind -> "namespace"
   in
   let func_details = match ty with
     | (_, Tfun ft) ->
@@ -485,6 +498,7 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
     res_pos      = Pos.to_absolute pos;
     res_ty       = desc_string;
     res_name     = x.name;
+    res_kind     = x.kind_;
     expected_ty  = expected_ty;
     func_details = func_details;
   }

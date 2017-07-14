@@ -668,9 +668,16 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
     }
   and hack_to_kind (completion: complete_autocomplete_result)
     : Completion.completionItemKind option =
-    (* TODO: change hh_server to return richer 'kind' information *)
-    (* For now we just return either 'Function' or 'None'. *)
-    Option.map completion.func_details ~f:(fun _ -> Completion.Function)
+    match completion.res_kind with
+    | Abstract_class_kind
+    | Class_kind -> Some Completion.Class
+    | Method_kind -> Some Completion.Method
+    | Variable_kind -> Some Completion.Variable
+    | Interface_kind
+    | Trait_kind -> Some Completion.Interface
+    | Enum_kind -> Some Completion.Enum
+    | Namespace_kind -> Some Completion.Module
+    | Constructor_kind -> Some Completion.Constructor
   and hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
     (* the inlineDetail (right column) for variable/field types. Is that good? *)

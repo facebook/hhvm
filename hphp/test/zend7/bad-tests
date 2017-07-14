@@ -1,0 +1,6 @@
+Tests that currently unexpectedly run forever, or crash/hang HHVM
+zend7/Zend/tests/jump13.php
+zend7/Zend/tests/foreach_016.php
+zend7/Zend/tests/foreach_011.php
+zend7/Zend/tests/bug70944.php
+zend7/Zend/tests/jump17.php

@@ -521,6 +521,7 @@ function get_options($argv) {
     'record-failures:' => '',
     'hackc' => '',
     'php7' => '',
+    'php7-runtime' => '',
   );
   $options = array();
   $files = array();
@@ -902,6 +903,10 @@ function hhvm_cmd_impl() {
     if (isset($options['php7'])) {
       $args[] = '-vEval.PHP7CompilerCommand="'.php7_compile_cmd($options).'"';
       $args[] = '-vEval.PHP7CompilerEnabled=true';
+    }
+
+    if (isset($options['php7']) || isset($options['php7-runtime'])) {
+      $args[] = '-vPHP7.all=1';
     }
 
     if (isset($options['relocate'])) {

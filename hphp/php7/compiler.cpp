@@ -61,9 +61,9 @@ inline std::string zval_to_string(const zval* zv) {
 
 using namespace bc;
 
-Compiler::Compiler() {
+Compiler::Compiler(const std::string& filename) {
   unit = std::make_unique<Unit>();
-  unit->name = "unit.hhas";
+  unit->name = filename;
 }
 
 void Compiler::compileProgram(const zend_ast* ast) {
@@ -330,6 +330,22 @@ void Compiler::compileStatement(const zend_ast* ast) {
     case ZEND_AST_DO_WHILE:
       compileWhile(ast->child[1], ast->child[0], true);
       break;
+    case ZEND_AST_FOR:
+      compileFor(ast);
+      break;
+    case ZEND_AST_BREAK:
+      activeBlock->exit(Jmp{currentLoop("break").continuation});
+      activeBlock = nullptr;
+      break;
+    case ZEND_AST_CONTINUE:
+      activeBlock->exit(Jmp{currentLoop("continue").test});
+      activeBlock = nullptr;
+      break;
+    case ZEND_AST_RETURN:
+      compileExpression(ast->child[0]);
+      activeBlock->exit(RetC{});
+      activeBlock = nullptr;
+      break;
     default:
       compileExpression(ast);
       activeBlock->emit(PopC{});
@@ -356,7 +372,9 @@ void Compiler::compileIf(const zend_ast* ast) {
 
       withBlock(branch, [&]() {
         compileStatement(contents);
-        activeBlock->exit(Jmp{end});
+        if (activeBlock) {
+          activeBlock->exit(Jmp{end});
+        }
       });
 
       compileExpression(condition);
@@ -364,7 +382,9 @@ void Compiler::compileIf(const zend_ast* ast) {
     }
   }
 
-  activeBlock->exit(Jmp{end});
+  if (activeBlock) {
+    activeBlock->exit(Jmp{end});
+  }
   activeBlock = end;
 }
 
@@ -378,7 +398,9 @@ void Compiler::compileWhile(const zend_ast* condition, const zend_ast* body,
   withBlock(bodyBlock, [&]() {
     activeLoops.push({continuation, testBlock});
     compileStatement(body);
-    activeBlock->exit(Jmp{testBlock});
+    if (activeBlock) {
+      activeBlock->exit(Jmp{testBlock});
+    }
     activeLoops.pop();
   });
 
@@ -394,6 +416,63 @@ void Compiler::compileWhile(const zend_ast* condition, const zend_ast* body,
     activeBlock->exit(Jmp{testBlock});
   }
 
+  activeBlock = continuation;
+}
+
+void Compiler::compileFor(const zend_ast* ast) {
+  auto initializers = zend_ast_get_list(ast->child[0]);
+  auto tests = zend_ast_get_list(ast->child[1]);
+  auto increments = zend_ast_get_list(ast->child[2]);
+  auto body = ast->child[3];
+
+  // compile the initializers
+  if (initializers) {
+    for (uint32_t i = 0; i < initializers->children; i++) {
+      compileExpression(initializers->child[i]);
+      activeBlock->emit(PopC{});
+    }
+  }
+
+  auto continuation = activeFunction->allocateBlock();
+  auto bodyBlock = activeFunction->allocateBlock();
+  auto testBlock = activeFunction->allocateBlock();
+  auto incrementBlock = activeFunction->allocateBlock();
+
+  withBlock(bodyBlock, [&]() {
+    activeLoops.push({continuation, incrementBlock});
+    compileStatement(body);
+    if (activeBlock) {
+      activeBlock->exit(Jmp{incrementBlock});
+    }
+    activeLoops.pop();
+  });
+
+  withBlock(testBlock, [&]() {
+    // an empty condition list is the same as one that is always successful
+    if (tests) {
+      for (uint32_t i = 0; i < tests->children; i++) {
+        compileExpression(tests->child[i]);
+        if (i + 1 < tests->children) { // all but the last are ignored
+          activeBlock->emit(PopC{});
+        }
+      }
+      activeBlock->exit(JmpZ{continuation});
+    }
+
+    activeBlock->exit(Jmp{bodyBlock});
+  });
+
+  withBlock(incrementBlock, [&]() {
+    if (increments) {
+      for (uint32_t i = 0; i < increments->children; i++) {
+        compileExpression(increments->child[i]);
+        activeBlock->emit(PopC{});
+      }
+    }
+    activeBlock->exit(Jmp{testBlock});
+  });
+
+  activeBlock->exit(Jmp{testBlock});
   activeBlock = continuation;
 }
 

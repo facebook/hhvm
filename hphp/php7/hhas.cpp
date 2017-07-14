@@ -93,6 +93,15 @@ struct InstrVisitor {
     }
   }
 
+  void imm(FatalOp op) {
+    out.append(" ");
+    switch (op) {
+#define FATAL_OP(name) case FatalOp::name: out.append( #name ); break;
+      FATAL_OPS
+#undef FATAL_OP
+    }
+  }
+
   template<class T>
   void imm(const T& imm) {
     out.append(" <immediate>");

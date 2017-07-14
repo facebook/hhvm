@@ -35,11 +35,17 @@ struct CompilerException : public std::logic_error {
     : std::logic_error(what) {}
 };
 
-struct Compiler {
-  explicit Compiler();
+struct LanguageException : CompilerException {
+  explicit LanguageException(const std::string& what)
+    : CompilerException(what) {}
+};
 
-  static std::unique_ptr<Unit> compile(const zend_ast* ast) {
-    Compiler compiler;
+struct Compiler {
+  explicit Compiler(const std::string& filename);
+
+  static std::unique_ptr<Unit> compile(const std::string& filename,
+                                       const zend_ast* ast) {
+    Compiler compiler(filename);
     compiler.compileProgram(ast);
     return std::move(compiler.unit);
   }
@@ -57,6 +63,7 @@ struct Compiler {
 
   void compileIf(const zend_ast* ast);
   void compileWhile(const zend_ast* cond, const zend_ast* body, bool bodyFirst);
+  void compileFor(const zend_ast* ast);
 
   Bytecode opForBinaryOp(const zend_ast* op);
   IncDecOp getIncDecOpForNode(zend_ast_kind kind);
@@ -112,6 +119,16 @@ struct Compiler {
   };
 
   std::stack<Loop> activeLoops;
+
+  Loop& currentLoop(const std::string& forWhat) {
+    if (activeLoops.empty()) {
+      throw LanguageException(
+          folly::sformat("'{}' not in the 'loop' or 'switch' context",
+                         forWhat));
+    }
+    return activeLoops.top();
+  }
+
 };
 
 }} // HPHP::php7

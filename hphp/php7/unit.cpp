@@ -73,7 +73,8 @@ std::vector<Block*> exitTargets(const Block::ExitOp& exit) {
       [&](const RetC& r) {},
       [&](const RetV& r) {},
       [&](const Unwind& u) {},
-      [&](const Throw& t) {});
+      [&](const Throw& t) {},
+      [&](const Fatal& t) {});
 
   return targets;
 }
@@ -128,4 +129,14 @@ std::vector<Block*> serializeControlFlowGraph(Block* entry) {
   return ordering;
 }
 
+std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
+                                    const std::string& msg) {
+  auto unit = std::make_unique<Unit>();
+  unit->name = filename;
+
+  auto blk = unit->getPseudomain()->entry;
+  blk->emit(bc::String{msg});
+  blk->exit(bc::Fatal{FatalOp::Parse});
+  return unit;
+}
 }} // HPHP::php7

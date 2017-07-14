@@ -45,7 +45,8 @@ struct Block {
     bc::RetC,
     bc::RetV,
     bc::Unwind,
-    bc::Throw
+    bc::Throw,
+    bc::Fatal
   >;
 
   void emit(bc::Jmp&&) = delete;
@@ -58,6 +59,7 @@ struct Block {
   void emit(bc::RetV&&) = delete;
   void emit(bc::Unwind&&) = delete;
   void emit(bc::Throw&&) = delete;
+  void emit(bc::Fatal&&) = delete;
   void emit(ExitOp&& op) = delete;
 
   void emit(Bytecode&& bc) {
@@ -111,6 +113,9 @@ struct Unit {
   std::unique_ptr<Function> pseudomain;
   std::vector<std::unique_ptr<Function>> functions;
 };
+
+std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
+                                    const std::string& msg);
 
 
 }} // HPHP::php7

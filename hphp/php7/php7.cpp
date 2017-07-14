@@ -30,8 +30,10 @@
 namespace {
 
 using HPHP::php7::CompilerException;
+using HPHP::php7::LanguageException;
 using HPHP::php7::Compiler;
 using HPHP::php7::dump_asm;
+using HPHP::php7::makeFatalUnit;
 
 struct Options {
   bool daemonEnabled{false};
@@ -83,11 +85,14 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
   return CG(ast);
 }
 
-std::string runCompiler(const folly::IOBuf& buf) {
-  auto ast = runParser(buf);
-  auto unit = Compiler::compile(ast);
-  auto hhas = dump_asm(*unit);
-  return hhas;
+std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
+  try {
+    auto ast = runParser(buf);
+    auto unit = Compiler::compile(filename, ast);
+    return dump_asm(*unit);
+  } catch (const LanguageException& e) {
+    return dump_asm(*makeFatalUnit(filename, e.what()));
+  }
 }
 
 int runDaemon() {
@@ -117,7 +122,7 @@ int runDaemon() {
       memset(buf->writableData() + code_length, '\0', ZEND_MMAP_AHEAD);
       buf->append(code_length + ZEND_MMAP_AHEAD);
 
-      auto hhas = runCompiler(*buf);
+      auto hhas = runCompiler(filename, *buf);
       std::cout << hhas.length() << std::endl
                 << hhas << std::endl;
     } catch (const CompilerException& e) {
@@ -149,7 +154,7 @@ int main(int argc, char** argv) {
       return runDaemon();
     } else {
       auto buf = readAll(std::cin);
-      std::cout << runCompiler(*buf) << std::endl;
+      std::cout << runCompiler("stdin.php", *buf) << std::endl;
     }
   } catch (const std::runtime_error& e) {
     std::cerr << "Fatal error: " << e.what() << std::endl;

@@ -1,0 +1,6 @@
+initialize {"initializationOptions":{},"processId":null,"rootPath":"/home/chrishahn/test","capabilities":{}}
+
+# sending shutdown isn't strictly necessary at the end of
+# a command session, but it's good practice to tell the LSP that we're done
+# working with it.
+shutdown {}

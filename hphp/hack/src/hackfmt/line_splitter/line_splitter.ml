@@ -38,7 +38,7 @@ let find_best_state init_state =
   let queue = State_queue.make_empty 7 in
   List.iter (expand_state init_state) ~f:(State_queue.push queue);
   let rec aux count best =
-    if count > 2000
+    if count > 100
       then None
     else if State_queue.is_empty queue || best.Solve_state.overflow = 0
       then Some best

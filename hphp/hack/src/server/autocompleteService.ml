@@ -223,10 +223,10 @@ let autocomplete_lvar_typing id env =
 
 let should_complete_class completion_type class_kind =
   match completion_type, class_kind with
-  | Some Autocomplete.Acid, Ast.Cnormal
-  | Some Autocomplete.Acid, Ast.Cabstract
-  | Some Autocomplete.Acnew, Ast.Cnormal
-  | Some Autocomplete.Actype, _ -> true
+  | Some Autocomplete.Acid, Some Ast.Cnormal
+  | Some Autocomplete.Acid, Some Ast.Cabstract
+  | Some Autocomplete.Acnew, Some Ast.Cnormal
+  | Some Autocomplete.Actype, Some _ -> true
   | _ -> false
 
 let should_complete_fun completion_type =
@@ -319,59 +319,56 @@ let compute_complete_global
           then None else Some (strip_all_ns gname)
     else None in
 
+  let does_fully_qualified_name_match_prefix ?(funky_gns_rules=false) name =
+    let stripped_name = strip_ns name in
+    match gname_gns with
+    | _ when string_starts_with stripped_name gname -> true
+    | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
+    | _ -> false
+  in
+
+  let string_to_replace_prefix name =
+    let stripped_name = strip_ns name in
+    stripped_name
+  in
+
   let result_count = ref 0 in
 
   let on_class name ~seen =
-    (* Skip the names that we know we have analyzed before *)
     if SSet.mem seen name then None else
-    if not (string_starts_with (strip_ns name) gname) then None else
-    match Typing_lazy_heap.get_class tcopt name with
-    | Some c
-      when should_complete_class completion_type c.Typing_defs.tc_kind ->
-        incr result_count;
-        let s = Utils.strip_ns name in
-        (match !ac_env with
-          | Some _env when completion_type = Some Autocomplete.Acnew ->
-              Some (get_partial_result s (Phase.decl (get_constructor_ty c)))
-          | _ ->
-              let desc = match c.Typing_defs.tc_kind with
-                | Ast.Cabstract -> "abstract class"
-                | Ast.Cnormal -> "class"
-                | Ast.Cinterface -> "interface"
-                | Ast.Ctrait -> "trait"
-                | Ast.Cenum -> "enum"
-              in
-              let ty =
-                Typing_reason.Rwitness c.Typing_defs.tc_pos,
-                Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), [])
-              in
-              Some (get_partial_result_with_desc s (Phase.decl ty) desc))
-    | _ -> None
+    if not (does_fully_qualified_name_match_prefix name) then None else
+    let target = Typing_lazy_heap.get_class tcopt name in
+    let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
+    if not (should_complete_class completion_type target_kind) then None else
+    Option.map target ~f:(fun c ->
+      incr result_count;
+      if completion_type = Some Autocomplete.Acnew then
+        get_partial_result
+          (string_to_replace_prefix name) (Phase.decl (get_constructor_ty c))
+      else
+        let desc = match c.Typing_defs.tc_kind with
+          | Ast.Cabstract -> "abstract class"
+          | Ast.Cnormal -> "class"
+          | Ast.Cinterface -> "interface"
+          | Ast.Ctrait -> "trait"
+          | Ast.Cenum -> "enum"
+        in
+        let ty =
+          Typing_reason.Rwitness c.Typing_defs.tc_pos,
+          Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
+        get_partial_result_with_desc (string_to_replace_prefix name) (Phase.decl ty) desc
+    )
   in
 
   let on_function name ~seen =
     if SSet.mem seen name then None else
-    if should_complete_fun completion_type then begin
-      (* stripped_name is like name but with leading "\\" removed, if present *)
-      let stripped_name = strip_ns name in
-      (* does stripped_name start with gname? *)
-      let matches_gname = string_starts_with stripped_name gname in
-      (* does stripped_name start with gname_gns? *)
-      let matches_gname_gns = match gname_gns with
-        | None -> false
-        | Some s -> string_starts_with stripped_name s in
-      if matches_gname || matches_gname_gns
-      then match Typing_lazy_heap.get_fun tcopt name with
-        | Some fun_ ->
-          incr result_count;
-          let ty =
-            Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
-            Typing_defs.Tfun fun_
-          in
-          Some (get_partial_result stripped_name (Phase.decl ty))
-        | _ -> None
-      else None
-    end else None
+    if not (should_complete_fun completion_type) then None else
+    if not (does_fully_qualified_name_match_prefix ~funky_gns_rules:true name) then None else
+    Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
+      incr result_count;
+      let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
+      get_partial_result (string_to_replace_prefix name) (Phase.decl ty)
+    )
   in
 
   (* Try using the names in local content buffer first *)

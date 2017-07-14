@@ -653,7 +653,7 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
     : Completion.completionItem =
     let (insertText, insertTextFormat) = hack_to_insert completion in
     {
-      label = completion.res_name;
+      label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
       kind = hack_to_kind completion;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);

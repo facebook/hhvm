@@ -400,14 +400,13 @@ let compute_complete_global
 
   let on_namespace name : autocomplete_result option =
     (* name will have the form "Str" or "HH\\Lib\\Str" *)
-    (* Our autocomplete will show up in the list as "Str\\", including the *)
-    (* trailing slash, so users needn't type the ugly slash themselves.    *)
+    (* Our autocomplete will show up in the list as "Str". *)
     if not delimit_on_namespaces then None else
     if not (does_fully_qualified_name_match_prefix name) then None else
     Some (Complete {
       res_pos = Pos.none |> Pos.to_absolute;
       res_ty = "namespace";
-      res_name = (string_to_replace_prefix name) ^ "\\";
+      res_name = string_to_replace_prefix name;
       res_kind = Namespace_kind;
       func_details = None;
     })

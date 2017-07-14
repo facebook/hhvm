@@ -1113,9 +1113,14 @@ let rec transform node =
       get_xhp_class_attribute_declaration_children x in
     Fmt [
       t kw;
-      WithRule (Rule.Parental, Nest [
-        handle_possible_list ~before_each:space_split xhp_attributes;
-      ]);
+      (match syntax xhp_attributes with
+      | Missing -> Nothing
+      | SyntaxList [attr] ->
+        WithRule (Rule.Parental, Nest [Space; Split; t attr])
+      | SyntaxList attrs ->
+        Nest [handle_list ~before_each:newline attrs]
+      | _ -> failwith "Expected SyntaxList"
+      );
       t semi;
       Newline;
     ]

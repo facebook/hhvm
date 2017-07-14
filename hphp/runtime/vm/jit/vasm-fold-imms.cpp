@@ -354,6 +354,14 @@ struct ImmFolder {
     return true;
   }
 
+  bool logical_bmsk(Vreg r, uint64_t& out) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!vixl::Assembler::IsImmLogical(imm64, vixl::kXRegSize)) return false;
+    out = imm64;
+    return true;
+  }
+
   bool zero_imm(Vreg r) {
     if (!valid.test(r)) return false;
     return vals[r] == 0;
@@ -403,7 +411,6 @@ struct ImmFolder {
   void fold(addq& in, Vinstr& out) { return fold_arith<addqi>(in, out); }
   void fold(andb& in, Vinstr& out) { return fold_logical<andbi>(in, out); }
   void fold(andl& in, Vinstr& out) { return fold_logical<andli>(in, out); }
-  void fold(andq& in, Vinstr& out) { return fold_logical<andqi>(in, out); }
   void fold(orq& in, Vinstr& out) { return fold_logical<orqi>(in, out); }
 
   void fold(testb& in, Vinstr& out) { return fold_test<testbi>(in, out); }
@@ -412,6 +419,15 @@ struct ImmFolder {
   void fold(cmpb& in, Vinstr& out) { return fold_cmp<cmpbi>(in, out); }
   void fold(cmpl& in, Vinstr& out) { return fold_cmp<cmpli>(in, out); }
   void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
+
+  void fold(andq& in, Vinstr& out) {
+    int val;
+    uint64_t bm;
+    if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
+    else if (logical_bmsk(in.s0, bm)) { out = andqi64{bm, in.s1, in.d, in.sf}; }
+    else if (logical_bmsk(in.s1, bm)) { out = andqi64{bm, in.s0, in.d, in.sf}; }
+  }
 
   void fold(storeb& in, Vinstr& out) {
     if (zero_imm(in.s)) out = storeb{PhysReg(vixl::wzr), in.m};

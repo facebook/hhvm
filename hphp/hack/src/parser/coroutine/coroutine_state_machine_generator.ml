@@ -829,9 +829,8 @@ let lower_body body =
   (body, locals_and_params)
 
 let make_closure_lambda_signature
-    classish_name
-    classish_type_parameters
-    ({ function_type; _; } as header_node) =
+    context
+    function_type =
   (*
   ( C_foo_GeneratedClosure $closure,
     mixed $coroutineData,
@@ -839,14 +838,13 @@ let make_closure_lambda_signature
   *)
   make_lambda_signature_syntax
     [
-      make_closure_parameter_syntax
-        classish_name classish_type_parameters header_node;
+      make_closure_parameter_syntax context;
       coroutine_data_parameter_syntax;
       nullable_exception_parameter_syntax;
     ]
     (make_coroutine_result_type_syntax function_type)
 
-let extract_parameter_declarations { function_parameter_list; _; } =
+let extract_parameter_declarations function_parameter_list =
   function_parameter_list
     |> syntax_node_to_list
     |> Core_list.map ~f:syntax
@@ -858,8 +856,8 @@ let extract_parameter_declarations { function_parameter_list; _; } =
       | _ -> failwith "Parameter had unexpected type."
       end
 
-let compute_state_machine_data locals_and_params header_node =
-  let parameters = extract_parameter_declarations header_node in
+let compute_state_machine_data locals_and_params function_parameter_list =
+  let parameters = extract_parameter_declarations function_parameter_list in
   let parameter_names =
     parameters
       |> Core_list.map ~f:
@@ -890,18 +888,17 @@ let compute_state_machine_data locals_and_params header_node =
  * implementation.
  *)
 let generate_coroutine_state_machine
-    classish_name
-    classish_type_parameters
+    context
     original_body
-    header_node =
+    function_type
+    function_parameter_list =
   let new_body, locals_and_params = lower_body original_body in
   let state_machine_data =
-    compute_state_machine_data locals_and_params header_node in
+    compute_state_machine_data locals_and_params function_parameter_list in
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure
-      classish_name
-      classish_type_parameters
+      context
       original_body
-      header_node
+      function_type
       state_machine_data in
   new_body, closure_syntax

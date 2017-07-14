@@ -73,26 +73,26 @@ let rewrite_coroutine_annotation
   )
 
 let rewrite_method_or_function
-    classish_name
-    classish_type_parameters
-    original_header_node
+    context
+    ({function_parameter_list; _;} as original_header_node)
     original_body =
-  let new_header_node = rewrite_header_node original_header_node in
+  let ({function_type; _;} as new_header_node) =
+    rewrite_header_node original_header_node in
   let new_body, closure_syntax =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
-      classish_name
-      classish_type_parameters
+      context
       original_body
-      new_header_node in
+      function_type
+      function_parameter_list in
   (new_header_node, new_body, closure_syntax)
 
-let lower_coroutine_function original_header original_body original_function =
-  let (new_header_node, new_body, closure_syntax) =
-    rewrite_method_or_function
-      global_syntax
-      (make_missing ())
-      original_header
-      original_body in
+let lower_coroutine_function
+    context
+    original_header
+    original_body
+    original_function =
+  let (new_header_node, new_body, closure_syntax) = rewrite_method_or_function
+    context original_header original_body in
   let new_function_syntax =
     CoroutineMethodLowerer.rewrite_function_declaration
       original_function
@@ -108,16 +108,18 @@ let lower_coroutine_functions_and_types
   | FunctionDeclaration ({
       function_declaration_header = {
         syntax = FunctionDeclarationHeader ({
-          function_coroutine;
-          _;
-        } as header_node);
-        _;
+          function_coroutine; _;
+        } as header_node); _;
       };
-      function_body;
-      _;
+      function_body; _;
     } as function_node) when not @@ is_missing function_coroutine ->
-      let (closure_syntax, new_function_syntax) =
-        lower_coroutine_function header_node function_body function_node in
+      let context = Coroutine_context.make_from_context
+        (current_node :: parents) in
+      let context = { context with
+        Coroutine_context.classish_name = global_syntax;
+      } in
+      let (closure_syntax, new_function_syntax) = lower_coroutine_function
+        context header_node function_body function_node in
       ((closure_syntax :: closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
   | LambdaExpression {
@@ -135,30 +137,21 @@ let lower_coroutine_functions_and_types
   | MethodishDeclaration ({
       methodish_function_decl_header = {
         syntax = FunctionDeclarationHeader ({
-          function_coroutine;
-          _;
-        } as header_node);
-        _;
+          function_coroutine; _;
+        } as header_node); _;
       };
-      methodish_function_body;
-      _;
+      methodish_function_body; _;
     } as method_node) when not @@ is_missing function_coroutine ->
-    (* TODO: Plumb the context through rather than tramping around the
-    header, class name and class type parameters. *)
-    let context = Coroutine_context.make_from_context parents in
-    let classish_name = context.Coroutine_context.classish_name in
-    let classish_type_parameters =
-      context.Coroutine_context.classish_type_parameters in
+    let context = Coroutine_context.make_from_context
+      (current_node :: parents) in
     let (new_header_node, new_body, closure_syntax) =
       rewrite_method_or_function
-        context.Coroutine_context.classish_name
-        context.Coroutine_context.classish_type_parameters
+        context
         header_node
         methodish_function_body in
     let new_method_syntax =
       CoroutineMethodLowerer.rewrite_methodish_declaration
-        classish_name
-        classish_type_parameters
+        context
         method_node
         new_header_node
         new_body in

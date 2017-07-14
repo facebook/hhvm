@@ -545,7 +545,7 @@ let continuation_variable =
 let continuation_variable_syntax =
   make_variable_syntax continuation_variable
 
-let make_closure_base_type_syntax { function_type; _; } =
+let make_closure_base_type_syntax function_type =
   make_type_specifier_syntax "ClosureBase" [ function_type; ]
 
 let make_continuation_type_syntax function_type =
@@ -553,7 +553,7 @@ let make_continuation_type_syntax function_type =
 
 let make_continuation_parameter_syntax
     ?visibility_syntax
-    { function_type; _; } =
+    function_type =
   make_parameter_declaration_syntax
     ?visibility_syntax
     (make_continuation_type_syntax function_type)
@@ -587,7 +587,10 @@ let create_suspended_coroutine_result_syntax =
     suspended_member_name
     []
 
-let make_closure_classname classish_name { function_name; _; } =
+(* ClassName_FunctionName_GeneratedClosure *)
+let make_closure_classname context =
+  let classish_name = context.Coroutine_context.classish_name in
+  let function_name = context.Coroutine_context.function_name in
   Printf.sprintf
     "%s_%s_GeneratedClosure"
     (string_of_name_token classish_name)
@@ -596,20 +599,23 @@ let make_closure_classname classish_name { function_name; _; } =
 (**
  * Given a list of TypeParameters syntaxes, combines them into a single
  * list of type_parameters.
+ TODO: What if there is a name collision?
  *)
-let make_closure_type_parameters
-    classish_type_parameters
-    { function_type_parameter_list; _; } =
+let make_closure_type_parameters context =
+  let classish_type_parameters =
+    context.Coroutine_context.classish_type_parameters in
+  let function_type_parameter_list =
+    context.Coroutine_context.function_type_parameter_list in
   (get_type_parameter_list classish_type_parameters) @
     (get_type_parameter_list function_type_parameter_list)
 
-let make_closure_type_syntax
-    classish_name
-    classish_type_parameters
-    header_node =
+(*
+    ClassName_FunctionName_GeneratedClosure<TClass, TFunc>
+*)
+let make_closure_type_syntax context =
   make_type_specifier_syntax
-    (make_closure_classname classish_name header_node)
-    (make_closure_type_parameters classish_type_parameters header_node)
+    (make_closure_classname context)
+    (make_closure_type_parameters context)
 
 let closure_variable =
   "$closure"
@@ -623,13 +629,9 @@ let closure_name_syntax name =
   let name_syntax = make_name_syntax name in
   make_member_selection_expression_syntax closure_variable_syntax name_syntax
 
-let make_closure_parameter_syntax
-    classish_name
-    classish_type_parameters
-    function_name =
+let make_closure_parameter_syntax context =
   make_parameter_declaration_syntax
-    (make_closure_type_syntax
-        classish_name classish_type_parameters function_name)
+    (make_closure_type_syntax context)
     closure_variable
 
 let resume_member_name =
@@ -717,15 +719,11 @@ let state_machine_variable_name =
 let state_machine_variable_name_syntax =
   make_variable_syntax state_machine_variable_name
 
-let make_state_machine_parameter_syntax
-    classish_name
-    classish_type_parameters
-    ({ function_type; _; } as header_node) =
+let make_state_machine_parameter_syntax context function_type =
   let state_machine_type_syntax =
     make_functional_type_syntax
       [
-        make_closure_type_syntax
-          classish_name classish_type_parameters header_node;
+        make_closure_type_syntax context;
         mixed_syntax;
         nullable_exception_type_syntax;
       ]

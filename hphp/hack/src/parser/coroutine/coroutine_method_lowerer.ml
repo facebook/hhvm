@@ -21,9 +21,9 @@ open Coroutine_state_machine_generator
  * To avoid conflicting with variadic function types, the contination parameter
  * is generated at the beginning rather than the end of the parameter list.
  *)
-let compute_parameter_list ({ function_parameter_list; _; } as header_node) =
+let compute_parameter_list { function_parameter_list; function_type; _; } = (* TODO *)
   let coroutine_parameter_syntax =
-    make_continuation_parameter_syntax header_node in
+    make_continuation_parameter_syntax function_type in
   prepend_to_comma_delimited_syntax_list
     coroutine_parameter_syntax
     function_parameter_list
@@ -85,19 +85,16 @@ let make_state_machine_method_reference_syntax
  * invoking resume (with a null argument).
  *)
 
- let rewrite_coroutine_body
-     classish_name
-     classish_type_parameters
-     ({ function_parameter_list; _; } as header_node)
+ let create_closure_invocation
+     context
+     { function_parameter_list; function_type; _; } (* TODO *)
      rewritten_body =
-   (* $param1, $param2 *)
-   let arg_list = parameter_list_to_arg_list function_parameter_list in
-
+  (* $param1, $param2 *)
+  let arg_list = parameter_list_to_arg_list function_parameter_list in
   (* ($closure, $data, $exception) ==> { body } *)
-  let lambda_signature = make_closure_lambda_signature classish_name
-      classish_type_parameters header_node in
+  let lambda_signature = make_closure_lambda_signature context function_type in
   let lambda = make_lambda_syntax lambda_signature rewritten_body in
-  let classname = make_closure_classname classish_name header_node in
+  let classname = make_closure_classname context in
   (* $continuation,
     ($closure, $data, $exception) ==> { body },
     $param1, $param2 *)
@@ -130,19 +127,14 @@ let make_state_machine_method_reference_syntax
   make_list [resume_statement_syntax; return_syntax]
 
 let rewrite_coroutine_body
-    classish_name
-    classish_type_parameters
+    context
     methodish_function_body
     header_node
     rewritten_body =
   match syntax methodish_function_body with
   | CompoundStatement node ->
-      let compound_statements = rewrite_coroutine_body
-        classish_name
-        classish_type_parameters
-        header_node
-        rewritten_body in
-
+      let compound_statements = create_closure_invocation
+        context header_node rewritten_body in
       make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
       methodish_function_body
@@ -156,8 +148,7 @@ let rewrite_coroutine_body
  * implementation.
  *)
 let rewrite_methodish_declaration
-    classish_name
-    classish_type_parameters
+    context
     ({ methodish_function_body; _; } as method_node)
     header_node
     rewritten_body =
@@ -165,8 +156,7 @@ let rewrite_methodish_declaration
     make_syntax (MethodishDeclaration method_node) in
   let methodish_function_body =
     rewrite_coroutine_body
-      classish_name
-      classish_type_parameters
+      context
       methodish_function_body
       header_node
       rewritten_body in
@@ -179,17 +169,19 @@ let rewrite_methodish_declaration
 
 let rewrite_function_declaration
     ({ function_body; _; } as function_node)
-    header_node
+    ({ function_name; function_type_parameter_list; _; } as header_node)
     rewritten_body =
   (* TODO:Would it be better to have no class name at all? *)
-  let classish_name = global_syntax in
-  let classish_type_parameters = make_missing () in
+  (* TODO: Return type? *)
+  let context = { Coroutine_context.empty with
+    Coroutine_context.classish_name = global_syntax;
+    Coroutine_context.function_name;
+    Coroutine_context.function_type_parameter_list } in
   let make_syntax function_node =
     make_syntax (FunctionDeclaration function_node) in
   let function_body =
     rewrite_coroutine_body
-      classish_name
-      classish_type_parameters
+      context
       function_body
       header_node
       rewritten_body in

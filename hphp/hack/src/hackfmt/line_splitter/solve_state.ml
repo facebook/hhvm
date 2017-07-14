@@ -206,6 +206,18 @@ let make chunk_group rbm =
   { chunk_group; lines; rbm; cost; overflow; nesting_set; candidate_rules;
     unprocessed_overflow; rules_on_partially_bound_lines; }
 
+let from_source source_text chunk_group =
+  let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
+  let rbm = List.fold chunk_group.Chunk_group.chunks ~init:rbm
+    ~f:begin fun rbm chunk ->
+      let idx = max 0 (chunk.Chunk.start_char - 1) in
+      if String.get source_text idx = '\n'
+      then IMap.add chunk.Chunk.rule true rbm
+      else rbm
+    end
+  in
+  make chunk_group rbm
+
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rbm
 

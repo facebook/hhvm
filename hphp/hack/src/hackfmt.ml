@@ -298,7 +298,7 @@ let format ?range ?ranges tree =
   |> EditableSyntax.from_tree
   |> Hack_format.transform
   |> Chunk_builder.build
-  |> Line_splitter.solve ?range
+  |> Line_splitter.solve ?range (SourceText.text source_text)
 
 let output ?text_source str =
   let with_out_channel f =
@@ -354,7 +354,8 @@ let format_intervals intervals tree =
     |> Hack_format.transform
     |> Chunk_builder.build
   in
-  let solve_states = Line_splitter.find_solve_states chunk_groups in
+  let solve_states = Line_splitter.find_solve_states
+    (SourceText.text source_text) chunk_groups in
   let line_ranges = get_char_ranges lines in
   let split_boundaries = get_split_boundaries solve_states in
   let ranges = intervals
@@ -405,7 +406,8 @@ let format_at_char tree pos =
   let range = (fst (expand_to_line_boundaries source_text range), ed) in
   (* Find a solution for that range, then expand the range start to a split
    * boundary (a line boundary in the formatted source). *)
-  let solve_states = Line_splitter.find_solve_states ~range chunk_groups in
+  let solve_states = Line_splitter.find_solve_states
+    ~range (SourceText.text source_text) chunk_groups in
   let split_boundaries = get_split_boundaries solve_states in
   let range = (fst (expand_to_split_boundaries split_boundaries range), ed) in
   (* Produce the formatted text *)

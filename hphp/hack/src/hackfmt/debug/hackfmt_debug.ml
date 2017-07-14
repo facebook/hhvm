@@ -67,7 +67,7 @@ let debug_nesting chunk_group =
 let debug_rule_deps chunk_group =
   Printf.printf "%s\n" (Chunk_group.dependency_map_to_string chunk_group)
 
-let debug_chunk_groups ~range chunk_groups =
+let debug_chunk_groups ~range source_text chunk_groups =
   let print_chunk = match !debug_config.chunk_ids with
     | None -> (fun id c -> Some (id, c))
     | Some id_list -> (fun id c ->
@@ -101,7 +101,8 @@ let debug_chunk_groups ~range chunk_groups =
     if !debug_config.print_rule_dependencies then debug_rule_deps cg;
     if !debug_config.print_nesting_graph then debug_nesting cg;
 
-    Printf.printf "%s\n" @@ Line_splitter.solve ~range [cg];
+    Printf.printf "%s\n"
+      (Line_splitter.solve ~range (SourceText.text source_text) [cg]);
   )
 
 let debug_full_text source_text =
@@ -120,4 +121,4 @@ let debug ~range source_text syntax_tree fmt_node chunk_groups =
   let range = Option.value range
     ~default:(0, Full_fidelity_source_text.length source_text)
   in
-  debug_chunk_groups ~range chunk_groups
+  debug_chunk_groups ~range source_text chunk_groups

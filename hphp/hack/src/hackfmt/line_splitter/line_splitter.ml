@@ -38,11 +38,10 @@ let find_best_state init_state =
   let queue = State_queue.make_empty 7 in
   List.iter (expand_state init_state) ~f:(State_queue.push queue);
   let rec aux count best =
-    if
-      State_queue.is_empty queue ||
-      count > 2000 ||
-      best.Solve_state.overflow = 0
-    then best
+    if count > 2000
+      then None
+    else if State_queue.is_empty queue || best.Solve_state.overflow = 0
+      then Some best
     else
       let next_state = State_queue.pop queue in
       List.iter (expand_state next_state) ~f:(State_queue.push queue);
@@ -50,7 +49,14 @@ let find_best_state init_state =
   in
   aux 0 init_state
 
-let find_solve_states ?range chunk_groups =
+let solve_chunk_group source_text chunk_group =
+  let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
+  let init_state = Solve_state.make chunk_group rbm in
+  match find_best_state init_state with
+  | Some state -> state
+  | None -> Solve_state.from_source source_text chunk_group
+
+let find_solve_states ?range source_text chunk_groups =
   let chunk_groups = match range with
     | None -> chunk_groups
     | Some range ->
@@ -59,11 +65,7 @@ let find_solve_states ?range chunk_groups =
         Interval.intervals_overlap range group_range
       )
   in
-  chunk_groups |> List.map ~f:(fun chunk_group ->
-    let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
-    let init_state = Solve_state.make chunk_group rbm in
-    find_best_state init_state
-  )
+  chunk_groups |> List.map ~f:(solve_chunk_group source_text)
 
 let print ?range solve_states =
   let formatted = solve_states
@@ -83,7 +85,7 @@ let print ?range solve_states =
      * preceding them, so the caller expects a newline after and not before. *)
     | Some _ -> (String_utils.lstrip formatted "\n") ^ "\n"
 
-let solve ?range chunk_groups =
+let solve ?range source_text chunk_groups =
   chunk_groups
-  |> find_solve_states ?range
+  |> find_solve_states ?range source_text
   |> print ?range

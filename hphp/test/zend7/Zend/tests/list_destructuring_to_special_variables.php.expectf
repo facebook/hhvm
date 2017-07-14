@@ -1,0 +1,13 @@
+string(2) "xy"
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+array(2) {
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}

@@ -1,0 +1,3 @@
+<?php
+isset(abc());
+?>

@@ -1,0 +1,18 @@
+string(1) "a"
+string(1) "a"
+string(1) "a"
+string(6) "     a"
+
+Warning: %s
+NULL
+string(0) ""
+
+Warning: %s
+string(1) "a"
+string(1) "a"
+Error: [] operator not supported for strings
+string(0) ""
+Error: Cannot use assign-op operators with string offsets
+string(0) ""
+Error: Cannot use string offset as an array
+string(0) ""

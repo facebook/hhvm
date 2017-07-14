@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#%d %s
+#%d %s
+  thrown in %s on line %d

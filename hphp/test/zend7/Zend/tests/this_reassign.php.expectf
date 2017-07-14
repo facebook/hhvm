@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %sthis_reassign.php(7): foo()
+#1 {main}
+  thrown in %sthis_reassign.php on line 4

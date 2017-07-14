@@ -1,0 +1,7 @@
+string(3) "Foo"
+
+Warning: %s
+
+Notice: %s
+string(3) "Baz"
+===DONE===

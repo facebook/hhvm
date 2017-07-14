@@ -1,0 +1,13 @@
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+non-static - ok
+static - ok
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

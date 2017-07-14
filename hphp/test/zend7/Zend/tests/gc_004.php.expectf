@@ -1,0 +1,9 @@
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    *RECURSION*
+  }
+}
+int(1)
+ok

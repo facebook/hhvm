@@ -1,0 +1,20 @@
+int(2)
+int(1)
+
+Notice: %s
+NULL
+
+Notice: %s
+NULL
+int(2)
+int(1)
+
+Notice: %s
+int(%d)
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+Done

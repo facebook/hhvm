@@ -1,0 +1,14 @@
+string(1) "x"
+object(ReflectionClass)#%d (1) {
+  ["name"]=>
+  string(8) "stdClass"
+}
+Parameter #0 [ <required> stdClass $x ]
+stdClass
+Method [ <internal, prototype Closure%s> public method __invoke ] {
+
+  - Parameters [1] {
+    Parameter #0 [ <required> stdClass $x ]
+  }
+  - Return [ stdClass ]
+}

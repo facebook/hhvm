@@ -1,0 +1,4 @@
+<?php
+if (!function_exists('zend_test_func2')) {
+    print 'skip';
+}

@@ -1,0 +1,28 @@
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+object(foo)#%d (0) {
+}
+===no_typehint===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===no_typehint_ref===
+object(foo)#%d (0) {
+}
+int(1)
+int(2)
+===typehint===
+object(foo)#%d (0) {
+}
+
+Fatal error: %s
+Stack trace:
+#0 [internal function]: typehint(1, 1)
+#1 %s(%d): array_walk(Array, 'typehint')
+#2 {main}
+  thrown in %s on line %d

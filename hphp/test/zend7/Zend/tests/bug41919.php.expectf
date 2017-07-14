@@ -1,0 +1,5 @@
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %sbug41919.php on line %d

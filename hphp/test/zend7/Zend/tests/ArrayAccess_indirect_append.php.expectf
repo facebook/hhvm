@@ -1,0 +1,15 @@
+object(AA)#%d (1) {
+  ["data":"AA":private]=>
+  array(2) {
+    [3]=>
+    int(1)
+    [4]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        int(2)
+      }
+    }
+  }
+}

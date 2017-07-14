@@ -1,0 +1,7 @@
+object(Foo)#%d (1) {
+  ["a"]=>
+  *RECURSION*
+}
+__destruct
+int(1)
+ok

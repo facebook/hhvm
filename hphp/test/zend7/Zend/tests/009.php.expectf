@@ -1,0 +1,16 @@
+Deprecated: Non-static method foo::bar() should not be called statically in %s on line %d
+string(3) "foo"
+
+Deprecated: Non-static method foo::bar() should not be called statically in %s on line %d
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+string(3) "foo"
+string(4) "foo2"
+Done

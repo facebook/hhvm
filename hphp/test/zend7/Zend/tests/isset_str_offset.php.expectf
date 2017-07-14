@@ -1,0 +1,41 @@
+- isset ---
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+- string ---
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+- bool ---
+bool(true)
+bool(true)
+bool(false)
+- null ---
+bool(true)
+- double ---
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+- array ---
+bool(false)
+bool(false)
+- object ---
+bool(false)
+- resource ---
+bool(false)
+done

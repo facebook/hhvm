@@ -1,0 +1,23 @@
+string(3) "bar"
+
+Notice: %s
+NULL
+object(Test)#%d (1) {
+  ["property":protected]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}
+
+Notice: %s
+
+Notice: %s
+object(Test)#%d (1) {
+  ["property":protected]=>
+  array(1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}
+===DONE===

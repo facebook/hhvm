@@ -1,0 +1,14 @@
+intTheValue = 10
+intTheValue = 10
+arrTheArray = Array
+(
+    [0] => xx1
+    [1] => xx3
+    [2] => xx4
+)
+objRefTest->getArray() = Array
+(
+    [0] => xx1
+    [1] => xx2
+    [2] => xx3
+)

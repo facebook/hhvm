@@ -1,0 +1,5 @@
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %soverloaded_func_001.php on line %d

@@ -1,0 +1,32 @@
+ok1
+bar::run1
+foo::method1
+
+Notice: %s
+foo::method1
+
+Notice: %s
+foo::finalize
+done!
+ok2
+bar::run2
+foo::method2
+foo::method2
+foo::finalize
+done!
+ok3
+bar::run3
+foo::method3
+foo::method3
+foo::finalize
+done!
+ouch
+bar::run1
+foo::method1
+
+Notice: %s
+foo::method1
+
+Notice: %s
+foo::finalize
+I'm alive!

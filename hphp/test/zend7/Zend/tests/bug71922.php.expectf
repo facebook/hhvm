@@ -1,0 +1,3 @@
+Assertion failure: assert(0 && new class {
+} && new class(42) extends stdclass {
+})

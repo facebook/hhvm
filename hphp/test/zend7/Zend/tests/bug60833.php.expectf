@@ -1,0 +1,13 @@
+object(B)#%d (4) {
+  ["v1"]=>
+  object(A)#%d (0) {
+  }
+  ["v2"]=>
+  object(A)#%d (0) {
+  }
+  ["v3"]=>
+  object(B)#%d (0) {
+  }
+  ["v4"]=>
+  string(1) "B"
+}

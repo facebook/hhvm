@@ -1,0 +1,12 @@
+bool(true)
+bool(false)
+string(5) "array"
+int(%d)
+string(%d) "%s"
+
+Notice: %s
+NULL
+
+Notice: %s
+NULL
+Done

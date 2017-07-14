@@ -1,0 +1,5 @@
+<?php
+if (!extension_loaded("curl")) {
+  die("skip Require a resource which is able to hold a callbck");
+}
+?>

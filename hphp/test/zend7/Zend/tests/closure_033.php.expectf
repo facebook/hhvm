@@ -1,0 +1,6 @@
+{closure}()
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %sclosure_033.php on line %d

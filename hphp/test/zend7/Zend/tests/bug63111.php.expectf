@@ -1,0 +1,12 @@
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+ok
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %sbug63111.php on line 20

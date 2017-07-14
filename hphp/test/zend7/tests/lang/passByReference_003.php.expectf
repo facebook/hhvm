@@ -1,0 +1,22 @@
+Passing undefined by value
+
+Notice: %s
+
+Inside passbyVal call:
+NULL
+
+After call
+
+Notice: %s
+NULL
+
+Passing undefined by reference
+
+Inside passbyRef call:
+NULL
+
+After call
+array(1) {
+  [0]=>
+  NULL
+}

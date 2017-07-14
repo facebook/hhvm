@@ -1,0 +1,30 @@
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+
+Notice: %s
+bool(false)
+
+Notice: %s
+bool(true)
+
+Notice: %s
+bool(true)
+
+Notice: %s
+bool(false)
+
+Notice: %s
+bool(true)
+
+Notice: %s
+bool(false)
+
+Notice: %s
+bool(true)
+Done

@@ -1,0 +1,12 @@
+<%= 'so should this' %>
+
+
+This gets echoed twice
+<%= $a%>
+
+<? $b=3; ?>
+
+
+Notice: %s
+
+Notice: %s

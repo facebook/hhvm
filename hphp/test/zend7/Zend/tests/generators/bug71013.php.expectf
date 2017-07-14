@@ -1,0 +1,7 @@
+Starting bar()
+Constructing new FooBar
+[foo()] Caught Exception
+Destructing FooBar
+NULL
+Unsetting $x
+Finishing bar()

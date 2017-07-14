@@ -1,0 +1,12 @@
+object(SubclassClassicInheritance)#%d (1) {
+  ["hello"]=>
+  int(0)
+}
+object(SubclassA)#%d (1) {
+  ["hello"]=>
+  int(0)
+}
+object(SubclassB)#%d (1) {
+  ["hello"]=>
+  int(0)
+}

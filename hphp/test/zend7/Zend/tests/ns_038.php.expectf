@@ -1,0 +1,6 @@
+ok
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %sns_038.php on line 7

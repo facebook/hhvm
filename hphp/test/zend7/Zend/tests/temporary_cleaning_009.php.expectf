@@ -1,0 +1,5 @@
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %stemporary_cleaning_009.php on line 12

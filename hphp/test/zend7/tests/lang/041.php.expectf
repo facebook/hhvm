@@ -1,0 +1,6 @@
+foo
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %s041.php on line %d

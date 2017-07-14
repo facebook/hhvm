@@ -1,0 +1,17 @@
+float(0)
+int(0)
+
+float(INF)
+int(0)
+
+float(-INF)
+int(0)
+
+float(0)
+int(0)
+
+float(-0)
+int(0)
+
+float(NAN)
+int(0)

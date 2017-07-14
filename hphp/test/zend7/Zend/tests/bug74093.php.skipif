@@ -1,0 +1,5 @@
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_ZTS) die("skip only for no-zts build");
+if (substr(PHP_OS, 0, 3) == 'WIN') die("skip not for Windows");
+?>

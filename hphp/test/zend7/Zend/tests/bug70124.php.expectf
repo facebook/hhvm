@@ -1,0 +1,7 @@
+
+Notice: %s
+string(30) "Function name must be a string"
+string(31) "Call to undefined method A::y()"
+string(31) "Call to undefined method A::y()"
+string(34) "Call to undefined function bar\y()"
+string(30) "Call to undefined function y()"

@@ -1,0 +1,7 @@
+object(stdClass)#%d (1) {
+  ["a"]=>
+  *RECURSION*
+}
+int(0)
+int(1)
+ok

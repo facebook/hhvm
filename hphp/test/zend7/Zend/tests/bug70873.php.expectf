@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %sbug70873.php(%d): B->bar()
+#1 {main}
+  thrown in %sbug70873.php on line %d

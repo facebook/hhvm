@@ -1,0 +1,6 @@
+
+Warning: %s
+
+Notice: %s
+string(%d) "foo"
+resource(%d) of type (stream)

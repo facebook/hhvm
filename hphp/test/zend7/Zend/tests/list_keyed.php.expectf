@@ -1,0 +1,17 @@
+string(3) "bad"
+string(3) "sad"
+
+int(2)
+int(4)
+int(8)
+
+string(20) "the best PHP version"
+string(17) "the cutest mascot"
+
+string(3) "bad"
+string(3) "sad"
+int(2)
+int(4)
+int(8)
+string(20) "the best PHP version"
+string(17) "the cutest mascot"

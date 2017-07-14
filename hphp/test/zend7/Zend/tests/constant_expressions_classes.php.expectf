@@ -1,0 +1,4 @@
+B::HW = this is A extended by B
+D::HW = this is space1\C extented by D
+E::getHW() = this is A extended by B
+G::get_me() = got this is F extended by G

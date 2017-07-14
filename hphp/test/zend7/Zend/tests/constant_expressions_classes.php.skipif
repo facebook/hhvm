@@ -1,0 +1,1 @@
+<?php if (!extension_loaded('Zend OPcache') || php_sapi_name() != "cli") die("skip CLI only"); ?>

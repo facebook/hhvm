@@ -1,0 +1,11 @@
+B1::doTest
+C1::test
+B2::doTest
+C2::test
+B4::doTest
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): B4::doTest()
+#1 {main}
+  thrown in %sbug37632.php on line %d

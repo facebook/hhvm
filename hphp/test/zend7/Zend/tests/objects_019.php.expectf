@@ -1,0 +1,13 @@
+array(2) {
+  [0]=>
+  object(stdClass)#%d (1) {
+    ["a"]=>
+    &int(2)
+  }
+  [1]=>
+  object(stdClass)#%d (1) {
+    ["a"]=>
+    &int(2)
+  }
+}
+string(3) "foo"

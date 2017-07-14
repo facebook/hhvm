@@ -1,0 +1,17 @@
+int(1)
+collect
+array(4) {
+  [0]=>
+  object(Generator)#%d (0) {
+  }
+  [1]=>
+  object(Generator)#%d (0) {
+  }
+  [2]=>
+  object(Generator)#%d (0) {
+  }
+  [3]=>
+  object(Generator)#%d (0) {
+  }
+}
+end

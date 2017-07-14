@@ -1,0 +1,150 @@
+*** Indexing - Testing value assignment with key ***
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+int(0)
+
+Warning: %s
+int(1)
+
+Warning: %s
+bool(true)
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+
+Notice: %s
+string(1) "A"
+
+Warning: %s
+
+Notice: %s
+string(1) "A"
+
+Warning: %s
+float(0.1)
+array(1) {
+  ["foo"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+*** Indexing - Testing reference assignment with key ***
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+int(0)
+
+Warning: %s
+int(1)
+
+Warning: %s
+bool(true)
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+float(0.1)
+array(1) {
+  ["foo"]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+*** Indexing - Testing value assignment no key ***
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+int(0)
+
+Warning: %s
+int(1)
+
+Warning: %s
+bool(true)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+float(0.1)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+*** Indexing - Testing reference assignment no key ***
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+int(0)
+
+Warning: %s
+int(1)
+
+Warning: %s
+bool(true)
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Warning: %s
+float(0.1)
+array(1) {
+  [0]=>
+  &array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Done

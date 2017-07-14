@@ -1,0 +1,11 @@
+Function call args:
+f(0) f(1) bool(true)
+f(0) f(1) bool(true)
+f(0) f(1) bool(false)
+f(0) f(1) bool(false)
+
+Array indices:
+bool(true)
+bool(true)
+bool(false)
+bool(false)

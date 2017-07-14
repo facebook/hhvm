@@ -1,0 +1,25 @@
+array(0) {
+}
+array(3) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): test(Array, Array, 2)
+#1 {main}
+  thrown in %s on line %d

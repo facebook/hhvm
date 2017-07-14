@@ -1,0 +1,10 @@
+ok
+ok
+ok
+ok
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): foo\test5(Object(foo\bar))
+#1 {main}
+  thrown in %sbug42802.php on line %d

@@ -1,0 +1,6 @@
+#0 %s(%d): test('\xD1\x82\xD0\xB5\xD1\x81\xD1\x82')
+#1 {main}
+Exception in %s:%d
+Stack trace:
+#0 %s(%d): test('\xD1\x82\xD0\xB5\xD1\x81\xD1\x82')
+#1 {main}

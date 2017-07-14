@@ -1,0 +1,12 @@
+int(0)
+int(1)
+Exception: Too few arguments to function test2(), 0 passed in %s001.php on line 18 and exactly 1 expected
+int(2)
+int(0)
+Exception: Too few arguments to function test3(), 1 passed in %s001.php on line 27 and exactly 2 expected
+int(2)
+int(1)
+
+Warning: %s
+int(-1)
+Done

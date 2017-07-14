@@ -1,0 +1,22 @@
+
+Warning: %s
+NULL
+
+Notice: %s
+bool(true)
+
+Warning: %s
+NULL
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(true)
+
+Deprecated: error in %s on line %d
+bool(true)
+Done

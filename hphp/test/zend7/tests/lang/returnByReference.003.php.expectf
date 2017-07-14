@@ -1,0 +1,15 @@
+---> 1. Trying to assign by reference the return value of a function that returns by value:
+
+Notice: %s
+int(5)
+int(100)
+
+---> 2. Trying to assign by reference the return value of a function that returns a constant by ref:
+
+Notice: %s
+int(5)
+int(100)
+
+---> 3. Trying to assign by reference the return value of a function that returns by ref:
+int(5)
+int(5)

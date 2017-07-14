@@ -1,0 +1,12 @@
+object(foo)#%d (1) {
+  ["fubar"]=>
+  string(5) "fubar"
+}
+string(5) "fubar"
+string(5) "fubar"
+object(foo)#%d (1) {
+  ["fubar"]=>
+  string(5) "fubar"
+}
+string(5) "fubar"
+string(5) "fubar"

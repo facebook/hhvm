@@ -1,0 +1,20 @@
+string(1) "a"
+string(1) "b"
+string(1) "c"
+
+Notice: %s
+string(0) ""
+string(1) "b"
+
+Notice: %s
+string(0) ""
+string(1) "a"
+string(1) "b"
+string(1) "c"
+
+Notice: %s
+string(0) ""
+string(1) "b"
+
+Notice: %s
+string(0) ""

@@ -1,0 +1,15 @@
+const ok
+func ok
+const ok
+const ok
+var ok
+method ok
+const ok
+const ok
+class ok
+ok
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %sns_057.php on line %d

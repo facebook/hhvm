@@ -1,0 +1,11 @@
+string(15) "abCdefghijklmno"
+string(15) "abCZefghijklmno"
+string(15) "abCZefghijPlmno"
+string(15) "abCZefghijPQmno"
+
+Warning: %s
+string(15) "abCZefghijPQmno"
+string(15) "AbCZefghijPQmno"
+string(21) "AbCZefghijPQmno     N"
+string(21) "AbCZefghijPQmno    UN"
+string(21) "AbCZefghijPQmno   nUN"

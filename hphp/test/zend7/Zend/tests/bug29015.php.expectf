@@ -1,0 +1,9 @@
+object(stdClass)#%d (1) {
+  [""]=>
+  string(10) "string('')"
+}
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

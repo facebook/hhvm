@@ -1,0 +1,24 @@
+---> Pass constant assignment by reference:
+
+Notice: %s
+string(10) "a.original"
+string(10) "a.original"
+
+
+---> Pass variable assignment by reference:
+
+Notice: %s
+string(10) "a.original"
+string(10) "a.original"
+
+
+---> Pass reference assignment by reference:
+string(10) "a.original"
+string(9) "a.changed"
+
+
+---> Pass concat assignment by reference:
+
+Notice: %s
+string(20) "b.originala.original"
+string(10) "a.original"

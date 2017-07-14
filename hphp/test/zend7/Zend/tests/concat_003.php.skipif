@@ -1,0 +1,1 @@
+<?php if (PHP_DEBUG) { die ("skip debug version is slow"); } ?>

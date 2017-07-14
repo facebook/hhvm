@@ -1,0 +1,15 @@
+Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
+%string|unicode%(1) "x"
+array(1) {
+  [0]=>
+  object(Closure%s)#%d (1) {
+    ["parameter"]=>
+    array(2) {
+      ["$a"]=>
+      string(10) "<required>"
+      ["$b"]=>
+      string(10) "<required>"
+    }
+  }
+}
+int(1)

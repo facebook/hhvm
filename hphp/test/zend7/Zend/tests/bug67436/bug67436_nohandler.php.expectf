@@ -1,0 +1,4 @@
+
+Warning: %s
+b::test()
+a::test(c::TESTCONSTANT)

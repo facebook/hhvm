@@ -1,0 +1,11 @@
+
+Warning: %s
+
+Exception: Unsupported operand types
+
+Warning: %s
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

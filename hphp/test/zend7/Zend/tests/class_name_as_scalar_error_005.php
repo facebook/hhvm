@@ -1,0 +1,5 @@
+<?php
+
+$x = static::class;
+
+?>

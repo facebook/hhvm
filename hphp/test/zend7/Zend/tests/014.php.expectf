@@ -1,0 +1,29 @@
+array(1) {
+  [0]=>
+  string(%d) "%s"
+}
+array(2) {
+  [0]=>
+  string(%d) "%s"
+  [1]=>
+  string(%d) "%s"
+}
+
+Warning: %s
+NULL
+array(2) {
+  [0]=>
+  string(%d) "%s"
+  [1]=>
+  string(%d) "%s"
+}
+
+Warning: %s
+NULL
+array(2) {
+  [0]=>
+  string(%d) "%s"
+  [1]=>
+  string(%d) "%s"
+}
+Done

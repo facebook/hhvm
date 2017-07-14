@@ -1,0 +1,7 @@
+int(5)
+string(5) "hello"
+int(5)
+string(5) "world"
+string(5) "world"
+int(6)
+string(6) "foobar"

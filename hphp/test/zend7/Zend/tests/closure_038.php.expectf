@@ -1,0 +1,18 @@
+int(1)
+Testing with scope given as object
+int(21)
+int(22)
+Testing with scope as string
+int(23)
+int(24)
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): Closure%s->{closure}()
+#1 {main}
+
+Next Error: Cannot access private property B::$x in %s:%d
+Stack trace:
+#0 %s(%d): Closure%s->{closure}()
+#1 {main}
+  thrown in %s on line %d

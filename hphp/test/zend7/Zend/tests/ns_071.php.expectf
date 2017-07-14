@@ -1,0 +1,7 @@
+NULL
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): foo\bar->__construct(Object(stdClass))
+#1 {main}
+  thrown in %s on line %d

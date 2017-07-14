@@ -1,0 +1,8 @@
+string(8) "finally1"
+string(8) "finally2"
+string(5) "label"
+string(7) "return2"
+string(8) "finally1"
+string(7) "catched"
+string(8) "finally2"
+string(7) "return1"

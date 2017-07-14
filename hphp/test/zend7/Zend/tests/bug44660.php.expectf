@@ -1,0 +1,20 @@
+--> read access: 
+Notice: %s
+
+--> direct assignment: 
+Warning: %s
+
+--> increment: 
+Warning: %s
+
+--> reference assignment:
+Warning: %s
+
+--> reference assignment:
+Warning: %s
+
+--> indexed assignment:
+Warning: %s
+
+--> Confirm assignments have had no impact:
+bool(true)

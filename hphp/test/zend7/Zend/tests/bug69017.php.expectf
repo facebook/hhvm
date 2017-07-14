@@ -1,0 +1,18 @@
+
+Warning: %s
+array(2) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  int(1)
+}
+array(1) {
+  [%d]=>
+  string(4) "zero"
+}

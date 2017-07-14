@@ -1,0 +1,6 @@
+Hello World!
+===NONE===
+string(%d) "Method NoneTest::__toString() must return a string value"
+===THROW===
+
+Fatal error: %s

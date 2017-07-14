@@ -1,0 +1,12 @@
+
+Warning: %s
+array(1) {
+  [%d]=>
+  int(42)
+}
+
+Warning: %s
+array(1) {
+  [%d]=>
+  int(42)
+}

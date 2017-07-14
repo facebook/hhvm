@@ -1,0 +1,131 @@
+func()
+------
+
+bindTo(null, null):
+Success!
+
+bindTo(new Cls, null):
+Success!
+
+bindTo(new Cls, Cls::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, Cls::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, stdClass::class):
+Cannot bind closure to scope of internal class stdClass
+
+bindTo(new stdClass, null):
+Success!
+
+strlen()
+--------
+
+bindTo(null, null):
+Success!
+
+bindTo(new Cls, null):
+Success!
+
+bindTo(new Cls, Cls::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, Cls::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, stdClass::class):
+Cannot bind closure to scope of internal class stdClass
+
+bindTo(new stdClass, null):
+Success!
+
+Cls::staticMethod()
+-------------------
+
+bindTo(null, Cls::class):
+Success!
+
+bindTo(new Cls, null):
+Cannot bind an instance to a static closure
+
+bindTo(new Cls, Cls::class):
+Cannot bind an instance to a static closure
+
+bindTo(null, null):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, ClsChild::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(null, ClsUnrelated::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+(new Cls)->method()
+-------------------
+
+bindTo(null, Cls::class):
+Success!
+
+bindTo(new Cls, Cls::class):
+Success!
+
+bindTo(new ClsChild, Cls::class):
+Success!
+
+bindTo(new ClsUnrelated, Cls::class):
+Cannot bind method Cls::method() to object of class ClsUnrelated
+
+bindTo(new Cls, null):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(new Cls, ClsUnrelated::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(new Cls, ClsChild::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+(new SplDoublyLinkedList)->count()
+----------------------------------
+
+bindTo(new SplDoublyLinkedList, SplDoublyLinkedList::class):
+Success!
+
+bindTo(new SplStack, SplDoublyLinkedList::class):
+Success!
+
+bindTo(new ClsUnrelated, SplDoublyLinkedList::class):
+Cannot bind method SplDoublyLinkedList::count() to object of class ClsUnrelated
+
+bindTo(null, null):
+Cannot unbind $this of internal method
+
+bindTo(null, SplDoublyLinkedList::class):
+Cannot unbind $this of internal method
+
+bindTo(new SplDoublyLinkedList, null):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+bindTo(new SplDoublyLinkedList, ClsUnrelated::class):
+Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure%s()
+
+(function() {})()
+-----------------
+
+bindTo(null, null):
+Success!
+
+bindTo(new Cls, null):
+Success!
+
+bindTo(new Cls, Cls::class):
+Success!
+
+bindTo(null, Cls::class):
+Success!
+
+bindTo(null, stdClass::class):
+Cannot bind closure to scope of internal class stdClass
+
+bindTo(new stdClass, null):
+Success!

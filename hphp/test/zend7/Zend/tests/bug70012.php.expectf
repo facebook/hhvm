@@ -1,0 +1,7 @@
+Outer try
+  Middle try
+  Middle finally
+    Inner try
+    Inner finally
+Outer catch
+Outer finally

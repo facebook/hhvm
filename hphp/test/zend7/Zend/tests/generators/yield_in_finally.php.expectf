@@ -1,0 +1,4 @@
+before return
+before yield
+string(%d) "yielded value"
+after yield

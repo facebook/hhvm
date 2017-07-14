@@ -1,0 +1,4 @@
+<?php
+if (PHP_INT_SIZE != 8)
+	 die("skip for machines with 64-bit longs");
+?>

@@ -1,0 +1,4 @@
+string(9) "yield foo"
+string(8) "send bar"
+string(9) "yield bar"
+string(8) "send foo"

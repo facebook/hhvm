@@ -1,0 +1,14 @@
+-- Val, Ref --
+string(10) "original.a"
+string(10) "original.a"
+int(2)
+int(2)
+string(9) "changed.y"
+
+
+-- Ref, Val --
+string(10) "original.b"
+string(10) "original.b"
+int(2)
+int(2)
+string(9) "changed.x"

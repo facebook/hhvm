@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %sgenerator_with_type_check.php(3): gen(42)
+#1 {main}
+  thrown in %sgenerator_with_type_check.php on line 2

@@ -1,0 +1,2 @@
+Deprecated: Non-static method A::foo() should not be called statically in %s on line %d
+Exception: Using $this when not in object context

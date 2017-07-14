@@ -1,0 +1,1 @@
+<?php if (!function_exists('memory_get_usage')) die('memory_get_usage() not installed'); ?>

@@ -1,0 +1,4 @@
+object(Test)#%d (1) {
+  [0]=>
+  *RECURSION*
+}

@@ -1,0 +1,4 @@
+get a (returns 0)
+set a = 1 (a was 0)
+get a (returns 1)
+set a = 2 (a was 1)

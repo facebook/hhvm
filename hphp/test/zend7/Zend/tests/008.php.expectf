@@ -1,0 +1,27 @@
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+bool(true)
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+bool(true)
+bool(true)
+bool(true)
+
+Notice: %s
+bool(false)
+bool(true)
+
+Warning: %s
+bool(false)
+int(1)
+int(2)
+int(3)
+Done

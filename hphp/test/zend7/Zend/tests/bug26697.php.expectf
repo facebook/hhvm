@@ -1,0 +1,5 @@
+__autoload(NotExistingClass)
+bool(false)
+__autoload(NotExistingClass), done
+bool(false)
+===DONE===

@@ -1,0 +1,7 @@
+
+Fatal error: %s
+Stack trace:
+#0 %sthis_in_mb_parse_str.php(3): mb_parse_str('this=42')
+#1 %sthis_in_mb_parse_str.php(6): foo()
+#2 {main}
+  thrown in %sthis_in_mb_parse_str.php on line 3

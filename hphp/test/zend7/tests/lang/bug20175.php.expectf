@@ -1,0 +1,27 @@
+%s
+foo_static()
+foo_global()
+foo:1
+foo_static()
+foo:1
+bar_static()
+bar_global()
+
+Notice: %s
+bar:1
+bar_static()
+bar:1
+wow_static()
+wow_global()
+wow:1
+wow_static()
+wow:1
+oop_test()
+oop_static()
+oop_class()
+oop:1
+oop_static()
+oop:1
+oop_test()
+oop_static()
+oop:1

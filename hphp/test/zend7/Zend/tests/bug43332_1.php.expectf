@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): foobar\foo->bar(Object(stdClass))
+#1 {main}
+  thrown in %sbug43332_1.php on line 5

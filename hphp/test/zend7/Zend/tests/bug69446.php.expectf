@@ -1,0 +1,8 @@
+object(bad)#%d (2) {
+  ["x"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["y"]=>
+  object(stdClass)#%d (0) {
+  }
+}

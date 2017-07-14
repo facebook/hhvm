@@ -1,0 +1,10 @@
+string(%d) "Exception: Foo in %sbug70944.php:%d
+Stack trace:
+#0 {main}"
+string(%d) "Exception: Foo in %sbug70944.php:%d
+Stack trace:
+#0 {main}
+
+Next Exception: Dummy in %sbug70944.php:%d
+Stack trace:
+#0 {main}"

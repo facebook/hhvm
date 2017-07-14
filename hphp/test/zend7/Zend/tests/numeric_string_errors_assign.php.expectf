@@ -1,0 +1,127 @@
+
+Notice: %s
+
+Notice: %s
+int(5)
+
+Warning: %s
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+
+Notice: %s
+int(-2)
+
+Warning: %s
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+
+Notice: %s
+int(143)
+
+Warning: %s
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+
+Notice: %s
+float(0.89473684210526)
+
+Warning: %s
+
+Warning: %s
+
+Warning: %s
+float(NAN)
+---
+
+Notice: %s
+
+Notice: %s
+float(3.0910586430935E+39)
+
+Warning: %s
+
+Warning: %s
+int(1)
+---
+
+Notice: %s
+
+Notice: %s
+int(31)
+
+Warning: %s
+
+Warning: %s
+---
+
+Notice: %s
+
+Notice: %s
+int(%d)
+
+Warning: %s
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+
+Notice: %s
+int(0)
+
+Warning: %s
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+int(63)
+
+Notice: %s
+int(71)
+
+Warning: %s
+int(73)
+
+Warning: %s
+int(79)
+---
+
+Notice: %s
+int(81)
+
+Notice: %s
+int(97)
+
+Warning: %s
+int(0)
+
+Warning: %s
+int(0)
+---
+
+Notice: %s
+int(28)
+
+Notice: %s
+int(252)
+
+Warning: %s
+int(137)
+
+Warning: %s
+int(139)

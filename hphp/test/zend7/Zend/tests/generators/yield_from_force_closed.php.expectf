@@ -1,0 +1,7 @@
+try
+gen1
+finally
+Error: Cannot use "yield from" in a force-closed generator in %s:%d
+Stack trace:
+#0 %s(%d): gen2()
+#1 {main}

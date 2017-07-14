@@ -1,0 +1,12 @@
+array(1) {
+  ["a"]=>
+  array(1) {
+    ["b"]=>
+    string(1) "c"
+  }
+}
+array(1) {
+  ["b"]=>
+  string(1) "c"
+}
+string(1) "c"

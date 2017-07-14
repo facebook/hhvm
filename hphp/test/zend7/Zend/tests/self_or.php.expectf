@@ -1,0 +1,10 @@
+int(127)
+
+Warning: %s
+int(11)
+
+Notice: %s
+int(45345)
+string(1) "f"
+string(2) "ff"
+Done

@@ -1,0 +1,7 @@
+Deprecated: Non-static method Foo::get() should not be called statically in %s on line %d
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): Foo::get()
+#1 {main}
+  thrown in %s on line %d

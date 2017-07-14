@@ -1,0 +1,35 @@
+
+Warning: %s
+int(3)
+string(4) "1foo"
+bool(false)
+bool(true)
+int(-1)
+int(1)
+int(0)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+string(3) "bar"
+string(3) "foo"
+string(3) "bar"
+int(1)
+int(0)
+string(3) "foo"
+array(6) {
+  [0]=>
+  bool(false)
+  ["foo"]=>
+  string(3) "foo"
+  [42]=>
+  int(42)
+  [3]=>
+  float(3.14)
+  [""]=>
+  NULL
+  [1]=>
+  bool(true)
+}
+string(3) "abc"

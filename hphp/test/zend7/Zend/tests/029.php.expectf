@@ -1,0 +1,33 @@
+array(1) {
+  [0]=>
+  object(stdClass)#%d (1) {
+    ["a"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  object(stdClass)#%d (2) {
+    ["a"]=>
+    object(stdClass)#%d (0) {
+    }
+    ["b"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+}
+array(1) {
+  [0]=>
+  object(stdClass)#%d (3) {
+    ["a"]=>
+    object(stdClass)#%d (0) {
+    }
+    ["b"]=>
+    object(stdClass)#%d (0) {
+    }
+    ["c"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+}

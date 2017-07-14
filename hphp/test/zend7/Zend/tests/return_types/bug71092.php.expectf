@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): boom()
+#1 {main}
+  thrown in %sbug71092.php on line %d

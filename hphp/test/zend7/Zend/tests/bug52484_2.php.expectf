@@ -1,0 +1,6 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): A->__set('\x00', 2)
+#1 {main}
+  thrown in %s on line %d

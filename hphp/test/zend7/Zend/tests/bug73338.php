@@ -1,0 +1,13 @@
+<?php
+
+try { call_user_func(new class { function __destruct () { throw new Error; } }); } catch (Error $e) {}
+
+set_error_handler(function() { throw new Error; });
+
+try { var_dump(new stdClass, call_user_func("fail")); } catch (Error $e) {}
+
+try { (function() { call_user_func("fail"); })(); } catch (Error $e) {}
+
+try { [new class { static function foo() {} function __destruct () { throw new Error; } }, "foo"](); } catch (Error $e) {}
+
+?>

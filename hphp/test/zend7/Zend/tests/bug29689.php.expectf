@@ -1,0 +1,10 @@
+foo: foo foo2
+bar: bar 
+Notice: %s
+
+---baz--
+foo: foo foo2
+bar: baz baz2
+---baz2--
+foo: foo foo2
+bar2: baz2 baz22

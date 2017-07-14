@@ -1,0 +1,7 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): {closure}(%s)
+#1 %s(%d): doSomething()
+#2 {main}
+  thrown in %s on line %d

@@ -1,0 +1,15 @@
+NULL
+array(0) {
+}
+array(0) {
+}
+
+Warning: %s
+NULL
+object(stdClass)#%d (1) {
+  ["a"]=>
+  int(1)
+}
+int(2)
+int(2)
+int(3)

@@ -1,0 +1,7 @@
+
+Warning: %s
+
+Fatal error: %s
+Stack trace:
+#0 {main}
+  thrown in %soffset_assign.php on line %d

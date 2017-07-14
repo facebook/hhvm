@@ -1,0 +1,16 @@
+NULL
+array(0) {
+}
+NULL
+array(0) {
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): a(NULL)
+#1 {main}
+  thrown in %s on line %d

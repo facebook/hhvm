@@ -1,0 +1,12 @@
+Foo::new
+Foo::new
+Foo::new
+Foo::self
+Foo::new
+Foo::self
+Foo::self
+string(3) "yay"
+Foo::new
+string(3) "yay"
+
+Done

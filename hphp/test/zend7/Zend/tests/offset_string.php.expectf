@@ -1,0 +1,35 @@
+string(1) "i"
+
+Notice: %s
+string(1) "S"
+
+Notice: %s
+string(1) "S"
+
+Warning: %s
+string(1) "S"
+string(1) "c"
+
+Warning: %s
+string(1) "o"
+
+Notice: %s
+string(1) "r"
+
+Notice: %s
+string(1) "i"
+
+Notice: %s
+string(1) "S"
+
+Warning: %s
+string(1) "%s"
+
+Warning: %s
+
+Notice: %s
+string(1) "%s"
+
+Warning: %s
+string(1) "i"
+Done

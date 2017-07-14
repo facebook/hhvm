@@ -1,0 +1,21 @@
+bool(true)
+array(2) {
+  ["row2"]=>
+  int(1)
+  ["row1"]=>
+  int(2)
+}
+bool(true)
+array(2) {
+  ["row2"]=>
+  int(1)
+  ["row1"]=>
+  int(2)
+}
+bool(true)
+array(2) {
+  ["row1"]=>
+  int(2)
+  ["row2"]=>
+  int(1)
+}

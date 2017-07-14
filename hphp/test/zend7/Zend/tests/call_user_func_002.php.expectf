@@ -1,0 +1,13 @@
+%unicode|string%(3) "foo"
+
+Warning: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s
+
+Notice: %s
+
+Warning: %s

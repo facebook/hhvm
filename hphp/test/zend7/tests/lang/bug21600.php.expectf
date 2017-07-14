@@ -1,0 +1,12 @@
+
+Notice: %s
+array(1) {
+  ["foo"]=>
+  string(4) "test"
+}
+
+Notice: %s
+array(1) {
+  ["foo"]=>
+  string(4) "test"
+}

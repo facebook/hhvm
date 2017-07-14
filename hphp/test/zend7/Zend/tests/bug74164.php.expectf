@@ -1,0 +1,7 @@
+
+Fatal error: %s
+Stack trace:
+#0 [internal function]: Foo\{closure}(%s)
+#1 %sbug74164.php(%d): call_user_func(%s)
+#2 {main}
+  thrown in %sbug74164.php on line %d

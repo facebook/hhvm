@@ -1,0 +1,6 @@
+%unicode|string%(27) "A::func2: This should work!"
+%unicode|string%(27) "A::func3: This should work!"
+
+Warning: %s
+
+Warning: %s

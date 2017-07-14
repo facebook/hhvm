@@ -1,0 +1,11 @@
+
+Notice: %s
+runtime
+
+Notice: %s
+NULL
+
+Notice: %s
+NULL
+
+Recoverable fatal error: Object of class Closure%s could not be converted to string in %sclass_properties_const.php on line %d

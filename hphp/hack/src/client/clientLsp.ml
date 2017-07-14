@@ -637,7 +637,8 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
   in
   let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
-  let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos) in
+  let delimit_on_namespaces = true in
+  let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces) in
   let result = rpc conn command in
 
   (* We use snippets to provide parentheses+arguments when autocompleting     *)

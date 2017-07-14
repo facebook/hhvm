@@ -272,10 +272,19 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
 (* possible identifier autocompletions at the autocomplete position (which   *)
 (* is stored in a global mutable reference). The results are stored in the   *)
 (* global mutable reference 'autocomplete_results'.                          *)
+(* This function has two modes of dealing with namespaces...                 *)
+(*     delimit_on_namespaces=true   delimit_on_namespaces=false              *)
+(*      St| =>               Str                          Str\compare, ...   *)
+(*  Str\\c| =>               compare                      Str\compare        *)
+(* Essentially, 'delimit_on_namespaces=true' means that autocomplete treats  *)
+(* namespaces as first class entities; 'false' means that it treats them     *)
+(* purely as part of long identifier names where the symbol '\\' is not      *)
+(* really any different from the symbol '_' for example.                     *)
 let compute_complete_global
-  (tcopt: TypecheckerOptions.t)
-  (content_funs: Reordered_argument_collections.SSet.t)
-  (content_classes: Reordered_argument_collections.SSet.t)
+  ~(tcopt: TypecheckerOptions.t)
+  ~(delimit_on_namespaces: bool)
+  ~(content_funs: Reordered_argument_collections.SSet.t)
+  ~(content_classes: Reordered_argument_collections.SSet.t)
   : unit =
   let completion_type = !Autocomplete.argument_global_type in
   let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
@@ -327,15 +336,31 @@ let compute_complete_global
 
   let does_fully_qualified_name_match_prefix ?(funky_gns_rules=false) name =
     let stripped_name = strip_ns name in
-    match gname_gns with
-    | _ when string_starts_with stripped_name gname -> true
-    | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
-    | _ -> false
+    if delimit_on_namespaces then
+      (* name must match gname, and have no additional namespace slashes, e.g. *)
+      (* name="Str\\co" gname="S" -> false *)
+      (* name="Str\\co" gname="Str\\co" -> true *)
+      string_starts_with stripped_name gname &&
+        not (String.contains_from stripped_name (String.length gname) '\\')
+    else
+      match gname_gns with
+      | _ when string_starts_with stripped_name gname -> true
+      | Some gns when funky_gns_rules -> string_starts_with stripped_name gns
+      | _ -> false
   in
 
   let string_to_replace_prefix name =
     let stripped_name = strip_ns name in
-    stripped_name
+    if delimit_on_namespaces then
+      (* returns the part of 'name' after its rightmost slash *)
+      try
+        let len = String.length stripped_name in
+        let i = (String.rindex stripped_name '\\') + 1 in
+        String.sub stripped_name i (len - i)
+      with _ ->
+        stripped_name
+    else
+      stripped_name
   in
 
   let result_count = ref 0 in
@@ -509,13 +534,13 @@ let result_compare a b =
   else if a.expected_ty then -1
   else 1
 
-let get_results tcopt funs classes =
+let get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes =
   Errors.ignore_ begin fun () ->
     let completion_type = !Autocomplete.argument_global_type in
     if completion_type = Some Autocomplete.Acid ||
        completion_type = Some Autocomplete.Acnew ||
        completion_type = Some Autocomplete.Actype
-    then compute_complete_global tcopt funs classes;
+    then compute_complete_global ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes;
     let results = !autocomplete_results in
     let env = match !ac_env with
       | Some e -> e

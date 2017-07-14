@@ -26,7 +26,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerInferType.go env (fn, line, char)
     | AUTOCOMPLETE content ->
         let result = try
-          ServerAutoComplete.auto_complete env.tcopt content
+          ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces:false content
           with Decl.Decl_not_found s ->
             let s = s ^ "-- Autocomplete File contents: " ^ content in
             Printexc.print_backtrace stderr;
@@ -112,14 +112,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerFileSync.close_file env path, ()
     | EDIT_FILE (path, edits) ->
         ServerFileSync.edit_file env path edits, ()
-    | IDE_AUTOCOMPLETE (path, pos) ->
+    | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces) ->
         let open Ide_api_types in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let offset = File_content.get_offset fc pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char fc offset in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let content = File_content.edit_file_unsafe fc edits in
-        let completions = ServerAutoComplete.auto_complete env.tcopt content in
+        let completions =
+          ServerAutoComplete.auto_complete ~tcopt:env.tcopt ~delimit_on_namespaces content in
         env, { AutocompleteService.completions; char_at_pos; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
         let open Ide_api_types in

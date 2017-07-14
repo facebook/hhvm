@@ -13,17 +13,17 @@
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let get_results (tcopt:TypecheckerOptions.t) _ (file_info:FileInfo.t)
+let get_results ~(tcopt:TypecheckerOptions.t) ~(delimit_on_namespaces:bool) _ (file_info:FileInfo.t)
   : AutocompleteService.complete_autocomplete_result list =
   let {
     FileInfo.n_funs = content_funs; n_classes = content_classes; _
   } = FileInfo.simplify file_info in
-  AutocompleteService.get_results tcopt content_funs content_classes
+  AutocompleteService.get_results ~tcopt ~delimit_on_namespaces ~content_funs ~content_classes
 
-let auto_complete (tcopt:TypecheckerOptions.t) (content:string)
+let auto_complete ~(tcopt:TypecheckerOptions.t) ~(delimit_on_namespaces:bool) (content:string)
   : AutocompleteService.complete_autocomplete_result list =
   AutocompleteService.attach_hooks();
   let result =
-    ServerIdeUtils.declare_and_check content ~f:(get_results tcopt) tcopt in
+    ServerIdeUtils.declare_and_check content ~f:(get_results ~tcopt ~delimit_on_namespaces) tcopt in
   AutocompleteService.detach_hooks();
   result

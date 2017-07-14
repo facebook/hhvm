@@ -629,7 +629,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Autocomplete ->
       let file = cat (Relative_path.to_absolute filename) in
       let result =
-        ServerAutoComplete.auto_complete opts file in
+        ServerAutoComplete.auto_complete ~tcopt:opts ~delimit_on_namespaces:false file in
       List.iter ~f: begin fun r ->
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty

@@ -222,7 +222,8 @@ let handle_request conn id protocol = function
   | Init init_params ->
     handle_init conn id protocol init_params
   | Autocomplete { filename; position; } ->
-    rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
+    let delimit_on_namespaces = false in
+    rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position, delimit_on_namespaces)) |>
     AutocompleteService.autocomplete_result_to_ide_response |>
     print_response id protocol
   | Infer_type args ->

@@ -648,12 +648,12 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
   let client_supports_snippets = Option.value_map !initialize_params
       ~default:false ~f:(fun params ->
       params.client_capabilities.textDocument.completion.completionItem.snippetSupport) in
-  let snippets_okay = is_caret_followed_by_whitespace && client_supports_snippets in
 
   let rec hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
+    let (insertText, insertTextFormat) = hack_to_insert completion in
     {
-      label = completion.res_name; (* TODO: check that label replaces the right range *)
+      label = completion.res_name;
       kind = hack_to_kind completion;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
@@ -661,8 +661,8 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
       documentation = None; (* TODO: provide doc-comments *)
       sortText = None;
       filterText = None;
-      insertText = Some (hack_to_snippet completion);
-      insertTextFormat = if snippets_okay then SnippetFormat else PlainText;
+      insertText = Some insertText;
+      insertTextFormat = insertTextFormat;
       textEdits = [];
       command = None;
       data = None;
@@ -702,16 +702,15 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
       let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
       let params = String.concat ", " (List.map details.params ~f) in
       Printf.sprintf "(%s)" params
-  and hack_to_snippet (completion: complete_autocomplete_result) : string =
+  and hack_to_insert (completion: complete_autocomplete_result) : (string * insertTextFormat) =
     match completion.func_details with
-    | Some details when snippets_okay ->
+    | Some details when is_caret_followed_by_whitespace && client_supports_snippets ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
       let params = String.concat ", " (List.mapi details.params ~f) in
-      Printf.sprintf "%s(%s)" completion.res_name params
+      (Printf.sprintf "%s(%s)" completion.res_name params, SnippetFormat)
     | _ ->
-      (* the name alone is a valid snippet and a valid plain-text *)
-      completion.res_name
+      (completion.res_name, PlainText)
   in
   {
     isIncomplete = not result.is_complete;

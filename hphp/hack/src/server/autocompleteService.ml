@@ -255,8 +255,8 @@ let get_constructor_ty c =
       reason, Typing_defs.Tfun (Typing_env.make_ft pos [] return_ty)
 
 (* Global identifier autocomplete uses search service to find matching names *)
-let search_funs_and_classes input ~on_class ~on_function =
-  HackSearchService.MasterApi.query_autocomplete input ~limit:(Some 100)
+let search_funs_and_classes input ~limit ~on_class ~on_function =
+  HackSearchService.MasterApi.query_autocomplete input ~limit
     ~filter_map:begin fun _ _ res ->
       let name = res.SearchUtils.name in
       match res.SearchUtils.result_type with
@@ -265,11 +265,30 @@ let search_funs_and_classes input ~on_class ~on_function =
       | _ -> None
     end
 
-let compute_complete_global tcopt content_funs content_classes =
+(* compute_complete_global: given the sets content_funs and content_classes  *)
+(* of function names and classes in the current file, returns a list of all  *)
+(* possible identifier autocompletions at the autocomplete position (which   *)
+(* is stored in a global mutable reference). The results are stored in the   *)
+(* global mutable reference 'autocomplete_results'.                          *)
+let compute_complete_global
+  (tcopt: TypecheckerOptions.t)
+  (content_funs: Reordered_argument_collections.SSet.t)
+  (content_classes: Reordered_argument_collections.SSet.t)
+  : unit =
   let completion_type = !Autocomplete.argument_global_type in
   let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
   let gname = strip_suffix gname in
 
+  (* Objective: given "fo|", we should suggest functions in both the current *)
+  (* namespace and also in the global namespace. We'll use gname_gns to      *)
+  (* indicate what prefix to look for (if any) in the global namespace...    *)
+
+  (* "$z = S|"      => gname = "S",      gname_gns = Some "S"   *)
+  (* "$z = Str|"    => gname = "Str",    gname_gns = Some "Str" *)
+  (* "$z = Str\\|"  => gname = "Str\\",  gname_gns = None       *)
+  (* "$z = Str\\s|" => gname = "Str\\s", gname_gns = None       *)
+  (* "$z = \\s|"    => gname = "\\s",    gname_gns = None       *)
+  (* "...; |"       => gname = "",       gname_gns = Some ""    *)
   let gname_gns = if should_complete_fun completion_type then
     (* Disgusting hack alert!
      *
@@ -282,6 +301,12 @@ let compute_complete_global tcopt content_funs content_classes =
      * namespace fallback behavior here -- we'd like to know if whatever
      * "gname" corresponds to in the source code has a '\' to qualify it, but
      * since it's already fully qualified here, we can't know.
+     *
+     *   [NOTE(ljw): is this really even true? if user wrote "foo|" then name
+     *   lookup of "fooAUTO332" is guaranteed to fail in the current namespace,
+     *   and guaranteed to fail in the global namespace, so how would the
+     *   typechecker fully qualify it? to what? Experimentally I've only
+     *   ever seen gname to be the exact string that the user typed.]
      *
      * Except, we can kinda reverse engineer and figure it out. We have the
      * positional information, which we can use to figure out how long the
@@ -331,8 +356,11 @@ let compute_complete_global tcopt content_funs content_classes =
   let on_function name ~seen =
     if SSet.mem seen name then None else
     if should_complete_fun completion_type then begin
+      (* stripped_name is like name but with leading "\\" removed, if present *)
       let stripped_name = strip_ns name in
+      (* does stripped_name start with gname? *)
       let matches_gname = string_starts_with stripped_name gname in
+      (* does stripped_name start with gname_gns? *)
       let matches_gname_gns = match gname_gns with
         | None -> false
         | Some s -> string_starts_with stripped_name s in
@@ -360,7 +388,7 @@ let compute_complete_global tcopt content_funs content_classes =
 
   (* Use search results to look for matches, while excluding names we have
    * already seen in local content buffer *)
-  let gname_results = search_funs_and_classes gname
+  let gname_results = search_funs_and_classes gname ~limit:(Some 100)
     ~on_class:(on_class ~seen:content_classes)
     ~on_function:(on_function ~seen:content_funs)
   in
@@ -369,7 +397,7 @@ let compute_complete_global tcopt content_funs content_classes =
   (* Compute global namespace fallback results for functions, if applicable *)
   match gname_gns with
   | Some gname_gns when gname <> gname_gns ->
-    let gname_gns_results = search_funs_and_classes gname_gns
+    let gname_gns_results = search_funs_and_classes gname_gns ~limit:(Some 100)
       ~on_class:(fun _ -> None)
       ~on_function:(on_function ~seen:content_funs)
     in
@@ -442,6 +470,8 @@ let get_results tcopt funs classes =
       | None ->
         Typing_env.empty tcopt Relative_path.default ~droot:None
     in
+    (* Here we turn autocomplete_results into complete_autocomplete_results *)
+    (* by using typing environment to convert ty information into strings.  *)
     let results = List.map results begin fun x ->
       let env, ty = match x.ty with
         | DeclTy ty -> Phase.localize_with_self env ty

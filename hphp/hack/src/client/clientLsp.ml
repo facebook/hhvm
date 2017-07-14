@@ -1257,7 +1257,7 @@ let do_initialize ()
       hoverProvider = true;
       completionProvider = Some {
         resolveProvider = true;
-        completion_triggerCharacters = ["$"; ">"; "\\"];
+        completion_triggerCharacters = ["$"; ">"; "\\"; ":"];
       };
       signatureHelpProvider = None;
       definitionProvider = true;

@@ -613,6 +613,7 @@ and emit_lambda env fundef ids =
   ]
 
 and emit_id env (p, s as id) =
+  let s = String.uppercase_ascii s in
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
@@ -623,7 +624,7 @@ and emit_id env (p, s as id) =
   | "__NAMESPACE__" ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
-  | ("exit" | "die") ->
+  | ("EXIT" | "DIE") ->
     emit_exit env None
   | _ ->
     let fq_id, id_opt, contains_backslash =

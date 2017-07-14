@@ -226,6 +226,7 @@ let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
  * literal strings. It's necessary to do this before closure conversion
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
+  let str = String.uppercase_ascii str in
   let return newstr = (p, String (pid, newstr)) in
   match str with
   | "__CLASS__" | "__TRAIT__"->
@@ -254,9 +255,8 @@ let convert_id (env:env) p (pid, str as id) =
     end
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
-    let pos, _ = id in
-    let _, line, _, _ = Pos.info_pos_extended pos in
-    p, Int (pos, string_of_int line)
+    let _, line, _, _ = Pos.info_pos_extended pid in
+    p, Int (pid, string_of_int line)
   | _ ->
     (p, Id id)
 

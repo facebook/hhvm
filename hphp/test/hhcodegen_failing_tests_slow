@@ -6,7 +6,6 @@ slow/array_iterator/array-traversable-2.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/array_trailing_comma.php
-slow/async/exceptions.php
 slow/async/foreach_await_as.php
 slow/async/return-annotation-1.php
 slow/async/return-annotation-2.php
@@ -484,7 +483,6 @@ slow/traits/1950.php
 slow/traits/1953.php
 slow/traits/1963.php
 slow/traits/1974.php
-slow/traits/1975.php
 slow/traits/1981.php
 slow/traits/1986.php
 slow/traits/1991.php
@@ -492,8 +490,6 @@ slow/traits/2003.php
 slow/traits/2010.php
 slow/traits/2044.php
 slow/traits/2048.php
-slow/traits/2053.php
-slow/traits/2055.php
 slow/traits/2063.php
 slow/traits/2070.php
 slow/traits/2107.php

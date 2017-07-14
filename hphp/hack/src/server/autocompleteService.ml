@@ -33,6 +33,9 @@ type autocomplete_kind =
   | Abstract_class_kind
   | Class_kind
   | Method_kind
+  | Function_kind
+  | Property_kind
+  | Class_constant_kind
   | Variable_kind
   | Interface_kind
   | Trait_kind
@@ -178,21 +181,15 @@ let autocomplete_method is_static class_ ~targs:_ id env cid
     ac_env := Some env;
     Autocomplete.auto_complete_pos := Some (fst id);
     Autocomplete.argument_global_type := Some Autocomplete.Acclass_get;
-    let results =
-      if is_static
-      then
-        let elts = SMap.union class_.tc_smethods class_.tc_sprops in
-        let elt_types = get_class_elt_types env class_ cid elts in
-        SMap.fold class_.tc_consts ~f:begin fun x class_const acc ->
-          SMap.add acc x class_const.cc_type
-        end ~init:elt_types
-      else
-        let elts = SMap.union class_.tc_methods class_.tc_props in
-        get_class_elt_types env class_ cid elts
-    in
-    SMap.iter results begin fun x ty ->
-      add_partial_result x (Phase.decl ty) Method_kind
-    end;
+    let add kind name ty = add_partial_result name (Phase.decl ty) kind in
+    if is_static then begin
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_smethods) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_sprops) ~f:(add Property_kind);
+      SMap.iter (class_.tc_consts) ~f:(fun name cc -> add Class_constant_kind name cc.cc_type);
+    end else begin
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_methods) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_props) ~f:(add Property_kind);
+    end
   end
 
 let autocomplete_smethod = autocomplete_method true
@@ -400,7 +397,7 @@ let compute_complete_global
     Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
       incr result_count;
       let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-      get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Method_kind
+      get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind
     )
   in
 
@@ -539,7 +536,10 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
   in
   let desc_string = match x.kind_ with
     | Method_kind
+    | Function_kind
     | Variable_kind
+    | Property_kind
+    | Class_constant_kind
     | Constructor_kind -> Typing_print.full_strip_ns env ty
     | Abstract_class_kind -> "abstract class"
     | Class_kind -> "class"
@@ -571,15 +571,12 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
       }
     | _ -> None
   in
-  let expected_ty = result_matches_expected_ty ty in
-  let pos = Typing_reason.to_pos (fst ty)
-  in
   {
-    res_pos      = Pos.to_absolute pos;
+    res_pos      = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
     res_ty       = desc_string;
     res_name     = x.name;
     res_kind     = x.kind_;
-    expected_ty  = expected_ty;
+    expected_ty  = result_matches_expected_ty ty;
     func_details = func_details;
   }
 

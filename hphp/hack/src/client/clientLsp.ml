@@ -673,7 +673,10 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
     | Abstract_class_kind
     | Class_kind -> Some Completion.Class
     | Method_kind -> Some Completion.Method
+    | Function_kind -> Some Completion.Function
     | Variable_kind -> Some Completion.Variable
+    | Property_kind -> Some Completion.Property
+    | Class_constant_kind -> Some Completion.Value (* a bit off, but the best we can do *)
     | Interface_kind
     | Trait_kind -> Some Completion.Interface
     | Enum_kind -> Some Completion.Enum

@@ -31,12 +31,14 @@ let elaborate_id ns kind id =
     Namespaces.renamespace_if_aliased
       ~reverse:true (auto_namespace_map ()) fully_qualified_id
   in
+  let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
+  let clean_id = SU.strip_ns fully_qualified_id in
   let need_fallback =
-    ns.Namespace_env.ns_name <> None &&
-    not (String.contains (snd id) '\\') in
-  if need_fallback
-  then SU.strip_global_ns fully_qualified_id, Some (snd id)
-  else SU.strip_global_ns fully_qualified_id, None
+    stripped_fully_qualified_id <> clean_id &&
+    (String.contains stripped_fully_qualified_id '\\') &&
+    not (String.contains (snd id) '\\')
+  in
+  stripped_fully_qualified_id, if need_fallback then Some clean_id else None
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.

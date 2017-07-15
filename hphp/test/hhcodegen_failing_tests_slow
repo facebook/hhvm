@@ -50,10 +50,7 @@ slow/concat/1577.php
 slow/concat/1578.php
 slow/concat/1589.php
 slow/constant/1597.php
-slow/constant/alias.php
 slow/constant/casing.php
-slow/constant/casing2.php
-slow/constant/double_realias.php
 slow/constant/globals-array-constant.php
 slow/constant/magic_constants.php
 slow/constant/multi_const.php
@@ -379,7 +376,6 @@ slow/parser/static_call_access.php
 slow/parser/static_call_access_const_expr.php
 slow/parser/tuple-1.php
 slow/parser/tuple-2.php
-slow/parser/use-const.php
 slow/parser/use-strict-hack.php
 slow/parser/use-strict.php
 slow/parser/val_colon_colon_class_method.php
@@ -517,9 +513,6 @@ slow/unpack_args/unpack_call_multi.php
 slow/unset/1117.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
-slow/use_function/realias.php
-slow/use_function/use_function.php
-slow/use_namespace_class/namespace_class_and_function.php
 slow/variable_argument/27.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php

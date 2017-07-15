@@ -1045,16 +1045,6 @@ const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
          uninit_variant;
 }
 
-const Variant& ArrayData::getNotFound(const String& k) {
-  raise_notice("Undefined index: %s", k.data());
-  return uninit_variant;
-}
-
-const Variant& ArrayData::getNotFound(const Variant& k) {
-  raise_notice("Undefined index: %s", k.toString().data());
-  return uninit_variant;
-}
-
 const char* ArrayData::kindToString(ArrayKind kind) {
   std::array<const char*,9> names = {{
     "PackedKind",

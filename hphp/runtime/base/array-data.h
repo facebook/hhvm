@@ -527,8 +527,6 @@ protected:
   static const Variant& getNotFound(const StringData* k);
   const Variant& getNotFound(int64_t k, bool error) const;
   const Variant& getNotFound(const StringData* k, bool error) const;
-  static const Variant& getNotFound(const String& k);
-  static const Variant& getNotFound(const Variant& k);
 
   static bool IsValidKey(Cell k);
   static bool IsValidKey(const Variant& k);

@@ -1038,6 +1038,7 @@ private:
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
   bool m_gc_enabled{RuntimeOption::EvalEnableGC};
+  bool m_enableStatsSync{false};
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;
@@ -1047,19 +1048,16 @@ private:
 
   static void* TlsInitSetup;
 
-#ifdef USE_JEMALLOC
   // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
-  size_t* m_cactive;
 
   // previous values of *m_[de]allocated from last refreshStats()
   uint64_t m_prevAllocated;
   uint64_t m_prevDeallocated;
 
-  bool m_enableStatsSync;
-  static bool s_statsEnabled; // true if mallctlnametomib() setup succeeded.
-#endif
+  // true if mallctlnametomib() setup succeeded, which requires jemalloc
+  static bool s_statsEnabled;
 
   int64_t m_req_start_micros;
 

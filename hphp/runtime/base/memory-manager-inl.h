@@ -53,11 +53,11 @@ struct MemoryManager::MaskAlloc {
     FTRACE(1, "MaskAlloc()\n");
     m_mm.refreshStats();
   }
+
   ~MaskAlloc() {
     FTRACE(1, "~MaskAlloc()\n");
-#ifdef USE_JEMALLOC
     // exclude mallocs and frees since construction
-    if (s_statsEnabled) {
+    if (use_jemalloc && s_statsEnabled) {
       FTRACE(1, "old: prev alloc: {}\nprev dealloc: {}\n",
         m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
 
@@ -67,7 +67,6 @@ struct MemoryManager::MaskAlloc {
       FTRACE(1, "new: prev alloc: {}\nprev dealloc: {}\n\n",
         m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
     }
-#endif
   }
 
   MaskAlloc(const MaskAlloc&) = delete;
@@ -334,21 +333,20 @@ void MemoryManager::objFreeIndex(void* ptr, size_t index) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline int64_t MemoryManager::getAllocated() const {
-#ifdef USE_JEMALLOC
-  assert(m_allocated);
-  return *m_allocated;
-#else
+  if (use_jemalloc) {
+    assert(m_allocated);
+    return *m_allocated;
+  }
   return 0;
-#endif
 }
 
 inline int64_t MemoryManager::getDeallocated() const {
-#ifdef USE_JEMALLOC
-  assert(m_deallocated);
-  return *m_deallocated;
-#else
-  return 0;
-#endif
+  if (use_jemalloc) {
+    assert(m_deallocated);
+    return *m_deallocated;
+  } else {
+    return 0;
+  }
 }
 
 inline int64_t MemoryManager::currentUsage() const {

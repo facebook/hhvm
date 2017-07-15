@@ -57,9 +57,9 @@ TRACE_SET_MOD(mm);
 std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
 
-#ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 
+#ifdef USE_JEMALLOC
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
 static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
@@ -127,7 +127,7 @@ MemoryManager::MemoryManager() {
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
-
+  m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "zend.enable_gc",
       &m_gc_enabled);
 }
@@ -155,20 +155,23 @@ void MemoryManager::resetRuntimeOptions() {
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
-#ifdef USE_JEMALLOC
-  FTRACE(1, "resetStatsImpl({}) pre:\n", isInternalCall);
-  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak alloc: {}\n",
-    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
-    m_stats.peakCap);
-  FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
-    m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
-  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
-#else
-  FTRACE(1, "resetStatsImpl({}) pre:\n"
-    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
-    m_stats.peakCap);
-#endif
+  auto traceStats = [&](const char* when) {
+    if (use_jemalloc) {
+      FTRACE(1, "resetStatsImpl({}) {}:\n", isInternalCall, when);
+      FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak alloc: {}\n",
+             m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
+             m_stats.peakCap);
+      FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
+             m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
+      FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
+    } else {
+      FTRACE(1, "resetStatsImpl({}) {}:\n"
+             "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
+             isInternalCall, when, m_stats.usage(), m_stats.capacity,
+             m_stats.peakUsage, m_stats.peakCap);
+    }
+  };
+  traceStats("pre");
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
@@ -179,12 +182,8 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.totalAlloc = 0;
     m_stats.peakIntervalUsage = 0;
     m_stats.peakIntervalCap = 0;
-#ifdef USE_JEMALLOC
     m_enableStatsSync = false;
   } else if (!m_enableStatsSync) {
-#else
-  } else {
-#endif
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
@@ -197,38 +196,19 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // We don't want to clear the other values because we do already have some
     // small-sized allocator usage and live slabs and wiping now will result in
     // negative values when we try to reconcile our accounting with jemalloc.
-#ifdef USE_JEMALLOC
+
     // Anything that was definitively allocated by the MemoryManager allocator
     // should be counted in this number even if we're otherwise zeroing out
     // the count for each thread.
     m_stats.totalAlloc = s_statsEnabled ? m_stats.mallocDebt : 0;
-
-    m_enableStatsSync = s_statsEnabled;
-#else
-    m_stats.totalAlloc = 0;
-#endif
+    m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   }
-#ifdef USE_JEMALLOC
   if (s_statsEnabled) {
     m_stats.mallocDebt = 0;
     m_prevDeallocated = *m_deallocated;
     m_prevAllocated = *m_allocated;
   }
-#endif
-#ifdef USE_JEMALLOC
-  FTRACE(1, "resetStatsImpl({}) post:\n", isInternalCall);
-  FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n",
-    m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
-    m_stats.peakCap);
-  FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
-    m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
-  FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
-#else
-  FTRACE(1, "resetStatsImpl({}) post:\n"
-    "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
-    isInternalCall, m_stats.usage(), m_stats.capacity,
-    m_stats.peakUsage, m_stats.peakCap);
-#endif
+  traceStats("post");
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
@@ -257,7 +237,6 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
  */
 template<bool live>
 void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
-#ifdef USE_JEMALLOC
   // Incrementally incorporate the difference between the previous and current
   // deltas into the memory usage statistic.  For reference, the total
   // malloced memory usage could be calculated as such, if delta0 were
@@ -287,8 +266,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // Since these deltas potentially include memory allocated from another
     // thread but deallocated on this one, it is possible for these numbers to
     // go negative.
-    int64_t curUsage = int64_t(curAllocated) - int64_t(curDeallocated);
-    int64_t prevUsage = int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
+    auto curUsage = curAllocated - curDeallocated;
+    auto prevUsage = m_prevAllocated - m_prevDeallocated;
     FTRACE(1, "je usage:\ncurrent: {}\nprevious: {}\n", curUsage, prevUsage);
 
     // Subtract the old usage adjustment (prevUsage) and add the current one
@@ -303,7 +282,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // Accumulate the increase in allocation volume since the last refresh.
     // We need to do the calculation instead of just setting it to curAllocated
     // because of the MaskAlloc capability.
-    stats.totalAlloc += int64_t(curAllocated) - int64_t(m_prevAllocated);
+    stats.totalAlloc += curAllocated - m_prevAllocated;
     if (live) {
       m_prevAllocated = curAllocated;
       m_prevDeallocated = curDeallocated;
@@ -313,7 +292,6 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "usage: {}\ntotalAlloc: {}\n\n",
       stats.usage(), stats.totalAlloc);
   }
-#endif
   assert(stats.limit > 0);
   if (live && stats.usage() > stats.limit && m_couldOOM) {
     refreshStatsHelperExceeded();

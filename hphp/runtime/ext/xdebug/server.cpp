@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/xdebug/util.h"
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -454,6 +455,10 @@ void XDebugServer::onRequestInit() {
       transport->setCookie(s_SESSION, sess_start, expire);
     }
   }
+
+  // Remove the artificial memory limit for this request since there is a
+  // debugger attached to it.
+  MM().setMemoryLimit(std::numeric_limits<int64_t>::max());
 }
 
 bool XDebugServer::isNeeded() {

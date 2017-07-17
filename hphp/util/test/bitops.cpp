@@ -93,7 +93,7 @@ TEST(BitopsTest, BitsetForEachEmpty) {
   std::bitset<256> bitset;
   bitset_for_each_set(
     bitset,
-    [&](size_t) { EXPECT_TRUE(false); }
+    [&](size_t) { ADD_FAILURE(); }
   );
 }
 

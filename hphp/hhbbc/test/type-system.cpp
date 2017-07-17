@@ -845,9 +845,9 @@ TEST(Type, IndexBased) {
   Index idx{borrow(program)};
 
   auto const cls = idx.resolve_class(ctx, s_TestClass.get());
-  if (!cls) EXPECT_TRUE(false);
+  if (!cls) ADD_FAILURE();
   auto const clsBase = idx.resolve_class(ctx, s_Base.get());
-  if (!clsBase) EXPECT_TRUE(false);
+  if (!clsBase) ADD_FAILURE();
 
   auto const objExactTy = objExact(*cls);
   auto const subObjTy   = subObj(*cls);
@@ -946,25 +946,25 @@ TEST(Type, Hierarchies) {
 
   // load classes in hierarchy
   auto const clsBase = idx.resolve_class(ctx, s_Base.get());
-  if (!clsBase) EXPECT_TRUE(false);
+  if (!clsBase) ADD_FAILURE();
   auto const clsA = idx.resolve_class(ctx, s_A.get());
-  if (!clsA) EXPECT_TRUE(false);
+  if (!clsA) ADD_FAILURE();
   auto const clsB = idx.resolve_class(ctx, s_B.get());
-  if (!clsB) EXPECT_TRUE(false);
+  if (!clsB) ADD_FAILURE();
   auto const clsAA = idx.resolve_class(ctx, s_AA.get());
-  if (!clsAA) EXPECT_TRUE(false);
+  if (!clsAA) ADD_FAILURE();
   auto const clsAB = idx.resolve_class(ctx, s_AB.get());
-  if (!clsAB) EXPECT_TRUE(false);
+  if (!clsAB) ADD_FAILURE();
   auto const clsBA = idx.resolve_class(ctx, s_BA.get());
-  if (!clsBA) EXPECT_TRUE(false);
+  if (!clsBA) ADD_FAILURE();
   auto const clsBB = idx.resolve_class(ctx, s_BB.get());
-  if (!clsBB) EXPECT_TRUE(false);
+  if (!clsBB) ADD_FAILURE();
   auto const clsBAA = idx.resolve_class(ctx, s_BAA.get());
-  if (!clsBAA) EXPECT_TRUE(false);
+  if (!clsBAA) ADD_FAILURE();
   auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
-  if (!clsTestClass) EXPECT_TRUE(false);
+  if (!clsTestClass) ADD_FAILURE();
   auto const clsNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
-  if (!clsNonUnique) EXPECT_TRUE(false);
+  if (!clsNonUnique) ADD_FAILURE();
 
   // make *exact type* and *sub type* types and objects for all loaded classes
   auto const objExactBaseTy = objExact(*clsBase);
@@ -1302,13 +1302,13 @@ TEST(Type, Interface) {
 
   // load classes in hierarchy
   auto const clsIA = idx.resolve_class(ctx, s_IA.get());
-  if (!clsIA) EXPECT_TRUE(false);
+  if (!clsIA) ADD_FAILURE();
   auto const clsIAA = idx.resolve_class(ctx, s_IAA.get());
-  if (!clsIAA) EXPECT_TRUE(false);
+  if (!clsIAA) ADD_FAILURE();
   auto const clsA = idx.resolve_class(ctx, s_A.get());
-  if (!clsA) EXPECT_TRUE(false);
+  if (!clsA) ADD_FAILURE();
   auto const clsAA = idx.resolve_class(ctx, s_AA.get());
-  if (!clsAA) EXPECT_TRUE(false);
+  if (!clsAA) ADD_FAILURE();
 
   // make sometypes and objects
   auto const subObjIATy  = subObj(*clsIA);
@@ -1351,11 +1351,11 @@ TEST(Type, NonUnique) {
   Index idx{borrow(program)};
 
   auto const clsA = idx.resolve_class(ctx, s_A.get());
-  if (!clsA) EXPECT_TRUE(false);
+  if (!clsA) ADD_FAILURE();
   auto const clssNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
-  if (!clssNonUnique) EXPECT_TRUE(false);
+  if (!clssNonUnique) ADD_FAILURE();
   auto const clssNonUniqueA = idx.resolve_class(ctx, s_NonUniqueA.get());
-  if (!clssNonUniqueA) EXPECT_TRUE(false);
+  if (!clssNonUniqueA) ADD_FAILURE();
 
   // non unique types are funny because we cannot really make any conclusion
   // about them so they resolve to "non precise" subtype relationship

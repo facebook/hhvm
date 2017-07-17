@@ -64,16 +64,16 @@ TEST(Resource, Casts) {
 
     try {
       cast<File>(res);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     try {
       cast<DummyResource>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // cast_or_null tests
@@ -83,9 +83,9 @@ TEST(Resource, Casts) {
 
     try {
       cast_or_null<File>(res);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast tests
@@ -96,9 +96,9 @@ TEST(Resource, Casts) {
 
     try {
       dyn_cast<DummyResource>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast_or_null

@@ -656,6 +656,10 @@ bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
   assert(pos->t != ')'); // already determined to be nonempty
 
   for (;;) {
+    if (nextIfToken(pos, T_ELLIPSIS)) {
+      return pos->t == ')';
+    }
+    nextIfToken(pos, '?');
     if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) &&
         !tryParseClassConstant(pos)) {
       return false;

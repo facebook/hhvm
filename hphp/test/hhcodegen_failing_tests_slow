@@ -508,6 +508,8 @@ slow/types/abstract_function_typehints.php
 slow/types/interface_typehint_fail.php
 slow/types/ref_type_fail.php
 slow/types/scalar_names.php
+slow/type_annotation/shape_type_param_with_known_and_unknown_fields.php
+slow/type_annotation/shape_type_param_with_unknown_fields.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
 slow/unset/1117.php

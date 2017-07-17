@@ -358,8 +358,10 @@ struct ProfData {
   int64_t transCounter(TransID id) const {
     folly::SharedMutex::ReadHolder lock{m_transLock};
     assertx(id < m_transRecs.size());
-    auto const counter = m_counters.get(id);
+    auto counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();
+    if (RuntimeOption::EvalJitPGOFastProfiling &&
+	(counter > initVal)) counter = 0;
     assert_flog(initVal >= counter,
                 "transCounter({}) = {}, initVal = {}\n",
                 id, counter, initVal);

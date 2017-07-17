@@ -160,3 +160,5 @@ let autocomplete_keyword (context:context) (stub:string) : string list =
   possibilities
     |> List.concat
     |> List.filter ~f:(fun x -> string_starts_with x stub)
+    |> List.sort ~cmp:Pervasives.compare
+    |> List.remove_consecutive_duplicates ~equal:(=)

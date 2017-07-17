@@ -4,7 +4,6 @@ do
 echo
 else
 elseif
-foo
 for
 foreach
 if

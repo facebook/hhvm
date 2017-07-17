@@ -16,7 +16,6 @@ open ContextParser
 open Core
 open String_utils
 
-(* BUG: local variable autocomplete does not work inside class functions *)
 (* TODO: Ensure this covers all cases *)
 let local_variable_valid_in_context (context:context) (stub:string) : bool =
   let open Container in

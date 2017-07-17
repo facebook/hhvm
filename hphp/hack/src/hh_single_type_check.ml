@@ -650,7 +650,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         Not_found -> failwith "Invalid test file: no flags found"
       in
       let result =
-        FfpAutocompleteService.auto_complete opts file_text position
+        FfpAutocompleteService.auto_complete file_text position
       in begin
         match result with
         | [] -> Printf.printf "No result found\n"

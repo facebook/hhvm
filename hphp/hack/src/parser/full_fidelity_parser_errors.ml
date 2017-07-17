@@ -291,8 +291,7 @@ let methodish_non_abstract_without_body node parents =
   non_abstract && not_has_body
 
 let methodish_in_interface_has_body node parents =
-  methodish_inside_interface parents &&
-      not (is_missing node.methodish_function_body)
+  methodish_inside_interface parents && methodish_has_body node
 
 (* Test whether node is a method that is both abstract and private
  *)
@@ -619,7 +618,7 @@ let methodish_errors node parents =
       produce_error errors methodish_abstract_conflict_with_final
       node SyntaxError.error2019 modifiers in
     let errors =
-      produce_error errors (methodish_in_interface_has_body md) parents
+      produce_error errors (methodish_in_interface_has_body node) parents
       SyntaxError.error2041 md.methodish_function_body in
     let errors =
       let class_name = Option.value (first_parent_class_name parents)

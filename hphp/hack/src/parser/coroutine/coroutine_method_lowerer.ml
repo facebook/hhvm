@@ -21,7 +21,9 @@ open Coroutine_state_machine_generator
  * To avoid conflicting with variadic function types, the contination parameter
  * is generated at the beginning rather than the end of the parameter list.
  *)
-let compute_parameter_list { function_parameter_list; function_type; _; } = (* TODO *)
+(* TODO: Consider packaging parameter-list-and-return-type into a "signature"
+object *)
+let compute_parameter_list function_parameter_list function_type =
   let coroutine_parameter_syntax =
     make_continuation_parameter_syntax function_type in
   prepend_to_comma_delimited_syntax_list
@@ -32,13 +34,17 @@ let compute_parameter_list { function_parameter_list; function_type; _; } = (* T
  * If the provided function declaration header is for a coroutine, rewrites the
  * parameter list and return type as necessary to implement the coroutine.
  *)
-let rewrite_function_decl_header ({ function_type; _; } as header_node) =
+let rewrite_function_decl_header header_node =
   let make_syntax node = make_syntax (FunctionDeclarationHeader node) in
+  let function_type =
+    make_coroutine_result_type_syntax header_node.function_type in
+  let function_parameter_list = compute_parameter_list
+    header_node.function_parameter_list header_node.function_type in
   make_syntax
     { header_node with
       function_coroutine = make_missing ();
-      function_type = make_coroutine_result_type_syntax function_type;
-      function_parameter_list = compute_parameter_list header_node;
+      function_type;
+      function_parameter_list;
     }
 
 let parameter_to_arg param =
@@ -84,10 +90,10 @@ let make_state_machine_method_reference_syntax
  * coroutine, pass in or set any necessary variables, and return the result from
  * invoking resume (with a null argument).
  *)
-
- let create_closure_invocation
+let create_closure_invocation
      context
-     { function_parameter_list; function_type; _; } (* TODO *)
+     function_parameter_list
+     function_type
      rewritten_body =
   (* $param1, $param2 *)
   let arg_list = parameter_list_to_arg_list function_parameter_list in
@@ -129,12 +135,13 @@ let make_state_machine_method_reference_syntax
 let rewrite_coroutine_body
     context
     methodish_function_body
-    header_node
+    function_parameter_list
+    function_type
     rewritten_body =
   match syntax methodish_function_body with
   | CompoundStatement node ->
       let compound_statements = create_closure_invocation
-        context header_node rewritten_body in
+        context function_parameter_list function_type rewritten_body in
       make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
       methodish_function_body
@@ -150,7 +157,7 @@ let rewrite_coroutine_body
 let rewrite_methodish_declaration
     context
     ({ methodish_function_body; _; } as method_node)
-    header_node
+    ({ function_parameter_list; function_type; _; } as header_node)
     rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
@@ -158,7 +165,8 @@ let rewrite_methodish_declaration
     rewrite_coroutine_body
       context
       methodish_function_body
-      header_node
+      function_parameter_list
+      function_type
       rewritten_body in
   make_syntax
     { method_node with
@@ -169,10 +177,10 @@ let rewrite_methodish_declaration
 
 let rewrite_function_declaration
     ({ function_body; _; } as function_node)
-    ({ function_name; function_type_parameter_list; _; } as header_node)
+    ({ function_name; function_type; function_parameter_list;
+      function_type_parameter_list; _; } as header_node)
     rewritten_body =
-  (* TODO:Would it be better to have no class name at all? *)
-  (* TODO: Return type? *)
+  (* TODO: Would it be better to have no class name at all? *)
   let context = { Coroutine_context.empty with
     Coroutine_context.classish_name = global_syntax;
     Coroutine_context.function_name;
@@ -183,7 +191,8 @@ let rewrite_function_declaration
     rewrite_coroutine_body
       context
       function_body
-      header_node
+      function_parameter_list
+      function_type
       rewritten_body in
   make_syntax
     { function_node with

@@ -21,26 +21,29 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module ContextParser = FfpAutocompleteContextParser
 
 (* The type returned to the client *)
-(* TODO: Add all the additional autocomplete info to this, not just the autocomplete word *)
+(* TODO: Add all the additional autocomplete info to this,
+   not just the autocomplete word *)
 type autocomplete_result = {
   name : string;
 }
 
 type result = autocomplete_result list
 
-(* TODO: Return autocomplete_results from each type of autocomplete directly instead of wrapping
-   them here *)
+(* TODO: Return autocomplete_results from each type of autocomplete directly
+   instead of wrapping them here *)
 let make_result (res:string) : autocomplete_result =
   { name = res }
 
-let auto_complete (file_content:string) (pos:int*int) : result =
+let auto_complete (file_content:string) (pos:Ide_api_types.position) : result =
   let source_text = SourceText.make file_content in
   let syntax_tree = SyntaxTree.make source_text in
 
-  let offset = SourceText.position_to_offset source_text pos in
+  let open Ide_api_types in
+  let position_tuple = (pos.line, pos.column) in
+  let offset = SourceText.position_to_offset source_text position_tuple in
   let (context, stub) = ContextParser.get_context_and_stub syntax_tree offset in
-  (* TODO: Delegate to each type of completion to determine whether or not that type is valid
-     in the current context *)
+  (* TODO: Delegate to each type of completion to determine whether or not that
+     type is valid in the current context *)
   (* TODO: Implement completions for class member access *)
   (* TODO: Implement namespace based completions *)
   let keywords = ACKeyword.autocomplete_keyword context stub in

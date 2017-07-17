@@ -638,17 +638,19 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       let file_text = cat (Relative_path.to_absolute filename) in
       (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
       let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [0-9]*" in
-      let (row, col) = try
+      let open Ide_api_types in
+      let position = try
         let _ = Str.search_forward args_regex file_text 0 in
         let raw_flags = Str.matched_string file_text in
         match split ' ' raw_flags with
-        | [ _; row; column] -> (int_of_string row, int_of_string column)
+        | [ _; row; column] ->
+          { line = int_of_string row; column = int_of_string column }
         | _ -> failwith "Invalid test file: no flags found"
       with
         Not_found -> failwith "Invalid test file: no flags found"
       in
       let result =
-        FfpAutocompleteService.auto_complete file_text (row, col)
+        FfpAutocompleteService.auto_complete file_text position
       in begin
         match result with
         | [] -> Printf.printf "No result found\n"

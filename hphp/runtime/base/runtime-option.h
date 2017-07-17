@@ -76,6 +76,8 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
+  static std::string getTraceOutputFile();
+
   static bool ServerMode;
   static std::string BuildId;
   static std::string InstanceId;
@@ -338,6 +340,7 @@ struct RuntimeOption {
   static std::string StackTraceFilename;
   static int StackTraceTimeout;
   static std::string RemoteTraceOutputDir;
+  static std::set<std::string, stdltistr> TraceFunctions;
 
   static bool EnableStats;
   static bool EnableAPCStats;

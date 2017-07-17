@@ -212,10 +212,6 @@ InitFiniNode s_traceRequestStart([]() {
   }
 }, InitFiniNode::When::RequestStart, "trace");
 
-std::string getTraceOutputFile() {
-  return folly::sformat("{}/hphp.{}.log",
-                        RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
-}
 } // namespace
 #endif // HPHP_TRACE
 
@@ -327,7 +323,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "      time        optional, default 20 (seconds)\n"
 #ifdef HPHP_TRACE
         "/trace-request:   write trace for next request(s) to "
-        + getTraceOutputFile() + "\n"
+        + RuntimeOption::getTraceOutputFile() + "\n"
         "    spec          module:level,... spec; see hphp/util/trace.h\n"
         "    count         optional, total requests to trace (default: 1)\n"
         "    url           optional, trace only if URL contains \'url\'\n"
@@ -529,7 +525,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 #ifdef HPHP_TRACE
     if (cmd == "trace-request") {
-      Trace::ensureInit(getTraceOutputFile());
+      Trace::ensureInit(RuntimeOption::getTraceOutputFile());
       // Just discard any existing task.
       delete s_traceTask.exchange(
         new TraceTask{transport->getParam("spec"),

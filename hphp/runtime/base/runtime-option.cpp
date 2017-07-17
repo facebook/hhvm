@@ -357,6 +357,7 @@ std::string RuntimeOption::CoreDumpReportDirectory =
 std::string RuntimeOption::StackTraceFilename;
 int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
+std::set<std::string, stdltistr> RuntimeOption::TraceFunctions{};
 
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
@@ -541,6 +542,11 @@ static inline int retranslateAllRequestDefault() {
 
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
+}
+
+std::string RuntimeOption::getTraceOutputFile() {
+  return folly::sformat("{}/hphp.{}.log",
+                        RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
 }
 
 const uint64_t kEvalVMStackElmsDefault =
@@ -1773,6 +1779,8 @@ void RuntimeOption::Load(
     Config::Bind(StackTraceTimeout, ini, config, "Debug.StackTraceTimeout", 0);
     Config::Bind(RemoteTraceOutputDir, ini, config,
                  "Debug.RemoteTraceOutputDir", "/tmp");
+    Config::Bind(TraceFunctions, ini, config,
+                 "Debug.TraceFunctions", TraceFunctions);
 
     {
       // Debug SimpleCounter
@@ -2032,6 +2040,10 @@ void RuntimeOption::Load(
 
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
+
+  if (TraceFunctions.size()) {
+    Trace::ensureInit(getTraceOutputFile());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

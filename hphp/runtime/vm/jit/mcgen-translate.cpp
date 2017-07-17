@@ -55,6 +55,16 @@ std::atomic<bool> s_retranslateAllComplete{false};
 void optimize(tc::FuncMetaInfo& info) {
   auto const func = info.func;
 
+  folly::Optional<Trace::BumpRelease> bumpLoads;
+  folly::Optional<Trace::BumpRelease> bumpStores;
+  folly::Optional<Trace::BumpRelease> bumpPrint;
+  if (!RuntimeOption::TraceFunctions.empty() &&
+      RuntimeOption::TraceFunctions.count(func->fullName()->toCppString())) {
+    bumpLoads.emplace(Trace::hhir_load, -10);
+    bumpStores.emplace(Trace::hhir_store, -10);
+    bumpPrint.emplace(Trace::printir, -10);
+  }
+
   // Regenerate the prologues and DV funclets before the actual function body.
   auto const includedBody = regeneratePrologues(func, info);
 

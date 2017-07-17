@@ -182,6 +182,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
     m_stats.auxUsage = 0;
+    m_stats.mallocDebt = 0;
     m_stats.capacity = 0;
     m_stats.peakUsage = 0;
     m_stats.peakCap = 0;
@@ -194,9 +195,10 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
+    assert(m_stats.auxUsage == 0);
 
     // The effect of this call is simply to ignore anything we've done *outside*
-    // the MemoryManager allocator after we initialized to avoid attributing
+    // the MemoryManager allocator after we initialized, to avoid attributing
     // shared structure initialization that happens during hphp_thread_init()
     // to this session.
 
@@ -204,16 +206,14 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // small-sized allocator usage and live slabs and wiping now will result in
     // negative values when we try to reconcile our accounting with jemalloc.
 
-    // Anything that was definitively allocated by the MemoryManager allocator
-    // should be counted in this number even if we're otherwise zeroing out
-    // the count for each thread.
-    m_stats.totalAlloc = s_statsEnabled ? m_stats.mallocDebt : 0;
     m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   }
   if (s_statsEnabled) {
-    m_stats.mallocDebt = 0;
     m_prevDeallocated = *m_deallocated;
-    m_prevAllocated = *m_allocated;
+    m_prevAllocated = *m_allocated - m_stats.mallocDebt;
+    // because we accounted for internal allocations here, the next call to
+    // refreshStatsImpl() will correctly update auxUsage and totalAlloc
+    // without double-counting or dropping anything.
   }
   traceStats("post");
 }

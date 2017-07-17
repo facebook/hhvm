@@ -299,6 +299,43 @@ stack, incorporating code and stack pointers, function names, and filepaths.
     #69 0x7fff52a60830 @ 0x1eefac0: main() at hphp/.../hhvm/main.cpp:611
 
 
+### walkfp
+
+The `walkfp` command, like `walkstk`, prints out an interleaved stacktrace.
+The output is less detailed, but the command has fewer dependencies and is more
+robust to issues like debuginfo or core corruption, gdb internal errors,
+unwinder problems, etc.
+
+    (gdb) walkfp
+    #0  0x7ffe34921c20 @ 0x006e67b5: HPHP::AsioContext::runUntil(HPHP::c_WaitableWaitHandle*)
+    #1  0x7ffe34921c50 @ 0x006e651f: HPHP::c_WaitableWaitHandle::join()
+    #2  0x7ffe34921ca0 @ 0x00a2fec6: HPHP::f_join(HPHP::Object const&)
+    #3  0x7ffe34921cc0 @ 0x00e9b8eb: HPHP::Native::callFuncIndirectImpl<HPHP::Variant>(HPHP::TypedValue* (*)(HPHP::ActRec*), long*, int, double*, int)
+    #4  0x7ffe34921e60 @ 0x00c1ab15: HPHP::Native::callFunc<false>(HPHP::Func const*, void*, HPHP::TypedValue*, int, HPHP::TypedValue&)
+    #5  0x7ffe34921ea0 @ 0x00c1adb4: HPHP::Native::functionWrapper<false>(HPHP::ActRec*)
+    #6  0x7ffe34922990 @ 0x01929451: HPHP::dispatchImpl<false>()
+    #7  0x7ffe349229f0 @ 0x006e7005: HPHP::ExecutionContext::resumeAsyncFunc(HPHP::Resumable*, HPHP::ObjectData*, HPHP::TypedValue)
+    #8  0x7ffe34922a00 @ 0x006e6d2e: HPHP::c_AsyncFunctionWaitHandle::resume()
+    #9  0x7ffe34922a80 @ 0x006e670d: HPHP::AsioContext::runUntil(HPHP::c_WaitableWaitHandle*)
+    #10 0x7ffe34922ab0 @ 0x006e651f: HPHP::c_WaitableWaitHandle::join()
+    #11 0x7ffe34922b00 @ 0x00a2fec6: HPHP::f_join(HPHP::Object const&)
+    #12 0x7ffe34922b20 @ 0x00e9b8eb: HPHP::Native::callFuncIndirectImpl<HPHP::Variant>(HPHP::TypedValue* (*)(HPHP::ActRec*), long*, int, double*, int)
+    #13 0x7ffe34922cc0 @ 0x00c1ab15: HPHP::Native::callFunc<false>(HPHP::Func const*, void*, HPHP::TypedValue*, int, HPHP::TypedValue&)
+    #14 0x7ffe34922d00 @ 0x00c1adb4: HPHP::Native::functionWrapper<false>(HPHP::ActRec*)
+    #15 0x7ffe349237f0 @ 0x01929451: HPHP::dispatchImpl<false>()
+    #16 0x7ffe34923880 @ 0x00642f83: HPHP::ExecutionContext::invokeFunc(HPHP::Func const*, HPHP::Variant const&, HPHP::ObjectData*, HPHP::Class*, HPHP::VarEnv*, HPHP::StringData*, HPHP::ExecutionContext::InvokeFlags, bool)
+    #17 0x7ffe349238c0 @ 0x008f71a1: HPHP::ExecutionContext::invokeUnit(HPHP::Unit const*)
+    #18 0x7ffe34923920 @ 0x007a4879: HPHP::invoke_file(HPHP::String const&, bool, char const*)
+    #19 0x7ffe349239a0 @ 0x00bff301: HPHP::include_impl_invoke(HPHP::String const&, bool, char const*)
+    #20 0x7ffe34923b50 @ 0x00bfe934: HPHP::hphp_invoke(HPHP::ExecutionContext*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool, HPHP::Array const&, HPHP::VRefParamValue const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, bool, bool, bool)
+    #21 0x7ffe34923c40 @ 0x03b90583: HPHP::hphp_invoke_simple(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)
+    #22 0x7ffe34924c20 @ 0x03ba5562: HPHP::execute_program_impl(int, char**)
+    #23 0x7ffe34924ce0 @ 0x03ba85b8: HPHP::execute_program(int, char**)
+    #24 0x7ffe34924dd0 @ 0x01954ceb: main(int, char**)
+    #25 0x7ffe34924ea0 @ 0x7ffbab134858: __libc_start_main
+    #26 0x0 @ 0x01952ab9: _start
+
+
 ### asyncstk
 
 The `asyncstk` command prints out the async function PHP stack for a given

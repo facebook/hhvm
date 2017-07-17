@@ -8,9 +8,39 @@ GDB commands related to the HHVM stack.
 from compatibility import *
 
 import gdb
+import re
 from gdbutils import *
 import frame
 import unwind
+
+
+#------------------------------------------------------------------------------
+# Helpers.
+
+def _function_for(rip):
+    """Get the name of the function containing `rip', or None if `rip' does not
+    belong to a native function."""
+    try:
+        out = gdb.execute('x/i %s' % str(rip), False, True)
+        # [=>] 0xabc3210 <HPHP::foo<T>((*) Foo*(int))+789>: jmp 0xf0 <...>
+        return re.split('\+\d+>:', out.split('<', 1)[1], 1)[0]
+    except:
+        return None
+
+    # We really ought to be able to do this using the gdb.Block API, but in
+    # practice it sometimes produces an entirely unrelated block---maybe due to
+    # debuginfo corruption from LTO, or template folding, or something else
+    # entirely.  The code should look something like:
+    #
+    # block = gdb.block_for_pc(int(rip))
+    #
+    # while block is not None:
+    #     if block.function is not None:
+    #         return block.function.name
+    #
+    #     block = block.superblock
+    #
+    # return None
 
 
 #------------------------------------------------------------------------------
@@ -128,10 +158,8 @@ The output backtrace has the following format:
                     # Just guess that the name of the frame is the same as the
                     # name of the block we're in.
                     try:
-                        block = gdb.block_for_pc(int(rip))
-                        name = block.function.name
                         print(frame.stringify(frame.create_native(
-                            idx=i, fp=fp, rip=rip, name='? ' + name)))
+                            idx=i, fp=fp, rip=rip, name=_function_for(rip))))
                     except:
                         print(frame.stringify(frame.create_native(
                             idx=i, fp=fp, rip=rip, native_frame=None)))
@@ -139,3 +167,63 @@ The output backtrace has the following format:
 
 
 WalkstkCommand()
+
+
+#------------------------------------------------------------------------------
+# `walkfp' command.
+
+class WalkfpCommand(gdb.Command):
+    """Traverse the interleaved VM and native stacks.
+
+This is a simplified version of `walkstk' which carries fewer dependencies.
+Its output is not as detailed, but it is more robust to failures (including
+internal gdb errors).
+
+The output backtrace has the following format:
+
+    #<idx> <fp> @ <rip>: <function> [at <filename>:<line>]
+"""
+
+    def __init__(self):
+        super(WalkfpCommand, self).__init__('walkfp', gdb.COMMAND_STACK)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        argv = parse_argv(args)
+
+        if len(argv) > 2:
+            print('Usage: walkfp [fp] [rip]')
+            return
+
+        fp_type = T('uintptr_t').pointer()
+        fp = gdb.parse_and_eval('$rbp').cast(fp_type)
+        rip = gdb.parse_and_eval('$rip').cast(T('uintptr_t'))
+
+        if len(argv) >= 1:
+            fp = argv[0].cast(fp_type)
+
+            if len(argv) == 2:
+                rip = argv[1].cast(T('uintptr_t'))
+
+        i = 0
+        fp = (fp, rip)
+
+        while fp:
+            rip = fp[1]
+            fp = fp[0].cast(fp_type)
+
+            try:
+                if frame.is_jitted(fp, rip):
+                    ar_type = T('HPHP::ActRec').pointer()
+                    print(frame.stringify(frame.create_php(
+                        idx=i, ar=fp.cast(ar_type), rip=rip)))
+                else:
+                    print(frame.stringify(frame.create_native(
+                        idx=i, fp=fp, rip=rip, name=_function_for(rip))))
+            except:
+                print(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip)))
+
+            i += 1
+
+
+WalkfpCommand()

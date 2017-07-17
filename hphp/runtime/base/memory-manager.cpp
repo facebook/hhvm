@@ -59,6 +59,9 @@ std::atomic<MemoryManager::ReqProfContext*>
 
 bool MemoryManager::s_statsEnabled = false;
 
+static std::atomic<size_t> s_heap_id; // global counter of heap instances
+static thread_local size_t t_heap_id; // thread's current heap instance id
+
 #ifdef USE_JEMALLOC
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
@@ -121,6 +124,7 @@ MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated);
 #endif
+  FTRACE(1, "heap-id {} new MM pid {}\n", t_heap_id, getpid());
   resetStatsImpl(true);
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup
@@ -133,6 +137,7 @@ MemoryManager::MemoryManager() {
 }
 
 MemoryManager::~MemoryManager() {
+  FTRACE(1, "heap-id {} ~MM\n", t_heap_id);
   if (debug) {
     // Check that every allocation in heap has been freed before destruction.
     forEachHeapObject([&](HeapObject* h, size_t) {
@@ -156,18 +161,19 @@ void MemoryManager::resetRuntimeOptions() {
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
   auto traceStats = [&](const char* when) {
+    FTRACE(1, "heap-id {} resetStatsImpl({}) {}: ",
+           t_heap_id, isInternalCall, when);
     if (use_jemalloc) {
-      FTRACE(1, "resetStatsImpl({}) {}:\n", isInternalCall, when);
-      FTRACE(1, "usage: {}\ncapacity: {}\npeak usage: {}\npeak alloc: {}\n",
-             m_stats.usage(), m_stats.capacity, m_stats.peakUsage,
-             m_stats.peakCap);
-      FTRACE(1, "total alloc: {}\nje alloc: {}\nje dealloc: {}\n",
-             m_stats.totalAlloc, m_prevAllocated, m_prevDeallocated);
-      FTRACE(1, "je debt: {}\n\n", m_stats.mallocDebt);
+      FTRACE(1, "mm-usage {} auxUsage {} debt {} ",
+             m_stats.mmUsage, m_stats.auxUsage, m_stats.mallocDebt);
+      FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
+             m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
+      FTRACE(1, "total {} prev alloc-dealloc {} cur alloc-dealloc {}\n",
+             m_stats.totalAlloc, m_prevAllocated-m_prevDeallocated,
+             *m_allocated - *m_deallocated);
     } else {
-      FTRACE(1, "resetStatsImpl({}) {}:\n"
-             "usage: {}\ncapacity: {}\npeak usage: {}\npeak capacity: {}\n\n",
-             isInternalCall, when, m_stats.usage(), m_stats.capacity,
+      FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
+             m_stats.usage(), m_stats.capacity,
              m_stats.peakUsage, m_stats.peakCap);
     }
   };
@@ -183,6 +189,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakIntervalUsage = 0;
     m_stats.peakIntervalCap = 0;
     m_enableStatsSync = false;
+    if (Trace::enabled) t_heap_id = ++s_heap_id;
   } else if (!m_enableStatsSync) {
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
@@ -255,20 +262,19 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     const int64_t curAllocated = *m_allocated;
     const int64_t curDeallocated = *m_deallocated;
 
-    FTRACE(1, "Before stats sync:\n");
-    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\nchange: {}\n",
-      curAllocated, m_prevAllocated, curAllocated - m_prevAllocated);
-    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\nchange: {}\n",
-      curDeallocated, m_prevDeallocated, curDeallocated - m_prevDeallocated);
-    FTRACE(1, "usage: {}\ntotalAlloc: {}\nmallocDebt: {}\n",
-      stats.usage(), stats.totalAlloc, stats.mallocDebt);
-
     // Since these deltas potentially include memory allocated from another
     // thread but deallocated on this one, it is possible for these numbers to
     // go negative.
     auto curUsage = curAllocated - curDeallocated;
     auto prevUsage = m_prevAllocated - m_prevDeallocated;
-    FTRACE(1, "je usage:\ncurrent: {}\nprevious: {}\n", curUsage, prevUsage);
+
+    FTRACE(1, "heap-id {} Before stats sync: ", t_heap_id);
+    FTRACE(1, "prev alloc-dealloc {} cur alloc-dealloc: {} alloc-change: {} ",
+      prevUsage, curUsage, curAllocated - m_prevAllocated);
+    FTRACE(1, "dealloc-change: {} ", curDeallocated - m_prevDeallocated);
+    FTRACE(1, "mm usage {} auxUsage {} totalAlloc {} capacity {} debt {}\n",
+      stats.mmUsage, stats.auxUsage, stats.totalAlloc, stats.capacity,
+      stats.mallocDebt);
 
     // Subtract the old usage adjustment (prevUsage) and add the current one
     // (curUsage) to arrive at the new combined usage number.
@@ -288,9 +294,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       m_prevDeallocated = curDeallocated;
     }
 
-    FTRACE(1, "After stats sync:\n");
-    FTRACE(1, "usage: {}\ntotalAlloc: {}\n\n",
-      stats.usage(), stats.totalAlloc);
+    FTRACE(1, "heap-id {} after sync auxUsage {} totalAlloc: {}\n",
+      t_heap_id, stats.auxUsage, stats.totalAlloc);
   }
   assert(stats.limit > 0);
   if (live && stats.usage() > stats.limit && m_couldOOM) {
@@ -340,7 +345,8 @@ void MemoryManager::sweep() {
   } while (!m_sweepables.empty());
 
   DEBUG_ONLY auto napcs = m_apc_arrays.size();
-  FTRACE(1, "sweep: sweepable {} native {} apc array {}\n",
+  FTRACE(1, "heap-id {} sweep: sweepable {} native {} apc array {}\n",
+         t_heap_id,
          num_sweepables,
          num_natives,
          napcs);
@@ -362,6 +368,7 @@ void MemoryManager::resetAllocator() {
   assert(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
   // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
+  FTRACE(1, "heap-id {} resetAllocator: strings {}\n", t_heap_id, nstrings);
 
   // free the heap
   m_heap.reset();
@@ -374,7 +381,6 @@ void MemoryManager::resetAllocator() {
   resetStatsImpl(true);
   setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
-  FTRACE(1, "reset: strings {}\n", nstrings);
   if (debug) resetEagerGC();
 }
 
@@ -1052,8 +1058,8 @@ void MemoryManager::setGCEnabled(bool isGCEnabled) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void BigHeap::reset() {
-  TRACE(1, "BigHeap-reset: slabs %lu bigs %lu\n", m_slabs.size(),
-        m_bigs.size());
+  TRACE(1, "heap-id %lu BigHeap-reset: slabs %lu bigs %lu\n",
+        t_heap_id, m_slabs.size(), m_bigs.size());
 #ifdef USE_JEMALLOC
   auto do_free = [&](void* ptr) { dallocx(ptr, 0); };
 #else

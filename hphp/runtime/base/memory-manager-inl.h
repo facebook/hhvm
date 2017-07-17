@@ -80,12 +80,12 @@ struct MemoryManager::SuppressOOM {
   explicit SuppressOOM(MemoryManager& mm)
       : m_mm(mm)
       , m_savedCouldOOM(mm.m_couldOOM) {
-    FTRACE(1, "SuppressOOM() [couldOOM was {}]\n", m_savedCouldOOM);
+    FTRACE(2, "SuppressOOM() [couldOOM was {}]\n", m_savedCouldOOM);
     m_mm.m_couldOOM = false;
   }
 
   ~SuppressOOM() {
-    FTRACE(1, "~SuppressOOM() [couldOOM is {}]\n", m_savedCouldOOM);
+    FTRACE(2, "~SuppressOOM() [couldOOM is {}]\n", m_savedCouldOOM);
     m_mm.m_couldOOM = m_savedCouldOOM;
   }
 

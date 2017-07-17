@@ -337,20 +337,11 @@ let parse_options () =
     tcopt;
   }
 
-let infer_return tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
-  let make_set =
-    List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty
-  in
-  let n_funs = make_set funs in
-  let n_classes = make_set classes in
-  let n_types = make_set typedefs in
-  let n_consts = make_set consts in
-  let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
+let infer_return tcopt fn info  =
+  let names = FileInfo.simplify info in
   let fast = Relative_path.Map.singleton fn names in
-  let inferred_types =
-    Typing_suggest_service.suggest_files
-      tcopt (Typing_suggest_service.keys fast)
-  in
+  let files = Typing_suggest_service.Files (Typing_suggest_service.keys fast) in
+  let inferred_types = Typing_suggest_service.get_inferred_types tcopt files in
   let funs_and_methods = !Typing_suggest.funs_and_methods in
   let () = Typing_suggest.funs_and_methods := [] in
   let funs_and_methods =
@@ -388,15 +379,8 @@ let infer_return tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
 in
 print_returns_with_funs inferred_types funs_and_methods
 
-let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
-  let make_set =
-    List.fold_left ~f: (fun acc (_, x) -> SSet.add x acc) ~init: SSet.empty
-  in
-  let n_funs = make_set funs in
-  let n_classes = make_set classes in
-  let n_types = make_set typedefs in
-  let n_consts = make_set consts in
-  let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
+let suggest_and_print tcopt fn info =
+  let names = FileInfo.simplify info in
   let fast = Relative_path.Map.singleton fn names in
   let patch_map = Typing_suggest_service.go None fast tcopt in
   match Relative_path.Map.get patch_map fn with

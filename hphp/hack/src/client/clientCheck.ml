@@ -396,9 +396,9 @@ let main args =
     | MODE_INFER_RETURN_TYPE name ->
       let action =
         parse_function_or_method_id
-          ~func_action:(fun fun_name -> ServerInferReturnType.Function fun_name)
+          ~func_action:(fun fun_name -> InferReturnTypeService.Function fun_name)
           ~meth_action:(fun class_name meth_name ->
-            ServerInferReturnType.Method (class_name, meth_name))
+            InferReturnTypeService.Method (class_name, meth_name))
           name
       in
       let result = rpc args @@ Rpc.INFER_RETURN_TYPE action in

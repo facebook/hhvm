@@ -288,7 +288,7 @@ class virtual ['self] endo =
           then this
           else (r0, r1)) env c0
       in
-      let r1 = self#on_id env c1 in
+      let r1 = self#on_list self#on_id env c1 in
       let r2 = self#on_cu_alias_type env c2 in
       if c0 == r0 && c1 == r1 && c2 == r2
       then this else ClassUseAlias (r0, r1, r2)

@@ -333,7 +333,7 @@ let rec get_doc node =
   | TraitUseConflictResolutionItem {
     trait_use_conflict_resolution_item_aliasing_name;
     trait_use_conflict_resolution_item_aliasing_keyword;
-    trait_use_conflict_resolution_item_aliased_name;
+    trait_use_conflict_resolution_item_aliased_names;
     } ->
     let aliasing_name =
       get_doc trait_use_conflict_resolution_item_aliasing_name
@@ -341,10 +341,10 @@ let rec get_doc node =
     let keyword =
       get_doc trait_use_conflict_resolution_item_aliasing_keyword
     in
-    let aliased_name =
-      get_doc trait_use_conflict_resolution_item_aliased_name
+    let aliased_names =
+      get_doc trait_use_conflict_resolution_item_aliased_names
     in
-    aliasing_name ^| keyword ^| aliased_name
+    aliasing_name ^| keyword ^| aliased_names
   | TraitUseConflictResolution {
     trait_use_conflict_resolution_keyword;
     trait_use_conflict_resolution_names;

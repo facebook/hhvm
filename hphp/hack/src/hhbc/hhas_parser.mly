@@ -338,8 +338,8 @@ classaliaslist:
   | classalias nl classaliaslist {$1 :: $3}
 ;
 classalias:
-  | ID classaliastype ID SEMI {($1, None, $3, $2)}
-  | ID COLONCOLON ID classaliastype ID SEMI {($1, Some $3, $5, $4)}
+  | ID classaliastype ID SEMI {($1, None, [$3], $2)}
+  | ID COLONCOLON ID classaliastype idlist SEMI {($1, Some $3, $5, $4)}
 ;
 classaliastype:
   | ID {match $1 with

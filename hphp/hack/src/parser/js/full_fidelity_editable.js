@@ -5454,33 +5454,33 @@ class TraitUseConflictResolutionItem extends EditableSyntax
   constructor(
     aliasing_name,
     aliasing_keyword,
-    aliased_name)
+    aliased_names)
   {
     super('trait_use_conflict_resolution_item', {
       aliasing_name: aliasing_name,
       aliasing_keyword: aliasing_keyword,
-      aliased_name: aliased_name });
+      aliased_names: aliased_names });
   }
   get aliasing_name() { return this.children.aliasing_name; }
   get aliasing_keyword() { return this.children.aliasing_keyword; }
-  get aliased_name() { return this.children.aliased_name; }
+  get aliased_names() { return this.children.aliased_names; }
   with_aliasing_name(aliasing_name){
     return new TraitUseConflictResolutionItem(
       aliasing_name,
       this.aliasing_keyword,
-      this.aliased_name);
+      this.aliased_names);
   }
   with_aliasing_keyword(aliasing_keyword){
     return new TraitUseConflictResolutionItem(
       this.aliasing_name,
       aliasing_keyword,
-      this.aliased_name);
+      this.aliased_names);
   }
-  with_aliased_name(aliased_name){
+  with_aliased_names(aliased_names){
     return new TraitUseConflictResolutionItem(
       this.aliasing_name,
       this.aliasing_keyword,
-      aliased_name);
+      aliased_names);
   }
   rewrite(rewriter, parents)
   {
@@ -5490,11 +5490,11 @@ class TraitUseConflictResolutionItem extends EditableSyntax
     new_parents.push(this);
     var aliasing_name = this.aliasing_name.rewrite(rewriter, new_parents);
     var aliasing_keyword = this.aliasing_keyword.rewrite(rewriter, new_parents);
-    var aliased_name = this.aliased_name.rewrite(rewriter, new_parents);
+    var aliased_names = this.aliased_names.rewrite(rewriter, new_parents);
     if (
       aliasing_name === this.aliasing_name &&
       aliasing_keyword === this.aliasing_keyword &&
-      aliased_name === this.aliased_name)
+      aliased_names === this.aliased_names)
     {
       return rewriter(this, parents);
     }
@@ -5503,7 +5503,7 @@ class TraitUseConflictResolutionItem extends EditableSyntax
       return rewriter(new TraitUseConflictResolutionItem(
         aliasing_name,
         aliasing_keyword,
-        aliased_name), parents);
+        aliased_names), parents);
     }
   }
   static from_json(json, position, source)
@@ -5514,13 +5514,13 @@ class TraitUseConflictResolutionItem extends EditableSyntax
     let aliasing_keyword = EditableSyntax.from_json(
       json.trait_use_conflict_resolution_item_aliasing_keyword, position, source);
     position += aliasing_keyword.width;
-    let aliased_name = EditableSyntax.from_json(
-      json.trait_use_conflict_resolution_item_aliased_name, position, source);
-    position += aliased_name.width;
+    let aliased_names = EditableSyntax.from_json(
+      json.trait_use_conflict_resolution_item_aliased_names, position, source);
+    position += aliased_names.width;
     return new TraitUseConflictResolutionItem(
         aliasing_name,
         aliasing_keyword,
-        aliased_name);
+        aliased_names);
   }
   get children_keys()
   {
@@ -5528,7 +5528,7 @@ class TraitUseConflictResolutionItem extends EditableSyntax
       TraitUseConflictResolutionItem._children_keys = [
         'aliasing_name',
         'aliasing_keyword',
-        'aliased_name'];
+        'aliased_names'];
     return TraitUseConflictResolutionItem._children_keys;
   }
 }

@@ -114,7 +114,7 @@ class virtual ['c] map :
                            Ast_visitors_ancestors.cu_alias_type;
         on_ClassUseAlias : 'd ->
                            (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-                            Ast_visitors_ancestors.id ->
+                            Ast_visitors_ancestors.id list ->
                             Ast_visitors_ancestors.cu_alias_type ->
                             Ast_visitors_ancestors.class_elt;
         on_ClassVars : 'd ->
@@ -745,7 +745,7 @@ class virtual ['c] map :
     method on_ClassUseAlias :
       'd ->
       (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.id list ->
       Ast_visitors_ancestors.cu_alias_type -> Ast_visitors_ancestors.class_elt
     method on_ClassVars :
       'd ->

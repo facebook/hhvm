@@ -86,7 +86,7 @@ and class_elt =
   | Attributes of class_attr list
   | TypeConst of typeconst
   | ClassUse of hint
-  | ClassUseAlias of (id * pstring option) * id * cu_alias_type
+  | ClassUseAlias of (id * pstring option) * id list * cu_alias_type
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of kind list * hint option * class_var list

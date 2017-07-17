@@ -7243,15 +7243,15 @@ final class ClassishBody extends EditableSyntax {
 final class TraitUseConflictResolutionItem extends EditableSyntax {
   private EditableSyntax $_aliasing_name;
   private EditableSyntax $_aliasing_keyword;
-  private EditableSyntax $_aliased_name;
+  private EditableSyntax $_aliased_names;
   public function __construct(
     EditableSyntax $aliasing_name,
     EditableSyntax $aliasing_keyword,
-    EditableSyntax $aliased_name) {
+    EditableSyntax $aliased_names) {
     parent::__construct('trait_use_conflict_resolution_item');
     $this->_aliasing_name = $aliasing_name;
     $this->_aliasing_keyword = $aliasing_keyword;
-    $this->_aliased_name = $aliased_name;
+    $this->_aliased_names = $aliased_names;
   }
   public function aliasing_name(): EditableSyntax {
     return $this->_aliasing_name;
@@ -7259,26 +7259,26 @@ final class TraitUseConflictResolutionItem extends EditableSyntax {
   public function aliasing_keyword(): EditableSyntax {
     return $this->_aliasing_keyword;
   }
-  public function aliased_name(): EditableSyntax {
-    return $this->_aliased_name;
+  public function aliased_names(): EditableSyntax {
+    return $this->_aliased_names;
   }
   public function with_aliasing_name(EditableSyntax $aliasing_name): TraitUseConflictResolutionItem {
     return new TraitUseConflictResolutionItem(
       $aliasing_name,
       $this->_aliasing_keyword,
-      $this->_aliased_name);
+      $this->_aliased_names);
   }
   public function with_aliasing_keyword(EditableSyntax $aliasing_keyword): TraitUseConflictResolutionItem {
     return new TraitUseConflictResolutionItem(
       $this->_aliasing_name,
       $aliasing_keyword,
-      $this->_aliased_name);
+      $this->_aliased_names);
   }
-  public function with_aliased_name(EditableSyntax $aliased_name): TraitUseConflictResolutionItem {
+  public function with_aliased_names(EditableSyntax $aliased_names): TraitUseConflictResolutionItem {
     return new TraitUseConflictResolutionItem(
       $this->_aliasing_name,
       $this->_aliasing_keyword,
-      $aliased_name);
+      $aliased_names);
   }
 
   public function rewrite(
@@ -7289,17 +7289,17 @@ final class TraitUseConflictResolutionItem extends EditableSyntax {
     array_push($new_parents, $this);
     $aliasing_name = $this->aliasing_name()->rewrite($rewriter, $new_parents);
     $aliasing_keyword = $this->aliasing_keyword()->rewrite($rewriter, $new_parents);
-    $aliased_name = $this->aliased_name()->rewrite($rewriter, $new_parents);
+    $aliased_names = $this->aliased_names()->rewrite($rewriter, $new_parents);
     if (
       $aliasing_name === $this->aliasing_name() &&
       $aliasing_keyword === $this->aliasing_keyword() &&
-      $aliased_name === $this->aliased_name()) {
+      $aliased_names === $this->aliased_names()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TraitUseConflictResolutionItem(
         $aliasing_name,
         $aliasing_keyword,
-        $aliased_name), $parents ?? []);
+        $aliased_names), $parents ?? []);
     }
   }
 
@@ -7310,18 +7310,18 @@ final class TraitUseConflictResolutionItem extends EditableSyntax {
     $aliasing_keyword = EditableSyntax::from_json(
       $json->trait_use_conflict_resolution_item_aliasing_keyword, $position, $source);
     $position += $aliasing_keyword->width();
-    $aliased_name = EditableSyntax::from_json(
-      $json->trait_use_conflict_resolution_item_aliased_name, $position, $source);
-    $position += $aliased_name->width();
+    $aliased_names = EditableSyntax::from_json(
+      $json->trait_use_conflict_resolution_item_aliased_names, $position, $source);
+    $position += $aliased_names->width();
     return new TraitUseConflictResolutionItem(
         $aliasing_name,
         $aliasing_keyword,
-        $aliased_name);
+        $aliased_names);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_aliasing_name;
     yield $this->_aliasing_keyword;
-    yield $this->_aliased_name;
+    yield $this->_aliased_names;
     yield break;
   }
 }

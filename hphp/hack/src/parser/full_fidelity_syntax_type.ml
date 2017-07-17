@@ -226,7 +226,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and trait_use_conflict_resolution_item =
     { trait_use_conflict_resolution_item_aliasing_name   : t
     ; trait_use_conflict_resolution_item_aliasing_keyword: t
-    ; trait_use_conflict_resolution_item_aliased_name    : t
+    ; trait_use_conflict_resolution_item_aliased_names   : t
     }
   and trait_use_conflict_resolution =
     { trait_use_conflict_resolution_keyword              : t
@@ -1453,7 +1453,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and trait_use_conflict_resolution_item =
     { trait_use_conflict_resolution_item_aliasing_name: specifier value
     ; trait_use_conflict_resolution_item_aliasing_keyword: Token.t value
-    ; trait_use_conflict_resolution_item_aliased_name: Token.t value
+    ; trait_use_conflict_resolution_item_aliased_names: specifier listesque value
     }
   and trait_use_conflict_resolution =
     { trait_use_conflict_resolution_keyword: Token.t value

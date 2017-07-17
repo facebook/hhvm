@@ -170,10 +170,12 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     List.filter_map
       ast_class.A.c_body
       (function
-        | A.ClassUseAlias (((_, id1), Some (_, id2)), (_, id3), flavor) ->
-          Some (id1, Some id2, id3, flavor)
-        | A.ClassUseAlias (((_, id1), None), (_, id3), flavor) ->
-          Some (id1, None, id3, flavor)
+        | A.ClassUseAlias (((_, id1), Some (_, id2)), ids, flavor) ->
+          let ids = List.map ~f:snd ids in
+          Some (id1, Some id2, ids, flavor)
+        | A.ClassUseAlias (((_, id), None), ids, flavor) ->
+          let ids = List.map ~f:snd ids in
+          Some (id, None, ids, flavor)
         | _ -> None)
   in
   let class_enum_type =

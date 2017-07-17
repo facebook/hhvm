@@ -64,7 +64,7 @@ class virtual ['b] reduce :
         on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> 'd;
         on_ClassUseAlias : 'c ->
                            (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-                            Ast_visitors_ancestors.id ->
+                            Ast_visitors_ancestors.id list ->
                             Ast_visitors_ancestors.cu_alias_type ->
                            'd;
         on_ClassVars : 'c ->
@@ -403,7 +403,7 @@ class virtual ['b] reduce :
     method on_ClassUseAlias :
       'c ->
       (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.id list ->
       Ast_visitors_ancestors.cu_alias_type ->
       'd
     method on_ClassVars :

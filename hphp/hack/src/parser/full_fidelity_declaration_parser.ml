@@ -831,6 +831,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_methodish parser attribute_spec modifiers
 
   and parse_trait_use_conflict_resolution_item parser =
+    (* TODO: Error if as expression is given more than one aliased names *)
     let parser, aliasing_name = parse_qualified_name_type parser in
     let parser, aliasing_name =
       if (peek_token_kind parser) = ColonColon then
@@ -848,12 +849,16 @@ module WithExpressionAndStatementAndTypeParser
       else
         assert_token parser Insteadof
     in
-    let (parser, aliased_name) = parse_qualified_name_type parser in
+    let (parser, aliased_names) =
+      parse_trait_name_list
+        parser
+        (function Semicolon -> true | _ -> false)
+    in
     let trait_use_conflict_resolution_item =
       make_trait_use_conflict_resolution_item
         aliasing_name
         aliasing_kw
-        aliased_name
+        aliased_names
     in
     (parser, trait_use_conflict_resolution_item)
 
@@ -866,8 +871,8 @@ module WithExpressionAndStatementAndTypeParser
       trait-use-conflict-resolution-item  trait-use-conflict-resolution-list
 
     trait-use-conflict-resolution-item:
-      trait-use-conflict-resolution-item-alising-name  as  qualified-name
-      trait-use-conflict-resolution-item-alising-name  insteadof  qualified-name
+      trait-use-conflict-resolution-item-alising-name  as  trait-name-list
+      trait-use-conflict-resolution-item-alising-name  insteadof  trait-name-list
 
     trait-use-conflict-resolution-item-alising-name:
       qualified-name
@@ -876,9 +881,9 @@ module WithExpressionAndStatementAndTypeParser
   and parse_trait_use_conflict_resolution parser use_token trait_name_list =
     let (parser, left_brace) = assert_token parser LeftBrace in
     let (parser, clauses) =
-      parse_separated_list
+      parse_separated_list_opt
         parser
-        TokenKind.Semicolon
+        Semicolon
         TrailingAllowed
         RightBrace
         SyntaxError.error1004
@@ -903,16 +908,21 @@ module WithExpressionAndStatementAndTypeParser
       qualified-name  generic-type-parameter-listopt
       trait-name-list  ,  qualified-name  generic-type-parameter-listopt
   *)
+  and parse_trait_name_list parser predicate =
+    parse_separated_list_predicate
+      parser
+      Comma
+      NoTrailing
+      predicate
+      SyntaxError.error1004
+      parse_qualified_name_type
+
   and parse_trait_use parser =
     let (parser, use_token) = assert_token parser Use in
     let (parser, trait_name_list) =
-      parse_separated_list_opt_predicate
+      parse_trait_name_list
         parser
-        Comma
-        NoTrailing
         (function Semicolon | LeftBrace -> true | _ -> false)
-        SyntaxError.error1004
-        parse_qualified_name_type
     in
     if (peek_token_kind parser) = LeftBrace then
       parse_trait_use_conflict_resolution parser use_token trait_name_list

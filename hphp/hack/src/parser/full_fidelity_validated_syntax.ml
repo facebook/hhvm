@@ -1055,7 +1055,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_trait_use_conflict_resolution_item : trait_use_conflict_resolution_item validator = function
   | { Syntax.syntax = Syntax.TraitUseConflictResolutionItem x; value = v } -> v,
-    { trait_use_conflict_resolution_item_aliased_name = validate_token x.Syntax.trait_use_conflict_resolution_item_aliased_name
+    { trait_use_conflict_resolution_item_aliased_names = validate_list_with (validate_specifier) x.Syntax.trait_use_conflict_resolution_item_aliased_names
     ; trait_use_conflict_resolution_item_aliasing_keyword = validate_token x.Syntax.trait_use_conflict_resolution_item_aliasing_keyword
     ; trait_use_conflict_resolution_item_aliasing_name = validate_specifier x.Syntax.trait_use_conflict_resolution_item_aliasing_name
     }
@@ -1065,7 +1065,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.TraitUseConflictResolutionItem
       { Syntax.trait_use_conflict_resolution_item_aliasing_name = invalidate_specifier x.trait_use_conflict_resolution_item_aliasing_name
       ; Syntax.trait_use_conflict_resolution_item_aliasing_keyword = invalidate_token x.trait_use_conflict_resolution_item_aliasing_keyword
-      ; Syntax.trait_use_conflict_resolution_item_aliased_name = invalidate_token x.trait_use_conflict_resolution_item_aliased_name
+      ; Syntax.trait_use_conflict_resolution_item_aliased_names = invalidate_list_with (invalidate_specifier) x.trait_use_conflict_resolution_item_aliased_names
       }
     ; Syntax.value = v
     }

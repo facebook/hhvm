@@ -29,7 +29,7 @@ type t = {
   class_is_top       : bool;
   class_uses         : Litstr.id list;
   class_use_aliases  :
-    (Litstr.id * Litstr.id option * Litstr.id * Ast.cu_alias_type) list;
+    (Litstr.id * Litstr.id option * Litstr.id list * Ast.cu_alias_type) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
   class_properties   : Hhas_property.t list;

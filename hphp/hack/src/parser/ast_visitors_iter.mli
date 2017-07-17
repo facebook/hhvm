@@ -64,7 +64,7 @@ class virtual ['b] iter :
         on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> unit;
         on_ClassUseAlias : 'c ->
                            (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.id list ->
                            Ast_visitors_ancestors.cu_alias_type ->
                            unit;
         on_ClassVars : 'c ->
@@ -412,7 +412,7 @@ class virtual ['b] iter :
     method on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> unit
     method on_ClassUseAlias : 'c ->
                               (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-                              Ast_visitors_ancestors.id ->
+                              Ast_visitors_ancestors.id list ->
                               Ast_visitors_ancestors.cu_alias_type ->
                               unit
     method on_ClassVars :

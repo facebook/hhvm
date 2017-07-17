@@ -352,7 +352,7 @@ let schema : schema_node list =
     ; fields =
       [ "aliasing_name", Aggregate Specifier
       ; "aliasing_keyword", Token
-      ; "aliased_name", Token
+      ; "aliased_names", ZeroOrMore (Aggregate Specifier)
       ]
     }
   ; { kind_name   = "TraitUseConflictResolution"

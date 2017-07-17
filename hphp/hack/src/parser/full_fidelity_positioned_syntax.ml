@@ -517,7 +517,7 @@ module FromMinimal = struct
           ; classish_body_right_brace
           }, results
       | SyntaxKind.TraitUseConflictResolutionItem
-      , (  trait_use_conflict_resolution_item_aliased_name
+      , (  trait_use_conflict_resolution_item_aliased_names
         :: trait_use_conflict_resolution_item_aliasing_keyword
         :: trait_use_conflict_resolution_item_aliasing_name
         :: results
@@ -525,7 +525,7 @@ module FromMinimal = struct
           TraitUseConflictResolutionItem
           { trait_use_conflict_resolution_item_aliasing_name
           ; trait_use_conflict_resolution_item_aliasing_keyword
-          ; trait_use_conflict_resolution_item_aliased_name
+          ; trait_use_conflict_resolution_item_aliased_names
           }, results
       | SyntaxKind.TraitUseConflictResolution
       , (  trait_use_conflict_resolution_right_brace
@@ -2333,11 +2333,11 @@ module FromMinimal = struct
     | { M.syntax = M.TraitUseConflictResolutionItem
         { M.trait_use_conflict_resolution_item_aliasing_name
         ; M.trait_use_conflict_resolution_item_aliasing_keyword
-        ; M.trait_use_conflict_resolution_item_aliased_name
+        ; M.trait_use_conflict_resolution_item_aliased_names
         }
       ; _ } as minimal_t ->
         let todo = Build (minimal_t, offset, todo) in
-        let todo = Convert (trait_use_conflict_resolution_item_aliased_name, todo) in
+        let todo = Convert (trait_use_conflict_resolution_item_aliased_names, todo) in
         let todo = Convert (trait_use_conflict_resolution_item_aliasing_keyword, todo) in
         convert offset todo results trait_use_conflict_resolution_item_aliasing_name
     | { M.syntax = M.TraitUseConflictResolution

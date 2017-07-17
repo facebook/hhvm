@@ -15,6 +15,7 @@ module SS = String_sequence
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 module TV = Typed_value
+module ULS = Unique_list_string
 open H
 
 (* Generic helpers *)
@@ -1260,7 +1261,7 @@ let add_enum_ty buf c =
     B.add_string buf ";"
   | _ -> ()
 
-let add_use_alias buf (id1, id_o, id2, flavor) =
+let add_use_alias buf (id1, id_o, ids, flavor) =
   let aliasing_id = match id_o with
     | None -> id1
     | Some id -> id1 ^ "::" ^ id
@@ -1269,15 +1270,20 @@ let add_use_alias buf (id1, id_o, id2, flavor) =
     | Ast.CU_as -> "as"
     | Ast.CU_insteadof -> "insteadof"
   in
-  B.add_string buf @@ Printf.sprintf "\n    %s %s %s;" aliasing_id flavor id2
+  let unique_ids = List.fold_left ULS.add ULS.empty ids in
+  let ids = String.concat " " @@ ULS.items unique_ids in
+  B.add_string buf @@ Printf.sprintf "\n    %s %s %s;" aliasing_id flavor ids
 
 let add_uses buf c =
   let use_l = Hhas_class.class_uses c in
   let use_alias_list = Hhas_class.class_use_aliases c in
   if use_l = [] then () else
     begin
-      B.add_string buf @@ Printf.sprintf "\n  .use %s"
-        @@ String.concat " " @@ List.map Utils.strip_ns use_l;
+      let unique_ids =
+        List.fold_left (fun l e -> ULS.add l (Utils.strip_ns e)) ULS.empty use_l
+      in
+      let use_l = String.concat " " @@ ULS.items unique_ids in
+      B.add_string buf @@ Printf.sprintf "\n  .use %s" use_l;
         if use_alias_list = [] then B.add_char buf ';' else
           (* HHVM emits insteadof aliases in front of as aliases *)
           let as_aliases, insteadof_aliases =

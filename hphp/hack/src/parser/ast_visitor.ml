@@ -113,7 +113,8 @@ class type ['a] ast_visitor_type = object
   method on_classUse: 'a -> hint -> 'a
   method on_cu_alias_type: 'a -> cu_alias_type -> 'a
   method on_classUseAlias: 'a ->
-                           (id * pstring option) -> id -> cu_alias_type -> 'a
+                           (id * pstring option) ->
+                           id list -> cu_alias_type -> 'a
   method on_classVars: 'a -> kind list -> hint option -> class_var list -> 'a
   method on_const: 'a -> hint option -> (id * expr) list -> 'a
   method on_constant: 'a -> gconst -> 'a
@@ -648,12 +649,12 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_classUse acc h =
     let acc = this#on_hint acc h in
     acc
-  method on_classUseAlias acc (id1, po) id2 at =
-    let acc = this#on_id acc id1 in
+  method on_classUseAlias acc (id, po) ids at =
+    let acc = this#on_id acc id in
     let acc = match po with
       | Some p -> this#on_pstring acc p
       | None -> acc in
-    let acc = this#on_id acc id2 in
+    let acc = List.fold_left this#on_id acc ids in
     let acc = this#on_cu_alias_type acc at in
     acc
   method on_xhpAttrUse acc h =

@@ -157,7 +157,7 @@ class virtual ['b] endo :
         on_ClassUseAlias : 'c ->
                       Ast_visitors_ancestors.class_elt ->
                       (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-                      Ast_visitors_ancestors.id ->
+                      Ast_visitors_ancestors.id list ->
                       Ast_visitors_ancestors.cu_alias_type ->
                       Ast_visitors_ancestors.class_elt;
         on_ClassVars : 'c ->
@@ -1011,7 +1011,7 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.class_elt ->
       (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
-      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.id list ->
       Ast_visitors_ancestors.cu_alias_type ->
       Ast_visitors_ancestors.class_elt
     method on_ClassVars :

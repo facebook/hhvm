@@ -1535,7 +1535,7 @@ and pClassElt : class_elt list parser = fun node env ->
       | TraitUseConflictResolutionItem
         { trait_use_conflict_resolution_item_aliasing_name = aliasing_name;
           trait_use_conflict_resolution_item_aliasing_keyword = alias_kw;
-          trait_use_conflict_resolution_item_aliased_name = aliased_name;
+          trait_use_conflict_resolution_item_aliased_names = aliased_names;
           _
         } ->
         let aliasing_name, opt_scope_resolution_name =
@@ -1553,8 +1553,11 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ ->
             missing_syntax "trait use conflict resolution item" alias_kw env
         in
+        let aliased_name_list =
+          couldMap ~f:(fun n _e -> pos_name n) aliased_names env
+        in
         ClassUseAlias ((aliasing_name, opt_scope_resolution_name),
-                        pos_name aliased_name,
+                        aliased_name_list,
                         alias_type)
       | _ -> missing_syntax "trait use conflict resolution item" node env
     in

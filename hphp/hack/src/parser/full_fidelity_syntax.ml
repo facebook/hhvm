@@ -692,11 +692,11 @@ module WithToken(Token: TokenType) = struct
     let get_trait_use_conflict_resolution_item_children {
       trait_use_conflict_resolution_item_aliasing_name;
       trait_use_conflict_resolution_item_aliasing_keyword;
-      trait_use_conflict_resolution_item_aliased_name;
+      trait_use_conflict_resolution_item_aliased_names;
     } = (
       trait_use_conflict_resolution_item_aliasing_name,
       trait_use_conflict_resolution_item_aliasing_keyword,
-      trait_use_conflict_resolution_item_aliased_name
+      trait_use_conflict_resolution_item_aliased_names
     )
 
     let get_trait_use_conflict_resolution_children {
@@ -2336,11 +2336,11 @@ module WithToken(Token: TokenType) = struct
       | TraitUseConflictResolutionItem {
         trait_use_conflict_resolution_item_aliasing_name;
         trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_name;
+        trait_use_conflict_resolution_item_aliased_names;
       } -> [
         trait_use_conflict_resolution_item_aliasing_name;
         trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_name;
+        trait_use_conflict_resolution_item_aliased_names;
       ]
       | TraitUseConflictResolution {
         trait_use_conflict_resolution_keyword;
@@ -3858,11 +3858,11 @@ module WithToken(Token: TokenType) = struct
       | TraitUseConflictResolutionItem {
         trait_use_conflict_resolution_item_aliasing_name;
         trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_name;
+        trait_use_conflict_resolution_item_aliased_names;
       } -> [
         "trait_use_conflict_resolution_item_aliasing_name";
         "trait_use_conflict_resolution_item_aliasing_keyword";
-        "trait_use_conflict_resolution_item_aliased_name";
+        "trait_use_conflict_resolution_item_aliased_names";
       ]
       | TraitUseConflictResolution {
         trait_use_conflict_resolution_keyword;
@@ -5459,12 +5459,12 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.TraitUseConflictResolutionItem, [
           trait_use_conflict_resolution_item_aliasing_name;
           trait_use_conflict_resolution_item_aliasing_keyword;
-          trait_use_conflict_resolution_item_aliased_name;
+          trait_use_conflict_resolution_item_aliased_names;
         ]) ->
         TraitUseConflictResolutionItem {
           trait_use_conflict_resolution_item_aliasing_name;
           trait_use_conflict_resolution_item_aliasing_keyword;
-          trait_use_conflict_resolution_item_aliased_name;
+          trait_use_conflict_resolution_item_aliased_names;
         }
       | (SyntaxKind.TraitUseConflictResolution, [
           trait_use_conflict_resolution_keyword;
@@ -7188,12 +7188,12 @@ module WithToken(Token: TokenType) = struct
     let make_trait_use_conflict_resolution_item
       trait_use_conflict_resolution_item_aliasing_name
       trait_use_conflict_resolution_item_aliasing_keyword
-      trait_use_conflict_resolution_item_aliased_name
+      trait_use_conflict_resolution_item_aliased_names
     =
       from_children SyntaxKind.TraitUseConflictResolutionItem [
         trait_use_conflict_resolution_item_aliasing_name;
         trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_name;
+        trait_use_conflict_resolution_item_aliased_names;
       ]
 
     let make_trait_use_conflict_resolution

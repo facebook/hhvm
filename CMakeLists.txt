@@ -30,7 +30,7 @@ if (PATCHES)
   foreach(PATCH ${PATCHES})
     message(STATUS "Applying ${PATCH}")
     execute_process(
-      COMMAND patch -p1 --forward
+      COMMAND patch -p1 --forward --ignore-whitespace
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       INPUT_FILE "${PATCH}"
       OUTPUT_VARIABLE OUTPUT

@@ -131,7 +131,7 @@ let lower_coroutine_functions_and_types
       function_body; _;
     } as function_node) when not @@ is_missing function_coroutine ->
       let context = Coroutine_context.make_from_context
-        (current_node :: parents) in
+        (current_node :: parents) None in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
         context header_node function_body function_node in
       ((closure_syntax :: closures, lambda_count),
@@ -147,7 +147,8 @@ let lower_coroutine_functions_and_types
     _;
     } as anon) when not @@ is_missing anonymous_coroutine_keyword ->
       (* TODO: Lambda count *)
-      let context = Coroutine_context.make_from_context parents in
+      let context =
+        Coroutine_context.make_from_context parents (Some lambda_count) in
       let (anon, closure_syntax) = lower_coroutine_anon context anon in
       ((closure_syntax :: closures, (lambda_count + 1)),
         Rewriter.Result.Replace anon)
@@ -160,7 +161,7 @@ let lower_coroutine_functions_and_types
       methodish_function_body; _;
     } as method_node) when not @@ is_missing function_coroutine ->
     let context = Coroutine_context.make_from_context
-      (current_node :: parents) in
+      (current_node :: parents) None in
     let (new_header_node, new_body, closure_syntax) =
       rewrite_method_or_function
         context

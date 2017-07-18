@@ -28,6 +28,7 @@ type t = {
   (* Note that there is never a name conflict because in Hack,
   class C<T> { public function M<T>(){} }
   is illegal. *)
+  lambda_count : int option;
   (* TODO: Fix naming in parse tree schema; why is it "class type parameters"
   but "function type parameter list"? *)
 }
@@ -38,6 +39,7 @@ let empty =
     classish_type_parameters = m;
     function_name = m;
     function_type_parameter_list = m;
+    lambda_count = None;
   }
 
 (* Note that the code below assumes that the parents list contains
@@ -46,7 +48,7 @@ nested named functions; Hack does not. If Hack ever supports nested
 classes or nested named functions then this code will have to change.
 (Though of course if Hack supports nested classes then generating closures
 for methods becomes easier!) *)
-let make_from_context parents =
+let make_from_context parents lambda_count =
   let folder acc h =
     match EditableSyntax.syntax h with
     | EditableSyntax.ClassishDeclaration {
@@ -71,4 +73,4 @@ let make_from_context parents =
         function_name; function_type_parameter_list }
     | _ -> acc
   in
-  Core_list.fold ~f:folder ~init:empty parents
+  { (Core_list.fold ~f:folder ~init:empty parents) with lambda_count }

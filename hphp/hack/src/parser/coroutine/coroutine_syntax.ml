@@ -587,7 +587,7 @@ let create_suspended_coroutine_result_syntax =
     suspended_member_name
     []
 
-(* ClassName_FunctionName_GeneratedClosure *)
+(* ClassName_FunctionName_Lambda_1_GeneratedClosure *)
 let make_closure_classname context =
   let classish_name = context.Coroutine_context.classish_name in
   (* TODO: Is there a better thing to do for coroutines that are inside no
@@ -595,10 +595,14 @@ let make_closure_classname context =
   let classish_name = if is_missing classish_name then
     global_syntax else classish_name in
   let function_name = context.Coroutine_context.function_name in
+  let lambda_name = match context.Coroutine_context.lambda_count with
+    | None -> ""
+    | Some c -> Printf.sprintf "Lambda_%i_" c in
   Printf.sprintf
-    "%s_%s_GeneratedClosure"
+    "%s_%s_%sGeneratedClosure"
     (string_of_name_token classish_name)
     (string_of_name_token function_name)
+    lambda_name
 
 (**
  * Given a list of TypeParameters syntaxes, combines them into a single

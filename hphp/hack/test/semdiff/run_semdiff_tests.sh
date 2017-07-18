@@ -26,7 +26,7 @@ SEMDIFF_PATH=$("$BUCK" targets --show-output //hphp/hack/src/hhbc/semdiff:semdif
 SEMDIFF_PATH="$BASEDIR/$SEMDIFF_PATH"
 echo "retrieving path: $SEMDIFF_PATH"
 
-NUM_MISSING_FDS=0
+MISSING_FDS=()
 # check if there are any arguments and look for files and directories
 if [ "$1" ]; then
   FDS_AUX=()
@@ -46,7 +46,7 @@ if [ "$1" ]; then
         then
           FDS_AUX+=("$FD")
         else
-          NUM_MISSING_FDS=$((NUM_MISSING_FDS + 1))
+          MISSING_FDS+=("$FD")
         fi
       fi
   done
@@ -58,19 +58,24 @@ fi
 
 NUM_SUCCESS=0
 NUM_FAIL=0
+CURR_DIR='' # so that it always prints the directory at the begining of the loop
 for FILE in ${FDS[*]}; do
+  DIR=$(dirname "${FILE}")
+  if [[ "$DIR" != "$CURR_DIR" ]]
+  then
+    echo -e "\t $DIR:"
+  fi
+  CURR_DIR=$DIR
   basename=${FILE%.1.hhas}
   test_name=${basename##*/}
-  "$SEMDIFF_PATH" "$FILE" "$basename.2.hhas" > "$DIFF_TMP"
   if [ ! -f "$basename.semdiff.exp" ]
   then
     new_file="$basename.semdiff.exp.out"
-    echo -e "\tcreating $YELLOW $test_name.semdiff.exp.out $NC"
-    mv "$DIFF_TMP" "$new_file"
+    echo -e "\t\tcreating $YELLOW $test_name.semdiff.exp.out $NC"
+    "$SEMDIFF_PATH" "$FILE" "$basename.2.hhas" > "$new_file"
   else
-    test_name=${basename##*/}
-    printf "\tdiff'ing %s:\t" "$test_name"
-    diff "$DIFF_TMP" "$basename.semdiff.exp" > "$DIFF_RESULT"
+    printf "\t\trunning: %s %s %s %s" "$(basename "$SEMDIFF_PATH")" "$(basename "$basename")".{{1,2}.hhas,semdiff.exp}
+    diff <("$SEMDIFF_PATH" "$basename".{1,2}.hhas) "$basename.semdiff.exp" > "$DIFF_RESULT"
     if [ -z "$(cat $DIFF_RESULT)" ]
     then
       echo -e "$GREEN OK $NC"
@@ -82,10 +87,13 @@ for FILE in ${FDS[*]}; do
   fi
 done
 
+NUM_MISSING_FDS=${#MISSING_FDS[@]}
 TOTAL_NUM_FDS=$((NUM_SUCCESS + NUM_FAIL + NUM_MISSING_FDS))
 echo -e "successes:\t$GREEN $NUM_SUCCESS $NC / $TOTAL_NUM_FDS"
 echo -e "failures:\t$RED $NUM_FAIL $NC / $TOTAL_NUM_FDS"
 if [[ $NUM_MISSING_FDS -gt 0 ]]
 then
   echo -e "missing files:\t$YELLOW $NUM_MISSING_FDS $NC / $TOTAL_NUM_FDS"
+  printf "\npaths of missing files: \n"
+  printf '\t%s\n' "${MISSING_FDS[@]}"
 fi

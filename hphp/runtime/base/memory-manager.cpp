@@ -164,8 +164,8 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     FTRACE(1, "heap-id {} resetStatsImpl({}) {}: ",
            t_heap_id, isInternalCall, when);
     if (use_jemalloc) {
-      FTRACE(1, "mm-usage {} auxUsage {} debt {} ",
-             m_stats.mmUsage, m_stats.auxUsage, m_stats.mallocDebt);
+      FTRACE(1, "mm-usage {} extUsage {} ",
+             m_stats.mmUsage, m_stats.extUsage);
       FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
              m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
       FTRACE(1, "total {} prev alloc-dealloc {} cur alloc-dealloc {}\n",
@@ -181,8 +181,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   if (isInternalCall) {
     m_statsIntervalActive = false;
     m_stats.mmUsage = 0;
-    m_stats.auxUsage = 0;
-    m_stats.mallocDebt = 0;
+    m_stats.extUsage = 0;
     m_stats.capacity = 0;
     m_stats.peakUsage = 0;
     m_stats.peakCap = 0;
@@ -192,10 +191,10 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_enableStatsSync = false;
     if (Trace::enabled) t_heap_id = ++s_heap_id;
   } else if (!m_enableStatsSync) {
-    // This is only set by the jemalloc stats sync which we don't enable until
+    // These are only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
-    assert(m_stats.auxUsage == 0);
+    assert(m_stats.extUsage == 0);
 
     // The effect of this call is simply to ignore anything we've done *outside*
     // the MemoryManager allocator after we initialized, to avoid attributing
@@ -210,9 +209,9 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
   }
   if (s_statsEnabled) {
     m_prevDeallocated = *m_deallocated;
-    m_prevAllocated = *m_allocated - m_stats.mallocDebt;
+    m_prevAllocated = *m_allocated - m_stats.capacity;
     // because we accounted for internal allocations here, the next call to
-    // refreshStatsImpl() will correctly update auxUsage and totalAlloc
+    // refreshStatsImpl() will correctly update extUsage and totalAlloc
     // without double-counting or dropping anything.
   }
   traceStats("post");
@@ -251,7 +250,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   //
   //   int64 musage = delta - delta0;
   //
-  // Note however, the slab allocator adds to m_stats.mallocDebt
+  // Note however, the slab allocator adds to m_stats.capacity
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
@@ -272,18 +271,12 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "prev alloc-dealloc {} cur alloc-dealloc: {} alloc-change: {} ",
       prevUsage, curUsage, curAllocated - m_prevAllocated);
     FTRACE(1, "dealloc-change: {} ", curDeallocated - m_prevDeallocated);
-    FTRACE(1, "mm usage {} auxUsage {} totalAlloc {} capacity {} debt {}\n",
-      stats.mmUsage, stats.auxUsage, stats.totalAlloc, stats.capacity,
-      stats.mallocDebt);
+    FTRACE(1, "mm usage {} extUsage {} totalAlloc {} capacity {}\n",
+      stats.mmUsage, stats.extUsage, stats.totalAlloc, stats.capacity);
 
     // Subtract the old usage adjustment (prevUsage) and add the current one
     // (curUsage) to arrive at the new combined usage number.
-    stats.auxUsage += curUsage - prevUsage;
-
-    // Remove the "debt" accrued from request-heap allocating slabs and big
-    // objects, so we don't double count them.
-    stats.auxUsage -= stats.mallocDebt;
-    stats.mallocDebt = 0;
+    stats.extUsage += curUsage - prevUsage;
 
     // Accumulate the increase in allocation volume since the last refresh.
     // We need to do the calculation instead of just setting it to curAllocated
@@ -294,8 +287,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       m_prevDeallocated = curDeallocated;
     }
 
-    FTRACE(1, "heap-id {} after sync auxUsage {} totalAlloc: {}\n",
-      t_heap_id, stats.auxUsage, stats.totalAlloc);
+    FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
+      t_heap_id, stats.extUsage, stats.totalAlloc);
   }
   assert(stats.limit > 0);
   if (live && stats.usage() > stats.limit && m_couldOOM) {
@@ -668,7 +661,6 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto mem = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(mem.ptr) & kSmallSizeAlignMask) == 0);
-  m_stats.mallocDebt += mem.size;
   m_stats.capacity += mem.size;
   m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
   auto slab = static_cast<Slab*>(mem.ptr);
@@ -777,7 +769,6 @@ void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
   auto const delta = Mode == FreeRequested ? bytes : block.size;
   m_stats.mmUsage += delta;
   // Adjust jemalloc otherwise we'll double count the direct allocation.
-  m_stats.mallocDebt += block.size + sizeof(MallocNode);
   m_stats.capacity += block.size + sizeof(MallocNode);
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
@@ -804,7 +795,6 @@ void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   auto old_size = n->nbytes - sizeof(MallocNode);
   auto block = m_heap.resizeBig(n + 1, nbytes);
   m_stats.mmUsage += block.size - old_size;
-  m_stats.mallocDebt += block.size - old_size;
   m_stats.capacity += block.size - old_size;
   updateBigStats();
   return block.ptr;
@@ -817,7 +807,6 @@ void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   m_stats.mmUsage -= bytes;
   auto actual = static_cast<MallocNode*>(vp)[-1].nbytes;
   assert(bytes <= actual);
-  m_stats.mallocDebt -= actual;
   m_stats.capacity -= actual;
   FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);

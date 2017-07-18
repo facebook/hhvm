@@ -33,13 +33,11 @@ namespace HPHP {
  */
 struct MemoryUsageStats {
   int64_t mmUsage;    // bytes are currently in use via MM apis
-  int64_t auxUsage;   // adjustment for allocations via jemalloc
+  int64_t extUsage;   // cumulative allocations via jemalloc
 
   int64_t capacity;   // sum of slabs & big objects (MM's capacity)
   int64_t limit;      // the max bytes allowed for a request before it is
                       // terminated for exceeding the memory limit
-  int64_t mallocDebt; // how many bytes of malloced memory have not
-                      // been processed by MemoryManager::refreshStats
   int64_t peakUsage;  // how many bytes have been used at maximum
   int64_t peakCap;    // peak bytes owned by MemoryManager (slabs and big)
   int64_t peakIntervalUsage; // peakUsage during userland interval
@@ -48,7 +46,8 @@ struct MemoryUsageStats {
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
 
-  int64_t usage() const { return mmUsage + auxUsage; }
+  int64_t usage() const { return mmUsage + auxUsage(); }
+  int64_t auxUsage() const { return extUsage - capacity; }
 
   friend struct MemoryManager;
 };

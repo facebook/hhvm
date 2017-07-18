@@ -48,6 +48,7 @@ inline void init_for_unit_test() {
   RuntimeOption::Load(ini, config);
   compile_file(0, 0, MD5(), 0);
   hphp_process_init();
+  hphp_session_init();
 }
 
 }

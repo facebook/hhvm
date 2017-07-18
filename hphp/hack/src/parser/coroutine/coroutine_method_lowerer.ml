@@ -217,3 +217,32 @@ let rewrite_anon
       anonymous_parameters;
       anonymous_type;
       anonymous_body }
+
+let rewrite_lambda
+    context
+    ({ lambda_parameters; lambda_type; _; } as lambda_signature)
+    ({ lambda_body; _; } as lambda) =
+  let make_lambda node =
+    make_syntax (LambdaExpression node) in
+  let make_sig node =
+    make_syntax (LambdaSignature node) in
+  let lambda_body =
+    rewrite_coroutine_body
+      context
+      lambda_body
+      lambda_parameters
+      lambda_type
+      lambda_body in (* TODO: Why do we take the body twice? *)
+  let lambda_parameters = compute_parameter_list
+    lambda_parameters lambda_type in
+  let lambda_type = make_coroutine_result_type_syntax lambda_type in
+  let lambda_signature = make_sig
+    { lambda_signature with
+      lambda_parameters;
+      lambda_type } in
+  make_lambda { lambda with
+    lambda_coroutine = make_missing();
+    (* TODO: This loses trivia on the original keyword. *)
+    lambda_signature;
+    lambda_body
+  }

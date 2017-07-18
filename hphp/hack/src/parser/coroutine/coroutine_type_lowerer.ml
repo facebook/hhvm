@@ -52,3 +52,12 @@ let rewrite_anon_function_return_type
   let anonymous_colon =
     if is_missing anonymous_colon then colon_syntax else anonymous_colon in
   { node with anonymous_type; anonymous_colon; }
+
+(* TODO: We might consider making the "colon ; return-type ;" pattern into its
+own parse tree node, since it crops up in a lot of places. *)
+let rewrite_lambda_return_type
+    ({ lambda_colon; lambda_type; _; } as node) =
+  let lambda_type = rewrite_return_type lambda_type in
+  let lambda_colon =
+    if is_missing lambda_colon then colon_syntax else lambda_colon in
+  { node with lambda_type; lambda_colon; }

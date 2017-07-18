@@ -88,6 +88,24 @@ let lower_coroutine_anon
   let anon = CoroutineMethodLowerer.rewrite_anon context anon in
   (anon, closure_syntax)
 
+let lower_coroutine_lambda
+    context
+    ({ lambda_parameters; _; } as lambda_signature)
+    lambda_body
+    lambda =
+  let ({lambda_type; _;} as lambda_signature) =
+    rewrite_lambda_return_type lambda_signature in
+  let lambda_body, closure_syntax =
+    CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      context
+      lambda_body
+      lambda_type
+      lambda_parameters in
+  let lambda = { lambda with lambda_body } in
+  let lambda = CoroutineMethodLowerer.rewrite_lambda
+    context lambda_signature lambda in
+  (lambda, closure_syntax)
+
 let rewrite_method_or_function
     context
     ({function_parameter_list; _;} as original_header_node)
@@ -136,17 +154,22 @@ let lower_coroutine_functions_and_types
         context header_node function_body function_node in
       ((closure_syntax :: closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
-  | LambdaExpression {
+  | LambdaExpression ({
     lambda_coroutine;
+    lambda_signature = { syntax = LambdaSignature lambda_signature; _; };
+    lambda_body;
     _;
-    } when not @@ is_missing lambda_coroutine ->
-     (* TODO: rewrite lambdas *)
-     (current_acc, Rewriter.Result.Keep)
+    } as lambda) when not @@ is_missing lambda_coroutine ->
+    let context =
+      Coroutine_context.make_from_context parents (Some lambda_count) in
+    let (lambda, closure_syntax) =
+      lower_coroutine_lambda context lambda_signature lambda_body lambda in
+    ((closure_syntax :: closures, (lambda_count + 1)),
+      Rewriter.Result.Replace lambda)
   | AnonymousFunction ({
     anonymous_coroutine_keyword;
     _;
     } as anon) when not @@ is_missing anonymous_coroutine_keyword ->
-      (* TODO: Lambda count *)
       let context =
         Coroutine_context.make_from_context parents (Some lambda_count) in
       let (anon, closure_syntax) = lower_coroutine_anon context anon in

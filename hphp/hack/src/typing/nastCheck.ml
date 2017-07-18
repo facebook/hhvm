@@ -594,10 +594,19 @@ and interface c =
       else ()
     | _ -> Errors.abstract_body (fst m.m_name)
   end in
+  (* make sure that interface methods are not async, in line with HHVM *)
+  let enforce_not_async = begin fun m ->
+    match m.m_fun_kind with
+    | Ast.FAsync -> Errors.async_in_interface (fst m.m_name)
+    | Ast.FAsyncGenerator -> Errors.async_in_interface (fst m.m_name)
+    | _ -> ()
+  end in
   (* make sure that interfaces only have empty public methods *)
   List.iter (c.c_static_methods @ c.c_methods) enforce_no_body;
+  List.iter (c.c_static_methods @ c.c_methods) enforce_not_async;
   (* make sure constructor has no body *)
   Option.iter c.c_constructor enforce_no_body;
+  Option.iter c.c_constructor enforce_not_async;
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
   | hd::_ ->

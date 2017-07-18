@@ -553,6 +553,7 @@ module NastCheck                            = struct
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
   let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
   let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
+  let async_in_interface                    = 3035 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1272,6 +1273,10 @@ let await_not_allowed p =
   add NastCheck.await_not_allowed p
     "await is only permitted as a statement, expression in a return statement \
       or as a right hand side in top level assignment."
+
+let async_in_interface p =
+  add NastCheck.async_in_interface p
+    "async is only meaningful when it modifies a method body"
 
 let magic (p, s) =
   add NastCheck.magic p

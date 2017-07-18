@@ -1,0 +1,2 @@
+File "interface_async_method.php", line 4, characters 25-27:
+async is only meaningful when it modifies a method body (NastCheck[3035])

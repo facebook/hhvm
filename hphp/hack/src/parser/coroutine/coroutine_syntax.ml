@@ -206,7 +206,7 @@ let prepend_to_comma_delimited_syntax_list prepend_syntax syntax_list_syntax =
 let get_list_item node =
   match syntax node with
   | ListItem { list_item; _; } -> list_item
-  | _ -> failwith "Was not a ListItem"
+  | _ -> failwith "get_list_item: Was not a ListItem"
 
 let get_type_parameter_list node =
   match syntax node with
@@ -215,7 +215,7 @@ let get_type_parameter_list node =
         |> syntax_node_to_list
         |> Core_list.map ~f:get_list_item
   | Missing -> []
-  | _ -> failwith "Was not a TypeParameters"
+  | _ -> failwith "get_type_parameter_list: Was not a TypeParameters"
 
 let is_static_method { methodish_modifiers; _; } =
   methodish_modifiers
@@ -225,7 +225,7 @@ let is_static_method { methodish_modifiers; _; } =
 let string_of_name_token node =
   match syntax node with
   | Token { EditableToken.kind = TokenKind.Name; text; _; } -> text
-  | _ -> failwith "Was not a Name Token"
+  | _ -> failwith "string_of_name_token: Was not a Name Token"
 
 
 (* Syntax creation functions *)
@@ -590,6 +590,10 @@ let create_suspended_coroutine_result_syntax =
 (* ClassName_FunctionName_GeneratedClosure *)
 let make_closure_classname context =
   let classish_name = context.Coroutine_context.classish_name in
+  (* TODO: Is there a better thing to do for coroutines that are inside no
+  class? *)
+  let classish_name = if is_missing classish_name then
+    global_syntax else classish_name in
   let function_name = context.Coroutine_context.function_name in
   Printf.sprintf
     "%s_%s_GeneratedClosure"

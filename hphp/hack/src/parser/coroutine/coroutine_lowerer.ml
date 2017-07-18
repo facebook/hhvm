@@ -72,12 +72,28 @@ let rewrite_coroutine_annotation
     }
   )
 
+(* TODO: Rename anonymous_parameters / function_parameter_list to match. *)
+let lower_coroutine_anon
+    context
+    ({ anonymous_body; anonymous_parameters; _; } as anon) =
+  let ({anonymous_type; _;} as anon) =
+    rewrite_anon_function_return_type anon in
+  let anonymous_body, closure_syntax =
+    CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      context
+      anonymous_body
+      anonymous_type
+      anonymous_parameters in
+  let anon = { anon with anonymous_body } in
+  let anon = CoroutineMethodLowerer.rewrite_anon context anon in
+  (anon, closure_syntax)
+
 let rewrite_method_or_function
     context
     ({function_parameter_list; _;} as original_header_node)
     original_body =
   let ({function_type; _;} as new_header_node) =
-    rewrite_header_node original_header_node in
+    rewrite_function_header_return_type original_header_node in
   let new_body, closure_syntax =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       context
@@ -95,6 +111,7 @@ let lower_coroutine_function
     context original_header original_body in
   let new_function_syntax =
     CoroutineMethodLowerer.rewrite_function_declaration
+      context
       original_function
       new_header_node
       new_body in
@@ -115,9 +132,6 @@ let lower_coroutine_functions_and_types
     } as function_node) when not @@ is_missing function_coroutine ->
       let context = Coroutine_context.make_from_context
         (current_node :: parents) in
-      let context = { context with
-        Coroutine_context.classish_name = global_syntax;
-      } in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
         context header_node function_body function_node in
       ((closure_syntax :: closures, lambda_count),
@@ -128,12 +142,15 @@ let lower_coroutine_functions_and_types
     } when not @@ is_missing lambda_coroutine ->
      (* TODO: rewrite lambdas *)
      (current_acc, Rewriter.Result.Keep)
-  | AnonymousFunction {
+  | AnonymousFunction ({
     anonymous_coroutine_keyword;
     _;
-    }  when not @@ is_missing anonymous_coroutine_keyword ->
-     (* TODO: rewrite anonymous functions *)
-     (current_acc, Rewriter.Result.Keep)
+    } as anon) when not @@ is_missing anonymous_coroutine_keyword ->
+      (* TODO: Lambda count *)
+      let context = Coroutine_context.make_from_context parents in
+      let (anon, closure_syntax) = lower_coroutine_anon context anon in
+      ((closure_syntax :: closures, (lambda_count + 1)),
+        Rewriter.Result.Replace anon)
   | MethodishDeclaration ({
       methodish_function_decl_header = {
         syntax = FunctionDeclarationHeader ({

@@ -132,6 +132,7 @@ let create_closure_invocation
     make_return_statement_syntax create_suspended_coroutine_result_syntax in
   make_list [resume_statement_syntax; return_syntax]
 
+(* TODO: Why does this take the body twice? *)
 let rewrite_coroutine_body
     context
     methodish_function_body
@@ -176,15 +177,10 @@ let rewrite_methodish_declaration
     }
 
 let rewrite_function_declaration
+    context
     ({ function_body; _; } as function_node)
-    ({ function_name; function_type; function_parameter_list;
-      function_type_parameter_list; _; } as header_node)
+    ({ function_type; function_parameter_list; _; } as header_node)
     rewritten_body =
-  (* TODO: Would it be better to have no class name at all? *)
-  let context = { Coroutine_context.empty with
-    Coroutine_context.classish_name = global_syntax;
-    Coroutine_context.function_name;
-    Coroutine_context.function_type_parameter_list } in
   let make_syntax function_node =
     make_syntax (FunctionDeclaration function_node) in
   let function_body =
@@ -199,3 +195,25 @@ let rewrite_function_declaration
       function_declaration_header = rewrite_function_decl_header header_node;
       function_body;
     }
+
+let rewrite_anon
+    context
+    ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
+  let make_syntax node =
+    make_syntax (AnonymousFunction node) in
+  let anonymous_body =
+    rewrite_coroutine_body
+      context
+      anonymous_body
+      anonymous_parameters
+      anonymous_type
+      anonymous_body in
+  let anonymous_parameters = compute_parameter_list
+    anonymous_parameters anonymous_type in
+  let anonymous_type = make_coroutine_result_type_syntax anonymous_type in
+  make_syntax
+    { anon with
+      anonymous_coroutine_keyword = make_missing();
+      anonymous_parameters;
+      anonymous_type;
+      anonymous_body }

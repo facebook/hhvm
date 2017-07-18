@@ -117,6 +117,9 @@ NATIVE_LIBRARIES=\
   $(ELF)\
   $(RT)
 
+COPIED_HHIS=\
+	$(foreach file,$(call rwildcard,../hhi/,*.hhi),_build/$(patsubst ../hhi/%,hhi/%,$(file)))
+
 TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check \
 	_build/hh_format \
@@ -172,7 +175,7 @@ space +=
 # As there is no efficient way to calculate the dependencies of
 # the targets, we make them dependent on all files. In doing this
 # we ensure that no rebuild is necessary if nothing has changed
-$(TARGETS): $(ALL_SRC_FILES)
+$(TARGETS): $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
 	# we place it here to avoid unnecessary rebuilds
 	$(MAKE) build-hack-native-deps build-hhi-archive
@@ -196,6 +199,10 @@ _build/utils/get_build_id.gen.c:
 _build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
 	cd $(dir $@) && $(OCAMLC) $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
+_build/ppx/ppx_gen_hhi:
+	mkdir -p $(dir $@)
+	$(OCAMLC) -o $@ -I +compiler-libs ocamlcommon.cma unix.cma ppx/ppx_gen_hhi.ml
+
 build-hhi-archive:
 	mkdir -p ../bin
 	$(MAKE) -C ../hhi
@@ -212,6 +219,12 @@ endif
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 	cp _build/full_fidelity_parse.$(TARGET_EXT) ../bin/hh_parse
+
+$(COPIED_HHIS): _build/%.hhi: ../%.hhi
+	mkdir -p $(dir $@)
+	cp $< $@
+
+copy-hhis: $(COPIED_HHIS)
 
 copy-hack-files-ocp: build-hack-with-ocp
 	mkdir -p ../bin

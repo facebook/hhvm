@@ -200,8 +200,10 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   } in
   let retries, conn =
     let start_t = Unix.gettimeofday () in
+    let timeout = (Option.value retries ~default:30) + 1 in
     let conn = ServerUtils.connect_to_monitor
-      ~timeout:(Option.value retries ~default:30) env.root
+      ~timeout
+      env.root
       handoff_options in
     let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
     let retries = Option.map retries

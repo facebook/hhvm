@@ -15,22 +15,56 @@ let payload = "Hello"
 let test_basic_no_timeout () =
   Timeout.with_timeout
     ~timeout:1
-    ~on_timeout:(fun _ -> ())
-    ~do_:begin fun _ ->
-      true
-    end
+    ~on_timeout:(fun _ -> false)
+    ~do_:(fun _ -> true)
 
 let test_basic_with_timeout () =
-  try
-    Timeout.with_timeout
-      ~timeout:1
-      ~on_timeout:(fun _ -> ())
-      ~do_:begin fun timeout ->
-        let _ = Unix.select [] [] [] 2.0 in
-        false
-      end
-  with
-  | Timeout.Timeout -> true
+  Timeout.with_timeout
+    ~timeout:1
+    ~on_timeout:(fun _ -> true)
+    ~do_:begin fun timeout ->
+      let _ = Unix.select [] [] [] 2.0 in
+      false
+    end
+
+let test_basic_nested_no_timeout () =
+  Timeout.with_timeout
+    ~timeout:1
+    ~on_timeout:(fun _ -> false)
+    ~do_:begin fun timeout ->
+      Timeout.with_timeout
+        ~timeout:1
+        ~on_timeout:(fun _ -> false)
+        ~do_:(fun _ -> true)
+    end
+
+let test_basic_nested_inner_timeout () =
+  Timeout.with_timeout
+    ~timeout:3
+    ~on_timeout:(fun _ -> false)
+    ~do_:begin fun timeout ->
+      Timeout.with_timeout
+        ~timeout:1
+        ~on_timeout:(fun _ -> true)
+        ~do_:begin fun timeout ->
+          let _ = Unix.select [] [] [] 2.0 in
+          false
+        end
+    end
+
+let test_basic_nested_outer_timeout () =
+  Timeout.with_timeout
+    ~timeout:1
+    ~on_timeout:(fun _ -> true)
+    ~do_:begin fun timeout ->
+      Timeout.with_timeout
+        ~timeout:3
+        ~on_timeout:(fun _ -> false)
+        ~do_:begin fun timeout ->
+          let _ = Unix.select [] [] [] 2.0 in
+          false
+        end
+    end
 
 (** The main method of the forked child process which will feed
  * data to the oc channel in two chunks split up by "delay" seconds. *)
@@ -53,7 +87,7 @@ let test_input_within_timeout () =
   let ic, _ = handle.Daemon.channels in
   Timeout.with_timeout
     ~timeout:1
-    ~on_timeout:(fun _ -> ())
+    ~on_timeout:(fun _ -> false)
     ~do_:begin fun timeout ->
       let result: string = Daemon.from_channel ~timeout ic in
       assert (result = payload);
@@ -66,16 +100,14 @@ let test_input_exceeds_timeout () =
   let handle = Daemon.spawn ~channel_mode:`socket
     (Daemon.null_fd (), Unix.stdout, Unix.stderr) data_producer_entry 3.0 in
   let ic, _ = handle.Daemon.channels in
-  try
-    Timeout.with_timeout
-      ~timeout:2
-      ~on_timeout:(fun _ -> ())
-      ~do_:begin fun timeout ->
-        let _result: string = Daemon.from_channel ~timeout ic in
-        false
-      end
-  with
-  | Timeout.Timeout -> true
+  Timeout.with_timeout
+    ~timeout:2
+    ~on_timeout:(fun _ -> true)
+    ~do_:begin fun timeout ->
+      let result: string = Daemon.from_channel ~timeout ic in
+      assert (result = payload);
+      false
+    end
 
 (**
  * We want to use up a lot of CPU time without any I/O operations like
@@ -108,19 +140,16 @@ let slow_computation_with_timeout_entry =
     "slow_computation_with_timeout"
     begin fun (timeout: int) ((_ic: unit Daemon.in_channel),
                               (oc_: unit Daemon.out_channel)) ->
-      try
-        Timeout.with_timeout
-          ~timeout
-          ~on_timeout:(fun _ -> exit 0)
-          ~do_:begin fun timeout ->
-            let total = really_long_computation timeout in
-            if total < 0 then
-              exit 2
-            else
-              exit 1
-          end
-      with
-      | Timeout.Timeout -> exit 0
+      Timeout.with_timeout
+        ~timeout
+        ~on_timeout:(fun _ -> exit 0)
+        ~do_:begin fun timeout ->
+          let total = really_long_computation timeout in
+          if total < 0 then
+            exit 2
+          else
+            exit 1
+        end
     end
 
 (** Forks a child that should exit after 2 seconds. *)
@@ -135,7 +164,7 @@ let test_timeout_no_input () =
     | 0, _ ->
       Printf.eprintf "Child hasn't exited";
       false
-    | _, Unix.WEXITED 0-> true
+    | _, Unix.WEXITED 0 -> true
     | _, Unix.WEXITED i ->
       Printf.eprintf "Child exited with code: %d" i;
       false
@@ -157,22 +186,19 @@ let slow_computation_after_io_entry =
     "slow_computation_after_io"
     begin fun (timeout: int) ((ic: string Daemon.in_channel),
                               (oc: unit Daemon.out_channel)) ->
-      try
-        Timeout.with_timeout
-          ~timeout
-          ~on_timeout:(fun _ -> exit 0)
-          ~do_:begin fun timeout ->
-            (** Read from ic, which is sent by parent process after a pause. *)
-            let result: string = Daemon.from_channel ~timeout ic in
-            assert (result = payload);
-            let total = really_long_computation timeout in
-            if total < 0 then
-              exit 2
-            else
-              exit 1
-          end
-      with
-      | Timeout.Timeout -> exit 0
+      Timeout.with_timeout
+        ~timeout
+        ~on_timeout:(fun _ -> exit 0)
+        ~do_:begin fun timeout ->
+          (** Read from ic, which is sent by parent process after a pause. *)
+          let result: string = Daemon.from_channel ~timeout ic in
+          assert (result = payload);
+          let total = really_long_computation timeout in
+          if total < 0 then
+            exit 2
+          else
+            exit 1
+        end
     end
 
 (** This tests that timeouts from strictly CPU work still happen after the Alarm
@@ -212,6 +238,9 @@ let test_timeout_after_input () =
 let tests = [
   "test_basic_no_timeout", test_basic_no_timeout;
   "test_basic_with_timeout", test_basic_with_timeout;
+  "test_basic_nested_no_timeout", test_basic_nested_no_timeout;
+  "test_basic_nested_inner_timeout", test_basic_nested_inner_timeout;
+  "test_basic_nested_outer_timeout", test_basic_nested_outer_timeout;
   "test_input_within_timeout", test_input_within_timeout;
   "test_input_exceeds_timeout", test_input_exceeds_timeout;
   "test_timeout_no_input", test_timeout_no_input;

@@ -16,33 +16,31 @@ let call_external_formatter
   (args : string list)
   : (string list, string) Result.t =
   let args = Array.of_list (cmd :: args) in
-  let lines = ref [] in
-  let status = ref None in
   let reader timeout ic oc =
     output_string oc content;
     close_out oc;
-    try while true do lines := Timeout.input_line ~timeout ic :: !lines done
-      with End_of_file -> ();
-    status := Some (Timeout.close_process_in ic);
+    let lines = ref [] in
+    begin
+      try
+        while true
+        do lines := Timeout.input_line ~timeout ic :: !lines
+        done
+      with End_of_file -> ()
+    end;
+    match Timeout.close_process_in ic with
+    | Unix.WEXITED 0 -> Result.Ok (List.rev !lines)
+    | Unix.WEXITED v -> Result.Error (Hackfmt_error.get_error_string_from_exit_value v)
+    | _ -> Result.Error "Call to hackfmt was killed"
   in
-  try
-    Timeout.read_process
-      ~timeout:2
-      ~on_timeout:(fun _ -> ())
-      ~reader
-      cmd
-      args;
-    match !status with
-      | Some (Unix.WEXITED 0) ->
-          Result.Ok (List.rev !lines)
-      | Some (Unix.WEXITED v) ->
-          Result.Error (Hackfmt_error.get_error_string_from_exit_value v)
-      | None -> Result.Error "Call to hackfmt never terminated"
-      | _ -> Result.Error "Call to hackfmt was killed"
-  with Timeout.Timeout -> begin
-    Hh_logger.log "Formatter timeout";
-    Result.Error "Call to hackfmt timed out"
-  end
+  Timeout.read_process
+    ~timeout:2
+    ~on_timeout:(fun _ ->
+      Hh_logger.log "Formatter timeout";
+      Result.Error "Call to hackfmt timed out"
+    )
+    ~reader
+    cmd
+    args
 
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]

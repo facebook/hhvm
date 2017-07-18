@@ -75,8 +75,6 @@ let init root =
     None
   | Unix.Unix_error (Unix.ECONNREFUSED, _, _) ->
     None
-  | Timeout.Timeout ->
-    None
 
 let get_status_ instance =
   match !(instance.state) with

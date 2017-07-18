@@ -216,7 +216,6 @@ inline void ArrayData::release() noexcept {
   assert(hasExactlyOneRef());
   g_array_funcs.release[kind()](this);
   AARCH64_WALKABLE_FRAME();
-  return;
 }
 
 inline ArrayData* ArrayData::append(Cell v, bool copy) {

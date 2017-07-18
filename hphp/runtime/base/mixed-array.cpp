@@ -468,6 +468,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
 
 //=============================================================================
 // Destruction
+
 NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
   assert(in->isRefCounted());

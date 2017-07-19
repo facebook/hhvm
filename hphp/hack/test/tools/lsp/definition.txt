@@ -1,0 +1,10 @@
+# @lint-ignore LINE_WRAP1
+initialize rw {"initializationOptions":{},"processId":null,"rootUri":">>> path_expand('.')","capabilities":{}}
+
+# @lint-ignore LINE_WRAP1
+textDocument/didOpen w { "textDocument":{"uri":">>> path_expand('sample.php')","languageId":"hack","version":1,"text":">>> read_file('sample.php')"}}
+
+# @lint-ignore LINE_WRAP1
+textDocument/definition rw {"textDocument":{"uri":">>> path_expand('sample.php')"}, "position":{"line":3, "character":10}}
+
+shutdown rw {}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import contextlib
+import json
+import os
+import re
 import subprocess
 
 
@@ -27,6 +30,8 @@ class LspCommandProcessor:
 
     def send(self, command):
         self._write_command(command)
+
+    def receive(self):
         return self._read_response()
 
     # decodes a compressed LSP command into a JSON
@@ -40,7 +45,9 @@ class LspCommandProcessor:
         if self._is_empty_line(line) or self._is_comment(line):
             return None
 
-        method, line = line.strip().split(" ", 1)
+        method, rw, line = line.strip().split(" ", 2)
+
+        line = self._eval_replacements(line)
 
         json_rpc_payload = f"""
 {{
@@ -51,7 +58,24 @@ class LspCommandProcessor:
 }}
     """.strip()
         content_length = len(json_rpc_payload)
-        return f"Content-Length: {content_length}\n\n{json_rpc_payload}"
+        return (f"Content-Length: {content_length}\n\n{json_rpc_payload}", rw)
+
+    def _eval_replacements(self, encoded_json):
+        decoded_json = json.loads(encoded_json)
+        return json.dumps(self._eval_json(decoded_json))
+
+    def _eval_json(self, json):
+        if isinstance(json, dict):
+            return {k: self._eval_json(v) for k, v in json.items()}
+        elif isinstance(json, list):
+            return [self._eval_json(i) for i in list]
+        elif isinstance(json, str):
+            match = re.match(r'>>>(.*)', json)
+            if match is None:
+                return json
+            return eval(match.group(1))  # noqa: P204
+        else:
+            return json
 
     def _write_command(self, command):
         self.proc.stdin.write(command.encode())
@@ -80,3 +104,14 @@ class LspCommandProcessor:
 
     def _is_comment(self, line):
         return line.startswith("#")
+
+
+# string replacement methods meant to be called
+# within a command processing script.
+def path_expand(path):
+    return "file://" + os.path.abspath(path)
+
+
+def read_file(file):
+    with open(file, "r") as f:
+        return f.read()

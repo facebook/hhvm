@@ -8,42 +8,41 @@
  *
  *)
 
+ (**
+ * This is a stack of scopes, and a scope is a set of expected `TokenKind`s.
+ * The top of the stack is the "current" scope. If we come across a `TokenKind`
+ * that is not in the current scope, but does occur in scopes further down
+ * the stack, we assume that the expected tokens were erroneously omitted in
+ * the input. In that case we must inform the user of their mistake by
+ * presenting an informative error message, but we must also continue
+ * parsing to the best of our ability.
+ *)
+
 module TokenKind = Full_fidelity_token_kind
 
-type t = {
-  expected : TokenKind.t list;
-}
+module Scope = struct
+  include Set.Make(struct
+    type t = TokenKind.t
+    let compare = Pervasives.compare
+    end)
+end
+
+type t = Scope.t list
 
 let empty =
-  let expected = [ ] in (* Always start the context empty *)
-  { expected }
+  [ ]
 
-(* Given the previous context and a newly-expected token_kind,
- * add the new token_kind to the front of the previous expected stack. *)
-let expect context token_kind =
-  { expected = token_kind :: context.expected }
-
-(* Given a current context, test if it expects token_kind. *)
-(* NOTE that this is an O(n) search. Usually n is small, so we can probably
- * get away with this for now, but it might be worth optimizing out later. *)
 let expects context token_kind =
-  Core.List.exists context.expected ~f:(fun k -> (k = token_kind))
+  Core.List.exists context ~f:(fun scope -> Scope.mem token_kind scope)
 
-(* Check if token_kind is next in the parser's list of expected token kinds. *)
-let expects_next context token_kind =
-  match context.expected with
-  | h :: t -> h = token_kind
-  | _ -> false
+let expects_here context token_kind =
+  expects (Core.List.take context 1) token_kind
 
-(* Access the expected stack of a context. *)
-let expected context =
-  context.expected
+let expect context token_kind_list =
+  let scope_addendum = Scope.of_list token_kind_list in
+  match context with
+  | current :: other -> Scope.union scope_addendum current :: other
+  | [ ] -> [ scope_addendum ]
 
-(* Utility function for debugging. *)
-let print_expected_list context =
-  let expected_list = context.expected in
-  Printf.printf "The list of expected token kinds has %d elements. They are:\n"
-    (Core.List.length expected_list);
-  let print_token_kind tok_kind = Printf.printf "%s\n"
-    (TokenKind.to_string tok_kind); in
-  Core.List.map expected_list ~f:print_token_kind
+let expect_in_new_scope context token_kind_list =
+  Scope.of_list token_kind_list :: context

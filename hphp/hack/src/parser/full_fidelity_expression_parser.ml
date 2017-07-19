@@ -118,10 +118,10 @@ module WithStatementAndDeclAndTypeParser
     let (parser1, token) = next_token_as_name parser in
     match (Token.kind token) with
     | Name -> parse_name_or_collection_literal_expression parser1 token
-    | kind when PrecedenceParser.expects_next parser kind ->
-      (* ERROR RECOVERY: If we're encountering a token that matches the next
-       * kind in the expected stack, don't eat it--just make the name missing,
-       * and continue parsing, starting from the offending token. *)
+    | kind when PrecedenceParser.expects_here parser kind ->
+      (* ERROR RECOVERY: If we're encountering a token that matches a kind in
+       * the previous scope of the expected stack, don't eat it--just mark the
+       * name missing and continue parsing, starting from the offending token. *)
       let parser = with_error parser SyntaxError.error1015 in
       (parser, make_missing())
     | _ ->

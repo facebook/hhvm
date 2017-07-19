@@ -11,6 +11,7 @@ module Token = Full_fidelity_minimal_token
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
+module Context = Full_fidelity_parser_context
 
 open Full_fidelity_minimal_syntax
 
@@ -21,7 +22,7 @@ module type ParserType = sig
   val with_errors : t -> SyntaxError.t list -> t
   val lexer : t -> Lexer.t
   val with_lexer : t -> Lexer.t -> t
-  val expect : t -> TokenKind.t -> t
+  val expect : t -> TokenKind.t list -> t
 end
 
 module WithParser(Parser : ParserType) = struct
@@ -201,7 +202,7 @@ module WithParser(Parser : ParserType) = struct
     expect_token parser TokenKind.Variable SyntaxError.error1008
 
   let context_expect_semicolon parser =
-    Parser.expect parser TokenKind.Semicolon
+    Parser.expect parser [ TokenKind.Semicolon ]
 
   let expect_semicolon parser =
     expect_token parser TokenKind.Semicolon SyntaxError.error1010

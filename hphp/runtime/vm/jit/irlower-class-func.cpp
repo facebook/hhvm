@@ -109,7 +109,16 @@ void cgLdFuncVecLen(IRLS& env, const IRInstruction* inst) {
   // handle that case.
   auto const off = Class::funcVecLenOff() -
     (inst->src(0)->isA(TCctx) ? ActRec::kHasClassBit : 0);
-  v << loadzlq{cls[off], dst};
+
+  static_assert(sizeof(Class::veclen_t) == 2 || sizeof(Class::veclen_t) == 4,
+                "Class::veclen_t must be 2 or 4 bytes wide");
+  if (sizeof(Class::veclen_t) == 2) {
+    auto const tmp = v.makeReg();
+    v << loadw{cls[off], tmp};
+    v << movzwq{tmp, dst};
+  } else {
+    v << loadzlq{cls[off], dst};
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

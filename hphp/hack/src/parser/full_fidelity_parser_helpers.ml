@@ -201,9 +201,6 @@ module WithParser(Parser : ParserType) = struct
   let expect_variable parser =
     expect_token parser TokenKind.Variable SyntaxError.error1008
 
-  let context_expect_semicolon parser =
-    Parser.expect parser [ TokenKind.Semicolon ]
-
   let expect_semicolon parser =
     expect_token parser TokenKind.Semicolon SyntaxError.error1010
 

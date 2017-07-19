@@ -741,9 +741,10 @@ module WithExpressionAndDeclAndTypeParser
     | Semicolon ->
       (parser1, make_expression_statement (make_missing ()) (make_token token))
     | _ ->
-      let parser = context_expect_semicolon parser in
+      let parser = SimpleParser.expect_in_new_scope parser [ Semicolon ] in
       let (parser, expression) = parse_expression parser in
       let (parser, token) = expect_semicolon parser in
+      let parser = SimpleParser.pop_scope parser [ Semicolon ] in
       (parser, make_expression_statement expression token)
 
   and parse_compound_statement parser =

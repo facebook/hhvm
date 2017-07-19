@@ -1,8 +1,8 @@
 File "must_be_arraykey.php", line 5, characters 14-19:
 Some type constraint(s) here are violated (Typing[4110])
-File "builtins.hhi", line 124, characters 30-30:
+File "hhi_lib__srcs/experimental/interfaces.hhi", line 13, characters 30-30:
 'T' is a constrained type
-File "builtins.hhi", line 124, characters 35-42:
+File "hhi_lib__srcs/experimental/interfaces.hhi", line 13, characters 35-42:
 This is an array key (int/string)
 File "must_be_arraykey.php", line 5, characters 21-21:
 It is incompatible with an object of type I

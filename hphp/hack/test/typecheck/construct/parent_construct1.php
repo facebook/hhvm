@@ -39,7 +39,3 @@ class C extends B {
   }
 
 }
-
-function mt_rand(): int {
-  // UNSAFE
-}

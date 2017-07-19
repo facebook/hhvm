@@ -1,4 +1,4 @@
 File "array_map1.php", line 4, characters 3-15:
 Too few arguments (Typing[4104])
-File "builtins.hhi", line 56, characters 10-18:
+File "hhi_lib__srcs/stdlib/builtins_array.hhi", line 117, characters 10-18:
 Definition is here

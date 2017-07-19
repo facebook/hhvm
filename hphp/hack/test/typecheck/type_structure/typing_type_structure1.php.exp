@@ -1,5 +1,5 @@
 File "typing_type_structure1.php", line 18, characters 5-23:
-  int
+  enum TypeStructureKind
 File "typing_type_structure1.php", line 19, characters 5-28:
   classname<Vector<int>>
 File "typing_type_structure1.php", line 20, characters 5-32:

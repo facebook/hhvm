@@ -9,15 +9,15 @@
  *
  */
 
-interface PlainSprintf {
+interface MyPlainSprintf {
   public function format_s<T>(T $s): string;
 }
 
-function sprintf(FormatString<PlainSprintf> $f, ...): string {
+function my_sprintf(FormatString<MyPlainSprintf> $f, ...): string {
   return 'hi';
 }
 
 function f() {
-  sprintf('%s', 'hi');
-  sprintf("%s", 'hi');
+  my_sprintf('%s', 'hi');
+  my_sprintf("%s", 'hi');
 }

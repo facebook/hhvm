@@ -11,6 +11,6 @@ function opt_c(): ?C {
 function f() {
   $c = opt_c();
   hh_show($c);
-  invariant($c instanceof C, 'format: '.($c?->y()));
+  invariant($c instanceof C, 'format: %s', (string) ($c?->y()));
   hh_show($c);
 }

@@ -1,5 +1,5 @@
 File "bad_type_structure_shape.php", line 4, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_shape.php", line 5, characters 3-23:
   ?string
 File "bad_type_structure_shape.php", line 6, characters 3-22:
@@ -19,9 +19,9 @@ File "bad_type_structure_shape.php", line 14, characters 3-29:
 File "bad_type_structure_shape.php", line 15, characters 3-31:
   _
 File "bad_type_structure_shape.php", line 18, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_shape.php", line 22, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_shape.php", line 23, characters 3-23:
   ?string
 File "bad_type_structure_shape.php", line 24, characters 3-22:
@@ -41,6 +41,6 @@ File "bad_type_structure_shape.php", line 32, characters 3-29:
 File "bad_type_structure_shape.php", line 33, characters 3-31:
   ?array
 File "bad_type_structure_shape.php", line 36, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_shape.php", line 10, characters 15-25:
 The field classname is undefined (Typing[4108])

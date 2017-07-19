@@ -4,7 +4,9 @@ File "constmap.php", line 12, characters 30-34:
 This is a mixed value
 File "constmap.php", line 13, characters 20-25:
 It is incompatible with a string
-File "builtins.hhi", line 20, characters 45-46:
+File "hhi_lib__srcs/collections/Map.hhi", line 58, characters 47-48:
+  via this generic Tk
+File "hhi_lib__srcs/collections/interfaces.hhi", line 1026, characters 47-48:
   via this generic Tk
 File "constmap.php", line 12, characters 30-34:
 Considering that this type argument is invariant with respect to ConstMap

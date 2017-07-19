@@ -17,6 +17,7 @@ function test_array_filter(
   take_int_string_array(array_filter($hashtable_array));
   hh_show(array_filter($container));
   take_int_string_array(array_filter($keyed_container));
+  /* HH_IGNORE_ERROR[4110] */
   hh_show(array_filter($int));
   hh_show(array_filter($untyped));
   take_arraykey_string_array(array_filter($intersection_type));
@@ -26,6 +27,7 @@ function test_array_filter(
   take_int_nullable_string_nullabarray(array_filter($hashtable_array, $f));
   take_arraykey_nullable_string_array(array_filter($container, $f));
   take_int_nullable_string_nullabarray(array_filter($keyed_container, $f));
+  /* HH_IGNORE_ERROR[4110] */
   hh_show(array_filter($int, $f));
   hh_show(array_filter($untyped, $f));
   take_arraykey_nullable(array_filter($intersection_type, $f));

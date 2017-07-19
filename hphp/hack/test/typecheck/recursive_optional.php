@@ -1,13 +1,13 @@
 <?hh
 
-function compact<T>(Vector<?T> $vector): Vector<T> {
+function my_compact<T>(Vector<?T> $vector): Vector<T> {
   //UNSAFE
 }
 
 function test(bool $b): ?string {
 
   $nullable = Vector {null}; // Vector([?T]])
-  $non_nullable = compact($nullable); // Vector([T])
+  $non_nullable = my_compact($nullable); // Vector([T])
 
   if ($b) {
     $res = $nullable;

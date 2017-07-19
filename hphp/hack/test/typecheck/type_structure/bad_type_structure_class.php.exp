@@ -1,5 +1,5 @@
 File "bad_type_structure_class.php", line 6, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_class.php", line 7, characters 3-23:
   ?string
 File "bad_type_structure_class.php", line 8, characters 3-22:
@@ -19,9 +19,9 @@ File "bad_type_structure_class.php", line 16, characters 3-29:
 File "bad_type_structure_class.php", line 17, characters 3-29:
   _
 File "bad_type_structure_class.php", line 20, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_class.php", line 24, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_class.php", line 25, characters 3-23:
   ?string
 File "bad_type_structure_class.php", line 26, characters 3-22:
@@ -41,6 +41,6 @@ File "bad_type_structure_class.php", line 34, characters 3-29:
 File "bad_type_structure_class.php", line 35, characters 3-29:
   _
 File "bad_type_structure_class.php", line 38, characters 3-22:
-  int
+  enum TypeStructureKind
 File "bad_type_structure_class.php", line 13, characters 15-24:
 The field nullable is undefined (Typing[4108])

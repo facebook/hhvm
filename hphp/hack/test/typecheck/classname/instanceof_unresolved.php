@@ -10,5 +10,5 @@ function f(mixed $x): Foo {
     hh_show($x);
     return $x;
   }
-  invariant_violation();
+  invariant_violation('unreachable');
 }

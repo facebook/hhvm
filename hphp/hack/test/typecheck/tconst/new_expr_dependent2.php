@@ -93,6 +93,6 @@ class D extends C {
 function test_vec_unpack(): (int, int) {
   // Make sure list() assign still works even though new Vector()
   // produces a dependent type
-  list($x, $y) = new Vector();
+  list($x, $y) = new Vector(null);
   return tuple($x, $y);
 }

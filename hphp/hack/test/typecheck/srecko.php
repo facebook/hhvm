@@ -12,7 +12,7 @@
 interface SomeInterface { }
 class Foo implements SomeInterface { }
 
-function fun(Foo $bar): Foo {
+function f(Foo $bar): Foo {
   if ($bar instanceof SomeInterface) {
     // At this point, $bar is of SomeInterface type.
     // All typing from Foo is lost.

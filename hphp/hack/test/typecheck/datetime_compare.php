@@ -1,7 +1,5 @@
 <?hh // strict
 
-class DateTime {}
-
 function test_compare(DateTime $d): bool {
   $new_datetime = new DateTime();
   return $d < $new_datetime;

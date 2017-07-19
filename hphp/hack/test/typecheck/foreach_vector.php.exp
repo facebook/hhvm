@@ -4,11 +4,13 @@ File "foreach_vector.php", line 21, characters 10-13:
 This is a num (int/float) because this is used in an arithmetic operation
 File "foreach_vector.php", line 18, characters 19-21:
 It is incompatible with an object of type Foo
-File "builtins.hhi", line 15, characters 47-48:
+File "hhi_lib__srcs/collections/Vector.hhi", line 49, characters 49-50:
   via this generic Tv
-File "builtins.hhi", line 12, characters 55-56:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 522, characters 49-50:
   via this generic Tv
-File "builtins.hhi", line 9, characters 63-64:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 271, characters 55-56:
   via this generic Tv
-File "builtins.hhi", line 6, characters 58-59:
+File "hhi_lib__srcs/interfaces.hhi", line 520, characters 63-64:
+  via this generic Tv
+File "hhi_lib__srcs/interfaces.hhi", line 54, characters 58-59:
   via this generic Tv

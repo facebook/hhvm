@@ -11,10 +11,10 @@
 
 
 function main(): void {
-  $x = new Vector();
+  $x = new Vector(null);
   $z = Vector {1, 2, 3};
   $t = Map {1 => 1, 2 => 2, 3 => 3};
-  $y = new Map();
+  $y = new Map(null);
   $y['ff'] = 0;
 
   $i = 0;

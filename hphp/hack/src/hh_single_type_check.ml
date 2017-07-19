@@ -47,170 +47,29 @@ type options = {
   tcopt : GlobalOptions.t;
 }
 
-let builtins_filename =
-  Relative_path.create Relative_path.Dummy "builtins.hhi"
+(* Canonical builtins from our hhi library *)
+let hhi_builtins = [%hhi_contents]
 
-let builtins =
-  "<?hh // decl\n"^
-  "interface Traversable<+Tv> {}\n"^
-  "interface Container<+Tv> extends Traversable<Tv> {}\n"^
-  "interface Iterator<+Tv> extends Traversable<Tv> {}\n"^
-  "interface Iterable<+Tv> extends Traversable<Tv> {}\n"^
-  "interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}\n"^
-  "interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
-  "interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
-  "interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
-  "interface Awaitable<+T> {"^
-  "  public function getWaitHandle(): WaitHandle<T>;"^
-  "}\n"^
-  "interface WaitHandle<+T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, KeyedContainer<int, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
-  "}\n"^
-  "interface ConstSet<+Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, KeyedContainer<Tk, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
-  "}\n"^
-  "final class Vector<Tv> implements ConstVector<Tv>{\n"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
-  "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
-  "  public function reserve(int $sz): void;"^
-  "  public function add(Tv $value): Vector<Tv>;"^
-  "  public function addAll(?Traversable<Tv> $it): Vector<Tv>;"^
-  "}\n"^
-  "final class ImmVector<+Tv> implements ConstVector<Tv> {"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ImmVector<Tu>;"^
-  "}\n"^
-  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
-  "  /* HH_FIXME[3007]: This is intentional; not a constructor */"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): Map<Tk, Tu>;"^
-  "  public function contains<Tu super Tk>(Tu $k): bool;"^
-  "}\n"^
-  "final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ImmMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ImmMap<Tk, Tu>;"^
-  "}\n"^
-  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): StableMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): StableMap<Tk, Tu>;"^
-  "}\n"^
-  "final class Set<Tv> implements ConstSet<Tv> {}\n"^
-  "final class ImmSet<+Tv> implements ConstSet<Tv> {}\n"^
-  "class Exception {"^
-  "  public function __construct(string $x) {}"^
-  "  public function getMessage(): string;"^
-  "}\n"^
-  "class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {\n"^
-  "  public function next(): void;\n"^
-  "  public function current(): Tv;\n"^
-  "  public function key(): Tk;\n"^
-  "  public function rewind(): void;\n"^
-  "  public function valid(): bool;\n"^
-  "  public function send(?Ts $v): void;\n"^
-  "}\n"^
-  "final class Pair<+Tk, +Tv> implements KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
-  "interface Stringish {public function __toString(): string {}}\n"^
-  "interface XHPChild {}\n"^
-  "function hh_show($val) {}\n"^
-  "function hh_show_env() {}\n"^
-  "interface Countable { public function count(): int; }\n"^
-  "interface AsyncIterator<+Tv> {}\n"^
-  "interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {}\n"^
-  "class AsyncGenerator<Tk, +Tv, -Ts> implements AsyncKeyedIterator<Tk, Tv> {\n"^
-  "  public function next(): Awaitable<?(Tk, Tv)> {}\n"^
-  "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
-  "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
-  "}\n"^
-  "function isset($x): bool;"^
-  "function empty($x): bool;"^
-  "function unset($x): void;"^
-  "namespace HH {\n"^
-  "abstract class BuiltinEnum<T> {\n"^
-  "  final public static function getValues(): array<string, T>;\n"^
-  "  final public static function getNames(): array<T, string>;\n"^
-  "  final public static function coerce(mixed $value): ?T;\n"^
-  "  final public static function assert(mixed $value): T;\n"^
-  "  final public static function isValid(mixed $value): bool;\n"^
-  "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
-  "}\n"^
-  "}\n"^
-  "function array_map($x, $y, ...);\n"^
-  "function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $c, $i, $d = null) {}\n"^
-  "final class stdClass {}\n" ^
-  "function rand($x, $y): int;\n" ^
-  "function invariant($x, ...): void;\n" ^
-  "function exit(int $exit_code_or_message = 0): noreturn;\n" ^
-  "function invariant_violation(...): noreturn;\n" ^
-  "function get_called_class(): string;\n" ^
-  "abstract final class Shapes {\n" ^
-  "  public static function idx(shape(...) $shape, arraykey $index, $default = null) {}\n" ^
-  "  public static function keyExists(shape(...) $shape, arraykey $index): bool {}\n" ^
-  "  public static function removeKey(shape(...) $shape, arraykey $index): void {}\n" ^
-  "  public static function toArray(shape(...) $shape): array<arraykey, mixed> {}\n" ^
-  "}\n" ^
-  "newtype typename<+T> as string = string;\n"^
-  "newtype classname<+T> as typename<T> = typename<T>;\n" ^
- "function var_dump($x): void;\n" ^
-  "function gena();\n" ^
-  "function genva();\n" ^
-  "function gen_array_rec();\n"^
-  "function is_int(mixed $x): bool {}\n"^
-  "function is_bool(mixed $x): bool {}\n"^
-  "function is_float(mixed $x): bool {}\n"^
-  "function is_string(mixed $x): bool {}\n"^
-  "function is_null(mixed $x): bool {}\n"^
-  "function is_array(mixed $x): bool {}\n"^
-  "function is_vec(mixed $x): bool {}\n"^
-  "function is_dict(mixed $x): bool {}\n"^
-  "function is_keyset(mixed $x): bool {}\n"^
-  "function is_resource(mixed $x): bool {}\n"^
-  "interface IMemoizeParam {\n"^
-  "  public function getInstanceKey(): string;\n"^
-  "}\n"^
-  "newtype TypeStructure<T> as shape(\n"^
-  "  'kind'=> int,\n"^
-  "  'nullable'=>?bool,\n"^
-  "  'classname'=>?classname<T>,\n"^
-  "  'elem_types' => ?array,\n"^
-  "  'param_types' => ?array,\n"^
-  "  'return_type' => ?array,\n"^
-  "  'generic_types' => ?array,\n"^
-  "  'fields' => ?array,\n"^
-  "  'name' => ?string,\n"^
-  "  'alias' => ?string,\n"^
-  ") = shape(\n"^
-  "  'kind'=> int,\n"^
-  "  'nullable'=>?bool,\n"^
-  "  'classname'=>?classname<T>,\n"^
-  "  'elem_types' => ?array,\n"^
-  "  'param_types' => ?array,\n"^
-  "  'return_type' => ?array,\n"^
-  "  'generic_types' => ?array,\n"^
-  "  'fields' => ?array,\n"^
-  "  'name' => ?string,\n"^
-  "  'alias' => ?string,\n"^
-  ");\n"^
-  "function type_structure($x, $y);\n"^
-  "const int __LINE__ = 0;\n"^
-  "const string __CLASS__ = '';\n"^
-  "const string __TRAIT__ = '';\n"^
-  "const string __FILE__ = '';\n"^
-  "const string __DIR__ = '';\n"^
-  "const string __FUNCTION__ = '';\n"^
-  "const string __METHOD__ = '';\n"^
-  "const string __NAMESPACE__ = '';\n"^
-  "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
-  "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
-  "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
-  "abstract final class keyset<+T as arraykey> implements Indexish<T, T> {}\n"^
-  "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
-  "function meth_caller(string $cls_name, string $meth_name);\n"^
-  "namespace HH\\Asio {"^
-  "  function va(...$args);\n"^
-  "}\n"^
-  "function hh_log_level(int $level) {}\n"
+(* All of the stuff that hh_single_type_check relies on is sadly not contained
+ * in the hhi library, so we include a very small number of magic builtins *)
+let magic_builtins = [|
+  (
+    "hh_single_type_check_magic.hhi",
+    "<?hh // decl\n" ^
+    "function gena();\n" ^
+    "function genva();\n" ^
+    "function gen_array_rec();\n" ^
+    "function hh_show($val) {}\n" ^
+    "function hh_show_env() {}\n"
+  )
+|]
+
+(* Take the builtins (file, contents) array and create relative paths *)
+let builtins = Array.fold_left begin fun acc (f, src) ->
+  Relative_path.Map.add acc
+    ~key:(Relative_path.create Relative_path.Dummy f)
+    ~data:src
+end Relative_path.Map.empty (Array.append magic_builtins hhi_builtins)
 
 (*****************************************************************************)
 (* Helpers *)
@@ -576,7 +435,10 @@ let test_decl_compare filename popt files_contents tcopt files_info =
   if (Relative_path.suffix filename) = "capitalization3.php" then () else
   if (Relative_path.suffix filename) = "capitalization4.php" then () else
   (* do not analyze builtins over and over *)
-  let files_info = Relative_path.Map.remove files_info builtins_filename in
+  let files_info = Relative_path.Map.fold builtins
+    ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
+    ~init:files_info
+  in
 
   let files = Relative_path.Map.fold files_info
     ~f:(fun k _ acc -> Relative_path.Set.add acc k)
@@ -645,7 +507,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       end
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
-        if fn = builtins_filename then () else begin
+        if Relative_path.Map.mem builtins fn then () else begin
           let result = ServerColorFile.get_level_list begin fun () ->
             ignore @@ Typing_check_utils.check_defs opts fn fileinfo;
             fn
@@ -655,7 +517,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       end
   | Coverage ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
-        if fn = builtins_filename then () else begin
+        if Relative_path.Map.mem builtins fn then () else begin
           let type_acc =
             ServerCoverageMetric.accumulate_types fn fileinfo opts in
           print_coverage fn type_acc;
@@ -696,7 +558,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Dump_inheritance ->
     Typing_deps.update_files files_info;
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      if fn = builtins_filename then () else begin
+      if Relative_path.Map.mem builtins fn then () else begin
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
@@ -751,7 +613,14 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Suggest
   | Infer_return_types
   | Errors ->
+      (* Check errors in everything *)
       let errors = check_errors opts errors files_info in
+
+      (* But filter builtins from suggesting types *)
+      let files_info = Relative_path.Map.fold builtins
+        ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
+        ~init:files_info
+      in
       if mode = Suggest
       then Relative_path.Map.iter files_info (suggest_and_print opts);
       if mode = Infer_return_types
@@ -775,11 +644,14 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Local_id.track_names := true;
   Ident.track_names := true;
-  let builtins = if no_builtins then "" else builtins in
+  let builtins = if no_builtins then Relative_path.Map.empty else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in
   let files_contents = file_to_files filename in
-  let files_contents_with_builtins = Relative_path.Map.add files_contents
-    ~key:builtins_filename ~data:builtins in
+  (* Merge in builtins *)
+  let files_contents_with_builtins = Relative_path.Map.fold builtins
+    ~f:begin fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src end
+    ~init:files_contents
+  in
 
   let errors, files_info, _ =
     parse_name_and_decl popt files_contents_with_builtins tcopt in

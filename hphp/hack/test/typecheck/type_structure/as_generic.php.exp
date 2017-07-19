@@ -1,5 +1,5 @@
 File "as_generic.php", line 5, characters 3-22:
-  int
+  enum TypeStructureKind
 File "as_generic.php", line 6, characters 3-36:
   ?^(string)
 File "as_generic.php", line 7, characters 3-35:

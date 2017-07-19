@@ -1,5 +1,5 @@
 File "shape_type_structure_with_optional_and_required_fields.php", line 9, characters 3-34:
-  int
+  enum TypeStructureKind
 File "shape_type_structure_with_optional_and_required_fields.php", line 10, characters 3-35:
   ?string
 File "shape_type_structure_with_optional_and_required_fields.php", line 11, characters 3-34:

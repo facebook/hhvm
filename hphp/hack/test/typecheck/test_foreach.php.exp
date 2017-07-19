@@ -4,9 +4,11 @@ File "test_foreach.php", line 12, characters 37-42:
 This is a string
 File "test_foreach.php", line 12, characters 19-21:
 It is incompatible with an int
-File "builtins.hhi", line 20, characters 45-46:
+File "hhi_lib__srcs/collections/Map.hhi", line 58, characters 47-48:
   via this generic Tk
-File "builtins.hhi", line 14, characters 51-52:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 1026, characters 47-48:
   via this generic Tk
-File "builtins.hhi", line 9, characters 59-60:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 778, characters 51-52:
+  via this generic Tk
+File "hhi_lib__srcs/interfaces.hhi", line 520, characters 59-60:
   via this generic Tk

@@ -2,26 +2,26 @@ name: \idx, kind: function, span: line 5, characters 5-20, definition:
  idx
    kind: function
    id: function::idx
-   position: line 57, characters 10-12
-   span: line 57, character 1 - line 57, character 66
+   position: line 22, characters 10-12
+   span: line 22, character 1 - line 23, character 21
    modifiers: 
    params:
-     $c
+     $collection
        kind: param
-       position: line 57, characters 46-47
-       span: line 57, character 22 - line 57, character 47
+       position: line 22, characters 46-56
+       span: line 22, character 22 - line 22, character 56
        modifiers: 
 
-     $i
+     $index
        kind: param
-       position: line 57, characters 50-51
-       span: line 57, character 50 - line 57, character 51
+       position: line 22, characters 59-64
+       span: line 22, character 59 - line 22, character 64
        modifiers: 
 
-     $d
+     $default
        kind: param
-       position: line 57, characters 54-55
-       span: line 57, character 54 - line 57, character 62
+       position: line 23, characters 3-10
+       span: line 23, character 3 - line 23, character 17
        modifiers: 
 
 

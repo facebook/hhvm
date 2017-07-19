@@ -10,7 +10,7 @@
  */
 
 function test(): void {
-  $x = new Vector();
+  $x = new Vector(null);
   $x[0] = $x;
   static $y = $x;
 }

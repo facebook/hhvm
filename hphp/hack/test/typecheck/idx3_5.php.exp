@@ -1,6 +1,6 @@
 File "idx3_5.php", line 9, characters 12-12:
 Invalid argument (Typing[4110])
-File "builtins.hhi", line 57, characters 23-36:
+File "hhi_lib__srcs/idx.hhi", line 22, characters 23-36:
 This is an object of type KeyedContainer
 File "idx3_5.php", line 9, characters 12-12:
 It is incompatible with an int

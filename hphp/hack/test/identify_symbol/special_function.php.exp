@@ -2,20 +2,20 @@ name: \meth_caller, kind: function, span: line 5, characters 5-27, definition:
  meth_caller
    kind: function
    id: function::meth_caller
-   position: line 126, characters 10-20
-   span: line 126, character 1 - line 126, character 58
+   position: line 27, characters 10-20
+   span: line 27, character 1 - line 27, character 58
    modifiers: 
    params:
      $cls_name
        kind: param
-       position: line 126, characters 29-37
-       span: line 126, character 22 - line 126, character 37
+       position: line 27, characters 29-37
+       span: line 27, character 22 - line 27, character 37
        modifiers: 
 
      $meth_name
        kind: param
-       position: line 126, characters 47-56
-       span: line 126, character 40 - line 126, character 56
+       position: line 27, characters 47-56
+       span: line 27, character 40 - line 27, character 56
        modifiers: 
 
 

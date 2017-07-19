@@ -1052,9 +1052,9 @@ private:
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
 
-  // previous values of *m_[de]allocated from last refreshStats()
-  uint64_t m_prevAllocated;
-  uint64_t m_prevDeallocated;
+  // previous values of *m_[de]allocated from last resetStats()
+  uint64_t m_resetAllocated;
+  uint64_t m_resetDeallocated;
 
   // true if mallctlnametomib() setup succeeded, which requires jemalloc
   static bool s_statsEnabled;

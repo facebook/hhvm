@@ -48,7 +48,11 @@ inline bool BigHeap::empty() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemoryManager::MaskAlloc {
-  explicit MaskAlloc(MemoryManager& mm) : m_mm(mm) {
+  explicit MaskAlloc(MemoryManager& mm)
+    : m_mm(mm)
+    , startAlloc(s_statsEnabled ? *mm.m_allocated : 0)
+    , startDealloc(s_statsEnabled ? *mm.m_deallocated : 0)
+  {
     // capture all mallocs prior to construction
     FTRACE(1, "MaskAlloc()\n");
     m_mm.refreshStats();
@@ -57,15 +61,15 @@ struct MemoryManager::MaskAlloc {
   ~MaskAlloc() {
     FTRACE(1, "~MaskAlloc()\n");
     // exclude mallocs and frees since construction
-    if (use_jemalloc && s_statsEnabled) {
-      FTRACE(1, "old: prev alloc: {}\nprev dealloc: {}\n",
-        m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
+    if (s_statsEnabled) {
+      FTRACE(1, "old: reset alloc: {} reset dealloc: {}\n",
+        m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
 
-      m_mm.m_prevAllocated = *m_mm.m_allocated;
-      m_mm.m_prevDeallocated = *m_mm.m_deallocated;
+      m_mm.m_resetAllocated += *m_mm.m_allocated - startAlloc;
+      m_mm.m_resetDeallocated += *m_mm.m_deallocated - startDealloc;
 
-      FTRACE(1, "new: prev alloc: {}\nprev dealloc: {}\n\n",
-        m_mm.m_prevAllocated, m_mm.m_prevDeallocated);
+      FTRACE(1, "new: reset alloc: {} prev dealloc: {}\n\n",
+        m_mm.m_resetAllocated, m_mm.m_resetDeallocated);
     }
   }
 
@@ -74,6 +78,8 @@ struct MemoryManager::MaskAlloc {
 
 private:
   MemoryManager& m_mm;
+  const uint64_t startAlloc;
+  const uint64_t startDealloc;
 };
 
 struct MemoryManager::SuppressOOM {

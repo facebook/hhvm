@@ -166,8 +166,8 @@ void MemoryManager::traceStats(const char* event) {
            m_stats.mmUsage, m_stats.extUsage);
     FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
            m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
-    FTRACE(1, "total {} prev alloc-dealloc {} cur alloc-dealloc {}\n",
-           m_stats.totalAlloc, m_prevAllocated-m_prevDeallocated,
+    FTRACE(1, "total {} reset alloc-dealloc {} cur alloc-dealloc {}\n",
+           m_stats.totalAlloc, m_resetAllocated - m_resetDeallocated,
            *m_allocated - *m_deallocated);
   } else {
     FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
@@ -192,8 +192,8 @@ void MemoryManager::resetAllStats() {
   m_enableStatsSync = false;
   if (Trace::enabled) t_heap_id = ++s_heap_id;
   if (s_statsEnabled) {
-    m_prevDeallocated = *m_deallocated;
-    m_prevAllocated = *m_allocated;
+    m_resetDeallocated = *m_deallocated;
+    m_resetAllocated = *m_allocated;
   }
   traceStats("resetAllStats post");
 }
@@ -212,8 +212,8 @@ void MemoryManager::resetExternalStats() {
          (m_stats.extUsage == 0 && m_stats.totalAlloc == 0));
   m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
-    m_prevDeallocated = *m_deallocated;
-    m_prevAllocated = *m_allocated - m_stats.capacity;
+    m_resetDeallocated = *m_deallocated;
+    m_resetAllocated = *m_allocated - m_stats.capacity;
     // By subtracting capcity here, the next call to refreshStatsImpl()
     // will correctly include m_stats.capacity in extUsage and totalAlloc.
   }
@@ -268,41 +268,35 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // thread but deallocated on this one, it is possible for these numbers to
     // go negative.
     auto curUsage = curAllocated - curDeallocated;
-    auto prevUsage = m_prevAllocated - m_prevDeallocated;
+    auto resetUsage = m_resetAllocated - m_resetDeallocated;
 
     FTRACE(1, "heap-id {} Before stats sync: ", t_heap_id);
-    FTRACE(1, "prev alloc-dealloc {} cur alloc-dealloc: {} alloc-change: {} ",
-      prevUsage, curUsage, curAllocated - m_prevAllocated);
-    FTRACE(1, "dealloc-change: {} ", curDeallocated - m_prevDeallocated);
+    FTRACE(1, "reset alloc-dealloc {} cur alloc-dealloc: {} alloc-change: {} ",
+      resetUsage, curUsage, curAllocated - m_resetAllocated);
+    FTRACE(1, "dealloc-change: {} ", curDeallocated - m_resetDeallocated);
     FTRACE(1, "mm usage {} extUsage {} totalAlloc {} capacity {}\n",
       stats.mmUsage, stats.extUsage, stats.totalAlloc, stats.capacity);
 
-    // Subtract the old usage adjustment (prevUsage) and add the current one
-    // (curUsage) to arrive at the new combined usage number.
-    stats.extUsage += curUsage - prevUsage;
+    // External usage (allocated-deallocated) since the last resetStats().
+    stats.extUsage = curUsage - resetUsage;
 
-    // Accumulate the increase in allocation volume since the last refresh.
+    // Calculate the allocation volume since the last reset.
     // We need to do the calculation instead of just setting it to curAllocated
-    // because of the MaskAlloc capability.
-    stats.totalAlloc += curAllocated - m_prevAllocated;
-    if (live) {
-      m_prevAllocated = curAllocated;
-      m_prevDeallocated = curDeallocated;
-    }
+    // because of the MaskAlloc capability, which updates m_resetAllocated.
+    stats.totalAlloc = curAllocated - m_resetAllocated;
 
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       t_heap_id, stats.extUsage, stats.totalAlloc);
   }
   assert(stats.limit > 0);
-  if (live && stats.usage() > stats.limit && m_couldOOM) {
+  auto usage = stats.usage();
+  if (live && usage > stats.limit && m_couldOOM) {
     refreshStatsHelperExceeded();
   }
-  if (stats.usage() > stats.peakUsage) {
-    if (live && stats.usage() > m_memThresholdCallbackPeakUsage) {
-      m_memThresholdCallbackPeakUsage = SIZE_MAX;
-      setSurpriseFlag(MemThresholdFlag);
-    }
-    stats.peakUsage = stats.usage();
+  stats.peakUsage = std::max(stats.peakUsage, usage);
+  if (live && usage > m_memThresholdCallbackPeakUsage) {
+    m_memThresholdCallbackPeakUsage = SIZE_MAX;
+    setSurpriseFlag(MemThresholdFlag);
   }
   if (live && m_statsIntervalActive) {
     stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, stats.usage());

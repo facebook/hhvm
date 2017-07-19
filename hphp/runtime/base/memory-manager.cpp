@@ -125,7 +125,7 @@ MemoryManager::MemoryManager() {
   threadStats(m_allocated, m_deallocated);
 #endif
   FTRACE(1, "heap-id {} new MM pid {}\n", t_heap_id, getpid());
-  resetStatsImpl(true);
+  resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup
   // make the circular-lists empty.
@@ -159,62 +159,65 @@ void MemoryManager::resetRuntimeOptions() {
   MemoryManager::TlsWrapper::getCheck(); // new MemoryManager()
 }
 
-void MemoryManager::resetStatsImpl(bool isInternalCall) {
-  auto traceStats = [&](const char* when) {
-    FTRACE(1, "heap-id {} resetStatsImpl({}) {}: ",
-           t_heap_id, isInternalCall, when);
-    if (use_jemalloc) {
-      FTRACE(1, "mm-usage {} extUsage {} ",
-             m_stats.mmUsage, m_stats.extUsage);
-      FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
-             m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
-      FTRACE(1, "total {} prev alloc-dealloc {} cur alloc-dealloc {}\n",
-             m_stats.totalAlloc, m_prevAllocated-m_prevDeallocated,
-             *m_allocated - *m_deallocated);
-    } else {
-      FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
-             m_stats.usage(), m_stats.capacity,
-             m_stats.peakUsage, m_stats.peakCap);
-    }
-  };
-  traceStats("pre");
-  if (isInternalCall) {
-    m_statsIntervalActive = false;
-    m_stats.mmUsage = 0;
-    m_stats.extUsage = 0;
-    m_stats.capacity = 0;
-    m_stats.peakUsage = 0;
-    m_stats.peakCap = 0;
-    m_stats.totalAlloc = 0;
-    m_stats.peakIntervalUsage = 0;
-    m_stats.peakIntervalCap = 0;
-    m_enableStatsSync = false;
-    if (Trace::enabled) t_heap_id = ++s_heap_id;
-  } else if (!m_enableStatsSync) {
-    // These are only set by the jemalloc stats sync which we don't enable until
-    // after this has been called.
-    assert(m_stats.totalAlloc == 0);
-    assert(m_stats.extUsage == 0);
-
-    // The effect of this call is simply to ignore anything we've done *outside*
-    // the MemoryManager allocator after we initialized, to avoid attributing
-    // shared structure initialization that happens during hphp_thread_init()
-    // to this session.
-
-    // We don't want to clear the other values because we do already have some
-    // small-sized allocator usage and live slabs and wiping now will result in
-    // negative values when we try to reconcile our accounting with jemalloc.
-
-    m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
+void MemoryManager::traceStats(const char* event) {
+  FTRACE(1, "heap-id {} {} ", t_heap_id, event);
+  if (use_jemalloc) {
+    FTRACE(1, "mm-usage {} extUsage {} ",
+           m_stats.mmUsage, m_stats.extUsage);
+    FTRACE(1, "capacity {} peak usage {} peak capacity {} ",
+           m_stats.capacity, m_stats.peakUsage, m_stats.peakCap);
+    FTRACE(1, "total {} prev alloc-dealloc {} cur alloc-dealloc {}\n",
+           m_stats.totalAlloc, m_prevAllocated-m_prevDeallocated,
+           *m_allocated - *m_deallocated);
+  } else {
+    FTRACE(1, "usage: {} capacity: {} peak usage: {} peak capacity: {}\n",
+           m_stats.usage(), m_stats.capacity,
+           m_stats.peakUsage, m_stats.peakCap);
   }
+}
+
+// Reset all memory stats counters, both internal and external; intended to
+// be used between requests when the whole heap is being reset.
+void MemoryManager::resetAllStats() {
+  traceStats("resetAllStats pre");
+  m_statsIntervalActive = false;
+  m_stats.mmUsage = 0;
+  m_stats.extUsage = 0;
+  m_stats.capacity = 0;
+  m_stats.peakUsage = 0;
+  m_stats.peakCap = 0;
+  m_stats.totalAlloc = 0;
+  m_stats.peakIntervalUsage = 0;
+  m_stats.peakIntervalCap = 0;
+  m_enableStatsSync = false;
+  if (Trace::enabled) t_heap_id = ++s_heap_id;
+  if (s_statsEnabled) {
+    m_prevDeallocated = *m_deallocated;
+    m_prevAllocated = *m_allocated;
+  }
+  traceStats("resetAllStats post");
+}
+
+// Reset external allocation counters, but preserve MemoryManager counters.
+// The effect of this call is simply to ignore anything we've done *outside*
+// the MemoryManager allocator after we initialized, to avoid attributing
+// shared structure initialization that happens during hphp_thread_init()
+// to this session. Intended to be used once per request, early in the request
+// lifetime before PHP execution begins.
+void MemoryManager::resetExternalStats() {
+  traceStats("resetExternalStats pre");
+  // extUsage and totalAlloc are only set by refreshStatsImpl, which we don't
+  // enable until after this has been called.
+  assert(m_enableStatsSync ||
+         (m_stats.extUsage == 0 && m_stats.totalAlloc == 0));
+  m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
     m_prevDeallocated = *m_deallocated;
     m_prevAllocated = *m_allocated - m_stats.capacity;
-    // because we accounted for internal allocations here, the next call to
-    // refreshStatsImpl() will correctly update extUsage and totalAlloc
-    // without double-counting or dropping anything.
+    // By subtracting capcity here, the next call to refreshStatsImpl()
+    // will correctly include m_stats.capacity in extUsage and totalAlloc.
   }
-  traceStats("post");
+  traceStats("resetExternalStats post");
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
@@ -246,7 +249,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // Incrementally incorporate the difference between the previous and current
   // deltas into the memory usage statistic.  For reference, the total
   // malloced memory usage could be calculated as such, if delta0 were
-  // recorded in resetStatsImpl():
+  // recorded in resetAllStats():
   //
   //   int64 musage = delta - delta0;
   //
@@ -371,7 +374,7 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;
-  resetStatsImpl(true);
+  resetAllStats();
   setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
   if (debug) resetEagerGC();

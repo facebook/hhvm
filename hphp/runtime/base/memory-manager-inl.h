@@ -402,8 +402,6 @@ inline void MemoryManager::forceOOM() {
   }
 }
 
-inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
-
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::empty() const {

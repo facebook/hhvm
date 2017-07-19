@@ -1005,8 +1005,8 @@ private:
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
-
-  void resetStatsImpl(bool isInternalCall);
+  void resetAllStats();
+  void traceStats(const char* when);
 
   static void initHole(void* ptr, uint32_t size);
   void initHole();

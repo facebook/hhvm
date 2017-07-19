@@ -17,6 +17,7 @@
 
 module TokenKind = Full_fidelity_token_kind
 module MinimalTrivia = Full_fidelity_minimal_trivia
+module TriviaKind = Full_fidelity_trivia_kind
 
 type t = {
   kind: TokenKind.t;
@@ -53,6 +54,10 @@ let leading token =
 
 let trailing token =
   token.trailing
+
+let has_leading_end_of_line token =
+  Core.List.exists token.leading
+    ~f:(fun trivia ->  MinimalTrivia.kind trivia = TriviaKind.EndOfLine)
 
 let to_json token =
   let open Hh_json in

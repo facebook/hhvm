@@ -21,7 +21,6 @@ slow/class_constant/abstract_const2.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
 slow/class_constant/reflective_constant.php
-slow/class_method/742.php
 slow/class_method/class_alias.php
 slow/class_type_constant/type_constant.php
 slow/class_type_constant/type_constant2.php
@@ -282,7 +281,6 @@ slow/object_invoke_method/773.php
 slow/object_magic_method/override_magic2.php
 slow/object_method/724.php
 slow/object_method/735.php
-slow/object_method/736.php
 slow/object_property/696.php
 slow/object_property/basesc-input.php
 slow/object_property_expression/798.php

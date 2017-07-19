@@ -1653,6 +1653,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
       instr_cgetl (get_local env id);
       instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
+  | A.Obj_get (obj, (_, A.String (_, id)), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
       emit_object_expr env obj;

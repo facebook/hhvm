@@ -56,3 +56,14 @@ let pop_scope context token_kind_list =
   | [ ] when Core.List.is_empty token_kind_list -> [ ]
   | _ -> failwith ("Error: attempted to pop a list of token kinds that " ^
     "wasn't on top of the context.")
+
+let print_expected context =
+  Printf.printf "There are %d scopes on the stack. %!" (Core.List.length context);
+  Printf.printf "The tokens we are expecting, from sooner to later, are:\n%!";
+  let print_token_kind token_kind =
+    Printf.printf "'%s', %!" (TokenKind.to_string token_kind); in
+  let print_scope scope =
+    Printf.printf ">> %!";
+    Scope.iter print_token_kind scope;
+    Printf.printf "\n%!"; in
+  Core.List.iter context print_scope

@@ -62,6 +62,9 @@ let pop_scope parser token_kind_list =
   let new_context = Context.pop_scope parser.context token_kind_list in
   with_context parser new_context
 
+let print_expected parser =
+  Context.print_expected parser.context
+
 (** Precedence functions **)
 
 let with_precedence parser precedence =

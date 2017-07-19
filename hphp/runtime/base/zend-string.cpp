@@ -1800,6 +1800,11 @@ String string_number_format(double d, int dec,
 
   /* allow for thousand separators */
   if (!thousand_sep.empty()) {
+    if (integral + thousand_sep.size() * ((integral-1) / 3) < integral) {
+      /* overflow */
+      raise_error("String overflow");
+    }
+
     integral += ((integral-1) / 3) * thousand_sep.size();
   }
 
@@ -1809,6 +1814,10 @@ String string_number_format(double d, int dec,
     reslen += dec;
 
     if (!dec_point.empty()) {
+      if (reslen + dec_point.size() < dec_point.size()) {
+        /* overflow */
+        raise_error("String overflow");
+      }
       reslen += dec_point.size();
     }
   }

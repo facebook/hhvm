@@ -46,3 +46,13 @@ let expect context token_kind_list =
 
 let expect_in_new_scope context token_kind_list =
   Scope.of_list token_kind_list :: context
+
+(* Removes the top scope from the context if and only if it contains exactly
+ * the same elements as the given token_kind_list. *)
+let pop_scope context token_kind_list =
+  match context with
+  | current :: others
+    when Scope.equal current (Scope.of_list token_kind_list) -> others
+  | [ ] when Core.List.is_empty token_kind_list -> [ ]
+  | _ -> failwith ("Error: attempted to pop a list of token kinds that " ^
+    "wasn't on top of the context.")

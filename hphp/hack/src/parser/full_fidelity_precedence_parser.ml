@@ -55,8 +55,12 @@ let expect_in_new_scope parser token_kind_list =
 let expects parser token_kind =
   Context.expects parser.context token_kind
 
-  let expects_here parser token_kind =
-    Context.expects_here parser.context token_kind
+let expects_here parser token_kind =
+  Context.expects_here parser.context token_kind
+
+let pop_scope parser token_kind_list =
+  let new_context = Context.pop_scope parser.context token_kind_list in
+  with_context parser new_context
 
 (** Precedence functions **)
 

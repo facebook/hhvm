@@ -58,4 +58,8 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
   let expects_here parser token_kind =
     Context.expects_here parser.context token_kind
 
+  let pop_scope parser token_kind_list =
+    let new_context = Context.pop_scope parser.context token_kind_list in
+    with_context parser new_context
+
 end

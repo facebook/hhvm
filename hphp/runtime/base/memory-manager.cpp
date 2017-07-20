@@ -651,9 +651,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
-  if (UNLIKELY(m_stats.usage() > m_stats.limit)) {
-    refreshStats();
-  }
+  refreshStats();
   requestGC();
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   auto mem = m_heap.allocSlab(kSlabSize);
@@ -751,9 +749,7 @@ inline void MemoryManager::updateBigStats() {
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
   if (debug) requestEagerGC();
-  if (use_jemalloc || UNLIKELY(m_stats.usage() > m_stats.limit)) {
-    refreshStats();
-  }
+  refreshStats();
 }
 
 template<MemoryManager::MBS Mode> NEVER_INLINE

@@ -395,9 +395,12 @@ inline bool MemoryManager::stopStatsInterval() {
 }
 
 inline bool MemoryManager::preAllocOOM(int64_t size) {
-  if (m_couldOOM && m_stats.usage() + size > m_stats.limit) {
-    refreshStatsHelperExceeded();
-    return true;
+  if (m_couldOOM) {
+    auto stats = getStatsCopy();
+    if (stats.usage() + size > stats.limit) {
+      refreshStatsHelperExceeded();
+      return true;
+    }
   }
   return false;
 }

@@ -512,11 +512,12 @@ void MemoryManager::requestGC() {
 }
 
 void MemoryManager::updateNextGc() {
-  auto mm_limit = m_stats.limit - m_stats.auxUsage();
-  int64_t delta = (mm_limit - m_stats.mmUsage) *
+  auto stats = getStatsCopy();
+  auto mm_limit = stats.limit - stats.auxUsage();
+  int64_t delta = (mm_limit - stats.mmUsage) *
                   RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
-  m_nextGc = m_stats.mmUsage + delta;
+  m_nextGc = stats.mmUsage + delta;
 }
 
 void MemoryManager::collect(const char* phase) {

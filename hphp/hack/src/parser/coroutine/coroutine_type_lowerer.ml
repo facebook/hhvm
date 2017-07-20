@@ -55,6 +55,7 @@ let rewrite_anon_function_return_type
 
 (* TODO: We might consider making the "colon ; return-type ;" pattern into its
 own parse tree node, since it crops up in a lot of places. *)
+(* TODO: If the lambda return type is missing, could we just keep it missing? *)
 let rewrite_lambda_return_type
     ({ lambda_colon; lambda_type; _; } as node) =
   let lambda_type = rewrite_return_type lambda_type in

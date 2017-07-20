@@ -135,6 +135,13 @@ let lower_coroutine_function
       new_body in
   (closure_syntax, new_function_syntax)
 
+let fix_up_lambda_body lambda_body =
+  match syntax lambda_body with
+  | CompoundStatement _ -> lambda_body
+  | _ ->
+    let stmt = make_return_statement_syntax lambda_body in
+    make_compound_statement_syntax [stmt]
+
 let lower_coroutine_functions_and_types
     parents
     current_node
@@ -162,6 +169,7 @@ let lower_coroutine_functions_and_types
     } as lambda) when not @@ is_missing lambda_coroutine ->
     let context =
       Coroutine_context.make_from_context parents (Some lambda_count) in
+    let lambda_body = fix_up_lambda_body lambda_body in
     let (lambda, closure_syntax) =
       lower_coroutine_lambda context lambda_signature lambda_body lambda in
     ((closure_syntax :: closures, (lambda_count + 1)),

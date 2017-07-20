@@ -249,7 +249,7 @@ String HHVM_FUNCTION(sodium_crypto_scalarmult,
                      const String& p) {
   if (
     n.size() != crypto_scalarmult_SCALARBYTES ||
-    p.size() != crypto_scalarmult_SCALARBYTES
+    p.size() != crypto_scalarmult_BYTES
   ) {
     throwSodiumException(s_crypto_scalarmult_size);
   }

@@ -39,8 +39,6 @@ In gen2
 ** suspend genList
 ** suspend genFoo
 ** enter HH\Asio\join
-** enter Exception::__construct
-** exit Exception::__construct
 ** resume genBar
 ** enter error_log
 Finished in genBar

@@ -10,6 +10,10 @@ namespace __SystemLib {
 trait BaseException {
   require implements Throwable;
 
+  /**
+   * throwable_init() and createAndConstructThrowable() depend on the order
+   * of properties below:
+   */
   protected $message = '';  // exception message
   private $string = '';     // php5 has this, we don't use it
   protected $code = 0;      // user defined exception code

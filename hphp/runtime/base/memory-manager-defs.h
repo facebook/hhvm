@@ -58,7 +58,8 @@ namespace HPHP {
  * the kSlabSize bytes into equal sized LineSize-byte "lines". Optimal LineSize
  * appears to be near average object size.
  */
-template<size_t LineSize> struct SlabHeader: FreeNode {
+template<size_t LineSize>
+struct alignas(kSmallSizeAlign) SlabHeader: FreeNode {
   static_assert((LineSize & (LineSize-1)) == 0, "LineSize must be power of 2");
 
   char* init() {
@@ -180,7 +181,7 @@ private:
   // -127..-1    line i is inside last object starting on line i+d
   // -128        saturation. object starts on or before i+d
   int8_t xmap_[NumLines];
-} __attribute__((__aligned__(kSmallSizeAlign)));
+};
 
 // LineSize of 256 was chosen experimentally as tradeoff between
 // SlabHeader overhead and lookup costs.

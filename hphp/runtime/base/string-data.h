@@ -289,10 +289,17 @@ struct StringData final : MaybeCountable,
   void checkStack() const;
 
   /*
-   * Access to the string's data as a character array.
+   * Access to the string's data as a null-terminated character array.
    *
-   * Please try to prefer slice() in new code, instead of assuming
-   * this is null terminated.
+   * Please try to prefer slice() in new code.
+   *
+   * The following extensions depend on the null terminator for correctness,
+   * and the lack of implicit copying (not perfect for Strings, but
+   * best-effort):
+   *
+   * - libsodium
+   * - mcrypt
+   * - openssl
    */
   const char* data() const;
 

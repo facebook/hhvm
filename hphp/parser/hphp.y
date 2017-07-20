@@ -808,6 +808,14 @@ top_statement:
     '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
                                            &Parser::useConst);
                                          _p->nns(T_USE); $$.reset();}
+  | T_USE T_NAMESPACE group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useNamespace);
+                                         _p->nns(T_USE); $$.reset();}
+  | T_USE T_TYPE group_use_prefix
+    '{' use_declarations '}' ';'       { _p->onGroupUse($3.text(), $5,
+                                           &Parser::useClass);
+                                         _p->nns(T_USE); $$.reset();}
   | constant_declaration ';'           { _p->nns();
                                          _p->finishStatement($$, $1); $$ = 1;}
 ;

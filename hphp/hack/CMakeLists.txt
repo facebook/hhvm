@@ -47,8 +47,8 @@ if (HACK_ONLY_BUILD AND NOT PC_SQLITE3_FOUND)
 endif()
 
 # This is totally the wrong way to do this, but I am tired of fighting with
-# build systems and don't really care to make this work the right way. libelf,
-# lz4 and sqlite3 all we need right now anyways.
+# build systems and don't really care to make this work the right way.
+# lz4 and sqlite3 are all we need right now anyways.
 unset(extra_include_paths)
 unset(extra_lib_paths)
 unset(extra_cc_flags)
@@ -62,19 +62,7 @@ ELSE()
   list(APPEND extra_include_paths ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 ENDIF()
 
-foreach(lib ${LIBELF_INCLUDE_DIRS})
-  list(APPEND extra_include_paths ${lib})
-endforeach()
-if(ELF_GETSHDRSTRNDX)
-  list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
-endif()
-
 list(APPEND extra_cc_flags -pthread)
-
-foreach(lib ${LIBELF_LIBRARIES})
-  get_filename_component(pth ${lib} PATH)
-  list(APPEND extra_lib_paths ${pth})
-endforeach()
 
 if(LZ4_FOUND)
   list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})

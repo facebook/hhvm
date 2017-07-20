@@ -18,18 +18,14 @@ ROOT=$(shell pwd)
 ifeq ($(OS), Linux)
   INOTIFY=third-party/inotify
   FSNOTIFY=fsnotify_linux
-  ELF=elf
   RT=rt
   FRAMEWORKS=
-  SECTCREATE=
 endif
 ifeq ($(OS), Darwin)
   INOTIFY=fsevents
   FSNOTIFY=fsnotify_darwin
-  ELF=
   RT=
   FRAMEWORKS=CoreServices CoreFoundation
-  SECTCREATE=-cclib -sectcreate -cclib __text -cclib hhi -cclib $(ROOT)/../bin/hhi.tar.gz
 endif
 
 ifeq ($(BYTECODE), 1)
@@ -93,8 +89,6 @@ MODULES=\
 
 NATIVE_C_FILES=\
   heap/hh_shared.c\
-  hhi/hhi_elf.c\
-  hhi/hhi_win32res_stubs.c\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
@@ -114,7 +108,6 @@ OCAML_LIBRARIES=\
 
 NATIVE_LIBRARIES=\
   pthread\
-  $(ELF)\
   $(RT)
 
 COPIED_HHIS=\
@@ -147,21 +140,21 @@ EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
 
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LINK) \
-	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS) $(SECTCREATE)
+	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS)
 # Function to recursively find files, eg: $(call rwildcard,dir/to/look/in/,*.c)
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
-all: build-hhi-archive build-hack copy-hack-files
-all-ocp: build-hhi-archive build-hack-with-ocp copy-hack-files-ocp
+all: build-hack copy-hack-files
+all-ocp: build-hack-with-ocp copy-hack-files-ocp
 
 clean:
 	$(OCAMLBUILD) -clean
 	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
-build-hack: $(TARGETS) build-hhi-archive
+build-hack: $(TARGETS)
 
-build-hack-with-ocp: build-hhi-archive _build/utils/get_build_id.gen.o
+build-hack-with-ocp: _build/utils/get_build_id.gen.o
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
 
@@ -178,7 +171,7 @@ space +=
 $(TARGETS): $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
 	# we place it here to avoid unnecessary rebuilds
-	$(MAKE) build-hack-native-deps build-hhi-archive
+	$(MAKE) build-hack-native-deps
 	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
@@ -203,17 +196,9 @@ _build/ppx/ppx_gen_hhi:
 	mkdir -p $(dir $@)
 	$(OCAMLC) -o $@ -I +compiler-libs ocamlcommon.cma unix.cma ppx/ppx_gen_hhi.ml
 
-build-hhi-archive:
-	mkdir -p ../bin
-	$(MAKE) -C ../hhi
-
 copy-hack-files: build-hack
 	mkdir -p ../bin
-ifeq ($(OS)$(BYTECODE), Linux)
-	objcopy --add-section hhi=../bin/hhi.tar.gz _build/hh_server.$(TARGET_EXT) ../bin/hh_server
-else
 	cp _build/hh_server.$(TARGET_EXT) ../bin/hh_server
-endif
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
@@ -228,11 +213,7 @@ copy-hhis: $(COPIED_HHIS)
 
 copy-hack-files-ocp: build-hack-with-ocp
 	mkdir -p ../bin
-ifeq ($(OS), Linux)
-	objcopy --add-section hhi=../bin/hhi.tar.gz ../_obuild/hh_server/hh_server.asm ../bin/hh_server
-else
 	cp ../_obuild/hh_server/hh_server.asm ../bin/hh_server
-endif
 	cp ../_obuild/hh_client/hh_client.asm ../bin/hh_client
 	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
 	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt

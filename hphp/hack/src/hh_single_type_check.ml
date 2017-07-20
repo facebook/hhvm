@@ -48,7 +48,7 @@ type options = {
 }
 
 (* Canonical builtins from our hhi library *)
-let hhi_builtins = [%hhi_contents]
+let hhi_builtins = Hhi.get_raw_hhi_contents ()
 
 (* All of the stuff that hh_single_type_check relies on is sadly not contained
  * in the hhi library, so we include a very small number of magic builtins *)

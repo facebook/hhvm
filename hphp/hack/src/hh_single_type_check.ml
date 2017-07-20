@@ -203,16 +203,9 @@ let infer_return tcopt fn info  =
   let inferred_types = Typing_suggest_service.get_inferred_types tcopt files in
   let funs_and_methods = !Typing_suggest.funs_and_methods in
   let () = Typing_suggest.funs_and_methods := [] in
-  let funs_and_methods =
-    List.filter
-      ~f:(fun (pos, _) -> Relative_path.Map.mem fast (Pos.filename pos))
-      funs_and_methods
-  in
   let inferred_types =
     List.filter
-      ~f:(fun (_, pos, kind, _) ->
-        (Relative_path.Map.mem fast (Pos.filename pos))
-        && (kind == Typing_suggest.Kreturn))
+      ~f:(fun (_, _, kind, _) -> kind == Typing_suggest.Kreturn)
       inferred_types
   in
   let inferred_types =
@@ -232,8 +225,8 @@ let infer_return tcopt fn info  =
       begin match Pos.compare p1 p2 with
         | 0 -> Printf.printf "%s : %s \n" id (Typing_print.full tenv ty);
                print_returns_with_funs ts_ fs_
-        | x when x > 0 -> print_returns_with_funs ts_ fs
-        | _ -> print_returns_with_funs ts fs_
+        | x when x > 0 -> print_returns_with_funs ts fs_
+        | _ -> print_returns_with_funs ts_ fs
       end
 in
 print_returns_with_funs inferred_types funs_and_methods
@@ -624,7 +617,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       if mode = Suggest
       then Relative_path.Map.iter files_info (suggest_and_print opts);
       if mode = Infer_return_types
-      then Relative_path.Map.iter files_info (infer_return opts);
+      then
+        Option.iter ~f:(infer_return opts filename)
+          (Relative_path.Map.get files_info filename);
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"

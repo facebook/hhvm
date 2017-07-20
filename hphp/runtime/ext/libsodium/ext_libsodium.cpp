@@ -410,6 +410,10 @@ bool HHVM_FUNCTION(sodium_crypto_generichash_update,
   }
 
   crypto_generichash_state state_tmp;
+  SCOPE_EXIT {
+    sodium_memzero(&state_tmp, state_len);
+  };
+
   memcpy(&state_tmp, state.data(), state_len);
   auto result = crypto_generichash_update(
     &state_tmp,
@@ -420,7 +424,6 @@ bool HHVM_FUNCTION(sodium_crypto_generichash_update,
     throwSodiumException(s_crypto_generichash_update_internal_error);
   }
   memcpy(state.mutableData(), &state_tmp, state_len);
-  sodium_memzero(&state_tmp, state_len);
   return true;
 }
 
@@ -463,6 +466,9 @@ String HHVM_FUNCTION(sodium_crypto_generichash_final,
 
   String hash(hash_len, ReserveString);
   crypto_generichash_state state_tmp;
+  SCOPE_EXIT {
+    sodium_memzero(&state_tmp, state_len);
+  };
   memcpy(&state_tmp, state.data(), state_len);
   auto result = crypto_generichash_final(
     &state_tmp,
@@ -963,6 +969,9 @@ String HHVM_FUNCTION(sodium_crypto_kx,
   static_assert(crypto_scalarmult_SCALARBYTES == crypto_kx_SECRETKEYBYTES, "");
 
   unsigned char q[crypto_scalarmult_BYTES];
+  SCOPE_EXIT {
+    sodium_memzero(&q, sizeof q);
+  };
   const auto result = crypto_scalarmult(
     q,
     reinterpret_cast<const unsigned char*>(secretkey.data()),
@@ -974,9 +983,11 @@ String HHVM_FUNCTION(sodium_crypto_kx,
 
   String sharedkey(crypto_kx_BYTES, ReserveString);
   crypto_generichash_state state;
+  SCOPE_EXIT {
+    sodium_memzero(&state, sizeof state);
+  };
   crypto_generichash_init(&state, nullptr, 0, crypto_generichash_BYTES);
   crypto_generichash_update(&state, q, sizeof q);
-  sodium_memzero(q, sizeof q);
   crypto_generichash_update(
     &state,
     reinterpret_cast<const unsigned char*>(client_publickey.data()),

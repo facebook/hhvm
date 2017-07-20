@@ -222,7 +222,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         | Server_hung_up ->
           (Printf.eprintf "hh_server died unexpectedly. Maybe you recently \
           launched a different version of hh_server. Now exiting hh_client.";
-          Exit_status.exit Exit_status.No_server_running)
+          raise Exit_status.(Exit_with No_server_running))
       end;
       (ic, oc)
   | Result.Error e ->

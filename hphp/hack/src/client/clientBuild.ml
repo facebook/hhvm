@@ -54,7 +54,7 @@ let handle_response env ic =
     Printf.fprintf stderr "Unexpected error: %s\n%s%!" e_str backtrace;
     raise e
 
-let main env =
+let main_exn env =
   let build_type = ServerBuild.build_type_of env.build_opts in
   let request_id = env.build_opts.ServerBuild.id in
   HackEventLogger.client_build build_type request_id;
@@ -94,3 +94,9 @@ let main env =
   HackEventLogger.client_build_finish
     ~rev_changed:(svnrev <> old_svnrev) ~build_type ~request_id ~exit_status;
   exit_status
+
+let main env =
+  try main_exn env with
+  | Exit_status.Exit_with Exit_status.No_server_running ->
+    Printf.eprintf "Retrying build...\n";
+    main_exn env

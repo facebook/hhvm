@@ -3,106 +3,120 @@ Semdiff - semantic differencing for hhas
 
 This is a technical overview of how the semdiff tool works.
 
-Version 0.1
+Version 0.2
 
 Introduction
 ============
 
-Semdiff is a standalone testing tool for comparing the hhas output of the hack and hhvm compilers on
-individual source files. Semdiff attempts to establish that two hhas files are behaviourally
-equivalent, i.e. will produce the same observable output in all contexts. It does not take
-differences in resource usage (time, memory) into account. Semdiff's analysis is at the level of
-individual functions/methods. For each pair of functions, it either establishes equivalence or
-fails, which may either be because the functions really are observationally different, or because
-semdiff's analysis is insufficiently powerful to show equivalence. The intention is that semdiff is
-sound - it should report equivalence only if the functions really will always produce the same
-observable results. For obvious computability reasons, semdiff is not complete (nor anywhere near
-it) when run on arbitrary hhas files. However, because the hack compiler was carefully written to
-produce output that is "essentially" the same as hhvm's, we *should* be able to establish
-equivalence of the compilers' outputs on any hack source file. We are just aiming to quotient by
-"trivial" differences.
+Semdiff is a standalone testing tool for comparing the hhas output of the hack
+and hhvm compilers on individual source files. Semdiff attempts to establish
+that two hhas files are behaviourally equivalent, i.e. will produce the same
+observable output in all contexts. It does not take differences in resource
+usage (time, memory) into account. Semdiff's analysis is at the level of
+individual functions/methods. For each pair of functions, it either establishes
+equivalence or fails, which may either be because the functions really are
+observationally different, or because semdiff's analysis is insufficiently
+powerful to show equivalence. The intention is that semdiff is sound - it should
+report equivalence only if the functions really will always produce the same
+observable results. For obvious computability reasons, semdiff is not complete
+(nor anywhere near it) when run on arbitrary hhas files. However, because the
+hack compiler was carefully written to produce output that is "essentially" the
+same as hhvm's, we *should* be able to establish equivalence of the compilers'
+outputs on any hack source file. We are just aiming to quotient by "trivial"
+differences.
 
-In the case that semdiff fails, it reports the positions in the two programs, and the assumed
-relation between their local variables and exception contexts, for which it was unable to establish
-equivalence. It also produces a *syntactic* diff of the two functions.
+In the case that semdiff fails, it reports the positions in the two programs,
+and the assumed relation between their local variables and exception contexts,
+for which it was unable to establish equivalence. It also produces a *syntactic*
+diff of the two functions.
 
-Semdiff first parses the two files, producing elements of the Hhbc_program.t datatype. Corresponding
-functions and classes in the programs are then compared. This comparison involves checking equality
-of flags, parameter names and types and so on, which is boring but straightforward. The interesting
-part is the way in which function bodies - sequences of Hhbc_ast.instructions - are compared, as it
-is here that there is a difference between syntactic and semantic comparisons.
+Semdiff first parses the two files, producing elements of the Hhbc_program.t
+datatype. Corresponding functions and classes in the programs are then compared.
+This comparison involves checking equality of flags, parameter names and types
+and so on, which is boring but straightforward. The interesting part is the way
+in which function bodies - sequences of Hhbc_ast.instructions - are compared, as
+it is here that there is a difference between syntactic and semantic
+comparisons.
 
 The basic idea
 ==============
 
 We start with an oversimplified explanation, which we'll refine later.
 
-Semdiff is essentially a prover for a very simple version of Relational Hoare Logic [1]. Assertions
-in the logic are, roughly, conjunctions of equalities between unnamed locals on the two sides, like
-this (the convention is that unprimed identifiers refer to the first program and primed ones to the
-second):
+Semdiff is essentially a prover for a very simple version of Relational Hoare
+Logic [1]. Assertions in the logic are, roughly, conjunctions of equalities
+between unnamed locals on the two sides, like this (the convention is that
+unprimed identifiers refer to the first program and primed ones to the second):
 
 phi = (_1 = _2') /\ (_2 = _5') /\ (_3 = _3')
 
-Unnamed locals are used as temporaries by the compilers; they do not appear in the source program.
-We do not currently deal with non-trivial relations between named locals because hhbc allows them to
-be accessed via dynamically computed string names (e.g. VGetN), which we cannot easily track. The
-meaning of the assertion above is a relation between the states on the two sides that says local 1
-on the left is equal to local 2 on the right, etc., *and* that everything else (evaluation stack,
-heap, named variables and parameters, the rest of the program, IO history,...) is equal. The
-relation does not constrain the values of unmentioned unnamed locals (though see later for the truth
-here).
+Unnamed locals are used as temporaries by the compilers; they do not appear in
+the source program. We do not currently deal with non-trivial relations between
+named locals because hhbc allows them to be accessed via dynamically computed
+string names (e.g. VGetN), which we cannot easily track. The meaning of the
+assertion above is a relation between the states on the two sides that says
+local 1 on the left is equal to local 2 on the right, etc., *and* that
+everything else (evaluation stack, heap, named variables and parameters, the
+rest of the program, IO history,...) is equal. The relation does not constrain
+the values of unmentioned unnamed locals (though see later for the truth here).
 
-Given two sequences of instructions (prog and prog') and two entry points (pc and pc'), with the
-same lists of parameters, we attempt to show that starting prog at pc and prog at pc' will yield
-equivalent results, in the sense that either both executions will diverge, or they will return
-identical (normal or exceptional) results to their callers, and in either case, the sequences of
-intermediate calls to other functions and input/output operations will be the same. In symbols, our
-initial goal is to show a judgment
+Given two sequences of instructions (prog and prog') and two entry points (pc
+and pc'), with the same lists of parameters, we attempt to show that starting
+prog at pc and prog at pc' will yield equivalent results, in the sense that
+either both executions will diverge, or they will return identical (normal or
+exceptional) results to their callers, and in either case, the sequences of
+intermediate calls to other functions and input/output operations will be the
+same. In symbols, our initial goal is to show a judgment
 
 init = |- pc,pc' : [true]
 
-where true is the assertion with no conjuncts, and [phi] is the relation on program counters that
-relates pc and pc' iff the machine configurations <prog,pc,s> and <prog',pc',s'> yield equivalent
-behaviour for any states s and s' related by phi. (We usually leave prog and prog' implicit when we
-write judgments, since they don't change during a proof.)
+where true is the assertion with no conjuncts, and [phi] is the relation on
+program counters that relates pc and pc' iff the machine configurations
+<prog,pc,s> and <prog',pc',s'> yield equivalent behaviour for any states s and
+s' related by phi. (We usually leave prog and prog' implicit when we write
+judgments, since they don't change during a proof.)
 
-We maintain a set of judgments that have been "assumed" and a set of judgments that are "todo". If
-we can prove all the things in todo then all the things in assumed will be true. To begin with we
-just have an init judgement for each corresponding pair of entry points, which always include pc=0,
-pc'=0 (the others arise from default value initializers, if there are any). We proceed by picking
-some pc,pc' : [phi] from todo, looking at the instructions prog.pc and prog'.pc' and on the basis of
-what we find there, either
+We maintain a set of judgments that have been "assumed" and a set of judgments
+that are "todo". If we can prove all the things in todo then all the things in
+assumed will be true. To begin with we just have an init judgement for each
+corresponding pair of entry points, which always include pc=0, pc'=0 (the others
+arise from default value initializers, if there are any). We proceed by picking
+some pc,pc' : [phi] from todo, looking at the instructions prog.pc and prog'.pc'
+and on the basis of what we find there, either
  (1) failing: we can't show equivalence, or
- (2) succeeding on this goal: we have established pc,pc':[phi], so go back pick something else from
-todo, or
- (3) adding pc,pc':[phi] to assumed, and generating new obligations that are added to todo.
+ (2) succeeding on this goal: we have established pc,pc':[phi], so go back and
+ pick something else from todo, or
+ (3) adding pc,pc':[phi] to assumed, and generating new obligations that are
+ added to todo.
 
-If there's nothing left to pick from todo, we're done and have established everything in assumed,
-including our initial goals.
+If there's nothing left to pick from todo, we're done and have established
+everything in assumed, including our initial goals.
 
-A crucial part of this algorithm is that if the thing we are trying to established is implied by
-what we have already assumed, then we are in case (2) - we've nothing more to do for that goal.
-Taken with the fact that we add things that we are trying to prove to assumed in case (3), one could
-be forgiven for wondering whether we're indulging in circular reasoning. The answer is that we are,
-but it's the good, sound kind! That relies on the fact that [.] is suitably well-behaved, and can be
-explained using step-indexing, coinduction, or domain theory [2,3,4], but I'll omit the the details
-here - it's essentially the same as the justification for loop invariants in ordinary Hoare Logic.
+A crucial part of this algorithm is that if the thing we are trying to
+established is implied by what we have already assumed, then we are in case (2)-
+we've nothing more to do for that goal. Taken with the fact that we add things
+that we are trying to prove to assumed in case (3), one could be forgiven for
+wondering whether we're indulging in circular reasoning. The answer is that we
+are, but it's the good, sound kind! That relies on the fact that [.] is suitably
+well-behaved, and can be explained using step-indexing, coinduction, or domain
+theory [2,3,4], but I'll omit the the details here - it's essentially the same
+as the justification for loop invariants in ordinary Hoare Logic.
 
-The details of how we decide whether we are in case (1), (2) or (3), and what we do in case (3), can
-be expressed using inference rules for deducing judgments Gamma |- pc,pc':[phi], where Gamma is the
-set of assumptions. For example
+The details of how we decide whether we are in case (1), (2) or (3), and what we
+do in case (3), can be expressed using inference rules for deducing judgments
+Gamma |- pc,pc':[phi], where Gamma is the set of assumptions. For example
 
  prog.pc = RetV   prog'.pc' = RetV
  ---------------------------------
       Gamma |- pc,pc' : [phi]
 
-This is a case (2) rule. It says that if both program counters point to RetV instructions, then we
-will get equal behaviour if the states are related by any phi, and irrespective of Gamma. The reason
-this is valid is that any phi in our assertion language represents a relation that says that the two
-evaluation stacks are equal, and so are the heaps and the rest of the program. So we'll return the
-same value to the same code on either side (or produce the same error). There are similar rules for
-Exit and Fatal.
+This is a case (2) rule. It says that if both program counters point to RetV
+instructions, then we will get equal behaviour if the states are related by any
+phi, and irrespective of Gamma. The reason this is valid is that any phi in our
+assertion language represents a relation that says that the two evaluation
+stacks are equal, and so are the heaps and the rest of the program. So we'll
+return the same value to the same code on either side (or produce the same
+error). There are similar rules for Exit and Fatal.
 
 The rule for using an assumption is straightforward, and has no premisses:
 
@@ -115,9 +129,10 @@ and we can also use logical implication:
   ---------------------------------------
          Gamma |- pc,pc':[phi2]
 
-The contravariance is caused by [.]: if we get equal behaviour when the states are related by phi1,
-and phi2 logically implies phi1, then we get equal behaviour when the states are related by phi2.
-(This is like a form of Hoare Logic for continuation-passing, in which we only have preconditions.)
+The contravariance is caused by [.]: if we get equal behaviour when the states
+are related by phi1, and phi2 logically implies phi1, then we get equal
+behaviour when the states are related by phi2. (This is like a form of Hoare
+Logic for continuation-passing, in which we only have preconditions.)
 
 Here's an example with a real premiss:
 
@@ -125,21 +140,22 @@ Here's an example with a real premiss:
  ---------------------------------------------------------------------------
                           Gamma |- pc,pc' : [phi]
 
-This is an example of case (3). If both pcs point to Dup, then we'll get equal behaviour for
-phi-related states if we can show that we get equal behaviour from the successor pcs from
-phi-related states. Note that we add the extra assumption pc,pc':[phi] to Gamma for the subproof.
-The assertion phi is the same because we haven't touched any locals, and if the stacks were the same
-before the Dup instructions, they'll be the same after as well.
+This is an example of case (3). If both pcs point to Dup, then we'll get equal
+behaviour for phi-related states if we can show that we get equal behaviour from
+the successor pcs from phi-related states. Note that we add the extra assumption
+pc,pc':[phi] to Gamma for the subproof. The assertion phi is the same because we
+haven't touched any locals, and if the stacks were the same before the Dup
+instructions, they'll be the same after as well.
 
 Similarly:
 
- prog.pc = String s   prog'.pc'=String s   Gamma; pc,pc':[phi] |- pc+1,pc'+1:[phi]
- ---------------------------------------------------------------------------------
+ prog.pc = String s  prog'.pc'=String s  Gamma; pc,pc':[phi] |- pc+1,pc'+1:[phi]
+ -------------------------------------------------------------------------------
                               Gamma |- pc,pc' : [phi]
 
-Note that the string literal s has to be the same on both sides for the rule to apply. There are
-many "boring" rules of this form for instructions that don't affect locals or control flow in an
-interesting way.
+Note that the string literal s has to be the same on both sides for the rule to
+apply. There are many "boring" rules of this form for instructions that don't
+affect locals or control flow in an interesting way.
 
 Here's a rule dealing with an instruction that reads an unnamed local variable:
 
@@ -148,22 +164,25 @@ Here's a rule dealing with an instruction that reads an unnamed local variable:
 -----------------------------------------------------------------
                         Gamma |- pc,pc' : [phi]
 
-Now we're using the relation phi. The two CGetL instructions will behave the same provided that the
-contents of the potentially different local variables on the two sides are known to be equal. Other
-instructions that read are dealt with in the same way.
+Now we're using the relation phi. The two CGetL instructions will behave the
+same provided that the contents of the potentially different local variables on
+the two sides are known to be equal. Other instructions that read are dealt with
+in the same way.
 
-The way we ever get any relations to use is from instructions that write to local variables, e.g.
+The way we ever get any relations to use is from instructions that write to
+local variables, e.g.
 
  prog.pc = SetL _l     prog'.pc' = SetL _l'
  Gamma; pc,pc':[phi] |- pc+1,pc'+1:[phi + _l=_l']
 --------------------------------------------------
                Gamma |- pc,pc' : [phi]
 
-Here, phi+_l=_l' means phi with any existing equalities involving _l or _l' removed, and the
-equality _l=_l' conjoined. When we arrive at pc,pc', the two stacks, and in particular their top
-values, will be equal. So at pc+1,pc'+1, we additionally know _l=_l' because we've just assigned the
-same value to them. But it's important not to forget the removal, since we might also have known
-_l=_l'' at pc,pc', but that could be invalidated by the SetL _l.
+Here, phi+_l=_l' means phi with any existing equalities involving _l or _l'
+removed, and the equality _l=_l' conjoined. When we arrive at pc,pc', the two
+stacks, and in particular their top values, will be equal. So at pc+1,pc'+1, we
+additionally know _l=_l' because we've just assigned the same value to them. But
+it's important not to forget the removal, since we might also have known _l=_l''
+at pc,pc', but that could be invalidated by the SetL _l.
 
 Some instructions both read and write:
 
@@ -173,9 +192,10 @@ Some instructions both read and write:
  ---------------------------------------------------------------
                        Gamma |- pc,pc' : [phi]
 
-We have to check that _l and _l' are equal before the operation, and assert that they are equal
-afterwards. Note that it isn't sound to just leave phi alone in the premiss, because (as above)
-other equalities involving _l or _l' might have been invalidated.
+We have to check that _l and _l' are equal before the operation, and assert that
+they are equal afterwards. Note that it isn't sound to just leave phi alone in
+the premiss, because (as above) other equalities involving _l or _l' might have
+been invalidated.
 
 Control flow instructions can sometimes be dealt with one side at a time:
 
@@ -183,10 +203,11 @@ Control flow instructions can sometimes be dealt with one side at a time:
  ----------------------------------------------------------------------
                              Gamma |- pc,pc' : [phi]
 
-we just follow the jump instruction on the left and carry on comparing. This allows the control flow
-on the two sides to be slightly different.
+we just follow the jump instruction on the left and carry on comparing. This
+allows the control flow on the two sides to be slightly different.
 
-But conditional branches have to be paired up, which generates two further obligations:
+But conditional branches have to be paired up, which generates two further
+obligations:
 
   prog.pc = JmpZ L        prog.pc2 = L:
   prog'.pc' = JmpZ L'     prog'.pc2' = L':
@@ -195,51 +216,57 @@ But conditional branches have to be paired up, which generates two further oblig
  ----------------------------------------------------
                  Gamma |- pc,pc' : [phi]
 
-Because we know the stacks are equal, we know that either both JmpZs will fall through, or they'll
-both take the branch, and we have to check for equivalent behaviour in both cases to know we get
-equivalent behaviour from the jump instructions. Switch statements generate an obligation for each
-case.
+Because we know the stacks are equal, we know that either both JmpZs will fall
+through, or they'll both take the branch, and we have to check for equivalent
+behaviour in both cases to know we get equivalent behaviour from the jump
+instructions. Switch statements generate an obligation for each case.
 
-We say two function bodies are equivalent if we can prove |- entry,entry' : [true] for each pair of
-entry points entry, entry'. The entry points we check are 0,0 (the start of each function) and DV_n,
-DV_n' for each matching pair of default value initializers. (Remark: we discovered a bug in both
-compilers here, relating to when parameters are VerifyParam'd in initializers. This should be fixed
-by restricting the source language.)
+We say two function bodies are equivalent if we can prove |- entry,entry' :
+[true] for each pair of entry points entry, entry'. The entry points we check
+are 0,0 (the start of each function) and DV_n, DV_n' for each matching pair of
+default value initializers. (Remark: we discovered a bug in both compilers here,
+relating to when parameters are VerifyParam'd in initializers. This should be
+fixed by restricting the source language.)
 
 Things we don't do and things we assume
 =======================================
 
-The VGetN instruction gets the value of the local variable whose name is given by the string on the
-top of the stack. Since we're not tracking the actual values on the stack, we don't know what
-variable that is. We assume that it can never be one of the unnamed locals (compiler temporaries).
-If that assumption is false, then what we're doing is unsound. The presence of VGetN and similar
-instructions is why we don't allow interesting correspondences between named locals (such as
-parameters).
+The VGetN instruction gets the value of the local variable whose name is given
+by the string on the top of the stack. Since we're not tracking the actual
+values on the stack, we don't know what variable that is. We assume that it can
+never be one of the unnamed locals (compiler temporaries). If that assumption is
+false, then what we're doing is unsound. The presence of VGetN and similar
+instructions is why we don't allow interesting correspondences between named
+locals (such as parameters).
 
-Similarly, if VGetL is ever applied to an unnamed local, we just fail. In practice this doesn't seem
-to happen, which is good.
+Similarly, if VGetL is applied to an unnamed local, we just fail, except in
+certain special cases. In practice this doesn't seem to happen very often, which
+is good.
 
 Specials
 ========
 
-The general analysis described above can cope with different uses of local variables as arise from
-different register allocators, different orderings of basic blocks, and minor variations in control
-flow, such as jumps to jumps. But it doesn't track anything interesting about actual values, so
-there are many valid equivalences that it can't prove. We could make the whole logic more
-expressive, but for now we instead add a number of ad hoc peephole equivalences corresponding to
-semantically equivalent code patterns we observe in the output of the two compilers. These are
-actually expressed as additional rules following the same format as those given above, but it is
-more convenient to explain most of them as extra equalities on programs. Obviously, the intention is
-that these really are semantic equivalences.
+The general analysis described above can cope with different uses of local
+variables as arise from different register allocators, different orderings of
+basic blocks, and minor variations in control flow, such as jumps to jumps. But
+it doesn't track anything interesting about actual values, so there are many
+valid equivalences that it can't prove. We could make the whole logic more
+expressive, but for now we instead add a number of ad hoc peephole equivalences
+corresponding to semantically equivalent code patterns we observe in the output
+of the two compilers. These are actually expressed as additional rules following
+the same format as those given above, but it is more convenient to explain most
+of them as extra equalities on programs. Obviously, the intention is that these
+really are semantic equivalences.
 
 Set-Pop-Get
 -----------
 
  SetL l; PopC; PushL l  =   Unset l
 
-The sequence on the left copies the top of the stack to local l, pops the stack, and then pushes the
-contents of l to the stack and unsets l. Provided that the code verifies (so the stack can't
-underflow), this is equivalent to just unsetting l.
+The sequence on the left copies the top of the stack to local l, pops the stack,
+and then pushes the contents of l to the stack and unsets l. Provided that the
+code verifies (so the stack can't underflow), this is equivalent to just
+unsetting l.
 
 Not-Jmp
 -------
@@ -254,21 +281,22 @@ String-Concat-Concat
 
  String s; Concat; Concat  =  Concat; String s; Concat
 
-These sequences both take a stack looking like [s1 s2] to [s1.s2.s] because string concatenation is
-associative.
+These sequences both take a stack looking like [s1 s2] to [s1.s2.s] because
+string concatenation is associative.
 
 (Planned: a slightly richer set of patterns for string operations.)
 
 FPassL
 ------
 
-FPassL n l pushes local l to the stack as argument n of an upcoming function call. This might look
-like a simple read of l, but the semantics are actually a bit more complicated: it behaves like
-CGetL if parameter n is by value, and like VGetL if it's by reference. But we don't track what
-function is about to be called, so don't know which case applies. And we don't allow VGetL on
-unnamed locals. So the easy, safe thing to do would be to disallow FPassL on unnamed locals.
-Unfortunately, that does occur in practice, when compiling pipes. So we implement the following
-nasty-but-safe hack:
+FPassL n l pushes local l to the stack as argument n of an upcoming function
+call. This might look like a simple read of l, but the semantics are actually a
+bit more complicated: it behaves like CGetL if parameter n is by value, and like
+VGetL if it's by reference. But we don't track what function is about to be
+called, so don't know which case applies. And we don't allow VGetL on unnamed
+locals. So the easy, safe thing to do would be to disallow FPassL on unnamed
+locals. Unfortunately, that does occur in practice, when compiling pipes. So we
+implement the following nasty-but-safe hack:
 
   prog.pc = FPassL n _l   prog'.pc' = FPassL n _l'
   safe_sequence(prog,pc+1)
@@ -278,14 +306,16 @@ nasty-but-safe hack:
  ----------------------------------------------------
                  Gamma |- pc,pc' : [phi]
 
-where safe_sequence(prog,pc) says "there's a sequence of (only) parameter-pushing instructions
-starting at pc, terminated by a call instruction that will consume all of them and the current top
-of the stack". Note that we're treating the FPassL instructions as if they might both read and write
-the locals. The read is clear, and the write accounts for the possibility that the call might modify
-the local if it ends up being passed by reference. I don't actually know if that can happen, but
-it's conservative to assume it might. If it can, then it won't *really* happen until the call
-returns, but it's safe to pretend it could happen at the point we do the push, since all we're doing
-is removing any other equalities involving _l or _l' earlier than we need to.
+where safe_sequence(prog,pc) says "there's a sequence of (only)
+parameter-pushing instructions starting at pc, terminated by a call instruction
+that will consume all of them and the current top of the stack". Note that we're
+treating the FPassL instructions as if they might both read and write the
+locals. The read is clear, and the write accounts for the possibility that the
+call might modify the local if it ends up being passed by reference. I don't
+actually know if that can happen, but it's conservative to assume it might. If
+it can, then it won't *really* happen until the call returns, but it's safe to
+pretend it could happen at the point we do the push, since all we're doing is
+removing any other equalities involving _l or _l' earlier than we need to.
 
 Fatal exit messages
 -------------------
@@ -294,44 +324,92 @@ String s; Fatal op = String s'; Fatal op
 
 So long as the op is the same, we allow different error messages.
 
+Permutation of free variables in closures
+-----------------------------------------
+
+The order in which free variables are passed to closures shouldn't matter. So
+when we're checking the code that creates a closure, we look for a sequence of
+CUGetL instructions on each side, followed by a CreateCL instructions. We check
+that the CUGetL sequences are equivalent up to some permutation, and then
+schedule the relevant closure classes to be compared up to that permutation.
+
+VGetL-Unset
+-----------
+
+Some nasty php-only foreach statements do generate code in which VGetL is used
+with an unnamed local. But the code follows a very specific pattern and the
+alias does not escape, so we implement a special pattern:
+
+  prog,pc -> [VGetL _n; CGetL2 l; BindN; PopV; UnsetL _n]
+  prog',pc' -> [VGetL _n'; CGetL2 l'; BindN; PopV; UnsetL _n']
+  phi => _n = _n'
+  phi => l = l'
+  Gamma; pc,pc':[phi] |- pc+5, pc'+5 : [phi + unset n + unset n']
+ -----------------------------------------------------------------
+                    Gamma |- pc,pc' : [phi]
+
+There are actually several variants of this pattern, including ones where
+there's a CGet before the VGetL (instead of a CGetL2 afterwards), and where the
+middle section does
+   BaseL l,mode; BindM n, key
+instead of BindN.
+
+VGetL-RetV
+----------
+
+Another special case that appears in some code is:
+
+  prog,pc -> [VGetL _n; RetV]
+  prog',pc' -> [VGetL _n'; RetV]
+  phi = _n = _n'
+ --------------------------------
+   Gamma |- pc,pc' : [phi]
+
 Exceptions
 ==========
 
-We now sketch how the simple model above is refined to deal with exceptions. This reflects my
-understanding, based on the documentation and doing some experiments.
+We now sketch how the simple model above is refined to deal with exceptions.
+This reflects my understanding, based on the documentation and doing some
+experiments.
 
-HHVM has two kinds of exception-handling mechanism: faults and catches. In both cases, a region of
-code is protected by a designated handler, and control transfers to the statically closest handler
-(or to the parent frame if there's no local handler) when an exception is thrown. In the case of a
-catch, that's essentially all one needs to know. Further propagation is handled by explicit throws
-in the catch-handler, with nested trys in the source compiling to overlapping regions (with both a
-nested region and its handler being covered by the enclosing region). In the case of faults, the
-propagation is more involved. Fault handlers end with an unwind instruction, which transfers control
-to the "next" handler - that associated with the region enclosing the one in which the exception was
-originally raised. That in turn unwinds to its parent and so on, stopping when the parent is a catch
-handler (or, as far as semdiff is concerned, when there's no parent in the current frame). If an
-exception is raised in a fault handler, that can create another chain of handlers to be unwound up.
+HHVM has two kinds of exception-handling mechanism: faults and catches. In both
+cases, a region of code is protected by a designated handler, and control
+transfers to the statically closest handler (or to the parent frame if there's
+no local handler) when an exception is thrown. In the case of a catch, that's
+essentially all one needs to know. Further propagation is handled by explicit
+throws in the catch-handler, with nested trys in the source compiling to
+overlapping regions (with both a nested region and its handler being covered by
+the enclosing region). In the case of faults, the propagation is more involved.
+Fault handlers end with an unwind instruction, which transfers control to the
+"next" handler - that associated with the region enclosing the one in which the
+exception was originally raised. That in turn unwinds to its parent and so on,
+stopping when the parent is a catch handler (or, as far as semdiff is concerned,
+when there's no parent in the current frame). If an exception is raised in a
+fault handler, that can create another chain of handlers to be unwound up.
 
-Semdiff deals with exceptional control flow by refining the simple notion of program counter used
-above, from an integer to an integer paired with a stack of handler entry points, representing the
-the fault handlers that are waiting to be unwound to. We assume, very conservatively, that (almost)
-any instruction might raise an exception and always check for equivalence along the exceptional
+Semdiff deals with exceptional control flow by refining the simple notion of
+program counter used above, from an integer to an integer paired with a stack of
+handler entry points, representing the the fault handlers that are waiting to be
+unwound to. We assume, very conservatively, that (almost) any instruction might
+raise an exception and always check for equivalence along the exceptional
 control flow path from the instruction as well as the normal one(s).
 
-(A side-effect of this refinement is that the same code can be analyzed more than once, with
-different handler stacks, which adds precision.)
+(A side-effect of this refinement is that the same code can be analyzed more
+than once, with different handler stacks, which adds precision.)
 
 Unset Variables
 ===============
 
-The initial assertion we used on entry points above was "true", which means that the stacks, heaps
-and named locals are equal, but says nothing at all about the unnamed locals. In fact, the unnamed
-locals will be "unset" at the start, and code sometimes tests if locals are set. If we started with
-"true" and then executed Isset _l in both programs, we wouldn't know that the two tests would
-evaluate the same way. So we further refine assertions to track two sets of variables (one for each
-side) that are *not* known to be unset - all others are known to be unset. So our initial assertion
-becomes (true,{},{}). When variables are assigned, they are added to the relevant sets as well as
-having equalities recorded; explicit Unsets remove variables from the sets, and we have a refined
+The initial assertion we used on entry points above was "true", which means that
+the stacks, heaps and named locals are equal, but says nothing at all about the
+unnamed locals. In fact, the unnamed locals will be "unset" at the start, and
+code sometimes tests if locals are set. If we started with "true" and then
+executed Isset _l in both programs, we wouldn't know that the two tests would
+evaluate the same way. So we further refine assertions to track two sets of
+variables (one for each side) that are *not* known to be unset - all others are
+known to be unset. So our initial assertion becomes (true,{},{}). When variables
+are assigned, they are added to the relevant sets as well as having equalities
+recorded; explicit Unsets remove variables from the sets, and we have a refined
 notion of entailment between assertions:
 
  (phi2,vs2,vs2') => (phi1,vs1,vs1')
@@ -344,17 +422,26 @@ notion of entailment between assertions:
 Class Loading and Matching
 ==========================
 
-How do we decide which classes to compare from the two programs? One could do this by name, but the
-compilers can generate differently-named classes to implement closures. Furthermore, it's possible
-to have more than one class with the same name appearing in an hhas file - nested classes can be
-loaded dynamically. Semdiff initially analyzes top-level functions, including ".main". When a pair
-of DefCls or CreateCl instructions are reached on the two sides, the classes to which they refer (by
-number, not name) are scheduled for comparison.
+How do we decide which classes to compare from the two programs? One could do
+this by name, but the compilers can generate differently-named classes to
+implement closures. Furthermore, it's possible to have more than one class with
+the same name appearing in an hhas file - nested classes can be loaded
+dynamically. Semdiff initially analyzes top-level functions, including ".main".
+When a pair of DefCls or CreateCl instructions are reached on the two sides, the
+classes to which they refer (by number, not name) are scheduled for comparison.
 
-This seems to be the best we can do on the basis of the information that's actually in the hhas
-file, though it seems that hhvm does actually load some classes for which a corresponding DefCls
-instruction is never executed. It also requires hack to produce the DefCls instructions in the same
-order as hhvm does.
+This seems to be the best we can do on the basis of the information that's
+actually in the hhas file, though it seems that hhvm does actually load some
+classes for which a corresponding DefCls instruction is never executed. It also
+requires hack to produce the DefCls instructions in the same order as hhvm does.
+
+Function Loading
+================
+
+We schedule top-level functions for comparison eagerly, by name. But functions
+that are marked [nontop] in the input are dynamically scheduled for comparison
+when corresponding pairs of DefFunc instructions are encountered, much like the
+dynamic class loading described above.
 
 Other Remarks
 =============
@@ -362,31 +449,88 @@ Other Remarks
 Conjunction
 -----------
 
-The reader may have noticed that we said there was a *set* of pc,pc':[phi] judgements, rather than a
-simple map from pc,pc' pairs to assertions. This is deliberate: a single pair of program counters
-can be associated with more than one assertion. This represents a conjunction of judegements, or a
-disjunction of assertions:
+The reader may have noticed that we said there was a *set* of pc,pc':[phi]
+judgements, rather than a simple map from pc,pc' pairs to assertions. This is
+deliberate: a single pair of program counters can be associated with more than
+one assertion. This represents a conjunction of judegements, or a disjunction of
+assertions:
 
 (pc,pc' : [phi1]) /\ (pc,pc' : [phi2])  <=>  pc,pc' : [phi1 \/ phi2]
 
-the analysis actually loops round when it gets back to a pc,pc' pair it's visited before, trying to
-find a fixpoint and potentially analyzing the same code several times under different assumptions.
-In reality, we quit if we don't find a fixed point after two iterations, as that seems to work well
-enough in practice. Nevertheless, the extra power compared to a non-iterative/conjunctive analysis
-is useful, particularly for exception handlers which (thanks to our conservative approach to where
-exceptions might be thrown) can be jumped to from many places, in which different assertions may
-hold.
+the analysis actually loops round when it gets back to a pc,pc' pair it's
+visited before, trying to find a fixpoint and potentially analyzing the same
+code several times under different assumptions. In reality, we quit if we don't
+find a fixed point after two iterations, as that seems to work well enough in
+practice. Nevertheless, the extra power compared to a non-iterative/conjunctive
+analysis is useful, particularly for exception handlers which (thanks to our
+conservative approach to where exceptions might be thrown) can be jumped to from
+many places, in which different assertions may hold.
 
 Interpreting the result of the tool
 -----------------------------------
 
-TODO
+Semdiff produces several kinds of output, and which ones are shown depends on
+the verbosity setting.
 
+If it's run with --verbose 0, then it simply produces a single number on stdout.
+This is a percentage similarity measure: 100.00 means that the two input files
+are semantically equivalent. Anything less means that some (potential) semantic
+difference was found. In that case, the number is a *rough* measure of the
+*syntactic* edit distance between the two programs. (Unfortunately, we do not
+have a good notion of semantic edit distance.)
 
+If it's run with --verbose 1, then semdiff reports the syntactic edit distance,
+the size of the input, the similarity percentage and a (possibly empty) list of
+syntactic edits, in a diff-like format. Note that the syntactic diff is
+typically rather larger than the minimal change that would be required to make
+the two programs equivalent, so shouldn't be read as the *reason* why the
+attempt to prove equivalence failed.
 
-[1] N Benton. Simple Relational Correctness Proofs for Program Analyses and Program Transformations.
-POPL 2004.
-[2] N Benton. A Typed Compositional Logic for a Stack-Based Abstract Machine. APLAS 2005.
-[3] N Benton and N Tabareau. Compiling Functional Types to Relational Specifications for Low Level
-Imperative Code. TLDI 2009.
-[4] N Benton and C-K Hur. Biorthogonality, Step-Indexing and Compiler Correctness. ICFP 2009.
+If it's run with --verbose 2, then the tool also produces logging information,
+reporting on what it's compared, which special rules have fired, and its
+internal state in the case that it is unable to prove equivalence. In the case
+that comparison of two methods or functions fails, the logging output will look
+something like this:
+
+comparing key test
+create cl pattern at lines 10, 10
+Semdiff failed
+pc=;15, pc'=;15, i=CreateCl 0 7 i'=CUGetL $w asn={}{}
+Assumed=
+[;0,;0-><{}{}>]
+[;1,;1-><{}{}>]
+[;2,;2-><{}{}>]
+[;3,;3-><{}{}>]
+[;4,;4-><{}{}>]
+[;5,;5-><{}{}>]
+[;6,;6-><{}{}>]
+[;10,;10-><{}{}>]
+[;11,;11-><{}{}>]
+[;12,;12-><{}{}>]
+[;13,;13-><{}{}>]
+[;14,;14-><{}{}>]
+
+Todo=
+
+This shows that in the function "test", semdiff failed when it reached
+instruction number 15 on both sides. The left-hand program had a CreateCl
+instruction, whereas the right-hand one had a CUGetL instruction. The assertion
+that was active at that point ("asn=") was just (True,{},{}). "Assumed" shows
+the list of pc,pc' |- [asn] judgements that have already been visited in the
+proof search, which in this case are rather uninteresting. Todo is the (here
+empty) list of pending judgements. The crucial thing to focus on is the pair of
+instructions that led to the failure, and the assertion that we were trying to
+prove there. The assumed and todo sets give some indication of the path that
+semdiff was exploring when it got stuck, but can be non-trivial to decipher  :-(
+
+In more complex cases, the pc's will also include a stack of handlers (innermost
+first), represented by the index of the corresponding handler code.
+
+[1] N Benton. Simple Relational Correctness Proofs for Program Analyses and
+Program Transformations. POPL 2004.
+[2] N Benton. A Typed Compositional Logic for a Stack-Based Abstract Machine.
+APLAS 2005.
+[3] N Benton and N Tabareau. Compiling Functional Types to Relational
+Specifications for Low Level Imperative Code. TLDI 2009.
+[4] N Benton and C-K Hur. Biorthogonality, Step-Indexing and Compiler
+Correctness. ICFP 2009.

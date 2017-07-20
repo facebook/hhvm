@@ -31,17 +31,18 @@ let get_type_from_hint tcopt file ret =
 let infer_return_type tcopt c_or_f name =
   let def = map c_or_f (fun c_or_f -> Typing_suggest_service.Def c_or_f) in
   let types = map def (Typing_suggest_service.get_inferred_types tcopt) in
-  let tyopt =
+  let types =
     map types
-      (List.find
+      (List.filter
         ~f:(fun (_, p1, _, _) ->
           let p2 = map name fst in
           match map p2 (Pos.compare p1) with
           | Ok 0 -> true
           | _ -> false))
   in
-  let ty = join @@ map tyopt (fun t -> of_option t "Could not infer type") in
-  map ty (fun (tenv, _, _, ty) -> Typing_print.full tenv ty)
+  let ty = map types (Typing_ops.LeastUpperBound.compute tcopt) in
+  let ty = join @@ map ty (of_option ~error:"Could not infer type") in
+  map ty (fun (tenv, _, _, ty) ->  Typing_print.full tenv ty)
 
 let get_fun_return_ty tcopt popt fun_name =
   let fun_name = add_ns fun_name in

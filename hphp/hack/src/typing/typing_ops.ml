@@ -46,3 +46,21 @@ let unify_decl p ur env ty1 ty2 =
   let env, ty2 = Phase.localize_with_self env ty2 in
   ignore (sub_type p ur env ty2 ty1);
   ignore (sub_type p ur env ty1 ty2)
+
+
+module LeastUpperBound = struct
+  open Typing_defs
+
+  (* @TODO expand this match to refine more types*)
+  let pairwise_least_upper_bound ty1 ty2 =
+    if ty_equal ty1 ty2 then ty1 else (fst ty1), Tmixed
+
+  let rec compute tcopt types =
+    match types with
+    | [] -> None
+    | [t] ->  Some t
+    | (tenv, p, k, ty1) :: (_, _, _, ty2) :: ts  ->
+      let ty = pairwise_least_upper_bound ty1 ty2 in
+      compute tcopt ((tenv, p, k, ty) :: ts)
+
+  end

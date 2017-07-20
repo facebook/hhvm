@@ -83,12 +83,11 @@ enum Attr {
   // share a name but both of which are unique.  |          |         //
   AttrUnique               = (1 << 10), //    X  |          |    X    //
                                         //       |          |         //
-  // Only valid in RepoAuthoritative mode.  Indicates that a function can be
-  // used with fb_rename_function---even if JitEnableRenameFunction is
-  // false---and can be used with fb_intercept.  (Note: we could split this
-  // into two bits, since you can technically pessimize less for fb_intercept
-  // than you need to for fb_rename_function, but we haven't done so at this
-  // point.)                            //       |          |         //
+  // Indicates that a function can be used with fb_rename_function---even if
+  // JitEnableRenameFunction is false --- and can be used with fb_intercept.
+  // (Note: we could split this into two bits, since you can technically
+  // pessimize less for fb_intercept than you need to for fb_rename_function,
+  //  but we haven't done so at this point.)     |          |         //
   AttrInterceptable        = (1 << 11), //       |          |    X    //
                                         //       |          |         //
   // FIXME: I have no documentation.    //       |          |         //

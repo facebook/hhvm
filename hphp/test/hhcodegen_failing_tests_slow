@@ -505,6 +505,7 @@ slow/unpack_args/unpack_call_multi.php
 slow/unset/1117.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
+slow/use_namespace_class/double_use_ns.php
 slow/variable_argument/27.php
 slow/variadic_args/by_reference_typehints.php
 slow/variadic_args/magic_call.php

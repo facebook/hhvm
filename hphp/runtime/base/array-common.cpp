@@ -76,13 +76,13 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   VecArrayInit init{size};
   IterateV(
     a,
-    [&](const TypedValue* v) {
-      if (UNLIKELY(v->m_type == KindOfRef)) {
-        if (v->m_data.pref->isReferenced()) {
+    [&](TypedValue v) {
+      if (UNLIKELY(v.m_type == KindOfRef)) {
+        if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
       }
-      init.append(tvAsCVarRef(v));
+      init.append(v);
     }
   );
   return init.create();
@@ -94,13 +94,13 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   DictInit init{size};
   IterateKV(
     a,
-    [&](const TypedValue* k, const TypedValue* v) {
-      if (UNLIKELY(v->m_type == KindOfRef)) {
-        if (v->m_data.pref->isReferenced()) {
+    [&](Cell k, TypedValue v) {
+      if (UNLIKELY(v.m_type == KindOfRef)) {
+        if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
       }
-      init.setValidKey(tvAsCVarRef(k), tvAsCVarRef(v));
+      init.setValidKey(k, v);
     }
   );
   return init.create();
@@ -112,21 +112,21 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   KeysetInit init{size};
   IterateV(
     a,
-    [&](const TypedValue* v) {
-      if (UNLIKELY(v->m_type == KindOfRef)) {
-        if (v->m_data.pref->isReferenced()) {
+    [&](TypedValue v) {
+      if (UNLIKELY(v.m_type == KindOfRef)) {
+        if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
-        v = v->m_data.pref->tv();
-        assertx(v->m_type != KindOfRef);
+        v = *v.m_data.pref->tv();
+        assertx(v.m_type != KindOfRef);
       }
 
-      if (LIKELY(isStringType(v->m_type))) {
-        init.add(v->m_data.pstr);
-      } else if (LIKELY(isIntType(v->m_type))) {
-        init.add(v->m_data.num);
+      if (LIKELY(isStringType(v.m_type))) {
+        init.add(v.m_data.pstr);
+      } else if (LIKELY(isIntType(v.m_type))) {
+        init.add(v.m_data.num);
       } else {
-        throwInvalidArrayKeyException(v, init.toArray().get());
+        throwInvalidArrayKeyException(&v, init.toArray().get());
       }
     }
   );
@@ -137,10 +137,7 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyArray();
   PackedArrayInit init{size};
-  IterateV(
-    a,
-    [&](const TypedValue* v) { init.appendWithRef(tvAsCVarRef(v)); }
-  );
+  IterateV( a, [&](TypedValue v) { init.appendWithRef(v); });
   return init.create();
 }
 
@@ -149,9 +146,9 @@ ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;
   IterateV(
     ad,
-    [&](const TypedValue* v) {
-      if (UNLIKELY(v->m_type == KindOfRef)) {
-        auto const ref = v->m_data.pref;
+    [&](TypedValue v) {
+      if (UNLIKELY(v.m_type == KindOfRef)) {
+        auto const ref = v.m_data.pref;
         if (ref->isReferenced() || ref->tv()->m_data.parr == ad) {
           result = RefCheckResult::Fail;
           return true;

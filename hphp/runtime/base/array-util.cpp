@@ -59,7 +59,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {
     Variant key(iter.first());
-    const Variant& v = iter.secondRef();
+    auto const v = iter.secondVal();
     if (key.isNumeric()) {
       out_hash.appendWithRef(v);
     } else {
@@ -70,7 +70,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   for (; pos < offset + length && iter; ++pos, ++iter) {
     if (removed) {
       Variant key(iter.first());
-      const Variant& v = iter.secondRef();
+      auto const v = iter.secondVal();
       if (key.isNumeric()) {
         removed->appendWithRef(v);
       } else {
@@ -82,14 +82,14 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   Array arr = replacement.toArray();
   if (!arr.empty()) {
     for (ArrayIter iterb(arr); iterb; ++iterb) {
-      const Variant& v = iterb.secondRef();
+      auto const v = iterb.secondVal();
       out_hash.appendWithRef(v);
     }
   }
 
   for (; iter; ++iter) {
     Variant key(iter.first());
-    const Variant& v = iter.secondRef();
+    auto const v = iter.secondVal();
     if (key.isNumeric()) {
       out_hash.appendWithRef(v);
     } else {
@@ -129,10 +129,11 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
   }
   for (ArrayIter iter(input); iter; ++iter) {
     Variant key(iter.first());
+    auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      ret.appendWithRef(iter.secondRef());
+      ret.appendWithRef(v);
     } else {
-      ret.setWithRef(key, iter.secondRef(), true);
+      ret.setWithRef(key, v, true);
     }
   }
   return ret;
@@ -248,12 +249,14 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    if (entry.isInteger() || entry.isString()) {
-      if (!ret.exists(entry)) {
-        ret.set(entry, 1);
+    auto const rval = iter.secondRval();
+    auto const inner = tvToCell(rval);
+    if (isIntType(inner.type()) || isStringType(inner.type())) {
+      if (!ret.exists(inner.tv())) {
+        ret.set(inner.tv(), make_tv<KindOfInt64>(1));
       } else {
-        ret.set(entry, ret[entry].toInt64() + 1);
+        ret.set(inner.tv(),
+                make_tv<KindOfInt64>(ret[inner.tv()].toInt64() + 1));
       }
     } else {
       raise_warning("Can only count STRING and INTEGER values!");
@@ -271,12 +274,12 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(HHVM_FN(strtolower)(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtolower)(key.toString()), iter.secondVal());
       } else {
-        ret.set(HHVM_FN(strtoupper)(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtoupper)(key.toString()), iter.secondVal());
       }
     } else {
-      ret.set(key, iter.secondRef());
+      ret.set(key, iter.secondVal());
     }
   }
   return ret;
@@ -405,11 +408,10 @@ Variant ArrayUtil::StringUnique(const Array& input) {
   Array seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    String str(entry.toString());
+    auto const str = String::attach(tvCastToString(iter.secondVal()));
     if (!seenValues.exists(str)) {
       seenValues.set(str, 1);
-      ret.set(iter.first(), entry);
+      ret.set(iter.first(), iter.secondVal());
     }
   }
   return ret;
@@ -419,12 +421,11 @@ Variant ArrayUtil::NumericUnique(const Array& input) {
   std::set<double> seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    const Variant& entry(iter.secondRef());
-    double value = entry.toDouble();
+    auto const value = tvCastToDouble(iter.secondVal());
     std::pair<std::set<double>::iterator, bool> res =
       seenValues.insert(value);
     if (res.second) { // it was inserted
-      ret.set(iter.first(), entry);
+      ret.set(iter.first(), iter.secondVal());
     }
   }
   return ret;
@@ -466,7 +467,9 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
   ArrayInit ret(indices.size() - duplicates_count, ArrayInit::Map{});
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
-    if (!duplicates[i]) ret.setValidKey(iter.first(), iter.secondRef());
+    if (!duplicates[i]) {
+      ret.setValidKey(*iter.first().asTypedValue(), iter.secondVal());
+    }
   }
   return ret.toVariant();
 }

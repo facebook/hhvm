@@ -99,6 +99,8 @@ ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
  */
 double tvCastToDouble(TypedValue tv);
 StringData* tvCastToString(TypedValue tv);
+ArrayData* tvCastToArrayLike(TypedValue tv);
+ObjectData* tvCastToObject(TypedValue tv);
 
 /*
  * Convert a cell to various raw data types, without changing the Cell.

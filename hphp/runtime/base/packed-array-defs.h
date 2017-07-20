@@ -109,7 +109,7 @@ void PackedArray::IterateV(const ArrayData* arr, F fn) {
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   for (auto i = arr->m_size; i--; elm++) {
-    if (ArrayData::call_helper(fn, elm)) break;
+    if (ArrayData::call_helper(fn, *elm)) break;
   }
 }
 
@@ -119,11 +119,9 @@ void PackedArray::IterateKV(const ArrayData* arr, F fn) {
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
-  TypedValue key;
-  key.m_data.num = 0;
-  key.m_type = KindOfInt64;
+  auto key = make_tv<KindOfInt64>(0);
   for (auto i = arr->m_size; i--; key.m_data.num++, elm++) {
-    if (ArrayData::call_helper(fn, &key, elm)) break;
+    if (ArrayData::call_helper(fn, key, *elm)) break;
   }
 }
 

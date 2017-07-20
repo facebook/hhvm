@@ -449,8 +449,8 @@ int64_t HHVM_FUNCTION(extract,
         // The const_cast is safe because we escalated the array.  We can't use
         // arr.lvalAt(name), because arr may have been modified as a side
         // effect of an earlier iteration.
-        auto& ref = const_cast<Variant&>(iter.secondRef());
-        g_context->bindVar(name.get(), ref.asTypedValue());
+        auto const rval = iter.secondRval();
+        g_context->bindVar(name.get(), const_cast<TypedValue*>(rval.tv_ptr()));
         ++count;
       }
       return count;
@@ -467,7 +467,7 @@ int64_t HHVM_FUNCTION(extract,
   for (ArrayIter iter(carr); iter; ++iter) {
     auto name = iter.first().toString();
     if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-    g_context->setVar(name.get(), iter.secondRef().asTypedValue());
+    g_context->setVar(name.get(), iter.secondRval().tv_ptr());
     ++count;
   }
   return count;

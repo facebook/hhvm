@@ -3027,7 +3027,7 @@ bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
   CHECK_ALLOC_R(stylearr, malloc_size, false);
   index = 0;
   for (ArrayIter iter(style); iter; ++iter) {
-    stylearr[index++] = iter.secondRef().toInt32();
+    stylearr[index++] = cellToInt(tvToCell(iter.secondVal()));
   }
   gdImageSetStyle(im, stylearr, index);
   IM_FREE(stylearr);

@@ -398,9 +398,9 @@ struct CompactWriter {
       Array keySpec = spec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
       Array valueSpec = spec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
-      auto elemWriter = [&](const TypedValue* k, const TypedValue* v) {
-        writeField(tvAsCVarRef(k), keySpec, keyType);
-        writeField(tvAsCVarRef(v), valueSpec, valueType);
+      auto elemWriter = [&](Cell k, TypedValue v) {
+        writeField(VarNR(k), keySpec, keyType);
+        writeField(VarNR(v), valueSpec, valueType);
         return false;
       };
 
@@ -427,33 +427,41 @@ struct CompactWriter {
       Array valueSpec = spec
         .rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
 
-      std::function<bool(const TypedValue*, const TypedValue*)> elemWriter;
-      if (listType == C_LIST_LIST) {
-        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
-          writeField(tvAsCVarRef(v), valueSpec, valueType);
-          return false;
-        };
-      } else if (listType == C_LIST_SET) {
-        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
-          writeField(tvAsCVarRef(k), valueSpec, valueType);
-          return false;
-        };
-      } else {
-        always_assert(false);
-      }
+      auto const listWriter = [&](TypedValue v) {
+        writeField(VarNR(v), valueSpec, valueType);
+      };
+      auto const setWriter = [&](Cell k, TypedValue v) {
+        writeField(VarNR(k), valueSpec, valueType);
+      };
+
+      always_assert(listType == C_LIST_LIST ||
+                    listType == C_LIST_SET);
 
       if (isContainer(list)) {
         writeListBegin(valueType, getContainerSize(list));
-        IterateKV(
-          *list.asCell(),
-          [](const ArrayData* ad) { return false; },
-          elemWriter,
-          [](const ObjectData* o) { return false; }
-        );
+        if (listType == C_LIST_LIST) {
+          IterateV(
+            *list.asCell(),
+            [](const ArrayData* ad) { return false; },
+            listWriter,
+            [](const ObjectData* o) { return false; }
+          );
+        } else {
+          IterateKV(
+            *list.asCell(),
+            [](const ArrayData* ad) { return false; },
+            setWriter,
+            [](const ObjectData* o) { return false; }
+          );
+        }
       } else {
         auto const arr = list.toArray();
         writeListBegin(valueType, arr.size());
-        IterateKV(arr.get(), elemWriter);
+        if (listType == C_LIST_LIST) {
+          IterateV(arr.get(), listWriter);
+        } else {
+          IterateKV(arr.get(), setWriter);
+        }
       }
 
       writeCollectionEnd();

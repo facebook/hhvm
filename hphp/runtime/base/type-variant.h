@@ -703,12 +703,17 @@ struct Variant : private TypedValue {
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
   template <typename T>
   typename std::enable_if<
-    !std::is_same<Variant,
-                 typename std::remove_reference<
-                   typename std::remove_cv<T>::type
-                   >::type
-                 >::value, Variant&>::type
-  operator=(T&& v) {
+    !std::is_same<
+      Variant,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value
+    &&
+    !std::is_same<
+      VarNR,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value,
+    Variant&
+  >::type operator=(T&& v) {
     set(std::forward<T>(v));
     return *this;
   }
@@ -1439,6 +1444,9 @@ void clearBlackHole();
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
 
+inline Variant Array::operator[](Cell key) const {
+  return rvalAt(key);
+}
 inline Variant Array::operator[](int key) const {
   return rvalAt(key);
 }

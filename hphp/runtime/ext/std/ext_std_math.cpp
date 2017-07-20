@@ -72,25 +72,25 @@ Variant HHVM_FUNCTION(min,
       raise_warning("min(): Array must contain at least one element");
       return false;
     }
-    Variant ret = iter.secondRefPlus();
+    auto ret = iter.secondValPlus();
     ++iter;
     for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (less(currVal, ret)) {
-        ret = currVal;
+      auto const cur = iter.secondValPlus();
+      if (tvLess(cur, ret)) {
+        ret = cur;
       }
     }
-    return ret;
+    return Variant(VarNR(ret));
   }
 
-  Variant ret = value;
+  auto ret = *value.asTypedValue();
   for (ArrayIter iter(args); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (less(currVal, ret)) {
-      ret = currVal;
+    auto const cur = iter.secondVal();
+    if (tvLess(cur, ret)) {
+      ret = cur;
     }
   }
-  return ret;
+  return Variant(VarNR(ret));
 }
 
 Variant HHVM_FUNCTION(max,
@@ -121,25 +121,25 @@ Variant HHVM_FUNCTION(max,
       raise_warning("max(): Array must contain at least one element");
       return false;
     }
-    Variant ret = iter.secondRefPlus();
+    auto ret = iter.secondValPlus();
     ++iter;
     for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (more(currVal, ret)) {
-        ret = currVal;
+      auto const cur = iter.secondValPlus();
+      if (tvGreater(cur, ret)) {
+        ret = cur;
       }
     }
-    return ret;
+    return Variant(VarNR(ret));
   }
 
-  Variant ret = value;
+  auto ret = *value.asTypedValue();
   for (ArrayIter iter(args); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (more(currVal, ret)) {
-      ret = currVal;
+    auto const cur = iter.secondVal();
+    if (tvGreater(cur, ret)) {
+      ret = cur;
     }
   }
-  return ret;
+  return Variant(VarNR(ret));
 }
 
 /*

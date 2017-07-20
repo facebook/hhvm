@@ -240,7 +240,7 @@ public:
     auto const* elm = a->data();
     for (auto i = a->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
-        if (ArrayData::call_helper(fn, &elm->tv)) break;
+        if (ArrayData::call_helper(fn, elm->tv)) break;
       }
     }
   }

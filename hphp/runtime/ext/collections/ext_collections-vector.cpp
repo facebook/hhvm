@@ -367,8 +367,8 @@ void BaseVector::addAllImpl(const Variant& t) {
       reserve(m_size + adata->size());
       return false;
     },
-    [this](const TypedValue* item) {
-      addRaw(tvAsCVarRef(item));
+    [this](TypedValue v) {
+      addRaw(tvToCell(v));
     },
     [&, this](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {

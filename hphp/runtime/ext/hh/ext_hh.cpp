@@ -166,13 +166,17 @@ ALWAYS_INLINE void serialize_memoize_string_data(StringBuffer& sb,
   sb.append(str->data(), len);
 }
 
-void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv);
+void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv);
+
+void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
+  serialize_memoize_tv(sb, depth, *tv);
+}
 
 void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_CONTAINER);
-  IterateKV(ad, [&] (const TypedValue* key, const TypedValue* val) {
-    serialize_memoize_tv(sb, depth, key);
-    serialize_memoize_tv(sb, depth, val);
+  IterateKV(ad, [&] (Cell k, TypedValue v) {
+    serialize_memoize_tv(sb, depth, k);
+    serialize_memoize_tv(sb, depth, v);
     return false;
   });
   serialize_memoize_code(sb, SER_MC_STOP);
@@ -208,35 +212,35 @@ void serialize_memoize_obj(StringBuffer& sb, int depth, ObjectData* obj) {
   }
 }
 
-void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
+void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
   if (depth > 256) {
     SystemLib::throwInvalidArgumentExceptionObject("Array depth exceeded");
   }
   depth++;
 
-  switch (tv->m_type) {
+  switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
       serialize_memoize_code(sb, SER_MC_NULL);
       break;
 
     case KindOfBoolean:
-      serialize_memoize_code(sb, tv->m_data.num ? SER_MC_TRUE : SER_MC_FALSE);
+      serialize_memoize_code(sb, tv.m_data.num ? SER_MC_TRUE : SER_MC_FALSE);
       break;
 
     case KindOfInt64:
-      serialize_memoize_int64(sb, tv->m_data.num);
+      serialize_memoize_int64(sb, tv.m_data.num);
       break;
 
     case KindOfDouble:
       serialize_memoize_code(sb, SER_MC_DOUBLE);
-      sb.append(reinterpret_cast<const char*>(&tv->m_data.dbl), 8);
+      sb.append(reinterpret_cast<const char*>(&tv.m_data.dbl), 8);
       break;
 
     case KindOfPersistentString:
     case KindOfString:
       serialize_memoize_code(sb, SER_MC_STRING);
-      serialize_memoize_string_data(sb, tv->m_data.pstr);
+      serialize_memoize_string_data(sb, tv.m_data.pstr);
       break;
 
     case KindOfPersistentVec:
@@ -247,18 +251,18 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
-      serialize_memoize_array(sb, depth, tv->m_data.parr);
+      serialize_memoize_array(sb, depth, tv.m_data.parr);
       break;
 
     case KindOfObject:
-      serialize_memoize_obj(sb, depth, tv->m_data.pobj);
+      serialize_memoize_obj(sb, depth, tv.m_data.pobj);
       break;
 
     case KindOfResource:
     case KindOfRef: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",
-        tname(tv->m_type)
+        tname(tv.m_type)
       ).str();
       SystemLib::throwInvalidArgumentExceptionObject(msg);
       break;

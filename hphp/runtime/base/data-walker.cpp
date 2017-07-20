@@ -29,11 +29,11 @@ void DataWalker::traverseData(ArrayData* data,
                               DataFeature& features,
                               PointerSet& visited) const {
   for (ArrayIter iter(data); iter; ++iter) {
-    const Variant& var = iter.secondRef();
+    auto const rval = iter.secondRval();
 
-    if (var.isReferenced()) {
-      Variant *pvar = var.getRefData();
-      if (markVisited(pvar, features, visited)) {
+    if (rval.type() == KindOfRef &&
+        rval.val().pref->isReferenced()) {
+      if (markVisited(rval.val().pref->var(), features, visited)) {
         if (canStopWalk(features)) return;
         continue; // don't recurse forever; we already went down this path
       }
@@ -43,15 +43,15 @@ void DataWalker::traverseData(ArrayData* data,
       if (canStopWalk(features)) return;
     }
 
-    auto const type = var.getType();
+    auto const inner = tvToCell(rval);
     // cheap enough, do it always
-    features.hasRefCountReference = isRefcountedType(type);
-    if (type == KindOfObject) {
+    features.hasRefCountReference = isRefcountedType(inner.type());
+    if (inner.type() == KindOfObject) {
       features.hasObjectOrResource = true;
-      traverseData(var.getObjectData(), features, visited);
-    } else if (isArrayLikeType(type)) {
-      traverseData(var.getArrayData(), features, visited);
-    } else if (type == KindOfResource) {
+      traverseData(inner.val().pobj, features, visited);
+    } else if (isArrayLikeType(inner.type())) {
+      traverseData(inner.val().parr, features, visited);
+    } else if (inner.type() == KindOfResource) {
       features.hasObjectOrResource = true;
     }
     if (canStopWalk(features)) return;

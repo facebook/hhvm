@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -162,10 +163,11 @@ struct ArrayIter {
     return firstHelper();
   }
   Variant firstHelper();
-  void nvFirst(TypedValue* out) {
-    const ArrayData* ad = getArrayData();
+
+  TypedValue nvFirst() {
+    auto const ad = getArrayData();
     assert(ad && m_pos != ad->iter_end());
-    cellCopy(ad->nvGetKey(m_pos), *out);
+    return ad->nvGetKey(m_pos);
   }
 
   /*
@@ -174,21 +176,29 @@ struct ArrayIter {
   Variant second();
 
   /*
-   * Get a reference to the value for the current iterator position.
-   * This function is strictly an optimization to second()---you must
-   * not modify the Variant.
+   * Get a member_rval for the current iterator position.
    *
-   * note that secondRef() has slightly different behavior than
-   * second() with regard to collection types.  Use secondRefPlus when
-   * you need support for these cases.  And note that unlike second(),
-   * secondRefPlus() will throw for non-collection types.
+   * Note that secondRval() has slightly different behavior than second() with
+   * regard to collection types.  Use secondRvalPlus() when you need support
+   * for these cases.  Also note that unlike second(), secondRvalPlus() will
+   * throw for non-collection types.
    */
-  const Variant& secondRef() const;
-  const Variant& secondRefPlus();
+  member_rval secondRval() const;
+  member_rval secondRvalPlus();
+
+  TypedValue secondVal() const { return secondRval().tv(); }
+  TypedValue secondValPlus() { return secondRvalPlus().tv(); }
+
+  const Variant& secondRef() const {
+    return tvAsCVarRef(secondRval().tv_ptr());
+  }
+  const Variant& secondRefPlus() {
+    return tvAsCVarRef(secondRvalPlus().tv_ptr());
+  }
 
   // Inline version of secondRef.  Only for use in iterator helpers.
   member_rval nvSecond() const {
-    const ArrayData* ad = getArrayData();
+    auto const ad = getArrayData();
     assert(ad && m_pos != ad->iter_end());
     return ad->rvalPos(m_pos);
   }
@@ -704,7 +714,7 @@ bool IterateV(const ArrayData* adata, ArrFn arrFn) {
     SetArray::Iterate<ArrFn, IncRef>(SetArray::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
-      if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
+      if (ArrayData::call_helper(arrFn, iter.secondVal())) {
         break;
       }
     }
@@ -739,9 +749,9 @@ bool IterateV(const TypedValue& it,
     if (adata) goto do_array;
     assert(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
-    if (!ArrayData::call_helper(arrFn, collections::at(odata, &tv))) {
+    if (!ArrayData::call_helper(arrFn, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;
-      ArrayData::call_helper(arrFn, collections::at(odata, &tv));
+      ArrayData::call_helper(arrFn, *collections::at(odata, &tv));
     }
     return true;
   }
@@ -788,13 +798,11 @@ bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
   } else if (adata->hasPackedLayout()) {
     PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
   } else if (adata->isKeyset()) {
-    auto fun = [&] (const TypedValue* v) { return arrFn(v, v); };
+    auto fun = [&](TypedValue v) { return arrFn(v, v); };
     SetArray::Iterate<decltype(fun), IncRef>(SetArray::asSet(adata), fun);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
-      if (ArrayData::call_helper(arrFn,
-                                 iter.first().asTypedValue(),
-                                 iter.secondRef().asTypedValue())) {
+      if (ArrayData::call_helper(arrFn, iter.nvFirst(), iter.secondVal())) {
         break;
       }
     }
@@ -829,9 +837,9 @@ bool IterateKV(const TypedValue& it,
     if (adata) goto do_array;
     assert(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
-    if (!ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv))) {
+    if (!ArrayData::call_helper(arrFn, tv, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;
-      ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv));
+      ArrayData::call_helper(arrFn, tv, *collections::at(odata, &tv));
     }
     return true;
   }

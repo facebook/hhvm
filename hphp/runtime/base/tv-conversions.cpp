@@ -431,6 +431,50 @@ StringData* tvCastToString(TypedValue tv) {
   not_reached();
 }
 
+ArrayData* tvCastToArrayLike(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
+  }
+
+  switch (tv.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return ArrayData::Create();
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfResource:
+      return ArrayData::Create(tv);
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
+    case KindOfArray: {
+      auto const ad = tv.m_data.parr;
+      ad->incRefCount();
+      return ad;
+    }
+
+    case KindOfObject: {
+      auto ad = tv.m_data.pobj->toArray();
+      assertx(ad->isPHPArray());
+      return ad.detach();
+    }
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
+}
+
 void tvCastToArrayInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -1056,6 +1100,52 @@ void tvCastToDArrayInPlace(TypedValue* tv) {
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
   assert(cellIsPlausible(*tv));
+}
+
+ObjectData* tvCastToObject(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
+  }
+
+  switch (tv.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return SystemLib::AllocStdClassObject().detach();
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfResource: {
+      auto o = SystemLib::AllocStdClassObject();
+      o->o_set(s_scalar, VarNR(tv));
+      return o.detach();
+    }
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset: {
+      auto const arr = Array::attach(tv.m_data.parr->toPHPArray(true));
+      return ObjectData::FromArray(arr.get()).detach();
+    }
+
+    case KindOfPersistentArray:
+    case KindOfArray:
+      return ObjectData::FromArray(tv.m_data.parr).detach();
+
+    case KindOfObject:
+      tv.m_data.pobj->incRefCount();
+      return tv.m_data.pobj;
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {

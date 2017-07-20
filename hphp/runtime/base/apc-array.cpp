@@ -133,11 +133,11 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   try {
     IterateKV(
       arr,
-      [&](const TypedValue* k, const TypedValue* v) {
-        auto key = APCHandle::Create(tvAsCVarRef(k), false,
+      [&](Cell k, TypedValue v) {
+        auto key = APCHandle::Create(VarNR(k), false,
                                      APCHandleLevel::Inner, unserializeObj);
         size += key.size;
-        auto val = APCHandle::Create(tvAsCVarRef(v), false,
+        auto val = APCHandle::Create(VarNR(v), false,
                                      APCHandleLevel::Inner, unserializeObj);
         size += val.size;
         ret->add(key.handle, val.handle);
@@ -208,8 +208,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
   try {
     IterateV(
       arr,
-      [&](const TypedValue* v) {
-        auto val = APCHandle::Create(tvAsCVarRef(v), false,
+      [&](TypedValue v) {
+        auto val = APCHandle::Create(VarNR(v), false,
                                      APCHandleLevel::Inner, unserializeObj);
         size += val.size;
         ret->vals()[i++] = val.handle;

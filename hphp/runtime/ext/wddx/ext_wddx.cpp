@@ -122,8 +122,8 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
       }
       for (; it; ++it) {
         auto key = it.first();
-        auto const& value = it.secondRef();
-        recursiveAddVarImpl(key.toString(), value, isObject, seen);
+        recursiveAddVarImpl(key.toString(), VarNR(it.secondVal()),
+                            isObject, seen);
       }
       if (isObject) {
         m_packetString.append("</struct>");
@@ -222,7 +222,7 @@ void find_var_recursive(const TypedValue* tv,
   }
   if (isArrayLikeType(tv->m_type)) {
     for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
-      find_var_recursive(iter.secondRef().asTypedValue(), wddxPacket);
+      find_var_recursive(iter.secondRval().tv_ptr(), wddxPacket);
     }
   }
 }

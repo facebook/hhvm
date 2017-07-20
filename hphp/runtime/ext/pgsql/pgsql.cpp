@@ -35,9 +35,9 @@
   std::vector<const char *> name; \
   name.reserve(params.size()); \
   for (ArrayIter iter(params); iter; ++iter) { \
-    const Variant &param = iter.secondRef(); \
-    name.push_back(param.isNull() ? \
-      nullptr : param.toString().detach()->data()); \
+    auto const param = tvToCell(iter.secondRval()); \
+    name.push_back(isNullType(param.type()) ? \
+      nullptr : tvCastToString(param.tv())->data()); /* leak the string... */\
   }
 
 namespace HPHP {

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/async-flow-stepper.h"
 
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -43,10 +44,13 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
   ArrayIter iter(depStack);
   ++iter; // Skip the top frame.
   for (; iter; ++iter) {
-    if (iter.secondRef().isNull()) {
+    auto const rval = tvToCell(iter.secondRval());
+    if (isNullType(rval.type())) {
       return false;
     }
-    auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
+    auto wh = objToWaitableWaitHandle(
+      Object::attach(tvCastToObject(rval.tv()))
+    );
     if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;

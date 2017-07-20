@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/intl-convert.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -356,10 +357,13 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    const Variant& value = iter.secondRef();
+    auto const rval = tvToCell(iter.secondRval());
     /* Process string values only. */
-    if (!value.isString()) continue;
-    String str = intl_convert_str_utf16_to_utf8(value.toString(), status);
+    if (!isStringType(rval.type())) continue;
+    String str = intl_convert_str_utf16_to_utf8(
+      StrNR(rval.val().pstr),
+      status
+    );
     if (U_FAILURE(*status)) {
       return;
     }
@@ -372,10 +376,13 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    const Variant& value = iter.secondRef();
+    auto const rval = tvToCell(iter.secondRval());
     /* Process string values only. */
-    if (!value.isString()) continue;
-    String str = intl_convert_str_utf8_to_utf16(value.toString(), status);
+    if (!isStringType(rval.type())) continue;
+    String str = intl_convert_str_utf8_to_utf16(
+      StrNR(rval.val().pstr),
+      status
+    );
     if (U_FAILURE(*status)) {
       return;
     }

@@ -73,9 +73,12 @@ ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
  *
  * @requires: isRefcountedType(tv->m_type)
  */
+ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
+  assert(isRefcountedType(tv.m_type));
+  return tv.m_data.pcnt->count();
+}
 ALWAYS_INLINE RefCount tvGetCount(const TypedValue* tv) {
-  assert(isRefcountedType(tv->m_type));
-  return tv->m_data.pcnt->count();
+  return tvGetCount(*tv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
@@ -162,7 +163,7 @@ void CmdWhere::onClient(DebuggerClient &client) {
   }
 }
 
-c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
+c_WaitableWaitHandle* objToWaitableWaitHandle(Object o) {
   assert(o->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(o.get());
 }
@@ -197,15 +198,21 @@ static Array createAsyncStacktrace() {
   Array depStack =
     objToWaitableWaitHandle(currentWaitHandle)->getDependencyStack();
   for (ArrayIter iter(depStack); iter; ++iter) {
-    if (iter.secondRef().isNull()) {
+    auto const rval = tvToCell(iter.secondRval());
+    if (isNullType(rval.type())) {
       trace.append(Array(staticEmptyArray()));
     } else {
-      auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
+      auto wh = objToWaitableWaitHandle(
+        Object::attach(tvCastToObject(rval.tv()))
+      );
       auto parents = wh->getParents();
       Array ancestors;
       for (ArrayIter piter(parents); piter; ++piter) {
+        auto const prval = tvToCell(piter.secondRval());
         // Note: the parent list contains no nulls.
-        auto parent = objToWaitableWaitHandle(piter.secondRef().toObject());
+        auto parent = objToWaitableWaitHandle(
+          Object::attach(tvCastToObject(prval.tv()))
+        );
         ancestors.append(parent->getName());
       }
       Array frameData;

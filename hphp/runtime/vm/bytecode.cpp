@@ -1239,7 +1239,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
       assert(stack.top() == (void*) ar);
       stack.pushStringNoRc(invName);
       for (ArrayIter iter(args); iter; ++iter) {
-        ai.appendWithRef(iter.secondRefPlus());
+        ai.appendWithRef(iter.secondValPlus());
       }
       stack.pushArrayNoRc(ai.create());
     }
@@ -1274,14 +1274,13 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   ArrayIter iter(args);
   if (LIKELY(nextra_regular == 0)) {
     for (int i = nregular; iter && (i < nparams); ++i, ++iter) {
-      TypedValue* from = const_cast<TypedValue*>(
-        iter.secondRefPlus().asTypedValue());
+      auto const from = iter.secondValPlus();
       TypedValue* to = stack.allocTV();
       if (LIKELY(!f->byRef(i))) {
-        cellDup(*tvToCell(from), *to);
-      } else if (LIKELY(from->m_type == KindOfRef &&
-                        from->m_data.pref->hasMultipleRefs())) {
-        refDup(*from, *to);
+        cellDup(tvToCell(from), *to);
+      } else if (LIKELY(from.m_type == KindOfRef &&
+                        from.m_data.pref->hasMultipleRefs())) {
+        refDup(from, *to);
       } else {
         if (doCufRefParamChecks && f->mustBeRef(i)) {
           try {
@@ -1302,7 +1301,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
             return false;
           }
         }
-        cellDup(*tvToCell(from), *to);
+        cellDup(tvToCell(from), *to);
       }
     }
 
@@ -1367,10 +1366,10 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     }
     for (int i = nextra_regular; i < extra; ++i, ++iter) {
       TypedValue* to = extraArgs->getExtraArg(i);
-      const TypedValue* from = iter.secondRefPlus().asTypedValue();
-      tvDupWithRef(*from, *to);
+      auto const from = iter.secondValPlus();
+      tvDupWithRef(from, *to);
       if (hasVarParam) {
-        ai.appendWithRef(iter.secondRefPlus());
+        ai.appendWithRef(from);
       }
     }
     assert(!iter); // iter should now be exhausted
@@ -1404,7 +1403,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       for (int i = nextra_regular; i < extra; ++i, ++iter) {
         // appendWithRef bumps the refcount to compensate for the
         // eventual decref of arrayArgs.
-        ai.appendWithRef(iter.secondRefPlus());
+        ai.appendWithRef(iter.secondValPlus());
       }
       assert(!iter); // iter should now be exhausted
       auto const ad = ai.create();
@@ -5086,7 +5085,7 @@ void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 OPTBLD_INLINE void iopWIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
   Cell* c1 = vmStack().topC();
   if (initIterator(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondRefPlus());
+    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
   }
 }
 
@@ -5094,7 +5093,7 @@ OPTBLD_INLINE void
 iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   Cell* c1 = vmStack().topC();
   if (initIterator(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondRefPlus());
+    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
     tvAsVariant(key.ptr) = it->arr().first();
   }
 }
@@ -5152,7 +5151,7 @@ OPTBLD_INLINE void iopWIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
   jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
     pc = targetpc;
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondRefPlus());
+    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
   }
 }
 
@@ -5161,7 +5160,7 @@ iopWIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
     pc = targetpc;
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondRefPlus());
+    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
     tvAsVariant(key.ptr) = it->arr().first();
   }
 }

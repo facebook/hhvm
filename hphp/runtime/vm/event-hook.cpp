@@ -234,7 +234,7 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
       // ... shuffled into a packed array stored in the variadic capture
       // param on the stack
       for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
-        retArray.appendWithRef(iter.secondRef());
+        retArray.appendWithRef(iter.secondVal());
       }
     } else {
       // ... or moved into the ExtraArgs datastructure.

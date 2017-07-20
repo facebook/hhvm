@@ -493,7 +493,7 @@ folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
     if (key.m_type != KindOfInt64) return folly::none;
     if (key.m_data.num != idx)     return folly::none;
     elems.push_back(
-      from_cell(*iter.secondRef().asTypedValue())
+      from_cell(iter.secondVal())
     );
   }
 
@@ -509,7 +509,7 @@ folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
     auto const key = *iter.first().asTypedValue();
     if (key.m_type != KindOfInt64) return folly::none;
     if (key.m_data.num != idx)     return folly::none;
-    t |= from_cell(*iter.secondRef().asTypedValue());
+    t |= from_cell(iter.secondVal());
   }
 
   return DArrLikePackedN { std::move(t) };
@@ -527,7 +527,7 @@ folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
       packed = isIntType(key.m_type) && key.m_data.num == idx;
       ++idx;
     }
-    auto const value = *iter.secondRef().asTypedValue();
+    auto const value = iter.secondVal();
     map.emplace_back(key, from_cell(value));
   }
   if (packed) return folly::none;
@@ -544,7 +544,7 @@ folly::Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
   for (ArrayIter iter(ar); iter; ++iter) {
     auto const key = *iter.first().asTypedValue();
     k |= from_cell(key);
-    v |= from_cell(*iter.secondRef().asTypedValue());
+    v |= from_cell(iter.secondVal());
     if (packed) {
       packed = isIntType(key.m_type) && key.m_data.num == idx;
       ++idx;
@@ -739,8 +739,8 @@ struct DualDispatchCouldBeImpl {
     bool bad = false;
     IterateKV(
       b,
-      [&] (const Cell* k, const TypedValue* v) {
-        bad |= !(a.key.couldBe(from_cell(*k)) && a.val.couldBe(from_cell(*v)));
+      [&] (Cell k, TypedValue v) {
+        bad |= !(a.key.couldBe(from_cell(k)) && a.val.couldBe(from_cell(v)));
         return bad;
       }
     );
@@ -982,8 +982,8 @@ struct DualDispatchSubtype {
     bool bad = false;
     IterateKV(
       a,
-      [&] (const Cell* k, const TypedValue* v) {
-        bad |= !(b.key.couldBe(from_cell(*k)) && b.val.couldBe(from_cell(*v)));
+      [&] (Cell k, TypedValue v) {
+        bad |= !(b.key.couldBe(from_cell(k)) && b.val.couldBe(from_cell(v)));
         return bad;
       }
     );
@@ -2059,8 +2059,8 @@ Type::ArrayCat categorize_array(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (const Cell* key, const TypedValue*) {
-                  return checkKey(*key);
+                [&] (Cell k, TypedValue) {
+                  return checkKey(k);
                 });
       break;
 
@@ -2104,9 +2104,9 @@ CompactVector<LSString> get_string_keys(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (const Cell* key, const TypedValue*) {
-                  assert(isStringType(key->m_type));
-                  strs.push_back(key->m_data.pstr);
+                [&] (Cell k, TypedValue) {
+                  assert(isStringType(k.m_type));
+                  strs.push_back(k.m_data.pstr);
                 });
       break;
 
@@ -2777,9 +2777,9 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
   auto const couldBeInt = key.type.couldBe(TInt);
   auto const couldBeStr = key.type.couldBe(TStr);
   auto ty = isPhpArray ? TInitNull : TBottom;
-  IterateKV(ad, [&] (const TypedValue* k, const TypedValue* v) {
-      if (isStringType(k->m_type) ? couldBeStr : couldBeInt) {
-        ty |= from_cell(*v);
+  IterateKV(ad, [&] (Cell k, TypedValue v) {
+      if (isStringType(k.m_type) ? couldBeStr : couldBeInt) {
+        ty |= from_cell(v);
         return TInitCell.subtypeOf(ty);
       }
       return false;

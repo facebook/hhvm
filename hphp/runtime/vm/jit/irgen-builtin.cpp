@@ -357,12 +357,12 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   ArrayInit flipped{haystack->size(), ArrayInit::Map{}};
 
   for (auto iter = ArrayIter{haystack}; iter; ++iter) {
-    auto const& key = iter.secondRef();
+    auto const key = tvToCell(iter.secondRval());
     int64_t ignoredInt;
     double ignoredDbl;
 
-    if (!key.isString() ||
-        key.asCStrRef().get()
+    if (!isStringType(key.type()) ||
+        key.val().pstr
           ->isNumericWithVal(ignoredInt, ignoredDbl, false) != KindOfNull) {
       // Numeric strings will complicate matters because the loose comparisons
       // done with array keys are not quite the same as loose comparisons done
@@ -372,7 +372,7 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
       return nullptr;
     }
 
-    flipped.set(key.asCStrRef(), init_null_variant);
+    flipped.set(StrNR(key.val().pstr), init_null_variant);
   }
 
   auto const needle = params[0].value;

@@ -398,6 +398,7 @@ public:
   /*
    * Get a refcounted copy of the element at `key'.
    */
+  Variant operator[](Cell key) const;
   Variant operator[](int key) const;
   Variant operator[](int64_t key) const;
   Variant operator[](const String& key) const;

@@ -741,7 +741,9 @@ void xdebug_var_export_text_ansi(
         }
 
         Indenter ind(exporter);
-        xdebug_var_export_text_ansi(sb, iter.secondRef(), ansi, exporter);
+        xdebug_var_export_text_ansi(
+          sb, VarNR(iter.secondVal()), ansi, exporter
+        );
       }
     } else {
       sb.printf("%*s...\n", exporter.level * 2, "");
@@ -816,7 +818,7 @@ void xdebug_var_export_text_ansi(
       sb.printf(" %s=>%s\n", ANSI_COLOR_POINTER, ANSI_COLOR_RESET);
 
       Indenter ind(exporter);
-      xdebug_var_export_text_ansi(sb, iter.secondRef(), ansi, exporter);
+      xdebug_var_export_text_ansi(sb, VarNR(iter.secondVal()), ansi, exporter);
     }
     sb.printf("%*s}", (exporter.level * 2) - 2, "");
     break;
@@ -984,7 +986,7 @@ void xdebug_var_export_fancy(
       sb.printf(" <font color='%s'>=&gt;</font> ", COLOR_POINTER);
 
       Indenter ind(exporter);
-      xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+      xdebug_var_export_fancy(sb, VarNR(iter.secondVal()), exporter);
     }
     break;
   }
@@ -1034,7 +1036,7 @@ void xdebug_var_export_fancy(
           first.m_data.num,
           COLOR_POINTER
         );
-        xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+        xdebug_var_export_fancy(sb, VarNR(iter.secondVal()), exporter);
         continue;
       }
 
@@ -1059,7 +1061,7 @@ void xdebug_var_export_fancy(
 
       sb.printf("<font color='%s'>=&gt;</font> ", COLOR_POINTER);
       Indenter ind(exporter);
-      xdebug_var_export_fancy(sb, iter.secondRef(), exporter);
+      xdebug_var_export_fancy(sb, VarNR(iter.secondVal()), exporter);
     }
     break;
   }

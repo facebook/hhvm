@@ -125,7 +125,7 @@ Type vecElemType(SSATmp* arr, SSATmp* idx) {
     Type type{TBottom};
     PackedArray::IterateV(
       arr->vecVal(),
-      [&](const TypedValue* v) { type |= Type(v->m_type); }
+      [&](TypedValue v) { type |= Type(v.m_type); }
     );
     return type;
   }
@@ -158,12 +158,12 @@ Type dictElemType(SSATmp* arr, SSATmp* idx) {
     Type type{TBottom};
     MixedArray::IterateKV(
       MixedArray::asMixed(arr->dictVal()),
-      [&](const TypedValue* k, const TypedValue* v) {
+      [&](Cell k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
-        if (isIntType(k->m_type)) {
-          if (!idx || idx->type().maybe(TInt)) type |= Type(v->m_type);
-        } else if (isStringType(k->m_type)) {
-          if (!idx || idx->type().maybe(TStr)) type |= Type(v->m_type);
+        if (isIntType(k.m_type)) {
+          if (!idx || idx->type().maybe(TInt)) type |= Type(v.m_type);
+        } else if (isStringType(k.m_type)) {
+          if (!idx || idx->type().maybe(TStr)) type |= Type(v.m_type);
         }
       }
     );
@@ -198,13 +198,13 @@ Type keysetElemType(SSATmp* arr, SSATmp* idx) {
     Type type{TBottom};
     SetArray::Iterate(
       SetArray::asSet(arr->keysetVal()),
-      [&](const TypedValue* k) {
+      [&](TypedValue v) {
         // Ignore values which can't correspond to the key's type
-        if (isIntType(k->m_type)) {
-          if (!idx || idx->type().maybe(TInt)) type |= Type(k->m_type);
+        if (isIntType(v.m_type)) {
+          if (!idx || idx->type().maybe(TInt)) type |= Type(v.m_type);
         } else {
-          assertx(isStringType(k->m_type));
-          if (!idx || idx->type().maybe(TStr)) type |= Type(k->m_type);
+          assertx(isStringType(v.m_type));
+          if (!idx || idx->type().maybe(TStr)) type |= Type(v.m_type);
         }
       }
     );

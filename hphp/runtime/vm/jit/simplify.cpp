@@ -1894,8 +1894,8 @@ SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
       bool keylike = true;
       IterateV(
         a,
-        [&](const TypedValue* v) {
-          if (!isIntType(v->m_type) && !isStringType(v->m_type)) {
+        [&](TypedValue v) {
+          if (!isIntType(v.m_type) && !isStringType(v.m_type)) {
             keylike = false;
             return true;
           }

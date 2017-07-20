@@ -224,7 +224,7 @@ Array magickQueryFormats(const char* pattern /* = "*" */) {
 String magickResolveFont(const String& fontName) {
   Array fonts = magickQueryFonts();
   for (ArrayIter it(fonts); it; ++it) {
-    if (strcasecmp(it.secondRefPlus().toCStrRef().c_str(),
+    if (strcasecmp(it.secondRvalPlus().val().pstr->data(),
                    fontName.c_str()) == 0) {
       return fontName;
     }
@@ -610,8 +610,11 @@ static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
               : files.isArray() ? files.toArray()
               : Array();
   for (ArrayIter it(array); it; ++it) {
-    String file = it.secondRefPlus().toString();
-    imagickReadOp(wand->getWand(), file, MagickReadImage);
+    imagickReadOp(
+      wand->getWand(),
+      String::attach(tvCastToString(it.secondValPlus())),
+      MagickReadImage
+    );
   }
 }
 
@@ -1804,7 +1807,9 @@ static vector<pair<String, String>> parseIdentify(const String& identify) {
   Array lines = HHVM_FN(explode)("\r\n", identify).toArray();
   ret.reserve(keys.size());
   for (ArrayIter it(lines); it; ++it) {
-    String line = HHVM_FN(trim)(it.secondRefPlus().toString());
+    String line = HHVM_FN(trim)(
+      String::attach(tvCastToString(it.secondValPlus()))
+    );
     auto key = std::find_if(keys.begin(), keys.end(),
         [=](Keys::const_reference i) {
           const string& prefix = i.first;
@@ -2498,8 +2503,11 @@ static bool HHVM_METHOD(Imagick, readImageFile,
 static bool HHVM_METHOD(Imagick, readImages, const Array& files) {
   auto wand = getMagickWandResource(Object{this_});
   for (ArrayIter it(files); it; ++it) {
-    String file = it.secondRefPlus().toString();
-    imagickReadOp(wand->getWand(), file, MagickReadImage);
+    imagickReadOp(
+      wand->getWand(),
+      String::attach(tvCastToString(it.secondValPlus())),
+      MagickReadImage
+    );
   }
   return true;
 }

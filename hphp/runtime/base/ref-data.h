@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/member-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {

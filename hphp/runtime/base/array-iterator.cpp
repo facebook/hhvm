@@ -424,7 +424,7 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-const Variant& ArrayIter::secondRef() const {
+member_rval ArrayIter::secondRval() const {
   if (!hasArrayData()) {
     raise_fatal_error("taking reference on iterator objects");
   }
@@ -432,15 +432,15 @@ const Variant& ArrayIter::secondRef() const {
   const ArrayData* ad = getArrayData();
   assert(ad);
   assert(m_pos != ad->iter_end());
-  return tvAsCVarRef(ad->rvalPos(m_pos).tv_ptr());
+  return ad->rvalPos(m_pos);
 }
 
-const Variant& ArrayIter::secondRefPlus() {
+member_rval ArrayIter::secondRvalPlus() {
   if (LIKELY(hasArrayData())) {
     const ArrayData* ad = getArrayData();
     assert(ad);
     assert(m_pos != ad->iter_end());
-    return tvAsCVarRef(ad->rvalPos(m_pos).tv_ptr());
+    return ad->rvalPos(m_pos);
   }
   auto obj = getObject();
   if (obj->isCollection()) {
@@ -450,7 +450,7 @@ const Variant& ArrayIter::secondRefPlus() {
         if (UNLIKELY(m_version != vec->getVersion())) {
           throw_collection_modified();
         }
-        return tvAsCVarRef(vec->at(m_pos));
+        return member_rval { obj, vec->at(m_pos) };
       }
       case CollectionType::Map:
       case CollectionType::ImmMap: {
@@ -458,30 +458,30 @@ const Variant& ArrayIter::secondRefPlus() {
         if (UNLIKELY(m_version != map->getVersion())) {
           throw_collection_modified();
         }
-        return tvAsCVarRef(map->iter_value(m_pos));
+        return member_rval { obj, map->iter_value(m_pos) };
       }
       case CollectionType::Set: {
         auto set = static_cast<BaseSet*>(obj);
         if (UNLIKELY(m_version != set->getVersion())) {
           throw_collection_modified();
         }
-        return tvAsCVarRef(set->iter_value(m_pos));
+        return member_rval { obj, set->iter_value(m_pos) };
       }
       case CollectionType::Pair: {
         auto pair = static_cast<c_Pair*>(obj);
-        return tvAsCVarRef(pair->at(m_pos));
+        return member_rval { obj, pair->at(m_pos) };
       }
       case CollectionType::ImmVector: {
         auto fvec = static_cast<c_ImmVector*>(obj);
         if (UNLIKELY(m_version != fvec->getVersion())) {
           throw_collection_modified();
         }
-        return tvAsCVarRef(fvec->at(m_pos));
+        return member_rval { obj, fvec->at(m_pos) };
       }
       case CollectionType::ImmSet: {
         auto set = static_cast<c_ImmSet*>(obj);
         assert(m_version == set->getVersion());
-        return tvAsCVarRef(set->iter_value(m_pos));
+        return member_rval { obj, set->iter_value(m_pos) };
       }
     }
   }
@@ -1079,7 +1079,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arr = iter->arr();
   if (typeArray) {
-    arr.nvFirst(out);
+    cellCopy(arr.nvFirst(), *out);
   } else {
     Variant key = arr.first();
     cellDup(*key.asTypedValue(), *out);

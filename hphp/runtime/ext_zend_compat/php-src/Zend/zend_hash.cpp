@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "zend_hash.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
@@ -315,7 +316,7 @@ ZEND_API int zend_hash_num_elements(const HashTable *ht) {
 
 ZEND_API void zend_hash_clean(HashTable *ht) {
   for (HPHP::ArrayIter it(ht); !it.end(); it.next()) {
-    ht->remove(it.secondRef(), false);
+    ht->remove(tvToCell(it.secondVal()), false);
   }
 }
 

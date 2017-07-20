@@ -530,7 +530,7 @@ public:
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
-        if (ArrayData::call_helper(fn, &elm->data)) break;
+        if (ArrayData::call_helper(fn, elm->data)) break;
       }
     }
   }
@@ -545,7 +545,7 @@ public:
         TypedValue key;
         key.m_data.num = elm->ikey;
         key.m_type = elm->hasIntKey() ? KindOfInt64 : KindOfString;
-        if (ArrayData::call_helper(fn, &key, &elm->data)) break;
+        if (ArrayData::call_helper(fn, key, elm->data)) break;
       }
     }
   }

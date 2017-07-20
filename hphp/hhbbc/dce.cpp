@@ -1224,9 +1224,9 @@ void dce(Env& env, const bc::Array& op) {
       assert(!env.dceState.isLocal);
 
       CompactVector<Bytecode> bcs;
-      IterateV(op.arr1, [&] (const TypedValue* tv) {
-          bcs.push_back(gen_constant(*tv));
-        });
+      IterateV(op.arr1, [&] (TypedValue v) {
+        bcs.push_back(gen_constant(v));
+      });
       env.dceState.replaceMap.emplace(env.id, std::move(bcs));
       ui.actions[env.id] = DceAction::Replace;
       return PushFlags::MarkUnused;

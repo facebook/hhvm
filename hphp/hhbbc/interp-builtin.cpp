@@ -64,7 +64,7 @@ folly::Optional<Type> const_fold(ISS& env,
     args.pop_back();
     IterateV(
       variadic.m_data.parr,
-      [&](const TypedValue* v) { args.emplace_back(*v); }
+      [&](TypedValue v) { args.emplace_back(v); }
     );
   }
 

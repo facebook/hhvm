@@ -537,7 +537,7 @@ bool ExecutionContext::removeShutdownFunction(const Variant& function,
 
   for (ArrayIter iter(funcs); iter; ++iter) {
     if (!same(iter.second().toArray()[s_name], function)) {
-      newFuncs.appendWithRef(iter.secondRef());
+      newFuncs.appendWithRef(iter.secondVal());
     } else {
       ret = true;
     }

@@ -109,7 +109,7 @@ void Array::escalate() {
 Array Array::values() const {
   PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.appendWithRef(iter.secondRef());
+    ai.appendWithRef(iter.secondVal());
   }
   return ai.toArray();
 }
@@ -201,12 +201,15 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     // Fast case
     for (ArrayIter iter(*this); iter; ++iter) {
       Variant key(iter.first());
-      const Variant& value(iter.secondRef());
+      auto const value = iter.secondVal();
       bool found = false;
       if (array->exists(key)) {
         if (by_value) {
           found = value_cmp_as_string_function(
-            value, array.rvalAt(key, AccessFlags::Key), value_data) == 0;
+            VarNR(value),
+            array.rvalAt(key, AccessFlags::Key),
+            value_data
+          ) == 0;
         } else {
           found = true;
         }
@@ -267,7 +270,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     if (min < max) { // found
       // if checking both, check value
       if (by_key && by_value) {
-        const Variant& val(iter.secondRef());
+        auto const val = iter.secondVal();
         // Have to look up and down for matches
         for (int i = mid; i < max; i++) {
           ssize_t pos = opaque1.positions[perm1[i]];
@@ -275,7 +278,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
             break;
           }
           if (value_cmp_as_string_function(
-                val,
+                VarNR(val),
                 VarNR(array->atPos(pos)),
                 value_data
               ) == 0) {
@@ -290,7 +293,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
               break;
             }
             if (value_cmp_as_string_function(
-                  val,
+                  VarNR(val),
                   VarNR(array->atPos(pos)),
                   value_data
                 ) == 0) {
@@ -306,7 +309,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     }
 
     if (found == match) {
-      ret.setWithRef(iter.first(), iter.secondRef(), true);
+      ret.setWithRef(iter.first(), iter.secondVal(), true);
     }
   }
   return ret;

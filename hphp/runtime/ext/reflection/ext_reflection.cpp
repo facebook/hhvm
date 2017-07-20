@@ -1323,7 +1323,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
 
   PackedArrayInit ai(st->size());
   for (ArrayIter iter(st.get()); iter; ++iter) {
-    ai.append(iter.secondRefPlus());
+    ai.append(iter.secondValPlus());
   }
   return ai.toArray();
 }

@@ -198,9 +198,11 @@ static void HHVM_METHOD(
     const Array& attrs) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
 
-  IterateKV(attrs.get(), [&](const TypedValue* k, const TypedValue* v) {
+  IterateKV(attrs.get(), [&](Cell k, TypedValue v) {
     data->m_conn_opts.setConnectionAttribute(
-        tvCastToString(*k)->toCppString(), tvCastToString(*v)->toCppString());
+      tvCastToString(k)->toCppString(),
+      tvCastToString(v)->toCppString()
+    );
   });
 }
 

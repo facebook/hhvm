@@ -137,12 +137,12 @@ ArrayData* deepCopyArray(ArrayData* arr) {
   Array ar(arr);
   IterateKV(
     arr,
-    [&](const TypedValue* k, const TypedValue* v) {
-      if (!isRefcountedType(v->m_type)) return false;
-      Variant value{tvAsCVarRef(v)};
+    [&](Cell k, TypedValue v) {
+      if (!isRefcountedType(v.m_type)) return false;
+      Variant value{VarNR(v)};
       deepCopy(value.asTypedValue());
-      if (value.asTypedValue()->m_data.num != v->m_data.num) {
-        ar.set(tvAsCVarRef(k), value, true);
+      if (value.asTypedValue()->m_data.num != v.m_data.num) {
+        ar.set(k, *value.asTypedValue(), true);
       }
       return false;
     }
@@ -155,13 +155,13 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
   Array ar(arr);
   PackedArray::IterateKV(
     arr,
-    [&](const TypedValue* k, const TypedValue* v) {
-      if (!isRefcountedType(v->m_type)) return false;
-      Variant value{tvAsCVarRef(v)};
+    [&](Cell k, TypedValue v) {
+      if (!isRefcountedType(v.m_type)) return false;
+      Variant value{VarNR(v)};
       deepCopy(value.asTypedValue());
-      if (value.asTypedValue()->m_data.num != v->m_data.num) {
-        assert(k->m_type == KindOfInt64);
-        ar.set(k->m_data.num, value);
+      if (value.asTypedValue()->m_data.num != v.m_data.num) {
+        assert(k.m_type == KindOfInt64);
+        ar.set(k.m_data.num, value);
       }
       return false;
     }
@@ -174,12 +174,12 @@ ArrayData* deepCopyDict(ArrayData* arr) {
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),
-    [&](const TypedValue* k, const TypedValue* v) {
-      if (!isRefcountedType(v->m_type)) return false;
-      Variant value{tvAsCVarRef(v)};
+    [&](Cell k, TypedValue v) {
+      if (!isRefcountedType(v.m_type)) return false;
+      Variant value{VarNR(v)};
       deepCopy(value.asTypedValue());
-      if (value.asTypedValue()->m_data.num != v->m_data.num) {
-        ar.set(tvAsCVarRef(k), value);
+      if (value.asTypedValue()->m_data.num != v.m_data.num) {
+        ar.set(k, *value.asTypedValue());
       }
       return false;
     }

@@ -395,8 +395,8 @@ static void fb_compact_serialize_vec(
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   PackedArray::IterateV(
     arr.get(),
-    [&](const TypedValue* v) {
-      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1);
+    [&](TypedValue v) {
+      fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
     }
   );
   fb_compact_serialize_code(sb, FB_CS_STOP);
@@ -407,14 +407,14 @@ static void fb_compact_serialize_array_as_map(
   fb_compact_serialize_code(sb, FB_CS_MAP);
   IterateKV(
     arr.get(),
-    [&](const TypedValue* k, const TypedValue* v) {
-      if (tvIsString(k)) {
-        fb_compact_serialize_string(sb, StrNR{k->m_data.pstr});
+    [&](Cell k, TypedValue v) {
+      if (isStringType(k.m_type)) {
+        fb_compact_serialize_string(sb, StrNR{k.m_data.pstr});
       } else {
-        assertx(k->m_type == KindOfInt64);
-        fb_compact_serialize_int64(sb, k->m_data.num);
+        assertx(isIntType(k.m_type));
+        fb_compact_serialize_int64(sb, k.m_data.num);
       }
-      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1);
+      fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
     }
   );
   fb_compact_serialize_code(sb, FB_CS_STOP);
@@ -425,14 +425,14 @@ static void fb_compact_serialize_keyset(
   fb_compact_serialize_code(sb, FB_CS_MAP);
   SetArray::Iterate(
     SetArray::asSet(arr.get()),
-    [&](const TypedValue* v) {
-      if (tvIsString(v)) {
-        fb_compact_serialize_string(sb, StrNR{v->m_data.pstr});
-        fb_compact_serialize_string(sb, StrNR{v->m_data.pstr});
+    [&](TypedValue v) {
+      if (isStringType(v.m_type)) {
+        fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
+        fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
       } else {
-        assertx(v->m_type == KindOfInt64);
-        fb_compact_serialize_int64(sb, v->m_data.num);
-        fb_compact_serialize_int64(sb, v->m_data.num);
+        assertx(v.m_type == KindOfInt64);
+        fb_compact_serialize_int64(sb, v.m_data.num);
+        fb_compact_serialize_int64(sb, v.m_data.num);
       }
     }
   );

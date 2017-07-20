@@ -306,8 +306,8 @@ bool Variant::isScalar() const noexcept {
   not_reached();
 }
 
-bool Variant::isAllowedAsConstantValue() const {
-  switch (m_type) {
+static bool isAllowedAsConstantValueImpl(TypedValue tv) {
+  switch (tv.m_type) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
@@ -325,13 +325,13 @@ bool Variant::isAllowedAsConstantValue() const {
     case KindOfVec:
     case KindOfDict:
     case KindOfArray: {
-      if (m_data.parr->isGlobalsArray()) return false;
+      if (tv.m_data.parr->isGlobalsArray()) return false;
 
       bool allowed = true;
       IterateV(
-        m_data.parr,
-        [&](const TypedValue* v) {
-          if (!tvAsCVarRef(v).isAllowedAsConstantValue()) allowed = false;
+        tv.m_data.parr,
+        [&] (TypedValue v) {
+          if (!isAllowedAsConstantValueImpl(v)) allowed = false;
           return !allowed;
         }
       );
@@ -344,6 +344,10 @@ bool Variant::isAllowedAsConstantValue() const {
       return false;
   }
   not_reached();
+}
+
+bool Variant::isAllowedAsConstantValue() const {
+  return isAllowedAsConstantValueImpl(*this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

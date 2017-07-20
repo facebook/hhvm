@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
@@ -137,9 +138,10 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
   for (ArrayIter it(odProps); !it.end(); it.next(), ++prop) {
     Variant key(it.first());
     assert(key.isString());
-    const Variant& value = it.secondRef();
-    if (!value.isNull()) {
-      auto val = APCHandle::Create(value, false, APCHandleLevel::Inner, true);
+    auto const rval = it.secondRval();
+    if (!isNullType(tvToCell(rval).type())) {
+      auto val = APCHandle::Create(VarNR(rval.tv()), false,
+                                   APCHandleLevel::Inner, true);
       prop->val = val.handle;
       size += val.size;
     } else {

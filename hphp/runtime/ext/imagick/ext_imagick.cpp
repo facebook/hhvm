@@ -278,7 +278,7 @@ MagickBooleanType withMagickLocaleFix(
 std::vector<double> toDoubleArray(const Array& array) {
   std::vector<double> ret;
   for (ArrayIter it(array); it; ++it) {
-    ret.push_back(it.secondRefPlus().toDouble());
+    ret.push_back(tvCastToDouble(it.secondValPlus()));
   }
   return ret;
 }
@@ -288,19 +288,19 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   int idx = 0;
 
   for (ArrayIter it(coordinates); it; ++it) {
-    const Variant& element = it.secondRefPlus();
-    if (!element.isArray()) {
+    auto const element = tvToCell(it.secondRvalPlus());
+    if (!isArrayLikeType(element.type())) {
       return {};
     }
 
-    const Array& coordinate = element.toCArrRef();
-    if (coordinate.size() != 2) {
+    auto const coordinate = element.val().parr;
+    if (coordinate->size() != 2) {
       return {};
     }
 
     for (ArrayIter jt(coordinate); jt; ++jt) {
       const String& key = jt.first().toString();
-      double value = jt.secondRefPlus().toDouble();
+      double value = tvCastToDouble(jt.secondValPlus());
       if (key == s_x) {
         ret[idx].x = value;
       } else if (key == s_y) {

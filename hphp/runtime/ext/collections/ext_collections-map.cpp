@@ -97,8 +97,8 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         return true;
       }
     },
-    [this](const TypedValue* key, const TypedValue* value) {
-      setRaw(tvAsCVarRef(key), tvAsCVarRef(value));
+    [this](Cell k, TypedValue v) {
+      setRaw(k, tvToCell(v));
     },
     [this](ObjectData* coll) {
       switch (coll->collectionType()) {

@@ -104,6 +104,14 @@ let string_of_class_kind = function
   | Ctrait -> "a trait"
   | Cenum -> "an enum"
 
+let string_of_kind = function
+  | Final -> "final"
+  | Static -> "static"
+  | Abstract -> "abstract"
+  | Private -> "private"
+  | Public -> "public"
+  | Protected -> "protected"
+
 module ShapeField = struct
   type t = shape_field_name
   (* We include span information in shape_field_name to improve error

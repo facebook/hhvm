@@ -29,7 +29,8 @@ type t = {
   class_is_top       : bool;
   class_uses         : Litstr.id list;
   class_use_aliases  :
-    (Litstr.id * Litstr.id option * Litstr.id list * Ast.cu_alias_type) list;
+    (Litstr.id option * Litstr.id * Litstr.id option * Ast.kind option) list;
+  class_use_precedences : (Litstr.id * Litstr.id * Litstr.id list) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
   class_properties   : Hhas_property.t list;
@@ -52,6 +53,7 @@ let make
   class_is_top
   class_uses
   class_use_aliases
+  class_use_precedences
   class_enum_type
   class_methods
   class_properties
@@ -72,6 +74,7 @@ let make
     class_is_top;
     class_uses;
     class_use_aliases;
+    class_use_precedences;
     class_enum_type;
     class_methods;
     class_properties;
@@ -93,6 +96,7 @@ let is_xhp hhas_class = hhas_class.class_is_xhp
 let is_top hhas_class = hhas_class.class_is_top
 let class_uses hhas_class = hhas_class.class_uses
 let class_use_aliases hhas_class = hhas_class.class_use_aliases
+let class_use_precedences hhas_class = hhas_class.class_use_precedences
 let enum_type hhas_class = hhas_class.class_enum_type
 let methods hhas_class = hhas_class.class_methods
 let with_methods hhas_class class_methods = { hhas_class with class_methods }

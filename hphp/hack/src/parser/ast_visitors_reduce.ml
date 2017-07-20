@@ -169,12 +169,17 @@ class virtual ['self] reduce =
     method on_Attributes = self#on_list self#on_class_attr
     method on_TypeConst = self#on_typeconst
     method on_ClassUse = self#on_hint
-    method on_ClassUseAlias env (c0, c1) c2 c3 =
-      let r0 = self#on_id env c0 in
-      let r1 = self#on_option self#on_pstring env c1 in
-      let r2 = self#on_list self#on_id env c2 in
-      let r3 = self#on_cu_alias_type env c3 in
+    method on_ClassUseAlias env c0 c1 c2 c3 =
+      let r0 = self#on_option self#on_id env c0 in
+      let r1 = self#on_pstring env c1 in
+      let r2 = self#on_option self#on_id env c2 in
+      let r3 = self#on_option self#on_kind env c3 in
       self#sum [ r0; r1; r2; r3 ]
+    method on_ClassUsePrecedence env c0 c1 c2 =
+      let r0 = self#on_id env c0 in
+      let r1 = self#on_pstring env c1 in
+      let r2 = self#on_list self#on_id env c2 in
+      self#sum [ r0; r1; r2 ]
     method on_XhpAttrUse = self#on_hint
     method on_ClassTraitRequire env c0 c1 =
       let r0 = self#on_trait_req_kind env c0 in
@@ -227,15 +232,15 @@ class virtual ['self] reduce =
     method on_ChildPlus _ = self#e
     method on_ChildQuestion _ = self#e
 
-    method on_cu_alias_type _ _ = self#e
-
     method on_class_elt env = function
       | Const (c0, c1) -> self#on_Const env c0 c1
       | AbsConst (c0, c1) -> self#on_AbsConst env c0 c1
       | Attributes c0 -> self#on_Attributes env c0
       | TypeConst c0 -> self#on_TypeConst env c0
       | ClassUse c0 -> self#on_ClassUse env c0
-      | ClassUseAlias (c0, c1, c2) -> self#on_ClassUseAlias env c0 c1 c2
+      | ClassUseAlias (c0, c1, c2, c3) -> self#on_ClassUseAlias env c0 c1 c2 c3
+      | ClassUsePrecedence (c0, c1, c2) ->
+        self#on_ClassUsePrecedence env c0 c1 c2
       | XhpAttrUse c0 -> self#on_XhpAttrUse env c0
       | ClassTraitRequire (c0, c1) ->
           self#on_ClassTraitRequire env c0 c1

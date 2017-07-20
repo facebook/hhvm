@@ -1053,19 +1053,37 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_trait_use_conflict_resolution_item : trait_use_conflict_resolution_item validator = function
-  | { Syntax.syntax = Syntax.TraitUseConflictResolutionItem x; value = v } -> v,
-    { trait_use_conflict_resolution_item_aliased_names = validate_list_with (validate_specifier) x.Syntax.trait_use_conflict_resolution_item_aliased_names
-    ; trait_use_conflict_resolution_item_aliasing_keyword = validate_token x.Syntax.trait_use_conflict_resolution_item_aliasing_keyword
-    ; trait_use_conflict_resolution_item_aliasing_name = validate_specifier x.Syntax.trait_use_conflict_resolution_item_aliasing_name
+  and validate_trait_use_precedence_item : trait_use_precedence_item validator = function
+  | { Syntax.syntax = Syntax.TraitUsePrecedenceItem x; value = v } -> v,
+    { trait_use_precedence_item_removed_names = validate_list_with (validate_specifier) x.Syntax.trait_use_precedence_item_removed_names
+    ; trait_use_precedence_item_keyword = validate_token x.Syntax.trait_use_precedence_item_keyword
+    ; trait_use_precedence_item_name = validate_specifier x.Syntax.trait_use_precedence_item_name
     }
-  | s -> validation_fail SyntaxKind.TraitUseConflictResolutionItem s
-  and invalidate_trait_use_conflict_resolution_item : trait_use_conflict_resolution_item invalidator = fun (v, x) ->
+  | s -> validation_fail SyntaxKind.TraitUsePrecedenceItem s
+  and invalidate_trait_use_precedence_item : trait_use_precedence_item invalidator = fun (v, x) ->
     { Syntax.syntax =
-      Syntax.TraitUseConflictResolutionItem
-      { Syntax.trait_use_conflict_resolution_item_aliasing_name = invalidate_specifier x.trait_use_conflict_resolution_item_aliasing_name
-      ; Syntax.trait_use_conflict_resolution_item_aliasing_keyword = invalidate_token x.trait_use_conflict_resolution_item_aliasing_keyword
-      ; Syntax.trait_use_conflict_resolution_item_aliased_names = invalidate_list_with (invalidate_specifier) x.trait_use_conflict_resolution_item_aliased_names
+      Syntax.TraitUsePrecedenceItem
+      { Syntax.trait_use_precedence_item_name = invalidate_specifier x.trait_use_precedence_item_name
+      ; Syntax.trait_use_precedence_item_keyword = invalidate_token x.trait_use_precedence_item_keyword
+      ; Syntax.trait_use_precedence_item_removed_names = invalidate_list_with (invalidate_specifier) x.trait_use_precedence_item_removed_names
+      }
+    ; Syntax.value = v
+    }
+  and validate_trait_use_alias_item : trait_use_alias_item validator = function
+  | { Syntax.syntax = Syntax.TraitUseAliasItem x; value = v } -> v,
+    { trait_use_alias_item_aliased_name = validate_option_with (validate_specifier) x.Syntax.trait_use_alias_item_aliased_name
+    ; trait_use_alias_item_visibility = validate_option_with (validate_token) x.Syntax.trait_use_alias_item_visibility
+    ; trait_use_alias_item_keyword = validate_token x.Syntax.trait_use_alias_item_keyword
+    ; trait_use_alias_item_aliasing_name = validate_specifier x.Syntax.trait_use_alias_item_aliasing_name
+    }
+  | s -> validation_fail SyntaxKind.TraitUseAliasItem s
+  and invalidate_trait_use_alias_item : trait_use_alias_item invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.TraitUseAliasItem
+      { Syntax.trait_use_alias_item_aliasing_name = invalidate_specifier x.trait_use_alias_item_aliasing_name
+      ; Syntax.trait_use_alias_item_keyword = invalidate_token x.trait_use_alias_item_keyword
+      ; Syntax.trait_use_alias_item_visibility = invalidate_option_with (invalidate_token) x.trait_use_alias_item_visibility
+      ; Syntax.trait_use_alias_item_aliased_name = invalidate_option_with (invalidate_specifier) x.trait_use_alias_item_aliased_name
       }
     ; Syntax.value = v
     }

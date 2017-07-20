@@ -664,6 +664,7 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_top             |> mutate_bool)
       (cls |> HC.class_uses)
       (cls |> HC.class_use_aliases)
+      (cls |> HC.class_use_precedences)
       (cls |> HC.enum_type          |> option_lift mutate_type_info)
       (cls |> HC.methods            |> delete_map mutate_method_data)
       (cls |> HC.properties         |> delete_map mutate_property)

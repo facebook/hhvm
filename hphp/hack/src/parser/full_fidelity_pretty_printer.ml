@@ -330,21 +330,26 @@ let rec get_doc node =
     group_doc (t ^| n ^| i ^| r)
   | XHPSimpleClassAttribute { xhp_simple_class_attribute_type } ->
     get_doc xhp_simple_class_attribute_type
-  | TraitUseConflictResolutionItem {
-    trait_use_conflict_resolution_item_aliasing_name;
-    trait_use_conflict_resolution_item_aliasing_keyword;
-    trait_use_conflict_resolution_item_aliased_names;
+  | TraitUseAliasItem {
+    trait_use_alias_item_aliasing_name;
+    trait_use_alias_item_keyword;
+    trait_use_alias_item_visibility;
+    trait_use_alias_item_aliased_name;
     } ->
-    let aliasing_name =
-      get_doc trait_use_conflict_resolution_item_aliasing_name
-    in
-    let keyword =
-      get_doc trait_use_conflict_resolution_item_aliasing_keyword
-    in
-    let aliased_names =
-      get_doc trait_use_conflict_resolution_item_aliased_names
-    in
-    aliasing_name ^| keyword ^| aliased_names
+    let n = get_doc trait_use_alias_item_aliasing_name in
+    let k = get_doc trait_use_alias_item_keyword in
+    let v = get_doc trait_use_alias_item_visibility in
+    let ns = get_doc trait_use_alias_item_aliased_name in
+    n ^| k ^| v ^| ns
+  | TraitUsePrecedenceItem {
+    trait_use_precedence_item_name;
+    trait_use_precedence_item_keyword;
+    trait_use_precedence_item_removed_names;
+    } ->
+    let n = get_doc trait_use_precedence_item_name in
+    let k = get_doc trait_use_precedence_item_keyword in
+    let ns = get_doc trait_use_precedence_item_removed_names in
+    n ^| k ^| ns
   | TraitUseConflictResolution {
     trait_use_conflict_resolution_keyword;
     trait_use_conflict_resolution_names;

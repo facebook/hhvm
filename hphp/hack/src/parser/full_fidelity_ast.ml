@@ -1525,40 +1525,55 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       ; m_doc_comment     = opt_doc_comment
       }]
-  | TraitUseConflictResolution {
-      trait_use_conflict_resolution_names;
-      trait_use_conflict_resolution_clauses;
-      _
+  | TraitUseConflictResolution
+    { trait_use_conflict_resolution_names
+    ; trait_use_conflict_resolution_clauses
+    ; _
     } ->
     let pTraitUseConflictResolutionItem node env =
       match syntax node with
-      | TraitUseConflictResolutionItem
-        { trait_use_conflict_resolution_item_aliasing_name = aliasing_name;
-          trait_use_conflict_resolution_item_aliasing_keyword = alias_kw;
-          trait_use_conflict_resolution_item_aliased_names = aliased_names;
-          _
+      | TraitUsePrecedenceItem
+        { trait_use_precedence_item_name = name
+        ; trait_use_precedence_item_removed_names = removed_names
+        ; _
         } ->
-        let aliasing_name, opt_scope_resolution_name =
-          match syntax aliasing_name with
+        let qualifier, name =
+          match syntax name with
           | ScopeResolutionExpression
             { scope_resolution_qualifier; scope_resolution_name; _ } ->
             pos_name scope_resolution_qualifier,
-            Some (pos_name scope_resolution_name)
-          | _ -> pos_name aliasing_name, None
+            pos_name scope_resolution_name
+          | _ -> missing_syntax "trait use precedence item" node env
         in
-        let alias_type =
-          match token_kind alias_kw with
-          | Some TK.As -> CU_as
-          | Some TK.Insteadof -> CU_insteadof
-          | _ ->
-            missing_syntax "trait use conflict resolution item" alias_kw env
+        let removed_names =
+          couldMap ~f:(fun n _e -> pos_name n) removed_names env
         in
-        let aliased_name_list =
-          couldMap ~f:(fun n _e -> pos_name n) aliased_names env
+        ClassUsePrecedence (qualifier, name, removed_names)
+      | TraitUseAliasItem
+        { trait_use_alias_item_aliasing_name = aliasing_name
+        ; trait_use_alias_item_visibility = visibility
+        ; trait_use_alias_item_aliased_name = aliased_name
+        ; _
+        } ->
+        let qualifier, name =
+          match syntax aliasing_name with
+          | ScopeResolutionExpression
+            { scope_resolution_qualifier; scope_resolution_name; _ } ->
+            Some (pos_name scope_resolution_qualifier),
+            pos_name scope_resolution_name
+          | _ -> None, pos_name aliasing_name
         in
-        ClassUseAlias ((aliasing_name, opt_scope_resolution_name),
-                        aliased_name_list,
-                        alias_type)
+        let visibility = Option.map (token_kind visibility)
+          ~f:begin function
+          | TK.Private   -> Private
+          | TK.Public    -> Public
+          | TK.Protected -> Protected
+          | _ -> missing_syntax "trait use alias item" node env end
+        in
+        let aliased_name =
+          if is_missing aliased_name then None else Some (pos_name aliased_name)
+        in
+        ClassUseAlias (qualifier, name, aliased_name, visibility)
       | _ -> missing_syntax "trait use conflict resolution item" node env
     in
     (couldMap ~f:(fun n e ->

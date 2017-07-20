@@ -84,7 +84,8 @@ module WithToken(Token: TokenType) = struct
       | MethodishDeclaration              _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration               _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody                      _ -> SyntaxKind.ClassishBody
-      | TraitUseConflictResolutionItem    _ -> SyntaxKind.TraitUseConflictResolutionItem
+      | TraitUsePrecedenceItem            _ -> SyntaxKind.TraitUsePrecedenceItem
+      | TraitUseAliasItem                 _ -> SyntaxKind.TraitUseAliasItem
       | TraitUseConflictResolution        _ -> SyntaxKind.TraitUseConflictResolution
       | TraitUse                          _ -> SyntaxKind.TraitUse
       | RequireClause                     _ -> SyntaxKind.RequireClause
@@ -243,7 +244,8 @@ module WithToken(Token: TokenType) = struct
     let is_methodish_declaration                = has_kind SyntaxKind.MethodishDeclaration
     let is_classish_declaration                 = has_kind SyntaxKind.ClassishDeclaration
     let is_classish_body                        = has_kind SyntaxKind.ClassishBody
-    let is_trait_use_conflict_resolution_item   = has_kind SyntaxKind.TraitUseConflictResolutionItem
+    let is_trait_use_precedence_item            = has_kind SyntaxKind.TraitUsePrecedenceItem
+    let is_trait_use_alias_item                 = has_kind SyntaxKind.TraitUseAliasItem
     let is_trait_use_conflict_resolution        = has_kind SyntaxKind.TraitUseConflictResolution
     let is_trait_use                            = has_kind SyntaxKind.TraitUse
     let is_require_clause                       = has_kind SyntaxKind.RequireClause
@@ -689,14 +691,26 @@ module WithToken(Token: TokenType) = struct
       classish_body_right_brace
     )
 
-    let get_trait_use_conflict_resolution_item_children {
-      trait_use_conflict_resolution_item_aliasing_name;
-      trait_use_conflict_resolution_item_aliasing_keyword;
-      trait_use_conflict_resolution_item_aliased_names;
+    let get_trait_use_precedence_item_children {
+      trait_use_precedence_item_name;
+      trait_use_precedence_item_keyword;
+      trait_use_precedence_item_removed_names;
     } = (
-      trait_use_conflict_resolution_item_aliasing_name,
-      trait_use_conflict_resolution_item_aliasing_keyword,
-      trait_use_conflict_resolution_item_aliased_names
+      trait_use_precedence_item_name,
+      trait_use_precedence_item_keyword,
+      trait_use_precedence_item_removed_names
+    )
+
+    let get_trait_use_alias_item_children {
+      trait_use_alias_item_aliasing_name;
+      trait_use_alias_item_keyword;
+      trait_use_alias_item_visibility;
+      trait_use_alias_item_aliased_name;
+    } = (
+      trait_use_alias_item_aliasing_name,
+      trait_use_alias_item_keyword,
+      trait_use_alias_item_visibility,
+      trait_use_alias_item_aliased_name
     )
 
     let get_trait_use_conflict_resolution_children {
@@ -2333,14 +2347,25 @@ module WithToken(Token: TokenType) = struct
         classish_body_elements;
         classish_body_right_brace;
       ]
-      | TraitUseConflictResolutionItem {
-        trait_use_conflict_resolution_item_aliasing_name;
-        trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_names;
+      | TraitUsePrecedenceItem {
+        trait_use_precedence_item_name;
+        trait_use_precedence_item_keyword;
+        trait_use_precedence_item_removed_names;
       } -> [
-        trait_use_conflict_resolution_item_aliasing_name;
-        trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_names;
+        trait_use_precedence_item_name;
+        trait_use_precedence_item_keyword;
+        trait_use_precedence_item_removed_names;
+      ]
+      | TraitUseAliasItem {
+        trait_use_alias_item_aliasing_name;
+        trait_use_alias_item_keyword;
+        trait_use_alias_item_visibility;
+        trait_use_alias_item_aliased_name;
+      } -> [
+        trait_use_alias_item_aliasing_name;
+        trait_use_alias_item_keyword;
+        trait_use_alias_item_visibility;
+        trait_use_alias_item_aliased_name;
       ]
       | TraitUseConflictResolution {
         trait_use_conflict_resolution_keyword;
@@ -3855,14 +3880,25 @@ module WithToken(Token: TokenType) = struct
         "classish_body_elements";
         "classish_body_right_brace";
       ]
-      | TraitUseConflictResolutionItem {
-        trait_use_conflict_resolution_item_aliasing_name;
-        trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_names;
+      | TraitUsePrecedenceItem {
+        trait_use_precedence_item_name;
+        trait_use_precedence_item_keyword;
+        trait_use_precedence_item_removed_names;
       } -> [
-        "trait_use_conflict_resolution_item_aliasing_name";
-        "trait_use_conflict_resolution_item_aliasing_keyword";
-        "trait_use_conflict_resolution_item_aliased_names";
+        "trait_use_precedence_item_name";
+        "trait_use_precedence_item_keyword";
+        "trait_use_precedence_item_removed_names";
+      ]
+      | TraitUseAliasItem {
+        trait_use_alias_item_aliasing_name;
+        trait_use_alias_item_keyword;
+        trait_use_alias_item_visibility;
+        trait_use_alias_item_aliased_name;
+      } -> [
+        "trait_use_alias_item_aliasing_name";
+        "trait_use_alias_item_keyword";
+        "trait_use_alias_item_visibility";
+        "trait_use_alias_item_aliased_name";
       ]
       | TraitUseConflictResolution {
         trait_use_conflict_resolution_keyword;
@@ -5456,15 +5492,27 @@ module WithToken(Token: TokenType) = struct
           classish_body_elements;
           classish_body_right_brace;
         }
-      | (SyntaxKind.TraitUseConflictResolutionItem, [
-          trait_use_conflict_resolution_item_aliasing_name;
-          trait_use_conflict_resolution_item_aliasing_keyword;
-          trait_use_conflict_resolution_item_aliased_names;
+      | (SyntaxKind.TraitUsePrecedenceItem, [
+          trait_use_precedence_item_name;
+          trait_use_precedence_item_keyword;
+          trait_use_precedence_item_removed_names;
         ]) ->
-        TraitUseConflictResolutionItem {
-          trait_use_conflict_resolution_item_aliasing_name;
-          trait_use_conflict_resolution_item_aliasing_keyword;
-          trait_use_conflict_resolution_item_aliased_names;
+        TraitUsePrecedenceItem {
+          trait_use_precedence_item_name;
+          trait_use_precedence_item_keyword;
+          trait_use_precedence_item_removed_names;
+        }
+      | (SyntaxKind.TraitUseAliasItem, [
+          trait_use_alias_item_aliasing_name;
+          trait_use_alias_item_keyword;
+          trait_use_alias_item_visibility;
+          trait_use_alias_item_aliased_name;
+        ]) ->
+        TraitUseAliasItem {
+          trait_use_alias_item_aliasing_name;
+          trait_use_alias_item_keyword;
+          trait_use_alias_item_visibility;
+          trait_use_alias_item_aliased_name;
         }
       | (SyntaxKind.TraitUseConflictResolution, [
           trait_use_conflict_resolution_keyword;
@@ -7185,15 +7233,28 @@ module WithToken(Token: TokenType) = struct
         classish_body_right_brace;
       ]
 
-    let make_trait_use_conflict_resolution_item
-      trait_use_conflict_resolution_item_aliasing_name
-      trait_use_conflict_resolution_item_aliasing_keyword
-      trait_use_conflict_resolution_item_aliased_names
+    let make_trait_use_precedence_item
+      trait_use_precedence_item_name
+      trait_use_precedence_item_keyword
+      trait_use_precedence_item_removed_names
     =
-      from_children SyntaxKind.TraitUseConflictResolutionItem [
-        trait_use_conflict_resolution_item_aliasing_name;
-        trait_use_conflict_resolution_item_aliasing_keyword;
-        trait_use_conflict_resolution_item_aliased_names;
+      from_children SyntaxKind.TraitUsePrecedenceItem [
+        trait_use_precedence_item_name;
+        trait_use_precedence_item_keyword;
+        trait_use_precedence_item_removed_names;
+      ]
+
+    let make_trait_use_alias_item
+      trait_use_alias_item_aliasing_name
+      trait_use_alias_item_keyword
+      trait_use_alias_item_visibility
+      trait_use_alias_item_aliased_name
+    =
+      from_children SyntaxKind.TraitUseAliasItem [
+        trait_use_alias_item_aliasing_name;
+        trait_use_alias_item_keyword;
+        trait_use_alias_item_visibility;
+        trait_use_alias_item_aliased_name;
       ]
 
     let make_trait_use_conflict_resolution

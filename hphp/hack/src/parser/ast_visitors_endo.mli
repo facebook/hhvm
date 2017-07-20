@@ -151,14 +151,18 @@ class virtual ['b] endo :
                       Ast_visitors_ancestors.class_elt ->
                       Ast_visitors_ancestors.hint ->
                       Ast_visitors_ancestors.class_elt;
-        on_cu_alias_type : 'c ->
-                      Ast_visitors_ancestors.cu_alias_type ->
-                      Ast_visitors_ancestors.cu_alias_type;
         on_ClassUseAlias : 'c ->
                       Ast_visitors_ancestors.class_elt ->
-                      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+                      Ast_visitors_ancestors.id option ->
+                      Ast_visitors_ancestors.pstring ->
+                      Ast_visitors_ancestors.id option ->
+                      Ast_visitors_ancestors.kind option ->
+                      Ast_visitors_ancestors.class_elt;
+        on_ClassUsePrecedence : 'c ->
+                      Ast_visitors_ancestors.class_elt ->
+                      Ast_visitors_ancestors.id ->
+                      Ast_visitors_ancestors.pstring ->
                       Ast_visitors_ancestors.id list ->
-                      Ast_visitors_ancestors.cu_alias_type ->
                       Ast_visitors_ancestors.class_elt;
         on_ClassVars : 'c ->
                        Ast_visitors_ancestors.class_elt ->
@@ -1004,15 +1008,20 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.class_elt ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.class_elt
-    method on_cu_alias_type :
-      'c -> Ast_visitors_ancestors.cu_alias_type ->
-      Ast_visitors_ancestors.cu_alias_type
     method on_ClassUseAlias :
       'c ->
       Ast_visitors_ancestors.class_elt ->
-      (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+      Ast_visitors_ancestors.id option ->
+      Ast_visitors_ancestors.pstring ->
+      Ast_visitors_ancestors.id option ->
+      Ast_visitors_ancestors.kind option ->
+      Ast_visitors_ancestors.class_elt
+    method on_ClassUsePrecedence :
+      'c ->
+      Ast_visitors_ancestors.class_elt ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.pstring ->
       Ast_visitors_ancestors.id list ->
-      Ast_visitors_ancestors.cu_alias_type ->
       Ast_visitors_ancestors.class_elt
     method on_ClassVars :
       'c ->

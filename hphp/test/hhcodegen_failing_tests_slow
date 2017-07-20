@@ -469,15 +469,10 @@ slow/switch_statement/1754.php
 slow/switch_statement/1755.php
 slow/switch_statement/1756.php
 slow/ternary/1736.php
-slow/traits/1953.php
-slow/traits/1963.php
 slow/traits/1981.php
-slow/traits/1991.php
 slow/traits/2010.php
-slow/traits/2044.php
 slow/traits/2063.php
 slow/traits/2070.php
-slow/traits/2107.php
 slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php

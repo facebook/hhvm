@@ -43,6 +43,7 @@ open Hhas_parser_actions
 %token CATCHDIRECTIVE
 %token ALIASDIRECTIVE
 %token STRICTDIRECTIVE
+%token AS INSTEADOF
 
 %start program
 %type <Hhas_program.t> program
@@ -195,8 +196,9 @@ classdecl:
           (List.mem "trait"     attrs) (*istrait*)
           false (*isxhp*)
           (not (List.mem "nontop" attrs)) (*istop*)
-          (fst $7)(*uses*)
-          (snd $7)(*use_alises*)
+          ((fun (x, _, _) -> x) $7)(*uses*)
+          ((fun (_, x, _) -> x) $7)(*use_alises*)
+          ((fun (_, _, x) -> x) $7)(*use_precedences*)
           $8(*enumtype*)
           $12(*methods*)
           $11(*properties*)
@@ -329,23 +331,31 @@ classenumty:
   | ENUMTYDIRECTIVE enumtypeinfo SEMI nl {Some $2}
 ;
 classuses:
-  | /* empty */ {[], []}
-  | USESDIRECTIVE idlist SEMI nl {$2, []}
-  | USESDIRECTIVE idlist LBRACE nl classaliaslist nl RBRACE nl {$2, $5}
+  | /* empty */ {[], [], []}
+  | USESDIRECTIVE idlist SEMI nl {$2, [], []}
+  | USESDIRECTIVE idlist LBRACE nl classconflictlist nl RBRACE nl {$2, fst $5, snd $5}
 ;
-classaliaslist:
-  | /* empty */ {[]}
-  | classalias nl classaliaslist {$1 :: $3}
+classconflictlist:
+  | /* empty */ {[], []}
+  | classalias nl classconflictlist {$1 :: fst $3, snd $3}
+  | classprecedence nl classconflictlist {fst $3, $1 :: snd $3}
 ;
 classalias:
-  | ID classaliastype ID SEMI {($1, None, [$3], $2)}
-  | ID COLONCOLON ID classaliastype idlist SEMI {($1, Some $3, $5, $4)}
+  | ID AS ID {(None, $1, Some $3, None)}
+  | ID AS visibility {(None, $1, None, Some $3)}
+  | ID COLONCOLON ID AS visibility {(Some $1, $3, None, Some $5)}
+  | ID COLONCOLON ID AS ID {(Some $1, $3, Some $5, None)}
+  | ID COLONCOLON ID AS visibility ID {(Some $1, $3, Some $6, Some $5)}
 ;
-classaliastype:
+classprecedence:
+  | ID COLONCOLON ID INSTEADOF idlist SEMI {($1, $3, $5)}
+;
+visibility:
   | ID {match $1 with
-        | "as" -> Ast.CU_as
-        | "insteadof" -> Ast.CU_insteadof
-        | _ -> report_error "incorrect class alias type"}
+        | "public" -> Ast.Public
+        | "private" -> Ast.Private
+        | "protected" -> Ast.Protected
+        | _ -> report_error "incorrect visibility type"}
 ;
 extendsimplements:
   | /* empty */ {(None,[])}

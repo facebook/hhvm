@@ -86,7 +86,10 @@ and class_elt =
   | Attributes of class_attr list
   | TypeConst of typeconst
   | ClassUse of hint
-  | ClassUseAlias of (id * pstring option) * id list * cu_alias_type
+  (* as expressions *)
+  | ClassUseAlias of id option * pstring * id option * kind option
+  (* insteadof expressions *)
+  | ClassUsePrecedence of id * pstring * id list
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of kind list * hint option * class_var list
@@ -95,10 +98,6 @@ and class_elt =
   | Method of method_
   | XhpCategory of pstring list
   | XhpChild of xhp_child
-
-and cu_alias_type =
-  | CU_as
-  | CU_insteadof
 
 and xhp_child =
   | ChildName of id

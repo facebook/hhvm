@@ -61,11 +61,16 @@ class virtual ['b] iter :
                                Ast_visitors_ancestors.trait_req_kind ->
                                Ast_visitors_ancestors.hint -> unit;
         on_ClassUse : 'c -> Ast_visitors_ancestors.hint -> unit;
-        on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> unit;
         on_ClassUseAlias : 'c ->
-                           (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+                           Ast_visitors_ancestors.id option ->
+                           Ast_visitors_ancestors.pstring ->
+                           Ast_visitors_ancestors.id option ->
+                           Ast_visitors_ancestors.kind option ->
+                           unit;
+        on_ClassUsePrecedence : 'c ->
+                           Ast_visitors_ancestors.id ->
+                           Ast_visitors_ancestors.pstring ->
                            Ast_visitors_ancestors.id list ->
-                           Ast_visitors_ancestors.cu_alias_type ->
                            unit;
         on_ClassVars : 'c ->
                        Ast_visitors_ancestors.kind list ->
@@ -409,11 +414,16 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.trait_req_kind ->
       Ast_visitors_ancestors.hint -> unit
     method on_ClassUse : 'c -> Ast_visitors_ancestors.hint -> unit
-    method on_cu_alias_type : 'c -> Ast_visitors_ancestors.cu_alias_type -> unit
     method on_ClassUseAlias : 'c ->
-                              (Ast_visitors_ancestors.id * Ast_visitors_ancestors.pstring option) ->
+                              Ast_visitors_ancestors.id option ->
+                              Ast_visitors_ancestors.pstring ->
+                              Ast_visitors_ancestors.id option ->
+                              Ast_visitors_ancestors.kind option ->
+                              unit
+    method on_ClassUsePrecedence : 'c ->
+                              Ast_visitors_ancestors.id ->
+                              Ast_visitors_ancestors.pstring ->
                               Ast_visitors_ancestors.id list ->
-                              Ast_visitors_ancestors.cu_alias_type ->
                               unit
     method on_ClassVars :
       'c ->

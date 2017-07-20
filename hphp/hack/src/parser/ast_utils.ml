@@ -45,6 +45,7 @@ let class_elt_type_to_string = function
   | Ast.TypeConst _ -> "typeConst"
   | Ast.ClassUse _ -> "classUse"
   | Ast.ClassUseAlias _ -> "classUseAlias"
+  | Ast.ClassUsePrecedence _ -> "ClassUsePrecedence"
   | Ast.XhpAttrUse _ -> "xhpAttrUse"
   | Ast.ClassTraitRequire _ -> "classTraitRequire"
   | Ast.ClassVars _ -> "classVars"

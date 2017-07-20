@@ -196,8 +196,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return ClassishDeclaration::from_json($json, $position, $source);
     case 'classish_body':
       return ClassishBody::from_json($json, $position, $source);
-    case 'trait_use_conflict_resolution_item':
-      return TraitUseConflictResolutionItem::from_json($json, $position, $source);
+    case 'trait_use_precedence_item':
+      return TraitUsePrecedenceItem::from_json($json, $position, $source);
+    case 'trait_use_alias_item':
+      return TraitUseAliasItem::from_json($json, $position, $source);
     case 'trait_use_conflict_resolution':
       return TraitUseConflictResolution::from_json($json, $position, $source);
     case 'trait_use':
@@ -7240,45 +7242,146 @@ final class ClassishBody extends EditableSyntax {
     yield break;
   }
 }
-final class TraitUseConflictResolutionItem extends EditableSyntax {
+final class TraitUsePrecedenceItem extends EditableSyntax {
+  private EditableSyntax $_name;
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_removed_names;
+  public function __construct(
+    EditableSyntax $name,
+    EditableSyntax $keyword,
+    EditableSyntax $removed_names) {
+    parent::__construct('trait_use_precedence_item');
+    $this->_name = $name;
+    $this->_keyword = $keyword;
+    $this->_removed_names = $removed_names;
+  }
+  public function name(): EditableSyntax {
+    return $this->_name;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function removed_names(): EditableSyntax {
+    return $this->_removed_names;
+  }
+  public function with_name(EditableSyntax $name): TraitUsePrecedenceItem {
+    return new TraitUsePrecedenceItem(
+      $name,
+      $this->_keyword,
+      $this->_removed_names);
+  }
+  public function with_keyword(EditableSyntax $keyword): TraitUsePrecedenceItem {
+    return new TraitUsePrecedenceItem(
+      $this->_name,
+      $keyword,
+      $this->_removed_names);
+  }
+  public function with_removed_names(EditableSyntax $removed_names): TraitUsePrecedenceItem {
+    return new TraitUsePrecedenceItem(
+      $this->_name,
+      $this->_keyword,
+      $removed_names);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $name = $this->name()->rewrite($rewriter, $new_parents);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $removed_names = $this->removed_names()->rewrite($rewriter, $new_parents);
+    if (
+      $name === $this->name() &&
+      $keyword === $this->keyword() &&
+      $removed_names === $this->removed_names()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new TraitUsePrecedenceItem(
+        $name,
+        $keyword,
+        $removed_names), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $name = EditableSyntax::from_json(
+      $json->trait_use_precedence_item_name, $position, $source);
+    $position += $name->width();
+    $keyword = EditableSyntax::from_json(
+      $json->trait_use_precedence_item_keyword, $position, $source);
+    $position += $keyword->width();
+    $removed_names = EditableSyntax::from_json(
+      $json->trait_use_precedence_item_removed_names, $position, $source);
+    $position += $removed_names->width();
+    return new TraitUsePrecedenceItem(
+        $name,
+        $keyword,
+        $removed_names);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_name;
+    yield $this->_keyword;
+    yield $this->_removed_names;
+    yield break;
+  }
+}
+final class TraitUseAliasItem extends EditableSyntax {
   private EditableSyntax $_aliasing_name;
-  private EditableSyntax $_aliasing_keyword;
-  private EditableSyntax $_aliased_names;
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_visibility;
+  private EditableSyntax $_aliased_name;
   public function __construct(
     EditableSyntax $aliasing_name,
-    EditableSyntax $aliasing_keyword,
-    EditableSyntax $aliased_names) {
-    parent::__construct('trait_use_conflict_resolution_item');
+    EditableSyntax $keyword,
+    EditableSyntax $visibility,
+    EditableSyntax $aliased_name) {
+    parent::__construct('trait_use_alias_item');
     $this->_aliasing_name = $aliasing_name;
-    $this->_aliasing_keyword = $aliasing_keyword;
-    $this->_aliased_names = $aliased_names;
+    $this->_keyword = $keyword;
+    $this->_visibility = $visibility;
+    $this->_aliased_name = $aliased_name;
   }
   public function aliasing_name(): EditableSyntax {
     return $this->_aliasing_name;
   }
-  public function aliasing_keyword(): EditableSyntax {
-    return $this->_aliasing_keyword;
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
   }
-  public function aliased_names(): EditableSyntax {
-    return $this->_aliased_names;
+  public function visibility(): EditableSyntax {
+    return $this->_visibility;
   }
-  public function with_aliasing_name(EditableSyntax $aliasing_name): TraitUseConflictResolutionItem {
-    return new TraitUseConflictResolutionItem(
+  public function aliased_name(): EditableSyntax {
+    return $this->_aliased_name;
+  }
+  public function with_aliasing_name(EditableSyntax $aliasing_name): TraitUseAliasItem {
+    return new TraitUseAliasItem(
       $aliasing_name,
-      $this->_aliasing_keyword,
-      $this->_aliased_names);
+      $this->_keyword,
+      $this->_visibility,
+      $this->_aliased_name);
   }
-  public function with_aliasing_keyword(EditableSyntax $aliasing_keyword): TraitUseConflictResolutionItem {
-    return new TraitUseConflictResolutionItem(
+  public function with_keyword(EditableSyntax $keyword): TraitUseAliasItem {
+    return new TraitUseAliasItem(
       $this->_aliasing_name,
-      $aliasing_keyword,
-      $this->_aliased_names);
+      $keyword,
+      $this->_visibility,
+      $this->_aliased_name);
   }
-  public function with_aliased_names(EditableSyntax $aliased_names): TraitUseConflictResolutionItem {
-    return new TraitUseConflictResolutionItem(
+  public function with_visibility(EditableSyntax $visibility): TraitUseAliasItem {
+    return new TraitUseAliasItem(
       $this->_aliasing_name,
-      $this->_aliasing_keyword,
-      $aliased_names);
+      $this->_keyword,
+      $visibility,
+      $this->_aliased_name);
+  }
+  public function with_aliased_name(EditableSyntax $aliased_name): TraitUseAliasItem {
+    return new TraitUseAliasItem(
+      $this->_aliasing_name,
+      $this->_keyword,
+      $this->_visibility,
+      $aliased_name);
   }
 
   public function rewrite(
@@ -7288,40 +7391,48 @@ final class TraitUseConflictResolutionItem extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $aliasing_name = $this->aliasing_name()->rewrite($rewriter, $new_parents);
-    $aliasing_keyword = $this->aliasing_keyword()->rewrite($rewriter, $new_parents);
-    $aliased_names = $this->aliased_names()->rewrite($rewriter, $new_parents);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $visibility = $this->visibility()->rewrite($rewriter, $new_parents);
+    $aliased_name = $this->aliased_name()->rewrite($rewriter, $new_parents);
     if (
       $aliasing_name === $this->aliasing_name() &&
-      $aliasing_keyword === $this->aliasing_keyword() &&
-      $aliased_names === $this->aliased_names()) {
+      $keyword === $this->keyword() &&
+      $visibility === $this->visibility() &&
+      $aliased_name === $this->aliased_name()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new TraitUseConflictResolutionItem(
+      return $rewriter(new TraitUseAliasItem(
         $aliasing_name,
-        $aliasing_keyword,
-        $aliased_names), $parents ?? []);
+        $keyword,
+        $visibility,
+        $aliased_name), $parents ?? []);
     }
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
     $aliasing_name = EditableSyntax::from_json(
-      $json->trait_use_conflict_resolution_item_aliasing_name, $position, $source);
+      $json->trait_use_alias_item_aliasing_name, $position, $source);
     $position += $aliasing_name->width();
-    $aliasing_keyword = EditableSyntax::from_json(
-      $json->trait_use_conflict_resolution_item_aliasing_keyword, $position, $source);
-    $position += $aliasing_keyword->width();
-    $aliased_names = EditableSyntax::from_json(
-      $json->trait_use_conflict_resolution_item_aliased_names, $position, $source);
-    $position += $aliased_names->width();
-    return new TraitUseConflictResolutionItem(
+    $keyword = EditableSyntax::from_json(
+      $json->trait_use_alias_item_keyword, $position, $source);
+    $position += $keyword->width();
+    $visibility = EditableSyntax::from_json(
+      $json->trait_use_alias_item_visibility, $position, $source);
+    $position += $visibility->width();
+    $aliased_name = EditableSyntax::from_json(
+      $json->trait_use_alias_item_aliased_name, $position, $source);
+    $position += $aliased_name->width();
+    return new TraitUseAliasItem(
         $aliasing_name,
-        $aliasing_keyword,
-        $aliased_names);
+        $keyword,
+        $visibility,
+        $aliased_name);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_aliasing_name;
-    yield $this->_aliasing_keyword;
-    yield $this->_aliased_names;
+    yield $this->_keyword;
+    yield $this->_visibility;
+    yield $this->_aliased_name;
     yield break;
   }
 }

@@ -787,6 +787,14 @@ module WithExpressionAndStatementAndTypeParser
     | QualifiedName -> parse_possible_generic_specifier parser
     | _ -> expect_qualified_name parser
 
+  and parse_qualified_name_type_opt parser =
+    (* Here we're parsing a name followed by an optional generic type
+       argument list; if we don't have a name, give an error. *)
+    match peek_token_kind parser with
+    | Name
+    | QualifiedName -> parse_possible_generic_specifier parser
+    | _ -> parser, make_missing ()
+
   and parse_require_clause parser =
     (* SPEC
         require-extends-clause:
@@ -855,37 +863,50 @@ module WithExpressionAndStatementAndTypeParser
     else
       parse_methodish parser attribute_spec modifiers
 
-  and parse_trait_use_conflict_resolution_item parser =
-    (* TODO: Error if as expression is given more than one aliased names *)
-    let parser, aliasing_name = parse_qualified_name_type parser in
-    let parser, aliasing_name =
-      if (peek_token_kind parser) = ColonColon then
-        (* scope resolution expression case *)
-        let (parser, cc_token) = expect_coloncolon parser in
-        let (parser, name) = expect_name parser in
-        (parser, make_scope_resolution_expression aliasing_name cc_token name)
-      else
-        (* plain qualified name case *)
-        (parser, aliasing_name)
-    in
-    let (parser, aliasing_kw) =
-      if (peek_token_kind parser) = As then
-        assert_token parser As
-      else
-        assert_token parser Insteadof
-    in
-    let (parser, aliased_names) =
+  and parse_trait_use_precendence_item parser name =
+    let (parser, keyword) = assert_token parser Insteadof in
+    let (parser, removed_names) =
       parse_trait_name_list
         parser
         (function Semicolon -> true | _ -> false)
     in
-    let trait_use_conflict_resolution_item =
-      make_trait_use_conflict_resolution_item
-        aliasing_name
-        aliasing_kw
-        aliased_names
+    let trait_use_precendence_item =
+      make_trait_use_precedence_item
+        name
+        keyword
+        removed_names
     in
-    (parser, trait_use_conflict_resolution_item)
+    (parser, trait_use_precendence_item)
+
+  and parse_trait_use_alias_item parser aliasing_name =
+    let (parser, keyword) = assert_token parser As in
+    let (parser, visibility) = parse_visibility_modifier_opt parser in
+    let (parser, aliased_name) = parse_qualified_name_type_opt parser in
+    let trait_use_alias_item =
+      make_trait_use_alias_item
+        aliasing_name
+        keyword
+        visibility
+        aliased_name
+    in
+    (parser, trait_use_alias_item)
+
+  and parse_trait_use_conflict_resolution_item parser =
+    let (parser, qualifier) = parse_qualified_name_type parser in
+    let (parser, name) =
+      if (peek_token_kind parser) = ColonColon then
+        (* scope resolution expression case *)
+        let (parser, cc_token) = expect_coloncolon parser in
+        let (parser, name) = expect_name parser in
+        (parser, make_scope_resolution_expression qualifier cc_token name)
+      else
+        (* plain qualified name case *)
+        (parser, qualifier)
+    in
+    if (peek_token_kind parser) = As then
+      parse_trait_use_alias_item parser name
+    else
+      parse_trait_use_precendence_item parser name
 
   (*  SPEC:
     trait-use-conflict-resolution:
@@ -896,10 +917,12 @@ module WithExpressionAndStatementAndTypeParser
       trait-use-conflict-resolution-item  trait-use-conflict-resolution-list
 
     trait-use-conflict-resolution-item:
-      trait-use-conflict-resolution-item-alising-name  as  trait-name-list
-      trait-use-conflict-resolution-item-alising-name  insteadof  trait-name-list
+      trait-use-conflict-resolution-item-name  as  name;
+      trait-use-conflict-resolution-item-name  as  visibility-modifier  name;
+      trait-use-conflict-resolution-item-name  as  visibility-modifier;
+      scope-resolution-expression  insteadof  trait-name-list
 
-    trait-use-conflict-resolution-item-alising-name:
+    trait-use-conflict-resolution-item-name:
       qualified-name
       scope-resolution-expression
   *)

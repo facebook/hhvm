@@ -153,11 +153,15 @@ class virtual ['self] iter =
     method on_Attributes = self#on_list self#on_class_attr
     method on_TypeConst = self#on_typeconst
     method on_ClassUse = self#on_hint
-    method on_ClassUseAlias env (c0, c1) c2 c3 =
+    method on_ClassUseAlias env c0 c1 c2 c3 =
+      self#on_option self#on_id env c0;
+      self#on_pstring env c1;
+      self#on_option self#on_id env c2;
+      self#on_option self#on_kind env c3;
+    method on_ClassUsePrecedence env c0 c1 c2 =
       self#on_id env c0;
-      self#on_option self#on_pstring env c1;
+      self#on_pstring env c1;
       self#on_list self#on_id env c2;
-      self#on_cu_alias_type env c3;
     method on_XhpAttrUse = self#on_hint
     method on_ClassTraitRequire env c0 c1 =
       self#on_trait_req_kind env c0;
@@ -205,17 +209,15 @@ class virtual ['self] iter =
     method on_ChildPlus env = ()
     method on_ChildQuestion env = ()
 
-    method on_cu_alias_type env = function
-      | CU_as
-      | CU_insteadof -> ()
-
     method on_class_elt env = function
       | Const (c0, c1) -> self#on_Const env c0 c1
       | AbsConst (c0, c1) -> self#on_AbsConst env c0 c1
       | Attributes c0 -> self#on_Attributes env c0
       | TypeConst c0 -> self#on_TypeConst env c0
       | ClassUse c0 -> self#on_ClassUse env c0
-      | ClassUseAlias (c0, c1, c2) -> self#on_ClassUseAlias env c0 c1 c2
+      | ClassUseAlias (c0, c1, c2, c3) -> self#on_ClassUseAlias env c0 c1 c2 c3
+      | ClassUsePrecedence (c0, c1, c2) ->
+        self#on_ClassUsePrecedence env c0 c1 c2
       | XhpAttrUse c0 -> self#on_XhpAttrUse env c0
       | ClassTraitRequire (c0, c1) ->
           self#on_ClassTraitRequire env c0 c1

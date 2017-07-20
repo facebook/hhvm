@@ -170,12 +170,19 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     List.filter_map
       ast_class.A.c_body
       (function
-        | A.ClassUseAlias (((_, id1), Some (_, id2)), ids, flavor) ->
-          let ids = List.map ~f:snd ids in
-          Some (id1, Some id2, ids, flavor)
-        | A.ClassUseAlias (((_, id), None), ids, flavor) ->
-          let ids = List.map ~f:snd ids in
-          Some (id, None, ids, flavor)
+        | A.ClassUseAlias (ido1, id, ido2, kindo) ->
+          let id1 = Option.map ido1 ~f:snd in
+          let id2 = Option.map ido2 ~f:snd in
+          Some (id1, snd id, id2, kindo)
+        | _ -> None)
+  in
+  let class_use_precedences =
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.ClassUsePrecedence (id1, id2, ids) ->
+          let ids = List.map ids ~f:snd in
+          Some (snd id1, snd id2, ids)
         | _ -> None)
   in
   let class_enum_type =
@@ -396,6 +403,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     is_top
     class_uses
     class_use_aliases
+    class_use_precedences
     class_enum_type
     (class_methods @ List.rev additional_methods)
     (class_properties @ additional_properties)

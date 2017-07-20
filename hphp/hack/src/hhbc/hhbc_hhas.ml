@@ -1261,22 +1261,27 @@ let add_enum_ty buf c =
     B.add_string buf ";"
   | _ -> ()
 
-let add_use_alias buf (id1, id_o, ids, flavor) =
-  let aliasing_id = match id_o with
-    | None -> id1
-    | Some id -> id1 ^ "::" ^ id
-  in
-  let flavor = match flavor with
-    | Ast.CU_as -> "as"
-    | Ast.CU_insteadof -> "insteadof"
-  in
+let add_use_precedence buf (id1, id2, ids) =
+  let name = id1 ^ "::" ^ id2 in
   let unique_ids = List.fold_left ULS.add ULS.empty ids in
   let ids = String.concat " " @@ ULS.items unique_ids in
-  B.add_string buf @@ Printf.sprintf "\n    %s %s %s;" aliasing_id flavor ids
+  B.add_string buf @@ Printf.sprintf "\n    %s insteadof %s;" name ids
+
+let add_use_alias buf (ido1, id, ido2, kindo) =
+  let aliasing_id =
+    Option.value_map ~f:(fun id1 -> id1 ^ "::" ^ id) ~default:id ido1
+  in
+  let kind =
+    Option.map kindo ~f:(fun kind -> "[" ^ Ast.string_of_kind kind ^ "]")
+  in
+  let rest = Option.merge kind ido2 ~f:(fun x y -> x ^ " " ^ y) in
+  let rest = Option.value ~default:"" rest in
+  B.add_string buf @@ Printf.sprintf "\n    %s as %s;" aliasing_id rest
 
 let add_uses buf c =
   let use_l = Hhas_class.class_uses c in
   let use_alias_list = Hhas_class.class_use_aliases c in
+  let use_precedence_list = Hhas_class.class_use_precedences c in
   if use_l = [] then () else
     begin
       let unique_ids =
@@ -1284,19 +1289,14 @@ let add_uses buf c =
       in
       let use_l = String.concat " " @@ ULS.items unique_ids in
       B.add_string buf @@ Printf.sprintf "\n  .use %s" use_l;
-        if use_alias_list = [] then B.add_char buf ';' else
-          (* HHVM emits insteadof aliases in front of as aliases *)
-          let as_aliases, insteadof_aliases =
-            List.partition
-              (fun (_, _, _, flavor) -> flavor = Ast.CU_as)
-              use_alias_list
-          in
-          begin
-            B.add_string buf " {";
-            List.iter (add_use_alias buf) (insteadof_aliases @ as_aliases);
-            B.add_string buf "\n  }";
-
-          end
+      if use_alias_list = [] && use_precedence_list = []
+      then B.add_char buf ';' else
+      begin
+        B.add_string buf " {";
+        List.iter (add_use_precedence buf) use_precedence_list;
+        List.iter (add_use_alias buf) use_alias_list;
+        B.add_string buf "\n  }";
+      end
     end
 
 let add_class_def buf class_def =

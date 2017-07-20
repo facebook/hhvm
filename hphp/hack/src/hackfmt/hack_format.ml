@@ -429,14 +429,28 @@ let rec transform node =
       ];
       Newline;
     ]
-  | TraitUseConflictResolutionItem x ->
-    let (aliasing_name, kw, aliased_name) =
-      get_trait_use_conflict_resolution_item_children x
+  | TraitUsePrecedenceItem x ->
+    let (name, kw, removed_names) =
+      get_trait_use_precedence_item_children x
+    in
+    Fmt [
+      t name;
+      Space;
+      t kw;
+      Space;
+      t removed_names;
+      Newline;
+    ]
+  | TraitUseAliasItem x ->
+    let (aliasing_name, kw, visibility, aliased_name) =
+      get_trait_use_alias_item_children x
     in
     Fmt [
       t aliasing_name;
       Space;
       t kw;
+      Space;
+      t visibility;
       Space;
       t aliased_name;
       Newline;

@@ -223,10 +223,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_body_elements                             : t
     ; classish_body_right_brace                          : t
     }
-  and trait_use_conflict_resolution_item =
-    { trait_use_conflict_resolution_item_aliasing_name   : t
-    ; trait_use_conflict_resolution_item_aliasing_keyword: t
-    ; trait_use_conflict_resolution_item_aliased_names   : t
+  and trait_use_precedence_item =
+    { trait_use_precedence_item_name                     : t
+    ; trait_use_precedence_item_keyword                  : t
+    ; trait_use_precedence_item_removed_names            : t
+    }
+  and trait_use_alias_item =
+    { trait_use_alias_item_aliasing_name                 : t
+    ; trait_use_alias_item_keyword                       : t
+    ; trait_use_alias_item_visibility                    : t
+    ; trait_use_alias_item_aliased_name                  : t
     }
   and trait_use_conflict_resolution =
     { trait_use_conflict_resolution_keyword              : t
@@ -938,7 +944,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | MethodishDeclaration              of methodish_declaration
   | ClassishDeclaration               of classish_declaration
   | ClassishBody                      of classish_body
-  | TraitUseConflictResolutionItem    of trait_use_conflict_resolution_item
+  | TraitUsePrecedenceItem            of trait_use_precedence_item
+  | TraitUseAliasItem                 of trait_use_alias_item
   | TraitUseConflictResolution        of trait_use_conflict_resolution
   | TraitUse                          of trait_use
   | RequireClause                     of require_clause
@@ -1450,10 +1457,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_body_elements: class_body_declaration listesque value
     ; classish_body_right_brace: Token.t value
     }
-  and trait_use_conflict_resolution_item =
-    { trait_use_conflict_resolution_item_aliasing_name: specifier value
-    ; trait_use_conflict_resolution_item_aliasing_keyword: Token.t value
-    ; trait_use_conflict_resolution_item_aliased_names: specifier listesque value
+  and trait_use_precedence_item =
+    { trait_use_precedence_item_name: specifier value
+    ; trait_use_precedence_item_keyword: Token.t value
+    ; trait_use_precedence_item_removed_names: specifier listesque value
+    }
+  and trait_use_alias_item =
+    { trait_use_alias_item_aliasing_name: specifier value
+    ; trait_use_alias_item_keyword: Token.t value
+    ; trait_use_alias_item_visibility: Token.t option value
+    ; trait_use_alias_item_aliased_name: specifier option value
     }
   and trait_use_conflict_resolution =
     { trait_use_conflict_resolution_keyword: Token.t value

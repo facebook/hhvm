@@ -343,16 +343,29 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
-  ; { kind_name   = "TraitUseConflictResolutionItem"
-    ; type_name   = "trait_use_conflict_resolution_item"
-    ; func_name   = "trait_use_conflict_resolution_item"
-    ; description = "trait_use_conflict_resolution_item"
-    ; prefix      = "trait_use_conflict_resolution_item"
+  ; { kind_name   = "TraitUsePrecedenceItem"
+    ; type_name   = "trait_use_precedence_item"
+    ; func_name   = "trait_use_precedence_item"
+    ; description = "trait_use_precedence_item"
+    ; prefix      = "trait_use_precedence_item"
+    ; aggregates  = []
+    ; fields =
+      [ "name", Aggregate Specifier
+      ; "keyword", Token
+      ; "removed_names", ZeroOrMore (Aggregate Specifier)
+      ]
+    }
+  ; { kind_name   = "TraitUseAliasItem"
+    ; type_name   = "trait_use_alias_item"
+    ; func_name   = "trait_use_alias_item"
+    ; description = "trait_use_alias_item"
+    ; prefix      = "trait_use_alias_item"
     ; aggregates  = []
     ; fields =
       [ "aliasing_name", Aggregate Specifier
-      ; "aliasing_keyword", Token
-      ; "aliased_names", ZeroOrMore (Aggregate Specifier)
+      ; "keyword", Token
+      ; "visibility", ZeroOrOne Token
+      ; "aliased_name", ZeroOrOne (Aggregate Specifier)
       ]
     }
   ; { kind_name   = "TraitUseConflictResolution"

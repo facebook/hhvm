@@ -146,12 +146,13 @@ struct ExitException : ExtendedException {
 };
 
 struct PhpFileDoesNotExistException : ExtendedException {
-  explicit PhpFileDoesNotExistException(const char *file)
-    : ExtendedException("File could not be loaded: %s", file) {}
-  explicit PhpFileDoesNotExistException(const char *msg, bool empty_file)
-    : ExtendedException("%s", msg) {
-      assert(empty_file);
-    }
+  explicit PhpFileDoesNotExistException(const char* file)
+      : ExtendedException("File could not be loaded: %s", file) {}
+  explicit PhpFileDoesNotExistException(const char* msg,
+                                        DEBUG_ONLY bool empty_file)
+      : ExtendedException("%s", msg) {
+    assert(empty_file);
+  }
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
 

@@ -132,7 +132,7 @@ FreeNode::UninitFrom(void* addr, FreeNode* next) {
   return node;
 }
 
-inline void MemoryManager::FreeList::push(void* val, size_t size) {
+inline void MemoryManager::FreeList::push(void* val, DEBUG_ONLY size_t size) {
   FTRACE(4, "FreeList::push({}, {}), prev head = {}\n", val, size, head);
   auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
   static_assert(kMaxSmallSize <= kMaxFreeSize, "");
@@ -421,7 +421,7 @@ inline bool MemoryManager::contains(void* p) const {
   return m_heap.contains(p);
 }
 
-inline bool MemoryManager::checkContains(void* p) const {
+inline bool MemoryManager::checkContains(DEBUG_ONLY void* p) const {
   // Be conservative if the small-block allocator is disabled.
   assert(RuntimeOption::DisableSmallAllocator || m_bypassSlabAlloc ||
          contains(p));

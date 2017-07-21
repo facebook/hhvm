@@ -238,10 +238,10 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 #endif
 
-#define TSRMLS_D  void ***tsrm_ls
-#define TSRMLS_DC  , TSRMLS_D
-#define TSRMLS_C  tsrm_ls
-#define TSRMLS_CC  , TSRMLS_C
+#define TSRMLS_D ATTRIBUTE_UNUSED void*** tsrm_ls
+#define TSRMLS_DC , TSRMLS_D
+#define TSRMLS_C tsrm_ls
+#define TSRMLS_CC , TSRMLS_C
 
 #ifndef HHVM
 #ifdef __cplusplus

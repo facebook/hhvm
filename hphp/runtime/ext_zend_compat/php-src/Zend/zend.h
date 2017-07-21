@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -213,7 +213,7 @@ char *alloca ();
 #endif
 
 #if ZEND_DEBUG
-#define ZEND_FILE_LINE_D        const char *__zend_filename, const uint __zend_lineno
+#define ZEND_FILE_LINE_D        ATTRIBUTE_UNUSED const char *__zend_filename, ATTRIBUTE_UNUSED const uint __zend_lineno
 #define ZEND_FILE_LINE_DC        , ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_ORIG_D      const char *__zend_orig_filename, const uint __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_DC      , ZEND_FILE_LINE_ORIG_D
@@ -476,9 +476,9 @@ typedef struct _zend_unserialize_data zend_unserialize_data;
 struct _zend_trait_method_reference {
   const char* method_name;
   unsigned int mname_len;
-  
+
   zend_class_entry *ce;
-  
+
   const char* class_name;
   unsigned int cname_len;
 };
@@ -486,20 +486,20 @@ typedef struct _zend_trait_method_reference  zend_trait_method_reference;
 
 struct _zend_trait_precedence {
   zend_trait_method_reference *trait_method;
-  
+
   zend_class_entry** exclude_from_classes;
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
 struct _zend_trait_alias {
   zend_trait_method_reference *trait_method;
-  
+
   /**
   * name for method to be added
   */
   const char* alias;
   unsigned int alias_len;
-  
+
   /**
   * modifiers to be set on trait method
   */
@@ -558,7 +558,7 @@ struct _zend_class_entry {
 
   zend_class_entry **interfaces;
   zend_uint num_interfaces;
-  
+
   zend_class_entry **traits;
   zend_uint num_traits;
   zend_trait_alias **trait_aliases;
@@ -872,7 +872,7 @@ END_EXTERN_C()
     FREE_ZVAL(pzv);            \
   }                    \
   INIT_PZVAL(&(zv));
-  
+
 #define MAKE_COPY_ZVAL(ppzv, pzv)   \
   INIT_PZVAL_COPY(pzv, *(ppzv));  \
   zval_copy_ctor((pzv));

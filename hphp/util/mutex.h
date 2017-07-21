@@ -94,8 +94,9 @@ public:
     }
 #endif
   }
-public:
-  explicit BaseMutex(bool recursive = true, Rank r = RankUnranked) {
+
+  public:
+  explicit BaseMutex(bool recursive = true, DEBUG_ONLY Rank r = RankUnranked) {
     pthread_mutexattr_init(&m_mutexattr);
     if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
@@ -229,10 +230,10 @@ private:
 #endif
   }
 
-public:
-  explicit ReadWriteMutex(Rank rank = RankUnranked)
+  public:
+  explicit ReadWriteMutex(DEBUG_ONLY Rank rank = RankUnranked)
 #ifdef DEBUG
-    : m_rank(rank)
+      : m_rank(rank)
 #endif
   {
     invalidateWriteOwner();

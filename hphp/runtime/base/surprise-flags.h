@@ -108,12 +108,13 @@ struct NoHandleSurpriseScope {
   static void AssertNone(SurpriseFlag flags);
   explicit NoHandleSurpriseScope(SurpriseFlag flags);
   ~NoHandleSurpriseScope();
- private:
+
+  private:
   SurpriseFlag m_flags;
 #else
   // Compiles to nothing in release mode.
-  static void AssertNone(SurpriseFlag flags) {}
-  explicit NoHandleSurpriseScope(SurpriseFlag flags) {}
+  static void AssertNone(SurpriseFlag) {}
+  explicit NoHandleSurpriseScope(SurpriseFlag) {}
   ~NoHandleSurpriseScope() {}
 #endif
 };

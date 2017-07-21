@@ -418,27 +418,33 @@ void setTraceThread(const std::string& traceSpec);
 struct Indent {
   Indent() {
     always_assert(true && "If this struct is completely empty we get unused "
-                  "variable warnings in code that uses it.");
+                          "variable warnings in code that uses it.");
   }
 };
-inline std::string indent() { return std::string(); }
+inline std::string indent() {
+  return std::string();
+}
 
 struct Bump {
-  Bump(Module mod, int adjust, bool condition = true) {
+  Bump(Module /*mod*/, int /*adjust*/, bool /*condition*/ = true) {
     always_assert(true && "If this struct is completely empty we get unused "
-                  "variable warnings in code that uses it.");
+                          "variable warnings in code that uses it.");
   }
 };
 
 const bool enabled = false;
 
-inline void trace(const char*, ...)      { }
-inline void trace(const std::string&)    { }
-inline void vtrace(const char*, va_list) { }
-inline bool moduleEnabled(Module t, int level = 1) { return false; }
-inline int moduleLevel(Module tm) { return 0; }
-inline void ensureInit(std::string outFile) { }
-inline void setTraceThread(const std::string& traceSpec) { }
+inline void trace(const char*, ...) {}
+inline void trace(const std::string&) {}
+inline void vtrace(const char*, va_list) {}
+inline bool moduleEnabled(Module /*t*/, int /*level*/ = 1) {
+  return false;
+}
+inline int moduleLevel(Module /*tm*/) {
+  return 0;
+}
+inline void ensureInit(std::string /*outFile*/) {}
+inline void setTraceThread(const std::string& /*traceSpec*/) {}
 
 //////////////////////////////////////////////////////////////////////
 

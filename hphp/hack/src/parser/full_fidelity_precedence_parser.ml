@@ -39,7 +39,7 @@ let context parser =
   parser.context
 
 let with_context parser context =
-    { parser with context }
+  { parser with context }
 
 (** Wrapper functions for interfacing with parser context **)
 

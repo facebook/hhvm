@@ -614,7 +614,7 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
               (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
               frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
               fragInd);
-    m_freelists[fragInd].push(frag, fragUsable);
+    m_freelists[fragInd].push(frag);
     remBytes -= fragUsable;
   }
 }
@@ -637,7 +637,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
               "split={}, splitUsable={}, splitInd={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
               split, splitUsable, splitInd);
-    m_freelists[splitInd].push(split, splitUsable);
+    m_freelists[splitInd].push(split);
   }
   void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
   assert(tailBytes >= nSplit * splitUsable);

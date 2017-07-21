@@ -132,11 +132,8 @@ FreeNode::UninitFrom(void* addr, FreeNode* next) {
   return node;
 }
 
-inline void MemoryManager::FreeList::push(void* val, DEBUG_ONLY size_t size) {
-  FTRACE(4, "FreeList::push({}, {}), prev head = {}\n", val, size, head);
-  auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
-  static_assert(kMaxSmallSize <= kMaxFreeSize, "");
-  assert(size > 0 && size <= kMaxFreeSize);
+inline void MemoryManager::FreeList::push(void* val) {
+  FTRACE(4, "FreeList::push({}), prev head = {}\n", val, head);
   head = FreeNode::UninitFrom(val, head);
 }
 
@@ -286,7 +283,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
 
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
-  m_freelists[index].push(ptr, bytes);
+  m_freelists[index].push(ptr);
   m_stats.mmUsage -= bytes;
 
   FTRACE(3, "freeSmallIndex: {} ({} bytes)\n", ptr, bytes);
@@ -304,7 +301,7 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
   auto const i = smallSize2Index(bytes);
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
 
-  m_freelists[i].push(ptr, bytes);
+  m_freelists[i].push(ptr);
   m_stats.mmUsage -= bytes;
 
   FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);

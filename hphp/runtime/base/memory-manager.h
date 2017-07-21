@@ -941,7 +941,7 @@ struct MemoryManager {
 
   struct FreeList {
     void* maybePop();
-    void push(void*, size_t size);
+    void push(void*);
     FreeNode* head{nullptr};
   };
   using FreelistArray = std::array<FreeList,kNumSmallSizes>;

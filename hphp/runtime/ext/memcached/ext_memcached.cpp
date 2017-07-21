@@ -1146,9 +1146,10 @@ bool HHVM_METHOD(Memcached, ispristine) {
   return data->m_impl->is_pristine;
 }
 
-bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
-                                      const String& key,
-                                      int expiration /*= 0*/) {
+bool HHVM_METHOD(Memcached, touchbykey,
+                 ATTRIBUTE_UNUSED const String& server_key,
+                 ATTRIBUTE_UNUSED const String& key,
+                 ATTRIBUTE_UNUSED int expiration /*= 0*/) {
 
 #ifndef HAVE_MEMCACHED_TOUCH
   throw_not_supported(__func__, "Not Implemented in libmemcached versions below"

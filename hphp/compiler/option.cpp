@@ -128,9 +128,8 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
                          const Hdf &roots,
                          const std::string& name,
                          std::map<std::string, std::string> &map) {
-  auto root_map_callback = [&] (const IniSetting::Map &ini_rm,
-                                const Hdf &hdf_rm,
-                                const std::string &ini_rm_key) {
+  auto root_map_callback = [&](const IniSetting::Map& ini_rm, const Hdf& hdf_rm,
+                               const std::string& /*ini_rm_key*/) {
     map[Config::GetString(ini_rm, hdf_rm, "root", "", false)] =
       Config::GetString(ini_rm, hdf_rm, "path", "", false);
   };
@@ -186,12 +185,11 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   }
 
   // build map from function names to sections
-  auto function_sections_callback = [&] (const IniSetting::Map &ini_fs,
-                                         const Hdf &hdf_fs,
-                                         const std::string &ini_fs_key) {
-    auto function_callback = [&] (const IniSetting::Map &ini_f,
-                                  const Hdf &hdf_f,
-                                  const std::string &ini_f_key) {
+  auto function_sections_callback = [&](const IniSetting::Map& ini_fs,
+                                        const Hdf& hdf_fs,
+                                        const std::string& ini_fs_key) {
+    auto function_callback = [&](const IniSetting::Map& ini_f, const Hdf& hdf_f,
+                                 const std::string& /*ini_f_key*/) {
       FunctionSections[Config::GetString(ini_f, hdf_f, "", "", false)] =
         hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() : ini_fs_key;
     };

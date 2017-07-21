@@ -53,7 +53,7 @@ void EmptyArray::Release(ArrayData*) {
   always_assert(!"never try to free the empty array");
 }
 
-Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t pos) {
+Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t /*pos*/) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }
@@ -61,31 +61,33 @@ Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t pos) {
 size_t EmptyArray::Vsize(const ArrayData*) { not_reached(); }
 
 member_rval::ptr_u
-EmptyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+EmptyArray::GetValueRef(const ArrayData* /*ad*/, ssize_t /*pos*/) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }
 
 // EmptyArray::IterAdvance() is reachable; see ArrayData::next() for details
-ssize_t EmptyArray::IterAdvance(const ArrayData*, ssize_t prev) {
+ssize_t EmptyArray::IterAdvance(const ArrayData*, ssize_t /*prev*/) {
   return 0;
 }
 
 // EmptyArray::IterRewind() is NOT reachable; see ArrayData::prev() for details
-ssize_t EmptyArray::IterRewind(const ArrayData*, ssize_t prev) {
+ssize_t EmptyArray::IterRewind(const ArrayData*, ssize_t /*prev*/) {
   not_reached();
 }
 
 // Even though we always return false in ValidMArrayIter, this function may
 // still be called because MArrayIters are constructed in an invalid position,
 // and then advanced to the first element.
-bool EmptyArray::AdvanceMArrayIter(ArrayData*, MArrayIter& fp) {
+bool EmptyArray::AdvanceMArrayIter(ArrayData*, MArrayIter& /*fp*/) {
   return false;
 }
 
 // We're always already a static array.
 void EmptyArray::OnSetEvalScalar(ArrayData*) { not_reached(); }
-ArrayData* EmptyArray::CopyStatic(const ArrayData* ad) { not_reached(); }
+ArrayData* EmptyArray::CopyStatic(const ArrayData* /*ad*/) {
+  not_reached();
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -209,10 +211,8 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
   return lval.arr_base();
 }
 
-ArrayData* EmptyArray::SetStr(ArrayData*,
-                              StringData* k,
-                              Cell val,
-                              bool copy) {
+ArrayData*
+EmptyArray::SetStr(ArrayData*, StringData* k, Cell val, bool /*copy*/) {
   tvIncRefGen(&val);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
@@ -269,19 +269,19 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
   return EmptyArray::MakeMixed(k, ref).arr_base();
 }
 
-ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {
+ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
   tvIncRefGen(&v);
   return EmptyArray::MakePackedInl(v).arr_base();
 }
 
-ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
+ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool /*copy*/) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto ref = *v.asRef();
   tvIncRefCountable(&ref);
   return EmptyArray::MakePacked(ref).arr_base();
 }
 
-ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool copy) {
+ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {
   if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }
@@ -342,21 +342,22 @@ ArrayData* EmptyArray::ToKeyset(ArrayData*, bool) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+ArrayData* EmptyArray::ZSetInt(ArrayData* /*ad*/, int64_t k, RefData* v) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
   return arr;
 }
 
-ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+ArrayData* EmptyArray::ZSetStr(ArrayData* /*ad*/, StringData* k, RefData* v) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
   return arr;
 }
 
-ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
+ArrayData*
+EmptyArray::ZAppend(ArrayData* /*ad*/, RefData* v, int64_t* key_ptr) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
   DEBUG_ONLY auto const tmp = arr->zAppend(v, key_ptr);
   assert(tmp == arr);

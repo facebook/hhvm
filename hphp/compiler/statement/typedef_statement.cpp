@@ -40,7 +40,7 @@ StatementPtr TypedefStatement::clone() {
 
 //////////////////////////////////////////////////////////////////////
 
-ConstructPtr TypedefStatement::getNthKid(int n) const {
+ConstructPtr TypedefStatement::getNthKid(int /*n*/) const {
   always_assert(0);
 }
 
@@ -48,7 +48,7 @@ int TypedefStatement::getKidCount() const {
   return 0;
 }
 
-void TypedefStatement::setNthKid(int n, ConstructPtr cp) {
+void TypedefStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
   always_assert(0);
 }
 
@@ -56,10 +56,11 @@ void TypedefStatement::setNthKid(int n, ConstructPtr cp) {
 
 void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
 
-void TypedefStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
-}
+void TypedefStatement::outputPHP(CodeGenerator& /*cg*/,
+                                 AnalysisResultPtr /*ar*/) {}
 
-void TypedefStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void TypedefStatement::onParse(AnalysisResultConstPtr /*ar*/,
+                               FileScopePtr scope) {
   scope->addTypeAliasName(name);
 }
 

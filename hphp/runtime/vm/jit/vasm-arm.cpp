@@ -245,8 +245,8 @@ struct Vgen {
   // intrinsics
   void emit(const copy& i);
   void emit(const copy2& i);
-  void emit(const debugtrap& i) { a->Brk(0); }
-  void emit(const fallthru& i) {}
+  void emit(const debugtrap& /*i*/) { a->Brk(0); }
+  void emit(const fallthru& /*i*/) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
@@ -259,7 +259,7 @@ struct Vgen {
   void emit(const call& i);
   void emit(const callr& i) { a->Blr(X(i.target)); }
   void emit(const calls& i);
-  void emit(const ret& i) { a->Ret(); }
+  void emit(const ret& /*i*/) { a->Ret(); }
 
   // stub function abi
   void emit(const callstub& i);
@@ -272,11 +272,11 @@ struct Vgen {
 
   // vm entry abi
   void emit(const calltc& i);
-  void emit(const inittc& i) {}
+  void emit(const inittc& /*i*/) {}
   void emit(const leavetc& i);
 
   // exceptions
-  void emit(const landingpad& i) {}
+  void emit(const landingpad& /*i*/) {}
   void emit(const nothrow& i);
   void emit(const syncpoint& i);
   void emit(const unwind& i);
@@ -345,7 +345,7 @@ struct Vgen {
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
-  void emit(const nop& i) { a->Nop(); }
+  void emit(const nop& /*i*/) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(const orq& i);
@@ -382,7 +382,7 @@ struct Vgen {
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
-  void emit(const ud2& i) { a->Brk(1); }
+  void emit(const ud2& /*i*/) { a->Brk(1); }
   void emit(const unpcklpd&);
   void emit(const xorb& i);
   void emit(const xorbi& i);
@@ -622,7 +622,7 @@ void Vgen::emit(const calltc& i) {
   a->Br(X(i.target));
 }
 
-void Vgen::emit(const leavetc& i) {
+void Vgen::emit(const leavetc& /*i*/) {
   // The LR was preserved on the stack by calltc above. Pop it while preserving
   // SP alignment and return.
   a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
@@ -631,7 +631,7 @@ void Vgen::emit(const leavetc& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const nothrow& i) {
+void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a->frontier(), nullptr);
 }
 
@@ -1129,8 +1129,8 @@ void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
   vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
 }
 
-template<typename Inst>
-void lower(const VLS& env, Inst& inst, Vlabel b, size_t i) {}
+template <typename Inst>
+void lower(const VLS& /*env*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1387,7 +1387,7 @@ void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(const VLS& e, stublogue& i, Vlabel b, size_t z) {
+void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Push both the LR and FP regardless of i.saveframe to align SP.
     v << pushp{rlr(), rvmfp()};
@@ -1417,14 +1417,14 @@ void lower(const VLS& e, tailcallstub& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(const VLS& e, stubunwind& i, Vlabel b, size_t z) {
+void lower(const VLS& e, stubunwind& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame.
     v << lea{rsp()[16], rsp()};
   });
 }
 
-void lower(const VLS& e, stubtophp& i, Vlabel b, size_t z) {
+void lower(const VLS& e, stubtophp& /*i*/, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame
     v << lea{rsp()[16], rsp()};

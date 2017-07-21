@@ -410,9 +410,8 @@ Array HHVM_FUNCTION(stream_get_transports) {
   return make_packed_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
-Variant HHVM_FUNCTION(stream_resolve_include_path,
-                      const String& filename,
-                      const Variant& context /* = uninit_variant */) {
+Variant HHVM_FUNCTION(stream_resolve_include_path, const String& filename,
+                      const Variant& /*context*/ /* = uninit_variant */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
   }

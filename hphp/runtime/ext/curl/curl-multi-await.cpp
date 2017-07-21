@@ -12,7 +12,7 @@ struct CurlEventHandler : AsioEventHandler {
   CurlEventHandler(AsioEventBase* base, int fd, CurlMultiAwait* cma):
     AsioEventHandler(base, fd), m_curlMultiAwait(cma), m_fd(fd) {}
 
-  void handlerReady(uint16_t events) noexcept override {
+  void handlerReady(uint16_t /*events*/) noexcept override {
     m_curlMultiAwait->setFinished(m_fd);
   }
 

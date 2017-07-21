@@ -198,7 +198,8 @@ DecInfoOffset DecodedInstruction::getFarBranchLength(AllowCond ac) const {
   return DecInfoOffset();
 }
 
-bool DecodedInstruction::setFarBranchTarget(uint8_t* target, bool smashable) {
+bool DecodedInstruction::setFarBranchTarget(uint8_t* target,
+                                            bool /*smashable*/) {
   DecoderInfo di = getFarBranch();
   if (di.isInvalid()) return false;
 

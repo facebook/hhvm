@@ -114,8 +114,9 @@ String HHVM_FUNCTION(addcslashes,
   char flags[256];
   string_charmask(list, masklen, flags);
 
-  return stringForEachBuffered(str.size(), str,
-    [&] (StringBuffer& ret, const char* src, const char* end) {
+  return stringForEachBuffered(
+    str.size(), str,
+    [&](StringBuffer& ret, const char* src, const char* /*end*/) {
       int c = (unsigned char)*src;
 
       if (flags[c]) {
@@ -129,9 +130,12 @@ String HHVM_FUNCTION(addcslashes,
             case '\v': ret.append('v'); break;
             case '\b': ret.append('b'); break;
             case '\f': ret.append('f'); break;
-            default: ret.append((char)('0' + (c / 64))); c %= 64;
-                     ret.append((char)('0' + (c /  8))); c %=  8;
-                     ret.append((char)('0' + c));
+            default:
+              ret.append((char)('0' + (c / 64)));
+              c %= 64;
+              ret.append((char)('0' + (c / 8)));
+              c %= 8;
+              ret.append((char)('0' + c));
           }
           return;
         }
@@ -208,16 +212,19 @@ String HHVM_FUNCTION(addslashes,
     return str;
   }
 
-  return stringForEachBuffered(str.size(), str,
-    [&] (StringBuffer& ret, const char* src, const char* end) {
+  return stringForEachBuffered(
+    str.size(), str,
+    [&](StringBuffer& ret, const char* src, const char* /*end*/) {
       switch (*src) {
         case '\0':
           ret.append('\\');
           ret.append('0');
           break;
-        case '\\': case '\"': case '\'':
+        case '\\':
+        case '\"':
+        case '\'':
           ret.append('\\');
-          /* fall through */
+        /* fall through */
         default:
           ret.append(*src);
       }
@@ -248,8 +255,9 @@ String HHVM_FUNCTION(bin2hex,
     return str;
   }
 
-  return stringForEachBuffered(str.size(), str,
-    [&] (StringBuffer& ret, const char* src, const char* end) {
+  return stringForEachBuffered(
+    str.size(), str,
+    [&](StringBuffer& ret, const char* src, const char* /*end*/) {
       static char hexconvtab[] = "0123456789abcdef";
       ret.append(hexconvtab[(unsigned char)*src >> 4]);
       ret.append(hexconvtab[(unsigned char)*src & 15]);
@@ -315,31 +323,31 @@ String HHVM_FUNCTION(nl2br,
     htmlType = s_non_xhtml_br;
   }
 
-  return stringForEachBuffered(str.size(), str,
-    [&] (StringBuffer& ret, const char*& src, const char* end) {
+  return stringForEachBuffered(
+    str.size(), str,
+    [&](StringBuffer& ret, const char*& src, const char* /*end*/) {
       // PHP treats a carriage return beside a newline as the same break
       // no matter what order they're in.  Don't do it for two of the same in
       // a row, though...
       switch (*src) {
-      case '\n':
-        ret.append(htmlType);
-        // skip next if carriage return
-        if (*(src + 1) == '\r') {
+        case '\n':
+          ret.append(htmlType);
+          // skip next if carriage return
+          if (*(src + 1) == '\r') {
+            ret.append(*src);
+            ++src;
+          }
           ret.append(*src);
-          ++src;
-        }
-        ret.append(*src);
-        break;
-      case '\r':
-        ret.append(htmlType);
-        // skip next if newline
-        if (*(src + 1) == '\n') {
-          ret.append(*src);
-          ++src;
-        }
+          break;
+        case '\r':
+          ret.append(htmlType);
+          // skip next if newline
+          if (*(src + 1) == '\n') {
+            ret.append(*src);
+            ++src;
+          }
         /* fall through */
-      default:
-        ret.append(*src);
+        default: ret.append(*src);
       }
     });
 }
@@ -350,13 +358,23 @@ String HHVM_FUNCTION(quotemeta,
     return str;
   }
 
-  return stringForEachBuffered(str.size(), str,
-    [&] (StringBuffer& ret, const char* src, const char* end) {
+  return stringForEachBuffered(
+    str.size(), str,
+    [&](StringBuffer& ret, const char* src, const char* /*end*/) {
       switch (*src) {
-        case '.': case '\\': case '+': case '*': case '?': case '[': case ']':
-        case '^': case '$': case '(': case ')':
+        case '.':
+        case '\\':
+        case '+':
+        case '*':
+        case '?':
+        case '[':
+        case ']':
+        case '^':
+        case '$':
+        case '(':
+        case ')':
           ret.append('\\');
-          /* fall through */
+        /* fall through */
         default:
           ret.append(*src);
       }
@@ -1707,9 +1725,7 @@ Variant HHVM_FUNCTION(soundex,
   return string_soundex(str);
 }
 
-Variant HHVM_FUNCTION(metaphone,
-                      const String& str,
-                      int phones /* = 0 */) {
+Variant HHVM_FUNCTION(metaphone, const String& str, int /*phones*/ /* = 0 */) {
   return string_metaphone(str.data(), str.size(), 0, 1);
 }
 

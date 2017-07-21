@@ -60,9 +60,10 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static Variant php_filter_encode_url(const String& value, const unsigned char* chars,
-                                     const int char_len, int high, int low,
-                                     int encode_nul) {
+static Variant
+php_filter_encode_url(const String& value, const unsigned char* chars,
+                      const int char_len, int /*high*/, int /*low*/,
+                      int /*encode_nul*/) {
   unsigned char tmp[256];
   unsigned char *s = (unsigned char *)chars;
   unsigned char *e = s + char_len;

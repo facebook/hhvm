@@ -213,7 +213,7 @@ static Object _node_as_zval(SimpleXMLElement* sxe, xmlNodePtr node,
   return obj;
 }
 
-static inline bool match_ns(SimpleXMLElement* sxe, xmlNodePtr node,
+static inline bool match_ns(SimpleXMLElement* /*sxe*/, xmlNodePtr node,
                             xmlChar* name, bool prefix) {
   if (name == nullptr && (node->ns == nullptr || node->ns->prefix == nullptr)) {
     return true;
@@ -1228,11 +1228,11 @@ static Variant HHVM_FUNCTION(simplexml_load_string,
   return obj;
 }
 
-static Variant HHVM_FUNCTION(simplexml_load_file,
-                              const String& filename,
-                              const String& class_name /* = "SimpleXMLElement" */,
-                              int64_t options /* = 0 */, const String& ns /* = "" */,
-                              bool is_prefix /* = false */) {
+static Variant
+HHVM_FUNCTION(simplexml_load_file, const String& filename,
+              const String& class_name /* = "SimpleXMLElement" */,
+              int64_t /*options*/ /* = 0 */, const String& ns /* = "" */,
+              bool is_prefix /* = false */) {
   SYNC_VM_REGS_SCOPED();
   auto cls = class_from_name(class_name, "simplexml_load_file");
   if (!cls) {

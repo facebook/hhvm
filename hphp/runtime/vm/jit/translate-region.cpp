@@ -205,10 +205,9 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
  * Emit type and reffiness prediction guards.
  */
 void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
-                                     const RegionDesc& region,
+                                     const RegionDesc& /*region*/,
                                      const RegionDesc::Block& block,
-                                     bool isEntry,
-                                     bool checkOuterTypeOnly) {
+                                     bool isEntry, bool checkOuterTypeOnly) {
   auto const sk = block.start();
   auto const bcOff = sk.offset();
   auto& typePredictions = block.typePredictions();
@@ -291,8 +290,7 @@ void initNormalizedInstruction(
 
 bool shouldTrySingletonInline(const RegionDesc& region,
                               const NormalizedInstruction& inst,
-                              unsigned instIdx,
-                              TransFlags trflags) {
+                              unsigned /*instIdx*/, TransFlags trflags) {
   if (!RuntimeOption::RepoAuthoritative) return false;
 
   // I don't really want to inline PPC64, yet.

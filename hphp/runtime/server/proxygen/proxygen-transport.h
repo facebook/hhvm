@@ -248,16 +248,16 @@ struct ProxygenTransport final
 
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override;
 
-  void onChunkHeader(size_t length) noexcept override {};
+  void onChunkHeader(size_t /*length*/) noexcept override{};
 
   void onChunkComplete() noexcept override {};
 
   void onTrailers(
-    std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept override {
+    std::unique_ptr<proxygen::HTTPHeaders> /*trailers*/) noexcept override {
     Logger::Error("HPHP ate the trailers");
   }
 
-  void onUpgrade(proxygen::UpgradeProtocol protocol) noexcept override {
+  void onUpgrade(proxygen::UpgradeProtocol /*protocol*/) noexcept override {
     Logger::Error("HPHP received upgrade");
   }
 

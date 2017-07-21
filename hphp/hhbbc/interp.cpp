@@ -148,7 +148,7 @@ void in(ISS& env, const bc::PopR&) {
 
 void in(ISS& env, const bc::EntryNop&) { nothrow(env); }
 
-void in(ISS& env, const bc::Dup& op) {
+void in(ISS& env, const bc::Dup& /*op*/) {
   nothrow(env);
   auto val = popC(env);
   push(env, val);
@@ -348,7 +348,7 @@ void in(ISS& env, const bc::NewLikeArrayL& op) {
   push(env, counted_aempty());
 }
 
-void in(ISS& env, const bc::AddElemC& op) {
+void in(ISS& env, const bc::AddElemC& /*op*/) {
   auto const v = popC(env);
   auto const k = popC(env);
 
@@ -375,7 +375,7 @@ void in(ISS& env, const bc::AddElemC& op) {
   push(env, std::move(outTy->first));
 }
 
-void in(ISS& env, const bc::AddElemV& op) {
+void in(ISS& env, const bc::AddElemV& /*op*/) {
   popV(env); popC(env);
   auto const ty = popC(env);
   auto const outTy =
@@ -419,7 +419,7 @@ void in(ISS& env, const bc::NewCol& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
-void in(ISS& env, const bc::NewPair& op) {
+void in(ISS& env, const bc::NewPair& /*op*/) {
   popC(env); popC(env);
   auto const name = collections::typeToString(CollectionType::Pair);
   push(env, objExact(env.index.builtin_class(name)));
@@ -488,7 +488,7 @@ void in(ISS& env, const bc::ClsRefName& op) {
   push(env, TSStr);
 }
 
-void in(ISS& env, const bc::Concat& op) {
+void in(ISS& env, const bc::Concat& /*op*/) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
@@ -529,8 +529,8 @@ void in(ISS& env, const bc::ConcatN& op) {
   push(env, TStr);
 }
 
-template<class Op, class Fun>
-void arithImpl(ISS& env, const Op& op, Fun fun) {
+template <class Op, class Fun>
+void arithImpl(ISS& env, const Op& /*op*/, Fun fun) {
   constprop(env);
   auto const t1 = popC(env);
   auto const t2 = popC(env);
@@ -552,7 +552,7 @@ void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
 void in(ISS& env, const bc::Shl& op)    { arithImpl(env, op, typeShl); }
 void in(ISS& env, const bc::Shr& op)    { arithImpl(env, op, typeShr); }
 
-void in(ISS& env, const bc::BitNot& op) {
+void in(ISS& env, const bc::BitNot& /*op*/) {
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
@@ -775,9 +775,12 @@ void in(ISS& env, const bc::CastDArray&)  {
   castImpl(env, TArr, tvCastToDArrayInPlace);
 }
 
-void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
+void in(ISS& env, const bc::Print& /*op*/) {
+  popC(env);
+  push(env, ival(1));
+}
 
-void in(ISS& env, const bc::Clone& op) {
+void in(ISS& env, const bc::Clone& /*op*/) {
   auto val = popC(env);
   if (!val.subtypeOf(TObj)) {
     val = is_opt(val) ? unopt(std::move(val)) : TObj;
@@ -788,11 +791,11 @@ void in(ISS& env, const bc::Clone& op) {
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
 void in(ISS& env, const bc::Fatal&) { popC(env); }
 
-void in(ISS& env, const bc::JmpNS&) {
+void in(ISS& /*env*/, const bc::JmpNS&) {
   always_assert(0 && "blocks should not contain JmpNS instructions");
 }
 
-void in(ISS& env, const bc::Jmp&) {
+void in(ISS& /*env*/, const bc::Jmp&) {
   always_assert(0 && "blocks should not contain Jmp instructions");
 }
 
@@ -1026,8 +1029,8 @@ void group(ISS& env, const bc::IsUninit&, const JmpOp& jmp) {
 // combination, so it gets forced to Cell. By analyzing this triplet as a group,
 // we can avoid this loss of type precision.
 template <class JmpOp>
-void group(ISS& env, const bc::MemoGet& get,
-           const bc::IsUninit& isuninit, const JmpOp& jmp) {
+void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
+           const JmpOp& jmp) {
   impl(env, get);
   typeTestPropagate(env, popCU(env), TUninit, memoizeImplRetType(env), jmp);
 }
@@ -1116,10 +1119,16 @@ void in(ISS& env, const bc::SSwitch& op) {
   });
 }
 
-void in(ISS& env, const bc::RetC& op)    { doRet(env, popC(env)); }
-void in(ISS& env, const bc::RetV& op)    { doRet(env, popV(env)); }
-void in(ISS& env, const bc::Unwind& op)  {}
-void in(ISS& env, const bc::Throw& op)   { popC(env); }
+void in(ISS& env, const bc::RetC& /*op*/) {
+  doRet(env, popC(env));
+}
+void in(ISS& env, const bc::RetV& /*op*/) {
+  doRet(env, popV(env));
+}
+void in(ISS& /*env*/, const bc::Unwind& /*op*/) {}
+void in(ISS& env, const bc::Throw& /*op*/) {
+  popC(env);
+}
 
 void in(ISS& env, const bc::Catch&) {
   nothrow(env);
@@ -1328,7 +1337,7 @@ void in(ISS& env, const bc::ClsRefGetC& op) {
   clsRefGetImpl(env, popC(env), op.slot);
 }
 
-void in(ISS& env, const bc::AKExists& op) {
+void in(ISS& env, const bc::AKExists& /*op*/) {
   auto const t1   = popC(env);
   auto const t2   = popC(env);
 
@@ -1566,13 +1575,13 @@ void isTypeCImpl(ISS& env, const Op& op) {
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }
 void in(ISS& env, const bc::IsTypeL& op) { isTypeLImpl(env, op); }
 
-void in(ISS& env, const bc::IsUninit& op) {
+void in(ISS& env, const bc::IsUninit& /*op*/) {
   nothrow(env);
   push(env, popCU(env));
   isTypeImpl(env, topT(env), TUninit);
 }
 
-void in(ISS& env, const bc::MaybeMemoType& op) {
+void in(ISS& env, const bc::MaybeMemoType& /*op*/) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   nothrow(env);
   constprop(env);
@@ -1581,7 +1590,7 @@ void in(ISS& env, const bc::MaybeMemoType& op) {
   push(env, ty.couldBe(memoTy) ? TTrue : TFalse);
 }
 
-void in(ISS& env, const bc::IsMemoType& op) {
+void in(ISS& env, const bc::IsMemoType& /*op*/) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   nothrow(env);
   constprop(env);
@@ -1604,7 +1613,7 @@ void in(ISS& env, const bc::InstanceOfD& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::InstanceOf& op) {
+void in(ISS& env, const bc::InstanceOf& /*op*/) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
@@ -1892,7 +1901,7 @@ void in(ISS& env, const bc::UnsetL& op) {
   setLocRaw(env, op.loc1, TUninit);
 }
 
-void in(ISS& env, const bc::UnsetN& op) {
+void in(ISS& env, const bc::UnsetN& /*op*/) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
@@ -1908,7 +1917,7 @@ void in(ISS& env, const bc::UnsetN& op) {
   mayUseVV(env);
 }
 
-void in(ISS& env, const bc::UnsetG& op) {
+void in(ISS& env, const bc::UnsetG& /*op*/) {
   auto const t1 = popC(env);
   if (!t1.couldBe(TObj) && !t1.couldBe(TRes)) nothrow(env);
 }
@@ -2217,7 +2226,7 @@ void in(ISS& env, const bc::FPassVNop&) {
   nothrow(env);
 }
 
-void in(ISS& env, const bc::FPassC& op) {
+void in(ISS& env, const bc::FPassC& /*op*/) {
   if (fpiTop(env).kind == FPIKind::Builtin) {
     return reduce(env, bc::Nop {});
   }
@@ -2417,7 +2426,7 @@ void fcallArrayImpl(ISS& env, int arg) {
   return push(env, TInitGen);
 }
 
-void in(ISS& env, const bc::FCallArray& op) {
+void in(ISS& env, const bc::FCallArray& /*op*/) {
   fcallArrayImpl(env, 1);
 }
 
@@ -2608,9 +2617,9 @@ void in(ISS& env, const bc::ReqOnce&)   { inclOpImpl(env); }
 void in(ISS& env, const bc::ReqDoc&)    { inclOpImpl(env); }
 void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
-void in(ISS& env, const bc::DefFunc&)      {}
-void in(ISS& env, const bc::DefCls&)       {}
-void in(ISS& env, const bc::DefClsNop&)    {}
+void in(ISS& /*env*/, const bc::DefFunc&) {}
+void in(ISS& /*env*/, const bc::DefCls&) {}
+void in(ISS& /*env*/, const bc::DefClsNop&) {}
 void in(ISS& env, const bc::AliasCls&) {
   popC(env);
   push(env, TBool);
@@ -2636,7 +2645,7 @@ void in(ISS& env, const bc::DefCns& op) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::DefTypeAlias&) {}
+void in(ISS& /*env*/, const bc::DefTypeAlias&) {}
 
 void in(ISS& env, const bc::This&) {
   if (thisAvailable(env)) {
@@ -2801,9 +2810,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   }
 }
 
-void in(ISS& env, const bc::VerifyRetTypeV& op) {}
+void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
 
-void in(ISS& env, const bc::VerifyRetTypeC& op) {
+void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;
   auto const stackT = topC(env);
 
@@ -2908,7 +2917,7 @@ void in(ISS& env, const bc::CreateCl& op) {
   return push(env, subObj(*closure));
 }
 
-void in(ISS& env, const bc::CreateCont& op) {
+void in(ISS& env, const bc::CreateCont& /*op*/) {
   // First resume is always next() which pushes null.
   push(env, TInitNull);
 }
@@ -2939,9 +2948,9 @@ void in(ISS& env, const bc::YieldFromDelegate&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::ContUnsetDelegate&) {}
+void in(ISS& /*env*/, const bc::ContUnsetDelegate&) {}
 
-void in(ISS& env, const bc::ContCheck&)   {}
+void in(ISS& /*env*/, const bc::ContCheck&) {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
 void in(ISS& env, const bc::ContStarted&) { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
@@ -2983,7 +2992,7 @@ void in(ISS& env, const bc::Await&) {
   pushTypeFromWH(env, popC(env));
 }
 
-void in(ISS& env, const bc::IncStat&) {}
+void in(ISS& /*env*/, const bc::IncStat&) {}
 
 void in(ISS& env, const bc::Idx&) {
   popC(env); popC(env); popC(env);
@@ -3046,8 +3055,7 @@ void in(ISS& env, const bc::Silence& op) {
   }
 }
 
-void in(ISS& emv, const bc::VarEnvDynCall&) {}
-
+void in(ISS& /*emv*/, const bc::VarEnvDynCall&) {}
 }
 
 //////////////////////////////////////////////////////////////////////

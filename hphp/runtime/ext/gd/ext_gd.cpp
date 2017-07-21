@@ -724,9 +724,8 @@ static unsigned short php_read2(const req::ptr<File>& stream) {
   return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
 
-static unsigned int php_next_marker(const req::ptr<File>& file,
-                                    int last_marker,
-                                    int ff_read) {
+static unsigned int
+php_next_marker(const req::ptr<File>& file, int /*last_marker*/, int ff_read) {
   int a=0, marker;
 
   // get marker byte, swallowing possible padding
@@ -1816,7 +1815,7 @@ static int php_write(void *buf, uint32_t size) {
   return size;
 }
 
-static void _php_image_output_putc(struct gdIOCtx *ctx, int c) {
+static void _php_image_output_putc(struct gdIOCtx* /*ctx*/, int c) {
   /* without the following downcast, the write will fail
    * (i.e., will write a zero byte) for all
    * big endian architectures:
@@ -1825,8 +1824,8 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c) {
   php_write(&ch, 1);
 }
 
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf,
-                                    int len) {
+static int
+_php_image_output_putbuf(struct gdIOCtx* /*ctx*/, const void* buf, int len) {
   return php_write((void *)buf, len);
 }
 
@@ -1835,11 +1834,9 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(const Resource& image,
-                                  const String& filename,
-                                  int quality, int basefilter,
-                                  int image_type, char *tn,
-                                  void (*func_p)()) {
+static bool _php_image_output_ctx(const Resource& image, const String& filename,
+                                  int quality, int basefilter, int image_type,
+                                  char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   req::ptr<File> file;
@@ -2142,9 +2139,9 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 }
 
 // For quality and type, -1 means that the argument does not exist
-static bool _php_image_output(const Resource& image, const String& filename,
-                              int quality, int type, int image_type, char *tn,
-                              void (*func_p)()) {
+static bool
+_php_image_output(const Resource& image, const String& filename, int quality,
+                  int type, int image_type, char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   req::ptr<File> file;
@@ -2617,45 +2614,39 @@ static bool php_imagepolygon(const Resource& image,
   return true;
 }
 
-static bool php_image_filter_negate(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_negate(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   return gdImageNegate(im) == 1;
 }
 
-static bool php_image_filter_grayscale(gdImagePtr im,
-                                       int arg1 /* = 0 */,
-                                       int arg2 /* = 0 */,
-                                       int arg3 /* = 0 */,
-                                       int arg4 /* = 0 */) {
+static bool
+php_image_filter_grayscale(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                           int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                           int /*arg4*/ /* = 0 */) {
   return gdImageGrayScale(im) == 1;
 }
 
-static bool php_image_filter_brightness(gdImagePtr im,
-                                        int arg1 /* = 0 */,
-                                        int arg2 /* = 0 */,
-                                        int arg3 /* = 0 */,
-                                        int arg4 /* = 0 */) {
+static bool
+php_image_filter_brightness(gdImagePtr im, int arg1 /* = 0 */,
+                            int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                            int /*arg4*/ /* = 0 */) {
   int brightness = arg1;
   return gdImageBrightness(im, brightness) == 1;
 }
 
-static bool php_image_filter_contrast(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_contrast(gdImagePtr im, int arg1 /* = 0 */,
+                          int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                          int /*arg4*/ /* = 0 */) {
   int contrast = arg1;
   return gdImageContrast(im, contrast) == 1;
 }
 
-static bool php_image_filter_colorize(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_colorize(gdImagePtr im, int arg1 /* = 0 */, int arg2 /* = 0 */,
+                          int arg3 /* = 0 */, int /*arg4*/ /* = 0 */) {
   int r = arg1;
   int g = arg2;
   int b = arg3;
@@ -2663,60 +2654,52 @@ static bool php_image_filter_colorize(gdImagePtr im,
   return gdImageColor(im, r, g, b, a) == 1;
 }
 
-static bool php_image_filter_edgedetect(gdImagePtr im,
-                                        int arg1 /* = 0 */,
-                                        int arg2 /* = 0 */,
-                                        int arg3 /* = 0 */,
-                                        int arg4 /* = 0 */) {
+static bool
+php_image_filter_edgedetect(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                            int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                            int /*arg4*/ /* = 0 */) {
   return gdImageEdgeDetectQuick(im) == 1;
 }
 
-static bool php_image_filter_emboss(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_emboss(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   return gdImageEmboss(im) == 1;
 }
 
-static bool php_image_filter_gaussian_blur(gdImagePtr im,
-                                           int arg1 /* = 0 */,
-                                           int arg2 /* = 0 */,
-                                           int arg3 /* = 0 */,
-                                           int arg4 /* = 0 */) {
+static bool
+php_image_filter_gaussian_blur(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                               int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                               int /*arg4*/ /* = 0 */) {
   return gdImageGaussianBlur(im) == 1;
 }
 
-static bool php_image_filter_selective_blur(gdImagePtr im,
-                                            int arg1 /* = 0 */,
-                                            int arg2 /* = 0 */,
-                                            int arg3 /* = 0 */,
-                                            int arg4 /* = 0 */) {
+static bool
+php_image_filter_selective_blur(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                                int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                                int /*arg4*/ /* = 0 */) {
   return gdImageSelectiveBlur(im) == 1;
 }
 
-static bool php_image_filter_mean_removal(gdImagePtr im,
-                                          int arg1 /* = 0 */,
-                                          int arg2 /* = 0 */,
-                                          int arg3 /* = 0 */,
-                                          int arg4 /* = 0 */) {
+static bool
+php_image_filter_mean_removal(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                              int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                              int /*arg4*/ /* = 0 */) {
   return gdImageMeanRemoval(im) == 1;
 }
 
-static bool php_image_filter_smooth(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_smooth(gdImagePtr im, int arg1 /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   int weight = arg1;
   return gdImageSmooth(im, weight) == 1;
 }
 
-static bool php_image_filter_pixelate(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_pixelate(gdImagePtr im, int arg1 /* = 0 */, int arg2 /* = 0 */,
+                          int /*arg3*/ /* = 0 */, int /*arg4*/ /* = 0 */) {
   int blocksize = arg1;
   unsigned mode = arg2;
   return gdImagePixelate(im, blocksize, mode) == 1;
@@ -2908,7 +2891,7 @@ Array HHVM_FUNCTION(gd_info) {
                      ((a & 0x0000ff00) << 8) | \
                      ((a & 0x000000ff) << 24))
 
-Variant HHVM_FUNCTION(imageloadfont, const String& file) {
+Variant HHVM_FUNCTION(imageloadfont, const String& /*file*/) {
   // TODO: ind = 5 + zend_list_insert(font, le_gd_font);
   throw_not_supported(__func__, "NYI");
 #ifdef NEVER
@@ -4441,10 +4424,8 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
 namespace {
 
 // PHP extension STANDARD: iptc.c
-inline int php_iptc_put1(req::ptr<File> file,
-                         int spool,
-                         unsigned char c,
-                         unsigned char **spoolbuf) {
+inline int php_iptc_put1(req::ptr<File> /*file*/, int spool, unsigned char c,
+                         unsigned char** spoolbuf) {
   if (spool > 0) {
     g_context->write((const char *)&c, 1);
   }
@@ -6265,9 +6246,9 @@ static int exif_process_string(char **result, char *value,
 }
 
 /* Process UserComment in IFD. */
-static int exif_process_user_comment(image_info_type *ImageInfo,
-                                     char **pszInfoPtr, char **pszEncoding,
-                                     char *szValuePtr, int ByteCount) {
+static int
+exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
+                          char** pszEncoding, char* szValuePtr, int ByteCount) {
   int   a;
 
 #if EXIF_USE_MBSTRING
@@ -6353,9 +6334,9 @@ static int exif_process_user_comment(image_info_type *ImageInfo,
 }
 
 /* Process unicode field in IFD. */
-static int exif_process_unicode(image_info_type *ImageInfo,
-                                xp_field_type *xp_field, int tag,
-                                char *szValuePtr, int ByteCount) {
+static int
+exif_process_unicode(image_info_type* /*ImageInfo*/, xp_field_type* xp_field,
+                     int tag, char* szValuePtr, int ByteCount) {
   xp_field->tag = tag;
   xp_field->value = nullptr;
 
@@ -6984,8 +6965,8 @@ static void exif_process_APP12(image_info_type *ImageInfo,
 }
 
 /* Process a SOFn marker.  This is useful for the image dimensions */
-static void exif_process_SOFn (unsigned char *Data, int marker,
-                               jpeg_sof_info *result) {
+static void
+exif_process_SOFn(unsigned char* Data, int /*marker*/, jpeg_sof_info* result) {
   result->bits_per_sample = Data[2];
   result->height          = php_jpg_get16(Data+3);
   result->width           = php_jpg_get16(Data+5);

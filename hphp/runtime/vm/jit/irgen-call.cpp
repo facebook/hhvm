@@ -41,13 +41,9 @@ const StaticString s_static("static");
 
 //////////////////////////////////////////////////////////////////////
 
-const Func* findCuf(Op op,
-                    SSATmp* callable,
-                    const Func* ctxFunc,
-                    const Class*& cls,
-                    StringData*& invName,
-                    bool& forward,
-                    bool& needsUnitLoad) {
+const Func*
+findCuf(Op /*op*/, SSATmp* callable, const Func* ctxFunc, const Class*& cls,
+        StringData*& invName, bool& forward, bool& needsUnitLoad) {
   cls = nullptr;
   invName = nullptr;
   needsUnitLoad = false;
@@ -224,11 +220,9 @@ void fpushObjMethodExactFunc(
   );
 }
 
-const Func* lookupInterfaceFuncForFPushObjMethod(
-  IRGS& env,
-  const Class* baseClass,
-  const StringData* methodName
-) {
+const Func*
+lookupInterfaceFuncForFPushObjMethod(IRGS& /*env*/, const Class* baseClass,
+                                     const StringData* methodName) {
   if (!baseClass) return nullptr;
   if (!classIsUniqueInterface(baseClass)) return nullptr;
 
@@ -257,13 +251,9 @@ void fpushObjMethodInterfaceFunc(
   return;
 }
 
-void fpushObjMethodNonExactFunc(
-  IRGS& env,
-  SSATmp* obj,
-  const Class* baseClass,
-  const Func* func,
-  uint32_t numParams
-) {
+void fpushObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
+                                const Class* /*baseClass*/, const Func* func,
+                                uint32_t numParams) {
   emitIncStat(env, Stats::ObjMethod_methodslot, 1);
   auto const clsTmp = gen(env, LdObjClass, obj);
   auto const funcTmp = gen(
@@ -1278,7 +1268,7 @@ void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot) {
  * work around it easily.
  */
 
-void emitFPassL(IRGS& env, uint32_t argNum, int32_t id) {
+void emitFPassL(IRGS& env, uint32_t /*argNum*/, int32_t id) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetL(env, id);
   } else {
@@ -1286,7 +1276,7 @@ void emitFPassL(IRGS& env, uint32_t argNum, int32_t id) {
   }
 }
 
-void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot) {
+void emitFPassS(IRGS& env, uint32_t /*argNum*/, uint32_t slot) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetS(env, slot);
   } else {
@@ -1294,7 +1284,7 @@ void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot) {
   }
 }
 
-void emitFPassG(IRGS& env, uint32_t argNum) {
+void emitFPassG(IRGS& env, uint32_t /*argNum*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetG(env);
   } else {
@@ -1302,7 +1292,7 @@ void emitFPassG(IRGS& env, uint32_t argNum) {
   }
 }
 
-void emitFPassR(IRGS& env, uint32_t argNum) {
+void emitFPassR(IRGS& env, uint32_t /*argNum*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     PUNT(FPassR-byRef);
   }
@@ -1312,7 +1302,7 @@ void emitFPassR(IRGS& env, uint32_t argNum) {
 
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
 
-void emitFPassV(IRGS& env, uint32_t argNum) {
+void emitFPassV(IRGS& env, uint32_t /*argNum*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // FPassV is a no-op when the callee expects by ref.
     return;
@@ -1323,14 +1313,14 @@ void emitFPassV(IRGS& env, uint32_t argNum) {
   decRef(env, tmp);
 }
 
-void emitFPassCE(IRGS& env, uint32_t argNum) {
+void emitFPassCE(IRGS& env, uint32_t /*argNum*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
 }
 
-void emitFPassCW(IRGS& env, uint32_t argNum) {
+void emitFPassCW(IRGS& env, uint32_t /*argNum*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);

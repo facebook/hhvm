@@ -170,9 +170,9 @@ struct BlobEncoder {
     if (some) encode(*opt);
   }
 
-  template<size_t I = 0, typename... Ts>
+  template <size_t I = 0, typename... Ts>
   typename std::enable_if<I == sizeof...(Ts), void>::type
-  encode(const std::tuple<Ts...>& val) {}
+  encode(const std::tuple<Ts...>& /*val*/) {}
 
   template<size_t I = 0, typename ...Ts>
   typename std::enable_if<I < sizeof...(Ts), void>::type
@@ -325,9 +325,9 @@ struct BlobDecoder {
     }
   }
 
-  template<size_t I = 0, typename... Ts>
+  template <size_t I = 0, typename... Ts>
   typename std::enable_if<I == sizeof...(Ts), void>::type
-  decode(std::tuple<Ts...>& val) {}
+  decode(std::tuple<Ts...>& /*val*/) {}
 
   template<size_t I = 0, typename ...Ts>
   typename std::enable_if<I < sizeof...(Ts), void>::type

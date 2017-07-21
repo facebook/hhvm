@@ -354,7 +354,7 @@ NEVER_INLINE void Marker::sweep() {
         }
       }
     },
-    [&](HeapObject* big, size_t big_size) { // onSlab
+    [&](HeapObject* big, size_t /*big_size*/) { // onSlab
       auto slab = Slab::fromHeader(big);
       slab->find_if((HeapObject*)slab->start(),
         [&](HeapObject* h, size_t h_size) {
@@ -365,8 +365,7 @@ NEVER_INLINE void Marker::sweep() {
           return false;
         }
       );
-    }
-  );
+    });
 }
 
 thread_local bool t_eager_gc{false};

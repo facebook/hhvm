@@ -1028,21 +1028,16 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
   };
 
   auto const effects = memory_effects(*inst);
-  match<void>(
-    effects,
-    [&] (GeneralEffects m)  { handle_stores(m.stores); },
-    [&] (PureStore m)       { handle_stores(m.dst); },
-    [&] (PureSpillFrame m)  { handle_stores(m.stk); },
-    [&] (CallEffects x) {
-      if (x.writes_locals) handle_stores(AFrameAny);
-      handle_stores(x.stack);
-    },
-    [&] (PureLoad m)        {},
-    [&] (ReturnEffects)     {},
-    [&] (ExitEffects)       {},
-    [&] (IrrelevantEffects) {},
-    [&] (UnknownEffects)    { pessimize_mbase(); }
-  );
+  match<void>(effects, [&](GeneralEffects m) { handle_stores(m.stores); },
+              [&](PureStore m) { handle_stores(m.dst); },
+              [&](PureSpillFrame m) { handle_stores(m.stk); },
+              [&](CallEffects x) {
+                if (x.writes_locals) handle_stores(AFrameAny);
+                handle_stores(x.stack);
+              },
+              [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
+              [&](ExitEffects) {}, [&](IrrelevantEffects) {},
+              [&](UnknownEffects) { pessimize_mbase(); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

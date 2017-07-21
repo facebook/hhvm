@@ -49,17 +49,15 @@ void cgBoxPtr(IRLS& env, const IRInstruction* inst) {
 
   irlower::emitTypeTest(
     v, env, TBoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)], v.makeReg(),
-    [&] (ConditionCode cc, Vreg sf) {
-      cond(v, cc, sf, dst,
-        [&] (Vout& v) { return base; },
-        [&] (Vout& v) {
-          auto const args = argGroup(env, inst).ssa(0 /* addr */);
-          auto const ret = v.makeReg();
-          cgCallHelper(v, env, CallSpec::direct(tvBox),
-                       callDest(ret), SyncOptions::None, args);
-          return ret;
-        }
-      );
+    [&](ConditionCode cc, Vreg sf) {
+      cond(v, cc, sf, dst, [&](Vout& /*v*/) { return base; },
+           [&](Vout& v) {
+             auto const args = argGroup(env, inst).ssa(0 /* addr */);
+             auto const ret = v.makeReg();
+             cgCallHelper(v, env, CallSpec::direct(tvBox), callDest(ret),
+                          SyncOptions::None, args);
+             return ret;
+           });
     });
 }
 

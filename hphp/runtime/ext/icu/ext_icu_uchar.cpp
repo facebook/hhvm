@@ -321,15 +321,15 @@ IC_INT_METHOD_CHAR(charDigitValue)
 #undef IC_INT_METHOD_CHAR
 
 /* All methods which take one UChar32 argument and return bool */
-template<UBool (*T)(UChar32)>
-Variant uchar_method(const Class* self_, const Variant& arg) {
+template <UBool (*T)(UChar32)>
+Variant uchar_method(const Class* /*self_*/, const Variant& arg) {
   GETCP(arg, cp);
   return (bool)T(cp);
 }
 
 /* All methods which take one UChar32 argument and return same */
-template<UChar32 (*T)(UChar32)>
-Variant uchar_method(const Class* self_, const Variant& arg) {
+template <UChar32 (*T)(UChar32)>
+Variant uchar_method(const Class* /*self_*/, const Variant& arg) {
   GETCP(arg, cp);
   auto ret = T(cp);
   if (arg.isString()) {

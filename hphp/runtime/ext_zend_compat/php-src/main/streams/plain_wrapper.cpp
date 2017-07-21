@@ -22,7 +22,8 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/resource-data.h"
 
-PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
+PHPAPI php_stream*
+_php_stream_fopen_tmpfile(int /*dummy*/ STREAMS_DC TSRMLS_DC) {
   FILE *f = tmpfile();
   if (f) {
     auto file = HPHP::req::make<HPHP::PlainFile>(f).detach();

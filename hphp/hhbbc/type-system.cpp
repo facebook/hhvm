@@ -685,22 +685,24 @@ struct DualDispatchEqImpl {
     return m && a.map == m->map;
   }
 
-  bool operator()(const DArrLikePackedN& a, SArray b) const {
+  bool operator()(const DArrLikePackedN& /*a*/, SArray /*b*/) const {
     return false;
   }
-  bool operator()(const DArrLikeMapN& a, SArray b) const {
+  bool operator()(const DArrLikeMapN& /*a*/, SArray /*b*/) const {
     return false;
   }
-  bool operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
+  bool
+  operator()(const DArrLikePacked& /*a*/, const DArrLikePackedN& /*b*/) const {
     return false;
   }
-  bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+  bool operator()(const DArrLikePacked& /*a*/, const DArrLikeMap& /*b*/) const {
     return false;
   }
   bool operator()(const DArrLikePacked&, const DArrLikeMapN&) const {
     return false;
   }
-  bool operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+  bool
+  operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     return false;
   }
   bool operator()(const DArrLikePackedN&, const DArrLikeMapN&) const {
@@ -766,7 +768,7 @@ struct DualDispatchCouldBeImpl {
     return true;
   }
 
-  bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+  bool operator()(const DArrLikePacked& /*a*/, const DArrLikeMap& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
   }
@@ -777,7 +779,8 @@ struct DualDispatchCouldBeImpl {
     }
     return true;
   }
-  bool operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+  bool
+  operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
   }
@@ -1013,15 +1016,16 @@ struct DualDispatchSubtype {
     // just a single array.
     return false;
   }
-  bool operator()(const DArrLikeMap& a, const DArrLikePacked& b) const {
+  bool operator()(const DArrLikeMap& /*a*/, const DArrLikePacked& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
   }
-  bool operator()(const DArrLikeMap& a, const DArrLikePackedN& b) const {
+  bool
+  operator()(const DArrLikeMap& /*a*/, const DArrLikePackedN& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
   }
-  bool operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+  bool operator()(const DArrLikePacked& /*a*/, const DArrLikeMap& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
   }
@@ -1196,10 +1200,12 @@ struct Type::DDHelperFn {
                           !Function::disjoint, Ret>::type
   operator()(const Y& y) const { return f(t, y); }
 
-  template<class Y>
-  typename std::enable_if<std::is_same<Y,T>::value &&
-                          Function::disjoint, Ret>::type
-  operator()(const Y& y) const { not_reached(); }
+  template <class Y>
+  typename std::enable_if<std::is_same<Y, T>::value && Function::disjoint,
+                          Ret>::type
+  operator()(const Y& /*y*/) const {
+    not_reached();
+  }
   Ret operator()() const { return f(); }
   Function f;
   const T& t;
@@ -3536,8 +3542,7 @@ keyset_elem(const Type& keyset, const Type& undisectedKey) {
   return array_like_elem(keyset, key);
 }
 
-std::pair<Type, bool>
-keyset_set(Type keyset, const Type&, const Type&) {
+std::pair<Type, bool> keyset_set(Type /*keyset*/, const Type&, const Type&) {
   // The set operation on keysets is not allowed.
   return {TBottom, false};
 }

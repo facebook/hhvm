@@ -29,8 +29,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Config::IniName(const Hdf& config,
-                            bool prepend_hhvm /* = true */) {
+std::string
+Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
   return Config::IniName(config.getFullPath());
 }
 

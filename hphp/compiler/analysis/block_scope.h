@@ -149,7 +149,7 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
     return false;
   }
 
-  virtual ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const {
+  virtual ClassScopePtr getParentScope(AnalysisResultConstPtr /*ar*/) const {
     return ClassScopePtr();
   }
 

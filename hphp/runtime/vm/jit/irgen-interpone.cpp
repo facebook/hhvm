@@ -347,7 +347,7 @@ interpOutputLocals(IRGS& env,
 }
 
 jit::vector<InterpOneData::ClsRefSlot>
-interpClsRefSlots(IRGS& env, const NormalizedInstruction& inst) {
+interpClsRefSlots(IRGS& /*env*/, const NormalizedInstruction& inst) {
   jit::vector<InterpOneData::ClsRefSlot> slots;
 
   auto const op = inst.op();

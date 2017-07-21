@@ -219,9 +219,9 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
   return out;
 }
 
-static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
-                                 const Object& object, const Variant& format,
-                                 const Variant& locale) {
+static String
+HHVM_STATIC_METHOD(IntlDateFormatter, formatObject, const Object& /*object*/,
+                   const Variant& /*format*/, const Variant& /*locale*/) {
   // TODO: Need IntlCalendar implemented first
   throw_not_implemented("IntlDateFormatter::formatObject");
 }
@@ -418,7 +418,8 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   }
 }
 
-static bool HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& which) {
+static bool
+HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& /*which*/) {
   // TODO: Need IntlCalendar implemented first
   throw_not_implemented("IntlDateFormatter::setCalendar");
 }

@@ -503,8 +503,7 @@ Class::TMIOps::aliasModifiers(Class::TMIOps::alias_type rule) {
 }
 
 inline const Func*
-Class::TMIOps::findTraitMethod(const Class* cls,
-                               const Class* traitCls,
+Class::TMIOps::findTraitMethod(const Class* /*cls*/, const Class* traitCls,
                                const StringData* origMethName) {
   return traitCls->lookupMethod(origMethName);
 }
@@ -515,15 +514,14 @@ Class::TMIOps::errorUnknownMethod(Class::TMIOps::prec_type rule) {
 }
 
 inline void
-Class::TMIOps::errorUnknownMethod(Class::TMIOps::alias_type rule,
+Class::TMIOps::errorUnknownMethod(Class::TMIOps::alias_type /*rule*/,
                                   const StringData* methName) {
   raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
 }
 
 template <class Rule>
-inline void
-Class::TMIOps::errorUnknownTrait(const Rule& rule,
-                                 const StringData* traitName) {
+inline void Class::TMIOps::errorUnknownTrait(const Rule& /*rule*/,
+                                             const StringData* traitName) {
   raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
 }
 

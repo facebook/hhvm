@@ -414,7 +414,7 @@ bool FuncChecker::checkLocal(PC pc, int k) {
   return true;
 }
 
-bool FuncChecker::checkString(PC pc, Id id) {
+bool FuncChecker::checkString(PC /*pc*/, Id id) {
   return unit()->isLitstrId(id);
 }
 
@@ -430,15 +430,15 @@ bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
   return true;
 }
 
-bool FuncChecker::checkImmBLA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmBLA(PC& pc, PC const /*instr*/) {
   return checkImmVec(pc, sizeof(Offset));
 }
 
-bool FuncChecker::checkImmSLA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
   return checkImmVec(pc, sizeof(Id) + sizeof(Offset));
 }
 
-bool FuncChecker::checkImmILA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
   auto ids = iterBreakIds(pc);
   if (ids.size() < 1) {
     error("invalid length of immediate vector %lu at Offset %d\n",
@@ -471,7 +471,7 @@ bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmI64A(PC& pc, PC const instr) {
+bool FuncChecker::checkImmI64A(PC& pc, PC const /*instr*/) {
   pc += sizeof(int64_t);
   return true;
 }
@@ -517,17 +517,17 @@ bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmDA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmDA(PC& pc, PC const /*instr*/) {
   pc += sizeof(double);
   return true;
 }
 
-bool FuncChecker::checkImmSA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmSA(PC& pc, PC const /*instr*/) {
   auto const id = decodeId(&pc);
   return checkString(pc, id);
 }
 
-bool FuncChecker::checkImmAA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmAA(PC& pc, PC const /*instr*/) {
   auto const id = decodeId(&pc);
   if (id < 0 || id >= (Id)unit()->numArrays()) {
     error("invalid array id %d\n", id);
@@ -536,7 +536,7 @@ bool FuncChecker::checkImmAA(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmRATA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
   // Nothing to check at the moment.
   pc += encodedRATSize(pc);
   return true;
@@ -550,7 +550,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmVSA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmVSA(PC& pc, PC const /*instr*/) {
   auto const len = decode_raw<int32_t>(pc);
   if (len < 1 || len > MixedArray::MaxStructMakeSize) {
     error("invalid length of immedate VSA vector %d at offset %d\n",
@@ -566,8 +566,8 @@ bool FuncChecker::checkImmVSA(PC& pc, PC const instr) {
   return ok;
 }
 
-template<typename Subop>
-bool FuncChecker::checkImmOAImpl(PC& pc, PC const instr) {
+template <typename Subop>
+bool FuncChecker::checkImmOAImpl(PC& pc, PC const /*instr*/) {
   auto const subop = decode_oa<Subop>(pc);
   if (!subopValid(subop)) {
     ferror("Invalid subop {}\n", size_t(subop));
@@ -576,7 +576,7 @@ bool FuncChecker::checkImmOAImpl(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
+bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
   auto const mcode = decode_raw<MemberCode>(pc);
   if (mcode < 0 || mcode >= NumMemberCodes) {
     ferror("Invalid MemberCode {}\n", uint8_t{mcode});
@@ -915,7 +915,7 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
   return true;
 }
 
-bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
+bool FuncChecker::checkFpi(State* cur, PC pc, Block* /*b*/) {
   if (cur->fpilen <= 0) {
     error("%s", "cannot access empty FPI stack\n");
     return false;
@@ -1450,7 +1450,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   return ok;
 }
 
-bool FuncChecker::checkEHStack(const EHEnt& handler, Block* b) {
+bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
   const State& state = m_info[b->id].state_in;
   if (!state.stk) return true; // ignore unreachable block
   if (state.fpilen != 0) {
@@ -1531,7 +1531,7 @@ void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
          offset(pc), min);
 }
 
-void FuncChecker::reportStkOverflow(Block*, const State& cur, PC pc) {
+void FuncChecker::reportStkOverflow(Block*, const State& /*cur*/, PC pc) {
   error("Rule2: Stack overflow at PC %d\n", offset(pc));
 }
 

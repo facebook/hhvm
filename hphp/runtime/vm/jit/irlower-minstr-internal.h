@@ -36,8 +36,8 @@ template<typename T> constexpr unsigned bitWidth() {
 
 // Determines the width in bits of all of its arguments
 template<typename... T> unsigned multiBitWidth();
-template<typename T, typename... Args>
-inline unsigned multiBitWidth(T t, Args... args) {
+template <typename T, typename... Args>
+inline unsigned multiBitWidth(T /*t*/, Args... args) {
   return bitWidth<T>() + multiBitWidth<Args...>(args...);
 }
 template<>

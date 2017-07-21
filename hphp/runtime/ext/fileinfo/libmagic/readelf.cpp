@@ -856,10 +856,9 @@ static const cap_desc_t cap_desc_386[] = {
   { 0, NULL }
 };
 
-private int
-doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
-    size_t size, off_t fsize, int *flags, int mach, int strtab)
-{
+private
+int doshn(struct magic_set* ms, int clazz, int swap, int fd, off_t off, int num,
+          size_t size, off_t fsize, int* flags, int mach, int /*strtab*/) {
   Elf32_Shdr sh32;
   Elf64_Shdr sh64;
   int stripped = 1;

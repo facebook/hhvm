@@ -91,9 +91,7 @@ static void gdPngWriteData (png_structp png_ptr, png_bytep data, png_size_t leng
   gdPutBuf (data, length, (gdIOCtx *) png_get_io_ptr(png_ptr));
 }
 
-static void gdPngFlushData (png_structp png_ptr)
-{
-}
+static void gdPngFlushData(png_structp /*png_ptr*/) {}
 
 gdImagePtr gdImageCreateFromPng (FILE * inFile)
 {

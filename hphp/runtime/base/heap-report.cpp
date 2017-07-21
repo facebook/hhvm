@@ -28,7 +28,7 @@ namespace {
 
 size_t count_reached(const HeapGraph& g, const std::vector<int>& root_nodes) {
   size_t count{0};
-  dfs_nodes(g, root_nodes, [&](int n) { count++; });
+  dfs_nodes(g, root_nodes, [&](int /*n*/) { count++; });
   return count;
 }
 

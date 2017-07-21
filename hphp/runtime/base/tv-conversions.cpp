@@ -1412,8 +1412,7 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToArrayInPlace(TypedValue* tv,
-                                 bool builtin) {
+bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1452,8 +1451,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToVecInPlace(TypedValue* tv,
-                               bool builtin) {
+bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1485,8 +1483,7 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToDictInPlace(TypedValue* tv,
-                                bool builtin) {
+bool tvCoerceParamToDictInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1518,8 +1515,7 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToKeysetInPlace(TypedValue* tv,
-                                  bool builtin) {
+bool tvCoerceParamToKeysetInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
 
@@ -1551,15 +1547,13 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv,
   not_reached();
 }
 
-bool tvCoerceParamToObjectInPlace(TypedValue* tv,
-                                  bool builtin) {
+bool tvCoerceParamToObjectInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfObject;
 }
 
-bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv,
-                                          bool builtin) {
+bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   if (isNullType(tv->m_type)) {
@@ -1570,8 +1564,7 @@ bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv,
   return tv->m_type == KindOfObject;
 }
 
-bool tvCoerceParamToResourceInPlace(TypedValue* tv,
-                                    bool builtin) {
+bool tvCoerceParamToResourceInPlace(TypedValue* tv, bool /*builtin*/) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfResource;

@@ -880,13 +880,10 @@ void mrinfo_step_impl(Env& env,
 
   auto const effects = memory_effects(inst);
   match<void>(
-    effects,
-    [&] (IrrelevantEffects) {},
-    [&] (ExitEffects)      {},
-    [&] (ReturnEffects)    {},
-    [&] (GeneralEffects)   {},
-    [&] (UnknownEffects)   { kill(ALocBits{}.set()); },
-    [&] (PureStore x)      { do_store(x.dst, x.value); },
+    effects, [&](IrrelevantEffects) {}, [&](ExitEffects) {},
+    [&](ReturnEffects) {}, [&](GeneralEffects) {},
+    [&](UnknownEffects) { kill(ALocBits{}.set()); },
+    [&](PureStore x) { do_store(x.dst, x.value); },
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -902,16 +899,16 @@ void mrinfo_step_impl(Env& env,
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
      */
-    [&] (PureLoad) {},
+    [&](PureLoad) {},
 
     /*
      * Since there's no semantically correct way to do PureLoads from the
      * locations in a PureSpillFrame unless something must have stored over
      * them again first, we don't need to kill anything here.
      */
-    [&] (PureSpillFrame x) {},
+    [&](PureSpillFrame /*x*/) {},
 
-    [&] (CallEffects x) {
+    [&](CallEffects /*x*/) {
       /*
        * Because PHP callees can side-exit (or for that matter throw from their
        * prologue), the program is ill-formed unless we have balanced reference
@@ -923,8 +920,7 @@ void mrinfo_step_impl(Env& env,
        * SSA registers.
        */
       gen(ALocBits{}.set());
-    }
-  );
+    });
 }
 
 // Helper for stepping after we've created a MemRefAnalysis.
@@ -1612,7 +1608,7 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
   return changed;
 }
 
-bool merge_into(Env& env, RCState& dst, const RCState& src) {
+bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   if (!dst.initialized) {
     dst = src;
     return true;
@@ -1659,14 +1655,15 @@ void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   fn(asetID);
 }
 
-void reduce_lower_bound(Env& env, RCState& state, uint32_t asetID) {
+void reduce_lower_bound(Env& /*env*/, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
   aset.lower_bound = std::max(aset.lower_bound - 1, 0);
 }
 
-template<class NAdder>
-void pessimize_one(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
+template <class NAdder>
+void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
+                   NAdder add_node) {
   auto& aset = state.asets[asetID];
   if (aset.pessimized) return;
   FTRACE(2, "      {} pessimized\n", asetID);
@@ -1710,8 +1707,8 @@ void observe(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   }
 }
 
-template<class NAdder>
-void observe_all(Env& env, RCState& state, NAdder add_node) {
+template <class NAdder>
+void observe_all(Env& /*env*/, RCState& state, NAdder add_node) {
   FTRACE(3, "    observe_all\n");
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
@@ -1836,7 +1833,7 @@ bool reduce_support(Env& env,
   return reduce_support_bits(env, state, alias, add_node);
 }
 
-void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
+void drop_support_bit(Env& /*env*/, RCState& state, uint32_t bit) {
   auto const current_set = state.support_map[bit];
   if (current_set != -1) {
     FTRACE(3, "    {} dropping support {}\n", current_set, bit);
@@ -1906,12 +1903,9 @@ void create_store_support(Env& env,
 
 //////////////////////////////////////////////////////////////////////
 
-template<class NAdder>
-void handle_call(Env& env,
-                 RCState& state,
-                 const IRInstruction& inst,
-                 CallEffects e,
-                 NAdder add_node) {
+template <class NAdder>
+void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
+                 CallEffects e, NAdder add_node) {
   // We have to block all incref motion through a PHP call, by observing at the
   // max.  This is fundamentally required because the callee can side-exit or
   // throw an exception without a catch trace, so everything needs to be
@@ -3323,7 +3317,7 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
  *  Convert DecRef to DecRefNZ in the underlying IR program---no change to
  *  the RC flowgraph.
  */
-Node* rule_decnz(Env& env, Node* node) {
+Node* rule_decnz(Env& /*env*/, Node* node) {
   bool const applies =
     node->type == NT::Dec &&
     node->lower_bound >= 2 &&

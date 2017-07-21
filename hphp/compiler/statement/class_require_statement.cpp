@@ -72,9 +72,9 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassRequireStatement::analyzeProgram(AnalysisResultPtr ar) {}
+void ClassRequireStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
-ConstructPtr ClassRequireStatement::getNthKid(int n) const {
+ConstructPtr ClassRequireStatement::getNthKid(int /*n*/) const {
   always_assert(false);
   return ConstructPtr();
 }
@@ -83,14 +83,15 @@ int ClassRequireStatement::getKidCount() const {
   return 0;
 }
 
-void ClassRequireStatement::setNthKid(int n, ConstructPtr cp) {
+void ClassRequireStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
   always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ClassRequireStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ClassRequireStatement::outputPHP(CodeGenerator& cg,
+                                      AnalysisResultPtr /*ar*/) {
   cg_printf("require %s %s;\n",
             m_extends ? "extends " : "implements ",
             m_required.c_str());

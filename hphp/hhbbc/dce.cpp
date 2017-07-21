@@ -496,8 +496,8 @@ bool lastUiIsLinked(const UseInfo& ui) {
   return isLinked(ui);
 }
 
-template<typename... Args>
-bool lastUiIsLinked(const UseInfo& ui, const Args&... args) {
+template <typename... Args>
+bool lastUiIsLinked(const UseInfo& /*ui*/, const Args&... args) {
   return lastUiIsLinked(args...);
 }
 
@@ -1243,7 +1243,7 @@ void dce(Env& env, const bc::NewMixedArray&) {
     });
 }
 
-void dce(Env& env, const bc::AddElemC& op) {
+void dce(Env& env, const bc::AddElemC& /*op*/) {
   stack_ops(env, [&] (UseInfo& ui) {
       // If the set might throw it needs to be kept.
       if (env.flags.wasPEI) {
@@ -1438,9 +1438,9 @@ dce_slot_default(Env& env, const Op& op) {
   writeSlot(env, op.slot);
 }
 
-template<typename Op>
-typename std::enable_if<!has_car<Op>::value && !has_caw<Op>::value,void>::type
-dce_slot_default(Env& env, const Op& op) {}
+template <typename Op>
+typename std::enable_if<!has_car<Op>::value && !has_caw<Op>::value, void>::type
+dce_slot_default(Env& /*env*/, const Op& /*op*/) {}
 
 template<class Op>
 void dce(Env& env, const Op& op) {
@@ -1794,11 +1794,12 @@ void remove_unused_locals(Context const ctx,
 namespace {
 
 struct WritableClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId*> {
-  template<class T>
-  typename std::enable_if<
-    !has_car<T>::value && !has_caw<T>::value, ClsRefSlotId*
-  >::type
-  operator()(T& t) const { return nullptr; }
+  template <class T>
+  typename std::enable_if<!has_car<T>::value && !has_caw<T>::value,
+                          ClsRefSlotId*>::type
+  operator()(T& /*t*/) const {
+    return nullptr;
+  }
 
   template<class T>
   typename std::enable_if<

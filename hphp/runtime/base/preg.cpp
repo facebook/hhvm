@@ -575,7 +575,7 @@ void pcre_dump_cache(const std::string& filename) {
   s_pcreCache.dump(filename);
 }
 
-static pcre_jit_stack* alloc_jit_stack(void* data) {
+static pcre_jit_stack* alloc_jit_stack(void* /*data*/) {
   return tl_pcre_globals->jit_stack;
 }
 

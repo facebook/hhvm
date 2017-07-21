@@ -171,16 +171,14 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
 
-    doWhile(v, CC_NZ, {},
-      [&] (const VregList& in, const VregList& out) {
-        auto const sf = v.makeReg();
+    doWhile(v, CC_NZ, {}, [&](const VregList& /*in*/, const VregList& /*out*/) {
+      auto const sf = v.makeReg();
 
-        decref_local(v);
-        next_local(v);
-        v << cmpq{local, last, sf};
-        return sf;
-      }
-    );
+      decref_local(v);
+      next_local(v);
+      v << cmpq{ local, last, sf };
+      return sf;
+    });
   });
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
@@ -224,7 +222,7 @@ void assert_tc_saved_rip(void* saved_lr_pointer) {
   }
 }
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
+TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
   ppc64_asm::Assembler a { cb };
   auto const start = a.frontier();
 

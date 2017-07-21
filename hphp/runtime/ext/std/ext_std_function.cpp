@@ -67,15 +67,15 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
   return vm_call_user_func(function, params);
 }
 
-Variant HHVM_FUNCTION(check_user_func_async, const Variant& handles,
-                     int timeout /* = -1 */) {
+Variant HHVM_FUNCTION(check_user_func_async, const Variant& /*handles*/,
+                      int /*timeout*/ /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }
 
-Variant HHVM_FUNCTION(end_user_func_async, const Object& handle,
-                     int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
-                     const Variant& additional_strategies /* = null */) {
+Variant HHVM_FUNCTION(end_user_func_async, const Object& /*handle*/,
+                      int /*default_strategy*/ /*= k_GLOBAL_STATE_IGNORE*/,
+                      const Variant& /*additional_strategies*/ /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }

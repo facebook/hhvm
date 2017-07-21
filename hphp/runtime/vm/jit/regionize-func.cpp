@@ -167,12 +167,10 @@ const TransIDVec& getRegionTransIDVec(const RegionToTransIDsMap& map,
  * translation.  The goal is to obtain an order that improves locality
  * when the function is executed.  Each region is translated separately.
  */
-void sortRegions(RegionVec&                  regions,
-                 const Func*                 func,
-                 const TransCFG&             cfg,
-                 const ProfData*             profData,
-                 const TransIDToRegionMap&   headToRegion,
-                 const RegionToTransIDsMap&  regionToTransIds) {
+void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
+                 const ProfData* profData,
+                 const TransIDToRegionMap& /*headToRegion*/,
+                 const RegionToTransIDsMap& regionToTransIds) {
   if (regions.empty()) return;
 
   // First, pick the region starting at the lowest bytecode offset.

@@ -157,73 +157,75 @@ ArrayData* APCLocalArray::loadElems() const {
   return elems;
 }
 
-member_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+member_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lval(k, false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-member_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+member_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalRef(k, false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-member_lval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval
+APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lval(k, false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-member_lval APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+member_lval
+APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalRef(k, false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-member_lval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
+member_lval APCLocalArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNew(false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool copy) {
+member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNewRef(false);
   return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayData*
-APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
+APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*
-APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
+APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setRef(k, v, false));
 }
 
-ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
+ArrayData* APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v,
+                                    bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setRef(k, v, false));
 }
 
-ArrayData *APCLocalArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->remove(k, false));
 }
 
 ArrayData*
-APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
+APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->remove(k, false));
 }
@@ -232,19 +234,18 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool copy) {
+ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->append(v, false));
 }
 
-ArrayData*
-APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
+ArrayData* APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->appendRef(v, false));
 }
 
 ArrayData*
-APCLocalArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
+APCLocalArray::AppendWithRef(ArrayData* ad, TypedValue v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->appendWithRef(v, false));
 }
@@ -260,7 +261,7 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool copy) {
+ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->prepend(v, false));
 }
@@ -308,31 +309,31 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   return ret;
 }
 
-void APCLocalArray::Ksort(ArrayData*, int sort_flags, bool ascending) {
+void APCLocalArray::Ksort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {
   not_reached();
 }
 
-void APCLocalArray::Sort(ArrayData*, int sort_flags, bool ascending) {
+void APCLocalArray::Sort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {
   not_reached();
 }
 
-void APCLocalArray::Asort(ArrayData*, int sort_flags, bool ascending) {
+void APCLocalArray::Asort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {
   not_reached();
 }
 
-bool APCLocalArray::Uksort(ArrayData*, const Variant& cmp_function) {
+bool APCLocalArray::Uksort(ArrayData*, const Variant& /*cmp_function*/) {
   not_reached();
 }
 
-bool APCLocalArray::Usort(ArrayData*, const Variant& cmp_function) {
+bool APCLocalArray::Usort(ArrayData*, const Variant& /*cmp_function*/) {
   not_reached();
 }
 
-bool APCLocalArray::Uasort(ArrayData*, const Variant& cmp_function) {
+bool APCLocalArray::Uasort(ArrayData*, const Variant& /*cmp_function*/) {
   not_reached();
 }
 
-ssize_t APCLocalArray::IterBegin(const ArrayData* ad) {
+ssize_t APCLocalArray::IterBegin(const ArrayData* /*ad*/) {
   return 0;
 }
 
@@ -366,7 +367,7 @@ bool APCLocalArray::ValidMArrayIter(const ArrayData* ad,
   not_reached();  // we should've escalated
 }
 
-bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
+bool APCLocalArray::AdvanceMArrayIter(ArrayData* /*ad*/, MArrayIter& /*fp*/) {
   not_reached();  // we should've escalated
 }
 

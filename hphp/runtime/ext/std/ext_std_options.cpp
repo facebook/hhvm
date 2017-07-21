@@ -251,7 +251,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
   return init_null();
 }
 
-static int64_t HHVM_FUNCTION(dl, const String& library) {
+static int64_t HHVM_FUNCTION(dl, const String& /*library*/) {
   return 0;
 }
 
@@ -259,8 +259,8 @@ static bool HHVM_FUNCTION(extension_loaded, const String& name) {
   return ExtensionRegistry::isLoaded(name);
 }
 
-static Array HHVM_FUNCTION(get_loaded_extensions,
-                           bool zend_extensions /*=false */) {
+static Array
+HHVM_FUNCTION(get_loaded_extensions, bool /*zend_extensions*/ /*=false */) {
   return ExtensionRegistry::getLoaded();
 }
 
@@ -276,7 +276,7 @@ static Variant HHVM_FUNCTION(get_extension_funcs, const String& module_name) {
   return result.toVariant();
 }
 
-static Variant HHVM_FUNCTION(get_cfg_var, const String& option) {
+static Variant HHVM_FUNCTION(get_cfg_var, const String& /*option*/) {
   return false;
 }
 

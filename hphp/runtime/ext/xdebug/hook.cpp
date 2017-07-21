@@ -492,7 +492,7 @@ void XDebugHook::onBreak(const BreakInfo& bi) {
 // Exception::getMessage method name.
 const StaticString s_GET_MESSAGE("getMessage");
 
-void XDebugHook::onOpcode(PC pc) {
+void XDebugHook::onOpcode(PC /*pc*/) {
   auto server = XDEBUG_GLOBAL(Server);
   if (server == nullptr) {
     return;

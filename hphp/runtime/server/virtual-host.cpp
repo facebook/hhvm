@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool VirtualHost::IsDefault(const IniSetting::Map &ini, const Hdf &vh,
+bool VirtualHost::IsDefault(const IniSetting::Map& /*ini*/, const Hdf& vh,
                             const std::string& ini_key /* = "" */) {
   if (vh.exists() && !vh.isEmpty()) {
     return (vh.getName() == "default");
@@ -259,9 +259,8 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
   m_decodePostDataBlackList =
     Config::GetSetC(ini, vh, "DecodePostDataBlackList");
 
-  auto rr_callback = [&] (const IniSetting::Map &ini_rr,
-                          const Hdf &hdf_rr,
-                          const std::string &ini_rr_key) {
+  auto rr_callback = [&](const IniSetting::Map& ini_rr, const Hdf& hdf_rr,
+                         const std::string& /*ini_rr_key*/) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
@@ -278,9 +277,8 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
       throw std::runtime_error("Invalid rewrite rule: (empty pattern or to)");
     }
 
-    auto rc_callback = [&] (const IniSetting::Map &ini_rc,
-                            const Hdf &hdf_rc,
-                            const std::string &ini_rc_key) {
+    auto rc_callback = [&](const IniSetting::Map& ini_rc, const Hdf& hdf_rc,
+                           const std::string& /*ini_rc_key*/) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
@@ -310,9 +308,8 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
   m_ipBlocks = std::make_shared<IpBlockMap>(ini, vh);
 
-  auto lf_callback = [&] (const IniSetting::Map &ini_lf,
-                          const Hdf &hdf_lf,
-                          const std::string &ini_lf_key) {
+  auto lf_callback = [&](const IniSetting::Map& ini_lf, const Hdf& hdf_lf,
+                         const std::string& /*ini_lf_key*/) {
     QueryStringFilter filter;
     filter.urlPattern = format_pattern(Config::GetString(ini_lf, hdf_lf, "url",
                                                          "", false),

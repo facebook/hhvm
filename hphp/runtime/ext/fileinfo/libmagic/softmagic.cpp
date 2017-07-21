@@ -337,9 +337,8 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
   return *returnval;  /* This is hit if -k is set or there is no match */
 }
 
-private int
-check_fmt(struct magic_set *ms, struct magic *m)
-{
+private
+int check_fmt(struct magic_set* /*ms*/, struct magic* m) {
   if (strchr(m->desc, '%') == NULL) {
     return 0;
   }

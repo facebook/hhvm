@@ -63,12 +63,12 @@ std::mutex s_allocMutex;
 //////////////////////////////////////////////////////////////////////
 
 struct SymbolKind : boost::static_visitor<std::string> {
-  std::string operator()(StaticLocal k) const { return "StaticLocal"; }
-  std::string operator()(ClsConstant k) const { return "ClsConstant"; }
-  std::string operator()(StaticMethod k) const { return "StaticMethod"; }
-  std::string operator()(StaticMethodF k) const { return "StaticMethodF"; }
-  std::string operator()(Profile k) const { return "Profile"; }
-  std::string operator()(SPropCache k) const { return "SPropCache"; }
+  std::string operator()(StaticLocal /*k*/) const { return "StaticLocal"; }
+  std::string operator()(ClsConstant /*k*/) const { return "ClsConstant"; }
+  std::string operator()(StaticMethod /*k*/) const { return "StaticMethod"; }
+  std::string operator()(StaticMethodF /*k*/) const { return "StaticMethodF"; }
+  std::string operator()(Profile /*k*/) const { return "Profile"; }
+  std::string operator()(SPropCache /*k*/) const { return "SPropCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {

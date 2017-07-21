@@ -33,7 +33,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy);
 struct HphpdHook : DebuggerHook {
   static DebuggerHook* GetInstance();
 
-  void onOpcode(const unsigned char* pc) override {
+  void onOpcode(const unsigned char* /*pc*/) override {
     Debugger::InterruptVMHook();
   }
 
@@ -45,11 +45,8 @@ struct HphpdHook : DebuggerHook {
     Debugger::InterruptVMHook(ExceptionHandler);
   }
 
-  void onError(
-    const ExtendedException& ee,
-    int errnum,
-    const std::string& message
-  ) override {
+  void onError(const ExtendedException& /*ee*/, int /*errnum*/,
+               const std::string& message) override {
     Debugger::InterruptVMHook(ExceptionThrown, String(message));
   }
 

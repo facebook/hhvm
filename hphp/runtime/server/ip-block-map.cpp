@@ -173,9 +173,8 @@ void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
 }
 
 IpBlockMap::IpBlockMap(const IniSetting::Map& ini, const Hdf& config) {
-  auto ipm_callback = [&] (const IniSetting::Map &ini_ipm,
-                           const Hdf &hdf_ipm,
-                           const std::string& ini_name) {
+  auto ipm_callback = [&](const IniSetting::Map& ini_ipm, const Hdf& hdf_ipm,
+                          const std::string& /*ini_name*/) {
     auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really

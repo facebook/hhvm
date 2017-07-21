@@ -58,7 +58,7 @@ struct default_ptr {
   /*
    * Assignments.
    */
-  default_ptr& operator=(std::nullptr_t p) {
+  default_ptr& operator=(std::nullptr_t /*p*/) {
     m_p.store(fallback(), std::memory_order_relaxed);
     return *this;
   }

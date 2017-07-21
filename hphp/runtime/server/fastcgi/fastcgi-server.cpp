@@ -22,7 +22,7 @@ namespace HPHP {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool FastCGIAcceptor::canAccept(const folly::SocketAddress& address) {
+bool FastCGIAcceptor::canAccept(const folly::SocketAddress& /*address*/) {
   // TODO: Support server IP whitelist.
   auto const cons = m_server->getLibEventConnectionCount();
   return (RuntimeOption::ServerConnectionLimit == 0 ||
@@ -32,10 +32,9 @@ bool FastCGIAcceptor::canAccept(const folly::SocketAddress& address) {
 void FastCGIAcceptor::onNewConnection(
   folly::AsyncTransportWrapper::UniquePtr sock,
   const folly::SocketAddress* peerAddress,
-  const std::string& nextProtocolName,
-  SecureTransportType secureProtocolType,
-  const ::wangle::TransportInfo& tinfo)
-{
+  const std::string& /*nextProtocolName*/,
+  SecureTransportType /*secureProtocolType*/,
+  const ::wangle::TransportInfo& /*tinfo*/) {
   folly::SocketAddress localAddress;
   try {
     sock->getLocalAddress(&localAddress);

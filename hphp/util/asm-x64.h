@@ -298,8 +298,12 @@ inline RIPRelativeRef DispRIP::operator[](intptr_t x) const {
 
 inline DispReg operator+(Reg64 r, intptr_t d) { return DispReg(r, d); }
 inline DispReg operator-(Reg64 r, intptr_t d) { return DispReg(r, -d); }
-inline DispRIP operator+(RegRIP r, intptr_t d) { return DispRIP(d); }
-inline DispRIP operator-(RegRIP r, intptr_t d) { return DispRIP(d); }
+inline DispRIP operator+(RegRIP /*r*/, intptr_t d) {
+  return DispRIP(d);
+}
+inline DispRIP operator-(RegRIP /*r*/, intptr_t d) {
+  return DispRIP(d);
+}
 
 inline ScaledIndex operator*(Reg64 r, int scale) {
   return ScaledIndex(r, scale);
@@ -315,7 +319,9 @@ inline IndexedDispReg operator+(Reg64 b, Reg64 i) {
 }
 
 inline MemoryRef operator*(Reg64 r)  { return MemoryRef(DispReg(r)); }
-inline DispRIP   operator*(RegRIP r) { return DispRIP(0); }
+inline DispRIP operator*(RegRIP /*r*/) {
+  return DispRIP(0);
+}
 
 inline MemoryRef Reg64::operator[](intptr_t disp) const {
   return *(*this + disp);
@@ -477,7 +483,7 @@ namespace reg {
     X(xmm14); X(xmm15);
     return nullptr;
   }
-  inline const char* regname(RegSF r) {
+  inline const char* regname(RegSF /*r*/) {
     return "%flags";
   }
 #undef X

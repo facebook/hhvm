@@ -476,8 +476,8 @@ static unsigned long php_unicode_tolower(unsigned long code,
   return case_lookup(code, l, r, field);
 }
 
-static unsigned long php_unicode_totitle(unsigned long code,
-                                         enum mbfl_no_encoding enc) {
+static unsigned long
+php_unicode_totitle(unsigned long code, enum mbfl_no_encoding /*enc*/) {
   int field;
   long l, r;
 
@@ -525,9 +525,9 @@ static unsigned long php_unicode_totitle(unsigned long code,
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
-static int php_mb_parse_encoding_list(const char *value, int value_length,
-                                      mbfl_encoding ***return_list,
-                                      int *return_size, int persistent) {
+static int php_mb_parse_encoding_list(const char* value, int value_length,
+                                      mbfl_encoding*** return_list,
+                                      int* return_size, int /*persistent*/) {
   int n, l, size, bauto, ret = 1;
   char *p, *p1, *p2, *endp, *tmpstr;
   mbfl_encoding *encoding;
@@ -822,9 +822,9 @@ static char *php_unicode_convert_case(int case_mode, const char *srcstr,
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
-static int php_mb_parse_encoding_array(const Array& array,
-                                       mbfl_encoding ***return_list,
-                                       int *return_size, int persistent) {
+static int
+php_mb_parse_encoding_array(const Array& array, mbfl_encoding*** return_list,
+                            int* return_size, int /*persistent*/) {
   int n, l, size, bauto,ret = 1;
   mbfl_encoding *encoding;
   mbfl_no_encoding *src;

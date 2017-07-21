@@ -472,9 +472,9 @@ static Variant invoke_failed(const char *func,
   return false;
 }
 
-static Variant invoke(const String& function, const Variant& params,
-                      strhash_t hash, bool tryInterp,
-                      bool fatal, bool useWeakTypes = false) {
+static Variant
+invoke(const String& function, const Variant& params, strhash_t /*hash*/,
+       bool /*tryInterp*/, bool fatal, bool useWeakTypes = false) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(

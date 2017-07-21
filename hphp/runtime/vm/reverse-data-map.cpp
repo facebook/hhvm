@@ -93,7 +93,7 @@ void register_start(Kind kind, const void* meta) {
   starts[imm >> kAlignShift] = static_cast<uint8_t>(kind);
 }
 
-void deregister(Kind kind, const void* meta) {
+void deregister(Kind /*kind*/, const void* meta) {
   assertx(s_starts);
   auto& starts = *s_starts;
 

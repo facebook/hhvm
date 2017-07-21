@@ -46,7 +46,7 @@ ConstantExpression::ConstantExpression
 }
 
 void ConstantExpression::onParse(AnalysisResultConstPtr ar,
-                                 FileScopePtr scope) {
+                                 FileScopePtr /*scope*/) {
   ar->parseOnDemandByConstant(m_name);
 }
 
@@ -205,7 +205,8 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ConstantExpression::outputPHP(CodeGenerator& cg,
+                                   AnalysisResultPtr /*ar*/) {
   if (hadBackslash()) {
     cg_printf("\\%s", m_name.c_str());
   } else {

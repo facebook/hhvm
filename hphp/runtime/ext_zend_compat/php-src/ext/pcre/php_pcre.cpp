@@ -922,9 +922,9 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, char *
 
 /* {{{ preg_do_eval
  */
-static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
-						int *offsets, int count, char **result TSRMLS_DC)
-{
+static int
+preg_do_eval(char* /*eval_str*/, int /*eval_str_len*/, char* /*subject*/,
+             int* /*offsets*/, int /*count*/, char** /*result*/ TSRMLS_DC) {
 #ifdef HHVM
     not_implemented();
 #else

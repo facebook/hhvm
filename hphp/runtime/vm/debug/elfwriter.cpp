@@ -44,9 +44,9 @@ void ElfWriter::logError(const std::string& msg) {
   std::cerr << msg << '\n';
 }
 
-int ElfWriter::dwarfCallback(
-  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
-  Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info) {
+int ElfWriter::dwarfCallback(LIBDWARF_CALLBACK_NAME_TYPE name, int size,
+                             Dwarf_Unsigned type, Dwarf_Unsigned flags,
+                             Dwarf_Unsigned /*link*/, Dwarf_Unsigned /*info*/) {
   if (!strncmp(name, ".rel", 4))
     return 0;
   return newSection(name, size, type, flags);

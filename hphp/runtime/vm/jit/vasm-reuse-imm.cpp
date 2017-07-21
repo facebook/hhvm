@@ -80,7 +80,7 @@ folly::Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
 }
 
 template <typename Inst>
-void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) {
+void reuseImmq(Env& env, const Inst& /*inst*/, Vlabel /*b*/, size_t i) {
   // leaky bucket
   env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan].reset();
 }

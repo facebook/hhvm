@@ -279,7 +279,7 @@ void Func::initPrologues(int numParams) {
   }
 }
 
-void Func::setFullName(int numParams) {
+void Func::setFullName(int /*numParams*/) {
   assert(m_name->isStatic());
   if (m_cls) {
     m_fullName = makeStaticString(

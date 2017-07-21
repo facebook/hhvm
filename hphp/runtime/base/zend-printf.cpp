@@ -1586,8 +1586,7 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-int vspprintf(char **pbuf, size_t max_len, const char *format, ...)
-{
+int vspprintf(char** pbuf, size_t /*max_len*/, const char* format, ...) {
   int len;
   va_list ap;
   va_start(ap, format);
@@ -1599,8 +1598,8 @@ int vspprintf(char **pbuf, size_t max_len, const char *format, ...)
 /*
  * Same as vspprintf but taking an va_list
  */
-int vspprintf_ap(char **pbuf, size_t max_len, const char *format, va_list ap)
-{
+int vspprintf_ap(char** pbuf, size_t /*max_len*/, const char* format,
+                 va_list ap) {
   int len;
   len = xbuf_format_converter(pbuf, format, ap);
   return len;

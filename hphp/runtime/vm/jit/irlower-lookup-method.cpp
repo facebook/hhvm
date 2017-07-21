@@ -368,10 +368,9 @@ void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
     // If we don't know whether we have a $this, we need to check dynamically.
     auto const sf = v.makeReg();
     v << testqi{ActRec::kHasClassBit, srcCtx, sf};
-    unlikelyCond(v, vcold(env), CC_NZ, sf, dstCtx,
-         [&] (Vout& v) { return srcCtx; },
-         [&] (Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); }
-        );
+    unlikelyCond(
+      v, vcold(env), CC_NZ, sf, dstCtx, [&](Vout& /*v*/) { return srcCtx; },
+      [&](Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); });
   }
 }
 

@@ -95,8 +95,8 @@ struct FastCGIServer : public Server,
   }
 
   // These are currently unimplemented (TODO(#4129))
-  void addTakeoverListener(TakeoverListener* lisener) override {}
-  void removeTakeoverListener(TakeoverListener* lisener) override {}
+  void addTakeoverListener(TakeoverListener* /*lisener*/) override {}
+  void removeTakeoverListener(TakeoverListener* /*lisener*/) override {}
 
   // Increases the size of the thread-pool for dispatching requests
   void addWorkers(int numWorkers) override {

@@ -37,9 +37,8 @@ ConstantTable::ConstantTable(BlockScope &blockScope)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ConstantTable::add(const std::string &name,
-                        ExpressionPtr exp, AnalysisResultConstPtr ar,
-                        ConstructPtr construct) {
+void ConstantTable::add(const std::string& name, ExpressionPtr exp,
+                        AnalysisResultConstPtr /*ar*/, ConstructPtr construct) {
 
   if (name == "true" || name == "false") {
     return;
@@ -70,8 +69,7 @@ void ConstantTable::add(const std::string &name,
   }
 }
 
-void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
-                               Symbol* sym) {
+void ConstantTable::setDynamic(AnalysisResultConstPtr /*ar*/, Symbol* sym) {
   if (!sym->isDynamic()) {
     Lock lock(BlockScope::s_constMutex);
     sym->setDynamic();
@@ -88,8 +86,8 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
   setDynamic(ar, genSymbol(name, true));
 }
 
-void ConstantTable::setValue(AnalysisResultConstPtr ar, const std::string &name,
-                             ExpressionPtr value) {
+void ConstantTable::setValue(AnalysisResultConstPtr /*ar*/,
+                             const std::string& name, ExpressionPtr value) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   sym->setValue(value);
@@ -207,5 +205,5 @@ ClassScopeRawPtr ConstantTable::findBase(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ConstantTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ConstantTable::outputPHP(CodeGenerator& /*cg*/, AnalysisResultPtr /*ar*/) {
 }

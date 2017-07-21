@@ -60,41 +60,45 @@ static bool chunk_merge(void* chunka, size_t sizea, void* chunkb, size_t sizeb,
 }
 #elif defined USE_JEMALLOC_EXTENT_HOOKS
 // jemalloc extent hooks
-static bool extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                          bool committed, unsigned arena_ind) {
+static bool
+extent_dalloc(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
+              bool /*committed*/, unsigned /*arena_ind*/) {
   return true;
 }
 
-static void extent_destroy(extent_hooks_t* extent_hooks, void* addr,
-                           size_t size, bool committed, unsigned arena_ind) {
+static void
+extent_destroy(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
+               size_t /*size*/, bool /*committed*/, unsigned /*arena_ind*/) {
   return;
 }
 
-static bool extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                          size_t offset, size_t length, unsigned arena_ind) {
+static bool
+extent_commit(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
+              size_t /*offset*/, size_t /*length*/, unsigned /*arena_ind*/) {
   return false;
 }
 
-static bool extent_decommit(extent_hooks_t* extent_hooks, void* addr,
-                            size_t size, size_t offset, size_t length,
-                            unsigned arena_ind) {
+static bool extent_decommit(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
+                            size_t /*size*/, size_t /*offset*/,
+                            size_t /*length*/, unsigned /*arena_ind*/) {
   return true;
 }
 
-static bool extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                         size_t offset, size_t length, unsigned arena_ind) {
+static bool
+extent_purge(extent_hooks_t* /*extent_hooks*/, void* /*addr*/, size_t /*size*/,
+             size_t /*offset*/, size_t /*length*/, unsigned /*arena_ind*/) {
   return true;
 }
 
-static bool extent_split(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                         size_t sizea, size_t sizeb, bool comitted,
-                         unsigned arena_ind) {
+static bool extent_split(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
+                         size_t /*size*/, size_t /*sizea*/, size_t /*sizeb*/,
+                         bool /*comitted*/, unsigned /*arena_ind*/) {
   return false;
 }
 
-static bool extent_merge(extent_hooks_t* extent_hooks, void* addra,
-                         size_t sizea, void* addrb, size_t sizeb,
-                         bool committed, unsigned arena_ind) {
+static bool extent_merge(extent_hooks_t* /*extent_hooks*/, void* /*addra*/,
+                         size_t /*sizea*/, void* /*addrb*/, size_t /*sizeb*/,
+                         bool /*committed*/, unsigned /*arena_ind*/) {
   return false;
 }
 
@@ -171,9 +175,9 @@ void* ManagedArena::chunk_alloc(void* addr, size_t size,
                                 size_t alignment, bool* zero, bool* commit,
                                 unsigned arena_ind) {
 #else
-void* ManagedArena::extent_alloc(extent_hooks_t* extent_hooks, void *addr,
-                                size_t size, size_t alignment, bool* zero,
-                                bool* commit, unsigned arena_ind) {
+void* ManagedArena::extent_alloc(extent_hooks_t* /*extent_hooks*/, void* addr,
+                                 size_t size, size_t alignment, bool* zero,
+                                 bool* commit, unsigned arena_ind) {
 #endif
   if (addr != nullptr) return nullptr;
   if (size > size1g) return nullptr;

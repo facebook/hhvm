@@ -552,9 +552,7 @@ private:
       writeImpl(buffer, len) : 0;
   }
 
-  static int close_file(void *context) {
-    return 0;
-  }
+  static int close_file(void* /*context*/) { return 0; }
 
   static xmlChar *xmls(const Variant& s) {
     return s.isNull() ? nullptr : (xmlChar*)s.toString().data();

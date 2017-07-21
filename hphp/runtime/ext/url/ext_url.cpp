@@ -113,7 +113,7 @@ static String normalize_variable_name(const String& name) {
 }
 
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
-                                   bool use_include_path /* = false */) {
+                    bool /*use_include_path*/ /* = false */) {
   auto const f = HHVM_FN(file_get_contents)(filename).toString();
 
   Variant matches;

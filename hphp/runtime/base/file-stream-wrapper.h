@@ -58,7 +58,7 @@ struct FileStreamWrapper final : Stream::Wrapper {
   int unlink(const String& path) override;
   int rename(const String& oldname, const String& newname) override;
   int mkdir(const String& path, int mode, int options) override;
-  int rmdir(const String& path, int options) override {
+  int rmdir(const String& path, int /*options*/) override {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }

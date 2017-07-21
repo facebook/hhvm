@@ -1062,7 +1062,7 @@ void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
   out->exp = expList;
 }
 
-void Parser::onConst(Token &out, Token &name, Token &value) {
+void Parser::onConst(Token& /*out*/, Token& name, Token& value) {
   // Convert to a define call
   Token sname;   onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
 
@@ -1077,7 +1077,7 @@ void Parser::onConst(Token &out, Token &name, Token &value) {
   m_cnstTable.insert(name.text());
 }
 
-void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
+void Parser::onClassConst(Token& out, Token& cls, Token& name, bool /*text*/) {
   if (!cls->exp) {
     cls->exp = NEW_EXP(ScalarExpression, T_STRING, cls->text());
   }
@@ -1126,7 +1126,7 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   m_staticVars.emplace_back();
 }
 
-void Parser::onMethodStart(Token &name, Token &mods,
+void Parser::onMethodStart(Token& name, Token& /*mods*/,
                            bool doPushComment /* = true */) {
   onFunctionStart(name, doPushComment);
 }
@@ -1908,7 +1908,7 @@ void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
   }
 }
 
-void Parser::setHasNonEmptyReturn(ConstructPtr blame) {
+void Parser::setHasNonEmptyReturn(ConstructPtr /*blame*/) {
   if (m_funcContexts.empty()) {
     return;
   }
@@ -2285,7 +2285,7 @@ void Parser::onLabel(Token &out, Token &label) {
   out->stmt = NEW_STMT(LabelStatement, label.text());
 }
 
-void Parser::onGoto(Token &out, Token &label, bool limited) {
+void Parser::onGoto(Token& out, Token& label, bool /*limited*/) {
   out->stmt = NEW_STMT(GotoStatement, label.text());
 }
 

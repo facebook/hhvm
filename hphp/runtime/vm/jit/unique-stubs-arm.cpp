@@ -154,16 +154,14 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Set up frame linkage to avoid an indirect fixup.
     v << copy{rsp(), rfp()};
 
-    doWhile(v, CC_NZ, {},
-      [&] (const VregList& in, const VregList& out) {
-        auto const sf = v.makeReg();
+    doWhile(v, CC_NZ, {}, [&](const VregList& /*in*/, const VregList& /*out*/) {
+      auto const sf = v.makeReg();
 
-        decref_local(v);
-        next_local(v);
-        v << cmpq{local, last, sf};
-        return sf;
-      }
-    );
+      decref_local(v);
+      next_local(v);
+      v << cmpq{ local, last, sf };
+      return sf;
+    });
   });
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
@@ -208,7 +206,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
+TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
   auto const start = cb.frontier();

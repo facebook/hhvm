@@ -34,16 +34,11 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant HHVM_FUNCTION(
-    mysql_connect,
-    const String& server,
-    const String& username,
-    const String& password,
-    bool new_link,
-    int client_flags,
-    int connect_timeout_ms,
-    int query_timeout_ms,
-    const Array& conn_attrs) {
+static Variant
+HHVM_FUNCTION(mysql_connect, const String& server, const String& username,
+              const String& password, bool /*new_link*/, int client_flags,
+              int connect_timeout_ms, int query_timeout_ms,
+              const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
       server,
       username,
@@ -80,17 +75,11 @@ static Variant HHVM_FUNCTION(
       sslContextProvider));
 }
 
-static Variant HHVM_FUNCTION(
-    mysql_connect_with_db,
-    const String& server,
-    const String& username,
-    const String& password,
-    const String& database,
-    bool new_link,
-    int client_flags,
-    int connect_timeout_ms,
-    int query_timeout_ms,
-    const Array& conn_attrs) {
+static Variant HHVM_FUNCTION(mysql_connect_with_db, const String& server,
+                             const String& username, const String& password,
+                             const String& database, bool /*new_link*/,
+                             int client_flags, int connect_timeout_ms,
+                             int query_timeout_ms, const Array& conn_attrs) {
   return Variant(php_mysql_do_connect(
       server,
       username,
@@ -148,7 +137,7 @@ static Variant HHVM_FUNCTION(mysql_pconnect_with_db,
 }
 
 static bool HHVM_FUNCTION(mysql_set_timeout, int query_timeout_ms /* = -1 */,
-                   const Variant& link_identifier /* = null */) {
+                          const Variant& /*link_identifier*/ /* = null */) {
   MySQL::SetDefaultReadTimeout(query_timeout_ms);
   return true;
 }

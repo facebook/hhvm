@@ -138,7 +138,7 @@ bool ServerNameIndication::ends_with(const std::string &s,
   return false;
 }
 
-int ServerNameIndication::callback(void *s, int *ad, void *arg) {
+int ServerNameIndication::callback(void* s, int* /*ad*/, void* /*arg*/) {
   SSL *ssl = (SSL *)s;
   const char *sn_ptr = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
   if (!sn_ptr) {

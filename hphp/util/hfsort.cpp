@@ -128,7 +128,7 @@ void freezeClusters(const TargetGraph& cg, std::vector<Cluster>& clusters) {
   }
 }
 
-void mergeInto(Cluster& into, Cluster&& other, const double aw = 0) {
+void mergeInto(Cluster& into, Cluster&& other, const double /*aw*/ = 0) {
   into.targets.insert(into.targets.end(), other.targets.begin(), other.targets.end());
   into.size += other.size;
   into.samples += other.samples;

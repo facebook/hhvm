@@ -37,10 +37,10 @@
 
 #include "hphp/util/assertions.h"
 
-void php_info_print_table_header(int num_cols, ...) {
+void php_info_print_table_header(int /*num_cols*/, ...) {
   not_implemented();
 }
-void php_info_print_table_row(int num_cols, ...) {
+void php_info_print_table_row(int /*num_cols*/, ...) {
   not_implemented();
 }
 void php_info_print_table_start(void) {

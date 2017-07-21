@@ -61,7 +61,7 @@ struct AsmInfo {
     return false;
   }
 
-  bool instRangeExists(AreaIndex area, const TcaRange& rng) const {
+  bool instRangeExists(AreaIndex /*area*/, const TcaRange& rng) const {
     return (instRangeExists(instRangesForArea(AreaIndex::Main), rng) ||
             instRangeExists(instRangesForArea(AreaIndex::Cold), rng) ||
             instRangeExists(instRangesForArea(AreaIndex::Frozen), rng));
@@ -182,12 +182,8 @@ struct AsmInfo {
   }
 
   template <typename MM>
-  TcaRange updateRange(MM& stateMap,
-                       uint32_t id,
-                       AreaIndex area,
-                       TCA start,
-                       TCA end,
-                       bool merge) {
+  TcaRange updateRange(MM& stateMap, uint32_t id, AreaIndex /*area*/, TCA start,
+                       TCA end, bool merge) {
     auto ranges = stateMap[id];
     auto itr = ranges.first;
 

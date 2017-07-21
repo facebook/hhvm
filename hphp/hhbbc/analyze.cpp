@@ -73,9 +73,8 @@ State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
   return ret;
 }
 
-State entry_state(const Index& index,
-                  Context const ctx,
-                  ClassAnalysis* clsAnalysis,
+State entry_state(const Index& index, Context const ctx,
+                  ClassAnalysis* /*clsAnalysis*/,
                   const std::vector<Type>* knownArgs) {
   auto ret = State{};
   ret.initialized = true;

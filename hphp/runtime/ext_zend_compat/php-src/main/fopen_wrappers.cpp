@@ -72,7 +72,7 @@
 
 #include "hphp/runtime/base/file-util.h"
 
-PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC) {
+PHPAPI int php_check_open_basedir(const char* /*path*/ TSRMLS_DC) {
   // we don't support openbasedir so you can access anything
   return SUCCESS;
 }
@@ -93,8 +93,10 @@ PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const cha
 }
 /* }}} */
 
-PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode TSRMLS_DC)
-{
+PHPAPI char*
+expand_filepath_with_mode(const char* filepath, char* real_path,
+                          const char* relative_to, size_t /*relative_to_len*/,
+                          int realpath_mode TSRMLS_DC) {
   // This part is basically the same as File::TranslatePath(), except relative_to is
   // optionally a parameter instead of coming from g_context
   assert(realpath_mode != CWD_FILEPATH); // not implemented

@@ -120,7 +120,7 @@ void XDebugProfiler::recordFrame(const TypedValue* retVal) {
   collectFrameData(*fd, retVal);
 }
 
-void XDebugProfiler::beginFrame(const char *symbol) {
+void XDebugProfiler::beginFrame(const char* /*symbol*/) {
   assert(isNeeded());
 
   // Check the stack depth, abort if we've reached the limit
@@ -137,9 +137,8 @@ void XDebugProfiler::beginFrame(const char *symbol) {
   }
 }
 
-void XDebugProfiler::endFrame(const TypedValue* retVal,
-                              const char *symbol,
-                              bool endMain /* = false */) {
+void XDebugProfiler::endFrame(const TypedValue* retVal, const char* /*symbol*/,
+                              bool /*endMain*/ /* = false */) {
   assert(isNeeded());
   m_depth--;
 

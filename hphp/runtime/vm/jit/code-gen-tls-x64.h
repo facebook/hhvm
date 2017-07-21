@@ -50,8 +50,8 @@ namespace HPHP { namespace jit { namespace x64 { namespace detail {
  * out, we take a datum's linear address, and subtract it from the linear
  * address where TLS starts.
  */
-template<typename T>
-Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
+template <typename T>
+Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
   uintptr_t vaddr = uintptr_t(datum.tls) - tlsBase();
   return Vptr{baseless(vaddr), Vptr::FS};
 }

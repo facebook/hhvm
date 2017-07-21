@@ -154,14 +154,15 @@ bool ModifierExpression::validForTraitAliasRule() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
+void ModifierExpression::analyzeProgram(AnalysisResultPtr /*ar*/) {
   // do nothing
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ModifierExpression::outputPHP(CodeGenerator& cg,
+                                   AnalysisResultPtr /*ar*/) {
   if (m_hasPrivacy) {
     if (m_modifiers.empty()) {
       cg_printf("public ");

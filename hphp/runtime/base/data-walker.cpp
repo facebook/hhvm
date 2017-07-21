@@ -82,10 +82,8 @@ inline bool DataWalker::markVisited(
   return false;
 }
 
-inline void DataWalker::objectFeature(
-    ObjectData* pobj,
-    DataFeature& features,
-    PointerSet& visited) const {
+inline void DataWalker::objectFeature(ObjectData* pobj, DataFeature& features,
+                                      PointerSet& /*visited*/) const {
   if (pobj->isCollection()) return;
   if ((m_features & LookupFeature::DetectSerializable) &&
        pobj->instanceof(SystemLib::s_SerializableClass)) {

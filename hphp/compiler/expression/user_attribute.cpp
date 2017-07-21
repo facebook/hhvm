@@ -42,7 +42,7 @@ ExpressionPtr UserAttribute::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void UserAttribute::analyzeProgram(AnalysisResultPtr ar) {
+void UserAttribute::analyzeProgram(AnalysisResultPtr /*ar*/) {
   // do nothing
 }
 

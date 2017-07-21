@@ -94,7 +94,7 @@ namespace {
 
 // Helpers for retrieving 'delta' field
 template <class Reply>
-uint64_t getDelta(const Reply& reply) {
+uint64_t getDelta(const Reply& /*reply*/) {
   mcr_throwException(
       "getDelta expected arithmetic reply type",
       mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
@@ -108,7 +108,7 @@ uint64_t getDelta(const mc::McDecrReply& reply) {
 
 // Helpers for retrieving 'casToken' field
 template <class Reply>
-uint64_t getCasToken(const Reply& reply) {
+uint64_t getCasToken(const Reply& /*reply*/) {
   mcr_throwException(
       "getCasToken expected reply type McGetsReply",
       mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);

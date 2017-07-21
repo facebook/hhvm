@@ -508,7 +508,7 @@ struct FileSessionData {
   FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
 
-  bool open(const char *save_path, const char *session_name) {
+  bool open(const char* save_path, const char* /*session_name*/) {
     String tmpdir;
     if (*save_path == '\0') {
       tmpdir = HHVM_FN(sys_get_temp_dir)();
@@ -913,7 +913,7 @@ struct UserSessionModule : SessionModule {
     ));
   }
 
-  bool gc(int maxlifetime, int *nrdels) override {
+  bool gc(int maxlifetime, int* /*nrdels*/) override {
     return handleReturnValue(vm_call_user_func(
        make_packed_array(s_session->ps_session_handler, s_gc),
        make_packed_array((int64_t)maxlifetime)
@@ -1199,7 +1199,7 @@ static std::string ini_get_serializer() {
   return serializer->getName();
 }
 
-static bool ini_on_update_trans_sid(const bool& value) {
+static bool ini_on_update_trans_sid(const bool& /*value*/) {
   return session_check_active_state();
 }
 
@@ -1815,7 +1815,8 @@ static bool HHVM_METHOD(SessionHandler, hhclose) {
   return s_session->default_mod && s_session->default_mod->close();
 }
 
-static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
+static Variant
+HHVM_METHOD(SessionHandler, hhread, const String& /*session_id*/) {
   String value;
   if (s_session->default_mod &&
       s_session->default_mod->read(s_session->id.data(), value)) {

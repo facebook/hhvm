@@ -1214,12 +1214,9 @@ Type flavorToType(FlavorDesc f) {
 
 }
 
-void translateInstr(
-  irgen::IRGS& irgs,
-  const NormalizedInstruction& ni,
-  bool checkOuterTypeOnly,
-  bool firstInst
-) {
+void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
+                    bool /*checkOuterTypeOnly*/, bool /*firstInst*/
+                    ) {
   irgen::prepareForNextHHBC(
     irgs,
     &ni,

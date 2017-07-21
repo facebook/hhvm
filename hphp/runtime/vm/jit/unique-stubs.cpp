@@ -407,7 +407,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
                  {done, ctch}};
     vc = ctch;
-    emitStubCatch(vc, us, [](Vout& v) {});
+    emitStubCatch(vc, us, [](Vout& /*v*/) {});
 
     v = done;
     v << tailcallstub{us.functionEnterHelper};
@@ -1062,7 +1062,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
+TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
   return vwrap(cb, data, [&] (Vout& v) {
     // Eagerly save VM regs.
     storeVMRegs(v);

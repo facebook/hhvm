@@ -30,8 +30,10 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Inst>
-bool simplify(Env&, const Inst& inst, Vlabel b, size_t i) { return false; }
+template <typename Inst>
+bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

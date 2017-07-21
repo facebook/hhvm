@@ -182,13 +182,13 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
 // Informs the client of all argument strings that may follow this command
 // name. Used for auto completion. The client uses the prefix of the argument
 // following the command name to narrow down the list displayed to the user.
-void DebuggerCommand::list(DebuggerClient& client) {
+void DebuggerCommand::list(DebuggerClient& /*client*/) {
   TRACE(2, "DebuggerCommand::list\n");
 }
 
 // The text to display when the debugger client
 // processes "help <this command name>".
-void DebuggerCommand::help(DebuggerClient& client) {
+void DebuggerCommand::help(DebuggerClient& /*client*/) {
   TRACE(2, "DebuggerCommand::help\n");
   not_reached();
 }
@@ -207,7 +207,7 @@ bool DebuggerCommand::displayedHelp(DebuggerClient& client) {
 
 // Server-side work for a command. Returning false indicates a failure to
 // communicate with the client (for commands that do so).
-bool DebuggerCommand::onServer(DebuggerProxy& proxy) {
+bool DebuggerCommand::onServer(DebuggerProxy& /*proxy*/) {
   TRACE(2, "DebuggerCommand::onServer\n");
   assert(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);

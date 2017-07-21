@@ -70,7 +70,7 @@ ExpressionPtr AssignmentExpression::clone() {
 // parser functions
 
 void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
-                                        FileScopeRawPtr fs,
+                                        FileScopeRawPtr /*fs*/,
                                         ClassScopePtr scope) {
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement
@@ -167,7 +167,7 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
   return true;
 }
 
-ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
+ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr /*ar*/) {
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
     if (var->checkUnused() &&
@@ -181,7 +181,7 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
     return ExpressionPtr();
   }

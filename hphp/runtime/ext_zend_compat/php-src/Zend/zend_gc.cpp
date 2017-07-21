@@ -24,6 +24,6 @@
 
 #define GC_ROOT_BUFFER_MAX_ENTRIES 10000
 
-ZEND_API void gc_remove_zval_from_buffer(zval *zv TSRMLS_DC) {
+ZEND_API void gc_remove_zval_from_buffer(zval* /*zv*/ TSRMLS_DC) {
   not_implemented();
 }

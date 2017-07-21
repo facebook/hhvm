@@ -227,7 +227,7 @@ struct TickWorker
     m_job->setState(TickRequest::State::COMPLETED);
     m_job.reset();
   }
-  void abortJob(TickRequestPtr job) override {
+  void abortJob(TickRequestPtr /*job*/) override {
     m_job->setState(TickRequest::State::ABORTED);
   }
   void tick() override {

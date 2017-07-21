@@ -265,8 +265,8 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Inst>
-void lower(VLS& env, Inst& inst, Vlabel b, size_t i) {}
+template <typename Inst>
+void lower(VLS& /*env*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 void lower(VLS& env, vcall& inst, Vlabel b, size_t i) {
   lower_vcall(env.unit, inst, b, i);
@@ -343,11 +343,11 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
       break;
   }
 }
-void lower(VLS& env, vregrestrict& inst, Vlabel b, size_t i) {
+void lower(VLS& env, vregrestrict& /*inst*/, Vlabel b, size_t i) {
   env.vreg_restrict_level--;
   env.unit.blocks[b].code[i] = nop{};
 }
-void lower(VLS& env, vregunrestrict& inst, Vlabel b, size_t i) {
+void lower(VLS& env, vregunrestrict& /*inst*/, Vlabel b, size_t i) {
   env.vreg_restrict_level++;
   env.unit.blocks[b].code[i] = nop{};
 }

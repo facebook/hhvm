@@ -416,7 +416,7 @@ cleanup:
   return ret;
 }
 
-bool PDOMySqlConnection::support(SupportedMethod method) {
+bool PDOMySqlConnection::support(SupportedMethod /*method*/) {
   return true;
 }
 
@@ -552,8 +552,8 @@ int64_t PDOMySqlConnection::doer(const String& sql) {
   return c;
 }
 
-bool PDOMySqlConnection::quoter(const String& input, String &quoted,
-                                PDOParamType paramtype) {
+bool PDOMySqlConnection::quoter(const String& input, String& quoted,
+                                PDOParamType /*paramtype*/) {
   String s(2 * input.size() + 3, ReserveString);
   char *buf = s.mutableData();
   int len = mysql_real_escape_string(m_server, buf + 1,
@@ -610,11 +610,11 @@ bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
   }
 }
 
-String PDOMySqlConnection::lastId(const char *name) {
+String PDOMySqlConnection::lastId(const char* /*name*/) {
   return (int64_t)mysql_insert_id(m_server);
 }
 
-bool PDOMySqlConnection::fetchErr(PDOStatement *stmt, Array &info) {
+bool PDOMySqlConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {
   if (m_einfo.errcode) {
     info.append((int64_t)m_einfo.errcode);
     info.append(String(m_einfo.errmsg, CopyString));
@@ -1004,7 +1004,7 @@ bool PDOMySqlStatement::executer() {
   return true;
 }
 
-bool PDOMySqlStatement::fetcher(PDOFetchOrientation ori, long offset) {
+bool PDOMySqlStatement::fetcher(PDOFetchOrientation /*ori*/, long /*offset*/) {
   int ret;
   if (m_stmt) {
     ret = mysql_stmt_fetch(m_stmt);

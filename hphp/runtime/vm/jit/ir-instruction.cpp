@@ -432,7 +432,9 @@ Type memoKeyReturn(const IRInstruction* inst) {
 
 template <uint32_t...> struct IdxSeq {};
 
-inline Type unionReturn(const IRInstruction* inst, IdxSeq<>) { return TBottom; }
+inline Type unionReturn(const IRInstruction* /*inst*/, IdxSeq<>) {
+  return TBottom;
+}
 
 template <uint32_t Idx, uint32_t... Rest>
 inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
@@ -442,7 +444,7 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 
 } // namespace
 
-Type outputType(const IRInstruction* inst, int dstId) {
+Type outputType(const IRInstruction* inst, int /*dstId*/) {
   using namespace TypeNames;
   using TypeNames::TCA;
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");

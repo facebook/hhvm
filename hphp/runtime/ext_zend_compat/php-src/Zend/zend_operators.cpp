@@ -193,7 +193,9 @@ ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2) /* {{{ */
   return zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
 }
 
-ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC) {
+ZEND_API zend_bool instanceof_function_ex(
+  const zend_class_entry* instance_ce, const zend_class_entry* ce,
+  zend_bool /*interfaces_only*/ TSRMLS_DC) {
   HPHP::Class * instance_cls = HPHP::zend_hphp_class_entry_to_class(instance_ce);
   HPHP::Class * cls = HPHP::zend_hphp_class_entry_to_class(ce);
   if (!cls || !instance_cls) {

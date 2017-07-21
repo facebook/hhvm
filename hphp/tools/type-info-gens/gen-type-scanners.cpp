@@ -2955,17 +2955,14 @@ void Generator::genIndexInit(std::ostream& os) const {
   for (const auto& indexed : m_indexed_types) {
     os << "  /* " << *indexed.type << " */\n";
     for (const auto& address : indexed.addresses) {
-      HPHP::match<void>(
-        address,
-        [&](const std::string& s) {
-          os << "  " << s << " = " << index << ";\n";
-        },
-        [&](uintptr_t p) {
-          os << "  *reinterpret_cast<Index*>(0x"
-             << std::hex << address << std::dec
-             << ") = " << index << ";\n";
-        }
-      );
+      HPHP::match<void>(address,
+                        [&](const std::string& s) {
+                          os << "  " << s << " = " << index << ";\n";
+                        },
+                        [&](uintptr_t /*p*/) {
+                          os << "  *reinterpret_cast<Index*>(0x" << std::hex
+                             << address << std::dec << ") = " << index << ";\n";
+                        });
     }
     ++index;
   }

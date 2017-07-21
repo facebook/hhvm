@@ -125,7 +125,7 @@ struct XDebugProfiler final : Profiler {
   void endAllFrames() override {}
 
   // xdebug has no need to write stats to php array
-  void writeStats(Array &ret) override {}
+  void writeStats(Array& /*ret*/) override {}
 
   // TODO (#3704) Need some way to get stack time/memory information for when
   //              we print the stack trace

@@ -48,9 +48,9 @@ using std::set;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Package::Package(const char *root, bool bShortTags /* = true */,
-                 bool bAspTags /* = false */)
-  : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
+Package::Package(const char* root, bool /*bShortTags*/ /* = true */,
+                 bool /*bAspTags*/ /* = false */)
+    : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
   m_root = FileUtil::normalizeDir(root);
   m_ar = std::make_shared<AnalysisResult>();
   m_fileCache = std::make_shared<FileCache>();

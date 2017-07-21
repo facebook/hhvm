@@ -538,8 +538,8 @@ member_rval::ptr_u PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   return LIKELY(size_t(ki) < ad->m_size) ? &data[ki] : nullptr;
 }
 
-member_rval::ptr_u PackedArray::NvGetStr(const ArrayData* ad,
-                                         const StringData* s) {
+member_rval::ptr_u
+PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
   assert(checkInvariants(ad));
   return nullptr;
 }
@@ -581,7 +581,7 @@ bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   return size_t(k) < ad->m_size;
 }
 
-bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
+bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* /*s*/) {
   assert(checkInvariants(ad));
   return false;
 }
@@ -647,8 +647,7 @@ PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   throwInvalidArrayKeyException(key, adIn);
 }
 
-member_lval
-PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
+member_lval PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t /*k*/, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
@@ -753,8 +752,8 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
   return mixed;
 }
 
-ArrayData*
-PackedArray::SetRefIntVec(ArrayData* adIn, int64_t k, Variant& v, bool copy) {
+ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t /*k*/,
+                                     Variant& /*v*/, bool /*copy*/) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
@@ -961,7 +960,7 @@ ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
   }
 }
 
-ArrayData* PackedArray::PlusEqVec(ArrayData* adIn, const ArrayData* elems) {
+ArrayData* PackedArray::PlusEqVec(ArrayData* adIn, const ArrayData* /*elems*/) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidAdditionException(adIn);
@@ -1022,7 +1021,7 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   return ad;
 }
 
-ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool copy) {
+ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool /*copy*/) {
   assert(checkInvariants(adIn));
 
   auto const ad = PrepareForInsert(adIn, adIn->cowCheck());
@@ -1142,7 +1141,7 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-void PackedArray::Ksort(ArrayData* ad, int flags, bool ascending) {
+void PackedArray::Ksort(ArrayData* ad, int /*flags*/, bool ascending) {
   assert(ad->getSize() <= 1 || ascending);
 }
 

@@ -1709,8 +1709,8 @@ void RuntimeOption::Load(
     Config::Bind(StaticFileExtensions, ini, config, "StaticFile.Extensions",
                  staticFileDefault);
 
-    auto matches_callback = [] (const IniSettingMap &ini_m, const Hdf &hdf_m,
-                                const std::string &ini_m_key) {
+    auto matches_callback = [](const IniSettingMap& ini_m, const Hdf& hdf_m,
+                               const std::string& /*ini_m_key*/) {
       FilesMatches.push_back(std::make_shared<FilesMatch>(ini_m, hdf_m));
     };
     Config::Iterate(matches_callback, ini, config, "StaticFile.FilesMatch");
@@ -1988,29 +1988,25 @@ void RuntimeOption::Load(
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "allow_url_fopen",
                    IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) { return false; },
+                     [](const std::string& /*value*/) { return false; },
                      []() { return "1"; }));
 
   // HPHP specific
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_id",
                    IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) { return false; },
-                     []() { return compilerId().begin(); }
-                   ));
+                     [](const std::string& /*value*/) { return false; },
+                     []() { return compilerId().begin(); }));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_version",
                    IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) { return false; },
-                     []() { return getHphpCompilerVersion(); }
-                   ));
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hphp.build_id",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) { return false; },
-                     nullptr
-                   ),
-                   &RuntimeOption::BuildId);
+                     [](const std::string& /*value*/) { return false; },
+                     []() { return getHphpCompilerVersion(); }));
+  IniSetting::Bind(
+    IniSetting::CORE, IniSetting::PHP_INI_NONE, "hphp.build_id",
+    IniSetting::SetAndGet<std::string>(
+      [](const std::string& /*value*/) { return false; }, nullptr),
+    &RuntimeOption::BuildId);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "notice_frequency",
                    &RuntimeOption::NoticeFrequency);

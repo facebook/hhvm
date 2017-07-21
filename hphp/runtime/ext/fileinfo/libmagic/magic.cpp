@@ -272,10 +272,9 @@ magic_list(struct magic_set *ms, const char *magicfile)
   return file_apprentice(ms, magicfile, FILE_LIST);
 }
 
-private void
-close_and_restore(const struct magic_set *ms, const char *name, int fd,
-    const struct stat *sb)
-{
+private
+void close_and_restore(const struct magic_set* ms, const char* name, int /*fd*/,
+                       const struct stat* sb) {
 
   if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
     /*
@@ -306,9 +305,8 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 /*
  * find type of descriptor
  */
-public const char *
-magic_descriptor(struct magic_set *ms, int fd)
-{
+public
+const char* magic_descriptor(struct magic_set* ms, int /*fd*/) {
   if (ms == NULL)
     return NULL;
   return file_or_stream(ms, NULL, NULL);

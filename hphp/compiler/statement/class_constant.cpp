@@ -175,7 +175,7 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (!isAbstract() && !isTypeconst()) {
     for (int i = 0; i < m_exp->getCount(); i++) {
       auto assignment =

@@ -94,10 +94,9 @@ static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t option
 #define FILEINFO_MODE_STREAM 1
 #define FILEINFO_MODE_FILE 2
 
-static Variant php_finfo_get_type(
-    const Resource& object, const Variant& what,
-    int64_t options, const Variant& context, int mode, int mimetype_emu)
-{
+static Variant
+php_finfo_get_type(const Resource& object, const Variant& what, int64_t options,
+                   const Variant& /*context*/, int mode, int mimetype_emu) {
   String ret_val;
   String buffer;
   char mime_directory[] = "directory";

@@ -303,8 +303,8 @@ static char *soo_sign_hmac(php_so_object *soo, char *message, const char *cs, co
 }
 /* }}} */
 
-static char *soo_sign_rsa(php_so_object *soo, char *message, const oauth_sig_context *ctx TSRMLS_DC)
-{
+static char* soo_sign_rsa(php_so_object* /*soo*/, char* message,
+                          const oauth_sig_context* ctx TSRMLS_DC) {
   zval *args[3], *func, *retval;
   unsigned char *result;
   int retlen;
@@ -346,7 +346,8 @@ static char *soo_sign_rsa(php_so_object *soo, char *message, const oauth_sig_con
 }
 /* }}} */
 
-static char *soo_sign_plain(php_so_object *soo, const char *cs, const char *ts TSRMLS_DC) /* {{{ */
+static char* soo_sign_plain(php_so_object* /*soo*/, const char* cs,
+                            const char* ts TSRMLS_DC) /* {{{ */
 {
   char *tret;
   spprintf(&tret, 0, "%s&%s", cs, ts);
@@ -1106,7 +1107,8 @@ static size_t soo_read_response(char *ptr, size_t size, size_t nmemb, void *ctx)
 }
 /* }}} */
 
-int oauth_debug_handler(CURL *ch, curl_infotype type, char *data, size_t data_len, void *ctx) /* {{{ */
+int oauth_debug_handler(CURL* /*ch*/, curl_infotype type, char* data,
+                        size_t data_len, void* ctx) /* {{{ */
 {
   php_so_debug *sdbg;
   char *z_data = NULL;

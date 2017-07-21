@@ -55,26 +55,23 @@ std::vector<Block*> exitTargets(const Block::ExitOp& exit) {
   using namespace bc;
   std::vector<Block*> targets;
 
-  match<void>(exit,
-      [&](const Jmp& j) { targets.push_back(j.imm1); },
-      [&](const JmpNS& j) { targets.push_back(j.imm1); },
-      [&](const JmpZ& j) { targets.push_back(j.imm1); },
-      [&](const JmpNZ& j) { targets.push_back(j.imm1); },
-      [&](const Switch& s) {
-        targets.insert(targets.end(), s.imm3.begin(), s.imm3.end());
-      },
-      [&](const SSwitch& s) {
-        const StringOffsetVector& sov = s.imm1;
-        for (const auto& pair : sov.branches) {
-          targets.push_back(pair.second);
-        }
-        targets.push_back(sov.defaultBranch);
-      },
-      [&](const RetC& r) {},
-      [&](const RetV& r) {},
-      [&](const Unwind& u) {},
-      [&](const Throw& t) {},
-      [&](const Fatal& t) {});
+  match<void>(exit, [&](const Jmp& j) { targets.push_back(j.imm1); },
+              [&](const JmpNS& j) { targets.push_back(j.imm1); },
+              [&](const JmpZ& j) { targets.push_back(j.imm1); },
+              [&](const JmpNZ& j) { targets.push_back(j.imm1); },
+              [&](const Switch& s) {
+                targets.insert(targets.end(), s.imm3.begin(), s.imm3.end());
+              },
+              [&](const SSwitch& s) {
+                const StringOffsetVector& sov = s.imm1;
+                for (const auto& pair : sov.branches) {
+                  targets.push_back(pair.second);
+                }
+                targets.push_back(sov.defaultBranch);
+              },
+              [&](const RetC& /*r*/) {}, [&](const RetV& /*r*/) {},
+              [&](const Unwind& /*u*/) {}, [&](const Throw& /*t*/) {},
+              [&](const Fatal& /*t*/) {});
 
   return targets;
 }

@@ -520,11 +520,11 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
 
 // Native accessor properties of mysqli.
 
-static Variant mysqli_client_info_get(const Object& this_) {
+static Variant mysqli_client_info_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_info)();
 }
 
-static Variant mysqli_client_version_get(const Object& this_) {
+static Variant mysqli_client_version_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_version)();
 }
 
@@ -691,21 +691,21 @@ struct mysqli_PropHandler : Native::MapPropHandler<mysqli_PropHandler> {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
-static Variant mysqli_driver_client_info_get(const Object& this_) {
+static Variant mysqli_driver_client_info_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_info)();
 }
 
-static Variant mysqli_driver_client_version_get(const Object& this_) {
+static Variant mysqli_driver_client_version_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_version)();
 }
 
-static Variant mysqli_driver_driver_version_get(const Object& this_) {
+static Variant mysqli_driver_driver_version_get(const Object& /*this_*/) {
   // Lets pretend we are the same version as PHP. Taken from here
   // http://git.io/wY2WPw
   return 101009;
 }
 
-static Variant mysqli_driver_embedded_get(const Object& this_) {
+static Variant mysqli_driver_embedded_get(const Object& /*this_*/) {
   return false;
 }
 
@@ -1102,16 +1102,14 @@ struct mysqliExtension final : Extension {
   mysqliExtension() : Extension("mysqli") {}
   // Use moduleLoad() for settings that are system-wide and cannot
   // change per request (e.g. PHP_INI_SYSTEM)
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     // Not supporting local_infile yet. But this is the skeleton for
     // when we do.
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
-                     "mysqli.allow_local_infile",
-                     IniSetting::SetAndGet<bool>(
-                       [](const bool value) { return false; },
-                       []() { return false; }
-                     ),
-                     &allow_local_infile);
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_SYSTEM, "mysqli.allow_local_infile",
+      IniSetting::SetAndGet<bool>([](const bool /*value*/) { return false; },
+                                  []() { return false; }),
+      &allow_local_infile);
     IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
                      "mysqli.allow_persistent", "true",
                      &allow_persistent);
@@ -1127,12 +1125,10 @@ struct mysqliExtension final : Extension {
     // Requires mysqlnd. This setting is actually an int, but setting
     // to a bool that returns false for now. If and when we support
     // this, we set to an int and define and bind to &cache_size
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
-                     "mysqli.cache_size",
-                     IniSetting::SetAndGet<bool>(
-                       [](const bool value) { return false; },
-                       []() { return false; }
-                     ));
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_SYSTEM, "mysqli.cache_size",
+      IniSetting::SetAndGet<bool>([](const bool /*value*/) { return false; },
+                                  []() { return false; }));
 
     MySQL::SetAllowReconnect(reconnect);
     MySQL::SetAllowPersistent(allow_persistent);

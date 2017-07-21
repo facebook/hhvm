@@ -42,7 +42,7 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginInlining(IRLS& env, const IRInstruction* inst) { }
+void cgBeginInlining(IRLS& /*env*/, const IRInstruction* /*inst*/) {}
 
 void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<DefInlineFP>();

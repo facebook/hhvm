@@ -795,8 +795,8 @@ bool HHVM_FUNCTION(odbc_commit, const Resource& link)
 }
 
 Variant HHVM_FUNCTION(odbc_connect, const String& dsn, const String& username,
-    const String& password, const Variant& cursor_type /* = 0 */)
-{
+                      const String& password,
+                      const Variant& /*cursor_type*/ /* = 0 */) {
   auto odbc_link = req::make<ODBCLink>();
 
   if (!odbc_link->connect(dsn, username, password)) {
@@ -812,19 +812,16 @@ void HHVM_FUNCTION(odbc_close, const Resource& link)
     odbc_link->close();
 }
 
-String HHVM_FUNCTION(odbc_error, const Variant& link)
-{
+String HHVM_FUNCTION(odbc_error, const Variant& /*link*/) {
   return String::FromCStr((char*)ODBCContext::get_last_error_code());
 }
 
-String HHVM_FUNCTION(odbc_errormsg, const Variant& link)
-{
+String HHVM_FUNCTION(odbc_errormsg, const Variant& /*link*/) {
   return String::FromCStr((char*)ODBCContext::get_last_error_msg());
 }
 
 Variant HHVM_FUNCTION(odbc_exec, const Resource& link, const String& query,
-                      const Variant& flags /* = 0 */)
-{
+                      const Variant& /*flags*/ /* = 0 */) {
   auto odbc_link = safe_cast<ODBCLink>(link);
   if (odbc_link == nullptr)
     return false;
@@ -840,8 +837,7 @@ bool HHVM_FUNCTION(odbc_execute, const Resource& result, const Variant& params)
 }
 
 Variant HHVM_FUNCTION(odbc_fetch_array, const Resource& cursor,
-                      const Variant& rownumber /* = 0 */)
-{
+                      const Variant& /*rownumber*/ /* = 0 */) {
   auto odbc_cursor = safe_cast<ODBCCursor>(cursor);
   if (odbc_cursor == nullptr)
     return false;

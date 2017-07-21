@@ -349,9 +349,8 @@ bool strip_exn_tree(const php::Func& func,
     n->id = nextId++;
     if (n->parent) {
       match<void>(
-        n->info,
-        [&] (const php::CatchRegion& cr) {},
-        [&] (const php::FaultRegion& fr) {
+        n->info, [&](const php::CatchRegion& /*cr*/) {},
+        [&](const php::FaultRegion& fr) {
           auto pentry = match<BlockId>(
             n->parent->info,
             [&] (const php::CatchRegion& cr2) { return cr2.catchEntry; },

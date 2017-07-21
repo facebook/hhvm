@@ -488,7 +488,7 @@ template <typename T, typename Element = T> struct TinyVectorReqAllocator {
     );
   }
   void deallocate(void* ptr) const { req::free(ptr); }
-  std::size_t usable_size(void* ptr, std::size_t size) const {
+  std::size_t usable_size(void* /*ptr*/, std::size_t size) const {
     return size;
   }
 };

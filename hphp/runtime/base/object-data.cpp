@@ -1050,10 +1050,10 @@ namespace {
 
 __thread ObjectData::PropRecurInfo propRecurInfo;
 
-template<class Invoker>
-InvokeResult magic_prop_impl(const StringData* key,
-                             const ObjectData::PropAccessInfo& info,
-                             Invoker invoker) {
+template <class Invoker>
+InvokeResult
+magic_prop_impl(const StringData* /*key*/,
+                const ObjectData::PropAccessInfo& info, Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
     if (!propRecurInfo.activeSet) {
       propRecurInfo.activeSet =

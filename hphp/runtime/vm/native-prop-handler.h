@@ -133,21 +133,20 @@ void registerNativePropHandler(const String& className) {
  * child classes.
  */
 struct BasePropHandler {
-  static Variant getProp(const Object& this_, const String& name) {
+  static Variant getProp(const Object& /*this_*/, const String& /*name*/) {
     return Native::prop_not_handled();
   }
-  static Variant setProp(const Object& this_,
-                         const String& name,
-                         const Variant& value) {
+  static Variant setProp(const Object& /*this_*/, const String& /*name*/,
+                         const Variant& /*value*/) {
     return Native::prop_not_handled();
   }
-  static Variant issetProp(const Object& this_, const String& name) {
+  static Variant issetProp(const Object& /*this_*/, const String& /*name*/) {
     return Native::prop_not_handled();
   }
-  static Variant unsetProp(const Object& this_, const String& name) {
+  static Variant unsetProp(const Object& /*this_*/, const String& /*name*/) {
     return Native::prop_not_handled();
   }
-  static bool isPropSupported(const String& name, const String& op) {
+  static bool isPropSupported(const String& /*name*/, const String& /*op*/) {
     return false;
   }
 };
@@ -199,7 +198,7 @@ struct MapPropHandler : BasePropHandler {
     return true;
   }
 
-  static bool isPropSupported(const String& name, const String& op) {
+  static bool isPropSupported(const String& name, const String& /*op*/) {
     return Derived::map.isPropSupported(name);
   }
 };

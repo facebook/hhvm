@@ -180,8 +180,8 @@ public:
                           : nullptr, NoIncRef{}) {}
 
   // make an empty string with cap reserve bytes, plus 1 for '\0'
-  String(size_t cap, ReserveStringMode mode)
-  : m_str(StringData::Make(cap), NoIncRef{}) { }
+  String(size_t cap, ReserveStringMode /*mode*/)
+      : m_str(StringData::Make(cap), NoIncRef{}) {}
 
   static String attach(StringData* sd) {
     return String(sd, NoIncRef{});

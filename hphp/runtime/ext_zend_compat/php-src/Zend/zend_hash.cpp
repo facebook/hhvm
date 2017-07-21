@@ -47,7 +47,11 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey,
   return SUCCESS;
 }
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+ZEND_API int
+_zend_hash_quick_add_or_update(HashTable* ht, const char* arKey,
+                               uint nKeyLength, ulong /*h*/, void* pData,
+                               uint nDataSize, void** pDest,
+                               int flag ZEND_FILE_LINE_DC) {
   return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 
@@ -120,7 +124,9 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
   }
 }
 
-ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
+ZEND_API int
+zend_hash_del_key_or_index(HashTable* ht, const char* arKey, uint nKeyLength,
+                           ulong h, int /*flag*/) {
   if (nKeyLength == 0) {
     ht->remove(h, false);
   } else {
@@ -152,7 +158,8 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   return SUCCESS;
 }
 
-ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData) {
+ZEND_API int zend_hash_quick_find(const HashTable* ht, const char* arKey,
+                                  uint nKeyLength, ulong /*h*/, void** pData) {
   return zend_hash_find(ht, arKey, nKeyLength, pData);
 }
 
@@ -175,7 +182,7 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyL
   );
 }
 
-ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
+ZEND_API ulong zend_hash_next_free_element(const HashTable* /*ht*/) {
   // TODO: What the caller really wants here is MixedArray::m_nextKI
   // Previously ht->iter_end() was returned, but that will give some
   // vaguely related number like MixedArray::m_used or APCLocalArray::m_size,
@@ -294,7 +301,10 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
   }
 }
 
-ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
+ZEND_API void
+_zend_hash_merge(HashTable* target, HashTable* source,
+                 copy_ctor_func_t pCopyConstructor, void* /*tmp*/,
+                 uint /*size*/, int /*overwrite*/ ZEND_FILE_LINE_DC) {
   always_assert(source->isProxyArray());
   HPHP::ProxyArray * source_proxy = static_cast<HPHP::ProxyArray*>(source);
   target->plusEq(source);
@@ -320,7 +330,9 @@ ZEND_API void zend_hash_clean(HashTable *ht) {
   }
 }
 
-ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
+ZEND_API void zend_hash_copy(HashTable* target, HashTable* source,
+                             copy_ctor_func_t pCopyConstructor, void* /*tmp*/,
+                             uint /*size*/) {
   always_assert(source->isProxyArray());
   HPHP::ProxyArray * source_proxy = static_cast<HPHP::ProxyArray*>(source);
   target->merge(source);
@@ -337,18 +349,19 @@ ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
   return zend_inline_hash_func(arKey, nKeyLength);
 }
 
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
-              compare_func_t compar, int renumber TSRMLS_DC) {
+ZEND_API int
+zend_hash_sort(HashTable* ht, sort_func_t sort_func, compare_func_t /*compar*/,
+               int /*renumber*/ TSRMLS_DC) {
   assert(sort_func == zend_qsort);
   // TODO figure out how to use compar
   ht->ksort(0, true);
   return SUCCESS;
 }
 
-ZEND_API int _zend_hash_init(HashTable *ht, uint nSize,
-    hash_func_t pHashFunction, dtor_func_t pDestructor,
-    zend_bool persistent ZEND_FILE_LINE_DC)
-{
+ZEND_API int
+_zend_hash_init(HashTable* ht, uint nSize, hash_func_t /*pHashFunction*/,
+                dtor_func_t pDestructor,
+                zend_bool persistent ZEND_FILE_LINE_DC) {
   always_assert(ht->isProxyArray());
   HPHP::ProxyArray * proxy = static_cast<HPHP::ProxyArray*>(ht);
   proxy->proxyInit(nSize, pDestructor, persistent);

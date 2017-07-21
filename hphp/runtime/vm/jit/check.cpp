@@ -290,7 +290,7 @@ bool checkCfg(const IRUnit& unit) {
 }
 
 bool checkTmpsSpanningCalls(const IRUnit& unit) {
-  auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
+  auto ignoreSrc = [&](IRInstruction& /*inst*/, SSATmp* src) {
     /*
      * FramePtr/StkPtr-typed tmps may live across calls.
      *
@@ -358,7 +358,7 @@ Type buildUnion(Type t, Args... ts) {
 template <uint32_t...> struct IdxSeq {};
 
 template <typename F>
-inline void forEachSrcIdx(F f, IdxSeq<>) {}
+inline void forEachSrcIdx(F /*f*/, IdxSeq<>) {}
 
 template <typename F, uint32_t Idx, uint32_t... Rest>
 inline void forEachSrcIdx(F f, IdxSeq<Idx, Rest...>) {
@@ -377,7 +377,7 @@ inline void forEachSrcIdx(F f, IdxSeq<Idx, Rest...>) {
  * increments curSrc, and at the end we can check that the argument
  * count was also correct.
  */
-bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
+bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
   int curSrc = 0;
 
   auto bail = [&] (const std::string& msg) {

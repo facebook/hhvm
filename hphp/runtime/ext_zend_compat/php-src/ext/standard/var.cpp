@@ -37,16 +37,19 @@
 #define COMMON (Z_ISREF_PP(struc) ? "&" : "")
 /* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC) {
+PHPAPI void php_var_serialize(smart_str* buf, zval** struc,
+                              php_serialize_data_t* /*var_hash*/ TSRMLS_DC) {
   HPHP::String s = HPHP::f_serialize(HPHP::tvAsVariant((*struc)->tv()));
   smart_str_appendl(buf, s.data(), s.size());
 }
-PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC) {
+PHPAPI int php_var_unserialize(zval** rval, const unsigned char** p,
+                               const unsigned char* max,
+                               php_unserialize_data_t* /*var_hash*/ TSRMLS_DC) {
   HPHP::Variant ret = HPHP::f_unserialize(HPHP::String((const char*) *p, max - *p, HPHP::CopyString));
   MAKE_STD_ZVAL(*rval);
   HPHP::cellDup(*ret.asCell(), *(*rval)->tv());
   return !ret.isBoolean() || ret.toBoolean();
 }
-PHPAPI void var_destroy(php_unserialize_data_t *var_hash) {
+PHPAPI void var_destroy(php_unserialize_data_t* /*var_hash*/) {
   not_implemented();
 }

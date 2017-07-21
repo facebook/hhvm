@@ -455,8 +455,7 @@ Variant HHVM_FUNCTION(apc_delete,
   return apc_store().eraseKey(key.toString());
 }
 
-bool HHVM_FUNCTION(apc_clear_cache,
-                   const String& cache_type /* = "" */) {
+bool HHVM_FUNCTION(apc_clear_cache, const String& /*cache_type*/ /* = "" */) {
   if (!apcExtension::Enable) return false;
   return apc_store().clear();
 }
@@ -575,8 +574,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
   return info.toArray();
 }
 
-Array HHVM_FUNCTION(apc_sma_info,
-                    bool limited /* = false */) {
+Array HHVM_FUNCTION(apc_sma_info, bool /*limited*/ /* = false */) {
   return empty_array();
 }
 
@@ -691,14 +689,12 @@ size_t get_const_map_size() {
 // Constant and APC priming (always with compressed data).
 
 EXTERNALLY_VISIBLE
-void const_load_impl_compressed
-    (struct cache_info *info,
-     int *int_lens, const char *int_keys, long long *int_values,
-     int *char_lens, const char *char_keys, char *char_values,
-     int *string_lens, const char *strings,
-     int *object_lens, const char *objects,
-     int *thrift_lens, const char *thrifts,
-     int *other_lens, const char *others) {
+void const_load_impl_compressed(
+  struct cache_info* /*info*/, int* /*int_lens*/, const char* /*int_keys*/,
+  long long* /*int_values*/, int* /*char_lens*/, const char* /*char_keys*/,
+  char* /*char_values*/, int* /*string_lens*/, const char* /*strings*/,
+  int* /*object_lens*/, const char* /*objects*/, int* /*thrift_lens*/,
+  const char* /*thrifts*/, int* /*other_lens*/, const char* /*others*/) {
   // TODO(8117903): Unused; remove after updating www side.
 }
 
@@ -905,9 +901,8 @@ const StaticString
 #define RFC1867_NAME_MAXLEN 63
 #define RFC1867_FILENAME_MAXLEN 127
 
-int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
-                         unsigned int event, void *event_data,
-                         void **extra) {
+int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
+                         void* event_data, void** /*extra*/) {
   switch (event) {
   case MULTIPART_EVENT_START: {
     multipart_event_start *data = (multipart_event_start *) event_data;

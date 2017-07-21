@@ -445,14 +445,14 @@ static bool HHVM_FUNCTION(xdebug_code_coverage_started) {
  *   - xdebug_get_zval_value_ansi
  *   - xdebug_get_zval_value
  */
-static TypedValue* HHVM_FN(xdebug_debug_zval)(ActRec* ar)
-  XDEBUG_NOTIMPLEMENTED
+static TypedValue*
+HHVM_FN(xdebug_debug_zval)(ActRec* /*ar*/) XDEBUG_NOTIMPLEMENTED
 
-// TODO(#3704) Requires xdebug_debug_zval, just print to stdout
-static TypedValue* HHVM_FN(xdebug_debug_zval_stdout)(ActRec* ar)
-  XDEBUG_NOTIMPLEMENTED
+  // TODO(#3704) Requires xdebug_debug_zval, just print to stdout
+  static TypedValue* HHVM_FN(xdebug_debug_zval_stdout)(ActRec* /*ar*/)
+    XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_disable) {
+  static void HHVM_FUNCTION(xdebug_disable) {
   XDEBUG_GLOBAL(DefaultEnable) = false;
 }
 
@@ -489,10 +489,9 @@ static Array HHVM_FUNCTION(xdebug_get_code_coverage) {
 
 // TODO(#3704) see xdebug_start_error_collection()
 static Array HHVM_FUNCTION(xdebug_get_collected_errors,
-                           bool clean /* = false */)
-  XDEBUG_NOTIMPLEMENTED
+                           bool /*clean*/ /* = false */) XDEBUG_NOTIMPLEMENTED
 
-const StaticString s_closure_varname("0Closure");
+  const StaticString s_closure_varname("0Closure");
 
 static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
   if (RuntimeOption::RepoAuthoritative) {
@@ -595,12 +594,11 @@ static int64_t HHVM_FUNCTION(xdebug_peak_memory_usage) {
 
 // TODO(#3704) This requires var_dump, error handling, and stack trace printing
 static void HHVM_FUNCTION(xdebug_print_function_stack,
-                          const String& message /* = "user triggered" */,
-                          int64_t options /* = 0 */)
-  XDEBUG_NOTIMPLEMENTED
+                          const String& /*message*/ /* = "user triggered" */,
+                          int64_t /*options*/ /* = 0 */) XDEBUG_NOTIMPLEMENTED
 
-static void HHVM_FUNCTION(xdebug_start_code_coverage,
-                          int64_t options /* = 0 */) {
+  static void HHVM_FUNCTION(xdebug_start_code_coverage,
+                            int64_t options /* = 0 */) {
   // XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE not supported right now primarily
   // because the internal CodeCoverage class does support either unexecuted line
   // tracking or dead code analysis

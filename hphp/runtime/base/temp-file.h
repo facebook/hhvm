@@ -41,7 +41,7 @@ struct TempFile : PlainFile {
   bool open(const String& filename, const String& mode) override;
   bool close() override;
 
-  Object await(uint16_t events, double timeout) override {
+  Object await(uint16_t /*events*/, double /*timeout*/) override {
     SystemLib::throwExceptionObject(
       "Temporary stream does not support awaiting");
   }

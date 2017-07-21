@@ -348,9 +348,8 @@ void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
 }
 
 MethodStatementPtr
-ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
-                              AnalysisResultPtr   ar,
-                              std::string         methName) {
+ClassScope::importTraitMethod(const TraitMethod& traitMethod,
+                              AnalysisResultPtr ar, std::string /*methName*/) {
   MethodStatementPtr meth = traitMethod.method;
   std::string origMethName = traitMethod.originalName;
   ModifierExpressionPtr modifiers = traitMethod.modifiers;
@@ -432,7 +431,7 @@ bool ClassScope::addClassRequirement(const std::string &requiredName,
   return true;
 }
 
-void ClassScope::importClassRequirements(AnalysisResultPtr ar,
+void ClassScope::importClassRequirements(AnalysisResultPtr /*ar*/,
                                          ClassScopePtr trait) {
   auto addRequires = [&] (
     const boost::container::flat_set<std::string>& reqs, bool isExtends) {
@@ -459,8 +458,7 @@ bool ClassScope::hasMethod(const std::string &methodName) const {
 
 namespace {
 
-void findTraitMethodsToImport(AnalysisResultPtr ar,
-                              ClassScopePtr trait,
+void findTraitMethodsToImport(AnalysisResultPtr /*ar*/, ClassScopePtr trait,
                               ClassScope::TMIData& tmid) {
   assert(Option::WholeProgram);
   auto tStmt = dynamic_pointer_cast<ClassStatement>(trait->getStmt());
@@ -519,9 +517,9 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
 
 }
 
-void ClassScope::TMIOps::addTraitAlias(ClassScope* cs,
-                                       TraitAliasStatementPtr stmt,
-                                       ClassScopePtr traitCls) {
+void ClassScope::TMIOps::addTraitAlias(ClassScope* /*cs*/,
+                                       TraitAliasStatementPtr /*stmt*/,
+                                       ClassScopePtr /*traitCls*/) {
   // We don't actually need to track this here, so do nothing.
 }
 
@@ -1069,7 +1067,7 @@ bool ClassScope::hasProperty(const std::string &name) const {
   return sym;
 }
 
-void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
+void ClassScope::setRedeclaring(AnalysisResultConstPtr /*ar*/, int redecId) {
   if (isTrait()) {
     Compiler::Error(Compiler::RedeclaredTrait, m_stmt);
   }
@@ -1077,7 +1075,7 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
   setVolatile(); // redeclared class is also volatile
 }
 
-bool ClassScope::addFunction(AnalysisResultConstPtr ar,
+bool ClassScope::addFunction(AnalysisResultConstPtr /*ar*/,
                              FileScopeRawPtr fileScope,
                              FunctionScopePtr funcScope) {
   FunctionScopePtr &func = m_functions[funcScope->getScopeName()];

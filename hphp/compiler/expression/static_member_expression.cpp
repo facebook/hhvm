@@ -147,7 +147,8 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr
+StaticMemberExpression::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }

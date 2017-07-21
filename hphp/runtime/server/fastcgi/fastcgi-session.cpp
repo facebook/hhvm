@@ -226,7 +226,8 @@ void FastCGISession::dropConnection() {
   m_sock->closeWithReset();
 }
 
-void FastCGISession::dumpConnectionState(uint8_t loglevel) { /* nop */ }
+void FastCGISession::dumpConnectionState(uint8_t /*loglevel*/) { /* nop */
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

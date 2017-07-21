@@ -2566,9 +2566,9 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
  * Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
  */
-String string_convert_hebrew_string(const String& inStr,
-                                    int max_chars_per_line,
-                                    int convert_newlines) {
+String
+string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
+                             int convert_newlines) {
   assert(!inStr.empty());
   auto str = inStr.data();
   auto str_len = inStr.size();

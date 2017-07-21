@@ -131,8 +131,8 @@ static Variant HHVM_METHOD(IntlBreakIterator, getLocale, int64_t locale_type) {
   return String(locale.getName(), CopyString);
 }
 
-static Object HHVM_METHOD(IntlBreakIterator, getPartsIterator,
-                          const String& key_type) {
+static Object
+HHVM_METHOD(IntlBreakIterator, getPartsIterator, const String& /*key_type*/) {
   throw_not_implemented("IntlBreakIterator::getPartsIterator");
 }
 

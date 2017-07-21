@@ -156,6 +156,6 @@ bool SimpleVariable::checkUnused() const {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void SimpleVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void SimpleVariable::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("$%s", m_name.c_str());
 }

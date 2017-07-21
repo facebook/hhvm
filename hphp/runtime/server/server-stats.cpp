@@ -635,7 +635,7 @@ int64_t ServerStats::get(const std::string& name) {
   return 0;
 }
 
-void ServerStats::logPage(const string& url, int code) {
+void ServerStats::logPage(const string& /*url*/, int /*code*/) {
   int64_t now = time(nullptr) / RuntimeOption::StatsSlotDuration;
   int slot = now % RuntimeOption::StatsMaxSlot;
 

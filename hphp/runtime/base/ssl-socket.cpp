@@ -97,7 +97,7 @@ int SSLSocket::verifyCallback(int preverify_ok, X509_STORE_CTX *ctx) {
 
 const StaticString s_passphrase("passphrase");
 
-int SSLSocket::passwdCallback(char *buf, int num, int verify, void *data) {
+int SSLSocket::passwdCallback(char* buf, int num, int /*verify*/, void* data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
   String passphrase = stream->m_context[s_passphrase].toString();

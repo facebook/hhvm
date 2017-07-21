@@ -2030,7 +2030,7 @@ void SymbolicStack::setString(const StringData* s) {
   se.name = s;
 }
 
-void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
+void SymbolicStack::setKnownCls(const StringData* s, bool /*nonNull*/) {
   assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
   assert(!se.className || se.className == s);
@@ -2384,8 +2384,8 @@ EmitterVisitor::registerReturn(StatementPtr s, Region* region, char sym) {
 }
 
 ControlTargetPtr
-EmitterVisitor::registerGoto(StatementPtr s, Region* region, StringData* name,
-                             bool alloc) {
+EmitterVisitor::registerGoto(StatementPtr /*s*/, Region* region,
+                             StringData* name, bool alloc) {
   ControlTargetPtr t;
   Region* r;
   for (r = region; true; r = r->m_parent.get()) {
@@ -7143,10 +7143,8 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   return PassByRefKind::ErrorOnCell;
 }
 
-void EmitterVisitor::emitClosureUseVar(Emitter& e,
-                                       ExpressionPtr exp,
-                                       int paramId,
-                                       bool byRef) {
+void EmitterVisitor::emitClosureUseVar(Emitter& e, ExpressionPtr exp,
+                                       int /*paramId*/, bool byRef) {
   visit(exp);
   if (checkIfStackEmpty("Closure Use Var*")) return;
   if (byRef) {
@@ -7702,7 +7700,7 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
                   m_evalStack.get(m_evalStack.size() - 1) | StackSym::M);
 }
 
-void EmitterVisitor::markElem(Emitter& e) {
+void EmitterVisitor::markElem(Emitter& /*e*/) {
   if (m_evalStack.empty()) {
     InvariantViolation("Emitter encountered an empty evaluation stack inside"
                        " the markElem function (at offset %d)",
@@ -7723,11 +7721,11 @@ void EmitterVisitor::markElem(Emitter& e) {
   }
 }
 
-void EmitterVisitor::markNewElem(Emitter& e) {
+void EmitterVisitor::markNewElem(Emitter& /*e*/) {
   m_evalStack.push(StackSym::W);
 }
 
-void EmitterVisitor::markProp(Emitter& e, PropAccessType propAccessType) {
+void EmitterVisitor::markProp(Emitter& /*e*/, PropAccessType propAccessType) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -7754,7 +7752,7 @@ void EmitterVisitor::markProp(Emitter& e, PropAccessType propAccessType) {
   }
 }
 
-void EmitterVisitor::markSProp(Emitter& e) {
+void EmitterVisitor::markSProp(Emitter& /*e*/) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -7796,19 +7794,19 @@ void EmitterVisitor::markSProp(Emitter& e) {
       m_ue.bcPos());                                        \
 }
 
-void EmitterVisitor::markName(Emitter& e) {
+void EmitterVisitor::markName(Emitter& /*e*/) {
   int index = m_evalStack.size() - 1;
   MARK_NAME_BODY(index, 1);
 }
 
-void EmitterVisitor::markNameSecond(Emitter& e) {
+void EmitterVisitor::markNameSecond(Emitter& /*e*/) {
   int index = m_evalStack.size() - 2;
   MARK_NAME_BODY(index, 2);
 }
 
 #undef MARK_NAME_BODY
 
-void EmitterVisitor::markGlobalName(Emitter& e) {
+void EmitterVisitor::markGlobalName(Emitter& /*e*/) {
   if (m_evalStack.empty()) {
     InvariantViolation(
       "Emitter encountered an empty evaluation stack inside "
@@ -7922,8 +7920,8 @@ static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   }
 }
 
-static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
-                             bool top) {
+static Attr
+buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe, bool /*top*/) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
   ModifierExpressionPtr mod(meth->getModifiers());
   Attr attrs = buildAttrs(mod, meth->isRef());
@@ -9125,7 +9123,8 @@ void EmitterVisitor::emitPostponedCtors() {
   }
 }
 
-void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
+void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p,
+                                         bool /*pinit*/) {
   Attr attrs = (Attr)(AttrPrivate | AttrStatic);
   if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
     attrs = attrs | AttrBuiltin;
@@ -11162,8 +11161,8 @@ class EmitterWorker
   bool m_ret;
 };
 
-static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
-                             void *data) {
+static void
+addEmitterWorker(AnalysisResultPtr /*ar*/, StatementPtr sp, void* data) {
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 

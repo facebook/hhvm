@@ -88,7 +88,7 @@ void Parser::fatal(const Location* loc, const char* msg) {
   throw ParseTimeFatalException(m_fileName, loc->r.line0, "%s", msg);
 }
 
-void Parser::onClassStart(int type, Token &name) {
+void Parser::onClassStart(int /*type*/, Token& /*name*/) {
   m_classScope++;
 }
 
@@ -103,16 +103,9 @@ void Parser::onClassStart(int type, Token &name) {
 //
 // The flag for final is set for enums, and the flag for abstract is set for
 // interfaces and traits.
-void Parser::onClass(
-  Token &out,
-  int type,
-  Token &name,
-  Token &base,
-  Token &baseInterface,
-  Token &stmt,
-  Token *attr,
-  Token *enumBase)
-{
+void Parser::onClass(Token& /*out*/, int type, Token& name, Token& base,
+                     Token& baseInterface, Token& stmt, Token* /*attr*/,
+                     Token* /*enumBase*/) {
   m_classScope--;
   if (!isOutsideOfClass()) {
     return;
@@ -194,24 +187,14 @@ void Parser::onClass(
   }
 }
 
-void Parser::onEnum(
-  Token &out,
-  Token &name,
-  Token &baseTy,
-  Token &stmt,
-  Token *attr)
-{
+void Parser::onEnum(Token& out, Token& name, Token& /*baseTy*/, Token& /*stmt*/,
+                    Token* /*attr*/) {
   Token t;
   onClass(out, T_ENUM, name, t, t, t, nullptr, nullptr);
 }
 
-void Parser::onInterface(
-  Token &out,
-  Token &name,
-  Token &base,
-  Token &stmt,
-  Token *attr)
-{
+void Parser::onInterface(Token& out, Token& name, Token& base, Token& stmt,
+                         Token* /*attr*/) {
   Token t;
   onClass(out, T_INTERFACE, name, t, base, stmt, nullptr, nullptr);
 }
@@ -223,19 +206,15 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out.m_baseTypes.emplace(std::move(name.takeText()));
 }
 
-void Parser::onTypedef(
-  Token& out,
-  Token& name,
-  const Token& type,
-  const Token* attr)
-{
+void Parser::onTypedef(Token& /*out*/, Token& name, const Token& /*type*/,
+                       const Token* /*attr*/) {
   if (!isOutsideOfClass()) {
     return;
   }
   m_result.typeAliases.emplace_back(std::move(name.takeText()));
 }
 
-void Parser::onConst(Token &out, Token &name, Token &value) {
+void Parser::onConst(Token& /*out*/, Token& name, Token& /*value*/) {
   if (!isOutsideOfClass()) {
     return;
   }
@@ -252,16 +231,9 @@ void Parser::onFunctionStart(Token &name) {
   m_result.functions.emplace_back(std::move(name.takeText()));
 }
 
-void Parser::onFunction(
-  Token &out,
-  Token *modifiers,
-  Token &ret,
-  Token &ref,
-  Token &name,
-  Token &params,
-  Token &stmt,
-  Token *attr)
-{
+void Parser::onFunction(Token& /*out*/, Token* /*modifiers*/, Token& /*ret*/,
+                        Token& /*ref*/, Token& /*name*/, Token& /*params*/,
+                        Token& /*stmt*/, Token* /*attr*/) {
   m_functionScope--;
 }
 
@@ -298,7 +270,7 @@ void Parser::onNamespaceEnd() {
 }
 
 // This is needed when computing the name for onCall
-std::string Parser::resolve(const std::string &ns, bool cls) {
+std::string Parser::resolve(const std::string& ns, bool /*cls*/) {
   auto const pos = ns.find(NAMESPACE_SEP);
 
   // if qualified name, prepend current namespace
@@ -315,13 +287,8 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
 }
 
 // Search for define("string", value)
-void Parser::onCall(
-  Token &out,
-  bool dynamic,
-  Token &name,
-  Token &params,
-  Token *cls)
-{
+void Parser::onCall(Token& /*out*/, bool dynamic, Token& name, Token& params,
+                    Token* cls) {
   if (
     !dynamic
     && !cls
@@ -366,11 +333,8 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
 }
 
 // Needed to preserve fully qualified names of base interfaces
-void Parser::onTypeAnnotation(
-  Token& out,
-  Token& name,
-  const Token& typeArgs)
-{
+void Parser::onTypeAnnotation(Token& out, Token& name,
+                              const Token& /*typeArgs*/) {
   out = Token(name);
 }
 
@@ -384,7 +348,7 @@ void Parser::onClassRequire(Token &out, Token &name, bool isExtends) {
 }
 
 // Trait uses are accumulated as base types for the enclosing type
-void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
+void Parser::onTraitUse(Token& out, Token& traits, Token& /*rules*/) {
   out = Token(std::move(traits));
 }
 
@@ -412,204 +376,166 @@ void Parser::setTypeVars(Token &out, Token &name) {
  * EVERYTHING below this point is empty/unused/returns a falsey value         *
  ******************************************************************************/
 
+void Parser::onScopeLabel(const Token& /*stmt*/, const Token& /*label*/) {}
 
-void Parser::onScopeLabel(const Token& stmt, const Token& label) {
+void Parser::onCompleteLabelScope(bool /*fresh*/) {}
+
+void Parser::onName(Token& /*out*/, Token& /*name*/, NameKind /*kind*/) {}
+
+void Parser::onStaticVariable(Token& /*out*/, Token* /*exprs*/, Token& /*var*/,
+                              Token* /*value*/) {}
+
+void Parser::onClassVariable(Token& /*out*/, Token* /*exprs*/, Token& /*var*/,
+                             Token* /*value*/) {}
+
+void Parser::onClassConstant(Token& /*out*/, Token* /*exprs*/, Token& /*var*/,
+                             Token& /*value*/) {}
+
+void Parser::onClassAbstractConstant(Token& /*out*/, Token* /*exprs*/,
+                                     Token& /*var*/) {}
+
+void Parser::onClassTypeConstant(Token& /*out*/, Token& /*var*/,
+                                 Token& /*value*/) {}
+
+void Parser::onVariable(Token& /*out*/, Token* /*exprs*/, Token& /*var*/,
+                        Token* /*value*/, bool /*constant*/ /* = false */,
+                        const std::string& /*docComment*/ /* = "" */) {}
+
+void Parser::onSimpleVariable(Token& /*out*/, Token& /*var*/) {}
+
+void Parser::onPipeVariable(Token& /*out*/) {}
+
+void Parser::onDynamicVariable(Token& /*out*/, Token& /*expr*/,
+                               bool /*encap*/) {}
+
+void Parser::onIndirectRef(Token& /*out*/, Token& /*refCount*/,
+                           Token& /*var*/) {}
+
+void Parser::onStaticMember(Token& /*out*/, Token& /*cls*/, Token& /*name*/) {}
+
+void Parser::onRefDim(Token& /*out*/, Token& /*var*/, Token& /*offset*/) {}
+
+void Parser::onObjectProperty(Token& /*out*/, Token& /*base*/,
+                              PropAccessType /*propAccessType*/,
+                              Token& /*prop*/) {}
+
+void Parser::onObjectMethodCall(Token& /*out*/, Token& /*base*/,
+                                bool /*nullsafe*/, Token& /*prop*/,
+                                Token& /*params*/) {}
+
+void Parser::onEncapsList(Token& /*out*/, int /*type*/, Token& /*list*/) {}
+
+void Parser::addEncap(Token& /*out*/, Token* /*list*/, Token& /*expr*/,
+                      int /*type*/) {}
+
+void Parser::encapRefDim(Token& /*out*/, Token& /*var*/, Token& /*offset*/) {}
+
+void Parser::encapObjProp(Token& /*out*/, Token& /*var*/,
+                          PropAccessType /*propAccessType*/, Token& /*name*/) {}
+
+void Parser::encapArray(Token& /*out*/, Token& /*var*/, Token& /*expr*/) {}
+
+void Parser::onConstantValue(Token& /*out*/, Token& /*constant*/) {}
+
+void Parser::onExprListElem(Token& /*out*/, Token* /*exprs*/, Token& /*expr*/) {
 }
 
-void Parser::onCompleteLabelScope(bool fresh) {
-}
+void Parser::onListAssignment(Token& /*out*/, Token& /*vars*/, Token* /*expr*/,
+                              bool /*rhsFirst*/ /* = false */) {}
 
-void Parser::onName(Token &out, Token &name, NameKind kind) {
-}
+void Parser::onAListVar(Token& /*out*/, Token* /*list*/, Token* /*var*/) {}
 
-void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
-                              Token *value) {
-}
+void Parser::onAListSub(Token& /*out*/, Token* /*list*/, Token& /*sublist*/) {}
 
-void Parser::onClassVariable(Token &out, Token *exprs, Token &var,
-                             Token *value) {
-}
+void Parser::onAssign(Token& /*out*/, Token& /*var*/, Token& /*expr*/,
+                      bool /*ref*/, bool /*rhsFirst*/ /* = false */) {}
 
-void Parser::onClassConstant(Token &out, Token *exprs, Token &var,
-                             Token &value) {
-}
+void Parser::onAssignNew(Token& /*out*/, Token& /*var*/, Token& /*name*/,
+                         Token& /*args*/) {}
 
-void Parser::onClassAbstractConstant(Token &out, Token *exprs, Token &var) {
-}
+void Parser::onNewObject(Token& /*out*/, Token& /*name*/, Token& /*args*/) {}
 
-void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
-}
+void Parser::onUnaryOpExp(Token& /*out*/, Token& /*operand*/, int /*op*/,
+                          bool /*front*/) {}
 
-void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
-                        bool constant /* = false */,
-                        const std::string &docComment /* = "" */) {
-}
+void Parser::onBinaryOpExp(Token& /*out*/, Token& /*operand1*/,
+                           Token& /*operand2*/, int /*op*/) {}
 
-void Parser::onSimpleVariable(Token &out, Token &var) {
-}
+void Parser::onQOp(Token& /*out*/, Token& /*exprCond*/, Token* /*expYes*/,
+                   Token& /*expNo*/) {}
 
-void Parser::onPipeVariable(Token &out) {
-}
+void Parser::onNullCoalesce(Token& /*out*/, Token& /*expFirst*/,
+                            Token& /*expSecond*/) {}
 
-void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
-}
+void Parser::onArray(Token& /*out*/, Token& /*pairs*/,
+                     int /*op*/ /* = T_ARRAY */) {}
 
-void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
-}
+void Parser::onDict(Token& /*out*/, Token& /*pairs*/) {}
 
-void Parser::onStaticMember(Token &out, Token &cls, Token &name) {
-}
+void Parser::onVec(Token& /*out*/, Token& /*exprs*/) {}
 
-void Parser::onRefDim(Token &out, Token &var, Token &offset) {
-}
+void Parser::onKeyset(Token& /*out*/, Token& /*exprs*/) {}
 
-void Parser::onObjectProperty(Token &out, Token &base,
-                              PropAccessType propAccessType, Token &prop) {
-}
+void Parser::onVArray(Token& /*out*/, Token& /*exprs*/) {}
 
-void Parser::onObjectMethodCall(Token &out, Token &base, bool nullsafe,
-                                Token &prop, Token &params) {
-}
+void Parser::onDArray(Token& /*out*/, Token& /*exprs*/) {}
 
-void Parser::onEncapsList(Token &out, int type, Token &list) {
-}
+void Parser::onArrayPair(Token& /*out*/, Token* /*pairs*/, Token* /*name*/,
+                         Token& /*value*/, bool /*ref*/) {}
 
-void Parser::addEncap(Token &out, Token *list, Token &expr, int type) {
-}
+void Parser::onEmptyCollection(Token& /*out*/) {}
 
-void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
-}
+void Parser::onUserAttribute(Token& /*out*/, Token* /*attrList*/,
+                             Token& /*name*/, Token& /*value*/) {}
 
-void Parser::encapObjProp(Token &out, Token &var,
-                          PropAccessType propAccessType, Token &name) {
-}
+void Parser::onClassConst(Token& /*out*/, Token& /*cls*/, Token& /*name*/,
+                          bool /*text*/) {}
 
-void Parser::encapArray(Token &out, Token &var, Token &expr) {
-}
+void Parser::onClassClass(Token& /*out*/, Token& /*cls*/, Token& /*name*/,
+                          bool /*inStaticContext*/) {}
 
-void Parser::onConstantValue(Token &out, Token &constant) {
-}
+void Parser::onMethodStart(Token& /*name*/, Token& /*mods*/,
+                           bool /*doPushComment*/ /* = true */) {}
 
-void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
-}
+void Parser::onMethod(Token& /*out*/, Token& /*modifiers*/, Token& /*ret*/,
+                      Token& /*ref*/, Token& /*name*/, Token& /*params*/,
+                      Token& /*stmt*/, Token* /*attr*/,
+                      bool /*reloc*/ /* = true */) {}
 
-void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
-                              bool rhsFirst /* = false */) {
-}
+void Parser::onVariadicParam(Token& /*out*/, Token* /*params*/, Token& /*type*/,
+                             Token& /*var*/, bool /*ref*/, Token* /*attr*/,
+                             Token* /*modifier*/) {}
 
-void Parser::onAListVar(Token &out, Token *list, Token *var) {
-}
-
-void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
-}
-
-void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
-                      bool rhsFirst /* = false */) {
-}
-
-void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
-}
-
-void Parser::onNewObject(Token &out, Token &name, Token &args) {
-}
-
-void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
-}
-
-void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
-                           int op) {
-}
-
-void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
-}
-
-void Parser::onNullCoalesce(Token &out, Token &expFirst, Token &expSecond) {
-}
-
-void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
-}
-
-void Parser::onDict(Token &out, Token &pairs) {
-}
-
-void Parser::onVec(Token& out, Token& exprs) {
-}
-
-void Parser::onKeyset(Token& out, Token& exprs) {
-}
-
-void Parser::onVArray(Token& out, Token& exprs) {
-}
-
-void Parser::onDArray(Token& out, Token& exprs) {
-}
-
-void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
-                         bool ref) {
-}
-
-void Parser::onEmptyCollection(Token &out) {
-}
-
-void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
-                             Token &value) {
-}
-
-void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
-}
-
-void Parser::onClassClass(Token &out, Token &cls, Token &name,
-                          bool inStaticContext) {
-}
-
-void Parser::onMethodStart(Token &name, Token &mods,
-                           bool doPushComment /* = true */) {
-}
-
-void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
-                      Token &name, Token &params, Token &stmt,
-                      Token *attr, bool reloc /* = true */) {
-}
-
-void Parser::onVariadicParam(Token &out, Token *params,
-                             Token &type, Token &var,
-                             bool ref, Token *attr, Token *modifier) {
-}
-
-void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
-                     bool ref, Token *defValue, Token *attr, Token *modifier) {
-}
+void Parser::onParam(Token& /*out*/, Token* /*params*/, Token& /*type*/,
+                     Token& /*var*/, bool /*ref*/, Token* /*defValue*/,
+                     Token* /*attr*/, Token* /*modifier*/) {}
 
 void Parser::onClassExpressionStart() {
 }
 
-void Parser::onClassExpression(Token &out, Token& args, Token &base,
-                               Token &baseInterface, Token &stmt) {
-}
+void Parser::onClassExpression(Token& /*out*/, Token& /*args*/, Token& /*base*/,
+                               Token& /*baseInterface*/, Token& /*stmt*/) {}
 
-void Parser::onTraitRule(Token &out, Token &stmtList, Token &newStmt) {
-}
+void Parser::onTraitRule(Token& /*out*/, Token& /*stmtList*/,
+                         Token& /*newStmt*/) {}
 
-void Parser::onTraitPrecRule(Token &out, Token &traitName, Token &methodName,
-                             Token &otherTraits) {
-}
+void Parser::onTraitPrecRule(Token& /*out*/, Token& /*traitName*/,
+                             Token& /*methodName*/, Token& /*otherTraits*/) {}
 
-void Parser::onTraitAliasRuleStart(Token &out, Token &traitName,
-                                   Token &methodName) {
-}
+void Parser::onTraitAliasRuleStart(Token& /*out*/, Token& /*traitName*/,
+                                   Token& /*methodName*/) {}
 
-void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
-                                    Token &accessModifiers,
-                                    Token &newMethodName) {
-}
+void Parser::onTraitAliasRuleModify(Token& /*out*/, Token& /*rule*/,
+                                    Token& /*accessModifiers*/,
+                                    Token& /*newMethodName*/) {}
 
-void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type, bool abstract /* = false */,
-                                  bool typeconst /* = false */) {
-}
+void Parser::onClassVariableStart(Token& /*out*/, Token* /*modifiers*/,
+                                  Token& /*decl*/, Token* /*type*/,
+                                  bool /*abstract*/ /* = false */,
+                                  bool /*typeconst*/ /* = false */) {}
 
-void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
-}
+void Parser::onMemberModifier(Token& /*out*/, Token* /*modifiers*/,
+                              Token& /*modifier*/) {}
 
 void Parser::initParseTree() {
 }
@@ -620,208 +546,154 @@ void Parser::finiParseTree() {
 void Parser::onHaltCompiler() {
 }
 
-void Parser::onStatementListStart(Token &out) {
+void Parser::onStatementListStart(Token& /*out*/) {}
+
+void Parser::addTopStatement(Token& /*new_stmt*/) {}
+
+void Parser::addStatement(Token& /*out*/, Token& /*stmts*/,
+                          Token& /*new_stmt*/) {}
+
+void Parser::finishStatement(Token& /*out*/, Token& /*stmts*/) {}
+
+void Parser::onBlock(Token& /*out*/, Token& /*stmts*/) {}
+
+void Parser::onIf(Token& /*out*/, Token& /*cond*/, Token& /*stmt*/,
+                  Token& /*elseifs*/, Token& /*elseStmt*/) {}
+
+void Parser::onElseIf(Token& /*out*/, Token& /*elseifs*/, Token& /*cond*/,
+                      Token& /*stmt*/) {}
+
+void Parser::onWhile(Token& /*out*/, Token& /*cond*/, Token& /*stmt*/) {}
+
+void Parser::onDo(Token& /*out*/, Token& /*stmt*/, Token& /*cond*/) {}
+
+void Parser::onFor(Token& /*out*/, Token& /*expr1*/, Token& /*expr2*/,
+                   Token& /*expr3*/, Token& /*stmt*/) {}
+
+void Parser::onSwitch(Token& /*out*/, Token& /*expr*/, Token& /*cases*/) {}
+
+void Parser::onCase(Token& /*out*/, Token& /*cases*/, Token* /*cond*/,
+                    Token& /*stmt*/) {}
+
+void Parser::onBreakContinue(Token& /*out*/, bool /*isBreak*/,
+                             Token* /*expr*/) {}
+
+void Parser::onReturn(Token& /*out*/, Token* /*expr*/) {}
+
+void Parser::onYield(Token& /*out*/, Token* /*expr*/) {}
+
+void Parser::onYieldFrom(Token& /*out*/, Token* /*expr*/) {}
+
+void Parser::onYieldPair(Token& /*out*/, Token* /*key*/, Token* /*val*/) {}
+
+void Parser::onYieldBreak(Token& /*out*/) {}
+
+void Parser::onAwait(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onGlobal(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onGlobalVar(Token& /*out*/, Token* /*exprs*/, Token& /*expr*/) {}
+
+void Parser::onStatic(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onHashBang(Token& /*out*/, Token& /*text*/) {}
+
+void Parser::onEcho(Token& /*out*/, Token& /*expr*/, bool /*html*/) {}
+
+void Parser::onUnset(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onExpStatement(Token& /*out*/, Token& /*expr*/) {}
+
+void Parser::onForEach(Token& /*out*/, Token& /*arr*/, Token& /*name*/,
+                       Token& /*value*/, Token& /*stmt*/, bool /*awaitAs*/) {}
+
+void Parser::onTry(Token& /*out*/, Token& /*tryStmt*/, Token& /*className*/,
+                   Token& /*var*/, Token& /*catchStmt*/, Token& /*catches*/,
+                   Token& /*finallyStmt*/) {}
+
+void Parser::onTry(Token& /*out*/, Token& /*tryStmt*/, Token& /*finallyStmt*/) {
 }
 
-void Parser::addTopStatement(Token &new_stmt) {
-}
+void Parser::onCatch(Token& /*out*/, Token& /*catches*/, Token& /*className*/,
+                     Token& /*var*/, Token& /*stmt*/) {}
 
-void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
-}
+void Parser::onFinally(Token& /*out*/, Token& /*stmt*/) {}
 
-void Parser::finishStatement(Token &out, Token &stmts) {
-}
+void Parser::onThrow(Token& /*out*/, Token& /*expr*/) {}
 
-void Parser::onBlock(Token &out, Token &stmts) {
-}
+void Parser::onClosureStart(Token& /*name*/) {}
 
-void Parser::onIf(Token &out, Token &cond, Token &stmt, Token &elseifs,
-                  Token &elseStmt) {
-}
-
-void Parser::onElseIf(Token &out, Token &elseifs, Token &cond, Token &stmt) {
-}
-
-void Parser::onWhile(Token &out, Token &cond, Token &stmt) {
-}
-
-void Parser::onDo(Token &out, Token &stmt, Token &cond) {
-}
-
-void Parser::onFor(Token &out, Token &expr1, Token &expr2, Token &expr3,
-                   Token &stmt) {
-}
-
-void Parser::onSwitch(Token &out, Token &expr, Token &cases) {
-}
-
-void Parser::onCase(Token &out, Token &cases, Token *cond, Token &stmt) {
-}
-
-void Parser::onBreakContinue(Token &out, bool isBreak, Token* expr) {
-}
-
-void Parser::onReturn(Token &out, Token *expr) {
-}
-
-void Parser::onYield(Token &out, Token *expr) {
-}
-
-void Parser::onYieldFrom(Token &out, Token *expr) {
-}
-
-void Parser::onYieldPair(Token &out, Token *key, Token *val) {
-}
-
-void Parser::onYieldBreak(Token &out) {
-}
-
-void Parser::onAwait(Token &out, Token &expr) {
-}
-
-void Parser::onGlobal(Token &out, Token &expr) {
-}
-
-void Parser::onGlobalVar(Token &out, Token *exprs, Token &expr) {
-}
-
-void Parser::onStatic(Token &out, Token &expr) {
-}
-
-void Parser::onHashBang(Token &out, Token &text) {
-}
-
-void Parser::onEcho(Token &out, Token &expr, bool html) {
-}
-
-void Parser::onUnset(Token &out, Token &expr) {
-}
-
-void Parser::onExpStatement(Token &out, Token &expr) {
-}
-
-void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
-                       Token &stmt, bool awaitAs) {
-}
-
-void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
-                   Token &catchStmt, Token &catches, Token &finallyStmt) {
-}
-
-void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
-}
-
-void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
-                     Token &stmt) {
-}
-
-void Parser::onFinally(Token &out, Token &stmt) {
-}
-
-void Parser::onThrow(Token &out, Token &expr) {
-}
-
-void Parser::onClosureStart(Token &name) {
-}
-
-Token Parser::onClosure(ClosureType type,
-                        Token* modifiers,
-                        Token& ref,
-                        Token& params,
-                        Token& cparams,
-                        Token& stmts,
-                        Token& ret1,
-                        Token* ret2 /* = nullptr */) {
+Token Parser::onClosure(ClosureType /*type*/, Token* /*modifiers*/,
+                        Token& /*ref*/, Token& /*params*/, Token& /*cparams*/,
+                        Token& /*stmts*/, Token& /*ret1*/,
+                        Token* /*ret2*/ /* = nullptr */) {
   return Token();
 }
 
-Token Parser::onExprForLambda(const Token& expr) {
+Token Parser::onExprForLambda(const Token& /*expr*/) {
   return Token();
 }
 
-void Parser::onClosureParam(Token &out, Token *params, Token &param,
-                            bool ref) {
+void Parser::onClosureParam(Token& /*out*/, Token* /*params*/, Token& /*param*/,
+                            bool /*ref*/) {}
+
+void Parser::onLabel(Token& /*out*/, Token& /*label*/) {}
+
+void Parser::onGoto(Token& /*out*/, Token& /*label*/, bool /*limited*/) {}
+
+void Parser::onTypeList(Token& /*type1*/, const Token& /*type2*/) {}
+
+void Parser::onClsCnsShapeField(Token& /*out*/, const Token& /*cls*/,
+                                const Token& /*cns*/, const Token& /*value*/) {}
+
+void Parser::onShapeFieldSpecialization(Token& /*shapeField*/,
+                                        char /*specialization*/) {}
+
+void Parser::onShape(Token& /*out*/, const Token& /*shapeFieldsList*/,
+                     bool /*terminatedWithEllipsis*/) {}
+
+void Parser::onTypeSpecialization(Token& /*type*/, char /*specialization*/) {}
+
+void Parser::onUseDeclaration(Token& /*out*/, const std::string& /*ns*/,
+                              const std::string& /*as*/) {}
+
+void Parser::onMixedUseDeclaration(Token& /*out*/, Token& /*use*/,
+                                   UseDeclarationConsumer /*f*/) {}
+
+void Parser::onUse(const Token& /*tok*/, UseDeclarationConsumer /*f*/) {}
+
+void Parser::onGroupUse(const std::string& /*prefix*/, const Token& /*tok*/,
+                        UseDeclarationConsumer /*f*/) {}
+
+void Parser::onDeclare(Token& /*out*/, Token& /*block*/) {}
+
+void Parser::onDeclareList(Token& /*out*/, Token& /*ident*/, Token& /*exp*/) {}
+
+void Parser::nns(int /*token*/ /* = 0 */,
+                 const std::string& /*text*/ /* = std::string() */) {}
+
+void Parser::useClassAndNamespace(const std::string& /*fn*/,
+                                  const std::string& /*as*/) {}
+
+void Parser::useClass(const std::string& /*fn*/, const std::string& /*as*/) {}
+
+void Parser::useNamespace(const std::string& /*fn*/,
+                          const std::string& /*as*/) {}
+
+void Parser::useFunction(const std::string& /*fn*/, const std::string& /*as*/) {
 }
 
-void Parser::onLabel(Token &out, Token &label) {
-}
+void Parser::useConst(const std::string& /*cnst*/, const std::string& /*as*/) {}
 
-void Parser::onGoto(Token &out, Token &label, bool limited) {
-}
+void Parser::invalidateGoto(TStatementPtr /*stmt*/, GotoError /*error*/) {}
 
-void Parser::onTypeList(Token& type1, const Token& type2) {
-}
+void Parser::invalidateLabel(TStatementPtr /*stmt*/) {}
 
-void Parser::onClsCnsShapeField(Token& out,
-                                const Token& cls,
-                                const Token& cns,
-                                const Token& value) {
-}
-
-void Parser::onShapeFieldSpecialization(
-    Token& shapeField, char specialization) {
-}
-
-void Parser::onShape(
-  Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
-}
-
-void Parser::onTypeSpecialization(Token& type, char specialization) {
-}
-
-void Parser::onUseDeclaration(Token& out, const std::string &ns,
-                                          const std::string &as) {
-}
-
-void Parser::onMixedUseDeclaration(Token &out,
-                                   Token &use, UseDeclarationConsumer f) {
-}
-
-void Parser::onUse(const Token &tok, UseDeclarationConsumer f) {
-}
-
-void Parser::onGroupUse(const std::string &prefix, const Token &tok,
-                        UseDeclarationConsumer f) {
-}
-
-void Parser::onDeclare(Token& out, Token& block) {
-}
-
-void Parser::onDeclareList(Token& out, Token& ident, Token& exp) {
-}
-
-void Parser::nns(int token /* = 0 */,
-                 const std::string& text /* = std::string() */) {
-}
-
-void Parser::useClassAndNamespace(const std::string &fn,
-                                  const std::string &as) {
-}
-
-void Parser::useClass(const std::string &fn, const std::string &as) {
-}
-
-void Parser::useNamespace(const std::string &fn, const std::string &as) {
-}
-
-void Parser::useFunction(const std::string &fn, const std::string &as) {
-}
-
-void Parser::useConst(const std::string &cnst, const std::string &as) {
-}
-
-void Parser::invalidateGoto(TStatementPtr stmt, GotoError error) {
-}
-
-void Parser::invalidateLabel(TStatementPtr stmt) {
-}
-
-TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
+TStatementPtr Parser::extractStatement(ScannerToken* /*stmt*/) {
   return nullptr;
 }
 
-void Parser::onNewLabelScope(bool fresh) {
-}
+void Parser::onNewLabelScope(bool /*fresh*/) {}
 
 /******************************************************************************
  * ONLY put new stubs here. Put implemented methods further up with the rest. *

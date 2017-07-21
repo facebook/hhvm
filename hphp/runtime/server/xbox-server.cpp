@@ -57,8 +57,8 @@ std::string XboxTransport::getHeader(const char *name) {
   return "";
 }
 
-void XboxTransport::sendImpl(const void *data, int size, int code,
-                             bool chunked, bool eom) {
+void XboxTransport::sendImpl(const void* data, int size, int code,
+                             bool /*chunked*/, bool eom) {
   m_response.append((const char*)data, size);
   if (code) {
     m_code = code;

@@ -45,8 +45,8 @@ StatementPtr ExpStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
-}
+void ExpStatement::onParse(AnalysisResultConstPtr /*ar*/,
+                           FileScopePtr /*scope*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions

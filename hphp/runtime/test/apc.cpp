@@ -71,8 +71,8 @@ std::vector<PrimePair> primable_ints(Store& store) {
  * Sets obj_n -> a stdClass
  */
 std::vector<PrimePair> primable_objs(Store& store) {
-  return primable_n(store, "obj", [&] (int64_t n) {
-      return Variant::attach(SystemLib::AllocStdClassObject().detach());
+  return primable_n(store, "obj", [&](int64_t /*n*/) {
+    return Variant::attach(SystemLib::AllocStdClassObject().detach());
   });
 }
 

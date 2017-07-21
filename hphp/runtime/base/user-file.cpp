@@ -366,7 +366,7 @@ bool UserFile::truncate(int64_t size) {
   return ret.isBoolean() ? ret.toBoolean() : false;
 }
 
-bool UserFile::lock(int operation, bool &wouldBlock) {
+bool UserFile::lock(int operation, bool& /*wouldBlock*/) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
     op |= PHP_LOCK_NB;

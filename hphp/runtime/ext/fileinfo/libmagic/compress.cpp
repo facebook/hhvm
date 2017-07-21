@@ -151,9 +151,8 @@ swrite(int fd, const void *buf, size_t n)
 /*
  * `safe' read for sockets and pipes.
  */
-protected ssize_t
-sread(int fd, void *buf, size_t n, int canbepipe)
-{
+protected
+ssize_t sread(int fd, void* buf, size_t n, int /*canbepipe*/) {
   ssize_t rv;
 #ifdef FIONREAD
   int t = 0;

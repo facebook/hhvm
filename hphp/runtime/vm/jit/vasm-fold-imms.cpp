@@ -98,7 +98,8 @@ struct ImmFolder {
     return true;
   }
   // folders
-  template<class Inst> void fold(Inst&, Vinstr& out) {}
+  template <class Inst>
+  void fold(Inst&, Vinstr& /*out*/) {}
   void fold(addq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
@@ -188,25 +189,25 @@ struct ImmFolder {
     int val;
     if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
   }
-  void fold(storebi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storebi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storew& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
     if (match_word(in.s, val)) { out = storewi{val, in.m}; }
   }
-  void fold(storewi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storewi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storel& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
     if (match_int(in.s, val)) { out = storeli{val, in.m}; }
   }
-  void fold(storeli& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storeli& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(store& in, Vinstr& out) {
     foldVptr(in.d);
     int val;
     if (match_int(in.s, val)) { out = storeqi{val, in.d}; }
   }
-  void fold(storeqi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storeqi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(subq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
@@ -291,7 +292,7 @@ struct ImmFolder {
   void fold(movtqb& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
-  void fold(copy& in, Vinstr& out) {
+  void fold(copy& in, Vinstr& /*out*/) {
     if (in.d.isVirt() && valid.test(in.s)) {
       valid.set(in.d);
       vals[in.d] = vals[in.s];
@@ -315,16 +316,16 @@ struct ImmFolder {
       }
     }
   }
-  void fold(load& in    , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadb& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadw& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadl& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadups& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadsd& in  , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadzbl& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadzlq& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadtqb& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadtql& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(load& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadb& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadw& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadups& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadsd& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzbl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzlq& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadtqb& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadtql& in, Vinstr& /*out*/) { foldVptr(in.s); }
 };
 } // namespace x64
 
@@ -334,8 +335,8 @@ struct ImmFolder {
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(Vunit& unit, jit::vector<uint8_t>&& uses_in)
-  : uses(std::move(uses_in)) { }
+  explicit ImmFolder(Vunit& /*unit*/, jit::vector<uint8_t>&& uses_in)
+      : uses(std::move(uses_in)) {}
 
   bool arith_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
@@ -405,8 +406,8 @@ struct ImmFolder {
     if (arith_imm(in.s0, val)) { out = cmpi{val, in.s1, in.sf}; }
   }
 
-  template<typename Inst>
-  void fold(Inst& i, Vinstr& out) {}
+  template <typename Inst>
+  void fold(Inst& /*i*/, Vinstr& /*out*/) {}
   void fold(addl& in, Vinstr& out) { return fold_arith<addli>(in, out); }
   void fold(addq& in, Vinstr& out) { return fold_arith<addqi>(in, out); }
   void fold(andb& in, Vinstr& out) { return fold_logical<andbi>(in, out); }
@@ -515,7 +516,7 @@ struct ImmFolder {
       }
     }
   }
-  void fold(copy& in, Vinstr& out) {
+  void fold(copy& in, Vinstr& /*out*/) {
     if (in.d.isVirt() && valid.test(in.s)) {
       valid.set(in.d);
       vals[in.d] = vals[in.s];

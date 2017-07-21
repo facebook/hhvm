@@ -461,7 +461,7 @@ int instrNumPushes(PC pc) {
 }
 
 namespace {
-FlavorDesc doFlavor(uint32_t i) {
+FlavorDesc doFlavor(uint32_t /*i*/) {
   always_assert(0 && "Invalid stack index");
 }
 template<typename... Args>
@@ -1017,8 +1017,8 @@ const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   return arr[idx];
 }
 
-template<class T, size_t Sz>
-bool subopValidImpl(const char* (&arr)[Sz], T op, int off) {
+template <class T, size_t Sz>
+bool subopValidImpl(const char* (&/*arr*/)[Sz], T op, int off) {
   auto raw = static_cast<typename std::underlying_type<T>::type>(op) - off;
   return raw >= 0 && raw < Sz;
 }

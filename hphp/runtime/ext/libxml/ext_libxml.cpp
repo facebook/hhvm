@@ -245,7 +245,7 @@ int libxml_streams_IO_close(void* context) {
   return forgetStream(context) ? 0 : -1;
 }
 
-int libxml_streams_IO_nop_close(void* context) {
+int libxml_streams_IO_nop_close(void* /*context*/) {
   return 0;
 }
 
@@ -497,7 +497,7 @@ String libxml_get_valid_file_path(const String& source) {
   return file_dest;
 }
 
-static void libxml_error_handler(void* userData, xmlErrorPtr error) {
+static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
   if (tl_libxml_request_data->m_suppress_error) {
     return;
   }

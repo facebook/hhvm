@@ -40,8 +40,7 @@ StatementPtr LabelStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void LabelStatement::analyzeProgram(AnalysisResultPtr ar) {
-}
+void LabelStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
 ConstructPtr LabelStatement::getNthKid(int n) const {
   switch (n) {
@@ -56,7 +55,7 @@ int LabelStatement::getKidCount() const {
   return 0;
 }
 
-void LabelStatement::setNthKid(int n, ConstructPtr cp) {
+void LabelStatement::setNthKid(int n, ConstructPtr /*cp*/) {
   switch (n) {
     default:
       assert(false);
@@ -67,6 +66,6 @@ void LabelStatement::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void LabelStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void LabelStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("%s:\n", m_label.c_str());
 }

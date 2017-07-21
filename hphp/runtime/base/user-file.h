@@ -56,7 +56,7 @@ struct UserFile : File, UserFSNode {
   bool lock(int operation, bool &wouldBlock) override;
   bool stat(struct stat* buf) override;
 
-  Object await(uint16_t events, double timeout) override {
+  Object await(uint16_t /*events*/, double /*timeout*/) override {
     SystemLib::throwExceptionObject(
       "Userstreams do not support awaiting");
   }

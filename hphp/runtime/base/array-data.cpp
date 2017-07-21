@@ -108,15 +108,18 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
 
 //////////////////////////////////////////////////////////////////////
 
-static ArrayData* ZSetIntThrow(ArrayData* ad, int64_t k, RefData* v) {
+static ArrayData*
+ZSetIntThrow(ArrayData* /*ad*/, int64_t /*k*/, RefData* /*v*/) {
   raise_fatal_error("Unimplemented ArrayData::ZSetInt");
 }
 
-static ArrayData* ZSetStrThrow(ArrayData* ad, StringData* k, RefData* v) {
+static ArrayData*
+ZSetStrThrow(ArrayData* /*ad*/, StringData* /*k*/, RefData* /*v*/) {
   raise_fatal_error("Unimplemented ArrayData::ZSetStr");
 }
 
-static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
+static ArrayData*
+ZAppendThrow(ArrayData* /*ad*/, RefData* /*v*/, int64_t* /*key_ptr*/) {
   raise_fatal_error("Unimplemented ArrayData::ZAppend");
 }
 

@@ -675,9 +675,7 @@ apply_filter(zval **zpp, yaml_event_t event, HashTable *callbacks TSRMLS_DC)
  *
  * All YAML scalar types found at http://yaml.org/type/index.html.
  */
-zval *eval_scalar(yaml_event_t event,
-    HashTable * callbacks TSRMLS_DC)
-{
+zval* eval_scalar(yaml_event_t event, HashTable* /*callbacks*/ TSRMLS_DC) {
   zval *retval = { 0 };
   char *value = (char *) event.data.scalar.value;
   size_t length = event.data.scalar.length;

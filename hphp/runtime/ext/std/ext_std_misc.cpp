@@ -435,7 +435,7 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
   }
 }
 
-int64_t HHVM_FUNCTION(ignore_user_abort, bool setting /* = false */) {
+int64_t HHVM_FUNCTION(ignore_user_abort, bool /*setting*/ /* = false */) {
   return 0;
 }
 

@@ -60,9 +60,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
 
 }
 
-void emitIterInit(IRGS& env,
-                  int32_t iterId,
-                  Offset relOffset,
+void emitIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
                   int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
@@ -78,11 +76,8 @@ void emitIterInit(IRGS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitIterInitK(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId,
-                   int32_t keyLocalId) {
+void emitIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
+                   int32_t valLocalId, int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
@@ -130,9 +125,7 @@ void emitIterNextK(IRGS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
-void emitWIterInit(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
+void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
                    int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
@@ -148,11 +141,8 @@ void emitWIterInit(IRGS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitWIterInitK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
+void emitWIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
+                    int32_t valLocalId, int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInitK);

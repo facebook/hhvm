@@ -697,8 +697,8 @@ int lintTarget(const CompilerOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void wholeProgramPasses(const CompilerOptions& po,
-                               AnalysisResultPtr ar) {
+static void
+wholeProgramPasses(const CompilerOptions& /*po*/, AnalysisResultPtr ar) {
   if (Option::PreOptimization) {
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();

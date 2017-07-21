@@ -43,7 +43,7 @@ void OutputFile::sweep() {
   File::sweep();
 }
 
-bool OutputFile::open(const String& filename, const String& mode) {
+bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
   raise_fatal_error("cannot open a php://output file ");
 }
 
@@ -64,7 +64,7 @@ bool OutputFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // virtual functions
 
-int64_t OutputFile::readImpl(char *buffer, int64_t length) {
+int64_t OutputFile::readImpl(char* /*buffer*/, int64_t /*length*/) {
   raise_warning("cannot read from a php://output stream");
   return -1;
 }
@@ -81,7 +81,7 @@ int64_t OutputFile::writeImpl(const char *buffer, int64_t length) {
   return length;
 }
 
-bool OutputFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
+bool OutputFile::seek(int64_t /*offset*/, int /*whence*/ /* = SEEK_SET */) {
   raise_warning("cannot seek a php://output stream");
   return false;
 }
@@ -108,7 +108,7 @@ bool OutputFile::flush() {
   return false;
 }
 
-bool OutputFile::truncate(int64_t size) {
+bool OutputFile::truncate(int64_t /*size*/) {
   raise_warning("cannot truncate a php://output stream");
   return false;
 }

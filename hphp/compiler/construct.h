@@ -50,7 +50,7 @@ struct IParseHandler {
    * onParse is called by the parser when the construct has just been parsed
    * to allow it to do any necessary work
    */
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  virtual void onParse(AnalysisResultConstPtr /*ar*/, FileScopePtr /*scope*/) {
     always_assert(0);
   }
   /**
@@ -60,8 +60,8 @@ struct IParseHandler {
    * (eg) a method, the ClassScope doesnt exist. So we wait until onParse
    * is called for the class, and it calls onParseRecur for its children.
    */
-  virtual void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
-                            ClassScopePtr scope) {
+  virtual void onParseRecur(AnalysisResultConstPtr /*ar*/,
+                            FileScopeRawPtr /*fs*/, ClassScopePtr /*scope*/) {
     always_assert(0);
   }
 };
@@ -246,7 +246,7 @@ public:
   int getChildrenEffects() const;
   int getContainedEffects() const;
   bool hasEffect() const { return getContainedEffects() != NoEffect;}
-  virtual bool kidUnused(int i) const { return false; }
+  virtual bool kidUnused(int /*i*/) const { return false; }
 
   template<typename T>
   static std::shared_ptr<T> Clone(std::shared_ptr<T> constr) {
@@ -275,12 +275,12 @@ public:
   /**
    * return the nth child construct
    */
-  virtual ConstructPtr getNthKid(int n) const { return ConstructPtr(); }
+  virtual ConstructPtr getNthKid(int /*n*/) const { return ConstructPtr(); }
 
   /**
    * set the nth child construct
    */
-  virtual void setNthKid(int n, ConstructPtr cp)  {}
+  virtual void setNthKid(int /*n*/, ConstructPtr /*cp*/) {}
 
   /**
    * get the kid count

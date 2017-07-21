@@ -226,7 +226,7 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
-void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, const Func* func,
+void DebugInfo::recordPerfMap(TCRange range, SrcKey /*sk*/, const Func* func,
                               bool exit, bool inPrologue, std::string name) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;

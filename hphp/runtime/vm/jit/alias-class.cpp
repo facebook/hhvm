@@ -724,7 +724,8 @@ bool AliasClass::refersToSameCufIterHelper(AliasClass o) const {
  * iterator, and they are only going to have a subclass relationship inside of
  * relevant_bits only if they refer to the same iterator.
  */
-bool AliasClass::diffSTagSubclassData(rep relevant_bits, AliasClass o) const {
+bool AliasClass::diffSTagSubclassData(rep /*relevant_bits*/,
+                                      AliasClass o) const {
   if (m_stag == STag::IterBoth || o.m_stag == STag::IterBoth) {
     return refersToSameIterHelper(o);
   } else if (m_stag == STag::CufIterAll || o.m_stag == STag::CufIterAll) {
@@ -743,7 +744,7 @@ bool AliasClass::diffSTagSubclassData(rep relevant_bits, AliasClass o) const {
  * information, and we know it only intersects if they are the same iterator
  * id.
  */
-bool AliasClass::diffSTagMaybeData(rep relevant_bits, AliasClass o) const {
+bool AliasClass::diffSTagMaybeData(rep /*relevant_bits*/, AliasClass o) const {
   if (m_stag == STag::IterBoth || o.m_stag == STag::IterBoth) {
     return refersToSameIterHelper(o);
   } else if (m_stag == STag::CufIterAll || o.m_stag == STag::CufIterAll) {

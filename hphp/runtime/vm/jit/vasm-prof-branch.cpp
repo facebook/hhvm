@@ -458,8 +458,8 @@ void insert_profiling_header(Env& env, BranchID branch, Vlabel& to) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Inst>
-void profile(Env& env, Inst& inst, Vlabel b) {}
+template <typename Inst>
+void profile(Env& /*env*/, Inst& /*inst*/, Vlabel /*b*/) {}
 
 void profile(Env& env, jcc& inst, Vlabel b) {
   auto branch = branch_id_for(env, inst, b);

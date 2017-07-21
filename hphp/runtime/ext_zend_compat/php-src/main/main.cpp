@@ -70,8 +70,8 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-printf.h"
 
-PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
-{
+PHPAPI void php_error_docref0(const char* /*docref*/ TSRMLS_DC, int type,
+                              const char* format, ...) {
   va_list args;
 
   va_start(args, format);

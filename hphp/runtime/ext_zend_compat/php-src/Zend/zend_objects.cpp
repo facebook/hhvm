@@ -34,15 +34,15 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
   object->guards = NULL;
 }
 
-ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
-{
+ZEND_API void zend_object_std_dtor(zend_object* /*object*/ TSRMLS_DC) {
   // No action is needed here.
   // Zend deletes properties here, but we delete properties in the ObjectData
   // destructor.
 }
 
-ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
-{
+ZEND_API void
+zend_objects_destroy_object(zend_object* /*object*/,
+                            zend_object_handle /*handle*/ TSRMLS_DC) {
   not_implemented();
 }
 
@@ -71,8 +71,11 @@ ZEND_API zend_object *zend_objects_get_address(const zval *zobject TSRMLS_DC)
   return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
-{
+ZEND_API void
+zend_objects_clone_members(zend_object* /*new_object*/,
+                           zend_object_value /*new_obj_val*/,
+                           zend_object* /*old_object*/,
+                           zend_object_handle /*handle*/ TSRMLS_DC) {
   not_implemented();
 }
 

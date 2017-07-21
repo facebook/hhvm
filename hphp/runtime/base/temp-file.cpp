@@ -56,7 +56,7 @@ void TempFile::sweep() {
   PlainFile::sweep();
 }
 
-bool TempFile::open(const String& filename, const String& mode) {
+bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
   raise_fatal_error((std::string("cannot open a temp file ") +
                              getName()).c_str());
 }

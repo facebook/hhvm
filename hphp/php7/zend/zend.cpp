@@ -10,11 +10,11 @@ void zenderror(const char* msg) {
   std::abort();
 }
 
-void zend_handle_encoding_declaration(zend_ast* declare_list) {
+void zend_handle_encoding_declaration(zend_ast* /*declare_list*/) {
   /* nothing :) */
 }
 
-zend_string* zend_string_init(const char* str, size_t len, int persistent) {
+zend_string* zend_string_init(const char* str, size_t len, int /*persistent*/) {
   zend_string* ret = (zend_string*)emalloc(sizeof(zend_string) + len);
   ret->len = len;
   memcpy(&ret->val, str, len);
@@ -22,7 +22,8 @@ zend_string* zend_string_init(const char* str, size_t len, int persistent) {
   return ret;
 }
 
-zend_string* zend_string_extend(zend_string* str, size_t new_len, int persistent) {
+zend_string*
+zend_string_extend(zend_string* str, size_t new_len, int /*persistent*/) {
 
   zend_string* ret = (zend_string*)erealloc(str, sizeof(zend_string) + new_len);
   ret->len = new_len;
@@ -78,19 +79,20 @@ char* estrndup(const char* str, size_t n) {
 }
 
 zend_class_entry* zend_ce_parse_error = (zend_class_entry*)42;
-void zend_throw_exception(zend_class_entry* cls, const char* msg, zend_long code) {
+void zend_throw_exception(zend_class_entry* /*cls*/, const char* msg,
+                          zend_long /*code*/) {
   std::cerr << msg << std::endl;
   std::abort();
 }
 
-void zend_error(int type, const char* fmt, ...) {
+void zend_error(int /*type*/, const char* fmt, ...) {
   va_list argp;
   va_start(argp, fmt);
 
   vfprintf(stderr, fmt, argp);
 }
 
-void zend_error_noreturn(int type, const char* fmt, ...) {
+void zend_error_noreturn(int /*type*/, const char* fmt, ...) {
   va_list argp;
   va_start(argp, fmt);
 

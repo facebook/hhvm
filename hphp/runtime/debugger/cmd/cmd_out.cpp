@@ -38,7 +38,7 @@ void CmdOut::help(DebuggerClient &client) {
   );
 }
 
-void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdOut::onSetup(DebuggerProxy& proxy, CmdInterrupt& /*interrupt*/) {
   TRACE(2, "CmdOut::onSetup\n");
   assert(!m_complete); // Complete cmds should not be asked to do work.
   m_stackDepth = proxy.getStackDepth();

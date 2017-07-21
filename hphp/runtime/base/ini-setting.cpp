@@ -466,7 +466,7 @@ IniSettingMap::IniSettingMap() {
   m_map = Variant(Array::Create());
 }
 
-IniSettingMap::IniSettingMap(Type t) : IniSettingMap() {}
+IniSettingMap::IniSettingMap(Type /*t*/) : IniSettingMap() {}
 
 IniSettingMap::IniSettingMap(const IniSettingMap& i) {
   m_map = i.m_map;
@@ -513,11 +513,13 @@ void IniSettingMap::set(const String& key, const Variant& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
 
-void IniSetting::ParserCallback::onSection(const std::string &name, void *arg) {
+void IniSetting::ParserCallback::onSection(const std::string& /*name*/,
+                                           void* /*arg*/) {
   // do nothing
 }
 
-void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
+void IniSetting::ParserCallback::onLabel(const std::string& /*name*/,
+                                         void* /*arg*/) {
   // do nothing
 }
 

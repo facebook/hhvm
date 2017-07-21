@@ -1712,7 +1712,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     return false;
   };
 
-  auto const doInitArgs = [&] (ActRec* ar, TypedValue&) {
+  auto const doInitArgs = [&](ActRec* /*ar*/, TypedValue&) {
     for (ssize_t i = 0; i < argc; ++i) {
       const TypedValue *from = &argv[i];
       TypedValue *to = vmStack().allocTV();

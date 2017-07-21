@@ -28,8 +28,8 @@ ExpressionPtr PipeVariable::clone() {
   return exp;
 }
 
-void PipeVariable::analyzeProgram(AnalysisResultPtr ar) {}
+void PipeVariable::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
-void PipeVariable::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
+void PipeVariable::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("$$");
 }

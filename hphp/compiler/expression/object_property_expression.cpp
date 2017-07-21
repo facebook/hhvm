@@ -60,7 +60,7 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
+bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr /*ar*/) {
   // To tell whether a property is declared as private in the context
   ClassScopePtr cls = getClassScope();
   if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;

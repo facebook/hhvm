@@ -366,7 +366,7 @@ void printIRInstruction(std::ostream& os,
   os << '\n';
 }
 
-void print(std::ostream& os, const Block* block, AreaIndex area,
+void print(std::ostream& os, const Block* block, AreaIndex /*area*/,
            const AsmInfo* asmInfo, const GuardConstraints* guards,
            BCMarker* markerPtr) {
   BCMarker dummy;

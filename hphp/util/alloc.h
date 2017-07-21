@@ -425,9 +425,7 @@ struct LowAllocator {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type num) {
-    low_free_data((void*)p);
-  }
+  void deallocate(pointer p, size_type /*num*/) { low_free_data((void*)p); }
 
   template<class U> bool operator==(const LowAllocator<U>&) const {
     return true;
@@ -480,9 +478,7 @@ struct HugeAllocator {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type num) {
-    free_huge((void*)p);
-  }
+  void deallocate(pointer p, size_type /*num*/) { free_huge((void*)p); }
 
   template<class U> bool operator==(const HugeAllocator<U>&) const {
     return true;

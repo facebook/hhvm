@@ -378,7 +378,9 @@ void emitContEnter(IRGS& env) {
   push(env, retVal);
 }
 
-void emitContRaise(IRGS& env) { PUNT(ContRaise); }
+void emitContRaise(IRGS& /*env*/) {
+  PUNT(ContRaise);
+}
 
 void emitYield(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);

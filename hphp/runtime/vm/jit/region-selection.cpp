@@ -80,7 +80,7 @@ void truncateMap(Container& c, SrcKey final) {
 
 //////////////////////////////////////////////////////////////////////
 
-PGORegionMode pgoRegionMode(const Func& func) {
+PGORegionMode pgoRegionMode(const Func& /*func*/) {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
@@ -718,7 +718,7 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
-  auto checkTypedLocations = [&](const char* msg, const TypedLocVec& vec) {
+  auto checkTypedLocations = [&](const char* /*msg*/, const TypedLocVec& vec) {
     for (auto& typedLoc : vec) {
       auto& loc = typedLoc.location;
       switch (loc.tag()) {
@@ -735,7 +735,8 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
-  auto checkGuardedLocations = [&](const char* msg, const GuardedLocVec& vec) {
+  auto checkGuardedLocations = [&](const char* /*msg*/,
+                                   const GuardedLocVec& vec) {
     for (auto& guardedLoc : vec) {
       assertx(guardedLoc.type.isSpecialized() ||
               typeFitsConstraint(guardedLoc.type, guardedLoc.category));

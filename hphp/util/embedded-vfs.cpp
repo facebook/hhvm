@@ -99,51 +99,53 @@ static int embeddedOpen(sqlite3_vfs *pVfs, const char *zName,
   return pOrigVfs->xOpen(pOrigVfs, zName, pConn, flags, pOutFlags);
 }
 
-static int embeddedDelete(sqlite3_vfs* pVfs, const char* zName, int syncDir) {
+static int
+embeddedDelete(sqlite3_vfs* /*pVfs*/, const char* zName, int syncDir) {
   return gEmbedded.pOrigVfs->xDelete(gEmbedded.pOrigVfs, zName, syncDir);
 }
 
-static int embeddedAccess(sqlite3_vfs* a, const char* b, int c, int* d) {
+static int embeddedAccess(sqlite3_vfs* /*a*/, const char* b, int c, int* d) {
   return gEmbedded.pOrigVfs->xAccess(gEmbedded.pOrigVfs, b, c, d);
 }
 
-static int embeddedFullPathname(sqlite3_vfs* a, const char* b, int c, char* d) {
+static int
+embeddedFullPathname(sqlite3_vfs* /*a*/, const char* b, int c, char* d) {
   return gEmbedded.pOrigVfs->xFullPathname(gEmbedded.pOrigVfs, b, c, d);
 }
 
-static void* embeddedDlOpen(sqlite3_vfs* a, const char* b) {
+static void* embeddedDlOpen(sqlite3_vfs* /*a*/, const char* b) {
   return gEmbedded.pOrigVfs->xDlOpen(gEmbedded.pOrigVfs, b);
 }
 
-static void embeddedDlError(sqlite3_vfs* a, int b, char* c) {
+static void embeddedDlError(sqlite3_vfs* /*a*/, int b, char* c) {
   gEmbedded.pOrigVfs->xDlError(gEmbedded.pOrigVfs, b, c);
 }
 
-static void (*embeddedDlSym(sqlite3_vfs* a, void* b, const char* c))() {
+static void (*embeddedDlSym(sqlite3_vfs* /*a*/, void* b, const char* c))() {
   return gEmbedded.pOrigVfs->xDlSym(gEmbedded.pOrigVfs, b, c);
 }
 
-static void embeddedDlClose(sqlite3_vfs* a, void* b) {
+static void embeddedDlClose(sqlite3_vfs* /*a*/, void* b) {
   gEmbedded.pOrigVfs->xDlClose(gEmbedded.pOrigVfs, b);
 }
 
-static int embeddedRandomness(sqlite3_vfs* a, int b, char* c) {
+static int embeddedRandomness(sqlite3_vfs* /*a*/, int b, char* c) {
   return gEmbedded.pOrigVfs->xRandomness(gEmbedded.pOrigVfs, b, c);
 }
 
-static int embeddedSleep(sqlite3_vfs* a, int b) {
+static int embeddedSleep(sqlite3_vfs* /*a*/, int b) {
   return gEmbedded.pOrigVfs->xSleep(gEmbedded.pOrigVfs, b);
 }
 
-static int embeddedCurrentTime(sqlite3_vfs* a, double* b) {
+static int embeddedCurrentTime(sqlite3_vfs* /*a*/, double* b) {
   return gEmbedded.pOrigVfs->xCurrentTime(gEmbedded.pOrigVfs, b);
 }
 
-static int embeddedGetLastError(sqlite3_vfs* a, int b, char* c) {
+static int embeddedGetLastError(sqlite3_vfs* /*a*/, int b, char* c) {
   return gEmbedded.pOrigVfs->xGetLastError(gEmbedded.pOrigVfs, b, c);
 }
 
-static int embeddedCurrentTimeInt64(sqlite3_vfs* a, sqlite3_int64* b) {
+static int embeddedCurrentTimeInt64(sqlite3_vfs* /*a*/, sqlite3_int64* b) {
   return gEmbedded.pOrigVfs->xCurrentTimeInt64(gEmbedded.pOrigVfs, b);
 }
 
@@ -172,16 +174,16 @@ static int embeddedRead(sqlite3_file* pConn, void* pBuf,
   return rc;
 }
 
-static int embeddedWrite(sqlite3_file* pConn, const void* pBuf,
-                         int iAmt, sqlite3_int64 iOfst) {
+static int embeddedWrite(sqlite3_file* /*pConn*/, const void* /*pBuf*/,
+                         int /*iAmt*/, sqlite3_int64 /*iOfst*/) {
   return SQLITE_IOERR_WRITE;
 }
 
-static int embeddedTruncate(sqlite3_file* pConn, sqlite3_int64 size) {
+static int embeddedTruncate(sqlite3_file* /*pConn*/, sqlite3_int64 /*size*/) {
   return SQLITE_IOERR_TRUNCATE;
 }
 
-static int embeddedSync(sqlite3_file* pConn, int flags) {
+static int embeddedSync(sqlite3_file* /*pConn*/, int /*flags*/) {
   return SQLITE_OK;
 }
 
@@ -191,27 +193,29 @@ static int embeddedFileSize(sqlite3_file* pConn, sqlite3_int64* pSize) {
   return SQLITE_OK;
 }
 
-static int embeddedLock(sqlite3_file* pConn, int lock) {
+static int embeddedLock(sqlite3_file* /*pConn*/, int /*lock*/) {
   return SQLITE_OK;
 }
 
-static int embeddedUnlock(sqlite3_file* pConn, int lock) {
+static int embeddedUnlock(sqlite3_file* /*pConn*/, int /*lock*/) {
   return SQLITE_OK;
 }
 
-static int embeddedCheckReservedLock(sqlite3_file* pConn, int* pResOut) {
+static int
+embeddedCheckReservedLock(sqlite3_file* /*pConn*/, int* /*pResOut*/) {
   return SQLITE_IOERR_CHECKRESERVEDLOCK;
 }
 
-static int embeddedFileControl(sqlite3_file* pConn, int op, void* pArg) {
+static int
+embeddedFileControl(sqlite3_file* /*pConn*/, int /*op*/, void* /*pArg*/) {
   return SQLITE_OK;
 }
 
-static int embeddedSectorSize(sqlite3_file* pConn) {
+static int embeddedSectorSize(sqlite3_file* /*pConn*/) {
   return 0;
 }
 
-static int embeddedDeviceCharacteristics(sqlite3_file* pConn) {
+static int embeddedDeviceCharacteristics(sqlite3_file* /*pConn*/) {
   return 0;
 }
 

@@ -334,7 +334,8 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void UnaryOpExpression::onParse(AnalysisResultConstPtr /*ar*/,
+                                FileScopePtr scope) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
     Compiler::Error(Compiler::UseEvaluation, self);

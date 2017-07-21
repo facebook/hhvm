@@ -39,7 +39,7 @@ struct DateTimeData {
   Variant sleep() const {
     return init_null();
   }
-  void wakeup(const Variant& content, ObjectData* obj) {}
+  void wakeup(const Variant& /*content*/, ObjectData* /*obj*/) {}
   int64_t getTimestamp() const {
     bool err = false;
     return m_dt->toTimeStamp(err);

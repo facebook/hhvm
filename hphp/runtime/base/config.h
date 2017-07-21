@@ -264,24 +264,24 @@ struct Config {
                            const std::string &filename, bool constants_only,
                            bool is_system);
 
-  static void StringInsert(std::vector<std::string> &values,
-                           const std::string &key,
-                           const std::string &value) {
+  static void
+  StringInsert(std::vector<std::string>& values, const std::string& /*key*/,
+               const std::string& value) {
     values.push_back(value);
   }
-  static void StringInsert(boost::container::flat_set<std::string> &values,
-                           const std::string &key,
-                           const std::string &value) {
+  static void
+  StringInsert(boost::container::flat_set<std::string>& values,
+               const std::string& /*key*/, const std::string& value) {
     values.insert(value);
   }
-  static void StringInsert(std::set<std::string, stdltistr> &values,
-                           const std::string &key,
-                           const std::string &value) {
+  static void
+  StringInsert(std::set<std::string, stdltistr>& values,
+               const std::string& /*key*/, const std::string& value) {
     values.insert(value);
   }
-  static void StringInsert(std::set<std::string> &values,
-                           const std::string &key,
-                           const std::string &value) {
+  static void
+  StringInsert(std::set<std::string>& values, const std::string& /*key*/,
+               const std::string& value) {
     values.insert(value);
   }
   static void StringInsert(std::map<std::string, std::string> &values,

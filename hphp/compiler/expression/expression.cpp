@@ -160,11 +160,11 @@ bool Expression::getEffectiveScalar(Variant &v) {
   return getScalarValue(v);
 }
 
-void Expression::addElement(ExpressionPtr exp) {
+void Expression::addElement(ExpressionPtr /*exp*/) {
   assert(false);
 }
 
-void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
+void Expression::insertElement(ExpressionPtr /*exp*/, int /*index*/ /* = 0 */) {
   assert(false);
 }
 
@@ -192,8 +192,7 @@ bool Expression::IsIdentifier(const std::string &value) {
   return true;
 }
 
-void Expression::analyzeProgram(AnalysisResultPtr ar) {
-}
+void Expression::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
 bool Expression::CheckNeededRHS(ExpressionPtr value) {
   bool needed = true;
@@ -225,10 +224,9 @@ bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
   return needed;
 }
 
-ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
-                                       BlockScopePtr scope,
-                                       const Location::Range& r,
-                                       const std::string &value) {
+ExpressionPtr
+Expression::MakeConstant(AnalysisResultConstPtr /*ar*/, BlockScopePtr scope,
+                         const Location::Range& r, const std::string& value) {
   auto exp = std::make_shared<ConstantExpression>(scope, r, value, false);
   if (value == "true" || value == "false") {
   } else if (value == "null") {

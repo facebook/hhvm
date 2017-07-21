@@ -73,7 +73,7 @@ void CmdFlowControl::onClient(DebuggerClient &client) {
   throw DebuggerConsoleExitException();
 }
 
-bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
+bool CmdFlowControl::onServer(DebuggerProxy& /*proxy*/) {
   // Flow control cmds do their work in onSetup() and onBeginInterrupt(), so
   // there is no real work to do in here.
   return true;

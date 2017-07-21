@@ -457,7 +457,7 @@ bool File::setBlocking(bool mode) {
   return fcntl(fd(), F_SETFL, flags) != -1;
 }
 
-bool File::setTimeout(uint64_t usecs) {
+bool File::setTimeout(uint64_t /*usecs*/) {
   return false;
 }
 
@@ -477,7 +477,7 @@ bool File::flush() {
   return true;
 }
 
-bool File::truncate(int64_t size) {
+bool File::truncate(int64_t /*size*/) {
   throw_not_supported(__func__, "cannot truncate");
 }
 
@@ -499,7 +499,7 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
   return true;
 }
 
-bool File::stat(struct stat *sb) {
+bool File::stat(struct stat* /*sb*/) {
   // Undocumented, but Zend returns false for streams where fstat is unsupported
   return false;
 }

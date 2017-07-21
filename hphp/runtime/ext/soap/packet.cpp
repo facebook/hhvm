@@ -32,10 +32,9 @@ static void add_soap_fault(SoapClient *client, const String& code,
 }
 
 /* SOAP client calls this function to parse response from SOAP server */
-bool parse_packet_soap(SoapClient *obj, const char *buffer,
-                       int buffer_size,
-                       std::shared_ptr<sdlFunction> fn, const char *fn_name,
-                       Variant &return_value, Array& soap_headers) {
+bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
+                       std::shared_ptr<sdlFunction> fn, const char* /*fn_name*/,
+                       Variant& return_value, Array& soap_headers) {
   char* envelope_ns = nullptr;
   xmlNodePtr trav, env, head, body, resp, cur, fault;
   xmlAttrPtr attr;

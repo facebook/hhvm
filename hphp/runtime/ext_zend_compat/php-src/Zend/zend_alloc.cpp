@@ -219,7 +219,9 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
   return HPHP::req::calloc_untyped(nmemb, size);
 }
 
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
+ZEND_API void*
+_erealloc(void* ptr, size_t size,
+          int /*allow_failure*/ ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
   return HPHP::req::realloc_untyped(ptr, size);
 }
 

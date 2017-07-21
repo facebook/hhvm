@@ -509,9 +509,9 @@ public:
   }
 
   template <typename B, class... Args>
-  ALWAYS_INLINE
-  static typename std::enable_if<std::is_same<B, bool>::value, bool>::type
-  call_helper(B f, Args&&... args) {
+  ALWAYS_INLINE static
+    typename std::enable_if<std::is_same<B, bool>::value, bool>::type
+    call_helper(B f, Args&&... /*args*/) {
     return f;
   }
 

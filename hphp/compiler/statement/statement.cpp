@@ -45,11 +45,11 @@ Statement::Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS)
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void Statement::addElement(StatementPtr stmt) {
+void Statement::addElement(StatementPtr /*stmt*/) {
   assert(false);
 }
 
-void Statement::insertElement(StatementPtr stmt, int index /* = 0 */) {
+void Statement::insertElement(StatementPtr /*stmt*/, int /*index*/ /* = 0 */) {
   assert(false);
 }
 

@@ -9,7 +9,7 @@ namespace HPHP {
 struct StandardExtension final : Extension {
   StandardExtension() : Extension("standard") {}
 
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     // Closure must be hoisted before anything which extends from it.
     // So we place it in the global systemlib and bind its dependencies early.
     loadClosure();

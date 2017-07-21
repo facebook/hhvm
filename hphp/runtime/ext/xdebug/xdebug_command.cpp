@@ -273,9 +273,7 @@ struct StatusCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {}
   ~StatusCmd() {}
 
-  bool isValidInStatus(Status status) const override {
-    return true;
-  }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     m_server.addStatus(xml);
@@ -297,7 +295,7 @@ struct FeatureGetCmd : XDebugCommand {
 
   ~FeatureGetCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Set to true once we have a match. Const cast is needed due to xdebug
@@ -414,7 +412,7 @@ struct RunCmd : XDebugCommand {
       status == Status::Break;
   }
 
-  void handleImpl(xdebug_xml_node& xml) override {
+  void handleImpl(xdebug_xml_node& /*xml*/) override {
     // Get the server status
     XDebugStatus status;
     XDebugReason reason;
@@ -459,9 +457,7 @@ struct StepIntoCmd : XDebugCommand {
       status == Status::Break;
   }
 
-  void handleImpl(xdebug_xml_node& xml) override {
-    phpDebuggerStepIn();
-  }
+  void handleImpl(xdebug_xml_node& /*xml*/) override { phpDebuggerStepIn(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -485,9 +481,7 @@ struct StepOutCmd : XDebugCommand {
       status == Status::Break;
   }
 
-  void handleImpl(xdebug_xml_node& xml) override {
-    phpDebuggerStepOut();
-  }
+  void handleImpl(xdebug_xml_node& /*xml*/) override { phpDebuggerStepOut(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,9 +504,7 @@ struct StepOverCmd : XDebugCommand {
       status == Status::Break;
   }
 
-  void handleImpl(xdebug_xml_node& xml) override {
-    phpDebuggerNext();
-  }
+  void handleImpl(xdebug_xml_node& /*xml*/) override { phpDebuggerNext(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -524,7 +516,7 @@ struct StopCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {}
   ~StopCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     m_server.setStatus(Status::Stopped, Reason::Ok);
@@ -768,7 +760,7 @@ struct BreakpointListCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {}
   ~BreakpointListCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     for (auto iter = XDEBUG_BREAKPOINTS.begin();
@@ -958,7 +950,7 @@ struct StackGetCmd : XDebugCommand {
 
   ~StackGetCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     auto backtraceArgs = BacktraceArgs()
@@ -1032,7 +1024,7 @@ struct ContextNamesCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {}
   ~ContextNamesCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     auto child = xdebug_xml_node_init("context");
@@ -1178,7 +1170,7 @@ struct TypemapGetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {}
   ~TypemapGetCmd() {}
 
-  bool isValidInStatus(Status status) const override { return true; }
+  bool isValidInStatus(Status /*status*/) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Add the schema

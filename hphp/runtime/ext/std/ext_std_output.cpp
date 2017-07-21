@@ -136,8 +136,8 @@ void HHVM_FUNCTION(ob_implicit_flush, bool flag /* = true */) {
 Array HHVM_FUNCTION(ob_list_handlers) {
   return g_context->obGetHandlers();
 }
-bool HHVM_FUNCTION(output_add_rewrite_var, const String& name,
-                                           const String& value) {
+bool HHVM_FUNCTION(output_add_rewrite_var, const String& /*name*/,
+                   const String& /*value*/) {
   throw_not_supported(__func__, "bad coding style");
 }
 bool HHVM_FUNCTION(output_reset_rewrite_vars) {

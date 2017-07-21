@@ -157,7 +157,7 @@ public:
   virtual const void *getPostData(size_t &size) = 0;
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
-  virtual bool getFiles(std::string &files) { return false; }
+  virtual bool getFiles(std::string& /*files*/) { return false; }
   /**
    * Is this a GET, POST or anything?
    */
@@ -180,7 +180,7 @@ public:
    */
   virtual std::string getHeader(const char *name) = 0;
   virtual void getHeaders(HeaderMap &headers) = 0;
-  virtual void getTransportParams(HeaderMap &serverParams) {};
+  virtual void getTransportParams(HeaderMap& /*serverParams*/){};
 
   /**
    * Get a description of the type of transport.
@@ -234,8 +234,9 @@ public:
    * Add/remove a request header. Default is no-op, because not all transports
    * need to support incoming request header manipulations.
    */
-  virtual void addRequestHeaderImpl(const char *name, const char *value) {}
-  virtual void removeRequestHeaderImpl(const char *name) {}
+  virtual void
+  addRequestHeaderImpl(const char* /*name*/, const char* /*value*/) {}
+  virtual void removeRequestHeaderImpl(const char* /*name*/) {}
 
   /**
    * Called when all sending should be done by this time point. Designed for
@@ -275,10 +276,11 @@ public:
    *         is being streamed later.  0 indicates that the push failed
    *         immediately.
    */
-  virtual int64_t pushResource(const char *host, const char *path,
-                               uint8_t priority, const Array& promiseHeaders,
-                               const Array& responseHeaders,
-                               const void *data, int size, bool eom) {
+  virtual int64_t
+  pushResource(const char* /*host*/, const char* /*path*/, uint8_t /*priority*/,
+               const Array& /*promiseHeaders*/,
+               const Array& /*responseHeaders*/, const void* /*data*/,
+               int /*size*/, bool /*eom*/) {
     return 0;
   };
 
@@ -290,8 +292,8 @@ public:
    * @param size length of @p body
    * @param eom true if no more body bytes are expected
    */
-  virtual void pushResourceBody(int64_t id, const void *data, int size,
-                                bool eom) {}
+  virtual void pushResourceBody(int64_t /*id*/, const void* /*data*/,
+                                int /*size*/, bool /*eom*/) {}
 
   /**
    * Need this implementation to break keep-alive connections.

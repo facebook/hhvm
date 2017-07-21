@@ -128,7 +128,7 @@ void ArrayIter::SetInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = st->iter_begin();
 }
 
-void ArrayIter::PairInit(ArrayIter* iter, ObjectData* obj) {
+void ArrayIter::PairInit(ArrayIter* iter, ObjectData* /*obj*/) {
   iter->m_pos = 0;
 }
 
@@ -595,7 +595,7 @@ void MIterTable::clear() {
   auto t = TlsWrapper::getNoCheck();
   t->ents.fill({nullptr, nullptr});
   if (!t->extras.empty()) {
-    t->extras.release_if([] (const MIterTable::Ent& e) { return true; });
+    t->extras.release_if([](const MIterTable::Ent& /*e*/) { return true; });
   }
 }
 

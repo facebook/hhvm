@@ -682,8 +682,8 @@ cleanup:
   }
 }
 
-static int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req,
-                             ber_int_t msgid, void *params) {
+static int _ldap_rebind_proc(LDAP* /*ldap*/, const char* url, ber_tag_t /*req*/,
+                             ber_int_t /*msgid*/, void* params) {
   auto ld = getLdapLinkFromToken(params);
 
   /* link exists and callback set? */

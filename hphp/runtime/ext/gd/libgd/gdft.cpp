@@ -537,8 +537,7 @@ static int tweenColorTest (void *element, void *key)
  * does the work so that text can be alpha blended across a complex
  * background (TBB; and for real in 2.0.2).
  */
-static void * tweenColorFetch (char **error, void *key)
-{
+static void* tweenColorFetch(char** /*error*/, void* key) {
   tweencolor_t *a;
   tweencolorkey_t *b = (tweencolorkey_t *) key;
   int pixel, npixel, bg, fg;

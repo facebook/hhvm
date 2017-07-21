@@ -709,15 +709,15 @@ inline TypedValue* ElemDDict(TypedValue* base, key_type<keyType> key) {
  * ElemD when base is a Keyset
  */
 template <bool reffy>
-[[noreturn]]
-inline TypedValue* ElemDKeysetPre(TypedValue* base, int64_t key) {
+[[noreturn]] inline TypedValue*
+ElemDKeysetPre(TypedValue* base, int64_t /*key*/) {
   if (reffy) throwRefInvalidArrayValueException(base->m_data.parr);
   throwInvalidKeysetOperation();
 }
 
 template <bool reffy>
-[[noreturn]]
-inline TypedValue* ElemDKeysetPre(TypedValue* base, StringData* key) {
+[[noreturn]] inline TypedValue*
+ElemDKeysetPre(TypedValue* base, StringData* /*key*/) {
   if (reffy) throwRefInvalidArrayValueException(base->m_data.parr);
   throwInvalidKeysetOperation();
 }
@@ -965,7 +965,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
   return lval.tv();
 }
 
-inline TypedValue* ElemUVecPre(TypedValue* base, StringData* key) {
+inline TypedValue* ElemUVecPre(TypedValue* /*base*/, StringData* /*key*/) {
   return ElemUEmptyish();
 }
 
@@ -1045,13 +1045,13 @@ inline TypedValue* ElemUDict(TypedValue* base, key_type<keyType> key) {
 /**
  * ElemU when base is a Keyset
  */
-[[noreturn]]
-inline TypedValue* ElemUKeysetPre(TypedValue* base, int64_t key) {
+[[noreturn]] inline TypedValue*
+ElemUKeysetPre(TypedValue* /*base*/, int64_t /*key*/) {
   throwInvalidKeysetOperation();
 }
 
-[[noreturn]]
-inline TypedValue* ElemUKeysetPre(TypedValue* base, StringData* key) {
+[[noreturn]] inline TypedValue*
+ElemUKeysetPre(TypedValue* /*base*/, StringData* /*key*/) {
   throwInvalidKeysetOperation();
 }
 
@@ -1404,7 +1404,7 @@ template<bool setRef> struct ShuffleReturn {};
 
 template<> struct ShuffleReturn<true> {
   typedef void return_type;
-  static void do_return(ArrayData* a) {}
+  static void do_return(ArrayData* /*a*/) {}
 };
 
 template<> struct ShuffleReturn<false> {
@@ -1533,11 +1533,9 @@ inline ArrayData* SetElemVecPre(ArrayData* a,
   return PackedArray::SetIntVec(a, key, *value, copy);
 }
 
-template<bool setResult>
-inline ArrayData* SetElemVecPre(ArrayData* a,
-                                StringData* key,
-                                Cell* value,
-                                bool copy) {
+template <bool setResult>
+inline ArrayData*
+SetElemVecPre(ArrayData* a, StringData* key, Cell* /*value*/, bool /*copy*/) {
   throwInvalidArrayKeyException(key, a);
 }
 
@@ -2376,8 +2374,8 @@ inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key,
   return PackedArray::RemoveIntVec(a, key, copy);
 }
 
-inline ArrayData* UnsetElemVecPre(ArrayData* a, StringData* key,
-                                  bool copy) {
+inline ArrayData*
+UnsetElemVecPre(ArrayData* a, StringData* /*key*/, bool /*copy*/) {
   /* Never contains strings, so a no-op. */
   return a;
 }

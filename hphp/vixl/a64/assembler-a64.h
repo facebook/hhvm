@@ -1602,7 +1602,7 @@ class Assembler {
   }
 
   // Instruction bits for vector format in load and store operations.
-  static Instr LSVFormat(VRegister vd) {
+  static Instr LSVFormat(VRegister /*vd*/) {
     // Note: vasm opcodes need only 2 lanes (64b each)
     return LS_NEON_2D;
   }

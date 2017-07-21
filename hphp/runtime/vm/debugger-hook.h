@@ -124,21 +124,20 @@ struct DebuggerHook {
 
   // Debugger events. Subclasses can override these methods to receive
   // events.
-  virtual void onExceptionThrown(ObjectData* exception) {}
+  virtual void onExceptionThrown(ObjectData* /*exception*/) {}
   virtual void onExceptionHandle() {}
-  virtual void onError(const ExtendedException &ee,
-                       int errnum,
-                       const std::string& message) {}
-  virtual void onEval(const Func* f) {}
-  virtual void onFileLoad(Unit* efile) {}
-  virtual void onDefClass(const Class* cls) {}
-  virtual void onDefFunc(const Func* func) {}
+  virtual void onError(const ExtendedException& /*ee*/, int /*errnum*/,
+                       const std::string& /*message*/) {}
+  virtual void onEval(const Func* /*f*/) {}
+  virtual void onFileLoad(Unit* /*efile*/) {}
+  virtual void onDefClass(const Class* /*cls*/) {}
+  virtual void onDefFunc(const Func* /*func*/) {}
 
   // Called whenever the program counter is at a location that could be
   // interesting to a debugger. Such as when have hit a registered breakpoint
   // (regardless of type), when interrupt forcing is enabled, or when the pc is
   // over an active line breakpoint
-  virtual void onOpcode(const unsigned char* pc) {}
+  virtual void onOpcode(const unsigned char* /*pc*/) {}
 
   // Called right before top-level pseudo-main enters and right after it
   // exits. This is useful for debuggers to initialize and shutdown separate
@@ -147,19 +146,19 @@ struct DebuggerHook {
   virtual void onRequestShutdown() {}
 
   // Called whenever we are breaking due to completion of a step in or step out
-  virtual void onStepInBreak(const Unit* unit, int line) {}
-  virtual void onStepOutBreak(const Unit* unit, int line) {}
-  virtual void onNextBreak(const Unit* unit, int line) {}
+  virtual void onStepInBreak(const Unit* /*unit*/, int /*line*/) {}
+  virtual void onStepOutBreak(const Unit* /*unit*/, int /*line*/) {}
+  virtual void onNextBreak(const Unit* /*unit*/, int /*line*/) {}
 
   // Called when we have hit a registered function entry breakpoint
-  virtual void onFuncEntryBreak(const Func* f) {}
+  virtual void onFuncEntryBreak(const Func* /*f*/) {}
 
   // Called when we have hit a registered function exit breakpoint
-  virtual void onFuncExitBreak(const Func* f) {}
+  virtual void onFuncExitBreak(const Func* /*f*/) {}
 
   // Called when we have hit a registered line breakpoint. Even though a line
   // spans multiple opcodes, this will only be called once per hit.
-  virtual void onLineBreak(const Unit* unit, int line) {}
+  virtual void onLineBreak(const Unit* /*unit*/, int /*line*/) {}
 
   // The number of DebuggerHooks that are currently attached to the process.
   // The mutex is needed because we need to perform work when we are sure there

@@ -126,7 +126,7 @@ member_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalStr(ad, String(k).get(), copy);
 }
 
-member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -137,7 +137,7 @@ member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   return member_lval { a, tv };
 }
 
-member_lval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
+member_lval GlobalsArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   return member_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
@@ -148,10 +148,8 @@ ArrayData* GlobalsArray::SetInt(ArrayData* ad,
   return SetStr(ad, String(k).get(), v, copy);
 }
 
-ArrayData* GlobalsArray::SetStr(ArrayData* ad,
-                                         StringData* k,
-                                         Cell v,
-                                         bool copy) {
+ArrayData*
+GlobalsArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
   auto a = asGlobals(ad);
   cellSet(v, *tvToCell(a->m_tab->lookupAdd(k)));
   return a;
@@ -164,10 +162,8 @@ ArrayData* GlobalsArray::SetRefInt(ArrayData* ad,
   return asGlobals(ad)->setRef(String(k).get(), v, copy);
 }
 
-ArrayData* GlobalsArray::SetRefStr(ArrayData* ad,
-                                            StringData* k,
-                                            Variant& v,
-                                            bool copy) {
+ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v,
+                                   bool /*copy*/) {
   auto a = asGlobals(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
@@ -179,8 +175,7 @@ GlobalsArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
 }
 
 ArrayData*
-GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
-                                 bool copy) {
+GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
   a->m_tab->unset(k);
   return a;
@@ -192,7 +187,7 @@ GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
  * is currently $GLOBALS.
  */
 
-ArrayData* GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
+ArrayData* GlobalsArray::Append(ArrayData*, Cell /*v*/, bool /*copy*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
@@ -280,20 +275,20 @@ bool GlobalsArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return true;
 }
 
-ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
+ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction /*sf*/) {
   raise_warning("Sorting the $GLOBALS array is not supported");
   return ad;
 }
-void GlobalsArray::Ksort(ArrayData*, int sort_flags, bool ascending) {}
-void GlobalsArray::Sort(ArrayData*, int sort_flags, bool ascending) {}
-void GlobalsArray::Asort(ArrayData*, int sort_flags, bool ascending) {}
-bool GlobalsArray::Uksort(ArrayData*, const Variant& cmp_function) {
+void GlobalsArray::Ksort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+void GlobalsArray::Sort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+void GlobalsArray::Asort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+bool GlobalsArray::Uksort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
-bool GlobalsArray::Usort(ArrayData*, const Variant& cmp_function) {
+bool GlobalsArray::Usort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
-bool GlobalsArray::Uasort(ArrayData*, const Variant& cmp_function) {
+bool GlobalsArray::Uasort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
 

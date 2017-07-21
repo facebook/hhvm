@@ -533,7 +533,7 @@ void stdout_func(const char* s, int len, void* data) {
   write(*fd, s, len);
 }
 
-void logging_hook(const char* header, const char* msg, const char* ending,
+void logging_hook(const char* /*header*/, const char* msg, const char* ending,
                   void* data) {
   int fd = *(int*)data;
   write(fd, msg, strlen(msg));
@@ -987,10 +987,9 @@ void CLIWorker::doJob(int client) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-req::ptr<File> CLIWrapper::open(const String& filename,
-                                const String& mode,
-                                int options,
-                                const req::ptr<StreamContext>& context) {
+req::ptr<File>
+CLIWrapper::open(const String& filename, const String& mode, int options,
+                 const req::ptr<StreamContext>& /*context*/) {
   String fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);

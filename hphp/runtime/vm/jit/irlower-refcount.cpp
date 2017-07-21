@@ -200,7 +200,8 @@ TargetProfile<DecRefProfile> decRefProfile(const IRLS& env,
  * kinds of translations, this functions returns 0.0, i.e. we assume that it's
  * unlikely.
  */
-float decRefDestroyedPercent(Vout& v, IRLS& env, const IRInstruction* inst,
+float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
+                             const IRInstruction* /*inst*/,
                              const TargetProfile<DecRefProfile>& profile) {
   if (!profile.optimizing()) return 0.0;
 

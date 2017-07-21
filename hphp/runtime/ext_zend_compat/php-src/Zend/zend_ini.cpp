@@ -174,8 +174,7 @@ ZEND_API int zend_register_ini_entries(
     TSRMLS_CC);
 }
 
-ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC) {
-}
+ZEND_API void zend_unregister_ini_entries(int /*module_number*/ TSRMLS_DC) {}
 
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
@@ -305,5 +304,4 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
   return SUCCESS;
 }
 
-ZEND_API void display_ini_entries(zend_module_entry *module) {
-}
+ZEND_API void display_ini_entries(zend_module_entry* /*module*/) {}

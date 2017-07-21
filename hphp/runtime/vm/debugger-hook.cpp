@@ -276,7 +276,7 @@ void phpDebuggerRequestShutdownHook() {
 
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
-void phpDebuggerFuncEntryHook(const ActRec* ar) {
+void phpDebuggerFuncEntryHook(const ActRec* /*ar*/) {
   VMRegAnchor anchor;
   RID().pushActiveLineBreak();
 }
@@ -284,7 +284,7 @@ void phpDebuggerFuncEntryHook(const ActRec* ar) {
 // Hook called on function exit. onOpcode handles function exit breakpoints,
 // this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
-void phpDebuggerFuncExitHook(const ActRec* ar) {
+void phpDebuggerFuncExitHook(const ActRec* /*ar*/) {
   VMRegAnchor anchor;
   auto& req_data = RID();
   req_data.popActiveLineBreak();

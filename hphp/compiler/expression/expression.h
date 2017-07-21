@@ -169,8 +169,8 @@ public:
   virtual bool isScalar() const { return false; }
   bool isArray() const;
   bool isCollection() const;
-  virtual bool isRefable(bool checkError = false) const { return false; }
-  virtual bool getScalarValue(Variant &value) { return false; }
+  virtual bool isRefable(bool /*checkError*/ = false) const { return false; }
+  virtual bool getScalarValue(Variant& /*value*/) { return false; }
   bool getEffectiveScalar(Variant &value);
   virtual ExpressionPtr clone() {
     assert(false);
@@ -180,7 +180,7 @@ public:
   virtual bool isLiteralString() const { return false;}
   virtual bool isLiteralNull() const { return false;}
   virtual std::string getLiteralString() const { return "";}
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {
+  virtual bool containsDynamicConstant(AnalysisResultPtr /*ar*/) const {
     return false;
   }
   void deepCopy(ExpressionPtr exp);
@@ -196,7 +196,7 @@ public:
   /**
    * Called before type inference.
    */
-  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar) {
+  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr /*ar*/) {
     return ExpressionPtr();
   }
 

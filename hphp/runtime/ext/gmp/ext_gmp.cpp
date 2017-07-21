@@ -998,9 +998,7 @@ static Variant HHVM_FUNCTION(gmp_prob_prime,
   return probPrime;
 }
 
-
-static void HHVM_FUNCTION(gmp_random,
-                          int64_t limiter) {
+static void HHVM_FUNCTION(gmp_random, int64_t /*limiter*/) {
   throw_not_implemented("gmp_random");
 }
 

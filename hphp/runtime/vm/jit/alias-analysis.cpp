@@ -210,7 +210,7 @@ bool collect_component(AliasAnalysis& aa,
 
 }
 
-AliasAnalysis::AliasAnalysis(const IRUnit& unit) {}
+AliasAnalysis::AliasAnalysis(const IRUnit& /*unit*/) {}
 
 folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
   auto const it = locations.find(acls);

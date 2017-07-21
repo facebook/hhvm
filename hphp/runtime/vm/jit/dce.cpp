@@ -897,7 +897,7 @@ IRSPRelOffset locToStkOff(IRInstruction& inst) {
  * caller's frame pointer, skipping frames marked as dead.
  */
 template <typename F>
-void rewriteToParentFrameImpl(IRUnit& unit, IRInstruction& inst, F dead) {
+void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   assertx(inst.is(LdClsRef, StClsRef, KillClsRef));
 
   auto fp = inst.src(0);

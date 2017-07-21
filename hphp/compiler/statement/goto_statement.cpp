@@ -55,8 +55,7 @@ void GotoStatement::invalidate(ParserBase::GotoError error) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void GotoStatement::analyzeProgram(AnalysisResultPtr ar) {
-}
+void GotoStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
 ConstructPtr GotoStatement::getNthKid(int n) const {
   switch (n) {
@@ -71,7 +70,7 @@ int GotoStatement::getKidCount() const {
   return 0;
 }
 
-void GotoStatement::setNthKid(int n, ConstructPtr cp) {
+void GotoStatement::setNthKid(int n, ConstructPtr /*cp*/) {
   switch (n) {
     default:
       assert(false);
@@ -82,6 +81,6 @@ void GotoStatement::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void GotoStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("goto %s;\n", m_label.c_str());
 }

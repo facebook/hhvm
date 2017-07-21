@@ -157,7 +157,7 @@ struct Vgen {
     a.addo(Reg64(i.d), Reg64(i.s1), Reg64(i.s0), true);
     copyCR0toCR1(a, rAsm);
   }
-  void emit(const nothrow& i) {
+  void emit(const nothrow& /*i*/) {
     // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
     TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;
     env.meta.catches.emplace_back(saved_pc, nullptr);
@@ -213,7 +213,7 @@ struct Vgen {
   void emit(const divsd& i) { a.fdiv(i.d, i.s1, i.s0); }
   void emit(const extsb& i) { a.extsb(i.d, Reg64(i.s)); }
   void emit(const extsl& i) { a.extsw(i.d, Reg64(i.s)); }
-  void emit(const fallthru& i) {}
+  void emit(const fallthru& /*i*/) {}
   void emit(const fcmpo& i) {
     a.fcmpo(i.sf, i.s0, i.s1);
     copyCR0toCR1(a, rAsm);
@@ -275,13 +275,13 @@ struct Vgen {
     a.neg(i.d, i.s, true);
     copyCR0toCR1(a, rAsm);
   }
-  void emit(const nop& i) { a.nop(); } // no-op form
+  void emit(const nop& /*i*/) { a.nop(); } // no-op form
   void emit(const not& i) { a.nor(i.d, i.s, i.s, false); }
   void emit(const orq& i) {
     a.or(i.d, i.s0, i.s1, true);
     copyCR0toCR1(a, rAsm);
   }
-  void emit(const ret& i) { a.blr(); }
+  void emit(const ret& /*i*/) { a.blr(); }
   void emit(const roundsd& i) { a.xsrdpi(i.d, i.s); }
   void emit(const sar& i) {
     a.srad(i.d, i.s1, i.s0, true);
@@ -335,7 +335,7 @@ struct Vgen {
     copyCR0toCR1(a, rAsm);
   }
   void emit(const subsd& i) { a.fsub(i.d, i.s1, i.s0, false); }
-  void emit(const ud2& i) { a.trap(); }
+  void emit(const ud2& /*i*/) { a.trap(); }
   void emit(const xorb& i) {
     a.xor(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
@@ -427,8 +427,8 @@ struct Vgen {
     copyCR0toCR1(a, rAsm);
   }
 
-  void emit(const conjure& i) { always_assert(false); }
-  void emit(const conjureuse& i) { always_assert(false); }
+  void emit(const conjure& /*i*/) { always_assert(false); }
+  void emit(const conjureuse& /*i*/) { always_assert(false); }
   void emit(const absdbl& i) { a.fabs(i.d, i.s, false); }
 
   // The following vasms reemit other vasms. They are implemented afterwards in
@@ -886,7 +886,7 @@ void Vgen::emit(const loadstubret& i) {
   a.ld(i.d, rsp()[AROFF(m_savedRip)]);
 }
 
-void Vgen::emit(const stubunwind& i) {
+void Vgen::emit(const stubunwind& /*i*/) {
   // reset the return address from native frame due to call to the vm frame
   a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
   a.mtlr(rfuncln());
@@ -894,7 +894,7 @@ void Vgen::emit(const stubunwind& i) {
   a.addi(rsp(), rsp(), min_frame_size);
 }
 
-void Vgen::emit(const stubtophp& i) {
+void Vgen::emit(const stubtophp& /*i*/) {
   emit(stubunwind{});
 }
 
@@ -942,7 +942,7 @@ bool patchImm(Immed imm, Vout& v, Vreg& tmpRegister) {
 
 /* Fallback, when a vasm is not lowered */
 template <typename Inst>
-void lowerForPPC64(const VLS& e, Vout& v, Inst& inst) {}
+void lowerForPPC64(const VLS& /*e*/, Vout& /*v*/, Inst& /*inst*/) {}
 
 /*
  * Using macro to commonlize vasms lowering
@@ -1140,22 +1140,22 @@ X(cmovl,  cmovq,  TWO(cc, sf), TWO_R64(f, t))
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lowerForPPC64(const VLS& e, Vout& v, popp& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, popp& inst) {
   v << pop{inst.d0};
   v << pop{inst.d1};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, poppm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, poppm& inst) {
   v << popm{inst.d0};
   v << popm{inst.d1};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, pushp& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, pushp& inst) {
   v << push{inst.s0};
   v << push{inst.s1};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, pushpm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, pushpm& inst) {
   v << pushm{inst.s0};
   v << pushm{inst.s1};
 }
@@ -1165,13 +1165,13 @@ void lowerForPPC64(const VLS& e, Vout& v, pushpm& inst) {
  * PHP function ABI
  */
 // phplogue and phpret doesn't save toc as it's saved on call.
-void lowerForPPC64(const VLS& e, Vout& v, phplogue& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, phplogue& inst) {
   // store basic info on vm frame
   v << mflr{rfuncln()};
   v << store{rfuncln(), inst.fp[AROFF(m_savedRip)]};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, phpret& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, phpret& inst) {
   v << load{inst.fp[AROFF(m_savedRip)], rfuncln()};
   if (!inst.noframe) v << load{inst.fp[AROFF(m_sfp)], inst.d};
 
@@ -1184,7 +1184,7 @@ void lowerForPPC64(const VLS& e, Vout& v, phpret& inst) {
  * Tail call elimination on ppc64: call without creating a stack and keep LR
  * contents as prior to the call.
  */
-void lowerForPPC64(const VLS& e, Vout& v, tailcallphp& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, tailcallphp& inst) {
   v << load{inst.fp[AROFF(m_savedRip)], rfuncln()};
   v << mtlr{rfuncln()};
   v << jmpr{inst.target, inst.args};
@@ -1193,20 +1193,20 @@ void lowerForPPC64(const VLS& e, Vout& v, tailcallphp& inst) {
 /////////////////////////////////////////////////////////////////////////////
 
 // Lower movs to copy
-void lowerForPPC64(const VLS& e, Vout& v, movtqb& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, movtqb& inst) {
   v << copy{inst.s, inst.d};
 }
-void lowerForPPC64(const VLS& e, Vout& v, movtql& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, movtql& inst) {
   v << copy{inst.s, inst.d};
 }
-void lowerForPPC64(const VLS& e, Vout& v, movtdb& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, movtdb& inst) {
   v << copy{inst.s, inst.d};
 }
-void lowerForPPC64(const VLS& e, Vout& v, movtdq& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, movtdq& inst) {
   v << copy{inst.s, inst.d};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, srem& i) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, srem& i) {
   // remainder as described on divd documentation:
   auto tmpSf = v.makeReg(), tmpSf2 = v.makeReg();
   auto quotient = v.makeReg();
@@ -1216,46 +1216,46 @@ void lowerForPPC64(const VLS& e, Vout& v, srem& i) {
   v << subq{quoxdiv, i.s0, i.d, tmpSf2};     // i.d = remainder
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, jmpm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, jmpm& inst) {
   Vptr p = inst.target;
   Vreg tmp = v.makeReg();
   v << load{p, tmp};
   v << jmpr{tmp, inst.args};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, callm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, callm& inst) {
   Vptr p = inst.target;
   auto d = v.makeReg();
   v << load{p, d};
   v << callr{d, inst.args};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, loadqp& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, loadqp& inst) {
   // in PPC we don't have anything like a RIP register
   // RIP register uses an absolute displacement address. Load it to a register
   Vptr p(v.cns(inst.s.r.disp), 0); // this Vptr doesn't need patch
   v << load{p, inst.d};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, pushm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, pushm& inst) {
   auto tmp = v.makeReg();
   v << load{inst.s, tmp};
   v << push{tmp};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, popm& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, popm& inst) {
   auto tmp = v.makeReg();
   v << pop{tmp};
   v << store{tmp, inst.d};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, setcc& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, setcc& inst) {
   auto zero = v.makeReg();
   v << ldimmq{0, zero};
   v << cmovq{inst.cc, inst.sf, zero, rone(), Vreg64{Reg64(inst.d)}};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, cvttsd2siq& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, cvttsd2siq& inst) {
   //  In order to fctidz be x64 compliant, it is necessary to return  the value
   //  0x8000000000000000 when the bit VXCVI is set. See fctidz instruction on
   //  ISA page 152, 4.6.7
@@ -1283,7 +1283,7 @@ void lowerForPPC64(const VLS& e, Vout& v, cvttsd2siq& inst) {
  *
  * Special handling is done below for them
  */
-void lowerForPPC64(const VLS& e, Vout& v, cmplim& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, cmplim& inst) {
   Vptr p = inst.s1;
 
   // this temp reg is always needed. Use one of our scratches.
@@ -1295,20 +1295,20 @@ void lowerForPPC64(const VLS& e, Vout& v, cmplim& inst) {
   if (patchImm(inst.s0, v, tmp)) v << cmpl {tmp,     tmp2, inst.sf};
   else                           v << cmpli{inst.s0, tmp2, inst.sf};
 }
-void lowerForPPC64(const VLS& e, Vout& v, cmpli& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, cmpli& inst) {
   Vreg tmp;
   if (patchImm(inst.s0, v, tmp)) v << cmpl {tmp,     inst.s1, inst.sf};
   else                           v << cmpli{inst.s0, inst.s1, inst.sf};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, cloadq& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, cloadq& inst) {
   auto m = inst.t;
   auto tmp = v.makeReg();
   v << load{m, tmp};
   v << cmovq{inst.cc, inst.sf, inst.f, tmp, inst.d};
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, cmpsd& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, cmpsd& inst) {
   auto sf = v.makeReg();
   auto r64_d = v.makeReg(); // auxiliary for GP -> FP conversion
 
@@ -1336,7 +1336,7 @@ void lowerForPPC64(const VLS& e, Vout& v, cmpsd& inst) {
   v << copy{r64_d, inst.d}; // GP -> FP
 }
 
-void lowerForPPC64(const VLS& e, Vout& v, decqmlock& inst) {
+void lowerForPPC64(const VLS& /*e*/, Vout& v, decqmlock& inst) {
   Vptr p = inst.m;
   // decqmlock uses ldarx and stdcx instructions that are X-Form instruction
   // and support only index+base address mode so we need to copy the

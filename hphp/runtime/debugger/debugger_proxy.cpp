@@ -521,8 +521,8 @@ static void append_stdout(const char *s, int len, void *data) {
 
 // Passed to the ExecutionContext during Eval to add writes to stderr
 // to the output buffer string.
-static void append_stderr(const char *header, const char *msg,
-                          const char *ending, void *data) {
+static void append_stderr(const char* /*header*/, const char* msg,
+                          const char* ending, void* data) {
   TRACE(2, "DebuggerProxy::append_stderr\n");
   StringBuffer *sb = (StringBuffer*)data;
   if (s_stderr_color) {

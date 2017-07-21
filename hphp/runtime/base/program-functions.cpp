@@ -1774,12 +1774,12 @@ static int execute_program_impl(int argc, char** argv) {
   // uncertain state. Don't start them in DumpHhas mode because
   // it _Exit()s after loading the first non-systemlib unit.
   if (!RuntimeOption::EvalDumpHhas) {
-    LightProcess::SetLostChildHandler([](pid_t child) {
-        if (!HttpServer::Server) return;
-        if (!HttpServer::Server->isStopped()) {
-          HttpServer::Server->stopOnSignal(SIGCHLD);
-        }
-      });
+    LightProcess::SetLostChildHandler([](pid_t /*child*/) {
+      if (!HttpServer::Server) return;
+      if (!HttpServer::Server->isStopped()) {
+        HttpServer::Server->stopOnSignal(SIGCHLD);
+      }
+    });
     LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                              RuntimeOption::LightProcessCount,
                              RuntimeOption::EvalRecordSubprocessTimes,
@@ -2064,7 +2064,7 @@ std::string get_systemlib(std::string* hhas,
 // C++ ffi
 
 #ifndef _MSC_VER
-static void on_timeout(int sig, siginfo_t* info, void* context) {
+static void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
@@ -2610,9 +2610,10 @@ static struct SetThreadInitFini {
       stackAddr, stackEnd,
       folly::sformat("Stack-{}", static_cast<void*>(tcbBase)));
   }
-  template<class ThreadT> static typename std::enable_if<
-    !std::is_integral<ThreadT>::value && !std::is_pointer<ThreadT>::value>::type
-  recordThreadAddr(ThreadT threadId, char* stackAddr, size_t stackSize) {
+  template <class ThreadT>
+  static typename std::enable_if<!std::is_integral<ThreadT>::value &&
+                                 !std::is_pointer<ThreadT>::value>::type
+  recordThreadAddr(ThreadT /*threadId*/, char* stackAddr, size_t stackSize) {
     // pthread_t is not an integer or pointer to TCB in this pthread
     // implementation.  But we can still figure out where TLS is.
     auto const tlsRange = getCppTdata();

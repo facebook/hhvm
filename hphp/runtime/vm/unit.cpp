@@ -245,7 +245,7 @@ void* Unit::operator new(size_t sz) {
   return low_malloc_data(sz);
 }
 
-void Unit::operator delete(void* p, size_t sz) {
+void Unit::operator delete(void* p, size_t /*sz*/) {
   low_free_data(p);
 }
 

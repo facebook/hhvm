@@ -21,7 +21,7 @@ struct EncodingDetector : IntlError {
     }
   }
   EncodingDetector(const EncodingDetector&) = delete;
-  EncodingDetector& operator=(const EncodingDetector& src) {
+  EncodingDetector& operator=(const EncodingDetector& /*src*/) {
     throwException("EncodingDetector may not be cloned.");
     not_reached();
   }

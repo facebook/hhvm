@@ -329,8 +329,8 @@ PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
  *
  * Returns true if no further analysis is needed for the def to `d'.
  */
-bool analyze_phys_callseq(const Env& env, Vreg d,
-                          const Vinstr& inst, const Vinstr* next) {
+bool analyze_phys_callseq(const Env& /*env*/, Vreg d, const Vinstr& inst,
+                          const Vinstr* next) {
   if (d != rvmfp()) return false;
 
   /*

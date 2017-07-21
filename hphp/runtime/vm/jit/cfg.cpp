@@ -287,7 +287,7 @@ EdgeSet findRetreatingEdges(const IRUnit& unit) {
 
 bool cfgHasLoop(const IRUnit& unit) {
   auto ret = false;
-  visit_retreating_edges(unit, [&] (Edge* edge) {
+  visit_retreating_edges(unit, [&](Edge* /*edge*/) {
     ret = true;
     return false;
   });

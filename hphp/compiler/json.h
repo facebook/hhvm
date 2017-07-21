@@ -108,7 +108,7 @@ struct _OutputStream {
     return *this;
   }
 
-  _OutputStream &operator<< (const Null &n) {
+  _OutputStream& operator<<(const Null& /*n*/) {
     m_out << "null";
     return *this;
   }

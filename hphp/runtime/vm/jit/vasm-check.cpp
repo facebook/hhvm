@@ -177,9 +177,11 @@ struct FlagDefChecker {
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
   template<class T, class H> void defHint(T r, H) { def(r); }
-  template<class T> void across(T r) {}
+  template <class T>
+  void across(T /*r*/) {}
   template<class T> void use(T) {}
-  template<class T, class H> void useHint(T r, H) {}
+  template <class T, class H>
+  void useHint(T /*r*/, H) {}
   void def(RegSet regs) {
     regs.forEach([&](Vreg r) {
       if (r.isSF()) def(VregSF(r));

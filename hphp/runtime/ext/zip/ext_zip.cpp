@@ -83,7 +83,9 @@ struct ZipStream : File {
     return n;
   }
 
-  int64_t writeImpl(const char *buffer, int64_t length) override { return 0; }
+  int64_t writeImpl(const char* /*buffer*/, int64_t /*length*/) override {
+    return 0;
+  }
 
   bool eof() override { return m_zipFile == nullptr; }
 
@@ -97,8 +99,9 @@ void ZipStream::sweep() {
 }
 
 struct ZipStreamWrapper final : Stream::Wrapper {
-  req::ptr<File> open(const String& filename, const String& mode, int options,
-                      const req::ptr<StreamContext>& context) override {
+  req::ptr<File>
+  open(const String& filename, const String& /*mode*/, int /*options*/,
+       const req::ptr<StreamContext>& /*context*/) override {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -1327,8 +1330,8 @@ static Variant HHVM_FUNCTION(zip_entry_name, const Resource& zip_entry) {
   return zipEntry->getName();
 }
 
-static bool HHVM_FUNCTION(zip_entry_open, const Resource& zip, const Resource& zip_entry,
-                          const String& mode) {
+static bool HHVM_FUNCTION(zip_entry_open, const Resource& zip,
+                          const Resource& zip_entry, const String& /*mode*/) {
   auto zipDir   = cast<ZipDirectory>(zip);
   auto zipEntry = cast<ZipEntry>(zip_entry);
 

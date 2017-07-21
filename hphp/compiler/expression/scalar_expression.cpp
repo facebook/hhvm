@@ -51,14 +51,13 @@ ScalarExpression::ScalarExpression
       m_type(type), m_value(value), m_originalValue(value), m_quoted(quoted) {
 }
 
-ScalarExpression::ScalarExpression
-(EXPRESSION_CONSTRUCTOR_PARAMETERS,
- int type, const std::string &value, const std::string &translated,
- bool quoted /* false */)
+ScalarExpression::ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS, int type,
+                                   const std::string& value,
+                                   const std::string& translated,
+                                   bool /*quoted*/ /* false */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_type(type), m_value(value), m_originalValue(value),
-      m_translated(translated) {
-}
+      m_translated(translated) {}
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
@@ -301,7 +300,7 @@ std::string ScalarExpression::getIdentifier() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ScalarExpression::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:

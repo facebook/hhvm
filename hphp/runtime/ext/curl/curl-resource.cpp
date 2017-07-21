@@ -1161,8 +1161,8 @@ size_t CurlResource::curl_write_header(char *data,
   return length;
 }
 
-int CurlResource::curl_debug(CURL *cp, curl_infotype type, char *buf,
-                             size_t buf_len, void *ctx) {
+int CurlResource::curl_debug(CURL* /*cp*/, curl_infotype type, char* buf,
+                             size_t buf_len, void* ctx) {
   CurlResource *ch = (CurlResource *)ctx;
   if (type == CURLINFO_HEADER_OUT && buf_len > 0) {
     ch->m_header = String(buf, buf_len, CopyString);

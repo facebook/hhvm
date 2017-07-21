@@ -478,9 +478,9 @@ static int collator_regular_compare_descending(const Variant& v1, const Variant&
   return collator_regular_compare_function(v1, v2, data, false);
 }
 
-static int collator_numeric_compare_function(const Variant& v1, const Variant& v2,
-                                             const void *data,
-                                             bool ascending) {
+static int
+collator_numeric_compare_function(const Variant& v1, const Variant& v2,
+                                  const void* /*data*/, bool ascending) {
   Variant num1;
   Variant num2;
 

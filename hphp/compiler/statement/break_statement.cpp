@@ -49,10 +49,9 @@ StatementPtr BreakStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void BreakStatement::analyzeProgram(AnalysisResultPtr ar) {
-}
+void BreakStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
-ConstructPtr BreakStatement::getNthKid(int n) const {
+ConstructPtr BreakStatement::getNthKid(int /*n*/) const {
   always_assert(false);
 }
 
@@ -60,7 +59,7 @@ int BreakStatement::getKidCount() const {
   return 0;
 }
 
-void BreakStatement::setNthKid(int n, ConstructPtr cp) {
+void BreakStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
   always_assert(false);
 }
 
@@ -68,14 +67,14 @@ uint64_t BreakStatement::getDepth() {
   return m_depth;
 }
 
-StatementPtr BreakStatement::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr BreakStatement::preOptimize(AnalysisResultConstPtr /*ar*/) {
   return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void BreakStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void BreakStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   if (m_depth != 1) {
     cg_printf("%s %" PRIu64 ";\n", m_name, m_depth);
   } else {

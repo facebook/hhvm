@@ -91,7 +91,7 @@ union FixupEntry {
 
 TreadHashMap<uint32_t,FixupEntry,std::hash<uint32_t>> s_fixups{kInitCapac};
 
-PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) {
+PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
   assertx(f);
   return f->getEntry() + fixup.pcOffset;
 }
@@ -165,7 +165,7 @@ const Fixup* findFixup(CTCA tca) {
 
 size_t size() { return s_fixups.size(); }
 
-void fixupWork(ExecutionContext* ec, ActRec* nextRbp) {
+void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");

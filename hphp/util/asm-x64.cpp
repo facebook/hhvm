@@ -268,7 +268,7 @@ void DecodedInstruction::determineOperandsMap0(uint8_t* ip) {
   }
 }
 
-void DecodedInstruction::determineOperandsMap1(uint8_t* ip) {
+void DecodedInstruction::determineOperandsMap1(uint8_t* /*ip*/) {
   switch (m_opcode >> 4) {
     case 0:
       if ((m_opcode & 15) < 4 || (m_opcode & 15) == 13) {
@@ -320,12 +320,12 @@ void DecodedInstruction::determineOperandsMap1(uint8_t* ip) {
   }
 }
 
-void DecodedInstruction::determineOperandsMap2(uint8_t* ip) {
+void DecodedInstruction::determineOperandsMap2(uint8_t* /*ip*/) {
   m_flags.hasModRm = true;
   if (m_opcode == 0x13) m_immSz = sz::byte;
 }
 
-void DecodedInstruction::determineOperandsMap3(uint8_t* ip) {
+void DecodedInstruction::determineOperandsMap3(uint8_t* /*ip*/) {
   m_flags.hasModRm = true;
   m_immSz = sz::byte;
 }

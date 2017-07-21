@@ -172,7 +172,7 @@ struct Sub {
   Cell operator()(int64_t a, double  b) const { return make_dbl(a - b); }
   Cell operator()(int64_t a, int64_t b) const { return make_int(a - b); }
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
+  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
     throw_bad_array_operand(a1);
   }
 };
@@ -183,7 +183,7 @@ struct Mul {
   Cell operator()(int64_t a, double  b) const { return make_dbl(a * b); }
   Cell operator()(int64_t a, int64_t b) const { return make_int(a * b); }
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
+  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
     throw_bad_array_operand(a1);
   }
 };
@@ -244,7 +244,7 @@ struct Div {
     return make_dbl(t / u);
   }
 
-  ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
+  ArrayData* operator()(ArrayData* a1, ArrayData* /*a2*/) const {
     throw_bad_array_operand(a1);
   }
 };
@@ -324,7 +324,7 @@ struct SubEq {
   double  operator()(int64_t a, double  b) const { return a - b; }
   double  operator()(double  a, double  b) const { return a - b; }
 
-  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
     throw_bad_array_operand(ad1);
   }
 };
@@ -335,7 +335,7 @@ struct MulEq {
   double  operator()(int64_t a, double  b) const { return a * b; }
   double  operator()(double  a, double  b) const { return a * b; }
 
-  ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+  ArrayData* operator()(ArrayData* ad1, ArrayData* /*ad2*/) const {
     throw_bad_array_operand(ad1);
   }
 };

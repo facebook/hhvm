@@ -89,8 +89,9 @@ Array HHVM_FUNCTION(apache_response_headers) {
   return empty_array();
 }
 
-bool HHVM_FUNCTION(apache_setenv, const String& variable, const String& value,
-                     bool walk_to_top /* = false */) {
+bool HHVM_FUNCTION(apache_setenv, const String& /*variable*/,
+                   const String& /*value*/,
+                   bool /*walk_to_top*/ /* = false */) {
   return false;
 }
 

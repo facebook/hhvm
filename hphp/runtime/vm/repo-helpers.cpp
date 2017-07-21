@@ -67,9 +67,10 @@ static void reportDbCorruption(Repo& repo, int repoId,
 
   // Use raw SQLite here because we just want to hit the raw DB itself.
   sqlite3_exec(repo.dbc(),
-               folly::sformat(
-                 "PRAGMA {}.integrity_check(4);", repo.dbName(repoId)).c_str(),
-               [](void* _report, int columns, char** text, char** names) {
+               folly::sformat("PRAGMA {}.integrity_check(4);",
+                              repo.dbName(repoId))
+                 .c_str(),
+               [](void* _report, int columns, char** text, char** /*names*/) {
                  std::string& report = *reinterpret_cast<std::string*>(_report);
                  for (int column = 0; column < columns; ++column) {
                    report += folly::sformat("Integrity Check ({}): {}\n",
@@ -77,8 +78,7 @@ static void reportDbCorruption(Repo& repo, int repoId,
                  }
                  return 0;
                },
-               &report,
-               nullptr);
+               &report, nullptr);
 
   Logger::Error(report);
 }

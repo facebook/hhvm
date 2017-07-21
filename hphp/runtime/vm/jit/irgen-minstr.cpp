@@ -106,10 +106,8 @@ struct PropInfo {
  * Class* can change (which happens in sandbox mode when the ctx class is
  * unrelated to baseClass).
  */
-PropInfo getPropertyOffset(IRGS& env,
-                           const Class* ctx,
-                           const Class* baseClass,
-                           Type keyType) {
+PropInfo getPropertyOffset(IRGS& /*env*/, const Class* ctx,
+                           const Class* baseClass, Type keyType) {
   if (!baseClass) return PropInfo();
 
   if (!keyType.hasConstVal(TStr)) return PropInfo();
@@ -1817,7 +1815,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   not_reached();
 }
 
-MOpMode fpassFlags(IRGS& env, int32_t idx) {
+MOpMode fpassFlags(IRGS& env, int32_t /*idx*/) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     return MOpMode::Define;
   }
@@ -1828,11 +1826,11 @@ MOpMode fpassFlags(IRGS& env, int32_t idx) {
 
 }
 
-void emitBaseNC(IRGS& env, uint32_t idx, MOpMode mode) {
+void emitBaseNC(IRGS& env, uint32_t /*idx*/, MOpMode /*mode*/) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
-void emitBaseNL(IRGS& env, int32_t locId, MOpMode mode) {
+void emitBaseNL(IRGS& env, int32_t /*locId*/, MOpMode /*mode*/) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 

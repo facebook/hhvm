@@ -73,8 +73,8 @@ size_t HttpClient::header(char *data, size_t size, size_t nmemb) {
   return length;
 }
 
-void HttpClient::auth(const std::string &username,
-                      const std::string &password, bool basic /* = true */) {
+void HttpClient::auth(const std::string& username, const std::string& password,
+                      bool /*basic*/ /* = true */) {
   m_basic = true;
   m_username = username;
   m_password = password;

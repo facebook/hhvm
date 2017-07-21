@@ -177,7 +177,7 @@ bool couldBeInSelf(ISS& env, const Base& b) {
   return !selfTy || b.locTy.couldBe(*selfTy);
 }
 
-bool couldBeInPublicStatic(ISS& env, const Base& b) {
+bool couldBeInPublicStatic(ISS& /*env*/, const Base& b) {
   return b.loc == BaseLoc::StaticObjProp;
 }
 
@@ -216,17 +216,11 @@ typename std::enable_if<
   return res.first;
 }
 
-template<typename R, typename B, typename... T>
-typename std::enable_if<
-  !std::is_same<R, std::pair<Type,bool>>::value,
-  folly::Optional<R>
->::type hack_array_op(
-  ISS& env,
-  bool nullOnFailure,
-  R opV(B, const T&...),
-  R opD(B, const T&...),
-  R opK(B, const T&...),
-  T... args) {
+template <typename R, typename B, typename... T>
+typename std::enable_if<!std::is_same<R, std::pair<Type, bool>>::value,
+                        folly::Optional<R>>::type
+hack_array_op(ISS& env, bool /*nullOnFailure*/, R opV(B, const T&...),
+              R opD(B, const T&...), R opK(B, const T&...), T... args) {
   auto const base = env.state.base.type;
   if (base.subtypeOf(TVec)) return opV(base, args...);
   if (base.subtypeOf(TDict)) return opD(base, args...);
@@ -1270,7 +1264,7 @@ void miFinalBindElem(ISS& env, int32_t nDiscard, const Type& key) {
   push(env, TRef);
 }
 
-void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
+void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& /*key*/) {
   discard(env, nDiscard);
   handleInSelfElemU(env);
   handleInPublicStaticElemU(env);
@@ -1562,7 +1556,7 @@ void in(ISS& env, const bc::BaseR& op) {
                         BaseLoc::EvalStack};
 }
 
-void in(ISS& env, const bc::BaseH& op) {
+void in(ISS& env, const bc::BaseH& /*op*/) {
   assert(env.state.arrayChain.empty());
   auto const ty = thisType(env);
   env.state.base = Base{ty ? *ty : TObj, BaseLoc::FrameThis};

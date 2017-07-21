@@ -286,17 +286,17 @@ struct StatsSS : ISS {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class OpCode>
-bool in(StatsSS& env, const OpCode&) {
+template <class OpCode>
+bool in(StatsSS& /*env*/, const OpCode&) {
   return false;
 }
 
-bool in(StatsSS& env, const bc::IterInit& op) {
+bool in(StatsSS& env, const bc::IterInit& /*op*/) {
   add_type(env.stats.iterInitBase, topC(env));
   return false;
 }
 
-bool in(StatsSS& env, const bc::IterInitK& op) {
+bool in(StatsSS& env, const bc::IterInitK& /*op*/) {
   add_type(env.stats.iterInitKBase, topC(env));
   return false;
 }

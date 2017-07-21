@@ -1300,13 +1300,11 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 /* {{{ data_available
  */
-int
-data_available(ftpbuf_t *ftp, php_socket_t s)
-{
-	int		n;
+int data_available(ftpbuf_t* /*ftp*/, php_socket_t s) {
+  int n;
 
-	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
-	if (n < 1) {
+  n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
+  if (n < 1) {
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
@@ -1320,13 +1318,11 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 /* }}} */
 /* {{{ data_writeable
  */
-int
-data_writeable(ftpbuf_t *ftp, php_socket_t s)
-{
-	int		n;
+int data_writeable(ftpbuf_t* /*ftp*/, php_socket_t s) {
+  int n;
 
-	n = php_pollfd_for_ms(s, POLLOUT, 1000);
-	if (n < 1) {
+  n = php_pollfd_for_ms(s, POLLOUT, 1000);
+  if (n < 1) {
 #ifndef PHP_WIN32
 		if (n == 0) {
 			errno = ETIMEDOUT;

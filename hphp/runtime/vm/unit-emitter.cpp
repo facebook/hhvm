@@ -1229,12 +1229,9 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
   return RepoStatus::success;
 }
 
-std::unique_ptr<UnitEmitter> createFatalUnit(
-  StringData* filename,
-  const MD5& md5,
-  FatalOp op,
-  StringData* err
-) {
+std::unique_ptr<UnitEmitter>
+createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
+                StringData* err) {
   auto ue = std::make_unique<UnitEmitter>(md5);
   ue->m_filepath = filename;
   ue->initMain(1, 1);

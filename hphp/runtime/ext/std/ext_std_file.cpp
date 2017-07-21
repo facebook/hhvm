@@ -1263,9 +1263,8 @@ Variant HHVM_FUNCTION(lstat,
   return stat_impl(&sb);
 }
 
-void HHVM_FUNCTION(clearstatcache,
-                   bool clear_realpath_cache /* = false */,
-                   const Variant& filename /* = uninit_variant */) {
+void HHVM_FUNCTION(clearstatcache, bool /*clear_realpath_cache*/ /* = false */,
+                   const Variant& /*filename*/ /* = uninit_variant */) {
   // we are not having a cache for file stats, so do nothing here
 }
 
@@ -1653,10 +1652,8 @@ bool HHVM_FUNCTION(copy,
   }
 }
 
-bool HHVM_FUNCTION(rename,
-                   const String& oldname,
-                   const String& newname,
-                   const Variant& context /* = null */) {
+bool HHVM_FUNCTION(rename, const String& oldname, const String& newname,
+                   const Variant& /*context*/ /* = null */) {
   CHECK_PATH_FALSE(oldname, 1);
   CHECK_PATH_FALSE(newname, 2);
   Stream::Wrapper* w = Stream::getWrapperFromURI(oldname);
@@ -1680,9 +1677,8 @@ int64_t HHVM_FUNCTION(umask,
   return oldumask;
 }
 
-bool HHVM_FUNCTION(unlink,
-                   const String& filename,
-                   const Variant& context /* = null */) {
+bool HHVM_FUNCTION(unlink, const String& filename,
+                   const Variant& /*context*/ /* = null */) {
   CHECK_PATH_FALSE(filename, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   if (!w) return false;
@@ -1899,11 +1895,9 @@ Variant HHVM_FUNCTION(tmpfile) {
 ///////////////////////////////////////////////////////////////////////////////
 // directory functions
 
-bool HHVM_FUNCTION(mkdir,
-                   const String& pathname,
-                   int64_t mode /* = 0777 */,
+bool HHVM_FUNCTION(mkdir, const String& pathname, int64_t mode /* = 0777 */,
                    bool recursive /* = false */,
-                   const Variant& context /* = null */) {
+                   const Variant& /*context*/ /* = null */) {
   CHECK_PATH_FALSE(pathname, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   if (!w) return false;
@@ -1912,9 +1906,8 @@ bool HHVM_FUNCTION(mkdir,
   return true;
 }
 
-bool HHVM_FUNCTION(rmdir,
-                   const String& dirname,
-                   const Variant& context /* = null */) {
+bool HHVM_FUNCTION(rmdir, const String& dirname,
+                   const Variant& /*context*/ /* = null */) {
   CHECK_PATH_FALSE(dirname, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
@@ -2026,9 +2019,8 @@ Variant HHVM_FUNCTION(dir,
   return d;
 }
 
-Variant HHVM_FUNCTION(opendir,
-                      const String& path,
-                      const Variant& context /* = null */) {
+Variant HHVM_FUNCTION(opendir, const String& path,
+                      const Variant& /*context*/ /* = null */) {
   CHECK_PATH(path, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   if (!w) return false;
@@ -2064,10 +2056,9 @@ void HHVM_FUNCTION(rewinddir,
   dir->rewind();
 }
 
-Variant HHVM_FUNCTION(scandir,
-                      const String& directory,
-                      bool descending /* = false */,
-                      const Variant& context /* = null */) {
+Variant
+HHVM_FUNCTION(scandir, const String& directory, bool descending /* = false */,
+              const Variant& /*context*/ /* = null */) {
   if (directory.empty()) {
     raise_warning("scandir(): Directory name cannot be empty");
     return false;

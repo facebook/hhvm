@@ -205,11 +205,9 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
 
     auto const sf = v.makeReg();
     v << testq{ptr, ptr, sf};
-    unlikelyCond(
-      v, vcold(env), CC_Z, sf, dst,
-      [&] (Vout& v) { return fill_cache(v, ch); },
-      [&] (Vout& v) { return ptr; }
-    );
+    unlikelyCond(v, vcold(env), CC_Z, sf, dst,
+                 [&](Vout& v) { return fill_cache(v, ch); },
+                 [&](Vout& /*v*/) { return ptr; });
   }
 }
 

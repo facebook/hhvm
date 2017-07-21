@@ -124,8 +124,7 @@ static bool isServerReachable(const String& host, int port /*= 0*/) {
 // methods
 
 static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
-                                           int timeout /*= 0*/,
-                                           int timeoutms /*= 0*/) {
+                        int /*timeout*/ /*= 0*/, int /*timeoutms*/ /*= 0*/) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
@@ -373,8 +372,8 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static Variant HHVM_METHOD(Memcache, get, const Variant& key,
-                                          VRefParam flags /*= null*/) {
+static Variant
+HHVM_METHOD(Memcache, get, const Variant& key, VRefParam /*flags*/ /*= null*/) {
   auto data = Native::data<MemcacheData>(this_);
 
   if (!hasAvailableServers(data)) {
@@ -675,8 +674,8 @@ static Array HHVM_METHOD(Memcache, getstats,
 }
 
 static Array HHVM_METHOD(Memcache, getextendedstats,
-                         const String& type /* = null_string */,
-                         int slabid /* = 0 */, int limit /* = 100 */) {
+                         const String& /*type*/ /* = null_string */,
+                         int /*slabid*/ /* = 0 */, int /*limit*/ /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
   memcached_stat_st *stats;
@@ -716,13 +715,13 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
   return return_val;
 }
 
-static bool HHVM_METHOD(Memcache, addserver, const String& host,
-                        int port /* = 11211 */,
-                        bool persistent /* = false */,
-                        int weight /* = 0 */, int timeout /* = 0 */,
-                        int retry_interval /* = 0 */, bool status /* = true */,
-                        const Variant& failure_callback /* = uninit_variant */,
-                        int timeoutms /* = 0 */) {
+static bool
+HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 11211 */,
+            bool /*persistent*/ /* = false */, int weight /* = 0 */,
+            int /*timeout*/ /* = 0 */, int /*retry_interval*/ /* = 0 */,
+            bool /*status*/ /* = true */,
+            const Variant& /*failure_callback*/ /* = uninit_variant */,
+            int /*timeoutms*/ /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 

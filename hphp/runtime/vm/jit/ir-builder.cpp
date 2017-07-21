@@ -487,9 +487,8 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  *
  * The caller never needs to clone or append; all this has been done.
  */
-SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
-                                CloneFlag doClone,
-                                Block* srcBlock) {
+SSATmp* IRBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone,
+                                Block* /*srcBlock*/) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };

@@ -277,8 +277,8 @@ void CmdPrint::processClear(DebuggerClient &client) {
   watches.erase(watches.begin() + num);
 }
 
-Variant CmdPrint::processWatch(DebuggerClient &client, const char *format,
-                            const std::string &php) {
+Variant CmdPrint::processWatch(DebuggerClient& client, const char* /*format*/,
+                               const std::string& php) {
   m_body = php;
   m_frame = client.getFrame();
   m_noBreak = true;

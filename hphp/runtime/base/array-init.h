@@ -284,8 +284,7 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Call add() on the underlying array.
    */
-  ArrayInit& add(int64_t name, TypedValue tv,
-                 bool keyConverted = false) {
+  ArrayInit& add(int64_t name, TypedValue tv, bool /*keyConverted*/ = false) {
     performOp([&]{
       return MixedArray::AddInt(m_arr, name, tvToInitCell(tv), false);
     });
@@ -359,8 +358,7 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   /*
    * Call setRef() on the underlying array.
    */
-  ArrayInit& setRef(int64_t name, Variant& v,
-                    bool keyConverted = false) {
+  ArrayInit& setRef(int64_t name, Variant& v, bool /*keyConverted*/ = false) {
     performOp([&]{ return MixedArray::SetRefInt(m_arr, name, v, false); });
     return *this;
   }

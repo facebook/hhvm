@@ -2269,8 +2269,8 @@ static bool HHVM_METHOD(Imagick, pingImageBlob, const String& image) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, pingImageFile,
-    const Resource& filehandle, const String& fileName) {
+static bool HHVM_METHOD(Imagick, pingImageFile, const Resource& filehandle,
+                        const String& /*fileName*/) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filehandle, MagickPingImageFile);
   return true;

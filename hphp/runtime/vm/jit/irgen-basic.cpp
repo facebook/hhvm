@@ -38,7 +38,7 @@ void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot) {
 }
 
 const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
-bool checkThis(IRGS& env, SSATmp* ctx) {
+bool checkThis(IRGS& env, SSATmp* /*ctx*/) {
   if (hasThis(env)) return true;
   auto const err = cns(env, s_FATAL_NULL_THIS.get());
   gen(env, RaiseError, err);

@@ -93,7 +93,8 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC) /* {{{ */
+static void
+lcg_init_globals(php_lcg_globals* /*lcg_globals_p*/ TSRMLS_DC) /* {{{ */
 {
   LCG(seeded) = 0;
 }

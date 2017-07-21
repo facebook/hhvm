@@ -1025,9 +1025,9 @@ void merge_into(Block* target, TrackedLoc& dst, const TrackedLoc& src) {
   }
 
   dst.knownValue.match(
-    [&] (SSATmp* tdst) {
+    [&](SSATmp* tdst) {
       src.knownValue.match(
-        [&] (SSATmp* tsrc) {
+        [&](SSATmp* tsrc) {
           if (auto const lcm = least_common_ancestor(tdst, tsrc)) {
             dst.knownValue = lcm;
             return;
@@ -1036,12 +1036,10 @@ void merge_into(Block* target, TrackedLoc& dst, const TrackedLoc& src) {
           dst.knownValue = target;
         },
 
-        [&] (Block* blk) { dst.knownValue = target; }
-      );
+        [&](Block* /*blk*/) { dst.knownValue = target; });
     },
 
-    [&] (Block* b) { dst.knownValue = target; }
-  );
+    [&](Block* /*b*/) { dst.knownValue = target; });
 }
 
 void merge_into(Global& genv, Block* target, State& dst, const State& src) {

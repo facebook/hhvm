@@ -62,14 +62,13 @@ static char s_logFile[PATH_MAX];
 static char s_filename[PATH_MAX];
 static int k_timeout = 30;
 
-bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
-                                      const char **urls, int nUrls,
-                                      const char *method,
-                                      const char *header, const char *postdata,
+bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
+                                      const char** urls, int nUrls,
+                                      const char* /*method*/,
+                                      const char* header, const char* postdata,
                                       bool responseHeader,
-                                      const char *file /* = "" */,
-                                      int line /* = 0 */,
-                                      int port /* = 0 */) {
+                                      const char* file /* = "" */,
+                                      int line /* = 0 */, int port /* = 0 */) {
   assert(input);
   if (port == 0) port = s_server_port;
 
@@ -255,10 +254,10 @@ void TestServer::KillServer() {
 struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  void handleRequest(Transport* transport) override {
+  void handleRequest(Transport* /*transport*/) override {
     // do nothing
   }
-  void abortRequest(Transport* transport) override {
+  void abortRequest(Transport* /*transport*/) override {
     // do nothing
   }
 };
@@ -502,10 +501,10 @@ struct TestTransport final : Transport {
   const void *getPostData(size_t &size) override { size = 0; return nullptr; }
   uint16_t getRemotePort() override { return 0; }
   Method getMethod() override { return Transport::Method::GET; }
-  std::string getHeader(const char *name) override { return ""; }
-  void getHeaders(HeaderMap &headers) override {}
-  void addHeaderImpl(const char *name, const char *value) override {}
-  void removeHeaderImpl(const char *name) override {}
+  std::string getHeader(const char* /*name*/) override { return ""; }
+  void getHeaders(HeaderMap& /*headers*/) override {}
+  void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
+  void removeHeaderImpl(const char* /*name*/) override {}
 
   /**
    * Get a description of the type of transport.
@@ -514,8 +513,8 @@ struct TestTransport final : Transport {
     return s_test;
   }
 
-  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
-       override {
+  void sendImpl(const void* data, int size, int code, bool /*chunked*/,
+                bool /*eom*/) override {
     m_response.clear();
     m_response.append((const char *)data, size);
     m_code = code;

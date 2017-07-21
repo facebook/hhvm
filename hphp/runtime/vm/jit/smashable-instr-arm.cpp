@@ -64,8 +64,8 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
   return start;
 }
 
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& meta, int32_t imm,
-                      PhysReg r, int8_t disp) {
+TCA emitSmashableCmpq(CodeBlock& /*cb*/, CGMeta& /*meta*/, int32_t /*imm*/,
+                      PhysReg /*r*/, int8_t /*disp*/) {
   // FIXME: This is used in func-guard*
   not_implemented();
 }
@@ -168,7 +168,7 @@ void smashMovq(TCA inst, uint64_t target) {
   smashInstr(inst, target, smashableMovqLen());
 }
 
-void smashCmpq(TCA inst, uint32_t target) {
+void smashCmpq(TCA /*inst*/, uint32_t /*target*/) {
   not_implemented();
 }
 
@@ -221,7 +221,7 @@ uint64_t smashableMovqImm(TCA inst) {
   return *reinterpret_cast<uint64_t*>(target);
 }
 
-uint32_t smashableCmpqImm(TCA inst) {
+uint32_t smashableCmpqImm(TCA /*inst*/) {
   not_implemented();
 }
 

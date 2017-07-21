@@ -1464,9 +1464,9 @@ static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
 #endif
 }
 
-static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& name,
-                        const Variant& step, const Variant& final,
-                        int64_t argcount /* = -1 */) {
+static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& /*name*/,
+                        const Variant& /*step*/, const Variant& /*final*/,
+                        int64_t /*argcount*/ /* = -1 */) {
   raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
   return false;
 }
@@ -3311,7 +3311,7 @@ static struct PDOExtension final : Extension {
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
   std::string mysql_default_socket;
 
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
                      "pdo_mysql.default_socket", nullptr,
                      &mysql_default_socket);

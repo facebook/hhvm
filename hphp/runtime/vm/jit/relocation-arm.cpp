@@ -232,7 +232,7 @@ bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
  * instruction(s) is rewritten to a different instruction sequence.
  */
 bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
-                        size_t& srcCount, size_t& destCount) {
+                        size_t& /*srcCount*/, size_t& destCount) {
   auto const destAddr = reinterpret_cast<TCA>(dest);
 
   if (!(src->IsPCRelAddressing() ||
@@ -974,8 +974,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
   }
 }
 
-void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                 AsmInfo* asmInfo,
+void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
                                  CGMeta& meta) {
   decltype(meta.smashableLocations) updatedSL;
   for (auto sl : meta.smashableLocations) {

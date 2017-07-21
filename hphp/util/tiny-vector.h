@@ -72,7 +72,7 @@ template <typename T> struct TinyVectorMallocAllocator {
 
   void* allocate(std::size_t size) const { return malloc(size); }
   void deallocate(void* ptr) const { free(ptr); }
-  std::size_t usable_size(void* ptr, std::size_t size) const {
+  std::size_t usable_size(void* ptr, std::size_t /*size*/) const {
     return malloc_usable_size(ptr);
   }
 };

@@ -38,12 +38,13 @@ static void on_request_completed(struct evhttp_request *req, void *obj) {
   ((HPHP::LibEventHttpClient*)obj)->onRequestCompleted(req);
 }
 
-static void on_connection_closed(struct evhttp_connection *conn, void *obj) {
+static void
+on_connection_closed(struct evhttp_connection* /*conn*/, void* obj) {
   assert(obj);
   ((HPHP::LibEventHttpClient*)obj)->onConnectionClosed();
 }
 
-static void timer_callback(int fd, short events, void *context) {
+static void timer_callback(int /*fd*/, short /*events*/, void* context) {
   event_base_loopbreak((struct event_base *)context);
 }
 

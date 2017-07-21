@@ -91,8 +91,8 @@ struct RequestHandler {
   /**
    * Called before and after request-handling work.
    */
-  virtual void setupRequest(Transport* transport) {}
-  virtual void teardownRequest(Transport* transport) noexcept {}
+  virtual void setupRequest(Transport* /*transport*/) {}
+  virtual void teardownRequest(Transport* /*transport*/) noexcept {}
 
   /**
    * Sub-class handles a request by implementing this function.
@@ -118,7 +118,7 @@ struct RequestHandler {
   /**
    * Write an entry to the handler's access log.
    */
-  virtual void logToAccessLog(Transport* transport) {}
+  virtual void logToAccessLog(Transport* /*transport*/) {}
 
   int getDefaultTimeout() const { return m_timeout; }
 
@@ -155,7 +155,7 @@ struct Server : IHostHealthObserver {
 public:
   struct ServerEventListener {
     virtual ~ServerEventListener() {}
-    virtual void serverStopped(Server* server) {}
+    virtual void serverStopped(Server* /*server*/) {}
   };
 
   Server(const std::string &address, int port);
@@ -206,8 +206,8 @@ public:
    *
    * This is a no-op for servers that do not support socket takeover.
    */
-  virtual void addTakeoverListener(TakeoverListener* listener) {}
-  virtual void removeTakeoverListener(TakeoverListener* listener) {}
+  virtual void addTakeoverListener(TakeoverListener* /*listener*/) {}
+  virtual void removeTakeoverListener(TakeoverListener* /*listener*/) {}
 
   /**
    * Add additional worker threads

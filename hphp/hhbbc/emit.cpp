@@ -673,8 +673,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  * reasonably likely to have the same ExnNode.  Try to coalesce the EH
  * regions we create for in those cases.
  */
-void emit_ehent_tree(FuncEmitter& fe,
-                     const php::Func& func,
+void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
                      const EmitBcInfo& info) {
   std::map<
     borrowed_ptr<const php::ExnNode>,

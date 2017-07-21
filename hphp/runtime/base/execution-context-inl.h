@@ -30,7 +30,7 @@ inline void* ExecutionContext::operator new(size_t s) {
   return req::malloc(s, type_scan::getIndexForMalloc<ExecutionContext>());
 }
 
-inline void* ExecutionContext::operator new(size_t s, void* p) {
+inline void* ExecutionContext::operator new(size_t /*s*/, void* p) {
   return p;
 }
 

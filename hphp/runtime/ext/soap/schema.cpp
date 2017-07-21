@@ -1132,8 +1132,8 @@ static bool schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType,
   Content: (annotation?)
 </any>
 */
-static bool schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr anyType,
-                       sdlTypePtr cur_type, sdlContentModelPtr model) {
+static bool schema_any(sdlPtr /*sdl*/, xmlAttrPtr /*tns*/, xmlNodePtr anyType,
+                       sdlTypePtr /*cur_type*/, sdlContentModelPtr model) {
   if (model) {
     auto newModel = std::make_shared<sdlContentModel>();
     newModel->kind = XSD_CONTENT_ANY;

@@ -20,7 +20,7 @@ struct PairIterator;
 struct c_Pair : ObjectData {
   DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
-  static ObjectData* instanceCtor(Class* cls) {
+  static ObjectData* instanceCtor(Class* /*cls*/) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Pairs cannot be created using the new operator"
     );

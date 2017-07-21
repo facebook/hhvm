@@ -890,10 +890,11 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
    return res;
 }
 
-static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImagePtr dst, unsigned int dst_width, unsigned int row, LineContribType *contrib)
-{
-    int *p_src_row = pSrc->tpixels[row];
-    int *p_dst_row = dst->tpixels[row];
+static inline void _gdScaleRow(gdImagePtr pSrc, unsigned int /*src_width*/,
+                               gdImagePtr dst, unsigned int dst_width,
+                               unsigned int row, LineContribType* contrib) {
+  int* p_src_row = pSrc->tpixels[row];
+  int* p_dst_row = dst->tpixels[row];
   unsigned int x;
 
     for (x = 0; x < dst_width - 1; x++) {
@@ -938,8 +939,10 @@ static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsign
   _gdContributionsFree (contrib);
 }
 
-static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
-{
+static inline void
+_gdScaleCol(gdImagePtr pSrc, unsigned int /*src_width*/, gdImagePtr pRes,
+            unsigned int /*dst_width*/, unsigned int dst_height,
+            unsigned int uCol, LineContribType* contrib) {
   unsigned int y;
   for (y = 0; y < dst_height - 1; y++) {
     register unsigned char r = 0, g = 0, b = 0, a = 0;

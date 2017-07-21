@@ -45,7 +45,8 @@ ExpressionPtr ClassExpression::clone() {
   return exp;
 }
 
-void ClassExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ClassExpression::outputPHP(CodeGenerator& /*cg*/,
+                                AnalysisResultPtr /*ar*/) {
   // XXX(jezng): I'm not sure how to test this, so leaving unimplemented
   // for now
 }

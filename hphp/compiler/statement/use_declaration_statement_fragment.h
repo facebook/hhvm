@@ -42,7 +42,7 @@ struct UseDeclarationStatementFragment : public Statement {
       ns(ns), as(as), mixed_consumer(nullptr) {
   }
 
-  void analyzeProgram(AnalysisResultPtr ar) override {
+  void analyzeProgram(AnalysisResultPtr /*ar*/) override {
     always_assert(false);
   }
 
@@ -50,7 +50,7 @@ struct UseDeclarationStatementFragment : public Statement {
     always_assert(false);
   }
 
-  void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override {
+  void outputPHP(CodeGenerator& /*cg*/, AnalysisResultPtr /*ar*/) override {
     always_assert(false);
   }
 };

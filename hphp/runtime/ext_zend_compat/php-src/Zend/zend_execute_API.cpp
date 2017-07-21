@@ -165,7 +165,8 @@ namespace {
   }
 }
 
-int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC) /* {{{ */
+int zend_call_function(zend_fcall_info* fci,
+                       zend_fcall_info_cache* /*fci_cache*/ TSRMLS_DC) /* {{{ */
 {
   // mostly from vm_call_user_func
   HPHP::ObjectData* inferred_obj = nullptr;

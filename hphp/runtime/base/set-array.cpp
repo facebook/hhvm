@@ -763,7 +763,7 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
+ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool /*copy*/) {
   auto a = asSet(ad);
   Elm e;
   assert(ClearElms(&e, 1));
@@ -842,7 +842,7 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
   return init.create();
 }
 
-ArrayData* SetArray::ToKeyset(ArrayData* ad, bool copy) {
+ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
   assertx(asSet(ad)->checkInvariants());
   return ad;
 }

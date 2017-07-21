@@ -570,10 +570,9 @@ getWatchmanClientForSocket(const std::string& socket_path) {
     auto socket =
       socket_path.size() ? socket_path : folly::Optional<std::string>();
     auto client = std::make_shared<watchman::WatchmanClient>(
-      &(WatchmanThreadEventBase::Get()->getEventBase()),
-      std::move(socket),
+      &(WatchmanThreadEventBase::Get()->getEventBase()), std::move(socket),
       WatchmanThreadEventBase::Get(),
-      [socket_path](folly::exception_wrapper& ex) { // (ASYNC) error handler
+      [socket_path](folly::exception_wrapper& /*ex*/) { // (ASYNC) error handler
         auto activeClient = s_activeClients.find(socket_path);
         if (activeClient != s_activeClients.end()) {
           s_activeClients.erase(socket_path);
@@ -581,7 +580,7 @@ getWatchmanClientForSocket(const std::string& socket_path) {
       });
     s_allClients.push_back(client);
     client->connect()
-      .then([client, socket_path] (const folly::dynamic& connect_info) {
+      .then([client, socket_path](const folly::dynamic& /*connect_info*/) {
         // (ASYNC)
         auto promise_list = s_connectPromises.find(socket_path);
         for (auto& promise : promise_list->second) {
@@ -590,18 +589,16 @@ getWatchmanClientForSocket(const std::string& socket_path) {
         s_activeClients.insert({socket_path, client});
         s_connectPromises.erase(socket_path);
         return client;
-      }
-    ).onError([socket_path](const folly::exception_wrapper& e) {
-      // (ASYNC)
-      auto promise_list = s_connectPromises.find(socket_path);
-      for (auto& promise : promise_list->second) {
-        promise.setException(e);
-      }
-      s_connectPromises.erase(socket_path);
-      e.throw_exception();
-      // shouldn't actually be reached but placates the compiler
-      return std::shared_ptr<watchman::WatchmanClient>();
-    });
+      })
+      .onError([socket_path](const folly::exception_wrapper& e) {
+        // (ASYNC)
+        auto promise_list = s_connectPromises.find(socket_path);
+        for (auto& promise : promise_list->second) { promise.setException(e); }
+        s_connectPromises.erase(socket_path);
+        e.throw_exception();
+        // shouldn't actually be reached but placates the compiler
+        return std::shared_ptr<watchman::WatchmanClient>();
+      });
     return new_future;
   } catch(...) {
     s_connectPromises.erase(socket_path);

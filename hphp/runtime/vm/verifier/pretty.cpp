@@ -38,7 +38,7 @@ void printInstr(const Unit* unit, PC pc) {
                " " << instrToString(pc, unit) << std::endl;
 }
 
-std::string blockToString(const Block* b, const Graph* g, const Unit* u) {
+std::string blockToString(const Block* b, const Graph* /*g*/, const Unit* u) {
   std::stringstream out;
   out << "B" << b->id << ":"
       << u->offsetOf(b->start) <<

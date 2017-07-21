@@ -332,25 +332,25 @@ ArrayData* ProxyArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   return ad;
 }
 
-ArrayData* ProxyArray::ToDict(ArrayData* ad, bool copy) {
+ArrayData* ProxyArray::ToDict(ArrayData* ad, bool /*copy*/) {
   auto const r = innerArr(ad)->toDict(innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }
 
-ArrayData* ProxyArray::ToVec(ArrayData* ad, bool copy) {
+ArrayData* ProxyArray::ToVec(ArrayData* ad, bool /*copy*/) {
   auto const r = innerArr(ad)->toVec(innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }
 
-ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool copy) {
+ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
   auto const r = innerArr(ad)->toKeyset(innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return const_cast<ArrayData*>(ad);
 }
 
-ArrayData* ProxyArray::ToVArray(ArrayData* ad, bool copy) {
+ArrayData* ProxyArray::ToVArray(ArrayData* ad, bool /*copy*/) {
   auto const r = innerArr(ad)->toVArray(innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return const_cast<ArrayData*>(ad);

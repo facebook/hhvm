@@ -33,7 +33,7 @@ struct ArrayElementExpression : Expression, LocalEffectsContainer {
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  bool isRefable(bool checkError = false) const override { return true;}
+  bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ExpressionPtr getVariable() const { return m_variable;}
   ExpressionPtr getOffset() const { return m_offset;}

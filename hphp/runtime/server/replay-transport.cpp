@@ -84,8 +84,8 @@ void ReplayTransport::replayInputImpl() {
                                                            "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
-  auto headers_callback = [&] (const IniSetting::Map &ini_h,
-                               const Hdf &hdf_h, const std::string &ini_h_key) {
+  auto headers_callback = [&](const IniSetting::Map& ini_h, const Hdf& hdf_h,
+                              const std::string& /*ini_h_key*/) {
     m_requestHeaders[Config::GetString(ini_h, hdf_h, "name",
                                        "", false)].push_back(
       Config::GetString(ini_h, hdf_h, "value", "", false)
@@ -137,8 +137,8 @@ void ReplayTransport::removeHeaderImpl(const char *name) {
   m_responseHeaders.erase(name);
 }
 
-void ReplayTransport::sendImpl(const void *data, int size, int code,
-                               bool chunked, bool eom) {
+void ReplayTransport::sendImpl(const void* data, int size, int code,
+                               bool /*chunked*/, bool eom) {
   m_code = code;
 
   m_response = "HTTP/1.1 ";

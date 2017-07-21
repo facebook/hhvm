@@ -2355,8 +2355,7 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   not_reached();
 }
 
-void Class::importTraitInstanceProp(Class*      trait,
-                                    Prop&       traitProp,
+void Class::importTraitInstanceProp(Class* /*trait*/, Prop& traitProp,
                                     TypedValue& traitPropVal,
                                     const int idxOffset,
                                     PropMap::Builder& curPropMap) {
@@ -2390,8 +2389,7 @@ void Class::importTraitInstanceProp(Class*      trait,
   }
 }
 
-void Class::importTraitStaticProp(Class*   trait,
-                                  SProp&   traitProp,
+void Class::importTraitStaticProp(Class* /*trait*/, SProp& traitProp,
                                   const int idxOffset,
                                   PropMap::Builder& curPropMap,
                                   SPropMap::Builder& curSPropMap) {
@@ -3074,9 +3072,8 @@ Class::TMIOps::findSingleTraitWithMethod(const Class* cls,
   return traitCls;
 }
 
-const Class*
-Class::TMIOps::findTraitClass(const Class* cls,
-                              const StringData* traitName) {
+const Class* Class::TMIOps::findTraitClass(const Class* /*cls*/,
+                                           const StringData* traitName) {
   return Unit::loadClass(traitName);
 }
 

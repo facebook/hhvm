@@ -347,11 +347,13 @@ bool record_request_heap_mem_event(const void* addr,
  *
  * All our stacks are black boxes, so we can't do much categorization.
  */
-bool record_cpp_stack_mem_event(const void* addr, StructuredLogEntry& record) {
+bool record_cpp_stack_mem_event(const void* /*addr*/,
+                                StructuredLogEntry& record) {
   record.setStr("location", "cpp_stack");
   return true;
 }
-bool record_vm_stack_mem_event(const void* addr, StructuredLogEntry& record) {
+bool record_vm_stack_mem_event(const void* /*addr*/,
+                               StructuredLogEntry& record) {
   record.setStr("location", "vm_stack");
   return true;
 }

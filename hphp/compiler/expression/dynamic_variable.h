@@ -29,7 +29,7 @@ struct DynamicVariable : Expression {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   int getLocalEffects() const override { return NoEffect; }
-  bool isRefable(bool checkError = false) const override { return true;}
+  bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ExpressionPtr getSubExpression() const { return m_exp; }
 private:

@@ -43,11 +43,9 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-req::ptr<File>
-HttpStreamWrapper::open(const String& filename,
-                        const String& mode,
-                        int options,
-                        const req::ptr<StreamContext>& context) {
+req::ptr<File> HttpStreamWrapper::open(const String& filename,
+                                       const String& mode, int /*options*/,
+                                       const req::ptr<StreamContext>& context) {
   if (RuntimeOption::ServerHttpSafeMode && !is_cli_mode()) {
     return nullptr;
   }

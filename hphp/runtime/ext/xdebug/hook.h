@@ -224,8 +224,7 @@ struct XDebugHook : DebuggerHook {
   }
 
   void onExceptionThrown(ObjectData* exception) override;
-  void onError(const ExtendedException& ee,
-               int errnum,
+  void onError(const ExtendedException& /*ee*/, int errnum,
                const std::string& message) override {
     auto const name = xdebug_error_type(errnum);
     auto const msg = String(message);

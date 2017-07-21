@@ -73,5 +73,4 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers(void) {
 }
 
 /* Called when the ctor was terminated by an exception */
-ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC) {
-}
+ZEND_API void zend_object_store_ctor_failed(zval* /*zobject*/ TSRMLS_DC) {}

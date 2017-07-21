@@ -1948,8 +1948,8 @@ static Variant HHVM_FUNCTION(iconv_substr,
   return false;
 }
 
-static String HHVM_FUNCTION(ob_iconv_handler,
-    const String& contents, int64_t status) {
+static String
+HHVM_FUNCTION(ob_iconv_handler, const String& contents, int64_t /*status*/) {
   String mimetype = g_context->getMimeType();
   if (!mimetype.empty()) {
     char *out_buffer;

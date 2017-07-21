@@ -148,7 +148,7 @@ static int set_saved_history() {
   return 0;
 }
 
-static int operate_and_get_next(int count, int c) {
+static int operate_and_get_next(int /*count*/, int c) {
   /* Accept the current line. */
   rl_newline (1, c);
 
@@ -174,7 +174,7 @@ static void debugger_signal_handler(int sig) {
   getStaticDebuggerClient().onSignal(sig);
 }
 
-void DebuggerClient::onSignal(int sig) {
+void DebuggerClient::onSignal(int /*sig*/) {
   TRACE(2, "DebuggerClient::onSignal\n");
   if (m_inputState == TakingInterrupt) {
     if (m_sigCount == 0) {
@@ -891,7 +891,8 @@ void DebuggerClient::promptFunctionPrototype() {
   rl_forced_update_display();
 }
 
-bool DebuggerClient::setCompletion(const char *text, int start, int end) {
+bool DebuggerClient::setCompletion(const char* text, int /*start*/,
+                                   int /*end*/) {
   TRACE(2, "DebuggerClient::setCompletion\n");
   if (m_inputState == TakingCommand) {
     parseCommand(rl_line_buffer);
@@ -2490,9 +2491,8 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_tutorialVisited, ini, config, "Tutorial.Visited");
   BIND(tutorial.visited, &m_tutorialVisited);
 
-  auto macros_callback = [&] (const IniSetting::Map &ini_m,
-                              const Hdf &hdf_m,
-                              const std::string &ini_m_key) {
+  auto macros_callback = [&](const IniSetting::Map& ini_m, const Hdf& hdf_m,
+                             const std::string& /*ini_m_key*/) {
     auto macro = std::make_shared<Macro>();
     macro->load(ini_m, hdf_m);
     m_macros.push_back(macro);

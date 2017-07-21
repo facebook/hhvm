@@ -50,13 +50,13 @@ HPHPSessionAcceptor::HPHPSessionAcceptor(
         m_server(server) {
 }
 
-bool HPHPSessionAcceptor::canAccept(const SocketAddress& address) {
+bool HPHPSessionAcceptor::canAccept(const SocketAddress& /*address*/) {
   // for now, we don't bother with the address whitelist
   return m_server->canAccept();
 }
 
-void HPHPSessionAcceptor::onIngressError(const proxygen::HTTPSession& session,
-                                         proxygen::ProxygenError error) {
+void HPHPSessionAcceptor::onIngressError(
+  const proxygen::HTTPSession& /*session*/, proxygen::ProxygenError error) {
   // This method is invoked when the HTTP library encountered some error before
   // it could completely parse the headers.  Most of these are HTTP garbage
   // (400 Bad Request) or client timeouts (408).
@@ -66,9 +66,9 @@ void HPHPSessionAcceptor::onIngressError(const proxygen::HTTPSession& session,
   m_server->onRequestError(&transport);
 }
 
-proxygen::HTTPTransaction::Handler* HPHPSessionAcceptor::newHandler(
-  proxygen::HTTPTransaction& txn,
-  proxygen::HTTPMessage *msg) noexcept {
+proxygen::HTTPTransaction::Handler*
+HPHPSessionAcceptor::newHandler(proxygen::HTTPTransaction& /*txn*/,
+                                proxygen::HTTPMessage* /*msg*/) noexcept {
   auto transport = std::make_shared<ProxygenTransport>(m_server);
   transport->setTransactionReference(transport);
   return transport.get();
@@ -91,12 +91,8 @@ void ProxygenJob::getRequestStart(struct timespec *outReqStart) {
 // ProxygenTransportTraits
 
 ProxygenTransportTraits::ProxygenTransportTraits(
-    std::shared_ptr<ProxygenJob> job,
-    void *opaque,
-    int id)
-  : server_((ProxygenServer*)opaque)
-  , transport_(std::move(job->transport))
-{
+  std::shared_ptr<ProxygenJob> job, void* opaque, int /*id*/)
+    : server_((ProxygenServer*)opaque), transport_(std::move(job->transport)) {
   VLOG(4) << "executing request with path=" << transport_->getUrl();
 }
 
@@ -588,9 +584,9 @@ int ProxygenServer::getLibEventConnectionCount() {
   return conns;
 }
 
-bool ProxygenServer::initialCertHandler(const std::string &server_name,
-                                        const std::string &key_file,
-                                        const std::string &cert_file,
+bool ProxygenServer::initialCertHandler(const std::string& /*server_name*/,
+                                        const std::string& key_file,
+                                        const std::string& cert_file,
                                         bool duplicate) {
   if (duplicate) {
     return true;
@@ -620,9 +616,9 @@ bool ProxygenServer::initialCertHandler(const std::string &server_name,
   }
 }
 
-bool ProxygenServer::dynamicCertHandler(const std::string &server_name,
-                                        const std::string &key_file,
-                                        const std::string &cert_file) {
+bool ProxygenServer::dynamicCertHandler(const std::string& /*server_name*/,
+                                        const std::string& key_file,
+                                        const std::string& cert_file) {
   try {
     wangle::SSLContextConfig sslCtxConfig;
     sslCtxConfig.setCertificate(cert_file, key_file, "");

@@ -36,12 +36,10 @@ gdImagePtr gdImageCreateFromPngSource (gdSourcePtr inSource)
   return im;
 }
 #else /* no HAVE_LIBPNG */
-void gdImagePngToSink (gdImagePtr im, gdSinkPtr outSink)
-{
+void gdImagePngToSink(gdImagePtr /*im*/, gdSinkPtr /*outSink*/) {
   php_gd_error("PNG support is not available");
 }
-gdImagePtr gdImageCreateFromPngSource (gdSourcePtr inSource)
-{
+gdImagePtr gdImageCreateFromPngSource(gdSourcePtr /*inSource*/) {
   php_gd_error("PNG support is not available");
   return NULL;
 }

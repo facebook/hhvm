@@ -1846,10 +1846,9 @@ static void send_soap_server_fault(
   xmlFreeDoc(doc_return);
 }
 
-static void send_soap_server_fault(
-    std::shared_ptr<sdlFunction> function,
-    Exception &e,
-    const req::ptr<soapHeader>& hdr) {
+static void
+send_soap_server_fault(std::shared_ptr<sdlFunction> /*function*/, Exception& e,
+                       const req::ptr<soapHeader>& /*hdr*/) {
   USE_SOAP_GLOBAL;
   if (SOAP_GLOBAL(use_soap_error_handler)) {
     send_soap_server_fault(

@@ -157,8 +157,8 @@ Array HHVM_FUNCTION(error_get_last) {
 }
 
 bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
-                              const Variant& destination /* = null */,
-                              const Variant& extra_headers /* = null */) {
+                   const Variant& destination /* = null */,
+                   const Variant& /*extra_headers*/ /* = null */) {
   // error_log() should not invoke the user error handler,
   // so we use Logger::Error() instead of raise_warning() or raise_error()
   switch (message_type) {

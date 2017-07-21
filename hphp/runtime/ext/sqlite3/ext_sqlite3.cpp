@@ -195,11 +195,10 @@ void SQLite3::validate() const {
   }
 }
 
-void HHVM_METHOD(SQLite3, open,
-                 const String& filename,
+void HHVM_METHOD(SQLite3, open, const String& filename,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
-                 const Variant& encryption_key /* = null */) {
+                 const Variant& /*encryption_key*/ /* = null */) {
   auto *data = Native::data<SQLite3>(this_);
   if (data->m_raw_db) {
     SystemLib::throwExceptionObject("Already initialized DB Object");
@@ -483,11 +482,9 @@ bool HHVM_METHOD(SQLite3, createaggregate,
   return false;
 }
 
-bool HHVM_METHOD(SQLite3, openblob,
-                 const String& table,
-                 const String& column,
-                 int64_t rowid,
-                 const Variant& dbname /* = null */) {
+bool HHVM_METHOD(SQLite3, openblob, const String& /*table*/,
+                 const String& /*column*/, int64_t /*rowid*/,
+                 const Variant& /*dbname*/ /* = null */) {
   throw_not_supported(__func__, "sqlite3 stream");
 }
 

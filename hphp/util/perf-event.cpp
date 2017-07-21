@@ -163,7 +163,7 @@ size_t mmap_sz() { return s_pagesz + buffer_sz(); } // with header
 /*
  * Register that a perf event was generated.
  */
-void signal_event(int sig, siginfo_t* info, void* context) {
+void signal_event(int sig, siginfo_t* info, void* /*context*/) {
   if (sig != SIGIO || info == nullptr) return;
 
   // Older versions of Linux have SIGIO here; newer versions have POLLIN.

@@ -261,13 +261,9 @@ public:
     beginContainer(name, true);
   }
 
-  void endObject(const char* name) override {
-    endContainer(false);
-  }
+  void endObject(const char* /*name*/) override { endContainer(false); }
 
-  void endList(const char* name) override {
-    endContainer(true);
-  }
+  void endList(const char* /*name*/) override { endContainer(true); }
 
   void writeEntry(const char* name, const std::string& value) override {
     beginEntity(name);
@@ -319,7 +315,7 @@ struct HTMLWriter : Writer {
     ++m_indent;
   }
 
-  void endObject(const char* name) override {
+  void endObject(const char* /*name*/) override {
     --m_indent;
     writeIndent();
     m_out << "</tbody></table></td></tr>\n";

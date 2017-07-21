@@ -231,9 +231,8 @@ void VariableTable::addParamLike(const std::string &name,
   }
 }
 
-void VariableTable::addStaticVariable(Symbol *sym,
-                                      AnalysisResultPtr ar,
-                                      bool member /* = false */) {
+void VariableTable::addStaticVariable(Symbol* sym, AnalysisResultPtr ar,
+                                      bool /*member*/ /* = false */) {
   if (isGlobalTable(ar) ||
       sym->isStatic()) {
     return; // a static variable at global scope is the same as non-static
@@ -254,8 +253,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
   addStaticVariable(sym, ar->lock().get(), member);
 }
 
-void VariableTable::cleanupForError(AnalysisResultConstPtr ar) {
-}
+void VariableTable::cleanupForError(AnalysisResultConstPtr /*ar*/) {}
 
 bool VariableTable::markOverride(AnalysisResultPtr ar, const std::string &name) {
   Symbol *sym = getSymbol(name);
@@ -497,7 +495,7 @@ bool VariableTable::hasNonStaticPrivate() const {
   return m_hasNonStaticPrivate;
 }
 
-void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void VariableTable::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   if (Option::ConvertSuperGlobals && !getAttribute(ContainsDynamicVariable)) {
     std::set<std::string> convertibles;
     typedef std::pair<const std::string,Symbol> symPair;

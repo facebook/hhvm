@@ -132,8 +132,8 @@ inline Vreg materialize(Vout&, Vreg data) { return data; }
  *
  * Assumes that the DataType corresponding to `dataSrc' already matches `type'.
  */
-template<class Loc, class JmpFn>
-void emitSpecializedTypeTest(Vout& v, IRLS& env, Type type, Loc dataSrc,
+template <class Loc, class JmpFn>
+void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
                              Vreg sf, JmpFn doJcc) {
   if (type < TRes) {
     // No cls field in Resource.

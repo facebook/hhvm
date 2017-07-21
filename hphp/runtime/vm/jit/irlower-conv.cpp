@@ -198,15 +198,16 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
   v << cvttsd2siq{src, d};
   v << cmpq{indef, d, sf};
 
-  unlikelyCond(v, vcold(env), CC_E, sf, dst,
-    [&] (Vout& v) {
+  unlikelyCond(
+    v, vcold(env), CC_E, sf, dst,
+    [&](Vout& v) {
       // result > max signed int or unordered
       auto const sf = v.makeReg();
       v << ucomisd{v.cns(0.0), src, sf};
 
-      return cond(v, CC_NB, sf, v.makeReg(),
-        [&] (Vout& v) { return d; },
-        [&] (Vout& v) {
+      return cond(
+        v, CC_NB, sf, v.makeReg(), [&](Vout& /*v*/) { return d; },
+        [&](Vout& v) {
           // src > 0 (CF = 1 -> less than 0 or unordered)
           return cond(v, CC_P, sf, v.makeReg(),
             [&] (Vout& v) {
@@ -251,11 +252,9 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
               );
             }
           );
-        }
-      );
+        });
     },
-    [&] (Vout& v) { return d; }
-  );
+    [&](Vout& /*v*/) { return d; });
 }
 
 IMPL_OPCODE_CALL(ConvStrToInt);

@@ -36,8 +36,8 @@ namespace HPHP { namespace jit {
 
 namespace detail {
 
-template<class F, class A1, class A2>
-auto invoke(F&& f, A1&& a1, A2&& a2)
+template <class F, class A1, class A2>
+auto invoke(F&& f, A1&& a1, A2 && /*a2*/)
   -> decltype(std::forward<F>(f)(std::forward<A1>(a1))) {
   return std::forward<F>(f)(std::forward<A1>(a1));
 }
@@ -82,8 +82,8 @@ void visit(const Vunit& unit, VcallArgsId a, F f) {
   for (auto r : args.stkArgs) detail::invoke(f, r, width(r));
 }
 
-template<class F>
-void visit(const Vunit& unit, RegSet regs, F f) {
+template <class F>
+void visit(const Vunit& /*unit*/, RegSet regs, F f) {
   regs.forEach([&](Vreg r) { detail::invoke(f, r, width(r)); });
 }
 

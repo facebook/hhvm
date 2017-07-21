@@ -165,8 +165,8 @@ void FastCGITransport::sendResponseHeaders(IOBufQueue& queue, int code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FastCGITransport::sendImpl(const void *data, int size, int code,
-                                bool chunked, bool eom) {
+void FastCGITransport::sendImpl(const void* data, int size, int code,
+                                bool /*chunked*/, bool eom) {
   if (!m_headersSent) {
     m_headersSent = true;
     sendResponseHeaders(m_txBuf, code);

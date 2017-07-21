@@ -51,7 +51,7 @@ struct LowPtrImpl {
 
   /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
 
-  /* implicit */ LowPtrImpl(std::nullptr_t px) : m_s{0} {}
+  /* implicit */ LowPtrImpl(std::nullptr_t /*px*/) : m_s{ 0 } {}
 
   LowPtrImpl(const LowPtrImpl<T, S>& r) : m_s{S::get(r.m_s)} {}
 
@@ -67,7 +67,7 @@ struct LowPtrImpl {
     return *this;
   }
 
-  LowPtrImpl& operator=(std::nullptr_t px) {
+  LowPtrImpl& operator=(std::nullptr_t /*px*/) {
     S::set(m_s, 0);
     return *this;
   }

@@ -107,7 +107,7 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr /*ar*/) {
   for (int i = 0; i < m_exp->getCount(); i++) {
     auto exp = (*m_exp)[i];
     auto assignment_exp =

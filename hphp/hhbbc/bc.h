@@ -212,7 +212,10 @@ hash(const hash_operand<T,S>& t, Unused...) {
  * Clone of folly::hash::hash_combine_generic(), but with a hasher argument
  * instead of a hasher template parameter.
  */
-template<class H> size_t hash_combine(H h) { return 0; }
+template <class H>
+size_t hash_combine(H /*h*/) {
+  return 0;
+}
 
 template<class H, typename T, typename... Ts>
 size_t hash_combine(H h, const T& t, const Ts&... ts) {
@@ -256,7 +259,10 @@ equals(const eq_operand<T,S>& t, Unused...) {
 /*
  * Check if a list of eq_operands are pairwise-equal.
  */
-template<class E> bool eq_pairs(E e) { return true; }
+template <class E>
+bool eq_pairs(E /*e*/) {
+  return true;
+}
 
 template<class E, typename T, typename... Ts>
 bool eq_pairs(E e, const T& t, const Ts&... ts) {
@@ -885,9 +891,11 @@ BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_caw, has_caw_flag, false);
 //////////////////////////////////////////////////////////////////////
 
 struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
-  template<class T>
-  typename std::enable_if<!has_car<T>::value,ClsRefSlotId>::type
-  operator()(T const& t) const { return NoClsRefSlotId; }
+  template <class T>
+  typename std::enable_if<!has_car<T>::value, ClsRefSlotId>::type
+  operator()(T const& /*t*/) const {
+    return NoClsRefSlotId;
+  }
 
   template<class T>
   typename std::enable_if<has_car<T>::value,ClsRefSlotId>::type
@@ -895,9 +903,11 @@ struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
 };
 
 struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
-  template<class T>
-  typename std::enable_if<!has_caw<T>::value,ClsRefSlotId>::type
-  operator()(T const& t) const { return NoClsRefSlotId; }
+  template <class T>
+  typename std::enable_if<!has_caw<T>::value, ClsRefSlotId>::type
+  operator()(T const& /*t*/) const {
+    return NoClsRefSlotId;
+  }
 
   template<class T>
   typename std::enable_if<has_caw<T>::value,ClsRefSlotId>::type

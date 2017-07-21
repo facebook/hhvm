@@ -35,13 +35,14 @@ void CmdStep::help(DebuggerClient &client) {
   );
 }
 
-void CmdStep::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdStep::onSetup(DebuggerProxy& /*proxy*/, CmdInterrupt& interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
   installLocationFilterForLine(interrupt.getSite());
   m_needsVMInterrupt = true;
 }
 
-void CmdStep::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdStep::onBeginInterrupt(DebuggerProxy& /*proxy*/,
+                               CmdInterrupt& interrupt) {
   // Step doesn't care about this interrupt... we just stay the course and
   // keep stepping.
   if (interrupt.getInterruptType() == ExceptionHandler) return;

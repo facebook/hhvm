@@ -133,10 +133,8 @@ struct RefineTmpsRec {
 
 }
 
-void cloneToBlock(const BlockList& rpoBlocks,
-                  IRUnit& unit,
-                  Block::iterator const first,
-                  Block::iterator const last,
+void cloneToBlock(const BlockList& /*rpoBlocks*/, IRUnit& unit,
+                  Block::iterator const first, Block::iterator const last,
                   Block* const target) {
   StateVector<SSATmp,SSATmp*> rewriteMap(unit, nullptr);
 
@@ -206,7 +204,7 @@ void moveToBlock(Block::iterator const first,
   }
 }
 
-bool retypeDests(IRInstruction* inst, const IRUnit* unit) {
+bool retypeDests(IRInstruction* inst, const IRUnit* /*unit*/) {
   auto changed = false;
   for (auto i = uint32_t{0}; i < inst->numDsts(); ++i) {
     DEBUG_ONLY auto const oldType = inst->dst(i)->type();
@@ -326,9 +324,8 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
 SSATmp* deletePhiDest(IRInstruction* label, unsigned i) {
   assertx(label->is(DefLabel));
   auto dest = label->dst(i);
-  label->block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp* src) {
-    jmp->deleteSrc(i);
-  });
+  label->block()->forEachSrc(
+    i, [&](IRInstruction* jmp, SSATmp* /*src*/) { jmp->deleteSrc(i); });
   label->deleteDst(i);
   return dest;
 }

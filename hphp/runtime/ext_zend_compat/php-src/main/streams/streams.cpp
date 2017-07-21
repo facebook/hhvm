@@ -145,7 +145,9 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const 
 /* }}} */
 
 /* {{{ php_stream_locate_url_wrapper */
-PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC) {
+PHPAPI php_stream_wrapper*
+php_stream_locate_url_wrapper(const char* path, char** /*path_for_open*/,
+                              int options TSRMLS_DC) {
   assert(options == 0);
   // TODO this leaks
   auto w = HPHP::Stream::getWrapperFromURI(path);
@@ -183,8 +185,9 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
   return buf;
 }
 
-PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC)
-{
+PHPAPI php_stream*
+_php_stream_opendir(char* path, int /*options*/,
+                    php_stream_context* /*context*/ STREAMS_DC TSRMLS_DC) {
   auto wrapper = HPHP::Stream::getWrapperFromURI(path);
   if (!wrapper) {
     return nullptr;
@@ -218,24 +221,27 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
   return ent;
 }
 
-PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
-{
+PHPAPI int _php_stream_set_option(php_stream* /*stream*/, int /*option*/,
+                                  int /*value*/, void* /*ptrparam*/ TSRMLS_DC) {
   HPHP::raise_fatal_error("unimplemented: _php_stream_set_option");
 }
 
-PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
-{
+PHPAPI php_stream_context*
+php_stream_context_set(php_stream* /*stream*/,
+                       php_stream_context* /*context*/) {
   HPHP::raise_fatal_error("unimplemented: php_stream_context_set");
 }
 
-PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
-    char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
-{
+PHPAPI void
+php_stream_notification_notify(php_stream_context* /*context*/,
+                               int /*notifycode*/, int /*severity*/,
+                               char* /*xmsg*/, int /*xcode*/,
+                               size_t /*bytes_sofar*/, size_t /*bytes_max*/,
+                               void* /*ptr*/ TSRMLS_DC) {
   HPHP::raise_fatal_error("unimplemented: php_stream_notification_notify");
 }
 
-PHPAPI void php_stream_context_free(php_stream_context *context)
-{
+PHPAPI void php_stream_context_free(php_stream_context* /*context*/) {
   HPHP::raise_fatal_error("unimplemented: php_stream_context_free");
 }
 
@@ -244,32 +250,35 @@ PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
   HPHP::raise_fatal_error("unimplemented: php_stream_notification_alloc");
 }
 
-PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
-{
+PHPAPI void php_stream_notification_free(php_stream_notifier* /*notifier*/) {
   HPHP::raise_fatal_error("unimplemented: php_stream_notification_free");
 }
 
-PHPAPI int php_stream_context_get_option(php_stream_context *context,
-    const char *wrappername, const char *optionname, zval ***optionvalue)
-{
+PHPAPI int php_stream_context_get_option(php_stream_context* /*context*/,
+                                         const char* /*wrappername*/,
+                                         const char* /*optionname*/,
+                                         zval*** /*optionvalue*/) {
   HPHP::raise_fatal_error("unimplemented: php_stream_context_get_option");
 }
 
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC) {
-    HPHP::String s;
-    if (maxlen == PHP_STREAM_COPY_ALL) {
-      HPHP::StringBuffer sb;
-      sb.read(src->hphp_file);
-      s = sb.detach();
-    } else {
-      s = src->hphp_file->read(maxlen);
-    }
-    *buf = (char*) emalloc(s.size());
-    memcpy(*buf, s.data(), s.size());
-    return s.size();
+PHPAPI size_t _php_stream_copy_to_mem(php_stream* src, char** buf,
+                                      size_t maxlen,
+                                      int /*persistent*/ STREAMS_DC TSRMLS_DC) {
+  HPHP::String s;
+  if (maxlen == PHP_STREAM_COPY_ALL) {
+    HPHP::StringBuffer sb;
+    sb.read(src->hphp_file);
+    s = sb.detach();
+  } else {
+    s = src->hphp_file->read(maxlen);
+  }
+  *buf = (char*)emalloc(s.size());
+  memcpy(*buf, s.data(), s.size());
+  return s.size();
 }
 
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC) {
+PHPAPI int _php_stream_cast(php_stream* stream, int castas, void** ret,
+                            int /*show_err*/ TSRMLS_DC) {
   switch (castas) {
     case PHP_STREAM_AS_STDIO:
       HPHP::PlainFile* pf = dynamic_cast<HPHP::PlainFile*>(stream->hphp_file);
@@ -279,7 +288,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
   return false;
 }
 
-PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) {
+PHPAPI php_stream* _php_stream_open_wrapper_ex(
+  char* path, const char* mode, int options, char** /*opened_path*/,
+  php_stream_context* /*context*/ STREAMS_DC TSRMLS_DC) {
   HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(path);
   if (!w) return nullptr;
   // This was using the implicit Variant(bool) ctor.
@@ -306,7 +317,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
   return stream;
 }
 
-PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) {
+PHPAPI int
+_php_stream_free(php_stream* stream, int /*close_options*/ TSRMLS_DC) {
   decRefRes(stream->hphp_file);
   return 1;
 }

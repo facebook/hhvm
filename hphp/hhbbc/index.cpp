@@ -638,23 +638,17 @@ SString Func::name() const {
 
 borrowed_ptr<const php::Func> Func::exactFunc() const {
   using Ret = borrowed_ptr<const php::Func>;
-  return match<Ret>(
-    val,
-    [&] (FuncName s)                  { return Ret{}; },
-    [&] (MethodName s)                { return Ret{}; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->first; },
-    [&] (borrowed_ptr<FuncFamily> fa) { return Ret{}; }
-  );
+  return match<Ret>(val, [&](FuncName /*s*/) { return Ret{}; },
+                    [&](MethodName /*s*/) { return Ret{}; },
+                    [&](borrowed_ptr<FuncInfo> fi) { return fi->first; },
+                    [&](borrowed_ptr<FuncFamily> /*fa*/) { return Ret{}; });
 }
 
 bool Func::cantBeMagicCall() const {
-  return match<bool>(
-    val,
-    [&] (FuncName s)                  { return true; },
-    [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return true; },
-    [&] (borrowed_ptr<FuncFamily> fa) { return true; }
-  );
+  return match<bool>(val, [&](FuncName /*s*/) { return true; },
+                     [&](MethodName /*s*/) { return false; },
+                     [&](borrowed_ptr<FuncInfo> /*fi*/) { return true; },
+                     [&](borrowed_ptr<FuncFamily> /*fa*/) { return true; });
 }
 
 bool Func::mightReadCallerFrame() const {
@@ -662,18 +656,17 @@ bool Func::mightReadCallerFrame() const {
     val,
     // Only non-method builtins can read the caller's frame and builtins are
     // always uniquely resolvable.
-    [&] (FuncName s)                  { return false; },
-    [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   {
+    [&](FuncName /*s*/) { return false; },
+    [&](MethodName /*s*/) { return false; },
+    [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrReadsCallerFrame;
     },
-    [&] (borrowed_ptr<FuncFamily> fa) {
+    [&](borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
         if (finfo->first->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
-    }
-  );
+    });
 }
 
 bool Func::mightWriteCallerFrame() const {
@@ -681,36 +674,33 @@ bool Func::mightWriteCallerFrame() const {
     val,
     // Only non-method builtins can write to the caller's frame and builtins are
     // always uniquely resolvable.
-    [&] (FuncName s)                  { return false; },
-    [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   {
+    [&](FuncName /*s*/) { return false; },
+    [&](MethodName /*s*/) { return false; },
+    [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrWritesCallerFrame;
     },
-    [&] (borrowed_ptr<FuncFamily> fa) {
+    [&](borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
         if (finfo->first->attrs & AttrWritesCallerFrame) return true;
       }
       return false;
-    }
-  );
+    });
 }
 
 bool Func::isFoldable() const {
-  return match<bool>(
-    val,
-    [&] (FuncName s)                  { return false; },
-    [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   {
-      return fi->first->attrs & AttrIsFoldable;
-    },
-    [&] (borrowed_ptr<FuncFamily> fa) {
-      if (fa->possibleFuncs.empty()) return false;
-      for (auto const& finfo : fa->possibleFuncs) {
-        if (!(finfo->first->attrs & AttrIsFoldable)) return false;
-      }
-      return true;
-    }
-  );
+  return match<bool>(val, [&](FuncName /*s*/) { return false; },
+                     [&](MethodName /*s*/) { return false; },
+                     [&](borrowed_ptr<FuncInfo> fi) {
+                       return fi->first->attrs & AttrIsFoldable;
+                     },
+                     [&](borrowed_ptr<FuncFamily> fa) {
+                       if (fa->possibleFuncs.empty()) return false;
+                       for (auto const& finfo : fa->possibleFuncs) {
+                         if (!(finfo->first->attrs & AttrIsFoldable))
+                           return false;
+                       }
+                       return true;
+                     });
 }
 
 bool Func::mightBeSkipFrame() const {
@@ -718,29 +708,22 @@ bool Func::mightBeSkipFrame() const {
     val,
     // Only builtins can be skip frame and non-method builtins are always
     // uniquely resolvable. Methods are more complicated though.
-    [&] (FuncName s)                  { return false; },
-    [&] (MethodName s)                { return true; },
-    [&] (borrowed_ptr<FuncInfo> fi)   {
-      return fi->first->attrs & AttrSkipFrame;
-    },
-    [&] (borrowed_ptr<FuncFamily> fa) {
+    [&](FuncName /*s*/) { return false; },
+    [&](MethodName /*s*/) { return true; },
+    [&](borrowed_ptr<FuncInfo> fi) { return fi->first->attrs & AttrSkipFrame; },
+    [&](borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
         if (finfo->first->attrs & AttrSkipFrame) return true;
       }
       return false;
-    }
-  );
+    });
 }
 
 std::string show(const Func& f) {
   std::string ret = f.name()->data();
-  match<void>(
-    f.val,
-    [&] (Func::FuncName) {},
-    [&] (Func::MethodName) {},
-    [&] (borrowed_ptr<FuncInfo> fi) { ret += "*"; },
-    [&] (borrowed_ptr<FuncFamily> fa) { ret += "+"; }
-  );
+  match<void>(f.val, [&](Func::FuncName) {}, [&](Func::MethodName) {},
+              [&](borrowed_ptr<FuncInfo> /*fi*/) { ret += "*"; },
+              [&](borrowed_ptr<FuncFamily> /*fa*/) { ret += "+"; });
   return ret;
 }
 
@@ -1311,10 +1294,8 @@ void compute_subclass_list(IndexData& index) {
   }
 }
 
-void define_func_family(IndexData& index,
-                        borrowed_ptr<ClassInfo> cinfo,
-                        SString name,
-                        borrowed_ptr<const php::Func> func) {
+void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
+                        SString name, borrowed_ptr<const php::Func> /*func*/) {
   index.funcFamilies.push_back(std::make_unique<FuncFamily>());
   auto const family = borrow(index.funcFamilies.back());
 
@@ -2481,8 +2462,8 @@ res::Func Index::resolve_method(Context ctx,
   not_reached();
 }
 
-folly::Optional<res::Func> Index::resolve_ctor(Context ctx,
-                                               res::Class rcls) const {
+folly::Optional<res::Func>
+Index::resolve_ctor(Context /*ctx*/, res::Class rcls) const {
   auto const cinfo = rcls.val.right();
   if (!cinfo || !cinfo->ctor) return folly::none;
   if (cinfo->ctor->attrs & AttrInterceptable) return folly::none;
@@ -2509,15 +2490,14 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   return do_resolve(func);
 }
 
-res::Func Index::resolve_func(Context ctx, SString name) const {
+res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   name = normalizeNS(name);
   auto const funcs = find_range(m_data->funcs, name);
   return resolve_func_helper(funcs, name);
 }
 
 std::pair<res::Func, folly::Optional<res::Func>>
-Index::resolve_func_fallback(Context ctx,
-                             SString nsName,
+Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
                              SString fallbackName) const {
   assert(!needsNSNormalization(nsName));
   assert(!needsNSNormalization(fallbackName));
@@ -2658,21 +2638,19 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
 
 bool Index::is_async_func(res::Func rfunc) const {
   return match<bool>(
-    rfunc.val,
-    [&] (res::Func::FuncName s)        { return false; },
-    [&] (res::Func::MethodName s)      { return false; },
-    [&] (borrowed_ptr<FuncInfo> finfo) {
+    rfunc.val, [&](res::Func::FuncName /*s*/) { return false; },
+    [&](res::Func::MethodName /*s*/) { return false; },
+    [&](borrowed_ptr<FuncInfo> finfo) {
       return finfo->first->isAsync && !finfo->first->isGenerator;
     },
-    [&] (borrowed_ptr<FuncFamily> fam) {
+    [&](borrowed_ptr<FuncFamily> fam) {
       for (auto const& finfo : fam->possibleFuncs) {
         if (!finfo->first->isAsync || finfo->first->isGenerator) {
           return false;
         }
       }
       return true;
-    }
-  );
+    });
 }
 
 bool Index::any_interceptable_functions() const {
@@ -2727,41 +2705,38 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
 
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
-    rfunc.val,
-    [&] (res::Func::FuncName s) { return TInitGen; },
-    [&] (res::Func::MethodName s) { return TInitGen; },
-    [&] (borrowed_ptr<FuncInfo> finfo) {
+    rfunc.val, [&](res::Func::FuncName /*s*/) { return TInitGen; },
+    [&](res::Func::MethodName /*s*/) { return TInitGen; },
+    [&](borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->first, ctx, Dep::ReturnTy);
       return finfo->second.returnTy;
     },
-    [&] (borrowed_ptr<FuncFamily> fam) {
+    [&](borrowed_ptr<FuncFamily> fam) {
       auto ret = TBottom;
       for (auto& f : fam->possibleFuncs) {
         add_dependency(*m_data, f->first, ctx, Dep::ReturnTy);
         ret |= f->second.returnTy;
       }
       return ret;
-    }
-  );
+    });
 }
 
 Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&] (res::Func::FuncName) {
+    [&](res::Func::FuncName) {
       return lookup_return_type(callCtx.caller, rfunc);
     },
-    [&] (res::Func::MethodName) {
+    [&](res::Func::MethodName) {
       return lookup_return_type(callCtx.caller, rfunc);
     },
-    [&] (borrowed_ptr<FuncInfo> finfo) {
+    [&](borrowed_ptr<FuncInfo> finfo) {
       add_dependency(*m_data, finfo->first, callCtx.caller, Dep::ReturnTy);
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
-    [&] (borrowed_ptr<FuncFamily> fam) {
+    [&](borrowed_ptr<FuncFamily> /*fam*/) {
       return lookup_return_type(callCtx.caller, rfunc);
-    }
-  );
+    });
 }
 
 std::vector<Type>
@@ -2789,8 +2764,7 @@ bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
   return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
 }
 
-PrepKind Index::lookup_param_prep(Context ctx,
-                                  res::Func rfunc,
+PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
                                   uint32_t paramId) const {
   return match<PrepKind>(
     rfunc.val,

@@ -35,9 +35,9 @@ template<class Fun>
 struct TargetVisitor : boost::static_visitor<void> {
   explicit TargetVisitor(Fun f) : f(f) {}
 
-  template<class T>
-  typename std::enable_if<!has_target<T>::value,void>::type
-  operator()(T const& t) const {}
+  template <class T>
+  typename std::enable_if<!has_target<T>::value, void>::type
+  operator()(T const& /*t*/) const {}
 
   template<class T>
   typename std::enable_if<has_target<T>::value,void>::type

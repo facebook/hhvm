@@ -438,7 +438,7 @@ struct JobQueueWorker {
    * The only functions a subclass needs to implement.
    */
   virtual void doJob(TJob job) = 0;
-  virtual void abortJob(TJob job) {
+  virtual void abortJob(TJob /*job*/) {
     Logger::Warning("Job dropped by JobQueueDispatcher because of timeout.");
   }
   virtual void onThreadEnter() {}

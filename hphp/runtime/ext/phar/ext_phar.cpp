@@ -38,8 +38,9 @@ static const StaticString
   s_opendir("opendir");
 
 static struct PharStreamWrapper final : Stream::Wrapper {
-  req::ptr<File> open(const String& filename, const String& mode, int options,
-                      const req::ptr<StreamContext>& context) override {
+  req::ptr<File>
+  open(const String& filename, const String& /*mode*/, int /*options*/,
+       const req::ptr<StreamContext>& /*context*/) override {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       return nullptr;
@@ -58,7 +59,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
     return dyn_cast_or_null<File>(ret.asResRef());
   }
 
-  int access(const String& path, int mode) override {
+  int access(const String& path, int /*mode*/) override {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());

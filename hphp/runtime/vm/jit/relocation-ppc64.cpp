@@ -353,10 +353,8 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   }
 }
 
-void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                 AsmInfo* asmInfo,
-                                 CGMeta& meta) {
-}
+void adjustMetaDataForRelocation(RelocationInfo& /*rel*/, AsmInfo* /*asmInfo*/,
+                                 CGMeta& /*meta*/) {}
 
 /*
  * Adjust potentially live references that point into the relocated

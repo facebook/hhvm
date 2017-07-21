@@ -821,7 +821,7 @@ void Scanner::warn(const char* fmt, ...) {
                   m_filename.c_str(), m_loc->r.line0, m_loc->r.char0);
 }
 
-void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
+void Scanner::incLoc(const char* rawText, int rawLeng, int /*type*/) {
   assert(rawText);
   assert(rawLeng > 0);
 

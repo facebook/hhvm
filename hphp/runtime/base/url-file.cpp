@@ -162,7 +162,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
 }
 
-int64_t UrlFile::writeImpl(const char *buffer, int64_t length) {
+int64_t UrlFile::writeImpl(const char* /*buffer*/, int64_t /*length*/) {
   assert(m_len != -1);
   raise_fatal_error((std::string("cannot write a url stream: ") +
                              getName()).c_str());

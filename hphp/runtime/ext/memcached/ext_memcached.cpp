@@ -808,8 +808,9 @@ const StaticString s_host("host"), s_port("port");
 const StaticString s_weight("weight");
 #endif
 
-memcached_return_t doServerListCallback(const memcached_st *ptr,
-    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
+memcached_return_t
+doServerListCallback(const memcached_st* /*ptr*/,
+                     LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void* context) {
   Array *returnValue = (Array*) context;
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
   in_port_t port = LMCD_SERVER_PORT(server);
@@ -900,8 +901,9 @@ const StaticString
   s_bytes_written("bytes_written"),
   s_version("version");
 
-memcached_return_t doStatsCallback(const memcached_st *ptr,
-    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *inContext) {
+memcached_return_t
+doStatsCallback(const memcached_st* /*ptr*/,
+                LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void* inContext) {
   StatsContext *context = (StatsContext*) inContext;
   char key[NI_MAXHOST + 6];
   const char* hostname = LMCD_SERVER_HOSTNAME(server);
@@ -964,8 +966,9 @@ Variant HHVM_METHOD(Memcached, getstats) {
 }
 
 namespace {
-memcached_return_t doVersionCallback(const memcached_st *ptr,
-    LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void *context) {
+memcached_return_t
+doVersionCallback(const memcached_st* /*ptr*/,
+                  LMCD_SERVER_CALLBACK_INSTANCE_TYPE server, void* context) {
   Array *returnValue = (Array*) context;
   char key[NI_MAXHOST + 6], version[16];
 

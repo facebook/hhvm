@@ -58,7 +58,8 @@ ShmCounters::~ShmCounters() {
 #endif
 }
 
-bool ShmCounters::initialize(bool create, logError_t logError /* = NULL */) {
+bool ShmCounters::initialize(bool /*create*/,
+                             logError_t /*logError*/ /* = NULL */) {
 #ifdef ENABLE_SHM_COUNTER
   ShmCounters::logError = logError;
   int flags = 0666;

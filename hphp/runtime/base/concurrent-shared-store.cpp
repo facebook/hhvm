@@ -722,14 +722,9 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   auto& sval = acc->second;
   if (sval.expired()) return false;
   s_hotCache.clearValue(sval);
-  auto const oldHandle = sval.data().match(
-    [&] (APCHandle* h) {
-      return h;
-    },
-    [&] (char* file) {
-      return unserialize(key, &sval);
-    }
-  );
+  auto const oldHandle =
+    sval.data().match([&](APCHandle* h) { return h; },
+                      [&](char* /*file*/) { return unserialize(key, &sval); });
   if (!oldHandle || oldHandle->toLocal().toInt64() != old) {
     return false;
   }

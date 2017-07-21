@@ -181,9 +181,7 @@ struct Allocator {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type num) {
-    req::free((void*)p);
-  }
+  void deallocate(pointer p, size_type /*num*/) { req::free((void*)p); }
 
   template<class U, typename A> bool operator==(const Allocator<U,A>&) const {
     return true;

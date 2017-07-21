@@ -156,10 +156,9 @@ file_badread(struct magic_set *ms)
   file_error(ms, errno, "error reading");
 }
 
-protected int
-file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const void *buf,
-    size_t nb)
-{
+protected
+int file_buffer(struct magic_set* ms, php_stream* stream,
+                const char* /*inname*/, const void* buf, size_t nb) {
   int m = 0, rv = 0, looks_text = 0;
   int mime = ms->flags & MAGIC_MIME;
   const unsigned char *ubuf = CAST(const unsigned char *, buf);

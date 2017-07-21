@@ -105,9 +105,9 @@ void>::type nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {
 }
 
 // Dummy copy method for classes where the assignment has been deleted
-template<class T>
-typename std::enable_if<!std::is_assignable<T,T>::value,
-void>::type nativeDataInfoCopy(ObjectData* dest, ObjectData* src) {}
+template <class T>
+typename std::enable_if<!std::is_assignable<T, T>::value, void>::type
+nativeDataInfoCopy(ObjectData* /*dest*/, ObjectData* /*src*/) {}
 
 template<class T>
 void nativeDataInfoDestroy(ObjectData* obj) {
@@ -184,9 +184,9 @@ Variant>::type nativeDataInfoSleep(const ObjectData* obj) {
   return data<T>(obj)->sleep();
 }
 
-template<class T>
-typename std::enable_if<!hasSleep<T, Variant() const>::value,
-Variant>::type nativeDataInfoSleep(const ObjectData* obj) {
+template <class T>
+typename std::enable_if<!hasSleep<T, Variant() const>::value, Variant>::type
+nativeDataInfoSleep(const ObjectData* /*obj*/) {
   always_assert(0);
 }
 
@@ -198,9 +198,10 @@ void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
   data<T>(obj)->wakeup(content, obj);
 }
 
-template<class T>
+template <class T>
 typename std::enable_if<!hasWakeup<T, void(const Variant&, ObjectData*)>::value,
-void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
+                        void>::type
+nativeDataInfoWakeup(ObjectData* /*obj*/, const Variant& /*content*/) {
   always_assert(0);
 }
 

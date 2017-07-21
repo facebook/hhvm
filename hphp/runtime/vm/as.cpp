@@ -1702,7 +1702,7 @@ void parse_try_catch(AsmState& as, int nestLevel) {
  * Record that subsequent bytecodes are at the source location indicated by the
  * range of inline numbers and character positions specified.
  */
-void parse_srcloc(AsmState& as, int nestLevel) {
+void parse_srcloc(AsmState& as, int /*nestLevel*/) {
   auto const line0 = as.in.readint();
   as.in.expectWs(':');
   auto const char0 = as.in.readint();

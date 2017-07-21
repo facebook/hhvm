@@ -422,8 +422,7 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   xslt_ext_function_php(ctxt, nargs, 2);
 }
 
-static void xslt_ext_error_handler(void *ctx,
-                                   const char *fmt, ...) {
+static void xslt_ext_error_handler(void* /*ctx*/, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
   try {
@@ -443,9 +442,9 @@ static void xslt_ext_error_handler(void *ctx,
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-static Variant HHVM_METHOD(XSLTProcessor, getParameter,
-                        const Variant& namespaceURI,
-                        const String& localName) {
+static Variant
+HHVM_METHOD(XSLTProcessor, getParameter, const Variant& /*namespaceURI*/,
+            const String& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
@@ -499,9 +498,9 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
   }
 }
 
-static bool HHVM_METHOD(XSLTProcessor, removeParameter,
-                        const Variant& namespaceURI,
-                        const String& localName) {
+static bool
+HHVM_METHOD(XSLTProcessor, removeParameter, const Variant& /*namespaceURI*/,
+            const String& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
@@ -542,10 +541,10 @@ static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
   }
 }
 
-static bool HHVM_METHOD(XSLTProcessor, setParameter,
-                        const Variant& namespaceURI,
-                        const Variant& localName,
-                        const Variant& value /*= uninit_variant*/) {
+static bool
+HHVM_METHOD(XSLTProcessor, setParameter, const Variant& /*namespaceURI*/,
+            const Variant& localName,
+            const Variant& value /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.

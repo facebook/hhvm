@@ -44,7 +44,7 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
-TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
+TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
   if (sr->getTopTranslation() == nullptr) return nullptr;
@@ -94,7 +94,8 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
   return tDest;
 }
 
-TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
+TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/,
+             bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
   if (sr->getTopTranslation() == nullptr) return nullptr;

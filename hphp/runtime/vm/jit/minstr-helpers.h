@@ -511,8 +511,8 @@ inline member_rval checkedGet(ArrayData* a, StringData* key) {
   }
 }
 
-template<bool warn, bool intishWarn>
-inline member_rval checkedGet(ArrayData* a, int64_t key) {
+template <bool warn, bool intishWarn>
+inline member_rval checkedGet(ArrayData* /*a*/, int64_t /*key*/) {
   not_reached();
 }
 

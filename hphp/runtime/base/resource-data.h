@@ -139,9 +139,7 @@ struct ResourceData : type_scan::MarkCountable<ResourceData> {
 
   virtual ~ResourceData(); // all PHP resources need vtables
 
-  void operator delete(void* p) {
-    always_assert(false);
-  }
+  void operator delete(void* /*p*/) { always_assert(false); }
 
   const String& o_getClassName() const;
   virtual const String& o_getClassNameHook() const;

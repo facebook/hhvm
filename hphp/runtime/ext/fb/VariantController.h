@@ -129,7 +129,7 @@ struct VariantControllerImpl {
   static ArrayIter mapIterator(const MapType& map) {
     return ArrayIter(map);
   }
-  static bool mapNotEnd(const MapType& map, ArrayIter& it) {
+  static bool mapNotEnd(const MapType& /*map*/, ArrayIter& it) {
     return !it.end();
   }
   static void mapNext(ArrayIter& it) { ++it; }
@@ -150,7 +150,7 @@ struct VariantControllerImpl {
   static ArrayIter vectorIterator(const VectorType& vec) {
     return ArrayIter(vec);
   }
-  static bool vectorNotEnd(const VectorType& vec, ArrayIter& it) {
+  static bool vectorNotEnd(const VectorType& /*vec*/, ArrayIter& it) {
     return !it.end();
   }
   static void vectorNext(ArrayIter& it) { ++it; }

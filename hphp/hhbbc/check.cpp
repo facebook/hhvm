@@ -49,7 +49,7 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
   for (auto it = begin(b.hhbcs); it != end(b.hhbcs); ++it) {
     assert(it->op != Op::Jmp && "unconditional Jmp mid-block");
     if (std::next(it) == end(b.hhbcs)) break;
-    forEachTakenEdge(*it, [&] (BlockId blk) {
+    forEachTakenEdge(*it, [&](BlockId /*blk*/) {
       assert(!"Instruction in middle of block had a jump target");
     });
   }
@@ -154,14 +154,12 @@ void checkFaultEntryRec(const php::Func& func,
 
 void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
   // Fault entries have a few things to assert.
-  match<void>(
-    node->info,
-    [&] (const FaultRegion& fr) {
-      boost::dynamic_bitset<> seenBlocks;
-      checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
-    },
-    [&] (const CatchRegion& cr) {}
-  );
+  match<void>(node->info,
+              [&](const FaultRegion& fr) {
+                boost::dynamic_bitset<> seenBlocks;
+                checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
+              },
+              [&](const CatchRegion& /*cr*/) {});
 
   for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
 }

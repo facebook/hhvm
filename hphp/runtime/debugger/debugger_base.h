@@ -223,8 +223,9 @@ struct Macro {
 struct DebuggerUsageLogger {
   virtual ~DebuggerUsageLogger() {}
   virtual void init() {}
-  virtual void log(const std::string &mode, const std::string &sandboxId,
-                   const std::string &cmd, const std::string &data) {}
+  virtual void
+  log(const std::string& /*mode*/, const std::string& /*sandboxId*/,
+      const std::string& /*cmd*/, const std::string& /*data*/) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -59,14 +59,17 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
   return HPHP::zend_hphp_class_to_class_entry(hphp_class);
 }
 
-static int parse_arg_object_to_string(zval **arg, const char **p, int *pl, int type TSRMLS_DC) {
+static int parse_arg_object_to_string(zval** arg, const char** p, int* pl,
+                                      int /*type*/ TSRMLS_DC) {
   HPHP::StringData *sd = tvCastToString(*(*arg)->tv());
   *p = sd->data();
   *pl = sd->size();
   return sd->empty();
 }
 
-static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) {
+static const char*
+zend_parse_arg_impl(int /*arg_num*/, zval** arg, va_list* va, const char** spec,
+                    char** error, int* severity TSRMLS_DC) {
   const char *spec_walk = *spec;
   char c = *spec_walk++;
   int check_null = 0;
@@ -794,7 +797,8 @@ ZEND_API int add_assoc_double_ex(zval *arg, const char *key, uint key_len, doubl
 }
 /* }}} */
 
-ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str, int duplicate) /* {{{ */
+ZEND_API int add_assoc_string_ex(zval* arg, const char* key, uint key_len,
+                                 const char* str, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -805,7 +809,9 @@ ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, const
 }
 /* }}} */
 
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int
+add_assoc_stringl_ex(zval* arg, const char* key, uint key_len, const char* str,
+                     uint length, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -877,7 +883,8 @@ ZEND_API int add_index_double(zval *arg, ulong index, double d) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int duplicate) /* {{{ */
+ZEND_API int add_index_string(zval* arg, ulong index, const char* str,
+                              int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -888,7 +895,8 @@ ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int dupli
 }
 /* }}} */
 
-ZEND_API int add_index_stringl(zval *arg, ulong index, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int add_index_stringl(zval* arg, ulong index, const char* str,
+                               uint length, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -960,7 +968,8 @@ ZEND_API int add_next_index_double(zval *arg, double d) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_next_index_string(zval *arg, const char *str, int duplicate) /* {{{ */
+ZEND_API int
+add_next_index_string(zval* arg, const char* str, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -971,7 +980,8 @@ ZEND_API int add_next_index_string(zval *arg, const char *str, int duplicate) /*
 }
 /* }}} */
 
-ZEND_API int add_next_index_stringl(zval *arg, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int add_next_index_stringl(zval* arg, const char* str, uint length,
+                                    int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -988,7 +998,9 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_assoc_string_ex(zval* arg, const char* key, uint key_len,
+                                     const char* str, void** dest,
+                                     int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -999,7 +1011,9 @@ ZEND_API int add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, c
 }
 /* }}} */
 
-ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_assoc_stringl_ex(zval* arg, const char* key, uint key_len,
+                                      const char* str, uint length, void** dest,
+                                      int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -1032,7 +1046,8 @@ ZEND_API int add_get_index_double(zval *arg, ulong index, double d, void **dest)
 }
 /* }}} */
 
-ZEND_API int add_get_index_string(zval *arg, ulong index, const char *str, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_index_string(zval* arg, ulong index, const char* str,
+                                  void** dest, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -1043,7 +1058,9 @@ ZEND_API int add_get_index_string(zval *arg, ulong index, const char *str, void 
 }
 /* }}} */
 
-ZEND_API int add_get_index_stringl(zval *arg, ulong index, const char *str, uint length, void **dest, int duplicate) /* {{{ */
+ZEND_API int
+add_get_index_stringl(zval* arg, ulong index, const char* str, uint length,
+                      void** dest, int /*duplicate*/) /* {{{ */
 {
   zval *tmp;
 
@@ -1088,7 +1105,11 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_is_callable_ex(zval* callable, zval* /*object_ptr*/,
+                                       uint check_flags, char** callable_name,
+                                       int* callable_name_len,
+                                       zend_fcall_info_cache* fcc,
+                                       char** /*error*/ TSRMLS_DC) /* {{{ */
 {
   HPHP::Variant name;
   HPHP::RefData* nameRef = nullptr;
@@ -1342,49 +1363,71 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_declare_property(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property(zend_class_entry* /*ce*/, const char* /*name*/,
+                      int /*name_length*/, zval* /*property*/,
+                      int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_null(zend_class_entry *ce, const char *name, int name_length, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_null(zend_class_entry* /*ce*/, const char* /*name*/,
+                           int /*name_length*/,
+                           int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_bool(zend_class_entry *ce, const char *name, int name_length, long value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_bool(zend_class_entry* /*ce*/, const char* /*name*/,
+                           int /*name_length*/, long /*value*/,
+                           int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_long(zend_class_entry *ce, const char *name, int name_length, long value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_long(zend_class_entry* /*ce*/, const char* /*name*/,
+                           int /*name_length*/, long /*value*/,
+                           int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_double(zend_class_entry *ce, const char *name, int name_length, double value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_double(zend_class_entry* /*ce*/, const char* /*name*/,
+                             int /*name_length*/, double /*value*/,
+                             int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_string(zend_class_entry *ce, const char *name, int name_length, const char *value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_string(zend_class_entry* /*ce*/, const char* /*name*/,
+                             int /*name_length*/, const char* /*value*/,
+                             int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *name, int name_length, const char *value, int value_len, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int
+zend_declare_property_stringl(zend_class_entry* /*ce*/, const char* /*name*/,
+                              int /*name_length*/, const char* /*value*/,
+                              int /*value_len*/,
+                              int /*access_type*/ TSRMLS_DC) /* {{{ */
 {
   // Done by our system library
   return SUCCESS;
@@ -1609,12 +1652,13 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
   return ce;
 }
 
-ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...) {
+ZEND_API void zend_class_implements(zend_class_entry* /*class_entry*/ TSRMLS_DC,
+                                    int /*num_interfaces*/, ...) {
   // Done by the system library
 }
 
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type) {
-}
+ZEND_API void object_properties_init(zend_object* /*object*/,
+                                     zend_class_entry* /*class_type*/) {}
 
 /* This function requires 'properties' to contain all props declared in the
  * class and all props being public. If only a subset is given or the class
@@ -1635,7 +1679,9 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
   return SUCCESS;
 }
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
+ZEND_API zval*
+zend_read_property(zend_class_entry* scope, zval* object, const char* name,
+                   int name_length, zend_bool /*silent*/ TSRMLS_DC) {
   HPHP::String prop_name(name, name_length, HPHP::CopyString);
   HPHP::String scope_name(scope->name, scope->name_length, HPHP::CopyString);
   HPHP::Class* ctx = nullptr;
@@ -1654,7 +1700,9 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
   return prop->m_data.pref;
 }
 
-ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
+ZEND_API zval*
+zend_read_static_property(zend_class_entry* scope, const char* name,
+                          int name_length, zend_bool /*silent*/ TSRMLS_DC) {
   auto const cls = HPHP::zend_hphp_class_entry_to_class(scope);
   if (!cls) {
     // You can't call this function from MINIT, sorry
@@ -1678,7 +1726,10 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
   return prop->m_data.pref;
 }
 
-ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {
+ZEND_API zend_class_entry*
+zend_register_internal_class_ex(zend_class_entry* class_entry,
+                                zend_class_entry* parent_ce,
+                                char* /*parent_name*/ TSRMLS_DC) {
   auto ret = zend_register_internal_class(class_entry TSRMLS_CC);
   if (parent_ce) {
     ret->create_object = parent_ce->create_object;

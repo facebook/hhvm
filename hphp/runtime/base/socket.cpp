@@ -68,16 +68,11 @@ Socket::Socket(std::shared_ptr<SocketData> data)
   inferStreamType();
 }
 
-Socket::Socket(std::shared_ptr<SocketData> data,
-               int sockfd,
-               int type,
-               const char *address /* = NULL */,
-               int port /* = 0 */,
+Socket::Socket(std::shared_ptr<SocketData> data, int sockfd, int type,
+               const char* address /* = NULL */, int /*port*/ /* = 0 */,
                double timeout /* = 0 */,
                const StaticString& streamType /* = empty_string_ref */)
-: File(data, null_string, streamType),
-  m_data(data.get())
-{
+    : File(data, null_string, streamType), m_data(data.get()) {
   if (address) m_data->m_address = address;
   setFd(sockfd);
 
@@ -123,7 +118,7 @@ void Socket::setError(int err) {
   s_lastErrno = m_data->m_error = err;
 }
 
-bool Socket::open(const String& filename, const String& mode) {
+bool Socket::open(const String& /*filename*/, const String& /*mode*/) {
   throw_not_supported(__func__, "cannot open socket this way");
 }
 

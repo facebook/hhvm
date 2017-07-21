@@ -93,11 +93,11 @@ void cgMov(IRLS& env, const IRInstruction* inst) {
   copyTV(vmain(env), src, dst, inst->dst()->type());
 }
 
-void cgUnreachable(IRLS& env, const IRInstruction* inst) {
+void cgUnreachable(IRLS& env, const IRInstruction* /*inst*/) {
   vmain(env) << ud2{};
 }
 
-void cgEndBlock(IRLS& env, const IRInstruction* inst) {
+void cgEndBlock(IRLS& env, const IRInstruction* /*inst*/) {
   vmain(env) << ud2{};
 }
 

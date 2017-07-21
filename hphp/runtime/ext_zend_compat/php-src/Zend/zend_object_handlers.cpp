@@ -29,82 +29,105 @@
 #include "zend_interfaces.h"
 #include "zend_compile.h"
 
-zval *zend_std_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) {
+zval* zend_std_read_property(zval* /*object*/, zval* member, int /*type*/,
+                             const zend_literal* /*key*/ TSRMLS_DC) {
   return Z_OBJVAL_P(member)->o_get(
     HPHP::String{tvCastToString(*member->tv())}
   ).asRef()->m_data.pref;
 }
 
-ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) {
+ZEND_API void
+zend_std_write_property(zval* /*object*/, zval* member, zval* value,
+                        const zend_literal* /*key*/ TSRMLS_DC) {
   Z_OBJVAL_P(member)->o_set(
     HPHP::String{tvCastToString(*member->tv())},
     tvAsVariant(value->tv())
   );
 }
 
-zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) {
+zval* zend_std_read_dimension(zval* object, zval* /*offset*/,
+                              int /*type*/ TSRMLS_DC) {
   zend_class_entry *ce = Z_OBJCE_P(object);
   zend_error_noreturn(E_ERROR, "Cannot use object of type %s as array", ce->name);
 }
 
-static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC) {
+static void zend_std_write_dimension(zval* object, zval* /*offset*/,
+                                     zval* /*value*/ TSRMLS_DC) {
   zend_class_entry *ce = Z_OBJCE_P(object);
   zend_error_noreturn(E_ERROR, "Cannot use object of type %s as array", ce->name);
 }
 
-static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) {
+static zval**
+zend_std_get_property_ptr_ptr(zval* /*object*/, zval* /*member*/, int /*type*/,
+                              const zend_literal* /*key*/ TSRMLS_DC) {
   not_implemented();
   return nullptr;
 }
 
-static int zend_std_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) {
+static int zend_std_has_property(zval* /*object*/, zval* /*member*/,
+                                 int /*has_set_exists*/,
+                                 const zend_literal* /*key*/ TSRMLS_DC) {
   not_implemented();
   return FAILURE;
 }
 
-static void zend_std_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) {
+static void zend_std_unset_property(zval* /*object*/, zval* /*member*/,
+                                    const zend_literal* /*key*/ TSRMLS_DC) {
   not_implemented();
 }
-static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC) {
-  not_implemented();
-  return FAILURE;
-}
-static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC) {
-  not_implemented();
-}
-ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC) {
-  not_implemented();
-  return nullptr;
-}
-static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len, const zend_literal *key TSRMLS_DC) {
-  not_implemented();
-  return nullptr;
-}
-ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC) {
-  not_implemented();
-  return nullptr;
-}
-zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) {
-  not_implemented();
-  return nullptr;
-}
-int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) {
+static int zend_std_has_dimension(zval* /*object*/, zval* /*offset*/,
+                                  int /*check_empty*/ TSRMLS_DC) {
   not_implemented();
   return FAILURE;
 }
-static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) {
+static void
+zend_std_unset_dimension(zval* /*object*/, zval* /*offset*/ TSRMLS_DC) {
   not_implemented();
-  return FAILURE;
 }
-int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) {
-  not_implemented();
-  return FAILURE;
-}
-ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_DC) {
+ZEND_API HashTable* zend_std_get_properties(zval* /*object*/ TSRMLS_DC) {
   not_implemented();
   return nullptr;
 }
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) {
+static union _zend_function*
+zend_std_get_method(zval** /*object_ptr*/, char* /*method_name*/,
+                    int /*method_len*/, const zend_literal* /*key*/ TSRMLS_DC) {
+  not_implemented();
+  return nullptr;
+}
+ZEND_API union _zend_function*
+zend_std_get_constructor(zval* /*object*/ TSRMLS_DC) {
+  not_implemented();
+  return nullptr;
+}
+zend_class_entry* zend_std_object_get_class(const zval* /*object*/ TSRMLS_DC) {
+  not_implemented();
+  return nullptr;
+}
+int zend_std_object_get_class_name(const zval* /*object*/,
+                                   const char** /*class_name*/,
+                                   zend_uint* /*class_name_len*/,
+                                   int /*parent*/ TSRMLS_DC) {
+  not_implemented();
+  return FAILURE;
+}
+static int zend_std_compare_objects(zval* /*o1*/, zval* /*o2*/ TSRMLS_DC) {
+  not_implemented();
+  return FAILURE;
+}
+int zend_std_get_closure(zval* /*obj*/, zend_class_entry** /*ce_ptr*/,
+                         zend_function** /*fptr_ptr*/,
+                         zval** /*zobj_ptr*/ TSRMLS_DC) {
+  not_implemented();
+  return FAILURE;
+}
+ZEND_API HashTable*
+zend_std_get_gc(zval* /*object*/, zval*** /*table*/, int* /*n*/ TSRMLS_DC) {
+  not_implemented();
+  return nullptr;
+}
+ZEND_API int
+zend_std_cast_object_tostring(zval* /*readobj*/, zval* /*writeobj*/,
+                              int /*type*/ TSRMLS_DC) {
   return FAILURE;
 }
 

@@ -491,7 +491,7 @@ static unsigned char *mm_cpystr(char *str) {
 
 extern "C" {
 
-void mm_searched(MAILSTREAM *stream, unsigned long number) {
+void mm_searched(MAILSTREAM* /*stream*/, unsigned long number) {
   MESSAGELIST *cur = NIL;
   if (IMAPG(messages) == NIL) {
     IMAPG(messages) = mail_newmessagelist();
@@ -508,12 +508,12 @@ void mm_searched(MAILSTREAM *stream, unsigned long number) {
   }
 }
 
-void mm_exists(MAILSTREAM *stream, unsigned long number) {}
-void mm_expunged(MAILSTREAM *stream, unsigned long number) {}
-void mm_flags(MAILSTREAM *stream, unsigned long number) {}
+void mm_exists(MAILSTREAM* /*stream*/, unsigned long /*number*/) {}
+void mm_expunged(MAILSTREAM* /*stream*/, unsigned long /*number*/) {}
+void mm_flags(MAILSTREAM* /*stream*/, unsigned long /*number*/) {}
 
 /* Author: CJH */
-void mm_notify(MAILSTREAM *stream, char *str, long errflg) {
+void mm_notify(MAILSTREAM* /*stream*/, char* str, long /*errflg*/) {
   STRINGLIST *cur = NIL;
   if (strncmp(str, "[ALERT] ", 8) == 0) {
     if (IMAPG(alertstack) == NIL) {
@@ -534,7 +534,7 @@ void mm_notify(MAILSTREAM *stream, char *str, long errflg) {
   }
 }
 
-void mm_list(MAILSTREAM *stream, int delimiter, char *mailbox,
+void mm_list(MAILSTREAM* /*stream*/, int delimiter, char* mailbox,
              long attributes) {
   STRINGLIST *cur=NIL;
   FOBJECTLIST *ocur=NIL;
@@ -583,7 +583,7 @@ void mm_list(MAILSTREAM *stream, int delimiter, char *mailbox,
   }
 }
 
-void mm_lsub(MAILSTREAM *stream, int delimiter, char *mailbox,
+void mm_lsub(MAILSTREAM* /*stream*/, int delimiter, char* mailbox,
              long attributes) {
   STRINGLIST *cur=NIL;
   FOBJECTLIST *ocur=NIL;
@@ -628,7 +628,7 @@ void mm_lsub(MAILSTREAM *stream, int delimiter, char *mailbox,
   }
 }
 
-void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status) {
+void mm_status(MAILSTREAM* /*stream*/, char* /*mailbox*/, MAILSTATUS* status) {
   IMAPG(status_flags)=status->flags;
   if (IMAPG(status_flags) & SA_MESSAGES) {
     IMAPG(status_messages)=status->messages;
@@ -673,7 +673,7 @@ void mm_log(char *str, long errflg) {
   }
 }
 
-void mm_login(NETMBX *mb, char *user, char *pwd, long trial) {
+void mm_login(NETMBX* mb, char* user, char* pwd, long /*trial*/) {
   if (*mb->user) {
     string_copy(user, mb->user, MAILTMPLEN);
   } else {
@@ -682,11 +682,13 @@ void mm_login(NETMBX *mb, char *user, char *pwd, long trial) {
   string_copy(pwd, IMAPG(password).c_str(), MAILTMPLEN);
 }
 
-void mm_dlog(char *str) {}
-void mm_critical(MAILSTREAM *stream) {}
-void mm_nocritical(MAILSTREAM *stream) {}
-long mm_diskerror(MAILSTREAM *stream, long errcode, long serious) { return 1;}
-void mm_fatal(char *str) {}
+void mm_dlog(char* /*str*/) {}
+void mm_critical(MAILSTREAM* /*stream*/) {}
+void mm_nocritical(MAILSTREAM* /*stream*/) {}
+long mm_diskerror(MAILSTREAM* /*stream*/, long /*errcode*/, long /*serious*/) {
+  return 1;
+}
+void mm_fatal(char* /*str*/) {}
 
 } // extern "C"
 
@@ -1067,10 +1069,10 @@ static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
   return true;
 }
 
-static Variant HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream,
-                             int64_t msg_number, int64_t fromlength /* = 0 */,
-                             int64_t subjectlength /* = 0 */,
-                             const String& defaulthost /* = "" */) {
+static Variant
+HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream, int64_t msg_number,
+              int64_t fromlength /* = 0 */, int64_t subjectlength /* = 0 */,
+              const String& /*defaulthost*/ /* = "" */) {
   auto obj = cast<ImapStream>(imap_stream);
   if (fromlength < 0 || fromlength > MAILTMPLEN) {
     Logger::Warning("From length has to be between 0 and %d", MAILTMPLEN);

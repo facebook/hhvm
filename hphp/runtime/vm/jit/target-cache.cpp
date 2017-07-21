@@ -300,12 +300,9 @@ void readMagicOrStatic(Entry* mce,
   decRefObj(obj);
 }
 
-template<bool fatal>
-NEVER_INLINE
-void readPublicStatic(Entry* mce,
-                      ActRec* ar,
-                      Class* cls,
-                      const Func* cand) {
+template <bool fatal>
+NEVER_INLINE void
+readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
   auto const obj = ar->getThis();
   ar->setClass(cls);

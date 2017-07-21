@@ -221,7 +221,7 @@ void AdminRequestHandler::logToAccessLog(Transport* transport) {
   WarnIfNotOK(transport);
 }
 
-void AdminRequestHandler::setupRequest(Transport* transport) {
+void AdminRequestHandler::setupRequest(Transport* /*transport*/) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
 }
@@ -1288,9 +1288,7 @@ std::string formatStaticString(StringData* str) {
 }
 
 bool AdminRequestHandler::handleDumpStaticStringsRequest(
-  const std::string& cmd,
-  const std::string& filename
-) {
+  const std::string& /*cmd*/, const std::string& filename) {
   std::vector<StringData*> list = lookupDefinedStaticStrings();
   std::ofstream out(filename.c_str());
   SCOPE_EXIT { out.close(); };
@@ -1314,9 +1312,7 @@ bool AdminRequestHandler::handleDumpStaticStringsRequest(
 }
 
 bool AdminRequestHandler::handleRandomStaticStringsRequest(
-  const std::string& cmd,
-  Transport* transport
-) {
+  const std::string& /*cmd*/, Transport* transport) {
   size_t count = 1;
   auto countParam = transport->getParam("count");
   if (countParam != "") {
@@ -1369,7 +1365,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   return false;
 }
 
-void AdminRequestHandler::handleProxyRequest(const std::string& cmd,
+void AdminRequestHandler::handleProxyRequest(const std::string& /*cmd*/,
                                              Transport* transport) {
   try {
     auto const percentStr = transport->getParam("percentage");
@@ -1426,8 +1422,8 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool AdminRequestHandler::handleRandomApcRequest(const std::string &cmd,
-                                                 Transport *transport){
+bool AdminRequestHandler::handleRandomApcRequest(const std::string& /*cmd*/,
+                                                 Transport* transport) {
   std::ostringstream out;
   uint32_t keyCount = 1;
   std::string count = transport->getParam("count");

@@ -1450,7 +1450,7 @@ struct notationIterator {
   xmlNotation *notation;
 };
 
-static void itemHashScanner(void *payload, void *data, xmlChar *name) {
+static void itemHashScanner(void* payload, void* data, xmlChar* /*name*/) {
   nodeIterator *priv = (nodeIterator *)data;
   if (priv->cur < priv->index) {
     priv->cur++;
@@ -1540,7 +1540,7 @@ struct DOMPropHandler: Native::BasePropHandler {
     return Derived::map.isset(this_, name);
   }
 
-  static bool isPropSupported(const String& name, const String& op) {
+  static bool isPropSupported(const String& name, const String& /*op*/) {
     return Derived::map.isPropertySupported(name);
   }
 };
@@ -2008,7 +2008,8 @@ static Variant domnode_textcontent_read(const Object& obj) {
   return empty_string_variant();
 }
 
-static void domnode_textcontent_write(const Object& obj, const Variant& value) {
+static void
+domnode_textcontent_write(const Object& /*obj*/, const Variant& /*value*/) {
   // do nothing
 }
 
@@ -2668,7 +2669,7 @@ static Variant domattr_name_read(const Object& obj) {
   return String((char *)(attrp->name), CopyString);
 }
 
-static Variant domattr_specified_read(const Object& obj) {
+static Variant domattr_specified_read(const Object& /*obj*/) {
   /* T O D O */
   return true;
 }
@@ -2699,7 +2700,7 @@ static Variant domattr_ownerelement_read(const Object& obj) {
   return create_node_object(nodep->parent, domnode->doc());
 }
 
-static Variant domattr_schematypeinfo_read(const Object& obj) {
+static Variant domattr_schematypeinfo_read(const Object& /*obj*/) {
   raise_warning("Not yet implemented");
   return init_null();
 }
@@ -3161,7 +3162,7 @@ static Variant dom_document_doctype_read(const Object& obj) {
   return create_node_object(dtd, obj);
 }
 
-static Variant dom_document_implementation_read(const Object& obj) {
+static Variant dom_document_implementation_read(const Object& /*obj*/) {
   return Object{getDOMImplementationClass()};
 }
 
@@ -3274,7 +3275,7 @@ static void dom_document_document_uri_write(const Object& obj,
   docp->URL = xmlStrdup((const xmlChar *)svalue.data());
 }
 
-static Variant dom_document_config_read(const Object& obj) {
+static Variant dom_document_config_read(const Object& /*obj*/) {
   return init_null();
 }
 
@@ -4038,7 +4039,7 @@ static Variant dom_element_tag_name_read(const Object& obj) {
   return String((char *)nodep->name, CopyString);
 }
 
-static Variant dom_element_schema_type_info_read(const Object& obj) {
+static Variant dom_element_schema_type_info_read(const Object& /*obj*/) {
   return init_null();
 }
 
@@ -4776,27 +4777,30 @@ static Variant dom_entity_notation_name_read(const Object& obj) {
   return ret;
 }
 
-static Variant dom_entity_actual_encoding_read(const Object& obj) {
+static Variant dom_entity_actual_encoding_read(const Object& /*obj*/) {
   return init_null();
 }
 
-static void dom_entity_actual_encoding_write(const Object& obj, const Variant& value) {
+static void dom_entity_actual_encoding_write(const Object& /*obj*/,
+                                             const Variant& /*value*/) {
   // do nothing
 }
 
-static Variant dom_entity_encoding_read(const Object& obj) {
+static Variant dom_entity_encoding_read(const Object& /*obj*/) {
   return init_null();
 }
 
-static void dom_entity_encoding_write(const Object& obj, const Variant& value) {
+static void
+dom_entity_encoding_write(const Object& /*obj*/, const Variant& /*value*/) {
   // do nothing
 }
 
-static Variant dom_entity_version_read(const Object& obj) {
+static Variant dom_entity_version_read(const Object& /*obj*/) {
   return init_null();
 }
 
-static void dom_entity_version_write(const Object& obj, const Variant& value) {
+static void
+dom_entity_version_write(const Object& /*obj*/, const Variant& /*value*/) {
   // do nothing
 }
 

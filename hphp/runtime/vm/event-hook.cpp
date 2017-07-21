@@ -344,7 +344,7 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
-static bool shouldLog(const Func* func) {
+static bool shouldLog(const Func* /*func*/) {
   return RID().logFunctionCalls();
 }
 

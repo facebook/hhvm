@@ -80,8 +80,8 @@ struct Vgen {
   // intrinsics
   void emit(const copy& i);
   void emit(const copy2& i);
-  void emit(const debugtrap& i) { a.int3(); }
-  void emit(const fallthru& i) {}
+  void emit(const debugtrap& /*i*/) { a.int3(); }
+  void emit(const fallthru& /*i*/) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
@@ -94,7 +94,7 @@ struct Vgen {
   void emit(const callm& i) { a.call(i.target); }
   void emit(const callr& i) { a.call(i.target); }
   void emit(const calls& i);
-  void emit(const ret& i) { a.ret(); }
+  void emit(const ret& /*i*/) { a.ret(); }
 
   // stub function abi
   void emit(const stubret& i);
@@ -109,12 +109,12 @@ struct Vgen {
   void emit(const contenter& i);
 
   // vm entry abi
-  void emit(const inittc& i) {}
+  void emit(const inittc& /*i*/) {}
   void emit(const calltc&);
   void emit(const leavetc&) { a.ret(); }
 
   // exceptions
-  void emit(const landingpad& i) {}
+  void emit(const landingpad& /*i*/) {}
   void emit(const nothrow& i);
   void emit(const syncpoint& i);
   void emit(const unwind& i);
@@ -156,7 +156,7 @@ struct Vgen {
   void emit(const cmpqim& i) { a.cmpq(i.s0, i.s1); }
   void emit(const cmpqm& i) { a.cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a.cmpsd(i.s0, i.d, i.pred); }
-  void emit(const cqo& i) { a.cqo(); }
+  void emit(const cqo& /*i*/) { a.cqo(); }
   void emit(const cvttsd2siq& i) { a.cvttsd2siq(i.s, i.d); }
   void emit(const cvtsi2sd& i);
   void emit(const cvtsi2sdm& i);
@@ -204,7 +204,7 @@ struct Vgen {
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
-  void emit(const nop& i) { a.nop(); }
+  void emit(const nop& /*i*/) { a.nop(); }
   void emit(not i) { unary(i); a.not(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(const orbim& i) { a.orb(i.s0, i.m); }
@@ -254,15 +254,15 @@ struct Vgen {
   void emit(const testqm& i) { a.testq(i.s0, i.s1); }
   void emit(const testqim& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
-  void emit(const ud2& i) { a.ud2(); }
+  void emit(const ud2& /*i*/) { a.ud2(); }
   void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
   void emit(xorl i) { commuteSF(i); a.xorl(i.s0, i.d); }
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
-  void emit(const conjure& i) { always_assert(false); }
-  void emit(const conjureuse& i) { always_assert(false); }
+  void emit(const conjure& /*i*/) { always_assert(false); }
+  void emit(const conjureuse& /*i*/) { always_assert(false); }
 
   void emit_nop() {
     emit(lea{rax[8], rax});
@@ -699,7 +699,7 @@ void Vgen::emit(const calltc& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const nothrow& i) {
+void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
 }
 
@@ -897,8 +897,8 @@ void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
   vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
 }
 
-template<typename Inst>
-void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
+template <typename Inst>
+void lower(Vunit& /*unit*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -940,11 +940,11 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
-void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+void lower(Vunit& unit, stubunwind& /*inst*/, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
 }
 
-void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
+void lower(Vunit& unit, stubtophp& /*inst*/, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
 }
 
@@ -1018,7 +1018,7 @@ void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  vasm_lower(unit, [&] (const VLS& env, Vinstr& inst, Vlabel b, size_t i) {
+  vasm_lower(unit, [&](const VLS& /*env*/, Vinstr& inst, Vlabel b, size_t i) {
     switch (inst.op) {
 #define O(name, ...)                      \
       case Vinstr::name:                  \

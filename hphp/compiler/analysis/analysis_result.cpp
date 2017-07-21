@@ -497,7 +497,7 @@ static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
   return f1->getName() < f2->getName();
 }
 
-void AnalysisResult::analyzeProgram(bool system /* = false */) {
+void AnalysisResult::analyzeProgram(bool /*system*/ /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
@@ -654,7 +654,7 @@ void AnalysisResult::analyzeProgramFinal() {
   setPhase(AnalysisResult::CodeGen);
 }
 
-static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void *data) {
+static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void* /*data*/) {
   s->dump(0, ar);
 }
 
@@ -941,9 +941,7 @@ struct DepthFirstVisitor {
     return stmt->preOptimize(m_data.m_ar);
   }
 
-  int visit(BlockScopeRawPtr scope) {
-    return 0;
-  }
+  int visit(BlockScopeRawPtr /*scope*/) { return 0; }
 
   void enqueue(BlockScopeRawPtr scope) {
     assert(scope->getMark() == BlockScope::MarkReady);
@@ -1074,8 +1072,8 @@ void OptWorker::doJob(BlockScope* scope) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-void AnalysisResult::processScopesParallel(const char *id,
-                                           void* context /* = NULL */) {
+void AnalysisResult::processScopesParallel(const char* /*id*/,
+                                           void* /*context*/ /* = NULL */) {
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
 

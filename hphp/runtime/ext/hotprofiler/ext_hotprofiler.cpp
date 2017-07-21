@@ -238,7 +238,7 @@ to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
   return (cycles + MHz/2) / MHz;
 }
 
-static inline uint64_t cpuTime(int64_t MHz) {
+static inline uint64_t cpuTime(int64_t /*MHz*/) {
   return vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
 }
 
@@ -375,18 +375,15 @@ Profiler::~Profiler() {
 /*
  * Called right before a function call.
  */
-void Profiler::beginFrameEx(const char *symbol) {
-}
+void Profiler::beginFrameEx(const char* /*symbol*/) {}
 
 /*
  * Called right after a function is finished.
  */
-void Profiler::endFrameEx(const TypedValue *retval,
-                          const char *_symbol) {
-}
+void Profiler::endFrameEx(const TypedValue* /*retval*/,
+                          const char* /*_symbol*/) {}
 
-void Profiler::writeStats(Array &ret) {
-}
+void Profiler::writeStats(Array& /*ret*/) {}
 
 void Profiler::endAllFrames() {
     while (m_stack) {
@@ -500,7 +497,7 @@ public:
     return new HierarchicalProfilerFrame();
   }
 
-  void beginFrameEx(const char *symbol) override {
+  void beginFrameEx(const char* /*symbol*/) override {
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
     frame->m_tsc_start = cpuCycles();
@@ -519,7 +516,8 @@ public:
     }
   }
 
-  void endFrameEx(const TypedValue *retval, const char *given_symbol) override {
+  void endFrameEx(const TypedValue* /*retval*/,
+                  const char* /*given_symbol*/) override {
     char symbol[512];
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
@@ -860,8 +858,8 @@ struct TraceProfiler final : Profiler {
     doTrace(symbol, false);
   }
 
-  void endFrame(const TypedValue *retval, const char *symbol,
-                bool endMain = false) override {
+  void endFrame(const TypedValue* /*retval*/, const char* symbol,
+                bool /*endMain*/ = false) override {
     doTrace(symbol, true);
   }
 
@@ -1009,11 +1007,10 @@ public:
     m_sampling_interval_tsc = SAMPLING_INTERVAL * m_MHz;
   }
 
-  void beginFrameEx(const char *symbol) override {
-    sample_check();
-  }
+  void beginFrameEx(const char* /*symbol*/) override { sample_check(); }
 
-  void endFrameEx(const TypedValue *retvalue, const char *symbol) override {
+  void
+  endFrameEx(const TypedValue* /*retvalue*/, const char* /*symbol*/) override {
     sample_check();
   }
 
@@ -1105,7 +1102,7 @@ private:
 // value from writeStats, not print to stderr :) Task 3396401 tracks this.
 
 struct MemoProfiler final : Profiler {
-  explicit MemoProfiler(int flags) : Profiler(true) {}
+  explicit MemoProfiler(int /*flags*/) : Profiler(true) {}
 
   ~MemoProfiler() {
   }
@@ -1133,8 +1130,8 @@ struct MemoProfiler final : Profiler {
     m_stack.push_back(f);
   }
 
-  void endFrame(const TypedValue *retval, const char *symbol,
-                bool endMain = false) override {
+  void endFrame(const TypedValue* retval, const char* symbol,
+                bool /*endMain*/ = false) override {
     if (m_stack.empty()) {
       fprintf(stderr, "STACK IMBALANCE empty %s\n", symbol);
       return;
@@ -1207,7 +1204,7 @@ struct MemoProfiler final : Profiler {
     // Nothing to do for this profiler since all work is done as we go.
   }
 
-  void writeStats(Array &ret) override {
+  void writeStats(Array& /*ret*/) override {
     fprintf(stderr, "writeStats start\n");
     // RetSame: the return value is the same instance every time
     // HasThis: call has a this argument

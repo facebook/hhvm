@@ -51,8 +51,8 @@ req::ptr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
 }
 
 req::ptr<File>
-FileStreamWrapper::open(const String& filename, const String& mode,
-                        int options, const req::ptr<StreamContext>& context) {
+FileStreamWrapper::open(const String& filename, const String& mode, int options,
+                        const req::ptr<StreamContext>& /*context*/) {
   String fname;
   if (StringUtil::IsFileUrl(filename)) {
     fname = StringUtil::DecodeFileUrl(filename);

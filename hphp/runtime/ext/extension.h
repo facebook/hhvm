@@ -71,7 +71,7 @@ public:
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {}
+  virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) {}
   virtual void moduleInfo(Array &info) { info.set(String(m_name), true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}

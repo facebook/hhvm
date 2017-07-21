@@ -40,14 +40,14 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
+void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
   auto& v = vmain(env);
 
   v << landingpad{};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
-void cgEndCatch(IRLS& env, const IRInstruction* inst) {
+void cgEndCatch(IRLS& env, const IRInstruction* /*inst*/) {
   // endCatchHelper only expects rvmtl() and rvmfp() to be live.
   vmain(env) << jmpi{tc::ustubs().endCatchHelper, rvmtl() | rvmfp()};
 }

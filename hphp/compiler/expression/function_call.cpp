@@ -156,7 +156,7 @@ bool FunctionCall::checkUnpackParams() {
 }
 
 void FunctionCall::markRefParams(FunctionScopePtr func,
-                                 const std::string &fooBarName) {
+                                 const std::string& /*fooBarName*/) {
   ExpressionList &params = *m_params;
   if (func) {
     int mpc = func->getMaxParamCount();
@@ -199,7 +199,7 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }

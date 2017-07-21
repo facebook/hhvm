@@ -102,8 +102,8 @@ struct InstrVisitor {
     }
   }
 
-  template<class T>
-  void imm(const T& imm) {
+  template <class T>
+  void imm(const T& /*imm*/) {
     out.append(" <immediate>");
   }
 

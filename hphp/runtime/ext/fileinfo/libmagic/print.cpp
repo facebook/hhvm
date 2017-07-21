@@ -47,9 +47,8 @@ FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
 #define SZOF(a)  (sizeof(a) / sizeof(a[0]))
 
 /*VARARGS*/
-protected void
-file_magwarn(struct magic_set *ms, const char *f, ...)
-{
+protected
+void file_magwarn(struct magic_set* /*ms*/, const char* f, ...) {
   va_list va;
   char *expanded_format;
 

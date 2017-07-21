@@ -703,13 +703,11 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
   return Variant(std::move(proc));
 }
 
-Variant HHVM_FUNCTION(proc_open,
-                      const String& cmd,
-                      const Array& descriptorspec,
-                      VRefParam pipesParam,
-                      const Variant& cwd /* = uninit_variant */,
-                      const Variant& env /* = uninit_variant */,
-                      const Variant& other_options /* = uninit_variant */) {
+Variant
+HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
+              VRefParam pipesParam, const Variant& cwd /* = uninit_variant */,
+              const Variant& env /* = uninit_variant */,
+              const Variant& /*other_options*/ /* = uninit_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }

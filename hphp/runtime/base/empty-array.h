@@ -120,7 +120,7 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
     return false;
   }
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf) {
+  static ArrayData* EscalateForSort(ArrayData* ad, SortFunction /*sf*/) {
     return ad;
   }
   static void Ksort(ArrayData*, int, bool) {}

@@ -101,7 +101,7 @@ inline Id FuncEmitter::lookupVarId(const StringData* name) const {
   return m_localNames.find(name)->second;
 }
 
-inline void FuncEmitter::freeUnnamedLocal(Id id) {
+inline void FuncEmitter::freeUnnamedLocal(Id /*id*/) {
   assert(m_activeUnnamedLocals > 0);
   --m_activeUnnamedLocals;
 }

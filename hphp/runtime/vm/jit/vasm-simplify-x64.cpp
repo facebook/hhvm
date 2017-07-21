@@ -29,8 +29,10 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Inst>
-bool simplify(Env&, const Inst& inst, Vlabel b, size_t i) { return false; }
+template <typename Inst>
+bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -79,10 +81,13 @@ struct CmpUseChecker {
 
   template<class T> void imm(const T&) {}
   template<class T> void def(T) {}
-  template<class T, class H> void defHint(T r, H) {}
+  template <class T, class H>
+  void defHint(T /*r*/, H) {}
   template<class T> void use(T) {}
-  template<class T, class H> void useHint(T r, H) {}
-  template<class T> void across(T r) {}
+  template <class T, class H>
+  void useHint(T /*r*/, H) {}
+  template <class T>
+  void across(T /*r*/) {}
 
   VregSF target;
   folly::Optional<bool> cc_result;

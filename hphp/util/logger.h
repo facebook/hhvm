@@ -159,12 +159,12 @@ protected:
   // Returns (lines, bytes) it's going to output. Used for monitoring growth.
   virtual std::pair<int, int> flush() { return std::make_pair(0, 0); }
 
-  virtual void setBatchSize(size_t bsize) {}
+  virtual void setBatchSize(size_t /*bsize*/) {}
 
   // flush the log after this timeout (in milliseconds) has been exceeded.
   // 0 will disable the timeout and flush only when the batch size has been
   // met.
-  virtual void setFlushTimeout(std::chrono::milliseconds timeoutMs) {}
+  virtual void setFlushTimeout(std::chrono::milliseconds /*timeoutMs*/) {}
 
   // deduce where to write log
   virtual FILE* output();

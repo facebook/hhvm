@@ -422,7 +422,7 @@ LightProcess::LightProcess() : m_shadowProcess(0), m_afdt_fd(-1) { }
 LightProcess::~LightProcess() {
 }
 
-void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
+void LightProcess::SigChldHandler(int /*sig*/, siginfo_t* info, void* /*ctx*/) {
   if (info->si_code != CLD_EXITED &&
       info->si_code != CLD_KILLED &&
       info->si_code != CLD_DUMPED) {

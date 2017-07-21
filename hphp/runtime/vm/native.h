@@ -369,16 +369,14 @@ std::vector<NativeSig::Type> build_args() {
 
 }
 
-template<class Ret>
-NativeSig::NativeSig(Ret (*ptr)())
-  : ret(detail::native_ret_type<Ret>::value)
-{}
+template <class Ret>
+NativeSig::NativeSig(Ret (*/*ptr*/)())
+    : ret(detail::native_ret_type<Ret>::value) {}
 
-template<class Ret, class... Args>
-NativeSig::NativeSig(Ret (*ptr)(Args...))
-  : ret(detail::native_ret_type<Ret>::value)
-  , args(detail::build_args<Args...>())
-{}
+template <class Ret, class... Args>
+NativeSig::NativeSig(Ret (*/*ptr*/)(Args...))
+    : ret(detail::native_ret_type<Ret>::value),
+      args(detail::build_args<Args...>()) {}
 
 #undef NATIVE_TYPES
 

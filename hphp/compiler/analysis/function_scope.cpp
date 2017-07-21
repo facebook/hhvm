@@ -126,7 +126,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
   setParamCounts(ar, m_minParam, m_numDeclParams);
 }
 
-void FunctionScope::init(AnalysisResultConstPtr ar) {
+void FunctionScope::init(AnalysisResultConstPtr /*ar*/) {
   m_dynamicInvoke = false;
 
   if (isNamed("__autoload")) {
@@ -199,7 +199,7 @@ void FunctionScope::setDynamicInvoke() {
   m_dynamicInvoke = true;
 }
 
-void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
+void FunctionScope::setParamCounts(AnalysisResultConstPtr /*ar*/, int minParam,
                                    int numDeclParam) {
   if (minParam >= 0) {
     m_minParam = minParam;
@@ -405,7 +405,7 @@ std::string FunctionScope::getOriginalFullName() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionScope::addCaller(BlockScopePtr caller,
-                              bool careAboutReturn /* = true */) {
+                              bool /*careAboutReturn*/ /* = true */) {
   addUse(caller, UseKindCaller);
 }
 

@@ -186,7 +186,7 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr StatementList::preOptimize(AnalysisResultConstPtr /*ar*/) {
   bool changed = false;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];

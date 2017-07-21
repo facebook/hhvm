@@ -192,7 +192,7 @@ struct Parser : ParserBase {
                   bool constant = false,
                   const std::string &docComment = "");
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
-  void onClassVariableModifer(Token &mod) {}
+  void onClassVariableModifer(Token& /*mod*/) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
                             Token *type, bool abstract = false,
                             bool typeconst = false);

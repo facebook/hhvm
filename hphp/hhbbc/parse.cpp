@@ -338,11 +338,9 @@ void add_factored_exits(php::Block& blk,
  * control flow through any parent protected regions of the region(s)
  * that pointed at each fault handler.
  */
-template<class BlockStarts, class FindBlock>
-void find_fault_funclets(ExnTreeInfo& tinfo,
-                         const php::Func& func,
-                         const BlockStarts& blockStarts,
-                         FindBlock findBlock) {
+template <class BlockStarts, class FindBlock>
+void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& /*func*/,
+                         const BlockStarts& blockStarts, FindBlock findBlock) {
   auto sectionId = uint32_t{1};
 
   for (auto funcletStartIt = begin(tinfo.faultFuncletStarts);
@@ -393,7 +391,7 @@ template<class T> void decode(PC& pc, T& val) {
   val = decode<T>(pc);
 }
 
-MKey make_mkey(const php::Func& func, MemberKey mk) {
+MKey make_mkey(const php::Func& /*func*/, MemberKey mk) {
   switch (mk.mcode) {
     case MEL: case MPL:
       return MKey{mk.mcode, static_cast<LocalId>(mk.iva)};

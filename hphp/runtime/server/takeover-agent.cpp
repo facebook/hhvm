@@ -57,8 +57,8 @@
 namespace HPHP {
 
 #ifndef _MSC_VER
-static void fd_transfer_error_handler(const struct afdt_error_t* err,
-                                      void* userdata) {
+static void
+fd_transfer_error_handler(const struct afdt_error_t* err, void* /*userdata*/) {
   Logger::Error("AFDT ERROR: phase=%s operation=%s "
                 "message=\"%s\" errno=\"%s\"",
                 afdt_phase_str(err->phase),

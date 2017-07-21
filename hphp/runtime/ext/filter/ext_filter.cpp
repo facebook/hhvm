@@ -133,7 +133,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 static struct FilterExtension final : Extension {
   FilterExtension() : Extension("filter", "0.11.0") {}
 
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     HHVM_FE(__SystemLib_filter_input_get_var);
     HHVM_FE(_filter_snapshot_globals);
   }

@@ -676,12 +676,11 @@ void liveRelocate(int time) {
   always_assert(fixups.empty());
 }
 
-std::string perfRelocMapInfo(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch>& incomingBranchesIn,
-    CGMeta& fixups) {
+std::string
+perfRelocMapInfo(TCA start, TCA /*end*/, TCA coldStart, TCA coldEnd, SrcKey sk,
+                 int argNum,
+                 const GrowableVector<IncomingBranch>& incomingBranchesIn,
+                 CGMeta& fixups) {
   for (auto& stub : fixups.reusedStubs) {
     Debug::DebugInfo::Get()->recordRelocMap(stub, 0, "NewStub");
   }

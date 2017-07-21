@@ -28,7 +28,8 @@ static unsigned long callback_thread_id() {
   return (unsigned long)Process::GetThreadId();
 }
 
-static void callback_locking(int mode, int type, const char *file, int line) {
+static void
+callback_locking(int mode, int type, const char* /*file*/, int /*line*/) {
   if (mode & CRYPTO_LOCK) {
     s_locks[type].lock();
   } else {

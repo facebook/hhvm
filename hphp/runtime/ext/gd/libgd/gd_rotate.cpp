@@ -185,8 +185,7 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 }
 
 /* Rotates an image by 90 degrees (counter clockwise) */
-gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate90(gdImagePtr src, int /*ignoretransparent*/) {
   int uY, uX;
   int c,r,g,b,a;
   gdImagePtr dst;
@@ -221,8 +220,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 }
 
 /* Rotates an image by 180 degrees (counter clockwise) */
-gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate180(gdImagePtr src, int /*ignoretransparent*/) {
   int uY, uX;
   int c,r,g,b,a;
   gdImagePtr dst;
@@ -257,8 +255,7 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 }
 
 /* Rotates an image by 270 degrees (counter clockwise) */
-gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate270(gdImagePtr src, int /*ignoretransparent*/) {
   int uY, uX;
   int c,r,g,b,a;
   gdImagePtr dst;

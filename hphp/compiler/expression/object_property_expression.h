@@ -36,7 +36,7 @@ struct ObjectPropertyExpression : Expression, LocalEffectsContainer {
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  bool isRefable(bool checkError = false) const override { return true;}
+  bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   void setContext(Context context) override;
   void clearContext(Context context) override;

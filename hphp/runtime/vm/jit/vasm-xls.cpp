@@ -621,9 +621,7 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
     auto& code = unit.blocks[b].code;
 
     bool front_uses{false};
-    visitUses(unit, code.front(), [&] (Vreg r) {
-      front_uses = true;
-    });
+    visitUses(unit, code.front(), [&](Vreg /*r*/) { front_uses = true; });
     if (front_uses) {
       auto irctx = code.front().irctx();
       code.emplace(code.begin(), nop{}, irctx);
@@ -921,7 +919,7 @@ struct UseVisitor {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
   }
-  void use(VcallArgsId id) {
+  void use(VcallArgsId /*id*/) {
     always_assert(false && "vcall unsupported in vxls");
   }
 
@@ -2317,7 +2315,8 @@ struct Renamer {
     , pos(pos)
   {}
 
-  template<class T> void imm(const T& r) {}
+  template <class T>
+  void imm(const T& /*r*/) {}
   template<class R> void def(R& r) { rename(r); }
   template<class D, class H> void defHint(D& dst, H) { rename(dst); }
   template<class R> void use(R& r) { rename(r); }
@@ -2325,7 +2324,7 @@ struct Renamer {
   template<class R> void across(R& r) { rename(r); }
 
   void def(RegSet) {}
-  void use(RegSet r) {}
+  void use(RegSet /*r*/) {}
   void use(Vptr& m) {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
@@ -2341,7 +2340,8 @@ private:
   void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
   void rename(VregSF& r) { r = RegSF{0}; }
   void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
-  void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
+  void rename(Vtuple /*t*/) { /* phijmp/phijcc+phidef handled by resolveEdges */
+  }
 
   PhysReg lookup(Vreg vreg, Constraint kind) {
     auto var = variables[vreg];
@@ -2381,8 +2381,9 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
 ///////////////////////////////////////////////////////////////////////////////
 // Flags liveness optimization.
 
-template<typename Inst, typename F>
-void optimize(Vunit& unit, Inst& inst, Vlabel b, size_t i, F sf_live) {}
+template <typename Inst, typename F>
+void optimize(Vunit& /*unit*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/,
+              F /*sf_live*/) {}
 
 template<typename xor_op, typename ldimm_op, typename F>
 void optimize_ldimm(Vunit& unit, ldimm_op& ldimm,
@@ -2568,7 +2569,7 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
  * after this.
  */
 void insertCopies(Vunit& unit, const VxlsContext& ctx,
-                  const jit::vector<Variable*>& variables,
+                  const jit::vector<Variable*>& /*variables*/,
                   const ResolutionPlan& resolution) {
   // Insert copies inside blocks.
   for (auto const b : ctx.blocks) {

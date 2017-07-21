@@ -428,7 +428,7 @@ SSATmp* simplifyConvClsToCctx(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyMov(State& env, const IRInstruction* inst) {
+SSATmp* simplifyMov(State& /*env*/, const IRInstruction* inst) {
   return inst->src(0);
 }
 
@@ -492,14 +492,9 @@ SSATmp* commutativeImpl(State& env,
  * Assumes that the values we're going to add new uses to are not reference
  * counted.  (I.e. this is a distributive FooInt opcode.)
  */
-template<class OutOper, class InOper>
-SSATmp* distributiveImpl(State& env,
-                         SSATmp* src1,
-                         SSATmp* src2,
-                         Opcode outcode,
-                         Opcode incode,
-                         OutOper outop,
-                         InOper inop) {
+template <class OutOper, class InOper>
+SSATmp* distributiveImpl(State& env, SSATmp* src1, SSATmp* src2, Opcode outcode,
+                         Opcode incode, OutOper outop, InOper /*inop*/) {
   if (auto simp = commutativeImpl(env, src1, src2, outcode, outop)) {
     return simp;
   }
@@ -1277,11 +1272,8 @@ SSATmp* cmpStrIntImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpObjImpl(State& env,
-                   Opcode opc,
-                   const IRInstruction* const inst,
-                   SSATmp* left,
-                   SSATmp* right) {
+SSATmp* cmpObjImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+                   SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TObj);
   assertx(right->type() <= TObj);
 
@@ -1295,11 +1287,8 @@ SSATmp* cmpObjImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpArrImpl(State& env,
-                   Opcode opc,
-                   const IRInstruction* const inst,
-                   SSATmp* left,
-                   SSATmp* right) {
+SSATmp* cmpArrImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+                   SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TArr);
   assertx(right->type() <= TArr);
 
@@ -1313,11 +1302,8 @@ SSATmp* cmpArrImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpVecImpl(State& env,
-                   Opcode opc,
-                   const IRInstruction* const inst,
-                   SSATmp* left,
-                   SSATmp* right) {
+SSATmp* cmpVecImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+                   SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TVec);
   assertx(right->type() <= TVec);
 
@@ -1330,11 +1316,8 @@ SSATmp* cmpVecImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpDictImpl(State& env,
-                    Opcode opc,
-                    const IRInstruction* const inst,
-                    SSATmp* left,
-                    SSATmp* right) {
+SSATmp* cmpDictImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+                    SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TDict);
   assertx(right->type() <= TDict);
 
@@ -1347,11 +1330,9 @@ SSATmp* cmpDictImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpKeysetImpl(State& env,
-                      Opcode opc,
-                      const IRInstruction* const inst,
-                      SSATmp* left,
-                      SSATmp* right) {
+SSATmp*
+cmpKeysetImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+              SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TKeyset);
   assertx(right->type() <= TKeyset);
 
@@ -1386,11 +1367,8 @@ SSATmp* cmpKeysetImpl(State& env,
   return nullptr;
 }
 
-SSATmp* cmpResImpl(State& env,
-                   Opcode opc,
-                   const IRInstruction* const inst,
-                   SSATmp* left,
-                   SSATmp* right) {
+SSATmp* cmpResImpl(State& env, Opcode opc, const IRInstruction* const /*inst*/,
+                   SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TRes);
   assertx(right->type() <= TRes);
 
@@ -2271,7 +2249,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvCellToObj(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvCellToObj(State& /*env*/, const IRInstruction* inst) {
   if (inst->src(0)->isA(TObj)) return inst->src(0);
   return nullptr;
 }
@@ -2365,14 +2343,14 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
   return roundImpl(env, inst, ceil);
 }
 
-SSATmp* simplifyUnboxPtr(State& env, const IRInstruction* inst) {
+SSATmp* simplifyUnboxPtr(State& /*env*/, const IRInstruction* inst) {
   if (inst->src(0)->isA(TPtrToCell)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
-SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
+SSATmp* simplifyBoxPtr(State& /*env*/, const IRInstruction* inst) {
   if (inst->src(0)->isA(TPtrToBoxedCell)) {
     return inst->src(0);
   }
@@ -2719,7 +2697,7 @@ SSATmp* simplifySelect(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
+SSATmp* simplifyAssertNonNull(State& /*env*/, const IRInstruction* inst) {
   if (!inst->src(0)->type().maybe(TNullptr)) {
     return inst->src(0);
   }
@@ -2925,8 +2903,8 @@ SSATmp* checkOffsetImpl(State& env, const IRInstruction* inst, G get) {
 }
 
 template <typename I, typename S, typename F>
-SSATmp* hackArrQueryImpl(State& env, const IRInstruction* inst,
-                         I getInt, S getStr, F finish) {
+SSATmp* hackArrQueryImpl(State& /*env*/, const IRInstruction* inst, I getInt,
+                         S getStr, F finish) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
 
@@ -3203,7 +3181,7 @@ SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
 }
 
-SSATmp* simplifyLookupClsRDS(State& env, const IRInstruction* inst) {
+SSATmp* simplifyLookupClsRDS(State& /*env*/, const IRInstruction* inst) {
   SSATmp* name = inst->src(0);
   if (name->inst()->is(LdClsName)) {
     return name->inst()->src(0);
@@ -3232,7 +3210,7 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
 }
 
 template <class F>
-SSATmp* simplifyByClass(State& env, const SSATmp* src, F f) {
+SSATmp* simplifyByClass(State& /*env*/, const SSATmp* src, F f) {
   if (!src->isA(TObj)) return nullptr;
   if (auto const spec = src->type().clsSpec()) {
     return f(spec.cls(), spec.exact());

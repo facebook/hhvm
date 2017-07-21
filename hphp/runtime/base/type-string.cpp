@@ -431,7 +431,7 @@ StaticString::StaticString(const char* s, int length)
 StaticString::StaticString(std::string s)
 : String(makeStaticStringSafe(s.c_str(), s.size()), NoIncRef{}) { }
 
-StaticString& StaticString::operator=(const StaticString &str) {
+StaticString& StaticString::operator=(const StaticString& /*str*/) {
   // Assignment to a StaticString is ignored. Generated code
   // should never use a StaticString on the left-hand side of
   // assignment. A StaticString can only be initialized by a

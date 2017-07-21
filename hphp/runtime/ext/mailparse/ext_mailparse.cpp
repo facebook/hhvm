@@ -39,7 +39,7 @@ Resource HHVM_FUNCTION(mailparse_msg_create) {
   return Resource(req::make<MimePart>());
 }
 
-bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
+bool HHVM_FUNCTION(mailparse_msg_free, const Resource& /*mimemail*/) {
   return true;
 }
 

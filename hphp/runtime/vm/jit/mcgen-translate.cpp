@@ -216,7 +216,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   return cg;
 }
 
-void print(hfsort::TargetGraph& cg, const char* fileName,
+void print(hfsort::TargetGraph& /*cg*/, const char* fileName,
            const std::vector<hfsort::Cluster>& clusters,
            jit::hash_map<hfsort::TargetId, FuncId>& target2FuncId) {
   FILE* outfile = fopen(fileName, "wt");

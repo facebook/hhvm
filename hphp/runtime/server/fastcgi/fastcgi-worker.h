@@ -48,12 +48,10 @@ private:
 };
 
 struct FastCGITransportTraits {
-  FastCGITransportTraits(std::shared_ptr<FastCGIJob> job,
-                         void* context,
-                         int id)
-    : m_server(reinterpret_cast<FastCGIServer*>(context))
-    , m_transport(job->getTransport())
-  {}
+  FastCGITransportTraits(std::shared_ptr<FastCGIJob> job, void* context,
+                         int /*id*/)
+      : m_server(reinterpret_cast<FastCGIServer*>(context)),
+        m_transport(job->getTransport()) {}
 
   Server* getServer() const;
   Transport* getTransport() const;

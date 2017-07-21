@@ -20,9 +20,29 @@
 
 #include <limits>
 
+#ifndef crypto_kx_BYTES
 #define crypto_kx_BYTES crypto_scalarmult_BYTES
+#else
+static_assert(
+    crypto_kx_BYTES == crypto_scalarmult_BYTES,
+    "crypto_kx_BYTES != crypto_scalarmult_BYTES");
+#endif
+
+#ifndef crypto_kx_PUBLICKEYBYTES
 #define crypto_kx_PUBLICKEYBYTES crypto_scalarmult_SCALARBYTES
+#else
+static_assert(
+    crypto_kx_PUBLICKEYBYTES == crypto_scalarmult_SCALARBYTES,
+    "crypto_kx_PUBLICKEYBYTES != crypto_scalarmult_SCALARBYTES");
+#endif
+
+#ifndef crypto_kx_SECRETKEYBYTES
 #define crypto_kx_SECRETKEYBYTES crypto_scalarmult_SCALARBYTES
+#else
+static_assert(
+    crypto_kx_SECRETKEYBYTES == crypto_scalarmult_SCALARBYTES,
+    "crypto_kx_SECRETKEYBYTES != crypto_scalarmult_SCALARBYTES");
+#endif
 
 #ifndef crypto_pwhash_scryptsalsa208sha256_STRPREFIX
 #define crypto_pwhash_scryptsalsa208sha256_STRPREFIX "$7$"

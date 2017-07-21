@@ -51,6 +51,16 @@ let () =
   let command = ClientArgs.parse_args () in
   let root = ClientArgs.root command in
   HackEventLogger.client_init root;
+  let command_name = function
+    | ClientCommand.CCheck _ -> "Check"
+    | ClientCommand.CStart _ -> "Start"
+    | ClientCommand.CStop _ -> "Stop"
+    | ClientCommand.CRestart _ -> "Restart"
+    | ClientCommand.CBuild _ -> "Build"
+    | ClientCommand.CIde _ -> "Ide"
+    | ClientCommand.CLsp _ -> "Lsp"
+    | ClientCommand.CDebug _ -> "Debug"
+  in
   let exit_status =
     try
       match command with
@@ -63,7 +73,7 @@ let () =
         | ClientCommand.CLsp env -> ClientLsp.main env (* never terminates *)
         | ClientCommand.CDebug env -> ClientDebug.main env
     with Exit_status.Exit_with es ->
-      HackEventLogger.client_bad_exit es;
+      HackEventLogger.client_bad_exit ~command:(command_name command) es;
       es
   in
   Exit_status.exit exit_status

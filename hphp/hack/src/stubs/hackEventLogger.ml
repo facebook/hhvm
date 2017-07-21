@@ -45,7 +45,7 @@ let client_lsp_method_exception
   ~message:_ ~stack:_ ~source:_ = ()
 let client_lsp_exception
   ~root:_ ~message:_ ~stack:_ ~source:_ = ()
-let client_bad_exit _ = ()
+let client_bad_exit ~command _ = ()
 let monitor_dead_but_typechecker_alive () = ()
 let client_connect_to_monitor_timeout () = ()
 let client_established_connection _ = ()

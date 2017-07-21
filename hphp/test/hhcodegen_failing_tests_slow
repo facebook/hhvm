@@ -116,11 +116,6 @@ slow/ext_xdebug/max_nesting_level_1.php
 slow/ext_xdebug/time_index.php
 slow/ext_xdebug/xdebug/xdebug_call.php
 slow/ext_xdebug/xdebug_var_dump_limitations.php
-slow/finally/finally_break_003.php
-slow/finally/finally_break_004.php
-slow/finally/finally_break_005.php
-slow/finally/finally_break_006.php
-slow/finally/finally_break_007.php
 slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
@@ -129,7 +124,6 @@ slow/finally/finally_pseudomain_001.php
 slow/finally/finally_pseudomain_002.php
 slow/finally/finally_yield_001.php
 slow/finally/goto-bare.php
-slow/finally/new_try_catch_002.php
 slow/finally/new_try_catch_004.php
 slow/finally/new_try_catch_005.php
 slow/finally/new_try_catch_006.php
@@ -457,7 +451,6 @@ slow/reflection/scalar_param_types/php-noforcehh.php
 slow/reflection/self-reflection-getclass.php
 slow/reflection_classes/1354.php
 slow/reflection_classes/xhp.php
-slow/return_statement/finally-typecheck.php
 slow/sanity/1.php
 slow/sanity/3.php
 slow/sanity/4.php

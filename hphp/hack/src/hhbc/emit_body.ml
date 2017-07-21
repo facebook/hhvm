@@ -64,7 +64,7 @@ and emit_defs env defs =
     | Ast.SetNamespaceEnv ns :: defs ->
       let env = Emit_env.with_namespace ns env in
       aux env defs
-    | [] -> Emit_statement.emit_dropthrough_return ()
+    | [] -> Emit_statement.emit_dropthrough_return env
     (* emit last statement in the list as final statement *)
     | [Ast.Stmt s]
     (* emit statement as final if it is one before the last and last statement is
@@ -72,7 +72,7 @@ and emit_defs env defs =
     | [Ast.Stmt s; Ast.Stmt (Ast.Markup ((_, ""), None))] ->
       Emit_statement.emit_final_statement env s
     | [d] ->
-      gather [emit_def env d; Emit_statement.emit_dropthrough_return ()]
+      gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
     | d::defs ->
       let i1 = emit_def env d in
       let i2 = aux env defs in
@@ -148,6 +148,7 @@ let emit_body
   let needs_local_this, decl_vars =
     Decl_vars.from_ast ~is_closure_body ~has_this ~params:params body in
   let adjust_closure = if is_closure_body then 1 else 0 in
+  Jump_targets.reset ();
   Local.reset_local
     (List.length params + List.length decl_vars + adjust_closure);
   let env = Emit_env.(
@@ -165,9 +166,6 @@ let emit_body
   let stmt_instrs =
     rewrite_static_instrseq svar_map
                     (Emit_expression.emit_expr ~need_ref:false) env stmt_instrs
-  in
-  let stmt_instrs =
-    Continue_break_rewriter.rewrite_special_flow_returns stmt_instrs
   in
   let first_instruction_is_label =
     match Instruction_sequence.first stmt_instrs with

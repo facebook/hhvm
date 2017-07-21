@@ -262,26 +262,8 @@ type instruct_control_flow =
 type iterator_list = (bool * Iterator.t) list
 
 type instruct_special_flow =
-  | Continue of int * int  (* This will be rewritten *)
-  | Break of int * int * iterator_list (* This will be rewritten *)
-  (* These two constructors are used to represent ret* instructions
-     that might be emitted in try region - these returns should be
-     rewritten as jumps to a finally prologue. In addition if ret* instruction
-     is enclosed in foreach body then jump should be emitted as IterBreak
-     to cleanup the iterator - list is necessary since there might be multiple
-     enclising foreach statements:
-     try {
-       foreach ($c2 as $v1) {
-         foreach ($c2 as $v2) {
-           return 1; // jump to finally prologue should release both iterators
-         }
-       }
-     }
-    finally {
-
-    } *)
-  | SF_RetC of iterator_list (* This will be rewritten *)
-  | SF_RetV of iterator_list (* This will be rewritten *)
+  | Continue of int
+  | Break of int
 
 type instruct_get =
   | CGetL of local_id

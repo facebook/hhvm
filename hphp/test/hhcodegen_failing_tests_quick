@@ -8,7 +8,6 @@ quick/class_constant.php
 quick/closure_recursive_bad.php
 quick/closure_use_this.php
 quick/constIntToString.php
-quick/continue.php
 quick/ctor_param_promotion_abstract.php
 quick/ctor_param_promotion_generic.php
 quick/ctor_param_promotion_generic1.php

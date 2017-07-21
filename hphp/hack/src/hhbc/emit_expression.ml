@@ -18,7 +18,6 @@ module A = Ast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
-module CBR = Continue_break_rewriter
 module SU = Hhbc_string_utils
 module ULS = Unique_list_string
 

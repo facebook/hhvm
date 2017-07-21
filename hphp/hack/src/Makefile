@@ -72,6 +72,7 @@ MODULES=\
   stubs\
   third-party/avl\
   third-party/core\
+  third-party/ppx_deriving\
   typing\
   utils\
   utils/collections\

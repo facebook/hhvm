@@ -10686,7 +10686,7 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
     unwrapped->addElement(ap->getValue());
   }
   emitArrayInit(e, unwrapped, HeaderKind::VecArray);
-  e.ColFromArray(static_cast<int>(ct));
+  e.ColFromArray(ct);
   return;
 }
 
@@ -10703,7 +10703,7 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
     }
   }
   emitArrayInit(e, el, HeaderKind::Dict, true);
-  e.ColFromArray(static_cast<int>(ct));
+  e.ColFromArray(ct);
 }
 
 void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
@@ -10719,7 +10719,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
     }
   }
   emitArrayInit(e, el, HeaderKind::Dict);
-  e.ColFromArray(static_cast<int>(ct));
+  e.ColFromArray(ct);
 }
 
 void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
@@ -10737,7 +10737,7 @@ void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
     if (ct == CollectionType::Pair) {
       throw IncludeTimeFatalException(b, "Initializer needed for Pair object");
     }
-    e.NewCol(static_cast<int>(*ct));
+    e.NewCol(*ct);
     return;
   }
 

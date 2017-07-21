@@ -1,0 +1,3 @@
+Verification Error (unit %s func ): Immediate of NewCol must not be a pair
+Verification Error (unit %s func ): Immediate of ColFromArray must not be a pair
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

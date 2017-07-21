@@ -22,6 +22,15 @@
 
 namespace HPHP {
 
+#define COLLECTION_TYPES              \
+  COL(Vector)                         \
+  COL(Map)                            \
+  COL(Set)                            \
+  COL(Pair)                           \
+  COL(ImmVector)                      \
+  COL(ImmMap)                         \
+  COL(ImmSet)
+
 /*
  * every request-allocated object has a 1-byte kind field in its
  * header, from this enum. If you update the enum, be sure to
@@ -176,15 +185,10 @@ inline bool isWaithandleKind(HeaderKind k) {
          k == HeaderKind::AsyncFuncWH;
 }
 
-enum class CollectionType : uint8_t { // Subset of possible HeaderKind values
-  // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  Vector = uint8_t(HeaderKind::Vector),
-  Map = uint8_t(HeaderKind::Map),
-  Set = uint8_t(HeaderKind::Set),
-  Pair = uint8_t(HeaderKind::Pair),
-  ImmVector = uint8_t(HeaderKind::ImmVector),
-  ImmMap = uint8_t(HeaderKind::ImmMap),
-  ImmSet = uint8_t(HeaderKind::ImmSet),
+enum class CollectionType : uint8_t {
+#define COL(name) name = uint8_t(HeaderKind::name),
+  COLLECTION_TYPES
+#undef COL
 };
 
 inline bool isVectorCollection(CollectionType ctype) {

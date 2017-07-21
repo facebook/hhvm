@@ -55,6 +55,10 @@ let random_flag () : HTC.type_constraint_flag =
   [HTC.Nullable; HTC.HHType; HTC.ExtendedHint; HTC.TypeVar; HTC.Soft;
    HTC.TypeConstant] |> rand_elt
 
+let random_collection_type () : CollectionType.t =
+  let open CollectionType in
+  [Vector; Map; Set; Pair; ImmVector; ImmMap; ImmSet] |> rand_elt
+
 let random_p_op () : initprop_op = [Static; NonStatic] |> rand_elt
 
 let random_query_op () : QueryOp.t =
@@ -118,7 +122,7 @@ let all_instrs : lazy_instruct list =
     (fun () -> ILitConst (NewMIArray (Random.int 1000)));
     (fun () -> ILitConst (NewMSArray (Random.int 1000)));
     (fun () -> ILitConst (NewLikeArrayL (random_local (), Random.int 1000)));
-    (fun () -> ILitConst (NewCol (Random.int 10)));
+    (fun () -> ILitConst (NewCol (random_collection_type ())));
     (fun () -> ILitConst (Cns (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsE (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsU (Const.from_raw_string "", "")));
@@ -142,7 +146,7 @@ let all_instrs : lazy_instruct list =
     (fun () -> IBasic PopR);
     (fun () -> IBasic PopU);
     (fun () -> IBasic PopV);
-    (fun () -> ILitConst (ColFromArray (Random.int 10)));
+    (fun () -> ILitConst (ColFromArray (random_collection_type ())));
     (fun () -> IOp Abs);
     (fun () -> IOp Sqrt);
     (fun () -> IOp Not);

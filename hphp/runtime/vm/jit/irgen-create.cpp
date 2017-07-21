@@ -435,8 +435,8 @@ void emitAddNewElemC(IRGS& env) {
   push(env, gen(env, AddNewElem, arr, val));
 }
 
-void emitNewCol(IRGS& env, uint32_t type) {
-  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
+void emitNewCol(IRGS& env, CollectionType type) {
+  assertx(type != CollectionType::Pair);
   push(env, gen(env, NewCol, NewColData{type}));
 }
 
@@ -448,8 +448,8 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitColFromArray(IRGS& env, uint32_t type) {
-  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
+void emitColFromArray(IRGS& env, CollectionType type) {
+  assertx(type != CollectionType::Pair);
   auto const arr = popC(env);
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }

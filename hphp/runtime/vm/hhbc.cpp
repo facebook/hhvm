@@ -952,6 +952,12 @@ static const char* BareThisOp_names[] = {
 #undef BARETHIS_OP
 };
 
+static const char* CollectionType_names[] = {
+#define COL(x) #x,
+  COLLECTION_TYPES
+#undef COL
+};
+
 static const char* SilenceOp_names[] = {
 #define SILENCE_OP(x) #x,
   SILENCE_OPS
@@ -1001,26 +1007,27 @@ static const char* CudOp_names[] = {
 };
 
 template<class T, size_t Sz>
-const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
+const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
     std::is_same<typename std::underlying_type<T>::type,uint8_t>::value,
     "Subops are all expected to be single-bytes"
   );
-  auto const idx = static_cast<uint8_t>(opcode);
+  auto const idx = static_cast<uint8_t>(opcode) - off;
   always_assert(idx < Sz);
   return arr[idx];
 }
 
 template<class T, size_t Sz>
-bool subopValidImpl(const char* (&arr)[Sz], T op) {
-  auto const raw = static_cast<typename std::underlying_type<T>::type>(op);
+bool subopValidImpl(const char* (&arr)[Sz], T op, int off) {
+  auto raw = static_cast<typename std::underlying_type<T>::type>(op) - off;
   return raw >= 0 && raw < Sz;
 }
 
 template<class T, size_t Sz>
-folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz], const char* str) {
+folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz],
+  const char* str, int off) {
   for (auto i = size_t{0}; i < Sz; ++i) {
-    if (!strcmp(str, arr[i])) return static_cast<T>(i);
+    if (!strcmp(str, arr[i])) return static_cast<T>(i + off);
   }
   return folly::none;
 }
@@ -1033,36 +1040,39 @@ template<class T> folly::Optional<T> nameToSubop(const char* str) {
   return NameToSubopHelper<T>::conv(str);
 }
 
-#define X(subop)                                            \
-  const char* subopToName(subop op) {                       \
-    return subopToNameImpl(subop##_names, op);              \
-  }                                                         \
-  template<> bool subopValid(subop op) {                    \
-    return subopValidImpl(subop##_names, op);               \
-  }                                                         \
-  namespace {                                               \
-  template<> struct NameToSubopHelper<subop> {              \
-    static folly::Optional<subop> conv(const char* str) {   \
-      return nameToSubopImpl<subop>(subop##_names, str);    \
-    }                                                       \
-  };                                                        \
-  }                                                         \
+#define X(subop, off)                                              \
+  const char* subopToName(subop op) {                              \
+    return subopToNameImpl(subop##_names, op, off);                \
+  }                                                                \
+  template<> bool subopValid(subop op) {                           \
+    return subopValidImpl(subop##_names, op, off);                 \
+  }                                                                \
+  namespace {                                                      \
+  template<> struct NameToSubopHelper<subop> {                     \
+    static folly::Optional<subop> conv(const char* str) {          \
+      return nameToSubopImpl<subop>(subop##_names, str, off);      \
+    }                                                              \
+  };                                                               \
+  }                                                                \
   template folly::Optional<subop> nameToSubop(const char*);
 
-X(InitPropOp)
-X(IsTypeOp)
-X(FatalOp)
-X(SetOpOp)
-X(IncDecOp)
-X(BareThisOp)
-X(SilenceOp)
-X(OODeclExistsOp)
-X(ObjMethodOp)
-X(SwitchKind)
-X(QueryMOp)
-X(MOpMode)
-X(ContCheckOp)
-X(CudOp)
+// Not all subops start indexing at 0
+/*Subop Name      Numerically first value */
+X(InitPropOp,     static_cast<int>(InitPropOp::Static))
+X(IsTypeOp,       static_cast<int>(IsTypeOp::Uninit))
+X(FatalOp,        static_cast<int>(FatalOp::Runtime))
+X(SetOpOp,        static_cast<int>(SetOpOp::PlusEqual))
+X(IncDecOp,       static_cast<int>(IncDecOp::PreInc))
+X(BareThisOp,     static_cast<int>(BareThisOp::Notice))
+X(SilenceOp,      static_cast<int>(SilenceOp::Start))
+X(CollectionType, static_cast<int>(HeaderKind::Vector))
+X(OODeclExistsOp, static_cast<int>(OODeclExistsOp::Class))
+X(ObjMethodOp,    static_cast<int>(ObjMethodOp::NullThrows))
+X(SwitchKind,     static_cast<int>(SwitchKind::Unbounded))
+X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
+X(MOpMode,        static_cast<int>(MOpMode::None))
+X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
+X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
 
 #undef X
 

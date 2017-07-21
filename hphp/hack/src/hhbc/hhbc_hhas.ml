@@ -94,8 +94,8 @@ let string_of_lit_const instruction =
     | Keyset id         -> sep ["Keyset"; string_of_adata_id id]
     | Vec id            -> sep ["Vec"; string_of_adata_id id]
     | TypedValue _tv    -> failwith "string_of_lit_const: TypedValue"
-    | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
-    | NewCol i          -> sep ["NewCol"; string_of_int i]
+    | ColFromArray t    -> sep ["ColFromArray"; CollectionType.to_string t]
+    | NewCol t          -> sep ["NewCol"; CollectionType.to_string t]
     | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
     | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
     | NewVecArray i     -> sep ["NewVecArray"; string_of_int i]

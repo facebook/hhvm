@@ -1111,6 +1111,17 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         return false;
       }
       break;
+    case Op::NewCol:
+    case Op::ColFromArray: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      auto colType = decode_oa<CollectionType>(new_pc);
+      if (colType == CollectionType::Pair) {
+        ferror("Immediate of {} must not be a pair\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    }
     case Op::AssertRATL:
     case Op::AssertRATStk: {
       if (pc == b->last){

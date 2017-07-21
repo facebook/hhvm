@@ -32,7 +32,6 @@ type const_id = Hhbc_id.Const.t
 type prop_id = Hhbc_id.Prop.t
 type num_params = int
 type classref_id = int
-type collection_type = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
 
@@ -86,6 +85,27 @@ module QueryOp = struct
   | Empty -> "Empty"
 
 end (* of QueryOp *)
+
+module CollectionType = struct
+  type t =
+  | Vector
+  | Map
+  | Set
+  | Pair
+  | ImmVector
+  | ImmMap
+  | ImmSet
+
+  let to_string = function
+  | Vector      -> "Vector"
+  | Map         -> "Map"
+  | Set         -> "Set"
+  | Pair        -> "Pair"
+  | ImmVector   -> "ImmVector"
+  | ImmMap      -> "ImmMap"
+  | ImmSet      -> "ImmSet"
+
+end (* of CollectionType *)
 
 module FatalOp = struct
   type t =
@@ -160,8 +180,8 @@ type instruct_lit_const =
   | AddElemV
   | AddNewElemC
   | AddNewElemV
-  | NewCol of collection_type
-  | ColFromArray of collection_type
+  | NewCol of CollectionType.t
+  | ColFromArray of CollectionType.t
   | MapAddElemC
   | Cns of const_id
   | CnsE of const_id

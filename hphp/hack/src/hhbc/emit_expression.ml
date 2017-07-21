@@ -135,13 +135,13 @@ let unop_to_incdec_op op =
   | _ -> None
 
 let collection_type = function
-  | "Vector"    -> 17
-  | "Map"       -> 18
-  | "Set"       -> 19
-  | "Pair"      -> 20
-  | "ImmVector" -> 21
-  | "ImmMap"    -> 22
-  | "ImmSet"    -> 23
+  | "Vector"    -> CollectionType.Vector
+  | "Map"       -> CollectionType.Map
+  | "Set"       -> CollectionType.Set
+  | "Pair"      -> CollectionType.Pair
+  | "ImmVector" -> CollectionType.ImmVector
+  | "ImmMap"    -> CollectionType.ImmMap
+  | "ImmSet"    -> CollectionType.ImmSet
   | x -> failwith ("unknown collection type '" ^ x ^ "'")
 
 let istype_op id =

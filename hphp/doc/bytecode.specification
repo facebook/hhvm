@@ -1156,7 +1156,8 @@ AddNewElemV    [C V]  ->  [C:Arr]
 NewCol <coll type>    []  ->  [C:Obj]
 
   New collection. Creates a empty new collection of type %1, and pushes it
-  onto the stack. %1 cannot be Pair.
+  onto the stack. %1 must be one of the values of the CollectionType enum other
+  than Pair.
 
 NewPair    [C C] -> [C:Obj]
 
@@ -1168,10 +1169,11 @@ NewPair    [C C] -> [C:Obj]
 ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
 
   Create a collection of type %1 from array $1, and pushes the collection onto
-  the stack. %1 cannot be Pair. The array will be used to implement the
-  collection without conversion or duplication, thus it should not to contain
-  references. $1 must be in packed mode if %1 is Vector or ImmVector, and must
-  be in mixed mode otherwise.
+  the stack. %1 must be one of the values of the CollectionType enum other
+  than Pair. The array will be used to implement the collection without
+  conversion or duplication, thus it should not contain references. $1 must be
+  in packed mode if %1 is Vector or ImmVector, and must be in mixed mode
+  otherwise.
 
   Note that integer-like string keys are converted to integers in array, but
   not in collections; thus not all collections can be created using this

@@ -451,6 +451,22 @@ let eqopofiarg arg =
   )
   | _ -> report_error "wrong kind of eqop arg"
 
+let collectiontypeofiarg arg =
+  match arg with
+  | IAId s -> (match s with
+    | "Vector" -> CollectionType.Vector
+    | "Map" -> CollectionType.Map
+    | "Set" -> CollectionType.Set
+    | "Pair" -> CollectionType.Pair
+    | "ImmVector" -> CollectionType.ImmVector
+    | "ImmMap" -> CollectionType.ImmMap
+    | "ImmSet" -> CollectionType.ImmSet
+    | _ ->
+      report_error
+      @@ Printf.sprintf "bad collection type: '%s'" s
+  )
+  | _ -> report_error "wrong kind of collection type arg"
+
 let queryopofiarg arg =
   match arg with
   | IAId s -> (
@@ -639,12 +655,8 @@ let makeunaryinst s arg = match s with
    | "NewKeysetArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewKeysetArray (Int64.to_int n))
        | _ -> report_error "bad array size")
-   | "NewCol" -> (match arg with
-       | IAInt64 n -> ILitConst (NewCol (Int64.to_int n))
-       | _ -> report_error "bad collection type")
-   | "ColFromArray" -> (match arg with
-       | IAInt64 n -> ILitConst (ColFromArray (Int64.to_int n))
-       | _ -> report_error "bad collection type")
+   | "NewCol" -> ILitConst (NewCol (collectiontypeofiarg arg))
+   | "ColFromArray" -> ILitConst (ColFromArray (collectiontypeofiarg arg))
    | "Cns" -> (match arg with
        | IAString sa -> ILitConst (Cns (Hhbc_id.Const.from_raw_string sa))
        | _ -> report_error "bad cns arg")

@@ -1106,8 +1106,8 @@ struct ContEnterData : IRExtraData {
 };
 
 struct NewColData : IRExtraData {
-  explicit NewColData(uint32_t itype)
-    : type(static_cast<CollectionType>(itype))
+  explicit NewColData(CollectionType itype)
+    : type(itype)
   {}
 
   std::string show() const {

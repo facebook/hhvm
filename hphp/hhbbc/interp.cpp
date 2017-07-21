@@ -414,7 +414,7 @@ void in(ISS& env, const bc::AddNewElemV&) {
 }
 
 void in(ISS& env, const bc::NewCol& op) {
-  auto const type = static_cast<CollectionType>(op.arg1);
+  auto const type = static_cast<CollectionType>(op.subop1);
   auto const name = collections::typeToString(type);
   push(env, objExact(env.index.builtin_class(name)));
 }
@@ -427,7 +427,7 @@ void in(ISS& env, const bc::NewPair& op) {
 
 void in(ISS& env, const bc::ColFromArray& op) {
   popC(env);
-  auto const type = static_cast<CollectionType>(op.arg1);
+  auto const type = static_cast<CollectionType>(op.subop1);
   auto const name = collections::typeToString(type);
   push(env, objExact(env.index.builtin_class(name)));
 }

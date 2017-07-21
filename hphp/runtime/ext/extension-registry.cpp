@@ -49,7 +49,7 @@ static void sortDependencies();
 ///////////////////////////////////////////////////////////////////////////////
 // dlfcn wrappers
 
-static void* dlopen(const char *dso) {
+static void* dlopen(ATTRIBUTE_UNUSED const char* dso) {
 #ifdef HAVE_LIBDL
   return ::dlopen(dso, DLOPEN_FLAGS);
 #else
@@ -57,7 +57,8 @@ static void* dlopen(const char *dso) {
 #endif
 }
 
-static void* dlsym(void *mod, const char *sym) {
+static void*
+dlsym(ATTRIBUTE_UNUSED void* mod, ATTRIBUTE_UNUSED const char* sym) {
 #ifdef HAVE_LIBDL
 # ifdef LIBDL_NEEDS_UNDERSCORE
   std::string tmp("_");

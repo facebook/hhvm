@@ -531,12 +531,7 @@ module WithParser(Parser : ParserType) = struct
         (parser, acc)
       else
         let (parser, result) = parse_item parser in
-        (* ERROR RECOVERY: If the item is was parsed as 'missing', then it means
-         * the parser bailed out of that scope. So, pass on whatever's been
-         * accumulated so far, but with a 'Missing' SyntaxNode prepended. *)
-        if is_missing result
-        then (parser, result :: acc )
-        else aux parser (result :: acc) in (* Or if nothing's wrong, recurse. *)
+        aux parser (result :: acc) in
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
 

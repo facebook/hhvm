@@ -191,8 +191,6 @@ let error_tests =
     "test_async_errors";
     "test_visibility_modifier_errors";
     "context/test_missing_name_in_expression";
-    "context/test_nested_function_lite";
-    "context/test_nested_function";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

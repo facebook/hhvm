@@ -809,6 +809,7 @@ end
 
 let error: type a. a ty_ -> _ = fun ty -> ErrorString.type_ ty
 let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
+let suggest_list: type a. a ty list -> _ = fun tys -> Suggest.list tys
 let full env ty = Full.to_string env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty

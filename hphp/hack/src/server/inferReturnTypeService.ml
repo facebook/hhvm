@@ -40,7 +40,7 @@ let infer_return_type tcopt c_or_f name =
           | Ok 0 -> true
           | _ -> false))
   in
-  let ty = map types (Typing_ops.LeastUpperBound.compute tcopt) in
+  let ty = map types Typing_ops.LeastUpperBound.compute in
   let ty = join @@ map ty (of_option ~error:"Could not infer type") in
   map ty (fun (tenv, _, _, ty) ->  Typing_print.full tenv ty)
 

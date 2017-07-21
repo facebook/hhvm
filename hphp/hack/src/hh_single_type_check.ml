@@ -39,6 +39,7 @@ type mode =
   | Highlight_refs of int * int
   | Decl_compare
   | Infer_return_types
+  | Least_upper_bound
 
 type options = {
   filename : string;
@@ -178,7 +179,10 @@ let parse_options () =
       of array<int, T>.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
-      " Infers return types of functions and methods."
+      " Infers return types of functions and methods.";
+    "--least-upper-bound",
+        Arg.Unit (set_mode Least_upper_bound),
+        " Gets the least upper bound of a list of types.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -195,6 +199,43 @@ let parse_options () =
     no_builtins = !no_builtins;
     tcopt;
   }
+
+let compute_least_type tcopt popt fn =
+  let hint_to_type tenv hint =
+    let decl_ty =
+      Typing_instantiability.instantiable_hint tenv hint
+    in
+    snd (Typing_phase.localize_with_self tenv decl_ty)
+  in
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
+  let tenv = Typing_env.empty tcopt ~droot:None fn in
+  match Parser_heap.ParserHeap.get fn with
+  | None -> ()
+  | Some (ast, _) ->
+    Option.iter (Parser_heap.find_fun_in_file popt fn "\\test")
+    ~f:begin fun f ->
+      let f = Naming.fun_ tcopt f in
+      let {Nast.fnb_nast; _} = Typing_naming_body.func_body tcopt f in
+      let types =
+        Nast.(List.fold fnb_nast ~init:[]
+          ~f:begin fun acc stmt ->
+            match stmt with
+            | Expr (_, New (CI ((_, "\\least_upper_bound"), hints), _, _)) ->
+              (List.map hints (hint_to_type tenv)) :: acc
+            | _ -> acc
+          end)
+      in
+      let types = List.rev types in
+      List.iter types
+        ~f:(begin fun tys ->
+          let tyop = Typing_ops.LeastUpperBound.full tenv tys in
+          let least_ty =
+            Option.value_map tyop ~default:"" ~f:Typing_print.suggest
+          in
+          let str_tys = Typing_print.suggest_list tys in
+          Printf.printf "Least upper bound of %s is %s \n" str_tys least_ty
+        end)
+      end
 
 let infer_return tcopt fn info  =
   let names = FileInfo.simplify info in
@@ -630,6 +671,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       else Printf.printf "No errors\n"
   | Decl_compare ->
     test_decl_compare filename popt files_contents opts files_info
+  | Least_upper_bound-> compute_least_type opts popt filename
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -15,6 +15,7 @@
 
 val error: 'a Typing_defs.ty_ -> string
 val suggest: 'a Typing_defs.ty -> string
+val suggest_list: 'a Typing_defs.ty list -> string
 val full: Typing_env.env -> 'a Typing_defs.ty -> string
 val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string
 val full_strip_ns: Typing_env.env -> 'a Typing_defs.ty -> string

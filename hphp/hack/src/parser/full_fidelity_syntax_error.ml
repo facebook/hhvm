@@ -116,8 +116,6 @@ let error1053 = "An XHP name or category name is expected here."
 let error1054 = "A comma is expected here."
 let error1055 = "A fallthrough directive can only appear at the end of" ^
   " a switch section."
-(* TODO(20052790): use the specific token's text in the message body. *)
-let error1056 = "This token is not valid as part of a function declaration."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."

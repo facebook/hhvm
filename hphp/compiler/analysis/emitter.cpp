@@ -4906,9 +4906,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case '@': {
         assert(oldErrorLevelLoc >= 0);
         assert(start != InvalidAbsoluteOffset);
+        emitRestoreErrorReporting(e, oldErrorLevelLoc);
         newFaultRegionAndFunclet(start, m_ue.bcPos(),
           new RestoreErrorReportingThunklet(oldErrorLevelLoc));
-        emitRestoreErrorReporting(e, oldErrorLevelLoc);
         m_curFunc->freeUnnamedLocal(oldErrorLevelLoc);
         break;
       }

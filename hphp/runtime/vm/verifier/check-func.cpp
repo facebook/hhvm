@@ -890,9 +890,10 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 
   if (cur->fpilen > 0 && isJmp(op)) {
     auto offset = getImm(pc, 0).u_BA;
-    if(offset < 0){
+    if (offset < 0) {
       error("FPI contains backwards jump at %s\n",
             opcodeToName(op));
+      ok = false;
     }
   }
 
@@ -1363,6 +1364,26 @@ bool FuncChecker::checkFlow() {
                      instrToString(pc, unit()) << std::endl;
       }
       auto const op = peek_op(pc);
+
+      // Reachable catch blocks and fault funclets have an empty stack and
+      // non-initialized class-ref slots. Checking an edge to the fault
+      // handler right before every instruction is unnecessary since
+      // not every instruction can throw; there is room for improvement
+      // here if we want to note in the bytecode table which instructions
+      // can actually throw to the fault handler.
+      if (b->exn) {
+        int save_stklen = cur.stklen;
+        int save_fpilen = cur.fpilen;
+        auto save_slots = cur.clsRefSlots;
+        cur.stklen = 0;
+        cur.fpilen = 0;
+        cur.clsRefSlots.reset();
+        ok &= checkEdge(b, cur, b->exn);
+        cur.stklen = save_stklen;
+        cur.fpilen = save_fpilen;
+        cur.clsRefSlots = std::move(save_slots);
+      }
+
       if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
       ok &= checkOp(&cur, pc, op, b);
       ok &= checkInputs(&cur, pc, b);
@@ -1382,26 +1403,15 @@ bool FuncChecker::checkFlow() {
       ok &= checkEHStack(handler, builder.at(handler.m_base));
     }
   }
+
   return ok;
 }
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  // Reachable catch blocks and fault funclets have an empty stack and
-  // non-initialized class-ref slots.
-  if (b->exn) {
-    int save_stklen = cur->stklen;
-    int save_fpilen = cur->fpilen;
-    auto save_slots = cur->clsRefSlots;
-    cur->stklen = 0;
-    cur->fpilen = 0;
-    cur->clsRefSlots.reset();
-    ok &= checkEdge(b, *cur, b->exn);
-    cur->stklen = save_stklen;
-    cur->fpilen = save_fpilen;
-    cur->clsRefSlots = std::move(save_slots);
-  }
-  if (isIter(b->last) && numSuccBlocks(b) == 2) {
+  int succs = numSuccBlocks(b);
+
+  if (isIter(b->last) && succs == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.

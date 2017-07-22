@@ -91,6 +91,13 @@ void GraphBuilder::linkBlocks() {
     }
     PC next_pc = !i.empty() ? i.front() : m_unit->at(m_func->past());
     Block* next = at(next_pc);
+    if (peek_op(pc) == Op::Unwind) { // exn block
+      const EHEnt* eh = m_func->findEHbyHandler(offset(pc));
+      // link the end of each fault handler to the beginning of its parent
+      succs(block)[0] = eh->m_parentIndex >= 0 ?
+                        at(m_func->ehtab()[eh->m_parentIndex].m_handler) :
+                        nullptr;
+    }
     if (next) {
       block->next_linear = next;
       block->end = next_pc;

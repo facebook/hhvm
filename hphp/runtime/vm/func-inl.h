@@ -604,6 +604,11 @@ inline const EHEnt* Func::findEH(Offset o) const {
   return findEH(shared()->m_ehtab, o);
 }
 
+inline const EHEnt* Func::findEHbyHandler(Offset o) const {
+  assert(o >= base() && o < past());
+  return findEHbyHandler(shared()->m_ehtab, o);
+}
+
 template<class Container>
 const typename Container::value_type*
 Func::findEH(const Container& ehtab, Offset o) {
@@ -616,6 +621,28 @@ Func::findEH(const Container& ehtab, Offset o) {
   }
   return eh;
 }
+
+template<class Container>
+const typename Container::value_type*
+Func::findEHbyHandler(const Container& ehtab, Offset o) {
+  const typename Container::value_type* eh = nullptr;
+  Offset closest = 0;
+
+  // We cannot rely on m_end to be a useful value (not kInvalidOffset), so
+  // instead we take the handler whose start is the closest without going
+  // over the offset we are looking for. We can rely on the fault handlers
+  // to be both contigous and dominated by an Unwind/Catch because we
+  // verify this in checkSection() in the verifier
+
+  for (uint32_t i = 0, sz = ehtab.size(); i < sz; ++i) {
+    if (ehtab[i].m_handler <= o && ehtab[i].m_handler > closest) {
+      eh = &ehtab[i];
+      closest = ehtab[i].m_handler;
+    }
+  }
+  return eh;
+}
+
 
 inline const FPIEnt* Func::findFPI(Offset o) const {
   assertx(o >= base() && o < past());

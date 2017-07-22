@@ -151,6 +151,7 @@ struct EmitBcInfo {
     BlockInfo()
       : offset(kInvalidOffset)
       , past(kInvalidOffset)
+      , regionsToPop(0)
     {}
 
     // The offset of the block, if we've already emitted it.
@@ -159,6 +160,11 @@ struct EmitBcInfo {
 
     // The offset past the end of this block.
     Offset past;
+
+    // How many fault regions the jump at the end of this block is leaving.
+    // 0 if there is no jump or if the jump is to the same fault region or a
+    // child
+    int regionsToPop;
 
     // When we emit a forward jump to a block we haven't seen yet, we
     // write down where the jump was so we can fix it up when we get
@@ -182,6 +188,41 @@ struct EmitBcInfo {
   bool containsCalls;
   std::vector<FPI> fpiRegions;
   std::vector<BlockInfo> blockInfo;
+};
+
+
+typedef borrowed_ptr<php::ExnNode> ExnNodePtr;
+
+bool handleEquivalent (ExnNodePtr eh1, ExnNodePtr eh2) {
+  if (!eh1 && !eh2) return true;
+  if (!eh1 || !eh2 || eh1->depth != eh2->depth) return false;
+
+  auto entry = [](ExnNodePtr eh) {
+    return match<BlockId>(eh->info,
+          [] (const php::CatchRegion& c) { return c.catchEntry; },
+          [] (const php::FaultRegion& f) { return f.faultEntry; });
+  };
+
+  while (entry(eh1) == entry(eh2)) {
+    eh1 = eh1->parent;
+    eh2 = eh2->parent;
+    if (!eh1 && !eh2) return true;
+  }
+
+  return false;
+};
+
+// The common parent P of eh1 and eh2 is the deepest region such that
+// eh1 and eh2 are both handle-equivalent to P or a child of P
+ExnNodePtr commonParent(ExnNodePtr eh1, ExnNodePtr eh2) {
+  if (!eh1 || !eh2) return nullptr;
+  while (eh1->depth > eh2->depth) eh1 = eh1->parent;
+  while (eh2->depth > eh1->depth) eh2 = eh2->parent;
+  while (!handleEquivalent(eh1, eh2)) {
+    eh1 = eh1->parent;
+    eh2 = eh2->parent;
+  }
+  return eh1;
 };
 
 EmitBcInfo emit_bytecode(EmitUnitState& euState,
@@ -509,6 +550,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
+    info.past = ue.bcPos();
+
     if (b->fallthrough != NoBlockId) {
       set_expected_depth(blockInfo[b->fallthrough]);
       if (std::next(blockIt) == endBlockIt ||
@@ -518,10 +561,19 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         } else {
           emit_inst(bc::Jmp { b->fallthrough });
         }
+
+        auto parent = commonParent(func.blocks[b->fallthrough]->exnNode,
+                                   b->exnNode);
+        // If we are in an exn region we pop from the current region to the
+        // common parent. If the common parent is null, we pop all regions
+        info.regionsToPop = b->exnNode ?
+                            b->exnNode->depth - (parent ? parent->depth : 0) :
+                            0;
+        assert(info.regionsToPop >= 0);
+        FTRACE(4, "      popped fault regions: {}\n", info.regionsToPop);
       }
     }
 
-    info.past = ue.bcPos();
     if (b->factoredExits.size()) {
       FTRACE(4, "      factored:");
       for (auto DEBUG_ONLY id : b->factoredExits) FTRACE(4, " {}", id);
@@ -729,6 +781,12 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
     }
     for (size_t i = prefix, sz = current.size(); i < sz; ++i) {
       push_active(current[i], offset);
+    }
+
+    for (int i = 0; i < info.blockInfo[b->id].regionsToPop; i++) {
+      // If the block ended in a jump out of the fault region, this effectively
+      // ends all fault regions deeper than the one we are jumping to
+      pop_active(info.blockInfo[b->id].past);
     }
 
     if (debug && !activeList.empty()) {

@@ -1,0 +1,4 @@
+Verification Error (unit %s func ): Offset branch target 100 is outside region primary body 0:75
+Verification Error (unit %s func ): Ret* may not appear in funclet body
+Verification Error (unit %s func ): Offset branch target 70 is outside region funclet body 85:101
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

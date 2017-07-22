@@ -2304,14 +2304,12 @@ and emit_unop ~need_ref env op e =
     Local.scope @@ fun () ->
       let fault_label = Label.next_fault () in
       let temp_local = Local.get_unnamed_local () in
-      let body = emit_expr ~need_ref:false env e in
-      let start = instr_silence_start temp_local in
       let cleanup = instr_silence_end temp_local in
+      let body = gather [emit_expr ~need_ref:false env e; cleanup] in
       let fault = gather [cleanup; instr_unwind] in
       gather [
-        start;
-        instr_try_fault fault_label body fault;
-        cleanup;
+        instr_silence_start temp_local;
+        instr_try_fault fault_label body fault
       ]
 
 and emit_exprs env exprs =

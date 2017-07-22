@@ -155,6 +155,7 @@ struct CatchRegion { BlockId catchEntry;
 
 struct ExnNode {
   uint32_t id;
+  uint32_t depth;
 
   borrowed_ptr<ExnNode> parent;
   CompactVector<std::unique_ptr<ExnNode>> children;
@@ -300,8 +301,9 @@ struct Func {
 
   /*
    * All owning pointers to blocks are in this vector, which has the
-   * blocks in an unspecified order.  Blocks have borrowed pointers to
-   * each other to represent control flow arcs.
+   * blocks in an unspecified order.  Blocks use BlockIds
+   * to represent control flow arcs. The id of a block is its
+   * index in this vector.
    */
   CompactVector<std::unique_ptr<Block>> blocks;
 

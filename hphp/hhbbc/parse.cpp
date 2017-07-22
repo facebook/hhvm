@@ -274,6 +274,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     auto node = std::make_unique<php::ExnNode>();
     node->id = nextExnNode++;
     node->parent = nullptr;
+    node->depth = 1; // 0 depth means no ExnNode
 
     switch (eh.m_type) {
     case EHEnt::Type::Fault:
@@ -298,6 +299,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
       auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
       assert(it != end(ret.ehMap));
       node->parent = it->second;
+      node->depth = node->parent->depth + 1;
       it->second->children.emplace_back(std::move(node));
     } else {
       func.exnNodes.emplace_back(std::move(node));

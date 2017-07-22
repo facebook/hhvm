@@ -331,7 +331,11 @@ tc_unwind_personality(int version,
                "Unclassified exception was thrown, exn {}, ti {}, "
                "Installing unknownExceptionHandler\n", (void*)ue, (void*)ti);
         auto const& stubs = tc::ustubs();
-        auto const ip = (TCA)_Unwind_GetIP(context);
+        auto ip = (TCA)_Unwind_GetIP(context);
+        if (ip == stubs.unknownExceptionHandlerPast) {
+          assertx(g_unwind_rds->originalRip);
+          ip = (TCA)g_unwind_rds->originalRip;
+        }
         if (tl_regState == VMRegState::DIRTY) {
           sync_regstate(ip, context);
         }

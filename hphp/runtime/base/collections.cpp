@@ -139,7 +139,7 @@ ArrayData* deepCopyArray(ArrayData* arr) {
     arr,
     [&](Cell k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
-      Variant value{VarNR(v)};
+      Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
       if (value.asTypedValue()->m_data.num != v.m_data.num) {
         ar.set(k, *value.asTypedValue(), true);
@@ -157,7 +157,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
     arr,
     [&](Cell k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
-      Variant value{VarNR(v)};
+      Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
       if (value.asTypedValue()->m_data.num != v.m_data.num) {
         assert(k.m_type == KindOfInt64);
@@ -176,7 +176,7 @@ ArrayData* deepCopyDict(ArrayData* arr) {
     MixedArray::asMixed(arr),
     [&](Cell k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
-      Variant value{VarNR(v)};
+      Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
       if (value.asTypedValue()->m_data.num != v.m_data.num) {
         ar.set(k, *value.asTypedValue());

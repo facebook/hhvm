@@ -69,7 +69,7 @@ const StaticString
 
 struct ObjprofObjectReferral {
   uint64_t refs{0};
-  std::unordered_set<ObjectData*> sources;
+  std::unordered_set<const ObjectData*> sources;
 };
 struct ObjprofClassReferral {
   uint64_t refs{0};
@@ -115,7 +115,7 @@ enum ObjprofFlags {
 std::pair<int, double> tvGetSize(
   TypedValue tv,
   int ref_adjust,
-  ObjectData* source,
+  const ObjectData* source,
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
@@ -129,8 +129,8 @@ void tvGetStrings(
   std::unordered_set<void*>* pointers);
 
 std::pair<int, double> getObjSize(
-  ObjectData* obj,
-  ObjectData* source,
+  const ObjectData* obj,
+  const ObjectData* source,
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
@@ -181,7 +181,7 @@ bool isObjprofRoot(
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad,
-  ObjectData* source,
+  const ObjectData* source,
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
@@ -419,7 +419,7 @@ void stringsOfArray(
 std::pair<int, double> tvGetSize(
   TypedValue tv,
   int ref_adjust,
-  ObjectData* source,
+  const ObjectData* source,
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
@@ -667,7 +667,7 @@ void tvGetStrings(
   }
 }
 
-bool supportsToArray(ObjectData* obj) {
+bool supportsToArray(const ObjectData* obj) {
   if (obj->isCollection()) {
     // we never want to toArray on a collection; if we're asking if we can,
     // then something has gone horribly wrong
@@ -692,8 +692,8 @@ bool supportsToArray(ObjectData* obj) {
 }
 
 std::pair<int, double> getObjSize(
-  ObjectData* obj,
-  ObjectData* source,
+  const ObjectData* obj,
+  const ObjectData* source,
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
@@ -746,7 +746,7 @@ std::pair<int, double> getObjSize(
       sized += array_size_pair.second;
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
-      auto pair = static_cast<c_Pair*>(obj);
+      auto pair = static_cast<const c_Pair*>(obj);
       auto elm_size_pair = tvGetSize(
         *pair->get(0),
         0, /* ref_adjust */
@@ -878,7 +878,7 @@ std::pair<int, double> getObjSize(
 }
 
 void getObjStrings(
-  ObjectData* obj,
+  const ObjectData* obj,
   ObjprofStrings* metrics,
   ObjprofStack* path,
   std::unordered_set<void*>* pointers
@@ -896,7 +896,7 @@ void getObjStrings(
       stringsOfArray(arr, metrics, path, pointers);
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
-      auto pair = static_cast<c_Pair*>(obj);
+      auto pair = static_cast<const c_Pair*>(obj);
       tvGetStrings(*pair->get(0), metrics, path, pointers);
       tvGetStrings(*pair->get(1), metrics, path, pointers);
     }
@@ -960,7 +960,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
   ObjprofStrings metrics;
 
   std::unordered_set<void*> pointers;
-  MM().forEachObject([&](ObjectData* obj) {
+  MM().forEachObject([&](const ObjectData* obj) {
     ObjprofStack path;
     getObjStrings(obj, &metrics, &path, &pointers);
   });
@@ -1002,7 +1002,7 @@ Array HHVM_FUNCTION(objprof_get_data,
     exclude_classes.insert(iter.second().toString().data());
   }
 
-  MM().forEachObject([&](ObjectData* obj) {
+  MM().forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     std::vector<const void*> val_stack;
     auto objsizePair = getObjSize(
@@ -1072,7 +1072,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
     exclude_classes.insert(iter.second().toString().data());
   }
 
-  MM().forEachObject([&](ObjectData* obj) {
+  MM().forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];

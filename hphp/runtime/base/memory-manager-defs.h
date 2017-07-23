@@ -555,53 +555,10 @@ template<class Fn> void MemoryManager::forEachHeapObject(Fn fn) {
 
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap("MM::forEachObject");
-  std::vector<ObjectData*> ptrs;
+  std::vector<const ObjectData*> ptrs;
   forEachHeapObject([&](HeapObject* h, size_t) {
-    switch (h->kind()) {
-      case HeaderKind::Object:
-      case HeaderKind::WaitHandle:
-      case HeaderKind::AsyncFuncWH:
-      case HeaderKind::AwaitAllWH:
-      case HeaderKind::Closure:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-        ptrs.push_back(static_cast<ObjectData*>(h));
-        break;
-      case HeaderKind::AsyncFuncFrame:
-        ptrs.push_back(asyncFuncWH(h));
-        break;
-      case HeaderKind::NativeData:
-        ptrs.push_back(Native::obj(static_cast<NativeNode*>(h)));
-        break;
-      case HeaderKind::ClosureHdr:
-        ptrs.push_back(closureObj(h));
-        break;
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
-      case HeaderKind::Keyset:
-      case HeaderKind::Apc:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::String:
-      case HeaderKind::Resource:
-      case HeaderKind::Ref:
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-      case HeaderKind::Free:
-        break;
-      case HeaderKind::BigObj:
-      case HeaderKind::Hole:
-      case HeaderKind::Slab:
-        assert(false && "forEachHeapObject skips these kinds");
-        break;
+    if (auto obj = innerObj(h)) {
+      ptrs.push_back(obj);
     }
   });
   for (auto ptr : ptrs) {

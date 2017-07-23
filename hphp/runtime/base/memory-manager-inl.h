@@ -363,12 +363,8 @@ inline MemoryUsageStats MemoryManager::getStats() {
 
 inline MemoryUsageStats MemoryManager::getStatsCopy() {
   auto copy = m_stats;
-  refreshStatsImpl<false>(copy);
+  refreshStatsImpl(copy);
   return copy;
-}
-
-inline void MemoryManager::refreshStats() {
-  refreshStatsImpl<true>(m_stats);
 }
 
 inline bool MemoryManager::startStatsInterval() {

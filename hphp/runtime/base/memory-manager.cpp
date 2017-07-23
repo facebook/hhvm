@@ -244,7 +244,6 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
  * member variables are updated and whether or not to call helper
  * methods in response to memory anomalies.
  */
-template<bool live>
 void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // Incrementally incorporate the difference between the previous and current
   // deltas into the memory usage statistic.  For reference, the total
@@ -290,22 +289,28 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   }
   assert(stats.limit > 0);
   auto usage = stats.usage();
-  if (live && usage > stats.limit && m_couldOOM) {
-    refreshStatsHelperExceeded();
-  }
   stats.peakUsage = std::max(stats.peakUsage, usage);
-  if (live && usage > m_memThresholdCallbackPeakUsage) {
-    m_memThresholdCallbackPeakUsage = SIZE_MAX;
-    setSurpriseFlag(MemThresholdFlag);
-  }
-  if (live && m_statsIntervalActive) {
-    stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, stats.usage());
+  if (m_statsIntervalActive) {
+    stats.peakIntervalUsage = std::max(stats.peakIntervalUsage, usage);
     stats.peakIntervalCap = std::max(stats.peakIntervalCap, stats.capacity);
   }
 }
 
-template void MemoryManager::refreshStatsImpl<true>(MemoryUsageStats& stats);
-template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
+/*
+ * Refresh our internally stored m_stats, then check for OOM and the
+ * memThresholdCallback
+ */
+void MemoryManager::refreshStats() {
+  refreshStatsImpl(m_stats);
+  auto usage = m_stats.usage();
+  if (usage > m_stats.limit && m_couldOOM) {
+    refreshStatsHelperExceeded();
+  }
+  if (usage > m_memThresholdCallbackPeakUsage) {
+    m_memThresholdCallbackPeakUsage = SIZE_MAX;
+    setSurpriseFlag(MemThresholdFlag);
+  }
+}
 
 void MemoryManager::sweep() {
   assert(!sweeping());

@@ -1003,7 +1003,7 @@ private:
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);
   void refreshStats();
-  template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
+  void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
   void resetAllStats();
   void traceStats(const char* when);

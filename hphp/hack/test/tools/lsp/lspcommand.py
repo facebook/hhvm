@@ -22,47 +22,40 @@ class LspCommandProcessor:
                                 stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+
         yield cls(proc)
 
         proc.stdin.close()
         proc.stdout.close()
         proc.stderr.close()
 
-    def send(self, command):
-        self._write_command(command)
+    def communicate(self, json_commands):
+        transcript = {}
+
+        for json_command in json_commands:
+            self.send(json_command)
+            # if it's an "id" command, there should
+            # be a response to read
+            if "id" in json_command:
+                transcript[json_command["id"]] = {
+                    "sent": json_command,
+                    "received": json.loads(self.receive())
+                }
+
+        return transcript
+
+    def send(self, json_command):
+        serialized = json.dumps(json_command)
+        content_length = len(serialized)
+        payload = f"Content-Length: {content_length}\n\n{serialized}"
+        self._write(payload)
 
     def receive(self):
-        return self._read_response()
+        return self._read()
 
-    # decodes a compressed LSP command into a JSON
-    # payload suitable to be sent to the LSP.
-    #
-    # commands that start with a "#" are considered comments
-    # and will return None for the built command.
-    def build_command(self, line):
-        line = line.strip()
-
-        if self._is_empty_line(line) or self._is_comment(line):
-            return None
-
-        method, rw, line = line.strip().split(" ", 2)
-
-        line = self._eval_replacements(line)
-
-        json_rpc_payload = f"""
-{{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "{method}",
-    "params": {line}
-}}
-    """.strip()
-        content_length = len(json_rpc_payload)
-        return (f"Content-Length: {content_length}\n\n{json_rpc_payload}", rw)
-
-    def _eval_replacements(self, encoded_json):
-        decoded_json = json.loads(encoded_json)
-        return json.dumps(self._eval_json(decoded_json))
+    def parse_commands(self, raw_data):
+        raw_json = json.loads(raw_data)
+        return [self._eval_json(command) for command in raw_json]
 
     def _eval_json(self, json):
         if isinstance(json, dict):
@@ -77,8 +70,8 @@ class LspCommandProcessor:
         else:
             return json
 
-    def _write_command(self, command):
-        self.proc.stdin.write(command.encode())
+    def _write(self, s):
+        self.proc.stdin.write(s.encode())
         self.proc.stdin.flush()
 
     def _read_content_length(self):
@@ -95,21 +88,19 @@ class LspCommandProcessor:
     def _read_content(self, length):
         return self.proc.stdout.read(length)
 
-    def _read_response(self):
+    def _read(self):
         length = self._read_content_length()
         return self._read_content(length)
-
-    def _is_empty_line(self, line):
-        return (not line) or (line == "\n")
-
-    def _is_comment(self, line):
-        return line.startswith("#")
 
 
 # string replacement methods meant to be called
 # within a command processing script.
 def path_expand(path):
-    return "file://" + os.path.abspath(path)
+    return os.path.abspath(path)
+
+
+def file_uri(path):
+    return "file://" + path_expand(path)
 
 
 def read_file(file):

@@ -9,32 +9,29 @@
  The LSP spec can be found here:
  https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md
 
- Input format: the first word is the LSP method (see the LSP spec for a full
- listing).
+ The input files must contain an array of json-rpc
+ commands to send to the language server.
 
- The second word is a string that is an element of
- [ "rw", "w" ]
+ Commands that you expect a response from the server
+ should include an "id" field.  The field should be
+ a unique integer per command.  The server will
+ send responses with the "id" passed in, and this
+ tool will use them to line up sent/response pairs.
 
- It indicates whether or not this tool should write
- the command and then read a response, or just write
- a command and not read a response.  This tool could
- do this automatically with a command lut, but it doesn't
- so that it can stay more of a testing tool and let you
- do things that aren't necessarily a good idea.
-
- The rest of the line is the JSON payload.
-
- You can comment out a line by prepending with a `#`.
+ Commands that are notificatins where you don't
+ expect a server response should not contain an
+ "id" field.  See textDocument/didOpen for an
+ example of this.
 
  Inside a command body, you can run a python function on the argument
  to cause the string output of that function to be replaced at run-time.
  For example, for a URI, you can use
 
-   >>> path_expand('/home/chrishahn/test')
+   >>> file_uri('sample.php')
 
- which generates
+ which would generate something like
 
-   file:///home/chrishahn/test
+   file:///home/chrishahn/test/sample.php
 
  you can also use
 
@@ -48,32 +45,34 @@
 
     python talk.py filename.txt
 """
+import json
 import fileinput
 from lspcommand import LspCommandProcessor
 
 
 def main():
     with LspCommandProcessor.create() as lsp_proc:
-        for line in fileinput.input():
-            command = lsp_proc.build_command(line)
-            if command:
-                command, rw = command
-                process_command(lsp_proc, command, rw)
+        json = lsp_proc.parse_commands(read_commands())
+        t = lsp_proc.communicate(json)
+        print_transcript(t)
 
 
-def process_command(lsp_proc, command, rw):
-    print_section("SENDING:", command)
-    lsp_proc.send(command)
-    if rw == "rw":
-        response = lsp_proc.receive()
-        print_section(header="LSP RESPONSE:", message=response.decode())
-    else:
-        print_section(header="SEND OK", message="")
+def print_transcript(t):
+    for package in t.values():
+        print("Sent:\n")
+        print(json.dumps(package["sent"], indent=2))
+        print("\nReceived:\n")
+        print(json.dumps(package["received"], indent=2))
+        print('-' * 80)
 
 
-def print_section(header, message):
-    print(f"{header}\n{message}\n\n{'-' * 80}\n")
-
+# this will read command data from stdin or
+# an arbitrary list of files
+def read_commands():
+    command_lines = []
+    for line in fileinput.input():
+        command_lines.append(line)
+    return '\n'.join(command_lines)
 
 if __name__ == "__main__":
     main()

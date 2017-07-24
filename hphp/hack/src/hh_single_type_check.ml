@@ -35,6 +35,7 @@ type mode =
   | Identify_symbol of int * int
   | Find_local of int * int
   | Outline
+  | Dump_tast
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -153,6 +154,9 @@ let parse_options () =
     "--outline",
       Arg.Unit (set_mode Outline),
       " Print file outline";
+    "--tast",
+      Arg.Unit (set_mode Dump_tast),
+      " Print out the typed AST";
     "--find-refs",
       Arg.Tuple ([
         Arg.Int (fun x -> line := x);
@@ -365,6 +369,42 @@ let check_errors opts errors files_info =
     errors @ Errors.get_error_list
         (Typing_check_utils.check_defs opts fn fileinfo)
   end ~init:errors
+
+let create_tast opts files_info =
+  let open Result in
+  let build_tast fn {FileInfo.funs; classes; typedefs; consts; _} =
+    (
+      List.map funs begin fun (_, x) ->
+        Parser_heap.find_fun_in_file ~full:true opts fn x
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
+        >>| Naming.fun_ opts
+        |> function
+          | Ok f -> Tast.Fun (Typing.fun_def opts f)
+          | Error e -> raise (Failure e)
+      end
+      @
+      List.map classes begin fun (_, x) ->
+        Parser_heap.find_class_in_file ~full:true opts fn x
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
+        >>| Naming.class_ opts
+        >>| Typing.class_def opts
+        >>= Result.of_option ~error:(Printf.sprintf "Error with class %s definition" x)
+        |> function
+          | Ok c -> Tast.Class c
+          | Error e -> raise (Failure e)
+      end
+      @
+      List.map consts begin fun (_, x) ->
+        Parser_heap.find_const_in_file ~full:true opts fn x
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
+        >>| Naming.global_const opts
+        >>| (fun x -> Typing.gconst_def x opts)
+        |> function
+          | Ok c -> Tast.Constant c
+          | Error e -> raise (Failure e)
+      end
+    )
+  in Relative_path.Map.mapi  (build_tast) files_info
 
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
@@ -628,6 +668,10 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline popt file in
     FileOutline.print ~short_pos:true results
+  | Dump_tast ->
+    let tasts = create_tast opts files_info in
+    let tast = Relative_path.Map.find filename tasts in
+    Printf.printf "%s\n" (Tast.show_program tast)
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

@@ -1,0 +1,7 @@
+
+Fatal error: %s
+Stack trace:
+#0 %s(%d): sodium_memzero()
+#1 %s(%d): do_memzero()
+#2 {main}
+  thrown in %s on line %d

@@ -37,10 +37,7 @@ class LspCommandProcessor:
             # if it's an "id" command, there should
             # be a response to read
             if "id" in json_command:
-                transcript[json_command["id"]] = {
-                    "sent": json_command,
-                    "received": json.loads(self.receive())
-                }
+                transcript[json_command["id"]] = self._transcribe(json_command)
 
         return transcript
 
@@ -56,6 +53,10 @@ class LspCommandProcessor:
     def parse_commands(self, raw_data):
         raw_json = json.loads(raw_data)
         return [self._eval_json(command) for command in raw_json]
+
+    def _transcribe(self, json_command):
+        return {"sent": json_command,
+                "received": json.loads(self.receive())}
 
     def _eval_json(self, json):
         if isinstance(json, dict):

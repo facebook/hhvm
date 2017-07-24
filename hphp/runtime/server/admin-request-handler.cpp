@@ -82,6 +82,9 @@
 
 #if defined(FACEBOOK) || defined(HAVE_LIBSODIUM)
 #include <sodium.h>
+#ifdef crypto_pwhash_STRBYTES
+#define HAVE_CRYPTO_PWHASH_STR
+#endif
 #endif
 
 #ifdef GOOGLE_CPU_PROFILER
@@ -415,7 +418,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     if (needs_password && !RuntimeOption::HashedAdminPasswords.empty()) {
       bool matched = false;
-#if defined(FACEBOOK) || defined(HAVE_LIBSODIUM)
+#ifdef HAVE_CRYPTO_PWHASH_STR
       const auto password = transport->getParam("auth");
       for (const std::string& hash : RuntimeOption::HashedAdminPasswords) {
         if (crypto_pwhash_str_verify(hash.data(),

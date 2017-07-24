@@ -178,6 +178,7 @@ struct CachedUnitNonRepo {
 #endif
   ino_t ino;
   dev_t devId;
+  off_t fileSize;
 };
 
 using NonRepoUnitCache = RankedCHM<
@@ -227,6 +228,7 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
 #endif
          cu.ino != s.st_ino ||
          cu.devId != s.st_dev ||
+         cu.fileSize != s.st_size ||
          stressUnitCache();
 }
 
@@ -416,6 +418,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 #endif
     rpathAcc->second.ino        = statInfo.st_ino;
     rpathAcc->second.devId      = statInfo.st_dev;
+    rpathAcc->second.fileSize   = statInfo.st_size;
 
     return rpathAcc->second.cachedUnit;
   }();
@@ -432,6 +435,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 #endif
     pathAcc->second.ino        = statInfo.st_ino;
     pathAcc->second.devId      = statInfo.st_dev;
+    pathAcc->second.fileSize   = statInfo.st_size;
   }
 
   return cuptr->cu;
@@ -704,9 +708,8 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
     initial = false;
     if (RuntimeOption::RepoAuthoritative ||
-        (it->second.ts_sec > s.st_mtime) ||
-        ((it->second.ts_sec == s.st_mtime) &&
-         (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
+        ((it->second.size == s.st_size) && 
+         (timespecCompare(it->second.mtime, s.st_mtim) >= 0))) {
       return it->second.unit;
     }
   }
@@ -723,11 +726,11 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     // rpath (if it exists).
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
     eContext->m_evaledFiles[spath.get()] =
-      {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
+      {cunit.unit, s.st_mtim, s.st_size};
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
       eContext->m_evaledFiles[cunit.unit->filepath()] =
-        {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
+        {cunit.unit, s.st_mtim, s.st_size};
     }
     if (g_system_profiler) {
       g_system_profiler->fileLoadCallBack(path->toCppString());

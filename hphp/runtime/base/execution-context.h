@@ -557,8 +557,8 @@ public:
   VarEnv* m_globalVarEnv;
   struct FileInfo {
     Unit* unit;
-    time_t ts_sec; // timestamp seconds
-    unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
+    struct timespec mtime;
+    off_t size;
   };
   req::hash_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;

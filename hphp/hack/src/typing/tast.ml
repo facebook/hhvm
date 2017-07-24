@@ -14,6 +14,7 @@
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
+let pp_ty fmt ty = Format.pp_print_string fmt (Typing_print.suggest ty)
 
 (* Typed AST.
  * We re-use the NAST but annotate expressions with position *and*
@@ -32,7 +33,15 @@ type ty = Typing_defs.locl Typing_defs.ty
  *
  *)
 module TypeAndPosAnnotatedAST =
-  Nast.AnnotatedAST(struct type t = Pos.t * ty option end)
+  Nast.AnnotatedAST(struct
+    type t = Pos.t * ty option
+    let pp fmt (_, ty) = match ty with
+      | None -> Format.pp_print_string fmt "None"
+      | Some ty ->
+        Format.pp_print_string fmt "(Some ";
+        pp_ty fmt ty;
+        Format.pp_print_string fmt ")"
+  end)
 
 include TypeAndPosAnnotatedAST
 

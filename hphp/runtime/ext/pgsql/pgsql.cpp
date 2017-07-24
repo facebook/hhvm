@@ -31,13 +31,22 @@
 #define PGSQL_STATUS_STRING 2
 
 #define FAIL_RETURN return false
-#define MAKE_STR_VECTOR(name, params) \
-  std::vector<const char *> name; \
-  name.reserve(params.size()); \
-  for (ArrayIter iter(params); iter; ++iter) { \
-    auto const param = tvToCell(iter.secondRval()); \
-    name.push_back(isNullType(param.type()) ? \
-      nullptr : tvCastToString(param.tv())->data()); /* leak the string... */\
+#define MAKE_STR_VECTOR(name, params)                 \
+  std::vector<const char *> name;                     \
+  std::vector<String> name##_decrefs;                 \
+  name.reserve(params.size());                        \
+  name##_decrefs.reserve(params.size());              \
+                                                      \
+  for (ArrayIter iter(params); iter; ++iter) {        \
+    auto const param = tvToCell(iter.secondRval());   \
+    if (isNullType(param.type())) {                   \
+      name.push_back(nullptr);                        \
+    } else {                                          \
+      name##_decrefs.push_back(                       \
+        String::attach(tvCastToString(param.tv()))    \
+      );                                              \
+      name.push_back(name##_decrefs.back().c_str());  \
+    }                                                 \
   }
 
 namespace HPHP {

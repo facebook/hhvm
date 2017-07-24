@@ -387,10 +387,14 @@ inline bool MemoryManager::stopStatsInterval() {
   return ret;
 }
 
+inline int64_t MemoryManager::getMemoryLimit() const {
+  return m_usageLimit;
+}
+
 inline bool MemoryManager::preAllocOOM(int64_t size) {
   if (m_couldOOM) {
     auto stats = getStatsCopy();
-    if (stats.usage() + size > stats.limit) {
+    if (stats.usage() + size > m_usageLimit) {
       refreshStatsHelperExceeded();
       return true;
     }

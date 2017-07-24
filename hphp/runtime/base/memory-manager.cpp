@@ -287,7 +287,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       t_heap_id, stats.extUsage, stats.totalAlloc);
   }
-  assert(stats.limit > 0);
+  assert(m_usageLimit > 0);
   auto usage = stats.usage();
   stats.peakUsage = std::max(stats.peakUsage, usage);
   if (m_statsIntervalActive) {
@@ -303,7 +303,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 void MemoryManager::refreshStats() {
   refreshStatsImpl(m_stats);
   auto usage = m_stats.usage();
-  if (usage > m_stats.limit && m_couldOOM) {
+  if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
   }
   if (usage > m_memThresholdCallbackPeakUsage) {

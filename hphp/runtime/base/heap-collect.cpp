@@ -385,7 +385,7 @@ StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
   sample.setInt("req_num", t_req_num);
   // MemoryUsageStats
-  sample.setInt("memory_limit", t_pre_stats.limit);
+  sample.setInt("memory_limit", MM().getMemoryLimit());
   sample.setInt("usage", t_pre_stats.usage());
   sample.setInt("mm_usage", t_pre_stats.mmUsage);
   sample.setInt("aux_usage", t_pre_stats.auxUsage());
@@ -512,7 +512,7 @@ void MemoryManager::requestGC() {
 
 void MemoryManager::updateNextGc() {
   auto stats = getStatsCopy();
-  auto mm_limit = stats.limit - stats.auxUsage();
+  auto mm_limit = m_usageLimit - stats.auxUsage();
   int64_t delta = (mm_limit - stats.mmUsage) *
                   RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
@@ -528,7 +528,8 @@ void MemoryManager::collect(const char* phase) {
 }
 
 void MemoryManager::setMemoryLimit(size_t limit) {
-  m_stats.limit = limit;
+  assert(limit <= (size_t)std::numeric_limits<int64_t>::max());
+  m_usageLimit = limit;
   updateNextGc();
 }
 

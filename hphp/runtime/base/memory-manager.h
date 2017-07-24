@@ -776,6 +776,7 @@ struct MemoryManager {
    * Update the request-memory limit.
    */
   void setMemoryLimit(size_t limit);
+  int64_t getMemoryLimit() const;
 
   /*
    * Update the tracked stats in the MemoryManager object, then return
@@ -1026,6 +1027,7 @@ private:
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGc; // request gc when heap usage reaches this size
+  int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
   MemoryUsageStats m_stats;
   BigHeap m_heap;
   std::vector<NativeNode*> m_natives;

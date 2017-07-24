@@ -28,12 +28,11 @@
 namespace HPHP {
 
 void test_json(const char* json) {
-  auto old_stats = MM().getStatsCopy();
-  MM().setMemoryLimit(old_stats.usage() + 0x10000);
+  auto old_limit = MM().getMemoryLimit();
+  MM().setMemoryLimit(MM().getStatsCopy().usage() + 0x10000);
   auto caught = false;
   req::vector<Variant> buf;
-  auto stats = MM().getStatsCopy();
-  ASSERT_FALSE(stats.usage() > stats.limit);
+  ASSERT_LE(MM().getStatsCopy().usage(), MM().getMemoryLimit());
   ASSERT_FALSE(getSurpriseFlag(MemExceededFlag));
   auto len = strlen(json);
   try {
@@ -50,7 +49,7 @@ void test_json(const char* json) {
     caught = true;
   }
   EXPECT_TRUE(caught);
-  MM().setMemoryLimit(old_stats.limit);
+  MM().setMemoryLimit(old_limit);
   MM().resetCouldOOM();
 }
 

@@ -132,6 +132,12 @@ which are *not* parameters of any lambda?
 
 let used_non_params node =
   let folder acc node parents =
+    (* Note that the parent chain here only goes up to the originally-passed-in
+    node; it does not include the parents of *that* node. Typically the node
+    will be a lambda. We want to examine all children of that lambda, looking
+    for local variables which are not parameters of the current lambda. If
+    there are local variables which are *closed-over parameters of an outer
+    lambda*, that's great; we don't want to exclude them. *)
     match syntax node with
     | VariableExpression { variable_expression =
         { syntax = Token { EditableToken.text; _}; _ } } ->

@@ -29,6 +29,7 @@ type t = {
   class C<T> { public function M<T>(){} }
   is illegal. *)
   lambda_count : int option;
+  parents : EditableSyntax.t list;
   (* TODO: Fix naming in parse tree schema; why is it "class type parameters"
   but "function type parameter list"? *)
 }
@@ -40,6 +41,7 @@ let empty =
     function_name = m;
     function_type_parameter_list = m;
     lambda_count = None;
+    parents = [];
   }
 
 (* Note that the code below assumes that the parents list contains
@@ -73,4 +75,4 @@ let make_from_context parents lambda_count =
         function_name; function_type_parameter_list }
     | _ -> acc
   in
-  { (Core_list.fold ~f:folder ~init:empty parents) with lambda_count }
+  { (Core_list.fold ~f:folder ~init:empty parents) with lambda_count; parents }

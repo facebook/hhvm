@@ -807,8 +807,7 @@ let unnest_compound_statements node =
     | None -> Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
 
-let lower_body body =
-  let locals_and_params = gather_locals_and_params body in
+let lower_body body locals_and_params =
   let body = add_missing_return body in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in
@@ -817,16 +816,12 @@ let lower_body body =
   let body = add_switch (next_loop_label, body) in
   let body = add_try_finally locals_and_params body in
   let body = unnest_compound_statements body in
-
   let coroutine_result_data_variables =
     next_loop_label
       |> Core_list.range 1
       |> Core_list.map ~f:make_coroutine_result_data_variable
       |> SMap.from_keys ~f:make_name_syntax in
-  let locals_and_params =
-    SMap.union locals_and_params coroutine_result_data_variables in
-
-  (body, locals_and_params)
+  (body, coroutine_result_data_variables)
 
 let make_closure_lambda_signature
     context
@@ -856,7 +851,11 @@ let extract_parameter_declarations function_parameter_list =
       | _ -> failwith "Parameter had unexpected type."
       end
 
-let compute_state_machine_data locals_and_params function_parameter_list =
+let compute_state_machine_data
+    locals_and_params
+    coroutine_result_data_variables
+    outer_variables
+    function_parameter_list =
   let parameters = extract_parameter_declarations function_parameter_list in
   let parameter_names =
     parameters
@@ -876,11 +875,13 @@ let compute_state_machine_data locals_and_params function_parameter_list =
         | _ -> failwith "Parameter had unexpected token."
         end
       |> SSet.of_list in
+  let all_locals =
+    SMap.union locals_and_params coroutine_result_data_variables in
   let local_variables =
     SMap.filter
       (fun k _ -> not (SSet.mem ("$" ^ k) parameter_names))
-      locals_and_params in
-  CoroutineStateMachineData.{ local_variables; parameters; }
+      all_locals in
+  CoroutineStateMachineData.{ local_variables; parameters; outer_variables; }
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
@@ -892,9 +893,16 @@ let generate_coroutine_state_machine
     original_body
     function_type
     function_parameter_list =
-  let new_body, locals_and_params = lower_body original_body in
-  let state_machine_data =
-    compute_state_machine_data locals_and_params function_parameter_list in
+  let locals_and_params = gather_locals_and_params original_body in
+  let new_body, coroutine_result_data_variables =
+    lower_body original_body locals_and_params in
+  let outer_variables = Lambda_analyzer.outer_variables
+    context.Coroutine_context.parents original_body in
+  let state_machine_data = compute_state_machine_data
+    locals_and_params
+    coroutine_result_data_variables
+    outer_variables
+    function_parameter_list in
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure
       context

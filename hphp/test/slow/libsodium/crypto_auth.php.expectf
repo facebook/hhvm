@@ -1,5 +1,0 @@
-bool(true)
-crypto_auth(): key must be CRYPTO_AUTH_KEYBYTES bytes
-bool(false)
-bool(false)
-bool(false)

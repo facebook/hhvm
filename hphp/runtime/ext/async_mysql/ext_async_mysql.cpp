@@ -200,8 +200,8 @@ static void HHVM_METHOD(
 
   IterateKV(attrs.get(), [&](Cell k, TypedValue v) {
     data->m_conn_opts.setConnectionAttribute(
-      tvCastToString(k)->toCppString(),
-      tvCastToString(v)->toCppString()
+      String::attach(tvCastToString(k)).toCppString(),
+      String::attach(tvCastToString(v)).toCppString()
     );
   });
 }

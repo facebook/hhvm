@@ -414,12 +414,11 @@ let make_classish_declaration_syntax
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
 let make_methodish_declaration_with_body_syntax
-    ?(methodish_modifiers = [])
     function_decl_header_syntax
     function_body =
   make_methodish_declaration
     (* methodish_attribute *) (make_missing ())
-    (make_list methodish_modifiers)
+    (make_list [public_syntax])
     function_decl_header_syntax
     function_body
     (* methodish_semicolon *) (make_missing ())
@@ -442,11 +441,9 @@ let make_lambda_syntax lambda_signature lambda_body =
     lambda_body
 
 let make_methodish_declaration_syntax
-    ?methodish_modifiers
     function_decl_header_syntax
     function_body =
   make_methodish_declaration_with_body_syntax
-    ?methodish_modifiers
     function_decl_header_syntax
     (make_compound_statement_syntax function_body)
 

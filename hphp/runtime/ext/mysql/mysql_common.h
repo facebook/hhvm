@@ -28,7 +28,10 @@
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/ext/extension.h"
+
+#ifdef ENABLE_ASYNC_MYSQL
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"
+#endif
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -451,9 +454,12 @@ Variant php_mysql_do_connect_on_link(
     bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
-    const Array* conn_attrs = nullptr,
-    std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
-        ssl_opts = nullptr);
+    const Array* conn_attrs = nullptr
+#ifdef ENABLE_ASYNC_MYSQL
+    , std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
+        ssl_opts = nullptr
+#endif
+);
 
 Variant php_mysql_do_connect(
     const String& server,

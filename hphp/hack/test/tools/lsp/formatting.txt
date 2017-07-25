@@ -1,0 +1,43 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params":
+    {
+      "initializationOptions":{},
+      "processId":null,
+      "rootPath":">>> path_expand('.')",
+      "capabilities":{}
+    }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didOpen",
+  "params": {
+     "textDocument": {
+       "uri":">>> file_uri('messy.php')",
+       "languageId": "hack",
+       "version":1,
+       "text":">>> read_file('messy.php')"
+     }
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/formatting",
+  "id": 2,
+  "params": {
+      "textDocument": {
+        "uri":">>> file_uri('messy.php')"
+      },
+      "options": {"tabSize": 5, "insertSpaces": true}
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "shutdown",
+  "params": {}
+}
+]

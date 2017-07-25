@@ -97,6 +97,8 @@ HttpServer::HttpServer()
 
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
       (RuntimeOption::ServerType);
+  auto adminServerFactory = ServerFactoryRegistry::getInstance()->getFactory
+      (RuntimeOption::AdminServerType);
   const std::string address = RuntimeOption::ServerFileSocket.empty()
     ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
   ServerOptions options(address, RuntimeOption::ServerPort,
@@ -138,7 +140,7 @@ HttpServer::HttpServer()
                               RuntimeOption::AdminThreadCount);
   admin_options.m_queueToWorkerRatio =
     RuntimeOption::AdminServerQueueToWorkerRatio;
-  m_adminServer = serverFactory->createServer(admin_options);
+  m_adminServer = adminServerFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 

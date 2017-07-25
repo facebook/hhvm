@@ -320,6 +320,7 @@ bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
 std::string RuntimeOption::TakeoverFilename;
+std::string RuntimeOption::AdminServerType;
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
@@ -1721,6 +1722,7 @@ void RuntimeOption::Load(
   }
   {
     // Admin Server
+    Config::Bind(AdminServerType, ini, config, "AdminServer.Type", ServerType);
     Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     // Single-threaded by default. If increasing the max thread count > 1, the

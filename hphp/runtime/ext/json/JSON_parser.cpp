@@ -643,22 +643,25 @@ struct json_parser {
   void initSb(int length) {
     if (UNLIKELY(length >= sb_cap)) {
       // No decoded string in the output can use more bytes than input size.
-      sb_cap = length + 1;
+      const auto new_cap = length + 1;
       size_t bufSize = length <= RuntimeOption::EvalSimpleJsonMaxLength ?
         SimpleParser::BufferBytesForLength(length) :
-        sb_cap * 2;
+        new_cap * 2;
       if (tl_buffer.raw) {
         free(tl_buffer.raw);
         tl_buffer.raw = nullptr;
       }
+      sb_cap = 0;
       if (!MM().preAllocOOM(bufSize)) {
         tl_buffer.raw = (char*)malloc(bufSize);
         if (!tl_buffer.raw) MM().forceOOM();
       }
       check_non_safepoint_surprise();
       always_assert(tl_buffer.raw);
-      sb_buf.setBuf(tl_buffer.raw, sb_cap);
-      sb_key.setBuf(tl_buffer.raw + sb_cap, sb_cap);
+      sb_buf.setBuf(tl_buffer.raw, new_cap);
+      sb_key.setBuf(tl_buffer.raw + new_cap, new_cap);
+      // Set new capacity if and ony if allocations succeed.
+      sb_cap = new_cap;
     } else {
       sb_buf.clear();
       sb_key.clear();

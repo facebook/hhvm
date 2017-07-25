@@ -32,12 +32,21 @@ class LspCommandProcessor:
     def communicate(self, json_commands):
         transcript = {}
 
+        notify_id = self._first_id()
+
+        # send all the commands at once without reading anything
         for json_command in json_commands:
             self.send(json_command)
-            # if it's an "id" command, there should
-            # be a response to read
-            if "id" in json_command:
-                transcript[json_command["id"]] = self._transcribe(json_command)
+
+            id, notify_id = self._make_transcript_id(json_command, notify_id)
+
+            transcript[id] = self._transcribe(json_command, None)
+
+        # read responses for requests, skip notifications as they shouldn't
+        # have responses
+        for id in transcript:
+            if not self.is_notify_id(id):
+                transcript[id] = self._transcribe_receive(transcript[id]["sent"])
 
         return transcript
 
@@ -54,9 +63,45 @@ class LspCommandProcessor:
         raw_json = json.loads(raw_data)
         return [self._eval_json(command) for command in raw_json]
 
-    def _transcribe(self, json_command):
+    def is_notify_id(self, id):
+        return id.startswith('NOTIFY_')
+
+    def is_request_command(self, json_command):
+        return 'id' in json_command
+
+    def is_request_id(self, id):
+        return id.startswith('REQUEST_')
+
+    def _make_transcript_id(self, json_command, notify_id):
+        id = ''
+
+        if self.is_request_command(json_command):
+            id = self._request_id_of(json_command)
+        else:
+            notify_id = self._next_id(notify_id)
+            id = self._notify_id_of(notify_id)
+
+        return id, notify_id
+
+    def _transcribe_receive(self, json_command):
+        return self._transcribe(json_command,
+                                json.loads(self.receive()))
+
+    def _transcribe(self, json_command, json_response):
         return {"sent": json_command,
-                "received": json.loads(self.receive())}
+                "received": json_response}
+
+    def _next_id(self, id):
+        return id + 1
+
+    def _first_id(self):
+        return 0
+
+    def _notify_id_of(self, id):
+        return 'NOTIFY_' + str(id)
+
+    def _request_id_of(self, json_command):
+        return 'REQUEST_' + str(json_command['id'])
 
     def _eval_json(self, json):
         if isinstance(json, dict):

@@ -54,15 +54,18 @@ def main():
     with LspCommandProcessor.create() as lsp_proc:
         json = lsp_proc.parse_commands(read_commands())
         t = lsp_proc.communicate(json)
-        print_transcript(t)
+        print_transcript(lsp_proc, t)
 
 
-def print_transcript(t):
-    for package in t.values():
-        print("Sent:\n")
+def print_transcript(lsp_proc, t):
+    for id, package in t.items():
+        print(f"Sent [id={id}]:\n")
         print(json.dumps(package["sent"], indent=2))
-        print("\nReceived:\n")
-        print(json.dumps(package["received"], indent=2))
+
+        if lsp_proc.is_request_id(id):
+            print("\nReceived:\n")
+            print(json.dumps(package["received"], indent=2))
+
         print('-' * 80)
 
 

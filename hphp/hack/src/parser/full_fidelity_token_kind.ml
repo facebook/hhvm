@@ -65,6 +65,7 @@ type t =
   | Finally
   | For
   | Foreach
+  | From
   | Function
   | Global
   | Goto
@@ -263,6 +264,7 @@ let from_string keyword =
   | "finally"      -> Some Finally
   | "for"          -> Some For
   | "foreach"      -> Some Foreach
+  | "from"         -> Some From
   | "function"     -> Some Function
   | "global"       -> Some Global
   | "goto"         -> Some Goto
@@ -433,6 +435,7 @@ let to_string kind =
   | Finally                       -> "finally"
   | For                           -> "for"
   | Foreach                       -> "foreach"
+  | From                          -> "from"
   | Function                      -> "function"
   | Global                        -> "global"
   | Goto                          -> "goto"

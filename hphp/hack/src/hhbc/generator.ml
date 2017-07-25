@@ -21,6 +21,9 @@ class generator_visitor = object
   method! on_yield_break (_, is_pair_generator) =
     (true, is_pair_generator)
 
+  method! on_yield_from (_, is_pair_generator) _ =
+    (true, is_pair_generator)
+
   method! on_class_ acc _ = acc
   method! on_fun_ acc _ = acc
 

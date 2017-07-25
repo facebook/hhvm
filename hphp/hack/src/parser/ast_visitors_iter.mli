@@ -288,6 +288,7 @@ class virtual ['b] iter :
         on_LogXor : 'c -> unit;
         on_Xor : 'c -> unit;
         on_Yield : 'c -> Ast_visitors_ancestors.afield -> unit;
+        on_Yield_from : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Yield_break : 'c -> unit;
         on_afield : 'c -> Ast_visitors_ancestors.afield -> unit;
         on_any : 'c -> Ast_visitors_ancestors.any -> unit;
@@ -684,6 +685,7 @@ class virtual ['b] iter :
     method on_LogXor : 'c -> unit
     method on_Xor : 'c -> unit
     method on_Yield : 'c -> Ast_visitors_ancestors.afield -> unit
+    method on_Yield_from : 'c -> Ast_visitors_ancestors.expr -> unit
     method on_Yield_break : 'c -> unit
     method on_afield : 'c -> Ast_visitors_ancestors.afield -> unit
     method on_any : 'c -> Ast_visitors_ancestors.any -> unit

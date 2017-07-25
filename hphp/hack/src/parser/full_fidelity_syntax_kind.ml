@@ -105,6 +105,7 @@ type t =
   | SafeMemberSelectionExpression
   | EmbeddedMemberSelectionExpression
   | YieldExpression
+  | YieldFromExpression
   | PrefixUnaryExpression
   | PostfixUnaryExpression
   | BinaryExpression
@@ -258,6 +259,7 @@ let to_string kind =
   | SafeMemberSelectionExpression     -> "safe_member_selection_expression"
   | EmbeddedMemberSelectionExpression -> "embedded_member_selection_expression"
   | YieldExpression                   -> "yield_expression"
+  | YieldFromExpression               -> "yield_from_expression"
   | PrefixUnaryExpression             -> "prefix_unary_expression"
   | PostfixUnaryExpression            -> "postfix_unary_expression"
   | BinaryExpression                  -> "binary_expression"

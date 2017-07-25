@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-07-18-0001",
+  "version" : "2017-07-24-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -103,6 +103,8 @@
       "token_text" : "for" },
     { "token_kind" : "Foreach",
       "token_text" : "foreach" },
+    { "token_kind" : "From",
+      "token_text" : "from" },
     { "token_kind" : "Function",
       "token_text" : "function" },
     { "token_kind" : "Global",
@@ -1202,6 +1204,15 @@
       "prefix" : "yield",
       "fields" : [
         { "field_name" : "keyword" },
+        { "field_name" : "operand" }
+      ] },
+    { "kind_name" : "YieldFromExpression",
+      "type_name" : "yield_from_expression",
+      "description" : "yield_from_expression",
+      "prefix" : "yield_from",
+      "fields" : [
+        { "field_name" : "yield_keyword" },
+        { "field_name" : "from_keyword" },
         { "field_name" : "operand" }
       ] },
     { "kind_name" : "PrefixUnaryExpression",

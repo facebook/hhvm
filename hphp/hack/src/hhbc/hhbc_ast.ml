@@ -526,10 +526,10 @@ type gen_creation_execution =
   | ContGetReturn
 
 type gen_delegation =
-  | ContAssignDelegate
+  | ContAssignDelegate of Iterator.t
   | ContEnterDelegate
-  | YieldFromDelegate
-  | ContUnsetDelegate of free_iterator
+  | YieldFromDelegate of Iterator.t * Label.t
+  | ContUnsetDelegate of free_iterator * Iterator.t
 
 type async_functions =
   | WHResult
@@ -563,4 +563,5 @@ type instruct =
   | IComment of string
   | IAsync of async_functions
   | IGenerator of gen_creation_execution
+  | IGenDelegation of gen_delegation
   | IIncludeEvalDefine of instruct_include_eval_define

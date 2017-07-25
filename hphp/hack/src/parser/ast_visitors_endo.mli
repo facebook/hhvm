@@ -709,6 +709,10 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.expr_ ->
                    Ast_visitors_ancestors.afield ->
                    Ast_visitors_ancestors.expr_;
+        on_Yield_from : 'c ->
+                    Ast_visitors_ancestors.expr_ ->
+                    Ast_visitors_ancestors.expr ->
+                    Ast_visitors_ancestors.expr_;
         on_Yield_break : 'c ->
                          Ast_visitors_ancestors.expr_ ->
                          Ast_visitors_ancestors.expr_;
@@ -1593,6 +1597,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.afield -> Ast_visitors_ancestors.expr_
+    method on_Yield_from :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Yield_break :
       'c -> Ast_visitors_ancestors.expr_ -> Ast_visitors_ancestors.expr_
     method on_afield :

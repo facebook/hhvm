@@ -923,6 +923,7 @@ and emit_expr env expr ~need_ref =
   | A.Yield e -> emit_yield env e
   | A.Yield_break ->
     failwith "yield break should be in statement position"
+  | A.Yield_from _ -> failwith "complex yield_from expression"
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda env fundef ids

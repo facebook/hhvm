@@ -852,6 +852,11 @@ let rec get_doc node =
     let y = get_doc x.yield_keyword in
     let o = get_doc x.yield_operand in
     group_doc (y ^| o)
+  | YieldFromExpression x ->
+    let y = get_doc x.yield_from_yield_keyword in
+    let f = get_doc x.yield_from_from_keyword in
+    let o = get_doc x.yield_from_operand in
+    group_doc (y ^| f ^| o)
   | CastExpression x ->
     let l = get_doc x.cast_left_paren in
     let t = get_doc x.cast_type in

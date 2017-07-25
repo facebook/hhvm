@@ -641,6 +641,19 @@ let string_of_include_eval_define = function
   | DefCns id -> sep ["DefCns"; string_of_const_id id]
   | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
+let string_of_free_iterator = function
+  | IgnoreIter -> "IgnoreIter"
+  | FreeIter -> "FreeIter"
+
+let string_of_gen_delegation = function
+  | ContAssignDelegate i -> sep ["ContAssignDelegate"; string_of_iterator_id i]
+  | ContEnterDelegate -> "ContEnterDelegate"
+  | YieldFromDelegate (i, l) ->
+    sep ["YieldFromDelegate"; string_of_iterator_id i; string_of_label l]
+  | ContUnsetDelegate (free, i) ->
+    sep ["ContUnsetDelegate";
+         string_of_free_iterator free;
+         string_of_iterator_id i]
 
 let string_of_instruction instruction =
   let s = match instruction with
@@ -662,6 +675,7 @@ let string_of_instruction instruction =
   | IAsync               i -> string_of_async i
   | IGenerator           i -> string_of_generator i
   | IIncludeEvalDefine   i -> string_of_include_eval_define i
+  | IGenDelegation       i -> string_of_gen_delegation i
   | _ -> failwith "invalid instruction" in
   s ^ "\n"
 
@@ -1002,6 +1016,7 @@ and string_of_param_default_value expr =
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Yield _
   | A.Yield_break
+  | A.Yield_from _
   | A.Await _
   | A.List _
   | A.Omitted

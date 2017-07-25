@@ -285,6 +285,7 @@ class virtual ['b] reduce :
         on_LogXor : 'c -> 'd;
         on_Xor : 'c -> 'd;
         on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd;
+        on_Yield_from : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Yield_break : 'c -> 'd;
         on_afield : 'c -> Ast_visitors_ancestors.afield -> 'd;
         on_any : 'c -> Ast_visitors_ancestors.any -> 'd;
@@ -660,6 +661,7 @@ class virtual ['b] reduce :
     method on_LogXor : 'c -> 'd
     method on_Xor : 'c -> 'd
     method on_Yield : 'c -> Ast_visitors_ancestors.afield -> 'd
+    method on_Yield_from : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_Yield_break : 'c -> 'd
     method on_afield : 'c -> Ast_visitors_ancestors.afield -> 'd
     method on_any : 'c -> Ast_visitors_ancestors.any -> 'd

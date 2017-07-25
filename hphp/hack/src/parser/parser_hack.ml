@@ -262,7 +262,7 @@ let rec check_lvalue env = function
   | pos, (Array _ | Darray _ | Varray _ | Shape _ | Collection _
   | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
-  | String _ | String2 _ | Yield _ | Yield_break
+  | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
   | Await _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
   | Xml _ | Import _ | Pipe _) ->

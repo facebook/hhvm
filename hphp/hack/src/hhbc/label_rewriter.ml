@@ -43,6 +43,7 @@ let get_regular_labels instr =
   | IIterator (MIterNextK (_, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (DecodeCufIter (_, l))
+  | IGenDelegation (YieldFromDelegate (_, l))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
   | IContFlow (Switch (_, _, ls)) -> ls
   | IContFlow (SSwitch pairs) -> List.map pairs snd
@@ -131,6 +132,8 @@ let rewrite_params_and_body defs used refs params body =
       Some (IIterator (MIterNextK (id, relabel l, k, v)))
     | IIterator (IterBreak (l, x)) ->
       Some (IIterator (IterBreak (relabel l, x)))
+    | IGenDelegation (YieldFromDelegate (i, l)) ->
+      Some (IGenDelegation (YieldFromDelegate (i, relabel l)))
     | ICall (DecodeCufIter (x, l)) ->
       Some (ICall (DecodeCufIter (x, relabel l)))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))

@@ -932,13 +932,18 @@ TODO: This will need to be fixed to allow situations where the qualified name
       TODO: Is this an expression or a statement?
       TODO: Add it to the specification.
     *)
-    let (parser, token) = assert_token parser Yield in
-    let (parser, operand) = if peek_token_kind parser = Break then
-      assert_token parser Break
-    else
-      parse_array_element_init parser in
-    let result = make_yield_expression token operand in
-    (parser, result)
+    let parser, yield_kw = assert_token parser Yield in
+    match peek_token_kind parser with
+    | From ->
+      let parser, from_kw = assert_token parser From in
+      let parser, operand = parse_expression parser in
+      parser, make_yield_from_expression yield_kw from_kw operand
+    | Break ->
+      let parser, break_kw = assert_token parser Break in
+      parser, make_yield_expression yield_kw break_kw
+    | _ ->
+      let parser, operand = parse_array_element_init parser in
+      parser, make_yield_expression yield_kw operand
 
   and parse_cast_or_parenthesized_or_lambda_expression parser =
   (* We need to disambiguate between casts, lambdas and ordinary
@@ -999,6 +1004,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Finally
     | For
     | Foreach
+    | From
     | Function
     | Global
     | Goto

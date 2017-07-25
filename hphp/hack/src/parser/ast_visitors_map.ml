@@ -689,6 +689,8 @@ class virtual ['self] map =
     method on_Yield env c0 =
       let r0 = self#on_afield env c0 in Yield r0
     method on_Yield_break env = Yield_break
+    method on_Yield_from env c0 =
+      let r0 = self#on_expr env c0 in Yield_from r0
     method on_Await env c0 =
       let r0 = self#on_expr env c0 in Await r0
     method on_List env c0 =
@@ -786,6 +788,7 @@ class virtual ['self] map =
       | String c0 -> self#on_String env c0
       | String2 c0 -> self#on_String2 env c0
       | Yield c0 -> self#on_Yield env c0
+      | Yield_from c0 -> self#on_Yield_from env c0
       | Yield_break -> self#on_Yield_break env
       | Await c0 -> self#on_Await env c0
       | List c0 -> self#on_List env c0

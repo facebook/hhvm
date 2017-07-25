@@ -323,6 +323,7 @@ and expr_ =
   | String2 of expr list
   | Yield of afield
   | Yield_break
+  | Yield_from of expr
   | Await of expr
   | List of expr list
   | Expr_list of expr list

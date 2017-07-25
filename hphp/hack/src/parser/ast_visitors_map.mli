@@ -489,6 +489,9 @@ class virtual ['c] map :
         on_Yield : 'd ->
                    Ast_visitors_ancestors.afield ->
                    Ast_visitors_ancestors.expr_;
+        on_Yield_from : 'd ->
+                    Ast_visitors_ancestors.expr ->
+                    Ast_visitors_ancestors.expr_;
         on_Yield_break : 'd -> Ast_visitors_ancestors.expr_;
         on_afield : 'd ->
                     Ast_visitors_ancestors.afield ->
@@ -1115,6 +1118,8 @@ class virtual ['c] map :
     method on_Xor : 'd -> Ast_visitors_ancestors.bop
     method on_Yield :
       'd -> Ast_visitors_ancestors.afield -> Ast_visitors_ancestors.expr_
+    method on_Yield_from :
+      'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_Yield_break : 'd -> Ast_visitors_ancestors.expr_
     method on_afield :
       'd -> Ast_visitors_ancestors.afield -> Ast_visitors_ancestors.afield

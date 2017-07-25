@@ -841,6 +841,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | YieldExpression { yield_operand; _ } ->
       env.saw_yield := true;
       Yield (pAField yield_operand env)
+    | YieldFromExpression { yield_from_operand; _ } ->
+      env.saw_yield := true;
+      Yield_from (pExpr yield_from_operand env)
 
     | DefineExpression { define_keyword; define_argument_list; _ } -> Call
       ( (let name = pos_name define_keyword in fst name, Id name)

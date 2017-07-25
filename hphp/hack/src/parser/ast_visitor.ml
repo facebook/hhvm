@@ -100,6 +100,7 @@ class type ['a] ast_visitor_type = object
   method on_while : 'a -> expr -> block -> 'a
   method on_xml : 'a -> id -> (pstring * expr) list -> expr list -> 'a
   method on_yield : 'a -> afield -> 'a
+  method on_yield_from : 'a -> expr -> 'a
   method on_yield_break : 'a -> 'a
 
 
@@ -306,6 +307,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Lvarvar (n, id)  -> this#on_lvarvar acc n id
    | Yield_break -> this#on_yield_break acc
    | Yield e     -> this#on_yield acc e
+   | Yield_from e -> this#on_yield_from acc e
    | Await e     -> this#on_await acc e
    | List el     -> this#on_list acc el
    | Clone e     -> this#on_clone acc e
@@ -409,6 +411,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_yield_break acc = acc
   method on_yield acc e = this#on_afield acc e
+  method on_yield_from acc e = this#on_expr acc e
   method on_await acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
 

@@ -929,6 +929,9 @@ class virtual ['self] endo =
       let r0 = self#on_afield env c0 in
       if c0 == r0 then this else Yield r0
     method on_Yield_break env this = this
+    method on_Yield_from env this c0 =
+      let r0 = self#on_expr env c0 in
+      if c0 == r0 then this else Yield_from r0
     method on_Await env this c0 =
       let r0 = self#on_expr env c0 in
       if c0 == r0 then this else Await r0
@@ -1060,6 +1063,7 @@ class virtual ['self] endo =
       | String c0 -> self#on_String env this c0
       | String2 c0 -> self#on_String2 env this c0
       | Yield c0 -> self#on_Yield env this c0
+      | Yield_from c0 -> self#on_Yield_from env this c0
       | Yield_break -> self#on_Yield_break env this
       | Await c0 -> self#on_Await env this c0
       | List c0 -> self#on_List env this c0

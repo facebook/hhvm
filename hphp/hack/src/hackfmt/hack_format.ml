@@ -876,6 +876,16 @@ let rec transform node =
       SplitWith Cost.Base;
       Nest [t operand];
     ]
+  | YieldFromExpression x ->
+    let (yield_kw, from_kw, operand) = get_yield_from_expression_children x in
+    Fmt [
+      t yield_kw;
+      Space;
+      t from_kw;
+      Space;
+      SplitWith Cost.Base;
+      Nest [t operand];
+    ]
   | PrefixUnaryExpression x ->
     let (operator, operand) = get_prefix_unary_expression_children x in
     Fmt [

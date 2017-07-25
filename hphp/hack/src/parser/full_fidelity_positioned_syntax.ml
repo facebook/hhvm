@@ -1228,6 +1228,17 @@ module FromMinimal = struct
           { yield_keyword
           ; yield_operand
           }, results
+      | SyntaxKind.YieldFromExpression
+      , (  yield_from_operand
+        :: yield_from_from_keyword
+        :: yield_from_yield_keyword
+        :: results
+        ) ->
+          YieldFromExpression
+          { yield_from_yield_keyword
+          ; yield_from_from_keyword
+          ; yield_from_operand
+          }, results
       | SyntaxKind.PrefixUnaryExpression
       , (  prefix_unary_operand
         :: prefix_unary_operator
@@ -2999,6 +3010,16 @@ module FromMinimal = struct
         let todo = Build (minimal_t, offset, todo) in
         let todo = Convert (yield_operand, todo) in
         convert offset todo results yield_keyword
+    | { M.syntax = M.YieldFromExpression
+        { M.yield_from_yield_keyword
+        ; M.yield_from_from_keyword
+        ; M.yield_from_operand
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (yield_from_operand, todo) in
+        let todo = Convert (yield_from_from_keyword, todo) in
+        convert offset todo results yield_from_yield_keyword
     | { M.syntax = M.PrefixUnaryExpression
         { M.prefix_unary_operator
         ; M.prefix_unary_operand

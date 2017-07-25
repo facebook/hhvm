@@ -308,6 +308,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return EmbeddedMemberSelectionExpression::from_json($json, $position, $source);
     case 'yield_expression':
       return YieldExpression::from_json($json, $position, $source);
+    case 'yield_from_expression':
+      return YieldFromExpression::from_json($json, $position, $source);
     case 'prefix_unary_expression':
       return PrefixUnaryExpression::from_json($json, $position, $source);
     case 'postfix_unary_expression':
@@ -851,6 +853,8 @@ abstract class EditableToken extends EditableSyntax {
        return new ForToken($leading, $trailing);
     case 'foreach':
        return new ForeachToken($leading, $trailing);
+    case 'from':
+       return new FromToken($leading, $trailing);
     case 'function':
        return new FunctionToken($leading, $trailing);
     case 'global':
@@ -1843,6 +1847,21 @@ final class ForeachToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): ForeachToken {
     return new ForeachToken($this->leading(), $trailing);
+  }
+}
+final class FromToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('from', $leading, $trailing, 'from');
+  }
+
+  public function with_leading(EditableSyntax $leading): FromToken {
+    return new FromToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): FromToken {
+    return new FromToken($this->leading(), $trailing);
   }
 }
 final class FunctionToken extends EditableToken {
@@ -13390,6 +13409,91 @@ final class YieldExpression extends EditableSyntax {
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
+    yield $this->_operand;
+    yield break;
+  }
+}
+final class YieldFromExpression extends EditableSyntax {
+  private EditableSyntax $_yield_keyword;
+  private EditableSyntax $_from_keyword;
+  private EditableSyntax $_operand;
+  public function __construct(
+    EditableSyntax $yield_keyword,
+    EditableSyntax $from_keyword,
+    EditableSyntax $operand) {
+    parent::__construct('yield_from_expression');
+    $this->_yield_keyword = $yield_keyword;
+    $this->_from_keyword = $from_keyword;
+    $this->_operand = $operand;
+  }
+  public function yield_keyword(): EditableSyntax {
+    return $this->_yield_keyword;
+  }
+  public function from_keyword(): EditableSyntax {
+    return $this->_from_keyword;
+  }
+  public function operand(): EditableSyntax {
+    return $this->_operand;
+  }
+  public function with_yield_keyword(EditableSyntax $yield_keyword): YieldFromExpression {
+    return new YieldFromExpression(
+      $yield_keyword,
+      $this->_from_keyword,
+      $this->_operand);
+  }
+  public function with_from_keyword(EditableSyntax $from_keyword): YieldFromExpression {
+    return new YieldFromExpression(
+      $this->_yield_keyword,
+      $from_keyword,
+      $this->_operand);
+  }
+  public function with_operand(EditableSyntax $operand): YieldFromExpression {
+    return new YieldFromExpression(
+      $this->_yield_keyword,
+      $this->_from_keyword,
+      $operand);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $yield_keyword = $this->yield_keyword()->rewrite($rewriter, $new_parents);
+    $from_keyword = $this->from_keyword()->rewrite($rewriter, $new_parents);
+    $operand = $this->operand()->rewrite($rewriter, $new_parents);
+    if (
+      $yield_keyword === $this->yield_keyword() &&
+      $from_keyword === $this->from_keyword() &&
+      $operand === $this->operand()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new YieldFromExpression(
+        $yield_keyword,
+        $from_keyword,
+        $operand), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $yield_keyword = EditableSyntax::from_json(
+      $json->yield_from_yield_keyword, $position, $source);
+    $position += $yield_keyword->width();
+    $from_keyword = EditableSyntax::from_json(
+      $json->yield_from_from_keyword, $position, $source);
+    $position += $from_keyword->width();
+    $operand = EditableSyntax::from_json(
+      $json->yield_from_operand, $position, $source);
+    $position += $operand->width();
+    return new YieldFromExpression(
+        $yield_keyword,
+        $from_keyword,
+        $operand);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_yield_keyword;
+    yield $this->_from_keyword;
     yield $this->_operand;
     yield break;
   }

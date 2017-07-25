@@ -2325,6 +2325,9 @@ module Make (GetLocals : GetLocals) = struct
       N.Any
     | BracedExpr _ ->
       N.Any
+    | Yield_from _ ->
+      Errors.unimplemented_feature p "yield from expressions";
+      N.Any
     | Import _ ->
       N.Any
     | Omitted ->

@@ -1061,6 +1061,18 @@ let schema : schema_node list =
       ; "operand", Aggregate ConstructorExpression
       ]
     }
+  ; { kind_name   = "YieldFromExpression"
+    ; type_name   = "yield_from_expression"
+    ; func_name   = "yield_from_expression"
+    ; description = "yield_from_expression"
+    ; prefix      = "yield_from"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "yield_keyword", Token
+      ; "from_keyword", Token
+      ; "operand", Aggregate Expression
+      ]
+    }
   ; { kind_name   = "PrefixUnaryExpression"
     ; type_name   = "prefix_unary_expression"
     ; func_name   = "prefix_unary_expression"

@@ -32,7 +32,11 @@ let set_default_dropthrough i = default_dropthrough := i
 let set_return_by_ref b = return_by_ref := b
 
 let emit_return ~need_ref env =
-  TFR.emit_return ~need_ref ~verify_return:!verify_return  ~in_finally_epilogue:false env
+  TFR.emit_return
+    ~need_ref
+    ~verify_return:!verify_return
+    ~in_finally_epilogue:false
+    env
 
 let emit_def_inline = function
   | A.Fun fd ->
@@ -114,6 +118,11 @@ let rec emit_stmt env st =
       emit_await env e;
       emit_return ~need_ref:false env;
     ]
+  | A.Return (_, Some (_, A.Yield_from e)) ->
+    gather [
+      emit_yield_from_delegates env e;
+      emit_return ~need_ref:false env;
+    ]
   | A.Expr (_, A.Await e) ->
     gather [
       emit_await env e;
@@ -163,6 +172,22 @@ let rec emit_stmt env st =
         with_temp_local temp (fun _ _ -> lhs);
         rhs;
         setop;
+        instr_popc;
+      ]
+  | A.Expr (_, A.Yield_from e) ->
+    gather [
+      emit_yield_from_delegates env e;
+      instr_popc;
+    ]
+  | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Yield_from e))) ->
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let rhs_instrs = instr_pushl temp in
+      gather [
+        emit_yield_from_delegates env e;
+        instr_setl temp;
+        instr_popc;
+        emit_lval_op_nonlist env LValOp.Set e_lhs rhs_instrs 1;
         instr_popc;
       ]
   | A.Expr expr ->
@@ -905,6 +930,31 @@ and emit_foreach_ env collection iterator block =
   ] in
   Iterator.free_iterator ();
   result
+
+and emit_yield_from_delegates env e =
+  let iterator_number = Iterator.get_iterator () in
+  let loop_label = Label.next_regular () in
+  let fault_label = Label.next_fault () in
+  let body =
+    gather [
+      instr_null;
+      instr_label loop_label;
+      instr_contEnterDelegate;
+      instr_yieldFromDelegate iterator_number loop_label;
+    ]
+  in
+  let fault_body =
+    gather [
+      instr_contUnsetDelegate_free iterator_number;
+      instr_unwind;
+    ]
+  in
+  gather [
+    emit_expr ~need_ref:false env e;
+    instr_contAssignDelegate iterator_number;
+    instr_try_fault fault_label body fault_body;
+    instr_contUnsetDelegate_ignore iterator_number;
+  ]
 
 and emit_stmts env stl =
   let results = List.map stl (emit_stmt env) in

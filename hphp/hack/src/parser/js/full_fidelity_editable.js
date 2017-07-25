@@ -245,6 +245,8 @@ class EditableSyntax
       return EmbeddedMemberSelectionExpression.from_json(json, position, source);
     case 'yield_expression':
       return YieldExpression.from_json(json, position, source);
+    case 'yield_from_expression':
+      return YieldFromExpression.from_json(json, position, source);
     case 'prefix_unary_expression':
       return PrefixUnaryExpression.from_json(json, position, source);
     case 'postfix_unary_expression':
@@ -746,6 +748,8 @@ class EditableToken extends EditableSyntax
        return new ForToken(leading, trailing);
     case 'foreach':
        return new ForeachToken(leading, trailing);
+    case 'from':
+       return new FromToken(leading, trailing);
     case 'function':
        return new FunctionToken(leading, trailing);
     case 'global':
@@ -1396,6 +1400,13 @@ class ForeachToken extends EditableToken
   constructor(leading, trailing)
   {
     super('foreach', leading, trailing, 'foreach');
+  }
+}
+class FromToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('from', leading, trailing, 'from');
   }
 }
 class FunctionToken extends EditableToken
@@ -11347,6 +11358,89 @@ class YieldExpression extends EditableSyntax
     return YieldExpression._children_keys;
   }
 }
+class YieldFromExpression extends EditableSyntax
+{
+  constructor(
+    yield_keyword,
+    from_keyword,
+    operand)
+  {
+    super('yield_from_expression', {
+      yield_keyword: yield_keyword,
+      from_keyword: from_keyword,
+      operand: operand });
+  }
+  get yield_keyword() { return this.children.yield_keyword; }
+  get from_keyword() { return this.children.from_keyword; }
+  get operand() { return this.children.operand; }
+  with_yield_keyword(yield_keyword){
+    return new YieldFromExpression(
+      yield_keyword,
+      this.from_keyword,
+      this.operand);
+  }
+  with_from_keyword(from_keyword){
+    return new YieldFromExpression(
+      this.yield_keyword,
+      from_keyword,
+      this.operand);
+  }
+  with_operand(operand){
+    return new YieldFromExpression(
+      this.yield_keyword,
+      this.from_keyword,
+      operand);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var yield_keyword = this.yield_keyword.rewrite(rewriter, new_parents);
+    var from_keyword = this.from_keyword.rewrite(rewriter, new_parents);
+    var operand = this.operand.rewrite(rewriter, new_parents);
+    if (
+      yield_keyword === this.yield_keyword &&
+      from_keyword === this.from_keyword &&
+      operand === this.operand)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new YieldFromExpression(
+        yield_keyword,
+        from_keyword,
+        operand), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let yield_keyword = EditableSyntax.from_json(
+      json.yield_from_yield_keyword, position, source);
+    position += yield_keyword.width;
+    let from_keyword = EditableSyntax.from_json(
+      json.yield_from_from_keyword, position, source);
+    position += from_keyword.width;
+    let operand = EditableSyntax.from_json(
+      json.yield_from_operand, position, source);
+    position += operand.width;
+    return new YieldFromExpression(
+        yield_keyword,
+        from_keyword,
+        operand);
+  }
+  get children_keys()
+  {
+    if (YieldFromExpression._children_keys == null)
+      YieldFromExpression._children_keys = [
+        'yield_keyword',
+        'from_keyword',
+        'operand'];
+    return YieldFromExpression._children_keys;
+  }
+}
 class PrefixUnaryExpression extends EditableSyntax
 {
   constructor(
@@ -17705,6 +17799,7 @@ exports.FinalToken = FinalToken;
 exports.FinallyToken = FinallyToken;
 exports.ForToken = ForToken;
 exports.ForeachToken = ForeachToken;
+exports.FromToken = FromToken;
 exports.FunctionToken = FunctionToken;
 exports.GlobalToken = GlobalToken;
 exports.GotoToken = GotoToken;
@@ -17949,6 +18044,7 @@ exports.MemberSelectionExpression = MemberSelectionExpression;
 exports.SafeMemberSelectionExpression = SafeMemberSelectionExpression;
 exports.EmbeddedMemberSelectionExpression = EmbeddedMemberSelectionExpression;
 exports.YieldExpression = YieldExpression;
+exports.YieldFromExpression = YieldFromExpression;
 exports.PrefixUnaryExpression = PrefixUnaryExpression;
 exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;

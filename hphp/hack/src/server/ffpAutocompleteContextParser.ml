@@ -111,8 +111,8 @@ let make_context
     | FunctionDeclaration _ as func ->
       { acc with inside_async_function = is_function_async func }
     | LambdaExpression _ as lambda ->
-      (* If we see a lambda, almost all context is reset, so each field should get consideration
-      on if its context flows into the lambda *)
+      (* If we see a lambda, almost all context is reset, so each field should
+      get consideration on if its context flows into the lambda *)
       {
         closest_parent_container = LambdaBodyExpression;
         predecessor = predecessor;
@@ -124,7 +124,10 @@ let make_context
       { acc with closest_parent_container = Container.CompoundStatement }
     | _ -> acc
   in
-  List.fold_right ~f:check_node ~init:{ initial_context with predecessor } full_path
+  List.fold_right
+    ~f:check_node
+    ~init:{ initial_context with predecessor }
+    full_path
 
 type autocomplete_location_classification =
   | InLeadingTrivia

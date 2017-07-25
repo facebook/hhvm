@@ -42,7 +42,7 @@ struct Local {
 #define IMM_TYPE_BLA std::vector<Block*>
 #define IMM_TYPE_SLA StringOffsetVector
 #define IMM_TYPE_ILA void*
-#define IMM_TYPE_IVA void*
+#define IMM_TYPE_IVA uint32_t
 #define IMM_TYPE_I64A int64_t
 #define IMM_TYPE_LA Local
 #define IMM_TYPE_IA int32_t

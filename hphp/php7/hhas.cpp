@@ -25,6 +25,7 @@ namespace HPHP { namespace php7 {
 
 namespace {
   std::string dump_pseudomain(const Function& func);
+  std::string dump_function(const Function& func);
   std::string dump_blocks(std::vector<Block*> blocks);
 
   std::string dump_declvars(const std::unordered_set<std::string>& locals);
@@ -34,6 +35,9 @@ std::string dump_asm(const Unit& unit) {
   std::string out;
   folly::format(&out, ".filepath \"{}\";\n\n", unit.name);
   out.append(dump_pseudomain(*unit.getPseudomain()));
+  for (const auto& func : unit.functions) {
+    out.append(dump_function(*func));
+  }
   return out;
 }
 
@@ -56,6 +60,10 @@ struct InstrVisitor {
   }
 
   void imm(int64_t intimm) {
+    folly::format(&out, " {}", intimm);
+  }
+
+  void imm(uint32_t intimm) {
     folly::format(&out, " {}", intimm);
   }
 
@@ -167,8 +175,26 @@ std::string dump_pseudomain(const Function& func) {
   out.append(".main {\n");
   out.append(dump_declvars(func.locals));
   out.append(dump_blocks(serializeControlFlowGraph(func.entry)));
-  out.append("}");
+  out.append("}\n\n");
   return out;
+}
+
+std::string dump_function(const Function& func) {
+  std::string out;
+  out.append(".function ");
+  out.append(func.name);
+  out.append("(");
+  for (const auto& param : func.params) {
+    folly::format(&out, " {}${},",
+        param.byRef ? "&" : "",
+        param.name);
+  }
+  out.append(") {\n");
+  out.append(dump_declvars(func.locals));
+  out.append(dump_blocks(serializeControlFlowGraph(func.entry)));
+  out.append("}\n\n");
+  return out;
+
 }
 
 std::string dump_blocks(std::vector<Block*> blocks) {

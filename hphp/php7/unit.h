@@ -85,6 +85,11 @@ struct Block {
 std::vector<Block*> serializeControlFlowGraph(Block* entry);
 
 struct Function {
+  struct Param {
+    std::string name;
+    bool byRef;
+  };
+
   explicit Function(Unit* parent,
       const std::string& name);
 
@@ -98,6 +103,7 @@ struct Function {
   Block* entry;
   Unit* parent;
   std::vector<std::unique_ptr<Block>> blocks;
+  std::vector<Param> params;
   std::unordered_set<std::string> locals;
 };
 
@@ -107,6 +113,11 @@ struct Unit {
 
   Function* getPseudomain() const {
     return pseudomain.get();
+  }
+
+  Function* makeFunction(const std::string& name) {
+    functions.emplace_back(std::make_unique<Function>(this, name));
+    return functions.back().get();
   }
 
   std::string name;

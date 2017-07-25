@@ -34,6 +34,10 @@ inline const zend_ast_list* zend_ast_get_list(const zend_ast* ast) {
   return reinterpret_cast<const zend_ast_list*>(ast);
 }
 
+inline const zend_ast_decl* zend_ast_get_decl(const zend_ast* ast) {
+  return reinterpret_cast<const zend_ast_decl*>(ast);
+}
+
 inline std::string zval_to_string(const zval* zv) {
   std::string out;
   switch (Z_TYPE_P(zv)) {
@@ -76,9 +80,50 @@ void Compiler::compileProgram(const zend_ast* ast) {
   compileStatement(ast);
 
   if (activeBlock) {
-    activeBlock->emit(Int{-1});
+    activeBlock->emit(Int{1});
     activeBlock->exit(RetC{});
   }
+}
+
+void Compiler::compileFunction(const zend_ast* ast) {
+  auto decl = zend_ast_get_decl(ast);
+  auto name = decl->name;
+  auto params = zend_ast_get_list(decl->child[0]);
+  auto body = decl->child[2];
+
+  auto func = unit->makeFunction(ZSTR_VAL(name));
+  std::swap(activeFunction, func);
+  SCOPE_EXIT { std::swap(activeFunction, func); };
+
+  if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
+    activeFunction->attr |= Attr::AttrReference;
+  }
+  activeFunction->params.reserve(params->children);
+  for (uint32_t i = 0; i < params->children; i++) {
+    auto param = params->child[i];
+    auto param_name = zval_to_string(zend_ast_get_zval(param->child[1]));
+    auto param_default = param->child[2];
+    auto param_attrs = param->attr;
+
+    if (param_default) {
+      panic("default parameter values not supported");
+    }
+
+    activeFunction->params.push_back({
+      param_name,
+      static_cast<bool>(param_attrs & ZEND_PARAM_REF)
+    });
+  }
+
+  withBlock(activeFunction->entry, [&] {
+    activeBlock = activeFunction->entry;
+    compileStatement(body);
+
+    if (activeBlock) {
+      activeBlock->emit(Null{});
+      activeBlock->exit(RetC{});
+    }
+  });
 }
 
 void Compiler::panic(const std::string& msg) {
@@ -128,8 +173,8 @@ void Compiler::compileConstant(const zend_ast* ast) {
   }
 }
 
-void Compiler::compileVar(const zend_ast* ast, Flavor expected) {
-  switch (expected) {
+void Compiler::compileVar(const zend_ast* ast, Destination dest) {
+  switch (dest.flavor) {
     case Drop:
       getLvalue(ast)->getC();
       activeBlock->emit(PopC{});
@@ -140,6 +185,11 @@ void Compiler::compileVar(const zend_ast* ast, Flavor expected) {
     case Ref:
       getLvalue(ast)->getV();
       return;
+    case FuncParam:
+      getLvalue(ast)->getF(dest.slot);
+      return;
+    case Return:
+      panic("Can't get a local with R flavor");
   }
 }
 
@@ -280,22 +330,50 @@ void Compiler::compileAssignOp(const zend_ast* ast) {
   getLvalue(lhs)->assignOp(op, rhs);
 }
 
+void Compiler::compileCall(const zend_ast* ast) {
+  auto callee = ast->child[0];
+  auto params = zend_ast_get_list(ast->child[1]);
 
-void Compiler::compileExpression(const zend_ast* ast, Flavor expected) {
+  auto zv = callee->kind == ZEND_AST_ZVAL
+      ? zend_ast_get_zval(callee)
+      : nullptr;
+
+  // push the FPI record
+  if (zv && Z_TYPE_P(zv) == IS_STRING) {
+    activeBlock->emit(FPushFuncD{
+      params->children,
+      Z_STRVAL_P(zend_ast_get_zval(callee))
+    });
+  } else {
+    compileExpression(callee, Flavor::Cell);
+    activeBlock->emit(FPushFunc{
+      params->children
+    });
+  }
+
+  for (uint32_t i = 0; i < params->children; i++) {
+    compileExpression(params->child[i], Destination::Param(i));
+  }
+
+  activeBlock->emit(FCall{params->children});
+}
+
+
+void Compiler::compileExpression(const zend_ast* ast, Destination dest) {
   switch (ast->kind) {
     case ZEND_AST_ZVAL:
       compileZvalLiteral(zend_ast_get_zval(ast));
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_CONST:
       compileConstant(ast);
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_UNARY_MINUS:
     case ZEND_AST_UNARY_PLUS:
     case ZEND_AST_UNARY_OP:
       compileUnaryOp(ast);
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_BINARY_OP:
     case ZEND_AST_GREATER:
@@ -303,37 +381,41 @@ void Compiler::compileExpression(const zend_ast* ast, Flavor expected) {
       compileExpression(ast->child[0], Flavor::Cell);
       compileExpression(ast->child[1], Flavor::Cell);
       activeBlock->emit(opForBinaryOp(ast));
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_POST_INC:
     case ZEND_AST_POST_DEC:
     case ZEND_AST_PRE_INC:
     case ZEND_AST_PRE_DEC:
       compileIncDec(ast);
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_VAR:
-      compileVar(ast, expected);
+      compileVar(ast, dest);
       break;
     case ZEND_AST_ASSIGN:
       compileAssignment(ast);
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_ASSIGN_REF:
       compileBind(ast);
-      fixFlavor(expected, Flavor::Ref);
+      fixFlavor(dest, Flavor::Ref);
       break;
     case ZEND_AST_ASSIGN_OP:
       compileAssignOp(ast);
-      fixFlavor(expected, Flavor::Cell);
+      fixFlavor(dest, Flavor::Cell);
+      break;
+    case ZEND_AST_CALL:
+      compileCall(ast);
+      fixFlavor(dest, Flavor::Return);
       break;
     default:
       panic("unsupported expression");
   }
 }
 
-void Compiler::fixFlavor(Flavor expected, Flavor actual) {
-  switch(expected) {
+void Compiler::fixFlavor(Destination dest, Flavor actual) {
+  switch(dest.flavor) {
     case Drop:
       switch (actual) {
         case Drop:
@@ -344,6 +426,12 @@ void Compiler::fixFlavor(Flavor expected, Flavor actual) {
         case Ref:
           activeBlock->emit(PopV{});
           return;
+        case Return:
+          activeBlock->emit(PopR{});
+          return;
+        case FuncParam:
+          panic("Can't drop param");
+          return;
       }
     case Ref:
       switch (actual) {
@@ -352,7 +440,11 @@ void Compiler::fixFlavor(Flavor expected, Flavor actual) {
           return;
         case Ref:
           return;
+        case Return:
+          activeBlock->emit(BoxR{});
+          return;
         case Drop:
+        case FuncParam:
           panic("Can't make ref");
       }
     case Cell:
@@ -362,8 +454,31 @@ void Compiler::fixFlavor(Flavor expected, Flavor actual) {
         case Ref:
           activeBlock->emit(Unbox{});
           return;
+        case Return:
+          activeBlock->emit(UnboxR{});
+          return;
         case Drop:
+        case FuncParam:
           panic("Can't make cell");
+      }
+    case Return:
+      panic("can't coerce to return value");
+      break;
+    case FuncParam:
+      auto slot = dest.slot;
+      switch (actual) {
+        case Cell:
+          activeBlock->emit(FPassCE{slot});
+          return;
+        case Ref:
+          activeBlock->emit(FPassV{slot});
+          return;
+        case Return:
+          activeBlock->emit(FPassR{slot});
+          return;
+        case Drop:
+        case FuncParam:
+          panic("Can't make function param");
       }
   }
 }
@@ -407,9 +522,20 @@ void Compiler::compileStatement(const zend_ast* ast) {
       activeBlock = nullptr;
       break;
     case ZEND_AST_RETURN:
-      compileExpression(ast->child[0], Flavor::Cell);
-      activeBlock->exit(RetC{});
+      if (!ast->child[0]) {
+        activeBlock->emit(Null{});
+        activeBlock->exit(RetC{});
+      } else if (activeFunction->attr & Attr::AttrReference) {
+        compileExpression(ast->child[0], Flavor::Ref);
+        activeBlock->exit(RetV{});
+      } else {
+        compileExpression(ast->child[0], Flavor::Cell);
+        activeBlock->exit(RetC{});
+      }
       activeBlock = nullptr;
+      break;
+    case ZEND_AST_FUNC_DECL:
+      compileFunction(ast);
       break;
     default:
       compileExpression(ast, Flavor::Drop);
@@ -554,6 +680,11 @@ struct Compiler::LocalLvalue : Compiler::Lvalue {
     c.activeBlock->emit(VGetL{name});
   }
 
+  void getF(uint32_t slot) override {
+    c.activeFunction->locals.insert(name);
+    c.activeBlock->emit(FPassL{slot, name});
+  }
+
   void assign(const zend_ast* rhs) override {
     c.activeFunction->locals.insert(name);
     c.compileExpression(rhs, Flavor::Cell);
@@ -598,6 +729,11 @@ struct Compiler::DynamicLocalLvalue : Compiler::Lvalue {
   void getV() override {
     getName();
     c.activeBlock->emit(VGetN{});
+  }
+
+  void getF(uint32_t slot) override {
+    getName();
+    c.activeBlock->emit(FPassN{slot});
   }
 
   void assign(const zend_ast* rhs) override {

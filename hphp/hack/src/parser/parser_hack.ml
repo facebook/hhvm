@@ -390,6 +390,14 @@ let ref_opt env =
       false
 
 (*****************************************************************************)
+(* Helpers for parsing integers *)
+(*****************************************************************************)
+
+let eliminate_underscores s = s
+                              |> Str.split (Str.regexp "_")
+                              |> String.concat ""
+
+(*****************************************************************************)
 (* Identifiers *)
 (*****************************************************************************)
 
@@ -1280,7 +1288,7 @@ and xhp_enum_decl_value env =
   let pos = Pos.make env.file env.lb in
   match tok with
   | Tint ->
-      let tok_value = Lexing.lexeme env.lb in
+      let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
       pos, Int (pos, tok_value)
   | Tquote ->
       let absolute_pos = env.lb.Lexing.lex_curr_pos in
@@ -2945,7 +2953,7 @@ and expr_atomic ~allow_class ~class_const env =
   let pos = Pos.make env.file env.lb in
   match tok with
   | Tint ->
-      let tok_value = Lexing.lexeme env.lb in
+      let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
       pos, Int (pos, tok_value)
   | Tfloat ->
       let tok_value = Lexing.lexeme env.lb in
@@ -3707,7 +3715,7 @@ and encapsed_expr env =
       expr_string env pos absolute_pos
   | Tint ->
       let pos = Pos.make env.file env.lb in
-      let tok_value = Lexing.lexeme env.lb in
+      let tok_value = eliminate_underscores (Lexing.lexeme env.lb) in
       pos, Int (pos, tok_value)
   | Tword ->
       let pid = Pos.make env.file env.lb in

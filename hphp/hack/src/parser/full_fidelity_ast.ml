@@ -931,13 +931,18 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       (match syntax expr with
       | Token _ ->
         let s = text expr in
+        (* We allow underscores while lexing the integer literals. This function gets
+         * rid of them before the literal is created. *)
+        let eliminate_underscores s = s
+                                      |> Str.split (Str.regexp "_")
+                                      |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
         if s <> String.lowercase s then Lint.lowercase_constant pos s;
         (match token_kind expr with
         | Some TK.DecimalLiteral
         | Some TK.OctalLiteral
         | Some TK.HexadecimalLiteral
-        | Some TK.BinaryLiteral             -> Int    (pos, s)
+        | Some TK.BinaryLiteral             -> Int    (pos, eliminate_underscores s)
         | Some TK.FloatingLiteral           -> Float  (pos, s)
         | Some TK.SingleQuotedStringLiteral -> String (pos, mkStr unesc_sgl s)
         | Some TK.DoubleQuotedStringLiteral

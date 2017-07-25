@@ -185,25 +185,39 @@ let scan_variable lexer =
   let lexer = scan_name_impl (advance lexer 1) in
   (lexer, TokenKind.Variable)
 
+let rec scan_with_underscores accepted_char lexer =
+  let ch = peek_char lexer 0 in
+  if accepted_char ch then scan_with_underscores accepted_char (advance lexer 1)
+  else if ch = '_' && accepted_char (peek_char lexer 1) then
+    scan_with_underscores accepted_char (advance lexer 2)
+  else lexer
+
 let rec scan_decimal_digits lexer =
   let ch = peek_char lexer 0 in
   if is_decimal_digit ch then scan_decimal_digits (advance lexer 1)
   else lexer
+
+let scan_decimal_digits_with_underscores lexer =
+  scan_with_underscores is_decimal_digit lexer
 
 let rec scan_octal_digits lexer =
   let ch = peek_char lexer 0 in
   if is_octal_digit ch then scan_octal_digits (advance lexer 1)
   else lexer
 
-let rec scan_binary_digits lexer =
-  let ch = peek_char lexer 0 in
-  if is_binary_digit ch then scan_binary_digits (advance lexer 1)
-  else lexer
+let scan_octal_digits_with_underscores lexer =
+  scan_with_underscores is_octal_digit lexer
+
+let scan_binary_digits_with_underscores lexer =
+  scan_with_underscores is_binary_digit lexer
 
 let rec scan_hexadecimal_digits lexer =
   let ch = peek_char lexer 0 in
   if is_hexadecimal_digit ch then scan_hexadecimal_digits (advance lexer 1)
   else lexer
+
+let scan_hexadecimal_digits_with_underscores lexer =
+  scan_with_underscores is_hexadecimal_digit lexer
 
 let scan_hex_literal lexer =
   let ch = peek_char lexer 0 in
@@ -211,7 +225,7 @@ let scan_hex_literal lexer =
     let lexer = with_error lexer SyntaxError.error0001 in
     (lexer, TokenKind.HexadecimalLiteral)
   else
-    (scan_hexadecimal_digits lexer, TokenKind.HexadecimalLiteral)
+    (scan_hexadecimal_digits_with_underscores lexer, TokenKind.HexadecimalLiteral)
 
 let scan_binary_literal lexer =
   let ch = peek_char lexer 0 in
@@ -219,7 +233,7 @@ let scan_binary_literal lexer =
     let lexer = with_error lexer SyntaxError.error0002 in
     (lexer, TokenKind.BinaryLiteral)
   else
-    (scan_binary_digits lexer, TokenKind.BinaryLiteral)
+    (scan_binary_digits_with_underscores lexer, TokenKind.BinaryLiteral)
 
 let scan_exponent lexer =
   let lexer = advance lexer 1 in
@@ -261,7 +275,12 @@ let scan_octal_or_float lexer =
         let ch = peek_char lexer_oct 0 in
         if ch = 'e' || ch = 'E' then scan_exponent lexer_oct
         else if ch = '.' then scan_after_decimal_point lexer_oct
-        else (lexer_oct, TokenKind.OctalLiteral)
+        else
+        (* This is irritating - we only want to allow underscores for integer literals.
+         * Deferring the lexing with underscores here allows us to make sure we're not dealing
+         * with floats. *)
+        let lexer_oct_with_underscores = scan_octal_digits_with_underscores lexer in
+        (lexer_oct_with_underscores, TokenKind.OctalLiteral)
       end
     else
       begin
@@ -280,12 +299,13 @@ let scan_octal_or_float lexer =
 
 let scan_decimal_or_float lexer =
   (* We've scanned a leading non-zero digit. *)
-  let lexer = scan_decimal_digits lexer in
-  let ch = peek_char lexer 0 in
+  let lexer_no_underscores = scan_decimal_digits lexer in
+  let lexer_with_underscores = scan_decimal_digits_with_underscores lexer in
+  let ch = peek_char lexer_no_underscores 0 in
   match ch with
-  | '.' -> (* 123. *) scan_after_decimal_point lexer
-  | 'e' | 'E' -> (* 123e *) scan_exponent lexer
-  | _ -> (* 123 *) (lexer, TokenKind.DecimalLiteral)
+  | '.' -> (* 123. *) scan_after_decimal_point lexer_no_underscores
+  | 'e' | 'E' -> (* 123e *) scan_exponent lexer_no_underscores
+  | _ -> (* 123 *) (lexer_with_underscores, TokenKind.DecimalLiteral)
 
 
 let scan_execution_string_literal lexer =
@@ -416,8 +436,8 @@ let scan_integer_literal lexer =
   | ('0', 'X') -> scan_hex_literal (advance lexer 2)
   | ('0', 'b')
   | ('0', 'B') -> scan_binary_literal (advance lexer 2)
-  | ('0', _) -> (scan_octal_digits lexer, TokenKind.OctalLiteral)
-  | _ -> (scan_decimal_digits lexer, TokenKind.DecimalLiteral)
+  | ('0', _) -> (scan_octal_digits_with_underscores lexer, TokenKind.OctalLiteral)
+  | _ -> (scan_decimal_digits_with_underscores lexer, TokenKind.DecimalLiteral)
 
 let scan_double_quote_string_literal_from_start lexer =
   let rec aux lexer =

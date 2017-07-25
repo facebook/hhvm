@@ -320,6 +320,17 @@ void cgLdClsCns(IRLS& env, const IRInstruction* inst) {
   v << lea{rvmtl()[link.handle()], dst};
 }
 
+void cgLdSubClsCns(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdSubClsCns>();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const slot = extra->slot;
+  auto const tmp = v.makeReg();
+  v << load{srcLoc(env, inst, 0).reg()[Class::constantsVecOff()], tmp};
+  v << lea{tmp[slot * sizeof(Class::Const) + offsetof(Class::Const, val)], dst};
+}
+
 Cell lookupClsCnsHelper(TypedValue* cache, const NamedEntity* ne,
                         const StringData* cls, const StringData* cns) {
   auto const clsCns = g_context->lookupClsCns(ne, cls, cns);

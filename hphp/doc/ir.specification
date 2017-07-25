@@ -1174,6 +1174,12 @@ To string conversions:
   Load the address of the constant 'constantName' for the class 'className' in
   RDS. If not initialized, branch to B.
 
+| LdSubClsCns<constantName,slot>, D(PtrToGen), S(Cls), NF
+
+  Load the address of the constant 'constantName' for the class S0. The
+  constant is known to be in the given slot. Note that the returned TypedValue
+  may be uninit (if it's a dynamically initialized constant).
+
 | LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 
   Loads the target cache entry for a forwarding call to clsName::methodName.

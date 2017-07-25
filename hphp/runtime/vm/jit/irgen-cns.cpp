@@ -187,20 +187,26 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
     return;
   }
   auto const cls = clsTy.clsSpec().cls();
-
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckType, taken, Type::ExactCls(cls), clsTmp);
-    },
-    [&] {
+  if (clsTy.clsSpec().exact()) {
+    killClsRef(env, slot);
+    implClsCns(env, cls, cnsNameStr, cls->name());
+  } else {
+    Slot cnsSlot;
+    auto const tv = cls->cnsNameToTV(cnsNameStr, cnsSlot, true);
+    if (cnsSlot != kInvalidSlot &&
+        (!tv ||
+         !static_cast<const TypedValueAux*>(tv)->constModifiers().isType)) {
+      auto const data = LdSubClsCnsData { cnsNameStr, cnsSlot };
+      auto const exit = makeExitSlow(env);
+      auto const ptv = gen(env, LdSubClsCns, data, clsTmp);
+      gen(env, CheckTypeMem, TUncountedInit, exit, ptv);
       killClsRef(env, slot);
-      implClsCns(env, cls, cnsNameStr, cls->name());
-    },
-    [&] {
-      gen(env, Jmp, makeExitSlow(env));
+      auto const val = gen(env, LdMem, TUncountedInit, ptv);
+      push(env, val);
+      return;
     }
-  );
+    interpOne(env, *env.currentNormalizedInstruction);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

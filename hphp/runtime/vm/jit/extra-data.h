@@ -715,7 +715,7 @@ struct RetCtrlData : IRExtraData {
 };
 
 /*
- * Name of a class constant.
+ * Name of a class constant in a known class
  */
 struct ClsCnsName : IRExtraData {
   explicit ClsCnsName(const StringData* cls, const StringData* cns)
@@ -729,6 +729,23 @@ struct ClsCnsName : IRExtraData {
 
   const StringData* clsName;
   const StringData* cnsName;
+};
+
+/*
+ * Name of a class constant in an unknown class.
+ */
+struct LdSubClsCnsData : IRExtraData {
+  explicit LdSubClsCnsData(const StringData* cns, Slot s)
+    : cnsName(cns)
+    , slot(s)
+  {}
+
+  std::string show() const {
+    return folly::sformat("<cls>::{}({})", cnsName, slot);
+  }
+
+  const StringData* cnsName;
+  Slot slot;
 };
 
 /*
@@ -1313,6 +1330,7 @@ X(CheckStaticLoc,               StaticLocName);
 X(InitStaticLoc,                StaticLocName);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
+X(LdSubClsCns,                  LdSubClsCnsData);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);

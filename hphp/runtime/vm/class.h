@@ -1020,6 +1020,9 @@ public:
   OFF(funcVecLen)
 #undef OFF
 
+  static constexpr ptrdiff_t constantsVecOff() {
+    return offsetof(Class, m_constants) + ConstMap::vecOff();
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // ExtraData.

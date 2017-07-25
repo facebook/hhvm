@@ -1545,6 +1545,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckStaticLoc:
   case LdStaticLoc:
   case LdClsCns:
+  case LdSubClsCns:
   case CheckCtxThis:
   case CheckFuncStatic:
   case LdARNumParams:

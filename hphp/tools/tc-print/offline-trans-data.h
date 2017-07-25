@@ -32,7 +32,7 @@
 
 namespace HPHP { namespace jit {
 
-struct OfflineX86Code;
+struct OfflineCode;
 
 typedef char MD5Str[33];
 
@@ -81,7 +81,7 @@ struct OfflineTransData {
 
   // Adds all control arcs among translations for 'selectedFuncId' by
   // disassembling transCode
-  void addControlArcs(uint32_t selectedFuncId, OfflineX86Code *transCode);
+  void addControlArcs(uint32_t selectedFuncId, OfflineCode *transCode);
 
   const TransIDSet& getTransPreds(TransID transId) const {
     assert(transId < preds.size());

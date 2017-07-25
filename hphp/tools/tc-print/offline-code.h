@@ -27,7 +27,9 @@
 #include "hphp/tools/tc-print/perf-events.h"
 
 extern "C" {
+#if defined(HAVE_LIBXED)
 #include <xed-interface.h>
+#endif
 }
 
 namespace HPHP { namespace jit {
@@ -52,9 +54,9 @@ struct TCRegionRec {
   uint32_t len;
 };
 
-struct OfflineX86Code {
+struct OfflineCode {
 
-  OfflineX86Code(std::string _dumpDir,
+  OfflineCode(std::string _dumpDir,
                  TCA _ahotBase,
                  TCA _aBase,
                  TCA _aprofBase,
@@ -64,25 +66,30 @@ struct OfflineX86Code {
     TCA tcRegionBases[TCRCount] = {
       _ahotBase, _aBase, _aprofBase, _coldBase, _frozenBase
     };
+#if defined(HAVE_LIBXED)
     xedInit();
+#endif
     openFiles(tcRegionBases);
     loadSymbolsMap();
   }
 
-  ~OfflineX86Code() {
+  ~OfflineCode() {
     closeFiles();
   }
 
   void printDisasm(TCA startAddr,
                    uint32_t len,
                    const std::vector<TransBCMapping>& bcMap,
-                   const PerfEventsMap<TCA>& perfEvents);
+                   const PerfEventsMap<TCA>& perfEvents,
+                   bool hostOpcodes);
 
   // Returns the fall-thru successor from 'a', if any
   TCA getTransJmpTargets(const TransRec *transRec,
                          std::vector<TCA> *jmpTargets);
 
   TCRegion findTCRegionContaining(TCA addr) const;
+
+  const char* getArchName();
 
 private:
   struct BCMappingInfo {
@@ -99,8 +106,10 @@ private:
 
   std::string       dumpDir;
   TCRegionRec       tcRegions[TCRCount];
+#if defined(HAVE_LIBXED)
   xed_state_t       xed_state;
   xed_syntax_enum_t xed_syntax;
+#endif
 
   std::unordered_map<TCA, std::string> addr2SymMap;
 
@@ -108,8 +117,6 @@ private:
   void closeFiles();
   void xedInit();
   void loadSymbolsMap();
-  void loadSymbolsMapTramp();
-  void loadSymbolsMapNm();
 
   bool tcRegionContains(TCRegion tcr, TCA addr) const;
 
@@ -119,8 +126,8 @@ private:
               uint64_t codeLen,
               const PerfEventsMap<TCA>& perfEvents,
               BCMappingInfo bcMappingInfo,
-              bool   printAddr=true,
-              bool   printBinary=false);
+              bool   printAddr,
+              bool   printBinary);
 
   TCA collectJmpTargets(FILE* file,
                         TCA fileStartAddr,

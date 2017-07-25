@@ -32,7 +32,7 @@
 
 #include "hphp/tools/tc-print/perf-events.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
-#include "hphp/tools/tc-print/offline-x86-code.h"
+#include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/mappers.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 
@@ -51,6 +51,7 @@ bool            transCFG        = false;
 bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
+bool            hostOpcodes     = false;
 folly::Optional<MD5> md5Filter;
 PerfEventType   sortBy          = EVENT_CYCLES;
 bool            sortByDensity   = false;
@@ -67,7 +68,7 @@ std::vector<uint32_t> transPrintOrder;
 
 RepoWrapper*      g_repo;
 OfflineTransData* g_transData;
-OfflineX86Code*   transCode;
+OfflineCode*   transCode;
 
 char errMsgBuff[MAX_SYM_LEN];
 const char* kListKeyword = "list";
@@ -134,6 +135,7 @@ void usage() {
          "    -n <level>      : level of verbosity for annotations. Use 0 for "
          "no annotations, 1 - for inline, 2 - to print all annotations "
          "including from a file (default: 2).\n"
+         "    -o              : print host opcodes\n"
          "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
          "when printing the top helpers (implies -i). The lower the percentage,"
          " the more helpers that will show up.\n"
@@ -279,6 +281,9 @@ void parseOptions(int argc, char *argv[]) {
         if (optopt == 'd' || optopt == 'c' || optopt == 'p' || optopt == 't') {
           fprintf (stderr, "Error: -%c expects an argument\n\n", optopt);
         }
+      case 'o':
+        hostOpcodes = true;
+        break;
       default:
         usage();
         exit(1);
@@ -486,21 +491,21 @@ void printTrans(TransID transId) {
     }
   }
 
-  printf("----------\nx64: main\n----------\n");
+  printf("----------\n%s: main\n----------\n", transCode->getArchName());
   transCode->printDisasm(tRec->aStart, tRec->aLen,
-                         tRec->bcMapping, tcaPerfEvents);
+                         tRec->bcMapping, tcaPerfEvents, hostOpcodes);
 
-  printf("----------\nx64: cold\n----------\n");
+  printf("----------\n%s: cold\n----------\n", transCode->getArchName());
   // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
   // twice in such cases.
   if (tRec->acoldStart != tRec->afrozenStart) {
     transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
-                           tRec->bcMapping, tcaPerfEvents);
+                           tRec->bcMapping, tcaPerfEvents, hostOpcodes);
   }
 
-  printf("----------\nx64: frozen\n----------\n");
+  printf("----------\n%s: frozen\n----------\n", transCode->getArchName());
   transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen,
-                         tRec->bcMapping, tcaPerfEvents);
+                         tRec->bcMapping, tcaPerfEvents, hostOpcodes);
 
   printf("----------\n");
 }
@@ -701,7 +706,7 @@ void printBytecodeStats(const OfflineTransData* tdata,
 }
 
 void printTopBytecodes(const OfflineTransData* tdata,
-                       OfflineX86Code* x86code,
+                       OfflineCode* olCode,
                        const PerfEventsMap<TCA>& samples,
                        PerfEventType etype,
                        ExtOpcode filterBy) {
@@ -734,23 +739,26 @@ void printTopBytecodes(const OfflineTransData* tdata,
     tfragPerfEvents.printEventsHeader(tfrag);
     printf("}\n\n");
 
-    printf("----------\nx64: main\n----------\n");
-    x86code->printDisasm(tfrag.aStart,
+    printf("----------\n%s: main\n----------\n", olCode->getArchName());
+    olCode->printDisasm(tfrag.aStart,
                          tfrag.aLen,
                          trec->bcMapping,
-                         samples);
+                         samples,
+                         hostOpcodes);
 
-    printf("----------\nx64: cold\n----------\n");
-    x86code->printDisasm(tfrag.acoldStart,
+    printf("----------\n%s: cold\n----------\n", olCode->getArchName());
+    olCode->printDisasm(tfrag.acoldStart,
                          tfrag.acoldLen,
                          trec->bcMapping,
-                         samples);
+                         samples,
+                         hostOpcodes);
 
-    printf("----------\nx64: frozen\n----------\n");
-    x86code->printDisasm(tfrag.afrozenStart,
+    printf("----------\n%s: frozen\n----------\n", olCode->getArchName());
+    olCode->printDisasm(tfrag.afrozenStart,
                          tfrag.afrozenLen,
                          trec->bcMapping,
-                         samples);
+                         samples,
+                         hostOpcodes);
   }
 }
 
@@ -762,7 +770,7 @@ int main(int argc, char *argv[]) {
   parseOptions(argc, argv);
 
   g_transData = new OfflineTransData(dumpDir);
-  transCode = new OfflineX86Code(dumpDir,
+  transCode = new OfflineCode(dumpDir,
                                  g_transData->getHotBase(),
                                  g_transData->getMainBase(),
                                  g_transData->getProfBase(),

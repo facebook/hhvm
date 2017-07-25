@@ -369,10 +369,11 @@ inline MemoryUsageStats MemoryManager::getStatsCopy() {
 
 inline bool MemoryManager::startStatsInterval() {
   auto ret = !m_statsIntervalActive;
-  refreshStats();
+  // Fetch current stats without changing m_stats or triggering OOM.
+  auto stats = getStatsCopy();
   // For the reasons stated below in refreshStatsImpl, usage can potentially be
   // negative. Make sure that doesn't occur here.
-  m_stats.peakIntervalUsage = std::max<int64_t>(0, m_stats.usage());
+  m_stats.peakIntervalUsage = std::max<int64_t>(0, stats.usage());
   m_stats.peakIntervalCap = m_stats.capacity;
   assert(m_stats.peakIntervalCap >= 0);
   m_statsIntervalActive = true;

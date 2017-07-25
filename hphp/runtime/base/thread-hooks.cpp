@@ -75,7 +75,7 @@ std::string get_thread_mem_usage() {
            "\t\tBytes allocated\t\tThread Name\n";
   for (auto it : threadMap) {
     if (!it.second->mm) continue;
-    auto usage = it.second->mm->getStats().usage();
+    auto usage = it.second->mm->getStatsCopy().usage();
     result += folly::sformat("\t{:10}\t{:9}\t{:13}\t\t{}\n", it.second->pid,
                              it.second->tid, usage,
                              *it.second->start_name_ptr);

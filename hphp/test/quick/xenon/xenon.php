@@ -53,7 +53,6 @@ $required_functions = array(
   'include',
   'HH\Asio\join',
   'HH\Asio\result',
-  Exception::class.'::__construct',
 
   'genList',
   'Closure$genList',

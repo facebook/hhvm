@@ -292,7 +292,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
   }
 
   if (strict_error) {
-    SystemLib::throwDOMExceptionObject(error_message, 0);
+    SystemLib::throwDOMExceptionObject(error_message);
   }
   raise_warning(std::string(error_message));
 }

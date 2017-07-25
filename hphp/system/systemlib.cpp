@@ -16,11 +16,16 @@
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/unit.h"
 
 #include <vector>
 
@@ -29,10 +34,45 @@ namespace HPHP { namespace SystemLib {
 
 namespace {
 
+const StaticString s_message("message");
+const StaticString s_code("code");
+const Slot s_messageIdx{0};
+const Slot s_codeIdx{2};
+
+DEBUG_ONLY bool throwable_has_expected_props() {
+  auto const erCls = s_ErrorClass;
+  auto const exCls = s_ExceptionClass;
+  return
+    erCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
+    exCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
+    erCls->lookupDeclProp(s_code.get()) == s_codeIdx &&
+    exCls->lookupDeclProp(s_code.get()) == s_codeIdx;
+}
+
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Variant& args) {
   Object inst{cls};
   tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
+  return inst;
+}
+
+/**
+ * Fast path for Errors and Exceptions that do not override the default
+ * constructor or message property initializer. Does not reenter VM.
+ */
+ALWAYS_INLINE
+Object createAndConstructThrowable(Class* cls, const Variant& message) {
+  assertx(throwable_has_expected_props());
+  assertx(cls->getCtor() == s_ErrorClass->getCtor() ||
+          cls->getCtor() == s_ExceptionClass->getCtor());
+
+  Object inst{cls};
+  auto props = inst->propVec();
+  assertx(isStringType(props[s_messageIdx].m_type));
+  assertx(props[s_messageIdx].m_data.pstr == staticEmptyString());
+  assertx(isIntType(props[s_codeIdx].m_type));
+  assertx(props[s_codeIdx].m_data.num == 0);
+  cellDup(*message.asCell(), props[s_messageIdx]);
   return inst;
 }
 
@@ -72,59 +112,51 @@ Object AllocPinitSentinel() {
 }
 
 Object AllocExceptionObject(const Variant& message) {
-  return createAndConstruct(s_ExceptionClass, make_packed_array(message));
+  return createAndConstructThrowable(s_ExceptionClass, message);
 }
 
 Object AllocErrorObject(const Variant& message) {
-  return createAndConstruct(s_ErrorClass, make_packed_array(message));
+  return createAndConstructThrowable(s_ErrorClass, message);
 }
 
 Object AllocArithmeticErrorObject(const Variant& message) {
-  return createAndConstruct(s_ArithmeticErrorClass, make_packed_array(message));
+  return createAndConstructThrowable(s_ArithmeticErrorClass, message);
 }
 
 Object AllocDivisionByZeroErrorObject(const Variant& message) {
-  return createAndConstruct(s_DivisionByZeroErrorClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_DivisionByZeroErrorClass, message);
 }
 
 Object AllocParseErrorObject(const Variant& message) {
-  return createAndConstruct(s_ParseErrorClass, make_packed_array(message));
+  return createAndConstructThrowable(s_ParseErrorClass, message);
 }
 
 Object AllocTypeErrorObject(const Variant& message) {
-  return createAndConstruct(s_TypeErrorClass, make_packed_array(message));
+  return createAndConstructThrowable(s_TypeErrorClass, message);
 }
 
 Object AllocBadMethodCallExceptionObject(const Variant& message) {
-  return createAndConstruct(s_BadMethodCallExceptionClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_BadMethodCallExceptionClass, message);
 }
 
 Object AllocInvalidArgumentExceptionObject(const Variant& message) {
-  return createAndConstruct(s_InvalidArgumentExceptionClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_InvalidArgumentExceptionClass, message);
 }
 
 Object AllocRuntimeExceptionObject(const Variant& message) {
-  return createAndConstruct(s_RuntimeExceptionClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_RuntimeExceptionClass, message);
 }
 
 Object AllocOutOfBoundsExceptionObject(const Variant& message) {
-  return createAndConstruct(s_OutOfBoundsExceptionClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_OutOfBoundsExceptionClass, message);
 }
 
 Object AllocInvalidOperationExceptionObject(const Variant& message) {
-  return createAndConstruct(s_InvalidOperationExceptionClass,
-                            make_packed_array(message));
+  return createAndConstructThrowable(s_InvalidOperationExceptionClass, message);
 }
 
-Object AllocDOMExceptionObject(const Variant& message,
-                                    const Variant& code) {
-  return createAndConstruct(s_DOMExceptionClass,
-                            make_packed_array(message, code));
+Object AllocDOMExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_DOMExceptionClass, message);
 }
 
 Object AllocSoapFaultObject(const Variant& code,
@@ -204,9 +236,8 @@ void throwInvalidOperationExceptionObject(const Variant& message) {
   throw_object(AllocInvalidOperationExceptionObject(message));
 }
 
-void throwDOMExceptionObject(const Variant& message,
-                             const Variant& code) {
-  throw_object(AllocDOMExceptionObject(message, code));
+void throwDOMExceptionObject(const Variant& message) {
+  throw_object(AllocDOMExceptionObject(message));
 }
 
 void throwSoapFaultObject(const Variant& code,

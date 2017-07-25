@@ -101,8 +101,7 @@ Object AllocInvalidArgumentExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
 Object AllocOutOfBoundsExceptionObject(const Variant& message);
 Object AllocInvalidOperationExceptionObject(const Variant& message);
-Object AllocDOMExceptionObject(const Variant& message,
-                               const Variant& code);
+Object AllocDOMExceptionObject(const Variant& message);
 Object AllocDirectoryObject();
 Object AllocPDOExceptionObject();
 Object AllocSoapFaultObject(const Variant& code,
@@ -131,8 +130,7 @@ void throwInvalidArgumentExceptionObject(const Variant& message);
 [[noreturn]]
 void throwInvalidOperationExceptionObject(const Variant& message);
 [[noreturn]]
-void throwDOMExceptionObject(const Variant& message,
-                             const Variant& code);
+void throwDOMExceptionObject(const Variant& message);
 [[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,

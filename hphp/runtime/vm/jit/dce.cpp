@@ -396,8 +396,10 @@ bool canDCE(IRInstruction* inst) {
   case LookupCnsE:
   case LookupCnsU:
   case LdClsCns:
-  case LdSubClsCns:
   case InitClsCns:
+  case LdSubClsCns:
+  case CheckSubClsCns:
+  case LdClsCnsVecLen:
   case LookupClsMethodFCache:
   case LookupClsMethodCache:
   case LookupClsMethod:
@@ -630,6 +632,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileArrayKind:
   case ProfileType:
   case ProfileMethod:
+  case ProfileSubClsCns:
   case CheckPackedArrayDataBounds:
   case LdVectorSize:
   case VectorDoCow:

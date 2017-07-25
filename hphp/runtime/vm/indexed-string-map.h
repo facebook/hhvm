@@ -124,6 +124,14 @@ struct IndexedStringMap {
     return offsetof(IndexedStringMap, m_map) +
       FixedStringMap<Index,CaseSensitive,Index>::tableOff();
   }
+  static constexpr ptrdiff_t sizeOff() {
+    return offsetof(IndexedStringMap, m_map) +
+      FixedStringMap<Index,CaseSensitive,Index>::sizeOff();
+  }
+  static constexpr size_t sizeSize() {
+    return FixedStringMap<Index,CaseSensitive,Index>::sizeSize();
+  }
+
 private:
   uint32_t byteSize() const { return size() * sizeof(T); }
   void setSize(Index size) { m_map.extra() = size; }

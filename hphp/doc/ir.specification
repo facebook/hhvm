@@ -1177,8 +1177,24 @@ To string conversions:
 | LdSubClsCns<constantName,slot>, D(PtrToGen), S(Cls), NF
 
   Load the address of the constant 'constantName' for the class S0. The
-  constant is known to be in the given slot. Note that the returned TypedValue
-  may be uninit (if it's a dynamically initialized constant).
+  constant is known to be in the given slot. If the returned TypedValue is not
+  UncountedInit, its value should not be used, and a fallback method should be
+  called.
+
+| CheckSubClsCns<constantName,slot>, ND, S(Cls), B
+
+  Check that the constant 'constantName' lives in the given slot for the class
+  S0, and branch if not. S0 must have at least slot+1 constants.
+
+| LdClsCnsVecLen, D(Int), S(Cls), NF
+
+  Load the size of S0's constant table.
+
+| ProfileSubClsCns<constantName,handle>, D(PtrToGen), S(Cls), NF
+
+  Load the address of the constant 'constantName' for the class S0, profiling
+  the observed slots. If the returned TypedValue is not UncountedInit, its
+  value should not be used, and a fallback method should be called.
 
 | LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 

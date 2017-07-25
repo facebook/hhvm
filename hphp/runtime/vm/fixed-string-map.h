@@ -49,11 +49,17 @@ struct FixedStringMap {
   ExtraType& extra() { return m_extra; }
   const ExtraType& extra() const { return m_extra; }
 
+  ExtraType size() const { return m_extra; }
+
   static constexpr ptrdiff_t tableOff() {
     return offsetof(FixedStringMap, m_table);
   }
-  ExtraType size() const { return m_extra; }
-
+  static constexpr ptrdiff_t sizeOff() {
+    return offsetof(FixedStringMap, m_extra);
+  }
+  static constexpr size_t sizeSize() {
+    return sizeof(m_extra);
+  }
 private:
   struct Elm {
     LowStringPtr sd;

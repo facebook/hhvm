@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -109,24 +111,6 @@ void implCns(IRGS& env,
   push(env, result);
 }
 
-//////////////////////////////////////////////////////////////////////
-
-}
-
-void emitCns(IRGS& env, const StringData* name) {
-  implCns(env, name, nullptr, false);
-}
-
-void emitCnsE(IRGS& env, const StringData* name) {
-  implCns(env, name, nullptr, true);
-}
-
-void emitCnsU(IRGS& env,
-              const StringData* name,
-              const StringData* fallback) {
-  implCns(env, name, fallback, false);
-}
-
 void implClsCns(IRGS& env,
                 const Class* cls,
                 const StringData* cnsNameStr,
@@ -173,22 +157,74 @@ void implClsCns(IRGS& env,
   );
 }
 
+StaticString clsCnsProfileKey { "ClsCnsProfile" };
+
+void clsCnsHelper(IRGS& env, SSATmp* ptv, uint32_t clsRefSlot,
+                      Block* exit = nullptr) {
+  if (!exit) exit = makeExitSlow(env);
+  gen(env, CheckTypeMem, TUncountedInit, exit, ptv);
+  killClsRef(env, clsRefSlot);
+  auto const val = gen(env, LdMem, TUncountedInit, ptv);
+  push(env, val);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+void emitCns(IRGS& env, const StringData* name) {
+  implCns(env, name, nullptr, false);
+}
+
+void emitCnsE(IRGS& env, const StringData* name) {
+  implCns(env, name, nullptr, true);
+}
+
+void emitCnsU(IRGS& env,
+              const StringData* name,
+              const StringData* fallback) {
+  implCns(env, name, fallback, false);
+}
+
 void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
   implClsCns(env, Unit::lookupClass(clsNameStr), cnsNameStr, clsNameStr);
 }
 
-void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
-  auto const clsTmp = peekClsRef(env, slot);
+void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
+  auto const clsTmp = peekClsRef(env, clsRefSlot);
   auto const clsTy = clsTmp->type();
   if (!clsTy.clsSpec()) {
+    if (RuntimeOption::RepoAuthoritative) {
+      TargetProfile<ClsCnsProfile> profile(env.context, env.irb->curMarker(),
+                                           clsCnsProfileKey.get());
+      if (profile.profiling()) {
+        auto const data = ProfileSubClsCnsData { cnsNameStr, profile.handle() };
+        clsCnsHelper(env, gen(env, ProfileSubClsCns, data, clsTmp), clsRefSlot);
+        return;
+      }
+      if (profile.optimizing()) {
+        auto const slot = profile.data(ClsCnsProfile::reduce).getSlot();
+        if (slot != kInvalidSlot) {
+          auto const exit = makeExitSlow(env);
+          auto const len = gen(env, LdClsCnsVecLen, clsTmp);
+          auto const cmp = gen(env, LteInt, len, cns(env, slot));
+          gen(env, JmpNZero, exit, cmp);
+          auto const data = LdSubClsCnsData { cnsNameStr, slot };
+          gen(env, CheckSubClsCns, data, exit, clsTmp);
+          clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp),
+                       clsRefSlot, exit);
+          return;
+        }
+      }
+    }
     interpOne(env, *env.currentNormalizedInstruction);
     return;
   }
   auto const cls = clsTy.clsSpec().cls();
   if (clsTy.clsSpec().exact()) {
-    killClsRef(env, slot);
+    killClsRef(env, clsRefSlot);
     implClsCns(env, cls, cnsNameStr, cls->name());
   } else {
     Slot cnsSlot;
@@ -197,12 +233,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
         (!tv ||
          !static_cast<const TypedValueAux*>(tv)->constModifiers().isType)) {
       auto const data = LdSubClsCnsData { cnsNameStr, cnsSlot };
-      auto const exit = makeExitSlow(env);
-      auto const ptv = gen(env, LdSubClsCns, data, clsTmp);
-      gen(env, CheckTypeMem, TUncountedInit, exit, ptv);
-      killClsRef(env, slot);
-      auto const val = gen(env, LdMem, TUncountedInit, ptv);
-      push(env, val);
+      clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp), clsRefSlot);
       return;
     }
     interpOne(env, *env.currentNormalizedInstruction);

@@ -749,6 +749,23 @@ struct LdSubClsCnsData : IRExtraData {
 };
 
 /*
+ * Name and handle of profiled class constant
+ */
+struct ProfileSubClsCnsData : IRExtraData {
+  explicit ProfileSubClsCnsData(const StringData* cns, rds::Handle h)
+    : cnsName(cns)
+    , handle(h)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>("<cls>::", cnsName->data());
+  }
+
+  const StringData* cnsName;
+  rds::Handle handle;
+};
+
+/*
  * The name of a static local in a function.
  */
 struct StaticLocName : IRExtraData {
@@ -1331,6 +1348,8 @@ X(InitStaticLoc,                StaticLocName);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
 X(LdSubClsCns,                  LdSubClsCnsData);
+X(CheckSubClsCns,               LdSubClsCnsData);
+X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);

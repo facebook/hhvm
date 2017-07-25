@@ -1024,6 +1024,14 @@ public:
     return offsetof(Class, m_constants) + ConstMap::vecOff();
   }
 
+  static constexpr ptrdiff_t constantsVecLenOff() {
+    return offsetof(Class, m_constants) + ConstMap::sizeOff();
+  }
+
+  static constexpr size_t constantsVecLenSize() {
+    return ConstMap::sizeSize();
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // ExtraData.
 

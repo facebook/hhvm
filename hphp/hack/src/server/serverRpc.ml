@@ -128,7 +128,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, { AutocompleteService.completions; char_at_pos; is_complete; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
         let content = ServerFileSync.get_file_content (ServerUtils.FileName path) in
-        env, FfpAutocompleteService.auto_complete content pos
+        env, FfpAutocompleteService.auto_complete env.tcopt content pos
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->

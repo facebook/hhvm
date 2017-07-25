@@ -8,11 +8,10 @@
  *
  *)
 
-module ContextParser = FfpAutocompleteContextParser
-module MinimalSyntax = Full_fidelity_minimal_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
+module MinimalSyntax = Full_fidelity_minimal_syntax
 module SyntaxTree = Full_fidelity_syntax_tree
-open ContextParser
+open FfpAutocompleteContextParser
 open Core
 open String_utils
 

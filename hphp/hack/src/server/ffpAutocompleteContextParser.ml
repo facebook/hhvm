@@ -17,21 +17,21 @@ module TokenKind = Full_fidelity_token_kind
 module Container = struct
   (* Set of mutually exclusive contexts. *)
   type t =
-  | ClassBody
-  | TypeSpecifier
-  | TopLevel
-  | LambdaBodyExpression
-  | CompoundStatement
   | BinaryExpression
+  | ClassBody
+  | CompoundStatement
+  | LambdaBodyExpression
+  | TopLevel
+  | TypeSpecifier
   | NoContainer
 end
 
 module Predecessor = struct
   type t =
   | IfWithoutElse
-  | TryWithoutFinally
   | OpenBrace
   | Statement
+  | TryWithoutFinally
   | NoPredecessor
 end
 

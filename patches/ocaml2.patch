@@ -1,0 +1,27 @@
+diff --git a/asmcomp/arm64/emit.mlp b/asmcomp/arm64/emit.mlp
+index 9cca60b..8a415e0 100644
+--- a/third-party/ocaml/src/asmcomp/arm64/emit.mlp
++++ b/third-party/ocaml/src/asmcomp/arm64/emit.mlp
+@@ -517,10 +517,18 @@ let assembly_code_for_allocation i ~n ~far =
+   if !fastcode_flag then begin
+     let lbl_redo = new_label() in
+     let lbl_call_gc = new_label() in
+-    `{emit_label lbl_redo}:`;
+-    `  sub     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, #{emit_int n}\n`;
+-    `  cmp     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_limit}\n`;
+-    `  add     {emit_reg i.res.(0)}, {emit_reg reg_alloc_ptr}, #8\n`;
++    if n > 4096 then begin
++      `{emit_label lbl_redo}:`;
++      emit_intconst reg_tmp1 (Nativeint.of_int n);
++      `        sub     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, {emit_reg reg_tmp1}\n`;
++      `        cmp     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_limit}\n`;
++      `        add     {emit_reg i.res.(0)}, {emit_reg reg_alloc_ptr}, #8\n`;
++    end else begin
++      `{emit_label lbl_redo}:`;
++      `        sub     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, #{emit_int n}\n`;
++      `        cmp     {emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_limit}\n`;
++      `        add     {emit_reg i.res.(0)}, {emit_reg reg_alloc_ptr}, #8\n`;
++    end;
+     if not far then begin
+       `        b.lo    {emit_label lbl_call_gc}\n`
+     end else begin

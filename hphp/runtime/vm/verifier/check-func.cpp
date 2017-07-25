@@ -996,9 +996,8 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
     }
   } else {
     if (!cur->iters[id]) {
-      // TODO(#2608280): we produce incorrect bytecode for iterators still
-      //error("Cannot access un-initialized iter %d\n", id);
-      //ok = false;
+      error("Cannot access un-initialized iter %d\n", id);
+      ok = false;
     }
     if (op == Op::IterFree ||
         op == Op::MIterFree ||
@@ -1159,9 +1158,8 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
   decode_raw<Offset>(pc); // skip target offset
   for (auto& iter : iterBreakIds(pc)) {
     if (!cur->iters[iter.id]) {
-      // TODO(#2608280): we produce incorrect bytecode for iterators still
-      //error("Cannot access un-initialized iter %d\n", iter.id);
-      //return false;
+      error("Cannot access un-initialized iter %d\n", iter.id);
+      return false;
     }
     // IterBreak has no fall-through path, so don't change iter.id's current
     // state; instead it will be done in checkSuccEdges.

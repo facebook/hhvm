@@ -557,7 +557,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Ffp_autocomplete ->
       let file_text = cat (Relative_path.to_absolute filename) in
       (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-      let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [0-9]*" in
+      let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
       let open Ide_api_types in
       let position = try
         let _ = Str.search_forward args_regex file_text 0 in

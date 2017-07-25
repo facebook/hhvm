@@ -126,31 +126,43 @@ let make_context
   in
   List.fold_right ~f:check_node ~init:{ initial_context with predecessor } full_path
 
-let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int) : context * string =
+type autocomplete_location_classification =
+  | InLeadingTrivia
+  | InToken
+  | InTrailingTrivia
+
+let classify_autocomplete_location
+  (parents:PositionedSyntax.t list) (offset:int)
+  : autocomplete_location_classification =
+  let open PositionedSyntax in
+  match parents with
+  | [] -> failwith "Empty parentage (this should never happen)"
+  | parent :: _ when offset < start_offset parent -> InLeadingTrivia
+  | parent :: _ when offset <= trailing_start_offset parent -> InToken
+  | _ -> InTrailingTrivia
+
+let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int)
+  : context * string =
   let open PositionedSyntax in
   let positioned_tree = from_tree syntax_tree in
+  (*
+  If the offset is the same as the width of the whole tree, then the cursor
+  is at the end of file, so we move our position back by one so that our
+  cursor is considered to be in the leading trivia of the end of file character.
+  This guarantees our parentage is not empty.
+  *)
   let offset = if offset = width positioned_tree then offset - 1 else offset in
-  let autocomplete_node_parentage = parentage positioned_tree offset in
-  let previous_offset = match autocomplete_node_parentage with
-    | [] -> offset - 1
-    | autocomplete_child :: _ -> leading_start_offset autocomplete_child - 1
+  let ancestry = parentage positioned_tree offset in
+  let location = classify_autocomplete_location ancestry offset in
+  let autocomplete_leaf_node = List.hd_exn ancestry in
+  let node_text =
+    if location = InToken then text autocomplete_leaf_node else ""
   in
+  let previous_offset = leading_start_offset autocomplete_leaf_node - 1 in
   let predecessor_parentage = parentage positioned_tree previous_offset in
-  match autocomplete_node_parentage with
-  | [] -> (* This case occurs iff the completion location is the last character in the file *)
-    (make_context ~full_path:predecessor_parentage ~predecessor:predecessor_parentage, "")
-  | autocomplete_child :: _ ->
-    let token_start_offset = start_offset autocomplete_child in
-    let token_end_offset = trailing_start_offset autocomplete_child in
-    if offset < token_start_offset then
-      (* This case handles when the completion location is in the leading trivia of a node *)
-      (make_context ~full_path:predecessor_parentage ~predecessor:predecessor_parentage, "")
-    else if offset <= token_end_offset then
-      (* This case handles when the completion location is in the main token of a node *)
-      (make_context ~full_path:autocomplete_node_parentage ~predecessor:predecessor_parentage,
-      text autocomplete_child)
-    else (* This case handles when the completion location is in the trailing trivia of a node *)
-      (make_context
-        ~full_path:autocomplete_node_parentage
-        ~predecessor:autocomplete_node_parentage,
-        "")
+  let (full_path, predecessor) = match location with
+    | InLeadingTrivia -> predecessor_parentage, predecessor_parentage
+    | InToken -> ancestry, predecessor_parentage
+    | InTrailingTrivia -> ancestry, ancestry
+  in
+  (make_context ~full_path ~predecessor, node_text)

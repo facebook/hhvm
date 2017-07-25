@@ -1,0 +1,2 @@
+<?hh
+// AUTOCOMPLETE 99 99

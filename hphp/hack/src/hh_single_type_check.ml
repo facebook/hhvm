@@ -691,14 +691,12 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Suggest
   | Infer_return_types
   | Errors ->
-      (* Check errors in everything *)
-      let errors = check_errors opts errors files_info in
-
-      (* But filter builtins from suggesting types *)
+      (* Don't typecheck builtins *)
       let files_info = Relative_path.Map.fold builtins
         ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
         ~init:files_info
       in
+      let errors = check_errors opts errors files_info in
       if mode = Suggest
       then Relative_path.Map.iter files_info (suggest_and_print opts);
       if mode = Infer_return_types

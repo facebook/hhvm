@@ -40,6 +40,12 @@ struct LanguageException : CompilerException {
     : CompilerException(what) {}
 };
 
+enum Flavor {
+  Drop,
+  Cell,
+  Ref,
+};
+
 struct Compiler {
   explicit Compiler(const std::string& filename);
 
@@ -53,12 +59,13 @@ struct Compiler {
  private:
   void compileProgram(const zend_ast* ast);
   void compileStatement(const zend_ast* ast);
-  void compileExpression(const zend_ast* ast);
+  void compileExpression(const zend_ast* ast, Flavor expectedFlavor);
 
   void compileZvalLiteral(const zval* ast);
   void compileConstant(const zend_ast* ast);
-  void compileVar(const zend_ast* ast);
+  void compileVar(const zend_ast* ast, Flavor expectedFlavor);
   void compileAssignment(const zend_ast* ast);
+  void compileBind(const zend_ast* ast);
   void compileAssignOp(const zend_ast* ast);
 
   void compileIf(const zend_ast* ast);
@@ -74,6 +81,8 @@ struct Compiler {
 
   [[noreturn]]
   void panic(const std::string& msg);
+
+  void fixFlavor(Flavor expected, Flavor actual);
 
   template<class Branch>
   void branchTo(Block* target) {
@@ -96,7 +105,9 @@ struct Compiler {
     virtual ~Lvalue() = default;
 
     virtual void getC() = 0;
+    virtual void getV() = 0;
     virtual void assign(const zend_ast* rhs) = 0;
+    virtual void bind(const zend_ast* rhs) = 0;
     virtual void assignOp(SetOpOp op, const zend_ast* rhs) = 0;
     virtual void incDec(IncDecOp op) = 0;
   };

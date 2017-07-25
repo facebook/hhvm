@@ -128,8 +128,19 @@ void Compiler::compileConstant(const zend_ast* ast) {
   }
 }
 
-void Compiler::compileVar(const zend_ast* ast) {
-  getLvalue(ast)->getC();
+void Compiler::compileVar(const zend_ast* ast, Flavor expected) {
+  switch (expected) {
+    case Drop:
+      getLvalue(ast)->getC();
+      activeBlock->emit(PopC{});
+      return;
+    case Cell:
+      getLvalue(ast)->getC();
+      return;
+    case Ref:
+      getLvalue(ast)->getV();
+      return;
+  }
 }
 
 Bytecode Compiler::opForBinaryOp(const zend_ast* ast) {
@@ -172,16 +183,16 @@ void Compiler::compileUnaryOp(const zend_ast* ast) {
   switch (ast->kind) {
     case ZEND_AST_UNARY_MINUS:
       activeBlock->emit(Int{0});
-      compileExpression(ast->child[0]);
+      compileExpression(ast->child[0], Flavor::Cell);
       activeBlock->emit(Sub{});
       return;
     case ZEND_AST_UNARY_PLUS:
       activeBlock->emit(Int{0});
-      compileExpression(ast->child[0]);
+      compileExpression(ast->child[0], Flavor::Cell);
       activeBlock->emit(Add{});
       return;
     case ZEND_AST_UNARY_OP:
-      compileExpression(ast->child[0]);
+      compileExpression(ast->child[0], Flavor::Cell);
       switch(ast->attr) {
         case ZEND_BOOL_NOT:
           activeBlock->emit(Not{});
@@ -248,10 +259,17 @@ void Compiler::compileIncDec(const zend_ast* ast) {
 }
 
 void Compiler::compileAssignment(const zend_ast* ast) {
-  auto rhs = ast->child[1];
   auto lhs = ast->child[0];
+  auto rhs = ast->child[1];
 
   getLvalue(lhs)->assign(rhs);
+}
+
+void Compiler::compileBind(const zend_ast* ast) {
+  auto lhs = ast->child[0];
+  auto rhs = ast->child[1];
+
+  getLvalue(lhs)->bind(rhs);
 }
 
 void Compiler::compileAssignOp(const zend_ast* ast) {
@@ -263,43 +281,90 @@ void Compiler::compileAssignOp(const zend_ast* ast) {
 }
 
 
-void Compiler::compileExpression(const zend_ast* ast) {
+void Compiler::compileExpression(const zend_ast* ast, Flavor expected) {
   switch (ast->kind) {
     case ZEND_AST_ZVAL:
       compileZvalLiteral(zend_ast_get_zval(ast));
+      fixFlavor(expected, Flavor::Cell);
       break;
     case ZEND_AST_CONST:
       compileConstant(ast);
+      fixFlavor(expected, Flavor::Cell);
       break;
     case ZEND_AST_UNARY_MINUS:
     case ZEND_AST_UNARY_PLUS:
     case ZEND_AST_UNARY_OP:
       compileUnaryOp(ast);
+      fixFlavor(expected, Flavor::Cell);
       break;
     case ZEND_AST_BINARY_OP:
     case ZEND_AST_GREATER:
     case ZEND_AST_GREATER_EQUAL:
-      compileExpression(ast->child[0]);
-      compileExpression(ast->child[1]);
+      compileExpression(ast->child[0], Flavor::Cell);
+      compileExpression(ast->child[1], Flavor::Cell);
       activeBlock->emit(opForBinaryOp(ast));
+      fixFlavor(expected, Flavor::Cell);
       break;
     case ZEND_AST_POST_INC:
     case ZEND_AST_POST_DEC:
     case ZEND_AST_PRE_INC:
     case ZEND_AST_PRE_DEC:
       compileIncDec(ast);
+      fixFlavor(expected, Flavor::Cell);
       break;
     case ZEND_AST_VAR:
-      compileVar(ast);
+      compileVar(ast, expected);
       break;
     case ZEND_AST_ASSIGN:
       compileAssignment(ast);
+      fixFlavor(expected, Flavor::Cell);
+      break;
+    case ZEND_AST_ASSIGN_REF:
+      compileBind(ast);
+      fixFlavor(expected, Flavor::Ref);
       break;
     case ZEND_AST_ASSIGN_OP:
       compileAssignOp(ast);
+      fixFlavor(expected, Flavor::Cell);
       break;
     default:
       panic("unsupported expression");
+  }
+}
+
+void Compiler::fixFlavor(Flavor expected, Flavor actual) {
+  switch(expected) {
+    case Drop:
+      switch (actual) {
+        case Drop:
+          return;
+        case Cell:
+          activeBlock->emit(PopC{});
+          return;
+        case Ref:
+          activeBlock->emit(PopV{});
+          return;
+      }
+    case Ref:
+      switch (actual) {
+        case Cell:
+          activeBlock->emit(Box{});
+          return;
+        case Ref:
+          return;
+        case Drop:
+          panic("Can't make ref");
+      }
+    case Cell:
+      switch (actual) {
+        case Cell:
+          return;
+        case Ref:
+          activeBlock->emit(Unbox{});
+          return;
+        case Drop:
+          panic("Can't make cell");
+      }
   }
 }
 
@@ -317,7 +382,7 @@ void Compiler::compileStatement(const zend_ast* ast) {
       break;
     }
     case ZEND_AST_ECHO:
-      compileExpression(ast->child[0]);
+      compileExpression(ast->child[0], Flavor::Cell);
       activeBlock->emit(Print{});
       activeBlock->emit(PopC{});
       break;
@@ -342,13 +407,12 @@ void Compiler::compileStatement(const zend_ast* ast) {
       activeBlock = nullptr;
       break;
     case ZEND_AST_RETURN:
-      compileExpression(ast->child[0]);
+      compileExpression(ast->child[0], Flavor::Cell);
       activeBlock->exit(RetC{});
       activeBlock = nullptr;
       break;
     default:
-      compileExpression(ast);
-      activeBlock->emit(PopC{});
+      compileExpression(ast, Flavor::Drop);
   }
 }
 
@@ -377,7 +441,7 @@ void Compiler::compileIf(const zend_ast* ast) {
         }
       });
 
-      compileExpression(condition);
+      compileExpression(condition, Flavor::Cell);
       branchTo<JmpNZ>(branch);
     }
   }
@@ -405,7 +469,7 @@ void Compiler::compileWhile(const zend_ast* condition, const zend_ast* body,
   });
 
   withBlock(testBlock, [&]() {
-    compileExpression(condition);
+    compileExpression(condition, Flavor::Cell);
     activeBlock->exit(JmpNZ{bodyBlock});
     activeBlock->exit(Jmp{continuation});
   });
@@ -428,8 +492,7 @@ void Compiler::compileFor(const zend_ast* ast) {
   // compile the initializers
   if (initializers) {
     for (uint32_t i = 0; i < initializers->children; i++) {
-      compileExpression(initializers->child[i]);
-      activeBlock->emit(PopC{});
+      compileExpression(initializers->child[i], Flavor::Drop);
     }
   }
 
@@ -451,10 +514,11 @@ void Compiler::compileFor(const zend_ast* ast) {
     // an empty condition list is the same as one that is always successful
     if (tests) {
       for (uint32_t i = 0; i < tests->children; i++) {
-        compileExpression(tests->child[i]);
-        if (i + 1 < tests->children) { // all but the last are ignored
-          activeBlock->emit(PopC{});
-        }
+        // ignore all but the last test
+        auto flavor = (i + 1 < tests->children)
+          ? Flavor::Drop
+          : Flavor::Cell;
+        compileExpression(tests->child[i], flavor);
       }
       activeBlock->exit(JmpZ{continuation});
     }
@@ -465,8 +529,7 @@ void Compiler::compileFor(const zend_ast* ast) {
   withBlock(incrementBlock, [&]() {
     if (increments) {
       for (uint32_t i = 0; i < increments->children; i++) {
-        compileExpression(increments->child[i]);
-        activeBlock->emit(PopC{});
+        compileExpression(increments->child[i], Flavor::Drop);
       }
     }
     activeBlock->exit(Jmp{testBlock});
@@ -486,15 +549,26 @@ struct Compiler::LocalLvalue : Compiler::Lvalue {
     c.activeBlock->emit(CGetL{name});
   }
 
+  void getV() override {
+    c.activeFunction->locals.insert(name);
+    c.activeBlock->emit(VGetL{name});
+  }
+
   void assign(const zend_ast* rhs) override {
     c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs);
+    c.compileExpression(rhs, Flavor::Cell);
     c.activeBlock->emit(SetL{name});
+  }
+
+  void bind(const zend_ast* rhs) override {
+    c.activeFunction->locals.insert(name);
+    c.compileExpression(rhs, Flavor::Ref);
+    c.activeBlock->emit(BindL{name});
   }
 
   void assignOp(SetOpOp op, const zend_ast* rhs) override {
     c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs);
+    c.compileExpression(rhs, Flavor::Cell);
     c.activeBlock->emit(SetOpL{name, op});
   }
 
@@ -512,25 +586,40 @@ struct Compiler::DynamicLocalLvalue : Compiler::Lvalue {
     : c(c)
     , nameExpr(nameExpr) {}
 
+  void getName() {
+    c.compileExpression(nameExpr, Flavor::Cell);
+  }
+
   void getC() override {
-    c.compileExpression(nameExpr);
+    getName();
     c.activeBlock->emit(CGetN{});
   }
 
+  void getV() override {
+    getName();
+    c.activeBlock->emit(VGetN{});
+  }
+
   void assign(const zend_ast* rhs) override {
-    c.compileExpression(nameExpr);
-    c.compileExpression(rhs);
+    getName();
+    c.compileExpression(rhs, Flavor::Cell);
     c.activeBlock->emit(SetN{});
   }
 
+  void bind(const zend_ast* rhs) override {
+    getName();
+    c.compileExpression(rhs, Flavor::Ref);
+    c.activeBlock->emit(BindN{});
+  }
+
   void assignOp(SetOpOp op, const zend_ast* rhs) override {
-    c.compileExpression(nameExpr);
-    c.compileExpression(rhs);
+    getName();
+    c.compileExpression(rhs, Flavor::Cell);
     c.activeBlock->emit(SetOpN{op});
   }
 
   void incDec(IncDecOp op) override {
-    c.compileExpression(nameExpr);
+    getName();
     c.activeBlock->emit(IncDecN{op});
   }
 

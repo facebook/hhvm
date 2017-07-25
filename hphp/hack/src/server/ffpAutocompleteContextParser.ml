@@ -25,26 +25,27 @@ module Container = struct
   | BinaryExpression
   | NoContainer
 end
-open Container
 
-type predecessor =
+module Predecessor = struct
+  type t =
   | IfWithoutElse
   | TryWithoutFinally
   | OpenBrace
   | Statement
   | NoPredecessor
+end
 
 type context = {
   closest_parent_container: Container.t;
-  predecessor: predecessor;
+  predecessor: Predecessor.t;
   inside_switch_body: bool;
   inside_loop_body: bool;
   inside_async_function: bool;
 }
 
 let initial_context = {
-  closest_parent_container = NoContainer;
-  predecessor = NoPredecessor;
+  closest_parent_container = Container.NoContainer;
+  predecessor = Predecessor.NoPredecessor;
   inside_switch_body = false;
   inside_loop_body = false;
   inside_async_function = false;
@@ -57,22 +58,18 @@ let is_function_async (function_object:PositionedSyntax.t) : bool =
   match function_object.syntax with
   | FunctionDeclaration {
       function_declaration_header = { syntax = FunctionDeclarationHeader {
-        function_async = { syntax = Token {
-          kind = Async; _
-        }; _ }; _
+        function_async = async; _
       }; _ }; _
     }
-  | LambdaExpression {
-      lambda_async = { syntax = Token {
-        kind = Async; _ }; _
-      }; _
-    } -> true
+  | LambdaExpression { lambda_async = async; _ } ->
+    is_specific_token Async async
   | _ -> false
 
-let validate_predecessor (predecessor:PositionedSyntax.t list) : predecessor =
+let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   let open PositionedSyntax in
   let open PositionedToken in
   let open TokenKind in
+  let open Predecessor in
   let rec aux path acc = match path with
     | [] -> acc
     | { syntax = IfStatement { if_else_clause = {
@@ -93,6 +90,7 @@ let make_context
   : context =
   let predecessor = validate_predecessor predecessor in
   let open PositionedSyntax in
+  let open Container in
   let rec aux path acc = match path with
     | [] -> acc
     | { syntax = SimpleTypeSpecifier _; _} :: _ ->

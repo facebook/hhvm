@@ -23,6 +23,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 
 open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
+open FfpAutocompleteContextParser.Predecessor
 open String_utils
 open Core
 

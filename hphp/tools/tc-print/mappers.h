@@ -25,7 +25,7 @@
 
 #include "hphp/tools/tc-print/perf-events.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
-#include "hphp/tools/tc-print/offline-x86-code.h"
+#include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 
 namespace HPHP { namespace jit {

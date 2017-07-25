@@ -16,7 +16,7 @@
 #include "hphp/tools/tc-print/offline-trans-data.h"
 
 #include "hphp/tools/tc-print/tc-print.h"
-#include "hphp/tools/tc-print/offline-x86-code.h"
+#include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/util/build-info.h"
 #include "hphp/runtime/vm/repo.h"
 
@@ -274,7 +274,7 @@ void OfflineTransData::findFuncTrans(uint32_t selectedFuncId,
 
 
 void OfflineTransData::addControlArcs(uint32_t selectedFuncId,
-                                      OfflineX86Code *transCode) {
+                                      OfflineCode *transCode) {
   vector<TransID> funcTrans;
   findFuncTrans(selectedFuncId, &funcTrans);
 

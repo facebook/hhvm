@@ -36,6 +36,7 @@ Disassembler::Disassembler() {
   buffer_ = reinterpret_cast<char*>(malloc(buffer_size_));
   buffer_pos_ = 0;
   own_buffer_ = true;
+  code_address_offset_ = 0;
 }
 
 
@@ -44,6 +45,7 @@ Disassembler::Disassembler(char* text_buffer, int buffer_size) {
   buffer_ = text_buffer;
   buffer_pos_ = 0;
   own_buffer_ = false;
+  code_address_offset_ = 0;
 }
 
 
@@ -1284,6 +1286,25 @@ void Disassembler::ProcessOutput(Instruction* /*instr*/) {
   // The base disasm does nothing more than disassembling into a buffer.
 }
 
+void Disassembler::MapCodeAddress(int64_t base_address,
+                                  const Instruction *instr_address) {
+  SetCodeAddressOffset(base_address -
+                          reinterpret_cast<intptr_t>(instr_address));
+}
+int64_t Disassembler::CodeRelativeAddress(const void *addr) {
+  return reinterpret_cast<intptr_t>(addr) + CodeAddressOffset();
+}
+
+void Disassembler::AppendCodeRelativeAddressToOutput(const Instruction *instr,
+                                                     const void *addr) {
+  USE(instr);
+  int64_t rel_addr = CodeRelativeAddress(addr);
+  if (rel_addr >= 0) {
+    AppendToOutput("(addr 0x%" PRIx64 ")", rel_addr);
+  } else {
+    AppendToOutput("(addr -0x%" PRIx64 ")", -rel_addr);
+  }
+}
 
 void Disassembler::Format(Instruction* instr, const char* mnemonic,
                           const char* format) {
@@ -1541,12 +1562,12 @@ int Disassembler::SubstituteLiteralField(Instruction* instr,
                                          const char* format) {
   assert(strncmp(format, "LValue", 6) == 0);
   USE(format);
-
+  const void* address = instr->LiteralAddress();
   switch (instr->Mask(LoadLiteralMask)) {
     case LDR_w_lit:
     case LDR_x_lit:
     case LDR_s_lit:
-    case LDR_d_lit: AppendToOutput("(addr %p)", instr->LiteralAddress()); break;
+    case LDR_d_lit: AppendCodeRelativeAddressToOutput(instr, address); break;
     default: not_reached();
   }
 

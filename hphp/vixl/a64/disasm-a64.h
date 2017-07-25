@@ -46,6 +46,11 @@ class Disassembler: public DecoderVisitor {
   VISITOR_LIST(DECLARE)
   #undef DECLARE
 
+  void MapCodeAddress(int64_t base_address, const Instruction* instr_address);
+  int64_t CodeRelativeAddress(const void* instr);
+  void AppendCodeRelativeAddressToOutput(const Instruction* instr,
+                                               const void* addr);
+
  protected:
   virtual void ProcessOutput(Instruction* instr);
 
@@ -84,6 +89,12 @@ class Disassembler: public DecoderVisitor {
 
   bool IsMovzMovnImm(unsigned reg_size, uint64_t value);
 
+  int64_t CodeAddressOffset() const { return code_address_offset_; }
+
+  void SetCodeAddressOffset(int64_t code_address_offset) {
+    code_address_offset_ = code_address_offset;
+  }
+
   void ResetOutput();
   void AppendToOutput(const char* string, ...);
 
@@ -91,6 +102,8 @@ class Disassembler: public DecoderVisitor {
   uint32_t buffer_pos_;
   uint32_t buffer_size_;
   bool own_buffer_;
+
+  int64_t code_address_offset_;
 };
 
 

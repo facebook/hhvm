@@ -16,6 +16,11 @@ type t = {
   env_jump_targets    : Jump_targets.t
 }
 
+let is_hh_file_ = ref false
+
+let set_is_hh_file v = is_hh_file_ := v
+let is_hh_file () = !is_hh_file_
+
 let empty = {
   env_pipe_var = None;
   env_scope = Ast_scope.Scope.toplevel;

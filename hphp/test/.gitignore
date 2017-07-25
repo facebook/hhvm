@@ -14,6 +14,7 @@
 *.hhcodegen_messages
 *.semdiff
 *.semdiff_messages
+*.hhcodegen_config.json
 /frameworks/composer.json.md5
 /frameworks/composer.phar
 /frameworks/framework_downloads

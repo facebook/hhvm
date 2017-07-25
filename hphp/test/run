@@ -269,14 +269,11 @@ function hhvm_path() {
   return rel_path($file);
 }
 
-function hh_codegen_cmd($options) {
-  // Right now hh_single_compile doesn't understand any of HHVM's options, to
-  // get 100% test coverage this will need to be fixed
+function hh_codegen_cmd($options, $config_file) {
   $cmd = hh_codegen_path();
-  $cmd .= ' -v Eval.EnableHipHopSyntax=1';
-  $cmd .= ' -v Hack.Compiler.ConstantFolding=0';
-  $cmd .= ' -v Hack.Compiler.OptimizeNullCheck=0';
-  $cmd .= ' -v Hack.Compiler.OptimizeCuf=0';
+  if (isset($config_file)) {
+    $cmd .= ' -c "'.$config_file.'"';
+  }
   if (isset($options['hackc'])) $cmd .= ' --daemon';
   return $cmd;
 }
@@ -948,7 +945,7 @@ function hhvm_cmd_impl() {
 }
 
 // Return the command and the env to run it in.
-function hhvm_cmd($options, $test, $test_run = null) {
+function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   if ($test_run === null) {
     $test_run = $test;
   }
@@ -965,14 +962,14 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_debug_config($test, 'hphpd.ini'),
     read_opts_file(find_test_ext($test, 'opts')),
     '--file',
-    escapeshellarg($test_run)
+    escapeshellarg($test_run),
+    $is_temp_file ? " --temp-file" : ""
   );
 
   $cmd = "";
 
   if (file_exists($test.'.verify')) {
     $cmd .= " -m verify";
-
   }
 
   if (isset($options['cli-server']) && can_run_server_test($test)) {
@@ -1386,7 +1383,7 @@ function clean_intermediate_files($test, $options) {
     return;
   }
   $exts = array('out', 'diff', 'repo', 'round_trip.hhas',
-                'hhcodegen_output.hhas', 'hhcodegen_messages');
+                'hhcodegen_output.hhas', 'hhcodegen_messages', 'hhcodegen_config.json');
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {
@@ -1650,10 +1647,17 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
   return $tmp_file;
 }
 
-function dump_hh_codegen($options, $test) {
+function dump_hh_codegen($options, $test, $test_config) {
   $temp_file = $test.'.hhcodegen_output.hhas';
   $msgs_file = $test.'.hhcodegen_messages';
-  $cmd = hh_codegen_cmd($options);
+  if ($test_config) {
+    $test_config_file = $test.'.hhcodegen_config.json';
+    file_put_contents($test_config_file, $test_config);
+    $cmd = hh_codegen_cmd($options, $test_config_file);
+  }
+  else {
+    $cmd = hh_codegen_cmd($options);
+  }
   $ret = false;
   system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
   return $ret === 0 ? $temp_file : false;
@@ -1997,6 +2001,21 @@ function run_typechecker_test($options, $test) {
   return $result;
 }
 
+function get_hhvm_ini_values($test, $options) {
+  // prepare script to setting values from HHVM
+  $get_ini_file = tempnam(sys_get_temp_dir(), "get_ini");
+  $tmp_file = tempnam(sys_get_temp_dir(), "output");
+  // write JSON encoded values from the script
+  // instead of just 'echo' to make sure result
+  // is not mixed with some another writes to stdout
+  file_put_contents($get_ini_file, "<?php\nfile_put_contents('$tmp_file', json_encode(ini_get_all()));");
+  list($hhvm_get_ini_cmd, $_) = hhvm_cmd($options, $test, $get_ini_file, true);
+  system("$hhvm_get_ini_cmd 1> /dev/null 2> /dev/null");
+  $test_config = file_get_contents($tmp_file);
+  unlink($tmp_file);
+  return $test_config;
+}
+
 function run_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
 
@@ -2062,11 +2081,16 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
   }
 
+  // for tests that should run HackC pull ini values from HHVM
+  if (isset($options['run-hh-codegen']) || isset($options['compare-hh-codegen'])) {
+    $test_config = get_hhvm_ini_values($test, $options);
+  }
+
   // Run the Hack code generator
   if (isset($options['run-hh-codegen'])) {
     if (substr($test, -5) === ".hhas") return 'skip';
 
-    $hhas_temp = dump_hh_codegen($options, $test);
+    $hhas_temp = dump_hh_codegen($options, $test, $test_config);
     if (!$hhas_temp || file_get_contents($hhas_temp) === "") {
       file_put_contents($test.'.diff', "CODEGEN FAILED");
       return false;
@@ -2082,7 +2106,7 @@ function run_test($options, $test) {
     if (substr($test, -5) === ".hhas") return 'skip';
     $hhas = dump_hhas_to_temp($hhvm, $test);
     if (!$hhas) return 'skip';
-    $hhcg = dump_hh_codegen($options, $test);
+    $hhcg = dump_hh_codegen($options, $test, $test_config);
     if (!$hhcg || file_get_contents($hhcg) === "") {
       file_put_contents($diff, "HACK CODEGEN FAILED");
       return false;

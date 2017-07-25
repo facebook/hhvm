@@ -158,7 +158,7 @@ let parse_text compiler_options popt fn text =
 let parse_file compiler_options popt filename text =
   try
     Some (Errors.do_ begin fun () ->
-      (parse_text compiler_options popt filename text).Parser_hack.ast
+      parse_text compiler_options popt filename text
     end)
   with Failure _ -> None
 
@@ -207,11 +207,16 @@ let do_compile config filename compiler_options opt_ast debug_time =
     | None ->
       Hhas_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse "Syntax error"
-    | Some (errors, ast, _) ->
+    | Some (errors, parser_return, _) ->
+      let is_hh_file =
+        Option.value_map parser_return.Parser_hack.file_mode
+          ~default:false ~f:(fun v -> v <> FileInfo.Mphp)
+      in
+      let ast = parser_return.Parser_hack.ast in
       List.iter (Errors.get_error_list errors) (fun e ->
         Printf.printf "%s\n" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
-      then Hhas_program.from_ast ast
+      then Hhas_program.from_ast is_hh_file ast
       else Hhas_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse "Syntax error"
       in

@@ -136,7 +136,7 @@ module Function = struct
   let add_suffix s suffix = s ^ suffix
   let elaborate_id ns (_, s as id) =
     if List.mem builtins_in_hh s
-    && Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
+    && (Emit_env.is_hh_file () || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options)
     then SU.prefix_namespace "HH" s, Some s
     else if List.mem builtins_at_top s
     then s, None

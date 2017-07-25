@@ -62,7 +62,6 @@ quick/impl_abstract_dv_i_integer.php
 quick/impl_abstract_dv_ia.php
 quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_so.php
-quick/incdec-string.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface11.php
@@ -102,6 +101,3 @@ quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
 quick/traits2.php
 quick/vec/basic-getters.php
-quick/xenon/xenon.php
-quick/xenon/xenon_crash.php
-quick/xenon/xenon_init.php

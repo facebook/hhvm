@@ -10,3 +10,4 @@
 *.hhcodegen_output.hhas
 *.semdiff
 *.semdiff_messages
+*.hhcodegen_config.json

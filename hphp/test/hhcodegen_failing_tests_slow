@@ -1,7 +1,5 @@
 slow/anon_class/anon_1.php
 slow/anon_class/extend_local.php
-slow/arithmetic/addo-member-key.php
-slow/arithmetic/edge_cases.php
 slow/array_iterator/array-traversable-2.php
 slow/array_offset/429.php
 slow/array_offset/433.php
@@ -39,7 +37,6 @@ slow/compilation/1301.php
 slow/compilation/1316.php
 slow/compilation/1317.php
 slow/compilation/1321.php
-slow/compilation/aliased-namespaces.php
 slow/compilation/switch-default-multiple.php
 slow/compilation/unset_non_array.php
 slow/concat/1573.php
@@ -94,11 +91,9 @@ slow/eval_order/1502.php
 slow/exceptions/52.php
 slow/exceptions/62.php
 slow/exceptions/prepend_exception_trace.php
-slow/ext_array/count-opts.php
 slow/ext_function/register_postsend_function-simple.php
 slow/ext_function/register_shutdown_function-simple.php
 slow/ext_mailparse/ext_uudecode.php
-slow/ext_math/intdiv.php
 slow/ext_misc/ext_misc.php
 slow/ext_phar/composer.php
 slow/ext_phar/create_tar.php
@@ -108,14 +103,6 @@ slow/ext_spl_datastructures/DoublyLinkedList_it_mode.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
 slow/ext_variable/ext_variable.php
-slow/ext_xdebug/get_code_coverage.php
-slow/ext_xdebug/get_function_stack.php
-slow/ext_xdebug/get_function_stack_noparams.php
-slow/ext_xdebug/max_nesting_level_0.php
-slow/ext_xdebug/max_nesting_level_1.php
-slow/ext_xdebug/time_index.php
-slow/ext_xdebug/xdebug/xdebug_call.php
-slow/ext_xdebug/xdebug_var_dump_limitations.php
 slow/finally/finally_break_008.php
 slow/finally/finally_goto_001.php
 slow/finally/finally_goto_002.php
@@ -206,7 +193,6 @@ slow/hhbbc/public_static_props_002.php
 slow/hhbbc/public_static_props_004.php
 slow/hhbbc/public_static_props_012.php
 slow/hint/2187.php
-slow/ini/source_root_empty.php
 slow/inline-hhas/hello-world.php
 slow/inline-hhas/if.php
 slow/inline-hhas/mixed.php
@@ -248,7 +234,6 @@ slow/memoize/varargs.php
 slow/memoize/variadics.php
 slow/memory/uninit-leak.php
 slow/namespace/2227.php
-slow/namespace/alias/alias.php
 slow/namespace/double_use1.php
 slow/namespace/double_use2.php
 slow/namespace/double_use3.php
@@ -416,7 +401,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_004.php
 slow/php7_backported/scalar-types/scalar_weak_reference.php
 slow/php7_backported/scalar-types/weak_from_builtins.php
 slow/php7_backported/varSyntax/indirect-fcall.php
-slow/php7_backported/varSyntax/issetOnTemp.php
 slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/ltr_eval/complex.php
 slow/php7_bcbreak/5/ltr_eval/simple.php
@@ -504,7 +488,6 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
-slow/xhp/attr_types.php
 slow/yield/2167.php
 slow/yield/2229.php
 slow/yield/yieldfrom/yield_from_advance_inner_generator.php

@@ -89,8 +89,9 @@ let emit_fatal_program ~ignore_message op message =
   in
     make [] [] [] [] body
 
-let from_ast ast =
+let from_ast is_hh_file ast =
   try
+    Emit_env.set_is_hh_file is_hh_file;
     (* Convert closures to top-level classes;
      * also hoist inner classes and functions *)
     let closed_ast = convert_toplevel_prog ast in

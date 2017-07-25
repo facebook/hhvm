@@ -23,13 +23,12 @@ type t = {
   option_aliased_namespaces : (string * string) list;
 }
 
-(* Default, unlike HHVM, is Eval.EnableHipHopSyntax=1 *)
 let default = {
   option_ints_overflow_to_ints = None;
-  option_enable_hiphop_syntax = true;
-  option_constant_folding = true;
-  option_optimize_null_check = true;
-  option_optimize_cuf = true;
+  option_enable_hiphop_syntax = false;
+  option_constant_folding = false;
+  option_optimize_null_check = false;
+  option_optimize_cuf = false;
   option_max_array_elem_size_on_the_stack = 12;
   option_aliased_namespaces = [];
 }
@@ -80,7 +79,10 @@ let get_value_from_config_ config key =
 
 let get_value_from_config_int config key =
   let json_opt = get_value_from_config_ config key in
-  Option.map json_opt ~f:(fun json -> int_of_string @@ J.get_string_exn json)
+  Option.map json_opt ~f:(fun json ->
+  match J.get_string_exn json with
+  | "" -> 0
+  | x -> int_of_string x)
 
 let get_value_from_config_str config key =
   let json_opt = get_value_from_config_ config key in
@@ -89,28 +91,35 @@ let get_value_from_config_str config key =
 let get_value_from_config_kv_list config key =
   let json_opt = get_value_from_config_ config key in
   Option.map json_opt ~f:(fun json ->
+    match json with
+    | J.JSON_Array [] -> []
+    | json ->
     let keys_with_json = J.get_object_exn json in
     List.map ~f:(fun (k, v) -> k, J.get_string_exn v) keys_with_json)
+
+let set_value name get set config opts =
+  let value = get config name in
+  Option.value_map value ~default:opts ~f:(set opts)
+
+let value_setters = [
+  (set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list @@
+    fun opts v -> { opts with option_aliased_namespaces = v });
+  (set_value "hhvm.force_hh" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_hiphop_syntax = (v = 1) });
+  (set_value "hhvm.hack.lang.ints_overflow_to_ints" get_value_from_config_int @@
+    fun opts v -> { opts with option_ints_overflow_to_ints = Some (v = 1) });
+  (set_value "hack.compiler.constant_folding" get_value_from_config_int @@
+    fun opts v -> { opts with option_constant_folding = (v = 1) });
+  (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
+    fun opts v -> { opts with option_optimize_null_check = (v = 1) });
+  (set_value "hack.compiler.optimize_cuf" get_value_from_config_int @@
+    fun opts v -> { opts with option_optimize_cuf = (v = 1) })
+]
 
 let extract_config_options_from_json ~init config_json =
   match config_json with None -> init | Some config_json ->
   let config = J.get_object_exn config_json in
-  let aliased_namespaces_opt =
-    get_value_from_config_kv_list config "hhvm.aliased_namespaces"
-  in
-  let init =
-    Option.value_map
-      aliased_namespaces_opt
-      ~default:init
-      ~f:(fun v -> { init with option_aliased_namespaces = v })
-  in
-  let ints_overflow_to_ints_opt =
-    get_value_from_config_int config "hhvm.hack.lang.ints_overflow_to_ints"
-  in
-  Option.value_map
-    ints_overflow_to_ints_opt
-    ~default:init
-    ~f:(fun v -> { init with option_ints_overflow_to_ints = Some (v = 1) })
+  List.fold_left value_setters ~init ~f:(fun opts setter -> setter config opts)
 
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.

@@ -120,7 +120,7 @@ match h with
 (* Shapes and tuples are just arrays *)
 | A.Hshape _ |  A.Htuple _ ->
   let tc_name = Some "array" in
-  let tc_flags = [TC.HHType] in
+  let tc_flags = [TC.HHType; TC.ExtendedHint] in
   TC.make tc_name tc_flags
 
 | A.Hoption t ->
@@ -139,27 +139,58 @@ match h with
     ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
   TC.make tc_name tc_flags
 
-let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
-  let tc =
-    match kind with
-    | Property ->
-      TC.make None []
-    | Param | TypeDef | Return ->
-      hint_to_type_constraint ~tparams ~skipawaitable ~namespace h
+let try_add_nullable ~nullable flags =
+  if nullable then List.dedup (TC.Nullable :: flags)
+  else flags
+
+let make_type_info ~tparams ~namespace h tc_name tc_flags =
+  let type_info_user_type = Some (fmt_hint ~tparams ~namespace h) in
+  let type_info_type_constraint = TC.make tc_name tc_flags in
+  Hhas_type_info.make type_info_user_type type_info_type_constraint
+
+let param_hint_to_type_info ~skipawaitable ~nullable
+  ~tparams ~namespace h =
+  let is_simple_hint =
+    match snd h with
+    | A.Hsoft _ | A.Hoption _ | A.Haccess _
+    | A.Hfun (_, _, _)
+    | A.Happly (_, _::_)
+    | A.Happly ((_, "mixed"), []) -> false
+    | A.Happly ((_, id), _) when List.mem tparams id -> false
+    | _ -> true
+  in
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace h in
+  let tc_name = TC.name tc in
+  if is_simple_hint
+  then
+    let is_hh_type =
+      Emit_env.is_hh_file ()
+      || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
     in
+    let tc_flags = if is_hh_type then [TC.HHType] else [] in
+    let tc_flags = if nullable then TC.Nullable :: tc_flags else tc_flags in
+    make_type_info ~tparams ~namespace h tc_name tc_flags
+  else
+    let tc_flags = try_add_nullable ~nullable (TC.flags tc) in
+    make_type_info ~tparams ~namespace h tc_name tc_flags
+
+let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
+  match kind with
+  | Param ->
+    param_hint_to_type_info ~skipawaitable ~nullable ~tparams ~namespace h
+  | _ ->
+  let tc =
+    if kind = Property then TC.make None []
+    else hint_to_type_constraint ~tparams ~skipawaitable ~namespace h
+  in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags =
     if kind = Return && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
     else tc_flags in
-  let tc_flags =
-    if nullable
-    then List.dedup (TC.Nullable :: tc_flags)
-    else tc_flags in
-  let type_info_user_type = Some (fmt_hint ~tparams ~namespace h) in
-  let type_info_type_constraint = TC.make tc_name tc_flags in
-  Hhas_type_info.make type_info_user_type type_info_type_constraint
+  let tc_flags = try_add_nullable ~nullable tc_flags in
+  make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_class ~namespace h =
   match h with

@@ -1,7 +1,3 @@
-zend/good/tests/classes/array_access_009.php
-zend/good/tests/classes/array_access_010.php
-zend/good/tests/classes/array_access_011.php
-zend/good/tests/classes/autoload_009.php
 zend/good/tests/classes/bug29446.php
 zend/good/tests/classes/constants_error_001.php
 zend/good/tests/classes/constants_error_005.php
@@ -15,7 +11,6 @@ zend/good/tests/classes/static_properties_undeclared_assignRef.php
 zend/good/tests/classes/static_properties_undeclared_inc.php
 zend/good/tests/classes/static_properties_undeclared_isset.php
 zend/good/tests/classes/static_properties_undeclared_read.php
-zend/good/tests/classes/type_hinting_003.php
 zend/good/tests/lang/004.php
 zend/good/tests/lang/005.php
 zend/good/tests/lang/006.php
@@ -25,9 +20,7 @@ zend/good/tests/lang/033.php
 zend/good/tests/lang/bug18872.php
 zend/good/tests/lang/bug24054.php
 zend/good/tests/lang/bug24403.php
-zend/good/tests/lang/bug24658.php
 zend/good/tests/lang/bug44654.php
-zend/good/tests/lang/catchable_error_001.php
 zend/good/tests/lang/comments.php
 zend/good/tests/lang/engine_assignExecutionOrder_001.php
 zend/good/tests/lang/engine_assignExecutionOrder_008.php

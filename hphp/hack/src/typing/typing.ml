@@ -393,12 +393,12 @@ and fun_def tcopt f =
         bind_param in
       let env, tb = fun_ env hret (fst f.f_name) nb f.f_fun_kind in
       let env = Env.check_todo env in
+      if Env.is_strict env then
+      List.iter2_exn f_params param_tys (check_param env);
       begin match f.f_ret with
-        | None when Env.is_strict env ->
-            List.iter2_exn f_params param_tys (check_param env);
-            suggest_return env (fst f.f_name) hret;
+        | None when Env.is_strict env -> suggest_return env (fst f.f_name) hret
         | None -> Typing_suggest.save_fun_or_method f.f_name
-        | Some _ -> ();
+        | Some _ -> ()
       end;
       {
         T.f_mode = f.f_mode;

@@ -8,5 +8,5 @@
  *
  *)
 
-val find_syntax_errors : Full_fidelity_positioned_syntax.t -> bool ->
+val find_syntax_errors : Full_fidelity_positioned_syntax.t -> bool -> bool ->
   Full_fidelity_syntax_error.t list

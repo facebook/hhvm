@@ -722,7 +722,7 @@ let property_errors node is_strict =
       [ SyntaxError.make s e SyntaxError.error2001 ]
   | _ -> [ ]
 
-let expression_errors node parents =
+let expression_errors node parents is_hack =
   match syntax node with
   | SubscriptExpression { subscript_left_bracket; _}
     when is_left_brace subscript_left_bracket ->
@@ -737,7 +737,7 @@ let expression_errors node parents =
         [ SyntaxError.make s e SyntaxError.error2033 ]
       | None -> [ ]
     end
-  | ObjectCreationExpression oce ->
+  | ObjectCreationExpression oce when is_hack ->
     if is_missing oce.object_creation_left_paren &&
         is_missing oce.object_creation_right_paren
     then
@@ -834,7 +834,7 @@ let alias_errors node =
       [ SyntaxError.make s e SyntaxError.error2034 ]
   | _ -> [ ]
 
-let find_syntax_errors node is_strict =
+let find_syntax_errors node is_strict is_hack =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
     let func_errs = function_errors node parents is_strict in
@@ -842,7 +842,7 @@ let find_syntax_errors node is_strict =
     let statement_errs = statement_errors node parents in
     let methodish_errs = methodish_errors node parents in
     let property_errs = property_errors node is_strict in
-    let expr_errs = expression_errors node parents in
+    let expr_errs = expression_errors node parents is_hack in
     let require_errs = require_errors node parents in
     let classish_errors = classish_errors node parents in
     let type_errors = type_errors node parents is_strict in

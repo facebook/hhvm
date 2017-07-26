@@ -107,9 +107,10 @@ let test_errors source =
   let offset_to_position = SourceText.offset_to_position source_text in
   let syntax_tree = SyntaxTree.make source_text in
   let is_strict = SyntaxTree.is_strict syntax_tree in
+  let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let root = PositionedSyntax.from_tree syntax_tree in
   let errors1 = SyntaxTree.errors syntax_tree in
-  let errors2 = ParserErrors.find_syntax_errors root is_strict in
+  let errors2 = ParserErrors.find_syntax_errors root is_strict is_hack in
   let errors = errors1 @ errors2 in
   let mapper err = SyntaxError.to_positioned_string err offset_to_position in
   let errors = List.map errors ~f:mapper in
@@ -190,6 +191,7 @@ let error_tests =
     "test_abstract_methodish_errors";
     "test_async_errors";
     "test_visibility_modifier_errors";
+    "test_legal_php";
     "context/test_missing_name_in_expression";
     "context/test_nested_function_lite";
     "context/test_nested_function";

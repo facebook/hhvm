@@ -166,12 +166,13 @@ let print_full_fidelity_error source_text error =
  * Specifying all_errors=false will attempt to filter out duplicate errors. *)
 let print_full_fidelity_errors ~syntax_tree ~source_text ~all_errors =
   let is_strict = SyntaxTree.is_strict syntax_tree in
+  let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let root = PositionedSyntax.from_tree syntax_tree in
   let errors1 =
     if all_errors
     then SyntaxTree.all_errors syntax_tree
     else SyntaxTree.errors syntax_tree in
-  let errors2 = ParserErrors.find_syntax_errors root is_strict in
+  let errors2 = ParserErrors.find_syntax_errors root is_strict is_hack in
   let errors = errors1 @ errors2 in
   List.iter (print_full_fidelity_error source_text) errors
 

@@ -70,6 +70,13 @@ module WithExpressionAndDeclAndTypeParser
     | Goto -> parse_goto_statement parser
     | QuestionGreaterThan ->
       parse_markup_section parser ~is_leading_section:false
+    | Semicolon -> parse_expression_statement parser
+    (* ERROR RECOVERY: when encountering a token that's invalid now but the
+     * context says is expected later, make the whole statement missing
+     * and continue on, starting at the unexpected token. *)
+    (* TODO T20390825: Make sure this this won't cause premature recovery. *)
+    | kind when SimpleParser.expects parser kind ->
+      (parser, make_missing ())
     | _ -> parse_expression_statement parser
 
   and parse_markup_section parser ~is_leading_section =
@@ -313,7 +320,7 @@ module WithExpressionAndDeclAndTypeParser
     let parse_else_opt parser_else =
       let (parser_else, else_token) = optional_token parser_else Else in
       match syntax else_token with
-      | Missing ->(parser_else, else_token)
+      | Missing -> (parser_else, else_token)
       | _ ->
         let (parser_else, else_consequence) = parse_statement parser_else in
         let else_syntax = make_else_clause else_token else_consequence in

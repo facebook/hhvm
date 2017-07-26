@@ -1839,9 +1839,34 @@ and transform_argish ?(allow_trailing=true) ?(spaces=false)
   let split_when_children_split =
     match spaces, syntax arg_list with
     | false, SyntaxList [x] ->
-      not (
-        List.is_empty (trailing_trivia left_p) &&
-        List.is_empty (trailing_trivia x)
+      let has_surrounding_whitespace =
+        not (
+          List.is_empty (trailing_trivia left_p) &&
+          List.is_empty (trailing_trivia x)
+        )
+      in
+      let item =
+        match syntax x with
+        | ListItem x -> fst (get_list_item_children x)
+        | _ -> failwith "Expected ListItem"
+      in
+      (* Blacklist constructs which look ugly when we try to preserve the
+       * lack-of-whitespace style. *)
+      (match syntax item with
+      | LambdaExpression { lambda_body = { syntax = CompoundStatement _; _ }; _ } ->
+        has_surrounding_whitespace
+      | FunctionCallExpression { function_call_receiver; _ } ->
+        Syntax.is_member_selection_expression function_call_receiver ||
+          has_surrounding_whitespace
+      | ConditionalExpression _
+      | BinaryExpression _
+      | MemberSelectionExpression _
+      | FieldSpecifier _
+      | FieldInitializer _
+      | ElementInitializer _
+      | LambdaExpression _
+        -> true
+      | _ -> has_surrounding_whitespace
       )
     | _ -> true
   in

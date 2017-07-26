@@ -51,22 +51,23 @@ module LeastUpperBound = struct
   open Typing_defs
 
   (* @TODO expand this match to refine more types*)
-  let pairwise_least_upper_bound ty1 ty2 =
-    if ty_equal ty1 ty2 then ty1 else (fst ty1), Tmixed
+  let pairwise_least_upper_bound env ty1 ty2 =
+    if SubType.is_sub_type env ty1 ty2 then ty2
+    else if SubType.is_sub_type env ty2 ty1 then ty1 else (fst ty1), Tmixed
 
   let rec full env types =
     match types with
     | [] -> None
     | [t] ->  Some t
     | ty1 :: ty2 :: ts ->
-      full env ((pairwise_least_upper_bound ty1 ty2) :: ts)
+      full env ((pairwise_least_upper_bound env ty1 ty2) :: ts)
 
   let rec compute types =
     match types with
     | [] -> None
     | [t] ->  Some t
     | (tenv, p, k, ty1) :: (_, _, _, ty2) :: ts  ->
-      let ty = pairwise_least_upper_bound ty1 ty2 in
+      let ty = pairwise_least_upper_bound tenv ty1 ty2 in
       compute ((tenv, p, k, ty) :: ts)
 
   end

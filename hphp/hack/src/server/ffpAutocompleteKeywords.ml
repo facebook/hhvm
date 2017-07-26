@@ -12,7 +12,6 @@
  * FUTURE IMPROVEMENTS:
  * - Order suggestions by how likely they are to be what the programmer
  *   wishes to do, not just what is valid
- * - Order sensitive suggestions, i.e. after public suggest the word function
  *)
 
 module MinToken = Full_fidelity_minimal_token
@@ -124,27 +123,57 @@ let async_keyword = {
 }
 
 let class_body_keywords = {
-  keywords = ["function"; "const"; "use"];
+  keywords = ["const"; "use"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
     context.predecessor = ClassBodyDeclaration)
   end;
 }
-(* TODO: function should be suggested after the method modifiers *)
+
+let function_keyword = {
+  keywords = ["function"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = OpenBrace ||
+    context.predecessor = ClassBodyDeclaration ||
+    context.predecessor = VisibilityModifier ||
+    context.predecessor = KeywordAsync ||
+    context.predecessor = KeywordStatic)
+    ||
+    context.closest_parent_container = TopLevel
+  end;
+}
+
+let class_keyword = {
+  keywords = ["class"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = TopLevel
+    ||
+    context.closest_parent_container = ClassHeader &&
+    (context.predecessor = KeywordAbstract ||
+    context.predecessor = KeywordFinal)
+  end;
+}
+
+let interface_keyword = {
+  keywords = ["interface"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = TopLevel
+  end;
+}
 
 let declaration_keywords = {
-  keywords = ["enum"; "require"; "class"; "include";
-  "require_once"; "include_once"; "function"; "use"; "interface"; "namespace";
-  "newtype"; "type"; "trait"];
+  keywords = ["enum"; "require"; "include"; "require_once"; "include_once";
+    "use"; "namespace"; "newtype"; "type"; "trait"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = TopLevel
   end;
 }
 
 let type_specifiers = {
-  keywords = ["bool"; "int"; "float"; "num"; "string"; "arraykey";
-  "void"; "resource"; "this"; "classname"; "mixed"; "noreturn"];
+  keywords = ["bool"; "int"; "float"; "num"; "string"; "arraykey"; "void";
+    "resource"; "this"; "classname"; "mixed"; "noreturn"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = TypeSpecifier
   end;
@@ -190,8 +219,8 @@ let postfix_expressions = {
 }
 
 let general_statements = {
-  keywords = ["if"; "do"; "while"; "for"; "foreach"; "try";
-  "return"; "throw"; "switch"; "yield"; "echo"; "async"];
+  keywords = ["if"; "do"; "while"; "for"; "foreach"; "try"; "return"; "throw";
+    "switch"; "yield"; "echo"; "async"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = CompoundStatement
   end;
@@ -243,22 +272,20 @@ let scope_resolution_qualifiers = {
   is_valid_in_context = fun _ -> true
 }*)
 
-(*
- * Each pair in this list is a list of keywords paired with a function that
- * takes a context and returns whether or not the list of keywords is valid in
- * this context.
- *)
 let keyword_matches: keyword_completion list = [
   abstract_keyword;
   async_keyword;
   async_func_body_keywords;
+  class_keyword;
   class_body_keywords;
   declaration_keywords;
   extends_keyword;
   final_keyword;
+  function_keyword;
   general_statements;
   if_trailing_keywords;
   implements_keyword;
+  interface_keyword;
   loop_body_keywords;
   postfix_expressions;
   primary_expressions;

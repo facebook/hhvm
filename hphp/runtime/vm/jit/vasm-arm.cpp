@@ -1531,9 +1531,7 @@ void lower(const VLS& e, movzlq& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
-    auto d = v.makeReg();
-    v << copy{i.s, d};
-    v << copy{d, i.d};
+    v << copy{i.s, i.d};
   });
 }
 

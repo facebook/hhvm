@@ -428,6 +428,7 @@ enumtypeinfo:
 ;
 functionbody:
     | /* empty */ {Instruction_sequence.empty}
+    | NEWLINE functionbody { $2 }
     | instruction NEWLINE functionbody {
         Instruction_sequence.gather [Instruction_sequence.instr $1; $3]}
     | TRYFAULTDIRECTIVE ID LBRACE NEWLINE functionbody nl RBRACE nl

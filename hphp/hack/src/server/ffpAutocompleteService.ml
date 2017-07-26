@@ -34,7 +34,8 @@ let make_result (res:string) : autocomplete_result =
 let auto_complete
   (tcopt:TypecheckerOptions.t)
   (file_content:string)
-  (pos:Ide_api_types.position) : result =
+  (pos:Ide_api_types.position)
+  ~(filter_by_token:bool) : result =
   let source_text = SourceText.make file_content in
   let syntax_tree = SyntaxTree.make source_text in
 
@@ -43,11 +44,22 @@ let auto_complete
   let offset = SourceText.position_to_offset source_text position_tuple in
   let (context, stub) =
     FfpAutocompleteContextParser.get_context_and_stub syntax_tree offset in
+  (* If we are running a test, filter the keywords and local variables based on
+  the token we are completing. *)
+  let filter_results res = List.filter res ~f:begin fun res ->
+    if filter_by_token
+    then String_utils.string_starts_with res stub
+    else true
+  end in
   (* Delegate to each type of completion to determine whether or not that
      type is valid in the current context *)
-  let keywords = FfpAutocompleteKeywords.autocomplete_keyword context stub in
+  let keywords =
+    FfpAutocompleteKeywords.autocomplete_keyword context
+    |> filter_results
+  in
   let local_vars =
     FfpAutocompleteLocalNames.autocomplete_local context stub syntax_tree offset
+    |> filter_results
   in
   let class_members = FfpAutocompleteClassMembers.autocomplete_class_member
     ~context
@@ -57,6 +69,6 @@ let auto_complete
   in
   let results = keywords @ local_vars @ class_members in
   results
-    |> List.sort ~cmp:Pervasives.compare
-    |> List.remove_consecutive_duplicates ~equal:(=)
-    |> List.map ~f:make_result
+  |> List.sort ~cmp:Pervasives.compare
+  |> List.remove_consecutive_duplicates ~equal:(=)
+  |> List.map ~f:make_result

@@ -8,5 +8,4 @@
  *
  *)
 
-val autocomplete_keyword :
-  FfpAutocompleteContextParser.context -> string -> string list
+val autocomplete_keyword : FfpAutocompleteContextParser.context -> string list

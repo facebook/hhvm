@@ -23,7 +23,6 @@ module SyntaxTree = Full_fidelity_syntax_tree
 open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
 open FfpAutocompleteContextParser.Predecessor
-open String_utils
 open Core
 
 (* Each keyword completion object has a list of keywords and a function that
@@ -307,11 +306,10 @@ let keyword_matches: keyword_completion list = [
   visibility_modifiers;
 ]
 
-let autocomplete_keyword (context:context) (stub:string) : string list =
-  let possibilities = List.filter_map keyword_matches
-    ~f:begin fun { keywords; is_valid_in_context } ->
+let autocomplete_keyword (context:context) : string list =
+  let check_keyword_match { keywords; is_valid_in_context } =
     Option.some_if (is_valid_in_context context) keywords
-  end in
-  possibilities
-    |> List.concat
-    |> List.filter ~f:(fun x -> string_starts_with x stub)
+  in
+  keyword_matches
+  |> List.filter_map ~f:check_keyword_match
+  |> List.concat

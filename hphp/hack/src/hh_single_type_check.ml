@@ -571,6 +571,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       in
       let result =
         FfpAutocompleteService.auto_complete opts file_text position
+        ~filter_by_token:true
       in begin
         match result with
         | [] -> Printf.printf "No result found\n"

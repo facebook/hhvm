@@ -64,11 +64,24 @@ let final_keyword = {
   end;
 }
 
-let class_trailing_modifiers = {
-  keywords = ["implements"; "extends"];
+let implements_keyword = {
+  keywords = ["implements"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    not (context.predecessor = OpenBrace)
+    (context.closest_parent_container = ClassHeader ||
+    context.closest_parent_container = ClassBody)
+    &&
+    (context.predecessor = ClassName ||
+     context.predecessor = ExtendsList)
+  end;
+}
+
+let extends_keyword = {
+  keywords = ["extends"];
+  is_valid_in_context = begin fun context ->
+    (context.closest_parent_container = ClassHeader ||
+    context.closest_parent_container = ClassBody)
+    &&
+    context.predecessor = ClassName
   end;
 }
 
@@ -223,7 +236,8 @@ let keyword_matches: keyword_completion list = [
   abstract_keyword;
   final_keyword;
   class_body_keywords;
-  class_trailing_modifiers;
+  extends_keyword;
+  implements_keyword;
   method_modifiers;
   visibility_modifiers;
   declaration_keywords;

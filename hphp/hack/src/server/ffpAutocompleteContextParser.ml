@@ -32,6 +32,9 @@ end
 module Predecessor = struct
   type t =
   | ClassBodyDeclaration
+  | ClassName
+  | ImplementsList
+  | ExtendsList
   | IfWithoutElse
   | KeywordAbstract
   | MarkupSection
@@ -76,16 +79,34 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   let open TokenKind in
   let open Predecessor in
   let classify_syntax_as_predecessor node = match syntax node with
+    | ClassishDeclaration {
+        classish_implements_list = { syntax = SyntaxList _; _ }; _
+      } -> Some ImplementsList
+    | ClassishDeclaration {
+        classish_extends_list = { syntax = SyntaxList _; _ };
+        classish_implements_keyword = { syntax = Missing; _ };
+        classish_implements_list = { syntax = Missing; _ };
+        _
+      } -> Some ExtendsList
+    | ClassishDeclaration {
+        classish_name = { syntax = Token _ ; _ };
+        classish_type_parameters = { syntax = Missing; _ };
+        classish_extends_keyword = { syntax = Missing; _ };
+        classish_extends_list = { syntax = Missing; _ };
+        classish_implements_keyword = { syntax = Missing; _ };
+        classish_implements_list = { syntax = Missing; _ };
+        _
+      } -> Some ClassName
     | PositionedSyntax.MarkupSection _ -> Some Predecessor.MarkupSection
     | IfStatement { if_else_clause = {
-          syntax = Missing; _
+        syntax = Missing; _
       }; _ } -> Some IfWithoutElse
     | ConstDeclaration _
     | PropertyDeclaration _
     | MethodishDeclaration _
     | TypeConstDeclaration _  -> Some ClassBodyDeclaration
     | TryStatement { try_finally_clause = {
-          syntax = Missing; _
+        syntax = Missing; _
       }; _ } -> Some TryWithoutFinally
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = LeftBrace; _ } -> Some OpenBrace

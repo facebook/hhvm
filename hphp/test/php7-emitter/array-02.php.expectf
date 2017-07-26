@@ -1,0 +1,4 @@
+
+Fatal error: Uncaught Error: Cannot use empty array elements in arrays in %s
+Stack trace:
+#0 {main}

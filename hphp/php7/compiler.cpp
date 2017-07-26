@@ -358,6 +358,51 @@ void Compiler::compileCall(const zend_ast* ast) {
   activeBlock->emit(FCall{params->children});
 }
 
+void Compiler::compileArray(const zend_ast* ast) {
+  // TODO: handle static array literals, too
+  auto list = zend_ast_get_list(ast);
+
+  // NB: array() and list() share the syntax node
+  // ZEND_AST_ARRAY--hence this odd check
+  if (list->attr == ZEND_ARRAY_SYNTAX_LIST) {
+    throw LanguageException("Cannot use list() as a standalone expression");
+  }
+
+  activeBlock->emit(NewArray{list->children});
+  for (uint32_t i = 0; i < list->children; i++) {
+    auto item = list->child[i];
+
+    if (!item) {
+      throw LanguageException("Cannot use empty array elements in arrays");
+    }
+
+    // NB: there's actually no constant for this in the parser; it's currently
+    // just set to 1 for ref-y items
+    bool ref = item->attr != 0;
+    auto flavor = ref ? Flavor::Ref : Flavor::Cell;
+
+    // if the second child is set, this is a name-value pair
+    if (item->child[1]) {
+      auto key = item->child[1];
+      auto val = item->child[0];
+      compileExpression(key, Flavor::Cell);
+      compileExpression(val, flavor);
+      if (ref) {
+        activeBlock->emit(AddElemV{});
+      } else {
+        activeBlock->emit(AddElemC{});
+      }
+    } else {
+      auto val = item->child[0];
+      compileExpression(val, flavor);
+      if (ref) {
+        activeBlock->emit(AddNewElemV{});
+      } else {
+        activeBlock->emit(AddNewElemC{});
+      }
+    }
+  }
+}
 
 void Compiler::compileExpression(const zend_ast* ast, Destination dest) {
   switch (ast->kind) {
@@ -408,6 +453,10 @@ void Compiler::compileExpression(const zend_ast* ast, Destination dest) {
     case ZEND_AST_CALL:
       compileCall(ast);
       fixFlavor(dest, Flavor::Return);
+      break;
+    case ZEND_AST_ARRAY:
+      compileArray(ast);
+      fixFlavor(dest, Flavor::Cell);
       break;
     default:
       panic("unsupported expression");

@@ -103,6 +103,7 @@ struct Compiler {
   void compileBind(const zend_ast* ast);
   void compileAssignOp(const zend_ast* ast);
   void compileCall(const zend_ast* ast);
+  void compileArray(const zend_ast* ast);
 
   void compileIf(const zend_ast* ast);
   void compileWhile(const zend_ast* cond, const zend_ast* body, bool bodyFirst);

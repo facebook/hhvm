@@ -1,0 +1,31 @@
+array(6) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(10)
+  [2]=>
+  &int(0)
+  ["var"]=>
+  &int(0)
+  ["val"]=>
+  int(10)
+  [3]=>
+  array(2) {
+    ["what"]=>
+    string(6) "arrays"
+    ["when"]=>
+    string(3) "now"
+  }
+}
+array(3) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+}
+array(1) {
+  ["foox"]=>
+  int(42)
+}

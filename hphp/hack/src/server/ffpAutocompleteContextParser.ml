@@ -21,6 +21,7 @@ module Container = struct
   type t =
   | BinaryExpression
   | ClassBody
+  | ClassHeader
   | CompoundStatement
   | LambdaBodyExpression
   | TopLevel
@@ -30,9 +31,11 @@ end
 
 module Predecessor = struct
   type t =
+  | ClassBodyDeclaration
   | IfWithoutElse
+  | KeywordAbstract
+  | MarkupSection
   | OpenBrace
-  | Statement
   | TryWithoutFinally
   | NoPredecessor
 end
@@ -73,13 +76,18 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   let open TokenKind in
   let open Predecessor in
   let classify_syntax_as_predecessor node = match syntax node with
+    | PositionedSyntax.MarkupSection _ -> Some Predecessor.MarkupSection
     | IfStatement { if_else_clause = {
           syntax = Missing; _
       }; _ } -> Some IfWithoutElse
+    | ConstDeclaration _
+    | PropertyDeclaration _
+    | MethodishDeclaration _
+    | TypeConstDeclaration _  -> Some ClassBodyDeclaration
     | TryStatement { try_finally_clause = {
           syntax = Missing; _
       }; _ } -> Some TryWithoutFinally
-    | MethodishDeclaration _ -> Some Statement
+    | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = LeftBrace; _ } -> Some OpenBrace
     | _ -> None
   in
@@ -99,6 +107,8 @@ let make_context
       { acc with closest_parent_container = TypeSpecifier }
     | Script _ ->
       { acc with closest_parent_container = TopLevel }
+    | ClassishDeclaration _ ->
+      { acc with closest_parent_container = ClassHeader }
     | ClassishBody _ ->
       { acc with closest_parent_container = ClassBody }
     | ForStatement _

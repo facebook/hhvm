@@ -35,10 +35,32 @@ type keyword_completion = {
   is_valid_in_context: context -> bool;
 }
 
-let class_leading_modifiers = {
-  keywords = ["abstract"; "final"; "abstract final"];
+let abstract_keyword = {
+  keywords = ["abstract"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TopLevel
+    (* Abstract class *)
+    (context.closest_parent_container = TopLevel ||
+    context.closest_parent_container = ClassHeader) &&
+    context.predecessor = MarkupSection
+    || (* Abstract method *)
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = OpenBrace ||
+    context.predecessor = ClassBodyDeclaration)
+  end;
+}
+
+let final_keyword = {
+  keywords = ["final"];
+  is_valid_in_context = begin fun context ->
+    (* Final class *)
+    (context.closest_parent_container = TopLevel ||
+    context.closest_parent_container = ClassHeader) &&
+    (context.predecessor = MarkupSection ||
+    context.predecessor = KeywordAbstract)
+    || (* Final method *)
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = OpenBrace ||
+    context.predecessor = ClassBodyDeclaration)
   end;
 }
 
@@ -54,7 +76,8 @@ let visibility_modifiers = {
   keywords = ["public"; "protected"; "private"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace || context.predecessor = Statement)
+    (context.predecessor = OpenBrace ||
+     context.predecessor = ClassBodyDeclaration)
   end;
 }
 
@@ -63,10 +86,11 @@ let visibility_modifiers = {
  * suggest "async" as a completion.
  *)
 let method_modifiers = {
-  keywords = ["abstract"; "final"; "static"; "async"];
+  keywords = ["static"; "async"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace || context.predecessor = Statement)
+    (context.predecessor = OpenBrace ||
+     context.predecessor = ClassBodyDeclaration)
   end;
 }
 
@@ -74,7 +98,8 @@ let class_body_keywords = {
   keywords = ["function"; "const"; "use"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace || context.predecessor = Statement)
+    (context.predecessor = OpenBrace ||
+     context.predecessor = ClassBodyDeclaration)
   end;
 }
 (* TODO: function should be suggested after the method modifiers *)
@@ -195,7 +220,8 @@ let scope_resolution_qualifiers = {
  * this context.
  *)
 let keyword_matches: keyword_completion list = [
-  class_leading_modifiers;
+  abstract_keyword;
+  final_keyword;
   class_body_keywords;
   class_trailing_modifiers;
   method_modifiers;

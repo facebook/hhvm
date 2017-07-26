@@ -23,6 +23,8 @@ module Container = struct
   | ClassBody
   | ClassHeader
   | CompoundStatement
+  | ConstantDeclarator
+  | FunctionParameterList
   | LambdaBodyExpression
   | TopLevel
   | TypeSpecifier
@@ -33,12 +35,16 @@ module Predecessor = struct
   type t =
   | ClassBodyDeclaration
   | ClassName
+  | IfWithoutElse
   | ImplementsList
   | ExtendsList
-  | IfWithoutElse
   | KeywordAbstract
   | KeywordAsync
+  | KeywordClass
+  | KeywordConst
+  | KeywordExtends
   | KeywordFinal
+  | KeywordImplements
   | KeywordStatic
   | MarkupSection
   | OpenBrace
@@ -114,7 +120,11 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
       }; _ } -> Some TryWithoutFinally
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = Async; _ } -> Some KeywordAsync
+    | Token { kind = Class; _ } -> Some KeywordClass
+    | Token { kind = Const; _ } -> Some KeywordConst
+    | Token { kind = Extends; _ } -> Some KeywordExtends
     | Token { kind = Final; _ } -> Some KeywordFinal
+    | Token { kind = Implements; _ } -> Some KeywordImplements
     | Token { kind = Static; _ } -> Some KeywordStatic
     | Token { kind = LeftBrace; _ } -> Some OpenBrace
     | Token { kind = Public; _ }
@@ -142,6 +152,8 @@ let make_context
       { acc with closest_parent_container = ClassHeader }
     | ClassishBody _ ->
       { acc with closest_parent_container = ClassBody }
+    | PositionedSyntax.ConstantDeclarator _ ->
+      { acc with closest_parent_container = Container.ConstantDeclarator }
     | ForStatement _
     | ForeachStatement _
     | WhileStatement _

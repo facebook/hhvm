@@ -122,8 +122,17 @@ let async_keyword = {
   end;
 }
 
-let class_body_keywords = {
-  keywords = ["const"; "use"];
+let const_keyword = {
+  keywords = ["const"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = OpenBrace ||
+    context.predecessor = ClassBodyDeclaration)
+  end;
+}
+
+let use_keyword = {
+  keywords = ["use"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
@@ -277,7 +286,7 @@ let keyword_matches: keyword_completion list = [
   async_keyword;
   async_func_body_keywords;
   class_keyword;
-  class_body_keywords;
+  const_keyword;
   declaration_keywords;
   extends_keyword;
   final_keyword;
@@ -294,6 +303,7 @@ let keyword_matches: keyword_completion list = [
   switch_body_keywords;
   try_trailing_keywords;
   type_specifiers;
+  use_keyword;
   visibility_modifiers;
 ]
 

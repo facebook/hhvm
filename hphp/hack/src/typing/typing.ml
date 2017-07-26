@@ -364,7 +364,7 @@ and fun_def tcopt f =
   NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
-  let tfun_def = Env.fresh_tenv env (
+  let tfun_def, tenv = Env.fresh_tenv env (
     fun env ->
       let env = Env.set_mode env f.f_mode in
       let env, constraints =
@@ -414,10 +414,11 @@ and fun_def tcopt f =
           T.fnb_nast = tb;
           T.fnb_unsafe = false (* TAST get this right *)
         }
-      }
+      },
+      env
   ) in
   Typing_hooks.dispatch_exit_fun_def_hook f;
-  tfun_def
+  tfun_def, tenv
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -4717,7 +4718,7 @@ and class_def_ env c tc =
     T.c_methods = typed_methods;
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
     T.c_enum = c.c_enum;
-  }
+  }, env
 
 and check_static_method obj method_name static_method =
   if SMap.mem method_name obj
@@ -5014,28 +5015,28 @@ and typedef_def tcopt typedef  =
 
 and gconst_def cst tcopt =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;
-  let typed_cst_value =
+  let filename = Pos.filename (fst cst.cst_name) in
+  let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
+  let env = Typing_env.empty tcopt filename (Some dep) in
+  let env = Typing_env.set_mode env cst.cst_mode in
+  let typed_cst_value, tenv =
     match cst.cst_value with
-    | None -> None
+    | None -> None, env
     | Some value ->
-      let filename = Pos.filename (fst cst.cst_name) in
-      let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
-      let env =
-        Typing_env.empty tcopt filename (Some dep) in
-      let env = Typing_env.set_mode env cst.cst_mode in
       let env, te, value_type = expr env value in
-      begin match cst.cst_type with
+      match cst.cst_type with
       | Some hint ->
         let ty = TI.instantiable_hint env hint in
         let env, dty = Phase.localize_with_self env ty in
-        ignore @@ Typing_utils.sub_type env value_type dty
-      | None -> () end;
-      Some te in
+        let env = Typing_utils.sub_type env value_type dty in
+        Some te, env
+      | None -> Some te, env
+  in
   { T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value
-  }
+  }, tenv
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)

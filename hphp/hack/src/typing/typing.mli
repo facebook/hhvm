@@ -15,13 +15,13 @@ val debug_print_last_pos:
   'a -> unit
 
 val fun_def:
-  TypecheckerOptions.t -> Nast.fun_ -> Tast.fun_
+  TypecheckerOptions.t -> Nast.fun_ -> Tast.fun_ * Typing_env.env
 val class_def:
-  TypecheckerOptions.t -> Nast.class_ -> Tast.class_ option
+  TypecheckerOptions.t -> Nast.class_ -> (Tast.class_ * Typing_env.env) option
 val typedef_def:
   TypecheckerOptions.t -> Nast.typedef -> unit
 val gconst_def:
-  Nast.gconst -> TypecheckerOptions.t -> Tast.gconst
+  Nast.gconst -> TypecheckerOptions.t -> Tast.gconst * Typing_env.env
 
 val expr:
   Typing_env.env -> Nast.expr ->

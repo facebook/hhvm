@@ -32,16 +32,16 @@ let pp_ty fmt ty = Format.pp_print_string fmt (Typing_print.suggest ty)
  * algorithm that can't be deduced again cheaply from the embedded type.
  *
  *)
-module TypeAndPosAnnotatedAST =
-  Nast.AnnotatedAST(struct
-    type t = Pos.t * ty option
-    let pp fmt (_, ty) = match ty with
-      | None -> Format.pp_print_string fmt "None"
-      | Some ty ->
-        Format.pp_print_string fmt "(Some ";
-        pp_ty fmt ty;
-        Format.pp_print_string fmt ")"
-  end)
+module AnnotationType = struct
+  type t = Pos.t * ty option
+  let pp fmt (_, ty) = match ty with
+    | None -> Format.pp_print_string fmt "None"
+    | Some ty ->
+      Format.pp_print_string fmt "(Some ";
+      pp_ty fmt ty;
+      Format.pp_print_string fmt ")"
+end
+module TypeAndPosAnnotatedAST = Nast.AnnotatedAST(AnnotationType)
 
 include TypeAndPosAnnotatedAST
 

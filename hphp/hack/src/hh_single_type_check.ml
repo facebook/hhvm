@@ -15,6 +15,15 @@ open Sys_utils
 
 module TNBody       = Typing_naming_body
 
+module StringAnnotation = struct
+  type t = string
+  let pp fmt str = Format.pp_print_string fmt str
+end
+module TASTMapper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
+  (StringAnnotation)
+module StringNAST = Nast.AnnotatedAST(StringAnnotation)
+
+
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
@@ -378,8 +387,9 @@ let create_tast opts files_info =
         Parser_heap.find_fun_in_file ~full:true opts fn x
         |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
         >>| Naming.fun_ opts
+        >>| Typing.fun_def opts
         |> function
-          | Ok f -> Tast.Fun (Typing.fun_def opts f)
+          | Ok (f, tenv) -> Tast.Fun f, tenv
           | Error e -> raise (Failure e)
       end
       @
@@ -390,7 +400,7 @@ let create_tast opts files_info =
         >>| Typing.class_def opts
         >>= Result.of_option ~error:(Printf.sprintf "Error with class %s definition" x)
         |> function
-          | Ok c -> Tast.Class c
+          | Ok (c, tenv) -> Tast.Class c, tenv
           | Error e -> raise (Failure e)
       end
       @
@@ -400,11 +410,11 @@ let create_tast opts files_info =
         >>| Naming.global_const opts
         >>| (fun x -> Typing.gconst_def x opts)
         |> function
-          | Ok c -> Tast.Constant c
+          | Ok (gc, tenv) -> Tast.Constant gc, tenv
           | Error e -> raise (Failure e)
       end
     )
-  in Relative_path.Map.mapi  (build_tast) files_info
+  in Relative_path.Map.mapi (build_tast) files_info
 
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
@@ -672,7 +682,12 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Dump_tast ->
     let tasts = create_tast opts files_info in
     let tast = Relative_path.Map.find filename tasts in
-    Printf.printf "%s\n" (Tast.show_program tast)
+    let type_to_string tenv (_, ty) = match ty with
+      | None -> "None"
+      | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
+    let program = List.map tast
+      (fun (def, tenv) -> TASTMapper.map_def (type_to_string tenv) def) in
+    Printf.printf "%s\n" (StringNAST.show_program program)
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

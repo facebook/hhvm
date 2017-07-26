@@ -31,11 +31,9 @@ void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
                         const Variant& callback);
 void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
                         const Variant& callback);
-void HHVM_METHOD(WaitHandle, import);
 bool HHVM_METHOD(WaitHandle, isFinished);
 bool HHVM_METHOD(WaitHandle, isSucceeded);
 bool HHVM_METHOD(WaitHandle, isFailed);
-int64_t HHVM_METHOD(WaitHandle, getId);
 String HHVM_METHOD(WaitHandle, getName);
 
 /**
@@ -93,10 +91,6 @@ T* wait_handle(const ObjectData* obj) {
 struct c_WaitHandle : ObjectData {
   WAITHANDLE_CLASSOF(WaitHandle);
   WAITHANDLE_DTOR(WaitHandle);
-
-  int64_t getId() const {
-    return ((intptr_t)this) / sizeof(void*);
-  }
 
   enum class Kind : uint8_t {
     Static,

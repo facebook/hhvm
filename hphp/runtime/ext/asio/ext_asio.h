@@ -29,7 +29,6 @@ struct AsioExtension final : Extension {
     initFunctions();
 
     initWaitHandle();
-    initWaitableWaitHandle();
     initResumableWaitHandle();
     initAsyncGenerator();
     initAwaitAllWaitHandle();
@@ -47,7 +46,6 @@ private:
   void initFunctions();
 
   void initWaitHandle();
-  void initWaitableWaitHandle();
   void initResumableWaitHandle();
   void initAsyncGenerator();
   void initAwaitAllWaitHandle();

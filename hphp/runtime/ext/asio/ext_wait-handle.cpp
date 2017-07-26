@@ -54,18 +54,6 @@ void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
   AsioSession::Get()->setOnJoin(callback);
 }
 
-// throws if cross-context cycle found
-void HHVM_METHOD(WaitHandle, import) {
-  auto obj = wait_handle<c_WaitHandle>(this_);
-  if (obj->isFinished()) {
-    return;
-  }
-
-  assert(obj->instanceof(c_WaitableWaitHandle::classof()));
-  auto const ctx_idx = AsioSession::Get()->getCurrentContextIdx();
-  asio::enter_context(static_cast<c_WaitableWaitHandle*>(this_), ctx_idx);
-}
-
 bool HHVM_METHOD(WaitHandle, isFinished) {
   return wait_handle<c_WaitHandle>(this_)->isFinished();
 }
@@ -76,10 +64,6 @@ bool HHVM_METHOD(WaitHandle, isSucceeded) {
 
 bool HHVM_METHOD(WaitHandle, isFailed) {
   return wait_handle<c_WaitHandle>(this_)->isFailed();
-}
-
-int64_t HHVM_METHOD(WaitHandle, getId) {
-  return wait_handle<c_WaitHandle>(this_)->getId();
 }
 
 String HHVM_METHOD(WaitHandle, getName) {
@@ -129,11 +113,9 @@ void AsioExtension::initWaitHandle() {
 
 #define WH_ME(meth) \
   HHVM_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
-  WH_ME(import);
   WH_ME(isFinished);
   WH_ME(isSucceeded);
   WH_ME(isFailed);
-  WH_ME(getId);
   WH_ME(getName);
 #undef WH_ME
 }

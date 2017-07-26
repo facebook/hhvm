@@ -48,7 +48,7 @@ $required_functions = array(
   'include',
   'HH\Asio\join',
   'HH\Asio\v',
-  WaitHandle::class.'::result',
+  'HH\Asio\result',
 
   'fa0',
   'fa1',

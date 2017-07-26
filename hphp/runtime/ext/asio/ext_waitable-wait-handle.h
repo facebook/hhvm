@@ -75,11 +75,6 @@ struct c_WaitableWaitHandle : c_WaitHandle {
   void throwCycleException(c_WaitableWaitHandle* child) const;
 };
 
-int64_t HHVM_METHOD(WaitableWaitHandle, getContextIdx);
-Object HHVM_METHOD(WaitableWaitHandle, getCreator);
-Array HHVM_METHOD(WaitableWaitHandle, getParents);
-Array HHVM_METHOD(WaitableWaitHandle, getDependencyStack);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

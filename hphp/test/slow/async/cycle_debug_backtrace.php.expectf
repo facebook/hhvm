@@ -18,15 +18,15 @@ array(4) {
 }
 string(%d) "Encountered dependency cycle.
 Existing stack:
-  {closure} (%d) (dupe)
-  <await-all> (%d)
+  {closure} (%x) (dupe)
+  <await-all> (%x)
 Trying to introduce dependency on:
-  {closure} (%d) (dupe)
+  {closure} (%x) (dupe)
 "
 string(%d) "Encountered dependency cycle.
 Existing stack:
-  {closure} (%d) (dupe)
-  <await-all> (%d)
+  {closure} (%x) (dupe)
+  <await-all> (%x)
 Trying to introduce dependency on:
-  {closure} (%d) (dupe)
+  {closure} (%x) (dupe)
 "

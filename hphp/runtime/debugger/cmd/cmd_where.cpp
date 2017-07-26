@@ -217,7 +217,7 @@ static Array createAsyncStacktrace() {
       }
       Array frameData;
       frameData.set(s_function, wh->getName(), true);
-      frameData.set(s_id, wh->getId(), true);
+      frameData.set(s_id, (uintptr_t)wh, true);
       frameData.set(s_ancestors, ancestors, true);
       // Async function wait handles may have a source location to add.
       if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {

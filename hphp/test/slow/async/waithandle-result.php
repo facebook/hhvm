@@ -12,11 +12,10 @@ try {
 
   $handle = blockme(2);
   HH\Asio\join(AwaitAllWaitHandle::fromArray(array($handle)));
-  var_dump($handle->result());
   var_dump(HH\Asio\result($handle));
 
   $handle = blockme(3);
-  var_dump($handle->result());
+  var_dump(HH\Asio\result($handle));
 } catch (InvalidOperationException $e) {
   echo "Exception: ", $e->getMessage(), "\n";
 }

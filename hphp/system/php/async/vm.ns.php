@@ -36,7 +36,7 @@ async function m<Tk, Tv>(
   // return $wait_handles->map($o ==> $o->result());
   $ret = Map {};
   foreach($wait_handles as $key => $value) {
-    $ret[$key] = $value->result();
+    $ret[$key] = \HH\Asio\result($value);
   }
   return $ret;
 }
@@ -73,7 +73,7 @@ async function v<Tv>(
   // return $wait_handles->map($o ==> $o->result());
   $ret = Vector {};
   foreach($wait_handles as $value) {
-    $ret[] = $value->result();
+    $ret[] = \HH\Asio\result($value);
   }
   return $ret;
 }
@@ -97,7 +97,7 @@ async function va(...$args): Awaitable/*<(...)>*/ {
   await AwaitAllWaitHandle::fromArray($wait_handles);
   $ret = array();
   foreach ($wait_handles as $value) {
-    $ret[] = $value->result();
+    $ret[] = \HH\Asio\result($value);
   }
   return $ret;
 }

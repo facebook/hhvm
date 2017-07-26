@@ -37,48 +37,34 @@ abstract class WaitHandle implements Awaitable {
     return $this;
   }
 
-  /* Import this wait handle to the current scheduler context
-   */
-  <<__Native>>
-  final public function import(): void;
-
-  /* Return the wait handle's result if it is already finished (and valid),
-   * throw an exception otherwise
-   * @return mixed - A result of the operation represented by given wait handle
-   */
-  final public function result(): mixed {
-    return \hh\asm('
-      This
-      WHResult
-    ');
-  }
-
   /* Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished
+   *
+   * DEPRECATED: use HH\Asio\has_finished()
    */
   <<__Native>>
   final public function isFinished(): bool;
 
   /* Check if this wait handle succeeded
    * @return bool - A boolean indicating whether this wait handle succeeded
+   *
+   * DEPRECATED: use HH\Asio\has_succeeded()
    */
   <<__Native>>
   final public function isSucceeded(): bool;
 
   /* Check if this wait handle failed
    * @return bool - A boolean indicating whether this wait handle failed
+   *
+   * DEPRECATED: use HH\Asio\has_failed()
    */
   <<__Native>>
   final public function isFailed(): bool;
 
-  /* Get unique ID of this wait handle (amongst existing ones)
-   * @return int - An integer representing unique ID of this wait handle
-   */
-  <<__Native>>
-  final public function getID(): int;
-
   /* Get name of the operation behind this wait handle
    * @return string - A name of the operation behind this wait handle
+   *
+   * TODO: replace this with a HH\Asio equivalent
    */
   <<__Native>>
   final public function getName(): string;
@@ -91,33 +77,6 @@ final class StaticWaitHandle extends WaitHandle {}
 /* A wait handle that can be waited upon
  */
 abstract class WaitableWaitHandle extends WaitHandle {
-
-  /* Get index of the scheduler context this wait handle operates in
-   * @return int - An index of scheduler context this wait handle operates in
-   */
-  <<__Native>>
-  final public function getContextIdx(): int;
-
-  /* Get wait handle that created this wait handle
-   * @return object - An AsyncFunctionWaitHandle that was being executed when
-   * this wait handle was constructed
-   */
-  <<__Native>>
-  final public function getCreator(): WaitHandle;
-
-  /* Get wait handles blocked on this wait handle
-   * @return array - An array of WaitableWaitHandles blocked on this wait handle
-   */
-  <<__Native>>
-  final public function getParents(): array;
-
-  /* Get the dependency stack for this wait handle
-   * @return array - A representation of the call stack of wait handles,
-   * starting with this wait handle. Each element in the array is a wait handle,
-   * or null which represents crossing a context boundary.
-   */
-  <<__Native>>
-  final public function getDependencyStack(): array;
 }
 
 /* A wait handle that can resume execution of PHP code
@@ -362,7 +321,10 @@ function result<T>(Awaitable<T> $awaitable): T {
     $awaitable instanceof WaitHandle,
     'unsupported user-land Awaitable',
   );
-  return $awaitable->result();
+  return \hh\asm('
+    CGetL $awaitable
+    WHResult
+  ');
 }
 
 /**

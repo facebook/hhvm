@@ -105,6 +105,7 @@ struct Compiler {
   void compileCall(const zend_ast* ast);
   void compileArray(const zend_ast* ast);
 
+  void compileGlobalDeclaration(const zend_ast* ast);
   void compileIf(const zend_ast* ast);
   void compileWhile(const zend_ast* cond, const zend_ast* body, bool bodyFirst);
   void compileFor(const zend_ast* ast);

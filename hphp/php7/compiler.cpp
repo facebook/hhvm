@@ -566,6 +566,9 @@ void Compiler::compileStatement(const zend_ast* ast) {
       activeBlock->exit(Jmp{currentLoop("break").continuation});
       activeBlock = nullptr;
       break;
+    case ZEND_AST_GLOBAL:
+      compileGlobalDeclaration(ast);
+      break;
     case ZEND_AST_CONTINUE:
       activeBlock->exit(Jmp{currentLoop("continue").test});
       activeBlock = nullptr;
@@ -589,6 +592,17 @@ void Compiler::compileStatement(const zend_ast* ast) {
     default:
       compileExpression(ast, Flavor::Drop);
   }
+}
+
+void Compiler::compileGlobalDeclaration(const zend_ast* ast) {
+  auto var = ast->child[0];
+  auto zv = var->child[0];
+  auto name = zval_to_string(zend_ast_get_zval(zv));
+
+  activeBlock->emit(String{name});
+  activeBlock->emit(VGetG{});
+  activeBlock->emit(BindL{name});
+  activeBlock->emit(PopV{});
 }
 
 void Compiler::compileIf(const zend_ast* ast) {

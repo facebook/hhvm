@@ -32,6 +32,7 @@ let reorder_reps = ref 1
 let replace_reps = ref 1
 let remove_reps = ref 1
 let insert_reps = ref 1
+let exn_reps = ref 1
 let metadata_reps = ref 1
 let complete_reps = ref 0
 let mut_prob = ref 0.1
@@ -61,6 +62,8 @@ let options =
       "Number of remove mutations (default 1)");
    ("-insert",    Arg.Set_int insert_reps,
       "Number of insert mutations (default 1)");
+   ("-exception",    Arg.Set_int exn_reps,
+      "Number of exception mutations (default 1)");
    ("-metadata",  Arg.Set_int metadata_reps,
       "Number of metadata mutations (default 1)");
    ("-complete", Arg.Set_int complete_reps,
@@ -138,6 +141,9 @@ let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
 
 let mutate (mut: IS.t -> IS.t) (prog : HP.t) =
   num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a)
+
+(* (i, k] *)
+let slice lst i k = Core.List.take (Core.List.drop lst (i + 1)) (k - i)
 
 open Hhbc_ast
 
@@ -490,8 +496,6 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     if Hashtbl.mem map h
     then Hashtbl.find map h |> List.filter ((<) idx)
     else [] in
-  (* (i, k] *)
-  let slice lst i k = Core.List.take (Core.List.drop lst (i + 1)) (k - i) in
   let mut (is : IS.t) =
     if not (should_mutate()) then is else
     let instrs = IS.instr_seq_to_list is in
@@ -515,8 +519,9 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     let newseq = subinstrs (-1) start1 @ subinstrs start2 end2 @
                  subinstrs end1 start2 @ subinstrs start1 end1 @
                  subinstrs end2 (List.length instrs - 1) in
-    IS.InstrSeq.flat_map (IS.Instr_list newseq)
-      (seq_data is |> maintain_stack (fun _ i -> [i])) in
+    IS.gather [IS.InstrSeq.flat_map (IS.Instr_list newseq)
+               (seq_data is |> maintain_stack (fun _ i -> [i]));
+               IS.extract_fault_instructions is] in
   Nondet.return input |> mutate mut input !reorder_reps
 
 (* This will randomly remove some of the instructions in a sequence. *)
@@ -533,16 +538,51 @@ let mutate_remove (input : HP.t) : mutation_monad =
     IS.InstrSeq.flat_map is (seq_data is |> maintain_stack remove) in
   Nondet.return input |> mutate mut input !remove_reps
 
+(* This will randomly wrap instruction sequences in try/fault or try/catch
+   blocks with trivial handlers. *)
+let mutate_exceptions (input : HP.t) : mutation_monad =
+  let rec new_exn_region (f : IS.t -> IS.t * IS.t) (is : IS.t) : IS.t =
+    let primary = IS.instr_seq_to_list is in
+    let primary_len = List.length primary in
+    let subinstrs = slice primary in
+    if primary_len <= 1 then is
+    else try
+           let start = Random.int (primary_len - 1) - 1 in
+           let end_pos = Random.int (primary_len - start - 1) + start + 1 in
+           let body, faults = subinstrs start end_pos |> IS.instrs |> f in
+           IS.gather [subinstrs (-1) start |> IS.instrs; body;
+                      subinstrs end_pos (primary_len - 1) |> IS.instrs;
+                      IS.extract_fault_instructions is; faults]
+         with Invalid_argument _ -> new_exn_region f is in
+  let make_fault (label : Label.t) (body : IS.t) : IS.t * IS.t =
+    let open IS in gather [ITry (TryFaultBegin label) |> instr; body;
+                           ITry TryFaultEnd |> instr],
+                   gather [ILabel label |> instr; instr_unwind] in
+  let make_catch (label : Label.t) (body : IS.t) : IS.t * IS.t =
+    let open IS in gather [instr_try_catch_begin; body; instr_jmp label;
+                           instr_try_catch_middle; instr_throw;
+                           instr_try_catch_end; instr_label label], IS.empty in
+  let resume_label () =
+    Label.get_next_label () |> string_of_int |> (^) "resume" |> Label.named in
+  let new_catch = resume_label ()       |> make_catch |> new_exn_region in
+  let new_fault = random_fault_label () |> make_fault |> new_exn_region in
+  let mut (is : IS.t) =
+    if not (should_mutate()) then is
+    else if Random.int 2 < 1
+      then new_catch is
+      else new_fault is in
+  Nondet.return input |> mutate mut input !exn_reps
+
 (* This will replace random instructions with others of the
    same stack signature *)
 let mutate_replace (input : HP.t) : mutation_monad =
   debug_print "Replacing";
   let equiv_instr (i : instruct) : instruct =
     let equiv_map = match i with
-                    | IBase _ -> sig_map_base
+                    | IBase  _ -> sig_map_base
                     | IFinal _ -> sig_map_final
-                    | ICall _ -> sig_map_fpass
-                    | _ -> sig_map_all in
+                    | ICall  _ -> sig_map_fpass
+                    | _        -> sig_map_all in
     try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
     with | Not_found | Invalid_argument _ -> i in
   let mut (is : IS.t) =
@@ -713,12 +753,12 @@ let _ =
   else
     set_binary_mode_out stdout true;
     let input = read_input () in
-    let mutations = [mutate_immediate; mutate_duplicate; mutate_reorder;
-                     mutate_remove;    mutate_replace;   mutate_insert;
-                     mutate_metadata] in
+    let mutations = [mutate_immediate;  mutate_duplicate; mutate_reorder;
+                     mutate_remove;     mutate_replace;   mutate_insert;
+                     mutate_exceptions; mutate_metadata] in
     if !complete_reps > 0
     then (imm_reps := 1; dup_reps := 1; reorder_reps := 1; remove_reps := 1;
-         replace_reps := 1; insert_reps := 1; metadata_reps := 1)
+         replace_reps := 1; insert_reps := 1; exn_reps := 1; metadata_reps := 1)
     else complete_reps := 1;
     for n = 1 to !complete_reps do
       fuzz input mutations

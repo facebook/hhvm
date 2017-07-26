@@ -293,7 +293,7 @@ let string_of_label label =
     | Label.Catch id -> "C" ^ (string_of_int id)
     | Label.Fault id -> "F" ^ (string_of_int id)
     | Label.DefaultArg id -> "DV" ^ (string_of_int id)
-    | Label.Named _ -> failwith "Label should be rewritten before this point"
+    | Label.Named id -> id
 
 let string_of_switch_kind kind =
   match kind with

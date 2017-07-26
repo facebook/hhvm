@@ -180,9 +180,7 @@ let makelabel s =
     | 'D' -> if s.[1] = 'V'
              then (Label.DefaultArg (int_of_string (String.sub s 2 (len-2))))
              else report_error "bad label: 'D', s.[1] <> 'V'"
-    | _ ->
-      report_error
-      @@ Printf.sprintf "bad label: '%c'" s.[0]
+    | _ -> Label.Named s
 let makelabelinst s = ILabel (makelabel s)
 
 (* TODO: replace stupidly big match with a hash table. Bootcampable? *)

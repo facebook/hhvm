@@ -97,6 +97,9 @@ let random_key () : MemberKey.t =
       fun () -> W]
      |> rand_elt) ()
 
+let random_fault_label () : Label.t = Label.Fault (Random.int 10)
+let random_catch_label () : Label.t = Label.Catch (Random.int 10)
+
 (* A list of generators for instructions. Doesn't include all instructions;
  not all can be meaningfully generated in a random fashion.
  TODO: autogenerate this somehow; this doesn't scale well for adding

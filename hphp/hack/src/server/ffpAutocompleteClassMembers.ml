@@ -8,27 +8,41 @@
  *
  *)
 
+open FfpAutocompleteContextParser
+open FfpAutocompleteContextParser.Container
 open Core
 
-(* TODO: Check the context to make sure we're actually completing a class
-   member access.*)
-(* TODO: Possibly find a way to avoid doing the "AUTO332" thing *)
-let autocomplete_class_member
+let is_complete_class_member context =
+  context.closest_parent_container = AfterDoubleColon ||
+  context.closest_parent_container = AfterRightArrow
+
+let legacy_auto_complete
   ~(file_content:string)
   ~(pos:Ide_api_types.position)
-  ~(tcopt:TypecheckerOptions.t) =
+  ~(tcopt:TypecheckerOptions.t)
+  : AutocompleteService.complete_autocomplete_result list Utils.With_complete_flag.t=
   let open Ide_api_types in
-  let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-  let content = File_content.edit_file_unsafe file_content edits in
+  (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service *)
   (* TODO: Call the method for getting global fns/classes separately *)
   (* TODO: Only run the parser/typechecker hooks for class members *)
-  let ac_results = ServerAutoComplete.auto_complete
+  let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
+  let content = File_content.edit_file_unsafe file_content edits in
+  ServerAutoComplete.auto_complete
     ~tcopt
     ~delimit_on_namespaces:true
     content
-  in
-  let open Utils.With_complete_flag in
-  List.map ac_results.value ~f: begin fun r ->
-    let open AutocompleteService in
-    r.res_name
-  end
+
+let autocomplete_class_member
+  ~(context:context)
+  ~(file_content:string)
+  ~(pos:Ide_api_types.position)
+  ~(tcopt:TypecheckerOptions.t) : string list =
+  if is_complete_class_member context then
+    let ac_results = legacy_auto_complete ~file_content ~pos ~tcopt in
+    let open Utils.With_complete_flag in
+    List.map ac_results.value ~f: begin fun r ->
+      let open AutocompleteService in
+      r.res_name
+    end
+  else
+    []

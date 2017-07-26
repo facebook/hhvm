@@ -49,8 +49,11 @@ let auto_complete
   let local_vars =
     FfpAutocompleteLocalNames.autocomplete_local context stub syntax_tree offset
   in
-  let class_members =
-    FfpAutocompleteClassMembers.autocomplete_class_member ~pos ~file_content ~tcopt
+  let class_members = FfpAutocompleteClassMembers.autocomplete_class_member
+    ~context
+    ~pos
+    ~file_content
+    ~tcopt
   in
   let results = keywords @ local_vars @ class_members in
   results

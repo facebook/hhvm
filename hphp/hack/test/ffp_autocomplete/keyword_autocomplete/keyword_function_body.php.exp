@@ -2,7 +2,6 @@ async
 clone
 do
 echo
-foo
 for
 foreach
 if

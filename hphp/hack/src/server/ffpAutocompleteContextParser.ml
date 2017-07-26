@@ -19,6 +19,8 @@ open Core
 module Container = struct
   (* Set of mutually exclusive contexts. *)
   type t =
+  | AfterDoubleColon
+  | AfterRightArrow
   | BinaryExpression
   | ClassBody
   | ClassHeader
@@ -143,6 +145,8 @@ let make_context
   let predecessor = validate_predecessor predecessor in
   let open PositionedSyntax in
   let open Container in
+  let open PositionedToken in
+  let open TokenKind in
   let check_node node acc = match syntax node with
     | SimpleTypeSpecifier _ ->
       { acc with closest_parent_container = TypeSpecifier }
@@ -175,6 +179,10 @@ let make_context
       }
     | PositionedSyntax.CompoundStatement _ ->
       { acc with closest_parent_container = Container.CompoundStatement }
+    | Token { kind = ColonColon; _ } ->
+      { acc with closest_parent_container = AfterDoubleColon }
+    | Token { kind = MinusGreaterThan; _ } ->
+      { acc with closest_parent_container = AfterRightArrow }
     | _ -> acc
   in
   List.fold_right

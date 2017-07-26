@@ -9,10 +9,9 @@
  *)
 
 open FfpAutocompleteContextParser
-open FfpAutocompleteContextParser.Container
-open Core
 
 let is_complete_class_member context =
+  let open FfpAutocompleteContextParser.Container in
   context.closest_parent_container = AfterDoubleColon ||
   context.closest_parent_container = AfterRightArrow
 
@@ -20,7 +19,7 @@ let legacy_auto_complete
   ~(file_content:string)
   ~(pos:Ide_api_types.position)
   ~(tcopt:TypecheckerOptions.t)
-  : AutocompleteService.complete_autocomplete_result list Utils.With_complete_flag.t=
+  : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t=
   let open Ide_api_types in
   (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service *)
   (* TODO: Call the method for getting global fns/classes separately *)
@@ -36,13 +35,11 @@ let autocomplete_class_member
   ~(context:context)
   ~(file_content:string)
   ~(pos:Ide_api_types.position)
-  ~(tcopt:TypecheckerOptions.t) : string list =
+  ~(tcopt:TypecheckerOptions.t)
+  : AutocompleteTypes.complete_autocomplete_result list =
   if is_complete_class_member context then
     let ac_results = legacy_auto_complete ~file_content ~pos ~tcopt in
     let open Utils.With_complete_flag in
-    List.map ac_results.value ~f: begin fun r ->
-      let open AutocompleteService in
-      r.res_name
-    end
+    ac_results.value
   else
     []

@@ -13,65 +13,9 @@ open Reordered_argument_collections
 open Typing_defs
 open Utils
 open String_utils
+include AutocompleteTypes
 
 module Phase = Typing_phase
-
-(* Details about functions to be added in json output *)
-type func_param_result = {
-    param_name     : string;
-    param_ty       : string;
-    param_variadic : bool;
-  }
-
-type func_details_result = {
-    params    : func_param_result list;
-    return_ty : string;
-    min_arity : int;
-  }
-
-type autocomplete_kind =
-  | Abstract_class_kind
-  | Class_kind
-  | Method_kind
-  | Function_kind
-  | Property_kind
-  | Class_constant_kind
-  | Variable_kind
-  | Interface_kind
-  | Trait_kind
-  | Enum_kind
-  | Namespace_kind
-  | Constructor_kind
-
-(* Results ready to be displayed to the user *)
-type complete_autocomplete_result = {
-    res_pos      : Pos.absolute;
-    res_ty       : string;
-    res_name     : string;
-    res_kind     : autocomplete_kind;
-    func_details : func_details_result option;
-  }
-
-(* Results that still need a typing environment to convert ty information
-   into strings *)
-type partial_autocomplete_result = {
-    ty   : Typing_defs.phase_ty;
-    name : string;
-    kind_: autocomplete_kind;
-  }
-
-type autocomplete_result =
-  | Partial of partial_autocomplete_result
-  | Complete of complete_autocomplete_result
-
-(* The type returned to the client *)
-type ide_result = {
-  completions : complete_autocomplete_result list;
-  char_at_pos : char;
-  is_complete : bool;
-}
-
-type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
@@ -496,6 +440,7 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
     | Trait_kind -> "trait"
     | Enum_kind -> "enum"
     | Namespace_kind -> "namespace"
+    | Keyword_kind -> "keyword"
   in
   let func_details = match ty with
     | (_, Tfun ft) ->

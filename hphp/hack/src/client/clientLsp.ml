@@ -596,20 +596,35 @@ let do_definition (conn: server_conn) (params: Definition.params)
   hack_to_lsp results
 
 let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
-  let open FfpAutocompleteService in
+  let open AutocompleteTypes in
   let open TextDocumentIdentifier in
-
   let open Completion in
   let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
   let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
   let result = rpc conn command in
-  let hack_completion_to_lsp (completion: autocomplete_result)
+  let hack_to_kind (completion: complete_autocomplete_result)
+    : Completion.completionItemKind option =
+    match completion.res_kind with
+    | Abstract_class_kind
+    | Class_kind -> Some Completion.Class
+    | Method_kind -> Some Completion.Method
+    | Function_kind -> Some Completion.Function
+    | Variable_kind -> Some Completion.Variable
+    | Property_kind -> Some Completion.Property
+    | Class_constant_kind -> Some Completion.Value (* a bit off, but the best we can do *)
+    | Interface_kind
+    | Trait_kind -> Some Completion.Interface
+    | Enum_kind -> Some Completion.Enum
+    | Namespace_kind -> Some Completion.Module
+    | Constructor_kind -> Some Completion.Constructor
+    | Keyword_kind -> Some Completion.Keyword
+  in
+  let hack_completion_to_lsp (completion: complete_autocomplete_result)
     : Completion.completionItem =
     {
-      (* TODO: Actually fill out the rest of these fields *)
-      label = completion.name;
-      kind = None;
+      label = completion.res_name;
+      kind = hack_to_kind completion;
       detail = None;
       inlineDetail = None;
       itemType = None;
@@ -682,6 +697,7 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
     | Enum_kind -> Some Completion.Enum
     | Namespace_kind -> Some Completion.Module
     | Constructor_kind -> Some Completion.Constructor
+    | Keyword_kind -> Some Completion.Keyword
   and hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
     (* the inlineDetail (right column) for variable/field types. Is that good? *)

@@ -576,8 +576,8 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         match result with
         | [] -> Printf.printf "No result found\n"
         | res -> List.iter res ~f:begin fun r ->
-            let open FfpAutocompleteService in
-            Printf.printf "%s\n" r.name
+            let open AutocompleteTypes in
+            Printf.printf "%s\n" r.res_name
           end
       end
   | Color ->

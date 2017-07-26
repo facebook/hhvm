@@ -33,7 +33,7 @@ type _ t =
   | INFER_TYPE : ServerUtils.file_input * int * int ->
       InferAtPosService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t
-  | AUTOCOMPLETE : string -> AutocompleteService.result t
+  | AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_FUNCTION : ServerUtils.file_input * int * int ->
       IdentifySymbolService.result t
   | METHOD_JUMP : (string * MethodJumps.filter * bool) ->
@@ -66,8 +66,8 @@ type _ t =
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
   | EDIT_FILE : string * (text_edit list) -> unit t
-  | IDE_AUTOCOMPLETE : string * position * bool -> AutocompleteService.ide_result t
-  | IDE_FFP_AUTOCOMPLETE : string * position -> FfpAutocompleteService.result t
+  | IDE_AUTOCOMPLETE : string * position * bool -> AutocompleteTypes.ide_result t
+  | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

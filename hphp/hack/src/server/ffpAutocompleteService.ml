@@ -8,8 +8,6 @@
  *
 *)
 
-open Core
-
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceText = Full_fidelity_source_text
@@ -17,19 +15,27 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree
 module TokenKind = Full_fidelity_token_kind
 
-(* The type returned to the client *)
-(* TODO: Add all the additional autocomplete info to this,
-   not just the autocomplete word *)
-type autocomplete_result = {
-  name : string;
-}
+open Core
+open AutocompleteTypes
 
-type result = autocomplete_result list
+let make_keyword_completion (keyword_name:string) =
+  {
+    res_pos = Pos.none |> Pos.to_absolute;
+    res_ty = "keyword";
+    res_name = keyword_name;
+    res_kind = Keyword_kind;
+    func_details = None;
+  }
 
-(* TODO: Return autocomplete_results from each type of autocomplete directly
-   instead of wrapping them here *)
-let make_result (res:string) : autocomplete_result =
-  { name = res }
+let make_local_var_completion (var_name:string) =
+  {
+    res_pos = Pos.none |> Pos.to_absolute;
+    res_ty = ""; (* TODO: Doing local variable completion syntactically means
+      that we don't know the type when completing it. Do we care about it? *)
+    res_name = var_name;
+    res_kind = Variable_kind;
+    func_details = None;
+  }
 
 let auto_complete
   (tcopt:TypecheckerOptions.t)
@@ -53,22 +59,22 @@ let auto_complete
   end in
   (* Delegate to each type of completion to determine whether or not that
      type is valid in the current context *)
-  let keywords =
+  let keyword_completions =
     FfpAutocompleteKeywords.autocomplete_keyword context
     |> filter_results
+    |> List.map ~f:make_keyword_completion
   in
-  let local_vars =
+  let local_var_completions =
     FfpAutocompleteLocalNames.autocomplete_local context stub syntax_tree offset
     |> filter_results
+    |> List.map ~f:make_local_var_completion
   in
-  let class_members = FfpAutocompleteClassMembers.autocomplete_class_member
+  let class_member_completions =
+    FfpAutocompleteClassMembers.autocomplete_class_member
     ~context
     ~pos
     ~file_content
     ~tcopt
   in
-  let results = keywords @ local_vars @ class_members in
-  results
-  |> List.sort ~cmp:Pervasives.compare
-  |> List.remove_consecutive_duplicates ~equal:(=)
-  |> List.map ~f:make_result
+  keyword_completions @ local_var_completions @ class_member_completions
+  |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)

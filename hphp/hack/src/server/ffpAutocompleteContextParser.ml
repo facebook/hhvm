@@ -37,6 +37,7 @@ module Predecessor = struct
   | ExtendsList
   | IfWithoutElse
   | KeywordAbstract
+  | KeywordFinal
   | MarkupSection
   | OpenBrace
   | TryWithoutFinally
@@ -109,6 +110,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
         syntax = Missing; _
       }; _ } -> Some TryWithoutFinally
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
+    | Token { kind = Final; _ } -> Some KeywordFinal
     | Token { kind = LeftBrace; _ } -> Some OpenBrace
     | _ -> None
   in

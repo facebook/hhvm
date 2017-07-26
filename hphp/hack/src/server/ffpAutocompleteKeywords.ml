@@ -90,7 +90,11 @@ let visibility_modifiers = {
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
-     context.predecessor = ClassBodyDeclaration)
+    context.predecessor = ClassBodyDeclaration)
+    || (* After seeing the word final, the parser thinks the next thing should
+      be a type specifier *)
+    context.closest_parent_container = TypeSpecifier &&
+    context.predecessor = KeywordFinal
   end;
 }
 
@@ -103,7 +107,7 @@ let method_modifiers = {
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
-     context.predecessor = ClassBodyDeclaration)
+    context.predecessor = ClassBodyDeclaration)
   end;
 }
 
@@ -112,7 +116,7 @@ let class_body_keywords = {
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
-     context.predecessor = ClassBodyDeclaration)
+    context.predecessor = ClassBodyDeclaration)
   end;
 }
 (* TODO: function should be suggested after the method modifiers *)

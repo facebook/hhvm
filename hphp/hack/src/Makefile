@@ -98,6 +98,7 @@ NATIVE_C_FILES=\
   utils/handle_stubs.c\
   utils/nproc.c\
   utils/priorities.c\
+  utils/processor_info.c\
   utils/realpath.c\
   utils/sysinfo.c\
   $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c

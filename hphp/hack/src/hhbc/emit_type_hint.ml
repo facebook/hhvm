@@ -135,6 +135,9 @@ match h with
   let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
+  match tc_name, tc_flags with
+  | None, [] -> tc
+  | _ ->
   let tc_flags = List.dedup
     ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
   TC.make tc_name tc_flags

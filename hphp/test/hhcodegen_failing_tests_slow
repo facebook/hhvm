@@ -166,10 +166,6 @@ slow/keyset/unreachable.php
 slow/lang/deprecated.php
 slow/lang/deprecated_disabled.php
 slow/lang/deprecated_sampled.php
-slow/lang/hh_return_type_0.php
-slow/lang/hh_return_type_1.php
-slow/lang/hh_return_type_2.php
-slow/lang/hh_return_type_3.php
 slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php

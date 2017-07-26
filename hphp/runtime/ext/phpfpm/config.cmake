@@ -1,0 +1,9 @@
+HHVM_DEFINE_EXTENSION("phpfpm"
+  SOURCES
+    ext_phpfpm.cpp
+  HEADERS
+    ext_phpfpm.h
+  SYSTEMLIB
+    ext_phpfpm.php
+  DEPENDS
+)

@@ -661,7 +661,6 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
 void ProxygenTransport::sendImpl(const void *data, int size, int code,
                                  bool chunked, bool eom) {
   assert(data);
-  assert(!m_sendStarted || chunked);
   if (m_sendEnded) {
     // This should never happen, but when it does we have to bail out,
     // since there's no sensible way to send data at this point and
@@ -670,6 +669,7 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
     // somewhere.
     return;
   }
+  assert(!m_sendStarted || chunked);
 
   VLOG(4) << "sendImpl called with data size=" << size << ", code=" << code
           << ", chunked=" << chunked << ", eom=" << eom;

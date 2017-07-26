@@ -167,6 +167,9 @@ void FastCGITransport::sendResponseHeaders(IOBufQueue& queue, int code) {
 
 void FastCGITransport::sendImpl(const void* data, int size, int code,
                                 bool /*chunked*/, bool eom) {
+  if (m_sendEnded) {
+    return;  // Output after fastcgi_finish_request will be ignored
+  }
   if (!m_headersSent) {
     m_headersSent = true;
     sendResponseHeaders(m_txBuf, code);

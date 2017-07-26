@@ -1,0 +1,4 @@
+Requesting 'test_fastcgi_finish_request.php?error=0'
+string(6) "before"
+Requesting 'test_fastcgi_finish_request.php?error=1'
+string(0) ""

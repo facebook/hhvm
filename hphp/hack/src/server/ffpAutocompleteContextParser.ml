@@ -38,9 +38,11 @@ module Predecessor = struct
   | IfWithoutElse
   | KeywordAbstract
   | KeywordFinal
+  | KeywordStatic
   | MarkupSection
   | OpenBrace
   | TryWithoutFinally
+  | VisibilityModifier
   | NoPredecessor
 end
 
@@ -111,7 +113,11 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
       }; _ } -> Some TryWithoutFinally
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = Final; _ } -> Some KeywordFinal
+    | Token { kind = Static; _ } -> Some KeywordStatic
     | Token { kind = LeftBrace; _ } -> Some OpenBrace
+    | Token { kind = Public; _ }
+    | Token { kind = Private; _ }
+    | Token { kind = Protected; _ } -> Some VisibilityModifier
     | _ -> None
   in
   predecessor

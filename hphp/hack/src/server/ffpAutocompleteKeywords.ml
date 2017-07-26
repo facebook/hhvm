@@ -98,16 +98,28 @@ let visibility_modifiers = {
   end;
 }
 
-(*
- * TODO: Complete these after other modifiers, i.e. "public static asy" should
- * suggest "async" as a completion.
- *)
-let method_modifiers = {
-  keywords = ["static"; "async"];
+let static_keyword = {
+  keywords = ["static"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
     context.predecessor = ClassBodyDeclaration)
+    ||
+    context.closest_parent_container = TypeSpecifier &&
+    context.predecessor = VisibilityModifier
+  end;
+}
+
+let async_keyword = {
+  keywords = ["async"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = OpenBrace ||
+    context.predecessor = ClassBodyDeclaration)
+    ||
+    context.closest_parent_container = TypeSpecifier &&
+    (context.predecessor = VisibilityModifier ||
+    context.predecessor = KeywordStatic)
   end;
 }
 
@@ -238,23 +250,24 @@ let scope_resolution_qualifiers = {
  *)
 let keyword_matches: keyword_completion list = [
   abstract_keyword;
-  final_keyword;
+  async_keyword;
+  async_func_body_keywords;
   class_body_keywords;
-  extends_keyword;
-  implements_keyword;
-  method_modifiers;
-  visibility_modifiers;
   declaration_keywords;
-  type_specifiers;
+  extends_keyword;
+  final_keyword;
   general_statements;
+  if_trailing_keywords;
+  implements_keyword;
   loop_body_keywords;
-  switch_body_keywords;
   postfix_expressions;
   primary_expressions;
   scope_resolution_qualifiers;
-  if_trailing_keywords;
+  static_keyword;
+  switch_body_keywords;
   try_trailing_keywords;
-  async_func_body_keywords;
+  type_specifiers;
+  visibility_modifiers;
 ]
 
 let autocomplete_keyword (context:context) (stub:string) : string list =

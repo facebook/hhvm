@@ -214,18 +214,8 @@ let parse_options () =
   }
 
 let compute_least_type tcopt popt fn =
-  let hint_to_type tenv hint =
-    let decl_ty =
-      Typing_instantiability.instantiable_hint tenv hint
-    in
-    snd (Typing_phase.localize_with_self tenv decl_ty)
-  in
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
-  let tenv = Typing_env.empty tcopt ~droot:None fn in
-  match Parser_heap.ParserHeap.get fn with
-  | None -> ()
-  | Some (ast, _) ->
-    Option.iter (Parser_heap.find_fun_in_file popt fn "\\test")
+  let tenv = Typing_infer_return.typing_env_from_file tcopt fn in
+  Option.iter (Parser_heap.find_fun_in_file popt fn "\\test")
     ~f:begin fun f ->
       let f = Naming.fun_ tcopt f in
       let {Nast.fnb_nast; _} = Typing_naming_body.func_body tcopt f in
@@ -234,7 +224,9 @@ let compute_least_type tcopt popt fn =
           ~f:begin fun acc stmt ->
             match stmt with
             | Expr (_, New (CI ((_, "\\least_upper_bound"), hints), _, _)) ->
-              (List.map hints (hint_to_type tenv)) :: acc
+              (List.map hints
+                (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
+              :: acc
             | _ -> acc
           end)
       in
@@ -243,9 +235,12 @@ let compute_least_type tcopt popt fn =
         ~f:(begin fun tys ->
           let tyop = Typing_ops.LeastUpperBound.full tenv tys in
           let least_ty =
-            Option.value_map tyop ~default:"" ~f:Typing_print.suggest
+            Option.value_map tyop ~default:""
+              ~f:(Typing_infer_return.print_type_locl tenv)
           in
-          let str_tys = Typing_print.suggest_list tys in
+          let str_tys =
+            Typing_infer_return.(print_list ~f:(print_type_locl tenv) tys)
+          in
           Printf.printf "Least upper bound of %s is %s \n" str_tys least_ty
         end)
       end
@@ -253,37 +248,8 @@ let compute_least_type tcopt popt fn =
 let infer_return tcopt fn info  =
   let names = FileInfo.simplify info in
   let fast = Relative_path.Map.singleton fn names in
-  let files = Typing_suggest_service.Files (Typing_suggest_service.keys fast) in
-  let inferred_types = Typing_suggest_service.get_inferred_types tcopt files in
-  let funs_and_methods = !Typing_suggest.funs_and_methods in
-  let () = Typing_suggest.funs_and_methods := [] in
-  let inferred_types =
-    List.filter
-      ~f:(fun (_, _, kind, _) -> kind == Typing_suggest.Kreturn)
-      inferred_types
-  in
-  let inferred_types =
-    List.sort
-      ~cmp: (fun (_, p1, _, _) (_ , p2, _, _) -> Pos.compare p1 p2)
-      inferred_types
-  in
-  let funs_and_methods =
-    List.sort
-      ~cmp: (fun (p1, _) (p2, _) -> Pos.compare p1 p2) funs_and_methods
-  in
-  let rec print_returns_with_funs ts fs  =
-    match ts, fs with
-    | [], _
-    | _, [] -> ()
-    | (tenv, p1, _, ty) :: ts_, (p2, id) :: fs_ ->
-      begin match Pos.compare p1 p2 with
-        | 0 -> Printf.printf "%s : %s \n" id (Typing_print.full tenv ty);
-               print_returns_with_funs ts_ fs_
-        | x when x > 0 -> print_returns_with_funs ts fs_
-        | _ -> print_returns_with_funs ts_ fs
-      end
-in
-print_returns_with_funs inferred_types funs_and_methods
+  let files = Typing_suggest_service.keys fast in
+  Typing_infer_return.(get_inferred_types tcopt files ~process:format_types)
 
 let suggest_and_print tcopt fn info =
   let names = FileInfo.simplify info in

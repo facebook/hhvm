@@ -1,1 +1,5 @@
+\C::getX : int try int
+\D::getX : int try int
+\F::getX : ?_, int try ?_
+\G::getX : ?_, int try ?_
 No errors

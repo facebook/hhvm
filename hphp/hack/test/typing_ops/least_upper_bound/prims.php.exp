@@ -1,8 +1,8 @@
 Least upper bound of int, int, int is int 
 Least upper bound of int, string is mixed 
 Least upper bound of float, int is mixed 
-Least upper bound of float, num (int/float) is num (int/float) 
+Least upper bound of float, num is num 
 Least upper bound of bool, void is mixed 
 Least upper bound of void is void 
-Least upper bound of float, int, num (int/float) is mixed 
-Least upper bound of float, num (int/float), int is num (int/float) 
+Least upper bound of float, int, num is mixed 
+Least upper bound of float, num, int is num 

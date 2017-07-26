@@ -194,42 +194,32 @@ let collate_types fast all_types =
 
 let keys map = Relative_path.Map.fold map ~init:[] ~f:(fun x _ y -> x :: y)
 
-type body =
-| Files of Relative_path.S.t list
-| Def of Nast.def
-
-let type_check tcopt = function
-  | Nast.Fun f -> Pervasives.ignore (Typing.fun_def tcopt f)
-  | Nast.Class c -> Pervasives.ignore (Typing.class_def tcopt c)
-  | _ -> ()
-
-let get_inferred_types tcopt body =
-  SharedMem.invalidate_caches();
-  Typing_defs.is_suggest_mode := true;
-  Typing_suggest.types := [];
-  Typing_suggest.funs_and_methods := [];
-  Typing_suggest.initialized_members := SMap.empty;
-  begin match body with
-  | Def def -> type_check tcopt def
-  | Files fnl ->
-    List.iter fnl
-      begin fun fn ->
-        let tcopt = TypecheckerOptions.make_permissive tcopt in
-        match Parser_heap.ParserHeap.get fn with
-        | None -> ()
-        | Some (ast, _) ->
-          List.iter (Naming.program tcopt ast) (type_check tcopt)
-      end
-  end;
-  let result = !Typing_suggest.types in
-  Typing_defs.is_suggest_mode := false;
-  Typing_suggest.types := [];
-  Typing_suggest.initialized_members := SMap.empty;
-  result
-
 (* Typecheck a part of the codebase, in order to record the type suggestions in
  * Type_suggest.types. *)
-let suggest_files tcopt fnl = get_inferred_types tcopt (Files fnl)
+
+let suggest_files tcopt fnl =
+ SharedMem.invalidate_caches();
+ Typing_defs.is_suggest_mode := true;
+ Typing_suggest.types := [];
+ Typing_suggest.funs_and_methods := [];
+ Typing_suggest.initialized_members := SMap.empty;
+ List.iter fnl begin fun fn ->
+   let tcopt = TypecheckerOptions.make_permissive tcopt in
+   match Parser_heap.ParserHeap.get fn with
+   | Some (ast, _) ->
+     let nast = Naming.program tcopt ast in
+     List.iter nast begin function
+       | Nast.Fun f -> ignore (Typing.fun_def tcopt f)
+       | Nast.Class c -> ignore (Typing.class_def tcopt c)
+       | _ -> ()
+     end
+   | None -> ()
+ end;
+ let result = !Typing_suggest.types in
+ Typing_defs.is_suggest_mode := false;
+ Typing_suggest.types := [];
+ Typing_suggest.initialized_members := SMap.empty;
+ result
 
 let suggest_files_worker tcopt acc fnl  =
   let types = suggest_files tcopt fnl  in

@@ -1,0 +1,6 @@
+\f : float, int try mixed
+\g : int, string try mixed
+\C::meth1 : string, string try string
+\h : int try int
+\k : void try void
+No errors

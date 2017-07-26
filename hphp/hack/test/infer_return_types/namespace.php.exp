@@ -1,7 +1,7 @@
-\TestNS\f : \TestNS\C 
-\TestNS\g : \TestNS\C 
-\TestNS2\f : \TestNS2\D 
-\TestNS2\g : \TestNS\C 
-\TestNS3\f : \TestNS\C 
-\Foo\f : \Foo\Bar\C 
+\TestNS\f : \TestNS\C try \TestNS\C
+\TestNS\g : \TestNS\C try \TestNS\C
+\TestNS2\f : \TestNS2\D try \TestNS2\D
+\TestNS2\g : \TestNS\C try \TestNS\C
+\TestNS3\f : \TestNS\C try \TestNS\C
+\Foo\f : \Foo\Bar\C try \Foo\Bar\C
 No errors

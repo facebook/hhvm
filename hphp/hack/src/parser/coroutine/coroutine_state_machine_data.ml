@@ -21,7 +21,7 @@ type t = {
   (**
    * Variable name -> syntax
    *)
-  local_variables: EditableSyntax.t SMap.t;
+  local_variables: string list;
   parameters: EditableSyntax.parameter_declaration list;
   outer_variables : string list;
 }

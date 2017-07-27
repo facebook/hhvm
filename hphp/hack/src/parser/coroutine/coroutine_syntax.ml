@@ -744,7 +744,8 @@ let inst_meth_syntax =
 let class_meth_syntax =
   make_qualified_name_syntax "class_meth"
 
-let make_member_with_unknown_type_declaration_syntax variable_syntax =
+let make_member_with_unknown_type_declaration_syntax variable_name =
+  let variable_syntax = make_variable_syntax variable_name in
   let declaration_syntax =
     make_property_declarator variable_syntax (make_missing ()) in
   make_property_declaration_syntax (make_missing ()) declaration_syntax

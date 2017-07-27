@@ -16,9 +16,8 @@ open EditableSyntax
 open CoroutineSyntax
 
 let generate_hoisted_locals { CoroutineStateMachineData.local_variables; _; } =
-  local_variables
-    |> SMap.values
-    |> Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
+  Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
+    local_variables
 
 let make_parameters_public_and_untyped
     { CoroutineStateMachineData.parameters; _; } =

@@ -113,41 +113,38 @@ let add_missing_return body =
 * Unused parameters are not included.
 * Locals are stripped of their initial $
 * TODO: We could further filter these down to only locals that are used
-        across a suspend.
+        across a suspend. If we do, rename this method, as it will then
+        no longer do what it says on the tin.
+* TODO: Locals used in PHP style constructs like "${x}" are not captured.
 *)
-let gather_locals_and_params node =
+let all_used_locals node =
   let folder acc node =
     match syntax node with
     | Token { EditableToken.kind = TokenKind.Variable; text; _; } ->
-      let text = String_utils.lstrip text "$" in
       (* "$this" is treated as a local, but obviously we don't want to copy
       it in or out. *)
-      if text = "this" then acc else SMap.add text node acc
+      if text = "$this" then acc else SSet.add text acc
     | _ -> acc in
-  Lambda_analyzer.fold_no_lambdas folder SMap.empty node
-
-let make_local name =
-  make_variable_syntax ("$" ^ name)
+  let locals = Lambda_analyzer.fold_no_lambdas folder SSet.empty node in
+  locals (* TODO: Return a list *)
 
 (* $closure->name = $name *)
 let copy_in_syntax variable =
+  let field_name = String_utils.lstrip variable "$" in
   make_assignment_syntax_variable
-    (closure_name_syntax variable)
-    (make_local variable)
+    (closure_name_syntax field_name)
+    (make_variable_syntax variable)
 
 (* $name = $closure->name *)
 let copy_out_syntax variable =
+  let field_name = String_utils.lstrip variable "$" in
   make_assignment_syntax_variable
-    (make_local variable)
-    (closure_name_syntax variable)
+    (make_variable_syntax variable)
+    (closure_name_syntax field_name)
 
-let add_try_finally locals_and_params body =
-  let copy_in = locals_and_params
-    |> SMap.keys (* TODO: Is this sorted? *)
-    |> Core_list.map ~f:copy_in_syntax in
-  let copy_out = locals_and_params
-    |> SMap.keys(* TODO: Is this sorted? *)
-    |> Core_list.map ~f:copy_out_syntax in
+let add_try_finally used_locals body =
+  let copy_in = Core_list.map ~f:copy_in_syntax used_locals in
+  let copy_out = Core_list.map ~f:copy_out_syntax used_locals in
   let copy_out = make_compound_statement_syntax copy_out in
   let copy_in = make_compound_statement_syntax copy_in in
   let try_body = make_compound_statement_syntax [ body ] in
@@ -807,15 +804,18 @@ let unnest_compound_statements node =
     | None -> Rewriter.Result.Keep in
   Rewriter.rewrite_post rewrite node
 
-let lower_body body locals_and_params =
+let lower_body body =
+  let used_locals = all_used_locals body in
+  let used_locals = SSet.elements used_locals in
   let body = add_missing_return body in
   let (next_loop_label, body) = rewrite_do 0 body in
   let body = rewrite_while body in
   let (next_loop_label, body) = rewrite_for next_loop_label body in
   let (next_loop_label, body) = rewrite_suspends body in
   let body = add_switch (next_loop_label, body) in
-  let body = add_try_finally locals_and_params body in
+  let body = add_try_finally used_locals body in
   let body = unnest_compound_statements body in
+  (* TODO: Make this not a map *)
   let coroutine_result_data_variables =
     next_loop_label
       |> Core_list.range 1
@@ -857,6 +857,7 @@ let compute_state_machine_data
     outer_variables
     function_parameter_list =
   let parameters = extract_parameter_declarations function_parameter_list in
+  (* TODO: Add a test case for "..." param. *)
   let parameter_names =
     parameters
       |> Core_list.map ~f:
@@ -875,12 +876,10 @@ let compute_state_machine_data
         | _ -> failwith "Parameter had unexpected token."
         end
       |> SSet.of_list in
-  let all_locals =
-    SMap.union locals_and_params coroutine_result_data_variables in
-  let local_variables =
-    SMap.filter
-      (fun k _ -> not (SSet.mem ("$" ^ k) parameter_names))
-      all_locals in
+  let local_variables = SSet.diff locals_and_params parameter_names in
+  let local_variables = SSet.elements local_variables in
+  let local_variables = local_variables @
+    (SMap.keys coroutine_result_data_variables) in
   CoroutineStateMachineData.{ local_variables; parameters; outer_variables; }
 
 (**
@@ -893,13 +892,15 @@ let generate_coroutine_state_machine
     original_body
     function_type
     function_parameter_list =
-  let locals_and_params = gather_locals_and_params original_body in
   let new_body, coroutine_result_data_variables =
-    lower_body original_body locals_and_params in
+    lower_body original_body in
+  (* TODO: Refactor this so that the lambda analyzer partitions used locals
+  into parameters, inner variables and outer variables. *)
   let outer_variables = Lambda_analyzer.outer_variables
     context.Coroutine_context.parents original_body in
+  let used_locals = all_used_locals original_body in
   let state_machine_data = compute_state_machine_data
-    locals_and_params
+    used_locals
     coroutine_result_data_variables
     outer_variables
     function_parameter_list in

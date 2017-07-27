@@ -50,7 +50,7 @@ nested named functions; Hack does not. If Hack ever supports nested
 classes or nested named functions then this code will have to change.
 (Though of course if Hack supports nested classes then generating closures
 for methods becomes easier!) *)
-let make_from_context parents lambda_count =
+let make_from_context node parents lambda_count =
   let folder acc h =
     match EditableSyntax.syntax h with
     | EditableSyntax.ClassishDeclaration {
@@ -75,4 +75,5 @@ let make_from_context parents lambda_count =
         function_name; function_type_parameter_list }
     | _ -> acc
   in
-  { (Core_list.fold ~f:folder ~init:empty parents) with lambda_count; parents }
+  { (Core_list.fold ~f:folder ~init:empty (node :: parents))
+    with lambda_count; parents }

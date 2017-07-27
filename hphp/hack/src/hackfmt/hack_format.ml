@@ -1014,11 +1014,7 @@ let rec transform node =
     let (name, left_b, initializers, right_b) =
       get_collection_literal_expression_children x
     in
-    Fmt [
-      t name;
-      Space;
-      transform_argish ~spaces:true left_b initializers right_b;
-    ]
+    transform_container_literal ~spaces:true name left_b initializers right_b
   | ObjectCreationExpression x ->
     let (kw, obj_type, left_p, arg_list, right_p) =
       get_object_creation_expression_children x
@@ -1036,48 +1032,30 @@ let rec transform node =
     let (kw, left_p, members, right_p) =
       get_array_intrinsic_expression_children x
     in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | DarrayIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_darray_intrinsic_expression_children x in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | DictionaryIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_dictionary_intrinsic_expression_children x
     in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | KeysetIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_keyset_intrinsic_expression_children x
     in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | VarrayIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_varray_intrinsic_expression_children x in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | VectorIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_vector_intrinsic_expression_children x
     in
-    Fmt [
-      t kw;
-      transform_argish left_p members right_p;
-    ]
+    transform_container_literal kw left_p members right_p
   | ElementInitializer x ->
     let (key, arrow, value) = get_element_initializer_children x in
     transform_mapish_entry key arrow value
@@ -1521,8 +1499,13 @@ and nest ?(spaces=false) right_delim nodes =
     transform right_delim;
   ]
 
-and after_each_argument is_last =
-  if is_last then Split else space_split ()
+and after_each_argument ?(force_newlines=false) is_last =
+  if force_newlines
+  then Newline
+  else
+    if is_last
+    then Split
+    else space_split ()
 
 and handle_lambda_body node =
   match syntax node with
@@ -1830,7 +1813,8 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
     ])
   ]
 
-and transform_argish ?(allow_trailing=true) ?(spaces=false)
+and transform_argish
+    ?(allow_trailing=true) ?(force_newlines=false) ?(spaces=false)
     left_p arg_list right_p =
   (* When there is only one argument, with no surrounding whitespace in the
    * original source, allow that style to be preserved even when there are line
@@ -1871,7 +1855,7 @@ and transform_argish ?(allow_trailing=true) ?(spaces=false)
     | _ -> true
   in
   delimited_nest ~spaces ~split_when_children_split left_p right_p [
-    transform_arg_list ~spaces ~allow_trailing arg_list
+    transform_arg_list ~spaces ~allow_trailing ~force_newlines arg_list
   ]
 
 and transform_braced_item left_p item right_p =
@@ -1908,15 +1892,28 @@ and transform_braced_item_with_trailer left_p item comma right_p =
        trailing commas in all these places reach end-of-life. *)
     [transform_trailing_comma ~allow_trailing:false item comma]
 
-and transform_arg_list ?(allow_trailing=true) ?(spaces=false) items =
+and transform_arg_list
+    ?(allow_trailing=true) ?(force_newlines=false) ?(spaces=false) items =
   handle_possible_list items
-    ~after_each:after_each_argument
+    ~after_each:(after_each_argument ~force_newlines)
     ~handle_last:(transform_last_arg ~allow_trailing)
 
 and transform_possible_comma_list ?(allow_trailing=true) ?(spaces=false)
     items right_p =
   nest ~spaces right_p [
     transform_arg_list ~spaces ~allow_trailing items
+  ]
+
+and transform_container_literal ?(spaces=false) kw left_p members right_p =
+  let force_newlines =
+    let trivia = trailing_trivia left_p in
+    List.exists trivia
+      ~f:(fun x -> Full_fidelity_editable_trivia.kind x = TriviaKind.EndOfLine)
+  in
+  Fmt [
+    transform kw;
+    if spaces then Space else Nothing;
+    transform_argish ~spaces ~force_newlines left_p members right_p;
   ]
 
 and remove_leading_trivia node =

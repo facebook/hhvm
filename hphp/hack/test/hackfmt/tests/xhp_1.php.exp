@@ -15,9 +15,9 @@ final class :MyFancyXHPClass extends :OtherXHPThing {
       <x:column-layout-component
         attr1="attr"
         attr2={
-          FakeClassWithReallyLongAttributeStuff::getCreateSomeStaticData(
-            Map { 'key1' => 'value1' },
-          )
+          FakeClassWithReallyLongAttributeStuff::getCreateSomeStaticData(Map {
+            'key1' => 'value1',
+          })
         }>
         <x:div padding="large"><x:link href="#">Click Here!</x:link></x:div>
         <x:div padding="large">{$link}</x:div>

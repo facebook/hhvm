@@ -852,34 +852,17 @@ let extract_parameter_declarations function_parameter_list =
       end
 
 let compute_state_machine_data
-    locals_and_params
+    (inner_variables, outer_variables, used_params)
     coroutine_result_data_variables
-    outer_variables
     function_parameter_list =
-  let parameters = extract_parameter_declarations function_parameter_list in
   (* TODO: Add a test case for "..." param. *)
-  let parameter_names =
-    parameters
-      |> Core_list.map ~f:
-        begin
-        function
-        | {
-            parameter_name =
-              {
-                syntax =
-                  Token { EditableToken.kind = TokenKind.Variable; text; _; };
-                _;
-              };
-            _;
-          } ->
-            text
-        | _ -> failwith "Parameter had unexpected token."
-        end
-      |> SSet.of_list in
-  let local_variables = SSet.diff locals_and_params parameter_names in
+  let parameters = extract_parameter_declarations function_parameter_list in
+  let local_variables = SSet.union inner_variables outer_variables in
   let local_variables = SSet.elements local_variables in
+  (* TODO: Why is this a map? *)
   let local_variables = local_variables @
     (SMap.keys coroutine_result_data_variables) in
+  let outer_variables = SSet.elements outer_variables in
   CoroutineStateMachineData.{ local_variables; parameters; outer_variables; }
 
 (**
@@ -894,15 +877,11 @@ let generate_coroutine_state_machine
     function_parameter_list =
   let new_body, coroutine_result_data_variables =
     lower_body original_body in
-  (* TODO: Refactor this so that the lambda analyzer partitions used locals
-  into parameters, inner variables and outer variables. *)
-  let outer_variables = Lambda_analyzer.outer_variables
-    context.Coroutine_context.parents original_body in
-  let used_locals = all_used_locals original_body in
+  let used_locals = Lambda_analyzer.partition_used_locals
+    context.Coroutine_context.parents function_parameter_list original_body in
   let state_machine_data = compute_state_machine_data
     used_locals
     coroutine_result_data_variables
-    outer_variables
     function_parameter_list in
   let closure_syntax =
     CoroutineClosureGenerator.generate_coroutine_closure

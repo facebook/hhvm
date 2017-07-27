@@ -44,6 +44,7 @@ type mode =
   | Identify_symbol of int * int
   | Find_local of int * int
   | Outline
+  | Dump_nast
   | Dump_tast
   | Find_refs of int * int
   | Highlight_refs of int * int
@@ -163,6 +164,9 @@ let parse_options () =
     "--outline",
       Arg.Unit (set_mode Outline),
       " Print file outline";
+    "--nast",
+      Arg.Unit (set_mode Dump_nast),
+      " Print out the named AST";
     "--tast",
       Arg.Unit (set_mode Dump_tast),
       " Print out the typed AST";
@@ -345,42 +349,60 @@ let check_errors opts errors files_info =
         (Typing_check_utils.check_defs opts fn fileinfo)
   end ~init:errors
 
-let create_tast opts files_info =
+let create_nasts opts files_info =
   let open Result in
-  let build_tast fn {FileInfo.funs; classes; typedefs; consts; _} =
-    (
+  let open Nast in
+  let build_nast fn {FileInfo.funs; classes; typedefs; consts; _} =
+    List.map ~f:Result.ok_or_failwith (
       List.map funs begin fun (_, x) ->
         Parser_heap.find_fun_in_file ~full:true opts fn x
         |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
         >>| Naming.fun_ opts
-        >>| Typing.fun_def opts
-        |> function
-          | Ok (f, tenv) -> Tast.Fun f, tenv
-          | Error e -> raise (Failure e)
+        >>| (fun f -> {f with f_body = (NamedBody (Typing_naming_body.func_body opts f))})
+        >>| (fun f -> Nast.Fun f)
       end
       @
       List.map classes begin fun (_, x) ->
         Parser_heap.find_class_in_file ~full:true opts fn x
         |> Result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
         >>| Naming.class_ opts
-        >>| Typing.class_def opts
-        >>= Result.of_option ~error:(Printf.sprintf "Error with class %s definition" x)
-        |> function
-          | Ok (c, tenv) -> Tast.Class c, tenv
-          | Error e -> raise (Failure e)
+        >>| Typing_naming_body.class_meth_bodies opts
+        >>| (fun c -> Nast.Class c)
+      end
+      @
+      List.map typedefs begin fun (_, x) ->
+        Parser_heap.find_typedef_in_file ~full:true opts fn x
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
+        >>| Naming.typedef opts
+        >>| (fun t -> Nast.Typedef t)
       end
       @
       List.map consts begin fun (_, x) ->
         Parser_heap.find_const_in_file ~full:true opts fn x
         |> Result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
         >>| Naming.global_const opts
-        >>| (fun x -> Typing.gconst_def x opts)
-        |> function
-          | Ok (gc, tenv) -> Tast.Constant gc, tenv
-          | Error e -> raise (Failure e)
+        >>| fun g -> Nast.Constant g
       end
     )
-  in Relative_path.Map.mapi (build_tast) files_info
+  in Relative_path.Map.mapi (build_nast) files_info
+
+let nast_to_tast_tenv opts nast =
+  let open Result in
+  let open Nast in
+  let def_conv = function
+    | Fun f -> Ok f
+      >>| Typing.fun_def opts
+      >>| (fun (f, tenv) -> Tast.Fun f, tenv)
+    | Class c -> Ok c
+      >>| Typing.class_def opts
+      >>= of_option ~error:(Printf.sprintf "Error with class %s definition" (snd c.c_name))
+      >>| (fun (c, tenv) -> Tast.Class c, tenv)
+    | Constant gc -> Ok gc
+      >>| (fun x -> Typing.gconst_def x opts)
+      >>| (fun (gc, tenv) -> Tast.Constant gc, tenv)
+    | Typedef td -> Error "Typedef not yet supported in TAST."
+  in
+  List.map nast (Fn.compose Result.ok_or_failwith def_conv)
 
 let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
@@ -519,6 +541,10 @@ let test_decl_compare filename popt files_contents tcopt files_info =
   List.iter2_exn classes1 classes2 compare_classes;
   ()
 
+(* Strip output of position information *)
+let filter_positions s = (Str.global_replace
+  (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" s)
+
 let handle_mode mode filename opts popt files_contents files_info errors =
   match mode with
   | Ai _ -> ()
@@ -645,18 +671,20 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline popt file in
     FileOutline.print ~short_pos:true results
+  | Dump_nast ->
+    let nasts = create_nasts opts files_info in
+    let nast = Relative_path.Map.find filename nasts in
+    Printf.printf "%s\n" (filter_positions (Nast.show_program nast))
   | Dump_tast ->
-    let tasts = create_tast opts files_info in
-    let tast = Relative_path.Map.find filename tasts in
+    let nasts = create_nasts opts files_info in
+    let nast = Relative_path.Map.find filename nasts in
+    let tast_tenv = nast_to_tast_tenv opts nast in
     let type_to_string tenv (_, ty) = match ty with
       | None -> "None"
       | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
-    let program = List.map tast
+    let program = List.map tast_tenv
       (fun (def, tenv) -> TASTMapper.map_def (type_to_string tenv) def) in
-    let output = (StringNAST.show_program program) in
-    (* Strip output of position information *)
-    Printf.printf "%s\n" (Str.global_replace
-      (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" output)
+    Printf.printf "%s\n" (filter_positions (StringNAST.show_program program))
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

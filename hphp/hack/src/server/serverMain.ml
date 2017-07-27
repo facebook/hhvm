@@ -426,8 +426,11 @@ let program_init genv =
         let env, _ = ServerInit.init genv in
         env, "fresh"
       | Some load_mini_approach ->
-        let env, did_load = ServerInit.init ~load_mini_approach genv in
-        env, if did_load then "mini_load" else "mini_load_fail"
+        let env, load_error = ServerInit.init ~load_mini_approach genv in
+        env, (match load_error with
+          | None -> "mini_load"
+          | Some err -> err
+        )
     else
       let env, _ = ServerInit.init genv in
       env, "fresh"

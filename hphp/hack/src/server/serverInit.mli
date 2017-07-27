@@ -19,4 +19,4 @@ val save_state: ServerEnv.env -> string -> unit
  * and refresh the environment and update the many shared heaps
  *)
 val init: ?load_mini_approach:load_mini_approach -> ServerEnv.genv
-  -> ServerEnv.env * bool (* whether the script succeeded *)
+  -> ServerEnv.env * string option (* If the script failed, the error message *)

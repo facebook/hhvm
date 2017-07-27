@@ -755,4 +755,8 @@ let init ?load_mini_approach genv =
   run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
-  env, Result.is_ok state
+  let load_error = match Result.error state with
+    | Some e -> Some (Printexc.to_string e)
+    | None -> None
+  in
+  env, load_error

@@ -653,7 +653,10 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
     let program = List.map tast
       (fun (def, tenv) -> TASTMapper.map_def (type_to_string tenv) def) in
-    Printf.printf "%s\n" (StringNAST.show_program program)
+    let output = (StringNAST.show_program program) in
+    (* Strip output of position information *)
+    Printf.printf "%s\n" (Str.global_replace
+      (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" output)
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

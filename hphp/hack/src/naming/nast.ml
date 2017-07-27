@@ -1,22 +1,20 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<bd77e4d4926d1880fc11ff243ebe2f10368de217>> *)
+(* SourceShasum<<b7dbe543a8400884fee6a3df1b5e0b0068b65eba>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
   "\n * Copyright (c) 2015, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the BSD-style license found in the\n * LICENSE file in the \"hack\" directory of this source tree. An additional grant\n * of patent rights can be found in the PATENTS file in the same directory.\n *\n "]
 module SN = Naming_special_names
-type id = (Pos.t* Local_id.t)[@@deriving show]
+type id =
+  (((Pos.t* Local_id.t))[@printer
+                          fun fmt  -> fun (_,id)  -> Local_id.pp fmt id])
+[@@deriving show]
 let rec pp_id : Format.formatter -> id -> Ppx_deriving_runtime.unit =
-  let __1 () = Local_id.pp
-  
-  and __0 () = Pos.pp
-   in
-  ((let open! Ppx_deriving_runtime in
-      fun fmt  ->
-        fun (a0,a1)  ->
-          Format.fprintf fmt "(@[";
-          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
-          Format.fprintf fmt "@])")
+  let __0 () =
+    ((let fprintf = Format.fprintf  in
+      fun fmt  -> fun (_,id)  -> Local_id.pp fmt id)
+    [@ocaml.warning "-26"])  in
+  ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
     [@ocaml.warning "-A"])
 
 and show_id : id -> Ppx_deriving_runtime.string =
@@ -68,7 +66,8 @@ and show_call_type : call_type -> Ppx_deriving_runtime.string =
 
 type shape_field_name = Ast.shape_field_name
 module ShapeMap = Ast.ShapeMap
-type hint = (Pos.t* hint_)
+type hint =
+  (((Pos.t* hint_))[@printer fun fmt  -> fun (_,h)  -> pp_hint_ fmt h])
 and hint_ =
   | Hoption of hint 
   | Hfun of hint list* bool* hint 
@@ -103,16 +102,11 @@ and nast_shape_info =
   nsi_allows_unknown_fields: bool ;
   nsi_field_map: shape_field_info ShapeMap.t }[@@deriving show]
 let rec pp_hint : Format.formatter -> hint -> Ppx_deriving_runtime.unit =
-  let __1 () = pp_hint_
-  
-  and __0 () = Pos.pp
-   in
-  ((let open! Ppx_deriving_runtime in
-      fun fmt  ->
-        fun (a0,a1)  ->
-          Format.fprintf fmt "(@[";
-          (((__0 ()) fmt) a0; Format.fprintf fmt ",@ "; ((__1 ()) fmt) a1);
-          Format.fprintf fmt "@])")
+  let __0 () =
+    ((let fprintf = Format.fprintf  in
+      fun fmt  -> fun (_,h)  -> pp_hint_ fmt h)
+    [@ocaml.warning "-26"])  in
+  ((let open! Ppx_deriving_runtime in fun fmt  -> (__0 ()) fmt)
     [@ocaml.warning "-A"])
 
 and show_hint : hint -> Ppx_deriving_runtime.string =

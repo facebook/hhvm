@@ -1,0 +1,198 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tvoid)));
+      f_name = (<p>, "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_hint =
+         (Some (<p>,
+                (Happly ((<p>, "\\MyPhonyVector"),
+                   [(<p>,
+                     (Happly ((<p>, "\\X"), [])))]
+                   ))));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = <p>; param_name = "$v"; param_expr = None
+         }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some \MyPhonyVector),
+                (AnnotatedAST.Binop ((Eq None),
+                   ((Some \MyPhonyVector),
+                    (AnnotatedAST.Lvar (<p>, $x))),
+                   ((Some \MyPhonyVector),
+                    (AnnotatedAST.New (
+                       (AnnotatedAST.CI
+                          ((<p>, "\\MyPhonyVector"), [])),
+                       [], [])))
+                   ))));
+             (AnnotatedAST.Expr
+                ((Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    (None,
+                     (AnnotatedAST.Obj_get (
+                        ((Some \MyPhonyVector),
+                         (AnnotatedAST.Lvar (<p>, $x))),
+                        (None, (AnnotatedAST.Id (<p>, "add"))),
+                        OG_nullthrows))),
+                    [], []))));
+             (AnnotatedAST.Expr
+                ((Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    (None,
+                     (AnnotatedAST.Obj_get (
+                        ((Some \MyPhonyVector),
+                         (AnnotatedAST.Lvar (<p>, $x))),
+                        (None, (AnnotatedAST.Id (<p>, "add"))),
+                        OG_nullthrows))),
+                    [], []))));
+             (AnnotatedAST.Expr
+                ((Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    ((Some (function(\MyPhonyVector<\X> $v): void)),
+                     (AnnotatedAST.Id (<p>, "\\test"))),
+                    [], []))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = (<p>, "\\MyPhonyVector");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = [];
+       c_vars =
+       [{ AnnotatedAST.cv_final = false; cv_is_xhp = false;
+          cv_visibility = Private;
+          cv_type =
+          (Some (<p>,
+                 (Happly ((<p>, "\\Vector"),
+                    [(<p>, (Habstr "T"))]))));
+          cv_id = (<p>, "x"); cv_expr = None }
+         ];
+       c_constructor =
+       (Some { AnnotatedAST.m_final = false; m_abstract = false;
+               m_visibility = Public;
+               m_name = (<p>, "__construct"); m_tparams = [];
+               m_where_constraints = [];
+               m_variadic = AnnotatedAST.FVnonVariadic; m_params = [];
+               m_body =
+               (AnnotatedAST.NamedBody
+                  { AnnotatedAST.fnb_nast =
+                    [(AnnotatedAST.Expr
+                        ((Some \Vector<_>),
+                         (AnnotatedAST.Binop ((Eq None),
+                            ((Some \Vector<_>), AnnotatedAST.Any),
+                            ((Some \Vector<_>),
+                             (AnnotatedAST.ValCollection (<vc_kind>, [])))
+                            ))))
+                      ];
+                    fnb_unsafe = false });
+               m_fun_kind = FSync; m_user_attributes = [];
+               m_ret =
+               (Some (<p>,
+                      (Happly ((<p>, "void"), []))))
+               });
+       c_static_methods = [];
+       c_methods =
+       [{ AnnotatedAST.m_final = false; m_abstract = false;
+          m_visibility = Public; m_name = (<p>, "add");
+          m_tparams = []; m_where_constraints = [];
+          m_variadic = AnnotatedAST.FVnonVariadic;
+          m_params =
+          [{ AnnotatedAST.param_hint =
+             (Some (<p>, (Habstr "T")));
+             param_is_reference = false; param_is_variadic = false;
+             param_pos = <p>; param_name = "$x";
+             param_expr = None }
+            ];
+          m_body =
+          (AnnotatedAST.NamedBody
+             { AnnotatedAST.fnb_nast =
+               [(AnnotatedAST.Expr
+                   ((Some _),
+                    (AnnotatedAST.Binop ((Eq None),
+                       ((Some T),
+                        (AnnotatedAST.Array_get (
+                           ((Some \Vector<T>),
+                            (AnnotatedAST.Obj_get (
+                               ((Some <static>), AnnotatedAST.This),
+                               (None,
+                                (AnnotatedAST.Id (<p>, "x"))),
+                               OG_nullthrows))),
+                           None))),
+                       ((Some T), (AnnotatedAST.Lvar (<p>, $x)))
+                       ))))
+                 ];
+               fnb_unsafe = false });
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some (<p>, (Hprim Tvoid))) };
+         { AnnotatedAST.m_final = false; m_abstract = false;
+           m_visibility = Public; m_name = (<p>, "get");
+           m_tparams = []; m_where_constraints = [];
+           m_variadic = AnnotatedAST.FVnonVariadic;
+           m_params =
+           [{ AnnotatedAST.param_hint =
+              (Some (<p>, (Hprim Tint)));
+              param_is_reference = false; param_is_variadic = false;
+              param_pos = <p>; param_name = "$x";
+              param_expr = None }
+             ];
+           m_body =
+           (AnnotatedAST.NamedBody
+              { AnnotatedAST.fnb_nast =
+                [(AnnotatedAST.Return (<p>,
+                    (Some ((Some T),
+                           (AnnotatedAST.Array_get (
+                              ((Some \Vector<T>),
+                               (AnnotatedAST.Obj_get (
+                                  ((Some <static>), AnnotatedAST.This),
+                                  (None,
+                                   (AnnotatedAST.Id (<p>, "x"))),
+                                  OG_nullthrows))),
+                              (Some ((Some int),
+                                     (AnnotatedAST.Int
+                                        (<p>, "0"))))
+                              ))))
+                    ))
+                  ];
+                fnb_unsafe = false });
+           m_fun_kind = FSync; m_user_attributes = [];
+           m_ret = (Some (<p>, (Habstr "T"))) }
+         ];
+       c_user_attributes = []; c_enum = None });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = (<p>, "\\X");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_user_attributes = []; c_enum = None });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = (<p>, "\\A");
+       c_tparams = <opaque>;
+       c_extends =
+       [(<p>, (Happly ((<p>, "\\X"), [])))];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_user_attributes = []; c_enum = None });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = (<p>, "\\B");
+       c_tparams = <opaque>;
+       c_extends =
+       [(<p>, (Happly ((<p>, "\\X"), [])))];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_user_attributes = []; c_enum = None })
+  ]

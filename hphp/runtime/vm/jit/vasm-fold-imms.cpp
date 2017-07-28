@@ -422,9 +422,7 @@ struct ImmFolder {
 
   void fold(andq& in, Vinstr& out) {
     if (!uses[in.sf] && valid.test(in.s0) && valid.test(in.s1)) {
-      auto imm0 = vals[in.s0];
-      auto result = imm0 & vals[in.s1];
-      out = ldimmq{result, in.d};
+      out = ldimmq{vals[in.s0] & vals[in.s1], in.d};
       return;
     }
     int val;
@@ -438,9 +436,7 @@ struct ImmFolder {
   void fold(andqi& in, Vinstr& out) {
     if (uses[in.sf]) return;
     if (!valid.test(in.s1)) return;
-    auto imm64 = vals[in.s1];
-    auto result = imm64 & in.s0.q();
-    out = ldimmq{result, in.d};
+    out = ldimmq{vals[in.s1] & in.s0.q(), in.d};
   }
 
   void fold(storeb& in, Vinstr& out) {

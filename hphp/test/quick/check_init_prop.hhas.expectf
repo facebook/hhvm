@@ -1,0 +1,6 @@
+Verification Error (unit %s func ): CheckProp cannot appear in  function
+Verification Error (unit %s func ): InitProp cannot appear in  function
+Verification Error (unit %s func 86sinit): InitProp references non-existent property foo
+Verification Error (unit %s func 86pinit): CheckProp references non-existent property bar
+Verification Error (unit %s func 86pinit): InitProp references non-existent property baz
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

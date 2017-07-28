@@ -1,0 +1,32 @@
+
+.main {
+  DefCls 0
+  FPushCtorD 0 "C"
+  FCall 0
+
+  CheckProp "foo"
+  InitProp "bar" NonStatic
+
+  PopR
+  RetC
+}
+
+.class C {
+  .default_ctor;
+
+  .method [public] 86sinit() {
+    String "default ::foo value"
+    InitProp "foo" Static
+
+    Null
+    RetC
+  }
+
+  .method [public] 86pinit() {
+    CheckProp "bar"
+    String "string"
+    InitProp "baz" Static
+
+    RetC
+  }
+}

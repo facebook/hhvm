@@ -1129,6 +1129,21 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
   switch (op) {
+    case Op::InitProp:
+    case Op::CheckProp: {
+        auto const prop = m_func->unit()->lookupLitstrId(getImm(pc, 0).u_SA);
+        auto fname = m_func->name()->toCppString();
+        if (fname.compare("86pinit") != 0 && fname.compare("86sinit") != 0) {
+          ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
+          return false;
+        }
+        if (!m_func->preClass() || !m_func->preClass()->hasProp(prop)){
+             ferror("{} references non-existent property {}\n",
+                    opcodeToName(op), prop);
+             return false;
+        }
+        break;
+    }
     case Op::DefCls:
     case Op::DefClsNop:
     case Op::CreateCl: {

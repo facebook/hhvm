@@ -235,6 +235,7 @@ const vixl::Register rVixlScratch1(vixl::x17);
 
 // x18 is used as assembler temporary
 const vixl::Register rAsm(vixl::x18);
+const vixl::Register rAsm_w(vixl::w18);
 
 ///////////////////////////////////////////////////////////////////////////////
 

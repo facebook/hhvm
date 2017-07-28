@@ -42,7 +42,7 @@ namespace arm {
 constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
 constexpr size_t smashableCallLen() { return 4 + 8 + 2 * 4; }
-constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
+constexpr size_t smashableJmpLen()  { return 2 * 4 + 4; }
 constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
@@ -76,6 +76,22 @@ constexpr size_t kSmashJmpTargetOff = 8;
 constexpr size_t kSmashJccTargetOff = 12;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+static void patchInstr(TCA inst, T target) {
+  *reinterpret_cast<T*>(inst) = target;
+  auto const end = reinterpret_cast<TCA>(inst + sizeof(T));
+  auto const begin = end - sizeof(T);
+  DataBlock::syncDirect(begin, end);
+}
+
+using TCA32 = uint32_t;
+
+template <class T>
+static uint32_t makeTCA32(T t) {
+  assertx(!(reinterpret_cast<intptr_t>(t) >> 32));
+  return static_cast<TCA32>(reinterpret_cast<intptr_t>(t));
+}
 
 }}}
 

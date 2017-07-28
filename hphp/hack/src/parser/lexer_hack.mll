@@ -577,6 +577,15 @@ and gt_or_comma file = parse
   | eof                { Terror }
   | ws+                { gt_or_comma file lexbuf }
   | '\n'               { Lexing.new_line lexbuf; gt_or_comma file lexbuf }
+  | fixme_start        { let fixme_pos = Pos.make file lexbuf in
+                         let fixme = fixme_state0 file lexbuf in
+                         let end_fixme_pos = Pos.make file lexbuf in
+                         let tok = gt_or_comma file lexbuf in
+                         (match fixme with
+                           | Some err_nbr -> add_fixme err_nbr (Pos.btw fixme_pos end_fixme_pos) (Pos.make file lexbuf)
+                           | None -> ());
+                         tok
+                       }
   | "/*"               { ignore (comment (Buffer.create 256) file lexbuf);
                          gt_or_comma file lexbuf
                        }

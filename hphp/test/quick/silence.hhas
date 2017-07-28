@@ -1,0 +1,62 @@
+# Tests that silence ends without silence starts fail the verifier
+.main {
+  .declvars $z;
+  FPushFuncD 2 "add"
+  Int 3
+  FPassCE 0
+  Int 2
+  FPassCE 1
+  FCall 2
+  UnboxR
+  Silence $z Start
+  SetL $z
+  Silence $z End
+  Silence _10 Start
+  SetL _10
+  Silence _10 End
+  PopC
+  Int 0
+  CGetL2 $z
+  Gt
+  Silence _1 Start
+  Silence _2 Start
+  Silence _3 Start
+  Silence _4 Start
+  Silence _8 Start
+  Silence _9 Start
+  JmpNZ L0
+  Silence _5 Start
+  Silence _3 End
+  Silence _8 End
+  FPushFuncD 1 "var_dump"
+  Int 1
+  FPassCE 0
+  FCall 1
+  PopR
+  Jmp L1
+L0:
+  Silence _6 Start
+  Silence _2 End
+  Silence _9 End
+  FPushFuncD 1 "var_dump"
+  Int 2
+  FPassCE 0
+  FCall 1
+  PopR
+L1:
+  Silence _1 End
+  Silence _5 End
+  Silence _6 End
+  Silence _7 End
+  Silence _8 End
+  Silence _9 End
+  Int 1
+  RetC
+}
+
+.function <"" N  > add($x, $y) {
+  CGetL $y
+  CGetL2 $x
+  AddO
+  RetC
+}

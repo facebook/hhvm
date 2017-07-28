@@ -1,0 +1,9 @@
+Verification Error (unit %s func ): Cannot store error reporting value in named local
+Verification Error (unit %s func ): Cannot store error reporting value in named local
+Verification Error (unit %s func ): SetL at PC 45 affected a local variable (10) which was reserved for storing the error reporting level
+Verification Error (unit %s func ): Silencer state mismatch on edge B2->B3: B2 had state 00101011010, B3 had state 01000110110
+Verification Error (unit %s func ): Silence ended on local variable 6 with no start
+Verification Error (unit %s func ): Silence ended on local variable 7 with no start
+Verification Error (unit %s func ): Silence ended on local variable 8 with no start
+Verification Error (unit %s func ): Error reporting was silenced at end of terminal block B3
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -65,6 +65,7 @@ struct State {
   int fpilen;       // length of FPI stack.
   bool mbr_live;    // liveness of member base register
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
+  boost::dynamic_bitset<> silences; // set of silenced local variables
 };
 
 /**
@@ -1038,6 +1039,65 @@ std::array<int32_t, 4> getWrittenClsRefSlots(PC pc) {
   return ret;
 }
 
+/* Returns a set of the immediates to op that are a local id */
+std::set<int> localImmediates(Op op) {
+  std::set<int> imms;
+  switch (op) {
+#define NA
+#define ONE(a) a(0)
+#define TWO(a, b) ONE(a) b(1)
+#define THREE(a, b, c) TWO(a, b) c(2)
+#define FOUR(a, b, c, d) THREE(a, b, c) d(3)
+#define LA(n) imms.insert(n);
+#define MA(n)
+#define BLA(n)
+#define SLA(n)
+#define ILA(n)
+#define IVA(n)
+#define I64A(n)
+#define IA(n)
+#define CAR(n)
+#define CAW(n)
+#define DA(n)
+#define SA(n)
+#define AA(n)
+#define RATA(n)
+#define BA(n)
+#define OA(op)
+#define VSA(n)
+#define KA(n)
+#define LAR(n)
+#define O(name, imm, in, out, flags) case Op::name: imm; break;
+    OPCODES
+#undef NA
+#undef ONE
+#undef TWO
+#undef THREE
+#undef FOUR
+#undef LA
+#undef MA
+#undef BLA
+#undef SLA
+#undef ILA
+#undef IVA
+#undef I64A
+#undef IA
+#undef CAR
+#undef CAW
+#undef DA
+#undef SA
+#undef AA
+#undef RATA
+#undef BA
+#undef OA
+#undef VSA
+#undef KA
+#undef LAR
+#undef O
+  }
+  return imms;
+}
+
 bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
   bool ok = true;
 
@@ -1145,9 +1205,41 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
+    case Op::Silence: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      auto const local = decode_iva(new_pc);
+      if (local < m_func->numNamedLocals()) {
+        ferror("Cannot store error reporting value in named local\n");
+        return false;
+      }
+
+      auto const silence = decode_oa<SilenceOp>(new_pc);
+      if (local + 1 > cur->silences.size()) cur->silences.resize(local + 1);
+      if (silence == SilenceOp::End && !cur->silences[local]) {
+        ferror("Silence ended on local variable {} with no start\n", local);
+        return false;
+      }
+
+      cur->silences[local] = silence == SilenceOp::Start ? 1 : 0;
+      break;
+    }
     default:
       break;
   }
+
+  if (op != Op::Silence && !isTypeAssert(op)) {
+    for (int imm : localImmediates(op)) {
+      auto local = getImm(pc, imm).u_LA;
+      if (cur->silences.size() > local && cur->silences[local]) {
+        ferror("{} at PC {} affected a local variable ({}) which was reserved "
+               "for storing the error reporting level\n",
+               opcodeToName(op), offset(pc), local);
+        return false;
+      }
+    }
+  }
+
   return true;
 }
 
@@ -1317,6 +1409,7 @@ void FuncChecker::initState(State* s) {
   s->fpilen = 0;
   s->mbr_live = false;
   s->mbr_mode.clear();
+  s->silences.clear();
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1330,6 +1423,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
+  to->silences = from->silences;
 }
 
 /**
@@ -1455,6 +1549,12 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     ok = false;
   }
 
+  if (succs == 0 && cur->silences.find_first() != cur->silences.npos &&
+      !b->exn) {
+    error("Error reporting was silenced at end of terminal block B%d\n", b->id);
+    return false;
+  }
+
   return ok;
 }
 
@@ -1480,6 +1580,21 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
     copyState(&state, &cur);
     return true;
   }
+
+  // An empty bitset should be considered equivalent to a bitset of all 0s
+  if (cur.silences.size() != state.silences.size()) {
+    state.silences.resize(cur.silences.size());
+  }
+
+  if (cur.silences != state.silences) {
+    std::string current, target;
+    boost::to_string(cur.silences, current);
+    boost::to_string(state.silences, target);
+    error("Silencer state mismatch on edge B%d->B%d: B%d had state %s, "
+          "B%d had state %s\n", b->id, t->id, b->id, current.c_str(),
+          t->id, target.c_str());
+  }
+
   // Check stack.
   if (state.stklen != cur.stklen) {
     reportStkMismatch(b, t, cur);

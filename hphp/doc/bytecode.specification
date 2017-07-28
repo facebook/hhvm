@@ -4096,6 +4096,15 @@ Silence  <local id> <Start|End>   []  ->  []
   reporting level to the previous value (stored in local variable %1); if the
   error reporting level is not 0, does nothing.
 
+  The verifier requires that all code paths to an End on local variable %1
+  contain a Start on %1, and that all code paths with a Start lead to an End on
+  the same variable.  It additionally requires that none of these paths store
+  any value in %1 between the Start and End operations. Lastly, the set of
+  variables storing the error reporting state must be consistent across block
+  boundaries.
+
+  In either case, the local variable %1 must be an unnamed local.
+
 GetMemoKeyL  <local id>  [] ->  [C:<Int/String>]
 
   Push an int or string which is an appropriate memoize cache key for the

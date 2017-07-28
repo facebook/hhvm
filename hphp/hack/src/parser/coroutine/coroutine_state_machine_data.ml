@@ -17,11 +17,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
  * Data extracted during the state machine generation step.
  *)
 type t = {
-
-  (**
-   * Variable name -> syntax
-   *)
-  local_variables: string list;
+  properties: string list;
   parameters: EditableSyntax.parameter_declaration list;
   outer_variables : string list;
 }

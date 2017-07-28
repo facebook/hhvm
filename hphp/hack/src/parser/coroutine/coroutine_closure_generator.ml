@@ -15,9 +15,9 @@ module EditableSyntax = Full_fidelity_editable_syntax
 open EditableSyntax
 open CoroutineSyntax
 
-let generate_hoisted_locals { CoroutineStateMachineData.local_variables; _; } =
+let generate_closure_properties { CoroutineStateMachineData.properties; _; } =
   Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
-    local_variables
+    properties
 
 let make_parameters_public_and_untyped
     { CoroutineStateMachineData.parameters; _; } =
@@ -86,7 +86,7 @@ let generate_closure_body
     context
     function_type
     state_machine_data =
-  generate_hoisted_locals state_machine_data
+  generate_closure_properties state_machine_data
     @ [
       generate_constructor_method context function_type state_machine_data;
       generate_do_resume_method function_type;

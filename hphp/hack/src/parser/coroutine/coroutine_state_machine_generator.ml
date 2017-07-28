@@ -815,12 +815,10 @@ let lower_body body =
   let body = add_switch (next_loop_label, body) in
   let body = add_try_finally used_locals body in
   let body = unnest_compound_statements body in
-  (* TODO: Make this not a map *)
   let coroutine_result_data_variables =
     next_loop_label
       |> Core_list.range 1
-      |> Core_list.map ~f:make_coroutine_result_data_variable
-      |> SMap.from_keys ~f:make_name_syntax in
+      |> Core_list.map ~f:make_coroutine_result_data_variable in
   (body, coroutine_result_data_variables)
 
 let make_closure_lambda_signature
@@ -857,13 +855,13 @@ let compute_state_machine_data
     function_parameter_list =
   (* TODO: Add a test case for "..." param. *)
   let parameters = extract_parameter_declarations function_parameter_list in
-  let local_variables = SSet.union inner_variables outer_variables in
-  let local_variables = SSet.elements local_variables in
-  (* TODO: Why is this a map? *)
-  let local_variables = local_variables @
-    (SMap.keys coroutine_result_data_variables) in
+  (* TODO: This isn't quite right. The outer variables should be passed in
+     along with the parameters, not generated as properties. *)
+  let properties = SSet.union inner_variables outer_variables in
+  let properties = SSet.elements properties in
+  let properties = properties @ coroutine_result_data_variables in
   let outer_variables = SSet.elements outer_variables in
-  CoroutineStateMachineData.{ local_variables; parameters; outer_variables; }
+  CoroutineStateMachineData.{ properties; parameters; outer_variables; }
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the

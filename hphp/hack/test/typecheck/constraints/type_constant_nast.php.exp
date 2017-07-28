@@ -1,0 +1,10 @@
+File "type_constant_nast.php", line 8, characters 27-28:
+Some type constraint(s) here are violated (Typing[4110])
+File "type_constant_nast.php", line 7, characters 19-19:
+'T' is a constrained type
+File "type_constant_nast.php", line 7, characters 24-25:
+This is an object of type I2
+File "type_constant_nast.php", line 8, characters 30-37:
+It is incompatible with an object of type I1
+File "type_constant_nast.php", line 9, characters 19-20:
+  resulting from expanding the type constant A2::TI

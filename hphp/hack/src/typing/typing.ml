@@ -4611,6 +4611,16 @@ and class_def tcopt c =
   let filename = Pos.filename (fst c.Nast.c_name) in
   let dep = Dep.Class (snd c.c_name) in
   let env = Env.empty tcopt filename (Some dep) in
+  (* Set up self identifier and type *)
+  let env = Env.set_self_id env (snd c.c_name) in
+  let self = get_self_from_c c in
+  (* For enums, localize makes self:: into an abstract type, which we don't
+   * want *)
+  let env, self = match c.c_kind with
+    | Ast.Cenum -> env, (fst self, Tclass (c.c_name, []))
+    | Ast.Cinterface | Ast.Cabstract | Ast.Ctrait
+    | Ast.Cnormal -> Phase.localize_with_self env self in
+  let env = Env.set_self env self in
   let c = TNBody.class_meth_bodies tcopt c in
   if not !auto_complete then begin
     NastCheck.class_ env c;
@@ -4649,17 +4659,6 @@ and class_def_ env c tc =
   let env = add_constraints (fst c.c_name) env constraints in
   Typing_variance.class_ (Env.get_options env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
-
-  (* Set up self identifier and type *)
-  let env = Env.set_self_id env (snd c.c_name) in
-  let self = get_self_from_c c in
-  (* For enums, localize makes self:: into an abstract type, which we don't
-   * want *)
-  let env, self = match c.c_kind with
-    | Ast.Cenum -> env, (fst self, Tclass (c.c_name, []))
-    | Ast.Cinterface | Ast.Cabstract | Ast.Ctrait
-    | Ast.Cnormal -> Phase.localize_with_self env self in
-  let env = Env.set_self env self in
 
   let env, parent_id, parent = class_def_parent env c tc in
   let is_final = tc.tc_final in

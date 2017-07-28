@@ -1,4 +1,7 @@
 
+with allow_unsafe_import():
+    import subprocess
+
 def get_fbcode_platform():
     return read_config('cxx', 'default_platform')
 
@@ -18,3 +21,10 @@ def is_dev_hhvm_build():
 def is_lto_build(platform):
     flags = read_config('cxx#{}'.format(platform), 'cxxflags')
     return " -flto " in flags
+
+def find_systemlib_files(dir, skip):
+    find_cmd = [ 'find', dir, '-type', 'f', '-name', 'ext_*.php' ]
+    proc = subprocess.Popen(find_cmd, stdout=subprocess.PIPE)
+    files = str(proc.stdout.read().decode('ascii')).split('\n')
+    return sorted(map(lambda x: x[len(dir) if skip else 0:],
+                      filter(lambda x: x[:len(dir)] == dir, files)))

@@ -45,6 +45,11 @@ struct ThreadInfo {
 
   static void GetExecutionSamples(std::map<Executing, int>& counts);
   static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
+  /*
+   * Only on-session threads should execute f()
+   * Returns number of on-session threads
+   */
+  static int ExecutePerOnSessionThread(std::function<void(ThreadInfo*)> f);
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   /*
@@ -90,6 +95,9 @@ struct ThreadInfo {
   Exception* m_pendingException{nullptr};
 
   Executing m_executing{Idling};
+
+  /* Set to false when session exit. Set to true when session init.  */
+  bool m_isOnSession{false};
 };
 
 //////////////////////////////////////////////////////////////////////

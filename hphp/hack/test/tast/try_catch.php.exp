@@ -1,0 +1,73 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tint)));
+      f_name = (<p>, "\\terminal_catch_can_do_whatever");
+      f_tparams = []; f_where_constraints = [];
+      f_variadic = AnnotatedAST.FVnonVariadic; f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some int),
+                (AnnotatedAST.Binop ((Eq None),
+                   ((Some int), (AnnotatedAST.Lvar (<p>, $a))),
+                   ((Some int), (AnnotatedAST.Int (<p>, "23")))
+                   ))));
+             (AnnotatedAST.Try (
+                [(AnnotatedAST.Expr
+                    ((Some int),
+                     (AnnotatedAST.Binop ((Eq None),
+                        ((Some int),
+                         (AnnotatedAST.Lvar (<p>, $a))),
+                        ((Some int),
+                         (AnnotatedAST.Int (<p>, "456")))
+                        ))))
+                  ],
+                [((<p>, "\\YourException"),
+                  (<p>, $e),
+                  [(AnnotatedAST.Return (<p>,
+                      (Some ((Some int),
+                             (AnnotatedAST.Lvar (<p>, $a))))
+                      ))
+                    ]);
+                  ((<p>, "\\MyException"),
+                   (<p>, $e),
+                   [(AnnotatedAST.Expr
+                       ((Some string),
+                        (AnnotatedAST.Binop ((Eq None),
+                           ((Some string),
+                            (AnnotatedAST.Lvar (<p>, $a))),
+                           ((Some string),
+                            (AnnotatedAST.String (<p>, "duck")))
+                           ))));
+                     (AnnotatedAST.Return (<p>,
+                        (Some ((Some int),
+                               (AnnotatedAST.Int (<p>, "23904"))))
+                        ))
+                     ]);
+                  ((<p>, "\\Exception"),
+                   (<p>, $e),
+                   [(AnnotatedAST.Return (<p>,
+                       (Some ((Some int),
+                              (AnnotatedAST.Lvar (<p>, $a))))
+                       ))
+                     ])
+                  ],
+                [(AnnotatedAST.Expr
+                    ((Some int),
+                     (AnnotatedAST.Binop ((Eq None),
+                        ((Some int),
+                         (AnnotatedAST.Lvar (<p>, $a))),
+                        ((Some int),
+                         (AnnotatedAST.Int (<p>, "4")))
+                        ))))
+                  ]
+                ));
+             (AnnotatedAST.Return (<p>,
+                (Some ((Some int),
+                       (AnnotatedAST.Lvar (<p>, $a))))
+                ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] })
+  ]

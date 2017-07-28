@@ -723,16 +723,18 @@ and try_catch env tb cl =
   let env = Env.freeze_local_env env in
   let env, ttb = block env tb in
   let after_try = env.Env.lenv in
-  let env, term_lenv_l = List.map_env env cl
+  let env, term_lenv_tcb_l = List.map_env env cl
     begin fun env (_, _, b as catch_block) ->
-      let env, lenv = catch parent_lenv after_try env catch_block in
+      let env, lenv, tcb = catch parent_lenv after_try env catch_block in
       let term = Nast_terminality.Terminal.block env b in
-      env, (term, lenv)
+      env, (term, lenv, tcb)
     end in
+  let term_lenv_l = List.map term_lenv_tcb_l (fun (a, b, _) -> (a, b)) in
+  let tcb_l = List.map term_lenv_tcb_l (fun (_, _, a) -> a) in
   let term_lenv_l =
     (Nast_terminality.Terminal.block env tb, after_try) :: term_lenv_l in
   let env = LEnv.intersect_list env parent_lenv term_lenv_l in
-  env, ttb, [] (* TODO TAST tcl *)
+  env, ttb, tcb_l
 
 and drop_dead_code_after_break_block = function
   | [] -> [], false
@@ -829,19 +831,19 @@ and case_list_ parent_lenv ty env = function
         | _ -> LEnv.intersect env parent_lenv lenv1 env.Env.lenv in
       case_list_ parent_lenv ty env rl
 
-and catch parent_lenv after_try env (ety, exn, b) =
+and catch parent_lenv after_try env (sid, exn, b) =
   let env = { env with Env.lenv = after_try } in
   let env = LEnv.fully_integrate env parent_lenv in
-  let cid = CI (ety, []) in
-  let ety_p = (fst ety) in
+  let cid = CI (sid, []) in
+  let ety_p = (fst sid) in
   TUtils.process_class_id cid;
   let env, _, _ = instantiable_cid ety_p env cid in
   let env, _te, ety = static_class_id ety_p env cid in
   let env = exception_ty ety_p env ety in
   let env = Env.set_local env (snd exn) ety in
-  let env, _tb = block env b in
+  let env, tb = block env b in
   (* Only keep the local bindings if this catch is non-terminal *)
-  env, env.Env.lenv
+  env, env.Env.lenv, (sid, exn, tb)
 
 and as_expr env pe =
 let make_result ty = env, ty in

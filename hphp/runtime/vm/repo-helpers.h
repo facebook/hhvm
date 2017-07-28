@@ -26,6 +26,7 @@
 #include <sqlite3.h>
 
 #include <folly/portability/Stdio.h>
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -55,6 +56,11 @@ struct RepoExc : std::exception {
     } else {
       m_msg = msg;
       free(msg);
+    }
+    std::string log_error = "Error: throw RepoExc ==>" + m_msg;
+    std::string databaseErrorStr = "no such table";
+    if(m_msg.find(databaseErrorStr) == std::string::npos){
+      Logger::Error(log_error);
     }
     va_end(ap);
   }

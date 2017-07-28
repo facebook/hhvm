@@ -252,8 +252,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "\n"
         "/instance-id:     instance id that's passed in from command line\n"
         "/compiler-id:     returns the compiler id that built this app\n"
-        "/repo-schema:     return the repo schema id used by this app\n"
+        "/repo-schema:     return the repo schema id used by this app\n"        
         "/ini-get-all:     dump all settings as JSON\n"
+        "/check-repo:      check tables of hhbc to judge whether error or not\n"
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
         "                  handled\n"
@@ -970,6 +971,42 @@ static bool send_status(Transport *transport, Writer::Format format,
 
 bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
+  if(cmd == "check-repo"){
+    string fileMd5Msg, funcMsg, litstrMsg, preClassMsg, unitArrayMsg,
+    unitLitstrMsg, unitMergeablesMsg, unitSourceLocMsg, unitMsg, magicMsg, writableMsg;
+    string sendMsg;
+    bool fileMd5Sel = Repo::get().getMessageFromTable("FileMd5", fileMd5Msg);
+    bool funcSel = Repo::get().getMessageFromTable("Func", funcMsg);
+    bool litstrSel = Repo::get().getMessageFromTable("Litstr", litstrMsg);
+    bool preClassSel = Repo::get().getMessageFromTable("PreClass", preClassMsg);
+    bool unitArraySel = Repo::get().getMessageFromTable("UnitArray", unitArrayMsg);
+    bool unitLitstrSel = Repo::get().getMessageFromTable("UnitLitstr", unitLitstrMsg);
+    bool unitMergeablesSel = Repo::get().getMessageFromTable("UnitMergeables", unitMergeablesMsg);
+    bool unitSourceLocSel = Repo::get().getMessageFromTable("UnitSourceLoc", unitSourceLocMsg);
+    bool unitSel = Repo::get().getMessageFromTable("Unit", unitMsg);
+    bool magicSel = Repo::get().getMessageFromTable("magic", magicMsg);
+    bool writableSel = Repo::get().getMessageFromTable("writable", writableMsg);
+    if(fileMd5Sel && funcSel && litstrSel && preClassSel && unitArraySel && unitLitstrSel && unitMergeablesSel
+      && unitSourceLocSel && unitSel && magicSel && writableSel){
+      sendMsg = "hhbc is ok!";
+    }else{
+      std::stringstream out;
+      out << fileMd5Msg << endl;
+      out << funcMsg << endl;
+      out << litstrMsg << endl;
+      out << preClassMsg << endl;
+      out << unitArrayMsg << endl;
+      out << unitLitstrMsg << endl;
+      out << unitMergeablesMsg << endl;
+      out << unitSourceLocMsg << endl;
+      out << unitMsg << endl;
+      out << magicMsg << endl;
+      out << writableMsg << endl;
+      sendMsg = out.str();
+    }
+    transport->sendString(sendMsg);
+    return true;
+  }
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
     transport->sendString(folly::to<std::string>(count));

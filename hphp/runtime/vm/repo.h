@@ -159,6 +159,7 @@ struct Repo : RepoProxy {
 
  public:
   std::string table(int repoId, const char* tablePrefix);
+  bool getMessageFromTable(const std::string & tableName, std::string & message);
   void exec(const std::string& sQuery); // throws(RepoExc)
 
   void begin(); // throws(RepoExc)

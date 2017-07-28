@@ -1,0 +1,7 @@
+Verification Error (unit %s): pseudo-main cannot be a memoize wrapper
+Verification Error (unit %s func foo): MaybeMemoType can only appear within memoize wrappers
+Verification Error (unit %s func foo): IsMemoType can only appear within memoize wrappers
+Verification Error (unit %s func foo): GetMemoKeyL can only appear within memoize wrappers
+Verification Error (unit %s func foo): MemoGet can only appear within memoize wrappers
+Verification Error (unit %s func foo): MemoSet can only appear within memoize wrappers
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

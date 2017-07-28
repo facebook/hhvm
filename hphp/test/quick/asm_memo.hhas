@@ -1,0 +1,25 @@
+.main {
+  .ismemoizewrapper;
+  Int 1
+  RetC
+}
+
+.function foo {
+  Int 1
+  MaybeMemoType
+  IsMemoType
+  GetMemoKeyL _0
+  PopC
+
+  BaseC 0
+  MemoGet 0 _0+0
+  CGetCUNop
+  PopC
+
+  Int 1
+  BaseC 0
+  MemoSet 0 _0+0
+  PopC
+
+  RetC
+}

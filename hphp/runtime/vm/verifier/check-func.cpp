@@ -1165,6 +1165,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::GetMemoKeyL:
     case Op::MemoGet:
     case Op::MemoSet:
+    case Op::MaybeMemoType:
+    case Op::IsMemoType:
       if (!m_func->isMemoizeWrapper()) {
         ferror("{} can only appear within memoize wrappers\n",
                opcodeToName(op));

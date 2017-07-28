@@ -324,6 +324,10 @@ bool UnitChecker::checkFuncs() {
 
   m_unit->forEachFunc([&](const Func* func) {
     if (func->isPseudoMain()) {
+      if(func->isMemoizeWrapper()) {
+        error("%s", "pseudo-main cannot be a memoize wrapper\n");
+        ok = false;
+      }
       if (pseudo) {
         multi = true;
         error("%s", "unit should have exactly one pseudo-main\n");

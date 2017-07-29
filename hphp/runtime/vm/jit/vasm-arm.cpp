@@ -301,6 +301,7 @@ struct Vgen {
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpbi& i) { a->Cmp(W(i.s1), bAsUb(i.s0)); }
+  void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -342,6 +343,7 @@ struct Vgen {
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
+  void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
@@ -377,6 +379,8 @@ struct Vgen {
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testbi& i){ a->Tst(W(i.s1), bAsUb(i.s0)); }
+  void emit(const testw& i){ a->Tst(W(i.s1), W(i.s0)); }
+  void emit(const testwi& i){ a->Tst(W(i.s1), wAsUw(i.s0)); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }

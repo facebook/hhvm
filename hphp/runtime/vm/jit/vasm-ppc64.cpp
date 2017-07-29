@@ -212,6 +212,7 @@ struct Vgen {
   void emit(const divint& i) { a.divd(i.d,  i.s0, i.s1, false); }
   void emit(const divsd& i) { a.fdiv(i.d, i.s1, i.s0); }
   void emit(const extsb& i) { a.extsb(i.d, Reg64(i.s)); }
+  void emit(const extsw& i) { a.extsh(i.d, Reg64(i.s)); }
   void emit(const extsl& i) { a.extsw(i.d, Reg64(i.s)); }
   void emit(const fallthru& /*i*/) {}
   void emit(const fcmpo& i) {
@@ -1075,7 +1076,9 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 }
 
 X(cmpb,  cmpq,  movzbq, NONE)
+X(cmpw,  cmpq,  movzwq, NONE)
 X(testb, testq, extsb,  NONE)
+X(testw, testq, extsw,  NONE)
 X(testl, testq, extsl,  NONE)
 X(subl,  subq,  extsl,  ONE_R64(d))
 
@@ -1089,8 +1092,10 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 }
 
 X(cmpbi,  cmpqi,  movzbq, NONE)
+X(cmpwi,  cmpqi,  movzwq, NONE)
 X(subli,  subqi,  extsl,  ONE_R64(d))
 X(testbi, testqi, extsb,  NONE)
+X(testwi, testqi, extsw,  NONE)
 X(testli, testqi, extsl,  NONE)
 
 #undef X
@@ -1194,6 +1199,9 @@ void lowerForPPC64(const VLS& /*e*/, Vout& v, tailcallphp& inst) {
 
 // Lower movs to copy
 void lowerForPPC64(const VLS& /*e*/, Vout& v, movtqb& inst) {
+  v << copy{inst.s, inst.d};
+}
+void lowerForPPC64(const VLS& /*e*/, Vout& v, movtqw& inst) {
   v << copy{inst.s, inst.d};
 }
 void lowerForPPC64(const VLS& /*e*/, Vout& v, movtql& inst) {

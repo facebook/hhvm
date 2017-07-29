@@ -145,6 +145,8 @@ struct Vgen {
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbm& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpw& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpwi& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwm& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
@@ -245,6 +247,8 @@ struct Vgen {
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
   void emit(const testbim& i) { a.testb(i.s0, i.s1); }
+  void emit(const testw& i) { a.testw(i.s0, i.s1); }
+  void emit(const testwi& i);
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
   void emit(const testli& i);
@@ -840,6 +844,13 @@ bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
   return true;
 }
 
+void Vgen::emit(const testwi& i) {
+  if (i.s0.w() == -1) {
+    return emit(testw{i.s1, i.s1, i.sf});
+  }
+  a.testw(i.s0, i.s1);
+}
+
 void Vgen::emit(const testwim& i) {
   if (testimHelper(*this, i, i.s0.w())) return;
   a.testw(i.s0, i.s1);
@@ -1006,6 +1017,9 @@ void lower(Vunit& unit, movtdb& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
 void lower(Vunit& unit, movtdq& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
+void lower(Vunit& unit, movtqw& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
 void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {

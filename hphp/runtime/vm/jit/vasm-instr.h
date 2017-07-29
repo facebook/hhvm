@@ -191,6 +191,8 @@ struct Vunit;
   O(cmpbi, I(s0) I(fl), U(s1), D(sf))\
   O(cmpbim, I(s0) I(fl), U(s1), D(sf))\
   O(cmpbm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpw, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpwi, I(s0) I(fl), U(s1), D(sf))\
   O(cmpwim, I(s0) I(fl), U(s1), D(sf))\
   O(cmpwm, I(fl), U(s0) U(s1), D(sf))\
   O(cmpl, I(fl), U(s0) U(s1), D(sf))\
@@ -206,6 +208,8 @@ struct Vunit;
   O(testb, I(fl), U(s0) U(s1), D(sf))\
   O(testbi, I(s0) I(fl), U(s1), D(sf))\
   O(testbim, I(s0) I(fl), U(s1), D(sf))\
+  O(testw, I(fl), U(s0) U(s1), D(sf))\
+  O(testwi, I(s0) I(fl), U(s1), D(sf))\
   O(testwim, I(s0) I(fl), U(s1), D(sf))\
   O(testl, I(fl), U(s0) U(s1), D(sf))\
   O(testli, I(s0) I(fl), U(s1), D(sf))\
@@ -238,6 +242,7 @@ struct Vunit;
   O(movtdb, Inone, UH(s,d), DH(d,s))\
   O(movtdq, Inone, UH(s,d), DH(d,s))\
   O(movtqb, Inone, UH(s,d), DH(d,s))\
+  O(movtqw, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
   /* loads/stores */\
   O(loadb, Inone, U(s), D(d))\
@@ -306,6 +311,7 @@ struct Vunit;
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
   /* ppc64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s))\
+  O(extsw, Inone, UH(s,d), DH(d,s))\
   O(extsl, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
@@ -957,6 +963,8 @@ struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct cmpbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpw { Vreg16 s0; Vreg16 s1; VregSF sf; Vflags fl; };
+struct cmpwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct cmpwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; Vflags fl; };
 struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; Vflags fl; };
@@ -973,6 +981,8 @@ struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 struct testb { Vreg8 s0, s1; VregSF sf; Vflags fl; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct testbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testw { Vreg16 s0, s1; VregSF sf; Vflags fl; };
+struct testwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct testwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 struct testl { Vreg32 s0, s1; VregSF sf; Vflags fl; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
@@ -1020,6 +1030,7 @@ struct movzlq { Vreg32 s; Vreg64 d; };
 struct movtdb { VregDbl s; Vreg8 d; };
 struct movtdq { VregDbl s; Vreg64 d; };
 struct movtqb { Vreg64 s; Vreg8 d; };
+struct movtqw { Vreg64 s; Vreg16 d; };
 struct movtql { Vreg64 s; Vreg32 d; };
 
 
@@ -1124,7 +1135,8 @@ struct ubfmli { Immed mr, ms; Vreg32 s, d; };
  * ppc64 intrinsics.
  */
 struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
-struct extsl { Vreg32 s; Vreg64 d; }; // Extend word sign
+struct extsw { Vreg16 s; Vreg64 d; }; // Extend word sign
+struct extsl { Vreg32 s; Vreg64 d; }; // Extend dword sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };

@@ -179,6 +179,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::movtdb:
     case Vinstr::movtdq:
     case Vinstr::movtql:
+    case Vinstr::movtqw:
     // branches
     case Vinstr::jcc:
     case Vinstr::jcci:
@@ -213,6 +214,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::msr:
     // ppc64 instructions
     case Vinstr::extsb:
+    case Vinstr::extsw:
     case Vinstr::extsl:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
@@ -250,8 +252,12 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::orwim:
     case Vinstr::cmovw:
     case Vinstr::csincw:
+    case Vinstr::cmpw:
+    case Vinstr::cmpwi:
     case Vinstr::cmpwim:
     case Vinstr::cmpwm:
+    case Vinstr::testw:
+    case Vinstr::testwi:
     case Vinstr::testwim:
     case Vinstr::loadw:
     case Vinstr::movw:

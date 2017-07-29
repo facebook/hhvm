@@ -104,6 +104,334 @@ bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /*
+ * Narrow compares
+ */
+
+/*
+ * Return a bound on the size of a Vreg.
+ * If its known to fit in:
+ *  - 8 unsigned bits, return sz::byte
+ *  - 16 unsigned bits, return sz::word
+ *  - 32 unsigned bits, return sz::dword
+ *  - otherwise return sz::qword.
+ */
+int value_width(Env& env, Vreg reg) {
+  auto const it = env.unit.regToConst.find(reg);
+  if (it != env.unit.regToConst.end()) {
+    if (!it->second.isUndef &&
+        it->second.kind != Vconst::Double) {
+      if (it->second.val <= 0xff)       return sz::byte;
+      if (it->second.val <= 0xffff)     return sz::word;
+      if (it->second.val <= 0xffffffff) return sz::dword;
+    }
+    return sz::qword;
+  }
+
+  switch (env.def_insts[reg]) {
+    case Vinstr::loadzbq:
+    case Vinstr::loadzbl:
+    case Vinstr::movzbw:
+    case Vinstr::movzbl:
+    case Vinstr::movzbq:
+      return sz::byte;
+
+    case Vinstr::movzwl:
+    case Vinstr::movzwq:
+      return sz::word;
+
+    case Vinstr::movzlq:
+    case Vinstr::loadzlq:
+      return sz::dword;
+    default:
+      break;
+  }
+
+  return sz::qword;
+}
+
+Vreg match_reg(int size, const Vreg8 r) {
+  return size == sz::byte ? Vreg{size_t{r}} : Vreg{};
+}
+
+Vreg match_reg(int size, const Vreg16 r) {
+  return size == sz::word ? Vreg{size_t{r}} : Vreg{};
+}
+
+Vreg match_reg(int size, const Vreg32 r) {
+  return size == sz::dword ? Vreg{size_t{r}} : Vreg{};
+}
+
+/*
+ * Return a suitable register for r, with width size.
+ *
+ *  - if r is constant, just return a constant.
+ *  - if r is the result of a zero-extending move from the
+ *    correct size, return the source of the move
+ *  - if r is the result of a zero-extending load with one use,
+ *    convert the load to a non-zero extending form
+ *  - otherwise apply a movtq<sz> to the register, and return the dst.
+ */
+Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
+  auto const it = env.unit.regToConst.find(r);
+  if (it != env.unit.regToConst.end()) {
+    assert(!it->second.isUndef && it->second.kind != Vconst::Double);
+    return r;
+  }
+
+  while (i--) {
+    auto replace = [&] (const Vinstr& rep) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << rep;
+        return 1;
+      });
+    };
+    auto const& inst = env.unit.blocks[b].code[i];
+    switch (inst.op) {
+      case Vinstr::loadzbq: {
+        auto const& load = inst.get<Vinstr::loadzbq>();
+        if (load.d == r) {
+          if (size == sz::byte && env.use_counts[r] == 1) {
+            replace(loadb{load.s, r});
+            return r;
+          }
+          return {};
+        }
+        break;
+      }
+      case Vinstr::loadzbl: {
+        auto const& load = inst.get<Vinstr::loadzbl>();
+        if (load.d == r) {
+          if (size == sz::byte && env.use_counts[r] == 1) {
+            replace(loadb{load.s, r});
+            return r;
+          }
+          return {};
+        }
+        break;
+      }
+      case Vinstr::movzbw:
+        if (inst.movzbw_.d == r) return match_reg(size, inst.movzbw_.s);
+        break;
+      case Vinstr::movzbl:
+        if (inst.movzbl_.d == r) return match_reg(size, inst.movzbl_.s);
+        break;
+      case Vinstr::movzbq:
+        if (inst.movzbq_.d == r) return match_reg(size, inst.movzbq_.s);
+        break;
+
+      case Vinstr::movzwl:
+        if (inst.movzwl_.d == r) return match_reg(size, inst.movzwl_.s);
+        break;
+      case Vinstr::movzwq:
+        if (inst.movzwq_.d == r) return match_reg(size, inst.movzwq_.s);
+        break;
+
+      case Vinstr::movzlq:
+        if (inst.movzlq_.d == r) return match_reg(size, inst.movzlq_.s);
+        break;
+
+      case Vinstr::loadzlq: {
+        auto const& load = inst.get<Vinstr::loadzlq>();
+        if (load.d == r) {
+          if (size == sz::dword && env.use_counts[r] == 1) {
+            replace(loadl{load.s, r});
+            return r;
+          }
+          return {};
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  return {};
+}
+
+int narrow_cmp(Env& env, int size, const cmpq& vcmp, Vlabel b, size_t i,
+               Vout& v) {
+  auto getreg = [&] (Vreg reg, Vout& v) {
+    auto out = narrow_reg(env, size, reg, b, i, v);
+    if (!out.isValid()) {
+      out = v.makeReg();
+      switch (size) {
+        case sz::byte:
+          v << movtqb{reg, out};
+          break;
+        case sz::word:
+          v << movtqw{reg, out};
+          break;
+        case sz::dword:
+          v << movtql{reg, out};
+          break;
+        default:
+          always_assert(false);
+      }
+    }
+    return out;
+  };
+  auto const s0 = getreg(vcmp.s0, v);
+  auto const s1 = getreg(vcmp.s1, v);
+  switch (size) {
+    case sz::byte:
+      v << cmpb{s0, s1, vcmp.sf};
+      break;
+    case sz::word:
+      v << cmpw{s0, s1, vcmp.sf};
+      break;
+    case sz::dword:
+      v << cmpl{s0, s1, vcmp.sf};
+      break;
+    default:
+      always_assert(false);
+  }
+  return 1;
+}
+
+enum class SFUsage {
+  Unsigned,
+  FixableSigned,
+  Unfixable
+};
+
+/*
+ * Provide a default template that matches every instruction, but which
+ * is an inexact match on the second parameter (we're going to pass an int).
+ */
+template <typename Inst>
+std::pair<ConditionCode*,Vreg> ccUsageHelper(Inst&, char) {
+  return { nullptr, Vreg{} };
+}
+
+/*
+ * Provide a template that only matches instructions with cc and sf members,
+ * but which is an exact match on the second parameter.
+ */
+template <typename Inst>
+auto ccUsageHelper(Inst& i, int) ->
+  decltype(std::make_pair(&i.cc, Vreg(size_t(i.sf)))) {
+  return { &i.cc, Vreg(size_t(i.sf)) };
+}
+
+std::pair<ConditionCode*,Vreg> ccUsageHelper(Vinstr& inst) {
+#define O(name,...) case Vinstr::name: return ccUsageHelper(inst.name##_, 0);
+  switch (inst.op) {
+    VASM_OPCODES
+  }
+#undef O
+  not_reached();
+}
+
+/*
+ * Get a reference to the condition code for inst, which must be known
+ * to have one.
+ */
+ConditionCode& getCC(Vinstr& inst) {
+  auto usage = ccUsageHelper(inst);
+  assertx(usage.first);
+  return *usage.first;
+}
+
+/*
+ * Return the sf reg read by inst, or an invalid register if the
+ * instruction doesn't read an sf.
+ */
+Vreg getSF(const Vinstr& inst) {
+  return ccUsageHelper(const_cast<Vinstr&>(inst)).second;
+}
+
+/*
+ * Check whether all uses of sf are either "unsigned" or could be
+ * converted to unsigned. If there are any uses outside of b, we
+ * assume they can't be fixed. If the fix parameter is true, we
+ * actually convert any signed uses to the corresponding unsigned use.
+ */
+SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
+  auto ret = SFUsage::Unsigned;
+  auto uses = env.use_counts[sf];
+  while (uses) {
+    auto check = [&] (Vinstr& tmp) {
+      auto &cc = getCC(tmp);
+      auto fixup = [&] (ConditionCode newCC) {
+        assertx(cc != newCC);
+        if (fix) {
+          cc = newCC;
+          simplify_impl(env, b, i, [&] (Vout& v) {
+            v << tmp;
+            return 1;
+          });
+        }
+        ret = SFUsage::FixableSigned;
+        return false;
+      };
+      switch (cc) {
+        case CC_None:
+          always_assert(false);
+        case CC_O:
+        case CC_NO:
+          // can't be fixed
+          return true;
+        case CC_B:
+        case CC_AE:
+        case CC_E:
+        case CC_NE:
+        case CC_BE:
+        case CC_A:
+          // already unsigned
+          return false;
+        case CC_S:
+        case CC_NS:
+        case CC_P:
+        case CC_NP:
+          // can't be fixed
+          return true;
+        case CC_L:  return fixup(CC_B);
+        case CC_GE: return fixup(CC_AE);
+        case CC_LE: return fixup(CC_BE);
+        case CC_G:  return fixup(CC_A);
+      }
+      not_reached();
+    };
+    auto const& code = env.unit.blocks[b].code;
+    if (++i == code.size()) return SFUsage::Unfixable;
+    if (getSF(code[i]) == sf) {
+      uses--;
+      auto tmp = code[i];
+      if (check(tmp)) return SFUsage::Unfixable;
+    }
+  }
+  return ret;
+}
+
+bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
+  auto const sz0 = value_width(env, vcmp.s0);
+  if (sz0 == sz::qword) return false;
+  auto const sz1 = value_width(env, vcmp.s1);
+  if (sz1 == sz::qword) return false;
+
+  auto const sz = sz1 > sz0 ? sz1 : sz0;
+
+  switch (check_unsigned_uses(env, vcmp.sf, b, i, false)) {
+    case SFUsage::Unsigned:
+      break;
+    case SFUsage::FixableSigned:
+      // convert signed uses to corresponding unsigned.
+      check_unsigned_uses(env, vcmp.sf, b, i, true);
+      // check that it worked.
+      assertx(check_unsigned_uses(env, vcmp.sf, b, i, false) ==
+              SFUsage::Unsigned);
+      break;
+    case SFUsage::Unfixable:
+      return false;
+  }
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    return narrow_cmp(env, sz, vcmp, b, i, v);
+  });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*
  * Conditional operations.
  */
 

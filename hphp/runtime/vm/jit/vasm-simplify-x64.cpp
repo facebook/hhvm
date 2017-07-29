@@ -144,6 +144,11 @@ bool simplify(Env& env, const cmpb& inst, Vlabel b, size_t i) {
   return reg.isValid() ? cmp_zero_impl<testb>(env, inst, reg, b, i) : false;
 }
 
+bool simplify(Env& env, const cmpw& inst, Vlabel b, size_t i) {
+  auto const reg = get_cmp_zero_reg(env, inst);
+  return reg.isValid() ? cmp_zero_impl<testw>(env, inst, reg, b, i) : false;
+}
+
 bool simplify(Env& env, const cmpl& inst, Vlabel b, size_t i) {
   auto const reg = get_cmp_zero_reg(env, inst);
   return reg.isValid() ? cmp_zero_impl<testl>(env, inst, reg, b, i) : false;

@@ -156,6 +156,10 @@ struct ImmFolder {
     int val;
     if (match_byte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
   }
+  void fold(cmpw& in, Vinstr& out) {
+    int val;
+    if (match_word(in.s0, val)) { out = cmpwi{val, in.s1, in.sf}; }
+  }
   void fold(cmpwm& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
@@ -289,6 +293,9 @@ struct ImmFolder {
   void fold(movtql& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
+  void fold(movtqw& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
   void fold(movtqb& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
@@ -415,9 +422,11 @@ struct ImmFolder {
   void fold(orq& in, Vinstr& out) { return fold_logical<orqi>(in, out); }
 
   void fold(testb& in, Vinstr& out) { return fold_test<testbi>(in, out); }
+  void fold(testw& in, Vinstr& out) { return fold_test<testwi>(in, out); }
   void fold(testl& in, Vinstr& out) { return fold_test<testli>(in, out); }
   void fold(testq& in, Vinstr& out) { return fold_test<testqi>(in, out); }
   void fold(cmpb& in, Vinstr& out) { return fold_cmp<cmpbi>(in, out); }
+  void fold(cmpw& in, Vinstr& out) { return fold_cmp<cmpwi>(in, out); }
   void fold(cmpl& in, Vinstr& out) { return fold_cmp<cmpli>(in, out); }
   void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
 

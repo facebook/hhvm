@@ -1272,7 +1272,7 @@ let do_initialize ()
       };
       hoverProvider = true;
       completionProvider = Some {
-        resolveProvider = true;
+        resolveProvider = false;
         completion_triggerCharacters = ["$"; ">"; "\\"; ":"];
       };
       signatureHelpProvider = None;

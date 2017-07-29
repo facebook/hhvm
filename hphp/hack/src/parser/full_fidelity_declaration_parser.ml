@@ -545,6 +545,7 @@ module WithExpressionAndStatementAndTypeParser
       so as to give an error later.  Write an error detection pass. *)
       let (parser, var) = assert_token parser Var in
       parse_property_declaration parser var
+    | kind when SimpleParser.expects parser kind -> (parser, make_missing())
     | _ ->
         (* TODO ERROR RECOVERY could be improved here. *)
       let (parser, token) = next_token parser in
@@ -1472,35 +1473,40 @@ module WithExpressionAndStatementAndTypeParser
       (parser1, make_error (make_token token))
 
   and parse_declaration parser =
+    let recovery_tokens = [ Class; Trait; Interface ] in
+    let parser = SimpleParser.expect_in_new_scope parser recovery_tokens in
     let (parser1, token) = next_token parser in
-    match (Token.kind token) with
-    | TokenKind.EndOfFile -> (parser1, make_end_of_file (make_token token))
-    | Include
-    | Include_once
-    | Require
-    | Require_once -> parse_inclusion_directive parser
-    | Type
-    | Newtype -> parse_alias_declaration parser (make_missing())
-    | Enum -> parse_enum_declaration parser (make_missing())
-    | Namespace -> parse_namespace_declaration parser
-    | Use -> parse_namespace_use_declaration parser
-    | Trait
-    | Interface
-    | Abstract
-    | Final
-    | Class -> parse_classish_declaration parser (make_missing())
-    | Async
-    | Coroutine
-    | Function -> parse_function_declaration parser (make_missing())
-    | LessThanLessThan ->
-      parse_enum_or_classish_or_function_declaration parser
-      (* TODO figure out what global const differs from class const *)
-    | Const -> parse_const_declaration parser1 (make_missing ())
+    let (parser, result) =
+      match (Token.kind token) with
+      | TokenKind.EndOfFile -> (parser1, make_end_of_file (make_token token))
+      | Include
+      | Include_once
+      | Require
+      | Require_once -> parse_inclusion_directive parser
+      | Type
+      | Newtype -> parse_alias_declaration parser (make_missing())
+      | Enum -> parse_enum_declaration parser (make_missing())
+      | Namespace -> parse_namespace_declaration parser
+      | Use -> parse_namespace_use_declaration parser
+      | Trait
+      | Interface
+      | Abstract
+      | Final
+      | Class -> parse_classish_declaration parser (make_missing())
+      | Async
+      | Coroutine
+      | Function -> parse_function_declaration parser (make_missing())
+      | LessThanLessThan ->
+        parse_enum_or_classish_or_function_declaration parser
+        (* TODO figure out what global const differs from class const *)
+      | Const -> parse_const_declaration parser1 (make_missing ())
               (make_token token)
-    | _ ->
-      parse_statement parser
-      (* TODO: What if it's not a legal statement? Do we still make progress
-      here? *)
+      | _ ->
+        parse_statement parser in
+        (* TODO: What if it's not a legal statement? Do we still make progress
+        here? *)
+    let parser1 = SimpleParser.pop_scope parser recovery_tokens in
+    (parser1, result)
 
   let parse_leading_markup_section parser =
     let parser1, markup_section = parse_in_statement_parser parser

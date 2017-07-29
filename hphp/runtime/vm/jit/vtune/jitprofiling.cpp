@@ -30,6 +30,8 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "jitprofiling.h"
+
 #include "ittnotify_config.h"
 
 #if ITT_PLATFORM==ITT_PLATFORM_WIN
@@ -45,8 +47,6 @@
 #include <malloc.h>
 #endif /* ITT_OS==ITT_OS_MAC */
 #include <stdlib.h>
-
-#include "jitprofiling.h"
 
 static const char rcsid[] = "\n@(#) $Revision: 243957 $\n";
 

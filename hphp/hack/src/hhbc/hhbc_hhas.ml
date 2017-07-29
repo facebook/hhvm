@@ -69,7 +69,7 @@ let string_of_adata_id id = "@" ^ id
 
 let string_of_param_id x =
   match x with
-  | Param_unnamed i -> string_of_int i
+  | Param_unnamed i -> "_" ^ string_of_int i
   | Param_named s -> s
 
 let string_of_param_num i = string_of_int i

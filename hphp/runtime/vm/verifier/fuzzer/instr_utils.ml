@@ -24,6 +24,7 @@ let rec num_fold f n acc =
 
 let rec rebalance_stk n (req : stack) : instruct list * stack =
   if n = 0 then [], [] else
+  if List.length req < 0 then failwith "cannot rebalance empty stack" else
   match List.hd req, List.tl req |> rebalance_stk (n - 1) with
   | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1)) :: buf, "C" :: extra
   | "V", (buf, extra) ->
@@ -168,6 +169,7 @@ let stk_data : instruct -> stack_sig = function
   | IMutator SetOpG _
   | IMutator SetOpS _
   | IMisc OODeclExists _
+  | IMisc AKExists
   | IGenerator YieldK                      -> ["C"; "C"], ["C"]
   | IMutator BindN
   | IMutator BindG
@@ -187,10 +189,10 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastVec
   | IOp CastDict
   | IOp CastKeyset
-  | IOp InstanceOf
   | IOp InstanceOfD _
   | IOp Print
   | IOp Clone
+  | IOp BitNot
   | IOp Hhbc_ast.Exit
   | IBase BaseSC _
   | IBase BaseSL _
@@ -199,9 +201,9 @@ let stk_data : instruct -> stack_sig = function
   | IMutator _
   | IIncludeEvalDefine _
   | IMisc VerifyRetTypeC
-  | IMisc AKExists
   | IGenerator _
   | IAsync _
+  | IMisc MaybeMemoType
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
   | ICall FPushCufSafe _                   -> ["C"; "C"], ["C"; "C"]
@@ -258,6 +260,7 @@ let stack_history (seq : IS.t) : (instruct * stack) list =
    Ret* or Unwind instruction is not desirable. *)
 let height_map (lst : (instruct * stack) list) :
     int list * (int, int list) Hashtbl.t =
+  if List.length lst < 0 then failwith "cannot get history of empty sequence";
   let hist = List.tl lst in (*remove the nop beginning of default hists*)
   let tbl = List.length hist |> Hashtbl.create in
   let heights = ref [] in

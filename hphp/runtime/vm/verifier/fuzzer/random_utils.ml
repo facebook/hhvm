@@ -23,6 +23,7 @@ type lazy_instruct = unit -> instruct
 let _ = Random.self_init ()
 
 let rand_elt lst =
+  if List.length lst < 0 then failwith "Cannot get rand elt of zero length lst";
   let i = Random.int (List.length lst) in
   List.nth lst i
 
@@ -99,43 +100,42 @@ let random_key () : MemberKey.t =
 
 let random_fault_label () : Label.t = Label.Fault (Random.int 10)
 let random_catch_label () : Label.t = Label.Catch (Random.int 10)
+let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
 
 (* A list of generators for instructions. Doesn't include all instructions;
  not all can be meaningfully generated in a random fashion.
  TODO: autogenerate this somehow; this doesn't scale well for adding
  instructions at all. Perhaps the project for generating code based on the
  bytecode spec could handle this *)
-let all_instrs : lazy_instruct list =
+let all_instrs (fn : IS.t) : lazy_instruct list =
+   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
    [(fun () -> IBasic Nop);
     (fun () -> IBasic EntryNop);
-    (fun () -> IGet (ClsRefGetL (random_local (), Random.int 10)));
     (fun () -> IGet (VGetL (random_local ())));
     (fun () -> ILitConst Null);
     (fun () -> ILitConst True);
     (fun () -> ILitConst (Int (Random.int64 Int64.max_int)));
     (fun () -> ILitConst (Double (Random.float 100.0 |> string_of_float)));
     (fun () -> ILitConst (String ""));
-    (fun () -> ILitConst (Array ""));
-    (fun () -> ILitConst (Vec ""));
-    (fun () -> ILitConst (Dict ""));
-    (fun () -> ILitConst (Keyset ""));
+    (fun () -> ILitConst (Array (random_adata_id ())));
+    (fun () -> ILitConst (Vec (random_adata_id ())));
+    (fun () -> ILitConst (Dict (random_adata_id ())));
+    (fun () -> ILitConst (Keyset (random_adata_id ())));
     (fun () -> ILitConst (NewArray (Random.int 1000)));
     (fun () -> ILitConst (NewMixedArray (Random.int 1000)));
     (fun () -> ILitConst (NewDictArray (Random.int 1000)));
-    (fun () -> ILitConst (NewMIArray (Random.int 1000)));
-    (fun () -> ILitConst (NewMSArray (Random.int 1000)));
+    (*(fun () -> ILitConst (NewMIArray (Random.int 1000)));*)
+    (*(fun () -> ILitConst (NewMSArray (Random.int 1000)));*)
     (fun () -> ILitConst (NewLikeArrayL (random_local (), Random.int 1000)));
     (fun () -> ILitConst (NewCol (random_collection_type ())));
     (fun () -> ILitConst (Cns (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsE (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsU (Const.from_raw_string "", "")));
-    (fun () -> ILitConst (ClsCns ((Const.from_raw_string "") , Random.int 10)));
     (fun () -> ILitConst (ClsCnsD (Const.from_raw_string "",
                                    Class.from_raw_string "")));
     (fun () -> ILitConst File);
     (fun () -> ILitConst Dir);
     (fun () -> ILitConst Method);
-    (fun () -> IMisc (ClsRefName (Random.int 10)));
     (fun () -> IGet (CGetL (random_local ())));
     (fun () -> IGet (CGetQuietL (random_local ())));
     (fun () -> IGet (CUGetL (random_local ())));
@@ -145,16 +145,15 @@ let all_instrs : lazy_instruct list =
     (fun () -> IIsset (IsTypeL (random_local (),random_op_type ())));
     (fun () -> ILitConst NullUninit);
     (fun () -> IBasic PopC);
-    (fun () -> IGet (ClsRefGetC (Random.int 10)));
     (fun () -> IBasic PopR);
     (fun () -> IBasic PopU);
     (fun () -> IBasic PopV);
     (fun () -> ILitConst (ColFromArray (random_collection_type ())));
-    (fun () -> IOp Abs);
-    (fun () -> IOp Sqrt);
+    (*(fun () -> IOp Abs);*)
+    (*(fun () -> IOp Sqrt);*)
     (fun () -> IOp Not);
-    (fun () -> IOp Floor);
-    (fun () -> IOp Ceil);
+    (*(fun () -> IOp Floor);
+    (fun () -> IOp Ceil);*)
     (fun () -> IOp CastBool);
     (fun () -> IOp CastInt);
     (fun () -> IOp CastDouble);
@@ -173,14 +172,11 @@ let all_instrs : lazy_instruct list =
     (fun () -> IGet CGetQuietN);
     (fun () -> IGet CGetG);
     (fun () -> IGet CGetQuietG);
-    (fun () -> IGet (CGetS (Random.int 10)));
-    (fun () -> IIsset IssetC);
+    (*(fun () -> IIsset IssetC);*)
     (fun () -> IIsset IssetN);
     (fun () -> IIsset IssetG);
-    (fun () -> IIsset (IssetS (Random.int 10)));
     (fun () -> IIsset EmptyN);
     (fun () -> IIsset EmptyG);
-    (fun () -> IIsset (EmptyS (Random.int 10)));
     (fun () -> IIsset (IsTypeC (random_op_type ())));
     (fun () -> IMisc MaybeMemoType);
     (fun () -> IMisc IsMemoType);
@@ -188,11 +184,9 @@ let all_instrs : lazy_instruct list =
     (fun () -> IMutator (SetOpL (random_local (), random_eq_op ())));
     (fun () -> IMutator (SetOpG (random_eq_op ())));
     (fun () -> IMutator (SetOpN (random_eq_op ())));
-    (fun () -> IMutator (SetOpS (random_eq_op (), Random.int 10)));
     (fun () -> IBasic Box);
     (fun () -> IGet VGetN);
     (fun () -> IGet VGetG);
-    (fun () -> IGet (VGetS (Random.int 10)));
     (fun () -> IBasic Unbox);
     (*(fun () -> IBasic BoxRNop);*)
     (fun () -> IBasic BoxR);
@@ -234,18 +228,15 @@ let all_instrs : lazy_instruct list =
     (fun () -> IOp InstanceOf);
     (fun () -> IMutator SetN);
     (fun () -> IMutator SetG);
-    (fun () -> IMutator (SetS (Random.int 10)));
     (fun () -> ILitConst AddNewElemV);
     (fun () -> ILitConst AddElemC);
     (fun () -> ILitConst AddElemV);
     (fun () -> IMutator (IncDecL (random_local (), random_incdec_op ())));
     (fun () -> IMutator (IncDecG (random_incdec_op ())));
     (fun () -> IMutator (IncDecN (random_incdec_op ())));
-    (fun () -> IMutator (IncDecS (random_incdec_op (), Random.int 10)));
     (fun () -> IMutator (BindL (random_local ())));
     (fun () -> IMutator BindN);
     (fun () -> IMutator BindG);
-    (fun () -> IMutator (BindS (Random.int 10)));
     (fun () -> IMutator (UnsetL (random_local ())));
     (fun () -> IMutator UnsetN);
     (fun () -> IMutator UnsetG);
@@ -253,9 +244,6 @@ let all_instrs : lazy_instruct list =
     (fun () -> IMutator (InitProp (Prop.from_raw_string "", random_p_op ())));
     (fun () -> ICall CufSafeArray);
     (fun () -> ICall CufSafeReturn);
-    (fun () -> IIterator (IterFree (Iterator.Id (Random.int 10))));
-    (fun () -> IIterator (MIterFree (Iterator.Id (Random.int 10))));
-    (fun () -> IIterator (CIterFree (Iterator.Id (Random.int 10))));
     (fun () -> IIncludeEvalDefine Incl);
     (fun () -> IIncludeEvalDefine InclOnce);
     (fun () -> IIncludeEvalDefine Req);
@@ -280,10 +268,6 @@ let all_instrs : lazy_instruct list =
     (fun () -> IMisc (VerifyParamType (random_param_id ())));
     (fun () -> IMisc VerifyRetTypeC);
     (fun () -> IMisc VerifyRetTypeV);
-    (fun () -> IMisc (Self (Random.int 10)));
-    (fun () -> IMisc (Parent (Random.int 10)));
-    (fun () -> IMisc (LateBoundCls (Random.int 10)));
-    (fun () -> IMisc (ClsRefName (Random.int 10)));
     (*(fun () -> IMisc NativeImpl);*)
     (*(fun () -> IMisc (IncStat (Random.int 100, Random.int 100)));*)
     (fun () -> IMisc AKExists);
@@ -297,10 +281,31 @@ let all_instrs : lazy_instruct list =
     (fun () -> IMisc (MemoSet (Random.int 10, random_local (), Random.int 10)));
     (fun () -> IMisc (MemoGet (Random.int 10, random_local (), Random.int 10)));
     (fun () -> IAsync WHResult);
-    (fun () -> IAsync Await)]
+    (fun () -> IAsync Await)] @
+    begin
+      if cls_ref_slts <= 0 then [] else
+      [(fun () -> IMisc (Self (Random.int cls_ref_slts)));
+       (fun () -> IIsset (IssetS (Random.int cls_ref_slts)));
+       (fun () -> IIsset (EmptyS (Random.int cls_ref_slts)));
+       (fun () -> IMisc (Parent (Random.int cls_ref_slts)));
+       (fun () -> IMisc (LateBoundCls (Random.int cls_ref_slts)));
+       (fun () -> IMutator (SetOpS (random_eq_op (), Random.int cls_ref_slts)));
+       (fun () -> IGet (CGetS (Random.int cls_ref_slts)));
+       (fun () -> IGet (VGetS (Random.int cls_ref_slts)));
+       (fun () -> ILitConst (ClsCns ((Const.from_raw_string ""),
+                                      Random.int cls_ref_slts)));
+       (fun () -> IMutator (SetS (Random.int cls_ref_slts)));
+       (fun () -> IMisc (ClsRefName (Random.int cls_ref_slts)));
+       (fun () -> IMutator (IncDecS (random_incdec_op (),
+                                     Random.int cls_ref_slts)));
+       (fun () -> IGet (ClsRefGetC (Random.int cls_ref_slts)));
+       (fun () -> IMutator (BindS (Random.int cls_ref_slts)));
+       (fun () -> IGet (ClsRefGetL (random_local (), Random.int cls_ref_slts)))]
+    end
 
 (* Generators for base instructions *)
-let base_instrs : lazy_instruct list =
+let base_instrs (fn : IS.t) : lazy_instruct list =
+  let cls_ref_slts = IS.get_num_cls_ref_slots fn in
   [(fun () -> IBase (BaseNC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseNL (random_local (), random_mode ())));
    (fun () -> IBase (FPassBaseNC (Random.int 10, Random.int 10)));
@@ -309,18 +314,21 @@ let base_instrs : lazy_instruct list =
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
    (fun () -> IBase (FPassBaseGC (Random.int 10, Random.int 10)));
    (fun () -> IBase (FPassBaseGL (Random.int 10, random_local ())));
-   (fun () -> IBase (BaseSC (Random.int 10, Random.int 10)));
-   (fun () -> IBase (BaseSL (random_local (), Random.int 10)));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
    (fun () -> IBase (FPassBaseL (Random.int 10, random_local ())));
    (fun () -> IBase (BaseC (Random.int 10)));
    (fun () -> IBase (BaseR (Random.int 10)));
    (fun () -> IBase BaseH);
    (fun () -> IBase (Dim (random_mode(), random_key ())));
-   (fun () -> IBase (FPassDim (Random.int 10, random_key())))]
+   (fun () -> IBase (FPassDim (Random.int 10, random_key())))] @
+   begin
+     if cls_ref_slts <= 0 then [] else
+     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10)));
+     (fun () -> IBase (BaseSL (random_local (), Random.int 10)))]
+    end
 
 (* Generators for final instructions *)
-let final_instrs : lazy_instruct list =
+let final_instrs (_ : IS.t) : lazy_instruct list =
   [(fun () -> IFinal (QueryM (Random.int 10,
     random_query_op (), random_key ())));
    (fun () -> IFinal (VGetM (Random.int 10, random_key ())));
@@ -336,17 +344,21 @@ let final_instrs : lazy_instruct list =
    (fun () -> IFinal (SetWithRefRML (random_local ())))]
 
 (* Generators for FPass* instructions *)
-let fpass_instrs : lazy_instruct list =
- [(fun () -> ICall (FPassC (Random.int 10)));
-  (fun () -> ICall (FPassCW (Random.int 10)));
-  (fun () -> ICall (FPassCE (Random.int 10)));
-  (fun () -> ICall (FPassV (Random.int 10)));
-  (fun () -> ICall (FPassVNop (Random.int 10)));
-  (fun () -> ICall (FPassR (Random.int 10)));
-  (fun () -> ICall (FPassL (Random.int 10, random_local ())));
-  (fun () -> ICall (FPassN (Random.int 10)));
-  (fun () -> ICall (FPassG (Random.int 10)));
-  (fun () -> ICall (FPassS (Random.int 10, Random.int 10)))]
+let fpass_instrs (fn : IS.t) : lazy_instruct list =
+  let cls_ref_slts = IS.get_num_cls_ref_slots fn in
+  [(fun () -> ICall (FPassCW (Random.int 10)));
+   (fun () -> ICall (FPassCE (Random.int 10)));
+   (fun () -> ICall (FPassV (Random.int 10)));
+   (fun () -> ICall (FPassVNop (Random.int 10)));
+   (fun () -> ICall (FPassR (Random.int 10)));
+   (fun () -> ICall (FPassL (Random.int 10, random_local ())));
+   (fun () -> ICall (FPassN (Random.int 10)));
+   (fun () -> ICall (FPassG (Random.int 10)));
+   (fun () -> ICall (FPassS (Random.int 10, Random.int 10)))] @
+   begin
+     if cls_ref_slts <= 0 then [] else
+     [(fun () -> ICall (FPassC (Random.int 10)))]
+   end
 
 (* An association list of stack signatures to random generators for
     instructions with that stack signature, produced from input list of
@@ -359,7 +371,7 @@ let by_signature (gens : lazy_instruct list) :
     (dat, elem :: old) :: List.remove_assoc dat acc in
   List.fold_left add [] gens
 
-let sig_map_all   = by_signature all_instrs
-let sig_map_base  = by_signature base_instrs
-let sig_map_final = by_signature final_instrs
-let sig_map_fpass = by_signature fpass_instrs
+let sig_map_all   fn  = all_instrs   fn |> by_signature
+let sig_map_base  fn  = base_instrs  fn |> by_signature
+let sig_map_final fn  = final_instrs fn |> by_signature
+let sig_map_fpass fn  = fpass_instrs fn |> by_signature

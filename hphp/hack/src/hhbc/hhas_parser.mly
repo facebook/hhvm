@@ -63,11 +63,12 @@ aliasdecl:
       {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4 None}
 ;
 maindecl:
-    | MAINDIRECTIVE LBRACE nl numiters numclsrefslots declvars statics nl functionbody RBRACE nl
-      {Hhas_body.make $9(*instrs*)
-        $6(*declvars*) $4(*numiters*)
-        $5(*numclsrefslots*) false(*ismemoizewrapper*)
-        [](*params*) None(*return type*) $7(*static_inits*) None (* doc *)}
+    | MAINDIRECTIVE LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl
+      functionbody RBRACE nl
+      {Hhas_body.make $10(*instrs*)
+        $7(*declvars*) $4(*numiters*)
+        $6(*numclsrefslots*) $5(*ismemoizewrapper*)
+        [](*params*) None(*return type*) $8 (*static_inits*) None (* doc *)}
 ;
 numiters:
     | /* empty */ {0}

@@ -48,7 +48,7 @@ let options =
       "The probability of a mutation occuring each pass (must be <= 1)");
    ("-magnitude", Arg.Set_int mag,
       "The magnitude of possible change for integer mutations (default 1)");
-  ("-debug", Arg.Set debug,
+   ("-debug",     Arg.Set debug,
       "Turn on debug prints (default false)");
    ("-immediate", Arg.Set_int imm_reps,
       "Number of immediate mutations (default 1)");
@@ -78,7 +78,8 @@ let print_output : Hhas_program.t -> unit =
       if !out_dir <> ""
       then open_out (!out_dir ^ "/mutation" ^ string_of_int(!m_no) ^ ".hhas")
       else stdout in
-    p |> Hhbc_hhas.to_string |> (Printf.fprintf out "%s\n");
+    begin try p |> Hhbc_hhas.to_string |> (Printf.fprintf out "%s\n")
+    with _ -> () end;
     if (!out_dir <> "") then close_out out;
     m_no := !m_no + 1
 
@@ -163,11 +164,14 @@ let mutate_local_id (id : Local.t) c =
 
 (* Changes the input label to another with the same stack height *)
 let mutate_label data (label : Label.t) =
-  if not (should_mutate()) then label else
-  let height l = data.stack_history |> List.assoc l |> List.length in
-  let init_height = height (ILabel label) in
-  List.filter (fun l -> init_height = height @@ ILabel l) data.labels |>
-  rand_elt
+  try
+    if not (should_mutate()) then label else
+    let height l = data.stack_history |> List.assoc l |> List.length in
+    let init_height = height (ILabel label) in
+    List.filter (fun l -> init_height = height @@ ILabel l) data.labels |>
+    rand_elt
+  with
+  | Not_found -> label
 
 let mutate_key (k : MemberKey.t) c =
   let new_key_type n =
@@ -577,15 +581,20 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
    same stack signature *)
 let mutate_replace (input : HP.t) : mutation_monad =
   debug_print "Replacing";
-  let equiv_instr (i : instruct) : instruct =
-    let equiv_map = match i with
-                    | IBase  _ -> sig_map_base
-                    | IFinal _ -> sig_map_final
-                    | ICall  _ -> sig_map_fpass
-                    | _        -> sig_map_all in
-    try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
-    with | Not_found | Invalid_argument _ -> i in
   let mut (is : IS.t) =
+    let sig_base, sig_final, sig_fpass, sig_all =
+      sig_map_base is, sig_map_final is, sig_map_fpass is, sig_map_all is in
+    let equiv_instr (i : instruct) : instruct =
+      let equiv_map = match i with
+                      | IBase _ -> sig_base
+                      | IFinal _ -> sig_final
+                      | ICall _ -> sig_fpass
+                      | _ -> sig_all in
+      match i with
+      | IContFlow _
+      | ITry _ -> i
+      | _ -> try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
+             with | Not_found | Invalid_argument _ -> i in
     let replace _ i = if should_mutate() then [equiv_instr i] else [i] in
     IS.InstrSeq.flat_map is (seq_data is |> maintain_stack replace) in
   Nondet.return input |> mutate mut input !replace_reps
@@ -594,9 +603,13 @@ let mutate_replace (input : HP.t) : mutation_monad =
    input program, rebalancing the stack as it goes *)
 let mutate_insert (input : HP.t) : mutation_monad =
   debug_print "Inserting";
-  let new_instr () : instruct = rand_elt all_instrs @@ () in
   let mut (is : IS.t) =
-    let insert _ i = if should_mutate() then [new_instr (); i] else [i] in
+    let new_instr : unit -> instruct =
+      let instrs = all_instrs is in
+      fun () -> (instrs |> rand_elt) () in
+    let insert _ i = match i with
+                    | ITry _ -> []
+                    | _ -> if should_mutate() then [new_instr (); i] else [i] in
     IS.InstrSeq.flat_map is (maintain_stack insert (seq_data is)) in
   Nondet.return input |> mutate mut input !insert_reps
 
@@ -617,6 +630,10 @@ let mutate_metadata (input : HP.t)  =
     HTC.make
       (const |> HTC.name  |> mutate_option)
       (const |> HTC.flags |> delete_map mutate_flag) in
+  let mutate_adata_id (id : adata_id) : adata_id =
+    let pre = "A_" in
+    let num = String.length pre |> Str.string_after id |> int_of_string in
+    pre ^ (mutate_int num !mag |> string_of_int) in
   let mutate_type_info (info : Hhas_type_info.t) : Hhas_type_info.t =
     Hhas_type_info.make
       (info |> Hhas_type_info.user_type       |> mutate_option)
@@ -727,10 +744,14 @@ let mutate_metadata (input : HP.t)  =
       (typedef |> Hhas_typedef.type_info      |> mutate_type_info)
       (typedef |> Hhas_typedef.type_structure |>
                                             option_lift mutate_typed_value) in
+  let mutate_adata (data : Hhas_adata.t) : Hhas_adata.t =
+    Hhas_adata.make
+      (data |> Hhas_adata.id    |> mutate_adata_id)
+      (data |> Hhas_adata.value |> mutate_typed_value) in
   let mut_data (prog : HP.t) : HP.t =
     let ids = prog |> HP.classes |> delete_map Hhas_class.name in
     HP.make
-      (prog |> HP.adata)
+      (prog |> HP.adata     |> delete_map mutate_adata)
       (prog |> HP.functions |> delete_map mutate_fun_data)
       (prog |> HP.classes   |> delete_map (mutate_class_data ids))
       (prog |> HP.typedefs  |> delete_map mutate_typedef)

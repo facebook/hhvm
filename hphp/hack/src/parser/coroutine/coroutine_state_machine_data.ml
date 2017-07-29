@@ -19,5 +19,4 @@ module EditableSyntax = Full_fidelity_editable_syntax
 type t = {
   properties: string list;
   parameters: EditableSyntax.parameter_declaration list;
-  outer_variables : string list;
 }

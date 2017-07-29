@@ -849,19 +849,39 @@ let extract_parameter_declarations function_parameter_list =
       | _ -> failwith "Parameter had unexpected type."
       end
 
+let make_outer_param outer_variable =
+  {
+    parameter_attribute = make_missing();
+    parameter_visibility = public_syntax;
+    parameter_type = make_missing();
+    parameter_name = make_variable_syntax outer_variable;
+    parameter_default_value = make_missing();
+  }
+
+let make_outer_params outer_variables =
+  Core_list.map ~f:make_outer_param outer_variables
+
 let compute_state_machine_data
-    (inner_variables, outer_variables, used_params)
+    (inner_variables, outer_variables, _used_params)
     coroutine_result_data_variables
     function_parameter_list =
   (* TODO: Add a test case for "..." param. *)
-  let parameters = extract_parameter_declarations function_parameter_list in
-  (* TODO: This isn't quite right. The outer variables should be passed in
-     along with the parameters, not generated as properties. *)
+  (* TODO: Right now we get this wrong; the outer variables have to be
+  on the parameters list, and not the properties list.  That means that
+  we'll need to fix up create_closure_invocation to pass in the outer
+  variables. When that happens, fix this code too. *)
+
+  (* TODO: Don't put the outer variables in the property list. *)
   let properties = SSet.union inner_variables outer_variables in
   let properties = SSet.elements properties in
   let properties = properties @ coroutine_result_data_variables in
-  let outer_variables = SSet.elements outer_variables in
-  CoroutineStateMachineData.{ properties; parameters; outer_variables; }
+
+  let parameters = extract_parameter_declarations function_parameter_list in
+  (* TODO: Add the outer_variables to the params as follows. *)
+  (* let outer_variables = SSet.elements outer_variables in
+  let outer_variable_params = make_outer_params outer_variables in
+  let parameters = outer_variable_params @ parameters in *)
+  CoroutineStateMachineData.{ properties; parameters; }
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the

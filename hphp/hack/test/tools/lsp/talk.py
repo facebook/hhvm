@@ -79,7 +79,7 @@ def read_commands():
     command_lines = []
     for line in fileinput.input():
         command_lines.append(line)
-    return '\n'.join(command_lines)
+    return ''.join(command_lines)
 
 if __name__ == "__main__":
     main()

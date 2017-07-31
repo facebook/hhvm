@@ -143,7 +143,7 @@ class LspCommandProcessor:
         if isinstance(json, dict):
             return {k: LspCommandProcessor._eval_json(v) for k, v in json.items()}
         elif isinstance(json, list):
-            return [LspCommandProcessor._eval_json(i) for i in list]
+            return [LspCommandProcessor._eval_json(i) for i in json]
         elif isinstance(json, str):
             match = re.match(r'>>>(.*)', json)
             if match is None:

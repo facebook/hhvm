@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/fast-stat-cache.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -273,6 +274,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/memory.xml:      show memory status in XML\n"
         "/memory.json:     show memory status in JSON\n"
         "/memory.html:     show memory status in HTML\n"
+
+        "/fsc-stats:       show cache statistics in FastStatCache buckets\n"
+        "/fsc-clear:       clear FastStatCache cache result\n"
 
         "/stats-on:        main switch: enable server stats\n"
         "/stats-off:       main switch: disable server stats\n"
@@ -638,6 +642,17 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
+    if (cmd == "fsc-stats") {
+      std::stringstream out;
+      FastStatCache::getStatistics(out);
+      transport->sendString(out.str());
+      break;
+    }
+    if (cmd == "fsc-clear") {
+      FastStatCache::clearAllCache();
+      transport->sendString("OK");
+      break;
+    }
     if (cmd == "pcre-cache-size") {
       std::ostringstream size;
       size << preg_pcre_cache_size() << endl;

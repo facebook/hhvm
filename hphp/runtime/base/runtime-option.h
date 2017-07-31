@@ -146,6 +146,9 @@ struct RuntimeOption {
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
+  static bool ServerFastStatCache;
+  static int ServerFastStatCacheBucketNum;
+  static int ServerFastStatCacheTTL;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;

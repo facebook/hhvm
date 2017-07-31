@@ -26,6 +26,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/fast-stat-cache.h"
 #include "hphp/runtime/vm/jit/hooks.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/file-util.h"
@@ -917,21 +918,25 @@ void StatCache::requestInit() {
 }
 
 int StatCache::stat(const std::string& path, struct stat* buf) {
+  if (RuntimeOption::ServerFastStatCache) return FastStatCache::stat(path.c_str(), buf);
   if (!RuntimeOption::ServerStatCache) return statSyscall(path, buf);
   return s_sc.statImpl(path, buf);
 }
 
 int StatCache::lstat(const std::string& path, struct stat* buf) {
+  if (RuntimeOption::ServerFastStatCache) return FastStatCache::lstat(path.c_str(), buf);
   if (!RuntimeOption::ServerStatCache) return lstatSyscall(path, buf);
   return s_sc.lstatImpl(path, buf);
 }
 
 std::string StatCache::readlink(const std::string& path) {
+  if (RuntimeOption::ServerFastStatCache) return FastStatCache::readlink(path.c_str());
   if (!RuntimeOption::ServerStatCache) return readlinkSyscall(path);
   return s_sc.readlinkImpl(path);
 }
 
 std::string StatCache::realpath(const char* path) {
+  if (RuntimeOption::ServerFastStatCache) return FastStatCache::realpath(path);
   if (!RuntimeOption::ServerStatCache) return realpathLibc(path);
   return s_sc.realpathImpl(path);
 }

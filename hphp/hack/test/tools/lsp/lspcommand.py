@@ -5,11 +5,15 @@ import json
 import os
 import re
 import subprocess
-
+import uuid
+from jsonrpc_stream import JsonRpcStreamReader
+from jsonrpc_stream import JsonRpcStreamWriter
 
 class LspCommandProcessor:
-    def __init__(self, proc):
+    def __init__(self, proc, reader, writer):
         self.proc = proc
+        self.reader = reader
+        self.writer = writer
 
     @classmethod
     @contextlib.contextmanager
@@ -23,91 +27,123 @@ class LspCommandProcessor:
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
 
-        yield cls(proc)
+        reader = JsonRpcStreamReader(proc.stdout)
+        writer = JsonRpcStreamWriter(proc.stdin)
+        yield cls(proc, reader, writer)
 
         proc.stdin.close()
         proc.stdout.close()
         proc.stderr.close()
 
-    def communicate(self, json_commands):
-        transcript = {}
+    @staticmethod
+    def parse_commands(raw_data):
+        raw_json = json.loads(raw_data)
+        return [LspCommandProcessor._eval_json(command) for command in raw_json]
 
-        notify_id = self._first_id()
+    # request_timeout is the number of seconds to wait for responses
+    # that we expect the server to send back.  this timeout can
+    # be longer because it typically won't be hit.
+    #
+    # notify_timeout is the number of seconds to wait for responses
+    # from the server that aren't caused by a request.  these could
+    # be errors or server notifications.
+    def communicate(self,
+                    json_commands,
+                    request_timeout=30,
+                    notify_timeout=1):
 
-        # send all the commands at once without reading anything
-        for json_command in json_commands:
-            self.send(json_command)
+        transcript = self._send_commands({}, json_commands)
 
-            id, notify_id = self._make_transcript_id(json_command, notify_id)
+        # we are expecting at least one response per request sent so
+        # we read these giving the server more time to respond with them.
+        transcript = self._read_request_responses(transcript,
+                                                  json_commands,
+                                                  request_timeout)
 
-            transcript[id] = self._transcribe(json_command, None)
+        # because it's possible the server sent us notifications
+        # along with responses we need to try to keep reading
+        # from the stream to get anything that might be left.
+        return self._read_extra_responses(transcript, notify_timeout)
 
-        # read responses for requests, skip notifications as they shouldn't
-        # have responses
-        for id in transcript:
-            if not self.is_notify_id(id):
-                transcript[id] = self._transcribe_receive(transcript[id]["sent"])
+    def _send_commands(self, transcript, commands):
+        for command in commands:
+            self.writer.write(command)
+            transcript = self._scribe(transcript, sent=command, received=None)
 
         return transcript
 
-    def send(self, json_command):
-        serialized = json.dumps(json_command)
-        content_length = len(serialized)
-        payload = f"Content-Length: {content_length}\n\n{serialized}"
-        self._write(payload)
+    def _read_request_responses(self, transcript, commands, timeout_seconds):
+        for _ in self._requests_in(commands):
+            response = self.reader.try_read(timeout_seconds)
+            transcript = self._scribe(transcript, sent=None, received=response)
+        return transcript
 
-    def receive(self):
-        return self._read()
+    def _read_extra_responses(self, transcript, timeout_seconds):
+        while True:
+            response = self.reader.try_read(timeout_seconds)
+            if not response:
+                break
+            transcript = self._scribe(transcript, sent=None, received=response)
+        return transcript
 
-    def parse_commands(self, raw_data):
-        raw_json = json.loads(raw_data)
-        return [self._eval_json(command) for command in raw_json]
+    def _scribe(self, transcript, sent, received):
+        transcript = dict(transcript)
 
-    def is_notify_id(self, id):
-        return id.startswith('NOTIFY_')
+        id = self._transcript_id(sent, received)
 
-    def is_request_command(self, json_command):
-        return 'id' in json_command
+        if sent and not received:
+            received = transcript[id]['received'] if id in transcript else None
 
-    def is_request_id(self, id):
-        return id.startswith('REQUEST_')
+        if received and not sent:
+            sent = transcript[id]['sent'] if id in transcript else None
 
-    def _make_transcript_id(self, json_command, notify_id):
-        id = ''
+        transcript[id] = {"sent": sent, "received": received}
 
-        if self.is_request_command(json_command):
-            id = self._request_id_of(json_command)
+        return transcript
+
+    def _transcript_id(self, sent, received):
+        assert sent is not None or received is not None
+
+        def make_id(json, idgen):
+            if LspCommandProcessor._has_id(json):
+                return LspCommandProcessor._request_id(json)
+            else:
+                return idgen()
+
+        if sent:
+            return make_id(sent, LspCommandProcessor._client_notify_id)
         else:
-            notify_id = self._next_id(notify_id)
-            id = self._notify_id_of(notify_id)
+            return make_id(received, LspCommandProcessor._server_notify_id)
 
-        return id, notify_id
+    def _requests_in(self, commands):
+        return [c for c in commands if LspCommandProcessor._has_id(c)]
 
-    def _transcribe_receive(self, json_command):
-        return self._transcribe(json_command,
-                                json.loads(self.receive()))
+    @staticmethod
+    def _has_id(json):
+        return 'id' in json
 
-    def _transcribe(self, json_command, json_response):
-        return {"sent": json_command,
-                "received": json_response}
+    @staticmethod
+    def _client_notify_id():
+        return LspCommandProcessor._notify_id('NOTIFY_CLIENT_TO_SERVER_')
 
-    def _next_id(self, id):
-        return id + 1
+    @staticmethod
+    def _server_notify_id():
+        return LspCommandProcessor._notify_id('NOTIFY_SERVER_TO_CLIENT_')
 
-    def _first_id(self):
-        return 0
+    @staticmethod
+    def _notify_id(prefix):
+        return prefix + str(uuid.uuid4())
 
-    def _notify_id_of(self, id):
-        return 'NOTIFY_' + str(id)
-
-    def _request_id_of(self, json_command):
+    @staticmethod
+    def _request_id(json_command):
         return 'REQUEST_' + str(json_command['id'])
 
-    def _eval_json(self, json):
+    @staticmethod
+    def _eval_json(json):
         if isinstance(json, dict):
-            return {k: self._eval_json(v) for k, v in json.items()}
+            return {k: LspCommandProcessor._eval_json(v) for k, v in json.items()}
         elif isinstance(json, list):
-            return [self._eval_json(i) for i in list]
+            return [LspCommandProcessor._eval_json(i) for i in list]
         elif isinstance(json, str):
             match = re.match(r'>>>(.*)', json)
             if match is None:
@@ -115,28 +151,6 @@ class LspCommandProcessor:
             return eval(match.group(1))  # noqa: P204
         else:
             return json
-
-    def _write(self, s):
-        self.proc.stdin.write(s.encode())
-        self.proc.stdin.flush()
-
-    def _read_content_length(self):
-        # read the 'Content-Length:' line and absorb the newline
-        # after it
-        length_line = self.proc.stdout.readline().decode()
-        self.proc.stdout.read(len("\n\n"))
-
-        # get the content length as an integer for the
-        # rest of the package
-        parts = length_line.split(":", 1)
-        return (int(parts[1].strip()))
-
-    def _read_content(self, length):
-        return self.proc.stdout.read(length)
-
-    def _read(self):
-        length = self._read_content_length()
-        return self._read_content(length)
 
 
 # string replacement methods meant to be called

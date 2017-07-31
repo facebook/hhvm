@@ -51,19 +51,23 @@ from lspcommand import LspCommandProcessor
 
 
 def main():
+    # TODO: add support for command line arguments like verbose mode
+    # and setting read timeout.
+    commands = LspCommandProcessor.parse_commands(read_commands())
+
     with LspCommandProcessor.create() as lsp_proc:
-        json = lsp_proc.parse_commands(read_commands())
-        t = lsp_proc.communicate(json)
-        print_transcript(lsp_proc, t)
+        transcript = lsp_proc.communicate(commands)
+        print_transcript(lsp_proc, transcript)
 
 
-def print_transcript(lsp_proc, t):
-    for id, package in t.items():
-        print(f"Sent [id={id}]:\n")
-        print(json.dumps(package["sent"], indent=2))
+def print_transcript(lsp_proc, transcript):
+    for id, package in transcript.items():
+        if package["sent"]:
+            print(f"Sent [{id}]:\n")
+            print(json.dumps(package["sent"], indent=2))
 
-        if lsp_proc.is_request_id(id):
-            print("\nReceived:\n")
+        if package["received"]:
+            print(f"\nReceived [{id}]:\n")
             print(json.dumps(package["received"], indent=2))
 
         print('-' * 80)

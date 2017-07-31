@@ -30,6 +30,7 @@ type t =
   | FixMe
   | IgnoreError
   | FallThrough
+  | ExtraTokenError
 
 let to_string kind =
   match kind with
@@ -42,3 +43,4 @@ let to_string kind =
   | FixMe             -> "fix_me"
   | IgnoreError       -> "ignore_error"
   | FallThrough       -> "fall_through"
+  | ExtraTokenError   -> "extra_token_error"

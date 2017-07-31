@@ -19,7 +19,9 @@
     { "trivia_kind_name" : "IgnoreError",
       "trivia_type_name" : "ignore_error" },
     { "trivia_kind_name" : "FallThrough",
-      "trivia_type_name" : "fall_through" } ],
+      "trivia_type_name" : "fall_through" },
+    { "trivia_kind_name" : "ExtraTokenError",
+      "trivia_type_name" : "extra_token_error" } ],
   "tokens" : [
     { "token_kind" : "Abstract",
       "token_text" : "abstract" },

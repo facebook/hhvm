@@ -143,6 +143,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return IgnoreError::from_json($json, $position, $source);
     case 'fall_through':
       return FallThrough::from_json($json, $position, $source);
+    case 'extra_token_error':
+      return ExtraTokenError::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
@@ -4308,6 +4310,8 @@ abstract class EditableTrivia extends EditableSyntax {
         return new IgnoreError($trivia_text);
       case 'fall_through':
         return new FallThrough($trivia_text);
+      case 'extra_token_error':
+        return new ExtraTokenError($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4401,6 +4405,15 @@ class FallThrough extends EditableTrivia {
   }
   public function with_text(string $text): FallThrough {
     return new FallThrough($text);
+  }
+}
+
+class ExtraTokenError extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('extra_token_error', $text);
+  }
+  public function with_text(string $text): ExtraTokenError {
+    return new ExtraTokenError($text);
   }
 }
 

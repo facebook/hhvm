@@ -2157,6 +2157,7 @@ and transform_trivia ~is_leading trivia =
   in
   List.iter trivia ~f:(fun triv ->
     match Trivia.kind triv with
+    | TriviaKind.ExtraTokenError
     | TriviaKind.UnsafeExpression
     | TriviaKind.FixMe
     | TriviaKind.IgnoreError

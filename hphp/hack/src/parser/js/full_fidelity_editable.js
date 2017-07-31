@@ -80,6 +80,8 @@ class EditableSyntax
       return IgnoreError.from_json(json, position, source);
     case 'fall_through':
       return FallThrough.from_json(json, position, source);
+    case 'extra_token_error':
+      return ExtraTokenError.from_json(json, position, source);
 
     case 'missing':
       return Missing.missing;
@@ -2637,6 +2639,8 @@ class EditableTrivia extends EditableSyntax
         return new IgnoreError(trivia_text);
       case 'fall_through':
         return new FallThrough(trivia_text);
+      case 'extra_token_error':
+        return new ExtraTokenError(trivia_text);
 
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
@@ -2730,6 +2734,15 @@ class FallThrough extends EditableTrivia
   with_text(text)
   {
     return new FallThrough(text);
+  }
+}
+
+class ExtraTokenError extends EditableTrivia
+{
+  constructor(text) { super('extra_token_error', text); }
+  with_text(text)
+  {
+    return new ExtraTokenError(text);
   }
 }
 
@@ -17962,6 +17975,7 @@ exports.UnsafeExpression = UnsafeExpression;
 exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;
+exports.ExtraTokenError = ExtraTokenError;
 
 exports.EndOfFile = EndOfFile;
 exports.Script = Script;

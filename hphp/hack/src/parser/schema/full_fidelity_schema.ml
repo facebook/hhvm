@@ -306,7 +306,8 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "UnsafeExpression"; "unsafe_expression" ];
   [ "FixMe"; "fix_me" ];
   [ "IgnoreError"; "ignore_error" ];
-  [ "FallThrough"; "fall_through" ]]
+  [ "FallThrough"; "fall_through" ];
+  [ "ExtraTokenError"; "extra_token_error"]]
 
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)

@@ -159,6 +159,7 @@ let get_doc_from_trivia trivia_lst allow_break =
   let handle_trivia trivia = match Trivia.kind trivia with
     | Kind.WhiteSpace -> (nil, false)
     | Kind.EndOfLine -> (nil, false)
+    | Kind.ExtraTokenError
     | Kind.Unsafe
     | Kind.FallThrough
     | Kind.SingleLineComment ->

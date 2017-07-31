@@ -45,18 +45,37 @@
 
     python talk.py filename.txt
 """
-import json
+import argparse
 import fileinput
+import json
 from lspcommand import LspCommandProcessor
 
 
 def main():
-    # TODO: add support for command line arguments like verbose mode
-    # and setting read timeout.
-    commands = LspCommandProcessor.parse_commands(read_commands())
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--request_timeout',
+                        type=int,
+                        action='store',
+                        default=30,
+                        help='duration to wait for request responses, in seconds.')
+    parser.add_argument('--notify_timeout',
+                        type=int,
+                        action='store',
+                        default=1,
+                        help='duration to wait for notify responses, in seconds.')
+    parser.add_argument('files',
+                        metavar='FILE',
+                        nargs='*',
+                        default=['-'],
+                        help='list of files to read, if empty, stdin is used.')
+    args = parser.parse_args()
+
+    commands = LspCommandProcessor.parse_commands(read_commands(args.files))
 
     with LspCommandProcessor.create() as lsp_proc:
-        transcript = lsp_proc.communicate(commands)
+        transcript = lsp_proc.communicate(commands,
+                                          request_timeout=args.request_timeout,
+                                          notify_timeout=args.notify_timeout)
         print_transcript(lsp_proc, transcript)
 
 
@@ -75,9 +94,9 @@ def print_transcript(lsp_proc, transcript):
 
 # this will read command data from stdin or
 # an arbitrary list of files
-def read_commands():
+def read_commands(files):
     command_lines = []
-    for line in fileinput.input():
+    for line in fileinput.input(files=files):
         command_lines.append(line)
     return ''.join(command_lines)
 

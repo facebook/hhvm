@@ -735,12 +735,12 @@ void VariableSerializer::writeOverflow(const TypedValue& tv) {
       int optId = m_refs[tv].m_id;
       assert(optId != NO_ID);
       bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
-      if (isObject) {
-        m_buf->append("r:");
+      if (wasRef) {
+        m_buf->append("R:");
         m_buf->append(optId);
         m_buf->append(';');
-      } else if (wasRef) {
-        m_buf->append("R:");
+      } else if (isObject) {
+        m_buf->append("r:");
         m_buf->append(optId);
         m_buf->append(';');
       } else {

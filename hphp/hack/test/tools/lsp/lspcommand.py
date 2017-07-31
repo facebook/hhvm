@@ -5,6 +5,7 @@ import json
 import os
 import re
 import subprocess
+import urllib.parse
 import uuid
 from jsonrpc_stream import JsonRpcStreamReader
 from jsonrpc_stream import JsonRpcStreamWriter
@@ -179,7 +180,7 @@ def path_expand(path):
 
 
 def file_uri(path):
-    return "file://" + path_expand(path)
+    return urllib.parse.urljoin("file://", path_expand(path))
 
 
 def read_file(file):

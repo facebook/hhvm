@@ -50,37 +50,45 @@ class LspCommandProcessor:
     def communicate(self,
                     json_commands,
                     request_timeout=30,
-                    notify_timeout=1):
+                    notify_timeout=1,
+                    verbose=False):
 
-        transcript = self._send_commands({}, json_commands)
+        transcript = self._send_commands({}, json_commands, verbose)
 
         # we are expecting at least one response per request sent so
         # we read these giving the server more time to respond with them.
         transcript = self._read_request_responses(transcript,
                                                   json_commands,
-                                                  request_timeout)
+                                                  request_timeout,
+                                                  verbose)
 
         # because it's possible the server sent us notifications
         # along with responses we need to try to keep reading
         # from the stream to get anything that might be left.
-        return self._read_extra_responses(transcript, notify_timeout)
+        return self._read_extra_responses(transcript, notify_timeout, verbose)
 
-    def _send_commands(self, transcript, commands):
+    def _send_commands(self, transcript, commands, verbose):
         for command in commands:
+            LspCommandProcessor._log(verbose, f"Sending: {command}")
             self.writer.write(command)
+            LspCommandProcessor._log(verbose, "Send OK.")
             transcript = self._scribe(transcript, sent=command, received=None)
 
         return transcript
 
-    def _read_request_responses(self, transcript, commands, timeout_seconds):
+    def _read_request_responses(self,
+                                transcript,
+                                commands,
+                                timeout_seconds,
+                                verbose):
         for _ in self._requests_in(commands):
-            response = self.reader.try_read(timeout_seconds)
+            response = self._try_read_logged(timeout_seconds, verbose)
             transcript = self._scribe(transcript, sent=None, received=response)
         return transcript
 
-    def _read_extra_responses(self, transcript, timeout_seconds):
+    def _read_extra_responses(self, transcript, timeout_seconds, verbose):
         while True:
-            response = self.reader.try_read(timeout_seconds)
+            response = self._try_read_logged(timeout_seconds, verbose)
             if not response:
                 break
             transcript = self._scribe(transcript, sent=None, received=response)
@@ -117,6 +125,17 @@ class LspCommandProcessor:
 
     def _requests_in(self, commands):
         return [c for c in commands if LspCommandProcessor._has_id(c)]
+
+    def _try_read_logged(self, timeout_seconds, verbose):
+        LspCommandProcessor._log(verbose, f"Reading, timeout={timeout_seconds}")
+        response = self.reader.try_read(timeout_seconds)
+        LspCommandProcessor._log(verbose, f"Response: {response}")
+        return response
+
+    @staticmethod
+    def _log(verbose, message):
+        if verbose:
+            print(message)
 
     @staticmethod
     def _has_id(json):

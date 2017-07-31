@@ -63,6 +63,14 @@ def main():
                         action='store',
                         default=1,
                         help='duration to wait for notify responses, in seconds.')
+    parser.add_argument('--verbose',
+                        action='store_true',
+                        default=False,
+                        help='display diagnostic information while reading/writing.')
+    parser.add_argument('--silent',
+                        action='store_true',
+                        default=False,
+                        help='suppresses printing of transcript, but not diagnostics.')
     parser.add_argument('files',
                         metavar='FILE',
                         nargs='*',
@@ -75,8 +83,10 @@ def main():
     with LspCommandProcessor.create() as lsp_proc:
         transcript = lsp_proc.communicate(commands,
                                           request_timeout=args.request_timeout,
-                                          notify_timeout=args.notify_timeout)
-        print_transcript(lsp_proc, transcript)
+                                          notify_timeout=args.notify_timeout,
+                                          verbose=args.verbose)
+        if not args.silent:
+            print_transcript(lsp_proc, transcript)
 
 
 def print_transcript(lsp_proc, transcript):

@@ -488,11 +488,11 @@ and stmt env = function
        * lenv *)
       let parent_lenv = env.Env.lenv in
       let env   = condition env true e in
-      let env, tb2 = block env b1 in
+      let env, tb1 = block env b1 in
       let lenv1 = env.Env.lenv in
       let env   = { env with Env.lenv = parent_lenv } in
       let env   = condition env false e in
-      let env, tb1 = block env b2 in
+      let env, tb2 = block env b2 in
       let lenv2 = env.Env.lenv in
       let terminal1 = Nast_terminality.Terminal.block env b1 in
       let terminal2 = Nast_terminality.Terminal.block env b2 in

@@ -123,9 +123,17 @@ module WithParser(Parser : ParserType) = struct
     if (Token.kind token) = kind then
       (parser1, make_token token)
     else
-      (* ERROR RECOVERY: Create a missing token for the expected token,
-         and continue on from the current token. Don't skip it. *)
-      (with_error parser error, (make_missing()))
+      (* ERROR RECOVERY: Look at the next token after this. Is it the one we
+       * require? If so, process the current token as extra and return the next
+       * one. Otherwise, create a missing token for what we required,
+       * and continue on from the current token (don't skip it). *)
+      let next_kind = peek_token_kind ~lookahead:1 parser in
+      if next_kind = kind then
+        let parser1 = process_next_as_extra parser in
+        let (parser, token) = next_token parser1 in
+        (parser, make_token token)
+      else
+        (with_error parser error, (make_missing()))
 
   let require_required parser =
     require_token parser TokenKind.Required SyntaxError.error1051

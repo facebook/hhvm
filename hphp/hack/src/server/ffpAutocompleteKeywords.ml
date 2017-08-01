@@ -142,7 +142,8 @@ let use_keyword = {
 let function_keyword = {
   keywords = ["function"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
+    (context.closest_parent_container = ClassBody ||
+    context.closest_parent_container = FunctionHeader) &&
     (context.predecessor = OpenBrace ||
     context.predecessor = ClassBodyDeclaration ||
     context.predecessor = VisibilityModifier ||
@@ -179,11 +180,56 @@ let declaration_keywords = {
   end;
 }
 
-let type_specifiers = {
-  keywords = ["bool"; "int"; "float"; "num"; "string"; "arraykey"; "void";
-    "resource"; "this"; "classname"; "mixed"; "noreturn"];
+let void_keyword = {
+  keywords = ["void"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TypeSpecifier
+    (context.closest_parent_container = TypeSpecifier ||
+    context.closest_parent_container = FunctionHeader) &&
+    (context.predecessor = TokenColon ||
+    context.predecessor = TokenLessThan)
+  end;
+}
+
+let noreturn_keyword = {
+  keywords = ["noreturn"];
+  is_valid_in_context = begin fun context ->
+    (context.closest_parent_container = TypeSpecifier ||
+    context.closest_parent_container = FunctionHeader) &&
+    context.predecessor = TokenColon
+  end;
+}
+
+let primitive_types = {
+  keywords = ["array"; "?array"; "arraykey"; "?arraykey"; "bool"; "?bool"; "classname";
+  "?classname"; "darray"; "?darray"; "float"; "?float"; "int"; "?int"; "mixed"; "num"; "?num";
+  "string"; "?string"; "resource"; "?resource"; "varray"; "?varray"];
+  is_valid_in_context = begin fun context ->
+    (* Function return type *)
+    (context.closest_parent_container = TypeSpecifier ||
+    context.closest_parent_container = FunctionHeader) &&
+    context.predecessor = TokenColon
+    || (* Parameter type *)
+    context.closest_parent_container = TypeSpecifier &&
+    (context.predecessor = TokenComma ||
+    context.predecessor = OpenParenthesis)
+    || (* Class property type *)
+    context.inside_class_body &&
+    context.closest_parent_container = TypeSpecifier &&
+    (context.predecessor = VisibilityModifier ||
+    context.predecessor = KeywordConst ||
+    context.predecessor = KeywordStatic)
+    || (* Generic type *)
+    context.closest_parent_container = TypeSpecifier &&
+    context.predecessor = TokenLessThan
+  end;
+}
+
+let this_type_keyword = {
+  keywords = ["this"; "?this"];
+  is_valid_in_context = begin fun context ->
+    context.closest_parent_container = TypeSpecifier &&
+    context.predecessor = TokenColon &&
+    context.inside_class_body
   end;
 }
 
@@ -295,15 +341,18 @@ let keyword_matches: keyword_completion list = [
   implements_keyword;
   interface_keyword;
   loop_body_keywords;
+  noreturn_keyword;
   postfix_expressions;
   primary_expressions;
+  primitive_types;
   scope_resolution_qualifiers;
   static_keyword;
   switch_body_keywords;
+  this_type_keyword;
   try_trailing_keywords;
-  type_specifiers;
   use_keyword;
   visibility_modifiers;
+  void_keyword;
 ]
 
 let autocomplete_keyword (context:context) : string list =

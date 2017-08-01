@@ -26,6 +26,7 @@ module Container = struct
   | ClassHeader
   | CompoundStatement
   | ConstantDeclarator
+  | FunctionHeader
   | FunctionParameterList
   | LambdaBodyExpression
   | TopLevel
@@ -50,6 +51,10 @@ module Predecessor = struct
   | KeywordStatic
   | MarkupSection
   | OpenBrace
+  | OpenParenthesis
+  | TokenColon
+  | TokenComma
+  | TokenLessThan
   | TryWithoutFinally
   | VisibilityModifier
   | NoPredecessor
@@ -61,6 +66,7 @@ type context = {
   inside_switch_body: bool;
   inside_loop_body: bool;
   inside_async_function: bool;
+  inside_class_body: bool;
 }
 
 let initial_context = {
@@ -69,6 +75,7 @@ let initial_context = {
   inside_switch_body = false;
   inside_loop_body = false;
   inside_async_function = false;
+  inside_class_body = false;
 }
 
 let is_function_async (function_object:PositionedSyntax.syntax) : bool =
@@ -123,15 +130,19 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = Async; _ } -> Some KeywordAsync
     | Token { kind = Class; _ } -> Some KeywordClass
+    | Token { kind = Colon; _ } -> Some TokenColon
+    | Token { kind = Comma; _ } -> Some TokenComma
     | Token { kind = Const; _ } -> Some KeywordConst
     | Token { kind = Extends; _ } -> Some KeywordExtends
     | Token { kind = Final; _ } -> Some KeywordFinal
     | Token { kind = Implements; _ } -> Some KeywordImplements
-    | Token { kind = Static; _ } -> Some KeywordStatic
     | Token { kind = LeftBrace; _ } -> Some OpenBrace
+    | Token { kind = LeftParen; _ } -> Some OpenParenthesis
+    | Token { kind = LessThan; _ } -> Some TokenLessThan
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }
     | Token { kind = Protected; _ } -> Some VisibilityModifier
+    | Token { kind = Static; _ } -> Some KeywordStatic
     | _ -> None
   in
   predecessor
@@ -155,7 +166,8 @@ let make_context
     | ClassishDeclaration _ ->
       { acc with closest_parent_container = ClassHeader }
     | ClassishBody _ ->
-      { acc with closest_parent_container = ClassBody }
+      { acc with closest_parent_container = ClassBody;
+        inside_class_body = true }
     | PositionedSyntax.ConstantDeclarator _ ->
       { acc with closest_parent_container = Container.ConstantDeclarator }
     | ForStatement _
@@ -167,6 +179,8 @@ let make_context
       { acc with inside_switch_body = true }
     | FunctionDeclaration _ as func ->
       { acc with inside_async_function = is_function_async func }
+    | FunctionDeclarationHeader _ ->
+      { acc with closest_parent_container = FunctionHeader }
     | LambdaExpression _ as lambda ->
       (* If we see a lambda, almost all context is reset, so each field should
       get consideration on if its context flows into the lambda *)
@@ -175,6 +189,7 @@ let make_context
         predecessor = predecessor;
         inside_switch_body = false;
         inside_loop_body = false;
+        inside_class_body = false;
         inside_async_function = is_function_async lambda;
       }
     | PositionedSyntax.CompoundStatement _ ->

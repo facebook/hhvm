@@ -31,6 +31,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct APCArray;
+struct APCHandle;
 struct ArrayInit;
 struct MemoryProfile;
 
@@ -356,6 +357,9 @@ public:
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
+  // Recursively register {allocation, rootAPCHandle} with APCGCManager
+  static void RegisterUncountedAllocations(ArrayData* ad,
+                                                APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*, size_t extra = 0);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);

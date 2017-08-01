@@ -641,6 +641,8 @@ struct RuntimeOption {
   F(bool, UncountedMixedArrayHuge,     true)                            \
   F(bool, UncountedStringHuge,         true)                            \
   F(bool, RandomHotFuncs,              false)                           \
+  F(bool, GCForAPC,                    false)                           \
+  F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
   F(bool, EnableGC,                    eagerGcDefault())                \
   /* Run GC eagerly at each surprise point. */                          \
   F(bool, EagerGC,                     eagerGcDefault())                \

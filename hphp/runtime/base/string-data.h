@@ -37,6 +37,7 @@ namespace HPHP {
 struct APCString;
 struct Array;
 struct String;
+struct APCHandle;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -199,6 +200,12 @@ struct StringData final : MaybeCountable,
    * using this function.
    */
   void destructUncounted();
+
+  /*
+   * root is the address of the top-level APCHandle which contains this string
+   * register {allocation, root} with APCGCManager
+   */
+  void registerUncountedAllocation(APCHandle* rootAPCHandle);
 
   /*
    * Reference-counting related.

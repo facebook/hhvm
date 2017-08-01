@@ -208,6 +208,8 @@ struct APCTypedValue {
   static APCTypedValue* tvFalse();
 
   void deleteUncounted();
+  // Recursively register all {allocation, root} with APCGCManager
+  void registerUncountedAllocations();
 
 private:
   APCTypedValue(const APCTypedValue&) = delete;

@@ -40,6 +40,7 @@ struct StringData;
 struct MArrayIter;
 struct MixedArray;
 struct APCArray;
+struct APCHandle;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -55,6 +56,9 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr size_t MaxSizeIndex = 121;
 
   static void Release(ArrayData*);
+  // Recursively register {allocation, rootAPCHandle} with APCGCManager
+  static void RegisterUncountedAllocations(ArrayData* ad,
+                                            APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*, size_t extra = 0);
   static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t ki);
   static constexpr auto NvTryGetInt = &NvGetInt;

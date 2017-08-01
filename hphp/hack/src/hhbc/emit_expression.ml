@@ -171,13 +171,13 @@ let get_passByRefKind expr =
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
     | A.Unop((A.Uincr | A.Udecr | A.Usilence), _) -> WarnOnCell
     | A.Unop((A.Usplat, _)) -> AllowCell
-    | A.Call((_, A.Id (_, "eval")), [_], []) ->
+    | A.Call((_, A.Id (_, "eval")), _, [_], []) ->
       WarnOnCell
-    | A.Call((_, A.Id (_, "array_key_exists")), [_; _], []) ->
+    | A.Call((_, A.Id (_, "array_key_exists")), _, [_; _], []) ->
       AllowCell
-    | A.Call((_, A.Id (_, ("idx"))), ([_; _] | [_; _; _]), []) ->
+    | A.Call((_, A.Id (_, ("idx"))), _, ([_; _] | [_; _; _]), []) ->
       AllowCell
-    | A.Call((_, A.Id (_, ("hphp_array_idx"))), [_; _; _], []) ->
+    | A.Call((_, A.Id (_, ("hphp_array_idx"))), _, [_; _; _], []) ->
       AllowCell
     | A.Xml _ ->
       AllowCell
@@ -880,24 +880,24 @@ and emit_expr env expr ~need_ref =
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     emit_obj_get ~need_ref env None query_op expr prop nullflavor
-  | A.Call ((_, A.Id (_, "isset")), exprs, []) ->
+  | A.Call ((_, A.Id (_, "isset")), _, exprs, []) ->
     emit_box_if_necessary need_ref @@ emit_call_isset_exprs env exprs
-  | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
+  | A.Call ((_, A.Id (_, "empty")), _, [expr], []) ->
     emit_box_if_necessary need_ref @@ emit_call_empty_expr env expr
   (* Did you know that tuples are functions? *)
-  | A.Call ((p, A.Id (_, "tuple")), es, _) ->
+  | A.Call ((p, A.Id (_, "tuple")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_tuple env p es
-  | A.Call ((_, A.Id (_, "idx")), es, _) ->
+  | A.Call ((_, A.Id (_, "idx")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_idx env es
-  | A.Call ((_, A.Id (_, "define")), [(_, A.String (_, s)); e], _) ->
+  | A.Call ((_, A.Id (_, "define")), _, [(_, A.String (_, s)); e], _) ->
     emit_box_if_necessary need_ref @@ emit_define env s e
-  | A.Call ((_, A.Id (_, "eval")), [expr], _) ->
+  | A.Call ((_, A.Id (_, "eval")), _, [expr], _) ->
     emit_box_if_necessary need_ref @@ emit_eval env expr
-  | A.Call ((_, A.Id (_, "class_alias")), es, _) ->
+  | A.Call ((_, A.Id (_, "class_alias")), _, es, _) ->
     emit_box_if_necessary need_ref @@ emit_class_alias es
-  | A.Call ((_, A.Id (_, "get_class")), [], _) ->
+  | A.Call ((_, A.Id (_, "get_class")), _, [], _) ->
     emit_box_if_necessary need_ref @@ emit_get_class_no_args ()
-  | A.Call ((_, A.Id (_, ("exit" | "die"))), es, _) ->
+  | A.Call ((_, A.Id (_, ("exit" | "die"))), _, es, _) ->
     emit_exit env (List.hd es)
   | A.Call _ -> emit_call_expr ~need_ref env expr
   | A.New (typeexpr, args, uargs) ->
@@ -1816,7 +1816,7 @@ and emit_call env (_, expr_ as expr) args uargs =
          ] end in
     instrs, Flavor.Cell
   | A.Id (_, "array_slice"), [
-    _, A.Call ((_, A.Id (_, "func_get_args")), [], []); (_, A.Int _ as count)
+    _, A.Call ((_, A.Id (_, "func_get_args")), _, [], []); (_, A.Int _ as count)
     ] ->
     let p = Pos.none in
     emit_call env (p, A.Id (p, "\\__SystemLib\\func_slice_args")) [count] []
@@ -1840,7 +1840,7 @@ and emit_call env (_, expr_ as expr) args uargs =
       (* Could use emit_jmpnz for better code *)
       emit_expr ~need_ref:false env e;
       instr_jmpnz l;
-      emit_ignored_expr env (p, A.Call (id, rest, uargs));
+      emit_ignored_expr env (p, A.Call (id, [], rest, uargs));
       Emit_fatal.emit_fatal_runtime "invariant_violation";
       instr_label l;
       instr_null;
@@ -1915,7 +1915,7 @@ and emit_call env (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr env (_, expr_ as expr) =
   match expr_ with
-  | A.Call (e, args, uargs) when not (is_special_function e args) ->
+  | A.Call (e, _, args, uargs) when not (is_special_function e args) ->
     emit_call env e args uargs
   | _ ->
     let flavor =

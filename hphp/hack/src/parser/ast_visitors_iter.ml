@@ -489,10 +489,11 @@ class virtual ['self] iter =
     method on_Class_const env c0 c1 =
       self#on_id env c0;
       self#on_pstring env c1;
-    method on_Call env c0 c1 c2 =
+    method on_Call env c0 c1 c2 c3 =
       self#on_expr env c0;
-      self#on_list self#on_expr env c1;
+      self#on_list self#on_hint env c1;
       self#on_list self#on_expr env c2;
+      self#on_list self#on_expr env c3;
     method on_Int = self#on_pstring
     method on_Float = self#on_pstring
     method on_String = self#on_pstring
@@ -576,7 +577,7 @@ class virtual ['self] iter =
       | Array_get (c0, c1) -> self#on_Array_get env c0 c1
       | Class_get (c0, c1) -> self#on_Class_get env c0 c1
       | Class_const (c0, c1) -> self#on_Class_const env c0 c1
-      | Call (c0, c1, c2) -> self#on_Call env c0 c1 c2
+      | Call (c0, c1, c2, c3) -> self#on_Call env c0 c1 c2 c3
       | Int c0 -> self#on_Int env c0
       | Float c0 -> self#on_Float env c0
       | String c0 -> self#on_String env c0

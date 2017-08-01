@@ -47,6 +47,7 @@ class virtual ['b] iter :
         on_Cabstract : 'c -> unit;
         on_Call : 'c ->
                   Ast_visitors_ancestors.expr ->
+                  Ast_visitors_ancestors.hint list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list -> unit;
         on_Case : 'c ->
@@ -399,6 +400,7 @@ class virtual ['b] iter :
     method on_Call :
       'c ->
       Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
       Ast_visitors_ancestors.expr list -> unit
     method on_Case :

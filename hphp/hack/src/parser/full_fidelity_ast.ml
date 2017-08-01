@@ -744,7 +744,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       { function_call_receiver      = recv
       ; function_call_argument_list = args
       ; _ }
-      -> Call (pExpr recv env, couldMap ~f:pExpr args  env, [])
+      -> Call (pExpr recv env, [], couldMap ~f:pExpr args  env, [])
 
     | QualifiedNameExpression { qualified_name_expression } ->
       Id (pos_name qualified_name_expression)
@@ -813,7 +813,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | Some TK.Await                   -> Await expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
-          Call ((pos, Id (pos, "echo")), [expr], [])
+          Call ((pos, Id (pos, "echo")), [], [expr], [])
         | Some TK.Dollar                  ->
           (match snd expr with
           | Lvarvar (n, id) -> Lvarvar (n + 1, id)
@@ -847,6 +847,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
 
     | DefineExpression { define_keyword; define_argument_list; _ } -> Call
       ( (let name = pos_name define_keyword in fst name, Id name)
+      , []
       , List.map ~f:(fun x -> pExpr x env) (as_list define_argument_list)
       , []
       )
@@ -1021,7 +1022,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       let body =
         { (fun_template yld node suspension_kind) with f_body = mk_noop blk }
       in
-      Call ((get_pos node, Lfun body), [], [])
+      Call ((get_pos node, Lfun body), [], [], [])
     | XHPExpression
       { xhp_open =
         { syntax = XHPOpen { xhp_open_name; xhp_open_attributes; _ }; _ }
@@ -1242,6 +1243,7 @@ and pStmt : stmt parser = fun node env ->
             -> let name = pos_name kw in fst name, Id name
           | _ -> missing_syntax "id" kw env
           )
+        , []
         , couldMap ~f:pExpr exprs env
         , []
       ))
@@ -1900,6 +1902,7 @@ let pProgram : program parser = fun node env ->
     | (Stmt Noop::el) -> post_process el
     | ((Stmt (Expr (_, (Call
         ( (_, (Id (_, "define")))
+        , []
         , [ (_, (String name))
           ; value
           ]
@@ -1943,7 +1946,7 @@ let pProgram : program parser = fun node env ->
         }
       | args ->
         let name = pos_name define_keyword in
-        Stmt (Expr (fst name, Call ((fst name, Id name), args, [])))
+        Stmt (Expr (fst name, Call ((fst name, Id name), [], args, [])))
       ) :: aux env nodel
   | node :: nodel -> pDef node env :: aux env nodel
   in

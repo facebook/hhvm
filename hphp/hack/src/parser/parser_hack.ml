@@ -255,7 +255,7 @@ let rec check_lvalue env = function
       error_at env pos "Array-like class consts are not valid lvalues"
   | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
     Unsafeexpr _ | Omitted | BracedExpr _) -> ()
-  | pos, Call ((_, Id (_, "tuple")), _, _) ->
+  | pos, Call ((_, Id (_, "tuple")), _, _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter el (check_lvalue env)
@@ -730,7 +730,7 @@ and toplevel_word def_start ~attr env = function
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
-  | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value], [])) ->
+  | Expr (_, Call ((_, Id (_, "define")), _, [(_, String name); value], [])) ->
     Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
@@ -1043,6 +1043,14 @@ and class_parameter_constraint_list env =
     let h = hint env in
     (Constraint_super, h) :: class_parameter_constraint_list env
   | _ -> L.back env.lb; []
+
+(*****************************************************************************)
+(* Call site hints (foo<T>(); etc ...) *)
+(*****************************************************************************)
+
+(* The behavior is the exact same - we want to parse
+ * types in the form <T1, T2, ...>. The name's different for clarity. *)
+and call_site_hint_params env = class_hint_params env
 
 (*****************************************************************************)
 (* Class hints (A<T> etc ...) *)
@@ -2458,7 +2466,7 @@ and statement_echo env =
   let pos = Pos.make env.file env.lb in
   let args = echo_args env in
   let f = pos, Id (pos, "echo") in
-  Expr (pos, Call (f, args, []))
+  Expr (pos, Call (f, [], args, []))
 
 and echo_args env =
   let e = expr env in
@@ -2726,7 +2734,24 @@ and expr_remain env e1 =
   | Tdiff ->
       expr_binop env Tdiff Diff e1
   | Tlt ->
-      expr_binop env Tlt Lt e1
+    let parse_call_with_hint_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        env.popt
+        TypecheckerOptions.experimental_annotate_function_calls in
+    if parse_call_with_hint_enabled then
+      let call_with_hint_res =
+        try_parse_with_errors env (fun env -> expr_call_with_hint env e1)
+        (* Seeing a < introduces an ambiguity: We might be
+         * dealing with a e1<>(), or an e1 < e2 binop.
+         * Backtrack if parsing the call with explicit annotation fails
+         *  and try the binop. We can't backtrack in the opposite direction,
+         * since when parsing e1 < a >, the parse of e1 < a would succeed, but the caller
+         * would immediately fail because of the unexpected >. *)
+      in begin match call_with_hint_res with
+        | Some expr -> expr
+        | None -> expr_binop env Tlt Lt e1
+      end
+    else expr_binop env Tlt Lt e1
   | Tdiff2 ->
       expr_binop env Tdiff2 Diff2 e1
   | Tgte ->
@@ -3187,7 +3212,7 @@ and expr_colcol_remain ~allow_class env e1 cname =
       e1
 
 (*****************************************************************************)
-(* Function call (f(params)) *)
+(* Function call (f(params) | f<type hints>(params)) *)
 (*****************************************************************************)
 
 and expr_call env e1 =
@@ -3195,9 +3220,17 @@ and expr_call env e1 =
     L.back env.lb;
     let args1, args2 = expr_call_list env in
     let end_ = Pos.make env.file env.lb in
-    Pos.btw (fst e1) end_, Call (e1, args1, args2)
+    Pos.btw (fst e1) end_, Call (e1, [], args1, args2)
   end
 
+and expr_call_with_hint env e1 =
+  reduce env e1 Tlt begin fun e1 env ->
+    L.back env.lb;
+    let hint_list = call_site_hint_params env in
+    let args1, args2 = expr_call_list env in
+    let end_ = Pos.make env.file env.lb in
+    Pos.btw (fst e1) end_, Call (e1, hint_list, args1, args2)
+  end
 (* An expr_call_list is the same as an expr_list except for the possibility
  * of ParamUnpack (aka splat) calls of the form:
  *   f(...$unpacked);
@@ -3370,7 +3403,7 @@ and expr_anon_async env pos =
   | Tlcb -> (* async { ... } *)
       L.back env.lb;
       let lambda = pos, lambda_body ~sync:FDeclAsync env [] None in
-      pos, Call (lambda, [], [])
+      pos, Call (lambda, [], [], [])
   | _ ->
       L.back env.lb;
       pos, Id (pos, "async")

@@ -673,11 +673,12 @@ class virtual ['self] map =
     method on_Class_const env c0 c1 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_pstring env c1 in Class_const (r0, r1)
-    method on_Call env c0 c1 c2 =
+    method on_Call env c0 c1 c2 c3 =
       let r0 = self#on_expr env c0 in
-      let r1 = self#on_list self#on_expr env c1 in
+      let r1 = self#on_list self#on_hint env c1 in
       let r2 = self#on_list self#on_expr env c2 in
-      Call (r0, r1, r2)
+      let r3 = self#on_list self#on_expr env c3 in
+      Call (r0, r1, r2, r3)
     method on_Int env c0 =
       let r0 = self#on_pstring env c0 in Int r0
     method on_Float env c0 =
@@ -782,7 +783,7 @@ class virtual ['self] map =
       | Array_get (c0, c1) -> self#on_Array_get env c0 c1
       | Class_get (c0, c1) -> self#on_Class_get env c0 c1
       | Class_const (c0, c1) -> self#on_Class_const env c0 c1
-      | Call (c0, c1, c2) -> self#on_Call env c0 c1 c2
+      | Call (c0, c1, c2, c3) -> self#on_Call env c0 c1 c2 c3
       | Int c0 -> self#on_Int env c0
       | Float c0 -> self#on_Float env c0
       | String c0 -> self#on_String env c0

@@ -88,6 +88,7 @@ class virtual ['c] map :
         on_Cabstract : 'd -> Ast_visitors_ancestors.class_kind;
         on_Call : 'd ->
                   Ast_visitors_ancestors.expr ->
+                  Ast_visitors_ancestors.hint list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr_;
@@ -725,6 +726,7 @@ class virtual ['c] map :
     method on_Call :
       'd ->
       Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
       Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_Case :

@@ -112,7 +112,7 @@ let emit_xhp_use_attributes xual =
       let e =
         p, A.Class_const ((p, s), (p, "__xhpAttributeDeclaration"))
       in
-      p, A.Call (e, [], [])
+      p, A.Call (e, [], [], [])
     | _ -> failwith "Xhp use attribute - unexpected attribute"
   in
   List.map ~f:aux xual
@@ -134,12 +134,13 @@ let from_attribute_declaration ~ns ast_class xal xual =
     p, A.Call (
       (p, A.Class_const ((p, "parent"), (p, "__xhpAttributeDeclaration"))),
       [],
+      [],
       [])
   in
   let args =
     arg1 :: emit_xhp_use_attributes xual @ [emit_xhp_attribute_array ~ns xal]
   in
-  let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), args, []) in
+  let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), [], args, []) in
   let true_branch =
     [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
   in

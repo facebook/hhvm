@@ -316,7 +316,7 @@ and expr_ =
   | Array_get of expr * expr option
   | Class_get of id * expr
   | Class_const of id * pstring
-  | Call of expr * expr list * expr list
+  | Call of expr * hint list * expr list * expr list
   | Int of pstring
   | Float of pstring
   | String of pstring

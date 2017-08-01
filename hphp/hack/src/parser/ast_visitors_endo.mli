@@ -121,6 +121,7 @@ class virtual ['b] endo :
         on_Call : 'c ->
                   Ast_visitors_ancestors.expr_ ->
                   Ast_visitors_ancestors.expr ->
+                  Ast_visitors_ancestors.hint list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr list ->
                   Ast_visitors_ancestors.expr_;
@@ -981,8 +982,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr ->
+      Ast_visitors_ancestors.hint list ->
       Ast_visitors_ancestors.expr list ->
-      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
+      Ast_visitors_ancestors.expr list ->
+      Ast_visitors_ancestors.expr_
     method on_Case :
       'c ->
       Ast_visitors_ancestors.case ->

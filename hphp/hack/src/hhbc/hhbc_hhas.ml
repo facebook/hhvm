@@ -932,7 +932,7 @@ and string_of_param_default_value expr =
     let e2 = string_of_param_default_value e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
   | A.New (e, es, ues)
-  | A.Call (e, es, ues) ->
+  | A.Call (e, _, es, ues) ->
     let e = String_utils.lstrip (string_of_param_default_value e) "\\\\" in
     let es = List.map string_of_param_default_value (es @ ues) in
     let prefix = match snd expr with A.New (_, _, _) -> "new " | _ -> "" in

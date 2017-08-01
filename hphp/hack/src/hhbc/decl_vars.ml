@@ -95,7 +95,7 @@ class declvar_visitor = object(this)
   method! on_class_const acc e _ =
     if is_lvar_like_id e then add_local ~bareparam:false acc e
     else acc
-  method! on_call acc e el1 el2 =
+  method! on_call acc e _ el1 el2 =
     let acc =
       match e with
       | (_, Ast.Id(p, "HH\\set_frame_metadata"))

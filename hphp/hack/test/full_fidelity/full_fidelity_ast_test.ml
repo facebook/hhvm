@@ -148,7 +148,7 @@ let comment_scraper_expected =
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
     (f_params: ())
-    (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () ())))))
+    (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
@@ -158,7 +158,7 @@ let comment_scraper_expected =
   (Fun
    ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
     (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_constrs: ())
-    (f_params: ()) (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
+    (f_params: ()) (f_body: ((Expr (p (Call (p (Id (p bar))) () () ())))))
     (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))

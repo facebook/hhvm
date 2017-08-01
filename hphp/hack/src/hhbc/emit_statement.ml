@@ -51,7 +51,7 @@ let emit_def_inline = function
 let emit_markup env s echo_expr_opt ~check_for_hashbang =
   let emit_ignored_call_expr f e =
     let p = Pos.none in
-    let call_expr = p, A.Call ((p, A.Id (p, f)), [e], []) in
+    let call_expr = p, A.Call ((p, A.Id (p, f)), [], [e], []) in
     emit_ignored_expr env call_expr
   in
   let emit_ignored_call_for_non_empty_string f s =
@@ -101,9 +101,9 @@ let rec emit_stmt env st =
       instr_null;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
+  | A.Expr (_, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
     gather (List.map exprl (emit_unset_expr env))
-  | A.Expr (_, A.Call ((_, A.Id (_, "declare")),
+  | A.Expr (_, A.Call ((_, A.Id (_, "declare")), _,
       [
         _, (
         A.Binop (A.Eq None, (_, A.Id(_, "ticks")), (_, A.Int(_))) |

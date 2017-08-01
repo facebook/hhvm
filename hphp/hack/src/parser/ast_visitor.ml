@@ -31,7 +31,7 @@ class type ['a] ast_visitor_type = object
   method on_pipe : 'a -> expr -> expr -> 'a
   method on_block : 'a -> block -> 'a
   method on_break : 'a -> Pos.t -> int option -> 'a
-  method on_call : 'a -> expr -> expr list -> expr list -> 'a
+  method on_call : 'a -> expr -> hint list -> expr list -> expr list -> 'a
   method on_case : 'a -> case -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
   method on_catch : 'a -> catch -> 'a
@@ -316,7 +316,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
    | Class_get   (id, p)   -> this#on_class_get acc id p
    | Class_const (id, pstr)   -> this#on_class_const acc id pstr
-   | Call        (e, el, uel) -> this#on_call acc e el uel
+   | Call        (e, hl, el, uel) -> this#on_call acc e hl el uel
    | String2     el           -> this#on_string2 acc el
    | Cast        (hint, e)   -> this#on_cast acc hint e
    | Unop        (uop, e)         -> this#on_unop acc uop e
@@ -382,8 +382,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_pstring acc pstr in
     acc
 
-  method on_call acc e el uel =
+  method on_call acc e hl el uel =
     let acc = this#on_expr acc e in
+    let acc = List.fold_left this#on_hint acc hl in
     let acc = List.fold_left this#on_expr acc el in
     let acc = List.fold_left this#on_expr acc uel in
     acc

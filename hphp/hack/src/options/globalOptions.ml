@@ -53,10 +53,16 @@ let tco_experimental_disable_shape_and_tuple_arrays =
 let tco_experimental_promote_nullable_to_optional_in_shapes =
   "promote_nullable_to_optional_in_shapes"
 
-  (* Whether Shapes::idx should return a non-nullable type when the input shape
+(* Whether Shapes::idx should return a non-nullable type when the input shape
     is known to contain the field. *)
-  let tco_experimental_stronger_shape_idx_ret =
+let tco_experimental_stronger_shape_idx_ret =
     "stronger_shape_idx_return"
+
+(**
+ * Allows parsing type hints for function calls, such as foo<int>(args);.
+ *)
+let tco_experimental_annotate_function_calls =
+  "annotate_function_calls"
 
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
@@ -69,6 +75,7 @@ let tco_experimental_all =
      tco_experimental_disable_shape_and_tuple_arrays;
      tco_experimental_promote_nullable_to_optional_in_shapes;
      tco_experimental_stronger_shape_idx_ret;
+     tco_experimental_annotate_function_calls;
    ]
 
 let tco_migration_flags_all =

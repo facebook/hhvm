@@ -37,13 +37,13 @@ and terminal_ tcopt nsenv ~in_try = function
   | Throw _ when not in_try -> raise Exit
   | Throw _ -> ()
   | Continue _
-  | Expr (_, (Call ((_, Id (_, "assert")), [_, False], [])
-                 | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _, [])))
+  | Expr (_, ( Call ((_, Id (_, "assert")), _, [_, False], [])
+             | Call ((_, Id (_, "invariant")), _, (_, False) :: _ :: _, [])))
   | Return _ -> raise Exit
-  | Expr (_, Call ((_, Id fun_id), _, _)) ->
+  | Expr (_, Call ((_, Id fun_id), _, _, _)) ->
     let _, fun_name = NS.elaborate_id nsenv NS.ElaborateFun fun_id in
     FuncTerm.(raise_exit_if_terminal (get_fun tcopt fun_name))
-  | Expr (_, Call ((_, Class_const (cls_id, (_, meth_name))), _, _))
+  | Expr (_, Call ((_, Class_const (cls_id, (_, meth_name))), _, _, _))
     when (snd cls_id).[0] <> '$' ->
     let _, cls_name = NS.elaborate_id nsenv NS.ElaborateClass cls_id in
     FuncTerm.(raise_exit_if_terminal

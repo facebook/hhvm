@@ -30,3 +30,8 @@ class TypeConstraintWhereClausesTest<T> {
     Tkey as IComparable<Tkey>,
   {}
 }
+
+// Where clauses should be supported on toplevel functions
+function whereClauseOnFunction<T> (): T where T=int {
+    return 5;
+}

@@ -947,7 +947,8 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let env, ty1 = TUtils.unresolved env ty1 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env, ty = Unify.unify env ty1 ty2 in
-  env, T.make_typed_expr p ty (T.Eif(tc, te1, te2)), ty
+  let te = if coalesce then T.NullCoalesce(tc, te2) else T.Eif(tc, te1, te2) in
+  env, T.make_typed_expr p ty te, ty
 
 and exprs env el =
   match el with

@@ -66,8 +66,6 @@ quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
 quick/simp-conv-to-int-dbl.php
-quick/static_prop_eval_order.php
-quick/string-cse.php
 quick/syntax-error.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php

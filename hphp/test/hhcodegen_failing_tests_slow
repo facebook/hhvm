@@ -159,10 +159,8 @@ slow/integer/bin-format.php
 slow/interpolated_function_call.php
 slow/keyset/hh-only1.php
 slow/keyset/hh-only2.php
-slow/keyset/hphpc-literal.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
-slow/keyset/unreachable.php
 slow/lang/deprecated.php
 slow/lang/deprecated_disabled.php
 slow/lang/deprecated_sampled.php
@@ -304,7 +302,6 @@ slow/php7_backported/ns_090.php
 slow/php7_backported/ns_092.php
 slow/php7_backported/ns_093.php
 slow/php7_backported/ns_094.php
-slow/php7_backported/scalar-types/scalar_float_with_invalid_default.php
 slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php
 slow/php7_backported/scalar-types/scalar_reserved2.php
 slow/php7_backported/scalar-types/scalar_reserved2_use.php

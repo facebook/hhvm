@@ -122,14 +122,22 @@ let to_int v =
     end
   | Int i -> Some i
   | Float f ->
-    (*If the source type is float, for the values INF, -INF, and NAN,
-    the result value is zero*)
+
     let fpClass = classify_float f in
-    if fpClass = FP_nan || fpClass = FP_infinite then Some Int64.zero
-    else
-    (* TODO: get this right. It's unlikely that Caml and
-     * PHP semantics match up *)
-    (try Some (Int64.of_float f) with Failure _ -> None)
+    begin match fpClass with
+      (* If the source type is float, for the value of NAN,
+       * the result value is min int
+       * TODO: This is only true in HHVM and PHP 4-5.
+       * PHP 7 no longer follows this. *)
+      | FP_nan -> Some Int64.min_int (* -9223372036854775808 *)
+      (* If the source type is float, for the values INF and -INF,
+      the result value is zero *)
+      | FP_infinite -> Some Int64.zero
+      | _ ->
+      (* TODO: get this right. It's unlikely that Caml and
+       * PHP semantics match up *)
+      (try Some (Int64.of_float f) with Failure _ -> None)
+    end
   | _ ->
     Some (if to_bool v then Int64.one else Int64.zero)
 
@@ -446,4 +454,6 @@ let cast_to_float v = Option.map (to_float v) (fun x -> Float x)
 let cast_to_arraykey v =
   match v with
   | String s -> Some (String s)
+  | Null -> Some (String "")
+  | Uninit | Array _ | Vec _ | Keyset _ | Dict _ -> None
   | _ -> cast_to_int v

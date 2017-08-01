@@ -37,7 +37,8 @@ let rec expr_to_typed_value
     TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), fields) ->
     let l = List.fold_left fields
-      ~f:(fun l x -> TVL.add l (value_afield_to_typed_value ns x))
+      ~f:(fun l x ->
+          TVL.add l (keyset_value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
   | A.Collection ((_, kind), fields)
@@ -130,7 +131,7 @@ and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
     | _ -> raise NotLiteral end;
   match TV.cast_to_arraykey tv with
   | Some tv -> tv
-  | None -> failwith "key_expr_to_typed_value: invalid key type"
+  | None -> raise NotLiteral
 
 and array_afield_to_typed_value_pair ns index afield =
   match afield with
@@ -152,6 +153,13 @@ and value_afield_to_typed_value ns afield =
   | A.AFvalue e -> expr_to_typed_value ns e
   | A.AFkvalue (_key, _value) ->
     failwith "value_afield_to_typed_value: unexpected key=>value"
+
+and keyset_value_afield_to_typed_value ns afield =
+  let tv = value_afield_to_typed_value ns afield in
+  begin match tv with
+  | TV.Int _ | TV.String _ -> ()
+  | _ -> raise NotLiteral end;
+  tv
 
 let expr_to_opt_typed_value ?(restrict_keys=false) ?(allow_maps=false) ns e =
   match expr_to_typed_value ~restrict_keys ~allow_maps ns e with

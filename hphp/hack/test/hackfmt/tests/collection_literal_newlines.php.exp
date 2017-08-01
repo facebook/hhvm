@@ -45,3 +45,14 @@ $foo = dict[
 
 // If there are no elements, there should not be a newline.
 $foo = dict[];
+
+type Foo = shape('should_stay' => OnSameLine);
+type Foo = shape(
+  'should_remain' => OnNewLine,
+);
+
+type Foo = shape('should_stay' => OnSameLine, ...);
+type Foo = shape(
+  'should_remain' => OnNewLine,
+  ...
+);

@@ -1393,14 +1393,8 @@ let rec transform node =
         let missing_separator = make_missing () in
         let ellipsis_list = [make_list_item ellipsis missing_separator] in
         make_list (children type_fields @ ellipsis_list) in
-    Fmt [
-      t shape_kw;
-      transform_argish
-        ~allow_trailing:(is_missing ellipsis)
-        left_p
-        fields
-        right_p;
-    ]
+    transform_container_literal
+      ~allow_trailing:(is_missing ellipsis) shape_kw left_p fields right_p
   | ShapeExpression x ->
     let (shape_kw, left_p, fields, right_p) = get_shape_expression_children x in
     Fmt [
@@ -1855,7 +1849,7 @@ and transform_argish
     | _ -> true
   in
   delimited_nest ~spaces ~split_when_children_split left_p right_p [
-    transform_arg_list ~spaces ~allow_trailing ~force_newlines arg_list
+    transform_arg_list ~allow_trailing ~force_newlines arg_list
   ]
 
 and transform_braced_item left_p item right_p =
@@ -1892,8 +1886,7 @@ and transform_braced_item_with_trailer left_p item comma right_p =
        trailing commas in all these places reach end-of-life. *)
     [transform_trailing_comma ~allow_trailing:false item comma]
 
-and transform_arg_list
-    ?(allow_trailing=true) ?(force_newlines=false) ?(spaces=false) items =
+and transform_arg_list ?(allow_trailing=true) ?(force_newlines=false) items =
   handle_possible_list items
     ~after_each:(after_each_argument ~force_newlines)
     ~handle_last:(transform_last_arg ~allow_trailing)
@@ -1901,10 +1894,11 @@ and transform_arg_list
 and transform_possible_comma_list ?(allow_trailing=true) ?(spaces=false)
     items right_p =
   nest ~spaces right_p [
-    transform_arg_list ~spaces ~allow_trailing items
+    transform_arg_list ~allow_trailing items
   ]
 
-and transform_container_literal ?(spaces=false) kw left_p members right_p =
+and transform_container_literal
+    ?(spaces=false) ?allow_trailing kw left_p members right_p =
   let force_newlines =
     let trivia = trailing_trivia left_p in
     List.exists trivia
@@ -1913,7 +1907,8 @@ and transform_container_literal ?(spaces=false) kw left_p members right_p =
   Fmt [
     transform kw;
     if spaces then Space else Nothing;
-    transform_argish ~spaces ~force_newlines left_p members right_p;
+    transform_argish
+      ~spaces ~force_newlines ?allow_trailing left_p members right_p;
   ]
 
 and remove_leading_trivia node =

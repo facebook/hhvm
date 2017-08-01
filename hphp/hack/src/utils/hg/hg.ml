@@ -10,38 +10,29 @@
 
 (** Tools for shelling out to Mercurial. *)
 
-open Core
-
 module Hg_actual = struct
 
   include Hg_sig.Types
 
-  (** Returns the closest SVN ancestor to the hg revision.
-   *
-   * hg log -r 'reverse(::<hg_rev>)' -T '{svnrev}\n' -l 150 --cwd <repo> *
-   * Note: The output is a newline-separated list of corresponding SVN
-   * revision numbers of the ancestors. For each ancestor that does NOT have
-   * a corresponding SVN revision, a blankline is printed. So we use "-l 150"
-   * to print up to 150 ancestors that might be newlines, filter away the
-   * blanks, and return the first result.
-   *)
-  let get_closest_svn_ancestor hg_rev repo =
-    let process = Process.exec "hg" [
-      "log";
-      "-r";
-      Printf.sprintf "reverse(::%s)" hg_rev;
-      "-T";
-      "{svnrev}\n";
-      "-l";
-      "150";
-      "--cwd";
-      repo;
-    ]
-    in
-    Future.make process @@ fun result ->
-      let lines = Sys_utils.split_lines result in
-      let nonempty str = String.length str > 0 in
-      List.filter lines ~f:nonempty |> List.hd_exn
+(** Returns the closest SVN ancestor in master to the given hg rev.
+ *
+ * hg log -r 'ancestor(master,hg_rev)' -T '{svnrev}\n'
+ *
+ * Note: hg_rev only works in short form from `hg id -i` (see below)
+ * and not the full hash form from `hg --debug id -i`
+ *)
+let get_closest_svn_ancestor hg_rev repo =
+  let process = Process.exec "hg" [
+    "log";
+    "-r";
+    Printf.sprintf "ancestor(master,%s)" hg_rev;
+    "-T";
+    "{svnrev}\n";
+    "--cwd";
+    repo;
+  ]
+  in
+  Future.make process String.trim
 
   (** Get the hg revision hash of the current working copy in the repo dir.
    *

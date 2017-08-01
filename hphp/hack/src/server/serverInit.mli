@@ -15,8 +15,15 @@ type load_mini_approach =
 (* Saves the state that load_mini_script below reads in *)
 val save_state: ServerEnv.env -> string -> unit
 
+type init_result =
+  (** Loaded a mini saved state of this distance. Note: for older load scripts
+   * distance is unknown, thus None. *)
+  | Mini_load of int option
+  (** Loading a  *)
+  | Mini_load_failed of string
+
 (* will parse, name, typecheck, the next set of files
  * and refresh the environment and update the many shared heaps
  *)
 val init: ?load_mini_approach:load_mini_approach -> ServerEnv.genv
-  -> ServerEnv.env * string option (* If the script failed, the error message *)
+  -> ServerEnv.env * init_result (* If the script failed, the error message *)

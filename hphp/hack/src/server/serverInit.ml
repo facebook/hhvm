@@ -31,6 +31,11 @@ type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target
 
+(** Docs are in .mli *)
+type init_result =
+  | Mini_load of int option
+  | Mini_load_failed of string
+
 module ServerInitCommon = struct
 
   let lock_and_load_deptable fn =
@@ -108,13 +113,19 @@ module ServerInitCommon = struct
       let deptable_fn =
         Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
       let end_time = Unix.gettimeofday () in
+      let open Hh_json.Access in
+      let state_distance = (return json) >>=
+        get_number_int "distance" |>
+        to_option
+      in
       Daemon.to_channel oc
         @@ Ok (`Fst (
           state_fn,
           corresponding_base_revision,
           is_cached,
           end_time,
-          deptable_fn));
+          deptable_fn,
+          state_distance));
       let json = read_json_line ic in
       assert (Unix.close_process_in ic = Unix.WEXITED 0);
       let kv = Hh_json.get_object_exn json in
@@ -155,7 +166,8 @@ module ServerInitCommon = struct
         corresponding_base_revision,
         is_cached,
         end_time,
-        deptable_fn) ->
+        deptable_fn,
+        state_distance) ->
         lock_and_load_deptable deptable_fn;
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
@@ -178,7 +190,8 @@ module ServerInitCommon = struct
               fn,
               corresponding_base_revision,
               Relative_path.set_of_list dirty_files,
-              old_saved)
+              old_saved,
+              state_distance)
         end in
         Result.Ok get_dirty_files
     with e ->
@@ -203,7 +216,8 @@ module ServerInitCommon = struct
        saved_state_fn,
        corresponding_base_revision,
        changes,
-       old_saved
+       old_saved,
+       None
      )) in
      Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
 
@@ -370,7 +384,13 @@ module ServerInitCommon = struct
   let get_state_future genv root state_future timeout =
     let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (saved_state_fn, corresponding_base_revision, dirty_files, old_saved) ->
+    >>= fun (
+      saved_state_fn,
+      corresponding_base_revision,
+      dirty_files,
+      old_saved,
+      state_distance
+    ) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -399,17 +419,21 @@ module ServerInitCommon = struct
       corresponding_base_revision,
       dirty_files,
       changed_while_parsing,
-      old_saved)
+      old_saved,
+      state_distance)
     in
     state
 end
 
 type saved_state_fn = string
 type corresponding_base_rev = string
+(** Newer versions of load script also output the distance of the
+ * saved state's revision to the node's merge base. *)
+type state_distance = int option
 
 type state_result =
  (saved_state_fn * corresponding_base_rev * Relative_path.Set.t
-   * Relative_path.Set.t * FileInfo.saved_state_info, exn)
+   * Relative_path.Set.t * FileInfo.saved_state_info * state_distance, exn)
  Result.t
 
 (* Laziness *)
@@ -484,7 +508,8 @@ module ServerEagerInit : InitKind = struct
       corresponding_base_revision,
       dirty_files,
       changed_while_parsing,
-      old_saved) ->
+      old_saved,
+      _state_distance) ->
       let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
@@ -592,7 +617,7 @@ module ServerLazyInit : InitKind = struct
     match state with
     | Ok (
       saved_state_fn, corresponding_base_revision,
-      dirty_files, changed_while_parsing, old_saved) ->
+      dirty_files, changed_while_parsing, old_saved, _state_distance) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
@@ -755,8 +780,16 @@ let init ?load_mini_approach genv =
   run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
-  let load_error = match Result.error state with
-    | Some e -> Some (Printexc.to_string e)
-    | None -> None
+  let result = match state with
+    | Result.Ok (
+      _saved_state_fn,
+      _corresponding_base_revision,
+      _dirty_files,
+      _changed_while_parsing,
+      _old_saved,
+      state_distance) ->
+        Mini_load state_distance
+    | Result.Error e ->
+      Mini_load_failed (Printexc.to_string e)
   in
-  env, load_error
+  env, result

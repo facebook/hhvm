@@ -21,6 +21,7 @@
 module TokenKind = Full_fidelity_token_kind
 module MinimalTrivia = Full_fidelity_minimal_trivia
 module MinimalToken = Full_fidelity_minimal_token
+module TriviaKind = Full_fidelity_trivia_kind
 
 module Scope = struct
   include Set.Make(struct

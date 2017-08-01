@@ -852,12 +852,12 @@ module WithExpressionAndStatementAndTypeParser
       | LeftParen, _ ->
         parse_property_declaration parser modifiers
       (* We encountered one unexpected token, but the next still indicates that
-       * we should be parsing a methodish. Throw an error, eat the token,
-       * and keep parsing a methodish. *)
+       * we should be parsing a methodish. Throw an error, process the token
+       * as an extra, and keep going. *)
       | _, (Async | Coroutine | Function)
         when not (Token.has_leading_end_of_line next_token) ->
         let parser = with_error parser SyntaxError.error1056 in
-        let parser = skip_token parser in
+        let parser = process_next_as_extra parser in
         parse_methodish parser attribute_spec modifiers
       (* Otherwise, continue parsing as a property (which might be a lambda). *)
       | ( _ , _ ) -> parse_property_declaration parser modifiers

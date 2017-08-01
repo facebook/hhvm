@@ -106,7 +106,7 @@ module WithParser(Parser : ParserType) = struct
     let errors = Parser.errors parser in
     Parser.with_errors parser (error :: errors)
 
-  let expect_token parser kind error =
+  let require_token parser kind error =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
       (parser1, make_token token)
@@ -115,13 +115,13 @@ module WithParser(Parser : ParserType) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser error, (make_missing()))
 
-  let expect_required parser =
-    expect_token parser TokenKind.Required SyntaxError.error1051
+  let require_required parser =
+    require_token parser TokenKind.Required SyntaxError.error1051
 
-  let expect_name parser =
-    expect_token parser TokenKind.Name SyntaxError.error1004
+  let require_name parser =
+    require_token parser TokenKind.Name SyntaxError.error1004
 
-  let expect_name_allow_keywords parser =
+  let require_name_allow_keywords parser =
     let (parser1, token) = next_token_as_name parser in
     if (Token.kind token) = TokenKind.Name then
       (parser1, make_token token)
@@ -160,7 +160,7 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
-  let expect_xhp_class_name parser =
+  let require_xhp_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
       (parser, make_token token)
@@ -170,7 +170,7 @@ module WithParser(Parser : ParserType) = struct
       (* TODO: Different error? *)
       (with_error parser SyntaxError.error1004, (make_missing()))
 
-  let expect_xhp_name parser =
+  let require_xhp_name parser =
     if is_next_name parser then
       let (parser, token) = next_xhp_name parser in
       (parser, make_token token)
@@ -180,12 +180,12 @@ module WithParser(Parser : ParserType) = struct
       (* TODO: Different error? *)
       (with_error parser SyntaxError.error1004, (make_missing()))
 
-  let expect_class_name parser =
+  let require_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
       (parser, make_token token)
     else
-      expect_name_allow_keywords parser
+      require_name_allow_keywords parser
 
   let next_xhp_class_name_or_other parser =
     if is_next_xhp_class_name parser then next_xhp_class_name parser
@@ -202,7 +202,7 @@ module WithParser(Parser : ParserType) = struct
 
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
-  let expect_qualified_name parser =
+  let require_qualified_name parser =
     (* TODO: What if the name is a keyword? *)
     let (parser1, name) = next_token parser in
     match Token.kind name with
@@ -211,67 +211,67 @@ module WithParser(Parser : ParserType) = struct
     | _ ->
       (with_error parser SyntaxError.error1004, (make_missing()))
 
-  let expect_function parser =
-    expect_token parser TokenKind.Function SyntaxError.error1003
+  let require_function parser =
+    require_token parser TokenKind.Function SyntaxError.error1003
 
-  let expect_variable parser =
-    expect_token parser TokenKind.Variable SyntaxError.error1008
+  let require_variable parser =
+    require_token parser TokenKind.Variable SyntaxError.error1008
 
-  let expect_semicolon parser =
-    expect_token parser TokenKind.Semicolon SyntaxError.error1010
+  let require_semicolon parser =
+    require_token parser TokenKind.Semicolon SyntaxError.error1010
 
-  let expect_colon parser =
-    expect_token parser TokenKind.Colon SyntaxError.error1020
+  let require_colon parser =
+    require_token parser TokenKind.Colon SyntaxError.error1020
 
-  let expect_left_brace parser =
-    expect_token parser TokenKind.LeftBrace SyntaxError.error1034
+  let require_left_brace parser =
+    require_token parser TokenKind.LeftBrace SyntaxError.error1034
 
-  let expect_right_brace parser =
-    expect_token parser TokenKind.RightBrace SyntaxError.error1006
+  let require_right_brace parser =
+    require_token parser TokenKind.RightBrace SyntaxError.error1006
 
-  let expect_left_paren parser =
-    expect_token parser TokenKind.LeftParen SyntaxError.error1019
+  let require_left_paren parser =
+    require_token parser TokenKind.LeftParen SyntaxError.error1019
 
-  let expect_right_paren parser =
-    expect_token parser TokenKind.RightParen SyntaxError.error1011
+  let require_right_paren parser =
+    require_token parser TokenKind.RightParen SyntaxError.error1011
 
-  let expect_left_angle parser =
-    expect_token parser TokenKind.LessThan SyntaxError.error1021
+  let require_left_angle parser =
+    require_token parser TokenKind.LessThan SyntaxError.error1021
 
-  let expect_right_angle parser =
-    expect_token parser TokenKind.GreaterThan SyntaxError.error1013
+  let require_right_angle parser =
+    require_token parser TokenKind.GreaterThan SyntaxError.error1013
 
-  let expect_right_double_angle parser =
-    expect_token parser TokenKind.GreaterThanGreaterThan SyntaxError.error1029
+  let require_right_double_angle parser =
+    require_token parser TokenKind.GreaterThanGreaterThan SyntaxError.error1029
 
-  let expect_left_bracket parser =
-    expect_token parser TokenKind.LeftBracket SyntaxError.error1026
+  let require_left_bracket parser =
+    require_token parser TokenKind.LeftBracket SyntaxError.error1026
 
-  let expect_right_bracket parser =
-    expect_token parser TokenKind.RightBracket SyntaxError.error1032
+  let require_right_bracket parser =
+    require_token parser TokenKind.RightBracket SyntaxError.error1032
 
-  let expect_equal parser =
-    expect_token parser TokenKind.Equal SyntaxError.error1036
+  let require_equal parser =
+    require_token parser TokenKind.Equal SyntaxError.error1036
 
-  let expect_arrow parser =
-    expect_token parser TokenKind.EqualGreaterThan SyntaxError.error1028
+  let require_arrow parser =
+    require_token parser TokenKind.EqualGreaterThan SyntaxError.error1028
 
-  let expect_lambda_arrow parser =
-    expect_token parser TokenKind.EqualEqualGreaterThan SyntaxError.error1046
+  let require_lambda_arrow parser =
+    require_token parser TokenKind.EqualEqualGreaterThan SyntaxError.error1046
 
-  let expect_as parser =
-    expect_token parser TokenKind.As SyntaxError.error1023
+  let require_as parser =
+    require_token parser TokenKind.As SyntaxError.error1023
 
-  let expect_while parser =
-    expect_token parser TokenKind.While SyntaxError.error1018
+  let require_while parser =
+    require_token parser TokenKind.While SyntaxError.error1018
 
-  let expect_comma parser =
-    expect_token parser TokenKind.Comma SyntaxError.error1054
+  let require_comma parser =
+    require_token parser TokenKind.Comma SyntaxError.error1054
 
-  let expect_coloncolon parser =
-    expect_token parser TokenKind.ColonColon SyntaxError.error1047
+  let require_coloncolon parser =
+    require_token parser TokenKind.ColonColon SyntaxError.error1047
 
-  let expect_name_or_variable_or_error parser error =
+  let require_name_or_variable_or_error parser error =
     let (parser1, token) = next_token_as_name parser in
     match Token.kind token with
     | TokenKind.Name
@@ -281,17 +281,17 @@ module WithParser(Parser : ParserType) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser error, (make_missing()))
 
-  let expect_name_or_variable parser =
-    expect_name_or_variable_or_error parser SyntaxError.error1050
+  let require_name_or_variable parser =
+    require_name_or_variable_or_error parser SyntaxError.error1050
 
-  let expect_xhp_class_name_or_name_or_variable parser =
+  let require_xhp_class_name_or_name_or_variable parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
       (parser, make_token token)
     else
-      expect_name_or_variable parser
+      require_name_or_variable parser
 
-  let expect_xhp_class_name_or_qualified_name_or_variable parser =
+  let require_xhp_class_name_or_qualified_name_or_variable parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
       (parser, make_token token)
@@ -470,9 +470,9 @@ module WithParser(Parser : ParserType) = struct
 
   let parse_delimited_list
       parser left_kind left_error right_kind right_error parse_items =
-    let (parser, left) = expect_token parser left_kind left_error in
+    let (parser, left) = require_token parser left_kind left_error in
     let (parser, items) = parse_items parser in
-    let (parser, right) = expect_token parser right_kind right_error in
+    let (parser, right) = require_token parser right_kind right_error in
     (parser, left, items, right)
 
   let parse_parenthesized_list parser parse_items =

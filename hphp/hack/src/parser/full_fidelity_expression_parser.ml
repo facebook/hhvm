@@ -224,7 +224,7 @@ module WithStatementAndDeclAndTypeParser
     if peek_token_kind parser1 = LeftParen then
       let (parser, left) = assert_token parser1 LeftParen in
       let (parser, arg) = parse_expression_with_reset_precedence parser in
-      let (parser, right) = expect_right_paren parser in
+      let (parser, right) = require_right_paren parser in
       let result = make_empty_expression keyword left arg right in
       (parser, result)
     else
@@ -245,7 +245,7 @@ module WithStatementAndDeclAndTypeParser
     if peek_token_kind parser1 = LeftParen then
       let (parser, left) = assert_token parser1 LeftParen in
       let (parser, arg) = parse_expression_with_reset_precedence parser in
-      let (parser, right) = expect_right_paren parser in
+      let (parser, right) = require_right_paren parser in
       let result = make_eval_expression keyword left arg right in
       (parser, result)
     else
@@ -782,7 +782,7 @@ module WithStatementAndDeclAndTypeParser
     let (parser, name) = if peek_token_kind parser = LeftBrace then
       parse_braced_expression parser
     else
-      expect_xhp_class_name_or_name_or_variable parser in
+      require_xhp_class_name_or_name_or_variable parser in
     let result = if (Token.kind token) = MinusGreaterThan then
       make_member_selection_expression term op name
     else
@@ -810,8 +810,8 @@ module WithStatementAndDeclAndTypeParser
     begin
       let (parser, index) = with_reset_precedence parser parse_expression in
       let (parser, right) = match Token.kind left with
-      | LeftBracket -> expect_right_bracket parser
-      | _ -> expect_right_brace parser in
+      | LeftBracket -> require_right_bracket parser
+      | _ -> require_right_brace parser in
       let left = make_token left in
       let result = make_subscript_expression term left index right in
       parse_remaining_expression parser result
@@ -1247,7 +1247,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     *)
     let sig_and_arrow parser =
       let (parser, signature) = parse_lambda_signature parser in
-      expect_lambda_arrow parser in
+      require_lambda_arrow parser in
     parses_without_error parser sig_and_arrow
 
   and parse_lambda_expression parser =
@@ -1258,7 +1258,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, async) = optional_token parser Async in
     let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, signature) = parse_lambda_signature parser in
-    let (parser, arrow) = expect_lambda_arrow parser in
+    let (parser, arrow) = require_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
     let result = make_lambda_expression async coroutine signature arrow body in
     (parser, result)
@@ -1293,7 +1293,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_parenthesized_expression parser =
     let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, expression) = with_reset_precedence parser parse_expression in
-    let (parser, right_paren) = expect_right_paren parser in
+    let (parser, right_paren) = require_right_paren parser in
     let syntax =
       make_parenthesized_expression left_paren expression right_paren in
     (parser, syntax)
@@ -1319,7 +1319,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       let (parser1, variable) = next_token parser in
       (parser1, make_token variable)
     | Dollar -> parse_dollar_expression parser
-    | _ -> expect_variable parser
+    | _ -> require_variable parser
 
   and parse_dollar_expression parser =
     let (parser, dollar) = assert_token parser Dollar in
@@ -1614,7 +1614,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       (parser, make_missing())
     else
       with_reset_precedence parser parse_expression in
-    let (parser, colon) = expect_colon parser in
+    let (parser, colon) = require_colon parser in
     let (parser, term) = parse_term parser in
     let precedence = Operator.precedence Operator.ConditionalQuestionOperator in
     let (parser, alternative) = parse_remaining_binary_expression_helper
@@ -1634,7 +1634,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_collection_literal_expression parser name =
     let parser, left_brace = assert_token parser LeftBrace in
     let parser, initialization_list = parse_optional_initialization parser in
-    let parser, right_brace = expect_right_brace parser in
+    let parser, right_brace = require_right_brace parser in
     (* Validating the name is a collection type happens in a later phase *)
     let syntax = make_collection_literal_expression
       name left_brace initialization_list right_brace
@@ -1657,7 +1657,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
 
   and parse_keyed_element_initializer parser =
     let parser, expr1 = parse_expression_with_reset_precedence parser in
-    let parser, arrow = expect_arrow parser in
+    let parser, arrow = require_arrow parser in
     let parser, expr2 = parse_expression_with_reset_precedence parser in
     let syntax = make_element_initializer expr1 arrow expr2 in
     (parser, syntax)
@@ -1718,7 +1718,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
           RightBracket
           SyntaxError.error1015
           parse_element_function in
-      let (parser, right_bracket) = expect_right_bracket parser in
+      let (parser, right_bracket) = require_right_bracket parser in
       let result =
         make_intrinsinc_function keyword left_bracket members right_bracket in
       (parser, result)
@@ -1810,7 +1810,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
        TODO: Make a later error pass that detects when it is not a
        literal or name. *)
     let (parser, name) = with_reset_precedence parser parse_expression in
-    let (parser, arrow) = expect_arrow parser in
+    let (parser, arrow) = require_arrow parser in
     let (parser, value) = with_reset_precedence parser parse_expression in
     let result = make_field_initializer name arrow value in
     (parser, result)
@@ -1857,7 +1857,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (* TODO: Is it better that this returns the variable as a *token*, or
     as an *expression* that consists of the token? We do the former. *)
     let (parser, ampersand) = optional_token parser Ampersand in
-    let (parser, variable) = expect_variable parser in
+    let (parser, variable) = require_variable parser in
     if is_missing ampersand then
       (parser, variable)
     else
@@ -1969,11 +1969,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_braced_expression parser =
     let (parser, left_brace) = assert_token parser LeftBrace in
     let (parser, expression) = parse_expression_with_reset_precedence parser in
-    let (parser, right_brace) = expect_right_brace parser in
+    let (parser, right_brace) = require_right_brace parser in
     let node = make_braced_expression left_brace expression right_brace in
     (parser, node)
 
-  and expect_right_brace_xhp parser =
+  and require_right_brace_xhp parser =
     let (parser1, token) = next_xhp_body_token parser in
     if (Token.kind token) = TokenKind.RightBrace then
       (parser1, make_token token)
@@ -1989,7 +1989,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     *)
     let (parser, left_brace) = assert_token parser LeftBrace in
     let (parser, expression) = parse_expression_with_reset_precedence parser in
-    let (parser, right_brace) = expect_right_brace_xhp parser in
+    let (parser, right_brace) = require_right_brace_xhp parser in
     let node = make_braced_expression left_brace expression right_brace in
     (parser, node)
 
@@ -2153,13 +2153,13 @@ TODO: This will need to be fixed to allow situations where the qualified name
     name or variable *token* and not a name or variable *expression*. Is
     that the desired tree topology? Give this more thought; it might impact
     rename refactoring semantics. *)
-    let (parser, op) = expect_coloncolon parser in
+    let (parser, op) = require_coloncolon parser in
     let (parser, name) =
       let parser1, token = next_token parser in
       match Token.kind token with
       | Class -> parser1, make_token token
       | Dollar -> parse_dollar_expression parser
-      | _ -> expect_name_or_variable_or_error parser SyntaxError.error1048
+      | _ -> require_name_or_variable_or_error parser SyntaxError.error1048
     in
     let result = make_scope_resolution_expression qualifier op name in
     (parser, result)

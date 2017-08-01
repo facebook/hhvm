@@ -201,7 +201,7 @@ and parse_variance_opt parser =
 *)
 and parse_type_parameter parser =
   let parser, variance = parse_variance_opt parser in
-  let (parser, type_name) = expect_name_allow_keywords parser in
+  let (parser, type_name) = require_name_allow_keywords parser in
   let (parser, constraints) =
     parse_list_until_none parser parse_generic_type_constraint_opt in
   (parser, make_type_parameter variance type_name constraints)
@@ -218,7 +218,7 @@ and parse_generic_type_parameter_list parser =
   let (parser, left) = assert_token parser LessThan in
   let (parser, params) =  parse_comma_list_allow_trailing parser GreaterThan
     SyntaxError.error1007 parse_type_parameter in
-  let (parser, right) = expect_right_angle parser in
+  let (parser, right) = require_right_angle parser in
   let result = make_type_parameters left params right in
   (parser, result)
 
@@ -322,7 +322,7 @@ and parse_array_type_specifier parser =
       let (parser, comma) = next_token parser in
       let comma = make_token comma in
       let (parser, value_type) = parse_type_specifier parser in
-      let (parser, right_angle) = expect_right_angle parser in
+      let (parser, right_angle) = require_right_angle parser in
       let result = make_map_array_type_specifier array_token left_angle key_type
         comma value_type right_angle in
       (parser, result)
@@ -348,7 +348,7 @@ and parse_array_type_specifier parser =
       let comma = make_token comma in
       let parser, value_type = parse_type_specifier parser in
       let parser, optional_comma = optional_token parser Comma in
-      let parser, right_angle = expect_right_angle parser in
+      let parser, right_angle = require_right_angle parser in
       let result =
         make_darray_type_specifier
           array_token
@@ -395,10 +395,10 @@ and parse_array_type_specifier parser =
       let result = make_simple_type_specifier keyword in
       (parser, result)
     else
-      let (parser, left) = expect_left_angle parser in
+      let (parser, left) = require_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
       let (parser, optional_comma) = optional_token parser Comma in
-      let (parser, right) = expect_right_angle parser in
+      let (parser, right) = require_right_angle parser in
       let result =
         make_vector_type_specifier keyword left t optional_comma right in
       (parser, result)
@@ -417,10 +417,10 @@ and parse_array_type_specifier parser =
       let result = make_simple_type_specifier keyword in
       (parser, result)
     else
-      let (parser, left) = expect_left_angle parser in
+      let (parser, left) = require_left_angle parser in
       let (parser, t) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
-      let (parser, right) = expect_right_angle parser in
+      let (parser, right) = require_right_angle parser in
       let result = make_keyset_type_specifier keyword left t comma right in
       (parser, result)
 
@@ -470,11 +470,11 @@ and parse_array_type_specifier parser =
     else
       (* TODO: This allows "noreturn" as a type argument. Should we
       disallow that at parse time? *)
-      let (parser, left) = expect_left_angle parser in
+      let (parser, left) = require_left_angle parser in
       let (parser, arguments) =
         parse_comma_list_allow_trailing parser GreaterThan
         SyntaxError.error1007 parse_return_type in
-      let (parser, right) = expect_right_angle parser in
+      let (parser, right) = require_right_angle parser in
       let result = make_dictionary_type_specifier
         keyword left arguments right in
       (parser, result)
@@ -502,7 +502,7 @@ and parse_closure_type_specifier parser =
   let (parser, coroutine) = optional_token parser Coroutine in
   let (parser, fnc) = next_token parser in
   let fnc = make_token fnc in
-  let (parser, ilp) = expect_left_paren parser in
+  let (parser, ilp) = require_left_paren parser in
   let (parser1, token) = next_token parser in
   let (parser, pts, irp) =
     if (Token.kind token) = RightParen then
@@ -510,11 +510,11 @@ and parse_closure_type_specifier parser =
     else
       (* TODO add second pass checking to ensure ellipsis is the last arg *)
       let (parser, pts) = parse_type_or_ellipsis_list parser RightParen in
-      let (parser, irp) = expect_right_paren parser in
+      let (parser, irp) = require_right_paren parser in
       (parser, pts, irp) in
-  let (parser, col) = expect_colon parser in
+  let (parser, col) = require_colon parser in
   let (parser, ret) = parse_type_specifier parser in
-  let (parser, orp) = expect_right_paren parser in
+  let (parser, orp) = require_right_paren parser in
   let result =
     make_closure_type_specifier olp coroutine fnc ilp pts irp col ret orp in
   (parser, result)
@@ -596,10 +596,10 @@ and parse_classname_type_specifier parser =
   (* TODO ERROR RECOVERY is unsophisticated here. *)
   let (parser, classname) = next_token parser in
   let classname = make_token classname in
-  let (parser, left_angle) = expect_left_angle parser in
+  let (parser, left_angle) = require_left_angle parser in
   let (parser, classname_type) = parse_type_specifier parser in
   let (parser, optional_comma) = optional_token parser Comma in
-  let (parser, right_angle) = expect_right_angle parser in
+  let (parser, right_angle) = require_right_angle parser in
   let result = make_classname_type_specifier
     classname left_angle classname_type optional_comma right_angle in
   (parser, result)
@@ -625,7 +625,7 @@ and parse_field_specifier parser =
     then assert_token parser Question
     else (parser, (make_missing())) in
   let (parser, name) = parse_expression parser in
-  let (parser, arrow) = expect_arrow parser in
+  let (parser, arrow) = require_arrow parser in
   let (parser, field_type) = parse_type_specifier parser in
   let result = make_field_specifier question name arrow field_type in
   (parser, result)
@@ -644,7 +644,7 @@ and parse_shape_specifier parser =
   (* TODO: ERROR RECOVERY is not very sophisticated here. *)
   let (parser, shape) = next_token parser in
   let shape = make_token shape in
-  let (parser, lparen) = expect_left_paren parser in
+  let (parser, lparen) = require_left_paren parser in
   let is_closing_token = function
     | RightParen | DotDotDot -> true
     | _ -> false in
@@ -654,7 +654,7 @@ and parse_shape_specifier parser =
     if peek_token_kind parser = DotDotDot
     then assert_token parser DotDotDot
     else (parser, (make_missing())) in
-  let (parser, rparen) = expect_right_paren parser in
+  let (parser, rparen) = require_right_paren parser in
   let result = make_shape_type_specifier shape lparen fields ellipsis rparen in
   (parser, result)
 

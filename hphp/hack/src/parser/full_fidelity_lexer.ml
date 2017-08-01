@@ -62,6 +62,9 @@ let width lexer =
 let current_text lexer =
   SourceText.sub lexer.text lexer.start (width lexer)
 
+let current_text_at lexer length relative_start =
+  SourceText.sub lexer.text (lexer.start + relative_start) length
+
 let at_end lexer =
   lexer.offset >= SourceText.length lexer.text
 

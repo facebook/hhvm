@@ -28,3 +28,4 @@ let scan_markup = Full_fidelity_lexer.scan_markup
 let is_next_xhp_category_name = Full_fidelity_lexer.is_next_xhp_category_name
 let next_xhp_category_name = Full_fidelity_lexer.next_xhp_category_name
 let errors = Full_fidelity_lexer.errors
+let current_text_at = Full_fidelity_lexer.current_text_at

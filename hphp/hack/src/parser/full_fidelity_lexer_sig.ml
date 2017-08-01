@@ -12,6 +12,7 @@ module type Lexer_S = sig
   type t
   val start_offset : t -> int
   val end_offset : t -> int
+  val current_text_at : t -> int -> int -> string
   val next_token : t -> t * Full_fidelity_minimal_token.t
   val next_token_no_trailing : t -> t * Full_fidelity_minimal_token.t
   val next_token_as_name : t -> t * Full_fidelity_minimal_token.t

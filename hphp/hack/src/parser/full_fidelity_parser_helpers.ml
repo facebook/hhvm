@@ -85,11 +85,6 @@ module WithParser(Parser : ParserType) = struct
     let (parser, _) = next_token parser in
     parser
 
-  let process_next_as_extra parser =
-    let (parser, token) = next_token parser in
-    let parser = Parser.carry_extra parser token in
-    parser
-
   let scan_markup parser ~is_leading_section =
     let (lexer, markup, suffix) =
       Parser.Lexer.scan_markup (Parser.lexer parser) ~is_leading_section
@@ -105,6 +100,23 @@ module WithParser(Parser : ParserType) = struct
     let error = SyntaxError.make start_offset end_offset message in
     let errors = Parser.errors parser in
     Parser.with_errors parser (error :: errors)
+
+  let current_token_text parser =
+    let token = peek_token parser in
+    let token_width = Token.width token in
+    let token_str = Parser.Lexer.current_text_at
+      (Parser.lexer parser) token_width 0 in
+    token_str
+
+  let process_next_as_extra ?(generate_error=true) parser =
+    let parser =
+      if generate_error then
+        let extra_str = current_token_text parser in
+        with_error parser (SyntaxError.error1057 extra_str)
+      else parser in
+    let (parser, token) = next_token parser in
+    let parser = Parser.carry_extra parser token in
+    parser
 
   let require_token parser kind error =
     let (parser1, token) = next_token parser in

@@ -1076,7 +1076,7 @@ let add_doc buf doc_comment =
   match doc_comment with
   | Some cmt ->
     B.add_string buf @@
-      Printf.sprintf "\n.doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
+      Printf.sprintf "\n  .doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
   | None -> ()
 
 let add_body buf indent body =

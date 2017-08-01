@@ -905,13 +905,13 @@ and emit_expr env expr ~need_ref =
   | A.Array es ->
     emit_box_if_necessary need_ref @@ emit_collection env expr es
   | A.Darray es ->
-    es
-      |> List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
-      |> emit_collection env expr
+    let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    let array_e = fst expr, A.Array es in
+    emit_box_if_necessary need_ref @@ emit_collection env array_e es
   | A.Varray es ->
-    es
-      |> List.map ~f:(fun e -> A.AFvalue e)
-      |> emit_collection env expr
+    let es = List.map ~f:(fun e -> A.AFvalue e) es in
+    let array_e = fst expr, A.Array es in
+    emit_box_if_necessary need_ref @@ emit_collection env array_e es
   | A.Collection ((pos, name), fields) ->
     emit_box_if_necessary need_ref
       @@ emit_named_collection env expr pos name fields
@@ -1089,8 +1089,7 @@ and emit_dynamic_collection env expr es =
 and emit_named_collection env expr pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
   match name with
-  (* TODO (#19893791): It shouldn't be possible to get varray/darray here *)
-  | "dict" | "vec" | "keyset" | "varray" | "darray"
+  | "dict" | "vec" | "keyset"
     -> emit_collection env expr fields
   | "Vector" | "ImmVector" ->
     let collection_type = collection_type name in

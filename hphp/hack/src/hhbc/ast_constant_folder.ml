@@ -33,6 +33,11 @@ let rec expr_to_typed_value
   | A.Id (_, id) when id = "NAN" -> TV.Float nan
   | A.Id (_, id) when id = "INF" -> TV.Float infinity
   | A.Array fields -> array_to_typed_value ns fields
+  | A.Varray es ->
+    array_to_typed_value ns @@ List.map es ~f:(fun e -> A.AFvalue e)
+  | A.Darray es ->
+    array_to_typed_value ns @@
+      List.map es ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
   | A.Collection ((_, "vec"), fields) ->
     TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), fields) ->

@@ -60,13 +60,10 @@ slow/dict/init-parse-error3.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
 slow/dv_array/arr_to_varray_cast.php
-slow/dv_array/constants.php
 slow/dv_array/convert.php
 slow/dv_array/hh-only1.php
 slow/dv_array/hh-only2.php
 slow/dv_array/is-a.php
-slow/dv_array/literal.php
-slow/dv_array/nested_in_container.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php

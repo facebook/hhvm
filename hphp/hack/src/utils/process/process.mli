@@ -12,16 +12,29 @@
 
 open Process_types
 
-(** exec program ?env args
- *
- * Shells out the program with the given args. *)
-val exec : string -> ?input:string -> ?env:string list -> string list ->
-  Process_types.t
+module Entry : sig
+  type 'param t
+  val register:
+    string -> ('param -> unit) ->
+    'param t
+end
 
-(** Wraps a Daemon entry point inside a Process, so we get Process's
- * goodness for free (read_and_wait_pid and is_ready). The daemon_entry
- * will be spawned into a separate process. *)
-val run_daemon : ('a, 'b, 'c) Daemon.entry -> 'a -> Process_types.t
+(**
+ * Shells out the program with the given args.
+ * Sets its current working directory if given.
+ * Sends input to stdin of spawned process if given.
+ *)
+val exec : ?cwd:string -> string -> ?input:string -> ?env:string list ->
+  string list -> Process_types.t
+
+val register_entry_point :
+  string -> ('param -> unit) ->
+  'param Entry.t
+
+(** Wraps a entry point inside a Process, so we get Process's
+ * goodness for free (read_and_wait_pid and is_ready). The entry will be
+ * spawned into a separate process. *)
+val run_entry : ?input:string -> 'a Entry.t -> 'a -> Process_types.t
 
 (**
  * Read data from stdout and stderr until EOF is reached. Waits for

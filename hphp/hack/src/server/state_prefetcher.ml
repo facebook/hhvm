@@ -15,7 +15,7 @@ let dummy = None
 
 let of_script_opt v = v
 
-let run_and_log (script, svn_rev) _ic_oc =
+let run_and_log (script, svn_rev) =
   HackEventLogger.init_informant_prefetcher_runner (Unix.time ());
   let start_t = Unix.time () in
   let process = Process.exec
@@ -51,12 +51,12 @@ let run_and_log (script, svn_rev) _ic_oc =
  *
  * Just set them to unit. (Ouch.)
  *)
-let run_and_log_entry : (Path.t * int, unit, unit) Daemon.entry =
-  Daemon.register_entry_point
+let run_and_log_entry : (Path.t * int) Process.Entry.t =
+  Process.register_entry_point
     "Prefetcher_run_and_log" run_and_log
 
 let run svn_rev t  = match t with
   | None -> Process_types.dummy
   | Some script ->
-    Process.run_daemon run_and_log_entry
+    Process.run_entry run_and_log_entry
       (script, svn_rev)

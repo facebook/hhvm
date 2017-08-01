@@ -82,6 +82,42 @@ let test_stdin_input () =
     Printf.eprintf "Error %s" (Process.failure_msg failure);
     false
 
+let print_string_main str =
+  Printf.printf "%s\n" str
+
+let print_string_entry = Process.register_entry_point
+  "print_string_main" print_string_main
+
+let test_entry_point () =
+  let process = Process.run_entry print_string_entry "hello" in
+  let result = Process.read_and_wait_pid ~timeout:10 process in
+  match result with
+  | Result.Ok (out, _err) ->
+    let () = String_asserter.assert_equals "hello\n" out "" in
+    true
+  | _ ->
+    false
+
+let test_chdir () =
+  let process = Process.exec ~cwd:"/tmp" "pwd" [] in
+  let result = Process.read_and_wait_pid ~timeout:10 process in
+  match result with
+  | Result.Ok (out, _err) ->
+    let () = String_asserter.assert_equals "/tmp\n" out "" in
+    true
+  | Result.Error (Process_types.Timed_out _) ->
+    Printf.eprintf "Process timed out\n";
+    false
+  | Result.Error Process_types.Process_aborted_input_too_large ->
+    Printf.eprintf "Unexpected error process input too large\n";
+    false
+  | Result.Error (Process_types.Process_exited_abnormally
+    (_, stdout, stderr)) ->
+      Printf.eprintf "Process exited abnormally\n";
+      Printf.eprintf "See stdout: %s\n" stdout;
+      Printf.eprintf "See stderr: %s\n" stderr;
+      false
+
 let tests = [
   ("test_echo", test_echo);
   ("test_process_read_idempotent", test_process_read_idempotent);
@@ -92,7 +128,10 @@ let tests = [
   ("test_future", test_future);
   ("test_future_is_ready", test_future_is_ready);
   ("test_stdin_input", test_stdin_input);
+  ("test_entry_point", test_entry_point);
+  ("test_chdir", test_chdir);
 ]
 
 let () =
+  Daemon.check_entry_point ();
   Unit_test.run_all tests

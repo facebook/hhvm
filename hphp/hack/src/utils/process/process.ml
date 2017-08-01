@@ -11,6 +11,19 @@
 open Core
 open Stack_utils
 
+module Entry = struct
+
+  type 'param t = ('param, unit, unit) Daemon.entry
+
+  let register name entry =
+    let daemon_entry =
+      Daemon.register_entry_point name begin fun params _channels ->
+        entry params
+    end in
+    daemon_entry
+
+end
+
 let chunk_size = 65536
 
 (** In the blocking read_and_wait_pid call, we alternate between
@@ -174,30 +187,9 @@ let failure_msg failure =
     | Process_aborted_input_too_large ->
       "Process_aborted_input_too_large"
 
-(** Exec the given program with these args. If input is set, send it to
- * the stdin on the spawned program and then close the file descriptor.
- *
- * Note: See Input_too_large
- *)
-let exec prog ?input ?env args =
+let send_input_and_form_result
+?input ~pid ~stdin_parent ~stdout_parent ~stderr_parent =
   let open Process_types in
-  let args = Array.of_list (prog :: args) in
-  let stdin_child, stdin_parent = Unix.pipe () in
-  let stdout_parent, stdout_child = Unix.pipe () in
-  let stderr_parent, stderr_child = Unix.pipe () in
-  Unix.set_close_on_exec stdin_parent;
-  Unix.set_close_on_exec stdout_parent;
-  Unix.set_close_on_exec stderr_parent;
-  let pid = match env with
-  | None ->
-    Unix.create_process prog args stdin_child stdout_child stderr_child
-  | Some env ->
-    Unix.create_process_env prog args
-      (Array.of_list env) stdin_child stdout_child stderr_child
-  in
-  Unix.close stdin_child;
-  Unix.close stdout_child;
-  Unix.close stderr_child;
   let input_failed = match input with
     | None -> false
     | Some input ->
@@ -222,17 +214,55 @@ let exec prog ?input ?env args =
     process_status = ref @@ process_status;
   }
 
-let run_daemon entry params =
-  let stdin = Daemon.null_fd () in
+
+let exec_no_chdir prog ?input ?env args =
+  let args = Array.of_list (prog :: args) in
+  let stdin_child, stdin_parent = Unix.pipe () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
-  let handle = Daemon.spawn (stdin, stdout_child, stderr_child) entry params in
-  {
-    Process_types.stdin_fd = ref @@ Some (Daemon.descr_of_in_channel
-      (fst handle.Daemon.channels));
-    stdout_fd = ref @@ Some stdout_parent;
-    stderr_fd = ref @@ Some stderr_parent;
-    acc = Stack.create ();
-    acc_err = Stack.create ();
-    process_status = ref @@ Process_types.Process_running handle.Daemon.pid;
-  }
+  Unix.set_close_on_exec stdin_parent;
+  Unix.set_close_on_exec stdout_parent;
+  Unix.set_close_on_exec stderr_parent;
+  let pid = match env with
+  | None ->
+    Unix.create_process prog args stdin_child stdout_child stderr_child
+  | Some env ->
+    Unix.create_process_env prog args
+      (Array.of_list env) stdin_child stdout_child stderr_child
+  in
+  Unix.close stdin_child;
+  Unix.close stdout_child;
+  Unix.close stderr_child;
+  send_input_and_form_result ?input ~pid ~stdin_parent
+    ~stdout_parent ~stderr_parent
+
+let register_entry_point = Entry.register
+
+let run_entry ?input entry params =
+  let stdin_child, stdin_parent = Unix.pipe () in
+  let stdout_parent, stdout_child = Unix.pipe () in
+  let stderr_parent, stderr_child = Unix.pipe () in
+  let { Daemon.pid; _ } = Daemon.spawn
+    (stdin_child, stdout_child, stderr_child) entry params in
+  send_input_and_form_result ?input ~pid ~stdin_parent
+    ~stdout_parent ~stderr_parent
+
+let chdir_main (cwd, prog, env_opt, args) =
+  Unix.chdir cwd;
+  let args = Array.of_list (prog :: args) in
+  Unix.execvpe prog args (Array.of_list @@ Option.value env_opt ~default:[])
+
+let chdir_entry = Entry.register "chdir_main" chdir_main
+
+
+(** Exec the given program with these args. If input is set, send it to
+ * the stdin on the spawned program and then close the file descriptor.
+ *
+ * Note: See Input_too_large
+ *)
+let exec ?cwd prog ?input ?env args =
+  match cwd with
+  | None ->
+    exec_no_chdir prog ?input ?env args
+  | Some cwd ->
+    run_entry ?input chdir_entry (cwd, prog, env, args)

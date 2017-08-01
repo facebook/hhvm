@@ -172,7 +172,8 @@ static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
-                                        .withThis());
+                                        .withThis()
+                                        .withMetadata());
   return new RequestTimeoutException(exceptionMsg, exceptionStack);
 }
 
@@ -187,7 +188,8 @@ static Exception* generate_request_cpu_timeout_exception(
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
-                                        .withThis());
+                                        .withThis()
+                                        .withMetadata());
   return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
 }
 
@@ -195,7 +197,8 @@ static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
-                                        .withThis());
+                                        .withThis()
+                                        .withMetadata());
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }

@@ -240,7 +240,7 @@ void OfflineCode::disasm(FILE* file,
 }
 #else
   // cmake should prevent this.
-  error "tc-print on x86_64 requires libxed"
+#error "tc-print on x86_64 requires libxed"
 #endif
 #endif
 

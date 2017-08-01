@@ -65,6 +65,17 @@ let pop_scope parser token_kind_list =
 let print_expected parser =
   Context.print_expected parser.context
 
+let carry_extra parser token =
+  let new_context = Context.carry_extra parser.context (Some token) in
+  with_context parser new_context
+
+let carrying_extra parser =
+  Context.carrying_extra parser.context
+
+let flush_extra parser =
+  let (context, trivia_list) = Context.flush_extra parser.context in
+  ({ parser with context }, trivia_list)
+
 (** Precedence functions **)
 
 let with_precedence parser precedence =

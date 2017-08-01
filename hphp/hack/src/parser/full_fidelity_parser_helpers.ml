@@ -12,6 +12,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
 module Context = Full_fidelity_parser_context
+module MinimalTrivia = Full_fidelity_minimal_trivia
 
 open Full_fidelity_minimal_syntax
 
@@ -23,6 +24,9 @@ module type ParserType = sig
   val lexer : t -> Lexer.t
   val with_lexer : t -> Lexer.t -> t
   val expect : t -> TokenKind.t list -> t
+  val carry_extra : t -> Token.t -> t
+  val carrying_extra: t -> bool
+  val flush_extra : t -> t * MinimalTrivia.t list
 end
 
 module WithParser(Parser : ParserType) = struct
@@ -31,6 +35,13 @@ module WithParser(Parser : ParserType) = struct
     let lexer = Parser.lexer parser in
     let (lexer, token) = Parser.Lexer.next_token lexer in
     let parser = Parser.with_lexer parser lexer in
+    (* ERROR RECOVERY: Check if the parser's carring ExtraTokenError trivia.
+     * If so, clear it and add it to the leading trivia of the current token. *)
+    let (parser, token) =
+      if Parser.carrying_extra parser then
+        let (parser1, trivia_list) = Parser.flush_extra parser in
+        (parser1, Token.prepend_to_leading token trivia_list)
+      else (parser, token) in
     (parser, token)
 
   let next_token_no_trailing parser =
@@ -72,6 +83,11 @@ module WithParser(Parser : ParserType) = struct
 
   let skip_token parser =
     let (parser, _) = next_token parser in
+    parser
+
+  let process_next_as_extra parser =
+    let (parser, token) = next_token parser in
+    let parser = Parser.carry_extra parser token in
     parser
 
   let scan_markup parser ~is_leading_section =

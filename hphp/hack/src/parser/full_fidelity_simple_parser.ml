@@ -65,4 +65,15 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
   let print_expected parser =
     Context.print_expected parser.context
 
+  let carry_extra parser token =
+    let new_context = Context.carry_extra parser.context (Some token) in
+    with_context parser new_context
+
+  let carrying_extra parser =
+    Context.carrying_extra parser.context
+
+  let flush_extra parser =
+    let (context, trivia_list) = Context.flush_extra parser.context in
+    ({ parser with context }, trivia_list)
+
 end

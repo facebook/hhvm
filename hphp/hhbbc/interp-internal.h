@@ -749,6 +749,10 @@ bool isTrackedThisProp(ISS& env, SString name) {
   return thisPropRaw(env, name);
 }
 
+bool isNonSerializedThisProp(ISS& env, SString name) {
+  return env.collect.props.isNonSerialized(name);
+}
+
 void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
   for (auto& kv : env.collect.props.privateProperties()) {
@@ -778,20 +782,19 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 }
 
 /*
- * Merge a type into the track property types on $this, in the sense
+ * Merge a type into the tracked property types on $this, in the sense
  * of tvSet (i.e. setting the inner type on possible refs).
  *
- * Note that all types we see that could go into an object property
- * have to loosen_statics and loosen_values.  This is because the
- * object could be serialized and then deserialized, losing the
- * static-ness of a string or array member, and we don't guarantee
- * deserialization would preserve a constant value object property
- * type.
+ * Note that all types we see that could go into an object property have to
+ * loosen_all.  This is because the object could be serialized and then
+ * deserialized, losing the static-ness of a string or array member, and we
+ * don't guarantee deserialization would preserve a constant value object
+ * property type.
  */
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t |= loosen_statics(loosen_values(type));
+  *t |= (isNonSerializedThisProp(env, name) ? type : loosen_all(type));
 }
 
 /*

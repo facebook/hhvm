@@ -572,9 +572,10 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * Initialize inferred private property types to their in-class
    * initializers.
    *
-   * We need to loosen_statics and loosen_values on instance
-   * properties, because the class could be unserialized, which we
-   * don't guarantee preserves those aspects of the type.
+   * We need to loosen_all on instance properties, because the class could be
+   * unserialized, which we don't guarantee preserves those aspects of the
+   * type. The exception is properties marked as AttrNoSerialize, which won't be
+   * unserialized.
    *
    * Also, set Uninit properties to TBottom, so that analysis
    * of 86pinit methods sets them to the correct type.
@@ -599,7 +600,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_statics(loosen_values(cellTy));
+      auto t = (prop.attrs & AttrNoSerialize) ? cellTy : loosen_all(cellTy);
       if (!is_closure(*ctx.cls) && t.subtypeOf(TUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit
@@ -665,15 +666,6 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(TBottom));
     } else {
       assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(TBottom));
-    }
-  }
-
-  // TODO(#3696042): We don't have support for static properties with
-  // specialized array types in the minstr functions yet, so if we
-  // have one after 86sinit, throw it away.
-  for (auto& kv : clsAnalysis.privateStatics) {
-    if (is_specialized_array(kv.second)) {
-      kv.second |= TArr;
     }
   }
 

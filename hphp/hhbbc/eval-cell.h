@@ -115,12 +115,9 @@ folly::Optional<Type> eval_cell(Pred p) {
      * to actually make these into non-reference-counted SStr or
      * SArrs.  If we leave the bytecode alone, though, it generally
      * won't actually be static at runtime.
-     *
-     * TODO(#3696042): loosen_statics here should ideally not give up
-     * on the array or string value, just its staticness.
      */
     auto const t = from_cell(c);
-    return options.ConstantProp ? t : loosen_statics(t);
+    return options.ConstantProp ? t : loosen_staticness(t);
   } catch (const Object&) {
     return folly::none;
   } catch (const std::exception&) {

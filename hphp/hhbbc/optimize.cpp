@@ -171,6 +171,16 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
     case Op::FPassBaseNC: assert_stack(bcode.FPassBaseNC.arg2); break;
     case Op::FPassBaseGC: assert_stack(bcode.FPassBaseGC.arg2); break;
+    case Op::Dim: {
+      switch (bcode.Dim.mkey.mcode) {
+        case MEC: case MPC:
+          assert_stack(bcode.Dim.mkey.idx);
+          break;
+        case MW:  case MEL: case MPL: case MEI:
+        case MET: case MPT: case MQT:
+          break;
+      }
+    }
     default:                                                    break;
   }
 }

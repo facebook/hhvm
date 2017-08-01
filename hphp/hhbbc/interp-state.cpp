@@ -19,6 +19,8 @@
 
 #include <folly/Format.h>
 #include <folly/Conv.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"
@@ -147,6 +149,13 @@ PropertiesInfo::PropertiesInfo(const Index& index,
     m_privateProperties = index.lookup_private_props(ctx.cls);
     m_privateStatics    = index.lookup_private_statics(ctx.cls);
   }
+
+  if (ctx.cls) {
+    for (auto const& prop : ctx.cls->properties) {
+      if (!(prop.attrs & AttrNoSerialize)) continue;
+      m_nonSerializedProps.emplace(prop.name);
+    }
+  }
 }
 
 PropState& PropertiesInfo::privateProperties() {
@@ -169,6 +178,10 @@ const PropState& PropertiesInfo::privateProperties() const {
 
 const PropState& PropertiesInfo::privateStatics() const {
   return const_cast<PropertiesInfo*>(this)->privateStatics();
+}
+
+bool PropertiesInfo::isNonSerialized(SString name) const {
+  return m_nonSerializedProps.count(name) > 0;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -410,6 +423,45 @@ std::string show(const ActRec& a) {
   );
 }
 
+std::string show(const php::Func& f, const Base& b) {
+  auto const locName = [&]{
+    return b.locName ? folly::sformat("\"{}\"", b.locName) : "-";
+  };
+  auto const local = [&]{
+    return b.locLocal != NoLocalId ? local_string(f, b.locLocal) : "-";
+  };
+
+  switch (b.loc) {
+    case BaseLoc::None:
+      return "none";
+    case BaseLoc::Elem:
+      return folly::to<std::string>(
+        "elem{", show(b.type), ",", show(b.locTy), "}"
+      );
+    case BaseLoc::Prop:
+      return folly::to<std::string>(
+        "prop{", show(b.type), ",", show(b.locTy), ",", locName(), "}"
+      );
+    case BaseLoc::StaticProp:
+      return folly::to<std::string>(
+        "sprop{", show(b.type), ",", show(b.locTy), ",", locName(), "}"
+      );
+    case BaseLoc::Local:
+      return folly::to<std::string>(
+        "local{", show(b.type), ",", locName(), ",", local(), "}"
+      );
+    case BaseLoc::This:
+      return folly::to<std::string>("this{", show(b.type), "}");
+    case BaseLoc::Stack:
+      return folly::to<std::string>(
+        "stack{", show(b.type), ",", b.locSlot, "}"
+      );
+    case BaseLoc::Global:
+      return folly::to<std::string>("global{", show(b.type), "}");
+  }
+  not_reached();
+}
+
 std::string state_string(const php::Func& f, const State& st,
                          const CollectedInfo& collect) {
   std::string ret;
@@ -470,6 +522,14 @@ std::string state_string(const php::Func& f, const State& st,
                   local_string(f, st.equivLocals[i]));
   }
 
+  if (st.base.loc != BaseLoc::None) {
+    folly::format(&ret, "active base   :: {}\n", show(f, st.base));
+  }
+
+  if (!st.arrayChain.empty()) {
+    folly::format(&ret, "array-chain   :: {}\n", array_chain_string(st));
+  }
+
   return ret;
 }
 
@@ -490,6 +550,15 @@ std::string property_state_string(const PropertiesInfo& props) {
   }
 
   return ret;
+}
+
+std::string array_chain_string(const State& state) {
+  using namespace folly::gen;
+  return from(state.arrayChain)
+    | map([&] (const std::pair<Type,Type>& p) {
+        return folly::sformat("<{},{}>", show(p.second), show(p.first));
+      })
+    | unsplit<std::string>(" -> ");
 }
 
 //////////////////////////////////////////////////////////////////////

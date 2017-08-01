@@ -37,6 +37,8 @@
 
 namespace HPHP { namespace HHBBC {
 
+void PrintTo(const Type& t, ::std::ostream* os) { *os << show(t); }
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +167,9 @@ std::unique_ptr<php::Program> make_program() {
 
 //////////////////////////////////////////////////////////////////////
 
+Cell tv(SString s) { return make_tv<KindOfPersistentString>(s); }
+Cell tv(const StaticString& s) { return tv(s.get()); }
+
 auto const test_empty_array = folly::lazy([] {
   return staticEmptyArray();
 });
@@ -216,6 +221,36 @@ auto const with_data = folly::lazy([] {
   };
 });
 
+auto const specialized_array_examples = folly::lazy([] {
+  auto ret = std::vector<Type>{};
+
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
+  ret.emplace_back(sarr_map(test_map_a));
+
+  auto test_map_b          = MapElems{};
+  test_map_b[tv(s_test)]   = TInt;
+  ret.emplace_back(sarr_map(test_map_b));
+
+  auto test_map_c          = MapElems{};
+  test_map_c[tv(s_A)]    = TInt;
+  ret.emplace_back(sarr_map(test_map_c));
+
+  auto test_map_d          = MapElems{};
+  test_map_d[tv(s_A)]      = TInt;
+  test_map_d[tv(s_test)]   = TDbl;
+  ret.emplace_back(sarr_map(test_map_d));
+
+  ret.emplace_back(arr_packedn(TInt));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, TArr));
+  ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
+  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
+  ret.emplace_back(arr_packed({TInt, TStr, TBool}));
+
+  return ret;
+});
+
 // In the sense of "non-union type", not the sense of TPrim.
 auto const primitives = folly::lazy([] {
   return std::vector<Type> {
@@ -231,6 +266,18 @@ auto const primitives = folly::lazy([] {
     TCArrE,
     TSArrN,
     TCArrN,
+    TSVecE,
+    TCVecE,
+    TSVecN,
+    TCVecN,
+    TSDictE,
+    TCDictE,
+    TSDictN,
+    TCDictN,
+    TSKeysetE,
+    TCKeysetE,
+    TSKeysetN,
+    TCKeysetN,
     TObj,
     TRes,
     TCls,
@@ -258,6 +305,27 @@ auto const optionals = folly::lazy([] {
     TOptSArr,
     TOptCArr,
     TOptArr,
+    TOptSVecE,
+    TOptCVecE,
+    TOptSVecN,
+    TOptCVecN,
+    TOptSVec,
+    TOptCVec,
+    TOptVec,
+    TOptSDictE,
+    TOptCDictE,
+    TOptSDictN,
+    TOptCDictN,
+    TOptSDict,
+    TOptCDict,
+    TOptDict,
+    TOptSKeysetE,
+    TOptCKeysetE,
+    TOptSKeysetN,
+    TOptCKeysetN,
+    TOptSKeyset,
+    TOptCKeyset,
+    TOptKeyset,
     TOptObj,
     TOptRes
   };
@@ -278,6 +346,21 @@ auto const non_opt_unions = folly::lazy([] {
     TSArr,
     TCArr,
     TArr,
+    TVecE,
+    TVecN,
+    TSVec,
+    TCVec,
+    TVec,
+    TDictE,
+    TDictN,
+    TSDict,
+    TCDict,
+    TDict,
+    TKeysetE,
+    TKeysetN,
+    TSKeyset,
+    TCKeyset,
+    TKeyset,
     TInitPrim,
     TPrim,
     TInitUnc,
@@ -292,11 +375,19 @@ auto const all_unions = folly::lazy([] {
   return boost::join(optionals(), non_opt_unions());
 });
 
-auto const all = folly::lazy([] {
+auto const all_no_data = folly::lazy([] {
   std::vector<Type> ret;
   ret.insert(end(ret), begin(primitives()), end(primitives()));
   ret.insert(end(ret), begin(all_unions()), end(all_unions()));
+  return ret;
+});
+
+auto const all = folly::lazy([] {
+  auto ret = all_no_data();
   ret.insert(end(ret), begin(with_data()), end(with_data()));
+  ret.insert(end(ret),
+             begin(specialized_array_examples()),
+             end(specialized_array_examples()));
   return ret;
 });
 
@@ -307,43 +398,17 @@ std::vector<Type> wait_handles_of(const Index& index, const Range& r) {
   return ret;
 }
 
+std::vector<Type> all_no_data_with_waithandles(const Index& index) {
+  auto ret = wait_handles_of(index, all_no_data());
+  for (auto& t : all_no_data()) ret.push_back(t);
+  return ret;
+}
+
 std::vector<Type> all_with_waithandles(const Index& index) {
   auto ret = wait_handles_of(index, all());
   for (auto& t : all()) ret.push_back(t);
   return ret;
 }
-
-Cell tv(SString s) { return make_tv<KindOfPersistentString>(s); }
-Cell tv(const StaticString& s) { return tv(s.get()); }
-
-auto const specialized_array_examples = folly::lazy([] {
-  auto ret = std::vector<Type>{};
-
-  auto test_map_a          = MapElems{};
-  test_map_a[tv(s_test)]   = ival(2);
-  ret.emplace_back(sarr_map(test_map_a));
-
-  auto test_map_b          = MapElems{};
-  test_map_b[tv(s_test)]   = TInt;
-  ret.emplace_back(sarr_map(test_map_b));
-
-  auto test_map_c          = MapElems{};
-  test_map_c[tv(s_A)]    = TInt;
-  ret.emplace_back(sarr_map(test_map_c));
-
-  auto test_map_d          = MapElems{};
-  test_map_d[tv(s_A)]      = TInt;
-  test_map_d[tv(s_test)]   = TDbl;
-  ret.emplace_back(sarr_map(test_map_d));
-
-  ret.emplace_back(arr_packedn(TInt));
-  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
-  ret.emplace_back(arr_mapn(TSStr, TArr));
-  ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
-  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
-
-  return ret;
-});
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2083,6 +2148,191 @@ TEST(Type, ArrKey) {
   EXPECT_TRUE(opt(TUncArrKey) == TOptUncArrKey);
   EXPECT_TRUE(unopt(TOptArrKey) == TArrKey);
   EXPECT_TRUE(unopt(TOptUncArrKey) == TUncArrKey);
+}
+
+TEST(Type, LoosenStaticness) {
+  auto const program = make_program();
+  Index index{ borrow(program) };
+
+  for (auto const& t : all_with_waithandles(index)) {
+    if (t == TUncArrKey || t == TOptUncArrKey ||
+        t == TInitUnc || t == TUnc ||
+        (t.subtypeOfAny(TOptSArr, TOptCArr,
+                        TOptSVec, TOptCVec,
+                        TOptSDict, TOptCDict,
+                        TOptSKeyset, TOptCKeyset,
+                        TOptSStr, TOptCStr) &&
+         t != TInitNull)) continue;
+    EXPECT_EQ(loosen_staticness(t), t);
+  }
+
+  auto test_map          = MapElems{};
+  test_map[tv(s_A)]      = TInt;
+  std::vector<std::pair<Type, Type>> tests = {
+    { TSStr, TStr },
+    { TCStr, TStr },
+    { TSArrE, TArrE },
+    { TSArrN, TArrN },
+    { TCArrE, TArrE },
+    { TCArrN, TArrN },
+    { TSVecE, TVecE },
+    { TSVecN, TVecN },
+    { TCVecE, TVecE },
+    { TCVecN, TVecN },
+    { TSDictE, TDictE },
+    { TSDictN, TDictN },
+    { TCDictE, TDictE },
+    { TCDictN, TDictN },
+    { TSKeysetE, TKeysetE },
+    { TSKeysetN, TKeysetN },
+    { TCKeysetE, TKeysetE },
+    { TCKeysetN, TKeysetN },
+    { TUncArrKey, TArrKey },
+    { TUnc, TCell },
+    { TInitUnc, TInitCell },
+    { sval(s_test.get()), TStr },
+    { sarr_packedn(TInt), arr_packedn(TInt) },
+    { sarr_packed({TInt, TBool}), arr_packed({TInt, TBool}) },
+    { sarr_mapn(TSStr, TInt), arr_mapn(TSStr, TInt) },
+    { sarr_map(test_map), arr_map(test_map) },
+    { carr_packedn(TInt), arr_packedn(TInt) },
+    { carr_packed({TInt, TBool}), arr_packed({TInt, TBool}) },
+    { carr_mapn(TSStr, TInt), arr_mapn(TSStr, TInt) }
+  };
+  for (auto const& p : tests) {
+    EXPECT_EQ(loosen_staticness(p.first), p.second);
+    if (p.first == TUnc || p.first == TInitUnc) continue;
+    EXPECT_EQ(loosen_staticness(opt(p.first)), opt(p.second));
+  }
+}
+
+TEST(Type, LoosenEmptiness) {
+  auto const program = make_program();
+  Index index{ borrow(program) };
+
+  for (auto const& t : all_with_waithandles(index)) {
+    if (t.subtypeOfAny(TOptArrE, TOptArrN,
+                       TOptVecE, TOptVecN,
+                       TOptDictE, TOptDictN,
+                       TOptKeysetE, TOptKeysetN) &&
+        t != TInitNull) continue;
+    EXPECT_EQ(loosen_emptiness(t), t);
+  }
+
+  auto test_map          = MapElems{};
+  test_map[tv(s_A)]      = TInt;
+  std::vector<std::pair<Type, Type>> tests = {
+    { TSArrE, TSArr },
+    { TSArrN, TSArr },
+    { TCArrE, TCArr },
+    { TCArrN, TCArr },
+    { TSVecE, TSVec },
+    { TSVecN, TSVec },
+    { TCVecE, TCVec },
+    { TCVecN, TCVec },
+    { TSDictE, TSDict },
+    { TSDictN, TSDict },
+    { TCDictE, TCDict },
+    { TCDictN, TCDict },
+    { TSKeysetE, TSKeyset },
+    { TSKeysetN, TSKeyset },
+    { TCKeysetE, TCKeyset },
+    { TCKeysetN, TCKeyset },
+    { arr_packedn(TInt), union_of(TArrE, arr_packedn(TInt)) },
+    { arr_packed({TInt, TBool}), union_of(TArrE, arr_packed({TInt, TBool})) },
+    { arr_mapn(TStr, TInt), union_of(TArrE, arr_mapn(TStr, TInt)) },
+    { arr_map(test_map), union_of(TArrE, arr_map(test_map)) }
+  };
+  for (auto const& p : tests) {
+    EXPECT_EQ(loosen_emptiness(p.first), p.second);
+    EXPECT_EQ(loosen_emptiness(opt(p.first)), opt(p.second));
+  }
+}
+
+TEST(Type, LoosenValues) {
+  auto const program = make_program();
+  auto const unit = borrow(program->units.back());
+    auto const func = [&]() -> borrowed_ptr<php::Func> {
+    for (auto& f : unit->funcs) {
+      if (f->name->isame(s_test.get())) return borrow(f);
+    }
+    return nullptr;
+  }();
+  EXPECT_TRUE(func != nullptr);
+
+  auto const ctx = Context { unit, func };
+  Index index{ borrow(program) };
+
+  for (auto const& t : all_no_data_with_waithandles(index)) {
+    if (t == TTrue || t == TFalse) continue;
+    if (t == TOptTrue || t == TOptFalse) continue;
+    EXPECT_EQ(loosen_values(t), t);
+  }
+
+  EXPECT_TRUE(loosen_values(TTrue) == TBool);
+  EXPECT_TRUE(loosen_values(TFalse) == TBool);
+  EXPECT_TRUE(loosen_values(TOptTrue) == TOptBool);
+  EXPECT_TRUE(loosen_values(TOptFalse) == TOptBool);
+
+  auto test_map          = MapElems{};
+  test_map[tv(s_A)]      = TInt;
+  std::vector<std::pair<Type, Type>> tests = {
+    { ival(123), TInt },
+    { dval(3.14), TDbl },
+    { sval(s_test.get()), TSStr },
+    { aval(test_array_packed_value()), TSArrN },
+    { ref_to(TInt), TRef },
+    { arr_packedn(TInt), TArrN },
+    { arr_packed({TInt, TBool}), TArrN },
+    { arr_mapn(TStr, TInt), TArrN },
+    { arr_map(test_map), TArrN }
+  };
+  for (auto const& p : tests) {
+    EXPECT_EQ(loosen_values(p.first), p.second);
+    if (p.first.subtypeOf(TRef)) continue;
+    EXPECT_EQ(loosen_values(opt(p.first)), opt(p.second));
+  }
+
+  auto const cls = index.resolve_class(ctx, s_TestClass.get());
+  if (!cls) EXPECT_TRUE(false);
+
+  EXPECT_TRUE(loosen_values(objExact(*cls)) == objExact(*cls));
+  EXPECT_TRUE(loosen_values(subObj(*cls)) == subObj(*cls));
+  EXPECT_TRUE(loosen_values(clsExact(*cls)) == clsExact(*cls));
+  EXPECT_TRUE(loosen_values(subCls(*cls)) == subCls(*cls));
+
+  EXPECT_TRUE(loosen_values(opt(objExact(*cls))) == opt(objExact(*cls)));
+  EXPECT_TRUE(loosen_values(opt(subObj(*cls))) == opt(subObj(*cls)));
+}
+
+TEST(Type, AddNonEmptiness) {
+  auto const program = make_program();
+  Index index{ borrow(program) };
+
+  for (auto const& t : all_with_waithandles(index)) {
+    if (t.subtypeOfAny(TOptArrE, TOptVecE, TOptDictE, TOptKeysetE)
+        && t != TInitNull) continue;
+    EXPECT_EQ(add_nonemptiness(t), t);
+  }
+
+  std::vector<std::pair<Type, Type>> tests = {
+    { TArrE, TArr },
+    { TSArrE, TSArr },
+    { TCArrE, TCArr },
+    { TVecE, TVec },
+    { TSVecE, TSVec },
+    { TCVecE, TCVec },
+    { TDictE, TDict },
+    { TSDictE, TSDict },
+    { TCDictE, TCDict },
+    { TKeysetE, TKeyset },
+    { TSKeysetE, TSKeyset },
+    { TCKeysetE, TCKeyset }
+  };
+  for (auto const& p : tests) {
+    EXPECT_EQ(add_nonemptiness(p.first), p.second);
+    EXPECT_EQ(add_nonemptiness(opt(p.first)), opt(p.second));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

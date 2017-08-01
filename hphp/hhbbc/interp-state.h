@@ -88,24 +88,28 @@ using Iter = boost::variant< UnknownIter
 /*
  * Tag indicating what sort of thing contains the current member base.
  *
- * The base is always the unboxed version of the type, and its
- * location could be inside of a Ref.  So, for example, a base with
- * BaseLoc::Frame could be located inside of a Ref that is pointed
- * to by the Frame.  (We may want to distinguish these two cases at
- * some point if we start trying to track real information about
- * Refs, but not yet.)
+ * The base is always the unboxed version of the type, and its location could be
+ * inside of a Ref. So, for example, a base with BaseLoc::Frame could be located
+ * inside of a Ref that is pointed to by the Frame. (We may want to distinguish
+ * these two cases at some point if we start trying to track real information
+ * about Refs, but not yet.)
+ *
+ * Note that if we're in an array-chain, the base location always reflects the
+ * location of the array which started the array-chain.
  */
 enum class BaseLoc {
+  None,
+
   /*
    * Base is in a number of possible places after an Elem op.  It
    * cannot possibly be in an object property (although it certainly
-   * may alias one).  See miElem for details.  Not all post-elem ops
-   * use this location (see LocalArrChain).
+   * may alias one). See miElem for details.
    *
-   * If it is definitely in an array, the locTy in the Base will be
-   * a subtype of TArr.
+   * This is only used if its unclear if its actually in an array. If it is
+   * definitely in an array, then arrayChain will be non-empty and the base
+   * location will reflect where the array is located.
    */
-  PostElem,
+  Elem,
 
   /*
    * Base is in possible locations after a Prop op.  This means it
@@ -116,66 +120,67 @@ enum class BaseLoc {
    * If it is definitely known to be a property in an object, the
    * locTy in the Base will be a subtype of TObj.
    */
-  PostProp,
+  Prop,
 
   /*
-   * Known to be a static property on an object.  This is only
+   * Known to be a static property on an object. This is only
    * possible as an initial base.
    */
-  StaticObjProp,
-
-  /*
-   * The base is inside of a local that contains a specialized array
-   * type, and the arrayChain is non-empty.
-   *
-   * When the location is set to this, the chain will continue as
-   * long as we keep staying inside specialized array types.  If it
-   * moves to something like a ?Arr type, we must leave the chain
-   * when the base moves.
-   */
-  LocalArrChain,
+  StaticProp,
 
   /*
    * Known to be contained in the current frame as a local, as the
    * frame $this, by the evaluation stack, or inside $GLOBALS.  Only
    * possible as initial bases.
    */
-  Frame,
-  FrameThis,
-  EvalStack,
+  Local,
+  This,
+  Stack,
   Global,
-
-  /*
-   * If we've execute an operation that's known to fatal, we use
-   * this BaseLoc.
-   */
-  Fataled,
 };
 
 /*
  * Information about the current member base's type and location.
  */
 struct Base {
+  explicit Base(Type type = {},
+                BaseLoc loc = BaseLoc::None,
+                Type locTy = {},
+                SString locName = {},
+                LocalId locLocal = NoLocalId,
+                uint32_t locSlot = 0)
+    : type{std::move(type)}
+    , loc{loc}
+    , locTy{std::move(locTy)}
+    , locName{locName}
+    , locLocal{locLocal}
+    , locSlot{locSlot} {}
+
   Type type;
   BaseLoc loc;
 
   /*
-   * We also need to track effects of intermediate dims on the type
-   * of the base.  So we have a type, name, and possibly associated
-   * local for the base's container.
+   * We also need to track effects of intermediate dims on the type of the base.
+   * So we have a type, name, and possibly associated local or stack slot for
+   * the base's container.
    *
-   * For StaticObjProp, locName this is the name of the property if
-   * known, or nullptr, and locTy is the type of the class
-   * containing the static property.
+   * For StaticProp, locName is the name of the property if known, or nullptr,
+   * and locTy is the type of the class containing the static property.
    *
-   * Similarly, if loc is PostProp, locName is the name of the
-   * property if it was known, and locTy gives as much information
-   * about the object type it is in.  (If we actually *know* it is
-   * in an object, locTy will be a subtype of TObj.)
+   * For Prop, locName is the name of the property if it was known, and locTy
+   * gives as much information about the object type it is in.  (If we actually
+   * *know* it is in an object, locTy will be a subtype of TObj.)
+   *
+   * For Local, locName is the name of the local if known, or nullptr, and
+   * locLocal is the LocalId corresponding to the local (or NoLocalId if not
+   * known).
+   *
+   * For Stack, locSlot is the stack index of the corresponding stack slot.
    */
   Type locTy;
   SString locName;
-  LocalId local;
+  LocalId locLocal;
+  uint32_t locSlot;
 };
 
 // An element on the eval stack
@@ -243,13 +248,13 @@ struct State {
    * The current member base. Updated as we move through bytecodes representing
    * the operation.
    */
-  Base base;
+  Base base{};
 
   /*
-   * Chains of member operations on array elements will all affect the type of
-   * something further back in the member instruction.  Currently this is just
-   * used for locals.  This vector tracks the base,key type pair that was used
-   * at each stage.  See irgen-minstr.cpp:resolveArrayChain().
+   * Chains of member operations on array elements will affect the type of
+   * something further back in the member instruction. This vector tracks the
+   * base,key type pair that was used at each stage. See
+   * interp-minstr.cpp:resolveArrayChain().
    */
   CompactVector<std::pair<Type,Type>> arrayChain;
 
@@ -301,10 +306,12 @@ struct PropertiesInfo {
   const PropState& privateProperties() const;
   const PropState& privateStatics() const;
 
+  bool isNonSerialized(SString name) const;
 private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
+  boost::container::flat_set<LSString> m_nonSerializedProps;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -375,8 +382,10 @@ bool widen_into(State&, const State&);
  * Functions to show various aspects of interpreter state as strings.
  */
 std::string show(const ActRec& a);
+std::string show(const php::Func&, const Base& b);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&, const CollectedInfo&);
+std::string array_chain_string(const State&);
 
 //////////////////////////////////////////////////////////////////////
 

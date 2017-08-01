@@ -191,7 +191,7 @@ Type typeIncDec(IncDecOp op, Type t) {
 
   // We may have inferred a TSStr or TSArr with a value here, but at
   // runtime it will not be static.
-  resultTy = loosen_statics(*resultTy);
+  resultTy = loosen_staticness(*resultTy);
   return *resultTy;
 }
 
@@ -223,8 +223,8 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_statics(a);
-  auto const nsb = loosen_statics(b);
+  auto const nsa = loosen_staticness(a);
+  auto const nsb = loosen_staticness(b);
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }

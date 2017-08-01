@@ -521,6 +521,10 @@ private:
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
   friend bool could_run_destructor(const Type&);
+  friend Type loosen_staticness(Type);
+  friend Type loosen_values(Type);
+  friend Type loosen_emptiness(Type);
+  friend Type add_nonemptiness(Type);
 
 private:
   union Data {
@@ -1011,25 +1015,38 @@ Type promote_emptyish(Type a, Type b);
 Type stack_flav(Type a);
 
 /*
- * Force any type that contains SStr and SArr to contain Arr and Str.
- * This is needed for some operations that can change static arrays or
- * strings into non-static ones.  Doesn't change the type if it can't
- * contain SStr or SArr.
+ * Discard any countedness information about the type. Force any type which
+ * contains only static or counted variants to contain both. Doesn't change the
+ * type otherwise.
  */
-Type loosen_statics(Type);
+Type loosen_staticness(Type);
 
 /*
- * Force any type that corresponds to a constant php value to contain
- * all values of that php type.
- *
- * Precisely: strict subtypes of TInt, TDbl, TBool, TSStr, and TSArr
- * become exactly that corresponding type.  Additionally, TOptTrue and
- * TOptFalse become TOptBool.  All other types are unchanged.
- *
- * TODO(#3696042): loosen values of an array shape should keep the
- * shape.
+ * Force any type which might contain any sub-types of Arr, Vec, Dict, and
+ * Keyset to contain Arr, Vec, Dict, and Keyset. This is needed for some
+ * operations whose effects on arrays cannot be predicted. Doesn't change the
+ * type otherwise.
  */
-Type loosen_values(Type);
+Type loosen_arrays(Type);
+
+/*
+ * Drop any data from the type (except for object class information) and force
+ * TTrue or TFalse to TBool. Doesn't change the type otherwise.
+ */
+Type loosen_values(Type t);
+
+/*
+ * Discard any emptiness information about the type. Force any type which
+ * contains only empty or non-empty variants to contain both. Doesn't change the
+ * type otherwise.
+ */
+Type loosen_emptiness(Type t);
+
+/*
+ * Loosens staticness, emptiness, and values from the type. This forces a type
+ * to its most basic form (except for object class information).
+ */
+Type loosen_all(Type t);
 
 /*
  * If t contains TUninit, returns the best type we can that contains
@@ -1039,6 +1056,12 @@ Type loosen_values(Type);
  * Pre: t.subtypeOf(TCell)
  */
 Type remove_uninit(Type t);
+
+/*
+ * Add non-empty variants of the type to the type if not already
+ * present. Doesn't change the type otherwise.
+ */
+Type add_nonemptiness(Type t);
 
 /*
  * Returns the best known type of an array inner element given a type

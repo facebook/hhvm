@@ -1730,7 +1730,7 @@ void in(ISS& env, const bc::SetOpL& op) {
 
     // We may have inferred a TSStr or TSArr with a value here, but
     // at runtime it will not be static.  For now just throw that
-    // away.  TODO(#3696042): should be able to loosen_statics here.
+    // away.  TODO(#3696042): should be able to loosen_staticness here.
     if (resultTy->subtypeOf(TStr)) resultTy = TStr;
     else if (resultTy->subtypeOf(TArr)) resultTy = TArr;
     else if (resultTy->subtypeOf(TVec)) resultTy = TVec;
@@ -3223,8 +3223,9 @@ StepFlags interpOps(Interp& interp,
 
 RunFlags run(Interp& interp, PropagateFn propagate) {
   SCOPE_EXIT {
-    FTRACE(2, "out {}\n",
-           state_string(*interp.ctx.func, interp.state, interp.collect));
+    FTRACE(2, "out {}{}\n",
+           state_string(*interp.ctx.func, interp.state, interp.collect),
+           property_state_string(interp.collect.props));
   };
 
   auto ret = RunFlags {};

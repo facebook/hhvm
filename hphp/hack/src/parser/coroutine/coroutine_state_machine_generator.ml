@@ -37,6 +37,27 @@ let make_label_declaration_syntax label =
 let make_goto_statement_syntax label =
   CoroutineSyntax.make_goto_statement_syntax (get_label_name label)
 
+(* checks if one of node's parents is a try-block of try-statement
+   NOTE: this function relies on physical identity of nodes being the same *)
+let rec is_in_try_block node parents =
+  match parents with
+  | [] -> false
+  | { syntax = TryStatement { try_compound_statement; _ }; _ } :: _
+      when node == try_compound_statement ->
+    true
+  | x :: xs -> is_in_try_block x xs
+
+(* given a node an a list of its ancestors [p1; p2; p3; ...]
+   checks nodes pairwise (node, p1), (p1, p2), (p2, p3) to make sure that
+   first node in the pair appear in the tail position within a second node*)
+let rec is_in_tail_position node parents =
+  match parents with
+  | [] -> true
+  | { syntax = ParenthesizedExpression {
+        parenthesized_expression_expression = e; _
+      }; _
+    } as n :: xs when node == e -> is_in_tail_position n xs
+  | _ -> false
 
 (*
 Consider a coroutine such as
@@ -396,10 +417,11 @@ let rewrite_for next_loop_label node =
  * been used, for earlier garbage collection. This can be done with a list of
  * statements to be executed *after* the rewritten variable.
  *)
-let extract_suspend_statements node next_label =
+let extract_suspend_statements ~parented_by_return_in_tail_position node next_label =
   let rewrite_suspends_and_gather_prefix_code
+      parents
       node
-      (next_label, prefix_statements_acc) =
+      (next_label, has_suspend_in_tail_position, prefix_statements_acc) =
     match syntax node with
     | PrefixUnaryExpression {
         prefix_unary_operator = {
@@ -414,6 +436,22 @@ let extract_suspend_statements node next_label =
           _;
         };
       } ->
+        if parented_by_return_in_tail_position && is_in_tail_position node parents
+        then
+          (* coroutine is in tail position - can call it and pass continuation
+            from the enclosing function *)
+          let function_call_argument_list =
+            prepend_to_comma_delimited_syntax_list
+              continuation_variable_syntax
+              function_call_argument_list in
+          let invoke_coroutine =
+            FunctionCallExpression {
+              function_call_expression with function_call_argument_list
+            } in
+          let invoke_coroutine_syntax = make_syntax invoke_coroutine in
+          (next_label, true, prefix_statements_acc),
+          Rewriter.Result.Replace invoke_coroutine_syntax
+        else
         let update_next_label_syntax = set_next_label_syntax next_label in
 
         let function_call_argument_list =
@@ -489,14 +527,15 @@ let extract_suspend_statements node next_label =
           throw_if_exception_not_null_syntax;
         ] in
 
-        (next_label + 1, prefix_statements_acc @ statements),
+        (next_label + 1, has_suspend_in_tail_position, prefix_statements_acc @ statements),
         Rewriter.Result.Replace coroutine_result_data_variable_syntax
     | _ ->
-        (next_label, prefix_statements_acc), Rewriter.Result.Keep in
-  Rewriter.aggregating_rewrite_post
+        (next_label, has_suspend_in_tail_position, prefix_statements_acc),
+        Rewriter.Result.Keep in
+  Rewriter.parented_aggregating_rewrite_post
     rewrite_suspends_and_gather_prefix_code
     node
-    (next_label, [])
+    (next_label, false, [])
 
 let get_token node =
   match EditableSyntax.get_token node with
@@ -513,8 +552,10 @@ let rec rewrite_if_statement next_label if_stmt =
     $t = suspend x();
     if ($t) a; else b;
   *)
-    let (next_label, prefix_statements), if_condition =
-      extract_suspend_statements if_condition next_label in
+    let (next_label, _, prefix_statements), if_condition =
+      extract_suspend_statements
+        ~parented_by_return_in_tail_position:false
+        if_condition next_label in
     let new_if = make_syntax (IfStatement { if_stmt with if_condition; }) in
     let statements = prefix_statements @ [ new_if ] in
     let statements = make_compound_statement_syntax statements in
@@ -605,8 +646,10 @@ let extract_suspend_statements_and_gather_rewrite_data_for_expressions
   let extract_suspend_statements_and_gather_rewrite_data
       expression
       (next_label, prefix_statements_acc, expressions_acc) =
-    let (next_label, prefix_statements), expression =
-      extract_suspend_statements expression next_label in
+    let (next_label, _, prefix_statements), expression =
+      extract_suspend_statements
+        ~parented_by_return_in_tail_position:false
+        expression next_label in
     next_label,
     prefix_statements @ prefix_statements_acc,
     expression :: expressions_acc in
@@ -640,8 +683,27 @@ let rewrite_suspends node =
     else
       match syntax node with
       | ReturnStatement { return_expression; _; } ->
-          let (next_label, prefix_statements), return_expression =
-            extract_suspend_statements return_expression next_label in
+          let in_tail_position = not (is_in_try_block node ancestors) in
+          let (next_label, has_suspend_in_tail_position, prefix_statements),
+            return_expression =
+            extract_suspend_statements
+              ~parented_by_return_in_tail_position:in_tail_position
+              return_expression next_label in
+          if has_suspend_in_tail_position
+          then
+            (* special case for tail positioned:
+                  return suspend someCoroutine()
+               replace it with
+                  return <rewritten return expression>
+            *)
+            let return_statement =
+              make_return_statement_syntax return_expression in
+            let statements =
+              let statements = prefix_statements @ [return_statement] in
+              make_compound_statement_syntax statements
+            in
+            next_label, Rewriter.Result.Replace statements
+          else
           let return_expression =
             if is_missing return_expression then coroutine_unit_call_syntax
             else return_expression in
@@ -656,8 +718,9 @@ let rewrite_suspends node =
         let (next_label, statements) = rewrite_if_statement next_label node in
         next_label, Rewriter.Result.Replace statements
       | ExpressionStatement ({ expression_statement_expression; _; } as node) ->
-          let (next_label, prefix_statements), expression_statement_expression =
+          let (next_label, _, prefix_statements), expression_statement_expression =
             extract_suspend_statements
+              ~parented_by_return_in_tail_position:false
               expression_statement_expression
               next_label in
           let new_expression_statement =
@@ -668,24 +731,30 @@ let rewrite_suspends node =
           let statements = make_compound_statement_syntax statements in
           next_label, Rewriter.Result.Replace statements
       | SwitchStatement ({ switch_expression; _; } as node) ->
-          let (next_label, prefix_statements), switch_expression =
-            extract_suspend_statements switch_expression next_label in
+          let (next_label, _, prefix_statements), switch_expression =
+            extract_suspend_statements
+              ~parented_by_return_in_tail_position:false
+              switch_expression next_label in
           let new_switch_statement =
             make_syntax (SwitchStatement { node with switch_expression; }) in
           let statements = prefix_statements @ [ new_switch_statement; ] in
           let statements = make_compound_statement_syntax statements in
           next_label, Rewriter.Result.Replace statements
       | ThrowStatement ({ throw_expression; _; } as node) ->
-          let (next_label, prefix_statements), throw_expression =
-            extract_suspend_statements throw_expression next_label in
+          let (next_label, _, prefix_statements), throw_expression =
+            extract_suspend_statements
+              ~parented_by_return_in_tail_position:false
+              throw_expression next_label in
           let new_throw_statement =
             make_syntax (ThrowStatement { node with throw_expression; }) in
           let statements = prefix_statements @ [ new_throw_statement; ] in
           let statements = make_compound_statement_syntax statements in
           next_label, Rewriter.Result.Replace statements
       | ForeachStatement ({ foreach_collection; _; } as node) ->
-          let (next_label, prefix_statements), foreach_collection =
-            extract_suspend_statements foreach_collection next_label in
+          let (next_label, _, prefix_statements), foreach_collection =
+            extract_suspend_statements
+              ~parented_by_return_in_tail_position:false
+              foreach_collection next_label in
           let new_foreach_collection=
             make_syntax (ForeachStatement { node with foreach_collection; }) in
           let statements = prefix_statements @ [ new_foreach_collection; ] in

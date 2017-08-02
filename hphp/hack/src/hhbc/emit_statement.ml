@@ -96,6 +96,8 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
 
 let rec emit_stmt env st =
   match st with
+  | A.Expr (_, A.Unsafeexpr e) ->
+    emit_stmt env (A.Expr e)
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;

@@ -1,0 +1,12 @@
+diff --git a/folly/CMakeLists.txt b/folly/CMakeLists.txt
+index c16c185..41e7152 100644
+--- a/third-party/folly/CMakeLists.txt
++++ b/third-party/folly/CMakeLists.txt
+@@ -56,6 +56,7 @@ list(REMOVE_ITEM files
+   ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerLib.cpp
+   ${FOLLY_DIR}/experimental/exception_tracer/StackTrace.cpp
+   ${FOLLY_DIR}/experimental/io/AsyncIO.cpp
++  ${FOLLY_DIR}/experimental/logging/example/main.cpp
+   ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
+   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
+   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.cpp

@@ -816,6 +816,14 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   SystemLib::s_inited = true;
   RuntimeOption::RepoCommit = true;
 
+
+  // the function is only invoked in hhvm --hphp, which is supposed to be in
+  // repo mode only. we are not setting it earlier in `compiler_main` since we
+  // want systemlib to be built without repo-auth == true, or otherwise,
+  // `compile_systemlib_string` will try to load systemlib from repo, while we
+  // are building it.
+  RuntimeOption::RepoAuthoritative = true;
+
   if (po.optimizeLevel > 0) {
     ret = 0;
     wholeProgramPasses(po, ar);

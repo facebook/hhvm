@@ -6157,7 +6157,11 @@ TCA suspendStack(PC &pc) {
 
 OPTBLD_INLINE void iopWHResult() {
   // we should never emit this bytecode for non-waithandle
-  auto const wh = c_WaitHandle::fromCellAssert(vmStack().topC());
+  auto const wh = c_WaitHandle::fromCell(vmStack().topC());
+  if (UNLIKELY(!wh)) {
+    raise_error("WHResult input was not a subclass of WaitHandle");
+  }
+
   // the failure condition is likely since we punt to this opcode
   // in the JIT when the state is failed.
   if (wh->isFailed()) {

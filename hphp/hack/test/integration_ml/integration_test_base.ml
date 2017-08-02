@@ -111,6 +111,20 @@ let fail x =
   Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
   exit 1
 
+(******************************************************************************(
+ * Utility functions to help format/throw errors for informative errors
+)******************************************************************************)
+let indent_string_with (indent : string) (error : string) : string =
+  indent ^ String.concat ("\n" ^ indent) Str.(split (regexp "\n") error)
+let indent_strings_with (indent : string) (errors : string list) : string =
+  String.concat "" @@ List.map ~f:(indent_string_with indent) errors
+let fail_on_none (error : string) optional_thing =
+  match optional_thing with
+  | None -> fail error
+  | Some _ -> ()
+let assert_responded (error : string) loop_output =
+  fail_on_none error loop_output.persistent_client_response
+
 let assertEqual expected got =
   let expected = String.trim expected in
   let got = String.trim got in
@@ -129,9 +143,9 @@ let connect_persistent_client env =
   let env, _ = run_loop_once env { default_loop_input with
     new_client = Some ConnectPersistent
   } in
-  match env.ServerEnv.persistent_client with
-  | Some _ -> env
-  | None -> fail "Expected persistent client to be connected"
+  fail_on_none "Expected persistent client to be connected"
+    env.ServerEnv.persistent_client;
+  env
 
 let get_errors env = Errors.get_error_list env.ServerEnv.errorl
 
@@ -139,11 +153,29 @@ let assert_no_errors env =
   if get_errors env <> [] then fail "Expected to have no errors"
 
 let assertSingleError expected err_list =
-  match err_list with
-  | [x] ->
-      let error_string = Errors.(to_string (to_absolute x)) in
-      assertEqual expected error_string
-  | _ -> fail "Expected to have exactly one error"
+  let error_strings =
+    List.map ~f:(fun x -> Errors.(to_string (to_absolute x))) err_list
+  in
+  match error_strings with
+  | [x] -> assertEqual expected x
+  | _ ->
+    let err_count = List.length err_list in
+    let fmt_expected = indent_string_with " < " expected in
+    let fmt_actual = indent_strings_with " > " error_strings in
+    let msg = Printf.sprintf
+"Expected to have exactly one error, namely:
+
+%s
+
+... but got %d errors...
+
+%s
+"
+      fmt_expected
+      err_count
+      fmt_actual
+    in
+    fail msg
 
 let subscribe_diagnostic ?(id=4) env =
   let env, _ = run_loop_once env { default_loop_input with
@@ -151,8 +183,8 @@ let subscribe_diagnostic ?(id=4) env =
       SUBSCRIBE_DIAGNOSTIC id
     )
   } in
-  if not @@ Option.is_some env.ServerEnv.diag_subscribe then
-    fail "Expected to subscribe to push diagnostics";
+  fail_on_none "Expected to subscribe to push diagnostics"
+    env.ServerEnv.diag_subscribe;
   env
 
 let open_file env ?contents file_name =
@@ -164,9 +196,7 @@ let open_file env ?contents file_name =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (OPEN_FILE (file_name, contents))
   } in
-  (match loop_output.persistent_client_response with
-  | Some () -> ()
-  | None -> fail "Expected OPEN_FILE to be processeded");
+  assert_responded "Expected OPEN_FILE to be processeded" loop_output;
   env
 
 let edit_file env name contents =
@@ -175,18 +205,14 @@ let edit_file env name contents =
       (root ^ name, [{Ide_api_types.range = None; text = contents;}])
     )
   } in
-  (match loop_output.persistent_client_response with
-  | Some () -> ()
-  | None -> fail "Expected EDIT_FILE to be processeded");
+  assert_responded "Expected EDIT_FILE to be processed" loop_output;
   env, loop_output
 
 let close_file env name =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (CLOSE_FILE (root ^ name))
   } in
-  (match loop_output.persistent_client_response with
-  | Some () -> ()
-  | None -> fail "Expected CLOSE_FILE to be processeded");
+  assert_responded "Expected CLOSE_FILE to be processeded" loop_output;
   env, loop_output
 
 let wait env =

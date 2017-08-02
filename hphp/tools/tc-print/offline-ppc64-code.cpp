@@ -33,11 +33,14 @@ namespace HPHP { namespace jit {
 
 #if defined(__powerpc64__)
 
+const char* OfflineCode::getArchName() { return "PPC64"; }
+
 TCA OfflineCode::collectJmpTargets(FILE *file,
                                    TCA fileStartAddr,
                                    TCA codeStartAddr,
                                    uint64_t codeLen,
                                    vector<TCA> *jmpTargets) {
+  return 0;
 }
 
 // Disassemble the code from the given raw file, whose initial address is given

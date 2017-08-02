@@ -65,6 +65,7 @@ quick/refcount-static.php
 quick/reserved_class1.php
 quick/reserved_class2.php
 quick/selfparent.php
+quick/serialize2.php
 quick/simp-conv-to-int-dbl.php
 quick/syntax-error.php
 quick/trailing_comma_bad5.php

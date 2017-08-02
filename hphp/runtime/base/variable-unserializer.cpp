@@ -422,13 +422,16 @@ void VariableUnserializer::expectChar(char expected) {
 }
 
 namespace {
-bool isWhitelistClass(const String& clsName, const Array& list) {
+bool isWhitelistClass(const String& requestedClassName,
+                      const Array& list,
+                      bool includeSubclasses) {
   if (!list.empty()) {
     for (ArrayIter iter(list); iter; ++iter) {
-      auto val = iter.second().toString();
-      if (val.get()->isame(clsName.get())) {
-        return true;
-      }
+      auto allowedClassName = iter.second().toString();
+      auto const matches = includeSubclasses
+        ? HHVM_FN(is_a)(requestedClassName, allowedClassName, true)
+        : allowedClassName.get()->isame(requestedClassName.get());
+      if (matches) return true;
     }
   }
   return false;
@@ -436,6 +439,7 @@ bool isWhitelistClass(const String& clsName, const Array& list) {
 }
 
 const StaticString s_allowed_classes("allowed_classes");
+const StaticString s_include_subclasses("include_subclasses");
 
 bool VariableUnserializer::whitelistCheck(const String& clsName) const {
   if (m_type != Type::Serialize || m_options.isNull()) {
@@ -448,7 +452,11 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
   if (m_options.exists(s_allowed_classes)) {
     auto allowed_classes = m_options[s_allowed_classes];
     if (allowed_classes.isArray()) {
-      return isWhitelistClass(clsName, allowed_classes.toArray());
+      bool subs = m_options.exists(s_include_subclasses)
+        && m_options[s_include_subclasses].toBoolean();
+      return isWhitelistClass(clsName,
+                              allowed_classes.toArray(),
+                              subs);
     } else if (allowed_classes.isBoolean()) {
       return allowed_classes.toBoolean();
     } else {
@@ -464,7 +472,7 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
   }
 
   // Check for old-style whitelist
-  if (isWhitelistClass(clsName, m_options)) {
+  if (isWhitelistClass(clsName, m_options, false)) {
     return true;
   }
 

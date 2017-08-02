@@ -224,13 +224,14 @@ let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int)
   : context * string =
   let open PositionedSyntax in
   let positioned_tree = from_tree syntax_tree in
-  (*
-  If the offset is the same as the width of the whole tree, then the cursor
-  is at the end of file, so we move our position back by one so that our
-  cursor is considered to be in the leading trivia of the end of file character.
-  This guarantees our parentage is not empty.
-  *)
-  let offset = if offset = width positioned_tree then offset - 1 else offset in
+  (* If the offset is the same as the width of the whole tree, then the cursor is at the end of
+  file, so we move our position to before the last character of the file so that our cursor is
+  considered to be in the leading trivia of the end of file character. This guarantees our parentage
+  is not empty. *)
+  let offset =
+    if offset >= full_width positioned_tree then full_width positioned_tree - 1
+    else offset
+  in
   let ancestry = parentage positioned_tree offset in
   let location = classify_autocomplete_location ancestry offset in
   let autocomplete_leaf_node = List.hd_exn ancestry in

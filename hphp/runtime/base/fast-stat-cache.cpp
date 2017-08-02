@@ -298,11 +298,11 @@ class StatCacheBucket {
 
   private:
     void checkUpdate() {
-      if (RuntimeOption::ServerFastStatCacheTTL <= 0) {
+      if (RuntimeOption::ServerFastStatCacheExpireSeconds <= 0) {
         return;
       }
       uint64_t now = get_time_us();
-      if (now > m_last_update_time_us + RuntimeOption::ServerFastStatCacheTTL * 1000000) {
+      if (now > m_last_update_time_us + RuntimeOption::ServerFastStatCacheExpireSeconds * 1000000) {
         m_last_update_time_us = now;
         clearAllCache();
       }

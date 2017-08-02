@@ -148,7 +148,7 @@ struct RuntimeOption {
   static bool ServerStatCache;
   static bool ServerFastStatCache;
   static int ServerFastStatCacheBucketNum;
-  static int ServerFastStatCacheTTL;
+  static int ServerFastStatCacheExpireSeconds;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;

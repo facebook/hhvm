@@ -175,7 +175,7 @@ bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFastStatCache = false;
 int RuntimeOption::ServerFastStatCacheBucketNum = 0;
-int RuntimeOption::ServerFastStatCacheTTL = 10;
+int RuntimeOption::ServerFastStatCacheExpireSeconds = 10;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
@@ -1405,7 +1405,7 @@ void RuntimeOption::Load(
     Config::Bind(ServerStatCache, ini, config, "Server.StatCache", false);
     Config::Bind(ServerFastStatCache, ini, config, "Server.FastStatCache", false);
     Config::Bind(ServerFastStatCacheBucketNum, ini, config, "Server.FastStatCacheBucketNum", 0);
-    Config::Bind(ServerFastStatCacheTTL, ini, config, "Server.FastStatCacheTTL", 5);
+    Config::Bind(ServerFastStatCacheExpireSeconds, ini, config, "Server.FastStatCacheExpireSeconds", 5);
     Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);

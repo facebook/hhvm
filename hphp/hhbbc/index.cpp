@@ -2477,17 +2477,34 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
     return res::Func { this, res::Func::FuncName { name } };
   };
 
-  if (begin(funcs) == end(funcs))              return name_only();
+  // no resolution
+  if (begin(funcs) == end(funcs)) return name_only();
+
   auto const func = begin(funcs)->second;
-  if (!(func->attrs & AttrUnique)) {
-    assert(std::next(begin(funcs)) != end(funcs));
+
+  // multiple resolutions
+  if (std::next(begin(funcs)) != end(funcs)) {
+    assert(!(func->attrs & AttrUnique));
     return name_only();
   }
 
-  assert(std::next(begin(funcs)) == end(funcs));
-  if (func->attrs & AttrInterceptable)         return name_only();
+  // single resolution
+  if (func->attrs & AttrInterceptable) return name_only();
 
-  return do_resolve(func);
+  // whole-program mode, that's it
+  if (RuntimeOption::RepoAuthoritative) {
+    assert(func->attrs & AttrUnique);
+    return do_resolve(func);
+  }
+
+  // single-unit mode, check builtins
+  if (func->attrs & AttrBuiltin) {
+    assert(func->attrs & AttrUnique);
+    return do_resolve(func);
+  }
+
+  // single-unit, non-builtin
+  return name_only();
 }
 
 res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
@@ -2507,7 +2524,8 @@ Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
   // considered before we can decide which function we're after.
   auto const r1 = find_range(m_data->funcs, nsName);
   auto const r2 = find_range(m_data->funcs, fallbackName);
-  if (begin(r1) != end(r1) && begin(r2) != end(r2)) {
+  if ((begin(r1) != end(r1) && begin(r2) != end(r2)) ||
+      !RuntimeOption::RepoAuthoritative) {
     // It could come from either at runtime.  (We could try to rule it
     // out by figuring out if one must be defined based on the
     // ctx.unit, but it's unlikely to matter for now.)
@@ -2516,6 +2534,8 @@ Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
       resolve_func_helper(r2, fallbackName)
     );
   }
+
+  assert(RuntimeOption::RepoAuthoritative);
   return begin(r2) == end(r2)
     ? std::make_pair(resolve_func_helper(r1, nsName), folly::none)
     : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);

@@ -137,15 +137,21 @@ function pack(string $format, ...$args): mixed;
  * @return int - Returns zero on success, or FALSE on errors. If the call was
  * interrupted by a signal, sleep() returns the number of seconds left to
  * sleep.
+ *
+ * FCallBuiltin is not used, as it would optimize away event hooks, resulting
+ * in broken request timeout semantics. It's also desirable to make sleep()
+ * frames visible in profiling tools such as Xenon.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function sleep(int $seconds): int;
 
 /* Delays program execution for the given number of micro seconds.
  * @param int $micro_seconds - Halt time in micro seconds. A micro second is
  * one millionth of a second.
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function usleep(int $micro_seconds): void;
 
 /* Delays program execution for the given number of seconds and nanoseconds.
@@ -155,16 +161,20 @@ function usleep(int $micro_seconds): void;
  * was interrupted by a signal, an associative array will be returned with the
  * components: seconds - number of seconds remaining in the delay nanoseconds
  * - number of nanoseconds remaining in the delay
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function time_nanosleep(int $seconds,
                         int $nanoseconds): mixed;
 
 /* Makes the script sleep until the specified timestamp.
  * @param float $timestamp - The timestamp when the script should wake.
  * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function time_sleep_until(float $timestamp): bool;
 
 /* Gets a prefixed unique identifier based on the current time in

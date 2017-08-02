@@ -1079,6 +1079,10 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
         cur <<= 1;
       }
       if (anyByRef) {
+        // Multiple methods with the same name will be combined in
+        // the same cell, thus we use |=. This only makes sense in
+        // WholeProgram mode since we use this field to check that no functions
+        // uses its n-th parameter byref, which requires global knowledge.
         index.method_ref_params_by_name[m->name] |= refs;
       }
       if (m->attrs & AttrInterceptable) {
@@ -1865,6 +1869,14 @@ PrepKind func_param_prep(borrowed_ptr<const php::Func> func,
 
 template<class PossibleFuncRange>
 PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
+
+  /*
+   * In sinlge-unit mode, the range is not complete. Without konwing all
+   * possible resolutions, HHBBC cannot deduce anything about by-ref vs by-val.
+   * So the caller should make sure not calling this in single-unit mode.
+   */
+  assert(RuntimeOption::RepoAuthoritative);
+
   if (begin(range) == end(range)) {
     /*
      * We can assume it's by value, because either we're calling a function
@@ -2789,9 +2801,11 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
   return match<PrepKind>(
     rfunc.val,
     [&] (res::Func::FuncName s) {
+      if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
       return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
     },
     [&] (res::Func::MethodName s) {
+      if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
       auto const it = m_data->method_ref_params_by_name.find(s.name);
       if (it == end(m_data->method_ref_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
@@ -2809,8 +2823,9 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       );
       /*
        * If we think it's supposed to be PrepKind::Ref, we still can't be sure
-       * unless we go through some effort to guarantee that it can't be going to
-       * an __call function magically (which will never take anything by ref).
+       * unless we go through some effort to guarantee that it can't be going
+       * to an __call function magically (which will never take anything by
+       * ref).
        */
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
@@ -2818,6 +2833,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       return func_param_prep(finfo->first, paramId);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
+      assert(RuntimeOption::RepoAuthoritative);
       return prep_kind_from_set(fam->possibleFuncs, paramId);
     }
   );

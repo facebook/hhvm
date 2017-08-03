@@ -67,7 +67,9 @@ auto if_inst(const Env& env, Vlabel b, size_t i, F f)
  * This just wraps vmodify() with some accounting logic for `env'.
  */
 template<typename Simplify>
-bool simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify) {
+auto simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify)
+  -> decltype(simplify(std::declval<Vout&>()), false)
+{
   auto& unit = env.unit;
 
   return vmodify(unit, b, i, [&] (Vout& v) {
@@ -98,6 +100,13 @@ bool simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify) {
     }
 
     return nremove;
+  });
+}
+
+inline bool simplify_impl(Env& env, Vlabel b, size_t i, const Vinstr& instr) {
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << instr;
+    return 1;
   });
 }
 

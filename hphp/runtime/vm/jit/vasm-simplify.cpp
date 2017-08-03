@@ -40,6 +40,87 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * If reg is defined by a load in b with index j < i, and there are no
+ * interfering stores between j and i, return a pointer to its Vptr
+ * argument.
+ *
+ * Note that during simplification, we can end up with mismatched
+ * register sizes, so that a loadzbq feeds a byte sized
+ * instruction. In that case, its ok to treat the loadzbq as if it
+ * were a loadb, provided we're expecting a byte sized operand. Since
+ * Vreg doesn't carry a register-width around, we pass it in via the
+ * size param, so that we can verify the zero-extend variants.
+ */
+const Vptr* foldable_load(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
+  if (!i || env.use_counts[reg] != 1) return nullptr;
+  auto const def_inst = env.def_insts[reg];
+  switch (def_inst) {
+    case Vinstr::loadb:
+    case Vinstr::loadw:
+    case Vinstr::loadl:
+    case Vinstr::load:
+      break;
+    case Vinstr::loadzbq:
+    case Vinstr::loadzbl:
+      if (size != sz::byte) return nullptr;
+      break;
+    case Vinstr::loadzlq:
+      if (size != sz::dword) return nullptr;
+      break;
+    case Vinstr::copy:
+      break;
+    default:
+      return nullptr;
+  }
+
+#define CHECK_LOAD(load)                        \
+  case Vinstr::load:                            \
+    if (inst.load##_.d != reg) break;           \
+    return &inst.load##_.s
+
+  while (i--) {
+    auto const& inst = env.unit.blocks[b].code[i];
+    if (inst.op == def_inst) {
+      switch (def_inst) {
+        CHECK_LOAD(loadb);
+        CHECK_LOAD(loadw);
+        CHECK_LOAD(loadl);
+        CHECK_LOAD(load);
+        CHECK_LOAD(loadzbq);
+        CHECK_LOAD(loadzbl);
+        CHECK_LOAD(loadzlq);
+        case Vinstr::copy:
+          if (inst.copy_.d != reg) break;
+          return foldable_load(env, inst.copy_.s, size, b, i);
+        default:
+          not_reached();
+      }
+    }
+    if (writesMemory(inst.op)) break;
+  }
+
+  return nullptr;
+}
+
+const Vptr* foldable_load(Env& env, Vreg8 reg, Vlabel b, size_t i) {
+  return foldable_load(env, reg, sz::byte, b, i);
+}
+
+const Vptr* foldable_load(Env& env, Vreg16 reg, Vlabel b, size_t i) {
+  return foldable_load(env, reg, sz::word, b, i);
+}
+
+const Vptr* foldable_load(Env& env, Vreg32 reg, Vlabel b, size_t i) {
+  return foldable_load(env, reg, sz::dword, b, i);
+}
+
+const Vptr* foldable_load(Env& env, Vreg64 reg, Vlabel b, size_t i) {
+  return foldable_load(env, reg, sz::qword, b, i);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Simplify an `inst' at block `b', instruction `i', returning whether or not
  * any changes were made.
  *
@@ -150,18 +231,6 @@ int value_width(Env& env, Vreg reg) {
   return sz::qword;
 }
 
-Vreg match_reg(int size, const Vreg8 r) {
-  return size == sz::byte ? Vreg{size_t{r}} : Vreg{};
-}
-
-Vreg match_reg(int size, const Vreg16 r) {
-  return size == sz::word ? Vreg{size_t{r}} : Vreg{};
-}
-
-Vreg match_reg(int size, const Vreg32 r) {
-  return size == sz::dword ? Vreg{size_t{r}} : Vreg{};
-}
-
 /*
  * Return a suitable register for r, with width size.
  *
@@ -186,6 +255,14 @@ Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
         return 1;
       });
     };
+    auto match = [&] (int rsz, size_t rn) {
+      if (rsz != size) return Vreg{};
+      if (env.use_counts[r] == 1) {
+        replace(nop{});
+      }
+      return Vreg{ rn };
+    };
+
     auto const& inst = env.unit.blocks[b].code[i];
     switch (inst.op) {
       case Vinstr::loadzbq: {
@@ -211,24 +288,24 @@ Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
         break;
       }
       case Vinstr::movzbw:
-        if (inst.movzbw_.d == r) return match_reg(size, inst.movzbw_.s);
+        if (inst.movzbw_.d == r) return match(sz::byte, inst.movzbw_.s);
         break;
       case Vinstr::movzbl:
-        if (inst.movzbl_.d == r) return match_reg(size, inst.movzbl_.s);
+        if (inst.movzbl_.d == r) return match(sz::byte, inst.movzbl_.s);
         break;
       case Vinstr::movzbq:
-        if (inst.movzbq_.d == r) return match_reg(size, inst.movzbq_.s);
+        if (inst.movzbq_.d == r) return match(sz::byte, inst.movzbq_.s);
         break;
 
       case Vinstr::movzwl:
-        if (inst.movzwl_.d == r) return match_reg(size, inst.movzwl_.s);
+        if (inst.movzwl_.d == r) return match(sz::word, inst.movzwl_.s);
         break;
       case Vinstr::movzwq:
-        if (inst.movzwq_.d == r) return match_reg(size, inst.movzwq_.s);
+        if (inst.movzwq_.d == r) return match(sz::word, inst.movzwq_.s);
         break;
 
       case Vinstr::movzlq:
-        if (inst.movzlq_.d == r) return match_reg(size, inst.movzlq_.s);
+        if (inst.movzlq_.d == r) return match(sz::dword, inst.movzlq_.s);
         break;
 
       case Vinstr::loadzlq: {
@@ -359,6 +436,9 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
 }
 
 bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i, cmpqm { vcmp.s0, *vptr, vcmp.sf });
+  }
   auto const sz0 = value_width(env, vcmp.s0);
   if (sz0 == sz::qword) return false;
   auto const sz1 = value_width(env, vcmp.s1);
@@ -384,6 +464,63 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
     return narrow_cmp(env, sz, vcmp, b, i, v);
   });
 }
+
+bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmplm { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmpwm { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmpbm { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpqi& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmpqim { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpli& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmplim { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpwi& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmpwim { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmpbi& vcmp, Vlabel b, size_t i) {
+  if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
+    return simplify_impl(env, b, i,
+                         cmpbim { vcmp.s0, *vptr, vcmp.sf });
+  }
+  return false;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /*
@@ -547,11 +684,13 @@ bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
 
 /*
  * Simplify load followed by truncation:
- *  loadq{s, tmp}; movtqb{tmp, d} -> loadtqb{s, d}
- *  loadq{s, tmp}; movtql{tmp, d} -> loadtql{s, d}
+ *  load{s, tmp}; movtqb{tmp, d} -> loadtqb{s, d}
+ *  load{s, tmp}; movtql{tmp, d} -> loadtql{s, d}
+ *  loadzbq{s, tmp}; movtqb{tmp, d} -> loadb{s, d}
+ *  loadzlq{s, tmp}; movtql{tmp, d} -> loadl{s, d}
  */
-template<Vinstr::Opcode mov_op, typename loadt>
-bool simplify_load_truncate(Env& env, const load& load, Vlabel b, size_t i) {
+template<Vinstr::Opcode mov_op, typename loadt, typename load_in>
+bool simplify_load_truncate(Env& env, const load_in& load, Vlabel b, size_t i) {
   if (env.use_counts[load.d] != 1) return false;
   auto const& code = env.unit.blocks[b].code;
   if (i + 1 >= code.size()) return false;
@@ -569,6 +708,14 @@ bool simplify(Env& env, const load& load, Vlabel b, size_t i) {
   return
     simplify_load_truncate<Vinstr::movtqb, loadtqb>(env, load, b, i) ||
     simplify_load_truncate<Vinstr::movtql, loadtql>(env, load, b, i);
+}
+
+bool simplify(Env& env, const loadzbq& load, Vlabel b, size_t i) {
+  return simplify_load_truncate<Vinstr::movtqb, loadb>(env, load, b, i);
+}
+
+bool simplify(Env& env, const loadzlq& load, Vlabel b, size_t i) {
+  return simplify_load_truncate<Vinstr::movtql, loadl>(env, load, b, i);
 }
 
 bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {

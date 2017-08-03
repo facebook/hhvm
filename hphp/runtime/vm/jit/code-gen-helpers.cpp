@@ -64,6 +64,24 @@ void assertSFNonNegative(Vout& v, Vreg sf) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Vreg emitMovtql(Vout& v, Vreg reg) {
+  auto it = v.unit().regToConst.find(reg);
+  if (it != v.unit().regToConst.end() && !it->second.isUndef) {
+    switch (it->second.kind) {
+      case Vconst::Double:
+        always_assert(false);
+      case Vconst::Quad:
+        return v.unit().makeConst(uint32_t(it->second.val));
+      case Vconst::Long:
+      case Vconst::Byte:
+        return reg;
+    }
+  }
+  auto const r = v.makeReg();
+  v << movtql{reg, r};
+  return r;
+}
+
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
     v << storeqi{imm.l(), ref};
@@ -86,8 +104,7 @@ void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << store{reg, mem};
   } else if (size == 4) {
-    auto const temp = v.makeReg();
-    v << movtql{reg, temp};
+    auto const temp = emitMovtql(v, reg);
     v << storel{temp, mem};
   } else {
     not_implemented();
@@ -382,8 +399,7 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    auto low = v.makeReg();
-    v << movtql{reg, low};
+    auto low = emitMovtql(v, reg);
     v << cmplm{low, mem, sf};
   } else {
     not_implemented();
@@ -394,10 +410,8 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {
-    auto const l1 = v.makeReg();
-    auto const l2 = v.makeReg();
-    v << movtql{reg1, l1};
-    v << movtql{reg2, l2};
+    auto const l1 = emitMovtql(v, reg1);
+    auto const l2 = emitMovtql(v, reg2);
     v << cmpl{l1, l2, sf};
   } else {
     not_implemented();

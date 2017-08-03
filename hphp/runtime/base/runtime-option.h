@@ -379,6 +379,7 @@ struct RuntimeOption {
   // is the following prefix followed by the pid of the hphp process.
   static std::string LightProcessFilePrefix;
   static int LightProcessCount;
+  static bool EnableDynamicFuncWarn;
 
   // Eval options
   static bool EnableHipHopSyntax;

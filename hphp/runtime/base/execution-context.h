@@ -66,6 +66,9 @@ enum class InclOpFlags {
   Relative = 16,
 };
 
+int64_t getEvaledUnits();
+int64_t getCreateFuncs();
+
 inline InclOpFlags operator|(const InclOpFlags& l, const InclOpFlags& r) {
   return static_cast<InclOpFlags>(static_cast<int>(l) | static_cast<int>(r));
 }

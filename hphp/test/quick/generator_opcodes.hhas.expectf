@@ -1,0 +1,8 @@
+Verification Error (unit %s func ): CreateCont may only appear in a generator
+Verification Error (unit %s func ): Yield may only appear in a generator
+Verification Error (unit %s func ): YieldK may only appear in a generator
+Verification Error (unit %s func foo): YieldFromDelegate may only appear in a non-async generator
+Verification Error (unit %s func foo): ContEnterDelegate may only appear in a non-async generator
+Verification Error (unit %s func foo): ContAssignDelegate may only appear in a non-async generator
+Verification Error (unit %s func foo): ContUnsetDelegate may only appear in a non-async generator
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

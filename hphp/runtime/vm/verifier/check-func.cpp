@@ -1222,6 +1222,44 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
+    case Op::ContAssignDelegate:
+    case Op::ContEnterDelegate:
+    case Op::YieldFromDelegate:
+    case Op::ContUnsetDelegate:
+      if (m_func->isAsync()) {
+        ferror("{} may only appear in a non-async generator\n",
+               opcodeToName(op));
+        return false;
+      }
+      // fallthrough
+    case Op::CreateCont:
+    case Op::YieldK:
+    case Op::Yield:
+      if (!m_func->isGenerator()) {
+        ferror("{} may only appear in a generator\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    case Op::ContEnter: // Only in non-static generator methods
+    case Op::ContRaise: {
+      auto cls = m_func->preClass();
+      if (m_func->isStatic() || !cls ||
+          (cls->name()->toCppString() != std::string("Generator") &&
+           cls->name()->toCppString() != std::string("HH\\AsyncGenerator"))) {
+        ferror("{} may only appear in non-static methods of the "
+               "[Async]Generator class\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    }
+    case Op::FCallAwait:
+    case Op::Await: {
+      if (!m_func->isAsync()) {
+        ferror("{} may only appear in an async function\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    }
     case Op::Silence: {
       auto new_pc = pc;
       decode_op(new_pc);

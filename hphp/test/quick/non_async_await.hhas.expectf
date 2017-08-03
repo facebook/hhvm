@@ -1,0 +1,3 @@
+Verification Error (unit %s func ): Await may only appear in an async function
+Verification Error (unit %s func ): FCallAwait may only appear in an async function
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

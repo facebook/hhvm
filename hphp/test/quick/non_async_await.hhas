@@ -1,0 +1,13 @@
+.main {
+  Int 1
+  Await
+  FPushFuncD 0 "foo"
+  FCallAwait 0 "" "foo"
+  PopC
+  RetC
+}
+
+.function foo () {
+  Int 1
+  RetC
+}

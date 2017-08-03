@@ -1,0 +1,4 @@
+
+Verification Error (unit %s): 86ctor in class C has illegal attribute
+Verification Error (unit %s): 86ctor in class D has illegal attribute
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

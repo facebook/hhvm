@@ -1,0 +1,20 @@
+#tests that 86ctors cannot have illegal attributes
+
+.main {
+  Int 1
+  RetC
+}
+
+.class C {
+  .method [public final no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class D {
+  .method [private no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}

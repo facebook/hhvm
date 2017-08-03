@@ -227,7 +227,19 @@ bool UnitChecker::checkPreClasses() {
       std::transform(className.begin(), className.end(), className.begin(),
                       ::tolower);
 
-      if(name == std::string("__construct") || name == std::string("86ctor") ||
+      if (name == std::string("86ctor")) {
+        hasConstructor = true;
+        ok &= checkStructor(method, preclass.get());
+        if ((attributes & ~(AttrBuiltin | AttrAbstract | AttrHot |
+                            AttrInterceptable | AttrMayUseVV)) !=
+            (AttrPublic|AttrNoInjection|AttrPhpLeafFn)) {
+              error("86ctor in class %s has illegal attribute\n",
+                    preclass->name()->data());
+              ok = false;
+           }
+      }
+
+      if(name == std::string("__construct") ||
          name == className) {
             hasConstructor = true;
             ok &= checkStructor(method, preclass.get());

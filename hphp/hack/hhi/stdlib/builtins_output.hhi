@@ -37,3 +37,16 @@ function hphp_instruction_counter() { }
 function hphp_get_hardware_counters() { }
 function hphp_set_hardware_events($events = null) { }
 function hphp_clear_hardware_events() { }
+
+const int PHP_OUTPUT_HANDLER_START = 0;
+const int PHP_OUTPUT_HANDLER_WRITE = 0;
+const int PHP_OUTPUT_HANDLER_FLUSH = 0;
+const int PHP_OUTPUT_HANDLER_CLEAN = 0;
+const int PHP_OUTPUT_HANDLER_FINAL = 0;
+const int PHP_OUTPUT_HANDLER_CONT = 0;
+const int PHP_OUTPUT_HANDLER_END = 0;
+
+const int PHP_OUTPUT_HANDLER_CLEANABLE = 0;
+const int PHP_OUTPUT_HANDLER_FLUSHABLE = 0;
+const int PHP_OUTPUT_HANDLER_REMOVABLE = 0;
+const int PHP_OUTPUT_HANDLER_STDFLAGS = 0;

@@ -432,10 +432,9 @@ module WithExpressionAndDeclAndTypeParser
 
   and parse_possible_erroneous_fallthrough parser =
     if is_switch_fallthrough parser then
+      let parser = with_error parser SyntaxError.error1055
+        ~on_whole_token:true in
       let (parser, result) = parse_switch_fallthrough parser in
-      (* TODO: This puts the error on the semi; it should be on
-      the whole thing. *)
-      let parser = with_error parser SyntaxError.error1055 in
       (parser, result)
     else
       parse_expression_statement parser

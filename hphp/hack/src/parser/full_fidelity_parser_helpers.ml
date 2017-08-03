@@ -91,12 +91,27 @@ module WithParser(Parser : ParserType) = struct
     in
     Parser.with_lexer parser lexer, markup, suffix
 
-  let with_error parser message =
-    (* TODO: Should be able to express errors on whole syntax node. *)
-    (* TODO: Is this even right? Won't this put the error on the trivia? *)
+  let error_offsets ?(on_whole_token=false) parser =
     let lexer = Parser.lexer parser in
-    let start_offset = Parser.Lexer.start_offset lexer in
-    let end_offset = Parser.Lexer.end_offset lexer in
+    if on_whole_token then
+      let token = peek_token parser in
+      let start_offset =
+        (Parser.Lexer.end_offset lexer) + (Token.leading_width token) in
+      let end_offset = start_offset + (Token.width token) in
+      (start_offset, end_offset)
+    else
+      let start_offset = Parser.Lexer.start_offset lexer in
+      let end_offset = Parser.Lexer.end_offset lexer in
+      (start_offset, end_offset)
+
+  (* This function reports an error starting at the current location of the
+   * parser. Setting on_whole_token=false will report the error only on trivia,
+   * which is useful in cases such as when "a semicolon is expected here" before
+   * the current node. However, setting on_whole_token=true will report the error
+   * only on the non-trivia text of the next token parsed, which is useful
+   * in cases like "flagging an entire token as an extra". *)
+  let with_error ?(on_whole_token=false) parser message =
+    let (start_offset, end_offset) = error_offsets parser ~on_whole_token in
     let error = SyntaxError.make start_offset end_offset message in
     let errors = Parser.errors parser in
     Parser.with_errors parser (error :: errors)
@@ -112,7 +127,7 @@ module WithParser(Parser : ParserType) = struct
     let parser =
       if generate_error then
         let extra_str = current_token_text parser in
-        with_error parser (SyntaxError.error1057 extra_str)
+        with_error parser (SyntaxError.error1057 extra_str) ~on_whole_token:true
       else parser in
     let (parser, token) = next_token parser in
     let parser = Parser.carry_extra parser token in

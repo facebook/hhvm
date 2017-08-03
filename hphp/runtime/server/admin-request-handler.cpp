@@ -224,13 +224,28 @@ void AdminRequestHandler::logToAccessLog(Transport* transport) {
   WarnIfNotOK(transport);
 }
 
-void AdminRequestHandler::setupRequest(Transport* /*transport*/) {
-  g_context.getCheck();
+void AdminRequestHandler::setupRequest(Transport* transport) {
+  auto const cmd = transport->getCommand();
+
+  if (strncmp(cmd.c_str(), "dump-apc", 8) == 0) {
+    hphp_session_init();
+  } else {
+    g_context.getCheck();
+  }
   GetAccessLog().onNewRequest();
 }
 
 void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {
-  SCOPE_EXIT { hphp_memory_cleanup(); };
+  SCOPE_EXIT {
+    auto const cmd = transport->getCommand();
+
+    if (strncmp(cmd.c_str(), "dump-apc", 8) == 0) {
+      hphp_context_exit();
+      hphp_session_exit();
+    } else {
+      hphp_memory_cleanup();
+    }
+  };
   GetAccessLog().log(transport, nullptr);
   WarnIfNotOK(transport);
 }

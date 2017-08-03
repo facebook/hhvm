@@ -206,6 +206,11 @@ module WithStatementAndDeclAndTypeParser
     | Isset -> parse_isset_expression parser
     | Define -> parse_define_expression parser
     | Eval -> parse_eval_expression parser
+    | kind when PrecedenceParser.expects parser kind ->
+      (* ERROR RECOVERY: if we've prematurely found a token we're expecting
+       * later, mark the expression missing, throw an error, and do not advance
+       * the parser. *)
+      (with_error parser SyntaxError.error1015, make_missing())
     | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
 

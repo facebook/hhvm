@@ -201,6 +201,7 @@ let error_tests =
     "context/test_recovery_to_classish2";
     "context/test_recovery_to_classish3";
     "context/test_single_extra_token_recovery";
+    "context/test_missing_foreach_value";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

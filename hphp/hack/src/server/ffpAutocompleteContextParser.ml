@@ -21,7 +21,7 @@ module Container = struct
   type t =
   | AfterDoubleColon
   | AfterRightArrow
-  | BinaryExpression
+  | AssignmentExpression
   | ClassBody
   | ClassHeader
   | CompoundStatement
@@ -200,6 +200,10 @@ let make_context
       }
     | PositionedSyntax.CompoundStatement _ ->
       { acc with closest_parent_container = Container.CompoundStatement }
+    | BinaryExpression {
+        binary_operator = { syntax = Token { kind = Equal; _ }; _ };
+        _
+      } -> { acc with closest_parent_container = AssignmentExpression }
     | Token { kind = ColonColon; _ } ->
       { acc with closest_parent_container = AfterDoubleColon }
     | Token { kind = MinusGreaterThan; _ } ->

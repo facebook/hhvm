@@ -21,7 +21,7 @@ let local_variable_valid_in_context (context:context) (stub:string) : bool =
   let open Container in
   (context.closest_parent_container = LambdaBodyExpression ||
   context.closest_parent_container = CompoundStatement ||
-  context.closest_parent_container = BinaryExpression) &&
+  context.closest_parent_container = AssignmentExpression) &&
   (stub = "" || string_starts_with stub "$")
 
 (* As of June 2017, the lambda analyzer only works with editable syntax trees

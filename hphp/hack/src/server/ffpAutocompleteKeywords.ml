@@ -118,6 +118,8 @@ let async_keyword = {
     context.closest_parent_container = TypeSpecifier &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordStatic)
+    ||
+    context.closest_parent_container = AssignmentExpression
   end;
 }
 
@@ -256,7 +258,8 @@ let async_func_body_keywords = {
   keywords = ["await"];
   is_valid_in_context = begin fun context ->
     context.inside_async_function &&
-    context.closest_parent_container = CompoundStatement
+    (context.closest_parent_container = CompoundStatement ||
+    context.closest_parent_container = AssignmentExpression)
   end;
 }
 
@@ -267,6 +270,7 @@ let async_func_body_keywords = {
 let postfix_expressions = {
   keywords = ["clone"; "new"];
   is_valid_in_context = begin fun context ->
+    context.closest_parent_container = AssignmentExpression ||
     context.closest_parent_container = CompoundStatement ||
     context.closest_parent_container = LambdaBodyExpression
   end;
@@ -304,6 +308,7 @@ let try_trailing_keywords = {
 let primary_expressions = {
   keywords = ["tuple"; "shape"];
   is_valid_in_context = begin fun context ->
+    context.closest_parent_container = AssignmentExpression ||
     context.closest_parent_container = CompoundStatement ||
     context.closest_parent_container = LambdaBodyExpression
   end;
@@ -312,6 +317,7 @@ let primary_expressions = {
 let scope_resolution_qualifiers = {
   keywords = ["self"; "parent"; "static"];
   is_valid_in_context = begin fun context ->
+    context.closest_parent_container = AssignmentExpression ||
     context.closest_parent_container = CompoundStatement ||
     context.closest_parent_container = LambdaBodyExpression
   end;

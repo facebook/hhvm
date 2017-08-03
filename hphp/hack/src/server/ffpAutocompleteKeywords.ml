@@ -89,9 +89,8 @@ let visibility_modifiers = {
     context.closest_parent_container = ClassBody &&
     (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
-    || (* After seeing the word final, the parser thinks the next thing should
-      be a type specifier *)
-    context.closest_parent_container = TypeSpecifier &&
+    ||
+    context.closest_parent_container = ClassBody &&
     context.predecessor = KeywordFinal
   end;
 }
@@ -103,7 +102,7 @@ let static_keyword = {
     (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
     ||
-    context.closest_parent_container = TypeSpecifier &&
+    context.closest_parent_container = ClassBody &&
     context.predecessor = VisibilityModifier
   end;
 }
@@ -115,7 +114,7 @@ let async_keyword = {
     (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
     ||
-    context.closest_parent_container = TypeSpecifier &&
+    context.closest_parent_container = ClassBody &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordStatic)
     ||
@@ -185,7 +184,7 @@ let declaration_keywords = {
 let void_keyword = {
   keywords = ["void"];
   is_valid_in_context = begin fun context ->
-    (context.closest_parent_container = TypeSpecifier ||
+    (context.closest_parent_container = ClassBody ||
     context.closest_parent_container = FunctionHeader) &&
     (context.predecessor = TokenColon ||
     context.predecessor = TokenLessThan)
@@ -195,7 +194,7 @@ let void_keyword = {
 let noreturn_keyword = {
   keywords = ["noreturn"];
   is_valid_in_context = begin fun context ->
-    (context.closest_parent_container = TypeSpecifier ||
+    (context.closest_parent_container = ClassBody ||
     context.closest_parent_container = FunctionHeader) &&
     context.predecessor = TokenColon
   end;
@@ -207,21 +206,19 @@ let primitive_types = {
   "string"; "?string"; "resource"; "?resource"; "varray"; "?varray"];
   is_valid_in_context = begin fun context ->
     (* Function return type *)
-    (context.closest_parent_container = TypeSpecifier ||
-    context.closest_parent_container = FunctionHeader) &&
+    context.closest_parent_container = FunctionHeader &&
     context.predecessor = TokenColon
     || (* Parameter type *)
-    context.closest_parent_container = TypeSpecifier &&
+    context.closest_parent_container = FunctionHeader &&
     (context.predecessor = TokenComma ||
     context.predecessor = TokenOpenParen)
     || (* Class property type *)
     context.inside_class_body &&
-    context.closest_parent_container = TypeSpecifier &&
+    context.closest_parent_container = ClassBody &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordConst ||
     context.predecessor = KeywordStatic)
     || (* Generic type *)
-    context.closest_parent_container = TypeSpecifier &&
     context.predecessor = TokenLessThan
   end;
 }
@@ -229,7 +226,7 @@ let primitive_types = {
 let this_type_keyword = {
   keywords = ["this"; "?this"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TypeSpecifier &&
+    context.closest_parent_container = FunctionHeader &&
     context.predecessor = TokenColon &&
     context.inside_class_body
   end;

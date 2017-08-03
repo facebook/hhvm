@@ -34,7 +34,6 @@ module Container = struct
   | TopLevel
   | TraitBody
   | TraitHeader
-  | TypeSpecifier
   | NoContainer
 end
 
@@ -182,8 +181,6 @@ let make_context
   let open PositionedToken in
   let open TokenKind in
   let check_node node acc = match syntax node with
-    | SimpleTypeSpecifier _ ->
-      { acc with closest_parent_container = TypeSpecifier }
     | Script _ ->
       { acc with closest_parent_container = TopLevel }
     | ClassishDeclaration { classish_keyword = {

@@ -354,6 +354,19 @@ SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyLdClsCctx(State& env, const IRInstruction* inst) {
+  assertx(inst->marker().func()->cls());
+  SSATmp* ctx = inst->src(0);
+
+  if (ctx->hasConstVal(TCctx)) {
+    return cns(env, ctx->cctxVal().cls());
+  }
+  if (ctx->inst()->op() == ConvClsToCctx) {
+    return ctx->inst()->src(0);
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyLdClsMethod(State& env, const IRInstruction* inst) {
   SSATmp* ctx = inst->src(0);
 
@@ -3513,6 +3526,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsCol)
   X(HasToString)
   X(LdClsCtx)
+  X(LdClsCctx)
   X(LdClsName)
   X(LookupClsRDS)
   X(LdClsMethod)

@@ -25,7 +25,7 @@ module Container = struct
   | ClassBody
   | ClassHeader
   | CompoundStatement
-  | ConstantDeclarator
+  | ConstantDeclaration
   | FunctionHeader
   | FunctionParameterList
   | LambdaBodyExpression
@@ -112,7 +112,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
         _
       } -> Some ExtendsList
     | ClassishDeclaration {
-        classish_name = { syntax = Token _ ; _ };
+        classish_name = { syntax = Token _; _ };
         classish_type_parameters = { syntax = Missing; _ };
         classish_extends_keyword = { syntax = Missing; _ };
         classish_extends_list = { syntax = Missing; _ };
@@ -172,8 +172,8 @@ let make_context
     | ClassishBody _ ->
       { acc with closest_parent_container = ClassBody;
         inside_class_body = true }
-    | PositionedSyntax.ConstantDeclarator _ ->
-      { acc with closest_parent_container = Container.ConstantDeclarator }
+    | ConstDeclaration _ ->
+      { acc with closest_parent_container = ConstantDeclaration }
     | ForStatement _
     | ForeachStatement _
     | WhileStatement _

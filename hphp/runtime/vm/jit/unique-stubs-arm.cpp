@@ -135,7 +135,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 
     ifThen(v, CC_G, sf, [&] (Vout& v) {
-      v << call{release, arg_regs(3)};
+      v << call{release, local | type};
     });
   };
 

@@ -150,7 +150,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       v << lea {rsp()[-2 * dword_size], rsp()};
       v << store{rfuncln(), rsp()[0]};
 
-      v << call{release, arg_regs(3)};
+      v << call{release, local | type};
 
       // restore the return value from the stack
       v << load{rsp()[0], rfuncln()};

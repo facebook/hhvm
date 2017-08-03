@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-info.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -295,52 +296,6 @@ enum class SFUsage {
 };
 
 /*
- * Provide a default template that matches every instruction, but which
- * is an inexact match on the second parameter (we're going to pass an int).
- */
-template <typename Inst>
-std::pair<ConditionCode*,Vreg> ccUsageHelper(Inst&, char) {
-  return { nullptr, Vreg{} };
-}
-
-/*
- * Provide a template that only matches instructions with cc and sf members,
- * but which is an exact match on the second parameter.
- */
-template <typename Inst>
-auto ccUsageHelper(Inst& i, int) ->
-  decltype(std::make_pair(&i.cc, Vreg(size_t(i.sf)))) {
-  return { &i.cc, Vreg(size_t(i.sf)) };
-}
-
-std::pair<ConditionCode*,Vreg> ccUsageHelper(Vinstr& inst) {
-#define O(name,...) case Vinstr::name: return ccUsageHelper(inst.name##_, 0);
-  switch (inst.op) {
-    VASM_OPCODES
-  }
-#undef O
-  not_reached();
-}
-
-/*
- * Get a reference to the condition code for inst, which must be known
- * to have one.
- */
-ConditionCode& getCC(Vinstr& inst) {
-  auto usage = ccUsageHelper(inst);
-  assertx(usage.first);
-  return *usage.first;
-}
-
-/*
- * Return the sf reg read by inst, or an invalid register if the
- * instruction doesn't read an sf.
- */
-Vreg getSF(const Vinstr& inst) {
-  return ccUsageHelper(const_cast<Vinstr&>(inst)).second;
-}
-
-/*
  * Check whether all uses of sf are either "unsigned" or could be
  * converted to unsigned. If there are any uses outside of b, we
  * assume they can't be fixed. If the fix parameter is true, we
@@ -351,7 +306,7 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
   auto uses = env.use_counts[sf];
   while (uses) {
     auto check = [&] (Vinstr& tmp) {
-      auto &cc = getCC(tmp);
+      auto &cc = getConditionCode(tmp);
       auto fixup = [&] (ConditionCode newCC) {
         assertx(cc != newCC);
         if (fix) {
@@ -394,7 +349,7 @@ SFUsage check_unsigned_uses(Env& env, Vreg sf, Vlabel b, size_t i, bool fix) {
     };
     auto const& code = env.unit.blocks[b].code;
     if (++i == code.size()) return SFUsage::Unfixable;
-    if (getSF(code[i]) == sf) {
+    if (getSFUseReg(code[i]) == sf) {
       uses--;
       auto tmp = code[i];
       if (check(tmp)) return SFUsage::Unfixable;

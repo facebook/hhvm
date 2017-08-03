@@ -98,12 +98,16 @@ void visitUses(const Vunit& unit, const Vinstr& inst, Use use) {
       uses \
       break; \
     }
-#define U(s) visit(unit, i.s, use);
-#define UA(s) visit(unit, i.s, use);
+#define U(s)    visit(unit, i.s, use);
+#define UA(s)   visit(unit, i.s, use);
 #define UH(s,h) visit(unit, i.s, use);
+#define UM(s)   visit(unit, i.s, use);
+#define UW(s)   visit(unit, i.s, use);
 #define Un
     VASM_OPCODES
 #undef Un
+#undef UW
+#undef UM
 #undef UH
 #undef UA
 #undef U
@@ -156,6 +160,8 @@ visitOperands(Tinstr& inst, Visitor& visitor) {
 #define U(s) visitor.use(i.s);
 #define UA(s) visitor.across(i.s);
 #define UH(s,h) visitor.useHint(i.s, i.h);
+#define UM(s) visitor.use(i.s);
+#define UW(s) visitor.use(i.s);
 #define D(d) visitor.def(i.d);
 #define DH(d,h) visitor.defHint(i.d, i.h);
 #define Inone
@@ -167,6 +173,8 @@ visitOperands(Tinstr& inst, Visitor& visitor) {
 #undef Inone
 #undef DH
 #undef D
+#undef UW
+#undef UM
 #undef UH
 #undef UA
 #undef U

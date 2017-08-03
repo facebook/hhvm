@@ -51,6 +51,8 @@ struct Vunit;
  *    I(f)      immediate
  *    Inone     no immediates
  *    U(s)      use s
+ *    UM(s)     s is a Vptr used to read-modify-write memory
+ *    UW(s)     s is a Vptr used to write memory
  *    UA(s)     use s, but s lifetime extends across the instruction
  *    UH(s,h)   use s, try assigning same register as h
  *    D(d)      define d
@@ -76,7 +78,7 @@ struct Vunit;
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
-  O(store, Inone, U(s) U(d), Dn)\
+  O(store, Inone, U(s) UW(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
@@ -133,42 +135,42 @@ struct Vunit;
   /* arithmetic instructions */\
   O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addlm, I(fl), U(s0) U(m), D(sf)) \
-  O(addlim, I(s0) I(fl), U(m), D(sf)) \
+  O(addlm, I(fl), U(s0) UM(m), D(sf)) \
+  O(addlim, I(s0) I(fl), UM(m), D(sf)) \
   O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addqim, I(s0) I(fl), U(m), D(sf)) \
+  O(addqim, I(s0) I(fl), UM(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(andb, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andbim, I(s) I(fl), U(m), D(sf)) \
+  O(andbim, I(s) I(fl), UM(m), D(sf)) \
   O(andl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(declm, I(fl), U(m), D(sf))\
+  O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(decqm, I(fl), U(m), D(sf))\
-  O(decqmlock, I(fl), U(m), D(sf))\
+  O(decqm, I(fl), UM(m), D(sf))\
+  O(decqmlock, I(fl), UM(m), D(sf))\
   O(incw, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(incwm, I(fl), U(m), D(sf))\
+  O(incwm, I(fl), UM(m), D(sf))\
   O(incl, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(inclm, I(fl), U(m), D(sf))\
+  O(inclm, I(fl), UM(m), D(sf))\
   O(incq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(incqm, I(fl), U(m), D(sf))\
+  O(incqm, I(fl), UM(m), D(sf))\
   O(imul, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(divint, Inone, U(s0) U(s1), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(neg, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
-  O(orbim, I(s0) I(fl), U(m), D(sf))\
-  O(orwim, I(s0) I(fl), U(m), D(sf))\
+  O(orbim, I(s0) I(fl), UM(m), D(sf))\
+  O(orwim, I(s0) I(fl), UM(m), D(sf))\
   O(orq, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(orqim, I(s0) I(fl), U(m), D(sf))\
+  O(orqim, I(s0) I(fl), UM(m), D(sf))\
   O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(shl, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(sarqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -257,15 +259,15 @@ struct Vunit;
   O(loadzlq, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
   O(loadtql, Inone, U(s), D(d))\
-  O(storeb, Inone, U(s) U(m), Dn)\
-  O(storebi, I(s), U(m), Dn)\
-  O(storew, Inone, U(s) U(m), Dn)\
-  O(storewi, I(s), U(m), Dn)\
-  O(storel, Inone, U(s) U(m), Dn)\
-  O(storeli, I(s), U(m), Dn)\
-  O(storeqi, I(s), U(m), Dn)\
-  O(storeups, Inone, U(s) U(m), Dn)\
-  O(storesd, Inone, U(s) U(m), Dn)\
+  O(storeb, Inone, U(s) UW(m), Dn)\
+  O(storebi, I(s), UW(m), Dn)\
+  O(storew, Inone, U(s) UW(m), Dn)\
+  O(storewi, I(s), UW(m), Dn)\
+  O(storel, Inone, U(s) UW(m), Dn)\
+  O(storeli, I(s), UW(m), Dn)\
+  O(storeqi, I(s), UW(m), Dn)\
+  O(storeups, Inone, U(s) UW(m), Dn)\
+  O(storesd, Inone, U(s) UW(m), Dn)\
   /* branches */\
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc), U(sf), Dn)\
@@ -276,9 +278,9 @@ struct Vunit;
   /* push/pop */\
   O(pop, Inone, Un, D(d))\
   O(popf, Inone, Un, D(d))\
-  O(popm, Inone, U(d), Dn)\
+  O(popm, Inone, UW(d), Dn)\
   O(popp, Inone, Un, D(d0) D(d1))\
-  O(poppm, Inone, U(d0) U(d1), Dn)\
+  O(poppm, Inone, UW(d0) UW(d1), Dn)\
   O(push, Inone, U(s), Dn)\
   O(pushf, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\

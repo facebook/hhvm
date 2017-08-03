@@ -28,8 +28,12 @@ module Container = struct
   | ConstantDeclaration
   | FunctionHeader
   | FunctionParameterList
+  | InterfaceBody
+  | InterfaceHeader
   | LambdaBodyExpression
   | TopLevel
+  | TraitBody
+  | TraitHeader
   | TypeSpecifier
   | NoContainer
 end
@@ -182,9 +186,21 @@ let make_context
       { acc with closest_parent_container = TypeSpecifier }
     | Script _ ->
       { acc with closest_parent_container = TopLevel }
+    | ClassishDeclaration { classish_keyword = {
+        syntax = Token { kind = Interface; _ }; _
+      }; _ } ->
+      { acc with closest_parent_container = InterfaceHeader }
+    | ClassishDeclaration { classish_keyword = {
+        syntax = Token { kind = Trait; _ }; _
+      }; _ } ->
+      { acc with closest_parent_container = TraitHeader }
     | ClassishDeclaration _ ->
       { acc with closest_parent_container = ClassHeader }
-    | ClassishBody _ ->
+    | ClassishBody _ when acc.closest_parent_container = InterfaceHeader ->
+      { acc with closest_parent_container = InterfaceBody }
+    | ClassishBody _ when acc.closest_parent_container = TraitHeader ->
+      { acc with closest_parent_container = TraitBody }
+    | ClassishBody _ when acc.closest_parent_container = ClassHeader ->
       { acc with closest_parent_container = ClassBody;
         inside_class_body = true }
     | ConstDeclaration _ ->

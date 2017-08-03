@@ -49,11 +49,12 @@ module Predecessor = struct
   | KeywordFinal
   | KeywordImplements
   | KeywordStatic
-  | OpenBrace
-  | OpenParenthesis
   | TokenColon
   | TokenComma
+  | TokenEqual
+  | TokenLeftBrace
   | TokenLessThan
+  | TokenOpenParen
   | TopLevelDeclaration
   | TryWithoutFinally
   | VisibilityModifier
@@ -150,11 +151,12 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Colon; _ } -> Some TokenColon
     | Token { kind = Comma; _ } -> Some TokenComma
     | Token { kind = Const; _ } -> Some KeywordConst
+    | Token { kind = Equal; _ } -> Some TokenEqual
     | Token { kind = Extends; _ } -> Some KeywordExtends
     | Token { kind = Final; _ } -> Some KeywordFinal
     | Token { kind = Implements; _ } -> Some KeywordImplements
-    | Token { kind = LeftBrace; _ } -> Some OpenBrace
-    | Token { kind = LeftParen; _ } -> Some OpenParenthesis
+    | Token { kind = LeftBrace; _ } -> Some TokenLeftBrace
+    | Token { kind = LeftParen; _ } -> Some TokenOpenParen
     | Token { kind = LessThan; _ } -> Some TokenLessThan
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }

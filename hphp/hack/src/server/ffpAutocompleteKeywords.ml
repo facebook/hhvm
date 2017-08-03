@@ -42,7 +42,7 @@ let abstract_keyword = {
     context.predecessor = TopLevelDeclaration
     || (* Abstract method *)
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
   end;
 }
@@ -57,7 +57,7 @@ let final_keyword = {
     context.predecessor = KeywordAbstract)
     || (* Final method *)
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
   end;
 }
@@ -87,7 +87,7 @@ let visibility_modifiers = {
   keywords = ["public"; "protected"; "private"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
     || (* After seeing the word final, the parser thinks the next thing should
       be a type specifier *)
@@ -100,7 +100,7 @@ let static_keyword = {
   keywords = ["static"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
     ||
     context.closest_parent_container = TypeSpecifier &&
@@ -112,7 +112,7 @@ let async_keyword = {
   keywords = ["async"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
     ||
     context.closest_parent_container = TypeSpecifier &&
@@ -127,7 +127,7 @@ let const_keyword = {
   keywords = ["const"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
   end;
 }
@@ -136,7 +136,7 @@ let use_keyword = {
   keywords = ["use"];
   is_valid_in_context = begin fun context ->
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
   end;
 }
@@ -146,7 +146,7 @@ let function_keyword = {
   is_valid_in_context = begin fun context ->
     (context.closest_parent_container = ClassBody ||
     context.closest_parent_container = FunctionHeader) &&
-    (context.predecessor = OpenBrace ||
+    (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration ||
     context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordAsync ||
@@ -213,7 +213,7 @@ let primitive_types = {
     || (* Parameter type *)
     context.closest_parent_container = TypeSpecifier &&
     (context.predecessor = TokenComma ||
-    context.predecessor = OpenParenthesis)
+    context.predecessor = TokenOpenParen)
     || (* Class property type *)
     context.inside_class_body &&
     context.closest_parent_container = TypeSpecifier &&

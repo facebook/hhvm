@@ -1199,6 +1199,16 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
+    case Op::Catch: {
+      auto handler = m_func->findEHbyHandler(offset(pc));
+      if (!handler || handler->m_type != EHEnt::Type::Catch ||
+          offset(pc) != handler->m_handler) {
+        ferror("{} must be the first instruction in a Catch handler\n",
+               opcodeToName(op));
+        return false;
+      }
+      break;
+    }
     case Op::AssertRATL:
     case Op::AssertRATStk: {
       if (pc == b->last){

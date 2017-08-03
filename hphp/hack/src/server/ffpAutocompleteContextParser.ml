@@ -88,6 +88,10 @@ let is_function_async (function_object:PositionedSyntax.syntax) : bool =
         function_async = async; _
       }; _ }; _
     }
+  | MethodishDeclaration { methodish_function_decl_header = { syntax =
+      FunctionDeclarationHeader { function_async = async; _ }; _
+    }; _ }
+  | AnonymousFunction { anonymous_async_keyword = async; _ }
   | LambdaExpression { lambda_async = async; _ } ->
     is_specific_token Async async
   | _ -> false
@@ -177,10 +181,12 @@ let make_context
       { acc with inside_loop_body = true }
     | SwitchSection _ ->
       { acc with inside_switch_body = true }
+    | MethodishDeclaration _
     | FunctionDeclaration _ as func ->
       { acc with inside_async_function = is_function_async func }
     | FunctionDeclarationHeader _ ->
       { acc with closest_parent_container = FunctionHeader }
+    | AnonymousFunction _
     | LambdaExpression _ as lambda ->
       (* If we see a lambda, almost all context is reset, so each field should
       get consideration on if its context flows into the lambda *)

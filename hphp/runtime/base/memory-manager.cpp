@@ -184,6 +184,7 @@ void MemoryManager::resetAllStats() {
   m_stats.mmUsage = 0;
   m_stats.extUsage = 0;
   m_stats.capacity = 0;
+  m_stats.heapAllocVolume = 0;
   m_stats.peakUsage = 0;
   m_stats.peakCap = 0;
   m_stats.totalAlloc = 0;
@@ -213,9 +214,15 @@ void MemoryManager::resetExternalStats() {
   m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
+#ifndef USE_CONTIGUOUS_HEAP
     m_resetAllocated = *m_allocated - m_stats.capacity;
     // By subtracting capcity here, the next call to refreshStatsImpl()
     // will correctly include m_stats.capacity in extUsage and totalAlloc.
+#else
+    // Contiguous heap does not use jemalloc,
+    // so we don't need to subtract capacity to avoid double-counting.
+    m_resetAllocated = *m_allocated;
+#endif
   }
   traceStats("resetExternalStats post");
 }
@@ -282,8 +289,10 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     // Calculate the allocation volume since the last reset.
     // We need to do the calculation instead of just setting it to curAllocated
     // because of the MaskAlloc capability, which updates m_resetAllocated.
-    stats.totalAlloc = curAllocated - m_resetAllocated;
 
+    // stats.heapAllocVolume is only used for contiguous heap, it would always
+    // be 0 in default BigHeap.
+    stats.totalAlloc = curAllocated - m_resetAllocated + stats.heapAllocVolume;
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       t_heap_id, stats.extUsage, stats.totalAlloc);
   }
@@ -659,10 +668,8 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   refreshStats();
   requestGC();
   storeTail(m_front, (char*)m_limit - (char*)m_front);
-  auto mem = m_heap.allocSlab(kSlabSize);
+  auto mem = m_heap.allocSlab(kSlabSize, m_stats);
   assert((uintptr_t(mem.ptr) & kSmallSizeAlignMask) == 0);
-  m_stats.capacity += mem.size;
-  m_stats.peakCap = std::max(m_stats.peakCap, m_stats.capacity);
   auto slab = static_cast<Slab*>(mem.ptr);
   auto slab_start = slab->init();
   m_front = (void*)(slab_start + nbytes); // allocate requested object
@@ -761,13 +768,10 @@ template<MemoryManager::MBS Mode> NEVER_INLINE
 void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
                                    type_scan::Index ty) {
   if (debug) MM().requestEagerGC();
-  auto block = Mode == ZeroFreeActual ? m_heap.callocBig(bytes, kind, ty) :
-               m_heap.allocBig(bytes, kind, ty);
-  // NB: We don't report the SweepNode size in the stats.
-  auto const delta = Mode == FreeRequested ? bytes : block.size;
-  m_stats.mmUsage += delta;
-  // Adjust jemalloc otherwise we'll double count the direct allocation.
-  m_stats.capacity += block.size + sizeof(MallocNode);
+  bool freereq = Mode == FreeRequested;
+  auto block = Mode == ZeroFreeActual ?
+                        m_heap.callocBig(bytes, kind, ty, m_stats, freereq) :
+                        m_heap.allocBig(bytes, kind, ty, m_stats, freereq);
   updateBigStats();
   FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
          block.ptr, bytes, block.size);
@@ -790,10 +794,7 @@ void* MemoryManager::mallocBigSize<MemoryManager::ZeroFreeActual>(
 void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   assert(n->kind() == HeaderKind::BigMalloc);
   assert(nbytes + sizeof(MallocNode) > kMaxSmallSize);
-  auto old_size = n->nbytes - sizeof(MallocNode);
-  auto block = m_heap.resizeBig(n + 1, nbytes);
-  m_stats.mmUsage += block.size - old_size;
-  m_stats.capacity += block.size - old_size;
+  auto block = m_heap.resizeBig(n + 1, nbytes, m_stats);
   updateBigStats();
   return block.ptr;
 }
@@ -1064,7 +1065,7 @@ void BigHeap::flush() {
   m_bigs = std::vector<MallocNode*>{};
 }
 
-MemBlock BigHeap::allocSlab(size_t size) {
+MemBlock BigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   void* slab = mallocx(size, 0);
   auto usable = sallocx(slab, 0);
@@ -1073,6 +1074,8 @@ MemBlock BigHeap::allocSlab(size_t size) {
   auto usable = size;
 #endif
   m_slabs.push_back({slab, size});
+  stats.capacity += usable;
+  stats.peakCap = std::max(stats.peakCap, stats.capacity);
   return {slab, usable};
 }
 
@@ -1084,7 +1087,8 @@ void BigHeap::enlist(MallocNode* n, HeaderKind kind,
 }
 
 MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind,
-                           type_scan::Index tyindex) {
+                           type_scan::Index tyindex, MemoryUsageStats& stats,
+                            bool freeRequested) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(mallocx(bytes + sizeof(MallocNode), 0));
   auto cap = sallocx(n, 0);
@@ -1093,11 +1097,17 @@ MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind,
   auto n = static_cast<MallocNode*>(safe_malloc(cap));
 #endif
   enlist(n, kind, cap, tyindex);
+  // NB: We don't report the SweepNode size in the stats.
+  auto const delta = freeRequested ? bytes : cap - sizeof(MallocNode);
+  stats.mmUsage += delta;
+  // Adjust jemalloc otherwise we'll double count the direct allocation.
+  stats.capacity += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
 MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
-                            type_scan::Index tyindex) {
+                            type_scan::Index tyindex, MemoryUsageStats& stats,
+                             bool freeRequested) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<MallocNode*>(
       mallocx(nbytes + sizeof(MallocNode), MALLOCX_ZERO)
@@ -1108,6 +1118,11 @@ MemBlock BigHeap::callocBig(size_t nbytes, HeaderKind kind,
   auto const n = static_cast<MallocNode*>(safe_calloc(cap, 1));
 #endif
   enlist(n, kind, cap, tyindex);
+  // NB: We don't report the SweepNode size in the stats.
+  auto const delta = freeRequested ? nbytes : cap - sizeof(MallocNode);
+  stats.mmUsage += delta;
+  // Adjust jemalloc otherwise we'll double count the direct allocation.
+  stats.capacity += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
@@ -1136,10 +1151,12 @@ void BigHeap::freeBig(void* ptr) {
 #endif
 }
 
-MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
+MemBlock BigHeap::resizeBig(void* ptr, size_t newsize,
+                            MemoryUsageStats& stats) {
   // Since we don't know how big it is (i.e. how much data we should memcpy),
   // we have no choice but to ask malloc to realloc for us.
   auto const n = static_cast<MallocNode*>(ptr) - 1;
+  auto old_size = n->nbytes - sizeof(MallocNode);
 #ifdef USE_JEMALLOC
   auto const newNode = static_cast<MallocNode*>(
     rallocx(n, newsize + sizeof(MallocNode), 0)
@@ -1154,6 +1171,8 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;
   }
+  stats.mmUsage += newsize - old_size;
+  stats.capacity += newsize - old_size;
   return {newNode + 1, newsize};
 }
 

@@ -59,7 +59,7 @@ bool hasNativeData(const HeapObject* h) {
 }
 
 template<bool apcgc> struct Marker {
-  explicit Marker(BigHeap& heap) : heap_(heap) {}
+  explicit Marker(HeapImpl& heap) : heap_(heap) {}
   void init();
   void traceRoots();
   void trace();
@@ -86,7 +86,7 @@ template<bool apcgc> struct Marker {
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
 
-  BigHeap& heap_;
+  HeapImpl& heap_;
   Counter allocd_, marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
@@ -477,7 +477,7 @@ void logCollection(const char* phase, const Marker<apcgc>& mkr) {
   StructuredLog::log("hhvm_gc", sample);
 }
 
-void collectImpl(BigHeap& heap, const char* phase) {
+void collectImpl(HeapImpl& heap, const char* phase) {
   VMRegAnchor _;
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;

@@ -498,14 +498,18 @@ struct BigHeap {
   /*
    * Allocate a MemBlock of at least size bytes, track in m_slabs.
    */
-  MemBlock allocSlab(size_t size);
+  MemBlock allocSlab(size_t size, MemoryUsageStats& stats);
 
   /*
    * Allocation API for big blocks.
    */
-  MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
-  MemBlock resizeBig(void* p, size_t size);
+  MemBlock allocBig(size_t size, HeaderKind kind,
+                    type_scan::Index tyindex, MemoryUsageStats& stats,
+                    bool freeRequested);
+  MemBlock callocBig(size_t size, HeaderKind kind,
+                    type_scan::Index tyindex, MemoryUsageStats& stats,
+                    bool freeRequested);
+  MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*);
 
   /*
@@ -552,6 +556,11 @@ struct BigHeap {
   std::vector<MallocNode*> m_bigs;
 };
 
+#ifdef USE_CONTIGUOUS_HEAP
+  using HeapImpl = ContiguousBigHeap;
+#else
+  using HeapImpl = BigHeap;
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemoryManager {
@@ -1029,7 +1038,7 @@ private:
   int64_t m_nextGc; // request gc when heap usage reaches this size
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
   MemoryUsageStats m_stats;
-  BigHeap m_heap;
+  HeapImpl m_heap;
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
 

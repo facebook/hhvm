@@ -44,8 +44,16 @@ struct MemoryUsageStats {
   int64_t totalAlloc; // how many bytes have cumulatively been allocated
                       // by the underlying allocator
 
+  int64_t heapAllocVolume; // how many bytes have cumulatively been allocated
+                           // by the MemoryManager, ONLY used in contiguous heap
+
   int64_t usage() const { return mmUsage + auxUsage(); }
+#ifdef USE_CONTIGUOUS_HEAP
+  // If use contiguous heap, stop subtracting capacity from extusage.
+  int64_t auxUsage() const { return extUsage; }
+#else
   int64_t auxUsage() const { return extUsage - capacity; }
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////

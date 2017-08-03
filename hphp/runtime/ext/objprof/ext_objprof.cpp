@@ -316,10 +316,8 @@ std::pair<int, double> sizeOfArray(
       FTRACE(2, "  Value size for that key was {}:{}\n",
         val_size_pair.first, val_size_pair.second);
       if (histogram) {
-        auto histogram_key = std::make_pair(
-          cls,
-          String::attach(tvCastToString(k)).c_str()
-        );
+        auto const k_str = String::attach(tvCastToString(k));
+        auto const histogram_key = std::make_pair(cls, k_str.toCppString());
         auto& metrics = (*histogram)[histogram_key];
         metrics.instances += 1;
         metrics.bytes += val_size_pair.first + key_size_pair.first;

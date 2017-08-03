@@ -39,7 +39,7 @@ let abstract_keyword = {
     (* Abstract class *)
     (context.closest_parent_container = TopLevel ||
     context.closest_parent_container = ClassHeader) &&
-    context.predecessor = MarkupSection
+    context.predecessor = TopLevelDeclaration
     || (* Abstract method *)
     context.closest_parent_container = ClassBody &&
     (context.predecessor = OpenBrace ||
@@ -53,7 +53,7 @@ let final_keyword = {
     (* Final class *)
     (context.closest_parent_container = TopLevel ||
     context.closest_parent_container = ClassHeader) &&
-    (context.predecessor = MarkupSection ||
+    (context.predecessor = TopLevelDeclaration ||
     context.predecessor = KeywordAbstract)
     || (* Final method *)
     context.closest_parent_container = ClassBody &&

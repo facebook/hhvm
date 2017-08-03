@@ -49,12 +49,12 @@ module Predecessor = struct
   | KeywordFinal
   | KeywordImplements
   | KeywordStatic
-  | MarkupSection
   | OpenBrace
   | OpenParenthesis
   | TokenColon
   | TokenComma
   | TokenLessThan
+  | TopLevelDeclaration
   | TryWithoutFinally
   | VisibilityModifier
   | NoPredecessor
@@ -102,6 +102,20 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   let open TokenKind in
   let open Predecessor in
   let classify_syntax_as_predecessor node = match syntax node with
+    | AliasDeclaration { alias_semicolon = { syntax = Token _; _ }; _ }
+    | EnumDeclaration { enum_right_brace = { syntax = Token _; _ }; _ }
+    | FunctionDeclaration { function_body = { syntax =
+        CompoundStatement { compound_right_brace = { syntax =
+          Token _; _
+        }; _ }; _
+      }; _ }
+    | InclusionDirective { inclusion_semicolon = { syntax = Token _; _ }; _ }
+    | MarkupSection _
+    | NamespaceBody { namespace_right_brace = { syntax = Token _; _ }; _ }
+    | NamespaceEmptyBody { namespace_semicolon = { syntax = Token _; _ }; _ }
+    | NamespaceUseDeclaration { namespace_use_semicolon = { syntax = Token _; _ }; _ }
+    | ClassishBody { classish_body_right_brace = { syntax = Token _; _ }; _ } ->
+        Some TopLevelDeclaration
     | ClassishDeclaration {
         classish_implements_list = { syntax = SyntaxList _; _ }; _
       } -> Some ImplementsList
@@ -120,7 +134,6 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
         classish_implements_list = { syntax = Missing; _ };
         _
       } -> Some ClassName
-    | PositionedSyntax.MarkupSection _ -> Some Predecessor.MarkupSection
     | IfStatement { if_else_clause = {
         syntax = Missing; _
       }; _ } -> Some IfWithoutElse

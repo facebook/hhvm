@@ -446,6 +446,9 @@ void RegionDesc::chainRetransBlocks() {
   BlockToChainMap block2chain;
   SCOPE_ASSERT_DETAIL("RegionDesc::chainRetransBlocks") { return show(*this); };
   jit::hash_set<RegionDesc::BlockId> blockIds;
+  jit::hash_map<RegionDesc::BlockId, int64_t> blockWgt;
+
+  auto profData = jit::profData();
 
   // 1. Initially assign each region block to its own chain.
   for (auto b : blocks()) {
@@ -454,6 +457,8 @@ void RegionDesc::chainRetransBlocks() {
     chains.push_back({cid, {bid}});
     block2chain[bid] = cid;
     blockIds.insert(bid);
+    always_assert(hasTransID(bid));
+    blockWgt[bid] = profData->transCounter(bid);
   }
   always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
@@ -498,14 +503,8 @@ void RegionDesc::chainRetransBlocks() {
   //          B3  ->   B2"
   //        Note the cycle: B2" -R-> B2' -> B3 -> B2".
   //
-  auto profData = jit::profData();
-
-  auto weight = [&](RegionDesc::BlockId bid) {
-    return hasTransID(bid) ? profData->transCounter(getTransID(bid)) : 0;
-  };
-
   auto cmpBlocks = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
-    return weight(bid1) > weight(bid2);
+    return blockWgt[bid1] > blockWgt[bid2];
   };
 
   TRACE(1, "chainRetransBlocks: computed chains:\n");
@@ -513,9 +512,9 @@ void RegionDesc::chainRetransBlocks() {
     std::sort(c.blocks.begin(), c.blocks.end(), cmpBlocks);
 
     if (Trace::moduleEnabled(Trace::region, 1) && c.blocks.size() > 0) {
-      FTRACE(1, "  -> {} (w={})", c.blocks[0], weight(c.blocks[0]));
+      FTRACE(1, "  -> {} (w={})", c.blocks[0], blockWgt[c.blocks[0]]);
       for (size_t i = 1; i < c.blocks.size(); i++) {
-        FTRACE(1, ", {} (w={})", c.blocks[i], weight(c.blocks[i]));
+        FTRACE(1, ", {} (w={})", c.blocks[i], blockWgt[c.blocks[i]]);
       }
       FTRACE(1, "\n");
     }

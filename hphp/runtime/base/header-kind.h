@@ -185,6 +185,10 @@ inline bool isWaithandleKind(HeaderKind k) {
          k == HeaderKind::AsyncFuncWH;
 }
 
+inline bool isBigKind(HeaderKind k) {
+  return k == HeaderKind::BigObj || k == HeaderKind::BigMalloc;
+}
+
 enum class CollectionType : uint8_t {
 #define COL(name) name = uint8_t(HeaderKind::name),
   COLLECTION_TYPES

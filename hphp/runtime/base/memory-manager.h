@@ -22,6 +22,7 @@
 #include <utility>
 #include <set>
 #include <unordered_map>
+#include <bitset>
 
 #include <folly/Memory.h>
 
@@ -525,8 +526,8 @@ struct BigHeap {
   void flush();
 
   /*
-   * Iterate over all the slabs and bigs, calling Fn on each block, including
-   * all of the blocks in each slab.
+   * Iterate over all the slabs and big blocks, calling Fn on each block,
+   * including all of the blocks in each slab.
    */
   template<class Fn> void iterate(Fn);
 
@@ -543,10 +544,9 @@ struct BigHeap {
   HeapObject* find(const void* p);
 
   /*
-   * Sorting helpers
+   * Sorts both slabs and big blocks.
    */
-  void sortSlabs();
-  void sortBigs();
+  void sort();
 
  protected:
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
@@ -554,6 +554,88 @@ struct BigHeap {
  protected:
   std::vector<MemBlock> m_slabs;
   std::vector<MallocNode*> m_bigs;
+};
+
+/*
+ * Contiguous heap allocator for chunks
+ */
+struct ContiguousBigHeap {
+  static constexpr size_t ChunkSize = kSlabSize;              // 2MB
+  static constexpr size_t HeapCap = 8 * 1024*1024*1024UL;     // 8G
+  static constexpr size_t FreebitsSize = HeapCap / ChunkSize; // 4096
+  ContiguousBigHeap();
+
+  ~ContiguousBigHeap();
+
+  /*
+   * Is the heap empty?
+   */
+  bool empty() const;
+
+  /*
+   * Whether `ptr' refers to slab-allocated memory.
+   */
+  bool contains(void* ptr) const;
+
+  /*
+   * Allocate a MemBlock of at least size bytes.
+   */
+  MemBlock allocSlab(size_t size, MemoryUsageStats& stats);
+
+  /*
+   * Allocation API for big blocks.
+   */
+  MemBlock allocBig(size_t size, HeaderKind kind,
+                    type_scan::Index tyindex, MemoryUsageStats& stats,
+                    bool FreeRequested);
+  MemBlock callocBig(size_t size, HeaderKind kind,
+                    type_scan::Index tyindex, MemoryUsageStats& stats,
+                    bool FreeRequested);
+  MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
+  void freeBig(void*);
+
+  /*
+   * Free all chunks.
+   */
+  void reset();
+
+  /*
+   * Release auxiliary structures to prepare to be idle for a while.
+   *
+   * @requires: empty()
+   */
+  void flush();
+
+  /*
+   * Iterate over all the chunks.
+   */
+  template<class OnBig, class OnSlab> void iterate(OnBig, OnSlab);
+  template<class Fn> void iterate(Fn);
+  template<class Fn> HeapObject* find_if(bool, Fn);
+
+  /*
+   * Find the HeapObject* which contains `p'. If `p' is
+   * not contained in any heap allocation, it returns nullptr.
+   */
+  HeapObject* find(const void* p);
+
+  /*
+   * Sorts both slabs and big blocks.
+   */
+  void sort() {}
+
+private:
+  char* raw_alloc(size_t size);
+  void raw_free(char* p, size_t size);
+  bool check_invariants() const;
+  char* grow(size_t size);
+  size_t chunk_index(char* p) const;
+
+private:
+  char* const m_base;       // lowest address in heap
+  char* const m_limit;      // limit of heap size
+  char* m_front;            // end of the allocated part of the heap
+  std::bitset<FreebitsSize> m_freebits;   // 1 for free, 0 for allocated
 };
 
 #ifdef USE_CONTIGUOUS_HEAP

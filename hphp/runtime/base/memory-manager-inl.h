@@ -45,6 +45,15 @@ inline bool BigHeap::empty() const {
   return m_slabs.empty() && m_bigs.empty();
 }
 
+inline bool ContiguousBigHeap::empty() const {
+  return m_base == m_front;
+}
+
+inline size_t ContiguousBigHeap::chunk_index(char* p) const {
+  assert(p >= m_base);
+  return (p - m_base) / ChunkSize;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemoryManager::MaskAlloc {

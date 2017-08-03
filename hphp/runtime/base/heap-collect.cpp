@@ -99,6 +99,10 @@ template<bool apcgc> struct Marker {
   APCGCManager* apcgc_ ;
 };
 
+// TODO(T20460162): The contiguous heap has a bitmap of which chunks of memory
+// are allocated/free. And it can efficiently find the start of an allocated
+// object using bit operations. So there is an opportunity to speed this up by
+// directly accessing the bitmap instead of using PtrMap.
 template <bool apcgc>
 HdrBlock Marker<apcgc>::find(const void* ptr) {
   if (auto r = ptrs_.region(ptr)) {

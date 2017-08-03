@@ -643,6 +643,8 @@ struct RuntimeOption {
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, GCForAPC,                    false)                           \
   F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
+  F(int64_t, ContiguousHeapWindowSize, 5 * 1000000)                     \
+  F(uint64_t,ContiguousHeapThreshold,  128 * 1024 * 1024)               \
   F(bool, EnableGC,                    eagerGcDefault())                \
   /* Run GC eagerly at each surprise point. */                          \
   F(bool, EagerGC,                     eagerGcDefault())                \

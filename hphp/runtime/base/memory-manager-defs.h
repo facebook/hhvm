@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/util/bitops.h"
 
 #include <algorithm>
 
@@ -531,6 +532,81 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
     } while (h < end);
     assert(!end || h == end); // otherwise, last object was truncated
   }
+}
+
+// The parameters onBigFn and onSlabFn are both lambda functions.
+// When calling this function, iterate the whole heap from m_base to m_front,
+// call onBigFn() on big blocks, call onSlabFn() on slabs.
+// This function is used in GC Marker init and Marker sweep
+template<class OnBigFn, class OnSlabFn>
+void ContiguousBigHeap::iterate(OnBigFn onBigFn, OnSlabFn onSlabFn) {
+  // [m_base,m_front) iterate the whole heap
+  find_if(true, [&](HeapObject* h, size_t size) {
+    switch (h->kind()) {
+      case HeaderKind::BigObj:
+      case HeaderKind::BigMalloc:
+        onBigFn(h, size);
+        break;
+      case HeaderKind::Slab:
+        onSlabFn(h, size);
+        break;
+      default:
+        break;
+    }
+    return false;
+  });
+}
+
+// The parameter Fn is a lambda function.
+// When calling this function, iterate the whole heap, call fn() on every
+// HeapObject(skip slab Header).
+template<class Fn> void ContiguousBigHeap::iterate(Fn fn) {
+  find_if(false, [&](HeapObject* h, size_t size) {
+    fn(h, size);
+    return false;
+  });
+}
+
+// For each in-use chunk (using the bitmask), within [m_base, m_front),
+// visit all the heap objects in the chunk by parsing headers.
+// If wholeSlab is true, we would not go into the inside of slab,
+// just take slab as a whole.
+//
+//bitmap:     0        0         1         0          1         1
+//       [--------][--------][--------][--------][--------][--------]
+//       ^usedStart          ^usedEnd                               ^endIndex
+template<class Fn>
+HeapObject* ContiguousBigHeap::find_if(bool wholeSlab, Fn fn) {
+  assert(check_invariants());
+  size_t endIndex   = chunk_index(m_front);
+  size_t startIndex = chunk_index(m_base);
+  size_t usedStart  = findFirst0(m_freebits, startIndex, endIndex);
+  size_t usedEnd    = findFirst1(m_freebits, usedStart, endIndex);
+  size_t size;
+  while (usedStart < endIndex) {
+    // in a contiguous allocated space, loop through all the header
+    auto hdr    = m_base + usedStart * ChunkSize;
+    auto endPtr = m_base + usedEnd * ChunkSize;
+    while (hdr < endPtr) {
+      if (((HeapObject*)hdr)->kind() == HeaderKind::Slab) {
+        if (wholeSlab) {
+          size = kSlabSize;
+        } else{
+          hdr += allocSize((HeapObject*)hdr);     // skip Slab header
+          continue;
+        }
+      } else {
+        size = allocSize((HeapObject*)hdr);
+      }
+      assert(hdr + size <= endPtr);
+      if (fn((HeapObject*)hdr, size)) return (HeapObject*)hdr;
+      hdr += size;
+    }
+    // go to next contiguous allocated space
+    usedStart = findFirst0(m_freebits, usedEnd, endIndex);
+    usedEnd   = findFirst1(m_freebits, usedStart, endIndex);
+  }
+  return nullptr;
 }
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {

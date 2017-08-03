@@ -481,8 +481,7 @@ void MemoryManager::initFree() {
       }
     }
   }
-  m_heap.sortSlabs();
-  m_heap.sortBigs();
+  m_heap.sort();
 }
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
@@ -1176,7 +1175,7 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize,
   return {newNode + 1, newsize};
 }
 
-void BigHeap::sortSlabs() {
+void BigHeap::sort() {
   std::sort(std::begin(m_slabs), std::end(m_slabs),
     [] (const MemBlock& l, const MemBlock& r) {
       assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
@@ -1184,9 +1183,6 @@ void BigHeap::sortSlabs() {
       return l.ptr < r.ptr;
     }
   );
-}
-
-void BigHeap::sortBigs() {
   std::sort(std::begin(m_bigs), std::end(m_bigs));
   for (size_t i = 0, n = m_bigs.size(); i < n; ++i) {
     m_bigs[i]->index() = i;
@@ -1201,7 +1197,7 @@ void BigHeap::sortBigs() {
  * If that fails, we return nullptr.
  */
 HeapObject* BigHeap::find(const void* p) {
-  sortSlabs();
+  sort();
   auto const slab = std::lower_bound(
     std::begin(m_slabs), std::end(m_slabs), p,
     [] (const MemBlock& slab, const void* p) {
@@ -1225,8 +1221,6 @@ HeapObject* BigHeap::find(const void* p) {
     // We know `p' is in the slab, so it must belong to one of the headers.
     always_assert(false);
   }
-
-  sortBigs();
 
   auto const big = std::lower_bound(
     std::begin(m_bigs), std::end(m_bigs), p,

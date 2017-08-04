@@ -85,7 +85,12 @@
                     [(AnnotatedAST.Expr
                         ((Some \Vector<_>),
                          (AnnotatedAST.Binop ((Eq None),
-                            ((Some \Vector<_>), AnnotatedAST.Any),
+                            ((Some \Vector<T>),
+                             (AnnotatedAST.Obj_get (
+                                ((Some <static>), AnnotatedAST.This),
+                                (None,
+                                 (AnnotatedAST.Id (<p>, "x"))),
+                                OG_nullthrows))),
                             ((Some \Vector<_>),
                              (AnnotatedAST.ValCollection (<vc_kind>, [])))
                             ))))

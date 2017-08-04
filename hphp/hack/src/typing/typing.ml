@@ -2137,7 +2137,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
        * check that the assignment is compatible with the type of
        * the member.
        *)
-      let env, _te1, real_type = lvalue no_fakes e1 in
+      let env, te1, real_type = lvalue no_fakes e1 in
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
       let env, ety2 = Env.expand_type env ty2 in
@@ -2160,7 +2160,7 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
             | _ -> ()
           ) in
           let env, ty = set_valid_rvalue p env local ty2 in
-          make_result env T.Any ty
+          env, te1, ty
       | _, Class_get (x, (_, y)) ->
           let env, local = Env.FakeMembers.make_static p env x y in
           let env, ty3 = set_valid_rvalue p env local ty2 in
@@ -2169,8 +2169,8 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
           | CIstatic ->
               Typing_suggest.save_member y env exp_real_type ty2;
           | _ -> ());
-          make_result env T.Any ty3
-      | _ -> make_result env T.Any ty2
+          env, te1, ty3
+      | _ -> env, te1, ty2
       )
   | _, Array_get ((_, Lvar (_, lvar)) as shape, ((Some _) as e2)) ->
     let access_type = Typing_arrays.static_array_access env e2 in

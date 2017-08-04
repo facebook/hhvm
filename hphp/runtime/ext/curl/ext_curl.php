@@ -61,8 +61,12 @@ function curl_strerror(int $errno): string;
  *
  * @return mixed - However, if the CURLOPT_RETURNTRANSFER option is set,
  *   it will return the result on success, FALSE on failure.
+ *
+ * FCallBuiltin is not used, as it would optimize away event hooks, resulting
+ * in broken request timeout semantics. It's also desirable to make curl_exec()
+ * frames visible in profiling tools such as Xenon.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_exec(resource $ch): mixed;
 
 /**
@@ -183,8 +187,10 @@ function curl_multi_close(resource $mh): mixed;
  *   This only returns errors regarding the whole multi stack. There might
  *   still have occurred problems on individual transfers even when this
  *   function returns CURLM_OK.
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_exec(resource $mh,
                          mixed &$still_running): ?int;
 
@@ -257,8 +263,10 @@ function curl_multi_remove_handle(resource $mh,
  * @return int - On success, returns the number of descriptors contained
  *   in the descriptor sets. On failure, this function will return -1 on a
  *   select failure or timeout (from the underlying select system call).
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_select(resource $mh,
                            float $timeout = 1.0): ?int;
 
@@ -283,8 +291,10 @@ function curl_multi_select(resource $mh,
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_await(resource $mh,
                           float $timeout = 1.0): Awaitable<int>;
 

@@ -61,7 +61,6 @@ void ExpressionList::setContext(Context context) {
       if (m_exps[i]) {
         m_exps[i]->setContext(UnsetContext);
         m_exps[i]->setContext(LValue);
-        m_exps[i]->setContext(NoLValueWrapper);
       }
     }
   }

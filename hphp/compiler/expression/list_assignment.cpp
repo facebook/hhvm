@@ -186,7 +186,6 @@ void ListAssignment::setLValue() {
           exp->setContext(Expression::DeepAssignmentLHS);
           exp->setContext(Expression::AssignmentLHS);
           exp->setContext(Expression::LValue);
-          exp->setContext(Expression::NoLValueWrapper);
         }
       }
     }

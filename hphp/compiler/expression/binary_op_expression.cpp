@@ -59,9 +59,6 @@ BinaryOpExpression::BinaryOpExpression
     m_exp1->setContext(Expression::LValue);
     m_exp1->setContext(Expression::OprLValue);
     m_exp1->setContext(Expression::DeepOprLValue);
-    if (m_exp1->is(Expression::KindOfObjectPropertyExpression)) {
-      m_exp1->setContext(Expression::NoLValueWrapper);
-    }
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();

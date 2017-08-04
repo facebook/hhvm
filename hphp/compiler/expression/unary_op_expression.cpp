@@ -52,7 +52,6 @@ inline void UnaryOpExpression::ctorInit() {
     // this is hacky, what we need is LValueWrapper
     if (!m_exp->is(Expression::KindOfSimpleVariable)) {
       m_exp->setContext(Expression::LValue);
-      m_exp->clearContext(Expression::NoLValueWrapper);
     }
     break;
   case T_PRINT:

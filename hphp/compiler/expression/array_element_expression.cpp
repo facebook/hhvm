@@ -74,16 +74,6 @@ void ArrayElementExpression::setContext(Context context) {
       if (!hasContext(Expression::UnsetContext)) {
         m_variable->setContext(Expression::LValue);
       }
-      if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
-        m_variable->clearContext(Expression::NoLValueWrapper);
-      }
-      // special case for $GLOBALS[], we do not need lvalue wrapper
-      if (m_variable->is(Expression::KindOfSimpleVariable)) {
-        auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-        if (var->getName() == "GLOBALS") {
-          m_context |= Expression::NoLValueWrapper;
-        }
-      }
       break;
     case Expression::DeepAssignmentLHS:
     case Expression::DeepOprLValue:
@@ -98,7 +88,6 @@ void ArrayElementExpression::setContext(Context context) {
       break;
     case Expression::InvokeArgument:
       m_variable->setContext(context);
-      setContext(NoLValueWrapper);
     default:
       break;
   }
@@ -116,7 +105,6 @@ void ArrayElementExpression::clearContext(Context context) {
       break;
     case Expression::InvokeArgument:
       m_variable->clearContext(context);
-      clearContext(NoLValueWrapper);
       break;
     case Expression::RefValue:
     case Expression::RefParameter:
@@ -160,9 +148,7 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_offset) m_offset->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_global) {
-      if (getContext() & (LValue|RefValue|DeepReference)) {
-        setContext(NoLValueWrapper);
-      } else if (!m_dynamicGlobal &&
+      if (!m_dynamicGlobal &&
           !(getContext() &
             (LValue|RefValue|RefParameter|DeepReference|
              UnsetContext|ExistContext))) {

@@ -50,7 +50,6 @@ AssignmentExpression::AssignmentExpression
   m_variable->setContext(Expression::DeepAssignmentLHS);
   m_variable->setContext(Expression::AssignmentLHS);
   m_variable->setContext(Expression::LValue);
-  m_variable->setContext(Expression::NoLValueWrapper);
   m_value->setContext(Expression::AssignmentRHS);
   if (ref) {
     m_variable->setContext(Expression::RefAssignmentLHS);

@@ -43,10 +43,8 @@ ForEachStatement::ForEachStatement
   }
   if (m_name) {
     m_name->setContext(Expression::LValue);
-    m_name->setContext(Expression::NoLValueWrapper);
   }
   m_value->setContext(Expression::LValue);
-  m_value->setContext(Expression::NoLValueWrapper);
   if (m_ref) {
     m_array->setContext(Expression::RefValue);
     m_value->setContext(Expression::RefValue);

@@ -38,7 +38,6 @@ SimpleVariable::SimpleVariable
     m_sym(nullptr), m_originalSym(nullptr),
     m_this(false), m_globals(false),
     m_superGlobal(false), m_alwaysStash(false) {
-  setContext(Expression::NoLValueWrapper);
 }
 
 ExpressionPtr SimpleVariable::clone() {

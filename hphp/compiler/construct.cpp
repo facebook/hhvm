@@ -207,9 +207,6 @@ void Construct::dumpNode(int spc) {
     } else if (c & Expression::LValue) {
       scontext += "|LValue";
     }
-    if (c & Expression::NoLValueWrapper) {
-      scontext += "|NoLValueWrapper";
-    }
     if (c & Expression::RefValue) {
       scontext += "|RefValue";
     }

@@ -43,7 +43,6 @@ SwitchStatement::SwitchStatement
       auto c = dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
       if (c->getCondition() && c->getCondition()->hasEffect()) {
         m_exp->setContext(Expression::LValue);
-        m_exp->setContext(Expression::NoLValueWrapper);
         break;
       }
     }

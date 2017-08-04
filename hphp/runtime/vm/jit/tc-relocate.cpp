@@ -732,7 +732,7 @@ perfRelocMapInfo(TCA start, TCA /*end*/, TCA coldStart, TCA coldEnd, SrcKey sk,
 //////////////////////////////////////////////////////////////////////
 
 void relocateTranslation(
-  const IRUnit& unit,
+  const IRUnit* unit,
   CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
   CodeBlock& frozen, CodeAddress frozen_start,
@@ -750,7 +750,7 @@ void relocateTranslation(
             map.afrozenStart);
     }
   }
-  if (ai) printUnit(kRelocationLevel, unit, " before relocation ", ai);
+  if (ai && unit) printUnit(kRelocationLevel, *unit, " before relocation ", ai);
 
   RelocationInfo rel;
   size_t asm_count{0};

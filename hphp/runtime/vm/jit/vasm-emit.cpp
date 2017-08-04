@@ -195,7 +195,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   assertx(code.isLocal() || main_in.frontier() == main_start);
 
   if (do_relocate) {
-    tc::relocateTranslation(unit,
+    tc::relocateTranslation(&unit,
                             main, main_in, main_start,
                             cold, cold_in, cold_start,
                             *frozen, frozen_start, ai, meta);

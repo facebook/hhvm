@@ -419,7 +419,7 @@ inline void liveRelocate(bool random) {
  * TODO(t10543562): This can probably be merged with relocateNewTranslation.
  */
 void relocateTranslation(
-  const IRUnit& unit,
+  const IRUnit* unit,
   CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
   CodeBlock& frozen, CodeAddress frozen_start,

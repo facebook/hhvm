@@ -348,16 +348,21 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
   not_reached();
 }
 
-Vptr lookupDestructor(Vout& v, Vreg type) {
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
 
-  auto const typel = v.makeReg();
   auto const index = v.makeReg();
   auto const indexl = v.makeReg();
+  auto const typel = [&] {
+    if (!typeIsLong) {
+      auto r = v.makeReg();
+      // the caller didn't zero extend the type, so we need to here
+      v << movzbl{type, r};
+      return r;
+    }
+    return type;
+  }();
 
-  // This movzbl is only needed because callers aren't required to zero-extend
-  // the type.
-  v << movzbl{type, typel};
   v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
   v << movzlq{indexl, index};
 

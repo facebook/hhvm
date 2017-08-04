@@ -151,12 +151,14 @@ private:
  */
 struct Vauto {
   explicit Vauto(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-                 CGMeta& fixups, CodeKind kind = CodeKind::Helper)
+                 CGMeta& fixups, CodeKind kind = CodeKind::Helper,
+                 bool relocate = false)
     : m_text{main, cold, data}
     , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main, 1)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold, 1)}
     , m_kind{kind}
+    , m_relocate{relocate}
   {
     m_unit.entry = Vlabel(this->main());
   }
@@ -174,28 +176,36 @@ private:
   Vout m_main;
   Vout m_cold;
   CodeKind m_kind;
+  bool m_relocate;
 };
 
 namespace detail {
   template<class GenFunc>
   TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta* meta, GenFunc gen,
-                 CodeKind kind = CodeKind::CrossTrace);
+                 CodeKind kind = CodeKind::CrossTrace,
+                 bool relocate = false);
 }
 
 /*
  * Convenience wrappers around Vauto for cross-trace or helper code.
+ *
+ * The relocate parameter attempts to generate code into a temporary
+ * buffer allocated from cb, and then relocate it to the start of cb -
+ * which can reduce the code size. If there isn't enough room in cb,
+ * the parameter will be ignored.
  */
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
-          CodeKind kind = CodeKind::CrossTrace) {
+          CodeKind kind = CodeKind::CrossTrace, bool relocate = false) {
   return detail::vwrap_impl(cb, cb, data, &meta,
-                            [&] (Vout& v, Vout&) { gen(v); }, kind);
+                            [&] (Vout& v, Vout&) { gen(v); }, kind, relocate);
 }
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen, bool relocate = false) {
   return detail::vwrap_impl(cb, cb, data, nullptr,
-                            [&] (Vout& v, Vout&) { gen(v); });
+                            [&] (Vout& v, Vout&) { gen(v); },
+                            CodeKind::CrossTrace, relocate);
 }
 template<class GenFunc>
 TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data,

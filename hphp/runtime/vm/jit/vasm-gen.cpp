@@ -95,20 +95,43 @@ Vauto::~Vauto() {
       // Prevent spurious printir traces.
       Trace::Bump bumper{Trace::printir, 10};
 
+      CodeBlock mainTmp, coldTmp;
+      auto text = [&] {
+        if (m_relocate) {
+          auto& cold = m_text.cold().code;
+          if (cold.canEmit(0x10000)) {
+            mainTmp.init(cold.frontier() + 0x8000, 0x4000, "vauto main tmp");
+            coldTmp.init(cold.frontier() + 0xc000, 0x4000, "vauto cold tmp");
+            return Vtext(mainTmp, coldTmp, m_text.data());
+          }
+          m_relocate = false;
+        }
+        return std::move(m_text);
+      }();
+
       auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
           optimizeX64(unit(), abi, true /* regalloc */);
-          emitX64(unit(), m_text, m_fixups, nullptr);
+          emitX64(unit(), text, m_fixups, nullptr);
           break;
         case Arch::ARM:
           optimizeARM(unit(), abi, true /* regalloc */);
-          emitARM(unit(), m_text, m_fixups, nullptr);
+          emitARM(unit(), text, m_fixups, nullptr);
           break;
         case Arch::PPC64:
           optimizePPC64(unit(), abi, true /* regalloc */);
-          emitPPC64(unit(), m_text, m_fixups, nullptr);
+          emitPPC64(unit(), text, m_fixups, nullptr);
           break;
+      }
+
+      if (m_relocate) {
+        tc::relocateTranslation(
+          nullptr,
+          mainTmp, m_text.main().code, m_text.main().code.frontier(),
+          coldTmp, m_text.cold().code, m_text.cold().code.frontier(),
+          coldTmp, coldTmp.frontier(),
+          nullptr, m_fixups);
       }
       return;
     }

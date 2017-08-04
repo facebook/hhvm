@@ -166,7 +166,7 @@ void emitCall(Vout& v, CallSpec call, RegSet args);
 /*
  * Return a Vptr to the native destructor function for values of type `type'.
  */
-Vptr lookupDestructor(Vout& v, Vreg type);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class metadata.

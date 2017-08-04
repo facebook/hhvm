@@ -39,7 +39,7 @@ struct CodeCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr int kNumFreeLocalsHelpers = 8;
+constexpr int kNumFreeLocalsHelpers = 7;
 
 /*
  * Addresses of various unique, long-lived JIT helper routines.

@@ -19,35 +19,37 @@
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/trace.h"
+#include <folly/MicroSpinLock.h>
 
 #include <type_traits>
 
 TRACE_SET_MOD(asmppc64);
 
 namespace ppc64_asm {
+
+// Lock to protect TOC when writing.
+static folly::MicroSpinLock s_TOC;
+
+//////////////////////////////////////////////////////////////////////
+
 VMTOC::~VMTOC() {
-  FTRACE(1, "Number of values stored in TOC: {}\n",
+  FTRACE(1, "Number of values if 64bits stored in TOC: {}\n",
     std::to_string(m_last_elem_pos));
 }
 
-int64_t VMTOC::pushElem(int64_t elem) {
-  auto& map_elem = m_map[elem];
-  if (map_elem) return map_elem;
+int64_t VMTOC::pushElem(int64_t elem, bool elemMayChange) {
+  int64_t offset;
+  if(elemMayChange) {
+    offset = allocTOC(elem);
+  }
+  else {
+    auto& map_elem = m_map[elem];
+    if (map_elem) return map_elem;
+    offset = allocTOC(elem);
+    map_elem = offset;
+  }
 
-  auto offset = allocTOC(static_cast<int32_t>(elem & 0xffffffff), true);
-  map_elem = offset;
-  allocTOC(static_cast<int32_t>((elem & 0xffffffff00000000) >> 32));
-  m_last_elem_pos += 2;
-  return offset;
-}
-
-int64_t VMTOC::pushElem(int32_t elem) {
-  auto& map_elem = m_map[elem];
-  if (map_elem) return map_elem;
-
-  auto offset = allocTOC(elem);
-  map_elem = offset;
-  m_last_elem_pos++;
+  m_last_elem_pos += 1;
   return offset;
 }
 
@@ -72,15 +74,15 @@ int64_t VMTOC::getValue(int64_t index, bool qword) {
   return ret_val;
 }
 
-int64_t VMTOC::allocTOC(int32_t target, bool align) {
-  HPHP::Address addr = m_tocvector->frontier();
-  if (align) {
-    forceAlignment(addr);
-    always_assert(reinterpret_cast<uintptr_t>(addr) % 8 == 0);
-  }
+uint64_t* VMTOC::getAddr(int64_t index) {
+  return reinterpret_cast<uint64_t*>(
+      static_cast<intptr_t>(index) + getPtrVector());
+}
 
-  m_tocvector->assertCanEmit(sizeof(int32_t));
-  m_tocvector->dword(target);
+int64_t VMTOC::allocTOC(int64_t target) {
+  folly::MSLGuard g{s_TOC};
+  HPHP::Address addr = m_tocvector->frontier();
+  m_tocvector->qword(target);
   return addr - (m_tocvector->base() + INT16_MAX + 1);
 }
 
@@ -94,6 +96,7 @@ void VMTOC::setTOCDataBlock(HPHP::DataBlock *db) {
 }
 
 void VMTOC::forceAlignment(HPHP::Address& addr) {
+  folly::MSLGuard g{s_TOC};
   // keep 8-byte alignment
   while (reinterpret_cast<uintptr_t>(addr) % 8 != 0) {
     uint8_t fill_byte = 0xf0;
@@ -101,6 +104,14 @@ void VMTOC::forceAlignment(HPHP::Address& addr) {
     m_tocvector->byte(fill_byte);
     addr = m_tocvector->frontier();
   }
+}
+
+int64_t VMTOC::getIndex(uint64_t elem) {
+  auto pos = m_map.find(elem);
+  if (pos != m_map.end()) {
+    return pos->second;
+  }
+  return LLONG_MIN;
 }
 
 void BranchParams::decodeInstr(const PPC64Instr* const pinstr) {
@@ -472,13 +483,7 @@ void Assembler::patchAbsolute(CodeAddress jmp, CodeAddress dest) {
   HPHP::CodeBlock cb;
   cb.init(jmp, Assembler::kLimmLen, "patched bctr");
   Assembler a{ cb };
-  a.limmediate(reg::r12, ssize_t(dest),
-#ifdef USE_TOC_ON_BRANCH
-      ImmType::TocOnly
-#else
-      ImmType::AnyFixed
-#endif
-      );
+  a.limmediate(reg::r12, ssize_t(dest), ImmType::TocOnly, true);
 }
 
 void Assembler::patchBranch(CodeAddress jmp, CodeAddress dest) {
@@ -575,56 +580,34 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
   }
 }
 
-void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
-  static_assert(
-      std::is_unsigned<
-        decltype(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize)>::value,
-      "RuntimeOption::EvalPPC64MinTOCImmSize is expected to be unsigned.");
-  always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
-
-  auto fits = [](int64_t imm, uint16_t shift_n) {
-     return (static_cast<uint64_t>(imm) >> shift_n) == 0 ? true : false;
-  };
-
-  if (
-#ifndef USE_TOC_ON_BRANCH
-      1 ||
-#endif
-      (fits(imm64, HPHP::RuntimeOption::EvalPPC64MinTOCImmSize)
-      && (immt != ImmType::TocOnly))) {
-    li64(rt, imm64, immt != ImmType::AnyCompact);
-    return;
-  }
-
-  bool fits32 = fits(imm64, 32);
+void Assembler::li64TOC (const Reg64& rt, int64_t imm64,
+                         ImmType immt, bool immMayChange) {
   int64_t TOCoffset;
-  if (fits32) {
-    TOCoffset = VMTOC::getInstance().pushElem(
-        static_cast<int32_t>(UINT32_MAX & imm64));
-  } else {
-    TOCoffset = VMTOC::getInstance().pushElem(imm64);
-  }
+  TOCoffset = VMTOC::getInstance().pushElem(imm64, immMayChange);
 
-  auto const toc_start = frontier();
   if (TOCoffset > INT16_MAX) {
     int16_t complement = 0;
     // If last four bytes is still bigger than a signed 16bits, uses as two
     // complement.
     if ((TOCoffset & UINT16_MAX) > INT16_MAX) complement = 1;
     addis(rt, reg::r2, static_cast<int16_t>((TOCoffset >> 16) + complement));
-    if (fits32) lwz(rt, rt[TOCoffset & UINT16_MAX]);
-    else        ld (rt, rt[TOCoffset & UINT16_MAX]);
+    ld (rt, rt[TOCoffset & UINT16_MAX]);
   } else {
-    if (fits32) lwz(rt, reg::r2[TOCoffset]);
-    else        ld (rt, reg::r2[TOCoffset]);
+    ld (rt, reg::r2[TOCoffset]);
+    emitNop(instr_size_in_bytes);
   }
-  bool toc_may_grow = HPHP::RuntimeOption::EvalJitRelocationSize != 0;
-  auto const toc_max_size = (immt == ImmType::AnyFixed) ? kLi64Len
-    : ((immt == ImmType::TocOnly) || toc_may_grow) ? kTocLen
-    : 0;
-  if (toc_max_size) {
-    emitNop(toc_max_size - (frontier() - toc_start));
-  }
+}
+
+void Assembler::limmediate(const Reg64& rt, int64_t imm64,
+                           ImmType immt, bool immMayChange) {
+  static_assert(
+      std::is_unsigned<
+        decltype(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize)>::value,
+      "RuntimeOption::EvalPPC64MinTOCImmSize is expected to be unsigned.");
+  always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
+
+  if (immt != ImmType::TocOnly) li64(rt, imm64, immt != ImmType::AnyCompact);
+  else li64TOC (rt, imm64, immt, immMayChange);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -640,7 +623,8 @@ Label::~Label() {
   }
 }
 
-void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
+void Label::branch(Assembler& a, BranchConditions bc,
+                   LinkReg lr, bool addrMayChange) {
   // Only optimize jump if it'll unlikely going to be patched.
   if (m_address) {
     // if diff is 0, then this is for sure going to be patched.
@@ -676,19 +660,20 @@ void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
     }
   }
   // fallback: use CTR to perform absolute branch up to 64 bits
-  branchFar(a, bc, lr);
+  branchFar(a, bc, lr, ImmType::TocOnly, addrMayChange);
 }
 
 void Label::branchFar(Assembler& a,
                   BranchConditions bc,
                   LinkReg lr,
-                  ImmType immt) {
+                  ImmType immt,
+                  bool immMayChange) {
   // Marking current address for patchAbsolute
   addJump(&a);
 
   // Use reserved function linkage register
   const ssize_t address = ssize_t(m_address);
-  a.limmediate(reg::r12, address, immt);
+  a.limmediate(reg::r12, address, immt, immMayChange);
 
   // When branching to another context, r12 need to keep the target address
   // to correctly set r2 (TOC reference).

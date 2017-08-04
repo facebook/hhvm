@@ -114,6 +114,18 @@ struct DecodedInstruction {
   // Retrieve the register used by li32 instruction
   HPHP::jit::Reg64 getLi32Reg() const { return getLi64Reg(); }
 
+  // Check if is loading data from TOC
+  bool isLoadingTOC() const;
+
+  // Return the TOC addres of the immediate
+  uint64_t* decodeTOCAddress() const;
+
+  // Return the TOC offset of the immediate
+  int64_t decodeTOCOffset() const;
+
+  // Check if immediate is smashable (must not have reference).
+  bool isSmashable(uint64_t imm) const;
+
 private:
   // Initialize m_dinfo and m_size up to m_max_size
   void decode();
@@ -128,6 +140,9 @@ private:
   // Check if m_ip points to the beginning of a limmediate instruction (relaxed
   // constraint, only checks a part of it)
   bool isLimmediatePossible() const;
+
+  // Calculate the TOC index
+  int64_t calcIndex (int16_t indexBigTOC, int16_t indexTOC) const;
 
   uint8_t* m_ip;
   int64_t m_imm;

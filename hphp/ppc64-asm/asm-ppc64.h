@@ -53,9 +53,6 @@ constexpr uint8_t toc_position_on_frame     = 3 * 8;
 // Currently it skips a "nop" or a "ld 2,24(1)"
 constexpr uint8_t call_skip_bytes_for_ret   = 1 * instr_size_in_bytes;
 
-// Allow TOC usage on branches - disabled at the moment.
-//#define USE_TOC_ON_BRANCH
-
 //////////////////////////////////////////////////////////////////////
 
 enum class RegNumber : uint32_t {};
@@ -194,11 +191,13 @@ struct Label {
   Label(const Label&) = delete;
   Label& operator=(const Label&) = delete;
 
-  void branch(Assembler& a, BranchConditions bc, LinkReg lr);
+  void branch(Assembler& a, BranchConditions bc,
+              LinkReg lr, bool addrMayChange = false);
   void branchFar(Assembler& a,
                   BranchConditions bc,
                   LinkReg lr,
-                  ImmType immt = ImmType::TocOnly);
+                  ImmType immt = ImmType::TocOnly,
+                  bool immMayChange = false);
   void asm_label(Assembler& a);
 
 private:
@@ -239,12 +238,7 @@ public:
   /*
    * Push a 64 bit element into the stack and return its index.
    */
-  int64_t pushElem(int64_t elem);
-
-  /*
-   * Push a 32 bit element into the stack and return its index.
-   */
-  int64_t pushElem(int32_t elem);
+  int64_t pushElem(int64_t elem, bool elemMayChange = false);
 
   /*
    * Get the singleton instance.
@@ -261,10 +255,21 @@ public:
   /*
    * Return a value previously pushed.
    */
-  int64_t getValue(int64_t index, bool qword = false);
+  int64_t getValue(int64_t index, bool qword = true);
+
+  /*
+   * Return the memory address of the index.
+   */
+  uint64_t* getAddr(int64_t index);
+
+  /*
+   * Return TOC index of the element.
+   */
+  int64_t getIndex(uint64_t elem);
 
 private:
-  int64_t allocTOC (int32_t target, bool align = false);
+  //int64_t allocTOC (int32_t target, bool align = false);
+  int64_t allocTOC (int64_t target);
   void forceAlignment(HPHP::Address& addr);
 
   HPHP::DataBlock *m_tocvector;
@@ -379,14 +384,8 @@ struct Assembler {
   // TOC emit length: (ld/lwz + nop) or (addis + ld/lwz)
   static const uint8_t kTocLen = instr_size_in_bytes * 2;
 
-  // Compile time switch for using TOC or not on branches
-  static const uint8_t kLimmLen =
-#ifdef USE_TOC_ON_BRANCH
-    kTocLen
-#else
-    kLi64Len
-#endif
-    ;
+  // Define using TOC on branches
+  static const uint8_t kLimmLen = kTocLen;
 
   // Jcc using TOC length: toc/li64 + mtctr + nop + nop + bcctr
   static const uint8_t kJccLen = kLimmLen + instr_size_in_bytes * 4;
@@ -709,15 +708,17 @@ struct Assembler {
 
   void branchAuto(Label& l,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch) {
-    l.branch(*this, bc, lr);
+                  LinkReg lr = LinkReg::DoNotTouch,
+                  bool addrMayChange = false) {
+    l.branch(*this, bc, lr, addrMayChange);
   }
 
   void branchAuto(CodeAddress c,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch) {
+                  LinkReg lr = LinkReg::DoNotTouch,
+                  bool addrMayChange = false) {
     Label l(c);
-    l.branch(*this, bc, lr);
+    l.branch(*this, bc, lr, addrMayChange);
   }
 
   void branchAuto(CodeAddress c,
@@ -729,29 +730,33 @@ struct Assembler {
   void branchFar(Label& l,
                  BranchConditions bc = BranchConditions::Always,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
-    l.branchFar(*this, bc, lr, immt);
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
+    l.branchFar(*this, bc, lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c,
                  BranchConditions bc = BranchConditions::Always,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
     Label l(c);
-    l.branchFar(*this, bc, lr, immt);
+    l.branchFar(*this, bc, lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c,
                  ConditionCode cc,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
-    branchFar(c, BranchParams::convertCC(cc), lr, immt);
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
+    branchFar(c, BranchParams::convertCC(cc), lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c, BranchParams bp,
-                 ImmType immt = ImmType::TocOnly) {
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
     LinkReg lr = (bp.savesLR()) ? LinkReg::Save : LinkReg::DoNotTouch;
-    branchFar(c, static_cast<BranchConditions>(bp), lr, immt);
+    branchFar(c, static_cast<BranchConditions>(bp), lr, immt, immMayChange);
   }
 
   // ConditionCode variants
@@ -784,11 +789,12 @@ struct Assembler {
   void call(T& target, CallArg ca = CallArg::Internal) {
     if (CallArg::Internal == ca) {
       // tries best performance possible
-      branchAuto(target, BranchConditions::Always, LinkReg::Save);
+      branchAuto(target, BranchConditions::Always, LinkReg::Save, true);
     } else {
       // branchFar is not only smashable but also it will use r12 so an
       // external branch can correctly set its TOC address appropriately.
-      branchFar(target, BranchConditions::Always, LinkReg::Save);
+      branchFar(target, BranchConditions::Always, LinkReg::Save,
+                ImmType::TocOnly, true);
     }
     callEpilogue(ca);
   }
@@ -806,10 +812,15 @@ struct Assembler {
 
   void limmediate(const Reg64& rt,
                   int64_t imm64,
-                  ImmType immt = ImmType::AnyCompact);
+                  ImmType immt = ImmType::TocOnly,
+                  bool immMayChange = false);
 
   // Auxiliary for loading a complete 64bits immediate into a register
   void li64(const Reg64& rt, int64_t imm64, bool fixedSize = false);
+
+  // Auxiliary for loading a complete 64bits immediate into a register from TOC
+  void li64TOC (const Reg64& rt, int64_t imm64,
+                ImmType immt, bool immMayChange);
 
   // Auxiliary for loading a 32bits immediate into a register
   void li32 (const Reg64& rt, int32_t imm32);

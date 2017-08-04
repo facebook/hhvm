@@ -505,11 +505,9 @@ struct BigHeap {
    * Allocation API for big blocks.
    */
   MemBlock allocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats,
-                    bool freeRequested);
+                    type_scan::Index tyindex, MemoryUsageStats& stats);
   MemBlock callocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats,
-                    bool freeRequested);
+                    type_scan::Index tyindex, MemoryUsageStats& stats);
   MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*);
 
@@ -586,11 +584,9 @@ struct ContiguousBigHeap {
    * Allocation API for big blocks.
    */
   MemBlock allocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats,
-                    bool FreeRequested);
+                    type_scan::Index tyindex, MemoryUsageStats& stats);
   MemBlock callocBig(size_t size, HeaderKind kind,
-                    type_scan::Index tyindex, MemoryUsageStats& stats,
-                    bool FreeRequested);
+                    type_scan::Index tyindex, MemoryUsageStats& stats);
   MemBlock resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*);
 
@@ -720,23 +716,13 @@ struct MemoryManager {
    * may be larger than the requested size.  The returned pointer is
    * guaranteed to be 16-byte aligned.
    *
-   * The size passed to freeBigSize must either be the requested size that was
-   * passed to mallocBigSize, or the MemBlock size that was returned as the
-   * actual allocation size.
-   *
-   * Mode of ZeroFreeActual is the same as FreeActual, but zeros memory.
-   *
    * Pre: size > kMaxSmallSize
    */
-  enum MBS {
-    FreeRequested, // caller frees requested size
-    FreeActual,    // caller frees actual size returned in MemBlock
-    ZeroFreeActual // calloc & FreeActual
-  };
+  enum MBS { Unzeroed, Zeroed };
   template<MBS Mode>
   void* mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
                       type_scan::Index tyindex = 0);
-  void freeBigSize(void* vp, size_t size);
+  void freeBigSize(void* vp);
   void* resizeBig(MallocNode* n, size_t nbytes);
 
   /*
@@ -1086,7 +1072,6 @@ private:
                  uint32_t splitUsable, unsigned splitInd);
   void* slabAlloc(uint32_t bytes, size_t index);
   void* newSlab(uint32_t nbytes);
-  void* mallocSmallSizeFast(size_t bytes, size_t index);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
 

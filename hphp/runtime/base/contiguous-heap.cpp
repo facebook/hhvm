@@ -348,26 +348,21 @@ MemBlock ContiguousBigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
 // performance starts to get really bad (in normal operation, and with
 // m_bypassSlabAlloc=true)
 MemBlock ContiguousBigHeap::allocBig(size_t bytes, HeaderKind kind,
-                           type_scan::Index tyindex, MemoryUsageStats& stats,
-                           bool freeRequested) {
+                           type_scan::Index tyindex, MemoryUsageStats& stats) {
   // Round up to the nearest multiple of ChunkSize
   auto cap = (bytes + sizeof(MallocNode) + ChunkSize - 1) & ~(ChunkSize - 1);
   auto n = (MallocNode*)raw_alloc(cap);
   n->initHeader(tyindex, kind, 0);
   n->nbytes = cap;
-  auto const delta = freeRequested ? bytes : cap - sizeof(MallocNode);
-  stats.mmUsage += delta;
-  // Adjust memory stats for jemalloc. Otherwise, we'll double count
-  // the direct allocation.
+  stats.mmUsage += cap;
   stats.capacity += cap;
   stats.heapAllocVolume += cap;
   return {n + 1, cap - sizeof(MallocNode)};
 }
 
 MemBlock ContiguousBigHeap::callocBig(size_t bytes, HeaderKind kind,
-                            type_scan::Index tyindex, MemoryUsageStats& stats,
-                            bool freeRequested) {
-  auto b = allocBig(bytes, kind, tyindex, stats, freeRequested);
+                            type_scan::Index tyindex, MemoryUsageStats& stats) {
+  auto b = allocBig(bytes, kind, tyindex, stats);
   memset(b.ptr, 0, b.size);
   return b;
 }
@@ -388,13 +383,12 @@ MemBlock ContiguousBigHeap::resizeBig(void* ptr, size_t newsize,
                                       MemoryUsageStats& stats) {
   auto newcap = (newsize + sizeof(MallocNode) + ChunkSize-1) & ~(ChunkSize-1);
   auto n = static_cast<MallocNode*>(ptr) - 1;
-  auto old_size = n->nbytes - sizeof(MallocNode);
   if (newcap == n->nbytes) {
     // capacity and heapAllocVolume don't change
-    stats.mmUsage += newsize - old_size;
-    return {n + 1, old_size};
+    return {n + 1, newcap - sizeof(MallocNode)};
   }
-  auto b = allocBig(newsize, n->kind(), n->typeIndex(), stats, true);
+  auto old_size = n->nbytes;
+  auto b = allocBig(newsize, n->kind(), n->typeIndex(), stats);
   memcpy(b.ptr, ptr, std::min(newcap, n->nbytes) - sizeof(MallocNode));
   raw_free((char*)n, n->nbytes);
   // Already add the stats in allocBig(), so just subtract the old stats

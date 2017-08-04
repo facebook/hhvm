@@ -920,7 +920,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().mallocBigSize<MemoryManager::FreeRequested>(size))
+  auto o = new (MM().mallocBigSize<MemoryManager::Unzeroed>(size))
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;

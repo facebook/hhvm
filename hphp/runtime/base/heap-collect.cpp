@@ -373,7 +373,7 @@ NEVER_INLINE void Marker<apcgc>::sweep() {
       if (big->kind() == HeaderKind::BigObj) {
         big = static_cast<MallocNode*>(big) + 1;
         if (!marked(big)) {
-          mm.freeBigSize(big, big_size - sizeof(MallocNode));
+          mm.freeBigSize(big);
         }
       }
     },

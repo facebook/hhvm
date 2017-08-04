@@ -256,9 +256,11 @@ inline size_t MemoryManager::smallSizeClass(size_t size) {
   return ret;
 }
 
-inline void* MemoryManager::mallocSmallSizeFast(size_t bytes, size_t index) {
+inline void* MemoryManager::mallocSmallIndex(size_t index) {
+  assert(index < kNumSmallSizes);
   if (debug) requestEagerGC();
 
+  auto bytes = sizeIndex2Size(index);
   m_stats.mmUsage += bytes;
 
   void *p = m_freelists[index].maybePop();
@@ -266,54 +268,33 @@ inline void* MemoryManager::mallocSmallSizeFast(size_t bytes, size_t index) {
     p = mallocSmallSizeSlow(bytes, index);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
-  FTRACE(3, "mallocSmallSizeFast: {} -> {}\n", bytes, p);
+  FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
   return p;
-}
-
-inline void* MemoryManager::mallocSmallIndex(size_t index) {
-  assert(index < kNumSmallSizes);
-  return mallocSmallSizeFast(sizeIndex2Size(index), index);
 }
 
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
-  return mallocSmallSizeFast(bytes, smallSize2Index(bytes));
+  return mallocSmallIndex(smallSize2Index(bytes));
 }
 
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   assert(index < kNumSmallSizes);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-  size_t bytes = sizeIndex2Size(index);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
-    return freeBigSize(ptr, bytes);
+    return freeBigSize(ptr);
   }
 
+  size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
   m_freelists[index].push(ptr);
   m_stats.mmUsage -= bytes;
-
-  FTRACE(3, "freeSmallIndex: {} ({} bytes)\n", ptr, bytes);
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
-  assert(bytes > 0);
-  assert(bytes <= kMaxSmallSize);
-  assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    return freeBigSize(ptr, bytes);
-  }
-
-  auto const i = smallSize2Index(bytes);
-  FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
-
-  m_freelists[i].push(ptr);
-  m_stats.mmUsage -= bytes;
-
-  FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
+  freeSmallIndex(ptr, smallSize2Index(bytes));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -321,25 +302,25 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<FreeRequested>(size);
+  return mallocBigSize<Unzeroed>(size);
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFree(void* vp, size_t size) {
   if (LIKELY(size <= kMaxSmallSize)) return freeSmallSize(vp, size);
-  freeBigSize(vp, size);
+  freeBigSize(vp);
 }
 
 ALWAYS_INLINE
 void* MemoryManager::objMallocIndex(size_t index) {
   if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
-  return mallocBigSize<MemoryManager::FreeRequested>(sizeIndex2Size(index));
+  return mallocBigSize<Unzeroed>(sizeIndex2Size(index));
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFreeIndex(void* ptr, size_t index) {
   if (LIKELY(index < kNumSmallSizes)) return freeSmallIndex(ptr, index);
-  return freeBigSize(ptr, sizeIndex2Size(index));
+  return freeBigSize(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,9 +19,14 @@ module StringAnnotation = struct
   type t = string
   let pp fmt str = Format.pp_print_string fmt str
 end
-module TASTMapper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
+
+module TASTStringMapper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
   (StringAnnotation)
+
 module StringNAST = Nast.AnnotatedAST(StringAnnotation)
+
+module TASTTypeStripper = Aast_mapper.MapAnnotatedAST (Tast.AnnotationType)
+  (Nast.PosAnnotation)
 
 
 (*****************************************************************************)
@@ -45,6 +50,7 @@ type mode =
   | Find_local of int * int
   | Outline
   | Dump_nast
+  | Dump_stripped_tast
   | Dump_tast
   | Find_refs of int * int
   | Highlight_refs of int * int
@@ -170,6 +176,10 @@ let parse_options () =
     "--tast",
       Arg.Unit (set_mode Dump_tast),
       " Print out the typed AST";
+    "--stripped-tast",
+      Arg.Unit (set_mode Dump_stripped_tast),
+      " Print out the typed AST, stripped of type information." ^
+      " This can be compared against the named AST to look for holes.";
     "--find-refs",
       Arg.Tuple ([
         Arg.Int (fun x -> line := x);
@@ -545,6 +555,12 @@ let test_decl_compare filename popt files_contents tcopt files_info =
 let filter_positions s = (Str.global_replace
   (Str.regexp "\\[L[0-9]+:[0-9]+-L[0-9]+:[0-9]+\\]") "<p>" s)
 
+(* Returns a list of Tast defs, along with associated type environments. *)
+let get_tast_tenv opts filename files_info =
+  let nasts = create_nasts opts files_info in
+  let nast = Relative_path.Map.find filename nasts in
+  nast_to_tast_tenv opts nast
+
 let handle_mode mode filename opts popt files_contents files_info errors =
   match mode with
   | Ai _ -> ()
@@ -676,15 +692,18 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (filter_positions (Nast.show_program nast))
   | Dump_tast ->
-    let nasts = create_nasts opts files_info in
-    let nast = Relative_path.Map.find filename nasts in
-    let tast_tenv = nast_to_tast_tenv opts nast in
+    let tast_tenv = get_tast_tenv opts filename files_info in
     let type_to_string tenv (_, ty) = match ty with
       | None -> "None"
       | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
     let program = List.map tast_tenv
-      (fun (def, tenv) -> TASTMapper.map_def (type_to_string tenv) def) in
+      (fun (def, tenv) -> TASTStringMapper.map_def (type_to_string tenv) def) in
     Printf.printf "%s\n" (filter_positions (StringNAST.show_program program))
+  | Dump_stripped_tast ->
+    let tast_tenv = get_tast_tenv opts filename files_info in
+    let program = List.map tast_tenv fst in
+    let program = TASTTypeStripper.map_program fst program in
+    Printf.printf "%s\n" (filter_positions (Nast.show_program program))
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

@@ -57,13 +57,13 @@ struct FpiState {
  * Facts about a Func's current frame at various program points
  */
 struct State {
-  FlavorDesc* stk; // Evaluation stack.
-  FpiState* fpi;    // FPI stack.
-  bool* iters;      // defined/not-defined state of each iter var.
+  FlavorDesc* stk{};  // Evaluation stack.
+  FpiState* fpi{};    // FPI stack.
+  bool* iters{};      // defined/not-defined state of each iter var.
   boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
-  int stklen;       // length of evaluation stack.
-  int fpilen;       // length of FPI stack.
-  bool mbr_live;    // liveness of member base register
+  int stklen{0};       // length of evaluation stack.
+  int fpilen{0};       // length of FPI stack.
+  bool mbr_live{false};    // liveness of member base register
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
 };
@@ -82,6 +82,7 @@ struct IterKindId {
 
 struct FuncChecker {
   FuncChecker(const Func* func, ErrorMode mode);
+  ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
 
@@ -234,6 +235,13 @@ FuncChecker::FuncChecker(const Func* f, ErrorMode mode)
 , m_graph(0)
 , m_instrs(m_arena, f->past() - f->base() + 1)
 , m_errmode(mode) {
+}
+
+FuncChecker::~FuncChecker() {
+  // if checkOffsets() is false, checkFlow() will never run so these will be
+  // uninitialized
+  if (!m_graph || !m_info) return;
+  for (int i = 0; i < m_graph->block_count; i++) m_info[i].~BlockInfo();
 }
 
 // Needs to be a sorted map so we can divide funcs into contiguous sections.
@@ -1522,7 +1530,6 @@ bool FuncChecker::checkFlow() {
   GraphBuilder builder(m_arena, m_func);
   m_graph = builder.build();
   m_info = new (m_arena) BlockInfo[m_graph->block_count];
-  memset(m_info, 0, sizeof(BlockInfo) * m_graph->block_count);
   m_tmp_sig = new (m_arena) FlavorDesc[maxStack()];
   sortRpo(m_graph);
   State cur;

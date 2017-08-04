@@ -1,8 +1,8 @@
 Least upper bound of int, int, int is int 
-Least upper bound of int, string is mixed 
-Least upper bound of float, int is mixed 
+Least upper bound of int, string is arraykey 
+Least upper bound of float, int is num 
 Least upper bound of float, num is num 
 Least upper bound of bool, void is mixed 
 Least upper bound of void is void 
-Least upper bound of float, int, num is mixed 
+Least upper bound of float, int, num is num 
 Least upper bound of float, num, int is num 

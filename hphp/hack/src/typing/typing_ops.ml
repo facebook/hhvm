@@ -49,11 +49,25 @@ let unify_decl p ur env ty1 ty2 =
 
 module LeastUpperBound = struct
   open Typing_defs
+  open Nast
+
+  let prim_least_up_bound tprim1 tprim2 =
+    match tprim1, tprim2 with
+    | Tint, Tstring | Tstring, Tint -> Some (Tprim Tarraykey)
+    | Tint, Tfloat | Tfloat, Tint -> Some (Tprim Tnum)
+    | _ , _ -> None
 
   (* @TODO expand this match to refine more types*)
   let pairwise_least_upper_bound env ty1 ty2 =
     if SubType.is_sub_type env ty1 ty2 then ty2
-    else if SubType.is_sub_type env ty2 ty1 then ty1 else (fst ty1), Tmixed
+    else if SubType.is_sub_type env ty2 ty1 then ty1
+    else
+      let (r1, ty_1), (_, ty_2) = ty1, ty2 in
+      match ty_1, ty_2 with
+      | Tprim tprim1, Tprim tprim2 ->
+        Option.value_map ~default:(r1, Tmixed) ~f:(fun ty -> r1, ty)
+          (prim_least_up_bound tprim1 tprim2)
+      | _, _ -> r1, Tmixed
 
   let rec full env types =
     match types with

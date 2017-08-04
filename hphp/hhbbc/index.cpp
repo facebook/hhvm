@@ -30,6 +30,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #include <folly/Format.h>
 #include <folly/Hash.h>
@@ -113,8 +114,6 @@ template<class T> using ISStringToOneT =
  * and the values are some kind of borrowed_ptr.
  */
 template<class T> using ISStringToOne = ISStringToOneT<borrowed_ptr<T>>;
-
-using G = std::lock_guard<std::mutex>;
 
 template<class MultiMap>
 folly::Range<typename MultiMap::const_iterator>
@@ -287,8 +286,8 @@ struct FuncInfoValue {
   CompactVector<Type> localStaticTypes;
 };
 
-using FuncInfoMap = std::unordered_map<borrowed_ptr<const php::Func>,
-                                       FuncInfoValue>;
+using FuncInfoMap = tbb::concurrent_unordered_map<borrowed_ptr<const php::Func>,
+                                                  FuncInfoValue>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -776,7 +775,6 @@ struct IndexData {
   std::vector<std::unique_ptr<ClassInfo>>  allClassInfos;
   std::vector<std::unique_ptr<FuncFamily>> funcFamilies;
 
-  std::mutex funcInfoLock;
   FuncInfoMap funcInfo;
 
   // Private instance and static property types are stored separately
@@ -839,22 +837,22 @@ void add_dependency(IndexData& data,
   current = current | newMask;
 }
 
-// Caller must ensure we are synchronized (either hold funcInfoLock or
-// be in a single threaded situation).
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
-  auto val = data.funcInfo.emplace(f, FuncInfoValue{});
-  auto& ret = static_cast<FuncInfo&>(*val.first);
-  if (val.second) {
-    if (f->nativeInfo) {
+  auto it = data.funcInfo.find(f);
+  if (LIKELY(it != end(data.funcInfo))) return static_cast<FuncInfo*>(&*it);
+
+  auto info = FuncInfoMap::value_type{f, {}};
+  if (f->nativeInfo) {
       // We'd infer this anyway when we look at the bytecode body
       // (NativeImpl) for the HNI function, but just initializing it
       // here saves on whole-program iterations.
-      ret.second.returnTy = native_function_return_type(f);
-    }
-    ret.second.thisAvailable = false;
+    info.second.returnTy = native_function_return_type(f);
   }
-  return &ret;
+  info.second.thisAvailable = false;
+
+  auto val = data.funcInfo.insert(std::move(info));
+  return static_cast<FuncInfo*>(&*val.first);
 }
 
 void find_deps(IndexData& data,
@@ -2791,7 +2789,6 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 }
 
 bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
-  G g(m_data->funcInfoLock);
   auto it = m_data->funcInfo.find(f);
   return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
 }
@@ -3204,7 +3201,6 @@ std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
 //////////////////////////////////////////////////////////////////////
 
 res::Func Index::do_resolve(borrowed_ptr<const php::Func> f) const {
-  G g(m_data->funcInfoLock);
   auto const finfo = create_func_info(*m_data, f);
   return res::Func { this, finfo };
 };

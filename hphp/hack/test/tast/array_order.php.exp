@@ -1,0 +1,57 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tvoid)));
+      f_name = (<p>, "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some array<string, _>),
+                (AnnotatedAST.Binop ((Eq None),
+                   ((Some array<string, _>),
+                    (AnnotatedAST.Lvar (<p>, $x))),
+                   ((Some array<string, _>),
+                    (AnnotatedAST.Array
+                       [(AnnotatedAST.AFkvalue (
+                           ((Some string),
+                            (AnnotatedAST.String (<p>, "k"))),
+                           ((Some int),
+                            (AnnotatedAST.Int (<p>, "0")))
+                           ));
+                         (AnnotatedAST.AFkvalue (
+                            ((Some string),
+                             (AnnotatedAST.String (<p>, "k2"))),
+                            ((Some _),
+                             (AnnotatedAST.Call (Cnormal,
+                                ((Some _),
+                                 (AnnotatedAST.Id
+                                    (<p>, "\\my_php_function"))),
+                                [], [])))
+                            ))
+                         ]))
+                   ))));
+             (AnnotatedAST.Expr
+                ((Some array<_>),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some array<_>),
+                     (AnnotatedAST.Lvar (<p>, $y))),
+                    ((Some array<_>),
+                     (AnnotatedAST.Array
+                        [(AnnotatedAST.AFvalue
+                            ((Some int),
+                             (AnnotatedAST.Int (<p>, "0"))));
+                          (AnnotatedAST.AFvalue
+                             ((Some _),
+                              (AnnotatedAST.Call (Cnormal,
+                                 ((Some _),
+                                  (AnnotatedAST.Id
+                                     (<p>, "\\my_php_function"))),
+                                 [], []))))
+                          ]))
+                    ))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] })
+  ]

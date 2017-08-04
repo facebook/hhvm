@@ -1038,7 +1038,7 @@ and expr_
               compute_exprs_and_supertype env l array_field_value in
             env, tel, AKvec value_ty in
         make_result env
-          (T.Array (List.map (List.rev tel) (fun e -> T.AFvalue e)))
+          (T.Array (List.map tel (fun e -> T.AFvalue e)))
           (Reason.Rwitness p, Tarraykind arraykind)
       else
       let env, value_exprs_and_tys = List.rev_map_env env l array_field_value in

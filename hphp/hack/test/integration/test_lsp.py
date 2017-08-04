@@ -39,9 +39,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         expected = self.parse_test_data(test_name + '.expected', variables)
         return (test, expected)
 
-    def generate_expected(self, test_name, observed_transcript):
-        file = os.path.join(self.test_data_root, test_name + '.expected')
-        text = self.prepare_responses(self.get_received_items(observed_transcript))
+    def write_observed(self, test_name, observed_transcript):
+        file = os.path.join(self.test_data_root, test_name + '.observed.log')
+        text = json.dumps(self.get_received_items(observed_transcript), indent=2)
         with open(file, "w") as f:
             f.write(text)
 
@@ -66,24 +66,23 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def prepare_responses(self, responses):
         return self.serialize_responses(self.sort_responses(responses))
 
-    def run_lsp_test(self, test_name, test, expected, generate):
+    def run_lsp_test(self, test_name, test, expected):
         commands = LspCommandProcessor.parse_commands(test)
         with LspCommandProcessor.create(self.test_env) as lsp:
             observed_transcript = lsp.communicate(commands)
 
-        if not generate:
-            expected_items = self.prepare_responses(json.loads(expected))
-            observed_items = self.prepare_responses(
-                self.get_received_items(observed_transcript)
-            )
+        self.write_observed(test_name, observed_transcript)
 
-            # validation checks that the number of items matches and that
-            # the responses are exactly identical to what we expect
-            self.assertEqual(len(expected_items), len(observed_items))
-            for i in range(len(expected_items)):
-                self.assertEqual(observed_items[i], expected_items[i])
-        else:
-            self.generate_expected(test_name, observed_transcript)
+        expected_items = self.prepare_responses(json.loads(expected))
+        observed_items = self.prepare_responses(
+            self.get_received_items(observed_transcript)
+        )
+
+        # validation checks that the number of items matches and that
+        # the responses are exactly identical to what we expect
+        self.assertEqual(len(expected_items), len(observed_items))
+        for i in range(len(expected_items)):
+            self.assertEqual(observed_items[i], expected_items[i])
 
     def test_init_shutdown(self):
         self.write_load_config()
@@ -97,5 +96,4 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         test, expected = self.load_test_data(test_name, variables)
         self.run_lsp_test(test_name=test_name,
                           test=test,
-                          expected=expected,
-                          generate=False)
+                          expected=expected)

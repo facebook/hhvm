@@ -53,35 +53,90 @@ module LeastUpperBound = struct
 
   let prim_least_up_bound tprim1 tprim2 =
     match tprim1, tprim2 with
-    | Tint, Tstring | Tstring, Tint -> Some (Tprim Tarraykey)
-    | Tint, Tfloat | Tfloat, Tint -> Some (Tprim Tnum)
+    | Tint, Tstring | Tstring, Tint -> Some Tarraykey
+    | Tint, Tfloat | Tfloat, Tint -> Some Tnum
     | _ , _ -> None
 
+  let rec type_visitor ~f ~default ty1 ty2 =
+  let array_kind ak1 ak2 =
+      match ak1, ak2 with
+      | AKmap (ty1, ty2), AKmap (ty3, ty4) ->
+        let ty1_ = type_visitor ~f ~default ty1 ty3 in
+        let ty2_ = type_visitor ~f ~default ty2 ty4 in
+        Some (AKmap (ty1_, ty2_))
+      | AKdarray (ty1, ty2), AKdarray (ty3, ty4) ->
+        let ty1_ = type_visitor ~f ~default ty1 ty3 in
+        let ty2_ = type_visitor ~f ~default ty2 ty4 in
+        Some (AKdarray (ty1_, ty2_))
+      | AKvarray ty1, AKvarray ty2 ->
+        let ty = type_visitor ~f ~default ty1 ty2 in
+        Some (AKvarray ty)
+      | AKvec ty1, AKvec ty2 ->
+        let ty = type_visitor ~f ~default ty1 ty2 in
+        Some (AKvec ty)
+      | _ -> None
+    in
+    let (r1, ty_1), (_, ty_2) = (ty1, ty2) in
+    match ty_1, ty_2 with
+      | Ttuple tyl1, Ttuple tyl2 ->
+        begin try let tyl = List.map2 (type_visitor ~f ~default) tyl1 tyl2 in
+          r1, Ttuple tyl
+          with _ -> default
+        end
+      | Tclass ((p, id1), tyl1), Tclass((_, id2), tyl2) ->
+        if id1 = id2 then
+          begin try let tyl = List.map2 (type_visitor ~f ~default) tyl1 tyl2 in
+            r1, Tclass ((p, id1), tyl)
+            with _ -> default
+          end
+        else
+          default
+      | Tarraykind ak1, Tarraykind ak2 ->
+        begin match array_kind ak1 ak2 with
+        | None -> default
+        | Some ak -> r1, Tarraykind ak
+        end
+      | Tprim tprim1, Tprim tprim2 ->
+        begin match prim_least_up_bound tprim1 tprim2 with
+        | None -> f ty1 ty2
+        | Some ty -> r1, Tprim ty
+        end
+      | Toption ty1, Toption ty2 ->
+        let ty = type_visitor ~f ~default ty1 ty2 in r1, Toption ty
+      | Toption ty1 , ty_2 | ty_2, Toption ty1 ->
+        let ty = type_visitor ~f ~default ty1 (r1, ty_2) in r1, Toption ty
+      | _ -> f ty1 ty2
+
   (* @TODO expand this match to refine more types*)
-  let pairwise_least_upper_bound env ty1 ty2 =
+  let pairwise_least_upper_bound env ~default ty1 ty2 =
     if SubType.is_sub_type env ty1 ty2 then ty2
     else if SubType.is_sub_type env ty2 ty1 then ty1
-    else
-      let (r1, ty_1), (_, ty_2) = ty1, ty2 in
-      match ty_1, ty_2 with
-      | Tprim tprim1, Tprim tprim2 ->
-        Option.value_map ~default:(r1, Tmixed) ~f:(fun ty -> r1, ty)
-          (prim_least_up_bound tprim1 tprim2)
-      | _, _ -> r1, Tmixed
+    else default
 
   let rec full env types =
     match types with
     | [] -> None
-    | [t] ->  Some t
+    | [t] -> Some t
     | ty1 :: ty2 :: ts ->
-      full env ((pairwise_least_upper_bound env ty1 ty2) :: ts)
+      let default = (fst ty1, Tmixed) in
+      let ty =
+        type_visitor
+          ~f:(pairwise_least_upper_bound env ~default)
+          ~default ty1 ty2
+      in
+      full env (ty :: ts)
 
   let rec compute types =
     match types with
     | [] -> None
     | [t] ->  Some t
     | (tenv, p, k, ty1) :: (_, _, _, ty2) :: ts  ->
-      let ty = pairwise_least_upper_bound tenv ty1 ty2 in
+      let default = (fst ty1, Tmixed) in
+      let ty =
+        type_visitor
+          ~f:(pairwise_least_upper_bound tenv ~default)
+          ~default ty1 ty2
+      in
       compute ((tenv, p, k, ty) :: ts)
 
   end

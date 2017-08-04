@@ -1,5 +1,5 @@
 \C::getX : int try int
 \D::getX : int try int
-\F::getX : ?_, int try ?_
-\G::getX : ?_, int try ?_
+\F::getX : ?_, int try ?int
+\G::getX : ?_, int try ?int
 No errors

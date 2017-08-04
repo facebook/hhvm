@@ -19,10 +19,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/debugger/debugger_client.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace Eval {
@@ -93,8 +89,7 @@ const StaticString
   s_omitted("...(omitted)");
 
 void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
-  CmdVariable cmd(client.isStackTraceAsync()
-                  ? KindOfVariableAsync : KindOfVariable);
+  CmdVariable cmd;
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
   auto rcmd = client.xend<CmdVariable>(&cmd);
@@ -171,8 +166,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
 
     // Using the new protocol, so variables contain only names.  Fetch the value
     // separately.
-    CmdVariable cmd(client.isStackTraceAsync()
-                    ? KindOfVariableAsync : KindOfVariable);
+    CmdVariable cmd;
     cmd.m_frame = frame;
     cmd.m_variables.reset();
     cmd.m_varName = name;
@@ -235,10 +229,6 @@ void CmdVariable::onClient(DebuggerClient &client) {
     return;
   }
 
-  if (client.isStackTraceAsync()) {
-    m_type = KindOfVariableAsync;
-  }
-
   m_frame = client.getFrame();
 
   auto cmd = client.xend<CmdVariable>(this);
@@ -259,44 +249,8 @@ Array CmdVariable::GetGlobalVariables() {
   return ret;
 }
 
-static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
-  assert(o->instanceof(c_WaitableWaitHandle::classof()));
-  return static_cast<c_WaitableWaitHandle*>(o.get());
-}
-
-static c_AsyncFunctionWaitHandle *objToContinuationWaitHandle(Object o) {
-  if (o->instanceof(c_AsyncFunctionWaitHandle::classof())) {
-    return static_cast<c_AsyncFunctionWaitHandle*>(o.get());
-  }
-  return nullptr;
-}
-
-static
-c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
-  auto top = HHVM_FN(asio_get_running)();
-
-  if (top.isNull()) {
-    return nullptr;
-  }
-
-  if (position == 0) {
-    return objToContinuationWaitHandle(top);
-  }
-
-  Array depStack =
-    objToWaitableWaitHandle(top)->getDependencyStack();
-
-  return objToContinuationWaitHandle(depStack[position].toObject());
-}
-
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
-  if (m_type == KindOfVariableAsync) {
-    // We only do variable inspection on continuation wait handles.
-    auto frame = getWaitHandleAtAsyncStackPosition(m_frame);
-    if (frame != nullptr) {
-      m_variables = getDefinedVariables(frame->actRec());
-    }
-  } else if (m_frame < 0) {
+  if (m_frame < 0) {
     m_variables = g_context->m_globalVarEnv->getDefinedVariables();
     m_global = true;
   } else {

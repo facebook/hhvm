@@ -9,32 +9,40 @@ Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
    7*  return $a + 1;
    8 }
 
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  gen1 [%d]
-#1  <<join>>
-#2  gen2 [%d]
-#3  <await-all> [%d]
-#4  genFoo [%d]
+w
+#0   ()
+    at %s/async_stack_traversal.php:7
+#1  gen1 (45)
+#2  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:13
+#3  gen2 (45)
     at %s/async_stack_traversal.php:32
-#5  <<join>>
+#4  genFoo (43)
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:36
+#6  main (42)
+    at %s/async_stack_traversal.php:39
 v
 $a = 45
 $v1 = "v1-gen1"
 u
-#1  <<join>>
+#1  gen1 (%d)
 v
-(no variable was defined)
+$awaitable = HH\AsyncFunctionWaitHandle Object
+(
+)
+
 u
-#2  gen2 [%d]
+#2  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:13
 v
 $a = 45
 $v1 = "v1-gen2"
 d
-#1  <<join>>
+#1  gen1 (%d)
 d
-#0  gen1 [%d]
+#0   ()
+    at %s/async_stack_traversal.php:7
 v
 $a = 45
 $v1 = "v1-gen1"
@@ -47,29 +55,35 @@ Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
 v
 $a = 46
 $v1 = "v1-gen1"
-wa
-Fetching async stacktrace...
-#0  gen1 [%d]
-#1  <<join>>
-#2  gen2 [%d]
-#3  <await-all> [%d]
-#4  genFoo [%d]
+w
+#0   ()
+    at %s/async_stack_traversal.php:7
+#1  gen1 (46)
+#2  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:13
+#3  gen2 (46)
     at %s/async_stack_traversal.php:32
-#5  <<join>>
+#4  genFoo (43)
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:36
+#6  main (42)
+    at %s/async_stack_traversal.php:39
 v
 $a = 46
 $v1 = "v1-gen1"
 u
-#1  <<join>>
+#1  gen1 (%d)
 u
-#2  gen2 [%d]
+#2  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+    at %s/async_stack_traversal.php:13
 v
 $a = 46
 $v1 = "v1-gen2"
 d
-#1  <<join>>
+#1  gen1 (%d)
 d
-#0  gen1 [%d]
+#0   ()
+    at %s/async_stack_traversal.php:7
 v
 $a = 46
 $v1 = "v1-gen1"

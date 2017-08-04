@@ -25,7 +25,6 @@ namespace HPHP { namespace Eval {
 
 struct CmdWhere : DebuggerCommand {
   CmdWhere() : DebuggerCommand(KindOfWhere) {}
-  explicit CmdWhere(Type type) : DebuggerCommand(type) {}
 
   void help(DebuggerClient& client) override;
 

@@ -6,21 +6,15 @@ break async_stack.php:36
 break async_stack.php:42
 continue
 w
-wa
 c
 w
-wa
 c
 w
-wa
 c
 w
-wa
 c
 w
-w a
 c
 w
-wa
 c
 quit

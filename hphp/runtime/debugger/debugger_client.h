@@ -314,8 +314,7 @@ public:
    * Stacktraces.
    */
   Array getStackTrace() { return m_stacktrace; }
-  void setStackTrace(const Array& stacktrace, bool isAsync);
-  bool isStackTraceAsync() { return m_stacktraceAsync; }
+  void setStackTrace(const Array& stacktrace);
   void moveToFrame(int index, bool display = true);
   void printFrame(int index, const Array& frame);
   void setFrame(int frame) { m_frame = frame; }
@@ -467,7 +466,6 @@ private:
   WatchPtrVec m_watches;
 
   Array m_stacktrace;
-  bool m_stacktraceAsync;
   int m_frame;
 
   std::string m_sourceRoot;

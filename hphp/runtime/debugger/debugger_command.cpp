@@ -138,13 +138,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
     case KindOfThread   : cmd = std::make_shared<CmdThread>(); break;
     case KindOfUp       : cmd = std::make_shared<CmdUp>(); break;
     case KindOfVariable : cmd = std::make_shared<CmdVariable>(); break;
-    case KindOfVariableAsync :
-      cmd = std::make_shared<CmdVariable>(KindOfVariableAsync);
-      break;
     case KindOfWhere    : cmd = std::make_shared<CmdWhere>(); break;
-    case KindOfWhereAsync:
-      cmd = std::make_shared<CmdWhere>(KindOfWhereAsync);
-      break;
     case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
     case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
     case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;

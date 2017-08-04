@@ -522,7 +522,7 @@ DebuggerClient::DebuggerClient()
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0),
-      m_stacktraceAsync(false), m_frame(0),
+      m_frame(0),
       m_unknownCmd(false) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
   Debugger::InitUsageLogging();
@@ -1684,12 +1684,6 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
     return new_cmd<CmdInternalTesting>("internaltesting");
   }
 
-  // Make 'wa' a quick shortcut for 'where async'
-  if (m_command == "wa") {
-    m_args.insert(m_args.begin(), "async");
-    return new_cmd<CmdWhere>("where");
-  }
-
   switch (tolower(m_command[0])) {
     case 'a': return match_cmd<CmdAbort>("abort");
     case 'b': return match_cmd<CmdBreak>("break");
@@ -2153,18 +2147,9 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
   m_watches.push_back(watch);
 }
 
-void DebuggerClient::setStackTrace(const Array& stacktrace, bool isAsync) {
+void DebuggerClient::setStackTrace(const Array& stacktrace) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
-  //when we set a new stack we need to reset the frame position
-  //if we go from regular to async or vice-versa since the lengths
-  //aren't necessairly the same
-  if (m_stacktraceAsync != isAsync) {
-    m_frame = 0;
-    const char* direction = isAsync ? "sync->async" : "async->sync";
-    info("switching stack contexts (%s) resetting stack state", direction);
-  }
-  m_stacktraceAsync = isAsync;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
@@ -2225,35 +2210,10 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
 
   String sindex(index);
 
-  if (m_stacktraceAsync) {
-    if (frame.empty()) {
-      // NB: join boundaries are represented by an empty array.
-      print("#%s  <<join>>", sindex.data());
-    } else {
-      print("#%s  %s [%s]",
-            sindex.data(),
-            func.data() ? func.data() : "",
-            frame[s_id].toString().data());
-      auto ancestors = frame[s_ancestors].toArray();
-      if (ancestors.size() > 1) {
-        StringBuffer ancestorList;
-        for (ArrayIter iter(frame[s_ancestors].toArray()); iter; ++iter) {
-          if (!ancestorList.empty()) ancestorList.append(", ");
-          ancestorList.append(iter.second());
-        }
-        if (!ancestorList.empty()) {
-          print(" %s  ancestors: %s",
-                String("           ").substr(0, sindex.size()).data(),
-                ancestorList.data());
-        }
-      }
-    }
-  } else {
-    print("#%s  %s (%s)",
-          sindex.data(),
-          func.data() ? func.data() : "",
-          args.data() ? args.data() : "");
-  }
+  print("#%s  %s (%s)",
+        sindex.data(),
+        func.data() ? func.data() : "",
+        args.data() ? args.data() : "");
   if (!frame[s_file].isNull()) {
     int line = (int)frame[s_line].toInt32();
     auto fileLineInfo =

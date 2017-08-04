@@ -30,7 +30,7 @@ struct CmdVariable : DebuggerCommand {
   static void PrintVariables(DebuggerClient &client, const Array& variables,
                               int frame, const String& text, int version);
 
-  explicit CmdVariable(Type type = KindOfVariable) : DebuggerCommand(type) {
+  CmdVariable() : DebuggerCommand(KindOfVariable) {
     m_frame = 0;
     m_version = 1;
     m_global = false;

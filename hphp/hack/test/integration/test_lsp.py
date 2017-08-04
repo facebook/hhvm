@@ -6,6 +6,7 @@ import common_tests
 import json
 import os
 import unittest
+import urllib.parse
 from lspcommand import LspCommandProcessor
 
 
@@ -21,18 +22,35 @@ class LspTestDriver(common_tests.CommonTestDriver):
 
 class TestLsp(LspTestDriver, unittest.TestCase):
 
-    template_repo = common_tests.CommonTests.template_repo
-    test_data_root = 'hphp/hack/test/integration/data/lsp_exchanges/'
+    template_repo = 'hphp/hack/test/integration/data/lsp_exchanges/'
 
-    def read_file(self, file):
-        with open(file, "r") as f:
+    def repo_file(self, file):
+        return os.path.join(self.repo_dir, file)
+
+    def read_repo_file(self, file):
+        with open(self.repo_file(file), "r") as f:
             return f.read()
 
+    def repo_file_uri(self, file):
+        return urllib.parse.urljoin('file://', self.repo_file(file))
+
     def parse_test_data(self, file, variables):
-        test = self.read_file(os.path.join(self.test_data_root, file))
+        text = self.read_repo_file(file)
+        data = json.loads(text)
         for variable, value in variables.items():
-            test = test.replace('${' + variable + '}', value)
-        return test
+            data = self.replace_variable(data, variable, value)
+        return data
+
+    def replace_variable(self, json, variable, text):
+        if isinstance(json, dict):
+            return {k:
+                    self.replace_variable(v, variable, text) for k, v in json.items()}
+        elif isinstance(json, list):
+            return [self.replace_variable(i, variable, text) for i in json]
+        elif isinstance(json, str):
+            return json.replace('${' + variable + '}', text)
+        else:
+            return json
 
     def load_test_data(self, test_name, variables):
         test = self.parse_test_data(test_name + '.json', variables)
@@ -40,7 +58,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         return (test, expected)
 
     def write_observed(self, test_name, observed_transcript):
-        file = os.path.join(self.test_data_root, test_name + '.observed.log')
+        file = os.path.join(self.template_repo, test_name + '.observed.log')
         text = json.dumps(self.get_received_items(observed_transcript), indent=2)
         with open(file, "w") as f:
             f.write(text)
@@ -67,13 +85,12 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         return self.serialize_responses(self.sort_responses(responses))
 
     def run_lsp_test(self, test_name, test, expected):
-        commands = LspCommandProcessor.parse_commands(test)
         with LspCommandProcessor.create(self.test_env) as lsp:
-            observed_transcript = lsp.communicate(commands)
+            observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)
 
-        expected_items = self.prepare_responses(json.loads(expected))
+        expected_items = self.prepare_responses(expected)
         observed_items = self.prepare_responses(
             self.get_received_items(observed_transcript)
         )
@@ -84,16 +101,33 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         for i in range(len(expected_items)):
             self.assertEqual(observed_items[i], expected_items[i])
 
-    def test_init_shutdown(self):
+    def prepare_environment(self):
         self.write_load_config()
         self.check_cmd(['No errors!'])
 
-        variables = {
-            'root_path': LspCommandProcessor.path_expand(self.repo_dir)
-        }
-
-        test_name = 'initialize_shutdown'
+    def load_and_run(self, test_name, variables):
         test, expected = self.load_test_data(test_name, variables)
         self.run_lsp_test(test_name=test_name,
                           test=test,
                           expected=expected)
+
+    def test_init_shutdown(self):
+        self.prepare_environment()
+
+        variables = {
+            'root_path': self.repo_dir,
+        }
+
+        self.load_and_run('initialize_shutdown', variables)
+
+    def test_definition(self):
+        self.prepare_environment()
+
+        test_php = 'definition.php'
+        variables = {
+            'root_path': self.repo_dir,
+            'php_file_uri': self.repo_file_uri(test_php),
+            'php_file': self.read_repo_file(test_php)
+        }
+
+        self.load_and_run('definition', variables)

@@ -3,10 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import contextlib
-import json
-import os
 import subprocess
-import urllib.parse
 import uuid
 from hh_paths import hh_client
 from jsonrpc_stream import JsonRpcStreamReader
@@ -35,10 +32,6 @@ class LspCommandProcessor:
             proc.stdin.close()
             proc.stdout.close()
             proc.stderr.close()
-
-    @staticmethod
-    def parse_commands(raw_data):
-        return json.loads(raw_data)
 
     # request_timeout is the number of seconds to wait for responses
     # that we expect the server to send back.  this timeout can
@@ -148,12 +141,3 @@ class LspCommandProcessor:
     @staticmethod
     def request_id(id):
         return 'REQUEST_' + str(id)
-
-    @staticmethod
-    def path_expand(path):
-        return os.path.abspath(path)
-
-    @staticmethod
-    def file_uri(path):
-        return urllib.parse.urljoin('file://',
-                                    LspCommandProcessor.path_expand(path))

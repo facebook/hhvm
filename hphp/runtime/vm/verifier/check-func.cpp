@@ -172,6 +172,8 @@ struct FuncChecker {
   FlavorDesc* m_tmp_sig;
 };
 
+const StaticString s_invoke("__invoke");
+
 bool checkNativeFunc(const Func* func, ErrorMode mode) {
   auto const funcname = func->displayName();
   auto const pc = func->preClass();
@@ -1145,12 +1147,33 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         break;
     }
     case Op::DefCls:
-    case Op::DefClsNop:
-    case Op::CreateCl: {
-      auto id = getImm(pc, 0).u_IVA;
-      if (op == Op::CreateCl) id = getImm(pc, 1).u_IVA;
+    case Op::DefClsNop: {
+      auto const id = getImm(pc, 0).u_IVA;
       if (id >= unit()->preclasses().size()) {
         ferror("{} references nonexistent class ({})\n", opcodeToName(op), id);
+        return false;
+      }
+      break;
+    }
+    case Op::CreateCl: {
+      auto const id = getImm(pc, 1).u_IVA;
+      if (id >= unit()->preclasses().size()) {
+        ferror("CreateCl must reference a closure defined in the same "
+               "unit\n");
+        return false;
+      }
+      auto const preCls = unit()->lookupPreClassId(id);
+      if (preCls->parent()->toCppString() != std::string("Closure")) {
+        ferror("CreateCl references non-closure class {} ({})\n",
+               preCls->name(), id);
+        return false;
+      }
+      auto const numBound = getImm(pc, 0).u_IVA;
+      auto const invoke = preCls->lookupMethod(s_invoke.get());
+      if (invoke &&
+          numBound != preCls->numProperties() - invoke->numStaticLocals()) {
+        ferror("CreateCl bound Closure {} with {} params instead of {}\n",
+               preCls->name(), numBound, preCls->numProperties());
         return false;
       }
       break;

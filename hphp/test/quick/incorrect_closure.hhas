@@ -1,0 +1,43 @@
+.main {
+  Int 1
+  RetC
+}
+
+.class [unique] A extends Closure {
+  .method [public] <"" N  > foo() isClosureBody {
+    Int 1
+    RetC
+  }
+}
+
+.class B extends Closure {
+  .method [public] <"" N  > __invoke() isClosureBody {
+    Int 1
+    RetC
+  }
+}
+
+.class [unique] C extends Closure {
+  .method [private] <"" N  > __invoke() isClosureBody {
+    Int 1
+    RetC
+  }
+}
+
+.class [unique] D extends Closure {
+  .method [public] <"" N  > __invoke() isClosureBody {
+    Int 1
+    RetC
+  }
+  .method [public] <"" N  > foo() {
+    Int 1
+    RetC
+  }
+}
+
+.class [unique] E extends Closure {
+  .method [public] <"" N  > __invoke() {
+    Int 1
+    RetC
+  }
+}

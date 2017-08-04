@@ -9609,6 +9609,9 @@ Id EmitterVisitor::emitClass(Emitter& e,
 
   auto is = static_pointer_cast<InterfaceStatement>(cNode->getStmt());
   StringData* parentName = makeStaticString(cNode->getOriginalParent());
+  if (UNLIKELY(parentName->toCppString() == std::string("Closure"))) {
+    throw IncludeTimeFatalException(is, "Class cannot extend Closure");
+  }
   StringData* classDoc = Option::GenerateDocComments ?
     makeStaticString(cNode->getDocComment()) : staticEmptyString();
   Attr attr = cNode->isInterface() ? AttrInterface :

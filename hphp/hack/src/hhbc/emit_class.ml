@@ -225,22 +225,27 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
   let class_is_final =
     ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
+  (* TODO: communicate this without looking at the name *)
+  let is_closure_class =
+    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let class_base =
     if class_is_interface then None
-    else from_extends
-          ~namespace
-          ~is_enum:(class_enum_type <> None)
-          tparams
-          ast_class.A.c_extends
+    else let base = from_extends
+                    ~namespace
+                    ~is_enum:(class_enum_type <> None)
+                    tparams
+                    ast_class.A.c_extends in
+         match base with
+         | Some cls when Hhbc_id.Class.to_raw_string cls = "Closure" &&
+                         not is_closure_class ->
+            Emit_fatal.raise_fatal_runtime "Class cannot extend Closure"
+         | _ -> base
   in
   let implements =
     if class_is_interface then ast_class.A.c_extends
     else ast_class.A.c_implements in
   let class_implements = from_implements ~namespace implements in
   let class_body = ast_class.A.c_body in
-  (* TODO: communicate this without looking at the name *)
-  let is_closure_class =
-    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let has_constructor_or_invoke = List.exists class_body
     (fun elt ->
       match elt with

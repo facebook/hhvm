@@ -1,0 +1,4 @@
+Verification Error (unit %s func foo): CreateCl bound Closure A with 3 params instead of 0
+Verification Error (unit %s func bar): CreateCl references non-closure class B (1)
+Verification Error (unit %s func baz): CreateCl must reference a closure defined in the same unit
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

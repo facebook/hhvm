@@ -1,0 +1,52 @@
+# tests that verifier checks properties of the CreateCl bytecode
+
+.main {
+  FPushFuncD 0 "foo"
+  FCall 0
+  PopR
+  FPushFuncD 0 "bar"
+  FCall 0
+  PopR
+  FPushFuncD 0 "baz"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.function foo() {
+  Int 1
+  Int 1
+  Int 1
+  CreateCl 3 0
+  RetC
+}
+
+.function bar() {
+  CreateCl 0 1
+  RetC
+}
+
+.function baz() {
+  CreateCl 0 2
+  RetC
+}
+
+.class [unique] A extends Closure {
+  .method [public] <"" N  > __invoke() isClosureBody {
+    Int 1
+    RetC
+  }
+}
+
+.class B {
+  .method [public] <"" N  > foo() {
+    Int 1
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Int 1
+    RetC
+  }
+}

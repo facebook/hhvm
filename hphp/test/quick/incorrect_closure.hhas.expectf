@@ -1,0 +1,6 @@
+Verification Error (unit %s): Closure A must have a single public method named __invoke
+Verification Error (unit %s): Closure B must be uniquely named
+Verification Error (unit %s): Closure C must have a single public method named __invoke
+Verification Error (unit %s): Closure D must have a single public method named __invoke
+Verification Error (unit %s): Closure E __invoke method must be a closure body
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

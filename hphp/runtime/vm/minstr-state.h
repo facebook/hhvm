@@ -44,9 +44,6 @@ struct MInstrState {
   TypedValue* base;
 
   // type-scan driven scanner
-  TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
-  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef);
-  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef2);
   TYPE_SCAN_IGNORE_FIELD(base);
 };
 

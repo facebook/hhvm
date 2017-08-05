@@ -53,7 +53,9 @@
                  (AnnotatedAST.Call (Cnormal,
                     ((Some (function(\MyPhonyVector<\X> $v): void)),
                      (AnnotatedAST.Id (<p>, "\\test"))),
-                    [], []))))
+                    [((Some \MyPhonyVector),
+                      (AnnotatedAST.Lvar (<p>, $x)))],
+                    []))))
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = [] });

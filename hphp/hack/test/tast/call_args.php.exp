@@ -1,0 +1,35 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tvoid)));
+      f_name = (<p>, "\\takes_string"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tstring)));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = <p>; param_name = "$s"; param_expr = None }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] });
+  (AnnotatedAST.Fun
+     { AnnotatedAST.f_mode = <opaque>;
+       f_ret = (Some (<p>, (Hprim Tvoid)));
+       f_name = (<p>, "\\f"); f_tparams = [];
+       f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+       f_params = [];
+       f_body =
+       (AnnotatedAST.NamedBody
+          { AnnotatedAST.fnb_nast =
+            [(AnnotatedAST.Expr
+                ((Some void),
+                 (AnnotatedAST.Call (Cnormal,
+                    ((Some (function(string $s): void)),
+                     (AnnotatedAST.Id (<p>, "\\takes_string"))),
+                    [((Some string),
+                      (AnnotatedAST.String (<p>, "hello")))],
+                    []))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = [] })
+  ]

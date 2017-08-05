@@ -3820,10 +3820,12 @@ and call_ pos env fty el uel =
     check_deprecated pos ft;
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
-    let env, e_tyl = List.map_env env el begin fun env e ->
-      let env, _te, ty = expr env e in
-      env, (e, ty)
+    let env, e_te_tyl = List.map_env env el begin fun env e ->
+      let env, te, ty = expr env e in
+      env, (e, te, ty)
     end in
+    let tel = List.map e_te_tyl (fun (_, b, _) -> b) in
+    let e_tyl = List.map e_te_tyl (fun (a, _, c) -> a, c) in
     let env, e_tyl, unpacked_tuple = unpack_exprl env e_tyl uel in
     let arity = if unpacked_tuple
       then List.length e_tyl
@@ -3841,7 +3843,7 @@ and call_ pos env fty el uel =
     let env = fold_fun_list env !todos in
     Typing_hooks.dispatch_fun_call_hooks
       ft.ft_params (List.map (el @ uel) fst) env;
-    env, [], [], ft.ft_ret
+    env, tel, [], ft.ft_ret
   | r2, Tanon (arity, id) when uel = [] ->
     let env, tel, tyl = exprs env el in
     let anon = Env.get_anonymous env id in

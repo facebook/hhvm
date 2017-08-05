@@ -39,7 +39,8 @@ let start_server env =
   let ai_options =
     match env.ai_mode with
     | Some ai -> [| "--ai"; ai |]
-    | None -> [||] in  let hh_server = get_hhserver () in
+    | None -> [||] in
+  let hh_server = get_hhserver () in
   let hh_server_args =
     Array.concat [
       [|hh_server; "-d"; Path.to_string env.root|];
@@ -117,6 +118,49 @@ let should_start env =
 
 let main env =
   HackEventLogger.client_start ();
+  (* TODO(ljw): There are some race conditions here. First scenario: two      *)
+  (* processes simultaneously do 'hh start' while the server isn't running.   *)
+  (* Both their calls to should_start will see the lockfile absent and        *)
+  (* immediately get back 'Server_missing'. So both of them launch hh_server. *)
+  (* One hh_server process will be slightly faster and will create a lockfile *)
+  (* and shortly start listening on the socket. The other will see that the   *)
+  (* lockfile already exists and so terminate with error code 0 immediately   *)
+  (* without sending the "ready" message. And the second start_server call    *)
+  (* will fail its assert that a "ready" message should come.                 *)
+  (*                                                                          *)
+  (* Second scenario: one process does 'hh start', and creates the lockfile,  *)
+  (* and after a short delay will start listening on its socket. Another      *)
+  (* process does 'hh start', sees the lockfile is present, tries to connect, *)
+  (* but we're still in above short delay and so it gets ECONNREFUSED         *)
+  (* immediately, which (given the presence of a lockfile) is returned as     *)
+  (* Monitor_not_ready. The should_start routine deems this an unresponsive   *)
+  (* server and so kills it and launches a new server again. The first        *)
+  (* process might or might not report failure, depending on how far it got   *)
+  (* with its 'hh start' -- i.e. whether or not it yet observed the "ready".  *)
+  (*                                                                          *)
+  (* Third and most typical scenario: an LSP client like Nuclide is running,  *)
+  (* and the user does 'hh restart' which kills the server and then calls     *)
+  (* start_server. As soon as LSP sees the server killed, it too immediately  *)
+  (* calls ClientStart.main. Maybe it will see the lockfile absent, and so    *)
+  (* proceed according to the first race scenario above. Maybe it will see    *)
+  (* the lockfile present and proceed according to the second race scenario   *)
+  (* above. In both cases the LSP client will see problem reports.            *)
+  (*                                                                          *)
+  (* The root problem is that should_start assumes an invariant that "if      *)
+  (* hh_server monitor is busy then it has failed and should be shut down."   *)
+  (* This invariant isn't true. Note that the reason we call should_start,    *)
+  (* rather than just using the default ClientConnect.autorestart which calls *)
+  (* into ClientStart.start_server, is because we do like its ability to kill *)
+  (* an unresponsive server. So the should_start function should simply give  *)
+  (* a grace period in case of a temporarily busy server.                     *)
+  (*                                                                          *)
+  (* I believe there's a second similar problem inside ClientConnect.connect  *)
+  (* when its env.autorestart is true. During the short delay window it might *)
+  (* immediately get Server_missing similar to the first scenario, and so     *)
+  (* ClientStart.start_server, which will fail in the same way. Or it might   *)
+  (* immediately get ECONNREFUSED during the delay window, so it will retry   *)
+  (* connection attempt immediately, and it might burn through all of its     *)
+  (* available retries instantly. That's because ECONNREFUSED is immediate.   *)
   if should_start env
   then begin
     start_server env;

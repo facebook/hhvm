@@ -306,6 +306,9 @@ public:
   static size_t Vsize(const ArrayData*);
   static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
+  static bool IsStrictVector(const ArrayData* ad) {
+    return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
+  }
   static constexpr auto NvTryGetInt = &NvGetInt;
   static constexpr auto NvTryGetStr = &NvGetStr;
   static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {

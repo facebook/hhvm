@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/array/ext_array.h"
 
-#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/actrec-args.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -27,21 +27,22 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-sort.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/logger.h"
 
 #include <vector>
@@ -1188,8 +1189,18 @@ TypedValue HHVM_FUNCTION(array_unshift,
 
 Variant array_values(const Variant& input) {
   auto const cell = *input.asCell();
-  if (isArrayType(cell.m_type) && cell.m_data.parr->isVectorData()) {
-    return input;
+  if (isArrayType(cell.m_type)) {
+    if (cell.m_data.parr->isPacked()) {
+      return input;
+    }
+    if (cell.m_data.parr->isMixed()) {
+      if (MixedArray::IsStrictVector(cell.m_data.parr)) {
+        return input;
+      }
+    } else if (cell.m_data.parr->isApcArray() &&
+               APCLocalArray::IsVectorData(cell.m_data.parr)) {
+      return input;
+    }
   }
 
   folly::Optional<PackedArrayInit> ai;

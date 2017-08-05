@@ -261,12 +261,6 @@ struct FuncInfoValue {
   uint32_t returnRefinments{0};
 
   /*
-   * Whether $this can be null or not on entry to the method. Only applies
-   * to method and it's always false for functions.
-   */
-  bool thisAvailable = false;
-
-  /*
    * Call-context sensitive return types are cached here.  This is not
    * an optimization.
    *
@@ -849,7 +843,6 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
       // here saves on whole-program iterations.
     info.second.returnTy = native_function_return_type(f);
   }
-  info.second.thisAvailable = false;
 
   auto val = data.funcInfo.insert(std::move(info));
   return static_cast<FuncInfo*>(&*val.first);
@@ -2789,8 +2782,7 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
 }
 
 bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
-  auto it = m_data->funcInfo.find(f);
-  return it != end(m_data->funcInfo) ? it->second.thisAvailable : false;
+  return (f->attrs & AttrRequiresThis) && !f->isClosureBody;
 }
 
 PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,

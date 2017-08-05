@@ -2018,6 +2018,16 @@ typedef RankedCHM<StringData*, HPHP::Unit*,
         StringDataHashCompare,
         RankEvaledUnits> EvaledUnitsMap;
 static EvaledUnitsMap s_evaledUnits;
+static std::atomic<int64_t> s_createfuncs;
+
+int64_t getEvaledUnits() {
+  return s_evaledUnits.size();
+}
+
+int64_t getCreateFuncs() {
+  return s_createfuncs.load(std::memory_order_acquire);
+}
+
 Unit* ExecutionContext::compileEvalString(
     StringData* code,
     const char* evalFilename /* = nullptr */) {
@@ -2026,6 +2036,11 @@ Unit* ExecutionContext::compileEvalString(
   // across requests.
   code = makeStaticString(code);
   if (s_evaledUnits.insert(acc, code)) {
+    if (RuntimeOption::EnableDynamicFuncWarn) {
+       Logger::Warning("Don't recommended call eval(), "
+         "maybe effect performance "
+          "in %s on %d", getContainingFileName()->data(), getLine());
+    }
     acc->second = compile_string(
       code->data(),
       code->size(),
@@ -2045,6 +2060,12 @@ StrNR ExecutionContext::createFunction(const String& args,
   }
 
   VMRegAnchor _;
+  s_createfuncs.fetch_add(1, std::memory_order_acq_rel);
+  if (RuntimeOption::EnableDynamicFuncWarn) {
+    Logger::Warning("Don't recommended call eval(), "
+      "maybe effect performance "
+       "in %s on %d", getContainingFileName()->data(), getLine());
+  }
   auto const ar = GetCallerFrame();
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name

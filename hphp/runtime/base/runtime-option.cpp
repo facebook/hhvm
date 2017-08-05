@@ -107,6 +107,7 @@ bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
+bool RuntimeOption::EnableDynamicFuncWarn = false;
 
 #ifdef FACEBOOK
 bool RuntimeOption::UseThriftLogger = false;
@@ -1138,6 +1139,8 @@ void RuntimeOption::Load(
   }
   {
     // Eval
+    Config::Bind(EnableDynamicFuncWarn, ini, config, "Eval.EnableDynamicFuncWarn",
+                 EnableDynamicFuncWarn);
     Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax",
                  EnableHipHopSyntax);
     Config::Bind(EnableHipHopExperimentalSyntax, ini,

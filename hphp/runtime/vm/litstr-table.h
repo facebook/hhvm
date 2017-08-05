@@ -24,6 +24,7 @@
 #include "hphp/util/mutex.h"
 
 #include <vector>
+#include <tbb/concurrent_unordered_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +141,7 @@ private:
 private:
   static LitstrTable* s_litstrTable;
 
-  using LitstrMap = hphp_hash_map<
+  using LitstrMap = tbb::concurrent_unordered_map<
     const StringData*,
     Id,
     string_data_hash,

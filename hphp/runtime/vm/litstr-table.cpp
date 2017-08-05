@@ -26,21 +26,22 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
+  auto it = m_litstr2id.find(litstr);
+  if (it != m_litstr2id.end()) return it->second;
+
   std::lock_guard<Mutex> g(mutex());
   assert(!m_safeToRead);
-  auto it = m_litstr2id.find(litstr);
 
-  if (it == m_litstr2id.end()) {
-    const StringData* sd = makeStaticString(litstr);
-    Id id = numLitstrs();
+  it = m_litstr2id.find(litstr);
+  if (it != m_litstr2id.end()) return it->second;
 
-    m_litstr2id[sd] = id;
-    m_namedInfo.emplace_back(sd, nullptr);
+  const StringData* sd = makeStaticString(litstr);
+  Id id = numLitstrs();
 
-    return id;
-  } else {
-    return it->second;
-  }
+  m_litstr2id[sd] = id;
+  m_namedInfo.emplace_back(sd, nullptr);
+
+  return id;
 }
 
 void LitstrTable::forEachNamedEntity(

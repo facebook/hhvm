@@ -3243,7 +3243,7 @@ SetPropL <local variable id>    [C B]  ->  [C]
        y->k is accessible
         y has eligible __set method
          y->k has been unset previously
-    ------+---------------------------------------------------------------------
+    -------+--------------------------------------------------------------------
     00XXXX | raise warning; push null
     01XXXX | y = new stdclass; y->k = x; push x
     1X0X0X | create property y->k; y->k = x; push x
@@ -3254,167 +3254,114 @@ SetPropL <local variable id>    [C B]  ->  [C]
     1X1101 | re-create property y->k; y->k = x; push x
     1X1111 | y->__set(k, x); push x
 
-SetOpPropC <op>    [C C B]  ->  [C]
-
-  Set op property. Perform one of the following actions:
-
-    $1 is an object
-     $1 is null/false/""
-      $1->$3 is visible
-       $1->$3 is accessible
-        $1 has eligible __get method
-         $1 has eligible __set method
-          $1->$3 has been unset previously
-    -------+--------------------------------------------------------------------
-    00XXXXX | raise warning; push null
-    01XXXXX | $1 = new stdclass; y = null <op> $2; $1->$3 = y; push y
-    100X0XX | y = null <op> $2; $1->$3 = y; push y
-    100X10X | x = $1->__get($3); y = x <op> $2; $1->$3 = y; push y
-    100X11X | x = $1->__get($3); y = x <op> $2; $1->__set($3, y), push y
-    10100XX | throw fatal error
-    101010X | throw fatal error
-    101011X | x = $1->__get($3); y = x <op> $2; $1->__set($3, y), push y
-    1011XX0 | x = $1->$3; y = x <op> $2; $1->$3 = y; push y
-    10110X1 | y = null <op> $2; re-create $1->$3; $1->$3 = y; push y
-    1011101 | x = $1->__get($3); y = x <op> $2; re-create $1->$3; $1->$3 = y;
-            |   push y
-    1011111 | x = $1->__get($3); y = x <op> $2; $1->__set($3, y); push y
-
+SetOpPropC <op>                        [C C B]  ->  [C]
 SetOpPropL <op> <local variable id>    [C B]  ->  [C]
 
-  Set op property. Perform one of the following actions, where k is the value
-  of the local given by %2.
+  Set op property.
 
-    $1 is an object
-     $1 is null/false/""
-      $1->k is visible
-       $1->k is accessible
-        $1 has eligible __get method
-         $1 has eligible __set method
-          $1->k has been unset previously
-    -------+--------------------------------------------------------------------
+  First, these operations load values into k and x, and a base into y, as given
+  by the following table:
+
+         operation    k    x    y
+       ------------+----+----+----
+        SetOpPropC | $3 | $2 | $1
+        SetOpPropL | %1 | $2 | $1
+
+  Next, perform one of the following actions:
+
+    y is an object
+     y is null/false/""
+      y->k is visible
+       y->k is accessible
+        y has eligible __get method
+         y has eligible __set method
+          y->k has been unset previously
+    --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | $1 = new stdclass; y = null <op> $2; $1->k = y; push y
-    100X0XX | y = null <op> $2; $1->k = y; push y
-    100X10X | x = $1->__get(k); y = x <op> $2; $1->k = y; push y
-    100X11X | x = $1->__get(k); y = x <op> $2; $1->__set(k, y), push y
+    01XXXXX | y = new stdclass; z = null <op> x; y->k = z; push z
+    100X0XX | z = null <op> x; y->k = z; push z
+    100X10X | w = y->__get(k); z = w <op> x; y->k = z; push z
+    100X11X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
     10100XX | throw fatal error
     101010X | throw fatal error
-    101011X | x = $1->__get(k); y = x <op> $2; $1->__set(k, y), push y
-    1011XX0 | x = $1->k; y = x <op> $2; $1->k = y; push y
-    10110X1 | y = null <op> $2; re-create $1->k; $1->k = y; push y
-    1011101 | x = $1->__get(k); y = x <op> $2; re-create $1->k; $1->k = y;
-            |   push y
-    1011111 | x = $1->__get(k); y = x <op> $2; $1->__set(k, y); push y
+    101011X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
+    1011XX0 | w = y->k; z = w <op> x; y->k = z; push z
+    10110X1 | z = null <op> x; re-create y->k; y->k = z; push z
+    1011101 | w = y->__get(k); z = w <op> x; re-create y->k; y->k = z; push z
+    1011111 | w = y->__get(k); z = w <op> x; y->__set(k, z); push z
 
-IncDecPropC <op>    [C B]  ->  [C]
-
-  Increment/decrement property. Perform one of the following actions:
-
-    $1 is an object
-     $1 is null/false/""
-      $1->$2 is visible
-       $1->$2 is accessible
-        $1 has eligible __get method
-         $1 has eligible __set method
-          $1->$2 has been unset previously
-    -------+--------------------------------------------------------------------
-    00XXXXX | raise warning; push null
-    01XXXXX | $1 = new stdclass; x = null; y = x; <op>y; $1->$2 = y;
-            |   push y (Pre*) or x (Post*)
-    100X0XX | x = null; y = x; <op>y; $1->$2 = y; push y (Pre*) or x (Post*)
-    100X10X | x = $1->__get($2); y = x; <op>y; $1->$2 = y;
-            |   push y (Pre*) or x (Post*)
-    100X11X | x = $1->__get($2); y = x, <op>y; $1->__set($2, y);
-            |   push y (Pre*) or x (Post*)
-    10100XX | throw fatal error
-    101010X | throw fatal error
-    101011X | x = $1->__get($2); y = x, <op>y; $1->__set($2, y);
-            |   push y (Pre*) or x (Post*)
-    1011XX0 | x = $1->$2; y = x; <op>y; $1->$2 = y; push y (Pre*) or x (Post*)
-    10110X1 | x = null; y = x; <op>y; re-create $1->$2; $1->$2 = y;
-            |   push y (Pre*) or x (Post*)
-    1011101 | x = $1->__get($2); y = x; <op>y; re-create $1->$2; $1->$2 = y;
-            |   push y (Pre*) or x (Post*)
-    1011111 | x = $1->__get($2); y = x; <op>y; $1->__set($2, y);
-            |   push y (Pre*) or x (Post*)
-
+IncDecPropC <op>                        [C B]  ->  [C]
 IncDecPropL <op> <local variable id>    [B]  ->  [C]
 
-  Increment/decrement property. Perform one of the following actions, where k
-  is the value of the local variable given by %2.
+  Increment/decrement property.
 
-    $1 is an object
-     $1 is null/false/""
-      $1->k is visible
-       $1->k is accessible
-        $1 has eligible __get method
-         $1 has eligible __set method
-          $1->k has been unset previously
-    -------+--------------------------------------------------------------------
+  First, these operations load a value into x and a base into y, as given by
+  the following table:
+
+         operation     x    y
+       -------------+----+----
+        IncDecPropC | $2 | $1
+        IncDecPropL | %1 | $1
+
+  Next, perform one of the following actions:
+
+    y is an object
+     y is null/false/""
+      y->x is visible
+       y->x is accessible
+        y has eligible __get method
+         y has eligible __set method
+          y->x has been unset previously
+    --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | $1 = new stdclass; x = null; y = x; <op>y; $1->k = y;
-            |   push y (Pre*) or x (Post*)
-    100X0XX | x = null; y = x; <op>y; $1->k = y; push y (Pre*) or x (Post*)
-    100X10X | x = $1->__get(k); y = x; <op>y; $1->k = y;
-            |   push y (Pre*) or x (Post*)
-    100X11X | x = $1->__get(k); y = x, <op>y; $1->__set(k, y);
-            |   push y (Pre*) or x (Post*)
+    01XXXXX | y = new stdclass; b = null; a = b; <op>a; y->x = a;
+            |   push a (Pre*) or b (Post*)
+    100X0XX | b = null; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
+    100X10X | b = y->__get(x); a = b; <op>a; y->x = a;
+            |   push a (Pre*) or b (Post*)
+    100X11X | b = y->__get(x); a = b, <op>a; y->__set(x, a);
+            |   push a (Pre*) or b (Post*)
     10100XX | throw fatal error
     101010X | throw fatal error
-    101011X | x = $1->__get(k); y = x, <op>y; $1->__set(k, y);
-            |   push y (Pre*) or x (Post*)
-    1011XX0 | x = $1->k; y = x; <op>y; $1->k = y; push y (Pre*) or x (Post*)
-    10110X1 | x = null; y = x; <op>y; re-create $1->k; $1->k = y;
-            |   push y (Pre*) or x (Post*)
-    1011101 | x = $1->__get(k); y = x; <op>y; re-create $1->k; $1->k = y;
-            |   push y (Pre*) or x (Post*)
-    1011111 | x = $1->__get(k); y = x; <op>y; $1->__set(k, y);
-            |   push y (Pre*) or x (Post*)
+    101011X | b = y->__get(x); a = b, <op>a; y->__set(x, a);
+            |   push a (Pre*) or b (Post*)
+    1011XX0 | b = y->x; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
+    10110X1 | b = null; a = b; <op>a; re-create y->x; y->x = a;
+            |   push a (Pre*) or b (Post*)
+    1011101 | b = y->__get(x); a = b; <op>a; re-create y->x; y->x = a;
+            |   push a (Pre*) or b (Post*)
+    1011111 | b = y->__get(x); a = b; <op>a; y->__set(x, a);
+            |   push a (Pre*) or b (Post*)
 
-BindPropC    [C V B]  ->  [V]
-
-  Bind property. If $1 is an object that does not have an eligible __set
-  method, this operation first checks if $1 has a visible property named $3. If
-  it does not, this operation creates a new property named $3, executes $1->$3
-  =& $2, and pushes $2 onto the stack. Otherwise, this operation continues to
-  check if the property named $3 is accessible. If the property named $3 is not
-  accessible, this operation throws a fatal error. Otherwise, this operation
-  executes $1->$3 =& $2 and pushes $2 onto the stack.
-
-  If $1 is an object that has an eligible __set method, this operation checks
-  if $1 has a visible and accessible property named $3. If it does, this
-  operation follows the rules described in the first case given above.
-  Otherwise this operation throws a fatal error.
-
-  If $1 is null, false, or empty string, this operation sets $1 to a new object
-  of type stdclass, executes $1->$3 =& $2, and pushes $2 onto the stack.
-
-  If $1 is true, integer, double, a non-empty string, or an array, this
-  operation raises a warning and pushes null onto the stack.
-
+BindPropC                        [C V B]  ->  [V]
 BindPropL <local variable id>    [V B]  ->  [V]
 
-  Bind property. Where k is the value of the local variable given by %1:
+  Bind property.
 
-  If $1 is an object that does not have an eligible __set method, this
-  operation first checks if $1 has a visible property named k. If it does not,
-  this operation creates a new property named k, executes $1->k =& $2, and
-  pushes $2 onto the stack. Otherwise, this operation continues to check if the
-  property named k is accessible. If the property named k is not accessible,
-  this operation throws a fatal error. Otherwise, this operation executes $1->k
-  =& $2 and pushes $2 onto the stack.
+  First, these operations load values into k and x, and a base into y, as given
+  by the following table:
 
-  If $1 is an object that has an eligible __set method, this operation checks
-  if $1 has a visible and accessible property named k. If it does, this
-  operation follows the rules described in the first case given above.
-  Otherwise this operation throws a fatal error.
+        operation |  k    x    y
+       -----------+----+----+----
+        BindPropC | $3 | $2 | $1
+        BindPropL | %1 | $2 | $1
 
-  If $1 is null, false, or empty string, this operation sets $1 to a new object
-  of type stdclass, executes $1->k =& $2, and pushes $2 onto the stack.
+  Next, perform one of the following actions:
 
-  If $1 is true, integer, double, a non-empty string, or an array, this
-  operation raises a warning and pushes null onto the stack.
+    y is an object
+     y is null/false/""
+      y->k is visible
+       y->k is accessible
+        y has eligible __set method
+         y->k has been unset previously
+    -------+--------------------------------------------------------------------
+    00XXXX | raise warning; push null
+    01XXXX | y = new stdclass; y->k =& x; push x
+    1X0X0X | create property y->k; y->k =& x; push x
+    1X0X1X | throw fatal error
+    1X10XX | throw fatal error
+    1X11X0 | y->k =& x; push x
+    1X11X1 | re-create property y->k; y->k =& x; push x
 
 UnsetPropC                        [C B]  ->  []
 UnsetPropL <local variable id>    [B]  ->  []

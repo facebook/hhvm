@@ -107,6 +107,9 @@ bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::AutoprimeGenerators = true;
+uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
+  kDefaultInitialStaticStringTableSize;
+uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
 
 #ifdef FACEBOOK
 bool RuntimeOption::UseThriftLogger = false;
@@ -1118,10 +1121,12 @@ void RuntimeOption::Load(
       RepoEvalMode = "readonly";
     }
 
-    Config::Bind(RepoJournal, ini, config, "Repo.Journal", "delete");
-    Config::Bind(RepoCommit, ini, config, "Repo.Commit", true);
+    Config::Bind(RepoJournal, ini, config, "Repo.Journal", RepoJournal);
+    Config::Bind(RepoCommit, ini, config, "Repo.Commit",
+                 RepoCommit);
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", true);
-    Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative", false);
+    Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
+                 RepoAuthoritative);
     Config::Bind(RepoPreload, ini, config, "Repo.Preload", false);
     Config::Bind(RepoLocalReadaheadRate, ini, config,
                  "Repo.LocalReadaheadRate", 0);
@@ -1153,6 +1158,12 @@ void RuntimeOption::Load(
                  true);
     Config::Bind(CheckFlushOnUserClose, ini, config,
                  "Eval.CheckFlushOnUserClose", true);
+    Config::Bind(EvalInitialNamedEntityTableSize, ini, config,
+                 "Eval.InitialNamedEntityTableSize",
+                 EvalInitialNamedEntityTableSize);
+    Config::Bind(EvalInitialStaticStringTableSize, ini, config,
+                 "Eval.InitialStaticStringTableSize",
+                 EvalInitialStaticStringTableSize);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

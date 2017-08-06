@@ -406,6 +406,8 @@ struct RuntimeOption {
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static bool AutoprimeGenerators;
+  static uint32_t EvalInitialStaticStringTableSize;
+  static uint32_t EvalInitialNamedEntityTableSize;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;
@@ -667,9 +669,6 @@ struct RuntimeOption {
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, JitFilterLease,              1)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
-  F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
-  F(uint32_t, InitialStaticStringTableSize,                             \
-                        kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
   F(string, PCRECacheType, std::string("static"))                       \

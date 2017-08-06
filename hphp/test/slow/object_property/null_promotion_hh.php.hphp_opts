@@ -1,1 +1,2 @@
 -vEnableHipHopSyntax=1
+-vRuntime.Eval.PromoteEmptyObject=true

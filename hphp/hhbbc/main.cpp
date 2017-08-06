@@ -270,24 +270,28 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   SCOPE_EXIT { Repo::shutdown(); };
   batchCommit(std::move(ues));
 
-  auto gd                     = Repo::GlobalData{};
-  gd.UsedHHBBC                = true;
-  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints            = options.HardTypeHints;
-  gd.CheckThisTypeHints       = options.CheckThisTypeHints;
-  gd.HardReturnTypeHints      = options.HardReturnTypeHints;
-  gd.HardPrivatePropInference = options.HardPrivatePropInference;
-  gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
-  gd.ElideAutoloadInvokes     = options.ElideAutoloadInvokes;
-  gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
-  gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
-  gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
-  gd.PHP7_Builtins            = RuntimeOption::PHP7_Builtins;
-  gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
-  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
-  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
-  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
-  gd.APCProfile               = std::move(apcProfile);
+  auto gd                         = Repo::GlobalData{};
+  gd.UsedHHBBC                    = true;
+  gd.EnableHipHopSyntax           = RuntimeOption::EnableHipHopSyntax;
+  gd.HardTypeHints                = options.HardTypeHints;
+  gd.CheckThisTypeHints           = options.CheckThisTypeHints;
+  gd.HardReturnTypeHints          = options.HardReturnTypeHints;
+  gd.HardPrivatePropInference     = options.HardPrivatePropInference;
+  gd.DisallowDynamicVarEnvFuncs   = options.DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes         = options.ElideAutoloadInvokes;
+  gd.PHP7_IntSemantics            = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes             = RuntimeOption::PHP7_ScalarTypes;
+  gd.PHP7_Substr                  = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins                = RuntimeOption::PHP7_Builtins;
+  gd.AutoprimeGenerators          = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject           = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction         = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices         = RuntimeOption::EvalHackArrCompatNotices;
+  gd.APCProfile                   = std::move(apcProfile);
+  gd.InitialNamedEntityTableSize  =
+    RuntimeOption::EvalInitialNamedEntityTableSize;
+  gd.InitialStaticStringTableSize =
+    RuntimeOption::EvalInitialStaticStringTableSize;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
@@ -331,12 +335,24 @@ int main(int argc, char** argv) try {
 
   initialize_repo();
 
+  // We need to set this flag so Repo::global will let us access it.
+  RuntimeOption::RepoAuthoritative = true;
+
   LitstrTable::init();
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoEvalMode = "readonly";
   open_repo(input_repo);
   Repo::get().loadGlobalData();
   LitstrTable::fini();
+  auto const& gd = Repo::get().global();
+  if (gd.InitialNamedEntityTableSize) {
+    RuntimeOption::EvalInitialNamedEntityTableSize =
+      gd.InitialNamedEntityTableSize;
+  }
+  if (gd.InitialStaticStringTableSize) {
+    RuntimeOption::EvalInitialStaticStringTableSize =
+      gd.InitialStaticStringTableSize;
+  }
 
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
@@ -347,9 +363,6 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoJournal         = "memory";
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;
-  // We only need to set this flag so Repo::global will let us access
-  // it.
-  RuntimeOption::RepoAuthoritative = true;
 
   register_process_init();
 

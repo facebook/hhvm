@@ -42,6 +42,16 @@ struct Repo::GlobalData {
   bool EnableHipHopSyntax = false;
 
   /*
+   * Copy of InitialNamedEntityTableSize for hhbbc to use.
+   */
+  uint32_t InitialNamedEntityTableSize = 0;
+
+  /*
+   * Copy of InitialStaticStringTableSize for hhbbc to use.
+   */
+  uint32_t InitialStaticStringTableSize = 0;
+
+  /*
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -148,6 +158,8 @@ struct Repo::GlobalData {
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
       (EnableHipHopSyntax)
+      (InitialNamedEntityTableSize)
+      (InitialStaticStringTableSize)
       (HardTypeHints)
       (CheckThisTypeHints)
       (HardReturnTypeHints)

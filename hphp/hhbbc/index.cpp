@@ -280,9 +280,6 @@ struct FuncInfoValue {
   CompactVector<Type> localStaticTypes;
 };
 
-using FuncInfoMap = tbb::concurrent_unordered_map<borrowed_ptr<const php::Func>,
-                                                  FuncInfoValue>;
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -327,7 +324,7 @@ struct FuncFamily {
 
 //////////////////////////////////////////////////////////////////////
 
-struct FuncInfo : FuncInfoMap::value_type {};
+struct FuncInfo : std::pair<borrowed_ptr<const php::Func>, FuncInfoValue> {};
 
 /*
  * Known information about a particular possible instantiation of a
@@ -769,7 +766,7 @@ struct IndexData {
   std::vector<std::unique_ptr<ClassInfo>>  allClassInfos;
   std::vector<std::unique_ptr<FuncFamily>> funcFamilies;
 
-  FuncInfoMap funcInfo;
+  std::vector<FuncInfo> funcInfo;
 
   // Private instance and static property types are stored separately
   // from ClassInfo, because you don't need to resolve a class to get
@@ -833,19 +830,19 @@ void add_dependency(IndexData& data,
 
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
-  auto it = data.funcInfo.find(f);
-  if (LIKELY(it != end(data.funcInfo))) return static_cast<FuncInfo*>(&*it);
-
-  auto info = FuncInfoMap::value_type{f, {}};
-  if (f->nativeInfo) {
+  auto fi = &data.funcInfo[f->idx];
+  if (UNLIKELY(fi->first == nullptr)) {
+    if (f->nativeInfo) {
       // We'd infer this anyway when we look at the bytecode body
       // (NativeImpl) for the HNI function, but just initializing it
       // here saves on whole-program iterations.
-    info.second.returnTy = native_function_return_type(f);
+      fi->second.returnTy = native_function_return_type(f);
+    }
+    fi->first = f;
   }
 
-  auto val = data.funcInfo.insert(std::move(info));
-  return static_cast<FuncInfo*>(&*val.first);
+  assert(fi->first == f);
+  return fi;
 }
 
 void find_deps(IndexData& data,
@@ -1976,6 +1973,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 {
   trace_time tracer("create index");
 
+  m_data->funcInfo.resize(program->nextFuncId);
+
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
   add_system_constants_to_index(*m_data);
@@ -2776,8 +2775,11 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
 }
 
 Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
-  auto it = m_data->funcInfo.find(f);
-  if (it != end(m_data->funcInfo)) return it->second.returnTy;
+  auto it = &m_data->funcInfo[f->idx];
+  if (it->first) {
+    assertx(it->first == f);
+    return it->second.returnTy;
+  }
   return TInitGen;
 }
 

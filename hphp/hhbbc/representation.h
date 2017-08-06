@@ -273,6 +273,11 @@ struct NativeInfo {
  */
 struct Func {
   /*
+   * An index, so we can lookup auxiliary structures efficiently
+   */
+  uint32_t idx;
+
+  /*
    * Basic information about the function.
    */
   LSString name;
@@ -574,6 +579,7 @@ struct Program {
   };
 
   explicit Program(size_t numUnitsGuess) :
+      nextFuncId(0),
       nextConstInit(0),
       constInits(100 + (numUnitsGuess / 4), 0) {
   }
@@ -582,6 +588,7 @@ struct Program {
   }
 
   std::vector<std::unique_ptr<Unit>> units;
+  std::atomic<uint32_t> nextFuncId;
   std::atomic<size_t> nextConstInit;
   AtomicVector<uintptr_t> constInits;
 };

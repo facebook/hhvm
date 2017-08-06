@@ -77,6 +77,8 @@ void record_const_init(php::Program& prog, uintptr_t encoded_func) {
 //////////////////////////////////////////////////////////////////////
 
 struct ParseUnitState {
+  std::atomic<uint32_t>& nextFuncId;
+
   /*
    * This is computed once for each unit and stashed here.  We support
    * having either a SourceLocTable or a LineTable.  If we're
@@ -823,12 +825,13 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   FTRACE(2, "  func: {}\n",
     fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
 
-  auto ret             = std::make_unique<php::Func>();
-  ret->name            = fe.name;
-  ret->srcInfo         = php::SrcInfo { fe.getLocation(),
-                                        fe.docComment };
-  ret->unit            = unit;
-  ret->cls             = cls;
+  auto ret         = std::make_unique<php::Func>();
+  ret->idx         = puState.nextFuncId.fetch_add(1, std::memory_order_relaxed);
+  ret->name        = fe.name;
+  ret->srcInfo     = php::SrcInfo { fe.getLocation(),
+                                    fe.docComment };
+  ret->unit        = unit;
+  ret->cls         = cls;
 
   ret->attrs              = static_cast<Attr>(fe.attrs & ~AttrNoOverride);
   ret->userAttributes     = fe.userAttributes;
@@ -1091,7 +1094,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   ret->useStrictTypes = ue.m_useStrictTypes;
   ret->useStrictTypesForBuiltins = ue.m_useStrictTypesForBuiltins;
 
-  ParseUnitState puState;
+  ParseUnitState puState{ prog.nextFuncId };
   if (ue.hasSourceLocInfo()) {
     puState.srcLocInfo = ue.createSourceLocTable();
   } else {

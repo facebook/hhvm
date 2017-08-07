@@ -22,6 +22,7 @@
 #include <string>
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/util/compact-vector.h"
 
 namespace HPHP {
 
@@ -64,7 +65,7 @@ struct ArrayTypeTable {
   typename std::enable_if<!SerDe::deserializing>::type serde(SerDe&);
 
 private:
-  std::vector<const RepoAuthType::Array*> m_arrTypes;
+  CompactVector<const RepoAuthType::Array*> m_arrTypes;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
@@ -169,7 +170,7 @@ using FuncEntry      = TableEntry<const Func*>;
 
 using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
-using FuncTable      = std::vector<FuncEntry>;
+using FuncTable      = CompactVector<FuncEntry>;
 
 /*
  * Get the line number or SourceLoc for Offset `pc' in `table'.
@@ -877,7 +878,7 @@ private:
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;
-  std::vector<PreClassPtr> m_preClasses;
+  CompactVector<PreClassPtr> m_preClasses;
   FixedVector<TypeAlias> m_typeAliases;
 
   /*

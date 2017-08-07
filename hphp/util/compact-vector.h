@@ -50,12 +50,16 @@ struct CompactVector {
   friend const_iterator begin(const CompactVector& v) { return v.begin(); }
   friend const_iterator end(const CompactVector& v) { return v.end(); }
 
+  CompactVector();
+  explicit CompactVector(size_type n);
+  CompactVector(size_type n, const T&);
   CompactVector(CompactVector&& other) noexcept;
   CompactVector(const CompactVector& other);
   CompactVector& operator=(CompactVector&&);
   CompactVector& operator=(const CompactVector&);
-  CompactVector();
   ~CompactVector();
+
+  void swap(CompactVector& other) noexcept;
 
   bool operator==(const CompactVector& other) const;
 
@@ -67,6 +71,8 @@ struct CompactVector {
   iterator end() { return m_data ? elems() + size() : nullptr; }
   const_iterator begin() const { return m_data ? elems() : nullptr; }
   const_iterator end() const { return m_data ? elems() + size() : nullptr; }
+  T* data() { return m_data ? elems() : nullptr; }
+  const T* data() const { return m_data ? elems() : nullptr; }
 
   bool empty() const;
   size_type size() const;
@@ -81,6 +87,7 @@ struct CompactVector {
   void erase(iterator, iterator);
   void resize(size_type sz);
   void resize(size_type sz, const value_type& value);
+  void shrink_to_fit();
 
   T& operator[](size_type index) { return *get(index); }
   const T& operator[](size_type index) const { return *get(index); }
@@ -121,6 +128,18 @@ CompactVector<T>::CompactVector() {
 }
 
 template <typename T>
+CompactVector<T>::CompactVector(size_type n) {
+  m_data = nullptr;
+  resize(n);
+}
+
+template <typename T>
+CompactVector<T>::CompactVector(size_type n, const T& val) {
+  m_data = nullptr;
+  resize(n, val);
+}
+
+template <typename T>
 CompactVector<T>::CompactVector(CompactVector&& other) noexcept
     : m_data(other.m_data) {
   other.m_data = nullptr;
@@ -154,6 +173,11 @@ template <typename T>
 CompactVector<T>& CompactVector<T>::operator=(CompactVector&& other) {
   std::swap(m_data, other.m_data);
   return *this;
+}
+
+template <typename T>
+void CompactVector<T>::swap(CompactVector& other) noexcept {
+  std::swap(m_data, other.m_data);
 }
 
 template <typename T>
@@ -235,7 +259,7 @@ bool CompactVector<T>::resize_helper(size_type sz) {
   auto elm = get(sz);
   m_data->m_len = sz;
   do {
-    elm->~T();
+    elm++->~T();
   } while (++sz < old_size);
   return true;
 }
@@ -254,6 +278,16 @@ void CompactVector<T>::resize(size_type sz) {
   while (m_data->m_len < sz) {
     push_back(T{});
   }
+}
+
+template <typename T>
+void CompactVector<T>::shrink_to_fit() {
+  if (!m_data || m_data->m_capacity == m_data->m_len) return;
+  if (!m_data->m_len) {
+    clear();
+    return;
+  }
+  reserve_impl(m_data->m_len);
 }
 
 template <typename T>

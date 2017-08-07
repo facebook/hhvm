@@ -1,17 +1,23 @@
 File "lvar_expr_dependent.php", line 20, characters 5-22:
-  <expr#1>::T as C::T as num
+  <expr#1>::T
 File "lvar_expr_dependent.php", line 21, characters 5-22:
-  <expr#1>::T as C::T as num
+  <expr#1>::T
 File "lvar_expr_dependent.php", line 29, characters 5-28:
-  <expr#1>::T as C::T as num
+  <expr#1>::T
 File "lvar_expr_dependent.php", line 33, characters 5-21:
   I
 File "lvar_expr_dependent.php", line 34, characters 5-28:
-  <expr#1>::T as I::T as num
+  <expr#1>::T
 File "lvar_expr_dependent.php", line 41, characters 5-22:
-  <expr#2>::T as C::T as num
+  <expr#2>::T
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
+File "lvar_expr_dependent.php", line 42, characters 13-18:
+Some type constraint(s) here are violated
+File "lvar_expr_dependent.php", line 12, characters 35-41:
+'<expr#1>::T' is a constrained type
+File "lvar_expr_dependent.php", line 12, characters 35-41:
+'I::T' is a constrained type
 File "lvar_expr_dependent.php", line 13, characters 26-32:
 This is the expression dependent type <expr#2>::T
 File "lvar_expr_dependent.php", line 10, characters 28-30:
@@ -19,8 +25,6 @@ File "lvar_expr_dependent.php", line 10, characters 28-30:
 File "lvar_expr_dependent.php", line 42, characters 5-6:
   where '<expr#2>' is a reference to this expression
 File "lvar_expr_dependent.php", line 12, characters 35-41:
-It is incompatible with the expression dependent type <expr#1>::T
+It is incompatible with a num (int/float)
 File "lvar_expr_dependent.php", line 10, characters 28-30:
-  resulting from expanding the type constant C::T
-File "lvar_expr_dependent.php", line 38, characters 14-15:
-  where '<expr#1>' is a reference to this expression
+  resulting from expanding the type constant I::T

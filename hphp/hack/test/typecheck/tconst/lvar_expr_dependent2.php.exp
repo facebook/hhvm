@@ -1,33 +1,33 @@
 File "lvar_expr_dependent2.php", line 19, characters 5-23:
-  <expr#1>::T as C::T as num
+  <expr#1>::T
 File "lvar_expr_dependent2.php", line 20, characters 5-23:
-  <expr#2>::T as C::T as num
+  <expr#2>::T
 File "lvar_expr_dependent2.php", line 25, characters 7-24:
-  <expr#1>::T as C::T as num
+  <expr#1>::T
 File "lvar_expr_dependent2.php", line 29, characters 7-24:
-  <expr#2>::T as C::T as num
+  <expr#2>::T
 File "lvar_expr_dependent2.php", line 34, characters 5-22:
-  ^(<expr#3>::T as C::T as num)
+  ^(<expr#3>::T)
 File "lvar_expr_dependent2.php", line 37, characters 5-22:
-  ^(<expr#3>::T as C::T as num)
+  ^(<expr#3>::T)
 File "lvar_expr_dependent2.php", line 42, characters 7-24:
-  ^(<expr#4>::T as C::T as num)
+  ^(<expr#4>::T)
 File "lvar_expr_dependent2.php", line 46, characters 5-22:
-  ^(<expr#5>::T as C::T as num)
+  ^(<expr#5>::T)
 File "lvar_expr_dependent2.php", line 49, characters 5-22:
-  ^(<expr#5>::T as C::T as num)
+  ^(<expr#5>::T)
 File "lvar_expr_dependent2.php", line 53, characters 7-24:
-  <expr#6>::T as C::T as num
+  <expr#6>::T
 File "lvar_expr_dependent2.php", line 57, characters 5-22:
-  ^(<expr#5>::T as C::T as num)
+  ^(<expr#5>::T)
 File "lvar_expr_dependent2.php", line 61, characters 7-24:
-  <expr#7>::T as C::T as num
+  <expr#7>::T
 File "lvar_expr_dependent2.php", line 63, characters 7-24:
-  <expr#7>::T as C::T as num
+  <expr#7>::T
 File "lvar_expr_dependent2.php", line 61, characters 7-24:[2]
-  <expr#8>::T as C::T as num
+  <expr#8>::T
 File "lvar_expr_dependent2.php", line 63, characters 7-24:[2]
-  <expr#8>::T as C::T as num
+  <expr#8>::T
 File "lvar_expr_dependent2.php", line 67, characters 5-22:
-  ^(<expr#9>::T as C::T as num)
+  ^(<expr#9>::T)
 No errors

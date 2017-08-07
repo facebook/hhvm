@@ -10,7 +10,7 @@
 
 open Core
 open Typing_defs
-
+module ExprDepTy = Typing_dependent_type
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 
@@ -30,6 +30,8 @@ end = struct
   let rec ty (_, x) = ty_ x
   and ty_ = function
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
+    | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
+      ty_opt cstr
     | Tabstract (AKgeneric x, _) -> raise (Found x)
     | Tanon _ | Tany | Terr | Tmixed | Tprim _ -> ()
     | Tarraykind akind ->

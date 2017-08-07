@@ -512,6 +512,8 @@ module AbstractKind = struct
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
        String.concat "::" (dt::ids)
+
+  let is_generic_dep_ty s = String_utils.is_substring "::" s
 end
 
 module ShapeFieldMap = struct

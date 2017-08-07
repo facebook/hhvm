@@ -103,10 +103,10 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         | reason, ty when ety_env.from_class <> None -> reason, ty
         | reason, ty ->
             Reason.Rinstantiate (reason, SN.Typehints.this, r), ty in
-      let ty =
+      let env, ty =
         match ety_env.from_class with
         | Some cid -> ExprDepTy.make env cid ty
-        | _ -> ty in
+        | _ -> env, ty in
       env, (ety_env, ty)
   | r, Tarray (ty1, ty2) ->
       let env, ty = match ty1, ty2 with

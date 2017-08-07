@@ -979,6 +979,11 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 
   (* Subtype is generic parameter *)
   | (r_sub, Tabstract (AKgeneric name_sub, opt_sub_cstr)), _ ->
+    (* If the generic is actually an expression dependent type,
+      we need to update the Unification environment's this_ty
+    *)
+    let uenv_sub = if AbstractKind.is_generic_dep_ty name_sub then
+      TUEnv.update_this_if_unset uenv_sub ety_sub else uenv_sub in
     let default () =
          (* If we've seen this type parameter before then we must have gone
          * round a cycle so we fail
@@ -1035,6 +1040,11 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 
   (* Supertype is generic parameter *)
   | _, (r_super, Tabstract (AKgeneric name_super, _)) ->
+    (* If the generic is actually an expression dependent type,
+      we need to update the Unification environment's this_ty
+    *)
+    let uenv_super =  if AbstractKind.is_generic_dep_ty name_super then
+    TUEnv.update_this_if_unset uenv_super ety_super else uenv_super in
     (* If we've seen this type parameter before then we must have gone
      * round a cycle so we fail
      *)

@@ -1130,7 +1130,8 @@ and expr_
       let ty = (r, ty) in
       let ty = r, TUtils.this_of ty in
       (* '$this' always refers to the late bound static type *)
-      make_result env T.This (ExprDepTy.make env CIstatic ty)
+      let env, new_ty = ExprDepTy.make env CIstatic ty in
+      make_result env T.This (new_ty)
   | Assert (AE_assert e) ->
       let env = condition env true e in
       make_result env T.Any (Reason.Rwitness p, Tprim Tvoid)
@@ -1591,7 +1592,8 @@ and expr_
       let env, tc, tel, tuel, ty =
         new_object ~check_not_abstract p env c el uel in
       let env = Env.forget_members env p in
-      make_result env (T.New(tc, tel, tuel)) (ExprDepTy.make env c ty)
+      let env, new_ty = (ExprDepTy.make env c ty) in
+      make_result env (T.New(tc, tel, tuel)) new_ty
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
@@ -2765,7 +2767,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
              * defined on the parent class, but $this is still the child class.
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
-            let this_ty = ExprDepTy.make env CIstatic
+            let env, this_ty = ExprDepTy.make env CIstatic
               (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
             let k_lhs _ = this_ty in
             let env, method_, _ =
@@ -3082,6 +3084,8 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       end in
     begin match resl with
     | [res] -> res
+    | res::rest
+      when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) -> res
     | _ -> error_array env p ety1
     end
   | Tmixed | Tprim _ | Tvar _ | Tfun _
@@ -3628,7 +3632,7 @@ and this_for_method env cid default_ty = match cid with
   | CIparent | CIself | CIstatic ->
       let p = Reason.to_pos (fst default_ty) in
       let env, _te, ty = static_class_id p env CIstatic in
-      env, ExprDepTy.make env CIstatic ty
+      ExprDepTy.make env CIstatic ty
   | _ ->
       env, default_ty
 
@@ -3893,9 +3897,9 @@ and call_param todos env (name, x) ((pos, _ as e), arg_ty) =
    * we store the expression id in the local env for Lvar, we want to apply
    * it in this case.
    *)
-  let dep_ty = match snd e with
+  let env, dep_ty = match snd e with
     | Lvar _ -> ExprDepTy.make env (CIexpr e) arg_ty
-    | _ -> arg_ty in
+    | _ -> env, arg_ty in
   (* We solve for Tanon types after all the other params because we want to
    * typecheck the lambda bodies with as much type information as possible. For
    * example, in array_map(fn, x), we might be able to use the type of x to
@@ -4384,12 +4388,20 @@ and condition ?lhs_of_null_coalesce env tparamet =
         (* Expand so that we don't modify x *)
         let env, obj_ty = Env.expand_type env obj_ty in
         match obj_ty with
+        (* If it's a generic that's expression dependent, we need to
+          look at all of its upper bounds and create an unresolved type to
+          represent all of the possible types.
+        *)
+        | r, Tabstract (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
+          let upper_bounds = Env.get_upper_bounds env s in
+          let env, tyl = List.map_env env upper_bounds resolve_obj in
+          env, (r, Tunresolved tyl)
         | _, Tabstract (AKgeneric name, _) ->
           if safe_instanceof_enabled
           then Errors.instanceof_generic_classname p name;
           env, obj_ty
         | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
-          let obj_ty =
+          let env, obj_ty =
             (* Technically instanceof static is not strong enough to prove
              * that a type is exactly the same as the late bound type.
              * For now we allow this lie to exist. To solve
@@ -4400,7 +4412,7 @@ and condition ?lhs_of_null_coalesce env tparamet =
             if cid = CIstatic then
               ExprDepTy.make env CIstatic obj_ty
             else
-              obj_ty in
+              env, obj_ty in
           env, obj_ty
         | _, Tabstract ((AKdependent _ | AKnewtype _), Some ty) ->
           resolve_obj env ty

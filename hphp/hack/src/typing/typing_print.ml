@@ -104,6 +104,8 @@ module ErrorString = struct
     match ak, cstr with
     | AKnewtype (_, _), _ -> "an object of type "^x
     | AKenum _, _ -> "a value of "^x
+    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s -> 
+      "the expression dependent type "^s
     | AKgeneric _, _ -> "a value of generic type "^x
     | AKdependent (`cls c, []), Some (_, ty) ->
         type_ ty^" (known to be exactly the class '"^strip_ns c^"')"

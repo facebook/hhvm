@@ -1,14 +1,18 @@
 File "method_swap_error.php", line 17, characters 14-23:
 Invalid argument (Typing[4110])
+File "method_swap_error.php", line 17, characters 14-23:
+Some type constraint(s) here are violated
+File "method_swap_error.php", line 8, characters 26-32:
+'<expr#2>::T' is a constrained type
+File "method_swap_error.php", line 8, characters 26-32:
+'X::T' is a constrained type
 File "method_swap_error.php", line 12, characters 24-30:
 This is the expression dependent type <expr#1>::T
 File "method_swap_error.php", line 4, characters 19-26:
   resulting from expanding the type constant X::T
 File "method_swap_error.php", line 17, characters 5-7:
   where '<expr#1>' is a reference to this expression
-File "method_swap_error.php", line 8, characters 26-32:
-It is incompatible with the expression dependent type <expr#2>::T
+File "method_swap_error.php", line 12, characters 24-30:
+It is incompatible with an array key (int/string)
 File "method_swap_error.php", line 4, characters 19-26:
   resulting from expanding the type constant X::T
-File "method_swap_error.php", line 17, characters 14-16:
-  where '<expr#2>' is a reference to this expression

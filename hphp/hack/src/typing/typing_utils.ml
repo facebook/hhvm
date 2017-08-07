@@ -136,8 +136,18 @@ let rec get_base_type env ty =
   match snd ty with
   | Tabstract (AKnewtype (classname, _), _) when
       classname = SN.Classes.cClassname -> ty
+  (* If we have an expression dependent type and it only has one super
+    type, we can treat it similarly to AKdependent _, Some ty  *)
+  | Tabstract (AKgeneric n, _) when AbstractKind.is_generic_dep_ty n ->
+    begin match Env.get_upper_bounds env n with
+    | ty2::_ when ty_equal ty ty2 -> ty
+    | ty::_ -> get_base_type env ty
+    | [] -> ty
+    end
   | Tabstract _ ->
     begin match get_concrete_supertypes env ty with
+    (* If the type is exactly equal, we don't want to recurse *)
+    | _, ty2::_ when ty_equal ty ty2 -> ty
     | _, ty::_ -> get_base_type env ty
     | _, [] -> ty
     end
@@ -169,8 +179,9 @@ let simplified_uerror env ty1 ty2 =
    *)
   if simplify then
     Errors.must_error
-      (fun _ -> ignore @@ unify env (get_base_type env ty1)
-                                    (get_base_type env ty2))
+      (fun _ ->
+          ignore @@ unify env (get_base_type env ty1) (get_base_type env ty2)
+      )
       (fun _ -> uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2))
   else
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)

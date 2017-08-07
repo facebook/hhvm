@@ -133,3 +133,8 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.prepare_environment()
         variables = self.setup_php_file('definition.php')
         self.load_and_run('hover', variables)
+
+    def test_non_existing_method(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('definition.php')
+        self.load_and_run('nomethod', variables)

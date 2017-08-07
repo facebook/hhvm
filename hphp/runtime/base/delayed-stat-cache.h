@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FAST_STAT_CACHE_H_
-#define incl_HPHP_FAST_STAT_CACHE_H_
+#ifndef incl_HPHP_DELAYED_STAT_CACHE_H_
+#define incl_HPHP_DELAYED_STAT_CACHE_H_
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -50,4 +50,4 @@ class DelayedStatCache {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_FAST_STAT_CACHE_H_
+#endif // incl_HPHP_DELAYED_STAT_CACHE_H_

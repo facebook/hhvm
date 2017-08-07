@@ -246,8 +246,8 @@ let string_literals_expected =
       (Const ((p (Happly (p string) ())))
        (((p FEINT_OCTAL) (p (String (p 058))))))))
     (c_namespace:
-     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
-      (ns_const_uses: (SMap ()))))
+     ((ns_name: \"\") (ns_ns_uses: (SMap ())) (ns_class_uses: (SMap ()))
+      (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (c_enum: ()) (c_span: p)))))"
 
 let test_data =

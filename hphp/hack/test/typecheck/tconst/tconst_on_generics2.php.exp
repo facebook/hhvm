@@ -1,0 +1,8 @@
+File "tconst_on_generics2.php", line 50, characters 18-19:
+A 'where' type constraint is violated here (Typing[4110])
+File "tconst_on_generics2.php", line 40, characters 26-29:
+This method's where constraints contain a generic type access
+File "tconst_on_generics2.php", line 10, characters 18-20:
+This is an int
+File "tconst_on_generics2.php", line 19, characters 18-23:
+It is incompatible with a string

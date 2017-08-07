@@ -38,6 +38,7 @@ module type S = sig
   val generic_class_var : Pos.t -> unit
   val explain_constraint : Pos.t -> Pos.t -> string -> error -> unit
   val explain_where_constraint : Pos.t -> Pos.t -> error -> unit
+  val explain_tconst_where_constraint : Pos.t -> Pos.t -> error -> unit
   val explain_type_constant : (Pos.t * string) list -> error -> unit
   val unexpected_arrow : Pos.t -> string -> unit
   val missing_arrow : Pos.t -> string -> unit

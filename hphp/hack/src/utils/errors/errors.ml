@@ -1545,6 +1545,17 @@ let explain_where_constraint use_pos def_pos (error : error) =
      def_pos, "This is the method with 'where' type constraints"] @ msgl
   end
 
+let explain_tconst_where_constraint use_pos def_pos (error: error) =
+  let inst_msg = "A 'where' type constraint is violated here" in
+  let code, msgl = (get_code error), (to_list error) in
+  add_list code begin
+    [use_pos, inst_msg;
+     def_pos,
+     "This method's where constraints contain a generic type access"] @ msgl
+  end
+
+
+
 let explain_type_constant reason_msgl (error: error) =
   let code, msgl = (get_code error), (to_list error) in
   add_list code (msgl @ reason_msgl)

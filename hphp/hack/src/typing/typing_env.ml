@@ -124,6 +124,13 @@ let get_upper_bounds env name =
   | None -> empty_bounds
   | Some {upper_bounds; _} -> upper_bounds in
   TySet.elements (TySet.union local global)
+
+(* Get bounds that are both an upper and lower of a given generic *)
+let get_equal_bounds env name =
+  let lower = TySet.of_list (get_lower_bounds env name) in
+  let upper = TySet.of_list (get_upper_bounds env name) in
+  TySet.elements (TySet.inter lower upper)
+
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
 let add_upper_bound_ tpenv name ty =
   match SMap.get name tpenv with

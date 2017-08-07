@@ -174,12 +174,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))
   | r, Taccess (root_ty, ids) ->
-      let env, root_ty' = localize ~ety_env env root_ty in
-      let env, root_ty = match root_ty with
-      | (r, Tgeneric x) when SMap.mem x ety_env.substs ->
-      ExprDepTy.make env (Nast.CIexpr (Reason.to_pos r, Nast.Any))
-        root_ty'
-      | _ -> env, root_ty' in
+      let env, root_ty = localize ~ety_env env root_ty in
       TUtils.expand_typeconst ety_env env r root_ty ids
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in

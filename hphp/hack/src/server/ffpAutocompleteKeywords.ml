@@ -75,9 +75,9 @@ let implements_keyword = {
 let extends_keyword = {
   keywords = ["extends"];
   is_valid_in_context = begin fun context ->
-    (context.closest_parent_container = ClassHeader ||
-    context.closest_parent_container = ClassBody)
-    &&
+    (context.closest_parent_container = InterfaceBody ||
+    context.closest_parent_container = ClassHeader ||
+    context.closest_parent_container = ClassBody) &&
     context.predecessor = ClassName
   end;
 }

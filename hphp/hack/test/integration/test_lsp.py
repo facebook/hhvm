@@ -134,6 +134,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file('definition.php')
         self.load_and_run('hover', variables)
 
+    def test_highlight(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('definition.php')
+        self.load_and_run('highlight', variables)
+
     def test_formatting(self):
         self.prepare_environment()
         variables = self.setup_php_file('messy.php')

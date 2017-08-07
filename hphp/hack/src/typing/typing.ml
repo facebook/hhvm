@@ -1607,7 +1607,7 @@ and expr_
       TUtils.process_class_id cid;
       let env, te2, _class = instantiable_cid p env cid in
       make_result env (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
-  | Efun (f, _idl) ->
+  | Efun (f, idl) ->
       let ft = Decl.fun_decl_in_env env.Env.decl_env f in
       (* When creating a closure, the 'this' type will mean the late bound type
        * of the current enclosing class
@@ -1616,19 +1616,19 @@ and expr_
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, ft = Phase.localize_ft ~ety_env env ft in
       (* check for recursive function calls *)
-      let anon = anon_make env p f in
+      let anon = anon_make env p f idl in
       let env, anon_id = Env.add_anonymous env anon in
-      let env = Errors.try_with_error
-        (fun () ->
-          ignore (anon env ft.ft_params); env)
+      let env, tefun, _ = Errors.try_with_error
+        (fun () -> anon env ft.ft_params)
         (fun () ->
           (* If the anonymous function declaration has errors itself, silence
              them in any subsequent usages. *)
           let anon env fun_params =
             Errors.ignore_ (fun () -> (anon env fun_params)) in
-          Env.set_anonymous env anon_id anon) in
-      (* TODO TAST: introduce lambda node in Tast.expr *)
-      make_result env T.Any (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
+          let _, tefun, ty = anon env ft.ft_params in
+          let env = Env.set_anonymous env anon_id anon in
+          env, tefun, ty) in
+      env, tefun, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let cid = CI (sid, []) in
       let env, _te, obj = expr env (fst sid, New (cid, [], [])) in
@@ -1701,13 +1701,13 @@ and class_const ?(incl_tc=false) env p (cid, mid) =
 (*****************************************************************************)
 (* Anonymous functions. *)
 (*****************************************************************************)
-and anon_bind_param params env ty : Env.env =
+and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
   match !params with
   | [] ->
       (* This code cannot be executed normally, because the arity is wrong
        * and it will error later. Bind as many parameters as we can and carry
        * on. *)
-      env
+      env, t_params
   | param :: paraml ->
       params := paraml;
       match param.param_hint with
@@ -1732,11 +1732,11 @@ and anon_bind_param params env ty : Env.env =
          * type-check. If $x is a string instead of ?string, null is not
          * subtype of string ...
         *)
-        let env, _ = bind_param env (h, param) in
-        env
+        let env, t_param = bind_param env (h, param) in
+        env, t_params @ [t_param]
       | None ->
-        let env, _ = bind_param env (ty, param) in
-        env
+        let env, t_param = bind_param env (ty, param) in
+        env, t_params @ [t_param]
 
 and anon_bind_opt_param env param : Env.env =
   match param.param_expr with
@@ -1760,7 +1760,7 @@ and anon_check_param env param =
       let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
       env
 
-and anon_make tenv p f =
+and anon_make tenv p f idl =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
@@ -1768,13 +1768,13 @@ and anon_make tenv p f =
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
-      env, err_witness p
+      expr_error env (Reason.Rwitness p)
     end
     else begin
       is_typing_self := true;
       Env.anon anon_lenv env begin fun env ->
         let params = ref f.f_params in
-        let env = List.fold_left ~f:(anon_bind_param params) ~init:env
+        let env, t_params = List.fold_left ~f:(anon_bind_param params) ~init:(env, [])
           (List.map supplied_params snd) in
         let env = List.fold_left ~f:anon_bind_opt_param ~init:env !params in
         let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
@@ -1792,7 +1792,7 @@ and anon_make tenv p f =
             Phase.localize ~ety_env env ret in
         let env = Env.set_return env hret in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let env, _ = block env nb.fnb_nast in
+        let env, tb = block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block tenv nb.fnb_nast
             || nb.fnb_unsafe || !auto_complete
@@ -1800,7 +1800,24 @@ and anon_make tenv p f =
           else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
         in
         is_typing_self := false;
-        env, hret
+        let tfun_ = {
+          T.f_mode = f.f_mode;
+          T.f_ret = f.f_ret;
+          T.f_name = f.f_name;
+          T.f_tparams = f.f_tparams;
+          T.f_where_constraints = f.f_where_constraints;
+          T.f_fun_kind = f.f_fun_kind;
+          T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
+          T.f_body = T.NamedBody {
+            T.fnb_nast = tb;
+            T.fnb_unsafe = nb.fnb_unsafe;
+          };
+          T.f_params = t_params;
+
+          T.f_variadic = T.FVnonVariadic; (* TODO TAST: Variadic efuns *)
+        } in
+        let te = T.make_typed_expr p hret (T.Efun (tfun_, idl)) in
+        env, te, hret
       end
     end
 
@@ -3855,7 +3872,7 @@ and call_ pos env fty el uel =
       | Some anon ->
         let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map tyl (fun x -> None, x) in
-        let env, ty = anon env tyl in
+        let env, _, ty = anon env tyl in
         env, tel, [], ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)

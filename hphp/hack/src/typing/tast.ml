@@ -14,7 +14,7 @@
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
-let pp_ty fmt ty = Format.pp_print_string fmt (Typing_print.suggest ty)
+let pp_ty fmt _ = Format.pp_print_string fmt "<type>"
 
 (* Typed AST.
  * We re-use the NAST but annotate expressions with position *and*

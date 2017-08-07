@@ -97,8 +97,16 @@ and streamed =
 
 type push =
   | DIAGNOSTIC of int * (Pos.absolute Errors.error_ list) SMap.t
+  | BUSY_STATUS of busy_status
   | NEW_CLIENT_CONNECTED
   | FATAL_EXCEPTION of Marshal_tools.remote_exception_data
+
+and busy_status =
+  | Needs_local_typecheck
+  | Doing_local_typecheck
+  | Done_local_typecheck
+  | Doing_global_typecheck
+  | Done_global_typecheck
 
 type 'a persistent_connection_message_type =
   | Push of push

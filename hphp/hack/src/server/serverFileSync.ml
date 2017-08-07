@@ -49,6 +49,7 @@ let close_file env path =
 
 let edit_file env path edits =
   let new_env = try_relativize_path path >>= fun path ->
+    ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let fc = match FileHeap.get path with
     | Some Ide f -> f
     | Some Disk content -> content

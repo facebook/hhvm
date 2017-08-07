@@ -28,7 +28,12 @@ type env = {
 (* of our progress notifications are non-overlapping, so we can use a single  *)
 (* constant id for all of them.                                               *)
 let progress_id_initialize = 1
-
+(* Progress and action-required is also used to report hh_server's typecheck  *)
+(* status from ServerCommandTypes.busy_status: whether it's ready, or doing   *)
+(* a local typecheck, or doing a global typecheck, etc. Again the lifetimes   *)
+(* of these are non-overlapping so again we use constant ids.                 *)
+let progress_id_server_status = 2
+let action_id_server_status = 3
 
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
@@ -259,6 +264,7 @@ let event_to_string (event: event) : string =
   match event with
   | Server_hello -> "Server hello"
   | Server_message ServerCommandTypes.DIAGNOSTIC _ -> "Server DIAGNOSTIC"
+  | Server_message ServerCommandTypes.BUSY_STATUS _ -> "Server BUSY_STATUS"
   | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED -> "Server NEW_CLIENT_CONNECTED"
   | Server_message ServerCommandTypes.FATAL_EXCEPTION _ -> "Server FATAL_EXCEPTION"
   | Client_message c -> Printf.sprintf "Client %s %s" (kind_to_string c.kind) c.method_
@@ -989,6 +995,21 @@ let do_documentFormatting
   do_formatting_common conn action
 
 
+(* do_server_busy: controls the progress / action-required indicator          *)
+let do_server_busy (status: ServerCommandTypes.busy_status) : unit =
+let open ServerCommandTypes in
+  let (progress, action) = match status with
+    | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
+    | Doing_local_typecheck -> (Some "Hack: checking edits", None)
+    | Done_local_typecheck -> (None, Some "Hack: save any file to do a whole-program check")
+    | Doing_global_typecheck -> (Some "Hack: checking entire project", None)
+    | Done_global_typecheck -> (None, None)
+  in
+  print_progress progress_id_server_status progress |> notify stdout "window/progress";
+  print_actionRequired action_id_server_status action |> notify stdout "window/actionRequired";
+  ()
+
+
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
 (* returns an updated "files_with_diagnostics" set of all files for which     *)
 (* our client currently has non-empty diagnostic reports.                     *)
@@ -1531,6 +1552,11 @@ let handle_event
     let response = do_shutdown menv.conn |> print_shutdown |> respond stdout c in
     state := Post_shutdown;
     response
+
+  (* server busy status *)
+  | _, Server_message ServerCommandTypes.BUSY_STATUS status ->
+    do_server_busy status;
+    None
 
   (* textDocument/publishDiagnostics notification *)
   | Main_loop menv, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->

@@ -722,8 +722,16 @@ let type_check genv env kind =
     Printf.eprintf "******************************************\n";
     Hh_logger.log "Check kind: %s" check_kind;
     match kind with
-    | Full_check -> FC.type_check genv env
-    | Lazy_check -> LC.type_check genv env
+    | Lazy_check ->
+      ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
+      let res = LC.type_check genv env in
+      ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
+      res
+    | Full_check ->
+      ServerBusyStatus.send env ServerCommandTypes.Doing_global_typecheck;
+      let res = FC.type_check genv env in
+      ServerBusyStatus.send env ServerCommandTypes.Done_global_typecheck;
+      res
   end
 
 let type_check genv env kind =

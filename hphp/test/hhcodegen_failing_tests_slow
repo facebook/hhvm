@@ -4,7 +4,6 @@ slow/array_offset/429.php
 slow/array_offset/433.php
 slow/array_trailing_comma.php
 slow/async/foreach_await_as.php
-slow/async/return-annotation-1.php
 slow/async/return-annotation-2.php
 slow/async/return-annotation-3.php
 slow/async/return-annotation-4.php
@@ -184,7 +183,6 @@ slow/namespace/dynamic_extra_slash_cns.php
 slow/namespace/dynamic_extra_slash_cns2.php
 slow/namespace/dynamic_extra_slash_func.php
 slow/namespace/hashbang_2.php
-slow/namespace/instanceof.php
 slow/namespace/nested-ns.php
 slow/now_doc/1906.php
 slow/now_doc/1907.php
@@ -360,7 +358,6 @@ slow/type_annotation/shape_type_param_with_known_and_unknown_fields.php
 slow/type_annotation/shape_type_param_with_unknown_fields.php
 slow/type_annotation/shape_typedef_with_multiple_optional_tokens.php
 slow/type_annotation/shape_usage_with_optional_field.php
-slow/type_annotation/type_annotation_self1.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php

@@ -1839,44 +1839,51 @@ and emit_call_user_func env id arg args =
 and emit_name_string env e =
   emit_expr ~need_ref:false env e
 
-and emit_call env (_, expr_ as expr) args uargs =
+and emit_special_function env id args uargs default =
   let nargs = List.length args + List.length uargs in
-  let default () =
-    gather [
-      emit_call_lhs env expr nargs;
-      emit_args_and_call env args uargs;
-    ], Flavor.ReturnVal in
-  match expr_, args with
-  | A.Id (_, id), _ when id = SN.SpecialFunctions.echo ->
+  let fq_id, _ =
+    Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) (Pos.none, id) in
+  (* Make sure that we do not treat a special function that is aliased as not
+   * aliased *)
+  (* Invariant is a special function that needs further special treatment since
+   * it doesn't get a fallback unless it has zero arguments, see emitter.cpp *)
+  if Hhbc_id.Function.to_raw_string fq_id <> id && not (id = "invariant")
+  then None else
+  match id, args with
+  | id, _ when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
            emit_expr ~need_ref:false env arg;
            instr (IOp Print);
            if i = nargs-1 then empty else instr_popc
          ] end in
-    instrs, Flavor.Cell
-  | A.Id (_, "array_slice"), [
-    _, A.Call ((_, A.Id (_, "func_get_args")), _, [], []); (_, A.Int _ as count)
+    Some (instrs, Flavor.Cell)
+
+  | "array_slice", [
+    _, A.Call ((_, A.Id (_, "func_get_args")), _, [], []);
+    (_, A.Int _ as count)
     ] ->
     let p = Pos.none in
-    emit_call env (p, A.Id (p, "\\__SystemLib\\func_slice_args")) [count] []
-  | A.Id (_, id), _ when
+    Some (emit_call env (p,
+        A.Id (p, "\\__SystemLib\\func_slice_args")) [count] [])
+
+  | id, _ when
     (optimize_cuf ()) && (is_call_user_func id (List.length args)) ->
     if List.length uargs != 0 then
     failwith "Using argument unpacking for a call_user_func is not supported";
     begin match args with
       | [] -> failwith "call_user_func - needs a name"
       | arg :: args ->
-        emit_call_user_func env id arg args
+        Some (emit_call_user_func env id arg args)
     end
 
-  | A.Id (_, "invariant"), _ when List.length args > 0 ->
+  | "invariant", _ when List.length args > 0 ->
     let e = List.hd_exn args in
     let rest = List.tl_exn args in
     let l = Label.next_regular () in
     let p = Pos.none in
     let id = p, A.Id (p, "hh\\invariant_violation") in
-    gather [
+    Some (gather [
       (* Could use emit_jmpnz for better code *)
       emit_expr ~need_ref:false env e;
       instr_jmpnz l;
@@ -1884,12 +1891,12 @@ and emit_call env (_, expr_ as expr) args uargs =
       Emit_fatal.emit_fatal_runtime "invariant_violation";
       instr_label l;
       instr_null;
-    ], Flavor.Cell
+    ], Flavor.Cell)
 
-  | A.Id (_, "assert"), _ ->
+  | "assert", _ ->
     let l0 = Label.next_regular () in
     let l1 = Label.next_regular () in
-    gather [
+    Some (gather [
       instr_string "zend.assertions";
       instr_fcallbuiltin 1 1 "ini_get";
       instr_unboxr_nop;
@@ -1902,9 +1909,9 @@ and emit_call env (_, expr_ as expr) args uargs =
       instr_label l0;
       instr_true;
       instr_label l1;
-    ], Flavor.Cell
+    ], Flavor.Cell)
 
-  | A.Id (_, ("class_exists" | "interface_exists" | "trait_exists" as id)), _
+  | ("class_exists" | "interface_exists" | "trait_exists" as id), _
     when nargs = 1 || nargs = 2 ->
     let class_kind =
       match id with
@@ -1912,7 +1919,7 @@ and emit_call env (_, expr_ as expr) args uargs =
       | "interface_exists" -> KInterface
       | "trait_exists" -> KTrait
       | _ -> failwith "class_kind" in
-    gather [
+    Some (gather [
       emit_name_string env (List.hd_exn args);
       instr (IOp CastString);
       if nargs = 1 then instr_true
@@ -1921,31 +1928,49 @@ and emit_call env (_, expr_ as expr) args uargs =
         instr (IOp CastBool)
       ];
       instr (IMisc (OODeclExists class_kind))
-    ], Flavor.Cell
+    ], Flavor.Cell)
 
-  | A.Id (_, ("exit" | "die")), _ when nargs = 0 || nargs = 1 ->
-    emit_exit env (List.hd args), Flavor.Cell
+  | ("exit" | "die"), _ when nargs = 0 || nargs = 1 ->
+    Some (emit_exit env (List.hd args), Flavor.Cell)
 
+  | _ -> None
+
+
+and emit_call env (_, expr_ as expr) args uargs =
+  let nargs = List.length args + List.length uargs in
+  let default () =
+    gather [
+      emit_call_lhs env expr nargs;
+      emit_args_and_call env args uargs;
+    ], Flavor.ReturnVal in
+
+  match expr_, args with
   | A.Id (_, id), _ ->
-    begin match get_call_builtin_func_info id with
-    | Some (nargs, i) when nargs = List.length args ->
-      gather [
-        emit_exprs env args;
-        instr i
-      ], Flavor.Cell
+    let special_fn_opt = emit_special_function env id args uargs default in
+    begin match special_fn_opt with
+    | Some (instrs, flavor) -> instrs, flavor
+    | None ->
+      begin match get_call_builtin_func_info id with
+      | Some (nargs, i) when nargs = List.length args ->
+        gather [
+          emit_exprs env args;
+          instr i
+        ], Flavor.Cell
 
-    | _ ->
-    begin match args, istype_op id with
-    | [(_, A.Lvar (_, arg_id))], Some i when not (is_local_this env arg_id) ->
-      instr (IIsset (IsTypeL (get_local env arg_id, i))),
-      Flavor.Cell
-    | [arg_expr], Some i ->
-      gather [
-        emit_expr ~need_ref:false env arg_expr;
-        instr (IIsset (IsTypeC i))
-      ], Flavor.Cell
-    | _ -> default ()
-    end
+      | _ ->
+        begin match args, istype_op id with
+        | [(_, A.Lvar (_, arg_id))], Some i
+          when not (is_local_this env arg_id) ->
+          instr (IIsset (IsTypeL (get_local env arg_id, i))),
+          Flavor.Cell
+        | [arg_expr], Some i ->
+          gather [
+            emit_expr ~need_ref:false env arg_expr;
+            instr (IIsset (IsTypeC i))
+          ], Flavor.Cell
+        | _ -> default ()
+        end
+      end
     end
   | _ -> default ()
 

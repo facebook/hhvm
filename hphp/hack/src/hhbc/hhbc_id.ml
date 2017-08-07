@@ -126,21 +126,35 @@ module Function = struct
   ]
 
   let builtins_at_top = [
+    "echo";
+    "exit";
+    "die";
     "func_get_args";
     "func_get_arg";
     "func_num_args"
   ]
 
+  let has_hh_prefix s =
+    let s = String.lowercase_ascii s in
+    String_utils.string_starts_with s "hh\\"
+
+  let is_hh_builtin s =
+    let s = if has_hh_prefix s then String_utils.lstrip s "hh\\" else s in
+    List.mem builtins_in_hh s
+
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
   let elaborate_id ns (_, s as id) =
-    if List.mem builtins_in_hh s
-    && (Emit_env.is_hh_file () || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options)
-    then SU.prefix_namespace "HH" s, Some s
+    if is_hh_builtin s
+    && (Emit_env.is_hh_file ()
+    || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options)
+    then if has_hh_prefix s
+          then s, None
+          else SU.prefix_namespace "HH" s, Some s
     else if List.mem builtins_at_top s
-    then s, None
-    else elaborate_id ns Namespaces.ElaborateFun id
+      then s, None
+      else elaborate_id ns Namespaces.ElaborateFun id
 
 end
 

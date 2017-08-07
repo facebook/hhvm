@@ -1,9 +1,9 @@
 <?hh  //strict
 
-function afunction(): int {
-  return bfunction();
+function a_definition(): int {
+  return b_definition();
 }
 
-function bfunction(): int {
+function b_definition(): int {
   return 42;
 }

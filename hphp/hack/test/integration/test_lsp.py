@@ -147,12 +147,12 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def test_hover(self):
         self.prepare_environment()
-        variables = self.setup_php_file('definition.php')
+        variables = self.setup_php_file('hover.php')
         self.load_and_run('hover', variables)
 
     def test_highlight(self):
         self.prepare_environment()
-        variables = self.setup_php_file('definition.php')
+        variables = self.setup_php_file('highlight.php')
         self.load_and_run('highlight', variables)
 
     def test_formatting(self):
@@ -162,10 +162,10 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def test_non_existing_method(self):
         self.prepare_environment()
-        variables = self.setup_php_file('definition.php')
+        variables = self.setup_php_file('nomethod.php')
         self.load_and_run('nomethod', variables)
 
     def test_bad_call(self):
         self.prepare_environment()
-        variables = self.setup_php_file('definition.php')
+        variables = self.setup_php_file('bad_call.php')
         self.load_and_run('bad_call', variables)

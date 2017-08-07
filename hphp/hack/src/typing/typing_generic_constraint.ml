@@ -12,6 +12,7 @@ module TUtils = Typing_utils
 module N = Nast
 module Reason = Typing_reason
 module Env = Typing_env
+open Typing_defs
 
 let check_constraint env ck cstr_ty ty =
   let env, ety = Env.expand_type env ty in
@@ -29,7 +30,8 @@ let check_constraint env ck cstr_ty ty =
        * add both expansions to the environment. We don't expand
        * both sides of the equation simultaniously, to preserve an
        * easier convergence indication. *)
-      TUtils.sub_type (TUtils.sub_type env ecstr_ty ty) ety cstr_ty
+       let env = TUtils.sub_type env ecstr_ty ty in
+       TUtils.sub_type env ety cstr_ty
   | Ast.Constraint_super ->
       (* If cstr_ty is a Tvar, we don't want to unify that Tvar with
        * ty; we merely want the constraint itself to be added to the
@@ -55,6 +57,21 @@ let add_check_where_constraint_todo (env_now:Env.env) pos ck cstr_ty ty =
         check_constraint env ck cstr_ty ty)
       (fun l ->
        Errors.explain_where_constraint env.Env.pos pos l;
+       env
+      ), true
+  end
+
+let add_check_tconst_where_constraint_todo
+  (env_now:Env.env) pos ck ty_from_env cstr_ty ty =
+  Env.add_todo env_now begin fun (env: Env.env) ->
+    Errors.try_
+      (fun () ->
+        let env, ty = ty_from_env env ty in
+        let env, cstr_ty = ty_from_env env cstr_ty in
+        check_constraint env ck ty cstr_ty
+      )
+      (fun l ->
+        Errors.explain_where_constraint env.Env.pos pos l;
        env
       ), true
   end

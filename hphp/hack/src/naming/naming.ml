@@ -736,8 +736,14 @@ module Make (GetLocals : GetLocals) = struct
       ?(allow_retonly=false)
       ?(allow_typedef=true)
       ?(allow_wildcard=false)
+      ?(in_where_clause=false)
       env (p, h) =
-    p, hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
+    p, hint_
+      ~forbid_this
+      ~allow_retonly
+      ~allow_typedef
+      ~allow_wildcard
+      ~in_where_clause
       is_static_var env h
 
   and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
@@ -773,6 +779,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
+            ~in_where_clause
         is_static_var env x =
     let hint =
       hint ~is_static_var ~forbid_this ~allow_typedef ~allow_wildcard in
@@ -818,6 +825,7 @@ module Make (GetLocals : GetLocals) = struct
               ~allow_typedef ~allow_wildcard:false env is_static_var root [] in
           (match h with
           | N.Hthis | N.Happly _ as h -> h
+          | N.Habstr _ when in_where_clause -> h
           | _ -> Errors.invalid_type_access_root root; N.Hany
           )
       in
@@ -1184,8 +1192,8 @@ module Make (GetLocals : GetLocals) = struct
 
   and type_where_constraints env locl_cstrl =
     List.map locl_cstrl (fun (h1, ck, h2) ->
-          let ty1 = hint env h1 in
-          let ty2 = hint env h2 in
+          let ty1 = hint ~in_where_clause:true env h1 in
+          let ty2 = hint ~in_where_clause:true env h2 in
           (ty1, ck, ty2))
 
   and class_use env x acc =

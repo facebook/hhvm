@@ -174,7 +174,12 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))
   | r, Taccess (root_ty, ids) ->
-      let env, root_ty = localize ~ety_env env root_ty in
+      let env, root_ty' = localize ~ety_env env root_ty in
+      let env, root_ty = match root_ty with
+      | (r, Tgeneric x) when SMap.mem x ety_env.substs ->
+      ExprDepTy.make env (Nast.CIexpr (Reason.to_pos r, Nast.Any))
+        root_ty'
+      | _ -> env, root_ty' in
       TUtils.expand_typeconst ety_env env r root_ty ids
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
@@ -288,7 +293,7 @@ and check_tparams_constraints ~ety_env env tparams =
       let env, ty = localize ~ety_env env ty in
       match SMap.get name ety_env.substs with
       | Some x_ty ->
-        TGenConstraint.add_check_constraint_todo env r name ck ty x_ty
+      TGenConstraint.add_check_constraint_todo env r name ck ty x_ty
       | None ->
         env
     end in
@@ -296,9 +301,29 @@ and check_tparams_constraints ~ety_env env tparams =
 
 and check_where_constraints ~ety_env env def_pos cstrl =
   List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
+      let contains_type_access =
+        match ty1, ty2 with
+        | (_, Taccess ((_, Tgeneric _), _)), _
+        | _, (_, Taccess ((_, Tgeneric _), _)) -> true
+        | _ -> false in
+      if contains_type_access then
+      let ty_from_env = localize ~ety_env in
+      TGenConstraint.add_check_tconst_where_constraint_todo
+        env
+        def_pos
+        ck
+        ty_from_env
+        ty2
+        ty1
+      else
       let env, ty1 = localize ~ety_env env ty1 in
       let env, ty2 = localize ~ety_env env ty2 in
-      TGenConstraint.add_check_where_constraint_todo env def_pos ck ty2 ty1
+      TGenConstraint.add_check_where_constraint_todo
+        env
+        def_pos
+        ck
+        ty2
+        ty1
     end
 
 let env_with_self env =

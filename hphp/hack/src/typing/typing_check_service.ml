@@ -112,9 +112,9 @@ let check_files opts (errors, err_info) fnl =
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
-      let t = Unix.gettimeofday () in
+      let t = Sys.time () in
       let result = check_file opts acc fn in
-      let t' = Unix.gettimeofday () in
+      let t' = Sys.time () in
       let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
         TypingLogger.log_typing_time duration filepath;
@@ -123,7 +123,7 @@ let check_files opts (errors, err_info) fnl =
     else check_file opts in
   let errors, failed, decl_failed = List.fold_left fnl
     ~f:check_file ~init:(errors, failed, decl_failed) in
-  let () = TypingLogger.flush_buffer () in
+  TypingLogger.flush_buffer ();
 
   let error_record = { Decl_service.
     errs = failed;

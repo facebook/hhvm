@@ -332,6 +332,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return IssetExpression::from_json($json, $position, $source);
     case 'function_call_expression':
       return FunctionCallExpression::from_json($json, $position, $source);
+    case 'function_call_with_type_arguments_expression':
+      return FunctionCallWithTypeArgumentsExpression::from_json($json, $position, $source);
     case 'parenthesized_expression':
       return ParenthesizedExpression::from_json($json, $position, $source);
     case 'braced_expression':
@@ -14481,6 +14483,141 @@ final class FunctionCallExpression extends EditableSyntax {
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_receiver;
+    yield $this->_left_paren;
+    yield $this->_argument_list;
+    yield $this->_right_paren;
+    yield break;
+  }
+}
+final class FunctionCallWithTypeArgumentsExpression extends EditableSyntax {
+  private EditableSyntax $_receiver;
+  private EditableSyntax $_type_args;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument_list;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $receiver,
+    EditableSyntax $type_args,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument_list,
+    EditableSyntax $right_paren) {
+    parent::__construct('function_call_with_type_arguments_expression');
+    $this->_receiver = $receiver;
+    $this->_type_args = $type_args;
+    $this->_left_paren = $left_paren;
+    $this->_argument_list = $argument_list;
+    $this->_right_paren = $right_paren;
+  }
+  public function receiver(): EditableSyntax {
+    return $this->_receiver;
+  }
+  public function type_args(): EditableSyntax {
+    return $this->_type_args;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument_list(): EditableSyntax {
+    return $this->_argument_list;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_receiver(EditableSyntax $receiver): FunctionCallWithTypeArgumentsExpression {
+    return new FunctionCallWithTypeArgumentsExpression(
+      $receiver,
+      $this->_type_args,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_type_args(EditableSyntax $type_args): FunctionCallWithTypeArgumentsExpression {
+    return new FunctionCallWithTypeArgumentsExpression(
+      $this->_receiver,
+      $type_args,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): FunctionCallWithTypeArgumentsExpression {
+    return new FunctionCallWithTypeArgumentsExpression(
+      $this->_receiver,
+      $this->_type_args,
+      $left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_argument_list(EditableSyntax $argument_list): FunctionCallWithTypeArgumentsExpression {
+    return new FunctionCallWithTypeArgumentsExpression(
+      $this->_receiver,
+      $this->_type_args,
+      $this->_left_paren,
+      $argument_list,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): FunctionCallWithTypeArgumentsExpression {
+    return new FunctionCallWithTypeArgumentsExpression(
+      $this->_receiver,
+      $this->_type_args,
+      $this->_left_paren,
+      $this->_argument_list,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $receiver = $this->receiver()->rewrite($rewriter, $new_parents);
+    $type_args = $this->type_args()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $receiver === $this->receiver() &&
+      $type_args === $this->type_args() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new FunctionCallWithTypeArgumentsExpression(
+        $receiver,
+        $type_args,
+        $left_paren,
+        $argument_list,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $receiver = EditableSyntax::from_json(
+      $json->function_call_with_type_arguments_receiver, $position, $source);
+    $position += $receiver->width();
+    $type_args = EditableSyntax::from_json(
+      $json->function_call_with_type_arguments_type_args, $position, $source);
+    $position += $type_args->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->function_call_with_type_arguments_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument_list = EditableSyntax::from_json(
+      $json->function_call_with_type_arguments_argument_list, $position, $source);
+    $position += $argument_list->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->function_call_with_type_arguments_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new FunctionCallWithTypeArgumentsExpression(
+        $receiver,
+        $type_args,
+        $left_paren,
+        $argument_list,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_receiver;
+    yield $this->_type_args;
     yield $this->_left_paren;
     yield $this->_argument_list;
     yield $this->_right_paren;

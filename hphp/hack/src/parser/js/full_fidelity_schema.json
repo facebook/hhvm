@@ -1312,6 +1312,17 @@
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
       ] },
+    { "kind_name" : "FunctionCallWithTypeArgumentsExpression",
+      "type_name" : "function_call_with_type_arguments_expression",
+      "description" : "function_call_with_type_arguments_expression",
+      "prefix" : "function_call_with_type_arguments",
+      "fields" : [
+        { "field_name" : "receiver" },
+        { "field_name" : "type_args" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "argument_list" },
+        { "field_name" : "right_paren" }
+      ] },
     { "kind_name" : "ParenthesizedExpression",
       "type_name" : "parenthesized_expression",
       "description" : "parenthesized_expression",

@@ -269,6 +269,8 @@ class EditableSyntax
       return IssetExpression.from_json(json, position, source);
     case 'function_call_expression':
       return FunctionCallExpression.from_json(json, position, source);
+    case 'function_call_with_type_arguments_expression':
+      return FunctionCallWithTypeArgumentsExpression.from_json(json, position, source);
     case 'parenthesized_expression':
       return ParenthesizedExpression.from_json(json, position, source);
     case 'braced_expression':
@@ -12395,6 +12397,133 @@ class FunctionCallExpression extends EditableSyntax
     return FunctionCallExpression._children_keys;
   }
 }
+class FunctionCallWithTypeArgumentsExpression extends EditableSyntax
+{
+  constructor(
+    receiver,
+    type_args,
+    left_paren,
+    argument_list,
+    right_paren)
+  {
+    super('function_call_with_type_arguments_expression', {
+      receiver: receiver,
+      type_args: type_args,
+      left_paren: left_paren,
+      argument_list: argument_list,
+      right_paren: right_paren });
+  }
+  get receiver() { return this.children.receiver; }
+  get type_args() { return this.children.type_args; }
+  get left_paren() { return this.children.left_paren; }
+  get argument_list() { return this.children.argument_list; }
+  get right_paren() { return this.children.right_paren; }
+  with_receiver(receiver){
+    return new FunctionCallWithTypeArgumentsExpression(
+      receiver,
+      this.type_args,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_type_args(type_args){
+    return new FunctionCallWithTypeArgumentsExpression(
+      this.receiver,
+      type_args,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new FunctionCallWithTypeArgumentsExpression(
+      this.receiver,
+      this.type_args,
+      left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_argument_list(argument_list){
+    return new FunctionCallWithTypeArgumentsExpression(
+      this.receiver,
+      this.type_args,
+      this.left_paren,
+      argument_list,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new FunctionCallWithTypeArgumentsExpression(
+      this.receiver,
+      this.type_args,
+      this.left_paren,
+      this.argument_list,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var receiver = this.receiver.rewrite(rewriter, new_parents);
+    var type_args = this.type_args.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      receiver === this.receiver &&
+      type_args === this.type_args &&
+      left_paren === this.left_paren &&
+      argument_list === this.argument_list &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new FunctionCallWithTypeArgumentsExpression(
+        receiver,
+        type_args,
+        left_paren,
+        argument_list,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let receiver = EditableSyntax.from_json(
+      json.function_call_with_type_arguments_receiver, position, source);
+    position += receiver.width;
+    let type_args = EditableSyntax.from_json(
+      json.function_call_with_type_arguments_type_args, position, source);
+    position += type_args.width;
+    let left_paren = EditableSyntax.from_json(
+      json.function_call_with_type_arguments_left_paren, position, source);
+    position += left_paren.width;
+    let argument_list = EditableSyntax.from_json(
+      json.function_call_with_type_arguments_argument_list, position, source);
+    position += argument_list.width;
+    let right_paren = EditableSyntax.from_json(
+      json.function_call_with_type_arguments_right_paren, position, source);
+    position += right_paren.width;
+    return new FunctionCallWithTypeArgumentsExpression(
+        receiver,
+        type_args,
+        left_paren,
+        argument_list,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (FunctionCallWithTypeArgumentsExpression._children_keys == null)
+      FunctionCallWithTypeArgumentsExpression._children_keys = [
+        'receiver',
+        'type_args',
+        'left_paren',
+        'argument_list',
+        'right_paren'];
+    return FunctionCallWithTypeArgumentsExpression._children_keys;
+  }
+}
 class ParenthesizedExpression extends EditableSyntax
 {
   constructor(
@@ -18069,6 +18198,7 @@ exports.EmptyExpression = EmptyExpression;
 exports.DefineExpression = DefineExpression;
 exports.IssetExpression = IssetExpression;
 exports.FunctionCallExpression = FunctionCallExpression;
+exports.FunctionCallWithTypeArgumentsExpression = FunctionCallWithTypeArgumentsExpression;
 exports.ParenthesizedExpression = ParenthesizedExpression;
 exports.BracedExpression = BracedExpression;
 exports.EmbeddedBracedExpression = EmbeddedBracedExpression;

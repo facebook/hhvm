@@ -961,6 +961,18 @@ let rec get_doc node =
     let args = get_doc function_call_argument_list in
     let rparen = get_doc function_call_right_paren in
     receiver ^^^ lparen ^^^ args ^^^ rparen
+  | FunctionCallWithTypeArgumentsExpression {
+    function_call_with_type_arguments_receiver;
+    function_call_with_type_arguments_type_args;
+    function_call_with_type_arguments_left_paren;
+    function_call_with_type_arguments_argument_list;
+    function_call_with_type_arguments_right_paren } ->
+    let receiver = get_doc function_call_with_type_arguments_receiver in
+    let tyargs = get_doc function_call_with_type_arguments_type_args in
+    let lparen = get_doc function_call_with_type_arguments_left_paren in
+    let args = get_doc function_call_with_type_arguments_argument_list in
+    let rparen = get_doc function_call_with_type_arguments_right_paren in
+    receiver ^^^ tyargs ^^^ lparen ^^^ args ^^^ rparen
   | EvalExpression {
     eval_keyword;
     eval_left_paren;

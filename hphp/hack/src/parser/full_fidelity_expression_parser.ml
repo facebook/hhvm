@@ -729,7 +729,6 @@ module WithStatementAndDeclAndTypeParser
     | BarBar
     | ExclamationEqual
     | LessThanGreaterThan
-    | LessThan
     | ExclamationEqualEqual
     | LessThanEqual
     | LessThanEqualGreaterThan
@@ -742,6 +741,8 @@ module WithStatementAndDeclAndTypeParser
     | BarGreaterThan
     | QuestionQuestion ->
       parse_remaining_binary_expression parser term assignment_prefix_kind
+    | LessThan ->
+      parse_funcall_with_tyargs_or_remaining_binary_expression parser term assignment_prefix_kind
     | Instanceof ->
       parse_instanceof_expression parser term
     | QuestionMinusGreaterThan
@@ -912,7 +913,26 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let result =
       make_object_creation_expression new_token designator left args right in
     (parser, result)
-
+  and parse_funcall_with_tyargs_or_remaining_binary_expression parser term prefix_kind =
+    (* This function is invoked on seeing a <. since a < b > ... is invalid as a binary
+     * expression, first attempt to parse a function call with type arguments,
+     * and if that fails default to a binary expression.
+     * SPEC
+       function-call-expression-with-type-arguments:
+         postfix-expression < type-argument-list-opt > ( argument-expression-list-opt )
+     *)
+    let parser1, type_arguments = parse_generic_type_arguments_opt parser in
+    if kind type_arguments <> SyntaxKind.TypeArguments
+    || List.exists is_missing @@ children type_arguments
+    || (List.length parser1.errors) > 0
+       (* Bail out if we're not dealing with a type annotation. *)
+    then parse_remaining_binary_expression parser term prefix_kind
+    else
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      let result =
+        make_function_call_with_type_arguments_expression term type_arguments left args right
+      in
+      parse_remaining_expression parser result
   and parse_function_call parser receiver =
     (* SPEC
       function-call-expression:

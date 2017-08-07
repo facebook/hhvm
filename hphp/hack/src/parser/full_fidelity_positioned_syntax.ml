@@ -1359,6 +1359,21 @@ module FromMinimal = struct
           ; function_call_argument_list
           ; function_call_right_paren
           }, results
+      | SyntaxKind.FunctionCallWithTypeArgumentsExpression
+      , (  function_call_with_type_arguments_right_paren
+        :: function_call_with_type_arguments_argument_list
+        :: function_call_with_type_arguments_left_paren
+        :: function_call_with_type_arguments_type_args
+        :: function_call_with_type_arguments_receiver
+        :: results
+        ) ->
+          FunctionCallWithTypeArgumentsExpression
+          { function_call_with_type_arguments_receiver
+          ; function_call_with_type_arguments_type_args
+          ; function_call_with_type_arguments_left_paren
+          ; function_call_with_type_arguments_argument_list
+          ; function_call_with_type_arguments_right_paren
+          }, results
       | SyntaxKind.ParenthesizedExpression
       , (  parenthesized_expression_right_paren
         :: parenthesized_expression_expression
@@ -3130,6 +3145,20 @@ module FromMinimal = struct
         let todo = Convert (function_call_argument_list, todo) in
         let todo = Convert (function_call_left_paren, todo) in
         convert offset todo results function_call_receiver
+    | { M.syntax = M.FunctionCallWithTypeArgumentsExpression
+        { M.function_call_with_type_arguments_receiver
+        ; M.function_call_with_type_arguments_type_args
+        ; M.function_call_with_type_arguments_left_paren
+        ; M.function_call_with_type_arguments_argument_list
+        ; M.function_call_with_type_arguments_right_paren
+        }
+      ; _ } as minimal_t ->
+        let todo = Build (minimal_t, offset, todo) in
+        let todo = Convert (function_call_with_type_arguments_right_paren, todo) in
+        let todo = Convert (function_call_with_type_arguments_argument_list, todo) in
+        let todo = Convert (function_call_with_type_arguments_left_paren, todo) in
+        let todo = Convert (function_call_with_type_arguments_type_args, todo) in
+        convert offset todo results function_call_with_type_arguments_receiver
     | { M.syntax = M.ParenthesizedExpression
         { M.parenthesized_expression_left_paren
         ; M.parenthesized_expression_expression

@@ -740,12 +740,37 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       { tuple_expression_keyword = recv
       ; tuple_expression_items   = args
       ; _ }
+      -> Call (pExpr recv env, [], couldMap ~f:pExpr args env, [])
     | FunctionCallExpression
       { function_call_receiver      = recv
       ; function_call_argument_list = args
       ; _ }
-      -> Call (pExpr recv env, [], couldMap ~f:pExpr args  env, [])
-
+      ->
+      let hints =
+        begin match (syntax recv) with
+          | GenericTypeSpecifier {generic_class_type; generic_argument_list} ->
+            begin match syntax generic_argument_list with
+              | TypeArguments { type_arguments_types; _ }
+                -> couldMap ~f:pHint type_arguments_types env
+              | _ -> []
+            end
+          | _ -> []
+        end
+      in
+      Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
+    | FunctionCallWithTypeArgumentsExpression
+      { function_call_with_type_arguments_receiver = recv
+      ; function_call_with_type_arguments_type_args = type_args
+      ; function_call_with_type_arguments_argument_list = args
+      ; _ }
+      ->
+      let hints =
+        begin match (syntax type_args) with
+          | TypeArguments { type_arguments_types; _ } ->
+            couldMap ~f:pHint type_arguments_types env
+          | _ -> missing_syntax "no type arguments for annotated function call" type_args env
+        end in
+      Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedNameExpression { qualified_name_expression } ->
       Id (pos_name qualified_name_expression)
     | VariableExpression { variable_expression } ->

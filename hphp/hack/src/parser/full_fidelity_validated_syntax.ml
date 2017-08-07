@@ -205,6 +205,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> ExprDefine x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> ExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> ExprFunctionCall x) x
+    | Syntax.FunctionCallWithTypeArgumentsExpression _ -> tag validate_function_call_with_type_arguments_expression (fun x -> ExprFunctionCallWithTypeArguments x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> ExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> ExprBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> ExprEmbeddedBraced x) x
@@ -228,51 +229,52 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.Expression s
   and invalidate_expression : expression invalidator = fun (value, thing) ->
     match thing with
-    | ExprLiteral                      thing -> invalidate_literal_expression             (value, thing)
-    | ExprVariable                     thing -> invalidate_variable_expression            (value, thing)
-    | ExprQualifiedName                thing -> invalidate_qualified_name_expression      (value, thing)
-    | ExprPipeVariable                 thing -> invalidate_pipe_variable_expression       (value, thing)
-    | ExprDecorated                    thing -> invalidate_decorated_expression           (value, thing)
-    | ExprInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
-    | ExprAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | ExprLambda                       thing -> invalidate_lambda_expression              (value, thing)
-    | ExprCast                         thing -> invalidate_cast_expression                (value, thing)
-    | ExprScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
-    | ExprMemberSelection              thing -> invalidate_member_selection_expression    (value, thing)
-    | ExprSafeMemberSelection          thing -> invalidate_safe_member_selection_expression (value, thing)
-    | ExprEmbeddedMemberSelection      thing -> invalidate_embedded_member_selection_expression (value, thing)
-    | ExprYield                        thing -> invalidate_yield_expression               (value, thing)
-    | ExprYieldFrom                    thing -> invalidate_yield_from_expression          (value, thing)
-    | ExprPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
-    | ExprPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
-    | ExprBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | ExprInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
-    | ExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
-    | ExprEval                         thing -> invalidate_eval_expression                (value, thing)
-    | ExprEmpty                        thing -> invalidate_empty_expression               (value, thing)
-    | ExprDefine                       thing -> invalidate_define_expression              (value, thing)
-    | ExprIsset                        thing -> invalidate_isset_expression               (value, thing)
-    | ExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
-    | ExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
-    | ExprBraced                       thing -> invalidate_braced_expression              (value, thing)
-    | ExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
-    | ExprList                         thing -> invalidate_list_expression                (value, thing)
-    | ExprCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
-    | ExprObjectCreation               thing -> invalidate_object_creation_expression     (value, thing)
-    | ExprArrayCreation                thing -> invalidate_array_creation_expression      (value, thing)
-    | ExprArrayIntrinsic               thing -> invalidate_array_intrinsic_expression     (value, thing)
-    | ExprDarrayIntrinsic              thing -> invalidate_darray_intrinsic_expression    (value, thing)
-    | ExprDictionaryIntrinsic          thing -> invalidate_dictionary_intrinsic_expression (value, thing)
-    | ExprKeysetIntrinsic              thing -> invalidate_keyset_intrinsic_expression    (value, thing)
-    | ExprVarrayIntrinsic              thing -> invalidate_varray_intrinsic_expression    (value, thing)
-    | ExprVectorIntrinsic              thing -> invalidate_vector_intrinsic_expression    (value, thing)
-    | ExprSubscript                    thing -> invalidate_subscript_expression           (value, thing)
-    | ExprEmbeddedSubscript            thing -> invalidate_embedded_subscript_expression  (value, thing)
-    | ExprAwaitableCreation            thing -> invalidate_awaitable_creation_expression  (value, thing)
-    | ExprXHPChildrenParenthesizedList thing -> invalidate_xhp_children_parenthesized_list (value, thing)
-    | ExprXHP                          thing -> invalidate_xhp_expression                 (value, thing)
-    | ExprShape                        thing -> invalidate_shape_expression               (value, thing)
-    | ExprTuple                        thing -> invalidate_tuple_expression               (value, thing)
+    | ExprLiteral                       thing -> invalidate_literal_expression             (value, thing)
+    | ExprVariable                      thing -> invalidate_variable_expression            (value, thing)
+    | ExprQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
+    | ExprPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
+    | ExprDecorated                     thing -> invalidate_decorated_expression           (value, thing)
+    | ExprInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
+    | ExprAnonymousFunction             thing -> invalidate_anonymous_function             (value, thing)
+    | ExprLambda                        thing -> invalidate_lambda_expression              (value, thing)
+    | ExprCast                          thing -> invalidate_cast_expression                (value, thing)
+    | ExprScopeResolution               thing -> invalidate_scope_resolution_expression    (value, thing)
+    | ExprMemberSelection               thing -> invalidate_member_selection_expression    (value, thing)
+    | ExprSafeMemberSelection           thing -> invalidate_safe_member_selection_expression (value, thing)
+    | ExprEmbeddedMemberSelection       thing -> invalidate_embedded_member_selection_expression (value, thing)
+    | ExprYield                         thing -> invalidate_yield_expression               (value, thing)
+    | ExprYieldFrom                     thing -> invalidate_yield_from_expression          (value, thing)
+    | ExprPrefixUnary                   thing -> invalidate_prefix_unary_expression        (value, thing)
+    | ExprPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
+    | ExprBinary                        thing -> invalidate_binary_expression              (value, thing)
+    | ExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | ExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
+    | ExprEval                          thing -> invalidate_eval_expression                (value, thing)
+    | ExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
+    | ExprDefine                        thing -> invalidate_define_expression              (value, thing)
+    | ExprIsset                         thing -> invalidate_isset_expression               (value, thing)
+    | ExprFunctionCall                  thing -> invalidate_function_call_expression       (value, thing)
+    | ExprFunctionCallWithTypeArguments thing -> invalidate_function_call_with_type_arguments_expression (value, thing)
+    | ExprParenthesized                 thing -> invalidate_parenthesized_expression       (value, thing)
+    | ExprBraced                        thing -> invalidate_braced_expression              (value, thing)
+    | ExprEmbeddedBraced                thing -> invalidate_embedded_braced_expression     (value, thing)
+    | ExprList                          thing -> invalidate_list_expression                (value, thing)
+    | ExprCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
+    | ExprObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | ExprArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
+    | ExprArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
+    | ExprDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
+    | ExprDictionaryIntrinsic           thing -> invalidate_dictionary_intrinsic_expression (value, thing)
+    | ExprKeysetIntrinsic               thing -> invalidate_keyset_intrinsic_expression    (value, thing)
+    | ExprVarrayIntrinsic               thing -> invalidate_varray_intrinsic_expression    (value, thing)
+    | ExprVectorIntrinsic               thing -> invalidate_vector_intrinsic_expression    (value, thing)
+    | ExprSubscript                     thing -> invalidate_subscript_expression           (value, thing)
+    | ExprEmbeddedSubscript             thing -> invalidate_embedded_subscript_expression  (value, thing)
+    | ExprAwaitableCreation             thing -> invalidate_awaitable_creation_expression  (value, thing)
+    | ExprXHPChildrenParenthesizedList  thing -> invalidate_xhp_children_parenthesized_list (value, thing)
+    | ExprXHP                           thing -> invalidate_xhp_expression                 (value, thing)
+    | ExprShape                         thing -> invalidate_shape_expression               (value, thing)
+    | ExprTuple                         thing -> invalidate_tuple_expression               (value, thing)
   and validate_specifier : specifier validator = fun x ->
     match Syntax.syntax x with
     | Syntax.SimpleTypeSpecifier _ -> tag validate_simple_type_specifier (fun x -> SpecSimple x) x
@@ -438,6 +440,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> LambdaDefine x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> LambdaIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> LambdaFunctionCall x) x
+    | Syntax.FunctionCallWithTypeArgumentsExpression _ -> tag validate_function_call_with_type_arguments_expression (fun x -> LambdaFunctionCallWithTypeArguments x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> LambdaParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> LambdaBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> LambdaEmbeddedBraced x) x
@@ -461,52 +464,53 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.LambdaBody s
   and invalidate_lambda_body : lambda_body invalidator = fun (value, thing) ->
     match thing with
-    | LambdaLiteral                      thing -> invalidate_literal_expression             (value, thing)
-    | LambdaVariable                     thing -> invalidate_variable_expression            (value, thing)
-    | LambdaQualifiedName                thing -> invalidate_qualified_name_expression      (value, thing)
-    | LambdaPipeVariable                 thing -> invalidate_pipe_variable_expression       (value, thing)
-    | LambdaDecorated                    thing -> invalidate_decorated_expression           (value, thing)
-    | LambdaInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
-    | LambdaCompoundStatement            thing -> invalidate_compound_statement             (value, thing)
-    | LambdaAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | LambdaLambda                       thing -> invalidate_lambda_expression              (value, thing)
-    | LambdaCast                         thing -> invalidate_cast_expression                (value, thing)
-    | LambdaScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
-    | LambdaMemberSelection              thing -> invalidate_member_selection_expression    (value, thing)
-    | LambdaSafeMemberSelection          thing -> invalidate_safe_member_selection_expression (value, thing)
-    | LambdaEmbeddedMemberSelection      thing -> invalidate_embedded_member_selection_expression (value, thing)
-    | LambdaYield                        thing -> invalidate_yield_expression               (value, thing)
-    | LambdaYieldFrom                    thing -> invalidate_yield_from_expression          (value, thing)
-    | LambdaPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
-    | LambdaPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
-    | LambdaBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | LambdaInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
-    | LambdaConditional                  thing -> invalidate_conditional_expression         (value, thing)
-    | LambdaEval                         thing -> invalidate_eval_expression                (value, thing)
-    | LambdaEmpty                        thing -> invalidate_empty_expression               (value, thing)
-    | LambdaDefine                       thing -> invalidate_define_expression              (value, thing)
-    | LambdaIsset                        thing -> invalidate_isset_expression               (value, thing)
-    | LambdaFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
-    | LambdaParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
-    | LambdaBraced                       thing -> invalidate_braced_expression              (value, thing)
-    | LambdaEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
-    | LambdaList                         thing -> invalidate_list_expression                (value, thing)
-    | LambdaCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
-    | LambdaObjectCreation               thing -> invalidate_object_creation_expression     (value, thing)
-    | LambdaArrayCreation                thing -> invalidate_array_creation_expression      (value, thing)
-    | LambdaArrayIntrinsic               thing -> invalidate_array_intrinsic_expression     (value, thing)
-    | LambdaDarrayIntrinsic              thing -> invalidate_darray_intrinsic_expression    (value, thing)
-    | LambdaDictionaryIntrinsic          thing -> invalidate_dictionary_intrinsic_expression (value, thing)
-    | LambdaKeysetIntrinsic              thing -> invalidate_keyset_intrinsic_expression    (value, thing)
-    | LambdaVarrayIntrinsic              thing -> invalidate_varray_intrinsic_expression    (value, thing)
-    | LambdaVectorIntrinsic              thing -> invalidate_vector_intrinsic_expression    (value, thing)
-    | LambdaSubscript                    thing -> invalidate_subscript_expression           (value, thing)
-    | LambdaEmbeddedSubscript            thing -> invalidate_embedded_subscript_expression  (value, thing)
-    | LambdaAwaitableCreation            thing -> invalidate_awaitable_creation_expression  (value, thing)
-    | LambdaXHPChildrenParenthesizedList thing -> invalidate_xhp_children_parenthesized_list (value, thing)
-    | LambdaXHP                          thing -> invalidate_xhp_expression                 (value, thing)
-    | LambdaShape                        thing -> invalidate_shape_expression               (value, thing)
-    | LambdaTuple                        thing -> invalidate_tuple_expression               (value, thing)
+    | LambdaLiteral                       thing -> invalidate_literal_expression             (value, thing)
+    | LambdaVariable                      thing -> invalidate_variable_expression            (value, thing)
+    | LambdaQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
+    | LambdaPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
+    | LambdaDecorated                     thing -> invalidate_decorated_expression           (value, thing)
+    | LambdaInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
+    | LambdaCompoundStatement             thing -> invalidate_compound_statement             (value, thing)
+    | LambdaAnonymousFunction             thing -> invalidate_anonymous_function             (value, thing)
+    | LambdaLambda                        thing -> invalidate_lambda_expression              (value, thing)
+    | LambdaCast                          thing -> invalidate_cast_expression                (value, thing)
+    | LambdaScopeResolution               thing -> invalidate_scope_resolution_expression    (value, thing)
+    | LambdaMemberSelection               thing -> invalidate_member_selection_expression    (value, thing)
+    | LambdaSafeMemberSelection           thing -> invalidate_safe_member_selection_expression (value, thing)
+    | LambdaEmbeddedMemberSelection       thing -> invalidate_embedded_member_selection_expression (value, thing)
+    | LambdaYield                         thing -> invalidate_yield_expression               (value, thing)
+    | LambdaYieldFrom                     thing -> invalidate_yield_from_expression          (value, thing)
+    | LambdaPrefixUnary                   thing -> invalidate_prefix_unary_expression        (value, thing)
+    | LambdaPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
+    | LambdaBinary                        thing -> invalidate_binary_expression              (value, thing)
+    | LambdaInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | LambdaConditional                   thing -> invalidate_conditional_expression         (value, thing)
+    | LambdaEval                          thing -> invalidate_eval_expression                (value, thing)
+    | LambdaEmpty                         thing -> invalidate_empty_expression               (value, thing)
+    | LambdaDefine                        thing -> invalidate_define_expression              (value, thing)
+    | LambdaIsset                         thing -> invalidate_isset_expression               (value, thing)
+    | LambdaFunctionCall                  thing -> invalidate_function_call_expression       (value, thing)
+    | LambdaFunctionCallWithTypeArguments thing -> invalidate_function_call_with_type_arguments_expression (value, thing)
+    | LambdaParenthesized                 thing -> invalidate_parenthesized_expression       (value, thing)
+    | LambdaBraced                        thing -> invalidate_braced_expression              (value, thing)
+    | LambdaEmbeddedBraced                thing -> invalidate_embedded_braced_expression     (value, thing)
+    | LambdaList                          thing -> invalidate_list_expression                (value, thing)
+    | LambdaCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
+    | LambdaObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | LambdaArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
+    | LambdaArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
+    | LambdaDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
+    | LambdaDictionaryIntrinsic           thing -> invalidate_dictionary_intrinsic_expression (value, thing)
+    | LambdaKeysetIntrinsic               thing -> invalidate_keyset_intrinsic_expression    (value, thing)
+    | LambdaVarrayIntrinsic               thing -> invalidate_varray_intrinsic_expression    (value, thing)
+    | LambdaVectorIntrinsic               thing -> invalidate_vector_intrinsic_expression    (value, thing)
+    | LambdaSubscript                     thing -> invalidate_subscript_expression           (value, thing)
+    | LambdaEmbeddedSubscript             thing -> invalidate_embedded_subscript_expression  (value, thing)
+    | LambdaAwaitableCreation             thing -> invalidate_awaitable_creation_expression  (value, thing)
+    | LambdaXHPChildrenParenthesizedList  thing -> invalidate_xhp_children_parenthesized_list (value, thing)
+    | LambdaXHP                           thing -> invalidate_xhp_expression                 (value, thing)
+    | LambdaShape                         thing -> invalidate_shape_expression               (value, thing)
+    | LambdaTuple                         thing -> invalidate_tuple_expression               (value, thing)
   and validate_constructor_expression : constructor_expression validator = fun x ->
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> CExprLiteral x) x
@@ -534,6 +538,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> CExprDefine x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> CExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> CExprFunctionCall x) x
+    | Syntax.FunctionCallWithTypeArgumentsExpression _ -> tag validate_function_call_with_type_arguments_expression (fun x -> CExprFunctionCallWithTypeArguments x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> CExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> CExprBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> CExprEmbeddedBraced x) x
@@ -558,52 +563,53 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.ConstructorExpression s
   and invalidate_constructor_expression : constructor_expression invalidator = fun (value, thing) ->
     match thing with
-    | CExprLiteral                      thing -> invalidate_literal_expression             (value, thing)
-    | CExprVariable                     thing -> invalidate_variable_expression            (value, thing)
-    | CExprQualifiedName                thing -> invalidate_qualified_name_expression      (value, thing)
-    | CExprPipeVariable                 thing -> invalidate_pipe_variable_expression       (value, thing)
-    | CExprDecorated                    thing -> invalidate_decorated_expression           (value, thing)
-    | CExprInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
-    | CExprAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | CExprLambda                       thing -> invalidate_lambda_expression              (value, thing)
-    | CExprCast                         thing -> invalidate_cast_expression                (value, thing)
-    | CExprScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
-    | CExprMemberSelection              thing -> invalidate_member_selection_expression    (value, thing)
-    | CExprSafeMemberSelection          thing -> invalidate_safe_member_selection_expression (value, thing)
-    | CExprEmbeddedMemberSelection      thing -> invalidate_embedded_member_selection_expression (value, thing)
-    | CExprYield                        thing -> invalidate_yield_expression               (value, thing)
-    | CExprYieldFrom                    thing -> invalidate_yield_from_expression          (value, thing)
-    | CExprPrefixUnary                  thing -> invalidate_prefix_unary_expression        (value, thing)
-    | CExprPostfixUnary                 thing -> invalidate_postfix_unary_expression       (value, thing)
-    | CExprBinary                       thing -> invalidate_binary_expression              (value, thing)
-    | CExprInstanceof                   thing -> invalidate_instanceof_expression          (value, thing)
-    | CExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
-    | CExprEval                         thing -> invalidate_eval_expression                (value, thing)
-    | CExprEmpty                        thing -> invalidate_empty_expression               (value, thing)
-    | CExprDefine                       thing -> invalidate_define_expression              (value, thing)
-    | CExprIsset                        thing -> invalidate_isset_expression               (value, thing)
-    | CExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
-    | CExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
-    | CExprBraced                       thing -> invalidate_braced_expression              (value, thing)
-    | CExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
-    | CExprList                         thing -> invalidate_list_expression                (value, thing)
-    | CExprCollectionLiteral            thing -> invalidate_collection_literal_expression  (value, thing)
-    | CExprObjectCreation               thing -> invalidate_object_creation_expression     (value, thing)
-    | CExprArrayCreation                thing -> invalidate_array_creation_expression      (value, thing)
-    | CExprArrayIntrinsic               thing -> invalidate_array_intrinsic_expression     (value, thing)
-    | CExprDarrayIntrinsic              thing -> invalidate_darray_intrinsic_expression    (value, thing)
-    | CExprDictionaryIntrinsic          thing -> invalidate_dictionary_intrinsic_expression (value, thing)
-    | CExprKeysetIntrinsic              thing -> invalidate_keyset_intrinsic_expression    (value, thing)
-    | CExprVarrayIntrinsic              thing -> invalidate_varray_intrinsic_expression    (value, thing)
-    | CExprVectorIntrinsic              thing -> invalidate_vector_intrinsic_expression    (value, thing)
-    | CExprElementInitializer           thing -> invalidate_element_initializer            (value, thing)
-    | CExprSubscript                    thing -> invalidate_subscript_expression           (value, thing)
-    | CExprEmbeddedSubscript            thing -> invalidate_embedded_subscript_expression  (value, thing)
-    | CExprAwaitableCreation            thing -> invalidate_awaitable_creation_expression  (value, thing)
-    | CExprXHPChildrenParenthesizedList thing -> invalidate_xhp_children_parenthesized_list (value, thing)
-    | CExprXHP                          thing -> invalidate_xhp_expression                 (value, thing)
-    | CExprShape                        thing -> invalidate_shape_expression               (value, thing)
-    | CExprTuple                        thing -> invalidate_tuple_expression               (value, thing)
+    | CExprLiteral                       thing -> invalidate_literal_expression             (value, thing)
+    | CExprVariable                      thing -> invalidate_variable_expression            (value, thing)
+    | CExprQualifiedName                 thing -> invalidate_qualified_name_expression      (value, thing)
+    | CExprPipeVariable                  thing -> invalidate_pipe_variable_expression       (value, thing)
+    | CExprDecorated                     thing -> invalidate_decorated_expression           (value, thing)
+    | CExprInclusion                     thing -> invalidate_inclusion_expression           (value, thing)
+    | CExprAnonymousFunction             thing -> invalidate_anonymous_function             (value, thing)
+    | CExprLambda                        thing -> invalidate_lambda_expression              (value, thing)
+    | CExprCast                          thing -> invalidate_cast_expression                (value, thing)
+    | CExprScopeResolution               thing -> invalidate_scope_resolution_expression    (value, thing)
+    | CExprMemberSelection               thing -> invalidate_member_selection_expression    (value, thing)
+    | CExprSafeMemberSelection           thing -> invalidate_safe_member_selection_expression (value, thing)
+    | CExprEmbeddedMemberSelection       thing -> invalidate_embedded_member_selection_expression (value, thing)
+    | CExprYield                         thing -> invalidate_yield_expression               (value, thing)
+    | CExprYieldFrom                     thing -> invalidate_yield_from_expression          (value, thing)
+    | CExprPrefixUnary                   thing -> invalidate_prefix_unary_expression        (value, thing)
+    | CExprPostfixUnary                  thing -> invalidate_postfix_unary_expression       (value, thing)
+    | CExprBinary                        thing -> invalidate_binary_expression              (value, thing)
+    | CExprInstanceof                    thing -> invalidate_instanceof_expression          (value, thing)
+    | CExprConditional                   thing -> invalidate_conditional_expression         (value, thing)
+    | CExprEval                          thing -> invalidate_eval_expression                (value, thing)
+    | CExprEmpty                         thing -> invalidate_empty_expression               (value, thing)
+    | CExprDefine                        thing -> invalidate_define_expression              (value, thing)
+    | CExprIsset                         thing -> invalidate_isset_expression               (value, thing)
+    | CExprFunctionCall                  thing -> invalidate_function_call_expression       (value, thing)
+    | CExprFunctionCallWithTypeArguments thing -> invalidate_function_call_with_type_arguments_expression (value, thing)
+    | CExprParenthesized                 thing -> invalidate_parenthesized_expression       (value, thing)
+    | CExprBraced                        thing -> invalidate_braced_expression              (value, thing)
+    | CExprEmbeddedBraced                thing -> invalidate_embedded_braced_expression     (value, thing)
+    | CExprList                          thing -> invalidate_list_expression                (value, thing)
+    | CExprCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
+    | CExprObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | CExprArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
+    | CExprArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
+    | CExprDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
+    | CExprDictionaryIntrinsic           thing -> invalidate_dictionary_intrinsic_expression (value, thing)
+    | CExprKeysetIntrinsic               thing -> invalidate_keyset_intrinsic_expression    (value, thing)
+    | CExprVarrayIntrinsic               thing -> invalidate_varray_intrinsic_expression    (value, thing)
+    | CExprVectorIntrinsic               thing -> invalidate_vector_intrinsic_expression    (value, thing)
+    | CExprElementInitializer            thing -> invalidate_element_initializer            (value, thing)
+    | CExprSubscript                     thing -> invalidate_subscript_expression           (value, thing)
+    | CExprEmbeddedSubscript             thing -> invalidate_embedded_subscript_expression  (value, thing)
+    | CExprAwaitableCreation             thing -> invalidate_awaitable_creation_expression  (value, thing)
+    | CExprXHPChildrenParenthesizedList  thing -> invalidate_xhp_children_parenthesized_list (value, thing)
+    | CExprXHP                           thing -> invalidate_xhp_expression                 (value, thing)
+    | CExprShape                         thing -> invalidate_shape_expression               (value, thing)
+    | CExprTuple                         thing -> invalidate_tuple_expression               (value, thing)
   and validate_namespace_internals : namespace_internals validator = fun x ->
     match Syntax.syntax x with
     | Syntax.NamespaceBody _ -> tag validate_namespace_body (fun x -> NSINamespaceBody x) x
@@ -2234,6 +2240,26 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; Syntax.function_call_left_paren = invalidate_token x.function_call_left_paren
       ; Syntax.function_call_argument_list = invalidate_list_with (invalidate_expression) x.function_call_argument_list
       ; Syntax.function_call_right_paren = invalidate_token x.function_call_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_function_call_with_type_arguments_expression : function_call_with_type_arguments_expression validator = function
+  | { Syntax.syntax = Syntax.FunctionCallWithTypeArgumentsExpression x; value = v } -> v,
+    { function_call_with_type_arguments_right_paren = validate_token x.Syntax.function_call_with_type_arguments_right_paren
+    ; function_call_with_type_arguments_argument_list = validate_list_with (validate_expression) x.Syntax.function_call_with_type_arguments_argument_list
+    ; function_call_with_type_arguments_left_paren = validate_token x.Syntax.function_call_with_type_arguments_left_paren
+    ; function_call_with_type_arguments_type_args = validate_type_arguments x.Syntax.function_call_with_type_arguments_type_args
+    ; function_call_with_type_arguments_receiver = validate_expression x.Syntax.function_call_with_type_arguments_receiver
+    }
+  | s -> validation_fail SyntaxKind.FunctionCallWithTypeArgumentsExpression s
+  and invalidate_function_call_with_type_arguments_expression : function_call_with_type_arguments_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.FunctionCallWithTypeArgumentsExpression
+      { Syntax.function_call_with_type_arguments_receiver = invalidate_expression x.function_call_with_type_arguments_receiver
+      ; Syntax.function_call_with_type_arguments_type_args = invalidate_type_arguments x.function_call_with_type_arguments_type_args
+      ; Syntax.function_call_with_type_arguments_left_paren = invalidate_token x.function_call_with_type_arguments_left_paren
+      ; Syntax.function_call_with_type_arguments_argument_list = invalidate_list_with (invalidate_expression) x.function_call_with_type_arguments_argument_list
+      ; Syntax.function_call_with_type_arguments_right_paren = invalidate_token x.function_call_with_type_arguments_right_paren
       }
     ; Syntax.value = v
     }

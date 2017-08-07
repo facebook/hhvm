@@ -1198,6 +1198,20 @@ let schema : schema_node list =
       ; "right_paren", Token
       ]
     }
+  ; { kind_name   = "FunctionCallWithTypeArgumentsExpression"
+    ; type_name   = "function_call_with_type_arguments_expression"
+    ; func_name   = "function_call_with_type_arguments_expression"
+    ; description = "function_call_with_type_arguments_expression"
+    ; prefix      = "function_call_with_type_arguments"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "receiver", Aggregate Expression
+      ; "type_args", Just "TypeArguments"
+      ; "left_paren", Token
+      ; "argument_list", ZeroOrMore (Aggregate Expression)
+      ; "right_paren", Token
+      ]
+    }
   ; { kind_name   = "ParenthesizedExpression"
     ; type_name   = "parenthesized_expression"
     ; func_name   = "parenthesized_expression"

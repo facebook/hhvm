@@ -938,6 +938,8 @@ let rec transform node =
       ])
   | FunctionCallExpression x ->
     handle_function_call_expression x
+  | FunctionCallWithTypeArgumentsExpression x ->
+    handle_function_call_with_type_arguments_expression x
   | EvalExpression x ->
     let (kw, left_p, arg, right_p) = get_eval_expression_children x in
     Fmt [
@@ -1622,6 +1624,26 @@ and handle_function_call_expression fce =
   | _ ->
     Fmt [
       transform receiver;
+      transform_argish lp args rp
+    ]
+
+and handle_function_call_with_type_arguments_expression afce =
+  let (receiever, tyargs, lp, args, rp) =
+    get_function_call_with_type_arguments_expression_children afce
+  in
+  match syntax receiever with
+  | MemberSelectionExpression mse ->
+    handle_possible_chaining
+      (get_member_selection_expression_children mse)
+      (Some (lp, args, rp))
+  | SafeMemberSelectionExpression smse ->
+    handle_possible_chaining
+      (get_safe_member_selection_expression_children smse)
+      (Some (lp, args, rp))
+  | _ ->
+    Fmt [
+      transform receiever;
+      transform tyargs;
       transform_argish lp args rp
     ]
 

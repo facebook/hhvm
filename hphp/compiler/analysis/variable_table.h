@@ -99,14 +99,6 @@ public:
   bool isStatic(const std::string &name) const;
   bool isGlobal(const std::string &name) const;
   bool isSuperGlobal(const std::string &name) const;
-  bool isLocal(const std::string &name) const;
-  bool isLocal(const Symbol *sym) const;
-  bool isRedeclared(const std::string &name) const;
-  bool isLocalGlobal(const std::string &name) const;
-  bool isNestedStatic(const std::string &name) const;
-  bool isLvalParam(const std::string &name) const;
-  bool isUsed(const std::string &name) const;
-  bool isNeeded(const std::string &name) const;
 
   bool isPseudoMainTable() const;
   bool hasPrivate() const;
@@ -190,13 +182,6 @@ public:
   }
 
   /**
-   * Called when analyze global and static statement.
-   */
-  bool checkRedeclared(const std::string &name, Statement::KindOf kindOf);
-  void addLocalGlobal(const std::string &name);
-  void addNestedStatic(const std::string &name);
-
-  /**
    * Helper for static variable default value
    */
   ConstructPtr getStaticInitVal(std::string varName);
@@ -211,11 +196,6 @@ public:
   /**
    * Called when analyze simple variable
    */
-  void addLvalParam(const std::string &name);
-  void addUsed(const std::string &name);
-  bool checkUnused(Symbol *sym);
-  void addNeeded(const std::string &name);
-  void clearUsed();
   void addStaticVariable(Symbol *sym, AnalysisResultConstPtr ar,
                          bool member = false);
   void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,

@@ -47,7 +47,6 @@ struct SimpleVariable : Expression {
   Symbol *getSymbol() const { return m_sym; }
 
   bool isHidden() const;
-  bool checkUnused() const;
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
   void updateSymbol(SimpleVariablePtr src);

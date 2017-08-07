@@ -67,10 +67,6 @@ void SimpleVariable::setContext(Context context) {
 }
 
 int SimpleVariable::getLocalEffects() const {
-  if (m_context == Declaration &&
-      m_sym && m_sym->isShrinkWrapped()) {
-    return LocalEffect;
-  }
   return NoEffect;
 }
 
@@ -112,10 +108,6 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
           }
         }
       }
-      if (m_sym && !(m_context & AssignmentLHS) &&
-          !((m_context & UnsetContext) && (m_context & LValue))) {
-        m_sym->setUsed();
-      }
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_sym && !m_this) {
@@ -136,20 +128,8 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
           }
         }
       }
-      // check function parameter that can occur in lval context
-      if (m_sym->isParameter() &&
-          m_context & (LValue | RefValue | DeepReference |
-                       UnsetContext | InvokeArgument | OprLValue |
-                       DeepOprLValue)) {
-        m_sym->setLvalParam();
-      }
     }
   }
-}
-
-bool SimpleVariable::checkUnused() const {
-  return !m_superGlobal && !m_globals &&
-    getScope()->getVariables()->checkUnused(m_sym);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -208,9 +208,6 @@ public:
                                             const Location::Range& r,
                                             const Variant &value);
 
-  static bool CheckNeededRHS(ExpressionPtr value);
-  static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
-
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
 protected:

@@ -120,58 +120,9 @@ bool VariableTable::isGlobal(const std::string &name) const {
   return sym && sym->isGlobal();
 }
 
-bool VariableTable::isRedeclared(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isRedeclared();
-}
-
-bool VariableTable::isLocalGlobal(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isLocalGlobal();
-}
-
-bool VariableTable::isNestedStatic(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isNestedStatic();
-}
-
-bool VariableTable::isLvalParam(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isLvalParam();
-}
-
-bool VariableTable::isUsed(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isUsed();
-}
-
-bool VariableTable::isNeeded(const std::string &name) const {
-  const Symbol *sym = getSymbol(name);
-  return sym && sym->isNeeded();
-}
-
 bool VariableTable::isSuperGlobal(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return sym && sym->isSuperGlobal();
-}
-
-bool VariableTable::isLocal(const std::string &name) const {
-  return isLocal(getSymbol(name));
-}
-
-bool VariableTable::isLocal(const Symbol *sym) const {
-  if (!sym) return false;
-  if (getScopePtr()->is(BlockScope::FunctionScope)) {
-    /*
-      isSuperGlobal is not wanted here. It just means that
-      $GLOBALS[name] was referenced in this scope.
-      It doesnt say anything about the variable $name.
-    */
-    return (!sym->isStatic() &&
-            !sym->isGlobal() &&
-            !sym->isParameter());
-  }
-  return false;
 }
 
 bool VariableTable::isInherited(const std::string &name) const {
@@ -387,74 +338,6 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   }
 
   return sym;
-}
-
-bool VariableTable::checkRedeclared(const std::string &name,
-                                    Statement::KindOf kindOf)
-{
-  Symbol *sym = getSymbol(name);
-  assert(kindOf == Statement::KindOfStaticStatement ||
-         kindOf == Statement::KindOfGlobalStatement);
-  if (kindOf == Statement::KindOfStaticStatement && sym->isPresent()) {
-    if (sym->isStatic()) {
-      return true;
-    } else if (!sym->isRedeclared()) {
-      sym->setRedeclared();
-      return true;
-    } else {
-      return false;
-    }
-  } else if (kindOf == Statement::KindOfGlobalStatement &&
-             sym && !sym->isGlobal() && !sym->isRedeclared()) {
-    sym->setRedeclared();
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void VariableTable::addLocalGlobal(const std::string &name) {
-  addSymbol(name)->setLocalGlobal();
-}
-
-void VariableTable::addNestedStatic(const std::string &name) {
-  addSymbol(name)->setNestedStatic();
-}
-
-void VariableTable::addLvalParam(const std::string &name) {
-  addSymbol(name)->setLvalParam();
-}
-
-void VariableTable::addUsed(const std::string &name) {
-  addSymbol(name)->setUsed();
-}
-
-void VariableTable::addNeeded(const std::string &name) {
-  addSymbol(name)->setNeeded();
-}
-
-bool VariableTable::checkUnused(Symbol *sym) {
-  if ((!sym || !sym->isHidden()) &&
-      (isPseudoMainTable() || getAttribute(ContainsDynamicVariable))) {
-    return false;
-  }
-  if (sym) {
-    return !sym->isUsed() && isLocal(sym);
-  }
-  return false;
-}
-
-void VariableTable::clearUsed() {
-  typedef std::pair<const std::string,Symbol> symPair;
-  bool ps = isPseudoMainTable();
-  for (symPair &sym: m_symbolMap) {
-    if (!ps || sym.second.isHidden()) {
-      sym.second.clearUsed();
-      sym.second.clearNeeded();
-      sym.second.clearGlobal();
-      sym.second.clearReseated();
-    }
-  }
 }
 
 void VariableTable::addSuperGlobal(const std::string &name) {

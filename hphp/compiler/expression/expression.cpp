@@ -194,36 +194,6 @@ bool Expression::IsIdentifier(const std::string &value) {
 
 void Expression::analyzeProgram(AnalysisResultPtr /*ar*/) {}
 
-bool Expression::CheckNeededRHS(ExpressionPtr value) {
-  bool needed = true;
-  always_assert(value);
-  while (value->is(KindOfAssignmentExpression)) {
-    value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
-  }
-  if (value->isScalar()) {
-    needed = false;
-  }
-  return needed;
-}
-
-bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
-  // if the value may involve object, consider the variable as "needed"
-  // so that objects are not destructed prematurely.
-  bool needed = true;
-  if (value) needed = CheckNeededRHS(value);
-  if (variable->is(Expression::KindOfSimpleVariable)) {
-    auto var = dynamic_pointer_cast<SimpleVariable>(variable);
-    const std::string &name = var->getName();
-    VariableTablePtr variables = var->getScope()->getVariables();
-    if (needed) {
-      variables->addNeeded(name);
-    } else {
-      needed = variables->isNeeded(name);
-    }
-  }
-  return needed;
-}
-
 ExpressionPtr
 Expression::MakeConstant(AnalysisResultConstPtr /*ar*/, BlockScopePtr scope,
                          const Location::Range& r, const std::string& value) {

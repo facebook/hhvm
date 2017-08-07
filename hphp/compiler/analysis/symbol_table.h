@@ -92,53 +92,28 @@ struct Symbol {
   bool isPrivate() const { return m_flags.m_private; }
   bool isStatic() const { return m_flags.m_static; }
   bool isGlobal() const { return m_flags.m_global; }
-  bool isRedeclared() const { return m_flags.m_redeclared; }
-  bool isLocalGlobal() const { return m_flags.m_localGlobal; }
-  bool isNestedStatic() const { return m_flags.m_nestedStatic; }
-  bool isLvalParam() const { return m_flags.m_lvalParam; }
-  bool isCallTimeRef() const { return m_flags.m_callTimeRef; }
-  bool isUsed() const { return m_flags.m_used; }
-  bool isNeeded() const { return m_flags.m_needed; }
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
   bool isOverride() const { return m_flags.m_override; }
-  bool isIndirectAltered() const { return m_flags.m_indirectAltered; }
   bool isHidden() const { return m_flags.m_hidden; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
   bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
   bool isPassClosureVar() const { return m_flags.m_passClosureVar; }
   bool isClassName() const { return m_flags.m_className; }
-  bool isShrinkWrapped() const { return m_flags.m_shrinkWrapped; }
-  bool isStashedVal() const { return m_flags.m_stashedVal; }
-  bool isReseated() const { return m_flags. m_reseated; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
   void setPrivate() { m_flags.m_private = true; }
   void setStatic() { m_flags.m_static = true; }
   void setGlobal() { m_flags.m_global = true; }
-  void setRedeclared() { m_flags.m_redeclared = true; }
-  void setLocalGlobal() { m_flags.m_localGlobal = true; }
-  void setNestedStatic() { m_flags.m_nestedStatic = true; }
-  void setLvalParam() { m_flags.m_lvalParam = true; }
-  void setCallTimeRef() { m_flags.m_callTimeRef = true; }
-  void setUsed() { m_flags.m_used = true; }
-  void setNeeded() { m_flags.m_needed = true; }
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
   void setOverride() { m_flags.m_override = true; }
-  void setIndirectAltered() { m_flags.m_indirectAltered = true; }
   void setHidden() { m_flags.m_hidden = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
   void setPassClosureVar() { m_flags.m_passClosureVar = true; }
   void setClassName() { m_flags.m_className = true; }
-  void setShrinkWrapped() { m_flags.m_shrinkWrapped = true; }
-  void setStashedVal() { m_flags.m_stashedVal = true; }
-  void setReseated() { m_flags.m_reseated = true; }
 
   void clearGlobal() { m_flags.m_global = false; }
-  void clearUsed() { m_flags.m_used = false; }
-  void clearNeeded() { m_flags.m_needed = false; }
-  void clearReseated() { m_flags.m_reseated = false; }
   void clearRefClosureVar() { m_flags.m_refClosureVar = false; }
 
   void update(Symbol *src) {
@@ -191,24 +166,13 @@ private:
       unsigned m_private : 1;
       unsigned m_static : 1;
       unsigned m_global : 1;
-      unsigned m_redeclared : 1;
-      unsigned m_localGlobal : 1;
-      unsigned m_nestedStatic : 1;
-      unsigned m_lvalParam : 1;
-      unsigned m_callTimeRef : 1;
-      unsigned m_used : 1;
-      unsigned m_needed : 1;
       unsigned m_superGlobal : 1;
       unsigned m_override : 1;
-      unsigned m_indirectAltered : 1;
       unsigned m_hidden : 1;
       unsigned m_closureVar : 1;
       unsigned m_refClosureVar : 1;
       unsigned m_passClosureVar : 1;
       unsigned m_className : 1;
-      unsigned m_shrinkWrapped : 1;
-      unsigned m_stashedVal : 1;
-      unsigned m_reseated : 1;
     } m_flags;
   };
   static_assert(

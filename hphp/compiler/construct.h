@@ -218,10 +218,6 @@ public:
   bool isFileLevel() const { return m_flags.fileLevel;}
   bool isTopLevel() const { return m_flags.topLevel;}
 
-  void setNeeded() { m_flags.needed = true; }
-  void clearNeeded() { m_flags.needed = false; }
-  bool isNeeded() const { return m_flags.needed; }
-
   void setIsUnpack() { m_flags.unpack = 1; }
   bool isUnpack() const { return m_flags.unpack; }
   void clearIsUnpack() { m_flags.unpack = 0; }
@@ -322,7 +318,6 @@ private:
     struct {
       unsigned fileLevel           : 1; // is it at top level of a file
       unsigned topLevel            : 1; // is it at top level of a scope
-      unsigned needed              : 1;
       unsigned unpack              : 1; // is this an unpack (only on params)
     } m_flags;
   };

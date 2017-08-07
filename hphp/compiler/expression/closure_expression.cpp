@@ -174,29 +174,12 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
         sym->setDeclaration(ConstructPtr());
         if (param->isRef()) {
           sym->setRefClosureVar();
-          sym->setUsed();
         } else {
           sym->clearRefClosureVar();
-          sym->clearUsed();
         }
       }
     }
     return;
-  }
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    // closure function's variable table (not containing function's)
-    VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
-    for (int i = 0; i < m_vars->getCount(); i++) {
-      auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      auto const& name = param->getName();
-
-      // so we can assign values to them, instead of seeing CVarRef
-      Symbol *sym = variables->getSymbol(name);
-      if (sym && sym->isParameter()) {
-        sym->setLvalParam();
-      }
-    }
   }
 }
 

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/fast-stat-cache.h"
+#include "hphp/runtime/base/delayed-stat-cache.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/lock.h"
@@ -32,19 +32,19 @@ static inline uint64_t get_time_us() {
 
 static int statSyscall(const char* path, struct stat* buf) {
   int ret = ::stat(path, buf);
-  TRACE(5, "FastStatCache: stat path:%s ret:%d\n", path, ret);
+  TRACE(5, "DelayedStatCache: stat path:%s ret:%d\n", path, ret);
   return ret;
 }
 
 static int lstatSyscall(const char* path, struct stat* buf) {
   int ret = ::lstat(path, buf);
-  TRACE(5, "FastStatCache: lstat path:%s ret:%d\n", path, ret);
+  TRACE(5, "DelayedStatCache: lstat path:%s ret:%d\n", path, ret);
   return ret;
 }
 
 static int accessSyscall(const char* path, int mode) {
   int ret = ::access(path, mode);
-  TRACE(5, "FastStatCache: access path:%s mode:%d ret:%d\n", path, mode, ret);
+  TRACE(5, "DelayedStatCache: access path:%s mode:%d ret:%d\n", path, mode, ret);
   return ret;
 }
 
@@ -56,7 +56,7 @@ static std::string readlinkSyscall(const char* path) {
   } else {
     buf[len] = '\0';
   }
-  TRACE(5, "FastStatCache: readlink path:%s ret:%s\n", path, buf);
+  TRACE(5, "DelayedStatCache: readlink path:%s ret:%s\n", path, buf);
   return buf;
 }
 
@@ -66,7 +66,7 @@ static std::string realpathSyscall(const char* path) {
   if (!::realpath(path, buf)) {
     buf[0] = '\0';
   }
-  TRACE(5, "FastStatCache: realpath path:%s ret:%s\n", path, buf);
+  TRACE(5, "DelayedStatCache: realpath path:%s ret:%s\n", path, buf);
   return buf;
 }
 
@@ -113,9 +113,9 @@ class StatCacheLock {
 
 /**
  * StatCacheBucket storages the stat result. 
- * If Server.FastStatCacheBucketNum > 0, the bucket may be shared by different threads,
+ * If Server.DelayedStatCacheBucketNum > 0, the bucket may be shared by different threads,
  *   the performance will be slower, but use less memory. 
- * If Server.FastStatCacheBucketNum <= 0, the bucket will be thread local, the performance 
+ * If Server.DelayedStatCacheBucketNum <= 0, the bucket will be thread local, the performance 
  *   will be better, but use more memory.
  */
 class StatCacheBucket {
@@ -298,11 +298,11 @@ class StatCacheBucket {
 
   private:
     void checkUpdate() {
-      if (RuntimeOption::ServerFastStatCacheExpireSeconds <= 0) {
+      if (RuntimeOption::ServerDelayedStatCacheExpireSeconds <= 0) {
         return;
       }
       uint64_t now = get_time_us();
-      if (now > m_last_update_time_us + RuntimeOption::ServerFastStatCacheExpireSeconds * 1000000) {
+      if (now > m_last_update_time_us + RuntimeOption::ServerDelayedStatCacheExpireSeconds * 1000000) {
         m_last_update_time_us = now;
         clearAllCache();
       }
@@ -334,7 +334,7 @@ StatCacheBucket* getStatCacheBucket() {
     return s_stat_cache_bucket;
   }
   Lock l(g_stat_cache_mutex);
-  int bucket_num = RuntimeOption::ServerFastStatCacheBucketNum;
+  int bucket_num = RuntimeOption::ServerDelayedStatCacheBucketNum;
   if (bucket_num > 0) {
     while (g_stat_cache_buckets.size() <= g_stat_cache_bucket_id) {
       auto bucket = std::make_shared<StatCacheBucket>(true);
@@ -351,54 +351,54 @@ StatCacheBucket* getStatCacheBucket() {
   return s_stat_cache_bucket;
 }
 
-int FastStatCache::stat(const char* path, struct stat* buf) {
-  if (RuntimeOption::ServerFastStatCache) {
+int DelayedStatCache::stat(const char* path, struct stat* buf) {
+  if (RuntimeOption::ServerDelayedStatCache) {
     return getStatCacheBucket()->stat(path, buf);
   } else {
     return statSyscall(path, buf);
   }
 }
 
-int FastStatCache::lstat(const char* path, struct stat* buf) {
-  if (RuntimeOption::ServerFastStatCache) {
+int DelayedStatCache::lstat(const char* path, struct stat* buf) {
+  if (RuntimeOption::ServerDelayedStatCache) {
     return getStatCacheBucket()->lstat(path, buf);
   } else {
     return lstatSyscall(path, buf);
   }
 }
 
-int FastStatCache::access(const char* path, int mode) {
-  if (RuntimeOption::ServerFastStatCache) {
+int DelayedStatCache::access(const char* path, int mode) {
+  if (RuntimeOption::ServerDelayedStatCache) {
     return getStatCacheBucket()->access(path, mode);
   } else {
     return accessSyscall(path, mode);
   }
 }
 
-std::string FastStatCache::readlink(const char* path) {
-  if (RuntimeOption::ServerFastStatCache) {
+std::string DelayedStatCache::readlink(const char* path) {
+  if (RuntimeOption::ServerDelayedStatCache) {
     return getStatCacheBucket()->readlink(path);
   } else {
     return readlinkSyscall(path);
   }
 }
 
-std::string FastStatCache::realpath(const char* path) {
-  if (RuntimeOption::ServerFastStatCache) {
+std::string DelayedStatCache::realpath(const char* path) {
+  if (RuntimeOption::ServerDelayedStatCache) {
     return getStatCacheBucket()->realpath(path);
   } else {
     return realpathSyscall(path);
   }
 }
 
-void FastStatCache::clearAllCache() {
+void DelayedStatCache::clearAllCache() {
   Lock l(g_stat_cache_mutex);
   for (auto bucket : g_stat_cache_buckets) {
     bucket->clearAllCache();
   }
 }
 
-void FastStatCache::getStatistics(std::stringstream& ss) {
+void DelayedStatCache::getStatistics(std::stringstream& ss) {
   Lock l(g_stat_cache_mutex);
   ss << "[";
   bool first = true;

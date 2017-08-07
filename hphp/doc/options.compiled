@@ -135,6 +135,9 @@ flood error logs.
     # Recommend to turn this on when all the file paths in the file invoke
     # table are relative for faster dynamic file inclusion.
     AlwaysUseRelativePath = false
+    # Cache the file stat to improve performance for non-RepoAuthoritative mode
+    DelayedStatCache = false
+    DelayedStatCacheExpireSeconds = 10
 
     RequestTimeoutSeconds = -1
     RequestMemoryMaxBytes = 0
@@ -228,6 +231,26 @@ true. Otherwise, use FileCache to point to the static content cache file
 created by the compiler.
 
 NOTE: the FileCache should be set with absolute path
+
+- DelayedStatCache, DelayedStatCacheExpireSeconds
+
+For non-RepoAuthoritative mode, the stat/access system call are hot functions. 
+DelayedStatCache cache the result of stat/lstat/access/readlink/realpath system call
+in the memory for fast access. 
+
+To enable this feature, turn DelayedStatCache on in you config,
+and set DelayedStatCacheExpireSeconds to a proper value.
+
+Notice! If you turn on this feature, the file stat result may not be the 
+latest status of the file system. If a php source file changed, HHVM will not 
+instantly detect this change, and will use the old logic to serve the requests, 
+until the cache expires after DelayedStatCacheExpireSeconds. To avoid this problem, 
+you can call the dsc-clear admin server command to clear the cache after deploying
+new php source files.
+
+For non-RepoAuthoritative mode, this option also helps consistency. If the file 
+updates all happen within the cache window, HHVM will either see the set of old files, 
+or the set of new files, but never a mixture of both.
 
 - ExpiresActive, ExpiresDefault, DefaultCharsetName
 

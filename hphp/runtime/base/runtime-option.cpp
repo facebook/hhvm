@@ -173,9 +173,9 @@ bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
-bool RuntimeOption::ServerFastStatCache = false;
-int RuntimeOption::ServerFastStatCacheBucketNum = 0;
-int RuntimeOption::ServerFastStatCacheExpireSeconds = 10;
+bool RuntimeOption::ServerDelayedStatCache = false;
+int RuntimeOption::ServerDelayedStatCacheBucketNum = 0;
+int RuntimeOption::ServerDelayedStatCacheExpireSeconds = 10;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
@@ -1403,9 +1403,9 @@ void RuntimeOption::Load(
     Config::Bind(ServerThreadDropStack, ini, config, "Server.ThreadDropStack");
     Config::Bind(ServerHttpSafeMode, ini, config, "Server.HttpSafeMode");
     Config::Bind(ServerStatCache, ini, config, "Server.StatCache", false);
-    Config::Bind(ServerFastStatCache, ini, config, "Server.FastStatCache", false);
-    Config::Bind(ServerFastStatCacheBucketNum, ini, config, "Server.FastStatCacheBucketNum", 0);
-    Config::Bind(ServerFastStatCacheExpireSeconds, ini, config, "Server.FastStatCacheExpireSeconds", 5);
+    Config::Bind(ServerDelayedStatCache, ini, config, "Server.DelayedStatCache", false);
+    Config::Bind(ServerDelayedStatCacheBucketNum, ini, config, "Server.DelayedStatCacheBucketNum", 0);
+    Config::Bind(ServerDelayedStatCacheExpireSeconds, ini, config, "Server.DelayedStatCacheExpireSeconds", 5);
     Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);

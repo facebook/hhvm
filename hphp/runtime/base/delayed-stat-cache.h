@@ -30,12 +30,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * FastStatCache cache the result of stat/lstat/access/readlink/realpath system call
+ * DelayedStatCache cache the result of stat/lstat/access/readlink/realpath system call
  * in the memory for fast access.
  * The result may not be the latest status of the file system. If the file system changes, 
- * the cache will update within Server.FastStatCacheTTL seconds.
+ * the cache will update within Server.DelayedStatCacheTTL seconds.
  */
-class FastStatCache {
+class DelayedStatCache {
   public:
     static int stat(const char* path, struct stat* buf);
     static int lstat(const char* path, struct stat* buf);

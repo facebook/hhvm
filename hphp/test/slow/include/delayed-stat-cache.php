@@ -1,6 +1,6 @@
 <?php
 
-$file = tempnam('/tmp', 'test-fast-stat-cache');
+$file = tempnam('/tmp', 'test-delayed-stat-cache');
 file_put_contents($file, "<?php\necho 'Old';");
 include($file);
 file_put_contents($file, "<?php\necho 'New';");

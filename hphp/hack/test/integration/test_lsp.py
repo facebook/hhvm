@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import common_tests
+import copy
 import json
 import os
 import unittest
@@ -69,6 +70,19 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def sort_responses(self, responses):
         return sorted(responses, key=lambda response: response['id'])
 
+    # removes stack traces from error responses since these can be noisy
+    # as code changes and they contain execution environment specific details
+    # by ignoring these when comparing responses we might miss some minor issues
+    # but will still catch the core error being thrown or not.
+    def sanitize_exceptions(self, responses):
+        sanitized = copy.deepcopy(responses)
+        for response in sanitized:
+            if "error" in response:
+                if "data" in response["error"]:
+                    if "stack" in response["error"]["data"]:
+                        del response["error"]["data"]["stack"]
+        return sanitized
+
     # dumps an LSP response into a standard json format that can be used for
     # doing precise text comparison in a way that is human readable in the case
     # of there being an error.
@@ -82,7 +96,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     # gets a set of loaded responses ready for validation by sorting them
     # by id and serializing them for precise text comparison
     def prepare_responses(self, responses):
-        return self.serialize_responses(self.sort_responses(responses))
+        return self.serialize_responses(
+            self.sanitize_exceptions(self.sort_responses(responses))
+        )
 
     def run_lsp_test(self, test_name, test, expected):
         with LspCommandProcessor.create(self.test_env) as lsp:
@@ -115,7 +131,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         return {
             'root_path': self.repo_dir,
             'php_file_uri': self.repo_file_uri(test_php),
-            'php_file': self.read_repo_file(test_php)
+            'php_file': self.read_repo_file(test_php),
         }
 
     def test_init_shutdown(self):
@@ -148,3 +164,8 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.prepare_environment()
         variables = self.setup_php_file('definition.php')
         self.load_and_run('nomethod', variables)
+
+    def test_bad_call(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('definition.php')
+        self.load_and_run('bad_call', variables)

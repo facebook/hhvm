@@ -43,7 +43,7 @@
       "code": -32601,
       "message": "not implemented: textDocument/nonExistingMethod",
       "data": {
-        "stack": "Raised at file \"/data/users/chrishahn/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 1514, characters 10-40\nCalled from file \"/data/users/chrishahn/fbsource/fbcode/hphp/hack/src/client/clientLsp.ml\", line 1575, characters 21-60\n"
+        "stack": "[omitted for reproducibility]"
       }
     }
   },

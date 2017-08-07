@@ -162,12 +162,16 @@ let get_files deps =
   end deps ~init:Relative_path.Set.empty
 
 let update_files fileInfo =
+  (* TODO: Figure out if we need GConstName and FunName as well here *)
   Relative_path.Map.iter fileInfo begin fun filename info ->
     let {FileInfo.funs; classes; typedefs;
-         consts = _ (* TODO probably a bug #3844332 *);
+         consts;
          comments = _;
          file_mode = _;
         } = info in
+    let consts = List.fold_left consts ~f: begin fun acc (_, const_id) ->
+      DepSet.add acc (Dep.make (Dep.GConst const_id))
+    end ~init:DepSet.empty in
     let funs = List.fold_left funs ~f:begin fun acc (_, fun_id) ->
       DepSet.add acc (Dep.make (Dep.Fun fun_id))
     end ~init:DepSet.empty in
@@ -178,6 +182,7 @@ let update_files fileInfo =
       DepSet.add acc (Dep.make (Dep.Class type_id))
     end ~init:classes in
     let defs = DepSet.union funs classes in
+    let defs = DepSet.union defs consts in
     DepSet.iter ~f:begin fun def ->
       let previous =
         try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty

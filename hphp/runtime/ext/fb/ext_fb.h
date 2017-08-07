@@ -49,8 +49,10 @@ Variant HHVM_FUNCTION(fb_disable_code_coverage);
 bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
+Variant HHVM_FUNCTION(fb_lazy_stat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
+Variant HHVM_FUNCTION(fb_lazy_readlink, const String& filename);
 
 Array HHVM_FUNCTION(fb_call_user_func_safe,
                     const Variant& function,

@@ -1158,6 +1158,13 @@ static Variant do_lazy_stat(Function dostat, const String& filename) {
   return stat_impl(&sb);
 }
 
+Variant HHVM_FUNCTION(fb_lazy_stat, const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+  return do_lazy_stat(StatCache::stat, filename);
+}
+
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return false;
@@ -1171,6 +1178,14 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
   }
 
   return StatCache::realpath(filename.c_str());
+}
+
+Variant HHVM_FUNCTION(fb_lazy_readlink, const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return false;
+  }
+
+  return StatCache::readlink(filename.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1210,8 +1225,10 @@ struct FBExtension : Extension {
     HHVM_FE(fb_output_compression);
     HHVM_FE(fb_set_exit_callback);
     HHVM_FE(fb_get_last_flush_size);
+    HHVM_FE(fb_lazy_stat);
     HHVM_FE(fb_lazy_lstat);
     HHVM_FE(fb_lazy_realpath);
+    HHVM_FE(fb_lazy_readlink);
     HHVM_FE(fb_call_user_func_safe);
     HHVM_FE(fb_call_user_func_safe_return);
     HHVM_FE(fb_call_user_func_array_safe);

@@ -179,6 +179,15 @@ function fb_set_exit_callback(mixed $function): void;
 <<__HipHopSpecific, __Native>>
 function fb_get_last_flush_size(): int;
 
+/* Gathers the statistics of the file named by filename, like stat(), except
+ * uses cached information from an internal inotify-based mechanism that may
+ * not be updated during the duration of a request.
+ * @param string $filename - Path to a file or a symbolic link.
+ * @return mixed - Same format as the normal php stat() function.
+ */
+<<__Native>>
+function fb_lazy_stat(string $filename): mixed;
+
 /* Gathers the statistics of the file named by filename, like lstat(), except
  * uses cached information from an internal inotify-based mechanism that may
  * not be updated during the duration of a request.
@@ -197,6 +206,15 @@ function fb_lazy_lstat(string $filename): mixed;
  */
 <<__Native>>
 function fb_lazy_realpath(string $filename): mixed;
+
+/* Returns the contents of the symbolic link path, like realpath(), 
+ * except uses cached information from an internal inotify-based mechanism 
+ * that may not be updated during the duration of a request.
+ * @param string $filename - The symbolic link path.
+ * @return string - Returns the contents of the symbolic link path.
+ */
+<<__Native>>
+function fb_lazy_readlink(string $filename): mixed;
 
 /* This function invokes $function with the arguments specified in its
  * parameter list. It returns an array of two elements, the first being a

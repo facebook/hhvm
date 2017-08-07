@@ -383,6 +383,31 @@ let print_showMessageRequest
   ]
 
 
+(************************************************************************)
+(** window/progress notification                                       **)
+(************************************************************************)
+
+let print_progress (id: int) (label: string option) : json =
+  let open Progress in
+  let r = { Progress.id; label; } in
+  JSON_Object [
+    "id", r.id |> int_;
+    "label", match r.label with None -> JSON_Null | Some s -> JSON_String s;
+  ]
+
+
+(************************************************************************)
+(** window/actionRequired notification                                 **)
+(************************************************************************)
+
+let print_actionRequired (id: int) (label: string option) : json =
+  let open ActionRequired in
+  let r = { ActionRequired.id; label; } in
+  JSON_Object [
+    "id", r.id |> int_;
+    "label", match r.label with None -> JSON_Null | Some s -> JSON_String s;
+  ]
+
 
 (************************************************************************)
 (** textDocument/hover request                                         **)
@@ -645,6 +670,7 @@ let parse_initialize (params: json option) : Initialize.params =
     {
       workspace = Jget.obj_opt json "workspace" |> parse_workspace;
       textDocument = Jget.obj_opt json "textDocument" |> parse_textDocument;
+      window = Jget.obj_opt json "window" |> parse_window;
     }
   and parse_workspace json =
     {
@@ -675,6 +701,11 @@ let parse_initialize (params: json option) : Initialize.params =
     }
   and parse_completionItem json =
     { snippetSupport = Jget.bool_d json "snippetSupport" ~default:false;
+    }
+  and parse_window json =
+    {
+      progress = Jget.obj_opt json "progress" |> Option.is_some;
+      actionRequired = Jget.obj_opt json "actionRequired" |> Option.is_some;
     }
   in
   parse_initialize params

@@ -243,11 +243,12 @@ module Initialize = struct
   and client_capabilities = {
     workspace: workspaceClientCapabilities;
     textDocument: textDocumentClientCapabilities;
+    window: windowClientCapabilities;
     (* omitted: experimental *)
   }
 
   and workspaceClientCapabilities = {
-    applyEdit: bool;  (* the client supports appling batch edits *)
+    applyEdit: bool;  (* client supports appling batch edits *)
     workspaceEdit: workspaceEdit;
     (* omitted: dynamic-registration fields *)
   }
@@ -277,6 +278,11 @@ module Initialize = struct
 
   and completionItem = {
     snippetSupport: bool;  (* client can do snippets as insert text *)
+  }
+
+  and windowClientCapabilities = {
+    progress: bool;  (* Nuclide-specific: client supports window/progress *)
+    actionRequired: bool;  (* Nuclide-specific: client supports window/actionRequired *)
   }
 
   (* What capabilities the server provides *)
@@ -665,6 +671,33 @@ module ShowMessageRequest = struct
 
   and messageActionItem = {
     title: string;
+  }
+end
+
+
+(* Progress notification, method="window/progress" *)
+module Progress = struct
+  type params = progressParams
+
+  and progressParams = {
+    (* LSP progress notifications have a lifetime that starts with their 1st  *)
+    (* window/progress update message and ends with an update message with    *)
+    (* label = None. They use an ID number (not JsonRPC id) to associate      *)
+    (* multiple messages to a single lifetime stream.                         *)
+    id: int;
+    label: string option;
+  }
+end
+
+
+(* ActionRequired notification, method="window/actionRequired" *)
+module ActionRequired = struct
+  type params = actionRequiredParams
+
+  and actionRequiredParams = {
+    (* See progressParams.id for an explanation of this field. *)
+    id: int;
+    label: string option;
   }
 end
 

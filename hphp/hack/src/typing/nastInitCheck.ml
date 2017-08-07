@@ -170,7 +170,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match st with
-    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el, _uel))
+    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), _, el, _uel))
         when m = SN.Members.__construct ->
       let acc = List.fold_left ~f:expr ~init:acc el in
       assign env acc DICheck.parent_init_prop
@@ -296,7 +296,7 @@ and expr_ env acc p e =
       | Some e -> expr acc e)
   | Class_const _
   | Class_get _ -> acc
-  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _) ->
+  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _, _) ->
       let method_ = Env.get_method env f in
       (match method_ with
       | None ->
@@ -311,7 +311,7 @@ and expr_ env acc p e =
             toplevel env acc fb.fnb_nast
           )
       )
-  | Call (_, e, el, uel) ->
+  | Call (_, e, _, el, uel) ->
     let el = el @ uel in
     let el =
       match e with

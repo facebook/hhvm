@@ -51,10 +51,10 @@ end = struct
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False)))
       -> raise Exit
-    | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _)) ->
+    | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _, _)) ->
       let tcopt = Env.get_options env in
       FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun tcopt fun_name)
-    | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _, _)) ->
       static_meth_terminal env ci meth_id
     | If ((_, True), b1, _) -> terminal env inside_case b1
     | If ((_, False), _, b2) -> terminal env inside_case b2
@@ -144,10 +144,10 @@ end = struct
     | Goto _
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False))) -> raise Exit
-    | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _)) ->
+    | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _, _)) ->
       let tcopt = Env.get_options env in
       FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun tcopt fun_name)
-    | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _, _)) ->
       static_meth_terminal env ci meth_id
     | If ((_, True), b1, _) -> terminal env b1
     | If ((_, False), _, b2) -> terminal env b2

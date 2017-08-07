@@ -48,8 +48,8 @@ and expr_ f = function
   | Array_get (e1, e2) -> Array_get (expr f e1, Option.map e2 (expr f))
   | Class_get (cid, id) -> Class_get (class_id f cid, pstring f id)
   | Class_const (cid, id) -> Class_const (class_id f cid, pstring f id)
-  | Call (ct, e, el, uel) ->
-    Call (ct, expr f e, List.map el (expr f), List.map uel (expr f))
+  | Call (ct, e, hl, el, uel) ->
+    Call (ct, expr f e, hl, List.map el (expr f), List.map uel (expr f))
   | String2 el -> String2 (List.map el (expr f))
   | Pair (e1, e2) -> Pair (expr f e1, expr f e2)
   | Cast (h, e) -> Cast (hint f h, expr f e)

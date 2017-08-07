@@ -1368,7 +1368,7 @@ and expr_
       let env, ty =
         array_get ?lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2 in
       make_result env (T.Array_get(te1, Some te2)) ty
-  | Call (Cnormal, (pos_id, Id ((_, s) as id)), el, [])
+  | Call (Cnormal, (pos_id, Id ((_, s) as id)), hl, el, [])
       when is_pseudo_function s ->
       let env, tel, tys = exprs env el in
       if s = SN.PseudoFunctions.hh_show
@@ -1387,9 +1387,10 @@ and expr_
         (T.Call(
           Cnormal,
           T.make_implicitly_typed_expr pos_id (T.Id id),
+          hl,
           tel,
           [])) (Env.fresh_type())
-  | Call (call_type, e, el, uel) ->
+  | Call (call_type, e, _, el, uel) ->
       let env, te, result = dispatch_call p env call_type e el uel in
       let env = Env.forget_members env p in
       env, te, result
@@ -2356,7 +2357,8 @@ and is_abstract_ft fty = match fty with
  *)
 and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
   let make_call env te tel tuel ty =
-    env, T.make_typed_expr p ty (T.Call (call_type, te, tel, tuel)), ty in
+    (* TODO: Thread hints through here *)
+    env, T.make_typed_expr p ty (T.Call (call_type, te, [], tel, tuel)), ty in
   let make_call_special env id tel ty =
     make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) tel [] ty in
   match fun_expr with
@@ -4241,11 +4243,11 @@ and condition ?lhs_of_null_coalesce env tparamet =
   | r, Expr_list (x::xs) ->
       let env, _ = expr env x in
       condition env tparamet (r, Expr_list xs)
-  | _, Call (Cnormal, (_, Id (_, func)), [param], [])
+  | _, Call (Cnormal, (_, Id (_, func)), _, [param], [])
     when SN.PseudoFunctions.isset = func && tparamet &&
     not (Env.is_strict env) ->
       condition_isset env param
-  | _, Call (Cnormal, (_, Id (_, func)), [e], [])
+  | _, Call (Cnormal, (_, Id (_, func)), _, [e], [])
     when not tparamet && SN.StdlibFunctions.is_null = func ->
       condition_var_non_null env e
   | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
@@ -4285,31 +4287,31 @@ and condition ?lhs_of_null_coalesce env tparamet =
       let env = condition env false e1 in
       let env = condition env false e2 in
       env
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
       is_array env `PHPArray p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_vec ->
       is_array env `HackVec p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_dict ->
       is_array env `HackDict p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_keyset ->
       is_array env `HackKeyset p f lv
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_int ->
       is_type env lv Tint (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_bool ->
       is_type env lv Tbool (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_float ->
       is_type env lv Tfloat (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_string ->
       is_type env lv Tstring (Reason.Rpredicated (p, f))
-  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
       is_type env lv Tresource (Reason.Rpredicated (p, f))
   | _, Unop (Ast.Unot, e) ->

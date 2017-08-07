@@ -206,6 +206,7 @@ and expr_ =
   | Class_const of class_id * pstring
   | Call of call_type
     * expr (* function *)
+    * hint list (* explicit type annotations *)
     * expr list (* positional args *)
     * expr list (* unpacked args *)
   | Int of pstring
@@ -715,7 +716,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
    | Class_get   (cid, id)   -> this#on_class_get acc cid id
    | Class_const (cid, id)   -> this#on_class_const acc cid id
-   | Call        (ct, e, el, uel) -> this#on_call acc ct e el uel
+   | Call        (ct, e, _, el, uel) -> this#on_call acc ct e el uel
    | String2     el          -> this#on_string2 acc el
    | Pair        (e1, e2)    -> this#on_pair acc e1 e2
    | Cast        (hint, e)   -> this#on_cast acc hint e

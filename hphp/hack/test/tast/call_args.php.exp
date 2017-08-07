@@ -26,6 +26,7 @@
                  (AnnotatedAST.Call (Cnormal,
                     ((Some (function(string $s): void)),
                      (AnnotatedAST.Id (<p>, "\\takes_string"))),
+                    [],
                     [((Some string),
                       (AnnotatedAST.String (<p>, "hello")))],
                     []))))

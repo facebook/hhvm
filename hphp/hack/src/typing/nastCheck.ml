@@ -172,7 +172,7 @@ module CheckFunctionBody = struct
         expr f_type e;
         maybe expr f_type eopt;
         ()
-    | _, Call (_, e, el, uel) ->
+    | _, Call (_, e, _, el, uel) ->
         expr f_type e;
         List.iter el (expr f_type);
         List.iter uel (expr f_type);
@@ -877,7 +877,7 @@ and expr_ env = function
       expr env e;
       maybe expr env eopt;
       ()
-  | Call (_, e, el, uel) ->
+  | Call (_, e, _, el, uel) ->
       expr env e;
       List.iter el (expr env);
       List.iter uel (expr env);

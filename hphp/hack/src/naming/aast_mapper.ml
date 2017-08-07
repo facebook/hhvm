@@ -63,8 +63,8 @@ struct
     | S.Obj_get(e1, e2, fl) -> T.Obj_get(map_expr f e1, map_expr f e2, fl)
     | S.Array_get(e1, e2) ->
       T.Array_get(map_expr f e1, Option.map e2 (map_expr f))
-    | S.Call(t, e1, el1, el2) ->
-      T.Call(t, map_expr f e1, map_exprl f el1, map_exprl f el2)
+    | S.Call(t, e1, hl, el1, el2) ->
+      T.Call(t, map_expr f e1, hl, map_exprl f el1, map_exprl f el2)
     | S.String2 el -> T.String2 (map_exprl f el)
     | S.Yield af -> T.Yield (map_afield af)
     | S.Await e -> T.Await (map_expr f e)

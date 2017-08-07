@@ -37,7 +37,7 @@
                          (AnnotatedAST.Lvar (<p>, $x))),
                         (None, (AnnotatedAST.Id (<p>, "add"))),
                         OG_nullthrows))),
-                    [], []))));
+                    [], [], []))));
              (AnnotatedAST.Expr
                 ((Some void),
                  (AnnotatedAST.Call (Cnormal,
@@ -47,12 +47,13 @@
                          (AnnotatedAST.Lvar (<p>, $x))),
                         (None, (AnnotatedAST.Id (<p>, "add"))),
                         OG_nullthrows))),
-                    [], []))));
+                    [], [], []))));
              (AnnotatedAST.Expr
                 ((Some void),
                  (AnnotatedAST.Call (Cnormal,
                     ((Some (function(\MyPhonyVector<\X> $v): void)),
                      (AnnotatedAST.Id (<p>, "\\test"))),
+                    [],
                     [((Some \MyPhonyVector),
                       (AnnotatedAST.Lvar (<p>, $x)))],
                     []))))

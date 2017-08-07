@@ -996,6 +996,14 @@ module Make (GetLocals : GetLocals) = struct
   and hintl ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard env l =
     List.map l
       (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard env)
+  and hintl_funcall env l =
+    hintl
+      ~allow_wildcard:true
+      ~forbid_this:false
+      ~allow_typedef:true
+      ~allow_retonly:true
+      env
+      l
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"
@@ -2024,16 +2032,16 @@ module Make (GetLocals : GetLocals) = struct
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
       else
         N.Class_const (make_class_id env x1 [], x2)
-    | Call ((_, Id (p, pseudo_func)), _, el, uel)
+    | Call ((_, Id (p, pseudo_func)), hl, el, uel)
         when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel ;
-        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), exprl env el, [])
-    | Call ((p, Id (_, cn)), _, el, uel)
+        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), hintl_funcall env hl, exprl env el, [])
+    | Call ((p, Id (_, cn)), hl, el, uel)
       when cn = SN.SpecialFunctions.call_user_func ->
         arg_unpack_unexpected uel ;
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
-        | f :: el -> N.Call (N.Cuser_func, expr env f, exprl env el, [])
+        | f :: el -> N.Call (N.Cuser_func, expr env f, hintl_funcall env hl, exprl env el, [])
         )
     | Call ((p, Id (_, cn)), _, el, uel) when cn = SN.SpecialFunctions.fun_ ->
         arg_unpack_unexpected uel ;
@@ -2125,7 +2133,7 @@ module Make (GetLocals : GetLocals) = struct
         | [] -> Errors.naming_too_few_arguments p; N.Any
         | el -> N.List (exprl env el)
         )
-    | Call ((p, Id f), _, el, uel) ->
+    | Call ((p, Id f), hl, el, uel) ->
         let qualified = Env.fun_id env f in
         let cn = snd qualified in
         (* The above special cases (fun, inst_meth, meth_caller, class_meth,
@@ -2154,22 +2162,24 @@ module Make (GetLocals : GetLocals) = struct
           | _ -> Errors.gen_array_rec_arity p; N.Any
           )
         end else
-          N.Call (N.Cnormal, (p, N.Id qualified),
+          N.Call (N.Cnormal, (p, N.Id qualified), hintl_funcall env hl,
                   exprl env el, exprl env uel)
     (* Handle nullsafe instance method calls here. Because Obj_get is used
        for both instance property access and instance method calls, we need
        to match the entire "Call(Obj_get(..), ..)" pattern here so that we
        only match instance method calls *)
-    | Call ((p, Obj_get (e1, e2, OG_nullsafe)), _, el, uel) ->
+    | Call ((p, Obj_get (e1, e2, OG_nullsafe)), hl, el, uel) ->
         N.Call
           (N.Cnormal,
            (p, N.Obj_get (expr env e1,
               expr_obj_get_name env e2, N.OG_nullsafe)),
+           hintl_funcall env hl,
            exprl env el, exprl env uel)
     (* Handle all kinds of calls that weren't handled by any of
        the cases above *)
-    | Call (e, _, el, uel) ->
-        N.Call (N.Cnormal, expr env e, exprl env el, exprl env uel)
+    | Call (e, hl, el, uel) ->
+        N.Call (N.Cnormal, expr env e,
+                hintl_funcall env hl, exprl env el, exprl env uel)
     | Yield_break -> N.Yield_break
     | Yield e -> N.Yield (afield env e)
     | Await e -> N.Await (expr env e)

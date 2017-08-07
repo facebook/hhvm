@@ -111,23 +111,25 @@ class TestLsp(LspTestDriver, unittest.TestCase):
                           test=test,
                           expected=expected)
 
-    def test_init_shutdown(self):
-        self.prepare_environment()
-
-        variables = {
-            'root_path': self.repo_dir,
-        }
-
-        self.load_and_run('initialize_shutdown', variables)
-
-    def test_definition(self):
-        self.prepare_environment()
-
-        test_php = 'definition.php'
-        variables = {
+    def setup_php_file(self, test_php):
+        return {
             'root_path': self.repo_dir,
             'php_file_uri': self.repo_file_uri(test_php),
             'php_file': self.read_repo_file(test_php)
         }
 
+    def test_init_shutdown(self):
+        self.prepare_environment()
+
+        self.load_and_run('initialize_shutdown',
+                          {'root_path': self.repo_dir})
+
+    def test_definition(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('definition.php')
         self.load_and_run('definition', variables)
+
+    def test_hover(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('definition.php')
+        self.load_and_run('hover', variables)

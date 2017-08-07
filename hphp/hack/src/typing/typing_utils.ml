@@ -21,17 +21,36 @@ module TySet = Typing_set
 (*****************************************************************************)
 (* Importing what is necessary *)
 (*****************************************************************************)
-
 let not_implemented _ = failwith "Function not implemented"
-
 type expand_typedef =
     expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * ety
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
-type unify = Env.env -> locl ty -> locl ty -> Env.env * locl ty
-let (unify_ref: unify ref) = ref not_implemented
-let unify x = !unify_ref x
+(* Options to check for while unifying *)
+type unify_options = {
+  (* If follow_bounds=false, only match generic parameters with themselves.
+   * If follow_bounds=true, look in lower and upper bounds of generic parameters,
+   * for example, to unify T and t if there are bounds T as t and T super t.
+   *)
+  follow_bounds : bool;
+  (* Whether we simplify our reason information after encountering a unification
+  error *)
+  simplify_errors : bool;
+}
+
+
+let default_unify_opt = {
+  follow_bounds = true;
+  simplify_errors = true;
+}
+
+let unify_fake ?(opts=default_unify_opt) = not_implemented opts
+
+type unify =
+  ?opts:unify_options -> Env.env -> locl ty -> locl ty -> Env.env * locl ty
+let (unify_ref: unify ref) = ref unify_fake
+let unify ?(opts=default_unify_opt) = !unify_ref ~opts
 
 type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
@@ -173,14 +192,27 @@ let simplified_uerror env ty1 ty2 =
     | Tclass _, Tabstract (AKdependent (`static, []), _) -> false
     | Tabstract (AKdependent _, Some _), _
     | _, Tabstract (AKdependent _, Some _) -> true
+    | Tabstract(AKgeneric s, _), _ ->
+      let base_ty1 = get_base_type env ty1 in
+      AbstractKind.is_generic_dep_ty s &&
+      not (ty_equal ty1 base_ty1)
+    | _, Tabstract(AKgeneric s, _) ->
+      let base_ty2 = get_base_type env ty2 in
+      AbstractKind.is_generic_dep_ty s &&
+      not (ty_equal ty2 base_ty2)
     | _, _ -> false in
+
+  let opts = {
+    follow_bounds = true;
+    simplify_errors = false;
+  } in
   (* We unify the base types to see if that produces an error, if not then
    * we use the standard unification error
    *)
   if simplify then
     Errors.must_error
       (fun _ ->
-          ignore @@ unify env (get_base_type env ty1) (get_base_type env ty2)
+          ignore @@ unify ~opts env (get_base_type env ty1) (get_base_type env ty2)
       )
       (fun _ -> uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2))
   else

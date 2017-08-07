@@ -130,6 +130,7 @@ NEVER_INLINE
 void initializeNamedDataMap() {
   NamedEntity::Map::Config config;
   config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
 
   s_namedDataMap = new NamedEntity::Map(
       RuntimeOption::EvalInitialNamedEntityTableSize, config);

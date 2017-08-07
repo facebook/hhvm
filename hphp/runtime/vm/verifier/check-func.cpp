@@ -1208,6 +1208,22 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
+    #define O(name) \
+    case Op::name: { \
+      auto const id = getImm(pc, 0).u_AA; \
+      if (id < 0 || id >= unit()->numArrays() || \
+          unit()->lookupArrayId(id)->toDataType() != KindOf##name) { \
+        ferror("{} references array data that is not a {}\n", \
+                #name, #name); \
+        return false; \
+      } \
+      break; \
+    }
+    O(Keyset)
+    O(Array)
+    O(Dict)
+    O(Vec)
+    #undef O
     case Op::GetMemoKeyL:
     case Op::MemoGet:
     case Op::MemoSet:

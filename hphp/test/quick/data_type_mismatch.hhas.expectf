@@ -1,0 +1,13 @@
+Verification Error (unit %s func ): Keyset references array data that is not a Keyset
+Verification Error (unit %s func ): Array references array data that is not a Array
+Verification Error (unit %s func ): Dict references array data that is not a Dict
+Verification Error (unit %s func ): Vec references array data that is not a Vec
+Verification Error (unit %s func ): Vec references array data that is not a Vec
+Verification Error (unit %s func ): Keyset references array data that is not a Keyset
+Verification Error (unit %s func ): Array references array data that is not a Array
+Verification Error (unit %s func ): Dict references array data that is not a Dict
+Verification Error (unit %s func ): Dict references array data that is not a Dict
+Verification Error (unit %s func ): Vec references array data that is not a Vec
+Verification Error (unit %s func ): Keyset references array data that is not a Keyset
+Verification Error (unit %s func ): Array references array data that is not a Array
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

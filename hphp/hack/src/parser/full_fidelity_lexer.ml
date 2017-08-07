@@ -612,7 +612,10 @@ let scan_string_literal_in_progress lexer name =
     | ('7', _)
     | ('8', _)
     | ('9', _) ->
-      scan_integer_literal lexer
+      let (lexer1, _) as literal = scan_integer_literal lexer in
+      if errors lexer == errors lexer1 then literal else
+        (* If we failed to scan a literal, do not interpret the literal *)
+        ({ lexer with offset = lexer1.offset }, TokenKind.StringLiteralBody)
     | _ ->
       (* Nothing interesting here. Skip it and find the next
          interesting character. *)

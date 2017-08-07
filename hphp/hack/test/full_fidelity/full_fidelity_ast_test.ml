@@ -213,6 +213,43 @@ let global_keyword_expected =
       (ns_fun_uses: (SMap ())) (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
+let string_literals =
+"<?hh // strict
+final class StringsThatArentNumericLiterals {
+  const string BINARY = \"0b101010\";
+  const string FEINT_BINARY = \"0b101012\";
+  const string HEXADECIMAL = \"0x2A\";
+  const string FEINT_HEXADECIMAL = \"0x2G\";
+  const string OCTAL = \"052\";
+  const string FEINT_OCTAL = \"058\";
+}
+"
+
+let string_literals_expected =
+"(AProgram
+ ((Stmt (Markup (p \"\") ()))
+  (Class
+   ((c_mode: Mstrict) (c_user_attributes: ()) (c_final: true)
+    (c_kind: Cnormal) (c_is_xhp: false)
+    (c_name: (p \"\\\\StringsThatArentNumericLiterals\")) (c_tparams: ())
+    (c_extends: ()) (c_implements: ())
+    (c_body:
+     ((Const ((p (Happly (p string) ())))
+       (((p BINARY) (p (String (p 0b101010))))))
+      (Const ((p (Happly (p string) ())))
+       (((p FEINT_BINARY) (p (String (p 0b101012))))))
+      (Const ((p (Happly (p string) ())))
+       (((p HEXADECIMAL) (p (String (p 0x2A))))))
+      (Const ((p (Happly (p string) ())))
+       (((p FEINT_HEXADECIMAL) (p (String (p 0x2G))))))
+      (Const ((p (Happly (p string) ()))) (((p OCTAL) (p (String (p 052))))))
+      (Const ((p (Happly (p string) ())))
+       (((p FEINT_OCTAL) (p (String (p 058))))))))
+    (c_namespace:
+     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
+      (ns_const_uses: (SMap ()))))
+    (c_enum: ()) (c_span: p)))))"
+
 let test_data =
   [ { name = "sanity_test_classic_parser"
     ; source = simple_source_1
@@ -232,6 +269,11 @@ let test_data =
   ; { name = "Global keyword"
     ; source = global_keyword
     ; expected = global_keyword_expected
+    ; test_function = full_fidelity_to_classic
+    }
+  ; { name = "String literals"
+    ; source = string_literals
+    ; expected = string_literals_expected
     ; test_function = full_fidelity_to_classic
     }
 ]

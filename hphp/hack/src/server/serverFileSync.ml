@@ -16,13 +16,31 @@ open File_heap
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
 
+let get_file_content_from_disk path =
+  let f () = Sys_utils.cat (Relative_path.to_absolute path) in
+  Option.try_with f
+
+let get_file_content = function
+  | ServerUtils.FileContent s -> s
+  | ServerUtils.FileName path ->
+    begin try_relativize_path path >>= fun path ->
+      match File_heap.FileHeap.get path with
+        | Some (Ide f) -> Some f
+        | Some (Disk c) -> Some c
+        | None -> get_file_content_from_disk path
+    end
+      (* In case of errors, proceed with empty file contents *)
+      |> Option.value ~default:""
+
 let open_file env path content =
+  let prev_content = get_file_content (ServerUtils.FileName path) in
   let new_env = try_relativize_path path >>= fun path ->
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     FileHeap.remove_batch (Relative_path.Set.singleton path);
     FileHeap.add path (Ide content);
     let ide_needs_parsing =
-      Relative_path.Set.add env.ide_needs_parsing path in
+      if content = prev_content then env.ide_needs_parsing
+      else Relative_path.Set.add env.ide_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
     Some { env with
       editor_open_files; ide_needs_parsing; last_command_time;
@@ -35,9 +53,10 @@ let close_relative_path env path =
   | Ide f -> f
   | _ -> assert false) in
   FileHeap.remove_batch (Relative_path.Set.singleton path);
-  FileHeap.add path (Disk contents);
+  let new_contents = File_heap.get_contents path in
   let ide_needs_parsing =
-    Relative_path.Set.add env.ide_needs_parsing path in
+    if new_contents = Some contents then env.ide_needs_parsing
+    else Relative_path.Set.add env.ide_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
   { env with
     editor_open_files; ide_needs_parsing; last_command_time
@@ -83,22 +102,6 @@ let clear_sync_data env =
   persistent_client = None;
   diag_subscribe = None;
 }
-
-let get_file_content_from_disk path =
-  let f () = Sys_utils.cat (Relative_path.to_absolute path) in
-  Option.try_with f
-
-let get_file_content = function
-  | ServerUtils.FileContent s -> s
-  | ServerUtils.FileName path ->
-    begin try_relativize_path path >>= fun path ->
-      match File_heap.FileHeap.get path with
-        | Some (Ide f) -> Some f
-        | Some (Disk c) -> Some c
-        | None -> get_file_content_from_disk path
-    end
-      (* In case of errors, proceed with empty file contents *)
-      |> Option.value ~default:""
 
 let get_unsaved_changes env =
   Relative_path.Set.fold env.editor_open_files

@@ -1,0 +1,63 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": false,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":"
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "renameProvider": false,
+        "typeCoverageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": [
+      {
+        "range": {
+          "start": {
+            "line": 0,
+            "character": 0
+          },
+          "end": {
+            "line": 15,
+            "character": 0
+          }
+        },
+        "newText": "<?hh //strict\n\nfunction x(): string {\n  /* @lint-ignore TXT2 3 tabs on purpose */\n  $a = \"this\";\n\n  /* @lint-ignore TXT2 2 tabs on purpose */\n  $b = \"is\";\n\n  /* lint-ignore TXT2 1 tab on purpose */\n  $c = \"messy\"; // 1 tab\n\n  $d = \".\"; // 4 spaces\n  return \"$a\".\"$b\".\"$c\".\"d\";\n}\n"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": null
+  }
+]

@@ -78,3 +78,4 @@ let auto_complete
   in
   keyword_completions @ local_var_completions @ class_member_completions
   |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)
+  |> List.remove_consecutive_duplicates ~equal:(fun a b -> a.res_name = b.res_name)

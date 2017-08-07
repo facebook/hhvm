@@ -18,10 +18,8 @@ open String_utils
 (* TODO: Ensure this covers all cases *)
 (* TODO: Add in "$this" when it's valid *)
 let local_variable_valid_in_context (context:context) (stub:string) : bool =
-  let open Container in
-  (context.closest_parent_container = LambdaBodyExpression ||
-  context.closest_parent_container = CompoundStatement ||
-  context.closest_parent_container = AssignmentExpression) &&
+  let open ContextPredicates in
+  is_expression_valid context &&
   (stub = "" || string_starts_with stub "$")
 
 (* As of June 2017, the lambda analyzer only works with editable syntax trees

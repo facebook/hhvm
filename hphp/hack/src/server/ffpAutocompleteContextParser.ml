@@ -28,6 +28,7 @@ module Container = struct
   | ConstantDeclaration
   | FunctionHeader
   | FunctionParameterList
+  | IfStatement
   | InterfaceBody
   | InterfaceHeader
   | LambdaBodyExpression
@@ -51,7 +52,9 @@ module Predecessor = struct
   | KeywordExtends
   | KeywordFinal
   | KeywordImplements
+  | KeywordReturn
   | KeywordStatic
+  | Statement
   | TokenColon
   | TokenComma
   | TokenEqual
@@ -72,6 +75,48 @@ type context = {
   inside_async_function: bool;
   inside_class_body: bool;
 }
+
+module ContextPredicates = struct
+  open Container
+  open Predecessor
+
+  let is_class_body_declaration_valid context =
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = TokenLeftBrace ||
+    context.predecessor = ClassBodyDeclaration)
+
+  let is_in_return_statement context =
+    context.predecessor = KeywordReturn &&
+    context.closest_parent_container = CompoundStatement
+
+  let is_at_beginning_of_new_statement context =
+    context.closest_parent_container = CompoundStatement &&
+    (context.predecessor = Statement ||
+    context.predecessor = TokenLeftBrace ||
+    context.predecessor = IfWithoutElse ||
+    context.predecessor = TryWithoutFinally ||
+    context.predecessor = TokenColon)
+
+  let is_rhs_of_assignment_expression context =
+    context.closest_parent_container = AssignmentExpression &&
+    context.predecessor = TokenEqual
+
+  let is_in_conditional context =
+    context.closest_parent_container = IfStatement &&
+    context.predecessor = TokenOpenParen
+
+  let is_expression_valid context =
+    is_rhs_of_assignment_expression context ||
+    is_in_conditional context ||
+    is_at_beginning_of_new_statement context ||
+    is_in_return_statement context ||
+    context.closest_parent_container = LambdaBodyExpression
+    (* or is parameter, or is inside if/switch/while/etc. clause *)
+
+  let is_top_level_statement_valid context =
+    context.closest_parent_container = TopLevel &&
+    context.predecessor = TopLevelDeclaration
+end
 
 let initial_context = {
   closest_parent_container = Container.NoContainer;
@@ -141,13 +186,27 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | IfStatement { if_else_clause = {
         syntax = Missing; _
       }; _ } -> Some IfWithoutElse
+    | TryStatement { try_finally_clause = {
+        syntax = Missing; _
+      }; _ } -> Some TryWithoutFinally
+    | CaseLabel _
+    | IfStatement _
+    | EchoStatement _
+    | WhileStatement _
+    | DoStatement _
+    | ForStatement _
+    | ForeachStatement _
+    | TryStatement _
+    | SwitchStatement _
+    | ReturnStatement _
+    | ThrowStatement _
+    | BreakStatement _
+    | ContinueStatement _
+    | ExpressionStatement _ -> Some Statement
     | ConstDeclaration _
     | PropertyDeclaration _
     | MethodishDeclaration _
     | TypeConstDeclaration _  -> Some ClassBodyDeclaration
-    | TryStatement { try_finally_clause = {
-        syntax = Missing; _
-      }; _ } -> Some TryWithoutFinally
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = Async; _ } -> Some KeywordAsync
     | Token { kind = Class; _ } -> Some KeywordClass
@@ -164,6 +223,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }
     | Token { kind = Protected; _ } -> Some VisibilityModifier
+    | Token { kind = Return; _ } -> Some KeywordReturn
     | Token { kind = Static; _ } -> Some KeywordStatic
     | _ -> None
   in
@@ -232,6 +292,8 @@ let make_context
         binary_operator = { syntax = Token { kind = Equal; _ }; _ };
         _
       } -> { acc with closest_parent_container = AssignmentExpression }
+    | PositionedSyntax.IfStatement _ ->
+      { acc with closest_parent_container = Container.IfStatement }
     | Token { kind = ColonColon; _ } ->
       { acc with closest_parent_container = AfterDoubleColon }
     | Token { kind = MinusGreaterThan; _ } ->

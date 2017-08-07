@@ -23,6 +23,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
 open FfpAutocompleteContextParser.Predecessor
+open FfpAutocompleteContextParser.ContextPredicates
 open Core
 
 (* Each keyword completion object has a list of keywords and a function that
@@ -37,13 +38,9 @@ let abstract_keyword = {
   keywords = ["abstract"];
   is_valid_in_context = begin fun context ->
     (* Abstract class *)
-    (context.closest_parent_container = TopLevel ||
-    context.closest_parent_container = ClassHeader) &&
-    context.predecessor = TopLevelDeclaration
+    is_top_level_statement_valid context
     || (* Abstract method *)
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    is_class_body_declaration_valid context
   end;
 }
 
@@ -51,11 +48,13 @@ let final_keyword = {
   keywords = ["final"];
   is_valid_in_context = begin fun context ->
     (* Final class *)
-    (context.closest_parent_container = TopLevel ||
-    context.closest_parent_container = ClassHeader) &&
     (context.predecessor = TopLevelDeclaration ||
     context.predecessor = KeywordAbstract)
+    ||
+    is_top_level_statement_valid context
     || (* Final method *)
+    is_class_body_declaration_valid context
+    ||
     context.closest_parent_container = ClassBody &&
     (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
@@ -69,7 +68,7 @@ let implements_keyword = {
     context.closest_parent_container = ClassBody)
     &&
     (context.predecessor = ClassName ||
-     context.predecessor = ExtendsList)
+    context.predecessor = ExtendsList)
   end;
 }
 
@@ -86,9 +85,7 @@ let extends_keyword = {
 let visibility_modifiers = {
   keywords = ["public"; "protected"; "private"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    is_class_body_declaration_valid context
     ||
     context.closest_parent_container = ClassBody &&
     context.predecessor = KeywordFinal
@@ -98,9 +95,7 @@ let visibility_modifiers = {
 let static_keyword = {
   keywords = ["static"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    is_class_body_declaration_valid context
     ||
     context.closest_parent_container = ClassBody &&
     context.predecessor = VisibilityModifier
@@ -110,33 +105,28 @@ let static_keyword = {
 let async_keyword = {
   keywords = ["async"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    (* Async method *)
+    is_class_body_declaration_valid context
     ||
     context.closest_parent_container = ClassBody &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordStatic)
     ||
-    context.closest_parent_container = AssignmentExpression
+    is_expression_valid context
   end;
 }
 
 let const_keyword = {
   keywords = ["const"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    is_class_body_declaration_valid context
   end;
 }
 
 let use_keyword = {
   keywords = ["use"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    is_class_body_declaration_valid context
   end;
 }
 
@@ -158,7 +148,7 @@ let function_keyword = {
 let class_keyword = {
   keywords = ["class"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TopLevel
+    is_top_level_statement_valid context
     ||
     context.closest_parent_container = ClassHeader &&
     (context.predecessor = KeywordAbstract ||
@@ -169,7 +159,7 @@ let class_keyword = {
 let interface_keyword = {
   keywords = ["interface"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TopLevel
+    is_top_level_statement_valid context
   end;
 }
 
@@ -177,15 +167,14 @@ let declaration_keywords = {
   keywords = ["enum"; "require"; "include"; "require_once"; "include_once";
     "use"; "namespace"; "newtype"; "type"; "trait"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = TopLevel
+    is_top_level_statement_valid context
   end;
 }
 
 let void_keyword = {
   keywords = ["void"];
   is_valid_in_context = begin fun context ->
-    (context.closest_parent_container = ClassBody ||
-    context.closest_parent_container = FunctionHeader) &&
+    context.closest_parent_container = FunctionHeader &&
     (context.predecessor = TokenColon ||
     context.predecessor = TokenLessThan)
   end;
@@ -267,17 +256,15 @@ let async_func_body_keywords = {
 let postfix_expressions = {
   keywords = ["clone"; "new"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = AssignmentExpression ||
-    context.closest_parent_container = CompoundStatement ||
-    context.closest_parent_container = LambdaBodyExpression
+    is_expression_valid context
   end;
 }
 
 let general_statements = {
   keywords = ["if"; "do"; "while"; "for"; "foreach"; "try"; "return"; "throw";
-    "switch"; "yield"; "echo"; "async"];
+    "switch"; "yield"; "echo"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = CompoundStatement
+    is_at_beginning_of_new_statement context
   end;
 }
 
@@ -305,18 +292,14 @@ let try_trailing_keywords = {
 let primary_expressions = {
   keywords = ["tuple"; "shape"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = AssignmentExpression ||
-    context.closest_parent_container = CompoundStatement ||
-    context.closest_parent_container = LambdaBodyExpression
+    is_expression_valid context
   end;
 }
 
 let scope_resolution_qualifiers = {
   keywords = ["self"; "parent"; "static"];
   is_valid_in_context = begin fun context ->
-    context.closest_parent_container = AssignmentExpression ||
-    context.closest_parent_container = CompoundStatement ||
-    context.closest_parent_container = LambdaBodyExpression
+    is_expression_valid context
   end;
 }
 

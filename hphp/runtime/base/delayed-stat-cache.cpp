@@ -219,7 +219,6 @@ class StatCacheBucket {
         if (ret == 0) {
           memcpy(buf, &it->second.m_stat, sizeof(struct stat));
         }
-        m_lstat_mutex.release(); 
         return ret;
       } else {
         l.release();

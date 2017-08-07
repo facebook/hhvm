@@ -12,8 +12,8 @@ open Core
 open SymbolOccurrence
 open Typing_defs
 
-type result =
-  ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
+type single_result = (string SymbolOccurrence.t) * (string SymbolDefinition.t option)
+type result = single_result list
 
 let result_to_ide_message x =
   let open Ide_message in

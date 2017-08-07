@@ -614,13 +614,37 @@ let do_definition (conn: server_conn) (params: Definition.params)
   let (file, line, column) = lsp_file_position_to_hack params in
   let command = ServerCommandTypes.IDENTIFY_FUNCTION (ServerUtils.FileName file, line, column) in
   let results = rpc conn command in
+  (* What's it like when we return multiple definitions? For instance, if you ask *)
+  (* for the definition of "new C()" then we've now got the definition of the     *)
+  (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
+  (* users would be happier to only have the definition of the constructor, so    *)
+  (* as to jump straight to it without the fuss of clicking to select which one.  *)
+  (* That indeed is what Typescript does -- it only gives the constructor.        *)
+  (* (VSCode displays multiple definitions with a peek view of them all;          *)
+  (*  Atom displays them with a small popup showing just file+line of each).      *)
+  (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
+  (* and a derived class "C" without a constructor, and click on "new C()", then  *)
+  (* both Hack and Typescript will take you to the constructor of B. As desired!  *)
+  (* Conclusion: given a class+method, we'll return only the method.              *)
+  let result_is (kind: SymbolDefinition.kind) (result: IdentifySymbolService.single_result): bool =
+    match result with
+    | (_, None) -> false
+    | (_, Some definition) -> definition.SymbolDefinition.kind = kind
+  in
+  let has_class = List.exists results ~f:(result_is SymbolDefinition.Class) in
+  let has_method = List.exists results ~f:(result_is SymbolDefinition.Method) in
+  let filtered_results = if has_class && has_method then
+    List.filter results ~f:(result_is SymbolDefinition.Method)
+  else
+    results
+  in
   let rec hack_to_lsp = function
     | [] -> []
     | (_occurrence, None) :: l -> hack_to_lsp l
     | (_occurrence, Some definition) :: l ->
       (hack_symbol_definition_to_lsp_location definition ~default_path:file) :: (hack_to_lsp l)
   in
-  hack_to_lsp results
+  hack_to_lsp filtered_results
 
 let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
   let open AutocompleteTypes in

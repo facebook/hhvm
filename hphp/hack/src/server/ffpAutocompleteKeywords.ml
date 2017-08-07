@@ -54,10 +54,10 @@ let final_keyword = {
     is_top_level_statement_valid context
     || (* Final method *)
     is_class_body_declaration_valid context
-    ||
+    || (* Final after other modifiers *)
     context.closest_parent_container = ClassBody &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration)
+    (context.predecessor = KeywordStatic ||
+    context.predecessor = VisibilityModifier)
   end;
 }
 
@@ -133,15 +133,20 @@ let use_keyword = {
 let function_keyword = {
   keywords = ["function"];
   is_valid_in_context = begin fun context ->
+    (* Class Method *)
+    is_class_body_declaration_valid context
+    || (* Class method, after modifiers *)
     (context.closest_parent_container = ClassBody ||
     context.closest_parent_container = FunctionHeader) &&
-    (context.predecessor = TokenLeftBrace ||
-    context.predecessor = ClassBodyDeclaration ||
-    context.predecessor = VisibilityModifier ||
+    (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordAsync ||
-    context.predecessor = KeywordStatic)
-    ||
-    context.closest_parent_container = TopLevel
+    context.predecessor = KeywordStatic ||
+    context.predecessor = KeywordFinal)
+    || (* Top level function *)
+    is_top_level_statement_valid context
+    || (* Top level async function *)
+    context.closest_parent_container = TopLevel &&
+    context.predecessor = KeywordAsync
   end;
 }
 

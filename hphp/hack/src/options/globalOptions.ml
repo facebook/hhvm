@@ -30,6 +30,9 @@ let tco_experimental_darray_and_varray = "darray_and_varray"
 
 let tco_experimental_goto = "goto"
 
+(* Whether allow accessing tconsts on generics *)
+let tco_experimental_tconst_on_generics = "tconst_on_generics"
+
 (* Whether Shapes::idx should allow accessing a field that does not exist in
   a partial shape and is not explicitly unset. *)
 let tco_experimental_shape_idx_relaxed =
@@ -71,6 +74,7 @@ let tco_experimental_all =
      tco_experimental_optional_shape_field;
      tco_experimental_darray_and_varray;
      tco_experimental_goto;
+     tco_experimental_tconst_on_generics;
      tco_experimental_shape_idx_relaxed;
      tco_experimental_disable_shape_and_tuple_arrays;
      tco_experimental_promote_nullable_to_optional_in_shapes;

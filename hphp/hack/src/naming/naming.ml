@@ -820,12 +820,17 @@ module Make (GetLocals : GetLocals) = struct
         | x when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
             Errors.invalid_type_access_root root; N.Hany
         | _ ->
+          let tconst_on_generics_enabled =
+            TypecheckerOptions.experimental_feature_enabled
+              (fst env).tcopt
+            TypecheckerOptions.experimental_tconst_on_generics in
           let h =
             hint_id ~forbid_this ~allow_retonly
               ~allow_typedef ~allow_wildcard:false env is_static_var root [] in
           (match h with
           | N.Hthis | N.Happly _ as h -> h
-          | N.Habstr _ when in_where_clause -> h
+          | N.Habstr _ when in_where_clause && tconst_on_generics_enabled ->
+            h
           | _ -> Errors.invalid_type_access_root root; N.Hany
           )
       in

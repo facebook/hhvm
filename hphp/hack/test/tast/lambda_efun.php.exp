@@ -18,7 +18,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     ((Some [fun]),
                      (AnnotatedAST.Lvar (<p>, $x))),
-                    ((Some int),
+                    ((Some _),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_mode = <opaque>; f_ret = None;
                           f_name = ([L0:-1-L0:-1], ";anonymous");
@@ -59,7 +59,7 @@
                  (AnnotatedAST.Binop ((Eq None),
                     ((Some [fun]),
                      (AnnotatedAST.Lvar (<p>, $x))),
-                    ((Some int),
+                    ((Some _),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_mode = <opaque>; f_ret = None;
                           f_name = ([L0:-1-L0:-1], ";anonymous");

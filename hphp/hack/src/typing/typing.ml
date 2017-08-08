@@ -1622,7 +1622,9 @@ and expr_
       let anon = anon_make env p f idl in
       let env, anon_id = Env.add_anonymous env anon in
       let env, tefun, _ = Errors.try_with_error
-        (fun () -> anon env ft.ft_params)
+        (fun () ->
+          let _, tefun, ty = anon env ft.ft_params
+          in env, tefun, ty)
         (fun () ->
           (* If the anonymous function declaration has errors itself, silence
              them in any subsequent usages. *)

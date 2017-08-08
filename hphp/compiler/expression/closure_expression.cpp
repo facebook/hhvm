@@ -157,7 +157,6 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     getFunctionScope()->addUse(m_func->getFunctionScope(),
                                BlockScope::UseKindClosure);
-    m_func->getFunctionScope()->setClosureVars(m_vars);
 
     // closure function's variable table (not containing function's)
     VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
@@ -166,17 +165,11 @@ void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
       auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
       auto const& name = param->getName();
       {
-        Symbol *containingSym = containing->addDeclaredSymbol(name, param);
-        containingSym->setPassClosureVar();
+        containing->addDeclaredSymbol(name, param);
 
         Symbol *sym = variables->addDeclaredSymbol(name, param);
         sym->setClosureVar();
         sym->setDeclaration(ConstructPtr());
-        if (param->isRef()) {
-          sym->setRefClosureVar();
-        } else {
-          sym->clearRefClosureVar();
-        }
       }
     }
     return;

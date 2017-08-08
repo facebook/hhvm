@@ -247,10 +247,6 @@ struct FunctionScope : BlockScope,
     return m_pseudoMain;
   }
 
-  void setClosureVars(ExpressionListPtr closureVars) {
-    m_closureVars = closureVars;
-  }
-
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
@@ -343,8 +339,6 @@ private:
   int m_redeclaring; // multiple definition of the same function
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
-  ExpressionListPtr m_closureVars;
-  ExpressionListPtr m_closureValues;
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 
   // holds the fact that defining this function is a fatal error

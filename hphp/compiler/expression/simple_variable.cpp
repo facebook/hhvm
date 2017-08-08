@@ -100,8 +100,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
           bool unset = hasAllContext(UnsetContext | LValue);
           func->setContainsBareThis(
             true,
-            hasAnyContext(RefValue | RefAssignmentLHS) ||
-            m_sym->isRefClosureVar() || unset);
+            hasAnyContext(RefValue | RefAssignmentLHS) || unset);
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             variables->add(m_sym, true, ar, shared_from_this(),
                            ModifierExpressionPtr());

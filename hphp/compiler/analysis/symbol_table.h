@@ -96,8 +96,6 @@ struct Symbol {
   bool isOverride() const { return m_flags.m_override; }
   bool isHidden() const { return m_flags.m_hidden; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
-  bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
-  bool isPassClosureVar() const { return m_flags.m_passClosureVar; }
   bool isClassName() const { return m_flags.m_className; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
@@ -109,12 +107,9 @@ struct Symbol {
   void setOverride() { m_flags.m_override = true; }
   void setHidden() { m_flags.m_hidden = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
-  void setRefClosureVar() { m_flags.m_refClosureVar = true; }
-  void setPassClosureVar() { m_flags.m_passClosureVar = true; }
   void setClassName() { m_flags.m_className = true; }
 
   void clearGlobal() { m_flags.m_global = false; }
-  void clearRefClosureVar() { m_flags.m_refClosureVar = false; }
 
   void update(Symbol *src) {
     m_flags_val = src->m_flags_val;
@@ -170,8 +165,6 @@ private:
       unsigned m_override : 1;
       unsigned m_hidden : 1;
       unsigned m_closureVar : 1;
-      unsigned m_refClosureVar : 1;
-      unsigned m_passClosureVar : 1;
       unsigned m_className : 1;
     } m_flags;
   };

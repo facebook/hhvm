@@ -115,7 +115,7 @@ AsyncStepHandleOpcodeResult AsyncFlowStepper::handleOpcode(PC pc) {
     {
       // Check if we are executing "await" instruction.
       if (m_awaitOpcodeBreakpointFilter.checkPC(pc)) {
-        auto wh = c_WaitHandle::fromCell(vmsp());
+        auto wh = c_WaitHandle::fromCell(*vmsp());
         // Is "await" blocked?
         if (wh && !wh->isFinished()) {
           handleBlockedAwaitOpcode(pc);

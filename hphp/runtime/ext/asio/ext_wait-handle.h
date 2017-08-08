@@ -126,16 +126,16 @@ struct c_WaitHandle : ObjectData {
     return offsetof(c_WaitHandle, m_resultOrException);
   }
 
-  static c_WaitHandle* fromCell(const Cell* cell) {
+  static c_WaitHandle* fromCell(Cell cell) {
     return (
-        cell->m_type == KindOfObject &&
-        cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
-      ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
+        cell.m_type == KindOfObject &&
+        cell.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
+      ) ? static_cast<c_WaitHandle*>(cell.m_data.pobj) : nullptr;
   }
-  static c_WaitHandle* fromCellAssert(const Cell* cell) {
-    assert(cell->m_type == KindOfObject);
-    assert(cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle));
-    return static_cast<c_WaitHandle*>(cell->m_data.pobj);
+  static c_WaitHandle* fromCellAssert(Cell cell) {
+    assert(cell.m_type == KindOfObject);
+    assert(cell.m_data.pobj->getAttribute(ObjectData::IsWaitHandle));
+    return static_cast<c_WaitHandle*>(cell.m_data.pobj);
   }
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }

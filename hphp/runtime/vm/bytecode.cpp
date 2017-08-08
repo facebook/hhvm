@@ -6089,7 +6089,7 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
 OPTBLD_INLINE TCA iopAwait(PC& pc) {
   auto const awaitable = vmStack().topC();
-  auto wh = c_WaitHandle::fromCell(awaitable);
+  auto wh = c_WaitHandle::fromCell(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
     if (LIKELY(awaitable->m_type == KindOfObject)) {
       auto const obj = awaitable->m_data.pobj;
@@ -6100,7 +6100,7 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
             g_context->invokeFuncFew(func, obj, nullptr, 0, nullptr)
         );
         cellSet(*tvToCell(ret.asTypedValue()), *vmStack().topC());
-        wh = c_WaitHandle::fromCell(vmStack().topC());
+        wh = c_WaitHandle::fromCell(*vmStack().topC());
       }
     }
 
@@ -6157,7 +6157,7 @@ TCA suspendStack(PC &pc) {
 
 OPTBLD_INLINE void iopWHResult() {
   // we should never emit this bytecode for non-waithandle
-  auto const wh = c_WaitHandle::fromCell(vmStack().topC());
+  auto const wh = c_WaitHandle::fromCell(*vmStack().topC());
   if (UNLIKELY(!wh)) {
     raise_error("WHResult input was not a subclass of WaitHandle");
   }

@@ -56,7 +56,7 @@ void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
 Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
                           const Variant& child) {
   // Child not a WaitHandle?
-  auto const child_wh = c_WaitHandle::fromCell(child.asCell());
+  auto const child_wh = c_WaitHandle::fromCell(*child.asCell());
   if (UNLIKELY(!child_wh)) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected child to be an instance of WaitHandle");

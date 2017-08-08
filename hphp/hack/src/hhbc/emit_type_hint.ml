@@ -71,6 +71,12 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 and fmt_hints ~tparams ~namespace hints =
   String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))
 
+let is_mixed h =
+  match snd h with
+  | A.Happly ((_, "mixed"), _)
+  | A.Hoption (_, A.Happly ((_, "mixed"), _)) -> true
+  | _ -> false
+
 let rec hint_to_type_constraint ~tparams ~skipawaitable ~namespace (_, h) =
 match h with
 | A.Happly ((_, ("mixed" | "void")), []) ->
@@ -124,26 +130,26 @@ match h with
   TC.make tc_name tc_flags
 
 | A.Hoption t ->
-  let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace t in
-  let tc_name = TC.name tc in
-  let tc_flags = TC.flags tc in
-  let tc_flags = List.dedup
-    ([TC.Nullable; TC.HHType; TC.ExtendedHint] @ tc_flags) in
-  TC.make tc_name tc_flags
+  make_tc_with_flags_if_non_empty_flags ~tparams ~skipawaitable ~namespace
+    t [TC.Nullable; TC.HHType; TC.ExtendedHint]
 
 | A.Hsoft t ->
+  make_tc_with_flags_if_non_empty_flags ~tparams ~skipawaitable ~namespace
+    t [TC.Soft; TC.HHType; TC.ExtendedHint]
+
+and make_tc_with_flags_if_non_empty_flags
+  ~tparams ~skipawaitable ~namespace t flags =
   let tc = hint_to_type_constraint ~tparams ~skipawaitable ~namespace t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   match tc_name, tc_flags with
   | None, [] -> tc
   | _ ->
-  let tc_flags = List.dedup
-    ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
+  let tc_flags = List.dedup (flags @ tc_flags) in
   TC.make tc_name tc_flags
 
-let try_add_nullable ~nullable flags =
-  if nullable then List.dedup (TC.Nullable :: flags)
+let try_add_nullable ~nullable h flags =
+  if nullable && not (is_mixed h) then List.dedup (TC.Nullable :: flags)
   else flags
 
 let make_type_info ~tparams ~namespace h tc_name tc_flags =
@@ -171,10 +177,11 @@ let param_hint_to_type_info ~skipawaitable ~nullable
       || Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options
     in
     let tc_flags = if is_hh_type then [TC.HHType] else [] in
-    let tc_flags = if nullable then TC.Nullable :: tc_flags else tc_flags in
+    let tc_flags = try_add_nullable ~nullable h tc_flags in
     make_type_info ~tparams ~namespace h tc_name tc_flags
   else
-    let tc_flags = try_add_nullable ~nullable (TC.flags tc) in
+    let tc_flags = TC.flags tc in
+    let tc_flags = try_add_nullable ~nullable h tc_flags in
     make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
@@ -192,7 +199,7 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
     if kind = Return && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
     else tc_flags in
-  let tc_flags = try_add_nullable ~nullable tc_flags in
+  let tc_flags = try_add_nullable ~nullable h tc_flags in
   make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_class ~namespace h =

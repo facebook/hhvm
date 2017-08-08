@@ -58,6 +58,7 @@ let emit_main defs =
       ~namespace:Namespace_env.empty_with_default_popt
       ~is_closure_body:false
       ~is_memoize:false
+      ~is_async:false
       ~skipawaitable:false
       ~is_return_by_ref:false
       ~scope:Ast_scope.Scope.toplevel

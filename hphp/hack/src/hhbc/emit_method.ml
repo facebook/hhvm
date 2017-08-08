@@ -51,10 +51,8 @@ let from_ast_wrapper : bool -> _ ->
     then Some (Emit_fatal.emit_fatal_runtimeomitframe
       ("Cannot call abstract method " ^ class_name
         ^ "::" ^ original_name ^ "()"))
-    else
-    if method_is_async
-    then Some (gather [instr_null; instr_retc])
-    else None in
+    else None
+  in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in
@@ -70,6 +68,7 @@ let from_ast_wrapper : bool -> _ ->
       ~scope:scope
       ~is_closure_body:method_is_closure_body
       ~is_memoize
+      ~is_async:method_is_async
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref:ast_method.Ast.m_ret_by_ref
       ~default_dropthrough

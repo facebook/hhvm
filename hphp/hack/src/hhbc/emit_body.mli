@@ -24,6 +24,7 @@ val emit_body:
   is_closure_body: bool ->
   (* True if this is the body of a <<__Memoize>> method *)
   is_memoize: bool ->
+  is_async: bool ->
   skipawaitable:bool ->
   (* True if the return type is a ref *)
   is_return_by_ref: bool ->

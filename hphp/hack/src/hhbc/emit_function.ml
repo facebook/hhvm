@@ -23,10 +23,6 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let function_is_async =
     ast_fun.Ast.f_fun_kind = Ast_defs.FAsync
     || ast_fun.Ast.f_fun_kind = Ast_defs.FAsyncGenerator in
-  let default_dropthrough =
-    if function_is_async
-    then Some (gather [instr_null; instr_retc])
-    else None in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
@@ -40,9 +36,10 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~scope
       ~is_closure_body:false
       ~is_memoize
+      ~is_async:function_is_async
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref:ast_fun.Ast.f_ret_by_ref
-      ~default_dropthrough
+      ~default_dropthrough:None
       ~return_value:instr_null
       ~namespace
       ~doc_comment:ast_fun.Ast.f_doc_comment

@@ -100,7 +100,7 @@ class DateTime implements DateTimeInterface {
   const RFC3339 = '';
   const RSS = '';
   const W3C = '';
-  public function __construct(mixed $time = 'now', ?DateTimeZone $timezone = null);
+  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset();

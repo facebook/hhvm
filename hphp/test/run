@@ -269,7 +269,7 @@ function hhvm_path() {
   return rel_path($file);
 }
 
-function hh_codegen_cmd($options, $config_file) {
+function hh_codegen_cmd($options, $config_file = null) {
   $cmd = hh_codegen_path();
   if (isset($config_file)) {
     $cmd .= ' -c "'.$config_file.'"';

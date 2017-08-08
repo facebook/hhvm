@@ -234,7 +234,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 
-    ArrayInit frame(7, ArrayInit::Map{});
+    ArrayInit frame(8, ArrayInit::Map{});
 
     auto const curUnit = fp->func()->unit();
     auto const curOp = curUnit->getOp(pc);
@@ -548,7 +548,7 @@ Array CompactTrace::Key::extract() const {
   PackedArrayInit aInit(m_frames.size(), CheckAllocation{});
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    ArrayInit frame(7, ArrayInit::Map{});
+    ArrayInit frame(6, ArrayInit::Map{});
     if (prev && !prev->func->isBuiltin()) {
       auto const prevUnit = prev->func->unit();
       auto prevFile = prevUnit->filepath();

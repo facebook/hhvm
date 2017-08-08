@@ -49,6 +49,7 @@
                      (AnnotatedAST.Call (Cnormal,
                         ((Some [fun]),
                          (AnnotatedAST.Lvar (<p>, $x))),
+                        [],
                         [((Some int),
                           (AnnotatedAST.Int (<p>, "2")))],
                         [])))
@@ -122,6 +123,7 @@
                      (AnnotatedAST.Call (Cnormal,
                         ((Some [fun]),
                          (AnnotatedAST.Lvar (<p>, $x))),
+                        [],
                         [((Some int),
                           (AnnotatedAST.Int (<p>, "2")));
                           ((Some int),

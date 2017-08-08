@@ -312,10 +312,10 @@ module Full = struct
       let _, n' = Env.get_var env n in
       if ISet.mem n' st then o "[rec]"
       else
-      (* In debug mode we show where type variables appear *)
-      if !debug_mode then o "^";
       (* For hh_show_env we further show the type variable number *)
-      if !show_tvars then o (string_of_int n');
+      if !show_tvars then (o "#"; o (string_of_int n))
+      (* In debug mode just show where type variables appear *)
+      else if !debug_mode then o "^";
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
       let st = ISet.add n' st in
       ty tcopt st env o ety

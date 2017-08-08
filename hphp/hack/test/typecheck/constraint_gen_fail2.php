@@ -18,8 +18,5 @@ function foo<T as A>(T $x): void {
 }
 
 function test(): void {
-  $x = foo('test');
+  foo('test');
 }
-
-
-

@@ -24,13 +24,18 @@ module Phase   = Typing_phase
 (*****************************************************************************)
 
 let sub_type p ur env ty_sub ty_super =
-  let env = { env with Env.pos = p } in
+  Typing_log.log_types p env
+    [Typing_log.Log_sub ("Typing_ops.sub_type",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
+
+  let env = { env with Env.pos = p; Env.outer_pos = p; Env.outer_reason = ur } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> SubType.sub_type env ty_sub ty_super)
     (fun () -> env)
 
 let unify p ur env ty1 ty2 =
-  let env = { env with Env.pos = p } in
+  let env = { env with Env.pos = p; Env.outer_pos = p; Env.outer_reason = ur } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> Unify.unify env ty1 ty2)
     (fun () -> env, (Reason.Rwitness p, Tany))

@@ -1,8 +1,8 @@
-File "constraint_gen_fail2.php", line 21, characters 12-17:
+File "constraint_gen_fail2.php", line 21, characters 7-12:
 Some type constraint(s) here are violated (Typing[4110])
 File "constraint_gen_fail2.php", line 16, characters 14-14:
 'T' is a constrained type
 File "constraint_gen_fail2.php", line 16, characters 19-19:
 This is an object of type A
-File "constraint_gen_fail2.php", line 21, characters 12-17:
+File "constraint_gen_fail2.php", line 21, characters 7-12:
 It is incompatible with a string

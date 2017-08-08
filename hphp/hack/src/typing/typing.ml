@@ -1701,6 +1701,11 @@ and class_const ?(incl_tc=false) env p (cid, mid) =
     | None ->
       env, T.make_typed_expr p const_ty (T.Class_const (ce, mid)), const_ty
 
+and anon_sub_type pos ur env ty_sub ty_super =
+  Errors.try_add_err pos (Reason.string_of_ureason ur)
+    (fun () -> SubType.sub_type env ty_sub ty_super)
+    (fun () -> env)
+
 (*****************************************************************************)
 (* Anonymous functions. *)
 (*****************************************************************************)
@@ -1724,7 +1729,8 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
           { (Phase.env_with_self env) with from_class = Some CIstatic } in
         let env, h = Phase.localize ~ety_env env h in
         let pos = Reason.to_pos (fst ty) in
-        let env = Type.sub_type pos Reason.URparam env ty h in
+        (* Don't use Type.sub_type as it resets env.Env.pos unnecessarily *)
+        let env = anon_sub_type pos Reason.URparam env ty h in
         (* Closures are allowed to have explicit type-hints. When
          * that is the case we should check that the argument passed
          * is compatible with the type-hint.
@@ -3877,7 +3883,7 @@ and call_ pos env fty el uel =
         env, tel, [], err_none
       | Some anon ->
         let () = check_arity pos fpos (List.length tyl) arity in
-        let tyl = List.map tyl (fun x -> None, x) in
+        let tyl = List.map tyl (fun ty -> None, ty) in
         let env, _, ty = anon env tyl in
         env, tel, [], ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->

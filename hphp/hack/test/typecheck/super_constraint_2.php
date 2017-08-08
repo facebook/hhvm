@@ -18,6 +18,12 @@ class C123<+T> {
 class FooBase123 {}
 class Foo123 extends FooBase123 {}
 class FooDerived123 extends Foo123 {}
-function test1(C123<Foo123> $c, FooDerived123 $x, bool $b): FooDerived123 {
-  return $c->foo($x, $b);
+class Woo {
+  public function test1(
+    C123<Foo123> $c,
+    FooDerived123 $x,
+    bool $b,
+  ): FooDerived123 {
+    return $c->foo($x, $b);
+  }
 }

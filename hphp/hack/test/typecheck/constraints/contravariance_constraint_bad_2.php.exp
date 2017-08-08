@@ -1,10 +1,10 @@
-File "contravariance_constraint_bad_2.php", line 41, characters 16-18:
-Some type constraint(s) here are violated (Typing[4110])
-File "contravariance_constraint_bad_2.php", line 14, characters 12-12:
+File "contravariance_constraint_bad_2.php", line 39, characters 7-14:
+Invalid argument (Typing[4110])
+File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
+Some type constraint(s) here are violated
+File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
 'T' is a constrained type
-File "contravariance_constraint_bad_2.php", line 40, characters 18-18:
-'T' is a constrained type
-File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
+File "contravariance_constraint_bad_2.php", line 39, characters 16-18:
 This is an object of type NAC\AAA
 File "contravariance_constraint_bad_2.php", line 36, characters 16-18:
 It is incompatible with an object of type NAC\BBB

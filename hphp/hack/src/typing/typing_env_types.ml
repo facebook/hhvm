@@ -53,6 +53,9 @@ type local_env = {
 
 type env = {
   pos     : Pos.t      ;
+  (* Position and reason information on entry to a subtype or unification check *)
+  outer_pos : Pos.t;
+  outer_reason : Typing_reason.ureason;
   tenv    : locl ty IMap.t ;
   subst   : int IMap.t ;
   lenv    : local_env  ;

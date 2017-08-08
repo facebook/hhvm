@@ -1,0 +1,6 @@
+File "contravariance_unresolved_bad_3.php", line 10, characters 24-25:
+Invalid argument (Typing[4110])
+File "contravariance_unresolved_bad_3.php", line 6, characters 13-18:
+This is a string
+File "contravariance_unresolved_bad_3.php", line 6, characters 22-24:
+It is incompatible with an object of type Map

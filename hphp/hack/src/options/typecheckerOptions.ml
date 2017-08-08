@@ -38,5 +38,7 @@ let experimental_stronger_shape_idx_ret =
   GlobalOptions.tco_experimental_stronger_shape_idx_ret
 let experimental_annotate_function_calls =
   GlobalOptions.tco_experimental_annotate_function_calls
+let experimental_unresolved_fix =
+  GlobalOptions.tco_experimental_unresolved_fix
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

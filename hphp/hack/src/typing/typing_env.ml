@@ -260,6 +260,8 @@ let empty_local tpenv = {
 
 let empty tcopt file ~droot = {
   pos     = Pos.none;
+  outer_pos = Pos.none;
+  outer_reason = Reason.URnone;
   tenv    = IMap.empty;
   subst   = IMap.empty;
   lenv    = empty_local SMap.empty;

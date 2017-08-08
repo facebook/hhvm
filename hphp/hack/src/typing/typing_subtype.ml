@@ -447,7 +447,6 @@ and subtype_method ~check_return env r_sub ft_sub r_super ft_super =
     Phase.localize_ft ~ety_env ~instantiate_tparams:false env ft_super in
   let env, ft_sub_no_tvars =
     Phase.localize_ft ~ety_env ~instantiate_tparams:false env ft_sub in
-
   subtype_funs_generic
     ~check_return env
     ~contravariant_arguments:false
@@ -570,10 +569,43 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     fst (Unify.unify_unwrapped
         env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
             ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
-  |  (_, Tunresolved tyl), _ ->
+
+    (* If the subtype is a type variable bound to an empty unresolved, record
+     * this in the todo list to be checked later. But make sure that we wrap
+     * any error using the position and reason information that was supplied
+     * at the entry point to subtyping.
+     *)
+  | (_, Tunresolved []), _ ->
+    begin match ty_sub with
+    | (_, Tvar _) ->
+      if not
+        (TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_unresolved_fix)
+      then env
+      else
+        let outer_pos = env.Env.outer_pos in
+        let outer_reason = env.Env.outer_reason in
+        Env.add_todo env begin fun env' ->
+          Errors.try_add_err outer_pos (Reason.string_of_ureason outer_reason)
+          (fun () ->
+            sub_type env' ty_sub ty_super, false)
+          (fun _ ->
+            env, true (* Remove from todo list if there was an error *)
+          )
+          end
+
+    | _ ->
+      env
+    end
+
+  | (_, Tunresolved tyl), _ ->
+    let env =
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super)
-      end ~init:env
+      end ~init:env in
+    env
+
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)

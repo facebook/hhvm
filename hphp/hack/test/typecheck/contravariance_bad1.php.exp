@@ -1,8 +1,10 @@
-File "", line 0, characters 0--1:
-Some type constraint(s) here are violated (Typing[4110])
-File "contravariance_bad1.php", line 16, characters 17-17:
-'T' is a constrained type
-File "contravariance_bad1.php", line 16, characters 22-22:
+File "contravariance_bad1.php", line 39, characters 10-11:
+Invalid return type (Typing[4110])
+File "contravariance_bad1.php", line 33, characters 16-16:
 This is an object of type A
-File "contravariance_bad1.php", line 32, characters 16-16:
+File "contravariance_bad1.php", line 16, characters 46-46:
+  via this generic T
+File "contravariance_bad1.php", line 30, characters 30-30:
 It is incompatible with an object of type B
+File "contravariance_bad1.php", line 30, characters 30-30:
+Considering that this type argument is contravariant with respect to ISettable

@@ -61,6 +61,11 @@ let tco_experimental_promote_nullable_to_optional_in_shapes =
 let tco_experimental_stronger_shape_idx_ret =
     "stronger_shape_idx_return"
 
+(* Whether subtype assertions of form TUnresolved[] <: t should be added to
+ * todo list and checked later (usually generated from contravariant types) *)
+let tco_experimental_unresolved_fix =
+  "unresolved_fix"
+
 (**
  * Allows parsing type hints for function calls, such as foo<int>(args);.
  *)
@@ -80,6 +85,7 @@ let tco_experimental_all =
      tco_experimental_promote_nullable_to_optional_in_shapes;
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;
+     tco_experimental_unresolved_fix;
    ]
 
 let tco_migration_flags_all =

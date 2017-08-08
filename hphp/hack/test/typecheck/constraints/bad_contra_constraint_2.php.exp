@@ -1,0 +1,10 @@
+File "bad_contra_constraint_2.php", line 20, characters 26-51:
+Invalid argument (Typing[4110])
+File "bad_contra_constraint_2.php", line 17, characters 52-57:
+This is a string
+File "bad_contra_constraint_2.php", line 18, characters 20-24:
+It is incompatible with a mixed value
+File "hhi_lib__srcs/collections/interfaces.hhi", line 778, characters 55-56:
+  via this generic Tv
+File "hhi_lib__srcs/interfaces.hhi", line 520, characters 63-64:
+  via this generic Tv

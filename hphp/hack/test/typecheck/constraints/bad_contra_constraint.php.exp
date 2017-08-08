@@ -1,0 +1,8 @@
+File "bad_contra_constraint.php", line 22, characters 21-25:
+Invalid argument (Typing[4110])
+File "", line 0, characters 0--1:
+This is a value of generic type Td
+File "bad_contra_constraint.php", line 22, characters 12-26:
+It was implicitly typed as a value of generic type Td during this operation
+File "bad_contra_constraint.php", line 13, characters 10-12:
+It is incompatible with a value of generic type Tb#1 from this instanceof test matching \Base<Tb#1>

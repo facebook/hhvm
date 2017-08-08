@@ -1,0 +1,6 @@
+File "fun_generics_bad.php", line 24, characters 29-33:
+Invalid argument (Typing[4110])
+File "fun_generics_bad.php", line 4, characters 29-31:
+This is an int
+File "fun_generics_bad.php", line 19, characters 18-21:
+It is incompatible with a nullable type

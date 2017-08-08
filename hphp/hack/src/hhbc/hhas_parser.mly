@@ -43,7 +43,6 @@ open Hhas_parser_actions
 %token CATCHDIRECTIVE
 %token ALIASDIRECTIVE
 %token STRICTDIRECTIVE
-%token AS INSTEADOF
 
 %start program
 %type <Hhas_program.t> program
@@ -198,7 +197,7 @@ classdecl:
           false (*isxhp*)
           (not (List.mem "nontop" attrs)) (*istop*)
           ((fun (x, _, _) -> x) $7)(*uses*)
-          ((fun (_, x, _) -> x) $7)(*use_alises*)
+          ((fun (_, x, _) -> x) $7)(*use_aliases*)
           ((fun (_, _, x) -> x) $7)(*use_precedences*)
           $8(*enumtype*)
           $12(*methods*)
@@ -334,29 +333,19 @@ classenumty:
 classuses:
   | /* empty */ {[], [], []}
   | USESDIRECTIVE idlist SEMI nl {$2, [], []}
-  | USESDIRECTIVE idlist LBRACE nl classconflictlist nl RBRACE nl {$2, fst $5, snd $5}
+  | USESDIRECTIVE idlist LBRACE nl classconflictlist nl RBRACE nl
+   {let (aliases,precedences) = split_classconflicts $5
+    in ($2, aliases, precedences)}
 ;
 classconflictlist:
-  | /* empty */ {[], []}
-  | classalias nl classconflictlist {$1 :: fst $3, snd $3}
-  | classprecedence nl classconflictlist {fst $3, $1 :: snd $3}
+  | /* empty */ {[]}
+  | idlist nl SEMI nl classconflictlist {parse_precedence_or_alias $1 :: $5}
+  | ID ID LBRACK idlist RBRACK idoption nl SEMI nl classconflictlist
+    {parse_alias $1 $2 $4 $6 :: $10}
 ;
-classalias:
-  | ID AS ID {(None, $1, Some $3, None)}
-  | ID AS visibility {(None, $1, None, Some $3)}
-  | ID COLONCOLON ID AS visibility {(Some $1, $3, None, Some $5)}
-  | ID COLONCOLON ID AS ID {(Some $1, $3, Some $5, None)}
-  | ID COLONCOLON ID AS visibility ID {(Some $1, $3, Some $6, Some $5)}
-;
-classprecedence:
-  | ID COLONCOLON ID INSTEADOF idlist SEMI {($1, $3, $5)}
-;
-visibility:
-  | ID {match $1 with
-        | "public" -> Ast.Public
-        | "private" -> Ast.Private
-        | "protected" -> Ast.Protected
-        | _ -> report_error "incorrect visibility type"}
+idoption:
+ | /* empty */ {None}
+ | ID {Some $1}
 ;
 extendsimplements:
   | /* empty */ {(None,[])}

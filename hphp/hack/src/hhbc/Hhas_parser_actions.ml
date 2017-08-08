@@ -183,6 +183,59 @@ let makelabel s =
     | _ -> Label.Named s
 let makelabelinst s = ILabel (makelabel s)
 
+type precedence_or_alias =
+ | Precedence of (string * string * string list)
+ | Alias of (string option * string * string option * Ast.kind option)
+
+let vis_of s = match s with
+ | "public" ->  Ast.Public
+ | "private" -> Ast.Private
+ | "protected" -> Ast.Protected
+ | _ -> report_error "bad visibility attribute in alias"
+
+let colon_split s = match Str.split (Str.regexp "::") s with
+ | [first_id; second_id] -> Some (first_id, second_id)
+ | [_one_id] -> None
+ | _ -> report_error "bad double colon split in precedence or alias"
+
+let parse_precedence_or_alias xs = match xs with
+ | [] -> report_error "empty idlist for precedence or alias"
+ | x :: rest ->
+   (match colon_split x with
+     | Some (first_id, second_id) ->
+       (match rest with
+         | ["as"; lastid] -> Alias (Some first_id, second_id, Some lastid, None)
+         | "insteadof" :: rest2 -> Precedence (first_id, second_id, rest2)
+         | _ -> report_error "bad idlist after colonsplit in precedence or alias")
+     | None ->
+       (match rest with
+         | ["as"; lastid] -> Alias (None, x, Some lastid, None)
+         | _ -> report_error "bad idlist after id in precedence or alias"))
+
+let parse_alias x y vislist opt_lastid =
+   let (first, second) =
+     match colon_split x with
+      | Some (first_id, second_id) -> (Some first_id, second_id)
+      | None -> (None, x) in
+   let vis =
+     match vislist with
+      | [] -> None
+      | [v] -> Some (vis_of v)
+      | _ -> report_error
+              "multiple visibility attributes in alias (this should probably not be an error!)" in
+   if y = "as" then
+    Alias (first, second, opt_lastid, vis)
+   else report_error "missing as in alias"
+
+(* TODO: replace with list library function *)
+let rec split_classconflicts xss = match xss with
+ | [] -> ([],[])
+ | xs :: rest ->
+   let (aliases, precedences) = split_classconflicts rest
+   in match xs with
+       | Alias tup -> (tup :: aliases, precedences)
+       | Precedence tup -> (aliases, tup :: precedences)
+
 (* TODO: replace stupidly big match with a hash table. Bootcampable? *)
 let makenullaryinst s =
  match s with

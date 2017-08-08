@@ -79,6 +79,13 @@ let locl ty = LoclTy ty
 
 type env = expand_env
 
+let env_with_self env =
+  {
+    type_expansions = [];
+    substs = SMap.empty;
+    this_ty = Reason.none, TUtils.this_of (Env.get_self env);
+    from_class = None;
+  }
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
  * common operations that are necessary for this operation, specifically:
@@ -186,19 +193,40 @@ and localize ~ety_env env ty =
 
 (* For the majority of cases when we localize a function type we instantiate
  * the function's type parameters to be a Tunresolved wrapped in a Tvar so the
- * type can grow. There is ONLY ONE case where we do not do this, in
- * Typing_subtype.subtype_method. See the comment for that function for why
+ * type can grow. There are two cases where we do not do this.
+
+ * 1) In Typing_subtype.subtype_method. See the comment for that function for why
  * this is necessary.
+ * 2) When the type arguments are explicitly specified, in which case we instantiate
+ * the type parameters to the provided types.
  *)
-and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
-  (* Set the instantiated type parameter to initially point to unresolved, so
-   * that it can grow and eventually be a subtype of something like "mixed".
-  *)
+and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env ft =
+  (* If no explicit type parameters are provided, set the instantiated type parameter to
+   * initially point to unresolved, so that it can grow and eventually be a subtype of
+   * something like "mixed".
+   * If explicit type parameters are provided, just instantiate tvarl to them.
+   *)
   let env, substs =
     if instantiate_tparams
     then
+      let default () = List.map_env env ft.ft_tparams TUtils.unresolved_tparam in
       let env, tvarl =
-        List.map_env env ft.ft_tparams TUtils.unresolved_tparam in
+        if List.length explicit_tparams = 0
+        then default ()
+        else if List.length explicit_tparams <> List.length ft.ft_tparams
+        then begin
+          Errors.expected_tparam ft.ft_pos (List.length ft.ft_tparams);
+          default ()
+        end
+        else
+          let type_argument env hint =
+            match hint with
+            | (pos, Nast.Happly ((_, "_"), [])) ->
+              let reason = Reason.Rwitness pos in
+              TUtils.in_var env (reason, Tunresolved [])
+            | _ -> hint_locl env hint in
+          List.map_env env explicit_tparams type_argument
+      in
       let ft_subst = Subst.make ft.ft_tparams tvarl in
       env, SMap.union ft_subst ety_env.substs
     else
@@ -321,19 +349,17 @@ and check_where_constraints ~ety_env env def_pos cstrl =
         ty1
     end
 
-let env_with_self env =
-  {
-    type_expansions = [];
-    substs = SMap.empty;
-    this_ty = Reason.none, TUtils.this_of (Env.get_self env);
-    from_class = None;
-  }
+
 
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env
  *)
-let localize_with_self env ty =
+and localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
+
+and hint_locl env h =
+  let h = Decl_hint.hint env.Env.decl_env h in
+  localize_with_self env h
 
 (* Add generic parameters to the environment, localize their bounds, and
  * transform these into a flat list of constraints of the form (ty1,ck,ty2)
@@ -351,10 +377,6 @@ let localize_generic_parameters_with_bounds
   env, List.concat cstrss
 
 (* Helper functions *)
-
-let hint_locl env h =
-  let h = Decl_hint.hint env.Env.decl_env h in
-  localize_with_self env h
 
 (* Ensure that types are equivalent i.e. subtypes of each other *)
 let unify_decl env ty1 ty2 =

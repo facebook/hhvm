@@ -1,0 +1,8 @@
+File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
+Invalid argument (Typing[4110])
+File "poly_instance_method_explicit_type_args_error.php", line 11, characters 20-22:
+This is an int
+File "poly_instance_method_explicit_type_args_error.php", line 4, characters 27-28:
+  via this generic T1
+File "poly_instance_method_explicit_type_args_error.php", line 11, characters 25-29:
+It is incompatible with a string

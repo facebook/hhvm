@@ -1,0 +1,42 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tint)));
+      f_name = (<p>, "\\f"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_hint =
+         (Some (<p>, (Hoption (<p>, (Hprim Tint)))));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = <p>; param_name = "$x"; param_expr = None }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.If (
+               ((Some bool),
+                (AnnotatedAST.Binop (EQeqeq,
+                   ((Some ?int), (AnnotatedAST.Lvar (<p>, $x))),
+                   ((Some ?int), AnnotatedAST.Null)))),
+               [(AnnotatedAST.Return (<p>,
+                   (Some ((Some int), (AnnotatedAST.Int (<p>, "1"))))
+                   ))
+                 ],
+               [AnnotatedAST.Noop]));
+             (AnnotatedAST.If (
+                ((Some bool),
+                 (AnnotatedAST.Binop (EQeqeq,
+                    ((Some int), AnnotatedAST.Null),
+                    ((Some int), (AnnotatedAST.Lvar (<p>, $x)))))),
+                [(AnnotatedAST.Return (<p>,
+                    (Some ((Some int),
+                           (AnnotatedAST.Int (<p>, "2"))))
+                    ))
+                  ],
+                [AnnotatedAST.Noop]));
+             (AnnotatedAST.Return (<p>,
+                (Some ((Some int), (AnnotatedAST.Int (<p>, "0"))))
+                ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] })
+  ]

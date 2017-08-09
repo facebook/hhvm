@@ -1429,13 +1429,16 @@ and expr_
       Typing_hooks.dispatch_binop_hook p bop ty1 ty2;
       make_result env (T.Binop(bop, te1, te2))
         (Reason.Rlogic_ret p, Tprim Tbool)
-  | Binop (bop, e, (pe, Null))
-  | Binop (bop, (pe, Null), e)
-    when Env.is_strict env && (bop = Ast.EQeqeq || bop = Ast.Diff2) ->
+  | Binop (bop, e1, e2) when Env.is_strict env
+                        && (snd e1 = Nast.Null || snd e2 = Nast.Null)
+                        && (bop = Ast.EQeqeq || bop = Ast.Diff2) ->
+      let e, ne = if snd e2 = Nast.Null then e1, e2 else e2, e1 in
       let _, te, ty = raw_expr in_cond env e in
       if not in_cond
       then Typing_equality_check.assert_nullable p bop env ty;
-      make_result env (T.Binop(bop, te, T.make_typed_expr pe ty T.Null))
+      let tne = T.make_typed_expr (fst ne) ty T.Null in
+      let te1, te2 = if snd e2 = Nast.Null then te, tne else tne, te in
+      make_result env (T.Binop(bop, te1, te2))
         (Reason.Rcomp p, Tprim Tbool)
   | Binop (bop, e1, e2) ->
       let env, te1, ty1 = raw_expr in_cond env e1 in

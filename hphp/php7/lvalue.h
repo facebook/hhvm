@@ -20,23 +20,19 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/php7/zend/zend.h"
 #include "hphp/php7/bytecode.h"
+#include "hphp/php7/cfg.h"
 
 namespace HPHP { namespace php7 {
-
-struct Compiler;
 
 /* This is a value that we can take a base pointer to--different from Lvalue
  * since PHP has values that can be indexed but not assigned to: namely, array
  * expressions
  */
 struct BaseValue {
-  explicit BaseValue(Compiler& c) : c(c) {}
   virtual ~BaseValue() = default;
 
   struct MinstrSeq;
-  virtual void getB(MinstrSeq& seq) = 0;
-
-  Compiler& c;
+  virtual CFG getB(MinstrSeq& seq) = 0;
 };
 
 /* This is a PHP value that acts like an lvalue--that is, it can be both read
@@ -44,19 +40,17 @@ struct BaseValue {
  * are object properties or elements of an array
  */
 struct Lvalue : BaseValue {
-  explicit Lvalue(Compiler& c) : BaseValue(c) {}
-
   /* Get an lvalue for an expression--if the expression is not an lvalue,
    * returns nullptr; */
-  static std::unique_ptr<Lvalue> getLvalue(Compiler& c, const zend_ast* ast);
+  static std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
 
-  virtual void getC() = 0;
-  virtual void getV() = 0;
-  virtual void getF(uint32_t slot) = 0;
-  virtual void assign(const zend_ast* rhs) = 0;
-  virtual void bind(const zend_ast* rhs) = 0;
-  virtual void assignOp(SetOpOp op, const zend_ast* rhs) = 0;
-  virtual void incDec(IncDecOp op) = 0;
+  virtual CFG getC() = 0;
+  virtual CFG getV() = 0;
+  virtual CFG getF(uint32_t slot) = 0;
+  virtual CFG assign(const zend_ast* rhs) = 0;
+  virtual CFG bind(const zend_ast* rhs) = 0;
+  virtual CFG assignOp(SetOpOp op, const zend_ast* rhs) = 0;
+  virtual CFG incDec(IncDecOp op) = 0;
 };
 
 }} // HPHP::php7

@@ -24,42 +24,64 @@
 
 namespace HPHP { namespace php7 {
 
+namespace {
+
+CFG compileZvalLiteral(const zval* ast);
+CFG compileConstant(const zend_ast* ast);
+CFG compileVar(const zend_ast* ast, Destination destination);
+CFG compileAssignment(const zend_ast* ast);
+CFG compileBind(const zend_ast* ast);
+CFG compileAssignOp(const zend_ast* ast);
+CFG compileCall(const zend_ast* ast);
+CFG compileArray(const zend_ast* ast);
+
+CFG compileGlobalDeclaration(const zend_ast* ast);
+CFG compileIf(Function* func, const zend_ast* ast);
+CFG compileWhile(Function* func,
+    const zend_ast* cond,
+    const zend_ast* body,
+    bool bodyFirst);
+CFG compileFor(Function* func, const zend_ast* ast);
+
+Bytecode opForBinaryOp(const zend_ast* op);
+IncDecOp getIncDecOpForNode(zend_ast_kind kind);
+SetOpOp getSetOpOp(zend_ast_attr attr);
+
+std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
+
+CFG compileUnaryOp(const zend_ast* op);
+CFG compileIncDec(const zend_ast* op);
+
+CFG fixFlavor(Destination dest, Flavor actual);
+
+} // namespace
+
 using namespace bc;
 
-Compiler::Compiler(const std::string& filename) {
-  unit = std::make_unique<Unit>();
-  unit->name = filename;
-}
-
-void Compiler::compileProgram(const zend_ast* ast) {
+void compileProgram(Unit* unit, const zend_ast* ast) {
   assert(ast->kind == ZEND_AST_STMT_LIST);
 
   auto pseudomain = unit->getPseudomain();
-  activeFunction = pseudomain;
-  activeBlock = pseudomain->entry;
 
-  compileStatement(ast);
-
-  if (activeBlock) {
-    activeBlock->emit(Int{1});
-    activeBlock->exit(RetC{});
-  }
+  pseudomain->cfg = compileStatement(pseudomain, ast)
+    .then(Int{1})
+    .thenReturn(Flavor::Cell)
+    .makeExitsReal();
 }
 
-void Compiler::compileFunction(const zend_ast* ast) {
+void compileFunction(Unit* unit, const zend_ast* ast) {
   auto decl = zend_ast_get_decl(ast);
   auto name = decl->name;
   auto params = zend_ast_get_list(decl->child[0]);
   auto body = decl->child[2];
 
   auto func = unit->makeFunction(ZSTR_VAL(name));
-  std::swap(activeFunction, func);
-  SCOPE_EXIT { std::swap(activeFunction, func); };
 
   if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
-    activeFunction->attr |= Attr::AttrReference;
+    func->attr |= Attr::AttrReference;
   }
-  activeFunction->params.reserve(params->children);
+
+  func->params.reserve(params->children);
   for (uint32_t i = 0; i < params->children; i++) {
     auto param = params->child[i];
     auto param_name = zval_to_string(zend_ast_get_zval(param->child[1]));
@@ -70,62 +92,55 @@ void Compiler::compileFunction(const zend_ast* ast) {
       panic("default parameter values not supported");
     }
 
-    activeFunction->params.push_back({
+    func->params.push_back({
       param_name,
       static_cast<bool>(param_attrs & ZEND_PARAM_REF)
     });
   }
 
-  withBlock(activeFunction->entry, [&] {
-    activeBlock = activeFunction->entry;
-    compileStatement(body);
-
-    if (activeBlock) {
-      activeBlock->emit(Null{});
-      activeBlock->exit(RetC{});
-    }
-  });
+  func->cfg = compileStatement(func, body)
+    .then(Null{})
+    .thenReturn(func->returnsByReference()
+      ? Flavor::Ref
+      : Flavor::Cell)
+    .makeExitsReal();
 }
 
-void Compiler::panic(const std::string& msg) {
+void panic(const std::string& msg) {
   throw CompilerException(folly::sformat("panic: {}", msg));
 }
 
-void Compiler::compileZvalLiteral(const zval* zv) {
+namespace {
+
+CFG compileZvalLiteral(const zval* zv) {
   switch (Z_TYPE_P(zv)) {
     case IS_LONG:
-      activeBlock->emit(Int{Z_LVAL_P(zv)});
-      break;
+      return { Int{Z_LVAL_P(zv)} };
     case IS_NULL:
-      activeBlock->emit(Null{});
-      break;
+      return { Null{} };
     case IS_FALSE:
-      activeBlock->emit(False{});
-      break;
+      return { False{} };
     case IS_TRUE:
-      activeBlock->emit(True{});
-      break;
+      return { True{} };
     case IS_DOUBLE:
-      activeBlock->emit(Double{Z_DVAL_P(zv)});
-      break;
+      return { Double{Z_DVAL_P(zv)} };
     case IS_STRING:
-      activeBlock->emit(String{Z_STRVAL_P(zv)});
-      break;
+      return { String{Z_STRVAL_P(zv)} };
     default:
       panic("unsupported literal");
   }
 }
 
-void Compiler::compileConstant(const zend_ast* ast) {
+CFG compileConstant(const zend_ast* ast) {
   auto name = ast->child[0];
   const char* str = Z_STRVAL_P(zend_ast_get_zval(name));
   if (name->attr & ZEND_NAME_NOT_FQ) {
     if (strcasecmp(str, "true") == 0) {
-      activeBlock->emit(True{});
+      return { True{} };
     } else if (strcasecmp(str, "false") == 0) {
-      activeBlock->emit(False{});
+      return { False{} };
     } else if (strcasecmp(str, "null") == 0) {
-      activeBlock->emit(Null{});
+      return { Null{} };
     } else {
       panic("unknown unqualified constant");
     }
@@ -135,35 +150,32 @@ void Compiler::compileConstant(const zend_ast* ast) {
 }
 
 
-std::unique_ptr<Lvalue> Compiler::getLvalue(const zend_ast* ast){
-  if (auto ret = Lvalue::getLvalue(*this, ast)) {
+std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast){
+  if (auto ret = Lvalue::getLvalue(ast)) {
     return ret;
   }
 
   panic("can't make lvalue");
 }
 
-void Compiler::compileVar(const zend_ast* ast, Destination dest) {
+CFG compileVar(const zend_ast* ast, Destination dest) {
   switch (dest.flavor) {
     case Drop:
-      getLvalue(ast)->getC();
-      activeBlock->emit(PopC{});
-      return;
+      return getLvalue(ast)->getC()
+        .then(PopC{});
     case Cell:
-      getLvalue(ast)->getC();
-      return;
+      return getLvalue(ast)->getC();
     case Ref:
-      getLvalue(ast)->getV();
-      return;
+      return getLvalue(ast)->getV();
     case FuncParam:
-      getLvalue(ast)->getF(dest.slot);
-      return;
+      return getLvalue(ast)->getF(dest.slot);
     case Return:
       panic("Can't get a local with R flavor");
   }
+  panic("bad destination flavor");
 }
 
-Bytecode Compiler::opForBinaryOp(const zend_ast* ast) {
+Bytecode opForBinaryOp(const zend_ast* ast) {
   // NB: bizarrely, greater-than (>,>=) have their own AST type
   // and there is no ZEND_IS_GREATER since it doesn't correspond to a VM
   // instruction
@@ -199,33 +211,29 @@ Bytecode Compiler::opForBinaryOp(const zend_ast* ast) {
   }
 }
 
-void Compiler::compileUnaryOp(const zend_ast* ast) {
+CFG compileUnaryOp(const zend_ast* ast) {
   switch (ast->kind) {
     case ZEND_AST_UNARY_MINUS:
-      activeBlock->emit(Int{0});
-      compileExpression(ast->child[0], Flavor::Cell);
-      activeBlock->emit(Sub{});
-      return;
+      return CFG()
+        .then(Int{0})
+        .then(compileExpression(ast->child[0], Flavor::Cell))
+        .then(Sub{});
     case ZEND_AST_UNARY_PLUS:
-      activeBlock->emit(Int{0});
-      compileExpression(ast->child[0], Flavor::Cell);
-      activeBlock->emit(Add{});
-      return;
+      return CFG()
+        .then(Int{0})
+        .then(compileExpression(ast->child[0], Flavor::Cell))
+        .then(Add{});
     case ZEND_AST_UNARY_OP:
-      compileExpression(ast->child[0], Flavor::Cell);
-      switch(ast->attr) {
-        case ZEND_BOOL_NOT:
-          activeBlock->emit(Not{});
-          return;
-        case ZEND_BW_NOT:
-          activeBlock->emit(BitNot{});
-          return;
-      }
+      return CFG()
+        .then(compileExpression(ast->child[0], Flavor::Cell))
+        .then(ast->attr == ZEND_BOOL_NOT
+            ? Bytecode{Not{}}
+            : Bytecode(BitNot{}));
   }
   panic("unknown unop");
 }
 
-IncDecOp Compiler::getIncDecOpForNode(zend_ast_kind kind) {
+IncDecOp getIncDecOpForNode(zend_ast_kind kind) {
   switch (kind) {
     case ZEND_AST_PRE_INC:
       return IncDecOp::PreInc;
@@ -240,7 +248,7 @@ IncDecOp Compiler::getIncDecOpForNode(zend_ast_kind kind) {
   }
 }
 
-SetOpOp Compiler::getSetOpOp(zend_ast_attr attr) {
+SetOpOp getSetOpOp(zend_ast_attr attr) {
   switch (attr) {
     case ZEND_ASSIGN_ADD:
       return SetOpOp::PlusEqual;
@@ -271,36 +279,36 @@ SetOpOp Compiler::getSetOpOp(zend_ast_attr attr) {
   }
 }
 
-void Compiler::compileIncDec(const zend_ast* ast) {
+CFG compileIncDec(const zend_ast* ast) {
   auto op = getIncDecOpForNode(ast->kind);
   auto var = ast->child[0];
 
-  getLvalue(var)->incDec(op);
+  return getLvalue(var)->incDec(op);
 }
 
-void Compiler::compileAssignment(const zend_ast* ast) {
+CFG compileAssignment(const zend_ast* ast) {
   auto lhs = ast->child[0];
   auto rhs = ast->child[1];
 
-  getLvalue(lhs)->assign(rhs);
+  return getLvalue(lhs)->assign(rhs);
 }
 
-void Compiler::compileBind(const zend_ast* ast) {
+CFG compileBind(const zend_ast* ast) {
   auto lhs = ast->child[0];
   auto rhs = ast->child[1];
 
-  getLvalue(lhs)->bind(rhs);
+  return getLvalue(lhs)->bind(rhs);
 }
 
-void Compiler::compileAssignOp(const zend_ast* ast) {
+CFG compileAssignOp(const zend_ast* ast) {
   auto rhs = ast->child[1];
   auto op = getSetOpOp(ast->attr);
   auto lhs = ast->child[0];
 
-  getLvalue(lhs)->assignOp(op, rhs);
+  return getLvalue(lhs)->assignOp(op, rhs);
 }
 
-void Compiler::compileCall(const zend_ast* ast) {
+CFG compileCall(const zend_ast* ast) {
   auto callee = ast->child[0];
   auto params = zend_ast_get_list(ast->child[1]);
 
@@ -308,27 +316,28 @@ void Compiler::compileCall(const zend_ast* ast) {
       ? zend_ast_get_zval(callee)
       : nullptr;
 
+  CFG call;
   // push the FPI record
   if (zv && Z_TYPE_P(zv) == IS_STRING) {
-    activeBlock->emit(FPushFuncD{
+    call.then(FPushFuncD{
       params->children,
       Z_STRVAL_P(zend_ast_get_zval(callee))
     });
   } else {
-    compileExpression(callee, Flavor::Cell);
-    activeBlock->emit(FPushFunc{
-      params->children
-    });
+    call.then(compileExpression(callee, Flavor::Cell))
+      .then(FPushFunc{
+        params->children
+      });
   }
 
   for (uint32_t i = 0; i < params->children; i++) {
-    compileExpression(params->child[i], Destination::Param(i));
+    call.then(compileExpression(params->child[i], Destination::Param(i)));
   }
 
-  activeBlock->emit(FCall{params->children});
+  return call.then(FCall{params->children});
 }
 
-void Compiler::compileArray(const zend_ast* ast) {
+CFG compileArray(const zend_ast* ast) {
   // TODO: handle static array literals, too
   auto list = zend_ast_get_list(ast);
 
@@ -338,7 +347,7 @@ void Compiler::compileArray(const zend_ast* ast) {
     throw LanguageException("Cannot use list() as a standalone expression");
   }
 
-  activeBlock->emit(NewArray{list->children});
+  CFG cfg(NewArray{list->children});
   for (uint32_t i = 0; i < list->children; i++) {
     auto item = list->child[i];
 
@@ -355,114 +364,104 @@ void Compiler::compileArray(const zend_ast* ast) {
     if (item->child[1]) {
       auto key = item->child[1];
       auto val = item->child[0];
-      compileExpression(key, Flavor::Cell);
-      compileExpression(val, flavor);
+      cfg.then(compileExpression(key, Flavor::Cell))
+         .then(compileExpression(val, flavor));
       if (ref) {
-        activeBlock->emit(AddElemV{});
+        cfg.then(AddElemV{});
       } else {
-        activeBlock->emit(AddElemC{});
+        cfg.then(AddElemC{});
       }
     } else {
       auto val = item->child[0];
-      compileExpression(val, flavor);
+      cfg.then(compileExpression(val, flavor));
       if (ref) {
-        activeBlock->emit(AddNewElemV{});
+        cfg.then(AddNewElemV{});
       } else {
-        activeBlock->emit(AddNewElemC{});
+        cfg.then(AddNewElemC{});
       }
     }
   }
+  return cfg;
 }
 
-void Compiler::compileExpression(const zend_ast* ast, Destination dest) {
+} // namespace
+
+CFG compileExpression(const zend_ast* ast, Destination dest) {
   switch (ast->kind) {
     case ZEND_AST_ZVAL:
-      compileZvalLiteral(zend_ast_get_zval(ast));
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileZvalLiteral(zend_ast_get_zval(ast))
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_CONST:
-      compileConstant(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileConstant(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_UNARY_MINUS:
     case ZEND_AST_UNARY_PLUS:
     case ZEND_AST_UNARY_OP:
-      compileUnaryOp(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileUnaryOp(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_BINARY_OP:
     case ZEND_AST_GREATER:
     case ZEND_AST_GREATER_EQUAL:
-      compileExpression(ast->child[0], Flavor::Cell);
-      compileExpression(ast->child[1], Flavor::Cell);
-      activeBlock->emit(opForBinaryOp(ast));
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return CFG()
+        .then(compileExpression(ast->child[0], Flavor::Cell))
+        .then(compileExpression(ast->child[1], Flavor::Cell))
+        .then(opForBinaryOp(ast))
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_POST_INC:
     case ZEND_AST_POST_DEC:
     case ZEND_AST_PRE_INC:
     case ZEND_AST_PRE_DEC:
-      compileIncDec(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileIncDec(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_VAR:
     case ZEND_AST_DIM:
-      compileVar(ast, dest);
-      break;
+      return compileVar(ast, dest);
     case ZEND_AST_ASSIGN:
-      compileAssignment(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileAssignment(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_ASSIGN_REF:
-      compileBind(ast);
-      fixFlavor(dest, Flavor::Ref);
+      return compileBind(ast)
+        .then(fixFlavor(dest, Flavor::Ref));
       break;
     case ZEND_AST_ASSIGN_OP:
-      compileAssignOp(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileAssignOp(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_CALL:
-      compileCall(ast);
-      fixFlavor(dest, Flavor::Return);
-      break;
+      return compileCall(ast)
+        .then(fixFlavor(dest, Flavor::Return));
     case ZEND_AST_ARRAY:
-      compileArray(ast);
-      fixFlavor(dest, Flavor::Cell);
-      break;
+      return compileArray(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     default:
       panic("unsupported expression");
   }
 }
 
-void Compiler::fixFlavor(Destination dest, Flavor actual) {
+namespace {
+
+CFG fixFlavor(Destination dest, Flavor actual) {
   switch(dest.flavor) {
     case Drop:
       switch (actual) {
         case Drop:
-          return;
+          return {};
         case Cell:
-          activeBlock->emit(PopC{});
-          return;
+          return { PopC{} };
         case Ref:
-          activeBlock->emit(PopV{});
-          return;
+          return { PopV{} };
         case Return:
-          activeBlock->emit(PopR{});
-          return;
+          return { PopR{} };
         case FuncParam:
           panic("Can't drop param");
-          return;
       }
     case Ref:
       switch (actual) {
         case Cell:
-          activeBlock->emit(Box{});
-          return;
+          return { Box{} };
         case Ref:
-          return;
+          return {};
         case Return:
-          activeBlock->emit(BoxR{});
-          return;
+          return { BoxR{} };
         case Drop:
         case FuncParam:
           panic("Can't make ref");
@@ -470,13 +469,11 @@ void Compiler::fixFlavor(Destination dest, Flavor actual) {
     case Cell:
       switch (actual) {
         case Cell:
-          return;
+          return {};
         case Ref:
-          activeBlock->emit(Unbox{});
-          return;
+          return { Unbox{} };
         case Return:
-          activeBlock->emit(UnboxR{});
-          return;
+          return { UnboxR{} };
         case Drop:
         case FuncParam:
           panic("Can't make cell");
@@ -486,7 +483,7 @@ void Compiler::fixFlavor(Destination dest, Flavor actual) {
     case Return:
       switch (actual) {
         case Return:
-          return;
+          return {};
         default:
           panic("can't coerce to return value");
       }
@@ -494,99 +491,91 @@ void Compiler::fixFlavor(Destination dest, Flavor actual) {
       auto slot = dest.slot;
       switch (actual) {
         case Cell:
-          activeBlock->emit(FPassCE{slot});
-          return;
+          return { FPassCE{slot} };
         case Ref:
-          activeBlock->emit(FPassV{slot});
-          return;
+          return { FPassV{slot} };
         case Return:
-          activeBlock->emit(FPassR{slot});
-          return;
+          return { FPassR{slot} };
         case Drop:
         case FuncParam:
           panic("Can't make function param");
       }
   }
+  panic("bad destination flavor");
 }
 
-void Compiler::compileStatement(const zend_ast* ast) {
+} // namespace
+
+CFG compileStatement(Function* func, const zend_ast* ast) {
   switch (ast->kind) {
     case ZEND_AST_STMT_LIST: {
       // just a block, so recur please :)
+      CFG cfg;
       auto list = zend_ast_get_list(ast);
       for (uint32_t i = 0; i < list->children; i++) {
         if (!list->child[i]) {
           continue;
         }
-        compileStatement(list->child[i]);
+        cfg.then(compileStatement(func, list->child[i]));
       }
-      break;
+      return cfg;
     }
     case ZEND_AST_ECHO:
-      compileExpression(ast->child[0], Flavor::Cell);
-      activeBlock->emit(Print{});
-      activeBlock->emit(PopC{});
-      break;
+      return CFG()
+        .then(compileExpression(ast->child[0], Flavor::Cell))
+        .then(Print{})
+        .then(PopC{});
     case ZEND_AST_IF:
-      compileIf(ast);
-      break;
+      return compileIf(func, ast);
     case ZEND_AST_WHILE:
-      compileWhile(ast->child[0], ast->child[1], false);
-      break;
+      return compileWhile(func, ast->child[0], ast->child[1], false);
     case ZEND_AST_DO_WHILE:
-      compileWhile(ast->child[1], ast->child[0], true);
-      break;
+      return compileWhile(func, ast->child[1], ast->child[0], true);
     case ZEND_AST_FOR:
-      compileFor(ast);
-      break;
+      return compileFor(func, ast);
     case ZEND_AST_BREAK:
-      activeBlock->exit(Jmp{currentLoop("break").continuation});
-      activeBlock = nullptr;
-      break;
+      return CFG().thenBreak();
     case ZEND_AST_GLOBAL:
-      compileGlobalDeclaration(ast);
-      break;
+      return compileGlobalDeclaration(ast);
     case ZEND_AST_CONTINUE:
-      activeBlock->exit(Jmp{currentLoop("continue").test});
-      activeBlock = nullptr;
-      break;
-    case ZEND_AST_RETURN:
-      if (!ast->child[0]) {
-        activeBlock->emit(Null{});
-        activeBlock->exit(RetC{});
-      } else if (activeFunction->attr & Attr::AttrReference) {
-        compileExpression(ast->child[0], Flavor::Ref);
-        activeBlock->exit(RetV{});
-      } else {
-        compileExpression(ast->child[0], Flavor::Cell);
-        activeBlock->exit(RetC{});
-      }
-      activeBlock = nullptr;
-      break;
+      return CFG().thenContinue();
+    case ZEND_AST_RETURN: {
+      auto flavor = func->returnsByReference()
+        ? Flavor::Ref
+        : Flavor::Cell;
+      auto expr = ast->child[0]
+        ? compileExpression(ast->child[0], flavor)
+        : CFG(Null{}).then(fixFlavor(flavor, Flavor::Cell));
+      return expr.thenReturn(flavor);
+    }
     case ZEND_AST_FUNC_DECL:
-      compileFunction(ast);
-      break;
+      compileFunction(func->parent, ast);
+      return CFG();
     default:
-      compileExpression(ast, Flavor::Drop);
+      return compileExpression(ast, Flavor::Drop);
   }
 }
 
-void Compiler::compileGlobalDeclaration(const zend_ast* ast) {
+namespace {
+
+CFG compileGlobalDeclaration(const zend_ast* ast) {
   auto var = ast->child[0];
   auto zv = var->child[0];
   auto name = zval_to_string(zend_ast_get_zval(zv));
 
-  activeBlock->emit(String{name});
-  activeBlock->emit(VGetG{});
-  activeBlock->emit(BindL{name});
-  activeBlock->emit(PopV{});
+  return {
+    String{name},
+    VGetG{},
+    BindL{name},
+    PopV{}
+  };
 }
 
-void Compiler::compileIf(const zend_ast* ast) {
+CFG compileIf(Function* func, const zend_ast* ast) {
   auto list = zend_ast_get_list(ast);
 
-  // where control will return after we're finished
-  auto end = activeFunction->allocateBlock();
+  CFG cfg;
+  auto end = cfg.makeBlock();
 
   for (uint32_t i = 0; i <list->children; i++) {
     auto elem = list->child[i];
@@ -594,115 +583,108 @@ void Compiler::compileIf(const zend_ast* ast) {
     auto contents = elem->child[1];
     if (!condition) {
       // if no condition is provided, this is the 'else' branch
-      compileStatement(contents);
-      break;
+      cfg.then(compileStatement(func, contents));
     } else {
-      // otherwise, we have a conditional
-      auto branch = activeFunction->allocateBlock();
-
-      withBlock(branch, [&]() {
-        compileStatement(contents);
-        if (activeBlock) {
-          activeBlock->exit(Jmp{end});
-        }
-      });
-
-      compileExpression(condition, Flavor::Cell);
-      branchTo<JmpNZ>(branch);
+      cfg
+        .then(compileExpression(condition, Flavor::Cell))
+        .branchNZ(
+          compileStatement(func, contents)
+            .thenJmp(end)
+        );
     }
   }
 
-  if (activeBlock) {
-    activeBlock->exit(Jmp{end});
-  }
-  activeBlock = end;
+  return cfg.thenJmp(end);
 }
 
-void Compiler::compileWhile(const zend_ast* condition, const zend_ast* body,
-                            bool bodyFirst) {
 
-  auto continuation = activeFunction->allocateBlock();
-  auto bodyBlock = activeFunction->allocateBlock();
-  auto testBlock = activeFunction->allocateBlock();
 
-  withBlock(bodyBlock, [&]() {
-    activeLoops.push({continuation, testBlock});
-    compileStatement(body);
-    if (activeBlock) {
-      activeBlock->exit(Jmp{testBlock});
-    }
-    activeLoops.pop();
-  });
+CFG compileWhile(Function* func,
+    const zend_ast* condition,
+    const zend_ast* contents,
+    bool bodyFirst) {
+  return CFG::Labeled(
+    ".start",
+    CFG().then(bodyFirst
+      ? ".loop-body"
+      : ".loop-header"),
 
-  withBlock(testBlock, [&]() {
-    compileExpression(condition, Flavor::Cell);
-    activeBlock->exit(JmpNZ{bodyBlock});
-    activeBlock->exit(Jmp{continuation});
-  });
+    ".loop-body",
+    compileStatement(func, contents)
+      .linkLoop(
+        CFG().then(".end"),
+        CFG().then(".loop-header"))
+      .then(".loop-header"),
 
-  if (bodyFirst) {
-    activeBlock->exit(Jmp{bodyBlock});
-  } else {
-    activeBlock->exit(Jmp{testBlock});
-  }
+    ".loop-header",
+    compileExpression(condition, Flavor::Cell)
+      .branchNZ(".loop-body"),
 
-  activeBlock = continuation;
+    ".end",
+    CFG()
+  );
+
+  return {};
 }
 
-void Compiler::compileFor(const zend_ast* ast) {
+CFG compileFor(Function* func, const zend_ast* ast) {
   auto initializers = zend_ast_get_list(ast->child[0]);
   auto tests = zend_ast_get_list(ast->child[1]);
   auto increments = zend_ast_get_list(ast->child[2]);
   auto body = ast->child[3];
 
-  // compile the initializers
-  if (initializers) {
-    for (uint32_t i = 0; i < initializers->children; i++) {
-      compileExpression(initializers->child[i], Flavor::Drop);
+  CFG cfg;
+
+  const auto doAll = [&] (const zend_ast_list* list) {
+    CFG all;
+    if (list) {
+      for (uint32_t i = 0; i < list->children; i++) {
+        all.then(compileExpression(list->child[i], Flavor::Drop));
+      }
     }
+    return all;
+  };
+
+  CFG testCFG;
+  if (tests) {
+    for (uint32_t i = 0; i < tests->children; i++) {
+      // ignore all but the last test
+      auto flavor = (i + 1 < tests->children)
+        ? Flavor::Drop
+        : Flavor::Cell;
+      testCFG.then(compileExpression(tests->child[i], flavor));
+    }
+    testCFG.branchNZ(".body");
+  } else {
+    testCFG.then(".body");
   }
 
-  auto continuation = activeFunction->allocateBlock();
-  auto bodyBlock = activeFunction->allocateBlock();
-  auto testBlock = activeFunction->allocateBlock();
-  auto incrementBlock = activeFunction->allocateBlock();
+  // compile the initializers
+  cfg.then(CFG::Labeled(
+    ".initializers",
+    doAll(initializers)
+      .then(".test"),
 
-  withBlock(bodyBlock, [&]() {
-    activeLoops.push({continuation, incrementBlock});
-    compileStatement(body);
-    if (activeBlock) {
-      activeBlock->exit(Jmp{incrementBlock});
-    }
-    activeLoops.pop();
-  });
+    ".body",
+    compileStatement(func, body)
+      .linkLoop(
+        CFG().then(".end"),
+        CFG().then(".increment"))
+      .then(".increment"),
 
-  withBlock(testBlock, [&]() {
-    // an empty condition list is the same as one that is always successful
-    if (tests) {
-      for (uint32_t i = 0; i < tests->children; i++) {
-        // ignore all but the last test
-        auto flavor = (i + 1 < tests->children)
-          ? Flavor::Drop
-          : Flavor::Cell;
-        compileExpression(tests->child[i], flavor);
-      }
-      activeBlock->exit(JmpZ{continuation});
-    }
+    ".increment",
+    doAll(increments).then(".test"),
 
-    activeBlock->exit(Jmp{bodyBlock});
-  });
+    ".test",
+    std::move(testCFG),
 
-  withBlock(incrementBlock, [&]() {
-    if (increments) {
-      for (uint32_t i = 0; i < increments->children; i++) {
-        compileExpression(increments->child[i], Flavor::Drop);
-      }
-    }
-    activeBlock->exit(Jmp{testBlock});
-  });
+    ".end",
+    CFG()
+  ));
 
-  activeBlock->exit(Jmp{testBlock});
-  activeBlock = continuation;
+  return cfg;
 }
+
+} // namespace
 
 }} // HPHP::php7

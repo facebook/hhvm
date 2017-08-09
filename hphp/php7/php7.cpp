@@ -31,7 +31,7 @@ namespace {
 
 using HPHP::php7::CompilerException;
 using HPHP::php7::LanguageException;
-using HPHP::php7::Compiler;
+using HPHP::php7::compile;
 using HPHP::php7::dump_asm;
 using HPHP::php7::makeFatalUnit;
 
@@ -88,7 +88,7 @@ zend_ast* runParser(const folly::IOBuf& buffer) {
 std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
   try {
     auto ast = runParser(buf);
-    auto unit = Compiler::compile(filename, ast);
+    auto unit = compile(filename, ast);
     return dump_asm(*unit);
   } catch (const LanguageException& e) {
     return dump_asm(*makeFatalUnit(filename, e.what()));

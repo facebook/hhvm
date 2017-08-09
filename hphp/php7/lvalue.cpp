@@ -84,45 +84,52 @@ struct BaseValue::MinstrSeq {
     return stackDepth++;
   }
 
-  void finalQuery(const MemberKey& key, QueryMOp op) {
+  CFG finalQuery(const MemberKey& key, QueryMOp op) {
     instrs.push_back(QueryM{ keysOnStack, op, key});
+    return emit();
   }
 
-  void finalCGet(const MemberKey& key) {
-    finalQuery(key, QueryMOp::CGet);
+  CFG finalCGet(const MemberKey& key) {
+    return finalQuery(key, QueryMOp::CGet);
   }
 
-  void finalFPass(const MemberKey& key) {
+  CFG finalFPass(const MemberKey& key) {
     assert(isArg);
     instrs.push_back(FPassM{ slot, keysOnStack, key});
+    return emit();
   }
 
-  void finalIsset(const MemberKey& key) {
-    finalQuery(key, QueryMOp::Isset);
+  CFG finalIsset(const MemberKey& key) {
+    return finalQuery(key, QueryMOp::Isset);
   }
 
-  void finalEmpty(const MemberKey& key) {
-    finalQuery(key, QueryMOp::Empty);
+  CFG finalEmpty(const MemberKey& key) {
+    return finalQuery(key, QueryMOp::Empty);
   }
 
-  void finalVGet(const MemberKey& key) {
+  CFG finalVGet(const MemberKey& key) {
     instrs.push_back(VGetM{keysOnStack, key});
+    return emit();
   }
 
-  void finalSet(const MemberKey& key) {
+  CFG finalSet(const MemberKey& key) {
     instrs.push_back(SetM{keysOnStack, key});
+    return emit();
   }
 
-  void finalSetOp(const MemberKey& key, SetOpOp op) {
+  CFG finalSetOp(const MemberKey& key, SetOpOp op) {
     instrs.push_back(SetOpM{keysOnStack, op, key});
+    return emit();
   }
 
-  void finalBind(const MemberKey& key) {
+  CFG finalBind(const MemberKey& key) {
     instrs.push_back(BindM{keysOnStack, key});
+    return emit();
   }
 
-  void finalIncDec(const MemberKey& key, IncDecOp op) {
+  CFG finalIncDec(const MemberKey& key, IncDecOp op) {
     instrs.push_back(IncDecM{keysOnStack, op, key});
+    return emit();
   }
 
   /* A visitor to fix the stack indices in member instructions
@@ -164,11 +171,13 @@ struct BaseValue::MinstrSeq {
     uint32_t depth;
   };
 
-  void emit(Compiler& c) {
+  CFG emit() {
+    CFG cfg;
     for (auto& bc : instrs) {
       bc.visit(MemberKeyVisitor(stackDepth));
-      c.activeBlock->emit(std::move(bc));
+      cfg.then(std::move(bc));
     }
+    return cfg;
   }
 
   bool isArg{false};
@@ -186,51 +195,43 @@ namespace {
  *   $x
  */
 struct LocalLvalue : Lvalue {
-  LocalLvalue(Compiler& c, std::string name)
-    : Lvalue(c)
-    , name(std::move(name)) {}
+  explicit LocalLvalue(std::string name)
+    : name(std::move(name)) {}
 
-  void getC() override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(CGetL{name});
+  CFG getC() override {
+    return { CGetL{name} };
   }
 
-  void getV() override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(VGetL{name});
+  CFG getV() override {
+    return { VGetL{name} };
   }
 
-  void getF(uint32_t slot) override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(FPassL{slot, name});
+  CFG getF(uint32_t slot) override {
+    return { FPassL{slot, name} };
   }
 
-  void getB(MinstrSeq& m) override {
-    c.activeFunction->locals.insert(name);
+  CFG getB(MinstrSeq& m) override {
     m.baseLocal(Local{name});
+    return {};
   }
 
-  void assign(const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetL{name});
+  CFG assign(const zend_ast* rhs) override {
+    return compileExpression(rhs, Flavor::Cell)
+      .then(SetL{name});
   }
 
-  void bind(const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Ref);
-    c.activeBlock->emit(BindL{name});
+  CFG bind(const zend_ast* rhs) override {
+    return compileExpression(rhs, Flavor::Ref)
+      .then(BindL{name});
   }
 
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetOpL{name, op});
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
+    return compileExpression(rhs, Flavor::Cell)
+      .then(SetOpL{name, op});
   }
 
-  void incDec(IncDecOp op) override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(IncDecL{name, op});
+  CFG incDec(IncDecOp op) override {
+    return { IncDecL{name, op} };
   }
 
   std::string name;
@@ -242,55 +243,54 @@ struct LocalLvalue : Lvalue {
  *   ${$x . "_foo"}
  */
 struct DynamicLocalLvalue : Lvalue {
-  DynamicLocalLvalue(Compiler& c, const zend_ast* nameExpr)
-    : Lvalue(c)
-    , nameExpr(nameExpr) {}
+  explicit DynamicLocalLvalue(const zend_ast* nameExpr)
+    : nameExpr(nameExpr) {}
 
-  void getName() {
-    c.compileExpression(nameExpr, Flavor::Cell);
+  CFG getName() {
+    return compileExpression(nameExpr, Flavor::Cell);
   }
 
-  void getC() override {
-    getName();
-    c.activeBlock->emit(CGetN{});
+  CFG getC() override {
+    return getName()
+      .then(CGetN{});
   }
 
-  void getV() override {
-    getName();
-    c.activeBlock->emit(VGetN{});
+  CFG getV() override {
+    return getName()
+      .then(VGetN{});
   }
 
-  void getF(uint32_t slot) override {
-    getName();
-    c.activeBlock->emit(FPassN{slot});
+  CFG getF(uint32_t slot) override {
+    return getName()
+      .then(FPassN{slot});
   }
 
-  void getB(MinstrSeq& m) override {
-    getName();
+  CFG getB(MinstrSeq& m) override {
     m.baseNamed(m.push());
+    return getName();
   }
 
-  void assign(const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetN{});
+  CFG assign(const zend_ast* rhs) override {
+    return getName()
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(SetN{});
   }
 
-  void bind(const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Ref);
-    c.activeBlock->emit(BindN{});
+  CFG bind(const zend_ast* rhs) override {
+    return getName()
+      .then(compileExpression(rhs, Flavor::Ref))
+      .then(BindN{});
   }
 
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetOpN{op});
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
+    return getName()
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(SetOpN{op});
   }
 
-  void incDec(IncDecOp op) override {
-    getName();
-    c.activeBlock->emit(IncDecN{op});
+  CFG incDec(IncDecOp op) override {
+    return getName()
+      .then(IncDecN{op});
   }
 
   const zend_ast* nameExpr;
@@ -304,11 +304,9 @@ struct DynamicLocalLvalue : Lvalue {
  * This composes with a base value that provides the array we index into
  */
 struct DynamicDimLvalue : Lvalue {
-  DynamicDimLvalue(Compiler& c,
-      std::unique_ptr<BaseValue> base,
+  DynamicDimLvalue(std::unique_ptr<BaseValue> base,
       const zend_ast* dimExpr)
-    : Lvalue(c)
-    , base(std::move(base))
+    : base(std::move(base))
     , dimExpr(dimExpr) {}
 
   inline MemberKey getKey(MinstrSeq& m, uint32_t location) {
@@ -318,80 +316,77 @@ struct DynamicDimLvalue : Lvalue {
     };
   }
 
-  void getC() override {
+  CFG getC() override {
     MinstrSeq m(MOpMode::Warn);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    m.finalCGet(getKey(m, idx));
-    m.emit(c);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
+    return setup.then(m.finalCGet(getKey(m, idx)));
   }
 
-  void getV() override {
+  CFG getV() override {
     MinstrSeq m(MOpMode::Define);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    m.finalVGet(getKey(m, idx));
-    m.emit(c);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
+    return setup.then(m.finalVGet(getKey(m, idx)));
   }
 
-  void getF(uint32_t slot) override {
+  CFG getF(uint32_t slot) override {
     MinstrSeq m(slot);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    m.finalFPass(getKey(m, idx));
-    m.emit(c);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
+    return setup.then(m.finalFPass(getKey(m, idx)));
   }
 
-  void getB(MinstrSeq& m) override {
-    c.compileExpression(dimExpr, Flavor::Cell);
+  CFG getB(MinstrSeq& m) override {
+    auto cfg = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
     auto idx = m.push();
-    base->getB(m);
     m.dim(getKey(m, idx));
+    return cfg;
   }
 
-  void assign(const zend_ast* rhs) override {
+  CFG assign(const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Cell);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
     m.pushArgument();
-    m.finalSet(getKey(m, idx));
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(m.finalSet(getKey(m, idx)));
   }
 
-  void bind(const zend_ast* rhs) override {
+  CFG bind(const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Ref);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
     m.pushArgument();
-    m.finalBind(getKey(m, idx));
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Ref))
+      .then(m.finalBind(getKey(m, idx)));
   }
 
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Cell);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
     m.pushArgument();
-    m.finalSetOp(getKey(m, idx), op);
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(m.finalSetOp(getKey(m, idx), op));
   }
 
-  void incDec(IncDecOp op) override {
+  CFG incDec(IncDecOp op) override {
     MinstrSeq m(MOpMode::Define);
-    c.compileExpression(dimExpr, Flavor::Cell);
     auto idx = m.push();
-    base->getB(m);
-    m.finalIncDec(getKey(m, idx), op);
-    m.emit(c);
+    auto setup = compileExpression(dimExpr, Flavor::Cell)
+      .then(base->getB(m));
+    return setup.then(m.finalIncDec(getKey(m, idx), op));
   }
 
   std::unique_ptr<BaseValue> base;
@@ -407,11 +402,9 @@ struct DynamicDimLvalue : Lvalue {
  * This composes with a base value that provides the array we index into
  */
 struct DimLvalue : Lvalue {
-  DimLvalue(Compiler& c,
-      std::unique_ptr<BaseValue> base,
+  DimLvalue(std::unique_ptr<BaseValue> base,
       const MemberKey& key)
-    : Lvalue(c)
-    , base(std::move(base))
+    : base(std::move(base))
     , key(key) {}
 
   /*
@@ -425,68 +418,66 @@ struct DimLvalue : Lvalue {
     }
   }
 
-  void getC() override {
+  CFG getC() override {
     MinstrSeq m(MOpMode::Warn);
     checkNewElemRead(m);
-    base->getB(m);
-    m.finalCGet(key);
-    m.emit(c);
+    auto setup = base->getB(m);
+    return setup.then(m.finalCGet(key));
   }
 
-  void getV() override {
+  CFG getV() override {
     MinstrSeq m(MOpMode::Define);
     checkNewElemRead(m);
-    base->getB(m);
-    m.finalVGet(key);
-    m.emit(c);
+    auto setup = base->getB(m);
+    return setup.then(m.finalVGet(key));
   }
 
-  void getF(uint32_t slot) override {
+  CFG getF(uint32_t slot) override {
     MinstrSeq m(slot);
     checkNewElemRead(m);
-    base->getB(m);
-    m.finalFPass(key);
-    m.emit(c);
+    auto setup = base->getB(m);
+    return setup.then(m.finalFPass(key));
   }
 
-  void getB(MinstrSeq& m) override {
+  CFG getB(MinstrSeq& m) override {
     checkNewElemRead(m);
-    base->getB(m);
+    auto setup = base->getB(m);
     m.dim(key);
+    return setup;
   }
 
-  void assign(const zend_ast* rhs) override {
+  CFG assign(const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Cell);
+    auto setup = base->getB(m);
+
     m.pushArgument();
-    m.finalSet(key);
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(m.finalSet(key));
   }
 
-  void bind(const zend_ast* rhs) override {
+  CFG bind(const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Ref);
+    auto setup = base->getB(m);
     m.pushArgument();
-    m.finalBind(key);
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Ref))
+      .then(m.finalBind(key));
   }
 
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
     MinstrSeq m(MOpMode::Define);
-    base->getB(m);
-    c.compileExpression(rhs, Flavor::Cell);
+    auto setup = base->getB(m);
     m.pushArgument();
-    m.finalSetOp(key, op);
-    m.emit(c);
+    return setup
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(m.finalSetOp(key, op));
   }
 
-  void incDec(IncDecOp op) override {
+  CFG incDec(IncDecOp op) override {
     MinstrSeq m(MOpMode::Define);
-    base->getB(m);
-    m.finalIncDec(key, op);
-    m.emit(c);
+    auto setup = base->getB(m);
+    return setup.then(m.finalIncDec(key, op));
   }
 
   std::unique_ptr<BaseValue> base;
@@ -498,55 +489,49 @@ struct DimLvalue : Lvalue {
  * produce an array
  */
 struct DynamicBase : BaseValue {
-  DynamicBase(Compiler& c,
-      const zend_ast* ast)
-    : BaseValue(c)
-    , ast(ast) {}
+  explicit DynamicBase(const zend_ast* ast)
+    : ast(ast) {}
 
-  void getB(MinstrSeq& m) override {
+  CFG getB(MinstrSeq& m) override {
     if (ast->kind == ZEND_AST_CALL) {
-      c.compileExpression(ast, Flavor::Return);
       m.baseRet(m.push());
+      return compileExpression(ast, Flavor::Return);
     } else {
-      c.compileExpression(ast, Flavor::Cell);
       m.baseCell(m.push());
+      return compileExpression(ast, Flavor::Cell);
     }
   }
 
   const zend_ast* ast;
 };
 
-
-std::unique_ptr<BaseValue> getBase(Compiler& c, const zend_ast* ast) {
-  if (auto lv = Lvalue::getLvalue(c, ast)){
+std::unique_ptr<BaseValue> getBase(const zend_ast* ast) {
+  if (auto lv = Lvalue::getLvalue(ast)){
     return std::move(lv); // move necessary since we're converting to BaseValue
   } else {
-    return std::make_unique<DynamicBase>(c, ast);
+    return std::make_unique<DynamicBase>(ast);
   }
 }
 
-
 } // namespace
 
-std::unique_ptr<Lvalue> Lvalue::getLvalue(Compiler& c, const zend_ast* ast) {
+std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
   if (ast->kind == ZEND_AST_VAR) {
     auto name = ast->child[0];
     switch (name->kind) {
       case ZEND_AST_ZVAL:
         return std::make_unique<LocalLvalue>(
-          c,
           zval_to_string(zend_ast_get_zval(name))
         );
       default:
-        return std::make_unique<DynamicLocalLvalue>(c, name);
+        return std::make_unique<DynamicLocalLvalue>(name);
     }
   } else if (ast->kind == ZEND_AST_DIM) {
     auto base = ast->child[0];
     auto dim  = ast->child[1];
     if (!dim) {
       return std::make_unique<DimLvalue>(
-        c,
-        getBase(c, base),
+        getBase(base),
         NewElem{}
       );
     } else if (dim->kind == ZEND_AST_ZVAL) {
@@ -554,14 +539,12 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(Compiler& c, const zend_ast* ast) {
       switch (Z_TYPE_P(zv)) {
         case IS_LONG:
           return std::make_unique<DimLvalue>(
-            c,
-            getBase(c, base),
+            getBase(base),
             ImmIntElem{Z_LVAL_P(zv)}
           );
         case IS_STRING:
           return std::make_unique<DimLvalue>(
-            c,
-            getBase(c, base),
+            getBase(base),
             ImmMember{MemberType::Element, Z_STRVAL_P(zv)}
           );
         default:
@@ -574,8 +557,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(Compiler& c, const zend_ast* ast) {
       if (name->kind == ZEND_AST_ZVAL){
         auto str = zval_to_string(zend_ast_get_zval(name));
         return std::make_unique<DimLvalue>(
-          c,
-          getBase(c, base),
+          getBase(base),
           LocalMember{MemberType::Element, Local{str}}
         );
       }
@@ -583,8 +565,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(Compiler& c, const zend_ast* ast) {
 
     // if we get here, we can't do anything smarter:
     return std::make_unique<DynamicDimLvalue>(
-      c,
-      getBase(c, base),
+      getBase(base),
       dim
     );
   }

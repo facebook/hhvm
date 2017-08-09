@@ -18,6 +18,7 @@
 #define incl_HPHP_PHP_UNIT_H
 
 #include "hphp/php7/bytecode.h"
+#include "hphp/php7/cfg.h"
 #include "hphp/runtime/base/attr.h"
 
 #include <boost/variant.hpp>
@@ -28,58 +29,8 @@
 
 namespace HPHP { namespace php7 {
 
-struct Block;
 struct Function;
 struct Unit;
-
-struct Block {
-  // these are the last instructions in the block, they must be jumps or leave
-  // the current function i.e. only these instructions:
-  using ExitOp = boost::variant<
-    bc::Jmp,
-    bc::JmpNS,
-    bc::JmpZ,
-    bc::JmpNZ,
-    bc::Switch,
-    bc::SSwitch,
-    bc::RetC,
-    bc::RetV,
-    bc::Unwind,
-    bc::Throw,
-    bc::Fatal
-  >;
-
-  void emit(bc::Jmp) = delete;
-  void emit(bc::JmpNS) = delete;
-  void emit(bc::JmpZ) = delete;
-  void emit(bc::JmpNZ) = delete;
-  void emit(bc::Switch) = delete;
-  void emit(bc::SSwitch) = delete;
-  void emit(bc::RetC) = delete;
-  void emit(bc::RetV) = delete;
-  void emit(bc::Unwind) = delete;
-  void emit(bc::Throw) = delete;
-  void emit(bc::Fatal) = delete;
-  void emit(ExitOp op) = delete;
-
-  void emit(Bytecode bc) {
-    assert(!exited);
-    code.push_back(std::move(bc));
-  }
-
-  void exit(ExitOp op) {
-    exited = true;
-    exits.push_back(std::move(op));
-  }
-
-  // identifies this block in its unit
-  uint64_t id;
-
-  // code associated with this block
-  std::vector<Bytecode> code;
-  std::vector<ExitOp> exits;
-  bool exited{false};
-};
 
 // get the series of block pointers in the control graph that starts at `entry`
 std::vector<Block*> serializeControlFlowGraph(Block* entry);
@@ -93,16 +44,14 @@ struct Function {
   explicit Function(Unit* parent,
       const std::string& name);
 
-  Block* getEntry() { return entry; }
-
-  Block* allocateBlock();
-  Block* getBlock(uint64_t id);
+  bool returnsByReference() const {
+    return attr & Attr::AttrReference;
+  }
 
   std::string name;
   Attr attr;
-  Block* entry;
   Unit* parent;
-  std::vector<std::unique_ptr<Block>> blocks;
+  CFG cfg;
   std::vector<Param> params;
   std::unordered_set<std::string> locals;
 };

@@ -28,6 +28,14 @@ namespace HPHP { namespace php7 {
 
 struct Block;
 
+enum Flavor {
+  Drop,
+  Cell,
+  Ref,
+  Return,
+  FuncParam,
+};
+
 namespace bc {
 
 struct StringOffsetVector {
@@ -259,6 +267,30 @@ OPCODES
 #undef O
   };
 };
+
+// these are the last instructions in the block, they must be jumps or leave
+// the current function i.e. only these instructions:
+#define EXIT_OPS \
+  EXIT(Jmp) \
+  EXIT(JmpNS) \
+  EXIT(JmpZ) \
+  EXIT(JmpNZ) \
+  EXIT(Switch) \
+  EXIT(SSwitch) \
+  EXIT(RetC) \
+  EXIT(RetV) \
+  EXIT(Unwind) \
+  EXIT(Throw) \
+  EXIT_LAST(Fatal)
+
+#define EXIT(name) bc::name,
+#define EXIT_LAST(name) bc::name
+typedef boost::variant<
+  EXIT_OPS
+> ExitOp;
+#undef EXIT
+#undef EXIT_LAST
+
 
 
 }}  // HPHP::php7

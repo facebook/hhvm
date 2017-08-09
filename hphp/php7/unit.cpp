@@ -26,32 +26,11 @@ namespace HPHP { namespace php7 {
 Function::Function(Unit* parent, const std::string& name)
   : name(name),
     attr(),
-    parent(parent) {
-  entry = allocateBlock();
-}
-
-Block* Function::allocateBlock() {
-  uint64_t id = blocks.size();
-
-  auto block = std::make_unique<Block>();
-  block->id = id;
-  auto borrowed = block.get();
-  blocks.emplace_back(std::move(block));
-
-  return borrowed;
-}
-
-Block* Function::getBlock(uint64_t id) {
-  if (id >= blocks.size()) {
-    return nullptr;
-  }
-
-  return blocks[id].get();
-}
+    parent(parent) { }
 
 namespace {
 
-std::vector<Block*> exitTargets(const Block::ExitOp& exit) {
+std::vector<Block*> exitTargets(const ExitOp& exit) {
   using namespace bc;
   std::vector<Block*> targets;
 
@@ -131,9 +110,9 @@ std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
   auto unit = std::make_unique<Unit>();
   unit->name = filename;
 
-  auto blk = unit->getPseudomain()->entry;
-  blk->emit(bc::String{msg});
-  blk->exit(bc::Fatal{FatalOp::Parse});
+  unit->pseudomain->cfg = CFG()
+    .then(bc::String{msg})
+    .then(bc::Fatal{FatalOp::Parse});
   return unit;
 }
 }} // HPHP::php7

@@ -215,7 +215,7 @@ struct CFGVisitor : public boost::static_visitor<void> {
     bc.visit(instr);
   }
 
-  void exit(const Block::ExitOp& exit) {
+  void exit(const ExitOp& exit) {
     boost::apply_visitor(*this, exit);
   }
 
@@ -228,7 +228,7 @@ std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
   out.append(dump_declvars(func.locals));
-  out.append(dump_blocks(serializeControlFlowGraph(func.entry)));
+  out.append(dump_blocks(serializeControlFlowGraph(func.cfg.entry())));
   out.append("}\n\n");
   return out;
 }
@@ -245,7 +245,7 @@ std::string dump_function(const Function& func) {
   }
   out.append(") {\n");
   out.append(dump_declvars(func.locals));
-  out.append(dump_blocks(serializeControlFlowGraph(func.entry)));
+  out.append(dump_blocks(serializeControlFlowGraph(func.cfg.entry())));
   out.append("}\n\n");
   return out;
 

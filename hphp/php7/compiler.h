@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_PHP7_COMPILER_H_
 #define incl_HPHP_PHP7_COMPILER_H_
 
-#include "hphp/php7/zend/zend.h"
 #include "hphp/php7/ast_info.h"
 #include "hphp/php7/bytecode.h"
+#include "hphp/php7/cfg.h"
 #include "hphp/php7/unit.h"
 #include "hphp/php7/lvalue.h"
+#include "hphp/php7/zend/zend.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -39,14 +40,6 @@ struct CompilerException : public std::logic_error {
 struct LanguageException : CompilerException {
   explicit LanguageException(const std::string& what)
     : CompilerException(what) {}
-};
-
-enum Flavor {
-  Drop,
-  Cell,
-  Ref,
-  Return,
-  FuncParam,
 };
 
 /*
@@ -80,92 +73,22 @@ struct Destination {
   const uint32_t slot;
 };
 
+void compileProgram(Unit* unit, const zend_ast* ast);
+void compileFunction(Unit* unit, const zend_ast* ast);
+CFG compileStatement(Function* func, const zend_ast* ast);
+CFG compileExpression(const zend_ast* ast, Destination destination);
 
-struct Compiler {
- private:
-  explicit Compiler(const std::string& filename);
+inline std::unique_ptr<Unit> compile(const std::string& filename,
+                                     const zend_ast* ast) {
+  auto unit = std::make_unique<Unit>();
+  unit->name = filename;
+  compileProgram(unit.get(), ast);
+  return unit;
+}
 
- public:
-  static std::unique_ptr<Unit> compile(const std::string& filename,
-                                       const zend_ast* ast) {
-    Compiler compiler(filename);
-    compiler.compileProgram(ast);
-    return std::move(compiler.unit);
-  }
+[[noreturn]]
+void panic(const std::string& msg);
 
-  void compileProgram(const zend_ast* ast);
-  void compileFunction(const zend_ast* ast);
-  void compileStatement(const zend_ast* ast);
-  void compileExpression(const zend_ast* ast, Destination destination);
-
-  void compileZvalLiteral(const zval* ast);
-  void compileConstant(const zend_ast* ast);
-  void compileVar(const zend_ast* ast, Destination destination);
-  void compileAssignment(const zend_ast* ast);
-  void compileBind(const zend_ast* ast);
-  void compileAssignOp(const zend_ast* ast);
-  void compileCall(const zend_ast* ast);
-  void compileArray(const zend_ast* ast);
-
-  void compileGlobalDeclaration(const zend_ast* ast);
-  void compileIf(const zend_ast* ast);
-  void compileWhile(const zend_ast* cond, const zend_ast* body, bool bodyFirst);
-  void compileFor(const zend_ast* ast);
-
-  Bytecode opForBinaryOp(const zend_ast* op);
-  IncDecOp getIncDecOpForNode(zend_ast_kind kind);
-  SetOpOp getSetOpOp(zend_ast_attr attr);
-
-  std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
-
-  void compileUnaryOp(const zend_ast* op);
-  void compileIncDec(const zend_ast* op);
-
-  [[noreturn]]
-  void panic(const std::string& msg);
-
-  void fixFlavor(Destination dest, Flavor actual);
-
-  template<class Branch>
-  void branchTo(Block* target) {
-    auto continuation = activeFunction->allocateBlock();
-
-    activeBlock->exit(Branch{target});
-    activeBlock->exit(bc::Jmp{continuation});
-
-    activeBlock = continuation;
-  }
-
-  template<class Function>
-  void withBlock(Block* blk, Function&& f) {
-    std::swap(blk, activeBlock);
-    SCOPE_EXIT { std::swap(blk, activeBlock); };
-    f();
-  }
-
-  std::unique_ptr<Unit> unit;
-
-  Function* activeFunction;
-  Block* activeBlock;
-
-  // relevant block addresses for a loop
-  struct Loop {
-    Block* continuation; // label immediately after loop
-    Block* test;         // label at loop test (for continue)
-  };
-
-  std::stack<Loop> activeLoops;
-
-  Loop& currentLoop(const std::string& forWhat) {
-    if (activeLoops.empty()) {
-      throw LanguageException(
-          folly::sformat("'{}' not in the 'loop' or 'switch' context",
-                         forWhat));
-    }
-    return activeLoops.top();
-  }
-
-};
 
 }} // HPHP::php7
 

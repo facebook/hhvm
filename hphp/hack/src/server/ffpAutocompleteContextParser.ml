@@ -52,6 +52,7 @@ module Predecessor = struct
   | KeywordExtends
   | KeywordFinal
   | KeywordImplements
+  | KeywordRequire
   | KeywordReturn
   | KeywordStatic
   | Statement
@@ -223,6 +224,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }
     | Token { kind = Protected; _ } -> Some VisibilityModifier
+    | Token { kind = Require; _ } -> Some KeywordRequire
     | Token { kind = Return; _ } -> Some KeywordReturn
     | Token { kind = Static; _ } -> Some KeywordStatic
     | _ -> None

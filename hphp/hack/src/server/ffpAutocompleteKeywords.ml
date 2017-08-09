@@ -64,21 +64,29 @@ let final_keyword = {
 let implements_keyword = {
   keywords = ["implements"];
   is_valid_in_context = begin fun context ->
+    (* Class implements interface *)
     (context.closest_parent_container = ClassHeader ||
-    context.closest_parent_container = ClassBody)
-    &&
+    context.closest_parent_container = ClassBody) &&
     (context.predecessor = ClassName ||
     context.predecessor = ExtendsList)
+    || (* "require implements" inside a trait *)
+    context.closest_parent_container = TraitBody &&
+    context.predecessor = KeywordRequire
   end;
 }
 
 let extends_keyword = {
   keywords = ["extends"];
   is_valid_in_context = begin fun context ->
-    (context.closest_parent_container = InterfaceBody ||
+    (context.closest_parent_container = InterfaceHeader ||
+    context.closest_parent_container = InterfaceBody ||
     context.closest_parent_container = ClassHeader ||
     context.closest_parent_container = ClassBody) &&
     context.predecessor = ClassName
+    || (* Inside trait/interface body *)
+    (context.closest_parent_container = TraitBody ||
+    context.closest_parent_container = InterfaceBody) &&
+    context.predecessor = KeywordRequire
   end;
 }
 
@@ -167,6 +175,18 @@ let interface_keyword = {
     is_top_level_statement_valid context
   end;
 }
+
+let require_constraint_keyword = {
+  keywords = ["require"];
+  is_valid_in_context = begin fun context ->
+    (* Require inside trait body or interface body *)
+    (context.closest_parent_container = TraitBody ||
+    context.closest_parent_container = InterfaceBody) &&
+    (context.predecessor = TokenLeftBrace ||
+    context.predecessor = ClassBodyDeclaration)
+  end;
+}
+
 
 let declaration_keywords = {
   keywords = ["enum"; "require"; "include"; "require_once"; "include_once";
@@ -336,6 +356,7 @@ let keyword_matches: keyword_completion list = [
   postfix_expressions;
   primary_expressions;
   primitive_types;
+  require_constraint_keyword;
   scope_resolution_qualifiers;
   static_keyword;
   switch_body_keywords;

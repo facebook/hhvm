@@ -19,7 +19,7 @@ val fun_def:
 val class_def:
   TypecheckerOptions.t -> Nast.class_ -> (Tast.class_ * Typing_env.env) option
 val typedef_def:
-  TypecheckerOptions.t -> Nast.typedef -> unit
+  TypecheckerOptions.t -> Nast.typedef -> Tast.typedef * Typing_env.env
 val gconst_def:
   Nast.gconst -> TypecheckerOptions.t -> Tast.gconst * Typing_env.env
 

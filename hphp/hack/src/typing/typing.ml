@@ -5059,17 +5059,27 @@ and typedef_def tcopt typedef  =
   } = typedef in
   let ty = TI.instantiable_hint env hint in
   let env, ty = Phase.localize_with_self env ty in
-  begin match tcstr with
+  let env = begin match tcstr with
     | Some tcstr ->
       let cstr = TI.instantiable_hint env tcstr in
       let env, cstr = Phase.localize_with_self env cstr in
-      ignore @@ Typing_ops.sub_type t_pos Reason.URnewtype_cstr env ty cstr
-    | _ -> ()
-  end;
-  match hint with
-  | pos, Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-    ignore (check_shape_keys_validity env pos (ShapeMap.keys nsi_field_map))
-  | _ -> ()
+      Typing_ops.sub_type t_pos Reason.URnewtype_cstr env ty cstr
+    | _ -> env
+  end in
+  let env = begin match hint with
+    | pos, Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
+      check_shape_keys_validity env pos (ShapeMap.keys nsi_field_map)
+    | _ -> env
+  end in
+  {
+    T.t_name = typedef.t_name;
+    T.t_mode = typedef.t_mode;
+    T.t_vis = typedef.t_vis;
+    T.t_user_attributes = List.map typedef.t_user_attributes (user_attribute env);
+    T.t_constraint = typedef.t_constraint;
+    T.t_kind = typedef.t_kind;
+    T.t_tparams = typedef.t_tparams;
+  }, env
 
 and gconst_def cst tcopt =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;

@@ -1,0 +1,33 @@
+[(AnnotatedAST.Typedef
+    { AnnotatedAST.t_name = (<p>, "\\T1"); t_tparams = [];
+      t_constraint = None; t_kind = (<p>, (Hprim Tint));
+      t_user_attributes =
+      [{ AnnotatedAST.ua_name = (<p>, "Bar"); ua_params = [] };
+        { AnnotatedAST.ua_name = (<p>, "Foo");
+          ua_params =
+          [((Some int), (AnnotatedAST.Int (<p>, "1")));
+            ((Some int), (AnnotatedAST.Int (<p>, "2")));
+            ((Some int), (AnnotatedAST.Int (<p>, "3")))]
+          }
+        ];
+      t_mode = <opaque>; t_vis = Transparent });
+  (AnnotatedAST.Typedef
+     { AnnotatedAST.t_name = (<p>, "\\T2"); t_tparams = [];
+       t_constraint = None;
+       t_kind = (<p>, (Hoption (<p>, (Hprim Tstring))));
+       t_user_attributes =
+       [{ AnnotatedAST.ua_name = (<p>, "SingleAttribute");
+          ua_params = [] }
+         ];
+       t_mode = <opaque>; t_vis = Transparent });
+  (AnnotatedAST.Typedef
+     { AnnotatedAST.t_name = (<p>, "\\Serialized_contra");
+       t_tparams = [(Contravariant, (<p>, "T"), [])];
+       t_constraint = None; t_kind = (<p>, (Hprim Tstring));
+       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent });
+  (AnnotatedAST.Typedef
+     { AnnotatedAST.t_name = (<p>, "\\Serialized_co");
+       t_tparams = [(Covariant, (<p>, "T"), [])];
+       t_constraint = None; t_kind = (<p>, (Hprim Tstring));
+       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent })
+  ]

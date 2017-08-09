@@ -51,7 +51,7 @@ let check_typedef opts fn x =
   match Parser_heap.find_typedef_in_file ~full:true opts fn x with
   | Some t ->
     let typedef = Naming.typedef opts t in
-    Typing.typedef_def opts typedef;
+    ignore (Typing.typedef_def opts typedef);
     Typing_variance.typedef opts x
   | None -> ()
 

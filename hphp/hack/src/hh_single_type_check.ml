@@ -410,7 +410,9 @@ let nast_to_tast_tenv opts nast =
     | Constant gc -> Ok gc
       >>| (fun x -> Typing.gconst_def x opts)
       >>| (fun (gc, tenv) -> Tast.Constant gc, tenv)
-    | Typedef td -> Error "Typedef not yet supported in TAST."
+    | Typedef td -> Ok td
+      >>| Typing.typedef_def opts
+      >>| (fun (td, tenv) -> Tast.Typedef td, tenv)
   in
   List.map nast (Fn.compose Result.ok_or_failwith def_conv)
 

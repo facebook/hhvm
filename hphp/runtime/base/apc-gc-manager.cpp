@@ -112,9 +112,9 @@ bool APCGCManager::mark(const void* ptr) {
 
   if (ptr == nullptr) return false;
   auto root = getRootAPCHandle(ptr); // Required l2 here
-  WriteLock l3(visibleFromHeapLock); // Require l3 after require l2
-
   if (root != nullptr) {
+    // Require lock only when root has been found
+    WriteLock l3(visibleFromHeapLock); // Require l3 after require l2
     visibleFromHeap.insert(root);
     FTRACE(4, "Mark root {} for ptr: {}\n", (const void*)root, ptr);
     return true;

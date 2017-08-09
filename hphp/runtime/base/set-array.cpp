@@ -126,42 +126,45 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
 }
 
 ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
-  auto a = asSet(array);
-  assertx(!a->empty());
-  auto const scale = a->scale();
-  auto const used = a->m_used;
+  auto src = asSet(array);
+  assertx(!src->empty());
+  auto const scale = src->scale();
+  auto const used = src->m_used;
   char* mem =
     static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
-  auto const ad = reinterpret_cast<SetArray*>(mem + extra);
+  auto const dest = reinterpret_cast<SetArray*>(mem + extra);
 
   assert((extra % 16) == 0);
-  assert(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
-  assert(reinterpret_cast<uintptr_t>(a) % 16 == 0);
-  memcpy16_inline(ad, a, sizeof(SetArray) + sizeof(Elm) * used);
-  assert(ClearElms(Data(ad) + used, Capacity(scale) - used));
-  CopyHash(HashTab(ad, scale), a->hashTab(), scale);
-  ad->m_count = UncountedValue;
+  assert(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
+  assert(reinterpret_cast<uintptr_t>(src) % 16 == 0);
+  memcpy16_inline(dest, src, sizeof(SetArray) + sizeof(Elm) * used);
+  assert(ClearElms(Data(dest) + used, Capacity(scale) - used));
+  CopyHash(HashTab(dest, scale), src->hashTab(), scale);
+  dest->m_count = UncountedValue;
 
   // Make sure all strings are uncounted.
-  auto const elms = a->data();
+  auto const elms = dest->data();
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
     StringData*& skey = elm.tv.m_data.pstr;
-    if (elm.hasStrKey() && !skey->isStatic()) {
+    if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
-      if (auto const st = lookupStaticString(skey)) {
-        skey = st;
-      } else {
-        skey = StringData::MakeUncounted(skey->slice());
+      if (!skey->isStatic()) {
+        if (auto const st = lookupStaticString(skey)) {
+          skey = st;
+        } else {
+          skey = StringData::MakeUncounted(skey->slice());
+        }
       }
     }
   }
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
-  return ad;
+
+  return dest;
 }
 
 SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {

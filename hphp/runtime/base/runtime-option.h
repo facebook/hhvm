@@ -698,6 +698,7 @@ struct RuntimeOption {
                                             std::vector<std::string>()) \
   F(std::vector<std::string>, UnixServerAllowedGroups,                  \
                                             std::vector<std::string>()) \
+  F(bool, TrashFillOnRequestExit, false)                                \
   /******************                                                   \
    | ARM   Options. |                                                   \
    *****************/                                                   \

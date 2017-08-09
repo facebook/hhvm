@@ -1037,14 +1037,19 @@ void MemoryManager::setGCEnabled(bool isGCEnabled) {
 void BigHeap::reset() {
   TRACE(1, "heap-id %lu BigHeap-reset: slabs %lu bigs %lu\n",
         t_heap_id, m_slabs.size(), m_bigs.size());
+  auto const do_free = [&](void* ptr, size_t size) {
+    if (RuntimeOption::EvalTrashFillOnRequestExit) {
+      memset(ptr, size, kSmallFreeFill);
+    }
 #ifdef USE_JEMALLOC
-  auto do_free = [&](void* ptr) { dallocx(ptr, 0); };
+    dallocx(ptr, 0);
 #else
-  auto do_free = [&](void* ptr) { free(ptr); };
+    free(ptr);
 #endif
-  for (auto slab : m_slabs) do_free(slab.ptr);
+  };
+  for (auto slab : m_slabs) do_free(slab.ptr, slab.size);
   m_slabs.clear();
-  for (auto n : m_bigs) do_free(n);
+  for (auto n : m_bigs) do_free(n, n->nbytes);
   m_bigs.clear();
 }
 

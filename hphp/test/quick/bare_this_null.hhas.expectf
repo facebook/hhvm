@@ -1,0 +1,3 @@
+Verification Error (unit %s func ): BareThis required that $this be guaranteed to be non-null
+Verification Error (unit %s func foo): BareThis required that $this be guaranteed to be non-null
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

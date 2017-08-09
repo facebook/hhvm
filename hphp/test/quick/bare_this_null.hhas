@@ -1,0 +1,48 @@
+# Check that BareThis NeverNull fails to verify if $this can be null
+
+.main {
+  Int 1       # b1
+  JmpZ chk
+  Jmp foo     # b2
+  chk:        # b3
+    CheckThis
+  loop:       # b4
+    Jmp next
+  next:       # b5
+    BareThis NeverNull
+    PopC
+  foo:        # b6
+    Jmp loop
+  Int 1
+  RetC
+}
+
+.function bar() {
+  Int 1
+  JmpZ chk    # b1
+  Jmp foo     # b2
+  chk:        # b3
+    CheckThis
+  loop:       # b4
+    CheckThis
+    Jmp next
+  next:       # b5
+    BareThis NeverNull
+    PopC
+  foo:        # b6
+    Jmp loop
+  Int 1
+  RetC
+}
+
+.class C {
+  .method [public] __construct() {
+    Null
+    RetC
+  }
+
+  .method [public static] foo() {
+    BareThis NeverNull
+    RetC
+  }
+}

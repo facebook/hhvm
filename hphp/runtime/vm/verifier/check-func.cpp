@@ -66,6 +66,7 @@ struct State {
   bool mbr_live{false};    // liveness of member base register
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
+  bool guaranteedThis; // whether $this is guaranteed to be non-null
 };
 
 /**
@@ -94,6 +95,7 @@ struct FuncChecker {
   };
 
   bool checkEdge(Block* b, const State& cur, Block* t);
+  bool checkBlock(State& cur, Block* b);
   bool checkSuccEdges(Block* b, State* cur);
   bool checkOffset(const char* name, Offset o, const char* regionName,
                    Offset base, Offset past, bool check_instrs = true);
@@ -122,6 +124,7 @@ struct FuncChecker {
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
+  bool checkExnEdge(State cur, Block* b);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -171,6 +174,7 @@ struct FuncChecker {
   Bits m_instrs;
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
+  Id m_last_rpo_id; // rpo_id of the last block visited
 };
 
 const StaticString s_invoke("__invoke");
@@ -1154,6 +1158,24 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         }
         break;
     }
+    case Op::This:
+    case Op::CheckThis: {
+      cur->guaranteedThis = true;
+      break;
+    }
+    case Op::BareThis: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      if (decode_oa<BareThisOp>(new_pc) != BareThisOp::NeverNull) break;
+    }
+    case Op::BaseH: {
+      if (!cur->guaranteedThis) {
+        ferror("{} required that $this be guaranteed to be non-null\n",
+        opcodeToName(op));
+        return false;
+      }
+      break;
+    }
     case Op::DefCls:
     case Op::DefClsNop: {
       auto const id = getImm(pc, 0).u_IVA;
@@ -1522,6 +1544,7 @@ void FuncChecker::initState(State* s) {
   s->mbr_live = false;
   s->mbr_mode.clear();
   s->silences.clear();
+  s->guaranteedThis = m_func->requiresThisInBody();
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1536,6 +1559,57 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
   to->silences = from->silences;
+  to->guaranteedThis = from->guaranteedThis;
+}
+
+bool FuncChecker::checkExnEdge(State cur, Block* b) {
+  // Reachable catch blocks and fault funclets have an empty stack and
+  // non-initialized class-ref slots. Checking an edge to the fault
+  // handler right before every instruction is unnecessary since
+  // not every instruction can throw; there is room for improvement
+  // here if we want to note in the bytecode table which instructions
+  // can actually throw to the fault handler.
+  int save_stklen = cur.stklen;
+  int save_fpilen = cur.fpilen;
+  auto save_slots = cur.clsRefSlots;
+  cur.stklen = 0;
+  cur.fpilen = 0;
+  cur.clsRefSlots.reset();
+  auto const ok = checkEdge(b, cur, b->exn);
+  cur.stklen = save_stklen;
+  cur.fpilen = save_fpilen;
+  cur.clsRefSlots = std::move(save_slots);
+  return ok;
+}
+
+bool FuncChecker::checkBlock(State& cur, Block* b) {
+  bool ok = true;
+  if (m_errmode == kVerbose) {
+    std::cout << blockToString(b, m_graph, unit()) << std::endl;
+  }
+  for (InstrRange i = blockInstrs(b); !i.empty(); ) {
+    PC pc = i.popFront();
+    if (m_errmode == kVerbose) {
+      std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
+                   stateToString(cur) << " " <<
+                   instrToString(pc, unit()) << std::endl;
+    }
+    auto const op = peek_op(pc);
+
+    if (b->exn) ok &= checkExnEdge(cur, b);
+    if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
+    ok &= checkOp(&cur, pc, op, b);
+    ok &= checkInputs(&cur, pc, b);
+    auto const flags = instrFlags(op);
+    if (flags & TF) ok &= checkTerminal(&cur, pc);
+    if (flags & FF) ok &= checkFpi(&cur, pc, b);
+    if (isIter(pc)) ok &= checkIter(&cur, pc);
+    if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
+    ok &= checkClsRefSlots(&cur, pc);
+    ok &= checkOutputs(&cur, pc, b);
+  }
+  ok &= checkSuccEdges(b, &cur);
+  return ok;
 }
 
 /**
@@ -1555,50 +1629,9 @@ bool FuncChecker::checkFlow() {
     ok &= checkEdge(0, cur, i.popFront());
   }
   for (Block* b = m_graph->first_rpo; b; b = b->next_rpo) {
+    m_last_rpo_id = b->rpo_id;
     copyState(&cur, &m_info[b->id].state_in);
-    if (m_errmode == kVerbose) {
-      std::cout << blockToString(b, m_graph, unit()) << std::endl;
-    }
-    for (InstrRange i = blockInstrs(b); !i.empty(); ) {
-      PC pc = i.popFront();
-      if (m_errmode == kVerbose) {
-        std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
-                     stateToString(cur) << " " <<
-                     instrToString(pc, unit()) << std::endl;
-      }
-      auto const op = peek_op(pc);
-
-      // Reachable catch blocks and fault funclets have an empty stack and
-      // non-initialized class-ref slots. Checking an edge to the fault
-      // handler right before every instruction is unnecessary since
-      // not every instruction can throw; there is room for improvement
-      // here if we want to note in the bytecode table which instructions
-      // can actually throw to the fault handler.
-      if (b->exn) {
-        int save_stklen = cur.stklen;
-        int save_fpilen = cur.fpilen;
-        auto save_slots = cur.clsRefSlots;
-        cur.stklen = 0;
-        cur.fpilen = 0;
-        cur.clsRefSlots.reset();
-        ok &= checkEdge(b, cur, b->exn);
-        cur.stklen = save_stklen;
-        cur.fpilen = save_fpilen;
-        cur.clsRefSlots = std::move(save_slots);
-      }
-
-      if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
-      ok &= checkOp(&cur, pc, op, b);
-      ok &= checkInputs(&cur, pc, b);
-      auto const flags = instrFlags(op);
-      if (flags & TF) ok &= checkTerminal(&cur, pc);
-      if (flags & FF) ok &= checkFpi(&cur, pc, b);
-      if (isIter(pc)) ok &= checkIter(&cur, pc);
-      if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
-      ok &= checkClsRefSlots(&cur, pc);
-      ok &= checkOutputs(&cur, pc, b);
-    }
-    ok &= checkSuccEdges(b, &cur);
+    ok &= checkBlock(cur, b);
   }
   // Make sure eval stack is correct at start of each try region
   for (auto& handler : m_func->ehtab()) {
@@ -1687,6 +1720,7 @@ bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
+  bool stateChange = false;
   if (!state.stk) {
     copyState(&state, &cur);
     return true;
@@ -1697,6 +1731,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
     state.silences.resize(cur.silences.size());
   }
 
+  // Check silence state
   if (cur.silences != state.silences) {
     std::string current, target;
     boost::to_string(cur.silences, current);
@@ -1704,6 +1739,13 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
     error("Silencer state mismatch on edge B%d->B%d: B%d had state %s, "
           "B%d had state %s\n", b->id, t->id, b->id, current.c_str(),
           t->id, target.c_str());
+    return false;
+  }
+
+  // Conservatively propagate guarantees about $this
+  if (state.guaranteedThis && !cur.guaranteedThis) {
+    stateChange = true;
+    state.guaranteedThis = false;
   }
 
   // Check stack.
@@ -1754,6 +1796,15 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       slotsToString(state.clsRefSlots)
     );
     return false;
+  }
+
+  // t's state has changed, but we've already visited it, so we need to visit
+  // it again. This is guaranteed to terminate because we only allow monotonic
+  // state changes
+  if (m_last_rpo_id > t->rpo_id && stateChange) {
+    State tmp;
+    copyState(&tmp, &state);
+    return checkBlock(tmp, t);
   }
 
   return true;

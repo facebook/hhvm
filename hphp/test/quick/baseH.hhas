@@ -1,0 +1,28 @@
+# check that baseH fails to verify if $this can be null
+
+.main {
+  .declvars $foo $baz $t;
+  Null
+  SetL $foo
+  PopC
+  String "abc"
+  SetL $baz
+  PopC
+  String "xyz"
+  SetL $t
+  PopC
+  BaseL $baz Warn
+  QueryM 0 CGet EL:$t
+  Int 12
+  BaseH
+  Dim Define ET:"x"
+  Dim Define ET:"y"
+  Dim Define ET:"q"
+  SetM 0 PC:1
+  PopC
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $foo
+  FCall 1
+  PopR
+  RetC
+}

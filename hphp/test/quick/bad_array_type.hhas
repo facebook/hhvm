@@ -1,0 +1,7 @@
+.adata A_0 = """v:1:{i:1;}""";
+
+.main {
+  Vec @A_0
+  ColFromArray Map
+  RetC
+}

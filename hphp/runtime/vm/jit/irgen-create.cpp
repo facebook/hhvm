@@ -451,6 +451,17 @@ void emitNewPair(IRGS& env) {
 void emitColFromArray(IRGS& env, CollectionType type) {
   assertx(type != CollectionType::Pair);
   auto const arr = popC(env);
+  if (UNLIKELY(!arr->isA(TVec) && !arr->isA(TDict))) {
+    PUNT(BadColType);
+  }
+  if (UNLIKELY(arr->isA(TVec) && type != CollectionType::Vector &&
+               type != CollectionType::ImmVector)) {
+      PUNT(ColTypeMismatch);
+  }
+  if (UNLIKELY(arr->isA(TDict) && (type == CollectionType::Vector ||
+               type == CollectionType::ImmVector))) {
+      PUNT(ColTypeMismatch);
+  }
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 

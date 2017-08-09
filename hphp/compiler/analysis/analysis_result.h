@@ -149,7 +149,8 @@ public:
 
   void addSystemFunction(FunctionScopeRawPtr fs);
   void addSystemClass(ClassScopeRawPtr cs);
-  void analyzeProgram(bool system = false);
+  void analyzeProgram(ConstructPtr);
+  void analyzeProgram();
   void analyzeProgramFinal();
   void dump();
 

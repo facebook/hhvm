@@ -66,13 +66,6 @@ StatementPtr ForEachStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ForEachStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_array->analyzeProgram(ar);
-  if (m_name) m_name->analyzeProgram(ar);
-  m_value->analyzeProgram(ar);
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
-
 ConstructPtr ForEachStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

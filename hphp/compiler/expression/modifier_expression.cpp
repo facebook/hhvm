@@ -152,13 +152,6 @@ bool ModifierExpression::validForTraitAliasRule() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// static analysis functions
-
-void ModifierExpression::analyzeProgram(AnalysisResultPtr /*ar*/) {
-  // do nothing
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ModifierExpression::outputPHP(CodeGenerator& cg,

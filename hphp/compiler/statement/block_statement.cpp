@@ -43,10 +43,6 @@ int BlockStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void BlockStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->analyzeProgram(ar);
-}
-
 bool BlockStatement::hasDecl() const {
   return m_stmts && m_stmts->hasDecl();
 }

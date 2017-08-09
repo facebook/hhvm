@@ -143,11 +143,6 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_variable->analyzeProgram(ar);
-  if (m_offset) m_offset->analyzeProgram(ar);
-}
-
 ConstructPtr ArrayElementExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

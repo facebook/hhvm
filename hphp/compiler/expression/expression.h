@@ -34,7 +34,6 @@
 #define EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES                 \
   scope, r
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
-  void analyzeProgram(AnalysisResultPtr ar) override;                   \
   ExpressionPtr clone() override;                                       \
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
@@ -189,8 +188,6 @@ public:
    */
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
-
-  void analyzeProgram(AnalysisResultPtr ar) override;
 
   /**
    * Called before type inference.

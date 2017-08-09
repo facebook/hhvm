@@ -192,11 +192,6 @@ int BinaryOpExpression::getLocalEffects() const {
   return effect;
 }
 
-void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp1->analyzeProgram(ar);
-  m_exp2->analyzeProgram(ar);
-}
-
 ConstructPtr BinaryOpExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

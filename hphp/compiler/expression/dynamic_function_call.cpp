@@ -49,7 +49,6 @@ ExpressionPtr DynamicFunctionCall::clone() {
 // static analysis functions
 
 void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
-  FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     if (hasStaticClass()) {
       resolveClass();

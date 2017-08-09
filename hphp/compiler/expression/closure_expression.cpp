@@ -140,8 +140,7 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
 // static analysis functions
 
 void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_func->analyzeProgram(ar);
-
+  ar->analyzeProgram(m_func);
   if (m_vars) analyzeVars(ar);
 
   FunctionScopeRawPtr container =
@@ -152,8 +151,6 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
-  m_values->analyzeProgram(ar);
-
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     getFunctionScope()->addUse(m_func->getFunctionScope(),
                                BlockScope::UseKindClosure);

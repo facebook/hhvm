@@ -39,10 +39,6 @@ StatementPtr ThrowStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ThrowStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr ThrowStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

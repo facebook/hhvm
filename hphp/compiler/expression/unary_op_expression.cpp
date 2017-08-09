@@ -345,10 +345,6 @@ void UnaryOpExpression::onParse(AnalysisResultConstPtr /*ar*/,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_exp) m_exp->analyzeProgram(ar);
-}
-
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   if (RuntimeOption::EvalDisableHphpcOpts) return false;
 

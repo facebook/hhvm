@@ -43,11 +43,6 @@ ExpressionPtr YieldFromExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void YieldFromExpression::analyzeProgram(AnalysisResultPtr ar) {
-  assert(getFunctionScope() && getFunctionScope()->isGenerator());
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr YieldFromExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

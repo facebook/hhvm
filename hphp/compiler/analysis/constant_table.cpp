@@ -112,7 +112,7 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
   if (const Symbol *sym = getSymbol(name)) {
     assert(sym->isPresent() && sym->valueSet());
     if (sym->isDynamic()) return ConstructPtr();
-    if (sym->getValue()) return sym->getValue();
+    if (auto val = sym->getValue()) return val;
   }
   ClassScopePtr parent = findParent(ar, name);
   if (parent) {
@@ -138,30 +138,26 @@ const {
   return ConstructPtr();
 }
 
-void ConstantTable::recordDependencies(Symbol* sym,
-                                       const ClassConstantSet& depends) {
+void ConstantTable::recordDependency(Symbol* sym,
+                                     ClassScopePtr cls, std::string name) {
   auto& set = m_dependencies[sym];
-  set.insert(depends.begin(), depends.end());
-  m_hasDependencies |= !set.empty();
+  set.emplace(cls, name);
+  m_hasDependencies = true;
 }
 
-void ConstantTable::recordDependencies(const std::string& name,
-                                       const ClassConstantSet& depends) {
-  if (Symbol* sym = getSymbol(name)) {
-    recordDependencies(sym, depends);
-  }
-}
+const ConstantTable::ClassConstantSet& ConstantTable::lookupDependencies(
+  const std::string& name) {
 
-void ConstantTable::lookupDependencies(const std::string& name,
-                                       ClassConstantSet& out) {
-
-  if (!m_hasDependencies) return;
-  if (Symbol* sym = getSymbol(name)) {
-    auto iter = m_dependencies.find(sym);
-    if (iter != m_dependencies.end()) {
-      out.insert(iter->second.begin(), iter->second.end());
+  if (m_hasDependencies) {
+    if (auto const sym = getSymbol(name)) {
+      auto iter = m_dependencies.find(sym);
+      if (iter != m_dependencies.end()) {
+        return iter->second;
+      }
     }
   }
+  static ClassConstantSet empty;
+  return empty;
 }
 
 void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {

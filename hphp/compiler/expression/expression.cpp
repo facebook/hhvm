@@ -192,8 +192,6 @@ bool Expression::IsIdentifier(const std::string &value) {
   return true;
 }
 
-void Expression::analyzeProgram(AnalysisResultPtr /*ar*/) {}
-
 ExpressionPtr
 Expression::MakeConstant(AnalysisResultConstPtr /*ar*/, BlockScopePtr scope,
                          const Location::Range& r, const std::string& value) {

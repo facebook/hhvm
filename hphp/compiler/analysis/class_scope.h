@@ -326,17 +326,6 @@ public:
     return m_functionsVec;
   }
 
-  using ReferencedClassConstantSet = boost::container::flat_set<
-    std::pair<ClassScopePtr, std::string>
-  >;
-  void addReferencedClassConstant(ClassScopePtr cls, const std::string& name) {
-    m_referencedClassConstants.emplace(cls, name);
-  }
-
-  const ReferencedClassConstantSet&
-  getReferencedClassConstants() const { return m_referencedClassConstants; }
-
-  void resetReferencedClassConstants() { m_referencedClassConstants.clear(); }
 private:
   void informClosuresAboutScopeClone(ConstructPtr root,
                                      FunctionScopePtr outerScope,
@@ -527,8 +516,6 @@ private:
 
   // holds the fact that accessing this class declaration is a fatal error
   const StringData* m_fatal_error_msg = nullptr;
-
-  ReferencedClassConstantSet m_referencedClassConstants;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

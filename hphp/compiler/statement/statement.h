@@ -31,7 +31,6 @@
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
   scope, labelScope, r, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
-  void analyzeProgram(AnalysisResultPtr ar) override;                   \
   StatementPtr clone() override;                                        \
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
@@ -59,7 +58,7 @@ public:
   static const char* nameOfKind(Construct::KindOf);
 
 protected:
-  Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+  explicit Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 
 public:
   /**

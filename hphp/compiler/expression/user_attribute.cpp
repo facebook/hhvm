@@ -40,13 +40,6 @@ ExpressionPtr UserAttribute::clone() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// static analysis functions
-
-void UserAttribute::analyzeProgram(AnalysisResultPtr /*ar*/) {
-  // do nothing
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void UserAttribute::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

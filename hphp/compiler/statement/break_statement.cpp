@@ -49,8 +49,6 @@ StatementPtr BreakStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void BreakStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
-
 ConstructPtr BreakStatement::getNthKid(int /*n*/) const {
   always_assert(false);
 }

@@ -487,14 +487,6 @@ int MethodStatement::getLocalEffects() const {
   return scope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
 }
 
-void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_params) {
-    m_params->analyzeProgram(ar);
-  }
-
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
-
 ConstructPtr MethodStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

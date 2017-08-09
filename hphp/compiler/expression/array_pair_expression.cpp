@@ -71,11 +71,6 @@ bool ArrayPairExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
     m_value->containsDynamicConstant(ar);
 }
 
-void ArrayPairExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_name) m_name->analyzeProgram(ar);
-  m_value->analyzeProgram(ar);
-}
-
 ConstructPtr ArrayPairExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

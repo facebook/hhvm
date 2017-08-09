@@ -45,11 +45,6 @@ ExpressionPtr NullCoalesceExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void NullCoalesceExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_expFirst->analyzeProgram(ar);
-  m_expSecond->analyzeProgram(ar);
-}
-
 ConstructPtr NullCoalesceExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

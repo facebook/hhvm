@@ -33,8 +33,6 @@ protected:
                const std::string &name, bool hadBackslash,
                ExpressionListPtr params, ExpressionPtr classExp);
 public:
-  void analyzeProgram(AnalysisResultPtr ar) override;
-
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ConstructPtr getNthKid(int n) const override;

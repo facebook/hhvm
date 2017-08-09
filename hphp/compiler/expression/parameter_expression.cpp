@@ -132,10 +132,6 @@ void ParameterExpression::fixupSelfAndParentTypehints(ClassScopePtr cls) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
-}
-
 ConstructPtr ParameterExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

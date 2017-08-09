@@ -42,8 +42,7 @@ using namespace HPHP;
 
 StatementList::StatementList
 (STATEMENT_CONSTRUCTOR_PARAMETERS)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StatementList)),
-    m_included(false) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StatementList)) {
 }
 
 StatementPtr StatementList::clone() {
@@ -147,23 +146,6 @@ bool StatementList::hasRetExp() const {
     if (m_stmts[i]->hasRetExp()) return true;
   }
   return false;
-}
-
-void StatementList::analyzeProgram(AnalysisResultPtr ar) {
-  m_included = true;
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr stmt = m_stmts[i];
-
-    // effect testing
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      if (!stmt->hasEffect() && !stmt->hasDecl() &&
-          !stmt->is(Statement::KindOfStatementList)) {
-        Compiler::Error(Compiler::StatementHasNoEffect, stmt);
-      }
-    }
-
-    stmt->analyzeProgram(ar);
-  }
 }
 
 ConstructPtr StatementList::getNthKid(int n) const {

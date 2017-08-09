@@ -90,10 +90,9 @@ struct ConstantTable : SymbolTable {
   >;
   using DependencyMap = std::map<Symbol*, ClassConstantSet>;
 
-  void recordDependencies(Symbol*, const ClassConstantSet&);
-  void recordDependencies(const std::string&, const ClassConstantSet&);
+  void recordDependency(Symbol* sym, ClassScopePtr cls, std::string name);
 
-  void lookupDependencies(const std::string&, ClassConstantSet&);
+  const ClassConstantSet& lookupDependencies(const std::string&);
 
   bool hasDependencies() const { return m_hasDependencies; }
   const DependencyMap& getDependencies() const { return m_dependencies; }

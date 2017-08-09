@@ -61,10 +61,6 @@ StatementPtr GlobalStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void GlobalStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr GlobalStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

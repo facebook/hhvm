@@ -31,6 +31,7 @@ struct ObjectMethodExpression : FunctionCall {
                          ExpressionListPtr params, bool nullsafe);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;

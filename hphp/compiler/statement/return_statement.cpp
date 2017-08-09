@@ -57,7 +57,6 @@ void ReturnStatement::analyzeProgram(AnalysisResultPtr ar) {
         m_exp->setContext(Expression::RefValue);
       }
     }
-    m_exp->analyzeProgram(ar);
   }
 }
 

@@ -279,12 +279,6 @@ ExpressionPtr &ExpressionList::operator[](int index) {
   return m_exps[index];
 }
 
-void ExpressionList::analyzeProgram(AnalysisResultPtr ar) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (m_exps[i]) m_exps[i]->analyzeProgram(ar);
-  }
-}
-
 bool ExpressionList::kidUnused(int i) const {
   if (m_kind == ListKindParam) {
     return false;

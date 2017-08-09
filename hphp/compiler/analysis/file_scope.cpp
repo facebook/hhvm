@@ -236,7 +236,7 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_pseudoMain) return;
-  m_pseudoMain->getStmt()->analyzeProgram(ar);
+  ar->analyzeProgram(m_pseudoMain->getStmt());
 
   resolve_lambda_names(ar, shared_from_this());
 }

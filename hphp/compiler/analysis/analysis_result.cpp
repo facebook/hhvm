@@ -497,7 +497,15 @@ static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
   return f1->getName() < f2->getName();
 }
 
-void AnalysisResult::analyzeProgram(bool /*system*/ /* = false */) {
+void AnalysisResult::analyzeProgram(ConstructPtr c) {
+  if (!c) return;
+  for (auto i = 0, n = c->getKidCount(); i < n; ++i) {
+    analyzeProgram(c->getNthKid(i));
+  }
+  c->analyzeProgram(shared_from_this());
+}
+
+void AnalysisResult::analyzeProgram() {
   AnalysisResultPtr ar = shared_from_this();
 
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
@@ -604,14 +612,16 @@ void AnalysisResult::analyzeProgram(bool /*system*/ /* = false */) {
 
       for (auto const& p : constants->getDependencies()) {
         auto const sym = p.first;
-        auto const& dependencies = p.second;
-        auto const beforeSize = dependencies.size();
+        auto const dependencies = p.second;
         ConstantTable::ClassConstantSet expanded;
         for (auto const& cns : dependencies) {
-          cns.first->getConstants()->lookupDependencies(cns.second, expanded);
+          auto const &deps =
+            cns.first->getConstants()->lookupDependencies(cns.second);
+          for (auto const& dep : deps) {
+            constants->recordDependency(sym, dep.first, dep.second);
+          }
         }
-        constants->recordDependencies(sym, expanded);
-        if (dependencies.size() > beforeSize) repeat = true;
+        if (dependencies.size() < p.second.size()) repeat = true;
       }
     }
   } while (repeat);

@@ -57,7 +57,6 @@ struct StatementList : Statement {
 
 private:
   std::vector<StatementPtr> m_stmts;
-  bool m_included; // whether includes have been inlined
 };
 
 ///////////////////////////////////////////////////////////////////////////////

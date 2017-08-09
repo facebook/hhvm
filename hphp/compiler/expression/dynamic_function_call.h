@@ -30,6 +30,7 @@ struct DynamicFunctionCall : FunctionCall {
                       ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 };
 

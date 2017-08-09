@@ -36,6 +36,7 @@ struct ClassExpression : FunctionCall {
                   ExpressionListPtr params);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
 
   ClassStatementPtr getClass() { return m_cls; }
 

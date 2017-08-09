@@ -44,10 +44,6 @@ ExpressionPtr DynamicVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void DynamicVariable::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr DynamicVariable::getNthKid(int n) const {
   switch (n) {
     case 0:

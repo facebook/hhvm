@@ -35,6 +35,7 @@ public:
                     ExpressionPtr exp, int op);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler

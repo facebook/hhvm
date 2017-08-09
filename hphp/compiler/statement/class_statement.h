@@ -38,6 +38,7 @@ struct ClassStatement : InterfaceStatement {
                  TypeAnnotationPtr enumBaseTy);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   bool hasDecl() const override { return true; }
   bool hasImpl() const override;
 

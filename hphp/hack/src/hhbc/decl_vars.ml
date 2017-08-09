@@ -85,6 +85,12 @@ class declvar_visitor = object(this)
     | Ast.Uref -> add_bare_expr this acc expr
     | _ -> super#on_unop acc unop expr
 
+  method! on_binop acc binop e1 e2 =
+    match binop, e2 with
+    | (Ast.Eq _, (_, Ast.Yield _)) -> let acc = this#on_expr acc e2 in this#on_expr acc e1
+    | (Ast.Eq _, (_, Ast.Yield_from _)) -> let acc = this#on_expr acc e2 in this#on_expr acc e1
+    | _ -> super#on_binop acc binop e1 e2
+
   method! on_lvar acc id = add_local ~bareparam:false acc id
   method! on_lvarvar acc _ id = add_local ~bareparam:false acc id
   method! on_class_get acc id prop =

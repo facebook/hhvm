@@ -65,17 +65,6 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void UseTraitStatement::analyzeProgram(AnalysisResultPtr ar) {
-  // Analyze children
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    (*m_exp)[i]->analyzeProgram(ar);
-  }
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-
-  // At the final pass, collect info & insert trait into target class
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-}
-
 ConstructPtr UseTraitStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

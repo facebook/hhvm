@@ -72,8 +72,6 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassRequireStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
-
 ConstructPtr ClassRequireStatement::getNthKid(int /*n*/) const {
   always_assert(false);
   return ConstructPtr();

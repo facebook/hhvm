@@ -97,9 +97,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, std::string &name,
 }
 
 void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->analyzeProgram(ar);
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     Symbol *sym;
     std::string name;
     if (findMember(ar, name, sym)) {
@@ -113,7 +111,6 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   }
-  m_exp->analyzeProgram(ar);
 }
 
 ConstructPtr StaticMemberExpression::getNthKid(int n) const {

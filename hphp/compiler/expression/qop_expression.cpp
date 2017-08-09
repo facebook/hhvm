@@ -46,14 +46,6 @@ ExpressionPtr QOpExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void QOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_condition->analyzeProgram(ar);
-  if (m_expYes) {
-    m_expYes->analyzeProgram(ar);
-  }
-  m_expNo->analyzeProgram(ar);
-}
-
 ConstructPtr QOpExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

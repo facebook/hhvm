@@ -51,10 +51,6 @@ void ExpStatement::onParse(AnalysisResultConstPtr /*ar*/,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ExpStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr ExpStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

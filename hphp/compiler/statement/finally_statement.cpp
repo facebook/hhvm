@@ -46,10 +46,6 @@ int FinallyStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void FinallyStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
-
 bool FinallyStatement::hasDecl() const {
   return (m_stmt && m_stmt->hasDecl());
 }

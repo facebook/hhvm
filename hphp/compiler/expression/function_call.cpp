@@ -187,14 +187,6 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
   }
 }
 
-void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_class) m_class->analyzeProgram(ar);
-  if (m_nameExp) m_nameExp->analyzeProgram(ar);
-  if (m_params) {
-    m_params->analyzeProgram(ar);
-  }
-}
-
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();

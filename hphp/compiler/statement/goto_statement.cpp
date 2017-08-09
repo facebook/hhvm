@@ -55,8 +55,6 @@ void GotoStatement::invalidate(ParserBase::GotoError error) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void GotoStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
-
 ConstructPtr GotoStatement::getNthKid(int n) const {
   switch (n) {
     default:

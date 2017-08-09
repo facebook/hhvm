@@ -69,22 +69,12 @@ bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
 }
 
 void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->analyzeProgram(ar);
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+  if (!m_class && ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     if (ClassScopePtr cls = resolveClass()) {
       ConstructPtr decl = cls->getConstants()->
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
-      if (auto scope = getScope()) {
-        if (auto clsScope = scope->getContainingClass()) {
-          // Record that this class constant is referenced inside this scope
-          // (which will be associated with another class constant if we're
-          // inside a class constant definition).
-          clsScope->addReferencedClassConstant(cls, m_varName);
-        }
-      }
     }
   }
 }
@@ -137,11 +127,11 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 
   ConstantTablePtr constants = cls->getConstants();
   ClassScopePtr defClass = cls;
+  BlockScope::s_constMutex.lock();
   ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
+  BlockScope::s_constMutex.unlock();
   if (decl) {
-    BlockScope::s_constMutex.lock();
     auto value = dynamic_pointer_cast<Expression>(decl);
-    BlockScope::s_constMutex.unlock();
 
     if (!value->isScalar() &&
         (value->is(KindOfClassConstantExpression) ||

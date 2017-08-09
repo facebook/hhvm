@@ -43,11 +43,6 @@ StatementPtr WhileStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void WhileStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_condition->analyzeProgram(ar);
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
-
 ConstructPtr WhileStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

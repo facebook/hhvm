@@ -44,14 +44,6 @@ ExpressionPtr EncapsListExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void EncapsListExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_exps) {
-    for (int i = 0; i < m_exps->getCount(); i++) {
-      (*m_exps)[i]->analyzeProgram(ar);
-    }
-  }
-}
-
 ConstructPtr EncapsListExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

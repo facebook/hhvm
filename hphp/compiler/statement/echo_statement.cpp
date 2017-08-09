@@ -40,12 +40,6 @@ StatementPtr EchoStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void EchoStatement::analyzeProgram(AnalysisResultPtr ar) {
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    (*m_exp)[i]->analyzeProgram(ar);
-  }
-}
-
 ConstructPtr EchoStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

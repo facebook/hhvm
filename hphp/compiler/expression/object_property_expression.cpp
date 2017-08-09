@@ -131,8 +131,6 @@ void ObjectPropertyExpression::clearContext(Context context) {
 }
 
 void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_object->analyzeProgram(ar);
-  m_property->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_valid && !hasLocalEffect(UnknownEffect) &&
         !m_object->isThis()) {

@@ -50,10 +50,6 @@ int IfStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IfStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->analyzeProgram(ar);
-}
-
 bool IfStatement::hasDecl() const {
   return m_stmts && m_stmts->hasDecl();
 }

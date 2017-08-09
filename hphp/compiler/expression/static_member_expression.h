@@ -29,6 +29,7 @@ struct StaticMemberExpression : Expression, StaticClassName {
                          ExpressionPtr classExp, ExpressionPtr exp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
   bool isRefable(bool /*checkError*/ = false) const override { return true; }

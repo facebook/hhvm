@@ -59,14 +59,6 @@ int TryStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_tryStmt) m_tryStmt->analyzeProgram(ar);
-  if (m_catches)
-    m_catches->analyzeProgram(ar);
-  if (m_finallyStmt)
-    m_finallyStmt->analyzeProgram(ar);
-}
-
 bool TryStatement::hasDecl() const {
   if (m_tryStmt && m_tryStmt->hasDecl()) return true;
   if (m_catches && m_catches->hasDecl()) return true;

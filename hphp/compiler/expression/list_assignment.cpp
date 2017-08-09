@@ -198,11 +198,6 @@ void ListAssignment::setLValue() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_variables) m_variables->analyzeProgram(ar);
-  if (m_array) m_array->analyzeProgram(ar);
-}
-
 ConstructPtr ListAssignment::getNthKid(int n) const {
   switch (m_rhsFirst ? 1 - n : n) {
     case 0:

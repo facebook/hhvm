@@ -266,7 +266,7 @@ public:
    * Called when we analyze a program, which file it includes, which function
    * and class it uses, etc.
    */
-  virtual void analyzeProgram(AnalysisResultPtr ar) = 0;
+  virtual void analyzeProgram(AnalysisResultPtr ar) {}
 
   /**
    * return the nth child construct

@@ -15,23 +15,25 @@
 */
 
 #include "hphp/compiler/expression/assignment_expression.h"
-#include "hphp/compiler/expression/array_element_expression.h"
-#include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/compiler/expression/simple_variable.h"
+
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/option.h"
+#include "hphp/parser/hphp.tab.hpp"
 
 #include "hphp/runtime/base/execution-context.h"
 
@@ -94,14 +96,33 @@ int AssignmentExpression::getLocalEffects() const {
   return AssignEffect;
 }
 
+void recordClassConstDependencies(ConstantTablePtr constants,
+                                  Symbol* sym,
+                                  ExpressionPtr e) {
+  if (!e) return;
+  if (e->is(Expression::KindOfClassConstantExpression)) {
+    auto cc = static_pointer_cast<ClassConstantExpression>(e);
+    if (auto ccCls = cc->resolveClass()) {
+      constants->recordDependency(sym, ccCls, cc->getConName());
+    }
+  } else {
+    for (auto i = 0, n = e->getKidCount(); i < n; i++) {
+      recordClassConstDependencies(constants, sym, e->getNthExpr(i));
+    }
+  }
+}
+
 void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_variable->analyzeProgram(ar);
-  m_value->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_variable->is(Expression::KindOfConstantExpression)) {
-      auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
-      if (!m_value->isScalar()) {
-        getScope()->getConstants()->setDynamic(ar, exp->getName());
+  if (m_variable->is(Expression::KindOfConstantExpression)) {
+    auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
+    if (!m_value->isScalar()) {
+      auto constants = getScope()->getConstants();
+      if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+        constants->setDynamic(ar, exp->getName());
+      } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+        if (auto const sym = constants->getSymbol(exp->getName())) {
+          recordClassConstDependencies(constants, sym, m_value);
+        }
       }
     }
   }

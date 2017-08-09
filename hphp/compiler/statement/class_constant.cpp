@@ -115,40 +115,6 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassConstant::analyzeProgram(AnalysisResultPtr ar) {
-  auto scope = [&]{
-    if (auto s = getScope()) {
-      if (auto c = s->getContainingClass()) return c;
-    }
-    return ClassScopeRawPtr();
-  }();
-
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    auto assignment =
-      dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-    if (assignment) {
-      auto var = assignment->getVariable();
-      const auto& name =
-        dynamic_pointer_cast<ConstantExpression>(var)->getName();
-
-      if (scope) scope->resetReferencedClassConstants();
-      assignment->analyzeProgram(ar);
-      if (scope) {
-        // Retrieve any class constants referenced while analyzing the
-        // right-hand side of this definition. Store them as dependencies of the
-        // class constant on the left-hand side.
-        auto const& referenced = scope->getReferencedClassConstants();
-        if (!referenced.empty()) {
-          scope->getConstants()->recordDependencies(name, referenced);
-        }
-        scope->resetReferencedClassConstants();
-      }
-    } else {
-      (*m_exp)[i]->analyzeProgram(ar);
-    }
-  }
-}
-
 ConstructPtr ClassConstant::getNthKid(int n) const {
   switch (n) {
     case 0:

@@ -42,11 +42,6 @@ ExpressionPtr AwaitExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void AwaitExpression::analyzeProgram(AnalysisResultPtr ar) {
-  assert(getFunctionScope() && getFunctionScope()->isAsync());
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr AwaitExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

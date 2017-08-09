@@ -33,6 +33,7 @@ struct ConstantExpression : Expression, private IParseHandler {
                      const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   bool isScalar() const override;

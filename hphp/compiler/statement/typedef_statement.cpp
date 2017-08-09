@@ -54,8 +54,6 @@ void TypedefStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
 
 //////////////////////////////////////////////////////////////////////
 
-void TypedefStatement::analyzeProgram(AnalysisResultPtr) {}
-
 void TypedefStatement::outputPHP(CodeGenerator& /*cg*/,
                                  AnalysisResultPtr /*ar*/) {}
 

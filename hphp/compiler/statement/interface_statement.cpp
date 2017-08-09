@@ -177,14 +177,10 @@ void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
 }
 
 void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  if (m_stmt) {
-    m_stmt->analyzeProgram(ar);
-  }
-
   checkVolatile(ar);
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
+  auto classScope = getClassScope();
   std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
   for (unsigned int i = 0; i < bases.size(); i++) {

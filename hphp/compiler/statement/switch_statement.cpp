@@ -67,9 +67,6 @@ int SwitchStatement::getRecursiveCount() const {
 // static analysis functions
 
 void SwitchStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-  if (m_cases) m_cases->analyzeProgram(ar);
-
   if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
       m_exp->is(Expression::KindOfSimpleVariable)) {
     auto exp = dynamic_pointer_cast<SimpleVariable>(m_exp);

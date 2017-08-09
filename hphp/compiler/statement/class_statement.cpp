@@ -201,18 +201,14 @@ std::string ClassStatement::getName() const {
 }
 
 void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
+  checkVolatile(ar);
+
+  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
+
   std::vector<std::string> bases;
   auto const hasParent = !m_originalParent.empty();
   if (hasParent) bases.push_back(m_originalParent);
   if (m_base) m_base->getStrings(bases);
-
-  checkVolatile(ar);
-
-  if (m_stmt) {
-    m_stmt->analyzeProgram(ar);
-  }
-
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
 
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);

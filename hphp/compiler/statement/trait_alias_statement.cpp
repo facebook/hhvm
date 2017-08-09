@@ -51,14 +51,6 @@ StatementPtr TraitAliasStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void TraitAliasStatement::analyzeProgram(AnalysisResultPtr ar) {
-  // Analyze children
-  m_traitName->analyzeProgram(ar);
-  m_methodName->analyzeProgram(ar);
-  m_modifiers->analyzeProgram(ar);
-  m_newMethodName->analyzeProgram(ar);
-}
-
 ConstructPtr TraitAliasStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

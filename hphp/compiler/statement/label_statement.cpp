@@ -40,8 +40,6 @@ StatementPtr LabelStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void LabelStatement::analyzeProgram(AnalysisResultPtr /*ar*/) {}
-
 ConstructPtr LabelStatement::getNthKid(int n) const {
   switch (n) {
     default:

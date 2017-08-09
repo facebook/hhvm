@@ -55,10 +55,6 @@ void DeclareStatement::setNthKid(int n, ConstructPtr cp) {
 
 //////////////////////////////////////////////////////////////////////
 
-void DeclareStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_block) m_block->analyzeProgram(ar);
-}
-
 void DeclareStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
   if (m_block) m_block->outputPHP(cg, ar);
 }

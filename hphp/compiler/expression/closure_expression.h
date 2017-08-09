@@ -47,6 +47,7 @@ struct ClosureExpression : Expression {
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   int getKidCount() const override;
+  void analyzeProgram(AnalysisResultPtr ar) override;
 
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }

@@ -124,10 +124,6 @@ std::string FunctionStatement::getName() const {
   return std::string("Function ") + getOriginalName();
 }
 
-void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
-  MethodStatement::analyzeProgram(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

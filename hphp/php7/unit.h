@@ -49,25 +49,25 @@ struct Block {
     bc::Fatal
   >;
 
-  void emit(bc::Jmp&&) = delete;
-  void emit(bc::JmpNS&&) = delete;
-  void emit(bc::JmpZ&&) = delete;
-  void emit(bc::JmpNZ&&) = delete;
-  void emit(bc::Switch&&) = delete;
-  void emit(bc::SSwitch&&) = delete;
-  void emit(bc::RetC&&) = delete;
-  void emit(bc::RetV&&) = delete;
-  void emit(bc::Unwind&&) = delete;
-  void emit(bc::Throw&&) = delete;
-  void emit(bc::Fatal&&) = delete;
-  void emit(ExitOp&& op) = delete;
+  void emit(bc::Jmp) = delete;
+  void emit(bc::JmpNS) = delete;
+  void emit(bc::JmpZ) = delete;
+  void emit(bc::JmpNZ) = delete;
+  void emit(bc::Switch) = delete;
+  void emit(bc::SSwitch) = delete;
+  void emit(bc::RetC) = delete;
+  void emit(bc::RetV) = delete;
+  void emit(bc::Unwind) = delete;
+  void emit(bc::Throw) = delete;
+  void emit(bc::Fatal) = delete;
+  void emit(ExitOp op) = delete;
 
-  void emit(Bytecode&& bc) {
+  void emit(Bytecode bc) {
     assert(!exited);
     code.push_back(std::move(bc));
   }
 
-  void exit(ExitOp&& op) {
+  void exit(ExitOp op) {
     exited = true;
     exits.push_back(std::move(op));
   }

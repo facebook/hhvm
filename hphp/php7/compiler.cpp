@@ -16,52 +16,13 @@
 
 #include "hphp/php7/compiler.h"
 
+#include "hphp/php7/util.h"
+
 #include <folly/Format.h>
 
 #include <iostream>
 
 namespace HPHP { namespace php7 {
-
-namespace {
-// helpers to cope with these functions taking non-const pointers
-// in zend_ast.h
-
-inline const zval* zend_ast_get_zval(const zend_ast* ast) {
-  return &reinterpret_cast<const zend_ast_zval*>(ast)->val;
-}
-
-inline const zend_ast_list* zend_ast_get_list(const zend_ast* ast) {
-  return reinterpret_cast<const zend_ast_list*>(ast);
-}
-
-inline const zend_ast_decl* zend_ast_get_decl(const zend_ast* ast) {
-  return reinterpret_cast<const zend_ast_decl*>(ast);
-}
-
-inline std::string zval_to_string(const zval* zv) {
-  std::string out;
-  switch (Z_TYPE_P(zv)) {
-    case IS_LONG:
-      folly::format(&out, "{}", Z_LVAL_P(zv));
-      break;
-    case IS_NULL:
-    case IS_FALSE:
-      break;
-    case IS_TRUE:
-      out.append("1");
-      break;
-    case IS_DOUBLE:
-      folly::format(&out, "{}", Z_DVAL_P(zv));
-      break;
-    case IS_STRING:
-      folly::format(&out, "{}", Z_STRVAL_P(zv));
-      break;
-  }
-  return out;
-}
-
-} // namespace
-
 
 using namespace bc;
 
@@ -171,6 +132,15 @@ void Compiler::compileConstant(const zend_ast* ast) {
   } else {
     panic("unknown constant");
   }
+}
+
+
+std::unique_ptr<Lvalue> Compiler::getLvalue(const zend_ast* ast){
+  if (auto ret = Lvalue::getLvalue(*this, ast)) {
+    return ret;
+  }
+
+  panic("can't make lvalue");
 }
 
 void Compiler::compileVar(const zend_ast* ast, Destination dest) {
@@ -436,6 +406,7 @@ void Compiler::compileExpression(const zend_ast* ast, Destination dest) {
       fixFlavor(dest, Flavor::Cell);
       break;
     case ZEND_AST_VAR:
+    case ZEND_AST_DIM:
       compileVar(ast, dest);
       break;
     case ZEND_AST_ASSIGN:
@@ -510,9 +481,15 @@ void Compiler::fixFlavor(Destination dest, Flavor actual) {
         case FuncParam:
           panic("Can't make cell");
       }
+    // nobody should be asking for a Return flavor unless they gosh darn know
+    // the expression being compiled is a call >:/
     case Return:
-      panic("can't coerce to return value");
-      break;
+      switch (actual) {
+        case Return:
+          return;
+        default:
+          panic("can't coerce to return value");
+      }
     case FuncParam:
       auto slot = dest.slot;
       switch (actual) {
@@ -726,122 +703,6 @@ void Compiler::compileFor(const zend_ast* ast) {
 
   activeBlock->exit(Jmp{testBlock});
   activeBlock = continuation;
-}
-
-struct Compiler::LocalLvalue : Compiler::Lvalue {
-  LocalLvalue(Compiler& c, std::string name)
-    : c(c)
-    , name(std::move(name)) {}
-
-  void getC() override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(CGetL{name});
-  }
-
-  void getV() override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(VGetL{name});
-  }
-
-  void getF(uint32_t slot) override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(FPassL{slot, name});
-  }
-
-  void assign(const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetL{name});
-  }
-
-  void bind(const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Ref);
-    c.activeBlock->emit(BindL{name});
-  }
-
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
-    c.activeFunction->locals.insert(name);
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetOpL{name, op});
-  }
-
-  void incDec(IncDecOp op) override {
-    c.activeFunction->locals.insert(name);
-    c.activeBlock->emit(IncDecL{name, op});
-  }
-
-  Compiler& c;
-  std::string name;
-};
-
-struct Compiler::DynamicLocalLvalue : Compiler::Lvalue {
-  DynamicLocalLvalue(Compiler& c, const zend_ast* nameExpr)
-    : c(c)
-    , nameExpr(nameExpr) {}
-
-  void getName() {
-    c.compileExpression(nameExpr, Flavor::Cell);
-  }
-
-  void getC() override {
-    getName();
-    c.activeBlock->emit(CGetN{});
-  }
-
-  void getV() override {
-    getName();
-    c.activeBlock->emit(VGetN{});
-  }
-
-  void getF(uint32_t slot) override {
-    getName();
-    c.activeBlock->emit(FPassN{slot});
-  }
-
-  void assign(const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetN{});
-  }
-
-  void bind(const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Ref);
-    c.activeBlock->emit(BindN{});
-  }
-
-  void assignOp(SetOpOp op, const zend_ast* rhs) override {
-    getName();
-    c.compileExpression(rhs, Flavor::Cell);
-    c.activeBlock->emit(SetOpN{op});
-  }
-
-  void incDec(IncDecOp op) override {
-    getName();
-    c.activeBlock->emit(IncDecN{op});
-  }
-
-  Compiler& c;
-  const zend_ast* nameExpr;
-};
-
-std::unique_ptr<Compiler::Lvalue> Compiler::getLvalue(const zend_ast* ast) {
-  if (ast->kind == ZEND_AST_VAR) {
-    auto name = ast->child[0];
-    switch (name->kind) {
-      case ZEND_AST_ZVAL:
-        return std::make_unique<Compiler::LocalLvalue>(
-            *this,
-            zval_to_string(zend_ast_get_zval(name)));
-      default:
-        return std::make_unique<Compiler::DynamicLocalLvalue>(
-            *this,
-            name);
-    }
-  }
-
-  panic("unsupported lvalue");
 }
 
 }} // HPHP::php7

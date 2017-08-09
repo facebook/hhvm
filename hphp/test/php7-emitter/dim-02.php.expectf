@@ -1,0 +1,4 @@
+
+Fatal error: Uncaught Error: Cannot use [] for reading in %s
+Stack trace:
+#0 {main}

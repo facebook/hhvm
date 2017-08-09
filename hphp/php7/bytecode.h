@@ -19,6 +19,8 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include <boost/variant.hpp>
+
 #include <unordered_map>
 #include <vector>
 
@@ -38,6 +40,41 @@ struct Local {
   std::string name;
 };
 
+enum MemberType {
+  Property,
+  Element,
+};
+
+struct LocalMember {
+  MemberType type;
+  Local local;
+};
+
+struct CellMember {
+  MemberType type;
+  uint32_t location;
+};
+
+struct ImmMember {
+  MemberType type;
+  std::string name;
+};
+
+struct ImmIntElem {
+  int64_t val;
+};
+
+struct NewElem {};
+
+typedef boost::variant<
+  CellMember,
+  LocalMember,
+  ImmMember,
+  ImmIntElem,
+  NewElem
+  // null-safe access (MQT) is left out since PHP doesn't have this feature
+> MemberKey;
+
 // void* immediate types just aren't being used right now
 #define IMM_TYPE_BLA std::vector<Block*>
 #define IMM_TYPE_SLA StringOffsetVector
@@ -54,7 +91,7 @@ struct Local {
 #define IMM_TYPE_RATA void*
 #define IMM_TYPE_BA Block*
 #define IMM_TYPE_OA(subtype) subtype
-#define IMM_TYPE_KA void*
+#define IMM_TYPE_KA MemberKey
 #define IMM_TYPE_LAR void*
 #define IMM_TYPE_VSA void*
 
@@ -82,6 +119,11 @@ struct Local {
     \
     template<class Visitor> \
     void visit_imms(Visitor&& v) const { \
+      IMM_VISIT_ ## imms \
+    } \
+    \
+    template<class Visitor> \
+    void visit_imms(Visitor&& v) { \
       IMM_VISIT_ ## imms \
     } \
   };
@@ -183,6 +225,15 @@ OPCODES
 
   template<class Visitor>
   void visit(Visitor&& visit) const {
+    switch (code) {
+#define O(opcode, ...) case Op::opcode: visit.bytecode(opcode); break;
+      OPCODES
+#undef O
+    }
+  }
+
+  template<class Visitor>
+  void visit(Visitor&& visit) {
     switch (code) {
 #define O(opcode, ...) case Op::opcode: visit.bytecode(opcode); break;
       OPCODES

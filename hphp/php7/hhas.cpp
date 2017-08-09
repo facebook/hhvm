@@ -110,8 +110,62 @@ struct InstrVisitor {
     }
   }
 
-  template <class T>
-  void imm(const T& /*imm*/) {
+  void imm(QueryMOp op) {
+    out.append(" ");
+    switch (op) {
+#define OP(name) case QueryMOp::name: out.append( #name ); break;
+      QUERY_M_OPS
+#undef OP
+    }
+  }
+
+  void imm(MOpMode op) {
+    out.append(" ");
+    switch (op) {
+#define MODE(name) case MOpMode::name: out.append( #name ); break;
+      M_OP_MODES
+#undef MODE
+    }
+  }
+
+  void imm(const bc::MemberKey& mk) {
+    using namespace bc;
+    out.append(" ");
+
+    const auto writeType = [&] (MemberType t) {
+      switch (t) {
+        case MemberType::Element:
+          out.append("E");
+          return;
+        case MemberType::Property:
+          out.append("P");
+          return;
+      }
+    };
+
+    match<void>(mk,
+      [&](const CellMember& m) {
+        writeType(m.type);
+        folly::format(&out, "C:{}", m.location);
+      },
+      [&](const LocalMember& m) {
+        writeType(m.type);
+        folly::format(&out, "L:${}", m.local.name);
+      },
+      [&](const ImmMember& m) {
+        writeType(m.type);
+        folly::format(&out, "T:\"{}\"", folly::cEscape<std::string>(m.name));
+      },
+      [&](const ImmIntElem& m) {
+        folly::format(&out, "EI:{}", m.val);
+      },
+      [&](const NewElem& m) {
+        out.append("W");
+      });
+  }
+
+  template<class T>
+  void imm(const T& /* imm */) {
     out.append(" <immediate>");
   }
 

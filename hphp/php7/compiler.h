@@ -21,6 +21,7 @@
 #include "hphp/php7/ast_info.h"
 #include "hphp/php7/bytecode.h"
 #include "hphp/php7/unit.h"
+#include "hphp/php7/lvalue.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -81,8 +82,10 @@ struct Destination {
 
 
 struct Compiler {
+ private:
   explicit Compiler(const std::string& filename);
 
+ public:
   static std::unique_ptr<Unit> compile(const std::string& filename,
                                        const zend_ast* ast) {
     Compiler compiler(filename);
@@ -90,7 +93,6 @@ struct Compiler {
     return std::move(compiler.unit);
   }
 
- private:
   void compileProgram(const zend_ast* ast);
   void compileFunction(const zend_ast* ast);
   void compileStatement(const zend_ast* ast);
@@ -113,6 +115,8 @@ struct Compiler {
   Bytecode opForBinaryOp(const zend_ast* op);
   IncDecOp getIncDecOpForNode(zend_ast_kind kind);
   SetOpOp getSetOpOp(zend_ast_attr attr);
+
+  std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
 
   void compileUnaryOp(const zend_ast* op);
   void compileIncDec(const zend_ast* op);
@@ -138,24 +142,6 @@ struct Compiler {
     SCOPE_EXIT { std::swap(blk, activeBlock); };
     f();
   }
-
-  struct Lvalue {
-    virtual ~Lvalue() = default;
-
-    virtual void getC() = 0;
-    virtual void getV() = 0;
-    virtual void getF(uint32_t slot) = 0;
-    virtual void assign(const zend_ast* rhs) = 0;
-    virtual void bind(const zend_ast* rhs) = 0;
-    virtual void assignOp(SetOpOp op, const zend_ast* rhs) = 0;
-    virtual void incDec(IncDecOp op) = 0;
-  };
-
-  struct LocalLvalue;
-  struct DynamicLocalLvalue;
-
-  std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
-
 
   std::unique_ptr<Unit> unit;
 

@@ -1,0 +1,16 @@
+0 bar
+1 quux
+array(5) {
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(4) "quux"
+  ["true"]=>
+  int(4)
+  [0]=>
+  int(10)
+  [2]=>
+  int(35)
+}
+string(4) "quux"
+string(3) "bar"

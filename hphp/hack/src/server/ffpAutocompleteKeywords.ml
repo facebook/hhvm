@@ -115,11 +115,14 @@ let async_keyword = {
   is_valid_in_context = begin fun context ->
     (* Async method *)
     is_class_body_declaration_valid context
-    ||
+    || (* Async method after modifiers *)
     context.closest_parent_container = ClassBody &&
     (context.predecessor = VisibilityModifier ||
-    context.predecessor = KeywordStatic)
-    ||
+    context.predecessor = KeywordFinal ||
+    context.predecessor = KeywordStatic )
+    || (* Async top level function *)
+    is_top_level_statement_valid context
+    || (* Async lambda *)
     is_expression_valid context
   end;
 }

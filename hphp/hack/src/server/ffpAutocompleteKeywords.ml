@@ -256,14 +256,16 @@ let this_type_keyword = {
 let loop_body_keywords = {
   keywords = ["continue"; "break"];
   is_valid_in_context = begin fun context ->
-    context.inside_loop_body
+    context.inside_loop_body &&
+    is_at_beginning_of_new_statement context
   end;
 }
 
 let switch_body_keywords = {
   keywords = ["case"; "default"; "break"];
   is_valid_in_context = begin fun context ->
-    context.inside_switch_body
+    context.inside_switch_body &&
+    is_at_beginning_of_new_statement context
   end;
 }
 

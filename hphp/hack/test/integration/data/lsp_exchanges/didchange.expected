@@ -1,0 +1,113 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": false,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":"
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "renameProvider": false,
+        "typeCoverageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/progress",
+    "params": {
+      "id": 2,
+      "label": "Hack: preparing to check edits"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/actionRequired",
+    "params": {
+      "id": 3,
+      "label": null
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/progress",
+    "params": {
+      "id": 2,
+      "label": "Hack: checking edits"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/actionRequired",
+    "params": {
+      "id": 3,
+      "label": null
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/progress",
+    "params": {
+      "id": 2,
+      "label": null
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "window/actionRequired",
+    "params": {
+      "id": 3,
+      "label": "Hack: save any file to do a whole-program check"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/publishDiagnostics",
+    "params": {
+      "uri": "${php_file_uri}",
+      "diagnostics": [
+        {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 9
+            },
+            "end": {
+              "line": 2,
+              "character": 11
+            }
+          },
+          "severity": 1,
+          "code": 1002,
+          "source": "Hack",
+          "message": "Expected identifier",
+          "relatedLocations": []
+        }
+      ]
+    }
+  }
+]

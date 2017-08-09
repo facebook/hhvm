@@ -1,0 +1,42 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params":
+    {
+      "initializationOptions":{},
+      "processId":null,
+      "rootPath":"${root_path}",
+      "capabilities":{}
+    }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didOpen",
+  "params": {
+     "textDocument": {
+       "uri":"${php_file_uri}",
+       "languageId": "hack",
+       "version":1,
+       "text":"${php_file}"
+     }
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":2, "character":9},
+           "end": {"line":2, "character":12}
+         },
+         "text":"***"
+       }]
+   }
+}
+]

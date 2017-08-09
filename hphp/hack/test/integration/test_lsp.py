@@ -67,8 +67,16 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     # sorts a list of responses using the 'id' parameter so they can be
     # compared in sequence even if they came back from the server out of sequence.
     # this can happen based on how json rpc is specified to work.
+    # if 'id' isn't present the response is a notification.  we sort notifications
+    # by their entire text.
+    def order_response(self, response):
+        if 'id' in response:
+            return str(response['id'])
+        else:
+            return json.dumps(response, indent=2)
+
     def sort_responses(self, responses):
-        return sorted(responses, key=lambda response: response['id'])
+        return sorted(responses, key=lambda response: self.order_response(response))
 
     # removes stack traces from error responses since these can be noisy
     # as code changes and they contain execution environment specific details
@@ -159,6 +167,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.prepare_environment()
         variables = self.setup_php_file('messy.php')
         self.load_and_run('formatting', variables)
+
+    def test_did_change(self):
+        self.prepare_environment()
+        variables = self.setup_php_file('didchange.php')
+        self.load_and_run('didchange', variables)
 
     def test_non_existing_method(self):
         self.prepare_environment()

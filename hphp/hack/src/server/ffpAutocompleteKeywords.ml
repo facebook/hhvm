@@ -137,7 +137,11 @@ let const_keyword = {
 let use_keyword = {
   keywords = ["use"];
   is_valid_in_context = begin fun context ->
+    (* use <trait> inside body *)
     is_class_body_declaration_valid context
+    || (* use <namespace> at top level *)
+    is_top_level_statement_valid context
+    (* TODO: "use" for closures *)
   end;
 }
 
@@ -193,7 +197,7 @@ let require_constraint_keyword = {
 
 let declaration_keywords = {
   keywords = ["enum"; "require"; "include"; "require_once"; "include_once";
-    "use"; "namespace"; "newtype"; "type"; "trait"];
+    "namespace"; "newtype"; "type"; "trait"];
   is_valid_in_context = begin fun context ->
     is_top_level_statement_valid context
   end;

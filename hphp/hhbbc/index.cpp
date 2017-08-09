@@ -645,8 +645,10 @@ bool Func::mightReadCallerFrame() const {
   return match<bool>(
     val,
     // Only non-method builtins can read the caller's frame and builtins are
-    // always uniquely resolvable.
-    [&](FuncName /*s*/) { return false; },
+    // always uniquely resolvable in repo mode.
+    [&](FuncName /*s*/) {
+      return !RuntimeOption::RepoAuthoritative;
+    },
     [&](MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrReadsCallerFrame;
@@ -663,8 +665,10 @@ bool Func::mightWriteCallerFrame() const {
   return match<bool>(
     val,
     // Only non-method builtins can write to the caller's frame and builtins are
-    // always uniquely resolvable.
-    [&](FuncName /*s*/) { return false; },
+    // always uniquely resolvable in repo mode.
+    [&](FuncName /*s*/) {
+      return !RuntimeOption::RepoAuthoritative;
+    },
     [&](MethodName /*s*/) { return false; },
     [&](borrowed_ptr<FuncInfo> fi) {
       return fi->first->attrs & AttrWritesCallerFrame;

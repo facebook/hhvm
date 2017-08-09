@@ -99,7 +99,7 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
   | IncludeOperator | IncludeOnceOperator | RequireOperator
-  | RequireOnceOperator | AwaitOperator | SuspendOperator -> 1
+  | RequireOnceOperator | AwaitOperator -> 1
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
@@ -126,7 +126,7 @@ let precedence operator =
   | GreaterThanOperator | GreaterThanOrEqualOperator -> 16
   | LeftShiftOperator | RightShiftOperator -> 17
   | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 18
-  | MultiplicationOperator | DivisionOperator | RemainderOperator -> 19
+  | MultiplicationOperator | DivisionOperator | RemainderOperator | SuspendOperator -> 19
   | CastOperator
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
@@ -152,7 +152,6 @@ let associativity operator =
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
   | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
-  | SuspendOperator
     -> NotAssociative
 
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -183,7 +182,7 @@ let associativity operator =
   | RemainderAssignmentOperator | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-  | PrintOperator
+  | PrintOperator | SuspendOperator
     -> RightAssociative
 
 let prefix_unary_from_token token =

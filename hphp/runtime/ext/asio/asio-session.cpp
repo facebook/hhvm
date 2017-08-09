@@ -277,22 +277,24 @@ void AsioSession::onExternalThreadEventCreate(
 
 void AsioSession::onExternalThreadEventSuccess(
   c_ExternalThreadEventWaitHandle* waitHandle,
-  const Variant& result
+  const Variant& result,
+  int64_t finish_time
 ) {
   runCallback(
     m_onExtThreadEventSuccess,
-    make_packed_array(waitHandle, result),
+    make_packed_array(waitHandle, result, finish_time),
     "ExternalThreadEventWaitHandle::onSuccess"
   );
 }
 
 void AsioSession::onExternalThreadEventFail(
   c_ExternalThreadEventWaitHandle* waitHandle,
-  const Object& exception
+  const Object& exception,
+  int64_t finish_time
 ) {
   runCallback(
     m_onExtThreadEventFail,
-    make_packed_array(waitHandle, exception),
+    make_packed_array(waitHandle, exception, finish_time),
     "ExternalThreadEventWaitHandle::onFail"
   );
 }
@@ -319,10 +321,13 @@ void AsioSession::onSleepCreate(c_SleepWaitHandle* waitHandle) {
   );
 }
 
-void AsioSession::onSleepSuccess(c_SleepWaitHandle* waitHandle) {
+void AsioSession::onSleepSuccess(
+  c_SleepWaitHandle* waitHandle,
+  int64_t finish_time
+) {
   runCallback(
     m_onSleepSuccess,
-    make_packed_array(waitHandle),
+    make_packed_array(waitHandle, finish_time),
     "SleepWaitHandle::onSuccess"
   );
 }

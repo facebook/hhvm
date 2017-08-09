@@ -50,6 +50,7 @@ bool AsioExternalThreadEvent::cancel() {
 void AsioExternalThreadEvent::markAsFinished() {
   uint32_t/*state_t*/ expected(Waiting);
   if (m_state.compare_exchange_strong(expected, Finished)) {
+    m_finishTime = AsioSession::TimePoint::clock::now();
     // transfer ownership
     m_queue->send(m_waitHandle);
   } else {

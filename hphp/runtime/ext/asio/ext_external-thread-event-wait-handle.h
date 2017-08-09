@@ -82,7 +82,6 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   // also be tracked as roots but its more complicated since they
   // are malloc'd and accessed by other threads.
   SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
-
  public:
   static const uint8_t STATE_WAITING = 2;
 

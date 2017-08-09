@@ -21,6 +21,7 @@
 #include <atomic>
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,6 +194,12 @@ struct AsioExternalThreadEvent {
      */
     virtual void unserialize(Cell& result) = 0;
 
+    /**
+     * Get the time markAsFinished was called to retroactively reference
+     * when the underlying IO operation was over
+     */
+    AsioSession::TimePoint getFinishTime() const { return m_finishTime; };
+
   protected:
     /**
      * Construct AsioExternalThreadEvent
@@ -282,6 +289,7 @@ struct AsioExternalThreadEvent {
     AsioExternalThreadEventQueue* m_queue;
     c_ExternalThreadEventWaitHandle* m_waitHandle;
     std::atomic<uint32_t/*state_t*/> m_state;
+    AsioSession::TimePoint m_finishTime;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

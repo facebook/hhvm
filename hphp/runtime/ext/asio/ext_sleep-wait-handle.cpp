@@ -90,7 +90,12 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   // this is technically a lie, since sleep failed
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
-    session->onSleepSuccess(this);
+    session->onSleepSuccess(
+      this,
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_waketime.time_since_epoch()
+      ).count()
+    );
   }
 
   return true;
@@ -115,7 +120,12 @@ bool c_SleepWaitHandle::process() {
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
-    session->onSleepSuccess(this);
+    session->onSleepSuccess(
+      this,
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_waketime.time_since_epoch()
+      ).count()
+    );
   }
 
   return true;

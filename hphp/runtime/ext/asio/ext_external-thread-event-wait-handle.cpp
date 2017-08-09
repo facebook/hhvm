@@ -151,7 +151,7 @@ bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
-    session->onExternalThreadEventFail(this, exception);
+    session->onExternalThreadEventFail(this, exception, 0);
   }
 
   return true;
@@ -163,6 +163,9 @@ void c_ExternalThreadEventWaitHandle::process() {
   if (isInContext()) {
     unregisterFromContext();
   }
+
+  // Store the finish time of the underlying IO operation
+  // So we can pass it in the finish callbacks
 
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
@@ -179,7 +182,13 @@ void c_ExternalThreadEventWaitHandle::process() {
 
     auto session = AsioSession::Get();
     if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
-      session->onExternalThreadEventFail(this, exception);
+      session->onExternalThreadEventFail(
+        this,
+        exception,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+          m_event->getFinishTime().time_since_epoch()
+        ).count()
+      );
     }
     return;
   } catch (...) {
@@ -199,7 +208,13 @@ void c_ExternalThreadEventWaitHandle::process() {
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventSuccess())) {
-    session->onExternalThreadEventSuccess(this, tvAsCVarRef(&result));
+    session->onExternalThreadEventSuccess(
+      this,
+      tvAsCVarRef(&result),
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_event->getFinishTime().time_since_epoch()
+      ).count()
+    );
   }
 }
 

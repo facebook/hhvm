@@ -142,9 +142,9 @@ struct AsioSession final {
   bool hasOnExternalThreadEventFail() { return !!m_onExtThreadEventFail; }
   void onExternalThreadEventCreate(c_ExternalThreadEventWaitHandle* waitHandle);
   void onExternalThreadEventSuccess(c_ExternalThreadEventWaitHandle* waitHandle,
-                                    const Variant& result);
+                                    const Variant& result, int64_t finish_time);
   void onExternalThreadEventFail(c_ExternalThreadEventWaitHandle* waitHandle,
-                                 const Object& exception);
+                                 const Object& exception, int64_t finish_time);
 
   // SleepWaitHandle callbacks:
   void setOnSleepCreate(const Variant& callback);
@@ -152,7 +152,7 @@ struct AsioSession final {
   bool hasOnSleepCreate() { return !!m_onSleepCreate; }
   bool hasOnSleepSuccess() { return !!m_onSleepSuccess; }
   void onSleepCreate(c_SleepWaitHandle* waitHandle);
-  void onSleepSuccess(c_SleepWaitHandle* waitHandle);
+  void onSleepSuccess(c_SleepWaitHandle* waitHandle, int64_t finish_time);
 
 private:
   AsioSession();

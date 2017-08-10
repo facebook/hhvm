@@ -331,11 +331,11 @@ bool Option::IsFileExcluded(const std::string &file,
 
 void Option::FilterFiles(std::vector<std::string> &files,
                          const std::set<std::string> &patterns) {
-  for (int i = files.size() - 1; i >= 0; i--) {
-    if (IsFileExcluded(files[i], patterns)) {
-      files.erase(files.begin() + i);
-    }
-  }
+  auto const it = std::remove_if(
+    files.begin(),
+    files.end(),
+    [&](const std::string& file) { return IsFileExcluded(file, patterns); });
+  files.erase(it, files.end());
 }
 
 //////////////////////////////////////////////////////////////////////

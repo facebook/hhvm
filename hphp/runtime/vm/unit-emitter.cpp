@@ -317,10 +317,19 @@ using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;
  */
 LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
   LineTable lines;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
-    lines.push_back(LineEntry(endOff, srcLoc[i].second.line1));
+  if (srcLoc.empty()) {
+    return lines;
   }
+
+  auto prev = srcLoc.begin();
+  for (auto it = prev + 1; it != srcLoc.end(); ++it) {
+    if (prev->second.line1 != it->second.line1) {
+      lines.push_back(LineEntry(it->first, prev->second.line1));
+      prev = it;
+    }
+  }
+
+  lines.push_back(LineEntry(bclen, prev->second.line1));
   return lines;
 }
 

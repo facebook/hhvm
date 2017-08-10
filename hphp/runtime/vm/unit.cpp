@@ -485,15 +485,15 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 }
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
-  LineEntry key = LineEntry(pc, -1);
-  auto lineTable = loadLineTable(this);
-  auto it = std::upper_bound(lineTable.begin(), lineTable.end(), key);
-  if (it != lineTable.end()) {
-    assert(pc < it->pastOffset());
-    Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
-    range.base = base;
-    range.past = it->pastOffset();
-    return true;
+  OffsetRangeVec offsets;
+  auto line = getLineNumber(pc);
+  getOffsetRanges(line, offsets);
+
+  for (auto offset: offsets) {
+    if (pc >= offset.base && pc < offset.past) {
+      range = offset;
+      return true;
+    }
   }
   return false;
 }

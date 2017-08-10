@@ -3,7 +3,7 @@
 // HPHP has has many version of these functions over time
 // Faceobok has impelemtnation differences
 function is_facebook() {
-  return extension_loaded("fbml");
+  return extension_loaded("facebook");
 }
 
 function brown_fox() {

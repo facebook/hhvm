@@ -153,4 +153,52 @@ inline void FuncEmitter::setLocation(int l1, int l2) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Serialization/Deserialization
+
+template<class SerDe>
+void FuncEmitter::serdeMetaData(SerDe& sd) {
+  // NOTE: name, top, and a few other fields currently handled outside of this.
+  Offset past_delta;
+  if (!SerDe::deserializing) {
+    past_delta = past - base;
+  }
+
+  sd(line1)
+    (line2)
+    (base)
+    (past_delta)
+    (attrs)
+    (hniReturnType)
+    (repoReturnType)
+    (repoAwaitedReturnType)
+    (docComment)
+    (m_numLocals)
+    (m_numIterators)
+    (m_numClsRefSlots)
+    (maxStackCells)
+    (m_repoBoolBitset)
+
+    (params)
+    (m_localNames)
+    (staticVars)
+    (ehtab)
+    (fpitab)
+    (userAttributes)
+    (retTypeConstraint)
+    (retUserType)
+    (originalFilename)
+    ;
+
+  if (isNative) {
+    sd(dynCallWrapperId)
+      ;
+  }
+
+  if (SerDe::deserializing) {
+    past = base + past_delta;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

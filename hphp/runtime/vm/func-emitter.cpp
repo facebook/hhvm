@@ -308,46 +308,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   return f;
 }
 
-template<class SerDe>
-void FuncEmitter::serdeMetaData(SerDe& sd) {
-  // NOTE: name, top, and a few other fields currently serialized
-  // outside of this.
-  sd(line1)
-    (line2)
-    (base)
-    (past)
-    (attrs)
-    (hniReturnType)
-    (repoReturnType)
-    (repoAwaitedReturnType)
-    (docComment)
-    (m_numLocals)
-    (m_numIterators)
-    (m_numClsRefSlots)
-    (maxStackCells)
-    (isClosureBody)
-    (isAsync)
-    (isGenerator)
-    (isPairGenerator)
-    (containsCalls)
-    (isNative)
-    (isMemoizeWrapper)
-
-    (params)
-    (m_localNames)
-    (staticVars)
-    (ehtab)
-    (fpitab)
-    (userAttributes)
-    (retTypeConstraint)
-    (retUserType)
-    (originalFilename)
-
-    (dynCallWrapperId)
-    ;
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and parameters.
 

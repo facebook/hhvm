@@ -285,15 +285,22 @@ public:
   EHEntVec ehtab;
   FPIEntVec fpitab;
 
-  bool isClosureBody{false};
-  bool isAsync{false};
-  bool isGenerator{false};
-  bool isPairGenerator{false};
+  union {
+    uint8_t m_repoBoolBitset{0};
+    struct {
+      bool isMemoizeWrapper : 1;
+      bool isClosureBody    : 1;
+      bool isAsync          : 1;
+      bool containsCalls    : 1;
+      bool isNative         : 1;
+      bool isGenerator      : 1;
+      bool isPairGenerator  : 1;
+    };
+  };
+
+  // These are not stored in the repo
   bool isMemoizeImpl{false};
-  bool isMemoizeWrapper{false};
   bool hasMemoizeSharedProp{false};
-  bool containsCalls{false};
-  bool isNative{false};
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;

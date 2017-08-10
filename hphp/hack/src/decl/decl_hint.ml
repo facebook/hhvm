@@ -96,7 +96,7 @@ and hint_ p env = function
         TypecheckerOptions.experimental_optional_shape_field in
     let shape_fields_known =
       match optional_shape_fields_enabled, nsi_allows_unknown_fields with
-        | true, true
+        | _, true
         | false, false ->
           (* Fields are only partially known, because this shape type comes from
            * type hint - shapes that contain listed fields can be passed here,
@@ -104,12 +104,7 @@ and hint_ p env = function
            * that we don't know about. *)
           FieldsPartiallyKnown ShapeMap.empty
         | true, false ->
-          FieldsFullyKnown
-        | false, true ->
-          (* The user is using the unknown types syntax but is not in the
-             experiment. *)
-          Errors.unknown_fields_not_supported p;
-          FieldsPartiallyKnown ShapeMap.empty in
+          FieldsFullyKnown in
     let fdm =
       ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
     Tshape (shape_fields_known, fdm)

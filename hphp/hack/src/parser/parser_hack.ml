@@ -4256,6 +4256,9 @@ and typedef_constraint env =
       None
 
 and promote_nullable_to_optional_in_shapes env =
+  (* To maintain compatibility with open source, we always promote the
+     definitions in Shapes.hhi. *)
+  String_utils.string_ends_with (Relative_path.suffix env.file) "Shapes.hhi" ||
   TypecheckerOptions.experimental_feature_enabled
     env.popt
     TypecheckerOptions.experimental_promote_nullable_to_optional_in_shapes

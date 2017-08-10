@@ -19,9 +19,17 @@ module IS = Instruction_sequence
 type stack = string list
 type stack_sig = stack * stack
 
+(* Performs f n times, the input to f at each state being the output of the
+ * previous. Basically Church numerals:
+ * num_fold f 0 acc = acc
+ * num_fold f 1 acc = f acc
+ * num_fold f 2 acc = f (f acc)
+ * ... *)
 let rec num_fold f n acc =
   if n <= 0 then acc else num_fold f (n - 1) (f acc)
 
+(* Produces a list of operations necessary to produce the top 'n' flavors of
+ * 'req' *)
 let rec rebalance_stk n (req : stack) : instruct list * stack =
   if n = 0 then [], [] else
   if List.length req < 0 then failwith "cannot rebalance empty stack" else
@@ -34,9 +42,11 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   | "R", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
-  | _ -> [], [] (*Impossible*)
+  | _ -> [], [] (* Impossible *)
 
-let rec empty_stk stk remaining =
+(* Produces a list of operations necessary to reduce the height of the input
+ * stack to the value of 'remaining' *)
+let rec empty_stk (stk : stack) (remaining : int) : instruct list =
   if List.length stk <= remaining then [] else
   match stk with
   | [] -> []
@@ -47,19 +57,21 @@ let rec empty_stk stk remaining =
   | _   :: t -> remaining - 1 |> empty_stk t
 
 (* Outputs a sequence of dummy instructions to make stk equal to target *)
-let equate_stk (stk : stack) (target : stack) =
+let equate_stk (stk : stack) (target : stack) : instruct list =
   let stklen, targetlen = List.length stk, List.length target in
   if stklen = targetlen then []
   else if stklen > targetlen then empty_stk stk targetlen
   else rebalance_stk (targetlen - stklen) target |> fst
 
+(* produces a list of a particular stack flavor of length 'n' *)
 let produce flavor n = num_fold (List.cons flavor) n []
 
 let string_of_stack (stk : stack) : string =
   List.fold_right (fun x acc -> x ^ "; " ^ acc) stk ""
 
 (* Determines how an instruction changes the stack, and how many
-   cells it consumes. Return format is (required, produced) *)
+ * cells it consumes. Return format is (required, produced).
+ * TODO(T20108993): autogenerate this from the bytecode spec. *)
 let stk_data : instruct -> stack_sig = function
   | IMutator UnsetL _
   | ICall FPushFuncD _
@@ -272,11 +284,14 @@ let height_map (lst : (instruct * stack) list) :
   List.iteri (fun idx (_,stk) -> add tbl (List.length stk) idx) hist;
   !heights, tbl
 
+(* produces a list of all the labels in the input sequence *)
 let collect_labels (seq : IS.t) : Label.t list =
   let f labels = function
   | ILabel l when List.mem l labels |> not -> l :: labels
   | _ -> labels in
   IS.InstrSeq.fold_left seq ~f:f ~init:[]
 
+(* produces a record containing the stack history and the labels of the input
+ * sequence *)
 let seq_data (seq : IS.t) : seq_data =
   {labels = collect_labels seq; stack_history = stack_history seq}

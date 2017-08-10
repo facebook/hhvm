@@ -15,27 +15,7 @@ helpmessage = """fuzz.py -i <inputfile> -g <generations> -f \
 <failureThreshold> -p <prob> -v (for verbose) -c (coverage mode) -t <threads>
 --timeout <timeout> -l <logfile> --args
 
-Generations specifies the number of generations for which to run \
-the fuzzer. Time to run increases exponentially with each generation.
-
-Failure Threshold specifies the maximum number of verifier \
-failures a program can have to not be culled at the end of a \
-generation. A higher number means more programs are kept,  leading \
-to a longer runtime.
-
-Prob specifies the probability of a mutation occuring at each \
-point in the input program. A higher number yields more mutations \
-per program, and thus a higher chance for verification errors.
-
-Threads specifies the maximum size of the threadpool used to \
-run the fuzzer.
-
-When run in coverage mode, (-c), the fuzzer will use coverage data from \
-HHVM as part of its genetic algorithm.
-
-To direct logging output to a file instead of stdout, pass a file in with -l
-
-Additional arguments can be passed directly to the fuzzer with --args.
+Specifics about each argument can be found in hphp/doc/fuzzer. \
 
 Results of a fuzzer run can be found in mutations/results.txt"""
 
@@ -158,6 +138,7 @@ def run(inputfile, failureThreshold, generations, prob, threads):
     os.mkdir("mutation_inputs")
 
     print("Generation 0")
+    # produce initial mutations from input
     run_generation(inputfile, "mutations/gen0/input0", prob)
     folder = "mutations/gen0"
     for gen in range(1, generations):
@@ -166,6 +147,8 @@ def run(inputfile, failureThreshold, generations, prob, threads):
             log("Filtering failures from gen " + str(gen - 1))
         filter_failures(failureThreshold, folder, threads)
         i = 0
+        # move all surviving mutations from output of previous generations
+        # to input for the subsequent generation
         os.mkdir("mutation_inputs/gen" + str(gen))
         for root, _dirs, files in os.walk("mutations/gen" + str(gen - 1)):
             for filename in files:
@@ -175,6 +158,7 @@ def run(inputfile, failureThreshold, generations, prob, threads):
         i = 0
         os.mkdir("mutations/gen" + str(gen))
         prefix = "mutation_inputs/gen" + str(gen) + "/"
+        # fuzz all surviving inputs
         pool = Pool(processes=threads)
         for filename in os.listdir("mutation_inputs/gen" + str(gen)):
             outdir = "mutations/gen" + str(gen) + "/input" + str(i)
@@ -185,6 +169,8 @@ def run(inputfile, failureThreshold, generations, prob, threads):
         pool.join()
         folder = "mutations/gen" + str(gen)
 
+    # Output of final generation, so log all survivors that both pass
+    # verification and crash HHVM
     process_candidates(generations, threads)
 
     for gen in range(0, generations):
@@ -192,6 +178,7 @@ def run(inputfile, failureThreshold, generations, prob, threads):
     shutil.rmtree("mutation_inputs")
 
 
+# Run HHVM on a mutation. If it passes verification AND crashes HHVM, log this
 def process_candidate(filename):
     (out, errs) = subprocess.Popen(args=[hhvm_dbgo, "-vEval.AllowHhas=1",
                                    "mutations/candidates/" + filename],
@@ -208,6 +195,8 @@ def process_candidate(filename):
                               errors + "\n\n")
 
 
+# move all survivors of the previous generation to a folder that won't get
+# deleted, and then process them to see if they expose a bug
 def process_candidates(generations, threads):
     if(verbose):
         log("Filtering candidates")
@@ -234,6 +223,7 @@ def process_candidates(generations, threads):
             log("HHVM timeout while running " + filename)
 
 
+# run the fuzzer on all files in a folder
 def run_generation(file, folder, prob):
     os.mkdir(folder)
     args = [fuzzer, file, "-o", folder,
@@ -279,6 +269,8 @@ def aggregateCoverage(folder):
     return ret
 
 
+# produce a map of files to line numbers for all coverage data from a
+# mutation
 def aggregateFileCoverage(file, ret):
     with open(file) as f:
         covData = f.readlines()
@@ -305,6 +297,8 @@ def listdir_fullpath(d):
     return [os.path.join(d, f) for f in os.listdir(d)]
 
 
+# filter out a mutation if it is too broken, is identical to another, or
+# optionally does not add new coverage data
 def filter_fail(root, mutation, failureThreshold, md5set, covData):
     old_path = os.getcwd()
     path = tempfile.mkdtemp()
@@ -325,6 +319,7 @@ def filter_fail(root, mutation, failureThreshold, md5set, covData):
     if coverage:
         hhvm = hhvm_dbgo_cov
     else:
+        # no need to actually execute the file if not in coverage mode
         hhvm_args = hhvm_args + " -m verify"
 
     # we have to change to a temp directory here because running the process
@@ -354,6 +349,8 @@ def filter_fail(root, mutation, failureThreshold, md5set, covData):
         return md5set, covData
 
     if coverage:
+        # run llvm commands to take raw profile data and make it parseable
+        # by the fuzzer
         command = profdata + " " + path + "/default.profraw -o " + path
         command = command + "/default.merged"
         os.system(command)
@@ -364,6 +361,8 @@ def filter_fail(root, mutation, failureThreshold, md5set, covData):
                                stderr=subprocess.PIPE).communicate()
         coveredLines = aggregateCoverage(path + "/coverage")
         newCoverage = False
+
+        # compare produced coverage map to existing coverage data
         for f in coveredLines:
             for line in coveredLines[f]:
                 if f not in covData:
@@ -398,6 +397,7 @@ def filter_failures(failureThreshold, folder, threads):
         pool.close()
         for mutation, res in results:
             try:
+                # update md5s and coverage data with data from the folder
                 global timeOut
                 md5set, covData = res.get(timeout=timeOut)
                 md5s.update(md5set)

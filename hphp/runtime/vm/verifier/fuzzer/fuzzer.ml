@@ -71,6 +71,17 @@ let options =
       overrides other mutation parameters)")
   ]
 
+(* The mutations are printed in reverse order; mutation0 is the "most" mutated
+   file, containing one of each enabled type, whereas the highest numbered
+   file is identical to the input *)
+
+let die : 'a . string -> 'a =
+  fun str ->
+  let oc = stderr in
+  output_string oc str;
+  close_out oc;
+  exit 2
+
 let print_output : Hhas_program.t -> unit =
   let m_no = ref 0 in
   fun (p : Hhas_program.t) ->
@@ -96,10 +107,16 @@ let parse_file program_parser filename =
 let read_input () : Hhas_program.t =
   let filename = ref ""  in
   let purpose = "Hhas fuzzing tool" in
-  let usage = Printf.sprintf "%s\nUsage: %s <file> -o <output dir>"
+  let usage = Printf.sprintf "%s\nUsage: %s <file> -o <output dir> -prob <float>
+                              -magnitude <int> -debug <bool> -immediate <int>
+                              -duplicate <int> -reorder <int> -remove <int>
+                              -insert <int> -exception <int> -metadata <int>
+                              -complete <int> (more help in hphp/doc/fuzzer)\n"
               purpose Sys.argv.(0) in
-  Arg.parse options (fun file -> filename := file) usage;
+  begin try Arg.parse options (fun file -> filename := file) usage
+        with _ -> die usage end;
   let program_parser = Hhas_parser.program Hhas_lexer.read in
+  if !filename = "" then die usage else
   parse_file program_parser !filename
 
 let debug_print str = if !debug then print_endline str
@@ -140,10 +157,14 @@ let mutate_methods (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
 let mutate_program (mut: IS.t -> IS.t) (p : HP.t) : Hhas_program.t =
   p |> mutate_main mut |> mutate_functions mut |> mutate_methods mut
 
-let mutate (mut: IS.t -> IS.t) (prog : HP.t) =
+(* Given a transformation on instruction sequences, an input program and a
+ * number of times to perform the transformation, lifts the transform to work
+ * on program monads *)
+let mutate (mut: IS.t -> IS.t) (prog : HP.t) : int ->
+    (mutation_monad -> mutation_monad) =
   num_fold (fun a -> mutate_program mut prog |> Nondet.add_event a)
 
-(* (i, k] *)
+(* produces sublist (i, k] of input lst *)
 let slice lst i k = Core.List.take (Core.List.drop lst (i + 1)) (k - i)
 
 open Hhbc_ast
@@ -154,6 +175,8 @@ let should_mutate () = Random.float 1.0 < !mut_prob
 
 let mutate_bool b = if should_mutate() then not b else b
 
+(* adds a random integer in range [-c, c] to n, produces the result if it is
+   positive, or 0 otherwise *)
 let mutate_int n c =
   if should_mutate () then n + Random.int (2 * (c + 1)) - c |> max 0 else n
 
@@ -162,7 +185,8 @@ let mutate_local_id (id : Local.t) c =
   | Local.Unnamed i -> Local.Unnamed (mutate_int i c)
   | _ -> id
 
-(* Changes the input label to another with the same stack height *)
+(* Changes the input label to another with the same stack height. If none
+   exists, produces the original label *)
 let mutate_label data (label : Label.t) =
   try
     if not (should_mutate()) then label else
@@ -173,6 +197,7 @@ let mutate_label data (label : Label.t) =
   with
   | Not_found -> label
 
+(* produces a new member key, swapping key types and values, if applicable *)
 let mutate_key (k : MemberKey.t) c =
   let new_key_type n =
     [MemberKey.EC n; MemberKey.EL (Local.Unnamed n); MemberKey.PC n;
@@ -204,24 +229,34 @@ let mutate_key (k : MemberKey.t) c =
 let mutate_mode (m : MemberOpMode.t) =
   if should_mutate() then random_mode () else m
 
-let maintain_stack op data =
+(* When given stack data about an instruction sequences, and applied as a
+ * wrapper around 'op', this will ensure that the mutations occurring as part
+ * of 'op' don't unbalance the evaluation stack. It does this by calculating
+ * what values and what flavors each instruction consumes and produces, and
+ * either inserting trivial ops to create missing values or Pop* instructions
+ * to consume excess values. Providing the trivial op (\x.[x]) and applying
+ * this to an instruction will just balance the stack of that sequence, if
+ * it was unbalanced *)
+let maintain_stack (data : Instr_utils.seq_data) :
+                   (Hhbc_ast.instruct -> Hhbc_ast.instruct list) ->
+                   (Hhbc_ast.instruct -> Hhbc_ast.instruct list) =
   let pc, stk = ref 0, ref [] in (* This is a cool scoping trick that lets *)
-  fun (i : instruct) ->        (* these refs get defined before the instr *)
-  pc := !pc + 1;               (* gets applied. Thus when this function is *)
-  let helper instr buffer =    (* is used later as an argument to *)
-    let ctrl_buffer =          (* flat_map, the internal state is not exposed *)
+  fun op (i : instruct) ->   (* these refs get defined before the op + instr *)
+  pc := !pc + 1;             (* get applied. Thus when this function is *)
+  let helper instr buffer =  (* is used later as an argument to *)
+    let ctrl_buffer =        (* flat_map, the internal state is not exposed *)
       match instr with
-      | IContFlow RetC
+      | IContFlow RetC (* These require a stack height of 1 *)
       | IContFlow RetV   ->
           let old_stk = !stk in
           stk := num_fold List.tl (List.length !stk - 1) !stk;
           empty_stk old_stk 1
-      | IContFlow Unwind
+      | IContFlow Unwind (* require a stack height of 0 *)
       | IMisc NativeImpl -> let old_stk = !stk in
                             stk := []; empty_stk old_stk 0
       | ILabel _
       | IIterator _
-      | IContFlow _      ->
+      | IContFlow _ -> (* Stack height needs to match across block boundaries *)
         let orig_stack = List.nth data.stack_history (!pc - 1) |> snd in
         let res = equate_stk !stk orig_stack in
         stk := orig_stack; res
@@ -234,14 +269,18 @@ let maintain_stack op data =
       Printf.printf "Instruction %s stack is [%s],
                      consumed [%s], produced [%s]\n"
       (Hhbc_hhas.string_of_instruction instr) (string_of_stack !stk)
-      (string_of_stack stk_req) (string_of_stack stk_prod)
-    end;
+      (string_of_stack stk_req) (string_of_stack stk_prod) end;
+    (* Append any dummy values inserted to the front of the stack, then
+     * remove all values consumed by the instruction, and append all values
+     * produced *)
     stk := stk_extra @ !stk;
     stk := List.fold_left (fun acc _ -> List.tl acc) !stk stk_req;
-    stk := List.fold_left (fun acc x -> x :: acc)      !stk stk_prod;
+    stk := List.fold_left (fun acc x -> x :: acc)    !stk stk_prod;
+    (* add any necessary buffer instructions in front of the original *)
     buffer @ pre_buffer @ ctrl_buffer @ [instr] in
-  List.fold_right helper (op data i) []
+  List.fold_right helper (op i) []
 
+(* Mutate immediates according to their types *)
 let mut_imms (is : IS.t) : IS.t =
   let mutate_get s =
     match s with    (*TODO: clean this up if OCaml ever gets macros *)
@@ -286,7 +325,7 @@ let mut_imms (is : IS.t) : IS.t =
     | BindL     id       -> BindL   (mutate_local_id id !mag)
     | BindS     i        -> BindS   (mutate_int      i  !mag)
     | UnsetL    id       -> UnsetL  (mutate_local_id id !mag)
-    | CheckProp p        -> CheckProp p (*TODO: figure out how to mutate these*)
+    | CheckProp p        -> CheckProp p
     | InitProp (p, Static) ->
         InitProp(p, if should_mutate() then NonStatic else Static)
     | InitProp (p, NonStatic) ->
@@ -467,7 +506,8 @@ let mut_imms (is : IS.t) : IS.t =
      | IIterator s -> IIterator (mutate_iterator  data s)
      | IMisc     s -> IMisc     (mutate_misc           s)
      | _ -> i] (*no immediates, or none worth mutating*) in
-  IS.InstrSeq.flat_map is (seq_data is |> maintain_stack change_imms)
+  let data = seq_data is in
+  IS.InstrSeq.flat_map is (change_imms data |> maintain_stack data)
 
 (* Mutates the immediates of the opcodes in the input program. Currently
    this is just naive, randomly changing integer values by a user specified
@@ -482,14 +522,14 @@ let mutate_immediate (input : HP.t) : mutation_monad =
 let mutate_duplicate (input : HP.t) : mutation_monad =
   debug_print "Duplicating";
   let mut (is : IS.t) =
-    let duplicate _ i =
+    let duplicate i =
       match i with
       | ILabel _
       | ICall _
       | ITry _
       | IContFlow _ -> [i] (*duplicating control flow just breaks the stack*)
       | _ -> if should_mutate() then [i; i] else [i] in
-    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack duplicate) in
+    IS.InstrSeq.flat_map is (maintain_stack (seq_data is) duplicate) in
   Nondet.return input |> mutate mut input !dup_reps
 
 (* This will randomly swap the position of instruction subsequences with
@@ -523,15 +563,16 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     let newseq = subinstrs (-1) start1 @ subinstrs start2 end2 @
                  subinstrs end1 start2 @ subinstrs start1 end1 @
                  subinstrs end2 (List.length instrs - 1) in
+    (* Reattach fault regions that were discarded by converting to list *)
     IS.gather [IS.InstrSeq.flat_map (IS.Instr_list newseq)
-               (seq_data is |> maintain_stack (fun _ i -> [i]));
+               (maintain_stack (seq_data is) Core.List.return);
                IS.extract_fault_instructions is] in
   Nondet.return input |> mutate mut input !reorder_reps
 
 (* This will randomly remove some of the instructions in a sequence. *)
 let mutate_remove (input : HP.t) : mutation_monad =
   debug_print "Removing";
-  let remove _ i =
+  let remove i =
     match i with
     | ILabel _
     | ICall _
@@ -539,7 +580,7 @@ let mutate_remove (input : HP.t) : mutation_monad =
     | IContFlow _ -> [i] (*removing control flow just breaks the stack*)
     | _ -> if should_mutate() then [] else [i] in
   let mut (is : IS.t) =
-    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack remove) in
+    IS.InstrSeq.flat_map is (maintain_stack (seq_data is) remove) in
   Nondet.return input |> mutate mut input !remove_reps
 
 (* This will randomly wrap instruction sequences in try/fault or try/catch
@@ -595,8 +636,8 @@ let mutate_replace (input : HP.t) : mutation_monad =
       | ITry _ -> i
       | _ -> try (List.assoc (stk_data i) equiv_map |> rand_elt) ()
              with | Not_found | Invalid_argument _ -> i in
-    let replace _ i = if should_mutate() then [equiv_instr i] else [i] in
-    IS.InstrSeq.flat_map is (seq_data is |> maintain_stack replace) in
+    let replace i = if should_mutate() then [equiv_instr i] else [i] in
+    IS.InstrSeq.flat_map is (maintain_stack (seq_data is) replace) in
   Nondet.return input |> mutate mut input !replace_reps
 
 (* This will add random instructions, with arbitrary stack signatures, to the
@@ -607,10 +648,10 @@ let mutate_insert (input : HP.t) : mutation_monad =
     let new_instr : unit -> instruct =
       let instrs = all_instrs is in
       fun () -> (instrs |> rand_elt) () in
-    let insert _ i = match i with
-                    | ITry _ -> []
-                    | _ -> if should_mutate() then [new_instr (); i] else [i] in
-    IS.InstrSeq.flat_map is (maintain_stack insert (seq_data is)) in
+    let insert i = match i with
+                   | ITry _ -> []
+                   | _ -> if should_mutate() then [new_instr (); i] else [i] in
+    IS.InstrSeq.flat_map is (maintain_stack (seq_data is) insert) in
   Nondet.return input |> mutate mut input !insert_reps
 
 (* This will charge random aspects of the input program metadata *)

@@ -22,6 +22,7 @@ type lazy_instruct = unit -> instruct
 
 let _ = Random.self_init ()
 
+(* Gets a random element from a a list *)
 let rand_elt lst =
   if List.length lst < 0 then failwith "Cannot get rand elt of zero length lst";
   let i = Random.int (List.length lst) in
@@ -73,6 +74,7 @@ let random_silence () : op_silence = [Start; End] |> rand_elt
 
 let random_check () : check_started = [IgnoreStarted; CheckStarted] |> rand_elt
 
+(* Recursively generates an arbitrary typed value *)
 let rec random_typed_value () : Typed_value.t =
  ([(fun () -> Typed_value.Uninit);
    (fun () -> Typed_value.Int (Random.bits () |> Int64.of_int));
@@ -104,7 +106,7 @@ let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
 
 (* A list of generators for instructions. Doesn't include all instructions;
  not all can be meaningfully generated in a random fashion.
- TODO: autogenerate this somehow; this doesn't scale well for adding
+ TODO(T20108993): autogenerate this somehow; this doesn't scale well for adding
  instructions at all. Perhaps the project for generating code based on the
  bytecode spec could handle this *)
 let all_instrs (fn : IS.t) : lazy_instruct list =

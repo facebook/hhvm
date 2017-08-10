@@ -43,21 +43,23 @@ void APCGCManager::registerPendingDeletion(APCHandle* root, const size_t size) {
   if (RuntimeOption::ServerExecutionMode()) {
     return; // Doesn't support server mode yet
   }
-
-  WriteLock l1(candidateListLock);
   if (RuntimeOption::ServerExecutionMode()) {
     // Root should be visible by default to implement asynchronous mark-sweep
     // But we don't need to do this in script mode
     WriteLock l3(visibleFromHeapLock);
     visibleFromHeap.insert(root);
   }
-  pendingSize.fetch_add(size, std::memory_order_relaxed);
-  assertx(candidateList.count(root) == 0);
-  candidateList.emplace(root, size);
-  FTRACE(1, "APCGCManager: increase used memory:{} by size:{}\n",
-                                                pendingSize.load(), size);
   // Recursively register all allocations belong to this root handle
   APCTypedValue::fromHandle(root)->registerUncountedAllocations();
+  // Add root APCHandle into to-free list
+  {
+    WriteLock l1(candidateListLock);
+    pendingSize.fetch_add(size, std::memory_order_relaxed);
+    assertx(candidateList.count(root) == 0);
+    candidateList.emplace(root, size);
+  }
+  FTRACE(1, "APCGCManager: increase used memory:{} by size:{}\n",
+                                                pendingSize.load(), size);
   /* TODO Task #20074509: API for global GC invoke */
   if (pendingSize.load() > someBar()) {
     // Bar is -vEval.GCForAPCBar, 10^9 by default

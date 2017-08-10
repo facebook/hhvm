@@ -11,28 +11,30 @@
 open Instruction_sequence
 open Hhbc_ast
 
-exception IncludeTimeFatalException of FatalOp.t * string
+exception IncludeTimeFatalException of FatalOp.t * Pos.t * string
 
-let raise_fatal_runtime message =
-  raise (IncludeTimeFatalException (FatalOp.Runtime, message))
+let raise_fatal_runtime p message =
+  raise (IncludeTimeFatalException (FatalOp.Runtime, p, message))
 
-let raise_fatal_parse message =
-  raise (IncludeTimeFatalException (FatalOp.Parse, message))
+let raise_fatal_parse p message =
+  raise (IncludeTimeFatalException (FatalOp.Parse, p, message))
 
-let emit_fatal op message =
+let emit_fatal op pos message =
   gather
   [
+    Emit_pos.emit_pos pos;
     instr_string message;
     instr (IOp (Fatal op))
   ]
 
-let emit_fatal_runtime message = emit_fatal FatalOp.Runtime message
-let emit_fatal_runtimeomitframe message =
-  emit_fatal FatalOp.RuntimeOmitFrame message
+let emit_fatal_runtime pos message =
+  emit_fatal FatalOp.Runtime pos message
+let emit_fatal_runtimeomitframe pos message =
+  emit_fatal FatalOp.RuntimeOmitFrame pos message
 
-let emit_fatal_for_break_continue level =
+let emit_fatal_for_break_continue pos level =
   let suffix = if level = 1 then "" else "s" in
   let message =
     Printf.sprintf "Cannot break/continue %d level%s" level suffix
   in
-  emit_fatal_runtime message
+  emit_fatal_runtime pos message

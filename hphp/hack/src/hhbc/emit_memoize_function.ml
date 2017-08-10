@@ -75,7 +75,7 @@ let make_memoize_function_no_params_code ~non_null_return renamed_function_id =
       ];
     instr_retc ]
 
-let make_memoize_function_with_params_code env params renamed_method_id =
+let make_memoize_function_with_params_code ~pos env params renamed_method_id =
   let param_count = List.length params in
   let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
@@ -86,7 +86,7 @@ let make_memoize_function_with_params_code env params renamed_method_id =
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params:params ~needs_local_this:false;
     instr_typedvalue (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
@@ -109,10 +109,10 @@ let make_memoize_function_with_params_code env params renamed_method_id =
     default_value_setters
   ]
 
-let make_memoize_function_code ~non_null_return env params renamed_method_id =
+let make_memoize_function_code ~pos ~non_null_return env params renamed_method_id =
   if List.is_empty params
   then make_memoize_function_no_params_code ~non_null_return renamed_method_id
-  else make_memoize_function_with_params_code env params renamed_method_id
+  else make_memoize_function_with_params_code ~pos env params renamed_method_id
 
 (* Construct the wrapper function body *)
 let make_wrapper_body return_type params instrs =
@@ -127,11 +127,12 @@ let make_wrapper_body return_type params instrs =
 
 let emit_wrapper_function ~original_id ~renamed_id ast_fun =
   if ast_fun.Ast.f_ret_by_ref
-  then Emit_fatal.raise_fatal_runtime
+  then Emit_fatal.raise_fatal_runtime (fst ast_fun.Ast.f_name)
     "<<__Memoize>> cannot be used on functions that return by reference"
   else
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let namespace = ast_fun.Ast.f_namespace in
+  let pos = ast_fun.Ast.f_span in
   let env = Emit_env.(
     empty |> with_namespace namespace |> with_scope scope
     ) in
@@ -147,11 +148,13 @@ let emit_wrapper_function ~original_id ~renamed_id ast_fun =
       ~scope ~skipawaitable:false ~namespace ast_fun.Ast.f_ret in
   let non_null_return =
     cannot_return_null ast_fun.Ast.f_fun_kind ast_fun.Ast.f_ret in
-  let body_instrs = make_memoize_function_code ~non_null_return env params renamed_id in
+  let body_instrs =
+    make_memoize_function_code ~pos ~non_null_return env params renamed_id in
   let memoized_body =
     make_wrapper_body return_type_info params body_instrs in
   Hhas_function.make
     function_attributes
     original_id
     memoized_body
+    (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
     false false false true

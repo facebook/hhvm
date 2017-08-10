@@ -32,7 +32,7 @@ let from_ast_wrapper : bool -> _ ->
     (not method_is_private && not method_is_protected)) in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
-  let (_, original_name) = ast_method.Ast.m_name in
+  let (pos, original_name) = ast_method.Ast.m_name in
   let (_,class_name) = ast_class.Ast.c_name in
   let class_name = Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
@@ -43,12 +43,12 @@ let from_ast_wrapper : bool -> _ ->
   if not method_is_static
     && ast_class.Ast.c_final
     && ast_class.Ast.c_kind = Ast.Cabstract
-  then Emit_fatal.raise_fatal_parse
+  then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
   let default_dropthrough =
     if List.mem ast_method.Ast.m_kind Ast.Abstract
-    then Some (Emit_fatal.emit_fatal_runtimeomitframe
+    then Some (Emit_fatal.emit_fatal_runtimeomitframe pos
       ("Cannot call abstract method " ^ class_name
         ^ "::" ^ original_name ^ "()"))
     else None
@@ -65,6 +65,7 @@ let from_ast_wrapper : bool -> _ ->
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
   let method_body, method_is_generator, method_is_pair_generator =
     Emit_body.emit_body
+      ~pos:ast_method.Ast.m_span
       ~scope:scope
       ~is_closure_body:method_is_closure_body
       ~is_memoize
@@ -117,6 +118,7 @@ let from_ast_wrapper : bool -> _ ->
     false (*method_no_injection*)
     method_id
     method_body
+    (Hhas_pos.pos_to_span ast_method.Ast.m_span)
     method_is_async
     method_is_generator
     method_is_pair_generator

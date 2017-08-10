@@ -39,7 +39,7 @@ and aexpr_requires_deep_init aexpr =
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
 let from_ast ast_class cv_kind_list type_hint tparams namespace
-             (_, (_, cv_name), initial_value) =
+             (_, (pos, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
@@ -52,7 +52,7 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace
   if not is_static
     && ast_class.Ast.c_final
     && ast_class.Ast.c_kind = Ast.Cabstract
-  then Emit_fatal.raise_fatal_parse
+  then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ Utils.strip_ns (snd ast_class.Ast.c_name) ^
       " contains non-static property declaration"
      ^ " and therefore cannot be declared 'abstract final'");

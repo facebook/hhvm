@@ -55,6 +55,7 @@ let with_adata hhas_prog hhas_adata =
 let emit_main defs =
   let body, _is_generator, _is_pair_generator =
     Emit_body.emit_body
+      ~pos:Pos.none
       ~namespace:Namespace_env.empty_with_default_popt
       ~is_closure_body:false
       ~is_memoize:false
@@ -71,14 +72,14 @@ let emit_main defs =
 
 open Closure_convert
 
-let emit_fatal_program ~ignore_message op message =
+let emit_fatal_program ~ignore_message op pos message =
   Iterator.reset_iterator ();
   let body = Emit_body.make_body
     (
       gather [
         optional ignore_message
           [instr (IComment "Ignore Fatal Parse message")];
-        Emit_fatal.emit_fatal op message
+        Emit_fatal.emit_fatal op pos message
       ]
     )
     [] (* decl_vars *)
@@ -103,5 +104,5 @@ let from_ast is_hh_file ast =
     let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
     let adata = Emit_adata.get_adata () in
     make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
-  with Emit_fatal.IncludeTimeFatalException (op, message) ->
-    emit_fatal_program ~ignore_message:false op message
+  with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
+    emit_fatal_program ~ignore_message:false op pos message

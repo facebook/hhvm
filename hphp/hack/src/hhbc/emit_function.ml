@@ -33,6 +33,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let function_body, function_is_generator, function_is_pair_generator =
     Emit_body.emit_body
+      ~pos: ast_fun.A.f_span
       ~scope
       ~is_closure_body:false
       ~is_memoize
@@ -51,6 +52,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       function_attributes
       renamed_id
       function_body
+      (Hhas_pos.pos_to_span ast_fun.Ast.f_span)
       function_is_async
       function_is_generator
       function_is_pair_generator

@@ -274,6 +274,7 @@ function hh_codegen_cmd($options, $config_file = null) {
   if (isset($config_file)) {
     $cmd .= ' -c "'.$config_file.'"';
   }
+  if (isset($options['hackc'])) $cmd .= ' -v Hack.Compiler.SourceMapping=1';
   if (isset($options['hackc'])) $cmd .= ' --daemon';
   return $cmd;
 }
@@ -2018,6 +2019,11 @@ function get_hhvm_ini_values($test, $options) {
 
 function run_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
+
+  // Skip pure hhas tests if we're running the Hack compiler
+  if (isset($options['hackc'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
+  }
 
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);

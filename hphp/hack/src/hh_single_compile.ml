@@ -147,9 +147,11 @@ let load_file file =
 let parse_text compiler_options popt fn text =
   match compiler_options.parser with
   | FFP ->
+    let ignore_pos =
+      not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
     Full_fidelity_ast.from_text_with_legacy
       ~parser_options:popt
-      ~ignore_pos:true
+      ~ignore_pos
       ~suppress_output:true
       fn text
   | Legacy ->
@@ -195,18 +197,14 @@ let print_debug_time_info filename debug_time =
   P.eprintf "Codegen: %0.3f s\n" !(debug_time.codegen_t);
   P.eprintf "Printing: %0.3f s\n" !(debug_time.printing_t)
 
-let do_compile config filename compiler_options opt_ast debug_time =
+let do_compile filename compiler_options opt_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
-  let options =
-    Hhbc_options.get_options_from_config config compiler_options.config_list
-  in
-  Hhbc_options.set_compiler_options options;
   let hhas_prog =
     match opt_ast with
     | None ->
       Hhas_program.emit_fatal_program ~ignore_message:true
-        Hhbc_ast.FatalOp.Parse "Syntax error"
+        Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
     | Some (errors, parser_return, _) ->
       let is_hh_file =
         Option.value_map parser_return.Parser_hack.file_mode
@@ -218,7 +216,7 @@ let do_compile config filename compiler_options opt_ast debug_time =
       if Errors.is_empty errors
       then Hhas_program.from_ast is_hh_file ast
       else Hhas_program.emit_fatal_program ~ignore_message:true
-        Hhbc_ast.FatalOp.Parse "Syntax error"
+        Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in
   let t = add_to_time_ref debug_time.codegen_t t in
   let hhas_text = Hhbc_hhas.to_string hhas_prog in
@@ -245,10 +243,14 @@ let process_single_file compiler_options popt filename outputfile =
   try
     let t = Unix.gettimeofday () in
     let config, text = load_config_and_file compiler_options filename in
+    let options =
+      Hhbc_options.get_options_from_config config compiler_options.config_list
+    in
+    Hhbc_options.set_compiler_options options;
     let opt_ast = parse_file compiler_options popt filename text in
     let debug_time = new_debug_time () in
     ignore @@ add_to_time_ref debug_time.parsing_t t;
-    let text = do_compile config filename compiler_options opt_ast debug_time in
+    let text = do_compile filename compiler_options opt_ast debug_time in
     if compiler_options.mode = DAEMON then
       Printf.printf "%i\n%!" (String.length text);
     match outputfile with

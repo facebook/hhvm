@@ -149,7 +149,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
     if not nullable then
     match (default_type_check param_name param_type_info p.A.param_expr) with
     | None    -> ()
-    | Some s  -> Emit_fatal.raise_fatal_parse s
+    | Some s  -> Emit_fatal.raise_fatal_parse (fst p.A.param_id) s
   in
   let param_expr =
     Option.map p.Ast.param_expr ~f:(resolver_visitor#on_expr scope)

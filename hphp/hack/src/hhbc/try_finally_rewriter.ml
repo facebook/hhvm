@@ -126,10 +126,10 @@ let emit_return ~need_ref ~verify_return ~in_finally_epilogue env =
     ]
   end
 
-and emit_break_or_continue ~is_break ~in_finally_epilogue env level =
+and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
   let jump_targets = Emit_env.get_jump_targets env in
   match JT.get_target_for_level ~is_break level jump_targets with
-  | JT.NotFound -> Emit_fatal.emit_fatal_for_break_continue level
+  | JT.NotFound -> Emit_fatal.emit_fatal_for_break_continue pos level
   | JT.ResolvedRegular (target_label, iterators_to_release) ->
     let preamble =
       if in_finally_epilogue && level = 1 then instr_unsetl @@ Local.get_label_id_local ()
@@ -157,7 +157,7 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env level =
       if is_break then instr_break adjusted_level else instr_continue adjusted_level
     ]
 
-let emit_finally_epilogue ~verify_return env jump_instructions finally_end =
+let emit_finally_epilogue ~verify_return env pos jump_instructions finally_end =
   let emit_instr i =
     match i with
     | IContFlow RetC ->
@@ -165,9 +165,9 @@ let emit_finally_epilogue ~verify_return env jump_instructions finally_end =
     | IContFlow RetV ->
       emit_return ~need_ref:true ~verify_return ~in_finally_epilogue:true env
     | ISpecialFlow (Break l) ->
-      emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env l
+      emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->
-      emit_break_or_continue ~is_break:false ~in_finally_epilogue:true env l
+      emit_break_or_continue ~is_break:false ~in_finally_epilogue:true env pos l
     | _ -> failwith "unexpected instruction: only Ret* or Break/Continue are expected"
   in
   match IMap.elements jump_instructions with

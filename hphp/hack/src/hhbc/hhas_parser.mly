@@ -25,6 +25,7 @@ open Hhas_parser_actions
 %token METHODDIRECTIVE CONSTDIRECTIVE ENUMTYDIRECTIVE USESDIRECTIVE
 %token TRYFAULTDIRECTIVE PROPERTYDIRECTIVE FILEPATHDIRECTIVE
 %token ISMEMOIZEWRAPPERDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
+%token SRCLOCDIRECTIVE
 %token LANGLE
 %token RANGLE
 %token COLONCOLON
@@ -62,12 +63,12 @@ aliasdecl:
       {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4 None}
 ;
 maindecl:
-    | MAINDIRECTIVE LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl
+    | MAINDIRECTIVE span LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl
       functionbody RBRACE nl
-      {Hhas_body.make $10(*instrs*)
-        $7(*declvars*) $4(*numiters*)
-        $6(*numclsrefslots*) $5(*ismemoizewrapper*)
-        [](*params*) None(*return type*) $8 (*static_inits*) None (* doc *)}
+      {Hhas_body.make $11(*instrs*)
+        $8(*declvars*) $5(*numiters*)
+        $7(*numclsrefslots*) $6(*ismemoizewrapper*)
+        [](*params*) None(*return type*) $9 (*static_inits*) None (* doc *)}
 ;
 numiters:
     | /* empty */ {0}
@@ -81,28 +82,29 @@ nonclassattribute:
     | TRIPLEQUOTEDSTRING {attribute_from_string $1}
 ;
 fundecl:
-    | FUNCTIONDIRECTIVE attributes typeinfooption ID fparams
+    | FUNCTIONDIRECTIVE attributes span typeinfooption ID fparams
       functionflags LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics
       functionbody RBRACE
         {
           let user_attrs, attrs = $2 in
           Hhas_function.make
             user_attrs (*attributes*)
-            (Hhbc_id.Function.from_raw_string $4) (*name*)
+            (Hhbc_id.Function.from_raw_string $5) (*name*)
             (Hhas_body.make
-              $14 (*instrs*)
-              $12 (*declvars*)
-              $9 (*numiters*)
-              $11 (*numclsrefslots *)
-              $10 (*ismemoizewrapper*)
-              $5 (*params*)
-              $3 (*typeinfo*)
-              $13 (*static_inits*)
+              $15 (*instrs*)
+              $13 (*declvars*)
+              $10 (*numiters*)
+              $12 (*numclsrefslots *)
+              $11 (*ismemoizewrapper*)
+              $6 (*params*)
+              $4 (*typeinfo*)
+              $14 (*static_inits*)
               None (* doc *)
             )
-            (isasync $6)
-            (isgenerator $6)
-            (ispairgenerator $6)
+            $3
+            (isasync $7)
+            (isgenerator $7)
+            (ispairgenerator $7)
             (not (List.mem "nontop" attrs))
         }
 ;
@@ -149,6 +151,10 @@ methodflags:
 fparams:
     | LPAR param_list RPAR {$2}
 ;
+span:
+    | LPAR INT COMMA INT RPAR { (Int64.to_int $2, Int64.to_int $4) }
+    | /* empty */ { (-1, -1) }
+;
 param_list:
     | /* empty */ { [] }
     | param { [$1]}
@@ -180,31 +186,32 @@ vname:
     | DOLLAR INT ID {"$" ^ (Int64.to_string $2) ^ $3 }
 ;
 classdecl:
-    | CLASSDIRECTIVE attributes ID extendsimplements LBRACE
+    | CLASSDIRECTIVE attributes ID span extendsimplements LBRACE
      nl classuses classenumty requires classtypeconstants
      classproperties methods nl RBRACE nl
         {
           let user_attrs, attrs = $2 in
           Hhas_class.make
           user_attrs (*attributes*)
-          (fst $4) (*base*)
-          (snd $4) (*implements*)
+          (fst $5) (*base*)
+          (snd $5) (*implements*)
           (Hhbc_id.Class.from_raw_string $3)(*name*)
+          $4 (*span *)
           (List.mem "final"     attrs) (*isfinal*)
           (List.mem "abstract"  attrs) (*isabstract*)
           (List.mem "interface" attrs) (*isinterface*)
           (List.mem "trait"     attrs) (*istrait*)
           false (*isxhp*)
           (not (List.mem "nontop" attrs)) (*istop*)
-          ((fun (x, _, _) -> x) $7)(*uses*)
-          ((fun (_, x, _) -> x) $7)(*use_aliases*)
-          ((fun (_, _, x) -> x) $7)(*use_precedences*)
-          $8(*enumtype*)
-          $12(*methods*)
-          $11(*properties*)
-          (fst $10) (*constants*)
-          (snd $10) (*typeconstants*)
-          $9 (* requirements *)
+          ((fun (x, _, _) -> x) $8)(*uses*)
+          ((fun (_, x, _) -> x) $8)(*use_aliases*)
+          ((fun (_, _, x) -> x) $8)(*use_precedences*)
+          $9(*enumtype*)
+          $13(*methods*)
+          $12(*properties*)
+          (fst $11) (*constants*)
+          (snd $11) (*typeconstants*)
+          $10 (* requirements *)
           None (* doc *) }
 ;
 methods:
@@ -215,7 +222,7 @@ methodname:
  | ID {$1}
 ;
 methoddecl:
- | METHODDIRECTIVE attributes typeinfooption methodname fparams idlist LBRACE nl
+ | METHODDIRECTIVE attributes span typeinfooption methodname fparams idlist LBRACE nl
     numiters ismemoizewrapper numclsrefslots declvars statics functionbody RBRACE nl
   {Hhas_method.make
     (fst $2) (* attributes *)
@@ -226,27 +233,36 @@ methoddecl:
     (List.mem "final" (snd $2))
     (List.mem "abstract" (snd $2))
     (List.mem "no_injection" (snd $2))
-    (Hhbc_id.Method.from_raw_string $4) (* name *)
+    (Hhbc_id.Method.from_raw_string $5) (* name *)
     (Hhas_body.make
-      $14 (* method instructions *)
-      $12 (* declvars *)
-      $9 (* numiters *)
-      $11 (* num cls ref slots *)
-      $10 (* ismemoizewrapper *)
-      $5 (* params *)
-      $3 (* return type *)
-      $13 (* static_inits *)
+      $15 (* method instructions *)
+      $13 (* declvars *)
+      $10 (* numiters *)
+      $12 (* num cls ref slots *)
+      $11 (* ismemoizewrapper *)
+      $6 (* params *)
+      $4 (* return type *)
+      $14 (* static_inits *)
       None (* doc *)
       )
-    (List.mem "isAsync" $6)
-    (List.mem "isGenerator" $6)
-    (List.mem "isPairGenerator" $6)
-    (List.mem "isClosureBody" $6)
+    $3
+    (List.mem "isAsync" $7)
+    (List.mem "isGenerator" $7)
+    (List.mem "isPairGenerator" $7)
+    (List.mem "isClosureBody" $7)
   }
 ;
 numclsrefslots:
  | /* empty */ {0}
  | NUMCLSREFSLOTSDIRECTIVE INT SEMI nl {Int64.to_int $2}
+;
+srcloc:
+ | SRCLOCDIRECTIVE INT COLON INT COMMA INT COLON INT SEMI
+   { (($2, $4), ($6, $8)) }
+;
+staticdirective:
+ | STATICDIRECTIVE DOLLAR ID EQUALS ID
+   { ($3, $5) }
 ;
 classproperties:
   | /* empty */ {[]}
@@ -419,6 +435,7 @@ enumtypeinfo:
 functionbody:
     | /* empty */ {Instruction_sequence.empty}
     | NEWLINE functionbody { $2 }
+    | srcloc functionbody { $2 }
     | /* Label: Instruction */ ID COLON functionbody {
       Instruction_sequence.gather
         [Instruction_sequence.instr (makelabelinst $1); $3]}

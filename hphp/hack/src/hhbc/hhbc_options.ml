@@ -21,6 +21,7 @@ type t = {
   option_optimize_cuf : bool;
   option_max_array_elem_size_on_the_stack : int;
   option_aliased_namespaces : (string * string) list;
+  option_source_mapping : bool;
 }
 
 let default = {
@@ -31,6 +32,7 @@ let default = {
   option_optimize_cuf = false;
   option_max_array_elem_size_on_the_stack = 12;
   option_aliased_namespaces = [];
+  option_source_mapping = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -40,6 +42,7 @@ let optimize_cuf o = o.option_optimize_cuf
 let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
 let aliased_namespaces o = o.option_aliased_namespaces
+let source_mapping o = o.option_source_mapping
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
  * Eval.EnableHipHopSyntax setting *)
@@ -65,6 +68,8 @@ let set_option options name value =
     { options with option_optimize_null_check = as_bool value }
   | "hack.compiler.optimizecuf" ->
     { options with option_optimize_cuf = as_bool value }
+  | "hack.compiler.sourcemapping" ->
+    { options with option_source_mapping = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =

@@ -40,10 +40,13 @@ let emit_return ~need_ref env =
 
 let emit_def_inline = function
   | A.Fun fd ->
+    Emit_pos.emit_pos_then (fst fd.Ast.f_name) @@
     instr_deffunc (int_of_string (snd fd.Ast.f_name))
   | A.Class cd ->
+    Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
     instr_defcls (int_of_string (snd cd.Ast.c_name))
   | A.Typedef td ->
+    Emit_pos.emit_pos_then (fst td.Ast.t_id) @@
     instr_deftypealias (int_of_string (snd td.Ast.t_id))
   | _ ->
     failwith "Define inline: Invalid inline definition"
@@ -103,7 +106,8 @@ let rec emit_stmt env st =
       instr_null;
       emit_return ~need_ref:false env;
     ]
-  | A.Expr (_, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
+  | A.Expr (pos, A.Call ((_, A.Id (_, "unset")), _, exprl, [])) ->
+    Emit_pos.emit_pos_then pos @@
     gather (List.map exprl (emit_unset_expr env))
   | A.Expr (_, A.Call ((_, A.Id (_, "declare")), _,
       [
@@ -194,15 +198,17 @@ let rec emit_stmt env st =
       ]
   | A.Expr expr ->
     emit_ignored_expr env expr
-  | A.Return (_, None) ->
+  | A.Return (pos, None) ->
     gather [
       instr_null;
+      Emit_pos.emit_pos pos;
       emit_return ~need_ref:false env;
     ]
-  | A.Return (_,  Some expr) ->
+  | A.Return (pos,  Some expr) ->
     let need_ref = !return_by_ref in
     gather [
       emit_expr ~need_ref env expr;
+      Emit_pos.emit_pos pos;
       emit_return ~need_ref env;
     ]
   | A.GotoLabel (_, label) ->
@@ -214,10 +220,10 @@ let rec emit_stmt env st =
     emit_if env condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     emit_while env e (A.Block b)
-  | A.Break (_, level_opt) ->
-    emit_break env (Option.value level_opt ~default:1)
-  | A.Continue (_, level_opt) ->
-    emit_continue env (Option.value level_opt ~default:1)
+  | A.Break (pos, level_opt) ->
+    emit_break env pos (Option.value level_opt ~default:1)
+  | A.Continue (pos, level_opt) ->
+    emit_continue env pos (Option.value level_opt ~default:1)
   | A.Do (b, e) ->
     emit_do env (A.Block b) e
   | A.For (e1, e2, e3, b) ->
@@ -238,8 +244,7 @@ let rec emit_stmt env st =
   | A.Switch (e, cl) ->
     emit_switch env e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    emit_foreach env (await_pos <> None) collection iterator
-      (A.Block block)
+    emit_foreach env collection await_pos iterator (A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
   | A.Static_var es ->
@@ -253,11 +258,11 @@ let rec emit_stmt env st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and emit_break env level =
-  TFR.emit_break_or_continue ~is_break:true ~in_finally_epilogue:false env level
+and emit_break env pos level =
+  TFR.emit_break_or_continue ~is_break:true ~in_finally_epilogue:false env pos level
 
-and emit_continue env level =
-  TFR.emit_break_or_continue ~is_break:false ~in_finally_epilogue:false env level
+and emit_continue env pos level =
+  TFR.emit_break_or_continue ~is_break:false ~in_finally_epilogue:false env pos level
 
 and emit_await env e =
   let after_await = Label.next_regular () in
@@ -579,8 +584,9 @@ and emit_try_finally_ env try_block finally_block =
 
   (* (3) Finally epilogue *)
 
+  (* TODO: position *)
   let finally_epilogue =
-    TFR.emit_finally_epilogue env ~verify_return:!verify_return
+    TFR.emit_finally_epilogue env Pos.none ~verify_return:!verify_return
       jump_instructions finally_end
   in
 
@@ -750,8 +756,8 @@ and emit_iterator_key_value_storage env iterator =
   *)
 and emit_iterator_lvalue_storage env v local =
   match v with
-  | _, A.Call _ ->
-    Emit_fatal.raise_fatal_parse "Can't use return value in write context"
+  | pos, A.Call _ ->
+    Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"
   | _, A.List exprs ->
     let preamble, load_values =
       emit_load_list_elements [instr_basel local MemberOpMode.Warn] exprs
@@ -794,12 +800,13 @@ and wrap_non_empty_block_in_fault prefix block fault_block =
       (gather @@ prefix::block)
       fault_block
 
-and emit_foreach env has_await collection iterator block =
+and emit_foreach env collection await_pos iterator block =
   Local.scope @@ fun () ->
-    if not has_await then emit_foreach_ env collection iterator block
-    else emit_foreach_await env collection iterator block
+    match await_pos with
+    | None -> emit_foreach_ env collection iterator block
+    | Some pos -> emit_foreach_await env pos collection iterator block
 
-and emit_foreach_await env collection iterator block =
+and emit_foreach_await env pos collection iterator block =
   let next_label = Label.next_regular () in
   let exit_label = Label.next_regular () in
   let iter_temp_local = Local.get_unnamed_local () in
@@ -828,7 +835,7 @@ and emit_foreach_await env collection iterator block =
     with_temp_local iter_temp_local begin fun _ _ -> gather [
       instr_instanceofd (Hhbc_id.Class.from_raw_string "HH\\AsyncIterator");
       instr_jmpnz next_label;
-      Emit_fatal.emit_fatal_runtime
+      Emit_fatal.emit_fatal_runtime pos
         "Unable to iterate non-AsyncIterator asynchronously";
       instr_label next_label;
       instr_cgetl iter_temp_local;

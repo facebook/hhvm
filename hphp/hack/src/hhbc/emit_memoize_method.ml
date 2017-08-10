@@ -34,14 +34,15 @@ let make_info ast_class class_id ast_methods =
   let check_method ast_method =
     if is_memoize ast_method
     then
+    let pos = fst ast_method.Ast.m_name in
     if ast_method.Ast.m_ret_by_ref
-    then Emit_fatal.raise_fatal_runtime
+    then Emit_fatal.raise_fatal_runtime pos
       "<<__Memoize>> cannot be used on functions that return by reference"
     else if ast_class.Ast.c_kind = Ast.Cinterface
-    then Emit_fatal.raise_fatal_runtime
+    then Emit_fatal.raise_fatal_runtime pos
       "<<__Memoize>> cannot be used in interfaces"
     else if List.mem ast_method.Ast.m_kind Ast.Abstract
-    then Emit_fatal.raise_fatal_parse
+    then Emit_fatal.raise_fatal_parse pos
       ("Abstract method " ^ Hhbc_id.Class.to_raw_string class_id ^ "::" ^
       snd ast_method.Ast.m_name ^ " cannot be memoized")
   in
@@ -154,7 +155,7 @@ let make_memoize_instance_method_no_params_code ~non_null_return info method_id 
     instr_retc ]
 
 (* md is the already-renamed memoize method that must be wrapped *)
-let make_memoize_instance_method_with_params_code
+let make_memoize_instance_method_with_params_code ~pos
   env info method_id params index =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
@@ -189,7 +190,7 @@ let make_memoize_instance_method_with_params_code
   let first_parameter_local = local_count in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params ~needs_local_this:false;
     instr_checkthis;
     index_block;
     param_code_sets params first_parameter_local;
@@ -285,7 +286,7 @@ let make_memoize_static_method_no_params_code ~non_null_return info method_id =
     ];
     instr_retc ]
 
-let make_memoize_static_method_with_params_code
+let make_memoize_static_method_with_params_code ~pos
   env info method_id params =
   let param_count = List.length params in
   let label = Label.Regular 0 in
@@ -298,7 +299,7 @@ let make_memoize_static_method_with_params_code
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~params:params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params:params ~needs_local_this:false;
     param_code_sets params param_count;
     instr_string (original_name_lc ^ multi_memoize_cache info.memoize_class_prefix);
     get_self info;
@@ -322,16 +323,16 @@ let make_memoize_static_method_with_params_code
     instr_retc;
     default_value_setters ]
 
-let make_memoize_static_method_code ~non_null_return env info method_id params =
+let make_memoize_static_method_code ~pos ~non_null_return env info method_id params =
   if List.is_empty params then
     make_memoize_static_method_no_params_code ~non_null_return info method_id
   else
-    make_memoize_static_method_with_params_code env info method_id params
+    make_memoize_static_method_with_params_code ~pos env info method_id params
 
-let make_memoize_instance_method_code ~non_null_return env info index method_id params =
+let make_memoize_instance_method_code ~pos ~non_null_return env info index method_id params =
   if List.is_empty params && info.memoize_instance_method_count <= 1
   then make_memoize_instance_method_no_params_code ~non_null_return info method_id
-  else make_memoize_instance_method_with_params_code env info method_id params index
+  else make_memoize_instance_method_with_params_code ~pos env info method_id params index
 
 (* Construct the wrapper function *)
 let make_wrapper return_type params instrs =
@@ -344,11 +345,11 @@ let make_wrapper return_type params instrs =
     [] (* static_inits *)
     None (* doc *)
 
-let emit ~non_null_return env info index return_type_info params is_static method_id =
+let emit ~pos ~non_null_return env info index return_type_info params is_static method_id =
   let instrs =
     if is_static
-    then make_memoize_static_method_code ~non_null_return env info method_id params
-    else make_memoize_instance_method_code ~non_null_return env info index method_id params
+    then make_memoize_static_method_code ~pos ~non_null_return env info method_id params
+    else make_memoize_instance_method_code ~pos ~non_null_return env info index method_id params
   in
   make_wrapper return_type_info params instrs
 
@@ -361,11 +362,12 @@ let emit_memoize_wrapper_body env memoize_info index ast_method
       Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret in
     let non_null_return = cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret in
     let params = Emit_param.from_asts ~namespace ~tparams:tparams ~generate_defaults:true ~scope params in
+    let pos = ast_method.Ast.m_span in
     let (_,original_name) = ast_method.Ast.m_name in
     let method_id =
       Hhbc_id.Method.from_ast_name original_name in
     (*let method_id = Hhbc_id.Method.add_suffix method_id Generate_memoized.memoize_suffix in*)
-    emit ~non_null_return env memoize_info index return_type_info params is_static method_id
+    emit ~pos ~non_null_return env memoize_info index return_type_info params is_static method_id
 
 let make_memoize_wrapper_method env info index ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
@@ -408,6 +410,7 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     false (*method_no_injection*)
     method_id
     method_body
+    (Hhas_pos.pos_to_span ast_method.Ast.m_span)
     false (*method_is_async*)
     false (*method_is_generator*)
     false (*method_is_pair_generator*)

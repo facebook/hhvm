@@ -19,6 +19,7 @@ type t = {
   method_no_injection  : bool;
   method_name          : Hhbc_id.Method.t;
   method_body          : Hhas_body.t;
+  method_span          : Hhas_pos.span;
   method_is_async      : bool;
   method_is_generator      : bool;
   method_is_pair_generator : bool;
@@ -36,6 +37,7 @@ let make
   method_no_injection
   method_name
   method_body
+  method_span
   method_is_async
   method_is_generator
   method_is_pair_generator
@@ -50,6 +52,7 @@ let make
     method_no_injection;
     method_name;
     method_body;
+    method_span;
     method_is_async;
     method_is_generator;
     method_is_pair_generator;
@@ -72,6 +75,7 @@ let make_private method_def =
     method_is_public = false;
     method_is_private = true }
 let body method_def = method_def.method_body
+let span method_def = method_def.method_span
 let is_async method_def = method_def.method_is_async
 let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator

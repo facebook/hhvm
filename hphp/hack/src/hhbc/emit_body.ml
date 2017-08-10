@@ -17,7 +17,8 @@ let has_type_constraint ti =
   | Some ti when (Hhas_type_info.has_type_constraint ti) -> true
   | _ -> false
 
-let emit_method_prolog ~params ~needs_local_this =
+let emit_method_prolog ~pos ~params ~needs_local_this =
+  Emit_pos.emit_pos_then pos @@
   gather (
     (if needs_local_this
     then instr (IMisc (InitThisLoc (Local.Named "$this")))
@@ -117,6 +118,7 @@ let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
       ~kind:Return ~nullable:false ~skipawaitable ~tparams ~namespace h)
 
 let emit_body
+  ~pos
   ~scope
   ~is_closure_body
   ~is_memoize
@@ -193,7 +195,7 @@ let emit_body
   in
   let header = gather [
         begin_label;
-        emit_method_prolog ~params ~needs_local_this;
+        emit_method_prolog ~pos ~params ~needs_local_this;
         generator_instr;
       ]
   in

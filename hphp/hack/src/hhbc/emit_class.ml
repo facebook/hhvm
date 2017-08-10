@@ -17,7 +17,8 @@ module SU = Hhbc_string_utils
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
 
-let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
+let make_86method
+  ~name ~params ~is_static ~is_private ~is_abstract ~span instrs =
   let method_attributes = [] in
   (* TODO: move this. We just know that there are no iterators in 86methods *)
   Iterator.reset_iterator ();
@@ -54,6 +55,7 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract instrs =
     method_no_injection
     (Hhbc_id.Method.from_ast_name name)
     method_body
+    span
     method_is_async
     method_is_generator
     method_is_pair_generator
@@ -238,7 +240,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
          match base with
          | Some cls when Hhbc_id.Class.to_raw_string cls = "Closure" &&
                          not is_closure_class ->
-            Emit_fatal.raise_fatal_runtime "Class cannot extend Closure"
+            Emit_fatal.raise_fatal_runtime (fst ast_class.A.c_name) "Class cannot extend Closure"
          | _ -> base
   in
   let implements =
@@ -246,6 +248,10 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     else ast_class.A.c_implements in
   let class_implements = from_implements ~namespace implements in
   let class_body = ast_class.A.c_body in
+  let class_span = Hhas_pos.pos_to_span ast_class.Ast.c_span in
+  (* TODO: communicate this without looking at the name *)
+  let is_closure_class =
+    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let has_constructor_or_invoke = List.exists class_body
     (fun elt ->
       match elt with
@@ -309,6 +315,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_static:true
         ~is_private:true
         ~is_abstract:false
+        ~span:class_span
         instrs]
     else
       [] in
@@ -327,6 +334,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_static:true
         ~is_private:true
         ~is_abstract:false
+        ~span:class_span
         instrs]
     else
       [] in
@@ -370,6 +378,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_static:true
         ~is_private:true
         ~is_abstract:false
+        ~span:class_span
         instrs] in
   let ctor_methods =
     if has_constructor_or_invoke ||(class_is_final && class_is_abstract) then []
@@ -381,6 +390,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~is_static:false
         ~is_private:false
         ~is_abstract:class_is_interface
+        ~span:class_span
         instrs] in
   let additional_methods =
     additional_methods @
@@ -400,6 +410,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_base
     class_implements
     class_id
+    class_span
     class_is_final
     class_is_abstract
     class_is_interface

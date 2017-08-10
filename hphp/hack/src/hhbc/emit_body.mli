@@ -19,6 +19,7 @@ val make_body:
   Hhas_body.t
 
 val emit_body:
+  pos: Pos.t ->
   scope: Ast_scope.Scope.t ->
   (* True if this is the body of a closure method *)
   is_closure_body: bool ->
@@ -40,6 +41,7 @@ val emit_body:
 val tparams_to_strings : Ast.tparam list -> string list
 
 val emit_method_prolog :
+  pos: Pos.t ->
   params: Hhas_param.t list ->
   needs_local_this:bool ->
   Instruction_sequence.t

@@ -15,33 +15,39 @@
 */
 
 #include "hphp/compiler/analysis/function_scope.h"
+
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+#include "hphp/compiler/expression/array_pair_expression.h"
+#include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/function_call.h"
+#include "hphp/compiler/expression/modifier_expression.h"
+#include "hphp/compiler/expression/parameter_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/parser/parser.h"
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/method_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/util/atomic.h"
+#include "hphp/util/logger.h"
+
 #include <folly/Conv.h>
 #include <utility>
 #include <vector>
-#include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/expression/array_pair_expression.h"
-#include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/compiler/expression/modifier_expression.h"
-#include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/expression/function_call.h"
-#include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/parser/parser.h"
-#include "hphp/util/logger.h"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/statement/exp_statement.h"
-#include "hphp/compiler/expression/parameter_expression.h"
-#include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/util/atomic.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-string.h"
 
 using namespace HPHP;
 
@@ -302,6 +308,12 @@ bool FunctionScope::isClosure() const {
   return ParserBase::IsClosureName(getScopeName());
 }
 
+bool FunctionScope::isLambdaClosure() const {
+  if (!isClosure()) return false;
+  auto const stmt = static_pointer_cast<MethodStatement>(getStmt());
+  return stmt->getContainingClosure()->type() == ClosureType::Short;
+}
+
 void FunctionScope::setVariableArgument(int reference) {
   m_attribute |= FileScope::VariableArgument;
   if (reference) {
@@ -321,20 +333,6 @@ bool FunctionScope::isFoldable() const {
 
 void FunctionScope::setContainsThis(bool f /* = true */) {
   m_containsThis = f;
-
-  BlockScopePtr bs(this->getOuterScope());
-  while (bs && bs->is(BlockScope::FunctionScope)) {
-    auto fs = static_pointer_cast<FunctionScope>(bs);
-    if (!fs->isClosure()) {
-      break;
-    }
-    fs->setContainsThis(f);
-    bs = bs->getOuterScope();
-  }
-
-  for (auto it = m_clonedTraitOuterScope.begin(); it != m_clonedTraitOuterScope.end(); it++) {
-    (*it)->setContainsThis(f);
-  }
 }
 
 void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
@@ -343,20 +341,15 @@ void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
   } else {
     m_containsBareThis = 0;
   }
+}
 
-  BlockScopePtr bs(this->getOuterScope());
-  while (bs && bs->is(BlockScope::FunctionScope)) {
-    auto fs = static_pointer_cast<FunctionScope>(bs);
-    if (!fs->isClosure()) {
-      break;
-    }
-    fs->setContainsBareThis(f, ref);
-    bs = bs->getOuterScope();
-  }
-
-  for (auto it = m_clonedTraitOuterScope.begin(); it != m_clonedTraitOuterScope.end(); it++) {
-    (*it)->setContainsBareThis(f, ref);
-  }
+FunctionScopeRawPtr FunctionScope::findClonedTraitInFile(FileScopeRawPtr fs) {
+  auto const it = std::find_if(
+    m_clonedTraitOuterScope.begin(), m_clonedTraitOuterScope.end(),
+    [&] (const FunctionScopePtr& func) {
+      return func->getContainingFile() == fs;
+    });
+  return it == m_clonedTraitOuterScope.end() ? FunctionScopeRawPtr{} : *it;
 }
 
 bool FunctionScope::hasImpl() const {

@@ -24,9 +24,9 @@
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/variable_table.h"
 
+#include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
@@ -44,6 +44,10 @@
 #include "hphp/util/logger.h"
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+__thread FileScope* FileScope::s_current;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -236,9 +240,10 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_pseudoMain) return;
+  s_current = this;
+  SCOPE_EXIT { s_current = nullptr; };
   ar->analyzeProgram(m_pseudoMain->getStmt());
-
-  resolve_lambda_names(ar, shared_from_this());
+  ClosureExpression::processLambdas(ar, std::move(m_lambdas));
 }
 
 void FileScope::visit(AnalysisResultPtr ar,

@@ -315,6 +315,7 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
 }
 
 void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+  FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     ConstructPtr self = shared_from_this();
     // Look up the corresponding FunctionScope and ClassScope

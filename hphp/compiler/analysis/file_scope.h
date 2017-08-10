@@ -30,6 +30,7 @@
 
 #include "hphp/compiler/statement/class_statement.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/text-util.h"
@@ -42,6 +43,7 @@ DECLARE_BOOST_TYPES(Expression)
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(StatementList);
+DECLARE_BOOST_TYPES(ClosureExpression);
 
 /**
  * A FileScope stores what's parsed from one single source file. It's up to
@@ -163,6 +165,11 @@ public:
       (BlockScope::shared_from_this());
   }
 
+  static FileScopeRawPtr getCurrent() {
+    return FileScopeRawPtr { s_current };
+  }
+
+  void addLambda(ClosureExpressionRawPtr c) { m_lambdas.push_back(c); }
 private:
   int m_size;
   MD5 m_md5;
@@ -188,8 +195,15 @@ private:
   // with the same name Unique.
   std::set<std::string> m_typeAliasNames;
 
+  // Temporary vector of lambda expressions; populated
+  // during analyzeProgram, and then processed at the end
+  // of FileScope::analyzeProgram.
+  CompactVector<ClosureExpressionRawPtr> m_lambdas;
+
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void setFileLevel(StatementListPtr stmt);
+
+  static __thread FileScope* s_current;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

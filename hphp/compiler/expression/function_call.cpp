@@ -187,6 +187,12 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
   }
 }
 
+void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+  if (isParent()) {
+    getFunctionScope()->setContainsThis();
+  }
+}
+
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();

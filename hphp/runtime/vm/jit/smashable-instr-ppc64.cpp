@@ -37,6 +37,14 @@ using ppc64_asm::DecodedInstruction;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Locks to avoid read/write when smashing instructions
+static folly::MicroSpinLock s_lockMovq;
+static folly::MicroSpinLock s_lockCmpq;
+static folly::MicroSpinLock s_lockCall;
+static folly::MicroSpinLock s_lockJmp;
+static folly::MicroSpinLock s_lockJcc;
+
+///////////////////////////////////////////////////////////////////////////////
 
 #define EMIT_BODY(cb, meta, inst, ...)      \
   ([&] {                                    \
@@ -87,10 +95,10 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 ///////////////////////////////////////////////////////////////////////////////
 
 void smashMovq(TCA inst, uint64_t imm) {
+  folly::MSLGuard g{s_lockMovq};
   CodeBlock cb;
   // Initialize code block cb pointing to li64
-  cb.init(inst, Assembler::kLi64Len, "smashing Movq");
-  CodeCursor cursor { cb, inst };
+  cb.init(inst, smashableMovqLen(), "smashing Movq");
   Assembler a { cb };
 
   const DecodedInstruction di(inst);
@@ -100,8 +108,9 @@ void smashMovq(TCA inst, uint64_t imm) {
 }
 
 void smashCmpq(TCA inst, uint32_t imm) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
+  folly::MSLGuard g{s_lockCmpq};
+  CodeBlock cb;
+  cb.init(inst, smashableCmpqLen(), "smashing Cmpq");
   Assembler a { cb };
 
   // the first instruction is a vasm ldimml, which is a li32
@@ -112,8 +121,9 @@ void smashCmpq(TCA inst, uint32_t imm) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
+  folly::MSLGuard g{s_lockCall};
+  CodeBlock cb;
+  cb.init(inst, smashableCallLen(), "smashing Call");
   Assembler a { cb };
 
   const DecodedInstruction di(inst);
@@ -122,14 +132,14 @@ void smashCall(TCA inst, TCA target) {
   }
 
   a.setFrontier(inst);
-
   a.limmediate(rfuncentry(), reinterpret_cast<uint64_t>(target),
       ImmType::TocOnly);
 }
 
 void smashJmp(TCA inst, TCA target) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
+  folly::MSLGuard g{s_lockJmp};
+  CodeBlock cb;
+  cb.init(inst, smashableJmpLen(), "smashing Jmp");
   Assembler a { cb };
 
   if (target > inst && target - inst <= smashableJmpLen()) {
@@ -140,22 +150,26 @@ void smashJmp(TCA inst, TCA target) {
 }
 
 void smashJcc(TCA inst, TCA target) {
+  folly::MSLGuard g{s_lockJcc};
   Assembler::patchBranch(inst, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 uint64_t smashableMovqImm(TCA inst) {
+  folly::MSLGuard g{s_lockMovq};
   const DecodedInstruction di(inst);
   return di.immediate();
 }
 
 uint32_t smashableCmpqImm(TCA inst) {
+  folly::MSLGuard g{s_lockCmpq};
   const DecodedInstruction di(inst);
   return static_cast<uint32_t>(di.immediate());
 }
 
 TCA smashableCallTarget(TCA inst) {
+  folly::MSLGuard g{s_lockCall};
   const DecodedInstruction di(inst);
   if (!di.isCall()) return nullptr;
 
@@ -173,10 +187,12 @@ static TCA smashableBranchTarget(TCA inst, bool allowCond) {
 }
 
 TCA smashableJmpTarget(TCA inst) {
+  folly::MSLGuard g{s_lockJmp};
   return smashableBranchTarget(inst, false);
 }
 
 TCA smashableJccTarget(TCA inst) {
+  folly::MSLGuard g{s_lockJcc};
   return smashableBranchTarget(inst, true);
 }
 

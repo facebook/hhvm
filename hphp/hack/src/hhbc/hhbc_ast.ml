@@ -234,6 +234,8 @@ type instruct_operator =
   | CastVec
   | CastDict
   | CastKeyset
+  | CastVArray
+  | CastDArray
   | InstanceOf
   | InstanceOfD of class_id
   | Print

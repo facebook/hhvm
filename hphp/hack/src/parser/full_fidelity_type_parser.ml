@@ -53,6 +53,7 @@ let rec parse_type_specifier parser =
   | Void
   | Noreturn
   | Resource
+  | Object
   | Mixed -> (parser1, make_simple_type_specifier (make_token token))
   | This -> parse_simple_type_or_type_constant parser
   | Name -> parse_simple_type_or_type_constant_or_generic parser

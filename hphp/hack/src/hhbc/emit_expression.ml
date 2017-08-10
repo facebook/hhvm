@@ -149,7 +149,7 @@ let istype_op id =
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
   | "is_string" -> Some OpStr
-  | "is_array" -> Some OpArr
+  | "is_array" | "is_varray_or_darray" -> Some OpArr
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   | "is_scalar" -> Some OpScalar
@@ -1782,6 +1782,8 @@ and get_call_builtin_func_info = function
   | "vec" -> Some (1, IOp CastVec)
   | "keyset" -> Some (1, IOp CastKeyset)
   | "dict" -> Some (1, IOp CastDict)
+  | "varray" -> Some (1, IOp CastVArray)
+  | "darray" -> Some (1, IOp CastDArray)
   | _ -> None
 
 and emit_call_user_func_args env i expr =

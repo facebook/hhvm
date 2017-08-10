@@ -34,8 +34,6 @@ quick/impl_abstract_dv_b_boolean.php
 quick/impl_abstract_dv_i_Int.php
 quick/impl_abstract_dv_i_integer.php
 quick/impl_abstract_dv_ia.php
-quick/impl_abstract_dv_io.php
-quick/impl_abstract_dv_so.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
 quick/interface11.php

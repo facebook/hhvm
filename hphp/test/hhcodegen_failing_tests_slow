@@ -58,17 +58,13 @@ slow/dict/init-parse-error2.php
 slow/dict/init-parse-error3.php
 slow/dict/init-parse-error4.php
 slow/dict/mixed-to-dict-with-refs.php
-slow/dv_array/arr_to_varray_cast.php
-slow/dv_array/convert.php
 slow/dv_array/hh-only1.php
 slow/dv_array/hh-only2.php
-slow/dv_array/is-a.php
 slow/dv_array/parse-error1.php
 slow/dv_array/parse-error2.php
 slow/dv_array/parse-error3.php
 slow/dv_array/parse-error4.php
 slow/dv_array/parse-error5.php
-slow/dv_array/type-hint.php
 slow/dynamic_methods/1214.php
 slow/dynamic_variables/1164.php
 slow/eval_order/1502.php
@@ -361,8 +357,6 @@ slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php
 slow/type_constraint/parse_super_constraint_bad.php
 slow/typecheck/type_coersion_5.php
-slow/typecheck/type_coersion_7.php
-slow/typecheck/type_coersion_7strict.php
 slow/typedef/typedef_parent.php
 slow/typedef/typedef_self.php
 slow/types/abstract_function_typehints.php

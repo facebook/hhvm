@@ -169,6 +169,8 @@ let string_of_operator instruction =
     | CastVec -> "CastVec"
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
+    | CastVArray -> "CastVArray"
+    | CastDArray -> "CastDArray"
     | InstanceOf -> "InstanceOf"
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
     | Print -> "Print"

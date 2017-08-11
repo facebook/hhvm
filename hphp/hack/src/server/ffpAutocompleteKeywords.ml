@@ -303,8 +303,17 @@ let general_statements = {
   end;
 }
 
+let if_after_else = {
+  keywords = ["if"];
+  is_valid_in_context = begin fun context ->
+    context.predecessor = KeywordElse &&
+    (context.closest_parent_container = CompoundStatement ||
+    context.closest_parent_container = IfStatement)
+  end;
+}
+
 let if_trailing_keywords = {
-  keywords = ["else"; "elseif"];
+  keywords = ["else"; "else if"];
   is_valid_in_context = begin fun context ->
     context.predecessor = IfWithoutElse &&
     context.closest_parent_container = CompoundStatement
@@ -344,6 +353,7 @@ let keyword_matches: keyword_completion list = [
   final_keyword;
   function_keyword;
   general_statements;
+  if_after_else;
   if_trailing_keywords;
   implements_keyword;
   interface_keyword;

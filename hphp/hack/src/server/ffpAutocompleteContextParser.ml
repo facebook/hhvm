@@ -51,6 +51,7 @@ module Predecessor = struct
   | KeywordCase
   | KeywordClass
   | KeywordConst
+  | KeywordElse
   | KeywordEnum
   | KeywordExtends
   | KeywordFinal
@@ -254,6 +255,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Colon; _ } -> Some TokenColon
     | Token { kind = Comma; _ } -> Some TokenComma
     | Token { kind = Const; _ } -> Some KeywordConst
+    | Token { kind = Else; _ } -> Some KeywordElse
     | Token { kind = Enum; _ } -> Some KeywordEnum
     | Token { kind = Equal; _ } -> Some TokenEqual
     | Token { kind = Extends; _ } -> Some KeywordExtends

@@ -3,7 +3,7 @@ clone
 do
 echo
 else
-elseif
+else if
 foo
 for
 foreach

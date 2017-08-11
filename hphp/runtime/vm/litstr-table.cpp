@@ -38,7 +38,7 @@ Id LitstrTable::mergeLitstr(const StringData* litstr) {
   const StringData* sd = makeStaticString(litstr);
   Id id = numLitstrs();
 
-  m_litstr2id[sd] = id;
+  m_litstr2id.insert({sd, id});
   m_namedInfo.emplace_back(sd, nullptr);
 
   return id;

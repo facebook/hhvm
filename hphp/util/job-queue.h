@@ -746,8 +746,14 @@ private:
     return m_maxThreadCount;
   }
 
-  // return the id for the worker.
-  int addWorkerImpl(bool start) {
+  // Cannot be called concurrently (callers should hold m_mutex, or
+  // otherwise ensure that no other threads are calling this).
+  void addWorkerImpl(bool start) {
+    if (m_workers.size() >= m_maxThreadCount) {
+      // another thread raced with us to add a worker.
+      assert(m_workers.size() == m_maxThreadCount);
+      return;
+    }
     TWorker *worker = new TWorker();
     AsyncFunc<TWorker> *func =
       new AsyncFunc<TWorker>(worker, &TWorker::start);
@@ -759,7 +765,6 @@ private:
     if (start) {
       func->start();
     }
-    return id;
   }
 
 };

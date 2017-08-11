@@ -29,6 +29,7 @@
 #include <folly/portability/Libgen.h>
 #include <folly/portability/SysStat.h>
 
+#include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -614,86 +615,17 @@ void FileUtil::find(std::vector<std::string> &out,
                     const std::string &root, const std::string& path, bool php,
                     const std::set<std::string> *excludeDirs /* = NULL */,
                     const std::set<std::string> *excludeFiles /* = NULL */) {
-  auto spath = path.empty() || !isDirSeparator(path[0]) ?
-    path : path.substr(1);
 
-  if (!spath.empty() && !isDirSeparator(spath.back())) {
-    spath += getDirSeparator();
-  }
-  auto fullPath = root + spath;
-  if (fullPath.empty()) {
-    return;
-  }
-  if (excludeDirs && excludeDirs->find(spath) != excludeDirs->end()) {
-    return;
-  }
-
-  DIR *dir = opendir(fullPath.c_str());
-  if (dir == nullptr) {
-    Logger::Error("FileUtil::find(): unable to open directory %s",
-                  fullPath.c_str());
-    return;
-  }
-
-  dirent *e;
-  while ((e = readdir(dir))) {
-    char *ename = e->d_name;
-
-    // skipping .  .. hidden files
-    if (ename[0] == '.' || !*ename) {
-      continue;
-    }
-    string fe = fullPath + ename;
-    struct stat se;
-    if (stat(fe.c_str(), &se)) {
-      Logger::Error("FileUtil::find(): unable to stat %s", fe.c_str());
-      continue;
-    }
-
-    if ((se.st_mode & S_IFMT) == S_IFDIR) {
-      string subdir = spath + ename;
-      find(out, root, subdir, php, excludeDirs, excludeFiles);
-      continue;
-    }
-
-    // skipping "tags" files
-    if (strcmp(ename, "tags") == 0) {
-      continue;
-    }
-
-    // skipping emacs leftovers
-    char last = ename[strlen(ename) - 1];
-    if (last == '~' || last == '#') {
-      continue;
-    }
-
-    bool isPHP = false;
-    const char *p = strrchr(ename, '.');
-    if (p) {
-      isPHP = (strncmp(p + 1, "php", 3) == 0);
-    } else {
-      try {
-        string line;
-        std::ifstream fin(fe.c_str());
-        if (std::getline(fin, line)) {
-          if (line[0] == '#' && line[1] == '!' &&
-              line.find("php") != string::npos) {
-            isPHP = true;
-          }
-        }
-      } catch (...) {
-        Logger::Error("FileUtil::find(): unable to read %s", fe.c_str());
-      }
-    }
-
-    if (isPHP == php &&
-        (!excludeFiles ||
-         excludeFiles->find(spath + ename) == excludeFiles->end())) {
-      out.push_back(fe);
-    }
-  }
-
-  closedir(dir);
+  find(root, path, php,
+       [&] (const std::string& rpath, bool isDir) {
+         if (isDir) {
+           return !excludeDirs || !excludeDirs->count(rpath);
+         }
+         if (!excludeFiles || !excludeFiles->count(rpath)) {
+           out.push_back(root + rpath);
+         }
+         return false;
+       });
 }
 
 bool FileUtil::isValidPath(const String& path) {

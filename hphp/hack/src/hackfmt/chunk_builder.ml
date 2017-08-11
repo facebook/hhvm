@@ -351,16 +351,16 @@ let builder = object (this)
 
   method build_chunk_groups node =
     this#reset ();
-    this#consume_fmt_node node;
+    this#consume_doc node;
     this#_end ()
 
-  method private consume_fmt_node node =
-    let open Fmt_node in
+  method private consume_doc node =
+    let open Doc in
     match node with
     | Nothing ->
       ()
     | Fmt nodes ->
-      List.iter nodes this#consume_fmt_node
+      List.iter nodes this#consume_doc
     | Text (text, width) ->
       this#add_string text width;
     | Comment (text, width) ->
@@ -382,15 +382,15 @@ let builder = object (this)
       seen_chars <- prev_seen + width;
     | DocLiteral node ->
       this#set_next_split_rule (RuleKind (Rule.Simple Cost.Base));
-      this#consume_fmt_node node;
+      this#consume_doc node;
       last_string_type <- DocStringClose;
     | NumericLiteral node ->
       if last_string_type = Concat then this#add_space ();
-      this#consume_fmt_node node;
+      this#consume_doc node;
       last_string_type <- Number;
     | ConcatOperator node ->
       if last_string_type = Number then this#add_space ();
-      this#consume_fmt_node node;
+      this#consume_doc node;
       last_string_type <- Concat;
     | Split ->
       this#split ()
@@ -405,41 +405,41 @@ let builder = object (this)
       this#add_space ()
     | Span nodes ->
       this#start_span ();
-      List.iter nodes this#consume_fmt_node;
+      List.iter nodes this#consume_doc;
       this#end_span ();
     | Nest nodes ->
       this#nest ();
-      List.iter nodes this#consume_fmt_node;
+      List.iter nodes this#consume_doc;
       this#unnest ();
     | ConditionalNest nodes ->
       this#nest ~skip_parent:true ();
-      List.iter nodes this#consume_fmt_node;
+      List.iter nodes this#consume_doc;
       this#unnest ();
     | BlockNest nodes ->
       this#start_block_nest ();
-      List.iter nodes this#consume_fmt_node;
+      List.iter nodes this#consume_doc;
       this#end_block_nest ();
     | WithRule (rule_kind, action) ->
       this#start_rule_kind ~rule_kind ();
-      this#consume_fmt_node action;
+      this#consume_doc action;
       this#end_rule ();
     | WithLazyRule (rule_kind, before, action) ->
       let rule = this#create_lazy_rule ~rule_kind () in
-      this#consume_fmt_node before;
+      this#consume_doc before;
       this#start_lazy_rule rule;
-      this#consume_fmt_node action;
+      this#consume_doc action;
       this#end_rule ();
     | WithPossibleLazyRule (rule_kind, before, action) ->
       if this#has_rule_kind rule_kind then begin
         let rule = this#create_lazy_rule ~rule_kind () in
-        this#consume_fmt_node before;
+        this#consume_doc before;
         this#start_lazy_rule rule;
-        this#consume_fmt_node action;
+        this#consume_doc action;
         this#end_rule ();
       end else begin
         this#start_rule_kind ~rule_kind ();
-        this#consume_fmt_node before;
-        this#consume_fmt_node action;
+        this#consume_doc before;
+        this#consume_doc action;
         this#end_rule ();
       end
     | TrailingComma ->

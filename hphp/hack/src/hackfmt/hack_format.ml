@@ -18,9 +18,9 @@ module Env = Format_env
 
 open Core
 open Syntax
-open Fmt_node
+open Doc
 
-let transform (env: Env.t) (node: Syntax.t) : Fmt_node.t =
+let transform (env: Env.t) (node: Syntax.t) : Doc.t =
 
 let rec t node =
   match syntax node with

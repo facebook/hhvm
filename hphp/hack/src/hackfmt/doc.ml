@@ -13,7 +13,7 @@ open Core
 type t =
   (* Null case *)
   | Nothing
-  (* List of sibling format nodes *)
+  (* List of concatenated nodes *)
   | Fmt of t list
   (* Text which will appear in the formatted file *)
   | Text of string * int
@@ -45,8 +45,8 @@ type t =
   (* Splits in a WithLazyRule region will default to using this lazy rule.
    * Lazy rules are necessary when needing to emit formatted text between the
    * location where the rule's dependencies are computed and the region to which
-   * the lazy rule applies. The first Fmt_node is for content before the lazy
-   * rule becomes active, while the second is for content the lazy rule applies
+   * the lazy rule applies. The first Doc is for content before the lazy rule
+   * becomes active, while the second is for content the lazy rule applies
    * to. *)
   | WithLazyRule of Rule.kind * t * t
 
@@ -114,7 +114,7 @@ let rec has_printable_content node =
   | Space
   | TrailingComma -> false
 
-(* Add "dump @@" before any fmt_node expression to dump it to stderr. *)
+(* Add "dump @@" before any Doc.t expression to dump it to stderr. *)
 let dump ?(ignored=false) node =
   let open Printf in
   let rec aux = function

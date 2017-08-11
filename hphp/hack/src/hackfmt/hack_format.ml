@@ -750,6 +750,16 @@ let rec t node =
     ]
   | SwitchSection x ->
     let (labels, statements, fallthrough) = get_switch_section_children x in
+    (* If there is FallThrough trivia leading the first case label, handle it in
+     * a BlockNest so that it is indented to the same level as the previous
+     * SwitchSection's statements. *)
+    let (labels_leading, labels) = remove_leading_trivia labels in
+    let (after_fallthrough, upto_fallthrough) =
+      List.split_while (List.rev labels_leading)
+        ~f:(fun t -> Trivia.kind t <> TriviaKind.FallThrough)
+    in
+    let upto_fallthrough = List.rev upto_fallthrough in
+    let after_fallthrough = List.rev after_fallthrough in
     let labels = syntax_node_to_list labels in
     let statements = syntax_node_to_list statements in
     (* When the statements in the SwitchSection are wrapped in a single
@@ -761,6 +771,12 @@ let rec t node =
       | _ -> false
     in
     Concat [
+      if List.is_empty upto_fallthrough
+      then transform_leading_trivia after_fallthrough
+      else Concat [
+        BlockNest [transform_leading_trivia upto_fallthrough];
+        transform_trailing_trivia after_fallthrough;
+      ];
       handle_list labels ~after_each:begin fun is_last_label ->
         if is_last_label && is_scoped_section
         then Nothing

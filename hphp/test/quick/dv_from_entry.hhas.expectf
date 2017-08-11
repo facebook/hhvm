@@ -1,0 +1,2 @@
+Verification Error (unit %s func foo): JmpNS: Cannot jump to start of function from outside of DV initializer
+Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

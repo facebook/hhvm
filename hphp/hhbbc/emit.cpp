@@ -120,6 +120,16 @@ std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
     }
   );
 
+  // If the first block is just a Nop, this means that there is a jump to the
+  // second block from somewhere in the function. We don't want this, so we
+  // change this nop to an EntryNop so it doesn't get optimized away
+  if (is_single_nop(*sorted.front())) {
+    sorted.front()->hhbcs.clear();
+    sorted.front()->hhbcs.push_back(bc::EntryNop{});
+    FTRACE(2, "      changing Nop to EntryNop in block {}\n",
+           sorted.front()->id);
+  }
+
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;

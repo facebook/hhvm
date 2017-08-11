@@ -1,0 +1,42 @@
+# /data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php starts here
+
+
+.filepath "/data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php";
+
+.main {
+  FPushFuncD 0 "foo"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+
+.function <"" N  > foo($b = DV1("""22"""), $c = DV2("""33""")) {
+L0:
+  String "/"
+  CGetL $b
+  Concat
+  String "/"
+  Concat
+  CGetL $c
+  Concat
+  String "\n"
+  Concat
+  Print
+  JmpZ DV1
+  Null
+  RetC
+DV1:
+  Int 22
+  SetL $b
+  PopC
+DV2:
+  Int 33
+  SetL $c
+  PopC
+  JmpNS L0
+}
+
+
+# /data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php ends here

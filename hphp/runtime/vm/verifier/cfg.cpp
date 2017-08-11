@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 namespace Verifier {
@@ -184,6 +185,19 @@ Block* GraphBuilder::createBlock(PC pc) {
 Block* GraphBuilder::at(PC target) {
   BlockMap::iterator i = m_blocks.find(target);
   return i == m_blocks.end() ? 0 : i->second;
+}
+
+bool GraphBuilder::reachable(Block* from, Block* to,
+                             boost::dynamic_bitset<>& visited) {
+   if (!from || !to) return false;
+   if (visited[from->id]) return false;
+   visited[from->id] = true;
+   if (from->id == to->id) return true;
+   for (int i = 0; i < numSuccBlocks(from); i++) {
+     if (reachable(from->succs[i], to, visited)) return true;
+   }
+   if (from->exn) return reachable(from->exn, to, visited);
+   return false;
 }
 
 /**

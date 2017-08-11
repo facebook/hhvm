@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/util/arena.h"
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 namespace Verifier {
@@ -148,6 +149,7 @@ private:
   }
   Graph* build();
   Block* at(Offset off) { return at(m_unit->at(off)); }
+  bool reachable(Block* from, Block* to, boost::dynamic_bitset<>& visited);
  private:
   void createBlocks();
   void createExBlocks();

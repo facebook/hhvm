@@ -2167,6 +2167,9 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
 
 folly::Optional<res::Class> Index::selfCls(const Context& ctx) const {
   if (!ctx.cls) return folly::none;
+  if (!RuntimeOption::RepoAuthoritative && ctx.cls->attrs & AttrTrait) {
+    return folly::none;
+  }
   return resolve_class(ctx.cls);
 }
 

@@ -18,6 +18,8 @@ module TokenKind = Full_fidelity_token_kind
 open Core
 open AutocompleteTypes
 
+let empty_autocomplete_token = "PLACEHOLDER"
+
 let make_keyword_completion (keyword_name:string) =
   {
     res_pos = Pos.none |> Pos.to_absolute;
@@ -37,21 +39,38 @@ let make_local_var_completion (var_name:string) =
     func_details = None;
   }
 
+let handle_empty_autocomplete pos file_content =
+  let open Ide_api_types in
+  let offset = File_content.get_offset file_content pos in
+  let prev_char = File_content.get_char file_content (offset-1) in
+  let next_char = File_content.get_char file_content offset in
+  let is_whitespace = function ' ' | '\n' | '\r' | '\t' -> true | _ -> false in
+  if is_whitespace prev_char && is_whitespace next_char then
+    let edits = [{range = Some {st = pos; ed = pos}; text = empty_autocomplete_token}] in
+    File_content.edit_file_unsafe file_content edits
+  else
+    file_content
+
 let auto_complete
   (tcopt:TypecheckerOptions.t)
   (file_content:string)
   (pos:Ide_api_types.position)
   ~(filter_by_token:bool) : result =
-  let source_text = SourceText.make file_content in
+  let open Ide_api_types in
+  let new_file_content = handle_empty_autocomplete pos file_content in
+  let source_text = SourceText.make new_file_content in
+  let offset = SourceText.position_to_offset source_text (pos.line, pos.column) in
   let syntax_tree = SyntaxTree.make source_text in
 
-  let open Ide_api_types in
-  let position_tuple = (pos.line, pos.column) in
-  let offset = SourceText.position_to_offset source_text position_tuple in
   let (context, stub) =
     FfpAutocompleteContextParser.get_context_and_stub syntax_tree offset in
   (* If we are running a test, filter the keywords and local variables based on
   the token we are completing. *)
+  let stub = if file_content <> new_file_content then
+      String_utils.rstrip stub empty_autocomplete_token
+    else
+      stub
+  in
   let filter_results res = List.filter res ~f:begin fun res ->
     if filter_by_token
     then String_utils.string_starts_with res stub

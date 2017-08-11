@@ -368,8 +368,8 @@ let make_context
     full_path
 
 type autocomplete_location_classification =
-  | InLeadingTrivia
   | BeforePunctuationToken
+  | InLeadingTrivia
   | InToken
   | InTrailingTrivia
 
@@ -377,17 +377,17 @@ let classify_autocomplete_location
   (parents:PositionedSyntax.t list) (offset:int)
   : autocomplete_location_classification =
   let open PositionedSyntax in
-  let check_for_special_token parent =
-    let open TokenKind in
+  let check_for_specific_token parent =
     let open PositionedToken in
     match syntax parent with
-    | Token { kind = RightParen; _ } -> BeforePunctuationToken
+    | Token { kind = TokenKind.EndOfFile; _ } -> InLeadingTrivia
+    | Token { kind = TokenKind.RightParen; _ } -> BeforePunctuationToken
     | _ -> InToken
   in
   match parents with
   | [] -> failwith "Empty parentage (this should never happen)"
   | parent :: _ when offset < start_offset parent -> InLeadingTrivia
-  | parent :: _ when offset = start_offset parent -> check_for_special_token parent
+  | parent :: _ when offset = start_offset parent -> check_for_specific_token parent
   | parent :: _ when offset <= trailing_start_offset parent -> InToken
   | _ -> InTrailingTrivia
 
@@ -399,11 +399,11 @@ let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int)
   file, so we move our position to before the last character of the file so that our cursor is
   considered to be in the leading trivia of the end of file character. This guarantees our parentage
   is not empty. *)
-  let offset =
+  let new_offset =
     if offset >= full_width positioned_tree then full_width positioned_tree - 1
     else offset
   in
-  let ancestry = parentage positioned_tree offset in
+  let ancestry = parentage positioned_tree new_offset in
   let location = classify_autocomplete_location ancestry offset in
   let autocomplete_leaf_node = List.hd_exn ancestry in
   let previous_offset = leading_start_offset autocomplete_leaf_node - 1 in

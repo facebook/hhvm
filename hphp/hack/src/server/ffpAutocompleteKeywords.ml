@@ -197,7 +197,7 @@ let require_constraint_keyword = {
 
 let declaration_keywords = {
   keywords = ["enum"; "require"; "include"; "require_once"; "include_once";
-    "namespace"; "newtype"; "type"; "trait"];
+    "namespace"; "newtype"; "trait"; "type"];
   is_valid_in_context = begin fun context ->
     is_top_level_statement_valid context
   end;
@@ -269,11 +269,6 @@ let switch_body_keywords = {
   end;
 }
 
-(*
- * TODO: Ideally, await will always be allowed inside a function body. Typing
- * await in a non-async function should either automatically make the function
- * async or suggest this change.
- *)
 let async_func_body_keywords = {
   keywords = ["await"];
   is_valid_in_context = begin fun context ->
@@ -305,24 +300,19 @@ let general_statements = {
 let if_trailing_keywords = {
   keywords = ["else"; "elseif"];
   is_valid_in_context = begin fun context ->
-    context.predecessor = IfWithoutElse
+    context.predecessor = IfWithoutElse &&
+    context.closest_parent_container = CompoundStatement
   end;
 }
 
 let try_trailing_keywords = {
   keywords = ["catch"; "finally"];
   is_valid_in_context = begin fun context ->
-    context.predecessor = TryWithoutFinally
+    context.predecessor = TryWithoutFinally &&
+    context.closest_parent_container = CompoundStatement
   end;
 }
 
-(*
- * According to the spec, vacuous expressions (a function with no side
- * effects is called then has its result discarded) are allowed.
- * TODO: Should we only complete expressions when it makes sense to do so?
- * i.e. Only suggest these keywords in a return statement, as an argument to a
- * function, or on the RHS of an assignment expression.
- *)
 let primary_expressions = {
   keywords = ["tuple"; "shape"];
   is_valid_in_context = begin fun context ->
@@ -336,15 +326,6 @@ let scope_resolution_qualifiers = {
     is_expression_valid context
   end;
 }
-
-(*
- * An improperly formatted use body causes the parser to throw an error so we
- * cannot complete these at the moment.
- *)
-(*let use_body_keywords = {
-  keywords = ["insteadof"; "as"];
-  is_valid_in_context = fun _ -> true
-}*)
 
 let keyword_matches: keyword_completion list = [
   abstract_keyword;

@@ -47,14 +47,26 @@ module Predecessor = struct
   | ExtendsList
   | KeywordAbstract
   | KeywordAsync
+  | KeywordAwait
+  | KeywordCase
   | KeywordClass
   | KeywordConst
+  | KeywordEnum
   | KeywordExtends
   | KeywordFinal
+  | KeywordFunction
   | KeywordImplements
+  | KeywordInclude
+  | KeywordInterface
+  | KeywordNamespace
+  | KeywordNewtype
   | KeywordRequire
   | KeywordReturn
   | KeywordStatic
+  | KeywordSwitch
+  | KeywordTrait
+  | KeywordType
+  | KeywordUse
   | Statement
   | TokenColon
   | TokenComma
@@ -95,8 +107,10 @@ module ContextPredicates = struct
     (context.predecessor = Statement ||
     context.predecessor = TokenLeftBrace ||
     context.predecessor = IfWithoutElse ||
-    context.predecessor = TryWithoutFinally ||
-    context.predecessor = TokenColon)
+    context.predecessor = TryWithoutFinally)
+    || (* Cases in a switch body *)
+    context.closest_parent_container = CompoundStatement &&
+    context.predecessor = TokenColon
 
   let is_rhs_of_assignment_expression context =
     context.closest_parent_container = AssignmentExpression &&
@@ -112,7 +126,7 @@ module ContextPredicates = struct
     is_at_beginning_of_new_statement context ||
     is_in_return_statement context ||
     context.closest_parent_container = LambdaBodyExpression
-    (* or is parameter, or is inside if/switch/while/etc. clause *)
+    (* TODO: or is parameter, or is inside if/switch/while/etc. clause *)
 
   let is_top_level_statement_valid context =
     context.closest_parent_container = TopLevel &&
@@ -210,23 +224,36 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | TypeConstDeclaration _  -> Some ClassBodyDeclaration
     | Token { kind = Abstract; _ } -> Some KeywordAbstract
     | Token { kind = Async; _ } -> Some KeywordAsync
+    | Token { kind = Await; _ } -> Some KeywordAwait
+    | Token { kind = Case; _ } -> Some KeywordCase
     | Token { kind = Class; _ } -> Some KeywordClass
     | Token { kind = Colon; _ } -> Some TokenColon
     | Token { kind = Comma; _ } -> Some TokenComma
     | Token { kind = Const; _ } -> Some KeywordConst
+    | Token { kind = Enum; _ } -> Some KeywordEnum
     | Token { kind = Equal; _ } -> Some TokenEqual
     | Token { kind = Extends; _ } -> Some KeywordExtends
     | Token { kind = Final; _ } -> Some KeywordFinal
+    | Token { kind = Function; _ } -> Some KeywordFunction
     | Token { kind = Implements; _ } -> Some KeywordImplements
+    | Token { kind = Include; _ }
+    | Token { kind = Include_once; _ } -> Some KeywordInclude
+    | Token { kind = Interface; _ } -> Some KeywordInterface
     | Token { kind = LeftBrace; _ } -> Some TokenLeftBrace
     | Token { kind = LeftParen; _ } -> Some TokenOpenParen
     | Token { kind = LessThan; _ } -> Some TokenLessThan
+    | Token { kind = Namespace; _ } -> Some KeywordNamespace
+    | Token { kind = Newtype; _ } -> Some KeywordNewtype
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }
     | Token { kind = Protected; _ } -> Some VisibilityModifier
     | Token { kind = Require; _ } -> Some KeywordRequire
     | Token { kind = Return; _ } -> Some KeywordReturn
     | Token { kind = Static; _ } -> Some KeywordStatic
+    | Token { kind = Switch; _ } -> Some KeywordSwitch
+    | Token { kind = Trait; _ } -> Some KeywordTrait
+    | Token { kind = Type; _ } -> Some KeywordType
+    | Token { kind = Use; _ } -> Some KeywordUse
     | _ -> None
   in
   predecessor
@@ -270,7 +297,8 @@ let make_context
     | DoStatement _ ->
       { acc with inside_loop_body = true }
     | SwitchSection _ ->
-      { acc with inside_switch_body = true }
+      { acc with closest_parent_container = Container.CompoundStatement;
+        inside_switch_body = true }
     | MethodishDeclaration _
     | FunctionDeclaration _ as func ->
       { acc with inside_async_function = is_function_async func }

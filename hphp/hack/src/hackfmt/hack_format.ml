@@ -759,7 +759,7 @@ let rec t node =
     Fmt [
       t kw;
       Space;
-      Split;
+      SplitWith Cost.Base;
       t expr;
       t colon;
       Newline;

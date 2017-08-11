@@ -84,11 +84,12 @@ end
 
 type context = {
   closest_parent_container: Container.t;
-  predecessor: Predecessor.t;
-  inside_switch_body: bool;
-  inside_loop_body: bool;
   inside_async_function: bool;
   inside_class_body: bool;
+  inside_loop_body: bool;
+  inside_static_method: bool;
+  inside_switch_body: bool;
+  predecessor: Predecessor.t;
 }
 
 module ContextPredicates = struct
@@ -173,30 +174,13 @@ end
 
 let initial_context = {
   closest_parent_container = Container.NoContainer;
-  predecessor = Predecessor.NoPredecessor;
-  inside_switch_body = false;
-  inside_loop_body = false;
   inside_async_function = false;
   inside_class_body = false;
+  inside_loop_body = false;
+  inside_static_method = false;
+  inside_switch_body = false;
+  predecessor = Predecessor.NoPredecessor;
 }
-
-let is_function_async (function_object:PositionedSyntax.syntax) : bool =
-  let open PositionedSyntax in
-  let open PositionedToken in
-  let open TokenKind in
-  match function_object with
-  | FunctionDeclaration {
-      function_declaration_header = { syntax = FunctionDeclarationHeader {
-        function_async = async; _
-      }; _ }; _
-    }
-  | MethodishDeclaration { methodish_function_decl_header = { syntax =
-      FunctionDeclarationHeader { function_async = async; _ }; _
-    }; _ }
-  | AnonymousFunction { anonymous_async_keyword = async; _ }
-  | LambdaExpression { lambda_async = async; _ } ->
-    is_specific_token Async async
-  | _ -> false
 
 let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   let open PositionedSyntax in
@@ -300,6 +284,35 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
   |> List.find_map ~f:classify_syntax_as_predecessor
   |> Option.value ~default:NoPredecessor
 
+let is_method_static (method_object:PositionedSyntax.syntax) : bool =
+  let open PositionedSyntax in
+  let open PositionedToken in
+  let open TokenKind in
+  match method_object with
+  | MethodishDeclaration { methodish_modifiers; _ } ->
+    List.exists (syntax_node_to_list methodish_modifiers) ~f:(is_specific_token Static)
+  | AnonymousFunction { anonymous_static_keyword = static; _ } ->
+    is_specific_token Static static
+  | _ -> false
+
+let is_function_async (function_object:PositionedSyntax.syntax) : bool =
+  let open PositionedSyntax in
+  let open PositionedToken in
+  let open TokenKind in
+  match function_object with
+  | FunctionDeclaration {
+      function_declaration_header = { syntax = FunctionDeclarationHeader {
+        function_async = async; _
+      }; _ }; _
+    }
+  | MethodishDeclaration { methodish_function_decl_header = { syntax =
+      FunctionDeclarationHeader { function_async = async; _ }; _
+    }; _ }
+  | AnonymousFunction { anonymous_async_keyword = async; _ }
+  | LambdaExpression { lambda_async = async; _ } ->
+    is_specific_token Async async
+  | _ -> false
+
 let make_context
   ~(full_path:PositionedSyntax.t list)
   ~(predecessor:PositionedSyntax.t list)
@@ -341,7 +354,8 @@ let make_context
         inside_switch_body = true }
     | MethodishDeclaration _
     | FunctionDeclaration _ as func ->
-      { acc with inside_async_function = is_function_async func }
+      { acc with inside_async_function = is_function_async func;
+        inside_static_method = is_method_static func }
     | FunctionDeclarationHeader _ ->
       { acc with closest_parent_container = FunctionHeader }
     | FunctionCallExpression _ ->
@@ -356,6 +370,7 @@ let make_context
         inside_switch_body = false;
         inside_loop_body = false;
         inside_class_body = false;
+        inside_static_method = is_method_static lambda;
         inside_async_function = is_function_async lambda;
       }
     | PositionedSyntax.CompoundStatement _ ->

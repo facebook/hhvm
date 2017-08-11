@@ -15,8 +15,6 @@ open FfpAutocompleteContextParser
 open Core
 open String_utils
 
-(* TODO: Ensure this covers all cases *)
-(* TODO: Add in "$this" when it's valid *)
 let local_variable_valid_in_context (context:context) (stub:string) : bool =
   let open ContextPredicates in
   is_expression_valid context &&
@@ -38,6 +36,11 @@ let autocomplete_local (context:context) (stub:string) (tree:SyntaxTree.t)
       ~init:SSet.empty
     in
     let local_vars = SSet.remove stub local_vars in
+    let local_vars =
+      if context.inside_class_body && not context.inside_static_method
+      then SSet.add "$this" local_vars
+      else local_vars
+    in
     SSet.elements local_vars
   else
     []

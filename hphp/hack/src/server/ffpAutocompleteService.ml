@@ -8,7 +8,6 @@
  *
 *)
 
-module MinimalSyntax = Full_fidelity_minimal_syntax
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -61,9 +60,10 @@ let auto_complete
   let source_text = SourceText.make new_file_content in
   let offset = SourceText.position_to_offset source_text (pos.line, pos.column) in
   let syntax_tree = SyntaxTree.make source_text in
+  let positioned_tree = PositionedSyntax.from_tree syntax_tree in
 
   let (context, stub) =
-    FfpAutocompleteContextParser.get_context_and_stub syntax_tree offset in
+    FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset in
   (* If we are running a test, filter the keywords and local variables based on
   the token we are completing. *)
   let stub = if file_content <> new_file_content then
@@ -73,20 +73,20 @@ let auto_complete
   in
   let filter_results res = List.filter res ~f:begin fun res ->
     if filter_by_token
-    then String_utils.string_starts_with res stub
+    then String_utils.string_starts_with res.res_name stub
     else true
   end in
   (* Delegate to each type of completion to determine whether or not that
      type is valid in the current context *)
   let keyword_completions =
     FfpAutocompleteKeywords.autocomplete_keyword context
-    |> filter_results
     |> List.map ~f:make_keyword_completion
+    |> filter_results
   in
   let local_var_completions =
     FfpAutocompleteLocalNames.autocomplete_local context stub syntax_tree offset
-    |> filter_results
     |> List.map ~f:make_local_var_completion
+    |> filter_results
   in
   let class_member_completions =
     FfpAutocompleteClassMembers.autocomplete_class_member
@@ -95,7 +95,10 @@ let auto_complete
     ~file_content
     ~tcopt
   in
-  let global_completions = FfpAutocompleteGlobals.get_globals context stub in
+  let global_completions =
+    FfpAutocompleteGlobals.get_globals context stub positioned_tree
+    |> filter_results
+  in
   [keyword_completions; local_var_completions; class_member_completions; global_completions]
   |> List.concat_no_order
   |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)

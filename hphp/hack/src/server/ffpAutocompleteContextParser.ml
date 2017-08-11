@@ -416,10 +416,9 @@ let classify_autocomplete_location
   | parent :: _ when offset <= trailing_start_offset parent -> InToken
   | _ -> InTrailingTrivia
 
-let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int)
+let get_context_and_stub (positioned_tree:PositionedSyntax.t) (offset:int)
   : context * string =
   let open PositionedSyntax in
-  let positioned_tree = from_tree syntax_tree in
   (* If the offset is the same as the width of the whole tree, then the cursor is at the end of
   file, so we move our position to before the last character of the file so that our cursor is
   considered to be in the leading trivia of the end of file character. This guarantees our parentage

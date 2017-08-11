@@ -736,23 +736,47 @@ let rec t node =
   | SwitchStatement x ->
     let (kw, left_p, expr, right_p, left_b, sections, right_b) =
       get_switch_statement_children x in
+    let sections = syntax_node_to_list sections in
     Fmt [
       t kw;
       Space;
-      t left_p;
-      Split;
-      WithRule (Rule.Parental, Fmt [
-        Nest [t expr];
-        t right_p;
-      ]);
-      handle_switch_body left_b sections right_b;
+      delimited_nest left_p right_p [t expr];
+      Space;
+      braced_block_nest left_b right_b (List.map sections t);
       Newline;
     ]
-  | SwitchSection _
-  | CaseLabel _
-  | DefaultLabel _
-  | SwitchFallthrough _ ->
-    failwith "SwitchStatement children should be handled by handle_switch_body"
+  | SwitchSection x ->
+    let (labels, statements, fallthrough) = get_switch_section_children x in
+    let labels = syntax_node_to_list labels in
+    let statements = syntax_node_to_list statements in
+    Fmt [
+      Fmt (List.map labels t);
+      BlockNest (List.map statements t);
+      t fallthrough;
+    ]
+  | CaseLabel x ->
+    let (kw, expr, colon) = get_case_label_children x in
+    Fmt [
+      t kw;
+      Space;
+      Split;
+      t expr;
+      t colon;
+      Newline;
+    ]
+  | DefaultLabel x ->
+    let (kw, colon) = get_default_label_children x in
+    Fmt [
+      t kw;
+      t colon;
+      Newline;
+    ]
+  | SwitchFallthrough x ->
+    let (kw, semi) = get_switch_fallthrough_children x in
+    Fmt [
+      t kw;
+      t semi;
+    ]
   | ReturnStatement x ->
     let (kw, expr, semi) = get_return_statement_children x in
     transform_keyword_expression_statement kw expr semi
@@ -1698,64 +1722,6 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
         Fmt (List.map tl ~f:(fun x -> Fmt [Split; transform_chain x]));
       ])
   | _ -> failwith "Expected a chain of at least length 1"
-
-and handle_switch_body left_b sections right_b =
-  let handle_fallthrough fallthrough =
-    match syntax fallthrough with
-    | SwitchFallthrough x ->
-      let (kw, semi) = get_switch_fallthrough_children x in
-      [
-        t kw;
-        t semi;
-      ]
-    | _ -> []
-  in
-  let handle_label label =
-    match syntax label with
-    | CaseLabel x ->
-      let (kw, expr, colon) = get_case_label_children x in
-      Fmt [
-        t kw;
-        Space;
-        Split;
-        t expr;
-        t colon;
-        Newline;
-      ]
-    | DefaultLabel x ->
-      let (kw, colon) = get_default_label_children x in
-      Fmt [
-        t kw;
-        t colon;
-        Newline;
-      ]
-    | _ -> Nothing
-  in
-  let handle_statement statement =
-    BlockNest [
-      t statement;
-    ]
-  in
-  let handle_section section =
-    match syntax section with
-    | SwitchSection s ->
-      Fmt (
-        (List.map
-          (syntax_node_to_list s.switch_section_labels)
-          ~f:handle_label)
-        @ (List.map
-          (syntax_node_to_list s.switch_section_statements)
-          ~f:handle_statement)
-        @ handle_fallthrough s.switch_section_fallthrough
-      )
-    | _ -> Nothing
-  in
-  Fmt [
-    Space;
-    braced_block_nest left_b right_b (
-      List.map (syntax_node_to_list sections) handle_section
-    )
-  ]
 
 and transform_fn_decl_name async coroutine kw amp name type_params leftp =
   [

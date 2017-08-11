@@ -105,48 +105,33 @@ let parse_options () =
 
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
-module PrintOptions = struct
-  type t = {
-    text_source: text_source;
-    range: range option;
-  }
-end
-
-module InPlaceOptions = struct
-  type t = {
-    filename: filename;
-  }
-end
-
-module AtCharOptions = struct
-  type t = {
-    text_source: text_source;
-    pos: int;
-  }
-end
-
-module DiffOptions = struct
-  type t = {
-    root: string option;
-    dry: bool;
-  }
-end
 type format_options =
-  | Print of PrintOptions.t
-  | InPlace of InPlaceOptions.t
-  | AtChar of AtCharOptions.t
-  | Diff of DiffOptions.t
+  | Print of {
+      text_source: text_source;
+      range: range option;
+    }
+  | InPlace of {
+      filename: filename;
+    }
+  | AtChar of {
+      text_source: text_source;
+      pos: int;
+    }
+  | Diff of {
+      root: string option;
+      dry: bool;
+    }
 
 let mode_string format_options =
   match format_options with
-  | Print {PrintOptions.text_source = File _; range = None; _} -> "FILE"
-  | Print {PrintOptions.text_source = File _; range = Some _; _} -> "RANGE"
-  | Print {PrintOptions.text_source = Stdin _; range = None; _} -> "STDIN"
-  | Print {PrintOptions.text_source = Stdin _; range = Some _; _} -> "STDIN_RANGE"
+  | Print {text_source = File _; range = None; _} -> "FILE"
+  | Print {text_source = File _; range = Some _; _} -> "RANGE"
+  | Print {text_source = Stdin _; range = None; _} -> "STDIN"
+  | Print {text_source = Stdin _; range = Some _; _} -> "STDIN_RANGE"
   | InPlace _ -> "IN_PLACE"
   | AtChar _ -> "AT_CHAR"
-  | Diff {DiffOptions.dry = true; _} -> "DIFF"
-  | Diff {DiffOptions.dry = false; _} -> "DIFF_DRY"
+  | Diff {dry = true; _} -> "DIFF"
+  | Diff {dry = false; _} -> "DIFF_DRY"
 
 type validate_options_input = {
   text_source : text_source;
@@ -200,13 +185,13 @@ let validate_options env
     fail "--at-char expects no range"
 
   | {diff = false; inplace = false; at_char = None; _} ->
-    Print {PrintOptions.text_source; range}
+    Print {text_source; range}
   | {diff = false; inplace = true; text_source = File filename; range = None; _} ->
-    InPlace {InPlaceOptions.filename}
+    InPlace {filename}
   | {diff = false; inplace = false; range = None; at_char = Some pos; _} ->
-    AtChar {AtCharOptions.text_source; pos}
+    AtChar {text_source; pos}
   | {diff = true; text_source = Stdin None; range = None; _} ->
-    Diff {DiffOptions.root; dry = diff_dry}
+    Diff {root; dry = diff_dry}
 
 let read_stdin () =
   let buf = Buffer.create 256 in
@@ -289,7 +274,7 @@ let debug_print ?range text_source =
 let main (env: Env.t) (options: format_options) =
   env.Env.mode <- Some (mode_string options);
   match options with
-  | Print {PrintOptions.text_source; range} ->
+  | Print {text_source; range} ->
     env.Env.text_source <- text_source;
     if env.Env.debug then
       debug_print ?range text_source
@@ -298,7 +283,7 @@ let main (env: Env.t) (options: format_options) =
         |> parse
         |> format ?range
         |> output
-  | InPlace {InPlaceOptions.filename} ->
+  | InPlace {filename} ->
     let text_source = File filename in
     env.Env.text_source <- text_source;
     if env.Env.debug then debug_print text_source;
@@ -306,7 +291,7 @@ let main (env: Env.t) (options: format_options) =
       |> parse
       |> format
       |> output ~text_source
-  | AtChar {AtCharOptions.text_source; pos} ->
+  | AtChar {text_source; pos} ->
     env.Env.text_source <- text_source;
     let tree = parse text_source in
     let range, formatted =
@@ -315,7 +300,7 @@ let main (env: Env.t) (options: format_options) =
     if env.Env.debug then debug_print text_source ~range;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted;
-  | Diff {DiffOptions.root; dry} ->
+  | Diff {root; dry} ->
     let root = get_root root in
     env.Env.root <- Path.to_string root;
     read_stdin ()

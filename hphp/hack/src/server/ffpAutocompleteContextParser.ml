@@ -240,6 +240,8 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | BreakStatement _
     | ContinueStatement _
     | ExpressionStatement _ -> Some Statement
+    | TraitUse _
+    | RequireClause _
     | ConstDeclaration _
     | PropertyDeclaration _
     | MethodishDeclaration _

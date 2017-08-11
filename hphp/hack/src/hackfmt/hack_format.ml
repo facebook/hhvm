@@ -14,6 +14,7 @@ module TriviaKind = Full_fidelity_trivia_kind
 module Trivia = Full_fidelity_editable_trivia
 module Token = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
+module Env = Format_env
 
 open Core
 open Syntax
@@ -22,9 +23,9 @@ open Fmt_node
 (* TODO: move this to a config file *)
 let __INDENT_WIDTH = 2
 
-let rec transform node =
-  let t = transform in
+let transform (env: Env.t) (node: Syntax.t) : Fmt_node.t =
 
+let rec t node =
   match syntax node with
   | Missing ->
     Nothing
@@ -96,7 +97,7 @@ let rec transform node =
       | SyntaxList l ->
         let last = trailing_token children in
         begin match last with
-          | Some tok -> wrap_with_literal_type tok (Fmt (List.map l transform))
+          | Some tok -> wrap_with_literal_type tok (Fmt (List.map l t))
           | _ -> failwith "Expected Token"
         end
       | _ -> failwith "Expected Token or SyntaxList"
@@ -1430,28 +1431,25 @@ and when_present node f =
   | Missing -> Nothing
   | _ -> f ()
 
-and is_present node =
-  not (is_missing node)
-
 and transform_simple node =
-  Fmt (List.map (children node) transform)
+  Fmt (List.map (children node) t)
 
 and transform_simple_statement node =
-  Fmt ((List.map (children node) transform) @ [Newline])
+  Fmt ((List.map (children node) t) @ [Newline])
 
 and braced_block_nest open_b close_b nodes =
   (* Remove the closing brace's leading trivia and handle it inside the
    * BlockNest, so that comments will be indented correctly. *)
   let leading, close_b = remove_leading_trivia close_b in
   Fmt [
-    transform open_b;
+    t open_b;
     Newline;
     BlockNest [
       Fmt nodes;
       transform_leading_trivia leading;
       Newline;
     ];
-    transform close_b;
+    t close_b;
   ]
 
 and delimited_nest
@@ -1467,7 +1465,7 @@ and delimited_nest
     else Rule.Simple Cost.Base
   in
   Span [
-    transform left_delim;
+    t left_delim;
     WithRule (rule,
       nest ~spaces right_delim nodes
     );
@@ -1489,7 +1487,7 @@ and nest ?(spaces=false) right_delim nodes =
     maybe_split;
     nested_contents;
     maybe_split;
-    transform right_delim;
+    t right_delim;
   ]
 
 and after_each_argument ?(force_newlines=false) is_last =
@@ -1508,7 +1506,7 @@ and handle_lambda_body node =
     Fmt [
       Space;
       SplitWith Cost.Base;
-      Nest [transform node];
+      Nest [t node];
     ]
 
 and handle_possible_compound_statement ?space:(space=true) node =
@@ -1522,7 +1520,7 @@ and handle_possible_compound_statement ?space:(space=true) node =
     Fmt [
       Newline;
       BlockNest [
-        transform node
+        t node
       ];
     ]
 
@@ -1550,7 +1548,7 @@ and handle_declarator_list declarators =
       (* Use an independent split, so we don't break just because a line break
        * occurs in the declarator. *)
       SplitWith Cost.Base;
-      transform declarator;
+      t declarator;
     ];
   | SyntaxList xs ->
     (* Use Rule.Parental to break each declarator onto its own line if any line
@@ -1558,14 +1556,14 @@ and handle_declarator_list declarators =
     WithRule (Rule.Parental, Nest (List.map xs (fun declarator -> Fmt [
       Space;
       Split;
-      transform declarator;
+      t declarator;
     ])));
   | _ -> failwith "SyntaxList expected"
 
 and handle_list
     ?(before_each=(fun () -> Nothing))
     ?(after_each=(fun _is_last -> Nothing))
-    ?(handle_last=transform)
+    ?(handle_last=t)
     list =
   let rec aux l = (
     match l with
@@ -1578,7 +1576,7 @@ and handle_list
     | hd :: tl ->
       Fmt [
         before_each ();
-        transform hd;
+        t hd;
         after_each false;
         aux tl
       ]
@@ -1589,21 +1587,21 @@ and handle_list
 and handle_possible_list
     ?(before_each=(fun () -> Nothing))
     ?(after_each=(fun _is_last -> Nothing))
-    ?(handle_last=transform)
+    ?(handle_last=t)
     node =
   match syntax node with
   | Missing -> Nothing
   | SyntaxList x -> handle_list x ~before_each ~after_each ~handle_last
   | _ -> handle_list [node] ~before_each ~after_each ~handle_last
 
-and handle_xhp_open_right_angle_token attrs t =
-  match syntax t with
+and handle_xhp_open_right_angle_token attrs node =
+  match syntax node with
   | Token token ->
     Fmt [
       if EditableToken.text token = "/>"
         then Fmt [Space; when_present attrs split]
         else Nothing;
-      transform t
+      t node
     ]
   | _ -> failwith "expected xhp_open right_angle token"
 
@@ -1620,7 +1618,7 @@ and handle_function_call_expression fce =
       (Some (lp, args, rp))
   | _ ->
     Fmt [
-      transform receiver;
+      t receiver;
       transform_argish lp args rp
     ]
 
@@ -1639,8 +1637,8 @@ and handle_function_call_with_type_arguments_expression afce =
       (Some (lp, args, rp))
   | _ ->
     Fmt [
-      transform receiever;
-      transform tyargs;
+      t receiever;
+      t tyargs;
       transform_argish lp args rp
     ]
 
@@ -1679,8 +1677,8 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
 
   let transform_chain (arrow, member, argish) =
     Fmt [
-      transform arrow;
-      transform member;
+      t arrow;
+      t member;
       Option.value_map argish ~default:Nothing
         ~f:(fun (lp, args, rp) -> transform_argish lp args rp);
     ]
@@ -1688,14 +1686,14 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
   match chain_list with
   | hd :: [] ->
     Fmt [
-      Span [transform obj];
+      Span [t obj];
       SplitWith Cost.SimpleMemberSelection;
       Nest [transform_chain hd];
     ]
   | hd :: tl ->
     WithLazyRule (Rule.Parental,
       Fmt [
-        transform obj;
+        t obj;
         Split;
       ],
       Nest [
@@ -1710,8 +1708,8 @@ and handle_switch_body left_b sections right_b =
     | SwitchFallthrough x ->
       let (kw, semi) = get_switch_fallthrough_children x in
       [
-        transform kw;
-        transform semi;
+        t kw;
+        t semi;
       ]
     | _ -> []
   in
@@ -1720,25 +1718,25 @@ and handle_switch_body left_b sections right_b =
     | CaseLabel x ->
       let (kw, expr, colon) = get_case_label_children x in
       Fmt [
-        transform kw;
+        t kw;
         Space;
         Split;
-        transform expr;
-        transform colon;
+        t expr;
+        t colon;
         Newline;
       ]
     | DefaultLabel x ->
       let (kw, colon) = get_default_label_children x in
       Fmt [
-        transform kw;
-        transform colon;
+        t kw;
+        t colon;
         Newline;
       ]
     | _ -> Nothing
   in
   let handle_statement statement =
     BlockNest [
-      transform statement;
+      t statement;
     ]
   in
   let handle_section section =
@@ -1764,16 +1762,16 @@ and handle_switch_body left_b sections right_b =
 
 and transform_fn_decl_name async coroutine kw amp name type_params leftp =
   [
-    transform async;
+    t async;
     when_present async space;
-    transform coroutine;
+    t coroutine;
     when_present coroutine space;
-    transform kw;
+    t kw;
     Space;
-    transform amp;
-    transform name;
-    transform type_params;
-    transform leftp;
+    t amp;
+    t name;
+    t type_params;
+    t leftp;
     Split;
   ]
 
@@ -1807,22 +1805,22 @@ and transform_fn_decl_args params rightp colon ret_type where =
   in
   WithRule (Rule.Parental, Fmt [
     transform_possible_comma_list ~allow_trailing params rightp;
-    transform colon;
+    t colon;
     when_present colon space;
-    transform ret_type;
+    t ret_type;
     when_present where space;
-    transform where;
+    t where;
   ])
 
 and transform_argish_with_return_type left_p params right_p colon ret_type =
   Fmt [
-    transform left_p;
+    t left_p;
     when_present params split;
     WithRule (Rule.Parental, Span [
       Span [ transform_possible_comma_list params right_p ];
-      transform colon;
+      t colon;
       when_present colon space;
-      transform ret_type;
+      t ret_type;
     ])
   ]
 
@@ -1872,16 +1870,20 @@ and transform_argish
   ]
 
 and transform_braced_item left_p item right_p =
-  delimited_nest left_p right_p [transform item]
+  delimited_nest left_p right_p [t item]
 
 and transform_trailing_comma ~allow_trailing item comma =
   let open EditableToken in
+  (* PHP does not permit trailing commas in function calls. Rather than try to
+   * account for where PHP's parser permits trailing commas, we just never add
+   * them in PHP files. *)
+  let allow_trailing = allow_trailing && (Env.add_trailing_commas env) in
   let item, item_trailing = remove_trailing_trivia item in
   match syntax comma with
   | Token tok ->
     Fmt [
       Fmt [
-        transform item;
+        t item;
         if allow_trailing then TrailingComma else Nothing;
         transform_trailing_trivia item_trailing;
       ];
@@ -1893,7 +1895,7 @@ and transform_trailing_comma ~allow_trailing item comma =
     ]
   | Missing ->
     Fmt [
-      transform item;
+      t item;
       if allow_trailing then TrailingComma else Nothing;
       transform_trailing_trivia item_trailing;
     ]
@@ -1924,7 +1926,7 @@ and transform_container_literal
       ~f:(fun x -> Full_fidelity_editable_trivia.kind x = TriviaKind.EndOfLine)
   in
   Fmt [
-    transform kw;
+    t kw;
     if spaces then Space else Nothing;
     transform_argish
       ~spaces ~force_newlines ?allow_trailing left_p members right_p;
@@ -1964,42 +1966,42 @@ and transform_last_arg ~allow_trailing node =
 
 and transform_mapish_entry key arrow value =
   Fmt [
-    transform key;
+    t key;
     Space;
-    transform arrow;
+    t arrow;
     Space;
     SplitWith Cost.Base;
-    Nest [transform value];
+    Nest [t value];
   ]
 
 and transform_keyword_expression_statement kw expr semi =
   Fmt [
-    transform kw;
+    t kw;
     when_present expr (fun () -> Fmt [
       Space;
       SplitWith Cost.Base;
-      Nest [transform expr];
+      Nest [t expr];
     ]);
-    transform semi;
+    t semi;
     Newline;
   ]
 
 and transform_keyword_expr_list_statement kw expr_list semi =
   Fmt [
-    transform kw;
+    t kw;
     handle_declarator_list expr_list;
-    transform semi;
+    t semi;
     Newline;
   ]
 
 and transform_condition left_p condition right_p =
   Fmt [
-    transform left_p;
+    t left_p;
     Split;
     WithRule (Rule.Parental, Fmt [
-      Nest [transform condition];
+      Nest [t condition];
       Split;
-      transform right_p;
+      t right_p;
     ])
   ]
 
@@ -2022,23 +2024,23 @@ and transform_binary_expression ~is_nested expr =
   if Full_fidelity_operator.is_comparison operator_t then
     WithLazyRule (Rule.Parental,
       Fmt [
-        transform left;
+        t left;
         Space;
-        transform operator;
+        t operator;
       ],
       Fmt [
         Space;
         Split;
-        Nest [transform right];
+        Nest [t right];
       ])
   else if Full_fidelity_operator.is_assignment operator_t then
     Fmt [
-      transform left;
+      t left;
       Space;
-      transform operator;
+      t operator;
       Space;
       SplitWith Cost.Base;
-      Nest [transform right];
+      Nest [t right];
     ]
   else
     Fmt [
@@ -2059,7 +2061,7 @@ and transform_binary_expression ~is_nested expr =
       let transform_operand operand =
         match syntax operand with
         | BinaryExpression x -> transform_binary_expression ~is_nested:true x
-        | _ -> transform operand
+        | _ -> t operand
       in
 
       let binary_expression_syntax_list =
@@ -2081,8 +2083,8 @@ and transform_binary_expression ~is_nested expr =
                     then (if op_has_spaces then space_split () else Split)
                     else (if op_has_spaces then Space else Nothing);
                   if is_concat op
-                    then ConcatOperator (transform op)
-                    else transform op;
+                    then ConcatOperator (t op)
+                    else t op;
                 ]
               end
               else begin
@@ -2295,3 +2297,6 @@ and transform_xhp_leading_trivia triv =
     ignore_trailing_invisibles up_to_first_newline;
     transform_leading_invisibles after_newline;
   ]
+in
+
+t node

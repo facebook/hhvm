@@ -11,6 +11,7 @@
 module SyntaxTree = Full_fidelity_syntax_tree
 module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
+module Env = Format_env
 
 open Core
 open Printf
@@ -88,9 +89,10 @@ let expand_to_split_boundaries boundaries range =
 (** Format an entire file. *)
 let format_tree tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
+  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
   tree
   |> EditableSyntax.from_tree
-  |> Hack_format.transform
+  |> Hack_format.transform env
   |> Chunk_builder.build
   |> Line_splitter.solve source_text
 
@@ -110,9 +112,10 @@ let format_tree tree =
  * will appear in the formatted output. *)
 let format_range range tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
+  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
   tree
   |> EditableSyntax.from_tree
-  |> Hack_format.transform
+  |> Hack_format.transform env
   |> Chunk_builder.build
   |> Line_splitter.solve ~range source_text
 
@@ -124,10 +127,11 @@ let format_intervals intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
   let lines = String_utils.split_on_newlines text in
+  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree
-    |> Hack_format.transform
+    |> Hack_format.transform env
     |> Chunk_builder.build
   in
   let solve_states = Line_splitter.find_solve_states
@@ -163,10 +167,11 @@ let format_intervals intervals tree =
  * Designed to be suitable for as-you-type-formatting. *)
 let format_at_offset tree offset =
   let source_text = SyntaxTree.text tree in
+  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree
-    |> Hack_format.transform
+    |> Hack_format.transform env
     |> Chunk_builder.build in
   let module PS = Full_fidelity_positioned_syntax in
   (* Grab the node which is the direct parent of the token at offset *)

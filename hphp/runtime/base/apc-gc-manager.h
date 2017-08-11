@@ -73,7 +73,7 @@ namespace HPHP {
 
 struct APCGCManager {
   public:
-    using Allocation = std::pair<void*, void*>;
+    using Allocation = std::pair<const void*, const void*>;
     // Register {allocation, root}
     void registerAllocation(void* start, void* end, APCHandle* root);
     // Increase pending size for APC uncounted data, register this APCHandle*

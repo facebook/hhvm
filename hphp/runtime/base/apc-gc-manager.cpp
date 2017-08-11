@@ -165,13 +165,14 @@ void APCGCManager::insert(Allocation r, APCHandle* root) {
 */
 APCHandle* APCGCManager::getRootAPCHandle(const void* ptr) {
   ReadLock l2(rootMapLock);
-  auto it = std::upper_bound(rootMap.begin(), rootMap.end(), ptr,
-    [](const void* p, const std::pair<Allocation, APCHandle*>& e) {
-          return p < e.first.first;
-        });
+  auto it = rootMap.upper_bound(Allocation(ptr, ptr));
+  // it and (it-1) both possibly contain ptr
+  if (ptr >= it->first.first && ptr < it->first.second) return it->second;
   if (it == rootMap.begin()) return nullptr;
   --it;
-  return ptr < it->first.second ? it->second : nullptr;
+  return (ptr >= it->first.first && ptr < it->first.second)
+    ? it->second
+    : nullptr;
 }
 
 APCGCManager& APCGCManager::getInstance() {

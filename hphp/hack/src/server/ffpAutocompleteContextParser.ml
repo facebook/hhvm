@@ -434,12 +434,14 @@ let get_context_and_stub (positioned_tree:PositionedSyntax.t) (offset:int)
   let autocomplete_leaf_node = List.hd_exn ancestry in
   let previous_offset = leading_start_offset autocomplete_leaf_node - 1 in
   let predecessor_parentage = parentage positioned_tree previous_offset in
+  let validate_hack_identifier id =
+    let identifier_regex = Str.regexp "^\\$?[a-zA-Z0-9_\x7f-\xff]*$" in
+    if Str.string_match identifier_regex id 0 then id else ""
+  in
   let node_text = match location with
-    | InToken -> text @@ List.hd_exn ancestry
+    | InToken -> validate_hack_identifier @@ text @@ List.hd_exn ancestry
     | BeforePunctuationToken ->
-      let token_text = text @@ List.hd_exn predecessor_parentage in
-      let identifier_regex = Str.regexp "^\\$?[a-zA-Z0-9_\x7f-\xff]*$" in
-      if Str.string_match identifier_regex token_text 0 then token_text else ""
+      validate_hack_identifier @@ text @@ List.hd_exn predecessor_parentage
     | _ -> ""
   in
   let (full_path, predecessor) = match location with

@@ -12,7 +12,6 @@ module EditableSyntax = Full_fidelity_editable_syntax
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module SyntaxTree = Full_fidelity_syntax_tree
 open FfpAutocompleteContextParser
-open Core
 open String_utils
 
 let local_variable_valid_in_context (context:context) (stub:string) : bool =
@@ -20,27 +19,16 @@ let local_variable_valid_in_context (context:context) (stub:string) : bool =
   is_expression_valid context &&
   (stub = "" || string_starts_with stub "$")
 
-(* As of June 2017, the lambda analyzer only works with editable syntax trees
-   for no specific reason. In the future, if the lambda analyzer is
-   functorized to accept any tree with the ability to get the text of a
-   token, this may be able to accept something other than a minimal tree that
-   is converted to an editable tree. *)
-let autocomplete_local (context:context) (stub:string) (tree:SyntaxTree.t)
-  (offset:int) : string list =
+let autocomplete_local
+  ~(context:context)
+  ~(file_content:string)
+  ~(stub:string)
+  ~(pos:Ide_api_types.position)
+  ~(tcopt:TypecheckerOptions.t)
+  : AutocompleteTypes.complete_autocomplete_result list =
   if local_variable_valid_in_context context stub then
-    let open EditableSyntax in
-    let editable_tree = from_tree tree in
-    let parents = parentage editable_tree offset in
-    let local_vars = List.fold_left parents
-      ~f:Lambda_analyzer.local_variables
-      ~init:SSet.empty
-    in
-    let local_vars = SSet.remove stub local_vars in
-    let local_vars =
-      if context.inside_class_body && not context.inside_static_method
-      then SSet.add "$this" local_vars
-      else local_vars
-    in
-    SSet.elements local_vars
+    let ac_results = ServerAutoComplete.auto_complete_at_position ~file_content ~pos ~tcopt in
+    let open Utils.With_complete_flag in
+    ac_results.value
   else
     []

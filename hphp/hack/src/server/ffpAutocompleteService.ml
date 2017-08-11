@@ -28,16 +28,6 @@ let make_keyword_completion (keyword_name:string) =
     func_details = None;
   }
 
-let make_local_var_completion (var_name:string) =
-  {
-    res_pos = Pos.none |> Pos.to_absolute;
-    res_ty = ""; (* TODO: Doing local variable completion syntactically means
-      that we don't know the type when completing it. Do we care about it? *)
-    res_name = var_name;
-    res_kind = Variable_kind;
-    func_details = None;
-  }
-
 let handle_empty_autocomplete pos file_content =
   let open Ide_api_types in
   let offset = File_content.get_offset file_content pos in
@@ -81,25 +71,18 @@ let auto_complete
   let keyword_completions =
     FfpAutocompleteKeywords.autocomplete_keyword context
     |> List.map ~f:make_keyword_completion
-    |> filter_results
   in
   let local_var_completions =
-    FfpAutocompleteLocalNames.autocomplete_local context stub syntax_tree offset
-    |> List.map ~f:make_local_var_completion
-    |> filter_results
+    FfpAutocompleteLocalNames.autocomplete_local ~context ~file_content ~stub ~pos ~tcopt
   in
   let class_member_completions =
-    FfpAutocompleteClassMembers.autocomplete_class_member
-    ~context
-    ~pos
-    ~file_content
-    ~tcopt
+    FfpAutocompleteClassMembers.autocomplete_class_member ~context ~file_content ~pos  ~tcopt
   in
   let global_completions =
     FfpAutocompleteGlobals.get_globals context stub positioned_tree
-    |> filter_results
   in
   [keyword_completions; local_var_completions; class_member_completions; global_completions]
   |> List.concat_no_order
+  |> filter_results
   |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)
   |> List.remove_consecutive_duplicates ~equal:(fun a b -> a.res_name = b.res_name)

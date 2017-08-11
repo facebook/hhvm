@@ -1,5 +1,3 @@
 $func_param
-$if_body_var
 $if_param
 $local_lambda_var
-$local_var

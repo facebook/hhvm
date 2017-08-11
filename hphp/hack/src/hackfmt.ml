@@ -8,14 +8,13 @@
  *
  *)
 
-module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
-module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Logger = HackfmtEventLogger
 
 open Core
 open Printf
+open Libhackfmt
 open Hackfmt_error
 
 type filename = string
@@ -233,72 +232,13 @@ let parse text_source =
     then tree
     else raise Hackfmt_error.InvalidSyntax
 
-let get_char_ranges lines =
-  let chars_seen = ref 0 in
-  Array.of_list @@ List.map lines (fun line -> begin
-    let line_start = !chars_seen in
-    let line_end = line_start + String.length line + 1 in
-    chars_seen := line_end;
-    line_start, line_end
-  end)
-
-let expand_to_line_boundaries ?ranges source_text range =
-  let start_char, end_char = range in
-  (* Ensure that 0 <= start_char <= end_char <= source_text length *)
-  let start_char = max start_char 0 in
-  let end_char = max start_char end_char in
-  let end_char = min end_char (SourceText.length source_text) in
-  let start_char = min start_char end_char in
-  (* Ensure that start_char and end_char fall on line boundaries *)
-  let ranges = match ranges with
-    | Some ranges -> ranges
-    | None -> get_char_ranges
-      (SourceText.text source_text |> String_utils.split_on_newlines)
-  in
-  Array.fold_left (fun (st, ed) (line_start, line_end) ->
-    let st = if st > line_start && st < line_end then line_start else st in
-    let ed = if ed > line_start && ed < line_end then line_end else ed in
-    st, ed
-  ) (start_char, end_char) ranges
-
-let get_split_boundaries solve_states =
-  List.fold solve_states
-    ~init:[]
-    ~f:begin fun boundaries solve_state ->
-      let chunks = Solve_state.chunks solve_state in
-      match chunks with
-      | [] -> boundaries
-      | hd :: tl ->
-        let boundaries, last_range = List.fold tl
-          ~init:(boundaries, Chunk.get_range hd)
-          ~f:begin fun (boundaries, curr_range) chunk ->
-            let chunk_range = Chunk.get_range chunk in
-            if Solve_state.has_split_before_chunk solve_state ~chunk
-              then curr_range :: boundaries, chunk_range
-              else boundaries, (fst curr_range, snd chunk_range)
-          end
-        in
-        last_range :: boundaries
-    end
-  |> List.rev
-
-let expand_to_split_boundaries boundaries range =
-  List.fold boundaries ~init:range ~f:(fun (st, ed) (b_st, b_ed) ->
-    let st = if st > b_st && st < b_ed then b_st else st in
-    let ed = if ed > b_st && ed < b_ed then b_ed else ed in
-    st, ed
-  )
-
 let format ?range ?ranges tree =
   let source_text = SyntaxTree.text tree in
-  let range =
-    Option.map range (expand_to_line_boundaries ?ranges source_text)
-  in
-  tree
-  |> EditableSyntax.from_tree
-  |> Hack_format.transform
-  |> Chunk_builder.build
-  |> Line_splitter.solve ?range (SourceText.text source_text)
+  match range with
+  | None -> format_tree tree
+  | Some range ->
+    let range = expand_to_line_boundaries ?ranges source_text range in
+    format_range range tree
 
 let output ?text_source str =
   let with_out_channel f =
@@ -331,93 +271,12 @@ let get_root = function
     eprintf "Guessed root: %a\n%!" Path.output root;
     root
 
-let line_interval_to_char_range char_ranges (start_line, end_line) =
-  if start_line > end_line then
-    invalid_arg (sprintf
-      "Illegal line interval: %d,%d" start_line end_line);
-  if start_line < 1 || start_line > Array.length char_ranges ||
-     end_line < 1 || end_line > Array.length char_ranges then
-      invalid_arg (sprintf
-        "Can't format line interval %d,%d in file with %d lines"
-        start_line end_line (Array.length char_ranges));
-  let start_char, _ = char_ranges.(start_line - 1) in
-  let _, end_char = char_ranges.(end_line - 1) in
-  start_char, end_char
-
-let format_intervals intervals tree =
-  let source_text = SyntaxTree.text tree in
-  let text = SourceText.text source_text in
-  let lines = String_utils.split_on_newlines text in
-  let chunk_groups =
-    tree
-    |> EditableSyntax.from_tree
-    |> Hack_format.transform
-    |> Chunk_builder.build
-  in
-  let solve_states = Line_splitter.find_solve_states
-    (SourceText.text source_text) chunk_groups in
-  let line_ranges = get_char_ranges lines in
-  let split_boundaries = get_split_boundaries solve_states in
-  let ranges = intervals
-    |> List.map ~f:(line_interval_to_char_range line_ranges)
-    |> List.map ~f:(expand_to_split_boundaries split_boundaries)
-    |> Interval.union_list
-    |> List.sort ~cmp:Interval.comparator
-  in
-  let formatted_intervals = List.map ranges (fun range ->
-    range, Line_splitter.print ~range solve_states
-  ) in
-  let length = SourceText.length source_text in
-  let buf = Buffer.create (length + 256) in
-  let chars_seen = ref 0 in
-  List.iter formatted_intervals (fun ((st, ed), formatted) ->
-    Buffer.add_string buf (String.sub text !chars_seen (st - !chars_seen));
-    Buffer.add_string buf formatted;
-    chars_seen := ed;
-  );
-  Buffer.add_string buf (String.sub text !chars_seen (length - !chars_seen));
-  Buffer.contents buf
-
-let format_diff_intervals intervals parsed_file =
-  try format_intervals intervals parsed_file with
+let format_diff_intervals intervals tree =
+  try format_intervals intervals tree with
   | Invalid_argument s -> raise (InvalidDiff s)
 
-let format_at_char tree pos =
-  let source_text = SyntaxTree.text tree in
-  let chunk_groups =
-    tree
-    |> EditableSyntax.from_tree
-    |> Hack_format.transform
-    |> Chunk_builder.build in
-  let module PS = Full_fidelity_positioned_syntax in
-  (* Grab the node which is the direct parent of the token at pos *)
-  let token, node = match PS.parentage (PS.from_tree tree) pos with
-    | token :: node :: tl -> token, node
-    | _ -> invalid_arg "Invalid offset" in
-  (* Format up to the end of the token at the given offset. *)
-  let pos = PS.end_offset token in
-  (* Our ranges are half-open, so the range end is the token end offset + 1. *)
-  let ed = pos + 1 in
-  (* Take a half-open range which starts at the beginning of the parent node *)
-  let range = (PS.start_offset node, ed) in
-  (* Expand the start offset to the nearest line boundary in the original
-   * source, since we want to add a leading newline before the node we're
-   * formatting if one should be there and isn't already present. *)
-  let range = (fst (expand_to_line_boundaries source_text range), ed) in
-  (* Find a solution for that range, then expand the range start to a split
-   * boundary (a line boundary in the formatted source). *)
-  let solve_states = Line_splitter.find_solve_states
-    ~range (SourceText.text source_text) chunk_groups in
-  let split_boundaries = get_split_boundaries solve_states in
-  let range = (fst (expand_to_split_boundaries split_boundaries range), ed) in
-  (* Produce the formatted text *)
-  let formatted = Line_splitter.print solve_states ~range in
-  (* We don't want a trailing newline here (in as-you-type-formatting, it would
-   * place the cursor on the next line), but the Line_splitter always prints one
-   * at the end of a formatted range. So, we remove it. *)
-  range, String.sub formatted 0 (String.length formatted - 1)
-
 let debug_print ?range text_source =
+  let module EditableSyntax = Full_fidelity_editable_syntax in
   let tree = parse text_source in
   let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_to_line_boundaries source_text) in
@@ -449,7 +308,7 @@ let main (env: Env.t) (options: format_options) =
     env.Env.text_source <- text_source;
     let tree = parse text_source in
     let range, formatted =
-      try format_at_char tree pos with
+      try format_at_offset tree pos with
       | Invalid_argument s -> raise (InvalidCliArg s) in
     if env.Env.debug then debug_print text_source ~range;
     Printf.printf "%d %d\n" (fst range) (snd range);

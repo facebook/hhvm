@@ -49,7 +49,6 @@ MODULES=\
   find\
   format\
   hackfmt/debug\
-  hackfmt/line_splitter\
   hackfmt\
   globals\
   hackfmt/error\

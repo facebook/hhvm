@@ -646,67 +646,10 @@ let do_definition (conn: server_conn) (params: Definition.params)
   in
   hack_to_lsp filtered_results
 
-let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
+let make_ide_completion_response (result:AutocompleteTypes.ide_result) =
   let open AutocompleteTypes in
-  let open TextDocumentIdentifier in
   let open Completion in
-  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
-  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
-  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
-  let result = rpc conn command in
-  let hack_to_kind (completion: complete_autocomplete_result)
-    : Completion.completionItemKind option =
-    match completion.res_kind with
-    | Abstract_class_kind
-    | Class_kind -> Some Completion.Class
-    | Method_kind -> Some Completion.Method
-    | Function_kind -> Some Completion.Function
-    | Variable_kind -> Some Completion.Variable
-    | Property_kind -> Some Completion.Property
-    | Class_constant_kind -> Some Completion.Value (* a bit off, but the best we can do *)
-    | Interface_kind
-    | Trait_kind -> Some Completion.Interface
-    | Enum_kind -> Some Completion.Enum
-    | Namespace_kind -> Some Completion.Module
-    | Constructor_kind -> Some Completion.Constructor
-    | Keyword_kind -> Some Completion.Keyword
-  in
-  let hack_completion_to_lsp (completion: complete_autocomplete_result)
-    : Completion.completionItem =
-    {
-      label = completion.res_name;
-      kind = hack_to_kind completion;
-      detail = None;
-      inlineDetail = None;
-      itemType = None;
-      documentation = None;
-      sortText = None;
-      filterText = None;
-      insertText = None;
-      insertTextFormat = PlainText;
-      textEdits = [];
-      command = None;
-      data = None;
-    }
-  in
-  {
-    isIncomplete = false;
-    items = List.map result ~f:hack_completion_to_lsp;
-  }
-
-let do_completion_legacy (conn: server_conn) (params: Completion.params)
-  : Completion.result =
-  let open TextDocumentIdentifier in
-  let open AutocompleteService in
-  let open Completion in
-  let open Initialize
-  in
-  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
-  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
-  let delimit_on_namespaces = true in
-  let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces) in
-  let result = rpc conn command in
-
+  let open Initialize in
   (* We use snippets to provide parentheses+arguments when autocompleting     *)
   (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
   (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
@@ -783,6 +726,24 @@ let do_completion_legacy (conn: server_conn) (params: Completion.params)
     isIncomplete = not result.is_complete;
     items = List.map result.completions ~f:hack_completion_to_lsp;
   }
+
+let do_completion_ffp (conn: server_conn) (params: Completion.params) : Completion.result =
+  let open TextDocumentIdentifier in
+  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
+  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
+  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
+  let result = rpc conn command in
+  make_ide_completion_response result
+
+let do_completion_legacy (conn: server_conn) (params: Completion.params)
+  : Completion.result =
+  let open TextDocumentIdentifier in
+  let pos = lsp_position_to_ide params.TextDocumentPositionParams.position in
+  let filename = lsp_uri_to_path params.TextDocumentPositionParams.textDocument.uri in
+  let delimit_on_namespaces = true in
+  let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces) in
+  let result = rpc conn command in
+  make_ide_completion_response result
 
 let do_workspaceSymbol
     (conn: server_conn)

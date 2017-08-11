@@ -128,7 +128,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }
     | IDE_FFP_AUTOCOMPLETE (path, pos) ->
         let content = ServerFileSync.get_file_content (ServerUtils.FileName path) in
-        env, FfpAutocompleteService.auto_complete env.tcopt content pos ~filter_by_token:false
+        let offset = File_content.get_offset content pos in (* will raise if out of bounds *)
+        let char_at_pos = File_content.get_char content offset in
+        let result =
+          FfpAutocompleteService.auto_complete env.tcopt content pos ~filter_by_token:false
+        in
+        env, { AutocompleteTypes.completions = result; char_at_pos; is_complete = true; }
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->

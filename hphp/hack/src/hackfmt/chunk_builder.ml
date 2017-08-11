@@ -26,7 +26,7 @@ let open_span start = {
 type string_type =
   | DocStringClose
   | Number
-  | Concat
+  | ConcatOp
   | Other
 
 let builder = object (this)
@@ -359,7 +359,7 @@ let builder = object (this)
     match node with
     | Nothing ->
       ()
-    | Fmt nodes ->
+    | Concat nodes ->
       List.iter nodes this#consume_doc
     | Text (text, width) ->
       this#add_string text width;
@@ -385,13 +385,13 @@ let builder = object (this)
       this#consume_doc node;
       last_string_type <- DocStringClose;
     | NumericLiteral node ->
-      if last_string_type = Concat then this#add_space ();
+      if last_string_type = ConcatOp then this#add_space ();
       this#consume_doc node;
       last_string_type <- Number;
     | ConcatOperator node ->
       if last_string_type = Number then this#add_space ();
       this#consume_doc node;
-      last_string_type <- Concat;
+      last_string_type <- ConcatOp;
     | Split ->
       this#split ()
     | SplitWith cost ->

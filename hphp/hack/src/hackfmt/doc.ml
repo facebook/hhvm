@@ -14,7 +14,7 @@ type t =
   (* Null case *)
   | Nothing
   (* List of concatenated nodes *)
-  | Fmt of t list
+  | Concat of t list
   (* Text which will appear in the formatted file *)
   | Text of string * int
   (* A comment which will appear in the formatted file *)
@@ -79,7 +79,7 @@ type t =
 
 let space () = Space
 let split () = Split
-let space_split () = Fmt [Space; Split]
+let space_split () = Concat [Space; Split]
 let newline () = Newline
 
 let rec has_printable_content node =
@@ -91,7 +91,7 @@ let rec has_printable_content node =
   | NumericLiteral _
   | ConcatOperator _ -> true
 
-  | Fmt nodes
+  | Concat nodes
   | Span nodes
   | Nest nodes
   | ConditionalNest nodes
@@ -120,7 +120,7 @@ let dump ?(ignored=false) node =
   let rec aux = function
     | Nothing ->
       ()
-    | Fmt nodes ->
+    | Concat nodes ->
       List.iter nodes aux
     | Text (text, _) ->
       print (sprintf "Text \"%s\"" text)

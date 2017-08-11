@@ -130,8 +130,8 @@ let mode_string format_options =
   | Print {text_source = Stdin _; range = Some _; _} -> "STDIN_RANGE"
   | InPlace _ -> "IN_PLACE"
   | AtChar _ -> "AT_CHAR"
-  | Diff {dry = true; _} -> "DIFF"
-  | Diff {dry = false; _} -> "DIFF_DRY"
+  | Diff {dry = false; _} -> "DIFF"
+  | Diff {dry = true; _} -> "DIFF_DRY"
 
 type validate_options_input = {
   text_source : text_source;

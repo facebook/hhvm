@@ -59,6 +59,7 @@ module Predecessor = struct
   | KeywordInclude
   | KeywordInterface
   | KeywordNamespace
+  | KeywordNew
   | KeywordNewtype
   | KeywordRequire
   | KeywordReturn
@@ -92,6 +93,23 @@ type context = {
 module ContextPredicates = struct
   open Container
   open Predecessor
+
+  let is_type_valid context =
+    (* Function return type *)
+    context.closest_parent_container = FunctionHeader &&
+    context.predecessor = TokenColon
+    || (* Parameter type *)
+    context.closest_parent_container = FunctionHeader &&
+    (context.predecessor = TokenComma ||
+    context.predecessor = TokenOpenParen)
+    || (* Class property type *)
+    context.inside_class_body &&
+    context.closest_parent_container = ClassBody &&
+    (context.predecessor = VisibilityModifier ||
+    context.predecessor = KeywordConst ||
+    context.predecessor = KeywordStatic)
+    || (* Generic type *)
+    context.predecessor = TokenLessThan
 
   let is_class_body_declaration_valid context =
     context.closest_parent_container = ClassBody &&
@@ -243,6 +261,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = LeftParen; _ } -> Some TokenOpenParen
     | Token { kind = LessThan; _ } -> Some TokenLessThan
     | Token { kind = Namespace; _ } -> Some KeywordNamespace
+    | Token { kind = New; _ } -> Some KeywordNew
     | Token { kind = Newtype; _ } -> Some KeywordNewtype
     | Token { kind = Public; _ }
     | Token { kind = Private; _ }

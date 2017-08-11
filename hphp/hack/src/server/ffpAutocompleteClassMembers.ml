@@ -22,7 +22,6 @@ let legacy_auto_complete
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t=
   let open Ide_api_types in
   (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service *)
-  (* TODO: Call the method for getting global fns/classes separately *)
   (* TODO: Only run the parser/typechecker hooks for class members *)
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in

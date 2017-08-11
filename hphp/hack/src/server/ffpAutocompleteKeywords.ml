@@ -225,23 +225,7 @@ let primitive_types = {
   keywords = ["array"; "?array"; "arraykey"; "?arraykey"; "bool"; "?bool"; "classname";
   "?classname"; "darray"; "?darray"; "float"; "?float"; "int"; "?int"; "mixed"; "num"; "?num";
   "string"; "?string"; "resource"; "?resource"; "varray"; "?varray"];
-  is_valid_in_context = begin fun context ->
-    (* Function return type *)
-    context.closest_parent_container = FunctionHeader &&
-    context.predecessor = TokenColon
-    || (* Parameter type *)
-    context.closest_parent_container = FunctionHeader &&
-    (context.predecessor = TokenComma ||
-    context.predecessor = TokenOpenParen)
-    || (* Class property type *)
-    context.inside_class_body &&
-    context.closest_parent_container = ClassBody &&
-    (context.predecessor = VisibilityModifier ||
-    context.predecessor = KeywordConst ||
-    context.predecessor = KeywordStatic)
-    || (* Generic type *)
-    context.predecessor = TokenLessThan
-  end;
+  is_valid_in_context = is_type_valid
 }
 
 let this_type_keyword = {

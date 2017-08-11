@@ -76,6 +76,8 @@ let auto_complete
     ~file_content
     ~tcopt
   in
-  keyword_completions @ local_var_completions @ class_member_completions
+  let global_completions = FfpAutocompleteGlobals.get_globals context stub in
+  [keyword_completions; local_var_completions; class_member_completions; global_completions]
+  |> List.concat_no_order
   |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)
   |> List.remove_consecutive_duplicates ~equal:(fun a b -> a.res_name = b.res_name)

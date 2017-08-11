@@ -14,10 +14,6 @@ open FfpAutocompleteContextParser
 open AutocompleteTypes
 open Core
 
-let should_complete_function (context:context) : bool =
-  let open ContextPredicates in
-  is_expression_valid context
-
 let should_complete_class (context:context) : bool =
   let open ContextPredicates in
   let open Container in
@@ -63,7 +59,6 @@ let should_complete_trait (context:context) : bool =
 (* TODO: Port over the namespace completion code from autocompleteService.ml *)
 let should_get_globals (context:context) : bool =
   should_complete_class context ||
-  should_complete_function context ||
   should_complete_interface context ||
   should_complete_trait context
 
@@ -103,49 +98,34 @@ let make_trait_completion (context:context) (name:string) =
   else
     None
 
-let make_function_completion (context:context) (name:string) =
-  if should_complete_function context then
-    Some ({
-      res_pos = Pos.none |> Pos.to_absolute;
-      res_ty = "function";
-      res_name = name;
-      res_kind = Function_kind;
-      func_details = None;
-    })
-  else
-    None
-
 let get_same_file_definitions (positioned_tree:PositionedSyntax.t)
-  : string list * string list * string list * string list =
+  : string list * string list * string list =
   let open PositionedSyntax in
   let open PositionedToken in
   let open TokenKind in
-  let aux (functions, classes, interfaces, traits) node = match syntax node with
-  | FunctionDeclarationHeader { function_name; _ } ->
-    (PositionedSyntax.text function_name)::functions, classes, interfaces, traits
+  let aux (classes, interfaces, traits) node = match syntax node with
   | ClassishDeclaration { classish_keyword = {
       syntax = Token { kind = Class; _ }; _
     }; classish_name; _ } ->
-    functions, (PositionedSyntax.text classish_name)::classes, interfaces, traits
+    (PositionedSyntax.text classish_name)::classes, interfaces, traits
   | ClassishDeclaration { classish_keyword = {
       syntax = Token { kind = Interface; _ }; _
     }; classish_name; _ } ->
-    functions, classes, (PositionedSyntax.text classish_name)::interfaces, traits
+    classes, (PositionedSyntax.text classish_name)::interfaces, traits
   | ClassishDeclaration { classish_keyword = {
       syntax = Token { kind = Trait; _ }; _
     }; classish_name; _ } ->
-    functions, classes, interfaces, (PositionedSyntax.text classish_name)::traits
-  | _ -> (functions, classes, interfaces, traits)
+    classes, interfaces, (PositionedSyntax.text classish_name)::traits
+  | _ -> (classes, interfaces, traits)
   in
-  FFUtils.fold aux ([], [], [], []) positioned_tree
+  FFUtils.fold aux ([], [], []) positioned_tree
 
 let get_globals (context:context) (input:string) (positioned_tree:PositionedSyntax.t)
   : complete_autocomplete_result list =
   if should_get_globals context then
     let open Utils.With_complete_flag in
-    let (functions, classes, interfaces, traits) = get_same_file_definitions positioned_tree in
+    let (classes, interfaces, traits) = get_same_file_definitions positioned_tree in
     let completions = List.concat_no_order [
-      List.filter_map ~f:(make_function_completion context) functions;
       List.filter_map ~f:(make_class_completion context) classes;
       List.filter_map ~f:(make_trait_completion context) traits;
       List.filter_map ~f:(make_interface_completion context) interfaces;
@@ -159,7 +139,6 @@ let get_globals (context:context) (input:string) (positioned_tree:PositionedSynt
           | HackSearchService.Class (Some Ast.Ctrait) -> make_trait_completion context name
           | HackSearchService.Class (Some Ast.Cinterface) -> make_interface_completion context name
           | HackSearchService.Class _ -> make_class_completion context name
-          | HackSearchService.Function -> make_function_completion context name
           | _ -> None
         end
     in

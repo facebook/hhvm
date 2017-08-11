@@ -52,8 +52,7 @@ let auto_complete
   let syntax_tree = SyntaxTree.make source_text in
   let positioned_tree = PositionedSyntax.from_tree syntax_tree in
 
-  let (context, stub) =
-    FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset in
+  let (context, stub) = FfpAutocompleteContextParser.get_context_and_stub positioned_tree offset in
   (* If we are running a test, filter the keywords and local variables based on
   the token we are completing. *)
   let stub = if file_content <> new_file_content then
@@ -72,16 +71,13 @@ let auto_complete
     FfpAutocompleteKeywords.autocomplete_keyword context
     |> List.map ~f:make_keyword_completion
   in
-  let local_var_completions =
-    FfpAutocompleteLocalNames.autocomplete_local ~context ~file_content ~stub ~pos ~tcopt
-  in
-  let class_member_completions =
-    FfpAutocompleteClassMembers.autocomplete_class_member ~context ~file_content ~pos  ~tcopt
+  let type_based_completions =
+    FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt
   in
   let global_completions =
     FfpAutocompleteGlobals.get_globals context stub positioned_tree
   in
-  [keyword_completions; local_var_completions; class_member_completions; global_completions]
+  [keyword_completions; type_based_completions; global_completions]
   |> List.concat_no_order
   |> filter_results
   |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)

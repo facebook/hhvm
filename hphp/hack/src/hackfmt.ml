@@ -280,10 +280,11 @@ let debug_print ?range text_source =
   let tree = parse text_source in
   let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_to_line_boundaries source_text) in
-  let env = {Format_env.add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env =
+    Format_env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
   let fmt_node = Hack_format.transform env (EditableSyntax.from_tree tree) in
   let chunk_groups = Chunk_builder.build fmt_node in
-  Hackfmt_debug.debug ~range source_text tree fmt_node chunk_groups
+  Hackfmt_debug.debug env ~range source_text tree fmt_node chunk_groups
 
 let main (env: Env.t) (options: format_options) =
   env.Env.mode <- Some (mode_string options);

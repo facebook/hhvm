@@ -8,10 +8,12 @@
  *
  *)
 
+module Env = Format_env
+
 open Core
 open Utils
 
-let print_state ?range state =
+let print_state env ?range state =
   let b = Buffer.create 200 in
   let chunks = Solve_state.chunks state in
 
@@ -34,9 +36,12 @@ let print_state ?range state =
     if not range_starts_in_chunk then begin
       if Solve_state.has_split_before_chunk state ~chunk then begin
         Buffer.add_string b "\n";
-        let indent = Solve_state.get_indent state ~chunk in
+        let indent = Solve_state.get_indent state env ~chunk in
         if chunk.Chunk.text <> "" && chunk.Chunk.indentable then
-          Buffer.add_string b (String.make indent ' ');
+          Buffer.add_string b @@
+            if Env.indent_with_tabs env
+            then String.make (indent / (Env.indent_width env)) '\t'
+            else String.make indent ' ';
       end else if chunk.Chunk.space_if_not_split then Buffer.add_string b " ";
     end;
 

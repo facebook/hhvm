@@ -8,10 +8,9 @@
  *
  *)
 
-open Core
+module Env = Format_env
 
-let _LINE_WIDTH = 80
-let _INDENT_WIDTH = 2
+open Core
 
 type t = {
   chunk_group: Chunk_group.t;
@@ -52,11 +51,11 @@ let has_comma_after_chunk t ~chunk =
 
 let get_bound_ruleset rbm = ISet.of_list @@ IMap.keys rbm
 
-let get_overflow len = max (len - _LINE_WIDTH) 0
+let get_overflow env len = max (len - (Env.line_width env)) 0
 
-let get_indent t ~chunk =
+let get_indent t env ~chunk =
   let block_indentation = t.chunk_group.Chunk_group.block_indentation in
-  _INDENT_WIDTH *
+  Env.indent_width env *
   (block_indentation + Nesting.get_indent chunk.Chunk.nesting t.nesting_set)
 
 (**
@@ -66,17 +65,17 @@ let get_indent t ~chunk =
  * Which correspond to the overflow and set of rules that correspond to
  * a particular line of output for a given Solve_state
  *)
-let build_lines chunk_group rbm nesting_set =
+let build_lines env chunk_group rbm nesting_set =
   let { Chunk_group.chunks; block_indentation; _ } = chunk_group in
 
   let get_text_length chunk ~has_comma =
     let comma_len = if has_comma then 1 else 0 in
     comma_len + String.length chunk.Chunk.text
   in
-  let get_prefix_whitespace_length chunk ~is_split =
+  let get_prefix_whitespace_length env chunk ~is_split =
     if is_split && chunk.Chunk.indentable
     then
-      _INDENT_WIDTH *
+      Env.indent_width env *
       (block_indentation + Nesting.get_indent chunk.Chunk.nesting nesting_set)
     else if chunk.Chunk.space_if_not_split then 1 else 0
   in
@@ -84,17 +83,17 @@ let build_lines chunk_group rbm nesting_set =
   let rec aux remaining_chunks acc =
     let (acc_len, acc_rules) = acc in
     match remaining_chunks with
-      | [] -> [(get_overflow acc_len, acc_rules)]
+      | [] -> [(get_overflow env acc_len, acc_rules)]
       | hd :: tl ->
         (* TODO: consider adding parent rules *)
         let rule = hd.Chunk.rule in
         let is_split = rbm_has_split_before_chunk hd rbm in
         let has_comma = rbm_has_comma_after_chunk hd rbm in
         let chunk_len = get_text_length hd ~has_comma +
-          get_prefix_whitespace_length hd ~is_split in
+          get_prefix_whitespace_length env hd ~is_split in
 
         if is_split
-        then (get_overflow acc_len, acc_rules) ::
+        then (get_overflow env acc_len, acc_rules) ::
           aux tl (chunk_len, ISet.add rule ISet.empty)
         else aux tl (chunk_len + acc_len, ISet.add rule acc_rules)
   in
@@ -150,7 +149,7 @@ let calculate_rules_on_partially_bound_lines lines bound_ruleset =
   )
 
 
-let make chunk_group rbm =
+let make env chunk_group rbm =
   let { Chunk_group.chunks; rule_dependency_map; _ } =
     chunk_group in
 
@@ -169,7 +168,7 @@ let make chunk_group rbm =
       )
   in
 
-  let lines = build_lines chunk_group rbm nesting_set in
+  let lines = build_lines env chunk_group rbm nesting_set in
 
   (* calculate the overflow of the last chunk *)
   let overflow = List.fold ~init:0 ~f:(+) @@ List.map ~f:fst lines in
@@ -210,7 +209,7 @@ let make chunk_group rbm =
   { chunk_group; lines; rbm; cost; overflow; nesting_set; candidate_rules;
     unprocessed_overflow; rules_on_partially_bound_lines; }
 
-let from_source source_text chunk_group =
+let from_source env source_text chunk_group =
   let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
   let rbm = List.fold chunk_group.Chunk_group.chunks ~init:rbm
     ~f:begin fun rbm chunk ->
@@ -220,7 +219,7 @@ let from_source source_text chunk_group =
       else rbm
     end
   in
-  make chunk_group rbm
+  make env chunk_group rbm
 
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rbm

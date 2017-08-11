@@ -26,20 +26,18 @@ let make ~id ~indent parent skip_parent = {
 }
 
 let get_indent nesting nesting_set =
-  let rec aux n =
+  let rec aux acc n =
     match n with
-      | None -> 0
+      | None -> acc
       | Some n ->
-        if ISet.mem n.id nesting_set then
-          let amount = if n.indent then 1 else 0 in
-          let grandparent n = Option.(>>=) n.parent (fun p -> p.parent) in
-          let next =
-            if n.skip_parent_if_nested then grandparent n else n.parent
-          in
-          amount + aux next
-        else aux n.parent
+        let in_set = ISet.mem n.id nesting_set in
+        let acc = if n.indent && in_set then acc + 1 else acc in
+        aux acc @@
+          if in_set && n.skip_parent_if_nested
+          then Option.(>>=) n.parent (fun p -> p.parent)
+          else n.parent
   in
-  aux (Some nesting)
+  aux 0 (Some nesting)
 
 let get_self_and_parent_list nesting =
   let rec aux acc n =

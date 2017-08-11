@@ -89,12 +89,12 @@ let expand_to_split_boundaries boundaries range =
 (** Format an entire file. *)
 let format_tree tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
-  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
   tree
   |> EditableSyntax.from_tree
   |> Hack_format.transform env
   |> Chunk_builder.build
-  |> Line_splitter.solve source_text
+  |> Line_splitter.solve env source_text
 
 (** Format a given range in a file.
  *
@@ -112,12 +112,12 @@ let format_tree tree =
  * will appear in the formatted output. *)
 let format_range range tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
-  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
   tree
   |> EditableSyntax.from_tree
   |> Hack_format.transform env
   |> Chunk_builder.build
-  |> Line_splitter.solve ~range source_text
+  |> Line_splitter.solve env ~range source_text
 
 (** Return the source of the entire file with the given intervals formatted.
  *
@@ -127,14 +127,14 @@ let format_intervals intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
   let lines = String_utils.split_on_newlines text in
-  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree
     |> Hack_format.transform env
     |> Chunk_builder.build
   in
-  let solve_states = Line_splitter.find_solve_states
+  let solve_states = Line_splitter.find_solve_states env
     (SourceText.text source_text) chunk_groups in
   let line_boundaries = get_line_boundaries lines in
   let split_boundaries = get_split_boundaries solve_states in
@@ -145,7 +145,7 @@ let format_intervals intervals tree =
     |> List.sort ~cmp:Interval.comparator
   in
   let formatted_intervals = List.map ranges (fun range ->
-    range, Line_splitter.print ~range solve_states
+    range, Line_splitter.print env ~range solve_states
   ) in
   let length = SourceText.length source_text in
   let buf = Buffer.create (length + 256) in
@@ -167,7 +167,7 @@ let format_intervals intervals tree =
  * Designed to be suitable for as-you-type-formatting. *)
 let format_at_offset tree offset =
   let source_text = SyntaxTree.text tree in
-  let env = {Env.add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree
@@ -190,12 +190,12 @@ let format_at_offset tree offset =
   let range = (fst (expand_to_line_boundaries source_text range), ed) in
   (* Find a solution for that range, then expand the range start to a split
    * boundary (a line boundary in the formatted source). *)
-  let solve_states = Line_splitter.find_solve_states
+  let solve_states = Line_splitter.find_solve_states env
     ~range (SourceText.text source_text) chunk_groups in
   let split_boundaries = get_split_boundaries solve_states in
   let range = (fst (expand_to_split_boundaries split_boundaries range), ed) in
   (* Produce the formatted text *)
-  let formatted = Line_splitter.print solve_states ~range in
+  let formatted = Line_splitter.print env solve_states ~range in
   (* We don't want a trailing newline here (in as-you-type-formatting, it would
    * place the cursor on the next line), but the Line_splitter always prints one
    * at the end of a formatted range. So, we remove it. *)

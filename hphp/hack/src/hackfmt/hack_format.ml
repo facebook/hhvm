@@ -20,9 +20,6 @@ open Core
 open Syntax
 open Fmt_node
 
-(* TODO: move this to a config file *)
-let __INDENT_WIDTH = 2
-
 let transform (env: Env.t) (node: Syntax.t) : Fmt_node.t =
 
 let rec t node =
@@ -922,7 +919,7 @@ let rec t node =
         t q_kw;
         when_present true_expr (fun () -> Fmt [
           Space;
-          if __INDENT_WIDTH = 2
+          if Env.indent_width env = 2
             then Nest [t true_expr]
             else t true_expr;
           Space;
@@ -930,7 +927,7 @@ let rec t node =
         ]);
         t c_kw;
         Space;
-        if not (is_missing true_expr) && __INDENT_WIDTH = 2
+        if not (is_missing true_expr) && Env.indent_width env = 2
           then Nest [t false_expr]
           else t false_expr;
       ])

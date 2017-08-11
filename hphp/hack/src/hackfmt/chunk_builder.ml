@@ -10,9 +10,6 @@
 
 open Core
 
-(* TODO: move this to a config file *)
-let __INDENT_WIDTH = 2
-
 type open_span = {
   open_span_start: int;
 }
@@ -246,8 +243,8 @@ let builder = object (this)
       | _ -> rule_type
     )
 
-  method private nest ?(amount=__INDENT_WIDTH) ?(skip_parent=false) () =
-    nesting_alloc <- Nesting_allocator.nest nesting_alloc amount skip_parent
+  method private nest ?(skip_parent=false) () =
+    nesting_alloc <- Nesting_allocator.nest nesting_alloc skip_parent
 
   method private unnest () =
     nesting_alloc <- Nesting_allocator.unnest nesting_alloc
@@ -311,12 +308,12 @@ let builder = object (this)
   *)
   method private start_block_nest () =
     if this#is_at_chunk_group_boundry ()
-    then block_indent <- block_indent + 2
+    then block_indent <- block_indent + 1
     else this#nest ()
 
   method private end_block_nest () =
     if this#is_at_chunk_group_boundry ()
-    then block_indent <- block_indent - 2
+    then block_indent <- block_indent - 1
     else this#unnest ()
 
   method private push_chunk_group () =

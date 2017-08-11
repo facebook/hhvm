@@ -11,6 +11,7 @@
 open Core
 
 let _LINE_WIDTH = 80
+let _INDENT_WIDTH = 2
 
 type t = {
   chunk_group: Chunk_group.t;
@@ -55,7 +56,8 @@ let get_overflow len = max (len - _LINE_WIDTH) 0
 
 let get_indent t ~chunk =
   let block_indentation = t.chunk_group.Chunk_group.block_indentation in
-  block_indentation + Nesting.get_indent chunk.Chunk.nesting t.nesting_set
+  _INDENT_WIDTH *
+  (block_indentation + Nesting.get_indent chunk.Chunk.nesting t.nesting_set)
 
 (**
  * Create a list of lines
@@ -73,7 +75,9 @@ let build_lines chunk_group rbm nesting_set =
   in
   let get_prefix_whitespace_length chunk ~is_split =
     if is_split && chunk.Chunk.indentable
-    then block_indentation + Nesting.get_indent chunk.Chunk.nesting nesting_set
+    then
+      _INDENT_WIDTH *
+      (block_indentation + Nesting.get_indent chunk.Chunk.nesting nesting_set)
     else if chunk.Chunk.space_if_not_split then 1 else 0
   in
 

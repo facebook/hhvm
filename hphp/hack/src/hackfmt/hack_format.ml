@@ -752,9 +752,23 @@ let rec t node =
     let (labels, statements, fallthrough) = get_switch_section_children x in
     let labels = syntax_node_to_list labels in
     let statements = syntax_node_to_list statements in
+    (* When the statements in the SwitchSection are wrapped in a single
+     * CompoundStatement, special-case the opening curly brace to appear on the
+     * same line as the case label. *)
+    let is_scoped_section =
+      match statements with
+      | [{ syntax = CompoundStatement _; _ }] -> true
+      | _ -> false
+    in
     Concat [
-      Concat (List.map labels t);
-      BlockNest (List.map statements t);
+      handle_list labels ~after_each:begin fun is_last_label ->
+        if is_last_label && is_scoped_section
+        then Nothing
+        else Newline
+      end;
+      if is_scoped_section
+      then handle_list statements
+      else BlockNest [handle_list statements];
       t fallthrough;
     ]
   | CaseLabel x ->
@@ -765,14 +779,12 @@ let rec t node =
       SplitWith Cost.Base;
       t expr;
       t colon;
-      Newline;
     ]
   | DefaultLabel x ->
     let (kw, colon) = get_default_label_children x in
     Concat [
       t kw;
       t colon;
-      Newline;
     ]
   | SwitchFallthrough x ->
     let (kw, semi) = get_switch_fallthrough_children x in

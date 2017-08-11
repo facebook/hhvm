@@ -1,11 +1,10 @@
 <?hh
 
 switch ($str) {
-  case 'foo':
-    {
-      logFooEvent();
-      break;
-    }
+  case 'foo': {
+    logFooEvent();
+    break;
+  }
   case 'bar':
     {
       $eventDetails = shape('message' => 'bar');
@@ -13,9 +12,8 @@ switch ($str) {
     }
     logSomethingElse();
     break;
-  default:
-    {
-      logOtherEvent();
-      break;
-    }
+  default: {
+    logOtherEvent();
+    break;
+  }
 }

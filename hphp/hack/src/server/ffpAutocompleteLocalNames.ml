@@ -37,6 +37,7 @@ let autocomplete_local (context:context) (stub:string) (tree:SyntaxTree.t)
       ~f:Lambda_analyzer.local_variables
       ~init:SSet.empty
     in
+    let local_vars = SSet.remove stub local_vars in
     SSet.elements local_vars
   else
     []

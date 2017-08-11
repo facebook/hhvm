@@ -94,6 +94,8 @@ let get_params node =
       lambda_parameters
     | AnonymousFunction { anonymous_parameters; _ } ->
       anonymous_parameters
+    | MethodishDeclaration { methodish_function_decl_header; _ } ->
+      aux methodish_function_decl_header
     | _ -> make_missing() in
   let param_list = aux node in
   let param_list = syntax_node_to_list param_list in
@@ -110,6 +112,7 @@ let get_body node =
   | FunctionDeclaration { function_body; _ } -> function_body
   | LambdaExpression { lambda_body; _ } -> lambda_body
   | AnonymousFunction { anonymous_body; _ } -> anonymous_body
+  | MethodishDeclaration { methodish_function_body; _ } -> methodish_function_body
   | _ -> make_missing()
 
 (* TODO: This does not consider situations like "${x}" as the use of a local.*)

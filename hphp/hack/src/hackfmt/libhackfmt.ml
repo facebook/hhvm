@@ -171,7 +171,7 @@ let format_at_offset tree offset =
   let module PS = Full_fidelity_positioned_syntax in
   (* Grab the node which is the direct parent of the token at offset *)
   let token, node = match PS.parentage (PS.from_tree tree) offset with
-    | token :: node :: tl -> token, node
+    | token :: node :: _ -> token, node
     | _ -> invalid_arg "Invalid offset" in
   (* Format up to the end of the token at the given offset. *)
   let offset = PS.end_offset token in

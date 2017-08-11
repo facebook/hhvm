@@ -278,7 +278,7 @@ let builder = object (this)
 
   method private end_rule () =
     rules <- match rules with
-      | hd :: tl -> tl
+      | _ :: tl -> tl
       | [] -> [] (*TODO: error *)
 
   method private has_rule_kind kind =
@@ -335,14 +335,14 @@ let builder = object (this)
   method private _end () =
     this#hard_split ();
     let last_chunk_empty = match chunks with
-      | hd :: tl -> hd.Chunk.text = ""
+      | hd :: _ -> hd.Chunk.text = ""
       | [] ->
         match chunk_groups with
         | [] -> true
-        | hd :: tl ->
+        | hd :: _ ->
           match List.rev hd.Chunk_group.chunks with
           | [] -> true
-          | hd :: tl -> hd.Chunk.text = ""
+          | hd :: _ -> hd.Chunk.text = ""
     in
     if not last_chunk_empty then
       this#add_always_empty_chunk ();

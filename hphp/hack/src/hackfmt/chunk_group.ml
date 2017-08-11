@@ -46,7 +46,7 @@ let get_initial_rule_bindings t =
   let get_dependencies rule_id =
     try IMap.find_unsafe rule_id t.rule_dependency_map with Not_found -> [] in
   let constrain k _v acc = constrain_rules t acc (get_dependencies k) in
-  let init_map = IMap.map (fun k -> true) always_rules in
+  let init_map = IMap.map (fun _ -> true) always_rules in
   IMap.fold constrain always_rules init_map
 
 (* When a child rule is broken on, all its parent rules must break too. *)

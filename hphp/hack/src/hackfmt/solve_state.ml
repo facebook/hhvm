@@ -147,7 +147,7 @@ let calculate_rules_on_partially_bound_lines lines bound_ruleset =
 
 
 let make chunk_group rbm =
-  let { Chunk_group.chunks; block_indentation; rule_dependency_map; _ } =
+  let { Chunk_group.chunks; rule_dependency_map; _ } =
     chunk_group in
 
   let nesting_set, _ =

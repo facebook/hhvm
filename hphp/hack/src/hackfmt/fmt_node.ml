@@ -122,16 +122,16 @@ let dump ?(ignored=false) node =
       ()
     | Fmt nodes ->
       List.iter nodes aux
-    | Text (text, width) ->
+    | Text (text, _) ->
       print (sprintf "Text \"%s\"" text)
-    | Comment (text, width) ->
+    | Comment (text, _) ->
       print (sprintf "Comment \"%s\"" text)
-    | Ignore (text, width) ->
+    | Ignore (text, _) ->
       if ignored then
         print (sprintf "Ignored \"%s\""
           (String.concat "\\n"
             (Str.split_delim (Str.regexp "\n") text)))
-    | MultilineString (strings, width) ->
+    | MultilineString (strings, _) ->
       print "MultilineString [";
       indent := !indent + 2;
       List.iter strings (fun s -> print (sprintf "\"%s\"" s));
@@ -164,15 +164,15 @@ let dump ?(ignored=false) node =
       dump_list "ConditionalNest" nodes
     | BlockNest nodes ->
       dump_list "BlockNest" nodes
-    | WithRule (rule_kind, action) ->
+    | WithRule (_, action) ->
       dump_list "WithRule" [action]
-    | WithLazyRule (rule_kind, before, action) ->
+    | WithLazyRule (_, before, action) ->
       print "WithLazyRule ([";
       dump_list_items [before];
       print "], [";
       dump_list_items [action];
       print "])";
-    | WithPossibleLazyRule (rule_kind, before, action) ->
+    | WithPossibleLazyRule (_, before, action) ->
       print "WithPossibleLazyRule ([";
       dump_list_items [before];
       print "], [";

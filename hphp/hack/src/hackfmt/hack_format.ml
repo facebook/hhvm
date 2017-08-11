@@ -46,7 +46,7 @@ let rec transform node =
         | NowdocStringLiteral ->
           let split_text = (Str.split_delim (Str.regexp "\n") (text x)) in
           begin match split_text with
-            | [s] -> Text (text x, width x)
+            | [_] -> Text (text x, width x)
             | _ -> MultilineString (split_text, width x)
           end
         | _ -> Text (text x, width x)
@@ -577,7 +577,7 @@ let rec transform node =
       t semi;
       Newline;
     ]
-  | CompoundStatement x ->
+  | CompoundStatement _ ->
     handle_possible_compound_statement node
   | UnsetStatement x ->
     let (kw, left_p, args, right_p, semi) = get_unset_statement_children x in
@@ -619,7 +619,7 @@ let rec transform node =
       t kw;
       Space;
       transform_condition left_p condition right_p;
-      handle_possible_compound_statement x.elseif_statement;
+      handle_possible_compound_statement body;
     ]
   | ElseClause x ->
     Fmt [
@@ -750,14 +750,11 @@ let rec transform node =
       handle_switch_body left_b sections right_b;
       Newline;
     ]
-  | SwitchSection x ->
-    failwith "SwitchSection should be handled by handle_switch_body"
-  | CaseLabel x ->
-    failwith "CaseLabel should be handled by handle_switch_body"
-  | DefaultLabel x ->
-    failwith "DefaultLabel should be handled by handle_switch_body"
-  | SwitchFallthrough x ->
-    failwith "SwitchFallthrough should be handled by handle_switch_body"
+  | SwitchSection _
+  | CaseLabel _
+  | DefaultLabel _
+  | SwitchFallthrough _ ->
+    failwith "SwitchStatement children should be handled by handle_switch_body"
   | ReturnStatement x ->
     let (kw, expr, semi) = get_return_statement_children x in
     transform_keyword_expression_statement kw expr semi
@@ -858,7 +855,7 @@ let rec transform node =
   | LambdaSignature x ->
     let (lp, params, rp, colon, ret_type) = get_lambda_signature_children x in
     transform_argish_with_return_type lp params rp colon ret_type
-  | CastExpression x ->
+  | CastExpression _ ->
     Span (List.map (children node) t)
   | MemberSelectionExpression x ->
     handle_possible_chaining
@@ -1567,7 +1564,7 @@ and handle_declarator_list declarators =
 
 and handle_list
     ?(before_each=(fun () -> Nothing))
-    ?(after_each=(fun is_last -> Nothing))
+    ?(after_each=(fun _is_last -> Nothing))
     ?(handle_last=transform)
     list =
   let rec aux l = (
@@ -1591,7 +1588,7 @@ and handle_list
 
 and handle_possible_list
     ?(before_each=(fun () -> Nothing))
-    ?(after_each=(fun is_last -> Nothing))
+    ?(after_each=(fun _is_last -> Nothing))
     ?(handle_last=transform)
     node =
   match syntax node with

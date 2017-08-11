@@ -40,7 +40,8 @@ let abstract_keyword = {
     (* Abstract class *)
     is_top_level_statement_valid context
     || (* Abstract method *)
-    is_class_body_declaration_valid context
+    is_class_body_declaration_valid context ||
+    is_trait_body_declaration_valid context
   end;
 }
 
@@ -54,6 +55,8 @@ let final_keyword = {
     is_top_level_statement_valid context
     || (* Final method *)
     is_class_body_declaration_valid context
+    ||
+    is_trait_body_declaration_valid context
     || (* Final after other modifiers *)
     context.closest_parent_container = ClassBody &&
     (context.predecessor = KeywordStatic ||
@@ -95,17 +98,28 @@ let visibility_modifiers = {
   is_valid_in_context = begin fun context ->
     is_class_body_declaration_valid context
     ||
+    is_trait_body_declaration_valid context
+    ||
     context.closest_parent_container = ClassBody &&
     context.predecessor = KeywordFinal
   end;
 }
 
+let interface_visibility_modifiers = {
+  keywords = ["public"];
+  is_valid_in_context = is_interface_body_declaration_valid
+}
+
 let static_keyword = {
   keywords = ["static"];
   is_valid_in_context = begin fun context ->
-    is_class_body_declaration_valid context
+    is_class_body_declaration_valid context ||
+    is_interface_body_declaration_valid context ||
+    is_trait_body_declaration_valid context
     ||
-    context.closest_parent_container = ClassBody &&
+    (context.closest_parent_container = ClassBody ||
+    context.closest_parent_container = InterfaceBody ||
+    context.closest_parent_container = TraitBody) &&
     context.predecessor = VisibilityModifier
   end;
 }
@@ -114,9 +128,11 @@ let async_keyword = {
   keywords = ["async"];
   is_valid_in_context = begin fun context ->
     (* Async method *)
-    is_class_body_declaration_valid context
+    is_class_body_declaration_valid context ||
+    is_trait_body_declaration_valid context
     || (* Async method after modifiers *)
-    context.closest_parent_container = ClassBody &&
+    (context.closest_parent_container = ClassBody ||
+    context.closest_parent_container = TraitBody) &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordFinal ||
     context.predecessor = KeywordStatic )
@@ -130,7 +146,8 @@ let async_keyword = {
 let const_keyword = {
   keywords = ["const"];
   is_valid_in_context = begin fun context ->
-    is_class_body_declaration_valid context
+    is_class_body_declaration_valid context ||
+    is_interface_body_declaration_valid context
   end;
 }
 
@@ -149,9 +166,15 @@ let function_keyword = {
   keywords = ["function"];
   is_valid_in_context = begin fun context ->
     (* Class Method *)
-    is_class_body_declaration_valid context
+    (* "function" is not valid without a visibility modifier, but we still suggest it here since a
+       user may wish to write the function before adding the modifier. *)
+    is_class_body_declaration_valid context ||
+    is_interface_body_declaration_valid context ||
+    is_trait_body_declaration_valid context
     || (* Class method, after modifiers *)
     (context.closest_parent_container = ClassBody ||
+    context.closest_parent_container = InterfaceBody ||
+    context.closest_parent_container = TraitBody ||
     context.closest_parent_container = FunctionHeader) &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordAsync ||
@@ -324,6 +347,7 @@ let keyword_matches: keyword_completion list = [
   if_trailing_keywords;
   implements_keyword;
   interface_keyword;
+  interface_visibility_modifiers;
   loop_body_keywords;
   noreturn_keyword;
   postfix_expressions;

@@ -111,8 +111,8 @@ module ContextPredicates = struct
     context.predecessor = TokenOpenParen ||
     context.predecessor = TokenWithoutTrailingTrivia)
     || (* Class property type *)
-    context.inside_class_body &&
-    context.closest_parent_container = ClassBody &&
+    (context.closest_parent_container = ClassBody ||
+    context.closest_parent_container = TraitBody) &&
     (context.predecessor = VisibilityModifier ||
     context.predecessor = KeywordConst ||
     context.predecessor = KeywordStatic)
@@ -121,6 +121,16 @@ module ContextPredicates = struct
 
   let is_class_body_declaration_valid context =
     context.closest_parent_container = ClassBody &&
+    (context.predecessor = TokenLeftBrace ||
+    context.predecessor = ClassBodyDeclaration)
+
+  let is_trait_body_declaration_valid context =
+    context.closest_parent_container = TraitBody &&
+    (context.predecessor = TokenLeftBrace ||
+    context.predecessor = ClassBodyDeclaration)
+
+  let is_interface_body_declaration_valid context =
+    context.closest_parent_container = InterfaceBody &&
     (context.predecessor = TokenLeftBrace ||
     context.predecessor = ClassBodyDeclaration)
 

@@ -98,7 +98,7 @@ String dirname(const String& path);
  * Search for PHP or non-PHP files under a directory.
  */
 void find(std::vector<std::string> &out,
-          const std::string &root, const char *path, bool php,
+          const std::string &root, const std::string& path, bool php,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
 

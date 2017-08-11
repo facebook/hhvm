@@ -611,32 +611,28 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
 }
 
 void FileUtil::find(std::vector<std::string> &out,
-                    const std::string &root, const char *path, bool php,
+                    const std::string &root, const std::string& path, bool php,
                     const std::set<std::string> *excludeDirs /* = NULL */,
                     const std::set<std::string> *excludeFiles /* = NULL */) {
-  if (!path) path = "";
-  if (isDirSeparator(*path)) path++;
+  auto spath = path.empty() || !isDirSeparator(path[0]) ?
+    path : path.substr(1);
 
-  string spath = path;
-  if (spath.length() && !isDirSeparator(spath[spath.length() - 1])) {
+  if (!spath.empty() && !isDirSeparator(spath.back())) {
     spath += getDirSeparator();
+  }
+  auto fullPath = root + spath;
+  if (fullPath.empty()) {
+    return;
   }
   if (excludeDirs && excludeDirs->find(spath) != excludeDirs->end()) {
     return;
   }
 
-  string fullPath = root + path;
-  if (fullPath.empty()) {
-    return;
-  }
   DIR *dir = opendir(fullPath.c_str());
   if (dir == nullptr) {
     Logger::Error("FileUtil::find(): unable to open directory %s",
                   fullPath.c_str());
     return;
-  }
-  if (!isDirSeparator(fullPath[fullPath.length() - 1])) {
-    fullPath += getDirSeparator();
   }
 
   dirent *e;
@@ -656,7 +652,7 @@ void FileUtil::find(std::vector<std::string> &out,
 
     if ((se.st_mode & S_IFMT) == S_IFDIR) {
       string subdir = spath + ename;
-      find(out, root, subdir.c_str(), php, excludeDirs, excludeFiles);
+      find(out, root, subdir, php, excludeDirs, excludeFiles);
       continue;
     }
 

@@ -60,22 +60,20 @@ void Package::addAllFiles(bool force) {
   if (Option::PackageDirectories.empty() && Option::PackageFiles.empty()) {
     addDirectory("/", force);
   } else {
-    for (auto iter = Option::PackageDirectories.begin();
-         iter != Option::PackageDirectories.end(); ++iter) {
-      addDirectory(*iter, force);
+    for (auto const& dir : Option::PackageDirectories) {
+      addDirectory(dir, force);
     }
-    for (auto iter = Option::PackageFiles.begin();
-         iter != Option::PackageFiles.end(); ++iter) {
-      addSourceFile((*iter).c_str());
+    for (auto const& file : Option::PackageFiles) {
+      addSourceFile(file);
     }
   }
 }
 
-void Package::addInputList(const char *listFileName) {
-  assert(listFileName && *listFileName);
-  FILE *f = fopen(listFileName, "r");
+void Package::addInputList(const std::string& listFileName) {
+  assert(!listFileName.empty());
+  auto const f = fopen(listFileName.c_str(), "r");
   if (f == nullptr) {
-    throw Exception("Unable to open %s: %s", listFileName,
+    throw Exception("Unable to open %s: %s", listFileName.c_str(),
                     folly::errnoStr(errno).c_str());
   }
   char fileName[PATH_MAX];
@@ -94,25 +92,21 @@ void Package::addInputList(const char *listFileName) {
   fclose(f);
 }
 
-void Package::addStaticFile(const char *fileName) {
-  assert(fileName && *fileName);
+void Package::addStaticFile(const std::string& fileName) {
+  assert(!fileName.empty());
   m_extraStaticFiles.insert(fileName);
 }
 
-void Package::addStaticDirectory(const std::string path) {
+void Package::addStaticDirectory(const std::string& path) {
   m_staticDirectories.insert(path);
 }
 
 void Package::addDirectory(const std::string &path, bool force) {
-  addDirectory(path.c_str(), force);
-}
-
-void Package::addDirectory(const char *path, bool force) {
   m_directories.insert(path);
   addPHPDirectory(path, force);
 }
 
-void Package::addPHPDirectory(const char *path, bool force) {
+void Package::addPHPDirectory(const std::string& path, bool force) {
   std::vector<std::string> files;
   if (force) {
     FileUtil::find(files, m_root, path, true);
@@ -129,10 +123,9 @@ void Package::addPHPDirectory(const char *path, bool force) {
 }
 
 std::shared_ptr<FileCache> Package::getFileCache() {
-  for (auto iter = m_directories.begin();
-       iter != m_directories.end(); ++iter) {
+  for (auto const& dir : m_directories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, iter->c_str(), false,
+    FileUtil::find(files, m_root, dir, false,
                    &Option::PackageExcludeStaticDirs,
                    &Option::PackageExcludeStaticFiles);
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
@@ -144,10 +137,9 @@ std::shared_ptr<FileCache> Package::getFileCache() {
       }
     }
   }
-  for (auto iter = m_staticDirectories.begin();
-       iter != m_staticDirectories.end(); ++iter) {
+  for (auto const& dir : m_staticDirectories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, iter->c_str(), false);
+    FileUtil::find(files, m_root, dir, false);
     for (auto& file : files) {
       auto const rpath = file.substr(m_root.size());
       if (!m_fileCache->fileExists(rpath.c_str())) {
@@ -156,21 +148,18 @@ std::shared_ptr<FileCache> Package::getFileCache() {
       }
     }
   }
-  for (auto iter = m_extraStaticFiles.begin();
-       iter != m_extraStaticFiles.end(); ++iter) {
-    const char *file = iter->c_str();
-    if (!m_fileCache->fileExists(file)) {
+  for (auto const& file : m_extraStaticFiles) {
+    if (!m_fileCache->fileExists(file.c_str())) {
       auto const fullpath = m_root + file;
       Logger::Verbose("saving %s", fullpath.c_str());
-      m_fileCache->write(file, fullpath.c_str());
+      m_fileCache->write(file.c_str(), fullpath.c_str());
     }
   }
 
-  for (auto iter = m_discoveredStaticFiles.begin();
-       iter != m_discoveredStaticFiles.end(); ++iter) {
-    const char *file = iter->first.c_str();
+  for (auto const& pair : m_discoveredStaticFiles) {
+    auto const file = pair.first.c_str();
     if (!m_fileCache->fileExists(file)) {
-      const char *fullpath = iter->second.c_str();
+      const char *fullpath = pair.second.c_str();
       Logger::Verbose("saving %s", fullpath[0] ? fullpath : file);
       if (fullpath[0]) {
         m_fileCache->write(file, fullpath);
@@ -217,15 +206,16 @@ struct ParserWorker
   }
 };
 
-void Package::addSourceFile(const char *fileName, bool check /* = false */) {
-  if (fileName && *fileName) {
+void Package::addSourceFile(const std::string& fileName,
+                            bool check /* = false */) {
+  if (!fileName.empty()) {
     Lock lock(m_mutex);
     auto canonFileName =
       FileUtil::canonicalize(String(fileName)).toCppString();
     bool inserted = m_filesToParse.insert(canonFileName).second;
     if (inserted && m_dispatcher) {
       ((JobQueueDispatcher<ParserWorker>*)m_dispatcher)->enqueue(
-          std::make_pair(m_files.add(fileName), check));
+        std::make_pair(m_files.add(fileName.c_str()), check));
     }
   }
 }
@@ -249,12 +239,11 @@ bool Package::parse(bool check) {
 
   m_dispatcher = &dispatcher;
 
-  std::set<std::string> files;
-  files.swap(m_filesToParse);
+  auto const files = std::move(m_filesToParse);
 
   dispatcher.start();
-  for (auto iter = files.begin(), end = files.end(); iter != end; ++iter) {
-    addSourceFile((*iter).c_str(), check);
+  for (auto const& file : files) {
+    addSourceFile(file, check);
   }
   dispatcher.waitEmpty();
 
@@ -268,10 +257,6 @@ bool Package::parse(bool check) {
   }
 
   return true;
-}
-
-bool Package::parse(const char *fileName) {
-  return parseImpl(m_files.add(fileName));
 }
 
 bool Package::parseImpl(const char *fileName) {

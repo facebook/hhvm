@@ -94,7 +94,7 @@ void ServerNameIndication::find_server_names(
 
   // Iterate through all files in the cert directory.
   std::vector<std::string> crt_dir_files;
-  FileUtil::find(crt_dir_files, "/", path.c_str(), /* php */ false);
+  FileUtil::find(crt_dir_files, "/", path, /* php */ false);
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     // Skip default cert and key; we'll fall back to those anyway.
     size_t filename_len = it->size() - path.size();

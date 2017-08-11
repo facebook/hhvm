@@ -117,8 +117,6 @@ bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;
 
-StringBag Option::OptionStrings;
-
 bool Option::GenerateDocComments = true;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,18 +154,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
 
-  {
-    std::string tmp;
-
-#define READ_CG_OPTION(name)                    \
-    tmp = Config::GetString(ini, config, "CodeGeneration."#name); \
-    if (!tmp.empty()) {                         \
-      name = OptionStrings.add(tmp.c_str());    \
-    }
-
-    READ_CG_OPTION(IdPrefix);
-    READ_CG_OPTION(LambdaPrefix);
-  }
+  Config::Bind(IdPrefix, ini, config, "CodeGeneration.IdPrefix", IdPrefix);
+  Config::Bind(LambdaPrefix, ini, config,
+               "CodeGeneration.LambdaPrefix", LambdaPrefix);
 
   Config::Bind(RuntimeOption::DynamicInvokeFunctions,
                ini, config, "DynamicInvokeFunctions",

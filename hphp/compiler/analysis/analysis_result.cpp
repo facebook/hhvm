@@ -156,7 +156,7 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
         Locker l(this);
         if (m_files.find(rname) != m_files.end()) return;
       }
-      m_package->addSourceFile(rname.c_str());
+      m_package->addSourceFile(rname);
     }
   }
 }

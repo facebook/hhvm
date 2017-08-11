@@ -584,7 +584,7 @@ int process(const CompilerOptions &po) {
     Timer timer2(Timer::WallTime, "parsing inputs");
     if (!po.inputs.empty() && isPickledPHP) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
-        package.addSourceFile(po.inputs[i].c_str());
+        package.addSourceFile(po.inputs[i]);
       }
     } else {
       ar->setPackage(&package);
@@ -603,19 +603,19 @@ int process(const CompilerOptions &po) {
           package.addDirectory(po.fmodules[i], true);
         }
         for (unsigned int i = 0; i < po.ffiles.size(); i++) {
-          package.addSourceFile(po.ffiles[i].c_str());
+          package.addSourceFile(po.ffiles[i]);
         }
         for (unsigned int i = 0; i < po.cmodules.size(); i++) {
-          package.addStaticDirectory(po.cmodules[i].c_str());
+          package.addStaticDirectory(po.cmodules[i]);
         }
         for (unsigned int i = 0; i < po.cfiles.size(); i++) {
-          package.addStaticFile(po.cfiles[i].c_str());
+          package.addStaticFile(po.cfiles[i]);
         }
         for (unsigned int i = 0; i < po.inputs.size(); i++) {
-          package.addSourceFile(po.inputs[i].c_str());
+          package.addSourceFile(po.inputs[i]);
         }
         if (!po.inputList.empty()) {
-          package.addInputList(po.inputList.c_str());
+          package.addInputList(po.inputList);
         }
       }
     }

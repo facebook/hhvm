@@ -86,10 +86,22 @@ let expand_to_split_boundaries boundaries range =
     st, ed
   )
 
+let env_from_config config =
+  let env = Option.value config ~default:Env.default in
+  if Env.indent_width env < 1 then invalid_arg "Invalid indent width";
+  if Env.line_width env < 0 then invalid_arg "Invalid line width";
+  env
+
+let env_from_tree config tree =
+  let env = env_from_config config in
+  if SyntaxTree.is_php tree
+  then {env with Env.add_trailing_commas = false}
+  else env
+
 (** Format an entire file. *)
-let format_tree tree =
+let format_tree ?config tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
-  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = env_from_tree config tree in
   tree
   |> EditableSyntax.from_tree
   |> Hack_format.transform env
@@ -110,9 +122,9 @@ let format_tree tree =
  * would bisect a token, the entire token will appear in the formatted output.
  * Under some circumstances, tokens outside the beginning or end of the range
  * will appear in the formatted output. *)
-let format_range range tree =
+let format_range ?config range tree =
   let source_text = SourceText.text (SyntaxTree.text tree) in
-  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = env_from_tree config tree in
   tree
   |> EditableSyntax.from_tree
   |> Hack_format.transform env
@@ -123,11 +135,11 @@ let format_range range tree =
  *
  * The intervals are a list of half-open intervals of 1-based line numbers.
  * They are permitted to overlap. *)
-let format_intervals intervals tree =
+let format_intervals ?config intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
   let lines = String_utils.split_on_newlines text in
-  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = env_from_tree config tree in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree
@@ -165,9 +177,9 @@ let format_intervals intervals tree =
  * is returned along with the formatted text of the node.
  *
  * Designed to be suitable for as-you-type-formatting. *)
-let format_at_offset tree offset =
+let format_at_offset ?config tree offset =
   let source_text = SyntaxTree.text tree in
-  let env = Env.{default with add_trailing_commas = SyntaxTree.is_hack tree} in
+  let env = env_from_tree config tree in
   let chunk_groups =
     tree
     |> EditableSyntax.from_tree

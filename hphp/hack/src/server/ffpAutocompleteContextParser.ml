@@ -26,8 +26,8 @@ module Container = struct
   | ClassHeader
   | CompoundStatement
   | ConstantDeclaration
+  | FunctionCallArgumentList
   | FunctionHeader
-  | FunctionParameterList
   | IfStatement
   | InterfaceBody
   | InterfaceHeader
@@ -75,6 +75,7 @@ module Predecessor = struct
   | TokenLeftBrace
   | TokenLessThan
   | TokenOpenParen
+  | TokenWithoutTrailingTrivia
   | TopLevelDeclaration
   | TryWithoutFinally
   | VisibilityModifier
@@ -94,6 +95,12 @@ module ContextPredicates = struct
   open Container
   open Predecessor
 
+  let is_inside_function_call context =
+    context.closest_parent_container = FunctionCallArgumentList &&
+    (context.predecessor = TokenComma ||
+    context.predecessor = TokenOpenParen ||
+    context.predecessor = TokenWithoutTrailingTrivia)
+
   let is_type_valid context =
     (* Function return type *)
     context.closest_parent_container = FunctionHeader &&
@@ -101,7 +108,8 @@ module ContextPredicates = struct
     || (* Parameter type *)
     context.closest_parent_container = FunctionHeader &&
     (context.predecessor = TokenComma ||
-    context.predecessor = TokenOpenParen)
+    context.predecessor = TokenOpenParen ||
+    context.predecessor = TokenWithoutTrailingTrivia)
     || (* Class property type *)
     context.inside_class_body &&
     context.closest_parent_container = ClassBody &&
@@ -136,13 +144,15 @@ module ContextPredicates = struct
 
   let is_in_conditional context =
     context.closest_parent_container = IfStatement &&
-    context.predecessor = TokenOpenParen
+    (context.predecessor = TokenOpenParen ||
+    context.predecessor = TokenWithoutTrailingTrivia)
 
   let is_expression_valid context =
     is_rhs_of_assignment_expression context ||
     is_in_conditional context ||
     is_at_beginning_of_new_statement context ||
     is_in_return_statement context ||
+    is_inside_function_call context ||
     context.closest_parent_container = LambdaBodyExpression
     (* TODO: or is parameter, or is inside if/switch/while/etc. clause *)
 
@@ -273,6 +283,7 @@ let validate_predecessor (predecessor:PositionedSyntax.t list) : Predecessor.t =
     | Token { kind = Trait; _ } -> Some KeywordTrait
     | Token { kind = Type; _ } -> Some KeywordType
     | Token { kind = Use; _ } -> Some KeywordUse
+    | Token { trailing_width = 0; _ } -> Some TokenWithoutTrailingTrivia
     | _ -> None
   in
   predecessor
@@ -323,6 +334,8 @@ let make_context
       { acc with inside_async_function = is_function_async func }
     | FunctionDeclarationHeader _ ->
       { acc with closest_parent_container = FunctionHeader }
+    | FunctionCallExpression _ ->
+      { acc with closest_parent_container = FunctionCallArgumentList }
     | AnonymousFunction _
     | LambdaExpression _ as lambda ->
       (* If we see a lambda, almost all context is reset, so each field should
@@ -356,6 +369,7 @@ let make_context
 
 type autocomplete_location_classification =
   | InLeadingTrivia
+  | BeforePunctuationToken
   | InToken
   | InTrailingTrivia
 
@@ -363,9 +377,17 @@ let classify_autocomplete_location
   (parents:PositionedSyntax.t list) (offset:int)
   : autocomplete_location_classification =
   let open PositionedSyntax in
+  let check_for_special_token parent =
+    let open TokenKind in
+    let open PositionedToken in
+    match syntax parent with
+    | Token { kind = RightParen; _ } -> BeforePunctuationToken
+    | _ -> InToken
+  in
   match parents with
   | [] -> failwith "Empty parentage (this should never happen)"
   | parent :: _ when offset < start_offset parent -> InLeadingTrivia
+  | parent :: _ when offset = start_offset parent -> check_for_special_token parent
   | parent :: _ when offset <= trailing_start_offset parent -> InToken
   | _ -> InTrailingTrivia
 
@@ -384,12 +406,18 @@ let get_context_and_stub (syntax_tree:SyntaxTree.t) (offset:int)
   let ancestry = parentage positioned_tree offset in
   let location = classify_autocomplete_location ancestry offset in
   let autocomplete_leaf_node = List.hd_exn ancestry in
-  let node_text =
-    if location = InToken then text autocomplete_leaf_node else ""
-  in
   let previous_offset = leading_start_offset autocomplete_leaf_node - 1 in
   let predecessor_parentage = parentage positioned_tree previous_offset in
+  let node_text = match location with
+    | InToken -> text @@ List.hd_exn ancestry
+    | BeforePunctuationToken ->
+      let token_text = text @@ List.hd_exn predecessor_parentage in
+      let identifier_regex = Str.regexp "^\\$?[a-zA-Z0-9_\x7f-\xff]*$" in
+      if Str.string_match identifier_regex token_text 0 then token_text else ""
+    | _ -> ""
+  in
   let (full_path, predecessor) = match location with
+    | BeforePunctuationToken
     | InLeadingTrivia -> predecessor_parentage, predecessor_parentage
     | InToken -> ancestry, predecessor_parentage
     | InTrailingTrivia -> ancestry, ancestry

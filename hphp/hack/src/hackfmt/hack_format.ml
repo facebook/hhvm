@@ -575,8 +575,11 @@ let rec t node =
       t semi;
       Newline;
     ]
-  | CompoundStatement _ ->
-    handle_possible_compound_statement node
+  | CompoundStatement x ->
+    Concat [
+      handle_compound_statement x;
+      Newline;
+    ]
   | UnsetStatement x ->
     let (kw, left_p, args, right_p, semi) = get_unset_statement_children x in
     Concat [

@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 11: All top level functions must be defined after any non-top functions in %s on line -1

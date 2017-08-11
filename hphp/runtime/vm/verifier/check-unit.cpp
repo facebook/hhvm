@@ -365,6 +365,7 @@ bool UnitChecker::checkFuncs() {
   const Func* pseudo = nullptr;
   bool multi = false;
   bool ok = true;
+  bool nonTops = true;
 
   m_unit->forEachFunc([&](const Func* func) {
     if (func->isPseudoMain()) {
@@ -378,6 +379,15 @@ bool UnitChecker::checkFuncs() {
         ok = false;
       }
       pseudo = func;
+    }
+
+    if (!func->preClass()) {
+      if (!nonTops && !func->top()) {
+        error("Non-top function %s defined after a toplevel function\n",
+              func->name()->data());
+        ok = false;
+      }
+      nonTops &= !func->top();
     }
 
     if (func->isCPPBuiltin()) {

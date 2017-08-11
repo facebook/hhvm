@@ -785,6 +785,7 @@ struct AsmState {
   UnitEmitter* ue;
   Input in;
   bool emittedPseudoMain{false};
+  bool emittedTopLevelFunc{false};
 
   std::map<std::string,ArrayData*> adataMap;
   std::map<FuncEmitter*,const StringData*> dynCallWrappers;
@@ -2113,6 +2114,13 @@ void parse_function(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs, &isTop);
+
+  if(!isTop && as.emittedTopLevelFunc) {
+    as.error("All top level functions must be defined after any "
+             "non-top functions");
+  }
+
+  as.emittedTopLevelFunc |= isTop;
 
   int line0;
   int line1;

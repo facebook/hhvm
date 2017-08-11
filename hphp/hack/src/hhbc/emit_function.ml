@@ -63,6 +63,6 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   else [normal_function]
 
 let emit_functions_from_program ast =
-  List.concat_map ast
+  List.concat_map (List.sort (fun (t1, _) (t2, _) -> compare t1 t2) ast)
   (fun (is_top, d) ->
     match d with Ast.Fun fd -> emit_function (fd, is_top) | _ -> [])

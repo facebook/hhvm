@@ -418,17 +418,27 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
 
 void AnalysisResult::checkClassDerivations() {
   AnalysisResultPtr ar = shared_from_this();
-  for (auto& pair : m_classDecs) {
-    for (ClassScopePtr cls : pair.second) {
-      if (Option::WholeProgram) {
-        try {
-          cls->importUsedTraits(ar);
-        } catch (const AnalysisTimeFatalException& e) {
-          cls->setFatal(e);
+  {
+    Timer timer(Timer::WallTime, "importUsedTraits");
+    for (auto& pair : m_classDecs) {
+      for (ClassScopePtr cls : pair.second) {
+        if (Option::WholeProgram) {
+          try {
+            cls->importUsedTraits(ar);
+          } catch (const AnalysisTimeFatalException& e) {
+            cls->setFatal(e);
+          }
         }
       }
-      hphp_string_iset seen;
-      cls->checkDerivation(ar, seen);
+    }
+  }
+  {
+    Timer timer(Timer::WallTime, "checkDerivation");
+    for (auto& pair : m_classDecs) {
+      for (ClassScopePtr cls : pair.second) {
+        hphp_string_iset seen;
+        cls->checkDerivation(ar, seen);
+      }
     }
   }
 }
@@ -505,6 +515,17 @@ void AnalysisResult::analyzeProgram(ConstructPtr c) {
   c->analyzeProgram(shared_from_this());
 }
 
+void AnalysisResult::analyzeProgram(AnalysisResult::Phase phase) {
+  Timer timer(Timer::WallTime,
+              phase == AnalysisResult::AnalyzeFinal ?
+              "analyze final" : "analyze all");
+  AnalysisResultPtr ar = shared_from_this();
+  setPhase(phase);
+  for (auto const& file : m_fileScopes) {
+    file->analyzeProgram(ar);
+  }
+}
+
 void AnalysisResult::analyzeProgram() {
   AnalysisResultPtr ar = shared_from_this();
 
@@ -514,9 +535,8 @@ void AnalysisResult::analyzeProgram() {
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
   sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
-  unsigned int i = 0;
-  for (i = 0; i < m_fileScopes.size(); i++) {
-    collectFunctionsAndClasses(m_fileScopes[i]);
+  for (auto& scope : m_fileScopes) {
+    collectFunctionsAndClasses(scope);
   }
 
   // Keep generated code identical without randomness
@@ -537,10 +557,7 @@ void AnalysisResult::analyzeProgram() {
 
   // Analyze All
   Logger::Verbose("Analyzing All");
-  setPhase(AnalysisResult::AnalyzeAll);
-  for (i = 0; i < m_fileScopes.size(); i++) {
-    m_fileScopes[i]->analyzeProgram(ar);
-  }
+  analyzeProgram(AnalysisResult::AnalyzeAll);
 
   /*
     Note that cls->collectMethods() can add entries to m_classDecs,
@@ -648,11 +665,7 @@ void AnalysisResult::analyzeProgram() {
 }
 
 void AnalysisResult::analyzeProgramFinal() {
-  AnalysisResultPtr ar = shared_from_this();
-  setPhase(AnalysisResult::AnalyzeFinal);
-  for (size_t i = 0; i < m_fileScopes.size(); i++) {
-    m_fileScopes[i]->analyzeProgram(ar);
-  }
+  analyzeProgram(AnalysisResult::AnalyzeFinal);
 
   // Keep generated code identical without randomness
   canonicalizeSymbolOrder();

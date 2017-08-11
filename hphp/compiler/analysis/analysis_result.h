@@ -150,6 +150,7 @@ public:
   void addSystemFunction(FunctionScopeRawPtr fs);
   void addSystemClass(ClassScopeRawPtr cs);
   void analyzeProgram(ConstructPtr);
+  void analyzeProgram(Phase);
   void analyzeProgram();
   void analyzeProgramFinal();
   void dump();

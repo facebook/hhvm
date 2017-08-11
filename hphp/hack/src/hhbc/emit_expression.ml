@@ -1358,6 +1358,8 @@ and emit_elem_instrs env opt_elem_expr =
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar (_, id))) when not (is_local_this env id) -> empty, 0
+  | Some (_, (A.Class_const (_, (_, id))))
+    when id = SN.Members.mClass -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
 
@@ -1381,6 +1383,9 @@ and get_elem_member_key env stack_index opt_expr =
   | Some (_, A.Int (_, str)) -> MemberKey.EI (Int64.of_string str)
   (* Special case for literal string *)
   | Some (_, A.String (_, str)) -> MemberKey.ET str
+  (* Special case for class name *)
+  | Some (_, (A.Class_const ((_, cid), (_, id))))
+    when id = SN.Members.mClass -> MemberKey.ET cid
   (* General case *)
   | Some _ -> MemberKey.EC stack_index
   (* ELement missing (so it's array append) *)

@@ -1054,9 +1054,9 @@ let string_of_params ps =
 
 let add_indent buf indent = B.add_string buf (String.make indent ' ')
 let add_indented_line buf indent str =
+  B.add_string buf "\n";
   add_indent buf indent;
-  B.add_string buf str;
-  B.add_string buf "\n"
+  B.add_string buf str
 
 let add_num_cls_ref_slots buf indent num_cls_ref_slots =
   if num_cls_ref_slots <> 0
@@ -1080,21 +1080,22 @@ let add_static_values buf indent lst =
   Core.List.iter lst
     (fun label -> add_static_default_value_option buf indent label)
 
-let add_doc buf doc_comment =
+let add_doc buf indent doc_comment =
   match doc_comment with
   | Some cmt ->
-    B.add_string buf @@
-      Printf.sprintf "\n  .doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
+    add_indented_line buf indent @@
+      Printf.sprintf ".doc \"\"\"%s\"\"\";" (Php_escaping.escape cmt)
   | None -> ()
 
 let add_body buf indent body =
+  add_doc buf indent (Hhas_body.doc_comment body);
   add_num_iters buf indent (Hhas_body.num_iters body);
   if Hhas_body.is_memoize_wrapper body
   then add_indented_line buf indent ".ismemoizewrapper;";
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
   add_static_values buf indent (Hhas_body.static_inits body);
-  add_doc buf (Hhas_body.doc_comment body);
+  B.add_string buf "\n";
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 
@@ -1125,7 +1126,7 @@ let add_fun_def buf fun_def =
   if function_is_generator then B.add_string buf " isGenerator";
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
-  B.add_string buf " {\n";
+  B.add_string buf " {";
   add_body buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -1164,7 +1165,7 @@ let add_method_def buf method_def =
   if method_is_async then B.add_string buf " isAsync";
   if method_is_pair_generator then B.add_string buf " isPairGenerator";
   if method_is_closure_body then B.add_string buf " isClosureBody";
-  B.add_string buf " {\n";
+  B.add_string buf " {";
   add_body buf 4 method_body;
   B.add_string buf "  }"
 
@@ -1340,9 +1341,9 @@ let add_class_def buf class_def =
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";
+  add_doc buf 2 (Hhas_class.doc_comment class_def);
   add_uses buf class_def;
   add_enum_ty buf class_def;
-  add_doc buf (Hhas_class.doc_comment class_def);
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter (add_requirement buf) (Hhas_class.requirements class_def);
@@ -1364,7 +1365,7 @@ let add_data_region buf adata =
   B.add_string buf "\n"
 
 let add_top_level buf body =
-  B.add_string buf ".main {\n";
+  B.add_string buf ".main {";
   add_body buf 2 body;
   B.add_string buf "}\n"
 

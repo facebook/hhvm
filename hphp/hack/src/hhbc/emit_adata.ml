@@ -74,7 +74,13 @@ let attributes_to_strings al =
   let al = List.sort
     (fun a1 a2 -> String.compare (Hhas_attribute.name a1)
       (Hhas_attribute.name a2)) al in
-  Core.List.map al attribute_to_string
+  (* Adjust for underscore coming before alphabet *)
+  let with_underscores, no_underscores =
+    Core.List.partition_tf
+      ~f:(fun x -> String_utils.string_starts_with (Hhas_attribute.name x) "__")
+      al
+  in
+  Core.List.map (with_underscores @ no_underscores) attribute_to_string
 
 
 (* Array identifier map. Maintain list as well, in generated order *)

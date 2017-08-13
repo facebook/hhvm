@@ -2810,21 +2810,20 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
         // by reference.
         return PrepKind::Val;
       }
-      if (paramId < sizeof(it->second) * CHAR_BIT &&
-          !((it->second >> paramId) & 1)) {
-        // no method by this name takes this parameter by reference
-        return PrepKind::Val;
-      }
-      auto const kind = prep_kind_from_set(
-        find_range(m_data->methods, s.name),
-        paramId
-      );
       /*
        * If we think it's supposed to be PrepKind::Ref, we still can't be sure
        * unless we go through some effort to guarantee that it can't be going
        * to an __call function magically (which will never take anything by
        * ref).
        */
+      if (paramId < sizeof(it->second) * CHAR_BIT) {
+        return ((it->second >> paramId) & 1) ?
+          PrepKind::Unknown : PrepKind::Val;
+      }
+      auto const kind = prep_kind_from_set(
+        find_range(m_data->methods, s.name),
+        paramId
+      );
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {

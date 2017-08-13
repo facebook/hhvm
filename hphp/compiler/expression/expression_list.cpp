@@ -129,13 +129,6 @@ bool ExpressionList::isNoObjectInvolved() const {
   return true;
 }
 
-bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
-  for (const auto& exp : m_exps) {
-    if (exp->containsDynamicConstant(ar)) return true;
-  }
-  return false;
-}
-
 bool ExpressionList::isScalarArrayPairs() const {
   if (m_elems_kind != ElemsKind::ArrayPairs &&
       m_elems_kind != ElemsKind::Collection) {

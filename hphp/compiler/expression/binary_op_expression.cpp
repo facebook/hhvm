@@ -96,16 +96,6 @@ std::string BinaryOpExpression::getLiteralString() const {
   return "";
 }
 
-bool BinaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
-  switch (m_op) {
-  case T_COLLECTION:
-    return m_exp2->containsDynamicConstant(ar);
-  default:
-    break;
-  }
-  return false;
-}
-
 bool BinaryOpExpression::isShortCircuitOperator() const {
   switch (m_op) {
   case T_BOOLEAN_OR:

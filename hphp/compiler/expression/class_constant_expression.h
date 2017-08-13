@@ -36,8 +36,6 @@ struct ClassConstantExpression : Expression, StaticClassName {
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
-
   const std::string &getConName() const { return m_varName; }
 
   ClassScopeRawPtr getOriginalClassScope() const;

@@ -238,21 +238,6 @@ bool UnaryOpExpression::isThis() const {
   return false;
 }
 
-bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
-  switch (m_op) {
-  case '+':
-  case '-':
-  case T_ARRAY:
-  case T_DICT:
-  case T_VEC:
-  case T_KEYSET:
-    return m_exp && m_exp->containsDynamicConstant(ar);
-  default:
-    break;
-  }
-  return false;
-}
-
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
     if (m_op == T_ARRAY) {

@@ -50,7 +50,6 @@ struct ExpressionList : Expression {
   bool isScalar() const override;
   int getLocalEffects() const override { return NoEffect; }
   bool isNoObjectInvolved() const;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   void removeElement(int index);
   void clearElements();
   bool getScalarValue(Variant &value) override;

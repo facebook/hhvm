@@ -178,9 +178,6 @@ public:
   virtual bool isLiteralString() const { return false;}
   virtual bool isLiteralNull() const { return false;}
   virtual std::string getLiteralString() const { return "";}
-  virtual bool containsDynamicConstant(AnalysisResultPtr /*ar*/) const {
-    return false;
-  }
   void deepCopy(ExpressionPtr exp);
 
   /**

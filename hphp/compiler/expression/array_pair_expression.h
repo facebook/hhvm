@@ -29,7 +29,6 @@ struct ArrayPairExpression : Expression {
                       ExpressionPtr name, ExpressionPtr value, bool ref);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   bool isScalar() const override;
 
   ExpressionPtr getName() { return m_name;}

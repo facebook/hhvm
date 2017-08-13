@@ -40,9 +40,6 @@ struct ConstantExpression : Expression, private IParseHandler {
   bool isLiteralNull() const override;
   int getLocalEffects() const override { return NoEffect; }
   bool getScalarValue(Variant &value) override;
-  bool containsDynamicConstant(AnalysisResultPtr /*ar*/) const override {
-    return !m_valid || m_dynamic;
-  }
 
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}

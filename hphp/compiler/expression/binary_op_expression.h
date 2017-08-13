@@ -33,7 +33,6 @@ struct BinaryOpExpression : Expression {
   int getLocalEffects() const override;
   bool isLiteralString() const override;
   std::string getLiteralString() const override;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
   bool isRefable(bool checkError = false) const override;
   bool isShortCircuitOperator() const;

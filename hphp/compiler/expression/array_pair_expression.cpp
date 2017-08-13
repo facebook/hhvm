@@ -66,11 +66,6 @@ bool ArrayPairExpression::isScalarArrayPair() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool ArrayPairExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
-  return (m_name && m_name->containsDynamicConstant(ar)) ||
-    m_value->containsDynamicConstant(ar);
-}
-
 ConstructPtr ArrayPairExpression::getNthKid(int n) const {
   switch (n) {
     case 0:

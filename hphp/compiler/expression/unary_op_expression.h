@@ -44,7 +44,6 @@ public:
   bool isRefable(bool checkError = false) const override;
   bool isScalar() const override;
   bool isThis() const override;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   bool getScalarValue(Variant &value) override;
 
   ExpressionPtr getExpression() { return m_exp;}

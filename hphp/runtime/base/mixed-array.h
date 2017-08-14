@@ -81,10 +81,10 @@ struct MixedArrayElm {
   }
 
   TYPE_SCAN_CUSTOM() {
-    // if data is a Tombstone, the TypedValue scanner will ignore it
     static_assert(!isRefcountedType(kInvalidDataType), "");
+    // if data is a Tombstone, key should have been set to int type.
     if (hasStrKey()) scanner.scan(skey);
-    scanner.scan(data);
+    if (isRefcountedType(data.m_type)) scanner.scan(data.m_data.pcnt);
   }
 
   // Members below here are required for HashTable implemenation.

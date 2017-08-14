@@ -4055,7 +4055,12 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
             )
-        ), _ -> binop in_cond p env Ast.Minus p1 te1 ty1 p2 te2 ty2
+        ), _ ->
+        let env, texpr, ty =
+          binop in_cond p env Ast.Minus p1 te1 ty1 p2 te2 ty2 in
+        match snd texpr with
+          | T.Binop (_, te1, te2) -> make_result env te1 te2 ty
+          | _ -> assert false
       )
   | Ast.Minus | Ast.Star ->
     begin
@@ -4087,7 +4092,7 @@ and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
           | (Some r, _) | (_, Some r) ->
             make_result env te1 te2 (r, Tprim Tnum)
           (* Otherwise? *)
-          | _, _ -> env, T.make_typed_expr p ty1 T.Any, ty1
+          | _, _ -> make_result env te1 te2 ty1
     end
   | Ast.Slash | Ast.Starstar ->
     begin

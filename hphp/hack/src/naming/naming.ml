@@ -974,19 +974,19 @@ module Make (GetLocals : GetLocals) = struct
               N.Hvarray (p, N.Hany)
           | [val_] -> N.Hvarray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
-      | nm when nm = SN.Typehints.darray_or_varray ->
+      | nm when nm = SN.Typehints.varray_or_darray ->
         let darray_and_varray_allowed =
           TypecheckerOptions.experimental_feature_enabled
             (fst env).tcopt
             TypecheckerOptions.experimental_darray_and_varray in
         if not darray_and_varray_allowed then
-          Errors.darray_or_varray_not_supported p;
+          Errors.varray_or_darray_not_supported p;
         Some (match hl with
           | [] ->
               if (fst env).in_mode = FileInfo.Mstrict then
                 Errors.too_few_type_arguments p;
-              N.Hdarray_or_varray (p, N.Hany)
-          | [val_] -> N.Hdarray_or_varray (hint env val_)
+              N.Hvarray_or_darray (p, N.Hany)
+          | [val_] -> N.Hvarray_or_darray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.integer ->
         Errors.primitive_invalid_alias p nm SN.Typehints.int;

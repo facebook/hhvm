@@ -1,0 +1,6 @@
+File "disallow_dict_where_varray_or_darray_is_required.php", line 4, characters 10-25:
+Invalid return type (Typing[4110])
+File "disallow_dict_where_varray_or_darray_is_required.php", line 3, characters 18-33:
+This is a varray_or_darray
+File "disallow_dict_where_varray_or_darray_is_required.php", line 4, characters 10-25:
+It is incompatible with an object of type dict

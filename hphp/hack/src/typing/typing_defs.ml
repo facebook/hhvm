@@ -76,8 +76,8 @@ and _ ty_ =
   (* Tvarray (ty) => "varray<ty>" *)
   | Tvarray : decl ty -> decl ty_
 
-  (* Tdarray_or_varray (ty) => "darray_or_varray<ty>" *)
-  | Tdarray_or_varray : decl ty -> decl ty_
+  (* Tvarray_or_darray (ty) => "varray_or_darray<ty>" *)
+  | Tvarray_or_darray : decl ty -> decl ty_
 
   (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
@@ -244,8 +244,8 @@ and array_kind =
   | AKvec of locl ty
   (* An array declared as a darray. *)
   | AKdarray of locl ty * locl ty
-  (* An array annotated as a darray_or_varray. *)
-  | AKdarray_or_varray of locl ty
+  (* An array annotated as a varray_or_darray. *)
+  | AKvarray_or_darray of locl ty
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty

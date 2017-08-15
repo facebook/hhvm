@@ -38,8 +38,8 @@ and hint_ p env = function
     Tdarray (hint env h1, hint env h2)
   | Hvarray (h) ->
     Tvarray (hint env h)
-  | Hdarray_or_varray h ->
-    Tdarray_or_varray (hint env h)
+  | Hvarray_or_darray h ->
+    Tvarray_or_darray (hint env h)
   | Hprim p -> Tprim p
   | Habstr x ->
     Tgeneric x

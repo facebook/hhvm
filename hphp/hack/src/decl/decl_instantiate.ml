@@ -57,8 +57,8 @@ and instantiate_ subst x =
       Tdarray (instantiate subst ty1, instantiate subst ty2)
   | Tvarray ty ->
       Tvarray (instantiate subst ty)
-  | Tdarray_or_varray ty ->
-      Tdarray_or_varray (instantiate subst ty)
+  | Tvarray_or_darray ty ->
+      Tvarray_or_darray (instantiate subst ty)
   | Tthis -> Tthis
   | Tmixed -> Tmixed
   | Tany

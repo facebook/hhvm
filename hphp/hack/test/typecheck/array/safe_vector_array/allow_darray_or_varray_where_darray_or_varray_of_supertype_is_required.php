@@ -1,8 +1,8 @@
 <?hh // strict
 
-function consumeDarrayOrVarrayOfNum(darray_or_varray<num> $arg): void {}
+function consumeDarrayOrVarrayOfNum(varray_or_darray<num> $arg): void {}
 
-function provideDarrayOrVarrayOfInt(): darray_or_varray<int> {
+function provideDarrayOrVarrayOfInt(): varray_or_darray<int> {
   return darray["a" => 0];
 }
 

@@ -1,6 +1,0 @@
-File "disallow_darray_with_wrong_key_type_where_darray_or_varray_is_required.php", line 4, characters 10-15:
-Invalid return type (Typing[4110])
-File "disallow_darray_with_wrong_key_type_where_darray_or_varray_is_required.php", line 3, characters 18-33:
-This is darray_or_varray, which requires arraykey-typed keys when used with an array (used like a hashtable)
-File "disallow_darray_with_wrong_key_type_where_darray_or_varray_is_required.php", line 4, characters 17-20:
-It is incompatible with a bool

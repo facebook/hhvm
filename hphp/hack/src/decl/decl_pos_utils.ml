@@ -81,7 +81,7 @@ let rec reason = function
   | Rpredicated (p, f)       -> Rpredicated (pos p, f)
   | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
   | Rfinal_property p        -> Rfinal_property (pos p)
-  | Rdarray_or_varray_key p -> Rdarray_or_varray_key (pos p)
+  | Rvarray_or_darray_key p -> Rvarray_or_darray_key (pos p)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =
@@ -95,7 +95,7 @@ let rec ty (p, x) =
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tdarray (ty1, ty2)   -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty      -> Tvarray (ty root_ty)
-    | Tdarray_or_varray root_ty -> Tdarray_or_varray (ty root_ty)
+    | Tvarray_or_darray root_ty -> Tvarray_or_darray (ty root_ty)
     | Tprim _ as x         -> x
     | Tgeneric _ as x      -> x
     | Ttuple tyl           -> Ttuple (List.map tyl ty)

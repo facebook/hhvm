@@ -6,7 +6,7 @@ function consumeIndexish(Indexish<arraykey, num> $arg): void {}
 function consumeTraversable(Traversable<num> $arg): void {}
 function consumeContainer(Container<num> $arg): void {}
 
-function provideDarrayOrVarrayOfInt(): darray_or_varray<int> {
+function provideDarrayOrVarrayOfInt(): varray_or_darray<int> {
   return darray["a" => 0];
 }
 

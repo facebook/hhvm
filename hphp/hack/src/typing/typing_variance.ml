@@ -459,9 +459,9 @@ and type_ tcopt root variance env (reason, ty) =
     type_ tcopt root variance env (reason, Tarray (Some ty1, Some ty2))
   | Tvarray ty ->
     type_ tcopt root variance env (reason, Tarray (Some ty, None))
-  | Tdarray_or_varray ty ->
+  | Tvarray_or_darray ty ->
     let tk =
-      Typing_reason.Rdarray_or_varray_key (Reason.to_pos reason),
+      Typing_reason.Rvarray_or_darray_key (Reason.to_pos reason),
       Tprim Nast.Tarraykey in
     type_ tcopt root variance env (reason, Tarray (Some tk, Some ty))
   | Tthis ->

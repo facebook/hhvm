@@ -2,7 +2,7 @@
 
 function consumeArrayWithNoTypeParameters(array $arg): void {}
 
-function provideDarrayOrVarrayOfAny(): darray_or_varray {
+function provideDarrayOrVarrayOfAny(): varray_or_darray {
   return darray["a" => 0];
 }
 

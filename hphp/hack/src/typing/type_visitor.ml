@@ -18,7 +18,7 @@ class type ['a] type_visitor_type = object
   method on_tmixed : 'a -> Reason.t -> 'a
   method on_tthis : 'a -> Reason.t -> 'a
   method on_tarray : 'a -> Reason.t -> 'b ty option -> 'b ty option -> 'a
-  method on_tdarray_or_varray : 'a -> Reason.t -> decl ty -> 'a
+  method on_tvarray_or_darray : 'a -> Reason.t -> decl ty -> 'a
   method on_tgeneric : 'a -> Reason.t -> string -> 'a
   method on_toption : 'a -> Reason.t -> 'b ty -> 'a
   method on_tprim : 'a -> Reason.t -> Nast.tprim -> 'a
@@ -52,7 +52,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     let acc = Option.fold ~f:this#on_type ~init:acc ty1_opt in
     let acc = Option.fold ~f:this#on_type ~init:acc ty2_opt in
     acc
-  method on_tdarray_or_varray acc _ ty =
+  method on_tvarray_or_darray acc _ ty =
     this#on_type acc ty
   method on_tgeneric acc _ _ = acc
   method on_toption: type a. _ -> Reason.t -> a ty -> _ =
@@ -94,7 +94,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     match array_kind with
     | AKany -> acc
     | AKempty -> acc
-    | AKdarray_or_varray ty
+    | AKvarray_or_darray ty
     | AKvarray ty
     | AKvec ty -> this#on_type acc ty
     | AKdarray (tk, tv)
@@ -122,8 +122,8 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
       this#on_type acc (r, Tarray (Some ty1, Some ty2))
     | Tvarray ty ->
       this#on_type acc (r, Tarray (Some ty, None))
-    | Tdarray_or_varray ty ->
-      this#on_tdarray_or_varray acc r ty
+    | Tvarray_or_darray ty ->
+      this#on_tvarray_or_darray acc r ty
     | Tgeneric s -> this#on_tgeneric acc r s
     | Toption ty -> this#on_toption acc r ty
     | Tprim prim -> this#on_tprim acc r prim

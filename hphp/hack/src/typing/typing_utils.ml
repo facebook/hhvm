@@ -455,7 +455,7 @@ let unwrap_class_type = function
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _
-      | Tdarray_or_varray _
+      | Tvarray_or_darray _
       | Tgeneric _
       | Toption _
       | Tprim _
@@ -504,7 +504,7 @@ end = struct
         match akind with
         | AKany -> Some r
         | AKempty -> acc
-        | AKdarray_or_varray ty
+        | AKvarray_or_darray ty
         | AKvarray ty
         | AKvec ty -> this#on_type acc ty
         | AKdarray (tk, tv)

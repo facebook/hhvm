@@ -71,7 +71,7 @@ type t =
   | Rpredicated      of Pos.t * string
   | Rinstanceof      of Pos.t * string
   | Rfinal_property  of Pos.t
-  | Rdarray_or_varray_key of Pos.t
+  | Rvarray_or_darray_key of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -194,10 +194,10 @@ let rec to_string prefix r =
       [(p, prefix ^ " from this instanceof test matching " ^ s)]
   | Rfinal_property _ ->
       [(p, prefix ^ " because properties cannot be declared final")]
-  | Rdarray_or_varray_key _ ->
+  | Rvarray_or_darray_key _ ->
       [(
         p,
-        "This is darray_or_varray, which requires arraykey-typed keys when \
+        "This is varray_or_darray, which requires arraykey-typed keys when \
         used with an array (used like a hashtable)"
       )]
 
@@ -258,7 +258,7 @@ and to_pos = function
   | Rused_as_shape p -> p
   | Rpredicated (p, _) -> p
   | Rinstanceof (p, _) -> p
-  | Rdarray_or_varray_key p
+  | Rvarray_or_darray_key p
   | Rfinal_property p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.

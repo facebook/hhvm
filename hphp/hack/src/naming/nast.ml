@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<05f951f16838e13348e78e8f9f746459b2dbf51e>> *)
+(* SourceShasum<<5dac961b50121c1ae0dd32337a01716fdbb26a05>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -82,7 +82,7 @@ and hint_ =
   | Harray of hint option* hint option 
   | Hdarray of hint* hint 
   | Hvarray of hint 
-  | Hdarray_or_varray of hint 
+  | Hvarray_or_darray of hint 
   | Hprim of tprim 
   | Hthis 
 and tprim =
@@ -254,8 +254,8 @@ and pp_hint_ : Format.formatter -> hint_ -> Ppx_deriving_runtime.unit =
             (Format.fprintf fmt "(@[<2>Hvarray@ ";
              ((__13 ()) fmt) a0;
              Format.fprintf fmt "@])")
-        | Hdarray_or_varray a0 ->
-            (Format.fprintf fmt "(@[<2>Hdarray_or_varray@ ";
+        | Hvarray_or_darray a0 ->
+            (Format.fprintf fmt "(@[<2>Hvarray_or_darray@ ";
              ((__14 ()) fmt) a0;
              Format.fprintf fmt "@])")
         | Hprim a0 ->

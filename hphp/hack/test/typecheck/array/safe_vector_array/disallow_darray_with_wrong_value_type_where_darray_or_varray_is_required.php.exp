@@ -1,6 +1,0 @@
-File "disallow_darray_with_wrong_value_type_where_darray_or_varray_is_required.php", line 4, characters 10-15:
-Invalid return type (Typing[4110])
-File "disallow_darray_with_wrong_value_type_where_darray_or_varray_is_required.php", line 3, characters 35-37:
-This is an int
-File "disallow_darray_with_wrong_value_type_where_darray_or_varray_is_required.php", line 4, characters 26-29:
-It is incompatible with a bool

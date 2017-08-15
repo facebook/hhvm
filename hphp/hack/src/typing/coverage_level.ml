@@ -140,7 +140,7 @@ let incr_reason_stats r p reason_stats =
     | Rpredicated _ -> "Rpredicated"
     | Rinstanceof _ -> "Rinstanceof"
     | Rfinal_property _ -> "Rfinal_property"
-    | Rdarray_or_varray_key _ -> "Rdarray_or_varray_key" in
+    | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key" in
   let pos_stats_map = match SMap.get string_key reason_stats with
     | Some x -> x
     | None -> Pos.Map.empty in

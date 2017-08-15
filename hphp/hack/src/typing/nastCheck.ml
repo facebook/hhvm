@@ -324,7 +324,7 @@ and hint_ env p = function
   | Hdarray (ty1, ty2) ->
       hint env ty1;
       hint env ty2
-  | Hdarray_or_varray ty
+  | Hvarray_or_darray ty
   | Hvarray ty ->
       hint env ty
   | Htuple hl -> List.iter hl (hint env)
@@ -658,7 +658,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hdarray (ty1, ty2) ->
         check_tparams ty1;
         check_tparams ty2
-    | Hdarray_or_varray ty
+    | Hvarray_or_darray ty
     | Hvarray ty ->
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams

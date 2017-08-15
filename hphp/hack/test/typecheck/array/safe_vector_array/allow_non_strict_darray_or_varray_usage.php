@@ -7,10 +7,10 @@ abstract class Class {
   public abstract function providesVarrayOfTany(): varray;
   public abstract function providesDarrayOfTany(): darray;
   public abstract function takesDarrayOrVarrayOfString(
-    darray_or_varray<string> $x,
+    varray_or_darray<string> $x,
   ): void;
   public abstract function takesDarrayOrVarrayOfTany(
-    darray_or_varray $x,
+    varray_or_darray $x,
   ): void;
 
   public function test() {

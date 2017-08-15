@@ -210,7 +210,7 @@ let rec check_memoizable env param ty =
       AKvarray ty
       | AKvec ty
       | AKdarray(_, ty)
-      | AKdarray_or_varray ty
+      | AKvarray_or_darray ty
       | AKmap(_, ty)
     ) ->
       check_memoizable env param ty
@@ -2319,7 +2319,7 @@ and call_parent_construct pos env el uel =
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
-        | Tdarray_or_varray _
+        | Tvarray_or_darray _
         | Tgeneric _
         | Toption _
         | Tprim _
@@ -2904,8 +2904,8 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
       let env = Type.sub_type p Reason.index_array env ty2 ty1 in
       env, ty
-  | Tarraykind (AKdarray_or_varray ty) ->
-      let ty1 = Reason.Rdarray_or_varray_key p, Tprim Tarraykey in
+  | Tarraykind (AKvarray_or_darray ty) ->
+      let ty1 = Reason.Rvarray_or_darray_key p, Tprim Tarraykey in
       let env = Type.sub_type p Reason.index_array env ty2 ty1 in
       env, ty
   | Tclass ((_, cn) as id, argl)
@@ -4834,7 +4834,7 @@ and check_extend_abstract_const ~is_final p smap =
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
-        | Tdarray_or_varray _
+        | Tvarray_or_darray _
         | Toption _
         | Tprim _
         | Tfun _

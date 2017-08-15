@@ -38,7 +38,7 @@ end = struct
       begin match akind with
         | AKany -> ()
         | AKempty -> ()
-        | AKdarray_or_varray tv
+        | AKvarray_or_darray tv
         | AKvarray tv
         | AKvec tv -> ty tv
         | AKdarray (tk, tv)

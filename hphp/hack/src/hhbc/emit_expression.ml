@@ -499,7 +499,7 @@ and emit_load_class_ref env cexpr =
   | Class_id id -> emit_known_class_id env id
   | Class_expr expr ->
   begin match expr with
-  | (_, A.Lvar _) ->
+  | (_, A.Lvar (_, id)) when id <> SN.SpecialIdents.this ->
     stash_in_local ~always_stash_this:true env expr
     begin fun temp _ ->
     instr (IGet (ClsRefGetL (temp, 0)))
@@ -1057,7 +1057,8 @@ and is_struct_init es =
     List.fold_right es ~init:(true, keys) ~f:(fun field (b, keys) ->
       match field with
         | A.AFkvalue ((_, A.String (_, s)), _) ->
-          b && (Option.is_none @@ Typed_value.string_to_int_opt s),
+          b && (Option.is_none
+            @@ Typed_value.string_to_int_opt ~allow_following:false s),
           ULS.add keys s
         | _ -> false, keys)
   in

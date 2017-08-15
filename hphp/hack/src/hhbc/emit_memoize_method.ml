@@ -417,6 +417,8 @@ let make_memoize_wrapper_method env info index ast_class ast_method =
     false (*method_is_closure_body*)
 
 let emit_wrapper_methods env info ast_class ast_methods =
+  (* Wrapper methods may not have iterators *)
+  Iterator.reset_iterator ();
   let _, hhas_methods =
     List.fold_left ast_methods ~init:(0, []) ~f:(fun (count,acc) ast_method ->
       if Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes

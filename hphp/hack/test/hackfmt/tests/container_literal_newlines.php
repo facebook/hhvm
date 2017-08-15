@@ -57,3 +57,8 @@ type Foo = shape(
   'should_remain' => OnNewLine,
   ...
 );
+
+foo(shape('should_stay' => 'on_same_line'));
+foo(shape(
+  'should_remain' => 'on_new_line',
+));

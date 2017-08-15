@@ -1457,10 +1457,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
       let (shape_kw, left_p, fields, right_p) =
         get_shape_expression_children x
       in
-      Concat [
-        t shape_kw;
-        transform_argish left_p fields right_p;
-      ]
+      transform_container_literal shape_kw left_p fields right_p
     | TupleExpression x ->
       let (kw, left_p, items, right_p) = get_tuple_expression_children x in
       Concat [

@@ -12,5 +12,10 @@ function foo(ShapeWithOptionalField $argument): void {
 }
 
 function bar(): void {
-  foo(shape('a' => 42, 'c' => "Hello"));
+  foo(
+    shape(
+      'a' => 42,
+      'c' => "Hello",
+    ),
+  );
 }

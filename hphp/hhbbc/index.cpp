@@ -41,6 +41,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 
 #include "hphp/runtime/vm/native.h"
@@ -1056,27 +1057,30 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
-      uint64_t refs = 0;
-      uint64_t cur = 1;
-      bool anyByRef = false;
-      for (auto& p : m->params) {
-        if (p.byRef) {
-          refs |= cur;
-          anyByRef = true;
-        }
-        // It doesn't matter that we lose parameters beyond the 64th,
-        // for those, we'll conservatively check everything anyway.
-        cur <<= 1;
-      }
-      if (anyByRef) {
-        // Multiple methods with the same name will be combined in
-        // the same cell, thus we use |=. This only makes sense in
-        // WholeProgram mode since we use this field to check that no functions
-        // uses its n-th parameter byref, which requires global knowledge.
-        index.method_ref_params_by_name[m->name] |= refs;
-      }
       if (m->attrs & AttrInterceptable) {
         index.any_interceptable_functions = true;
+      }
+
+
+      if (RuntimeOption::RepoAuthoritative) {
+        uint64_t refs = 0, cur = 1;
+        bool anyByRef = false;
+        for (auto& p : m->params) {
+          if (p.byRef) {
+            refs |= cur;
+            anyByRef = true;
+          }
+          // It doesn't matter that we lose parameters beyond the 64th,
+          // for those, we'll conservatively check everything anyway.
+          cur <<= 1;
+        }
+        if (anyByRef) {
+          // Multiple methods with the same name will be combined in the same
+          // cell, thus we use |=. This only makes sense in WholeProgram mode
+          // since we use this field to check that no functions uses its n-th
+          // parameter byref, which requires global knowledge.
+          index.method_ref_params_by_name[m->name] |= refs;
+        }
       }
     }
 

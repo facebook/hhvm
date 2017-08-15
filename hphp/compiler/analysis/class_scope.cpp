@@ -374,7 +374,6 @@ ClassScope::importTraitMethod(const TraitMethod& traitMethod,
   cloneMeth->resetScope(cloneFuncScope);
   cloneFuncScope->setOuterScope(shared_from_this());
   cloneFuncScope->setFromTrait(true);
-  informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
 
@@ -385,33 +384,6 @@ ClassScope::importTraitMethod(const TraitMethod& traitMethod,
   cloneMeth->setOriginalFilename(name);
 
   return cloneMeth;
-}
-
-void ClassScope::informClosuresAboutScopeClone(
-    ConstructPtr root,
-    FunctionScopePtr outerScope,
-    AnalysisResultPtr ar) {
-
-  if (!root) {
-    return;
-  }
-
-  for (int i = 0; i < root->getKidCount(); i++) {
-    auto cons = root->getNthKid(i);
-    auto closure =
-      dynamic_pointer_cast<ClosureExpression>(cons);
-
-    if (!closure) {
-      informClosuresAboutScopeClone(cons, outerScope, ar);
-      continue;
-    }
-
-    FunctionStatementPtr func = closure->getClosureFunction();
-    HPHP::FunctionScopePtr funcScope = func->getFunctionScope();
-    assert(funcScope->isClosure());
-    funcScope->addClonedTraitOuterScope(outerScope);
-    // Don't need to recurse
-  }
 }
 
 bool ClassScope::addClassRequirement(const std::string &requiredName,

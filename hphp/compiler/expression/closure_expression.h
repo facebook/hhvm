@@ -72,7 +72,8 @@ struct ClosureExpression : Expression {
 private:
   void initializeFromUseList(ExpressionListPtr vars);
   void initializeValuesFromVars();
-  void analyzeVars(AnalysisResultPtr);
+  void analyzeVarsForClosure(AnalysisResultPtr);
+  void analyzeVarsForClosureExpression(AnalysisResultPtr);
   bool hasStaticLocalsImpl(ConstructPtr root);
   void processLambda(AnalysisResultPtr ar);
 

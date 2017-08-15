@@ -343,15 +343,6 @@ void FunctionScope::setContainsBareThis(bool f, bool ref /* = false */) {
   }
 }
 
-FunctionScopeRawPtr FunctionScope::findClonedTraitInFile(FileScopeRawPtr fs) {
-  auto const it = std::find_if(
-    m_clonedTraitOuterScope.begin(), m_clonedTraitOuterScope.end(),
-    [&] (const FunctionScopePtr& func) {
-      return func->getContainingFile() == fs;
-    });
-  return it == m_clonedTraitOuterScope.end() ? FunctionScopeRawPtr{} : *it;
-}
-
 bool FunctionScope::hasImpl() const {
   if (!isUserFunction()) {
     return !isAbstract();

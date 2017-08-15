@@ -142,15 +142,6 @@ struct FunctionScope : BlockScope,
   }
 
   /**
-   * Tell this function about another outer scope that contains it.
-   */
-  void addClonedTraitOuterScope(FunctionScopePtr scope) {
-    m_clonedTraitOuterScope.push_back(scope);
-  }
-
-  FunctionScopeRawPtr findClonedTraitInFile(FileScopeRawPtr fs);
-
-  /**
    * Get/set original name of the function, without case being lowered.
    */
   const std::string &getOriginalName() const;
@@ -339,7 +330,6 @@ private:
   int m_redeclaring; // multiple definition of the same function
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
-  std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 
   // holds the fact that defining this function is a fatal error
   const StringData* m_fatal_error_msg = nullptr;

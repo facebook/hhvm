@@ -326,12 +326,6 @@ public:
     return m_functionsVec;
   }
 
-private:
-  void informClosuresAboutScopeClone(ConstructPtr root,
-                                     FunctionScopePtr outerScope,
-                                     AnalysisResultPtr ar);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Trait flattening.
 

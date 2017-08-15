@@ -42,6 +42,7 @@
   using classname ## Ptr      = std::shared_ptr<classname>;             \
   using classname ## RawPtr   = hphp_raw_ptr<classname>;                \
   using classname ## ConstPtr = std::shared_ptr<const classname>;       \
+  using classname ## ConstRawPtr = hphp_raw_ptr<const classname>;       \
 
 #define DECLARE_EXTENDED_BOOST_TYPES(classname)                     \
   DECLARE_BOOST_TYPES(classname)                                    \

@@ -40,7 +40,7 @@ public:
   int getKidCount() const override;
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  void analyzeProgram(AnalysisResultPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   const std::string& getName() const = delete;//{ return m_name; }
   const std::string& getOriginalName() const { return m_origName; }

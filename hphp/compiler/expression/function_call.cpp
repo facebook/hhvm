@@ -187,7 +187,7 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
   }
 }
 
-void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (isParent()) {
     getFunctionScope()->setContainsThis();
   }

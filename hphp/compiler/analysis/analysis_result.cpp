@@ -214,7 +214,6 @@ BlockScopePtr AnalysisResult::findConstantDeclarer(
 }
 
 ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
-  AnalysisResultConstPtr ar = shared_from_this();
   auto const lname = toLower(name);
   auto const sysIter = m_systemClasses.find(lname);
   if (sysIter != m_systemClasses.end()) return sysIter->second;
@@ -508,27 +507,60 @@ static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
   return f1->getName() < f2->getName();
 }
 
-void AnalysisResult::analyzeProgram(ConstructPtr c) {
+void AnalysisResult::analyzeProgram(ConstructPtr c) const {
   if (!c) return;
   for (auto i = 0, n = c->getKidCount(); i < n; ++i) {
     analyzeProgram(c->getNthKid(i));
   }
-  c->analyzeProgram(shared_from_this());
+  c->analyzeProgram(AnalysisResultConstRawPtr{this});
 }
 
+class AnalyzeWorker
+  : public JobQueueWorker<FileScopeRawPtr, const AnalysisResult*, true, true> {
+ public:
+  AnalyzeWorker() {}
+  void doJob(JobType job) override {
+    try {
+      job->analyzeProgram(AnalysisResultConstRawPtr{m_context});
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+    } catch (...) {
+      Logger::Error("Fatal: An unexpected exception was thrown");
+    }
+  }
+  void onThreadEnter() override {
+  }
+  void onThreadExit() override {
+    hphp_memory_cleanup();
+  }
+};
+
 void AnalysisResult::analyzeProgram(AnalysisResult::Phase phase) {
-  Timer timer(Timer::WallTime,
-              phase == AnalysisResult::AnalyzeFinal ?
-              "analyze final" : "analyze all");
-  AnalysisResultPtr ar = shared_from_this();
-  setPhase(phase);
-  for (auto const& file : m_fileScopes) {
-    file->analyzeProgram(ar);
+  {
+    Timer timer(Timer::WallTime,
+                phase == AnalysisResult::AnalyzeFinal ?
+                "analyze final" : "analyze all");
+    setPhase(phase);
+
+    auto const nFiles = m_fileScopes.size();
+    auto threadCount = Option::ParserThreadCount;
+    if (threadCount > nFiles) {
+      threadCount = nFiles;
+    }
+    if (!threadCount) threadCount = 1;
+    JobQueueDispatcher<AnalyzeWorker> dispatcher(threadCount, 0, false, this);
+
+    dispatcher.start();
+    for (auto const& file : m_fileScopes) {
+      dispatcher.enqueue(file);
+    }
+    dispatcher.waitEmpty();
   }
 
   if (phase == AnalysisResult::AnalyzeAll) {
     Timer timer2(Timer::WallTime, "processImportedLambdas");
-    ClosureExpression::processLambdas(ar, std::move(m_lambdas));
+    ClosureExpression::processLambdas(AnalysisResultConstRawPtr{this},
+                                      std::move(m_lambdas));
   } else {
     always_assert(m_lambdas.empty());
   }

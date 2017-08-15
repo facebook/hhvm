@@ -65,7 +65,7 @@ StatementPtr CatchStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
+void CatchStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   (void)resolveClass();
   if (m_variable->isThis()) {
     getFunctionScope()->setContainsBareThis(true, true);

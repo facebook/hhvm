@@ -49,7 +49,7 @@ StatementPtr StaticStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
+void StaticStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     BlockScopePtr scope = getScope();
     for (int i = 0; i < m_exp->getCount(); i++) {

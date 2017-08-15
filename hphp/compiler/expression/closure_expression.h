@@ -48,7 +48,7 @@ struct ClosureExpression : Expression {
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   int getKidCount() const override;
-  void analyzeProgram(AnalysisResultPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }
@@ -57,7 +57,7 @@ struct ClosureExpression : Expression {
   ClosureType type() const { return m_type; }
   std::set<std::string> collectParamNames() const;
 
-  static void processLambdas(AnalysisResultPtr ar,
+  static void processLambdas(AnalysisResultConstRawPtr ar,
                              CompactVector<ClosureExpressionRawPtr>&& lambdas);
 
   /*
@@ -66,16 +66,16 @@ struct ClosureExpression : Expression {
    *
    * Pre: captureState() == CaptureState::Unknown.
    */
-  void setCaptureList(AnalysisResultPtr ar,
+  void setCaptureList(AnalysisResultConstRawPtr ar,
                       const std::set<std::string>&);
 
 private:
   void initializeFromUseList(ExpressionListPtr vars);
   void initializeValuesFromVars();
-  void analyzeVarsForClosure(AnalysisResultPtr);
-  void analyzeVarsForClosureExpression(AnalysisResultPtr);
+  void analyzeVarsForClosure(AnalysisResultConstRawPtr);
+  void analyzeVarsForClosureExpression(AnalysisResultConstRawPtr);
   bool hasStaticLocalsImpl(ConstructPtr root);
-  void processLambda(AnalysisResultPtr ar);
+  void processLambda(AnalysisResultConstRawPtr ar);
 
 private:
   ClosureType m_type;

@@ -29,7 +29,7 @@ struct NewObjectExpression : FunctionCall {
                       ExpressionPtr variable, ExpressionListPtr params);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   bool isRefable(bool checkError = false) const override { return checkError; }
 private:

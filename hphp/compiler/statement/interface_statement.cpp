@@ -176,7 +176,7 @@ void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
   }
 }
 
-void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
+void InterfaceStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   checkVolatile(ar);
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;

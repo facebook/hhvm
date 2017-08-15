@@ -35,7 +35,7 @@ struct ObjectPropertyExpression : Expression, LocalEffectsContainer {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
-  void analyzeProgram(AnalysisResultPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 

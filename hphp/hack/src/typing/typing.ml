@@ -1133,8 +1133,9 @@ and expr_
       let env, new_ty = ExprDepTy.make env CIstatic ty in
       make_result env T.This (new_ty)
   | Assert (AE_assert e) ->
+      let env, te, _ = expr env e in
       let env = condition env true e in
-      make_result env T.Any (Reason.Rwitness p, Tprim Tvoid)
+      make_result env (T.Assert (T.AE_assert te)) (Reason.Rwitness p, Tprim Tvoid)
   | True ->
       make_result env T.True (Reason.Rwitness p, Tprim Tbool)
   | False ->

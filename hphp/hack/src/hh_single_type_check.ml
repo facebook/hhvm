@@ -62,6 +62,7 @@ type options = {
   filename : string;
   mode : mode;
   no_builtins : bool;
+  filter_positions: bool;
   tcopt : GlobalOptions.t;
 }
 
@@ -108,6 +109,7 @@ let parse_options () =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
+  let filter_positions = ref false in
   let line = ref 0 in
   let set_mode x () =
     if !mode <> Errors
@@ -141,6 +143,9 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       " Dump all symbol information";
+    "--filter-positions",
+      Arg.Set filter_positions,
+      " Filter positions from print-outs of data-structures.";
     "--lint",
       Arg.Unit (set_mode Lint),
       " Produce lint errors";
@@ -225,6 +230,7 @@ let parse_options () =
   { filename = fn;
     mode = !mode;
     no_builtins = !no_builtins;
+    filter_positions = !filter_positions;
     tcopt;
   }
 
@@ -565,12 +571,14 @@ let get_tast_tenv opts filename files_info =
   nast_to_tast_tenv opts nast
 
 let handle_mode mode filename opts popt files_contents files_info errors =
+  let filter_output =
+    (if opts.filter_positions then filter_positions else (fun x -> x)) in
   match mode with
   | Ai _ -> ()
   | Autocomplete ->
       let file = cat (Relative_path.to_absolute filename) in
       let result =
-        ServerAutoComplete.auto_complete ~tcopt:opts ~delimit_on_namespaces:false file in
+        ServerAutoComplete.auto_complete ~tcopt:opts.tcopt ~delimit_on_namespaces:false file in
       List.iter ~f: begin fun r ->
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty
@@ -591,7 +599,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         Not_found -> failwith "Invalid test file: no flags found"
       in
       let result =
-        FfpAutocompleteService.auto_complete opts file_text position
+        FfpAutocompleteService.auto_complete opts.tcopt file_text position
         ~filter_by_token:true
       in begin
         match result with
@@ -605,7 +613,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
           let result = ServerColorFile.get_level_list begin fun () ->
-            ignore @@ Typing_check_utils.check_defs opts fn fileinfo;
+            ignore @@ Typing_check_utils.check_defs opts.tcopt fn fileinfo;
             fn
           end in
           print_colored fn result;
@@ -615,7 +623,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
           let type_acc =
-            ServerCoverageMetric.accumulate_types fn fileinfo opts in
+            ServerCoverageMetric.accumulate_types fn fileinfo opts.tcopt in
           print_coverage fn type_acc;
         end
       end
@@ -623,7 +631,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       begin match Relative_path.Map.get files_info filename with
         | Some fileinfo ->
             let raw_result =
-              SymbolInfoService.helper opts [] [(filename, fileinfo)] in
+              SymbolInfoService.helper opts.tcopt [] [(filename, fileinfo)] in
             let result = SymbolInfoService.format_result raw_result in
             let result_json = ClientSymbolInfo.to_json result in
             print_endline (Hh_json.json_to_multiline result_json)
@@ -633,7 +641,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       let lint_errors = Relative_path.Map.fold files_contents ~init:[]
         ~f:begin fun fn content lint_errors ->
           lint_errors @ fst (Lint.do_ begin fun () ->
-            Linting_service.lint opts fn content
+            Linting_service.lint opts.tcopt fn content
           end)
         end in
       if lint_errors <> []
@@ -648,7 +656,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       else Printf.printf "No lint errors\n"
   | Dump_deps ->
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      ignore @@ Typing_check_utils.check_defs opts fn fileinfo
+      ignore @@ Typing_check_utils.check_defs opts.tcopt fn fileinfo
     end;
     Typing_deps.dump_deps stdout
   | Dump_inheritance ->
@@ -658,7 +666,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
-          let ancestors = MethodJumps.get_inheritance opts class_
+          let ancestors = MethodJumps.get_inheritance opts.tcopt class_
             ~filter:MethodJumps.No_filter ~find_children:false files_info
             None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
@@ -668,7 +676,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
-          let children = MethodJumps.get_inheritance opts class_
+          let children = MethodJumps.get_inheritance opts.tcopt class_
             ~filter:MethodJumps.No_filter ~find_children:true files_info None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
@@ -677,7 +685,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     end;
   | Identify_symbol (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    begin match ServerIdentifyFunction.go_absolute file line column opts with
+    begin match ServerIdentifyFunction.go_absolute file line column opts.tcopt with
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
@@ -691,28 +699,28 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     let results = FileOutline.outline popt file in
     FileOutline.print ~short_pos:true results
   | Dump_nast ->
-    let nasts = create_nasts opts files_info in
+    let nasts = create_nasts opts.tcopt files_info in
     let nast = Relative_path.Map.find filename nasts in
-    Printf.printf "%s\n" (filter_positions (Nast.show_program nast))
+    Printf.printf "%s\n" (filter_output (Nast.show_program nast))
   | Dump_tast ->
-    let tast_tenv = get_tast_tenv opts filename files_info in
+    let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
     let type_to_string tenv (_, ty) = match ty with
       | None -> "None"
       | Some ty -> "(Some " ^ Typing_print.full tenv ty ^ ")" in
     let program = List.map tast_tenv
       (fun (def, tenv) -> TASTStringMapper.map_def (type_to_string tenv) def) in
-    Printf.printf "%s\n" (filter_positions (StringNAST.show_program program))
+    Printf.printf "%s\n" (filter_output (StringNAST.show_program program))
   | Dump_stripped_tast ->
-    let tast_tenv = get_tast_tenv opts filename files_info in
+    let tast_tenv = get_tast_tenv opts.tcopt filename files_info in
     let program = List.map tast_tenv fst in
     let program = TASTTypeStripper.map_program fst program in
-    Printf.printf "%s\n" (filter_positions (Nast.show_program program))
+    Printf.printf "%s\n" (filter_output (Nast.show_program program))
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.files_info;
-      ServerEnv.tcopt = opts;
+      ServerEnv.tcopt = opts.tcopt;
     } in
     let file = cat (Relative_path.to_absolute filename) in
     let include_defs = false in
@@ -721,7 +729,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let results = ServerHighlightRefs.go (file, line, column) opts  in
+    let results = ServerHighlightRefs.go (file, line, column) opts.tcopt  in
     ClientHighlightRefs.go results ~output_json:false;
   | Suggest
   | Infer_return_types
@@ -731,30 +739,30 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
         ~init:files_info
       in
-      let errors = check_errors opts errors files_info in
+      let errors = check_errors opts.tcopt errors files_info in
       if mode = Suggest
-      then Relative_path.Map.iter files_info (suggest_and_print opts);
+      then Relative_path.Map.iter files_info (suggest_and_print opts.tcopt);
       if mode = Infer_return_types
       then
-        Option.iter ~f:(infer_return opts filename)
+        Option.iter ~f:(infer_return opts.tcopt filename)
           (Relative_path.Map.get files_info filename);
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"
   | AllErrors ->
-      let errors = check_errors opts errors files_info in
+      let errors = check_errors opts.tcopt errors files_info in
       if errors <> []
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
   | Decl_compare ->
-    test_decl_compare filename popt files_contents opts files_info
-  | Least_upper_bound-> compute_least_type opts popt filename
+    test_decl_compare filename popt files_contents opts.tcopt files_info
+  | Least_upper_bound-> compute_least_type opts.tcopt popt filename
 
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
+let decl_and_run_mode ({filename; mode; no_builtins; tcopt; _} as opts) popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Local_id.track_names := true;
   Ident.track_names := true;
@@ -770,7 +778,7 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
   let errors, files_info, _ =
     parse_name_and_decl popt files_contents_with_builtins tcopt in
 
-  handle_mode mode filename tcopt popt files_contents files_info
+  handle_mode mode filename opts popt files_contents files_info
     (Errors.get_error_list errors)
 
 let main_hack ({filename; mode; no_builtins; _} as opts) =

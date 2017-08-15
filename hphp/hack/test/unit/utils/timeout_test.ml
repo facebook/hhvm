@@ -66,6 +66,18 @@ let test_basic_nested_outer_timeout () =
         end
     end
 
+let ack = "I'm ALIVE!"
+let send_ack oc = Daemon.to_channel oc ~flush:true ack
+let wait_for_ack handle =
+  let ic, _ = handle.Daemon.channels in
+  Timeout.with_timeout
+    ~timeout:10
+    ~on_timeout:(fun _ -> failwith "Failed to send ack")
+    ~do_:begin fun timeout ->
+      let result: string = Daemon.from_channel ~timeout ic in
+      assert (result = ack);
+    end
+
 (** The main method of the forked child process which will feed
  * data to the oc channel in two chunks split up by "delay" seconds. *)
 let data_producer delay oc =
@@ -76,6 +88,7 @@ let data_producer_entry =
   Daemon.register_entry_point
     "data_producer_main"
     (fun (delay: float) ((_ic: unit Daemon.in_channel), oc) ->
+       send_ack oc;
        data_producer delay oc)
 
 (** Child sends data after a 0.5 second delay. Parent read timeout is
@@ -85,6 +98,7 @@ let test_input_within_timeout () =
       ~channel_mode:`socket (Daemon.null_fd (), Unix.stdout, Unix.stderr)
       data_producer_entry 0.5 in
   let ic, _ = handle.Daemon.channels in
+  wait_for_ack handle;
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> false)
@@ -99,6 +113,7 @@ let test_input_within_timeout () =
 let test_input_exceeds_timeout () =
   let handle = Daemon.spawn ~channel_mode:`socket
     (Daemon.null_fd (), Unix.stdout, Unix.stderr) data_producer_entry 3.0 in
+  wait_for_ack handle;
   let ic, _ = handle.Daemon.channels in
   Timeout.with_timeout
     ~timeout:2
@@ -139,7 +154,8 @@ let slow_computation_with_timeout_entry =
   Daemon.register_entry_point
     "slow_computation_with_timeout"
     begin fun (timeout: int) ((_ic: unit Daemon.in_channel),
-                              (oc_: unit Daemon.out_channel)) ->
+                              (oc: string Daemon.out_channel)) ->
+      send_ack oc;
       Timeout.with_timeout
         ~timeout
         ~on_timeout:(fun _ -> exit 0)
@@ -155,10 +171,10 @@ let slow_computation_with_timeout_entry =
 (** Forks a child that should exit after 2 seconds. *)
 let test_timeout_no_input () =
   let handle = Daemon.spawn
-    ~channel_mode:`socket Daemon.(null_fd (), null_fd (), null_fd ())
+    ~channel_mode:`socket Daemon.(null_fd (), Unix.stdout, Unix.stderr)
     slow_computation_with_timeout_entry 2 in
-  (** In case machine is very slow to spawn process, give it 2 extra seconds. *)
-  let _ = Unix.select [] [] [] 4.0 in
+  wait_for_ack handle;
+  let _ = Unix.select [] [] [] 3.0 in
   let pid = handle.Daemon.pid in
   let result = match Unix.waitpid [Unix.WNOHANG] pid with
     | 0, _ ->
@@ -185,7 +201,8 @@ let slow_computation_after_io_entry =
   Daemon.register_entry_point
     "slow_computation_after_io"
     begin fun (timeout: int) ((ic: string Daemon.in_channel),
-                              (oc: unit Daemon.out_channel)) ->
+                              (oc: string Daemon.out_channel)) ->
+      send_ack oc;
       Timeout.with_timeout
         ~timeout
         ~on_timeout:(fun _ -> exit 0)
@@ -210,6 +227,7 @@ let test_timeout_after_input () =
   let handle = Daemon.spawn
       ~channel_mode:`socket (Daemon.null_fd (), Unix.stdout, Unix.stderr)
       slow_computation_after_io_entry 2 in
+  wait_for_ack handle;
   let (_ic, oc) = handle.Daemon.channels in
   (** Wait 1.1 seconds before sending data on the in channel. *)
   let _ = Unix.select [] [] [] 1.1 in

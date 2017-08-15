@@ -1,0 +1,78 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tint)));
+      f_name = (<p>, "\\f"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params =
+      [{ AnnotatedAST.param_hint = (Some (<p>, (Hprim Tint)));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = <p>; param_name = "$x"; param_expr = None }
+        ];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some int),
+                (AnnotatedAST.Binop ((Eq (Some Minus)),
+                   ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
+                   ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+             (AnnotatedAST.Expr
+                ((Some int),
+                 (AnnotatedAST.Binop ((Eq (Some Plus)),
+                    ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+             (AnnotatedAST.Expr
+                ((Some int),
+                 (AnnotatedAST.Binop ((Eq (Some Star)),
+                    ((Some int), (AnnotatedAST.Lvar (<p>, $x))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+             (AnnotatedAST.Expr
+                ((Some array<int>),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some array<int>),
+                     (AnnotatedAST.Lvar (<p>, $arr))),
+                    ((Some array<int>),
+                     (AnnotatedAST.Array
+                        [(AnnotatedAST.AFvalue
+                            ((Some int),
+                             (AnnotatedAST.Int (<p>, "1"))));
+                          (AnnotatedAST.AFvalue
+                             ((Some int),
+                              (AnnotatedAST.Int (<p>, "2"))));
+                          (AnnotatedAST.AFvalue
+                             ((Some int),
+                              (AnnotatedAST.Int (<p>, "3"))));
+                          (AnnotatedAST.AFvalue
+                             ((Some int),
+                              (AnnotatedAST.Int (<p>, "4"))))
+                          ]))
+                    ))));
+             (AnnotatedAST.Expr
+                ((Some int),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some int), (AnnotatedAST.Lvar (<p>, $i))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "2")))))));
+             (AnnotatedAST.Expr
+                ((Some int),
+                 (AnnotatedAST.Binop ((Eq (Some Plus)),
+                    ((Some int),
+                     (AnnotatedAST.Array_get (
+                        ((Some array<int>),
+                         (AnnotatedAST.Lvar (<p>, $arr))),
+                        (Some ((Some int),
+                               (AnnotatedAST.Binop (Minus,
+                                  ((Some int),
+                                   (AnnotatedAST.Lvar (<p>, $i))),
+                                  ((Some int),
+                                   (AnnotatedAST.Int (<p>, "1")))
+                                  ))))
+                        ))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "4")))))));
+             (AnnotatedAST.Return (<p>,
+                (Some ((Some int),
+                       (AnnotatedAST.Lvar (<p>, $x))))
+                ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] })
+  ]

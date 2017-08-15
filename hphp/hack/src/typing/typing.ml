@@ -1394,13 +1394,19 @@ and expr_
       let env, te, result = dispatch_call p env call_type e hl el uel in
       let env = Env.forget_members env p in
       env, te, result
-    (* For example, e1 += e2. This is typed and translated as if
-     * written e1 = e1 + e2.
-     * TODO TAST: is this right? e1 will get evaluated more than once
+    (* This case covers expressions like "e1 += e2". It is typed as if
+     * "e1 = e1 + e2" was written, meaning that e1 is typechecked twice. The
+     * returned typed expression correctly preserves the "e1 += e2" structure.
      *)
   | Binop (Ast.Eq (Some op), e1, e2) ->
-      let e2 = p, Binop (op, e1, e2) in
-      raw_expr in_cond env (p, Binop (Ast.Eq None, e1, e2))
+      let e_fake = (p, Binop (Ast.Eq None, e1, (p, Binop (op, e1, e2)))) in
+      let env, te_fake, ty = raw_expr in_cond env e_fake in
+      begin match snd te_fake with
+        | T.Binop (_, te1, (_, T.Binop (_, _, te2))) ->
+          let te = T.Binop (Ast.Eq (Some op), te1, te2) in
+          make_result env te ty
+        | _ -> assert false
+      end
   | Binop (Ast.Eq None, e1, e2) ->
       let env, te2, ty2 = raw_expr in_cond env e2 in
       let env, te1, ty = assign p env e1 ty2 in

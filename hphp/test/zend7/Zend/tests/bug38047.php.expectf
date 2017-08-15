@@ -4,7 +4,4 @@ Non-static method A::A_ftk() should not be called statically
 
 
 Fatal error: %s
-Stack trace:
-#0 %sbug38047.php(36): A::A_ftk()
-#1 {main}
-  thrown in %sbug38047.php on line 7
+Stack trace:%A

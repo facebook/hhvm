@@ -1,17 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-
-Next Exception: First in %sexception_007.php:%d
-Stack trace:
-#0 {main}
-
-Next Exception: Second in %sexception_007.php:%d
-Stack trace:
-#0 {main}
-
-Next Exception: Third in %sexception_007.php:%d
-Stack trace:
-#0 {main}
-  thrown in %sexception_007.php on line %d
+Stack trace:%A

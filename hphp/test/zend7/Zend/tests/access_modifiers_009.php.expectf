@@ -1,3 +1,4 @@
 bool(false)
 
 Fatal error: %s
+Stack trace:%A

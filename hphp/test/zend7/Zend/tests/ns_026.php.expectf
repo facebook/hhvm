@@ -5,6 +5,4 @@ Method - Foo\Foo::Bar
 Func   - Foo\Bar
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sns_026.php on line %d
+Stack trace:%A

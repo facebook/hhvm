@@ -1,6 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): Foo\f()
-#1 {main}
-  thrown in %sbug43344_7.php on line %d
+Stack trace:%A

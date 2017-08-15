@@ -6,7 +6,4 @@ test4
 test5
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): B->test()
-#1 {main}
-  thrown in %sbug42937.php on line 21
+Stack trace:%A

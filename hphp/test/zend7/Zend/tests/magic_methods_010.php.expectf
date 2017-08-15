@@ -2,3 +2,4 @@
 Warning: %s
 
 Fatal error: %s
+Stack trace:%A

@@ -1,6 +1,4 @@
 Exception: [] operator not supported for strings in %sexception_015.php on line %d
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sexception_015.php on line %d
+Stack trace:%A

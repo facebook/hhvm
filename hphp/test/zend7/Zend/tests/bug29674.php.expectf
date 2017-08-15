@@ -7,7 +7,4 @@ NULL
 string(4) "Base"
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): BaseClass->printVars()
-#1 {main}
-  thrown in %sbug29674.php on line %d
+Stack trace:%A

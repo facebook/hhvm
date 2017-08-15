@@ -8,6 +8,4 @@ A Object
 Notice: %s
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sbug32660.php on line 23
+Stack trace:%A

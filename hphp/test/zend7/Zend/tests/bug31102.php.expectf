@@ -5,7 +5,4 @@ Caught: __autoload
 __autoload(Test3,3)
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): eval()
-#1 {main}
-  thrown in %sbug31102.php(%d) : eval()'d code on line 1
+Stack trace:%A

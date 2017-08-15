@@ -4,3 +4,4 @@ Deprecated: Methods with the same name as their class will not be constructors i
 OverridingIsSilent2 OverridingIsSilent2
 
 Fatal error: %s
+Stack trace:%A

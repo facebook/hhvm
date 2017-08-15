@@ -2,7 +2,4 @@ ok
 ok
 
 Fatal error: %s
-Stack trace:
-#0 %s030.php(10): foo(0)
-#1 {main}
-  thrown in %s030.php on line 3
+Stack trace:%A

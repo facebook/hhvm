@@ -6,7 +6,4 @@ object(baz)#%d (0) {
 }
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): foo->testFoo(Object(stdClass))
-#1 {main}
-  thrown in %s on line %d
+Stack trace:%A

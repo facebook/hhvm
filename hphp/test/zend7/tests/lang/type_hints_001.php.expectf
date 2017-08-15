@@ -1,6 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): type_hint_foo(Object(Bar))
-#1 {main}
-  thrown in %s on line 9
+Stack trace:%A

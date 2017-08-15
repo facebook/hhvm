@@ -1,7 +1,4 @@
 Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): foo::teste()
-#1 {main}
-  thrown in %s on line %d
+Stack trace:%A

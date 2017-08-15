@@ -1,6 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 %sexception_019.php(%d): Exception->__construct(Object(stdClass))
-#1 {main}
-  thrown in %sexception_019.php on line %d
+Stack trace:%A

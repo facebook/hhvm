@@ -1,6 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 %sbug69761.php(%d): serialize(Object(class@anonymous))
-#1 {main}
-  thrown in %sbug69761.php on line %d
+Stack trace:%A

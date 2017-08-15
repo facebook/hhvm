@@ -10,6 +10,4 @@ class ok
 ok
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sns_058.php on line %d
+Stack trace:%A

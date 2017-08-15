@@ -5,6 +5,4 @@ Deprecated: Non-static method foo::aa() should not be called statically in %s on
 ok
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Stack trace:%A

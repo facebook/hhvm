@@ -2,6 +2,4 @@
 Warning: %s
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sbug73792.php on line 4
+Stack trace:%A

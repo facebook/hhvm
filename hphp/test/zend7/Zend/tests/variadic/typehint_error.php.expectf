@@ -19,7 +19,4 @@ array(3) {
 }
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): test(Array, Array, 2)
-#1 {main}
-  thrown in %s on line %d
+Stack trace:%A

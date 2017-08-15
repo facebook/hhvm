@@ -1,5 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sbug36071.php on line 2
+Stack trace:%A

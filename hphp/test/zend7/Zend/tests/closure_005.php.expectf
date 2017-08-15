@@ -7,7 +7,4 @@
 Destroyed
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): A::{closure}()
-#1 {main}
-  thrown in %sclosure_005.php on line 28
+Stack trace:%A

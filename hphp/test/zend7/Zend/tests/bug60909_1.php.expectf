@@ -7,6 +7,4 @@ Stack trace:
   thrown in %sbug60909_1.php on line 5
 
 Fatal error: %s
-
-
-!!!shutdown!!!
+Stack trace:%A

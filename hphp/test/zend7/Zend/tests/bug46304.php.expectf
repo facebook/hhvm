@@ -21,6 +21,4 @@ value6
 value6
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sbug46304.php on line %d
+Stack trace:%A

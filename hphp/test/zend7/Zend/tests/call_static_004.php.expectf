@@ -1,6 +1,4 @@
 string(3) "AaA"
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Stack trace:%A

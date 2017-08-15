@@ -1,6 +1,4 @@
 -----( Try to iterate with &$value: )-----
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %s on line 13
+Stack trace:%A

@@ -13,7 +13,7 @@ import urllib2
 
 # The version that we will be importing the tests from.
 # Must be a valid, released version from php download site
-zend_version = "7.1.6"
+zend_version = "7.1.8"
 
 no_import = ()
 
@@ -103,13 +103,20 @@ def walk(filename, dest_subdir):
             exp = exp.replace('\nNotice:', 'Notice:')
 
             match_rest_of_line = '%s'
+            match_rest_of_file = '%A'
             if key == 'EXPECTREGEX':
+                # Technically incorrect because it matches new lines
                 match_rest_of_line = '.+'
+                match_rest_of_file = '.*'
 
             exp = re.sub(r'(?:Parse|Fatal)\\? error\\?:.*',
-                         '\nFatal error: ' + match_rest_of_line, exp)
+                         '\nFatal error: ' + match_rest_of_line + '\n' +
+                         'Stack trace:' + match_rest_of_file, exp,
+                         flags=re.MULTILINE | re.DOTALL)
             exp = re.sub(r'(?:Catchable fatal)\\? error\\?:.*',
-                         '\nCatchable fatal error: ' + match_rest_of_line, exp)
+                         '\nCatchable fatal error: ' + match_rest_of_line +
+                         '\n' + 'Stack trace:' + match_rest_of_file, exp,
+                         flags=re.MULTILINE | re.DOTALL)
             exp = re.sub(r'Warning\\?:.*',
                          '\nWarning: ' + match_rest_of_line, exp)
             exp = re.sub(r'Notice\\?:.*',

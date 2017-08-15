@@ -1,5 +1,3 @@
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sexpect_007.php on line 10
+Stack trace:%A

@@ -4,6 +4,4 @@ Exception: Argument 1 passed to foo() must be callable, string given, called in 
 Exception: Cannot call abstract method C::foo()
 
 Fatal error: %s
-Stack trace:
-#0 {main}
-  thrown in %sexception_017.php on line %d
+Stack trace:%A

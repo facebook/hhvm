@@ -156,7 +156,4 @@ Array
 )
 
 Fatal error: %s
-Stack trace:
-#0 %s(%d): foo\oops()
-#1 {main}
-  thrown in %sbug42819.php on line %d
+Stack trace:%A

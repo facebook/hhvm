@@ -2,7 +2,4 @@ float(NAN)
 bool(true)
 
 Fatal error: %s
-Stack trace:
-#0 %s(9): takes_int(NAN)
-#1 {main}
-  thrown in %s on line 6
+Stack trace:%A

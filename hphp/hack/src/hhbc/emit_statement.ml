@@ -639,6 +639,8 @@ and load_lvarvar n id =
 
 and get_id_of_simple_lvar_opt v =
   match v with
+  | A.Lvar (pos, str) when str = SN.SpecialIdents.this ->
+    Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
   | A.Lvar (_, id) | A.Unop (A.Uref, (_, A.Lvar (_, id)))
     when not (SN.Superglobals.is_superglobal id) -> Some id
   | _ -> None

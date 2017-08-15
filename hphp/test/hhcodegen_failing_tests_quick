@@ -54,8 +54,6 @@ quick/pcre-crash.php
 quick/post_try_error.php
 quick/prop_order.php
 quick/prop_order_parens.php
-quick/reassign_this1.php
-quick/reassign_this2.php
 quick/reassign_this3.php
 quick/redeclared_function.php
 quick/redeclared_method.php

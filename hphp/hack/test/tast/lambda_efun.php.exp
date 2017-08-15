@@ -35,7 +35,16 @@
                           (AnnotatedAST.NamedBody
                              { AnnotatedAST.fnb_nast =
                                [(AnnotatedAST.Return (<p>,
-                                   (Some ((Some int), AnnotatedAST.Any))))
+                                   (Some ((Some int),
+                                          (AnnotatedAST.Binop (Plus,
+                                             ((Some int),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $y))),
+                                             ((Some _),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $z)))
+                                             ))))
+                                   ))
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [] },
@@ -76,7 +85,16 @@
                           (AnnotatedAST.NamedBody
                              { AnnotatedAST.fnb_nast =
                                [(AnnotatedAST.Return (<p>,
-                                   (Some ((Some int), AnnotatedAST.Any))))
+                                   (Some ((Some int),
+                                          (AnnotatedAST.Binop (Plus,
+                                             ((Some int),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $y))),
+                                             ((Some _),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $z)))
+                                             ))))
+                                   ))
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [] },
@@ -109,7 +127,16 @@
                           (AnnotatedAST.NamedBody
                              { AnnotatedAST.fnb_nast =
                                [(AnnotatedAST.Return (<p>,
-                                   (Some ((Some _), AnnotatedAST.Any))))
+                                   (Some ((Some _),
+                                          (AnnotatedAST.Binop (Plus,
+                                             ((Some _),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $a))),
+                                             ((Some _),
+                                              (AnnotatedAST.Lvar
+                                                 (<p>, $b)))
+                                             ))))
+                                   ))
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [] },

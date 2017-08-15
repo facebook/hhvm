@@ -126,10 +126,9 @@ let make_wrapper_body return_type params instrs =
     None (* doc *)
 
 let emit_wrapper_function ~original_id ~renamed_id ast_fun =
-  if ast_fun.Ast.f_ret_by_ref
-  then Emit_fatal.raise_fatal_runtime (fst ast_fun.Ast.f_name)
-    "<<__Memoize>> cannot be used on functions that return by reference"
-  else
+  Emit_memoize_helpers.check_memoize_possible (fst ast_fun.Ast.f_name)
+    ~ret_by_ref: ast_fun.Ast.f_ret_by_ref
+    ~params: ast_fun.Ast.f_params;
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let namespace = ast_fun.Ast.f_namespace in
   let pos = ast_fun.Ast.f_span in

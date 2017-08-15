@@ -637,10 +637,12 @@ and load_lvarvar n id =
   instr_cgetl (Local.Named id) ::
   List.replicate (n - 1) instr_cgetn
 
-and get_id_of_simple_lvar_opt v =
+and get_id_of_simple_lvar_opt ~is_key v =
   match v with
   | A.Lvar (pos, str) when str = SN.SpecialIdents.this ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
+  | A.Unop (A.Uref, (_, A.Lvar (pos, _))) when is_key ->
+    Emit_fatal.raise_fatal_parse pos "Key element cannot be a reference"
   | A.Lvar (_, id) | A.Unop (A.Uref, (_, A.Lvar (_, id)))
     when not (SN.Superglobals.is_superglobal id) -> Some id
   | _ -> None
@@ -707,7 +709,8 @@ and emit_load_list_element path i v =
 and emit_iterator_key_value_storage env iterator =
   match iterator with
   | A.As_kv (((_, k) as expr_k), ((_, v) as expr_v)) ->
-    begin match get_id_of_simple_lvar_opt k, get_id_of_simple_lvar_opt v with
+    begin match get_id_of_simple_lvar_opt ~is_key:true k,
+                get_id_of_simple_lvar_opt ~is_key:false v with
     | Some key_id, Some value_id ->
       let key_local = Local.Named key_id in
       let value_local = Local.Named value_id in
@@ -733,7 +736,7 @@ and emit_iterator_key_value_storage env iterator =
       (gather value_preamble)::value_load
     end
   | A.As_v ((_, v) as expr_v) ->
-    begin match get_id_of_simple_lvar_opt v with
+    begin match get_id_of_simple_lvar_opt ~is_key:false v with
     | Some value_id ->
       let value_local = Local.Named value_id in
       None, value_local, [], []

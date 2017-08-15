@@ -54,3 +54,14 @@ let cannot_return_null fun_kind _ret =
    !m_curFunc->retTypeConstraint.isSoft() &&
    !m_curFunc->retTypeConstraint.isNullable() &&
    RuntimeOption::EvalCheckReturnTypeHints >= 3) *)
+
+let check_memoize_possible pos ~ret_by_ref ~params =
+  if ret_by_ref
+  then Emit_fatal.raise_fatal_runtime pos
+    "<<__Memoize>> cannot be used on functions that return by reference";
+  if List.exists params (fun p -> p.Ast.param_is_reference)
+  then Emit_fatal.raise_fatal_runtime pos
+    "<<__Memoize>> cannot be used on functions with args passed by reference";
+  if List.exists params (fun p -> p.Ast.param_is_variadic)
+  then Emit_fatal.raise_fatal_runtime pos
+    "<<__Memoize>> cannot be used on functions with variable arguments"

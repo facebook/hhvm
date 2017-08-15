@@ -40,6 +40,9 @@ let from_ast_wrapper : bool -> _ ->
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
+  if ast_class.Ast.c_kind = Ast.Cinterface && not (List.is_empty ast_method.Ast.m_body)
+  then Emit_fatal.raise_fatal_parse pos
+    (Printf.sprintf "Interface method %s::%s cannot contain body" class_name original_name);
   if not method_is_static
     && ast_class.Ast.c_final
     && ast_class.Ast.c_kind = Ast.Cabstract

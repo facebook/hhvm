@@ -35,10 +35,10 @@ let make_info ast_class class_id ast_methods =
     if is_memoize ast_method
     then
     let pos = fst ast_method.Ast.m_name in
-    if ast_method.Ast.m_ret_by_ref
-    then Emit_fatal.raise_fatal_runtime pos
-      "<<__Memoize>> cannot be used on functions that return by reference"
-    else if ast_class.Ast.c_kind = Ast.Cinterface
+    Emit_memoize_helpers.check_memoize_possible pos
+      ~ret_by_ref: ast_method.Ast.m_ret_by_ref
+      ~params: ast_method.Ast.m_params;
+    if ast_class.Ast.c_kind = Ast.Cinterface
     then Emit_fatal.raise_fatal_runtime pos
       "<<__Memoize>> cannot be used in interfaces"
     else if List.mem ast_method.Ast.m_kind Ast.Abstract

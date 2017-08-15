@@ -73,22 +73,15 @@ struct BlockScope : std::enable_shared_from_this<BlockScope> {
   };
 
   enum UseKinds {
-    /* Callers */
-    UseKindCallerParam    = 0x1 << 1,
-    UseKindCallerReturn   = 0x1 << 2,
-    UseKindCaller         = (UseKindCallerParam  |
-                             UseKindCallerReturn),
-
+    UseKindSelf           = 0x1 << 0,
     /* Static references */
-    UseKindStaticRef      = 0x1 << 3,
+    UseKindStaticRef      = 0x1 << 1,
 
     /* Constants */
-    UseKindConstRef       = 0x1 << 20,
+    UseKindConstRef       = 0x1 << 2,
 
     /* Other types */
-    UseKindParentRef      = 0x1 << 21,
-    UseKindInclude        = 0x1 << 22,
-    UseKindClosure        = 0x1 << 23,
+    UseKindParentRef      = 0x1 << 3,
     UseKindAny            = (unsigned)-1
   };
 

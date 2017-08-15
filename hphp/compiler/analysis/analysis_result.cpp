@@ -797,7 +797,7 @@ struct DepthFirstVisitor {
       if (auto kid = e->getNthExpr(i)) {
         auto rep = visitExprRecur(kid);
         if (rep) {
-          e->getScope()->addUpdates(BlockScope::UseKindCaller);
+          e->getScope()->addUpdates(BlockScope::UseKindSelf);
           e->setNthKid(i, rep);
         }
       }
@@ -816,14 +816,14 @@ struct DepthFirstVisitor {
           if (scope) scope->incLoopNestedLevel();
           if (auto rep = visitStmtRecur(s)) {
             stmt->setNthKid(i, rep);
-            stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
+            stmt->getScope()->addUpdates(BlockScope::UseKindSelf);
           }
           if (scope) scope->decLoopNestedLevel();
         } else {
           auto e = dynamic_pointer_cast<Expression>(kid);
           if (auto rep = visitExprRecur(e)) {
             stmt->setNthKid(i, rep);
-            stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
+            stmt->getScope()->addUpdates(BlockScope::UseKindSelf);
           }
         }
       }
@@ -844,8 +844,8 @@ struct DepthFirstVisitor {
         updates = scope->getUpdated();
         all_updates |= updates;
       } while (updates);
-      if (all_updates & BlockScope::UseKindCaller) {
-        all_updates &= ~BlockScope::UseKindCaller;
+      if (all_updates & BlockScope::UseKindSelf) {
+        all_updates &= ~BlockScope::UseKindSelf;
       }
       return all_updates;
     }

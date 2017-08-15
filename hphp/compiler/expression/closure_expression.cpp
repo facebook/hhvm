@@ -218,9 +218,6 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 
 void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    getFunctionScope()->addUse(m_func->getFunctionScope(),
-                               BlockScope::UseKindClosure);
-
     // closure function's variable table (not containing function's)
     VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
     VariableTablePtr containing = getFunctionScope()->getVariables();

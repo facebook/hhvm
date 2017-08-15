@@ -78,7 +78,6 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
                (func->hasOverride() &&
                 cls->getAttribute(ClassScope::NotFinal))))) {
           m_funcScope = func;
-          func->addCaller(getScope());
         }
       }
     }

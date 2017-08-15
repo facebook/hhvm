@@ -397,15 +397,6 @@ std::string FunctionScope::getOriginalFullName() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FunctionScope::addCaller(BlockScopePtr caller,
-                              bool /*careAboutReturn*/ /* = true */) {
-  addUse(caller, UseKindCaller);
-}
-
-void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
-  addUse(caller, UseKindCaller & ~UseKindCallerReturn);
-}
-
 bool FunctionScope::isRefParam(int index) const {
   assert(index >= 0 && index < (int)m_refs.size());
   return m_refs[index];
@@ -524,30 +515,6 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
     paramSymbols.push_back(SymParamWrapper(sym));
   }
   ms.add("parameters", paramSymbols);
-
-  // scopes that call this scope (callers)
-  std::vector<std::string> callers;
-  for (const auto& p : getDeps()) {
-    if ((*p.second & BlockScope::UseKindCaller) &&
-        p.first->is(BlockScope::FunctionScope)) {
-      auto f = static_pointer_cast<FunctionScope>(p.first);
-      callers.push_back(f->getDocFullName());
-    }
-  }
-  ms.add("callers", callers);
-
-  // scopes that this scope calls (callees)
-  // TODO(stephentu): this list only contains *user* functions,
-  // we should also include builtins
-  std::vector<std::string> callees;
-  for (const auto pf : getOrderedUsers()) {
-    if ((pf->second & BlockScope::UseKindCaller) &&
-        pf->first->is(BlockScope::FunctionScope)) {
-      auto f = static_pointer_cast<FunctionScope>(pf->first);
-      callees.push_back(f->getDocFullName());
-    }
-  }
-  ms.add("callees", callees);
 
   ms.done();
 }

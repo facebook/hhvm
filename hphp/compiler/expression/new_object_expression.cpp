@@ -62,7 +62,6 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
       if (ClassScopePtr cls = resolveClass()) {
         m_origName = m_origClassName;
         func = cls->findConstructor(ar, true);
-        if (func) func->addNewObjCaller(getScope());
       }
     }
 

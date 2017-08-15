@@ -290,7 +290,6 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
     if (m_funcScope != func) {
       m_funcScope = func;
       Construct::recomputeEffects();
-      m_funcScope->addCaller(getScope());
     }
   }
 }

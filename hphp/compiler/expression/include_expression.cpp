@@ -218,10 +218,6 @@ bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
     return false;
   }
 
-  FunctionScopePtr func = getFunctionScope();
-  if (func && file->getPseudoMain()) {
-    file->getPseudoMain()->addUse(func, BlockScope::UseKindInclude);
-  }
   return true;
 }
 

@@ -360,7 +360,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr /*ar*/) {
     }
   }
   if (changed) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
+    getScope()->addUpdates(BlockScope::UseKindSelf);
   }
 }
 

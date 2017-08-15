@@ -250,9 +250,6 @@ struct FunctionScope : BlockScope,
     return m_pseudoMain;
   }
 
-  void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
-  void addNewObjCaller(BlockScopePtr caller);
-
   struct FunctionInfo {
     explicit FunctionInfo(int rva = -1)
       /*

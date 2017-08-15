@@ -490,12 +490,27 @@ module WithExpressionAndDeclAndTypeParser
 
   and parse_catch_clause_opt parser =
     (* SPEC
-      catch  (  type-specification variable-name  )  compound-statement
+      catch  (  type-specification-opt variable-name  )  compound-statement
     *)
     if peek_token_kind parser = Catch then
       let (parser, catch_token) = assert_token parser Catch in
       let (parser, left_paren) = require_left_paren parser in
-      let (parser, catch_type) = parse_type_specifier parser in
+      let (parser, catch_type) =
+        match peek_token_kind parser with
+        | TokenKind.Variable ->
+          let parser = with_error parser SyntaxError.error1007 in
+          parser, make_missing ()
+        | _ ->
+          let type_parser =
+            TypeParser.make parser.lexer parser.errors parser.context
+          in
+          let (type_parser, node) =
+            TypeParser.parse_type_specifier type_parser
+          in
+          let lexer = TypeParser.lexer type_parser in
+          let errors = TypeParser.errors type_parser in
+          { parser with lexer; errors }, node
+      in
       let (parser, catch_var) = require_variable parser in
       let (parser, right_paren) = require_right_paren parser in
       let (parser, compound_stmt) = parse_compound_statement parser in
@@ -781,15 +796,5 @@ module WithExpressionAndDeclAndTypeParser
     let errors = ExpressionParser.errors expression_parser in
     let parser = { parser with lexer; errors } in
     (parser, node)
-
-and parse_type_specifier parser =
-  let type_parser = TypeParser.make parser.lexer
-    parser.errors parser.context in
-  let (type_parser, node) =
-    TypeParser.parse_type_specifier type_parser in
-  let lexer = TypeParser.lexer type_parser in
-  let errors = TypeParser.errors type_parser in
-  let parser = { parser with lexer; errors } in
-  (parser, node)
 
 end

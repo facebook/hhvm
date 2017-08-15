@@ -21,7 +21,7 @@
                     ((Some _),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([L0:-1-L0:-1], ";anonymous");
+                          f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
@@ -71,7 +71,7 @@
                     ((Some _),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([L0:-1-L0:-1], ";anonymous");
+                          f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =
@@ -108,7 +108,7 @@
                     ((Some _),
                      (AnnotatedAST.Efun (
                         { AnnotatedAST.f_mode = <opaque>; f_ret = None;
-                          f_name = ([L0:-1-L0:-1], ";anonymous");
+                          f_name = ([Pos.none], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = AnnotatedAST.FVnonVariadic;
                           f_params =

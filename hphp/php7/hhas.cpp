@@ -16,6 +16,7 @@
 
 #include "hphp/php7/hhas.h"
 
+#include "hphp/php7/cfg.h"
 #include "hphp/util/match.h"
 
 #include <folly/Format.h>
@@ -26,7 +27,7 @@ namespace HPHP { namespace php7 {
 namespace {
   std::string dump_pseudomain(const Function& func);
   std::string dump_function(const Function& func);
-  std::string dump_blocks(std::vector<Block*> blocks);
+  std::string dump_blocks(const Function& func);
 
   std::string dump_declvars(const std::unordered_set<std::string>& locals);
 } // namespace
@@ -175,13 +176,58 @@ struct InstrVisitor {
 // This is just a visitor for instructions and exits that will omit a jump
 // (Jmp, JmpNS) iff the block that is the jump target follows immediately after
 // the jump instruction
-struct CFGVisitor : public boost::static_visitor<void> {
-  explicit CFGVisitor(std::string& out)
+struct AssemblyVisitor : public boost::static_visitor<void>
+                       , public CFGVisitor {
+
+  explicit AssemblyVisitor(std::string& out)
     : out(out)
     , instr(out)
   {}
 
-  void beginBlock(Block* blk) {
+  ~AssemblyVisitor() {
+    end();
+  }
+
+  void doIndent() {
+    for (int i = 0 ; i < indent; i++) {
+      out.append("  ");
+    }
+  }
+
+  void beginTry() override {
+    end();
+    doIndent();
+    out.append(".try {\n");
+    indent++;
+  }
+
+  void beginCatch() override {
+    end();
+    indent--;
+    doIndent();
+    out.append("} .catch {\n");
+    indent++;
+  }
+
+  void endRegion() override {
+    end();
+    indent--;
+    doIndent();
+    out.append("}\n");
+
+  }
+
+  void block(Block* blk) override {
+    label(blk);
+    for (const auto& bc : blk->code) {
+      bc.visit(*this);
+    }
+    for (const auto& ex : blk->exits) {
+      exit(ex);
+    }
+  }
+
+  void label(Block* blk) {
     // if there was an unconditional jump and its target was *not* this block
     // actually emit the instruction
     if (nextUnconditionalDestination
@@ -189,12 +235,14 @@ struct CFGVisitor : public boost::static_visitor<void> {
       bytecode(bc::Jmp{nextUnconditionalDestination});
     }
     nextUnconditionalDestination = nullptr;
+    doIndent();
     folly::format(&out, "L{}:\n", blk->id);
   }
 
   void end() {
     if (nextUnconditionalDestination) {
-      instr.bytecode(bc::Jmp{nextUnconditionalDestination});
+      bytecode(bc::Jmp{nextUnconditionalDestination});
+      nextUnconditionalDestination = nullptr;
     }
   }
 
@@ -212,6 +260,7 @@ struct CFGVisitor : public boost::static_visitor<void> {
   }
 
   void bytecode(const Bytecode& bc) {
+    doIndent();
     bc.visit(instr);
   }
 
@@ -222,13 +271,14 @@ struct CFGVisitor : public boost::static_visitor<void> {
   std::string& out;
   InstrVisitor instr;
   Block* nextUnconditionalDestination{nullptr};
+  unsigned indent{1};
 };
 
 std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
   out.append(dump_declvars(func.locals));
-  out.append(dump_blocks(serializeControlFlowGraph(func.cfg.entry())));
+  func.cfg.visit(AssemblyVisitor(out));
   out.append("}\n\n");
   return out;
 }
@@ -245,27 +295,8 @@ std::string dump_function(const Function& func) {
   }
   out.append(") {\n");
   out.append(dump_declvars(func.locals));
-  out.append(dump_blocks(serializeControlFlowGraph(func.cfg.entry())));
+  func.cfg.visit(AssemblyVisitor(out));
   out.append("}\n\n");
-  return out;
-
-}
-
-std::string dump_blocks(std::vector<Block*> blocks) {
-  std::string out;
-  CFGVisitor visitor(out);
-
-  for (auto blk : blocks) {
-    visitor.beginBlock(blk);
-    for (const auto& bc : blk->code) {
-      bc.visit(visitor);
-    }
-    for (const auto& exit : blk->exits) {
-      visitor.exit(exit);
-    }
-  }
-
-  visitor.end();
   return out;
 }
 

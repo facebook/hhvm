@@ -1,0 +1,5 @@
+<?php
+
+try {
+  echo "bad";
+}

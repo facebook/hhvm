@@ -30,10 +30,8 @@
 namespace HPHP { namespace php7 {
 
 struct Function;
+struct Region;
 struct Unit;
-
-// get the series of block pointers in the control graph that starts at `entry`
-std::vector<Block*> serializeControlFlowGraph(Block* entry);
 
 struct Function {
   struct Param {

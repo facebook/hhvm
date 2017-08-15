@@ -17,6 +17,7 @@
 #include "hphp/php7/compiler.h"
 
 #include "hphp/php7/util.h"
+#include "hphp/util/match.h"
 
 #include <folly/Format.h>
 
@@ -32,10 +33,14 @@ CFG compileVar(const zend_ast* ast, Destination destination);
 CFG compileAssignment(const zend_ast* ast);
 CFG compileBind(const zend_ast* ast);
 CFG compileAssignOp(const zend_ast* ast);
-CFG compileCall(const zend_ast* ast);
+CFG compileFunctionCall(const zend_ast* ast);
+CFG compileNew(const zend_ast* ast);
+CFG compileCall(const zend_ast_list* params);
 CFG compileArray(const zend_ast* ast);
 
 CFG compileGlobalDeclaration(const zend_ast* ast);
+CFG compileCatch(Function* func, const zend_ast_list* catches);
+CFG compileTry(Function* func, const zend_ast* ast);
 CFG compileIf(Function* func, const zend_ast* ast);
 CFG compileWhile(Function* func,
     const zend_ast* cond,
@@ -66,7 +71,8 @@ void compileProgram(Unit* unit, const zend_ast* ast) {
   pseudomain->cfg = compileStatement(pseudomain, ast)
     .then(Int{1})
     .thenReturn(Flavor::Cell)
-    .makeExitsReal();
+    .makeExitsReal()
+    .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 }
 
 void compileFunction(Unit* unit, const zend_ast* ast) {
@@ -103,7 +109,8 @@ void compileFunction(Unit* unit, const zend_ast* ast) {
     .thenReturn(func->returnsByReference()
       ? Flavor::Ref
       : Flavor::Cell)
-    .makeExitsReal();
+    .makeExitsReal()
+    .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 }
 
 void panic(const std::string& msg) {
@@ -308,7 +315,7 @@ CFG compileAssignOp(const zend_ast* ast) {
   return getLvalue(lhs)->assignOp(op, rhs);
 }
 
-CFG compileCall(const zend_ast* ast) {
+CFG compileFunctionCall(const zend_ast* ast) {
   auto callee = ast->child[0];
   auto params = zend_ast_get_list(ast->child[1]);
 
@@ -316,20 +323,43 @@ CFG compileCall(const zend_ast* ast) {
       ? zend_ast_get_zval(callee)
       : nullptr;
 
-  CFG call;
-  // push the FPI record
   if (zv && Z_TYPE_P(zv) == IS_STRING) {
-    call.then(FPushFuncD{
+    return CFG(FPushFuncD{
       params->children,
       Z_STRVAL_P(zend_ast_get_zval(callee))
-    });
+    }).then(compileCall(params));
   } else {
-    call.then(compileExpression(callee, Flavor::Cell))
+    return compileExpression(callee, Flavor::Cell)
       .then(FPushFunc{
         params->children
-      });
+      })
+      .then(compileCall(params));
   }
+}
 
+CFG compileNew(const zend_ast* ast) {
+  auto cls = ast->child[0];
+  auto params = zend_ast_get_list(ast->child[1]);
+
+  auto zv = cls->kind == ZEND_AST_ZVAL
+      ? zend_ast_get_zval(cls)
+      : nullptr;
+
+  // push the FPI record
+  if (zv && Z_TYPE_P(zv) == IS_STRING) {
+    return CFG(FPushCtorD{
+      params->children,
+      Z_STRVAL_P(zv)
+    })
+      .then(compileCall(params))
+      .then(PopR{});
+  } else {
+    panic("new with variable classref");
+  }
+}
+
+CFG compileCall(const zend_ast_list* params) {
+  CFG call;
   for (uint32_t i = 0; i < params->children; i++) {
     call.then(compileExpression(params->child[i], Destination::Param(i)));
   }
@@ -427,8 +457,11 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
       return compileAssignOp(ast)
         .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_CALL:
-      return compileCall(ast)
+      return compileFunctionCall(ast)
         .then(fixFlavor(dest, Flavor::Return));
+    case ZEND_AST_NEW:
+      return compileNew(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_ARRAY:
       return compileArray(ast)
         .then(fixFlavor(dest, Flavor::Cell));
@@ -548,6 +581,11 @@ CFG compileStatement(Function* func, const zend_ast* ast) {
         : CFG(Null{}).then(fixFlavor(flavor, Flavor::Cell));
       return expr.thenReturn(flavor);
     }
+    case ZEND_AST_TRY:
+      return compileTry(func, ast);
+    case ZEND_AST_THROW:
+      return compileExpression(ast->child[0], Flavor::Cell)
+        .thenThrow();
     case ZEND_AST_FUNC_DECL:
       compileFunction(func->parent, ast);
       return CFG();
@@ -569,6 +607,61 @@ CFG compileGlobalDeclaration(const zend_ast* ast) {
     BindL{name},
     PopV{}
   };
+}
+
+CFG compileCatch(Function* func, const zend_ast_list* catches) {
+  CFG cfg;
+  auto end = cfg.makeBlock();
+
+  for (uint32_t i = 0; i < catches->children; i++) {
+    auto clause = catches->child[i];
+    auto types = zend_ast_get_list(clause->child[0]);
+    auto capture = zval_to_string(zend_ast_get_zval(clause->child[1]));
+    auto body = clause->child[2];
+
+    auto handler = CFG({
+      SetL{capture},
+      PopC{}
+    }).then(compileStatement(func, body))
+      .thenJmp(end);
+
+    for (uint32_t j = 0; j < types->children; j++) {
+      auto name = zval_to_string(zend_ast_get_zval(types->child[j]));
+      cfg.then(Dup{})
+        .then(InstanceOfD{name})
+        .branchNZ("handler");
+    }
+
+    cfg.replace("handler", std::move(handler));
+  }
+
+  cfg.thenThrow();
+
+  return cfg.continueFrom(end);
+}
+
+
+CFG compileTry(Function* func, const zend_ast* ast) {
+  auto body = ast->child[0];
+  auto catches = zend_ast_get_list(ast->child[1]);
+  auto finally = ast->child[2];
+
+  if (!finally && catches->children == 0) {
+    throw LanguageException("Cannot use try without catch or finally");
+  }
+
+  CFG cfg = compileStatement(func, body);
+
+  // don't bother adding a catch region if there's no catches
+  if (catches->children > 0) {
+    cfg.addExnHandler(compileCatch(func, catches));
+  }
+
+  if (finally) {
+    panic("NYI: finally");
+  }
+
+  return cfg;
 }
 
 CFG compileIf(Function* func, const zend_ast* ast) {

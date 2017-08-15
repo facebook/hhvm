@@ -26,6 +26,8 @@
 
 namespace HPHP { namespace php7 {
 
+struct Region;
+
 /* A basic block of bytecode
  *
  * Each block has a sequence of non-exit instructions followed by a sequence of
@@ -62,7 +64,71 @@ struct Block {
   // code associated with this block
   std::vector<Bytecode> code;
   std::vector<ExitOp> exits;
+  Region* region;
   bool exited{false};
+};
+
+/* A region is a way of keeping bytecode contiguous in the output unit and to
+ * mark protected regions. Regions come in three flavors: fault-protected
+ * regions (those with an associated fault funclet), exception-protected (with
+ * an associated catch label), and vanilla (nothing special).
+ *
+ * All regions correspond to:
+ * - a function body (vanilla)
+ * - the body of a try (protected)
+ * - the body of a catch (vanilla)
+ * - a fault funclet (vanilla)
+ *
+ * A catch's region must have the same immediate parent as the try's region
+ *
+ * In addition, regions must nest completely: i.e. if two regions share any
+ * bytecode, one must contain the other completely.
+ *
+ * It's up to the compiler to ensure that all blocks in a region are dominated
+ * by a single block (i.e. they can be made into one contiguous chunk of code)
+ */
+struct Region {
+  enum Kind {
+    Entry,
+    Protected,
+    Catch,
+  };
+
+  explicit Region(Kind kind, Region* parent = nullptr)
+    : kind(kind)
+    , parent(parent) {}
+
+  Kind kind;
+  Region* parent;
+  Block* handler{nullptr};
+  std::vector<std::unique_ptr<Region>> children;
+
+  void addChild(std::unique_ptr<Region> child) {
+    child->parent = this;
+    children.push_back(std::move(child));
+  }
+
+  bool containsBlock(const Block* blk) const {
+    auto region = blk->region;
+    while (region) {
+      if (region == this) {
+        return true;
+      }
+      region = region->parent;
+    }
+
+    return false;
+  }
+};
+
+struct CFGVisitor {
+  virtual ~CFGVisitor() = default;
+
+  virtual void beginTry() = 0;
+  virtual void beginCatch() = 0;
+  virtual void endRegion() = 0;
+
+  virtual void block(Block* blk) = 0;
 };
 
 /* A CFG represents a collection of blocks with a single entry and one or more
@@ -125,12 +191,6 @@ struct Block {
  * the CFG further will probably have unexpected results.
  */
 struct CFG {
-  struct ThrowTarget {
-    bool operator==(const ThrowTarget& /*other*/) const {
-      return true;
-    }
-  };
-
   struct ReturnTarget {
     bool operator==(const ReturnTarget& other) const {
       return other.flavor == flavor;
@@ -151,7 +211,6 @@ struct CFG {
   };
 
   using LinkTarget = boost::variant<
-    ThrowTarget,
     ReturnTarget,
     LoopTarget,
     LabelTarget
@@ -238,6 +297,7 @@ struct CFG {
   CFG&& then(const std::string& label);
   CFG&& branchZ(const std::string& label);
   CFG&& branchNZ(const std::string& label);
+  CFG&& continueFrom(Block* block);
 
   /* sequences a link into this CFG */
   CFG&& then(LinkTarget target);
@@ -246,6 +306,9 @@ struct CFG {
   CFG&& thenContinue();
   CFG&& thenBreak();
   CFG&& thenLabel(const std::string& name);
+
+  /* replace the given label and strip it out */
+  CFG&& replace(const std::string& label, CFG cfg);
 
   /* Finalize all exits and raise errors if:
    *  - any continue or break hasn't been matched with a loop
@@ -258,6 +321,12 @@ struct CFG {
 
   /* rewrite breaks and continues to resolve to these CFGs */
   CFG&& linkLoop(CFG breakTarget, CFG continueTarget);
+  /* add a catch region with the given handler */
+  CFG&& addExnHandler(CFG catchHandler);
+
+  CFG&& inRegion(std::unique_ptr<Region> region);
+
+  void visit(CFGVisitor&& visitor) const;
 
  private:
   /* replaces named labels with the given block */
@@ -322,9 +391,10 @@ struct CFG {
     return std::move(*this);
   }
 
- private:
+ public:
   uint64_t m_maxId{0};
   std::vector<std::unique_ptr<Block>> m_blocks;
+  std::vector<std::unique_ptr<Region>> m_topRegions;
   std::unordered_map<std::string, Block*> m_labels;
   std::vector<Linkage> m_unresolvedLinks;
   Block* m_entry;

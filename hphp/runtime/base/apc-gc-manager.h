@@ -104,7 +104,7 @@ struct APCGCManager {
     void invokeGlobalGC();
     void insert(Allocation r, APCHandle* root);
     APCHandle* getRootAPCHandle(const void* ptr);
-    void insertVisibleRoot(APCHandle *root);
+    void insertVisibleRoot(APCHandle* root);
 
   private:
     // Size of total to-be-deleted APC uncounted data
@@ -112,9 +112,6 @@ struct APCGCManager {
     // Mapping { (stAddress, edAddress) -> root } }
     std::map<Allocation, APCHandle*> rootMap;
     ReadWriteMutex rootMapLock;
-    // Every root in this set is visible from heap
-    std::set<APCHandle*> visibleFromHeap;
-    ReadWriteMutex visibleFromHeapLock;
     // To ensure won't free same handle twice
     // We can free an APCHandle* if and only if it is contained by this list
     // It also shows the size of the whole APC uncounted value

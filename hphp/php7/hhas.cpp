@@ -84,6 +84,14 @@ struct InstrVisitor {
     folly::format(&out, " ${}", local.name);
   }
 
+  void imm(const std::vector<Block*>& jmps) {
+    out.append(" <");
+    for (const auto& blk : jmps) {
+      folly::format(&out, " L{}", blk->id);
+    }
+    out.append(" >");
+  }
+
   void imm(IncDecOp op) {
     out.append(" ");
     switch (op) {
@@ -126,6 +134,15 @@ struct InstrVisitor {
 #define MODE(name) case MOpMode::name: out.append( #name ); break;
       M_OP_MODES
 #undef MODE
+    }
+  }
+
+  void imm(SwitchKind op) {
+    out.append(" ");
+    switch (op) {
+#define KIND(name) case SwitchKind::name: out.append( #name ); break;
+      SWITCH_KINDS
+#undef KIND
     }
   }
 

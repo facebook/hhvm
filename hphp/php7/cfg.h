@@ -298,6 +298,7 @@ struct CFG {
   CFG&& branchZ(const std::string& label);
   CFG&& branchNZ(const std::string& label);
   CFG&& continueFrom(Block* block);
+  CFG&& switchUnbounded(std::vector<CFG> exits);
 
   /* sequences a link into this CFG */
   CFG&& then(LinkTarget target);
@@ -323,6 +324,7 @@ struct CFG {
   CFG&& linkLoop(CFG breakTarget, CFG continueTarget);
   /* add a catch region with the given handler */
   CFG&& addExnHandler(CFG catchHandler);
+  CFG&& addFinallyGuard(CFG guard);
 
   CFG&& inRegion(std::unique_ptr<Region> region);
 

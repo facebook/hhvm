@@ -658,7 +658,7 @@ CFG compileTry(Function* func, const zend_ast* ast) {
   }
 
   if (finally) {
-    panic("NYI: finally");
+    cfg.addFinallyGuard(compileStatement(func, finally));
   }
 
   return cfg;
@@ -687,7 +687,9 @@ CFG compileIf(Function* func, const zend_ast* ast) {
     }
   }
 
-  return cfg.thenJmp(end);
+  cfg.thenJmp(end);
+
+  return cfg.continueFrom(end);
 }
 
 

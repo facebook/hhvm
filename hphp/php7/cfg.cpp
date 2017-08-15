@@ -109,7 +109,7 @@ CFG&& CFG::thenJmp(Block* target) {
   }
 
   m_continuation->exit(Jmp{target});
-  m_continuation = target;
+  m_continuation = nullptr;
   return self();
 }
 
@@ -131,6 +131,7 @@ CFG&& CFG::then(Bytecode bc) {
     auto next = makeBlock();
     next->emit(bc);
     thenJmp(next);
+    return continueFrom(next);
   } else {
     m_continuation->emit(bc);
   }
@@ -158,6 +159,17 @@ CFG&& CFG::branchNZ(const std::string& label) {
 
 CFG&& CFG::continueFrom(Block* blk) {
   m_continuation = blk;
+  return self();
+}
+
+CFG&& CFG::switchUnbounded(std::vector<CFG> exits) {
+  std::vector<Block*> jmpVector;
+  for (auto& cfg : exits) {
+    jmpVector.push_back(cfg.m_entry);
+    merge(std::move(cfg));
+  }
+  thenExitRaw(Switch{SwitchKind::Unbounded, 0, jmpVector});
+  m_continuation = nullptr;
   return self();
 }
 
@@ -279,7 +291,104 @@ CFG&& CFG::addExnHandler(CFG handler) {
   merge(handler
     .thenJmp(cont)
     .inRegion(std::make_unique<Region>(Region::Kind::Catch)));
-  return thenJmp(cont);
+  thenJmp(cont);
+
+  return continueFrom(cont);
+}
+
+/* The idea here is that, since PHP allows pretty arbitrary actions inside a
+ * finally block, since it tracks finally guards at runtime--and HHVM doesn't,
+ * we need to do some pretty crazy gymnastics here to make everything work in
+ * the most general case
+ *
+ * We solve this problem by intercepting every exit from the region in the try
+ * and turn them into jumps to the finally guard--before they jump, they set a
+ * local to an integer code--the handler continues to a switch that takes this
+ * code and uses it to resume execution in the correct place
+ *
+ * Also worth noting is that we set the guard using a catch handler--*not* a
+ * fault funclet. This is mostly since HHVM doesn't allow returns from a fault
+ * funclet, only throwing a new exception or unwinding further.
+ *
+ * It might be worthwhile later to check if there's unusual exits from the
+ * finally guard and/or the try region, and if there aren't, we can get rid of
+ * some of this garbage
+ */
+CFG&& CFG::addFinallyGuard(CFG guard) {
+  // these will be the exits from the finally guard's switch
+  std::vector<CFG> exits;
+  auto idx = 0;
+
+  // there's one exit for exceptions, which corresponds to an entry from catch
+  addExnHandler(CFG({
+    SetL{"exn"},
+    PopC{},
+    Int{idx++},
+    SetL{"exit"},
+    PopC{}
+  }).thenJmp(guard.m_entry));
+  exits.push_back(CFG(CGetL{"exn"}).thenThrow());
+
+  // every exit from the region is a linkage, so we intercept them all by
+  // creating a new trampoline block that jumps to the finally handler
+  // before exiting in the way it normally would
+  for (auto& linkage : m_unresolvedLinks) {
+    auto trampoline = linkage.trampoline;
+    CFG muxExit;
+
+    match<void>(linkage.target,
+      // for returns, put the relevant value in a local and restore
+      // it before continuing
+      [&](const ReturnTarget& ret) {
+        switch (ret.flavor) {
+          case Cell:
+            trampoline->emit(SetL{"return"});
+            trampoline->emit(PopC{});
+            muxExit.then(CGetL{"return"});
+            break;
+          case Ref:
+            trampoline->emit(BindL{"return"});
+            trampoline->emit(PopV{});
+            muxExit.then(VGetL{"return"});
+            break;
+          default:
+            panic("bad return flavor");
+        }
+        muxExit.thenReturn(ret.flavor);
+      },
+      // for other exits, there's no extra value associated with this exit
+      [&](const LoopTarget& loopTarget) { },
+      [&](const LabelTarget& label) { }
+    );
+
+    // for all exits, we allocate a code and put this in a local, then jump
+    // to the finally guard
+    trampoline->emit(Int{idx++});
+    trampoline->emit(SetL{"exit"});
+    trampoline->emit(PopC{});
+    trampoline->exit(Jmp{guard.m_entry});
+
+    // we create a new trampoline block for this linkage and jump to it as one
+    // of the switch exits
+    auto newTrampoline = makeBlock();
+    exits.push_back(muxExit
+      .thenJmp(newTrampoline));
+    linkage.trampoline = newTrampoline;
+  }
+
+  // the last exit simply continues execution
+  Block* cont = makeBlock();
+  exits.push_back(CFG().thenJmp(cont));
+  then(Int{idx++});
+  then(SetL{"exit"});
+  then(PopC{});
+  // execute the finally guard
+  then(std::move(guard));
+  // then switch based on the exit code local
+  then(CGetL{"exit"});
+  switchUnbounded(std::move(exits));
+
+  return continueFrom(cont);
 }
 
 CFG&& CFG::inRegion(std::unique_ptr<Region> reg) {

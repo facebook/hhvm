@@ -2232,7 +2232,8 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
     (* references can be "lvalues" in foreach bindings *)
     if Env.is_strict env then
       Errors.reference_expr pref;
-    assign p env e1' ty2
+    let env, texpr, ty = assign p env e1' ty2 in
+    make_result env (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
       assign_simple p env e1 ty2
 

@@ -1,0 +1,67 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tint)));
+      f_name = (<p>, "\\foo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some array<int>),
+                (AnnotatedAST.Binop ((Eq None),
+                   ((Some array<int>),
+                    (AnnotatedAST.Lvar (<p>, $arr))),
+                   ((Some array<int>),
+                    (AnnotatedAST.Array
+                       [(AnnotatedAST.AFvalue
+                           ((Some int),
+                            (AnnotatedAST.Int (<p>, "1"))));
+                         (AnnotatedAST.AFvalue
+                            ((Some int),
+                             (AnnotatedAST.Int (<p>, "2"))));
+                         (AnnotatedAST.AFvalue
+                            ((Some int),
+                             (AnnotatedAST.Int (<p>, "3"))))
+                         ]))
+                   ))));
+             (AnnotatedAST.Expr
+                ((Some int),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some int), (AnnotatedAST.Lvar (<p>, $y))),
+                    ((Some int), (AnnotatedAST.Int (<p>, "0")))))));
+             (AnnotatedAST.Foreach (
+                ((Some array<int>), (AnnotatedAST.Lvar (<p>, $arr))),
+                (AnnotatedAST.As_v
+                   ((Some int),
+                    (AnnotatedAST.Unop (Uref,
+                       ((Some int), (AnnotatedAST.Lvar (<p>, $val)))
+                       )))),
+                [(AnnotatedAST.Expr
+                    ((Some int),
+                     (AnnotatedAST.Binop ((Eq (Some Plus)),
+                        ((Some int), (AnnotatedAST.Lvar (<p>, $y))),
+                        ((Some int),
+                         (AnnotatedAST.Unop (Upincr,
+                            ((Some int),
+                             (AnnotatedAST.Lvar (<p>, $val)))
+                            )))
+                        ))))
+                  ]
+                ));
+             (AnnotatedAST.Expr
+                ((Some _),
+                 (AnnotatedAST.Call (Cnormal,
+                    ((Some (function<...>($expression): _)),
+                     (AnnotatedAST.Id (<p>, "\\var_dump"))),
+                    [],
+                    [((Some array<int>),
+                      (AnnotatedAST.Lvar (<p>, $arr)))],
+                    []))));
+             (AnnotatedAST.Return (<p>,
+                (Some ((Some int), (AnnotatedAST.Lvar (<p>, $y))))
+                ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] })
+  ]

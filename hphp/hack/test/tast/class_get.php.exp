@@ -1,0 +1,48 @@
+[(AnnotatedAST.Class
+    { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = false;
+      c_kind = Cnormal; c_name = (<p>, "\\TestClass");
+      c_tparams = <opaque>; c_extends = []; c_uses = [];
+      c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+      c_req_implements = []; c_implements = []; c_consts = [];
+      c_typeconsts = [];
+      c_static_vars =
+      [{ AnnotatedAST.cv_final = false; cv_is_xhp = false;
+         cv_visibility = Private;
+         cv_type =
+         (Some (<p>,
+                (Hoption (<p>, (Hprim Tint)))));
+         cv_id = (<p>, "x");
+         cv_expr = (Some ((Some ?_), AnnotatedAST.Null)) }
+        ];
+      c_vars = []; c_constructor = None;
+      c_static_methods =
+      [{ AnnotatedAST.m_final = false; m_abstract = false;
+         m_visibility = Public; m_name = (<p>, "get");
+         m_tparams = []; m_where_constraints = [];
+         m_variadic = AnnotatedAST.FVnonVariadic; m_params = [];
+         m_body =
+         (AnnotatedAST.NamedBody
+            { AnnotatedAST.fnb_nast =
+              [(AnnotatedAST.If (
+                  ((Some ?int),
+                   (AnnotatedAST.Class_get (AnnotatedAST.CIself,
+                      (<p>, "$x")))),
+                  [(AnnotatedAST.Return (<p>,
+                      (Some ((Some int),
+                             (AnnotatedAST.Class_get (AnnotatedAST.CIself,
+                                (<p>, "$x")))))
+                      ))
+                    ],
+                  [(AnnotatedAST.Return (<p>,
+                      (Some ((Some int),
+                             (AnnotatedAST.Int (<p>, "0"))))
+                      ))
+                    ]
+                  ))
+                ];
+              fnb_unsafe = false });
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some (<p>, (Hprim Tint))) }
+        ];
+      c_methods = []; c_user_attributes = []; c_enum = None })
+  ]

@@ -1503,11 +1503,23 @@ and expr_
             expr_error env (Reason.Rwitness p)
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get (x, (_, y))
+  | Class_get (x, (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
-        expr env local
+        let env, _, ty = expr env local in
+        let cid, env = begin match x with
+          | CIparent -> T.CIparent, env
+          | CIself -> T.CIself, env
+          | CIstatic -> T.CIstatic, env
+          | CIexpr ((_, This) as e)
+          | CIexpr ((_, Lvar (_, _)) as e) ->
+            let env, te, _ = expr env e in
+            T.CIexpr te, env
+          | CI x -> T.CI x, env
+          | CIexpr _ -> assert false
+        end in
+        make_result env (T.Class_get (cid, (py, y))) ty
   | Class_get (cid, mid) ->
       TUtils.process_static_find_ref cid mid;
       let env, te, cty = static_class_id p env cid in

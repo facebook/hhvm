@@ -27,49 +27,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(apc);
 
-// Get HeapObject* from a given APCHandle
-static HeapObject* getHeapObjectFromAPCUncounted(APCHandle* p) {
-  auto kind = p->kind();
-  switch (kind) {
-    case APCKind::UncountedString:
-      return APCTypedValue::fromHandle(p)->getStringData();
-    case APCKind::UncountedArray:
-      return APCTypedValue::fromHandle(p)->getArrayData();
-    case APCKind::UncountedVec:
-      return APCTypedValue::fromHandle(p)->getVecData();
-    case APCKind::UncountedDict:
-      return APCTypedValue::fromHandle(p)->getDictData();
-    case APCKind::UncountedKeyset:
-      return APCTypedValue::fromHandle(p)->getKeysetData();
-    case APCKind::Uninit:
-    case APCKind::Null:
-    case APCKind::Bool:
-    case APCKind::Int:
-    case APCKind::Double:
-    case APCKind::StaticString:
-    case APCKind::StaticArray:
-    case APCKind::StaticVec:
-    case APCKind::StaticDict:
-    case APCKind::StaticKeyset:
-    case APCKind::SharedString:
-    case APCKind::SharedArray:
-    case APCKind::SharedPackedArray:
-    case APCKind::SharedObject:
-    case APCKind::SharedCollection:
-    case APCKind::SharedVec:
-    case APCKind::SharedDict:
-    case APCKind::SharedKeyset:
-    case APCKind::SerializedArray:
-    case APCKind::SerializedObject:
-    case APCKind::SerializedVec:
-    case APCKind::SerializedDict:
-    case APCKind::SerializedKeyset:
-      assert(false);
-      break;
-  }
-  not_reached();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void APCGCManager::registerAllocation(void* start, void* end, APCHandle* root) {
@@ -89,7 +46,8 @@ void APCGCManager::registerPendingDeletion(APCHandle* root, const size_t size) {
   if (RuntimeOption::ServerExecutionMode()) {
     // Root should be visible by default to implement asynchronous mark-sweep
     // But we don't need to do this in script mode
-    getHeapObjectFromAPCUncounted(root)->mark(GCBits::Mark);
+    WriteLock l3(visibleFromHeapLock);
+    visibleFromHeap.insert(root);
   }
   // Recursively register all allocations belong to this root handle
   APCTypedValue::fromHandle(root)->registerUncountedAllocations();
@@ -118,16 +76,16 @@ void APCGCManager::sweep() {
   FTRACE(1, "Sweep! Pending size:{}\n", apcgcPendingSize());
   WriteLock l1(candidateListLock);
   WriteLock l2(rootMapLock);
+  WriteLock l3(visibleFromHeapLock);
 
   for (auto it = rootMap.begin() ; it != rootMap.end() ;) {
     auto cur = it++;
     APCHandle* root = cur->second;
-    auto candidate = candidateList.find(root);
-    // If root haven't been freed before
-    if (candidate != candidateList.end()) {
-      HeapObject* p = getHeapObjectFromAPCUncounted(root);
-      // If root is not visible from any heap
-      if (!(p->marks() & GCBits::Mark)) {
+    // If root is not visible from any heap
+    if (visibleFromHeap.count(root) == 0) {
+      auto candidate = candidateList.find(root);
+      // If root haven't been freed before, free it
+      if (candidate != candidateList.end()) {
         pendingSize.fetch_add(-candidate->second, std::memory_order_relaxed);
         // Remove the root from list, so we won't free it twice
         candidateList.erase(candidate);
@@ -135,13 +93,11 @@ void APCGCManager::sweep() {
         // Free the root
         APCTypedValue::fromHandle(root)->deleteUncounted();
       }
+      // Remove {allocation, root}
+      rootMap.erase(cur);
     }
-    // Remove {allocation, root}
-    rootMap.erase(cur);
   }
-  for (auto it : candidateList) {
-    getHeapObjectFromAPCUncounted(it.first)->clearMarks();
-  }
+  visibleFromHeap.clear();
 }
 
 void APCGCManager::invokeGlobalGC() {
@@ -159,7 +115,9 @@ bool APCGCManager::mark(const void* ptr) {
   if (ptr == nullptr) return false;
   auto root = getRootAPCHandle(ptr); // Required l2 here
   if (root != nullptr) {
-    getHeapObjectFromAPCUncounted(root)->mark(GCBits::Mark);
+    // Require lock only when root has been found
+    WriteLock l3(visibleFromHeapLock); // Require l3 after require l2
+    visibleFromHeap.insert(root);
     FTRACE(4, "Mark root {} for ptr: {}\n", (const void*)root, ptr);
     return true;
   } else {

@@ -145,8 +145,12 @@ extern void *MALLOC(size_t);
 #define MALLOC malloc
 #endif
 
+} // namespace HPHP
+
 #include <ctype.h>
 #include <errno.h>
+
+namespace HPHP {
 
 #ifdef Bad_float_h
 #ifdef IEEE_BIG_ENDIAN
@@ -188,10 +192,18 @@ extern void *MALLOC(size_t);
 #define LONG_MAX 2147483647
 #endif
 #else
+} // namespace HPHP
+
 #include <float.h>
+
+namespace HPHP {
 #endif
 #ifndef __MATH_H__
+} // namespace HPHP
+
 #include <math.h>
+
+namespace HPHP {
 #endif
 
 #ifndef CONST

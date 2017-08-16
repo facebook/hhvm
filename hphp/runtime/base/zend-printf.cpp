@@ -106,7 +106,11 @@ static const char* s_null = "(null)";
 #define HAVE_LOCALE_H 1
 
 #ifdef HAVE_LOCALE_H
+} // namespace HPHP
+
 #include <locale.h>
+
+namespace HPHP {
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #else
 #define LCONV_DECIMAL_POINT '.'

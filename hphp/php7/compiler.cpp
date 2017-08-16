@@ -27,6 +27,8 @@ namespace HPHP { namespace php7 {
 
 namespace {
 
+void buildFunction(Function* func, const zend_ast* ast);
+
 CFG compileZvalLiteral(const zval* ast);
 CFG compileConstant(const zend_ast* ast);
 CFG compileVar(const zend_ast* ast, Destination destination);
@@ -34,6 +36,7 @@ CFG compileAssignment(const zend_ast* ast);
 CFG compileBind(const zend_ast* ast);
 CFG compileAssignOp(const zend_ast* ast);
 CFG compileFunctionCall(const zend_ast* ast);
+CFG compileMethodCall(const zend_ast_list* params);
 CFG compileNew(const zend_ast* ast);
 CFG compileCall(const zend_ast_list* params);
 CFG compileArray(const zend_ast* ast);
@@ -59,6 +62,10 @@ CFG compileIncDec(const zend_ast* op);
 
 CFG fixFlavor(Destination dest, Flavor actual);
 
+Attr getMemberModifiers(uint32_t flags);
+void compileClassStatement(Class* cls, const zend_ast* ast);
+void compileMethod(Class* cls, const zend_ast* ast);
+
 } // namespace
 
 using namespace bc;
@@ -76,12 +83,45 @@ void compileProgram(Unit* unit, const zend_ast* ast) {
 }
 
 void compileFunction(Unit* unit, const zend_ast* ast) {
+  buildFunction(unit->makeFunction(), ast);
+}
+
+CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto decl = zend_ast_get_decl(ast);
-  auto name = decl->name;
+  auto name = ZSTR_VAL(decl->name);
+  auto attr = decl->flags;
+  auto statements = zend_ast_get_list(decl->child[2]);
+
+  auto cls = unit->makeClass();
+  cls->name = name;
+
+  if (attr & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+    cls->attr |= Attr::AttrAbstract;
+  }
+  if (attr & ZEND_ACC_FINAL) {
+    cls->attr |= Attr::AttrFinal;
+  }
+
+  for (uint32_t i = 0; i < statements->children; i++) {
+    compileClassStatement(cls, statements->child[i]);
+  }
+
+  return CFG(DefCls{cls->index});
+}
+
+void panic(const std::string& msg) {
+  throw CompilerException(folly::sformat("panic: {}", msg));
+}
+
+namespace {
+
+void buildFunction(Function* func, const zend_ast* ast) {
+  auto decl = zend_ast_get_decl(ast);
+  auto name = ZSTR_VAL(decl->name);
   auto params = zend_ast_get_list(decl->child[0]);
   auto body = decl->child[2];
 
-  auto func = unit->makeFunction(ZSTR_VAL(name));
+  func->name = name;
 
   if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
     func->attr |= Attr::AttrReference;
@@ -112,12 +152,6 @@ void compileFunction(Unit* unit, const zend_ast* ast) {
     .makeExitsReal()
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 }
-
-void panic(const std::string& msg) {
-  throw CompilerException(folly::sformat("panic: {}", msg));
-}
-
-namespace {
 
 CFG compileZvalLiteral(const zval* zv) {
   switch (Z_TYPE_P(zv)) {
@@ -337,6 +371,35 @@ CFG compileFunctionCall(const zend_ast* ast) {
   }
 }
 
+CFG compileMethodCall(const zend_ast* ast) {
+  auto target = ast->child[0];
+  auto method = ast->child[1];
+  auto params = zend_ast_get_list(ast->child[2]);
+
+  auto zv = method->kind == ZEND_AST_ZVAL
+      ? zend_ast_get_zval(method)
+      : nullptr;
+
+  auto targetCfg = compileExpression(target, Flavor::Cell);
+
+  if (zv && Z_TYPE_P(zv) == IS_STRING) {
+    return targetCfg
+      .then(FPushObjMethodD{
+        params->children,
+        Z_STRVAL_P(zv),
+        ObjMethodOp::NullThrows
+      })
+      .then(compileCall(params));
+  } else {
+    return compileExpression(method, Flavor::Cell)
+      .then(std::move(targetCfg))
+      .then(FPushObjMethod{
+        params->children,
+        ObjMethodOp::NullThrows
+      });
+  }
+}
+
 CFG compileNew(const zend_ast* ast) {
   auto cls = ast->child[0];
   auto params = zend_ast_get_list(ast->child[1]);
@@ -458,6 +521,9 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
         .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_CALL:
       return compileFunctionCall(ast)
+        .then(fixFlavor(dest, Flavor::Return));
+    case ZEND_AST_METHOD_CALL:
+      return compileMethodCall(ast)
         .then(fixFlavor(dest, Flavor::Return));
     case ZEND_AST_NEW:
       return compileNew(ast)
@@ -589,6 +655,8 @@ CFG compileStatement(Function* func, const zend_ast* ast) {
     case ZEND_AST_FUNC_DECL:
       compileFunction(func->parent, ast);
       return CFG();
+    case ZEND_AST_CLASS:
+      return compileClass(func->parent, ast);
     default:
       return compileExpression(ast, Flavor::Drop);
   }
@@ -778,6 +846,45 @@ CFG compileFor(Function* func, const zend_ast* ast) {
   ));
 
   return cfg;
+}
+
+Attr getMemberModifiers(uint32_t flags) {
+  Attr attr{};
+  if (flags & ZEND_ACC_PUBLIC) {
+    attr |= Attr::AttrPublic;
+  }
+  if (flags & ZEND_ACC_PROTECTED) {
+    attr |= Attr::AttrProtected;
+  }
+  if (flags & ZEND_ACC_PRIVATE) {
+    attr |= Attr::AttrPrivate;
+  }
+  if (flags & ZEND_ACC_STATIC) {
+    attr |= Attr::AttrStatic;
+  }
+  if (flags & ZEND_ACC_ABSTRACT) {
+    attr |= Attr::AttrAbstract;
+  }
+  if (flags & ZEND_ACC_FINAL) {
+    attr |= Attr::AttrFinal;
+  }
+  return attr;
+}
+
+void compileClassStatement(Class* cls, const zend_ast* ast) {
+  switch(ast->kind) {
+    case ZEND_AST_METHOD:
+      compileMethod(cls, ast);
+      break;
+    default:
+      panic("unsupported class statement");
+  }
+}
+
+void compileMethod(Class* cls, const zend_ast* ast) {
+  auto func = cls->makeMethod();
+  buildFunction(func, ast);
+  func->attr |= getMemberModifiers(zend_ast_get_decl(ast)->flags);
 }
 
 } // namespace

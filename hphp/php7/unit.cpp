@@ -18,11 +18,6 @@
 
 namespace HPHP { namespace php7 {
 
-Function::Function(Unit* parent, const std::string& name)
-  : name(name),
-    attr(),
-    parent(parent) {}
-
 std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
                                     const std::string& msg) {
   auto unit = std::make_unique<Unit>();

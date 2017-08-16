@@ -75,6 +75,7 @@ struct Destination {
 
 void compileProgram(Unit* unit, const zend_ast* ast);
 void compileFunction(Unit* unit, const zend_ast* ast);
+CFG compileClass(Unit* unit, const zend_ast* ast);
 CFG compileStatement(Function* func, const zend_ast* ast);
 CFG compileExpression(const zend_ast* ast, Destination destination);
 

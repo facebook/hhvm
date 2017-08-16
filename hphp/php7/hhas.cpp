@@ -29,8 +29,10 @@ namespace {
 
 std::string dump_pseudomain(const Function& func);
 std::string dump_function(const Function& func);
+std::string dump_class(const Class& cls);
+std::string dump_method(const Function& func);
 std::string dump_blocks(const Function& func);
-std::string dump_declvars(const std::unordered_set<std::string>& locals);
+std::string dump_function_body(const Function& func);
 
 } // namespace
 
@@ -40,6 +42,9 @@ std::string dump_asm(const Unit& unit) {
   out.append(dump_pseudomain(*unit.getPseudomain()));
   for (const auto& func : unit.functions) {
     out.append(dump_function(*func));
+  }
+  for (const auto& cls : unit.classes) {
+    out.append(dump_class(*cls));
   }
   return out;
 }
@@ -152,6 +157,15 @@ struct InstrVisitor {
 #define KIND(name) case SwitchKind::name: out.append( #name ); break;
       SWITCH_KINDS
 #undef KIND
+    }
+  }
+
+  void imm(ObjMethodOp op) {
+    out.append(" ");
+    switch (op) {
+#define OBJMETHOD_OP(name) case ObjMethodOp::name: out.append( #name ); break;
+      OBJMETHOD_OPS
+#undef OBJMETHOD_OP
     }
   }
 
@@ -304,8 +318,7 @@ struct AssemblyVisitor : public boost::static_visitor<void>
 std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
-  out.append(dump_declvars(analyzeLocals(func)));
-  func.cfg.visit(AssemblyVisitor(out));
+  out.append(dump_function_body(func));
   out.append("}\n\n");
   return out;
 }
@@ -321,19 +334,71 @@ std::string dump_function(const Function& func) {
         param.name);
   }
   out.append(") {\n");
-  out.append(dump_declvars(analyzeLocals(func)));
-  func.cfg.visit(AssemblyVisitor(out));
+  out.append(dump_function_body(func));
   out.append("}\n\n");
   return out;
 }
 
-std::string dump_declvars(const std::unordered_set<std::string>& locals) {
+std::string dump_class(const Class& cls) {
   std::string out;
-  out.append(".declvars");
+  out.append(".class ");
+  out.append(cls.name);
+  out.append(" {\n");
+  for (const auto& method : cls.methods) {
+    out.append(dump_method(*method));
+  }
+  out.append("}\n\n");
+  return out;
+
+}
+
+std::string dump_method(const Function& func) {
+  std::string out;
+  out.append(".method [");
+
+  if (func.attr & Attr::AttrPublic) {
+    out.append(" public");
+  }
+  if (func.attr & Attr::AttrProtected) {
+    out.append(" protected");
+  }
+  if (func.attr & Attr::AttrPrivate) {
+    out.append(" private");
+  }
+  if (func.attr & Attr::AttrStatic) {
+    out.append(" static");
+  }
+  if (func.attr & Attr::AttrAbstract) {
+    out.append(" abstract");
+  }
+  if (func.attr & Attr::AttrFinal) {
+    out.append(" final");
+  }
+
+  out.append(" ] ");
+  out.append(func.name);
+  out.append("(");
+  for (const auto& param : func.params) {
+    folly::format(&out, " {}${},",
+        param.byRef ? "&" : "",
+        param.name);
+  }
+  out.append(") {\n");
+  out.append(dump_function_body(func));
+  out.append("}\n\n");
+  return out;
+
+}
+
+std::string dump_function_body(const Function& func) {
+  std::string out;
+  auto locals = analyzeLocals(func);
+  out.append("  .declvars");
   for (const auto& name : locals) {
     folly::format(&out, " ${}", name);
   }
-  out.append(";");
+  out.append(";\n");
+  func.cfg.visit(AssemblyVisitor(out));
   return out;
 }
 

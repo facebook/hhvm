@@ -103,6 +103,8 @@ public:
   static ArrayData* Create(TypedValue name, TypedValue value);
   static ArrayData* Create(const Variant& name, TypedValue value);
   static ArrayData* Create(const Variant& name, const Variant& value);
+  static ArrayData* CreateWithRef(TypedValue name, TypedValue value);
+  static ArrayData* CreateWithRef(const Variant& name, TypedValue value);
   static ArrayData* CreateRef(Variant& value);
   static ArrayData* CreateRef(TypedValue name, Variant& value);
   static ArrayData* CreateRef(const Variant& name, Variant& value);
@@ -287,6 +289,9 @@ public:
   ArrayData *set(int64_t k, Cell v, bool copy);
   ArrayData *set(StringData* k, Cell v, bool copy);
 
+  ArrayData *setWithRef(int64_t k, TypedValue v, bool copy);
+  ArrayData *setWithRef(StringData* k, TypedValue v, bool copy);
+
   ArrayData *setRef(int64_t k, Variant& v, bool copy);
   ArrayData *setRef(StringData* k, Variant& v, bool copy);
 
@@ -335,6 +340,9 @@ public:
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, Cell, bool) = delete;
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
+  ArrayData *setWithRef(Cell k, TypedValue v, bool copy);
+  ArrayData *setWithRef(const String& k, TypedValue v, bool copy);
+  ArrayData *setWithRef(const StringData*, TypedValue, bool) = delete;
   ArrayData *setRef(Cell k, Variant& v, bool copy);
   ArrayData *setRef(const String& k, Variant& v, bool copy);
   ArrayData *setRef(const Variant& k, Variant& v, bool copy);
@@ -633,8 +641,11 @@ struct ArrayFunctions {
   member_rval::ptr_u (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
-  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
-                           bool copy);
+  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
+  ArrayData* (*setWithRefInt[NK])(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  ArrayData* (*setWithRefStr[NK])(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
   size_t (*vsize[NK])(const ArrayData*);
   member_rval::ptr_u (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);

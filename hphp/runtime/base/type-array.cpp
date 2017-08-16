@@ -707,6 +707,16 @@ void Array::setImpl(const T& key, TypedValue v) {
 }
 
 template<typename T> ALWAYS_INLINE
+void Array::setWithRefImpl(const T& key, TypedValue v) {
+  if (!m_arr) {
+    m_arr = Ptr::attach(ArrayData::CreateWithRef(key, v));
+  } else {
+    auto const escalated = m_arr->setWithRef(key, v, m_arr->cowCheck());
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
+  }
+}
+
+template<typename T> ALWAYS_INLINE
 void Array::setRefImpl(const T& key, Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
@@ -872,28 +882,8 @@ FOR_EACH_KEY_TYPE(void, remove, )
 
 FOR_EACH_KEY_TYPE(set, TypedValue)
 FOR_EACH_KEY_TYPE(add, TypedValue)
+FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 FOR_EACH_KEY_TYPE(setRef, Variant&)
-
-#undef I
-#undef V
-#undef C
-
-#define C(key_t, name) \
-  void Array::name(key_t k, TypedValue v, bool isKey) {         \
-    auto lval = lvalAt(k, isKey ? Flags::Key : Flags::None);    \
-    tvSetWithRef(v, *lval.tv());                                \
-    if (lval.type() == KindOfUninit) lval.type() = KindOfNull;  \
-  }
-#define V(key_t, name) \
-  void Array::name(key_t k, TypedValue v, bool isKey) {         \
-    lvalAt(k, isKey ? Flags::Key : Flags::None).setWithRef(v);  \
-  }
-#define I(key_t, name) \
-  void Array::name(key_t k, TypedValue v) { \
-    lvalAt(k).setWithRef(v);                \
-  }
-
-FOR_EACH_KEY_TYPE(setWithRef)
 
 #undef I
 #undef V

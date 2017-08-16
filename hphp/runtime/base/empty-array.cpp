@@ -202,21 +202,41 @@ member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
+ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v, bool) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
-  if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
-  tvIncRefGen(&c);
-  auto const lval = k == 0 ? EmptyArray::MakePacked(c)
-                           : EmptyArray::MakeMixed(k, c);
+  if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
+  tvIncRefGen(&v);
+  auto const lval = k == 0 ? EmptyArray::MakePacked(v)
+                           : EmptyArray::MakeMixed(k, v);
   return lval.arr_base();
 }
 
 ArrayData*
-EmptyArray::SetStr(ArrayData*, StringData* k, Cell val, bool /*copy*/) {
-  tvIncRefGen(&val);
+EmptyArray::SetStr(ArrayData*, StringData* k, Cell v, bool /*copy*/) {
+  tvIncRefGen(&v);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
-  if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
-  return EmptyArray::MakeMixed(k, val).arr_base();
+  if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
+  return EmptyArray::MakeMixed(k, v).arr_base();
+}
+
+ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
+                                     TypedValue v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+    raiseHackArrCompatRefBind(k);
+  }
+  auto const lval = LvalInt(ad, k, copy);
+  tvSetWithRef(v, *lval.tv());
+  return lval.arr_base();
+}
+
+ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
+                                     TypedValue v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+    raiseHackArrCompatRefBind(k);
+  }
+  auto const lval = LvalStr(ad, k, copy);
+  tvSetWithRef(v, *lval.tv());
+  return lval.arr_base();
 }
 
 member_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {

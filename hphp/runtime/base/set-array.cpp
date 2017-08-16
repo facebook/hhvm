@@ -637,6 +637,18 @@ ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell, bool) {
   );
 }
 
+ArrayData* SetArray::SetWithRefInt(ArrayData*, int64_t, TypedValue, bool) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Invalid keyset operation (set with ref int)"
+  );
+}
+
+ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue, bool) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Invalid keyset operation (set with ref string)"
+  );
+}
+
 ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();

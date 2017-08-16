@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/member-val.h"
-#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -97,11 +96,11 @@ ALWAYS_INLINE member_rval tvToCell(member_rval tv) {
 }
 
 /*
- * Return an unboxed and initialized `cell'.
+ * Return an unboxed and initialized `tv'.
  *
  * This function:
- *  - is *tvToCell() if `cell' is KindOfRef.
- *  - returns a KindOfNull when `cell' is KindOfUninit.
+ *  - is *tvToCell() if `tv' is KindOfRef.
+ *  - returns a KindOfNull when `tv' is KindOfUninit.
  *  - is the identity otherwise.
  */
 ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
@@ -262,22 +261,6 @@ ALWAYS_INLINE void tvWriteUninit(TypedValue* to) {
 }
 ALWAYS_INLINE void tvWriteNull(TypedValue* to) {
   to->m_type = KindOfNull;
-}
-ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
-  to->m_type = KindOfObject;
-  to->m_data.pobj = pobj;
-  to->m_data.pobj->incRefCount();
-}
-
-/*
- * Write a value to `to', with Copy semantics.
- *
- * (Note that the semantics of this operation don't match that of the Move
- * operations defined below.)
- */
-ALWAYS_INLINE void tvMoveObject(ObjectData* pobj, TypedValue* to) {
-  to->m_type = KindOfObject;
-  to->m_data.pobj = pobj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -193,11 +193,9 @@ ArrayData* ProxyArray::SetInt(ArrayData* ad,
                               Cell v,
                               bool copy) {
   if (copy) {
-    return innerArr(ad)->set(k, tvAsCVarRef(&v), true);
+    return innerArr(ad)->set(k, v, true);
   }
-  auto const r = innerArr(ad)->set(
-    k, tvAsCVarRef(&v), innerArr(ad)->cowCheck()
-  );
+  auto const r = innerArr(ad)->set(k, v, innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }
@@ -207,11 +205,29 @@ ArrayData* ProxyArray::SetStr(ArrayData* ad,
                               Cell v,
                               bool copy) {
   if (copy) {
-    return innerArr(ad)->set(k, tvAsCVarRef(&v), copy);
+    return innerArr(ad)->set(k, v, copy);
   }
-  auto const r = innerArr(ad)->set(
-    k, tvAsCVarRef(&v), innerArr(ad)->cowCheck()
-  );
+  auto const r = innerArr(ad)->set(k, v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
+}
+
+ArrayData* ProxyArray::SetWithRefInt(ArrayData* ad, int64_t k,
+                                     TypedValue v, bool copy) {
+  if (copy) {
+    return innerArr(ad)->setWithRef(k, v, copy);
+  }
+  auto const r = innerArr(ad)->setWithRef(k, v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
+}
+
+ArrayData* ProxyArray::SetWithRefStr(ArrayData* ad, StringData* k,
+                                     TypedValue v, bool copy) {
+  if (copy) {
+    return innerArr(ad)->setWithRef(k, v, copy);
+  }
+  auto const r = innerArr(ad)->setWithRef(k, v, innerArr(ad)->cowCheck());
   reseatable(ad, r);
   return ad;
 }

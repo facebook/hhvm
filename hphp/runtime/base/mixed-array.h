@@ -330,6 +330,10 @@ public:
   static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
   static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
@@ -432,6 +436,10 @@ public:
   static member_lval LvalIntRefDict(ArrayData*, int64_t, bool);
   static member_lval LvalStrRefDict(ArrayData*, StringData*, bool);
   static member_lval LvalNewRefDict(ArrayData*, bool);
+  static ArrayData* SetWithRefIntDict(ArrayData*, int64_t k,
+                                      TypedValue v, bool copy);
+  static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k,
+                                      TypedValue v, bool copy);
   static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
@@ -619,6 +627,7 @@ private:
 
   template <bool warn, class K> member_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
+  template <class K> ArrayData* updateWithRef(K k, TypedValue data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);

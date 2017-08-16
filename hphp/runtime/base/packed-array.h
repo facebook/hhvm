@@ -82,6 +82,10 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
   static size_t Vsize(const ArrayData*);
   static member_rval::ptr_u GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -96,8 +100,7 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static member_lval LvalNew(ArrayData*, bool copy);
   static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
-    bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
@@ -145,6 +148,10 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static member_rval::ptr_u NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* SetWithRefIntVec(ArrayData*, int64_t k,
+                                     TypedValue v, bool copy);
+  static ArrayData* SetWithRefStrVec(ArrayData*, StringData* k,
+                                     TypedValue v, bool copy);
   static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
   static member_lval LvalIntVec(ArrayData*, int64_t, bool);
   static member_lval LvalStrVec(ArrayData*, StringData*, bool);

@@ -428,10 +428,12 @@ public:
   static member_lval LvalStrRef(ArrayData*, StringData*, bool);
   static member_lval LvalNew(ArrayData*, bool);
   static member_lval LvalNewRef(ArrayData*, bool);
-  static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStr(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue, bool);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
+  static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;

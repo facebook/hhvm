@@ -239,6 +239,23 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetStr)
 
   /*
+   * ArrayData* SetWithRefInt(ArrayData*, int64_t k, Cell v, bool copy)
+   *
+   *   Set a value in the array for an integer key, preserving refs unless they
+   *   are singly-referenced.  This function has copy/grow semantics.
+   */
+  DISPATCH(SetWithRefInt)
+
+  /*
+   * ArrayData* SetWithRefStr(ArrayData*, StringData* k, Cell v, bool copy)
+   *
+   *   Set a value in the array for a string key, preserving refs unless they
+   *   are singly-referenced.  This function has copy/grow semantics, and is
+   *   not responsible for intish-string casts.
+   */
+  DISPATCH(SetWithRefStr)
+
+  /*
    * size_t Vsize(const ArrayData*)
    *
    *   This entry point essentially is only for GlobalsArray and ProxyArray;
@@ -724,6 +741,19 @@ const ArrayFunctions g_array_funcs = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+DEBUG_ONLY void assertForCreate(TypedValue name) {
+  auto const k = tvToCell(name);
+  int64_t unused;
+  always_assert(isStringType(k.m_type)
+    ? !k.m_data.pstr->isStrictlyInteger(unused)
+    : isIntType(k.m_type)
+  );
+}
+
+}
+
 // In general, arrays can contain int-valued-strings, even though plain array
 // access converts them to integers.  non-int-string assertions should go
 // upstream of the ArrayData api.
@@ -748,16 +778,18 @@ ArrayData* ArrayData::Create(TypedValue value) {
 }
 
 ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
-  if (debug) {
-    DEBUG_ONLY auto const k = tvToCell(name);
-    DEBUG_ONLY int64_t unused;
-    assertx(isStringType(k.m_type)
-              ? !k.m_data.pstr->isStrictlyInteger(unused)
-              : isIntType(k.m_type));
-  }
+  if (debug) assertForCreate(name);
 
   ArrayInit init(1, ArrayInit::Map{});
   init.setValidKey(name, value);
+  return init.create();
+}
+
+ArrayData* ArrayData::CreateWithRef(TypedValue name, TypedValue value) {
+  if (debug) assertForCreate(name);
+
+  ArrayInit init(1, ArrayInit::Map{});
+  init.setWithRef(name, value);
   return init.create();
 }
 
@@ -768,13 +800,7 @@ ArrayData* ArrayData::CreateRef(Variant& value) {
 }
 
 ArrayData* ArrayData::CreateRef(TypedValue name, Variant& value) {
-  if (debug) {
-    DEBUG_ONLY auto const k = tvToCell(name);
-    DEBUG_ONLY int64_t unused;
-    assertx(isStringType(k.m_type)
-              ? !k.m_data.pstr->isStrictlyInteger(unused)
-              : isIntType(k.m_type));
-  }
+  if (debug) assertForCreate(name);
 
   ArrayInit init(1, ArrayInit::Map{});
   init.setRef(name, value, true);

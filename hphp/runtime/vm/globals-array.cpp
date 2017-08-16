@@ -155,6 +155,18 @@ GlobalsArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
   return a;
 }
 
+ArrayData* GlobalsArray::SetWithRefInt(ArrayData* ad, int64_t k,
+                                       TypedValue v, bool copy) {
+  return SetWithRefStr(ad, String(k).get(), v, copy);
+}
+
+ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
+                                       TypedValue v, bool) {
+  auto a = asGlobals(ad);
+  tvSetWithRef(v, *a->m_tab->lookupAdd(k));
+  return a;
+}
+
 ArrayData* GlobalsArray::SetRefInt(ArrayData* ad,
                                             int64_t k,
                                             Variant& v,

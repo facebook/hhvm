@@ -36,14 +36,24 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v) {
 }
 
 /*
- * Modify an array element.
+ * Modify an array element, with semantics like those in tv-mutate.h.
+ *
+ * These functions all promote uninit null values to init null values, except
+ * for setElemWithRef() which asserts that `v' is init instead.
  */
-ALWAYS_INLINE void setElem(TypedValue& elem, Cell v) {
-  auto const dst = tvToCell(&elem);
+ALWAYS_INLINE void setElemNoRef(Cell& elem, Cell v) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     v.m_type = KindOfNull;
   }
-  cellSet(v, *dst);
+  cellSet(v, elem);
+}
+ALWAYS_INLINE void setElem(TypedValue& elem, Cell v) {
+  setElemNoRef(*tvToCell(&elem), v);
+}
+
+ALWAYS_INLINE void setElemWithRef(TypedValue& elem, TypedValue v) {
+  assertx(UNLIKELY(v.m_type != KindOfUninit));
+  tvSetWithRef(v, elem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

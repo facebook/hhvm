@@ -282,6 +282,29 @@ struct ArrayInit : ArrayInitBase<MixedArray, KindOfArray> {
   }
 
   /*
+   * Call setWithRef() on the underlying array.
+   */
+  ArrayInit& setWithRef(int64_t name, TypedValue tv) {
+    performOp([&]{
+      return MixedArray::SetWithRefInt(m_arr, name, tv, false);
+    });
+    return *this;
+  }
+  ArrayInit& setWithRef(const String& name, TypedValue tv) {
+    performOp([&]{
+      return MixedArray::SetWithRefStr(m_arr, name.get(), tv, false);
+    });
+    return *this;
+  }
+  template<class T>
+  ArrayInit& setWithRef(const T& name, TypedValue tv) {
+    performOp([&]{
+      return m_arr->setWithRef(name, tv, false);
+    });
+    return *this;
+  }
+
+  /*
    * Call add() on the underlying array.
    */
   ArrayInit& add(int64_t name, TypedValue tv, bool /*keyConverted*/ = false) {

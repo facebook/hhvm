@@ -65,6 +65,11 @@ inline ArrayData* ArrayData::Create(const Variant& name, const Variant& value) {
   return Create(*name.asTypedValue(), *value.asTypedValue());
 }
 
+inline ArrayData* ArrayData::CreateWithRef(const Variant& name,
+                                           TypedValue value) {
+  return CreateWithRef(*name.asTypedValue(), value);
+}
+
 inline ArrayData* ArrayData::CreateRef(const Variant& name, Variant& value) {
   return CreateRef(*name.asTypedValue(), value);
 }
@@ -170,6 +175,22 @@ inline ArrayData* ArrayData::set(const String& k, const Variant& v,
 inline ArrayData* ArrayData::set(const Variant& k, const Variant& v,
                                  bool copy) {
   return set(*k.asCell(), *v.asCell(), copy);
+}
+
+inline ArrayData* ArrayData::setWithRef(Cell k, TypedValue v, bool copy) {
+  assertx(cellIsPlausible(k));
+  assertx(tvIsPlausible(v));
+  assertx(IsValidKey(k));
+
+  return detail::isIntKey(k) ? setWithRef(detail::getIntKey(k), v, copy)
+                             : setWithRef(detail::getStringKey(k), v, copy);
+}
+
+inline ArrayData* ArrayData::setWithRef(const String& k,
+                                        TypedValue v, bool copy) {
+  assertx(tvIsPlausible(v));
+  assertx(IsValidKey(k));
+  return setWithRef(k.get(), v, copy);
 }
 
 inline ArrayData* ArrayData::setRef(Cell k, Variant& v, bool copy) {
@@ -312,6 +333,17 @@ inline ArrayData* ArrayData::set(int64_t k, Cell v, bool copy) {
 inline ArrayData* ArrayData::set(StringData* k, Cell v, bool copy) {
   assertx(cellIsPlausible(v));
   return g_array_funcs.setStr[kind()](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::setWithRef(int64_t k, TypedValue v, bool copy) {
+  assertx(tvIsPlausible(v));
+  return g_array_funcs.setWithRefInt[kind()](this, k, v, copy);
+}
+
+inline ArrayData* ArrayData::setWithRef(StringData* k,
+                                        TypedValue v, bool copy) {
+  assertx(tvIsPlausible(v));
+  return g_array_funcs.setWithRefStr[kind()](this, k, v, copy);
 }
 
 inline ArrayData* ArrayData::zSet(int64_t k, RefData* v) {

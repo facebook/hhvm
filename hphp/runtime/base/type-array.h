@@ -559,6 +559,7 @@ private:
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);
   template<typename T> void setImpl(const T& key, TypedValue v);
+  template<typename T> void setWithRefImpl(const T& key, TypedValue v);
   template<typename T> void setRefImpl(const T& key, Variant& v);
   template<typename T> void addImpl(const T& key, TypedValue v);
 

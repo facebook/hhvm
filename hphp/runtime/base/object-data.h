@@ -489,6 +489,17 @@ ALWAYS_INLINE void decRefObj(ObjectData* obj) {
   obj->decRefAndRelease();
 }
 
+/*
+ * Write a value to `to', with Dup semantics.
+ *
+ * @see: tv-mutate.h
+ */
+ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
+  to->m_type = KindOfObject;
+  to->m_data.pobj = pobj;
+  to->m_data.pobj->incRefCount();
+}
+
 inline ObjectData* instanceFromTv(TypedValue* tv) {
   assert(tv->m_type == KindOfObject);
   assert(dynamic_cast<ObjectData*>(tv->m_data.pobj));

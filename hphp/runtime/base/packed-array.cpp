@@ -723,7 +723,7 @@ ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
 ArrayData*
 PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   return MutableOpIntVec(adIn, k, copy,
-    [&] (ArrayData* ad) { setElem(packedData(ad)[k], v); return ad; }
+    [&] (ArrayData* ad) { setElemNoRef(packedData(ad)[k], v); return ad; }
   );
 }
 
@@ -735,6 +735,60 @@ ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, Cell v,
 }
 
 ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell, bool) {
+  assert(checkInvariants(adIn));
+  assert(adIn->isVecArray());
+  throwInvalidArrayKeyException(k, adIn);
+}
+
+ArrayData* PackedArray::SetWithRefInt(ArrayData* adIn, int64_t k,
+                                      TypedValue v, bool copy) {
+  auto const checkHackArrRef = [&] {
+    if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+      raiseHackArrCompatRefBind(k);
+    }
+  };
+
+  return MutableOpInt(adIn, k, copy,
+    [&] (ArrayData* ad) {
+      checkHackArrRef();
+      setElemWithRef(packedData(ad)[k], v);
+      return ad;
+    },
+    [&] { return AppendWithRef(adIn, v, copy); },
+    [&] (MixedArray* mixed) {
+      checkHackArrRef();
+      auto const lval = mixed->addLvalImpl<false>(k);
+      tvSetWithRef(v, *lval.tv());
+      return lval.arr_base();
+    }
+  );
+}
+
+ArrayData* PackedArray::SetWithRefIntVec(ArrayData* adIn, int64_t k,
+                                         TypedValue v, bool copy) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
+
+  return MutableOpIntVec(adIn, k, copy,
+    [&] (ArrayData* ad) { setElemNoRef(packedData(ad)[k], v); return ad; }
+  );
+}
+
+ArrayData* PackedArray::SetWithRefStr(ArrayData* adIn, StringData* k,
+                                      TypedValue v, bool copy) {
+  return MutableOpStr(adIn, k, copy,
+    [&] (MixedArray* mixed) {
+      if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+        raiseHackArrCompatRefBind(k);
+      }
+      auto const lval = mixed->addLvalImpl<false>(k);
+      tvSetWithRef(v, *lval.tv());
+      return lval.arr_base();
+    }
+  );
+}
+
+ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
+                                         TypedValue, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(k, adIn);

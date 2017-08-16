@@ -80,6 +80,10 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
   static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {
     return ad;
   }
@@ -104,8 +108,7 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static member_lval LvalNew(ArrayData*, bool copy);
   static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
-    bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v, bool copy);
   static constexpr auto AddInt = &SetInt;
   static constexpr auto AddStr = &SetStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;

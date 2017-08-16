@@ -174,6 +174,23 @@ inline MixedArray::Elm& MixedArray::addKeyAndGetElem(StringData* key) {
 }
 
 template <class K>
+ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
+  assert(!isFull());
+  auto p = insert(k);
+  if (p.found) {
+    // TODO(#3888164): We should restructure things so we don't have to check
+    // KindOfUninit here.
+    setElemWithRef(p.tv, data);
+    return this;
+  }
+  // TODO(#3888164): We should restructure things so we don't have to check
+  // KindOfUninit here.
+  tvDupWithRef(data, p.tv);
+  if (p.tv.m_type == KindOfUninit) p.tv.m_type = KindOfNull;
+  return this;
+}
+
+template <class K>
 ArrayData* MixedArray::updateRef(K k, Variant& data) {
   assert(!isFull());
   auto p = insert(k);

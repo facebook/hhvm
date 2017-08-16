@@ -1028,6 +1028,22 @@ MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->update(k, v);
 }
 
+ArrayData* MixedArray::SetWithRefInt(ArrayData* ad, int64_t k,
+                                     TypedValue v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+    raiseHackArrCompatRefBind(k);
+  }
+  return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
+}
+
+ArrayData* MixedArray::SetWithRefStr(ArrayData* ad, StringData* k,
+                                     TypedValue v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && tvIsReferenced(v)) {
+    raiseHackArrCompatRefBind(k);
+  }
+  return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
+}
+
 ArrayData*
 MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
@@ -1623,6 +1639,18 @@ member_rval::ptr_u MixedArray::NvTryGetStrDict(const ArrayData* ad,
   auto const ptr = MixedArray::NvGetStr(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
+}
+
+ArrayData* MixedArray::SetWithRefIntDict(ArrayData* ad, int64_t k,
+                                         TypedValue v, bool copy) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
+  return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
+}
+
+ArrayData* MixedArray::SetWithRefStrDict(ArrayData* ad, StringData* k,
+                                         TypedValue v, bool copy) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
+  return asMixed(ad)->prepareForInsert(copy)->updateWithRef(k, v);
 }
 
 member_lval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {

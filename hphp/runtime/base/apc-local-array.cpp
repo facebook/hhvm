@@ -198,13 +198,25 @@ member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
 ArrayData*
 APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
+  return helper.release(helper.escalated->set(k, v, false));
 }
 
 ArrayData*
 APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
+  return helper.release(helper.escalated->set(k, v, false));
+}
+
+ArrayData*
+APCLocalArray::SetWithRefInt(ArrayData* ad, int64_t k, TypedValue v, bool) {
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->setWithRef(k, v, false));
+}
+
+ArrayData*
+APCLocalArray::SetWithRefStr(ArrayData* ad, StringData* k, TypedValue v, bool) {
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->setWithRef(k, v, false));
 }
 
 ArrayData*

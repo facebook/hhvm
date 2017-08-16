@@ -586,23 +586,60 @@ bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* /*s*/) {
   return false;
 }
 
-member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
-  assert(checkInvariants(adIn));
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template<typename FoundFn, typename AppendFn, typename PromotedFn>
+auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
+                  FoundFn found, AppendFn append, PromotedFn promoted) {
+  assert(PackedArray::checkInvariants(adIn));
   assert(adIn->isPacked());
 
-  if (LIKELY(size_t(k) < adIn->m_size)) {
-    auto const ad = copy ? Copy(adIn) : adIn;
-    return member_lval { ad, &packedData(ad)[k] };
+  if (LIKELY(size_t(k) < adIn->getSize())) {
+    auto const ad = copy ? PackedArray::Copy(adIn) : adIn;
+    return found(ad);
   }
 
-  // We can stay packed if the index is m_size, and the operation does
-  // the same thing as LvalNew.
-  if (size_t(k) == adIn->m_size) return LvalNew(adIn, copy);
+  if (size_t(k) == adIn->getSize()) return append();
 
-  // Promote-to-mixed path, we know the key is new and should be using
-  // findForNewInsert but aren't yet TODO(#2606310).
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl<true>(k);
+  auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
+                          : PackedArray::ToMixed(adIn);
+  return promoted(mixed);
+}
+
+template<typename PromotedFn>
+auto MutableOpStr(ArrayData* adIn, StringData* k, bool copy,
+                  PromotedFn promoted) {
+  assert(PackedArray::checkInvariants(adIn));
+  assert(adIn->isPacked());
+
+  auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
+                          : PackedArray::ToMixed(adIn);
+  return promoted(mixed);
+}
+
+template<typename FoundFn>
+auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
+  assert(PackedArray::checkInvariants(adIn));
+  assert(adIn->isVecArray());
+
+  if (UNLIKELY(size_t(k) >= adIn->getSize())) {
+    throwOOBArrayKeyException(k, adIn);
+  }
+  auto const ad = copy ? PackedArray::Copy(adIn) : adIn;
+  return found(ad);
+}
+
+}
+
+member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
+  return MutableOpInt(adIn, k, copy,
+    [&] (ArrayData* ad) { return member_lval { ad, &packedData(ad)[k] }; },
+    [&] { return LvalNew(adIn, copy); },
+    // TODO(#2606310): Make use of our knowledge that the key is missing.
+    [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
+  );
 }
 
 member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
@@ -611,11 +648,9 @@ member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
 }
 
 member_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isVecArray());
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
-  auto const ad = copy ? Copy(adIn) : adIn;
-  return member_lval { ad, &packedData(ad)[k] };
+  return MutableOpIntVec(adIn, k, copy,
+    [&] (ArrayData* ad) { return member_lval { ad, &packedData(ad)[k] }; }
+  );
 }
 
 member_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
@@ -625,13 +660,11 @@ member_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   return member_lval { ad, &packedData(ad)[k] };
 }
 
-member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
-  // We have to promote.  We know the key doesn't exist, but aren't
-  // making use of that fact yet.  TODO(#2606310).
-  assert(checkInvariants(adIn));
-  assert(adIn->isPacked());
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl<true>(key);
+member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k, bool copy) {
+  return MutableOpStr(adIn, k, copy,
+    // TODO(#2606310): Make use of our knowledge that the key is missing.
+    [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
+  );
 }
 
 member_lval
@@ -679,52 +712,26 @@ member_lval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData*
-PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isPacked());
-
-  // Right now SetInt is used for the AddInt entry point also. This
-  // first branch is the only thing we'd be able to omit if we were
-  // doing AddInt.
-  if (size_t(k) < adIn->m_size) {
-    auto const ad = copy ? Copy(adIn) : adIn;
-    // TODO(#3888164): we should restructure things so we don't have
-    // to check KindOfUninit here.
-    setElem(packedData(ad)[k], v);
-    return ad;
-  }
-
-  // Setting the int at the size of the array can keep it in packed
-  // mode---it's the same as an append.
-  if (size_t(k) == adIn->m_size) return Append(adIn, v, copy);
-
-  // On the promote-to-mixed path, we can use addVal since we know the
-  // key can't exist.
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addVal(k, v);
+ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
+  return MutableOpInt(adIn, k, copy,
+    [&] (ArrayData* ad) { setElem(packedData(ad)[k], v); return ad; },
+    [&] { return Append(adIn, v, copy); },
+    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
+  );
 }
 
 ArrayData*
 PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isVecArray());
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
-  auto const ad = copy ? Copy(adIn) : adIn;
-  // TODO(#3888164): we should restructure things so we don't have
-  // to check KindOfUninit here.
-  setElem(packedData(ad)[k], v);
-  return ad;
+  return MutableOpIntVec(adIn, k, copy,
+    [&] (ArrayData* ad) { setElem(packedData(ad)[k], v); return ad; }
+  );
 }
 
 ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, Cell v,
                                bool copy) {
-  // We must convert to mixed, but can call addVal since the key must
-  // not exist.
-  assert(checkInvariants(adIn));
-  assert(adIn->isPacked());
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addVal(k, v);
+  return MutableOpStr(adIn, k, copy,
+    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
+  );
 }
 
 ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell, bool) {
@@ -735,21 +742,14 @@ ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell, bool) {
 
 ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
                                   bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isPacked());
-
-  if (size_t(k) == adIn->m_size) return AppendRef(adIn, v, copy);
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  if (size_t(k) < adIn->m_size) {
-    auto const ad = copy ? Copy(adIn) : adIn;
-    tvBind(v.asRef(), &packedData(ad)[k]);
-    return ad;
-  }
 
-  // todo t2606310: key can't exist.  use add/findForNewInsert
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  mixed->updateRef(k, v);
-  return mixed;
+  return MutableOpInt(adIn, k, copy,
+    [&] (ArrayData* ad) { tvBind(v.asRef(), &packedData(ad)[k]); return ad; },
+    [&] { return AppendRef(adIn, v, copy); },
+    // TODO(#2606310): Make use of our knowledge that the key is missing.
+    [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
+  );
 }
 
 ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t /*k*/,
@@ -763,12 +763,12 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
                                   StringData* k,
                                   Variant& v,
                                   bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isPacked());
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
-  auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  // todo t2606310: key can't exist.  use add/findForNewInsert
-  return mixed->updateRef(k, v);
+
+  return MutableOpStr(adIn, k, copy,
+    // TODO(#2606310): Make use of our knowledge that the key is missing.
+    [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
+  );
 }
 
 ArrayData*
@@ -778,9 +778,11 @@ PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, Variant&, bool) {
   throwInvalidArrayKeyException(k, adIn);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
-static void adjustMArrayIterAfterPop(ArrayData* ad) {
+void adjustMArrayIterAfterPop(ArrayData* ad) {
   assert(ad->hasPackedLayout());
   auto const size = ad->getSize();
   if (size) {

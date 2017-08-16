@@ -267,11 +267,13 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   template <class F, bool inc = true>
   static void IterateKV(const ArrayData* arr, F fn);
 
-private:
-  static MixedArray* ToMixedHeader(const ArrayData*, size_t);
   static MixedArray* ToMixed(ArrayData*);
   static MixedArray* ToMixedCopy(const ArrayData*);
   static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
+
+private:
+  static MixedArray* ToMixedHeader(const ArrayData*, size_t);
+
   static ArrayData* Grow(ArrayData*, bool);
   static ArrayData* PrepareForInsert(ArrayData*, bool);
   static SortFlavor preSort(ArrayData*);

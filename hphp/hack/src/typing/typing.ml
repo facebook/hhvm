@@ -412,7 +412,7 @@ and fun_def tcopt f =
         T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
         T.f_body = T.NamedBody {
           T.fnb_nast = tb;
-          T.fnb_unsafe = false (* TAST get this right *)
+          T.fnb_unsafe = nb.fnb_unsafe;
         }
       },
       env
@@ -5055,7 +5055,7 @@ and method_def env m =
     T.m_ret = m.m_ret;
     T.m_body = T.NamedBody {
       T.fnb_nast = tb;
-      T.fnb_unsafe = false (* TAST get this right *)
+      T.fnb_unsafe = nb.fnb_unsafe;
     };
   }
 

@@ -14,7 +14,8 @@ module type TypeParserType = sig
     -> Full_fidelity_parser_context.t -> t
   val lexer : t -> Full_fidelity_lexer.t
   val errors : t -> Full_fidelity_syntax_error.t list
-  val parse_type_specifier : t -> t * Full_fidelity_minimal_syntax.t
+  val parse_type_specifier : ?allow_var:bool -> t ->
+    t * Full_fidelity_minimal_syntax.t
   val parse_return_type : t -> t * Full_fidelity_minimal_syntax.t
   val parse_possible_generic_specifier : t -> t * Full_fidelity_minimal_syntax.t
   val parse_type_constraint_opt : t -> t * Full_fidelity_minimal_syntax.t

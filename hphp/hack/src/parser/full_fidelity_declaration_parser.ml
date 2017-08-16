@@ -45,8 +45,8 @@ module WithExpressionAndStatementAndTypeParser
   let parse_possible_generic_specifier parser =
     parse_in_type_parser parser TypeParser.parse_possible_generic_specifier
 
-  let parse_type_specifier parser =
-    parse_in_type_parser parser TypeParser.parse_type_specifier
+  let parse_type_specifier ?(allow_var=false) parser =
+    parse_in_type_parser parser (TypeParser.parse_type_specifier ~allow_var)
 
   let parse_return_type parser =
     parse_in_type_parser parser TypeParser.parse_return_type
@@ -712,7 +712,7 @@ module WithExpressionAndStatementAndTypeParser
         make_xhp_enum_type enum_token left_brace values right_brace in
       (parser, result)
     else
-      parse_type_specifier parser
+      parse_type_specifier ~allow_var:true parser
 
   and parse_xhp_required_opt parser =
     (* SPEC (Draft)

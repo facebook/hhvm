@@ -38,7 +38,7 @@ let parse_expression parser =
 (* TODO: What about something like for::for? Is that a legal
   type constant?  *)
 
-let rec parse_type_specifier parser =
+let rec parse_type_specifier ?(allow_var=false) parser =
   (* Strictly speaking, "mixed" is a nullable type specifier. We parse it as
      a simple type specifier here. *)
   let (parser1, token) = next_xhp_class_name_or_other parser in
@@ -55,6 +55,7 @@ let rec parse_type_specifier parser =
   | Resource
   | Object
   | Mixed -> (parser1, make_simple_type_specifier (make_token token))
+  | Var when allow_var -> parser1, make_simple_type_specifier (make_token token)
   | This -> parse_simple_type_or_type_constant parser
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Self

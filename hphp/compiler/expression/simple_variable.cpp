@@ -81,7 +81,7 @@ bool SimpleVariable::isHidden() const {
   return m_sym && m_sym->isHidden();
 }
 
-void SimpleVariable::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
 
   VariableTablePtr variables = getScope()->getVariables();

@@ -33,7 +33,7 @@ ClassExpression::ClassExpression(
 {
 }
 
-void ClassExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void ClassExpression::analyzeProgram(AnalysisResultPtr ar) {
   ar->analyzeProgram(m_cls);
 }
 

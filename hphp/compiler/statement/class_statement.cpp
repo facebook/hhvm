@@ -200,7 +200,7 @@ std::string ClassStatement::getName() const {
   return std::string("Class ") + getOriginalName();
 }
 
-void ClassStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   checkVolatile(ar);
 
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;

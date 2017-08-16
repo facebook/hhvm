@@ -62,12 +62,12 @@ ExpressionPtr ObjectMethodExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ObjectMethodExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    auto func = m_funcScope;
+    FunctionScopePtr func = m_funcScope;
     if (!func && m_object->isThis() && !m_origName.empty()) {
-      auto cls = getClassScope();
+      ClassScopePtr cls = getClassScope();
       if (cls) {
         m_classScope = cls;
         func = cls->findFunction(ar, m_origName, true, true);

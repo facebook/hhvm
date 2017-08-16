@@ -206,8 +206,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
 
 void VariableTable::cleanupForError(AnalysisResultConstPtr /*ar*/) {}
 
-bool VariableTable::markOverride(AnalysisResultConstPtr ar,
-                                 const std::string &name) {
+bool VariableTable::markOverride(AnalysisResultPtr ar, const std::string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   bool ret = false;

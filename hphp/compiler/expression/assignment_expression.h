@@ -31,7 +31,7 @@ struct AssignmentExpression : Expression, IParseHandler {
                        bool ref, bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler

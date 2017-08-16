@@ -313,7 +313,7 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     ConstructPtr self = shared_from_this();
@@ -342,16 +342,16 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
           auto const symbol = name->getLiteralString();
           switch (m_type) {
             case FunType::Define: {
+              ConstantTableConstPtr constants = ar->getConstants();
               // system constant
-              if (ar->getConstants()->isPresent(symbol)) {
+              if (constants->isPresent(symbol)) {
                 break;
               }
               // user constant
-              auto const arv = ar->lock();
-              auto const block = ar->findConstantDeclarer(symbol);
+              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
               // not found (i.e., undefined)
               if (!block) break;
-              auto const constants = block->getConstants();
+              constants = block->getConstants();
               const Symbol *sym = constants->getSymbol(symbol);
               always_assert(sym);
               if (!sym->isDynamic()) {
@@ -364,12 +364,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
               break;
             }
             case FunType::Defined: {
-              if (!ar->getConstants()->isPresent(symbol)) {
-                auto const arv = ar->lock();
+              ConstantTablePtr constants = ar->getConstants();
+              if (!constants->isPresent(symbol)) {
                 // user constant
-                auto const block = arv->findConstantDeclarer(symbol);
+                BlockScopePtr block = ar->findConstantDeclarer(symbol);
                 if (block) { // found the constant
-                  auto const constants = block->getConstants();
+                  constants = block->getConstants();
                   // set to be dynamic
                   if (m_type == FunType::Defined) {
                     constants->setDynamic(ar, symbol);

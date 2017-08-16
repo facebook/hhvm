@@ -42,7 +42,7 @@ struct UseDeclarationStatementFragment : public Statement {
       ns(ns), as(as), mixed_consumer(nullptr) {
   }
 
-  void analyzeProgram(AnalysisResultConstRawPtr /*ar*/) override {
+  void analyzeProgram(AnalysisResultPtr /*ar*/) override {
     always_assert(false);
   }
 

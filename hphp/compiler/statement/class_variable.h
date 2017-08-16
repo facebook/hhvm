@@ -34,7 +34,7 @@ struct ClassVariable : Statement, IParseHandler {
                 ExpressionListPtr declaration);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
+  void analyzeProgram(AnalysisResultPtr ar) override;
   StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler

@@ -96,9 +96,9 @@ int AssignmentExpression::getLocalEffects() const {
   return AssignEffect;
 }
 
-static void recordClassConstDependencies(ConstantTableRawPtr constants,
-                                         Symbol* sym,
-                                         ExpressionPtr e) {
+void recordClassConstDependencies(ConstantTablePtr constants,
+                                  Symbol* sym,
+                                  ExpressionPtr e) {
   if (!e) return;
   if (e->is(Expression::KindOfClassConstantExpression)) {
     auto cc = static_pointer_cast<ClassConstantExpression>(e);
@@ -112,7 +112,7 @@ static void recordClassConstDependencies(ConstantTableRawPtr constants,
   }
 }
 
-void AssignmentExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
     if (!m_value->isScalar()) {

@@ -221,7 +221,7 @@ bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
   return true;
 }
 
-void IncludeExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
         ar->getPhase() == AnalysisResult::AnalyzeFinal) {

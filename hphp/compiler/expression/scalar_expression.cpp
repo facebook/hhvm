@@ -144,7 +144,7 @@ bool ScalarExpression::needsTranslation() const {
   }
 }
 
-void ScalarExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     auto const id = HPHP::toLower(getIdentifier());
 

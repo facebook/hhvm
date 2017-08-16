@@ -60,13 +60,11 @@ ClassScopeRawPtr ClassConstantExpression::getOriginalClassScope() const {
   return scope ? scope->getContainingClass() : ClassScopeRawPtr();
 }
 
-void ClassConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_class && ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     if (ClassScopePtr cls = resolveClass()) {
-      {
-        Lock lock{BlockScope::s_constMutex};
-        cls->getConstants()->getValueRecur(ar, m_varName, cls);
-      }
+      ConstructPtr decl = cls->getConstants()->
+        getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
     }

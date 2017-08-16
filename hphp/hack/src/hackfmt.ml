@@ -243,13 +243,26 @@ let parse text_source =
     then tree
     else raise Hackfmt_error.InvalidSyntax
 
-let format ?config ?range ?ranges tree =
+let logging_time_taken env logger thunk =
+  let start_t = Unix.gettimeofday () in
+  let res = thunk () in
+  let end_t = Unix.gettimeofday () in
+  if not env.Env.test then
+    logger
+      ~start_t
+      ~end_t
+      ~mode:env.Env.mode
+      ~file:(text_source_to_filename env.Env.text_source)
+      ~root:env.Env.root;
+  res
+
+let format ?config ?range ?ranges env tree =
   let source_text = SyntaxTree.text tree in
   match range with
-  | None -> format_tree ?config tree
+  | None -> logging_time_taken env Logger.format_tree_end (fun () -> format_tree ?config tree)
   | Some range ->
     let range = expand_to_line_boundaries ?ranges source_text range in
-    format_range ?config range tree
+    logging_time_taken env Logger.format_range_end (fun () -> format_range ?config range tree)
 
 let output ?text_source str =
   let with_out_channel f =
@@ -282,8 +295,11 @@ let get_root = function
     eprintf "Guessed root: %a\n%!" Path.output root;
     root
 
-let format_diff_intervals ?config intervals tree =
-  try format_intervals ?config intervals tree with
+let format_diff_intervals ?config env intervals tree =
+  try
+    logging_time_taken env Logger.format_intervals_end
+      (fun () -> format_intervals ?config intervals tree)
+  with
   | Invalid_argument s -> raise (InvalidDiff s)
 
 let debug_print ?range ?config text_source =
@@ -306,7 +322,7 @@ let main (env: Env.t) (options: format_options) =
     else
       text_source
         |> parse
-        |> format ?range ~config
+        |> format ?range ~config env
         |> output
   | InPlace {filename; config} ->
     let text_source = File filename in
@@ -314,13 +330,16 @@ let main (env: Env.t) (options: format_options) =
     if env.Env.debug then debug_print ~config text_source;
     text_source
       |> parse
-      |> format ~config
+      |> format ~config env
       |> output ~text_source
   | AtChar {text_source; pos; config} ->
     env.Env.text_source <- text_source;
     let tree = parse text_source in
     let range, formatted =
-      try format_at_offset ~config tree pos with
+      try
+        logging_time_taken env Logger.format_at_offset_end
+          (fun () -> format_at_offset ~config tree pos)
+      with
       | Invalid_argument s -> raise (InvalidCliArg s) in
     if env.Env.debug then debug_print text_source ~range ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
@@ -351,7 +370,7 @@ let main (env: Env.t) (options: format_options) =
           let contents =
             text_source
             |> parse
-            |> format_diff_intervals ~config intervals in
+            |> format_diff_intervals ~config env intervals in
           Some (text_source, rel_path, contents)
         with
         (* A parse error isn't a signal that there's something wrong with the

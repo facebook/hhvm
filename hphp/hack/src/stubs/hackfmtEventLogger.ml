@@ -10,3 +10,7 @@
 
 let init _ = ()
 let exit ~time_taken:_ ~error:_ ~exit_code:_ ~mode:_ ~file:_ ~root:_ = ()
+let format_tree_end ~start_t:_ ~end_t:_ ~mode:_ ~file:_ ~root:_ = ()
+let format_range_end ~start_t:_ ~end_t:_ ~mode:_ ~file:_ ~root:_ = ()
+let format_intervals_end ~start_t:_ ~end_t:_ ~mode:_ ~file:_ ~root:_ = ()
+let format_at_offset_end ~start_t:_ ~end_t:_ ~mode:_ ~file:_ ~root:_ = ()

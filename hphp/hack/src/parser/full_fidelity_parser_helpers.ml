@@ -159,8 +159,8 @@ module WithParser(Parser : ParserType) = struct
        * and continue on from the current token (don't skip it). *)
       let next_kind = peek_token_kind ~lookahead:1 parser in
       if next_kind = kind then
-        let parser1 = skip_and_log_unexpected_token parser in
-        let (parser, token) = next_token parser1 in
+        let parser = skip_and_log_unexpected_token parser in
+        let (parser, token) = next_token parser in
         (parser, make_token token)
       else
         (with_error parser error, (make_missing()))

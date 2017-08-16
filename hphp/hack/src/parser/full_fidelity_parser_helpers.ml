@@ -12,7 +12,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
 module Context = Full_fidelity_parser_context
-module MinimalTrivia = Full_fidelity_minimal_trivia
+module Trivia = Full_fidelity_minimal_trivia
 
 open Full_fidelity_minimal_syntax
 
@@ -24,9 +24,9 @@ module type ParserType = sig
   val lexer : t -> Lexer.t
   val with_lexer : t -> Lexer.t -> t
   val expect : t -> TokenKind.t list -> t
-  val carry_extra : t -> Token.t -> t
-  val carrying_extra: t -> bool
-  val flush_extra : t -> t * MinimalTrivia.t list
+  val skipped_tokens : t -> Token.t list
+  val with_skipped_tokens : t -> Token.t list -> t
+  val clear_skipped_tokens : t -> t
 end
 
 module WithParser(Parser : ParserType) = struct
@@ -37,11 +37,26 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (* ERROR RECOVERY: Check if the parser's carring ExtraTokenError trivia.
      * If so, clear it and add it to the leading trivia of the current token. *)
-    let (parser, token) =
-      if Parser.carrying_extra parser then
-        let (parser1, trivia_list) = Parser.flush_extra parser in
-        (parser1, Token.prepend_to_leading token trivia_list)
-      else (parser, token) in
+     let (parser, token) =
+       match Parser.skipped_tokens parser with
+       | [] -> (parser, token)
+       | skipped_tokens ->
+         let trivialise_token acc t =
+           (* Every bit of a skipped token must end up in `acc`, so push all the
+           * token's trailing trivia, then push the "trivialised" token itself,
+           * followed by the leading trivia. *)
+           let prepend_onto elt_list elt = List.cons elt elt_list in
+           let acc = List.fold_left prepend_onto acc (Token.trailing t) in
+           let acc = Trivia.make_extra_token_error (Token.width t) :: acc in
+           List.fold_left prepend_onto acc (Token.leading t)
+         in
+         let leading =
+           List.fold_left trivialise_token (Token.leading token) skipped_tokens
+         in
+         let token = Token.with_leading leading token in
+         let parser = Parser.clear_skipped_tokens parser in
+         (parser, token)
+       in
     (parser, token)
 
   let next_token_no_trailing parser =
@@ -123,15 +138,15 @@ module WithParser(Parser : ParserType) = struct
       (Parser.lexer parser) token_width 0 in
     token_str
 
-  let process_next_as_extra ?(generate_error=true) parser =
+  let skip_and_log_unexpected_token ?(generate_error=true) parser =
     let parser =
       if generate_error then
         let extra_str = current_token_text parser in
         with_error parser (SyntaxError.error1057 extra_str) ~on_whole_token:true
       else parser in
-    let (parser, token) = next_token parser in
-    let parser = Parser.carry_extra parser token in
-    parser
+    let parser, token = next_token parser in
+    let skipped_tokens = token :: Parser.skipped_tokens parser in
+    Parser.with_skipped_tokens parser skipped_tokens
 
   let require_token parser kind error =
     let (parser1, token) = next_token parser in
@@ -144,7 +159,7 @@ module WithParser(Parser : ParserType) = struct
        * and continue on from the current token (don't skip it). *)
       let next_kind = peek_token_kind ~lookahead:1 parser in
       if next_kind = kind then
-        let parser1 = process_next_as_extra parser in
+        let parser1 = skip_and_log_unexpected_token parser in
         let (parser, token) = next_token parser1 in
         (parser, make_token token)
       else

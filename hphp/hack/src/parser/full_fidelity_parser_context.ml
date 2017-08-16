@@ -19,7 +19,6 @@
  *)
 
 module TokenKind = Full_fidelity_token_kind
-module MinimalTrivia = Full_fidelity_minimal_trivia
 module MinimalToken = Full_fidelity_minimal_token
 module TriviaKind = Full_fidelity_trivia_kind
 
@@ -35,11 +34,17 @@ end
 
 type t = {
   expected : Scope.t list;
-  extra_token_error : MinimalTrivia.t list option
+  skipped_tokens : MinimalToken.t list
 }
 
 let empty =
-  { expected = [ ]; extra_token_error = None }
+  { expected = [ ]; skipped_tokens = [ ] }
+
+let skipped_tokens context =
+  context.skipped_tokens
+
+let with_skipped_tokens context skipped_tokens =
+  { context with skipped_tokens }
 
 let with_expected context expected =
   { context with expected }
@@ -84,24 +89,6 @@ let pop_scope context token_kind_list =
     failwith (failure_str)
   | [ ] -> failwith ("Error: tried to pop a list of token kinds off of an " ^
     "empty context.")
-
-(* Dealing with extra_token_error *)
-
-let carry_extra context token =
-  match token with
-  | None -> { expected = (context.expected); extra_token_error = None }
-  | Some token ->
-    let extra_token_error = Some (MinimalToken.as_error_trivia_list token) in
-    {context with extra_token_error}
-
-let carrying_extra context =
-  Option.is_some context.extra_token_error
-
-let flush_extra context =
-  match context.extra_token_error with
-  | Some extra -> (carry_extra context None, extra)
-  | None -> failwith("Error: tried to flush an extra token from parser " ^
-    "context, but parser context was not carrying an extra token.")
 
 (* Utility debugging function *)
 

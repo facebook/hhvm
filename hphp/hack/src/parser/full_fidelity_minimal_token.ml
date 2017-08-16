@@ -59,12 +59,7 @@ let has_leading_end_of_line token =
   Core.List.exists token.leading
     ~f:(fun trivia ->  MinimalTrivia.kind trivia = TriviaKind.EndOfLine)
 
-let as_error_trivia_list token =
-  let error_trivia = MinimalTrivia.make_extra_token_error (width token) in
-    (leading token) @ [ error_trivia ] @ (trailing token)
-
-let prepend_to_leading token trivia_list =
-  let leading = trivia_list @ token.leading in
+let with_leading leading token =
   { token with leading }
 
 let to_json token =

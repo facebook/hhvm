@@ -41,6 +41,17 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
   let with_context parser context =
     { parser with context }
 
+  let skipped_tokens parser =
+    Context.skipped_tokens parser.context
+
+  let with_skipped_tokens parser skipped_tokens =
+    let new_context = Context.with_skipped_tokens
+      parser.context skipped_tokens in
+    with_context parser new_context
+
+  let clear_skipped_tokens parser =
+    with_skipped_tokens parser []
+
   (** Wrapper functions for interfacing with parser context **)
 
   let expect parser token_kind_list =
@@ -64,16 +75,5 @@ module WithLexer(Lexer : Full_fidelity_lexer_sig.Lexer_S) = struct
 
   let print_expected parser =
     Context.print_expected parser.context
-
-  let carry_extra parser token =
-    let new_context = Context.carry_extra parser.context (Some token) in
-    with_context parser new_context
-
-  let carrying_extra parser =
-    Context.carrying_extra parser.context
-
-  let flush_extra parser =
-    let (context, trivia_list) = Context.flush_extra parser.context in
-    ({ parser with context }, trivia_list)
 
 end

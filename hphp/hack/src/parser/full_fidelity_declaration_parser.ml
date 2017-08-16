@@ -860,7 +860,8 @@ module WithExpressionAndStatementAndTypeParser
         when not (Token.has_leading_end_of_line next_token) ->
         let parser = with_error parser SyntaxError.error1056
           ~on_whole_token:true in
-        let parser = process_next_as_extra parser ~generate_error:false in
+        let parser = skip_and_log_unexpected_token parser
+          ~generate_error:false in
         parse_methodish parser attribute_spec modifiers
       (* Otherwise, continue parsing as a property (which might be a lambda). *)
       | ( _ , _ ) -> parse_property_declaration parser modifiers

@@ -44,9 +44,21 @@ struct StringOffsetVector {
 };
 
 // to disambiguate between string literals and local names
-struct Local {
+struct NamedLocal {
   std::string name;
 };
+
+struct UniqueLocal {
+  explicit UniqueLocal()
+    : id(std::make_shared<uint32_t>(-1)) {}
+
+  std::shared_ptr<uint32_t> id;
+};
+
+typedef boost::variant<
+  NamedLocal,
+  UniqueLocal
+> Local;
 
 enum MemberType {
   Property,

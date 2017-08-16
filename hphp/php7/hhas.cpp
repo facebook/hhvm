@@ -16,6 +16,7 @@
 
 #include "hphp/php7/hhas.h"
 
+#include "hphp/php7/analysis.h"
 #include "hphp/php7/cfg.h"
 #include "hphp/util/match.h"
 
@@ -25,11 +26,12 @@
 namespace HPHP { namespace php7 {
 
 namespace {
-  std::string dump_pseudomain(const Function& func);
-  std::string dump_function(const Function& func);
-  std::string dump_blocks(const Function& func);
 
-  std::string dump_declvars(const std::unordered_set<std::string>& locals);
+std::string dump_pseudomain(const Function& func);
+std::string dump_function(const Function& func);
+std::string dump_blocks(const Function& func);
+std::string dump_declvars(const std::unordered_set<std::string>& locals);
+
 } // namespace
 
 std::string dump_asm(const Unit& unit) {
@@ -81,7 +83,14 @@ struct InstrVisitor {
   }
 
   void imm(const bc::Local& local) {
-    folly::format(&out, " ${}", local.name);
+    match<void>(local,
+      [&](const bc::NamedLocal& named){
+        folly::format(&out, " ${}", named.name);
+      },
+      [&](const bc::UniqueLocal& unique){
+        folly::format(&out, " _{}", *unique.id);
+      }
+    );
   }
 
   void imm(const std::vector<Block*>& jmps) {
@@ -168,7 +177,8 @@ struct InstrVisitor {
       },
       [&](const LocalMember& m) {
         writeType(m.type);
-        folly::format(&out, "L:${}", m.local.name);
+        out.append("L:");
+        imm(m.local);
       },
       [&](const ImmMember& m) {
         writeType(m.type);
@@ -294,7 +304,7 @@ struct AssemblyVisitor : public boost::static_visitor<void>
 std::string dump_pseudomain(const Function& func) {
   std::string out;
   out.append(".main {\n");
-  out.append(dump_declvars(func.locals));
+  out.append(dump_declvars(analyzeLocals(func)));
   func.cfg.visit(AssemblyVisitor(out));
   out.append("}\n\n");
   return out;
@@ -311,7 +321,7 @@ std::string dump_function(const Function& func) {
         param.name);
   }
   out.append(") {\n");
-  out.append(dump_declvars(func.locals));
+  out.append(dump_declvars(analyzeLocals(func)));
   func.cfg.visit(AssemblyVisitor(out));
   out.append("}\n\n");
   return out;
@@ -319,13 +329,11 @@ std::string dump_function(const Function& func) {
 
 std::string dump_declvars(const std::unordered_set<std::string>& locals) {
   std::string out;
-
-  out.append("  .declvars");
-  for (const auto& local : locals) {
-    folly::format(&out, " ${}", local);
+  out.append(".declvars");
+  for (const auto& name : locals) {
+    folly::format(&out, " ${}", name);
   }
-  out.append(";\n");
-
+  out.append(";");
   return out;
 }
 

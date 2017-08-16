@@ -1,0 +1,10 @@
+inner
+outer
+int(42)
+inner
+outer
+string(5) "x set"
+inner
+string(11) "x and y set"
+inner
+string(10) "just y set"

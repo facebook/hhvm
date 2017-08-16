@@ -25,7 +25,6 @@
 
 #include <string>
 #include <vector>
-#include <unordered_set>
 
 namespace HPHP { namespace php7 {
 
@@ -51,7 +50,6 @@ struct Function {
   Unit* parent;
   CFG cfg;
   std::vector<Param> params;
-  std::unordered_set<std::string> locals;
 };
 
 struct Unit {

@@ -318,16 +318,18 @@ CFG&& CFG::addFinallyGuard(CFG guard) {
   // these will be the exits from the finally guard's switch
   std::vector<CFG> exits;
   auto idx = 0;
+  UniqueLocal exitCode;
 
   // there's one exit for exceptions, which corresponds to an entry from catch
+  UniqueLocal exnLocal;
   addExnHandler(CFG({
-    SetL{"exn"},
+    SetL{exnLocal},
     PopC{},
     Int{idx++},
-    SetL{"exit"},
+    SetL{exitCode},
     PopC{}
   }).thenJmp(guard.m_entry));
-  exits.push_back(CFG(CGetL{"exn"}).thenThrow());
+  exits.push_back(CFG(CGetL{exnLocal}).thenThrow());
 
   // every exit from the region is a linkage, so we intercept them all by
   // creating a new trampoline block that jumps to the finally handler
@@ -340,16 +342,17 @@ CFG&& CFG::addFinallyGuard(CFG guard) {
       // for returns, put the relevant value in a local and restore
       // it before continuing
       [&](const ReturnTarget& ret) {
+        UniqueLocal tmp;
         switch (ret.flavor) {
           case Cell:
-            trampoline->emit(SetL{"return"});
+            trampoline->emit(SetL{tmp});
             trampoline->emit(PopC{});
-            muxExit.then(CGetL{"return"});
+            muxExit.then(CGetL{tmp});
             break;
           case Ref:
-            trampoline->emit(BindL{"return"});
+            trampoline->emit(BindL{tmp});
             trampoline->emit(PopV{});
-            muxExit.then(VGetL{"return"});
+            muxExit.then(VGetL{tmp});
             break;
           default:
             panic("bad return flavor");
@@ -364,7 +367,7 @@ CFG&& CFG::addFinallyGuard(CFG guard) {
     // for all exits, we allocate a code and put this in a local, then jump
     // to the finally guard
     trampoline->emit(Int{idx++});
-    trampoline->emit(SetL{"exit"});
+    trampoline->emit(SetL{exitCode});
     trampoline->emit(PopC{});
     trampoline->exit(Jmp{guard.m_entry});
 
@@ -380,12 +383,12 @@ CFG&& CFG::addFinallyGuard(CFG guard) {
   Block* cont = makeBlock();
   exits.push_back(CFG().thenJmp(cont));
   then(Int{idx++});
-  then(SetL{"exit"});
+  then(SetL{exitCode});
   then(PopC{});
   // execute the finally guard
   then(std::move(guard));
   // then switch based on the exit code local
-  then(CGetL{"exit"});
+  then(CGetL{exitCode});
   switchUnbounded(std::move(exits));
 
   return continueFrom(cont);

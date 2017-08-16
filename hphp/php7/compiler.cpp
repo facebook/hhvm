@@ -604,7 +604,7 @@ CFG compileGlobalDeclaration(const zend_ast* ast) {
   return {
     String{name},
     VGetG{},
-    BindL{name},
+    BindL{NamedLocal{name}},
     PopV{}
   };
 }
@@ -620,7 +620,7 @@ CFG compileCatch(Function* func, const zend_ast_list* catches) {
     auto body = clause->child[2];
 
     auto handler = CFG({
-      SetL{capture},
+      SetL{NamedLocal{capture}},
       PopC{}
     }).then(compileStatement(func, body))
       .thenJmp(end);

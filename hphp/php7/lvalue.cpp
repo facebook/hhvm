@@ -199,39 +199,39 @@ struct LocalLvalue : Lvalue {
     : name(std::move(name)) {}
 
   CFG getC() override {
-    return { CGetL{name} };
+    return { CGetL{NamedLocal{name}} };
   }
 
   CFG getV() override {
-    return { VGetL{name} };
+    return { VGetL{NamedLocal{name}} };
   }
 
   CFG getF(uint32_t slot) override {
-    return { FPassL{slot, name} };
+    return { FPassL{slot, NamedLocal{name}} };
   }
 
   CFG getB(MinstrSeq& m) override {
-    m.baseLocal(Local{name});
+    m.baseLocal(NamedLocal{name});
     return {};
   }
 
   CFG assign(const zend_ast* rhs) override {
     return compileExpression(rhs, Flavor::Cell)
-      .then(SetL{name});
+      .then(SetL{NamedLocal{name}});
   }
 
   CFG bind(const zend_ast* rhs) override {
     return compileExpression(rhs, Flavor::Ref)
-      .then(BindL{name});
+      .then(BindL{NamedLocal{name}});
   }
 
   CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
     return compileExpression(rhs, Flavor::Cell)
-      .then(SetOpL{name, op});
+      .then(SetOpL{NamedLocal{name}, op});
   }
 
   CFG incDec(IncDecOp op) override {
-    return { IncDecL{name, op} };
+    return { IncDecL{NamedLocal{name}, op} };
   }
 
   std::string name;
@@ -558,7 +558,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
         auto str = zval_to_string(zend_ast_get_zval(name));
         return std::make_unique<DimLvalue>(
           getBase(base),
-          LocalMember{MemberType::Element, Local{str}}
+          LocalMember{MemberType::Element, NamedLocal{str}}
         );
       }
     }

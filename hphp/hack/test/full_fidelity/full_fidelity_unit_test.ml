@@ -204,6 +204,7 @@ let error_tests =
     "context/test_single_extra_token_recovery";
     "context/test_missing_foreach_value";
     "test_namespace_error_recovery";
+    "test_correct_code1";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

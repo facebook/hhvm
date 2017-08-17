@@ -770,7 +770,7 @@ and case_list_ parent_lenv ty env = function
     let env, tb = block env b in
     env, [Nast_terminality.Terminal.case env (Default b), env.Env.lenv],
       [T.Default tb]
-  | Case (e, b) :: rl ->
+  | (Case (e, b)) as ce :: rl ->
     (* TODO - we should consider handling the comparisons the same
      * way as Binop Ast.EqEq, since case statements work using ==
      * comparison rules *)
@@ -782,25 +782,18 @@ and case_list_ parent_lenv ty env = function
     let both_are_sub_types env tprim ty1 ty2 =
       (SubType.is_sub_type env ty1 tprim) &&
       (SubType.is_sub_type env ty2 tprim) in
-    if Nast_terminality.Terminal.block env b then
-      let env, te, ty2 = expr env e in
-      let env, _ =
-        if (both_are_sub_types env ty_num ty ty2) ||
-          (both_are_sub_types env ty_arraykey ty ty2)
-        then env, ty
-        else Type.unify (fst e) Reason.URnone env ty ty2 in
+    let env, te, ty2 = expr env e in
+    let env, _ = if (both_are_sub_types env ty_num ty ty2) ||
+                    (both_are_sub_types env ty_arraykey ty ty2)
+                 then env, ty
+                 else Type.unify (fst e) Reason.URnone env ty ty2 in
+
+    let env, lenv, rl, tcl = begin if Nast_terminality.Terminal.block env b then
       let env, tb = block env b in
       let lenv = env.Env.lenv in
       let env, rl, tcl = case_list parent_lenv ty env rl in
-      env, (Nast_terminality.Terminal.case env (Case (e, b)), lenv) :: rl,
-        T.Case (te, tb)::tcl
+      env, lenv, rl, T.Case (te, tb) :: tcl
     else
-      let env, _te, ty2 = expr env e in
-      let env, _ =
-        if (both_are_sub_types env ty_num ty ty2) ||
-          (both_are_sub_types env ty_arraykey ty ty2)
-        then env, ty
-        else Type.unify (fst e) Reason.URnone env ty ty2 in
       (* Since this block is not terminal we will end up falling through to the
        * next block. This means the lenv will include what our current
        * environment is, intersected (or integrated?) with the environment
@@ -816,7 +809,7 @@ and case_list_ parent_lenv ty env = function
        *    ...
        *)
       let lenv1 = env.Env.lenv in
-      let env, _ = block env b in
+      let env, tb = block env b in
       (* PERF: If the case is empty or a Noop then we do not need to intersect
        * the lenv since they will be the same.
        *
@@ -829,7 +822,11 @@ and case_list_ parent_lenv ty env = function
       let env = match b with
         | [] | [Noop] -> env
         | _ -> LEnv.intersect env parent_lenv lenv1 env.Env.lenv in
-      case_list_ parent_lenv ty env rl
+      let lenv = env.Env.lenv in
+      let env, rl, tcl = case_list_ parent_lenv ty env rl in
+      env, lenv, rl, T.Case (te, tb) :: tcl
+    end in
+    env, (Nast_terminality.Terminal.case env ce, lenv) :: rl, tcl
 
 and catch parent_lenv after_try env (sid, exn, b) =
   let env = { env with Env.lenv = after_try } in

@@ -6,8 +6,7 @@
 
 namespace HPHP {
 
-typedef struct
-{
+typedef struct {
     const uint8_t *string;
     size_t len;
     size_t pos;

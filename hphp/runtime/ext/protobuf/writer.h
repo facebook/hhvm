@@ -10,8 +10,7 @@
 
 namespace HPHP {
 
-typedef struct
-{
+typedef struct {
     uint8_t *data;
     size_t pos;
     size_t size;

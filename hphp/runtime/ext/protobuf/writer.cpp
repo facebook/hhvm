@@ -18,8 +18,7 @@ static inline void write_fixed64(fixed64_t value, uint8_t *out);
 
 static inline void writer_write_varint_uint64(writer_t *writer, uint64_t value);
 
-void writer_free_pack(writer_t *writer)
-{
+void writer_free_pack(writer_t *writer) {
     if (writer->data != NULL) {
         smart_free(writer->data);
         writer->data = NULL;
@@ -29,8 +28,7 @@ void writer_free_pack(writer_t *writer)
     }
 }
 
-void writer_init(writer_t *writer)
-{
+void writer_init(writer_t *writer) {
     if ((writer->data = (uint8_t *) smart_malloc(WRITER_DATA_SIZE_INCREMENT)) != NULL)
         writer->size = WRITER_DATA_SIZE_INCREMENT;
     else
@@ -39,15 +37,13 @@ void writer_init(writer_t *writer)
     writer->pos = 0;
 }
 
-char *writer_get_pack(writer_t *writer, int *size)
-{
+char *writer_get_pack(writer_t *writer, int *size) {
     *size = writer->pos;
     writer->data[writer->pos] = '\0';
     return (char *) writer->data;
 }
 
-int writer_write_double(writer_t *writer, uint32_t field_number, double value)
-{
+int writer_write_double(writer_t *writer, uint32_t field_number, double value) {
     int64_t key;
     fixed64_t val;
 
@@ -65,8 +61,7 @@ int writer_write_double(writer_t *writer, uint32_t field_number, double value)
     return 0;
 }
 
-int writer_write_fixed32(writer_t *writer, uint32_t field_number, int32_t value)
-{
+int writer_write_fixed32(writer_t *writer, uint32_t field_number, int32_t value) {
     int64_t key;
     fixed32_t val;
 
@@ -84,8 +79,7 @@ int writer_write_fixed32(writer_t *writer, uint32_t field_number, int32_t value)
     return 0;
 }
 
-int writer_write_fixed64(writer_t *writer, uint32_t field_number, int64_t value)
-{
+int writer_write_fixed64(writer_t *writer, uint32_t field_number, int64_t value) {
     int64_t key;
     fixed64_t val;
 
@@ -103,8 +97,7 @@ int writer_write_fixed64(writer_t *writer, uint32_t field_number, int64_t value)
     return 0;
 }
 
-int writer_write_float(writer_t *writer, uint32_t field_number, double value)
-{
+int writer_write_float(writer_t *writer, uint32_t field_number, double value) {
     int64_t key;
     fixed32_t val;
 
@@ -122,8 +115,7 @@ int writer_write_float(writer_t *writer, uint32_t field_number, double value)
     return 0;
 }
 
-int writer_write_int(writer_t *writer, uint32_t field_number, int64_t value)
-{
+int writer_write_int(writer_t *writer, uint32_t field_number, int64_t value) {
     int64_t key;
 
     if (writer_ensure_space(writer, 2 * WRITER_VARINT_SPACE) != 0)
@@ -137,8 +129,7 @@ int writer_write_int(writer_t *writer, uint32_t field_number, int64_t value)
     return 0;
 }
 
-int writer_write_uint64(writer_t *writer, uint32_t field_number, uint64_t value)
-{
+int writer_write_uint64(writer_t *writer, uint32_t field_number, uint64_t value) {
     int64_t key;
 
     if (writer_ensure_space(writer, 2 * WRITER_VARINT_SPACE) != 0) {
@@ -152,8 +143,7 @@ int writer_write_uint64(writer_t *writer, uint32_t field_number, uint64_t value)
     return 0;
 }
 
-int writer_write_signed_int(writer_t *writer, uint32_t field_number, int64_t value)
-{
+int writer_write_signed_int(writer_t *writer, uint32_t field_number, int64_t value) {
     int64_t key;
 
     if (writer_ensure_space(writer, 2 * WRITER_VARINT_SPACE) != 0)
@@ -173,8 +163,7 @@ int writer_write_signed_int(writer_t *writer, uint32_t field_number, int64_t val
     return 0;
 }
 
-int writer_write_string(writer_t *writer, uint32_t field_number, const char *str, size_t len)
-{
+int writer_write_string(writer_t *writer, uint32_t field_number, const char *str, size_t len) {
     int64_t key;
 
     if (writer_ensure_space(writer, 2 * WRITER_VARINT_SPACE + len) != 0)
@@ -190,8 +179,7 @@ int writer_write_string(writer_t *writer, uint32_t field_number, const char *str
     return 0;
 }
 
-static inline int writer_ensure_space(writer_t *writer, size_t space)
-{
+static inline int writer_ensure_space(writer_t *writer, size_t space) {
     uint8_t *data;
 
     if ((writer->size - writer->pos) + 1 < space) {
@@ -207,8 +195,7 @@ static inline int writer_ensure_space(writer_t *writer, size_t space)
     return 0;
 }
 
-static inline void writer_write_varint(writer_t *writer, int64_t value)
-{
+static inline void writer_write_varint(writer_t *writer, int64_t value) {
     int i;
     uint8_t byte;
 
@@ -236,8 +223,7 @@ static inline void writer_write_varint(writer_t *writer, int64_t value)
     }
 }
 
-static inline void writer_write_varint_uint64(writer_t *writer, uint64_t value)
-{
+static inline void writer_write_varint_uint64(writer_t *writer, uint64_t value) {
     uint8_t byte = 0;
 
     if (value == 0) {
@@ -258,8 +244,7 @@ static inline void writer_write_varint_uint64(writer_t *writer, uint64_t value)
     }
 }
 
-static inline void write_fixed32(fixed32_t value, uint8_t *out)
-{
+static inline void write_fixed32(fixed32_t value, uint8_t *out) {
 #ifndef WORDS_BIGENDIAN
     memcpy(out, &value.u_val, 4);
 #else
@@ -270,8 +255,7 @@ static inline void write_fixed32(fixed32_t value, uint8_t *out)
 #endif
 }
 
-static inline void write_fixed64(fixed64_t value, uint8_t *out)
-{
+static inline void write_fixed64(fixed64_t value, uint8_t *out) {
 #ifndef WORDS_BIGENDIAN
     memcpy(out, &value.u_val, 8);
 #else

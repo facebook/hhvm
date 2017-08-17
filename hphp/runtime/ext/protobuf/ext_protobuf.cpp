@@ -91,13 +91,13 @@ static int pb_write_uint64(const Object& obj, writer_t *writer,
 
 
 void HHVM_METHOD(ProtobufMessage, append, int64_t position, CVarRef value) {
-    //检查参数
+    //check params
     if (value.isNull()) {
         return;
     }
-    //获取成员values
+    //get object method values
     Array values = pb_get_values(Object{this_});
-    //从values中获取字段内容，append只适用于repeated字段
+    //get the field content from values, append only applies to the repeated field
     Variant in_value = pb_get_value(Object{this_}, values, position); 
     if (!in_value.isArray()) {
         PB_COMPILE_ERROR("'%s' field internal type should be an array", 
@@ -105,24 +105,24 @@ void HHVM_METHOD(ProtobufMessage, append, int64_t position, CVarRef value) {
         return;
     }
     Array array = in_value.toArray();
-    //根据proto文件，矫正参数类型
+    //according to the proto file, correct the parameter type
     Variant dst;
     if (pb_assign_value(Object{this_}, dst, value, position) != 0) {
         return;
     }
-    //将矫正后的参数添加到字段内容里
+    //Add the corrected parameters to the field contents
     array.append(dst);
-    //将新字段替换到values
+    //replace the new field value with values
     values.set(position, array);
-    //将values替换到类变量
+    // replace class property with values
     Object{this_}->o_set(PB_VALUES_PROPERTY, values);
 }
 
 void HHVM_METHOD(ProtobufMessage, clear, int64_t position) {
-    //获取类变量values
+    //get class property values
     Array values = pb_get_values(Object{this_});
     values.set(position, Array::Create());
-    //将values替换到类变量
+    //replace class property with values
     Object{this_}->o_set(PB_VALUES_PROPERTY, values);
 }
 
@@ -269,28 +269,27 @@ bool HHVM_METHOD(ProtobufMessage, parseFromString, const String& packed) {
 
         Array field_descriptor = pb_get_field_descriptor(Object{this_}, field_descriptors, field_number);
         if (field_descriptor.isNull()) { 
-            switch (wire_type)
-            {
-            case WIRE_TYPE_VARINT:
-                ret = reader_skip_varint(&reader);
-                break;
+            switch (wire_type) {
+                case WIRE_TYPE_VARINT:
+                    ret = reader_skip_varint(&reader);
+                    break;
 
-            case WIRE_TYPE_64BIT:
-                ret = reader_skip_64bit(&reader);
-                break;
+                case WIRE_TYPE_64BIT:
+                    ret = reader_skip_64bit(&reader);
+                    break;
 
-            case WIRE_TYPE_LENGTH_DELIMITED:
-                ret = reader_skip_length_delimited(&reader);
-                break;
+                case WIRE_TYPE_LENGTH_DELIMITED:
+                    ret = reader_skip_length_delimited(&reader);
+                    break;
 
-            case WIRE_TYPE_32BIT:
-                ret = reader_skip_32bit(&reader);
-                break;
+                case WIRE_TYPE_32BIT:
+                    ret = reader_skip_32bit(&reader);
+                    break;
 
-            default:
-                PB_PARSE_ERROR("unexpected wire type %d for unexpected %ld field", 
-                    wire_type, field_number);
-                return false;
+                default:
+                    PB_PARSE_ERROR("unexpected wire type %d for unexpected %ld field", 
+                        wire_type, field_number);
+                    return false;
             }
 
             if (ret != 0) {
@@ -362,90 +361,79 @@ bool HHVM_METHOD(ProtobufMessage, parseFromString, const String& packed) {
             }
 
             Variant tmp;
-            switch (field_type.toByte())
-            {
-            case PB_TYPE_DOUBLE:
-                {
+            switch (field_type.toByte()) {
+                case PB_TYPE_DOUBLE: {
                     double out = 0.0;
                     ret = reader_read_double(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
-
-            case PB_TYPE_FIXED32:
-                {
+                case PB_TYPE_FIXED32: {
                     int64_t out = 0;
                     ret = reader_read_fixed32(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
 
-            case PB_TYPE_FIXED64:
-                {
+                case PB_TYPE_FIXED64: {
                     int64_t out = 0;
                     ret = reader_read_fixed64(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
 
-            case PB_TYPE_FLOAT:
-                {
+                case PB_TYPE_FLOAT: {
                     double out = 0.0;
                     ret = reader_read_float(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
-
-            case PB_TYPE_INT:
-                {
+                
+                case PB_TYPE_INT: {
                     int64_t out = 0;
                     ret = reader_read_int(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
 
-            case PB_TYPE_BOOL:
-                {
+                case PB_TYPE_BOOL: {
                     int64_t out = 0;
                     ret = reader_read_int(&reader, &out);
                     tmp = out;
                     tmp = tmp.toBoolean();
+                    break;
                 }
-                break;
 
-            case PB_TYPE_SIGNED_INT:
-                {
+                case PB_TYPE_SIGNED_INT: {
                     int64_t out = 0;
                     ret = reader_read_signed_int(&reader, &out);
                     tmp = out;
+                    break;
                 }
-                break;
 
-            case PB_TYPE_STRING:
-                {
+                case PB_TYPE_STRING: {
                     char* str = NULL;
                     int str_size = 0;
                     if ((ret = reader_read_string(&reader, &str, &str_size)) == 0) {
                         tmp = String(str, str_size, CopyString);
                     }
+                    break;
                 }
-                break;
 
-            case PB_TYPE_UINT64:
-                {
+                case PB_TYPE_UINT64: {
                     uint64_t out = 0;
                     reader_read_uint64(&reader, &out);
                     std::ostringstream num;
                     num << out;
                     tmp = String(num.str().c_str(), num.str().length(), CopyString);
+                    break;
                 }
-                break;
 
-            default:
-                PB_COMPILE_ERROR("unexpected '%s' field type %d in field descriptor", 
-                    pb_get_field_name(Object{this_}, field_number), 
-                    field_type.toByte());
-                return false;
+                default:
+                    PB_COMPILE_ERROR("unexpected '%s' field type %d in field descriptor", 
+                        pb_get_field_name(Object{this_}, field_number), 
+                        field_type.toByte());
+                    return false;
             }
 
             if (ret != 0) {
@@ -597,36 +585,35 @@ static int64_t pb_assign_value(const Object& obj, Variant& dst,
 
     Variant tmp = src;
     if (type.isInteger()) {
-        switch (type.toInt64())
-        {
-        case PB_TYPE_DOUBLE:
-        case PB_TYPE_FLOAT:
-            if (!tmp.isDouble()) {
-                tmp = tmp.toDouble();
-            }
-            break;
+        switch (type.toInt64()) {
+            case PB_TYPE_DOUBLE:
+            case PB_TYPE_FLOAT:
+                if (!tmp.isDouble()) {
+                    tmp = tmp.toDouble();
+                }
+                break;
 
-        case PB_TYPE_FIXED32:
-        case PB_TYPE_INT:
-        case PB_TYPE_FIXED64:
-        case PB_TYPE_SIGNED_INT:
-        case PB_TYPE_BOOL:
-            if (!tmp.isInteger()) {
-                tmp = tmp.toInt64();
-            }
-            break;
+            case PB_TYPE_FIXED32:
+            case PB_TYPE_INT:
+            case PB_TYPE_FIXED64:
+            case PB_TYPE_SIGNED_INT:
+            case PB_TYPE_BOOL:
+                if (!tmp.isInteger()) {
+                    tmp = tmp.toInt64();
+                }
+                break;
 
-        case PB_TYPE_STRING:
-        case PB_TYPE_UINT64:
-            if (!tmp.isString()) {
-                tmp = tmp.toString();
-            }
-            break;
+            case PB_TYPE_STRING:
+            case PB_TYPE_UINT64:
+                if (!tmp.isString()) {
+                    tmp = tmp.toString();
+                }
+                break;
 
-        default:
-            PB_COMPILE_ERROR("unexpected '%s' field type %d in field descriptor", 
-                pb_get_field_name(obj, field_number), type.toInt32());
-            ASSIGN_FAIL_RETURN;
+            default:
+                PB_COMPILE_ERROR("unexpected '%s' field type %d in field descriptor", 
+                    pb_get_field_name(obj, field_number), type.toInt32());
+                ASSIGN_FAIL_RETURN;
         }
     } else if (!type.isString()) {
         ASSIGN_FAIL_RETURN;
@@ -740,27 +727,26 @@ static int32_t pb_dump_field_value(CVarRef value, int64_t level, bool only_set) 
 static const char *pb_get_wire_type_name(int wire_type) {
     const char *name;
 
-    switch (wire_type)
-    {
-    case WIRE_TYPE_VARINT:
-        name = "varint";
-        break;
+    switch (wire_type) {
+        case WIRE_TYPE_VARINT:
+            name = "varint";
+            break;
 
-    case WIRE_TYPE_64BIT:
-        name = "64bit";
-        break;
+        case WIRE_TYPE_64BIT:
+            name = "64bit";
+            break;
 
-    case WIRE_TYPE_LENGTH_DELIMITED:
-        name = "length-delimited";
-        break;
+        case WIRE_TYPE_LENGTH_DELIMITED:
+            name = "length-delimited";
+            break;
 
-    case WIRE_TYPE_32BIT:
-        name = "32bit";
-        break;
+        case WIRE_TYPE_32BIT:
+            name = "32bit";
+            break;
 
-    default:
-        name = "unknown";
-        break;
+        default:
+            name = "unknown";
+            break;
     }
 
     return name;
@@ -788,46 +774,45 @@ static int pb_serialize_field_value(const Object& obj, writer_t *writer, uint32_
         }
     } else if (type.isInteger()) {
         int r = 0;
-        switch (type.toInt64())
-        {
-        case PB_TYPE_DOUBLE:
-            r = writer_write_double(writer, field_number, value.toDouble());
-            break;
+        switch (type.toInt64()) {
+            case PB_TYPE_DOUBLE:
+                r = writer_write_double(writer, field_number, value.toDouble());
+                break;
     
-        case PB_TYPE_FIXED32:
-            r = writer_write_fixed32(writer, field_number, value.toInt64());
-            break;
+            case PB_TYPE_FIXED32:
+                r = writer_write_fixed32(writer, field_number, value.toInt64());
+                break;
     
-        case PB_TYPE_INT:
-        case PB_TYPE_BOOL:
-            r = writer_write_int(writer, field_number, value.toInt64());
-            break;
+            case PB_TYPE_INT:
+            case PB_TYPE_BOOL:
+                r = writer_write_int(writer, field_number, value.toInt64());
+                break;
     
-        case PB_TYPE_FIXED64:
-            r = writer_write_fixed64(writer, field_number, value.toInt64());
-            break;
+            case PB_TYPE_FIXED64:
+                r = writer_write_fixed64(writer, field_number, value.toInt64());
+                break;
     
-        case PB_TYPE_FLOAT:
-            r = writer_write_float(writer, field_number, value.toDouble());
-            break;
+            case PB_TYPE_FLOAT:
+                r = writer_write_float(writer, field_number, value.toDouble());
+                break;
     
-        case PB_TYPE_SIGNED_INT:
-            r = writer_write_signed_int(writer, field_number, value.toInt64());
-            break;
+            case PB_TYPE_SIGNED_INT:
+                r = writer_write_signed_int(writer, field_number, value.toInt64());
+                break;
     
-        case PB_TYPE_STRING:
-            r = writer_write_string(writer, field_number, 
-                    value.toString().c_str(), value.toString().length());
-            break;
+            case PB_TYPE_STRING:
+                r = writer_write_string(writer, field_number, 
+                        value.toString().c_str(), value.toString().length());
+                break;
 
-        case PB_TYPE_UINT64:
-            r = pb_write_uint64(obj, writer, field_number, value);
-            break;
+            case PB_TYPE_UINT64:
+                r = pb_write_uint64(obj, writer, field_number, value);
+                break;
 
-        default:
-            PB_COMPILE_ERROR("unexpected '%s' field type %ld in field descriptor", 
-                pb_get_field_name(obj, field_number), type.toInt64());
-            return -1;
+            default:
+                PB_COMPILE_ERROR("unexpected '%s' field type %ld in field descriptor", 
+                    pb_get_field_name(obj, field_number), type.toInt64());
+                return -1;
         }
     
         if (r != 0) {
@@ -845,8 +830,7 @@ static int pb_serialize_field_value(const Object& obj, writer_t *writer, uint32_
 static int pb_get_wire_type(int field_type) {
     int ret = -1;
 
-    switch (field_type)
-    {
+    switch (field_type) {
         case PB_TYPE_DOUBLE:
         case PB_TYPE_FIXED64:
             ret = WIRE_TYPE_64BIT;

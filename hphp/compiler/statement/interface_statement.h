@@ -41,7 +41,7 @@ public:
                      ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  void analyzeProgram(AnalysisResultPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
   bool hasDecl() const override { return true; }
   bool hasImpl() const override;

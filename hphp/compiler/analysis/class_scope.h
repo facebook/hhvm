@@ -222,7 +222,7 @@ public:
   /**
    * Look up function by name.
    */
-  FunctionScopePtr findFunction(AnalysisResultConstPtr ar,
+  FunctionScopePtr findFunction(AnalysisResultConstRawPtr ar,
                                 const std::string &name,
                                 bool recursive,
                                 bool exclIntfBase = false);

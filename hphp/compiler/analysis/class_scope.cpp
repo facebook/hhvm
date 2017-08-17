@@ -803,7 +803,7 @@ void ClassScope::setVolatile() {
   }
 }
 
-FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
+FunctionScopePtr ClassScope::findFunction(AnalysisResultConstRawPtr ar,
                                           const std::string &name,
                                           bool recursive,
                                           bool exclIntfBase /* = false */) {

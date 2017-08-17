@@ -148,7 +148,7 @@ public:
    * a definition in a base class. Returns whether or not there
    * was an error in marking as override.
    */
-  bool markOverride(AnalysisResultPtr ar, const std::string &name);
+  bool markOverride(AnalysisResultConstPtr ar, const std::string &name);
 
   /**
    * Called when a variable is used or being evaluated (r-value).

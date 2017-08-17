@@ -148,7 +148,7 @@ public:
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
 
-  void analyzeProgram(AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultConstRawPtr ar);
 
   void visit(AnalysisResultPtr ar,
              void (*cb)(AnalysisResultPtr, StatementPtr, void*),

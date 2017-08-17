@@ -64,8 +64,8 @@ ExpressionPtr StaticMemberExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool StaticMemberExpression::findMember(AnalysisResultPtr ar, std::string &name,
-                                        Symbol *&sym) {
+bool StaticMemberExpression::findMember(AnalysisResultConstPtr ar,
+                                        std::string &name, Symbol *&sym) {
   if (m_exp->is(Expression::KindOfScalarExpression)) {
     auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
     name = var->getString();
@@ -96,7 +96,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, std::string &name,
   return true;
 }
 
-void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
+void StaticMemberExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     Symbol *sym;
     std::string name;

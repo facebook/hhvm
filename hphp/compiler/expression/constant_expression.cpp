@@ -122,7 +122,7 @@ Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
   return sym;
 }
 
-void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
+void ConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     Symbol *sym = resolveNS(ar);
     if (!(m_context & LValue) && !m_dynamic) {

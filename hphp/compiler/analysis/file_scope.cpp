@@ -238,7 +238,7 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
   ar->declareConst(shared_from_this(), name);
 }
 
-void FileScope::analyzeProgram(AnalysisResultPtr ar) {
+void FileScope::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (!m_pseudoMain) return;
   s_current = this;
   SCOPE_EXIT { s_current = nullptr; };

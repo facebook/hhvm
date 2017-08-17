@@ -132,23 +132,21 @@ let create_closure_invocation
     make_return_statement_syntax create_suspended_coroutine_result_syntax in
   make_list [resume_statement_syntax; return_syntax]
 
-(* TODO: Why does this take the body twice? *)
 let rewrite_coroutine_body
     context
-    methodish_function_body
     function_parameter_list
     function_type
     rewritten_body =
-  match syntax methodish_function_body with
+  match syntax rewritten_body with
   | CompoundStatement node ->
       let compound_statements = create_closure_invocation
         context function_parameter_list function_type rewritten_body in
       make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
-      methodish_function_body
+      rewritten_body
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
-      failwith "methodish_function_body wasn't a CompoundStatement"
+      failwith "rewritten_body wasn't a CompoundStatement"
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
@@ -157,18 +155,13 @@ let rewrite_coroutine_body
  *)
 let rewrite_methodish_declaration
     context
-    ({ methodish_function_body; _; } as method_node)
+    method_node
     ({ function_parameter_list; function_type; _; } as header_node)
     rewritten_body =
   let make_syntax method_node =
     make_syntax (MethodishDeclaration method_node) in
-  let methodish_function_body =
-    rewrite_coroutine_body
-      context
-      methodish_function_body
-      function_parameter_list
-      function_type
-      rewritten_body in
+  let methodish_function_body = rewrite_coroutine_body
+    context function_parameter_list function_type rewritten_body in
   make_syntax
     { method_node with
       methodish_function_decl_header =
@@ -178,18 +171,13 @@ let rewrite_methodish_declaration
 
 let rewrite_function_declaration
     context
-    ({ function_body; _; } as function_node)
+    function_node
     ({ function_type; function_parameter_list; _; } as header_node)
     rewritten_body =
   let make_syntax function_node =
     make_syntax (FunctionDeclaration function_node) in
-  let function_body =
-    rewrite_coroutine_body
-      context
-      function_body
-      function_parameter_list
-      function_type
-      rewritten_body in
+  let function_body = rewrite_coroutine_body
+    context function_parameter_list function_type rewritten_body in
   make_syntax
     { function_node with
       function_declaration_header = rewrite_function_decl_header header_node;
@@ -201,13 +189,8 @@ let rewrite_anon
     ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
   let make_syntax node =
     make_syntax (AnonymousFunction node) in
-  let anonymous_body =
-    rewrite_coroutine_body
-      context
-      anonymous_body
-      anonymous_parameters
-      anonymous_type
-      anonymous_body in
+  let anonymous_body = rewrite_coroutine_body
+    context anonymous_parameters anonymous_type anonymous_body in
   let anonymous_parameters = compute_parameter_list
     anonymous_parameters anonymous_type in
   let anonymous_type = make_coroutine_result_type_syntax anonymous_type in
@@ -226,13 +209,8 @@ let rewrite_lambda
     make_syntax (LambdaExpression node) in
   let make_sig node =
     make_syntax (LambdaSignature node) in
-  let lambda_body =
-    rewrite_coroutine_body
-      context
-      lambda_body
-      lambda_parameters
-      lambda_type
-      lambda_body in (* TODO: Why do we take the body twice? *)
+  let lambda_body = rewrite_coroutine_body
+    context lambda_parameters lambda_type lambda_body in
   let lambda_parameters = compute_parameter_list
     lambda_parameters lambda_type in
   let lambda_type = make_coroutine_result_type_syntax lambda_type in

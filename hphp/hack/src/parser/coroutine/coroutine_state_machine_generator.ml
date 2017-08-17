@@ -874,6 +874,7 @@ let unnest_compound_statements node =
   Rewriter.rewrite_post rewrite node
 
 let lower_body body =
+  if is_missing body then (body, []) else
   let used_locals = all_used_locals body in
   let used_locals = SSet.elements used_locals in
   let body = add_missing_return body in

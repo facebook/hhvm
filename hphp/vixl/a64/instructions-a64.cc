@@ -178,7 +178,7 @@ inline int Instruction::ImmBranch() const {
 
 
 void Instruction::SetImmPCOffsetTarget(Instruction* target,
-				       Instruction* from) {
+                                       Instruction* from) {
   auto adjusted_target = !from ? target : target + (int64_t)(this - from);
   if (IsPCRelAddressing()) {
     SetPCRelImmTarget(adjusted_target);

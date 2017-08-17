@@ -2,10 +2,10 @@ Overview
 --------
 
 The retranslate all feature performs many retranslations simultaneously. These
-threads need space to translate into before statically relocate to the final
-location in the translation cache. If we allocated this space for every thread,
-then we'd run out of low memory. Therefore a single piece of low memory is
-allocated to be used as a "virtual address space". This is where the worker
+threads need space to translate into before they statically relocate to the
+final location in the translation cache. If we allocated this space for every
+thread, then we'd run out of low memory. Therefore a single piece of low memory
+is allocated to be used as a "virtual address space". This is where the worker
 threads *think* they're writing the translations, when in fact the assembler
 is writing them to the actual location allocated by the worker thread as
 scratch space.
@@ -46,11 +46,11 @@ describe this work for ARM.
 *   Update Vixl assembler to use toDestAddress() when necessary.
     *   Update binding/linking with virtual address support. Label::link_ and
         Label::target_ are virtual addresses. When binding a Label, the actual
-	instructions linked to it will be updated with target built from the
-	offset between the current link_ and target_.
+        instructions linked to it will be updated with target built from the
+        offset between the current link_ and target_.
 *   Update relocateImpl() and all of the helpers.
     *   Use toDestAddress() when casting to Instruction.
-    *   Fix uses of SetImmPCOffset() and ImmPCOffset(). (details in next section)
+    *   Fix uses of SetImmPCOffset() and ImmPCOffset(). (see next section)
 *   Update all uses of __builtin__clear_cache().
     *   align-arm.cpp
     *   func-guard-arm.cpp
@@ -84,25 +84,22 @@ address and not the actual address.
 -   Instructions are linked to a Label during their emission upon the call to:
     -   Label::UpdateAndGetByteOffsetTo()
     -   Label::UpdateAndGetInstructionOffsetTo()
-    -   If the Label is already bound, then the instruction gets the proper address,
-    -   If the Label is not yet bound, then it is inserted into the head of the Label's
-        linked list. The offset returned is the 0 this is the first linked instruction.
-	Otherwise it is the offset to the Instruction which is the previous head of the
-	list. The Label's link is then set to this new Instruction as the new head.
+    -   If the Label is already bound, then the instruction gets the proper
+            address,
+    -   If the Label is not yet bound, then it is inserted into the head of the
+        Label's linked list. The offset returned is the 0 this is the first
+        linked instruction. Otherwise it is the offset to the Instruction which
+        is the previous head of the list. The Label's link is then set to this
+        new Instruction as the new head.
 -   Labels are bound through a call to:
     -   Label::bind()
-    -   If the Label has been linked, then each Instruction in the chain has their
-        offset updated to point to the new bound location.
+    -   If the Label has been linked, then each Instruction in the chain has
+        their offset updated to point to the new bound location.
 -   PC Relative Instruction targets are manipulated with calls to:
     -   Instruction::SetImmPCOffsetTarget()
     -   Instruction::ImmPCOffsetTarget()
     -   These are used in:
         -   smashable-instr-arm.cpp: Code is published, so no updates needed.
-	-   Label::bind() - Needs updating. (DONE)
-	-   relocation-test.cpp: No updates needed.
-	-   relocation-arm.cpp: Needs updating.
-
-
-Scratch Work
-------------
-
+        -   Label::bind() - Needs updating. (DONE)
+        -   relocation-test.cpp: No updates needed.
+        -   relocation-arm.cpp: Needs updating.

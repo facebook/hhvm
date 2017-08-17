@@ -188,7 +188,8 @@ bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
     // Look up the smashable (jmp, jcc, etc) from the target. Note this is
     // an actual address, and so we'll use the offset with the (potentially)
     // virtual srcAddr when we search through smashableLocation.
-    auto slActual = getSmashableFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
+    auto slActual =
+      getSmashableFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
     auto sl = srcAddr + (slActual - srcAddrActual);
     if (sl && env.meta.smashableLocations.count(sl)) {
       target = nullptr;
@@ -596,7 +597,8 @@ size_t relocateImpl(Env& env) {
       destCount = 1;
 
       // Initially copy the instruction word
-      env.destBlock.bytes(kInstructionSize, env.srcBlock.toDestAddress(srcAddr));
+      env.destBlock.bytes(kInstructionSize,
+                          env.srcBlock.toDestAddress(srcAddr));
 
       // If it's not a literal, then attempt any special relocations
       if (!literals.count(src) &&
@@ -655,7 +657,8 @@ size_t relocateImpl(Env& env) {
         if (!env.rewrites.count(src) && !literals.count(src)) {
           auto const destAddr = env.rel.adjustedAddressAfter(srcAddr);
           auto const destFrom = Instruction::Cast(destAddr);
-          auto const dest = Instruction::Cast(env.destBlock.toDestAddress(destAddr));
+          auto const dest =
+            Instruction::Cast(env.destBlock.toDestAddress(destAddr));
           /*
            * PC Relative
            *   ADR/ADRP
@@ -670,9 +673,12 @@ size_t relocateImpl(Env& env) {
               src->IsUncondBranchImm() ||
               src->IsCompareBranch() ||
               src->IsTestBranch()) {
-            auto const old_target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
-            auto const adjusted_target = env.rel.adjustedAddressAfter(old_target);
-            auto const new_target = adjusted_target ? adjusted_target : old_target;
+            auto const old_target =
+              reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
+            auto const adjusted_target =
+              env.rel.adjustedAddressAfter(old_target);
+            auto const new_target =
+              adjusted_target ? adjusted_target : old_target;
 
             /*
              * Calculate the new offset and update. At this stage, we've already
@@ -700,7 +706,8 @@ size_t relocateImpl(Env& env) {
               env.far.insert(src);
               ok = false;
             } else {
-              dest->SetImmPCOffsetTarget(Instruction::Cast(new_target), destFrom);
+              dest->SetImmPCOffsetTarget(Instruction::Cast(new_target),
+                                         destFrom);
             }
           }
 
@@ -725,8 +732,8 @@ size_t relocateImpl(Env& env) {
 
             if (adjusted) {
               *addr = adjusted;
-              __builtin___clear_cache(reinterpret_cast<char*>(addr),
-                                      reinterpret_cast<char*>(addr) + 8);
+              auto const begin = reinterpret_cast<TCA>(addr);
+              DataBlock::syncDirect(begin, begin + 8);
             }
           } else if (src->IsMovz()) {
             int length = 1;
@@ -785,10 +792,7 @@ size_t relocateImpl(Env& env) {
     env.destBlock.setFrontier(destStart);
     throw;
   }
-  auto const start = env.destBlock.toDestAddress(destStart);
-  auto const end = env.destBlock.toDestAddress(env.destBlock.frontier());
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
+  env.destBlock.sync(destStart);
 
   return asmCount;
 }
@@ -851,8 +855,8 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
 
       // Update offset
       instr->SetImmPCOffsetTarget(Instruction::Cast(adjusted));
-      __builtin___clear_cache(reinterpret_cast<char*>(instr),
-                              reinterpret_cast<char*>(instr) + 4);
+      auto const begin = reinterpret_cast<TCA>(instr);
+      DataBlock::syncDirect(begin, begin + vixl::kInstructionSize);
     }
   }
 
@@ -870,8 +874,8 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     auto adjusted = rel.adjustedAddressAfter(target);
     if (adjusted) {
       *addr = adjusted;
-      __builtin___clear_cache(reinterpret_cast<char*>(addr),
-                              reinterpret_cast<char*>(addr) + 8);
+      auto const begin = reinterpret_cast<TCA>(addr);
+      DataBlock::syncDirect(begin, begin + 8);
     }
   } else if (instr->IsMovz()) {
     const auto rd = instr->Rd();

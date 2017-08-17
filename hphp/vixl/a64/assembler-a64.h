@@ -556,7 +556,7 @@ class Label {
  private:
   // Indicates if the label has been bound, ie its location is fixed.
   bool is_bound_;
-  
+
   // Branches instructions branching to this label form a chained list, with
   // their offset indicating where the next instruction is located.
   // link_ points to the latest branch instruction generated branching to this
@@ -568,11 +568,11 @@ class Label {
   // instructions and the virtual target_. This will cause calls to
   // Instruction::ImmPCOffsetTarget() for the physical instruction to return
   // target in the weeds, and so the code in relocation-arm.cpp takes this
-  // into account. Whe the madness? Because translations in high memory of
+  // into account. Why the madness? Because translations in high memory of
   // thread local caches will have branches distances as if they were in
   // low memory. Ideally, this means we're very likely to have an identically-
   // sized translation once we relocate into the code cache.
-  
+
   // If link_ is not nullptr, the label has been linked to.
   HPHP::CodeAddress link_;
   // The label location.

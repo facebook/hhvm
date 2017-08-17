@@ -2459,7 +2459,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   | Id ((_, array_filter) as id)
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
       (* dispatch the call to typecheck the arguments *)
-      let env, fty = fun_type_of_id env id [] in
+      let env, fty = fun_type_of_id env id hl in
       let env, tel, tuel, res = call p env fty el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd_exn el in
@@ -2491,7 +2491,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
         | (r, Terr) ->
             env, (r, Terr)
         | (r, _) ->
-            let tk, tv = Env.fresh_type(), Env.fresh_type() in
+            let tk, tv = Env.fresh_type (), Env.fresh_type () in
             Errors.try_
               (fun () ->
                 let keyed_container = (
@@ -2560,9 +2560,23 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
 
             where R is constructed by build_output_container applied to Tr
           *)
-          let build_function build_output_container =
-            let vars = List.map args (fun _ -> Env.fresh_type()) in
-            let tr = Env.fresh_type() in
+          let build_function env build_output_container =
+            let env, vars, tr =
+              (* If T1, ... Tn, Tr are provided explicitly, instantiate the function parameters with
+               * those directly. *)
+              if List.length hl = 0
+              then env, List.map args (fun _ -> Env.fresh_type()), Env.fresh_type ()
+              else if List.length hl <> List.length args + 1 then begin
+                Errors.expected_tparam fty.ft_pos (1 + (List.length args));
+                env, List.map args (fun _ -> Env.fresh_type()), Env.fresh_type () end
+              else
+              let env, vars_and_tr = List.map_env env hl Phase.hint_locl in
+              let vars, trl = List.split_n vars_and_tr (List.length vars_and_tr - 1) in
+              (* Since we split the arguments and return type at the last index and the length is
+                 non-zero this is safe. *)
+              let tr = List.hd_exn trl in
+              env, vars, tr
+            in
             let f = (None, (
               r_fty,
               Tfun {
@@ -2583,11 +2597,12 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
                 )
               )
             ) in
-            (r_fty, Tfun {fty with
-              ft_arity = Fstandard (arity+1, arity+1);
-              ft_params = f::containers;
-              ft_ret =  build_output_container tr;
-            }) in
+            env, (r_fty, Tfun {fty with
+                               ft_arity = Fstandard (arity+1, arity+1);
+                               ft_params = f::containers;
+                               ft_ret =  build_output_container tr;
+                              })
+          in
 
           (*
             Takes a Container type and returns a function that can "pack" a type
@@ -2671,9 +2686,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
             | [x] ->
               let env, _tx, x = expr env x in
               let env, output_container = build_output_container env x in
-              env, build_function output_container
+              build_function env output_container
             | _ ->
-              env, build_function (fun tr ->
+              build_function env (fun tr ->
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> env, fty in
       let env, tel, _tuel, ty = call p env fty el [] in

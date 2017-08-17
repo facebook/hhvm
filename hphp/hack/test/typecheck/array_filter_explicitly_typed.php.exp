@@ -1,0 +1,8 @@
+File "array_filter_explicitly_typed.php", line 9, characters 31-40:
+Invalid argument (Typing[4110])
+File "array_filter_explicitly_typed.php", line 9, characters 23-28:
+This is a string
+File "hhi_lib__srcs/stdlib/builtins_array.hhi", line 86, characters 37-38:
+  via this generic Tv
+File "array_filter_explicitly_typed.php", line 8, characters 31-33:
+It is incompatible with an int

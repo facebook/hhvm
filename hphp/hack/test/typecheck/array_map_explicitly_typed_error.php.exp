@@ -1,0 +1,6 @@
+File "array_map_explicitly_typed_error.php", line 5, characters 74-82:
+Invalid argument (Typing[4110])
+File "array_map_explicitly_typed_error.php", line 5, characters 18-23:
+This is a string
+File "array_map_explicitly_typed_error.php", line 5, characters 78-78:
+It is incompatible with an int

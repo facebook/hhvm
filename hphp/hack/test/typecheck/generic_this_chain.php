@@ -52,7 +52,7 @@ final class Another<T> {
 
 function takesX(X $arg): void {}
 
-function test(int $i): Base {
+function test(int $i): Base<X> {
   $x = new X();
   switch ($i) {
     case 0:

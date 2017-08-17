@@ -13,7 +13,7 @@ class LimitIterator<Tv> extends IteratorIterator<Tv> {
 
   // Methods
   public function __construct(
-    Iterator $iterator,
+    Iterator<Tv> $iterator,
     int $offset = 0,
     int $count = -1,
   );

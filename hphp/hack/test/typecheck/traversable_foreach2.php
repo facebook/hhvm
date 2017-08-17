@@ -9,6 +9,7 @@
  *
  */
 
+/* HH_FIXME[4101] */
 function foo2(Traversable $p) {
   foreach ($p as $k => $v) {
     f1($k);
@@ -19,4 +20,3 @@ function foo2(Traversable $p) {
 function f1(int $k) {}
 
 function f2(string $v) {}
-

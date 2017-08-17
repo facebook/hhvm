@@ -3,6 +3,7 @@
 
 interface I<T> {}
 interface I2 extends I<int> {}
+/* HH_FIXME[4101] */
 function i(): I {
   // UNSAFE
 }

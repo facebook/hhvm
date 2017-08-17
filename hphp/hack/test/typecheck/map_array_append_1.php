@@ -9,6 +9,7 @@
  *
  */
 
+/* HH_FIXME[4101] */
 function foo(Map $map) {
   $map[] = 'meh';
 }

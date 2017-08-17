@@ -40,5 +40,7 @@ let experimental_annotate_function_calls =
   GlobalOptions.tco_experimental_annotate_function_calls
 let experimental_unresolved_fix =
   GlobalOptions.tco_experimental_unresolved_fix
+let experimental_generics_arity =
+  GlobalOptions.tco_experimental_generics_arity
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

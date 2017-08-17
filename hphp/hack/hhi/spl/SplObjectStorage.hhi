@@ -31,9 +31,9 @@ class SplObjectStorage<Tobj, Tv>
   public function offsetGet(Tobj $object): ?Tv;
   public function offsetSet(Tobj $object, ?Tv $data = null): void;
   public function offsetUnset(Tobj $object): void;
-  public function removeAll(SplObjectStorage $storage): void;
-  public function removeAllExcept(SplObjectStorage $storage): void;
-  public function addAll(SplObjectStorage $storage): void;
+  public function removeAll(SplObjectStorage<Tobj,Tv> $storage): void;
+  public function removeAllExcept(SplObjectStorage<Tobj,Tv> $storage): void;
+  public function addAll(SplObjectStorage<Tobj,Tv> $storage): void;
   public function getHash(Tobj $object): string;
   public function serialize();
   public function unserialize($serialized);

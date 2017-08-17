@@ -72,6 +72,12 @@ let tco_experimental_unresolved_fix =
 let tco_experimental_annotate_function_calls =
   "annotate_function_calls"
 
+(**
+ * Insist on instantiations for all generic types, even in non-strict files
+ *)
+let tco_experimental_generics_arity =
+  "generics_arity"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -86,6 +92,7 @@ let tco_experimental_all =
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;
      tco_experimental_unresolved_fix;
+     tco_experimental_generics_arity;
    ]
 
 let tco_migration_flags_all =

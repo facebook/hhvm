@@ -9,12 +9,14 @@
  *
  */
 
+/* HH_FIXME[4101] */
 function foo1(KeyedTraversable $p) {
   foreach ($p as $v) {
     f2($v);
   }
 }
 
+/* HH_FIXME[4101] */
 function foo2(KeyedTraversable $p) {
   foreach ($p as $k => $v) {
     f1($k);
@@ -46,6 +48,7 @@ function arr3(array<int, string> $arr) {
 //  foo1($arr);
   foo3($arr);
 }
+/* HH_FIXME[4101] */
 function map1(Map $map) {
   foo1($map);
   foo3($map);
@@ -54,6 +57,7 @@ function map2(Map<int, string> $map) {
   foo1($map);
   foo3($map);
 }
+/* HH_FIXME[4101] */
 function vec1(Vector $v) {
   foo1($v);
   foo3($v);

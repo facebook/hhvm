@@ -19,6 +19,7 @@ class A<T> {
   }
 }
 
+/* HH_FIXME[4101] */
 function foo(A $x): int {
   return $x->get();
 }

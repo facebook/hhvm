@@ -9,6 +9,7 @@
  *
  */
 
+/* HH_FIXME[4101] */
 function f1(Map $m) {
   f1($m);
   f2($m);

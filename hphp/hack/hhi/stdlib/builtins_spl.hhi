@@ -306,11 +306,11 @@ class MultipleIterator<T> implements Iterator<T> {
   const int MIT_KEYS_NUMERIC = 0;
   const int MIT_KEYS_ASSOC = 2;
   public function __construct($flags) {}
-  public function attachIterator(Iterator $iterator, $infos = null) {}
-  public function containsIterator(Iterator $iterator) {}
+  public function attachIterator(Iterator<T> $iterator, $infos = null) {}
+  public function containsIterator(Iterator<T> $iterator) {}
   public function countIterators() {}
   public function current() {}
-  public function detachIterator(Iterator $iterator) {}
+  public function detachIterator(Iterator<T> $iterator) {}
   public function getFlags() {}
   public function key() {}
   public function next() {}

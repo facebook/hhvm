@@ -369,9 +369,13 @@ and check_params env p x params hl =
 
 and check_arity env p tname arity size =
   if size = arity then () else
-  if size = 0 && not (Typing_env.is_strict env.tenv) then () else
-  let nargs = soi arity in
-  Errors.type_arity p tname nargs
+  if size = 0 && not (Typing_env.is_strict env.tenv)
+  && not (TypecheckerOptions.experimental_feature_enabled (Env.get_options env.tenv)
+    TypecheckerOptions.experimental_generics_arity)
+  then ()
+  else
+    let nargs = soi arity in
+    Errors.type_arity p tname nargs
 
 and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in

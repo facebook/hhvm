@@ -404,6 +404,7 @@ void MixedArray::Release(ArrayData* in) {
     }
   }
   MM().objFree(ad, ad->heapSize());
+  AARCH64_WALKABLE_FRAME();
 }
 
 NEVER_INLINE

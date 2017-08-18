@@ -114,23 +114,18 @@ let create_closure_invocation
   (* (new Closure($continuation, ...)) *)
   let new_closure_syntax =
     make_parenthesized_expression_syntax new_closure_syntax in
-  (* (new Closure($continuation, ...))->resume *)
-  let select_resume_member_syntax =
+  (* (new Closure($continuation, ...))->doResume *)
+  let select_do_resume_member_syntax =
     make_member_selection_expression_syntax
       new_closure_syntax
-      resume_member_name_syntax in
-  (* (new Closure($continuation, ...))->resume(null) *)
-  let call_resume_with_null_syntax =
+      do_resume_member_name_syntax in
+  (* (new Closure($continuation, ...))->doResume(null, null) *)
+  let call_do_resume_with_null_syntax =
     make_function_call_expression_syntax
-      select_resume_member_syntax
-      [null_syntax] in
-  (* (new Closure($continuation, ...))->resume(null); *)
-  let resume_statement_syntax =
-    make_expression_statement_syntax call_resume_with_null_syntax in
+      select_do_resume_member_syntax
+      [ null_syntax; null_syntax; ] in
   (* return SuspendedCoroutineResult::create(); *)
-  let return_syntax =
-    make_return_statement_syntax create_suspended_coroutine_result_syntax in
-  make_list [resume_statement_syntax; return_syntax]
+  make_return_statement_syntax call_do_resume_with_null_syntax
 
 let rewrite_coroutine_body
     context

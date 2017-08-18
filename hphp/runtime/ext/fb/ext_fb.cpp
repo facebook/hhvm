@@ -804,7 +804,7 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
   int32_t srcPosBytes;
   for (srcPosBytes = 0; srcPosBytes < srcLenBytes; /* U8_NEXT increments */) {
     // This is lame, but gcc doesn't optimize U8_NEXT very well
-    if (srcBuf[srcPosBytes] > 0 && srcBuf[srcPosBytes] <= 0x7f) {
+    if (srcBuf[srcPosBytes] != 0 && !(srcBuf[srcPosBytes] & 0x80)) {
       srcPosBytes++; // U8_NEXT would increment this
       continue;
     }
@@ -847,7 +847,7 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
   for (/* already init'd */; srcPosBytes < srcLenBytes; /* see U8_NEXT */) {
     UChar32 curCodePoint;
     // This is lame, but gcc doesn't optimize U8_NEXT very well
-    if (srcBuf[srcPosBytes] > 0 && srcBuf[srcPosBytes] <= 0x7f) {
+    if (srcBuf[srcPosBytes] != 0 && !(srcBuf[srcPosBytes] & 0x80)) {
       curCodePoint = srcBuf[srcPosBytes++]; // U8_NEXT would increment
     } else {
       U8_NEXT(srcBuf, srcPosBytes, srcLenBytes, curCodePoint);

@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/trace.h"
 
+#include <type_traits>
+
 TRACE_SET_MOD(asmppc64);
 
 namespace ppc64_asm {
@@ -574,8 +576,11 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
 }
 
 void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
-  always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
-    HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
+  static_assert(
+      std::is_unsigned<
+        decltype(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize)>::value,
+      "RuntimeOption::EvalPPC64MinTOCImmSize is expected to be unsigned.");
+  always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
 
   auto fits = [](int64_t imm, uint16_t shift_n) {
      return (static_cast<uint64_t>(imm) >> shift_n) == 0 ? true : false;

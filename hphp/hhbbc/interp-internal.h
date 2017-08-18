@@ -656,7 +656,7 @@ void unsetUnknownLocal(ISS& env) {
 
 // Read the specified class-ref slot without discarding the stored value.
 const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
-  assert(slot >= 0);
+  assert(slot != NoClsRefSlotId);
   always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(TCls),
                      "class-ref slot contained non-TCls");
   return env.state.clsRefSlots[slot];
@@ -664,7 +664,7 @@ const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
 
 // Read the specified class-ref slot and discard the stored value.
 Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
-  assert(slot >= 0);
+  assert(slot != NoClsRefSlotId);
   auto ret = std::move(env.state.clsRefSlots[slot]);
   FTRACE(2, "    read class-ref: {} -> {}\n", slot, show(ret));
   always_assert_flog(ret.subtypeOf(TCls), "class-ref slot contained non-TCls");
@@ -673,7 +673,7 @@ Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
 }
 
 void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
-  assert(slot >= 0);
+  assert(slot != NoClsRefSlotId);
   always_assert_flog(ty.subtypeOf(TCls),
                      "attempted to set class-ref slot to non-TCls");
   FTRACE(2, "    write class-ref: {} -> {}\n", slot, show(ty));

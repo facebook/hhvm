@@ -64,9 +64,6 @@ static int getEMachine(JitHeader *hdr)  {
   }
 
   read(fd, &info, sizeof(info));
-  if (info.e_machine < 0)  {
-    hdr->elf_mach = 0; /* ELF EM_NONE */
-  }
   close(fd);
   return 0;
 }

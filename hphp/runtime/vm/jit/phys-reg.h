@@ -23,6 +23,8 @@
 
 #include <folly/Optional.h>
 
+#include <type_traits>
+
 namespace HPHP { namespace jit {
 
 struct Vreg;
@@ -105,12 +107,15 @@ public:
   }
 
   Type type() const {
-    assertx(n >= 0 && n < kMaxRegs);
+    assertx(n < kMaxRegs);
     return isGP() ? GP :
            isSIMD() ? SIMD :
            /* isSF() ? */ SF;
   }
-  bool isGP() const { return n >= kGPOffset && n < kGPOffset+numGP(); }
+  bool isGP() const {
+    static_assert(kGPOffset == 0, "kGPOffset is expected to be zero.");
+    return n < kGPOffset+numGP();
+  }
   bool isSIMD() const { return n >= kSIMDOffset && n < kSIMDOffset+numSIMD(); }
   bool isSF() const { return n >= kSFOffset && n < kSFOffset+kNumSF; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
@@ -257,9 +262,11 @@ struct RegSet {
   constexpr RegSet() : m_lo(0), m_hi(0) {}
 
   explicit RegSet(PhysReg r)
-    : m_lo(r.n >= 0  && r.n < 64  ? uint64_t{1} << r.n        : 0)
+    : m_lo(r.n < 64 ? uint64_t{1} << r.n : 0)
     , m_hi(r.n >= 64 && r.n < 128 ? uint64_t{1} << (r.n - 64) : 0)
-  {}
+  {
+    static_assert(std::is_unsigned<decltype(r.n)>::value, "");
+  }
 
 private:
   explicit RegSet(uint64_t lo, uint64_t hi) : m_lo(lo), m_hi(hi) {}

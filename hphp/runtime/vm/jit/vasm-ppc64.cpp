@@ -40,6 +40,7 @@
 
 #include <algorithm>
 #include <tuple>
+#include <type_traits>
 
 // TODO(lbianc): This is a temporary solution for compiling in different
 // archs. The correct way of doing that is do not compile arch specific
@@ -725,8 +726,10 @@ void Vgen::emit(const inittc&) {
 
   // Save TOC pointer in r2
   // First, assert the PPC64MinTOCImmSize.
-  always_assert(RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
-    RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
+  static_assert(
+      std::is_unsigned<decltype(RuntimeOption::EvalPPC64MinTOCImmSize)>::value,
+      "RuntimeOption::EvalPPC64MinTOCImmSize is expected to be unsigned.");
+  always_assert(RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
   a.li64(ppc64::rtoc(), VMTOC::getInstance().getPtrVector(), false);
 }
 

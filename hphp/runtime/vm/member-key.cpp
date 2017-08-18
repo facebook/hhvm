@@ -24,6 +24,7 @@
 #include <folly/Conv.h>
 
 #include <string.h>
+#include <type_traits>
 
 namespace HPHP {
 
@@ -36,7 +37,10 @@ static_assert(memberNamesCount == NumMemberCodes,
              "Member code missing for memberCodeString");
 
 const char* memberCodeString(MemberCode mcode) {
-  assert(mcode >= 0 && mcode < NumMemberCodes);
+  static_assert(
+      std::is_unsigned<typename std::underlying_type<MemberCode>::type>::value,
+      "MemberCode is expected to be unsigned.");
+  assert(mcode < NumMemberCodes);
   return memberNames[mcode];
 }
 

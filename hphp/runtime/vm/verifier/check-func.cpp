@@ -33,6 +33,7 @@
 #include <limits>
 #include <list>
 #include <stdexcept>
+#include <type_traits>
 
 namespace HPHP {
 namespace Verifier {
@@ -592,8 +593,12 @@ bool FuncChecker::checkImmOAImpl(PC& pc, PC const /*instr*/) {
 }
 
 bool FuncChecker::checkImmKA(PC& pc, PC const /*instr*/) {
+  static_assert(
+      std::is_unsigned<typename std::underlying_type<MemberCode>::type>::value,
+      "MemberCode is expected to be unsigned.");
+
   auto const mcode = decode_raw<MemberCode>(pc);
-  if (mcode < 0 || mcode >= NumMemberCodes) {
+  if (mcode >= NumMemberCodes) {
     ferror("Invalid MemberCode {}\n", uint8_t{mcode});
     return false;
   }

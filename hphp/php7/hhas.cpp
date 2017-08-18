@@ -106,6 +106,18 @@ struct InstrVisitor {
     out.append(" >");
   }
 
+  void imm(const bc::ReadClassref& read) {
+    out.append(" ");
+    assert(read.slot.allocated());
+    out.append(folly::to<std::string>(*read.slot.id));
+  }
+
+  void imm(const bc::WriteClassref& write) {
+    out.append(" ");
+    assert(write.slot.allocated());
+    out.append(folly::to<std::string>(*write.slot.id));
+  }
+
   void imm(IncDecOp op) {
     out.append(" ");
     switch (op) {
@@ -401,6 +413,8 @@ std::string dump_function_body(const Function& func) {
     folly::format(&out, " ${}", name);
   }
   out.append(";\n");
+  folly::format(&out, "  .numclsrefslots {};\n",
+    analyzeClassrefs(func.cfg));
   func.cfg.visit(AssemblyVisitor(out));
   return out;
 }

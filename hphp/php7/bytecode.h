@@ -95,6 +95,31 @@ typedef boost::variant<
   // null-safe access (MQT) is left out since PHP doesn't have this feature
 > MemberKey;
 
+struct ClassrefSlot {
+  explicit ClassrefSlot()
+    : id(std::make_shared<int32_t>(-1)) {}
+
+  bool allocated() const {
+    return *id >= 0;
+  }
+
+  std::shared_ptr<int32_t> id;
+};
+
+struct ReadClassref {
+  /* implicit */ ReadClassref(const ClassrefSlot& slot)
+    : slot(slot) {}
+
+  ClassrefSlot slot;
+};
+
+struct WriteClassref {
+  /* implicit */ WriteClassref(const ClassrefSlot& slot)
+    : slot(slot) {}
+
+  ClassrefSlot slot;
+};
+
 // void* immediate types just aren't being used right now
 #define IMM_TYPE_BLA std::vector<Block*>
 #define IMM_TYPE_SLA StringOffsetVector
@@ -103,8 +128,8 @@ typedef boost::variant<
 #define IMM_TYPE_I64A int64_t
 #define IMM_TYPE_LA Local
 #define IMM_TYPE_IA int32_t
-#define IMM_TYPE_CAR int32_t
-#define IMM_TYPE_CAW int32_t
+#define IMM_TYPE_CAR ReadClassref
+#define IMM_TYPE_CAW WriteClassref
 #define IMM_TYPE_DA double
 #define IMM_TYPE_SA std::string
 #define IMM_TYPE_AA int
@@ -302,8 +327,6 @@ typedef boost::variant<
 > ExitOp;
 #undef EXIT
 #undef EXIT_LAST
-
-
 
 }}  // HPHP::php7
 

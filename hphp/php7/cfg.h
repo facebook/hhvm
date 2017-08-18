@@ -332,6 +332,9 @@ struct CFG {
   CFG&& inRegion(std::unique_ptr<Region> region);
 
   void visit(CFGVisitor&& visitor) const;
+  void visit(CFGVisitor& visitor) const {
+    visit(std::move(visitor)); // we don't take ownership
+  }
 
  private:
   /* replaces named labels with the given block */

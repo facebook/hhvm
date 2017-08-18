@@ -96,6 +96,83 @@ std::unordered_set<std::string> analyzeLocals(const Function& func) {
 
 namespace {
 
+struct ClassrefVisitor : CFGVisitor {
+  explicit ClassrefVisitor() {}
+
+  void beginTry() override {}
+
+  void beginCatch() override {}
+
+  void endRegion() override {}
+
+  void block(Block* blk) override {
+    for (auto& bc : blk->code) {
+      bc.visit(*this);
+    }
+    end();
+  }
+
+  void end() const {
+#ifndef NDEBUG
+    // all classrefs must be free at block exit
+    for (const bool free : m_slotsFree) {
+      assert(free);
+    }
+#endif // NDEBUG
+  }
+
+  uint32_t classrefSlotsUsed() const {
+    return m_slotsFree.size();
+  }
+
+  template <class T>
+  void bytecode(T& bc) {
+    bc.visit_imms(*this);
+  }
+
+  void imm(bc::ReadClassref& read) {
+    // this clasref must have been correctly allocated
+    assert(read.slot.allocated());
+    // the slot is now available
+    m_slotsFree[*read.slot.id] = true;
+  }
+
+  void imm(bc::WriteClassref& write) {
+    // find the first empty slot
+    for (uint32_t i = 0; i < m_slotsFree.size(); i++) {
+      if (m_slotsFree[i]) {
+        // assign this classref to this index
+        // and mark the slot as used
+        *write.slot.id = i;
+        m_slotsFree[i] = false;
+        return;
+      }
+    }
+    // if there wasn't a free slot already allocated, grow the slot set
+    *write.slot.id = m_slotsFree.size();
+    m_slotsFree.emplace_back(false);
+  }
+
+  template <class T>
+  void imm(const T&) {}
+
+ private:
+  std::vector<bool> m_slotsFree;
+};
+
+} // namespace
+
+uint32_t analyzeClassrefs(const CFG& cfg) {
+  ClassrefVisitor visitor;
+  cfg.visit(visitor);
+  visitor.end();
+  return visitor.classrefSlotsUsed();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
 struct LabelUseVisitor : CFGVisitor {
   explicit LabelUseVisitor(std::unordered_multiset<Block*>& references)
     : references(references) {}

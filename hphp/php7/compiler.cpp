@@ -408,6 +408,58 @@ CFG compileMethodCall(const zend_ast* ast) {
   }
 }
 
+CFG compileStaticCall(const zend_ast* ast) {
+  auto cls = ast->child[0];
+  auto method = ast->child[1];
+  auto params = zend_ast_get_list(ast->child[2]);
+
+  CFG cfg;
+  auto mthString = method->kind == ZEND_AST_ZVAL
+      ? Z_STRVAL_P(zend_ast_get_zval(method))
+      : nullptr;
+  auto clsString = cls->kind == ZEND_AST_ZVAL
+      ? Z_STRVAL_P(zend_ast_get_zval(cls))
+      : nullptr;
+
+  ClassrefSlot slot;
+  if (clsString) {
+    if (0 == strcasecmp(clsString, "self")) {
+      return compileExpression(method, Flavor::Cell)
+        .then(Self{slot})
+        .then(FPushClsMethodF{
+          params->children,
+          slot
+        }).then(compileCall(params));
+    } else if (0 == strcasecmp(clsString, "parent")) {
+      return compileExpression(method, Flavor::Cell)
+        .then(Parent{slot})
+        .then(FPushClsMethodF{
+          params->children,
+          slot
+        }).then(compileCall(params));
+    } else if (0 == strcasecmp(clsString, "static")) {
+      return compileExpression(method, Flavor::Cell)
+        .then(LateBoundCls{slot})
+        .then(FPushClsMethodF{
+          params->children,
+          slot
+        }).then(compileCall(params));
+    } else if (mthString) {
+      return CFG(FPushClsMethodD{
+        params->children,
+        mthString,
+        clsString
+      }).then(compileCall(params));
+    }
+  }
+
+  return compileExpression(cls, Flavor::Cell)
+    .then(ClsRefGetC{slot})
+    .then(compileExpression(method, Flavor::Cell))
+    .then(FPushClsMethod{params->children, slot})
+    .then(compileCall(params));
+}
+
 CFG compileNew(const zend_ast* ast) {
   auto cls = ast->child[0];
   auto params = zend_ast_get_list(ast->child[1]);
@@ -532,6 +584,9 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
         .then(fixFlavor(dest, Flavor::Return));
     case ZEND_AST_METHOD_CALL:
       return compileMethodCall(ast)
+        .then(fixFlavor(dest, Flavor::Return));
+    case ZEND_AST_STATIC_CALL:
+      return compileStaticCall(ast)
         .then(fixFlavor(dest, Flavor::Return));
     case ZEND_AST_NEW:
       return compileNew(ast)

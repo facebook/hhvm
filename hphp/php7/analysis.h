@@ -26,6 +26,10 @@ namespace HPHP { namespace php7 {
 /* Find all named locals and allocate IDs for unnamed locals */
 std::unordered_set<std::string> analyzeLocals(const Function& func);
 
+/* Find the number of classref slots needed to execute this CFG and allocate
+ * classref IDs */
+uint32_t analyzeClassrefs(const CFG& cfg);
+
 /* Simplifies the given CFG, coalescing blocks to remove redundant labels */
 void simplifyCFG(CFG& cfg);
 

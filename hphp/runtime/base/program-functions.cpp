@@ -755,16 +755,12 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #endif
-
-#if FACEBOOK
 # define AT_END_OF_TEXT       __attribute__((__section__(".stub")))
-#else
-# define AT_END_OF_TEXT
-#endif
+# define ALIGN_HUGE_PAGE      __attribute__((aligned(2 * 1024 * 1024)))
 
-static void NEVER_INLINE AT_END_OF_TEXT __attribute__((__optimize__("2")))
+static void NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE __attribute__((__optimize__("2")))
 hugifyText(char* from, char* to) {
-#if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+#if !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
     // This shouldn't happen if HHVM is behaving correctly (I think),
     // but if it does then there is nothing to do and we should bail
@@ -796,6 +792,10 @@ hugifyText(char* from, char* to) {
   free(mem);
   mlock(from, to - from);
   Debug::DebugInfo::setPidMapOverlay(from, to);
+  std::stringstream ss;
+  ss << "Mapped text section onto huge pages from " <<
+      std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
+  Logger::Info(ss.str());
 #endif
 }
 
@@ -854,7 +854,7 @@ static void pagein_self(void) {
           if (to - from >  maxHugeHotTextBytes) {
             to = from + maxHugeHotTextBytes;
           }
-          if (to < (void*)hugifyText) {
+          if (to <= (void*)hugifyText) {
             hugifyText(from, to);
           }
         }

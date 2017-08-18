@@ -105,6 +105,7 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
     if (!(env.use_counts[inst.d] == 1 &&
           inst.s.q() <= -1  &&
           inst.s.q() >= -4095 &&
+          inst.d == ea.s.index &&
           ea.s.disp == 0 &&
           ea.s.base.isValid())) return false;
 

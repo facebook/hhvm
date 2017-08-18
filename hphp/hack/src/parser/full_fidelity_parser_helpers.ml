@@ -148,11 +148,46 @@ module WithParser(Parser : ParserType) = struct
     let skipped_tokens = token :: Parser.skipped_tokens parser in
     Parser.with_skipped_tokens parser skipped_tokens
 
+  (* Returns true if the strings underlying two tokens are of the same length
+   * but with one character different. *)
+  let one_character_different str1 str2 =
+    if String.length str1 != String.length str2 then false
+    else begin
+      let rec off_by_one str1 str2 =
+        let str_len = String.length str1 in (* both strings have same length *)
+        if str_len = 0 then true
+        else begin
+          let rest_of_str1 = String.sub str1 1 (str_len - 1) in
+          let rest_of_str2 = String.sub str2 1 (str_len - 1) in
+          if Char.equal (String.get str1 0) (String.get str2 0)
+          then off_by_one rest_of_str1 rest_of_str2
+          (* Allow only one mistake *)
+          else (String.compare rest_of_str1 rest_of_str2) = 0
+        end
+      in
+      off_by_one str1 str2
+    end
+
+  (* Compare the text of the token we have in hand to the text of the
+   * anticipated kind. Note: this automatically returns false for any
+   * TokenKinds of length 1. *)
+  let is_misspelled_kind kind token_str =
+    let tokenkind_str = TokenKind.to_string kind in
+    if String.length tokenkind_str <= 1 then false
+    else
+      one_character_different tokenkind_str token_str
+
+  let skip_and_log_misspelled_token parser required_str =
+    let received_str = current_token_text parser in
+    let parser = with_error parser
+      (SyntaxError.error1058 received_str required_str) ~on_whole_token:true in
+    skip_and_log_unexpected_token ~generate_error:false parser
+
   let require_token parser kind error =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
       (parser1, make_token token)
-    else
+    else begin
       (* ERROR RECOVERY: Look at the next token after this. Is it the one we
        * require? If so, process the current token as extra and return the next
        * one. Otherwise, create a missing token for what we required,
@@ -162,8 +197,19 @@ module WithParser(Parser : ParserType) = struct
         let parser = skip_and_log_unexpected_token parser in
         let (parser, token) = next_token parser in
         (parser, make_token token)
-      else
-        (with_error parser error, (make_missing()))
+      else begin
+        (* ERROR RECOVERY: We know we didn't encounter an extra token.
+         * So, as a second line of defense, check if the current token
+         * is a misspelling, by our existing narrow definition of misspelling. *)
+         if is_misspelled_kind kind (current_token_text parser)
+         then
+          let parser = skip_and_log_misspelled_token parser
+            (TokenKind.to_string kind) in
+          (parser, make_missing ())
+         else
+          (with_error parser error, (make_missing()))
+      end
+    end
 
   let require_required parser =
     require_token parser TokenKind.Required SyntaxError.error1051

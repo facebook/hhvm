@@ -119,6 +119,8 @@ let error1055 = "A fallthrough directive can only appear at the end of" ^
 (* TODO(20052790): use the specific token's text in the message body. *)
 let error1056 = "This token is not valid as part of a function declaration."
 let error1057 text = "Encountered unexpected token '" ^ text ^ "'."
+let error1058 received required = Printf.sprintf ("Encountered unexpected " ^^
+  "token '%s'. Did you mean '%s'?") received required
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."

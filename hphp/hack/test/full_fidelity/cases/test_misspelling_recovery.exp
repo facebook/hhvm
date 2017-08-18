@@ -1,0 +1,7 @@
+(7,3)-(7,8) Encountered unexpected token 'whike'. Did you mean 'while'?
+(17,2)-(18,1) The 'while' keyword is expected here.
+(18,1)-(18,6) Encountered unexpected token '
+whik'.
+(24,18)-(24,18) A semicolon is expected here.
+(24,20)-(24,20) An expression is expected here.
+(25,22)-(25,22) A semicolon is expected here.

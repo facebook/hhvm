@@ -343,6 +343,9 @@ std::string dump_class(const Class& cls) {
   std::string out;
   out.append(".class ");
   out.append(cls.name);
+  if (cls.parentName) {
+    folly::format(&out, " extends {}", *cls.parentName);
+  }
   out.append(" {\n");
   for (const auto& method : cls.methods) {
     out.append(dump_method(*method));

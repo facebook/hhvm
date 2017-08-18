@@ -90,6 +90,7 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
   auto decl = zend_ast_get_decl(ast);
   auto name = ZSTR_VAL(decl->name);
   auto attr = decl->flags;
+  auto parent = decl->child[0];
   auto statements = zend_ast_get_list(decl->child[2]);
 
   auto cls = unit->makeClass();
@@ -100,6 +101,10 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
   }
   if (attr & ZEND_ACC_FINAL) {
     cls->attr |= Attr::AttrFinal;
+  }
+
+  if (parent) {
+    cls->parentName = zval_to_string(zend_ast_get_zval(parent));
   }
 
   for (uint32_t i = 0; i < statements->children; i++) {

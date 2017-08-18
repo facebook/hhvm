@@ -101,6 +101,18 @@
 # define DEBUG_ONLY UNUSED
 #endif
 
+
+/*
+ * AARCH64 needs to create a walkable stack frame for
+ * getFrameRegs() when a FixupEntry isIndirect()
+ */
+#ifdef __aarch64__
+#define AARCH64_WALKABLE_FRAME() asm("" ::: "memory");
+#else
+#define AARCH64_WALKABLE_FRAME()
+#endif
+
+
 /*
  * We need to keep some unreferenced functions from being removed by
  * the linker. There is no compile time mechanism for doing this, but

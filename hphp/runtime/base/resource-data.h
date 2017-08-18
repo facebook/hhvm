@@ -164,6 +164,7 @@ struct ResourceData : type_scan::MarkCountable<ResourceData> {
 inline void ResourceHdr::release() noexcept {
   assert(kindIsValid());
   delete data();
+  AARCH64_WALKABLE_FRAME();
 }
 
 inline ResourceData* safedata(ResourceHdr* hdr) {

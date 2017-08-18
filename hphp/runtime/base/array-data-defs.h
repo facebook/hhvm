@@ -261,7 +261,8 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 inline void ArrayData::release() noexcept {
   assert(hasExactlyOneRef());
-  return g_array_funcs.release[kind()](this);
+  g_array_funcs.release[kind()](this);
+  AARCH64_WALKABLE_FRAME();
 }
 
 inline ArrayData* ArrayData::append(Cell v, bool copy) {

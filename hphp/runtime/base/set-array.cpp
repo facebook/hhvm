@@ -275,6 +275,7 @@ void SetArray::Release(ArrayData* in) {
     assert(!has_strong_iterator(ad));
   }
   MM().objFree(ad, ad->heapSize());
+  AARCH64_WALKABLE_FRAME();
 }
 
 void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {

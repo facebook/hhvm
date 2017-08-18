@@ -97,10 +97,12 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
     if (UNLIKELY(bits.cow)) {
       m_count = 1;
       bits.cow = bits.z = 0;
+      AARCH64_WALKABLE_FRAME();
       return;
     }
     this->~RefData();
     MM().freeSmallSize(this, sizeof(RefData));
+    AARCH64_WALKABLE_FRAME();
   }
 
   void releaseMem() const {

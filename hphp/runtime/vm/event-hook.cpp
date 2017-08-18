@@ -303,8 +303,10 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
     ar->setLocalsDecRefd();
     frame_free_locals_no_hook(ar);
+
+    // Tear down the callee frame, then push the return value.
     Stack& stack = vmStack();
-    stack.top() = (Cell*)(ar + 1);
+    stack.trim((Cell*)(ar + 1));
     cellDup(*ret.asCell(), *stack.allocTV());
 
     vmfp() = outer;

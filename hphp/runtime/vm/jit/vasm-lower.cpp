@@ -231,6 +231,15 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       v << copy{rret(0), dests[0]};
       break;
 
+    case DestType::SSAPair:
+      assertx(dests.size() == 2);
+      assertx(dests[0].isValid());
+      assertx(dests[1].isValid());
+
+      // Copy the result pair to dests.
+      v << copy2{rret(0), rret(1), dests[0], dests[1]};
+      break;
+
     case DestType::Dbl:
       // Copy the single-register result to dests[0].
       assertx(dests.size() == 1);

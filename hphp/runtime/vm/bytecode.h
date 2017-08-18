@@ -513,6 +513,17 @@ public:
   }
 
   ALWAYS_INLINE
+  void trim(Cell* c) {
+    assert(c <= m_base);
+    assert(m_top <= c);
+    if (debug) {
+      while (m_top < c) tvDebugTrash(m_top++);
+    } else {
+      m_top = c;
+    }
+  }
+
+  ALWAYS_INLINE
   void dup() {
     assert(m_top != m_base);
     assert(m_top != m_elms);

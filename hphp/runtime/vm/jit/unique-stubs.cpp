@@ -144,6 +144,21 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
 }
 
 /*
+ * Convenience wrapper around a simple vcall to `helper', with a single `arg'
+ * and a pair of return values in `d1' and `d2'.
+ */
+template<class F>
+Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d1, Vreg d2) {
+  return vcall{
+    CallSpec::direct(helper),
+    v.makeVcallArgs({{arg}}),
+    v.makeTuple({d1, d2}),
+    Fixup{},
+    DestType::SSAPair
+  };
+}
+
+/*
  * Emit a catch trace that unwinds a stub context back to the PHP context that
  * called it.
  */
@@ -168,7 +183,12 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA fcallHelper(ActRec* ar) {
+struct FCallHelperRet {
+  TCA destAddr;
+  TCA retAddr;
+};
+
+FCallHelperRet fcallHelper(ActRec* ar) {
   assert_native_stack_aligned();
   assertx(!ar->resumed());
 
@@ -177,7 +197,7 @@ TCA fcallHelper(ActRec* ar) {
       const_cast<Func*>(ar->func()),
       ar->numArgs()
     );
-    if (tca) return tca;
+    if (tca) return { tca, nullptr };
   }
 
   // Check for stack overflow in the same place func prologues make their
@@ -185,14 +205,19 @@ TCA fcallHelper(ActRec* ar) {
   // cleans and syncs vmRegs for us.
   if (checkCalleeStackOverflow(ar)) handleStackOverflow(ar);
 
+  // If doFCall indicates that the function was intercepted and should be
+  // skipped, it will have already torn down the callee's frame. So, we need to
+  // save the return value thats in it.
+  auto const retAddr = (TCA)ar->m_savedRip;
+
   try {
     VMRegAnchor _(ar);
     if (doFCall(ar, vmpc())) {
-      return tc::ustubs().resumeHelperRet;
+      return { tc::ustubs().resumeHelperRet, nullptr };
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs
     // have already been fixed; indicate this with a nullptr return.
-    return nullptr;
+    return { nullptr, retAddr };
   } catch (...) {
     // The VMRegAnchor above took care of us, but we need to tell the unwinder
     // (since ~VMRegAnchor() will have reset tl_regState).
@@ -256,9 +281,10 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
     v << phplogue{rvmfp()};
 
     // fcallHelper asserts native stack alignment for us.
-    TCA (*helper)(ActRec*) = &fcallHelper;
+    FCallHelperRet (*helper)(ActRec*) = &fcallHelper;
     auto const dest = v.makeReg();
-    v << simplecall(v, helper, rvmfp(), dest);
+    auto const saved_rip = v.makeReg();
+    v << simplecall(v, helper, rvmfp(), dest, saved_rip);
 
     // Clobber rvmsp in debug builds.
     if (debug) v << copy{v.cns(0x1), rvmsp()};
@@ -267,23 +293,15 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
     v << testq{dest, dest, sf};
 
     unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
-      // A nullptr dest means the callee was intercepted and should be skipped.
-      // Make a copy of the current rvmfp(), which belongs to the callee,
-      // before syncing VM regs and return regs.
-      auto const callee_fp = v.makeReg();
-      v << copy{rvmfp(), callee_fp};
+      // A nullptr dest means the callee was intercepted and should be
+      // skipped. In that case, saved_rip will contain the return address that
+      // was in the callee's ActRec before it was torn down by the intercept.
       loadVMRegs(v);
       loadReturnRegs(v);
 
-      // Do a PHP return to the caller---i.e., relative to the callee's frame.
-      // Note that if intercept skips the callee, it tears down its frame but
-      // guarantees that m_savedRip remains valid, so this is safe (and is the
-      // only way to get the return address).
-      //
-      // TODO(#8908075): We've been fishing the m_savedRip out of the callee's
-      // logically-trashed frame for a while now, but we really ought to
-      // respect that the frame is freed and not touch it.
-      v << phpret{callee_fp, rvmfp(), php_return_regs(), true};
+      // Return to the caller. This unbalances the return stack buffer, but if
+      // we're intercepting, we probably don't care.
+      v << jmpr{saved_rip};
     });
 
     // Jump to the func prologue.

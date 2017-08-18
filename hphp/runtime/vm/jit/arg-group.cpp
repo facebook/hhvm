@@ -32,6 +32,7 @@ const char* destTypeName(DestType dt) {
     case DestType::None:     return "None";
     case DestType::Indirect: return "Indirect";
     case DestType::SSA:      return "SSA";
+    case DestType::SSAPair:  return "SSAPair";
     case DestType::Byte:     return "Byte";
     case DestType::TV:       return "TV";
     case DestType::Dbl:      return "Dbl";

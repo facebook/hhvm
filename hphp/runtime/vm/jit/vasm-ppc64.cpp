@@ -382,17 +382,8 @@ struct Vgen {
     }                                                     \
   } while(0)
 
-  // As all registers are 64-bits wide, a smaller number from the memory should
-  // have its sign extended after loading except for the 'z' vasm variants
-  void emit(const loadw& i) {
-    X(lhz,  Reg64(i.d), i.s);
-    a.extsh(Reg64(i.d), Reg64(i.d));
-  }
-  void emit(const loadl& i) {
-    X(lwz,  Reg64(i.d), i.s);
-    a.extsw(Reg64(i.d), Reg64(i.d));
-  }
-
+  void emit(const loadw& i)   { X(lhz,  Reg64(i.d), i.s); }
+  void emit(const loadl& i)   { X(lwz,  Reg64(i.d), i.s); }
   void emit(const loadb& i)   { X(lbz, Reg64(i.d),  i.s); }
   void emit(const loadtqb& i) { X(lbz, Reg64(i.d),  i.s); }
   void emit(const loadzbl& i) { X(lbz,  Reg64(i.d), i.s); }
@@ -1025,13 +1016,27 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   else v << vasm_dst_imm{inst.s0, tmp2, inst.sf};                       \
 }
 
-X(cmpbim,  cmpl,  cmpli,  loadb)
+X(cmpbim,  cmpq,  cmpqi,  loadzbq)
 X(cmpqim,  cmpq,  cmpqi,  load)
-X(testbim, testq, testqi, loadb)
-X(testwim, testq, testqi, loadw)
-X(testlim, testq, testqi, loadl)
+X(testbim, testq, testqi, loadzbq)
 X(testqim, testq, testqi, load)
+#undef X
 
+#define X(vasm_src, vasm_dst_reg, vasm_dst_imm, vasm_load, vasm_exts)   \
+void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
+  Vptr p = inst.s1;                                                     \
+  Vreg tmp; if (!e.allow_vreg()) tmp = Vreg(PhysReg(rAsm));             \
+  Vreg tmp2 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm));       \
+  Vreg tmp3 = v.makeReg();                                              \
+  v << vasm_load{p, tmp2};                                              \
+  v << vasm_exts{tmp2, tmp3};                                           \
+  if (patchImm(inst.s0, v, tmp))                                        \
+    v << vasm_dst_reg{tmp, tmp3, inst.sf};                              \
+  else v << vasm_dst_imm{inst.s0, tmp3, inst.sf};                       \
+}
+
+X(testwim, testq, testqi, loadw, extsw)
+X(testlim, testq, testqi, loadl, extsl)
 #undef X
 
 // Very similar with the above case: handles MemoryRef and Immed, but also
@@ -1046,10 +1051,23 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   v << vasm_store{tmp3, p};                                             \
 }
 
-X(orwim,  orq,  loadw, storew)
 X(orqim,  orq,  load,  store)
 X(addqim, addq, load,  store)
-X(addlim, addl, load,  store)
+#undef X
+
+#define X(vasm_src, vasm_dst, vasm_load, vasm_store, vasm_exts)         \
+void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
+  Vreg tmp = v.makeReg(), tmp3 = v.makeReg(), tmp2, tmp4 = v.makeReg(); \
+  Vptr p = inst.m;                                                      \
+  v << vasm_load{p, tmp4};                                              \
+  v << vasm_exts{tmp4, tmp};                                            \
+  lowerImm(inst.s0, v, tmp2);                                           \
+  v << vasm_dst{tmp2, tmp, tmp3, inst.sf};                              \
+  v << vasm_store{tmp3, p};                                             \
+}
+
+X(orwim,  orq,  loadw, storew, extsw)
+X(addlim, addq, load,  store, extsl)
 #undef X
 
 // Handles MemoryRef arguments and load the data input from memory, but these
@@ -1065,10 +1083,21 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 X(testqm, testq, load,  ONE(s0))
 X(cmplm,  cmpl,  loadl, ONE(s0))
 X(cmpqm,  cmpq,  load,  ONE(s0))
-X(cmpbm,  cmpq,  loadb, ONE_R64(s0))
-X(cmpwm,  cmpq,  loadw, ONE_R64(s0))
-
+X(cmpbm,  cmpq,  loadzbq, ONE_R64(s0))
 #undef X
+
+#define X(vasm_src, vasm_dst, vasm_load, operands, vasm_exts)           \
+void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
+  Vptr p = inst.s1;                                                     \
+  Vreg tmp = v.makeReg(), tmp2 = v.makeReg();                           \
+  v << vasm_load{p, tmp};                                               \
+  v << vasm_exts{tmp, tmp2};                                            \
+  v << vasm_dst{operands tmp2, inst.sf};                                \
+}
+
+X(cmpwm,  cmpq,  loadw, ONE_R64(s0), extsw)
+#undef X
+
 
 #define X(vasm_src, vasm_dst, vasm_ext, operands)                       \
 void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
@@ -1357,6 +1386,13 @@ void lowerForPPC64(const VLS& /*e*/, Vout& v, decqmlock& inst) {
     v << ldimml{Immed(p.disp), p.index};
   }
   v << decqmlock{p, inst.sf};
+}
+
+/*
+ * Replace any loadb by loadzbq, as in PPC64 the char is unsigned by default.
+ */
+void lowerForPPC64(const VLS& /*e*/, Vout& v, loadb& inst) {
+  v << loadzbq{inst.s, Reg64(inst.d)};
 }
 
 /*

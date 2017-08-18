@@ -21,8 +21,9 @@ type type_hint_kind =
 | TypeDef
 
 let fmt_name_or_prim ~tparams ~namespace x =
-  if List.mem tparams (snd x)
-  then snd x
+  let name = snd x in
+  if List.mem tparams name || name = "self"
+  then name
   else
     let fq_id, _ = Hhbc_id.Class.elaborate_id namespace x in
     Hhbc_id.Class.to_unmangled_string fq_id

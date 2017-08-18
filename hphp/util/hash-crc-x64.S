@@ -5,7 +5,7 @@
 .file	"hphp/util/hash-crc-x64.S"
 
 /*
- * If SSE4.2 is explicitly specified, we define the HPHP::hash_string* funcitons
+ * If SSE4.2 is explicitly specified, we define the HPHP::hash_string* functions
  * here, otherwise those functions are the same as the 'fallback' version, which
  * check CPUID and possibly jumps here.   Thus the function name is different
  * depending on whether __SSE4_2__ is defined.

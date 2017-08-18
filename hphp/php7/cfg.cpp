@@ -414,7 +414,7 @@ CFG&& CFG::inRegion(std::unique_ptr<Region> reg) {
 namespace {
 
 /* Find all blocks this exit can target */
-std::vector<Block*> exitTargets(const ExitOp& exit) {
+std::vector<Block*> exitOpTargets(const ExitOp& exit) {
   std::vector<Block*> targets;
 
   match<void>(exit,
@@ -527,7 +527,7 @@ void CFG::visit(CFGVisitor&& visitor) const {
     // add all of the exit targets to the queue
     const auto& exits = blk->exits;
     for (auto riter = exits.rbegin(); riter != exits.rend(); riter++) {
-      for (Block* child : exitTargets(*riter)) {
+      for (Block* child : exitOpTargets(*riter)) {
         if (0 == visited.count(child)) {
           breadcrumbs.push_front(child);
           visited.insert(child);
@@ -536,6 +536,19 @@ void CFG::visit(CFGVisitor&& visitor) const {
     }
   }
 
+}
+
+std::vector<Block*> Block::exitTargets() const {
+  std::vector<Block*> allTargets;
+  for (const auto& exit : exits) {
+    auto targets = exitOpTargets(exit);
+    allTargets.insert(
+      allTargets.end(),
+      targets.begin(),
+      targets.end()
+    );
+  }
+  return allTargets;
 }
 
 }} // namespace HPHP::php7

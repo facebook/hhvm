@@ -94,4 +94,87 @@ std::unordered_set<std::string> analyzeLocals(const Function& func) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+struct LabelUseVisitor : CFGVisitor {
+  explicit LabelUseVisitor(std::unordered_multiset<Block*>& references)
+    : references(references) {}
+
+  void beginTry() override {}
+
+  void beginCatch() override {}
+
+  void endRegion() override {}
+
+  void block(Block* blk) override {
+    for (Block* target : blk->exitTargets()) {
+      references.insert(target);
+    }
+  }
+
+  std::unordered_multiset<Block*>& references;
+};
+
+struct BlockCoalescingVisitor : CFGVisitor {
+  explicit BlockCoalescingVisitor(std::unordered_multiset<Block*> references)
+    : references(std::move(references)) {}
+
+  void beginTry() override {}
+
+  void beginCatch() override {}
+
+  void endRegion() override {}
+
+  void block(Block* blk) override {
+    // finds the given block's single unconditional exit if it has one
+    const auto hasFallthrough = [&](Block* blk) -> Block* {
+      // if this block has one exit ...
+      if (blk->exits.size() == 1) {
+        auto exit = blk->exits[0];
+        // ... that's an unconditional jump ...
+        if (auto jmp = boost::get<bc::Jmp>(&exit)) {
+          Block* target = jmp->imm1;
+          // ... to a block other than itself ...
+          if (target != blk) {
+            return target;
+          }
+        }
+      }
+      return nullptr;
+    };
+
+    // if this block has one unconditional exit
+    if (auto target = hasFallthrough(blk)) {
+      // and its jump target is referenced by only us
+      // and is in the same region
+      while (target
+          && references.count(target) == 1
+          && target->region == blk->region) {
+        // coalesce these blocks into one
+        blk->code.insert(
+          blk->code.end(),
+          target->code.begin(),
+          target->code.end()
+        );
+        // target will be dead at this point but that's fine
+        std::swap(blk->exits, target->exits);
+        // repeat this process if we can
+        target = hasFallthrough(blk);
+      }
+    }
+  }
+
+  std::unordered_multiset<Block*> references;
+};
+
+} // namespace
+
+void simplifyCFG(CFG& cfg) {
+  std::unordered_multiset<Block*> references;
+  // mark where blocks are referenced by jumps
+  cfg.visit(LabelUseVisitor(references));
+  // coalesce blocks
+  cfg.visit(BlockCoalescingVisitor(std::move(references)));
+}
+
 }} // namespace HPHP::php7

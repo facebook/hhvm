@@ -16,6 +16,7 @@
 
 #include "hphp/php7/compiler.h"
 
+#include "hphp/php7/analysis.h"
 #include "hphp/php7/util.h"
 #include "hphp/util/match.h"
 
@@ -80,6 +81,7 @@ void compileProgram(Unit* unit, const zend_ast* ast) {
     .thenReturn(Flavor::Cell)
     .makeExitsReal()
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
+  simplifyCFG(pseudomain->cfg);
 }
 
 void compileFunction(Unit* unit, const zend_ast* ast) {
@@ -156,6 +158,7 @@ void buildFunction(Function* func, const zend_ast* ast) {
       : Flavor::Cell)
     .makeExitsReal()
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
+  simplifyCFG(func->cfg);
 }
 
 CFG compileZvalLiteral(const zval* zv) {

@@ -40,7 +40,7 @@ std::string dump_asm(const Unit& unit) {
   std::string out;
   folly::format(&out, ".filepath \"{}\";\n\n", unit.name);
   out.append(dump_pseudomain(*unit.getPseudomain()));
-  for (const auto& func : unit.functions) {
+  for (auto& func : unit.functions) {
     out.append(dump_function(*func));
   }
   for (const auto& cls : unit.classes) {

@@ -26,6 +26,9 @@ namespace HPHP { namespace php7 {
 /* Find all named locals and allocate IDs for unnamed locals */
 std::unordered_set<std::string> analyzeLocals(const Function& func);
 
+/* Simplifies the given CFG, coalescing blocks to remove redundant labels */
+void simplifyCFG(CFG& cfg);
+
 }} // namespace HPHP::php7
 
 #endif // incl_HPHP_PHP7_ANALYSIS_H

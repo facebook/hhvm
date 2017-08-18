@@ -58,6 +58,9 @@ struct Block {
     exits.push_back(std::move(op));
   }
 
+  /* Find blocks that this block has exits to */
+  std::vector<Block*> exitTargets() const;
+
   /* identifies this block in its function */
   uint64_t id;
 
@@ -132,7 +135,7 @@ struct CFGVisitor {
 };
 
 /* A CFG represents a collection of blocks with a single entry and one or more
- * exits.
+ * exits. Not all blocks in the CFG are guaranteed to be live code.
  *
  * Each CFG has a fallthrough exit that we can add code to by compising it with
  * other CFGs or instructions using `then` or one of its variants. We can use

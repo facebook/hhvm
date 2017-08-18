@@ -23,3 +23,8 @@ let arguments a = a.attribute_arguments
 let is_memoized attributes =
   let f attr = (name attr) = "__Memoize" in
   List.exists attributes f
+let deprecation_info attributes =
+  let f attr =
+    if (name attr) = "__Deprecated" then Some (arguments attr) else None
+  in
+  List.find_map attributes f

@@ -152,8 +152,6 @@ slow/keyset/hh-only2.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
 slow/lang/deprecated.php
-slow/lang/deprecated_disabled.php
-slow/lang/deprecated_sampled.php
 slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
@@ -317,7 +315,6 @@ slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/closure_namespace.php
-slow/reflection/deprecation.php
 slow/reflection/dynamic_property2.php
 slow/reflection/isCallable.php
 slow/reflection/ns_closure.php

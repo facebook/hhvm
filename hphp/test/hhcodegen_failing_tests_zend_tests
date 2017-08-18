@@ -24,7 +24,6 @@ zend/good/tests/lang/bug44654.php
 zend/good/tests/lang/comments.php
 zend/good/tests/lang/engine_assignExecutionOrder_001.php
 zend/good/tests/lang/engine_assignExecutionOrder_008.php
-zend/good/tests/lang/foreachLoop.006.php
 zend/good/tests/lang/foreachLoop.016.php
 zend/good/tests/lang/foreachLoop.017.php
 zend/good/tests/lang/foreachLoopIteratorAggregate.001.php

@@ -60,6 +60,7 @@ let emit_main defs =
       ~is_closure_body:false
       ~is_memoize:false
       ~is_async:false
+      ~deprecation_info:None
       ~skipawaitable:false
       ~is_return_by_ref:false
       ~scope:Ast_scope.Scope.toplevel

@@ -26,6 +26,7 @@ val emit_body:
   (* True if this is the body of a <<__Memoize>> method *)
   is_memoize: bool ->
   is_async: bool ->
+  deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->
   (* True if the return type is a ref *)
   is_return_by_ref: bool ->

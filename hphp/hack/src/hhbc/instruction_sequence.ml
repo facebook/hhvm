@@ -69,6 +69,7 @@ let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
 let instr_eq = instr (IOp Eq)
 let instr_gt = instr (IOp Gt)
+let instr_concat = instr (IOp Concat)
 let instr_print = instr (IOp Print)
 let instr_retc = instr (IContFlow RetC)
 let instr_retv = instr (IContFlow RetV)
@@ -78,6 +79,7 @@ let instr_dup = instr (IBasic Dup)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
+let instr_int64 i = instr (ILitConst (Int i))
 let instr_int_of_string litstr =
   instr (ILitConst (Int (Int64.of_string litstr)))
 let instr_double litstr = instr (ILitConst (Double litstr))
@@ -116,6 +118,8 @@ let instr_bindn = instr (IMutator BindN)
 let instr_bindl local = instr (IMutator (BindL local))
 let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
+let instr_clsrefname =
+  instr (IMisc (ClsRefName class_ref_rewrite_sentinel))
 let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_parent =
@@ -264,6 +268,9 @@ let instr_contUnsetDelegate_free iter =
   instr (IGenDelegation (ContUnsetDelegate (FreeIter, iter)))
 let instr_contUnsetDelegate_ignore iter =
   instr (IGenDelegation (ContUnsetDelegate (IgnoreIter, iter)))
+
+let instr_trigger_sampled_error =
+  instr_fcallbuiltin 3 3 "trigger_sampled_error"
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

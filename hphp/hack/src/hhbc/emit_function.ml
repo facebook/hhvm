@@ -26,6 +26,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.Ast.f_user_attributes in
   let is_memoize = Hhas_attribute.is_memoized function_attributes in
+  let deprecation_info = Hhas_attribute.deprecation_info function_attributes in
   let renamed_id =
     if is_memoize
     then Hhbc_id.Function.add_suffix original_id Emit_memoize_helpers.memoize_suffix
@@ -38,6 +39,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       ~is_closure_body:false
       ~is_memoize
       ~is_async:function_is_async
+      ~deprecation_info
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref:ast_fun.Ast.f_ret_by_ref
       ~default_dropthrough:None

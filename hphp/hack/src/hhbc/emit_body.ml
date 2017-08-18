@@ -117,12 +117,58 @@ let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
     Emit_type_hint.(hint_to_type_info
       ~kind:Return ~nullable:false ~skipawaitable ~tparams ~namespace h)
 
+let emit_deprecation_warning scope = function
+  | None -> empty
+  | Some args ->
+    (* Drop the indexes *)
+    let args = List.filteri ~f:(fun i _ -> i mod 2 <> 0) args in
+    let strip_id id = SU.strip_global_ns (snd id) in
+    let class_name, trait_instrs, concat_instruction =
+      match Ast_scope.Scope.get_class scope with
+      | None -> "", empty, empty
+      | Some c when c.Ast.c_kind = Ast.Ctrait ->
+        "::", gather [instr_self; instr_clsrefname;], instr_concat
+      | Some c -> strip_id c.Ast.c_name ^ "::", empty, empty
+    in
+    let fn_name =
+      match scope with
+      | Ast_scope.ScopeItem.Function fd :: _ -> strip_id fd.Ast.f_name
+      | Ast_scope.ScopeItem.Method md :: _ -> strip_id md.Ast.m_name
+      | _ -> failwith "deprecated functions must have names"
+    in
+    let deprecation_string = class_name ^ fn_name ^ ": " ^
+      match args with
+      | [] -> "deprecated function"
+      | Typed_value.String s :: _ -> s
+      | _ -> failwith "deprecated attribute first argument is not a string"
+    in
+    let sampling_rate =
+      match args with
+      | [] | [_] -> Int64.one
+      | _ :: Typed_value.Int i :: _ -> i
+      | _ -> failwith "deprecated attribute second argument is not an integer"
+    in
+    (* TODO: if the function is system function or a native function,
+     * emit PHP_DEPRECATED error code *)
+    let user_deprecated_error_code = 16384 (* USER_DEPRECATED *) in
+    if Int64.to_int sampling_rate <= 0 then empty else
+    gather [
+      trait_instrs;
+      instr_string deprecation_string;
+      concat_instruction;
+      instr_int64 sampling_rate;
+      instr_int user_deprecated_error_code;
+      instr_trigger_sampled_error;
+      instr_popr;
+    ]
+
 let emit_body
   ~pos
   ~scope
   ~is_closure_body
   ~is_memoize
   ~is_async
+  ~deprecation_info
   ~skipawaitable
   ~is_return_by_ref
   ~default_dropthrough
@@ -194,6 +240,7 @@ let emit_body
     | _ -> false
   in
   let header = gather [
+        emit_deprecation_warning scope deprecation_info;
         begin_label;
         emit_method_prolog ~pos ~params ~needs_local_this;
         generator_instr;

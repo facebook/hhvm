@@ -65,11 +65,8 @@ inline void scanFrameSlots(const ActRec* ar, type_scan::Scanner& scanner) {
   auto locals = frame_local(ar, num_locals - 1);
   scanner.scan(*locals, num_locals * sizeof(TypedValue));
   auto num_iters = ar->func()->numIterators();
-  if (num_iters > 0) {
-    // Conservatively scan iterators: we don't know their liveness or type
-    auto iters = frame_iter(ar, num_iters - 1);
-    scanner.conservative(iters, num_iters * sizeof(Iter));
-  }
+  auto iters = frame_iter(ar, num_iters - 1);
+  scanner.scan(*iters, num_iters * sizeof(Iter));
 }
 
 inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {

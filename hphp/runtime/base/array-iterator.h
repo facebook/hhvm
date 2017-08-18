@@ -357,6 +357,10 @@ private:
   // in the array. Beware that when m_data is null, m_pos is uninitialized.
   ssize_t m_pos;
  private:
+  // we don't use this pointer, but it gives ArrayIter the same layout
+  // as MArrayIter and CufIter, allowing Iter to be scanned without a union
+  // descriminator.
+  MaybeCountable* m_unused;
   int m_version;
   // This is unioned so new_iter_array can initialize it more
   // efficiently.
@@ -545,6 +549,7 @@ private:
   // "before the first" position in the array.
   UNUSED uint32_t m_unused;
   uint32_t m_resetFlag;
+  friend struct Iter;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -614,33 +619,29 @@ void reset_strong_iterators(ArrayData* ad);
 //////////////////////////////////////////////////////////////////////
 
 struct CufIter {
-  CufIter() : m_func(nullptr), m_ctx(nullptr), m_name(nullptr) {}
+  CufIter() : m_obj_or_cls(nullptr), m_func(nullptr), m_name(nullptr) {}
   ~CufIter();
   const Func* func() const { return m_func; }
-  void* ctx() const { return m_ctx; }
+  void* ctx() const { return m_obj_or_cls; }
   StringData* name() const { return m_name; }
 
   void setFunc(const Func* f) { m_func = f; }
-  void setCtx(ObjectData* obj) { m_ctx = obj; }
+  void setCtx(ObjectData* obj) { m_obj_or_cls = obj; }
   void setCtx(const Class* cls) {
-    m_ctx = cls ? (void*)((char*)cls + 1) : nullptr;
+    m_obj_or_cls = !cls ? nullptr :
+                   reinterpret_cast<ObjectData*>((char*)cls + 1);
   }
   void setName(StringData* name) { m_name = name; }
 
   static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
-  static constexpr uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
+  static constexpr uint32_t ctxOff() { return offsetof(CufIter, m_obj_or_cls); }
   static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
 
  private:
+  ObjectData* m_obj_or_cls; // maybe a Class* if lsb set.
   const Func* m_func;
-  void* m_ctx;
   StringData* m_name;
-
-  TYPE_SCAN_CUSTOM_FIELD(m_ctx) {
-    if (m_ctx && intptr_t(m_ctx) % 2 == 0) {
-      scanner.enqAddr((const ObjectData**)&m_ctx);
-    }
-  }
+  friend struct Iter;
 };
 
 struct alignas(16) Iter {
@@ -658,6 +659,10 @@ struct alignas(16) Iter {
   void cfree();
 
 private:
+  // ArrayIter, MArrayIter, and CufIter all declare pointers at the
+  // same offsets, allowing gen-type-scanners to generate a scanner
+  // automatically, for the union. If the layouts become incompatible,
+  // gen-type-scanners will report a build-time error.
   union Data {
     Data() {}
     ArrayIter aiter;

@@ -881,8 +881,8 @@ ArrayData* MArrayIter::reregister() {
 //////////////////////////////////////////////////////////////////////
 
 CufIter::~CufIter() {
-  if (m_ctx && !(uintptr_t(m_ctx) & 1)) {
-    decRefObj((ObjectData*)m_ctx);
+  if (m_obj_or_cls && !(uintptr_t(m_obj_or_cls) & 1)) {
+    decRefObj(m_obj_or_cls);
   }
   if (m_name) decRefStr(m_name);
 }

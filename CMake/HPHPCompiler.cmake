@@ -142,8 +142,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "maybe-uninitialized"
       "old-style-declaration"
     )
-    list(APPEND GENERAL_CXX_OPTIONS
+    list(APPEND GENERAL_OPTIONS
       "ffunction-sections"
+    )
+    list(APPEND GENERAL_CXX_OPTIONS
       "fdata-sections"
       "fno-gcse"
       "fno-canonical-system-headers"

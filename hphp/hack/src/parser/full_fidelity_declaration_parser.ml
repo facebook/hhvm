@@ -570,11 +570,11 @@ module WithExpressionAndStatementAndTypeParser
              start a classish element. *)
     (* ERROR RECOVERY: we're in the body of a classish, so we add visibility
      * modifiers to our context. *)
-    let expected_tokens = [Public; Protected; Private] in
-    let parser = SimpleParser.expect_in_new_scope parser expected_tokens in
+    let recovery_tokens = [Public; Protected; Private] in
+    let parser = SimpleParser.expect_in_new_scope parser recovery_tokens in
     let (parser, element_list) =
       parse_terminated_list parser parse_classish_element RightBrace in
-    let parser = SimpleParser.pop_scope parser expected_tokens in
+    let parser = SimpleParser.pop_scope parser recovery_tokens in
     (parser, element_list)
 
   and parse_xhp_children_paren parser =

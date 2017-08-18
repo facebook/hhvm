@@ -32,4 +32,25 @@ std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
   return unit;
 }
 
+Function* Class::getConstructor() {
+  for (const auto& func : methods) {
+    if (func->name == "__construct" || func->name == "86ctor") {
+      return func.get();
+    }
+  }
+
+  // we must not have a constructor yet so make a default one
+  using namespace bc;
+  auto func = makeMethod();
+  func->name = "86ctor";
+  func->attr |= Attr::AttrPublic;
+  func->cfg = CFG({
+    Null{},
+    RetC{}
+  }).makeExitsReal()
+    .inRegion(std::make_unique<Region>(Region::Kind::Entry));
+
+  return func;
+}
+
 }} // HPHP::php7

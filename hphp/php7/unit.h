@@ -65,6 +65,8 @@ struct Class {
     return methods.back().get();
   }
 
+  Function* getConstructor();
+
   Unit* parent;
   std::string name;
   folly::Optional<std::string> parentName;

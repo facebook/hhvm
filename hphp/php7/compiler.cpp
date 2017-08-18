@@ -113,6 +113,9 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
     compileClassStatement(cls, statements->child[i]);
   }
 
+  /* Force the creation of a ctor if we don't have one yet */
+  cls->getConstructor();
+
   return CFG(DefCls{cls->index});
 }
 

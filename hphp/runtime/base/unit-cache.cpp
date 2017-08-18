@@ -45,6 +45,7 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -602,12 +603,6 @@ CachedUnit checkoutFile(
     : lookupUnitNonRepoAuth(path, statInfo, ent);
 }
 
-//////////////////////////////////////////////////////////////////////
-
-} // end empty namespace
-
-//////////////////////////////////////////////////////////////////////
-
 const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
@@ -631,6 +626,23 @@ const std::string mangleAliasedNamespaces() {
   return s;
 }
 
+const std::string mangleExternCompilerVersions() {
+  std::string s;
+  if (HackcMode::kNever != hackc_mode()) {
+    s += hackc_version();
+  }
+  if (RuntimeOption::EvalPHP7CompilerEnabled) {
+    s += php7c_version();
+  }
+  return s;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+} // end empty namespace
+
+//////////////////////////////////////////////////////////////////////
+
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
@@ -650,7 +662,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + mangleUnitPHP7Options()
-    + mangleAliasedNamespaces();
+    + mangleAliasedNamespaces()
+    + mangleExternCompilerVersions();
   return string_md5(t);
 }
 

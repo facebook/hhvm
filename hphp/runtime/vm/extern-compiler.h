@@ -44,5 +44,7 @@ CompilerResult hackc_compile(const char* code, int len,
                              const char* filename, const MD5& md5);
 CompilerResult php7_compile(const char* code, int len,
                             const char* filename, const MD5& md5);
+std::string hackc_version();
+std::string php7c_version();
 
 }

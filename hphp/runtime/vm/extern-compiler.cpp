@@ -127,6 +127,11 @@ struct ExternCompiler {
     }
   }
 
+  std::string getVersionString() {
+    if (!isRunning()) start();
+    return m_version;
+  }
+
 private:
   void start();
   void stop();
@@ -138,6 +143,7 @@ private:
   pid_t m_pid{-1};
   FILE* m_in{nullptr};
   FILE* m_out{nullptr};
+  std::string m_version;
 
   unsigned m_compilations{0};
   const CompilerOptions& m_options;
@@ -156,6 +162,7 @@ struct CompilerPool {
   void shutdown();
   CompilerResult compile(const char* code, int len,
       const char* filename, const MD5& md5);
+  std::string getVersionString() { return m_version; }
 
  private:
   std::atomic<size_t> m_freeCount{0};
@@ -163,6 +170,28 @@ struct CompilerPool {
   std::condition_variable m_compilerCv;
   AtomicVector<ExternCompiler*> m_compilers{0, nullptr};
   CompilerOptions m_options;
+  std::string m_version;
+};
+
+struct CompilerGuard final {
+  explicit CompilerGuard(CompilerPool& pool)
+    : m_pool(pool) {
+    std::tie(m_index, m_ptr) = m_pool.getCompiler();
+  }
+
+  ~CompilerGuard() {
+    m_pool.releaseCompiler(m_index, m_ptr);
+  }
+
+  CompilerGuard(CompilerGuard&&) = delete;
+  CompilerGuard& operator=(CompilerGuard&&) = delete;
+
+  ExternCompiler* operator->() const { return m_ptr; }
+
+private:
+  size_t m_index;
+  ExternCompiler* m_ptr;
+  CompilerPool& m_pool;
 };
 
 std::pair<size_t, ExternCompiler*> CompilerPool::getCompiler() {
@@ -199,6 +228,10 @@ void CompilerPool::start() {
     m_compilers[i].store(new ExternCompiler(m_options),
         std::memory_order_relaxed);
   }
+
+  CompilerGuard g(*this);
+  m_version = g->getVersionString();
+
 }
 
 void CompilerPool::shutdown() {
@@ -207,27 +240,6 @@ void CompilerPool::shutdown() {
     delete c;
   }
 }
-
-struct CompilerGuard final {
-  explicit CompilerGuard(CompilerPool& pool)
-    : m_pool(pool) {
-    std::tie(m_index, m_ptr) = m_pool.getCompiler();
-  }
-
-  ~CompilerGuard() {
-    m_pool.releaseCompiler(m_index, m_ptr);
-  }
-
-  CompilerGuard(CompilerGuard&&) = delete;
-  CompilerGuard& operator=(CompilerGuard&&) = delete;
-
-  ExternCompiler* operator->() const { return m_ptr; }
-
-private:
-  size_t m_index;
-  ExternCompiler* m_ptr;
-  CompilerPool& m_pool;
-};
 
 CompilerResult CompilerPool::compile(const char* code, int len,
     const char* filename, const MD5& md5) {
@@ -413,6 +425,8 @@ void ExternCompiler::start() {
 
   m_in = in.detach("w");
   m_out = out.detach("r");
+
+  m_version = readline(m_out);
 }
 
 folly::Optional<CompilerOptions> hackcConfiguration() {
@@ -517,6 +531,17 @@ CompilerResult php7_compile(
   always_assert(s_php7_pool);
   return s_php7_pool->compile(code, len, filename, md5);
 }
+
+std::string hackc_version() {
+  always_assert(s_hackc_pool);
+  return s_hackc_pool->getVersionString();
+}
+
+std::string php7c_version() {
+  always_assert(s_php7_pool);
+  return s_php7_pool->getVersionString();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 }

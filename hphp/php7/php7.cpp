@@ -27,6 +27,11 @@
 #include <string>
 #include <iostream>
 
+namespace HPHP { namespace php7 {
+  // TODO come up with something that actually changes
+  const static char build_id[] = "php7c";
+}}
+
 namespace {
 
 using HPHP::php7::CompilerException;
@@ -34,6 +39,7 @@ using HPHP::php7::LanguageException;
 using HPHP::php7::compile;
 using HPHP::php7::dump_asm;
 using HPHP::php7::makeFatalUnit;
+using HPHP::php7::build_id;
 
 struct Options {
   bool daemonEnabled{false};
@@ -96,6 +102,7 @@ std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
 }
 
 int runDaemon() {
+  std::cout << build_id << std::endl;
   while (true) {
     try {
       std::string filename;

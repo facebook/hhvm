@@ -36,6 +36,9 @@ type options = {
   mode            : mode;
 }
 
+(* TODO: actually link this in *)
+let version_string = "hh_single_compile-some-version";
+
 (*****************************************************************************)
 (* Debug info refs *)
 (*****************************************************************************)
@@ -117,6 +120,7 @@ let parse_options () =
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
+  if !mode = DAEMON then P.printf "%s\n%!" version_string;
   let fn = match !fn_ref with
     | Some fn -> if !mode == CLI then fn else die usage
     | None -> if !mode == CLI then die usage else read_line () in

@@ -496,6 +496,7 @@ function get_options($argv) {
     'verbose' => 'v',
     'fbmake' => '',
     'testpilot' => '',
+    'xml' => '',
     'threads:' => '',
     'args:' => 'a:',
     'log' => 'l',
@@ -1118,6 +1119,7 @@ class Status {
   private static $mode = 0;
 
   private static $use_color = false;
+  private static $xml = false;
 
   private static $queue = null;
   private static $killed = false;
@@ -1188,8 +1190,16 @@ class Status {
     self::$use_color = $use;
   }
 
+  public static function setXml($xml) {
+    self::$xml = $xml;
+  }
+
   public static function getMode() {
     return self::$mode;
+  }
+
+  public static function getXml() {
+    return self::$xml;
   }
 
   public static function getOverallStartTime() {
@@ -2207,6 +2217,15 @@ function make_header($str) {
   return "\n\033[0;33m".$str."\033[0m\n";
 }
 
+function print_xml_name($fp, $test) {
+  fputs($fp,
+    sprintf(" <testcase classname='%s' name='%s'>\n",
+      dirname($test),  # directory, specifiying a package of tests
+      basename($test)  # test name inside of that package
+    )
+  );
+}
+
 function print_commands($tests, $options) {
   print make_header("Run these by hand:");
 
@@ -2270,6 +2289,11 @@ function msg_loop($num_tests, $queue) {
     } else {
       $cols = $output[1][0];
     }
+  }
+
+  if (Status::getXml()) {
+    $fp = fopen('/tmp/hphp-tests.xml', "w");
+    fputs($fp, sprintf("<testsuite tests='%d'>\n", $num_tests));
   }
 
   while (true) {
@@ -2338,6 +2362,9 @@ function msg_loop($num_tests, $queue) {
           case Status::MODE_RECORD_FAILURES:
             break;
         }
+        if (Status::getXml()) {
+          print_xml_name($fp, $test);
+        }
         break;
 
       case Status::MSG_TEST_SKIP:
@@ -2371,6 +2398,11 @@ function msg_loop($num_tests, $queue) {
           case Status::MODE_RECORD_FAILURES:
             break;
         }
+        if (Status::getXml()) {
+          print_xml_name($fp, $test);
+          fputs($fp,"  <skipped/>\n");
+          fputs($fp," </testcase>\n");
+        }
         break;
 
       case Status::MSG_TEST_FAIL:
@@ -2402,6 +2434,11 @@ function msg_loop($num_tests, $queue) {
           case Status::MODE_RECORD_FAILURES:
             break;
         }
+        if (Status::getXml()) {
+          print_xml_name($fp, $test);
+          fputs($fp,"  <failure/>\n");
+          fputs($fp," </testcase>\n");
+        }
         break;
 
       default:
@@ -2432,6 +2469,11 @@ function msg_loop($num_tests, $queue) {
         "\033[0m$fill] ($total_run/$num_tests) ".
         "($skipped skipped, $failed failed)";
     }
+  }
+
+  if (Status::getXml()) {
+    fputs($fp, "</testsuite>\n");
+    $fp = fclose($fp);
   }
 
   if ($do_progress) {
@@ -2933,6 +2975,7 @@ function main($argv) {
     Status::setMode(Status::MODE_RECORD_FAILURES);
   }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
+  Status::setXml(isset($options['xml']));
 
   Status::$key = rand();
   $queue = Status::getQueue();

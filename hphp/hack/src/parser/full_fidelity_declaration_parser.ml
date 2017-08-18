@@ -375,11 +375,21 @@ module WithExpressionAndStatementAndTypeParser
     parse_classish_modifier_opt parser []
 
   and parse_classish_token parser =
+    let spellcheck_tokens = [Class; Trait; Interface] in
+    let token_str = current_token_text parser in
     let (parser1, token) = next_token parser in
-    match (Token.kind token) with
+    match Token.kind token with
       | Class
       | Trait
       | Interface -> (parser1, make_token token)
+       (* Spellcheck case *)
+      | Name when is_misspelled_from spellcheck_tokens token_str ->
+        (* Default won't be used, since we already checked is_misspelled_from *)
+        let suggested_kind =
+          Option.value (suggested_kind_from spellcheck_tokens token_str)
+            ~default:Name in
+        let parser = skip_and_log_misspelled_token parser suggested_kind in
+        (parser, make_missing())
       | _ -> (with_error parser SyntaxError.error1035, (make_missing()))
 
   and parse_classish_extends_opt parser =

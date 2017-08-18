@@ -206,6 +206,7 @@ let error_tests =
     "test_namespace_error_recovery";
     "test_correct_code1";
     "test_misspelling_recovery";
+    "test_misspelling_recovery2";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

@@ -177,8 +177,19 @@ module WithParser(Parser : ParserType) = struct
     else
       one_character_different tokenkind_str token_str
 
-  let skip_and_log_misspelled_token parser required_str =
+  let is_misspelled_from kind_list token_str =
+    List.exists (fun kind -> is_misspelled_kind kind token_str) kind_list
+
+  (* If token_str is a misspelling (by our narrow definition of misspelling)
+   * of a TokenKind from kind_list, return the TokenKind that token_str is a
+   * misspelling of. Otherwise, return None. *)
+  let suggested_kind_from kind_list token_str =
+    Core.List.find_map kind_list ~f:(fun kind ->
+      if is_misspelled_kind kind token_str then Some kind else None)
+
+  let skip_and_log_misspelled_token parser required_kind =
     let received_str = current_token_text parser in
+    let required_str = TokenKind.to_string required_kind in
     let parser = with_error parser
       (SyntaxError.error1058 received_str required_str) ~on_whole_token:true in
     skip_and_log_unexpected_token ~generate_error:false parser
@@ -203,8 +214,7 @@ module WithParser(Parser : ParserType) = struct
          * is a misspelling, by our existing narrow definition of misspelling. *)
          if is_misspelled_kind kind (current_token_text parser)
          then
-          let parser = skip_and_log_misspelled_token parser
-            (TokenKind.to_string kind) in
+          let parser = skip_and_log_misspelled_token parser kind in
           (parser, make_missing ())
          else
           (with_error parser error, (make_missing()))

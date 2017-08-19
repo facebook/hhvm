@@ -174,17 +174,7 @@ void cgSelect(IRLS& env, const IRInstruction* inst) {
     } else {
       auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
       auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
-
-      if (trueTy <= TDbl || falseTy <= TDbl) {
-        cond(
-          v, v, CC_NZ, sf, dloc.reg(0),
-          [&](Vout&){ return tloc.reg(0); },
-          [&](Vout&){ return floc.reg(0); },
-          ""
-        );
-      } else {
-        v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
-      }
+      v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
     }
   }
 }

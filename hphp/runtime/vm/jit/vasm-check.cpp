@@ -275,7 +275,7 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
         case Vconst::Quad:
         case Vconst::Long:
         case Vconst::Byte:   return Width::QuadN;
-        case Vconst::Double: return Width::Dbl;
+        case Vconst::Double: return Width::Quad;
       }
       not_reached();
     }();

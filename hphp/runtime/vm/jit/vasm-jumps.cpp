@@ -58,7 +58,7 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
   for (size_t i = 0; i < m_def_widths.size(); ++i) {
     Vreg r{i};
     if (r.isGP()) m_def_widths[i] &= Width::QuadN;
-    if (r.isSIMD()) m_def_widths[i] &= Width::Wide;
+    if (r.isSIMD()) m_def_widths[i] &= Width::Octa;
     if (r.isSF()) m_def_widths[i] &= Width::Flags;
   }
 
@@ -71,7 +71,7 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
         case Vconst::Quad:
         case Vconst::Long:
         case Vconst::Byte:   return Width::QuadN;
-        case Vconst::Double: return Width::Dbl;
+        case Vconst::Double: return Width::Quad;
       }
       not_reached();
     }();
@@ -231,12 +231,9 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
         moves.emplace_back(cmovq{cc, sf, r1, r2, d}, irctx);
         break;
       case Width::Octa:
-      case Width::Dbl:
       case Width::Flags:
-      case Width::Wide:
       case Width::AnyNF:
       case Width::Any:
-      /* This can happen due to int/double mixing: t11216467 */
       case Width::None:
         return false;
     }

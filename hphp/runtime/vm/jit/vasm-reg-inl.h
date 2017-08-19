@@ -125,14 +125,12 @@ inline std::string show(Width w) {
     case Width::Long:  return "Vreg32";
     case Width::Quad:  return "Vreg64";
     case Width::Octa:  return "Vreg128";
-    case Width::Dbl:   return "VregDbl";
     case Width::Flags: return "VregSF";
-    case Width::Wide:  return "Vreg{128,Dbl}";
     case Width::WordN: return "Vreg{8,16}";
     case Width::LongN: return "Vreg{8,16,32}";
     case Width::QuadN: return "Vreg{8,16,32,64}";
-    case Width::AnyNF: return "Vreg{8,16,32,64,128,Dbl}";
-    case Width::Any:   return "Vreg{8,16,32,64,128,Dbl,SF}";
+    case Width::AnyNF: return "Vreg{8,16,32,64,128}";
+    case Width::Any:   return "Vreg{8,16,32,64,128,SF}";
   }
   not_reached();
 }

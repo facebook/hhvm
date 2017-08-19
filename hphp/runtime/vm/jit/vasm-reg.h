@@ -220,16 +220,14 @@ enum class Width : uint8_t {
   Long  = 1 << 2,
   Quad  = 1 << 3,
   Octa  = 1 << 4,
-  Dbl   = 1 << 5,
-  Flags = 1 << 6,
-  Wide  = Octa | Dbl,
+  Flags = 1 << 5,
   // X-or-narrower widths.
   WordN = Byte | Word,
   LongN = Byte | Word | Long,
   QuadN = Byte | Word | Long | Quad,
   // Any non-flags register.
-  AnyNF = Byte | Word | Long | Quad | Octa | Dbl,
-  Any   = Byte | Word | Long | Quad | Octa | Dbl | Flags,
+  AnyNF = Byte | Word | Long | Quad | Octa,
+  Any   = Byte | Word | Long | Quad | Octa | Flags,
 };
 
 inline Width operator&(Width w1, Width w2) {
@@ -247,7 +245,7 @@ inline Width width(Vreg16)  { return Width::Word; }
 inline Width width(Vreg32)  { return Width::Long; }
 inline Width width(Vreg64)  { return Width::Quad; }
 inline Width width(Vreg128) { return Width::Octa; }
-inline Width width(VregDbl) { return Width::Dbl; }
+inline Width width(VregDbl) { return Width::Quad; }
 inline Width width(VregSF)  { return Width::Flags; }
 
 std::string show(Width w);

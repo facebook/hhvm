@@ -486,7 +486,15 @@ void collectImpl(HeapImpl& heap, const char* phase) {
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;
     auto pc = vmpc();
-    if (t_surprise_filter.test(pc)) return;
+    if (t_surprise_filter.test(pc)) {
+      if (RuntimeOption::EvalGCForAPC) {
+        if (!APCGCManager::getInstance().excessedGCTriggerBar()) {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
     t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
     phase = "eager";

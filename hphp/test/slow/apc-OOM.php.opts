@@ -1,4 +1,3 @@
 -vServer.APC.MemModelTreadmill=true
 -vEval.GCForAPC=true
 -vEval.EnableGC=1
--vEval.EagerGC=0

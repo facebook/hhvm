@@ -99,6 +99,7 @@ struct APCGCManager {
     }
     // To be global unique
     static APCGCManager& getInstance();
+    bool excessedGCTriggerBar();
 
   private:
     void invokeGlobalGC();

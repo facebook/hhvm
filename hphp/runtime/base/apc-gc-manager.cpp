@@ -68,6 +68,10 @@ void APCGCManager::registerPendingDeletion(APCHandle* root, const size_t size) {
   }
 }
 
+bool APCGCManager::excessedGCTriggerBar() {
+  return pendingSize.load() > someBar();
+}
+
 void APCGCManager::sweep() {
   assertx(RuntimeOption::EvalGCForAPC);
   if (RuntimeOption::ServerExecutionMode()) {

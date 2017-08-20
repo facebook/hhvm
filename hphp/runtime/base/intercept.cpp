@@ -67,7 +67,7 @@ struct InterceptRequestData final : RequestEventHandler {
 
 private:
   Variant m_global_handler;
-  folly::Optional<req::StringIMap<Variant>> m_intercept_handlers;
+  req::Optional<req::StringIMap<Variant>> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 

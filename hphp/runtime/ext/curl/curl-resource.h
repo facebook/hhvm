@@ -16,7 +16,7 @@ namespace HPHP {
 
 
 struct CurlResource : SweepableResourceData {
-  using ExceptionType = folly::Optional<boost::variant<Object,Exception*>>;
+  using ExceptionType = req::Optional<boost::variant<Object,Exception*>>;
 
   struct WriteHandler {
     int                method{0};

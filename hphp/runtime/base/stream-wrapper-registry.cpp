@@ -52,8 +52,8 @@ struct RequestWrappers final : RequestEventHandler {
   }
 
 private:
-  folly::Optional<DisabledSet> m_disabled;
-  folly::Optional<WrapperMap> m_wrappers;
+  req::Optional<DisabledSet> m_disabled;
+  req::Optional<WrapperMap> m_wrappers;
 };
 
 // Global registry for wrappers

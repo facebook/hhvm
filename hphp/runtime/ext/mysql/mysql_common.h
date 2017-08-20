@@ -351,7 +351,7 @@ protected:
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
   req::vector<MySQLFieldInfo> m_fields;
-  folly::Optional<req::list<req::vector<Variant>>> m_rows;
+  req::Optional<req::list<req::vector<Variant>>> m_rows;
   req::list<req::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow

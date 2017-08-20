@@ -902,7 +902,7 @@ struct SystemSettings {
 
 struct LocalSettings {
   using Map = req::hash_map<std::string,Variant>;
-  folly::Optional<Map> settings;
+  req::Optional<Map> settings;
   Map& init() {
     if (!settings) settings.emplace();
     return settings.value();
@@ -923,6 +923,7 @@ struct IniSettingExtension final : Extension {
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
     assert(!s_saved_defaults->settings.hasValue());
+    s_user_callbacks.fixTypeIndex();
   }
 } s_ini_extension;
 

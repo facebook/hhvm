@@ -1804,6 +1804,7 @@ static int execute_program_impl(int argc, char** argv) {
     Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
     exit(HPHP_EXIT_FAILURE);
   }
+  MemoryManager::TlsWrapper::fixTypeIndex();
 
   // It's okay if this fails.
   init_member_reflection();
@@ -2248,6 +2249,7 @@ void hphp_process_init() {
   BootStats::mark("rds::requestExit");
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
+  context->onRequestShutdown(); // TODO T20898959 kill early REH usage.
   context->~ExecutionContext();
   new (context) ExecutionContext();
   BootStats::mark("ExecutionContext");

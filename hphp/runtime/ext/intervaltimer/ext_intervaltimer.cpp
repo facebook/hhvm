@@ -48,7 +48,7 @@ struct TimerPool final : RequestEventHandler {
   }
 
  private:
-  folly::Optional<TimerSet> m_timers;
+  req::Optional<TimerSet> m_timers;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);

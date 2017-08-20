@@ -81,7 +81,7 @@ struct ZendRequestLocalMap final : RequestEventHandler {
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
 private:
-  folly::Optional<container> m_map;
+  req::Optional<container> m_map;
 };
 
 }

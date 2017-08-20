@@ -35,6 +35,7 @@
 #include <boost/container/flat_map.hpp>
 
 #include <folly/Memory.h>
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/req-malloc.h"
 
@@ -509,6 +510,18 @@ struct TinyVector final : HPHP::TinyVector<T,
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Like folly::Optional, but exactly scans T
+ */
+template<typename T>
+struct Optional: folly::Optional<T> {
+  using Base = folly::Optional<T>;
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_CUSTOM(T) {
+    if (this->hasValue()) scanner.scan(*this->get_pointer());
+  }
+};
 
 }}
 

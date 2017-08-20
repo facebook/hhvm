@@ -853,8 +853,9 @@ static Array get_function_param_info(const Func* func) {
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
-    std::string phpTypeHint(typeHint->toCppString());
-    if (isPhpTypeHintEnabled(func) && phpTypeHint[0] == '?') {
+    std::string phpTypeHint(isPhpTypeHintEnabled(func) ? typeHint->toCppString() : "");
+
+    if (!phpTypeHint.empty() && phpTypeHint[0] == '?') {
       phpTypeHint = phpTypeHint.substr(1);
       param.set(s_type_hint, phpTypeHint);
     }
@@ -870,7 +871,7 @@ static Array get_function_param_info(const Func* func) {
       // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
       // the types to come back as PHP 7 style scalar types, not HH\ style
       // scalar types.
-      if (isPhpTypeHintEnabled(func) && boost::starts_with(phpTypeHint, "HH\\")) {
+      if (!phpTypeHint.empty() && boost::starts_with(phpTypeHint, "HH\\")) {
         phpTypeHint = phpTypeHint.substr(3);
         param.set(s_type_hint, phpTypeHint);
       }

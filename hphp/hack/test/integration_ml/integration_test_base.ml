@@ -250,10 +250,27 @@ let assert_no_diagnostics loop_output =
 let assert_has_diagnostics loop_output =
   match loop_output.push_message with
   | Some DIAGNOSTIC _ -> ()
-  | Some BUSY_STATUS _
-  | Some NEW_CLIENT_CONNECTED
-  | Some FATAL_EXCEPTION _ ->
-    fail "Unexpected push message"
+  | Some BUSY_STATUS s ->
+    let msg =
+      match s with
+      | Needs_local_typecheck -> "Needs_local_typecheck"
+      | Doing_local_typecheck -> "Doing_local_typecheck"
+      | Done_local_typecheck -> "Done_local_typecheck"
+      | Doing_global_typecheck -> "Doing_global_typecheck"
+      | Done_global_typecheck -> "Done_global_typecheck"
+    in
+    let msg =
+      Printf.sprintf "Expected DIAGNOSTIC, but got BUSY_STATUS %s." msg
+    in
+    fail msg
+  | Some NEW_CLIENT_CONNECTED ->
+    fail "Expected DIAGNOSTIC, but got NEW_CLIENT_CONNECTED."
+  | Some FATAL_EXCEPTION e ->
+    let msg = Printf.sprintf
+      "Expected DIAGNOSTIC, but got FATAL_EXCEPTION:\n%s"
+      e.Marshal_tools.message
+    in
+    fail msg
   | None -> fail "Expected to receive push diagnostics."
 
 let errors_to_string buf x =

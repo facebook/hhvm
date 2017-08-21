@@ -37,7 +37,17 @@ function test() {
 let check_has_no_errors env =
   match Errors.get_error_list env.errorl with
   | [] -> ()
-  | _ -> Test.fail "Expected to have no errors"
+  | es ->
+    let buf = Buffer.create 256 in
+    Buffer.add_string buf "Expected to have no errors, but instead got: ";
+    List.iter
+      (fun e ->
+        Buffer.add_string buf "\n  - ";
+        let str = Errors.to_string (Errors.to_absolute e) in
+        Buffer.add_string buf str
+      ) es;
+    let msg = Buffer.contents buf in
+    Test.fail msg
 
 let check_has_errors env =
   match Errors.get_error_list env.errorl with

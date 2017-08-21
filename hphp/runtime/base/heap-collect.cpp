@@ -258,13 +258,6 @@ NEVER_INLINE void Marker<apcgc>::init() {
     allocd_ += size;
   };
 
-  auto init_unknown = [&](HeapObject* h, size_t size) {
-    // unknown type for a req::malloc'd block. See rationale above.
-    unknown_ += size;
-    h->mark(GCBits::Pin);
-    enqueue(h);
-  };
-
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
       ptrs_.insert(h, size);
@@ -274,7 +267,9 @@ NEVER_INLINE void Marker<apcgc>::init() {
         assert(h->kind() == HeaderKind::BigMalloc);
         init(h, size);
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
-          init_unknown(h, size);
+          unknown_ += size;
+          h->mark(GCBits::Pin);
+          enqueue(h);
         }
       }
     },
@@ -282,10 +277,8 @@ NEVER_INLINE void Marker<apcgc>::init() {
       ptrs_.insert(h, size);
       Slab::fromHeader(h)->initCrossingMap([&](HeapObject* h, size_t size) {
         init(h, size);
-        if (h->kind() == HeaderKind::SmallMalloc &&
-            !type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
-          init_unknown(h, size);
-        }
+        assert(h->kind() != HeaderKind::SmallMalloc ||
+            type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex()));
       });
     }
   );

@@ -783,7 +783,6 @@ void* MemoryManager::mallocBigSize<MemoryManager::Zeroed>(
 
 void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
   assert(n->kind() == HeaderKind::BigMalloc);
-  assert(nbytes + sizeof(MallocNode) > kMaxSmallSize);
   auto block = m_heap.resizeBig(n + 1, nbytes, m_stats);
   updateBigStats();
   return block.ptr;
@@ -829,15 +828,23 @@ void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
 }
 
 void* malloc_untyped(size_t nbytes) {
-  return allocate<MBS::Unzeroed>(nbytes, type_scan::kIndexUnknown);
+  return MM().mallocBigSize<MBS::Unzeroed>(
+      std::max(nbytes, 1ul),
+      HeaderKind::BigMalloc,
+      type_scan::kIndexUnknown
+  );
 }
 
-void* calloc_untyped(size_t count, size_t nbytes) {
-  return allocate<MBS::Zeroed>(count * nbytes, type_scan::kIndexUnknown);
+void* calloc_untyped(size_t count, size_t bytes) {
+  return MM().mallocBigSize<MBS::Zeroed>(
+      std::max(count * bytes, 1ul),
+      HeaderKind::BigMalloc,
+      type_scan::kIndexUnknown
+  );
 }
 
-static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
-  // first handle corner cases that degenerate to malloc() or free()
+void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
+  assert(type_scan::isKnownType(tyindex));
   if (!ptr) {
     return allocate<MBS::Unzeroed>(nbytes, tyindex);
   }
@@ -848,7 +855,8 @@ static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
          ptr, nbytes, tyindex);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->nbytes <= kMaxSmallSize) ||
+  assert(n->typeIndex() == tyindex);
+  if (LIKELY(n->kind() == HeaderKind::SmallMalloc) ||
       UNLIKELY(nbytes + sizeof(MallocNode) <= kMaxSmallSize)) {
     // either the old or new block will be small; force a copy.
     auto newmem = allocate<MBS::Unzeroed>(nbytes, tyindex);
@@ -861,13 +869,21 @@ static void* reallocate(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   return MM().resizeBig(n, nbytes);
 }
 
-void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
-  assert(type_scan::isKnownType(tyindex));
-  return reallocate(ptr, nbytes, tyindex);
-}
-
 void* realloc_untyped(void* ptr, size_t nbytes) {
-  return reallocate(ptr, nbytes, type_scan::kIndexUnknown);
+  // first handle corner cases that degenerate to malloc() or free()
+  if (!ptr) {
+    return req::malloc_untyped(nbytes);
+  }
+  if (!nbytes) {
+    req::free(ptr);
+    return nullptr;
+  }
+  FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
+         ptr, nbytes, type_scan::kIndexUnknown);
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  assert(n->kind() == HeaderKind::BigMalloc);
+  assert(n->typeIndex() == type_scan::kIndexUnknown);
+  return MM().resizeBig(n, nbytes);
 }
 
 char* strndup(const char* str, size_t len) {
@@ -883,8 +899,7 @@ char* strndup(const char* str, size_t len) {
 void free(void* ptr) {
   if (!ptr) return;
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->nbytes <= kMaxSmallSize)) {
-    assert(n->kind() == HeaderKind::SmallMalloc);
+  if (LIKELY(n->kind() == HeaderKind::SmallMalloc)) {
     return MM().freeSmallSize(n, n->nbytes);
   }
   assert(n->kind() == HeaderKind::BigMalloc);

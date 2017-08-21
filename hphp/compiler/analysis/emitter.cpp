@@ -9107,6 +9107,8 @@ void EmitterVisitor::emitPostponedCtors() {
   while (!m_postponedCtors.empty()) {
     PostponedCtor& p = m_postponedCtors.front();
 
+    m_curFunc = p.m_fe;
+
     Attr attrs = AttrPublic;
     if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
       attrs = attrs | AttrBuiltin;
@@ -9125,6 +9127,8 @@ void EmitterVisitor::emitPostponedCtors() {
 
 void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p,
                                          bool /*pinit*/) {
+  m_curFunc = p.m_fe;
+
   Attr attrs = (Attr)(AttrPrivate | AttrStatic);
   if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
     attrs = attrs | AttrBuiltin;
@@ -9184,6 +9188,8 @@ void EmitterVisitor::emitPostponedSinits() {
 void EmitterVisitor::emitPostponedCinits() {
   while (!m_postponedCinits.empty()) {
     PostponedNonScalars& p = m_postponedCinits.front();
+
+    m_curFunc = p.m_fe;
 
     Attr attrs = (Attr)(AttrPrivate | AttrStatic);
     if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {

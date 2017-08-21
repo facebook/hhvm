@@ -2114,7 +2114,16 @@ res::Class Index::resolve_class(borrowed_ptr<const php::Class> cls) const {
       result = cinfo;
     }
   }
-  if (result) return res::Class { this, result };
+
+  // The function is supposed to return a cinfo if we can uniquely resolve cls.
+  // In repo mode, if there is only one cinfo, return it.
+  // In non-repo mode, we don't know all the cinfo's. So "only one cinfo" does
+  // not mean anything unless it is a built-in and we disable rename/intercept.
+  if (result && (RuntimeOption::RepoAuthoritative ||
+                 (!RuntimeOption::EvalJitEnableRenameFunction &&
+                  cls->attrs & AttrBuiltin))) {
+    return res::Class { this, result };
+  }
 
   // We know its a class, not an enum or type alias, so return
   // by name

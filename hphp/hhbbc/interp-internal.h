@@ -705,6 +705,17 @@ bool thisAvailable(ISS& env) { return env.state.thisAvailable; }
 // null.
 folly::Optional<Type> thisType(ISS& env) {
   if (!env.ctx.cls) return folly::none;
+
+  // Due to `bindTo`, we can't conclude the type of $this.
+  if (RuntimeOption::EvalAllowScopeBinding && env.ctx.func->isClosureBody) {
+    return folly::none;
+  }
+
+  // Due to unflattened traits in non-repo mode, we can't conclude $this type.
+  if (!RuntimeOption::RepoAuthoritative && env.ctx.cls->attrs & AttrTrait) {
+    return folly::none;
+  }
+
   return subObj(env.index.resolve_class(env.ctx.cls));
 }
 

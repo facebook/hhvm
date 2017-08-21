@@ -1853,9 +1853,18 @@ class ReflectionClass implements Reflector {
     $props_map = hphp_array_idx(self::$propInfoCache, $this->getName(), null);
     if (null === $props_map) {
       $prop_info = $this->getClassPropertyInfo();
-      $properties = $prop_info['properties'] + $prop_info['private_properties'];
-      $props_index =
-        $prop_info['properties_index'] + $prop_info['private_properties_index'];
+      $properties = $prop_info['properties'];
+      foreach ($prop_info['private_properties'] as $k => $v) {
+        if (!array_key_exists($k, $properties)) {
+          $properties[$k] = $v;
+        }
+      }
+      $props_index = $prop_info['properties_index'];
+      foreach ($prop_info['private_properties_index'] as $k => $v) {
+        if (!array_key_exists($k, $props_index)) {
+          $props_index[$k] = $v;
+        }
+      }
       $ordering = array_values($props_index);
       array_multisort($ordering, $properties);
       self::$propInfoCache[$this->getName()]

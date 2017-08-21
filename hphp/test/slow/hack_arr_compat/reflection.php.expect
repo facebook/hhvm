@@ -1,0 +1,122 @@
+array(4) {
+  [0]=>
+  object(ReflectionProperty)#3 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(5) "prop1"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      NULL
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(3) "Foo"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(5) "prop1"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [1]=>
+  object(ReflectionProperty)#4 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(5) "prop2"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      NULL
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(3) "Foo"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(5) "prop2"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [2]=>
+  object(ReflectionProperty)#5 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(5) "prop3"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      NULL
+      ["access"]=>
+      string(7) "private"
+      ["accessible"]=>
+      bool(false)
+      ["modifiers"]=>
+      int(1024)
+      ["class"]=>
+      string(3) "Foo"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(5) "prop3"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [3]=>
+  object(ReflectionProperty)#6 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(5) "prop4"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      NULL
+      ["access"]=>
+      string(7) "private"
+      ["accessible"]=>
+      bool(false)
+      ["modifiers"]=>
+      int(1024)
+      ["class"]=>
+      string(3) "Foo"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(5) "prop4"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

@@ -17,3 +17,10 @@ function shape_idx_required_field_return3(
 ): int {
   return Shapes::idx($s, 'x');
 }
+
+function shape_idx_required_field_return4(
+  shape('x' => int) $s,
+  int $default,
+): int {
+  return Shapes::idx($s, 'x', $default);
+}

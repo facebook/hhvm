@@ -89,14 +89,24 @@ let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
   else
     Nast.ShapeMap.singleton field_name fake_shape_field
 
-let has_non_optional_field env field_name (_, ty) =
+let apply_on_field ~f ~default field_name (_, ty) =
   match ty with
   | Tshape (_, fdm) ->
     begin match ShapeMap.get field_name fdm with
-    | Some field_ty -> not (TUtils.is_shape_field_optional env field_ty)
-    | None -> false
+    | Some field -> f field
+    | None -> default
     end
-  | _ -> false
+  | _ ->  default
+
+let has_non_optional_field env =
+  apply_on_field
+    ~f:(fun field_ty -> not (TUtils.is_shape_field_optional env field_ty))
+    ~default: false
+
+let field_has_nullable_type env =
+  apply_on_field
+    ~f:(fun field_ty -> TUtils.is_option env field_ty.sft_ty)
+    ~default: false
 
 (* Typing rule for Shapes::idx($s, field, [default])
 
@@ -145,7 +155,12 @@ let idx env fty shape_ty field default =
         env, (fst fty, Toption res)
       | Some (default_pos, default_ty) ->
         let env, default_ty = Typing_utils.unresolved env default_ty in
-        Type.sub_type default_pos Reason.URparam env res default_ty, res
+        let env, res = Type.sub_type default_pos Reason.URparam env res default_ty, res in
+        let res =
+          if field_has_nullable_type env field_name shape_ty
+          then (fst fty, Toption res)
+          else res in
+        env, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env (fst field) (snd field) with

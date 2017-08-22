@@ -498,8 +498,8 @@ and emit_load_class_ref env cexpr =
   | Class_self -> instr (IMisc (Self 0))
   | Class_id id -> emit_known_class_id env id
   | Class_expr expr ->
-  begin match expr with
-  | (_, A.Lvar (_, id)) when id <> SN.SpecialIdents.this ->
+  begin match snd expr with
+  | A.Lvar (_, id) when id <> SN.SpecialIdents.this ->
     stash_in_local ~always_stash_this:true env expr
     begin fun temp _ ->
     instr (IGet (ClsRefGetL (temp, 0)))
@@ -1645,8 +1645,8 @@ and emit_arg env i (pos, expr_ as expr) =
   | A.Obj_get (e1, e2, nullflavor) ->
     emit_obj_get ~need_ref:false env (Some i) QueryOp.CGet e1 e2 nullflavor
 
-  | A.Class_get (cid, id) ->
-    emit_class_get env (Some i) QueryOp.CGet false cid id
+  | A.Class_get (cid, e) ->
+    emit_class_get env (Some i) QueryOp.CGet false cid e
 
   | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar id)) ->
     let local = get_local env id in
@@ -1700,6 +1700,22 @@ and emit_object_expr env (_, expr_ as expr) =
     instr_this
   | _ -> emit_expr ~need_ref:false env expr
 
+and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
+  let id = Pos.none, SN.SpecialIdents.this in
+  let temp = Local.get_unnamed_local () in
+  gather [
+    emit_local ~notice:Notice ~need_ref:false env id;
+    instr_setl temp;
+    with_temp_local temp
+    begin fun temp _ -> gather [
+      instr_popc;
+      instrs;
+      instr (IGet (ClsRefGetL (temp, 0)));
+      instr_unsetl temp;
+    ]
+    end
+  ]
+
 and emit_call_lhs env (_, expr_ as expr) nargs =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
@@ -1732,10 +1748,17 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     | Class_id cid when not forward ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       instr_fpushclsmethodd nargs method_id fq_cid
-    | _ ->
+    | cexpr ->
       let method_name = Hhbc_id.Method.to_raw_string method_id in
+      let body_instrs =
+        match cexpr with
+        | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+          emit_call_lhs_with_this env @@ instr_string method_name
+        | _ ->
+          emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name))
+      in
       gather [
-        emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
+        body_instrs;
         instr_fpushclsmethod ~forward nargs
       ]
     end
@@ -1743,9 +1766,16 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
   | A.Class_get (cid, e) ->
     let cexpr, forward = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) (id_to_expr cid) in
+    let expr_instrs = emit_expr ~need_ref:false env e in
+    let body_instrs =
+      match cexpr with
+      | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+        emit_call_lhs_with_this env expr_instrs
+      | _ ->
+        gather [ expr_instrs; emit_load_class_ref env cexpr ]
+    in
     gather [
-      emit_expr ~need_ref:false env e;
-      emit_load_class_ref env cexpr;
+      body_instrs;
       instr_fpushclsmethod ~forward nargs
     ]
 
@@ -1788,13 +1818,14 @@ and is_call_user_func id num_args =
   let (is_fn, min_args, max_args) = get_call_user_func_info id in
   is_fn && num_args >= min_args && num_args <= max_args
 
-and get_call_builtin_func_info = function
+and get_call_builtin_func_info fn_name =
+  match SU.strip_global_ns fn_name with
   | "array_key_exists" -> Some (2, IMisc AKExists)
   | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
   | "intval" -> Some (1, IOp CastInt)
   | "boolval" -> Some (1, IOp CastBool)
   | "strval" -> Some (1, IOp CastString)
-  | "floatval" -> Some (1, IOp CastDouble)
+  | "floatval" | "doubleval" -> Some (1, IOp CastDouble)
   | "vec" -> Some (1, IOp CastVec)
   | "keyset" -> Some (1, IOp CastKeyset)
   | "dict" -> Some (1, IOp CastDict)

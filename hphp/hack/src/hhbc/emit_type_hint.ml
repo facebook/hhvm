@@ -72,11 +72,13 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 and fmt_hints ~tparams ~namespace hints =
   String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))
 
-let is_mixed h =
+let can_be_nullable h =
   match snd h with
+  | A.Hfun (_, _, _)
+  | A.Hoption (_, A.Hfun (_, _, _))
   | A.Happly ((_, "mixed"), _)
-  | A.Hoption (_, A.Happly ((_, "mixed"), _)) -> true
-  | _ -> false
+  | A.Hoption (_, A.Happly ((_, "mixed"), _)) -> false
+  | _ -> true
 
 let rec hint_to_type_constraint ~tparams ~skipawaitable ~namespace (_, h) =
 match h with
@@ -150,7 +152,7 @@ and make_tc_with_flags_if_non_empty_flags
   TC.make tc_name tc_flags
 
 let try_add_nullable ~nullable h flags =
-  if nullable && not (is_mixed h) then List.dedup (TC.Nullable :: flags)
+  if nullable && can_be_nullable h then List.dedup (TC.Nullable :: flags)
   else flags
 
 let make_type_info ~tparams ~namespace h tc_name tc_flags =

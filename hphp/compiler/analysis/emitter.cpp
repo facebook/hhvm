@@ -11202,7 +11202,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
   }
-  if (arrTable) gd.arrayTypeTable.repopulate(*arrTable);
+  if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
 }
 

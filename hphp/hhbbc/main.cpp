@@ -293,7 +293,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
 
-  gd.arrayTypeTable.repopulate(*arrTable);
+  globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(gd);
 }

@@ -84,12 +84,6 @@ struct Repo::GlobalData {
   bool HardPrivatePropInference = false;
 
   /*
-   * A table of array type information for various array types found
-   * in the repo.  This is only used in authoritative repos.
-   */
-  ArrayTypeTable arrayTypeTable;
-
-  /*
    * Indicates whether the repo was compiled with DisallowDynamicVarEnvFuncs. If
    * so, we assume that '$f()' doesn't read or write over locals (that
    * haven't been passed).
@@ -175,7 +169,6 @@ struct Repo::GlobalData {
       (EnableRenameFunction)
       (HackArrCompatNotices)
       (APCProfile)
-      (arrayTypeTable)
       ;
   }
 };

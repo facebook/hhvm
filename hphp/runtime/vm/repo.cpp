@@ -173,7 +173,9 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       }
       BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
-
+      auto& arrayTypeTable = globalArrayTypeTable();
+      decoder(arrayTypeTable);
+      decoder.assertDone();
       txn.commit();
     } catch (RepoExc& e) {
       failures.push_back(repoName(repoId) + ": "  + e.msg());
@@ -190,7 +192,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     RuntimeOption::PHP7_Substr            = s_globalData.PHP7_Substr;
     RuntimeOption::PHP7_Builtins          = s_globalData.PHP7_Builtins;
     RuntimeOption::AutoprimeGenerators    = s_globalData.AutoprimeGenerators;
-    HHBBC::options.CheckThisTypeHints = s_globalData.CheckThisTypeHints;
+    HHBBC::options.CheckThisTypeHints     = s_globalData.CheckThisTypeHints;
     HHBBC::options.HardTypeHints          = s_globalData.HardTypeHints;
     HHBBC::options.HardReturnTypeHints    = s_globalData.HardReturnTypeHints;
     HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
@@ -246,6 +248,7 @@ void Repo::saveGlobalData(GlobalData newData) {
   RepoTxnQuery query(txn, stmt);
   BlobEncoder encoder;
   encoder(s_globalData);
+  encoder(globalArrayTypeTable());
   query.bindBlob("@data", encoder, /* static */ true);
   query.exec();
 

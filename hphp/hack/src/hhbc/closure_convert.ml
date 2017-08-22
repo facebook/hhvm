@@ -211,7 +211,7 @@ let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
   let get_class_call =
     p, Call ((pe, Id (pe, "get_class")), [], [], [])
   in
-  let name c = p, String (pe, strip_id c.c_name) in
+  let name c = p, String (pe, SU.Xhp.mangle @@ strip_id c.c_name) in
   let empty_str = p, String (pe, "") in
   match Scope.get_class env.scope with
   | Some c when trait ->

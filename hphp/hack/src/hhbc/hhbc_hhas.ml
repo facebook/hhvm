@@ -895,6 +895,7 @@ and string_of_xml (_, id) attributes children =
   ^ ", __FILE__, __LINE__)"
 
 and string_of_param_default_value expr =
+  let p = Pos.none in
   let middle_aux e1 s e2 =
     let e1 = string_of_param_default_value e1 in
     let e2 = string_of_param_default_value e2 in
@@ -1008,11 +1009,12 @@ and string_of_param_default_value expr =
   | A.NullCoalesce (e1, e2) -> middle_aux e1 " \\?\\? " e2
   | A.InstanceOf (e1, e2) -> middle_aux e1 " instanceof " e2
   | A.Varray es ->
+    let index i = p, A.Int (p, string_of_int i) in
     string_of_param_default_value @@
-     (Pos.none, A.Array (List.map (fun e -> A.AFvalue e) es))
+     (p, A.Array (List.mapi (fun i e -> A.AFkvalue (index i, e)) es))
   | A.Darray es ->
     string_of_param_default_value @@
-     (Pos.none, A.Array (List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es))
+     (p, A.Array (List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es))
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
     let e = string_of_param_default_value e in

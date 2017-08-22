@@ -240,9 +240,9 @@ let emit_body
     | _ -> false
   in
   let header = gather [
-        emit_deprecation_warning scope deprecation_info;
         begin_label;
         emit_method_prolog ~pos ~params ~needs_local_this;
+        emit_deprecation_warning scope deprecation_info;
         generator_instr;
       ]
   in

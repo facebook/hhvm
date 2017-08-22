@@ -8,6 +8,8 @@
  *
 *)
 
+module SU = Hhbc_string_utils
+
 open Core
 open Instruction_sequence
 
@@ -35,7 +37,7 @@ let from_ast_wrapper : bool -> _ ->
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let (pos, original_name) = ast_method.Ast.m_name in
   let (_,class_name) = ast_class.Ast.c_name in
-  let class_name = Utils.strip_ns class_name in
+  let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
   let method_id = make_name ast_method.Ast.m_name in
   let method_is_async =

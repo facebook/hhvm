@@ -195,6 +195,8 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   }
 
   if (SerDe::deserializing) {
+    repoReturnType.resolveArray(ue());
+    repoAwaitedReturnType.resolveArray(ue());
     past = base + past_delta;
   }
 }

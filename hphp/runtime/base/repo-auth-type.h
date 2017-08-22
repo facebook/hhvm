@@ -25,7 +25,6 @@
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -134,6 +133,10 @@ struct RepoAuthType {
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
   size_t hash() const;
 
+  /*
+   * Class Names.
+   */
+
   const StringData* clsName() const {
     assert(hasClassName());
     return static_cast<const StringData*>(m_data.ptr());
@@ -218,14 +221,8 @@ struct RepoAuthType {
        // nullptr case, already done
        if (id == kInvalidArrayId) return;
 
-       // RepoAuth case
-       if (RuntimeOption::RepoAuthoritative) {
-         resolveArrayGlobal(id);
-         return;
-       }
-
        // id case
-       // this is the only case where we set the highbit
+       // this is the only case where we set the 0x40 bit
        auto ptr = reinterpret_cast<void*>(id);
        m_data.set(toIdTag(t), ptr);
        return;
@@ -239,8 +236,6 @@ struct RepoAuthType {
    }
 
  private:
-   void resolveArrayGlobal(uint32_t id);
-
    #define TAG(x) static_assert((static_cast<uint8_t>(Tag::x) & 0x40) == 0, "");
      REPO_AUTH_TYPE_TAGS
    #undef TAG

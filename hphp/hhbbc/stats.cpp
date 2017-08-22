@@ -381,7 +381,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
   }
 
   if (rat.mayHaveArrData()) {
-    if (rat.array()) {
+    if (rat.hasArrData()) {
       if (bc.op == Op::AssertRATL) {
         ++stats.ratL_specialized_array;
       } else {

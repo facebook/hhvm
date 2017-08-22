@@ -187,8 +187,8 @@ Block* GraphBuilder::at(PC target) const {
   return i == m_blocks.end() ? 0 : i->second;
 }
 
-bool GraphBuilder::reachable(Block* from, Block* to,
-                             boost::dynamic_bitset<>& visited) const {
+bool Block::reachable(Block* from, Block* to,
+                      boost::dynamic_bitset<>& visited) {
    if (!from || !to) return false;
    if (visited[from->id]) return false;
    visited[from->id] = true;

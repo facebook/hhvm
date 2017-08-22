@@ -46,6 +46,9 @@ struct Block {
   explicit Block(const Block&) = delete;
   Block& operator=(const Block&) = delete;
 
+  static bool reachable(Block* from, Block* to,
+                        boost::dynamic_bitset<>& visited);
+
   PC start;           // first instruction
   PC last;            // last instruction (inclusive)
   PC end;             // points past last instruction (exclusive)
@@ -149,8 +152,6 @@ private:
   }
   Graph* build();
   Block* at(Offset off) const { return at(m_unit->at(off)); }
-  bool reachable(Block* from, Block* to,
-                 boost::dynamic_bitset<>& visited) const;
  private:
   void createBlocks();
   void createExBlocks();

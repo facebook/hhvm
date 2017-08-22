@@ -170,7 +170,7 @@ let convert_event debug_event = match debug_event with
       changed_while_parsing;
       build_targets; },
     global_state) ->
-    let dirty_files = files_with_contents dirty_files in
+    let dirty_files = files_with_contents_opt dirty_files in
     let changed_while_parsing = files_with_contents changed_while_parsing in
     (** TODO: Some build target files might not exist. Skip them.
      * Improve this. *)

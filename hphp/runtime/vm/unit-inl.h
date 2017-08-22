@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/litstr-table.h"
 
@@ -223,6 +224,10 @@ inline size_t Unit::numArrays() const {
 inline const ArrayData* Unit::lookupArrayId(Id id) const {
   assert(id < m_arrays.size());
   return m_arrays[id];
+}
+
+inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
+  return m_arrayTypeTable.lookup(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

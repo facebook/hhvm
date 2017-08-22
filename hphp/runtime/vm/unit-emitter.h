@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo-status.h"
@@ -112,10 +113,11 @@ struct UnitEmitter {
   // Litstrs and Arrays.
 
   /*
-   * Look up a static string or array by ID.
+   * Look up a static string or array/arraytype by ID.
    */
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
+  const RepoAuthType::Array* lookupArrayType(Id id) const;
 
   /*
    * Merge a literal string into either the global LitstrTable or the table for
@@ -134,6 +136,10 @@ struct UnitEmitter {
   Id mergeArray(const ArrayData* a);
   Id mergeArray(const ArrayData* a, const ArrayData::ScalarArrayKey& key);
 
+  /*
+   * Clear and rebuild the array type table from the builder.
+   */
+   void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
@@ -404,6 +410,11 @@ private:
   std::vector<ArrayData*> m_arrays;
 
   /*
+   * Unit local array type table.
+   */
+  ArrayTypeTable m_arrayTypeTable;
+
+  /*
    * Type alias table.
    */
   std::vector<TypeAlias> m_typeAliases;
@@ -495,6 +506,15 @@ struct UnitRepoProxy : public RepoProxy {
     GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue); // throws(RepoExc)
   };
+  struct InsertUnitArrayTypeTableStmt : public RepoProxy::Stmt {
+    InsertUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, int64_t unitSn,
+                const ArrayTypeTable& att); // throws(RepoExc)
+  };
+  struct GetUnitArrayTypeTableStmt : public RepoProxy::Stmt {
+    GetUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue); // throws(RepoExc)
+  };
   struct InsertUnitArrayStmt : public RepoProxy::Stmt {
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
@@ -531,6 +551,8 @@ struct UnitRepoProxy : public RepoProxy {
   URP_GOP(Unit) \
   URP_IOP(UnitLitstr) \
   URP_GOP(UnitLitstrs) \
+  URP_IOP(UnitArrayTypeTable) \
+  URP_GOP(UnitArrayTypeTable) \
   URP_IOP(UnitArray) \
   URP_GOP(UnitArrays) \
   URP_IOP(UnitMergeable) \

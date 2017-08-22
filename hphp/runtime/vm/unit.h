@@ -20,6 +20,7 @@
 #include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -457,6 +458,10 @@ public:
    */
   const ArrayData* lookupArrayId(Id id) const;
 
+  /*
+   * Look up a RepoAuthType::Array by ID
+   */
+   const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Funcs and PreClasses.                                              [const]
@@ -889,6 +894,7 @@ private:
   MD5 m_md5;
   NamedEntityPairTable m_namedInfo;
   FixedVector<const ArrayData*> m_arrays;
+  ArrayTypeTable m_arrayTypeTable;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
 };

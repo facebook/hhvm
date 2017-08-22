@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_REPO_AUTH_TYPE_H_
 #define incl_HPHP_REPO_AUTH_TYPE_H_
 
+#include <limits>
 #include <string>
 
 #include <folly/Optional.h>
@@ -24,6 +25,7 @@
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -31,6 +33,9 @@ namespace HPHP {
 
 struct StringData;
 struct TypedValue;
+struct Unit;
+struct UnitEmitter;
+struct RepoAuthType;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -107,7 +112,7 @@ struct RepoAuthType {
   };
 
   explicit RepoAuthType(Tag tag = Tag::Gen, const StringData* sd = nullptr) {
-    m_data.set(tag, sd);
+    m_data.set(static_cast<uint8_t>(tag), sd);
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:
     case Tag::SubObj: case Tag::ExactObj:
@@ -119,11 +124,11 @@ struct RepoAuthType {
   }
 
   explicit RepoAuthType(Tag tag, const Array* ar) {
-    m_data.set(tag, ar);
+    m_data.set(static_cast<uint8_t>(tag), ar);
     assert(mayHaveArrData());
   }
 
-  Tag tag() const { return m_data.tag(); }
+  Tag tag() const { return toResolvedTag(m_data.tag()); }
 
   bool operator==(RepoAuthType) const;
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
@@ -132,11 +137,6 @@ struct RepoAuthType {
   const StringData* clsName() const {
     assert(hasClassName());
     return static_cast<const StringData*>(m_data.ptr());
-  }
-
-  const Array* array() const {
-    assert(mayHaveArrData());
-    return static_cast<const Array*>(m_data.ptr());
   }
 
   bool hasClassName() const {
@@ -150,6 +150,26 @@ struct RepoAuthType {
     not_reached();
   }
 
+  /*
+   * Arrays.
+   */
+
+   const Array* array() const {
+     assert(resolved());
+     return static_cast<const Array*>(m_data.ptr());
+   }
+
+  // Returns a valid id if there is a corresponding Array* somewhere,
+  // or return kInvalidArrayId if Array* is null or if it is unresolved.
+  const uint32_t arrayId() const;
+  static constexpr auto kInvalidArrayId = std::numeric_limits<uint32_t>::max();
+
+  // Turn an array RAT represented by ID into equivalent array RAT represented
+  // by its actual Array*. Should only be called when it is indeed not resolved
+  // yet, which should be the place where an RAT is initally loaded from Repo.
+  void resolveArray(const Unit& unit);
+  void resolveArray(const UnitEmitter& ue);
+
   bool mayHaveArrData() const {
     switch (tag()) {
     case Tag::OptArr: case Tag::OptSArr: case Tag::Arr: case Tag::SArr:
@@ -160,34 +180,93 @@ struct RepoAuthType {
     not_reached();
   }
 
-  template<class SerDe>
-  void serde(SerDe& sd) {
-    auto t = tag();
-    sd(t);
-    if (SerDe::deserializing) {
-      // mayHaveArrData and hasClassName need to read tag().
-      m_data.set(t, nullptr);
-    }
-    auto const vp = [&]() -> const void* {
-      if (mayHaveArrData()) {
-        auto arr = array();
-        sd(arr);
-        return arr;
-      } else if (hasClassName()) {
-        auto c = clsName();
-        sd(c);
-        return c;
-      }
-      return nullptr;
-    }();
-    m_data.set(t, vp);
+  // Return true if m_data contains non-null Array*.
+  bool hasArrData() const {
+    return mayHaveArrData() && resolved() && m_data.ptr();
   }
 
+  /*
+   * Serialization/Deserialization
+   */
+
+   template<class SerDe> void serde(SerDe& sd) {
+     auto t = tag();
+     sd(t);
+
+     if (SerDe::deserializing) {
+       // mayHaveArrData and hasClassName need to read tag().
+       m_data.set(static_cast<uint8_t>(t), nullptr);
+     }
+
+     // the 0x40 bit for resolved/unresolved Array* should not be visible
+     // to the outside world.
+     assert(resolved());
+
+     if (mayHaveArrData()) {
+       // serialization
+       if (!SerDe::deserializing) {
+         // either a valid id for non-null array, or a kInvalidArrayId for null
+         uint32_t id = arrayId();
+         sd(id);
+         return;
+       }
+
+       // deserialization
+       uint32_t id;
+       sd(id);
+
+       // nullptr case, already done
+       if (id == kInvalidArrayId) return;
+
+       // RepoAuth case
+       if (RuntimeOption::RepoAuthoritative) {
+         resolveArrayGlobal(id);
+         return;
+       }
+
+       // id case
+       // this is the only case where we set the highbit
+       auto ptr = reinterpret_cast<void*>(id);
+       m_data.set(toIdTag(t), ptr);
+       return;
+     }
+
+     if (hasClassName()) {
+       auto c = clsName();
+       sd(c);
+       m_data.set(static_cast<uint8_t>(t), reinterpret_cast<const void*>(c));
+     }
+   }
+
+ private:
+   void resolveArrayGlobal(uint32_t id);
+
+   #define TAG(x) static_assert((static_cast<uint8_t>(Tag::x) & 0x40) == 0, "");
+     REPO_AUTH_TYPE_TAGS
+   #undef TAG
+
+   // false if m_data contains an uint32_t id for array type.
+   // true otherwise (it may not even be an array type).
+   // Note that the 0x80 bit is used by encodeRAT and decodeRAT,
+   // and the 0x20 bit is used in the Tag enum.
+   const bool resolved() const {
+     return (m_data.tag() & 0x40) == 0;
+   }
+   static uint8_t toIdTag(Tag tag) {
+     return static_cast<uint8_t>(tag) | 0x40;
+   }
+   static Tag toResolvedTag(uint8_t tag) {
+     return static_cast<Tag>(tag & ~0x40);
+   }
+
 private:
-  // This is the type tag, plus an optional pointer to a class name
-  // (for the obj_* types), or an optional pointer to array
-  // information for array types.
-  CompactTaggedPtr<const void,Tag> m_data;
+  // This is the type tag (for the lower 6 bits) plus two flag bits (0x80 used
+  // by encodeRAT/decodeRAT and 0x40 used by ourselves), plus an optional
+  // pointer to a class name (for the obj_* types), or an optional pointer to
+  // array information for array types, or alternatively, an optional id to the
+  // array information with 0x40 flag set to 1 to differentiate from the pointer
+  // case.
+  CompactTaggedPtr<const void,uint8_t> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////

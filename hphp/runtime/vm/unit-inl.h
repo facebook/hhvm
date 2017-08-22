@@ -227,7 +227,9 @@ inline const ArrayData* Unit::lookupArrayId(Id id) const {
 }
 
 inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
-  return m_arrayTypeTable.lookup(id);
+  return RuntimeOption::RepoAuthoritative
+           ? globalArrayTypeTable().lookup(id)
+           : m_arrayTypeTable.lookup(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

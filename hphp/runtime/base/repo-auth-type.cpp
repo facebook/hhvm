@@ -20,11 +20,13 @@
 #include <folly/Hash.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -88,6 +90,38 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void RepoAuthType::resolveArray(const Unit& unit) {
+  if (!mayHaveArrData() || resolved()) return;
+
+  auto const id = arrayId();
+  assert(id != kInvalidArrayId); // this case is handled in deser time.
+  auto const array = unit.lookupArrayTypeId(id);
+  m_data.set(static_cast<uint8_t>(tag()), array);
+}
+
+void RepoAuthType::resolveArray(const UnitEmitter& ue) {
+  if (!mayHaveArrData() || resolved()) return;
+
+  auto const id = arrayId();
+  assert(id != kInvalidArrayId); // this case is handled in deser time.
+  auto const array = ue.lookupArrayType(id);
+  m_data.set(static_cast<uint8_t>(tag()), array);
+}
+
+void RepoAuthType::resolveArrayGlobal(uint32_t id) {
+  assert(RuntimeOption::RepoAuthoritative);
+
+  auto array = globalArrayTypeTable().lookup(id);
+  m_data.set(static_cast<uint8_t>(tag()), array);
+}
+
+const uint32_t RepoAuthType::arrayId() const {
+  assert(mayHaveArrData());
+  if (resolved()) return m_data.ptr() ? array()->id() : kInvalidArrayId;
+
+  return reinterpret_cast<uintptr_t>(m_data.ptr());
+}
 
 bool RepoAuthType::operator==(RepoAuthType o) const {
   using T = Tag;
@@ -379,8 +413,12 @@ std::string show(RepoAuthType rat) {
         ret += 'S';
       }
       ret += "Arr";
-      if (auto const ar = rat.array()) {
-        folly::format(&ret, "{}", show(*ar));
+      if (rat.hasArrData()) {
+        if (auto const ar = rat.array()) {
+          folly::format(&ret, "{}", show(*ar));
+        }
+      } else {
+        folly::format(&ret, "{}", rat.arrayId());
       }
       return ret;
     }

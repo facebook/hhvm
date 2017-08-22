@@ -25,8 +25,9 @@ namespace HPHP {
 
 namespace {
 
-template<class LookupStr>
-RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
+template <class LookupStr, class LookupArrayType>
+RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
+                           LookupArrayType lookupArrayType) {
   using T = RepoAuthType::Tag;
   auto const rawTag = *pc++;
   bool const highBitSet = rawTag & kRATArrayDataBit;
@@ -83,7 +84,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);
       pc += sizeof id;
-      auto const arr = Repo::get().global().arrayTypeTable.lookup(id);
+      auto const arr = lookupArrayType(id);
       return RepoAuthType{tag, arr};
     }
     return RepoAuthType{tag};
@@ -107,15 +108,19 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
 }
 
 RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
-  return decodeRATImpl(pc, [&] (uint32_t id) {
-    return unit->lookupLitstrId(id);
-  });
+  return decodeRATImpl(
+    pc,
+    [&](uint32_t id) { return unit->lookupLitstrId(id); },
+    [&](uint32_t id) { return unit->lookupArrayTypeId(id); }
+  );
 }
 
 RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
-  return decodeRATImpl(pc, [&] (uint32_t id) {
-    return ue.lookupLitstr(id);
-  });
+  return decodeRATImpl(
+    pc,
+    [&](uint32_t id) { return ue.lookupLitstr(id); },
+    [&](uint32_t id) { return ue.lookupArrayType(id); }
+  );
 }
 
 void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {

@@ -148,11 +148,6 @@ struct BlobEncoder {
     std::copy(sd->data(), sd->data() + sz, &m_blob[start]);
   }
 
-  void encode(const RepoAuthType::Array* ar) {
-    if (!ar) return encode(std::numeric_limits<uint32_t>::max());
-    encode(ar->id());
-  }
-
   void encode(const TypedValue& tv) {
     if (tv.m_type == KindOfUninit) {
       return encode(staticEmptyString());
@@ -288,14 +283,6 @@ struct BlobDecoder {
     const StringData* sd;
     decode(sd);
     s = sd;
-  }
-
-  void decode(const RepoAuthType::Array*& ar) {
-    uint32_t id;
-    decode(id);
-    ar = id == std::numeric_limits<uint32_t>::max()
-      ? nullptr
-      : Repo::get().global().arrayTypeTable.lookup(id);
   }
 
   void decode(TypedValue& tv) {

@@ -135,7 +135,9 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
 }
 
 const RepoAuthType::Array* UnitEmitter::lookupArrayType(Id id) const {
-  return m_arrayTypeTable.lookup(id);
+  return RuntimeOption::RepoAuthoritative
+           ? globalArrayTypeTable().lookup(id)
+           : m_arrayTypeTable.lookup(id);
 }
 
 void UnitEmitter::repopulateArrayTypeTable(

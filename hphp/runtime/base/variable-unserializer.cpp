@@ -438,6 +438,7 @@ bool isWhitelistClass(const String& requestedClassName,
 }
 }
 
+const StaticString s_throw("throw");
 const StaticString s_allowed_classes("allowed_classes");
 const StaticString s_include_subclasses("include_subclasses");
 
@@ -451,17 +452,24 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
   // all others result in __Incomplete_PHP_Class
   if (m_options.exists(s_allowed_classes)) {
     auto allowed_classes = m_options[s_allowed_classes];
-    if (allowed_classes.isArray()) {
-      bool subs = m_options.exists(s_include_subclasses)
-        && m_options[s_include_subclasses].toBoolean();
-      return isWhitelistClass(clsName,
-                              allowed_classes.toArray(),
-                              subs);
-    } else if (allowed_classes.isBoolean()) {
-      return allowed_classes.toBoolean();
-    } else {
-      throw InvalidAllowedClassesException();
+    auto const ok = [&] {
+      if (allowed_classes.isArray()) {
+        auto const subs = m_options[s_include_subclasses].toBoolean();
+        return isWhitelistClass(clsName,
+                                allowed_classes.toArray(),
+                                subs);
+      } else if (allowed_classes.isBoolean()) {
+        return allowed_classes.toBoolean();
+      } else {
+        throw InvalidAllowedClassesException();
+      }
+    }();
+
+    if (!ok && m_options[s_throw].toBoolean()) {
+      throw_object(m_options[s_throw].toString(),
+                   make_packed_array(clsName));
     }
+    return ok;
   }
 
   if (!RuntimeOption::UnserializationWhitelistCheck) {

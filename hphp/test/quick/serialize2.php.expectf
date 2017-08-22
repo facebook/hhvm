@@ -1,0 +1,28 @@
+_____ ({"include_subclasses":false,"allowed_classes":[]})
+A____ ({"include_subclasses":false,"allowed_classes":["A"]})
+_B___ ({"include_subclasses":false,"allowed_classes":["B"]})
+__C__ ({"include_subclasses":false,"allowed_classes":["C"]})
+___D_ ({"include_subclasses":false,"allowed_classes":["D"]})
+____E ({"include_subclasses":false,"allowed_classes":["E"]})
+_____ ({"include_subclasses":false,"allowed_classes":["I"]})
+A____ ({"include_subclasses":false,"allowed_classes":["A","I"]})
+A____ ({"include_subclasses":false,"allowed_classes":["A","I"]})
+ABCDE ({"include_subclasses":false,"allowed_classes":["A","B","C","D","E","I"],"throw":"UnexpectedSerializedClass"})
+UnexpectedSerializedClass B {"include_subclasses":false,"allowed_classes":["A","I"],"throw":"UnexpectedSerializedClass"}
+_____ ({"include_subclasses":false,"allowed_classes":false,"throw":false})
+UnexpectedSerializedClass A {"include_subclasses":false,"allowed_classes":false,"throw":"UnexpectedSerializedClass"}
+_____ ({"include_subclasses":true,"allowed_classes":[]})
+AB__E ({"include_subclasses":true,"allowed_classes":["A"]})
+_B__E ({"include_subclasses":true,"allowed_classes":["B"]})
+__CD_ ({"include_subclasses":true,"allowed_classes":["C"]})
+___D_ ({"include_subclasses":true,"allowed_classes":["D"]})
+____E ({"include_subclasses":true,"allowed_classes":["E"]})
+__CDE ({"include_subclasses":true,"allowed_classes":["I"]})
+ABCDE ({"include_subclasses":true,"allowed_classes":["A","I"]})
+ABCDE ({"include_subclasses":true,"allowed_classes":["A","I"]})
+ABCDE ({"include_subclasses":true,"allowed_classes":["A","B","C","D","E","I"],"throw":"UnexpectedSerializedClass"})
+ABCDE ({"include_subclasses":true,"allowed_classes":["A","I"],"throw":"UnexpectedSerializedClass"})
+_____ ({"include_subclasses":true,"allowed_classes":false,"throw":false})
+UnexpectedSerializedClass A {"include_subclasses":true,"allowed_classes":false,"throw":"UnexpectedSerializedClass"}
+[load Bar][load Baz][load MadeUp]
+Fatal error: Class undefined: MadeUp in %s/serialize2.php on line 59

@@ -1068,7 +1068,7 @@ bool Repo::writable(int repoId) {
 
 //////////////////////////////////////////////////////////////////////
 
-void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
   auto& repo = Repo::get();
 
   // Attempt batch commit.  This can legitimately fail due to multiple input

@@ -11065,9 +11065,7 @@ namespace {
 
 std::atomic<uint64_t> lastHHBCUnitIndex;
 
-}
-
-static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
+UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   // If we're in whole program mode, we can just assign each Unit an increasing
   // counter, guaranteeing uniqueness.
   auto md5 = Option::WholeProgram ? MD5{++lastHHBCUnitIndex} : fsp->getMd5();
@@ -11085,30 +11083,6 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
 
   auto ue = emitHHBCUnitEmitter(ar, fsp, md5);
   assert(ue != nullptr);
-
-  if (Option::GenerateTextHHBC) {
-    // TODO(#2973538): Move HHBC text generation to after all the
-    // units are created, and get rid of the LitstrTable locking,
-    // since it won't be needed in that case.
-    LitstrTable::get().mutex().lock();
-    LitstrTable::get().setReading();
-    std::unique_ptr<Unit> unit(ue->create());
-    std::string fullPath = AnalysisResult::prepareFile(
-      ar->getOutputPath().c_str(), Option::UserFilePrefix + fsp->getName(),
-      true, false) + ".hhbc.txt";
-
-    std::ofstream f(fullPath.c_str());
-    if (!f) {
-      Logger::Error("Unable to open %s for write", fullPath.c_str());
-    } else {
-      CodeGenerator cg(&f, CodeGenerator::TextHHBC);
-      cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
-      cg.printRaw(unit->toString().c_str());
-      f.close();
-    }
-    LitstrTable::get().setWriting();
-    LitstrTable::get().mutex().unlock();
-  }
 
   return ue;
 }
@@ -11134,6 +11108,13 @@ struct UEQ : Synchronizable {
     m_ues.pop_front();
     return ue;
   }
+  // must be called in single threaded mode.
+  void fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+    for (auto const ue : m_ues) {
+      ues.push_back(std::unique_ptr<UnitEmitter>{ue});
+    }
+    m_ues.clear();
+  }
  private:
   std::deque<UnitEmitter*> m_ues;
 };
@@ -11146,12 +11127,7 @@ class EmitterWorker
   void doJob(JobType job) override {
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
-      UnitEmitter* ue = emitHHBCVisitor(ar, job);
-      if (Option::GenerateBinaryHHBC) {
-        s_ueq.push(ue);
-      } else {
-        delete ue;
-      }
+      s_ueq.push(emitHHBCVisitor(ar, job));
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
       m_ret = false;
@@ -11175,8 +11151,71 @@ addEmitterWorker(AnalysisResultPtr /*ar*/, StatementPtr sp, void* data) {
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void
-commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
+void genText(UnitEmitter* ue, const std::string& outputPath) {
+  std::unique_ptr<Unit> unit(ue->create(true));
+  auto const fullPath = AnalysisResult::prepareFile(
+    outputPath.c_str(),
+    Option::UserFilePrefix + unit->filepath()->toCppString(),
+    true, false) + ".hhbc.txt";
+
+  std::ofstream f(fullPath.c_str());
+  if (!f) {
+    Logger::Error("Unable to open %s for write", fullPath.c_str());
+  } else {
+    CodeGenerator cg(&f, CodeGenerator::TextHHBC);
+    auto const& md5 = ue->md5();
+    cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
+    cg.printRaw(unit->toString().c_str());
+    f.close();
+  }
+}
+
+class GenTextWorker
+    : public JobQueueWorker<UnitEmitter*, const std::string*, true, true> {
+ public:
+  void doJob(JobType job) override {
+    try {
+      genText(job, *m_context);
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+    } catch (...) {
+      Logger::Error("Fatal: An unexpected exception was thrown");
+    }
+  }
+  void onThreadEnter() override {
+    g_context.getCheck();
+  }
+  void onThreadExit() override {
+    hphp_memory_cleanup();
+  }
+};
+
+void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
+             const std::string& outputPath) {
+  if (!ues.size()) return;
+
+  Timer timer(Timer::WallTime, "Generating text bytcode");
+  LitstrTable::get().mutex().lock();
+  LitstrTable::get().setReading();
+  if (ues.size() > Option::ParserThreadCount && Option::ParserThreadCount > 1) {
+    JobQueueDispatcher<GenTextWorker> dispatcher {
+      Option::ParserThreadCount, 0, false, &outputPath
+    };
+    dispatcher.start();
+    for (auto& ue : ues) {
+      dispatcher.enqueue(ue.get());
+    }
+    dispatcher.waitEmpty();
+  } else {
+    for (auto& ue : ues) {
+      genText(ue.get(), outputPath);
+    }
+  }
+  LitstrTable::get().setWriting();
+  LitstrTable::get().mutex().unlock();
+}
+
+void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                        = Repo::GlobalData{};
   gd.UsedHHBBC                   = Option::UseHHBBC;
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
@@ -11204,6 +11243,8 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   }
   if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
   Repo::get().saveGlobalData(gd);
+}
+
 }
 
 /*
@@ -11258,11 +11299,27 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   ar->visitFiles(addEmitterWorker, &dispatcher);
 
   auto ues = ar->getHhasFiles();
+  decltype(ues) ues_to_print;
+  auto const outputPath = ar->getOutputPath();
+
+  SCOPE_EXIT {
+    genText(ues_to_print, outputPath);
+  };
+
+  auto commitSome = [&] (decltype(ues)& emitters) {
+    batchCommit(emitters);
+    if (Option::GenerateTextHHBC) {
+      std::move(emitters.begin(), emitters.end(),
+                std::back_inserter(ues_to_print));
+    }
+    emitters.clear();
+  };
+
   if (!Option::UseHHBBC && ues.size()) {
-    batchCommit(std::move(ues));
+    commitSome(ues);
   }
 
-  if (Option::GenerateBinaryHHBC) {
+  if (Option::GenerateBinaryHHBC || Option::UseHHBBC) {
     // kBatchSize needs to strike a balance between reducing transaction commit
     // overhead (bigger batches are better), and limiting the cost incurred by
     // failed commits due to identical units that require rollback and retry
@@ -11272,54 +11329,48 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
     // Gather up units created by the worker threads and commit them in
     // batches.
-    bool didPop;
-    bool inShutdown = false;
     while (true) {
       // Poll, but with a 100ms timeout so that this thread doesn't spin wildly
       // if it gets ahead of the workers.
-      UnitEmitter* ue = s_ueq.tryPop(0, 100 * 1000 * 1000);
-      if ((didPop = (ue != nullptr))) {
+      if (auto const ue = s_ueq.tryPop(0, 100 * 1000 * 1000)) {
         ues.push_back(std::unique_ptr<UnitEmitter>{ue});
-      }
-      if (!Option::UseHHBBC &&
-          (ues.size() == kBatchSize ||
-           (!didPop && inShutdown && ues.size() > 0))) {
-        batchCommit(std::move(ues));
-      }
-      if (!inShutdown) {
-        inShutdown = dispatcher.pollEmpty();
-      } else if (!didPop) {
-        assert(Option::UseHHBBC || ues.size() == 0);
+      } else if (dispatcher.pollEmpty()) {
+        // there could be a race, so fetch any remaining ues
+        s_ueq.fetch(ues);
         break;
       }
-    }
-
-    if (!Option::UseHHBBC) {
-      commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+      if (!Option::UseHHBBC && ues.size() == kBatchSize) {
+        commitSome(ues);
+      }
     }
   } else {
     dispatcher.waitEmpty();
+    s_ueq.fetch(ues_to_print);
   }
-
-  assert(Option::UseHHBBC || ues.empty());
 
   ar->finish();
   ar.reset();
 
   if (!Option::UseHHBBC) {
-    batchCommit(std::move(ues));
+    if (Option::GenerateBinaryHHBC) {
+      commitSome(ues);
+      commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
+    }
     return;
   }
 
   RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
-  auto pair = [&]{
+  auto pair = [&] {
     Timer timer(Timer::WallTime, "running HHBBC");
     return HHBBC::whole_program(
       std::move(ues),
       Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0
     );
   }();
-  batchCommit(std::move(pair.first));
+  batchCommit(pair.first);
+  if (Option::GenerateTextHHBC) {
+    ues_to_print = std::move(pair.first);
+  }
   commitGlobalData(std::move(pair.second));
 }
 

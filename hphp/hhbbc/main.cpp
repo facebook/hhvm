@@ -268,7 +268,8 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   RuntimeOption::RepoEvalMode = "local";
   open_repo(output_repo);
   SCOPE_EXIT { Repo::shutdown(); };
-  batchCommit(std::move(ues));
+  batchCommit(ues);
+  ues.clear();
 
   auto gd                         = Repo::GlobalData{};
   gd.UsedHHBBC                    = true;

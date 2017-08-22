@@ -547,10 +547,10 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-std::unique_ptr<Unit> UnitEmitter::create() {
+std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
   INC_TPC(unit_load);
   auto u = std::make_unique<Unit>();
-  u->m_repoId = m_repoId;
+  u->m_repoId = saveLineTable ? RepoIdInvalid : m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
@@ -685,13 +685,15 @@ std::unique_ptr<Unit> UnitEmitter::create() {
    */
   if (m_sourceLocTab.size() != 0) {
     stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
+  } else if (saveLineTable) {
+    stashLineTable(u.get(), m_lineTable);
   }
 
   /*
    * Similarly if we plan to dump hhas we will need the extended line table
    * information in the output.
    */
-  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+  if (saveLineTable || (RuntimeOption::EvalDumpHhas && SystemLib::s_inited)) {
     stashExtendedLineTable(u.get(), createSourceLocTable());
   }
 

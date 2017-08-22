@@ -236,7 +236,7 @@ private:
  * Try to commit a vector of unit emitters to the current repo.  Note that
  * errors are ignored!
  */
-void batchCommit(std::vector<std::unique_ptr<UnitEmitter>>);
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>&);
 
 //////////////////////////////////////////////////////////////////////
 

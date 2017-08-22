@@ -437,6 +437,17 @@ int getLineNumber(const LineTable& table, Offset pc) {
 }
 
 int Unit::getLineNumber(Offset pc) const {
+  if (UNLIKELY(m_repoId == RepoIdInvalid)) {
+    auto const lineTable = [&] () -> const LineTable* {
+      LineTableStash::accessor acc;
+      if (s_lineTables.find(acc, this)) {
+        return &acc->second;
+      }
+      return nullptr;
+    }();
+    if (lineTable) return HPHP::getLineNumber(*lineTable, pc);
+  }
+
   {
     LineInfoCache::const_accessor acc;
     if (s_lineInfo.find(acc, this)) {

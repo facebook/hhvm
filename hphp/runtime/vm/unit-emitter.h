@@ -80,7 +80,7 @@ struct UnitEmitter {
   /*
    * Instatiate a runtime Unit*.
    */
-  std::unique_ptr<Unit> create();
+  std::unique_ptr<Unit> create(bool saveLineTable = false);
 
   template<class SerDe> void serdeMetaData(SerDe&);
 

@@ -722,7 +722,7 @@ bool ClassScope::usesTrait(const std::string &traitName) const {
   return false;
 }
 
-bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
+bool ClassScope::needsInvokeParent(AnalysisResultConstRawPtr ar,
                                    bool considerSelf /* = true */) {
   // check all functions this class has
   if (considerSelf) {
@@ -746,7 +746,7 @@ bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
   return false;
 }
 
-bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
+bool ClassScope::derivesFrom(AnalysisResultConstRawPtr ar,
                              const std::string &base,
                              bool strict, bool def) const {
 
@@ -765,7 +765,7 @@ bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
   return false;
 }
 
-ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstPtr ar,
+ClassScopePtr ClassScope::FindCommonParent(AnalysisResultConstRawPtr ar,
                                            const std::string &cn1,
                                            const std::string &cn2) {
 
@@ -834,7 +834,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultConstRawPtr ar,
   return FunctionScopePtr();
 }
 
-FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
+FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstRawPtr ar,
                                              bool recursive) {
   std::string name;
   if (classNameCtor()) {
@@ -876,11 +876,11 @@ bool ClassScope::hasConst(const std::string &name) const {
 
 Symbol *ClassScope::findProperty(ClassScopePtr &cls,
                                  const std::string &name,
-                                 AnalysisResultConstPtr ar) {
+                                 AnalysisResultConstRawPtr ar) {
   return getVariables()->findProperty(cls, name, ar);
 }
 
-void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
+void ClassScope::getInterfaces(AnalysisResultConstRawPtr ar,
                                std::vector<std::string> &names,
                                bool recursive /* = true */) const {
   ClassScope *self = const_cast<ClassScope*>(this);
@@ -911,7 +911,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
   }
 }
 
-ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) const {
+ClassScopePtr ClassScope::getParentScope(AnalysisResultConstRawPtr ar) const {
   if (m_parent.empty()) return ClassScopePtr();
   return ar->findClass(m_parent);
 }
@@ -1039,7 +1039,7 @@ bool ClassScope::hasProperty(const std::string &name) const {
   return sym;
 }
 
-void ClassScope::setRedeclaring(AnalysisResultConstPtr /*ar*/, int redecId) {
+void ClassScope::setRedeclaring(AnalysisResultConstRawPtr /*ar*/, int redecId) {
   if (isTrait()) {
     Compiler::Error(Compiler::RedeclaredTrait, m_stmt);
   }
@@ -1047,7 +1047,7 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr /*ar*/, int redecId) {
   setVolatile(); // redeclared class is also volatile
 }
 
-bool ClassScope::addFunction(AnalysisResultConstPtr /*ar*/,
+bool ClassScope::addFunction(AnalysisResultConstRawPtr /*ar*/,
                              FileScopeRawPtr fileScope,
                              FunctionScopePtr funcScope) {
   FunctionScopePtr &func = m_functions[funcScope->getScopeName()];

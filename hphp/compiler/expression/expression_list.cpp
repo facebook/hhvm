@@ -329,7 +329,7 @@ std::string ExpressionList::getLiteralString() const {
   return v ? v->getLiteralString() : std::string("");
 }
 
-void ExpressionList::optimize(AnalysisResultConstPtr /*ar*/) {
+void ExpressionList::optimize(AnalysisResultConstRawPtr /*ar*/) {
   bool changed = false;
   size_t i = m_exps.size();
   if (m_kind != ListKindParam) {
@@ -364,7 +364,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr /*ar*/) {
   }
 }
 
-ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstRawPtr ar) {
   optimize(ar);
   return ExpressionPtr();
 }

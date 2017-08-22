@@ -60,7 +60,7 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
   return ExpressionPtr();
 }

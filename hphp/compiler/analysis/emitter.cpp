@@ -10819,7 +10819,7 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
 
 Thunklet::~Thunklet() {}
 
-static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstPtr ar) {
+static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstRawPtr ar) {
   if (RuntimeOption::EvalDisableHphpcOpts) return ConstructPtr();
 
   for (int i = 0, n = c->getKidCount(); i < n; i++) {

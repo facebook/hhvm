@@ -19,14 +19,13 @@
 #include <folly/Format.h>
 
 #include "hphp/util/hash.h"
-
-#include <boost/algorithm/string/predicate.hpp>
+#include "hphp/util/bstring.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ParserBase::IsClosureName(const std::string &name) {
-  return boost::istarts_with(name, "closure$");
+  return name.size() >= 8 && bstrcaseeq(name.c_str(), "closure$", 8);
 }
 
 bool ParserBase::IsAnonymousClassName(folly::StringPiece name) {

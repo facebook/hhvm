@@ -76,7 +76,7 @@ void UnsetStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr UnsetStatement::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr UnsetStatement::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   if (m_exp->getCount() == 0) return NULL_STATEMENT();
   return StatementPtr();
 }

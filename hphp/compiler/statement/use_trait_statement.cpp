@@ -45,7 +45,7 @@ StatementPtr UseTraitStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
+void UseTraitStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                      FileScopeRawPtr fs,
                                      ClassScopePtr scope) {
   if (scope->isInterface()) {

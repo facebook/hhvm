@@ -96,14 +96,14 @@ void FileScope::setUseStrictTypesForBuiltins() {
 }
 
 
-FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
+FunctionScopePtr FileScope::setTree(AnalysisResultConstRawPtr ar,
                                     StatementListPtr tree) {
   m_tree = tree;
   setFileLevel(tree);
   return createPseudoMain(ar);
 }
 
-void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
+void FileScope::cleanupForError(AnalysisResultConstRawPtr ar) {
   for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {
     for (ClassScopePtr cls: iter->second) {
       cls->getVariables()->cleanupForError(ar);
@@ -122,7 +122,7 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
 
 template <class Meth>
 void makeFatalMeth(FileScope& file,
-                   AnalysisResultConstPtr ar,
+                   AnalysisResultConstRawPtr ar,
                    const std::string& msg,
                    int line,
                    Meth meth) {
@@ -146,21 +146,21 @@ void makeFatalMeth(FileScope& file,
   file.setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
 }
 
-void FileScope::makeFatal(AnalysisResultConstPtr ar,
+void FileScope::makeFatal(AnalysisResultConstRawPtr ar,
                           const std::string& msg,
                           int line) {
   auto meth = [](SimpleFunctionCallPtr e) { e->setThrowFatal(); };
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-void FileScope::makeParseFatal(AnalysisResultConstPtr ar,
+void FileScope::makeParseFatal(AnalysisResultConstRawPtr ar,
                                const std::string& msg,
                                int line) {
   auto meth = [](SimpleFunctionCallPtr e) { e->setThrowParseFatal(); };
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-bool FileScope::addFunction(AnalysisResultConstPtr ar,
+bool FileScope::addFunction(AnalysisResultConstRawPtr ar,
                             FunctionScopePtr funcScope) {
   if (ar->declareFunction(funcScope)) {
     FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
@@ -183,7 +183,8 @@ bool FileScope::addFunction(AnalysisResultConstPtr ar,
   return false;
 }
 
-bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
+bool FileScope::addClass(AnalysisResultConstRawPtr ar,
+                         ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
     m_classes[classScope->getScopeName()].push_back(classScope);
     return true;
@@ -227,7 +228,7 @@ int FileScope::popAttribute() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
+ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstRawPtr ar) const {
   if (m_tree) return m_tree->getEffectiveImpl(ar);
   return ExpressionPtr();
 }
@@ -261,7 +262,7 @@ const std::string &FileScope::pseudoMainName() {
   return m_pseudoMainName;
 }
 
-FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
+FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstRawPtr ar) {
   StatementListPtr st = m_tree;
   auto labelScope = std::make_shared<LabelScope>();
   auto f =

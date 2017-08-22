@@ -119,7 +119,7 @@ void ArrayElementExpression::clearContext(Context context) {
 // parser functions
 
 bool ArrayElementExpression::appendClass(ExpressionPtr cls,
-                                         AnalysisResultConstPtr ar,
+                                         AnalysisResultConstRawPtr ar,
                                          FileScopePtr file) {
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     return dynamic_pointer_cast<ArrayElementExpression>(m_variable)
@@ -174,7 +174,8 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr ArrayElementExpression::preOptimize(
+  AnalysisResultConstRawPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {
     if (m_offset && m_variable->isScalar()) {

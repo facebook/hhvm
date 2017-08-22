@@ -29,7 +29,7 @@ struct IfStatement : Statement {
   IfStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   bool hasDecl() const override;
   bool hasRetExp() const override;
   int getRecursiveCount() const override;

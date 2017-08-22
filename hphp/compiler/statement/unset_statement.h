@@ -29,7 +29,7 @@ struct UnsetStatement : Statement {
   UnsetStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   ExpressionListPtr getExps() const { return m_exp; }
 private:

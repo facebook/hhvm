@@ -54,7 +54,7 @@ public:
   bool hasImpl() const override { return false; }
   int getRecursiveCount() const override;
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
   void fixupSelfAndParentTypehints(ClassScopePtr scope);
@@ -89,7 +89,8 @@ public:
 
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
-  FunctionScopePtr onInitialParse(AnalysisResultConstPtr ar, FileScopePtr fs);
+  FunctionScopePtr onInitialParse(AnalysisResultConstRawPtr ar,
+                                  FileScopePtr fs);
 
   FunctionScopeRawPtr getFunctionScope() const {
     BlockScopeRawPtr b = getScope();
@@ -115,7 +116,7 @@ public:
     m_originalFilename = name;
   }
 
-  void addTraitMethodToScope(AnalysisResultConstPtr ar,
+  void addTraitMethodToScope(AnalysisResultConstRawPtr ar,
                              ClassScopePtr classScope);
 
   void setMayCallSetFrameMetadata(bool f) { m_mayCallSetFrameMetadata = f; }

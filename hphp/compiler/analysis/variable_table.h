@@ -127,7 +127,7 @@ public:
    * Add a function's parameter to this table.
    */
   void addParam(const std::string &name,
-                AnalysisResultConstPtr ar, ConstructPtr construct);
+                AnalysisResultConstRawPtr ar, ConstructPtr construct);
 
   void addParamLike(const std::string &name,
                     AnalysisResultPtr ar, ConstructPtr construct,
@@ -137,10 +137,10 @@ public:
    * Called when a variable is declared or being assigned (l-value).
    */
   void add(const std::string &name, bool implicit,
-           AnalysisResultConstPtr ar, ConstructPtr construct,
+           AnalysisResultConstRawPtr ar, ConstructPtr construct,
            ModifierExpressionPtr modifiers);
   void add(Symbol *sym, bool implicit,
-           AnalysisResultConstPtr ar, ConstructPtr construct,
+           AnalysisResultConstRawPtr ar, ConstructPtr construct,
            ModifierExpressionPtr modifiers);
 
   /**
@@ -148,31 +148,31 @@ public:
    * a definition in a base class. Returns whether or not there
    * was an error in marking as override.
    */
-  bool markOverride(AnalysisResultConstPtr ar, const std::string &name);
+  bool markOverride(AnalysisResultConstRawPtr ar, const std::string &name);
 
   /**
    * Called when a variable is used or being evaluated (r-value).
    */
   void checkVariable(const std::string &name,
-                     AnalysisResultConstPtr ar, ConstructPtr construct);
+                     AnalysisResultConstRawPtr ar, ConstructPtr construct);
   void checkVariable(Symbol *sym,
-                     AnalysisResultConstPtr ar, ConstructPtr construct);
+                     AnalysisResultConstRawPtr ar, ConstructPtr construct);
   /**
    * Find the class which contains the property, and return
    * its Symbol
    */
   Symbol *findProperty(ClassScopePtr &cls,
                        const std::string &name,
-                       AnalysisResultConstPtr ar);
+                       AnalysisResultConstRawPtr ar);
 
   /**
    * Walk up to find first parent that has the specified symbol.
    */
-  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
                            const std::string &name,
                            const Symbol *&sym) const;
 
-  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
                            const std::string &name,
                            Symbol *&sym) {
     const Symbol *ss;
@@ -196,11 +196,11 @@ public:
   /**
    * Called when analyze simple variable
    */
-  void addStaticVariable(Symbol *sym, AnalysisResultConstPtr ar,
+  void addStaticVariable(Symbol *sym, AnalysisResultConstRawPtr ar,
                          bool member = false);
-  void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
+  void addStaticVariable(Symbol *sym, AnalysisResultRawPtr ar,
                          bool member = false);
-  void cleanupForError(AnalysisResultConstPtr ar);
+  void cleanupForError(AnalysisResultConstRawPtr ar);
 
   /**
    * Keep track of $GLOBALS['var'].
@@ -234,7 +234,7 @@ private:
   unsigned m_hasNonStaticPrivate : 1;
   unsigned m_forcedVariants : 4;
 
-  bool isGlobalTable(AnalysisResultConstPtr ar) const;
+  bool isGlobalTable(AnalysisResultConstRawPtr ar) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -99,7 +99,8 @@ void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr ClassConstantExpression::preOptimize(
+  AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return ExpressionPtr();
   }

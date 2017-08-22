@@ -189,15 +189,15 @@ public:
   /**
    * Called before type inference.
    */
-  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr /*ar*/) {
+  virtual ExpressionPtr preOptimize(AnalysisResultConstRawPtr /*ar*/) {
     return ExpressionPtr();
   }
 
-  static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
+  static ExpressionPtr MakeConstant(AnalysisResultConstRawPtr ar,
                                     BlockScopePtr scope,
                                     const Location::Range& r,
                                     const std::string &value);
-  static ExpressionPtr MakeScalarExpression(AnalysisResultConstPtr ar,
+  static ExpressionPtr MakeScalarExpression(AnalysisResultConstRawPtr ar,
                                             BlockScopePtr scope,
                                             const Location::Range& r,
                                             const Variant &value);

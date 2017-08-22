@@ -163,7 +163,7 @@ bool VariableTable::setClassInitVal(std::string varName, ConstructPtr value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void VariableTable::addParam(const std::string &name,
-                             AnalysisResultConstPtr ar,
+                             AnalysisResultConstRawPtr ar,
                              ConstructPtr construct) {
   Symbol *sym = addDeclaredSymbol(name, construct);
   if (!sym->isParameter()) {
@@ -182,7 +182,7 @@ void VariableTable::addParamLike(const std::string &name,
   }
 }
 
-void VariableTable::addStaticVariable(Symbol* sym, AnalysisResultPtr ar,
+void VariableTable::addStaticVariable(Symbol* sym, AnalysisResultRawPtr ar,
                                       bool /*member*/ /* = false */) {
   if (isGlobalTable(ar) ||
       sym->isStatic()) {
@@ -194,7 +194,7 @@ void VariableTable::addStaticVariable(Symbol* sym, AnalysisResultPtr ar,
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
-                                      AnalysisResultConstPtr ar,
+                                      AnalysisResultConstRawPtr ar,
                                       bool member /* = false */) {
   if (isGlobalTable(ar) ||
       sym->isStatic()) {
@@ -204,9 +204,9 @@ void VariableTable::addStaticVariable(Symbol *sym,
   addStaticVariable(sym, ar->lock().get(), member);
 }
 
-void VariableTable::cleanupForError(AnalysisResultConstPtr /*ar*/) {}
+void VariableTable::cleanupForError(AnalysisResultConstRawPtr /*ar*/) {}
 
-bool VariableTable::markOverride(AnalysisResultConstPtr ar,
+bool VariableTable::markOverride(AnalysisResultConstRawPtr ar,
                                  const std::string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
@@ -236,14 +236,14 @@ bool VariableTable::markOverride(AnalysisResultConstPtr ar,
 }
 
 void VariableTable::add(const std::string &name,
-                        bool implicit, AnalysisResultConstPtr ar,
+                        bool implicit, AnalysisResultConstRawPtr ar,
                         ConstructPtr construct,
                         ModifierExpressionPtr modifiers) {
   add(addSymbol(name), implicit, ar, construct, modifiers);
 }
 
 void VariableTable::add(Symbol *sym,
-                        bool implicit, AnalysisResultConstPtr ar,
+                        bool implicit, AnalysisResultConstRawPtr ar,
                         ConstructPtr construct,
                         ModifierExpressionPtr modifiers) {
   if (getAttribute(InsideStaticStatement)) {
@@ -295,13 +295,13 @@ void VariableTable::add(Symbol *sym,
 }
 
 void VariableTable::checkVariable(const std::string &name,
-                                  AnalysisResultConstPtr ar,
+                                  AnalysisResultConstRawPtr ar,
                                   ConstructPtr construct) {
   checkVariable(addSymbol(name), ar, construct);
 }
 
 void VariableTable::checkVariable(Symbol *sym,
-                                  AnalysisResultConstPtr ar,
+                                  AnalysisResultConstRawPtr ar,
                                   ConstructPtr construct) {
 
   // Variable used in pseudomain
@@ -317,7 +317,7 @@ void VariableTable::checkVariable(Symbol *sym,
 
 Symbol *VariableTable::findProperty(ClassScopePtr &cls,
                                     const std::string &name,
-                                    AnalysisResultConstPtr ar) {
+                                    AnalysisResultConstRawPtr ar) {
   Symbol *sym = getSymbol(name);
   if (sym) {
     assert(sym->declarationSet());
@@ -349,7 +349,7 @@ bool VariableTable::isConvertibleSuperGlobal(const std::string &name) const {
   return !getAttribute(ContainsDynamicVariable) && isSuperGlobal(name);
 }
 
-ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
+ClassScopePtr VariableTable::findParent(AnalysisResultConstRawPtr ar,
                                         const std::string &name,
                                         const Symbol *&sym) const {
   sym = nullptr;
@@ -363,7 +363,7 @@ ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
   return ClassScopePtr();
 }
 
-bool VariableTable::isGlobalTable(AnalysisResultConstPtr ar) const {
+bool VariableTable::isGlobalTable(AnalysisResultConstRawPtr ar) const {
   return ar->getVariables().get() == this;
 }
 

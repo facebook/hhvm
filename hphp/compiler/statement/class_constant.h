@@ -34,10 +34,10 @@ struct ClassConstant : Statement, IParseHandler {
                 bool typeconst, TypeAnnotationPtr typeAnnot);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
   std::string getTypeConstraint() const { return m_typeConstraint; }

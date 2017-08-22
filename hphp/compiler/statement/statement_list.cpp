@@ -111,7 +111,8 @@ bool StatementList::hasImpl() const {
   return false;
 }
 
-ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
+ExpressionPtr StatementList::getEffectiveImpl(
+  AnalysisResultConstRawPtr ar) const {
   ExpressionListPtr rep;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr s = m_stmts[i];
@@ -168,7 +169,7 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StatementList::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr StatementList::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   bool changed = false;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];

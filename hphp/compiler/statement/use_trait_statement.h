@@ -43,7 +43,7 @@ struct UseTraitStatement : Statement, IParseHandler {
   }
 
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
 private:

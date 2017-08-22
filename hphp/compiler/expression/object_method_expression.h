@@ -34,7 +34,7 @@ struct ObjectMethodExpression : FunctionCall {
   ConstructPtr getNthKid(int n) const override;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   void setNthKid(int n, ConstructPtr cp) override;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   ExpressionPtr getObject() const { return m_object; }
   bool isNullSafe() const { return m_nullsafe; }

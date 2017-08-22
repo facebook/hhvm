@@ -31,7 +31,7 @@ struct ArrayElementExpression : Expression, LocalEffectsContainer {
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
@@ -49,7 +49,7 @@ struct ArrayElementExpression : Expression, LocalEffectsContainer {
    * self::$a[1][2] correctly.
    */
   bool appendClass(ExpressionPtr cls,
-                   AnalysisResultConstPtr ar, FileScopePtr file);
+                   AnalysisResultConstRawPtr ar, FileScopePtr file);
 
 private:
   ExpressionPtr m_variable;

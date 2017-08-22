@@ -90,7 +90,7 @@ struct AnalysisResult : BlockScope, FunctionContainer {
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
     }
-    explicit Locker(AnalysisResultConstPtr ar) :
+    explicit Locker(AnalysisResultConstRawPtr ar) :
         m_ar(const_cast<AnalysisResult*>(ar.get())),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
@@ -101,8 +101,8 @@ struct AnalysisResult : BlockScope, FunctionContainer {
     ~Locker() {
       if (m_ar) m_mutex.unlock();
     }
-    AnalysisResultPtr get() const {
-      return m_ar->shared_from_this();
+    AnalysisResultRawPtr get() const {
+      return AnalysisResultRawPtr{m_ar};
     }
     AnalysisResult *operator->() const {
       return m_ar;
@@ -276,10 +276,7 @@ public:
       (BlockScope::shared_from_this());
   }
 
-  AnalysisResultConstPtr shared_from_this() const {
-    return static_pointer_cast<const AnalysisResult>
-      (BlockScope::shared_from_this());
-  }
+  AnalysisResultConstRawPtr shared_from_this() const = delete;
 
 private:
   std::vector<BlockScopePtr> m_ignoredScopes;

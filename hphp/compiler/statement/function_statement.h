@@ -44,7 +44,7 @@ struct FunctionStatement : MethodStatement {
   std::string getName() const override;
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   void outputPHPHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputPHPBody(CodeGenerator &cg, AnalysisResultPtr ar);

@@ -64,7 +64,7 @@ StatementPtr ClassStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+void ClassStatement::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
   ClassScope::KindOf kindOf = ClassScope::KindOf::ObjectClass;
   switch (m_type) {
     case T_CLASS:     kindOf = ClassScope::KindOf::ObjectClass;   break;

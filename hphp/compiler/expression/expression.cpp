@@ -193,7 +193,7 @@ bool Expression::IsIdentifier(const std::string &value) {
 }
 
 ExpressionPtr
-Expression::MakeConstant(AnalysisResultConstPtr /*ar*/, BlockScopePtr scope,
+Expression::MakeConstant(AnalysisResultConstRawPtr /*ar*/, BlockScopePtr scope,
                          const Location::Range& r, const std::string& value) {
   auto exp = std::make_shared<ConstantExpression>(scope, r, value, false);
   if (value == "true" || value == "false") {
@@ -219,7 +219,7 @@ bool Expression::isCollection() const {
   return false;
 }
 
-ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
+ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
                                                BlockScopePtr scope,
                                                const Location::Range& r,
                                                const Variant& value) {

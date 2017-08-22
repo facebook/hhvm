@@ -45,7 +45,7 @@ StatementPtr ExpStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ExpStatement::onParse(AnalysisResultConstPtr /*ar*/,
+void ExpStatement::onParse(AnalysisResultConstRawPtr /*ar*/,
                            FileScopePtr /*scope*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr ExpStatement::preOptimize(AnalysisResultConstRawPtr ar) {
   assert (ar->getPhase() > AnalysisResult::AnalyzeAll);
   return StatementPtr();
 }

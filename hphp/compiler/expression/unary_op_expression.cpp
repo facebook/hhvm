@@ -318,7 +318,7 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UnaryOpExpression::onParse(AnalysisResultConstPtr /*ar*/,
+void UnaryOpExpression::onParse(AnalysisResultConstRawPtr /*ar*/,
                                 FileScopePtr scope) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
@@ -414,7 +414,7 @@ void UnaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   Variant value;
   Variant result;
 

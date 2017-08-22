@@ -47,7 +47,7 @@ struct ClassStatement : InterfaceStatement {
   }
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
   bool ignored() const { return m_ignored;}
 
   std::string getName() const override;

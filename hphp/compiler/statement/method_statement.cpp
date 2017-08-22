@@ -114,7 +114,7 @@ int MethodStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
+FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstRawPtr ar,
                                                  FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   int minParam = 0, numDeclParam = 0;
@@ -204,7 +204,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   return funcScope;
 }
 
-void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
+void MethodStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                    FileScopeRawPtr fileScope,
                                    ClassScopePtr classScope) {
   checkParameters(fileScope);
@@ -469,7 +469,7 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
   }
 }
 
-void MethodStatement::addTraitMethodToScope(AnalysisResultConstPtr ar,
+void MethodStatement::addTraitMethodToScope(AnalysisResultConstRawPtr ar,
                                             ClassScopePtr classScope) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   FileScopeRawPtr fileScope = getFileScope();

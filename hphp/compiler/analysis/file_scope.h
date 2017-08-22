@@ -97,21 +97,21 @@ public:
    * Whether this file has top level non-declaration statements that
    * have CPP implementation.
    */
-  ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
+  ExpressionPtr getEffectiveImpl(AnalysisResultConstRawPtr ar) const;
 
   /**
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.
    */
-  FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
-  void cleanupForError(AnalysisResultConstPtr ar);
-  void makeFatal(AnalysisResultConstPtr ar,
+  FunctionScopePtr setTree(AnalysisResultConstRawPtr ar, StatementListPtr tree);
+  void cleanupForError(AnalysisResultConstRawPtr ar);
+  void makeFatal(AnalysisResultConstRawPtr ar,
                  const std::string& msg, int line);
-  void makeParseFatal(AnalysisResultConstPtr ar,
+  void makeParseFatal(AnalysisResultConstRawPtr ar,
                       const std::string& msg, int line);
 
-  bool addFunction(AnalysisResultConstPtr ar, FunctionScopePtr funcScope);
-  bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
+  bool addFunction(AnalysisResultConstRawPtr ar, FunctionScopePtr funcScope);
+  bool addClass(AnalysisResultConstRawPtr ar, ClassScopePtr classScope);
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }
@@ -200,7 +200,7 @@ private:
   // of FileScope::analyzeProgram.
   CompactVector<ClosureExpressionRawPtr> m_lambdas;
 
-  FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
+  FunctionScopePtr createPseudoMain(AnalysisResultConstRawPtr ar);
   void setFileLevel(StatementListPtr stmt);
 
   static __thread FileScope* s_current;

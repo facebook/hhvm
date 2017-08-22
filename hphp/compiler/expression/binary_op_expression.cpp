@@ -213,7 +213,7 @@ void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) {
       if (m_exp1->is(KindOfBinaryOpExpression)) {
@@ -237,7 +237,7 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return optExp;
 }
 
-static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
+static ExpressionPtr makeIsNull(AnalysisResultConstRawPtr ar,
                                 const Location::Range& r, ExpressionPtr exp,
                                 bool invert) {
   /* Replace "$x === null" with an is_null call; this requires slightly
@@ -265,7 +265,7 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
 // the effectivness of this during parse to ensure that we eliminate only
 // very simple scalars that don't require analysis in later phases. For now,
 // that's just simply scalar values.
-ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
+ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstRawPtr ar) {
   ExpressionPtr optExp;
   Variant v1;
   Variant v2;
@@ -559,7 +559,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr
-BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
+BinaryOpExpression::foldRightAssoc(AnalysisResultConstRawPtr ar) {
   ExpressionPtr optExp1;
 
   if (RuntimeOption::EvalDisableHphpcOpts) return ExpressionPtr();

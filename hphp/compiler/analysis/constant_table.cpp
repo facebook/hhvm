@@ -38,7 +38,7 @@ ConstantTable::ConstantTable(BlockScope &blockScope)
 ///////////////////////////////////////////////////////////////////////////////
 
 void ConstantTable::add(const std::string& name, ExpressionPtr exp,
-                        AnalysisResultConstPtr /*ar*/, ConstructPtr construct) {
+                        AnalysisResultConstRawPtr, ConstructPtr construct) {
 
   if (name == "true" || name == "false") {
     return;
@@ -69,7 +69,7 @@ void ConstantTable::add(const std::string& name, ExpressionPtr exp,
   }
 }
 
-void ConstantTable::setDynamic(AnalysisResultConstPtr /*ar*/, Symbol* sym) {
+void ConstantTable::setDynamic(AnalysisResultConstRawPtr /*ar*/, Symbol* sym) {
   if (!sym->isDynamic()) {
     Lock lock(BlockScope::s_constMutex);
     sym->setDynamic();
@@ -81,19 +81,19 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr /*ar*/, Symbol* sym) {
   }
 }
 
-void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
+void ConstantTable::setDynamic(AnalysisResultConstRawPtr ar,
                                const std::string &name) {
   setDynamic(ar, genSymbol(name, true));
 }
 
-void ConstantTable::setValue(AnalysisResultConstPtr /*ar*/,
+void ConstantTable::setValue(AnalysisResultConstRawPtr /*ar*/,
                              const std::string& name, ExpressionPtr value) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   sym->setValue(value);
 }
 
-bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstPtr ar,
+bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstRawPtr ar,
                                           const std::string &name) const {
   if (const Symbol *sym ATTRIBUTE_UNUSED = getSymbol(name)) {
     assert(sym->isPresent() && sym->valueSet());
@@ -106,7 +106,7 @@ bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstPtr ar,
   return false;
 }
 
-ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
+ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstRawPtr ar,
                                           const std::string &name,
                                           ClassScopePtr &defClass) const {
   if (const Symbol *sym = getSymbol(name)) {
@@ -122,7 +122,7 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
   return ConstructPtr();
 }
 
-ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultConstPtr ar,
+ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultConstRawPtr ar,
                                                 const std::string &name,
                                                 ClassScopePtr &defClass)
 const {
@@ -160,7 +160,7 @@ const ConstantTable::ClassConstantSet& ConstantTable::lookupDependencies(
   return empty;
 }
 
-void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
+void ConstantTable::cleanupForError(AnalysisResultConstRawPtr ar) {
   AnalysisResult::Locker lock(ar);
 
   for (auto& ent : m_symbolMap) {
@@ -173,7 +173,7 @@ void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
   }
 }
 
-ClassScopePtr ConstantTable::findParent(AnalysisResultConstPtr ar,
+ClassScopePtr ConstantTable::findParent(AnalysisResultConstRawPtr ar,
                                         const std::string &name) const {
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();
@@ -186,7 +186,7 @@ ClassScopePtr ConstantTable::findParent(AnalysisResultConstPtr ar,
 }
 
 ClassScopeRawPtr ConstantTable::findBase(
-  AnalysisResultConstPtr ar, const std::string &name,
+  AnalysisResultConstRawPtr ar, const std::string &name,
   const std::vector<std::string> &bases) const {
   for (int i = bases.size(); i--; ) {
     ClassScopeRawPtr p = ar->findClass(bases[i]);

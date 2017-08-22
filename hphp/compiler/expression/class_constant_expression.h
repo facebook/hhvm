@@ -33,7 +33,7 @@ struct ClassConstantExpression : Expression, StaticClassName {
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
   const std::string &getConName() const { return m_varName; }

@@ -84,7 +84,7 @@ void IfStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr IfStatement::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return StatementPtr();
   }

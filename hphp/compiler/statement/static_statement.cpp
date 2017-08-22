@@ -71,8 +71,8 @@ void StaticStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
       variable = assignment_exp->getVariable();
       value = assignment_exp->getValue();
       auto var = dynamic_pointer_cast<SimpleVariable>(variable);
-      // set the Declaration context here instead of all over this file - this phase
-      // is the first to run
+      // set the Declaration context here instead of all over this
+      // file - this phase is the first to run
       var->setContext(Expression::Declaration);
       Symbol *sym = var->getSymbol();
       sym->setStaticInitVal(value);
@@ -106,7 +106,7 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr StaticStatement::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   for (int i = 0; i < m_exp->getCount(); i++) {
     auto exp = (*m_exp)[i];
     auto assignment_exp =

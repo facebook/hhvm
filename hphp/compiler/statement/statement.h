@@ -79,7 +79,7 @@ public:
  /**
    * Called before type inference.
    */
-  virtual StatementPtr preOptimize(AnalysisResultConstPtr /*ar*/) {
+  virtual StatementPtr preOptimize(AnalysisResultConstRawPtr /*ar*/) {
     return StatementPtr();
   }
 

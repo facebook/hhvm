@@ -139,7 +139,8 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+void SimpleFunctionCall::onParse(AnalysisResultConstRawPtr ar,
+                                 FileScopePtr fs) {
   FunctionCall::onParse(ar, fs);
   mungeIfSpecialFunction(ar, fs);
 
@@ -154,7 +155,7 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   }
 }
 
-void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
+void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
                                                 FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   switch (m_type) {
@@ -244,7 +245,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
 }
 
 void SimpleFunctionCall::resolveNSFallbackFunc(
-    AnalysisResultConstPtr ar, FileScopePtr fs) {
+    AnalysisResultConstRawPtr ar, FileScopePtr fs) {
   if (ar->findFunction(m_origName)) {
     // the fully qualified name for this function exists, nothing to do
     return;
@@ -263,7 +264,7 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
+void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr ar) {
   FunctionScopePtr func;
   if (!m_class && !hasStaticClass()) {
     if (!m_dynamicInvoke) {
@@ -294,7 +295,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   }
 }
 
-void SimpleFunctionCall::addLateDependencies(AnalysisResultConstPtr ar) {
+void SimpleFunctionCall::addLateDependencies(AnalysisResultConstRawPtr ar) {
   m_funcScope.reset();
   m_classScope.reset();
   setupScopes(ar);
@@ -523,7 +524,7 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   return true;
 }
 
-bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
+bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstRawPtr ar) {
   if (m_class || hasStaticClass()) return false;
   if (m_type == FunType::Define && m_params &&
       unsigned(m_params->getCount() - 2) <= 1u) {
@@ -552,7 +553,7 @@ const StaticString
   s_GLOBALS("GLOBALS"),
   s_this("this");
 
-ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
+ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstRawPtr ar) {
   if (m_class || !m_funcScope ||
       (hasStaticClass() && (!m_classScope || !isPresent()))) {
     return ExpressionPtr();
@@ -745,7 +746,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstRawPtr ar) {
   if (!Option::ParseTimeOpts) return ExpressionPtr();
 
   if (m_class) updateClassName();
@@ -974,7 +975,7 @@ SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
 }
 
 SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-  AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
+  AnalysisResultConstRawPtr ar, SimpleFunctionCallPtr call, int testOnly,
   int firstParam, bool &error) {
   error = false;
   ExpressionListPtr params = call->getParams();
@@ -1109,7 +1110,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
 namespace HPHP {
 
 ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstPtr ar,
+                                      AnalysisResultConstRawPtr ar,
                                       SimpleFunctionCallPtr call, int mode) {
   bool error = false;
   if (!cg && mode <= 1 && Option::WholeProgram) {
@@ -1139,7 +1140,7 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
 }
 
 ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstPtr ar,
+                                         AnalysisResultConstRawPtr ar,
                                          SimpleFunctionCallPtr call, int mode) {
   bool error = false;
   if (!cg && mode <= 1 && Option::WholeProgram) {
@@ -1168,7 +1169,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
 }
 
 ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstPtr ar,
+                                   AnalysisResultConstRawPtr ar,
                                    SimpleFunctionCallPtr call, int mode) {
   if (!cg && mode <= 1 && Option::WholeProgram) {
     ExpressionListPtr params = call->getParams();

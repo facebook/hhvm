@@ -30,7 +30,7 @@ struct NullCoalesceExpression : Expression {
                          ExpressionPtr expSecond);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
   ExpressionPtr getFirst() const { return m_expFirst; }

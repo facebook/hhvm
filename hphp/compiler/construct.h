@@ -50,7 +50,7 @@ struct IParseHandler {
    * onParse is called by the parser when the construct has just been parsed
    * to allow it to do any necessary work
    */
-  virtual void onParse(AnalysisResultConstPtr /*ar*/, FileScopePtr /*scope*/) {
+  virtual void onParse(AnalysisResultConstRawPtr, FileScopePtr /*scope*/) {
     always_assert(0);
   }
   /**
@@ -60,7 +60,7 @@ struct IParseHandler {
    * (eg) a method, the ClassScope doesnt exist. So we wait until onParse
    * is called for the class, and it calls onParseRecur for its children.
    */
-  virtual void onParseRecur(AnalysisResultConstPtr /*ar*/,
+  virtual void onParseRecur(AnalysisResultConstRawPtr /*ar*/,
                             FileScopeRawPtr /*fs*/, ClassScopePtr /*scope*/) {
     always_assert(0);
   }
@@ -287,7 +287,7 @@ public:
   void dumpNode(int spc);
   void dumpNode(int spc) const;
 
-  void dump(int spc, AnalysisResultConstPtr ar);
+  void dump(int spc, AnalysisResultConstRawPtr ar);
 
   /**
    * Called when generating code.
@@ -307,9 +307,9 @@ public:
 
   void recomputeEffects();
 
-  ExpressionPtr makeConstant(AnalysisResultConstPtr ar,
+  ExpressionPtr makeConstant(AnalysisResultConstRawPtr ar,
                              const std::string &value) const;
-  ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,
+  ExpressionPtr makeScalarExpression(AnalysisResultConstRawPtr ar,
                                      const Variant &value) const;
 private:
   BlockScopeRawPtr m_blockScope;

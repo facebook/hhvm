@@ -152,7 +152,7 @@ public:
   /**
    * Whether this class name was declared twice or more.
    */
-  void setRedeclaring(AnalysisResultConstPtr ar, int redecId);
+  void setRedeclaring(AnalysisResultConstRawPtr ar, int redecId);
   bool isRedeclaring() const { return m_redeclaring >= 0;}
 
   /* For class_exists */
@@ -175,7 +175,7 @@ public:
   bool getAttribute(Attribute attr) const {
     return m_attribute & attr;
   }
-  bool hasAttribute(Attribute attr, AnalysisResultConstPtr ar) const {
+  bool hasAttribute(Attribute attr, AnalysisResultConstRawPtr ar) const {
     if (getAttribute(attr)) return true;
     ClassScopePtr parent = getParentScope(ar);
     return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
@@ -197,7 +197,8 @@ public:
    * may be redeclared or may have private methods that need to check class
    * context.
    */
-  bool needsInvokeParent(AnalysisResultConstPtr ar, bool considerSelf = true);
+  bool needsInvokeParent(AnalysisResultConstRawPtr ar,
+                         bool considerSelf = true);
 
   /*
     void collectProperties(AnalysisResultPtr ar,
@@ -209,13 +210,13 @@ public:
    * Testing whether this class derives from another.
    */
   bool derivesDirectlyFrom(const std::string &base) const;
-  bool derivesFrom(AnalysisResultConstPtr ar, const std::string &base,
+  bool derivesFrom(AnalysisResultConstRawPtr ar, const std::string &base,
                    bool strict, bool def) const;
 
  /**
   * Find a common parent of two classes; returns "" if there is no such.
   */
-  static ClassScopePtr FindCommonParent(AnalysisResultConstPtr ar,
+  static ClassScopePtr FindCommonParent(AnalysisResultConstRawPtr ar,
                                         const std::string &cn1,
                                         const std::string &cn2);
 
@@ -230,16 +231,16 @@ public:
   /**
    * Look up constructor, both __construct and class-name constructor.
    */
-  FunctionScopePtr findConstructor(AnalysisResultConstPtr ar,
+  FunctionScopePtr findConstructor(AnalysisResultConstRawPtr ar,
                                    bool recursive);
 
   Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultConstPtr ar);
+                       AnalysisResultConstRawPtr ar);
 
   /**
    * Collect parent class names.
    */
-  void getInterfaces(AnalysisResultConstPtr ar,
+  void getInterfaces(AnalysisResultConstRawPtr ar,
                      std::vector<std::string> &names,
                      bool recursive = true) const;
 
@@ -250,7 +251,7 @@ public:
 
   UserAttributeMap& userAttributes() { return m_userAttributes;}
 
-  ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const override;
+  ClassScopePtr getParentScope(AnalysisResultConstRawPtr ar) const override;
 
   void addUsedTraits(const std::vector<std::string> &names) {
     for (unsigned i = 0; i < names.size(); i++) {
@@ -308,7 +309,7 @@ public:
   /**
    * Override function container
    */
-  bool addFunction(AnalysisResultConstPtr ar,
+  bool addFunction(AnalysisResultConstRawPtr ar,
                    FileScopeRawPtr fileScope,
                    FunctionScopePtr funcScope);
 

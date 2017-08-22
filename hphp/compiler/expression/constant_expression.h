@@ -34,8 +34,8 @@ struct ConstantExpression : Expression, private IParseHandler {
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   bool isScalar() const override;
   bool isLiteralNull() const override;
   int getLocalEffects() const override { return NoEffect; }
@@ -67,7 +67,7 @@ struct ConstantExpression : Expression, private IParseHandler {
   bool hadBackslash() const { return m_hadBackslash; }
 private:
 
-  Symbol *resolveNS(AnalysisResultConstPtr ar);
+  Symbol *resolveNS(AnalysisResultConstRawPtr ar);
   std::string m_name;
   std::string m_origName;
   bool m_hadBackslash;

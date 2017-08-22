@@ -123,12 +123,12 @@ bool LocalEffectsContainer::hasLocalEffect(Construct::Effect effect) const {
   return m_localEffects & effect;
 }
 
-ExpressionPtr Construct::makeConstant(AnalysisResultConstPtr ar,
+ExpressionPtr Construct::makeConstant(AnalysisResultConstRawPtr ar,
                                       const std::string &value) const {
   return Expression::MakeConstant(ar, getScope(), getRange(), value);
 }
 
-ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstPtr ar,
+ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstRawPtr ar,
                                                const Variant &value) const {
   return Expression::MakeScalarExpression(ar, getScope(),
                                           getRange(), value);
@@ -314,7 +314,7 @@ void Construct::dumpNode(int spc) {
   std::cout << "\n";
 }
 
-void Construct::dump(int spc, AnalysisResultConstPtr ar) {
+void Construct::dump(int spc, AnalysisResultConstRawPtr ar) {
   dumpNode(spc);
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (auto kid = getNthKid(i)) {

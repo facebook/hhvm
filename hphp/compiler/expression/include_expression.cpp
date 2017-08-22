@@ -183,7 +183,8 @@ std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
   return included;
 }
 
-void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void IncludeExpression::onParse(AnalysisResultConstRawPtr ar,
+                                FileScopePtr scope) {
   /* m_documentRoot is a bitfield */
   bool dr = m_documentRoot;
   m_include = CheckInclude(shared_from_this(), scope, m_exp, dr);
@@ -195,7 +196,7 @@ void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 // static analysis functions
 
 FileScopeRawPtr IncludeExpression::getIncludedFile(
-  AnalysisResultConstPtr ar) const {
+  AnalysisResultConstRawPtr ar) const {
   if (m_include.empty()) return FileScopeRawPtr();
   return ar->findFileScope(m_include);
 }
@@ -209,7 +210,7 @@ bool IncludeExpression::isReqLit() const {
     m_op == T_REQUIRE_ONCE && isDocumentRoot();
 }
 
-bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
+bool IncludeExpression::analyzeInclude(AnalysisResultConstRawPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
@@ -233,7 +234,7 @@ void IncludeExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   var->setAttribute(VariableTable::ContainsLDynamicVariable);
 }
 
-ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       bool dr = m_documentRoot;

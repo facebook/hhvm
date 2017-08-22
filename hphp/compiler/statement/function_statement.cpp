@@ -54,7 +54,8 @@ StatementPtr FunctionStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
+                                FileScopePtr scope) {
   checkParameters(scope);
   // Correctness checks are normally done before adding function to scope.
   if (m_params) {

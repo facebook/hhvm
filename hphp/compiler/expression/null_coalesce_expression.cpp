@@ -77,7 +77,7 @@ void NullCoalesceExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr
-NullCoalesceExpression::preOptimize(AnalysisResultConstPtr /*ar*/) {
+NullCoalesceExpression::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   Variant value;
   if (m_expFirst->getScalarValue(value)) {
     return value.isNull() ? m_expSecond : m_expFirst;

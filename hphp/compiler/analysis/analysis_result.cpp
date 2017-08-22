@@ -344,7 +344,7 @@ void AnalysisResult::canonicalizeSymbolOrder() {
 }
 
 void AnalysisResult::markRedeclaringClasses() {
-  AnalysisResultPtr ar = shared_from_this();
+  auto const ar = AnalysisResultConstRawPtr{this};
   for (auto& pair : m_classDecs) {
     auto& classes = pair.second;
     if (classes.size() > 1) {
@@ -417,7 +417,7 @@ void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
 }
 
 void AnalysisResult::checkClassDerivations() {
-  AnalysisResultPtr ar = shared_from_this();
+  auto const ar = shared_from_this();
   {
     Timer timer(Timer::WallTime, "importUsedTraits");
     for (auto& pair : m_classDecs) {
@@ -447,7 +447,7 @@ void AnalysisResult::resolveNSFallbackFuncs() {
   for (auto &pair : m_nsFallbackFuncs) {
     auto sfc = static_pointer_cast<SimpleFunctionCall>(pair.first);
     sfc->resolveNSFallbackFunc(
-      shared_from_this(),
+      AnalysisResultConstRawPtr{this},
       pair.second
     );
   }
@@ -815,7 +815,7 @@ struct OptVisitor {
     return m_dispatcher->getActiveWorker();
   }
 
-  AnalysisResultPtr m_ar;
+  AnalysisResultConstRawPtr m_ar;
   unsigned m_nscope;
   JobQueueDispatcher<OptWorker>* m_dispatcher;
 };

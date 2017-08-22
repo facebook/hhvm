@@ -74,7 +74,7 @@ int InterfaceStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
+void InterfaceStatement::onParse(AnalysisResultConstRawPtr ar,
                                  FileScopePtr scope) {
   std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
@@ -154,7 +154,7 @@ std::string InterfaceStatement::getName() const {
   return std::string("Interface ") + m_originalName;
 }
 
-bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
+bool InterfaceStatement::checkVolatileBases(AnalysisResultConstRawPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   assert(!classScope->isVolatile());
   auto const& bases = classScope->getBases();
@@ -165,7 +165,7 @@ bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
   return false;
 }
 
-void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
+void InterfaceStatement::checkVolatile(AnalysisResultConstRawPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   // redeclared classes/interfaces are automatically volatile
   if (!classScope->isVolatile()) {
@@ -230,7 +230,7 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
+StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     checkVolatile(ar);
   }

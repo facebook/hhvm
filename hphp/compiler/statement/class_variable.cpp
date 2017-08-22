@@ -76,7 +76,7 @@ static bool isEquivRedecl(const std::string &name,
   return exp->getText() == symDeclExp->getText();
 }
 
-void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
+void ClassVariable::onParseRecur(AnalysisResultConstRawPtr ar,
                                  FileScopeRawPtr fs,
                                  ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
@@ -255,7 +255,7 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr ClassVariable::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   auto scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     auto exp = (*m_declaration)[i];

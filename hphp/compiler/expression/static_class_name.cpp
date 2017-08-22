@@ -47,7 +47,7 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
   }
 }
 
-void StaticClassName::onParse(AnalysisResultConstPtr ar,
+void StaticClassName::onParse(AnalysisResultConstRawPtr ar,
                               FileScopePtr /*scope*/) {
   if (!m_self && !m_parent && !m_static && hasStaticClass()) {
     ar->parseOnDemandByClass(m_origClassName);

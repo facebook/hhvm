@@ -29,12 +29,12 @@ struct ExpStatement : Statement, IParseHandler {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect;}
 
   ExpressionPtr getExpression() { return m_exp;}
 
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   bool kidUnused(int i) const override { return i == 0; }
 private:

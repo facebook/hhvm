@@ -41,7 +41,7 @@ StatementPtr ClassRequireStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
+void ClassRequireStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                          FileScopeRawPtr fs,
                                          ClassScopePtr scope) {
   if (!scope->isTrait() && !scope->isInterface()) {

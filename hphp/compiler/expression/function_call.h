@@ -39,7 +39,7 @@ public:
   void setNthKid(int n, ConstructPtr cp) override;
   int getKidCount() const override;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   const std::string& getName() const = delete;//{ return m_name; }
@@ -60,7 +60,7 @@ public:
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
   bool hasUnpack() const;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr fileScope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fileScope) override;
   bool checkUnpackParams();
   bool isNamed(folly::StringPiece name) const;
 private:

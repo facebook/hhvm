@@ -38,7 +38,7 @@ struct TypedefStatement : Statement, IParseHandler {
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
 public: // IParseHandler
-  void onParse(AnalysisResultConstPtr, FileScopePtr) override;
+  void onParse(AnalysisResultConstRawPtr, FileScopePtr) override;
 
 public:
   const std::string name;

@@ -124,7 +124,7 @@ void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void FunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+void FunctionCall::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
   StaticClassName::onParse(ar, fs);
   if (!checkUnpackParams()) {
     parseTimeFatal(
@@ -193,7 +193,7 @@ void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr /*ar*/) {
+ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }

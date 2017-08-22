@@ -55,19 +55,19 @@ struct ConstantTable : SymbolTable {
   /**
    * Explicitly setting a constant to be dynamic, mainly for "Dynamic" note.
    */
-  void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
-  void setDynamic(AnalysisResultConstPtr ar, Symbol* sym);
+  void setDynamic(AnalysisResultConstRawPtr ar, const std::string &name);
+  void setDynamic(AnalysisResultConstRawPtr ar, Symbol* sym);
 
   /**
    * Called when a constant is declared (l-value).
    */
   void add(const std::string &name, ExpressionPtr exp,
-           AnalysisResultConstPtr ar, ConstructPtr construct);
+           AnalysisResultConstRawPtr ar, ConstructPtr construct);
 
   /**
    * Called after a constants value is determined
    */
-  void setValue(AnalysisResultConstPtr ar, const std::string &name,
+  void setValue(AnalysisResultConstRawPtr ar, const std::string &name,
                 ExpressionPtr value);
 
   /**
@@ -75,15 +75,16 @@ struct ConstantTable : SymbolTable {
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  bool isRecursivelyDeclared(AnalysisResultConstPtr ar,
+  bool isRecursivelyDeclared(AnalysisResultConstRawPtr ar,
                              const std::string &name) const;
-  ConstructPtr getValueRecur(AnalysisResultConstPtr ar, const std::string &name,
+  ConstructPtr getValueRecur(AnalysisResultConstRawPtr ar,
+                             const std::string &name,
                              ClassScopePtr &defClass) const;
-  ConstructPtr getDeclarationRecur(AnalysisResultConstPtr ar,
+  ConstructPtr getDeclarationRecur(AnalysisResultConstRawPtr ar,
                                    const std::string &name,
                                    ClassScopePtr &defClass) const;
 
-  void cleanupForError(AnalysisResultConstPtr ar);
+  void cleanupForError(AnalysisResultConstRawPtr ar);
 
   using ClassConstantSet = boost::container::flat_set<
     std::pair<ClassScopePtr, std::string>
@@ -100,9 +101,9 @@ private:
   bool m_hasDynamic;
   bool m_hasDependencies;
 
-  ClassScopePtr findParent(AnalysisResultConstPtr ar,
+  ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
                            const std::string &name) const;
-  ClassScopeRawPtr findBase(AnalysisResultConstPtr ar,
+  ClassScopeRawPtr findBase(AnalysisResultConstRawPtr ar,
                             const std::string &name,
                             const std::vector<std::string> &bases) const;
 

@@ -35,10 +35,10 @@ public:
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   void deepCopy(SimpleFunctionCallPtr exp);
 
-  bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
+  bool isDefineWithoutImpl(AnalysisResultConstRawPtr ar);
   void setValid() { m_valid = true; }
   void setThrowFatal() { m_type = FunType::ThrowFatal; }
   void setThrowParseFatal() { m_type = FunType::ThrowParseFatal; }
@@ -55,24 +55,24 @@ public:
   int getLocalEffects() const override;
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr fs) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) override;
 
-  void addLateDependencies(AnalysisResultConstPtr ar);
+  void addLateDependencies(AnalysisResultConstRawPtr ar);
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
-    AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
+    AnalysisResultConstRawPtr ar, SimpleFunctionCallPtr call, int testOnly,
     int firstParam, bool &error);
-  void setupScopes(AnalysisResultConstPtr ar);
+  void setupScopes(AnalysisResultConstRawPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
   void updateVtFlags();
   void setLocalThis(const std::string& name) { m_localThis = name; }
   bool isCallToFunction(folly::StringPiece name) const;
   std::string getFullName() const;
-  void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
+  void resolveNSFallbackFunc(AnalysisResultConstRawPtr ar, FileScopePtr fs);
 
   void changeToBytecode() {
     m_changedToBytecode = true;
@@ -117,7 +117,7 @@ protected:
   ExpressionPtr m_safeDef;
   std::string m_lambda;
 
-  ExpressionPtr optimize(AnalysisResultConstPtr ar);
+  ExpressionPtr optimize(AnalysisResultConstRawPtr ar);
 private:
   FunctionScopePtr
   getFuncScopeFromParams(AnalysisResultPtr ar,
@@ -126,7 +126,7 @@ private:
                          ExpressionPtr funcName,
                          ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
-  void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
+  void mungeIfSpecialFunction(AnalysisResultConstRawPtr ar, FileScopePtr fs);
 
   std::string m_localThis;
 };
@@ -140,15 +140,15 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
 // hphp_opt functions
 
 ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstPtr ar,
+                                         AnalysisResultConstRawPtr ar,
                                          SimpleFunctionCallPtr call, int mode);
 
 ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstPtr ar,
+                                   AnalysisResultConstRawPtr ar,
                                    SimpleFunctionCallPtr call, int mode);
 
 ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstPtr ar,
+                                      AnalysisResultConstRawPtr ar,
                                       SimpleFunctionCallPtr call, int mode);
 
 ///////////////////////////////////////////////////////////////////////////////

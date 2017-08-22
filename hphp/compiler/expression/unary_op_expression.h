@@ -39,8 +39,8 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope);
   bool isRefable(bool checkError = false) const override;
   bool isScalar() const override;
   bool isThis() const override;

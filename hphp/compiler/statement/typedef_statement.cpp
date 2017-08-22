@@ -57,7 +57,7 @@ void TypedefStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
 void TypedefStatement::outputPHP(CodeGenerator& /*cg*/,
                                  AnalysisResultPtr /*ar*/) {}
 
-void TypedefStatement::onParse(AnalysisResultConstPtr /*ar*/,
+void TypedefStatement::onParse(AnalysisResultConstRawPtr /*ar*/,
                                FileScopePtr scope) {
   scope->addTypeAliasName(name);
 }

@@ -30,14 +30,15 @@ struct StaticMemberExpression : Expression, StaticClassName {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
   bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ExpressionPtr getExp() { return m_exp; }
 
 private:
-  bool findMember(AnalysisResultConstPtr ar, std::string &name, Symbol *&sym);
+  bool findMember(AnalysisResultConstRawPtr ar,
+                  std::string &name, Symbol *&sym);
 
   ExpressionPtr    m_exp;
   bool             m_valid;

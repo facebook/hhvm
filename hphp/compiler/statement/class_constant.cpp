@@ -53,7 +53,7 @@ StatementPtr ClassConstant::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
+void ClassConstant::onParseRecur(AnalysisResultConstRawPtr ar,
                                  FileScopeRawPtr fs,
                                  ClassScopePtr scope) {
   ConstantTablePtr constants = scope->getConstants();
@@ -141,7 +141,7 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr ClassConstant::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   if (!isAbstract() && !isTypeconst()) {
     for (int i = 0; i < m_exp->getCount(); i++) {
       auto assignment =

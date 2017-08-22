@@ -49,7 +49,7 @@ DECLARE_BOOST_TYPES(MethodStatement);
 struct CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
-                                        AnalysisResultConstPtr ar,
+                                        AnalysisResultConstRawPtr ar,
                                         SimpleFunctionCallPtr, int);
 
 typedef std::pair< ParameterExpressionPtr, int >
@@ -68,7 +68,7 @@ struct FunctionScope : BlockScope,
   /**
    * User defined functions.
    */
-  FunctionScope(AnalysisResultConstPtr ar, bool method,
+  FunctionScope(AnalysisResultConstRawPtr ar, bool method,
                 const std::string &originalName, StatementPtr stmt,
                 bool reference, int minParam, int maxParam,
                 ModifierExpressionPtr modifiers, int attribute,
@@ -77,7 +77,7 @@ struct FunctionScope : BlockScope,
                 const std::vector<UserAttributePtr> &attrs,
                 bool inPseudoMain = false);
 
-  FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
+  FunctionScope(FunctionScopePtr orig, AnalysisResultConstRawPtr ar,
                 const std::string &originalName,
                 StatementPtr stmt, ModifierExpressionPtr modifiers, bool user);
 
@@ -85,7 +85,7 @@ struct FunctionScope : BlockScope,
    * System functions.
    */
   FunctionScope(bool method, const std::string &name, bool reference);
-  void setParamCounts(AnalysisResultConstPtr ar,
+  void setParamCounts(AnalysisResultConstRawPtr ar,
                       int minParam, int numDeclParam);
   void setRefParam(int index);
 
@@ -294,7 +294,7 @@ struct FunctionScope : BlockScope,
   }
 
 private:
-  void init(AnalysisResultConstPtr ar);
+  void init(AnalysisResultConstRawPtr ar);
 
   static StringToFunctionInfoPtrMap s_refParamInfo;
 

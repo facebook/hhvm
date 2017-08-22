@@ -45,7 +45,7 @@ ConstantExpression::ConstantExpression
     m_visited(false), m_depsSet(false) {
 }
 
-void ConstantExpression::onParse(AnalysisResultConstPtr ar,
+void ConstantExpression::onParse(AnalysisResultConstRawPtr ar,
                                  FileScopePtr /*scope*/) {
   ar->parseOnDemandByConstant(m_name);
 }
@@ -107,7 +107,7 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
+Symbol *ConstantExpression::resolveNS(AnalysisResultConstRawPtr ar) {
   BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
   if (!block) {
     if (!hadBackslash() && Option::WholeProgram) {
@@ -142,7 +142,7 @@ void ConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return ExpressionPtr();
   }

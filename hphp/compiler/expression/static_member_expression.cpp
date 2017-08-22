@@ -64,7 +64,7 @@ ExpressionPtr StaticMemberExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool StaticMemberExpression::findMember(AnalysisResultConstPtr ar,
+bool StaticMemberExpression::findMember(AnalysisResultConstRawPtr ar,
                                         std::string &name, Symbol *&sym) {
   if (m_exp->is(Expression::KindOfScalarExpression)) {
     auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
@@ -145,7 +145,7 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr
-StaticMemberExpression::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StaticMemberExpression::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }

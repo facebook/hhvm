@@ -87,7 +87,7 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr /*ar*/) {
+StatementPtr GlobalStatement::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
   if (!m_exp->getCount()) {
     return NULL_STATEMENT();
   }

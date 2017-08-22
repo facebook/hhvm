@@ -127,7 +127,8 @@ let full_text token =
     (source_text token) (leading_start_offset token) (full_width token)
 
 let leading_text token =
-  SourceText.sub (source_text token) (start_offset token) (leading_width token)
+  SourceText.sub
+    (source_text token) (leading_start_offset token) (leading_width token)
 
 let trailing_text token =
   SourceText.sub

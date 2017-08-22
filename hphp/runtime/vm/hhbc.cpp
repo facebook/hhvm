@@ -590,105 +590,58 @@ bool pushesActRec(Op opcode) {
   }
 }
 
-void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
-  if (ad->isVecArray()) out << "vec(";
-  else if (ad->isDict()) out << "dict(";
-  else if (ad->isKeyset()) out << "keyset(";
+void staticArrayStreamer(const ArrayData* ad, std::string& out) {
+  if (ad->isVecArray()) out += "vec(";
+  else if (ad->isDict()) out += "dict(";
+  else if (ad->isKeyset()) out += "keyset(";
   else {
     assert(ad->isPHPArray());
-    out << "array(";
+    out += "array(";
   }
 
   if (!ad->empty()) {
     bool comma = false;
     for (ArrayIter it(ad); !it.end(); it.next()) {
       if (comma) {
-        out << ",";
+        out += ",";
       } else {
         comma = true;
       }
       Variant key = it.first();
 
       if (!ad->isVecArray() && !ad->isKeyset()) {
-        // Key.
-        if (isIntType(key.getType())) {
-          out << *key.getInt64Data();
-        } else if (isStringType(key.getType())) {
-          out << "\""
-              << escapeStringForCPP(key.getStringData()->data(),
-                                    key.getStringData()->size())
-              << "\"";
-        } else {
-          assert(false);
-        }
-
-        out << "=>";
+        staticStreamer(key.asTypedValue(), out);
+        out += "=>";
       }
 
       Variant val = it.second();
 
-      // Value.
-      [&] {
-        switch (val.getType()) {
-          case KindOfUninit:
-          case KindOfNull:
-            out << "null";
-            return;
-          case KindOfBoolean:
-            out << (val.toBoolean() ? "true" : "false");
-            return;
-          case KindOfInt64:
-            out << *val.getInt64Data();
-            return;
-          case KindOfDouble:
-            out << *val.getDoubleData();
-            return;
-          case KindOfPersistentString:
-          case KindOfString:
-            out << "\""
-                << escapeStringForCPP(val.getStringData()->data(),
-                                      val.getStringData()->size())
-                << "\"";
-            return;
-          case KindOfPersistentVec:
-          case KindOfVec:
-          case KindOfPersistentDict:
-          case KindOfDict:
-          case KindOfPersistentKeyset:
-          case KindOfKeyset:
-          case KindOfPersistentArray:
-          case KindOfArray:
-            staticArrayStreamer(val.getArrayData(), out);
-            return;
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfRef:
-            not_reached();
-        }
-      }();
+      staticStreamer(val.asTypedValue(), out);
     }
   }
-  out << ")";
+  out += ")";
 }
 
-void staticStreamer(const TypedValue* tv, std::stringstream& out) {
+void staticStreamer(const TypedValue* tv, std::string& out) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      out << "null";
+      out += "null";
       return;
     case KindOfBoolean:
-      out << (tv->m_data.num ? "true" : "false");
+      out += (tv->m_data.num ? "true" : "false");
       return;
     case KindOfInt64:
-      out << tv->m_data.num;
+      out += folly::to<std::string>(tv->m_data.num);
       return;
     case KindOfDouble:
-      out << tv->m_data.dbl;
+      out += folly::to<std::string>(tv->m_data.dbl);
       return;
     case KindOfPersistentString:
     case KindOfString:
-      out << "\"" << tv->m_data.pstr->data() << "\"";
+      folly::format(&out, "\"{}\"",
+                    escapeStringForCPP(tv->m_data.pstr->data(),
+                                       tv->m_data.pstr->size()));
       return;
     case KindOfPersistentVec:
     case KindOfVec:
@@ -709,20 +662,20 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
 }
 
 std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
-  std::stringstream out;
+  std::string out;
   PC iStart = it;
   Op op = decode_op(it);
 
   auto readRATA = [&] {
     if (auto unit = u.left()) {
       auto const rat = decodeRAT(unit, it);
-      out << ' ' << show(rat);
+      folly::format(&out, " {}", show(rat));
       return;
     }
 
     auto const pc = it;
     it += encodedRATSize(pc);
-    out << " <RepoAuthType>";
+    out += " <RepoAuthType>";
   };
 
   auto offsetOf = [u](PC pc) {
@@ -748,85 +701,84 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 
   switch (op) {
 
-#define READ(t) out << " " << *((t*)&*it); it += sizeof(t)
+#define READ(t) folly::format(&out, " {}", *((t*)&*it)); it += sizeof(t)
 
-#define READOFF() do {                                              \
-  Offset _value = *(Offset*)it;                                     \
-  out << " " << _value;                                             \
-  if (u != nullptr) {                                               \
-    out << " (" << offsetOf(iStart + _value) << ")";                \
-  }                                                                 \
-  it += sizeof(Offset);                                             \
+#define READOFF() do {                                          \
+  Offset _value = *(Offset*)it;                                 \
+  folly::format(&out, " {}", _value);                           \
+  if (u != nullptr) {                                           \
+    folly::format(&out, " ({})", offsetOf(iStart + _value));    \
+  }                                                             \
+  it += sizeof(Offset);                                         \
 } while (false)
 
-#define READV() out << " " << decode_iva(it);
+#define READV() folly::format(&out, " ()", decode_iva(it));
 
-#define READLA() out << " L:" << decode_iva(it);
+#define READLA() folly::format(&out, " L:{}", decode_iva(it));
 
-#define READIVA() do {                      \
-  out << " ";                               \
-  auto imm = decode_iva(it);                \
-  if (op == OpIncStat && immIdx == 0) {     \
-    out << Stats::g_counterNames[imm];      \
-  } else {                                  \
-    out << imm;                             \
-  }                                         \
-  immIdx++;                                 \
+#define READIVA() do {                                          \
+  auto imm = decode_iva(it);                                    \
+  if (op == OpIncStat && immIdx == 0) {                         \
+    folly::format(&out, " {}", Stats::g_counterNames[imm]);     \
+  } else {                                                      \
+    folly::format(&out, " {}", imm);                            \
+  }                                                             \
+  immIdx++;                                                     \
 } while (false)
 
-#define READOA(type) do {                       \
-  auto const immVal = static_cast<type>(        \
-    *reinterpret_cast<const uint8_t*>(it)       \
-  );                                            \
-  it += sizeof(unsigned char);                  \
-  out << " " << subopToName(immVal);            \
+#define READOA(type) do {                               \
+  auto const immVal = static_cast<type>(                \
+    *reinterpret_cast<const uint8_t*>(it)               \
+  );                                                    \
+  it += sizeof(unsigned char);                          \
+  folly::format(&out, " {}", subopToName(immVal));      \
 } while (false)
 
-#define READLITSTR(sep) do {                                      \
-  Id id = decode_raw<Id>(it);                                     \
-  if (id < 0) {                                                   \
-    assert(op == OpSSwitch);                                      \
-    out << sep << "-";                                            \
-  } else {                                                        \
-    auto const sd = lookupLitstrId(id);                           \
-    out << sep << "\"" <<                                         \
-      escapeStringForCPP(sd->data(), sd->size()) << "\"";         \
-  }                                                               \
+#define READLITSTR(sep) do {                                    \
+  Id id = decode_raw<Id>(it);                                   \
+  if (id < 0) {                                                 \
+    assert(op == OpSSwitch);                                    \
+    folly::format(&out, "{}-", sep);                            \
+  } else {                                                      \
+    auto const sd = lookupLitstrId(id);                         \
+    folly::format(&out, "{}\"{}\"", sep,                        \
+                  escapeStringForCPP(sd->data(), sd->size()));  \
+  }                                                             \
 } while (false)
 
-#define READSVEC() do {                         \
-  int sz = decode_raw<int>(it);                 \
-  out << " <";                                  \
-  const char* sep = "";                         \
-  for (int i = 0; i < sz; ++i) {                \
-    out << sep;                                 \
-    if (op == OpSSwitch) {                      \
-      READLITSTR("");                           \
-      out << ":";                               \
-    }                                           \
-    Offset o = decode_raw<Offset>(it);          \
-    out << offsetOf(iStart + o);                \
-    sep = " ";                                  \
-  }                                             \
-  out << ">";                                   \
+#define READSVEC() do {                                 \
+  int sz = decode_raw<int>(it);                         \
+  out += " <";                                          \
+  const char* sep = "";                                 \
+  for (int i = 0; i < sz; ++i) {                        \
+    out += sep;                                         \
+    if (op == OpSSwitch) {                              \
+      READLITSTR("");                                   \
+      out += ":";                                       \
+    }                                                   \
+    Offset o = decode_raw<Offset>(it);                  \
+    folly::format(&out, "{}", offsetOf(iStart + o));    \
+    sep = " ";                                          \
+  }                                                     \
+  out += ">";                                           \
 } while (false)
 
-#define READIVEC() do {                           \
-  int sz = decode_raw<int>(it);                     \
-  out << " <";                                    \
-  const char* sep = "";                           \
-  for (int i = 0; i < sz; ++i) {                  \
-    out << sep;                                   \
-    IterKind k = (IterKind)decode_raw<Id>(it);      \
-    switch(k) {                                   \
-      case KindOfIter:  out << "(Iter) ";  break; \
-      case KindOfMIter: out << "(MIter) "; break; \
-      case KindOfCIter: out << "(CIter) "; break; \
-    }                                             \
-    out << decode_raw<Id>(it);                      \
-    sep = ", ";                                   \
-  }                                               \
-  out << ">";                                     \
+#define READIVEC() do {                                 \
+  int sz = decode_raw<int>(it);                         \
+  out += " <";                                          \
+  const char* sep = "";                                 \
+  for (int i = 0; i < sz; ++i) {                        \
+    out += sep;                                         \
+    IterKind k = (IterKind)decode_raw<Id>(it);          \
+    switch(k) {                                         \
+      case KindOfIter:  out += "(Iter) ";  break;       \
+      case KindOfMIter: out += "(MIter) "; break;       \
+      case KindOfCIter: out += "(CIter) "; break;       \
+    }                                                   \
+    folly::format(&out, "{}", decode_raw<Id>(it));      \
+    sep = ", ";                                         \
+  }                                                     \
+  out += ">";                                           \
 } while (false)
 
 #define ONE(a) H_##a
@@ -849,23 +801,23 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_SA READLITSTR(" ")
 #define H_RATA readRATA()
 #define H_AA do {                                                \
-  out << ' ';                                                    \
+  out += ' ';                                                    \
   staticArrayStreamer(lookupArrayId(decode_raw<Id>(it)), out);   \
 } while (false)
 #define H_VSA do {                                      \
   int sz = decode_raw<int32_t>(it);                     \
-  out << " <";                                          \
+  out += " <";                                          \
   for (int i = 0; i < sz; ++i) {                        \
     H_SA;                                               \
   }                                                     \
-  out << " >";                                          \
+  out += " >";                                          \
 } while (false)
-#define H_KA out << ' ' << show(decode_member_key(it, u))
-#define H_LAR out << ' ' << show(decodeLocalRange(it))
+#define H_KA (out += ' ', out += show(decode_member_key(it, u)))
+#define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
 
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
-    out << #name;                         \
+    out += #name;                         \
     UNUSED unsigned immIdx = 0;           \
     imm;                                  \
     break;                                \
@@ -898,7 +850,7 @@ OPCODES
 #undef H_KA
     default: assert(false);
   };
-  return out.str();
+  return out;
 }
 
 const char* opcodeToName(Op op) {

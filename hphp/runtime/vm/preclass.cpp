@@ -156,9 +156,9 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";
   } else {
-    std::stringstream ss;
+    std::string ss;
     staticStreamer(&m_val, ss);
-    out << ss.str();
+    out << ss;
   }
   out << " (RAT = " << show(m_repoAuthType) << ")";
   if (m_typeConstraint && !m_typeConstraint->empty()) {
@@ -193,9 +193,9 @@ void PreClass::Const::prettyPrint(std::ostream& out,
   if (m_val.m_type == KindOfUninit) {
     out << " = " << "<non-scalar>";
   } else {
-    std::stringstream ss;
+    std::string ss;
     staticStreamer(&m_val, ss);
-    out << " = " << ss.str();
+    out << " = " << ss;
   }
   out << std::endl;
 }

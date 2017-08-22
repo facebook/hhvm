@@ -71,9 +71,9 @@ std::string escaped_string(SString str) {
 };
 
 std::string array_string(SArray arr) {
-  std::ostringstream str;
+  std::string str;
   staticArrayStreamer(const_cast<ArrayData*>(arr), str);
-  return str.str();
+  return str;
 }
 
 }

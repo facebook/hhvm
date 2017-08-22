@@ -831,10 +831,10 @@ ArgUnion getImm(PC opcode, int idx, const Unit* u = nullptr);
 // Don't use this with variable-sized immediates!
 ArgUnion* getImmPtr(PC opcode, int idx);
 
-void staticStreamer(const TypedValue* tv, std::stringstream& out);
+void staticStreamer(const TypedValue* tv, std::string& out);
 
 std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u);
-void staticArrayStreamer(const ArrayData*, std::ostream&);
+void staticArrayStreamer(const ArrayData*, std::string&);
 
 /*
  * Convert subopcodes or opcodes into strings.

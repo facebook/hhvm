@@ -694,6 +694,9 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
+#if (JEMALLOC_VERSION_MAJOR >= 5)
+    ",metadata_thp:false"
+#endif
 #if (JEMALLOC_VERSION_MAJOR < 5)
     ",lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
 #endif

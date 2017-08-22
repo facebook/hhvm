@@ -182,13 +182,13 @@ Block* GraphBuilder::createBlock(PC pc) {
   return b;
 }
 
-Block* GraphBuilder::at(PC target) {
-  BlockMap::iterator i = m_blocks.find(target);
+Block* GraphBuilder::at(PC target) const {
+  auto const i = m_blocks.find(target);
   return i == m_blocks.end() ? 0 : i->second;
 }
 
 bool GraphBuilder::reachable(Block* from, Block* to,
-                             boost::dynamic_bitset<>& visited) {
+                             boost::dynamic_bitset<>& visited) const {
    if (!from || !to) return false;
    if (visited[from->id]) return false;
    visited[from->id] = true;

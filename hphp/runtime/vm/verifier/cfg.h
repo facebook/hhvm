@@ -148,8 +148,9 @@ private:
       m_unit(func->unit()), m_graph(0) {
   }
   Graph* build();
-  Block* at(Offset off) { return at(m_unit->at(off)); }
-  bool reachable(Block* from, Block* to, boost::dynamic_bitset<>& visited);
+  Block* at(Offset off) const { return at(m_unit->at(off)); }
+  bool reachable(Block* from, Block* to,
+                 boost::dynamic_bitset<>& visited) const;
  private:
   void createBlocks();
   void createExBlocks();
@@ -157,7 +158,7 @@ private:
   void linkExBlocks();
   Block* createBlock(PC pc);
   Block* createBlock(Offset off) { return createBlock(m_unit->at(off)); }
-  Block* at(PC addr);
+  Block* at(PC addr) const;
   Offset offset(PC addr) const {
     return m_unit->offsetOf(addr);
   }

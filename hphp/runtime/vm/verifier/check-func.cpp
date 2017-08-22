@@ -95,9 +95,10 @@ struct FuncChecker {
     {}
   };
 
-  bool checkEdge(Block* b, const State& cur, Block* t, GraphBuilder builder);
-  bool checkBlock(State& cur, Block* b, GraphBuilder builder);
-  bool checkSuccEdges(Block* b, State* cur, GraphBuilder builder);
+  bool checkEdge(Block* b, const State& cur, Block* t,
+                 const GraphBuilder& builder);
+  bool checkBlock(State& cur, Block* b, const GraphBuilder& builder);
+  bool checkSuccEdges(Block* b, State* cur, const GraphBuilder& builder);
   bool checkOffset(const char* name, Offset o, const char* regionName,
                    Offset base, Offset past, bool check_instrs = true);
   bool checkRegion(const char* name, Offset b, Offset p,
@@ -125,7 +126,7 @@ struct FuncChecker {
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
-  bool checkExnEdge(State cur, Block* b, GraphBuilder builder);
+  bool checkExnEdge(State cur, Block* b, const GraphBuilder& builder);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -1567,7 +1568,8 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->guaranteedThis = from->guaranteedThis;
 }
 
-bool FuncChecker::checkExnEdge(State cur, Block* b, GraphBuilder builder) {
+bool FuncChecker::checkExnEdge(State cur, Block* b,
+                               const GraphBuilder& builder) {
   // Reachable catch blocks and fault funclets have an empty stack and
   // non-initialized class-ref slots. Checking an edge to the fault
   // handler right before every instruction is unnecessary since
@@ -1587,7 +1589,8 @@ bool FuncChecker::checkExnEdge(State cur, Block* b, GraphBuilder builder) {
   return ok;
 }
 
-bool FuncChecker::checkBlock(State& cur, Block* b, GraphBuilder builder) {
+bool FuncChecker::checkBlock(State& cur, Block* b,
+                             const GraphBuilder& builder) {
   bool ok = true;
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, unit()) << std::endl;
@@ -1648,7 +1651,8 @@ bool FuncChecker::checkFlow() {
   return ok;
 }
 
-bool FuncChecker::checkSuccEdges(Block* b, State* cur, GraphBuilder builder) {
+bool FuncChecker::checkSuccEdges(Block* b, State* cur,
+                                 const GraphBuilder& builder) {
   bool ok = true;
   int succs = numSuccBlocks(b);
 
@@ -1749,7 +1753,7 @@ bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
  * Otherwise, require the state exactly match.
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t,
-                            GraphBuilder builder) {
+                            const GraphBuilder& builder) {
   State& state = m_info[t->id].state_in;
   bool stateChange = false;
   if (!state.stk) {

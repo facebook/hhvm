@@ -819,7 +819,9 @@ struct MemoryManager {
   /*
    * Heap iterator methods.  `fn' takes a HeapObject* argument.
    *
-   * initFree(): prepare to iterate by initializing free block headers.
+   * initFree(): prepare to iterate by initializing free block headers,
+   *             initializing dead space past m_front, and sorting slabs.
+   * reinitFree(): like initFree() but only update the freelists.
    * iterate(): Raw iterator loop over every HeapObject in the heap.
    *            Skips BigObj because it's just a detail of which sub-heap we
    *            used to allocate something based on its size, and it can prefix
@@ -830,6 +832,7 @@ struct MemoryManager {
    *                  prefixes (NativeData, AsyncFuncFrame, and ClosureHdr).
    */
   void initFree();
+  void reinitFree();
   template<class Fn> void iterate(Fn fn);
   template<class Fn> void forEachHeapObject(Fn fn);
   template<class Fn> void forEachObject(Fn fn);

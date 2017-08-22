@@ -346,9 +346,13 @@ NEVER_INLINE void Marker<apcgc>::sweep() {
     assert(freed_bytes_ >= 0);
   };
 
+  bool need_reinit_free = false;
   g_context->sweepDynPropTable([&](const ObjectData* obj) {
+    if (need_reinit_free) mm.reinitFree();
     auto r = find(obj);
-    return !r.ptr || !marked(r.ptr);
+    // if we return true, call reinitFree() before calling find() again,
+    // to ensure the heap remains walkable.
+    return need_reinit_free = !r.ptr || !marked(r.ptr);
   });
 
   mm.sweepApcArrays([&](APCLocalArray* a) {
@@ -359,7 +363,7 @@ NEVER_INLINE void Marker<apcgc>::sweep() {
     return !marked(s);
   });
 
-  mm.initFree();
+  mm.reinitFree();
 
   heap_.iterate(
     [&](HeapObject* big, size_t big_size) { // onBig

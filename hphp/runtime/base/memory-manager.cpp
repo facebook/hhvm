@@ -465,9 +465,13 @@ void MemoryManager::initHole() {
   }
 }
 
-// initialize the FreeNode header on all freelist entries.
 void MemoryManager::initFree() {
   initHole();
+  m_heap.sort();
+  reinitFree();
+}
+
+void MemoryManager::reinitFree() {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
@@ -481,7 +485,6 @@ void MemoryManager::initFree() {
       }
     }
   }
-  m_heap.sort();
 }
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {

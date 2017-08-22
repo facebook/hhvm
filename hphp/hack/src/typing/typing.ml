@@ -1535,11 +1535,14 @@ and expr_
     (* Fake member property access. For example:
      *   if ($x->f !== null) { ...$x->f... }
      *)
-  | Obj_get (e, (_, Id (_, y)), _)
+  | Obj_get (e, (pid, Id (py, y)), nf)
       when Env.FakeMembers.get env e y <> None ->
         let env, local = Env.FakeMembers.make p env e y in
         let local = p, Lvar (p, local) in
-        expr env local
+        let env, _, ty = expr env local in
+        let env, t_lhs, _ = expr env e in
+        let t_rhs = T.make_typed_expr pid ty (T.Id (py, y)) in
+        make_result env (T.Obj_get (t_lhs, t_rhs, nf)) ty
     (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (pm, Id m), nullflavor) ->
       let nullsafe =

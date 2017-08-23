@@ -39,6 +39,12 @@ struct MInstrState {
     TypedValue tvTempBase;
   };
 
+  // TODO: T21284314 avoid conservative scanning here. The JIT passes
+  // &tvBuiltinReturn::m_data to builtins returning Array/Object/String,
+  // which perform RVO in C++, thus writing valid pointers without updating
+  // m_type, preventing the GC from scanning the pointer.
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
+
   TypedValue tvRef;
   TypedValue tvRef2;
   TypedValue* base;

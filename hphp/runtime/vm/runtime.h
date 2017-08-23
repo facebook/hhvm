@@ -198,6 +198,14 @@ newInstance(Class* cls) {
   Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
                             : Stats::ObjectData_new_dtor_no);
 
+  if (one_bit_refcount && cls->getDtor()) {
+    raise_error(
+      "Class %s has a __destruct() method and cannot be instantiated in "
+      "single-bit reference counting mode",
+      cls->name()->data()
+    );
+  }
+
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && cls->getDtor())) {
     g_context->m_liveBCObjs.insert(inst);
   }

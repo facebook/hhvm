@@ -94,7 +94,7 @@ struct BaseGenerator {
     auto const ar_off = (char*)((T*)datamem)->actRec() - (char*)node;
     auto const tyindex = type_scan::getIndexForMalloc<T>();
     node->obj_offset = obj_offset;
-    node->initHeader(tyindex, HeaderKind::NativeData, ar_off);
+    node->initHeader_32_16(HeaderKind::NativeData, ar_off, tyindex);
     auto const obj = new (objmem) ObjectData(cls, ObjectData::HasNativeData);
     assert((void*)obj == (void*)objmem);
     assert(obj->hasExactlyOneRef());

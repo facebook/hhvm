@@ -184,8 +184,7 @@ struct MixedArray final : ArrayData,
    * Initialize an empty small mixed array with given field. This should be
    * inlined.
    */
-  static void InitSmall(MixedArray* a, RefCount count, uint32_t size,
-                        int64_t nextIntKey);
+  static void InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey);
 
   /*
    * Allocate a new, empty, request-local array in (mixed|dict) mode, with

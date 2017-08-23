@@ -138,23 +138,21 @@ MemoryManager::MemoryManager() {
 
 MemoryManager::~MemoryManager() {
   FTRACE(1, "heap-id {} ~MM\n", t_heap_id);
-  if (debug) {
-    // Check that every allocation in heap has been freed before destruction.
+  // TODO(T20916887): Enable this for one-bit refcounting.
+  if (debug && !one_bit_refcount) {
+    // Check that every object in the heap is free.
     forEachHeapObject([&](HeapObject* h, size_t) {
-      assert(h->kind() == HeaderKind::Free);
+        assert_flog(h->kind() == HeaderKind::Free,
+                    "{} still live in ~MemoryManager()",
+                    header_names[size_t(h->kind())]);
     });
   }
   // ~BigHeap releases its slabs/bigs.
 }
 
 void MemoryManager::resetRuntimeOptions() {
-  if (debug) {
-    checkHeap("resetRuntimeOptions");
-    // check that every allocation in heap has been freed before reset
-    iterate([&](HeapObject* h, size_t) {
-      assert(h->kind() == HeaderKind::Free);
-    });
-  }
+  if (debug) checkHeap("resetRuntimeOptions");
+
   MemoryManager::TlsWrapper::destroy(); // ~MemoryManager()
   MemoryManager::TlsWrapper::getCheck(); // new MemoryManager()
 }
@@ -476,7 +474,7 @@ void MemoryManager::reinitFree() {
     auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
     for (; n && n->kind() != HeaderKind::Free; n = n->next) {
-      n->initHeader(HeaderKind::Free, size);
+      n->initHeader_32(HeaderKind::Free, size);
     }
     if (debug) {
       // ensure the freelist tail is already initialized.
@@ -814,7 +812,7 @@ static void* allocate(size_t nbytes, type_scan::Index ty) {
   if (LIKELY(npadded <= kMaxSmallSize)) {
     auto const ptr = static_cast<MallocNode*>(MM().mallocSmallSize(npadded));
     ptr->nbytes = npadded;
-    ptr->initHeader(ty, HeaderKind::SmallMalloc, 0);
+    ptr->initHeader_32_16(HeaderKind::SmallMalloc, 0, ty);
     return Mode == MBS::Zeroed ? memset(ptr + 1, 0, nbytes) : ptr + 1;
   }
   return MM().mallocBigSize<Mode>(nbytes, HeaderKind::BigMalloc, ty);
@@ -1093,7 +1091,7 @@ MemBlock BigHeap::allocSlab(size_t size, MemoryUsageStats& stats) {
 
 void BigHeap::enlist(MallocNode* n, HeaderKind kind,
                      size_t size, type_scan::Index tyindex) {
-  n->initHeader(tyindex, kind, m_bigs.size());
+  n->initHeader_32_16(kind, m_bigs.size(), tyindex);
   n->nbytes = size;
   m_bigs.push_back(n);
 }

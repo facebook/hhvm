@@ -42,12 +42,10 @@ inline void MixedArray::scan(type_scan::Scanner& scanner) const {
 }
 
 ALWAYS_INLINE
-void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
-                           int64_t nextIntKey) {
-  assert(count != 0);
+void MixedArray::InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey) {
   InitSmallHash(a);
   a->m_sizeAndPos = size; // pos=0
-  a->initHeader(HeaderKind::Mixed, count);
+  a->initHeader(HeaderKind::Mixed, InitialValue);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
 }

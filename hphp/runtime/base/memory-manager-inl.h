@@ -128,7 +128,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 inline FreeNode*
 FreeNode::InitFrom(void* addr, uint32_t size, HeaderKind kind) {
   auto node = static_cast<FreeNode*>(addr);
-  node->initHeader(kind, size);
+  node->initHeader_32(kind, size);
   return node;
 }
 

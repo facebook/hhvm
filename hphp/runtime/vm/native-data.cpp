@@ -100,7 +100,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   );
   node->obj_offset = nativeDataSize;
   assert(type_scan::isKnownType(ndi->tyindex));
-  node->initHeader(ndi->tyindex, HeaderKind::NativeData, 0);
+  node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   assert(obj->hasExactlyOneRef());

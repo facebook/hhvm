@@ -352,7 +352,7 @@ MemBlock ContiguousBigHeap::allocBig(size_t bytes, HeaderKind kind,
   // Round up to the nearest multiple of ChunkSize
   auto cap = (bytes + sizeof(MallocNode) + ChunkSize - 1) & ~(ChunkSize - 1);
   auto n = (MallocNode*)raw_alloc(cap);
-  n->initHeader(tyindex, kind, 0);
+  n->initHeader_32_16(kind, 0, tyindex);
   n->nbytes = cap;
   stats.mmUsage += cap;
   stats.capacity += cap;

@@ -85,7 +85,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   ad->initHash(scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->initHeader(hk, 1);
+  ad->initHeader(hk, InitialValue);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
@@ -154,7 +154,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   auto const ad    = reqAlloc(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader(HeaderKind::Mixed, 1);
+  ad->initHeader(HeaderKind::Mixed, InitialValue);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -198,7 +198,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   ad->initHash(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader(HeaderKind::Mixed, 1);
+  ad->initHeader(HeaderKind::Mixed, InitialValue);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -266,7 +266,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   // `malloc' returns multiple of 16 bytes.
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
-  RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
+  auto const count = mode == AllocMode::Request ? InitialValue : StaticValue;
   ad->initHeader(dest_hk, count);
   CopyHash(ad->hashTab(), other.hashTab(), scale);
 
@@ -697,7 +697,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto ad            = reqAlloc(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->initHeader(*old, 1);
+  ad->initHeader(*old, InitialValue);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -1212,7 +1212,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->initHeader(*src, 1);
+  ad->initHeader(*src, InitialValue);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1379,7 +1379,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   assert(asMixed(ad)->checkInvariants());
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
   assert(ret->hasExactlyOneRef());
-  ret->initHeader(HeaderKind::Mixed, 1);
+  ret->initHeader(HeaderKind::Mixed, InitialValue);
 
   if (elems->hasMixedLayout()) {
     auto const rhs = asMixed(elems);

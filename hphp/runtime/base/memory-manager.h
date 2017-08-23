@@ -457,7 +457,7 @@ static_assert(sizeof(FreeNode) <= kSmallSizeAlign,
 struct NativeNode : HeapObject,
                     type_scan::MarkCountable<NativeNode> {
   NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
-    initHeader(k, 0);
+    initHeader_32(k, 0);
   }
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*

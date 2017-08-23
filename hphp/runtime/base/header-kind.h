@@ -17,8 +17,12 @@
 #ifndef incl_HPHP_HEADER_KIND_H_
 #define incl_HPHP_HEADER_KIND_H_
 
-#include <cstdint>
+#include "hphp/util/compilation-flags.h"
+
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <type_traits>
 
 namespace HPHP {
 
@@ -66,9 +70,28 @@ inline bool haveCount(HeaderKind k) {
 }
 
 /*
- * RefCount type for m_count field in refcounted objects
+ * RefCount type for m_count field in refcounted objects.
+ *
+ * The sign bit flags a reference count as persistent. If a reference count is
+ * persistent, it means we should never increment or decrement it: the object
+ * lives across requests and may be accessed by multiple threads. Persistent
+ * objects can be static or uncounted; static objects have process lifetime,
+ * while uncounted objects are freed using the treadmill. Using 8-bit values
+ * generates shorter cmp instructions while still being far enough from 0 to be
+ * safe.
  */
-using RefCount = int32_t;
+enum RefCount : std::conditional<one_bit_refcount, int8_t, int32_t>::type {
+  InitialValue   = one_bit_refcount ? 0 : 1,
+  UncountedValue = -128,
+  StaticValue    = -127,
+
+  /* Only relevant when one_bit_refcount == true, but always defined so we
+   * don't have to #ifdef away all the relevant code. */
+  PrivateValue   = 0,
+  SharedValue    = 1,
+};
+
+using UnsignedRefCount = std::make_unsigned<RefCount>::type;
 
 enum GCBits {
   Unmarked = 0,
@@ -99,6 +122,9 @@ protected:
   union {
     struct {
       mutable RefCount m_count;
+#ifdef ONE_BIT_REFCOUNT
+      int8_t m_padding[3];
+#endif
       HeaderKind m_kind;
       mutable uint8_t m_weak_refed:1;
       mutable uint8_t m_marks:7;
@@ -111,27 +137,51 @@ protected:
     uint64_t m_all64;
   };
 
-  template<class T> T& aux() const {
+  // rename aux16
+  template<class T> T& aux16() const {
     static_assert(sizeof(T) == 2, "");
     return reinterpret_cast<T&>(m_aux16);
   }
 
-public:
-  void initHeader(HeaderKind kind, RefCount count) {
-    m_all64 = uint64_t(kind) << (8 * offsetof(HeapObject, m_kind)) |
-              uint32_t(count) << (8 * offsetof(HeapObject, m_count));
+  template<class T> T& aux32() {
+    static_assert(sizeof(T) == 4, "");
+    return reinterpret_cast<T&>(m_aux32);
   }
 
-  template<class T>
-  void initHeader(T aux, HeaderKind kind, RefCount count) {
+public:
+  // All of the initHeader functions are carefully crafted to properly
+  // zero-extend their arguments and compose them together into one 8-byte
+  // store. You must carefully audit each one if you change anything about the
+  // layout of HeapObject.
+
+  static_assert(std::is_unsigned<std::underlying_type<HeaderKind>::type>::value,
+                "initHeader() functions assume HeaderKind is unsigned");
+
+  void initHeader(HeaderKind kind, RefCount count) {
+    m_all64 = uint64_t(kind) << (8 * offsetof(HeapObject, m_kind)) |
+              UnsignedRefCount(count);
+  }
+
+  void initHeader_32(HeaderKind kind, uint32_t aux32) {
+    m_all64 = uint64_t(kind) << (8 * offsetof(HeapObject, m_kind)) |
+              aux32;
+  }
+
+  void initHeader_16(HeaderKind kind, RefCount count, uint16_t aux16) {
     m_all64 = uint64_t(kind)  << (8 * offsetof(HeapObject, m_kind)) |
-              uint64_t(uint16_t(aux))   << (8 * offsetof(HeapObject, m_aux16)) |
-              uint32_t(count) << (8 * offsetof(HeapObject, m_count));
-    static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
+              uint64_t(aux16) << (8 * offsetof(HeapObject, m_aux16)) |
+              UnsignedRefCount(count);
+  }
+
+  void initHeader_32_16(HeaderKind kind, uint32_t aux32, uint16_t aux16) {
+    m_all64 = uint64_t(kind)  << (8 * offsetof(HeapObject, m_kind)) |
+              uint64_t(aux16) << (8 * offsetof(HeapObject, m_aux16)) |
+              aux32;
   }
 
   void initHeader(const HeapObject& h, RefCount count) {
-    m_all64 = uint64_t(h.m_hi32) << 32 | uint32_t(count);
+    m_all64 = uint64_t(h.m_hi32) << (8 * offsetof(HeapObject, m_hi32)) |
+              UnsignedRefCount(count);
   }
 
   static constexpr size_t kind_offset() {

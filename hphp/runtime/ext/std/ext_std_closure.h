@@ -33,7 +33,7 @@ extern const StaticString s_Closure;
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
 struct ClosureHdr : HeapObject {
   explicit ClosureHdr(uint32_t size) {
-    initHeader(HeaderKind::ClosureHdr, size);
+    initHeader_32(HeaderKind::ClosureHdr, size);
   }
   uint32_t& size() { return m_aux32; }
   uint32_t size() const { return m_aux32; }

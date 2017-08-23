@@ -60,11 +60,11 @@ namespace HPHP {
  * appears to be near average object size.
  */
 template<size_t LineSize>
-struct alignas(kSmallSizeAlign) SlabHeader: FreeNode {
+struct alignas(kSmallSizeAlign) SlabHeader : FreeNode {
   static_assert((LineSize & (LineSize-1)) == 0, "LineSize must be power of 2");
 
   char* init() {
-    initHeader(HeaderKind::Slab, sizeof(*this));
+    initHeader_32(HeaderKind::Slab, sizeof(*this));
     return start();
     static_assert(sizeof(*this) % kSmallSizeAlign == 0, "");
   }

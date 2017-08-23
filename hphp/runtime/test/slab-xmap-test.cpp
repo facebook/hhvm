@@ -33,15 +33,15 @@ TEST(SlabXmapTest, very_small_xmap) {
   // set up slab like this: [header][large...   ][small][hole]
   //                        [line 0   ][line 1]...           ]
   auto large = reinterpret_cast<MallocNode*>(start);
-  large->initHeader(HeaderKind::SmallMalloc, 0);
+  large->initHeader_32(HeaderKind::SmallMalloc, 0);
   large->nbytes = kMaxSmallSize;
 
   auto small = reinterpret_cast<MallocNode*>(start + large->nbytes);
-  small->initHeader(HeaderKind::SmallMalloc, 0);
+  small->initHeader_32(HeaderKind::SmallMalloc, 0);
   small->nbytes = kSmallSizeAlign;
 
   auto hole = reinterpret_cast<FreeNode*>((char*)small + small->nbytes);
-  hole->initHeader(HeaderKind::Hole, slab->end() - (char*)hole);
+  hole->initHeader_32(HeaderKind::Hole, slab->end() - (char*)hole);
   slab->initCrossingMap([](void*,size_t){});
 
   // ensure find doesn't walk off beginning of crossing map

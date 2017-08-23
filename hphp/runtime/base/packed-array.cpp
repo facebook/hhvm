@@ -113,7 +113,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->initHeader(HeaderKind::Mixed, 1);
+  ad->initHeader(HeaderKind::Mixed, InitialValue);
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 
@@ -239,7 +239,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     // to do that by reinitializing the whole header.
     auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
     assert(ok);
-    ad->initHeader(uint16_t(sizeIndex), adIn->m_kind, 1);
+    ad->initHeader_16(adIn->m_kind, InitialValue, sizeIndex);
 
     assert(ad->m_size == adIn->m_size);
     assert(ad->m_pos == adIn->m_pos);
@@ -247,7 +247,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     // Copy everything from `adIn' to `ad', including header and m_sizeAndPos
     static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
     memcpy16_inline(ad, adIn, (adIn->m_size + 1) * sizeof(TypedValue));
-    ad->initHeader(uint16_t(sizeIndex), adIn->m_kind, 1);
+    ad->initHeader_16(adIn->m_kind, InitialValue, sizeIndex);
 
     assert(ad->m_size == adIn->m_size);
     assert(ad->m_pos == adIn->m_pos);
@@ -324,7 +324,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   // All we have to do afterwards is fix the refcount on the copy.
   auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
   assert(ok);
-  ad->m_count = 1;
+  ad->m_count = InitialValue;
 
   assert(ad->kind() == adIn->kind());
   assert(capacity(ad) == capacity(adIn));
@@ -346,7 +346,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   // reinitializing the whole header.
   auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
   assert(ok);
-  ad->initHeader(uint16_t(sizeIndex), adIn->m_kind, StaticValue);
+  ad->initHeader_16(adIn->m_kind, StaticValue, sizeIndex);
 
   assert(ad->kind() == adIn->kind());
   assert(capacity(ad) >= adIn->m_size);
@@ -362,7 +362,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
 
   auto const sizeIndex = packedArrayCapacityToSizeIndex(arr->m_size);
   auto ad = alloc_packed_static(arr->m_size);
-  ad->initHeader(uint16_t(sizeIndex), HeaderKind::Packed, StaticValue);
+  ad->initHeader_16(HeaderKind::Packed, StaticValue, sizeIndex);
   ad->m_sizeAndPos = arr->m_sizeAndPos;
 
   auto data = packedData(ad);
@@ -389,7 +389,7 @@ ALWAYS_INLINE
 ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
   auto const sizeIndex = packedArrayCapacityToSizeIndex(cap);
   auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeIndex));
-  ad->initHeader(uint16_t(sizeIndex), hk, 1);
+  ad->initHeader_16(hk, InitialValue, sizeIndex);
 
   assert(ad->m_kind == hk);
   assert(capacity(ad) >= cap);
@@ -1154,7 +1154,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Vecs cannot contain references");
     }
-    ad->initHeader(adIn->m_aux16, HeaderKind::VecArray, 1);
+    ad->initHeader_16(HeaderKind::VecArray, InitialValue, adIn->m_aux16);
 
     return ad;
   };
@@ -1244,7 +1244,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
     malloc_huge(extra + sizeof(ArrayData) + size * sizeof(TypedValue))
   );
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
-  ad->initHeader(uint16_t(sizeIndex), array->m_kind, UncountedValue);
+  ad->initHeader_16(array->m_kind, UncountedValue, sizeIndex);
   ad->m_sizeAndPos = array->m_sizeAndPos;
 
   // Do a raw copy without worrying about refcounts, and convert the values to

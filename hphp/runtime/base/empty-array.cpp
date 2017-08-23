@@ -122,7 +122,9 @@ member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   auto const ad = static_cast<ArrayData*>(
     MM().mallocSmallIndex(PackedArray::SmallSizeIndex)
   );
-  ad->initHeader(uint16_t(PackedArray::SmallSizeIndex), HeaderKind::Packed, 1);
+  ad->initHeader_16(
+    HeaderKind::Packed, InitialValue, PackedArray::SmallSizeIndex
+  );
   ad->m_sizeAndPos = 1; // size=1, pos=0
 
   auto const elem = packedData(ad);
@@ -149,7 +151,7 @@ member_lval EmptyArray::MakePacked(TypedValue tv) {
 NEVER_INLINE
 member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
-  MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
+  MixedArray::InitSmall(ad, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const khash = key->hash();
@@ -177,7 +179,7 @@ member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  */
 member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
-  MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
+  MixedArray::InitSmall(ad, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
 

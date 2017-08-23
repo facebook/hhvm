@@ -71,7 +71,7 @@ protected:
    * NOTE: MixedArray no longer calls this constructor.  If you change
    * it, change the MixedArray::Make functions as appropriate.
    */
-  explicit ArrayData(ArrayKind kind, RefCount initial_count = 1)
+  explicit ArrayData(ArrayKind kind, RefCount initial_count = InitialValue)
     : m_sizeAndPos(uint32_t(-1)) {
     initHeader(static_cast<HeaderKind>(kind), initial_count);
     assert(m_size == -1);

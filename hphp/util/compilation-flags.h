@@ -55,6 +55,14 @@ constexpr bool use_tsan =
 #endif
   ;
 
+constexpr bool one_bit_refcount =
+#ifdef ONE_BIT_REFCOUNT
+  true
+#else
+  false
+#endif
+  ;
+
 //////////////////////////////////////////////////////////////////////
 
 }

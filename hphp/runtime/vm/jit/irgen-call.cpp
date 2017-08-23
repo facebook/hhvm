@@ -953,7 +953,10 @@ void emitFPushCtorD(IRGS& env,
   bool const fastAlloc =
     persistentCls &&
     canInstantiate &&
-    !cls->hasNativePropHandler();
+    !cls->hasNativePropHandler() &&
+    // Destructors are not supported in one-bit reference counting, so force
+    // the slow path which will fatal.
+    !(one_bit_refcount && cls->getDtor());
 
   auto const func = lookupImmutableCtor(cls, curClass(env));
 

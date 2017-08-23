@@ -71,7 +71,7 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
   auto ret = static_cast<ProxyArray*>(MM().objMalloc(sizeof(ProxyArray)));
   ret->m_size            = -1;
   ret->m_pos             = 0;
-  ret->initHeader(HeaderKind::Proxy, 1);
+  ret->initHeader(HeaderKind::Proxy, InitialValue);
   ret->m_destructor      = ZvalPtrDtor;
   ret->m_ref             = RefData::Make(make_tv<KindOfArray>(ad));
   return ret;

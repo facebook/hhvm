@@ -34,11 +34,11 @@ __thread int Socket::s_lastErrno;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
 
-SocketData::SocketData(
-  int port,
-  int type
-) : FileData(true), m_port(port), m_type(type) {
-}
+SocketData::SocketData(int port, int type, bool nonblocking)
+  : FileData(nonblocking)
+  , m_port(port)
+  , m_type(type)
+{}
 
 bool SocketData::closeImpl() {
   s_pcloseRet = 0;
@@ -54,8 +54,8 @@ SocketData::~SocketData() {
   SocketData::closeImpl();
 }
 
-Socket::Socket()
-: File(std::make_shared<SocketData>(0, -1)),
+Socket::Socket(bool nonblocking /* = true*/)
+: File(std::make_shared<SocketData>(0, -1, nonblocking)),
   m_data(static_cast<SocketData*>(getFileData()))
 {
 }
@@ -98,9 +98,10 @@ Socket::Socket(std::shared_ptr<SocketData> data, int sockfd, int type,
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */,
-               const StaticString& streamType /* = empty_string_ref */)
+               const StaticString& streamType /* = empty_string_ref */,
+               bool nonblocking /* = true */)
 : Socket(
-    std::make_shared<SocketData>(port, type),
+    std::make_shared<SocketData>(port, type, nonblocking),
     sockfd, type, address, port, timeout, streamType)
 { }
 

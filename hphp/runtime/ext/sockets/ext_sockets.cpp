@@ -490,7 +490,8 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
 
     fd = socket(domain, type, 0);
     sock = req::make<StreamSocket>(
-      fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
+      fd, domain, hosturl.getHost().c_str(), hosturl.getPort(),
+      0, empty_string_ref, false);
 
     if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
@@ -536,14 +537,17 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
       fd = -1;
     }
 
-    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx);
+    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx, false);
     if (sslsock) {
       sock = sslsock;
     } else {
       sock = req::make<StreamSocket>(fd,
                                      domain,
                                      hosturl.getHost().c_str(),
-                                     hosturl.getPort());
+                                     hosturl.getPort(),
+                                     0,
+                                     empty_string_ref,
+                                     false);
     }
   }
 

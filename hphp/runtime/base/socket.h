@@ -37,8 +37,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct SocketData : FileData {
-  SocketData() { }
-  SocketData(int port, int type);
+  explicit SocketData(bool nonblocking) : FileData(nonblocking) { }
+  SocketData(int port, int type, bool nonblocking);
 
   bool closeImpl() override;
   ~SocketData() override;
@@ -94,13 +94,15 @@ struct Socket : File {
   std::shared_ptr<SocketData> getData() const {
     return std::static_pointer_cast<SocketData>(File::getData());
   }
+
 protected:
   bool waitForData();
   bool timedOut() const { return m_data->m_timedOut; }
 
-  Socket();
+  explicit Socket(bool nonblocking = true);
   Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
-         double timeout = 0, const StaticString& streamType = empty_string_ref);
+         double timeout = 0, const StaticString& streamType = empty_string_ref,
+         bool nonblocking = true);
   Socket(std::shared_ptr<SocketData> data,
          int sockfd,
          int type,
@@ -126,11 +128,15 @@ struct ConcreteSocket final : Socket {
   CLASSNAME_IS("Socket");
   RESOURCENAME_IS("Socket");
 
-  ConcreteSocket() = default;
+  explicit ConcreteSocket(bool nonblocking = true)
+    : Socket(nonblocking)
+  {}
   ConcreteSocket(int sockfd, int type, const char *address = nullptr,
                  int port = 0, double timeout = 0,
-                 const StaticString& streamType = empty_string_ref) :
-      Socket(sockfd, type, address, port, timeout, streamType) { }
+                 const StaticString& streamType = empty_string_ref,
+                 bool nonblocking = true)
+    : Socket(sockfd, type, address, port, timeout, streamType, nonblocking)
+  {}
   explicit ConcreteSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
 
   // overriding ResourceData
@@ -141,11 +147,15 @@ struct ConcreteSocket final : Socket {
 // This class provides exactly the same functionality as ConcreteSocket but
 // reports the default behavior for File.
 struct StreamSocket final : Socket {
-  StreamSocket() = default;
+  explicit StreamSocket(bool nonblocking = true)
+    : Socket(nonblocking)
+  {}
   StreamSocket(int sockfd, int type, const char *address = nullptr,
                  int port = 0, double timeout = 0,
-                 const StaticString& streamType = empty_string_ref) :
-      Socket(sockfd, type, address, port, timeout, streamType) { }
+                 const StaticString& streamType = empty_string_ref,
+                 bool nonblocking = true)
+    : Socket(sockfd, type, address, port, timeout, streamType, nonblocking)
+  {}
   explicit StreamSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
 };
 

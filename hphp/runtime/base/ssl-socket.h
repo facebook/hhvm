@@ -52,15 +52,18 @@ struct SSLSocket final : Socket {
   static int GetSSLExDataIndex();
   static req::ptr<SSLSocket> Create(int fd, int domain, const HostURL &hosturl,
                                     double timeout,
-                                    const req::ptr<StreamContext>& ctx);
+                                    const req::ptr<StreamContext>& ctx,
+                                    bool nonblocking = true);
   static req::ptr<SSLSocket> Create(int fd, int domain, CryptoMethod method,
                                     std::string address, int port,
                                     double timeout,
-                                    const req::ptr<StreamContext>& ctx);
+                                    const req::ptr<StreamContext>& ctx,
+                                    bool nonblocking = true);
 
-  SSLSocket();
+  explicit SSLSocket(bool nonblocking = true);
   SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,
-            const char *address = nullptr, int port = 0);
+            const char *address = nullptr, int port = 0,
+            bool nonblocking = true);
   virtual ~SSLSocket();
   DECLARE_RESOURCE_ALLOCATION(SSLSocket);
 
@@ -107,8 +110,12 @@ private:
 };
 
 struct SSLSocketData : SocketData {
-  SSLSocketData() {}
-  SSLSocketData(int port, int type) : SocketData(port, type) {}
+  explicit SSLSocketData(bool nonblocking = true)
+    : SocketData(nonblocking)
+  {}
+  SSLSocketData(int port, int type, bool nonblocking = true)
+    : SocketData(port, type, nonblocking)
+  {}
   virtual bool closeImpl();
   ~SSLSocketData();
 private:

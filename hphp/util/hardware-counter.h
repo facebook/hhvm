@@ -62,7 +62,8 @@ struct HardwareCounter {
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,
-                   bool excludeKernel);
+                   bool excludeKernel,
+                   int exportInterval);
   static void RecordSubprocessTimes();
   static void ExcludeKernel();
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
@@ -118,7 +119,8 @@ struct HardwareCounter {
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,
-                   bool excludeKernel) {}
+                   bool excludeKernel,
+                   bool exportInterval) {}
   static void RecordSubprocessTimes() {}
   static void ExcludeKernel() {}
 

@@ -1190,7 +1190,8 @@ void RuntimeOption::Load(
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
                           false,
-                          EvalProfileHWExcludeKernel);
+                          EvalProfileHWExcludeKernel,
+                          EvalProfileHWExportInterval);
 
     Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",
                  EnableEmitterStats);

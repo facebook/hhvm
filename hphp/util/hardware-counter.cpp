@@ -51,6 +51,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
 static bool s_recordSubprocessTimes = false;
 static bool s_excludeKernel = false;
 static bool s_profileHWEnable;
+static int s_exportInterval = -1;
 static std::string s_profileHWEvents;
 
 static inline bool useCounters() {
@@ -65,20 +66,23 @@ static ServiceData::ExportedTimeSeries*
 createTimeSeries(const std::string& name) {
   assertx(!name.empty());
 
+  if (s_exportInterval == -1) {
+    // We're initializing counters for the main thread in a server process,
+    // which won't be running requests and shouldn't have any time series. Or
+    // someone manually disabled time series exporting in the config. Either
+    // way, bail out early.
+    return nullptr;
+  }
+
   static const std::vector<ServiceData::StatsType> exportTypes{
     ServiceData::StatsType::AVG,
-    ServiceData::StatsType::RATE,
     ServiceData::StatsType::SUM,
-  };
-  static const std::vector<std::chrono::seconds> levels{
-    std::chrono::seconds(60),
-    std::chrono::seconds(0),
   };
 
   return ServiceData::createTimeSeries(
     "perf." + name,
     exportTypes,
-    levels
+    {std::chrono::seconds(s_exportInterval)}
   );
 }
 
@@ -108,13 +112,12 @@ struct HardwareCounterImpl {
   }
 
   void updateServiceData(StructuredLogEntry* entry, bool includingPsp) {
-    auto& timeSeries = includingPsp ? m_timeSeries : m_timeSeriesNonPsp;
-    if (timeSeries == nullptr) return;
-
     auto const value = read();
+    auto timeSeries = includingPsp ? m_timeSeries : m_timeSeriesNonPsp;
+
     if (value != 0) {
       if (entry) entry->setInt(m_desc, value);
-      timeSeries->addValue(value);
+      if (timeSeries) timeSeries->addValue(value);
     }
   }
 
@@ -259,11 +262,13 @@ void HardwareCounter::ExcludeKernel() {
 }
 
 void HardwareCounter::Init(bool enable, const std::string& events,
-                           bool subProc, bool excludeKernel) {
+                           bool subProc, bool excludeKernel,
+                           int exportInterval) {
   s_profileHWEnable = enable;
   s_profileHWEvents = events;
   s_recordSubprocessTimes = subProc;
   s_excludeKernel = excludeKernel;
+  s_exportInterval = exportInterval;
 }
 
 void HardwareCounter::Reset() {
@@ -515,22 +520,22 @@ void HardwareCounter::UpdateServiceData(const timespec& cpu_begin,
 
   static auto cpuTimeSeries = createTimeSeries("cpu-time-us");
   static auto cpuTimeNonPspSeries = createTimeSeries("cpu-time-us-nonpsp");
-  auto& cpu_series = includingPsp ? cpuTimeSeries : cpuTimeNonPspSeries;
+  auto cpu_series = includingPsp ? cpuTimeSeries : cpuTimeNonPspSeries;
   auto const cpuTimeUs = gettime_diff_us(cpu_begin, cpu_now);
   if (cpuTimeUs > 0) {
     if (entry) entry->setInt("cpu-time-us", cpuTimeUs);
-    cpu_series->addValue(cpuTimeUs);
+    if (cpu_series) cpu_series->addValue(cpuTimeUs);
   }
 
   struct timespec wall_now;
   Timer::GetMonotonicTime(wall_now);
   static auto wallTimeSeries = createTimeSeries("wall-time-us");
   static auto wallTimeNonPspSeries = createTimeSeries("wall-time-us-nonpsp");
-  auto& wall_series = includingPsp ? wallTimeSeries : wallTimeNonPspSeries;
+  auto wall_series = includingPsp ? wallTimeSeries : wallTimeNonPspSeries;
   auto const wallTimeUs = gettime_diff_us(wall_begin, wall_now);
   if (wallTimeUs > 0) {
     if (entry) entry->setInt("wall-time-us", wallTimeUs);
-    wall_series->addValue(wallTimeUs);
+    if (wall_series) wall_series->addValue(wallTimeUs);
   }
 
   if (entry) entry->setInt("includingPsp", includingPsp);

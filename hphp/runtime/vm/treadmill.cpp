@@ -30,6 +30,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -188,6 +189,10 @@ void startRequest() {
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
       s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
     }
+    if (!ThreadInfo::s_threadInfo.isNull()) {
+      TI().changeGlobalGCStatus(ThreadInfo::Idle,
+                                ThreadInfo::OnRequestWithNoPendingExecution);
+    }
   }
 }
 
@@ -228,6 +233,33 @@ void finishRequest() {
         }
         toFire.emplace_back(std::move(*it));
         it = s_tq.erase(it);
+      }
+    }
+    constexpr int limit = 100;
+    if (!ThreadInfo::s_threadInfo.isNull()) {
+      // If somehow we excessed the limit, GlobalGCTrigger will stay on
+      // "Triggering" stage forever. No more global GC can be triggered.
+      // But it should have no effect on APC GC -- The data will be freed
+      // by treadmill's calling
+      int i;
+      for (i = 0; i < limit; ++i) {
+        if (TI().changeGlobalGCStatus(
+              ThreadInfo::OnRequestWithPendingExecution,
+              ThreadInfo::Idle)) {
+          // Call globalGCTrigger to Run the pending execution
+          // TODO(20074509)
+          FTRACE(2, "treadmill executes pending global GC callbacks\n");
+          return;
+        }
+        if (TI().changeGlobalGCStatus(
+              ThreadInfo::OnRequestWithNoPendingExecution,
+              ThreadInfo::Idle)) {
+          return;
+        }
+      }
+      assert(i < limit);
+      if (i == limit) {
+        Logger::Warning("Treadmill fails to set global GC status into Idle");
       }
     }
   }

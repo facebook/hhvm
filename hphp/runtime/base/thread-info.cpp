@@ -81,7 +81,6 @@ void ThreadInfo::init() {
   rds::threadInit();
   onSessionInit();
   // TODO(20427335): Get rid of the illogical onSessionInit() call above.
-  m_isOnSession = false;
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
 }
@@ -105,22 +104,24 @@ void ThreadInfo::ExecutePerThread(std::function<void(ThreadInfo*)> f) {
   }
 }
 
-int ThreadInfo::ExecutePerOnSessionThread(std::function<void(ThreadInfo*)> f) {
-  Lock lock(s_thread_info_mutex);
-  int count = 0;
-  for (auto thread : s_thread_infos) {
-    if (thread->m_isOnSession) {
-      f(thread);
-      count++;
+int ThreadInfo::SetPendingGCForAllOnRequestThread() {
+  int cnt = 0;
+  ExecutePerThread( [&cnt](ThreadInfo* t) {
+    if ( t->changeGlobalGCStatus(OnRequestWithNoPendingExecution,
+                                 OnRequestWithPendingExecution)) {
+      t->m_reqInjectionData.setFlag(PendingGCFlag);
+      cnt++;
     }
-  }
-  return count;
+  } );
+  return cnt;
 }
 
 void ThreadInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
-  assert(m_isOnSession == false);
-  m_isOnSession = true;
+}
+
+bool ThreadInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
+  return m_globalGCStatus.compare_exchange_strong(from, to);
 }
 
 void ThreadInfo::setPendingException(Exception* e) {
@@ -138,8 +139,6 @@ void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
-  assert(m_isOnSession);
-  m_isOnSession = false;
 
   if (auto tmp = m_pendingException) {
     m_pendingException = nullptr;

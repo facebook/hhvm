@@ -42,14 +42,25 @@ struct ThreadInfo {
     UserFunctions,
     NetworkIO,
   };
+  /*
+   * Set to Idle when Treadmill::finishRequest().
+   * Set to OnRequestWithNoPendingExecution when Treadmill::startRequest()
+   * If SetPendingGCForAllOnRequestThread() get called,
+   * set to OnRequestWithPendingExecution for each on-request thread
+   */
+  enum GlobalGCStatus {
+    Idle,
+    OnRequestWithNoPendingExecution,
+    OnRequestWithPendingExecution,
+  };
 
   static void GetExecutionSamples(std::map<Executing, int>& counts);
   static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
   /*
-   * Only on-session threads should execute f()
-   * Returns number of on-session threads
+   * Only on-request threads should set up PendingGCFlag
+   * Returns number of on-request threads
    */
-  static int ExecutePerOnSessionThread(std::function<void(ThreadInfo*)> f);
+  static int SetPendingGCForAllOnRequestThread();
   static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   /*
@@ -68,6 +79,13 @@ struct ThreadInfo {
 
   void onSessionInit();
   void onSessionExit();
+
+  /*
+   * Change m_globalGCStatus as atomic operation
+   * Returns true if m_globalGCStatus == from when user call this, and atomic
+   * change it
+   */
+  bool changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to);
 
   /*
    * Setting the pending exception.
@@ -96,8 +114,8 @@ struct ThreadInfo {
 
   Executing m_executing{Idling};
 
-  /* Set to false when session exit. Set to true when session init.  */
-  bool m_isOnSession{false};
+private:
+  std::atomic<GlobalGCStatus> m_globalGCStatus{Idle};
 };
 
 //////////////////////////////////////////////////////////////////////

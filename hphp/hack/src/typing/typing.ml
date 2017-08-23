@@ -1661,18 +1661,20 @@ and expr_
          * valid, not that they match the declared type for the attribute *)
         let namepstr, valexpr = attr in
         let valp, _ = valexpr in
-        let env, _te, valty = expr env valexpr in
-        env, (namepstr, (valp, valty))
+        let env, te, valty = expr env valexpr in
+        env, (namepstr, (valp, valty), te)
       end in
-      let env, _tel, _body = exprs env el in
+      let tal = List.map attr_ptyl (fun (a, _, c) -> (a, c)) in
+      let env, tel, _body = exprs env el in
+      let txml = T.Xml (sid, tal, tel) in
       let env, _te, classes = class_id_for_new p env cid in
       (match classes with
-       | [] -> make_result env T.Any (Reason.Runknown_class p, Tobject)
+       | [] -> make_result env txml (Reason.Runknown_class p, Tobject)
          (* OK to ignore rest of list; class_info only used for errors, and
           * cid = CI sid cannot produce a union of classes anyhow *)
        | (_, class_info, _)::_ ->
         let env = List.fold_left attr_ptyl ~f:begin fun env attr ->
-          let namepstr, valpty = attr in
+          let namepstr, valpty, _ = attr in
           let valp, valty = valpty in
           (* We pretend that XHP attributes are stored as member variables,
            * prefixed with a colon.
@@ -1685,7 +1687,7 @@ and expr_
           let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
           Type.sub_type valp ureason env valty declty
         end ~init:env in
-        make_result env T.Any obj
+        make_result env txml obj
       )
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)

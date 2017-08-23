@@ -1,0 +1,78 @@
+[(AnnotatedAST.Fun
+    { AnnotatedAST.f_mode = <opaque>;
+      f_ret = (Some (<p>, (Hprim Tvoid)));
+      f_name = (<p>, "\\main"); f_tparams = [];
+      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+      f_params = [];
+      f_body =
+      (AnnotatedAST.NamedBody
+         { AnnotatedAST.fnb_nast =
+           [(AnnotatedAST.Expr
+               ((Some \:foo),
+                (AnnotatedAST.Xml ((<p>, "\\:foo"),
+                   [((<p>, "bar"),
+                     ((Some string),
+                      (AnnotatedAST.String (<p>, "herp"))))
+                     ],
+                   []))));
+             (AnnotatedAST.Expr
+                ((Some string),
+                 (AnnotatedAST.Binop ((Eq None),
+                    ((Some string),
+                     (AnnotatedAST.Lvar (<p>, $derp))),
+                    ((Some string),
+                     (AnnotatedAST.String (<p>, "derp")))
+                    ))));
+             (AnnotatedAST.Expr
+                ((Some \:foo),
+                 (AnnotatedAST.Xml ((<p>, "\\:foo"),
+                    [((<p>, "bar"),
+                      ((Some string),
+                       (AnnotatedAST.Lvar (<p>, $derp))))
+                      ],
+                    []))));
+             (AnnotatedAST.Expr
+                ((Some \:foo),
+                 (AnnotatedAST.Xml ((<p>, "\\:foo"),
+                    [((<p>, "bar"),
+                      ((Some string),
+                       (AnnotatedAST.String (<p>, "herp"))))
+                      ],
+                    [((Some \:foo),
+                      (AnnotatedAST.Xml ((<p>, "\\:foo"),
+                         [((<p>, "bar"),
+                           ((Some string),
+                            (AnnotatedAST.String (<p>, "derp"))))
+                           ],
+                         [((Some \:foo),
+                           (AnnotatedAST.Xml ((<p>, "\\:foo"),
+                              [((<p>, "bar"),
+                                ((Some string),
+                                 (AnnotatedAST.String
+                                    (<p>, "herp"))))
+                                ],
+                              [])))
+                           ]
+                         )))
+                      ]
+                    ))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = [] });
+  (AnnotatedAST.Class
+     { AnnotatedAST.c_mode = <opaque>; c_final = false; c_is_xhp = true;
+       c_kind = Cnormal; c_name = (<p>, "\\:foo");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = [];
+       c_vars =
+       [{ AnnotatedAST.cv_final = false; cv_is_xhp = true;
+          cv_visibility = Public;
+          cv_type =
+          (Some (<p>, (Hoption (<p>, (Hprim Tstring)))));
+          cv_id = (<p>, ":bar"); cv_expr = None }
+         ];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_user_attributes = []; c_enum = None })
+  ]

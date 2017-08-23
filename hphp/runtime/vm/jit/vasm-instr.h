@@ -1292,9 +1292,10 @@ VASM_OPCODES
 bool isBlockEnd(const Vinstr& inst);
 
 /*
- * Whether `inst' is a call instruction.
+ * Whether `op' or `inst' is a call instruction.
  */
-bool isCall(const Vinstr& inst);
+bool isCall(Vinstr::Opcode op);
+inline bool isCall(const Vinstr& inst) { return isCall(inst.op); }
 
 /*
  * The register width specification of `op'.

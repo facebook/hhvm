@@ -51,8 +51,9 @@ namespace {
  * Vreg doesn't carry a register-width around, we pass it in via the
  * size param, so that we can verify the zero-extend variants.
  */
-const Vptr* foldable_load(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
-  if (!i || env.use_counts[reg] != 1) return nullptr;
+std::pair<const Vptr*, size_t>
+foldable_load_helper(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
+  if (!i || env.use_counts[reg] != 1) return { nullptr, 0 };
   auto const def_inst = env.def_insts[reg];
   switch (def_inst) {
     case Vinstr::loadb:
@@ -62,21 +63,21 @@ const Vptr* foldable_load(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
       break;
     case Vinstr::loadzbq:
     case Vinstr::loadzbl:
-      if (size != sz::byte) return nullptr;
+      if (size != sz::byte) return { nullptr, 0 };
       break;
     case Vinstr::loadzlq:
-      if (size != sz::dword) return nullptr;
+      if (size != sz::dword) return { nullptr, 0 };
       break;
     case Vinstr::copy:
       break;
     default:
-      return nullptr;
+      return { nullptr, 0 };
   }
 
 #define CHECK_LOAD(load)                        \
   case Vinstr::load:                            \
     if (inst.load##_.d != reg) break;           \
-    return &inst.load##_.s
+    return { &inst.load##_.s, i };
 
   while (i--) {
     auto const& inst = env.unit.blocks[b].code[i];
@@ -91,7 +92,7 @@ const Vptr* foldable_load(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
         CHECK_LOAD(loadzlq);
         case Vinstr::copy:
           if (inst.copy_.d != reg) break;
-          return foldable_load(env, inst.copy_.s, size, b, i);
+          return foldable_load_helper(env, inst.copy_.s, size, b, i);
         default:
           not_reached();
       }
@@ -99,7 +100,32 @@ const Vptr* foldable_load(Env& env, Vreg reg, int size, Vlabel b, size_t i) {
     if (writesMemory(inst.op)) break;
   }
 
-  return nullptr;
+  return { nullptr, 0 };
+}
+
+const Vptr* foldable_load(Env& env, Vreg reg, int size,
+                          Vlabel b, size_t i) {
+  auto const info = foldable_load_helper(env, reg, size, b, i);
+  if (!info.first || info.second + 1 == i) return info.first;
+  std::vector<Vreg> nonSSARegs;
+  visit(env.unit, *info.first, [&] (Vreg r, Width) {
+    if (r.isPhys()) nonSSARegs.push_back(r);
+  });
+  if (nonSSARegs.empty()) return info.first;
+  // The Vptr contains non-ssa regs, so we need to check that they're
+  // not modified between the load and the use.
+  for (auto ix = info.second; ++ix < i; ) {
+    auto const& inst = env.unit.blocks[b].code[ix];
+    if (isCall(inst)) return nullptr;
+    bool ok = true;
+    visitDefs(env.unit, inst, [&] (Vreg r, Width) {
+      for (auto const t : nonSSARegs) {
+        if (t == r) ok = false;
+      }
+    });
+    if (!ok) return nullptr;
+  }
+  return info.first;
 }
 
 const Vptr* foldable_load(Env& env, Vreg8 reg, Vlabel b, size_t i) {

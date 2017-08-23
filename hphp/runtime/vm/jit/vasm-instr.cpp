@@ -72,8 +72,8 @@ bool isBlockEnd(const Vinstr& inst) {
   }
 }
 
-bool isCall(const Vinstr& inst) {
-  switch (inst.op) {
+bool isCall(Vinstr::Opcode op) {
+  switch (op) {
     case Vinstr::call:
     case Vinstr::callarray:
     case Vinstr::callfaststub:

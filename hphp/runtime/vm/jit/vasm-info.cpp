@@ -78,6 +78,7 @@ Vreg getSFUseReg(const Vinstr& inst) {
 
 bool touchesMemory(Vinstr::Opcode op) {
   if (op == Vinstr::lea) return false;
+  if (isCall(op)) return true;
 #define O(name, imms, uses, defs) \
   case Vinstr::name: { using T = name; return uses false; }
 #define U(s)    useMemory<decltype(T::s)>() ||
@@ -95,11 +96,15 @@ bool touchesMemory(Vinstr::Opcode op) {
 #undef Un
 #undef UH
 #undef UA
+#undef UW
+#undef UM
 #undef U
+
 #undef O
 }
 
 bool writesMemory(Vinstr::Opcode op) {
+  if (isCall(op)) return true;
 #define O(name, imms, uses, defs)               \
   case Vinstr::name: { using T = name; return uses false; }
 

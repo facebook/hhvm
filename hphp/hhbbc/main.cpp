@@ -266,6 +266,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
                   std::vector<SString> apcProfile) {
   RuntimeOption::RepoCommit = true;
   RuntimeOption::RepoEvalMode = "local";
+  RuntimeOption::RepoDebugInfo = false; // Don't record UnitSourceLoc
   open_repo(output_repo);
   SCOPE_EXIT { Repo::shutdown(); };
   batchCommit(ues);

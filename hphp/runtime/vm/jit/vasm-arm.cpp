@@ -908,6 +908,26 @@ void Vgen::emit(const unpcklpd& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Use of comparison to zero in unordered
+ * case may not be obvious. 
+ *
+ * fcmeq                fcmeqz
+ * ===================  =======
+ * op1   op2    result  result2
+ * ----  ----   ------  -------
+ * Num == Num     T     F
+ * Num != Num     F     T
+ * Num    SNaN    F     T
+ * Num    QNaN    F     T
+ * SNaN   Num     F     T
+ * SNaN   SNaN    F     T
+ * SNaN   QNaN    F     T
+ * QNaN   Num     F     T
+ * QNaN   SNaN    F     T
+ * QNaN   QNaN    F     T
+ */
+
 void Vgen::emit(const cmpsd& i) {
   switch (i.pred) {
   case ComparisonPred::eq_ord:
@@ -915,7 +935,7 @@ void Vgen::emit(const cmpsd& i) {
     break;
   case ComparisonPred::ne_unord:
     a->fcmeq(D(i.d), D(i.s0), D(i.s1));
-    a->fcmeq(D(i.d), D(i.d));
+    a->fcmeqz(D(i.d), D(i.d));
     break;
   default:
     always_assert(false);

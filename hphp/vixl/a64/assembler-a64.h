@@ -1249,7 +1249,7 @@ class Assembler {
   void fcmp(const FPRegister& fn, const FPRegister& fm);
 
   // FP compare register against zero
-  void fcmeq(const FPRegister& fd, const FPRegister& fn);
+  void fcmeqz(const FPRegister& fd, const FPRegister& fn);
 
   // FP compare registers.
   void fcmeq(const FPRegister& fd, const FPRegister& fn, const FPRegister& fm);

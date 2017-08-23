@@ -84,9 +84,10 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
 
-  LitstrTable::init();
-  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
-  Repo::get().loadGlobalData();
+  if (RuntimeOption::RepoAuthoritative) {
+    LitstrTable::init();
+    Repo::get().loadGlobalData();
+  }
 
   jit::mcgen::processInit();
   jit::processInitProfData();
@@ -140,8 +141,6 @@ void ProcessInit() {
 
   SystemLib::s_nullFunc =
     Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
-
-  LitstrTable::get().setReading();
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \

@@ -61,7 +61,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Option::WholeProgram = false;
 
   LitstrTable::init();
-  LitstrTable::get().setWriting();
   RuntimeOption::RepoAuthoritative = true;
   repo->loadGlobalData(true /* allowFailure */);
 
@@ -76,8 +75,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   addUnit(hhasUnit);
 
   SystemLib::s_inited = true;
-
-  LitstrTable::get().setReading();
 }
 
 RepoWrapper::~RepoWrapper() {

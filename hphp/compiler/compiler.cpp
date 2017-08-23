@@ -580,6 +580,9 @@ int process(const CompilerOptions &po) {
     processInitRan = true;
   }
 
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+
   {
     Timer timer2(Timer::WallTime, "parsing inputs");
     if (!po.inputs.empty() && isPickledPHP) {

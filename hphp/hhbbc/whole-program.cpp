@@ -453,9 +453,9 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     parallel::num_threads = num_threads;
   }
 
-  LitstrTable::get().setReading();
-
   auto program = parse_program(std::move(ues));
+
+  LitstrTable::fini();
 
   state_after("parse", *program);
 
@@ -480,8 +480,10 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   debug_dump_program(index, *program);
   print_stats(index, *program);
 
+  LitstrTable::init();
   LitstrTable::get().setWriting();
   ues = make_unit_emitters(index, *program);
+  LitstrTable::get().setReading();
 
   return { std::move(ues), std::move(index.array_table_builder()) };
 }

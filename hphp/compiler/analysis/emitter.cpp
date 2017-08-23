@@ -11195,8 +11195,6 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
   if (!ues.size()) return;
 
   Timer timer(Timer::WallTime, "Generating text bytcode");
-  LitstrTable::get().mutex().lock();
-  LitstrTable::get().setReading();
   if (ues.size() > Option::ParserThreadCount && Option::ParserThreadCount > 1) {
     JobQueueDispatcher<GenTextWorker> dispatcher {
       Option::ParserThreadCount, 0, false, &outputPath
@@ -11211,8 +11209,6 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
       genText(ue.get(), outputPath);
     }
   }
-  LitstrTable::get().setWriting();
-  LitstrTable::get().mutex().unlock();
 }
 
 void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
@@ -11257,8 +11253,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     threadCount = nFiles;
   }
   if (!threadCount) threadCount = 1;
-
-  LitstrTable::get().setWriting();
 
   /* there is a race condition in the first call to
      makeStaticString. Make sure we dont hit it */
@@ -11348,6 +11342,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     s_ueq.fetch(ues_to_print);
   }
 
+  LitstrTable::get().setReading();
   ar->finish();
   ar.reset();
 

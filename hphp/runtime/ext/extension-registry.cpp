@@ -223,12 +223,10 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 
 void moduleInit() {
   bool wasInited = SystemLib::s_inited;
-  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
   auto const wasDB = RuntimeOption::EvalDumpBytecode;
   RuntimeOption::EvalDumpBytecode &= ~1;
   SCOPE_EXIT {
     SystemLib::s_inited = wasInited;
-    LitstrTable::get().setReading();
     RuntimeOption::EvalDumpBytecode = wasDB;
   };
   SystemLib::s_inited = false;

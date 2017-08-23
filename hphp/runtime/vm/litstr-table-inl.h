@@ -22,10 +22,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void LitstrTable::init() {
+  assert(!LitstrTable::s_litstrTable);
   LitstrTable::s_litstrTable = new LitstrTable();
 }
 
 inline void LitstrTable::fini() {
+  assert(LitstrTable::s_litstrTable);
   delete LitstrTable::s_litstrTable;
   LitstrTable::s_litstrTable = nullptr;
 }
@@ -38,10 +40,12 @@ inline LitstrTable& LitstrTable::get() {
 // Main API.
 
 inline size_t LitstrTable::numLitstrs() const {
+  assert(m_safeToRead);
   return m_namedInfo.size();
 }
 
 inline bool LitstrTable::contains(Id id) const {
+  assert(m_safeToRead);
   return m_namedInfo.contains(id);
 }
 
@@ -69,15 +73,8 @@ void LitstrTable::setNamedEntityPairTable(NamedEntityPairTable&& namedInfo) {
 ///////////////////////////////////////////////////////////////////////////////
 // Concurrency control.
 
-inline Mutex& LitstrTable::mutex() {
-  return m_mutex;
-}
-
-inline void LitstrTable::setReading() {
-  m_safeToRead = true;
-}
-
 inline void LitstrTable::setWriting() {
+  always_assert(!m_litstr2id.size());
   m_safeToRead = false;
 }
 

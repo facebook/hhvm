@@ -820,10 +820,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
 bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
   MemberKey key;
 
-  if(RuntimeOption::RepoAuthoritative) { //if the key mcode is ET, MT or QT
-    LitstrTable::get().setReading();     //we need to read from the LitstrTable
-  }
-
   switch(op){
     case Op::IncDecM:
     case Op::SetOpM:

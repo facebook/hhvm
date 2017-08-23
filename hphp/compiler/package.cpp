@@ -274,9 +274,6 @@ bool Package::parse(bool check) {
     return true;
   }
 
-  LitstrTable::get().setWriting();
-  SCOPE_EXIT { LitstrTable::get().setReading(); };
-
   auto const threadCount = Option::ParserThreadCount <= 0 ?
     1 : Option::ParserThreadCount;
 

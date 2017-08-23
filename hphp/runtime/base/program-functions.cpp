@@ -2397,8 +2397,6 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   MM().resetCouldOOM(isStandardRequest());
   RID().resetTimer();
 
-  LitstrTable::get().setReading();
-
   bool ret = true;
   if (!warmupOnly) {
     try {

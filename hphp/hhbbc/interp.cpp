@@ -2911,10 +2911,9 @@ void in(ISS& env, const bc::CreateCl& op) {
   // Closure classes can be cloned and rescoped at runtime, so it's not safe to
   // assert the exact type of closure objects. The best we can do is assert
   // that it's a subclass of Closure.
-  auto const closure = env.index.resolve_class(env.ctx, s_Closure.get());
-  always_assert(closure.hasValue());
+  auto const closure = env.index.builtin_class(s_Closure.get());
 
-  return push(env, subObj(*closure));
+  return push(env, subObj(closure));
 }
 
 void in(ISS& env, const bc::CreateCont& /*op*/) {

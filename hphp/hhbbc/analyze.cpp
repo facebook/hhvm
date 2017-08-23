@@ -125,9 +125,8 @@ State entry_state(const Index& index, Context const ctx,
   if (ctx.func->isClosureBody) {
     assert(locId < ret.locals.size());
     assert(ctx.func->cls);
-    auto const rcls = index.resolve_class(ctx, s_Closure.get());
-    assert(rcls && "Closure class must always be unique and must resolve");
-    ret.locals[locId++] = subObj(*rcls);
+    auto const rcls = index.builtin_class(s_Closure.get());
+    ret.locals[locId++] = subObj(rcls);
   }
   auto const useVars = ctx.func->isClosureBody
     ? index.lookup_closure_use_vars(ctx.func)

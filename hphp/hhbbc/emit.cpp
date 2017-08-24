@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/hhbbc/representation.h"
@@ -1061,7 +1062,13 @@ void emit_class(EmitUnitState& state,
 
   bool needs86cinit = false;
 
+  auto const nativeConsts = cls.attrs & AttrBuiltin ?
+    Native::getClassConstants(cls.name) : nullptr;
+
   for (auto& cconst : cls.constants) {
+    if (nativeConsts && nativeConsts->count(cconst.name)) {
+      break;
+    }
     if (!cconst.val.hasValue()) {
       pce->addAbstractConstant(
         cconst.name,

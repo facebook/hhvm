@@ -1009,6 +1009,26 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     );
   }
 
+  if (ret->attrs & AttrBuiltin) {
+    if (auto nativeConsts = Native::getClassConstants(ret->name)) {
+      for (auto const& cnsMap : *nativeConsts) {
+        TypedValueAux tvaux;
+        tvCopy(cnsMap.second, tvaux);
+        tvaux.constModifiers() = { false, false };
+        ret->constants.push_back(
+          php::Const {
+            cnsMap.first,
+            borrow(ret),
+            tvaux,
+            staticEmptyString(),
+            staticEmptyString(),
+            false
+          }
+        );
+      }
+    }
+  }
+
   ret->enumBaseTy = pce.enumBaseTy();
 
   return ret;

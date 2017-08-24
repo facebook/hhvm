@@ -262,10 +262,11 @@ interpOutputLocals(IRGS& env,
       setImmLocType(0, TCell);
       break;
 
-    case OpSetL: {
+    case OpSetL:
+    case OpPopL: {
       auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       auto stackType = topType(env, BCSPRelOffset{0});
-      // SetL preserves reffiness of a local.
+      // [Set,Pop]L preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }

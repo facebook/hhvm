@@ -97,6 +97,7 @@ static const struct {
                     IgnoreInnerType,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
+  { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput       }},
@@ -997,6 +998,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::PopR:
   case Op::PopV:
   case Op::PopU:
+  case Op::PopL:
   case Op::Print:
   case Op::PushL:
   case Op::RetC:

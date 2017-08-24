@@ -779,6 +779,68 @@ inline SSATmp* stLocNRC(IRGS& env,
   return stLocImpl(env, id, ldrefExit, ldPMExit, newVal, decRefOld, incRefNew);
 }
 
+inline void stLocMove(IRGS& env,
+                      uint32_t id,
+                      Block* ldrefExit,
+                      Block* ldPMExit,
+                      SSATmp* newVal) {
+  assertx(!newVal->type().maybe(TBoxedCell));
+
+  auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeBoxAndCountness);
+
+  // If the local isn't a ref and we're not in a pseudo-main, we can just move
+  // newValue into the local without manipulating its ref-count.
+  auto unboxed_case = [&] {
+    if (curFunc(env)->isPseudoMain()) gen(env, IncRef, newVal);
+    stLocRaw(env, id, fp(env), newVal);
+    decRef(env, oldLoc);
+    if (curFunc(env)->isPseudoMain()) decRef(env, newVal);
+    return nullptr;
+  };
+
+  // However, if the local is a ref, we'll manipulate the ref-counts as if this
+  // was a SetL, PopC pair. Otherwise, overwriting the ref's inner value can
+  // trigger a destructor, which can then overwrite the ref's inner value
+  // again. If we don't increment newVal's ref-count, this second overwrite
+  // might trigger newVal's destructor, where it wouldn't otherwise. So, to keep
+  // destructor ordering consistent with SetL, PopC, we'll emulate its ref-count
+  // behavior.
+  auto boxed_case = [&] (SSATmp* box) {
+    // It's important that the IncRef happens after the guard on the inner type
+    // of the ref, since it may side-exit.
+    auto const predTy = env.irb->predictedLocalInnerType(id);
+
+    assert(ldrefExit);
+    gen(env, CheckRefInner, predTy, ldrefExit, box);
+
+    auto const innerCell = gen(env, LdRef, predTy, box);
+    gen(env, StRef, box, newVal);
+    gen(env, IncRef, newVal);
+    decRef(env, innerCell);
+    decRef(env, newVal);
+    env.irb->constrainValue(box, DataTypeBoxAndCountness);
+    return nullptr;
+  };
+
+  if (oldLoc->type() <= TCell) {
+    unboxed_case();
+    return;
+  }
+  if (oldLoc->type() <= TBoxedCell) {
+    boxed_case(oldLoc);
+    return;
+  }
+
+  cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, CheckType, TBoxedCell, taken, oldLoc);
+    },
+    boxed_case,
+    unboxed_case
+  );
+}
+
 inline SSATmp* pushStLoc(IRGS& env,
                          uint32_t id,
                          Block* ldrefExit,

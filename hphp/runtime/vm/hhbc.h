@@ -358,6 +358,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopR,            NA,               ONE(RV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
+  O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
   O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \

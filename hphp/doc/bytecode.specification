@@ -982,6 +982,13 @@ PopU                  [U]  ->  []
 
   Pop. Discards the value on the top of the stack.
 
+PopL <local variable id>    [C]  ->  []
+
+  Teleport value from the stack into a local. This instruction marks the local
+  variable given by %1 as defined and pops and stores the value $1 into the
+  local variable. This instruction behaves as if it was a SetL PopC pair, but
+  might be implemented more efficiently.
+
 Dup    [C:<T>]  ->  [C:<T> C:<T>]
 
   Duplicate. Duplicates the cell $1 and pushes it onto the stack.

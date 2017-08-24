@@ -571,6 +571,13 @@ void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopU(IRGS& env)   { popU(env); }
 
+void emitPopL(IRGS& env, int32_t id) {
+  auto const ldrefExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
+  auto const src = popC(env, DataTypeGeneric);
+  stLocMove(env, id, ldrefExit, ldPMExit, src);
+}
+
 void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
 void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
 void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }

@@ -73,6 +73,11 @@ void BasicPeephole::push_back(const Bytecode& next) {
         }
       }
     }
+
+    if (cur.op == Op::SetL && next.op == Op::PopC) {
+      cur = bc_with_loc(next.srcLoc, bc::PopL { cur.SetL.loc1 });
+      return;
+    }
   }
   m_next.push_back(next);
 }

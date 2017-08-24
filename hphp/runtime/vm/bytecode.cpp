@@ -1824,6 +1824,20 @@ OPTBLD_INLINE void iopPopU() {
   vmStack().popU();
 }
 
+OPTBLD_INLINE void iopPopL(local_var to) {
+  assert(to.index < vmfp()->m_func->numLocals());
+  Cell* fr = vmStack().topC();
+  if (to->m_type == KindOfRef || vmfp()->m_func->isPseudoMain()) {
+    // Manipulate the ref-counts as if this was a SetL, PopC pair to preserve
+    // destructor ordering.
+    tvSet(*fr, *to);
+    vmStack().popC();
+  } else {
+    cellMove(*fr, *to);
+    vmStack().discard();
+  }
+}
+
 OPTBLD_INLINE void iopDup() {
   vmStack().dup();
 }

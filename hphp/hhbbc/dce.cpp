@@ -1312,6 +1312,24 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
     });
 }
 
+void dce(Env& env, const bc::PopL& op) {
+  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
+  if (!isLocLive(env, op.loc1) && !effects) {
+    assert(!locRaw(env, op.loc1).couldBe(TRef) ||
+           env.stateBefore.localStaticBindings[op.loc1] ==
+           LocalStaticBinding::Bound);
+    discardNonDtors(env);
+    env.dceState.actionMap[env.id] = DceAction::PopInputs;
+    return;
+  }
+  pop(env);
+  if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
+    addLocGen(env, op.loc1);
+  } else {
+    addLocKill(env, op.loc1);
+  }
+}
+
 void dce(Env& env, const bc::SetL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {

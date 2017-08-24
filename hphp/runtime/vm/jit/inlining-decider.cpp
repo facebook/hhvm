@@ -231,6 +231,7 @@ bool isInliningVVSafe(Op op) {
   switch (op) {
     case Op::Null:
     case Op::PopC:
+    case Op::PopL:
     case Op::CGetL:
     case Op::SetL:
     case Op::IsTypeL:

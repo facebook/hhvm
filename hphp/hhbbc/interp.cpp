@@ -1637,7 +1637,17 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   push(env, TBool);
 }
 
-void in(ISS& env, const bc::SetL& op) {
+namespace {
+
+/*
+ * If the value on the top of the stack is known to be equivalent to the local
+ * its being moved/copied to, return folly::none with modifying any
+ * state. Otherwise, pop the stack value, perform the set, and return a pair
+ * giving the value's type, and any other local its known to be equivalent to.
+ */
+template <typename Op>
+folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
+                                                        const Op& op) {
   nothrow(env);
   auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
@@ -1647,7 +1657,7 @@ void in(ISS& env, const bc::SetL& op) {
     if (equivLoc != NoLocalId) {
       if (equivLoc == op.loc1 ||
           locsAreEquiv(env, equivLoc, op.loc1)) {
-        return reduce(env, bc::Nop {});
+        return folly::none;
       }
     } else {
       equivLoc = op.loc1;
@@ -1658,7 +1668,26 @@ void in(ISS& env, const bc::SetL& op) {
   if (equivLoc != op.loc1 && equivLoc != NoLocalId) {
     addLocEquiv(env, op.loc1, equivLoc);
   }
-  push(env, std::move(val), equivLoc);
+  return { std::make_pair(std::move(val), equivLoc) };
+}
+
+}
+
+void in(ISS& env, const bc::PopL& op) {
+  // If the same value is already in the local, do nothing but pop
+  // it. Otherwise, the set has been done by moveToLocImpl.
+  if (!moveToLocImpl(env, op)) return reduce(env, bc::PopC {});
+}
+
+void in(ISS& env, const bc::SetL& op) {
+  // If the same value is already in the local, do nothing because SetL keeps
+  // the value on the stack. If it isn't, we need to push it back onto the stack
+  // because moveToLocImpl popped it.
+  if (auto p = moveToLocImpl(env, op)) {
+    push(env, std::move(p->first), p->second);
+  } else {
+    reduce(env, bc::Nop {});
+  }
 }
 
 void in(ISS& env, const bc::SetN&) {

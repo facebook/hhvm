@@ -7,6 +7,7 @@ class C {
     var_dump($obj);
     echo "==========\n";
     $obj = 1;
+    echo "C::__destruct done\n";
   }
 }
 

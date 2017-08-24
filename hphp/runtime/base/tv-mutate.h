@@ -311,7 +311,11 @@ ALWAYS_INLINE void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
   auto const old = to;
   cellCopy(fr, to);
   tvDecRefGen(old);
-  assert(cellIsPlausible(to));
+  // NB: If we're in a pseudo-main, the dec-ref on "old" may trigger a
+  // destructor which can bind or change the value in "to", so there's no
+  // guarantee that "from" and "to" contain the same value at this point (or
+  // that "to" is even stiil a cell).
+  assert(tvIsPlausible(to));
 }
 
 /*

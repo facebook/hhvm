@@ -17,6 +17,8 @@
 module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
+module Trivia = Full_fidelity_positioned_trivia
+module TriviaKind = Full_fidelity_trivia_kind
 module SourceText = Full_fidelity_source_text
 open Prim_defs
 
@@ -1995,105 +1997,77 @@ let pScript node env =
 
 exception Malformed_trivia of int
 
+type fixmes = Pos.t IMap.t IMap.t
 type scoured_comment = Pos.t * comment
 type scoured_comments = scoured_comment list
+type accumulator = scoured_comments * fixmes
 
 let scour_comments
   (path        : Relative_path.t)
-  (source_text : Full_fidelity_source_text.t)
+  (source_text : SourceText.t)
   (tree        : node)
-  : scoured_comments =
-    let pos_of_offset =
-      Full_fidelity_source_text.relative_pos path source_text
+  : accumulator =
+    let pos_of_offset = SourceText.relative_pos path source_text in
+    let go (node : node) (cmts, fm as acc : accumulator) (t : Trivia.t)
+        : accumulator =
+      match Trivia.kind t with
+      | TriviaKind.WhiteSpace
+      | TriviaKind.EndOfLine
+      | TriviaKind.Unsafe
+      | TriviaKind.UnsafeExpression
+      | TriviaKind.FallThrough
+      | TriviaKind.ExtraTokenError
+        -> acc
+      | TriviaKind.DelimitedComment ->
+        let start = Trivia.start_offset t + 2 (* for the '/*' *) in
+        let end_  = Trivia.end_offset t - 2 (* for the '*/' *) in
+        let len   = end_ - start + 1 in
+        let p = pos_of_offset start end_ in
+        let t = String.sub (Trivia.text t) 2 len in
+        (p, CmtBlock t) :: cmts, fm
+      | TriviaKind.SingleLineComment ->
+        let text = SourceText.text (Trivia.source_text t) in
+        let start = Trivia.start_offset t in
+        let start = start + if text.[start] = '#' then 1 else 2 in
+        let end_  = Trivia.end_offset t in
+        let len   = end_ - start + 1 in
+        let p = pos_of_offset start end_ in
+        let t = String.sub text start len in
+        (p, CmtLine t) :: cmts, fm
+      | TriviaKind.FixMe
+      | TriviaKind.IgnoreError
+        -> let open Str in
+           let line = Pos.line (get_pos node) in
+           let ignores = try IMap.find line fm with Not_found -> IMap.empty in
+           let reg = regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)\\[\\([0-9]+\\)\\]" in
+           let txt = Trivia.text t in
+           (try ignore (search_forward reg txt 0) with
+           | Not_found ->
+             let msg =
+               "Inconsistent trivia classification: Received " ^
+               TriviaKind.to_string (Trivia.kind t) ^ ", but failed to match " ^
+               "regexp for FIXME or IGNORE_ERROR. Either the lexer has a bug" ^
+               "in its trivia classification, or the lowerer is more " ^
+               "restrictive then the lexer."
+             in
+             failwith msg;
+           );
+           let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
+           let code = int_of_string (matched_group 2 txt) in
+           let ignores = IMap.add code p ignores in
+           cmts, IMap.add line ignores fm
     in
-    let parse
-      (acc : scoured_comments)
-      (offset : int)
-      (str : string)
-      : scoured_comments =
-        let fail state n =
-          let state =
-            match state with
-            | `Free        -> "Free"
-            | `LineCmt     -> "LineCmt"
-            | `SawSlash    -> "SawSlash"
-            | `EmbeddedCmt -> "EmbeddedCmt"
-            | `EndEmbedded -> "EndEmbedded"
-          in
-          if not !(lowerer_state.suppress_output) then
-            Printf.eprintf "Error parsing trivia in state %s: '%s'\n" state str;
-          raise (Malformed_trivia n)
-        in
-        let length = String.length str in
-        let mk tag (start : int) (end_plus_one : int) acc : scoured_comments =
-          match tag with
-          | `Line ->
-            (* Correct for the offset of the comment in the file *)
-            let start = offset + start in
-            let end_ = offset + end_plus_one in
-            let (p, c) as result =
-              Full_fidelity_source_text.
-              ( pos_of_offset start end_
-              , CmtLine (sub source_text start (end_ - start))
-              )
-            in
-            result :: acc
-          | `Block ->
-            (* Correct for the offset of the comment in the file *)
-            let start = offset + start in
-            let end_ = offset + end_plus_one - 1 in
-            let (p, c) as result =
-              Full_fidelity_source_text.
-              (* Should be 'start end_', but keeping broken for fidelity. *)
-              ( pos_of_offset (end_) (end_ + 1)
-              , CmtBlock (sub source_text start (end_ - start))
-              )
-            in
-            result :: acc
-        in
-        let rec go start state idx : scoured_comments =
-          if idx = length (* finished? *)
-          then begin
-            match state with
-            | `Free -> acc
-            | `LineCmt -> mk `Line start length acc
-            | _        -> fail state start
-          end else begin
-            let next = idx + 1 in
-            match state, str.[idx] with
-            (* Ending comments produces the comment just scanned *)
-            | `LineCmt,     '\n' -> mk `Line  start idx @@ go next `Free next
-            | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
-            (* PHP has line comments delimited by a # *)
-            | `Free,     '#'              -> go next `LineCmt      next
-            (* All other comment delimiters start with a / *)
-            | `Free,     '/'              -> go start `SawSlash    next
-            (* After a / in trivia, we must see either another / or a * *)
-            | `SawSlash, '/'              -> go next  `LineCmt     next
-            | `SawSlash, '*'              -> go next  `EmbeddedCmt next
-            (* A * without a / does not end an embedded comment *)
-            | `EmbeddedCmt, '*'           -> go start `EndEmbedded next
-            | `EndEmbedded, '*'           -> go start `EndEmbedded next
-            | `EndEmbedded,  _            -> go start `EmbeddedCmt next
-            (* Whitespace skips everywhere else *)
-            | _, (' ' | '\t' | '\n')      -> go start state        next
-            (* When scanning comments, anything else is accepted *)
-            | `LineCmt,     _             -> go start state        next
-            | `EmbeddedCmt, _             -> go start state        next
-            (* Anything else; bail *)
-            | _ -> fail state start
-          end
-        in
-        go 0 `Free 0
-    in (* Now that we have a parser *)
-    let rec aux (acc : scoured_comments) node : scoured_comments =
+    let rec aux (cmts, fm as acc : accumulator) (node : node) : accumulator =
       match syntax node with
-      | Token _ ->
-        let acc = parse acc (leading_start_offset node) (leading_text node) in
-        parse acc (trailing_start_offset node) (trailing_text node)
+      | Token t ->
+        let f = go node in
+        let trivia = PositionedToken.leading t in
+        let acc = List.fold_left ~f ~init:acc trivia in
+        let trivia = PositionedToken.trailing t in
+        List.fold_left ~f ~init:acc trivia
       | _ -> List.fold_left ~f:aux ~init:acc (children node)
     in
-    aux [] tree
+    aux ([], IMap.empty) tree
 
 (*****************************************************************************(
  * Front-end matter
@@ -2138,13 +2112,9 @@ let lower
       then Namespaces.elaborate_defs parser_options ast
       else ast
     in
-    let comments, fixmes =
-      if not include_line_comments
-      then [], IMap.empty
-      else
-        let comments = scour_comments file source_text script in
-        let fixmes = IMap.empty (*TODO*) in
-        comments, fixmes
+    let comments, fixmes = scour_comments file source_text script in
+    let comments = if include_line_comments then comments else
+      List.filter ~f:(fun (_,c) -> not (Prim_defs.is_line_comment c)) comments
     in
     if keep_errors then begin
       Fixmes.HH_FIXMES.add file fixmes;

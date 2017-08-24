@@ -1,0 +1,6 @@
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 4, characters 10-33:
+Invalid return type (Typing[4166])
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 63-67:
+The field 'a' is not defined in this shape type, and this shape type does not allow unknown fields.
+File "shape_with_known_fields_is_not_subtype_of_shape_with_known_subset_of_fields.php", line 3, characters 15-19:
+The field 'a' is set in the shape.

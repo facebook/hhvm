@@ -720,6 +720,7 @@ module Typing                               = struct
   let required_field_is_optional            = 4163 (* DONT MODIFY!!!! *)
   let final_property                        = 4164 (* DONT MODIFY!!!! *)
   let array_get_with_optional_field         = 4165 (* DONT MODIFY!!!! *)
+  let unknown_field_disallowed_in_shape     = 4166 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1486,6 +1487,17 @@ let missing_field pos1 pos2 name =
     (pos1, "The field '"^name^"' is missing")::
     [pos2, "The field '"^name^"' is defined"])
 
+let unknown_field_disallowed_in_shape pos1 pos2 name =
+  add_list
+    Typing.unknown_field_disallowed_in_shape
+    [
+      pos1,
+      "The field '" ^ name ^ "' is not defined in this shape type, and \
+      this shape type does not allow unknown fields.";
+      pos2,
+      "The field '" ^ name ^ "' is set in the shape.";
+    ]
+
 let missing_optional_field pos1 pos2 name =
   add_list Typing.missing_optional_field
     (* We have the position of shape type that is marked as optional -
@@ -1500,11 +1512,13 @@ let missing_optional_field pos1 pos2 name =
 
 let shape_fields_unknown pos1 pos2 =
   add_list Typing.shape_fields_unknown
-    [pos1, "This is a shape type coming from a type annotation. Because of " ^
-            "structural subtyping it might have some other fields besides " ^
-            "those listed in its declaration.";
-     pos2, "It is incompatible with a shape created using \"shape\" "^
-           "constructor, which has all the fields known"]
+    [
+      pos1,
+      "This shape type allows unknown fields, and so it may contain fields \
+      other than those explicitly declared in its declaration.";
+      pos2,
+      "It is incompatible with a shape that does not allow unknown fields.";
+    ]
 
 let shape_field_unset pos1 pos2 name =
   add_list Typing.shape_field_unset (

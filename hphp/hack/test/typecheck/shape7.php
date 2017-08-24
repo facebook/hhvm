@@ -12,6 +12,7 @@
 type myshape = shape(
   'field1' => int,
   'field2' => bool,
+  ...
 );
 
 function test(): myshape {

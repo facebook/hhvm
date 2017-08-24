@@ -277,6 +277,23 @@ let get_printable_shape_field_name = Env.get_shape_field_name
 let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
   (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) =
   begin match fields_known1, fields_known2 with
+    | FieldsFullyKnown, FieldsFullyKnown
+        when TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env)
+          TypecheckerOptions.experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
+            ->
+        (* If both shapes are FieldsFullyKnown, then we must ensure that the
+           supertype shape knows about every single field that could possibly
+           be present in the subtype shape. *)
+        ShapeMap.iter begin fun name _ ->
+          if not @@ ShapeMap.mem name fdm1 then
+            let pos1 = Reason.to_pos r1 in
+            let pos2 = Reason.to_pos r2 in
+            Errors.unknown_field_disallowed_in_shape
+              pos1
+              pos2
+              (get_printable_shape_field_name name)
+        end fdm2
     | FieldsFullyKnown, FieldsPartiallyKnown _  ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in

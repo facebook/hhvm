@@ -8,6 +8,10 @@ function f(): shape('x' => int) {
   return shape('x' => 4);
 }
 
-function test(): shape('y' => int) {
+function test(
+): shape(
+  'y' => int,
+  ...
+) {
   return f();
 }

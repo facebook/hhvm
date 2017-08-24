@@ -9,7 +9,10 @@ type s = shape(
   'y' => string,
 );
 
-type t = shape('x' => num);
+type t = shape(
+  'x' => num,
+  ...
+);
 
 function test(s $s): t {
   return $s;

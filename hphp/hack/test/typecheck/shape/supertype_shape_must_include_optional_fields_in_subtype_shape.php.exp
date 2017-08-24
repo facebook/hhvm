@@ -1,0 +1,6 @@
+File "supertype_shape_must_include_optional_fields_in_subtype_shape.php", line 4, characters 10-33:
+Invalid return type (Typing[4166])
+File "supertype_shape_must_include_optional_fields_in_subtype_shape.php", line 3, characters 64-68:
+The field 'a' is not defined in this shape type, and this shape type does not allow unknown fields.
+File "supertype_shape_must_include_optional_fields_in_subtype_shape.php", line 3, characters 15-19:
+The field 'a' is set in the shape.

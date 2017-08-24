@@ -78,6 +78,28 @@ let tco_experimental_annotate_function_calls =
 let tco_experimental_generics_arity =
   "generics_arity"
 
+(**
+ * There was a bug in the typechecker, and this flag exists PURELY to facilitate
+ * migration away from the bug. It is safe to remove thereafter. Here's the bug:
+ *
+ * Consider a shape A and shape B. In this example, we're trying to use shape A
+ * as a supertype of shape B.
+ *
+ * When this is disabled, we only verify that supertype shape A's fields are
+ * consistent with subtype shape B's fields. So, consider:
+ *
+ * type A = shape('int_field' => int);
+ * type B = shape('int_field' => int, ?'optional_string_field' => string);
+ *
+ * Here, A has a single field. It is in fact consistent with B's definition!
+ * However, since A is a FieldsFullyKnown shape, it has the additional
+ * requirement that no other fields may be present in the subtype shape B. Here,
+ * 'optional_string_field' may be present in B, and so A should not be a
+ * supertype of B. When this flag is enabled, this relationship is enforced.
+ *)
+let tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
+  "unknown_fields_shape_is_not_subtype_of_known_fields_shape"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -92,6 +114,7 @@ let tco_experimental_all =
      tco_experimental_annotate_function_calls;
      tco_experimental_unresolved_fix;
      tco_experimental_generics_arity;
+     tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape;
    ]
 
 let tco_migration_flags_all =

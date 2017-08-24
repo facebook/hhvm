@@ -42,5 +42,8 @@ let experimental_unresolved_fix =
   GlobalOptions.tco_experimental_unresolved_fix
 let experimental_generics_arity =
   GlobalOptions.tco_experimental_generics_arity
+let experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
+  GlobalOptions.
+    tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

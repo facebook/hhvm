@@ -6,6 +6,7 @@
 type ShapeWithOptionalField = shape(
   ?'a' => int,
   ?'b' => int,
+  ...
 );
 
 function foo(ShapeWithOptionalField $argument): void {}

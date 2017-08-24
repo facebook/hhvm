@@ -5,7 +5,7 @@ function VS($x, $y) {
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) { VS($x !== false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -15,8 +15,14 @@ if ($pid == 0) {
 }
 pcntl_wait($status);
 
-VS(pcntl_getpriority(), 0);
-VERIFY(pcntl_setpriority(0));
+$pri = pcntl_getpriority();
+VERIFY($pri);
+if ($pri < 15) {
+  VS(pcntl_setpriority(15), true);
+  VS(pcntl_getpriority(), 15);
+} else {
+  var_dump(true, true);
+}
 
 $pid = pcntl_fork();
 if ($pid == 0) {

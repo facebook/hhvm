@@ -1050,7 +1050,8 @@ Array HHVM_FUNCTION(proc_get_status,
 #ifndef _WIN32
 bool HHVM_FUNCTION(proc_nice,
                    int increment) {
-  if (nice(increment) < 0 && errno) {
+  errno = 0;
+  if (nice(increment) == -1 && errno) {
     raise_warning("Only a super user may attempt to increase the "
                     "priority of a process");
     return false;

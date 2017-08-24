@@ -1359,6 +1359,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       cur->silences[local] = silence == SilenceOp::Start ? 1 : 0;
       break;
     }
+    case Op::Fatal:
+      // fatals skip all fault handlers, and the silence state is reset
+      // by the runtime.
+      cur->silences.clear();
+      break;
+
     default:
       break;
   }

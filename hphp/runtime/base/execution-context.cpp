@@ -944,6 +944,10 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   MM().resetCouldOOM(isStandardRequest());
   RID().resetTimer();
+  // need to restore the error reporting level, because the fault
+  // handler for silencers won't be run on fatals, and we might be
+  // about to run a user error handler (and psp/shutdown code).
+  RID().setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
 
   auto prefix = "\nFatal error: ";
   auto errnum = static_cast<int>(ErrorMode::FATAL_ERROR);

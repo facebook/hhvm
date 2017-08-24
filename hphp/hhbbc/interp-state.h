@@ -244,19 +244,30 @@ struct State {
   CompactVector<StackElem> stack;
   CompactVector<ActRec> fpiStack;
 
-  /*
-   * The current member base. Updated as we move through bytecodes representing
-   * the operation.
-   */
-  Base base{};
+  struct MInstrState {
+    /*
+     * The current member base. Updated as we move through bytecodes
+     * representing the operation.
+     */
+    Base base{};
 
+    /*
+     * Chains of member operations on array elements will affect the type of
+     * something further back in the member instruction. This vector tracks the
+     * base,key type pair that was used at each stage. See
+     * interp-minstr.cpp:resolveArrayChain().
+     */
+    using ArrayChain = CompactVector<std::pair<Type,Type>>;
+    ArrayChain arrayChain;
+  };
+  MInstrState mInstrState;
   /*
-   * Chains of member operations on array elements will affect the type of
-   * something further back in the member instruction. This vector tracks the
-   * base,key type pair that was used at each stage. See
-   * interp-minstr.cpp:resolveArrayChain().
+   * If we're calling a function with parameters of unknown refiness, we can't
+   * know statically whether a member instruction sequence is defining or
+   * not. In that case, we keep track of two parallel mInstrStates, one for the
+   * non-defining case, and one for the defining case.
    */
-  CompactVector<std::pair<Type,Type>> arrayChain;
+  copy_ptr<MInstrState> mInstrStateDefine;
 
   /*
    * Mapping of a local to another local which is known to have an equivalent
@@ -383,9 +394,9 @@ bool widen_into(State&, const State&);
  */
 std::string show(const ActRec& a);
 std::string show(const php::Func&, const Base& b);
+std::string show(const php::Func&, const State::MInstrState&);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&, const CollectedInfo&);
-std::string array_chain_string(const State&);
 
 //////////////////////////////////////////////////////////////////////
 

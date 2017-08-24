@@ -462,6 +462,22 @@ std::string show(const php::Func& f, const Base& b) {
   not_reached();
 }
 
+std::string show(const php::Func& f, const State::MInstrState& s) {
+  if (s.arrayChain.empty()) return show(f, s.base);
+  return folly::sformat(
+    "{} ({})",
+    show(f, s.base),
+    [&]{
+      using namespace folly::gen;
+      return from(s.arrayChain)
+        | map([&] (const std::pair<Type,Type>& p) {
+            return folly::sformat("<{},{}>", show(p.second), show(p.first));
+          })
+        | unsplit<std::string>(" -> ");
+    }()
+  );
+}
+
 std::string state_string(const php::Func& f, const State& st,
                          const CollectedInfo& collect) {
   std::string ret;
@@ -522,12 +538,16 @@ std::string state_string(const php::Func& f, const State& st,
                   local_string(f, st.equivLocals[i]));
   }
 
-  if (st.base.loc != BaseLoc::None) {
-    folly::format(&ret, "active base   :: {}\n", show(f, st.base));
+  if (st.mInstrState.base.loc != BaseLoc::None) {
+    folly::format(&ret, "mInstrState   :: {}\n", show(f, st.mInstrState));
   }
 
-  if (!st.arrayChain.empty()) {
-    folly::format(&ret, "array-chain   :: {}\n", array_chain_string(st));
+  if (st.mInstrStateDefine) {
+    folly::format(
+      &ret,
+      "mInstrState (define)   :: {}\n",
+      show(f, *st.mInstrStateDefine)
+    );
   }
 
   return ret;
@@ -550,15 +570,6 @@ std::string property_state_string(const PropertiesInfo& props) {
   }
 
   return ret;
-}
-
-std::string array_chain_string(const State& state) {
-  using namespace folly::gen;
-  return from(state.arrayChain)
-    | map([&] (const std::pair<Type,Type>& p) {
-        return folly::sformat("<{},{}>", show(p.second), show(p.first));
-      })
-    | unsplit<std::string>(" -> ");
 }
 
 //////////////////////////////////////////////////////////////////////

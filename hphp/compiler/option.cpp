@@ -78,6 +78,7 @@ std::vector<std::string> Option::APCProfile;
 std::map<std::string, std::string> Option::FunctionSections;
 
 bool Option::GenerateTextHHBC = false;
+bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
 std::string Option::RepoCentralPath;
 bool Option::RepoDebugInfo = false;

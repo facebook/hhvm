@@ -124,6 +124,7 @@ struct Option {
    * CodeGenerator options for HHBC.
    */
   static bool GenerateTextHHBC;
+  static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
   static std::string RepoCentralPath;
   static bool RepoDebugInfo;

@@ -804,6 +804,11 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     type = "creating text HHBC files";
     formatCount++;
   }
+  if (po.format.find("hhas") != std::string::npos) {
+    Option::GenerateHhasHHBC = true;
+    type = "creating hhas HHBC files";
+    formatCount++;
+  }
   if (po.format.find("binary") != std::string::npos) {
     Option::GenerateBinaryHHBC = true;
     type = "creating binary HHBC files";

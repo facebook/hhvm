@@ -114,6 +114,7 @@
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -11153,20 +11154,36 @@ addEmitterWorker(AnalysisResultPtr /*ar*/, StatementPtr sp, void* data) {
 
 void genText(UnitEmitter* ue, const std::string& outputPath) {
   std::unique_ptr<Unit> unit(ue->create(true));
-  auto const fullPath = AnalysisResult::prepareFile(
+  auto const basePath = AnalysisResult::prepareFile(
     outputPath.c_str(),
     Option::UserFilePrefix + unit->filepath()->toCppString(),
-    true, false) + ".hhbc.txt";
+    true, false);
 
-  std::ofstream f(fullPath.c_str());
-  if (!f) {
-    Logger::Error("Unable to open %s for write", fullPath.c_str());
-  } else {
-    CodeGenerator cg(&f, CodeGenerator::TextHHBC);
-    auto const& md5 = ue->md5();
-    cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
-    cg.printRaw(unit->toString().c_str());
-    f.close();
+  if (Option::GenerateTextHHBC) {
+    auto const fullPath = basePath + ".hhbc.txt";
+
+    std::ofstream f(fullPath.c_str());
+    if (!f) {
+      Logger::Error("Unable to open %s for write", fullPath.c_str());
+    } else {
+      CodeGenerator cg(&f, CodeGenerator::TextHHBC);
+      auto const& md5 = ue->md5();
+      cg.printf("Hash: %" PRIx64 "%016" PRIx64 "\n", md5.q[0], md5.q[1]);
+      cg.printRaw(unit->toString().c_str());
+      f.close();
+    }
+  }
+
+  if (Option::GenerateHhasHHBC) {
+    auto const fullPath = basePath + ".hhas";
+
+    std::ofstream f(fullPath.c_str());
+    if (!f) {
+      Logger::Error("Unable to open %s for write", fullPath.c_str());
+    } else {
+      f << disassemble(unit.get());
+      f.close();
+    }
   }
 }
 
@@ -11302,7 +11319,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
   auto commitSome = [&] (decltype(ues)& emitters) {
     batchCommit(emitters);
-    if (Option::GenerateTextHHBC) {
+    if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
       std::move(emitters.begin(), emitters.end(),
                 std::back_inserter(ues_to_print));
     }
@@ -11363,7 +11380,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     );
   }();
   batchCommit(pair.first);
-  if (Option::GenerateTextHHBC) {
+  if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
     ues_to_print = std::move(pair.first);
   }
   commitGlobalData(std::move(pair.second));

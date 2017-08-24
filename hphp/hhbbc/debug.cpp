@@ -29,6 +29,7 @@
 
 #include <folly/portability/Stdlib.h>
 
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 
@@ -39,6 +40,8 @@ namespace fs = boost::filesystem;
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+const StaticString s_invoke("__invoke");
 
 template<class Operation>
 void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
@@ -80,25 +83,60 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
   return ret;
 }
 
-void dump_class_propstate(std::ostream& out,
-                          const Index& index,
-                          borrowed_ptr<const php::Class> c) {
-  out << "Class " << c->name->data() << '\n';
+void dump_class_state(std::ostream& out,
+                      const Index& index,
+                      borrowed_ptr<const php::Class> c) {
+  if (is_closure(*c)) {
+    auto const invoke = find_method(c, s_invoke.get());
+    auto const useVars = index.lookup_closure_use_vars(invoke);
+    for (auto i = size_t{0}; i < useVars.size(); ++i) {
+      out << c->name->data() << "->" << c->properties[i].name->data() << " :: "
+          << show(useVars[i]) << '\n';
+    }
+  } else {
+    auto const pprops = sorted_prop_state(
+      index.lookup_private_props(c)
+    );
+    for (auto const& kv : pprops) {
+      out << c->name->data() << "->" << kv.first->data() << " :: "
+          << show(kv.second) << '\n';
+    }
 
-  auto const pprops = sorted_prop_state(
-    index.lookup_private_props(c)
-  );
-  for (auto& kv : pprops) {
-    out << "$this->" << kv.first->data() << " :: "
-        << show(kv.second) << '\n';
+    auto const sprops = sorted_prop_state(
+      index.lookup_private_statics(c)
+    );
+    for (auto const& kv : sprops) {
+      out << c->name->data() << "::$" << kv.first->data() << " :: "
+          << show(kv.second) << '\n';
+    }
   }
 
-  auto const sprops = sorted_prop_state(
-    index.lookup_private_statics(c)
-  );
-  for (auto& kv : sprops) {
-    out << "self::$" << kv.first->data() << " :: "
-        << show(kv.second) << '\n';
+  for (auto const& constant : c->constants) {
+    if (constant.val) {
+      auto const ty = from_cell(*constant.val);
+      out << c->name->data() << "::" << constant.name->data() << " :: "
+          << (ty.subtypeOf(TUninit) ? "<dynamic>" : show(ty)) << '\n';
+    }
+  }
+}
+
+void dump_func_state(std::ostream& out,
+                     const Index& index,
+                     borrowed_ptr<const php::Func> f) {
+  if (f->unit->pseudomain.get() == f) return;
+
+  auto const name = f->cls
+    ? folly::sformat("{}::{}()", f->cls->name->data(), f->name->data())
+    : folly::sformat("{}()", f->name->toCppString());
+
+  auto const retTy = index.lookup_return_type_raw(f);
+  out << name << " :: " << show(retTy) << '\n';
+
+  auto const localStatics = index.lookup_local_static_types(f);
+  for (auto i = size_t{0}; i < localStatics.size(); ++i) {
+    if (localStatics[i].subtypeOf(TBottom)) continue;
+    out << name << "::" << local_string(*f, i)
+        << " :: " << show(localStatics[i]) << '\n';
   }
 }
 
@@ -115,7 +153,14 @@ void dump_index(fs::path dir,
 
       with_file(dir, borrow(u), [&] (std::ostream& out) {
         for (auto& c : u->classes) {
-          dump_class_propstate(out, index, borrow(c));
+          dump_class_state(out, index, borrow(c));
+          for (auto& m : c->methods) {
+            dump_func_state(out, index, borrow(m));
+          }
+        }
+
+        for (auto& f : u->funcs) {
+          dump_func_state(out, index, borrow(f));
         }
       });
     }
@@ -131,30 +176,37 @@ void debug_dump_program(const Index& index, const php::Program& program) {
 
   trace_time tracer("debug dump");
 
-  char dirBuf[] = "/tmp/hhbbcXXXXXX";
-  auto const dtmpRet = mkdtemp(dirBuf);
-  if (!dtmpRet) {
-    throw std::runtime_error(
-      std::string("Failed to create temporary directory") +
-        strerror(errno));
-  }
-  auto const dir = fs::path(dtmpRet);
+  auto dir = [&]{
+    if (auto const dumpDir = getenv("HHBBC_DUMP_DIR")) {
+      return fs::path(dumpDir);
+    } else {
+      char dirBuf[] = "/tmp/hhbbcXXXXXX";
+      auto const dtmpRet = mkdtemp(dirBuf);
+      if (!dtmpRet) {
+        throw std::runtime_error(
+          std::string("Failed to create temporary directory") +
+          strerror(errno));
+      }
+      return fs::path(dtmpRet);
+    }
+  }();
   fs::create_directory(dir);
-  std::cout << "debug dump going to " << dir << '\n';
 
-  {
+  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump going to {}\n", dir.string());
+
+  if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
     trace_time tracer2("debug dump: representation");
     dump_representation(dir / "representation", program);
   }
+
   {
     trace_time tracer2("debug dump: index");
     dump_index(dir / "index", index, program);
   }
 
-  std::cout << "debug dump done\n";
+  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump done\n");
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-

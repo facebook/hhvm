@@ -587,6 +587,9 @@ struct Index {
   std::vector<Type>
     lookup_closure_use_vars(borrowed_ptr<const php::Func>) const;
 
+  CompactVector<Type>
+    lookup_local_static_types(borrowed_ptr<const php::Func> f) const;
+
   /*
    * Return the availability of $this on entry to the provided method.
    * If the Func provided is not a method of a class false is

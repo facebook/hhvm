@@ -2801,6 +2801,16 @@ Type Index::lookup_return_type_raw(borrowed_ptr<const php::Func> f) const {
   return TInitGen;
 }
 
+CompactVector<Type>
+Index::lookup_local_static_types(borrowed_ptr<const php::Func> f) const {
+  auto it = &m_data->funcInfo[f->idx];
+  if (it->first) {
+    assertx(it->first == f);
+    return it->second.localStaticTypes;
+  }
+  return {};
+}
+
 bool Index::lookup_this_available(borrowed_ptr<const php::Func> f) const {
   return (f->attrs & AttrRequiresThis) && !f->isClosureBody;
 }

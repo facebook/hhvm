@@ -1,4 +1,1 @@
-File "shape_structural_subtyping_allows_indexing_for_nullable_field.php", line 6, characters 10-12:
-Invalid index operation: 'a' is marked as an optional shape field. It may not be present in the shape. Use Shapes::idx instead. (Typing[4165])
-File "shape_structural_subtyping_allows_indexing_for_nullable_field.php", line 3, characters 37-39:
-This is where the field was declared as optional.
+No errors

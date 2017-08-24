@@ -1,7 +1,7 @@
 File "generic_type_structure.php", line 24, characters 3-15:
   TypeStructure<^(int)>
 File "generic_type_structure.php", line 25, characters 3-15:
-  TypeStructure<^(shape(unset fields:)(x => shape(optional => true, type => ?int), y => shape(type => (string, bool))))>
+  TypeStructure<^(shape(unset fields:)(x => shape(type => ?int), y => shape(type => (string, bool))))>
 File "generic_type_structure.php", line 26, characters 3-36:
   (TypeStructure<^bool>, TypeStructure<^string>)
 No errors

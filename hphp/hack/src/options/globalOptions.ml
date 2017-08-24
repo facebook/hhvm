@@ -88,7 +88,6 @@ let tco_experimental_all =
      tco_experimental_tconst_on_generics;
      tco_experimental_shape_idx_relaxed;
      tco_experimental_disable_shape_and_tuple_arrays;
-     tco_experimental_promote_nullable_to_optional_in_shapes;
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;
      tco_experimental_unresolved_fix;

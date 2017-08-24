@@ -148,6 +148,10 @@ let idx env fty shape_ty field default =
           && has_non_optional_field env field_name shape_ty ->
           Lint.shape_idx_access_required_field (fst field)
             (Env.get_shape_field_name field_name);
+          let res =
+            if field_has_nullable_type env field_name shape_ty
+            then (fst fty, Toption res)
+            else res in
           env, res
       | None ->
         (* no default and we can't guarantee that the shape contains field:

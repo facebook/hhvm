@@ -87,7 +87,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   zend_clear_exception(TSRMLS_C);
 
   // Invoke the PHP extension function/method
-  ZendExecutionStack::pushHHVMStack((void*)ar);
+  ZendExecutionStack::pushHHVMStack(ar);
   try {
     native_func(
       ar->numArgs(),

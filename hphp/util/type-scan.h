@@ -212,8 +212,8 @@ struct InitException: std::runtime_error {
  */
 struct Scanner {
   // Enqueue a pointer into this scanner to be reported later. This is meant to
-  // be called from type custom scanner functions to report interesting
-  // pointers.
+  // be called from hand-written custom scanner functions to report interesting
+  // pointers, for which we don't have an address.
   template <typename T> void enqueue(const T* ptr) {
     // Don't allow void*
     static_assert(!detail::IsVoid<T>::value,
@@ -223,18 +223,6 @@ struct Scanner {
     // those.
     if (detail::Uninteresting<T*>::value) return;
     m_ptrs.emplace_back(ptr);
-  }
-
-  // Enqueue the address of a pointer
-  template <typename T> void enqAddr(const T** addr) {
-    // Don't allow void**
-    static_assert(!detail::IsVoid<T>::value,
-                  "Trying to enqueue void pointer(s). "
-                  "Please provide a more specific type.");
-    // Certain types are statically uninteresting, so don't enqueue pointers to
-    // those.
-    if (detail::Uninteresting<T*>::value) return;
-    m_addrs.emplace_back((const void**)addr);
   }
 
   /*
@@ -248,39 +236,20 @@ struct Scanner {
    * on the type.
    */
 
-  // Overload for types where we statically know the type isn't interesting, so
-  // do nothing.
-  template <typename T>
-  typename std::enable_if<detail::Uninteresting<T>::value>::type
-  scan(const T&, DEBUG_ONLY std::size_t size = sizeof(T)) {
-    // Even though this function is a nop, still try to catch errors like trying
-    // to scan an unbounded array.
-    static_assert(!detail::UnboundedArray<T>::value,
-                  "Trying to scan unbounded array");
-    assert(size % sizeof(T) == 0);
-  }
-
   // Overload for interesting pointer types. "Scanning" a pointer is just
   // enqueuing it, so do that.
   template <typename T>
-  typename std::enable_if<std::is_pointer<T>::value &&
-                          !detail::Uninteresting<T>::value>::type
+  typename std::enable_if<std::is_pointer<T>::value>::type
   scan(const T& ptr, DEBUG_ONLY std::size_t size = sizeof(T)) {
-    // No pointers to void or unbounded arrays.
-    static_assert(!detail::IsVoid<T>::value,
-                  "Trying to scan void pointer(s). "
-                  "Please provide a more specific type.");
     static_assert(!detail::UnboundedArray<T>::value,
                   "Trying to scan unbounded array");
-
     assert(size == sizeof(T));
     m_addrs.emplace_back((const void**)&ptr);
   }
 
   // Overload for interesting non-pointer types.
-  template <typename T> typename std::enable_if<
-    !std::is_pointer<T>::value && !detail::Uninteresting<T>::value
-  >::type
+  template <typename T>
+  typename std::enable_if<!std::is_pointer<T>::value>::type
   scan(const T& val, std::size_t size = sizeof(T)) {
     static_assert(!detail::IsVoid<T>::value,
                   "Trying to scan void pointer(s). "

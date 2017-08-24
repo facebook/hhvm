@@ -51,7 +51,9 @@ struct ZendResourceData : ResourceData {
   // The pointer to the Zend resource, always null except when
   // calling the Zend destructor.
   void* ptr;
-  TYPE_SCAN_CONSERVATIVE_FIELD(ptr);
+  TYPE_SCAN_CUSTOM_FIELD(ptr) {
+    scanner.scan(ptr);
+  }
 
   int type;
   int refcount;

@@ -81,15 +81,22 @@ namespace HPHP {
         refcount{1},
         raw_ptr_is_resource{false} {}
     ZendResourceWrapper(ResourceData* ptr, int id)
-      : raw_ptr{ptr},
+      : resource{ptr},
         id{id},
         type{php_file_le_stream()},
         refcount{1},
         raw_ptr_is_resource{true} { ptr->incRefCount(); }
     ~ZendResourceWrapper();
 
-    void* raw_ptr;
-    TYPE_SCAN_CONSERVATIVE_FIELD(raw_ptr);
+    union {
+      ResourceData* resource;
+      void* raw_ptr;
+    };
+    TYPE_SCAN_CUSTOM_FIELD(raw_ptr) {
+      // even when !raw_ptr_is_resource, raw_ptr often points to a heap
+      // allocated thing. if it's a malloc block we won't move it.
+      scanner.scan(resource);
+    }
     int id;
     int type;
     int refcount;
@@ -120,7 +127,7 @@ namespace HPHP {
     } else {
       // Otherwise we're storing a ResourceData instance, so just release our
       // reference to it.
-      decRefRes(static_cast<ResourceData*>(raw_ptr));
+      decRefRes(resource);
     }
   }
 

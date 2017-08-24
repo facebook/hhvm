@@ -28,13 +28,13 @@ ZendExecutionStack & ZendExecutionStack::getStack() {
   return *tl_stack.get();
 }
 
-zval** ZendExecutionStack::getArg(int i) {
+zval** ZendExecutionStack::getArg(size_t i) {
   auto& stack = getStack();
   auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK: {
-      ActRec* ar = (ActRec*)entry.value;
-      const int numNonVaradic = ar->m_func->numNonVariadicParams();
+      ActRec* ar = entry.ar;
+      const auto numNonVaradic = ar->m_func->numNonVariadicParams();
       TypedValue* arg;
       if (i < numNonVaradic) {
         arg = (TypedValue*)ar - i - 1;
@@ -57,11 +57,10 @@ zval** ZendExecutionStack::getArg(int i) {
 
     case ZendStackMode::SIDE_STACK: {
       // Zend puts the number of args as the last thing on the stack
-      int numargs = uintptr_t(entry.value);
+      auto numargs = entry.numargs;
       assert(numargs < 4096);
       assert(i < numargs);
-      zval** zvpp =
-        (zval**) &stack.m_stack[stack.m_stack.size() - 1 - numargs + i].value;
+      auto zvpp = &stack.m_stack[stack.m_stack.size() - 1 - numargs + i].zvp;
       (*zvpp)->assertValid();
       return zvpp;
     }
@@ -70,15 +69,15 @@ zval** ZendExecutionStack::getArg(int i) {
   return nullptr;
 }
 
-int32_t ZendExecutionStack::numArgs() {
+size_t ZendExecutionStack::numArgs() {
   auto& stack = getStack();
   auto& entry = stack.m_stack.back();
   switch (entry.mode) {
     case ZendStackMode::HHVM_STACK:
-      return ((ActRec*)entry.value)->numArgs();
+      return entry.ar->numArgs();
     case ZendStackMode::SIDE_STACK:
       // Zend puts the number of args as the last thing on the stack
-      return uintptr_t(entry.value);
+      return entry.numargs;
   }
   not_reached();
   return 0;
@@ -87,7 +86,7 @@ int32_t ZendExecutionStack::numArgs() {
 void ZendExecutionStack::push(void* z) {
   ZendStackEntry entry;
   entry.mode = ZendStackMode::SIDE_STACK;
-  entry.value = z;
+  entry.zvp = (zval*)z;
   getStack().m_stack.push_back(entry);
 }
 
@@ -96,20 +95,19 @@ void* ZendExecutionStack::pop() {
   auto ret = stack.m_stack.back();
   stack.m_stack.pop_back();
   assert(ret.mode == ZendStackMode::SIDE_STACK);
-  return ret.value;
+  return ret.zvp;
 }
 
-void ZendExecutionStack::pushHHVMStack(void * ar) {
+void ZendExecutionStack::pushHHVMStack(ActRec* ar) {
   ZendStackEntry entry;
   entry.mode = ZendStackMode::HHVM_STACK;
-  entry.value = ar;
+  entry.ar = ar;
   getStack().m_stack.push_back(entry);
 }
 
 void ZendExecutionStack::popHHVMStack() {
   auto& stack = getStack();
-  DEBUG_ONLY auto& entry = stack.m_stack.back();
-  assert(entry.mode == ZendStackMode::HHVM_STACK);
+  assert(stack.m_stack.back().mode == ZendStackMode::HHVM_STACK);
   stack.m_stack.pop_back();
 }
 

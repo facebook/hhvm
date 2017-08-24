@@ -55,6 +55,7 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::priority_queue",
   "std::queue",
   "std::set",
+  "std::shared_ptr",
   "std::stack",
   "std::unique_ptr",
   "std::unordered_map",
@@ -68,7 +69,6 @@ const std::unordered_set<std::string> forced_conservative = {
   "boost::variant",
   "folly::Optional",
   "std::optional",
-  "std::shared_ptr",
   "std::function"
 };
 

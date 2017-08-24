@@ -1127,7 +1127,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
       m_params_given++;
 
       b = &m_params[param->paramno];
-      param->driver_data = b;
+      param->driver_ext_data = b;
       b->is_null = &m_in_null[param->paramno];
       b->length = &m_in_length[param->paramno];
       /* recall how many parameters have been provided */
@@ -1140,7 +1140,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
         return false;
       }
 
-      b = (MYSQL_BIND*)param->driver_data;
+      b = (MYSQL_BIND*)param->driver_ext_data;
       *b->is_null = 0;
       if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
           param->parameter.isNull()) {

@@ -520,8 +520,8 @@ public:
   PDOStatement *stmt;      /* for convenience in dtor */
   bool is_param;           /* parameter or column ? */
 
-  void *driver_data;
-  TYPE_SCAN_CONSERVATIVE_FIELD(driver_data);
+  void *driver_ext_data;   /* must not be request-heap ptr */
+  TYPE_SCAN_IGNORE_FIELD(driver_ext_data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

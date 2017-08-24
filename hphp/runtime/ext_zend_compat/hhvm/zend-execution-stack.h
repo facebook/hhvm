@@ -33,17 +33,25 @@ enum class ZendStackMode {
 
 struct ZendStackEntry {
   ZendStackMode mode;
-  void* value; // union { ActRec*, uintptr, zval** }
-  TYPE_SCAN_CONSERVATIVE_FIELD(value);
+  union {
+    ActRec* ar;
+    size_t numargs;
+    zval* zvp;
+  };
+  TYPE_SCAN_CUSTOM_FIELD(ar) {
+    scanner.scan(ar); // zvp transparently handled too.
+    // if the union member is numargs, we expect numargs
+    // to be a small integer which won't be treated as a ptr.
+  }
 };
 
 struct ZendExecutionStack final : RequestEventHandler {
-  static zval** getArg(int i);
-  static int numArgs();
+  static zval** getArg(size_t i);
+  static size_t numArgs();
 
   static void push(void* z);
   static void* pop();
-  static void pushHHVMStack(void* ar);
+  static void pushHHVMStack(ActRec* ar);
   static void popHHVMStack();
 
   // Instance methods

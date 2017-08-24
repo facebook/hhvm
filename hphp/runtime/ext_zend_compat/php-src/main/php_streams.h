@@ -166,7 +166,9 @@ typedef struct _php_stream_wrapper_ops {
 struct _php_stream_wrapper  {
   php_stream_wrapper_ops *wops;  /* operations the wrapper can perform */
   void *abstract;          /* context for the wrapper */
-  TYPE_SCAN_CONSERVATIVE_FIELD(abstract);
+  TYPE_SCAN_CUSTOM_FIELD(abstract) {
+    scanner.scan(abstract);
+  }
   int is_url;            /* so that PG(allow_url_fopen) can be respected */
 };
 
@@ -191,15 +193,15 @@ struct _php_stream_wrapper  {
 
 struct _php_stream  {
 #ifdef HHVM
-  _php_stream(HPHP::File *file) : hphp_file(file) {}
-  _php_stream(HPHP::Directory *dir) : hphp_dir(dir) {}
+  explicit _php_stream(HPHP::File *file) : hphp_file(file) {}
+  explicit _php_stream(HPHP::Directory *dir) : hphp_dir(dir) {}
   union {
     HPHP::File *hphp_file;
     HPHP::Directory *hphp_dir;
   };
 
-  TYPE_SCAN_CONSERVATIVE_FIELD(abstract);
-  TYPE_SCAN_CONSERVATIVE_FIELD(wrapperthis);
+  TYPE_SCAN_CUSTOM_FIELD(abstract) { scanner.scan(abstract); }
+  TYPE_SCAN_CUSTOM_FIELD(wrapperthis) { scanner.scan(wrapperthis); }
 #endif
   php_stream_ops *ops;
   void *abstract;      /* convenience pointer for abstraction */

@@ -97,6 +97,7 @@ private:
 private:
   static Map s_empty_map; // so our iterators can be normal Map iterators
   copy_ptr<Map> m_map;
+  TYPE_SCAN_IGNORE_FIELD(m_map); // TypedValue in Map are never heap ptrs
 };
 
 //////////////////////////////////////////////////////////////////////

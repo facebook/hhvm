@@ -41,23 +41,28 @@ typedef struct _zend_object_store_bucket {
       const zend_object_handlers *handlers;
       zend_uint refcount;
       gc_root_buffer *buffered;
+      // buckets can have req pointers:
+      // bucket.obj.object is a void* that typically points to an
+      // extension custom object, which can contain zval* (RefData*),
+      // HashTable* (ArrayData*), etc.
+      TYPE_SCAN_CUSTOM_FIELD(object) {
+        scanner.scan(object);
+      }
     } obj;
     struct {
-      int next;
+      size_t next; // overlaps with _store_object.object
     } free_list;
   } bucket;
-  // buckets can have req pointers:
-  // bucket.obj.object is a void* that typically points to an
-  // extension custom object, which can contain zval* (RefData*),
-  // HashTable* (ArrayData*), etc.
-  TYPE_SCAN_CONSERVATIVE_FIELD(obj);
+  TYPE_SCAN_CUSTOM_FIELD(obj) {
+    scanner.scan(bucket.obj);
+  }
 } zend_object_store_bucket;
 
 typedef struct _zend_objects_store {
   zend_object_store_bucket *object_buckets;
   zend_uint top;
   zend_uint size;
-  int free_list_head;
+  size_t free_list_head;
 } zend_objects_store;
 
 /* Global store handling functions */

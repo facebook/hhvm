@@ -802,10 +802,8 @@ void relocateTranslation(
   memset(main.base(), 0xcc, main.frontier() - main.base());
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
   if (arch() == Arch::ARM) {
-    __builtin___clear_cache(reinterpret_cast<char*>(main.base()),
-                            reinterpret_cast<char*>(main.frontier()));
-    __builtin___clear_cache(reinterpret_cast<char*>(cold.base()),
-                            reinterpret_cast<char*>(cold.frontier()));
+    main.sync();
+    cold.sync();
   }
 #endif
 }

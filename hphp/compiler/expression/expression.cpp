@@ -85,6 +85,7 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep, bool noWarn) {
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }
+  if (isUnpack()) rep->setIsUnpack();
   rep->copyContext(m_context & ~(DeadStore|AccessContext));
 
   if (rep->getScope() != getScope()) {

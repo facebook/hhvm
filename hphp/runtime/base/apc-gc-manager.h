@@ -121,9 +121,9 @@ struct APCGCManager {
     // It also shows the size of the whole APC uncounted value
     std::map<APCHandle*, size_t> candidateList;
     ReadWriteMutex candidateListLock;
-    // TODO decide policy
-    // bar for doing GC for APC
-    // using runtime flag -vEval.GCForAPCTrigger
+    // TODO(21303333)
+    // Threshold for triggering GC for APC
+    // Currently it just uses -vEval.GCForAPCTrigger as the threshold
     size_t someBar() {
       return RuntimeOption::EvalGCForAPCTrigger;
     }

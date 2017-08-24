@@ -1,5 +1,0 @@
-Value returned from( async)\? method [_a-zA-Z:()]+ must be of type \??[a-zA-Z]+, \\??[a-zA-Z]+ given
-Argument [0-9]+ to [_a-zA-Z:()]+ must be of type \??[a-zA-Z]+, \??[a-zA-Z]+ given.*
-Argument [0-9]+ passed to [_a-zA-Z:()]+ must implement interface [a-zA-Z]+, [a-zA-Z]+ given
-Value returned from( async)? method [_a-zA-Z:()]+ must be of type @?[a-zA-Z\?]+, @?[a-zA-Z\?]+ given
-Argument [0-9]+ to [_a-zA-Z:()]+ must be of type @?[a-zA-Z\?]+, @?[a-zA-Z\?]+ given.*

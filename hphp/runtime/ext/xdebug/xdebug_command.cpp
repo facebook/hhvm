@@ -1461,19 +1461,28 @@ private:
 // stdout -i # -c 0|1|2
 // Redirect or copy stdout to the client
 
+namespace {
+
 // Helper called on stdout write when we have redirected it with the stdout
 // command. Once installed, this continues until it is either explicitly
 // uninstalled, or if there is no longer an xdebug server.
-static void onStdoutWrite(const char* bytes, int len, void* copy) {
-  if (XDEBUG_GLOBAL(Server) == nullptr) {
-    g_context->setStdout(nullptr, nullptr);
-  }
-  XDEBUG_GLOBAL(Server)->sendStream("stdout", bytes, len);
+template<bool copy>
+struct XDebugStdoutHook final : ExecutionContext::StdoutHook {
+  void operator()(const char* bytes, int len) override {
+    if (XDEBUG_GLOBAL(Server) == nullptr) {
+      g_context->setStdout(nullptr);
+    }
+    XDEBUG_GLOBAL(Server)->sendStream("stdout", bytes, len);
 
-  // If copy is true, we also copy the data to stdout
-  if ((bool) copy) {
-    write(fileno(stdout), bytes, len);
+    // If copy is true, we also copy the data to stdout
+    if (copy) {
+      write(fileno(stdout), bytes, len);
+    }
   }
+};
+XDebugStdoutHook<false> onStdoutWriteNoCopy;
+XDebugStdoutHook<true> onStdoutWriteCopy;
+
 }
 
 struct StdoutCmd : XDebugCommand {
@@ -1502,13 +1511,13 @@ struct StdoutCmd : XDebugCommand {
   void handleImpl(xdebug_xml_node& xml) override {
     switch (m_mode) {
       case MODE_DISABLE:
-        g_context->setStdout(nullptr, nullptr);
+        g_context->setStdout(nullptr);
         break;
       case MODE_COPY:
-        g_context->setStdout(onStdoutWrite, (void*) true);
+        g_context->setStdout(&onStdoutWriteCopy);
         break;
       case MODE_REDIRECT:
-        g_context->setStdout(onStdoutWrite, (void*) false);
+        g_context->setStdout(&onStdoutWriteNoCopy);
         break;
       default:
         throw Exception("Invalid mode type");

@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
@@ -192,8 +193,11 @@ public:
    */
   void writeTransport(const char* s, int len);
 
-  using PFUNC_STDOUT = void (*)(const char* s, int len, void* data);
-  void setStdout(PFUNC_STDOUT func, void* data);
+  struct StdoutHook {
+    virtual void operator()(const char* s, int len) = 0;
+    virtual ~StdoutHook() {};
+  };
+  void setStdout(StdoutHook*);
 
   /**
    * Output buffering.
@@ -495,6 +499,13 @@ private:
                             FInitArgs doInitArgs,
                             FEnterVM doEnterVM);
 
+  struct ExcLoggerHook final : LoggerHook {
+    explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}
+    void operator()(const char* header, const char* msg, const char* ending)
+         override;
+    ExecutionContext& ec;
+  };
+
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.
 private:
@@ -510,8 +521,7 @@ private:
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
-  PFUNC_STDOUT m_stdout;
-  void* m_stdoutData;
+  StdoutHook* m_stdout;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;
 
@@ -554,6 +564,7 @@ public:
   // we cannot *call* the error handlers (or their destructors) while
   // destroying the context, so C++ order of destruction is not an issue.
   req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
   VarEnv* m_globalVarEnv;
   struct FileInfo {
     Unit* unit;
@@ -582,9 +593,8 @@ public:
 public:
   Cell m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
-
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_stdoutData);
-  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
+private:
+  ExcLoggerHook m_logger_hook;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

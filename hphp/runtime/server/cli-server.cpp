@@ -528,16 +528,26 @@ void CLIServer::stop() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void stdout_func(const char* s, int len, void* data) {
-  int* fd = (int*)data;
-  write(*fd, s, len);
-}
+namespace {
 
-void logging_hook(const char* /*header*/, const char* msg, const char* ending,
-                  void* data) {
-  int fd = *(int*)data;
-  write(fd, msg, strlen(msg));
-  if (ending) write(fd, ending, strlen(ending));
+struct CliStdoutHook final : ExecutionContext::StdoutHook {
+  int fd;
+  explicit CliStdoutHook(int fd) : fd(fd) {}
+  void operator()(const char* s, int len) override {
+    write(fd, s, len);
+  }
+};
+
+struct CliLoggerHook final : LoggerHook {
+  int fd;
+  explicit CliLoggerHook(int fd) : fd(fd) {}
+  void operator()(const char* /*hdr*/, const char* msg, const char* ending)
+       override {
+    write(fd, msg, strlen(msg));
+    if (ending) write(fd, ending, strlen(ending));
+  }
+};
+
 }
 
 const StaticString
@@ -934,10 +944,10 @@ void CLIWorker::doJob(int client) {
       SCOPE_EXIT {
         tl_env = nullptr;
         envArr.reset();
-        g_context->setStdout(nullptr, nullptr);
+        g_context->setStdout(nullptr);
         clearThreadLocalIO();
         LightProcess::setThreadLocalAfdtOverride(nullptr);
-        Logger::SetThreadHook(nullptr, nullptr);
+        Logger::SetThreadHook(nullptr);
         Stream::setThreadLocalFileHandler(nullptr);
         execute_command_line_end(xhprofFlags, true, args[0].c_str());
         try {
@@ -954,11 +964,13 @@ void CLIWorker::doJob(int client) {
                                 envp.get());
       tl_env = &envArr;
 
-      g_context->setStdout(stdout_func, &cli_out.fd);
+      CliStdoutHook stdout_hook(cli_out.fd);
+      CliLoggerHook logging_hook(cli_err.fd);
+      g_context->setStdout(&stdout_hook);
       g_context->setCwd(String(cwd.c_str(), CopyString));
       setThreadLocalIO(cli_in.file, cli_out.file, cli_err.file);
       LightProcess::setThreadLocalAfdtOverride(cli_afdt.fd);
-      Logger::SetThreadHook(logging_hook, &cli_err.fd);
+      Logger::SetThreadHook(&logging_hook);
 
       CLIWrapper wrapper(client);
       Stream::setThreadLocalFileHandler(&wrapper);
@@ -1150,7 +1162,8 @@ bool CLIWrapper::chgrp(const String& path, const String& group) {
 ////////////////////////////////////////////////////////////////////////////////
 
 int mkdir_recursive(const char* path, int mode) {
-  if (strlen(path) > PATH_MAX) {
+  auto path_len = strlen(path);
+  if (path_len > PATH_MAX) {
     errno = ENAMETOOLONG;
     return -1;
   }
@@ -1163,7 +1176,7 @@ int mkdir_recursive(const char* path, int mode) {
 
   char dir[PATH_MAX+1];
   char *p;
-  strncpy(dir, path, sizeof(dir));
+  memcpy(dir, path, path_len + 1); // copy null terminator
 
   for (p = dir + 1; *p; p++) {
     if (FileUtil::isDirSeparator(*p)) {

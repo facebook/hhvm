@@ -47,6 +47,12 @@ struct ErrorLogFileData {
   bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
 };
 
+struct LoggerHook {
+  virtual ~LoggerHook() {}
+  virtual void operator()(const char* header, const char* msg,
+                          const char* ending) = 0;
+};
+
 struct Logger {
   enum LogLevelType {
     LogNone,
@@ -102,9 +108,7 @@ struct Logger {
   static void ClearThreadLog();
   static void UnlimitThreadMessages();
 
-  typedef void (*PFUNC_LOG)(const char *header, const char *msg,
-                            const char *ending, void *data);
-  static void SetThreadHook(PFUNC_LOG func, void *data);
+  static void SetThreadHook(LoggerHook*);
 
   static constexpr const char *DEFAULT = "Default";
   static void SetTheLogger(const std::string &name, Logger* newLogger);
@@ -132,9 +136,7 @@ protected:
     LogFileFlusher flusher;
     FILE *log{nullptr};
     bool threadLogOnly{false};
-    PFUNC_LOG hook{nullptr};
-    void *hookData;
-    TYPE_SCAN_CONSERVATIVE_FIELD(hookData);
+    LoggerHook* hook{nullptr};
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 

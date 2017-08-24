@@ -86,7 +86,6 @@ ExecutionContext::ExecutionContext()
   , m_implicitFlush(false)
   , m_protectedLevel(0)
   , m_stdout(nullptr)
-  , m_stdoutData(nullptr)
   , m_stdoutBytesWritten(0)
   , m_errorState(ExecutionContext::ErrorState::NoError)
   , m_lastErrorNum(0)
@@ -102,6 +101,7 @@ ExecutionContext::ExecutionContext()
   , m_lastErrorPath(staticEmptyString())
   , m_lastErrorLine(0)
   , m_executingSetprofileCallback(false)
+  , m_logger_hook(*this)
 {
   resetCoverageCounters();
   // We don't want a new execution context to cause any request-heap
@@ -214,9 +214,8 @@ void ExecutionContext::write(const String& s) {
   write(s.data(), s.size());
 }
 
-void ExecutionContext::setStdout(PFUNC_STDOUT func, void *data) {
-  m_stdout = func;
-  m_stdoutData = data;
+void ExecutionContext::setStdout(StdoutHook* hook) {
+  m_stdout = hook;
 }
 
 static void safe_stdout(const  void  *ptr,  size_t  size) {
@@ -235,7 +234,7 @@ void ExecutionContext::writeStdout(const char *s, int len) {
     }
     m_stdoutBytesWritten += len;
   } else {
-    m_stdout(s, len, m_stdoutData);
+    (*m_stdout)(s, len);
   }
 }
 
@@ -1387,13 +1386,13 @@ void ExecutionContext::popVMState() {
   TRACE(1, "Reentry: exit fp %p pc %p\n", vmfp(), vmpc());
 }
 
-static void threadLogger(const char* header, const char* msg,
-                         const char* ending, void* data) {
-  auto* ec = static_cast<ExecutionContext*>(data);
-  ec->write(header);
-  ec->write(msg);
-  ec->write(ending);
-  ec->flush();
+void ExecutionContext::ExcLoggerHook::operator()(
+    const char* header, const char* msg, const char* ending
+) {
+  ec.write(header);
+  ec.write(msg);
+  ec.write(ending);
+  ec.flush();
 }
 
 StaticString
@@ -1457,7 +1456,7 @@ void ExecutionContext::requestInit() {
   assert(cls == SystemLib::s_stdclassClass);
 #endif
 
-  if (Logger::UseRequestLog) Logger::SetThreadHook(&threadLogger, this);
+  if (Logger::UseRequestLog) Logger::SetThreadHook(&m_logger_hook);
 
   // Needs to be last (or nearly last): might cause unit merging to call an
   // extension function in the VM; this is bad if systemlib itself hasn't been
@@ -1489,7 +1488,7 @@ void ExecutionContext::requestExit() {
 
   m_deferredErrors = Array::CreateVec();
 
-  if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);
+  if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
 }
 
 /*

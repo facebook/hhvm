@@ -413,13 +413,7 @@ std::string show(RepoAuthType rat) {
         ret += 'S';
       }
       ret += "Arr";
-      if (rat.hasArrData()) {
-        if (auto const ar = rat.array()) {
-          folly::format(&ret, "{}", show(*ar));
-        }
-      } else {
-        folly::format(&ret, "{}", rat.arrayId());
-      }
+      if (rat.hasArrData()) folly::format(&ret, "{}", show(*rat.array()));
       return ret;
     }
     break;

@@ -219,17 +219,22 @@ struct Vgen {
     , catches(env.catches)
   {}
   ~Vgen() {
-    env.cb->sync();
+    auto begin = env.cb->toDestAddress(base);
+    auto end = env.cb->toDestAddress(a->frontier());
+    __builtin___clear_cache(reinterpret_cast<char*>(begin),
+                            reinterpret_cast<char*>(end));
   }
 
   static void patch(Venv& env);
 
   static void pad(CodeBlock& cb) {
     vixl::MacroAssembler a { cb };
-    auto const begin = cb.frontier();
+    auto const begin = cb.toDestAddress(cb.frontier());
     while (cb.available() >= 4) a.Brk(1);
     assertx(cb.available() == 0);
-    cb.sync(begin);
+    auto const end = cb.toDestAddress(cb.frontier());
+    __builtin___clear_cache(reinterpret_cast<char*>(begin),
+                            reinterpret_cast<char*>(end));
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -417,25 +422,16 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static CodeBlock* getBlock(Venv& env, CodeAddress a) {
+static CodeAddress toReal(Venv& env, CodeAddress a) {
   if (env.text.main().code.contains(a)) {
-    return &env.text.main().code;
+    return env.text.main().code.toDestAddress(a);
   }
   if (env.text.cold().code.contains(a)) {
-    return &env.text.cold().code;
+    return env.text.cold().code.toDestAddress(a);
   }
   if (env.text.frozen().code.contains(a)) {
-    return &env.text.frozen().code;
+    return env.text.frozen().code.toDestAddress(a);
   }
-  return nullptr;
-}
-
-static CodeAddress toReal(Venv& env, CodeAddress a) {
-  CodeBlock* b = getBlock(env, a);
-  if (b) {
-    return b->toDestAddress(a);
-  }
-
   return a;
 }
 
@@ -443,22 +439,18 @@ void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
     // 'jmp' is 2 instructions, load followed by branch
-    auto const begin = p.instr + 2 * 4;
-    auto const block = getBlock(env, begin);
-    assertx(block);
-    auto const addr = block->toDestAddress(begin);
-    *reinterpret_cast<TCA*>(addr) = env.addrs[p.target];
-    block->sync(begin, begin + sizeof(env.addrs[p.target]));
+    auto const begin = reinterpret_cast<char*>(toReal(env, p.instr + 2 * 4));
+    auto const end = begin + sizeof(env.addrs[p.target]);
+    *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
+    __builtin___clear_cache(begin, end);
   }
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
     // 'jcc' is 3 instructions, b.!cc + load followed by branch
-    auto const begin = p.instr + 3 * 4;
-    auto const block = getBlock(env, begin);
-    assertx(block);
-    auto const addr = block->toDestAddress(begin);
-    *reinterpret_cast<TCA*>(addr) = env.addrs[p.target];
-    block->sync(begin, begin + sizeof(env.addrs[p.target]));
+    auto const begin = reinterpret_cast<char*>(toReal(env, p.instr + 3 * 4));
+    auto const end = begin + sizeof(env.addrs[p.target]);
+    *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
+    __builtin___clear_cache(begin, end);
   }
 }
 

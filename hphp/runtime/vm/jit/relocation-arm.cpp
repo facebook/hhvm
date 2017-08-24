@@ -732,8 +732,8 @@ size_t relocateImpl(Env& env) {
 
             if (adjusted) {
               *addr = adjusted;
-              auto const begin = reinterpret_cast<TCA>(addr);
-              DataBlock::syncDirect(begin, begin + 8);
+              __builtin___clear_cache(reinterpret_cast<char*>(addr),
+                                      reinterpret_cast<char*>(addr) + 8);
             }
           } else if (src->IsMovz()) {
             int length = 1;
@@ -792,7 +792,10 @@ size_t relocateImpl(Env& env) {
     env.destBlock.setFrontier(destStart);
     throw;
   }
-  env.destBlock.sync(destStart);
+  auto const start = env.destBlock.toDestAddress(destStart);
+  auto const end = env.destBlock.toDestAddress(env.destBlock.frontier());
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(end));
 
   return asmCount;
 }
@@ -855,8 +858,8 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
 
       // Update offset
       instr->SetImmPCOffsetTarget(Instruction::Cast(adjusted));
-      auto const begin = reinterpret_cast<TCA>(instr);
-      DataBlock::syncDirect(begin, begin + vixl::kInstructionSize);
+      __builtin___clear_cache(reinterpret_cast<char*>(instr),
+                              reinterpret_cast<char*>(instr) + 4);
     }
   }
 
@@ -874,8 +877,8 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     auto adjusted = rel.adjustedAddressAfter(target);
     if (adjusted) {
       *addr = adjusted;
-      auto const begin = reinterpret_cast<TCA>(addr);
-      DataBlock::syncDirect(begin, begin + 8);
+      __builtin___clear_cache(reinterpret_cast<char*>(addr),
+                              reinterpret_cast<char*>(addr) + 8);
     }
   } else if (instr->IsMovz()) {
     const auto rd = instr->Rd();

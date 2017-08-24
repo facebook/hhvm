@@ -26,7 +26,6 @@
 #include <folly/Format.h>
 #include <folly/portability/SysMman.h>
 
-#include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -271,20 +270,6 @@ struct DataBlock {
   size_t numAllocs()  const { return m_nalloc; }
   size_t bytesFree()  const { return m_bytesFree; }
   size_t blocksFree() const { return m_freeRanges.size(); }
-
-  void sync(Address begin = nullptr,  Address end = nullptr) {
-    if (!begin) begin = m_base;
-    if (!end) end = m_frontier;
-    syncDirect(toDestAddress(begin), toDestAddress(end));
-  }
-
-  static void syncDirect(Address begin,  Address end) {
-    if (arch() == Arch::ARM) {
-      __builtin___clear_cache(reinterpret_cast<char*>(begin),
-                              reinterpret_cast<char*>(end));
-
-    }
-  }
 
 private:
 

@@ -175,10 +175,11 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptArr:
     {
       auto tagByte = static_cast<uint8_t>(rat.tag());
-      if (rat.hasArrData()) tagByte |= kRATArrayDataBit;
+      auto const arr = rat.array();
+      if (arr) tagByte |= kRATArrayDataBit;
       ue.emitByte(tagByte);
-      if (rat.hasArrData()) {
-        ue.emitInt32(rat.arrayId());
+      if (arr) {
+        ue.emitInt32(arr->id());
       }
       break;
     }

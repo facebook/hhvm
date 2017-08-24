@@ -22,7 +22,6 @@
 #include "hphp/parser/parser.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/native.h"
@@ -344,12 +343,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_constMap)
     (m_enumBaseTy)
     ;
-
-    if (SerDe::deserializing) {
-      for (unsigned i = 0; i < m_propMap.size(); ++i) {
-        m_propMap[i].resolveArray(this);
-      }
-    }
 }
 
 //=============================================================================

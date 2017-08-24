@@ -381,20 +381,27 @@ and fun_def tcopt f =
           let ty = TI.instantiable_hint env ret in
           Phase.localize_with_self env ty
       in
-      (* TODO TAST: convert default expression in param *)
-      let f_params = match f.f_variadic with
-        | FVvariadicArg param -> param :: f.f_params
-        | _ -> f.f_params
-      in
-      TI.check_params_instantiable env f_params;
+      TI.check_params_instantiable env f.f_params;
       TI.check_tparams_instantiable env f.f_tparams;
-      let env, param_tys = List.map_env env f_params make_param_local_ty in
-      let env, tparams = List.map_env env (List.zip_exn param_tys f_params)
+      let env, param_tys = List.map_env env f.f_params make_param_local_ty in
+      let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
         bind_param in
+      let env, t_variadic, v_ty = match f.f_variadic with
+        | FVvariadicArg vparam ->
+          TI.check_param_instantiable env vparam;
+          let env, ty = make_param_local_ty env vparam in
+          let env, t_vparam = bind_param env (ty, vparam) in
+          env, T.FVvariadicArg t_vparam, Some ty
+        | FVellipsis -> env, T.FVellipsis, None
+        | FVnonVariadic -> env, T.FVnonVariadic, None in
       let env, tb = fun_ env hret (fst f.f_name) nb f.f_fun_kind in
       let env = Env.check_todo env in
-      if Env.is_strict env then
-      List.iter2_exn f_params param_tys (check_param env);
+      if Env.is_strict env then begin
+        List.iter2_exn f.f_params param_tys (check_param env);
+        match f.f_variadic, v_ty with
+          | FVvariadicArg vparam, Some ty -> check_param env vparam ty;
+          | _ -> ()
+      end;
       begin match f.f_ret with
         | None when Env.is_strict env -> suggest_return env (fst f.f_name) hret
         | None -> Typing_suggest.save_fun_or_method f.f_name
@@ -406,8 +413,8 @@ and fun_def tcopt f =
         T.f_name = f.f_name;
         T.f_tparams = f.f_tparams;
         T.f_where_constraints = f.f_where_constraints;
-        T.f_variadic = T.FVnonVariadic (* TAST: get this right *);
-        T.f_params = tparams;
+        T.f_variadic = t_variadic;
+        T.f_params = typed_params;
         T.f_fun_kind = f.f_fun_kind;
         T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
         T.f_body = T.NamedBody {
@@ -5022,19 +5029,27 @@ and method_def env m =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
       Phase.localize ~ety_env env ret in
-  let m_params = match m.m_variadic with
-    | FVvariadicArg param -> param :: m.m_params
-    | _ -> m.m_params
-  in
-  TI.check_params_instantiable env m_params;
-  let env, param_tys = List.map_env env m_params make_param_local_ty in
+  TI.check_params_instantiable env m.m_params;
+  let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
-    List.iter2_exn ~f:(check_param env) m_params param_tys;
+    List.iter2_exn ~f:(check_param env) m.m_params param_tys;
   end;
   if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
-    List.iter2_exn ~f:(check_memoizable env) m_params param_tys;
+    List.iter2_exn ~f:(check_memoizable env) m.m_params param_tys;
   let env, typed_params =
-    List.map_env env (List.zip_exn param_tys m_params) bind_param in
+    List.map_env env (List.zip_exn param_tys m.m_params) bind_param in
+  let env, t_variadic = match m.m_variadic with
+    | FVvariadicArg vparam ->
+      TI.check_param_instantiable env vparam;
+      let env, ty = make_param_local_ty env vparam in
+      if Env.is_strict env then
+        check_param env vparam ty;
+      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
+        check_memoizable env vparam ty;
+      let env, t_variadic = bind_param env (ty, vparam) in
+      env, (T.FVvariadicArg t_variadic)
+    | FVellipsis -> env, T.FVellipsis
+    | FVnonVariadic -> env, T.FVnonVariadic in
   let nb = Nast.assert_named_body m.m_body in
   let env, tb =
     fun_ ~abstract:m.m_abstract env ret (fst m.m_name) nb m.m_fun_kind in
@@ -5062,7 +5077,7 @@ and method_def env m =
     T.m_name = m.m_name;
     T.m_tparams = m.m_tparams;
     T.m_where_constraints = m.m_where_constraints;
-    T.m_variadic = T.FVnonVariadic (* TODO TAST: get this right m.m_variadic *);
+    T.m_variadic = t_variadic;
     T.m_params = typed_params;
     T.m_fun_kind = m.m_fun_kind;
     T.m_user_attributes = List.map m.m_user_attributes (user_attribute env);

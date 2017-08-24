@@ -173,12 +173,13 @@ end
 let check_instantiable (env:Env.env) (h:Nast.hint) =
   CheckInstantiability.check env h
 
-let check_params_instantiable (env:Env.env) (params:Nast.fun_param list)=
-  List.iter params ~f:begin fun param ->
-    match param.param_hint with
+let check_param_instantiable (env:Env.env) (param:Nast.fun_param)=
+  match param.param_hint with
     | None -> ()
     | Some h -> check_instantiable env h
-  end
+
+let check_params_instantiable (env:Env.env) (params:Nast.fun_param list)=
+  List.iter params ~f:(check_param_instantiable env)
 
 let check_tparams_instantiable (env:Env.env) (tparams:Nast.tparam list) =
   List.iter tparams ~f:begin fun (_variance, _sid, cstrl) ->

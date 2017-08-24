@@ -185,3 +185,4 @@ let error2046 = "The 'async' annotation cannot be used on 'abstract' methods " ^
   "or methods inside of interfaces."
 let error2047 visibility_modifier = "Methods inside of interfaces may not be " ^
   "marked '" ^ visibility_modifier ^ "'; only 'public' visibility is allowed."
+let error2048 = "Expected group use prefix to end with '\\'"

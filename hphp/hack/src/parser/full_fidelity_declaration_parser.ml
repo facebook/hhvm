@@ -301,7 +301,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, use_token) = assert_token parser Use in
     let (parser, use_kind) = parse_namespace_use_kind_opt parser in
     (* We already know that this is a name, qualified name, or prefix. *)
-    (* TODO: Give an error in a later pass if it is not a prefix. *)
+    (* If this is not a prefix, it will be detected as an error in a later pass *)
     let (parser, prefix) = next_token parser in
     let prefix = make_token prefix in
     let (parser, left, clauses, right) =

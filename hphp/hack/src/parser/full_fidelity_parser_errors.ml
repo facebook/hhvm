@@ -834,6 +834,15 @@ let alias_errors node =
       [ SyntaxError.make s e SyntaxError.error2034 ]
   | _ -> [ ]
 
+let group_use_errors node =
+  match syntax node with
+  | NamespaceGroupUseDeclaration { namespace_group_use_prefix = prefix; _} when
+    token_kind prefix <> Some TokenKind.NamespacePrefix ->
+      let s = start_offset prefix in
+      let e = end_offset prefix in
+      [ SyntaxError.make s e SyntaxError.error2048 ]
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict is_hack =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -847,9 +856,11 @@ let find_syntax_errors node is_strict is_hack =
     let classish_errors = classish_errors node parents in
     let type_errors = type_errors node parents is_strict in
     let alias_errors = alias_errors node in
+    let group_use_errors = group_use_errors node in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
-      expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors in
+      expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
+      group_use_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

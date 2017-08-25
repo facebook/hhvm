@@ -3055,10 +3055,13 @@ void in(ISS& env, const bc::InitProp& op) {
       mergeThisProp(env, op.str1, t);
       break;
   }
-  if (auto const v = tv(t)) {
+  auto const v = tv(t);
+  if (v || !could_run_destructor(t)) {
     for (auto& prop : env.ctx.func->cls->properties) {
       if (prop.name == op.str1) {
         ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
+        prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
+        if (!v) break;
         prop.val = *v;
         if (op.subop2 == InitPropOp::Static &&
             !env.collect.publicStatics &&

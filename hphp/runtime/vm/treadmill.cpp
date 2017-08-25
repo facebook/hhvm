@@ -249,12 +249,12 @@ void finishRequest() {
           // Call globalGCTrigger to Run the pending execution
           // TODO(20074509)
           FTRACE(2, "treadmill executes pending global GC callbacks\n");
-          return;
+          break;
         }
         if (TI().changeGlobalGCStatus(
               ThreadInfo::OnRequestWithNoPendingExecution,
               ThreadInfo::Idle)) {
-          return;
+          break;
         }
       }
       assert(i < limit);

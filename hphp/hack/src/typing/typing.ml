@@ -2932,7 +2932,7 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
   match snd ety1 with
   | Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
-        array_get is_lvalue p env ty1 e2 ty2
+        array_get ~lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2
       end in
       env, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvarray ty | AKvec ty) ->
@@ -3113,6 +3113,12 @@ and array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           env, (Reason.Rwitness p, Terr)
         | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
+  | Toption tyl when lhs_of_null_coalesce ->
+      (* Normally, we would not allow indexing into a nullable container,
+         however, because the pattern shows up so frequently, we are allowing
+         indexing into a nullable container as long as it is on the lhs of a
+         null coalesce *)
+      array_get ~lhs_of_null_coalesce is_lvalue p env tyl e2 ty2
   | Toption _ ->
       Errors.null_container p
         (Reason.to_string

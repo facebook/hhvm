@@ -1,0 +1,4 @@
+File "null_shape_disallows_indexing_for_expression.php", line 4, characters 3-11:
+You are trying to access an element of this container but the container could be null.  (Typing[4063])
+File "null_shape_disallows_indexing_for_expression.php", line 4, characters 3-6:
+This is what makes me believe it can be null

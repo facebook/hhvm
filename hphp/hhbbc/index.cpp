@@ -2724,12 +2724,21 @@ Type Index::lookup_class_constant(Context ctx,
 }
 
 folly::Optional<Type> Index::lookup_constant(Context ctx,
-                                             SString cnsName) const {
-  auto const it = m_data->constants.find(cnsName);
+                                             SString cnsName,
+                                             SString fallbackName) const {
+  auto it = m_data->constants.find(cnsName);
   if (it == m_data->constants.end()) {
     // flag to indicate that the constant isn't in the index yet.
     if (options.HardConstProp) return folly::none;
     return TInitCell;
+  }
+
+  if (it->second.readonly && fallbackName) {
+    auto it2 = m_data->constants.find(fallbackName);
+    if (it2 != m_data->constants.end() &&
+        !it2->second.readonly) {
+      it = std::move(it2);
+    }
   }
 
   if (it->second.func &&

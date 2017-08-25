@@ -1054,10 +1054,11 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   return array($cmd, $env);
 }
 
-function hphp_cmd($options, $test) {
+function hphp_cmd($options, $test, $timeout_prefix) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
   return implode(" ", array(
     "HHVM_DISABLE_HHBBC=1",
+    $timeout_prefix,
     hhvm_path(),
     '--hphp',
     '--config',
@@ -1068,8 +1069,9 @@ function hphp_cmd($options, $test) {
   ));
 }
 
-function hhbbc_cmd($options, $test) {
+function hhbbc_cmd($options, $test, $timeout_prefix) {
   return implode(" ", array(
+    $timeout_prefix,
     hhvm_path(),
     '--hhbbc',
     '--no-logging',
@@ -1958,6 +1960,14 @@ function run_config_post($outputs, $test, $options) {
   return $passed;
 }
 
+function timeout_prefix() {
+  if (is_executable('/usr/bin/timeout')) {
+    return '/usr/bin/timeout 300 ';
+  } else {
+    return __DIR__.'/../tools/timeout.sh -t 300 ';
+  }
+}
+
 function run_one_config($options, $test, $cmd, $cmd_env) {
   if (is_array($cmd)) {
     $result = 'skip';
@@ -1967,11 +1977,7 @@ function run_one_config($options, $test, $cmd, $cmd_env) {
     }
     return $result;
   }
-  if (is_executable('/usr/bin/timeout')) {
-    $cmd = '/usr/bin/timeout 300 ' . $cmd;
-  } else {
-    $cmd = __DIR__.'/../tools/timeout.sh -t 300 '. $cmd;
-  }
+  $cmd = timeout_prefix() . $cmd;
   $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
@@ -2046,8 +2052,8 @@ function run_test($options, $test) {
     $hphp_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_repo = "$test.repo/hhvm.hhbbc";
     shell_exec("rm -f \"$hphp_repo\" \"$hhbbc_repo\" ");
-    $hphp = hphp_cmd($options, $test);
-    $hhbbc = hhbbc_cmd($options, $test);
+    $hphp = hphp_cmd($options, $test, timeout_prefix());
+    $hhbbc = hhbbc_cmd($options, $test, timeout_prefix());
     shell_exec("$hphp 2>&1");
     shell_exec("$hhbbc 2>&1");
     if (isset($options['hhbbc2'])) {
@@ -2224,8 +2230,8 @@ function print_commands($tests, $options) {
     }
 
     // How to run it with hhbbc:
-    $hhbbc_cmds = hphp_cmd($options, $test)."\n";
-    $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
+    $hhbbc_cmds = hphp_cmd($options, $test, '')."\n";
+    $hhbbc_cmd  = hhbbc_cmd($options, $test, '')."\n";
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {
       foreach ((array)$command as $c) {

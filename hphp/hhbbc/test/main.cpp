@@ -18,6 +18,13 @@
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
+
+  // If this is called with `--gtest_list_tests` then do only that, and bail
+  // early (avoiding setting up HPHP environment)
+  if (::testing::FLAGS_gtest_list_tests) {
+    return RUN_ALL_TESTS();
+  }
+
   HPHP::init_for_unit_test();
   SCOPE_EXIT { HPHP::hphp_process_exit(); };
   return RUN_ALL_TESTS();

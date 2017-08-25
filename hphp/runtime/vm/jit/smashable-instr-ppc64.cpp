@@ -73,14 +73,17 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
 }
 
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
-  return EMIT_BODY(cb, fixups, branchFar, target, ppc64_asm::BranchConditions::Always,
-                   ppc64_asm::LinkReg::DoNotTouch, ppc64_asm::ImmType::TocOnly, true);
+  return EMIT_BODY(cb, fixups, branchFar, target,
+                   ppc64_asm::BranchConditions::Always,
+                   ppc64_asm::LinkReg::DoNotTouch,
+                   ppc64_asm::ImmType::TocOnly, true);
 }
 
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc) {
   assertx(cc != CC_None);
-  return EMIT_BODY(cb, fixups, branchFar, target, cc, ppc64_asm::LinkReg::DoNotTouch,
+  return EMIT_BODY(cb, fixups, branchFar, target, cc,
+                   ppc64_asm::LinkReg::DoNotTouch,
                    ppc64_asm::ImmType::TocOnly, true);
 }
 
@@ -107,7 +110,8 @@ void smashCmpq(TCA inst, uint32_t imm) {
 void smashCall(TCA inst, TCA target) {
   // Smash TOC value
   const DecodedInstruction di(inst);
-  assertx(di.isLoadingTOC() && di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
   uint64_t* imm_address = di.decodeTOCAddress();
   *imm_address = reinterpret_cast<uint64_t>(target);
 }
@@ -115,15 +119,17 @@ void smashCall(TCA inst, TCA target) {
 void smashJmp(TCA inst, TCA target) {
   // Smash TOC value
   const DecodedInstruction di(inst);
-  assertx(di.isLoadingTOC() && di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
   uint64_t* imm_address = di.decodeTOCAddress();
-  if(imm_address) *imm_address = reinterpret_cast<uint64_t>(target);
+  if (imm_address) *imm_address = reinterpret_cast<uint64_t>(target);
 }
 
 void smashJcc(TCA inst, TCA target) {
   // Smash TOC value
   const DecodedInstruction di(inst);
-  assertx(di.isLoadingTOC() && di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
   uint64_t* imm_address = di.decodeTOCAddress();
   *imm_address = reinterpret_cast<uint64_t>(target);
 }

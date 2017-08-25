@@ -268,7 +268,6 @@ public:
   int64_t getIndex(uint64_t elem);
 
 private:
-  //int64_t allocTOC (int32_t target, bool align = false);
   int64_t allocTOC (int64_t target);
   void forceAlignment(HPHP::Address& addr);
 

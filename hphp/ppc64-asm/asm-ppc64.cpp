@@ -39,7 +39,7 @@ VMTOC::~VMTOC() {
 
 int64_t VMTOC::pushElem(int64_t elem, bool elemMayChange) {
   int64_t offset;
-  if(elemMayChange) {
+  if (elemMayChange) {
     offset = allocTOC(elem);
   }
   else {

@@ -452,7 +452,7 @@ int64_t DecodedInstruction::decodeTOCOffset() const {
 bool DecodedInstruction::isSmashable(uint64_t elem) const {
   auto elemOffset = decodeTOCOffset();
   auto offset = VMTOC::getInstance().getIndex(elem);
-  return offset!=elemOffset;
+  return offset != elemOffset;
 }
 
 bool DecodedInstruction::fitsOnNearBranch(ptrdiff_t diff, bool uncond) const {
@@ -469,10 +469,7 @@ bool DecodedInstruction::isLimmediatePossible() const {
 }
 
 bool DecodedInstruction::isLoadingTOC() const {
-  if (m_dinfo.isLd(true) || m_dinfo.isLwz(true) || m_dinfo.isAddis(true)) {
-    return true;
-  }
-  return false;
+  return m_dinfo.isLd(true) || m_dinfo.isLwz(true) || m_dinfo.isAddis(true);
 }
 
 bool DecodedInstruction::isLi64Possible() const {

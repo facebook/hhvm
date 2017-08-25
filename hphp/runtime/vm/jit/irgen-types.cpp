@@ -342,87 +342,6 @@ void implIsScalarC(IRGS& env) {
 
 }
 
-/*
- * Note: this is currently separate from typeFromRAT for now, just because we
- * don't want to enable every single type for assertions yet.
- *
- * (Some of them currently regress performance, presumably because the IR
- * doesn't always handle the additional type information very well.  It is
- * possibly a compile-time slowdown only, but we haven't investigated yet.)
- */
-folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
-  using T = RepoAuthType::Tag;
-
-  switch (rat.tag()) {
-    case T::Uninit:
-    case T::InitNull:
-    case T::Null:
-    case T::Bool:
-    case T::Int:
-    case T::Dbl:
-    case T::Res:
-    case T::SStr:
-    case T::Str:
-    case T::Obj:
-    case T::SArr:
-    case T::Arr:
-    case T::SVec:
-    case T::Vec:
-    case T::SDict:
-    case T::Dict:
-    case T::SKeyset:
-    case T::Keyset:
-    case T::Cell:
-    case T::Ref:
-    case T::InitUnc:
-    case T::Unc:
-    case T::OptUncArrKey:
-    case T::OptArrKey:
-    case T::UncArrKey:
-    case T::ArrKey:
-      return typeFromRAT(rat, nullptr);
-
-    case T::OptExactObj:
-    case T::OptSubObj:
-    case T::ExactObj:
-    case T::SubObj: {
-      return typeFromRAT(rat, curClass(env));
-    }
-
-    // Type assertions can't currently handle Init-ness.
-    case T::InitCell:
-      return TCell;
-    case T::InitGen:
-      return folly::none;
-
-    case T::Gen:
-      return folly::none;
-
-    case T::OptInt:
-    case T::OptObj:
-    case T::OptDbl:
-    case T::OptBool:
-    case T::OptSStr:
-    case T::OptStr:
-    case T::OptRes:
-      return folly::none;
-
-    case T::OptSArr:
-    case T::OptArr:
-    case T::OptSVec:
-    case T::OptVec:
-    case T::OptSDict:
-    case T::OptDict:
-    case T::OptSKeyset:
-    case T::OptKeyset:
-      // TODO(#4205897): optional array types.
-      return folly::none;
-  }
-  not_reached();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
   /*
    * InstanceOfD is always false if it's not an object.
@@ -611,15 +530,15 @@ void emitIsMemoType(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitAssertRATL(IRGS& env, int32_t loc, RepoAuthType rat) {
-  if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeLocal(env, loc, *t);
-  }
+  assertTypeLocal(env, loc, typeFromRAT(rat, curClass(env)));
 }
 
 void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
-  if (auto const t = ratToAssertType(env, rat)) {
-    assertTypeStack(env, BCSPRelOffset{safe_cast<int32_t>(offset)}, *t);
-  }
+  assertTypeStack(
+    env,
+    BCSPRelOffset{safe_cast<int32_t>(offset)},
+    typeFromRAT(rat, curClass(env))
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

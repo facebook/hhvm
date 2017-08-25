@@ -239,8 +239,7 @@ void emitAwait(IRGS& env) {
     auto const stkLoc = decode_iva(pc);
     if (stkLoc != 0) return returnTypeAwaited(child);
     auto const rat = decodeRAT(curUnit(env), pc);
-    auto const ty = ratToAssertType(env, rat);
-    return ty ? *ty : returnTypeAwaited(child);
+    return typeFromRAT(rat, curClass(env));
   }();
 
   ifThenElse(

@@ -1084,9 +1084,8 @@ void Vgen::emit(const vasm_opc& i) {                         \
   } else {                                                   \
     checkSF(i, StatusFlags::NotV);                           \
     if (!flagRequired(i.fl, StatusFlags::C)) {               \
-      /* Perform the shift and set N and Z. */               \
-      a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l());         \
-      a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);      \
+      /* Equivalent to shift and test, set N and Z. */       \
+      a->Tst(gpr_w(i.s1), Operand(~(-1LL << (sz - i.s0.l())))); \
     } else {                                                 \
       /* Use VIXL's macroassembler scratch regs. */          \
       a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);      \

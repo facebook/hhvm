@@ -174,7 +174,7 @@ using BreakInfo = boost::variant<FuncBreak, LineBreak, ExnBreak>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct XDebugHook : DebuggerHook {
+struct XDebugHook final : DebuggerHook {
   static DebuggerHook* GetInstance();
 
   // Starting the server on request init

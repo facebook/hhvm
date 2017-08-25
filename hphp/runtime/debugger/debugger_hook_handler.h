@@ -30,7 +30,7 @@ namespace HPHP { namespace Eval {
 void proxySetBreakPoints(DebuggerProxy* proxy);
 
 /* Debugger hook for hphpd. */
-struct HphpdHook : DebuggerHook {
+struct HphpdHook final : DebuggerHook {
   static DebuggerHook* GetInstance();
 
   void onOpcode(const unsigned char* /*pc*/) override {

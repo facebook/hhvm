@@ -21,6 +21,7 @@
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/host-health-monitor.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -183,14 +184,14 @@ bool PageletTransport::isPipelineEmpty() {
   return m_pipeline.empty();
 }
 
-bool PageletTransport::getResults(
-  Array &results,
-  int &code,
-  PageletServerTaskEvent* next_event
-) {
+Array PageletTransport::getAsyncResults(bool allow_empty) {
+  auto results = Array::Create();
+  PageletServerTaskEvent* next_event = nullptr;
+  int code;
+
   {
     Lock lock(this);
-    assert(m_done || !m_pipeline.empty());
+    assert(m_done || !m_pipeline.empty() || allow_empty);
     while (!m_pipeline.empty()) {
       std::string &str = m_pipeline.front();
       String response(str.c_str(), str.size(), CopyString);
@@ -202,13 +203,20 @@ bool PageletTransport::getResults(
     if (m_done) {
       String response(m_response.c_str(), m_response.size(), CopyString);
       results.append(response);
-      return true;
     } else {
+      next_event = new PageletServerTaskEvent();
       m_event = next_event;
       m_event->setJob(this);
-      return false;
     }
   }
+
+  return PackedArrayInit(3)
+    .append(results)
+    .append(next_event
+      ? make_tv<KindOfObject>(next_event->getWaitHandle())
+      : make_tv<KindOfNull>())
+    .append(make_tv<KindOfInt64>(code))
+    .toArray();
 }
 
 String PageletTransport::getResults(
@@ -447,6 +455,11 @@ String PageletServer::TaskResult(const Resource& task, Array &headers, int &code
                                  int64_t timeout_ms) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);
+}
+
+Array PageletServer::AsyncTaskResult(const Resource& task) {
+  auto ptask = cast<PageletTask>(task);
+  return ptask->getJob()->getAsyncResults(true);
 }
 
 void PageletServer::AddToPipeline(const std::string &s) {

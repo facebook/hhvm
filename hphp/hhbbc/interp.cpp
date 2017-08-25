@@ -2733,8 +2733,6 @@ void in(ISS& env, const bc::StaticLocDef& op) {
 
 void in(ISS& env, const bc::StaticLocCheck& op) {
   auto const l = op.loc1;
-  setLocRaw(env, l, TGen);
-  maybeBindLocalStatic(env, l);
   if (!env.ctx.func->isMemoizeWrapper &&
       !env.ctx.func->isClosureBody &&
       env.collect.localStaticTypes.size() > l) {
@@ -2748,6 +2746,8 @@ void in(ISS& env, const bc::StaticLocCheck& op) {
                     bc::True {});
     }
   }
+  setLocRaw(env, l, TGen);
+  maybeBindLocalStatic(env, l);
   push(env, TBool);
 }
 

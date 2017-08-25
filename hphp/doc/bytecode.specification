@@ -3475,9 +3475,9 @@ FPassDim   <param id> <member key>    []  ->  []
 10.3 Final operations
 ----------------------
 
-All final operations take a <stack count> immediate as %0, which indicates the
-number of member keys on the eval stack that must be consumed before pushing
-the final result, if any.
+All final operations take a <stack count> immediate, which indicates the number
+of elements on the eval stack that must be consumed before pushing the final
+result. These are elements read by Base*[CR] instructions, and member keys.
 
 QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 

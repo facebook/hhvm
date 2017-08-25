@@ -167,6 +167,20 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
+namespace detail {
+
+ALWAYS_INLINE void checkPromotion(const TypedValue* base) {
+  if (LIKELY(!RuntimeOption::EvalHackArrCompatNotices)) return;
+
+  if (base->m_type == KindOfNull) {
+    raise_hackarr_compat_notice("Promoting null to array");
+  } else if (base->m_type == KindOfBoolean) {
+    raise_hackarr_compat_notice("Promoting false to array");
+  }
+}
+
+}
+
 /**
  * Elem when base is Null
  */
@@ -744,6 +758,7 @@ inline TypedValue* ElemDKeyset(TypedValue* base, key_type<keyType> key) {
  */
 template<MOpMode mode, KeyType keyType>
 inline TypedValue* ElemDEmptyish(TypedValue* base, key_type<keyType> key) {
+  detail::checkPromotion(base);
   auto scratchKey = initScratchKey(key);
   tvAsVariant(base) = Array::Create();
   auto const result = const_cast<TypedValue*>(
@@ -1133,6 +1148,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
  * NewElem when base is Null
  */
 inline TypedValue* NewElemEmptyish(TypedValue* base) {
+  detail::checkPromotion(base);
   Array a = Array::Create();
   TypedValue* result = const_cast<TypedValue*>(a.lvalAt().asTypedValue());
   tvAsVariant(base) = a;
@@ -1241,13 +1257,7 @@ inline TypedValue* NewElem(TypedValue& tvRef,
 template <KeyType keyType>
 inline void SetElemEmptyish(TypedValue* base, key_type<keyType> key,
                             Cell* value) {
-  if (RuntimeOption::EvalHackArrCompatNotices) {
-    if (base->m_type == KindOfNull) {
-      raise_hackarr_compat_notice("Promoting null to array");
-    } else if (base->m_type == KindOfBoolean) {
-      raise_hackarr_compat_notice("Promoting false to array");
-    }
-  }
+  detail::checkPromotion(base);
   auto const& scratchKey = initScratchKey(key);
   tvAsVariant(base) = Array::Create();
   tvAsVariant(base).asArrRef().set(tvAsCVarRef(&scratchKey),
@@ -1694,6 +1704,7 @@ inline StringData* SetElem(TypedValue* base, key_type<keyType> key,
  * SetNewElem when base is Null
  */
 inline void SetNewElemEmptyish(TypedValue* base, Cell* value) {
+  detail::checkPromotion(base);
   Array a = Array::Create();
   a.append(cellAsCVarRef(*value));
   tvAsVariant(base) = a;
@@ -1870,6 +1881,8 @@ inline TypedValue* SetOpElemEmptyish(SetOpOp op, Cell* base,
                                      TypedValue key, Cell* rhs) {
   assert(cellIsPlausible(*base));
 
+  detail::checkPromotion(base);
+
   Array a = Array::Create();
   TypedValue* result = const_cast<TypedValue*>(a.lvalAt(tvAsCVarRef(&key))
                                                .asTypedValue());
@@ -1985,6 +1998,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
 
 inline TypedValue* SetOpNewElemEmptyish(SetOpOp op,
                                         TypedValue* base, Cell* rhs) {
+  detail::checkPromotion(base);
   Array a = Array::Create();
   TypedValue* result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
@@ -2126,6 +2140,8 @@ inline Cell IncDecElemEmptyish(
   TypedValue* base,
   TypedValue key
 ) {
+  detail::checkPromotion(base);
+
   auto a = Array::Create();
   auto result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
   tvAsVariant(base) = a;
@@ -2232,6 +2248,7 @@ inline Cell IncDecNewElemEmptyish(
   IncDecOp op,
   TypedValue* base
 ) {
+  detail::checkPromotion(base);
   auto a = Array::Create();
   auto result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;

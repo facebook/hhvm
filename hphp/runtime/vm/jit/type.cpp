@@ -630,22 +630,18 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::InitGen:        return TInitGen;
     case T::Gen:            return TGen;
 
-    // TODO(#4205897): option specialized array types
-    case T::OptArr:         return TArr          | TInitNull;
-    case T::OptSArr:        return TStaticArr    | TInitNull;
-    case T::OptVec:         return TVec          | TInitNull;
-    case T::OptSVec:        return TStaticVec    | TInitNull;
-    case T::OptDict:        return TDict         | TInitNull;
-    case T::OptSDict:       return TStaticDict   | TInitNull;
-    case T::OptKeyset:      return TKeyset       | TInitNull;
-    case T::OptSKeyset:     return TStaticKeyset | TInitNull;
+#define X(A, B) \
+      [&]{                                                              \
+        if (auto const arr = ty.array()) return Type::B(arr);           \
+        else return A;                                                  \
+      }()
 
-    case T::SArr:
-      if (auto const ar = ty.array()) return Type::StaticArray(ar);
-      return TStaticArr;
-    case T::Arr:
-      if (auto const ar = ty.array()) return Type::Array(ar);
-      return TArr;
+    case T::SArr:           return X(TStaticArr, StaticArray);
+    case T::Arr:            return X(TArr, Array);
+
+    case T::OptSArr:        return X(TStaticArr, StaticArray) | TInitNull;
+    case T::OptArr:         return X(TArr, Array)             | TInitNull;
+#undef X
 
     case T::SVec:           return TStaticVec;
     case T::Vec:            return TVec;
@@ -653,6 +649,13 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Dict:           return TDict;
     case T::SKeyset:        return TStaticKeyset;
     case T::Keyset:         return TKeyset;
+
+    case T::OptSVec:        return TStaticVec    | TInitNull;
+    case T::OptVec:         return TVec          | TInitNull;
+    case T::OptSDict:       return TStaticDict   | TInitNull;
+    case T::OptDict:        return TDict         | TInitNull;
+    case T::OptSKeyset:     return TStaticKeyset | TInitNull;
+    case T::OptKeyset:      return TKeyset       | TInitNull;
 
     case T::SubObj:
     case T::ExactObj:

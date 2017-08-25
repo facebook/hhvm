@@ -3680,9 +3680,7 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return RepoAuthType { tag, dobj.cls.name() };
   }
 
-  if (t.strictSubtypeOf(TArr) ||
-      // TODO(#4205897): optional array types.
-      (false && is_opt(t) && t.strictSubtypeOf(TOptArr))) {
+  if (t.strictSubtypeOf(TArr) || (is_opt(t) && t.strictSubtypeOf(TOptArr))) {
     return make_repo_type_arr(arrTable, t);
   }
 

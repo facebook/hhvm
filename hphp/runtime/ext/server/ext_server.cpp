@@ -85,10 +85,18 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers /* = null_array */,
                        const String& post_data /* = null_string */,
-                       const Array& files /* = null_array */) {
+                       const Array& files /* = null_array */,
+                       int64_t desired_timeout /* = 0 */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
-  int timeout = ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
+  // If a non-zero timeout is requested, use it and cap it at the remaining
+  // request time.
+  int remaining_time =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
+  int timeout = desired_timeout > 0 && desired_timeout <= remaining_time
+    ? desired_timeout
+    : remaining_time;
+
   if (transport) {
     remote_host = transport->getRemoteHost();
     if (!headers.exists(s_Host) && RuntimeOption::SandboxMode) {

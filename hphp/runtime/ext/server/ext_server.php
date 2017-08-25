@@ -34,7 +34,8 @@ function pagelet_server_is_enabled(): bool;
 function pagelet_server_task_start(string $url,
                                    array $headers = [],
                                    string $post_data = "",
-                                   array $files = []): resource;
+                                   array $files = [],
+                                   int $timeout_seconds = 0): resource;
 
 /**
  * Checks finish status of a pagelet task.

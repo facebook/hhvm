@@ -37,7 +37,8 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers = null_array,
                        const String& post_data = null_string,
-                       const Array& files = null_array);
+                       const Array& files = null_array,
+                       int64_t timeout_seconds = 0);
 int64_t HHVM_FUNCTION(pagelet_server_task_status,
                       const Resource& task);
 String HHVM_FUNCTION(pagelet_server_task_result,

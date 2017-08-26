@@ -170,6 +170,7 @@ class virtual ['b] endo :
                        Ast_visitors_ancestors.kind list ->
                        Ast_visitors_ancestors.hint option ->
                        Ast_visitors_ancestors.class_var list ->
+                       string option ->
                        Ast_visitors_ancestors.class_elt;
         on_Class_const : 'c ->
                          Ast_visitors_ancestors.expr_ ->
@@ -1036,6 +1037,7 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.kind list ->
       Ast_visitors_ancestors.hint option ->
       Ast_visitors_ancestors.class_var list ->
+      string option ->
       Ast_visitors_ancestors.class_elt
     method on_Class_const :
       'c ->

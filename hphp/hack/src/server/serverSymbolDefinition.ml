@@ -58,7 +58,7 @@ let get_member_def opt (x : class_element) =
   | Property
   | Static_property ->
     let props = List.concat_map c.Ast.c_body begin function
-      | Ast.ClassVars (kinds, _, vars) ->
+      | Ast.ClassVars (kinds, _, vars, _) ->
         List.map vars (fun var -> (kinds, var))
       | Ast.XhpAttr (_, var, _, _) -> [([], var)]
       | _ -> []

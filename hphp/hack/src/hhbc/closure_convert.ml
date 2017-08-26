@@ -195,7 +195,7 @@ let make_closure ~explicit_use ~class_num
     c_tparams = tparams;
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
-    c_body = [ClassVars ([Private], None, cvl); Method md];
+    c_body = [ClassVars ([Private], None, cvl, None); Method md];
     c_namespace = Namespace_env.empty_with_default_popt;
     c_enum = None;
     c_span = p;
@@ -631,9 +631,9 @@ and convert_class_elt env st ce =
     let st, params = convert_params env st md.m_params in
     st, Method { md with m_body = block; m_params = params }
 
-  | ClassVars (kinds, hint, cvl) ->
+  | ClassVars (kinds, hint, cvl, doc_comment_opt) ->
     let st, cvl = List.map_env st cvl (convert_class_var env) in
-    st, ClassVars (kinds, hint, cvl)
+    st, ClassVars (kinds, hint, cvl, doc_comment_opt)
 
   | Const (ho, iel) ->
     let st, iel = List.map_env st iel (convert_class_const env) in

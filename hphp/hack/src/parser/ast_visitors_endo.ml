@@ -300,13 +300,13 @@ class virtual ['self] endo =
       let r1 = self#on_hint env c1 in if c0 == r0 && c1 == r1
       then this
       else ClassTraitRequire (r0, r1)
-    method on_ClassVars env this c0 c1 c2 =
+    method on_ClassVars env this c0 c1 c2 c3 =
       let r0 = self#on_list self#on_kind env c0 in
       let r1 = self#on_option self#on_hint env c1 in
       let r2 = self#on_list self#on_class_var env c2 in
       if c0 == r0 && c1 == r1 && c2 == r2
       then this
-      else ClassVars (r0, r1, r2)
+      else ClassVars (r0, r1, r2, c3)
     method on_XhpAttr env this c0 c1 c2 c3 =
       let r0 = self#on_option self#on_hint env c0 in
       let r1 = self#on_class_var env c1 in
@@ -382,8 +382,8 @@ class virtual ['self] endo =
       | XhpAttrUse c0 -> self#on_XhpAttrUse env this c0
       | ClassTraitRequire (c0, c1) as this ->
           self#on_ClassTraitRequire env this c0 c1
-      | ClassVars (c0, c1, c2) as this ->
-          self#on_ClassVars env this c0 c1 c2
+      | ClassVars (c0, c1, c2, c3) as this ->
+          self#on_ClassVars env this c0 c1 c2 c3
       | XhpAttr (c0, c1, c2, c3) as this ->
           self#on_XhpAttr env this c0 c1 c2 c3
       | Method c0 -> self#on_Method env this c0

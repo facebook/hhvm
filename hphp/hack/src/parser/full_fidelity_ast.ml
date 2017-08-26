@@ -1436,7 +1436,7 @@ and extract_docblock = fun node ->
   parse (leading_text node)
 
 and pClassElt : class_elt list parser = fun node env ->
-  let opt_doc_comment = extract_docblock node in
+  let doc_comment_opt = extract_docblock node in
   match syntax node with
   | ConstDeclaration
     { const_abstract; const_type_specifier; const_declarators; _ } ->
@@ -1478,6 +1478,10 @@ and pClassElt : class_elt list parser = fun node env ->
       ]
   | PropertyDeclaration
     { property_modifiers; property_type; property_declarators; _ } ->
+      (* TODO: doc comments do not have to be at the beginning, they can go in
+       * the middle of the decleration, to be associated with individual
+       * properties, right now we don't handle this *)
+      let doc_comment_opt = extract_docblock node in
       [ ClassVars
         ( pKinds property_modifiers env
         , mpOptional pHint property_type env
@@ -1495,6 +1499,7 @@ and pClassElt : class_elt list parser = fun node env ->
             )
           | _ -> missing_syntax "property declarator" node env
           end
+        , doc_comment_opt
         )
       ]
   | MethodishDeclaration
@@ -1518,6 +1523,7 @@ and pClassElt : class_elt list parser = fun node env ->
           ( Option.to_list param.param_modifier
           , param.param_hint
           , [span, cvname, None]
+          , None
           )
         )
       in
@@ -1560,7 +1566,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_ret_by_ref      = hdr.fh_ret_by_ref
       ; m_span            = get_pos node
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
-      ; m_doc_comment     = opt_doc_comment
+      ; m_doc_comment     = doc_comment_opt
       }]
   | TraitUseConflictResolution
     { trait_use_conflict_resolution_names
@@ -1722,7 +1728,7 @@ and pNamespaceUseClause ~prefix env kind node =
   | _ -> missing_syntax "namespace use clause" node env
 
 and pDef : def parser = fun node env ->
-  let opt_doc_comment = extract_docblock node in
+  let doc_comment_opt = extract_docblock node in
   match syntax node with
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
@@ -1753,7 +1759,7 @@ and pDef : def parser = fun node env ->
         end
       ; f_user_attributes =
         List.concat @@ couldMap ~f:pUserAttribute function_attribute_spec env
-      ; f_doc_comment = opt_doc_comment
+      ; f_doc_comment = doc_comment_opt
       }
   | ClassishDeclaration
     { classish_attribute       = attr
@@ -1793,7 +1799,7 @@ and pDef : def parser = fun node env ->
         | Some TK.Enum              -> Cenum
         | _ -> missing_syntax "class kind" kw env
         end
-      ; c_doc_comment = opt_doc_comment
+      ; c_doc_comment = doc_comment_opt
       }
   | ConstDeclaration
     { const_type_specifier = ty
@@ -1866,7 +1872,7 @@ and pDef : def parser = fun node env ->
         { e_base       = pHint base env
         ; e_constraint = mpOptional pTConstraintTy constr env
         }
-      ; c_doc_comment = opt_doc_comment
+      ; c_doc_comment = doc_comment_opt
       }
   | InclusionDirective
     { inclusion_expression =

@@ -92,7 +92,7 @@ and class_elt =
   | ClassUsePrecedence of id * pstring * id list
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
-  | ClassVars of kind list * hint option * class_var list
+  | ClassVars of kind list * hint option * class_var list * string option
   | XhpAttr of hint option * class_var * bool *
                ((Pos.t * expr list) option)
   | Method of method_

@@ -76,7 +76,8 @@ class virtual ['b] reduce :
         on_ClassVars : 'c ->
                        Ast_visitors_ancestors.kind list ->
                        Ast_visitors_ancestors.hint option ->
-                       Ast_visitors_ancestors.class_var list -> 'd;
+                       Ast_visitors_ancestors.class_var list ->
+                       string option -> 'd;
         on_Class_const : 'c ->
                          Ast_visitors_ancestors.id ->
                          Ast_visitors_ancestors.pstring -> 'd;
@@ -424,7 +425,8 @@ class virtual ['b] reduce :
       'c ->
       Ast_visitors_ancestors.kind list ->
       Ast_visitors_ancestors.hint option ->
-      Ast_visitors_ancestors.class_var list -> 'd
+      Ast_visitors_ancestors.class_var list ->
+      string option -> 'd
     method on_Class_const :
       'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.pstring -> 'd
     method on_Class_get :

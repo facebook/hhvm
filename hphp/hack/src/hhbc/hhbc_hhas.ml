@@ -1228,9 +1228,15 @@ let property_type_info p =
   let tinfo = Hhas_property.type_info p in
   (string_of_type_info ~is_enum:false tinfo) ^ " "
 
+let property_doc_comment p =
+  match Hhas_property.doc_comment p with
+  | None -> ""
+  | Some s -> Printf.sprintf "\"\"\"%s\"\"\" " (Php_escaping.escape s)
+
 let add_property class_def buf property =
   B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
+  B.add_string buf (property_doc_comment property);
   B.add_string buf (property_type_info property);
   B.add_string buf (Hhbc_id.Prop.to_raw_string (Hhas_property.name property));
   B.add_string buf " =\n    ";

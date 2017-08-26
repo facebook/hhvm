@@ -273,7 +273,7 @@ idorvname:
   | vname {$1}
 ;
 classproperty:
-  | PROPERTYDIRECTIVE propertyattributes typeinfo idorvname EQUALS nl propertyvalue
+  | PROPERTYDIRECTIVE propertyattributes doc_comment typeinfo idorvname EQUALS nl propertyvalue
   {Hhas_property.make
     (List.mem "private" $2)
     (List.mem "protected" $2)
@@ -281,11 +281,16 @@ classproperty:
     (List.mem "static" $2)
     (List.mem "deep_init" $2)
     (List.mem "no_serialize" $2)
-    (Hhbc_id.Prop.from_raw_string $4) (*name *)
-    $7 (*initial value *)
+    (Hhbc_id.Prop.from_raw_string $5) (*name *)
+    $8 (*initial value *)
     None (* initializer instructions. already been emitted elsewhere *)
-    $3 (* type_info *)
+    $4 (* type_info *)
+    $3 (* doc_comment *)
   }
+;
+doc_comment:
+  | /* empty */ {None}
+  | TRIPLEQUOTEDSTRING {Some $1}
 ;
 propertyattributes:
   | /* empty */ {[]}

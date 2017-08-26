@@ -1334,7 +1334,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
     | AbsConst _ -> acc
-    | ClassVars (kl, h, cvl) when List.mem kl Static ->
+    | ClassVars (kl, h, cvl, _) when List.mem kl Static ->
       (* Static variables are shared for all classes in the hierarchy.
        * This makes the 'this' type completely unsafe as a type for a
        * static variable. See test/typecheck/this_tparam_static.php as
@@ -1361,7 +1361,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
     | AbsConst _ -> acc
-    | ClassVars (kl, h, cvl) when not (List.mem kl Static) ->
+    | ClassVars (kl, h, cvl, _) when not (List.mem kl Static) ->
       let h = Option.map h (hint env) in
       let cvl = List.map cvl (class_prop_ env) in
       let cvl = List.map cvl (fill_prop kl h) in

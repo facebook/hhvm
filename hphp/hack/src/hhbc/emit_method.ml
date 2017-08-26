@@ -92,7 +92,7 @@ let from_ast_wrapper : bool -> _ ->
     if method_is_closure_body
     then List.concat_map ast_class.Ast.c_body (fun item ->
       match item with
-      | Ast.ClassVars(_, _, cvl) ->
+      | Ast.ClassVars(_, _, cvl, _) ->
         let cvl = List.filter cvl ~f:(fun (_, (_, id), _) ->
           (String.length id) < 9 || (String.sub id 0 9) <> "86static_") in
         List.map cvl (fun (_, (_,id), _) -> "$" ^ id)

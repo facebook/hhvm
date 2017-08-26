@@ -19,7 +19,7 @@ type t = {
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
   property_type_info : Hhas_type_info.t;
-  (* TODO: xhp *)
+  property_doc_comment : string option;
 }
 
 (* Interestingly, HHAS does not represent the declared types of properties,
@@ -35,7 +35,8 @@ let make
   property_name
   property_initial_value
   property_initializer_instrs
-  property_type_info = {
+  property_type_info
+  property_doc_comment = {
     property_is_private;
     property_is_protected;
     property_is_public;
@@ -46,6 +47,7 @@ let make
     property_initial_value;
     property_initializer_instrs;
     property_type_info;
+    property_doc_comment;
   }
 
 let name hhas_property = hhas_property.property_name
@@ -58,3 +60,4 @@ let initial_value hhas_property = hhas_property.property_initial_value
 let initializer_instrs hhas_property = hhas_property.property_initializer_instrs
 let no_serialize hhas_property = hhas_property.property_no_serialize
 let type_info hhas_property = hhas_property.property_type_info
+let doc_comment hhas_property = hhas_property.property_doc_comment

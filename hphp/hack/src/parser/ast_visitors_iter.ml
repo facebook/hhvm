@@ -166,7 +166,7 @@ class virtual ['self] iter =
     method on_ClassTraitRequire env c0 c1 =
       self#on_trait_req_kind env c0;
       self#on_hint env c1;
-    method on_ClassVars env c0 c1 c2 =
+    method on_ClassVars env c0 c1 c2 _ =
       self#on_list self#on_kind env c0;
       self#on_option self#on_hint env c1;
       self#on_list self#on_class_var env c2;
@@ -221,7 +221,7 @@ class virtual ['self] iter =
       | XhpAttrUse c0 -> self#on_XhpAttrUse env c0
       | ClassTraitRequire (c0, c1) ->
           self#on_ClassTraitRequire env c0 c1
-      | ClassVars (c0, c1, c2) -> self#on_ClassVars env c0 c1 c2
+      | ClassVars (c0, c1, c2, c3) -> self#on_ClassVars env c0 c1 c2 c3
       | XhpAttr (c0, c1, c2, c3) -> self#on_XhpAttr env c0 c1 c2 c3
       | Method c0 -> self#on_Method env c0
       | XhpCategory c0 -> self#on_XhpCategory env c0

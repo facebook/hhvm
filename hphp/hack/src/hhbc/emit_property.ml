@@ -38,7 +38,7 @@ and aexpr_requires_deep_init aexpr =
   | A.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
-let from_ast ast_class cv_kind_list type_hint tparams namespace
+let from_ast ast_class cv_kind_list type_hint tparams namespace doc_comment_opt
              (_, (pos, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
@@ -111,3 +111,4 @@ let from_ast ast_class cv_kind_list type_hint tparams namespace
     initial_value
     initializer_instrs
     tinfo
+    doc_comment_opt

@@ -185,7 +185,7 @@ let summarize_class class_ ~no_children =
     in
     Some (List.concat_map class_.Ast.c_body ~f:begin function
       | Ast.Method m -> [summarize_method class_name m]
-      | Ast.ClassVars (kinds, _, vars) ->
+      | Ast.ClassVars (kinds, _, vars, _doc_comment_opt) ->
           List.concat_map vars
             ~f:(maybe_summarize_property class_name ~skip:implicit_props kinds)
       | Ast.XhpAttr (_, var, _, _) ->

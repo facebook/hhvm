@@ -170,7 +170,12 @@ Width width(Vinstr::Opcode op) {
     // restrict/unrestrict new virtuals
     case Vinstr::vregrestrict:
     case Vinstr::vregunrestrict:
-    // zero-extending/truncating copies
+    // sign/zero-extending/truncating copies
+    case Vinstr::movsbl:
+    case Vinstr::movswl:
+    case Vinstr::movsbq:
+    case Vinstr::movswq:
+    case Vinstr::movslq:
     case Vinstr::movzbw:
     case Vinstr::movzbl:
     case Vinstr::movzbq:
@@ -215,9 +220,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::mrs:
     case Vinstr::msr:
     // ppc64 instructions
-    case Vinstr::extsb:
-    case Vinstr::extsw:
-    case Vinstr::extsl:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:

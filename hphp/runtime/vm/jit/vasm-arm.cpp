@@ -24,11 +24,15 @@
  *  A Vreg64 is a X-register with a u64 value.
  *
  * This allows to omit truncation instructions for sub-32-bit
- * operations. E.g. a cmpb{Vreg8 s0, Vreg8 s1} has to truncate
- * s0 and s1 before emitting a cmp instruction. When using the
- * early-truncation policy, the cmpb{} emitter can rely on the
+ * operations. E.g. a testb{Vreg8 s0, Vreg8 s1} has to truncate
+ * s0 and s1 before emitting a tst instruction. When using the
+ * early-truncation policy, the testb{} emitter can rely on the
  * fact, that s0 and s1 are already truncated and can emit a
  * cmp instruction without preceding uxtb's.
+ *
+ * Conversely any arithmetic instruction has to sign extend any
+ * Vreg8 before operating on it. Vasm is light on these instructions,
+ * with only the following, currently: csinc[bw]{} and cmp[bw][i]{}.
  *
  * Early-truncation has also consequences to extension/truncation
  * vasm instructions. The following list shows how to use them:
@@ -45,7 +49,7 @@
  * Early-truncation also implies, that instructions have to truncate
  * after performing the actual operation if it cannot guarantee that
  * the resulting VregN type matches. E.g. emitting code for the vasm
- * instruction subbi{Immed imm, Vreg8 s, Vreg8 d} has to truncate the
+ * instruction andbi{Immed imm, Vreg8 s, Vreg8 d} has to truncate the
  * result to guarantee that register d indeed holds a u8 value.
  *
  * Note, that the early-truncation policy allows aarch64 specific
@@ -97,14 +101,6 @@ namespace {
 
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
-
-uint8_t bAsUb(Immed imm) {
-  return static_cast<uint8_t>(imm.b());
-}
-
-uint16_t wAsUw(Immed imm) {
-  return static_cast<uint16_t>(imm.w());
-}
 
 vixl::Register X(Vreg64 r) {
   PhysReg pr(r.asReg());
@@ -286,7 +282,7 @@ struct Vgen {
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), bAsUb(i.s0), UF(i.fl)); }
+  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
@@ -296,14 +292,12 @@ struct Vgen {
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
-  void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), bAsUb(i.s0)); }
-  void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cmpsd& i);
+  // TODO(CDE): csinc[bw]{} Should a) sign extend and b) set SF for overflow
   void emit(const csincb& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const csincw& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const csincl& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -339,6 +333,8 @@ struct Vgen {
   void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movsbl& i) { a->Sxtb(W(i.d), W(i.s)); }
+  void emit(const movswl& i) { a->Sxth(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
@@ -378,9 +374,9 @@ struct Vgen {
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testbi& i){ a->Tst(W(i.s1), bAsUb(i.s0)); }
+  void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
   void emit(const testw& i){ a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testwi& i){ a->Tst(W(i.s1), wAsUw(i.s0)); }
+  void emit(const testwi& i){ a->Tst(W(i.s1), i.s0.uw()); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
@@ -524,8 +520,8 @@ void Vgen::emit(const vasm_opc& i) {          \
   }                                           \
 }
 
-Y(ldimmb, b, 8, W, bAsUb(i.s))
-Y(ldimmw, w, 16, W, wAsUw(i.s))
+Y(ldimmb, b, 8, W, i.s.ub())
+Y(ldimmw, w, 16, W, i.s.uw())
 Y(ldimml, l, 32, W, i.s.l())
 Y(ldimmq, q, 64, X, i.s.q())
 
@@ -876,7 +872,7 @@ void Vgen::emit(const vasm_opc& i) {                  \
 Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, bAsUb(i.s0), wzr);
+Y(xorbi, Eor, W, i.s0.ub(), wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);
@@ -1307,6 +1303,35 @@ Y(orwim, orqi, loadw, storew, s0, m)
 
 #undef Y
 
+#define Y(vasm_opc, lower_opc, mov_opc)                     \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    auto r0 = v.makeReg(), r1 = v.makeReg();                \
+    v << mov_opc{i.s0, r0};                                 \
+    v << mov_opc{i.s1, r1};                                 \
+    v << lower_opc{r0, r1, i.sf};                           \
+  });                                                       \
+}
+
+Y(cmpb, cmpl, movsbl)
+Y(cmpw, cmpl, movswl)
+
+#undef Y
+
+#define Y(vasm_opc, lower_opc, mov_opc)                     \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    auto r = v.makeReg();                                   \
+    v << mov_opc{i.s1, r};                                  \
+    v << lower_opc{i.s0, r, i.sf};                          \
+  });                                                       \
+}
+
+Y(cmpbi, cmpli, movsbl)
+Y(cmpwi, cmpli, movswl)
+
+#undef Y
+
 #define Y(vasm_opc, lower_opc, load_opc)                         \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                       \
@@ -1317,12 +1342,12 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
   });                                                            \
 }
 
-Y(cmpbim, cmpli, loadb)
+Y(cmpbim, cmpbi, loadb)
 Y(cmplim, cmpli, loadl)
 Y(cmplm, cmpl, loadl)
 Y(cmpqim, cmpqi, load)
 Y(cmpqm, cmpq, load)
-Y(cmpwim, cmpli, loadw)
+Y(cmpwim, cmpwi, loadw)
 Y(testbim, testli, loadb)
 Y(testlim, testli, loadl)
 Y(testqim, testqi, load)

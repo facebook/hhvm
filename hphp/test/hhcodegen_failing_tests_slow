@@ -31,6 +31,7 @@ slow/compilation/1247.php
 slow/compilation/1301.php
 slow/compilation/1316.php
 slow/compilation/1317.php
+slow/compilation/infinite-static-local.php
 slow/compilation/switch-default-multiple.php
 slow/concat/1573.php
 slow/concat/1575.php

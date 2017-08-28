@@ -201,24 +201,10 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
   }
 }
 
-bool widen_into(PropState& dst, const PropState& src) {
-  assert(dst.size() == src.size());
-
-  auto changed = false;
-
-  auto dstIt = begin(dst);
-  auto srcIt = begin(src);
-  for (; dstIt != end(dst); ++dstIt, ++srcIt) {
-    assert(srcIt != end(src));
-    assert(srcIt->first == dstIt->first);
-    auto const newT = widening_union(dstIt->second, srcIt->second);
-    if (newT != dstIt->second) {
-      changed = true;
-      dstIt->second = newT;
-    }
+void widen_props(PropState& props) {
+  for (auto& prop : props) {
+    prop.second = widen_type(std::move(prop.second));
   }
-
-  return changed;
 }
 
 bool merge_into(ActRec& dst, const ActRec& src) {

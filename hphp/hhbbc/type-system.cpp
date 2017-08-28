@@ -54,6 +54,12 @@ const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
+// When widening a type, allow no specialized information at a nesting depth
+// greater than this. This keeps any such types from growing unbounded.
+constexpr int kTypeWidenMaxDepth = 8;
+
+//////////////////////////////////////////////////////////////////////
+
 // Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
   switch (bits) {
@@ -2551,20 +2557,83 @@ Type promote_emptyish(Type a, Type b) {
   return union_of(a, b);
 }
 
-Type widening_union(const Type& a, const Type& b) {
-  if (a == b) return a;
+void widen_type_impl(Type& t, uint32_t depth) {
+  // Right now to guarantee termination we need to just limit the nesting depth
+  // of the type to a fixed degree.
+  auto const checkDepth = [&]{
+    if (depth >= kTypeWidenMaxDepth) {
+      t = Type { t.m_bits };
+      return true;
+    }
+    return false;
+  };
 
-  auto const u = union_of(a, b);
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::ArrLikeVal:
+      return;
 
-  // Currently the only types in our typesystem that have infinitely
-  // growing chains of union_of are specialized arrays.
-  if (!is_specialized_array_like(a) || !is_specialized_array_like(b)) {
-    return u;
+    case DataTag::Obj:
+      if (t.m_data.dobj.whType) {
+        widen_type_impl(*t.m_data.dobj.whType.mutate(), depth + 1);
+      }
+      return;
+
+    case DataTag::RefInner:
+      return widen_type_impl(*t.m_data.inner.mutate(), depth + 1);
+
+    case DataTag::ArrLikePacked: {
+      if (checkDepth()) return;
+      auto& packed = *t.m_data.packed.mutate();
+      for (auto& e : packed.elems) {
+        widen_type_impl(e, depth + 1);
+      }
+      return;
+    }
+
+    case DataTag::ArrLikePackedN: {
+      if (checkDepth()) return;
+      auto& packed = *t.m_data.packedn.mutate();
+      widen_type_impl(packed.type, depth + 1);
+      return;
+    }
+
+    case DataTag::ArrLikeMap: {
+      if (checkDepth()) return;
+      auto& map = *t.m_data.map.mutate();
+      for (auto it = map.map.begin(); it != map.map.end(); it++) {
+        auto temp = it->second;
+        widen_type_impl(temp, depth + 1);
+        map.map.update(it, std::move(temp));
+      }
+      return;
+    }
+
+    case DataTag::ArrLikeMapN: {
+      if (checkDepth()) return;
+      auto& map = *t.m_data.mapn.mutate();
+      // Key must be at least ArrKey, which doesn't need widening.
+      widen_type_impl(map.val, depth + 1);
+      return;
+    }
   }
 
-  // This (throwing away the data) is overly conservative, but works
-  // for now.
-  return is_specialized_array_like(u) ? Type { u.m_bits } : u;
+  not_reached();
+}
+
+Type widen_type(Type t) {
+  widen_type_impl(t, 0);
+  return t;
+}
+
+Type widening_union(const Type& a, const Type& b) {
+  if (a.subtypeOf(b)) return b;
+  if (b.subtypeOf(a)) return a;
+  return widen_type(union_of(a, b));
 }
 
 Type stack_flav(Type a) {

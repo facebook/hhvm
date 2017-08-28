@@ -384,8 +384,8 @@ bool merge_into(State&, const State&);
  * State merging functions, based on the widening_union operation.
  * See analyze.cpp for details on when this is needed.
  */
-bool widen_into(PropState&, const PropState&);
 bool widen_into(State&, const State&);
+void widen_props(PropState&);
 
 //////////////////////////////////////////////////////////////////////
 

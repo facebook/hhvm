@@ -473,6 +473,8 @@ private:
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
+  friend void widen_type_impl(Type&, uint32_t);
+  friend Type widen_type(Type);
   friend Type widening_union(const Type&, const Type&);
   friend Type promote_emptyish(Type, Type);
   friend Type opt(Type);
@@ -987,12 +989,22 @@ Type union_of(Type a, Type b);
  * successive applications of the function eventually reaches a stable
  * point.
  *
+ * This is currently implemented by unioning the types, then applying
+ * widen_type() to the result.
+ *
  * For portions of our analysis that rely on growing types reaching
  * stable points for termination, this function must occasionally be
  * used instead of union_of to guarantee termination.  See details in
  * analyze.cpp.
  */
 Type widening_union(const Type& a, const Type& b);
+
+/*
+ * Widen a type to one which has a finite chain under the union operator. This
+ * generally involves restricting the type's nesting depth to a fixed limit and
+ * preventing a specialized array type from growing larger unbounded.
+ */
+Type widen_type(Type t);
 
 /*
  * A sort of union operation that also attempts to remove "emptyish" types from

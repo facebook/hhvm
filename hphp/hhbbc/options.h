@@ -61,8 +61,8 @@ struct Options {
    * Flags for various limits on when to perform widening operations.
    * See analyze.cpp for details.
    */
-  uint32_t analyzeFuncWideningLimit = 50;
-  uint32_t analyzeClassWideningLimit = 20;
+  uint32_t analyzeFuncWideningLimit = 12;
+  uint32_t analyzeClassWideningLimit = 6;
 
   /*
    * When to stop refining return types.

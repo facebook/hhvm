@@ -287,20 +287,20 @@ FuncAnalysis do_analyze_collect(const Index& index,
   auto incompleteQ = prepare_incompleteQ(index, ai, clsAnalysis, knownArgs);
 
   /*
-   * There are potentially infinitely growing types when we're using
-   * union_of to merge states, so occasonially we need to apply a
-   * widening operator.
+   * There are potentially infinitely growing types when we're using union_of to
+   * merge states, so occasionally we need to apply a widening operator.
    *
-   * Currently this is done by having a straight-forward hueristic: if
-   * you visit a block too many times, we'll start doing all the
-   * merges with the widening operator until we've had a chance to
-   * visit the block again.  We must then continue iterating in case
-   * the actual fixed point is higher than the result of widening.
+   * Currently this is done by having a straight-forward hueristic: if you visit
+   * a block too many times, we'll start doing all the merges with the widening
+   * operator. We must then continue iterating in case the actual fixed point is
+   * higher than the result of widening. Likewise if we loop too much because of
+   * local static types changing, we'll widen those.
    *
-   * Terminiation is guaranteed because the widening operator has only
-   * finite chains in the type lattice.
+   * Termination is guaranteed because the widening operator has only finite
+   * chains in the type lattice.
    */
-  auto nonWideVisits = std::vector<uint32_t>(ctx.func->blocks.size());
+  auto totalVisits = std::vector<uint32_t>(ctx.func->blocks.size());
+  auto totalLoops = uint32_t{0};
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
@@ -322,9 +322,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
     while (!incompleteQ.empty()) {
       auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
-      if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
-        nonWideVisits[blk->id] = 0;
-      }
+      totalVisits[blk->id]++;
 
       FTRACE(2, "block #{}\nin {}{}", blk->id,
              state_string(*ctx.func, ai.bdata[blk->id].stateIn, collect),
@@ -333,16 +331,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
       auto propagate = [&] (BlockId target, const State& st) {
         auto const needsWiden =
-          nonWideVisits[target] >= options.analyzeFuncWideningLimit;
-
-        // We haven't optimized the widening operator much, because it
-        // doesn't happen in practice right now.  We want to know when
-        // it starts happening:
-        if (needsWiden) {
-          std::fprintf(stderr, "widening in %s on %s\n",
-            ctx.unit->filename->data(),
-            ctx.func->name->data());
-        }
+          totalVisits[target] >= options.analyzeFuncWideningLimit;
 
         FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target);
         FTRACE(4, "target old {}",
@@ -372,8 +361,18 @@ FuncAnalysis do_analyze_collect(const Index& index,
         ai.inferredReturn |= std::move(*flags.returned);
       }
     }
+
     // maybe some local statics changed type since the last time their
     // blocks were visited.
+
+    if (totalLoops++ >= options.analyzeFuncWideningLimit) {
+      // If we loop too many times because of static locals, widen them to
+      // ensure termination.
+      for (auto& t : collect.localStaticTypes) {
+        t = widen_type(std::move(t));
+      }
+    }
+
     for (auto const& elm : usedLocalStatics) {
       for (auto const& ls : elm.second) {
         if (collect.localStaticTypes[ls.first] != ls.second) {
@@ -678,7 +677,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * the result of widening the old state with the new state, and then
    * reset the counter.  This guarantees eventual termination.
    */
-  auto nonWideVisits = uint32_t{0};
+  auto totalVisits = uint32_t{0};
 
   for (;;) {
     auto const previousProps   = clsAnalysis.privateProperties;
@@ -741,11 +740,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       break;
     }
 
-    if (nonWideVisits++ > options.analyzeClassWideningLimit) {
-      auto const a = widen_into(clsAnalysis.privateProperties, previousProps);
-      auto const b = widen_into(clsAnalysis.privateStatics, previousStatics);
-      always_assert(a || b);
-      nonWideVisits = 0;
+    if (totalVisits++ >= options.analyzeClassWideningLimit) {
+      widen_props(clsAnalysis.privateProperties);
+      widen_props(clsAnalysis.privateStatics);
     }
   }
 

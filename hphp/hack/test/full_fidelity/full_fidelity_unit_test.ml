@@ -165,6 +165,7 @@ let minimal_tests =
     "test_trailing_commas";
     "context/test_extra_error_trivia";
     "test_funcall_with_type_arguments";
+    "test_nested_namespace_declarations";
   ] ~f:mapper
 
 let error_tests =

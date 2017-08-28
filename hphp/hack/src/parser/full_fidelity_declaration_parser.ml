@@ -204,8 +204,7 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO: Some error cases not caught by the parser that should be caught
              in later passes:
              (1) You cannot mix the "semi" and "compound" flavours in one script
-             (2) The declaration list may not contain a namespace decl.
-             (3) Qualified names are a superset of legal namespace names.
+             (2) Qualified names are a superset of legal namespace names.
     *)
     let (parser, namespace_token) = assert_token parser Namespace in
     let (parser1, token) = next_token parser in

@@ -186,3 +186,4 @@ let error2046 = "The 'async' annotation cannot be used on 'abstract' methods " ^
 let error2047 visibility_modifier = "Methods inside of interfaces may not be " ^
   "marked '" ^ visibility_modifier ^ "'; only 'public' visibility is allowed."
 let error2048 = "Expected group use prefix to end with '\\'"
+let error2049 = "A namespace use clause may not specify the kind here."

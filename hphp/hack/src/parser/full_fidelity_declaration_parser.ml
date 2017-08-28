@@ -323,12 +323,24 @@ module WithExpressionAndStatementAndTypeParser
       TODO: Add the grammar for the namespace-use-clauses; ensure that it
       indicates that trailing commas are allowed in the list.
     *)
-    (* TODO: ERROR RECOVERY
+    (* ERROR RECOVERY
     In the "simple" format, the kind may only be specified up front.
-    In the "group" format, if the kind is specified up front then it may not
-    be specified in each clause.
-    We do not enforce this rule here. Rather, we allow the kind to be anywhere,
-    and we'll add an error reporting pass later that deduces violations. *)
+
+    The grammar in the specification says that in the "group"
+    format, if the kind is specified up front then it may not
+    be specified in each clause. However, HHVM's parser disallows
+    the kind in each clause regardless of whether it is specified up front.
+    We will fix the specification to match HHVM.
+
+    The grammar in the specification also says that in the "simple" format,
+    the kind may only be specified up front.  But HHVM allows the kind to
+    be specified in each clause.  Again, we will fix the specification to match
+    HHVM.
+
+    TODO: Update the grammar comment above when the specification is fixed.
+
+    We do not enforce these rules here. Rather, we allow the kind to be anywhere,
+    and detect the errors in a later pass. *)
     if is_group_use parser then
       parse_group_use parser
     else

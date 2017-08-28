@@ -332,6 +332,14 @@ let rec continue_is_legal parents =
 let is_bad_xhp_attribute_name name =
   (String.contains name ':') || (String.contains name '-')
 
+let make_error_from_nodes start_node end_node error =
+  let s = start_offset start_node in
+  let e = end_offset end_node in
+  SyntaxError.make s e error
+
+let make_error_from_node node error =
+  make_error_from_nodes node node error
+
 let xhp_errors node _parents =
 (* An attribute name cannot contain - or :, but we allow this in the lexer
    because it's easier to have one rule for tokenizing both attribute and
@@ -340,9 +348,7 @@ let xhp_errors node _parents =
   |  XHPAttribute attr when
     (is_bad_xhp_attribute_name
     (PositionedSyntax.text attr.xhp_attribute_name)) ->
-      let s = start_offset attr.xhp_attribute_name in
-      let e = end_offset attr.xhp_attribute_name in
-      [ SyntaxError.make s e SyntaxError.error2002 ]
+      [ make_error_from_node attr.xhp_attribute_name SyntaxError.error2002 ]
   | _ -> [ ]
 
 let classish_duplicate_modifiers node =
@@ -354,16 +360,12 @@ let type_contains_array_in_strict is_strict node =
 (* helper since there are so many kinds of errors *)
 let produce_error acc check node error error_node =
   if check node then
-    let s = start_offset error_node in
-    let e = end_offset error_node in
-    (SyntaxError.make s e error) :: acc
+    (make_error_from_node error_node error) :: acc
   else acc
 
 let produce_error_parents acc check node parents error error_node =
   if check node parents then
-    let s = start_offset error_node in
-    let e = end_offset error_node in
-    (SyntaxError.make s e error) :: acc
+    (make_error_from_node error_node error) :: acc
   else acc
 
 (* use [check] to check properties of function *)
@@ -655,25 +657,19 @@ let params_errors params =
     match ends_with_variadic_comma params with
     | None -> []
     | Some comma ->
-      let s = start_offset comma in
-      let e = end_offset comma in
-      [ SyntaxError.make s e SyntaxError.error2022 ]
+      [ make_error_from_node comma SyntaxError.error2022 ]
   in
     match misplaced_variadic_param params with
     | None -> errors
     | Some param ->
-      let s = start_offset param in
-      let e = end_offset param in
-      ( SyntaxError.make s e SyntaxError.error2021 ) :: errors
+      ( make_error_from_node param SyntaxError.error2021 ) :: errors
 
 let parameter_errors node parents is_strict =
   match syntax node with
   | ParameterDeclaration { parameter_type; _}
     when is_strict && (is_missing parameter_type) &&
     (parameter_type_is_required parents) ->
-      let s = start_offset node in
-      let e = end_offset node in
-      [ SyntaxError.make s e SyntaxError.error2001 ]
+      [ make_error_from_node node SyntaxError.error2001 ]
   | FunctionDeclarationHeader { function_parameter_list; _ } ->
     params_errors function_parameter_list
   | AnonymousFunction { anonymous_parameters; _ } ->
@@ -688,9 +684,7 @@ let function_errors node _parents is_strict =
     if is_strict && is_missing f.function_type && is_function then
       (* Where do we want to report the error? Probably on the right paren. *)
       let rparen = f.function_right_paren in
-      let s = start_offset rparen in
-      let e = end_offset rparen in
-      [ SyntaxError.make s e SyntaxError.error2001 ]
+      [ make_error_from_node rparen SyntaxError.error2001 ]
     else
       [ ]
   | _ -> [ ]
@@ -710,47 +704,39 @@ let statement_errors node parents =
   match result with
   | None -> [ ]
   | Some (error_node, error_message) ->
-    let s = start_offset error_node in
-    let e = end_offset error_node in
-    [ SyntaxError.make s e error_message ]
+    [ make_error_from_node error_node error_message ]
 
 let property_errors node is_strict =
   match syntax node with
   | PropertyDeclaration p when is_strict && is_missing (p.property_type) ->
-      let s = start_offset node in
-      let e = end_offset node in
-      [ SyntaxError.make s e SyntaxError.error2001 ]
+      [ make_error_from_node node SyntaxError.error2001 ]
   | _ -> [ ]
 
 let expression_errors node parents is_hack =
   match syntax node with
   | SubscriptExpression { subscript_left_bracket; _}
     when is_left_brace subscript_left_bracket ->
-    let s = start_offset node in
-    let e = end_offset node in
-    [ SyntaxError.make s e SyntaxError.error2020 ]
+    [ make_error_from_node node SyntaxError.error2020 ]
   | FunctionCallExpression { function_call_argument_list; _} ->
     begin match misplaced_variadic_arg function_call_argument_list with
       | Some h ->
-        let s = start_offset h in
-        let e = end_offset h in
-        [ SyntaxError.make s e SyntaxError.error2033 ]
+        [ make_error_from_node h SyntaxError.error2033 ]
       | None -> [ ]
     end
   | ObjectCreationExpression oce when is_hack ->
     if is_missing oce.object_creation_left_paren &&
         is_missing oce.object_creation_right_paren
     then
-      let s = start_offset oce.object_creation_new_keyword in
-      let e = end_offset oce.object_creation_type in
+      let start_node = oce.object_creation_new_keyword in
+      let end_node = oce.object_creation_type in
       let constructor_name = PositionedSyntax.text oce.object_creation_type in
-      [ SyntaxError.make s e (SyntaxError.error2038 constructor_name)]
+      [ make_error_from_nodes start_node end_node
+        (SyntaxError.error2038 constructor_name)]
     else
       [ ]
   | ListExpression le
     when (is_invalid_list_expression node parents) ->
-    [ SyntaxError.make (start_offset node) (end_offset node)
-        SyntaxError.error2040 ]
+    [ make_error_from_node node SyntaxError.error2040 ]
   | _ -> [ ] (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents =
@@ -759,14 +745,10 @@ let require_errors node parents =
     begin
       match (containing_classish_kind parents, token_kind p.require_kind) with
       | (Some TokenKind.Class, Some TokenKind.Extends) ->
-        let s = start_offset node in
-        let e = end_offset node in
-        [ SyntaxError.make s e SyntaxError.error2029 ]
+        [ make_error_from_node node SyntaxError.error2029 ]
       | (Some TokenKind.Interface, Some TokenKind.Implements)
       | (Some TokenKind.Class, Some TokenKind.Implements) ->
-        let s = start_offset node in
-        let e = end_offset node in
-        [ SyntaxError.make s e SyntaxError.error2030 ]
+        [ make_error_from_node node SyntaxError.error2030 ]
       | _ -> []
     end
   | _ -> [ ]
@@ -829,18 +811,30 @@ let alias_errors node =
   | AliasDeclaration {alias_keyword; alias_constraint; _} when
     token_kind alias_keyword = Some TokenKind.Type &&
     not (is_missing alias_constraint) ->
-      let s = start_offset alias_keyword in
-      let e = end_offset alias_keyword in
-      [ SyntaxError.make s e SyntaxError.error2034 ]
+      [ make_error_from_node alias_keyword SyntaxError.error2034 ]
   | _ -> [ ]
+
+let is_invalid_group_use_clause clause =
+  match syntax clause with
+  | NamespaceUseClause { namespace_use_clause_kind = kind; _ } ->
+    not (is_missing kind)
+  | _ -> false
+
+let is_invalid_group_use_prefix prefix =
+  token_kind prefix <> Some TokenKind.NamespacePrefix
 
 let group_use_errors node =
   match syntax node with
-  | NamespaceGroupUseDeclaration { namespace_group_use_prefix = prefix; _} when
-    token_kind prefix <> Some TokenKind.NamespacePrefix ->
-      let s = start_offset prefix in
-      let e = end_offset prefix in
-      [ SyntaxError.make s e SyntaxError.error2048 ]
+  | NamespaceGroupUseDeclaration
+    { namespace_group_use_prefix = prefix
+    ; namespace_group_use_clauses = clauses
+    ; _} ->
+      let invalid_clauses = List.filter is_invalid_group_use_clause
+        (syntax_to_list_no_separators clauses) in
+      let mapper clause = make_error_from_node clause SyntaxError.error2049 in
+      let invalid_clause_errors = List.map mapper invalid_clauses in
+      produce_error invalid_clause_errors is_invalid_group_use_prefix prefix
+        SyntaxError.error2048 prefix
   | _ -> [ ]
 
 let find_syntax_errors node is_strict is_hack =

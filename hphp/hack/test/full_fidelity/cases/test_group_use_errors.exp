@@ -1,1 +1,4 @@
 (9,7)-(9,10) Expected group use prefix to end with '\'
+(13,15)-(13,20) A namespace use clause may not specify the kind here.
+(17,15)-(17,20) A namespace use clause may not specify the kind here.
+(17,23)-(17,28) A namespace use clause may not specify the kind here.

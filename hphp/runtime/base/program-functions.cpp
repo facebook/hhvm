@@ -2118,6 +2118,9 @@ static void update_constants_and_options() {
 }
 
 void hphp_thread_init() {
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+  thread_huge_tcache_create();
+#endif
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_rand_init();
@@ -2139,6 +2142,9 @@ void hphp_thread_exit() {
   InitFiniNode::ThreadFini();
   ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+  thread_huge_tcache_destroy();
+#endif
 }
 
 void hphp_process_init() {

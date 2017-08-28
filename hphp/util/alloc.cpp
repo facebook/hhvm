@@ -231,8 +231,18 @@ void set_numa_binding(int node) {}
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
 unsigned low_huge1g_arena = 0;
 unsigned high_huge1g_arena = 0;
+// Explicit per-thread tcache for huge arenas.  -1 means no tcache.
+// In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
+// #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
+__thread int high_huge1g_tcache = -1;
+static_assert(MALLOCX_TCACHE(-1) == MALLOCX_TCACHE_NONE,
+              "Are you using jemalloc 4.x/5.x?");
+#endif
+
 std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
@@ -631,7 +641,7 @@ void* low_malloc_huge1g_impl(size_t size) {
     // We are out of space in the 1G arena, I don't expect it to get more pages
     // later, because we (should) rarely deallocate in that arena.  This is fine
     // because the decallocation call to both arenas are the same.
-    static_assert(low_dallocx_huge1g_flags() == dallocx_huge1g_flags(), "");
+    static_assert(low_dallocx_huge1g_flags() == low_dallocx_flags(), "");
     low_huge1g_arena = 0;
   }
   return low_malloc(size);
@@ -685,6 +695,35 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
     return mallctlCall("prof.dump", true);
   }
 }
+
+#ifdef USE_JEMALLOC_CUSTOM_HOOKS
+
+void thread_huge_tcache_create() {
+  if (high_huge1g_arena) {
+    int tc = -1;
+    if (mallctlRead("tcache.create", &tc, true)) {
+      return;
+    }
+    assert(high_huge1g_tcache == -1);   // no previous tcache
+    high_huge1g_tcache = tc;
+  }
+};
+
+void thread_huge_tcache_flush() {
+  // It is OK if flushing fails
+  if (MALLOCX_TCACHE(high_huge1g_tcache) != MALLOCX_TCACHE_NONE) {
+    mallctlWrite("tcache.flush", high_huge1g_tcache, true);
+  }
+}
+
+void thread_huge_tcache_destroy() {
+  if (MALLOCX_TCACHE(high_huge1g_tcache) != MALLOCX_TCACHE_NONE) {
+    mallctlWrite("tcache.destroy", high_huge1g_tcache, true);
+    high_huge1g_tcache = -1;
+  }
+}
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

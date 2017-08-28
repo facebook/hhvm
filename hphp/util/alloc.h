@@ -142,20 +142,26 @@ inline int low_mallocx_flags() {
 #endif
 }
 
-inline int low_dallocx_flags() {
 #ifdef MALLOCX_TCACHE_NONE
+inline constexpr int low_dallocx_flags() {
   // Bypass the implicit tcache for this deallocation.
   return MALLOCX_TCACHE_NONE;
+}
 #else
+inline int low_dallocx_flags() {
   // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
   // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
   return MALLOCX_ARENA(low_arena);
-#endif
 }
+#endif
+
 
 #ifdef USE_JEMALLOC_CUSTOM_HOOKS
 extern unsigned low_huge1g_arena;
 extern unsigned high_huge1g_arena;
+
+// Explicit per-thread tcache for the huge arenas.
+extern __thread int high_huge1g_tcache;
 
 inline int low_mallocx_huge1g_flags() {
   // MALLOCX_TCACHE_NONE is introduced earlier than the chunk hook API
@@ -167,12 +173,17 @@ inline constexpr int low_dallocx_huge1g_flags() {
 }
 
 inline int mallocx_huge1g_flags() {
-  return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE_NONE;
+  return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE(high_huge1g_tcache);
 }
 
-inline constexpr int dallocx_huge1g_flags() {
-  return MALLOCX_TCACHE_NONE;
+inline int dallocx_huge1g_flags() {
+  return MALLOCX_TCACHE(high_huge1g_tcache);
 }
+
+// Functions to manipulate tcaches for huge arenas
+void thread_huge_tcache_create();       // tcache.create
+void thread_huge_tcache_flush();        // tcache.flush
+void thread_huge_tcache_destroy();      // tcache.destroy
 
 #endif
 

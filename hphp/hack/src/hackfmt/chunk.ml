@@ -20,22 +20,22 @@ open Core
  *   are broken on newlines and stripped of their indentation whitespace so that
  *   their segments can be reindented properly.
  * - A single instance of ExtraTokenError trivia
+ * - An empty string representing a blank line. When this atom occurs, it must
+ *   be the only atom in the chunk.
  *
  * We keep track of the atoms that make up a chunk to make it possible
  * to format ranges which begin or end inside chunks (essential for as-you-type
  * formatting, where the cursor may be in the middle of a chunk).
  *
- * This data structure associates an atom's offset in the original source text
- * with its offset in a chunk. *)
+ * This data structure associates atoms with their location in the original
+ * source. *)
 type atom = {
-  atom_text: string;
-  width: int;
-  source_offset: int;
-  chunk_offset: int;
+  text: string;
+  range: Interval.t;
+  leading_space: bool;
 }
 
 type t = {
-  text: string;
   spans: Span.t list;
   is_appendable: bool;
   space_if_not_split: bool;
@@ -46,10 +46,10 @@ type t = {
   end_char: int;
   indentable: bool;
   atoms: atom list;
+  length: int;
 }
 
 let default_chunk = {
-  text = "";
   spans = [];
   is_appendable = true;
   space_if_not_split = false;
@@ -60,6 +60,7 @@ let default_chunk = {
   end_char = -1;
   indentable = true;
   atoms = [];
+  length = -1;
 }
 
 let make rule nesting start_char =
@@ -69,10 +70,9 @@ let make rule nesting start_char =
   in
   {c with start_char; nesting}
 
-let add_atom c atom_text width source_offset =
-  let chunk_offset = String.length c.text in
-  let atoms = {atom_text; width; source_offset; chunk_offset} :: c.atoms in
-  {c with atoms; text = c.text ^ atom_text}
+let add_atom c ?(leading_space=false) text width source_offset =
+  let range = source_offset, source_offset + width in
+  {c with atoms = {text; range; leading_space} :: c.atoms}
 
 let finalize chunk rule ra space comma end_char =
   let end_char = max chunk.start_char end_char in
@@ -81,6 +81,14 @@ let finalize chunk rule ra space comma end_char =
     then rule
     else chunk.rule
   in
+  let atom_length atom =
+    (if atom.leading_space then 1 else 0) + String.length atom.text
+  in
+  let length =
+    chunk.atoms
+    |> List.map ~f:atom_length
+    |> List.fold ~init:0 ~f:(+)
+  in
   {chunk with
     is_appendable = false;
     rule;
@@ -88,6 +96,7 @@ let finalize chunk rule ra space comma end_char =
     comma_rule = comma;
     end_char;
     atoms = List.rev chunk.atoms;
+    length;
   }
 
 let get_nesting_id chunk =
@@ -96,24 +105,16 @@ let get_nesting_id chunk =
 let get_range chunk =
   (chunk.start_char, chunk.end_char)
 
-let print_range chunk range =
-  let source_end atom = atom.source_offset + atom.width in
-  let chunk_end atom = atom.chunk_offset + atom.width in
-  let range_start, range_end = range in
-  (* Find the nearest atom which starts at or before range_start, then get the
-   * offset of that atom's first character in the chunk text *)
-  let start_chunk_offset =
-    chunk.atoms
-    |> List.rev
-    |> List.find ~f:(fun atom -> atom.source_offset <= range_start)
-    |> Option.value_map ~default:0 ~f:(fun atom -> atom.chunk_offset)
-  in
-  (* Find the nearest atom which ends at or after range_end, then get the
-   * offset (+ 1) of the atom's last character in the chunk text *)
-  let end_chunk_offset =
-    chunk.atoms
-    |> List.find ~f:(fun atom -> range_end <= source_end atom)
-    |> Option.value_map ~default:(String.length chunk.text) ~f:chunk_end
-  in
-  let width = end_chunk_offset - start_chunk_offset in
-  String.sub chunk.text start_chunk_offset width
+let is_empty chunk =
+  match chunk.atoms with
+  | [] -> true
+  | [atom] when atom.text = "" -> true
+  | _ -> false
+
+let text chunk =
+  let buf = Buffer.create chunk.length in
+  List.iter chunk.atoms ~f:begin fun atom ->
+    if atom.leading_space then Buffer.add_char buf ' ';
+    Buffer.add_string buf atom.text;
+  end;
+  Buffer.contents buf

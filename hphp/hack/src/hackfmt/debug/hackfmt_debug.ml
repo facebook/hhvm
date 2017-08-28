@@ -90,7 +90,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
         c.Chunk.rule
         c.Chunk.start_char
         c.Chunk.end_char
-        c.Chunk.text
+        (Chunk.text c)
     );
     Printf.printf "Rule count %d\n"
       (IMap.cardinal cg.Chunk_group.rule_map);

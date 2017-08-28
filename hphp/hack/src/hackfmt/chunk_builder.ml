@@ -86,11 +86,11 @@ let builder = object (this)
 
     chunks <- (match chunks with
       | hd :: tl when hd.Chunk.is_appendable ->
-        let text = hd.Chunk.text ^ (if pending_space then " " else "") in
+        let leading_space = pending_space in
         pending_space <- false;
         let indentable = hd.Chunk.indentable && not multiline in
-        let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
-        let hd = Chunk.add_atom hd s width seen_chars in
+        let hd = Chunk.{hd with indentable} in
+        let hd = Chunk.add_atom hd ~leading_space s width seen_chars in
         hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
@@ -197,6 +197,7 @@ let builder = object (this)
     let create_empty_chunk () =
       let rule = this#create_rule Rule.Always in
       let chunk = Chunk.make (Some rule) nesting last_chunk_end in
+      let chunk = Chunk.add_atom chunk "" 0 last_chunk_end in
       last_chunk_end <- seen_chars;
       Chunk.finalize chunk rule rule_alloc false None seen_chars
     in

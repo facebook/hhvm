@@ -262,7 +262,19 @@ let format ?config ?range ?ranges env tree =
   | None -> logging_time_taken env Logger.format_tree_end (fun () -> format_tree ?config tree)
   | Some range ->
     let range = expand_to_line_boundaries ?ranges source_text range in
-    logging_time_taken env Logger.format_range_end (fun () -> format_range ?config range tree)
+    logging_time_taken env Logger.format_range_end (fun () ->
+      let formatted = format_range ?config range tree in
+      (* This is a bit of a hack to deal with situations where a newline exists
+       * in the original source in a location where hackfmt refuses to split,
+       * and the range end falls at that newline. It is correct for format_range
+       * not to add the trailing newline, but it looks better to add an
+       * incorrect newline than to omit it, which would cause the following line
+       * (along with its indentation spaces) to be joined with the last line in
+       * the range. See test case: binary_expression_range_formatting.php *)
+      if formatted.[String.length formatted - 1] = '\n'
+      then formatted
+      else formatted ^ "\n"
+    )
 
 let output ?text_source str =
   let with_out_channel f =

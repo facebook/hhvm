@@ -70,7 +70,7 @@ let build_lines env chunk_group rbm nesting_set =
 
   let get_text_length chunk ~has_comma =
     let comma_len = if has_comma then 1 else 0 in
-    comma_len + String.length chunk.Chunk.text
+    comma_len + chunk.Chunk.length
   in
   let get_prefix_whitespace_length env chunk ~is_split =
     if is_split && chunk.Chunk.indentable

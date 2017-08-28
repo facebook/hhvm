@@ -122,9 +122,16 @@ void ConcatPeephole::append(const Bytecode& op,
       return push_back(op);
     }
 
-    // If the first concat operand is from the previous concat in the stream,
-    // continue the current stream.
+    // If the first concat operand is from the previous concat in the
+    // stream, continue the current stream.
     if (srcStack[ind2] == Op::Concat && nstack == prevsz) {
+      return push_back(op, true);
+    }
+
+    // If the second concat operand is from the previous concat in the
+    // stream, continue the current stream.
+    if (srcStack[ind1] == Op::Concat && nstack == prevsz - 1) {
+      m_working.back().stacksz--;
       return push_back(op, true);
     }
 
@@ -154,7 +161,7 @@ void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
     auto& inner = m_working.back();
 
     if (is_concat) ++inner.concats;
-    inner.stream.push_back(std::make_pair(op, is_concat));
+    inner.stream.emplace_back(op, is_concat);
   }
 }
 
@@ -165,7 +172,7 @@ void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
 void ConcatPeephole::squash() {
   assert(!m_working.empty());
 
-  auto workstream = m_working.back();
+  auto workstream = std::move(m_working.back());
   m_working.pop_back();
 
   // Concat counters.
@@ -179,12 +186,7 @@ void ConcatPeephole::squash() {
     auto& is_concat = item.second;
 
     // If we passed the last concat, just append the remaining bytecode.
-    if (ntotal == workstream.concats) {
-      push_back(op);
-      continue;
-    }
-
-    if (is_concat) {
+    if (ntotal < workstream.concats && is_concat) {
       // Bump counters.
       ++naccum;
       ++ntotal;
@@ -192,7 +194,11 @@ void ConcatPeephole::squash() {
       // Emit a ConcatN if we hit the limit, or if we hit the final Concat.
       if (naccum == kMaxConcatN || ntotal == workstream.concats) {
         if (naccum >= 2) {
-          push_back(bc::ConcatN {naccum});
+          if (naccum == 2) {
+            push_back(bc::Concat {});
+          } else {
+            push_back(bc::ConcatN {naccum});
+          }
         }
         naccum = 1;
       }

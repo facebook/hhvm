@@ -491,45 +491,50 @@ void in(ISS& env, const bc::ClsRefName& op) {
   push(env, TSStr);
 }
 
-void in(ISS& env, const bc::Concat& /*op*/) {
-  auto const t1 = popC(env);
-  auto const t2 = popC(env);
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2) {
-    auto to_string_is_safe = [] (const Cell& cell) {
-      return
-        isStringType(cell.m_type)    ||
-        cell.m_type == KindOfNull    ||
-        cell.m_type == KindOfBoolean ||
-        cell.m_type == KindOfInt64   ||
-        cell.m_type == KindOfDouble;
-    };
-    if (to_string_is_safe(*v1) && to_string_is_safe(*v2)) {
-      constprop(env);
-      auto const cell = eval_cell([&] {
-        auto s = StringData::Make(
-          tvAsCVarRef(&*v2).toString().get(),
-          tvAsCVarRef(&*v1).toString().get());
+void concatHelper(ISS& env, uint32_t n) {
+  uint32_t i = 0;
+  StringData* result = nullptr;
+  while (i < n) {
+    auto const t = topC(env, i);
+    auto const v = tv(t);
+    if (!v) break;
+    if (!isStringType(v->m_type)   &&
+        v->m_type != KindOfNull    &&
+        v->m_type != KindOfBoolean &&
+        v->m_type != KindOfInt64   &&
+        v->m_type != KindOfDouble) {
+      break;
+    }
+    auto const cell = eval_cell_value([&] {
+        auto const s = makeStaticString(
+          result ?
+          StringData::Make(tvAsCVarRef(&*v).toString().get(), result) :
+          tvAsCVarRef(&*v).toString().get());
         return make_tv<KindOfString>(s);
       });
-      return push(env, cell ? *cell : TInitCell);
-    }
+    if (!cell) break;
+    result = cell->m_data.pstr;
+    i++;
   }
-  // Not nothrow even if both are strings: can throw for strings
-  // that are too large.
+  if (result && i >= 2) {
+    std::vector<Bytecode> bcs(i, bc::PopC {});
+    bcs.push_back(gen_constant(make_tv<KindOfString>(result)));
+    if (i < n) {
+      bcs.push_back(bc::ConcatN { n - i + 1 });
+    }
+    return reduce(env, std::move(bcs));
+  }
+  discard(env, n);
   push(env, TStr);
 }
 
-void in(ISS& env, const bc::ConcatN& op) {
-  auto n = op.arg1;
-  assert(n > 1);
-  assert(n < 5);
+void in(ISS& env, const bc::Concat& /*op*/) {
+  concatHelper(env, 2);
+}
 
-  for (auto i = 0; i < n; ++i) {
-    popC(env);
-  }
-  push(env, TStr);
+void in(ISS& env, const bc::ConcatN& op) {
+  if (op.arg1 == 2) return reduce(env, bc::Concat {});
+  concatHelper(env, op.arg1);
 }
 
 template <class Op, class Fun>

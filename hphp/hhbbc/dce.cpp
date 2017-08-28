@@ -287,12 +287,24 @@ bool operator<(const LocationId& i1, const LocationId& i2) {
   return i2.isSlot && !i1.isSlot;
 }
 
-enum class DceAction {
-  Kill,
-  PopInputs,
-  PopOutputs,
-  Replace,
-  PopAndReplace
+struct DceAction {
+  enum Action {
+    Kill,
+    PopInputs,
+    PopOutputs,
+    Replace,
+    PopAndReplace,
+    MinstrStackFinal,
+    MinstrStackFixup
+  } action;
+  using MaskType = uint32_t;
+  static constexpr size_t kMaskSize = 32;
+  MaskType mask{0};
+
+
+  DceAction() = default;
+  /* implicit */ DceAction(Action a) : action{a} {}
+  DceAction(Action a, MaskType m) : action{a}, mask{m} {}
 };
 
 using DceActionMap = std::map<InstrId, DceAction>;
@@ -304,7 +316,7 @@ struct UseInfo {
 
   Use usage;
   /*
-   * Set of instructions that should be removed if we decide to
+   * Set of actions that should be performed if we decide to
    * discard the corresponding stack slot.
    */
   DceActionMap actions;
@@ -390,12 +402,14 @@ struct DceState {
 // debugging
 
 const char* show(DceAction action) {
-  switch (action) {
-    case DceAction::Kill:          return "Kill";
-    case DceAction::PopInputs:     return "PopInputs";
-    case DceAction::PopOutputs:    return "PopOutputs";
-    case DceAction::Replace:       return "Replace";
-    case DceAction::PopAndReplace: return "PopAndReplace";
+  switch (action.action) {
+    case DceAction::Kill:             return "Kill";
+    case DceAction::PopInputs:        return "PopInputs";
+    case DceAction::PopOutputs:       return "PopOutputs";
+    case DceAction::Replace:          return "Replace";
+    case DceAction::PopAndReplace:    return "PopAndReplace";
+    case DceAction::MinstrStackFinal: return "MinstrStackFinal";
+    case DceAction::MinstrStackFixup: return "MinstrStackFixup";
   };
   not_reached();
 }
@@ -782,14 +796,20 @@ DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
 
   for (auto& i : am) {
     auto ret = dst.insert(i);
-    if (!ret.second && i.second != ret.first->second) {
-      assert(i.second == DceAction::Kill);
-      if (ret.first->second == DceAction::PopAndReplace) {
-        ret.first->second = DceAction::Replace;
-      } else if (ret.first->second == DceAction::PopInputs) {
-        ret.first->second = DceAction::Kill;
-      } else {
-        always_assert(false);
+    if (!ret.second) {
+      if (i.second.action == DceAction::MinstrStackFixup ||
+          i.second.action == DceAction::MinstrStackFinal) {
+        assertx(i.second.action == ret.first->second.action);
+        ret.first->second.mask |= i.second.mask;
+      } else if (i.second.action != ret.first->second.action) {
+        assertx(i.second.action == DceAction::Kill);
+        if (ret.first->second.action == DceAction::PopAndReplace) {
+          ret.first->second.action = DceAction::Replace;
+        } else if (ret.first->second.action == DceAction::PopInputs) {
+          ret.first->second.action = DceAction::Kill;
+        } else {
+          always_assert(false);
+        }
       }
     }
   }
@@ -1469,27 +1489,88 @@ void dce(Env& env, const Op& op) {
 }
 
 /*
- * There's a set of Base instructions that read a cell from the stack
- * without popping it. For correctness, we need to mark the cell as
- * used.
+ * The minstr instructions can read a cell from the stack without
+ * popping it. They need special handling.
+ *
+ * In addition, final minstr instructions can drop a number of
+ * elements from the stack. Its possible that these elements are dead
+ * (eg because an MEC somewhere in the sequence was optimized to MEI
+ * or MET), so again we need some special handling.
  */
-template<class Op>
-void touch(Env& env, const Op& op, int32_t ix) {
-  addLocGenSet(env, env.flags.mayReadLocalSet);
-  push_outputs(env, op.numPush());
-  pop_inputs(env, op.numPop());
-  dce_slot_default(env, op);
+
+void minstr_touch(Env& env, int32_t depth) {
+  assertx(depth < env.dceState.stack.size());
+  // First make sure that the stack element we reference, and any
+  // linked ones are marked used.
   use(env.dceState.forcedLiveLocations,
-      env.dceState.stack, env.dceState.stack.size() - 1 - ix);
+      env.dceState.stack, env.dceState.stack.size() - 1 - depth);
+  // If any stack slots at a lower depth get killed, we'll have to
+  // adjust our stack index accordingly, so add a MinstrStackFixup
+  // action to candidate stack slots.
+  // We only track slots up to kMaskSize though - so nothing below
+  // that will get killed.
+  if (depth > DceAction::kMaskSize) depth = DceAction::kMaskSize;
+  while (depth--) {
+    auto& ui = env.dceState.stack[env.dceState.stack.size() - 1 - depth];
+    if (ui.usage != Use::Used) {
+      DEBUG_ONLY auto inserted = ui.actions.emplace(
+        env.id, DceAction { DceAction::MinstrStackFixup, 1u << depth }).second;
+      assertx(inserted);
+    }
+  }
 }
 
-void dce(Env& env, const bc::BaseC& op)       { touch(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseNC& op)      { touch(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseGC& op)      { touch(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseSC& op)      { touch(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseR& op)       { touch(env, op, op.arg1); }
-void dce(Env& env, const bc::FPassBaseNC& op) { touch(env, op, op.arg2); }
-void dce(Env& env, const bc::FPassBaseGC& op) { touch(env, op, op.arg2); }
+template<class Op>
+void minstr_base(Env& env, const Op& op, int32_t ix) {
+  dce<Op>(env, op);
+  minstr_touch(env, ix);
+}
+
+template<class Op>
+void minstr_dim(Env& env, const Op& op) {
+  dce<Op>(env, op);
+  if (op.mkey.mcode == MEC || op.mkey.mcode == MPC) {
+    minstr_touch(env, op.mkey.idx);
+  }
+}
+
+template<class Op>
+void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
+  addLocGenSet(env, env.flags.mayReadLocalSet);
+  push_outputs(env, op.numPush());
+  dce_slot_default(env, op);
+  auto const numPop = op.numPop();
+  auto const stackRead = op.mkey.mcode == MEC || op.mkey.mcode == MPC ?
+    op.mkey.idx : numPop;
+
+  for (auto i = numPop; i--; ) {
+    if (i == stackRead || i >= DceAction::kMaskSize || i < numPop - ndiscard) {
+      pop(env);
+    } else {
+      pop(env, {Use::Not, {{env.id, {DceAction::MinstrStackFinal, 1u << i}}}});
+    }
+  }
+}
+
+void dce(Env& env, const bc::BaseC& op)       { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseNC& op)      { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseSC& op)      { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseR& op)       { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::FPassBaseNC& op) { minstr_base(env, op, op.arg2); }
+void dce(Env& env, const bc::FPassBaseGC& op) { minstr_base(env, op, op.arg2); }
+
+void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
+void dce(Env& env, const bc::FPassDim& op)    { minstr_dim(env, op); }
+
+void dce(Env& env, const bc::QueryM& op)     { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::VGetM& op)      { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::SetM& op)       { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::IncDecM& op)    { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::SetOpM& op)     { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::BindM& op)      { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::UnsetM& op)     { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::FPassM& op)     { minstr_final(env, op, op.arg2); }
 
 void dispatch_dce(Env& env, const Bytecode& op) {
 #define O(opcode, ...) case Op::opcode: dce(env, op.opcode); return;
@@ -1497,6 +1578,64 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 #undef O
   not_reached();
 }
+
+using MaskType = DceAction::MaskType;
+
+void m_adj(uint32_t& depth, MaskType mask) {
+  auto i = depth;
+  if (i > DceAction::kMaskSize) i = DceAction::kMaskSize;
+  while (i--) {
+    if ((mask >> i) & 1) depth--;
+  }
+}
+
+void m_adj(MKey& mkey, MaskType mask) {
+  if (mkey.mcode == MEC || mkey.mcode == MPC) {
+    uint32_t d = mkey.idx;
+    m_adj(d, mask);
+    mkey.idx = d;
+  }
+}
+
+template<typename Op>
+void m_adj(uint32_t& ndiscard, Op& op, MaskType mask) {
+  auto const adjust = op.numPop() - ndiscard + 1;
+  ndiscard += adjust;
+  m_adj(ndiscard, mask);
+  ndiscard -= adjust;
+  m_adj(op.mkey, mask);
+}
+
+template<typename Op>
+void adjustMinstr(Op& op, MaskType mask) { always_assert(false); }
+
+void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
+void adjustMinstr(bc::BaseNC& op, MaskType m)      { m_adj(op.arg1, m); }
+void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
+void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
+void adjustMinstr(bc::BaseR& op, MaskType m)       { m_adj(op.arg1, m); }
+void adjustMinstr(bc::FPassBaseNC& op, MaskType m) { m_adj(op.arg2, m); }
+void adjustMinstr(bc::FPassBaseGC& op, MaskType m) { m_adj(op.arg2, m); }
+
+void adjustMinstr(bc::Dim& op, MaskType m)         { m_adj(op.mkey, m); }
+void adjustMinstr(bc::FPassDim& op, MaskType m)    { m_adj(op.mkey, m); }
+
+void adjustMinstr(bc::QueryM& op, MaskType m)  { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::VGetM& op, MaskType m)   { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::SetM& op, MaskType m)    { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::IncDecM& op, MaskType m) { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::SetOpM& op, MaskType m)  { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::BindM& op, MaskType m)   { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::UnsetM& op, MaskType m)  { m_adj(op.arg1, op, m); }
+void adjustMinstr(bc::FPassM& op, MaskType m)  { m_adj(op.arg2, op, m); }
+
+void adjustMinstr(Bytecode& op, MaskType m) {
+#define O(opcode, ...) case Op::opcode: adjustMinstr(op.opcode, m); return;
+  switch (op.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1692,7 +1831,7 @@ void dce_perform(const php::Func& func,
     auto const& id = elm.first;
     auto const b = borrow(func.blocks[id.blk]);
     FTRACE(1, "{} {}\n", show(elm), show(func, b->hhbcs[id.idx]));
-    switch (elm.second) {
+    switch (elm.second.action) {
       case DceAction::PopInputs:
         // we want to replace the bytecode with pops of its inputs
         if (auto const numToPop = numPop(b->hhbcs[id.idx])) {
@@ -1742,6 +1881,12 @@ void dce_perform(const php::Func& func,
                           numToPop,
                           bc::PopC {});
         }
+        break;
+      }
+      case DceAction::MinstrStackFinal:
+      case DceAction::MinstrStackFixup:
+      {
+        adjustMinstr(b->hhbcs[id.idx], elm.second.mask);
         break;
       }
     }

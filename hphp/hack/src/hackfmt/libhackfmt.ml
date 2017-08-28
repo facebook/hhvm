@@ -161,13 +161,17 @@ let format_intervals ?config intervals tree =
   ) in
   let length = SourceText.length source_text in
   let buf = Buffer.create (length + 256) in
-  let offsets_seen = ref 0 in
+  let bytes_seen = ref 0 in
   List.iter formatted_intervals (fun ((st, ed), formatted) ->
-    Buffer.add_string buf (String.sub text !offsets_seen (st - !offsets_seen));
+    for i = !bytes_seen to st - 1 do
+      Buffer.add_char buf text.[i];
+    done;
     Buffer.add_string buf formatted;
-    offsets_seen := ed;
+    bytes_seen := ed;
   );
-  Buffer.add_string buf (String.sub text !offsets_seen (length - !offsets_seen));
+  for i = !bytes_seen to length - 1 do
+    Buffer.add_char buf text.[i];
+  done;
   Buffer.contents buf
 
 (** Format a node at the given offset.
@@ -210,5 +214,6 @@ let format_at_offset ?config tree offset =
   let formatted = Line_splitter.print env solve_states ~range in
   (* We don't want a trailing newline here (in as-you-type-formatting, it would
    * place the cursor on the next line), but the Line_splitter always prints one
-   * at the end of a formatted range. So, we remove it. *)
-  range, String.sub formatted 0 (String.length formatted - 1)
+   * at the end of a formatted range when the last token ought to have a
+   * trailing newline. So, we remove it. *)
+  range, String_utils.rstrip formatted "\n"

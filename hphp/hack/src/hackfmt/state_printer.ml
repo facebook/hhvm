@@ -15,12 +15,25 @@ open Utils
 
 let print_state env ?range state =
   let b = Buffer.create 200 in
-  let chunks = Solve_state.chunks state in
+  let state_chunks = Solve_state.chunks state in
+
+  (* When printing a chunk group, we want to print a newline after and not
+   * before. This corresponds with the way trailing trivia works (the final
+   * token in the chunk is associated with the trailing newline) and the
+   * expectations of range-formatting at line boundaries.
+   *
+   * However, chunks are associated with the split preceding them, so if we
+   * print a newline character before every chunk whose associated split is
+   * broken on, we will print the chunk group with a leading newline and no
+   * trailing newline. Instead, we don't print a newline before the first chunk
+   * we print, and do print a trailing newline if the last chunk in the range is
+   * bound to have a newline after it. *)
+  let chunk_printed = ref false in
 
   let chunks = match range with
-    | None -> chunks
+    | None -> state_chunks
     | Some range ->
-      List.filter chunks ~f:(fun c ->
+      List.filter state_chunks ~f:(fun c ->
         Interval.intervals_overlap range (c.Chunk.start_char, c.Chunk.end_char)
       )
   in
@@ -29,13 +42,21 @@ let print_state env ?range state =
       match range, chunk.Chunk.tokens with
       | Some (range_start, range_end), tokens
         when tokens <> [] ->
-        chunk.Chunk.start_char < range_start, range_end < chunk.Chunk.end_char
+        let first_token = List.hd_exn chunk.Chunk.tokens in
+        let last_token = List.last_exn chunk.Chunk.tokens in
+        let token_start = first_token.Chunk.source_offset in
+        let token_end =
+          last_token.Chunk.source_offset + last_token.Chunk.width
+        in
+        token_start < range_start, range_end < token_end
       | _ -> false, false
     in
 
     if not range_starts_in_chunk then begin
       if Solve_state.has_split_before_chunk state ~chunk then begin
-        Buffer.add_string b "\n";
+        if !chunk_printed
+        then Buffer.add_string b "\n"
+        else chunk_printed := true;
         let indent = Solve_state.get_indent state env ~chunk in
         if chunk.Chunk.text <> "" && chunk.Chunk.indentable then
           Buffer.add_string b @@
@@ -55,4 +76,30 @@ let print_state env ?range state =
     if Solve_state.has_comma_after_chunk state ~chunk && not range_ends_in_chunk
       then Buffer.add_string b ",";
   end;
+
+  (* We want a line break after this chunk group when any of the following
+   * conditions holds:
+   *
+   * - The range ended in this chunk group, and the first chunk after the end
+   *   of the range has a line break before it in this solve state.
+   * - The range included the final chunk in this chunk group. *)
+  let group_range = Chunk_group.get_char_range state.Solve_state.chunk_group in
+  let range_includes_trailing_newline =
+    match range with
+    | None -> true
+    | Some range when not (Interval.intervals_overlap range group_range) -> false
+    | Some range ->
+      let range_end = snd range in
+      try
+        let chunk =
+          List.find_exn state_chunks
+            ~f:(fun c -> range_end >= c.Chunk.end_char)
+        in
+        Solve_state.has_split_before_chunk state ~chunk
+      with Not_found ->
+        range_end >= snd group_range
+  in
+  if range_includes_trailing_newline then
+    Buffer.add_string b "\n";
+
   Buffer.contents b

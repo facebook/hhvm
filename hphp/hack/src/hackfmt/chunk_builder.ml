@@ -90,10 +90,7 @@ let builder = object (this)
         pending_space <- false;
         let indentable = hd.Chunk.indentable && not multiline in
         let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
-        let hd =
-          if is_trivia
-          then {hd with Chunk.text = text ^ s}
-          else Chunk.add_token hd s width seen_chars in
+        let hd = Chunk.add_token hd s width seen_chars in
         hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
@@ -101,10 +98,7 @@ let builder = object (this)
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
             let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
-            let chunk =
-              if is_trivia
-              then {chunk with Chunk.text = s}
-              else Chunk.add_token chunk s width seen_chars in
+            let chunk = Chunk.add_token chunk s width seen_chars in
             let chunk = {chunk with Chunk.indentable = not multiline} in
             let cs = chunk :: chunks in
             this#end_rule ();
@@ -114,10 +108,7 @@ let builder = object (this)
           match next_split_rule with
             | NoRule ->
               let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
-              let chunk =
-                if is_trivia
-                then {chunk with Chunk.text = s}
-                else Chunk.add_token chunk s width seen_chars in
+              let chunk = Chunk.add_token chunk s width seen_chars in
               let chunk = {chunk with Chunk.indentable = not multiline} in
               chunk :: chunks
             | LazyRuleID rule_id ->
@@ -331,19 +322,9 @@ let builder = object (this)
 
   method private _end () =
     this#hard_split ();
-    let last_chunk_empty = match chunks with
-      | hd :: _ -> hd.Chunk.text = ""
-      | [] ->
-        match chunk_groups with
-        | [] -> true
-        | hd :: _ ->
-          match List.rev hd.Chunk_group.chunks with
-          | [] -> true
-          | hd :: _ -> hd.Chunk.text = ""
-    in
-    if not last_chunk_empty then
-      this#add_always_empty_chunk ();
-    this#push_chunk_group ();
+    if not (List.is_empty chunks)
+    then failwith ("The impossible happened: Chunk_builder attempted to end " ^
+                   "when not at a chunk group boundary");
     List.rev chunk_groups
 
   method private advance n =

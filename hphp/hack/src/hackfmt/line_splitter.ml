@@ -70,22 +70,9 @@ let find_solve_states env ?range source_text chunk_groups =
   chunk_groups |> List.map ~f:(solve_chunk_group env source_text)
 
 let print env ?range solve_states =
-  let formatted = solve_states
-    |> List.map ~f:(State_printer.print_state env ?range)
-    |> String.concat ""
-  in
-  match range with
-    | None -> formatted
-    (* FIXME: This is a hack to work around the bizarre situation we're in,
-     * where chunks are associated with the newline preceding them (because Bob
-     * Nystrom suggested that that approach might be nicer than the
-     * alternative), but chunk ranges associate tokens with the newline that
-     * followed them (since that newline is in the token's trailing trivia).
-     * Because chunks are associated with the split preceding them, printing a
-     * range of chunks produces a newline before and not after. However, the
-     * range we were provided associates newline characters with the line
-     * preceding them, so the caller expects a newline after and not before. *)
-    | Some _ -> (String_utils.lstrip formatted "\n") ^ "\n"
+  solve_states
+  |> List.map ~f:(State_printer.print_state env ?range)
+  |> String.concat ""
 
 let solve env ?range source_text chunk_groups =
   chunk_groups

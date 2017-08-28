@@ -1,0 +1,4 @@
+C::__destruct
+int(42)
+C::__destruct done
+int(23)

@@ -116,7 +116,7 @@ struct Repo : RepoProxy {
    * Load the repo-global metadata table, including the global litstr
    * table.  Normally called during process initialization.
    */
-  void loadGlobalData(bool allowFailure = false);
+  void loadGlobalData(bool allowFailure = false, bool readArrayTable = true);
 
   /*
    * Access to global data.

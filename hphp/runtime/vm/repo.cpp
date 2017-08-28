@@ -134,7 +134,8 @@ size_t Repo::stringLengthLimit() const {
   return limit;
 }
 
-void Repo::loadGlobalData(bool allowFailure /* = false */) {
+void Repo::loadGlobalData(bool allowFailure /* = false */,
+                          bool readArrayTable /* = true */) {
   m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
@@ -173,9 +174,11 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       }
       BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
-      auto& arrayTypeTable = globalArrayTypeTable();
-      decoder(arrayTypeTable);
-      decoder.assertDone();
+      if (readArrayTable) {
+        auto& arrayTypeTable = globalArrayTypeTable();
+        decoder(arrayTypeTable);
+        decoder.assertDone();
+      }
       txn.commit();
     } catch (RepoExc& e) {
       failures.push_back(repoName(repoId) + ": "  + e.msg());

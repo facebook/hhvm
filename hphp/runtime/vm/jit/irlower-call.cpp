@@ -260,18 +260,18 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     emitEagerSyncPoint(v, pc, rvmtl(), srcLoc(env, inst, 0).reg(), synced_sp);
   }
 
-  int returnOffset = rds::kVmMInstrStateOff +
-                     offsetof(MInstrState, tvBuiltinReturn);
   auto args = argGroup(env, inst);
+
+  int returnOffset = 0;
 
   if (!returnByValue) {
     if (isBuiltinByRef(funcReturnType)) {
-      if (isReqPtrRef(funcReturnType)) {
-        returnOffset += TVOFF(m_data);
-      }
-      // Pass the address of tvBuiltinReturn to the native function as the
-      // location where it can construct the return Array, String, Object, or
-      // Variant.
+      returnOffset = rds::kVmMInstrStateOff +
+        (isReqPtrRef(funcReturnType) ? offsetof(MInstrState, ptrBuiltinReturn) :
+         offsetof(MInstrState, tvBuiltinReturn));
+      // Pass the address of tvBuiltinReturn or ptrBuiltinReturn to the
+      // native function as the location where it can construct the return
+      // Array, String, Object, or Variant.
       args.indRet(rvmtl(), returnOffset);
     }
   }
@@ -344,8 +344,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (returnType.isSimpleType() || returnByValue) return;
 
   // For return by reference (String, Object, Array, Variant), the builtin
-  // writes the return value into MInstrState::tvBuiltinReturn, from where it
-  // has to be tested and copied.
+  // writes the return value into MInstrState::tvBuiltinReturn or
+  // ptrBuiltinReturn, from where it has to be tested and copied.
 
   if (returnType.isReferenceType()) {
     // The return type is String, Array, or Object; fold nullptr to KindOfNull.

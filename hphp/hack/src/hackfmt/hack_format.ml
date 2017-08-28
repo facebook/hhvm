@@ -2213,8 +2213,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
           let dc = Trivia.make_delimited_comment @@
             String.sub str start_index len in
           Concat [
-            Newline;
             Ignore ("\n", 1);
+            Newline;
             Ignore ((String.make start_index ' '), start_index);
             Comment ((Trivia.text dc), (Trivia.width dc));
           ]

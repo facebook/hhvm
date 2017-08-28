@@ -1,0 +1,12 @@
+diff --git a/sum.php b/sum.php
+--- a/sum.php
++++ b/sum.php
+@@ -2,6 +2,8 @@
+
+ /**
+  * Returns the sum of the two arguments.
++ *
++ * Equivalent to $a + $b.
+  */
+ function sum(int $a, int $b) {
+   return $a + $b;

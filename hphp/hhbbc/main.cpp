@@ -261,14 +261,28 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   };
 }
 
-void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
-                  std::unique_ptr<ArrayTypeTable::Builder> arrTable,
-                  std::vector<SString> apcProfile) {
+void write_output(
+  UnitEmitterQueue& ueq,
+  std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+  std::vector<SString> apcProfile) {
+  folly::Optional<trace_time> timer;
+
   RuntimeOption::RepoCommit = true;
   RuntimeOption::RepoEvalMode = "local";
   RuntimeOption::RepoDebugInfo = false; // Don't record UnitSourceLoc
   open_repo(output_repo);
   SCOPE_EXIT { Repo::shutdown(); };
+
+  std::vector<std::unique_ptr<UnitEmitter>> ues;
+  while (auto ue = ueq.pop()) {
+    if (!timer) timer.emplace("writing output repo");
+    ues.push_back(std::move(ue));
+    if (ues.size() == 8) {
+      batchCommit(ues);
+      ues.clear();
+    }
+  }
+
   batchCommit(ues);
   ues.clear();
 
@@ -306,13 +320,23 @@ void compile_repo() {
     std::cout << folly::format("{} units\n", input.first.size());
   }
 
-  auto pair = whole_program(std::move(input.first));
-  {
-    trace_time timer("writing output repo");
-    write_output(std::move(pair.first),
-                 std::move(pair.second),
-                 std::move(input.second));
-  }
+  UnitEmitterQueue ueq;
+  std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+  auto wp_thread = std::thread([&] {
+    hphp_thread_init();
+    hphp_session_init();
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+    };
+    Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
+    arrTable = whole_program(std::move(input.first), ueq);
+    ueq.push(nullptr);
+  });
+
+  write_output(ueq, arrTable, std::move(input.second));
+  wp_thread.join();
 }
 
 //////////////////////////////////////////////////////////////////////

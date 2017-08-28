@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_HHBBC_H_
 #define incl_HPHP_HHBBC_H_
 
+#include <atomic>
+#include <deque>
 #include <vector>
 #include <memory>
 #include <string>
@@ -24,6 +26,9 @@
 #include "hphp/hhbbc/options.h"
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/synchronizable.h"
 
 namespace HPHP { struct UnitEmitter; }
 namespace HPHP { namespace HHBBC {
@@ -46,6 +51,21 @@ OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
 
 //////////////////////////////////////////////////////////////////////
 
+struct UnitEmitterQueue : Synchronizable {
+  // Add another ue. Adding nullptr marks us done.
+  void push(std::unique_ptr<UnitEmitter> ue);
+  // Get the next ue, or nullptr to indicate we're done.
+  std::unique_ptr<UnitEmitter> pop();
+  // Fetch any remaining ues.
+  // Must be called in single threaded mode, after we've stopped adding ues.
+  void fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues);
+  // Clear done flag, and get us ready for reuse.
+  void reset();
+ private:
+  std::deque<std::unique_ptr<UnitEmitter>> m_ues;
+  std::atomic<bool> m_done{};
+};
+
 /*
  * Perform whole-program optimization on a set of UnitEmitters.
  *
@@ -53,11 +73,10 @@ OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
  * expects traits are already flattened (it might be wrong if they
  * aren't).
  */
-std::pair<
-  std::vector<std::unique_ptr<UnitEmitter>>,
-  std::unique_ptr<ArrayTypeTable::Builder>
->
-whole_program(std::vector<std::unique_ptr<UnitEmitter>>, int num_threads = 0);
+std::unique_ptr<ArrayTypeTable::Builder>
+whole_program(std::vector<std::unique_ptr<UnitEmitter>>,
+              UnitEmitterQueue& ueq,
+              int num_threads = 0);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -11090,38 +11090,7 @@ UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   return ue;
 }
 
-struct UEQ : Synchronizable {
-  void push(UnitEmitter* ue) {
-    assert(ue != nullptr);
-    Lock lock(this);
-    m_ues.push_back(ue);
-    notify();
-  }
-  UnitEmitter* tryPop(long sec, long long nsec) {
-    Lock lock(this);
-    if (m_ues.empty()) {
-      // Check for empty() after wait(), in case of spurious wakeup.
-      if (!wait(sec, nsec) || m_ues.empty()) {
-        return nullptr;
-      }
-    }
-    assert(m_ues.size() > 0);
-    UnitEmitter* ue = m_ues.front();
-    assert(ue != nullptr);
-    m_ues.pop_front();
-    return ue;
-  }
-  // must be called in single threaded mode.
-  void fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
-    for (auto const ue : m_ues) {
-      ues.push_back(std::unique_ptr<UnitEmitter>{ue});
-    }
-    m_ues.clear();
-  }
- private:
-  std::deque<UnitEmitter*> m_ues;
-};
-static UEQ s_ueq;
+static HHBBC::UnitEmitterQueue s_ueq;
 
 class EmitterWorker
   : public JobQueueWorker<FileScopeRawPtr, void*, true, true> {
@@ -11130,7 +11099,7 @@ class EmitterWorker
   void doJob(JobType job) override {
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
-      s_ueq.push(emitHHBCVisitor(ar, job));
+      s_ueq.push(std::unique_ptr<UnitEmitter>{emitHHBCVisitor(ar, job)});
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
       m_ret = false;
@@ -11332,7 +11301,12 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     commitSome(ues);
   }
 
-  if (Option::GenerateBinaryHHBC || Option::UseHHBBC) {
+  auto dispatcherThread = std::thread([&] {
+    dispatcher.waitEmpty();
+    s_ueq.push(nullptr);
+  });
+
+  auto commitLoop = [&] {
     // kBatchSize needs to strike a balance between reducing transaction commit
     // overhead (bigger batches are better), and limiting the cost incurred by
     // failed commits due to identical units that require rollback and retry
@@ -11340,52 +11314,60 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     // value in the 2-10 range is reasonable.
     static const unsigned kBatchSize = 8;
 
-    // Gather up units created by the worker threads and commit them in
-    // batches.
-    while (true) {
-      // Poll, but with a 100ms timeout so that this thread doesn't spin wildly
-      // if it gets ahead of the workers.
-      if (auto const ue = s_ueq.tryPop(0, 100 * 1000 * 1000)) {
-        ues.push_back(std::unique_ptr<UnitEmitter>{ue});
-      } else if (dispatcher.pollEmpty()) {
-        // there could be a race, so fetch any remaining ues
-        s_ueq.fetch(ues);
-        break;
-      }
-      if (!Option::UseHHBBC && ues.size() == kBatchSize) {
+    while (auto ue = s_ueq.pop()) {
+      ues.push_back(std::move(ue));
+      if (ues.size() == kBatchSize) {
         commitSome(ues);
       }
     }
-  } else {
-    dispatcher.waitEmpty();
-    s_ueq.fetch(ues_to_print);
+    if (ues.size()) commitSome(ues);
+  };
+
+  if (Option::GenerateBinaryHHBC && !Option::UseHHBBC) {
+    commitLoop();
   }
+
+  dispatcherThread.join();
 
   LitstrTable::get().setReading();
   ar->finish();
   ar.reset();
 
+  if (!Option::GenerateBinaryHHBC || Option::UseHHBBC) {
+    s_ueq.fetch(Option::UseHHBBC ? ues : ues_to_print);
+  }
+
+  s_ueq.reset();
+
   if (!Option::UseHHBBC) {
     if (Option::GenerateBinaryHHBC) {
-      commitSome(ues);
       commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
     }
     return;
   }
 
   RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
-  auto pair = [&] {
+
+  std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+  auto wp_thread = std::thread([&] {
     Timer timer(Timer::WallTime, "running HHBBC");
-    return HHBBC::whole_program(
-      std::move(ues),
-      Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0
-    );
-  }();
-  batchCommit(pair.first);
-  if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
-    ues_to_print = std::move(pair.first);
-  }
-  commitGlobalData(std::move(pair.second));
+    hphp_thread_init();
+    hphp_session_init();
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+      hphp_thread_exit();
+    };
+
+    arrTable = HHBBC::whole_program(
+      std::move(ues), s_ueq,
+      Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
+    s_ueq.push(nullptr);
+  });
+
+  commitLoop();
+  commitGlobalData(std::move(arrTable));
+  wp_thread.join();
 }
 
 namespace {

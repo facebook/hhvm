@@ -422,13 +422,16 @@ std::unique_ptr<php::Program> parse_program(Container units) {
   return ret;
 }
 
-std::vector<std::unique_ptr<UnitEmitter>>
-make_unit_emitters(const Index& index, const php::Program& program) {
+template<typename F>
+void make_unit_emitters(
+  const Index& index,
+  const php::Program& program,
+  F outFunc) {
   trace_time trace("make_unit_emitters");
-  return parallel::map(
+  return parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
-      return emit_unit(index, *unit);
+      outFunc(emit_unit(index, *unit));
     }
   );
 }
@@ -439,11 +442,46 @@ make_unit_emitters(const Index& index, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::pair<
-  std::vector<std::unique_ptr<UnitEmitter>>,
-  std::unique_ptr<ArrayTypeTable::Builder>
->
+void UnitEmitterQueue::push(std::unique_ptr<UnitEmitter> ue) {
+  assertx(!m_done.load(std::memory_order_relaxed));
+  Lock lock(this);
+  if (!ue) {
+    m_done.store(true, std::memory_order_relaxed);
+  } else {
+    m_ues.push_back(std::move(ue));
+  }
+  notify();
+}
+
+std::unique_ptr<UnitEmitter> UnitEmitterQueue::pop() {
+  Lock lock(this);
+  while (m_ues.empty()) {
+    if (m_done.load(std::memory_order_relaxed)) return nullptr;
+    wait();
+  }
+  assertx(m_ues.size() > 0);
+  auto ue = std::move(m_ues.front());
+  assertx(ue != nullptr);
+  m_ues.pop_front();
+  return ue;
+}
+
+void UnitEmitterQueue::fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+  assertx(m_done.load(std::memory_order_relaxed));
+  std::move(m_ues.begin(), m_ues.end(), std::back_inserter(ues));
+  m_ues.clear();
+}
+
+void UnitEmitterQueue::reset() {
+  m_ues.clear();
+  m_done.store(false, std::memory_order_relaxed);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::unique_ptr<ArrayTypeTable::Builder>
 whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
+              UnitEmitterQueue& ueq,
               int num_threads) {
   trace_time tracer("whole program");
 
@@ -482,10 +520,12 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   LitstrTable::init();
   LitstrTable::get().setWriting();
-  ues = make_unit_emitters(index, *program);
+  make_unit_emitters(index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
+    ueq.push(std::move(ue));
+  });
   LitstrTable::get().setReading();
 
-  return { std::move(ues), std::move(index.array_table_builder()) };
+  return std::move(index.array_table_builder());
 }
 
 //////////////////////////////////////////////////////////////////////

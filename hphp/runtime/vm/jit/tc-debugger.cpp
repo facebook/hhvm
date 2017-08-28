@@ -98,7 +98,7 @@ bool addDbgGuards(const Unit* unit) {
     auto& data = view.data();
 
     HPHP::Timer::GetMonotonicTime(tsBegin);
-    // Doc says even find _could_ invalidate iterator, in pactice it should
+    // Doc says even find _could_ invalidate iterator, in practice it should
     // be very rare, so go with it now.
     CGMeta fixups;
     for (auto& pair : srcDB()) {

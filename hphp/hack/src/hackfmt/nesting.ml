@@ -25,7 +25,7 @@ let make ~id ~indent parent skip_parent = {
   skip_parent_if_nested = skip_parent;
 }
 
-let get_indent nesting nesting_set =
+let get_indent_level nesting nesting_set =
   let rec aux acc n =
     match n with
       | None -> acc

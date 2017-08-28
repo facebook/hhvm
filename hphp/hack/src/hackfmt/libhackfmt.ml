@@ -88,7 +88,7 @@ let expand_to_split_boundaries boundaries range =
 
 let env_from_config config =
   let env = Option.value config ~default:Env.default in
-  if Env.indent_width env < 1 then invalid_arg "Invalid indent width";
+  if Env.indent_width env < 0 then invalid_arg "Invalid indent width";
   if Env.line_width env < 0 then invalid_arg "Invalid line width";
   env
 

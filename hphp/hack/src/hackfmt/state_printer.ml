@@ -29,8 +29,8 @@ let string_of_subchunks env subchunks =
     | Indent indent ->
       Buffer.add_string buf @@
         if Env.indent_with_tabs env
-        then String.make (indent / Env.indent_width env) '\t'
-        else String.make indent ' '
+        then String.make indent '\t'
+        else String.make (indent * Env.indent_width env) ' '
   end;
   Buffer.contents buf
 
@@ -62,9 +62,8 @@ let print_state env ?range state =
     if Solve_state.has_split_before_chunk state ~chunk
     then begin
       add_subchunk Newline;
-      let indent = Solve_state.get_indent state env ~chunk in
       if not (Chunk.is_empty chunk) && chunk.Chunk.indentable then
-        add_subchunk (Indent indent);
+        add_subchunk (Indent (Solve_state.get_indent_level state chunk));
     end
     else if chunk.Chunk.space_if_not_split then add_subchunk Space;
 

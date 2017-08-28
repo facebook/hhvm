@@ -53,10 +53,15 @@ let get_bound_ruleset rbm = ISet.of_list @@ IMap.keys rbm
 
 let get_overflow env len = max (len - (Env.line_width env)) 0
 
-let get_indent t env ~chunk =
-  let block_indentation = t.chunk_group.Chunk_group.block_indentation in
-  Env.indent_width env *
-  (block_indentation + Nesting.get_indent chunk.Chunk.nesting t.nesting_set)
+let compute_indent_level chunk_group nesting_set chunk =
+  let block_indentation = chunk_group.Chunk_group.block_indentation in
+  block_indentation + Nesting.get_indent_level chunk.Chunk.nesting nesting_set
+
+let get_indent_level t chunk =
+  compute_indent_level t.chunk_group t.nesting_set chunk
+
+let get_indent_columns env chunk_group nesting_set chunk =
+  Env.indent_width env * compute_indent_level chunk_group nesting_set chunk
 
 (**
  * Create a list of lines
@@ -66,7 +71,7 @@ let get_indent t env ~chunk =
  * a particular line of output for a given Solve_state
  *)
 let build_lines env chunk_group rbm nesting_set =
-  let { Chunk_group.chunks; block_indentation; _ } = chunk_group in
+  let { Chunk_group.chunks; _ } = chunk_group in
 
   let get_text_length chunk ~has_comma =
     let comma_len = if has_comma then 1 else 0 in
@@ -74,9 +79,7 @@ let build_lines env chunk_group rbm nesting_set =
   in
   let get_prefix_whitespace_length env chunk ~is_split =
     if is_split && chunk.Chunk.indentable
-    then
-      Env.indent_width env *
-      (block_indentation + Nesting.get_indent chunk.Chunk.nesting nesting_set)
+    then get_indent_columns env chunk_group nesting_set chunk
     else if chunk.Chunk.space_if_not_split then 1 else 0
   in
 

@@ -576,7 +576,7 @@ void populate_block(ParseUnitState& puState,
       auto b = [&] () -> Bytecode {                                \
         IMM_##imms /*these two macros advance the pc as required*/ \
         FLAGS_##flags                                              \
-        if (isTypeAssert(op)) bc::Nop {};                          \
+        if (isTypeAssert(op)) return bc::Nop {};                   \
         return bc::opcode { IMM_ARG_##imms FLAGS_ARG_##flags };    \
       }();                                                         \
       b.srcLoc = srcLocIx;                                         \

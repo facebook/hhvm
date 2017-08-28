@@ -431,12 +431,22 @@ struct ImmFolder {
   void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
 
   void fold(andq& in, Vinstr& out) {
+    if (!uses[in.sf] && valid.test(in.s0) && valid.test(in.s1)) {
+      out = ldimmq{vals[in.s0] & vals[in.s1], in.d};
+      return;
+    }
     int val;
     uint64_t bm;
     if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
     else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
     else if (logical_bmsk(in.s0, bm)) { out = andqi64{bm, in.s1, in.d, in.sf}; }
     else if (logical_bmsk(in.s1, bm)) { out = andqi64{bm, in.s0, in.d, in.sf}; }
+  }
+
+  void fold(andqi& in, Vinstr& out) {
+    if (uses[in.sf]) return;
+    if (!valid.test(in.s1)) return;
+    out = ldimmq{vals[in.s1] & in.s0.q(), in.d};
   }
 
   void fold(storeb& in, Vinstr& out) {

@@ -90,7 +90,7 @@ let builder = object (this)
         pending_space <- false;
         let indentable = hd.Chunk.indentable && not multiline in
         let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
-        let hd = Chunk.add_token hd s width seen_chars in
+        let hd = Chunk.add_atom hd s width seen_chars in
         hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
@@ -98,7 +98,7 @@ let builder = object (this)
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
             let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
-            let chunk = Chunk.add_token chunk s width seen_chars in
+            let chunk = Chunk.add_atom chunk s width seen_chars in
             let chunk = {chunk with Chunk.indentable = not multiline} in
             let cs = chunk :: chunks in
             this#end_rule ();
@@ -108,7 +108,7 @@ let builder = object (this)
           match next_split_rule with
             | NoRule ->
               let chunk = Chunk.make (List.hd rules) nesting last_chunk_end in
-              let chunk = Chunk.add_token chunk s width seen_chars in
+              let chunk = Chunk.add_atom chunk s width seen_chars in
               let chunk = {chunk with Chunk.indentable = not multiline} in
               chunk :: chunks
             | LazyRuleID rule_id ->

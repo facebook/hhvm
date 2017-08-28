@@ -10,10 +10,25 @@
 
 open Core
 
-(* Association between a token's offset in the original source text and its
- * offset in a chunk. *)
-type token = {
-  token_text: string;
+(* An atom is a substring of the original source which will be exactly
+ * represented in the formatted output and is considered indivisible by hackfmt.
+ *
+ * An atom is one of the following:
+ * - A single token
+ * - A single-line comment or delimited comment containing no newlines
+ * - A segment of a multiline delimited comment. Multiline delimited comments
+ *   are broken on newlines and stripped of their indentation whitespace so that
+ *   their segments can be reindented properly.
+ * - A single instance of ExtraTokenError trivia
+ *
+ * We keep track of the atoms that make up a chunk to make it possible
+ * to format ranges which begin or end inside chunks (essential for as-you-type
+ * formatting, where the cursor may be in the middle of a chunk).
+ *
+ * This data structure associates an atom's offset in the original source text
+ * with its offset in a chunk. *)
+type atom = {
+  atom_text: string;
   width: int;
   source_offset: int;
   chunk_offset: int;
@@ -30,7 +45,7 @@ type t = {
   start_char: int;
   end_char: int;
   indentable: bool;
-  tokens: token list;
+  atoms: atom list;
 }
 
 let default_chunk = {
@@ -44,7 +59,7 @@ let default_chunk = {
   start_char = -1;
   end_char = -1;
   indentable = true;
-  tokens = [];
+  atoms = [];
 }
 
 let make rule nesting start_char =
@@ -54,10 +69,10 @@ let make rule nesting start_char =
   in
   {c with start_char; nesting}
 
-let add_token c token_text width source_offset =
+let add_atom c atom_text width source_offset =
   let chunk_offset = String.length c.text in
-  let tokens = {token_text; width; source_offset; chunk_offset} :: c.tokens in
-  {c with tokens; text = c.text ^ token_text}
+  let atoms = {atom_text; width; source_offset; chunk_offset} :: c.atoms in
+  {c with atoms; text = c.text ^ atom_text}
 
 let finalize chunk rule ra space comma end_char =
   let end_char = max chunk.start_char end_char in
@@ -72,7 +87,7 @@ let finalize chunk rule ra space comma end_char =
     space_if_not_split = space;
     comma_rule = comma;
     end_char;
-    tokens = List.rev chunk.tokens;
+    atoms = List.rev chunk.atoms;
   }
 
 let get_nesting_id chunk =
@@ -82,22 +97,22 @@ let get_range chunk =
   (chunk.start_char, chunk.end_char)
 
 let print_range chunk range =
-  let source_end tok = tok.source_offset + tok.width in
-  let chunk_end tok = tok.chunk_offset + tok.width in
+  let source_end atom = atom.source_offset + atom.width in
+  let chunk_end atom = atom.chunk_offset + atom.width in
   let range_start, range_end = range in
-  (* Find the nearest token which starts at or before range_start, then get the
-   * offset of that token's first character in the chunk text *)
+  (* Find the nearest atom which starts at or before range_start, then get the
+   * offset of that atom's first character in the chunk text *)
   let start_chunk_offset =
-    chunk.tokens
+    chunk.atoms
     |> List.rev
-    |> List.find ~f:(fun tok -> tok.source_offset <= range_start)
-    |> Option.value_map ~default:0 ~f:(fun tok -> tok.chunk_offset)
+    |> List.find ~f:(fun atom -> atom.source_offset <= range_start)
+    |> Option.value_map ~default:0 ~f:(fun atom -> atom.chunk_offset)
   in
-  (* Find the nearest token which ends at or after range_end, then get the
-   * offset (+ 1) of the token's last character in the chunk text *)
+  (* Find the nearest atom which ends at or after range_end, then get the
+   * offset (+ 1) of the atom's last character in the chunk text *)
   let end_chunk_offset =
-    chunk.tokens
-    |> List.find ~f:(fun tok -> range_end <= source_end tok)
+    chunk.atoms
+    |> List.find ~f:(fun atom -> range_end <= source_end atom)
     |> Option.value_map ~default:(String.length chunk.text) ~f:chunk_end
   in
   let width = end_chunk_offset - start_chunk_offset in

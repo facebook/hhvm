@@ -19,7 +19,7 @@ let print_state env ?range state =
 
   (* When printing a chunk group, we want to print a newline after and not
    * before. This corresponds with the way trailing trivia works (the final
-   * token in the chunk is associated with the trailing newline) and the
+   * atom in the chunk is associated with the trailing newline) and the
    * expectations of range-formatting at line boundaries.
    *
    * However, chunks are associated with the split preceding them, so if we
@@ -39,16 +39,16 @@ let print_state env ?range state =
   in
   List.iter chunks ~f:begin fun chunk ->
     let range_starts_in_chunk, range_ends_in_chunk =
-      match range, chunk.Chunk.tokens with
-      | Some (range_start, range_end), tokens
-        when tokens <> [] ->
-        let first_token = List.hd_exn chunk.Chunk.tokens in
-        let last_token = List.last_exn chunk.Chunk.tokens in
-        let token_start = first_token.Chunk.source_offset in
-        let token_end =
-          last_token.Chunk.source_offset + last_token.Chunk.width
+      match range, chunk.Chunk.atoms with
+      | Some (range_start, range_end), atoms
+        when atoms <> [] ->
+        let first_atom = List.hd_exn chunk.Chunk.atoms in
+        let last_atom = List.last_exn chunk.Chunk.atoms in
+        let atom_start = first_atom.Chunk.source_offset in
+        let atom_end =
+          last_atom.Chunk.source_offset + last_atom.Chunk.width
         in
-        token_start < range_start, range_end < token_end
+        atom_start < range_start, range_end < atom_end
       | _ -> false, false
     in
 

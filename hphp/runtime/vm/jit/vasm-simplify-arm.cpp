@@ -110,8 +110,9 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
           ea.s.base.isValid())) return false;
 
     return simplify_impl(env, b, i, [&] (Vout& v) {
-      auto sf = env.unit.makeReg();
-      v << subqi{-inst.s.l(), ea.s.base, ea.d, sf};
+      // eXtend ea - lowerVptr() too conservative.
+      Vptr xea{ea.s.base, inst.s.l()};
+      v << lea{xea, ea.d};
       return 2;
     });
   });

@@ -11,3 +11,4 @@
 *.semdiff
 *.semdiff_messages
 *.hhcodegen_config.json
+*.debug_out

@@ -488,6 +488,7 @@ class virtual ['b] iter :
     method on_Eq : 'c -> Ast_visitors_ancestors.bop option -> unit
     method on_Eqeq : 'c -> unit
     method on_Expr : 'c -> Ast_visitors_ancestors.expr -> unit
+    method on_Omitted : 'c -> unit
     method on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> unit
     method on_FAsync : 'c -> unit
     method on_FAsyncGenerator : 'c -> unit
@@ -512,6 +513,9 @@ class virtual ['b] iter :
     method on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> unit
     method on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> unit
     method on_Goto : 'c -> Ast_visitors_ancestors.pstring -> unit
+    method on_Markup : 'c ->
+                Ast_visitors_ancestors.pstring ->
+                Ast_visitors_ancestors.expr option -> unit
     method on_Gt : 'c -> unit
     method on_Gte : 'c -> unit
     method on_Gtgt : 'c -> unit
@@ -530,6 +534,7 @@ class virtual ['b] iter :
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit
     method on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> unit
+    method on_Hsoft : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_Id : 'c -> Ast_visitors_ancestors.id -> unit
     method on_Id_type_arguments :
       'c ->

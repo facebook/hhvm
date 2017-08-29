@@ -1463,8 +1463,8 @@ void handleDualMInstrState(ISS& env, A nondefine, B define) {
 
   env.flags.wasPEI |= nonDefineFlags.wasPEI;
   env.flags.canConstProp &= nonDefineFlags.canConstProp;
-  assert(env.flags.wasPEI);
-  // an FPass instruction can have side effects if it ends up by-ref
+  // Elements of a minstr sequence should never be constprop - it
+  // would leave invalid bytecode.
   assert(!env.flags.canConstProp);
 }
 

@@ -1,0 +1,8 @@
+1
+Catch: Out of bounds vec access: invalid index 2
+Catch: Out of bounds vec access: invalid index 2
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Vecs cannot contain references' in %s/test/slow/vec/fpass-oob.php:8
+Stack trace:
+#0 %s/test/slow/vec/fpass-oob.php(22): foo()
+#1 {main}

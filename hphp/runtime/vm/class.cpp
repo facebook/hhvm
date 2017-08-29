@@ -1855,8 +1855,9 @@ void Class::setODAttributes() {
 
   markNonStatic(this, s_call);
   markNonStatic(this, s_debugInfo);
-  if(!((attrs() & AttrAbstract) && (attrs() & AttrFinal)))
+  if (!((attrs() & AttrAbstract) && (attrs() & AttrFinal))) {
     markNonStatic(m_ctor);
+  }
 
   if (m_dtor == nullptr) m_ODAttrs |= ObjectData::NoDestructor;
 

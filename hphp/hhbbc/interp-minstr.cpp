@@ -227,16 +227,17 @@ typename std::enable_if<
     base.subtypeOf(TVec) ? opV(base, args...) :
     base.subtypeOf(TDict) ? opD(base, args...) :
     opK(base, args...);
-  // TODO: we cannot support unreachable() in the middle of a minstr sequence
-  // right now as it causes problems in the verifier when we fall out of the
-  // fault funclet before the minstr is complete.
-  //
-  // if (res.first == TBottom) {
-  //   unreachable(env);
-  // }
-  if (res.second || nullOnFailure) nothrow(env);
-  if (res.first == TBottom) return nullOnFailure ? TInitNull : TInitCell;
-  if (nullOnFailure && !res.second) res.first |= TInitNull;
+
+  if (nullOnFailure) {
+    nothrow(env);
+    if (res.first == TBottom || !res.second) res.first |= TInitNull;
+  } else {
+    if (res.first == TBottom) {
+      unreachable(env);
+    } else if (res.second) {
+      nothrow(env);
+    }
+  }
   return res.first;
 }
 

@@ -1144,6 +1144,17 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
   switch (op) {
+    case Op::BreakTraceHint:
+      if (cur->mbr_live) {
+        // Special case for unreachable code. hhbbc generates
+        // BreakTraceHint; String; Fatal
+        auto const str = pc + instrLen(pc);
+        if (peek_op(str) != Op::String) break;
+        auto const fatal = str + instrLen(str);
+        if (peek_op(fatal) != Op::Fatal) break;
+        cur->mbr_live = false;
+      }
+      break;
     case Op::InitProp:
     case Op::CheckProp: {
         auto const prop = m_func->unit()->lookupLitstrId(getImm(pc, 0).u_SA);

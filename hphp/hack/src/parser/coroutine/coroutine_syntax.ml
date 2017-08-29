@@ -36,6 +36,9 @@ let make_name_syntax text =
 let make_variable_syntax text =
   make_token_syntax TokenKind.Variable ~text
 
+let make_suspend_syntax operand =
+  let token = make_token_syntax TokenKind.Suspend in
+  make_prefix_unary_expression token operand
 
 (* General syntaxes *)
 
@@ -77,6 +80,9 @@ let assignment_operator_syntax =
 
 let not_syntax =
   make_token_syntax TokenKind.Exclamation
+
+let identical_syntax =
+  make_token_syntax TokenKind.EqualEqual
 
 let not_identical_syntax =
   make_token_syntax TokenKind.ExclamationEqualEqual
@@ -181,12 +187,14 @@ let member_selection_syntax =
 let this_syntax =
   make_variable_syntax "$this"
 
+let unset_syntax =
+  make_name_syntax "unset"
+
 let exception_type_syntax =
   make_name_syntax "Exception"
 
 let constructor_member_name =
   "__construct"
-
 
 (* Syntax helper functions *)
 
@@ -279,13 +287,22 @@ let make_return_missing_statement_syntax =
 let make_throw_statement_syntax expression_syntax =
   make_throw_statement throw_keyword_syntax expression_syntax semicolon_syntax
 
+let make_assignment_expression_syntax left assignment_expression_syntax =
+  make_binary_expression
+    left
+    assignment_operator_syntax
+    assignment_expression_syntax
+
+let make_unary_not_syntax expr =
+  make_prefix_unary_expression not_syntax expr
+
 let make_assignment_syntax_variable left assignment_expression_syntax =
   let assignment_binary_expression =
-    make_binary_expression
-      left
-      assignment_operator_syntax
-      assignment_expression_syntax in
+    make_assignment_expression_syntax left assignment_expression_syntax in
   make_expression_statement_syntax assignment_binary_expression
+
+let make_is_null_syntax operand =
+  make_binary_expression operand identical_syntax null_syntax
 
 let make_not_null_syntax operand =
   make_binary_expression operand not_identical_syntax null_syntax
@@ -314,6 +331,11 @@ let make_function_call_expression_syntax receiver_syntax argument_list =
     argument_list_syntax
     right_paren_syntax
 
+let make_function_call_statement_syntax receiver_syntax argument_list =
+  let function_call_expression =
+    make_function_call_expression_syntax receiver_syntax argument_list in
+  make_expression_statement function_call_expression semicolon_syntax
+
 let make_static_function_call_expression_syntax
     receiver_syntax
     member_name
@@ -336,6 +358,14 @@ let make_construct_parent_syntax argument_list =
       constructor_member_name
       argument_list in
   make_expression_statement_syntax expression_syntax
+
+let make_conditional_expression_syntax test consequence alternate =
+  make_conditional_expression
+    test
+    (make_token_syntax TokenKind.Question)
+    consequence
+    (make_token_syntax TokenKind.Colon)
+    alternate
 
 let make_member_selection_expression_syntax receiver_syntax member_syntax =
   make_member_selection_expression
@@ -477,7 +507,14 @@ let make_property_declaration_syntax type_syntax declaration_syntax =
     declaration_syntax
     semicolon_syntax
 
-let make_if_syntax condition_syntax true_statements =
+let make_if_else_syntax condition_syntax true_statements false_statements =
+  let else_clause =
+    match false_statements with
+    | [] ->
+      make_missing ()
+    | l ->
+      make_else_clause else_keyword_syntax (make_compound_statement_syntax l)
+  in
   make_if_statement
     if_keyword_syntax
     left_paren_syntax
@@ -485,7 +522,10 @@ let make_if_syntax condition_syntax true_statements =
     right_paren_syntax
     (make_compound_statement_syntax true_statements)
     (make_missing ())
-    (make_missing ())
+    else_clause
+
+let make_if_syntax condition_syntax true_statements =
+  make_if_else_syntax condition_syntax true_statements []
 
 let make_while_syntax condition_syntax body_statements =
   make_while_statement
@@ -675,6 +715,9 @@ let make_coroutine_result_data_variable index =
 let make_coroutine_result_data_member_name_syntax index =
   make_name_syntax (make_coroutine_result_data_member_name index)
 
+let make_closure_result_data_member_name_syntax index =
+  closure_name_syntax (make_coroutine_result_data_member_name index)
+
 let coroutine_data_type_syntax =
   mixed_syntax
 
@@ -775,3 +818,40 @@ let label_name_syntax =
 let set_next_label_syntax number =
   let number = make_int_literal_syntax number in
   make_assignment_syntax_variable label_syntax number
+
+type label =
+  | StateLabel of int
+  | ErrorStateLabel
+  | LoopLabel of int
+
+let get_label_string = function
+  | StateLabel number -> Printf.sprintf "state_label_%d" number
+  | ErrorStateLabel -> "state_label_error"
+  | LoopLabel number -> Printf.sprintf "loop_label_%d" number
+
+let get_label_name label =
+  make_name_syntax (get_label_string label)
+
+let make_label_declaration_syntax label =
+  make_label_declaration_syntax (get_label_name label)
+
+let make_goto_statement_syntax label =
+  make_goto_statement_syntax (get_label_name label)
+
+let make_if_statement_syntax if_stmt =
+  make_syntax (IfStatement if_stmt)
+
+let make_switch_statement_syntax switch_stmt =
+  make_syntax (SwitchStatement switch_stmt)
+
+let make_foreach_statement_syntax foreach_stmt =
+  make_syntax (ForeachStatement foreach_stmt)
+
+let make_echo_statement_syntax echo_stmt =
+  make_syntax (EchoStatement echo_stmt)
+
+let make_unset_statement_syntax unset_stmt =
+  make_syntax (UnsetStatement unset_stmt)
+
+let boolval_syntax =
+  make_name_syntax "boolval"

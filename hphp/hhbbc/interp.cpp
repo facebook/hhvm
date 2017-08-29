@@ -1018,6 +1018,22 @@ void group(ISS& env, const bc::Dup& dup,
   impl(env, dup, istype, jmp);
 }
 
+// If we duplicate a value, do an instanceof check and Jmp based on
+// that result, we can narrow the type of the top of the stack.
+template<class JmpOp>
+void group(ISS& env, const bc::Dup& dup,
+           const bc::InstanceOfD& inst, const JmpOp& jmp) {
+  auto bail = [&] { impl(env, dup, inst, jmp); };
+
+  if (interface_supports_non_objects(inst.str1)) return bail();
+  auto const rcls = env.index.resolve_class(env.ctx, inst.str1);
+  if (!rcls) return bail();
+
+  auto const instTy = subObj(*rcls);
+  auto const obj = popC(env);
+  typeTestPropagate(env, obj, instTy, obj, jmp);
+}
+
 // If we do an IsUninit check and then Jmp based on the check, one branch will
 // be the original type minus the Uninit, and the other will be
 // Uninit. (IsUninit does not pop the value).
@@ -3176,6 +3192,15 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
         return group(env, it, it[0].Dup, it[1].IsTypeC, it[2].JmpZ);
       case Op::JmpNZ:
         return group(env, it, it[0].Dup, it[1].IsTypeC, it[2].JmpNZ);
+      default: break;
+      }
+      break;
+    case Op::InstanceOfD:
+      switch (o3) {
+      case Op::JmpZ:
+        return group(env, it, it[0].Dup, it[1].InstanceOfD, it[2].JmpZ);
+      case Op::JmpNZ:
+        return group(env, it, it[0].Dup, it[1].InstanceOfD, it[2].JmpNZ);
       default: break;
       }
       break;

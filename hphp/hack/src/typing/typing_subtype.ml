@@ -509,7 +509,9 @@ and sub_type env ty_sub ty_super =
 *)
 and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
-    [Typing_log.Log_sub ("sub_type_with_uenv",
+    [Typing_log.Log_sub (Printf.sprintf
+        "sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
+        uenv_sub.TUEnv.unwrappedToption uenv_super.TUEnv.unwrappedToption,
       [Typing_log.Log_type ("ty_sub", ty_sub);
        Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super =
@@ -523,8 +525,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
-        Unify.unify_unwrapped env uenv_super.TUEnv.non_null ty_super
-                                  uenv_sub.TUEnv.non_null ty_sub in
+        Unify.unify_unwrapped env uenv_super.TUEnv.unwrappedToption ty_super
+                                  uenv_sub.TUEnv.unwrappedToption ty_sub in
       env
 (****************************************************************************)
 (* ### Begin Tunresolved madness ###
@@ -553,8 +555,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
         Unify.unify_unwrapped
-          env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
-              ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
+          env ~unwrappedToption1:uenv_super.TUEnv.unwrappedToption ty_super
+              ~unwrappedToption2:uenv_sub.TUEnv.unwrappedToption ty_sub in
       env
   | (_, Tunresolved _), (_, Tany) ->
       (* This branch is necessary in the following case:
@@ -567,8 +569,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
        * type.
        *)
     fst (Unify.unify_unwrapped
-        env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
-            ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
+        env ~unwrappedToption1:uenv_super.TUEnv.unwrappedToption ty_super
+            ~unwrappedToption2:uenv_sub.TUEnv.unwrappedToption ty_sub)
 
     (* If the subtype is a type variable bound to an empty unresolved, record
      * this in the todo list to be checked later. But make sure that we wrap
@@ -831,7 +833,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
         sub_type env ty_sub ty_super
       end env r fields_sub
-  | _, (_, Toption ty_super) when uenv_super.TUEnv.non_null ->
+  | _, (_, Toption ty_super) when uenv_super.TUEnv.unwrappedToption ->
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
   (* Subtype is generic parameter
@@ -842,22 +844,33 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tabstract (AKgeneric _, _)), _ ->
     sub_generic_params SSet.empty env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (_, Toption ty_sub), _ when uenv_sub.TUEnv.non_null ->
-    sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+  | (_, Toption arg_ty_sub), _ when uenv_sub.TUEnv.unwrappedToption ->
+    sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, ty_super)
 
-  | (_, Toption ty_sub), (_, Toption ty_super) ->
+  | (_, Toption arg_ty_sub), (_, Toption arg_ty_super) ->
+    let uenv_sub = {
+      TUEnv.unwrappedToption = true;
+      TUEnv.this_ty = uenv_sub.TUEnv.this_ty;
+    } in
+    let env, earg_ty_sub = Env.expand_type env arg_ty_sub in
+    begin match arg_ty_sub, earg_ty_sub with
+      (* special case for ? (v:=Tunresolved ...) <: ? t
+       * because it's possible to substitute v with another nullable.
+       *)
+    | (_, Tvar _), (_, Tunresolved _) ->
+      sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, ty_super)
+
+    | _, _ ->
       let uenv_super = {
-        TUEnv.non_null = true;
+        TUEnv.unwrappedToption = true;
         TUEnv.this_ty = uenv_super.TUEnv.this_ty;
       } in
-      let uenv_sub = {
-        TUEnv.non_null = true;
-        TUEnv.this_ty = uenv_sub.TUEnv.this_ty;
-      } in
-      sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
+      sub_type_with_uenv env (uenv_sub, arg_ty_sub) (uenv_super, arg_ty_super)
+    end
+
   | _, (_, Toption ty_opt) ->
       let uenv_super = {
-        TUEnv.non_null = true;
+        TUEnv.unwrappedToption = true;
         TUEnv.this_ty = uenv_super.TUEnv.this_ty;
       } in
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_opt)
@@ -1060,7 +1073,7 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
         Errors.try_
           (fun () ->
           let uenv_super = {
-            TUEnv.non_null = true;
+            TUEnv.unwrappedToption = true;
             TUEnv.this_ty = uenv_super.TUEnv.this_ty;
           } in
           sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super))

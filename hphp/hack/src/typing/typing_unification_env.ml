@@ -16,10 +16,10 @@
  * get stuck in a loop with Tvar, mapping across Tunresolved, dealing with "as"
  * constraints, etc. *)
 type uenv = {
-  (* The type has already been proved to be non-null, and we should drop any
+  (* We have gone under a Toption, so we should drop any
    * further Toption we see. This can happen with types which are
    * Toption[Tunresolved[Toption]] or similar. *)
-  non_null: bool;
+  unwrappedToption: bool;
 
   (* The first expression dependent type we've seen while subtyping. This is
    * used in Typing_subtype to properly handle the 'this' type for inheritance.
@@ -28,7 +28,7 @@ type uenv = {
 
 }
 
-let empty = { non_null = false; this_ty = None; }
+let empty = { unwrappedToption = false; this_ty = None; }
 
 let update_this_if_unset uenv ty =
   match uenv.this_ty with

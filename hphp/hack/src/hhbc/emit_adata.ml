@@ -103,6 +103,11 @@ let get_array_identifier tv =
   | Some id ->
     id
 
+let reset () =
+  array_identifier_counter := 0;
+  adata := [];
+  array_identifier_map := TVMap.empty
+
 let rewrite_typed_value tv =
   ILitConst (
   match tv with

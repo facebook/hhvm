@@ -94,6 +94,7 @@ let emit_fatal_program ~ignore_message op pos message =
 
 let from_ast is_hh_file ast =
   try
+    Emit_adata.reset ();
     Emit_env.set_is_hh_file is_hh_file;
     (* Convert closures to top-level classes;
      * also hoist inner classes and functions *)

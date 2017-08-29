@@ -1561,6 +1561,12 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
     match syntax node with
     | CompoundStatement x ->
       handle_compound_statement x;
+    | XHPExpression _ ->
+      WithRule (Rule.Parental, Concat [
+        Space;
+        Split;
+        Nest [t node];
+      ])
     | _ ->
       Concat [
         Space;

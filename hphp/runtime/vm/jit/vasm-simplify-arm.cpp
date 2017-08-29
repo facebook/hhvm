@@ -101,18 +101,16 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
   return if_inst<Vinstr::lea>(env, b, i + 1, [&] (const lea& ea) {
-    // ldimmq{s, tmp}; lea{tmp, d} -> subqi{s, d}
+    // ldimmq{s, index}; lea{base[index], d} -> lea{base[s],d}
     if (!(env.use_counts[inst.d] == 1 &&
-          inst.s.q() <= -1  &&
+          inst.s.q() <= 4095  &&
           inst.s.q() >= -4095 &&
           inst.d == ea.s.index &&
           ea.s.disp == 0 &&
           ea.s.base.isValid())) return false;
 
     return simplify_impl(env, b, i, [&] (Vout& v) {
-      // eXtend ea - lowerVptr() too conservative.
-      Vptr xea{ea.s.base, inst.s.l()};
-      v << lea{xea, ea.d};
+      v << lea{ea.s.base[inst.s.l()], ea.d};
       return 2;
     });
   });

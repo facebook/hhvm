@@ -209,6 +209,7 @@ let error_tests =
     "test_misspelling_recovery";
     "test_misspelling_recovery2";
     "test_group_use_errors";
+    "test_abstract_initializers";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

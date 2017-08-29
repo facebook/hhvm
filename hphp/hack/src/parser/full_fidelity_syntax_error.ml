@@ -187,3 +187,5 @@ let error2047 visibility_modifier = "Methods inside of interfaces may not be " ^
   "marked '" ^ visibility_modifier ^ "'; only 'public' visibility is allowed."
 let error2048 = "Expected group use prefix to end with '\\'"
 let error2049 = "A namespace use clause may not specify the kind here."
+let error2050 = "A concrete constant declaration must have an initializer."
+let error2051 = "An abstract constant declaration must not have an initializer."

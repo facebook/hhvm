@@ -572,6 +572,43 @@ let is_invalid_list_expression le_node parents =
   | _ :: _ :: p3 :: _ when is_list_expression p3 -> false
   | _ -> true (* All other deployments of list_expression are invalid *)
 
+(* Given a node, checks if it is a concrete ConstDeclaration *)
+let is_concrete_const declaration =
+  match syntax declaration with
+  | ConstDeclaration x -> is_missing x.const_abstract
+  | _ -> false
+
+(* Given a node, checks if it is a abstract ConstDeclaration *)
+let is_abstract_const declaration =
+  match syntax declaration with
+  | ConstDeclaration x -> not (is_missing x.const_abstract)
+  | _ -> false
+
+(* Given a ConstDeclarator node, test whether it is concrete, but has no
+   initializer. *)
+let concrete_no_initializer cd_node parents =
+  let is_concrete =
+    match parents with
+    | _ :: _ :: p3 :: _ when is_concrete_const p3 -> true
+    | _ -> false
+    in
+  let has_no_initializer =
+    is_missing cd_node.constant_declarator_initializer in
+  is_concrete && has_no_initializer
+
+(* Given a ConstDeclarator node, test whether it is abstract, but has an
+   initializer. *)
+let abstract_with_initializer cd_node parents =
+  let is_abstract =
+    match parents with
+    | _ :: _ :: p3 :: _ when is_abstract_const p3 -> true
+    | _ -> false
+    in
+  let has_initializer =
+    not (is_missing cd_node.constant_declarator_initializer) in
+  is_abstract && has_initializer
+
+
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
@@ -802,7 +839,7 @@ let type_errors node parents is_strict =
   match syntax node with
   | SimpleTypeSpecifier t ->
     let acc = [ ] in
-    produce_error acc (type_contains_array_in_strict is_strict)
+      produce_error acc (type_contains_array_in_strict is_strict)
       t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> [ ]
 
@@ -837,6 +874,19 @@ let group_use_errors node =
         SyntaxError.error2048 prefix
   | _ -> [ ]
 
+let const_decl_errors node parents =
+  match syntax node with
+  | ConstantDeclarator cd ->
+    let errors = [ ] in
+    let errors =
+      produce_error_parents errors concrete_no_initializer cd parents
+      SyntaxError.error2050 cd.constant_declarator_initializer in
+    let errors =
+      produce_error_parents errors abstract_with_initializer cd parents
+      SyntaxError.error2051 cd.constant_declarator_initializer in
+    errors
+  | _ -> [ ]
+
 let find_syntax_errors node is_strict is_hack =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -851,10 +901,11 @@ let find_syntax_errors node is_strict is_hack =
     let type_errors = type_errors node parents is_strict in
     let alias_errors = alias_errors node in
     let group_use_errors = group_use_errors node in
+    let const_decl_errors = const_decl_errors node parents in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
       expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
-      group_use_errors in
+      group_use_errors @ const_decl_errors in
     { errors } in
   let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
   List.sort SyntaxError.compare acc.errors

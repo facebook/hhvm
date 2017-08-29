@@ -1081,6 +1081,9 @@ module WithExpressionAndStatementAndTypeParser
        Note that if this logic is changed, it should be changed in
        is_type_in_const above as well.
     *)
+    (* This permits abstract variables to have an initializer, and vice-versa.
+       This is deliberate, and those errors will be detected after the syntax
+       tree is created. *)
     let (parser, const_name) = require_name_allow_keywords parser in
     let (parser, initializer_) = parse_simple_initializer_opt parser in
     (parser, make_constant_declarator const_name initializer_)

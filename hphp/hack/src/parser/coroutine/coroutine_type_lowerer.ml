@@ -29,7 +29,7 @@ let is_void node =
   | _ -> false
 
 let rewrite_return_type return_type =
-  if is_missing return_type then mixed_type
+  if is_missing return_type then mixed_syntax
   else if is_void return_type then unit_type_syntax
   else return_type
 

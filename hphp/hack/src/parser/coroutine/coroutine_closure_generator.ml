@@ -96,20 +96,25 @@ let generate_closure_body
  * If the provided methodish declaration is for a coroutine, rewrites the
  * declaration header and the function body into a desugared coroutine
  * implementation.
+ *
+ * Returns None if no closure needs to be generated for the function. For
+ * example, if the function is abstract and does not have an implementation,
+ * then it is not meaningful to generate a closure.
  *)
 let generate_coroutine_closure
     context
     body
     function_type
     state_machine_data =
-  if is_missing body then
-    body
-  else
-    make_classish_declaration_syntax
-      (make_closure_classname context)
-      (make_closure_type_parameters context)
-      [ make_closure_base_type_syntax function_type ]
-      (generate_closure_body
-        context
-        function_type
-        state_machine_data)
+  Option.some_if
+    (not @@ is_missing body)
+    (
+      make_classish_declaration_syntax
+        (make_closure_classname context)
+        (make_closure_type_parameters context)
+        [ make_closure_base_type_syntax function_type ]
+        (generate_closure_body
+          context
+          function_type
+          state_machine_data)
+    )

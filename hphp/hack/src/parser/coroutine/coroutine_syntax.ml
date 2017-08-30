@@ -38,6 +38,11 @@ let make_name_syntax text =
 let make_variable_syntax text =
   make_token_syntax TokenKind.Variable ~text
 
+let make_variable_expression_syntax text =
+  text
+    |> make_variable_syntax
+    |> make_variable_expression
+
 let make_suspend_syntax operand =
   let token = make_token_syntax TokenKind.Suspend in
   make_prefix_unary_expression token operand
@@ -94,9 +99,7 @@ let nullable_syntax =
 
 let mixed_syntax =
   make_token_syntax TokenKind.Mixed
-
-let mixed_type =
-  make_simple_type_specifier mixed_syntax
+    |> make_simple_type_specifier
 
 let global_syntax =
   make_name_syntax "Global"
@@ -110,11 +113,15 @@ let unit_type_syntax =
 let int_syntax =
   make_token_syntax TokenKind.Int
 
+let minus_syntax =
+  make_token_syntax TokenKind.Minus
+
 let void_syntax =
   make_token_syntax TokenKind.Void
 
 let null_syntax =
   make_token_syntax TokenKind.NullLiteral
+    |> make_literal_expression
 
 let true_expression_syntax =
   make_token_syntax TokenKind.BooleanLiteral ~text:"true"
@@ -187,13 +194,14 @@ let member_selection_syntax =
   make_token_syntax TokenKind.MinusGreaterThan
 
 let this_syntax =
-  make_variable_syntax "$this"
+  make_variable_expression_syntax "$this"
 
 let unset_syntax =
   make_name_syntax "unset"
 
 let exception_type_syntax =
   make_name_syntax "Exception"
+    |> make_simple_type_specifier
 
 let constructor_member_name =
   "__construct"
@@ -218,6 +226,11 @@ let get_list_item node =
   | ListItem { list_item; _; } -> list_item
   | _ -> failwith "get_list_item: Was not a ListItem"
 
+let get_type_parameter node =
+  match syntax node with
+  | TypeParameter type_parameter -> type_parameter
+  | _ -> failwith "get_type_parameter: Was not a TypeParameter"
+
 let get_type_parameter_list node =
   match syntax node with
   | TypeParameters { type_parameters_parameters; _; } ->
@@ -226,6 +239,13 @@ let get_type_parameter_list node =
         |> Core_list.map ~f:get_list_item
   | Missing -> []
   | _ -> failwith "get_type_parameter_list: Was not a TypeParameters"
+
+let get_type_arguments node =
+  node
+    |> get_type_parameter_list
+    |> Core_list.map ~f:get_type_parameter
+    |> Core_list.map
+      ~f:(fun { type_name; _; } -> make_simple_type_specifier type_name)
 
 let is_static_method { methodish_modifiers; _; } =
   methodish_modifiers
@@ -255,9 +275,16 @@ let make_string_literal_syntax string_literal =
       TokenKind.DoubleQuotedStringLiteral
       ~text:(Printf.sprintf "\"%s\"" string_literal))
 
-let make_int_literal_syntax value =
-  make_literal_expression
-    (make_token_syntax TokenKind.DecimalLiteral ~text:(string_of_int value))
+let rec make_int_literal_syntax value =
+  if value < 0 then
+    (* Negative values are parsed as the positive numeric value, wrapped in a
+       unary negation expression. *)
+    make_prefix_unary_expression
+      minus_syntax
+      (make_int_literal_syntax (abs value))
+  else
+    make_literal_expression
+      (make_token_syntax TokenKind.DecimalLiteral ~text:(string_of_int value))
 
 let make_qualified_name_syntax name =
   make_qualified_name_expression (make_name_syntax name)
@@ -311,19 +338,9 @@ let make_not_null_syntax operand =
 
 let make_assignment_syntax receiver_variable assignment_expression_syntax =
   let receiver_variable_syntax =
-    make_variable_syntax receiver_variable in
+    make_variable_expression_syntax receiver_variable in
   make_assignment_syntax_variable
     receiver_variable_syntax assignment_expression_syntax
-
-let make_object_creation_expression_syntax classname arguments =
-  let classname_syntax = make_name_syntax classname in
-  let arguments_syntax = make_delimited_list comma_syntax arguments in
-  make_object_creation_expression
-    new_keyword_syntax
-    classname_syntax
-    left_paren_syntax
-    arguments_syntax
-    right_paren_syntax
 
 let make_function_call_expression_syntax receiver_syntax argument_list =
   let argument_list_syntax = make_delimited_list comma_syntax argument_list in
@@ -388,6 +405,15 @@ let make_parameter_declaration_syntax
     parameter_variable_syntax
     (* default value *)  (make_missing ())
 
+let make_type_arguments_syntax = function
+  | [] ->
+      make_missing ()
+  | type_arguments_list ->
+      make_type_arguments
+        left_angle_syntax
+        (make_delimited_list comma_syntax type_arguments_list)
+        right_angle_syntax
+
 let make_type_parameters_syntax type_parameter_list =
   match type_parameter_list with
   | [] ->
@@ -400,12 +426,22 @@ let make_type_parameters_syntax type_parameter_list =
 
 let make_type_specifier_syntax classname type_parameter_list =
   let classname_syntax = make_name_syntax classname in
-  let type_parameters_syntax =
-    make_type_parameters_syntax type_parameter_list in
-  if is_missing type_parameters_syntax then
+  let type_arguments_syntax =
+    make_type_arguments_syntax type_parameter_list in
+  if is_missing type_arguments_syntax then
     make_simple_type_specifier classname_syntax
   else
-    make_generic_type_specifier classname_syntax type_parameters_syntax
+    make_generic_type_specifier classname_syntax type_arguments_syntax
+
+let make_object_creation_expression_syntax classname arguments =
+  let type_specifier_syntax = make_type_specifier_syntax classname [] in
+  let arguments_syntax = make_delimited_list comma_syntax arguments in
+  make_object_creation_expression
+    new_keyword_syntax
+    type_specifier_syntax
+    left_paren_syntax
+    arguments_syntax
+    right_paren_syntax
 
 let make_functional_type_syntax argument_types return_type_syntax =
   let argument_types_syntax = make_delimited_list comma_syntax argument_types in
@@ -429,6 +465,11 @@ let make_classish_declaration_syntax
   let classname_syntax = make_name_syntax classname in
   let extends_list_syntax =
     make_delimited_list comma_syntax extends_list in
+  let classish_body =
+    make_classish_body
+      left_brace_syntax
+      (make_list classish_body)
+      right_brace_syntax in
   make_classish_declaration
     (* classish_attribute *) (make_missing ())
     (* classish_modifiers *) (make_missing ())
@@ -442,7 +483,7 @@ let make_classish_declaration_syntax
     extends_list_syntax
     (* classish_implements_keyword *) (make_missing ())
     (* classish_implements_list *) (make_missing ())
-    (make_compound_statement_syntax classish_body)
+    classish_body
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
 let make_methodish_declaration_with_body_syntax
@@ -504,9 +545,9 @@ let make_constructor_decl_header_syntax name parameter_list =
 
 let make_property_declaration_syntax type_syntax declaration_syntax =
   make_property_declaration
-    (make_list [ public_syntax ])
+    (make_list [ public_syntax; ])
     type_syntax
-    declaration_syntax
+    (make_delimited_list comma_syntax [ declaration_syntax; ])
     semicolon_syntax
 
 let make_if_else_syntax condition_syntax true_statements false_statements =
@@ -582,7 +623,7 @@ let continuation_variable =
   "$coroutineContinuation_generated"
 
 let continuation_variable_syntax =
-  make_variable_syntax continuation_variable
+  make_variable_expression_syntax continuation_variable
 
 let make_closure_base_type_syntax function_type =
   make_type_specifier_syntax "ClosureBase" [ function_type; ]
@@ -656,20 +697,28 @@ let make_closure_type_parameters context =
   (get_type_parameter_list classish_type_parameters) @
     (get_type_parameter_list function_type_parameter_list)
 
+let make_closure_type_arguments context =
+  let classish_type_parameters =
+    context.Coroutine_context.classish_type_parameters in
+  let function_type_parameter_list =
+    context.Coroutine_context.function_type_parameter_list in
+  (get_type_arguments classish_type_parameters) @
+    (get_type_arguments function_type_parameter_list)
+
 (*
     ClassName_FunctionName_GeneratedClosure<TClass, TFunc>
 *)
 let make_closure_type_syntax context =
   make_type_specifier_syntax
     (make_closure_classname context)
-    (make_closure_type_parameters context)
+    (make_closure_type_arguments context)
 
 let closure_variable =
   "$closure"
 
 (* $closure *)
 let closure_variable_syntax =
-  make_variable_syntax closure_variable
+  make_variable_expression_syntax closure_variable
 
 (* $closure->name *)
 let closure_name_syntax name =
@@ -700,13 +749,13 @@ let coroutine_data_variable =
   "$coroutineData"
 
 let coroutine_data_variable_syntax =
-  make_variable_syntax coroutine_data_variable
+  make_variable_expression_syntax coroutine_data_variable
 
 let coroutine_result_variable =
   "$coroutineResult"
 
 let coroutine_result_variable_syntax =
-  make_variable_syntax coroutine_result_variable
+  make_variable_expression_syntax coroutine_result_variable
 
 let make_coroutine_result_data_member_name index =
   Printf.sprintf "coroutineResultData%d" index
@@ -732,7 +781,7 @@ let exception_variable =
   "$exception_generated"
 
 let exception_variable_syntax =
-  make_variable_syntax exception_variable
+  make_variable_expression_syntax exception_variable
 
 let nullable_exception_type_syntax =
   make_nullable_type_specifier_syntax exception_type_syntax
@@ -767,7 +816,7 @@ let state_machine_variable_name =
   "$" ^ state_machine_member_name
 
 let state_machine_variable_name_syntax =
-  make_variable_syntax state_machine_variable_name
+  make_variable_expression_syntax state_machine_variable_name
 
 let make_state_machine_parameter_syntax context function_type =
   let state_machine_type_syntax =
@@ -856,4 +905,4 @@ let make_unset_statement_syntax unset_stmt =
   make_syntax (UnsetStatement unset_stmt)
 
 let boolval_syntax =
-  make_name_syntax "boolval"
+  make_qualified_name_syntax "boolval"

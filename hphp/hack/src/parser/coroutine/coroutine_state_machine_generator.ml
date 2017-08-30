@@ -115,14 +115,12 @@ let copy_in_syntax variable =
   let field_name = String_utils.lstrip variable "$" in
   make_assignment_syntax_variable
     (closure_name_syntax field_name)
-    (make_variable_syntax variable)
+    (make_variable_expression_syntax variable)
 
 (* $name = $closure->name *)
 let copy_out_syntax variable =
   let field_name = String_utils.lstrip variable "$" in
-  make_assignment_syntax_variable
-    (make_variable_syntax variable)
-    (closure_name_syntax field_name)
+  make_assignment_syntax variable (closure_name_syntax field_name)
 
 let add_try_finally used_locals body =
   (*TODO: if there are no used locals - just return the body ? *)
@@ -254,7 +252,7 @@ let extract_expressions_from_for_statement
     | condition_expr :: rev_control_exprs ->
       Core_list.rev_map
         ~f:make_expression_statement_from_list_item rev_control_exprs,
-      condition_expr in
+      get_list_item condition_expr in
   let end_of_loop_exprs = make_expression_statements for_end_of_loop in
   initializer_exprs, control_exprs, condition_expr, end_of_loop_exprs
 
@@ -433,11 +431,17 @@ let make_switch_section_syntax number =
   let label = make_int_case_label_syntax number in
   let statement = make_goto_statement_syntax (StateLabel number) in
   let fallthrough = make_missing() in
-  make_switch_section label statement fallthrough
+  make_switch_section
+    (make_list [ label; ])
+    (make_list [ statement; ])
+    fallthrough
 
 let default_section_syntax =
   let statement = make_goto_statement_syntax ErrorStateLabel in
-  make_switch_section default_label_syntax statement (make_missing())
+  make_switch_section
+    (make_list [ default_label_syntax; ])
+    (make_list [ statement; ])
+    (make_missing())
 
 let make_switch_sections number =
   let rec aux n acc =

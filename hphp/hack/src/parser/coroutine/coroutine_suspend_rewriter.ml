@@ -299,12 +299,23 @@ let rec might_be_spilled node parent
     false
   (* do not spill member accesses on $closure variable *)
   | MemberSelectionExpression {
-    member_object = {
-      syntax = Token ({ Token.kind = TokenKind.Variable; _; } as token);
-      _ };
-    _ }, _ ->
-    let text = Token.text token in
-    text <> closure_variable
+      member_object = {
+        syntax = VariableExpression {
+          variable_expression = {
+            syntax = Token ({
+              Token.kind = TokenKind.Variable;
+              _;
+            } as token);
+            _;
+          }
+        };
+        _;
+      };
+      _;
+    },
+    _ ->
+      let text = Token.text token in
+      text <> closure_variable
   (* do not spill binary expressions where operands don't need spilling *)
   | BinaryExpression {
       binary_left_operand = left;
@@ -638,12 +649,15 @@ let rewrite_suspends_in_statement
           let alternative_assignment_or_return =
             assign_to_temp_or_return alternative alternative_extra_info in
 
+          let not_missing syntax = not @@ is_missing syntax in
           let then_block =
               consequence_extra_info.prefix
-            @ [ consequence_assignment_or_return ] in
+            @ [ consequence_assignment_or_return ]
+            |> Core_list.filter ~f:not_missing in
           let else_block =
               alternative_extra_info.prefix
-            @ [ alternative_assignment_or_return ] in
+            @ [ alternative_assignment_or_return ]
+            |> Core_list.filter ~f:not_missing in
           let if_statement =
             make_if_else_syntax test then_block else_block in
 

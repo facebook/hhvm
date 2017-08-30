@@ -125,7 +125,9 @@ let create_closure_invocation
       select_do_resume_member_syntax
       [ null_syntax; null_syntax; ] in
   (* return SuspendedCoroutineResult::create(); *)
-  make_return_statement_syntax call_do_resume_with_null_syntax
+  let return_statement_syntax =
+    make_return_statement_syntax call_do_resume_with_null_syntax in
+  [ return_statement_syntax; ]
 
 let rewrite_coroutine_body
     context
@@ -136,6 +138,7 @@ let rewrite_coroutine_body
   | CompoundStatement node ->
       let compound_statements = create_closure_invocation
         context function_parameter_list function_type rewritten_body in
+      let compound_statements = make_list compound_statements in
       make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
       rewritten_body

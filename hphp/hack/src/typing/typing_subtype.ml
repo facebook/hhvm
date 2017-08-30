@@ -21,6 +21,38 @@ module TUEnv = Typing_unification_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 
+(* Decomposition and subtyping for arrays *)
+let decompose_array env r ak_sub ak_super sub fail =
+  match ak_sub, ak_super with
+  (* An array of any kind is a subtype of an array of AKany *)
+  | _, AKany ->
+    env
+
+  (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
+     But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
+  | AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super ->
+    sub env ty_sub ty_super
+
+  | (AKvarray ty_sub | AKvec ty_sub),
+    (AKvarray ty_super | AKvec ty_super | AKvarray_or_darray ty_super) ->
+    sub env ty_sub ty_super
+
+  | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
+    (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)) ->
+    let env = sub env tk_sub tk_super in
+    sub env tv_sub tv_super
+
+  | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
+    (AKvarray_or_darray tv_super) ->
+    let tk_super =
+      Reason.Rvarray_or_darray_key (Reason.to_pos r),
+      Tprim Nast.Tarraykey in
+    let env = sub env tk_sub tk_super in
+    sub env tv_sub tv_super
+
+  | _ ->
+    fail env
+
 (* Given two types that we know are in a subtype relationship
  *   ty_sub <: ty_super
  * add to env.tpenv any bounds on generic type parameters that must
@@ -66,6 +98,11 @@ let rec decompose_subtype env ty_sub ty_super fail =
   (* If ?ty_sub' <: ?ty_super' then must have ty_sub <: ty_super *)
   | (_, Toption ty_sub'), (_, Toption ty_super') ->
     decompose_subtype env ty_sub' ty_super' fail
+
+  (* Arrays *)
+  | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
+    decompose_array env r ak_sub ak_super (fun env ty_sub' ty_super' ->
+      decompose_subtype env ty_sub' ty_super' fail) fail
 
   (* Singleton union *)
   | _, (_, Tunresolved [ty_super']) ->
@@ -788,30 +825,6 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
   | (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
     when xhp_child = SN.Classes.cXHPChild -> env
-  | (_, (Tarraykind _)), (_, (Tarraykind AKany)) ->
-      (* An array of any kind is a subtype of an array of Tany. *)
-      env
-  | (* varray_or_darray<ty1> <: varray_or_darray<ty2> if t1 <: ty2
-       But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
-    (
-      (_, Tarraykind (AKvarray_or_darray ty_sub)),
-      (_, Tarraykind (AKvarray_or_darray ty_super))
-      | (_, Tarraykind (AKvarray ty_sub | AKvec ty_sub)),
-        (
-          _,
-          Tarraykind (
-            AKvarray ty_super
-            | AKvec ty_super
-            | AKvarray_or_darray ty_super
-          )
-        )
-    ) ->
-      sub_type env ty_sub ty_super
-  | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
-    (_, Tarraykind (AKdarray (tk_super, tv_super) | AKmap (tk_super, tv_super)))
-    ->
-      let env = sub_type env tk_sub tk_super in
-      sub_type env tv_sub tv_super
   | (_, Tarraykind (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub))),
     (r, Tarraykind (AKvarray_or_darray tv_super)) ->
       let tk_super =
@@ -833,6 +846,10 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
         sub_type env ty_sub ty_super
       end env r fields_sub
+
+  | (r, Tarraykind ak_sub), (_, Tarraykind ak_super) ->
+    decompose_array env r ak_sub ak_super sub_type (fun env -> fst (Unify.unify env ty_super ty_sub))
+
   | _, (_, Toption ty_super) when uenv_super.TUEnv.unwrappedToption ->
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 

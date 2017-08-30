@@ -1,0 +1,30 @@
+File "is_array_bad.php", line 6, characters 12-13:
+Invalid return type (Typing[4110])
+  File "is_array_bad.php", line 4, characters 53-55:
+  This is an int
+  File "is_array_bad.php", line 5, characters 7-14:
+  It is incompatible with a value of generic type T#1 from the argument to this \is_array test
+File "is_array_bad.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+  File "is_array_bad.php", line 11, characters 41-46:
+  This is a darray
+  File "is_array_bad.php", line 12, characters 13-20:
+  It is incompatible with a varray_or_darray from the argument to this \is_array test
+File "is_array_bad.php", line 18, characters 10-11:
+Invalid return type (Typing[4110])
+  File "is_array_bad.php", line 16, characters 41-46:
+  This is a varray
+  File "is_array_bad.php", line 17, characters 13-20:
+  It is incompatible with a varray_or_darray from the argument to this \is_array test
+File "is_array_bad.php", line 23, characters 10-11:
+Invalid return type (Typing[4110])
+  File "is_array_bad.php", line 21, characters 27-32:
+  This is a varray
+  File "is_array_bad.php", line 22, characters 13-20:
+  It is incompatible with a varray_or_darray from the argument to this \is_array test
+File "is_array_bad.php", line 28, characters 10-11:
+Invalid return type (Typing[4110])
+  File "is_array_bad.php", line 26, characters 27-32:
+  This is a darray
+  File "is_array_bad.php", line 27, characters 13-20:
+  It is incompatible with a varray_or_darray from the argument to this \is_array test

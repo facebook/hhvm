@@ -21,6 +21,7 @@ let migration_flag_enabled =
 let default = GlobalOptions.default
 let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
+let experimental_isarray = GlobalOptions.tco_experimental_isarray
 let experimental_optional_shape_field =
   GlobalOptions.tco_experimental_optional_shape_field
 let experimental_darray_and_varray =

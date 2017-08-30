@@ -186,6 +186,11 @@ struct Object;
   Native::registerClassConstant<KindOfBoolean>(s_##class_name.get(), \
     makeStaticString(#const_name), bool{const_value});
 
+// Register a dynamic constant. This will not be optimized by hhbbc
+#define HHVM_RC_DYNAMIC(const_name, const_value_cell)           \
+  Native::registerConstant(makeStaticString(#const_name),       \
+                           const_value_cell, true);
+
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
@@ -559,13 +564,16 @@ inline BuiltinFunctionInfo GetBuiltinFunction(const char* fname,
 //////////////////////////////////////////////////////////////////////////////
 // Global constants
 
-typedef std::map<const StringData*,TypedValue> ConstantMap;
+typedef std::map<const StringData*,TypedValueAux> ConstantMap;
 extern ConstantMap s_constant_map;
 
 inline
-bool registerConstant(const StringData* cnsName, Cell cns) {
+bool registerConstant(const StringData* cnsName, Cell cns,
+                      bool dynamic = false) {
   assert(cellIsPlausible(cns));
-  s_constant_map[cnsName] = cns;
+  auto& dst = s_constant_map[cnsName];
+  *static_cast<Cell*>(&dst) = cns;
+  dst.dynamic() = dynamic;
   return Unit::defCns(cnsName, &cns, true);
 }
 
@@ -608,7 +616,7 @@ bool registerClassConstant(const StringData *clsName,
   assert(cellIsPlausible(cns));
   auto &cls = s_class_constant_map[clsName];
   assert(cls.find(cnsName) == cls.end());
-  cls[cnsName] = cns;
+  *static_cast<Cell*>(&cls[cnsName]) = cns;
   return true;
 }
 

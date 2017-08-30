@@ -1031,7 +1031,9 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 void add_system_constants_to_index(IndexData& index) {
   for (auto cnsPair : Native::getConstants()) {
     auto& c = index.constants[cnsPair.first];
-    auto t = cnsPair.second.m_type == KindOfUninit ?
+    auto t =
+      cnsPair.second.m_type == KindOfUninit ||
+      cnsPair.second.dynamic() ?
       TInitCell : from_cell(cnsPair.second);
     c.func = nullptr;
     c.type = t;

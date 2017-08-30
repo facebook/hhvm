@@ -728,9 +728,10 @@ bool registerConstant(const StringData* cnsName,
   if (!Unit::defSystemConstantCallback(cnsName, callback)) {
     return false;
   }
-  TypedValue tv;
+  TypedValueAux tv;
   tv.m_type = KindOfUninit;
   tv.m_data.pref = reinterpret_cast<RefData*>(callback);
+  tv.dynamic() = true;
   s_constant_map[cnsName] = tv;
   return true;
 }

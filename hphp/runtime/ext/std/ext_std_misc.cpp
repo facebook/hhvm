@@ -261,10 +261,16 @@ void StandardExtension::initMisc() {
                             IniSetting::PHP_INI_PERDIR |
                             IniSetting::PHP_INI_USER);
 
-    HHVM_RC_STR(PHP_BINARY, current_executable_path());
-    HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
+    HHVM_RC_DYNAMIC(PHP_BINARY,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(current_executable_path())));
+    HHVM_RC_DYNAMIC(PHP_BINDIR,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(current_executable_directory())));
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
-    HHVM_RC_STR(PHP_SAPI, HHVM_FN(php_sapi_name()));
+    HHVM_RC_DYNAMIC(PHP_SAPI,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(HHVM_FN(php_sapi_name()))));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);

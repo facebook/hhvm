@@ -85,6 +85,8 @@ union AuxUnion {
   ConstModifiers u_constModifiers;
   // Used by InvokeResult.
   bool u_ok;
+  // Used by system constants
+  bool u_dynamic;
 };
 
 /*
@@ -140,6 +142,9 @@ struct TypedValueAux : TypedValue {
   ConstModifiers& constModifiers() {
     return m_aux.u_constModifiers;
   }
+
+  const bool& dynamic() const { return m_aux.u_dynamic; }
+        bool& dynamic()       { return m_aux.u_dynamic; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

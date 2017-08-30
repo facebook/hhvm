@@ -32,6 +32,9 @@ type t = {
 let make content =
   { text = content; offset_map = OffsetMap.make content }
 
+let empty =
+  make ""
+
 let from_file file =
   let content =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in

@@ -489,17 +489,17 @@ void first_pass(const Index& index,
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
 
   auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<Op> srcStack(state.stack.size(), Op::Nop);
+  std::vector<std::pair<Op,bool>> srcStack(state.stack.size(),
+                                           {Op::Nop, false});
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
-    auto const stateIn = state; // Peephole expects input eval state.
-    auto gen = [&,srcStack] (const Bytecode& newBC) {
+    auto gen = [&] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(ctx.func, newBC));
       if (options.Peephole) {
-        peephole.append(newBC, stateIn, srcStack);
+        peephole.append(newBC, srcStack);
       } else {
         newBCs.push_back(newBC);
       }
@@ -507,17 +507,23 @@ void first_pass(const Index& index,
 
     auto const flags = step(interp, op);
 
-    if (op.op == Op::CGetL2) {
-      srcStack.insert(srcStack.end() - 1, op.op);
-    } else {
-      FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
-      for (int i = 0; i < op.numPop(); i++) {
-        srcStack.pop_back();
+    // The peephole wants the old values of srcStack, so defer the update to the
+    // end of the loop.
+    SCOPE_EXIT {
+      if (op.op == Op::CGetL2) {
+        srcStack.emplace(srcStack.end() - 1,
+                         op.op, (state.stack.end() - 2)->type.subtypeOf(TStr));
+      } else {
+        FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
+        for (int i = 0; i < op.numPop(); i++) {
+          srcStack.pop_back();
+        }
+        for (int i = 0; i < op.numPush(); i++) {
+          srcStack.emplace_back(
+            op.op, state.stack[srcStack.size()].type.subtypeOf(TStr));
+        }
       }
-      for (int i = 0; i < op.numPush(); i++) {
-        srcStack.push_back(op.op);
-      }
-    }
+    };
 
     auto genOut = [&] (const Bytecode* op) -> Op {
       if (options.ConstantProp && flags.canConstProp) {

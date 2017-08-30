@@ -94,18 +94,16 @@ void ConcatPeephole::finalize() {
 }
 
 void ConcatPeephole::append(const Bytecode& op,
-                            const State& state,
-                            const std::vector<Op>& srcStack) {
+                            const std::vector<std::pair<Op,bool>>& srcStack) {
   FTRACE(1, "ConcatPeephole::append {}\n", m_next.show(op));
-  assert(state.stack.size() == srcStack.size());
-  int nstack = state.stack.size();
+  int nstack = srcStack.size();
 
   // Size of the stack at the previous Concat.
   int prevsz = m_working.empty() ? -1 : m_working.back().stacksz;
 
   // Squash the innermost concat stream if we consumed its concat result.
   if (nstack < prevsz - 1 || (nstack == prevsz - 1 &&
-                              srcStack[nstack - 1] != Op::Concat)) {
+                              srcStack[nstack - 1].first != Op::Concat)) {
     squash();
   }
 
@@ -114,8 +112,7 @@ void ConcatPeephole::append(const Bytecode& op,
     auto ind2 = nstack - 2;
 
     // Non-string concat; just append, squashing if this terminates a stream.
-    if (!state.stack[ind1].type.subtypeOf(TStr) ||
-        !state.stack[ind2].type.subtypeOf(TStr)) {
+    if (!srcStack[ind1].second || !srcStack[ind2].second) {
       if (nstack == prevsz) {
         squash();
       }
@@ -124,13 +121,13 @@ void ConcatPeephole::append(const Bytecode& op,
 
     // If the first concat operand is from the previous concat in the
     // stream, continue the current stream.
-    if (srcStack[ind2] == Op::Concat && nstack == prevsz) {
+    if (srcStack[ind2].first == Op::Concat && nstack == prevsz) {
       return push_back(op, true);
     }
 
     // If the second concat operand is from the previous concat in the
     // stream, continue the current stream.
-    if (srcStack[ind1] == Op::Concat && nstack == prevsz - 1) {
+    if (srcStack[ind1].first == Op::Concat && nstack == prevsz - 1) {
       m_working.back().stacksz--;
       return push_back(op, true);
     }

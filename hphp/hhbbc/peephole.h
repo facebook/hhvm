@@ -74,11 +74,10 @@ struct ConcatPeephole {
   /*
    * Register the next bytecode into the stream.
    *
-   * The State `state' is the pre-step interp state.
+   * The srcStack reflects the pre-interp state.
    */
   void append(const Bytecode& op,
-              const State& state,
-              const std::vector<Op>& srcStack);
+              const std::vector<std::pair<Op,bool>>& srcStack);
 
 private:
   /*

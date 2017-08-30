@@ -11,15 +11,14 @@ module CoroutineMethodLowerer = Coroutine_method_lowerer
 module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
 module CoroutineTypeLowerer = Coroutine_type_lowerer
-module EditableSyntax = Full_fidelity_editable_syntax
-module EditableToken = Full_fidelity_editable_token
+module Syntax = Full_fidelity_editable_positioned_syntax
 module List = Core_list
-module Rewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 module SourceText = Full_fidelity_source_text
 module SyntaxTree = Full_fidelity_syntax_tree
 
 open CoroutineSyntax
-open EditableSyntax
+open Syntax
 open Coroutine_type_lowerer
 
 (**
@@ -253,12 +252,8 @@ let rewrite_script closures root =
     | _ -> failwith "How did we get a root that is not a script?"
     end
 
-let lower_coroutines syntax_tree =
-  let root = from_tree syntax_tree in
+let lower_coroutines root =
   let ((closures, _), root) = Rewriter.parented_aggregating_rewrite_post
     lower_coroutine_functions_and_types root ([], 0) in
   root
     |> rewrite_script (List.rev closures)
-    |> text
-    |> SourceText.make
-    |> SyntaxTree.make

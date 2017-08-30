@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
-module SyntaxTree = Full_fidelity_syntax_tree
+module Syntax = Full_fidelity_editable_positioned_syntax
 
 (**
  * Transforms a full-fidelity syntax tree to generate the required constructs
@@ -20,4 +20,4 @@ module SyntaxTree = Full_fidelity_syntax_tree
  * Kotlin. You can read more about Kotlin's design and implementation details at
  * https://github.com/Kotlin/kotlin-coroutines/blob/master/kotlin-coroutines-informal.md.
  *)
-val lower_coroutines : SyntaxTree.t -> SyntaxTree.t
+val lower_coroutines : Syntax.t -> Syntax.t

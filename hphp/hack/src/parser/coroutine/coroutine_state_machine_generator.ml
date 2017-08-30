@@ -10,13 +10,13 @@
 module CoroutineClosureGenerator = Coroutine_closure_generator
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
-module EditableSyntax = Full_fidelity_editable_syntax
-module EditableToken = Full_fidelity_editable_token
-module Rewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
-module Utils = Full_fidelity_syntax_utilities.WithSyntax(EditableSyntax)
+module Syntax = Full_fidelity_editable_positioned_syntax
+module Token = Syntax.Token
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
+module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 module SuspendRewriter = Coroutine_suspend_rewriter
 
-open EditableSyntax
+open Syntax
 open CoroutineSyntax
 
 (*
@@ -101,7 +101,8 @@ let add_missing_return body =
 let all_used_locals node =
   let folder acc node =
     match syntax node with
-    | Token { EditableToken.kind = TokenKind.Variable; text; _; } ->
+    | Token ({ Token.kind = TokenKind.Variable; _; } as token) ->
+      let text = Token.text token in
       (* "$this" is treated as a local, but obviously we don't want to copy
       it in or out. *)
       if text = "$this" then acc else SSet.add text acc
@@ -318,7 +319,7 @@ let rewrite_for next_loop_label node =
   Rewriter.aggregating_rewrite_post rewrite node next_loop_label
 
 let get_token node =
-  match EditableSyntax.get_token node with
+  match Syntax.get_token node with
   | Some token -> token
   | None -> failwith "expected a token"
 
@@ -382,8 +383,7 @@ let rec rewrite_if_statement if_stmt =
       elseif_statement } ->
       let child_if_keyword = get_token elseif_keyword in
       let child_if_keyword =
-        EditableToken.with_kind child_if_keyword TokenKind.If in
-      let child_if_keyword = EditableToken.with_text child_if_keyword "if" in
+        Token.synthesize_from child_if_keyword TokenKind.If "if" in
       let child_if_keyword = make_token child_if_keyword in
       let child_if = {
         if_keyword = child_if_keyword;

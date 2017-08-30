@@ -82,6 +82,9 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let revalidated = Syntax.Validated.validate_script invalidated in
   assert (validated = revalidated); (* Idempotence *after* validation *)
   assert (script = invalidated); (* Idempotence *of* validation *)
+  let invalidated =
+    Full_fidelity_editable_positioned_syntax.from_positioned_syntax
+      invalidated in
   Lowerer.lower
     ~elaborate_namespaces:true
     ~include_line_comments:false

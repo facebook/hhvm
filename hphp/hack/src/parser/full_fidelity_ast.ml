@@ -8,20 +8,21 @@
  *
  *)
 
-module Syntax = Full_fidelity_positioned_syntax
-module SyntaxValue = Syntax.PositionedSyntaxValue
-module Token = Full_fidelity_positioned_token
+module Syntax = Full_fidelity_editable_positioned_syntax
+module SyntaxValue = Syntax.Value
+module Token = Full_fidelity_editable_positioned_token
 
-(* What we're lowering from *)
-open Syntax
-type node = Syntax.t (* Let's be more explicit *)
-(* What we're lowering to *)
-open Ast
+ (* What we're lowering from *)
+ open Syntax
+ type node = Syntax.t (* Let's be more explicit *)
+ (* What we're lowering to *)
+ open Ast
 
 module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module Trivia = Full_fidelity_positioned_trivia
 module TriviaKind = Full_fidelity_trivia_kind
+module SourceData = Full_fidelity_editable_positioned_original_source_data
 module SourceText = Full_fidelity_source_text
 open Prim_defs
 
@@ -65,6 +66,10 @@ type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
 let get_pos : node -> Pos.t = fun node ->
+  (* TODO(tingley): Position information is lowered into the AST. However, some
+     tokens or syntaxes may be synthetic. We need to add logic here to handle
+     the case for synthetic syntaxes, by ensuring that Pos.none is passed
+     through to the AST. *)
   if !(lowerer_state.ignorePos)
   then Pos.none
   else begin
@@ -76,7 +81,11 @@ let get_pos : node -> Pos.t = fun node ->
       let start_offset = start_offset node in
       if start_offset = 0 then 0 else start_offset - 1
     in
-    let end_offset = end_offset node in
+    let end_offset =
+      (*should be removed after resolving TODO above *)
+      let end_offset = end_offset node in
+      if end_offset = 0 then 0 else end_offset - 1
+    in
     let s_line, s_column = SourceText.offset_to_position text start_offset in
     let e_line, e_column = SourceText.offset_to_position text end_offset in
     let pos_start =
@@ -177,7 +186,7 @@ let as_list : node -> node list =
   | syn -> [syn]
 
 let missing =
-  let value = SyntaxValue.make SourceText.empty 0 0 0 0 in
+  let value = SyntaxValue.Synthetic in
   make Missing value
 
 
@@ -267,30 +276,33 @@ let pKinds : kind list parser = couldMap ~f:(fun node env ->
 
 let syntax_of_token : Token.t -> node = fun t ->
   let value =
-    SyntaxValue.make
-      (Token.source_text t)
-      (Token.leading_start_offset t)
-      (Token.leading_width t)
-      (Token.width t)
-      (Token.trailing_width t) in
+    SyntaxValue.from_token t in
   make (Token t) value
 
 (* TODO: Clean up string escaping *)
 let prepString2 : node list -> node list =
   let trimLeft ~n t =
     Token.(
-      { t with
-        leading_width = leading_width t + n;
-        width = width t - n;
-      }
+      with_updated_original_source_data
+        t
+        SourceData.(fun t ->
+          { t with
+            leading_width = leading_width t + n;
+            width = width t - n;
+          }
+        )
     )
   in
   let trimRight ~n t =
     Token.(
-      { t with
-        trailing_width = trailing_width t + n;
-        width = width t - n;
-      }
+      with_updated_original_source_data
+        t
+        SourceData.(fun t ->
+          { t with
+            trailing_width = trailing_width t + n;
+            width = width t - n;
+          }
+        )
     )
   in
   function
@@ -1071,8 +1083,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       in
       let combine b e =
         syntax_of_token Token.(
-          make (kind b) (source_text b) (leading_start_offset b)
-            (start_offset e - start_offset b + width e) (leading b) (trailing e)
+          concatenate b e
         )
       in
       let aggregate_tokens node =
@@ -2151,12 +2162,13 @@ let from_text
   : result =
     let open Full_fidelity_syntax_tree in
     let tree   = make source_text in
-    let tree =
+    let script = Full_fidelity_positioned_syntax.from_tree tree in
+    let script = from_positioned_syntax script in
+    let script =
       if lower_coroutines then
-        Coroutine_lowerer.lower_coroutines tree
+        Coroutine_lowerer.lower_coroutines script
       else
-        tree in
-    let script = Syntax.from_tree tree in
+        script in
     let fi_mode = if is_php tree then FileInfo.Mphp else
       let mode_string = String.trim (mode tree) in
       let mode_word =

@@ -8,8 +8,8 @@
  *
  *)
 module List = Core_list
-module Token = Full_fidelity_editable_token
-module Syntax = Full_fidelity_editable_syntax
+module Syntax = Full_fidelity_editable_positioned_syntax
+module Token = Syntax.Token
 module SyntaxKind = Full_fidelity_syntax_kind
 module Utils = Full_fidelity_syntax_utilities.WithSyntax(Syntax)
 open Syntax
@@ -119,8 +119,8 @@ let get_body node =
 let add_local acc node =
   match syntax node with
   | VariableExpression { variable_expression =
-      { syntax = Token { EditableToken.text; _}; _ } } ->
-    SSet.add text acc
+      { syntax = Token token; _ } } ->
+    SSet.add (Token.text token) acc
   | _ -> acc
 
 let local_variables acc node =
@@ -144,7 +144,8 @@ let used_non_params node =
     lambda*, that's great; we don't want to exclude them. *)
     match syntax node with
     | VariableExpression { variable_expression =
-        { syntax = Token { EditableToken.text; _}; _ } } ->
+        { syntax = Token token; _ } } ->
+      let text = Token.text token in
       (* TODO: This is very expensive and inefficient. Basically on every
       encounter of a local variable we reconstruct the set of parameters
       in scope from this parent chain. A more efficient approach would be

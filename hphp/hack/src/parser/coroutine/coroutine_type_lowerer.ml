@@ -7,8 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
- module Syntax = Full_fidelity_editable_syntax
- module Token = Full_fidelity_editable_token
+ module Syntax = Full_fidelity_editable_positioned_syntax
+ module Token = Syntax.Token
  module TokenKind = Full_fidelity_token_kind
  open Coroutine_syntax
  open Syntax

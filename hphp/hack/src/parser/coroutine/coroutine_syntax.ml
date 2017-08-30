@@ -11,24 +11,26 @@
  * Contains syntaxes used in coroutine code generation.
  *)
 
-module EditableSyntax = Full_fidelity_editable_syntax
-module EditableTrivia = Full_fidelity_editable_trivia
+module Syntax = Full_fidelity_editable_positioned_syntax
+module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
 
-open EditableSyntax
+open Syntax
 
 
 (* Common factories *)
 
 let make_syntax syntax =
-  make syntax EditableSyntaxValue.NoValue
+  (* TODO(tingley): When possible, we should synthesize syntaxes from existing
+     syntaxes, instead of minting a purely synthetic syntax. *)
+  make syntax Value.Synthetic
 
-let single_space = [EditableTrivia.make_whitespace " "]
+let single_space = " "
 
 let make_token_syntax ?text token_kind =
   let text = Option.value text ~default:(TokenKind.to_string token_kind) in
   make_syntax @@
-    Token (EditableToken.make token_kind text single_space single_space)
+    Token (Token.synthesize_new token_kind text single_space single_space)
 
 let make_name_syntax text =
   make_token_syntax TokenKind.Name ~text
@@ -232,7 +234,7 @@ let is_static_method { methodish_modifiers; _; } =
 
 let string_of_name_token node =
   match syntax node with
-  | Token { EditableToken.kind = TokenKind.Name; text; _; } -> text
+  | Token ({ Token.kind = TokenKind.Name; _; } as token) -> Token.text token
   | _ -> failwith "string_of_name_token: Was not a Name Token"
 
 

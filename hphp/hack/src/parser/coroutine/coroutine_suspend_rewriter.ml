@@ -7,12 +7,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
-module EditableSyntax = Full_fidelity_editable_syntax
-module EditableToken = Full_fidelity_editable_token
+module Syntax = Full_fidelity_editable_positioned_syntax
+module Token = Syntax.Token
 module CoroutineSyntax = Coroutine_syntax
-module Rewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
-open EditableSyntax
+open Syntax
 open CoroutineSyntax
 
 let failwithf fmt = Printf.ksprintf failwith fmt
@@ -47,7 +47,7 @@ let rec is_in_tail_position node parents =
   | { syntax = BinaryExpression {
         binary_operator = {
           syntax = Token {
-            EditableToken.kind = TokenKind.QuestionQuestion; _
+            Token.kind = TokenKind.QuestionQuestion; _
           }; _
         };
         binary_right_operand = right; _
@@ -74,7 +74,7 @@ let split_n_reverse_first_exn l n =
 type extra_node_info =
 { (* extra statements that should be executed before the
    evaluation of target node *)
-  prefix: EditableSyntax.t list;
+  prefix: Syntax.t list;
   (* node was a suspend that was rewritten into the tail call *)
   is_tail_call: bool
 }
@@ -98,7 +98,7 @@ type rewrite_suspend_result =
 { next_label: int
 ; next_temp: int
 (* expression that represents the result of 'suspend' *)
-; expression: EditableSyntax.t
+; expression: Syntax.t
 (* additional information necessary to initialize expression *)
 ; extra_info: extra_node_info }
 
@@ -276,7 +276,7 @@ let rec might_be_spilled node parent
      $a[...]  *)
   | VariableExpression {
       variable_expression = {
-        syntax = Token { EditableToken.kind = TokenKind.Variable; _ }; _ };
+        syntax = Token { Token.kind = TokenKind.Variable; _ }; _ };
       _
     },
     (
@@ -287,9 +287,10 @@ let rec might_be_spilled node parent
   (* spill variables except $this *)
   | VariableExpression {
       variable_expression = {
-        syntax = Token { EditableToken.kind = TokenKind.Variable; text; _ }; _ };
+        syntax = Token ({ Token.kind = TokenKind.Variable; _; } as token); _ };
       _
     }, _ ->
+    let text = Token.text token in
     text <> "$this"
   (* do not spill tokens, literals or qualified names *)
   | Token _, _
@@ -299,9 +300,10 @@ let rec might_be_spilled node parent
   (* do not spill member accesses on $closure variable *)
   | MemberSelectionExpression {
     member_object = {
-      syntax = Token { EditableToken.kind = TokenKind.Variable; text; _  };
+      syntax = Token ({ Token.kind = TokenKind.Variable; _; } as token);
       _ };
     _ }, _ ->
+    let text = Token.text token in
     text <> closure_variable
   (* do not spill binary expressions where operands don't need spilling *)
   | BinaryExpression {
@@ -447,7 +449,7 @@ let rewrite_short_circuit_operator
 let get_children_count n =
   match syntax n with
   | Token _ | Missing -> 0
-  | _ -> Core_list.length (EditableSyntax.children n)
+  | _ -> Core_list.length (Syntax.children n)
 
 (* rewrites an expression that contains nested suspends
    by introducing a temporary locals to preserve evaluation order.
@@ -510,7 +512,7 @@ let rewrite_suspends_in_statement
     (* convert applications of 'suspend' operators *)
     | PrefixUnaryExpression {
         prefix_unary_operator = {
-          syntax = Token { EditableToken.kind = TokenKind.Suspend; _; };
+          syntax = Token { Token.kind = TokenKind.Suspend; _; };
           _ };
         prefix_unary_operand = {
           syntax = FunctionCallExpression function_call_expression;
@@ -668,7 +670,7 @@ let rewrite_suspends_in_statement
           binary_left_operand = left;
           binary_operator = {
               syntax = Token {
-                EditableToken.kind = (
+                Token.kind = (
                   TokenKind.BarBar |
                   TokenKind.AmpersandAmpersand |
                   TokenKind.QuestionQuestion |
@@ -755,7 +757,7 @@ let rewrite_suspends_in_statement
           binary_left_operand = left;
           binary_operator = {
               syntax = Token {
-                EditableToken.kind = (
+                Token.kind = (
                   TokenKind.Equal |
                   TokenKind.PlusEqual |
                   TokenKind.MinusEqual |
@@ -801,7 +803,7 @@ let rewrite_suspends_in_statement
                 next_temp
             else
               let next_temp, children =
-                EditableSyntax.children left
+                Syntax.children left
                 |> Core_list.fold_left
                   ~init:(next_temp, [])
                   ~f:(fun (next_temp, acc) n ->
@@ -830,7 +832,7 @@ let rewrite_suspends_in_statement
                 @ right_extra_info.prefix in
 
               let left =
-                EditableSyntax.from_children (EditableSyntax.kind left) children in
+                Syntax.from_children (Syntax.kind left) children in
 
               prefix, left, next_temp
           in
@@ -883,7 +885,7 @@ let rewrite_suspends_in_statement
         in
 
         (* get a list of chidren for a current node *)
-        let children = EditableSyntax.children node in
+        let children = Syntax.children node in
 
         (* walk child nodes from right to left and check if we need to introduce
            any extra spills:
@@ -903,7 +905,7 @@ let rewrite_suspends_in_statement
           let nodes, prefixes = Core_list.unzip result in
 
           let new_node =
-            EditableSyntax.from_children (EditableSyntax.kind node) nodes in
+            Syntax.from_children (Syntax.kind node) nodes in
 
           let extra_info =
             no_tail_call_extra_info (Core_list.concat prefixes) in

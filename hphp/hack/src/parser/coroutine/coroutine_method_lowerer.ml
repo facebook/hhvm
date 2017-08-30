@@ -8,9 +8,9 @@
  *)
 
 module CoroutineSyntax = Coroutine_syntax
-module EditableSyntax = Full_fidelity_editable_syntax
+module Syntax = Full_fidelity_editable_positioned_syntax
 
-open EditableSyntax
+open Syntax
 open CoroutineSyntax
 open Coroutine_state_machine_generator
 

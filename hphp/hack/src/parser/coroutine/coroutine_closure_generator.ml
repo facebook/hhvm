@@ -10,9 +10,9 @@
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
 module CoroutineTypeLowerer = Coroutine_type_lowerer
-module EditableSyntax = Full_fidelity_editable_syntax
+module Syntax = Full_fidelity_editable_positioned_syntax
 
-open EditableSyntax
+open Syntax
 open CoroutineSyntax
 
 let generate_closure_properties { CoroutineStateMachineData.properties; _; } =

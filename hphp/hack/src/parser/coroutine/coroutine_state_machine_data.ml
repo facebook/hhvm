@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
-module EditableSyntax = Full_fidelity_editable_syntax
+module Syntax = Full_fidelity_editable_positioned_syntax
 
 (**
  * Common types shared between coroutine modules.
@@ -18,5 +18,5 @@ module EditableSyntax = Full_fidelity_editable_syntax
  *)
 type t = {
   properties: string list;
-  parameters: EditableSyntax.parameter_declaration list;
+  parameters: Syntax.parameter_declaration list;
 }

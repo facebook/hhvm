@@ -6,9 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
-module EditableSyntax = Full_fidelity_editable_syntax
+module Syntax = Full_fidelity_editable_positioned_syntax
 
 val rewrite_suspends:
-  EditableSyntax.t ->
+  Syntax.t ->
   (* (next_label * next_temp) * new_node *)
-  (int * int) * EditableSyntax.t
+  (int * int) * Syntax.t

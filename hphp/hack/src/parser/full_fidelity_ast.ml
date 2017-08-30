@@ -66,11 +66,7 @@ type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
 let get_pos : node -> Pos.t = fun node ->
-  (* TODO(tingley): Position information is lowered into the AST. However, some
-     tokens or syntaxes may be synthetic. We need to add logic here to handle
-     the case for synthetic syntaxes, by ensuring that Pos.none is passed
-     through to the AST. *)
-  if !(lowerer_state.ignorePos)
+  if !(lowerer_state.ignorePos) || (value node) = Value.Synthetic
   then Pos.none
   else begin
     let pos_file = !(lowerer_state.filePath) in

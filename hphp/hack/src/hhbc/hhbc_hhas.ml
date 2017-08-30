@@ -1393,8 +1393,7 @@ let add_typedef buf typedef =
   | None ->
     B.add_string buf ";"
 
-let add_program buf hhas_prog =
-  B.add_string buf "#starts here\n";
+let add_program_content buf hhas_prog =
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
@@ -1403,10 +1402,23 @@ let add_program buf hhas_prog =
   add_top_level buf top_level_body;
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) classes;
-  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
-  B.add_string buf "\n#ends here\n"
+  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog)
 
-let to_string hhas_prog =
+let add_program ?path buf hhas_prog =
+  match path with
+  | Some path ->
+      let path = Relative_path.to_absolute path in
+      B.add_string
+        buf
+        (Printf.sprintf "# %s starts here\n\n .filepath \"%s\";\n" path path);
+      add_program_content buf hhas_prog;
+      B.add_string buf (Printf.sprintf "\n# %s ends here\n" path)
+  | None ->
+      B.add_string buf "#starts here\n";
+      add_program_content buf hhas_prog;
+      B.add_string buf "\n#ends here\n"
+
+let to_string ?path hhas_prog =
   let buf = Buffer.create 1024 in
-  add_program buf hhas_prog;
+  add_program ?path buf hhas_prog;
   B.contents buf

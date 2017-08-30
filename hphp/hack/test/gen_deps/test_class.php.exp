@@ -1,0 +1,13 @@
+test_class.php
+In class A, File "test_class.php", line 10, characters 34-34: 
+Found type: B
+In function hint_on_shape, File "test_class.php", line 17, characters 40-40: 
+Found type: B
+In function optional_hint, File "test_class.php", line 21, characters 28-28: 
+Found type: B
+In function function_hint, File "test_class.php", line 25, characters 37-37: 
+Found type: B
+In function function_hint, File "test_class.php", line 25, characters 39-39: 
+Found type: A
+In function function_hint, File "test_class.php", line 25, characters 42-42: 
+Found type: C

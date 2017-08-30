@@ -156,7 +156,36 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_includeOnce acc = acc
   method on_requireOnce acc = acc
 
-  method on_hint acc _ = acc
+  method on_hint acc h =
+    match (snd h) with
+    | Hsoft h
+    | Hoption h ->
+      let acc = this#on_hint acc h in
+      acc
+    | Hfun (hl, _, h) ->
+      let acc = List.fold_left this#on_hint acc hl in
+      let acc = this#on_hint acc h in
+      acc
+    | Htuple hl ->
+      let acc = List.fold_left this#on_hint acc hl in
+      acc
+    | Happly (id, hl) ->
+      let acc = this#on_id acc id in
+      let acc = List.fold_left this#on_hint acc hl in
+      acc
+    | Hshape shape_info ->
+      let {si_shape_field_list; _} = shape_info in
+      let acc = List.fold_left (fun acc sf ->
+        let acc = this#on_shape_field_name acc sf.sf_name in
+        let acc = this#on_hint acc sf.sf_hint in
+        acc
+      ) acc si_shape_field_list in
+      acc
+    | Haccess (id1, id2, idl) ->
+      let acc = this#on_id acc id1 in
+      let acc = this#on_id acc id2 in
+      let acc = List.fold_left this#on_id acc idl in
+      acc
 
   method on_throw acc e =
     let acc = this#on_expr acc e in

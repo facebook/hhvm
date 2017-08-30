@@ -1083,6 +1083,13 @@ folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
   return *var.asTypedValue();
 }
 
+bool checkTypeVec(const std::vector<Type> &elems) {
+  for (auto const& t : elems) {
+    if (!is_scalar(t)) return false;
+  }
+  return true;
+}
+
 Variant keyHelper(SString key) {
   return Variant{ key, Variant::PersistentStrInit{} };
 }
@@ -1113,6 +1120,14 @@ folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
   });
   if (val && val->m_type == KindOfUninit) val.clear();
   return val;
+}
+
+template<typename Key>
+bool checkTypeMap(const ArrayLikeMap<Key> &elems) {
+  for (auto const& elm : elems) {
+    if (!is_scalar(elm.second)) return false;
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2144,71 +2159,109 @@ CompactVector<LSString> get_string_keys(const Type& t) {
   return strs;
 }
 
-folly::Optional<Cell> tv(const Type& t) {
+template<typename R>
+struct tvHelper {
+  template<DataType dt,typename... Args>
+  static R make(Args&&... args) {
+    return make_tv<dt>(std::forward<Args>(args)...);
+  }
+  template<typename Init, typename... Args>
+  static R fromMap(Args&&... args) {
+    return fromTypeMap<Init>(std::forward<Args>(args)...);
+  }
+  template<typename Init, typename... Args>
+  static R fromVec(Args&&... args) {
+    return fromTypeVec<Init>(std::forward<Args>(args)...);
+  }
+};
+
+template<>
+struct tvHelper<bool> {
+  template<DataType dt,typename... Args>
+  static bool make(Args&&... args) {
+    return true;
+  }
+  template<typename Init, typename... Args>
+  static bool fromMap(Args&&... args) {
+    return checkTypeMap(std::forward<Args>(args)...);
+  }
+  template<typename Init, typename... Args>
+  static bool fromVec(Args&&... args) {
+    return checkTypeVec(std::forward<Args>(args)...);
+  }
+};
+
+template<typename R>
+R tvImpl(const Type& t) {
   assert(t.checkInvariants());
+  using H = tvHelper<R>;
 
   switch (t.m_bits) {
-  case BUninit:      return make_tv<KindOfUninit>();
-  case BInitNull:    return make_tv<KindOfNull>();
-  case BTrue:        return make_tv<KindOfBoolean>(true);
-  case BFalse:       return make_tv<KindOfBoolean>(false);
-  case BCArrE:       /* fallthrough */
-  case BSArrE:       return make_tv<KindOfPersistentArray>(staticEmptyArray());
+  case BUninit:      return H::template make<KindOfUninit>();
+  case BInitNull:    return H::template make<KindOfNull>();
+  case BTrue:        return H::template make<KindOfBoolean>(true);
+  case BFalse:       return H::template make<KindOfBoolean>(false);
+  case BCArrE:
+  case BSArrE:
+    return H::template make<KindOfPersistentArray>(staticEmptyArray());
   case BCVecE:
   case BSVecE:
-    return make_tv<KindOfPersistentVec>(staticEmptyVecArray());
+    return H::template make<KindOfPersistentVec>(staticEmptyVecArray());
   case BCDictE:
   case BSDictE:
-    return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
+    return H::template make<KindOfPersistentDict>(staticEmptyDictArray());
   case BCKeysetE:
   case BSKeysetE:
-    return make_tv<KindOfPersistentKeyset>(staticEmptyKeysetArray());
+    return H::template make<KindOfPersistentKeyset>(staticEmptyKeysetArray());
   default:
     if (is_opt(t)) {
       break;
     }
     switch (t.m_dataTag) {
-    case DataTag::Int:    return make_tv<KindOfInt64>(t.m_data.ival);
-    case DataTag::Dbl:    return make_tv<KindOfDouble>(t.m_data.dval);
-    case DataTag::Str:    return make_tv<KindOfPersistentString>(t.m_data.sval);
+    case DataTag::Int:
+      return H::template make<KindOfInt64>(t.m_data.ival);
+    case DataTag::Dbl:
+      return H::template make<KindOfDouble>(t.m_data.dval);
+    case DataTag::Str:
+      return H::template make<KindOfPersistentString>(t.m_data.sval);
     case DataTag::ArrLikeVal:
       if ((t.m_bits & BArrN) == t.m_bits) {
-        return make_tv<KindOfPersistentArray>(
+        return H::template make<KindOfPersistentArray>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       if ((t.m_bits & BVecN) == t.m_bits) {
-        return make_tv<KindOfPersistentVec>(
+        return H::template make<KindOfPersistentVec>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       if ((t.m_bits & BDictN) == t.m_bits) {
-        return make_tv<KindOfPersistentDict>(
+        return H::template make<KindOfPersistentDict>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       if ((t.m_bits & BKeysetN) == t.m_bits) {
-        return make_tv<KindOfPersistentKeyset>(
+        return H::template make<KindOfPersistentKeyset>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       break;
     case DataTag::ArrLikeMap:
       if ((t.m_bits & BDictN) == t.m_bits) {
-        return fromTypeMap<DictInit>(t.m_data.map->map);
+        return H::template fromMap<DictInit>(t.m_data.map->map);
       } else if ((t.m_bits & BKeysetN) == t.m_bits) {
-        return fromTypeMap<KeysetInit>(t.m_data.map->map);
+        return H::template fromMap<KeysetInit>(t.m_data.map->map);
       } else if ((t.m_bits & BArrN) == t.m_bits) {
-        return fromTypeMap<MixedArrayInit>(t.m_data.map->map);
+        return H::template fromMap<MixedArrayInit>(t.m_data.map->map);
       }
       break;
     case DataTag::ArrLikePacked:
       if ((t.m_bits & BVecN) == t.m_bits) {
-        return fromTypeVec<VecArrayInit>(t.m_data.packed->elems);
+        return H::template fromVec<VecArrayInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BDictN) == t.m_bits) {
-        return fromTypeVec<DictInit>(t.m_data.packed->elems);
+        return H::template fromVec<DictInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BArrN) == t.m_bits) {
-        return fromTypeVec<PackedArrayInit>(t.m_data.packed->elems);
+        return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems);
       }
       break;
     case DataTag::RefInner:
@@ -2221,7 +2274,15 @@ folly::Optional<Cell> tv(const Type& t) {
     }
   }
 
-  return folly::none;
+  return R{};
+}
+
+folly::Optional<Cell> tv(const Type& t) {
+  return tvImpl<folly::Optional<Cell>>(t);
+}
+
+bool is_scalar(const Type& t) {
+  return tvImpl<bool>(t);
 }
 
 Type type_of_istype(IsTypeOp op) {

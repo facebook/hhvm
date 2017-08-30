@@ -377,11 +377,20 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   auto const numPop  = op.numPop();
   auto const numPush = op.numPush();
   auto const stkSize = state.stack.size();
+  constexpr auto numCells = 4;
+  Cell constVals[numCells];
 
   // All outputs of the instruction must have constant types for this
   // to be allowed.
   for (auto i = size_t{0}; i < numPush; ++i) {
-    if (!tv(state.stack[stkSize - i - 1].type)) return false;
+    auto const& ty = state.stack[stkSize - i - 1].type;
+    if (i < numCells) {
+      auto const v = tv(ty);
+      if (!v) return false;
+      constVals[i] = *v;
+    } else if (!is_scalar(ty)) {
+      return false;
+    }
   }
 
   auto const slot = visit(op, ReadClsRefSlotVisitor{});
@@ -413,8 +422,9 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   }
 
   for (auto i = size_t{0}; i < numPush; ++i) {
-    auto const v = tv(state.stack[stkSize - i - 1].type);
-    gen(gen_constant(*v));
+    auto const v = i < numCells ?
+      constVals[i] : *tv(state.stack[stkSize - i - 1].type);
+    gen(gen_constant(v));
 
     // Special case for FPass* instructions.  We just put a C on the
     // stack, so we need to get it to be an F.

@@ -480,7 +480,8 @@ private:
   friend Type opt(Type);
   friend Type unopt(Type);
   friend bool is_opt(const Type&);
-  friend folly::Optional<Cell> tv(const Type&);
+  template<typename R>
+  friend R tvImpl(const Type&);
   friend std::string show(const Type&);
   friend ArrKey disect_array_key(const Type&);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
@@ -921,6 +922,12 @@ Type objcls(const Type& t);
  * The returned Cell can only contain non-reference-counted types.
  */
 folly::Optional<Cell> tv(const Type& t);
+
+/*
+ * If the type t has a known constant value, return true.
+ * Otherwise return false.
+ */
+bool is_scalar(const Type& t);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

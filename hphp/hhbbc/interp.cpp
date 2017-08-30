@@ -1062,7 +1062,7 @@ void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
 template<class JmpOp>
 void group(ISS& env, const bc::CGetL& cgetl, const JmpOp& jmp) {
   auto const loc = derefLoc(env, cgetl.loc1);
-  if (tv(loc)) return impl(env, cgetl, jmp);
+  if (is_scalar(loc)) return impl(env, cgetl, jmp);
 
   if (!locCouldBeUninit(env, cgetl.loc1)) nothrow(env);
 
@@ -3254,20 +3254,31 @@ StepFlags interpOps(Interp& interp,
   auto const numPushed   = iter->numPush();
   interpStep(env, iter, stop);
 
-  auto outputs_constant = [&] {
+  auto fix_const_outputs = [&] {
     auto elems = &interp.state.stack.back();
-    for (auto i = size_t{0}; i < numPushed; ++i, --elems) {
-      if (!tv(elems->type)) return false;
+    constexpr auto numCells = 4;
+    Cell cells[numCells];
+
+    auto i = size_t{0};
+    while (i < numPushed) {
+      if (i < numCells) {
+        auto const v = tv(elems->type);
+        if (!v) return false;
+        cells[i] = *v;
+      } else if (!is_scalar(elems->type)) {
+        return false;
+      }
+      ++i;
+      --elems;
+    }
+    while (++elems, i--) {
+      elems->type = from_cell(i < numCells ?
+                              cells[i] : *tv(elems->type));
     }
     return true;
   };
 
-  if (options.ConstantProp && flags.canConstProp && outputs_constant()) {
-    auto elems = &interp.state.stack.back();
-    for (auto i = size_t{0}; i < numPushed; ++i, --elems) {
-      auto& ty = elems->type;
-      ty = from_cell(*tv(ty));
-    }
+  if (options.ConstantProp && flags.canConstProp && fix_const_outputs()) {
     if (flags.wasPEI) {
       FTRACE(2, "   nothrow (due to constprop)\n");
       flags.wasPEI = false;

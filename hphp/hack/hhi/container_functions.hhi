@@ -31,3 +31,18 @@ function usort<Tv>(Container<Tv> &$arg, mixed $c): bool;
 function uasort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
 function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
+
+/**
+ * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
+ */
+function dict<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
+/**
+ * Creates a `vec` from a `Traversable`, preserving order. Keys are not
+ * preserved.
+ */
+function vec<Tv>(Traversable<Tv> $arr): vec<Tv>;
+/**
+ * Create a `keyset` from a `Traversable` of strings or ints, preserving order.
+ * Keys are not preserved.
+ */
+function keyset<Tv as arraykey>(Traversable<Tv> $arr): keyset<Tv>;

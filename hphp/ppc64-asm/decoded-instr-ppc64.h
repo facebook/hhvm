@@ -38,6 +38,7 @@ struct DecInfoOffset {
 struct DecodedInstruction {
   explicit DecodedInstruction(PPC64Instr* ip, uint8_t max_size = 0)
     : m_ip(reinterpret_cast<uint8_t*>(ip))
+    , m_base(reinterpret_cast<uint8_t*>(ip))
     , m_imm(0)
     , m_dinfo(Decoder::GetDecoder().getInvalid())
     , m_size(instr_size_in_bytes)
@@ -48,6 +49,33 @@ struct DecodedInstruction {
   // 0 as @max_size means unlimited size
   explicit DecodedInstruction(uint8_t* ip, uint8_t max_size = 0)
     : m_ip(ip)
+    , m_base(ip)
+    , m_imm(0)
+    , m_dinfo(Decoder::GetDecoder().getInvalid())
+    , m_size(instr_size_in_bytes)
+    , m_max_size(max_size)
+  {
+    decode();
+  }
+
+  explicit DecodedInstruction(PPC64Instr* ip,
+                              PPC64Instr* base,
+                              uint8_t max_size = 0)
+    : m_ip(reinterpret_cast<uint8_t*>(ip))
+    , m_base(reinterpret_cast<uint8_t*>(base))
+    , m_imm(0)
+    , m_dinfo(Decoder::GetDecoder().getInvalid())
+    , m_size(instr_size_in_bytes)
+    , m_max_size(max_size)
+  {
+    decode();
+  }
+
+  explicit DecodedInstruction(uint8_t* ip,
+                             uint8_t* base,
+                             uint8_t max_size = 0)
+    : m_ip(ip)
+    , m_base(base)
     , m_imm(0)
     , m_dinfo(Decoder::GetDecoder().getInvalid())
     , m_size(instr_size_in_bytes)
@@ -130,6 +158,7 @@ private:
   bool isLimmediatePossible() const;
 
   uint8_t* m_ip;
+  uint8_t* m_base;
   int64_t m_imm;
   DecoderInfo m_dinfo;
   uint8_t m_size;

@@ -317,6 +317,10 @@ struct Assembler {
     return codeBlock.contains(addr);
   }
 
+  CodeAddress toDestAddress(CodeAddress addr) const {
+    return codeBlock.toDestAddress(addr);
+  }
+
   bool empty() const {
     return codeBlock.empty();
   }

@@ -34,8 +34,7 @@ namespace {
   use const \NS1\{c};
 }
 
-namespace foo;
-
-use \Things\{AbstractBeanFactoryFactoryController, InternXControllerManager, OtherContrivedNamespace};
-
-use \Things\AbstractBeanFactoryFactoryController, \Things\InternXControllerManager, \Things\OtherContrivedNamespace;
+namespace foo {
+  use \Things\{AbstractBeanFactoryFactoryController, InternXControllerManager, OtherContrivedNamespace};
+  use \Things\AbstractBeanFactoryFactoryController, \Things\InternXControllerManager, \Things\OtherContrivedNamespace;
+}

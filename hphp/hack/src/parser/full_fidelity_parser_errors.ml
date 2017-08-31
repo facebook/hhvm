@@ -17,8 +17,11 @@ module TokenKind = Full_fidelity_token_kind
 
 open PositionedSyntax
 
+type namespace_type = Unspecified | Bracketed | Unbracketed
+
 type accumulator = {
   errors : SyntaxError.t list;
+  namespace_type : namespace_type;
 }
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
@@ -887,6 +890,28 @@ let const_decl_errors node parents =
     errors
   | _ -> [ ]
 
+let mixed_namespace_errors node namespace_type =
+  match syntax node with
+  | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
+    let errors = if namespace_type = Unbracketed then
+        let s = start_offset namespace_left_brace in
+        let e = end_offset namespace_right_brace in
+        [ SyntaxError.make s e SyntaxError.error2052 ]
+      else [ ] in
+    let namespace_type =
+      if namespace_type = Unspecified then Bracketed else namespace_type in
+    { errors; namespace_type }
+  | NamespaceEmptyBody { namespace_semicolon; _ } ->
+    let errors = if namespace_type = Bracketed then
+        let s = start_offset namespace_semicolon in
+        let e = end_offset namespace_semicolon in
+        [ SyntaxError.make s e SyntaxError.error2052 ]
+      else [ ] in
+    let namespace_type =
+      if namespace_type = Unspecified then Unbracketed else namespace_type in
+    { errors; namespace_type }
+  | _ -> { errors = [ ]; namespace_type }
+
 let find_syntax_errors node is_strict is_hack =
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
@@ -902,10 +927,13 @@ let find_syntax_errors node is_strict is_hack =
     let alias_errors = alias_errors node in
     let group_use_errors = group_use_errors node in
     let const_decl_errors = const_decl_errors node parents in
+    let mixed_namespace_acc =
+      mixed_namespace_errors node acc.namespace_type in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
       expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
-      group_use_errors @ const_decl_errors in
-    { errors } in
-  let acc = SyntaxUtilities.parented_fold_pre folder { errors = [] } node in
+      group_use_errors @ const_decl_errors @ mixed_namespace_acc.errors in
+    { errors; namespace_type = mixed_namespace_acc.namespace_type } in
+  let acc = SyntaxUtilities.parented_fold_pre folder
+    { errors = []; namespace_type = Unspecified } node in
   List.sort SyntaxError.compare acc.errors

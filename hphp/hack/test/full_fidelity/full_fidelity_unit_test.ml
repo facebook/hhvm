@@ -210,6 +210,8 @@ let error_tests =
     "test_misspelling_recovery2";
     "test_group_use_errors";
     "test_abstract_initializers";
+    "test_mixed_bracketed_unbracketed_namespaces1";
+    "test_mixed_bracketed_unbracketed_namespaces2";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

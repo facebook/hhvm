@@ -5,7 +5,7 @@ namespace NS1 // error1038, and recover to declaration level
   interface I1 { }
   trait T1 { }
 
-namespace NS2; // no error
+namespace NS2; // error2052, cannot mix bracketed and unbracketed namespaces
 class C2 { }
 interface I2 { }
 trait T2 { }

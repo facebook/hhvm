@@ -189,3 +189,5 @@ let error2048 = "Expected group use prefix to end with '\\'"
 let error2049 = "A namespace use clause may not specify the kind here."
 let error2050 = "A concrete constant declaration must have an initializer."
 let error2051 = "An abstract constant declaration must not have an initializer."
+let error2052 = "Cannot mix bracketed namespace declarations with " ^
+  "unbracketed namespace declarations"

@@ -966,6 +966,8 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Break ->
       let parser, break_kw = assert_token parser Break in
       parser, make_yield_expression yield_kw break_kw
+    | Semicolon ->
+      parser, make_yield_expression yield_kw (make_missing ())
     | _ ->
       let parser, operand = parse_array_element_init parser in
       parser, make_yield_expression yield_kw operand

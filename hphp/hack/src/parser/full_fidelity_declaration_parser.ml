@@ -1007,10 +1007,14 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_const_or_type_const_declaration parser abstr =
     let (parser, const) = assert_token parser Const in
-    if (peek_token_kind parser) = Type
-       && (peek_token_kind ~lookahead:1 parser <> Equal) then
+    let kind1 = peek_token_kind parser in
+    let kind2 = peek_token_kind ~lookahead:1 parser in
+    match kind1, kind2 with
+    | Type, (Equal | Semicolon) ->
+      parse_const_declaration parser abstr const
+    | Type, _ when kind2 <> Equal ->
       parse_type_const_declaration parser abstr const
-    else
+    | _, _ ->
       parse_const_declaration parser abstr const
 
   and parse_property_declaration parser modifiers =

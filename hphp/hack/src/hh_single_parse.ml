@@ -158,7 +158,12 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
         exit_with Unsupported
     with Not_found -> ());
     let ffp_result = run_ffp file in
-    let ffp_sexpr = dump_sexpr ffp_result.Lowerer.ast in
+    let ffp_sexpr =
+      match ffp_result.Lowerer.ast with
+      | Ast.Stmt (Ast.Markup ((_, ""), _)) :: defs
+      | defs
+        -> dump_sexpr defs
+    in
     if ast_sexpr <> ffp_sexpr then begin
       let mkTemp (name : string) (content : string) = begin
         let ic = open_process_in (sprintf "mktemp tmp.%s.XXXXXXXX" name) in

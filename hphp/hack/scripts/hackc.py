@@ -14,15 +14,48 @@ import sys
 import time
 
 hh_single_compile = "hh_single_compile.opt"
-pool_size = 30
+pool_size = 60
 delete_generated_code = True
 total_timeout = multiprocessing.Value('i', 0)
 timeout_limit = "30s"
 list_timeout = multiprocessing.Queue()
 file_with_nyi = multiprocessing.Queue()
+sort_of_nyis = multiprocessing.Queue()
 collect_nyis = False
 quiet_mode = False
-
+nyis = {
+    "NYI: lval expression": 0,
+    "NYI: Folding": 0,
+    "NYI: Expected a literal expression in literal_from_expr": 0,
+    "NYI: collection_literal in constant folder": 0,
+    "NYI: foreach codegen does not support arbitrary lvalues yet": 0,
+    "NYI - Xhp attribute hint": 0,
+    "NYI: default value closure body": 0,
+}
+nyi_to_ignore = [
+    " NYIN",
+    "SINNYIIYHE",
+    "GNYIS",
+    " NYI ZLA",
+    " NYIS ",
+    "RNYING",
+    "ETHIOPIC SYLLABLE NYI",
+    "SUNDANESE CONSONANT SIGN PANYIKU",
+    "LEPCHA CONSONANT SIGN NYIN-DO",
+    "NUBIAN NYI",
+    "SYLLABLE NYI",
+    "RADICAL NYI",
+    "LETTER NYI",
+    "MAENYI",
+    "MBANYI",
+    "PHASE-A NYI",
+    "PHASE-B NYI",
+    "PHASE-C NYI",
+    "PHASE-D NYI",
+    "PHASE-E NYI",
+    "PHASE-F NYI",
+    "MBANYI",
+]
 
 def p(text, bypass_quiet_mode=False):
     if not quiet_mode or bypass_quiet_mode:
@@ -43,20 +76,16 @@ def run_hack(input_filename):
         total_timeout.value += 1
         list_timeout.put(input_filename)
     if collect_nyis:
-        to_ignore = [
-            "NYI: lval expression",
-            "NYI: Folding",
-            "NYI: Expected a literal expression in literal_from_expr",
-            "NYI: collection_literal in constant folder",
-            "NYI: foreach codegen does not support arbitrary lvalues yet",
-            "NYI - Xhp attribute hint",
-        ]
-        for line in [l for l in stdoutdata.split('\n') if " NYI" in l or "NYI:" in l]:
+        file_nyis = [l for l in stdoutdata.split('\n') if "NYI" in l]
+        cpt = file_nyis.count("NYI")
+        for line in file_nyis:
             found = False
-            for ti in to_ignore:
+            for ti in nyis:
                 if ti in line:
+                    cpt -= 1
+                    sort_of_nyis.put(ti)
                     found = True
-            if not found:
+            if not found and cpt > 0:
                 file_with_nyi.put(input_filename)
                 break
 
@@ -166,7 +195,12 @@ if __name__ == '__main__':
             p("\n")
         i += 1
     if collect_nyis:
-        p("nyis:\n")
+        p("known nyis:\n")
+        while not sort_of_nyis.empty():
+            nyis[sort_of_nyis.get()] += 1
+        for k, v in nyis.items():
+            p("{} {}\n".format(v, k))
+        p("new nyis:\n")
         while not file_with_nyi.empty():
             p("{}\n".format(file_with_nyi.get()))
     p("time in seconds: ")

@@ -216,7 +216,8 @@ module WithExpressionAndStatementAndTypeParser
       (* ERROR RECOVERY Plainly the name is missing. *)
       (with_error parser SyntaxError.error1004, (make_missing()))
     | _ ->
-      (with_error parser1 SyntaxError.error1004, make_token token) in
+      (* TODO: Death to PHPisms; keywords as namespace names *)
+      require_name_allow_keywords parser in
     let (parser, body) = parse_namespace_body parser in
     let result = make_namespace_declaration namespace_token name body in
     (parser, result)

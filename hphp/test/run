@@ -182,7 +182,7 @@ function hh_codegen_binary_routes() {
 
 function php7_codegen_binary_routes() {
   return array(
-    "buck"    => "/buck-out/gen/hphp/php7/php7",
+    "buck"    => "/buck-out/gen/hphp/php7/php7/php7",
   # "cmake"   => "/hphp/php7/bin"
   );
 }

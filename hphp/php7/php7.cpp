@@ -19,6 +19,7 @@
 #include "hphp/php7/zend/zend_language_scanner_defs.h"
 #include "hphp/php7/bytecode.h"
 #include "hphp/php7/hhas.h"
+#include "hphp/util/embedded-data.h"
 
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
@@ -27,11 +28,6 @@
 #include <string>
 #include <iostream>
 
-namespace HPHP { namespace php7 {
-  // TODO come up with something that actually changes
-  const static char build_id[] = "php7c";
-}}
-
 namespace {
 
 using HPHP::php7::CompilerException;
@@ -39,11 +35,26 @@ using HPHP::php7::LanguageException;
 using HPHP::php7::compile;
 using HPHP::php7::dump_asm;
 using HPHP::php7::makeFatalUnit;
-using HPHP::php7::build_id;
 
 struct Options {
   bool daemonEnabled{false};
 };
+
+
+std::string getBuildId() {
+  HPHP::embedded_data data;
+  auto constexpr unknown_version = "php7-unknown-version";
+  if (!HPHP::get_embedded_data("build_id", &data)) {
+    return unknown_version;
+  }
+
+  auto const str = HPHP::read_embedded_data(data);
+  if (str.empty()) {
+    return unknown_version;
+  }
+
+  return str;
+}
 
 static constexpr size_t read_chunk = 1024;
 static constexpr size_t allocate_chunk = 4096;
@@ -102,7 +113,7 @@ std::string runCompiler(const std::string& filename, const folly::IOBuf& buf) {
 }
 
 int runDaemon() {
-  std::cout << build_id << std::endl;
+  std::cout << getBuildId() << std::endl;
   while (true) {
     try {
       std::string filename;

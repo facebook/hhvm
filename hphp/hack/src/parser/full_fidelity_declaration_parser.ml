@@ -1374,7 +1374,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, function_token) = require_function parser in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
-      parse_function_label parser in
+      parse_function_label_opt parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, left_paren_token, parameter_list, right_paren_token) =
@@ -1400,12 +1400,15 @@ module WithExpressionAndStatementAndTypeParser
 
   (* A function label is either a function name, a __construct label, or a
   __destruct label. *)
-  and parse_function_label parser =
+  and parse_function_label_opt parser =
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
     | Construct
     | Destruct -> (parser1, make_token token)
+    | LeftParen ->
+      (* It turns out, it was just a verbose lambda; YOLO PHP *)
+      (parser, make_missing ())
     | _ ->
       (* TODO: We might have a non-reserved keyword as the name here; "empty",
       for example, is a keyword but a legal function name. What we do here is

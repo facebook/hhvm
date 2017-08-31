@@ -29,6 +29,7 @@ module WithExpressionAndDeclAndTypeParser
 
   let rec parse_statement parser =
     match peek_token_kind parser with
+    | Async
     | Function -> parse_possible_php_function parser
     | Abstract
     | Final
@@ -137,10 +138,14 @@ module WithExpressionAndDeclAndTypeParser
     TODO: Give an error for nested nominal functions in a later pass.
 
     *)
-    if peek_token_kind ~lookahead:1 parser = LeftParen then
-      parse_expression_statement parser
-    else
-      parse_php_function parser
+    let kind0 = peek_token_kind ~lookahead:0 parser in
+    let kind1 = peek_token_kind ~lookahead:1 parser in
+    match kind0, kind1 with
+    | Function, LeftParen (* Verbose-style lambda *)
+    | Async, LeftParen (* Async, compact-style lambda *)
+    | Async, LeftBrace (* Async block *)
+      -> parse_expression_statement parser
+    | _ -> parse_php_function parser
 
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)

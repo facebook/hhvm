@@ -191,6 +191,7 @@ slow/parser/async_bad_class.php
 slow/parser/async_bad_if.php
 slow/parser/async_bad_tr.php
 slow/parser/backquote.php
+slow/parser/backquote-fail.php
 slow/parser/bad_yield.php
 slow/parser/closure_return_types_both_places.php
 slow/parser/colon_colon_class.php
@@ -297,6 +298,8 @@ slow/php7_backported/scalar-types/scalar_reserved7.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_001.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_002.php
 slow/php7_backported/scalar-types/scalar_strict_declaration_placement_003.php
+slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
+slow/php7_backported/scalar-types/strict_nested.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/staticMember.php
 slow/php7_bcbreak/5/ltr_eval/complex.php

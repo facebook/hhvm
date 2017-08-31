@@ -1000,6 +1000,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
           | "true"  -> True
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
+        | Some TK.ExecutionString -> Null (* PHP Clowns *)
         | _ -> missing_syntax "literal" expr env
         )
 

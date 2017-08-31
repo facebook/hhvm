@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C1 {
   private function foo() {
     echo "C1::foo\n";

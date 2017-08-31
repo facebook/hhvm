@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c {
   public $prop = 'old value';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function breaker(&$x) {
   $x = (string)mt_rand();

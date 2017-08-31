@@ -1,4 +1,4 @@
-<?php
+<?hh
 try {
     new PDO('aoeu');
 } catch (PDOException $e) {

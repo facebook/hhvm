@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($v) {
   return (bool)$v;
@@ -84,4 +84,3 @@ function bar($i) {
 }
 
 bar(1);
-?>

@@ -1,4 +1,4 @@
-<?
+<?php
 
 function foo($a) {
   print "foo $a\n";

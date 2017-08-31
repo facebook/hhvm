@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($x, $y) {
   var_dump($x == $y);

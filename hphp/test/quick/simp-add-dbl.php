@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo1(bool $a) {
   return $a + 1.1;

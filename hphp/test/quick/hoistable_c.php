@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # Make the verify script happy.
 print "1..4\n";

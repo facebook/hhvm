@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 set_error_handler('handler');
 

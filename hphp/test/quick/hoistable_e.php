@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (!isset($g)) {
   # Make the verify script happy.

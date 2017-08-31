@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a, $b) {
   // const - const
   $a = 5;

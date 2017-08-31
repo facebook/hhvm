@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   const FOO = Y::BAR;

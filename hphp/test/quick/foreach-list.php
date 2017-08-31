@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_simple() {
   $arr = array(

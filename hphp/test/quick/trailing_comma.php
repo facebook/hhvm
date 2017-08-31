@@ -1,4 +1,4 @@
-<?php
+<?hh
 function id($x,) {return $x;}
 var_dump(id(1,));
 

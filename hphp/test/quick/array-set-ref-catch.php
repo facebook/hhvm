@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // generate a string from bits in i where 0=>a, 1=>A. This causes
 // hash collisions if the string hash is case-insensitive.

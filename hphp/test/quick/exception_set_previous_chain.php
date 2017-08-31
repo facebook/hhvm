@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $e0 = new Exception('0');
 $e1 = new Exception('1');

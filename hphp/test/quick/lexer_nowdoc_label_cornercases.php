@@ -1,4 +1,4 @@
-<?php
+<?hh
 $total_size = 0;
 $x = <<<'EOD'
 \\EOD

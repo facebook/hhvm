@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo "Test begin\n";
 function f() {

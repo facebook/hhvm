@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blah(&$val) {
   global $x;

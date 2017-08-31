@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Similar to nested_vm_exceptions, except throw intercepted functions
 // into it also.

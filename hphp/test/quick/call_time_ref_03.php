@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($a) {
   echo __FUNCTION__ . "\n";

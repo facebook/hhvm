@@ -1,4 +1,4 @@
-<?php
+<?hh
 class someClass1 {
   private function someMethod() {
     //do things

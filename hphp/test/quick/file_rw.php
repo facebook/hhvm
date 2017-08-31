@@ -1,4 +1,4 @@
-<?php
+<?hh
 $fname = tempnam(__DIR__, "data");
 unlink("$fname");
 $w = fopen("$fname", "w");

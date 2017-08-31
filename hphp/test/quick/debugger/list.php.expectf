@@ -35,7 +35,7 @@ list MyClass::myMeth
   14 (END)
 
 list 3
-   1 <?php
+   1 <?hh
    2 $h = new SplMaxHeap();
    3 $h->insert(1);
    4 

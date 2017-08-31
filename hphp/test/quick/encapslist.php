@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $a = 4.5;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $n = 10;
 $vals = array();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T {
   public static function bar(self $a1) { echo __CLASS__.
     " accepts param from subclass ".get_class($a1)."\n"; }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   X::foo();

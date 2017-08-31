@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace M {
   function call(callable $fn) { $fn(); }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   $x = array('a' => 1);
   $y = array('b' => 2);

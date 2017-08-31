@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface IA {}
 interface IB {}
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // class with __get and __set
 class A {

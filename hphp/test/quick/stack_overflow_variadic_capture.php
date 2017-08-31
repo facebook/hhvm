@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function asd($x, $y, ...$z) {
   asd($x, $y, $x + $y, $y + $x, "asd");

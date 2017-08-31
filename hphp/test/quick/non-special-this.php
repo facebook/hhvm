@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Glub {
   public function twee() {

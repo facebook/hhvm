@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class :xhp {
   public function __construct($attributes, $children, $file=null, $line=null) {

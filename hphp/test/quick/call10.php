@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C1 {
   public function __call($fn, $args) {

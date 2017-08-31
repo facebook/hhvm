@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $a = 1;
 $cl = function () use ($a) {

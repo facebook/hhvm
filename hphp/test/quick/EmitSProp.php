@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g() {
   $c::$x;

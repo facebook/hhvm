@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class HasCall {
   public function __call($name, $args) {

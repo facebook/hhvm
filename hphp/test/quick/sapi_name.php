@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $const = PHP_SAPI;
 $value_from_func = php_sapi_name();

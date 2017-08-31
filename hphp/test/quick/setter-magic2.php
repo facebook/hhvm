@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Heh {
   public function __set($k, $v) {

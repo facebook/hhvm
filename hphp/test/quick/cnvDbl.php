@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($v) {
   return (double)$v;

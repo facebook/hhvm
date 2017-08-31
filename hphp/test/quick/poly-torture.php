@@ -1,4 +1,4 @@
-<?
+<?hh
 
 trait T1 {
   function dubiousArgs($a, $b, $c, $d, $e, $f, $g, $h, $i) {

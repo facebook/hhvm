@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class F {
   public $foo;

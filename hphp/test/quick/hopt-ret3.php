@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($x) {
   return 30000000000;

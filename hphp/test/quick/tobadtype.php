@@ -1,4 +1,4 @@
-<?php ;
+<?hh ;
 
 class X {
   function not__toString() { throw new Exception('boom'); }

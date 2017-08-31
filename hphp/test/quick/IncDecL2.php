@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function postInc(&$x) {
   return $x++;

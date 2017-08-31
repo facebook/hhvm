@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bloo() {
   static $splonk = 1;

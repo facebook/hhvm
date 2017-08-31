@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(is_dir(false));
 var_dump(is_dir(true));

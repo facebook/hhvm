@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $arr = array();
 $a = $arr[123];

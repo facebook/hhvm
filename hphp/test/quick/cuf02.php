@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {  public function foo() { echo "C::foo\n"; var_dump(get_called_class()); }
   public static function bar() { echo "C::bar\n"; var_dump(get_called_class()); }
 }

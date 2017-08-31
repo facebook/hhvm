@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $g = array(1,2,3);
 function cmp($a, $b) {

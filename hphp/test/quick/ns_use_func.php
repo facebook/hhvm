@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A {
   function f() { return 'a'; }
 }

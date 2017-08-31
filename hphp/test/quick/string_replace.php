@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function replace_array_str($in) {
   $search = array('a', 'b');

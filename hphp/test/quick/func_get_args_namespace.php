@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace foo {
   function bar($a, $b) {

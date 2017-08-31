@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A5 {
   private function A5() {
   }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // test manually created array
 function main() {
   $x = null;

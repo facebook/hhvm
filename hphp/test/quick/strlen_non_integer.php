@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function none() {}
 set_error_handler('none');

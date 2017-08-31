@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($arr, $n, ...) {
   $fga = array_slice(func_get_args(), 2);

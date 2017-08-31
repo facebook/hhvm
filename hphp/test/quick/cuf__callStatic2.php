@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class my_base {
   public function __call($f, $a) {

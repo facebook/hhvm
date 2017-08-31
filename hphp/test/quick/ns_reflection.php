@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A\B;
 
 class Foo { }
@@ -16,4 +16,3 @@ var_dump($function->inNamespace());
 var_dump($function->getName());
 var_dump($function->getNamespaceName());
 var_dump($function->getShortName());
-?>

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a) {
   $sc = new SoapClient(null,
                        array('location' =>

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main($a, $i) {
   unset($a[$i]);
   $a[] = 'foo';

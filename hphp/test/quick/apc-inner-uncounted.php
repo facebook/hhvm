@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function makeNonStatic($n) {
   $s = 'foobar';

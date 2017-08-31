@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $x = true;
 

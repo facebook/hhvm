@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $hhvm = PHP_BINARY;
 $file = '/../../a/b/test.php';

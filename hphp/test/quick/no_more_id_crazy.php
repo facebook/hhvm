@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # These are all not parse errors anymore
 (print 3)[1];

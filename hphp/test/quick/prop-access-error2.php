@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   protected $x = 1;

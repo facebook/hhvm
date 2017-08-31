@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function main() {
   $x = 'hey-o';

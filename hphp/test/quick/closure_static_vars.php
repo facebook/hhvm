@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $foo = function() {
   static $a;

@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class A {
   static public $a = array(array( 12));

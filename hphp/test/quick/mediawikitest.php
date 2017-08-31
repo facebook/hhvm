@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * Test for PHP bug #50394 (PHP 5.3.x conversion to null only, not 5.2.x)
  */

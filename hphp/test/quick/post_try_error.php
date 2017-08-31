@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 try {} asdf {}

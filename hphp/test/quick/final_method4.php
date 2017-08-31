@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T {
   final static function f() {
     echo "Hello\n";

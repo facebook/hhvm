@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump( ini_get('memory_limit'));
 

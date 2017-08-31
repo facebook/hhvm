@@ -1,4 +1,4 @@
-<?php
+<?hh
 function gcd($x, $y) {
   if ($x >= $y) {
     $a = $x;

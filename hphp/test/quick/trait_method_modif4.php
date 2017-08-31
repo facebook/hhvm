@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   private function f() {
     return 'Foo';

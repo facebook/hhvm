@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   if (isset($GLOBALS['b'])) $b = 0;
   return $b;

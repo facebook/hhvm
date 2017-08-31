@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait TestTrait {
   public static function __callStatic($name, $arguments) {

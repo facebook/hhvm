@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($cls) {
   echo "__autoload $cls\n";
   if ($cls === 'B') {

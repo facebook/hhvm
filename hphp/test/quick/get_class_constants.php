@@ -1,4 +1,4 @@
-<?
+<?hh
 // Never True
 if (rand(100,101) == 2) {
     define("FOO", 1);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($pass) {
   echo "Begin f($pass)\n";
   foreach (['null','NULL','SID'] as $k) {

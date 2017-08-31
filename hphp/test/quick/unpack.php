@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // 32-bit
 var_dump(unpack("V", "\xFF\xFF\xFF\xFF"));

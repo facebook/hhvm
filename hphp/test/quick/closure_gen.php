@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function using($cgen) {
   foreach ($cgen() as $x) {

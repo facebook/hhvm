@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump(intval('1e10'));

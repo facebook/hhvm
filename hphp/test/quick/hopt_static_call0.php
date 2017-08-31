@@ -1,4 +1,4 @@
-<?php
+<?hh
 class AA {
   public $aa1 = 0;
   public static function f1() { print "Pass\n"; return 1; }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function lambda_1() {
   echo "lambda one\n";

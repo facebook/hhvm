@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test the following:
 // - Stepping over yeilds.

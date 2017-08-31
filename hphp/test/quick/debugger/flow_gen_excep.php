@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test stepping with exceptions in continuations. This is a very simple test
 // which simply confirms that exceptions flowing around continuations don't

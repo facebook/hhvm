@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public $pub = 'C::$pub';
   protected $prot = 'C::$prot';

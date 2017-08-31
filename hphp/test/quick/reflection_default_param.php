@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "--SQLite3::open--\n";
 $ro = new ReflectionClass('SQLite3');
 $mo = $ro->getMethod('open');

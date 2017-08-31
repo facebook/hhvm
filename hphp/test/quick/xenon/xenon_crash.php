@@ -1,4 +1,4 @@
-<?hh
+<?php
 
 // Testing that we don't crash due to xenon
 

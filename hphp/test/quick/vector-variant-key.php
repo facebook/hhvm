@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class asshat {
   private $prop;

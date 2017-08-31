@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
   public function __call($fn, $args) {
     var_dump($fn, $args);

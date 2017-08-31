@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(E_ALL);
 
 function __autoload($s) { echo "[load $s]"; }

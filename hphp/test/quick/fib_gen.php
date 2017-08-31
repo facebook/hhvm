@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Lazy infinite list!
 function fibonacci($first, $second) {

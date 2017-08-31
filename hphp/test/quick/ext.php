@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $date = new DateTime("now");

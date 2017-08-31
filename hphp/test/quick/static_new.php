@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public $cls = 'C';
   public function foo() {

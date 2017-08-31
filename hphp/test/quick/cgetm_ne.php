@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $asd = array("asd", array("bar","baz"));

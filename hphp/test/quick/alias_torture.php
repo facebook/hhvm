@@ -1,4 +1,4 @@
-<?
+<?php
 
 function foo() {
   global $a;

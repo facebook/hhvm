@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # bug #2088495
 function asd($x, $y) {

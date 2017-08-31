@@ -1,4 +1,4 @@
-<?php
+<?hh
 is_null();
 is_null(null);
 is_null(null, null);

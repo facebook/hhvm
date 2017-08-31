@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ci($x) {
   print "----------\nx == 0\n";

@@ -274,8 +274,10 @@ function hh_codegen_cmd($options, $config_file = null) {
   if (isset($config_file)) {
     $cmd .= ' -c "'.$config_file.'"';
   }
-  if (isset($options['hackc'])) $cmd .= ' -v Hack.Compiler.SourceMapping=1';
-  if (isset($options['hackc'])) $cmd .= ' --daemon';
+  if (isset($options['hackc'])) {
+    $cmd .= ' -vHack.Compiler.SourceMapping=1';
+    $cmd .= ' --daemon';
+  }
   return $cmd;
 }
 
@@ -520,6 +522,8 @@ function get_options($argv) {
     'hackc' => '',
     'php7' => '',
     'php7-runtime' => '',
+    'hack-only' => '',
+    'ignore-oids' => '',
   );
   $options = array();
   $files = array();
@@ -1442,7 +1446,31 @@ function run($options, $tests, $bad_test_file) {
   return 0;
 }
 
+function is_hack_file($options, $test) {
+  if (substr($test, -3) === '.hh') return true;
+
+  $file = fopen($test, 'r');
+  if ($file === false) return false;
+
+  // Skip lines that are a shebang or whitespace.
+  while (($line = fgets($file)) !== false) {
+    $line = trim($line);
+    if ($line === '' || substr($line, 0, 2) === '#!') continue;
+    if (substr($line, 0, 4) === '<?hh') return true;
+    break;
+  }
+  fclose($file);
+
+  return false;
+}
+
 function skip_test($options, $test) {
+  if (isset($options['hack-only']) &&
+      substr($test, -5) !== '.hhas' &&
+      !is_hack_file($options, $test)) {
+    return true;
+  }
+
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
     return false;
@@ -1804,6 +1832,12 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
   return array($output, $stderr);
 }
 
+function replace_object_ids($str, $replacement) {
+  return preg_replace(
+    '/(object\([a-zA-Z_\\\\]+\)#)\d+/', '\1'.$replacement, $str
+  );
+}
+
 function run_config_post($outputs, $test, $options) {
   $output = $outputs[0];
   $stderr = $outputs[1];
@@ -1849,6 +1883,11 @@ function run_config_post($outputs, $test, $options) {
   if ((!$is_tc && ($type === 'expect' || $type === 'hhvm.expect')) ||
       ($is_tc && $type === 'typechecker.expect')) {
     $wanted = trim(file_get_contents($file));
+    if (isset($options['ignore-oids'])) {
+      $output = replace_object_ids($output, 'n');
+      $wanted = replace_object_ids($wanted, 'n');
+    }
+
     if (!$repeats) {
       $passed = !strcmp($output, $wanted);
       if (!$passed) {
@@ -1860,6 +1899,9 @@ function run_config_post($outputs, $test, $options) {
   } else if ((!$is_tc && ($type === 'expectf' || $type === 'hhvm.expectf')) ||
              ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
+    if (isset($options['ignore-oids'])) {
+      $wanted = replace_object_ids($wanted, '%d');
+    }
     $wanted_re = $wanted;
 
     // do preg_quote, but miss out any %r delimited sections.
@@ -1867,7 +1909,7 @@ function run_config_post($outputs, $test, $options) {
     $r = "%r";
     $startOffset = 0;
     $length = strlen($wanted_re);
-    while($startOffset < $length) {
+    while ($startOffset < $length) {
       $start = strpos($wanted_re, $r, $startOffset);
       if ($start !== false) {
         // we have found a start tag.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $keys = array(null, true, false, 0, 100, 0.0, 1238.93498);
 

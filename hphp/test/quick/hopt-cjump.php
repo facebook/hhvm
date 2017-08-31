@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function same($left, $right) {
   echo ($left === $right) ? "true\n" : "false\n";

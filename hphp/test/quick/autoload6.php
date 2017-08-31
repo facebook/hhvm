@@ -1,4 +1,4 @@
-<?php
+<?hh
 function my_autoload_func1($cls) {
   echo "my_autoload_func1 $cls\n";
 }

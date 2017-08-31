@@ -1,4 +1,4 @@
-<?hh
+<?php
 
 class Dtor {
   function __destruct() {

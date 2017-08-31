@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function dynString() {
   static $state = 0x71177beef7337;

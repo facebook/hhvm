@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($x, $y) {
   while ($x < $y) {

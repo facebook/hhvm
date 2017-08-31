@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fsort($a) {
   sort($a);

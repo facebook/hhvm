@@ -1,4 +1,4 @@
-<?php
+<?hh
 $tmp_sqllite = tempnam('/tmp', 'vmpdotest');
 $source = "sqlite:$tmp_sqllite";
 $dbh = new PDO($source);

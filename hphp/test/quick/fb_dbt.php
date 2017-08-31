@@ -1,4 +1,4 @@
-<?
+<?hh
 
 $_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
 

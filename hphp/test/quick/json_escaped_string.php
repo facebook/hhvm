@@ -1,4 +1,4 @@
-<?php
+<?hh
 $data = [
   '"foo\nbar"',
   '"baz\u003dbong"',

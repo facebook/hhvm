@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //
 // only constructors can promote parameters

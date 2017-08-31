@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fiz($a) { var_dump($a); }
 class a {

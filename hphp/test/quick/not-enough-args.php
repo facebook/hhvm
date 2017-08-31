@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function one($a) { echo "one\n"; }
 function two($a, $b) { echo "two\n"; }

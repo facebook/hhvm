@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class NewClass {
   static public $a;

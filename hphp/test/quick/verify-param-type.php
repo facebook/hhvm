@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 // Note that this is not the case when compiling with WholeProgram

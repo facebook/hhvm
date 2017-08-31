@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class BaseDerp {
   public function genDerp() {

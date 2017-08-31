@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function show($x) {
   echo $x;

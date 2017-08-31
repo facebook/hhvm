@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function b($s) {
   if ($s === 'floo') {

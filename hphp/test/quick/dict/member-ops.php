@@ -1,4 +1,4 @@
-<?hh
+<?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function base_elem_warn($d, $k) {

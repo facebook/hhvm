@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thrower() {
   throw new Exception("Not MyJunk");

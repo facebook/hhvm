@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bare_break_continue() {
   // This should emit properly; it's not an include-time fatal

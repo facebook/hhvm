@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace foo {
   function bar_namespaced() {
     $args = func_get_args();
@@ -10,5 +10,3 @@ namespace foo {
 namespace {
   foo\bar_namespaced(1, 2, 3)->next();
 }
-
-?>

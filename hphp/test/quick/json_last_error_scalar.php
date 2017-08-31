@@ -1,4 +1,4 @@
-<?php
+<?hh
 $data = [
   'null',
   'false',

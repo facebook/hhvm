@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 function () use ($this) {};

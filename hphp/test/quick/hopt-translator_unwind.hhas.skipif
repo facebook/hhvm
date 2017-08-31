@@ -1,0 +1,4 @@
+<?php
+if (HHVM_NO_DESTRUCTORS) {
+  echo 'skip';
+}

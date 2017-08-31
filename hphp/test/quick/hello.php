@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 print "Hello world!\n";

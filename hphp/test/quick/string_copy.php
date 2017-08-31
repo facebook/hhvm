@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($str) {
   $arr = array();

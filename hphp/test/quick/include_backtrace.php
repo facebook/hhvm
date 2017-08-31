@@ -1,1 +1,1 @@
-<?php include "include_backtrace.inc";
+<?hh include "include_backtrace.inc";

@@ -1,4 +1,4 @@
-<?
+<?hh
 
 $GLOBALS['foo'] = array();
 $GLOBALS['foo']['bar'] = 0xba53ba11;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B {
   public static function g1() {
     static::h();

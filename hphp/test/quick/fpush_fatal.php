@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blah() {}
 function foo() {

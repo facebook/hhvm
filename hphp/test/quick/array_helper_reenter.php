@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This is a micro-test for a specific, tricky bug in the jit. See comments
 // inline for explanation. It hinges on invoking the user error handler (i.e.

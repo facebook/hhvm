@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $response_text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 $patt = "/\\\\(?:(?:\\\\|u00[0-7])(*SKIP)(*FAIL)|u([0-9a-fA-F]{4}))/";

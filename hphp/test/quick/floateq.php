@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function main() {
   // Precision loss when comparing bit ints w/ floats.

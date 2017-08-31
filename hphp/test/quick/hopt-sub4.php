@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a, $b) {
   // const - reg
   $a = 5;

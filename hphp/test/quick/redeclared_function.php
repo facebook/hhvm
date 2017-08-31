@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo "declaring f()\n";
 function f() { echo "first def!\n"; }

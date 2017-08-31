@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   $a = array();
   $x = array_shift($a);

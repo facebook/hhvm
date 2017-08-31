@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface A {
   const FOO = 'FOO';

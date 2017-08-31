@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class HijriBirthday {
   public function convertSolarToLunar($year, $month, $date) {

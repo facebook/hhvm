@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class :base {
   // This is necessary because the generated __xhpAttributeDeclaration() has a

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   // Force all the types to be in so these don't get constant folded.

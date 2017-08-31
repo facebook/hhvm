@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function int_min() {
   return ~PHP_INT_MAX;

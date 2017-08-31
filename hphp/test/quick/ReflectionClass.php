@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Thing {
   public static function testOne() { echo "one\n"; }

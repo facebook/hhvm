@@ -1,4 +1,4 @@
-<?
+<?php
 
 print "Test begin\n";
 

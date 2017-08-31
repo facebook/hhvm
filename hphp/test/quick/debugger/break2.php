@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Warning: line numbers are sensitive, do not change
 

@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class V { const X = 10; }
 function &values() {

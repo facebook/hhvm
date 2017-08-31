@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function neg_zero() {
   $zero = -1.0;

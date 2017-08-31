@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C1 {
   public static function __callStatic($fn, $args) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # Static arrays.
 $a = array();

@@ -1,4 +1,4 @@
-<?
+<?hh
 
 /*
  * Check that the translator correctly adapts to callsites with variable

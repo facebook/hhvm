@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function baz(&$x) {
   var_dump($x);

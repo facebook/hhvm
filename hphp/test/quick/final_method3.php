@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T {
   final public function foo() {
     return 'T::foo';

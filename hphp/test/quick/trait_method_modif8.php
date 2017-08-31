@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   function f() {
     echo "Foo\n";

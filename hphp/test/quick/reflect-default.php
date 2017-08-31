@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function quote_default($f = '"\'"') {}
 function zero_default($f = "x\0x") {}

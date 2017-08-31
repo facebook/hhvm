@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function one() {
   return 1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // check a variety of acceptable default values and type hints: pass
 define('D0',0);
 define('D1',1);

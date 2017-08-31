@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Tests a case where prepareFuncEntry throws in a nested VM context.
 

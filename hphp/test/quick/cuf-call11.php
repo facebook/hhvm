@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * For some of the tests below the VM produces different output than

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Test flow control around exceptions. Stepping into/over/out of throws,

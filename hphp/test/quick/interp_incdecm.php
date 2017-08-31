@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function case1() {
   $x = array();

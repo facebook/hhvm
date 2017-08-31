@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function exn_throw($exn) {
   throw new Exception('throwing second');

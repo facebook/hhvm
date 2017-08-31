@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class blah {
   private function breaker() {

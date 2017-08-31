@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo1() {
   return NAN * NAN;

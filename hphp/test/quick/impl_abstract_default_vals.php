@@ -1,4 +1,4 @@
-<?php
+<?hh
 // check default values and type hints, implementating abstract methods: pass
 define('D0',0);
 define('D1',1);

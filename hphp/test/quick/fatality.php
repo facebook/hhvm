@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function main() {
   function e($errno, $errstr, $errfile, $errline, $errcontext='',

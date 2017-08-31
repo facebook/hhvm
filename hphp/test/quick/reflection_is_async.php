@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo () {}
 async function async_foo() {}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $a = 1;#"a\n";
 print $a."\n";

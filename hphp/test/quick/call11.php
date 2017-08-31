@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public function __call($fn, $args) {
     echo "C::__call\n";

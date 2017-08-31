@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function &id(&$x) { return $x; }
 function id2(&$x) { return $x; }

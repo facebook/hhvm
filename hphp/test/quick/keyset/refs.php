@@ -1,4 +1,4 @@
-<?hh
+<?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function pass_by_ref(&$ks) {}

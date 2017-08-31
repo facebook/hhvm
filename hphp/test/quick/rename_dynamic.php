@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bungle($s) {
   return 314159;

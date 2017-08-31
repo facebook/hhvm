@@ -91,29 +91,11 @@ bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
 
 //////////////////////////////////////////////////////////////////////
 
-void RepoAuthType::resolveArray(const Unit& unit) {
-  if (!mayHaveArrData() || resolved()) return;
-
-  auto const id = arrayId();
-  assert(id != kInvalidArrayId); // this case is handled in deser time.
-  auto const array = unit.lookupArrayTypeId(id);
-  m_data.set(static_cast<uint8_t>(tag()), array);
-}
-
 void RepoAuthType::resolveArray(const UnitEmitter& ue) {
-  if (!mayHaveArrData() || resolved()) return;
-
-  auto const id = arrayId();
-  assert(id != kInvalidArrayId); // this case is handled in deser time.
-  auto const array = ue.lookupArrayType(id);
-  m_data.set(static_cast<uint8_t>(tag()), array);
-}
-
-void RepoAuthType::resolveArrayGlobal(uint32_t id) {
-  assert(RuntimeOption::RepoAuthoritative);
-
-  auto array = globalArrayTypeTable().lookup(id);
-  m_data.set(static_cast<uint8_t>(tag()), array);
+  auto fn = [&](const uint32_t id) {
+    return ue.lookupArrayType(id);
+  };
+  doResolve(fn);
 }
 
 const uint32_t RepoAuthType::arrayId() const {
@@ -122,6 +104,8 @@ const uint32_t RepoAuthType::arrayId() const {
 
   return reinterpret_cast<uintptr_t>(m_data.ptr());
 }
+
+//////////////////////////////////////////////////////////////////////
 
 bool RepoAuthType::operator==(RepoAuthType o) const {
   using T = Tag;
@@ -178,13 +162,9 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
 
   case T::SArr:
   case T::Arr:
-    if (array() == nullptr && o.array() == nullptr) {
-      return true;
-    }
-    if ((array() == nullptr) != (o.array() == nullptr)) {
-      return false;
-    }
-    return array()->id() == o.array()->id();
+    // array id equals to either kInvalidArrayId for null array info, or a
+    // regular id. in each case, we just need to compare their id.
+    return arrayId() == o.arrayId();
 
   case T::SubObj:
   case T::ExactObj:
@@ -200,8 +180,8 @@ size_t RepoAuthType::hash() const {
   if (hasClassName()) {
     return folly::hash::hash_128_to_64(iTag, clsName()->hash());
   }
-  if (mayHaveArrData() && array()) {
-    return folly::hash::hash_128_to_64(iTag, array()->id());
+  if (mayHaveArrData() && (arrayId() != kInvalidArrayId)) {
+    return folly::hash::hash_128_to_64(iTag, arrayId());
   }
   return iTag;
 }

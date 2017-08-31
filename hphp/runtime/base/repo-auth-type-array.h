@@ -65,6 +65,12 @@ struct ArrayTypeTable {
   typename std::enable_if<!SerDe::deserializing>::type serde(SerDe&);
 
 private:
+  /*
+   * Check that the ArrayTypeTable is fully resolved after deserialization.
+   */
+  bool check(const RepoAuthType::Array*) const;
+
+private:
   CompactVector<const RepoAuthType::Array*> m_arrTypes;
 };
 
@@ -107,8 +113,10 @@ struct RepoAuthType::Array {
    * just serializes the ids.  These functions are what the
    * ArrayTypeTable uses to (de)serialize the actual data.
    */
-  template<class SerDe> static Array* deserialize(SerDe&);
-  template<class SerDe> void serialize(SerDe&) const;
+  template <class SerDe>
+  static Array* deserialize(SerDe&, const ArrayTypeTable&);
+  template <class SerDe>
+  void serialize(SerDe&) const;
 
   // These are variable-sized heap allocated objects.  We can't copy
   // them around.
@@ -187,6 +195,7 @@ private:
   }
 
 private:
+  friend struct ArrayTypeTable;
   friend struct ArrayTypeTable::Builder;
 
 private:

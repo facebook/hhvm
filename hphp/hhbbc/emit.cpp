@@ -915,10 +915,24 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptKeyset:
   case T::SKeyset:
   case T::Keyset:
-    // We don't need to merge the litstrs in the array, because rats
-    // in arrays in the array type table must be using global litstr
-    // ids.  (As the array type table itself is not associated with
-    // any unit.)
+    // NOTE: In repo mode, RAT's in Array's might only contain global litstr
+    // id's. No need to merge. In non-repo mode, RAT's in Array's might contain
+    // local litstr id's.
+    if (RuntimeOption::RepoAuthoritative) return;
+
+    if (rat.hasArrData()) {
+      auto arr = rat.array();
+      switch (arr->tag()) {
+        case RepoAuthType::Array::Tag::Packed:
+          for (uint32_t i = 0; i < arr->size(); ++i) {
+            merge_repo_auth_type(ue, arr->packedElem(i));
+          }
+          break;
+        case RepoAuthType::Array::Tag::PackedN:
+          merge_repo_auth_type(ue, arr->elemType());
+          break;
+      }
+    }
     return;
 
   case T::OptSubObj:

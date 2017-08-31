@@ -34,9 +34,10 @@ ArrayTypeTable::serde(SerDe& sd) {
   FTRACE(1, "ArrayTypeTable size = {}\n", size);
   decltype(m_arrTypes)(size).swap(m_arrTypes);
   for (auto i = uint32_t{0}; i < size; ++i) {
-    m_arrTypes[i] = RepoAuthType::Array::deserialize(sd);
+    m_arrTypes[i] = RepoAuthType::Array::deserialize(sd, *this);
     assert(m_arrTypes[i] != nullptr);
     assert(m_arrTypes[i]->id() == i);
+    assert(check(m_arrTypes[i]));
     FTRACE(2, "  {} {}\n", i, show(*m_arrTypes[i]));
   }
 }
@@ -52,8 +53,9 @@ ArrayTypeTable::serde(SerDe& sd) {
   }
 }
 
-template<class SerDe>
-RepoAuthType::Array* RepoAuthType::Array::deserialize(SerDe& sd) {
+template <class SerDe>
+RepoAuthType::Array*
+RepoAuthType::Array::deserialize(SerDe& sd, const ArrayTypeTable& table) {
   Tag tag;
   Empty emptiness;
   uint32_t id;
@@ -63,6 +65,8 @@ RepoAuthType::Array* RepoAuthType::Array::deserialize(SerDe& sd) {
     (id)
     (size)
     ;
+
+  auto fn = [&](const uint32_t id) { return table.lookup(id); };
 
   switch (tag) {
   case Tag::Packed:
@@ -74,6 +78,7 @@ RepoAuthType::Array* RepoAuthType::Array::deserialize(SerDe& sd) {
       arr->m_id = id;
       for (; tyPtr != stop; ++tyPtr) {
         sd(*tyPtr);
+        tyPtr->doResolve(fn);
       }
       return arr;
     }
@@ -83,6 +88,7 @@ RepoAuthType::Array* RepoAuthType::Array::deserialize(SerDe& sd) {
       auto const arr   = new (std::malloc(bytes)) Array(tag, emptiness, size);
       arr->m_id = id;
       sd(arr->types()[0]);
+      arr->types()->doResolve(fn);
       return arr;
     }
   }

@@ -86,7 +86,13 @@ struct PreClassEmitter {
         ;
     }
 
-   private:
+  private:
+    friend PreClassEmitter;
+    void resolveArray(const PreClassEmitter* pce) {
+      m_repoAuthType.resolveArray(pce->ue());
+    }
+
+  private:
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;

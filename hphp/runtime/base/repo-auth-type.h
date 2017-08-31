@@ -134,6 +134,10 @@ struct RepoAuthType {
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
   size_t hash() const;
 
+  /*
+   * Class Names.
+   */
+
   const StringData* clsName() const {
     assert(hasClassName());
     return static_cast<const StringData*>(m_data.ptr());
@@ -154,10 +158,10 @@ struct RepoAuthType {
    * Arrays.
    */
 
-   const Array* array() const {
-     assert(resolved());
-     return static_cast<const Array*>(m_data.ptr());
-   }
+  const Array* array() const {
+    assert(resolved());
+    return static_cast<const Array*>(m_data.ptr());
+  }
 
   // Returns a valid id if there is a corresponding Array* somewhere,
   // or return kInvalidArrayId if Array* is null or if it is unresolved.
@@ -167,7 +171,6 @@ struct RepoAuthType {
   // Turn an array RAT represented by ID into equivalent array RAT represented
   // by its actual Array*. Should only be called when it is indeed not resolved
   // yet, which should be the place where an RAT is initally loaded from Repo.
-  void resolveArray(const Unit& unit);
   void resolveArray(const UnitEmitter& ue);
 
   bool mayHaveArrData() const {
@@ -189,61 +192,67 @@ struct RepoAuthType {
    * Serialization/Deserialization
    */
 
-   template<class SerDe> void serde(SerDe& sd) {
-     auto t = tag();
-     sd(t);
+  template <class SerDe>
+  void serde(SerDe& sd) {
+    auto t = tag();
+    sd(t);
 
-     if (SerDe::deserializing) {
-       // mayHaveArrData and hasClassName need to read tag().
-       m_data.set(static_cast<uint8_t>(t), nullptr);
-     }
+    if (SerDe::deserializing) {
+      // mayHaveArrData and hasClassName need to read tag().
+      m_data.set(static_cast<uint8_t>(t), nullptr);
+    }
 
-     // the 0x40 bit for resolved/unresolved Array* should not be visible
-     // to the outside world.
-     assert(resolved());
+    // the 0x40 bit for resolved/unresolved Array* should not be visible
+    // to the outside world.
+    assert(resolved());
 
-     if (mayHaveArrData()) {
-       // serialization
-       if (!SerDe::deserializing) {
-         // either a valid id for non-null array, or a kInvalidArrayId for null
-         uint32_t id = arrayId();
-         sd(id);
-         return;
-       }
+    if (mayHaveArrData()) {
+      // serialization
+      if (!SerDe::deserializing) {
+        // either a valid id for non-null array, or a kInvalidArrayId for null
+        uint32_t id = arrayId();
+        sd(id);
+        return;
+      }
 
-       // deserialization
-       uint32_t id;
-       sd(id);
+      // deserialization
+      uint32_t id;
+      sd(id);
 
-       // nullptr case, already done
-       if (id == kInvalidArrayId) return;
+      // nullptr case, already done
+      if (id == kInvalidArrayId) return;
 
-       // RepoAuth case
-       if (RuntimeOption::RepoAuthoritative) {
-         resolveArrayGlobal(id);
-         return;
-       }
+      // id case
+      // this is the only case where we set the 0x40 bit
+      auto ptr = reinterpret_cast<const void*>(id);
+      m_data.set(toIdTag(t), ptr);
+      return;
+    }
 
-       // id case
-       // this is the only case where we set the highbit
-       auto ptr = reinterpret_cast<void*>(id);
-       m_data.set(toIdTag(t), ptr);
-       return;
-     }
+    if (hasClassName()) {
+      auto c = clsName();
+      sd(c);
+      m_data.set(static_cast<uint8_t>(t), reinterpret_cast<const void*>(c));
+    }
+  }
 
-     if (hasClassName()) {
-       auto c = clsName();
-       sd(c);
-       m_data.set(static_cast<uint8_t>(t), reinterpret_cast<const void*>(c));
-     }
-   }
-
- private:
-   void resolveArrayGlobal(uint32_t id);
-
+private:
    #define TAG(x) static_assert((static_cast<uint8_t>(Tag::x) & 0x40) == 0, "");
      REPO_AUTH_TYPE_TAGS
    #undef TAG
+
+   friend struct ArrayTypeTable;
+   friend struct Array;
+
+   template <class LookupFn>
+   void doResolve(LookupFn fn) {
+     if (!mayHaveArrData() || resolved()) return;
+
+     auto const id = arrayId();
+     assert(id != kInvalidArrayId); // this case is handled in deser time.
+     auto const array = fn(id);
+     m_data.set(static_cast<uint8_t>(tag()), array);
+   }
 
    // false if m_data contains an uint32_t id for array type.
    // true otherwise (it may not even be an array type).

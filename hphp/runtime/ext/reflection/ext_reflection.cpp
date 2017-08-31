@@ -1922,13 +1922,15 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 
 // helper for __construct:
 // caller throws exception when return value is false
-static bool HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
+static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
   auto const typeAliasReq = Unit::loadTypeAlias(name.get());
 
-  if (!typeAliasReq) return false;
+  if (!typeAliasReq) {
+    return empty_string();
+  }
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAliasReq(typeAliasReq);
-  return true;
+  return String::attach(const_cast<StringData*>(typeAliasReq->name.get()));
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {

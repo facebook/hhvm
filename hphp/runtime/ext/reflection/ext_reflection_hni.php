@@ -1142,11 +1142,11 @@ class ReflectionClass implements Reflector {
     } else {
       $classname = $name_or_obj;
     }
-    if (!$this->__init($classname)) {
+    $name = $this->__init($classname);
+    if (!$name) {
       throw new ReflectionException("Class $classname does not exist");
     }
-
-    $this->name = $this->getName();
+    $this->name = $name;
   }
 
   <<__Native>>
@@ -2400,16 +2400,17 @@ class ReflectionTypeAlias implements Reflector {
    * @name      string  Name of the type alias.
    */
   final public function __construct(string $name) {
-    if (!$this->__init($name)) {
+    $n = $this->__init($name);
+    if (!$n) {
       throw new ReflectionException(
         "type alias {$name} does not exist");
     }
-    $this->name = $name;
+    $this->name = $n;
   }
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name): bool;
+  private function __init(string $name): string;
 
   /**
    * Get the TypeStructure that contains the full type information of

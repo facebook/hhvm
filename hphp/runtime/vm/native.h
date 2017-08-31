@@ -570,7 +570,7 @@ extern ConstantMap s_constant_map;
 inline
 bool registerConstant(const StringData* cnsName, Cell cns,
                       bool dynamic = false) {
-  assert(cellIsPlausible(cns));
+  assert(cellIsPlausible(cns) && cns.m_type != KindOfUninit);
   auto& dst = s_constant_map[cnsName];
   *static_cast<Cell*>(&dst) = cns;
   dst.dynamic() = dynamic;

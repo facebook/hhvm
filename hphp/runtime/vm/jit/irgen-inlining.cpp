@@ -35,7 +35,8 @@ bool beginInlining(IRGS& env,
                    const Func* target,
                    SrcKey startSk,
                    Offset returnBcOffset,
-                   ReturnTarget returnTarget) {
+                   ReturnTarget returnTarget,
+                   int cost) {
   auto const& fpiStack = env.irb->fs().fpiStack();
 
   assertx(!fpiStack.empty() &&
@@ -142,7 +143,12 @@ bool beginInlining(IRGS& env,
         sp(env), cns(env, target));
   }
 
-  gen(env, BeginInlining, IRSPRelOffsetData{calleeAROff}, sp(env));
+  gen(
+    env,
+    BeginInlining,
+    BeginInliningData{calleeAROff, target, cost},
+    sp(env)
+  );
 
   DefInlineFPData data;
   data.target        = target;
@@ -260,7 +266,8 @@ bool conjureBeginInlining(IRGS& env,
     func,
     startSk,
     0 /* returnBcOffset */,
-    returnTarget
+    returnTarget,
+    9 /* cost */
   );
 }
 

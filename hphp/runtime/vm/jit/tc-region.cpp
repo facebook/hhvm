@@ -499,6 +499,10 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
     logTranslation(env, range);
   }
 
+  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty() && env.vunit) {
+    logFrames(*env.vunit);
+  }
+
   return TransMetaInfo{sk, codeView, viewKind, args.kind, range,
                        std::move(fixups), std::move(tr)};
 }

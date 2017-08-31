@@ -47,7 +47,8 @@ struct Vblock {
     , weight(w) {}
 
   AreaIndex area_idx;
-  uint64_t  weight;
+  int frame{-1};
+  uint64_t weight;
   jit::vector<Vinstr> code;
 };
 
@@ -129,6 +130,34 @@ struct Vconst {
   };
 };
 
+struct Vframe {
+  Vframe(const Func* func, int parent, int cost, uint64_t entry_weight)
+    : func(func)
+    , parent(parent)
+    , entry_weight(entry_weight)
+    , inclusive_cost(cost)
+    , exclusive_cost(cost)
+  {}
+
+  struct Section {
+    size_t inclusive{0};
+    size_t exclusive{0};
+  };
+
+  static constexpr int Top = -1;
+
+  LowPtr<const Func> func;
+  int parent;
+
+  uint64_t entry_weight;
+  int inclusive_cost;
+  int exclusive_cost;
+
+  int num_inner_frames{0};
+
+  jit::array<Section, kNumAreas> sections;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -205,6 +234,7 @@ struct Vunit {
 
   unsigned next_vr{Vreg::V0};
   Vlabel entry;
+  jit::vector<Vframe> frames;
   jit::vector<Vblock> blocks;
   jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;
   jit::hash_map<size_t,Vconst> regToConst;

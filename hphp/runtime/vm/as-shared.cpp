@@ -79,7 +79,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string attrs_to_string(AttrContext ctx, Attr attrs) {
+std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
   std::vector<std::string> vec;
 
 #define X(attr, mask, str) \
@@ -87,8 +87,12 @@ std::string attrs_to_string(AttrContext ctx, Attr attrs) {
   HHAS_ATTRS
 #undef X
 
+  return vec;
+}
+
+std::string attrs_to_string(AttrContext ctx, Attr attrs) {
   using namespace folly::gen;
-  return from(vec) | unsplit<std::string>(" ");
+  return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
 }
 
 folly::Optional<Attr> string_to_attr(AttrContext ctx,

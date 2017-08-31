@@ -86,6 +86,8 @@ struct Vunit;
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
   O(funcguard, Inone, Un, Dn)\
+  O(inlinestart, Inone, Un, Dn)\
+  O(inlineend, Inone, Un, Dn)\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -525,6 +527,17 @@ struct conjureuse { Vreg c; };
  * *watch will be set to the address following the guard.
  */
 struct funcguard { const Func* func; TCA* watch; };
+
+/*
+ * Marks the entry block of an inlined function, func, in the current unit,
+ * whose Vcost was computed to be cost.
+ */
+struct inlinestart { const Func* func; int cost; Vlabel target; };
+
+/*
+ * Marks a return target or exit from the current inlined frame.
+ */
+struct inlineend { Vlabel target; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.

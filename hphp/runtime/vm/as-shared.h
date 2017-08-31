@@ -46,6 +46,11 @@ enum class AttrContext {
 };
 
 /*
+ * Convert an attr to a vector of attribute names, for a given context.
+ */
+std::vector<std::string> attrs_to_vec(AttrContext, Attr);
+
+/*
  * Convert an attr to a string of space-separated attribute names, for
  * a given context.
  */

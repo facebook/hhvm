@@ -240,7 +240,8 @@ bool beginInlining(IRGS& env,
                    const Func* target,
                    SrcKey startSk,
                    Offset returnBcOffset,
-                   ReturnTarget returnTarget);
+                   ReturnTarget returnTarget,
+                   int cost);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.

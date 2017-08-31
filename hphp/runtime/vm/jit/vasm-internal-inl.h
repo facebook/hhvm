@@ -210,6 +210,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     // helper unique stub.
     if (is_empty_catch(block)) continue;
 
+    auto const start = env.cb->frontier();
+
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
 
@@ -225,6 +227,18 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 #undef O
       }
       postprocess<Vemit>(env, inst);
+    }
+
+    if (block.frame != -1) {
+      auto& frames = unit.frames;
+      auto const size = env.cb->frontier() - start;
+      always_assert(env.cb->contains(start));
+      always_assert((int64_t)size >= 0);
+      auto const area = static_cast<uint8_t>(block.area_idx);
+      frames[block.frame].sections[area].exclusive += size;
+      for (auto f = block.frame; f != Vframe::Top; f = frames[f].parent) {
+        frames[f].sections[area].inclusive += size;
+      }
     }
 
     irmu.register_block_end();

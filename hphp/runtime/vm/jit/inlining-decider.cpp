@@ -378,15 +378,17 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
 /*
  * Update context for start of inlining.
  */
-void InliningDecider::accountForInlining(SrcKey callerSk,
-                                         Op callerFPushOp,
-                                         const Func* callee,
-                                         const RegionDesc& region) {
+int InliningDecider::accountForInlining(SrcKey callerSk,
+                                        Op callerFPushOp,
+                                        const Func* callee,
+                                        const RegionDesc& region) {
   int cost = computeTranslationCost(callerSk, callerFPushOp, region);
   m_costStack.push_back(cost);
   m_cost       += cost;
   m_callDepth  += 1;
   m_stackDepth += callee->maxStackCells();
+
+  return cost;
 }
 
 void InliningDecider::initWithCallee(const Func* callee) {

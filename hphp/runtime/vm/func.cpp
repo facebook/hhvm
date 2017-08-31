@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -1148,6 +1149,35 @@ bool funcNeedsCallerFrame(const Func* callee) {
       s_ignores_frame.count(callee->name()->data()) == 0) ||
     funcReadsLocals(callee) ||
     funcWritesLocals(callee);
+}
+
+void logFunc(const Func* func, StructuredLogEntry& ent) {
+  auto const attrs = attrs_to_vec(AttrContext::Func, func->attrs());
+  std::set<folly::StringPiece> attrSet(attrs.begin(), attrs.end());
+
+  if (func->isMemoizeWrapper()) attrSet.emplace("memoize_wrapper");
+  if (func->isMemoizeImpl()) attrSet.emplace("memoize_impl");
+  if (func->isAsync()) attrSet.emplace("async");
+  if (func->isGenerator()) attrSet.emplace("generator");
+  if (func->isClosureBody()) attrSet.emplace("closure_body");
+  if (func->isPairGenerator()) attrSet.emplace("pair_generator");
+  if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
+  if (func->hasStaticLocals()) attrSet.emplace("has_statics");
+  if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
+  if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
+  if (func->attrs() & AttrPhpLeafFn) attrSet.emplace("leaf_function");
+  if (func->cls() && func->cls()->isPersistent()) attrSet.emplace("persistent");
+
+  ent.setSet("func_attributes", attrSet);
+
+  ent.setInt("num_params", func->numNonVariadicParams());
+  ent.setInt("num_locals", func->numLocals());
+  ent.setInt("num_named_locals", func->numNamedLocals());
+  ent.setInt("num_class_refs", func->numClsRefSlots());
+  ent.setInt("num_iterators", func->numIterators());
+  ent.setInt("frame_cells", func->numSlotsInFrame());
+  ent.setInt("max_stack_cells", func->maxStackCells());
+  ent.setInt("num_static_locals", func->numStaticLocals());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -131,10 +131,10 @@ struct InliningDecider {
   /*
    * Update our context to account for the beginning of an inlined call.
    */
-  void accountForInlining(SrcKey callerSk,
-                          Op callerFPushOp,
-                          const Func* callee,
-                          const RegionDesc& region);
+  int accountForInlining(SrcKey callerSk,
+                         Op callerFPushOp,
+                         const Func* callee,
+                         const RegionDesc& region);
 
   /*
    * Update context to begin inlining of callee with cost zero.

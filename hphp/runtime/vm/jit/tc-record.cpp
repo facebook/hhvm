@@ -39,6 +39,9 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include <folly/gen/Base.h>
+#include <folly/json.h>
+
 TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
@@ -199,6 +202,118 @@ void reportJitMaturity(const CodeCache& code) {
   codeUsed->addValue(code.data().used() - codeUsed->getSum());
 }
 
+static void logFrame(const Vunit& unit, const size_t frame) {
+  std::vector<const Func*> funcs;
+  for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
+    funcs.emplace_back(unit.frames[f].func);
+  }
+  auto gens = folly::gen::from(funcs);
+
+  auto esc = [&] (const char* s) {
+    std::string ret;
+    folly::json::escapeString(s, ret, folly::json::serialization_opts());
+    return ret;
+  };
+
+#define MAP(e) \
+  gens | folly::gen::mapped([&] (const Func* f) -> std::string {            \
+    return esc(e);                                                          \
+  }) | folly::gen::as<std::vector>()
+
+  auto fullnames = MAP(f->fullDisplayName()->data());
+  auto names = MAP(f->name()->data());
+  auto impl_classes = MAP(f->implCls() ? f->implCls()->name()->data() : "");
+  auto base_classes = MAP(f->baseCls() ? f->baseCls()->name()->data() : "");
+  auto ctx_classes = MAP(f->cls() ? f->cls()->name()->data() : "");
+  auto files = MAP(f->unit()->filepath()->data());
+
+#undef MAP
+
+#define CAST(t, v) std::t<folly::StringPiece>(v.begin(), v.end())
+
+  StructuredLogEntry ent;
+  ent.setStr("inlined", funcs.size() != 1 ? "true" : "false");
+
+  auto const func = funcs.front();
+
+  if (auto cls = func->cls()) {
+    std::vector<std::string> interfaces;
+    std::vector<std::string> traits;
+    std::vector<std::string> parents;
+
+    for (auto iface : cls->allInterfaces().range()) {
+      interfaces.emplace_back(esc(iface->name()->data()));
+    }
+    for (auto trait : cls->preClass()->usedTraits()) {
+      traits.emplace_back(esc(trait->data()));
+    }
+    for (auto c = cls; c; c = c->parent()) {
+      parents.emplace_back(esc(c->name()->data()));
+    }
+
+    ent.setSet("traits", CAST(set, traits));
+    ent.setSet("interfaces", CAST(set, interfaces));
+    ent.setVec("parent_classes", CAST(vector, parents));
+  }
+
+#define SET(nm, vec)                            \
+  ent.setStr(#nm, vec.front());                 \
+  ent.setVec("inlined_" #nm, CAST(vector, vec))
+
+  SET(full_function_name, fullnames);
+  SET(function_name, names);
+  SET(impl_class, impl_classes);
+  SET(base_class, base_classes);
+  SET(class, ctx_classes);
+  SET(file, files);
+
+#undef SET
+#undef CAST
+
+  size_t inclusive = 0;
+  size_t exclusive = 0;
+  for (uint8_t idx = 0; idx < kNumAreas; ++idx) {
+    auto const aidx = static_cast<AreaIndex>(idx);
+    auto const inm = folly::sformat("{}_inclusive_bytes", areaAsString(aidx));
+    auto const enm = folly::sformat("{}_exclusive_bytes", areaAsString(aidx));
+    auto const ibytes = unit.frames[frame].sections[idx].inclusive;
+    auto const ebytes = unit.frames[frame].sections[idx].exclusive;
+    ent.setInt(inm, ibytes);
+    ent.setInt(enm, ebytes);
+    inclusive += ibytes;
+    exclusive += ebytes;
+  }
+
+  ent.setInt("total_inclusive_bytes", inclusive);
+  ent.setInt("total_exclusive_bytes", exclusive);
+
+  ent.setInt("inclusive_cost", unit.frames[frame].inclusive_cost);
+  ent.setInt("exclusive_cost", unit.frames[frame].exclusive_cost);
+  ent.setInt("num_inner_frames", unit.frames[frame].num_inner_frames);
+  ent.setInt("entry_weight", unit.frames[frame].entry_weight);
+
+  ent.setStr("version", "6");
+  ent.setStr("trans_kind", show(unit.context->kind));
+  ent.setStr("prologue", unit.context->prologue ? "true" : "false");
+  ent.setStr("has_this", unit.context->hasThis ? "true" : "false");
+  ent.setStr("resumed", unit.context->resumed ? "true" : "false");
+
+  logFunc(func, ent);
+
+  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+    ent.setStr("run_key", RuntimeOption::EvalJitLogAllInlineRegions);
+  }
+
+  StructuredLog::log("hhvm_tc_func_sizes", ent);
+}
+
+void logFrames(const Vunit& unit) {
+  if (!unit.context || unit.frames.empty() || !unit.frames.front().func) return;
+  for (size_t frame = 0; frame < unit.frames.size(); ++frame) {
+    logFrame(unit, frame);
+  }
+}
+
 void logTranslation(const TransEnv& env, const TransRange& range) {
   auto nanos = HPHP::Timer::GetThreadCPUTimeNanos() - env.unit->startNanos();
   auto& cols = *env.unit->logEntry();
@@ -243,6 +358,10 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
     cols.setInt("num_vblocks_main", num_vblocks[(int)AreaIndex::Main]);
     cols.setInt("num_vblocks_cold", num_vblocks[(int)AreaIndex::Cold]);
     cols.setInt("num_vblocks_frozen", num_vblocks[(int)AreaIndex::Frozen]);
+
+    if (RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+      logFrames(*env.vunit);
+    }
   }
   // x64 stats
   cols.setInt("main_size", range.main.size());

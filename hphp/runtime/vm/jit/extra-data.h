@@ -1241,6 +1241,23 @@ struct FuncGuardData : IRExtraData {
   TCA* prologueAddrPtr;
 };
 
+struct BeginInliningData : IRExtraData {
+  BeginInliningData(IRSPRelOffset offset, const Func* func, int cost)
+    : offset(offset)
+    , func(func)
+    , cost(cost)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>("IRSPOff ", offset.offset,
+                                  " FUNC ", func->fullName()->data());
+  }
+
+  IRSPRelOffset offset;
+  const Func* func;
+  int cost;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1314,7 +1331,7 @@ X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
-X(BeginInlining,                IRSPRelOffsetData);
+X(BeginInlining,                BeginInliningData);
 X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturn,                 FPRelOffsetData);
 X(InlineReturnNoFrame,          FPRelOffsetData);

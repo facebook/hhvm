@@ -497,7 +497,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        TranslateRetryContext& retry,
                                        InliningDecider& inl,
                                        const irgen::IRGS& irgs,
-                                       int32_t maxBCInstrs) {
+                                       int32_t maxBCInstrs,
+                                       int& calleeCost) {
   if (psk.srcKey.op() != Op::FCall &&
       psk.srcKey.op() != Op::FCallD) {
     return nullptr;
@@ -528,7 +529,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  inl.accountForInlining(psk.srcKey, info.fpushOpc, callee, *calleeRegion);
+  calleeCost = inl.accountForInlining(psk.srcKey, info.fpushOpc, callee,
+                                      *calleeRegion);
   return calleeRegion;
 }
 
@@ -697,12 +699,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
+      int calleeCost{0};
       RegionDescPtr calleeRegion{nullptr};
       // See if we have a callee region we can inline---but only if the
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
         calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
-                                                irgs, budgetBCInstrs);
+                                                irgs, budgetBCInstrs,
+                                                calleeCost);
       }
 
       if (calleeRegion) {
@@ -728,7 +732,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee,
                                  calleeRegion->start(),
                                  returnFuncOff,
-                                 irgen::ReturnTarget { returnBlock })) {
+                                 irgen::ReturnTarget { returnBlock },
+                                 calleeCost)) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 

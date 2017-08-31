@@ -668,6 +668,13 @@ struct RuntimeOption {
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
+  /* Log the sizes and metadata for all translations in the TC broken
+   * down by function and inclusive/exclusive size for inlined regions.
+   * When set to "" TC size data will be sampled on a per function basis
+   * as determined by JitSampleRate. When set to a non-empty string all
+   * translations will be logged, and run_key column will be logged with
+   * the value of this option. */                                       \
+  F(string,   JitLogAllInlineRegions,      "")                          \
   F(uint32_t, JitFilterLease,              1)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \

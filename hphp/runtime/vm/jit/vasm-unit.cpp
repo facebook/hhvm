@@ -21,6 +21,8 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int Vframe::Top;
+
 Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   auto i = blocks.size();
   blocks.emplace_back(area, weight);

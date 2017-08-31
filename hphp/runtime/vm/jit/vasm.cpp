@@ -39,6 +39,8 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::unwind:      return {inst.unwind_.targets, 2};
     case Vinstr::vcallarray:  return {inst.vcallarray_.targets, 2};
     case Vinstr::vinvoke:     return {inst.vinvoke_.targets, 2};
+    case Vinstr::inlinestart: return {&inst.inlinestart_.target, 1};
+    case Vinstr::inlineend:   return {&inst.inlineend_.target, 1};
     default:                  return {nullptr, nullptr};
   }
 }

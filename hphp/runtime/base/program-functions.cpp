@@ -2548,7 +2548,7 @@ void hphp_session_exit(const Transport* transport) {
   assert(MM().empty());
 
   s_sessionInitialized = false;
-  s_extra_request_microseconds = 0;
+  s_extra_request_nanoseconds = 0;
 }
 
 void hphp_process_exit() noexcept {

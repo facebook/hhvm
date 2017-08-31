@@ -33,7 +33,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
-#include "hphp/util/vdso.h"
+#include "hphp/util/timer.h"
 
 #include <iostream>
 #include <fstream>
@@ -239,7 +239,7 @@ to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 }
 
 static inline uint64_t cpuTime(int64_t /*MHz*/) {
-  return vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
+  return gettime_ns(CLOCK_THREAD_CPUTIME_ID);
 }
 
 uint64_t

@@ -17,17 +17,21 @@
 
 #include <cassert>
 
+#include <folly/ClockGettimeWrappers.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/vdso.h"
+
+#ifdef FACEBOOK
+#include "common/time/ClockGettimeNS.h" // nolint
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-__thread int64_t s_extra_request_microseconds;
+__thread int64_t s_extra_request_nanoseconds;
 
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,11 +80,11 @@ void Timer::report() const {
 }
 
 void Timer::GetMonotonicTime(timespec &ts) {
-  vdso::clock_gettime(CLOCK_MONOTONIC, &ts);
+  gettime(CLOCK_MONOTONIC, &ts);
 }
 
 void Timer::GetRealtimeTime(timespec &ts) {
-  vdso::clock_gettime(CLOCK_REALTIME, &ts);
+  gettime(CLOCK_REALTIME, &ts);
 }
 
 static int64_t to_usec(const timeval& tv) {
@@ -110,7 +114,7 @@ int64_t Timer::GetRusageMicros(Type t, Who who) {
 }
 
 int64_t Timer::GetThreadCPUTimeNanos() {
-  return vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
+  return gettime_ns(CLOCK_THREAD_CPUTIME_ID);
 }
 
 int64_t Timer::measure() const {
@@ -155,19 +159,49 @@ int64_t SlowTimer::getTime() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 int gettime(clockid_t clock, timespec* ts) {
-  auto const ret = vdso::clock_gettime(clock, ts);
-  if (clock == CLOCK_THREAD_CPUTIME_ID) {
-    always_assert(ts->tv_nsec < 1000000000);
-
-    ts->tv_sec += s_extra_request_microseconds / 1000000;
-    auto res = ts->tv_nsec + (s_extra_request_microseconds % 1000000) * 1000;
-    if (res > 1000000000) {
-      res -= 1000000000;
-      ts->tv_sec += 1;
-    }
-    ts->tv_nsec = res;
+  if (clock != CLOCK_THREAD_CPUTIME_ID) {
+    return folly::chrono::clock_gettime(clock, ts);
   }
+
+  constexpr uint64_t sec_to_ns = 1000000000;
+
+#ifdef FACEBOOK
+  uint64_t time;
+  if (!fb_perf_get_thread_cputime_ns(&time)) {
+    time += s_extra_request_nanoseconds;
+    ts->tv_sec = time / sec_to_ns;
+    ts->tv_nsec = time % sec_to_ns;
+    return 0;
+  }
+#endif
+
+  auto const ret = folly::chrono::clock_gettime(clock, ts);
+  always_assert(ts->tv_nsec < sec_to_ns);
+
+  ts->tv_sec += s_extra_request_nanoseconds / sec_to_ns;
+  auto res = ts->tv_nsec + s_extra_request_nanoseconds % sec_to_ns;
+  if (res > sec_to_ns) {
+    res -= sec_to_ns;
+    ts->tv_sec += 1;
+  }
+  ts->tv_nsec = res;
+
   return ret;
+}
+
+int64_t gettime_ns(clockid_t clock) {
+  if (clock != CLOCK_THREAD_CPUTIME_ID) {
+    return folly::chrono::clock_gettime_ns(clock);
+  }
+
+#ifdef FACEBOOK
+  uint64_t time;
+  if (!fb_perf_get_thread_cputime_ns(&time)) {
+    return time + s_extra_request_nanoseconds;
+  }
+#endif
+
+  return folly::chrono::clock_gettime_ns(clock) + s_extra_request_nanoseconds;
 }
 
 int64_t gettime_diff_us(const timespec& start, const timespec& end) {

@@ -830,7 +830,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
     rusage ru;
     const auto ret = wait4(pid, stat_loc, options, &ru);
     if (s_trackProcessTimes) {
-      s_extra_request_microseconds += ru2microseconds(ru);
+      s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
     }
     return ret;
   }
@@ -849,7 +849,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
       if (ret < 0) {
         errno = err;
       } else if (s_trackProcessTimes) {
-        s_extra_request_microseconds += time_us;
+        s_extra_request_nanoseconds += time_us * 1000;
         HardwareCounter::IncInstructionCount(events[0]);
         HardwareCounter::IncLoadCount(events[1]);
         HardwareCounter::IncStoreCount(events[2]);
@@ -863,7 +863,7 @@ pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
   rusage ru;
   const auto ret = wait4(pid, stat_loc, options, &ru);
   if (s_trackProcessTimes) {
-    s_extra_request_microseconds += ru2microseconds(ru);
+    s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
   }
   return ret;
 }

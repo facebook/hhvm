@@ -27,7 +27,6 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/vdso.h"
 
 TRACE_SET_MOD(jittime);
 

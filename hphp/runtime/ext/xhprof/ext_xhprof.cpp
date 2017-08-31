@@ -3,7 +3,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/vdso.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

@@ -90,9 +90,10 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern __thread int64_t s_extra_request_microseconds;
+extern __thread int64_t s_extra_request_nanoseconds;
 
 int gettime(clockid_t, struct timespec*);
+int64_t gettime_ns(clockid_t);
 
 /*
  * Computes the difference between two timespec objects in microseconds.

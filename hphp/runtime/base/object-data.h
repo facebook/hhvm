@@ -389,6 +389,9 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
+  template<typename K>
+  TypedValue* makeDynProp(K key, AccessFlags);
+
   bool invokeSet(const StringData* key, const TypedValue* val);
   InvokeResult invokeGet(const StringData* key);
   InvokeResult invokeIsset(const StringData* key);

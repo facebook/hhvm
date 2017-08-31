@@ -1256,6 +1256,15 @@ void raiseHackArrCompatRefBind(const StringData* k) {
   );
 }
 
+void raiseHackArrCompatRefBind(TypedValue tv) {
+  if (isStringType(tv.m_type)) {
+    raiseHackArrCompatRefBind(tv.m_data.pstr);
+  } else {
+    assertx(isIntType(tv.m_type));
+    raiseHackArrCompatRefBind(tv.m_data.num);
+  }
+}
+
 void raiseHackArrCompatRefNew() {
   raise_hackarr_compat_notice("Binding new-element ref in array");
 }

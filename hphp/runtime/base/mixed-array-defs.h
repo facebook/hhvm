@@ -207,6 +207,9 @@ member_lval MixedArray::addLvalImpl(K k) {
   auto p = insert(k);
   if (!p.found) {
     tvWriteNull(&p.tv);
+    if (warn && RuntimeOption::EvalHackArrCompatNotices) {
+      raise_hackarr_compat_notice("Lval on missing array element");
+    }
   }
   return member_lval { this, &p.tv };
 }

@@ -1037,13 +1037,15 @@ template void bindElemC<false>(TypedValue*, TypedValue, RefData*);
 template <bool intishWarn>
 void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
-  auto const keyC = tvToCell(&keyTV);
-  auto elem = UNLIKELY(val.m_type == KindOfRef)
-    ? HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, *keyC)
-    : HPHP::ElemD<MOpMode::Define, false, intishWarn>(localTvRef, base, *keyC);
-  // Intentionally leak the old value pointed to by elem, including from magic
-  // methods.
-  tvDup(val, *elem);
+  auto const keyC = tvToCell(keyTV);
+
+  if (UNLIKELY(val.m_type == KindOfRef)) {
+    HPHP::SetWithRefMLElem<MOpMode::Define, true, intishWarn>(
+      localTvRef, base, keyC, val);
+  } else {
+    HPHP::SetWithRefMLElem<MOpMode::Define, false, intishWarn>(
+      localTvRef, base, keyC, val);
+  }
 }
 
 template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue);

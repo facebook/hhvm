@@ -882,6 +882,68 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   unknownBaseType(base);
 }
 
+/*
+ * Implementation for SetWithRef*ML bytecodes.
+ */
+template<MOpMode mode, bool reffy, bool intishWarn,
+         KeyType keyType = KeyType::Any>
+void SetWithRefMLElem(TypedValue& tvRef, TypedValue* base,
+                      key_type<keyType> key, TypedValue val) {
+  assertx(mode == MOpMode::Define);
+
+  base = tvToCell(base);
+  assertx(cellIsPlausible(*base));
+
+  auto const elem = [&] {
+    switch (base->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        return ElemDEmptyish<mode, keyType>(base, key);
+      case KindOfBoolean:
+        return ElemDBoolean<mode, keyType>(tvRef, base, key);
+      case KindOfInt64:
+      case KindOfDouble:
+      case KindOfResource:
+        return ElemDScalar(tvRef);
+      case KindOfPersistentString:
+      case KindOfString:
+        return ElemDString<mode, keyType>(base, key);
+      case KindOfPersistentVec:
+      case KindOfVec:
+        return ElemDVec<reffy, keyType>(base, key);
+      case KindOfPersistentDict:
+      case KindOfDict:
+        return ElemDDict<reffy, keyType>(base, key);
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        return ElemDKeyset<reffy, keyType>(base, key);
+      case KindOfPersistentArray:
+      case KindOfArray: {
+        // We want to notice for binding assignments here, but not for missing
+        // index, since we're about to initialize the value in that case.
+        // Rather than fork the Lval API to have warn and no-warn flavors, we
+        // instead lift the binding assignment warning here, and then disable
+        // Hack array notices.
+        if (reffy && RuntimeOption::EvalHackArrCompatNotices &&
+            !base->m_data.parr->isGlobalsArray()) {
+          raiseHackArrCompatRefBind(key);
+        }
+        SuppressHackArrCompatNotices shacn;
+        return ElemDArray<mode, reffy, intishWarn, keyType>(base, key);
+      }
+      case KindOfObject:
+        return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
+      case KindOfRef:
+        break;
+    }
+    unknownBaseType(base);
+  }();
+
+  // Intentionally leak the old value pointed to by elem, including from magic
+  // methods.
+  tvDup(val, *elem);
+}
+
 /**
  * ElemU when base is Null
  */

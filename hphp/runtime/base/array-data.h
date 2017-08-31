@@ -725,6 +725,7 @@ void decRefArr(ArrayData* arr) {
 
 void raiseHackArrCompatRefBind(int64_t);
 void raiseHackArrCompatRefBind(const StringData*);
+void raiseHackArrCompatRefBind(TypedValue);
 void raiseHackArrCompatRefNew();
 void raiseHackArrCompatRefIter();
 

@@ -3644,9 +3644,22 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
-    mstate.base = UNLIKELY(value->m_type == KindOfRef)
-      ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, mstate.base, key)
-      : ElemD<MOpMode::Define, false, true>(mstate.tvRef, mstate.base, key);
+    mstate.base = [&] {
+      if (LIKELY(value->m_type != KindOfRef)) {
+        return ElemD<MOpMode::Define, false, true>(
+          mstate.tvRef, mstate.base, key
+        );
+      }
+
+      // See the comment in SetWithRefMLElem() for an explanation of this check
+      // and the notice suppressor below.
+      if (!mstate.base->m_data.parr->isGlobalsArray()) {
+        raiseHackArrCompatRefBind(key);
+      }
+
+      SuppressHackArrCompatNotices shacn;
+      return ElemD<MOpMode::Define, true, true>(mstate.tvRef, mstate.base, key);
+    }();
   } else {
     mstate.base = UNLIKELY(value->m_type == KindOfRef)
       ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base, key)

@@ -1,30 +1,58 @@
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 5
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 5
+
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 6
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 6
 
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 7
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 7
+
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 8
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 8
 
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 10
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 10
+
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 11
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 11
 
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 12
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 12
+
 Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 13
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 13
 
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 15
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 15
+
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 16
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 16
 
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 17
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 17
+
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 19
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 19
 
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 20
 
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 20
+
 Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 21
+
+Notice: Hack Array Compat: Lval on missing array element in %s/setop.php on line 21
 array(16) {
   [1]=>
   string(3) "foo"

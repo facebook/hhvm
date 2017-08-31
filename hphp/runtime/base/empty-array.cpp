@@ -123,7 +123,12 @@ member_lval EmptyArray::MakePackedInl(TypedValue tv) {
     MM().mallocSmallIndex(PackedArray::SmallSizeIndex)
   );
   ad->initHeader_16(
-    HeaderKind::Packed, InitialValue, PackedArray::SmallSizeIndex
+    HeaderKind::Packed,
+    InitialValue,
+    PackedArray::packSizeIndexAndDV(
+      PackedArray::SmallSizeIndex,
+      ArrayData::kNotDVArray
+    )
   );
   ad->m_sizeAndPos = 1; // size=1, pos=0
 

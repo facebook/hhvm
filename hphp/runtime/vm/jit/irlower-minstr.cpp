@@ -918,10 +918,10 @@ void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
   v << loadzlq{sizePtr, size};
 
   { // Bail out unless size < cap
-    auto const indexw = v.makeReg();
-    v << loadw{arrayData[HeaderAuxOffset], indexw};
+    auto const indexb = v.makeReg();
+    v << loadb{arrayData[PackedArray::SizeIndexOffset], indexb};
     auto const index = v.makeReg();
-    v << movzwq{indexw, index};
+    v << movzbq{indexb, index};
     auto const cap = v.makeReg();
     auto const table =
       reinterpret_cast<uintptr_t>(kSizeIndex2PackedArrayCapacity);

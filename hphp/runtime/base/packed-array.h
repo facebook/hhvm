@@ -55,6 +55,9 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr size_t SmallSizeIndex = 3;
   static constexpr size_t MaxSizeIndex = 121;
 
+  static_assert(MaxSizeIndex <= std::numeric_limits<uint8_t>::max(),
+                "Size index must fit into 8-bits");
+
   static void Release(ArrayData*);
   // Recursively register {allocation, rootAPCHandle} with APCGCManager
   static void RegisterUncountedAllocations(ArrayData* ad,
@@ -233,6 +236,8 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
 
   static uint32_t capacity(const ArrayData*);
   static size_t heapSize(const ArrayData*);
+  static uint16_t packSizeIndexAndDV(uint8_t, ArrayData::DVArray);
+
   static void scan(const ArrayData*, type_scan::Scanner&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
@@ -278,7 +283,10 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static MixedArray* ToMixedCopy(const ArrayData*);
   static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
 
+  static constexpr auto SizeIndexOffset = HeaderAuxOffset + 1;
 private:
+  static uint8_t sizeClass(const ArrayData*);
+
   static MixedArray* ToMixedHeader(const ArrayData*, size_t);
 
   static ArrayData* Grow(ArrayData*, bool);

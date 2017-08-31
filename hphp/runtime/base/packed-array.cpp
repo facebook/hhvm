@@ -49,7 +49,11 @@ struct PackedArray::VecInitializer {
   VecInitializer() {
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyVecArray);
     ad->m_sizeAndPos = 0;
-    ad->initHeader(HeaderKind::VecArray, StaticValue);
+    ad->initHeader_16(
+      HeaderKind::VecArray,
+      StaticValue,
+      packSizeIndexAndDV(0, ArrayData::kNotDVArray)
+    );
   }
 };
 PackedArray::VecInitializer PackedArray::s_initializer;
@@ -228,7 +232,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->m_size == capacity(adIn));
 
-  auto const sizeIndex = adIn->m_aux16 + kSizeClassesPerDoubling;
+  auto const sizeIndex = sizeClass(adIn) + kSizeClassesPerDoubling;
   if (UNLIKELY(sizeIndex > MaxSizeIndex)) return nullptr;
   auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeIndex));
 
@@ -239,7 +243,11 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     // to do that by reinitializing the whole header.
     auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
     assert(ok);
-    ad->initHeader_16(adIn->m_kind, InitialValue, sizeIndex);
+    ad->initHeader_16(
+      adIn->m_kind,
+      InitialValue,
+      packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+    );
 
     assert(ad->m_size == adIn->m_size);
     assert(ad->m_pos == adIn->m_pos);
@@ -247,7 +255,11 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     // Copy everything from `adIn' to `ad', including header and m_sizeAndPos
     static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
     memcpy16_inline(ad, adIn, (adIn->m_size + 1) * sizeof(TypedValue));
-    ad->initHeader_16(adIn->m_kind, InitialValue, sizeIndex);
+    ad->initHeader_16(
+      adIn->m_kind,
+      InitialValue,
+      packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+    );
 
     assert(ad->m_size == adIn->m_size);
     assert(ad->m_pos == adIn->m_pos);
@@ -317,7 +329,7 @@ NEVER_INLINE
 ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
-  auto ad = static_cast<ArrayData*>(MM().objMallocIndex(adIn->m_aux16));
+  auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeClass(adIn)));
 
   // CopyPackedHelper will copy the header (including capacity and kind), and
   // m_sizeAndPos; since we pass convertingPackedToVec = false, it can't fail.
@@ -346,7 +358,11 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   // reinitializing the whole header.
   auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
   assert(ok);
-  ad->initHeader_16(adIn->m_kind, StaticValue, sizeIndex);
+  ad->initHeader_16(
+    adIn->m_kind,
+    StaticValue,
+    packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+  );
 
   assert(ad->kind() == adIn->kind());
   assert(capacity(ad) >= adIn->m_size);
@@ -362,7 +378,11 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
 
   auto const sizeIndex = packedArrayCapacityToSizeIndex(arr->m_size);
   auto ad = alloc_packed_static(arr->m_size);
-  ad->initHeader_16(HeaderKind::Packed, StaticValue, sizeIndex);
+  ad->initHeader_16(
+    HeaderKind::Packed,
+    StaticValue,
+    packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+  );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
 
   auto data = packedData(ad);
@@ -389,7 +409,11 @@ ALWAYS_INLINE
 ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
   auto const sizeIndex = packedArrayCapacityToSizeIndex(cap);
   auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeIndex));
-  ad->initHeader_16(hk, InitialValue, sizeIndex);
+  ad->initHeader_16(
+    hk,
+    InitialValue,
+    packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+  );
 
   assert(ad->m_kind == hk);
   assert(capacity(ad) >= cap);
@@ -507,7 +531,7 @@ void PackedArray::Release(ArrayData* ad) {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
   }
-  MM().objFreeIndex(ad, ad->m_aux16);
+  MM().objFreeIndex(ad, sizeClass(ad));
   AARCH64_WALKABLE_FRAME();
 }
 
@@ -1148,9 +1172,9 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     // convertingPackedToVec = true, it can fail and we have to handle that.
     // All we have to do afterwards is fix the kind and refcount in the copy;
     // it's easiest to do that by reinitializing the whole header.
-    auto ad = static_cast<ArrayData*>(MM().objMallocIndex(adIn->m_aux16));
+    auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeClass(adIn)));
     if (!CopyPackedHelper<true>(adIn, ad)) {
-      MM().objFreeIndex(ad, adIn->m_aux16);
+      MM().objFreeIndex(ad, sizeClass(adIn));
       SystemLib::throwInvalidArgumentExceptionObject(
         "Vecs cannot contain references");
     }
@@ -1244,7 +1268,11 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
     malloc_huge(extra + sizeof(ArrayData) + size * sizeof(TypedValue))
   );
   auto ad = reinterpret_cast<ArrayData*>(mem + extra);
-  ad->initHeader_16(array->m_kind, UncountedValue, sizeIndex);
+  ad->initHeader_16(
+    array->m_kind,
+    UncountedValue,
+    packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
+  );
   ad->m_sizeAndPos = array->m_sizeAndPos;
 
   // Do a raw copy without worrying about refcounts, and convert the values to

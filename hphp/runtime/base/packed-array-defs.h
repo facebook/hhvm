@@ -88,12 +88,26 @@ static_assert(
 
 ALWAYS_INLINE
 uint32_t PackedArray::capacity(const ArrayData* ad) {
-  return kSizeIndex2PackedArrayCapacity[ad->m_aux16];
+  return kSizeIndex2PackedArrayCapacity[sizeClass(ad)];
 }
 
 ALWAYS_INLINE
 size_t PackedArray::heapSize(const ArrayData* ad) {
-  return kSizeIndex2Size[ad->m_aux16];
+  return kSizeIndex2Size[sizeClass(ad)];
+}
+
+// Pack together the size class and the varray/darray state into a single 16-bit
+// number which can be stored in the HeapObject object. ArrayData requires the
+// varray/darray state to be in the lower 8-bits, but we're free to use the
+// upper.
+ALWAYS_INLINE
+uint16_t PackedArray::packSizeIndexAndDV(uint8_t idx, ArrayData::DVArray dv) {
+  return (static_cast<uint16_t>(idx) << 8) | dv;
+}
+
+ALWAYS_INLINE
+uint8_t PackedArray::sizeClass(const ArrayData* ad) {
+  return ad->m_aux16 >> 8;
 }
 
 inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {

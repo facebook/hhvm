@@ -66,6 +66,12 @@ struct ArrayData : MaybeCountable {
     kNumKinds = 9     // insert new values before kNumKinds.
   };
 
+  enum DVArray : uint8_t {
+    kNotDVArray,
+    kVArray,
+    kDArray
+  };
+
 protected:
   /*
    * NOTE: MixedArray no longer calls this constructor.  If you change
@@ -186,6 +192,10 @@ public:
   bool isHackArray() const { return kind() >= kDictKind; }
 
   bool isVArray() const { return isPacked() || isEmptyArray(); }
+
+  // The darray/varray state is stored in the lower 8-bits of m_aux16. The array
+  // is free to store whatever it wants in the upper 8-bits.
+  DVArray dvArray() const { return static_cast<DVArray>(m_aux16); }
 
   DataType toDataType() const {
     auto const k = kind();

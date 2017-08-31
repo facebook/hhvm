@@ -109,6 +109,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
@@ -7140,6 +7141,8 @@ DispatchSwitch:
 }
 
 static void dispatch() {
+  WorkloadStats guard(WorkloadStats::InInterp);
+
   DEBUG_ONLY auto const retAddr = dispatchImpl<false>();
   assert(retAddr == nullptr);
 }

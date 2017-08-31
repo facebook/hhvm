@@ -34,6 +34,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/program-functions.h"
 
@@ -394,6 +395,7 @@ translate(TransArgs args, FPInvOffset spOff,
   if (!tc::shouldTranslate(args.sk.func(), args.kind)) return folly::none;
 
   Timer timer(Timer::mcg_translate);
+  WorkloadStats guard(WorkloadStats::InTrans);
 
   auto const srcRec = tc::findSrcRec(args.sk);
   always_assert(srcRec);

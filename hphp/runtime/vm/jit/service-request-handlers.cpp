@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/vixl/a64/decoder-a64.h"
@@ -462,16 +463,20 @@ TCA handleResume(bool interpFirst) {
   // If we can't get a translation at the current SrcKey, interpret basic
   // blocks until we end up somewhere with a translation (which we may have
   // created, if the lease holder dropped it).
-  while (!start) {
-    INC_TPC(interp_bb);
-    if (auto retAddr = HPHP::dispatchBB()) {
-      start = retAddr;
-      break;
-    }
+  if (!start) {
+    WorkloadStats guard(WorkloadStats::InInterp);
 
-    assertx(vmpc());
-    sk = liveSK();
-    start = getTranslation(TransArgs{sk});
+    while (!start) {
+      INC_TPC(interp_bb);
+      if (auto retAddr = HPHP::dispatchBB()) {
+        start = retAddr;
+        break;
+      }
+
+      assertx(vmpc());
+      sk = liveSK();
+      start = getTranslation(TransArgs{sk});
+    }
   }
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {

@@ -144,7 +144,9 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
   let result = p node { env with saw_yield = local_ptr } in
   result, !local_ptr
 
-
+type expr_location =
+  | TopLevel
+  | InString
 
 
 let pos_name node =
@@ -675,10 +677,10 @@ and pString2: node list -> env -> expr list =
             Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
         in
         aux tl env ((pos, id)::acc)
-    | x::xs -> aux xs env ((pExpr ~top_level:false x env)::acc)
+    | x::xs -> aux xs env ((pExpr ~location:InString x env)::acc)
   in
   fun l env -> aux l env []
-and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
+and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
   let rec pExpr_ : expr_ parser = fun node env ->
     let pos = get_pos node in
     match syntax node with
@@ -791,7 +793,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         end in
       Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedNameExpression { qualified_name_expression } ->
-      Id (pos_name qualified_name_expression)
+      if location = InString
+      then String (pos_name qualified_name_expression)
+      else Id (pos_name qualified_name_expression)
     | VariableExpression { variable_expression } ->
       Lvar (pos_name variable_expression)
 
@@ -873,7 +877,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
           (pExpr binary_left_operand  env)
           (pExpr binary_right_operand env)
 
-    | Token _ when top_level -> Id (pos_name node)
+    | Token _ when location = TopLevel -> Id (pos_name node)
     | Token _ -> String (pos, unesc_dbl (text node))
 
     | YieldExpression { yield_operand; _ } when text yield_operand = "break" ->
@@ -930,7 +934,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       { embedded_subscript_receiver; embedded_subscript_index; _ } ->
       Array_get
       ( pExpr embedded_subscript_receiver env
-      , mpOptional pExpr embedded_subscript_index env
+      , mpOptional (pExpr ~location) embedded_subscript_index env
       )
     | ShapeExpression { shape_expression_fields; _ } ->
       Shape (

@@ -324,7 +324,10 @@ module WithParser(Parser : ParserType) = struct
     require_token parser TokenKind.Variable SyntaxError.error1008
 
   let require_semicolon parser =
-    require_token parser TokenKind.Semicolon SyntaxError.error1010
+    (* TODO: Kill PHPism; no semicolon required right before ?> *)
+    match peek_token_kind parser with
+    | TokenKind.QuestionGreaterThan -> parser, make_missing ()
+    | _ -> require_token parser TokenKind.Semicolon SyntaxError.error1010
 
   let require_colon parser =
     require_token parser TokenKind.Colon SyntaxError.error1020

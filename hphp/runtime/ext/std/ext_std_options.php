@@ -189,6 +189,12 @@ function clock_gettime(int $clk_id,
                        mixed &$sec,
                        mixed &$nsec): bool;
 
+/* Same as clock_gettime(), but returns a single integer in nanoseconds
+ * and throws exception on failure.
+ */
+<<__Native>>
+function clock_gettime_ns(int $clk_id): int;
+
 /* Gets number of processors.
  */
 <<__Native>>

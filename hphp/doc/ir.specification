@@ -2144,6 +2144,13 @@ To string conversions:
 
   Returns a double of the current time in seconds.
 
+| GetTimeNs, D(Int), C(Int), NF
+
+  Returns the current time of the given clock id specified as clockid_t in
+  nanoseconds as integer. This will call kernel's clock_gettime_ns() API. Note
+  that this cannot be used for CLOCK_THREAD_CPUTIME_ID, as HHVM provides
+  different semantics for that counter.
+
 | KillClsRef<slot>, ND, S(FramePtr), NF
 
   Mark the class-ref slot `slot` in frame S0 as no longer containing a

@@ -819,6 +819,10 @@ static bool HHVM_FUNCTION(clock_gettime,
   return ret == 0;
 }
 
+static int64_t HHVM_FUNCTION(clock_gettime_ns, int64_t clk_id) {
+  return gettime_ns(clockid_t(clk_id));
+}
+
 static int64_t HHVM_FUNCTION(cpu_get_count) {
   return Process::GetCPUCount();
 }
@@ -1300,6 +1304,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(getrusage);
   HHVM_FE(clock_getres);
   HHVM_FE(clock_gettime);
+  HHVM_FE(clock_gettime_ns);
   HHVM_FE(cpu_get_count);
   HHVM_FE(cpu_get_model);
   HHVM_FALIAS(ini_alter, ini_set);

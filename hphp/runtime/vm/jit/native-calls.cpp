@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/native-calls.h"
 
+#include <folly/ClockGettimeWrappers.h>
+
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -542,6 +544,8 @@ static CallMap s_callMap {
 
     /* microtime(true) */
     {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},
+    /* clock_gettime_ns($clk_id) */
+    {GetTimeNs, folly::chrono::clock_gettime_ns, DSSA, SNone, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

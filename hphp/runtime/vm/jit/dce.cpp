@@ -259,6 +259,7 @@ bool canDCE(IRInstruction* inst) {
   case KeysetEmptyElem:
   case KeysetIdx:
   case GetTime:
+  case GetTimeNs:
   case Select:
   case MemoGet:
   case LdARCtx:

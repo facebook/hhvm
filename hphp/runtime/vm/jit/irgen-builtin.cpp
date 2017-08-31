@@ -95,6 +95,7 @@ const StaticString
   s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
   s_strlen("strlen"),
+  s_clock_gettime_ns("clock_gettime_ns"),
   s_microtime("microtime"),
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2"),
@@ -463,6 +464,19 @@ SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_clock_gettime_ns(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+
+  auto const val = params[0].value;
+
+  // CLOCK_THREAD_CPUTIME_ID needs special handling
+  if (val->hasConstVal(TInt) && val->intVal() != CLOCK_THREAD_CPUTIME_ID) {
+    return gen(env, GetTimeNs, val);
+  }
+
+  return nullptr;
+}
+
 SSATmp* opt_microtime(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
 
@@ -728,6 +742,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(method_exists)
     X(sqrt)
     X(strlen)
+    X(clock_gettime_ns)
     X(microtime)
     X(max2)
     X(ceil)

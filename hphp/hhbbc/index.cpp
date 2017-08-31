@@ -1309,7 +1309,13 @@ void define_func_family(IndexData& index, borrowed_ptr<ClassInfo> cinfo,
     family->possibleFuncs.push_back(finfo);
   }
 
-  std::sort(begin(family->possibleFuncs), end(family->possibleFuncs));
+  std::sort(begin(family->possibleFuncs), end(family->possibleFuncs),
+            [] (const FuncInfo* a, const FuncInfo* b) {
+              if (auto d = a->first->name->compare(b->first->name)) {
+                return d < 0;
+              }
+              return std::less<const void*>{}(a, b);
+            });
   family->possibleFuncs.erase(
     std::unique(begin(family->possibleFuncs), end(family->possibleFuncs)),
     end(family->possibleFuncs)

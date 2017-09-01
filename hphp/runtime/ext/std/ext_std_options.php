@@ -189,8 +189,8 @@ function clock_gettime(int $clk_id,
                        mixed &$sec,
                        mixed &$nsec): bool;
 
-/* Same as clock_gettime(), but returns a single integer in nanoseconds
- * and throws exception on failure.
+/* Same as clock_gettime(), but returns a single integer in nanoseconds.
+ * Returns -1 if invalid or non-supported clock is specified.
  */
 <<__Native>>
 function clock_gettime_ns(int $clk_id): int;

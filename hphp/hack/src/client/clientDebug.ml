@@ -19,7 +19,6 @@ let main env =
     force_dormant_start = false;
     ai_mode = None;
     retries = Some 800;
-    retry_if_init = true;
     expiry = None;
     no_load = false;
     profile_log = false;

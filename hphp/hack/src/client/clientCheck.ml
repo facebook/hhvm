@@ -76,7 +76,6 @@ let connect args =
     autostart = args.autostart;
     force_dormant_start = args.force_dormant_start;
     retries = Some args.retries;
-    retry_if_init = args.retry_if_init;
     expiry = args.timeout;
     no_load = args.no_load;
     profile_log = args.profile_log;

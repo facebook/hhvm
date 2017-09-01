@@ -70,7 +70,6 @@ let main_exn env =
      * update/rebase, we need to force it to be started. *)
     force_dormant_start = env.force_dormant_start;
     retries = if env.wait then None else Some env.retries;
-    retry_if_init = true;
     expiry = None;
     no_load = false;
     profile_log = false;

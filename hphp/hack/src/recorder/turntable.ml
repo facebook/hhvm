@@ -24,7 +24,6 @@ let start_server root =
     root = root;
     from = "";
     output_json = false;
-    retry_if_init = true;
     retries = 800;
     timeout = None;
     autostart = true;

@@ -55,7 +55,6 @@ type client_check_env = {
   root: Path.t;
   from: string;
   output_json: bool;
-  retry_if_init: bool;
   retries: int;
   timeout: float option;
   autostart: bool;

@@ -17,7 +17,6 @@ type env = {
   autostart : bool;
   force_dormant_start : bool;
   retries : int option;
-  retry_if_init : bool;
   expiry : float option;
   no_load : bool;
   profile_log : bool;

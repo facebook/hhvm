@@ -1199,7 +1199,6 @@ let do_initialize_connect
       force_dormant_start = false;
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
-      retry_if_init = true; (* not actually used *)
       no_load = false; (* only relevant when autostart=true *)
       profile_log = false; (* irrelevant *)
       ai_mode = None; (* only relevant when autostart=true *)

@@ -66,7 +66,6 @@ let parse_check_args cmd =
   let mode = ref None in
   let retries = ref 800 in
   let output_json = ref false in
-  let retry_if_init = ref true in
   let no_load = ref false in
   let profile_log = ref false in
   let timeout = ref None in
@@ -327,9 +326,6 @@ let parse_check_args cmd =
       Arg.Set output_json,
       " output json for machine consumption. (default: false)";
     Common_argspecs.retries retries;
-    "--retry-if-init",
-      Arg.Bool (fun x -> retry_if_init := x),
-      " retry if the server is initializing (default: true)";
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
@@ -350,10 +346,13 @@ let parse_check_args cmd =
       " run AI module with provided options\n";
 
     (* deprecated *)
+    "--retry-if-init",
+      Arg.Bool (fun _ -> ()),
+      " (ignored)";
     "--from-vim",
-      Arg.Unit (fun () -> from := "vim"; retries := 0; retry_if_init := false),
+      Arg.Unit (fun () -> from := "vim"; retries := 0),
       " (deprecated) equivalent to \
-       --from vim --retries 0 --retry-if-init false";
+       --from vim --retries 0";
     "--from-emacs", Arg.Unit (set_from "emacs"),
       " (deprecated) equivalent to --from emacs";
     "--from-arc-diff", Arg.Unit (set_from "arc_diff"),
@@ -402,7 +401,6 @@ let parse_check_args cmd =
     root = root;
     from = !from;
     output_json = !output_json;
-    retry_if_init = !retry_if_init;
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;

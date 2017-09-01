@@ -1127,7 +1127,9 @@ let report_progress_end
     Main_loop menv
 
 
-let do_initialize_after_hello
+(* After the server has sent 'hello', it means the persistent connection is   *)
+(* ready, so we can send our backlog of file-edits to the server.             *)
+let connect_after_hello
     (server_conn: server_conn)
     (file_edits: ClientMessageQueue.client_message ImmQueue.t)
   : unit =
@@ -1158,7 +1160,7 @@ let do_initialize_after_hello
   rpc server_conn (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
 
 
-let do_initialize_start
+let connect_start
     (root: Path.t)
   : Exit_status.t =
   (* This basically does "hh_client start": a single attempt to open the     *)
@@ -1181,7 +1183,7 @@ let do_initialize_start
   ClientStart.main env_start
 
 
-let do_initialize_connect
+let connect_client
     (root: Path.t)
   : server_conn =
   let open Exit_status in
@@ -1234,7 +1236,7 @@ let do_initialize_connect
       { Lsp.Initialize.retry = true; }))
 
 
-let do_initialize_hello_attempt
+let connect_attempt_hello
     (server_conn: server_conn)
   : bool =
   (* This waits up to 3 seconds for the server to send "Hello", the first     *)
@@ -1259,55 +1261,60 @@ let do_initialize_hello_attempt
       { Lsp.Initialize.retry = true; }))
 
 
-let do_initialize ()
-  : (Initialize.result * state) =
-  let open Initialize in
+(* connect: this method attempts to connect to the server. If it can within   *)
+(* three seconds then it returns Main_loop state; if not, In_init state.      *)
+(* Errors will be reported as exceptions, including LSP ServerErrorStart.     *)
+let connect ()
+  : state =
   let start_time = Unix.time () in
-  let local_config = ServerLocalConfig.load ~silent:true in
   let root = match get_root () with
     | None -> failwith "we should have root after an initialize request"
     | Some root -> root
   in
 
-  (* This code does the connection protocol. *)
-  let _result_code = do_initialize_start root in
-  let server_conn  = do_initialize_connect root in
-  let got_hello    = do_initialize_hello_attempt server_conn in
-  let new_state =
-    if got_hello then begin
-      do_initialize_after_hello server_conn ImmQueue.empty;
-      Main_loop {
-        conn = server_conn;
-        needs_idle = true;
-        uris_with_diagnostics = SSet.empty;
-        ready_dialog_cancel = None;
-      }
-    end else begin
-      let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
-      let clear_cancel_flag state = match state with
-        | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
-        | _ -> state in
-      let handle_result ~state ~result:_ = clear_cancel_flag state in
-      let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
-      let req = print_showMessageRequest MessageType.InfoMessage
-          "Waiting for Hack server to be ready..." [] in
-      let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
-      if supports_progress () then begin
-        let progress = "hh_server initializing" in
-        print_progress progress_id_initialize (Some progress) |> notify stdout "window/progress"
-      end;
-      let ienv =
-        { In_init_env.
-          conn = server_conn;
-          start_time;
-          busy_dialog_cancel = Some cancel;
-          file_edits = ImmQueue.empty;
-          tail_env = Tail.create_env log_file;
-        } in
-      In_init ienv
-    end
+  let _result_code = connect_start root in
+  let server_conn  = connect_client root in
+  let got_hello    = connect_attempt_hello server_conn in
 
-  in
+  if got_hello then begin
+    connect_after_hello server_conn ImmQueue.empty;
+    Main_loop {
+      conn = server_conn;
+      needs_idle = true;
+      uris_with_diagnostics = SSet.empty;
+      ready_dialog_cancel = None;
+    }
+  end else begin
+    let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
+    let clear_cancel_flag state = match state with
+      | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
+      | _ -> state in
+    let handle_result ~state ~result:_ = clear_cancel_flag state in
+    let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+    let req = print_showMessageRequest MessageType.InfoMessage
+        "Waiting for Hack server to be ready..." [] in
+    let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+    if supports_progress () then begin
+      let progress = "hh_server initializing" in
+      print_progress progress_id_initialize (Some progress) |> notify stdout "window/progress"
+    end;
+    let ienv =
+      { In_init_env.
+        conn = server_conn;
+        start_time;
+        busy_dialog_cancel = Some cancel;
+        file_edits = ImmQueue.empty;
+        tail_env = Tail.create_env log_file;
+      } in
+    In_init ienv
+  end
+
+
+let do_initialize ()
+  : (Initialize.result * state) =
+  let open Initialize in
+  let local_config = ServerLocalConfig.load ~silent:true in
+  let new_state = connect () in
   let result = {
     server_capabilities = {
       textDocumentSync = {
@@ -1439,7 +1446,7 @@ let handle_event
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
-    do_initialize_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
+    connect_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
     state := report_progress_end ienv;
     None
 

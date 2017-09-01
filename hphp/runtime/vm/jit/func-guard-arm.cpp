@@ -60,7 +60,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
-  auto const start = reinterpret_cast<char*>(cb.frontier());
+  auto const start = cb.toDestAddress(cb.frontier());
 
   assertx(arm::abi(CodeKind::CrossTrace).gpUnreserved.contains(vixl::x0));
 
@@ -76,15 +76,17 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   a.  dc64  (tc::ustubs().funcPrologueRedispatch);
   a.  bind  (&after_data);
 
-  __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+  auto const end = cb.toDestAddress(cb.frontier());
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(end));
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* /*func*/) {
   if (!isPrologueStub(prologue)) {
-    // Typically a func guard is a smashable movq followed by an ldr, cmp, b,
-    // br, and a 64 bit target. However, relocation can shorten the sequence,
-    // so search backwards until the smashable movq is found.
-    for (int length = 0; length < (5 * 4) + 8; length += 4) {
+    // Typically a func guard is a smashable movq followed by an ldr, cmp, b.eq,
+    // ldr, br, and a 64 bit target. However, relocation can shorten the
+    // sequence, so search backwards until the smashable movq is found.
+    for (int length = 0; length <= (5 * 4) + 8; length += 4) {
       TCA inst = prologue - (smashableMovqLen() + length);
       if (isSmashableMovq(inst)) return inst;
     }

@@ -392,10 +392,11 @@ void Assembler::bind(Label* label) {
   label->target_ = cb_.frontier();
   while (label->IsLinked()) {
     // Get the address of the following instruction in the chain.
-    auto link = Instruction::Cast(label->link_);
-    Instruction* next_link = link->ImmPCOffsetTarget();
+    auto const link = Instruction::Cast(label->link_);
+    auto const actual_link = Instruction::Cast(cb_.toDestAddress(label->link_));
+    auto const next_link = actual_link->ImmPCOffsetTarget(link);
     // Update the instruction target.
-    link->SetImmPCOffsetTarget(Instruction::Cast(label->target_));
+    actual_link->SetImmPCOffsetTarget(Instruction::Cast(label->target_), link);
     // Update the label's link.
     // If the offset of the branch we just updated was 0 (kEndOfChain) we are
     // done.

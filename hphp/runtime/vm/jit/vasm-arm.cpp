@@ -219,20 +219,22 @@ struct Vgen {
     , catches(env.catches)
   {}
   ~Vgen() {
-    auto begin = reinterpret_cast<char*>(base);
-    auto end = reinterpret_cast<char*>(a->frontier());
-    __builtin___clear_cache(begin, end);
+    auto begin = env.cb->toDestAddress(base);
+    auto end = env.cb->toDestAddress(a->frontier());
+    __builtin___clear_cache(reinterpret_cast<char*>(begin),
+                            reinterpret_cast<char*>(end));
   }
 
   static void patch(Venv& env);
 
   static void pad(CodeBlock& cb) {
     vixl::MacroAssembler a { cb };
-    auto const begin = reinterpret_cast<char*>(cb.frontier());
+    auto const begin = cb.toDestAddress(cb.frontier());
     while (cb.available() >= 4) a.Brk(1);
     assertx(cb.available() == 0);
-    auto const end = reinterpret_cast<char*>(cb.frontier());
-    __builtin___clear_cache(begin, end);
+    auto const end = cb.toDestAddress(cb.frontier());
+    __builtin___clear_cache(reinterpret_cast<char*>(begin),
+                            reinterpret_cast<char*>(end));
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -420,11 +422,24 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static CodeAddress toReal(Venv& env, CodeAddress a) {
+  if (env.text.main().code.contains(a)) {
+    return env.text.main().code.toDestAddress(a);
+  }
+  if (env.text.cold().code.contains(a)) {
+    return env.text.cold().code.toDestAddress(a);
+  }
+  if (env.text.frozen().code.contains(a)) {
+    return env.text.frozen().code.toDestAddress(a);
+  }
+  return a;
+}
+
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
     // 'jmp' is 2 instructions, load followed by branch
-    auto const begin = reinterpret_cast<char*>(p.instr + 2 * 4);
+    auto const begin = reinterpret_cast<char*>(toReal(env, p.instr + 2 * 4));
     auto const end = begin + sizeof(env.addrs[p.target]);
     *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
     __builtin___clear_cache(begin, end);
@@ -432,7 +447,7 @@ void Vgen::patch(Venv& env) {
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
     // 'jcc' is 3 instructions, b.!cc + load followed by branch
-    auto const begin = reinterpret_cast<char*>(p.instr + 3 * 4);
+    auto const begin = reinterpret_cast<char*>(toReal(env, p.instr + 3 * 4));
     auto const end = begin + sizeof(env.addrs[p.target]);
     *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
     __builtin___clear_cache(begin, end);
@@ -543,7 +558,7 @@ void Vgen::emit(const mcprep& i) {
    */
   auto const mov_addr = emitSmashableMovq(a->code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(mov_addr, (imm << 1) | 1);
+  smashMovq(a->code().toDestAddress(mov_addr), (imm << 1) | 1);
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
@@ -745,7 +760,7 @@ void Vgen::emit(const jcc& i) {
     a->Ldr(rAsm, &data);
     a->Br(rAsm);
     a->bind(&data);
-    a->dc64(a->frontier());
+    a->dc64(a->code().toDestAddress(a->frontier()));
     a->bind(&skip);
   }
   emit(jmp{i.targets[0]});
@@ -770,7 +785,7 @@ void Vgen::emit(const jmp& i) {
   a->Ldr(rAsm, &data);
   a->Br(rAsm);
   a->bind(&data);
-  a->dc64(a->frontier());
+  a->dc64(a->code().toDestAddress(a->frontier()));
 }
 
 void Vgen::emit(const jmpi& i) {

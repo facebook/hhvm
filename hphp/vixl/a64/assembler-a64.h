@@ -556,10 +556,23 @@ class Label {
  private:
   // Indicates if the label has been bound, ie its location is fixed.
   bool is_bound_;
+
   // Branches instructions branching to this label form a chained list, with
   // their offset indicating where the next instruction is located.
   // link_ points to the latest branch instruction generated branching to this
   // branch.
+
+  // link_ and target_ will hold virtual addresses if the CodeBlock is
+  // configured as such. When binding a Label, the physical instructions will
+  // be updated with targets computed with the virtual address of the linked
+  // instructions and the virtual target_. This will cause calls to
+  // Instruction::ImmPCOffsetTarget() for the physical instruction to return
+  // target in the weeds, and so the code in relocation-arm.cpp takes this
+  // into account. Why the madness? Because translations in high memory of
+  // thread local caches will have branches distances as if they were in
+  // low memory. Ideally, this means we're very likely to have an identically-
+  // sized translation once we relocate into the code cache.
+
   // If link_ is not nullptr, the label has been linked to.
   HPHP::CodeAddress link_;
   // The label location.
@@ -1789,7 +1802,6 @@ class Assembler {
 
   // Emit the instruction at pc_.
   void Emit(Instr instruction) {
-    assert(cb_.canEmit(sizeof(instruction)));
     assert(sizeof(instruction) == sizeof(uint32_t));
     CheckBufferSpace();
 
@@ -1802,7 +1814,6 @@ class Assembler {
 
   // Emit data inline in the instruction stream.
   void EmitData(void const * data, unsigned size) {
-    assert(cb_.canEmit(size));
     CheckBufferSpace();
 
 #ifdef DEBUG
@@ -1815,7 +1826,6 @@ class Assembler {
   }
 
   inline void CheckBufferSpace() {
-    assert(cb_.available() > 0);
     if (cb_.frontier() > next_literal_pool_check_) {
       CheckLiteralPool();
     }

@@ -42,25 +42,30 @@ struct AlignImpl {
 
   static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
     vixl::MacroAssembler a { cb };
-    auto const start = reinterpret_cast<char*>(cb.frontier());
+    auto const start = cb.toDestAddress(cb.frontier());
 
     switch (context) {
-      case AlignContext::Live:
+      case AlignContext::Live: {
         assert(((bytes & 3) == 0) && "alignment must be multiple of 4");
         for (; bytes > 0; bytes -= 4) {
           a.Nop();
         }
-        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        auto const end = cb.toDestAddress(cb.frontier());
+        __builtin___clear_cache(reinterpret_cast<char*>(start),
+                                reinterpret_cast<char*>(end));
         return;
-
-      case AlignContext::Dead:
+      }
+      case AlignContext::Dead: {
         if (bytes > 4) {
           a.Brk();
           bytes -= 4;
         }
-        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        auto const end = cb.toDestAddress(cb.frontier());
+        __builtin___clear_cache(reinterpret_cast<char*>(start),
+                                reinterpret_cast<char*>(end));
         if (bytes > 0) pad(cb, AlignContext::Live, bytes);
         return;
+      }
     }
     not_reached();
   }

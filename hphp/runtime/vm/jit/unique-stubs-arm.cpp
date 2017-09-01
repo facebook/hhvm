@@ -217,8 +217,9 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   a.bind(&target_data);
   a.dc64(us.enterTCExit);
 
+  auto const end = cb.frontier();
   __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(cb.frontier()));
+                          reinterpret_cast<char*>(end));
   return start;
 }
 

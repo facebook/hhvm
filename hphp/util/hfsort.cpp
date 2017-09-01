@@ -83,6 +83,7 @@ void TargetGraph::normalizeArcWeights() {
     for (auto src : func.preds) {
       auto& arc = *arcs.find(Arc(src, f));
       arc.normalizedWeight = arc.weight / func.samples;
+      if (arc.weight == 0) continue;
       arc.avgCallOffset = arc.avgCallOffset / arc.weight;
       assert(arc.avgCallOffset < targets[src].size);
     }
@@ -129,7 +130,8 @@ void freezeClusters(const TargetGraph& cg, std::vector<Cluster>& clusters) {
 }
 
 void mergeInto(Cluster& into, Cluster&& other, const double /*aw*/ = 0) {
-  into.targets.insert(into.targets.end(), other.targets.begin(), other.targets.end());
+  into.targets.insert(into.targets.end(),
+                      other.targets.begin(), other.targets.end());
   into.size += other.size;
   into.samples += other.samples;
 

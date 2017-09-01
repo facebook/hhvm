@@ -74,9 +74,11 @@ struct JmpOutOfRange : std::exception {};
  * Maintains various state during relocation.
  */
 struct Env {
-  explicit Env(RelocationInfo& rel, CodeBlock& destBlock,
+  explicit Env(RelocationInfo& rel,
+               CodeBlock& srcBlock, CodeBlock& destBlock,
                TCA start, TCA end, CGMeta& meta, TCA* exitAddr)
     : rel(rel)
+    , srcBlock(srcBlock)
     , destBlock(destBlock)
     , start(start)
     , end(end)
@@ -88,6 +90,7 @@ struct Env {
   }
 
   RelocationInfo& rel;
+  CodeBlock& srcBlock;
   CodeBlock& destBlock;
   const TCA start, end;
   const CGMeta& meta;
@@ -166,10 +169,11 @@ InstrSet findLiterals(Instruction* start, Instruction* end) {
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
+bool relocateSmashable(Env& env, TCA srcAddr, TCA destAddr,
                        size_t& srcCount, size_t& destCount) {
-  auto const srcAddr = reinterpret_cast<TCA>(src);
-  auto const destAddr = reinterpret_cast<TCA>(dest);
+
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const src = Instruction::Cast(srcAddrActual);
 
   if (env.far.count(src)) return false;
 
@@ -179,9 +183,14 @@ bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
    * jmp that can be optimized. It's important to not simply analyze this
    * smashable jmp without first considering if it's part of a jcc.
    */
-  auto target = smashableJmpTarget(srcAddr);
+  auto target = smashableJmpTarget(srcAddrActual);
   if (target) {
-    auto sl = getSmashableFromTargetAddr(srcAddr + kSmashJmpTargetOff);
+    // Look up the smashable (jmp, jcc, etc) from the target. Note this is
+    // an actual address, and so we'll use the offset with the (potentially)
+    // virtual srcAddr when we search through smashableLocation.
+    auto slActual =
+      getSmashableFromTargetAddr(srcAddrActual + kSmashJmpTargetOff);
+    auto sl = srcAddr + (slActual - srcAddrActual);
     if (sl && env.meta.smashableLocations.count(sl)) {
       target = nullptr;
     }
@@ -209,10 +218,8 @@ bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
   }
   env.updateInternalRefs = true;
   FTRACE(3,
-         "Relocated smashable at src 0x{:08x} ",
-         "with target 0x{:08x} to 0x{:08x} (0x{:08x})\n",
-         (uint64_t)srcAddr, (uint64_t)target,
-         *((uint32_t*)destAddr), (uint64_t)destAddr);
+         "Relocated and optimized smashable at src {} with target {} to {}.\n",
+         srcAddrActual, target, env.destBlock.toDestAddress(destAddr));
 
   return true;
 }
@@ -231,9 +238,16 @@ bool relocateSmashable(Env& env, Instruction* src, Instruction* dest,
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
+bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
                         size_t& /*srcCount*/, size_t& destCount) {
-  auto const destAddr = reinterpret_cast<TCA>(dest);
+
+  auto const srcFrom = Instruction::Cast(srcAddr);
+  auto const destFrom = Instruction::Cast(destAddr);
+
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const destAddrActual = env.destBlock.toDestAddress(destAddr);
+  auto const src = Instruction::Cast(srcAddrActual);
+  auto const dest = Instruction::Cast(destAddrActual);
 
   if (!(src->IsPCRelAddressing() ||
         src->IsLoadLiteral() ||
@@ -242,7 +256,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         src->IsCompareBranch() ||
         src->IsTestBranch())) return false;
 
-  auto target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
+  auto target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
 
   // If the target is outside of the range of this relocation,
   // then update it.
@@ -255,7 +269,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
      *       scope is just a single macroassembler directive, whereas
      *       the scope of rAsm is an entire vasm instruction.
      */
-    int imm = src->ImmPCOffsetTarget() - dest;
+    int imm = src->ImmPCOffsetTarget(srcFrom) - dest;
     bool isRelative = true;
     if (src->IsPCRelAddressing()) {
       if (!is_int21(imm) || env.far.count(src)) {
@@ -264,7 +278,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
 
         vixl::MacroAssembler a { env.destBlock };
         auto const dst = vixl::Register(src->Rd(), 64);
-        a.Mov(dst, src->ImmPCOffsetTarget());
+        a.Mov(dst, src->ImmPCOffsetTarget(srcFrom));
 
         destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
         isRelative = false;
@@ -279,7 +293,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         auto const dst = vixl::Register(src->Rd(), 64);
         auto const tmp = dst.Is(rVixlScratch0)
           ? rVixlScratch1 : rVixlScratch0;
-        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
         a.Ldr(dst, vixl::MemOperand(tmp));
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
@@ -298,7 +312,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         a.B(&end, vixl::InvertCondition(cond));
-        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -315,7 +329,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         vixl::MacroAssembler a { env.destBlock };
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         auto const tmp = rVixlScratch0;
-        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
         a.Br(tmp);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
@@ -338,7 +352,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         } else {
           a.Cbz(rt, &end);
         }
-        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -363,7 +377,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         } else {
           a.Tbz(rt, bit_pos, &end);
         }
-        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -375,7 +389,7 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
 
     // Update offset if it was NOT converted from relative to absolute
     if (isRelative) {
-      dest->SetImmPCOffsetTarget(src->ImmPCOffsetTarget());
+      dest->SetImmPCOffsetTarget(src->ImmPCOffsetTarget(srcFrom), destFrom);
     } else {
       // Otherwise it was rewritten to absolute, and this
       // internal reference must be updated later.
@@ -407,10 +421,13 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
  * destCount, srcCount and rewrites are updated to reflect when an
  * instruction(s) is rewritten to a different instruction sequence.
  */
-size_t relocateImmediate(Env& env, Instruction* src, Instruction* dest,
+size_t relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
                          size_t& srcCount, size_t& destCount) {
-  auto const srcAddr = reinterpret_cast<TCA>(src);
-  auto const destAddr = reinterpret_cast<TCA>(dest);
+
+  auto const srcAddrActual = env.srcBlock.toDestAddress(srcAddr);
+  auto const destAddrActual = env.destBlock.toDestAddress(destAddr);
+  auto const src = Instruction::Cast(srcAddrActual);
+  auto const dest = Instruction::Cast(destAddrActual);
 
   if (!src->IsMovz()) return false;
 
@@ -565,34 +582,36 @@ size_t relocateImpl(Env& env) {
    */
   try {
     // Find the literals embedded within the range
-    InstrSet literals = findLiterals(Instruction::Cast(env.start),
-                                     Instruction::Cast(env.end));
+    InstrSet literals =
+      findLiterals(Instruction::Cast(env.srcBlock.toDestAddress(env.start)),
+                   Instruction::Cast(env.srcBlock.toDestAddress(env.end)));
 
     // Relocate each instruction to the destination.
     size_t srcCount, destCount;
-    for (auto src = Instruction::Cast(env.start);
-         src < Instruction::Cast(env.end);
-         src += srcCount * kInstructionSize) {
-      auto const srcAddr = reinterpret_cast<TCA>(src);
+    for (auto srcAddr = env.start;
+         srcAddr < env.end;
+         srcAddr += srcCount * kInstructionSize) {
+      auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
       auto destAddr = env.destBlock.frontier();
-      auto const dest = Instruction::Cast(destAddr);
       srcCount = 1;
       destCount = 1;
 
       // Initially copy the instruction word
-      env.destBlock.bytes(kInstructionSize, srcAddr);
+      env.destBlock.bytes(kInstructionSize,
+                          env.srcBlock.toDestAddress(srcAddr));
 
       // If it's not a literal, then attempt any special relocations
       if (!literals.count(src) &&
-          !relocateSmashable(env, src, dest, srcCount, destCount) &&
-          !relocatePCRelative(env, src, dest, srcCount, destCount) &&
-          !relocateImmediate(env, src, dest, srcCount, destCount)) {
+          !relocateSmashable(env, srcAddr, destAddr, srcCount, destCount) &&
+          !relocatePCRelative(env, srcAddr, destAddr, srcCount, destCount) &&
+          !relocateImmediate(env, srcAddr, destAddr, srcCount, destCount)) {
         // Do nothing, as the instruction word was initially copied above
       }
 
       // If we just copied the first instruction of a smashableMovq, then it may
       // have an internal reference that'll need to be adjusted below.
-      if (!literals.count(src) && isSmashableMovq(srcAddr)) {
+      if (!literals.count(src) &&
+          isSmashableMovq(env.srcBlock.toDestAddress(srcAddr))) {
         env.updateInternalRefs = true;
       }
 
@@ -627,17 +646,19 @@ size_t relocateImpl(Env& env) {
      */
     if (env.updateInternalRefs) {
       bool ok = true;
-      for (auto src = Instruction::Cast(env.start);
-           src < Instruction::Cast(env.end);
-           src = src->NextInstruction()) {
-        auto const destAddr = env.rel.adjustedAddressAfter(
-          reinterpret_cast<TCA>(src)
-        );
-        auto const dest = Instruction::Cast(destAddr);
+      for (auto srcAddr = env.start;
+           srcAddr < env.end;
+           srcAddr += kInstructionSize) {
+        auto const srcFrom = Instruction::Cast(srcAddr);
+        auto const src = Instruction::Cast(env.srcBlock.toDestAddress(srcAddr));
 
         // Adjust this instruction if A) it wasn't written from a pc relative
         // instruction to an absolute (or vice-versa) and B) it isn't a literal.
         if (!env.rewrites.count(src) && !literals.count(src)) {
+          auto const destAddr = env.rel.adjustedAddressAfter(srcAddr);
+          auto const destFrom = Instruction::Cast(destAddr);
+          auto const dest =
+            Instruction::Cast(env.destBlock.toDestAddress(destAddr));
           /*
            * PC Relative
            *   ADR/ADRP
@@ -652,9 +673,12 @@ size_t relocateImpl(Env& env) {
               src->IsUncondBranchImm() ||
               src->IsCompareBranch() ||
               src->IsTestBranch()) {
-            auto old_target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
-            auto adjusted_target = env.rel.adjustedAddressAfter(old_target);
-            auto new_target = adjusted_target ? adjusted_target : old_target;
+            auto const old_target =
+              reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
+            auto const adjusted_target =
+              env.rel.adjustedAddressAfter(old_target);
+            auto const new_target =
+              adjusted_target ? adjusted_target : old_target;
 
             /*
              * Calculate the new offset and update. At this stage, we've already
@@ -682,7 +706,8 @@ size_t relocateImpl(Env& env) {
               env.far.insert(src);
               ok = false;
             } else {
-              dest->SetImmPCOffsetTarget(Instruction::Cast(new_target));
+              dest->SetImmPCOffsetTarget(Instruction::Cast(new_target),
+                                         destFrom);
             }
           }
 
@@ -767,8 +792,10 @@ size_t relocateImpl(Env& env) {
     env.destBlock.setFrontier(destStart);
     throw;
   }
-  __builtin___clear_cache(reinterpret_cast<char*>(destStart),
-                          reinterpret_cast<char*>(env.destBlock.frontier()));
+  auto const start = env.destBlock.toDestAddress(destStart);
+  auto const end = env.destBlock.toDestAddress(env.destBlock.frontier());
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(end));
 
   return asmCount;
 }
@@ -976,6 +1003,12 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta) {
 
 void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
                                  CGMeta& meta) {
+  for (auto& li : meta.literals) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
+
   decltype(meta.smashableLocations) updatedSL;
   for (auto sl : meta.smashableLocations) {
     if (auto adjusted = rel.adjustedAddressAfter(sl)) {
@@ -985,6 +1018,16 @@ void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
     }
   }
   updatedSL.swap(meta.smashableLocations);
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
 }
 
 void findFixups(TCA start, TCA end, CGMeta& meta) {
@@ -1015,13 +1058,13 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
-                CodeBlock&,
+                CodeBlock& srcBlock,
                 CGMeta& meta,
                 TCA* exitAddr,
                 AreaIndex) {
   while (true) {
     try {
-      Env env(rel, destBlock, start, end, meta, exitAddr);
+      Env env(rel, srcBlock, destBlock, start, end, meta, exitAddr);
       return relocateImpl(env);
     } catch (JmpOutOfRange& j) {
     }

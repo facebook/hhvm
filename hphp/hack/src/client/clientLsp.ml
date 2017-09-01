@@ -160,18 +160,18 @@ let hack_errors_to_lsp_diagnostic
 (************************************************************************)
 
 type server_conn = {
-  ic : Timeout.in_channel;
-  oc : out_channel;
+  ic: Timeout.in_channel;
+  oc: out_channel;
 
   (* Pending messages sent from the server. They need to be relayed to the
      client. *)
-  pending_messages : ServerCommandTypes.push Queue.t;
+  pending_messages: ServerCommandTypes.push Queue.t;
 }
 
 module Main_env = struct
   type t = {
     conn: server_conn;
-    needs_idle : bool;
+    needs_idle: bool;
     uris_with_diagnostics: SSet.t;
     ready_dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
   }
@@ -181,9 +181,9 @@ open Main_env
 module In_init_env = struct
   type t = {
     conn: server_conn;
-    start_time : float;
+    start_time: float;
     busy_dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
-    file_edits : ClientMessageQueue.client_message ImmQueue.t;
+    file_edits: ClientMessageQueue.client_message ImmQueue.t;
     tail_env: Tail.env;
   }
 end
@@ -990,7 +990,7 @@ let do_documentFormatting
 
 (* do_server_busy: controls the progress / action-required indicator          *)
 let do_server_busy (status: ServerCommandTypes.busy_status) : unit =
-let open ServerCommandTypes in
+  let open ServerCommandTypes in
   let (progress, action) = match status with
     | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
     | Doing_local_typecheck -> (Some "Hack: checking edits", None)

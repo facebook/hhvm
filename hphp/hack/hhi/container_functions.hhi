@@ -35,7 +35,7 @@ function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 /**
  * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
  */
-function dict<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
+function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
 /**
  * Creates a `vec` from a `Traversable`, preserving order. Keys are not
  * preserved.

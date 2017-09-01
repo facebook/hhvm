@@ -746,10 +746,19 @@ let statement_errors node parents =
   | Some (error_node, error_message) ->
     [ make_error_from_node error_node error_message ]
 
-let property_errors node is_strict =
+let missing_property_check is_strict p = is_strict && is_missing (p.property_type)
+
+let invalid_var_check is_hack p = is_hack && (is_var p.property_modifiers)
+
+let property_errors node is_strict is_hack =
   match syntax node with
-  | PropertyDeclaration p when is_strict && is_missing (p.property_type) ->
-      [ make_error_from_node node SyntaxError.error2001 ]
+  | PropertyDeclaration p ->
+      let errors = [] in
+      let errors = produce_error errors (missing_property_check is_strict) p
+                   SyntaxError.error2001 node in
+      let errors = produce_error errors (invalid_var_check is_hack) p
+                   SyntaxError.error2053 p.property_modifiers in
+      errors
   | _ -> [ ]
 
 let expression_errors node parents is_hack =
@@ -919,7 +928,7 @@ let find_syntax_errors node is_strict is_hack =
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in
     let methodish_errs = methodish_errors node parents in
-    let property_errs = property_errors node is_strict in
+    let property_errs = property_errors node is_strict is_hack in
     let expr_errs = expression_errors node parents is_hack in
     let require_errs = require_errors node parents in
     let classish_errors = classish_errors node parents in

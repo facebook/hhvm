@@ -563,9 +563,9 @@ module WithExpressionAndStatementAndTypeParser
       TODO: Add an error in a later pass for Hack files. *)
       parse_methodish parser (make_missing()) (make_missing())
     | Var ->
-      (* TODO: We allow "var" as a synonym for "public" in a property; this
+      (* We allow "var" as a synonym for "public" in a property; this
       is a PHP-ism that we do not support in Hack, but we parse anyways
-      so as to give an error later.  Write an error detection pass. *)
+      so as to give an error later. *)
       let (parser, var) = assert_token parser Var in
       parse_property_declaration parser var
     | kind when SimpleParser.expects parser kind -> (parser, make_missing())

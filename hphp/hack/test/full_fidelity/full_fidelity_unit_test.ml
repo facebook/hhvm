@@ -212,6 +212,9 @@ let error_tests =
     "test_abstract_initializers";
     "test_mixed_bracketed_unbracketed_namespaces1";
     "test_mixed_bracketed_unbracketed_namespaces2";
+    "test_var_phpism";
+    "test_var_phpism2";
+    "test_var_phpism3";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

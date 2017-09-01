@@ -406,6 +406,7 @@ module WithToken(Token: TokenType) = struct
     let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot
     let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
+    let is_var        = is_specific_token Full_fidelity_token_kind.Var
 
     let get_end_of_file_children {
       end_of_file_token;

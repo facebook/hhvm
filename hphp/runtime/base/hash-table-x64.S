@@ -183,3 +183,7 @@ IMPLEMENT_NV_GET_STR(_ZN4HPHP5array9HashTableINS_8SetArrayENS_11SetArrayElmEE8Nv
 #undef IMPLEMENT_NV_GET_STR
 
 #endif
+
+#ifdef __linux__
+              .section .note.GNU-stack,"",@progbits
+#endif

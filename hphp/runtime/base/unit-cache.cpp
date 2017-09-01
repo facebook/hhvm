@@ -645,21 +645,21 @@ const std::string mangleExternCompilerVersions() {
 
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
-    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
+    + (RuntimeOption::AssertEmitted ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
-    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
-    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
-    + (RuntimeOption::AssertEmitted ? '1' : '0')
-    + RuntimeOption::EvalHackCompilerCommand + '\0'
+    + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerFallback ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerVerify ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
-    + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
+    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
+    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + RuntimeOption::EvalHackCompilerCommand + '\0'
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + mangleExternCompilerVersions();

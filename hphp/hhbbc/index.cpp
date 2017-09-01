@@ -1134,6 +1134,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
 struct NamingEnv {
   struct Define;
+  struct Seen;
 
   borrowed_ptr<ClassInfo> try_lookup(SString name) const {
     auto const it = names.find(name);
@@ -1146,16 +1147,49 @@ struct NamingEnv {
     return ret;
   }
 
+  // Return true when the name has been seen before.
+  // This is intended only for checking circular dependencies in
+  // pre-resolution time.
+  bool seen(SString name) const {
+    return names.count(name);
+  }
+
 private:
   ISStringToOne<ClassInfo> names;
+};
+
+struct NamingEnv::Seen {
+
+  // Add to the seen set.
+  explicit Seen(NamingEnv& env, SString name): env(env), name(name) {
+    ITRACE(3, "visiting {}\n", name);
+    assert(!env.seen(name));
+
+    // A name can not be simultaneously in "defined" and "visiting" state.
+    // When one reaches the "define" case, it is already preresolved, and thus
+    // it has been removed from the "visiting" set since we've done visiting it.
+    env.names[name] = nullptr;
+  }
+
+  // Remove from the seen set when going out-of-scope
+  ~Seen() {
+    env.names.erase(name);
+  }
+
+  // Prevent copying
+  Seen(const Seen&)            = delete;
+  Seen& operator=(const Seen&) = delete;
+
+private:
+  Trace::Indent indent;
+  NamingEnv& env;
+  SString name;
 };
 
 struct NamingEnv::Define {
   explicit Define(NamingEnv& env, SString n, borrowed_ptr<ClassInfo> ci,
                   borrowed_ptr<const php::Class> cls)
-    : env(env)
-    , n(n)
-  {
+      : env(env), n(n) {
     ITRACE(2, "defining {} for {}\n", n, cls->name);
     always_assert(!env.names.count(n));
     env.names[n] = ci;
@@ -1263,10 +1297,12 @@ void resolve_combinations(IndexData& index,
 void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   if (index.classInfo.count(clsName)) return;
 
-  // TODO(#3649211): we'll need to handle inheritance cycles here
-  // after hphpc is fixed not to just remove them.
-
   ITRACE(2, "preresolve: {}\n", clsName);
+  if (env.seen(clsName)) {
+    ITRACE(3, "Circular inheritance detected: {}\n", clsName);
+    return;
+  }
+  NamingEnv::Seen seen(env, clsName);
   {
     Trace::Indent indent;
     for (auto& kv : find_range(index.classes, clsName)) {

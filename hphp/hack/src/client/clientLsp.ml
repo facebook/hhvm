@@ -1316,7 +1316,7 @@ let do_initialize ()
         want_change = IncrementalSync;
         want_willSave = false;
         want_willSaveWaitUntil = false;
-        want_didSave = { includeText = false }
+        want_didSave = Some { includeText = false }
       };
       hoverProvider = true;
       completionProvider = Some {

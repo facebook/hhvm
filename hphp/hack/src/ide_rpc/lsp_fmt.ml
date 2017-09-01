@@ -279,6 +279,19 @@ let parse_didClose (params: json option) : DidClose.params =
 
 
 (************************************************************************)
+(** textDocument/didSave notification                                  **)
+(************************************************************************)
+
+let parse_didSave (params: json option) : DidSave.params =
+  let open DidSave in
+  {
+    textDocument = Jget.obj_exn params "textDocument" |> parse_textDocumentIdentifier;
+    text = Jget.string_opt params "text";
+  }
+
+
+
+(************************************************************************)
 (** textDocument/didChange notification                                **)
 (************************************************************************)
 
@@ -727,14 +740,14 @@ let print_initialize (r: Initialize.result) : json =
   in
   JSON_Object [
     "capabilities", Jprint.object_opt [
-      "textDocumentSync", Some (JSON_Object [
-        "openClose", JSON_Bool sync.want_openClose;
-        "change", print_textDocumentSyncKind sync.want_change;
-        "willSave", JSON_Bool sync.want_willSave;
-        "willSaveWaitUntil", JSON_Bool sync.want_willSaveWaitUntil;
-        "save", JSON_Object [
-          "includeText", JSON_Bool sync.want_didSave.includeText;
-        ];
+      "textDocumentSync", Some (Jprint.object_opt [
+        "openClose", Some (JSON_Bool sync.want_openClose);
+        "change", Some (print_textDocumentSyncKind sync.want_change);
+        "willSave", Some (JSON_Bool sync.want_willSave);
+        "willSaveWaitUntil", Some (JSON_Bool sync.want_willSaveWaitUntil);
+        "save", Option.map sync.want_didSave ~f:(fun save -> JSON_Object [
+          "includeText", JSON_Bool save.includeText;
+        ]);
       ]);
       "hoverProvider", Some (JSON_Bool cap.hoverProvider);
       "completionProvider", Option.map cap.completionProvider ~f:(fun comp -> JSON_Object [

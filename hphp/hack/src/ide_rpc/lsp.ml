@@ -342,7 +342,7 @@ module Initialize = struct
     want_change: textDocumentSyncKind;
     want_willSave: bool;  (* textDocument/willSave *)
     want_willSaveWaitUntil: bool;  (* textDoc.../willSaveWaitUntil *)
-    want_didSave: saveOptions;  (* textDocument/didSave *)
+    want_didSave: saveOptions option;  (* textDocument/didSave *)
   }
 
   and textDocumentSyncKind =
@@ -419,6 +419,16 @@ module DidClose = struct
 
   and didCloseTextDocumentParams = {
     textDocument: TextDocumentIdentifier.t; (* the doc that was closed *)
+  }
+end
+
+(* DidSaveTextDocument notification, method="textDocument/didSave" *)
+module DidSave = struct
+  type params = didSaveTextDocumentParams
+
+  and didSaveTextDocumentParams = {
+    textDocument: TextDocumentIdentifier.t; (* the doc that was saved *)
+    text: string option; (* content when saved; depends on includeText *)
   }
 end
 

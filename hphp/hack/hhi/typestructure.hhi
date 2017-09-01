@@ -39,33 +39,51 @@ enum TypeStructureKind : int {
   OF_UNRESOLVED = 0;
 }
 
+// Note: Nullable fields in shapes of this type may not be present, and so
+// should be considered optional. Additionally, shapes of this type may contain
+// additional fields other than those specified here.
 newtype TypeStructure<T> as shape(
-  'kind' => TypeStructureKind,
   'nullable' => ?bool,
+  'kind' => TypeStructureKind,
+  'name' => ?string,
   'classname' => ?classname<T>,
   'elem_types' => ?array,
-  'param_types' => ?array,
   'return_type' => ?array,
+  'param_types' => ?array,
   'generic_types' => ?array,
+  'root_name' => ?string,
+  'access_list' => ?array,
   'fields' => ?array,
-  'name' => ?string,
+  'allows_unknown_fields' => ?bool,
+  'is_cls_cns' => ?bool,
+  'optional_shape_field' => ?bool,
+  'value' => ?array,
+  'typevars' => ?string,
   'alias' => ?string,
 ) = shape(
-  'kind' => TypeStructureKind,
   'nullable' => ?bool,
+  'kind' => TypeStructureKind,
+  // name for generics (type variables)
+  'name' => ?string,
   // classname for classes, interfaces, enums, or traits
   'classname' => ?classname<T>,
   // for tuples
   'elem_types' => ?array,
+  'return_type' => ?array,
   // for functions
   'param_types' => ?array,
-  'return_type' => ?array,
   // for arrays, classes
   'generic_types' => ?array,
+  'root_name' => ?string,
+  'access_list' => ?array,
   // for shapes
   'fields' => ?array,
-  // name for generics (type variables)
-  'name' => ?string,
+  'allows_unknown_fields' => ?bool,
+  'is_cls_cns' => ?bool,
+  'optional_shape_field' => ?bool,
+  'value' => ?array,
+  // Comma-separated string
+  'typevars' => ?string,
   // for type aliases
   'alias' => ?string,
 );

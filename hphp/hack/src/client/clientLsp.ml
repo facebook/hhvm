@@ -1160,29 +1160,6 @@ let connect_after_hello
   rpc server_conn (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
 
 
-let connect_start
-    (root: Path.t)
-  : Exit_status.t =
-  (* This basically does "hh_client start": a single attempt to open the     *)
-  (* socket, send+read version and compare for mismatch, send handoff and    *)
-  (* read response. It will print information to stderr. If the server is in *)
-  (* an unresponsive or invalid state then it will kill the server. Next if  *)
-  (* necessary it tries to spawn the server and wait until the monitor is    *)
-  (* responsive enough to print "ready". It will do a hard program exit if   *)
-  (* there were spawn problems.                                              *)
-  let env_start =
-    { ClientStart.
-      root;
-      no_load = false;
-      profile_log = false;
-      ai_mode = None;
-      silent = true;
-      exit_on_failure = false;
-      debug_port = None;
-    } in
-  ClientStart.main env_start
-
-
 let connect_client
     (root: Path.t)
   : server_conn =
@@ -1197,13 +1174,13 @@ let connect_client
   let env_connect =
     { ClientConnect.
       root;
-      autostart = false; (* we already did a more aggressive start *)
+      autostart = true;
       force_dormant_start = false;
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
-      no_load = false; (* only relevant when autostart=true *)
+      no_load = false;
       profile_log = false; (* irrelevant *)
-      ai_mode = None; (* only relevant when autostart=true *)
+      ai_mode = None;
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;
     } in
@@ -1272,9 +1249,8 @@ let connect ()
     | Some root -> root
   in
 
-  let _result_code = connect_start root in
-  let server_conn  = connect_client root in
-  let got_hello    = connect_attempt_hello server_conn in
+  let server_conn = connect_client root in
+  let got_hello = connect_attempt_hello server_conn in
 
   if got_hello then begin
     connect_after_hello server_conn ImmQueue.empty;

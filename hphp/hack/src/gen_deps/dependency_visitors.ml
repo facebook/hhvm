@@ -8,11 +8,10 @@
  *
  *)
 
- (* This file defines a visitor on the AST which calculates dependencies
-  * between toplevel entities in Hack. It grabs toplevel entities from the
-  * global naming table and adds the corresponding dependencies.
-  *)
-open Utils
+(* This file defines a visitor on the AST which calculates dependencies
+ * between toplevel entities in Hack. It grabs toplevel entities from the
+ * global naming table and adds the corresponding dependencies.
+ *)
 open Ast
 
 
@@ -37,11 +36,27 @@ let default_env popt = {
 }
 
 let toplevel_to_string = function
-| Class s -> "class "^(strip_ns s)
-| Function f -> "function "^(strip_ns f)
-| Typedef t -> "typedef "^(strip_ns t)
-| Const c -> "const "^(strip_ns c)
+| Class s -> "class "^s
+| Function f -> "function "^f
+| Typedef t -> "typedef "^t
+| Const c -> "const "^c
 | Other -> "*UNKNOWN*"
+
+let add_dep popt toplevel ty_name =
+  (* XXX: Need to elaborate namespaces here *)
+  let ty_name = "\\"^ty_name in
+  match NamingGlobal.GEnv.type_info popt ty_name with
+  | Some (_, `Class) ->
+    let name = Class ty_name in
+    Printf.printf "%s -> %s\n"
+      (toplevel_to_string toplevel)
+      (toplevel_to_string name)
+  | Some (_, `Typedef) ->
+    let name = Typedef ty_name in
+    Printf.printf "%s -> %s\n"
+      (toplevel_to_string toplevel)
+      (toplevel_to_string name)
+  | None -> ()
 
 
 class dependency_visitor = object
@@ -81,11 +96,7 @@ class dependency_visitor = object
     | Happly ((_, ty_name), _)
     (* Only care about the base class's name *)
     | Haccess ((_, ty_name), _, _) ->
-      (* For now, just print out any types we find. We'll add deps later *)
-      let top_ent = toplevel_to_string dep_env.top in
-      let pos = Pos.string (Pos.to_absolute (fst hint)) in
-      Printf.printf "In %s, %s \n" top_ent pos;
-      Printf.printf "Found type: %s\n" ty_name
+      add_dep dep_env.popt dep_env.top ty_name
     (* No need to recurse here, since the parent class does it for us  *)
     | Hshape _
     | Hoption _

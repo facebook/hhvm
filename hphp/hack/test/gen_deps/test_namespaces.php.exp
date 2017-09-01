@@ -1,0 +1,2 @@
+test_namespaces.php
+function \B\test -> class \B\Foo

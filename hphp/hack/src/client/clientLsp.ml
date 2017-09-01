@@ -1384,6 +1384,12 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
   | _ -> state
 
 
+let handle_idle_if_necessary (state: state) (event: event) : state =
+  match state, event with
+  | Main_loop menv, Tick -> Main_loop { menv with needs_idle = true; }
+  | _ -> state
+
+
 (************************************************************************)
 (** Message handling                                                   **)
 (************************************************************************)
@@ -1624,11 +1630,7 @@ let main (env: env) : 'a =
     try
       let event = get_next_event !state client in
       ref_event := Some event;
-      if event <> Tick then begin
-        match !state with
-        | Main_loop menv -> state := Main_loop { menv with needs_idle = true; }
-        | _ -> ()
-      end;
+      state := handle_idle_if_necessary !state event;
       state := regain_lost_server_if_necessary !state event;
       state := dismiss_ready_dialog_if_necessary !state event;
       let response = handle_event ~env ~state ~client ~event in

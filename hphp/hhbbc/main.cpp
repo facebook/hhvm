@@ -250,6 +250,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalPromoteEmptyObject      = gd.PromoteEmptyObject;
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
+  RuntimeOption::EnableIntrinsicsExtension   = gd.EnableIntrinsicsExtension;
   options.DisallowDynamicVarEnvFuncs         = gd.DisallowDynamicVarEnvFuncs;
 
   return {
@@ -303,6 +304,7 @@ void write_output(
   gd.PromoteEmptyObject           = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction         = RuntimeOption::EvalJitEnableRenameFunction;
   gd.HackArrCompatNotices         = RuntimeOption::EvalHackArrCompatNotices;
+  gd.EnableIntrinsicsExtension    = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                   = std::move(apcProfile);
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;

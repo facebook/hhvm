@@ -200,6 +200,8 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     HHBBC::options.HardReturnTypeHints    = s_globalData.HardReturnTypeHints;
     HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
+    RuntimeOption::EnableIntrinsicsExtension =
+      s_globalData.EnableIntrinsicsExtension;
 
     if (HHBBC::options.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;

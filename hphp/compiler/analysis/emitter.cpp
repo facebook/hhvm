@@ -11217,6 +11217,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
   gd.CheckThisTypeHints          = RuntimeOption::EvalCheckThisTypeHints;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
+  gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.InitialNamedEntityTableSize =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

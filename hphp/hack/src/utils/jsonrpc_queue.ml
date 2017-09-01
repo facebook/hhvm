@@ -1,7 +1,6 @@
 open Core
-open Lsp_fmt
 
-type client_message_kind =
+type jsonrpc_message_kind =
  | Request
  | Notification
  | Response
@@ -11,10 +10,10 @@ let kind_to_string = function
  | Notification -> "Notification"
  | Response -> "Response"
 
-type client_message = {
+type jsonrpc_message = {
   timestamp : float;
   message_json_for_logging : string; (* the json payload *)
-  kind : client_message_kind;
+  kind : jsonrpc_message_kind;
   method_ : string; (* mandatory for request+notification; empty otherwise *)
   id : Hh_json.json option; (* mandatory for request+response *)
   params : Hh_json.json option; (* optional for request+notification *)
@@ -23,12 +22,12 @@ type client_message = {
 }
 
 type result =
-  | Message of client_message
+  | Message of jsonrpc_message
   | Fatal_exception of Marshal_tools.remote_exception_data
   | Recoverable_exception of Marshal_tools.remote_exception_data
 
 type daemon_message =
-  | Daemon_message of client_message
+  | Daemon_message of jsonrpc_message
   | Daemon_fatal_exception of Marshal_tools.remote_exception_data
   | Daemon_recoverable_exception of Marshal_tools.remote_exception_data
 
@@ -50,18 +49,19 @@ type t = {
 
 (* Try to read a message from the daemon's stdin, which is where all of the
    editor messages can be read from. May throw if the message is malformed. *)
-let read_message (reader : Buffered_line_reader.t) : client_message =
+let read_message (reader : Buffered_line_reader.t) : jsonrpc_message =
   let message = reader |> Http_lite.read_message_utf8 in
-  let json = Some (Hh_json.json_of_string message) in
+  let json = Hh_json.json_of_string message in
 
-  let id = Jget.val_opt json "id" in
-  let method_ = Jget.string_opt json "method" in
-  let params = Jget.val_opt json "params" in
-  let result = Jget.val_opt json "result" in
-  let error = Jget.obj_opt json "error" in
+  let id = Hh_json_helpers.try_get_val "id" json in
+  let method_ = Hh_json_helpers.try_get_val "method" json
+    |> Option.map ~f:Hh_json.get_string_exn in
+  let params = Hh_json_helpers.try_get_val "params" json in
+  let result = Hh_json_helpers.try_get_val "result" json in
+  let error = Hh_json_helpers.try_get_val "error" json in
   (* Following categorization mostly mirrors that of VSCode except that     *)
   (* VSCode allows number+string+null ID for response, but we allow any ID. *)
-  (* https://github.com/Microsoft/vscode-languageserver-node/blob/master/jsonrpc/src/main.ts#L655 *)
+  (* https://github.com/Microsoft/vscode-languageserver-node/blob/master/jsonrpc/src/messages.ts *)
   let kind = match id, method_, result, error with
     | Some _id, Some _method, _, _            -> Request
     | None,     Some _method, _, _            -> Notification

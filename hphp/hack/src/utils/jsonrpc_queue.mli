@@ -3,20 +3,20 @@
 
 type t
 
-type client_message_kind =
+type jsonrpc_message_kind =
  | Request
  | Notification
  | Response
 
-val kind_to_string : client_message_kind -> string
+val kind_to_string : jsonrpc_message_kind -> string
 
-type client_message = {
+type jsonrpc_message = {
   (* The timestamp field is added when this message is read. It's not part of
      the JSON RPC spec. *)
   timestamp : float;
   message_json_for_logging : string; (* the json payload *)
 
-  kind : client_message_kind;
+  kind : jsonrpc_message_kind;
   method_ : string; (* mandatory for request+notification; empty otherwise *)
   id : Hh_json.json option; (* mandatory for request+response *)
   params : Hh_json.json option; (* optional for request+notification *)
@@ -25,7 +25,7 @@ type client_message = {
 }
 
 type result =
-  | Message of client_message
+  | Message of jsonrpc_message
   | Fatal_exception of Marshal_tools.remote_exception_data
   | Recoverable_exception of Marshal_tools.remote_exception_data
 

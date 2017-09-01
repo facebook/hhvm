@@ -748,7 +748,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
         tc.isSoft() ||
         tc.isTypeVar() ||
         tc.isTypeConstant() ||
-        (tc.isThis() && !options.CheckThisTypeHints) ||
+        (tc.isThis() && !RuntimeOption::EvalCheckThisTypeHints) ||
         tc.type() != AnnotType::Object) {
       return;
     }
@@ -776,13 +776,13 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     if (t.subtypeOf(TKeyset))   return retype(AnnotType::Keyset);
   };
 
-  if (options.HardTypeHints) {
+  if (RuntimeOption::EvalHardTypeHints) {
     for (auto& p : func->params) {
       fixTypeConstraint(p.typeConstraint, TTop);
     }
   }
 
-  if (options.HardReturnTypeHints) {
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
     auto const rtype = [&] {
       if (!func->isAsync) return ainfo.inferredReturn;
       if (!is_specialized_wait_handle(ainfo.inferredReturn)) return TGen;

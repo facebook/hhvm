@@ -426,8 +426,17 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
   // The configuration command line strings were already processed above
   // Don't process them again.
+  //
+  // Note that some options depends on RepoAuthoritative, we thus set/unset them
+  // here. If we reach this code, we are invoking hhvm --hphp, which is
+  // supposed to be in repo mode only. But we are restoring it to false since
+  // we need compile_systemlib_string to actually parse the file instead of
+  // trying to load it from repo (which is the case when RepoAuthoritative is
+  // true).
+  RuntimeOption::RepoAuthoritative = true;
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
+  RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
 
   initialize_repo();
@@ -499,9 +508,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;
   }
-
-  HHBBC::options.DisallowDynamicVarEnvFuncs =
-    (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 
   return 0;
 }
@@ -786,9 +792,6 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
-  if (HHBBC::options.HardReturnTypeHints) {
-    RuntimeOption::EvalCheckReturnTypeHints = 3;
-  }
 
   // Turn off commits, because we don't want systemlib to get included
   RuntimeOption::RepoCommit = false;

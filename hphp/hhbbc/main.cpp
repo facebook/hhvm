@@ -159,11 +159,8 @@ void parse_options(int argc, char** argv) {
     ("filter-assertions",       po::value(&options.FilterAssertions))
     ("strength-reduce",         po::value(&options.StrengthReduce))
     ("func-families",           po::value(&options.FuncFamilies))
-
     ("hard-const-prop",         po::value(&options.HardConstProp))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
-    ("disallow-dyn-var-env-funcs",
-                                po::value(&options.DisallowDynamicVarEnvFuncs))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
@@ -204,6 +201,7 @@ void parse_options(int argc, char** argv) {
 
   options.TraceFunctions         = make_method_map(trace_fns);
   options.TraceBytecodes         = make_bytecode_map(trace_bcs);
+
   logging = !no_logging;
 }
 
@@ -247,11 +245,10 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   SCOPE_EXIT { Repo::shutdown(); };
 
   auto const& gd = Repo::get().global();
-  RuntimeOption::EvalPromoteEmptyObject      = gd.PromoteEmptyObject;
+  // When running hhbbc, these option is loaded from GD, and will override CLI.
+  // When running hhvm, these option is not loaded from GD, but read from CLI.
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
-  RuntimeOption::EnableIntrinsicsExtension   = gd.EnableIntrinsicsExtension;
-  options.DisallowDynamicVarEnvFuncs         = gd.DisallowDynamicVarEnvFuncs;
 
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
@@ -287,25 +284,26 @@ void write_output(
   batchCommit(ues);
   ues.clear();
 
-  auto gd                         = Repo::GlobalData{};
-  gd.UsedHHBBC                    = true;
-  gd.EnableHipHopSyntax           = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints                = options.HardTypeHints;
-  gd.CheckThisTypeHints           = options.CheckThisTypeHints;
-  gd.HardReturnTypeHints          = options.HardReturnTypeHints;
-  gd.HardPrivatePropInference     = options.HardPrivatePropInference;
-  gd.DisallowDynamicVarEnvFuncs   = options.DisallowDynamicVarEnvFuncs;
-  gd.ElideAutoloadInvokes         = options.ElideAutoloadInvokes;
-  gd.PHP7_IntSemantics            = RuntimeOption::PHP7_IntSemantics;
-  gd.PHP7_ScalarTypes             = RuntimeOption::PHP7_ScalarTypes;
-  gd.PHP7_Substr                  = RuntimeOption::PHP7_Substr;
-  gd.PHP7_Builtins                = RuntimeOption::PHP7_Builtins;
-  gd.AutoprimeGenerators          = RuntimeOption::AutoprimeGenerators;
-  gd.PromoteEmptyObject           = RuntimeOption::EvalPromoteEmptyObject;
-  gd.EnableRenameFunction         = RuntimeOption::EvalJitEnableRenameFunction;
-  gd.HackArrCompatNotices         = RuntimeOption::EvalHackArrCompatNotices;
-  gd.EnableIntrinsicsExtension    = RuntimeOption::EnableIntrinsicsExtension;
-  gd.APCProfile                   = std::move(apcProfile);
+  auto gd                        = Repo::GlobalData{};
+  gd.UsedHHBBC                   = true;
+  gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
+  gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
+  gd.CheckThisTypeHints          = RuntimeOption::EvalCheckThisTypeHints;
+  gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
+  gd.HardPrivatePropInference    = options.HardPrivatePropInference;
+  gd.DisallowDynamicVarEnvFuncs  = RuntimeOption::DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes        = options.ElideAutoloadInvokes;
+  gd.PHP7_IntSemantics           = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes            = RuntimeOption::PHP7_ScalarTypes;
+  gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
+  gd.AutoprimeGenerators         = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject          = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
+  gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
+  gd.APCProfile                  = std::move(apcProfile);
+
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

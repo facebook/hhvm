@@ -3817,7 +3817,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     mainReturn.m_type = kInvalidDataType;
     bool notMergeOnly = false;
 
-    if (Option::UseHHBBC && SystemLib::s_inited) notMergeOnly = true;
+    if (RuntimeOption::EvalUseHHBBC && SystemLib::s_inited) notMergeOnly = true;
 
     auto region = createRegion(stmts, Region::Kind::Global);
     enterRegion(region);
@@ -11201,12 +11201,12 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
 
 void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                        = Repo::GlobalData{};
-  gd.UsedHHBBC                   = Option::UseHHBBC;
+  gd.UsedHHBBC                   = RuntimeOption::EvalUseHHBBC;
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints               = HHBBC::options.HardTypeHints;
-  gd.HardReturnTypeHints         = HHBBC::options.HardReturnTypeHints;
+  gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
+  gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.HardPrivatePropInference    = true;
-  gd.DisallowDynamicVarEnvFuncs  = HHBBC::options.DisallowDynamicVarEnvFuncs;
+  gd.DisallowDynamicVarEnvFuncs  = RuntimeOption::DisallowDynamicVarEnvFuncs;
   gd.ElideAutoloadInvokes        = HHBBC::options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics           = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes            = RuntimeOption::PHP7_ScalarTypes;
@@ -11298,7 +11298,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     emitters.clear();
   };
 
-  if (!Option::UseHHBBC && ues.size()) {
+  if (!RuntimeOption::EvalUseHHBBC && ues.size()) {
     commitSome(ues);
   }
 
@@ -11324,7 +11324,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     if (ues.size()) commitSome(ues);
   };
 
-  if (Option::GenerateBinaryHHBC && !Option::UseHHBBC) {
+  if (Option::GenerateBinaryHHBC && !RuntimeOption::EvalUseHHBBC) {
     commitLoop();
   }
 
@@ -11334,13 +11334,13 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   ar->finish();
   ar.reset();
 
-  if (!Option::GenerateBinaryHHBC || Option::UseHHBBC) {
-    s_ueq.fetch(Option::UseHHBBC ? ues : ues_to_print);
+  if (!Option::GenerateBinaryHHBC || RuntimeOption::EvalUseHHBBC) {
+    s_ueq.fetch(RuntimeOption::EvalUseHHBBC ? ues : ues_to_print);
   }
 
   s_ueq.reset();
 
-  if (!Option::UseHHBBC) {
+  if (!RuntimeOption::EvalUseHHBBC) {
     if (Option::GenerateBinaryHHBC) {
       commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
     }
@@ -11413,8 +11413,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                           const char* filename, Unit** releaseUnit) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
-    HHBBC::options.HardReturnTypeHints =
-      RuntimeOption::EvalCheckReturnTypeHints >= 3;
     Option::RecordErrors = false;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;

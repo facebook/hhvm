@@ -88,7 +88,7 @@ void raise_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error_without_first_frame(msg);
-  if (RuntimeOption::RepoAuthoritative && Repo::global().HardTypeHints) {
+  if (RuntimeOption::EvalHardTypeHints) {
     raise_error("Error handler tried to recover from typehint violation");
   }
 }
@@ -99,19 +99,13 @@ void raise_return_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error(msg);
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 3 ||
-      (RuntimeOption::RepoAuthoritative &&
-       Repo::global().HardReturnTypeHints)) {
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
     raise_error("Error handler tried to recover from a return typehint "
                 "violation");
   }
 }
 
 void raise_disallowed_dynamic_call(const Func* f) {
-  if (RuntimeOption::RepoAuthoritative &&
-      Repo::global().DisallowDynamicVarEnvFuncs) {
-    raise_error(Strings::DISALLOWED_DYNCALL, f->fullName()->data());
-  }
   raise_hack_strict(
     RuntimeOption::DisallowDynamicVarEnvFuncs,
     "disallow_dynamic_var_env_funcs",

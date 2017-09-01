@@ -499,6 +499,7 @@ struct RuntimeOption {
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
+  F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.
@@ -510,11 +511,26 @@ struct RuntimeOption {
      3 - Same as 2, except if a regular type hint fails the runtime
          will not allow execution to resume normally; if the user
          error handler returns something other than boolean false,
-         the runtime will throw a fatal error (this goes together
-         with Option::HardReturnTypeHints). */                          \
+         the runtime will throw a fatal error. */                       \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  F(bool, CheckThisTypeHints,          false)                            \
-  F(bool, SoftClosureReturnTypeHints,  false)                           \
+  /* Whether to assume that `this` types will be verified by Verify*Type
+     instructions at runtime. This changes program behavior because
+     this type hints that are checked at runtime will enable additional
+     HHBBC optimizations. This is serialized in Repo::GlobalData */     \
+  F(bool, CheckThisTypeHints,          false)                           \
+  /* Whether or not to assume that VerifyParamType instructions must
+     throw if the parameter does not match the associated type
+     constraint. This changes program behavior because parameter type
+     hint validation is normally a recoverable fatal. When this option
+     is on, hhvm will fatal if the error handler tries to recover in
+     this situation.
+     1) In repo-mode, we only set this option to hphpc, and serialize
+        it in Repo::GlobalData::HardTypeHints. Subsequent invocations
+        to hhbbc/hhvm runtime will only load it from the GlobalData.
+     2) In non-repo mode, we set this option to the runtime as usual.
+     3) Both HHBBC and the runtime should query only this option
+        instead of the GlobalData. */                                   \
+  F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \

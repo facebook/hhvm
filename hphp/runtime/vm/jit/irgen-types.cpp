@@ -183,7 +183,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     if (isReturnType) {
       updateMarker(env);
       env.irb->exceptionStackBoundary();
-      if (failHard && Repo::global().HardReturnTypeHints) {
+      if (failHard && RuntimeOption::EvalCheckReturnTypeHints >= 3) {
         gen(env, VerifyRetFailHard, ldStkAddr(env, BCSPRelOffset{0}));
       } else {
         gen(env, VerifyRetFail, ldStkAddr(env, BCSPRelOffset{0}));
@@ -192,7 +192,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     }
 
     if (failHard &&
-        Repo::global().HardTypeHints &&
+        RuntimeOption::EvalHardTypeHints &&
         !(tc.isArray() && valType.maybe(TObj))) {
       gen(env, VerifyParamFailHard, cns(env, id));
     } else {

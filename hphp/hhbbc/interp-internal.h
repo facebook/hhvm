@@ -242,7 +242,9 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
      * happen if calling such frame accessing functions dynamically is
      * forbidden.
      */
-    if (options.DisallowDynamicVarEnvFuncs) return;
+    if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
+      return;
+    }
   }
 
   /*
@@ -251,7 +253,8 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
    * our locals unless they can't call such functions.
    */
   if (func.mightWriteCallerFrame() ||
-      (!options.DisallowDynamicVarEnvFuncs && func.mightBeSkipFrame())) {
+      (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
+       func.mightBeSkipFrame())) {
     readUnknownLocals(env);
     killLocals(env);
     mayUseVV(env);
@@ -271,7 +274,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
     // fallthrough
   case FPIKind::Func:
     if (!ar.func) {
-      if (!options.DisallowDynamicVarEnvFuncs) {
+      if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON) {
         readUnknownLocals(env);
         killLocals(env);
         mayUseVV(env);
@@ -294,7 +297,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
      * forbid this, we have to be pessimistic. Imagine something like
      * Vector::map calling assert.
      */
-    if (!options.DisallowDynamicVarEnvFuncs &&
+    if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
         (!ar.func || ar.func->mightBeSkipFrame())) {
       readUnknownLocals(env);
       killLocals(env);

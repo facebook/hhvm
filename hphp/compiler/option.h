@@ -186,7 +186,6 @@ struct Option {
   static bool GenerateDocComments;
   static bool DumpAst;
   static bool WholeProgram;
-  static bool UseHHBBC;  // see hhbbc/README
   static bool RecordErrors;
 
 private:

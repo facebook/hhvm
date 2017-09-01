@@ -105,7 +105,7 @@ State entry_state(const Index& index, Context const ctx,
     auto const& param = ctx.func->params[locId];
     if (ctx.func->isMemoizeImpl &&
         !param.byRef &&
-        options.HardTypeHints) {
+        RuntimeOption::EvalHardTypeHints) {
       auto const& constraint = param.typeConstraint;
       if (constraint.hasConstraint() && !constraint.isTypeVar() &&
           !constraint.isTypeConstant()) {
@@ -487,8 +487,8 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
      * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
-      !options.HardTypeHints ||
-      !options.DisallowDynamicVarEnvFuncs ||
+      !RuntimeOption::EvalHardTypeHints ||
+      RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON ||
       clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.typeConstraint);

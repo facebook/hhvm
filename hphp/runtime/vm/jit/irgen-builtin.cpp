@@ -2045,9 +2045,7 @@ void emitGetMemoKeyL(IRGS& env, int32_t locId) {
   // interpreter.
   using MK = MemoKeyConstraint;
   auto const mkc = [&]{
-    if (!RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints) {
-      return MK::None;
-    }
+    if (!RuntimeOption::EvalHardTypeHints) return MK::None;
     if (locId >= func->numParams()) return MK::None;
     return memoKeyConstraintFromTC(func->params()[locId].typeConstraint);
   }();
@@ -2159,14 +2157,11 @@ void emitVarEnvDynCall(IRGS& env) {
   auto const func = curFunc(env);
   assertx(func->dynCallTarget());
 
-  if (RuntimeOption::RepoAuthoritative &&
-      Repo::global().DisallowDynamicVarEnvFuncs) {
+  if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
     std::string msg;
-    string_printf(
-      msg,
-      Strings::DISALLOWED_DYNCALL,
-      func->fullDisplayName()->data()
-    );
+    std::string format = "(hhvm.hack.disallow_dynamic_var_env_funcs=error) " +
+                         std::string(Strings::DISALLOWED_DYNCALL);
+    string_printf(msg, format.c_str(), func->fullDisplayName()->data());
     gen(env, RaiseError, cns(env, makeStaticString(msg)));
   } else {
     gen(env, RaiseVarEnvDynCall, cns(env, func->dynCallTarget()));

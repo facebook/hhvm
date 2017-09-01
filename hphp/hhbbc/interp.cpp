@@ -1400,7 +1400,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // stay in sync with the interpreter and JIT.
   using MK = MemoKeyConstraint;
   auto const mkc = [&] {
-    if (!options.HardTypeHints) return MK::None;
+    if (!RuntimeOption::EvalHardTypeHints) return MK::None;
     if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
     auto tc = env.ctx.func->params[op.loc1].typeConstraint;
     if (tc.type() == AnnotType::Object) {
@@ -2830,13 +2830,13 @@ void in(ISS& env, const bc::OODeclExists& op) {
 void in(ISS& env, const bc::VerifyParamType& op) {
   if (env.ctx.func->isMemoizeImpl &&
       !locCouldBeRef(env, op.loc1) &&
-      options.HardTypeHints) {
+      RuntimeOption::EvalHardTypeHints) {
     // a MemoizeImpl's params have already been checked by the wrapper
     return reduce(env, bc::Nop {});
   }
 
   locAsCell(env, op.loc1);
-  if (!options.HardTypeHints) return;
+  if (!RuntimeOption::EvalHardTypeHints) return;
 
   /*
    * In HardTypeHints mode, we assume that if this opcode doesn't
@@ -2851,7 +2851,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * on.
    */
   auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
-  if (!options.CheckThisTypeHints && constraint.isThis()) {
+  if (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis()) {
     return;
   }
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
@@ -2877,15 +2877,15 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
     return;
   }
 
-  // If HardReturnTypeHints is false OR if the constraint is soft,
+  // If CheckReturnTypeHints < 3 OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
-  if (!options.HardReturnTypeHints || constraint.isSoft()
-      || (!options.CheckThisTypeHints && constraint.isThis())) {
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
+      || (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis())) {
     return;
   }
 
-  // If we reach here, then HardReturnTypeHints is true AND the constraint
+  // If we reach here, then CheckReturnTypeHints >= 3 AND the constraint
   // is not soft.  We can safely assume that either VerifyRetTypeC will
   // throw or it will produce a value whose type is compatible with the
   // return type constraint.

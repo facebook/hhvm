@@ -3953,7 +3953,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   // have. This scheme needs to agree with HHBBC and the JIT.
   using MK = MemoKeyConstraint;
   auto const mkc = [&]{
-    if (!RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints) {
+    if (!RuntimeOption::EvalHardTypeHints) {
       return MK::None;
     }
     if (loc.index >= func->numParams()) return MK::None;

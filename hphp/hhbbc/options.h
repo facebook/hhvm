@@ -210,38 +210,6 @@ struct Options {
   bool HardConstProp = true;
 
   /*
-   * Whether or not to assume that VerifyParamType instructions must
-   * throw if the parameter does not match the associated type
-   * constraint.
-   *
-   * This changes program behavior because parameter type hint
-   * validation is normally a recoverable fatal.  When this option is
-   * on, hhvm will fatal if the error handler tries to recover in this
-   * situation.
-   */
-  bool HardTypeHints = true;
-
-  /*
-   * Whether or not to assume that VerifyRetType* instructions must
-   * throw if the parameter does not match the associated type
-   * constraint.
-   *
-   * This changes program behavior because return type hint validation
-   * is normally a recoverable fatal.  When this option is on, hhvm will
-   * fatal if the error handler tries to recover in this situation.
-   */
-  bool HardReturnTypeHints = false;
-
-  /*
-   * Whether to assume that `this` types will be verified by Verify*Type
-   * instructions at runtime.
-   *
-   * This changes program behavior because this type hints that are checked
-   * at runtime will enable additional HHBBC optimizations.
-   */
-  bool CheckThisTypeHints = true;
-
-  /*
    * If true, we'll try to infer the types of declared private class
    * properties.
    *
@@ -253,12 +221,6 @@ struct Options {
    * inferred, we'll raise a notice and unserialize() returns false.
    */
   bool HardPrivatePropInference = true;
-
-  /*
-   * If true, we'll assume that dynamic function calls (like '$f()') do not
-   * have effects on unknown locals (i.e. are not extract / compact /...).
-   */
-  bool DisallowDynamicVarEnvFuncs = true;
 
   /*
    * If true, we'll perform optimizations which can remove invocations of the

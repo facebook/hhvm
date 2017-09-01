@@ -459,9 +459,7 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
 void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
                                      int paramNum, bool useStrictTypes) const {
   verifyFail(func, tv, paramNum, useStrictTypes);
-  assertx(isSoft() ||
-          !RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints ||
-          check(tv, func));
+  assertx(isSoft() || !RuntimeOption::EvalHardTypeHints || check(tv, func));
 }
 
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,

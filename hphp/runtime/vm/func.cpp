@@ -1078,9 +1078,7 @@ const StaticString s_assert("assert");
 }
 
 bool disallowDynamicVarEnvFuncs() {
-  return (RuntimeOption::RepoAuthoritative &&
-          Repo::global().DisallowDynamicVarEnvFuncs) ||
-    RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
+  return RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
 }
 
 bool funcWritesLocals(const Func* callee) {

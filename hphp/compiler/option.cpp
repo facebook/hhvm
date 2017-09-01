@@ -113,7 +113,6 @@ int Option::GetScannerType() {
 
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
-bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC");
 bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;
@@ -204,19 +203,36 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::Bind(AutoloadRoot, ini, config, "AutoloadMap.root");
   }
 
-  Config::Bind(HHBBC::options.HardTypeHints, ini, config,
-               "HardTypeHints", true);
-  Config::Bind(HHBBC::options.HardReturnTypeHints, ini, config,
-               "HardReturnTypeHints", true);
+  Config::Bind(RuntimeOption::EvalHardTypeHints, ini, config,
+               "HardTypeHints", RuntimeOption::EvalHardTypeHints);
+
+  static bool HardReturnTypeHints;
+  Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", true);
+
+  // This option takes precedence over RuntimeOption. We test to see if the
+  // option has been set (by the user) or not.
+  auto is_set = [&](const std::string& key) {
+    auto a = Config::GetBool(ini, config, key, true);
+    auto b = Config::GetBool(ini, config, key, false);
+    return a == b;
+  };
+
+  if (!is_set("CheckReturnTypeHints") || is_set("HardReturnTypeHints")) {
+    // Note that the actual value does not matter, since HHBBC only cares about
+    // whether the value is 3 or not.
+    RuntimeOption::EvalCheckReturnTypeHints = HardReturnTypeHints ? 3 : 2;
+  }
+
   Config::Bind(HHBBC::options.HardConstProp, ini, config,
-               "HardConstProp", true);
+               "HardConstProp", HHBBC::options.HardConstProp);
   Config::Bind(HHBBC::options.ElideAutoloadInvokes, ini, config,
-               "ElideAutoloadInvokes", true);
+               "ElideAutoloadInvokes", HHBBC::options.ElideAutoloadInvokes);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 
-  Config::Bind(HHBBC::options.CheckThisTypeHints, ini, config,
-               "CheckThisTypeHints", false);
+  Config::Bind(RuntimeOption::EvalCheckThisTypeHints, ini, config,
+               "CheckThisTypeHints", RuntimeOption::EvalCheckThisTypeHints);
+
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",
                RuntimeOption::EnableHipHopSyntax);
@@ -273,7 +289,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(GenerateDocComments, ini, config, "GenerateDocComments", true);
   Config::Bind(DumpAst, ini, config, "DumpAst", false);
   Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
-  Config::Bind(UseHHBBC, ini, config, "UseHHBBC", UseHHBBC);
+  Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
+               RuntimeOption::EvalUseHHBBC);
 
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);

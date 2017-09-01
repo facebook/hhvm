@@ -168,11 +168,6 @@ type server_conn = {
   pending_messages : ServerCommandTypes.push Queue.t;
 }
 
-type message_source =
-  | No_source
-  | From_client
-  | From_server
-
 module Main_env = struct
   type t = {
     conn: server_conn;
@@ -218,7 +213,7 @@ type event =
   | Server_hello
   | Server_message of ServerCommandTypes.push
   | Client_message of ClientMessageQueue.client_message
-  | Tick (* once per second, on idle, only generated when server is connected *)
+  | Tick (* once per second, on idle *)
 
 (* Here are some exit points. The "exit_fail_delay" is in case the user    *)
 (* restarted hh_server themselves: we'll give them a chance to start it up *)
@@ -451,26 +446,38 @@ let hack_log_error
 
 
 (* Determine whether to read a message from the client (the editor) or the
-   server (hh_server). *)
+   server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source
     (server: server_conn)
     (client: ClientMessageQueue.t)
-  : message_source =
+  : [> `From_server | `From_client | `No_source ] =
   (* Take action on server messages in preference to client messages, because
      server messages are very easy and quick to service (just send a message to
      the client), while client messages require us to launch a potentially
      long-running RPC command. *)
   let has_server_messages = not (Queue.is_empty server.pending_messages) in
-  if has_server_messages then From_server else
-  if ClientMessageQueue.has_message client then From_client else
+  if has_server_messages then `From_server else
+  if ClientMessageQueue.has_message client then `From_client else
 
   (* If no immediate messages are available, then wait up to 1 second. *)
   let server_read_fd = Unix.descr_of_out_channel server.oc in
   let client_read_fd = ClientMessageQueue.get_read_fd client in
   let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
-  if readable = [] then No_source
-  else if List.mem readable server_read_fd then From_server
-  else From_client
+  if readable = [] then `No_source
+  else if List.mem readable server_read_fd then `From_server
+  else `From_client
+
+
+(* A simplified version of get_message_source which only looks at client *)
+let get_client_message_source
+    (client: ClientMessageQueue.t)
+  : [> `From_client | `No_source ] =
+  if ClientMessageQueue.has_message client then `From_client else
+  let client_read_fd = ClientMessageQueue.get_read_fd client in
+  let readable, _, _ = Unix.select [client_read_fd] [] [] 1.0 in
+  if readable = [] then `No_source
+  else `From_client
+
 
 (*  Read a message unmarshaled from the server's out_channel. *)
 let read_message_from_server (server: server_conn) : event =
@@ -508,18 +515,19 @@ let get_next_event (state: state) (client: ClientMessageQueue.t) : event =
       raise (Client_recoverable_connection_exception edata)
   in
 
-  let from_either server client =
-    match get_message_source server client with
-    | No_source -> Tick
-    | From_client -> from_client client
-    | From_server -> from_server server
-  in
+  match state with
+  | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> begin
+      match get_message_source conn client with
+      | `From_client -> from_client client
+      | `From_server -> from_server conn
+      | `No_source -> Tick
+    end
+  | _ -> begin
+      match get_client_message_source client with
+      | `From_client -> from_client client
+      | `No_source -> Tick
+    end
 
-  let event = match state with
-    | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> from_either conn client
-    | _ -> from_client client
-  in
-  event
 
 
 (* cancel_if_stale: If a message is stale, throw the necessary exception to

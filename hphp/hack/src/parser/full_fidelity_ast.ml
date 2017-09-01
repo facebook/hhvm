@@ -677,6 +677,13 @@ and pString2: node list -> env -> expr list =
             Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
         in
         aux tl env ((pos, id)::acc)
+    | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ })::
+      ({ syntax = EmbeddedBracedExpression {
+          embedded_braced_expression_expression
+          ; _ }
+        ; _ } as expr_with_braces)
+      ::tl ->
+        aux tl env (pExpr ~location:InString expr_with_braces env::acc)
     | x::xs -> aux xs env ((pExpr ~location:InString x env)::acc)
   in
   fun l env -> aux l env []

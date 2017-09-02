@@ -1,0 +1,6 @@
+File "gena_correctly_types_varray_or_darray_argument.php", line 13, characters 10-72:
+Invalid return type (Typing[4110])
+File "gena_correctly_types_varray_or_darray_argument.php", line 8, characters 31-34:
+This is a nullable type
+File "gena_correctly_types_varray_or_darray_argument.php", line 12, characters 71-73:
+It is incompatible with an int

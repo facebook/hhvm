@@ -111,9 +111,18 @@ let gena env p ty =
   | r, Tarraykind (AKvec ty1) ->
     let env, ty1 = overload_extract_from_awaitable env p ty1 in
     env, (r, Tarraykind (AKvec ty1))
+  | r, Tarraykind (AKvarray ty1) ->
+    let env, ty1 = overload_extract_from_awaitable env p ty1 in
+    env, (r, Tarraykind (AKvarray ty1))
+  | r, Tarraykind (AKvarray_or_darray ty1) ->
+    let env, ty1 = overload_extract_from_awaitable env p ty1 in
+    env, (r, Tarraykind (AKvarray_or_darray ty1))
   | r, Tarraykind AKmap (ty1, ty2) ->
     let env, ty2 = overload_extract_from_awaitable env p ty2 in
     env, (r, Tarraykind (AKmap (ty1, ty2)))
+  | r, Tarraykind AKdarray (ty1, ty2) ->
+    let env, ty2 = overload_extract_from_awaitable env p ty2 in
+    env, (r, Tarraykind (AKdarray (ty1, ty2)))
   | r, Tarraykind AKshape fdm ->
     let env, fdm = overload_extract_from_awaitable_shape env p fdm in
     env, (r, Tarraykind (AKshape fdm))
@@ -176,9 +185,18 @@ let rec gen_array_rec env p ty =
   | r, Tarraykind (AKvec vty) ->
     let env, vty = is_array env vty in
     env, (r, Tarraykind (AKvec vty))
+  | r, Tarraykind (AKvarray vty) ->
+    let env, vty = is_array env vty in
+    env, (r, Tarraykind (AKvarray vty))
+  | r, Tarraykind (AKvarray_or_darray vty) ->
+    let env, vty = is_array env vty in
+    env, (r, Tarraykind (AKvarray_or_darray vty))
   | r, Tarraykind (AKmap (kty, vty)) ->
     let env, vty = is_array env vty in
     env, (r, Tarraykind (AKmap( kty, vty)))
+  | r, Tarraykind (AKdarray (kty, vty)) ->
+    let env, vty = is_array env vty in
+    env, (r, Tarraykind (AKdarray(kty, vty)))
   | r, Tarraykind (AKshape fdm) ->
     let env, fdm = Nast.ShapeMap.map_env begin fun env (tk, tv) ->
       let env, tv = is_array env tv in

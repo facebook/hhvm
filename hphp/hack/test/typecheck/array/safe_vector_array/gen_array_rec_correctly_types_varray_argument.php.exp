@@ -1,0 +1,6 @@
+File "gen_array_rec_correctly_types_varray_argument.php", line 8, characters 10-56:
+Invalid return type (Typing[4110])
+File "gen_array_rec_correctly_types_varray_argument.php", line 3, characters 46-49:
+This is a nullable type
+File "gen_array_rec_correctly_types_varray_argument.php", line 7, characters 51-53:
+It is incompatible with an int

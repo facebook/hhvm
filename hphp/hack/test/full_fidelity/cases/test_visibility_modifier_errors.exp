@@ -1,3 +1,4 @@
+(4,3)-(4,21) Method declarations require a visibility modifier such as public, private or protected.
 (6,3)-(6,9) Methods inside of interfaces may not be marked 'private'; only 'public' visibility is allowed.
 (7,3)-(7,11) Methods inside of interfaces may not be marked 'protected'; only 'public' visibility is allowed.
 (10,16)-(10,22) Methods inside of interfaces may not be marked 'private'; only 'public' visibility is allowed.

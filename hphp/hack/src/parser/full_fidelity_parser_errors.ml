@@ -612,7 +612,7 @@ let abstract_with_initializer cd_node parents =
   is_abstract && has_initializer
 
 
-let methodish_errors node parents =
+let methodish_errors node parents is_hack =
   match syntax node with
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
@@ -635,6 +635,10 @@ let methodish_errors node parents =
     let errors =
       produce_error_for_header errors class_constructor_has_static header_node
       [node] SyntaxError.error2009 modifiers in
+    let errors =
+      let missing_modifier is_hack modifiers = is_hack && is_missing modifiers in
+      produce_error errors (missing_modifier is_hack) modifiers
+      SyntaxError.error2054 header_node in
     let errors =
       produce_error_for_header errors
       class_destructor_has_non_visibility_modifier header_node [node]
@@ -927,7 +931,7 @@ let find_syntax_errors node is_strict is_hack =
     let func_errs = function_errors node parents is_strict in
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in
-    let methodish_errs = methodish_errors node parents in
+    let methodish_errs = methodish_errors node parents is_hack in
     let property_errs = property_errors node is_strict is_hack in
     let expr_errs = expression_errors node parents is_hack in
     let require_errs = require_errors node parents in

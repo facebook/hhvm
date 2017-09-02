@@ -1,3 +1,9 @@
+(4,3)-(4,20) Method declarations require a visibility modifier such as public, private or protected.
+(5,3)-(5,20) Method declarations require a visibility modifier such as public, private or protected.
 (5,22)-(5,24) Unexpected method body: interfaces may contain only method signatures, and not method implementations.
+(9,3)-(9,21) Method declarations require a visibility modifier such as public, private or protected.
 (9,22)-(9,22) A non-abstract method must have a body.
+(10,3)-(10,21) Method declarations require a visibility modifier such as public, private or protected.
+(14,3)-(14,22) Method declarations require a visibility modifier such as public, private or protected.
 (14,23)-(14,23) A non-abstract method must have a body.
+(15,3)-(15,22) Method declarations require a visibility modifier such as public, private or protected.

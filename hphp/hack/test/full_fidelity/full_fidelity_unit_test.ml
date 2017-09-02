@@ -174,6 +174,7 @@ let error_tests =
   List.map
   [
     "test_alias_errors";
+    "test_method_modifier_errors";
     "test_errors_not_strict";
     "test_errors_strict";
     "test_no_errors_strict";

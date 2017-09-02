@@ -5,3 +5,5 @@
 (18,44)-(18,44) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (25,47)-(26,1) A variable name is expected here.
 (34,47)-(35,1) A variable name is expected here.
+(18,44)-(18,55) Method declarations require a visibility modifier such as public, private or protected.
+(27,3)-(27,14) Method declarations require a visibility modifier such as public, private or protected.

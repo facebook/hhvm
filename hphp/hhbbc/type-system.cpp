@@ -1130,6 +1130,14 @@ bool checkTypeMap(const ArrayLikeMap<Key> &elems) {
   return true;
 }
 
+struct KeysetAppendInit : KeysetInit {
+  using KeysetInit::KeysetInit;
+  KeysetAppendInit& append(const Variant& v) {
+    add(*v.asTypedValue());
+    return *this;
+  }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -2201,18 +2209,36 @@ R tvImpl(const Type& t) {
   case BInitNull:    return H::template make<KindOfNull>();
   case BTrue:        return H::template make<KindOfBoolean>(true);
   case BFalse:       return H::template make<KindOfBoolean>(false);
-  case BCArrE:
+  case BArrE:
   case BSArrE:
     return H::template make<KindOfPersistentArray>(staticEmptyArray());
-  case BCVecE:
+  case BVecE:
   case BSVecE:
     return H::template make<KindOfPersistentVec>(staticEmptyVecArray());
-  case BCDictE:
+  case BDictE:
   case BSDictE:
     return H::template make<KindOfPersistentDict>(staticEmptyDictArray());
-  case BCKeysetE:
+  case BKeysetE:
   case BSKeysetE:
     return H::template make<KindOfPersistentKeyset>(staticEmptyKeysetArray());
+
+  case BCStr:
+  case BCArrE:
+  case BCArrN:
+  case BCArr:
+  case BCVecE:
+  case BCVecN:
+  case BCVec:
+  case BCDictE:
+  case BCDictN:
+  case BCDict:
+  case BCKeysetE:
+  case BCKeysetN:
+  case BCKeyset:
+    // We don't want to turn definitely counted types into constants which are
+    // static.
+    return R{};
+
   default:
     if (is_opt(t)) {
       break;
@@ -2260,6 +2286,8 @@ R tvImpl(const Type& t) {
         return H::template fromVec<VecArrayInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BDictN) == t.m_bits) {
         return H::template fromVec<DictInit>(t.m_data.packed->elems);
+      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
+        return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BArrN) == t.m_bits) {
         return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems);
       }

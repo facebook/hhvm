@@ -1,0 +1,72 @@
+---- read ----
+string(1) "d"
+array(2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+---- dim read ----
+string(1) "d"
+array(2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  array(1) {
+    [0]=>
+    string(1) "d"
+  }
+}
+---- read quiet ----
+string(1) "d"
+array(2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+---- dim read quiet----
+string(1) "d"
+array(2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  array(1) {
+    [0]=>
+    string(1) "d"
+  }
+}
+---- set ----
+array(2) {
+  ["a"]=>
+  &string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+---- dim set ----
+array(2) {
+  ["a"]=>
+  &string(1) "b"
+  ["c"]=>
+  array(1) {
+    [0]=>
+    string(1) "d"
+  }
+}
+---- unset ----
+array(2) {
+  ["a"]=>
+  &string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+---- dim unset ----
+array(2) {
+  ["a"]=>
+  &string(1) "b"
+  ["c"]=>
+  array(1) {
+    [0]=>
+    string(1) "d"
+  }
+}

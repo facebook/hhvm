@@ -1190,7 +1190,8 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
 template<MOpMode mode>
 TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
                                  const StringData* key) {
-  auto const lookup = getProp(ctx, key);
+  auto constexpr write = (mode == MOpMode::Define) || (mode == MOpMode::Unset);
+  auto const lookup = getPropImpl(ctx, key, write);
   auto const prop = lookup.prop;
 
   if (prop) {

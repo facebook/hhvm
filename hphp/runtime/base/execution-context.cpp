@@ -123,7 +123,7 @@ template<>
 void ThreadLocalNoCheck<ExecutionContext>::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();
-    setNull();
+    nullOut();
   }
 }
 

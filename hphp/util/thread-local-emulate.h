@@ -71,12 +71,12 @@ inline void ThreadLocalSetCleanupHandler(pthread_key_t cleanup_key,
  * object is a true global, and the get() method returns a thread-dependent
  * pointer from pthread's thread-specific data management.
  */
-template<typename T>
-struct ThreadLocal {
+template<bool Check, typename T>
+struct ThreadLocalImpl {
   /**
    * Constructor that has to be called from a thread-neutral place.
    */
-  ThreadLocal() : m_key(0) {
+  ThreadLocalImpl() : m_key(0) {
 #ifdef __APPLE__
     ThreadLocalCreateKey(&m_key, nullptr);
     ThreadLocalCreateKey(&m_cleanup_key,
@@ -86,8 +86,18 @@ struct ThreadLocal {
 #endif
   }
 
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(m_key);
+  NEVER_INLINE T* getCheck() const {
+    return get();
+  }
+
+  T* getNoCheck() const {
+    auto obj = (T*)pthread_getspecific(m_key);
+    assert(obj);
+    return obj;
+  }
+
+  T* get() const {
+    auto obj = (T*)pthread_getspecific(m_key);
     if (obj == nullptr) {
       obj = new T();
       ThreadLocalSetValue(m_key, obj);
@@ -113,12 +123,12 @@ struct ThreadLocal {
   /**
    * Access object's member or method through this operator overload.
    */
-  T *operator->() const {
-    return get();
+  T* operator->() const {
+    return Check ? get() : getNoCheck();
   }
 
-  T &operator*() const {
-    return *get();
+  T& operator*() const {
+    return Check ? *get() : *getNoCheck();
   }
 
 private:
@@ -129,69 +139,8 @@ private:
 #endif
 };
 
-template<typename T>
-struct ThreadLocalNoCheck {
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocalNoCheck() : m_key(0) {
-#ifdef __APPLE__
-    ThreadLocalCreateKey(&m_key, nullptr);
-    ThreadLocalCreateKey(&m_cleanup_key,
-                         ThreadLocalOnThreadExit<darwin_pthread_handler>);
-#else
-    ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
-#endif
-  }
-
-  NEVER_INLINE T *getCheck() const;
-
-  T* getNoCheck() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    assert(obj);
-    return obj;
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
-
-  void destroy() {
-    delete (T*)pthread_getspecific(m_key);
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-public:
-  void setNull() { ThreadLocalSetValue(m_key, nullptr); }
-  pthread_key_t m_key;
-
-#ifdef __APPLE__
-  pthread_key_t m_cleanup_key;
-#endif
-};
-
-template<typename T>
-T *ThreadLocalNoCheck<T>::getCheck() const {
-  T *obj = (T*)pthread_getspecific(m_key);
-  if (obj == nullptr) {
-    obj = new T();
-    ThreadLocalSetValue(m_key, obj);
-#ifdef __APPLE__
-    ThreadLocalSetCleanupHandler(m_cleanup_key, m_key,
-                                 ThreadLocalOnThreadCleanup<T>);
-#endif
-  }
-  return obj;
-}
+template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
+template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Singleton thread-local storage for T

@@ -207,16 +207,24 @@ void ThreadLocalOnThreadExit(void * p) {
  * The USE_GCC_FAST_TLS implementation of ThreadLocal is just a lazy-initialized
  * pointer wrapper. In this case, we have one ThreadLocal object per thread.
  */
-template<typename T>
-struct ThreadLocal {
-  T *get() const {
-    if (m_node.m_p == nullptr) {
-      const_cast<ThreadLocal<T>*>(this)->create();
-    }
+template<bool Check, typename T>
+struct ThreadLocalImpl {
+
+  NEVER_INLINE T* getCheck() const {
+    return get();
+  }
+
+  T* getNoCheck() const {
+    assert(m_node.m_p);
     return m_node.m_p;
   }
 
-  NEVER_INLINE void create();
+  T* get() const {
+    if (m_node.m_p == nullptr) {
+      const_cast<ThreadLocalImpl<Check,T>*>(this)->create();
+    }
+    return m_node.m_p;
+  }
 
   bool isNull() const { return m_node.m_p == nullptr; }
 
@@ -229,12 +237,12 @@ struct ThreadLocal {
     m_node.m_p = nullptr;
   }
 
-  T *operator->() const {
-    return get();
+  T* operator->() const {
+    return Check ? get() : getNoCheck();
   }
 
-  T &operator*() const {
-    return *get();
+  T& operator*() const {
+    return Check ? *get() : *getNoCheck();
   }
 
   void fixTypeIndex() {
@@ -244,63 +252,18 @@ struct ThreadLocal {
     }
   }
 
-  ThreadLocalNode<T> m_node;
-};
-
-template<typename T>
-void ThreadLocal<T>::create() {
-  if (m_node.m_on_thread_exit_fn == nullptr) {
-    m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    ThreadLocalManager::PushTop(m_node);
-  }
-  assert(m_node.m_p == nullptr);
-  m_node.m_p = new T();
-}
-
-/**
- * ThreadLocalNoCheck is a pointer wrapper like ThreadLocal, except that it is
- * explicitly initialized with getCheck(), rather than being initialized when
- * it is first dereferenced.
- */
-template<typename T>
-struct ThreadLocalNoCheck {
-  NEVER_INLINE T *getCheck() const;
-  T* getNoCheck() const {
-    assert(m_node.m_p);
-    return m_node.m_p;
+  static size_t node_ptr_offset() {
+    using Self = ThreadLocalImpl<Check,T>;
+    return offsetof(Self, m_node) + offsetof(ThreadLocalNode<T>, m_p);
   }
 
+ private:
   NEVER_INLINE void create();
-
-  bool isNull() const { return m_node.m_p == nullptr; }
-
-  void destroy() {
-    delete m_node.m_p;
-    m_node.m_p = nullptr;
-  }
-
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-  void fixTypeIndex() {
-    if (!type_scan::isKnownType(m_node.m_tyindex)) {
-      m_node.m_tyindex = type_scan::getIndexForScan<T>();
-      assert(type_scan::isKnownType(m_node.m_tyindex));
-    }
-  }
-
   ThreadLocalNode<T> m_node;
-private:
-  void setNull() { m_node.m_p = nullptr; }
 };
 
-template<typename T>
-void ThreadLocalNoCheck<T>::create() {
+template<bool Check, typename T>
+void ThreadLocalImpl<Check,T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
     ThreadLocalManager::PushTop(m_node);
@@ -308,14 +271,9 @@ void ThreadLocalNoCheck<T>::create() {
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
-template<typename T>
-T *ThreadLocalNoCheck<T>::getCheck() const {
-  if (m_node.m_p == nullptr) {
-    const_cast<ThreadLocalNoCheck<T>*>(this)->create();
-  }
-  return m_node.m_p;
-}
 
+template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
+template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Singleton thread-local storage for T

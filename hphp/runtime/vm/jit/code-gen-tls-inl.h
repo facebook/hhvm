@@ -50,8 +50,7 @@ inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
 template<typename T>
 inline void
 emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d) {
-  auto const off = offsetof(ThreadLocalNoCheck<T>, m_node) +
-                   offsetof(decltype(ThreadLocalNoCheck<T>::m_node), m_p);
+  auto const off = ThreadLocalNoCheck<T>::node_ptr_offset();
   v << load{emitTLSAddr(v, datum) + safe_cast<int32_t>(off), d};
 }
 

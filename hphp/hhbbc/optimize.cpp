@@ -612,7 +612,6 @@ void first_pass(const Index& index,
 
   if (it != fpiStack.end()) {
     fpiStack.erase(it, fpiStack.end());
-    ainfo.builtinsRemoved = true;
   }
 }
 
@@ -667,10 +666,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
   do {
     again = false;
     visit_blocks_mutable("first pass", index, ainfo, first_pass);
-    if (ainfo.builtinsRemoved) {
-      again = true;
-      ainfo.builtinsRemoved = false;
-    }
 
     FTRACE(10, "{}", show(*ainfo.ctx.func));
     /*

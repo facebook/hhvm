@@ -1030,12 +1030,30 @@ inline InvokeResult::InvokeResult(bool ok, Variant&& v) :
   val.m_aux.u_ok = ok;
 }
 
-struct ObjectData::PropAccessInfo::Hash {
+struct PropAccessInfo {
+  struct Hash;
+
+  bool operator==(const PropAccessInfo& o) const {
+    return obj == o.obj && attr == o.attr && key->same(o.key);
+  }
+
+  ObjectData* obj;
+  const StringData* key;      // note: not necessarily static
+  ObjectData::Attribute attr;
+};
+
+struct PropAccessInfo::Hash {
   size_t operator()(PropAccessInfo const& info) const {
     return hash_int64_pair(reinterpret_cast<intptr_t>(info.obj),
                            info.key->hash() |
                            (static_cast<int64_t>(info.attr) << 32));
   }
+};
+
+struct PropRecurInfo {
+  using RecurSet = req::hash_set<PropAccessInfo, PropAccessInfo::Hash>;
+  const PropAccessInfo* activePropInfo{nullptr};
+  RecurSet* activeSet{nullptr};
 };
 
 namespace {
@@ -1058,35 +1076,38 @@ namespace {
  * to a recursion error.
  */
 
-__thread ObjectData::PropRecurInfo propRecurInfo;
+IMPLEMENT_THREAD_LOCAL(PropRecurInfo, propRecurInfo);
 
 template <class Invoker>
 InvokeResult
-magic_prop_impl(const StringData* /*key*/,
-                const ObjectData::PropAccessInfo& info, Invoker invoker) {
-  if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
-    if (!propRecurInfo.activeSet) {
-      propRecurInfo.activeSet =
-        req::make_raw<ObjectData::PropRecurInfo::RecurSet>();
-      propRecurInfo.activeSet->insert(*propRecurInfo.activePropInfo);
+magic_prop_impl(const StringData* /*key*/, const PropAccessInfo& info,
+                Invoker invoker) {
+  auto recur_info = propRecurInfo.get();
+  if (UNLIKELY(recur_info->activePropInfo != nullptr)) {
+    auto activeSet = recur_info->activeSet;
+    if (!activeSet) {
+      activeSet = req::make_raw<PropRecurInfo::RecurSet>();
+      activeSet->insert(*recur_info->activePropInfo);
+      recur_info->activeSet = activeSet;
     }
-    if (!propRecurInfo.activeSet->insert(info).second) {
+    if (!activeSet->insert(info).second) {
       // We're already running a magic method on the same type here.
       return {false, make_tv<KindOfUninit>()};
     }
     SCOPE_EXIT {
-      propRecurInfo.activeSet->erase(info);
+      activeSet->erase(info);
     };
 
     return {true, invoker()};
   }
 
-  propRecurInfo.activePropInfo = &info;
+  recur_info->activePropInfo = &info;
   SCOPE_EXIT {
-    propRecurInfo.activePropInfo = nullptr;
-    if (UNLIKELY(propRecurInfo.activeSet != nullptr)) {
-      req::destroy_raw(propRecurInfo.activeSet);
-      propRecurInfo.activeSet = nullptr;
+    recur_info->activePropInfo = nullptr;
+    auto activeSet = recur_info->activeSet;
+    if (UNLIKELY(activeSet != nullptr)) {
+      req::destroy_raw(activeSet);
+      recur_info->activeSet = nullptr;
     }
   };
 
@@ -1097,7 +1118,7 @@ magic_prop_impl(const StringData* /*key*/,
 // methods.  __set takes 2 args, so it uses its own function.
 struct MagicInvoker {
   const StringData* magicFuncName;
-  const ObjectData::PropAccessInfo& info;
+  const PropAccessInfo& info;
 
   TypedValue operator()() const {
     auto const meth = info.obj->getVMClass()->lookupMethod(magicFuncName);

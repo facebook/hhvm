@@ -364,24 +364,6 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
                                       bool copyDynArray);
 
-  struct PropAccessInfo {
-    struct Hash;
-
-    bool operator==(const PropAccessInfo& o) const {
-      return obj == o.obj && attr == o.attr && key->same(o.key);
-    }
-
-    ObjectData* obj;
-    const StringData* key;      // note: not necessarily static
-    ObjectData::Attribute attr;
-  };
-
-  struct PropRecurInfo {
-    using RecurSet = req::hash_set<PropAccessInfo, PropAccessInfo::Hash>;
-    const PropAccessInfo* activePropInfo;
-    RecurSet* activeSet;
-  };
-
  private:
   template<MOpMode mode>
   TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,

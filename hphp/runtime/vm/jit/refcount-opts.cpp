@@ -2466,10 +2466,12 @@ Node* add_between(Env& env,
   assertx(new_node->type != NT::Phi);
 
   // Unlink backward pointers.
-  if (succ->type == NT::Phi) {
-    rm_phi_pred(to_phi(succ), pred);
-  } else {
-    if (debug) succ->prev = nullptr;
+  if (succ != nullptr) {
+    if (succ->type == NT::Phi) {
+      rm_phi_pred(to_phi(succ), pred);
+    } else {
+      if (debug) succ->prev = nullptr;
+    }
   }
 
   // Add forward pointers.
@@ -2477,10 +2479,12 @@ Node* add_between(Env& env,
   new_node->next = succ;
 
   // Add backward pointers.
-  if (succ->type == NT::Phi) {
-    add_phi_pred(env, to_phi(succ), new_node);
-  } else {
-    succ->prev = new_node;
+  if (succ != nullptr) {
+    if (succ->type == NT::Phi) {
+      add_phi_pred(env, to_phi(succ), new_node);
+    } else {
+      succ->prev = new_node;
+    }
   }
   new_node->prev = pred;
 

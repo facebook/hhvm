@@ -2071,18 +2071,20 @@ let scour_comments
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
         -> let open Str in
-           let line = Pos.line (get_pos node) in
+           let pos = get_pos node in
+           let line = Pos.line pos in
            let ignores = try IMap.find line fm with Not_found -> IMap.empty in
-           let reg = regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)\\[\\([0-9]+\\)\\]" in
+           let reg = regexp "HH_\\(FIXME\\|IGNORE_ERROR\\)[ \\t\\n]*\\[?\\([0-9]+\\)\\]?" in
            let txt = Trivia.text t in
            (try ignore (search_forward reg txt 0) with
            | Not_found ->
-             let msg =
-               "Inconsistent trivia classification: Received " ^
-               TriviaKind.to_string (Trivia.kind t) ^ ", but failed to match " ^
-               "regexp for FIXME or IGNORE_ERROR. Either the lexer has a bug" ^
-               "in its trivia classification, or the lowerer is more " ^
-               "restrictive then the lexer."
+             let msg = Printf.sprintf
+               "Inconsistent trivia classification: Received %s, but failed to \
+                match regexp for FIXME or IGNORE_ERROR. Either the lexer has a \
+                bug in its trivia classification, or the lowerer is more \
+                restrictive than the lexer. Source: %s"
+               (TriviaKind.to_string (Trivia.kind t))
+               (Pos.string (Pos.to_absolute pos))
              in
              failwith msg;
            );

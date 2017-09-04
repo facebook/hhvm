@@ -2006,7 +2006,7 @@ TEST(Type, EmptyArray) {
     auto const possible_e = union_of(arr_packedn(TInt), aempty());
     EXPECT_TRUE(possible_e.couldBe(aempty()));
     EXPECT_TRUE(possible_e.couldBe(arr_packedn(TInt)));
-    EXPECT_EQ(array_elem(possible_e, ival(0)), opt(TInt));
+    EXPECT_EQ(array_elem(possible_e, ival(0)).first, opt(TInt));
   }
 
   {
@@ -2015,8 +2015,8 @@ TEST(Type, EmptyArray) {
     EXPECT_TRUE(possible_e.couldBe(arr_packed({TInt, TInt})));
     EXPECT_FALSE(possible_e.couldBe(arr_packed({TInt, TInt, TInt})));
     EXPECT_FALSE(possible_e.subtypeOf(arr_packedn(TInt)));
-    EXPECT_EQ(array_elem(possible_e, ival(0)), opt(TInt));
-    EXPECT_EQ(array_elem(possible_e, ival(1)), opt(TInt));
+    EXPECT_EQ(array_elem(possible_e, ival(0)).first, opt(TInt));
+    EXPECT_EQ(array_elem(possible_e, ival(1)).first, opt(TInt));
   }
 
   {
@@ -2030,7 +2030,7 @@ TEST(Type, EmptyArray) {
     EXPECT_TRUE(estat.couldBe(TSArrE));
   }
 
-  EXPECT_EQ(array_newelem(aempty(), ival(142)), arr_packed({ival(142)}));
+  EXPECT_EQ(array_newelem(aempty(), ival(142)).first, arr_packed({ival(142)}));
 }
 
 TEST(Type, BasicArrays) {
@@ -2090,14 +2090,14 @@ TEST(Type, ArrBitCombos) {
   EXPECT_TRUE(u1.couldBe(TSArrE));
   EXPECT_TRUE(u1.couldBe(TCArrE));
   EXPECT_TRUE(u1.couldBe(sarr_packedn(TInt)));
-  EXPECT_EQ(array_elem(u1, ival(0)), TOptInt);
+  EXPECT_EQ(array_elem(u1, ival(0)).first, TOptInt);
 
   auto const u2 = union_of(TSArrE, carr_packedn(TInt));
   EXPECT_TRUE(u2.couldBe(TArrE));
   EXPECT_TRUE(u2.couldBe(TSArrE));
   EXPECT_TRUE(u2.couldBe(TCArrE));
   EXPECT_TRUE(u2.couldBe(arr_packedn(TInt)));
-  EXPECT_EQ(array_elem(u2, ival(0)), TOptInt);
+  EXPECT_EQ(array_elem(u2, ival(0)).first, TOptInt);
 }
 
 TEST(Type, ArrKey) {

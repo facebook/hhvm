@@ -3225,16 +3225,16 @@ Type arr_map_newelem(Type& map, const Type& val) {
   return ival(lastK + 1);
 }
 
-std::pair<Type, bool> array_like_elem(const Type& arr, const ArrKey& key) {
+std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
   const bool maybeEmpty = arr.m_bits & BArrLikeE;
   const bool mustBeStatic = (arr.m_bits & BSArrLike) == arr.m_bits;
 
   auto const isPhpArray = arr.subtypeOf(TOptArr);
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { isPhpArray ? TInitNull : TBottom, ThrowMode::MissingElement };
   }
-  auto ret = [&]() -> std::pair<Type, bool> {
+  auto pair = [&]() -> std::pair<Type, bool> {
     switch (arr.m_dataTag) {
     case DataTag::Str:
     case DataTag::Obj:
@@ -3269,7 +3269,11 @@ std::pair<Type, bool> array_like_elem(const Type& arr, const ArrKey& key) {
     not_reached();
   }();
 
-  if (key.mayThrow) ret.second = false;
+  std::pair<Type, ThrowMode> ret = {
+    std::move(pair.first),
+    key.mayThrow ? ThrowMode::MaybeBadKey :
+    pair.second ? ThrowMode::None : ThrowMode::MaybeMissingElement
+  };
 
   if (!ret.first.subtypeOf(TInitCell)) {
     ret.first = TInitCell;
@@ -3277,16 +3281,19 @@ std::pair<Type, bool> array_like_elem(const Type& arr, const ArrKey& key) {
 
   if (maybeEmpty) {
     if (isPhpArray) ret.first |= TInitNull;
-    ret.second = false;
+    if (ret.second == ThrowMode::None) {
+      ret.second = ThrowMode::MaybeMissingElement;
+    }
   }
 
   return ret;
 }
 
-Type array_elem(const Type& arr, const Type& undisectedKey) {
+std::pair<Type,ThrowMode>
+array_elem(const Type& arr, const Type& undisectedKey) {
   assert(arr.subtypeOf(TArr));
   auto const key = disect_array_key(undisectedKey);
-  return array_like_elem(arr, key).first;
+  return array_like_elem(arr, key);
 }
 
 /*
@@ -3302,9 +3309,9 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
  * If the key could be an illegal key type, the array may remain empty.
  */
 
-std::pair<Type,bool> array_like_set(Type arr,
-                                    const ArrKey& key,
-                                    const Type& valIn) {
+std::pair<Type,ThrowMode> array_like_set(Type arr,
+                                         const ArrKey& key,
+                                         const Type& valIn) {
 
   const bool maybeEmpty = arr.m_bits & BArrLikeE;
   const bool isVector   = arr.m_bits & BOptVec;
@@ -3315,7 +3322,8 @@ std::pair<Type,bool> array_like_set(Type arr,
   if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
 
   auto const fixRef  = !isPhpArray && valIn.couldBe(TRef);
-  auto const noThrow = !fixRef && validKey && !key.mayThrow;
+  auto const throwMode = !fixRef && validKey && !key.mayThrow ?
+    ThrowMode::None : ThrowMode::BadOperation;
   auto const& val    = fixRef ? TInitCell : valIn;
   // We don't want to store types more general than TArrKey into specialized
   // array type keys. If the key was strange (array or object), it will be more
@@ -3327,23 +3335,23 @@ std::pair<Type,bool> array_like_set(Type arr,
 
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);
-    if (isVector) return { TBottom, false };
+    if (isVector) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i && !*fixedKey.i) {
-      return { packed_impl(bits, { val }), noThrow };
+      return { packed_impl(bits, { val }), throwMode };
     }
     if (auto const k = fixedKey.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
-      return { map_impl(bits, std::move(m)), noThrow };
+      return { map_impl(bits, std::move(m)), throwMode };
     }
-    return { mapn_impl(bits, fixedKey.type, val), noThrow };
+    return { mapn_impl(bits, fixedKey.type, val), throwMode };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
-                          const Type& inVal) -> std::pair<Type,bool> {
+                          const Type& inVal) -> std::pair<Type,ThrowMode> {
     return { mapn_impl(bits,
                        union_of(inKey, fixedKey.type),
-                       union_of(inVal, val)), noThrow };
+                       union_of(inVal, val)), throwMode };
   };
 
   arr.m_bits = bits;
@@ -3358,7 +3366,7 @@ std::pair<Type,bool> array_like_set(Type arr,
     not_reached();
 
   case DataTag::None:
-    return { std::move(arr), false };
+    return { std::move(arr), ThrowMode::BadOperation };
 
   case DataTag::ArrLikeVal:
     if (maybeEmpty && !isVector) {
@@ -3382,7 +3390,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
       auto const inRange = arr_packed_set(arr, fixedKey, val);
-      return { std::move(arr), inRange && noThrow };
+      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
 
   case DataTag::ArrLikePackedN:
@@ -3390,7 +3398,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
       auto const inRange = arr_packedn_set(arr, fixedKey, val, false);
-      return { std::move(arr), inRange && noThrow };
+      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
 
   case DataTag::ArrLikeMap:
@@ -3400,7 +3408,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(std::move(mkv.first), std::move(mkv.second));
     } else {
       auto const inRange = arr_map_set(arr, fixedKey, val);
-      return { std::move(arr), inRange && noThrow };
+      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
 
   case DataTag::ArrLikeMapN:
@@ -3409,23 +3417,23 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     } else {
       auto const inRange = arr_mapn_set(arr, fixedKey, val);
-      return { std::move(arr), inRange && noThrow };
+      return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
   }
 
   not_reached();
 }
 
-std::pair<Type, bool> array_set(Type arr,
-                                const Type& undisectedKey,
-                                const Type& val) {
+std::pair<Type, ThrowMode> array_set(Type arr,
+                                     const Type& undisectedKey,
+                                     const Type& val) {
   assert(arr.subtypeOf(TArr));
 
   // Unless you know an array can't cow, you don't know if the TRef
   // will stay a TRef or turn back into a TInitCell.  Generally you
   // want a TInitGen.
   always_assert((val == TBottom || !val.subtypeOf(TRef)) &&
-         "You probably don't want to put Ref types into arrays ...");
+                "You probably don't want to put Ref types into arrays ...");
 
   auto const key = disect_array_key(undisectedKey);
   assert(key.type != TBottom);
@@ -3536,7 +3544,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
   not_reached();
 }
 
-std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
+std::pair<Type,Type> array_newelem(Type arr, const Type& val) {
   assert(arr.subtypeOf(TArr));
 
   // Unless you know an array can't cow, you don't know if the TRef
@@ -3545,11 +3553,7 @@ std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val) {
   always_assert((val == TBottom || !val.subtypeOf(TRef)) &&
          "You probably don't want to put Ref types into arrays ...");
 
-  return array_like_newelem(arr, val);
-}
-
-Type array_newelem(const Type& arr, const Type& val) {
-  return array_newelem_key(arr, val).first;
+  return array_like_newelem(std::move(arr), val);
 }
 
 std::pair<Type,Type> iter_types(const Type& iterable) {
@@ -3677,18 +3681,19 @@ ArrKey disect_vec_key(const Type& keyTy) {
   return ret;
 }
 
-std::pair<Type, bool> vec_elem(const Type& vec, const Type& undisectedKey) {
+std::pair<Type, ThrowMode>
+vec_elem(const Type& vec, const Type& undisectedKey) {
   auto const key = disect_vec_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, false};
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(vec, key);
 }
 
-std::pair<Type, bool>
+std::pair<Type, ThrowMode>
 vec_set(Type vec, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(TInitCell)) return {TBottom, false};
+  if (!val.couldBe(TInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_vec_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, false};
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
   return array_like_set(std::move(vec), key, val);
 }
@@ -3729,18 +3734,19 @@ ArrKey disect_strict_key(const Type& keyTy) {
   return ret;
 }
 
-std::pair<Type, bool> dict_elem(const Type& dict, const Type& undisectedKey) {
+std::pair<Type, ThrowMode>
+dict_elem(const Type& dict, const Type& undisectedKey) {
   auto const key = disect_strict_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, false};
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(dict, key);
 }
 
-std::pair<Type, bool>
+std::pair<Type, ThrowMode>
 dict_set(Type dict, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(TInitCell)) return {TBottom, false};
+  if (!val.couldBe(TInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_strict_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, false};
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
   return array_like_set(std::move(dict), key, val);
 }
@@ -3752,16 +3758,17 @@ std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::pair<Type, bool>
+std::pair<Type, ThrowMode>
 keyset_elem(const Type& keyset, const Type& undisectedKey) {
   auto const key = disect_strict_key(undisectedKey);
-  if (key.type == TBottom) return {TBottom, false};
+  if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(keyset, key);
 }
 
-std::pair<Type, bool> keyset_set(Type /*keyset*/, const Type&, const Type&) {
+std::pair<Type, ThrowMode>
+keyset_set(Type /*keyset*/, const Type&, const Type&) {
   // The set operation on keysets is not allowed.
-  return {TBottom, false};
+  return {TBottom, ThrowMode::BadOperation};
 }
 
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val) {

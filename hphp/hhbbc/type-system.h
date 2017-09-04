@@ -386,6 +386,15 @@ struct DArrLikeMap;
 struct DArrLikeMapN;
 using MapElems = ArrayLikeMap<Cell>;
 struct ArrKey;
+
+enum class ThrowMode {
+  None,
+  MaybeMissingElement,
+  MaybeBadKey,
+  MissingElement,
+  BadOperation,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
@@ -490,11 +499,11 @@ private:
                                               const ArrKey& key);
   friend std::pair<Type,bool> arr_packedn_elem(const Type& pack,
                                                const ArrKey& key);
-  friend std::pair<Type, bool> array_like_elem(const Type& arr,
-                                               const ArrKey& key);
-  friend std::pair<Type,bool> array_like_set(Type arr,
-                                             const ArrKey& key,
-                                             const Type& val);
+  friend std::pair<Type,ThrowMode> array_like_elem(const Type& arr,
+                                                    const ArrKey& key);
+  friend std::pair<Type,ThrowMode> array_like_set(Type arr,
+                                                  const ArrKey& key,
+                                                  const Type& val);
   friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val);
   friend bool arr_map_set(Type& map, const ArrKey& key, const Type& val);
   friend bool arr_packed_set(Type& pack, const ArrKey& key, const Type& val);
@@ -502,22 +511,12 @@ private:
                               const Type& val, bool maybeEmpty);
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
   friend Type arr_map_newelem(Type& map, const Type& val);
-  friend Type array_elem(const Type&, const Type&);
-  friend std::pair<Type,bool> array_set(Type, const Type&, const Type&);
-  friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
 
   friend struct ArrKey disect_vec_key(const Type&);
   friend struct ArrKey disect_strict_key(const Type&);
-
-  friend std::pair<Type, bool> vec_elem(const Type&, const Type&);
-  friend std::pair<Type, bool> vec_set(Type, const Type&, const Type&);
-  friend std::pair<Type, bool> dict_elem(const Type&, const Type&);
-  friend std::pair<Type, bool> dict_set(Type, const Type&, const Type&);
-  friend std::pair<Type, bool> keyset_elem(const Type&, const Type&);
-  friend std::pair<Type, bool> keyset_set(Type, const Type&, const Type&);
 
   friend Type spec_array_like_union(Type&, Type&, const Type&, const Type&);
   friend Type vec_val(SArray);
@@ -1083,63 +1082,51 @@ Type remove_uninit(Type t);
 Type add_nonemptiness(Type t);
 
 /*
+ * (array|vec|dict|keyset)_elem
+ *
  * Returns the best known type of an array inner element given a type
  * for the key.  The returned type is always a subtype of TInitCell.
  *
- * Pre: arr.subtypeOf(TArr)
+ * The returned type will be TBottom if the operation will always throw.
+ * ThrowMode indicates what kind of failures may occur.
+ *
+ * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-Type array_elem(const Type& arr, const Type& key);
+std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key);
+std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key);
+std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key);
+std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key);
 
 /*
- * Perform an array set on types.  Returns a type that represents the
+ * (array|vec|dict|keyset)_set
+ *
+ * Perform an array-like set on types.  Returns a type that represents the
  * effects of arr[key] = val.
  *
- * The returned type will be TBottom if the operation will always throw, and
- * the bool will be true if the operation can never throw.
+ * The returned type will be TBottom if the operation will always throw.
+ * ThrowMode indicates what kind of failures may occur.
  *
- * Pre arr.subtypeOf(TArr)
+ * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type, bool> array_set(Type arr, const Type& key, const Type& val);
+std::pair<Type, ThrowMode> array_set(Type arr, const Type& key,
+                                     const Type& val);
+std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val);
+std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key,
+                                    const Type& val);
+std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key,
+                                      const Type& val);
 
 /*
- * Perform a newelem operation on an array type.  Returns an array
- * that contains a new pushed-back element with the supplied value, in
- * the sense of arr[] = val.
+ * (array|vec|dict|keyset)_newelem
  *
- * Pre: arr.subtypeOf(TArr)
- */
-Type array_newelem(const Type& arr, const Type& val);
-
-/*
- * The same as array_newelem, except return the best known type of the
- * key that was added.  (This is either TInt or a subtype of it.)
- */
-std::pair<Type,Type> array_newelem_key(const Type& arr, const Type& val);
-
-/*
- * Returns the best known type for a hack array inner element given a type for
- * the key. The type returned will be TBottom if the operation will always
- * throw, and the bool will be true if the operation will never throw.
- */
-std::pair<Type, bool> vec_elem(const Type& vec, const Type& key);
-std::pair<Type, bool> dict_elem(const Type& dict, const Type& key);
-std::pair<Type, bool> keyset_elem(const Type& keyset, const Type& key);
-
-/*
- * Perform a set operation on a hack array. Returns a type that represents the
- * effects of $a[key] = val, for a hack array $a.
+ * Perform a newelem operation on an array-like type.  Returns an
+ * array that contains a new pushed-back element with the supplied
+ * value, in the sense of arr[] = val, and the best known type of the
+ * key that was added.
  *
- * The returned type will be TBottom if the operation will always throw, and
- * the bool will be true if the operation can never throw.
+ * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type, bool> vec_set(Type vec, const Type& key, const Type& val);
-std::pair<Type, bool> dict_set(Type dict, const Type& key, const Type& val);
-std::pair<Type, bool> keyset_set(Type keyset, const Type& key, const Type& val);
-
-/*
- * Perform a newelem operation on a hack array type. Returns a new type which
- * represents the result of this operation.
- */
+std::pair<Type,Type> array_newelem(Type arr, const Type& val);
 std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
 std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);

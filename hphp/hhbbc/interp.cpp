@@ -352,7 +352,8 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   auto const v = popC(env);
   auto const k = popC(env);
 
-  auto const outTy = [&] (Type ty) -> folly::Optional<std::pair<Type,bool>> {
+  auto const outTy = [&] (Type ty) ->
+    folly::Optional<std::pair<Type,ThrowMode>> {
     if (ty.subtypeOf(TArr)) {
       return array_set(std::move(ty), k, v);
     }
@@ -368,7 +369,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
   if (outTy->first.subtypeOf(TBottom)) {
     unreachable(env);
-  } else if (outTy->second) {
+  } else if (outTy->second == ThrowMode::None) {
     nothrow(env);
     if (env.collect.trackConstantArrays) constprop(env);
   }
@@ -390,7 +391,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return array_newelem(std::move(ty), std::move(v));
+      return array_newelem(std::move(ty), std::move(v)).first;
     }
     return folly::none;
   }(popC(env));

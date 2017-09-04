@@ -393,6 +393,16 @@ struct DceState {
   std::vector<UseInfo> slotUsage;
 
   /*
+   * Can be set by a minstr-final instruction to indicate the actions
+   * to take provided all previous minstrs in the group are non-pei.
+   *
+   * eg if the result of a QueryM is unused, and the whole sequence is
+   * non-pei we can kill it. Or if the result is a literal, and the
+   * whole sequence is non-pei, we can replace it with pops plus the
+   * constant.
+   */
+  folly::Optional<UseInfo> minstrUI;
+  /*
    * Flag to indicate local vs global dce.
    */
   bool isLocal{false};
@@ -1563,7 +1573,30 @@ void dce(Env& env, const bc::FPassBaseGC& op) { minstr_base(env, op, op.arg2); }
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
 void dce(Env& env, const bc::FPassDim& op)    { minstr_dim(env, op); }
 
-void dce(Env& env, const bc::QueryM& op)     { minstr_final(env, op, op.arg1); }
+void dce(Env& env, const bc::QueryM& op) {
+  if (!env.flags.wasPEI) {
+    assertx(!env.dceState.minstrUI);
+    auto ui = env.dceState.stack.back();
+    if (!isLinked(ui)) {
+      if (allUnused(ui)) {
+        addLocGenSet(env, env.flags.mayReadLocalSet);
+        ui.actions[env.id] = DceAction::Kill;
+        ui.location.id = env.id.idx;
+        env.dceState.minstrUI.emplace(std::move(ui));
+      } else if (auto const val = tv(env.stateAfter.stack.back().type)) {
+        addLocGenSet(env, env.flags.mayReadLocalSet);
+        CompactVector<Bytecode> bcs;
+        bcs.emplace_back(gen_constant(*val));
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::Replace;
+        ui.location.id = env.id.idx;
+        env.dceState.minstrUI.emplace(std::move(ui));
+      }
+    }
+  }
+  minstr_final(env, op, op.arg1);
+}
+
 void dce(Env& env, const bc::VGetM& op)      { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetM& op)       { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::IncDecM& op)    { minstr_final(env, op, op.arg1); }
@@ -1739,7 +1772,45 @@ dce_visit(const Index& index,
       states[idx].second,
       states[idx+1].first,
     };
-    dispatch_dce(visit_env, op);
+    auto const handled = [&] {
+      if (!dceState.minstrUI) return false;
+      if (visit_env.flags.wasPEI) {
+        dceState.minstrUI.clear();
+        return false;
+      }
+      if (isMemberDimOp(op.op)) {
+        dceState.minstrUI->actions[visit_env.id] = DceAction::Kill;
+        // we're almost certainly going to delete this op, but we might not,
+        // so we need to record its local uses etc just in case.
+        return false;
+      }
+      if (isMemberBaseOp(op.op)) {
+        auto const& final = blk->hhbcs[dceState.minstrUI->location.id];
+        if (final.numPop()) {
+          CompactVector<Bytecode> bcs;
+          for (auto i = 0; i < final.numPop(); i++) {
+            use(dceState.forcedLiveLocations,
+                dceState.stack, dceState.stack.size() - 1 - i);
+            if (op.op == Op::BaseR && i == op.BaseR.arg1) {
+              bcs.push_back(bc::PopR {});
+            } else {
+              bcs.push_back(bc::PopC {});
+            }
+          }
+          dceState.replaceMap.emplace(visit_env.id, std::move(bcs));
+          dceState.minstrUI->actions[visit_env.id] = DceAction::Replace;
+        } else {
+          dceState.minstrUI->actions[visit_env.id] = DceAction::Kill;
+        }
+        commitActions(visit_env, false, dceState.minstrUI->actions);
+        dceState.minstrUI.clear();
+        return true;
+      }
+      return false;
+    }();
+    if (!handled) {
+      dispatch_dce(visit_env, op);
+    }
 
     /*
      * When we see a PEI, liveness must take into account the fact
@@ -1771,7 +1842,9 @@ dce_visit(const Index& index,
           | unsplit<std::string>(" ");
       }()
     );
-
+    if (dceState.minstrUI) {
+      FTRACE(4, "    minstr ui: {}\n", show(*dceState.minstrUI));
+    }
     FTRACE(4, "    cls-ref slots: {}\n{}\n",
       slot_bits_string(dceState.ainfo.ctx.func, dceState.liveSlots),
       [&]{
@@ -1793,6 +1866,7 @@ dce_visit(const Index& index,
     assert(dceState.stack.size() == states[idx].first.stack.size());
   }
 
+  dceState.minstrUI.clear();
   return dceState;
 }
 

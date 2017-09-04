@@ -2646,6 +2646,17 @@ Type promote_emptyish(Type a, Type b) {
   return union_of(a, b);
 }
 
+Emptiness emptiness(const Type& t) {
+  auto const empty_mask = BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE;
+  if ((t.m_bits & empty_mask) == t.m_bits) return Emptiness::Empty;
+  auto const non_empty_mask = BTrue | BArrN | BVecN | BDictN | BKeysetN;
+  if ((t.m_bits & non_empty_mask) == t.m_bits) return Emptiness::NonEmpty;
+  if (auto v = tv(t)) {
+    return cellToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
+  }
+  return Emptiness::Maybe;
+}
+
 void widen_type_impl(Type& t, uint32_t depth) {
   // Right now to guarantee termination we need to just limit the nesting depth
   // of the type to a fixed degree.

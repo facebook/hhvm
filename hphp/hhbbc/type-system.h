@@ -387,6 +387,12 @@ struct DArrLikeMapN;
 using MapElems = ArrayLikeMap<Cell>;
 struct ArrKey;
 
+enum class Emptiness {
+  Empty,
+  NonEmpty,
+  Maybe
+};
+
 enum class ThrowMode {
   None,
   MaybeMissingElement,
@@ -486,6 +492,7 @@ private:
   friend Type widen_type(Type);
   friend Type widening_union(const Type&, const Type&);
   friend Type promote_emptyish(Type, Type);
+  friend Emptiness emptiness(const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
   friend bool is_opt(const Type&);

@@ -699,8 +699,13 @@ folly::Optional<Type> key_type_or_fixup(ISS& env, Op op) {
 //////////////////////////////////////////////////////////////////////
 // base ops
 
-Base miBaseLocal(ISS& env, LocalId locBase, bool isDefine) {
+Base miBaseLocal(ISS& env, LocalId locBase, MOpMode mode) {
   auto const locName = env.ctx.func->locals[locBase].name;
+  auto const isDefine = mode == MOpMode::Define;
+  if (mode == MOpMode::None ||
+      (mode == MOpMode::Warn && !locCouldBeUninit(env, locBase))) {
+    nothrow(env);
+  }
   // If we're changing the local to define it, we don't need to do an miThrow
   // yet---the promotions (to array or stdClass) on previously uninitialized
   // locals happen before raising warnings that could throw, so we can wait
@@ -1085,16 +1090,18 @@ void pessimisticFinalElemD(ISS& env, const Type& key, const Type& ty) {
   }
 }
 
+template<typename F>
 void miFinalCGetElem(ISS& env, int32_t nDiscard,
-                     const Type& key, bool nullOnMissing) {
-  auto const ty = [&] {
+                     const Type& key, bool nullOnMissing,
+                     F transform) {
+  auto ty = [&] {
     if (auto type = array_do(env, nullOnMissing, elem, key)) {
       return std::move(*type);
     }
     return TInitCell;
   }();
   discard(env, nDiscard);
-  push(env, ty);
+  push(env, transform(std::move(ty)));
 }
 
 void miFinalVGetElem(ISS& env, int32_t nDiscard, const Type& key) {
@@ -1537,7 +1544,7 @@ void in(ISS& env, const bc::BaseSL& op) {
 }
 
 void in(ISS& env, const bc::BaseL& op) {
-  startBase(env, miBaseLocal(env, op.loc1, op.subop2 == MOpMode::Define));
+  startBase(env, miBaseLocal(env, op.loc1, op.subop2));
 }
 
 void in(ISS& env, const bc::BaseC& op) {
@@ -1553,6 +1560,7 @@ void in(ISS& env, const bc::BaseC& op) {
       (uint32_t)env.state.stack.size() - op.arg1 - 1
     }
   );
+  nothrow(env);
 }
 
 void in(ISS& env, const bc::BaseR& op) {
@@ -1569,11 +1577,13 @@ void in(ISS& env, const bc::BaseR& op) {
       (uint32_t)env.state.stack.size() - op.arg1 - 1
     }
   );
+  nothrow(env);
 }
 
 void in(ISS& env, const bc::BaseH&) {
   auto const ty = thisType(env);
   startBase(env, Base{ty ? *ty : TObj, BaseLoc::This});
+  nothrow(env);
 }
 
 template<typename BC>
@@ -1659,15 +1669,28 @@ void in(ISS& env, const bc::QueryM& op) {
   } else if (mcodeIsElem(op.mkey.mcode)) {
     switch (op.subop2) {
       case QueryMOp::CGet:
-        miFinalCGetElem(env, nDiscard, *key, false);
+        miFinalCGetElem(env, nDiscard, *key, false,
+                        [](Type t) { return t; });
         break;
       case QueryMOp::CGetQuiet:
-        miFinalCGetElem(env, nDiscard, *key, true);
+        miFinalCGetElem(env, nDiscard, *key, true,
+                        [](Type t) { return t; });
         break;
       case QueryMOp::Isset:
+        miFinalCGetElem(env, nDiscard, *key, true,
+                        [](Type t) {
+                          return t.subtypeOf(TInitNull) ? TFalse :
+                            !t.couldBe(TInitNull) ? TTrue : TBool;
+                        });
+        break;
       case QueryMOp::Empty:
-        discard(env, nDiscard);
-        push(env, TBool);
+        miFinalCGetElem(env, nDiscard, *key, true,
+                        [](Type t) {
+                          auto const e = emptiness(t);
+                          return
+                            e == Emptiness::Empty ? TTrue :
+                            e == Emptiness::NonEmpty ? TFalse : TBool;
+                        });
         break;
     }
   } else {

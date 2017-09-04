@@ -64,7 +64,7 @@ struct c_Closure final : ObjectData {
    * Update that method if this assumption changes.
    */
   explicit c_Closure(Class* cls)
-    : ObjectData(cls, IsCppBuiltin | HasClone, HeaderKind::Closure) {
+    : ObjectData(cls, HasClone, HeaderKind::Closure) {
     // hdr()->ctx must be initialized by init() or the TC.
     if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
   }

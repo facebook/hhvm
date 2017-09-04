@@ -766,7 +766,7 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
 }
 
 ObjectData* ObjectData::clone() {
-  if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
+  if (getAttribute(HasClone) && isCppBuiltin()) {
     if (isCollection()) {
       return collections::clone(this);
     }
@@ -800,7 +800,7 @@ ObjectData* ObjectData::clone() {
     // PHP classes that inherit from cpp builtins that have special clone
     // functionality *may* also define a __clone method, but it's totally
     // fine if a __clone doesn't exist.
-    if (method || !getAttribute(IsCppBuiltin)) {
+    if (method || !isCppBuiltin()) {
       assert(method);
       g_context->invokeMethodV(clone.get(), method);
     }

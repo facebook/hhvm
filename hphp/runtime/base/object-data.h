@@ -82,13 +82,11 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
-    HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
-                            // if not IsCppBuiltin, defines __clone PHP method
+    HasClone      = 0x0100, // if isCppBuiltin(), has custom clone logic
+                            // if !isCppBuiltin(), defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
-    IsCppBuiltin  = 0x1000, // has a custom instanceCtor and instanceDtor
-                            // if you subclass ObjectData, you need this
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
@@ -204,6 +202,10 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
 
   // Whether the object implements Iterator.
   bool isIterator() const;
+
+  // Has a custom instanceCtor and instanceDtor. If you subclass ObjectData
+  // in C++, you need this.
+  bool isCppBuiltin() const;
 
   // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;

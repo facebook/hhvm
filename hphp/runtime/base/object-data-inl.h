@@ -164,6 +164,10 @@ inline bool ObjectData::isCollection() const {
   return getAttribute(Attribute::IsCollection);
 }
 
+inline bool ObjectData::isCppBuiltin() const {
+  return HPHP::isCppBuiltin(m_kind);
+}
+
 inline bool ObjectData::isMutableCollection() const {
   return isCollection() && HPHP::isMutableCollection(collectionType());
 }
@@ -206,7 +210,7 @@ inline void ObjectData::clearNoDestruct() {
 }
 
 inline bool ObjectData::hasInstanceDtor() const {
-  return m_aux16 & (IsCppBuiltin | HasNativeData);
+  return getAttribute(HasNativeData) || isCppBuiltin();
 }
 
 inline uint32_t ObjectData::getId() const {

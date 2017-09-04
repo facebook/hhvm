@@ -222,6 +222,19 @@ inline bool isFreeKind(HeaderKind k) {
   return k >= HeaderKind::Free;
 }
 
+namespace detail {
+// update these if you add more kinds for ObjectData that should
+// pass the isCppBuiltin() predicate.
+constexpr auto FirstCppBuiltin = HeaderKind::WaitHandle;
+constexpr auto LastCppBuiltin = HeaderKind::AsyncFuncFrame;
+static_assert((int)LastCppBuiltin - (int)FirstCppBuiltin == 11,
+              "keep predicate in sync with enum");
+}
+
+inline bool isCppBuiltin(HeaderKind k) {
+  return k >= detail::FirstCppBuiltin && k <= detail::LastCppBuiltin;
+}
+
 inline bool isHackArrayKind(HeaderKind k) {
   return
     k == HeaderKind::Dict     ||

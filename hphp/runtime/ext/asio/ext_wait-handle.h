@@ -106,8 +106,7 @@ struct c_WaitHandle : ObjectData {
   explicit c_WaitHandle(Class* cls, HeaderKind kind,
                         type_scan::Index tyindex) noexcept
     : ObjectData(cls,
-                 ObjectData::IsWaitHandle | ObjectData::NoDestructor |
-                 ObjectData::IsCppBuiltin,
+                 ObjectData::IsWaitHandle | ObjectData::NoDestructor,
                  kind,
                  NoInit{}),
       m_tyindex(tyindex)

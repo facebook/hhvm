@@ -1669,8 +1669,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   } else if (UNLIKELY(type == VariableSerializer::Type::DebuggerSerialize)) {
     // Don't try to serialize a CPP extension class which doesn't
     // support serialization. Just send the class name instead.
-    if (obj->getAttribute(ObjectData::IsCppBuiltin) &&
-        !obj->getVMClass()->isCppSerializable()) {
+    if (obj->isCppBuiltin() && !obj->getVMClass()->isCppSerializable()) {
       write(obj->getClassName());
       return;
     }

@@ -50,8 +50,7 @@ constexpr ObjectData::Attribute objectFlags =
     ObjectData::UseGet |
     ObjectData::UseSet |
     ObjectData::UseIsset |
-    ObjectData::UseUnset |
-    ObjectData::IsCppBuiltin
+    ObjectData::UseUnset
   );
 
 /**

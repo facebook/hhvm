@@ -28,7 +28,8 @@ struct c_Pair : ObjectData {
 
   c_Pair() = delete;
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1)
-    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair)
+    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair,
+                 NoInit{})
     , m_size(2)
   {
     cellDup(e0, elm0);
@@ -36,7 +37,8 @@ struct c_Pair : ObjectData {
   }
   enum class NoIncRef {};
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
-    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair)
+    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair,
+                 NoInit{})
     , m_size(2)
   {
     cellCopy(e0, elm0);

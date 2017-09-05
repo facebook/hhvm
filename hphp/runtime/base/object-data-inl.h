@@ -31,19 +31,11 @@ inline void ObjectData::resetMaxId() {
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  initHeader_16(kind, InitialValue, flags);
-  assert(m_aux16 == flags && hasExactlyOneRef());
+  initHeader_16(kind, InitialValue, flags | cls->getODAttrs());
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
+  assert(!getAttribute(IsCollection)); // collections use NoInit{}
   o_id = ++os_max_id;
-
-  if (flags & Attribute::IsCollection) {
-    // Whatever attribute we need to set, do it via flags and void runtime
-    // loading.  These assertions guarantee that `instanceInit(cls)' is not
-    // needed for collections.
-    assertx(cls->numDeclProperties() == 0);
-    return;
-  }
   instanceInit(cls);
 }
 
@@ -51,7 +43,6 @@ inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
   : m_cls(cls)
 {
   initHeader_16(HeaderKind::Object, InitialValue, 0);
-  assert(m_aux16 == 0 && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
@@ -63,7 +54,6 @@ inline ObjectData::ObjectData(Class* cls,
   : m_cls(cls)
 {
   initHeader_16(kind, InitialValue, flags);
-  assert(m_aux16 == flags && hasExactlyOneRef());
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
@@ -125,8 +115,6 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
 }
 
 inline void ObjectData::instanceInit(Class* cls) {
-  m_aux16 |= cls->getODAttrs();
-
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
     if (cls->pinitVec().size() > 0) {

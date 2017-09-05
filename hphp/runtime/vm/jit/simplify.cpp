@@ -2269,7 +2269,7 @@ namespace {
 
 ALWAYS_INLINE bool isSimplifyOkay(const IRInstruction* inst) {
   // We want to be able to simplify the coerce calls away if possible.
-  // These serve as huristics to help remove CoerceCell* IT ops.
+  // These serve as heuristics to help remove CoerceCell* IT ops.
   // We will let tvCoerceIfStrict handle the exact checking at runtime.
   auto const f = inst->marker().func();
 

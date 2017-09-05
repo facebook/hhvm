@@ -352,6 +352,9 @@ let xhp_errors node _parents =
     (is_bad_xhp_attribute_name
     (PositionedSyntax.text attr.xhp_attribute_name)) ->
       [ make_error_from_node attr.xhp_attribute_name SyntaxError.error2002 ]
+  |  XHPEnumType enumType when
+    (is_missing enumType.xhp_enum_values) ->
+      [ make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 ]
   | _ -> [ ]
 
 let classish_duplicate_modifiers node =

@@ -195,3 +195,4 @@ let error2053 = "Use of 'var' as synonym for 'public' in declaration disallowed 
   "Use 'public' instead."
 let error2054 = "Method declarations require a visibility modifier " ^
   "such as public, private or protected."
+let error2055 = "At least one enumerated item is expected."

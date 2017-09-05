@@ -216,6 +216,7 @@ let error_tests =
     "test_var_phpism";
     "test_var_phpism2";
     "test_var_phpism3";
+    "test_xhp_attribute_enum_errors";
   ] ~f:mapper
 
 let test_data = minimal_tests @ error_tests @

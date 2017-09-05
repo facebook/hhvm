@@ -37,3 +37,25 @@ let go action genv env =
     patch :: acc
   end ~init:[] in
   changes
+
+let go_ide definitions new_name genv env =
+  let open SymbolDefinition in
+  match definitions with
+  | (_, Some definition) :: [] -> begin
+    let {full_name; kind; _} = definition in
+    let pieces = Str.split (Str.regexp "::") full_name in
+    match kind, pieces with
+    | Function, [function_name] ->
+      let command =
+        ServerRefactorTypes.FunctionRename (function_name, new_name) in
+      go command genv env
+    | Class, [class_name] ->
+      let command =
+        ServerRefactorTypes.ClassRename (class_name, new_name) in
+      go command genv env
+    | Method, [class_name; method_name] ->
+      let command =
+        ServerRefactorTypes.MethodRename (class_name, method_name, new_name) in
+      go command genv env
+    | _, _ -> [] end
+  | _ -> [] (* We have 0 or >1 definitions so correct behavior is unknown *)

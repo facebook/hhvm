@@ -12,6 +12,7 @@ let debug_describe_t : type a. a t -> string = function
   | IDE_FIND_REFS            _ -> "IDE_FIND_REFS"
   | IDE_HIGHLIGHT_REFS       _ -> "IDE_HIGHLIGHT_REFS"
   | REFACTOR                 _ -> "REFACTOR"
+  | IDE_REFACTOR             _ -> "IDE_REFACTOR"
   | DUMP_SYMBOL_INFO         _ -> "DUMP_SYMBOL_INFO"
   | DUMP_AI_INFO             _ -> "DUMP_AI_INFO"
   | REMOVE_DEAD_FIXMES       _ -> "REMOVE_DEAD_FIXMES"

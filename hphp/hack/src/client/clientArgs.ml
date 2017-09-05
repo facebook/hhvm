@@ -195,6 +195,9 @@ let parse_check_args cmd =
       ]),
       " (mode) rename a symbol, Usage: --refactor " ^
       "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>";
+    "--ide-refactor", Arg.String (fun x -> set_mode (MODE_IDE_REFACTOR x) ()),
+      " (mode) rename a symbol, Usage: --ide-refactor " ^
+      " <filename>:<line number>:<col number>:<new name>";
     "--search",
       Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
       " (mode) fuzzy search symbol definitions";

@@ -59,6 +59,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action ->
         env, ServerRefactor.go refactor_action genv env
+    | IDE_REFACTOR (file_input, line, char, new_name) ->
+        let content = ServerFileSync.get_file_content file_input in
+        let definitions = ServerIdentifyFunction.go_absolute content line char env.tcopt in
+        env, ServerRefactor.go_ide definitions new_name genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
       env, ServerRefactor.get_fixme_patches codes env

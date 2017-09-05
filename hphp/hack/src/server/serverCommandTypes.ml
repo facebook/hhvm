@@ -45,6 +45,8 @@ type _ t =
   | IDE_HIGHLIGHT_REFS : ServerUtils.file_input * int * int ->
       ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
+  | IDE_REFACTOR : ServerUtils.file_input * int * int * string ->
+      ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> ServerRefactorTypes.patch list t

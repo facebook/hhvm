@@ -115,6 +115,15 @@ let print_patches_json file_map =
   end file_map [] in
   print_endline (Hh_json.json_to_string (Hh_json.JSON_Array entries))
 
+let go_ide conn args filename line char new_name =
+  let patches = ServerCommand.rpc conn @@
+    ServerCommandTypes.IDE_REFACTOR (filename, line, char, new_name) in
+  let file_map = List.fold_left patches
+    ~f:map_patches_to_filename ~init:SMap.empty in
+  if args.output_json
+  then print_patches_json file_map
+  else apply_patches file_map
+
 let go conn args mode before after =
     let command = match mode with
     | "Class" -> ServerRefactorTypes.ClassRename (before, after)

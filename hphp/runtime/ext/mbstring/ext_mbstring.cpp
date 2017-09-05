@@ -4386,7 +4386,7 @@ bool HHVM_FUNCTION(mb_send_mail,
       }
       to_r[to_len - 1] = '\0';
     }
-    for (int i = 0; to_r[i]; i++) {
+    for (size_t i = 0; to_r[i]; i++) {
       if (iscntrl((unsigned char)to_r[i])) {
         /**
          * According to RFC 822, section 3.1.1 long headers may be

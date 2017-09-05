@@ -81,23 +81,24 @@ let param_name node =
     }; _ } -> token_to_string parameter_name
   | _ -> None
 
+let rec get_params_list node =
+  match syntax node with
+  | FunctionDeclaration { function_declaration_header; _ } ->
+    get_params_list function_declaration_header
+  | FunctionDeclarationHeader { function_parameter_list; _ } ->
+    function_parameter_list
+  | LambdaExpression { lambda_signature; _ } ->
+    get_params_list lambda_signature
+  | LambdaSignature { lambda_parameters; _ } ->
+    lambda_parameters
+  | AnonymousFunction { anonymous_parameters; _ } ->
+    anonymous_parameters
+  | MethodishDeclaration { methodish_function_decl_header; _ } ->
+    get_params_list methodish_function_decl_header
+  | _ -> make_missing()
+
 let get_params node =
-  let rec aux node =
-    match syntax node with
-    | FunctionDeclaration { function_declaration_header; _ } ->
-      aux function_declaration_header
-    | FunctionDeclarationHeader { function_parameter_list; _ } ->
-      function_parameter_list
-    | LambdaExpression { lambda_signature; _ } ->
-      aux lambda_signature
-    | LambdaSignature { lambda_parameters; _ } ->
-      lambda_parameters
-    | AnonymousFunction { anonymous_parameters; _ } ->
-      anonymous_parameters
-    | MethodishDeclaration { methodish_function_decl_header; _ } ->
-      aux methodish_function_decl_header
-    | _ -> make_missing() in
-  let param_list = aux node in
+  let param_list = get_params_list node in
   let param_list = syntax_node_to_list param_list in
   let param_list = List.filter_map param_list ~f:param_name in
   SSet.of_list param_list
@@ -129,7 +130,9 @@ let local_variables acc node =
   let locals = fold_no_lambdas add_local params body in
   SSet.union acc locals
 
-let partition_used_locals parents params body =
+let partition_used_locals parents node =
+  let params = get_params_list node in
+  let body = get_body node in
   let all_used = fold_no_lambdas add_local SSet.empty body in
   let all_used = SSet.remove "$this" all_used in
   let decls = syntax_node_to_list params in

@@ -595,7 +595,7 @@ let generate_coroutine_state_machine
   let new_body, coroutine_result_data_variables =
     lower_body original_body in
   let used_locals = Lambda_analyzer.partition_used_locals
-    context.Coroutine_context.parents function_parameter_list original_body in
+    context.Coroutine_context.parents context.Coroutine_context.original_node in
   let state_machine_data = compute_state_machine_data
     used_locals
     coroutine_result_data_variables

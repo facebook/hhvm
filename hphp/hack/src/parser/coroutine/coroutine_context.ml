@@ -25,6 +25,7 @@ type t = {
   classish_type_parameters : Syntax.t;
   function_name : Syntax.t;
   function_type_parameter_list : Syntax.t;
+  original_node : Syntax.t;
   (* Note that there is never a name conflict because in Hack,
   class C<T> { public function M<T>(){} }
   is illegal. *)
@@ -40,6 +41,7 @@ let empty =
     classish_type_parameters = m;
     function_name = m;
     function_type_parameter_list = m;
+    original_node = m;
     lambda_count = None;
     parents = [];
   }
@@ -50,7 +52,7 @@ nested named functions; Hack does not. If Hack ever supports nested
 classes or nested named functions then this code will have to change.
 (Though of course if Hack supports nested classes then generating closures
 for methods becomes easier!) *)
-let make_from_context node parents lambda_count =
+let make_from_context original_node parents lambda_count =
   let folder acc h =
     match Syntax.syntax h with
     | Syntax.ClassishDeclaration {
@@ -75,5 +77,5 @@ let make_from_context node parents lambda_count =
         function_name; function_type_parameter_list }
     | _ -> acc
   in
-  { (Core_list.fold ~f:folder ~init:empty (node :: parents))
-    with lambda_count; parents }
+  { (Core_list.fold ~f:folder ~init:empty (original_node :: parents))
+    with lambda_count; parents; original_node }

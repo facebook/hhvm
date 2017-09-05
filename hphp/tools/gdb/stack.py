@@ -79,7 +79,10 @@ The output backtrace has the following format:
 
         # Set fp = $rbp, rip = $rip.
         fp_type = T('uintptr_t').pointer()
-        fp = native_frame.read_register('rbp').cast(fp_type)
+        if get_arch(self) == 'aarch64':
+            fp = native_frame.read_register('x29').cast(fp_type)
+        else:
+            fp = native_frame.read_register('rbp').cast(fp_type)
         rip = native_frame.pc()
 
         if len(argv) == 1:
@@ -196,8 +199,13 @@ The output backtrace has the following format:
             return
 
         fp_type = T('uintptr_t').pointer()
-        fp = gdb.parse_and_eval('$rbp').cast(fp_type)
-        rip = gdb.parse_and_eval('$rip').cast(T('uintptr_t'))
+        if get_arch(self) == 'aarch64':
+            fp = gdb.parse_and_eval('x29').cast(fp_type)
+            rip = gdb.parse_and_eval('x30').cast(T('uintptr_t'))
+        else:
+            fp = gdb.parse_and_eval('$rbp').cast(fp_type)
+            rip = gdb.parse_and_eval('$rip').cast(T('uintptr_t'))
+        
 
         if len(argv) >= 1:
             fp = argv[0].cast(fp_type)

@@ -82,6 +82,7 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
+    IsWeakRefed   = 0x0080, // Is pointed to by at least one WeakRef
     HasClone      = 0x0100, // if isCppBuiltin(), has custom clone logic
                             // if !isCppBuiltin(), defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
@@ -135,14 +136,14 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   size_t heapSize() const;
 
   // WeakRef control methods.
-  inline void invalidateWeakRef() const {
-    if (UNLIKELY(m_weak_refed)) {
+  inline void invalidateWeakRef() {
+    if (UNLIKELY(getAttribute(IsWeakRefed))) {
       WeakRefData::invalidateWeakRef((uintptr_t)this);
     }
   }
 
-  inline void setWeakRefed(bool flag) const {
-    m_weak_refed = flag;
+  inline void setWeakRefed(bool flag) {
+    setAttribute(IsWeakRefed);
   }
 
  public:

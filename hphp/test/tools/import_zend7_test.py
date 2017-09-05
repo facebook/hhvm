@@ -13,9 +13,11 @@ import urllib2
 
 # The version that we will be importing the tests from.
 # Must be a valid, released version from php download site
-zend_version = "7.1.8"
+zend_version = "7.1.9"
 
-no_import = ()
+no_import = (
+  "Zend/tests/bug39438.php",
+)
 
 # only import these tests
 whitelist = (

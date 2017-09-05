@@ -627,6 +627,7 @@ function find_test_files($file) {
     'http'       => 'hphp/test/server/http/tests',
     'fastcgi'    => 'hphp/test/server/fastcgi/tests',
     'zend'       => 'hphp/test/zend/good',
+    'zend7'       => 'hphp/test/zend7',
     'php7'       => 'hphp/test/php7-emitter',
     'facebook'   => 'hphp/facebook/test',
 

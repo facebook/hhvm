@@ -79,6 +79,8 @@ std::unique_ptr<folly::IOBuf> readAll(std::istream& in) {
   // coalesce and return the buffer
   auto buf = queue.move();
   buf->coalesce();
+  // PHP allows the cursor to be advanced to yy_limit + ZEND_MMAP_AHEAD, so
+  // don't tell it about our extra allocated space.
   buf->trimEnd(ZEND_MMAP_AHEAD);
   return buf;
 }
@@ -137,8 +139,10 @@ int runDaemon() {
             code_length)) {
         throw std::runtime_error("Could not read code from stdin");
       }
+      // PHP allows the cursor to be advanced to yy_limit + ZEND_MMAP_AHEAD, so
+      // don't tell it about our extra allocated space.
       memset(buf->writableData() + code_length, '\0', ZEND_MMAP_AHEAD);
-      buf->append(code_length + ZEND_MMAP_AHEAD);
+      buf->append(code_length);
 
       auto hhas = runCompiler(filename, *buf);
       std::cout << hhas.length() << std::endl

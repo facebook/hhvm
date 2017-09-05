@@ -32,9 +32,14 @@ falls back to the default GDB unwinder(s) otherwise.
         super(HHVMUnwinder, self).__init__('hhvm_unwinder')
 
     def __call__(self, pending_frame):
-        fp = pending_frame.read_register('rbp')
-        sp = pending_frame.read_register('rsp')
-        ip = pending_frame.read_register('rip')
+        if get_arch(self) == 'aarch64':
+            fp = pending_frame.read_register('x29')
+            sp = pending_frame.read_register('x28')
+            ip = pending_frame.read_register('x30')
+        else:
+            fp = pending_frame.read_register('rbp')
+            sp = pending_frame.read_register('rsp')
+            ip = pending_frame.read_register('rip')
 
         if not frame.is_jitted(fp, ip):
             return None
@@ -53,18 +58,28 @@ falls back to the default GDB unwinder(s) otherwise.
 
         # Restore the saved frame pointer and instruction pointer.
         fp = fp.cast(T('uintptr_t').pointer())
-        unwind_info.add_saved_register('rbp', fp[0])
-        unwind_info.add_saved_register('rip', fp[1])
+        if get_arch(self) == 'aarch64':
+            unwind_info.add_saved_register('x29', fp[0])
+            unwind_info.add_saved_register('x30', fp[1])
+        else:
+            unwind_info.add_saved_register('rbp', fp[0])
+            unwind_info.add_saved_register('rip', fp[1])
 
         if frame.is_jitted(fp[0], fp[1]):
             # Our parent frame is jitted.  Again, we are unable to track %rsp
             # properly in the TC, so just preserve its value (just as we do in
             # the TC's custom .eh_frame section).
-            unwind_info.add_saved_register('rsp', sp)
+            if get_arch(self) == 'aarch64':
+                unwind_info.add_saved_register('x28', sp)
+            else:
+                unwind_info.add_saved_register('rsp', sp)
         else:
             # Our parent frame is not jitted, so we're in enterTCHelper, and we
             # can restore our parent's %rsp as usual.
-            unwind_info.add_saved_register('rsp', fp + 16)
+            if get_arch(self) == 'aarch64':
+                unwind_info.add_saved_register('x28', fp + 16)
+            else:
+                unwind_info.add_saved_register('rsp', fp + 16)
 
         return unwind_info
 

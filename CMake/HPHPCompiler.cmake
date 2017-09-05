@@ -35,6 +35,22 @@ CHECK_CXX_SOURCE_COMPILES("
 #endif
 int main() { return 0; }" IS_PPC64)
 
+function(AARCH64_HAS_CRC HAS_CRC)
+  if(NOT AARCH64_TARGET_CPU)
+    set(CMAKE_REQUIRED_FLAGS "-mcpu=native")
+  endif()
+  CHECK_CXX_SOURCE_COMPILES("
+    int main() {
+      unsigned x;
+      unsigned ret;
+      __asm__ (\"crc32cx %w0, %w1, %x1\"
+      : \"=r\"(ret)
+      : \"r\"(x)
+     );  return ret;
+  }" FOUND_CRC)
+  set(HAS_CRC ${FOUND_CRC} PARENT_SCOPE)
+endfunction()
+
 # using Clang or GCC
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # Warnings to disable by name, -Wno-${name}
@@ -224,6 +240,14 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
         # you can likely disable this fix with the following flag too. YMMV
         if(NOT ${AARCH64_TARGET_CPU} STREQUAL "cortex-a53")
           list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
+        endif()
+      endif()
+
+      AARCH64_HAS_CRC(HAS_CRC)
+      if(NOT ENABLE_AARCH64_CRC)
+        if(HAS_CRC)
+          message(STATUS "AARCH64 Host supports crc instruction.")
+          message(STATUS "Consider adding -DENABLE_AARCH64_CRC")
         endif()
       endif()
     endif()

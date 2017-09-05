@@ -126,7 +126,11 @@ def string_data_val(val, keep_case=True):
     else:
         data = val['m_data']
 
-    s = data.string('utf-8', 'ignore', val['m_len'])
+    try:
+        s = data.string('utf-8', 'ignore', val['m_len'])
+    except:
+        s = "Unknown"
+
     return s if keep_case else s.lower()
 
 
@@ -300,3 +304,11 @@ def deref(val):
         return val.cast(rawtype(val.type))
     else:
         return deref(p.referenced_value())
+
+def get_arch(self):
+    try:
+        arch = gdb.selected_frame().architecture().name()
+    except:
+        arch = re.search('\(currently (.*)\)', gdb.execute('show architecture', to_string=True)).group(1)
+    return arch
+

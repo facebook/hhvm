@@ -83,6 +83,23 @@ let add_fun_dep dep_env id =
       add_dep top (Function name)
     | None, None -> ()
 
+let add_const_dep dep_env id =
+  let {top; nsenv; popt;} = dep_env in
+  match nsenv with
+  | None -> ()
+  | Some nsenv ->
+    let open Namespaces in
+    let global_name = "\\"^(snd id) in
+    let (_, const_name) = elaborate_id nsenv ElaborateConst id in
+    let nm = NamingGlobal.GEnv.gconst_pos popt in
+    match nm const_name, nm global_name with
+    | Some _, _ ->
+      add_dep top (Const const_name)
+    | _, Some _ ->
+      add_dep top (Const global_name)
+    | None, None -> ()
+
+
 class dependency_visitor = object
   inherit [_] Ast_visitors_iter.iter as super
   method! on_fun_ dep_env f =
@@ -138,6 +155,17 @@ class dependency_visitor = object
       add_fun_dep dep_env id
     | _ -> ());
     super#on_Call dep_env exp hl el el2
+
+  method! on_id dep_env id =
+    (* There's a minor bug here where if a global constant
+      and a function are named exactly the same thing, we may end up adding
+      an extra dependency when calling a function. Since there's
+      no good way of telling whether this id is associated with a function call
+      or not, we'll have to accept the false positive for now.
+    *)
+    add_const_dep dep_env id;
+    super#on_id dep_env id
+
 end
 
 let print_deps popt ast =

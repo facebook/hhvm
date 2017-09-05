@@ -220,8 +220,13 @@ let emit_xhp_children_paren_expr c =
   get_array3 (A.Int (p, string_of_int op_num)) (A.Int (p, "5")) arr
 
 let emit_xhp_children_array = function
-  | [] | [A.ChildName (_, "empty")] -> A.Int (Pos.none, "0")
-  | [A.ChildName (_, "any")] -> A.Int (Pos.none, "1")
+  | [] -> A.Int (Pos.none, "0")
+  | [A.ChildName (_, n) as c] ->
+    begin match String.lowercase_ascii n with
+    | "empty" -> A.Int (Pos.none, "0")
+    | "any" -> A.Int (Pos.none, "1")
+    | _ -> emit_xhp_children_paren_expr c
+    end
   | [c] -> emit_xhp_children_paren_expr c
   | _ -> failwith "HHVM does not support multiple children declarations"
 

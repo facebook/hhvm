@@ -497,6 +497,15 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
     case CURLOPT_TCP_FASTOPEN:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
+    case CURLOPT_KEEP_SENDING_ON_ERROR:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
+    case CURLOPT_SUPPRESS_CONNECT_HEADERS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    case CURLOPT_SOCKS5_AUTH:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -686,6 +695,12 @@ bool CurlResource::isNullableStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
     case CURLOPT_UNIX_SOCKET_PATH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073500 /* Available since 7.53.0 */
+    case CURLOPT_ABSTRACT_UNIX_SOCKET:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    case CURLOPT_REQUEST_TARGET:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
     case CURLOPT_KRBLEVEL:

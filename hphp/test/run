@@ -175,7 +175,7 @@ function hh_server_binary_routes() {
 
 function hh_codegen_binary_routes() {
   return array(
-    "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
+    "buck"    => "/buck-out/gen/hphp/hack/src/hh_single_compile",
     "cmake"   => "/hphp/hack/bin"
   );
 }

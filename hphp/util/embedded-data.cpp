@@ -210,4 +210,21 @@ void embedded_data_cleanup() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+extern "C" {
+
+ssize_t hphp_read_embedded_data(const char* section, char* buf, size_t len) {
+  embedded_data data;
+  if (get_embedded_data(section, &data)) {
+    auto str = read_embedded_data(data);
+    auto data_len = str.length();
+    auto real_len = data_len < len ? data_len : len;
+    memcpy(buf, str.data(), real_len * sizeof(char));
+    return real_len;
+  } else {
+    return -1;
+  }
 }
+
+}
+
+} // namespace HPHP

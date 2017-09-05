@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_UTIL_EMBEDDED_DATA_H_
 #define incl_HPHP_UTIL_EMBEDDED_DATA_H_
 
+#ifdef __cplusplus
+
 #include <cstdint>
 #include <string>
 
@@ -59,5 +61,16 @@ void embedded_data_cleanup();
 ///////////////////////////////////////////////////////////////////////////////
 
 }
+
+#else //__cplusplus
+
+/*
+ * Read data from the named section and place it into the given buffer (of size
+ * len) Returns the number of bytes (not null-terminated) read or -1 if
+ * unsuccessful
+ */
+ssize_t hphp_read_embedded_data(const char* section, char* buf, size_t len);
+
+#endif //__cplusplus
 
 #endif

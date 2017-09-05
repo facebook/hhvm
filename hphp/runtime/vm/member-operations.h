@@ -534,7 +534,7 @@ inline TypedValue* ElemDArrayPre(TypedValue* base, int64_t key, bool& defined) {
     decRefArr(oldArr);
   }
 
-  return r.tv();
+  return r.tv_ptr();
 }
 
 template<MOpMode mode, bool reffy, bool intishWarn>
@@ -560,7 +560,7 @@ inline TypedValue* ElemDArrayPre(TypedValue* base, StringData* key,
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return r.tv();
+  return r.tv_ptr();
 }
 
 template<MOpMode mode, bool reffy, bool intishWarn>
@@ -622,7 +622,7 @@ inline TypedValue* ElemDVecPre(TypedValue* base, int64_t key) {
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 template <bool reffy>
@@ -673,7 +673,7 @@ inline TypedValue* ElemDDictPre(TypedValue* base, int64_t key) {
     decRefArr(oldArr);
   }
 
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 template <bool reffy>
@@ -697,7 +697,7 @@ inline TypedValue* ElemDDictPre(TypedValue* base, StringData* key) {
     decRefArr(oldArr);
   }
 
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 template <bool reffy>
@@ -962,7 +962,7 @@ inline TypedValue* ElemUArrayImpl(TypedValue* base, int64_t key) {
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return r.tv();
+  return r.tv_ptr();
 }
 
 template <bool intishWarn>
@@ -978,7 +978,7 @@ inline TypedValue* ElemUArrayImpl(TypedValue* base, StringData* key) {
       assertx(cellIsPlausible(*base));
       decRefArr(oldArr);
     }
-    return r.tv();
+    return r.tv_ptr();
   } else {
     if (!oldArr->exists(key)) return ElemUEmptyish();
     auto const r = oldArr->lval(key, oldArr->cowCheck());
@@ -988,7 +988,7 @@ inline TypedValue* ElemUArrayImpl(TypedValue* base, StringData* key) {
       assertx(cellIsPlausible(*base));
       decRefArr(oldArr);
     }
-    return r.tv();
+    return r.tv_ptr();
   }
 }
 
@@ -1039,7 +1039,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* /*base*/, StringData* /*key*/) {
@@ -1081,7 +1081,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, int64_t key) {
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
@@ -1098,7 +1098,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return lval.tv();
+  return lval.tv_ptr();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, TypedValue key) {

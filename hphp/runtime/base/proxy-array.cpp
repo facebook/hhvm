@@ -526,7 +526,7 @@ void* ProxyArray::proxyGet(StringData * str) const {
   }
   auto lval = innerArr(this)->lval(str, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv()));
+  return elementToData(&tvAsVariant(lval.tv_ptr()));
 }
 
 void* ProxyArray::proxyGet(int64_t k) const {
@@ -535,7 +535,7 @@ void* ProxyArray::proxyGet(int64_t k) const {
   }
   auto lval = innerArr(this)->lval(k, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv()));
+  return elementToData(&tvAsVariant(lval.tv_ptr()));
 }
 
 void* ProxyArray::proxyGet(const Variant & k) const {
@@ -544,7 +544,7 @@ void* ProxyArray::proxyGet(const Variant & k) const {
   }
   auto lval = innerArr(this)->lval(k, false);
   reseatable(this, lval.arr_base());
-  return elementToData(&tvAsVariant(lval.tv()));
+  return elementToData(&tvAsVariant(lval.tv_ptr()));
 }
 
 void * ProxyArray::proxyGet(MArrayIter & pos) const {

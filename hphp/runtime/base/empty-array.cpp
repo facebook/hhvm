@@ -232,7 +232,7 @@ ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
     raiseHackArrCompatRefBind(k);
   }
   auto const lval = LvalInt(ad, k, copy);
-  tvSetWithRef(v, *lval.tv());
+  tvSetWithRef(v, *lval.tv_ptr());
   return lval.arr_base();
 }
 
@@ -242,7 +242,7 @@ ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
     raiseHackArrCompatRefBind(k);
   }
   auto const lval = LvalStr(ad, k, copy);
-  tvSetWithRef(v, *lval.tv());
+  tvSetWithRef(v, *lval.tv_ptr());
   return lval.arr_base();
 }
 

@@ -67,7 +67,7 @@ inline DataType& member_lval::type() {
   return m_ptr.tv->m_type;
 }
 
-inline TypedValue* member_lval::tv() const {
+inline TypedValue* member_lval::tv_ptr() const {
   return m_ptr.tv;
 }
 

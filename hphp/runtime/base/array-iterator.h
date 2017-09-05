@@ -192,9 +192,6 @@ struct ArrayIter {
   const Variant& secondRef() const {
     return tvAsCVarRef(secondRval().tv_ptr());
   }
-  const Variant& secondRefPlus() {
-    return tvAsCVarRef(secondRvalPlus().tv_ptr());
-  }
 
   // Inline version of secondRef.  Only for use in iterator helpers.
   member_rval nvSecond() const {

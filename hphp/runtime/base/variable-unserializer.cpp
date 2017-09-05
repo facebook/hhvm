@@ -1258,7 +1258,7 @@ Array VariableUnserializer::unserializeDict() {
     }();
     assertx(lval.arr_base() == arr.get());
 
-    auto& val = tvAsVariant(lval.tv());
+    auto& val = tvAsVariant(lval.tv_ptr());
 
     if (UNLIKELY(isRefcountedType(val.getRawType()))) {
       putInOverwrittenList(val);
@@ -1304,7 +1304,7 @@ Array VariableUnserializer::unserializeVec() {
   for (int64_t i = 0; i < size; i++) {
     auto const lval = PackedArray::LvalNewVec(arr.get(), false);
     assertx(lval.arr_base() == arr.get());
-    auto& val = tvAsVariant(lval.tv());
+    auto& val = tvAsVariant(lval.tv_ptr());
     unserializeVariant(val, UnserializeMode::VecValue);
     assertx(val.getRawType() != KindOfRef);
 

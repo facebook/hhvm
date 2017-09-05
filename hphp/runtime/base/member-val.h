@@ -93,7 +93,7 @@ struct member_lval {
    *
    * TODO(#9077255): Make it happen for monomorphic arrays.
    */
-  TypedValue* tv() const;
+  TypedValue* tv_ptr() const;
 
   /*
    * Opaque element pointer.

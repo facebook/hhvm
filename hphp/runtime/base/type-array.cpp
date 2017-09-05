@@ -813,7 +813,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 /*
  * Conversion helpers.
  */
-Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv()); }
+Variant& as_var(member_lval lval) { return tvAsVariant(lval.tv_ptr()); }
 
 }
 
@@ -916,16 +916,16 @@ Variant& Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.tv());
-  return tvAsVariant(lval.tv());
+  assert(lval.tv_ptr());
+  return tvAsVariant(lval.tv_ptr());
 }
 
 Variant& Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
   if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
-  assert(lval.tv());
-  return tvAsVariant(lval.tv());
+  assert(lval.tv_ptr());
+  return tvAsVariant(lval.tv_ptr());
 }
 
 void Array::append(TypedValue v) {

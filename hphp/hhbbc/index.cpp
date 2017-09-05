@@ -78,6 +78,7 @@ const StaticString s_set("__set");
 const StaticString s_isset("__isset");
 const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
+const StaticString s_toBoolean("__toBoolean");
 const StaticString s_86ctor("86ctor");
 const StaticString s_86cinit("86cinit");
 const StaticString s_Closure("Closure");
@@ -442,7 +443,8 @@ struct ClassInfo {
     magicGet,
     magicSet,
     magicIsset,
-    magicUnset;
+    magicUnset,
+    magicBool;
 };
 
 using MagicMapInfo = struct {
@@ -453,6 +455,7 @@ using MagicMapInfo = struct {
 const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
   { s_call.get(),       { &ClassInfo::magicCall,       AttrNone } },
   { s_callStatic.get(), { &ClassInfo::magicCallStatic, AttrNone } },
+  { s_toBoolean.get(),  { &ClassInfo::magicBool,       AttrNone } },
   { s_get.get(),        { &ClassInfo::magicGet,   AttrNoOverrideMagicGet } },
   { s_set.get(),        { &ClassInfo::magicSet,   AttrNoOverrideMagicSet } },
   { s_isset.get(),      { &ClassInfo::magicIsset, AttrNoOverrideMagicIsset } },
@@ -548,6 +551,15 @@ bool Class::couldHaveMagicGet() const {
     [] (SString) { return true; },
     [] (borrowed_ptr<ClassInfo> cinfo) {
       return cinfo->magicGet.derivedHas;
+    }
+  );
+}
+
+bool Class::couldHaveMagicBool() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return cinfo->magicBool.derivedHas;
     }
   );
 }
@@ -1614,20 +1626,39 @@ void compute_iface_vtables(IndexData& index) {
 }
 
 void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
+  auto any = false;
   for (auto& kv : magicMethodMap) {
     if ((derived.*kv.second.pmem).thisHas) {
-      (cinfo.*kv.second.pmem).derivedHas = true;
+      auto& derivedHas = (cinfo.*kv.second.pmem).derivedHas;
+      if (!derivedHas) {
+        derivedHas = any = true;
+      }
     }
   }
-  if (cinfo.parent) return mark_magic_on_parents(*cinfo.parent, derived);
+  if (!any) return;
+  if (cinfo.parent) mark_magic_on_parents(*cinfo.parent, derived);
+  for (auto iface : cinfo.declInterfaces) {
+    mark_magic_on_parents(*const_cast<ClassInfo*>(iface), derived);
+  }
+}
+
+bool has_magic_method(borrowed_ptr<const ClassInfo> cinfo, SString name) {
+  if (name == s_toBoolean.get()) {
+    // note that "having" a magic method includes the possibility that
+    // a parent class has it. This can't happen for the collection
+    // classes, because they're all final; but for SimpleXMLElement,
+    // we need to search.
+    while (cinfo->parent) cinfo = cinfo->parent;
+    return has_magic_bool_conversion(cinfo->cls->name);
+  }
+  return cinfo->methods.find(name) != end(cinfo->methods);
 }
 
 void find_magic_methods(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
-    auto& methods         = cinfo->methods;
     bool any = false;
     for (auto& kv : magicMethodMap) {
-      bool const found = methods.find(kv.first) != end(methods);
+      bool const found = has_magic_method(borrow(cinfo), kv.first);
       any = any || found;
       (cinfo.get()->*kv.second.pmem).thisHas = found;
     }
@@ -1747,8 +1778,7 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
     auto& info = cinfo->*kv.second.pmem;
 
     // Magic method flags should be consistent with the method table.
-    always_assert(info.thisHas ==
-      (cinfo->methods.find(kv.first) != end(cinfo->methods)));
+    always_assert(info.thisHas == has_magic_method(cinfo, kv.first));
 
     // Non-'derived' flags (thisHas) about magic methods imply the derived
     // ones.

@@ -1031,6 +1031,18 @@ Type widen_type(Type t);
  */
 Type promote_emptyish(Type a, Type b);
 
+
+/*
+ * Returns what we know about the emptiness of the type.
+ */
+Emptiness emptiness(const Type&);
+
+/*
+ * Returns whether a Type could hold an object that has a custom
+ * boolean conversion function.
+ */
+bool could_have_magic_bool_conversion(const Type&);
+
 /*
  * Returns the smallest type that `a' is a subtype of, from the
  * following set: TGen, TInitCell, TRef, TUninit, TCls.

@@ -2646,14 +2646,29 @@ Type promote_emptyish(Type a, Type b) {
   return union_of(a, b);
 }
 
+bool could_have_magic_bool_conversion(const Type& t) {
+  if (!t.couldBe(TObj)) return false;
+
+  if (t.strictSubtypeOf(TObj) ||
+      (is_opt(t) && unopt(t).strictSubtypeOf(TObj))) {
+    return dobj_of(t).cls.couldHaveMagicBool();
+  }
+  return true;
+}
+
 Emptiness emptiness(const Type& t) {
   auto const empty_mask = BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE;
   if ((t.m_bits & empty_mask) == t.m_bits) return Emptiness::Empty;
   auto const non_empty_mask = BTrue | BArrN | BVecN | BDictN | BKeysetN;
   if ((t.m_bits & non_empty_mask) == t.m_bits) return Emptiness::NonEmpty;
-  if (auto v = tv(t)) {
+  if (t.strictSubtypeOf(TObj)) {
+    if (!could_have_magic_bool_conversion(t)) {
+      return Emptiness::NonEmpty;
+    }
+  } else if (auto v = tv(t)) {
     return cellToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
   }
+
   return Emptiness::Maybe;
 }
 

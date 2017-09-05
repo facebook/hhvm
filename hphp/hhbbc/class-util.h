@@ -38,10 +38,9 @@ bool is_collection(res::Class);
 bool is_closure(const php::Class&);
 
 /*
- * Returns whether a Type could hold an object that has a custom
- * boolean conversion function.
+ * Returns whether a clsName is a class with a magic toBoolean method.
  */
-bool could_have_magic_bool_conversion(Type);
+bool has_magic_bool_conversion(SString clsName);
 
 /*
  * Returns method named "name" if it exists.

@@ -32,33 +32,19 @@ const StaticString
   s_86pinit("86pinit"),
   s_86sinit("86sinit"),
   s_MockClass("__MockClass");
-
-bool has_magic_bool_conversion(res::Class) UNUSED;
-bool has_magic_bool_conversion(res::Class cls) {
-  return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
+bool has_magic_bool_conversion(SString clsName) {
+  return
+    collections::isTypeName(clsName) ||
+    clsName->isame(s_SimpleXMLElement.get());
+}
+
 bool is_collection(res::Class cls) {
   auto const name = cls.name();
   return collections::isTypeName(name);
-}
-
-bool could_have_magic_bool_conversion(Type t) {
-  if (!t.couldBe(TObj)) return false;
-  // TODO(#3499765): we need to handle interfaces that the collection
-  // classes implement before we can ever return false here.
-  // Note: exclude s_Pair if we re-enable this.
-  // if (t.strictSubtypeOf(TObj)) {
-  //   return has_magic_bool_conversion(dobj_of(t).cls);
-  // }
-  // if (is_opt(t) && unopt(t).strictSubtypeOf(TObj)) {
-  //   return has_magic_bool_conversion(dobj_of(t).cls);
-  // }
-  return true;
 }
 
 borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,

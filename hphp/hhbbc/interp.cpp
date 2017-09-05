@@ -672,38 +672,30 @@ void in(ISS& env, const bc::Xor&) {
   });
 }
 
-void castBoolImpl(ISS& env, bool negate) {
+void castBoolImpl(ISS& env, const Type& t, bool negate) {
   nothrow(env);
   constprop(env);
 
-  auto const t = popC(env);
-  auto const v = tv(t);
-  if (v) {
-    auto cell = eval_cell([&] {
-      return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
-    });
-    always_assert_flog(!!cell, "cellToBool should never throw");
-    return push(env, std::move(*cell));
-  }
-
-  if (t.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
-    return push(env, negate ? TTrue : TFalse);
-  }
-  if (t.subtypeOfAny(TArrN, TVecN, TDictN, TKeysetN)) {
-    return push(env, negate ? TFalse : TTrue);
+  auto const e = emptiness(t);
+  switch (e) {
+    case Emptiness::Empty:
+    case Emptiness::NonEmpty:
+      return push(env, (e == Emptiness::Empty) == negate ? TTrue : TFalse);
+    case Emptiness::Maybe:
+      break;
   }
 
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::Not&) {
-  castBoolImpl(env, true);
+  castBoolImpl(env, popC(env), true);
 }
 
 void in(ISS& env, const bc::CastBool&) {
   auto const t = topC(env);
   if (t.subtypeOf(TBool)) return reduce(env, bc::Nop {});
-  castBoolImpl(env, false);
+  castBoolImpl(env, popC(env), false);
 }
 
 void in(ISS& env, const bc::CastInt&) {
@@ -811,18 +803,18 @@ void in(ISS& /*env*/, const bc::Jmp&) {
 template<bool Negate, class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
   nothrow(env);
-  auto const t1 = popC(env);
-  auto const v1 = tv(t1);
-  if (v1) {
-    auto const taken = !cellToBool(*v1) != Negate;
-    if (taken) {
-      jmp_nofallthrough(env);
-      env.propagate(op.target, env.state);
-    } else {
-      jmp_nevertaken(env);
-    }
+  auto const e = emptiness(popC(env));
+  if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
+    jmp_nofallthrough(env);
+    env.propagate(op.target, env.state);
     return;
   }
+
+  if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty)) {
+    jmp_nevertaken(env);
+    return;
+  }
+
   if (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
       next_real_block(*env.ctx.func, op.target)) {
     jmp_nevertaken(env);
@@ -1063,7 +1055,8 @@ void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
 template<class JmpOp>
 void group(ISS& env, const bc::CGetL& cgetl, const JmpOp& jmp) {
   auto const loc = derefLoc(env, cgetl.loc1);
-  if (is_scalar(loc)) return impl(env, cgetl, jmp);
+  auto const flag = emptiness(loc);
+  if (flag != Emptiness::Maybe) return impl(env, cgetl, jmp);
 
   if (!locCouldBeUninit(env, cgetl.loc1)) nothrow(env);
 
@@ -1496,11 +1489,7 @@ void in(ISS& env, const bc::IssetL& op) {
 void in(ISS& env, const bc::EmptyL& op) {
   nothrow(env);
   constprop(env);
-  if (!locCouldBeUninit(env, op.loc1)) {
-    return impl(env, bc::CGetL { op.loc1 }, bc::Not {});
-  }
-  locAsCell(env, op.loc1); // read the local
-  push(env, TBool);
+  castBoolImpl(env, locAsCell(env, op.loc1), true);
 }
 
 void in(ISS& env, const bc::EmptyS& op) {

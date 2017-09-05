@@ -207,6 +207,12 @@ struct Class {
   bool couldHaveMagicGet() const;
 
   /*
+   * Whether this class (or its subtypes) could possibly have have
+   * a magic toBoolean() method.
+   */
+  bool couldHaveMagicBool() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */

@@ -1107,7 +1107,7 @@ module WithExpressionAndStatementAndTypeParser
       interfaces cannot have concrete type consts with type constraints
     *)
     let (parser, type_token) = assert_token parser Type in
-    let (parser, name) = require_name parser in
+    let (parser, name) = require_name_allow_keywords parser in
     let (parser, type_constraint) = parse_type_constraint_opt parser in
     let (parser, equal_token, type_specifier) = if is_missing abstr then
       let (parser, equal_token) = require_equal parser in

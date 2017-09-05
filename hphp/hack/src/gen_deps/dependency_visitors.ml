@@ -46,7 +46,15 @@ let toplevel_to_string = function
 | Const c -> "const "^c
 | Other -> "*UNKNOWN*"
 
-let add_dep dep_env id =
+(* Just print it out for now *)
+let add_dep t1 t2 =
+  Printf.printf "%s -> %s\n"
+    (toplevel_to_string t1)
+    (toplevel_to_string t2)
+
+(* Check if the hint refers to a class of some sort,
+  and then add a dependency if it's the case *)
+let add_class_dep dep_env id =
   let {popt; top; nsenv } = dep_env in
   match nsenv with
   | None -> assert (top = Other)
@@ -55,16 +63,25 @@ let add_dep dep_env id =
   let (_, ty_name) = elaborate_id nsenv ElaborateClass id in
   match NamingGlobal.GEnv.type_info popt ty_name with
   | Some (_, `Class) ->
-    let name = Class ty_name in
-    Printf.printf "%s -> %s\n"
-      (toplevel_to_string top)
-      (toplevel_to_string name)
+    add_dep top (Class ty_name)
   | Some (_, `Typedef) ->
-    let name = Typedef ty_name in
-    Printf.printf "%s -> %s\n"
-      (toplevel_to_string top)
-      (toplevel_to_string name)
+    add_dep top (Typedef ty_name)
   | None -> ()
+
+let add_fun_dep dep_env id =
+  let {top; nsenv; _} = dep_env in
+  match nsenv with
+    | None -> ()
+    | Some nsenv ->
+    let open Namespaces in
+    let global_name = "\\"^(snd id) in
+    let (_, fun_name) = elaborate_id nsenv ElaborateFun id in
+    let nm = NamingGlobal.GEnv.fun_canon_name in
+    match nm fun_name, nm global_name with
+    | Some name, _
+    | _, Some name ->
+      add_dep top (Function name)
+    | None, None -> ()
 
 class dependency_visitor = object
   inherit [_] Ast_visitors_iter.iter as super
@@ -101,13 +118,11 @@ class dependency_visitor = object
   super#on_gconst dep_env c
 
   method! on_hint dep_env hint =
-  (* Check if the hint refers to a class of some sort,
-    and then add a dependency if it's the case *)
     (match (snd hint) with
     | Happly (id, _)
     (* Only care about the base class's name *)
     | Haccess (id, _, _) ->
-      add_dep dep_env id
+      add_class_dep dep_env id
     (* No need to recurse here, since the parent class does it for us  *)
     | Hshape _
     | Hoption _
@@ -116,9 +131,17 @@ class dependency_visitor = object
     | Htuple _ -> ());
     super#on_hint dep_env hint
 
+  method! on_Call dep_env exp hl el el2 =
+    (match exp with
+    (* Match on a direct call on a name(not a Lvar) *)
+    | _, Id id ->
+      add_fun_dep dep_env id
+    | _ -> ());
+    super#on_Call dep_env exp hl el el2
 end
 
 let print_deps popt ast =
+  (* Elaborate the namespaces away *)
   let env = default_env popt in
   let _ = (new dependency_visitor)#on_program env ast in
   ()

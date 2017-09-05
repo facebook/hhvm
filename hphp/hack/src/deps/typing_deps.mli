@@ -33,9 +33,12 @@ module Dep :
 module DepSet : module type of
   Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
 
+
+type debug_trace_type = Bazooka | Full | No_trace
+
 val trace : bool ref
 
-val debug_trace : bool ref
+val debug_trace : debug_trace_type ref
 val dump_deps : out_channel -> unit
 
 val add_idep : Dep.variant -> Dep.variant -> unit

@@ -46,6 +46,7 @@ type mode =
   | Lint
   | Suggest
   | Dump_deps
+  | Dump_bazooka_deps
   | Dump_toplevel_deps
   | Identify_symbol of int * int
   | Find_local of int * int
@@ -157,8 +158,11 @@ let parse_options () =
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
     "--dump-deps",
-      Arg.Unit (set_mode Dump_deps),
+      Arg.Unit (set_mode (Dump_deps)),
       " Print dependencies";
+    "--dump-bazooka-deps",
+      Arg.Unit (set_mode (Dump_bazooka_deps)),
+      " Print dependencies, simplified to toplevel";
     "--dump-toplevel-deps",
       Arg.Unit (set_mode Dump_toplevel_deps),
       " Print toplevel dependencies";
@@ -658,7 +662,13 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         exit 2
       end
       else Printf.printf "No lint errors\n"
+  | Dump_bazooka_deps
   | Dump_deps ->
+    (* Don't typecheck builtins *)
+    let files_info = Relative_path.Map.fold builtins
+      ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
+      ~init:files_info
+    in
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       ignore @@ Typing_check_utils.check_defs opts.tcopt fn fileinfo
     end;
@@ -779,7 +789,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
 (*****************************************************************************)
 
 let decl_and_run_mode ({filename; mode; no_builtins; tcopt; _} as opts) popt =
-  if mode = Dump_deps then Typing_deps.debug_trace := true;
+  if mode = Dump_deps then Typing_deps.debug_trace := Typing_deps.Full
+  else if mode = Dump_bazooka_deps
+    then Typing_deps.debug_trace := Typing_deps.Bazooka;
   Local_id.track_names := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in

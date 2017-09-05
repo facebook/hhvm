@@ -15,7 +15,7 @@ open Utils
 (**********************************)
 (* Handling dependencies *)
 (**********************************)
-
+type debug_trace_type = Bazooka | Full | No_trace
 module Dep = struct
   type variant =
     (* GConst is used for "global" constants, in other words,
@@ -104,26 +104,6 @@ end
 (*****************************************************************************)
 (* Module keeping track of what object depends on what. *)
 (*****************************************************************************)
-let trace = ref true
-
-(* Instead of actually recording the dependencies in shared memory, we record
- * string representations of them for printing out *)
-let debug_trace = ref false
-let dbg_dep_set = HashSet.create 0
-
-let add_idep root obj =
-  if !trace then Graph.add (Dep.make obj) (Dep.make root);
-  if !debug_trace then
-    (* Note: this is the inverse of what is actually stored in the shared
-     * memory table. I find it easier to read "X depends on Y" instead of
-     * "Y is a dependent of X" *)
-    HashSet.add dbg_dep_set
-      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
-
-let dump_deps oc =
-  let xs = HashSet.fold (fun x xs -> x :: xs) dbg_dep_set [] in
-  let xs = List.sort String.compare xs in
-  List.iter xs print_endline
 
 let get_ideps_from_hash x =
   Graph.get x
@@ -131,8 +111,7 @@ let get_ideps_from_hash x =
 let get_ideps x =
   Graph.get (Dep.make x)
 
-(* Gets ALL the dependencies ... hence the name *)
-let get_bazooka x =
+let to_bazooka x =
   match x with
   | Dep.Const (cid, _)
   | Dep.Prop (cid, _)
@@ -141,11 +120,42 @@ let get_bazooka x =
   | Dep.Cstr cid
   | Dep.SMethod (cid, _)
   | Dep.Extends cid
-  | Dep.Class cid -> get_ideps (Dep.Class cid)
-  | Dep.Fun fid -> get_ideps (Dep.Fun fid)
-  | Dep.FunName fid -> get_ideps (Dep.FunName fid)
-  | Dep.GConst cid -> get_ideps (Dep.GConst cid)
-  | Dep.GConstName cid -> get_ideps (Dep.GConstName cid)
+  | Dep.Class cid -> Dep.Class cid
+  | x -> x
+
+(* Gets ALL the dependencies ... hence the name *)
+let get_bazooka x =
+  get_ideps (to_bazooka x)
+
+let trace = ref true
+(* Instead of actually recording the dependencies in shared memory, we record
+ * string representations of them for printing out *)
+let debug_trace = ref No_trace
+let dbg_dep_set = HashSet.create 0
+
+let add_idep root obj =
+  if !trace then Graph.add (Dep.make obj) (Dep.make root);
+  (* Note: this is the inverse of what is actually stored in the shared
+   * memory table. I find it easier to read "X depends on Y" instead of
+   * "Y is a dependent of X" *)
+  match !debug_trace with
+  | Full ->
+    HashSet.add dbg_dep_set
+      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
+  | Bazooka ->
+    let root = to_bazooka root in
+    let obj = to_bazooka obj in
+    HashSet.add dbg_dep_set
+      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
+  | No_trace -> ()
+
+let dump_deps oc =
+  let xs = HashSet.fold (fun x xs -> x :: xs) dbg_dep_set [] in
+  let xs = List.sort String.compare xs in
+  List.iter xs print_endline
+
+
+
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)

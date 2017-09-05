@@ -1,7 +1,6 @@
-test_class.php
-class \A -> class \B
-function \hint_on_shape -> class \B
-function \optional_hint -> class \B
-function \function_hint -> class \B
-function \function_hint -> class \A
-function \function_hint -> class \C
+Class \A -> Class \B
+Fun \function_hint -> Class \A
+Fun \function_hint -> Class \B
+Fun \function_hint -> Class \C
+Fun \hint_on_shape -> Class \B
+Fun \optional_hint -> Class \B

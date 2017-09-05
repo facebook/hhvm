@@ -28,6 +28,7 @@ module Dep :
     val is_class : t -> bool
     val extends_of_class : t -> t
     val compare : t -> t -> int
+    val to_string : variant -> string
   end
 
 module DepSet : module type of
@@ -39,7 +40,8 @@ type debug_trace_type = Bazooka | Full | No_trace
 val trace : bool ref
 
 val debug_trace : debug_trace_type ref
-val dump_deps : out_channel -> unit
+val print_string_hash_set : string HashSet.t -> unit
+val dump_debug_deps : unit -> unit
 
 val add_idep : Dep.variant -> Dep.variant -> unit
 val get_ideps_from_hash : Dep.t -> DepSet.t

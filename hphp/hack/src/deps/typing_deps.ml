@@ -7,7 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-
 open Core
 open Reordered_argument_collections
 open Utils
@@ -149,11 +148,12 @@ let add_idep root obj =
       ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
   | No_trace -> ()
 
-let dump_deps oc =
-  let xs = HashSet.fold (fun x xs -> x :: xs) dbg_dep_set [] in
+let print_string_hash_set set =
+  let xs = HashSet.fold (fun x xs -> x :: xs) set [] in
   let xs = List.sort String.compare xs in
   List.iter xs print_endline
 
+let dump_debug_deps () = print_string_hash_set dbg_dep_set
 
 
 

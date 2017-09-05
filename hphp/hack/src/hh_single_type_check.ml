@@ -672,7 +672,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       ignore @@ Typing_check_utils.check_defs opts.tcopt fn fileinfo
     end;
-    Typing_deps.dump_deps stdout
+    Typing_deps.dump_debug_deps () 
 
   | Dump_toplevel_deps ->
     (* Don't typecheck builtins *)
@@ -681,7 +681,6 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       ~init:files_info
     in
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      print_endline (Relative_path.to_absolute fn);
       let ast = Parser_heap.get_from_parser_heap popt fn in
       Dependency_visitors.print_deps popt ast
     end

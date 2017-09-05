@@ -13,20 +13,13 @@
  * global naming table and adds the corresponding dependencies.
  *)
 open Ast
-
-
-type toplevel =
-| Class of string
-| Function of string
-| Typedef of string
-| Const of string
-| Other
+open Typing_deps
 
 
 type dep_env = {
   popt: ParserOptions.t;
   (* Current toplevel entity we are in *)
-  top : toplevel;
+  top : Dep.variant option;
 
   (* The namespace we are currently in *)
   nsenv: Namespace_env.env option;
@@ -35,37 +28,36 @@ type dep_env = {
 
 let default_env popt = {
   popt;
-  top = Other;
+  top = None;
   nsenv = None;
 }
 
-let toplevel_to_string = function
-| Class s -> "class "^s
-| Function f -> "function "^f
-| Typedef t -> "typedef "^t
-| Const c -> "const "^c
-| Other -> "*UNKNOWN*"
+let dbg_dep_set = HashSet.create 0
 
 (* Just print it out for now *)
-let add_dep t1 t2 =
-  Printf.printf "%s -> %s\n"
-    (toplevel_to_string t1)
-    (toplevel_to_string t2)
+let add_dep root obj =
+  match root with
+  | None -> ()
+  (* The root is already namespace elaborated,
+  so does not need to be canonicalized *)
+  | Some r ->
+    HashSet.add
+      dbg_dep_set
+      ((Dep.to_string r) ^ " -> " ^ (Dep.to_string obj))
+
 
 (* Check if the hint refers to a class of some sort,
   and then add a dependency if it's the case *)
 let add_class_dep dep_env id =
   let {popt; top; nsenv } = dep_env in
   match nsenv with
-  | None -> assert (top = Other)
+  | None -> assert (top = None)
   | Some nsenv ->
   let open Namespaces in
   let (_, ty_name) = elaborate_id nsenv ElaborateClass id in
   match NamingGlobal.GEnv.type_info popt ty_name with
-  | Some (_, `Class) ->
-    add_dep top (Class ty_name)
-  | Some (_, `Typedef) ->
-    add_dep top (Typedef ty_name)
+  | Some _ ->
+    add_dep top (Dep.Class ty_name)
   | None -> ()
 
 let add_fun_dep dep_env id =
@@ -80,7 +72,7 @@ let add_fun_dep dep_env id =
     match nm fun_name, nm global_name with
     | Some name, _
     | _, Some name ->
-      add_dep top (Function name)
+      add_dep top (Dep.Fun name)
     | None, None -> ()
 
 let add_const_dep dep_env id =
@@ -94,9 +86,9 @@ let add_const_dep dep_env id =
     let nm = NamingGlobal.GEnv.gconst_pos popt in
     match nm const_name, nm global_name with
     | Some _, _ ->
-      add_dep top (Const const_name)
+      add_dep top (Dep.GConst const_name)
     | _, Some _ ->
-      add_dep top (Const global_name)
+      add_dep top (Dep.GConst global_name)
     | None, None -> ()
 
 
@@ -105,7 +97,7 @@ class dependency_visitor = object
   method! on_fun_ dep_env f =
     let dep_env = {
       dep_env with
-      top = Function (snd f.f_name);
+      top = Some (Dep.Fun (snd f.f_name));
       nsenv = Some f.f_namespace;
     } in
     super#on_fun_ dep_env f
@@ -113,7 +105,7 @@ class dependency_visitor = object
   method! on_class_ dep_env c =
     let dep_env = {
       dep_env with
-      top = Class (snd c.c_name);
+      top = Some (Dep.Class (snd c.c_name));
       nsenv = Some c.c_namespace;
     } in
     super#on_class_ dep_env c
@@ -121,7 +113,7 @@ class dependency_visitor = object
   method! on_typedef dep_env t =
   let dep_env = {
     dep_env with
-    top = Typedef (snd t.t_id);
+    top = Some (Dep.Class (snd t.t_id));
     nsenv = Some t.t_namespace;
   } in
   super#on_typedef dep_env t
@@ -129,7 +121,7 @@ class dependency_visitor = object
   method! on_gconst dep_env c =
   let dep_env = {
     dep_env with
-    top = Const (snd c.cst_name);
+    top = Some (Dep.GConst (snd c.cst_name));
     nsenv = Some c.cst_namespace;
   } in
   super#on_gconst dep_env c
@@ -172,4 +164,4 @@ let print_deps popt ast =
   (* Elaborate the namespaces away *)
   let env = default_env popt in
   let _ = (new dependency_visitor)#on_program env ast in
-  ()
+  Typing_deps.print_string_hash_set dbg_dep_set

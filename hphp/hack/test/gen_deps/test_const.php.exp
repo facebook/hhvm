@@ -1,9 +1,8 @@
-test_const.php
-const \X -> const \X
-const \Y -> const \Y
-function \test -> const \X
-const \B\X -> const \B\X
-function \B\test -> const \Y
-function \B\test2 -> const \B\X
-function \B\test2 -> const \Y
-function \B\test3 -> const \B\X
+Fun \B\test -> GConst \Y
+Fun \B\test2 -> GConst \B\X
+Fun \B\test2 -> GConst \Y
+Fun \B\test3 -> GConst \B\X
+Fun \test -> GConst \X
+GConst \B\X -> GConst \B\X
+GConst \X -> GConst \X
+GConst \Y -> GConst \Y

@@ -216,6 +216,9 @@ let rec delimit delimit_syntax = function
 let make_delimited_list delimit_syntax items =
   make_list (delimit delimit_syntax items)
 
+let make_comma_list items =
+  make_delimited_list comma_syntax items
+
 let prepend_to_comma_delimited_syntax_list prepend_syntax syntax_list_syntax =
   let list_item = make_list_item prepend_syntax comma_syntax in
   let syntax_list = list_item :: syntax_node_to_list syntax_list_syntax in
@@ -343,7 +346,7 @@ let make_assignment_syntax receiver_variable assignment_expression_syntax =
     receiver_variable_syntax assignment_expression_syntax
 
 let make_function_call_expression_syntax receiver_syntax argument_list =
-  let argument_list_syntax = make_delimited_list comma_syntax argument_list in
+  let argument_list_syntax = make_comma_list argument_list in
   make_function_call_expression
     receiver_syntax
     left_paren_syntax
@@ -411,7 +414,7 @@ let make_type_arguments_syntax = function
   | type_arguments_list ->
       make_type_arguments
         left_angle_syntax
-        (make_delimited_list comma_syntax type_arguments_list)
+        (make_comma_list type_arguments_list)
         right_angle_syntax
 
 let make_type_parameters_syntax type_parameter_list =
@@ -421,7 +424,7 @@ let make_type_parameters_syntax type_parameter_list =
   | _ ->
       make_type_parameters
         left_angle_syntax
-        (make_delimited_list comma_syntax type_parameter_list)
+        (make_comma_list type_parameter_list)
         right_angle_syntax
 
 let make_type_specifier_syntax classname type_parameter_list =
@@ -435,7 +438,7 @@ let make_type_specifier_syntax classname type_parameter_list =
 
 let make_object_creation_expression_syntax classname arguments =
   let type_specifier_syntax = make_type_specifier_syntax classname [] in
-  let arguments_syntax = make_delimited_list comma_syntax arguments in
+  let arguments_syntax = make_comma_list arguments in
   make_object_creation_expression
     new_keyword_syntax
     type_specifier_syntax
@@ -444,7 +447,7 @@ let make_object_creation_expression_syntax classname arguments =
     right_paren_syntax
 
 let make_functional_type_syntax argument_types return_type_syntax =
-  let argument_types_syntax = make_delimited_list comma_syntax argument_types in
+  let argument_types_syntax = make_comma_list argument_types in
   make_closure_type_specifier
     left_paren_syntax
     (* coroutine *) (make_missing ())
@@ -464,7 +467,7 @@ let make_classish_declaration_syntax
     classish_body =
   let classname_syntax = make_name_syntax classname in
   let extends_list_syntax =
-    make_delimited_list comma_syntax extends_list in
+    make_comma_list extends_list in
   let classish_body =
     make_classish_body
       left_brace_syntax
@@ -497,7 +500,7 @@ let make_methodish_declaration_with_body_syntax
     (* methodish_semicolon *) (make_missing ())
 
 let make_lambda_signature_syntax lambda_parameters lambda_type =
-  let lambda_parameters = make_delimited_list comma_syntax lambda_parameters in
+  let lambda_parameters = make_comma_list lambda_parameters in
   make_lambda_signature
     left_paren_syntax
     lambda_parameters
@@ -525,7 +528,7 @@ let make_function_decl_header_syntax
     parameter_list
     return_type_syntax =
   let name_syntax = make_name_syntax name in
-  let parameter_list_syntax = make_delimited_list comma_syntax parameter_list in
+  let parameter_list_syntax = make_comma_list parameter_list in
   make_function_declaration_header
     (* function_async *) (make_missing ())
     (* function_coroutine *) (make_missing ())
@@ -547,7 +550,7 @@ let make_property_declaration_syntax type_syntax declaration_syntax =
   make_property_declaration
     (make_list [ public_syntax; ])
     type_syntax
-    (make_delimited_list comma_syntax [ declaration_syntax; ])
+    (make_comma_list [ declaration_syntax; ])
     semicolon_syntax
 
 let make_if_else_syntax condition_syntax true_statements false_statements =

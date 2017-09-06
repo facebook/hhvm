@@ -1425,6 +1425,7 @@ void handleDualMInstrState(ISS& env, A nondefine, B define) {
   auto const nonDefineFlags = env.flags;
 
   env.flags.canConstProp = false;
+  env.flags.effectFree = false;
   env.flags.wasPEI = true;
   env.state = std::move(start);
 
@@ -1462,6 +1463,8 @@ void handleDualMInstrState(ISS& env, A nondefine, B define) {
 
   env.flags.wasPEI |= nonDefineFlags.wasPEI;
   env.flags.canConstProp &= nonDefineFlags.canConstProp;
+  env.flags.effectFree &= nonDefineFlags.effectFree;
+
   // Elements of a minstr sequence should never be constprop - it
   // would leave invalid bytecode.
   assert(!env.flags.canConstProp);

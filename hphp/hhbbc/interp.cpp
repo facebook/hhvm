@@ -81,10 +81,12 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
 
     auto const wasPEI = env.flags.wasPEI;
     auto const canConstProp = env.flags.canConstProp;
+    auto const effectFree = env.flags.effectFree;
 
     FTRACE(3, "    (impl {}\n", show(env.ctx.func, *it));
     env.flags.wasPEI          = true;
     env.flags.canConstProp    = false;
+    env.flags.effectFree      = false;
     env.flags.strengthReduced = folly::none;
     default_dispatch(env, *it);
 
@@ -107,6 +109,7 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
             env.collect.propagate_constants(*it, env.state, currentReduction)) {
           env.flags.canConstProp = false;
           env.flags.wasPEI = false;
+          env.flags.effectFree = true;
         } else {
           currentReduction.push_back(std::move(*it));
         }
@@ -117,6 +120,7 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
     // then the whole thing could throw.
     env.flags.wasPEI = env.flags.wasPEI || wasPEI;
     env.flags.canConstProp = env.flags.canConstProp && canConstProp;
+    env.flags.effectFree = env.flags.effectFree && effectFree;
     if (env.state.unreachable) break;
   }
 
@@ -224,60 +228,78 @@ void in(ISS& env, const bc::BoxRNop&) {
   push(env, std::move(t));
 }
 
-void in(ISS& env, const bc::Null&)      { nothrow(env); push(env, TInitNull); }
-void in(ISS& env, const bc::NullUninit&){ nothrow(env); push(env, TUninit); }
-void in(ISS& env, const bc::True&)      { nothrow(env); push(env, TTrue); }
-void in(ISS& env, const bc::False&)     { nothrow(env); push(env, TFalse); }
+void in(ISS& env, const bc::Null&) {
+  effect_free(env);
+  push(env, TInitNull);
+}
+
+void in(ISS& env, const bc::NullUninit&) {
+  effect_free(env);
+  push(env, TUninit);
+}
+
+void in(ISS& env, const bc::True&) {
+  effect_free(env);
+  push(env, TTrue);
+}
+
+void in(ISS& env, const bc::False&) {
+  effect_free(env);
+  push(env, TFalse);
+}
 
 void in(ISS& env, const bc::Int& op) {
-  nothrow(env);
+  effect_free(env);
   push(env, ival(op.arg1));
 }
 
 void in(ISS& env, const bc::Double& op) {
-  nothrow(env);
+  effect_free(env);
   push(env, dval(op.dbl1));
 }
 
 void in(ISS& env, const bc::String& op) {
-  nothrow(env);
+  effect_free(env);
   push(env, sval(op.str1));
 }
 
 void in(ISS& env, const bc::Array& op) {
   assert(op.arr1->isPHPArray());
-  nothrow(env);
+  effect_free(env);
   push(env, aval(op.arr1));
 }
 
 void in(ISS& env, const bc::Vec& op) {
   assert(op.arr1->isVecArray());
-  nothrow(env);
+  effect_free(env);
   push(env, vec_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Dict& op) {
   assert(op.arr1->isDict());
-  nothrow(env);
+  effect_free(env);
   push(env, dict_val(op.arr1));
 }
 
 void in(ISS& env, const bc::Keyset& op) {
   assert(op.arr1->isKeyset());
-  nothrow(env);
+  effect_free(env);
   push(env, keyset_val(op.arr1));
 }
 
 void in(ISS& env, const bc::NewArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+  push(env, op.arg1 == 0 ?
+       effect_free(env), aempty() : counted_aempty());
 }
 
 void in(ISS& env, const bc::NewDictArray& op) {
-  push(env, op.arg1 == 0 ? dict_empty() : counted_dict_empty());
+  push(env, op.arg1 == 0 ?
+       effect_free(env), dict_empty() : counted_dict_empty());
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {
-  push(env, op.arg1 == 0 ? aempty() : counted_aempty());
+  push(env, op.arg1 == 0 ?
+       effect_free(env), aempty() : counted_aempty());
 }
 
 void in(ISS& env, const bc::NewPackedArray& op) {
@@ -1138,10 +1160,10 @@ void in(ISS& env, const bc::SSwitch& op) {
 }
 
 void in(ISS& env, const bc::RetC& /*op*/) {
-  doRet(env, popC(env));
+  doRet(env, popC(env), false);
 }
 void in(ISS& env, const bc::RetV& /*op*/) {
-  doRet(env, popV(env));
+  doRet(env, popV(env), false);
 }
 void in(ISS& /*env*/, const bc::Unwind& /*op*/) {}
 void in(ISS& env, const bc::Throw& /*op*/) {
@@ -1162,13 +1184,13 @@ void in(ISS& env, const bc::NativeImpl&) {
     assert(!(env.ctx.func->attrs & AttrReference));
     auto const resCls = env.index.builtin_class(env.ctx.cls->name);
     // Can still return null if parameter coercion fails
-    return doRet(env, union_of(objExact(resCls), TInitNull));
+    return doRet(env, union_of(objExact(resCls), TInitNull), true);
   }
 
   if (env.ctx.func->nativeInfo) {
-    return doRet(env, native_function_return_type(env.ctx.func));
+    return doRet(env, native_function_return_type(env.ctx.func), true);
   }
-  doRet(env, TInitGen);
+  doRet(env, TInitGen, true);
 }
 
 void in(ISS& env, const bc::CGetL& op) {
@@ -2446,12 +2468,10 @@ void in(ISS& env, const bc::FCallD& op) {
 }
 
 void in(ISS& env, const bc::FCallAwait& op) {
-  in(env, bc::FCallD { op.arg1, op.str2, op.str3 });
-  in(env, bc::UnboxRNop { });
-  in(env, bc::Await { });
-
-  env.flags.wasPEI = true;
-  env.flags.canConstProp = false;
+  impl(env,
+       bc::FCallD { op.arg1, op.str2, op.str3 },
+       bc::UnboxRNop {},
+       bc::Await {});
 }
 
 void fcallArrayImpl(ISS& env, int arg) {
@@ -3280,8 +3300,13 @@ StepFlags interpOps(Interp& interp,
       FTRACE(2, "   nothrow (due to constprop)\n");
       flags.wasPEI = false;
     }
+    if (!flags.effectFree) {
+      FTRACE(2, "   effect_free (due to constprop)\n");
+      flags.effectFree = true;
+    }
   }
 
+  assertx(!flags.effectFree || !flags.wasPEI);
   if (flags.wasPEI) {
     FTRACE(2, "   PEI.\n");
     for (auto factored : interp.blk->factoredExits) {
@@ -3305,6 +3330,10 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
     auto const flags = interpOps(interp, iter, stop, propagate);
+    if (interp.collect.effectFree && !flags.effectFree) {
+      interp.collect.effectFree = false;
+    }
+
     if (flags.usedLocalStatics) {
       if (!ret.usedLocalStatics) {
         ret.usedLocalStatics = std::move(flags.usedLocalStatics);

@@ -278,6 +278,11 @@ struct FuncInfoValue {
    * Type info for local statics.
    */
   CompactVector<Type> localStaticTypes;
+
+  /*
+   * Whether the function is effectFree.
+   */
+  bool effectFree{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2762,6 +2767,19 @@ bool Index::is_async_func(res::Func rfunc) const {
     });
 }
 
+bool Index::is_effect_free(res::Func rfunc) const {
+  return match<bool>(
+    rfunc.val,
+    [&](res::Func::FuncName /*s*/) { return false; },
+    [&](res::Func::MethodName /*s*/) { return false; },
+    [&](borrowed_ptr<FuncInfo> finfo) {
+      return finfo->second.effectFree;
+    },
+    [&](borrowed_ptr<FuncFamily> fam) {
+      return false;
+    });
+}
+
 bool Index::any_interceptable_functions() const {
   return m_data->any_interceptable_functions;
 }
@@ -3085,6 +3103,19 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
   }
 }
 
+void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {
+  auto& fdata = create_func_info(*m_data, func)->second;
+  always_assert_flog(
+    !fdata.effectFree || flag,
+    "Index effectFree changed from true to false in {} {}{}.\n",
+    func->unit->filename,
+    func->cls ? folly::to<std::string>(func->cls->name->data(), "::") :
+    std::string{},
+    func->name);
+
+  fdata.effectFree = flag;
+}
+
 void Index::refine_local_static_types(
   borrowed_ptr<const php::Func> func,
   const CompactVector<Type>& localStaticTypes) {
@@ -3103,7 +3134,7 @@ void Index::refine_local_static_types(
       newTy.subtypeOf(indexTy),
       "Index local static type invariant violated in {} {}{}.\n"
       "   Static Local {}: {} is not a subtype of {}\n",
-      func->unit->filename->data(),
+      func->unit->filename,
       func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
       : std::string{},
       func->name->data(),

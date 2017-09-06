@@ -70,6 +70,7 @@ struct ActRec {
   {}
 
   FPIKind kind;
+  bool foldable{false};
   folly::Optional<res::Class> cls;
   folly::Optional<res::Func> func;
   // Possible fallback func if we cannot determine which will be called.
@@ -363,6 +364,7 @@ struct CollectedInfo {
   PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
   bool mayUseVV{false};
+  bool effectFree{true};
   bool readsUntrackedConstants{false};
   const bool trackConstantArrays;
   bool (*propagate_constants)(const Bytecode& bc, const State& state,

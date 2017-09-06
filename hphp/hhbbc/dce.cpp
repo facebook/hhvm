@@ -1629,7 +1629,7 @@ void dce(Env& env, const bc::FPassM& op)     { minstr_final(env, op, op.arg2); }
 
 void dce(Env& env, const bc::FCallD& op) {
   auto const& ar = env.stateBefore.fpiStack.back();
-  if (ar.func && ar.func->isFoldable()) {
+  if (ar.foldable) {
     auto const& ui = env.dceState.stack.back();
     if (!isLinked(ui)) {
       auto const val = tv(env.stateAfter.stack.back().type);

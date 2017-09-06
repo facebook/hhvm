@@ -139,9 +139,16 @@ void unreachable(ISS& env) {
   FTRACE(2, "    unreachable\n");
   env.state.unreachable = true;
 }
+
 void constprop(ISS& env) {
   FTRACE(2, "    constprop\n");
   env.flags.canConstProp = true;
+}
+
+void effect_free(ISS& env) {
+  FTRACE(2, "    effect_free\n");
+  nothrow(env);
+  env.flags.effectFree = true;
 }
 
 void jmp_nofallthrough(ISS& env) {
@@ -210,9 +217,18 @@ void killLocals(ISS& env) {
   env.state.equivLocals.clear();
 }
 
-void doRet(ISS& env, Type t) {
+void doRet(ISS& env, Type t, bool hasEffects) {
   readAllLocals(env);
   assert(env.state.stack.empty());
+  if (!hasEffects) {
+    for (auto const& l : env.state.locals) {
+      if (could_run_destructor(l)) {
+        hasEffects = true;
+        break;
+      }
+    }
+    if (!hasEffects) effect_free(env);
+  }
   env.flags.returned = t;
 }
 
@@ -381,7 +397,13 @@ void push(ISS& env, Type t, LocalId l = NoLocalId) {
 
 void fpiPush(ISS& env, ActRec ar) {
   FTRACE(2, "    fpi+: {}\n", show(ar));
-  env.state.fpiStack.push_back(ar);
+  if (ar.kind != FPIKind::Ctor &&
+      ar.kind != FPIKind::Builtin &&
+      ar.func &&
+      (ar.func->isFoldable() || env.index.is_effect_free(*ar.func))) {
+    ar.foldable = true;
+  }
+  env.state.fpiStack.push_back(std::move(ar));
 }
 
 ActRec fpiPop(ISS& env) {

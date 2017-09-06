@@ -1,6 +1,6 @@
 <?hh
 
-function busy() {}
+function busy() { return __hhvm_intrinsics\launder_value(42); }
 
 $x1 = null;
 $t1 = new IntervalTimer(

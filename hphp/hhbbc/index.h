@@ -709,6 +709,11 @@ struct Index {
                                  const CompactVector<Type>& localStaticTypes);
 
   /*
+   * Refine the effectFree flag for func.
+   */
+  void refine_effect_free(borrowed_ptr<const php::Func> func, bool flag);
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *
@@ -772,6 +777,11 @@ struct Index {
    * function.
    */
   bool is_async_func(res::Func rfunc) const;
+
+  /*
+   * Return true if the resolved function is effect free.
+   */
+  bool is_effect_free(res::Func rfunc) const;
 
   /*
    * Return true if there are any interceptable functions

@@ -113,6 +113,16 @@ struct StepFlags {
   bool canConstProp = false;
 
   /*
+   * If an instruction sets this flag, it means that this
+   * instruction doesn't prevent a call to the containing function
+   * from being discarded if its result is unneeded.
+   *
+   * Instructions that are marked canConstProp that also produce a
+   * constant result automatically set this flag.
+   */
+  bool effectFree = false;
+
+  /*
    * If an instruction may read or write to locals, these flags
    * indicate which ones.  We don't track this information for local
    * ids past kMaxTrackedLocals, which are assumed to always be in

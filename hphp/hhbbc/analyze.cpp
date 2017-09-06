@@ -387,6 +387,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.cnsMap = std::move(collect.cnsMap);
   ai.readsUntrackedConstants = collect.readsUntrackedConstants;
   ai.mayUseVV = collect.mayUseVV;
+  ai.effectFree = collect.effectFree;
 
   if (ctx.func->isGenerator) {
     if (ctx.func->isAsync) {

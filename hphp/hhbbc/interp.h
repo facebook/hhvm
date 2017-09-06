@@ -35,6 +35,7 @@ struct StepFlags;
 struct Bytecode;
 struct ISS;
 namespace php { struct Block; }
+namespace res { struct Func; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -206,6 +207,9 @@ void finish_builtin(ISS& env,
 void reduce_fpass_arg(ISS& env, const Bytecode&, uint32_t param, bool byRef);
 
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
+
+folly::Optional<Type>
+const_fold(ISS& env, uint32_t nArgs, const res::Func& rfunc);
 
 //////////////////////////////////////////////////////////////////////
 

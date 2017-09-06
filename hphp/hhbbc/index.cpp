@@ -699,12 +699,7 @@ bool Func::isFoldable() const {
                        return fi->first->attrs & AttrIsFoldable;
                      },
                      [&](borrowed_ptr<FuncFamily> fa) {
-                       if (fa->possibleFuncs.empty()) return false;
-                       for (auto const& finfo : fa->possibleFuncs) {
-                         if (!(finfo->first->attrs & AttrIsFoldable))
-                           return false;
-                       }
-                       return true;
+                       return false;
                      });
 }
 

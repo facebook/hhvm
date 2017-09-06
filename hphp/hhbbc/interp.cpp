@@ -2334,6 +2334,13 @@ const StaticString s_function_exists { "function_exists" };
 void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   auto const ar = fpiPop(env);
   always_assert(ar.func.hasValue());
+
+  if (options.ConstantFoldBuiltins && ar.func->isFoldable()) {
+    if (auto val = const_fold(env, numArgs, *ar.func)) {
+      return push(env, std::move(*val));
+    }
+  }
+
   specialFunctionEffects(env, ar);
 
   if (ar.func->name()->isame(s_function_exists.get())) {

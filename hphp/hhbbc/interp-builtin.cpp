@@ -32,61 +32,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<Type> const_fold(ISS& env,
-                                 const bc::FCallBuiltin& op,
-                                 const res::Func& rfunc) {
-  assert(rfunc.isFoldable());
-
-  // Don't pop the args yet---if the builtin throws at compile time (because
-  // it would raise a warning or something at runtime) we're going to leave
-  // the call alone.
-  std::vector<Cell> args(op.arg1);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto const val = tv(topT(env, i));
-    if (!val || val->m_type == KindOfUninit) return folly::none;
-    args[op.arg1 - i - 1] = *val;
-  }
-
-  auto const func = Unit::lookupBuiltin(rfunc.name());
-  always_assert_flog(
-    func,
-    "func not found for builtin {}\n",
-    rfunc.name()->data()
-  );
-
-  // If the function is variadic, all the variadic parameters are already packed
-  // into an array as the last parameter. invokeFuncFew, however, expects them
-  // to be unpacked, so do so here.
-  if (func->hasVariadicCaptureParam()) {
-    if (args.empty()) return folly::none;
-    if (!isArrayType(args.back().m_type)) return folly::none;
-    auto const variadic = args.back();
-    args.pop_back();
-    IterateV(
-      variadic.m_data.parr,
-      [&](TypedValue v) { args.emplace_back(v); }
-    );
-  }
-
-  FTRACE(1, "invoking: {}\n", func->fullName()->data());
-
-  assert(!RuntimeOption::EvalJit);
-  return eval_cell(
-    [&] {
-      auto retVal = g_context->invokeFuncFew(
-        func, nullptr, nullptr,
-        args.size(), args.data(), !env.ctx.unit->useStrictTypes
-      );
-
-      // If we got here, we didn't throw, so we can pop the inputs.
-      for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-
-      assert(cellIsPlausible(retVal));
-      return retVal;
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
@@ -291,9 +236,9 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const func = env.index.resolve_func(env.ctx, name);
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
-    if (auto const val = const_fold(env, op, func)) {
+    if (auto val = const_fold(env, op.arg1, func)) {
       constprop(env);
-      return push(env, *val);
+      return push(env, std::move(*val));
     }
   }
 
@@ -466,6 +411,57 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
     func->unit->persistent.store(false, std::memory_order_relaxed);
   }
   return false;
+}
+
+folly::Optional<Type> const_fold(ISS& env,
+                                 uint32_t nArgs,
+                                 const res::Func& rfunc) {
+  assert(rfunc.isFoldable());
+
+  // Don't pop the args yet---if the builtin throws at compile time (because
+  // it would raise a warning or something at runtime) we're going to leave
+  // the call alone.
+  std::vector<Cell> args(nArgs);
+  for (auto i = uint32_t{0}; i < nArgs; ++i) {
+    auto const val = tv(topT(env, i));
+    if (!val || val->m_type == KindOfUninit) return folly::none;
+    args[nArgs - i - 1] = *val;
+  }
+
+  auto const func = Unit::lookupBuiltin(rfunc.name());
+  if (!func) return folly::none;
+
+  // If the function is variadic, all the variadic parameters are already packed
+  // into an array as the last parameter. invokeFuncFew, however, expects them
+  // to be unpacked, so do so here.
+  if (func->hasVariadicCaptureParam()) {
+    if (args.empty()) return folly::none;
+    if (!isArrayType(args.back().m_type)) return folly::none;
+    auto const variadic = args.back();
+    args.pop_back();
+    IterateV(
+      variadic.m_data.parr,
+      [&](TypedValue v) { args.emplace_back(v); }
+    );
+  }
+
+  FTRACE(1, "invoking: {}\n", func->fullName()->data());
+
+  assert(!RuntimeOption::EvalJit);
+  return eval_cell(
+    [&] {
+      auto retVal = g_context->invokeFuncFew(
+        func, nullptr, nullptr,
+        args.size(), args.data(), !env.ctx.unit->useStrictTypes
+      );
+
+      // If we got here, we didn't throw, so we can pop the inputs.
+      for (auto i = uint32_t{0}; i < nArgs; ++i) popT(env);
+
+      assert(cellIsPlausible(retVal));
+      return retVal;
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

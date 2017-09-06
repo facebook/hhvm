@@ -493,8 +493,6 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   auto program = parse_program(std::move(ues));
 
-  LitstrTable::fini();
-
   state_after("parse", *program);
 
   Index index{borrow(program)};
@@ -518,6 +516,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   debug_dump_program(index, *program);
   print_stats(index, *program);
 
+  LitstrTable::fini();
   LitstrTable::init();
   LitstrTable::get().setWriting();
   make_unit_emitters(index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {

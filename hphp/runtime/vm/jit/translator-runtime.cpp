@@ -774,10 +774,6 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(SetArray::RvalStr(a, key), def);
 }
 
-int32_t arrayVsize(ArrayData* ad) {
-  return ad->vsize();
-}
-
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx) {

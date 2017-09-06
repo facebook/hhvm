@@ -165,8 +165,6 @@ TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
-int32_t arrayVsize(ArrayData*);
-
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,

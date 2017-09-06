@@ -363,11 +363,6 @@ inline size_t ArrayData::vsize() const {
   return g_array_funcs.vsize[kind()](this);
 }
 
-inline bool ArrayData::noCopyOnWrite() const {
-  // GlobalsArray doesn't support COW.
-  return kind() == kGlobalsKind;
-}
-
 inline bool ArrayData::isVectorData() const {
   return g_array_funcs.isVectorData[kind()](this);
 }

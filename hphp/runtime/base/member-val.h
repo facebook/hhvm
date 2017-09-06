@@ -39,6 +39,9 @@ union Value;
 /*
  * Encapsulated minstr lval reference to a container and the value and type tag
  * of one of its members.
+ *
+ * member_lval is nullable/optional.  The presence of a value can be detected
+ * via has_val(), or by explicit cast to a bool.
  */
 struct member_lval {
   member_lval();
@@ -117,7 +120,7 @@ private:
  * Encapsulated minstr rval reference to a container and the value and type tag
  * of one of its members.
  *
- * Similar to member_lval, except all the pointers and references are const.
+ * Just like member_lval, except all the pointers and references are const.
  */
 struct member_rval {
   member_rval();

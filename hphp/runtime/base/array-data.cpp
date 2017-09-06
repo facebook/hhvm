@@ -1025,7 +1025,7 @@ Variant ArrayData::key() const {
   return m_pos != iter_end() ? getKey(m_pos) : uninit_null();
 }
 
-Variant ArrayData::value(int32_t &pos) const {
+Variant ArrayData::value(int32_t pos) const {
   return pos != iter_end() ? getValue(pos) : Variant(false);
 }
 

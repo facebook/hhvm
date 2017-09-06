@@ -1,6 +1,7 @@
 zend/good/tests/classes/bug29446.php
 zend/good/tests/classes/constants_error_001.php
 zend/good/tests/classes/constants_error_005.php
+zend/good/tests/classes/constants_error_006.php
 zend/good/tests/classes/constants_error_007.php
 zend/good/tests/classes/inheritance_006.php
 zend/good/tests/classes/iterators_008.php

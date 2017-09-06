@@ -1,5 +1,6 @@
 slow/anon_class/anon_1.php
 slow/anon_class/extend_local.php
+slow/arithmetic/inc-dec-dollar-this.php
 slow/array_offset/429.php
 slow/array_offset/433.php
 slow/array_trailing_comma.php
@@ -11,6 +12,7 @@ slow/async/return-annotation-4.php
 slow/async/return-annotation-5.php
 slow/async/return-annotation-6.php
 slow/async/return-annotation-7.php
+slow/break_statement/1415.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
 slow/bug-5127251.php
@@ -78,6 +80,7 @@ slow/ext_phar/composer.php
 slow/ext_phar/create_tar.php
 slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
+slow/ext_std/extract.008.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
 slow/finally/finally_break_008.php
@@ -150,10 +153,12 @@ slow/keyset/hh-only1.php
 slow/keyset/hh-only2.php
 slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
+slow/labels/72.php
 slow/lang/deprecated.php
 slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
+slow/list_assignment/36.php
 slow/list_assignment/46.php
 slow/list_assignment/47.php
 slow/llvm/switch.php
@@ -191,8 +196,8 @@ slow/parser/async.php
 slow/parser/async_bad_class.php
 slow/parser/async_bad_if.php
 slow/parser/async_bad_tr.php
-slow/parser/backquote.php
 slow/parser/backquote-fail.php
+slow/parser/backquote.php
 slow/parser/bad_yield.php
 slow/parser/closure_return_types_both_places.php
 slow/parser/colon_colon_class.php
@@ -352,6 +357,7 @@ slow/types/scalar_names.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
 slow/unset/1117.php
+slow/unset/1120.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
 slow/use_namespace_class/double_use_ns.php

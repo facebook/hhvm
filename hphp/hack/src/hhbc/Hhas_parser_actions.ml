@@ -381,7 +381,7 @@ let makenullaryinst s =
  | "Await" -> IAsync Await
  | "WHResult" -> IAsync WHResult
 
- | _ -> IComment ("NYI nullary: " ^ s)
+ | _ -> IComment (Hhbc_ast.nyi ^ " nullary: " ^ s)
 
 type iarg =
   | IAInt64 of int64
@@ -823,7 +823,7 @@ let makeunaryinst s arg = match s with
       textual bytecode format represents them using directives and braces rather
       than instructions
    *)
-   | _ -> IComment ("NYI unary: " ^ s)
+   | _ -> IComment (Hhbc_ast.nyi ^ " unary: " ^ s)
 
 let makebinaryinst s arg1 arg2 =
 match s with
@@ -902,7 +902,7 @@ match s with
  | "AssertRATL" -> IMisc (AssertRATL (localidofiarg arg1, stringofiarg arg2))
  | "AssertRATStk" -> IMisc (AssertRATStk (intofiarg arg1, stringofiarg arg2))
  | "Silence" -> IMisc (Silence (localidofiarg arg1, opsilenceofiarg arg2))
- | _ -> IComment ("NYI binary: " ^ s)
+ | _ -> IComment (Hhbc_ast.nyi ^ " binary: " ^ s)
 
 let maketernaryinst s arg1 arg2 arg3 =
  match s with
@@ -956,7 +956,7 @@ let maketernaryinst s arg1 arg2 arg3 =
     IMisc(MemoSet(intofiarg arg1, localidofiarg arg2, intofiarg arg3 + 1))
  | "MemoGet" ->
     IMisc(MemoGet(intofiarg arg1, localidofiarg arg2, intofiarg arg3 + 1))
- | _ -> IComment ("NYI ternary: " ^ s)
+ | _ -> IComment (Hhbc_ast.nyi ^ " ternary: " ^ s)
 
 let makequaternaryinst s arg1 arg2 arg3 arg4 =
 match s with
@@ -972,4 +972,4 @@ match s with
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "MIterNextK" -> IIterator(MIterNextK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
- | _ -> IComment ("NYI quaternary: " ^ s)
+ | _ -> IComment (Hhbc_ast.nyi ^ " quaternary: " ^ s)

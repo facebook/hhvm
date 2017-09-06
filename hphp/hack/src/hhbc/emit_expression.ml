@@ -67,7 +67,7 @@ let optimize_cuf () =
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
-  instr (IComment ("NYI: " ^ description))
+  instr (IComment (H.nyi ^ ": " ^ description))
 
 let make_varray p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
 let make_kvarray p kvs =

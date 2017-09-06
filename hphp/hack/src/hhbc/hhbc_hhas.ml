@@ -115,7 +115,7 @@ let string_of_lit_const instruction =
       sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
     | File -> "File"
     | Dir -> "Dir"
-    | NYI text -> "NYI: " ^ text
+    | NYI text -> nyi ^ ": " ^ text
     | NullUninit -> "NullUninit"
     | AddElemV -> "AddElemV"
     | AddNewElemV -> "AddNewElemV"
@@ -416,7 +416,7 @@ let string_of_final instruction =
     sep ["IncDecM";
       string_of_param_num i; string_of_incdec_op op; string_of_member_key mk]
   | _ ->
-    "# string_of_final NYI"
+    "# string_of_final " ^ nyi
 (*
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t
@@ -631,7 +631,7 @@ let string_of_generator = function
   | CreateCont -> "CreateCont"
   | Yield -> "Yield"
   | YieldK -> "YieldK"
-  | _ -> "### string_of_generator - NYI"
+  | _ -> "### string_of_generator - " ^ nyi
 
 let string_of_include_eval_define = function
   | Incl -> "Incl"
@@ -867,7 +867,7 @@ and string_of_fun f use_list =
       ^ ") "
   in
   (* TODO: Pretty print body for closure as a default value *)
-  let body = "NYI: default value closure body" in
+  let body = nyi ^ ": default value closure body" in
   "function ("
   ^ args
   ^ ") "
@@ -926,7 +926,7 @@ and string_of_param_default_value expr =
     name = "ImmSet" || name = "ImmVector" || name = "ImmMap" ->
     "HH\\\\" ^ name ^ " {" ^ string_of_afield_list afl ^ "}"
   | A.Collection ((_, name), _) ->
-    "NYI - Default value for an unknown collection - " ^ name
+    nyi ^ " - Default value for an unknown collection - " ^ name
   | A.Shape fl ->
     let fl =
       List.map

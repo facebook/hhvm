@@ -8,6 +8,8 @@
  *
 *)
 
+let nyi = "HackCNYI"
+
 type check_started =
   | IgnoreStarted
   | CheckStarted

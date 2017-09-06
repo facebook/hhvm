@@ -29,19 +29,19 @@ struct BaseVector : ObjectData {
 protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
-    : ObjectData(cls, collections::objectFlags, kind, NoInit{})
+    : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
     , m_versionAndSize(0)
     , m_arr(staticEmptyVecArray())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, collections::objectFlags, kind, NoInit{})
+    : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
     , m_versionAndSize(arr->m_size)
     , m_arr(arr)
   {
     assertx(arr->isVecArray());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
-    : ObjectData(cls, collections::objectFlags, kind, NoInit{})
+    : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
     , m_versionAndSize(0)
     , m_arr(PackedArray::MakeReserveVec(cap))
   {}

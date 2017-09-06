@@ -922,19 +922,32 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 }
 
 // called from jit code
-ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  auto o = new (MM().mallocSmallSize(size)) ObjectData(cls, NoInit{});
-  assert(o->hasExactlyOneRef());
-  return o;
+template<bool Big>
+ObjectData* ObjectData::newInstanceRaw(Class* cls, size_t size) {
+  assert(cls->getODAttrs() == 0);
+  assert(Big || size <= kMaxSmallSize);
+  auto mem = Big ? MM().mallocBigSize<MemoryManager::Unzeroed>(size) :
+             MM().mallocSmallSize(size);
+  return new (mem) ObjectData(cls, InitRaw{}, 0);
 }
 
 // called from jit code
-ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().mallocBigSize<MemoryManager::Unzeroed>(size))
-    ObjectData(cls, NoInit{});
-  assert(o->hasExactlyOneRef());
-  return o;
+template<bool Big>
+ObjectData* ObjectData::newInstanceRawAttrs(Class* cls, size_t size,
+                                            uint16_t attrs) {
+  assert(Big || size <= kMaxSmallSize);
+  auto mem = Big ? MM().mallocBigSize<MemoryManager::Unzeroed>(size) :
+             MM().mallocSmallSize(size);
+  return new (mem) ObjectData(cls, InitRaw{}, attrs);
 }
+
+// Explicitly instantiate newInstanceRaw[Attrs]() template funcs.
+template ObjectData* ObjectData::newInstanceRaw<false>(Class*, size_t);
+template ObjectData* ObjectData::newInstanceRaw<true>(Class*, size_t);
+template ObjectData*
+ObjectData::newInstanceRawAttrs<false>(Class*, size_t, uint16_t);
+template ObjectData*
+ObjectData::newInstanceRawAttrs<true>(Class*, size_t, uint16_t);
 
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.

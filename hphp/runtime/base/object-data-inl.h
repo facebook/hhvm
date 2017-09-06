@@ -39,26 +39,22 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   instanceInit(cls);
 }
 
-inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
-  : m_cls(cls)
-{
-  initHeader_16(HeaderKind::Object, InitialValue, 0);
-  assert(!cls->needInitialization() || cls->initialized());
-  o_id = ++os_max_id;
-}
-
-inline ObjectData::ObjectData(Class* cls,
-                              uint16_t flags,
-                              HeaderKind kind,
-                              NoInit) noexcept
+inline ObjectData::ObjectData(Class* cls, InitRaw, uint16_t flags,
+                              HeaderKind kind) noexcept
   : m_cls(cls)
 {
   initHeader_16(kind, InitialValue, flags);
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
-  assert(cls->numDeclProperties() == 0);
   o_id = ++os_max_id;
+}
+
+inline ObjectData::ObjectData(Class* cls, NoInit, uint16_t flags,
+                              HeaderKind kind) noexcept
+  : ObjectData(cls, InitRaw{}, flags, kind)
+{
+  assert(cls->numDeclProperties() == 0);
 }
 
 inline size_t ObjectData::heapSize() const {
@@ -107,9 +103,8 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
 
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);
-  auto& mm = MM();
-  auto const obj = new (mm.objMalloc(size)) ObjectData(cls, NoInit{});
-  obj->m_aux16 |= cls->getODAttrs();
+  auto const obj = new (MM().objMalloc(size))
+                   ObjectData(cls, NoInit{}, cls->getODAttrs());
   assert(obj->hasExactlyOneRef());
   return obj;
 }

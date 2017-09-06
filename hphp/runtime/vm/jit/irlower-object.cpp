@@ -56,16 +56,24 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->extra<NewInstanceRaw>()->cls;
   auto const size = ObjectData::sizeForNProps(cls->numDeclProperties());
 
-  auto const callSpec = size <= kMaxSmallSize
-    ? CallSpec::direct(ObjectData::newInstanceRaw)
-    : CallSpec::direct(ObjectData::newInstanceRawBig);
-
-  auto const args = argGroup(env, inst)
-    .imm(reinterpret_cast<uintptr_t>(cls))
-    .imm(size);
-
-  cgCallHelper(vmain(env), env, callSpec,
-               callDest(dst), SyncOptions::Sync, args);
+  if (auto attrs = cls->getODAttrs()) {
+    auto func = size <= kMaxSmallSize
+      ? &ObjectData::newInstanceRawAttrs<false>
+      : &ObjectData::newInstanceRawAttrs<true>;
+    cgCallHelper(vmain(env), env, CallSpec::direct(func),
+                 callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+                   .imm(reinterpret_cast<uintptr_t>(cls))
+                   .imm(size)
+                   .imm(attrs));
+  } else {
+    auto func = size <= kMaxSmallSize
+      ? &ObjectData::newInstanceRaw<false>
+      : &ObjectData::newInstanceRaw<true>;
+    cgCallHelper(vmain(env), env, CallSpec::direct(func),
+                 callDest(dst), SyncOptions::Sync, argGroup(env, inst)
+                   .imm(reinterpret_cast<uintptr_t>(cls))
+                   .imm(size));
+  }
 }
 
 void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
@@ -116,15 +124,6 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->extra<InitObjProps>()->cls;
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
-  // Set the attributes, if any.
-  auto const odAttrs = cls->getODAttrs();
-  if (odAttrs) {
-    static_assert(sizeof(ObjectData::Attribute) == 2,
-                  "Codegen expects 2-byte ObjectData attributes");
-    assertx(!(odAttrs & 0xffff0000));
-    v << orwim{odAttrs, obj[ObjectData::attributeOff()], v.makeReg()};
-  }
 
   // Initialize the properties.
   auto const nprops = cls->numDeclProperties();

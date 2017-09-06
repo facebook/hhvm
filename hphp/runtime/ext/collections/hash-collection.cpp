@@ -12,7 +12,7 @@ namespace HPHP {
 // HashCollection
 
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
-  : ObjectData(cls, collections::objectFlags, kind, NoInit{})
+  : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
   , m_versionAndSize(0)
   , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
           MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))

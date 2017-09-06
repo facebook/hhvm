@@ -117,12 +117,15 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
 
  protected:
   enum class NoInit {};
+  enum class InitRaw {};
 
-  explicit ObjectData(Class*, NoInit) noexcept;
-  explicit ObjectData(Class* cls,
-                      uint16_t flags,
-                      HeaderKind kind,
-                      NoInit) noexcept;
+  // for JIT-generated instantiation with inlined property init
+  explicit ObjectData(Class* cls, InitRaw, uint16_t flags = 0,
+                      HeaderKind = HeaderKind::Object) noexcept;
+
+  // for C++ subclasses with no declared properties
+  explicit ObjectData(Class* cls, NoInit, uint16_t flags = 0,
+                      HeaderKind = HeaderKind::Object) noexcept;
 
  public:
   ALWAYS_INLINE void decRefAndRelease() {
@@ -167,15 +170,18 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
    * Given a Class that is assumed to be a concrete, regular (not a trait or
    * interface), pure PHP class, and an allocation size, return a new,
    * uninitialized object of that class. These are meant to be called from the
-   * JIT.
+   * JIT, where the cls, size, and attributes are constants at JIT time.
    *
-   * newInstanceRaw should be called only when size <= kMaxSmallSize,
-   * otherwise use newInstanceRawBig.
+   * newInstanceRaw<> should be called only when and cls->getODAttrs() == 0.
+   * newInstanceRawAttrs takes nonzero attributes. The big=true versions should
+   * be called when size > kMaxSmallSize.
    *
    * The initial ref-count will be set to one.
    */
-  static ObjectData* newInstanceRaw(Class*, uint32_t);
-  static ObjectData* newInstanceRawBig(Class*, size_t);
+  template<bool Big>
+  static ObjectData* newInstanceRaw(Class*, size_t);
+  template<bool Big>
+  static ObjectData* newInstanceRawAttrs(Class*, size_t, uint16_t attrs);
 
   void release() noexcept;
   void releaseNoObjDestructCheck() noexcept;

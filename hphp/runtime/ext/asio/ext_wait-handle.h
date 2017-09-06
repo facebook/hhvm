@@ -105,10 +105,9 @@ struct c_WaitHandle : ObjectData {
 
   explicit c_WaitHandle(Class* cls, HeaderKind kind,
                         type_scan::Index tyindex) noexcept
-    : ObjectData(cls,
+    : ObjectData(cls, NoInit{},
                  ObjectData::IsWaitHandle | ObjectData::NoDestructor,
-                 kind,
-                 NoInit{}),
+                 kind),
       m_tyindex(tyindex)
   {
     assert(type_scan::isKnownType(tyindex));

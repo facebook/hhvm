@@ -135,13 +135,17 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
 
   // Create a special arena to manage this piece of memory.
   size_t sz = sizeof(m_arenaId);
-  if (mallctl(JEMALLOC_NEW_ARENA_CMD, &m_arenaId, &sz, nullptr, 0) != 0) {
+  if (mallctl(JEMALLOC_NEW_ARENA_CMD, &m_arenaId, &sz, nullptr, 0)) {
     throw std::runtime_error{"error when creating new arena."};
   }
   if (m_arenaId >= MAX_HUGE_ARENA_COUNT) {
     always_assert(false);               // testing
     throw std::runtime_error{"too many arenas, check MAX_HUGE_ARENA_COUNT"};
   }
+  // Disable purging in this arena, as we won't be able to return the memory to
+  // the system anyway.
+  ssize_t decay_time = -1;
+
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
   chunk_hooks_t hooks {
     ManagedArena::chunk_alloc,
@@ -155,16 +159,30 @@ ManagedArena::ManagedArena(void* base, size_t maxCap,
   char command[32];
   std::snprintf(command, sizeof(command), "arena.%d.chunk_hooks", m_arenaId);
   sz = sizeof(hooks);
-  if (mallctl(command, nullptr, nullptr, &hooks, sz) != 0) {
+  if (mallctl(command, nullptr, nullptr, &hooks, sz)) {
     throw std::runtime_error("error in setting chunk hooks");
+  }
+  std::snprintf(command, sizeof(command), "arena.%d.decay_time", m_arenaId);
+  if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
+    throw std::runtime_error("error when turning off decaying");
   }
 #else
   char command[32];
   std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
   extent_hooks_t *hooks_ptr = &custom_extent_hooks;
   sz = sizeof(hooks_ptr);
-  if (mallctl(command, nullptr, nullptr, &hooks_ptr, sz) != 0) {
+  if (mallctl(command, nullptr, nullptr, &hooks_ptr, sz)) {
     throw std::runtime_error("error in setting extent hooks");
+  }
+  std::snprintf(command, sizeof(command),
+                "arena.%d.dirty_decay_ms", m_arenaId);
+  if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
+    throw std::runtime_error("error when turning off decaying");
+  }
+  std::snprintf(command, sizeof(command),
+                "arena.%d.muzzy_decay_ms", m_arenaId);
+  if (mallctl(command, nullptr, nullptr, &decay_time, sizeof(decay_time))) {
+    throw std::runtime_error("error when turning off decaying");
   }
 #endif
   s_arenas[m_arenaId] = this;

@@ -86,9 +86,15 @@ let print_state env ?range state =
     | None -> subchunks
     | Some range -> subchunks_in_range subchunks range
   in
-  (* Drop leading whitespace *)
+  (* Drop leading whitespace. Also drop leading Commas. Comma represents a
+   * trailing comma that was added because its associated split was broken on.
+   * Since we don't have source mapping information for Commas (since there may
+   * have been no trailing comma in the original source), we only want to print
+   * them when the atom preceding the trailing comma is printed. If a Comma is
+   * at the beginning of the range, then the atom preceding it was not
+   * included, and neither should the Comma. *)
   let subchunks = List.drop_while subchunks ~f:begin function
-    | Newline | Space -> true
+    | Newline | Space | Comma -> true
     | _ -> false
   end in
   string_of_subchunks env subchunks

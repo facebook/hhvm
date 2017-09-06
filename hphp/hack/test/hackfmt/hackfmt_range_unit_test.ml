@@ -82,6 +82,23 @@ let range_test_suite =
 
     "blank_line_at_start" >::
     assert_range_formats_to ~src:"a;\n\nb;" ~rng:((3,6),"\nb;") ~exp:"\nb;\n";
+
+    "comma_at_start_of_range" >::
+    assert_range_formats_to ~src:"f($x, $y)" ~rng:((4,8),", $y") ~exp:", $y";
+
+    (* When the formatter inserts a trailing comma, ensure that it is printed
+     * only if the atom preceding it is printed. *)
+    "trailing_comma_inserted_at_start_of_range" >::
+    assert_range_formats_to
+      ~src:((String.make 80 'f') ^ "($x,$y)")
+      ~rng:((86,87),")")
+      ~exp:")\n";
+
+    "trailing_comma_inserted_at_end_of_range" >::
+    assert_range_formats_to
+      ~src:((String.make 80 'f') ^ "($x,$y)")
+      ~rng:((84,86),"$y")
+      ~exp:"  $y,\n";
   ]
 
 let _ =

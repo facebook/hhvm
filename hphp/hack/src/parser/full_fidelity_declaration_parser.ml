@@ -337,6 +337,7 @@ module WithExpressionAndStatementAndTypeParser
     HHVM.
 
     TODO: Update the grammar comment above when the specification is fixed.
+    (This work is being tracked by spec work items 102, 103 and 104.)
 
     We do not enforce these rules here. Rather, we allow the kind to be anywhere,
     and detect the errors in a later pass. *)
@@ -495,8 +496,10 @@ module WithExpressionAndStatementAndTypeParser
      TODO: that we were expecting either const or public.
      Note that a visibility modifier is required; static is optional;
      any order is allowed.
+
      TODO: The spec indicates that abstract is disallowed, but Hack allows
      TODO: it; resolve this disagreement.
+     (This work is tracked by task T21622566)
 
      // method-declaration
      <<attr>> public/private/protected/abstract/final/static async function
@@ -507,13 +510,18 @@ module WithExpressionAndStatementAndTypeParser
 
      // constructor-declaration
      <<attr>> public/private/protected/abstract/final function __construct
-     TODO: Hack allows static constructors and requires a visibility modifier,
-     TODO: as with regular methods. Resolve this disagreement with the spec.
+     TODO: We allow static constructors in this parser; we should produce
+     an error message in a later pass.
+     (This work is tracked by task T21630909.)
 
      // destructor-declaration
      <<attr>> public/private/protected function __destruct
-     TODO: Hack allows static, final and abstract destructors
-     TODO: as with regular methods. Resolve this disagreement with the spec.
+     TODO: Hack and HHVM allow final and abstract destructors, but the
+     TODO: spec says that these should not be legal; resolve this discrepancy.
+
+     TODO: We allow static destructors in this parser; we should produce
+     an error message in a later pass.
+     (This work is tracked by task T21630909.)
 
      // trait clauses
     require  extends  qualified-name
@@ -542,8 +550,7 @@ module WithExpressionAndStatementAndTypeParser
     | Protected
     | Private
     | Final ->
-      (* Parse methods, constructors, destructors or properties.
-      TODO: const can also start with these tokens *)
+      (* Parse methods, constructors, destructors or properties. *)
       parse_methodish_or_property parser (make_missing())
     | LessThanLessThan ->
       (* Parse "methodish" declarations: methods, ctors and dtors *)
@@ -560,7 +567,8 @@ module WithExpressionAndStatementAndTypeParser
       (* ERROR RECOVERY
       Hack requires that a function inside a class be marked
       with a visibility modifier, but PHP does not have this requirement.
-      TODO: Add an error in a later pass for Hack files. *)
+      We accept the lack of a modifier here, and produce an error in
+      a later pass. *)
       parse_methodish parser (make_missing()) (make_missing())
     | Var ->
       (* We allow "var" as a synonym for "public" in a property; this
@@ -721,8 +729,10 @@ module WithExpressionAndStatementAndTypeParser
             string literals here?
       ERROR RECOVERY: We parse any expressions here;
       TODO: give an error in a later pass if the expressions are not literals.
+      (This work is tracked by task T21175355)
 
-      TODO: We allow an empty list of enums; add an error for that.
+      An empty list is illegal, but we allow it here and give an error in
+      a later pass.
     *)
     if peek_token_kind parser = Enum then
       let (parser, enum_token) = assert_token parser Enum in
@@ -831,7 +841,7 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO: What about "require extends :foo<int>;" ? *)
     (* TODO: The spec is incomplete; we need to be able to parse
        require extends Foo<int>;
-       Fix the spec.
+       (This work is being tracked by spec issue 105.)
        TODO: Check whether we also need to handle
          require extends foo::bar
        and so on.
@@ -1071,7 +1081,6 @@ module WithExpressionAndStatementAndTypeParser
     (parser, make_const_declaration abstr const type_spec const_list semi)
 
   and is_type_in_const parser =
-    (* TODO Use Eric's helper here to assert length of errors *)
     let before = List.length (errors parser) in
     let (parser1, _) = parse_type_specifier parser in
     let (parser1, _) = require_name_allow_keywords parser1 in
@@ -1100,12 +1109,22 @@ module WithExpressionAndStatementAndTypeParser
       abstract  const  type  name  type-constraintopt  ;
     concrete-type-constant-declaration:
       const  type  name  type-constraintopt  =  type-specifier  ;
+
+    ERROR RECOVERY:
+
+    An abstract type constant may only occur in an interface or an abstract
+    class. We allow that to be parsed here, and the type checker detects the
+    error.
+    CONSIDER: We could detect this error in a post-parse pass; it is entirely
+    syntactic.  Consider moving the error detection out of the type checker.
+
+    An interface may not contain a non-abstract type constant that has a
+    type constraint.  We allow that to be parsed here, and the type checker
+    detects the error.
+    CONSIDER: We could detect this error in a post-parse pass; it is entirely
+    syntactic.  Consider moving the error detection out of the type checker.
   *)
   and parse_type_const_declaration parser abstr const =
-    (* TODO: Error handle -
-      abstract type consts only in interfaces or abstract classes
-      interfaces cannot have concrete type consts with type constraints
-    *)
     let (parser, type_token) = assert_token parser Type in
     let (parser, name) = require_name_allow_keywords parser in
     let (parser, type_constraint) = parse_type_constraint_opt parser in
@@ -1136,8 +1155,11 @@ module WithExpressionAndStatementAndTypeParser
       attribute_values , attribute_value
     attribute_value := expression
    *)
-   (* TODO: The list of attrs can have a trailing comma. Update the spec. *)
-   (* TODO: The list of values can have a trailing comma. Update the spec. *)
+   (*
+   TODO: The list of attrs can have a trailing comma. Update the spec.
+   TODO: The list of values can have a trailing comma. Update the spec.
+   (Both these work items are tracked by spec issue 106.) *)
+
   and parse_attribute_specification_opt parser =
     if peek_token_kind parser = LessThanLessThan then
       let (parser, left, items, right) =
@@ -1180,8 +1202,11 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_parameter_list_opt parser =
       (* SPEC
-
-        TODO: Update the spec to match this.
+        TODO: The specification is wrong in several respects concerning
+        variadic parameters. Variadic parameters are permitted to have a
+        type and name but this is not mentioned in the spec. And variadic
+        parameters are not mentioned at all in the grammar for constructor
+        parameter lists.  (This is tracked by spec issue 107.)
 
         parameter-list:
           variadic-parameter
@@ -1203,7 +1228,7 @@ module WithExpressionAndStatementAndTypeParser
         pass gives an error if a variadic parameter is in an incorrect position
         or followed by a trailing comma.  *)
      (* TODO: Add an error checking pass that ensures that a variadic parameter
-     does not have a default value. *)
+     does not have a default value. (This work is tracked by task T21650816.) *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =
@@ -1217,13 +1242,17 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_parameter_declaration parser =
     (* SPEC
-    TODO: The specification does not include modifiers. Fix the spec.
     parameter-declaration:
       attribute-specification-opt  type-specifier  variable-name \
       default-argument-specifier-opt
     *)
-    (* In strict mode, we require a type specifier. This error is not caught
-       at parse time but rather by a later pass. *)
+    (* ERROR RECOVERY
+       In strict mode, we require a type specifier. This error is not caught
+       at parse time but rather by a later pass.
+       TODO: Visibility modifiers are only legal in constructor parameter
+       lists; give an error in a later pass.
+       (This work is tracked by task T21651107.)
+    *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
     let (parser, visibility) = parse_visibility_modifier_opt parser in
     let token = peek_token parser in
@@ -1253,6 +1282,7 @@ module WithExpressionAndStatementAndTypeParser
           & & variable
           ... & variable
        at a later pass
+       (This work is tracked by task T21651222.)
      *)
     let (parser, decorator) = next_token parser in
     let decorator = make_token decorator in
@@ -1299,6 +1329,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_constraint_operator parser =
     (* TODO: Put this in the specification
+    (This work is tracked by spec issue #100.)
       constraint-operator:
         =
         as
@@ -1315,8 +1346,10 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_where_constraint parser =
     (* TODO: Put this in the specification
+    (This work is tracked by spec issue #100.)
     constraint:
       type-specifier  constraint-operator  type-specifier
+
     *)
     let (parser, left) = parse_type_specifier parser in
     let (parser, op) = parse_constraint_operator parser in
@@ -1332,6 +1365,7 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_where_clause parser =
     (* TODO: Add this to the specification
+    (This work is tracked by spec issue #100.)
       where-clause:
         where   constraint-list
 
@@ -1359,15 +1393,14 @@ module WithExpressionAndStatementAndTypeParser
         attribute-specification-opt  async-opt  coroutine-opt  function  name  /
         generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
         return-type   where-clause-opt
-
       TODO: The spec does not specify "where" clauses. Add them.
-
+      (This work is tracked by spec issue #100.)
     *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     (* In non-strict mode we allow an & to appear before the name.
-      TODO: Produce an error if this occurs in strict mode, or if it
-      TODO: appears before a special name like __construct, and so on. *)
+      TODO: Produce an error if this occurs in strict mode
+      (This work is tracked by task T21651451.) *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, coroutine_token) = optional_token parser Coroutine in
     let (parser, function_token) = require_function parser in
@@ -1550,7 +1583,8 @@ module WithExpressionAndStatementAndTypeParser
     let valid =
       match markup_section.syntax with
       (* proceed successfully if we've consumed <?... *)
-      (* TODO: Give an error if there is leading trivia on the < in an hh file *)
+      (* TODO: Give an error if there is leading trivia on the < in an hh
+      file. (This work is tracked by task T21653075.) *)
       (* TODO: Handle the case where the langauge is not a Name. *)
       | MarkupSection { markup_suffix; _ } -> not (is_missing markup_suffix)
       | _ -> false

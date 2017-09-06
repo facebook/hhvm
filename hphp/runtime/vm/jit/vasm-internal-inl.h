@@ -232,7 +232,11 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     if (block.frame != -1) {
       auto& frames = unit.frames;
       auto const size = env.cb->frontier() - start;
-      always_assert(env.cb->contains(start));
+      // It's possible that (a) this block is empty, and (b) cb is full, so the
+      // frontier from the start of the block is actually the first byte after
+      // the block. This is particularly likely when RetranslateAll is in use as
+      // ephemeral code blocks are resizable.
+      always_assert(!size || env.cb->contains(start));
       always_assert((int64_t)size >= 0);
       auto const area = static_cast<uint8_t>(block.area_idx);
       frames[block.frame].sections[area].exclusive += size;

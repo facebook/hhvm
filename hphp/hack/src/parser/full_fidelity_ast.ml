@@ -1800,24 +1800,23 @@ and pDef : def parser = fun node env ->
     ; classish_body            =
       { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
     ; _ } ->
-      Class
-      { c_mode            = !(lowerer_state.mode)
-      ; c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attr env
-      ; c_final           = List.mem (pKinds mods env) Final
-      ; c_is_xhp          =
-        (match token_kind name with
-        | Some TK.XHPElementName | Some TK.XHPClassName -> true
+      let c_mode = !(lowerer_state.mode) in
+      let c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attr env in
+      let c_final = List.mem (pKinds mods env) Final in
+      let c_is_xhp =
+        match token_kind name with
+        | Some (TK.XHPElementName | TK.XHPClassName) -> true
         | _ -> false
-        )
-      ; c_name            = pos_name name
-      ; c_tparams         = pTParaml tparaml env
-      ; c_extends         = couldMap ~f:pHint exts env
-      ; c_implements      = couldMap ~f:pHint impls env
-      ; c_body            = List.concat (couldMap ~f:pClassElt elts env)
-      ; c_namespace       = Namespace_env.empty !(lowerer_state.popt)
-      ; c_enum            = None
-      ; c_span            = get_pos node
-      ; c_kind            = begin
+      in
+      let c_name = pos_name name in
+      let c_tparams = pTParaml tparaml env in
+      let c_extends = couldMap ~f:pHint exts env in
+      let c_implements = couldMap ~f:pHint impls env in
+      let c_body = List.concat (couldMap ~f:pClassElt elts env) in
+      let c_namespace = Namespace_env.empty !(lowerer_state.popt) in
+      let c_enum = None in
+      let c_span = get_pos node in
+      let c_kind =
         let is_abs = Str.(string_match (regexp ".*abstract.*") (text mods) 0) in
         match token_kind kw with
         | Some TK.Class when is_abs -> Cabstract
@@ -1826,8 +1825,23 @@ and pDef : def parser = fun node env ->
         | Some TK.Trait             -> Ctrait
         | Some TK.Enum              -> Cenum
         | _ -> missing_syntax "class kind" kw env
-        end
-      ; c_doc_comment = doc_comment_opt
+      in
+      let c_doc_comment = doc_comment_opt in
+      Class
+      { c_mode
+      ; c_user_attributes
+      ; c_final
+      ; c_is_xhp
+      ; c_name
+      ; c_tparams
+      ; c_extends
+      ; c_implements
+      ; c_body
+      ; c_namespace
+      ; c_enum
+      ; c_span
+      ; c_kind
+      ; c_doc_comment
       }
   | ConstDeclaration
     { const_type_specifier = ty
@@ -1981,10 +1995,11 @@ let pProgram : program parser = fun node env ->
   in
 
   (* The list of top-level things in a file is somewhat special. *)
-  let rec aux env = function
-  | [] -> []
+  let rec aux env acc = function
+  | []
   (* EOF happens only as the last token in the list. *)
-  | [{ syntax = EndOfFile _; _ }] -> []
+  | [{ syntax = EndOfFile _; _ }]
+    -> List.rev acc
   (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
    * of the world; `define` is an *expression* in FF, but a *definition* in AST.
    * Luckily, `define` only happens at the level of definitions.
@@ -1996,23 +2011,27 @@ let pProgram : program parser = fun node env ->
         ; _ }
       ; _ }
     ; _ } :: nodel ->
-      ( match List.map ~f:(fun x -> pExpr x env) (as_list args) with
-      | [ _, String name; e ] -> Constant
-        { cst_mode      = !(lowerer_state.mode)
-        ; cst_kind      = Cst_define
-        ; cst_name      = name
-        ; cst_type      = None
-        ; cst_value     = e
-        ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
-        }
-      | args ->
-        let name = pos_name define_keyword in
-        Stmt (Expr (fst name, Call ((fst name, Id name), [], args, [])))
-      ) :: aux env nodel
-  | node :: nodel -> pDef node env :: aux env nodel
+      let def =
+        match List.map ~f:(fun x -> pExpr x env) (as_list args) with
+        | [ _, String name; e ] -> Constant
+          { cst_mode      = !(lowerer_state.mode)
+          ; cst_kind      = Cst_define
+          ; cst_name      = name
+          ; cst_type      = None
+          ; cst_value     = e
+          ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
+          }
+        | args ->
+          let name = pos_name define_keyword in
+          Stmt (Expr (fst name, Call ((fst name, Id name), [], args, [])))
+      in
+      aux env (def :: acc) nodel
+  | node :: nodel ->
+    let def = pDef node env in
+    aux env (def :: acc) nodel
   in
   let nodes = as_list node in
-  let nodes = aux env nodes in
+  let nodes = aux env [] nodes in
   post_process nodes
 
 let pScript node env =

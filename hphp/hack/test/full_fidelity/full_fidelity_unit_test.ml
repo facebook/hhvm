@@ -169,6 +169,7 @@ let minimal_tests =
     "context/test_extra_error_trivia";
     "test_funcall_with_type_arguments";
     "test_nested_namespace_declarations";
+    "test_xhp_attributes";
   ] ~f:mapper
 
 let error_tests =

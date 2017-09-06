@@ -1,26 +1,31 @@
 <?php
 
 function foo(int $a): bool {}
+function nfoo(?int $a): ?bool {}
 
-$rf = new ReflectionFunction('foo');
+$rp = null;
 
-echo "--Parameter--\n\n";
+foreach(['nfoo','foo'] as $fName) {
+  $rf = new ReflectionFunction($fName);
 
-$rp = $rf->getParameters()[0];
-var_dump($rp->hasType());
-$rt = $rp->getType();
-var_dump($rt->isBuiltin());
-var_dump($rt->__toString());
-var_dump($rt->allowsNull());
+  echo "--Function $fName - Parameter--\n\n";
 
-echo "\n--Return--\n\n";
+  $rp = $rf->getParameters()[0];
+  var_dump($rp->hasType());
+  $rt = $rp->getType();
+  var_dump($rt->isBuiltin());
+  var_dump($rt->__toString());
+  var_dump($rt->allowsNull());
 
-var_dump($rf->hasReturnType());
-$rt = $rf->getReturnType();
-var_dump($rt->isBuiltin());
-var_dump($rt->__toString());
-var_dump($rt->allowsNull());
+  echo "\n--Function $fName - Return--\n\n";
 
+  var_dump($rf->hasReturnType());
+  $rt = $rf->getReturnType();
+  var_dump($rt->isBuiltin());
+  var_dump($rt->__toString());
+  var_dump($rt->allowsNull());
+  echo "\n";
+}
 
 echo "\n--Call Constructor Directly--\n\n";
 

@@ -148,6 +148,7 @@ let minimal_tests =
     "test_array_key_value_precedence";
     "test_enum";
     "test_class_with_attributes";
+    "test_class_with_qualified_name";
     "test_namespace";
     "test_empty_class";
     "test_class_method_declaration";

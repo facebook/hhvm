@@ -287,13 +287,6 @@ module WithParser(Parser : ParserType) = struct
       (* TODO: Different error? *)
       (with_error parser SyntaxError.error1004, (make_missing()))
 
-  let require_class_name parser =
-    if is_next_xhp_class_name parser then
-      let (parser, token) = next_xhp_class_name parser in
-      (parser, make_token token)
-    else
-      require_name_allow_keywords parser
-
   let next_xhp_class_name_or_other parser =
     if is_next_xhp_class_name parser then next_xhp_class_name parser
     else next_token parser
@@ -310,13 +303,26 @@ module WithParser(Parser : ParserType) = struct
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let require_qualified_name parser =
-    (* TODO: What if the name is a keyword? *)
-    let (parser1, name) = next_token parser in
+    let (parser1, name) = next_token_as_name parser in
     match Token.kind name with
     | TokenKind.QualifiedName
     | TokenKind.Name -> (parser1, make_token name)
     | _ ->
       (with_error parser SyntaxError.error1004, (make_missing()))
+
+  (**
+   * TODO: If using qualified names for class names is legal in some cases, then
+   * we need to update the specification accordingly.
+   *
+   * TODO: if we need the use of qualified names to be an error in some cases,
+   * we need to add error checking code in a later pass.
+   *)
+  let require_class_name parser =
+    if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, make_token token)
+    else
+      require_qualified_name parser
 
   let require_function parser =
     require_token parser TokenKind.Function SyntaxError.error1003

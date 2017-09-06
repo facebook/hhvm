@@ -12,10 +12,8 @@ slow/async/return-annotation-4.php
 slow/async/return-annotation-5.php
 slow/async/return-annotation-6.php
 slow/async/return-annotation-7.php
-slow/break_statement/1415.php
 slow/break_statement/badexp.php
 slow/break_statement/zero.php
-slow/bug-5127251.php
 slow/class_constant/abstract_const2.php
 slow/class_constant/abstract_const7.php
 slow/class_constant/globals-array.php
@@ -158,9 +156,6 @@ slow/lang/deprecated.php
 slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
-slow/list_assignment/36.php
-slow/list_assignment/46.php
-slow/list_assignment/47.php
 slow/llvm/switch.php
 slow/memoize/args.php
 slow/memoize/basic.php
@@ -308,8 +303,6 @@ slow/php7_backported/scalar-types/scalar_strict_declaration_placement_008.php
 slow/php7_backported/scalar-types/strict_nested.php
 slow/php7_backported/varSyntax/indirect-fcall.php
 slow/php7_backported/varSyntax/staticMember.php
-slow/php7_bcbreak/5/ltr_eval/complex.php
-slow/php7_bcbreak/5/ltr_eval/simple.php
 slow/php7_bcbreak/5/php4_constructor/multiple_classes.php
 slow/php7_bcbreak/5/php4_constructor/reflecting.php
 slow/php7_bcbreak/5/php4_constructor/simple_class.php

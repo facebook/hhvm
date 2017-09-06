@@ -150,7 +150,12 @@ let rec emit_stmt env st =
           instr_popc;
           with_temp_local temp
           begin fun temp _ ->
-            emit_lval_op_list env (Some temp) [] e1
+            let prefix, block =
+              emit_lval_op_list env (Some temp) [] e1 in
+              gather [
+                prefix;
+                block
+              ]
           end;
           instr_pushl temp;
           instr_popc;

@@ -1650,8 +1650,11 @@ and emit_arg env i (pos, expr_ as expr) =
 
   | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar id)) ->
     let local = get_local env id in
+    let lhs_instrs, set_instrs =
+      emit_lval_op_list env (Some local) [] e in
     gather [
-      emit_lval_op_list env (Some local) [] e;
+      lhs_instrs;
+      set_instrs;
       instr_fpassl i local;
     ]
 
@@ -2137,14 +2140,22 @@ and can_use_as_rhs_in_list_assignment expr =
  *     list($a, list($b, $c)) = $d
  * and list(list($a, $b), $c) = $d
  * will both assign to $c, $b and $a in that order.
+ * Returns a pair of instructions:
+ * 1. initialization part of the left hand side
+ * 2. assignment
+ * this is necessary to handle cases like:
+ * list($a[$f()]) = b();
+ * here f() should be invoked before b()
  *)
  and emit_lval_op_list env local indices expr =
   match snd expr with
   | A.List exprs ->
-    gather @@
-    List.rev @@
-    List.mapi exprs (fun i expr -> emit_lval_op_list env local (i::indices) expr)
-  | A.Omitted -> empty
+    let lhs_instrs, set_instrs =
+      List.mapi exprs (fun i expr -> emit_lval_op_list env local (i::indices) expr)
+      |> List.unzip in
+    gather lhs_instrs,
+    gather (List.rev set_instrs)
+  | A.Omitted -> empty, empty
   | _ ->
     (* Generate code to access the element from the array *)
     let access_instrs =
@@ -2153,9 +2164,13 @@ and can_use_as_rhs_in_list_assignment expr =
       | None -> instr_null
     in
     (* Generate code to assign to the lvalue *)
-    let assign_instrs = emit_lval_op_nonlist env LValOp.Set expr access_instrs 1 in
+    (* Return pair: side effects to initialize lhs + assignment *)
+    let lhs_instrs, rhs_instrs, set_op =
+      emit_lval_op_nonlist_steps env LValOp.Set expr access_instrs 1 in
+    lhs_instrs,
     gather [
-      assign_instrs;
+      rhs_instrs;
+      set_op;
       instr_popc
     ]
 
@@ -2191,7 +2206,7 @@ and emit_lval_op env op expr1 opt_expr2 =
           | _ -> true)
       in
       if has_elements then
-        stash_in_local ~leave_on_stack:true env expr2
+        stash_in_local_with_prefix ~leave_on_stack:true env expr2
         begin fun local _break_label ->
           let local =
             if can_use_as_rhs_in_list_assignment (snd expr2) then
@@ -2452,12 +2467,26 @@ and emit_unop ~need_ref env op e =
 and emit_exprs env exprs =
   gather (List.map exprs (emit_expr ~need_ref:false env))
 
+(* allows to create a block of code that will
+- get a fresh temporary local
+- be wrapped in a try/fault where fault will clean temporary from the previous
+  bulletpoint*)
 and with_temp_local temp f =
+  let _, block =
+    with_temp_local_with_prefix temp (fun temp label -> empty, f temp label) in
+  block
+
+(* similar to with_temp_local with addition that
+  function 'f' that creates result block of code can generate an
+  additional prefix instruction sequence that should be
+  executed before the result block *)
+and with_temp_local_with_prefix temp f =
   let break_label = Label.next_regular () in
-  let block = f temp break_label in
-  if is_empty block then block
+  let prefix, block = f temp break_label in
+  if is_empty block then prefix, block
   else
     let fault_label = Label.next_fault () in
+    prefix,
     gather [
       instr_try_fault
         fault_label
@@ -2470,6 +2499,39 @@ and with_temp_local temp f =
       instr_label break_label;
     ]
 
+(* Similar to stash_in_local with addition that function that
+   creates a block of code can yield a prefix instrution
+  that will be executed as the first instruction in the result instruction set *)
+and stash_in_local_with_prefix ?(always_stash=false) ?(leave_on_stack=false)
+                   ?(always_stash_this=false) env e f =
+  match e with
+  | (_, A.Lvar id) when not always_stash
+    && not (is_local_this env (snd id) &&
+    ((Emit_env.get_needs_local_this env) || always_stash_this)) ->
+    let break_label = Label.next_regular () in
+    let prefix_instr, result_instr =
+      f (get_local env id) break_label in
+    gather [
+      prefix_instr;
+      result_instr;
+      instr_label break_label;
+      if leave_on_stack then instr_cgetl (get_local env id) else empty;
+    ]
+  | _ ->
+    let generate_value =
+      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let prefix_instr, result_instr =
+        with_temp_local_with_prefix temp f in
+      gather [
+        prefix_instr;
+        generate_value;
+        instr_setl temp;
+        instr_popc;
+        result_instr;
+        if leave_on_stack then instr_pushl temp else instr_unsetl temp
+      ]
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
  * temporary local `temp` (unless it is itself a local). Then use `f` to
  * generate code that uses this local and branches or drops through to
@@ -2481,25 +2543,5 @@ and with_temp_local temp f =
  *)
 and stash_in_local ?(always_stash=false) ?(leave_on_stack=false)
                    ?(always_stash_this=false) env e f =
-  match e with
-  | (_, A.Lvar id) when not always_stash
-    && not (is_local_this env (snd id) &&
-    ((Emit_env.get_needs_local_this env) || always_stash_this)) ->
-    let break_label = Label.next_regular () in
-    gather [
-      f (get_local env id) break_label;
-      instr_label break_label;
-      if leave_on_stack then instr_cgetl (get_local env id) else empty;
-    ]
-  | _ ->
-    let generate_value =
-      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
-    Local.scope @@ fun () ->
-      let temp = Local.get_unnamed_local () in
-      gather [
-        generate_value;
-        instr_setl temp;
-        instr_popc;
-        with_temp_local temp f;
-        if leave_on_stack then instr_pushl temp else instr_unsetl temp
-      ]
+  stash_in_local_with_prefix ~always_stash ~leave_on_stack ~always_stash_this
+    env e (fun temp label -> empty, f temp label)

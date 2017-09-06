@@ -207,21 +207,53 @@ bool isDimBaseLoc(BaseLoc loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename B, typename... T>
-folly::Optional<Type> array_op(
-  ISS& env,
-  bool nullOnMissing,
-  std::pair<Type,ThrowMode> opA(B, const T&...),
-  std::pair<Type,ThrowMode> opV(B, const T&...),
-  std::pair<Type,ThrowMode> opD(B, const T&...),
-  std::pair<Type,ThrowMode> opK(B, const T&...),
-  T... args) {
+/*
+ * If the current base is an array-like, update it via *_set, and return true;
+ * otherwise, return false.
+ */
+bool array_do_set(ISS& env, const Type& key, const Type& value) {
+  auto& base = env.state.mInstrState.base.type;
+  auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
+    if (base.subtypeOf(TArr))    return  array_set(std::move(base), key, value);
+    if (base.subtypeOf(TVec))    return    vec_set(std::move(base), key, value);
+    if (base.subtypeOf(TDict))   return   dict_set(std::move(base), key, value);
+    if (base.subtypeOf(TKeyset)) return keyset_set(std::move(base), key, value);
+    return folly::none;
+  }();
+  if (!res) return false;
+
+  switch (res->second) {
+    case ThrowMode::None:
+      nothrow(env);
+      break;
+    case ThrowMode::MaybeMissingElement:
+    case ThrowMode::MissingElement:
+    case ThrowMode::MaybeBadKey:
+    case ThrowMode::BadOperation:
+      break;
+  }
+
+  if (res->first == TBottom) {
+    unreachable(env);
+  }
+
+  base = std::move(res->first);
+  return true;
+}
+
+/*
+ * If the current base is an array-like, return the best known type
+ * for base[key].
+ */
+folly::Optional<Type> array_do_elem(ISS& env,
+                                    bool nullOnMissing,
+                                    const Type& key) {
   auto const& base = env.state.mInstrState.base.type;
   auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
-    if (base.subtypeOf(TArr))    return opA(base, args...);
-    if (base.subtypeOf(TVec))    return opV(base, args...);
-    if (base.subtypeOf(TDict))   return opD(base, args...);
-    if (base.subtypeOf(TKeyset)) return opK(base, args...);
+    if (base.subtypeOf(TArr))    return  array_elem(base, key);
+    if (base.subtypeOf(TVec))    return    vec_elem(base, key);
+    if (base.subtypeOf(TDict))   return   dict_elem(base, key);
+    if (base.subtypeOf(TKeyset)) return keyset_elem(base, key);
     return folly::none;
   }();
   if (!res) return folly::none;
@@ -253,29 +285,23 @@ folly::Optional<Type> array_op(
   return std::move(res->first);
 }
 
-template <typename R, typename B, typename... T>
-typename std::enable_if<!std::is_same<R, std::pair<Type, ThrowMode>>::value,
-                        folly::Optional<R>>::type
-array_op(
-  ISS& env,
-  bool /*nullOnMissing*/,
-  R opA(B, const T&...),
-  R opV(B, const T&...),
-  R opD(B, const T&...),
-  R opK(B, const T&...),
-  T... args) {
-  auto const& base = env.state.mInstrState.base.type;
-  if (base.subtypeOf(TArr)) return opA(base, args...);
-  if (base.subtypeOf(TVec)) return opV(base, args...);
-  if (base.subtypeOf(TDict)) return opD(base, args...);
-  if (base.subtypeOf(TKeyset)) return opK(base, args...);
-  return folly::none;
+/*
+ * If the current base is an array-like, update it via *_newelem, and
+ * return the best known type for the key added; otherwise return folly::none.
+ */
+folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
+  auto& base = env.state.mInstrState.base.type;
+  auto res = [&] () -> folly::Optional<std::pair<Type,Type>> {
+    if (base.subtypeOf(TArr))    return  array_newelem(std::move(base), value);
+    if (base.subtypeOf(TVec))    return    vec_newelem(std::move(base), value);
+    if (base.subtypeOf(TDict))   return   dict_newelem(std::move(base), value);
+    if (base.subtypeOf(TKeyset)) return keyset_newelem(std::move(base), value);
+    return folly::none;
+  }();
+  if (!res) return folly::none;
+  base = std::move(res->first);
+  return res->second;
 }
-
-#define array_do(env, nullOnMissing, op, ...)                           \
-  array_op(env, nullOnMissing,                                          \
-           array_ ## op, vec_ ## op, dict_ ## op, keyset_ ## op,        \
-           ##__VA_ARGS__)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -836,7 +862,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     handleInPublicStaticElemU(env);
     promoteBaseElemU(env);
 
-    if (auto ty = array_do(env, false, elem, key)) {
+    if (auto ty = array_do_elem(env, false, key)) {
       moveBase(
         env,
         Base { std::move(*ty), BaseLoc::Elem, env.state.mInstrState.base.type },
@@ -852,7 +878,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     promoteBaseElemD(env);
   }
 
-  if (auto ty = array_do(env, mode == MOpMode::None, elem, key)) {
+  if (auto ty = array_do_elem(env, mode == MOpMode::None, key)) {
     extendArrChain(
       env, std::move(key), env.state.mInstrState.base.type,
       std::move(*ty),
@@ -882,10 +908,11 @@ void miNewElem(ISS& env) {
   handleInPublicStaticNewElem(env);
   promoteBaseNewElem(env);
 
-  if (auto pair = array_do(env, false, newelem, TInitNull)) {
-    extendArrChain(
-      env, std::move(pair->second), std::move(pair->first), TInitNull
-    );
+  if (auto kty = array_do_newelem(env, TInitNull)) {
+    extendArrChain(env,
+                   std::move(*kty),
+                   std::move(env.state.mInstrState.base.type),
+                   TInitNull);
   } else {
     moveBase(env, Base { TInitCell, BaseLoc::Elem, TTop });
   }
@@ -1085,9 +1112,7 @@ void miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
 // handle array chains and frame effects, but don't yet do anything
 // better than supplying a single type.
 void pessimisticFinalElemD(ISS& env, const Type& key, const Type& ty) {
-  if (auto ret = array_do(env, false, set, key, ty)) {
-    env.state.mInstrState.base.type = std::move(*ret);
-  }
+  array_do_set(env, key, ty);
 }
 
 template<typename F>
@@ -1095,7 +1120,7 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard,
                      const Type& key, bool nullOnMissing,
                      F transform) {
   auto ty = [&] {
-    if (auto type = array_do(env, nullOnMissing, elem, key)) {
+    if (auto type = array_do_elem(env, nullOnMissing, key)) {
       return std::move(*type);
     }
     return TInitCell;
@@ -1173,11 +1198,10 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
    * We push the right hand side on the stack only if the base is an
    * array, object or emptyish.
    */
-  auto& baseTy = env.state.mInstrState.base.type;
-  if (auto ty = array_do(env, false, set, key, t1)) {
-    auto const maybeWeird = baseTy.subtypeOf(TArr) && keyCouldBeWeird(key);
-    baseTy = std::move(*ty);
+  if (array_do_set(env, key, t1)) {
     if (env.state.unreachable) return finish(TBottom);
+    auto const maybeWeird =
+      env.state.mInstrState.base.type.subtypeOf(TArr) && keyCouldBeWeird(key);
     return finish(maybeWeird ? union_of(t1, TInitNull) : t1);
   }
 
@@ -1187,7 +1211,8 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
 
   auto const isWeird =
     keyCouldBeWeird(key) ||
-    (!mustBeEmptyish(baseTy) && !baseTy.subtypeOf(TObj));
+    (!mustBeEmptyish(env.state.mInstrState.base.type) &&
+     !env.state.mInstrState.base.type.subtypeOf(TObj));
   finish(isWeird ? TInitCell : t1);
 }
 
@@ -1198,15 +1223,9 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
   handleInPublicStaticElemD(env);
   promoteBaseElemD(env);
   auto const lhsTy = [&] {
-    if (auto ty = array_do(env, false, elem, key)) {
+    if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
       assertx(!ty->subtypeOf(TBottom));
-
-      if (env.state.mInstrState.base.type.subtypeOf(TArr) &&
-          keyCouldBeWeird(key)) {
-        *ty |= TInitNull;
-      }
-
       return std::move(*ty);
     }
     return TInitCell;
@@ -1224,15 +1243,9 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
   handleInPublicStaticElemD(env);
   promoteBaseElemD(env);
   auto const postTy = [&] {
-    if (auto ty = array_do(env, false, elem, key)) {
+    if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
       assertx(!ty->subtypeOf(TBottom));
-
-      if (env.state.mInstrState.base.type.subtypeOf(TArr) &&
-          keyCouldBeWeird(key)) {
-        *ty |= TInitNull;
-      }
-
       return std::move(*ty);
     }
     return TInitCell;
@@ -1286,9 +1299,7 @@ void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
 // array chains and frame effects, but don't yet do anything better than
 // supplying a single type.
 void pessimisticFinalNewElem(ISS& env, const Type& type) {
-  if (auto pair = array_do(env, false, newelem, type)) {
-    env.state.mInstrState.base.type = std::move(pair->first);
-  }
+  array_do_newelem(env, type);
 }
 
 void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
@@ -1326,8 +1337,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
     push(env, std::move(ty));
   };
 
-  if (auto pair = array_do(env, false, newelem, t1)) {
-    env.state.mInstrState.base.type = std::move(pair->first);
+  if (array_do_newelem(env, t1)) {
     return finish(t1);
   }
 

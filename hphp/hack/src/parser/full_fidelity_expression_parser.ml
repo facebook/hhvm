@@ -107,9 +107,11 @@ module WithStatementAndDeclAndTypeParser
 
   and parses_without_error parser f =
     let old_errors = List.length (errors parser) in
-    let (parser, result) = f parser in
-    let new_errors = List.length(errors parser) in
-    old_errors = new_errors
+    try
+      let (parser, result) = f parser in
+      let new_errors = List.length(errors parser) in
+      old_errors = new_errors
+    with Failure _ -> false
 
   and parse_as_name_or_error parser =
     (* TODO: Are there "reserved" keywords that absolutely cannot start

@@ -352,13 +352,12 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   //============================================================================
   // Properties.
  private:
-  void initDynProps(int numDynamic = 0);
   Slot declPropInd(const TypedValue* prop) const;
 
-  inline Variant o_getImpl(const String& propName, int flags, bool error = true,
+  inline Variant o_getImpl(const String& propName, bool error = true,
                            const String& context = null_string);
-  template <typename T>
-  inline Variant o_setImpl(const String& propName, T v, const String& context);
+  inline Variant o_setImpl(const String& propName, const Variant& v,
+                           const String& context);
  public:
 
   template <class T>

@@ -360,7 +360,6 @@ const Variant* ObjectData::o_realProp(const String& propName, int flags,
 }
 
 inline Variant ObjectData::o_getImpl(const String& propName,
-                                     int flags,
                                      bool error /* = true */,
                                      const String& context /*= null_string*/) {
   assert(kindIsValid());
@@ -369,7 +368,7 @@ inline Variant ObjectData::o_getImpl(const String& propName,
     throw_invalid_property_name(propName);
   }
 
-  if (const Variant* t = o_realProp(propName, flags, context)) {
+  if (const Variant* t = o_realProp(propName, 0, context)) {
     if (t->isInitialized())
       return *t;
   }
@@ -390,11 +389,11 @@ inline Variant ObjectData::o_getImpl(const String& propName,
 
 Variant ObjectData::o_get(const String& propName, bool error /* = true */,
                           const String& context /* = null_string */) {
-  return o_getImpl(propName, 0, error, context);
+  return o_getImpl(propName, error, context);
 }
 
-template <class T>
-ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
+ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName,
+                                            const Variant& v,
                                             const String& context) {
   assert(kindIsValid());
 
@@ -419,12 +418,12 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
 }
 
 Variant ObjectData::o_set(const String& propName, const Variant& v) {
-  return o_setImpl<const Variant&>(propName, v, null_string);
+  return o_setImpl(propName, v, null_string);
 }
 
 Variant ObjectData::o_set(const String& propName, const Variant& v,
                           const String& context) {
-  return o_setImpl<const Variant&>(propName, v, context);
+  return o_setImpl(propName, v, context);
 }
 
 void ObjectData::o_setArray(const Array& properties) {

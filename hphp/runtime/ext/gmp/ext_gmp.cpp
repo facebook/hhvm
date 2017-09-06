@@ -1352,7 +1352,7 @@ static void HHVM_METHOD(GMP, unserialize,
 
   auto gmpObjectData = Native::data<GMPData>(this_);
   gmpObjectData->setGMPMpz(gmpData);
-  this_->o_setArray(props.toArray());
+  this_->setDynPropArray(props.toArray());
 
   mpz_clear(gmpData);
 }

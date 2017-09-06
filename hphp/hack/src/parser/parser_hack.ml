@@ -4401,6 +4401,13 @@ and namespace_use env =
     | Some prefix -> namespace_group_use env kind prefix
     | None -> namespace_use_list env false Tsc kind []
 
+and maybe_namespace_use_list env allow_change_kind end_token kind acc =
+  match L.token env.file env.lb with
+  | x when x = end_token -> acc
+  | _ ->
+      L.back env.lb;
+      namespace_use_list env allow_change_kind end_token kind acc
+
 and namespace_use_list env allow_change_kind end_token kind acc =
   let kind = if allow_change_kind then namespace_kind env else kind in
   let p1, s1 = identifier env in
@@ -4419,7 +4426,8 @@ and namespace_use_list env allow_change_kind end_token kind acc =
   let acc = (kind, id1, id2) :: acc in
   match L.token env.file env.lb with
     | x when x = end_token -> acc
-    | Tcomma -> namespace_use_list env allow_change_kind end_token kind acc
+    | Tcomma ->
+      maybe_namespace_use_list env allow_change_kind end_token kind acc
     | _ ->
       error_expect env "namespace use list";
       acc

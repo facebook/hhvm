@@ -13,6 +13,7 @@
 
 type t = Full_fidelity_lexer.t
 
+let source = Full_fidelity_lexer.source
 let start_offset = Full_fidelity_lexer.start_offset
 let end_offset = Full_fidelity_lexer.end_offset
 let next_token = Full_fidelity_lexer.next_token_in_type

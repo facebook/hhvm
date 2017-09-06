@@ -236,7 +236,7 @@ let parse text_source =
     | File filename ->
       SourceText.from_file @@ Relative_path.create Relative_path.Dummy filename
     | Stdin _ ->
-      SourceText.make @@ read_stdin ()
+      SourceText.make Relative_path.default @@ read_stdin ()
   in
   let tree = SyntaxTree.make source_text in
   if List.is_empty (SyntaxTree.all_errors tree)

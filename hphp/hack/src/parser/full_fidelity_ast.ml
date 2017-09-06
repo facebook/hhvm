@@ -2264,7 +2264,7 @@ let from_text_with_legacy
       ?lower_coroutines
       ~parser_options
       file
-      (Full_fidelity_source_text.make content)
+      (Full_fidelity_source_text.make file content)
 
 let from_file_with_legacy
   ?(elaborate_namespaces  = true)

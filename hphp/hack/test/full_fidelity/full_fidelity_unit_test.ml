@@ -87,12 +87,14 @@ let remove_whitespace text =
 
 
 let test_minimal source =
-  let source_text = SourceText.make source in
+  let file_path = Relative_path.(create Dummy "<test_minimal>") in
+  let source_text = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make source_text in
   TestUtils.minimal_to_string (SyntaxTree.root syntax_tree)
 
 let test_mode source =
-  let source_text = SourceText.make source in
+  let file_path = Relative_path.(create Dummy "<test_mode>") in
+  let source_text = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make source_text in
   let lang = SyntaxTree.language syntax_tree in
   let mode = SyntaxTree.mode syntax_tree in
@@ -103,7 +105,8 @@ let test_mode source =
     lang mode is_strict is_hack is_php
 
 let test_errors source =
-  let source_text = SourceText.make source in
+  let file_path = Relative_path.(create Dummy "<test_errors>") in
+  let source_text = SourceText.make file_path source in
   let offset_to_position = SourceText.offset_to_position source_text in
   let syntax_tree = SyntaxTree.make source_text in
   let is_strict = SyntaxTree.is_strict syntax_tree in

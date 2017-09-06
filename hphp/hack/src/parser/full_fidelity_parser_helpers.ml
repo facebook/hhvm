@@ -13,6 +13,7 @@ module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
 module Context = Full_fidelity_parser_context
 module Trivia = Full_fidelity_minimal_trivia
+module SourceText = Full_fidelity_source_text
 
 open Full_fidelity_minimal_syntax
 
@@ -424,10 +425,14 @@ module WithParser(Parser : ParserType) = struct
 
   let assert_token parser kind =
     let (parser, token) = next_token parser in
+    let lexer = Parser.lexer parser in
+    let source = Parser.Lexer.source lexer in
+    let file_path = SourceText.file_path source in
     if (Token.kind token) <> kind then
-      failwith (Printf.sprintf "Expected token %s but got %s\n"
+      failwith (Printf.sprintf "Expected token '%s' but got '%s'\n  in %s\n"
         (TokenKind.to_string kind)
-        (TokenKind.to_string (Token.kind token)));
+        (TokenKind.to_string (Token.kind token))
+        (Relative_path.to_absolute file_path));
     (parser, make_token token)
 
   type separated_list_kind =

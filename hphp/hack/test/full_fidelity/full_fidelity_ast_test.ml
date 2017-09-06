@@ -63,11 +63,12 @@ let comment_compare source =
   end;
 
   let errorl, result, _ =
+    let path = Relative_path.default in
     Errors.do_ @@ fun () ->
       Full_fidelity_ast.from_text
         ~include_line_comments:true
-        Relative_path.default
-        (Full_fidelity_source_text.make source)
+        path
+        (Full_fidelity_source_text.make path source)
   in
   if not (Errors.is_empty errorl) then begin
     let errors = Errors.get_error_list errorl in

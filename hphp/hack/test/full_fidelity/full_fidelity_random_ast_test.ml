@@ -30,7 +30,8 @@ let gen_test count config =
     let error_message = SyntaxError.to_string err in
     if acc = "" then error_message
     else Printf.sprintf "%s, %s" error_message acc in
-  let gen_source = SourceText.make source in
+  let file_path = Relative_path.(create Dummy "<gen_test>") in
+  let gen_source = SourceText.make file_path source in
   let syntax_tree = SyntaxTree.make gen_source in
   let gen_errors = SyntaxTree.errors syntax_tree in
   let parse = TestUtils.minimal_to_string (SyntaxTree.root syntax_tree) in

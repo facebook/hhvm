@@ -19,8 +19,9 @@ function sum($a, $b) {
 }"
 
 let format_range src range =
+  let path = Relative_path.(create Dummy "<format_range>") in
   src
-  |> SourceText.make
+  |> SourceText.make path
   |> SyntaxTree.make
   |> Libhackfmt.format_range range
 

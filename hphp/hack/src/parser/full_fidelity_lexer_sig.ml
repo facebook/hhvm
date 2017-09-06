@@ -10,6 +10,7 @@
 
 module type Lexer_S = sig
   type t
+  val source : t -> Full_fidelity_source_text.t
   val start_offset : t -> int
   val end_offset : t -> int
   val current_text_at : t -> int -> int -> string

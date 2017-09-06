@@ -27,6 +27,9 @@ let invalid = '\000'
 let make text =
   { text; start = 0; offset = 0; errors = [] }
 
+let source lexer =
+  lexer.text
+
 let errors lexer =
   lexer.errors
 

@@ -47,7 +47,8 @@ let auto_complete
   ~(filter_by_token:bool) : result =
   let open Ide_api_types in
   let new_file_content = handle_empty_autocomplete pos file_content in
-  let source_text = SourceText.make new_file_content in
+  let dummy_path = Relative_path.(create Dummy "<autocomplete>") in
+  let source_text = SourceText.make dummy_path new_file_content in
   let offset = SourceText.position_to_offset source_text (pos.line, pos.column) in
   let syntax_tree = SyntaxTree.make source_text in
   let positioned_tree = PositionedSyntax.from_tree syntax_tree in

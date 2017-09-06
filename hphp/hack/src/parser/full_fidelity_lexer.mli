@@ -10,6 +10,7 @@
 
 type t
 val make : Full_fidelity_source_text.t -> t
+val source : t -> Full_fidelity_source_text.t
 val errors : t -> Full_fidelity_syntax_error.t list
 val start_offset : t -> int
 val end_offset : t -> int

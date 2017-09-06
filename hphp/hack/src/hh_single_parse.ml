@@ -11,6 +11,7 @@
 module Lowerer = Full_fidelity_ast
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
+module SourceText = Full_fidelity_source_text
 
 let purpose = "Read a single Hack file and produce the resulting S-Expression."
 let extra   = "(Options for development / parser selection and comparisson.)"
@@ -61,9 +62,7 @@ let run_ffp : Relative_path.t -> Lowerer.result =
 
 let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
   let open Full_fidelity_syntax_tree in
-  let content =
-    try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
-  let source_text = Full_fidelity_source_text.make content in
+  let source_text = SourceText.from_file file in
   let tree        = make source_text in
   let language    = language tree in
   let script      = Syntax.from_tree tree in
@@ -93,7 +92,7 @@ let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
     ~quick:false
     ~suppress_output:false
     ~parser_options:ParserOptions.default
-    ~content
+    ~content:(SourceText.text source_text)
     ~language
     ~file
     ~fi_mode:(if is_php tree then FileInfo.Mphp else

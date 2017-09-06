@@ -342,16 +342,6 @@ template<class Fn> void iterateRoots(Fn fn) {
   // Root handles & sweep lists
   MM().iterateRoots(fn);
 
-  // asio session
-  if (auto asio = AsioSession::Get()) {
-    // ThreadLocalProxy<T> instances aren't in ThreadLocalManager.
-    // asio was created with req::make_raw<AsioSession>, but we dont have
-    // the address of the thread local AsioSession*.
-    using Wrapper = EphemeralPtrWrapper<AsioSession*>;
-    auto w = Wrapper{asio};
-    fn(&w, sizeof(w), type_scan::getIndexForScan<Wrapper>());
-  }
-
   // Zend compat resources
 #ifdef ENABLE_ZEND_COMPAT
   ts_iterate_resources(fn);

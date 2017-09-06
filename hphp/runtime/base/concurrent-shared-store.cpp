@@ -800,7 +800,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            bool overwrite,
                                            bool limit_ttl) {
   StoreValue *sval;
-  auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
   auto keyLen = key.size();
   char* const kcp = strdup(key.data());
   {
@@ -816,7 +815,6 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
     if (present) {
       free(kcp);
       if (!overwrite && !sval->expired()) {
-        svar.handle->unreferenceRoot(svar.size);
         return false;
       }
       /*
@@ -850,6 +848,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       adjustedTtl = 0;
     }
 
+    auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
     if (current) {
       if (sval->expire == 0 && adjustedTtl != 0) {
         APCStats::getAPCStats().removeAPCValue(

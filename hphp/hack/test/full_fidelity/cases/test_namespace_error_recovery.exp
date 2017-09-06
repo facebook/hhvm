@@ -3,3 +3,4 @@
 (31,35)-(32,1) An expression is expected here.
 (37,1)-(37,1) A right brace is expected here.
 (8,14)-(8,14) Cannot mix bracketed namespace declarations with unbracketed namespace declarations
+  (4,1)-(4,1) First unbracketed namespace occurrence here

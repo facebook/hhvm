@@ -201,9 +201,9 @@ module WithExpressionAndStatementAndTypeParser
         namespace  namespace-name-opt  { declaration-list }
     *)
 
-    (* TODO: Some error cases not caught by the parser that should be caught
-             in later passes:
-             (1) Qualified names are a superset of legal namespace names.
+    (* TODO: An error case not caught by the parser that should be caught
+             in a later pass:
+             Qualified names are a superset of legal namespace names.
     *)
     let (parser, namespace_token) = assert_token parser Namespace in
     let (parser1, token) = next_token parser in

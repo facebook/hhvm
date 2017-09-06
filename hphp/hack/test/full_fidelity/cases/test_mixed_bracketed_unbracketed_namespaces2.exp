@@ -1,3 +1,6 @@
 (3,14)-(3,14) Cannot mix bracketed namespace declarations with unbracketed namespace declarations
+  (2,15)-(2,16) First unbracketed namespace occurrence here
 (5,16)-(5,16) Cannot mix bracketed namespace declarations with unbracketed namespace declarations
+  (2,15)-(2,16) First unbracketed namespace occurrence here
 (8,18)-(8,18) Cannot mix bracketed namespace declarations with unbracketed namespace declarations
+  (2,15)-(2,16) First unbracketed namespace occurrence here

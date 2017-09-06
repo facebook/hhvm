@@ -26,12 +26,13 @@ let gen_test count config =
   let module AstGenGrammar = Hack_grammar_descriptor in
   let module AstGen = Random_ast_generator.Make(AstGenGrammar) in
   let source = AstGen.generate count config in
-  let printer acc err =
-    let error_message = SyntaxError.to_string err in
-    if acc = "" then error_message
-    else Printf.sprintf "%s, %s" error_message acc in
   let file_path = Relative_path.(create Dummy "<gen_test>") in
   let gen_source = SourceText.make file_path source in
+  let printer acc err =
+    let error_message = SyntaxError.to_positioned_string err
+      (SourceText.offset_to_position gen_source) in
+    if acc = "" then error_message
+    else Printf.sprintf "%s, %s" error_message acc in
   let syntax_tree = SyntaxTree.make gen_source in
   let gen_errors = SyntaxTree.errors syntax_tree in
   let parse = TestUtils.minimal_to_string (SyntaxTree.root syntax_tree) in

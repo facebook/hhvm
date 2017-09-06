@@ -17,7 +17,10 @@ module TokenKind = Full_fidelity_token_kind
 
 open PositionedSyntax
 
-type namespace_type = Unspecified | Bracketed | Unbracketed
+type namespace_type =
+  | Unspecified
+  | Bracketed of { start_offset : int; end_offset : int }
+  | Unbracketed of { start_offset : int; end_offset : int }
 
 type accumulator = {
   errors : SyntaxError.t list;
@@ -909,22 +912,36 @@ let const_decl_errors node parents =
 let mixed_namespace_errors node namespace_type =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
-    let errors = if namespace_type = Unbracketed then
-        let s = start_offset namespace_left_brace in
-        let e = end_offset namespace_right_brace in
-        [ SyntaxError.make s e SyntaxError.error2052 ]
-      else [ ] in
+    let s = start_offset namespace_left_brace in
+    let e = end_offset namespace_right_brace in
+    let errors =
+      match namespace_type with
+      | Unbracketed { start_offset; end_offset } ->
+        let child = Some
+          (SyntaxError.make start_offset end_offset SyntaxError.error2057) in
+        [ SyntaxError.make ~child s e SyntaxError.error2052 ]
+      | _ -> [ ] in
     let namespace_type =
-      if namespace_type = Unspecified then Bracketed else namespace_type in
+      if namespace_type = Unspecified
+      then Bracketed { start_offset = s; end_offset = e }
+      else namespace_type
+    in
     { errors; namespace_type }
   | NamespaceEmptyBody { namespace_semicolon; _ } ->
-    let errors = if namespace_type = Bracketed then
-        let s = start_offset namespace_semicolon in
-        let e = end_offset namespace_semicolon in
-        [ SyntaxError.make s e SyntaxError.error2052 ]
-      else [ ] in
+    let s = start_offset namespace_semicolon in
+    let e = end_offset namespace_semicolon in
+    let errors =
+      match namespace_type with
+      | Bracketed { start_offset; end_offset } ->
+        let child = Some
+          (SyntaxError.make start_offset end_offset SyntaxError.error2056) in
+        [ SyntaxError.make ~child s e SyntaxError.error2052 ]
+      | _ -> [ ] in
     let namespace_type =
-      if namespace_type = Unspecified then Unbracketed else namespace_type in
+      if namespace_type = Unspecified
+      then Unbracketed { start_offset = s; end_offset = e }
+      else namespace_type
+    in
     { errors; namespace_type }
   | _ -> { errors = [ ]; namespace_type }
 

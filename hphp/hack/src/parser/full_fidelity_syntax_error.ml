@@ -11,21 +11,24 @@
 (* TODO: Integrate these with the rest of the Hack error messages. *)
 
 type t = {
+  child : t option;
   start_offset : int;
   end_offset : int;
   message : string
 }
 
-let make start_offset end_offset message =
-  { start_offset; end_offset; message }
+let make ?(child = None) start_offset end_offset message =
+  { child; start_offset; end_offset; message }
 
-let to_string error =
-  Printf.sprintf "(%d-%d) %s" error.start_offset error.end_offset error.message
-
-let to_positioned_string error offset_to_position =
+let rec to_positioned_string error offset_to_position =
+  let child =
+    match error.child with
+    | Some child ->
+      Printf.sprintf "\n  %s" (to_positioned_string child offset_to_position)
+    | _ -> "" in
   let (sl, sc) = offset_to_position error.start_offset in
   let (el, ec) = offset_to_position error.end_offset in
-  Printf.sprintf "(%d,%d)-(%d,%d) %s" sl sc el ec error.message
+  Printf.sprintf "(%d,%d)-(%d,%d) %s%s" sl sc el ec error.message child
 
 let compare err1 err2 =
   if err1.start_offset < err2.start_offset then -1
@@ -196,3 +199,5 @@ let error2053 = "Use of 'var' as synonym for 'public' in declaration disallowed 
 let error2054 = "Method declarations require a visibility modifier " ^
   "such as public, private or protected."
 let error2055 = "At least one enumerated item is expected."
+let error2056 = "First unbracketed namespace occurrence here"
+let error2057 = "First bracketed namespace occurrence here"

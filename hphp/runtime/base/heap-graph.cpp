@@ -45,10 +45,6 @@ conservativeScan(const void* start, size_t len, Fn fn) {
 
 namespace {
 
-// When we don't know the offset. 0 is safe since offset 0 in real
-// objects is the header word, which never contains pointers.
-const ptrdiff_t UnknownOffset = 0;
-
 size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
             ptrdiff_t offset) {
   auto& from_node = g.nodes[from];
@@ -72,13 +68,6 @@ void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
   g.root_nodes.push_back(from);
   scanner.scanByIndex(ty, h, size);
   scanner.finish(
-    [&](const void* p) {
-      if (auto r = blocks.region(p)) {
-        auto e = addPtr(g, from, blocks.index(r), HeapGraph::Implicit,
-               UnknownOffset);
-        g.root_ptrs.push_back(e);
-      }
-    },
     [&](const void* p, std::size_t size) {
       conservativeScan(p, size, [&](const void** addr, const void* ptr) {
         if (auto r = blocks.region(ptr)) {
@@ -173,12 +162,6 @@ HeapGraph makeHeapGraph(bool include_free) {
     auto from = blocks.index(h);
     assert(from == i);
     scanner.finish(
-      [&](const void* p) {
-        // definitely a ptr, but maybe interior, and maybe not counted
-        if (auto r = blocks.region(p)) {
-          addPtr(g, from, blocks.index(r), HeapGraph::Implicit, UnknownOffset);
-        }
-      },
       [&](const void* p, std::size_t size) {
         conservativeScan(p, size, [&](const void** addr, const void* ptr) {
           if (auto r = blocks.region(ptr)) {

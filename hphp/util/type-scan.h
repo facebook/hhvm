@@ -211,20 +211,6 @@ struct InitException: std::runtime_error {
  * re-used this way multiple times.
  */
 struct Scanner {
-  // Enqueue a pointer into this scanner to be reported later. This is meant to
-  // be called from hand-written custom scanner functions to report interesting
-  // pointers, for which we don't have an address.
-  template <typename T> void enqueue(const T* ptr) {
-    // Don't allow void*
-    static_assert(!detail::IsVoid<T>::value,
-                  "Trying to enqueue void pointer(s). "
-                  "Please provide a more specific type.");
-    // Certain types are statically uninteresting, so don't enqueue pointers to
-    // those.
-    if (detail::Uninteresting<T*>::value) return;
-    m_ptrs.emplace_back(ptr);
-  }
-
   /*
    * scan() overloads:
    *
@@ -274,30 +260,24 @@ struct Scanner {
 
   // Called once all the scanning is done. Callbacks report different
   // pointer types:
-  //   F1 - called to report enqueued raw pointers (no address available)
-  //   F2 - called to report conservative ranges
-  //   F3 - called to report addresses of pointers
+  //   F1 - called to report conservative ranges
+  //   F2 - called to report addresses of pointers
   // Afterwards, all the state is cleared, and the scanner can be re-used.
-  template <typename F1, typename F2, typename F3>
-  void finish(F1&& f1, F2&& f2, F3&& f3) {
-    for (auto ptr : m_ptrs) {
-      f1(ptr);
-    }
+  template <typename F1, typename F2>
+  void finish(F1&& f1, F2&& f2) {
     for (auto r : m_conservative) {
-      f2(r.first, r.second);
+      f1(r.first, r.second);
     }
     for (auto addr : m_addrs) {
-      f3(addr);
+      f2(addr);
     }
     m_addrs.clear();
-    m_ptrs.clear();
     m_conservative.clear();
   }
 
   // These are logically private, but they're public so that the generated
   // functions can manipulate them directly.
   std::vector<const void**> m_addrs; // pointer locations
-  std::vector<const void*> m_ptrs; // pointer values
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
 };
 

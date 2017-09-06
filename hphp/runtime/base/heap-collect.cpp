@@ -291,10 +291,6 @@ NEVER_INLINE void Marker<apcgc>::init() {
 template <bool apcgc>
 void Marker<apcgc>::finish_typescan() {
   type_scanner_.finish(
-    [this](const void* p) {
-      xscanned_ += sizeof(p);
-      checkedEnqueue(p, GCBits::Pin);
-    },
     [this](const void* p, std::size_t size) {
       // we could extract the addresses of ambiguous ptrs, if desired.
       conservativeScan(p, size);

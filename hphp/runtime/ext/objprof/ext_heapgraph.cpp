@@ -158,7 +158,7 @@ static HeapGraphContextPtr get_valid_heapgraph_context_resource(
 
 static const StringData* edge_kind_strs[3];
 static const char* edge_kind_cstrs[] = {
-  "Ptr:Counted", "Ptr:Implicit", "Ptr:Ambiguous"
+  "Ptr:Counted", "Ptr:Ambiguous"
 };
 
 const StringData* edgeKindName(HeapGraph::PtrKind kind) {
@@ -168,10 +168,9 @@ const StringData* edgeKindName(HeapGraph::PtrKind kind) {
     edge_kind_strs[(int)kind] = s;
   }
   return s;
-  static_assert(HeapGraph::NumPtrKinds == 3, "");
+  static_assert(HeapGraph::NumPtrKinds == 2, "");
   static_assert(HeapGraph::Counted == 0, "");
-  static_assert(HeapGraph::Implicit == 1, "");
-  static_assert(HeapGraph::Ambiguous == 2, "");
+  static_assert(HeapGraph::Ambiguous == 1, "");
 }
 
 // return metadata about this pointer, in the form of a CapturedPtr

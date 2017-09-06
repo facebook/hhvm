@@ -101,7 +101,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
 
 const char* ptrSym[] = {
     "<--", // Counted
-    "<..", // Implicit
     "<~~", // Ambiguous
 };
 
@@ -226,15 +225,14 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
     if (!haveCount(node.h->kind())) continue;
     auto count = static_cast<const MaybeCountable*>(node.h)->count();
     assert(count >= 0); // static things shouldn't be in the heap.
-    unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
+    unsigned num_counted{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
       switch (ptr.ptr_kind) {
         case HeapGraph::Counted: num_counted++; break;
-        case HeapGraph::Implicit: num_implicit++; break;
         case HeapGraph::Ambiguous: num_ambig++; break;
       }
     });
-    auto num_ptrs = num_counted + num_implicit + num_ambig;
+    auto num_ptrs = num_counted + num_ambig;
     if (num_ptrs < count) {
       // missed at least one counted pointer, or refcount too high
       // no assert, because without gc the only effect is a leak.

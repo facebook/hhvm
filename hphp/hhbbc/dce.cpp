@@ -1901,6 +1901,13 @@ DceAnalysis analyze_dce(const Index& index,
 void dce_perform(const php::Func& func,
                  const DceActionMap& actionMap,
                  const DceReplaceMap& replaceMap) {
+
+  using It = std::vector<Bytecode>::iterator;
+  auto setloc = [] (int32_t srcLoc, It start, int n) {
+    while (n--) {
+      start++->srcLoc = srcLoc;
+    }
+  };
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
     auto const b = borrow(func.blocks[id.blk]);
@@ -1909,17 +1916,21 @@ void dce_perform(const php::Func& func,
       case DceAction::PopInputs:
         // we want to replace the bytecode with pops of its inputs
         if (auto const numToPop = numPop(b->hhbcs[id.idx])) {
+          auto const srcLoc = b->hhbcs[id.idx].srcLoc;
           b->hhbcs.erase(b->hhbcs.begin() + id.idx);
           b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                           numToPop,
                           bc::PopC {});
+          setloc(srcLoc, b->hhbcs.begin() + id.idx, numToPop);
           break;
         }
         // Fall through
       case DceAction::Kill:
         if (b->hhbcs.size() == 1) {
           // we don't allow empty blocks
+          auto const srcLoc = b->hhbcs[0].srcLoc;
           b->hhbcs[0] = bc::Nop {};
+          b->hhbcs[0].srcLoc = srcLoc;
         } else {
           b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         }
@@ -1931,21 +1942,26 @@ void dce_perform(const php::Func& func,
         b->hhbcs.insert(b->hhbcs.begin() + id.idx + 1,
                         numToPop,
                         bc::PopC {});
+        setloc(b->hhbcs[id.idx].srcLoc,
+               b->hhbcs.begin() + id.idx + 1, numToPop);
         break;
       }
       case DceAction::Replace:
       {
         auto it = replaceMap.find(id);
         always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                         begin(it->second), end(it->second));
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, it->second.size());
         break;
       }
       case DceAction::PopAndReplace:
       {
         auto it = replaceMap.find(id);
         always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         auto const numToPop = numPop(b->hhbcs[id.idx]);
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
@@ -1955,6 +1971,7 @@ void dce_perform(const php::Func& func,
                           numToPop,
                           bc::PopC {});
         }
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, numToPop + it->second.size());
         break;
       }
       case DceAction::MinstrStackFinal:

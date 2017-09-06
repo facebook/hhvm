@@ -710,7 +710,10 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     auto pos = m_lookahead.begin();
     auto typePos = pos;
     nextLookahead(pos);
-    if (isValidClassConstantName(pos->t)) {
+    if (
+      isValidClassConstantName(pos->t)
+      || (pos->t == T_NS_SEPARATOR && tokid == T_UNRESOLVED_TYPE)
+    ) {
       typePos->t = tokid == T_UNRESOLVED_TYPE ? T_TYPE : T_NEWTYPE;
     } else {
       typePos->t = T_STRING;

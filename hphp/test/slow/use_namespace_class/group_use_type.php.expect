@@ -1,2 +1,4 @@
 string(8) "MyNS\Foo"
 string(8) "MyNS\Bar"
+string(9) "MyNS\Herp"
+string(9) "MyNS\Derp"

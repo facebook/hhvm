@@ -23,6 +23,8 @@ zend/good/tests/lang/bug24403.php
 zend/good/tests/lang/bug44654.php
 zend/good/tests/lang/comments.php
 zend/good/tests/lang/engine_assignExecutionOrder_001.php
+zend/good/tests/lang/engine_assignExecutionOrder_002.php
+zend/good/tests/lang/engine_assignExecutionOrder_004.php
 zend/good/tests/lang/engine_assignExecutionOrder_008.php
 zend/good/tests/lang/foreachLoop.016.php
 zend/good/tests/lang/foreachLoop.017.php

@@ -2139,11 +2139,12 @@ and can_use_as_rhs_in_list_assignment expr =
  * will both assign to $c, $b and $a in that order.
  *)
  and emit_lval_op_list env local indices expr =
-  match expr with
-  | (_, A.List exprs) ->
+  match snd expr with
+  | A.List exprs ->
     gather @@
     List.rev @@
     List.mapi exprs (fun i expr -> emit_lval_op_list env local (i::indices) expr)
+  | A.Omitted -> empty
   | _ ->
     (* Generate code to access the element from the array *)
     let access_instrs =

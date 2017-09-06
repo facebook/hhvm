@@ -272,21 +272,10 @@ inline void iterateRds(rds::Header* rds, Fn fn) {
      type_scan::getIndexForScan<PhpStack>());
 }
 
-template<class T> struct EphemeralPtrWrapper {
-  T ptr;
-  TYPE_SCAN_CUSTOM_FIELD(ptr) { scanner.enqueue(ptr); }
-};
-
 template<class Fn>
 void MemoryManager::iterateRoots(Fn fn) const {
-  using Wrapper = EphemeralPtrWrapper<HeapObject*>;
-  for (auto s = m_sweepables.next(); s != &m_sweepables; s = s->next()) {
-    if (auto h = static_cast<HeapObject*>(s->owner())) {
-      assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
-      auto w = Wrapper{h};
-      fn(&w, sizeof(w), type_scan::getIndexForScan<Wrapper>());
-    }
-  }
+  fn(&m_sweepables, sizeof(m_sweepables),
+     type_scan::getIndexForScan<SweepableList>());
   for (auto& node: m_natives) {
     fn(&node, sizeof(node), type_scan::getIndexForScan<NativeNode*>());
   }

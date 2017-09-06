@@ -81,8 +81,6 @@ protected:
 
 private:
   Sweepable *m_next, *m_prev;
-  TYPE_SCAN_IGNORE_FIELD(m_next);
-  TYPE_SCAN_IGNORE_FIELD(m_prev);
 };
 
 /*

@@ -1315,7 +1315,10 @@ and pStmt : stmt parser = fun node env ->
      * The max_depth is only there to stop the *optimised* version from an
      * unbounded recursion. Sad times.
      *)
-    Def_inline (pDef node { env with max_depth = env.max_depth - 1 })
+    (match pDef node { env with max_depth = env.max_depth - 1 } with
+    | [def] -> Def_inline def
+    | _ -> failwith "This should be impossible; inline definition was list."
+    )
   | _ -> missing_syntax "statement" node env
 
 and pMarkup node env =
@@ -1755,14 +1758,14 @@ and pNamespaceUseClause ~prefix env kind node =
     )
   | _ -> missing_syntax "namespace use clause" node env
 
-and pDef : def parser = fun node env ->
+and pDef : def list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
   match syntax node with
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
       let hdr = pFunHdr function_declaration_header env in
       let block, yield = mpYielding (mpOptional pBlock) function_body env in
-      Fun
+      [ Fun
       { (fun_template yield node hdr.fh_suspension_kind) with
         f_tparams         = hdr.fh_type_parameters
       ; f_ret             = hdr.fh_return_type
@@ -1788,7 +1791,7 @@ and pDef : def parser = fun node env ->
       ; f_user_attributes =
         List.concat @@ couldMap ~f:pUserAttribute function_attribute_spec env
       ; f_doc_comment = doc_comment_opt
-      }
+      }]
   | ClassishDeclaration
     { classish_attribute       = attr
     ; classish_modifiers       = mods
@@ -1827,7 +1830,7 @@ and pDef : def parser = fun node env ->
         | _ -> missing_syntax "class kind" kw env
       in
       let c_doc_comment = doc_comment_opt in
-      Class
+      [ Class
       { c_mode
       ; c_user_attributes
       ; c_final
@@ -1842,26 +1845,28 @@ and pDef : def parser = fun node env ->
       ; c_span
       ; c_kind
       ; c_doc_comment
-      }
+      }]
   | ConstDeclaration
     { const_type_specifier = ty
     ; const_declarators    = decls
     ; _ } ->
-      (match List.map ~f:syntax (as_list decls) with
-      | [ ConstantDeclarator
-          { constant_declarator_name        = name
-          ; constant_declarator_initializer = init
-          }
-        ] -> Constant
-          { cst_mode      = !(lowerer_state.mode)
-          ; cst_kind      = Cst_const
-          ; cst_name      = pos_name name
-          ; cst_type      = mpOptional pHint ty env
-          ; cst_value     = pSimpleInitializer init env
-          ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
-          }
-      | _ -> missing_syntax "constant declaration" decls env
-      )
+      let declarations = List.map ~f:syntax (as_list decls) in
+      let f = function
+        | ConstantDeclarator
+            { constant_declarator_name        = name
+            ; constant_declarator_initializer = init
+            }
+          -> Constant
+            { cst_mode      = !(lowerer_state.mode)
+            ; cst_kind      = Cst_const
+            ; cst_name      = pos_name name
+            ; cst_type      = mpOptional pHint ty env
+            ; cst_value     = pSimpleInitializer init env
+            ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
+            }
+        | _ -> missing_syntax "constant declaration" decls env
+      in
+      List.map ~f declarations
   | AliasDeclaration
     { alias_attribute_spec    = attr
     ; alias_keyword           = kw
@@ -1869,7 +1874,8 @@ and pDef : def parser = fun node env ->
     ; alias_generic_parameter = tparams
     ; alias_constraint        = constr
     ; alias_type              = hint
-    ; _ } -> Typedef
+    ; _ } ->
+      [ Typedef
       { t_id              = pos_name name
       ; t_tparams         = pTParaml tparams env
       ; t_constraint      = Option.map ~f:snd @@
@@ -1883,7 +1889,7 @@ and pDef : def parser = fun node env ->
         | Some TK.Newtype -> NewType (pHint hint env)
         | Some TK.Type    -> Alias   (pHint hint env)
         | _ -> missing_syntax "kind" kw env
-      }
+      }]
   | EnumDeclaration
     { enum_attribute_spec = attrs
     ; enum_name           = name
@@ -1897,7 +1903,7 @@ and pDef : def parser = fun node env ->
           fun env -> Const (None, [pos_name name, pExpr value env])
         | _ -> missing_syntax "enumerator" node
       in
-      Class
+      [ Class
       { c_mode            = !(lowerer_state.mode)
       ; c_user_attributes = List.concat @@ couldMap ~f:pUserAttribute attrs env
       ; c_final           = false
@@ -1915,7 +1921,7 @@ and pDef : def parser = fun node env ->
         ; e_constraint = mpOptional pTConstraintTy constr env
         }
       ; c_doc_comment = doc_comment_opt
-      }
+      }]
   | InclusionDirective
     { inclusion_expression =
       { syntax = InclusionExpression
@@ -1926,35 +1932,36 @@ and pDef : def parser = fun node env ->
     ; inclusion_semicolon  = _
     } ->
       let flavor = pImportFlavor req env in
-      Stmt (Expr (get_pos node, Import (flavor, pExpr file env)))
+      [ Stmt (Expr (get_pos node, Import (flavor, pExpr file env))) ]
   | NamespaceDeclaration
     { namespace_name = name
     ; namespace_body =
       { syntax = NamespaceBody { namespace_declarations = decls; _ }; _ }
-    ; _ } -> Namespace
+    ; _ } ->
+      [ Namespace
       ( pos_name name
-      , List.map ~f:(fun x -> pDef x env) (as_list decls)
-      )
+      , List.concat_map ~f:(fun x -> pDef x env) (as_list decls)
+      )]
   | NamespaceDeclaration { namespace_name = name; _ } ->
-    Namespace (pos_name name, [])
+    [ Namespace (pos_name name, []) ]
   | NamespaceGroupUseDeclaration
     { namespace_group_use_kind = kind
     ; namespace_group_use_prefix = prefix
     ; namespace_group_use_clauses = clauses
     ; _ } ->
       let f = pNamespaceUseClause env kind ~prefix:(Some prefix) in
-      NamespaceUse (List.map ~f (as_list clauses))
+      [ NamespaceUse (List.map ~f (as_list clauses)) ]
   | NamespaceUseDeclaration
     { namespace_use_kind    = kind
     ; namespace_use_clauses = clauses
     ; _ } ->
       let f = pNamespaceUseClause env kind ~prefix:None in
-      NamespaceUse (List.map ~f (as_list clauses))
+      [ NamespaceUse (List.map ~f (as_list clauses)) ]
   (* Fail open, assume top-level statement. Not too nice when reporting bugs,
    * but if this turns out prohibitive, just `try` this and catch-and-correct
    * the raised exception.
    *)
-  | _ -> Stmt (pStmt node env)
+  | _ -> [ Stmt (pStmt node env) ]
 let pProgram : program parser = fun node env ->
   let rec post_process program =
     let span (p : 'a -> bool) =
@@ -1999,7 +2006,7 @@ let pProgram : program parser = fun node env ->
   | []
   (* EOF happens only as the last token in the list. *)
   | [{ syntax = EndOfFile _; _ }]
-    -> List.rev acc
+    -> List.concat (List.rev acc)
   (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
    * of the world; `define` is an *expression* in FF, but a *definition* in AST.
    * Luckily, `define` only happens at the level of definitions.
@@ -2025,7 +2032,7 @@ let pProgram : program parser = fun node env ->
           let name = pos_name define_keyword in
           Stmt (Expr (fst name, Call ((fst name, Id name), [], args, [])))
       in
-      aux env (def :: acc) nodel
+      aux env ([def] :: acc) nodel
   | node :: nodel ->
     let def = pDef node env in
     aux env (def :: acc) nodel

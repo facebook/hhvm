@@ -37,7 +37,13 @@
                          (AnnotatedAST.Lvar (<p>, $x))),
                         (None, (AnnotatedAST.Id (<p>, "add"))),
                         OG_nullthrows))),
-                    [], [], []))));
+                    [],
+                    [((Some \B),
+                      (AnnotatedAST.New (
+                         (AnnotatedAST.CI ((<p>, "\\B"), [])),
+                         [], [])))
+                      ],
+                    []))));
              (AnnotatedAST.Expr
                 ((Some void),
                  (AnnotatedAST.Call (Cnormal,
@@ -47,7 +53,13 @@
                          (AnnotatedAST.Lvar (<p>, $x))),
                         (None, (AnnotatedAST.Id (<p>, "add"))),
                         OG_nullthrows))),
-                    [], [], []))));
+                    [],
+                    [((Some \A),
+                      (AnnotatedAST.New (
+                         (AnnotatedAST.CI ((<p>, "\\A"), [])),
+                         [], [])))
+                      ],
+                    []))));
              (AnnotatedAST.Expr
                 ((Some void),
                  (AnnotatedAST.Call (Cnormal,

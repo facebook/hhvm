@@ -2876,12 +2876,14 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
+      let tel = ref [] and tuel = ref [] in
       let fn = (fun (env, fty, _) ->
-        let env, _tel, _tuel, method_ = call p env fty el uel in
+        let env, tel_, tuel_, method_ = call p env fty el uel in
+        tel := tel_; tuel := tuel_;
         env, method_, None) in
       let env, ty = obj_get ~is_method ~nullsafe ~explicit_tparams:hl env ty1 (CIexpr e1) m fn in
       make_call env (T.make_implicitly_typed_expr fpos (T.Obj_get(te1,
-        T.make_implicitly_typed_expr pos_id (T.Id m), nullflavor))) hl [] [] ty
+        T.make_implicitly_typed_expr pos_id (T.Id m), nullflavor))) hl !tel !tuel ty
 
   (* Function invocation *)
   | Fun_id x ->

@@ -442,10 +442,8 @@ using namespace detail;
 //////////////////////////////////////////////////////////////////////
 
 __thread void* tl_base = nullptr;
-static __thread std::aligned_storage<
-  sizeof(Array),
-  alignof(Array)
->::type s_constantsStorage;
+
+IMPLEMENT_THREAD_LOCAL_PROXY(ArrayData, s_constantsStorage);
 
 // All threads tl_bases are kept in a set, to allow iterating Local
 // and Normal RDS sections across threads.
@@ -471,7 +469,7 @@ typedef tbb::concurrent_hash_map<const StringData*, Handle,
 
 void requestInit() {
   assert(tl_base);
-  new (&s_constantsStorage) Array();
+  s_constantsStorage.set(nullptr);
   assert(!s_constants().get());
   assert(g_current_gen_link.bound());
 
@@ -500,7 +498,7 @@ void requestInit() {
 }
 
 void requestExit() {
-  s_constants().detach(); // it will be swept
+  s_constantsStorage.set(nullptr); // it will be swept
   // Don't bother running the dtor ...
 }
 
@@ -567,8 +565,7 @@ folly::Range<const char*> persistentSection() {
 }
 
 Array& s_constants() {
-  void* vp = &s_constantsStorage;
-  return *static_cast<Array*>(vp);
+  return *reinterpret_cast<Array*>(&s_constantsStorage.m_p);
 }
 
 //////////////////////////////////////////////////////////////////////

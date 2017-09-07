@@ -401,10 +401,6 @@ struct ThreadLocalProxy {
 
   bool isNull() const { return m_p == nullptr; }
 
-  void destroy() {
-    m_p = nullptr;
-  }
-
   T *operator->() const {
     return get();
   }

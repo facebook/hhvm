@@ -104,7 +104,7 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);
   auto const obj = new (MM().objMalloc(size))
-                   ObjectData(cls, NoInit{}, cls->getODAttrs());
+                   ObjectData(cls, InitRaw{}, cls->getODAttrs());
   assert(obj->hasExactlyOneRef());
   return obj;
 }

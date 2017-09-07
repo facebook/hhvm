@@ -1,0 +1,9 @@
+bool(true)
+object(C)#2 (1) {
+  ["lol"]=>
+  string(3) "wat"
+}
+object(C)#1 (1) {
+  ["lol"]=>
+  string(3) "wat"
+}

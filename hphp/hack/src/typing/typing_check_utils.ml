@@ -25,11 +25,15 @@ let check_defs tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
         Typing_check_service.type_class tcopt fn x;
       end
     );
-    List.iter typedefs begin fun (_, x) ->
-      Typing_check_service.check_typedef tcopt fn x
-    end;
-    List.iter consts begin fun (_, x) ->
-      Typing_check_service.check_const tcopt fn x
-    end;
+    ignore(
+      List.map typedefs begin fun (_, x) ->
+        Typing_check_service.check_typedef tcopt fn x
+      end
+    );
+    ignore(
+      List.map consts begin fun (_, x) ->
+        Typing_check_service.check_const tcopt fn x
+      end
+    );
   )) in
   result

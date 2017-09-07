@@ -35,47 +35,31 @@ let type_fun opts fn x =
   match Parser_heap.find_fun_in_file ~full:true opts fn x with
   | Some f ->
     let fun_ = Naming.fun_ opts f in
-    ignore (Typing.fun_def opts fun_);
-    Some fun_
+    Some (Typing.fun_def opts fun_)
   | None -> None
 
 let type_class opts fn x =
   match Parser_heap.find_class_in_file ~full:true opts fn x with
   | Some cls ->
     let class_ = Naming.class_ opts cls in
-    ignore (Typing.class_def opts class_);
-    Some class_
+    Typing.class_def opts class_
   | None -> None
 
 let check_typedef opts fn x =
   match Parser_heap.find_typedef_in_file ~full:true opts fn x with
   | Some t ->
     let typedef = Naming.typedef opts t in
-    ignore (Typing.typedef_def opts typedef);
-    Typing_variance.typedef opts x
-  | None -> ()
+    let ret = Typing.typedef_def opts typedef in
+    Typing_variance.typedef opts x;
+    Some ret
+  | None -> None
 
 let check_const opts fn x =
   match Parser_heap.find_const_in_file ~full:true opts fn x with
-  | None -> ()
+  | None -> None
   | Some cst ->
     let cst = Naming.global_const opts cst in
-    match cst.Nast.cst_value with
-    | None -> ()
-    | Some v ->
-      let filename = Pos.filename (fst cst.Nast.cst_name) in
-      let dep = Typing_deps.Dep.GConst (snd cst.Nast.cst_name) in
-      let env =
-        Typing_env.empty opts filename (Some dep) in
-      let env = Typing_env.set_mode env cst.Nast.cst_mode in
-      let env, _et, value_type = Typing.expr env v in
-      match cst.Nast.cst_type with
-      | Some h ->
-        let declared_type = Decl_hint.hint env.Typing_env.decl_env h in
-        let env, dty = Typing_phase.localize_with_self env declared_type in
-        let _env = Typing_utils.sub_type env value_type dty in
-        ()
-      | None -> ()
+    Some (Typing.gconst_def cst opts)
 
 let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
@@ -83,11 +67,15 @@ let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
     ignore(type_fun opts fn name) in
   let ignore_type_class opts fn name =
     ignore(type_class opts fn name) in
+  let ignore_check_typedef opts fn name =
+    ignore(check_typedef opts fn name) in
+  let ignore_check_const opts fn name =
+    ignore(check_const opts fn name) in
   let errors', (), err_flags = Errors.do_ begin fun () ->
     SSet.iter (ignore_type_fun opts fn) n_funs;
     SSet.iter (ignore_type_class opts fn) n_classes;
-    SSet.iter (check_typedef opts fn) n_types;
-    SSet.iter (check_const opts fn) n_consts;
+    SSet.iter (ignore_check_typedef opts fn) n_types;
+    SSet.iter (ignore_check_const opts fn) n_consts;
   end in
   let lazy_decl_err = Errors.get_lazy_decl_flag err_flags in
   let errors = Errors.merge errors' errors in

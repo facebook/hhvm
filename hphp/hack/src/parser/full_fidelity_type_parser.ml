@@ -60,6 +60,7 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Self
   | Parent -> parse_simple_type_or_type_constant parser
+  | Category
   | XHPClassName
   | QualifiedName -> parse_possible_generic_specifier_or_type_const parser
   | Array -> parse_array_type_specifier parser

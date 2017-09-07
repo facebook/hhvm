@@ -67,12 +67,11 @@ void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
   auto const link = rds::bindStaticLocal(extra->func, extra->name);
   auto& v = vmain(env);
 
-  // If we're here, the target-cache-local RefData is all zeros, so we can
-  // initialize it by storing the new value into it's TypedValue and
+  // Initialize the RefData by storing the new value into it's TypedValue and
   // incrementing the RefData reference count (which will set it to 1).
   auto mem = rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()];
   storeTV(v, mem + RefData::tvOffset(), srcLoc(env, inst, 0), inst->src(0));
-  v << storeli{1, mem + (int)FAST_REFCOUNT_OFFSET};
+  emitStoreRefCount(v, OneReference, mem);
   v << storebi{0, mem + RefData::cowZOffset()};
   v << storebi{uint8_t(HeaderKind::Ref), mem + (int)HeaderKindOffset};
   markRDSHandleInitialized(v, link.handle());

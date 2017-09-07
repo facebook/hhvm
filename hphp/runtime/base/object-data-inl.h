@@ -31,7 +31,7 @@ inline void ObjectData::resetMaxId() {
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  initHeader_16(kind, InitialValue, flags | cls->getODAttrs());
+  initHeader_16(kind, OneReference, flags | cls->getODAttrs());
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   assert(!getAttribute(IsCollection)); // collections use NoInit{}
@@ -43,7 +43,7 @@ inline ObjectData::ObjectData(Class* cls, InitRaw, uint16_t flags,
                               HeaderKind kind) noexcept
   : m_cls(cls)
 {
-  initHeader_16(kind, InitialValue, flags);
+  initHeader_16(kind, OneReference, flags);
   assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));

@@ -329,6 +329,7 @@ struct Vptr {
 
 Vptr operator+(Vptr lhs, int32_t d);
 Vptr operator+(Vptr lhs, intptr_t d);
+Vptr operator+(Vptr lhr, size_t d);
 
 Vptr baseless(VscaledDisp);
 

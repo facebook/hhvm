@@ -83,7 +83,7 @@ struct ArrayData : MaybeCountable {
   // Creation and destruction.
 
 protected:
-  explicit ArrayData(ArrayKind kind, RefCount initial_count = InitialValue);
+  explicit ArrayData(ArrayKind kind, RefCount initial_count = OneReference);
 
   /*
    * We can't `= delete` this because we subclass ArrayData.

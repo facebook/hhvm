@@ -38,13 +38,12 @@ inline RefCount& operator--(RefCount& count) {
   return count;
 }
 
-constexpr int32_t RefCountMaxRealistic = (1 << 30) - 1;
 auto constexpr FAST_REFCOUNT_OFFSET = HeapObject::count_offset();
 
 /*
  * When true, IncRef operations on non-persistent objects in one-bit mode will
- * always store SharedValue. When false, they will only store SharedValue if
- * the current value is PrivateValue.
+ * always store MultiReference. When false, they will only store MultiReference
+ * if the current value is OneReference.
  */
 auto constexpr unconditional_one_bit_incref = true;
 
@@ -89,7 +88,7 @@ struct Countable : MaybeCountable {
 
 ALWAYS_INLINE bool MaybeCountable::checkCount() const {
   if (one_bit_refcount) {
-    return m_count == PrivateValue || m_count == SharedValue ||
+    return m_count == OneReference || m_count == MultiReference ||
       m_count == UncountedValue || m_count == StaticValue;
   }
 
@@ -98,7 +97,7 @@ ALWAYS_INLINE bool MaybeCountable::checkCount() const {
 
 ALWAYS_INLINE bool Countable::checkCount() const {
   if (one_bit_refcount) {
-    return m_count == PrivateValue || m_count == SharedValue;
+    return m_count == OneReference || m_count == MultiReference;
   }
 
   return m_count >= 1;
@@ -114,37 +113,33 @@ ALWAYS_INLINE bool Countable::isRefCounted() const {
 
 ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
   assert(checkCount());
-  if (one_bit_refcount) return m_count != PrivateValue;
+  if (one_bit_refcount) return m_count != OneReference;
 
   return uint32_t(m_count) > 1; // treat Static/Uncounted as large counts
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
   assert(checkCount());
-  if (one_bit_refcount) return m_count != PrivateValue;
+  if (one_bit_refcount) return m_count != OneReference;
 
   return m_count > 1;
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasExactlyOneRef() const {
   assert(checkCount());
-  if (one_bit_refcount) return m_count == PrivateValue;
-
-  return m_count == 1;
+  return m_count == OneReference;
 }
 
 ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {
   assert(checkCount());
-  if (one_bit_refcount) return m_count == PrivateValue;
-
-  return m_count == 1;
+  return m_count == OneReference;
 }
 
 ALWAYS_INLINE void MaybeCountable::incRefCount() const {
   assert(!tl_sweeping);
   assert(checkCount() || m_count == 0 /* due to static init order */);
   if (one_bit_refcount) {
-    if (m_count == PrivateValue) m_count = SharedValue;
+    if (m_count == OneReference) m_count = MultiReference;
     return;
   }
 
@@ -155,8 +150,8 @@ ALWAYS_INLINE void Countable::incRefCount() const {
   assert(!tl_sweeping);
   assert(checkCount() || m_count == 0 /* due to static init order */);
   if (one_bit_refcount) {
-    if (unconditional_one_bit_incref || m_count == PrivateValue) {
-      m_count = SharedValue;
+    if (unconditional_one_bit_incref || m_count == OneReference) {
+      m_count = MultiReference;
     }
     return;
   }
@@ -168,7 +163,9 @@ ALWAYS_INLINE void MaybeCountable::rawIncRefCount() const {
   assert(!tl_sweeping);
   assert(isRefCounted());
   if (one_bit_refcount) {
-    m_count = SharedValue;
+    if (unconditional_one_bit_incref || m_count == OneReference) {
+      m_count = MultiReference;
+    }
     return;
   }
 
@@ -179,7 +176,9 @@ ALWAYS_INLINE void Countable::rawIncRefCount() const {
   assert(!tl_sweeping);
   assert(isRefCounted());
   if (one_bit_refcount) {
-    m_count = SharedValue;
+    if (unconditional_one_bit_incref || m_count == OneReference) {
+      m_count = MultiReference;
+    }
     return;
   }
 
@@ -213,7 +212,7 @@ ALWAYS_INLINE bool Countable::decWillRelease() const {
 ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
   assert(!tl_sweeping);
   assert(checkCount());
-  if (one_bit_refcount) return m_count == PrivateValue;
+  if (one_bit_refcount) return m_count == OneReference;
 
   if (m_count == 1) return true;
   if (m_count > 1) --m_count;
@@ -223,7 +222,7 @@ ALWAYS_INLINE bool MaybeCountable::decReleaseCheck() {
 ALWAYS_INLINE bool Countable::decReleaseCheck() {
   assert(!tl_sweeping);
   assert(checkCount());
-  if (one_bit_refcount) return m_count == PrivateValue;
+  if (one_bit_refcount) return m_count == OneReference;
 
   if (m_count == 1) return true;
   --m_count;

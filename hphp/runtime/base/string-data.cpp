@@ -52,7 +52,7 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
   auto const sizeIndex = MemoryManager::size2Index(len + kStringOverhead);
   auto sd = static_cast<StringData*>(MM().objMallocIndex(sizeIndex));
   // Refcount initialized to 1.
-  sd->initHeader_16(HeaderKind::String, InitialValue, sizeIndex);
+  sd->initHeader_16(HeaderKind::String, OneReference, sizeIndex);
   assert(sd->capacity() >= len);
 #ifndef NO_M_DATA
   sd->m_data = reinterpret_cast<char*>(sd + 1);
@@ -365,7 +365,7 @@ StringData* StringData::MakeProxy(const APCString* apcstr) {
   );
   auto const data = apcstr->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->initHeader(*data, InitialValue);
+  sd->initHeader(*data, OneReference);
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->proxy()->apcstr = apcstr;
   sd->enlist();

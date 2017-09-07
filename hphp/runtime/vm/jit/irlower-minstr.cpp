@@ -614,8 +614,7 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  auto const sf = v.makeReg();
-  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, arr);
   ifThen(v, CC_NE, sf, label(env, inst->taken()));
 }
 

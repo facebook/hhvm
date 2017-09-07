@@ -88,7 +88,7 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   if (iter.valid()) {
     auto k = iter.curKey();
     if (k->isRefCounted()) {
-      k->incRefCount();
+      k->rawIncRefCount();
       return make_tv<KindOfString>(const_cast<StringData*>(k));
     }
     return make_tv<KindOfPersistentString>(k);

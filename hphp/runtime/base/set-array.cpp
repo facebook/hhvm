@@ -86,7 +86,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   assert(ClearElms(Data(ad), Capacity(scale)));
 
   ad->initHash(scale);
-  ad->initHeader(HeaderKind::Keyset, InitialValue);
+  ad->initHeader(HeaderKind::Keyset, OneReference);
   ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
@@ -179,7 +179,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   memcpy16_inline(ad, &other, sizeof(SetArray) + sizeof(Elm) * used);
   assert(ClearElms(Data(ad) + used, Capacity(scale) - used));
   CopyHash(HashTab(ad, scale), other.hashTab(), scale);
-  auto const count = mode == AllocMode::Request ? InitialValue : StaticValue;
+  auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   ad->initHeader(HeaderKind::Keyset, count);
 
   // Bump refcounts.
@@ -379,7 +379,7 @@ SetArray* SetArray::grow(bool copy) {
   auto ad            = reqAlloc(newScale);
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
-  ad->initHeader(*this, InitialValue);
+  ad->initHeader(*this, OneReference);
 
   assert(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);

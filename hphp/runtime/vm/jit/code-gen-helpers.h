@@ -114,6 +114,24 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
 void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
 
 /*
+ * Compare an object's reference count with an immediate value, return the
+ * status flags used for the comparison.
+ */
+Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1);
+
+/*
+ * Store `s0' to the reference count of the given object.
+ */
+void emitStoreRefCount(Vout& v, Immed s0, Vreg s1);
+void emitStoreRefCount(Vout& v, Immed s0, Vptr m);
+
+/*
+ * Decrement the reference count of the given object, returning the status
+ * flags from the decrement instruction.
+ */
+Vreg emitDecRefCount(Vout& v, Vreg s0);
+
+/*
  * Incref or decref `data', and perform some asserts.
  *
  * These routines do not perform any checks; they just unconditionally mutate

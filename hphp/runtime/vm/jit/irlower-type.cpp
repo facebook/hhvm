@@ -133,8 +133,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       src->type().maybe(typeParam)) {
     assertx(src->type().maybe(TPersistent));
 
-    auto const sf = v.makeReg();
-    v << cmplim{0, srcData[FAST_REFCOUNT_OFFSET], sf};
+    auto const sf = emitCmpRefCount(v, 0, srcData);
     doJcc(CC_L, sf);
     doMov();
     return;

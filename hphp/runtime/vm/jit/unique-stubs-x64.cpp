@@ -76,28 +76,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
     auto const data = rarg(0);
     v << load{tv[TVOFF(m_data)], data};
 
-    auto const sf = v.makeReg();
-    v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-
-    auto skipref = v.makeBlock();
-    auto destroy = v.makeBlock();
-    auto chkref  = v.makeBlock();
-    auto decref  = v.makeBlock();
-
-    // We can't quite get the layout we want from two nested ifThens,
-    // because we want the else case from the first to jmp to the middle
-    // of the then case of the second (we want to share the ret).
-    v << jcc{CC_L, sf, {chkref, skipref}, StringTag{}};
-    v = chkref;
-    v << jcc{CC_NE, sf, {destroy, decref}, StringTag{}};
-    v = decref;
-    v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
-    v << jmp{skipref};
-    v = skipref;
-    v << ret{live};
-    v = destroy;
-
-    {
+    auto emit_destroy = [&](Vout& v) {
       // Note that the stack is aligned since we called to this helper from an
       // stack-unaligned stub.
       PhysRegSaver prs{v, live};
@@ -110,7 +89,33 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
       // saved RIP of the call from the stub to this helper.
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+    };
+
+    auto const sf = emitCmpRefCount(v, OneReference, data);
+
+    if (one_bit_refcount) {
+      ifThen(v, CC_E, sf, emit_destroy);
+    } else {
+      auto skipref = v.makeBlock();
+      auto destroy = v.makeBlock();
+      auto chkref  = v.makeBlock();
+      auto decref  = v.makeBlock();
+
+      // We can't quite get the layout we want from two nested ifThens, because
+      // we want the else case from the first to jmp to the middle of the then
+      // case of the second (we want to share the ret).
+      v << jcc{CC_L, sf, {chkref, skipref}, StringTag{}};
+      v = chkref;
+      v << jcc{CC_NE, sf, {destroy, decref}, StringTag{}};
+      v = decref;
+      emitDecRefCount(v, data);
+      v << jmp{skipref};
+      v = skipref;
+      v << ret{live};
+      v = destroy;
+      emit_destroy(v);
     }
+
     v << ret{live};
   }, CodeKind::CrossTrace, true);
 

@@ -250,13 +250,10 @@ void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
 }
 
 void emitAssertRefCount(Vout& v, Vreg data) {
-  auto const sf = v.makeReg();
-  v << cmplim{StaticValue, data[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, StaticValue, data);
 
   ifThen(v, CC_NLE, sf, [&] (Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{RefCountMaxRealistic, data[FAST_REFCOUNT_OFFSET], sf};
-
+    auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
     ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << ud2{}; });
   });
 }
@@ -265,34 +262,40 @@ void emitIncRef(Vout& v, Vreg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(v, base);
   }
-  auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  assertSFNonNegative(v, sf);
+
+  if (one_bit_refcount) {
+    emitStoreRefCount(v, MultiReference, base);
+  } else {
+    auto const sf = v.makeReg();
+    v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
+    assertSFNonNegative(v, sf);
+  }
 }
 
 Vreg emitDecRef(Vout& v, Vreg base) {
-  auto const sf = v.makeReg();
-  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-  assertSFNonNegative(v, sf);
+  auto const sf = one_bit_refcount ?
+    emitCmpRefCount(v, OneReference, base) :
+    emitDecRefCount(v, base);
 
+  assertSFNonNegative(v, sf);
   return sf;
 }
 
 void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
-  // ifRefCountType
+  // ifRefCountedType
   ifThen(v, CC_G, sf, [&] (Vout& v) {
-    auto const sf2 = v.makeReg();
-    // ifNonStatic
-    v << cmplim{0, data[FAST_REFCOUNT_OFFSET], sf2};
-    ifThen(v, CC_GE, sf2, [&] (Vout& v) { emitIncRef(v, data); });
+    // One-bit mode: do the IncRef if m_count == OneReference (0). Normal mode:
+    // do the IncRef if m_count >= 0.
+    auto const sf2 = emitCmpRefCount(v, 0, data);
+    auto const cc = one_bit_refcount ? CC_E : CC_GE;
+    ifThen(v, cc, sf2, [&] (Vout& v) { emitIncRef(v, data); });
   });
 }
 
 void emitDecRefWorkObj(Vout& v, Vreg obj) {
-  auto const shouldRelease = v.makeReg();
-  v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
+  auto const shouldRelease = emitCmpRefCount(v, OneReference, obj);
   ifThenElse(
     v, CC_E, shouldRelease,
     [&] (Vout& v) {

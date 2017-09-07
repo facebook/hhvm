@@ -220,6 +220,10 @@ inline Vptr operator+(Vptr lhs, intptr_t d) {
   return lhs + safe_cast<int32_t>(d);
 }
 
+inline Vptr operator+(Vptr lhs, size_t d) {
+  return lhs + safe_cast<int32_t>(d);
+}
+
 inline Vptr baseless(VscaledDisp vd) {
   return Vptr(Vreg{}, vd.vs.index, vd.vs.scale, vd.disp);
 }

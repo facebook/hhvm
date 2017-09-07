@@ -21,6 +21,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP { namespace jit {
 
@@ -56,23 +57,65 @@ inline Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1) {
+  auto const sf = v.makeReg();
+
+  if (one_bit_refcount) {
+    v << cmpbim{s0, s1[FAST_REFCOUNT_OFFSET], sf};
+  } else {
+    v << cmplim{s0, s1[FAST_REFCOUNT_OFFSET], sf};
+  }
+
+  return sf;
+}
+
+inline void emitStoreRefCount(Vout& v, Immed s0, Vreg s1) {
+  emitStoreRefCount(v, s0, *s1);
+}
+
+inline void emitStoreRefCount(Vout& v, Immed s0, Vptr m) {
+  if (one_bit_refcount) {
+    v << storebi{s0, m + FAST_REFCOUNT_OFFSET};
+  } else {
+    v << storeli{s0, m + FAST_REFCOUNT_OFFSET};
+  }
+}
+
+inline Vreg emitDecRefCount(Vout& v, Vreg s0) {
+  always_assert(
+    !one_bit_refcount &&
+    "Reference counts should never be decremented in one-bit mode"
+  );
+
+  auto const sf = v.makeReg();
+  v << declm{s0[FAST_REFCOUNT_OFFSET], sf};
+  return sf;
+}
+
 template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
-  auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-  ifThenElse(
-    v, vcold, CC_E, sf,
-    destroy,
-    [&] (Vout& v) {
-      // If it's not static, actually reduce the reference count.  This does
-      // another branch using the same status flags from the cmplim above.
-      ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
-             tag_from_string("decref-is-static"));
-    },
-    unlikelyDestroy,
-    tag_from_string("decref-is-one")
-  );
+  auto const sf = emitCmpRefCount(v, OneReference, data);
+
+  if (one_bit_refcount) {
+    ifThen(
+      v, vcold, CC_E, sf, destroy, unlikelyDestroy,
+      tag_from_string("decref-is-one")
+    );
+  } else {
+    ifThenElse(
+      v, vcold, CC_E, sf,
+      destroy,
+      [&] (Vout& v) {
+        // If it's not static, actually reduce the reference count.  This does
+        // another branch using the same status flags from the cmplim above.
+        ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
+               tag_from_string("decref-is-static"));
+      },
+      unlikelyDestroy,
+      tag_from_string("decref-is-one")
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

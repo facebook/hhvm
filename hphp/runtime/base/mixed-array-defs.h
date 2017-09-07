@@ -45,7 +45,7 @@ ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, uint32_t size, int64_t nextIntKey) {
   InitSmallHash(a);
   a->m_sizeAndPos = size; // pos=0
-  a->initHeader(HeaderKind::Mixed, InitialValue);
+  a->initHeader(HeaderKind::Mixed, OneReference);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
 }

@@ -75,8 +75,8 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
    * change how initialization works it keep that up to date.
    */
   void initInRDS() {
-    // cow=z=0, count=InitialValue
-    initHeader_16(HeaderKind::Ref, InitialValue, 0);
+    // cow=z=0, count=OneReference
+    initHeader_16(HeaderKind::Ref, OneReference, 0);
   }
 
   /*
@@ -275,8 +275,8 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
 private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
-    // cow=z=0, count=InitialValue
-    initHeader_16(HeaderKind::Ref, InitialValue, 0);
+    // cow=z=0, count=OneReference
+    initHeader_16(HeaderKind::Ref, OneReference, 0);
     if (!isNullType(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;

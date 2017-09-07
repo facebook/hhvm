@@ -80,7 +80,7 @@ Variant::Variant(StringData *v) noexcept {
       m_type = KindOfPersistentString;
     } else {
       m_type = KindOfString;
-      v->incRefCount();
+      v->rawIncRefCount();
     }
   } else {
     m_type = KindOfNull;

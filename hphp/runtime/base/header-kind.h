@@ -79,16 +79,40 @@ inline bool haveCount(HeaderKind k) {
  * while uncounted objects are freed using the treadmill. Using 8-bit values
  * generates shorter cmp instructions while still being far enough from 0 to be
  * safe.
+ *
+ *
+ * One-bit reference counting:
+ *
+ * When one_bit_refcount == true, HHVM's reference counting primitives behave
+ * very differently. Reference counts are conceptually one bit, where 0 means
+ * "one reference" and 1 means "many references". In practice, m_count is a
+ * full byte wide, both to accommodate UncountedValue and StaticValue, and so
+ * we can operate on m_count directly without any bit twiddling.
+ *
+ * DecRef becomes `if (m_count == 0) release();`, while IncRef becomes `m_count
+ * = 1` (depending on the value of unconditional_one_bit_incref; see
+ * runtime/base/countable.h). This means that any object that is ever IncRefed
+ * will stick at m_count == 1 until the GC collects it or the end of the
+ * request. This also causes spurious COW operations on ararys, and means
+ * Object destructors aren't supported.
+ *
+ * None of this matters to the vast majority of runtime and JIT code. The
+ * interpreter and HHIR programs should still use balanced IncRef and DecRef
+ * operations as usual, regardless of the build mode. All differences in how
+ * reference counts are manipulated are isolated to member functions of
+ * Countable/MaybeCountable and the HHIR -> vasm lowering code for the IncRef
+ * and DecRef HHIR instructions.
  */
 enum RefCount : std::conditional<one_bit_refcount, int8_t, int32_t>::type {
-  InitialValue   = one_bit_refcount ? 0 : 1,
+  OneReference   = one_bit_refcount ? 0 : 1,
+  // MultiReference should never be used outside of one-bit mode, so set it to
+  // something above RefCountMaxRealistic to trip asserts.
+  MultiReference = one_bit_refcount ? 1 : 0x40000000,
+
   UncountedValue = -128,
   StaticValue    = -127,
 
-  /* Only relevant when one_bit_refcount == true, but always defined so we
-   * don't have to #ifdef away all the relevant code. */
-  PrivateValue   = 0,
-  SharedValue    = 1,
+  RefCountMaxRealistic = one_bit_refcount ? MultiReference : (1 << 30) - 1,
 };
 
 using UnsignedRefCount = std::make_unsigned<RefCount>::type;

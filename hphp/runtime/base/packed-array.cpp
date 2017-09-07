@@ -117,7 +117,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->initHeader(HeaderKind::Mixed, InitialValue);
+  ad->initHeader(HeaderKind::Mixed, OneReference);
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 
@@ -245,7 +245,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     assert(ok);
     ad->initHeader_16(
       adIn->m_kind,
-      InitialValue,
+      OneReference,
       packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
     );
 
@@ -257,7 +257,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     memcpy16_inline(ad, adIn, (adIn->m_size + 1) * sizeof(TypedValue));
     ad->initHeader_16(
       adIn->m_kind,
-      InitialValue,
+      OneReference,
       packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
     );
 
@@ -336,7 +336,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   // All we have to do afterwards is fix the refcount on the copy.
   auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
   assert(ok);
-  ad->m_count = InitialValue;
+  ad->m_count = OneReference;
 
   assert(ad->kind() == adIn->kind());
   assert(capacity(ad) == capacity(adIn));
@@ -411,7 +411,7 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
   auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeIndex));
   ad->initHeader_16(
     hk,
-    InitialValue,
+    OneReference,
     packSizeIndexAndDV(sizeIndex, ArrayData::kNotDVArray)
   );
 
@@ -1178,7 +1178,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Vecs cannot contain references");
     }
-    ad->initHeader_16(HeaderKind::VecArray, InitialValue, adIn->m_aux16);
+    ad->initHeader_16(HeaderKind::VecArray, OneReference, adIn->m_aux16);
 
     return ad;
   };

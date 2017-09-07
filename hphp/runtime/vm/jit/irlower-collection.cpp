@@ -203,9 +203,8 @@ void cgVectorHasImmCopy(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const arr = v.makeReg();
-  auto const sf = v.makeReg();
   v << load{src[BaseVector::arrOffset()], arr};
-  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, arr);
   v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

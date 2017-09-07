@@ -64,13 +64,17 @@ namespace {
 
 template<class Then>
 void ifNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
+  always_assert(
+    !one_bit_refcount &&
+    "ifNonPersistent is too coarse to be used in one-bit refcount mode"
+  );
+
   if (!ty.maybe(TPersistent)) {
     then(v); // non-persistent check below will always succeed
     return;
   }
 
-  auto const sf = v.makeReg();
-  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, 0, loc.reg());
   static_assert(UncountedValue < 0 && StaticValue < 0, "");
   ifThen(v, CC_GE, sf, then);
 }
@@ -171,6 +175,22 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
       v << incwm{rvmtl()[*profHandle + offsetof(IncRefProfile, tryinc)],
                  v.makeReg()};
     }
+
+    if (one_bit_refcount) {
+      if (unconditional_one_bit_incref && !ty.maybe(TPersistent)) {
+        emitIncRef(v, loc.reg());
+      } else {
+        // if (m_count == OneReference) m_count = MultiReference; This combines
+        // the persistence check and an attempt to reduce memory traffic,
+        // depending on why we ended up in this branch.
+        auto const sf = emitCmpRefCount(v, OneReference, loc.reg());
+        ifThen(v, CC_E, sf, [&](Vout& v) {
+          emitIncRef(v, loc.reg());
+        });
+      }
+      return;
+    }
+
     ifNonPersistent(v, ty, loc, [&] (Vout& v) {
       emitIncRef(v, loc.reg());
     });
@@ -285,7 +305,7 @@ void implDecRefProf(Vout& v, IRLS& env,
   };
 
   v << incwm{rvmtl()[profile.handle() + offsetof(DecRefProfile, refcounted)],
-      v.makeReg()};
+             v.makeReg()};
 
   if (!ty.maybe(TPersistent)) {
     auto const sf = emitDecRef(v, base);
@@ -300,8 +320,7 @@ void implDecRefProf(Vout& v, IRLS& env,
     return;
   }
 
-  auto const sf = v.makeReg();
-  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, base);
   ifThenElse(
     v, vcold(env), CC_E, sf,
     destroy,
@@ -311,7 +330,8 @@ void implDecRefProf(Vout& v, IRLS& env,
       ifThen(v, CC_NL, sf, [&] (Vout& v) {
           v << incwm{
             rvmtl()[profile.handle() + offsetof(DecRefProfile, decremented)],
-            v.makeReg()};
+            v.makeReg()
+          };
           emitDecRef(v, base);
         },
         tag_from_string("decref-is-static"));
@@ -323,14 +343,19 @@ void implDecRefProf(Vout& v, IRLS& env,
 
 /*
  * This function emits a DecRef optimized for the case where the value will be
- * destroyed / release.
+ * destroyed/released.
  */
 template<class Destroy>
 void emitDecRefOptDestroy(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyPersist,
                           bool unlikelySurvive) {
-  auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, data);
+
+  if (one_bit_refcount) {
+    ifThen(v, CC_E, sf, destroy, tag_from_string("decref-is-one"));
+    return;
+  }
+
   ifThenElse(
     v, vcold, CC_NE, sf,
     [&] (Vout& v) {
@@ -353,8 +378,16 @@ template<class Destroy>
 void emitDecRefOptSurvive(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyDestroy,
                           bool unlikelyPersist) {
-  auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, data);
+
+  if (one_bit_refcount) {
+    ifThen(
+      v, vcold, CC_E, sf, destroy, unlikelyDestroy,
+      tag_from_string("decref-is-one")
+    );
+    return;
+  }
+
   ifThenElse(
     v, vcold, CC_LE, sf,
     [&] (Vout& v) {
@@ -379,8 +412,16 @@ template<class Destroy>
 void emitDecRefOptPersist(Vout& v, Vout& vcold, Vreg data,
                           Destroy destroy, bool unlikelyDestroy,
                           bool unlikelySurvive) {
-  auto const sf = v.makeReg();
-  v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
+  auto const sf = emitCmpRefCount(v, OneReference, data);
+
+  if (one_bit_refcount) {
+    ifThen(
+      v, vcold, CC_E, sf, destroy, unlikelyDestroy,
+      tag_from_string("decref-is-one")
+    );
+    return;
+  }
+
   ifThen(
     v, vcold, CC_GE, sf,
     [&] (Vout& v) {
@@ -628,6 +669,11 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 }
 
 void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
+  if (one_bit_refcount) {
+    // Nothing to do here.
+    return;
+  }
+
   auto& v = vmain(env);
   auto const ty = inst->src(0)->type();
 

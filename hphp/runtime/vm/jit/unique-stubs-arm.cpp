@@ -74,20 +74,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     auto const data = rarg(0);
     v << load{tv[TVOFF(m_data)], data};
 
-    auto const sf = v.makeReg();
-    v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-
-    ifThen(v, CC_NL, sf, [&] (Vout& v) {
-      // The refcount is positive, so the value is refcounted.  We need to
-      // either decref or release.
-      ifThen(v, CC_NE, sf, [&] (Vout& v) {
-        // The refcount is greater than 1; decref it.
-        v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
-        // Pop FP/LR and return
-        v << popp{rfp(), rlr()};
-        v << ret{live};
-      });
-
+    auto destroy = [&](Vout& v) {
       // Note that the stack is aligned since we called to this helper from an
       // stack-unaligned stub.
       PhysRegSaver prs{v, live};
@@ -101,7 +88,27 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       // saved RIP of the call from the stub to this helper.
       v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
       // fallthru
-    });
+    };
+
+    auto const sf = emitCmpRefCount(v, OneReference, data);
+
+    if (one_bit_refcount) {
+      ifThen(v, CC_E, sf, destroy);
+    } else {
+      ifThen(v, CC_NL, sf, [&] (Vout& v) {
+        // The refcount is positive, so the value is refcounted.  We need to
+        // either decref or release.
+        ifThen(v, CC_NE, sf, [&] (Vout& v) {
+          // The refcount is greater than 1; decref it.
+          emitDecRefCount(v, data);
+          // Pop FP/LR and return
+          v << popp{rfp(), rlr()};
+          v << ret{live};
+        });
+
+        destroy(v);
+      });
+    }
 
     // Either we did a decref, or the value was static.
     // Pop FP/LR and return

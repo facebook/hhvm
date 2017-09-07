@@ -28,12 +28,12 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
+#include "hphp/runtime/base/req-containers.h"
+
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/trace.h"
-
-#include <unordered_map>
 
 TRACE_SET_MOD(debugger);
 
@@ -81,41 +81,46 @@ bool addDbgBLPC(PC pc) {
   return true;
 }
 
-namespace {
-__thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
-}
+struct DebuggerCatches {
+  // keys could point to resumable ActRecs in req heap
+  req::Optional<req::hash_map<const ActRec*, TCA>> catches;
+};
+
+IMPLEMENT_THREAD_LOCAL(DebuggerCatches, tl_debuggerCatches);
 
 void stashDebuggerCatch(const ActRec* fp) {
-  if (!tl_debuggerCatches) {
-    tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
-  }
-
   if (auto const catchBlock = getCatchTrace(TCA(fp->m_savedRip))) {
     // Record the corresponding catch trace for `fp'.  There might not be one,
     // if the one we would have registered was empty.
     always_assert(*catchBlock);
     FTRACE(1, "Pushing debugger catch {} with fp {}\n", *catchBlock, fp);
-    tl_debuggerCatches->emplace(fp, *catchBlock);
+    auto& catches = tl_debuggerCatches->catches;
+    if (!catches) catches.emplace(); // create map
+    catches->emplace(fp, *catchBlock);
   }
 }
 
 TCA unstashDebuggerCatch(const ActRec* fp) {
-  always_assert(tl_debuggerCatches);
-
-  auto const it = tl_debuggerCatches->find(fp);
-  if (it == tl_debuggerCatches->end()) {
+  if (tl_debuggerCatches.isNull()) {
+    return tc::ustubs().endCatchHelper;
+  }
+  auto& catches = tl_debuggerCatches->catches;
+  if (!catches) {
+    return tc::ustubs().endCatchHelper;
+  }
+  auto const it = catches->find(fp);
+  if (it == catches->end()) {
     return tc::ustubs().endCatchHelper;
   }
 
   auto const catchBlock = it->second;
-  tl_debuggerCatches->erase(it);
+  catches->erase(it);
   FTRACE(1, "Popped debugger catch {} for fp {}\n", catchBlock, fp);
   return catchBlock;
 }
 
 void clearDebuggerCatches() {
-  delete tl_debuggerCatches;
-  tl_debuggerCatches = nullptr;
+  tl_debuggerCatches.destroy();
 }
 
 }}

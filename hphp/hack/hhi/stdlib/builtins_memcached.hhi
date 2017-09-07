@@ -69,49 +69,62 @@ class Memcached {
   const RES_BAD_KEY_PROVIDED = 0;
   const RES_CONNECTION_SOCKET_CREATE_FAILURE = 0;
   const RES_PAYLOAD_FAILURE = 0;
-  public function __construct($persistent_id = null) { }
-  public function add($key, $value, $expiration = 0) { }
-  public function addByKey($server_key, $key, $value, $expiration = 0) { }
-  public function addServer($host, $port, $weight = 0) { }
-  public function addServers($servers) { }
-  public function append($key, $value) { }
-  public function appendByKey($server_key, $key, $value) { }
-  public function cas($cas_token, $key, $value, $expiration = 0) { }
-  public function casByKey($cas_token, $server_key, $key, $value, $expiration = 0) { }
-  public function decrement($key, $offset = 1) { }
-  public function delete($key, $time = 0) { }
-  public function deleteByKey($server_key, $key, $time = 0) { }
-  public function deleteMulti(array $keys, int $time = 0): mixed { }
-  public function deleteMultiByKey(string $server_key, array $keys,
-                                   int $time = 0): mixed { }
-  public function fetch() { }
-  public function fetchAll() { }
-  public function flush($delay = 0) { }
-  public function get($key, $cache_cb = null, &$cas_token = null) { }
-  public function getByKey($server_key, $key, $cache_cb = null, &$cas_token = null) { }
-  public function getDelayed($keys, $with_cas = false, $value_cb = null) { }
-  public function getDelayedByKey($server_key, $keys, $with_cas = false, $value_cb = null) { }
-  public function getMulti($keys, &$cas_tokens = null, $flags = 0) { }
-  public function getMultiByKey($server_key, $keys, &$cas_tokens = null, $flags = 0) { }
-  public function getOption($option) { }
-  public function getResultCode() { }
-  public function getResultMessage() { }
-  public function getServerByKey($server_key) { }
-  public function getServerList() { }
-  public function getStats() { }
-  public function getVersion() { }
-  public function increment($key, $offset = 1) { }
-  public function prepend($key, $value) { }
-  public function prependByKey($server_key, $key, $value) { }
-  public function replace($key, $value, $expiration = 0) { }
-  public function replaceByKey($server_key, $key, $value, $expiration = 0) { }
-  public function set($key, $value, $expiration = 0) { }
-  public function setByKey($server_key, $key, $value, $expiration = 0) { }
-  public function setMulti($items, $expiration = 0) { }
-  public function setMultiByKey($server_key, $items, $expiration = 0) { }
-  public function setOption($option, $value) { }
-  public function touch(string $key, int $expiration = 0): bool { }
-  public function touchByKey(string $server_key,
-                             string $key,
-                             int $expiration = 0): bool { }
+  const HAVE_SESSION = true;
+
+  public function __construct(?string $persistent_id = null): void;
+  public function add(mixed $key, mixed $value, int $expiration = 0): bool;
+  public function addByKey(string $server_key, string $key, mixed $value, int $expiration = 0): bool;
+  public function addServer(string $host, int $port, int $weight = 0): bool;
+  public function addServers(array<array<mixed>> $servers): bool;
+  public function append(mixed $key, mixed $value): bool;
+  public function appendByKey(string $server_key, string $key, string $value): bool;
+  public function cas(float $cas_token, string $key, mixed $value, int $expiration = 0): bool;
+  public function casByKey(float $cas_token, string $server_key, string $key, mixed $value, int $expiration = 0): bool;
+  public function decrement(string $key, int $offset = 1, mixed $initial_value = false, int $expiry = 0): mixed;
+  public function decrementByKey(string $server_key, string $key, int $offset = 1, mixed $initial_value = false, int $expiry = 0): mixed;
+  public function delete(mixed $key, int $time = 0): bool;
+  public function deleteMultiByKey(string $server_key, array $keys, int $time = 0): mixed;
+  public function deleteMulti(array $keys, int $time = 0): mixed;
+  public function deleteByKey(string $server_key, string $key, int $time = 0): bool;
+
+  public function fetch(): mixed;
+  public function fetchAll(): mixed;
+  public function flush(int $delay = 0): bool;
+  public function get(mixed $key, mixed $cache_cb = null, mixed &$cas_token = null): mixed;
+  public function getAllKeys(): mixed;
+  public function getByKey(string $server_key, string $key, mixed $cache_cb = null, mixed &$cas_token = null);
+  public function getDelayed(mixed $keys, mixed $with_cas = false, mixed $value_cb = null): bool;
+  public function getDelayedByKey(string $server_key, arraay $keys, bool $with_cas = false, ?callable $value_cb = null): bool;
+  public function getMulti(mixed $keys, mixed &$cas_tokens = null, int $flags = 0): mixed;
+  public function getMultiByKey(string $server_key, array $keys, mixed &$cas_tokens = null, int $flags = 0): mixed;
+  public function getOption(int $option): mixed;
+  public function getResultCode(): int;
+  public function getResultMessage(): string;
+  public function getServerByKey(string $server_key): mixed;
+  public function getServerList(): array;
+  public function resetServerList(): bool;
+  public function getStats(): mixed;
+  public function getVersion(): mixed;
+
+  public function increment(string $key, int $offset = 1, mixed $initial_value = false, int $expiry = 0): mixed;
+  public function incrementByKey(string $server_key, string $key, int $offset = 1, mxied $initial_value = false, int $expiry = 0): mixed;
+
+  public function isPersistent(): bool;
+  public function isPristine(): bool;
+
+  public function prepend(mixed $key, mixed $value): bool;
+  public function prependByKey(string $server_key, string $key, string $value): bool;
+
+  public function quit(): bool;
+
+  public function replace(mixed $key, mixed $value, int $expiration = 0): bool;
+  public function replaceByKey(string $server_key, string $key, mixed $value, int $expiration = 0): bool;
+  public function set(mixed $key, mixed $value, int $expiration = 0): bool;
+  public function setByKey(string $server_key, string $key, mixed $value, int $expiration = 0): bool;
+  public function setMulti(array<string, mixed> $items, int $expiration = 0): bool;
+  public function setMultiByKey(string $server_key, array<string, mixed> $items, int $expiration = 0): bool;
+  public function setOption(int $option, mixed $value): bool;
+  public function setOptions(array<int, mixed> $options): bool;
+  public function touch(string $key, int $expiration = 0): bool;
+  public function touchByKey(string $server_key, string $key, int $expiration = 0): bool;
 }

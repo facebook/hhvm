@@ -317,13 +317,19 @@ void CompactVector<T>::grow() {
 template <typename T>
 void CompactVector<T>::reserve_impl(size_type new_capacity) {
   if (m_data) {
-    auto const len = m_data->m_len;
+    auto len = m_data->m_len;
     auto const old_data = m_data;
+    auto old_elems = elems();
 
     m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
 
-    memcpy(m_data, old_data, required_mem(len));
+    auto new_elems = elems();
+    m_data->m_len = len;
     m_data->m_capacity = safe_cast<uint32_t>(new_capacity);
+    while (len--) {
+      new (new_elems++) T(std::move(*old_elems));
+      old_elems++->~T();
+    }
     free(old_data);
   } else {
     // If there are currently no elements, all we have to do is allocate a

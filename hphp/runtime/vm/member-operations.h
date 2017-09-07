@@ -3064,7 +3064,7 @@ inline void SetPropStdclass(TypedValue* base, TypedValue key, Cell* val) {
     [&] (ObjectData* obj) {
       auto const keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
-      obj->setProp(nullptr, keySD, (TypedValue*)val);
+      obj->setProp(nullptr, keySD, *val);
     });
 }
 
@@ -3075,7 +3075,7 @@ inline void SetPropObj(Class* ctx, ObjectData* instance,
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Set property.
-  instance->setProp(ctx, keySD, val);
+  instance->setProp(ctx, keySD, *val);
 }
 
 // $base->$key = $val
@@ -3139,8 +3139,8 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
       tvWriteNull(&tvRef);
-      setopBody(tvToCell(&tvRef), op, rhs);
-      obj->setProp(nullptr, keySD, &tvRef);
+      setopBody(tvAssertCell(&tvRef), op, rhs);
+      obj->setProp(nullptr, keySD, tvAssertCell(tvRef));
     });
 
   return &tvRef;
@@ -3218,7 +3218,7 @@ inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
       TypedValue tv;
       tvWriteNull(&tv);
       dest = IncDecBody(op, &tv);
-      obj->setProp(nullptr, keySD, &dest);
+      obj->setProp(nullptr, keySD, dest);
       assert(!isRefcountedType(tv.m_type));
     });
 

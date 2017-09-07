@@ -382,12 +382,12 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   template<typename K>
   TypedValue* makeDynProp(K key, AccessFlags);
 
-  bool invokeSet(const StringData* key, const TypedValue* val);
+  bool invokeSet(const StringData* key, Cell val);
   InvokeResult invokeGet(const StringData* key);
   InvokeResult invokeIsset(const StringData* key);
   bool invokeUnset(const StringData* key);
   InvokeResult invokeNativeGetProp(const StringData* key);
-  bool invokeNativeSetProp(const StringData* key, TypedValue* val);
+  bool invokeNativeSetProp(const StringData* key, Cell val);
   InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
@@ -420,8 +420,7 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, TypedValue* val,
-               bool bindingAssignment = false);
+  void setProp(Class* ctx, const StringData* key, Cell val);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
 

@@ -412,7 +412,7 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName,
   }
 
   if (useSet) {
-    invokeSet(propName.get(), (TypedValue*)(&variant(v)));
+    invokeSet(propName.get(), *v.asCell());
   }
   return variant(v);
 }
@@ -449,15 +449,7 @@ void ObjectData::o_setArray(const Array& properties) {
       k = k.substr(subLen);
     }
 
-    auto const rval = iter.secondRval();
-    setProp(ctx,
-            k.get(),
-            // Set prop is happening with WithRef semantics---we only
-            // use a binding assignment if it was already KindOfRef,
-            // so despite the const_cast here we're safely not
-            // modifying the original Variant.
-            const_cast<TypedValue*>(rval.tv_ptr()),
-            rval.type() == KindOfRef && rval.val().pref->isReferenced());
+    setProp(ctx, k.get(), tvAssertCell(iter.secondRval().tv()));
   }
 }
 
@@ -1143,13 +1135,13 @@ struct MagicInvoker {
 
 }
 
-bool ObjectData::invokeSet(const StringData* key, const TypedValue* val) {
+bool ObjectData::invokeSet(const StringData* key, Cell val) {
   auto const info = PropAccessInfo { this, key, UseSet };
   auto r = magic_prop_impl(key, info, [&] {
     auto const meth = m_cls->lookupMethod(s___set.get());
     TypedValue args[2] = {
       make_tv<KindOfString>(const_cast<StringData*>(key)),
-      *tvToCell(val)
+      val
     };
     return g_context->invokeMethod(this, meth, folly::range(args));
   });
@@ -1196,9 +1188,9 @@ InvokeResult ObjectData::invokeNativeGetProp(const StringData* key) {
   );
 }
 
-bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue* val) {
+bool ObjectData::invokeNativeSetProp(const StringData* key, Cell val) {
   auto r = guardedNativePropResult(
-    Native::setProp(Object{this}, StrNR(key), tvAsVariant(val))
+    Native::setProp(Object{this}, StrNR(key), tvAsCVarRef(&val))
   );
   tvDecRefGen(r.val);
   return r.ok();
@@ -1388,10 +1380,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   return propEmptyImpl(ctx, key);
 }
 
-void ObjectData::setProp(Class* ctx,
-                         const StringData* key,
-                         TypedValue* val,
-                         bool bindingAssignment /* = false */) {
+void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
@@ -1399,11 +1388,7 @@ void ObjectData::setProp(Class* ctx,
     if (prop->m_type != KindOfUninit ||
         !getAttribute(UseSet) ||
         !invokeSet(key, val)) {
-      if (UNLIKELY(bindingAssignment)) {
-        tvBind(val, prop);
-      } else {
-        tvSet(*val, *prop);
-      }
+      tvSet(val, *prop);
     }
     return;
   }
@@ -1426,18 +1411,7 @@ void ObjectData::setProp(Class* ctx,
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
     }
-    // when seting a dynamic property, do not write
-    // directly to the TypedValue in the MixedArray, since
-    // its m_aux field is used to store the string hash of
-    // the property name. Instead, call the appropriate
-    // setters (set() or setRef()).
-    if (UNLIKELY(bindingAssignment)) {
-      reserveProperties().setRef(
-        StrNR(key), tvAsVariant(val), true /* isKey */);
-    } else {
-      reserveProperties().set(
-        StrNR(key), tvAsCVarRef(val), true /* isKey */);
-    }
+    reserveProperties().set(StrNR(key), val, true);
     return;
   }
 }
@@ -1454,15 +1428,17 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
+        // don't unbox until after setopBody; see longer comment below
         setopBody(tvToCell(&r.val), op, val);
+        tvUnboxIfNeeded(&r.val);
         if (getAttribute(UseSet)) {
-          cellDup(*tvToCell(&r.val), tvRef);
-          if (invokeSet(key, &tvRef)) {
+          cellDup(tvAssertCell(r.val), tvRef);
+          if (invokeSet(key, tvAssertCell(tvRef))) {
             return &tvRef;
           }
           tvRef.m_type = KindOfUninit;
         }
-        cellDup(*tvToCell(&r.val), *prop);
+        cellDup(tvAssertCell(r.val), *prop);
         return prop;
       }
     }
@@ -1478,7 +1454,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     if (auto r = invokeNativeGetProp(key)) {
       tvCopy(r.val, tvRef);
       setopBody(tvToCell(&tvRef), op, val);
-      if (invokeNativeSetProp(key, &tvRef)) {
+      if (invokeNativeSetProp(key, tvToCell(tvRef))) {
         return &tvRef;
       }
     }
@@ -1518,7 +1494,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
       // __set functions can't take parameters by reference.)
       tvCopy(r.val, tvRef);
       setopBody(tvToCell(&tvRef), op, val);
-      invokeSet(key, &tvRef);
+      invokeSet(key, tvToCell(tvRef));
       return &tvRef;
     }
   }
@@ -1542,12 +1518,13 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
-        auto const dest = IncDecBody(op, &r.val);
+        tvUnboxIfNeeded(&r.val);
+        auto const dest = IncDecBody(op, tvAssertCell(&r.val));
         if (getAttribute(UseSet)) {
-          invokeSet(key, &r.val);
+          invokeSet(key, tvAssertCell(r.val));
           return dest;
         }
-        tvCopy(r.val, *prop);
+        cellCopy(tvAssertCell(r.val), *prop);
         tvWriteNull(&r.val); // suppress decref
         return dest;
       }
@@ -1557,7 +1534,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     } else {
       prop = tvToCell(prop);
     }
-    return IncDecBody(op, prop);
+    return IncDecBody(op, tvAssertCell(prop));
   }
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
@@ -1567,8 +1544,8 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (auto r = invokeNativeGetProp(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
       tvUnboxIfNeeded(&r.val);
-      auto const dest = IncDecBody(op, &r.val);
-      if (invokeNativeSetProp(key, &r.val)) {
+      auto const dest = IncDecBody(op, tvAssertCell(&r.val));
+      if (invokeNativeSetProp(key, tvAssertCell(r.val))) {
         return dest;
       }
     }
@@ -1582,7 +1559,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (!r) tvWriteNull(&r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
     tvUnboxIfNeeded(&r.val);
-    auto const dest = IncDecBody(op, &r.val);
+    auto const dest = IncDecBody(op, tvAssertCell(&r.val));
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(StrNR(key), AccessFlags::Key);
 
@@ -1598,8 +1575,8 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (auto r = invokeGet(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
       tvUnboxIfNeeded(&r.val);
-      auto const dest = IncDecBody(op, &r.val);
-      invokeSet(key, &r.val);
+      auto const dest = IncDecBody(op, tvAssertCell(&r.val));
+      invokeSet(key, tvAssertCell(r.val));
       return dest;
     }
   }

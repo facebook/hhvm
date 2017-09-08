@@ -3029,19 +3029,19 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-void Index::refine_class_constants(const Context& ctx, ContextSet& deps) {
-  bool changed = false;
-  for (auto& c : ctx.func->cls->constants) {
-    if (c.val && c.val->m_type == KindOfUninit) {
-      auto const fa = analyze_func_inline(*this, ctx, { sval(c.name) });
-      auto val = tv(fa.inferredReturn);
-      if (val) {
-        changed = true;
-        c.val = *val;
-      }
-    }
+void Index::refine_class_constants(
+  const Context& ctx,
+  const CompactVector<std::pair<size_t, TypedValue>>& resolved,
+  ContextSet& deps) {
+  if (!resolved.size()) return;
+  auto& constants = ctx.func->cls->constants;
+  for (auto const& c : resolved) {
+    assertx(c.first < constants.size());
+    auto& cnst = constants[c.first];
+    assertx(cnst.val && cnst.val->m_type == KindOfUninit);
+    cnst.val = c.second;
   }
-  if (changed) find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
+  find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
 }
 
 void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
@@ -3098,9 +3098,6 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
     }
   }
   if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
-  if (func->name == s_86cinit.get()) {
-    refine_class_constants(fa.ctx, deps);
-  }
 }
 
 void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {

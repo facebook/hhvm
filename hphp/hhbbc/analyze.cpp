@@ -45,6 +45,7 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
@@ -655,6 +656,32 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       true
     );
   }
+  /*
+   * The 86cinit is a little different from the other two, but
+   * similarly can't play a role in the fixed point computation.
+   */
+  if (auto f = find_method(ctx.cls, s_86cinit.get())) {
+    auto const cinit_ctx = Context { ctx.unit, f, ctx.cls };
+    do_analyze(
+      index,
+      cinit_ctx,
+      &clsAnalysis,
+      nullptr,
+      true
+    );
+    // We do want to use it to resolve as-yet unresolved class
+    // constants, however.
+    size_t idx = 0;
+    for (auto const& c : ctx.cls->constants) {
+      if (c.val && c.val->m_type == KindOfUninit) {
+        auto const fa = analyze_func_inline(index, cinit_ctx, { sval(c.name) });
+        if (auto const val = tv(fa.inferredReturn)) {
+          clsAnalysis.resolvedConstants.emplace_back(idx, *val);
+        }
+      }
+      ++idx;
+    }
+  }
 
   // Verify that none of the class properties are TBottom, i.e.
   // any property of type KindOfUninit has been initialized (by
@@ -684,14 +711,15 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     auto const previousProps   = clsAnalysis.privateProperties;
     auto const previousStatics = clsAnalysis.privateStatics;
 
-    std::vector<FuncAnalysis> methodResults;
-    std::vector<FuncAnalysis> closureResults;
+    CompactVector<FuncAnalysis> methodResults;
+    CompactVector<FuncAnalysis> closureResults;
 
     // Analyze every method in the class until we reach a fixed point
     // on the private property states.
     for (auto& f : ctx.cls->methods) {
       if (f->name->isame(s_86pinit.get()) ||
-          f->name->isame(s_86sinit.get())) {
+          f->name->isame(s_86sinit.get()) ||
+          f->name->isame(s_86cinit.get())) {
         continue;
       }
 

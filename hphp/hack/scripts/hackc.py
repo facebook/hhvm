@@ -37,6 +37,7 @@ nyis = {
 }
 
 
+
 def p(text, bypass_quiet_mode=False):
     if not quiet_mode or bypass_quiet_mode:
         sys.stdout.write(text)
@@ -166,7 +167,6 @@ if __name__ == '__main__':
                 p('\rcompiling ' + c)
                 time.sleep(0.1)
             else:
-                p('\r')
                 return
     t = threading.Thread(target=animate)
     t.start()
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     pool.terminate()
     animate = False
     end_time = time.time()
-    p("Compiled {} files in {}\033[K\n".format(
+    p("\rCompiled {} files in {}\033[K\n".format(
         len(files),
         pretty_time_delta(end_time - start_time),
     ))
@@ -192,7 +192,8 @@ if __name__ == '__main__':
         while not sort_of_nyis.empty():
             nyis[sort_of_nyis.get()] += 1
         for k, v in nyis.items():
-            p("{} {}\n".format(v, k))
+            if v > 0:
+                p("{} {}\n".format(v, k))
         if not file_with_nyi.empty():
             p("--> we found unknown NYIs in the following files:\n")
         while not file_with_nyi.empty():

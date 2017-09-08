@@ -17,6 +17,8 @@ open Config_file.Getters
 open Reordered_argument_collections
 
 type t = {
+  version : string option;
+
   load_script      : Path.t option;
   load_script_timeout : int; (* in seconds *)
 
@@ -181,6 +183,7 @@ let prepare_ignored_fixme_codes config =
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let local_config = ServerLocalConfig.load ~silent:false in
+  let version = SMap.get config "version" in
   let load_script =
     Option.map (SMap.get config "load_script") maybe_relative_path in
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
@@ -205,6 +208,7 @@ let load config_filename options =
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);
   {
+    version = version;
     load_script = load_script;
     load_script_timeout = load_script_timeout;
     load_mini_script = load_mini_script;
@@ -218,6 +222,7 @@ let load config_filename options =
 
 (* useful in testing code *)
 let default_config = {
+  version = None;
   load_script = None;
   load_script_timeout = 0;
   load_mini_script = None;

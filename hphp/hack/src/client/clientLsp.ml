@@ -1254,36 +1254,10 @@ let connect_client
       { Lsp.Initialize.retry = true; }))
 
 
-let connect_attempt_hello
-    (server_conn: server_conn)
-  : bool =
-  (* This waits up to 3 seconds for the server to send "Hello", the first     *)
-  (* message it sends after handoff. It might take some time if the server    *)
-  (* has to finish typechecking first. Returns whether it got the "Hello".    *)
-  try
-    let retries = Some 3 in  (* it does one retry per second *)
-    let tail_env = None in  (* don't report progress to stderr *)
-    let time = Unix.time () in  (* dummy; not used because of tail_env=None *)
-    ClientConnect.wait_for_server_hello server_conn.ic retries
-      ClientConnect.null_progress_reporter time tail_env;
-    true
-  with
-  | Exit_status.Exit_with Exit_status.Out_of_retries ->
-    false
-  | ClientConnect.Server_hung_up ->
-    (* Raised by wait_for_server_hello, if someone killed the server while  *)
-    (* it was busy doing its typechecking or other work.                    *)
-    (* How should user react? - by attempting to re-connect.                *)
-    raise (Lsp.Error.ServerErrorStart (
-      "hh_server died unexpectedly. Maybe you recently launched a different version of hh_server.",
-      { Lsp.Initialize.retry = true; }))
-
-
-(* connect: this method attempts to connect to the server. If it can within   *)
-(* three seconds then it returns Main_loop state; if not, In_init state.      *)
-(* Errors will be reported as exceptions, including LSP ServerErrorStart.     *)
-let connect ()
-  : state =
+(* connect: this method attempts to connect to the server and returns         *)
+(* In_init state, with a dialog and progress indicator. Or it might raise     *)
+(* before putting any dialog up.                                              *)
+let connect () : state =
   let start_time = Unix.time () in
   let root = match get_root () with
     | None -> failwith "we should have root after an initialize request"
@@ -1291,50 +1265,35 @@ let connect ()
   in
 
   let server_conn = connect_client root in
-  let got_hello = connect_attempt_hello server_conn in
 
-  if got_hello then begin
-    connect_after_hello server_conn ImmQueue.empty;
-    Main_loop {
-      conn = server_conn;
-      needs_idle = true;
-      uris_with_unsaved_changes = SSet.empty;
-      uris_with_diagnostics = SSet.empty;
-      ready_dialog_cancel = None;
-    }
-  end else begin
-    let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
-    let clear_cancel_flag state = match state with
-      | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
-      | _ -> state in
-    let handle_result ~state ~result:_ = clear_cancel_flag state in
-    let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
-    let req = print_showMessageRequest MessageType.InfoMessage
-        "Waiting for Hack server to be ready..." [] in
-    let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
-    if supports_progress () then begin
-      let progress = "hh_server initializing" in
-      print_progress progress_id_initialize (Some progress) |> notify stdout "window/progress"
-    end;
-    let ienv =
-      { In_init_env.
-        conn = server_conn;
-        start_time;
-        uris_with_unsaved_changes = SSet.empty;
-        busy_dialog_cancel = Some cancel;
-        file_edits = ImmQueue.empty;
-        tail_env = Tail.create_env log_file;
-      } in
-    In_init ienv
-  end
+  let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
+  let clear_cancel_flag state = match state with
+    | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
+    | _ -> state in
+  let handle_result ~state ~result:_ = clear_cancel_flag state in
+  let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+  let req = print_showMessageRequest MessageType.InfoMessage
+      "Waiting for Hack server to be ready..." [] in
+  let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+  if supports_progress () then begin
+    let progress = "hh_server initializing" in
+    print_progress progress_id_initialize (Some progress) |> notify stdout "window/progress"
+  end;
+
+  In_init { In_init_env.
+    conn = server_conn;
+    start_time;
+    uris_with_unsaved_changes = SSet.empty;
+    busy_dialog_cancel = Some cancel;
+    file_edits = ImmQueue.empty;
+    tail_env = Tail.create_env log_file;
+  }
 
 
-let do_initialize ()
-  : (Initialize.result * state) =
+let do_initialize () : Initialize.result =
   let open Initialize in
   let local_config = ServerLocalConfig.load ~silent:true in
-  let new_state = connect () in
-  let result = {
+  {
     server_capabilities = {
       textDocumentSync = {
         want_openClose = true;
@@ -1370,30 +1329,30 @@ let do_initialize ()
       typeCoverageProvider = true;
     }
   }
-  in
-  (result, new_state)
 
 
-let regain_lost_server_if_necessary
+let reconnect_from_lost_if_necessary
     (state: state)
     (reason: [> `Event of event | `Force_regain ])
   : state =
   let open Lost_env in
-  let should_regain = match state, reason with
+  let should_reconnect = match state, reason with
     | Lost_server _, `Force_regain -> true
     | Lost_server lenv, `Event Client_message _ when lenv.p.trigger_on_lsp -> true
     | Lost_server lenv, `Event Tick when lenv.p.trigger_on_lock_file ->
       MonitorConnection.server_exists lenv.lock_file
     | _, _ -> false
   in
-  if should_regain then
+  if should_reconnect then
     let has_unsaved_changes = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
     let has_different_version = match state, get_root () with
       | Lost_server lenv, Some root -> lenv.prev_hhconfig_version <> read_hhconfig_version root
       | _ -> assert false in
     let needs_to_terminate = has_unsaved_changes || has_different_version in
     if needs_to_terminate then
-      exit_fail_delay ()
+      (* In these cases we have to terminate our LSP server, *)
+      (* and trust the client to restart us.                 *)
+      exit_fail ()
     else
       let new_state = connect () in
       (* if that succeeded without exception, then it's safe for us to have the *)
@@ -1444,7 +1403,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     let result = Option.value_map result ~default:""
       ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
     match result, state with
-    | "Restart", Lost_server _ -> regain_lost_server_if_necessary state `Force_regain
+    | "Restart", Lost_server _ -> reconnect_from_lost_if_necessary state `Force_regain
     | _ -> state
   in
 
@@ -1461,6 +1420,25 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     dialog_cancel = Some dialog;
     actionRequired_id = Some action_id_lost_server;
   }
+
+
+let connect_from_preinit_if_necessary (state: state) (event: event) : (state * exn option) =
+  match state, event with
+  | Pre_init, Client_message c when c.Jsonrpc_queue.method_ = "initialize" ->
+    begin try
+      let new_state = connect () in
+      (new_state, None)
+    with e ->
+      let (_code, message, _data) = Lsp_fmt.get_error_info e in
+      let new_state = do_lost_server state
+        { Lost_env.
+          message = "hh_server failed to start: " ^ message;
+          trigger_on_lock_file = true;
+          trigger_on_lsp = false;
+        } in
+      (new_state, Some e)
+    end
+  | _ -> (state, None)
 
 
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
@@ -1515,6 +1493,29 @@ let track_edits_if_necessary (state: state) (event: event) : state =
   | _ -> state
 
 
+let log_response_if_necessary
+    (event: event)
+    (response: Hh_json.json option)
+    (start_handle_t: float)
+  : unit =
+  let open Jsonrpc_queue in
+  match event with
+  | Client_message c ->
+    let json_response = match response with
+      | None -> ""
+      | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
+    in
+    HackEventLogger.client_lsp_method_handled
+      ~root:(get_root ())
+      ~method_:(if c.kind = Response then get_outstanding_method_name c.id else c.method_)
+      ~kind:(kind_to_string c.kind)
+      ~start_queue_t:c.timestamp
+      ~start_handle_t
+      ~json:c.message_json_for_logging
+      ~json_response
+  | _ -> ()
+
+
 (************************************************************************)
 (** Message handling                                                   **)
 (************************************************************************)
@@ -1539,13 +1540,12 @@ let handle_event
   | _, Client_message c when c.method_ = "exit" ->
     if !state = Post_shutdown then exit_ok () else exit_fail ()
 
-  (* initialize request*)
+  (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     initialize_params := Some (parse_initialize c.params);
-    let (result, new_state) = do_initialize () in
-    let response = print_initialize result |> respond stdout c in
-    state := new_state;
-    response
+    (* We always succeed in initialization and send a response here.          *)
+    (* The real work to establish a server connection happens in our caller.  *)
+    do_initialize () |> print_initialize |> respond stdout c
 
   (* any request/notification if we haven't yet initialized *)
   | Pre_init, Client_message _c ->
@@ -1762,28 +1762,25 @@ let main (env: env) : 'a =
       deferred_action := None;
       let event = get_next_event !state client in
       ref_event := Some event;
+
+      (* maybe set a flag to indicate that we'll need to send an idle message *)
       state := handle_idle_if_necessary !state event;
-      state := regain_lost_server_if_necessary !state (`Event event);
+      (* if we're in a lost-server state, some triggers cause us to reconnect *)
+      state := reconnect_from_lost_if_necessary !state (`Event event);
+      (* if the user does any interaction, then dismiss the "ready" dialog *)
       state := dismiss_ready_dialog_if_necessary !state event;
+      (* we keep track of all files that have unsaved changes in them *)
       state := track_edits_if_necessary !state event;
+
+      (* this is the main handler for each message*)
       let response = handle_event ~env ~state ~client ~event in
-      match event with
-      | Client_message c -> begin
-          let open Jsonrpc_queue in
-          let response_for_logging = match response with
-            | None -> ""
-            | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
-          in
-          HackEventLogger.client_lsp_method_handled
-            ~root:(get_root ())
-            ~method_:(if c.kind = Response then get_outstanding_method_name c.id else c.method_)
-            ~kind:(kind_to_string c.kind)
-            ~start_queue_t:c.timestamp
-            ~start_handle_t
-            ~json:c.message_json_for_logging
-            ~json_response:response_for_logging;
-        end
-      | _ -> ()
+      (* for LSP requests and notifications, we keep a log of what+when we responded *)
+      log_response_if_necessary event response start_handle_t;
+
+      (* if client send an initialize request, we'll switch to either In_init or Lost_server *)
+      let (new_state, exn) = connect_from_preinit_if_necessary !state event in
+      state := new_state;
+      Option.iter exn ~f:(fun e -> raise e);
     with
     | Server_fatal_connection_exception edata ->
       if !state <> Post_shutdown then begin

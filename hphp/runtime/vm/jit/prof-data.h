@@ -361,7 +361,7 @@ struct ProfData {
     auto counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();
     if (RuntimeOption::EvalJitPGOFastProfiling &&
-	(counter > initVal)) counter = 0;
+        (counter > initVal)) counter = 0;
     assert_flog(initVal >= counter,
                 "transCounter({}) = {}, initVal = {}\n",
                 id, counter, initVal);

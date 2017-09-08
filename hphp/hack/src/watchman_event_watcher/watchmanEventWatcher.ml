@@ -243,7 +243,8 @@ let check_new_connections env =
   let new_clients = get_new_clients env.socket in
   let env = List.fold_left new_clients ~init:env
     ~f:process_client in
-  HackEventLogger.processed_clients (List.length new_clients);
+  let count = List.length new_clients in
+  if count > 0 then HackEventLogger.processed_clients count;
   env
 
 let rec serve env =

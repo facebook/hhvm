@@ -20,23 +20,6 @@ type env = {
   use_ffp_autocomplete: bool; (* Flag to turn on the (experimental) FFP based autocomplete *)
 }
 
-(* This LSP server uses progress to indicate its lazy initialization: the     *)
-(* lifetime of each progress indicator starts with do_initialize and ends     *)
-(* when the hello message is received from hh_server. That will happen upon   *)
-(* first initialization, and also in case the persistent connection is lost   *)
-(* it will happen when it's subsequently regained. In any case, the lifetimes *)
-(* of our progress notifications are non-overlapping, so we can use a single  *)
-(* constant id for all of them.                                               *)
-let progress_id_initialize = 1
-(* Progress and action-required is also used to report hh_server's typecheck  *)
-(* status from ServerCommandTypes.busy_status: whether it's ready, or doing   *)
-(* a local typecheck, or doing a global typecheck, etc. Again the lifetimes   *)
-(* of these are non-overlapping so again we use constant ids.                 *)
-let progress_id_server_status = 2
-let action_id_server_status = 3
-(* Action-required is also used to report a crashed hh_server. Again the      *)
-(* lifetime of each crashed-hh_server-report is non-overlapping.              *)
-let action_id_lost_server = 4
 
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
@@ -174,25 +157,30 @@ type server_conn = {
   pending_messages: ServerCommandTypes.push Queue.t;
 }
 
+type progress_id = Progress_id of int | Progress_none
+type actionRequired_id = ActionRequired_id of int | ActionRequired_none
+
 module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle: bool;
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t;
-    ready_dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
+    dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
+    progress_id: progress_id; (* "typechecking..." *)
+    actionRequired_id: actionRequired_id; (* "save any file to trigger a global recheck" *)
   }
 end
-open Main_env
 
 module In_init_env = struct
   type t = {
     conn: server_conn;
     start_time: float;
-    busy_dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
     file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t;
     uris_with_unsaved_changes: SSet.t;
     tail_env: Tail.env;
+    dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
+    progress_id: progress_id; (* "hh_server is initializing [naming]" *)
   }
 end
 
@@ -203,7 +191,7 @@ module Lost_env = struct
     uris_with_unsaved_changes: SSet.t;
     lock_file: string;
     dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
-    actionRequired_id: int option; (* "hh_server stopped" notification  *)
+    actionRequired_id: actionRequired_id; (* "hh_server stopped" *)
   }
 
   and params = {
@@ -385,6 +373,54 @@ let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
   ]
   in
   message |> Hh_json.json_to_string |> Http_lite.write_message outchan
+
+
+(* notify_progress: for sending/updating/closing progress messages.           *)
+(* To start a new indicator: id=None, message=Some, and get back the new id.  *)
+(* To update an existing one: id=Some, message=Some, and get back id.         *)
+(* To close an existing one: id=Some, message=None, and get back None.        *)
+(* No-op, for convenience: id=None, message=None, and you get back None.      *)
+(* messages. To start a new progress notifier, put id=None and message=Some.  *)
+let progress_and_actionRequired_counter = ref 0
+
+let notify_progress (id: progress_id) (message: string option) : progress_id =
+  match id, message with
+  | Progress_none, Some message ->
+    if supports_progress () then
+      let () = incr progress_and_actionRequired_counter in
+      let id = !progress_and_actionRequired_counter in
+      let () = print_progress id (Some message) |> notify stdout "window/progress" in
+      Progress_id id
+    else
+      Progress_none
+  | Progress_id id, Some message ->
+    print_progress id (Some message) |> notify stdout "window/progress";
+    Progress_id id
+  | Progress_id id, None ->
+    print_progress id None |> notify stdout "window/progress";
+    Progress_none
+  | Progress_none, None ->
+    Progress_none
+
+let notify_actionRequired (id: actionRequired_id) (message: string option) : actionRequired_id =
+  match id, message with
+  | ActionRequired_none, Some message ->
+    if supports_actionRequired () then
+      let () = incr progress_and_actionRequired_counter in
+      let id = !progress_and_actionRequired_counter in
+      let () = print_actionRequired id (Some message) |> notify stdout "window/actionRequired" in
+      ActionRequired_id id
+    else
+      ActionRequired_none
+  | ActionRequired_id id, Some message ->
+    print_actionRequired id (Some message) |> notify stdout "window/actionRequired";
+    ActionRequired_id id
+  | ActionRequired_id id, None ->
+    print_actionRequired id None |> notify stdout "window/actionRequired";
+    ActionRequired_none
+  | ActionRequired_none, None ->
+    ActionRequired_none
+
 
 (* request: produce a Request message; returns a method you can call to cancel it *)
 let request
@@ -591,14 +627,60 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   | _ -> ()
 
 
+(* dismiss_indicators: dismisses all dialogs, progress- and action-required   *)
+(* indicators in a state.                                                     *)
+let dismiss_indicators (state: state) : state =
+  let dismiss_dialog (cancel: (unit->unit) option) : (unit->unit) option =
+    let () = Option.call ~f:cancel () in
+    None
+  in
+  match state with
+  | In_init ienv ->
+    let open In_init_env in
+    In_init { ienv with
+      dialog_cancel = dismiss_dialog ienv.dialog_cancel;
+      progress_id = notify_progress ienv.progress_id None;
+    }
+  | Main_loop menv ->
+    let open Main_env in
+    Main_loop { menv with
+      dialog_cancel = dismiss_dialog menv.dialog_cancel;
+      progress_id = notify_progress menv.progress_id None;
+      actionRequired_id = notify_actionRequired menv.actionRequired_id None;
+    }
+  | Lost_server lenv ->
+    let open Lost_env in
+    Lost_server { lenv with
+      dialog_cancel = dismiss_dialog lenv.dialog_cancel;
+      actionRequired_id = notify_actionRequired lenv.actionRequired_id None;
+    }
+  | Pre_init -> Pre_init
+  | Post_shutdown -> Post_shutdown
+
+
 (************************************************************************)
 (** Protocol                                                           **)
 (************************************************************************)
 
-let do_shutdown (conn: server_conn) : Shutdown.result =
-  rpc conn (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0);
-  rpc conn (ServerCommandTypes.DISCONNECT);
-  ()
+let do_shutdown (state: state) : state =
+  let state = dismiss_indicators state in
+  begin match state with
+  | Main_loop menv ->
+    (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
+    (* server to disconnect so it can revert the state of its unsaved files.  *)
+    let open Main_env in
+    rpc menv.conn (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0);
+    rpc menv.conn (ServerCommandTypes.DISCONNECT)
+  | In_init _ienv ->
+    (* In In_init state, even though we have a 'conn', it's still waiting for *)
+    (* the server to become responsive, so there's no use sending any rpc     *)
+    (* messages to the server over it.                                        *)
+    ()
+  | _ ->
+    (* No other states have a 'conn' to send any disconnect messages over.    *)
+    ()
+  end;
+  Post_shutdown
 
 let do_didOpen (conn: server_conn) (params: DidOpen.params) : unit =
   let open DidOpen in
@@ -1023,8 +1105,9 @@ let do_documentFormatting
 
 
 (* do_server_busy: controls the progress / action-required indicator          *)
-let do_server_busy (status: ServerCommandTypes.busy_status) : unit =
+let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : state =
   let open ServerCommandTypes in
+  let open Main_env in
   let (progress, action) = match status with
     | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
     | Doing_local_typecheck -> (Some "Hack: checking edits", None)
@@ -1032,9 +1115,17 @@ let do_server_busy (status: ServerCommandTypes.busy_status) : unit =
     | Doing_global_typecheck -> (Some "Hack: checking entire project", None)
     | Done_global_typecheck -> (None, None)
   in
-  print_progress progress_id_server_status progress |> notify stdout "window/progress";
-  print_actionRequired action_id_server_status action |> notify stdout "window/actionRequired";
-  ()
+  (* Following code is subtle. Thanks to the magic of the notify_ functions,  *)
+  (* it will either create a new progress/action notification, or update an   *)
+  (* an existing one, or close an existing one, or just no-op, as appropriate *)
+  match state with
+  | Main_loop menv ->
+    Main_loop { menv with
+      progress_id = notify_progress menv.progress_id progress;
+      actionRequired_id = notify_actionRequired menv.actionRequired_id action;
+    }
+  | _ ->
+    state
 
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
@@ -1093,7 +1184,7 @@ let do_diagnostics_flush
 
 let report_progress
     (ienv: In_init_env.t)
-  : unit =
+  : state =
   (* Our goal behind progress reporting is to let the user know when things   *)
   (* won't be instantaneous, and to show that things are working as expected. *)
   (* We already eagerly showed a "please wait" dialog box as soon as we gave  *)
@@ -1104,57 +1195,55 @@ let report_progress
   (* (if the client doesn't), or show a completion dialog box (if we'd taken  *)
   (* 30 seconds or more).                                                     *)
   let open In_init_env in
-  if supports_progress () then begin
-    let time = Unix.time () in
-    let delay_in_secs = int_of_float (time -. ienv.start_time) in
-    (* TODO: better to report time that hh_server has spent initializing *)
-    let load_state_not_found, tail_msg =
-      ClientConnect.open_and_get_tail_msg ienv.start_time ienv.tail_env in
-    let msg = if load_state_not_found then
-      Printf.sprintf
-        "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-        tail_msg delay_in_secs
-    else
-      Printf.sprintf
-        "hh_server initializing: %s [%i seconds]"
-        tail_msg delay_in_secs
-    in
-    print_progress progress_id_initialize (Some msg) |> notify stdout "window/progress"
-  end
+  let time = Unix.time () in
+  let delay_in_secs = int_of_float (time -. ienv.start_time) in
+  (* TODO: better to report time that hh_server has spent initializing *)
+  let load_state_not_found, tail_msg =
+    ClientConnect.open_and_get_tail_msg ienv.start_time ienv.tail_env in
+  let msg = if load_state_not_found then
+    Printf.sprintf
+      "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
+      tail_msg delay_in_secs
+  else
+    Printf.sprintf
+      "hh_server initializing: %s [%i seconds]"
+      tail_msg delay_in_secs
+  in
+  In_init { ienv with
+    progress_id = notify_progress ienv.progress_id (Some msg);
+  }
 
 
 let report_progress_end
     (ienv: In_init_env.t)
   : state =
   let open In_init_env in
+  let _state = dismiss_indicators (In_init ienv) in
   let menv =
     { Main_env.
       conn = ienv.In_init_env.conn;
       needs_idle = true;
       uris_with_diagnostics = SSet.empty;
       uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
-      ready_dialog_cancel = None;
+      dialog_cancel = None;
+      progress_id = Progress_none;
+      actionRequired_id = ActionRequired_none;
     }
   in
-  (* dismiss the "busy..." dialog if present *)
-  Option.call ~f:ienv.busy_dialog_cancel ();
-  (* dismiss the "hh_server initializing" spinner if present *)
-  if supports_progress () then
-    print_progress progress_id_initialize None |> notify stdout "window/progress";
-  (* and alert the user that hack is ready, either by console log or by dialog *)
+  (* alert the user that hack is ready, either by console log or by dialog *)
   let time = Unix.time () in
   let seconds = int_of_float (time -. ienv.start_time) in
   let msg = Printf.sprintf "hh_server is now ready, after %i seconds." seconds in
   if (time -. ienv.start_time > 30.0) then begin
     let clear_cancel_flag state = match state with
-      | Main_loop menv -> Main_loop {menv with ready_dialog_cancel = None}
+      | Main_loop menv -> Main_loop {menv with Main_env.dialog_cancel = None}
       | _ -> state
     in
     let handle_result ~state ~result:_ = clear_cancel_flag state in
     let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
     let req = print_showMessageRequest MessageType.InfoMessage msg [] in
     let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
-    Main_loop {menv with ready_dialog_cancel = Some cancel;}
+    Main_loop {menv with Main_env.dialog_cancel = Some cancel;}
   end else if (not (supports_progress ())) then begin
     print_logMessage MessageType.InfoMessage msg |> notify stdout "window/logMessage";
     Main_loop menv
@@ -1258,23 +1347,21 @@ let connect () : state =
 
   let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
   let clear_cancel_flag state = match state with
-    | In_init ienv -> In_init {ienv with In_init_env.busy_dialog_cancel = None}
+    | In_init ienv -> In_init {ienv with In_init_env.dialog_cancel = None}
     | _ -> state in
   let handle_result ~state ~result:_ = clear_cancel_flag state in
   let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
   let req = print_showMessageRequest MessageType.InfoMessage
       "Waiting for Hack server to be ready..." [] in
   let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
-  if supports_progress () then begin
-    let progress = "hh_server initializing" in
-    print_progress progress_id_initialize (Some progress) |> notify stdout "window/progress"
-  end;
+  let progress_id = notify_progress Progress_none (Some "hh_server initializing") in
 
   In_init { In_init_env.
     conn = server_conn;
     start_time;
     uris_with_unsaved_changes = SSet.empty;
-    busy_dialog_cancel = Some cancel;
+    dialog_cancel = Some cancel;
+    progress_id;
     file_edits = ImmQueue.empty;
     tail_env = Tail.create_env log_file;
   }
@@ -1370,14 +1457,7 @@ let reconnect_from_lost_if_necessary
       let new_state = connect () in
       (* if that succeeded without exception, then it's safe for us to have the *)
       (* side-effect of dismissing dialog+indicator on the client.              *)
-      let _ = match state with
-        | Lost_server lenv ->
-          Option.iter lenv.dialog_cancel
-            ~f:(fun cancel -> cancel ());
-          Option.iter lenv.actionRequired_id
-            ~f:(fun id -> print_actionRequired id None |> notify stdout "window/actionRequired")
-        | _ -> assert false
-      in
+      let _state = dismiss_indicators state in
       new_state
   else
     state
@@ -1388,6 +1468,7 @@ let reconnect_from_lost_if_necessary
 (* of getting the server back.                                                *)
 let do_lost_server (state: state) (p: Lost_env.params) : state =
   let open Lost_env in
+  let state = dismiss_indicators state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
 
   let prev_hhconfig_version = match state with
@@ -1428,8 +1509,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     | _ -> state
   in
 
-  let _ = print_actionRequired action_id_lost_server (Some p.message)
-    |> notify stdout "window/actionRequired" in
+  let actionRequired_id = notify_actionRequired ActionRequired_none (Some p.message) in
   let dialog = print_showMessageRequest MessageType.ErrorMessage p.message ["Restart"]
     |> request stdout handle_result handle_error "window/showMessageRequest"
   in
@@ -1439,7 +1519,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     uris_with_unsaved_changes;
     lock_file;
     dialog_cancel = Some dialog;
-    actionRequired_id = Some action_id_lost_server;
+    actionRequired_id;
   }
 
 
@@ -1467,14 +1547,15 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
   (* We'll auto-dismiss the ready dialog if it was up, in response to user    *)
   (* actions like typing or hover, and in response to a lost server.          *)
   let open Jsonrpc_queue in
+  let open Main_env in
   match state with
-  | Main_loop ({ready_dialog_cancel = Some cancel; _} as menv) -> begin
+  | Main_loop ({dialog_cancel = Some cancel; _} as menv) -> begin
       match event with
       | Client_message {kind = Jsonrpc_queue.Response; _} ->
         state
       | Client_message _
       | Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-        cancel (); Main_loop {menv with ready_dialog_cancel = None}
+        cancel (); Main_loop { menv with Main_env.dialog_cancel = None; }
       | _ ->
         state
     end
@@ -1483,7 +1564,7 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
 
 let handle_idle_if_necessary (state: state) (event: event) : state =
   match state, event with
-  | Main_loop menv, Tick -> Main_loop { menv with needs_idle = true; }
+  | Main_loop menv, Tick -> Main_loop { menv with Main_env.needs_idle = true; }
   | _ -> state
 
 
@@ -1552,11 +1633,17 @@ let handle_event
     ~(event: event)
   : Hh_json.json option =
   let open Jsonrpc_queue in
+  let open Main_env in
   match !state, event with
   (* response *)
   | _, Client_message c when c.kind = Jsonrpc_queue.Response ->
     state := do_response !state c.id c.result c.error;
     None
+
+  (* shutdown request *)
+  | _, Client_message c when c.method_ = "shutdown" ->
+    state := do_shutdown !state;
+    print_shutdown () |> respond stdout c;
 
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" ->
@@ -1583,8 +1670,6 @@ let handle_event
         (* These three crucial-for-correctness notifications will be buffered *)
         (* up so we'll be able to handle them when we're ready.               *)
         state := In_init { ienv with file_edits = ImmQueue.push ienv.file_edits c }
-      | "shutdown" ->
-        state := Post_shutdown
       | _ ->
         raise (Error.RequestCancelled "Server busy")
         (* We deny all other requests. Operation_cancelled is the only *)
@@ -1594,7 +1679,7 @@ let handle_event
 
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
-    report_progress ienv;
+    state := report_progress ienv;
     None
 
   (* server completes initialization *)
@@ -1699,15 +1784,9 @@ let handle_event
   | Main_loop _menv, Client_message c when c.method_ = "textDocument/didSave" ->
     None
 
-  (* shutdown request *)
-  | Main_loop menv, Client_message c when c.method_ = "shutdown" ->
-    let response = do_shutdown menv.conn |> print_shutdown |> respond stdout c in
-    state := Post_shutdown;
-    response
-
   (* server busy status *)
   | _, Server_message ServerCommandTypes.BUSY_STATUS status ->
-    do_server_busy status;
+    state := do_server_busy !state status;
     None
 
   (* textDocument/publishDiagnostics notification *)

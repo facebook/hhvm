@@ -64,6 +64,9 @@ let rec from_positioned_syntax node =
           |> syntax_from_children (PositionedSyntax.kind node) in
   make syntax (Value.from_positioned_syntax node)
 
+let synthesize_from editable_positioned_syntax syntax =
+  { editable_positioned_syntax with syntax; }
+
 (**
  * Computes the text from constituent tokens.
  *)

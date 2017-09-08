@@ -520,7 +520,8 @@ let lower_body body =
       |> Core_list.map ~f:make_coroutine_result_data_variable in
   (body, coroutine_result_data_variables)
 
-let make_closure_lambda_signature
+let make_closure_lambda_signature_from_method
+    method_node
     context
     function_type =
   (*
@@ -528,7 +529,8 @@ let make_closure_lambda_signature
     mixed $coroutineData,
     ?Exception $exception) : CoroutineResult<Unit>
   *)
-  make_lambda_signature_syntax
+  make_lambda_signature_from_method_syntax
+    method_node
     [
       make_closure_parameter_syntax context;
       coroutine_data_parameter_syntax;

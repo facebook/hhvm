@@ -92,14 +92,21 @@ let make_state_machine_method_reference_syntax
  *)
 let create_closure_invocation
      context
+     method_node
      function_parameter_list
      function_type
      rewritten_body =
   (* $param1, $param2 *)
   let arg_list = parameter_list_to_arg_list function_parameter_list in
   (* ($closure, $data, $exception) ==> { body } *)
-  let lambda_signature = make_closure_lambda_signature context function_type in
-  let lambda = make_lambda_syntax lambda_signature rewritten_body in
+  let lambda_signature = make_closure_lambda_signature_from_method
+    method_node
+    context
+    function_type in
+  let lambda = make_lambda_from_method_syntax
+    method_node
+    lambda_signature
+    rewritten_body in
   let classname = make_closure_classname context in
   (* $continuation,
     ($closure, $data, $exception) ==> { body },
@@ -131,13 +138,18 @@ let create_closure_invocation
 
 let rewrite_coroutine_body
     context
+    method_node
     function_parameter_list
     function_type
     rewritten_body =
   match syntax rewritten_body with
   | CompoundStatement node ->
       let compound_statements = create_closure_invocation
-        context function_parameter_list function_type rewritten_body in
+        context
+        method_node
+        function_parameter_list
+        function_type
+        rewritten_body in
       let compound_statements = make_list compound_statements in
       make_syntax (CompoundStatement { node with compound_statements })
   | Missing ->
@@ -156,59 +168,66 @@ let rewrite_methodish_declaration
     method_node
     ({ function_parameter_list; function_type; _; } as header_node)
     rewritten_body =
-  let make_syntax method_node =
-    make_syntax (MethodishDeclaration method_node) in
-  let methodish_function_body = rewrite_coroutine_body
-    context function_parameter_list function_type rewritten_body in
-  make_syntax
-    { method_node with
+  let methodish_function_body =
+    rewrite_coroutine_body
+      context
+      method_node
+      function_parameter_list
+      function_type
+      rewritten_body in
+  let methodish_declaration_node = get_methodish_declaration method_node in
+  Syntax.synthesize_from
+    method_node
+    (MethodishDeclaration { methodish_declaration_node with
       methodish_function_decl_header =
         rewrite_function_decl_header header_node;
       methodish_function_body;
-    }
+    })
 
 let rewrite_function_declaration
     context
     function_node
     ({ function_type; function_parameter_list; _; } as header_node)
     rewritten_body =
-  let make_syntax function_node =
-    make_syntax (FunctionDeclaration function_node) in
   let function_body = rewrite_coroutine_body
-    context function_parameter_list function_type rewritten_body in
-  make_syntax
-    { function_node with
-      function_declaration_header = rewrite_function_decl_header header_node;
-      function_body;
-    }
-
-let rewrite_anon
     context
-    ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
-  let make_syntax node =
-    make_syntax (AnonymousFunction node) in
+    function_node
+    function_parameter_list
+    function_type
+    rewritten_body in
+  Syntax.synthesize_from
+    function_node
+    (FunctionDeclaration
+      { (get_function_declaration function_node) with
+        function_declaration_header = rewrite_function_decl_header header_node;
+        function_body;
+      })
+
+let rewrite_anon context anon_node =
+  let ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
+    get_anonymous_function anon_node in
   let anonymous_body = rewrite_coroutine_body
-    context anonymous_parameters anonymous_type anonymous_body in
+    context anon_node anonymous_parameters anonymous_type anonymous_body in
   let anonymous_parameters = compute_parameter_list
     anonymous_parameters anonymous_type in
   let anonymous_type = make_coroutine_result_type_syntax anonymous_type in
-  make_syntax
+  let anon =
     { anon with
       anonymous_coroutine_keyword = make_missing();
       anonymous_parameters;
       anonymous_type;
-      anonymous_body }
+      anonymous_body } in
+  Syntax.synthesize_from anon_node (AnonymousFunction anon)
 
 let rewrite_lambda
     context
     ({ lambda_parameters; lambda_type; _; } as lambda_signature)
-    ({ lambda_body; _; } as lambda) =
-  let make_lambda node =
-    make_syntax (LambdaExpression node) in
+    lambda_node =
+  let ({ lambda_body; _; } as lambda) = get_lambda_expression lambda_node in
   let make_sig node =
     make_syntax (LambdaSignature node) in
   let lambda_body = rewrite_coroutine_body
-    context lambda_parameters lambda_type lambda_body in
+    context lambda_node lambda_parameters lambda_type lambda_body in
   let lambda_parameters = compute_parameter_list
     lambda_parameters lambda_type in
   let lambda_type = make_coroutine_result_type_syntax lambda_type in
@@ -216,9 +235,11 @@ let rewrite_lambda
     { lambda_signature with
       lambda_parameters;
       lambda_type } in
-  make_lambda { lambda with
-    lambda_coroutine = make_missing();
-    (* TODO: This loses trivia on the original keyword. *)
-    lambda_signature;
-    lambda_body
-  }
+  let lambda =
+    { lambda with
+      lambda_coroutine = make_missing();
+      (* TODO: This loses trivia on the original keyword. *)
+      lambda_signature;
+      lambda_body
+    } in
+  Syntax.synthesize_from lambda_node (LambdaExpression lambda)

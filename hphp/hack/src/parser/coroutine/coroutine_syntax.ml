@@ -229,6 +229,26 @@ let get_list_item node =
   | ListItem { list_item; _; } -> list_item
   | _ -> failwith "get_list_item: Was not a ListItem"
 
+let get_function_declaration node =
+  match syntax node with
+  | FunctionDeclaration function_declaration -> function_declaration
+  | _ -> failwith "get_function_declaration: Was not a FunctionDeclaration"
+
+let get_lambda_expression node =
+  match syntax node with
+  | LambdaExpression lambda_expression -> lambda_expression
+  | _ -> failwith "get_lambda_expression: Was not a LambdaExpression"
+
+let get_anonymous_function node =
+  match syntax node with
+  | AnonymousFunction anonymous_function -> anonymous_function
+  | _ -> failwith "get_anonymous_function: Was not an AnonymousFunction"
+
+let get_methodish_declaration node =
+  match syntax node with
+  | MethodishDeclaration methodish_declaration -> methodish_declaration
+  | _ -> failwith "get_methodish_declaration: Was not a MethodishDeclaration"
+
 let get_type_parameter node =
   match syntax node with
   | TypeParameter type_parameter -> type_parameter
@@ -499,22 +519,31 @@ let make_methodish_declaration_with_body_syntax
     function_body
     (* methodish_semicolon *) (make_missing ())
 
-let make_lambda_signature_syntax lambda_parameters lambda_type =
-  let lambda_parameters = make_comma_list lambda_parameters in
-  make_lambda_signature
-    left_paren_syntax
+let make_lambda_signature_from_method_syntax
+    existing_node
     lambda_parameters
-    right_paren_syntax
-    (if is_missing lambda_type then make_missing () else colon_syntax )
-    lambda_type
+    lambda_type =
+  synthesize_from
+    existing_node
+    (LambdaSignature {
+      lambda_left_paren = left_paren_syntax;
+      lambda_parameters = make_delimited_list comma_syntax lambda_parameters;
+      lambda_right_paren = right_paren_syntax;
+      lambda_colon =
+        if is_missing lambda_type then make_missing () else colon_syntax;
+      lambda_type;
+    })
 
-let make_lambda_syntax lambda_signature lambda_body =
-  make_lambda_expression
-    (make_missing()) (* async *)
-    (make_missing()) (* coroutine *)
-    lambda_signature
-    lambda_arrow_syntax
-    lambda_body
+let make_lambda_from_method_syntax existing_node lambda_signature lambda_body =
+  synthesize_from
+    existing_node
+    (LambdaExpression {
+      lambda_async = make_missing();
+      lambda_coroutine = make_missing();
+      lambda_signature = lambda_signature;
+      lambda_arrow = lambda_arrow_syntax;
+      lambda_body = lambda_body;
+    })
 
 let make_methodish_declaration_syntax
     function_decl_header_syntax

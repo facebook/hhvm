@@ -74,7 +74,9 @@ let rewrite_coroutine_annotation
 (* TODO: Rename anonymous_parameters / function_parameter_list to match. *)
 let lower_coroutine_anon
     context
-    ({ anonymous_body; anonymous_parameters; _; } as anon) =
+    anon_node =
+  let ({ anonymous_body; anonymous_parameters; _; } as anon) =
+    get_anonymous_function anon_node in
   let ({anonymous_type; _;} as anon) =
     rewrite_anon_function_return_type anon in
   let anonymous_body, closure_syntax =
@@ -84,6 +86,7 @@ let lower_coroutine_anon
       anonymous_type
       anonymous_parameters in
   let anon = { anon with anonymous_body } in
+  let anon = Syntax.synthesize_from anon_node (AnonymousFunction anon) in
   let anon = CoroutineMethodLowerer.rewrite_anon context anon in
   (anon, closure_syntax)
 
@@ -91,7 +94,8 @@ let lower_coroutine_lambda
     context
     ({ lambda_parameters; _; } as lambda_signature)
     lambda_body
-    lambda =
+    lambda_node =
+  let lambda = get_lambda_expression lambda_node in
   let ({lambda_type; _;} as lambda_signature) =
     rewrite_lambda_return_type lambda_signature in
   let lambda_body, closure_syntax =
@@ -101,6 +105,7 @@ let lower_coroutine_lambda
       lambda_type
       lambda_parameters in
   let lambda = { lambda with lambda_body } in
+  let lambda = Syntax.synthesize_from lambda_node (LambdaExpression lambda) in
   let lambda = CoroutineMethodLowerer.rewrite_lambda
     context lambda_signature lambda in
   (lambda, closure_syntax)
@@ -146,50 +151,54 @@ let lower_coroutine_functions_and_types
     current_node
     ((closures, lambda_count) as current_acc) =
   match syntax current_node with
-  | FunctionDeclaration ({
+  | FunctionDeclaration {
       function_declaration_header = {
         syntax = FunctionDeclarationHeader ({
           function_coroutine; _;
         } as header_node); _;
       };
       function_body; _;
-    } as function_node) when not @@ is_missing function_coroutine ->
+    } when not @@ is_missing function_coroutine ->
       let context = Coroutine_context.make_from_context
         current_node parents None in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
-        context header_node function_body function_node in
+        context header_node function_body current_node in
       (((Option.to_list closure_syntax) @ closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
-  | LambdaExpression ({
+  | LambdaExpression {
     lambda_coroutine;
     lambda_signature = { syntax = LambdaSignature lambda_signature; _; };
     lambda_body;
     _;
-    } as lambda) when not @@ is_missing lambda_coroutine ->
+    } when not @@ is_missing lambda_coroutine ->
     let context = Coroutine_context.make_from_context
       current_node parents (Some lambda_count) in
     let lambda_body = fix_up_lambda_body lambda_body in
     let (lambda, closure_syntax) =
-      lower_coroutine_lambda context lambda_signature lambda_body lambda in
+      lower_coroutine_lambda
+        context
+        lambda_signature
+        lambda_body
+        current_node in
     (((Option.to_list closure_syntax) @ closures, (lambda_count + 1)),
       Rewriter.Result.Replace lambda)
-  | AnonymousFunction ({
+  | AnonymousFunction {
     anonymous_coroutine_keyword;
     _;
-    } as anon) when not @@ is_missing anonymous_coroutine_keyword ->
+    } when not @@ is_missing anonymous_coroutine_keyword ->
       let context = Coroutine_context.make_from_context
         current_node parents (Some lambda_count) in
-      let (anon, closure_syntax) = lower_coroutine_anon context anon in
+      let (anon, closure_syntax) = lower_coroutine_anon context current_node in
       (((Option.to_list closure_syntax) @ closures, (lambda_count + 1)),
         Rewriter.Result.Replace anon)
-  | MethodishDeclaration ({
+  | MethodishDeclaration {
       methodish_function_decl_header = {
         syntax = FunctionDeclarationHeader ({
           function_coroutine; _;
         } as header_node); _;
       };
       methodish_function_body; _;
-    } as method_node) when not @@ is_missing function_coroutine ->
+    } when not @@ is_missing function_coroutine ->
     let context = Coroutine_context.make_from_context
       current_node parents None in
     let (new_header_node, new_body, closure_syntax) =
@@ -200,7 +209,7 @@ let lower_coroutine_functions_and_types
     let new_method_syntax =
       CoroutineMethodLowerer.rewrite_methodish_declaration
         context
-        method_node
+        current_node
         new_header_node
         new_body in
     (((Option.to_list closure_syntax) @ closures, lambda_count),

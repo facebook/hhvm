@@ -166,6 +166,9 @@ type server_conn = {
   ic: Timeout.in_channel;
   oc: out_channel;
 
+  (* The hhconfig version indicates which binary format the server speaks... *)
+  hhconfig_version: string option;
+
   (* Pending messages sent from the server. They need to be relayed to the
      client. *)
   pending_messages: ServerCommandTypes.push Queue.t;
@@ -196,6 +199,7 @@ end
 module Lost_env = struct
   type t = {
     p: params;
+    prev_hhconfig_version: string option;
     uris_with_unsaved_changes: SSet.t;
     lock_file: string;
     dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
@@ -1157,6 +1161,12 @@ let report_progress_end
     Main_loop menv
 
 
+let read_hhconfig_version (root: Path.t) : string option =
+  let file = Filename.concat (Path.to_string root) ".hhconfig" in
+  let config = Config_file.parse file in
+  SMap.get "version" config
+
+
 (* After the server has sent 'hello', it means the persistent connection is   *)
 (* ready, so we can send our backlog of file-edits to the server.             *)
 let connect_after_hello
@@ -1217,7 +1227,8 @@ let connect_client
   try
     let (ic, oc) = ClientConnect.connect env_connect in
     let pending_messages = Queue.create () in
-    { ic; oc; pending_messages; }
+    let hhconfig_version = read_hhconfig_version root in
+    { ic; oc; hhconfig_version; pending_messages; }
   with
   | Exit_with No_server_running ->
     (* Raised when (1) the connection was refused/timed-out and no lockfile *)
@@ -1376,7 +1387,11 @@ let regain_lost_server_if_necessary
     | _, _ -> false
   in
   if should_regain then
-    let needs_to_terminate = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
+    let has_unsaved_changes = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
+    let has_different_version = match state, get_root () with
+      | Lost_server lenv, Some root -> lenv.prev_hhconfig_version <> read_hhconfig_version root
+      | _ -> assert false in
+    let needs_to_terminate = has_unsaved_changes || has_different_version in
     if needs_to_terminate then
       exit_fail_delay ()
     else
@@ -1401,8 +1416,14 @@ let regain_lost_server_if_necessary
 (* of getting the server back.                                                *)
 let do_lost_server (state: state) (p: Lost_env.params) : state =
   let open Lost_env in
-  (* TODO: track hhconfig to figure out if we're forced to terminate *)
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+
+  let prev_hhconfig_version = match state with
+    | Main_loop menv -> menv.Main_env.conn.hhconfig_version
+    | In_init ienv -> ienv.In_init_env.conn.hhconfig_version
+    | Lost_server lenv -> lenv.prev_hhconfig_version
+    | _ -> None
+  in
 
   let lock_file = match get_root () with
     | None -> assert false
@@ -1434,6 +1455,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
   in
   Lost_server { Lost_env.
     p;
+    prev_hhconfig_version;
     uris_with_unsaved_changes;
     lock_file;
     dialog_cancel = Some dialog;

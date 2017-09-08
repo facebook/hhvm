@@ -54,7 +54,7 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 
   | A.Hsoft h -> "@" ^ fmt_hint ~tparams ~namespace h
 
-  | A.Hshape { A.si_allows_unknown_fields; si_shape_field_list } ->
+  | A.Hshape { A.si_shape_field_list; _ } ->
     let fmt_field = function
       | A.SFlit (_, s) -> "'" ^ s ^ "'"
       | A.SFclass_const (cid, (_, s2)) ->
@@ -64,10 +64,8 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
       fmt_field sf_name ^ "=>" ^ fmt_hint ~tparams ~namespace sf_hint in
     let shape_fields =
       List.map ~f:format_shape_field si_shape_field_list in
-    let shape_suffix = if si_allows_unknown_fields then ["..."] else [] in
-    let formatted_shape_entries = shape_fields @ shape_suffix in
     prefix_namespace "HH" "shape(" ^
-      String.concat ", " formatted_shape_entries ^ ")"
+      String.concat ", " shape_fields ^ ")"
 
 and fmt_hints ~tparams ~namespace hints =
   String.concat ", " (List.map hints (fmt_hint ~tparams ~namespace))

@@ -44,7 +44,6 @@ slow/constant/1597.php
 slow/constant/casing.php
 slow/constant/globals-array-constant.php
 slow/constant/magic_constants.php
-slow/constant/multi_const.php
 slow/constant/realias.php
 slow/constant/true_false_null.php
 slow/constructor/1719.php
@@ -336,8 +335,6 @@ slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
 slow/traits/self_resolution.php
-slow/type_annotation/shape_type_param_with_known_and_unknown_fields.php
-slow/type_annotation/shape_type_param_with_unknown_fields.php
 slow/type_annotation/shape_typedef_with_multiple_optional_tokens.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php

@@ -188,6 +188,21 @@ module In_init_env = struct
   }
 end
 
+module Lost_env = struct
+  type t = {
+    p: params;
+    lock_file: string;
+    dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
+    actionRequired_id: int option; (* "hh_server stopped" notification  *)
+  }
+
+  and params = {
+    message: string; (* e.g. "hh_server has crashed." *)
+    trigger_on_lsp: bool; (* regain if we receive any LSP request/notification *)
+    trigger_on_lock_file: bool; (* regain if lockfile is created *)
+  }
+end
+
 type state =
   (* Pre_init: we haven't yet received the initialize request.           *)
   | Pre_init
@@ -200,7 +215,7 @@ type state =
   | Main_loop of Main_env.t
   (* Lost_server: someone stole the persistent connection from us.       *)
   (* We might choose to grab it back if prompted...                      *)
-  | Lost_server
+  | Lost_server of Lost_env.t
   (* Post_shutdown: we received a shutdown request from the client, and  *)
   (* therefore shut down our connection to the server. We can't handle   *)
   (* any more requests from the client and will close as soon as it      *)
@@ -271,7 +286,7 @@ let state_to_string (state: state) : string =
   | Pre_init -> "Pre_init"
   | In_init _ienv -> "In_init"
   | Main_loop _menv -> "Main_loop"
-  | Lost_server -> "Lost_server"
+  | Lost_server _lenv -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
 
 
@@ -1332,14 +1347,28 @@ let do_initialize ()
 
 
 let regain_lost_server_if_necessary (state: state) (event: event) : state =
+  let open Lost_env in
   (* It's only necessary to regain a lost server if (1) we need it to handle  *)
   (* a client message, and (2) we lost it in the first place.                 *)
   match event, state with
-  | Client_message _, Lost_server ->
+  | Client_message _, Lost_server lenv when lenv.p.trigger_on_lsp ->
     let (_result, new_state) = do_initialize () in
     new_state
   | _ ->
     state
+
+
+(* do_lost_server: handles the various ways we might lose the server. We keep *)
+(* the LSP server alive, and will (elsewhere) listen for the various triggers *)
+(* of getting the server back.                                                *)
+let do_lost_server (_state: state) (params: Lost_env.params) : state =
+  let open Lost_env in
+  (* TODO: call this method in response to Server_fatal_exception *)
+  (* TODO: show dialog and, if dismissed, the action-required indicator *)
+  (* TODO: implement other triggers: lockfile and user_click *)
+  (* TODO: track dirty files from previous state to figure out the restart action *)
+  (* TODO: track hhconfig to figure out if we're forced to terminate *)
+  Lost_server { p = params; lock_file = ""; dialog_cancel = None; actionRequired_id = None; }
 
 
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
@@ -1562,7 +1591,11 @@ let handle_event
   | Main_loop menv, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
     do_diagnostics_flush menv.uris_with_diagnostics;
     state := dismiss_ready_dialog_if_necessary !state event;
-    state := Lost_server;
+    state := do_lost_server !state { Lost_env.
+      message = "hh_server is active in another window.";
+      trigger_on_lock_file = false;
+      trigger_on_lsp = true;
+    };
     None
 
   (* server shut-down request, unexpected *)
@@ -1581,14 +1614,14 @@ let handle_event
     None
 
   (* client message when we've lost the server *)
-  | Lost_server, Client_message _c ->
-    (* Our caller should have already transitioned away from this state if    *)
-    (* necessary before calling us, via regain_lost_server_if_necessary.      *)
-    (* If we get here, it's entirely unexpected! don't know how to recover... *)
-    let open Marshal_tools in
-    let message = "unexpected client message for lost server" in
-    let stack = "" in
-    raise (Server_fatal_connection_exception { message; stack; })
+  | Lost_server lenv, Client_message _c ->
+    let open Lost_env in
+    (* if trigger_on_lsp_method is set, our caller should already have        *)
+    (* transitioned away from this state.                                     *)
+    assert (not lenv.p.trigger_on_lsp);
+    (* We deny all other requests. This is the only response that won't       *)
+    (* produce logs/warnings on most clients.                                 *)
+    raise (Error.RequestCancelled "Server busy")
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)

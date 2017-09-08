@@ -12,7 +12,8 @@ open Instruction_sequence
 open Hhbc_ast
 
 let emit_pos pos =
-  if Hhbc_options.source_mapping !Hhbc_options.compiler_options
+  if Hhbc_options.source_mapping !Hhbc_options.compiler_options &&
+    pos <> Pos.none
   then instr (ISrcLoc pos)
   else empty
 

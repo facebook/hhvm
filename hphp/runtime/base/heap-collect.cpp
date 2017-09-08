@@ -58,23 +58,26 @@ bool hasNativeData(const HeapObject* h) {
   );
 }
 
-template<bool apcgc> struct Marker {
-  explicit Marker(HeapImpl& heap) : heap_(heap) {}
+struct Marker {
+  explicit Marker(HeapImpl& heap, APCGCManager* apcgc)
+    : heap_(heap), apcgc_(apcgc)
+  {}
   void init();
-  void traceRoots();
-  void trace();
+  template<bool apcgc> void traceRoots();
+  template<bool apcgc> void trace();
   void sweep();
 
   // drain the scanner, enqueue pointers
   void finish_scan();
 
   // mark ambiguous pointers in the range [start,start+len)
+  template<bool apcgc>
   void conservativeScan(const void* start, size_t len);
 
   static bool marked(const HeapObject* h) { return h->marks() & GCBits::Mark; }
   bool mark(const HeapObject*, GCBits = GCBits::Mark);
-  void checkedEnqueue(const void* p, GCBits bits);
-  void finish_typescan();
+  template<bool apcgc> void checkedEnqueue(const void* p, GCBits bits);
+  template<bool apcgc> void finish_typescan();
   HdrBlock find(const void*);
 
   void enqueue(const HeapObject* h) {
@@ -96,15 +99,14 @@ template<bool apcgc> struct Marker {
   PtrMap<const HeapObject*> ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> work_;
-  APCGCManager* apcgc_ ;
+  APCGCManager* const apcgc_;
 };
 
 // TODO(T20460162): The contiguous heap has a bitmap of which chunks of memory
 // are allocated/free. And it can efficiently find the start of an allocated
 // object using bit operations. So there is an opportunity to speed this up by
 // directly accessing the bitmap instead of using PtrMap.
-template <bool apcgc>
-HdrBlock Marker<apcgc>::find(const void* ptr) {
+HdrBlock Marker::find(const void* ptr) {
   if (auto r = ptrs_.region(ptr)) {
     auto h = const_cast<HeapObject*>(r->first);
     if (h->kind() == HeaderKind::Slab) {
@@ -124,8 +126,7 @@ HdrBlock Marker<apcgc>::find(const void* ptr) {
 // Mark the object at h, return true if first time. For allocations that
 // contain prefix data followed by an ObjectData, h should point to the
 // start of the whole allocation, not the interior ObjectData.
-template <bool apcgc>
-inline bool Marker<apcgc>::mark(const HeapObject* h, GCBits marks) {
+inline bool Marker::mark(const HeapObject* h, GCBits marks) {
   assert(h->kind() <= HeaderKind::BigMalloc);
   assert(h->kind() != HeaderKind::AsyncFuncWH);
   assert(h->kind() != HeaderKind::Closure);
@@ -187,7 +188,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
 }
 
 template <bool apcgc>
-void Marker<apcgc>::checkedEnqueue(const void* p, GCBits bits) {
+void Marker::checkedEnqueue(const void* p, GCBits bits) {
   auto r = find(p);
   if (auto h = r.ptr) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
@@ -198,11 +199,9 @@ void Marker<apcgc>::checkedEnqueue(const void* p, GCBits bits) {
       enqueue(h);
       assert(checkEnqueuedKind(h));
     }
-  } else {
-      if (apcgc) {
-        // If p doesn't belong to any APC data, APCGCManager won't do anything
-        apcgc_->mark(p);
-      }
+  } else if (apcgc) {
+    // If p doesn't belong to any APC data, APCGCManager won't do anything
+    apcgc_->mark(p);
   }
 }
 
@@ -210,13 +209,13 @@ void Marker<apcgc>::checkedEnqueue(const void* p, GCBits bits) {
 // end is a partial word, don't scan that word.
 template <bool apcgc>
 void FOLLY_DISABLE_ADDRESS_SANITIZER
-Marker<apcgc>::conservativeScan(const void* start, size_t len) {
+Marker::conservativeScan(const void* start, size_t len) {
   constexpr uintptr_t M{7}; // word size - 1
   auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   cscanned_ += uintptr_t(e) - uintptr_t(s);
   for (; s < e; s++) {
-    checkedEnqueue(
+    checkedEnqueue<apcgc>(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
       (void*)(uintptr_t(*s) & (-1ULL >> 16)),
@@ -246,8 +245,7 @@ inline int64_t cpu_ns() {
  */
 
 // initially parse the heap to find valid objects and initialize metadata.
-template <bool apcgc>
-NEVER_INLINE void Marker<apcgc>::init() {
+NEVER_INLINE void Marker::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
   MM().initFree();
@@ -283,53 +281,49 @@ NEVER_INLINE void Marker<apcgc>::init() {
     }
   );
   ptrs_.prepare();
-  if (apcgc) {
-    apcgc_ = &APCGCManager::getInstance();
-  }
 }
 
 template <bool apcgc>
-void Marker<apcgc>::finish_typescan() {
+void Marker::finish_typescan() {
   type_scanner_.finish(
     [this](const void* p, std::size_t size) {
       // we could extract the addresses of ambiguous ptrs, if desired.
-      conservativeScan(p, size);
+      conservativeScan<apcgc>(p, size);
     },
     [this](const void** addr) {
       xscanned_ += sizeof(*addr);
-      checkedEnqueue(*addr, GCBits::Mark);
+      checkedEnqueue<apcgc>(*addr, GCBits::Mark);
     }
   );
 }
 
 template <bool apcgc>
-NEVER_INLINE void Marker<apcgc>::traceRoots() {
+NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { roots_ns_ = cpu_ns() - t0; };
   iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
     type_scanner_.scanByIndex(tyindex, p, size);
-    finish_typescan();
+    finish_typescan<apcgc>();
   });
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
 }
 
 template <bool apcgc>
-NEVER_INLINE void Marker<apcgc>::trace() {
+NEVER_INLINE void Marker::trace() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { mark_ns_ = cpu_ns() - t0; };
   while (!work_.empty()) {
     auto h = work_.back();
     work_.pop_back();
     scanHeapObject(h, type_scanner_);
-    finish_typescan();
+    finish_typescan<apcgc>();
   }
 }
 
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
-template <bool apcgc>
-NEVER_INLINE void Marker<apcgc>::sweep() {
+NEVER_INLINE void Marker::sweep() {
   auto& mm = MM();
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();
@@ -382,7 +376,7 @@ NEVER_INLINE void Marker<apcgc>::sweep() {
         }
       );
     });
-  if (apcgc) {
+  if (apcgc_) {
     // This should be removed after global GC API is provided
     // Currently we do this to sweeping only when script mode
     apcgc_->sweep();
@@ -417,8 +411,7 @@ StructuredLogEntry logCommon() {
   return sample;
 }
 
-template<bool apcgc>
-void logCollection(const char* phase, const Marker<apcgc>& mkr) {
+void logCollection(const char* phase, const Marker& mkr) {
   // log stuff
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
@@ -500,27 +493,23 @@ void collectImpl(HeapImpl& heap, const char* phase) {
   if (t_enable_samples) {
     t_pre_stats = MM().getStatsCopy(); // don't check or trigger OOM
   }
+  Marker mkr(
+    heap,
+    RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr
+  );
+  mkr.init();
   if (RuntimeOption::EvalGCForAPC) {
-    Marker<true> mkr(heap);
-    mkr.init();
-    mkr.traceRoots();
-    mkr.trace();
-    mkr.sweep();
-    if (t_enable_samples) {
-      logCollection(phase, mkr);
-    }
-    ++t_gc_num;
+    mkr.traceRoots<true>();
+    mkr.trace<true>();
   } else {
-    Marker<false> mkr(heap);
-    mkr.init();
-    mkr.traceRoots();
-    mkr.trace();
-    mkr.sweep();
-    if (t_enable_samples) {
-      logCollection(phase, mkr);
-    }
-    ++t_gc_num;
+    mkr.traceRoots<false>();
+    mkr.trace<false>();
   }
+  mkr.sweep();
+  if (t_enable_samples) {
+    logCollection(phase, mkr);
+  }
+  ++t_gc_num;
 }
 
 }

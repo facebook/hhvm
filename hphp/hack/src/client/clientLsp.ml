@@ -179,6 +179,7 @@ module In_init_env = struct
     file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t;
     uris_with_unsaved_changes: SSet.t;
     tail_env: Tail.env;
+    has_reported_progress: bool;
     dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
     progress_id: progress_id; (* "hh_server is initializing [naming]" *)
   }
@@ -1182,19 +1183,47 @@ let do_diagnostics_flush
   SSet.iter per_uri diagnostic_uris
 
 
-let report_progress
+
+let report_connect_start
     (ienv: In_init_env.t)
   : state =
+  let open In_init_env in
+  assert (not ienv.has_reported_progress);
+  assert (ienv.dialog_cancel = None);
+  assert (ienv.progress_id = Progress_none);
   (* Our goal behind progress reporting is to let the user know when things   *)
   (* won't be instantaneous, and to show that things are working as expected. *)
-  (* We already eagerly showed a "please wait" dialog box as soon as we gave  *)
-  (* do_initialize learned that it hadn't gotten a "hello" back immediately   *)
-  (* from the server. This report_progress is called once a second and will   *)
-  (* update the busy-tooltip. And once we do get the "hello", either close    *)
-  (* the busy indicator (if the client supports one), or log to the console   *)
-  (* (if the client doesn't), or show a completion dialog box (if we'd taken  *)
-  (* 30 seconds or more).                                                     *)
+  (* Upon connection, if it connects immediately (before we've had 1s idle)   *)
+  (* then nothing will have been displayed. Otherwise, at that first 1s idle, *)
+  (* which is implemented here, we put up a progress indicator and a dialog   *)
+  (* saying "initializing..."... When it's done, if it took too long, then in *)
+  (* report_progress_end we put up a "ready" dialog.                          *)
+
+  (* dialog... *)
+  let clear_cancel_flag state = match state with
+    | In_init ienv -> In_init {ienv with In_init_env.dialog_cancel = None}
+    | _ -> state in
+  let handle_result ~state ~result:_ = clear_cancel_flag state in
+  let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
+  let req = print_showMessageRequest MessageType.InfoMessage
+      "Waiting for hh_server to be ready..." [] in
+  let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
+
+  (* progress indicator... *)
+  let progress_id = notify_progress Progress_none (Some "hh_server initializing") in
+
+  In_init { ienv with
+    has_reported_progress = true;
+    dialog_cancel = Some cancel;
+    progress_id;
+  }
+
+
+let report_connect_progress
+    (ienv: In_init_env.t)
+  : state =
   let open In_init_env in
+  assert ienv.has_reported_progress;
   let time = Unix.time () in
   let delay_in_secs = int_of_float (time -. ienv.start_time) in
   (* TODO: better to report time that hh_server has spent initializing *)
@@ -1214,7 +1243,7 @@ let report_progress
   }
 
 
-let report_progress_end
+let report_connect_end
     (ienv: In_init_env.t)
   : state =
   let open In_init_env in
@@ -1234,7 +1263,7 @@ let report_progress_end
   let time = Unix.time () in
   let seconds = int_of_float (time -. ienv.start_time) in
   let msg = Printf.sprintf "hh_server is now ready, after %i seconds." seconds in
-  if (time -. ienv.start_time > 30.0) then begin
+  if (time -. ienv.start_time > 30.0) then
     let clear_cancel_flag state = match state with
       | Main_loop menv -> Main_loop {menv with Main_env.dialog_cancel = None}
       | _ -> state
@@ -1244,10 +1273,7 @@ let report_progress_end
     let req = print_showMessageRequest MessageType.InfoMessage msg [] in
     let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
     Main_loop {menv with Main_env.dialog_cancel = Some cancel;}
-  end else if (not (supports_progress ())) then begin
-    print_logMessage MessageType.InfoMessage msg |> notify stdout "window/logMessage";
-    Main_loop menv
-  end else
+  else
     Main_loop menv
 
 
@@ -1333,37 +1359,24 @@ let connect_client
     raise (ServerErrorStart ("server isn't responsive", { Lsp.Initialize.retry = true; }))
 
 
-(* connect: this method attempts to connect to the server and returns         *)
-(* In_init state, with a dialog and progress indicator. Or it might raise     *)
-(* before putting any dialog up.                                              *)
 let connect () : state =
   let start_time = Unix.time () in
   let root = match get_root () with
     | None -> failwith "we should have root after an initialize request"
     | Some root -> root
   in
-
-  let server_conn = connect_client root in
-
-  let log_file = Sys_utils.readlink_no_fail (ServerFiles.log_link root) in
-  let clear_cancel_flag state = match state with
-    | In_init ienv -> In_init {ienv with In_init_env.dialog_cancel = None}
-    | _ -> state in
-  let handle_result ~state ~result:_ = clear_cancel_flag state in
-  let handle_error ~state ~code:_ ~message:_ ~data:_ = clear_cancel_flag state in
-  let req = print_showMessageRequest MessageType.InfoMessage
-      "Waiting for Hack server to be ready..." [] in
-  let cancel = request stdout handle_result handle_error "window/showMessageRequest" req in
-  let progress_id = notify_progress Progress_none (Some "hh_server initializing") in
-
+  let tail_env = Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)) in
+  let conn = connect_client root
+  in
   In_init { In_init_env.
-    conn = server_conn;
+    conn;
     start_time;
     uris_with_unsaved_changes = SSet.empty;
-    dialog_cancel = Some cancel;
-    progress_id;
     file_edits = ImmQueue.empty;
-    tail_env = Tail.create_env log_file;
+    tail_env;
+    has_reported_progress = false;
+    dialog_cancel = None;
+    progress_id = Progress_none;
   }
 
 
@@ -1679,13 +1692,17 @@ let handle_event
 
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
-    state := report_progress ienv;
+    let open In_init_env in
+    if ienv.has_reported_progress then
+      state := report_connect_progress ienv
+    else
+      state := report_connect_start ienv;
     None
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
     connect_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
-    state := report_progress_end ienv;
+    state := report_connect_end ienv;
     None
 
   (* any "hello" from the server when we weren't expecting it. This is so *)

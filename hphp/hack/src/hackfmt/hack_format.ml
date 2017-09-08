@@ -2104,15 +2104,8 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
                   in
                   let op_is_leading = operator_is_leading !last_op in
                   Concat [
-                    if op_is_leading then begin
-                      (* TODO: We only have this split to ensure that range
-                       * formatting works when it starts or ends here. We should
-                       * remove it once we can return an expanded formatting
-                       * range. *)
-                      if op_has_spaces
-                        then Concat [Space; SplitWith Cost.Base]
-                        else SplitWith Cost.Base
-                    end
+                    if op_is_leading
+                    then (if op_has_spaces then Space else Nothing)
                     else (if op_has_spaces then space_split () else Split);
                     transform_operand operand;
                   ]

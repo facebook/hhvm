@@ -1495,6 +1495,8 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     | None -> assert false
     | Some root -> ServerFiles.lock_file root
   in
+  let reconnect_immediately = MonitorConnection.server_exists lock_file
+  in
 
   (* These helper functions are for the dialog *)
   let clear_dialog_flag (state: state) : state =
@@ -1522,18 +1524,30 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     | _ -> state
   in
 
-  let actionRequired_id = notify_actionRequired ActionRequired_none (Some p.message) in
-  let dialog = print_showMessageRequest MessageType.ErrorMessage p.message ["Restart"]
-    |> request stdout handle_result handle_error "window/showMessageRequest"
-  in
-  Lost_server { Lost_env.
-    p;
-    prev_hhconfig_version;
-    uris_with_unsaved_changes;
-    lock_file;
-    dialog_cancel = Some dialog;
-    actionRequired_id;
-  }
+  if reconnect_immediately then
+    let lost_state = Lost_server { Lost_env.
+      p;
+      prev_hhconfig_version;
+      uris_with_unsaved_changes;
+      lock_file;
+      dialog_cancel = None;
+      actionRequired_id = ActionRequired_none;
+    } in
+    let new_state = reconnect_from_lost_if_necessary lost_state `Force_regain in
+    new_state
+  else
+    let actionRequired_id = notify_actionRequired ActionRequired_none (Some p.message) in
+    let dialog = print_showMessageRequest MessageType.ErrorMessage p.message ["Restart"]
+      |> request stdout handle_result handle_error "window/showMessageRequest" in
+    let lost_state = Lost_server { Lost_env.
+      p;
+      prev_hhconfig_version;
+      uris_with_unsaved_changes;
+      lock_file;
+      dialog_cancel = Some dialog;
+      actionRequired_id;
+    } in
+    lost_state
 
 
 let connect_from_preinit_if_necessary (state: state) (event: event) : (state * exn option) =

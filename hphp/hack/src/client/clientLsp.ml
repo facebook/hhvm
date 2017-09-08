@@ -34,6 +34,9 @@ let progress_id_initialize = 1
 (* of these are non-overlapping so again we use constant ids.                 *)
 let progress_id_server_status = 2
 let action_id_server_status = 3
+(* Action-required is also used to report a crashed hh_server. Again the      *)
+(* lifetime of each crashed-hh_server-report is non-overlapping.              *)
+let action_id_lost_server = 4
 
 (************************************************************************)
 (** Conversions - ad-hoc ones written as needed them, not systematic   **)
@@ -1346,29 +1349,81 @@ let do_initialize ()
   (result, new_state)
 
 
-let regain_lost_server_if_necessary (state: state) (event: event) : state =
+let regain_lost_server_if_necessary
+    (state: state)
+    (reason: [> `Event of event | `Force_regain ])
+  : state =
   let open Lost_env in
-  (* It's only necessary to regain a lost server if (1) we need it to handle  *)
-  (* a client message, and (2) we lost it in the first place.                 *)
-  match event, state with
-  | Client_message _, Lost_server lenv when lenv.p.trigger_on_lsp ->
-    let (_result, new_state) = do_initialize () in
-    new_state
-  | _ ->
+  let should_regain = match state, reason with
+    | Lost_server _, `Force_regain -> true
+    | Lost_server lenv, `Event Client_message _ when lenv.p.trigger_on_lsp -> true
+    | Lost_server lenv, `Event Tick when lenv.p.trigger_on_lock_file ->
+      MonitorConnection.server_exists lenv.lock_file
+    | _, _ -> false
+  in
+  if should_regain then
+    let needs_to_terminate = false in
+    if needs_to_terminate then
+      exit_fail_delay ()
+    else
+      let new_state = connect () in
+      (* if that succeeded without exception, then it's safe for us to have the *)
+      (* side-effect of dismissing dialog+indicator on the client.              *)
+      let _ = match state with
+        | Lost_server lenv ->
+          Option.iter lenv.dialog_cancel
+            ~f:(fun cancel -> cancel ());
+          Option.iter lenv.actionRequired_id
+            ~f:(fun id -> print_actionRequired id None |> notify stdout "window/actionRequired")
+        | _ -> assert false
+      in
+      new_state
+  else
     state
 
 
 (* do_lost_server: handles the various ways we might lose the server. We keep *)
 (* the LSP server alive, and will (elsewhere) listen for the various triggers *)
 (* of getting the server back.                                                *)
-let do_lost_server (_state: state) (params: Lost_env.params) : state =
+let do_lost_server (_state: state) (p: Lost_env.params) : state =
   let open Lost_env in
-  (* TODO: call this method in response to Server_fatal_exception *)
-  (* TODO: show dialog and, if dismissed, the action-required indicator *)
-  (* TODO: implement other triggers: lockfile and user_click *)
   (* TODO: track dirty files from previous state to figure out the restart action *)
   (* TODO: track hhconfig to figure out if we're forced to terminate *)
-  Lost_server { p = params; lock_file = ""; dialog_cancel = None; actionRequired_id = None; }
+
+  let lock_file = match get_root () with
+    | None -> assert false
+    | Some root -> ServerFiles.lock_file root
+  in
+
+  (* These helper functions are for the dialog *)
+  let clear_dialog_flag (state: state) : state =
+    match state with
+    | Lost_server lenv -> Lost_server { lenv with dialog_cancel = None; }
+    | _ -> state
+  in
+  let handle_error ~state ~code:_ ~message:_ ~data:_ =
+    state |> clear_dialog_flag
+  in
+  let handle_result ~state ~result =
+    let state = state |> clear_dialog_flag in
+    let result = Option.value_map result ~default:""
+      ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
+    match result, state with
+    | "Restart", Lost_server _ -> regain_lost_server_if_necessary state `Force_regain
+    | _ -> state
+  in
+
+  let _ = print_actionRequired action_id_lost_server (Some p.message)
+    |> notify stdout "window/actionRequired" in
+  let dialog = print_showMessageRequest MessageType.ErrorMessage p.message ["Restart"]
+    |> request stdout handle_result handle_error "window/showMessageRequest"
+  in
+  Lost_server { Lost_env.
+    p;
+    lock_file;
+    dialog_cancel = Some dialog;
+    actionRequired_id = Some action_id_lost_server;
+  }
 
 
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
@@ -1630,6 +1685,7 @@ let main (env: env) : 'a =
   Printexc.record_backtrace true;
   HackEventLogger.client_set_from env.from;
   let client = Jsonrpc_queue.make () in
+  let deferred_action = ref None in
   let state = ref Pre_init in
   while true do
     let ref_event = ref None in
@@ -1637,10 +1693,12 @@ let main (env: env) : 'a =
     (* TODO: we should log how much of the "handling" time was spent *)
     (* idle just waiting for an RPC response from hh_server.         *)
     try
+      Option.call () !deferred_action;
+      deferred_action := None;
       let event = get_next_event !state client in
       ref_event := Some event;
       state := handle_idle_if_necessary !state event;
-      state := regain_lost_server_if_necessary !state event;
+      state := regain_lost_server_if_necessary !state (`Event event);
       state := dismiss_ready_dialog_if_necessary !state event;
       let response = handle_event ~env ~state ~client ~event in
       match event with
@@ -1662,10 +1720,35 @@ let main (env: env) : 'a =
       | _ -> ()
     with
     | Server_fatal_connection_exception edata ->
-      let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-      hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
-      client_log Lsp.MessageType.ErrorMessage (edata.message ^ ", from_server\n" ^ stack);
-      exit_fail_delay ()
+      if !state <> Post_shutdown then begin
+        let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
+        hack_log_error !ref_event edata.message stack "from_server" start_handle_t;
+        client_log Lsp.MessageType.ErrorMessage (edata.message ^ ", from_server\n" ^ stack);
+        (* The server never tells us why it closed the connection - it simply   *)
+        (* closes. We don't have privilege to inspect its exit status.          *)
+        (* The monitor is responsible for detecting server closure and exit     *)
+        (* status, and restarting the server if necessary (that's not our job). *)
+        (* All we'll do is put up a dialog telling the user that the server is  *)
+        (* down and giving them a button to restart. We use a heuristic hint    *)
+        (* for when would be a good time to auto-dismiss the dialog and attempt *)
+        (* a proper re-connection (it's not our job to ascertain with certainty *)
+        (* whether that re-connection will succeed - it's impossible to know,   *)
+        (* but also our re-connection attempt is pretty forceful. Our heurstic  *)
+        (* is to sleep for 1 second, and then look for the presence of the lock *)
+        (* file. The sleep is because typically if you do "hh stop" then the    *)
+        (* persistent connection shuts down instantly but the monitor takes a   *)
+        (* short time to release its lockfile.                                  *)
+        Unix.sleep 1;
+        (* We're right now inside an exception handler. We don't want to do     *)
+        (* work that might itself throw. So instead we'll leave that to the     *)
+        (* next time around the loop.                                           *)
+        deferred_action := Some (fun () ->
+          state := do_lost_server !state { Lost_env.
+            message = "hh_server has stopped.";
+            trigger_on_lock_file = true;
+            trigger_on_lsp = false;
+          })
+        end
     | Client_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" start_handle_t;

@@ -176,6 +176,7 @@ module Main_env = struct
     conn: server_conn;
     needs_idle: bool;
     uris_with_diagnostics: SSet.t;
+    uris_with_unsaved_changes: SSet.t;
     ready_dialog_cancel: (unit -> unit) option; (* "hack server is now ready" dialog *)
   }
 end
@@ -187,6 +188,7 @@ module In_init_env = struct
     start_time: float;
     busy_dialog_cancel: (unit -> unit) option; (* "hack server is busy" dialog *)
     file_edits: Jsonrpc_queue.jsonrpc_message ImmQueue.t;
+    uris_with_unsaved_changes: SSet.t;
     tail_env: Tail.env;
   }
 end
@@ -194,6 +196,7 @@ end
 module Lost_env = struct
   type t = {
     p: params;
+    uris_with_unsaved_changes: SSet.t;
     lock_file: string;
     dialog_cancel: (unit -> unit) option; (* "hh_server stopped" dialog *)
     actionRequired_id: int option; (* "hh_server stopped" notification  *)
@@ -291,6 +294,14 @@ let state_to_string (state: state) : string =
   | Main_loop _menv -> "Main_loop"
   | Lost_server _lenv -> "Lost_server"
   | Post_shutdown -> "Post_shutdown"
+
+
+let get_uris_with_unsaved_changes (state: state): SSet.t =
+  match state with
+  | Main_loop menv -> menv.Main_env.uris_with_unsaved_changes
+  | In_init ienv -> ienv.In_init_env.uris_with_unsaved_changes
+  | Lost_server lenv -> lenv.Lost_env.uris_with_unsaved_changes
+  | _ -> SSet.empty
 
 
 let get_root () : Path.t option =
@@ -1116,6 +1127,7 @@ let report_progress_end
       conn = ienv.In_init_env.conn;
       needs_idle = true;
       uris_with_diagnostics = SSet.empty;
+      uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
       ready_dialog_cancel = None;
     }
   in
@@ -1275,6 +1287,7 @@ let connect ()
     Main_loop {
       conn = server_conn;
       needs_idle = true;
+      uris_with_unsaved_changes = SSet.empty;
       uris_with_diagnostics = SSet.empty;
       ready_dialog_cancel = None;
     }
@@ -1296,6 +1309,7 @@ let connect ()
       { In_init_env.
         conn = server_conn;
         start_time;
+        uris_with_unsaved_changes = SSet.empty;
         busy_dialog_cancel = Some cancel;
         file_edits = ImmQueue.empty;
         tail_env = Tail.create_env log_file;
@@ -1362,7 +1376,7 @@ let regain_lost_server_if_necessary
     | _, _ -> false
   in
   if should_regain then
-    let needs_to_terminate = false in
+    let needs_to_terminate = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
     if needs_to_terminate then
       exit_fail_delay ()
     else
@@ -1385,10 +1399,10 @@ let regain_lost_server_if_necessary
 (* do_lost_server: handles the various ways we might lose the server. We keep *)
 (* the LSP server alive, and will (elsewhere) listen for the various triggers *)
 (* of getting the server back.                                                *)
-let do_lost_server (_state: state) (p: Lost_env.params) : state =
+let do_lost_server (state: state) (p: Lost_env.params) : state =
   let open Lost_env in
-  (* TODO: track dirty files from previous state to figure out the restart action *)
   (* TODO: track hhconfig to figure out if we're forced to terminate *)
+  let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
 
   let lock_file = match get_root () with
     | None -> assert false
@@ -1420,6 +1434,7 @@ let do_lost_server (_state: state) (p: Lost_env.params) : state =
   in
   Lost_server { Lost_env.
     p;
+    uris_with_unsaved_changes;
     lock_file;
     dialog_cancel = Some dialog;
     actionRequired_id = Some action_id_lost_server;
@@ -1447,6 +1462,34 @@ let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
 let handle_idle_if_necessary (state: state) (event: event) : state =
   match state, event with
   | Main_loop menv, Tick -> Main_loop { menv with needs_idle = true; }
+  | _ -> state
+
+
+let track_edits_if_necessary (state: state) (event: event) : state =
+  let open Jsonrpc_queue in
+  (* We'll keep track of which files have unsaved edits. Note that not all    *)
+  (* clients send didSave messages; for those we only rely on didClose.       *)
+  let previous = get_uris_with_unsaved_changes state in
+  let uris_with_unsaved_changes = match event with
+    | Client_message ({ method_ = "textDocument/didChange"; _ } as c) ->
+      let params = parse_didChange c.params in
+      let uri = params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri in
+      SSet.add uri previous
+    | Client_message ({ method_ = "textDocument/didClose"; _ } as c) ->
+      let params = parse_didClose c.params in
+      let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
+      SSet.remove uri previous
+    | Client_message ({ method_ = "textDocument/didSave"; _ } as c) ->
+      let params = parse_didSave c.params in
+      let uri = params.DidSave.textDocument.TextDocumentIdentifier.uri in
+      SSet.remove uri previous
+    | _ ->
+      previous
+  in
+  match state with
+  | Main_loop menv -> Main_loop { menv with Main_env.uris_with_unsaved_changes; }
+  | In_init ienv -> In_init { ienv with In_init_env.uris_with_unsaved_changes; }
+  | Lost_server lenv -> Lost_server { lenv with Lost_env.uris_with_unsaved_changes; }
   | _ -> state
 
 
@@ -1700,6 +1743,7 @@ let main (env: env) : 'a =
       state := handle_idle_if_necessary !state event;
       state := regain_lost_server_if_necessary !state (`Event event);
       state := dismiss_ready_dialog_if_necessary !state event;
+      state := track_edits_if_necessary !state event;
       let response = handle_event ~env ~state ~client ~event in
       match event with
       | Client_message c -> begin

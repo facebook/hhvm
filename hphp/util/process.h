@@ -157,6 +157,11 @@ struct Process {
    * Get current user's home directory.
    */
   static std::string GetHomeDirectory();
+
+  /**
+   * Set core dump filters to make sure hugetlb pages are included in coredumps.
+   */
+  static void SetCoreDumpHugePages();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

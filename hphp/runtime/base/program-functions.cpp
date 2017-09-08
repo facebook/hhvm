@@ -956,6 +956,8 @@ static int start_server(const std::string &username, int xhprof) {
     _exit(1);
   }
   Capability::SetDumpable();
+  // Include hugetlb pages in core dumps.
+  Process::SetCoreDumpHugePages();
 #endif
 
   hphp_process_init();

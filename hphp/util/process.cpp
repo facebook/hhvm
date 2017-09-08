@@ -357,5 +357,37 @@ std::string Process::GetHomeDirectory() {
   return ret;
 }
 
+void Process::SetCoreDumpHugePages() {
+#if defined(__linux__)
+  /*
+   * From documentation athttp://man7.org/linux/man-pages/man5/core.5.html
+   *
+   * The bits in coredump_filter have the following meanings:
+   *
+   *   bit 0  Dump anonymous private mappings.
+   *   bit 1  Dump anonymous shared mappings.
+   *   bit 2  Dump file-backed private mappings.
+   *   bit 3  Dump file-backed shared mappings.
+   *   bit 4 (since Linux 2.6.24) Dump ELF headers.
+   *   bit 5 (since Linux 2.6.28) Dump private huge pages.
+   *   bit 6 (since Linux 2.6.28) Dump shared huge pages.
+   *   bit 7 (since Linux 4.4) Dump private DAX pages.
+   *   bit 8 (since Linux 4.4) Dump shared DAX pages.
+   */
+  if (FILE* f = fopen("/proc/self/coredump_filter", "r+")) {
+    unsigned mask = 0;
+    if (fscanf(f, "%x", &mask)) {
+      constexpr unsigned hugetlbMask = 0x60;
+      if ((mask & hugetlbMask) != hugetlbMask) {
+        mask |= hugetlbMask;
+        rewind(f);
+        fprintf(f, "0x%x", mask);
+      }
+    }
+    fclose(f);
+  }
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

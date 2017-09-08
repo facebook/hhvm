@@ -1946,5 +1946,6 @@ let main (env: env) : 'a =
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" start_handle_t;
+      client_log Lsp.MessageType.ErrorMessage (message ^ ", internal\n" ^ stack);
   done;
   failwith "unreachable"

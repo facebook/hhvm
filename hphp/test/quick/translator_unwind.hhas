@@ -4,7 +4,7 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   PopR
 
@@ -15,7 +15,7 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCE 0
+    FPassCE 0 Any
   FCall 1
   PopR
 
@@ -45,7 +45,7 @@
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   PopR
   Throw
@@ -87,7 +87,7 @@
 
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
-    FPassL 0 $id
+    FPassL 0 $id Any
   FCall 1
   PopR
   RetC
@@ -111,105 +111,105 @@
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_2
   PopC
   FPushFuncD 1 "make_obj"
     Int 3
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_3
   PopC
   FPushFuncD 1 "make_obj"
     Int 4
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_4
   PopC
   FPushFuncD 1 "make_obj"
     Int 5
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_5
   PopC
   FPushFuncD 1 "make_obj"
     Int 6
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_6
   PopC
   FPushFuncD 1 "make_obj"
     Int 7
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_7
   PopC
   FPushFuncD 1 "make_obj"
     Int 8
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_8
   PopC
   FPushFuncD 1 "make_obj"
     Int 9
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_9
   PopC
   FPushFuncD 1 "make_obj"
     Int 10
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_10
   PopC
   FPushFuncD 1 "make_obj"
     Int 11
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_11
   PopC
   FPushFuncD 1 "make_obj"
     Int 12
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_12
   PopC
   FPushFuncD 1 "make_obj"
     Int 13
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_13
   PopC
   FPushFuncD 1 "make_obj"
     Int 14
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_14

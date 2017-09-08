@@ -43,7 +43,7 @@ let param_code_sets params local =
 
 let param_code_gets params =
   gather @@ List.mapi params (fun index param ->
-      instr_fpassl index (Local.Named (Hhas_param.name param)))
+      instr_fpassl index (Local.Named (Hhas_param.name param)) Hhbc_ast.Cell)
 
 (* Return true if method or function with this kind and return type
  * definitely cannot return null *)

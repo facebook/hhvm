@@ -892,6 +892,41 @@ inline void decRefThis(IRGS& env) {
   decRef(env, ctx);
 }
 
+void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
+                    bool byRef);
+
+template<class F>
+SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {
+  auto const t = value->type();
+  if (t <= TCell) {
+    if (t <= TUninit) {
+      value = cns(env, TInitNull);
+    }
+    value = gen(env, Box, value);
+    rewrite(value);
+  } else if (t.maybe(TCell)) {
+    value = cond(env,
+                 [&](Block* taken) {
+                   auto const ret = gen(env, CheckType, TBoxedInitCell,
+                                        taken, value);
+                   env.irb->constrainValue(ret, DataTypeSpecific);
+                   return ret;
+                 },
+                 [&](SSATmp* box) { // Next: value is Boxed
+                   return box;
+                 },
+                 [&] { // Taken: value is not Boxed
+                   auto const tmpType = t - TBoxedInitCell;
+                   assertx(tmpType <= TCell);
+                   auto const tmp = gen(env, AssertType, tmpType, value);
+                   auto const ret = gen(env, Box, tmp);
+                   rewrite(ret);
+                   return ret;
+                 });
+  }
+  return value;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Class-ref slots
 

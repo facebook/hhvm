@@ -25,11 +25,11 @@
           WIterInitK 0 end_loop $v $k
 loop:
           FPushFuncD 1 "var_dump"
-          FPassL 0 $k
+          FPassL 0 $k Any
           FCall 1
           PopR
           FPushFuncD 1 "var_dump"
-          FPassL 0 $v
+          FPassL 0 $v Any
           FCall 1
           PopR
           WIterNextK 0 loop $v $k

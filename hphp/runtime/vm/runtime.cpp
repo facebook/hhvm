@@ -236,6 +236,28 @@ void raiseArrayKeyNotice(const StringData* key) {
   raise_notice("Undefined index: %s", key->data());
 }
 
+std::string formatParamRefMismatch(const char* fname, uint32_t index,
+                                   bool funcByRef) {
+  if (funcByRef) {
+    return folly::sformat(
+      "{}() expects parameter {} by reference, but the call was "
+      "not annotated with '&'", fname, index + 1
+    );
+  } else {
+    return folly::sformat(
+      "{}() expects parameter {} by value, but the call was "
+      "annotated with '&'", fname, index + 1
+    );
+  }
+}
+
+void raiseParamRefMismatch(uint32_t index, const Func* func) {
+  raise_warning(
+    formatParamRefMismatch(func->fullDisplayName()->data(),
+                           index, func->byRef(index))
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

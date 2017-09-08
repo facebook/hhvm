@@ -45,12 +45,12 @@ PART2
 ;
   if ($withKey) {
     echo "    loop:   FPushCufIter 2 0\n";
-    echo "            FPassL 0 \$k\n";
-    echo "            FPassL 1 \$v\n";
+    echo "            FPassL 0 \$k Any\n";
+    echo "            FPassL 1 \$v Any\n";
     echo "            FCall 2\n";
   } else {
     echo "    loop:   FPushCufIter 1 0\n";
-    echo "            FPassL 0 \$v\n";
+    echo "            FPassL 0 \$v Any\n";
     echo "            FCall 1\n";
   }
 
@@ -100,7 +100,7 @@ PART3;
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw

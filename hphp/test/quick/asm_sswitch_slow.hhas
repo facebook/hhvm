@@ -49,7 +49,7 @@ fail:
   PopC
 
   FPushFuncD 1 "sswitch_on"
-  FPassL 0 $foo
+  FPassL 0 $foo Any
   FCall 1
   UnboxR
   RetC
@@ -71,7 +71,7 @@ fail:
   PopC
 
   FPushFuncD 1 "sswitch_on"
-  FPassL 0 $obj
+  FPassL 0 $obj Any
   FCall 1
   UnboxR
   RetC
@@ -80,7 +80,7 @@ fail:
 .function case_default() {
   FPushFuncD 1 "sswitch_on"
   String "kujhasekguheku"
-  FPassC 0
+  FPassC 0 Any
   FCall 1
   UnboxR
   RetC

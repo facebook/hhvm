@@ -4,12 +4,12 @@
   DefCls 0
   FPushFuncD 1 "test"
   ClsCnsD "FOO" "Foo"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
   FPushFuncD 1 "test"
   String "hi"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
   Int 1

@@ -39,9 +39,9 @@
       UnsetL _4
     }
     FPushFuncD 3 "var_dump"
-    FPassL 0 $x
-    FPassL 1 $y
-    FPassL 2 $z
+    FPassL 0 $x Any
+    FPassL 1 $y Any
+    FPassL 2 $z Any
     FCall 3
     PopR
     Int 6
@@ -51,7 +51,7 @@
   }
 L0:
   FPushFuncD 1 "var_dump"
-  FPassL 0 $array
+  FPassL 0 $array Any
   FCall 1
   PopR
   Null

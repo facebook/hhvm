@@ -20,8 +20,8 @@
   PopC
 
   FPushFuncD 2 "obj_type"
-  FPassL 0 $x
-  FPassL 1 $y
+  FPassL 0 $x Any
+  FPassL 1 $y Any
   FCall 2
   PopR
 

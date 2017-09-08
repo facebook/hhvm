@@ -12,14 +12,14 @@
    FPushCtorD 0 "Foo"
    FCall 0
    PopR
-   FPassC 0
+   FPassC 0 Any
   FCall 1
   PopR
 
   CGetL $object
   FPushObjMethodD 1 "main" NullThrows
    Null
-   FPassC 0
+   FPassC 0 Any
   FCall 1
   PopR
 

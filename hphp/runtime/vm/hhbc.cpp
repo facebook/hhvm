@@ -958,6 +958,12 @@ static const char* CudOp_names[] = {
 #undef CUD_OP
 };
 
+static const char* FPassHint_names[] = {
+#define OP(x) #x,
+  FPASS_HINT_OPS
+#undef OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1025,6 +1031,7 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
+X(FPassHint,      static_cast<int>(FPassHint::Any))
 
 #undef X
 

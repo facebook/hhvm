@@ -31,11 +31,11 @@
   CGetL $obj
   AssertRATStk 0 Obj=Cls1
   FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x
-  FPassL 1 $x
-  FPassL 2 $x
-  FPassL 3 $x
-  FPassL 4 $x
+  FPassL 0 $x Any
+  FPassL 1 $x Any
+  FPassL 2 $x Any
+  FPassL 3 $x Any
+  FPassL 4 $x Any
   FCallD 5 "Cls1" "foobaz"
   UnboxRNop
   Jmp end
@@ -44,11 +44,11 @@ cls2:
   CGetL $obj
   AssertRATStk 0 Obj=Cls2
   FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x
-  FPassL 1 $x
-  FPassL 2 $x
-  FPassL 3 $x
-  FPassL 4 $x
+  FPassL 0 $x Any
+  FPassL 1 $x Any
+  FPassL 2 $x Any
+  FPassL 3 $x Any
+  FPassL 4 $x Any
   FCallD 5 "Cls2" "foobaz"
   UnboxRNop
   Jmp end
@@ -67,9 +67,9 @@ end:
   SetL $obj
   PopC
   FPushFuncD 3 "test"
-  FPassL 0 $obj
-  FPassL 1 $type
-  FPassL 2 $x
+  FPassL 0 $obj Any
+  FPassL 1 $type Any
+  FPassL 2 $x Any
   FCall 3
   UnboxRNop
   RetC
@@ -81,9 +81,9 @@ cls2:
   SetL $obj
   PopC
   FPushFuncD 3 "test"
-  FPassL 0 $obj
-  FPassL 1 $type
-  FPassL 2 $x
+  FPassL 0 $obj Any
+  FPassL 1 $type Any
+  FPassL 2 $x Any
   FCall 3
   UnboxRNop
   RetC
@@ -101,9 +101,9 @@ header:
   JmpZ end
 
   FPushFuncD 2 "test_outer"
-  FPassL 0 $type
+  FPassL 0 $type Any
   Int 1
-  FPassC 1
+  FPassC 1 Any
   FCall 2
   PopR
 
@@ -119,17 +119,17 @@ end:
 .function main() {
   FPushFuncD 2 "loop"
   False
-  FPassC 0
+  FPassC 0 Any
   Int 40
-  FPassC 1
+  FPassC 1 Any
   FCall 2
   PopR
 
   FPushFuncD 2 "loop"
   True
-  FPassC 0
+  FPassC 0 Any
   Int 100
-  FPassC 1
+  FPassC 1 Any
   FCall 2
   UnboxRNop
   RetC

@@ -14,19 +14,19 @@
   Int 1
   SetL $foo
   target: PopC
-  FPassL 0 $foo
+  FPassL 0 $foo Any
   Int 2
   SetL $bar
   PopC
   Int 0
   JmpNZ target
-  FPassL 1 $bar
+  FPassL 1 $bar Any
   FCall 2
   UnboxR
   SetL $baz
   PopC
   FPushFuncD 1 "var_dump"
-  FPassL 0 $baz
+  FPassL 0 $baz Any
   FCall 1
   PopR
   Int 1

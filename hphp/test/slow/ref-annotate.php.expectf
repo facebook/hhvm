@@ -1,0 +1,133 @@
+Builtin calls:
+
+Warning: ksort() expects parameter 1 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 12
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+  [2]=>
+  int(12)
+}
+Literal calls:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 18
+
+Warning: var_dump() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 20
+array(2) {
+  ["x"]=>
+  array(1) {
+    ["y"]=>
+    int(0)
+  }
+  ["a"]=>
+  array(1) {
+    ["b"]=>
+    int(1)
+  }
+}
+Plain calls:
+
+Warning: foo() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 26
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 26
+
+Warning: foo() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 27
+
+Warning: foo() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 28
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 28
+
+Warning: foo() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 29
+
+Warning: foo() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 30
+
+Warning: foo() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 30
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 30
+
+Warning: foo() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 31
+
+Warning: foo() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 31
+$b[$c][$d] = $b[q][r] = 7
+Dynamic calls:
+
+Warning: foo() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 35
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 35
+
+Warning: foo() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 36
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 36
+$b[$c][$d] = $b[q][r] = 10
+CUF/dynamic-CUF calls:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 41
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 42
+
+Warning: Parameter 3 to foo() expected to be a reference, value given in %s/ref-annotate.php on line 42
+$b[$c][$d] = $b[q][r] = 10
+CUF + ref calls:
+
+Warning: call_user_func() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 46
+
+Warning: call_user_func() expects parameter 4 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 46
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 46
+
+Warning: call_user_func() expects parameter 3 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 47
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 47
+$b[$c][$d] = $b[q][r] = 10
+dynamic-CUF + ref calls:
+
+Warning: call_user_func() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 52
+
+Warning: call_user_func() expects parameter 4 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 52
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 52
+
+Warning: call_user_func() expects parameter 3 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 53
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 53
+$b[$c][$d] = $b[q][r] = 10
+CUFA calls:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 61
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 62
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 63
+$b[$c][$d] = $b[q][r] = 19
+CUFA + ref calls:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 67
+
+Warning: call_user_func_array() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 68
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 68
+$b[$c][$d] = $b[q][r] = 21
+dynamic-CUFA calls:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 72
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 73
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 74
+$b[$c][$d] = $b[q][r] = 24
+dynamic-CUFA + ref calls:
+
+Warning: call_user_func_array() expects parameter 1 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 78
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 78
+
+Warning: call_user_func_array() expects parameter 2 by value, but the call was annotated with '&' in %s/ref-annotate.php on line 79
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 79
+$b[$c][$d] = $b[q][r] = 26
+Fatal call:
+
+Warning: foo() expects parameter 3 by reference, but the call was not annotated with '&' in %s/ref-annotate.php on line 83
+
+Fatal error: Cannot pass parameter 3 by reference in %s/ref-annotate.php on line 83

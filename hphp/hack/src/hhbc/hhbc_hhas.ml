@@ -218,6 +218,12 @@ let string_of_member_key mk =
   | QT id -> "QT:" ^ string_of_prop_id id
   | W -> "W"
 
+let string_of_fpasshint h =
+  match h with
+  | Any -> "Any"
+  | Cell -> "Cell"
+  | Ref -> "Ref"
+
 let string_of_eq_op op =
   match op with
   | PlusEqual -> "PlusEqual"
@@ -403,9 +409,10 @@ let string_of_final instruction =
   | BindM (n, mk) ->
     sep ["BindM";
       string_of_int n; string_of_member_key mk]
-  | FPassM (i, n, mk) ->
+  | FPassM (i, n, mk, h) ->
     sep ["FPassM";
-      string_of_param_num i; string_of_int n; string_of_member_key mk]
+      string_of_param_num i; string_of_int n; string_of_member_key mk;
+      string_of_fpasshint h]
   | SetM (i, mk) ->
     sep ["SetM";
       string_of_param_num i; string_of_member_key mk]
@@ -463,26 +470,28 @@ let string_of_call instruction =
     sep ["FPushCufSafe"; string_of_int n]
   | CufSafeArray -> "CufSafeArray"
   | CufSafeReturn -> "CufSafeReturn"
-  | FPassC i ->
-    sep ["FPassC"; string_of_param_num i]
-  | FPassCW i ->
-    sep ["FPassCW"; string_of_param_num i]
-  | FPassCE i ->
-    sep ["FPassCE"; string_of_param_num i]
-  | FPassV i ->
-    sep ["FPassV"; string_of_param_num i]
-  | FPassVNop i ->
-    sep ["FPassVNop"; string_of_param_num i]
-  | FPassR i ->
-    sep ["FPassR"; string_of_param_num i]
-  | FPassL (i, lid) ->
-    sep ["FPassL"; string_of_param_num i; string_of_local_id lid]
-  | FPassN i ->
-    sep ["FPassN"; string_of_param_num i]
-  | FPassG i ->
-    sep ["FPassG"; string_of_param_num i]
-  | FPassS (i, id) ->
-    sep ["FPassS"; string_of_param_num i; string_of_classref id]
+  | FPassC (i, h) ->
+    sep ["FPassC"; string_of_param_num i; string_of_fpasshint h]
+  | FPassCW (i, h) ->
+    sep ["FPassCW"; string_of_param_num i; string_of_fpasshint h]
+  | FPassCE (i, h) ->
+    sep ["FPassCE"; string_of_param_num i; string_of_fpasshint h]
+  | FPassV (i, h) ->
+    sep ["FPassV"; string_of_param_num i; string_of_fpasshint h]
+  | FPassVNop (i, h) ->
+    sep ["FPassVNop"; string_of_param_num i; string_of_fpasshint h]
+  | FPassR (i, h) ->
+    sep ["FPassR"; string_of_param_num i; string_of_fpasshint h]
+  | FPassL (i, lid, h) ->
+    sep ["FPassL"; string_of_param_num i; string_of_local_id lid;
+         string_of_fpasshint h]
+  | FPassN (i, h) ->
+    sep ["FPassN"; string_of_param_num i; string_of_fpasshint h]
+  | FPassG (i, h) ->
+    sep ["FPassG"; string_of_param_num i; string_of_fpasshint h]
+  | FPassS (i, id, h) ->
+    sep ["FPassS"; string_of_param_num i; string_of_classref id;
+         string_of_fpasshint h]
   | FCall n ->
     sep ["FCall"; string_of_int n]
   | FCallD (n, c, f) ->

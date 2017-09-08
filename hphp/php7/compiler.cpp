@@ -656,11 +656,11 @@ CFG fixFlavor(Destination dest, Flavor actual) {
       auto slot = dest.slot;
       switch (actual) {
         case Cell:
-          return { FPassCE{slot} };
+          return { FPassCE{slot, FPassHint::Any} };
         case Ref:
-          return { FPassV{slot} };
+          return { FPassV{slot, FPassHint::Any} };
         case Return:
-          return { FPassR{slot} };
+          return { FPassR{slot, FPassHint::Any} };
         case Drop:
         case FuncParam:
           panic("Can't make function param");

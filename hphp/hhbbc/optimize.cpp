@@ -432,7 +432,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       if (state.fpiStack.back().kind != FPIKind::Builtin) {
         // We should only ever const prop for FPassL right now.
         always_assert(numPush == 1 && op.op == Op::FPassL);
-        gen(bc::FPassC { op.FPassL.arg1 });
+        gen(bc::FPassC { op.FPassL.arg1, op.FPassL.subop3 });
       }
       continue;
     }

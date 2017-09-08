@@ -42,7 +42,7 @@
   FCall 0
   UnboxR
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -54,7 +54,7 @@
   FCall 0
   UnboxR
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -66,7 +66,7 @@
   FCall 0
   UnboxR
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -78,7 +78,7 @@
   FCall 0
   UnboxR
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -90,7 +90,7 @@
   FCall 0
   UnboxR
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -102,7 +102,7 @@
   FCall 0
   UnboxR
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -114,7 +114,7 @@
   FCall 0
   UnboxR
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -126,7 +126,7 @@
   FCall 0
   UnboxR
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -138,7 +138,7 @@
   FCall 0
   UnboxR
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -150,7 +150,7 @@
   FCall 0
   UnboxR
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -162,7 +162,7 @@
   FCall 0
   UnboxR
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -174,7 +174,7 @@
   FCall 0
   UnboxR
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -186,7 +186,7 @@
   FCall 0
   UnboxR
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -198,7 +198,7 @@
   FCall 0
   UnboxR
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -210,7 +210,7 @@
   FCall 0
   UnboxR
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -222,7 +222,7 @@
   FCall 0
   UnboxR
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -234,7 +234,7 @@
   FCall 0
   UnboxR
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -246,7 +246,7 @@
   FCall 0
   UnboxR
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -258,7 +258,7 @@
   FCall 0
   UnboxR
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -270,7 +270,7 @@
   FCall 0
   UnboxR
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -282,7 +282,7 @@
   FCall 0
   UnboxR
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -294,7 +294,7 @@
   FCall 0
   UnboxR
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -306,7 +306,7 @@
   FCall 0
   UnboxR
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -318,7 +318,7 @@
   FCall 0
   UnboxR
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -330,7 +330,7 @@
   FCall 0
   UnboxR
   Div
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -344,7 +344,7 @@
   FCall 0
   UnboxR
   Div
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -358,7 +358,7 @@
   FCall 0
   UnboxR
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -368,7 +368,7 @@
   UnboxR
   True
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -378,7 +378,7 @@
   UnboxR
   False
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -388,7 +388,7 @@
   UnboxR
   True
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -398,7 +398,7 @@
   UnboxR
   False
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -408,7 +408,7 @@
   UnboxR
   True
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -418,7 +418,7 @@
   True
   True
   Add
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -426,7 +426,7 @@
   True
   False
   Sub
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -434,7 +434,7 @@
   False
   False
   BitOr
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -442,7 +442,7 @@
   False
   True
   BitAnd
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -450,7 +450,7 @@
   True
   False
   BitXor
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -458,7 +458,7 @@
   False
   True
   Mul
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 

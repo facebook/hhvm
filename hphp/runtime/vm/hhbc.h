@@ -346,6 +346,17 @@ enum class CudOp : uint8_t {
 #undef CUD_OP
 };
 
+#define FPASS_HINT_OPS \
+  OP(Any)              \
+  OP(Cell)             \
+  OP(Ref)
+
+enum class FPassHint : uint8_t {
+#define OP(name) name,
+  FPASS_HINT_OPS
+#undef OP
+};
+
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -535,16 +546,28 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), PF) \
-  O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
-  O(FPassVNop,       ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
-  O(FPassR,          ONE(IVA),         ONE(RV),         ONE(FV),    FF) \
-  O(FPassL,          TWO(IVA,LA),      NOV,             ONE(FV),    FF) \
-  O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassG,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassS,          TWO(IVA,CAR),     ONE(CV),         ONE(FV),    FF) \
+  O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(FPassCW,         TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(FPassCE,         TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(FPassV,          TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(VV),         ONE(FV),    FF) \
+  O(FPassVNop,       TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(VV),         ONE(FV),    FF) \
+  O(FPassR,          TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(RV),         ONE(FV),    FF) \
+  O(FPassL,          THREE(IVA,LA,OA(FPassHint)),                       \
+                                       NOV,             ONE(FV),    FF) \
+  O(FPassN,          TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(FPassG,          TWO(IVA,OA(FPassHint)),                            \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(FPassS,          THREE(IVA,CAR,OA(FPassHint)),                      \
+                                       ONE(CV),         ONE(FV),    FF) \
+  O(RaiseFPassWarning, THREE(OA(FPassHint),SA,IVA),                     \
+                                       NOV,             NOV,        NF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
@@ -660,7 +683,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
-  O(FPassM,          THREE(IVA, IVA, KA),                               \
+  O(FPassM,          FOUR(IVA,IVA,KA,OA(FPassHint)),                    \
                                        F_MFINAL,        ONE(FV),    FF) \
   O(SetM,            TWO(IVA, KA),     C_MFINAL,        ONE(CV),    NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
@@ -856,6 +879,7 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
+const char* subopToName(FPassHint);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

@@ -37,6 +37,8 @@ let random_mode () : MemberOpMode.t =
   [MemberOpMode.ModeNone; MemberOpMode.Define; MemberOpMode.Warn;
    MemberOpMode.Unset] |> rand_elt
 
+let random_fpasshint () : fpass_hint = [Any; Cell; Ref] |> rand_elt
+
 let random_local () : local_id = Local.Unnamed (Random.int 10)
 let random_param_id () : param_id = Param_unnamed (Random.int 10)
 
@@ -334,7 +336,8 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
   [(fun () -> IFinal (QueryM (Random.int 10,
     random_query_op (), random_key ())));
    (fun () -> IFinal (VGetM (Random.int 10, random_key ())));
-   (fun () -> IFinal (FPassM (Random.int 10, Random.int 10, random_key ())));
+   (fun () -> IFinal (FPassM (Random.int 10, Random.int 10, random_key (),
+                              random_fpasshint ())));
    (fun () -> IFinal (SetM (Random.int 10, random_key ())));
    (fun () -> IFinal (IncDecM (Random.int 10,
      random_incdec_op (), random_key ())));
@@ -348,18 +351,20 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
 (* Generators for FPass* instructions *)
 let fpass_instrs (fn : IS.t) : lazy_instruct list =
   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
-  [(fun () -> ICall (FPassCW (Random.int 10)));
-   (fun () -> ICall (FPassCE (Random.int 10)));
-   (fun () -> ICall (FPassV (Random.int 10)));
-   (fun () -> ICall (FPassVNop (Random.int 10)));
-   (fun () -> ICall (FPassR (Random.int 10)));
-   (fun () -> ICall (FPassL (Random.int 10, random_local ())));
-   (fun () -> ICall (FPassN (Random.int 10)));
-   (fun () -> ICall (FPassG (Random.int 10)));
-   (fun () -> ICall (FPassS (Random.int 10, Random.int 10)))] @
+  [(fun () -> ICall (FPassCW (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassCE (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassV (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassVNop (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassR (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassL (Random.int 10, random_local (),
+                             random_fpasshint ())));
+   (fun () -> ICall (FPassN (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassG (Random.int 10, random_fpasshint ())));
+   (fun () -> ICall (FPassS (Random.int 10, Random.int 10,
+                             random_fpasshint ())))] @
    begin
      if cls_ref_slts <= 0 then [] else
-     [(fun () -> ICall (FPassC (Random.int 10)))]
+     [(fun () -> ICall (FPassC (Random.int 10, random_fpasshint ())))]
    end
 
 (* An association list of stack signatures to random generators for

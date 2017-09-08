@@ -1250,6 +1250,16 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
   ar->setVarEnv(nullptr);
 }
 
+static void raiseFPassHintWarning(const StringData* fname, uint32_t id,
+                                  FPassHint hint) {
+  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+
+  assert(hint != FPassHint::Any);
+  raise_warning(
+    formatParamRefMismatch(fname->data(), id, hint == FPassHint::Cell)
+  );
+}
+
 // offset is the number of params already on the stack to which the
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
@@ -1270,6 +1280,18 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     return true;
   }
 
+#define WRAP(e)                                                        \
+  try {                                                                \
+    e;                                                                 \
+  } catch (...) {                                                      \
+    /* If the user error handler throws an exception, discard the
+     * uninitialized value(s) at the top of the eval stack so that the
+     * unwinder doesn't choke */                                       \
+    stack.discard();                                                   \
+    if (retval) { tvWriteNull(retval); }                               \
+    throw;                                                             \
+  }
+
   int const nparams = f->numNonVariadicParams();
   int nextra_regular = std::max(nregular - nparams, 0);
   ArrayIter iter(args);
@@ -1281,20 +1303,13 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
         cellDup(tvToCell(from), *to);
       } else if (LIKELY(from.m_type == KindOfRef &&
                         from.m_data.pref->hasMultipleRefs())) {
+        WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
         refDup(from, *to);
       } else {
+        WRAP(raiseFPassHintWarning(f->fullDisplayName(), i, FPassHint::Cell));
         if (doCufRefParamChecks && f->mustBeRef(i)) {
-          try {
-            raise_warning("Parameter %d to %s() expected to be a reference, "
-                          "value given", i + 1, f->fullName()->data());
-          } catch (...) {
-            // If the user error handler throws an exception, discard the
-            // uninitialized value(s) at the top of the eval stack so that the
-            // unwinder doesn't choke
-            stack.discard();
-            if (retval) { tvWriteNull(retval); }
-            throw;
-          }
+          WRAP(raise_warning("Parameter %d to %s() expected to be a reference, "
+                             "value given", i + 1, f->fullName()->data()));
           if (skipCufOnInvalidParams) {
             stack.discard();
             cleanupParamsAndActRec(stack, ar, nullptr, &i);
@@ -1321,6 +1336,8 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       return true;
     }
   }
+
+#undef WRAP
 
   // there are "extra" arguments; passed as standard arguments prior to the
   // ... unpack operator and/or still remaining in argArray
@@ -3533,9 +3550,28 @@ OPTBLD_INLINE void iopVGetM(intva_t nDiscard, MemberKey mk) {
   vGetMImpl(mk, nDiscard);
 }
 
+static void checkFPassHint(ActRec* ar, intva_t paramId, FPassHint hint) {
+  assert(paramId < ar->numArgs());
+
+  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+
+  switch (hint) {
+  case FPassHint::Any: return;
+  case FPassHint::Cell:
+    if (!ar->m_func->byRef(paramId)) return;
+    break;
+  case FPassHint::Ref:
+    if (ar->m_func->byRef(paramId)) return;
+    break;
+  }
+  raiseFPassHintWarning(ar->m_func->fullDisplayName(), paramId.n, hint);
+}
+
 OPTBLD_INLINE
-void iopFPassM(intva_t paramId, intva_t nDiscard, MemberKey mk) {
+void iopFPassM(intva_t paramId, intva_t nDiscard, MemberKey mk,
+               FPassHint hint) {
   auto ar = arFromSp(paramId + nDiscard);
+  checkFPassHint(ar, paramId, hint);
   auto const mode = fpass_mode(ar, paramId);
   if (mode == MOpMode::Warn) {
     return queryMImpl(mk, nDiscard, QueryMOp::CGet);
@@ -4777,6 +4813,12 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   tvDecRefGen(&func);
 }
 
+OPTBLD_INLINE void iopRaiseFPassWarning(
+  FPassHint hint, const StringData* fname, intva_t arg
+) {
+  raiseFPassHintWarning(fname, arg.n, hint);
+}
+
 OPTBLD_INLINE void iopFPushCuf(intva_t numArgs) {
   doFPushCuf(numArgs, false, false);
 }
@@ -4789,46 +4831,46 @@ OPTBLD_INLINE void iopFPushCufSafe(intva_t numArgs) {
   doFPushCuf(numArgs, false, true);
 }
 
-OPTBLD_INLINE void iopFPassC(intva_t paramId) {
-  assert(paramId < arFromSp(paramId + 1)->numArgs());
+OPTBLD_INLINE void iopFPassC(intva_t paramId, FPassHint hint) {
+  checkFPassHint(arFromSp(paramId + 1), paramId, hint);
 }
 
-OPTBLD_INLINE void iopFPassCW(intva_t paramId) {
+OPTBLD_INLINE void iopFPassCW(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
     raise_strict_warning("Only variables should be passed by reference");
   }
 }
 
-OPTBLD_INLINE void iopFPassCE(intva_t paramId) {
+OPTBLD_INLINE void iopFPassCE(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   auto const func = ar->m_func;
   if (func->mustBeRef(paramId)) {
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
 }
 
-OPTBLD_INLINE void iopFPassV(intva_t paramId) {
+OPTBLD_INLINE void iopFPassV(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   const Func* func = ar->m_func;
   if (!func->byRef(paramId)) {
     vmStack().unbox();
   }
 }
 
-OPTBLD_INLINE void iopFPassVNop(intva_t paramId) {
-  DEBUG_ONLY auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+OPTBLD_INLINE void iopFPassVNop(intva_t paramId, FPassHint hint) {
+  auto ar = arFromSp(paramId + 1);
+  checkFPassHint(ar, paramId, hint);
   assert(ar->m_func->byRef(paramId));
 }
 
-OPTBLD_INLINE void iopFPassR(intva_t paramId) {
+OPTBLD_INLINE void iopFPassR(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   const Func* func = ar->m_func;
   if (func->byRef(paramId)) {
     TypedValue* tv = vmStack().topTV();
@@ -4842,9 +4884,9 @@ OPTBLD_INLINE void iopFPassR(intva_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopFPassL(intva_t paramId, local_var loc) {
+OPTBLD_INLINE void iopFPassL(intva_t paramId, local_var loc, FPassHint hint) {
   auto ar = arFromSp(paramId);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   TypedValue* fr = loc.ptr;
   TypedValue* to = vmStack().allocTV();
   if (!ar->m_func->byRef(paramId)) {
@@ -4854,9 +4896,9 @@ OPTBLD_INLINE void iopFPassL(intva_t paramId, local_var loc) {
   }
 }
 
-OPTBLD_INLINE void iopFPassN(intva_t paramId) {
+OPTBLD_INLINE void iopFPassN(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetN();
   } else {
@@ -4864,9 +4906,9 @@ OPTBLD_INLINE void iopFPassN(intva_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopFPassG(intva_t paramId) {
+OPTBLD_INLINE void iopFPassG(intva_t paramId, FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetG();
   } else {
@@ -4874,9 +4916,10 @@ OPTBLD_INLINE void iopFPassG(intva_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopFPassS(intva_t paramId, clsref_slot slot) {
+OPTBLD_INLINE void iopFPassS(intva_t paramId, clsref_slot slot,
+                             FPassHint hint) {
   auto ar = arFromSp(paramId + 1);
-  assert(paramId < ar->numArgs());
+  checkFPassHint(ar, paramId, hint);
   if (!ar->m_func->byRef(paramId)) {
     iopCGetS(slot);
   } else {
@@ -6466,6 +6509,14 @@ TCA iopWrapper(Op, void(*fn)(intva_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t, FPassHint), PC& pc) {
+  auto n = decode_intva(pc);
+  auto imm = decode_oa<FPassHint>(pc);
+  fn(n, imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(intva_t,intva_t), PC& pc) {
   auto n1 = decode_intva(pc);
   auto n2 = decode_intva(pc);
@@ -6535,6 +6586,34 @@ iopWrapper(Op /*op*/, void (*fn)(intva_t, local_var), PC& pc) {
   auto n = decode_intva(pc);
   auto var = decode_local(pc);
   fn(n, var);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/,
+           void (*fn)(FPassHint,const StringData*,intva_t), PC& pc) {
+  auto imm = decode_oa<FPassHint>(pc);
+  auto s = decode_litstr(pc);
+  auto n = decode_intva(pc);
+  fn(imm, s, n);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/, void (*fn)(intva_t, local_var, FPassHint), PC& pc) {
+  auto n = decode_intva(pc);
+  auto var = decode_local(pc);
+  auto imm = decode_oa<FPassHint>(pc);
+  fn(n, var, imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static TCA
+iopWrapper(Op /*op*/, void (*fn)(intva_t, clsref_slot, FPassHint), PC& pc) {
+  auto n = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  auto imm = decode_oa<FPassHint>(pc);
+  fn(n, s, imm);
   return nullptr;
 }
 
@@ -6816,6 +6895,16 @@ TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,MemberKey), PC& pc) {
   auto n2 = decode_intva(pc);
   auto mk = decode_member_key(pc, liveUnit());
   fn(n1, n2, mk);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,MemberKey,FPassHint), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto n2 = decode_intva(pc);
+  auto mk = decode_member_key(pc, liveUnit());
+  auto imm = decode_oa<FPassHint>(pc);
+  fn(n1, n2, mk, imm);
   return nullptr;
 }
 

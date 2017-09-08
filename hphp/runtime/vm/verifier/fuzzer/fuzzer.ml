@@ -229,6 +229,9 @@ let mutate_key (k : MemberKey.t) c =
 let mutate_mode (m : MemberOpMode.t) =
   if should_mutate() then random_mode () else m
 
+let mutate_fpasshint (h : fpass_hint) =
+  if should_mutate() then random_fpasshint () else h
+
 (* When given stack data about an instruction sequences, and applied as a
  * wrapper around 'op', this will ensure that the mutations occurring as part
  * of 'op' don't unbalance the evaluation stack. It does this by calculating
@@ -354,18 +357,28 @@ let mut_imms (is : IS.t) : IS.t =
     | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int        id !mag)
     | DecodeCufIter (i, id) -> DecodeCufIter (mutate_int        i  !mag,
                                               mutate_label data id)
-    | FPassS        (i, id) -> FPassS        (mutate_int        i  !mag,
-                                              mutate_int        id !mag)
-    | FPassL        (i, id) -> FPassL        (mutate_int        i  !mag,
-                                              mutate_local_id   id !mag)
-    | FPassC         i      -> FPassC        (mutate_int        i  !mag)
-    | FPassCW        i      -> FPassCW       (mutate_int        i  !mag)
-    | FPassCE        i      -> FPassCE       (mutate_int        i  !mag)
-    | FPassV         i      -> FPassV        (mutate_int        i  !mag)
-    | FPassVNop      i      -> FPassVNop     (mutate_int        i  !mag)
-    | FPassR         i      -> FPassR        (mutate_int        i  !mag)
-    | FPassN         i      -> FPassN        (mutate_int        i  !mag)
-    | FPassG         i      -> FPassG        (mutate_int        i  !mag)
+    | FPassS        (i, id, h) -> FPassS     (mutate_int        i  !mag,
+                                              mutate_int        id !mag,
+                                              mutate_fpasshint  h)
+    | FPassL        (i, id, h) -> FPassL     (mutate_int        i  !mag,
+                                              mutate_local_id   id !mag,
+                                              mutate_fpasshint  h)
+    | FPassC        (i, h)     -> FPassC     (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassCW       (i, h)     -> FPassCW    (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassCE       (i, h)     -> FPassCE    (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassV        (i, h)     -> FPassV     (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassVNop     (i, h)     -> FPassVNop  (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassR        (i, h)     -> FPassR     (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassN        (i, h)     -> FPassN     (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
+    | FPassG        (i, h)     -> FPassG     (mutate_int        i  !mag,
+                                              mutate_fpasshint  h)
     | _ -> s in
   let mutate_base s =
     match s with
@@ -413,8 +426,9 @@ let mut_imms (is : IS.t) : IS.t =
     match s with
     | QueryM  (i, op, k) ->
         QueryM (mutate_int i !mag,   mutate_op      op,      mutate_key k !mag)
-    | FPassM  (i, i', k) ->
-        FPassM (mutate_int i !mag,   mutate_int i' !mag,     mutate_key k !mag)
+    | FPassM  (i, i', k, h) ->
+        FPassM (mutate_int i !mag,   mutate_int i' !mag,     mutate_key k !mag,
+                mutate_fpasshint h)
     | VGetM   (i,     k) -> VGetM   (mutate_int i  !mag,     mutate_key k !mag)
     | SetM    (i,     k) -> SetM    (mutate_int i  !mag,     mutate_key k !mag)
     | IncDecM (i, op, k) -> IncDecM (mutate_int i  !mag, op, mutate_key k !mag)

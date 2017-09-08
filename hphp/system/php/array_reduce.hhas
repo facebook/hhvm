@@ -44,8 +44,8 @@ check_func:
 
   .try 1 {
     loop_x:   FPushCufIter 2 0
-              FPassL 0 $res
-              FPassL 1 $v
+              FPassL 0 $res Any
+              FPassL 1 $v Any
               FCall 2
               UnboxR
               SetL $res

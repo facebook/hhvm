@@ -124,16 +124,16 @@ let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
-let instr_fpassl param local = instr (ICall (FPassL (param, local)))
-let instr_fpassr i = instr (ICall (FPassR i))
-let instr_fpassv i = instr (ICall (FPassV i))
-let instr_fpassn i = instr (ICall (FPassN i))
-let instr_fpassg i = instr (ICall (FPassG i))
-and instr_fpass kind i =
+let instr_fpassl param local hint = instr (ICall (FPassL (param, local, hint)))
+let instr_fpassr i hint = instr (ICall (FPassR (i, hint)))
+let instr_fpassv i hint = instr (ICall (FPassV (i, hint)))
+let instr_fpassn i hint = instr (ICall (FPassN (i, hint)))
+let instr_fpassg i hint = instr (ICall (FPassG (i, hint)))
+and instr_fpass kind i hint =
   match kind with
-  | PassByRefKind.AllowCell -> instr (ICall (FPassC i))
-  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW i))
-  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE i))
+  | PassByRefKind.AllowCell -> instr (ICall (FPassC (i, hint)))
+  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW (i, hint)))
+  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE (i, hint)))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popr = instr (IBasic PopR)
@@ -464,7 +464,7 @@ let rewrite_class_refs_instr num = function
 | IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _)) -> (num - 1, IBase (BaseSC (si, num)))
 | IBase (BaseSL (l, _)) -> (num - 1, IBase (BaseSL (l, num)))
-| ICall (FPassS (np, _)) -> (num - 1, ICall (FPassS (np, num)))
+| ICall (FPassS (np, _, h)) -> (num - 1, ICall (FPassS (np, num, h)))
 | ICall (FPushCtor (np, _)) -> (num - 1, ICall (FPushCtor (np, num)))
 | ICall (FPushClsMethod (np, _)) -> (num - 1, ICall (FPushClsMethod (np, num)))
 | ICall (FPushClsMethodF (np, _)) ->

@@ -48,7 +48,7 @@ let analyze_header text script =
         markup_suffix_name = {
           syntax = Missing | Token { MinimalToken.kind = TK.Equal; _ }
         ; _ }
-      ; _ } -> "", ""
+      ; _ } -> "php", ""
     | MarkupSuffix {
         markup_suffix_less_than_question = ltq;
         markup_suffix_name = name;
@@ -63,6 +63,7 @@ let analyze_header text script =
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
+      let language = String.lowercase language in
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in
@@ -70,7 +71,7 @@ let analyze_header text script =
       let mode = strip_comment_start mode in
       let mode = String.trim mode in
       language, mode
-    | _ -> "", ""
+    | _ -> "php", ""
     end
   | _ -> failwith "unexpected: script content should be list"
   (* The parser never produces a leading markup section; it fills one in with zero

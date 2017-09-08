@@ -95,7 +95,7 @@ struct BaseValue::MinstrSeq {
 
   CFG finalFPass(const MemberKey& key) {
     assert(isArg);
-    instrs.push_back(FPassM{ slot, keysOnStack, key});
+    instrs.push_back(FPassM{ slot, keysOnStack, key, FPassHint::Any});
     return emit();
   }
 
@@ -207,7 +207,7 @@ struct LocalLvalue : Lvalue {
   }
 
   CFG getF(uint32_t slot) override {
-    return { FPassL{slot, NamedLocal{name}} };
+    return { FPassL{slot, NamedLocal{name}, FPassHint::Any} };
   }
 
   CFG getB(MinstrSeq& m) override {
@@ -262,7 +262,7 @@ struct DynamicLocalLvalue : Lvalue {
 
   CFG getF(uint32_t slot) override {
     return getName()
-      .then(FPassN{slot});
+      .then(FPassN{slot, FPassHint::Any});
   }
 
   CFG getB(MinstrSeq& m) override {

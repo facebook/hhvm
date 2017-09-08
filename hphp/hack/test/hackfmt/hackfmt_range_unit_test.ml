@@ -96,8 +96,8 @@ let range_test_suite =
 
     "trailing_comma_inserted_at_end_of_range" >::
     assert_range_formats_to
-      ~src:((String.make 80 'f') ^ "($x,$y)")
-      ~rng:((84,86),"$y")
+      ~src:("<?hh " ^ (String.make 80 'f') ^ "($x,$y)")
+      ~rng:((89,91),"$y")
       ~exp:"  $y,\n";
   ]
 

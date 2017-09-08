@@ -45,61 +45,61 @@
   FPushCtorD 0 "C"
   FCall 0
   PopR
-  FPassC 0
+  FPassC 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_class"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Int 5
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Array @A_0
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int_nullable"
   Int 6
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int_nullable"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int"
   Int 5
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_mixed"
   Array @A_0
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "use_int"
   Array @A_0
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 

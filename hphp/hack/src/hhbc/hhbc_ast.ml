@@ -55,6 +55,12 @@ module PassByRefKind = struct
   type t = AllowCell | WarnOnCell | ErrorOnCell
 end
 
+(* Indicates whether a call site was annotated as pass-by-ref or not *)
+type fpass_hint =
+  | Any
+  | Cell
+  | Ref
+
 module MemberOpMode = struct
 
   type t =
@@ -387,16 +393,16 @@ type instruct_call =
   | FPushCufSafe of num_params
   | CufSafeArray
   | CufSafeReturn
-  | FPassC of param_num
-  | FPassCW of param_num
-  | FPassCE of param_num
-  | FPassV of param_num
-  | FPassVNop of param_num
-  | FPassR of param_num
-  | FPassL of param_num * local_id
-  | FPassN of param_num
-  | FPassG of param_num
-  | FPassS of param_num * classref_id
+  | FPassC of param_num * fpass_hint
+  | FPassCW of param_num * fpass_hint
+  | FPassCE of param_num * fpass_hint
+  | FPassV of param_num * fpass_hint
+  | FPassVNop of param_num * fpass_hint
+  | FPassR of param_num * fpass_hint
+  | FPassL of param_num * local_id * fpass_hint
+  | FPassN of param_num * fpass_hint
+  | FPassG of param_num * fpass_hint
+  | FPassS of param_num * classref_id * fpass_hint
   | FCall of num_params
   | FCallD of num_params * class_id * function_id
   | FCallArray
@@ -426,7 +432,7 @@ type instruct_base =
 type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t
   | VGetM of num_params * MemberKey.t
-  | FPassM of param_num * num_params * MemberKey.t
+  | FPassM of param_num * num_params * MemberKey.t * fpass_hint
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
   | SetOpM of num_params  * eq_op * MemberKey.t

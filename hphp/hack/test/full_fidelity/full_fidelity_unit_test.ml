@@ -235,7 +235,7 @@ let test_data = minimal_tests @ error_tests @
   {
     name = "test_mode_2";
     source = "";
-    expected = "Lang:Mode:Strict:falseHack:falsePhp:false";
+    expected = "Lang:phpMode:Strict:falseHack:falsePhp:true";
     test_function = test_mode;
   };
   {

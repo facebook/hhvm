@@ -28,17 +28,19 @@ std::vector<Bytecode> samples {
   bc::True {},
   bc::Int { 52 },
   bc::False {},
-  bc::FPassC { 0 },
+  bc::FPassC { 0, FPassHint::Any },
   bc::FPushFunc { 2, false },
 };
 
 TEST(Bytecode, EqualityComparable) {
   Bytecode x = bc::Nop {};
-  Bytecode y = bc::FPassC { 1 };
+  Bytecode y = bc::FPassC { 1, FPassHint::Any };
   EXPECT_FALSE(x == y);
   EXPECT_TRUE(bc::Nop {} == x);
-  EXPECT_FALSE(bc::FPassC { 2 } == y);
-  EXPECT_TRUE(y == bc::FPassC { 1 });
+  Bytecode q = bc::FPassC { 2, FPassHint::Any };
+  EXPECT_FALSE(q == y);
+  Bytecode r = bc::FPassC { 1, FPassHint::Any };
+  EXPECT_TRUE(y == r);
 
   for (auto& b : samples) EXPECT_EQ(b, b);
   EXPECT_EQ(std::unique(begin(samples), end(samples)), end(samples));
@@ -58,13 +60,15 @@ TEST(Bytecode, Hash) {
 
   std::unordered_map<Bytecode,Bytecode,bc_hash> map {
     { bc::Nop {}, bc::Int { 3 } },
-    { bc::FPassC { 0 }, bc::Int { 4 } },
-    { bc::FPassC { 1 }, bc::Int { 5 } },
+    { bc::FPassC { 0, FPassHint::Any }, bc::Int { 4 } },
+    { bc::FPassC { 1, FPassHint::Any }, bc::Int { 5 } },
   };
 
+  Bytecode b1 = bc::FPassC { 0, FPassHint::Any };
+  Bytecode b2 = bc::FPassC { 1, FPassHint::Any };
   EXPECT_EQ(map[bc::Nop{}], bc::Int { 3 });
-  EXPECT_EQ(map[bc::FPassC { 0 }], bc::Int { 4 });
-  EXPECT_EQ(map[bc::FPassC { 1 }], bc::Int { 5 });
+  EXPECT_EQ(map[b1], bc::Int { 4 });
+  EXPECT_EQ(map[b2], bc::Int { 5 });
 }
 
 }}

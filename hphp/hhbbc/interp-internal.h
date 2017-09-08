@@ -130,6 +130,15 @@ void reduce(ISS& env, Bytecodes&&... hhbc) {
   reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
 
+bool fpassCanThrow(ISS& env, PrepKind kind, FPassHint hint) {
+  switch (kind) {
+  case PrepKind::Unknown: return hint != FPassHint::Any;
+  case PrepKind::Val:     return hint == FPassHint::Ref;
+  case PrepKind::Ref:     return hint == FPassHint::Cell;
+  }
+  not_reached();
+}
+
 void nothrow(ISS& env) {
   FTRACE(2, "    nothrow\n");
   env.flags.wasPEI = false;
@@ -428,6 +437,25 @@ PrepKind prepKind(ISS& env, uint32_t paramId) {
   }
   assert(ar.kind != FPIKind::Builtin);
   return PrepKind::Unknown;
+}
+
+template<class... Bytecodes>
+void reduceFPassBuiltin(ISS& env, PrepKind kind, FPassHint hint, uint32_t arg,
+                        Bytecodes&&... bcs) {
+  assert(kind != PrepKind::Unknown);
+
+  // Since PrepKind is never Unknown for FCallBuiltins we should know statically
+  // if we will throw or not at runtime (PrepKind and FPassHint don't match).
+  if (fpassCanThrow(env, kind, hint)) {
+    auto ar = fpiTop(env);
+    assert(ar.kind == FPIKind::Builtin && ar.func && !ar.fallbackFunc);
+    return reduce(
+      env,
+      std::forward<Bytecodes>(bcs)...,
+      bc::RaiseFPassWarning { hint, ar.func->name(), arg }
+    );
+  }
+  return reduce(env, std::forward<Bytecodes>(bcs)...);
 }
 
 //////////////////////////////////////////////////////////////////////

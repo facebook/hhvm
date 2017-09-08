@@ -5,7 +5,7 @@
   String "abc"
   String "asdfasdf"
   OODeclExists Interface
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
   Int 1

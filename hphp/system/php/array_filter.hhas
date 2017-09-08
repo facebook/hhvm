@@ -48,7 +48,7 @@ start:          IsTypeL $arr Arr
                 JmpNZ loop_key
 
     loop_val:   FPushCufIter 1 0
-                FPassL 0 $v
+                FPassL 0 $v Any
                 FCall 1
                 UnboxR
                 JmpZ next_val
@@ -58,8 +58,8 @@ start:          IsTypeL $arr Arr
                 Jmp endloop_a
 
     loop_both:  FPushCufIter 2 0
-                FPassL 0 $v
-                FPassL 1 $k
+                FPassL 0 $v Any
+                FPassL 1 $k Any
                 FCall 2
                 UnboxR
                 JmpZ next_both
@@ -69,7 +69,7 @@ start:          IsTypeL $arr Arr
                 Jmp endloop_a
 
     loop_key:   FPushCufIter 1 0
-                FPassL 0 $k
+                FPassL 0 $k Any
                 FCall 1
                 UnboxR
                 JmpZ next_key
@@ -133,7 +133,7 @@ start_kt:         IssetL $func
                   JmpNZ loop_key_kt
 
     loop_val_kt:  FPushCufIter 1 0
-                  FPassL 0 $v
+                  FPassL 0 $v Any
                   FCall 1
                   UnboxR
                   JmpZ next_val_kt
@@ -145,8 +145,8 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_both_kt: FPushCufIter 2 0
-                  FPassL 0 $v
-                  FPassL 1 $k
+                  FPassL 0 $v Any
+                  FPassL 1 $k Any
                   FCall 2
                   UnboxR
                   JmpZ next_both_kt
@@ -158,7 +158,7 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_key_kt:  FPushCufIter 1 0
-                  FPassL 0 $k
+                  FPassL 0 $k Any
                   FCall 1
                   UnboxR
                   JmpZ next_key_kt

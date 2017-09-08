@@ -66,15 +66,15 @@
 .function main() {
   FPushFuncD 1 "foo"
   String "sup: "
-  FPassC 0
+  FPassC 0 Any
   FCall 1
   PopR
 
   FPushFuncD 2 "foo"
   String "sup: "
-  FPassC 0
+  FPassC 0 Any
   String " non-default y value\n"
-  FPassC 1
+  FPassC 1 Any
   FCall 2
   PopR
 
@@ -83,14 +83,14 @@
   PopR
   FPushFuncD 1 "multiple"
   String "nondef\n"
-  FPassC 0
+  FPassC 0 Any
   FCall 1
   PopR
   FPushFuncD 2 "multiple"
   String "nondef1\n"
-  FPassC 0
+  FPassC 0 Any
   String "nondef2\n"
-  FPassC 1
+  FPassC 1 Any
   FCall 2
   PopR
 

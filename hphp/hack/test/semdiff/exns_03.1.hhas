@@ -17,9 +17,9 @@
       .try {
         FPushCtorD 2 "Exception"
         String "Error Processing Request"
-        FPassCE 0
+        FPassCE 0 Any
         Int 1
-        FPassCE 1
+        FPassCE 1 Any
         FCall 2
         PopR
         Throw
@@ -45,7 +45,7 @@
       PopC
       FPushCtorD 1 "Exception"
       String "exn thrown after inner"
-      FPassCE 0
+      FPassCE 0 Any
       FCall 1
       PopR
       Throw
@@ -63,7 +63,7 @@ L2:
   Print
   PopC
   FPushFuncD 1 "var_dump"
-  FPassL 0 $x
+  FPassL 0 $x Any
   FCall 1
   PopR
   Null
@@ -91,7 +91,7 @@ F9:
     PopC
     FPushCtorD 1 "Exception"
     String "exn thrown after inner"
-    FPassCE 0
+    FPassCE 0 Any
     FCall 1
     PopR
     Throw

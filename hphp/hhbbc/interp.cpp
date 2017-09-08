@@ -2152,19 +2152,26 @@ void in(ISS& env, const bc::FPushCufSafe&) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::RaiseFPassWarning& op) {
+}
+
 void in(ISS& env, const bc::FPassL& op) {
   switch (prepKind(env, op.arg1)) {
   case PrepKind::Unknown:
-    if (!locCouldBeUninit(env, op.loc2)) nothrow(env);
+    if (!locCouldBeUninit(env, op.loc2) && op.subop3 == FPassHint::Any) {
+      nothrow(env);
+    }
     // This might box the local, we can't tell.  Note: if the local
     // is already TRef, we could try to leave it alone, but not for
     // now.
     setLocRaw(env, op.loc2, TGen);
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce_fpass_arg(env, bc::CGetL { op.loc2 }, op.arg1, false);
+    return reduce_fpass_arg(env, bc::CGetL { op.loc2 }, op.arg1, false,
+                            op.subop3);
   case PrepKind::Ref:
-    return reduce_fpass_arg(env, bc::VGetL { op.loc2 }, op.arg1, true);
+    return reduce_fpass_arg(env, bc::VGetL { op.loc2 }, op.arg1, true,
+                            op.subop3);
   }
 }
 
@@ -2179,11 +2186,13 @@ void in(ISS& env, const bc::FPassN& op) {
   case PrepKind::Val: return reduce_fpass_arg(env,
                                               bc::CGetN {},
                                               op.arg1,
-                                              false);
+                                              false,
+                                              op.subop2);
   case PrepKind::Ref: return reduce_fpass_arg(env,
                                               bc::VGetN {},
                                               op.arg1,
-                                              true);
+                                              true,
+                                              op.subop2);
   }
 }
 
@@ -2193,11 +2202,13 @@ void in(ISS& env, const bc::FPassG& op) {
   case PrepKind::Val:     return reduce_fpass_arg(env,
                                                   bc::CGetG {},
                                                   op.arg1,
-                                                  false);
+                                                  false,
+                                                  op.subop2);
   case PrepKind::Ref:     return reduce_fpass_arg(env,
                                                   bc::VGetG {},
                                                   op.arg1,
-                                                  true);
+                                                  true,
+                                                  op.subop2);
   }
 }
 
@@ -2223,85 +2234,92 @@ void in(ISS& env, const bc::FPassS& op) {
     }
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce_fpass_arg(env, bc::CGetS { op.slot }, op.arg1, false);
+    return reduce_fpass_arg(env, bc::CGetS { op.slot }, op.arg1, false,
+                            op.subop3);
   case PrepKind::Ref:
-    return reduce_fpass_arg(env, bc::VGetS { op.slot }, op.arg1, true);
+    return reduce_fpass_arg(env, bc::VGetS { op.slot }, op.arg1, true,
+                            op.subop3);
   }
 }
 
 void in(ISS& env, const bc::FPassV& op) {
-  nothrow(env);
-  switch (prepKind(env, op.arg1)) {
+  auto const kind = prepKind(env, op.arg1);
+  if (!fpassCanThrow(env, kind, op.subop2)) nothrow(env);
+  switch (kind) {
   case PrepKind::Unknown:
     popV(env);
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce_fpass_arg(env, bc::Unbox {}, op.arg1, false);
+    return reduce_fpass_arg(env, bc::Unbox {}, op.arg1, false, op.subop2);
   case PrepKind::Ref:
-    return reduce_fpass_arg(env, bc::Nop {}, op.arg1, true);
+    return reduce_fpass_arg(env, bc::Nop {}, op.arg1, true, op.subop2);
   }
 }
 
 void in(ISS& env, const bc::FPassR& op) {
-  nothrow(env);
+  auto const kind = prepKind(env, op.arg1);
+  if (!fpassCanThrow(env, kind, op.subop2)) nothrow(env);
   if (fpiTop(env).kind == FPIKind::Builtin) {
-    switch (prepKind(env, op.arg1)) {
+    switch (kind) {
     case PrepKind::Unknown:
       not_reached();
     case PrepKind::Val:
-      return reduce(env, bc::UnboxR {});
+      return reduceFPassBuiltin(env, kind, op.subop2, op.arg1, bc::UnboxR {});
     case PrepKind::Ref:
-      return reduce(env, bc::BoxR {});
+      return reduceFPassBuiltin(env, kind, op.subop2, op.arg1, bc::BoxR {});
     }
   }
 
   auto const t1 = topT(env);
   if (t1.subtypeOf(TCell)) {
-    return reduce_fpass_arg(env, bc::UnboxRNop {}, op.arg1, false);
+    return reduce_fpass_arg(env, bc::UnboxRNop {}, op.arg1, false, op.subop2);
   }
 
   // If it's known to be a ref, this behaves like FPassV, except we need to do
   // it slightly differently to keep stack flavors correct.
   if (t1.subtypeOf(TRef)) {
-    switch (prepKind(env, op.arg1)) {
+    switch (kind) {
     case PrepKind::Unknown:
       popV(env);
       return push(env, TInitGen);
     case PrepKind::Val:
-      return reduce_fpass_arg(env, bc::UnboxR {}, op.arg1, false);
+      return reduce_fpass_arg(env, bc::UnboxR {}, op.arg1, false, op.subop2);
     case PrepKind::Ref:
-      return reduce_fpass_arg(env, bc::BoxRNop {}, op.arg1, true);
+      return reduce_fpass_arg(env, bc::BoxRNop {}, op.arg1, true, op.subop2);
     }
     not_reached();
   }
 
   // Here we don't know if it is going to be a cell or a ref.
-  switch (prepKind(env, op.arg1)) {
+  switch (kind) {
   case PrepKind::Unknown:      popR(env); return push(env, TInitGen);
   case PrepKind::Val:          popR(env); return push(env, TInitCell);
   case PrepKind::Ref:          popR(env); return push(env, TRef);
   }
 }
 
-void in(ISS& env, const bc::FPassVNop&) {
+void in(ISS& env, const bc::FPassVNop& op) {
   push(env, popV(env));
   if (fpiTop(env).kind == FPIKind::Builtin) {
-    return reduce(env, bc::Nop {});
+    return reduceFPassBuiltin(env, prepKind(env, op.arg1), op.subop2, op.arg1,
+                              bc::Nop {});
   }
-  nothrow(env);
+  if (op.subop2 != FPassHint::Cell) nothrow(env);
 }
 
-void in(ISS& env, const bc::FPassC& /*op*/) {
+void in(ISS& env, const bc::FPassC& op) {
   if (fpiTop(env).kind == FPIKind::Builtin) {
-    return reduce(env, bc::Nop {});
+    return reduceFPassBuiltin(env, prepKind(env, op.arg1), op.subop2, op.arg1,
+                              bc::Nop {});
   }
-  nothrow(env);
+  if (op.subop2 != FPassHint::Ref) nothrow(env);
 }
 
-void fpassCXHelper(ISS& env, uint32_t param, bool error) {
+void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
   auto const& fpi = fpiTop(env);
+  auto const kind = prepKind(env, param);
   if (fpi.kind == FPIKind::Builtin) {
-    switch (prepKind(env, param)) {
+    switch (kind) {
       case PrepKind::Unknown:
         not_reached();
       case PrepKind::Ref:
@@ -2309,15 +2327,25 @@ void fpassCXHelper(ISS& env, uint32_t param, bool error) {
         auto const& params = fpi.func->exactFunc()->params;
         if (param >= params.size() || params[param].mustBeRef) {
           if (error) {
-            return reduce(env,
-                          bc::String { s_byRefError.get() },
-                          bc::Fatal { FatalOp::Runtime });
+            return reduceFPassBuiltin(
+              env,
+              kind,
+              hint,
+              param,
+              bc::String { s_byRefError.get() },
+              bc::Fatal { FatalOp::Runtime }
+            );
           } else {
-            return reduce(env,
-                          bc::String { s_byRefWarn.get() },
-                          bc::Int { (int)ErrorMode::STRICT },
-                          bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
-                          bc::PopC {});
+            return reduceFPassBuiltin(
+              env,
+              kind,
+              hint,
+              param,
+              bc::String { s_byRefWarn.get() },
+              bc::Int { (int)ErrorMode::STRICT },
+              bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
+              bc::PopC {}
+            );
           }
         }
         // fall through
@@ -2327,19 +2355,19 @@ void fpassCXHelper(ISS& env, uint32_t param, bool error) {
     }
     not_reached();
   }
-  switch (prepKind(env, param)) {
+  switch (kind) {
     case PrepKind::Unknown: return;
-    case PrepKind::Val:     return reduce(env, bc::FPassC { param });
+    case PrepKind::Val:     return reduce(env, bc::FPassC { param, hint });
     case PrepKind::Ref:     /* will warn/fatal at runtime */ return;
   }
 }
 
 void in(ISS& env, const bc::FPassCW& op) {
-  fpassCXHelper(env, op.arg1, false);
+  fpassCXHelper(env, op.arg1, false, op.subop2);
 }
 
 void in(ISS& env, const bc::FPassCE& op) {
-  fpassCXHelper(env, op.arg1, true);
+  fpassCXHelper(env, op.arg1, true, op.subop2);
 }
 
 void pushCallReturnType(ISS& env, Type&& ty) {

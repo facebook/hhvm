@@ -288,7 +288,7 @@ final class Map implements \MutableMap {
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -314,7 +314,7 @@ final class Map implements \MutableMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -344,8 +344,8 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
+            FPassL 0 $k Any
+            FPassL 1 $v Any
             FCall 2
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -371,7 +371,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -402,7 +402,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             JmpZ next
@@ -430,7 +430,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -461,8 +461,8 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
+            FPassL 0 $k Any
+            FPassL 1 $v Any
             FCall 2
             UnboxR
             JmpZ next
@@ -490,7 +490,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -553,7 +553,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             JmpNZ skip
@@ -583,7 +583,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -885,7 +885,7 @@ final class ImmMap implements \ConstMap {
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -914,7 +914,7 @@ final class ImmMap implements \ConstMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -946,8 +946,8 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
+            FPassL 0 $k Any
+            FPassL 1 $v Any
             FCall 2
             UnboxR
             AssertRATL $res Obj=HH\Map
@@ -976,7 +976,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -1007,7 +1007,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             JmpZ next
@@ -1038,7 +1038,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -1069,8 +1069,8 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
+            FPassL 0 $k Any
+            FPassL 1 $v Any
             FCall 2
             UnboxR
             JmpZ next
@@ -1101,7 +1101,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw
@@ -1148,7 +1148,7 @@ EOT
            IterInitK 1 endloop $v $k
   .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
+            FPassL 0 $v Any
             FCall 1
             UnboxR
             JmpNZ skip
@@ -1181,7 +1181,7 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
+          FPassC 0 Any
           FCall 1
           PopR
           Throw

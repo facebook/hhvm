@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -735,6 +736,16 @@ void implUnboxR(IRGS& env) {
   }
 }
 
+void implBoxR(IRGS& env) {
+  auto const value = pop(env, DataTypeGeneric);
+  auto const boxed = boxHelper(
+    env,
+    gen(env, AssertType, TCell | TBoxedInitCell, value),
+    [] (SSATmp* ) {});
+  push(env, boxed);
+}
+
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -1258,6 +1269,61 @@ void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot) {
 
 //////////////////////////////////////////////////////////////////////
 
+void checkFPassHint(IRGS& env, uint32_t paramId, int off, FPassHint hint,
+                    bool byRef) {
+  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+  switch (hint) {
+  case FPassHint::Any: return;
+  case FPassHint::Cell:
+    if (!byRef) return;
+    break;
+  case FPassHint::Ref:
+    if (byRef) return;
+    break;
+  }
+
+  auto const& fpiStack = env.irb->fs().fpiStack();
+  if (!fpiStack.empty() && fpiStack.back().func) {
+    auto const str = makeStaticString([&] {
+      if (hint == FPassHint::Ref) {
+        return folly::sformat(
+          "{}() expects parameter {} by value, but the call was "
+          "annotated with '&'",
+          fpiStack.back().func->fullName(), paramId + 1);
+      }
+      return folly::sformat(
+        "{}() expects parameter {} by reference, but the call was "
+        "not annotated with '&'",
+        fpiStack.back().func->fullName(), paramId + 1);
+    }());
+    gen(env, RaiseWarning, cns(env, str));
+    return;
+  }
+
+  auto const actRecOff = offsetFromIRSP(env, BCSPRelOffset { off });
+  auto const funcptr = gen(env, LdARFuncPtr, TFunc,
+                           IRSPRelOffsetData { actRecOff }, sp(env));
+  gen(
+    env,
+    RaiseParamRefMismatch,
+    RaiseParamRefMismatchData { paramId },
+    funcptr
+  );
+}
+
+void emitRaiseFPassWarning(
+  IRGS& env, FPassHint hint, const StringData* fname, uint32_t arg
+) {
+  if (!RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) return;
+
+  assertx(hint != FPassHint::Any);
+  auto const str = makeStaticString(
+    formatParamRefMismatch(fname->data(), arg, hint == FPassHint::Cell)
+  );
+
+  gen(env, RaiseWarning, cns(env, str));
+}
+
 /*
  * All fpass instructions spill the stack after they execute, because we are
  * sure to need that value in memory, regardless of whether we side-exit or
@@ -1271,63 +1337,85 @@ void emitFPushClsMethodF(IRGS& env, uint32_t numParams, uint32_t slot) {
  * work around it easily.
  */
 
-void emitFPassL(IRGS& env, uint32_t /*argNum*/, int32_t id) {
+void emitFPassC(IRGS& env, uint32_t argNum, FPassHint hint) {
+  checkFPassHint(env, argNum, argNum + 1, hint,
+                 env.currentNormalizedInstruction->preppedByRef);
+}
+
+void emitFPassVNop(IRGS& env, uint32_t argNum, FPassHint hint) {
+  checkFPassHint(env, argNum, argNum + 1, hint, true);
+}
+
+void emitFPassL(IRGS& env, uint32_t argNum, int32_t id, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
+    checkFPassHint(env, argNum, argNum, hint, true);
     emitVGetL(env, id);
   } else {
+    checkFPassHint(env, argNum, argNum, hint, false);
     emitCGetL(env, id);
   }
 }
 
-void emitFPassS(IRGS& env, uint32_t /*argNum*/, uint32_t slot) {
+void emitFPassS(IRGS& env, uint32_t argNum, uint32_t slot, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
+    checkFPassHint(env, argNum, argNum + 1, hint, true);
     emitVGetS(env, slot);
   } else {
+    checkFPassHint(env, argNum, argNum + 1, hint, false);
     emitCGetS(env, slot);
   }
 }
 
-void emitFPassG(IRGS& env, uint32_t /*argNum*/) {
+void emitFPassG(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
+    checkFPassHint(env, argNum, argNum + 1, hint, true);
     emitVGetG(env);
   } else {
+    checkFPassHint(env, argNum, argNum + 1, hint, false);
     emitCGetG(env);
   }
 }
 
-void emitFPassR(IRGS& env, uint32_t /*argNum*/) {
+void emitFPassR(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    PUNT(FPassR-byRef);
+    checkFPassHint(env, argNum, argNum + 1, hint, true);
+    implBoxR(env);
+  } else {
+    checkFPassHint(env, argNum, argNum + 1, hint, false);
+    implUnboxR(env);
   }
-
-  implUnboxR(env);
 }
 
 void emitUnboxR(IRGS& env) { implUnboxR(env); }
+void emitBoxR(IRGS& env) { implBoxR(env); }
 
-void emitFPassV(IRGS& env, uint32_t /*argNum*/) {
+void emitFPassV(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // FPassV is a no-op when the callee expects by ref.
+    checkFPassHint(env, argNum, argNum + 1, hint, true);
     return;
   }
 
+  checkFPassHint(env, argNum, argNum + 1, hint, false);
   auto const tmp = popV(env);
   pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
   decRef(env, tmp);
 }
 
-void emitFPassCE(IRGS& env, uint32_t /*argNum*/) {
+void emitFPassCE(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise an error
     PUNT(FPassCE-byRef);
   }
+  checkFPassHint(env, argNum, argNum + 1, hint, false);
 }
 
-void emitFPassCW(IRGS& env, uint32_t /*argNum*/) {
+void emitFPassCW(IRGS& env, uint32_t argNum, FPassHint hint) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     // Need to raise a warning
     PUNT(FPassCW-byRef);
   }
+  checkFPassHint(env, argNum, argNum + 1, hint, false);
 }
 
 //////////////////////////////////////////////////////////////////////

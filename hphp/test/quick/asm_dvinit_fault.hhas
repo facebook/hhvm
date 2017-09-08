@@ -8,7 +8,7 @@
   FPushFuncD 1 "var_dump"
     FPushFuncD 0 "main"
     FCall 0
-    FPassR 0
+    FPassR 0 Any
   FCall 1
   PopR
   Int 1

@@ -380,17 +380,18 @@ void finish_builtin(ISS& env,
   fpiPop(env);
 }
 
-void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef){
+void reduce_fpass_arg(ISS& env, const Bytecode& bc, uint32_t param, bool byRef,
+                      FPassHint hint) {
   auto ar = fpiTop(env);
   if (ar.kind == FPIKind::Builtin) {
-    return reduce(env, bc);
+    return reduceFPassBuiltin(env, prepKind(env, param), hint, param, bc);
   }
 
   if (byRef) {
-    return reduce(env, bc, bc::FPassVNop { param });
+    return reduce(env, bc, bc::FPassVNop { param, hint });
   }
 
-  return reduce(env, bc, bc::FPassC { param });
+  return reduce(env, bc, bc::FPassC { param, hint });
 }
 
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {

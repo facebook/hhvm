@@ -1970,6 +1970,11 @@ To string conversions:
 
   Raises a Hack array compat notice with the text in S0 as its message.
 
+| RaiseParamRefMismatch<paramIndex>, ND, S(Func), Er
+
+  Raise a warning indicating that the reffiness of a parameter was incorrectly
+  annotated at the callsite.
+
 | CheckStaticLoc<func,staticLocalName>, ND, NA, B
 
   Check whether the static local variable named 'staticLocalName' for

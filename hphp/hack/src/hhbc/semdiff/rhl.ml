@@ -311,11 +311,11 @@ let check_instruct_mutator asn i i' =
 
 let check_instruct_call asn i i' =
  match i, i' with
-  | FPassL (param_id,Local.Named s), FPassL (param_id', Local.Named s')
-    when param_id=param_id' && s=s' -> Some asn
-  | FPassL (_,_), _
-  | _, FPassL (_,_) -> None (* if this is pass by reference, might get aliasing
-                               so just wimp out for now *)
+  | FPassL (param_id,Local.Named s, h), FPassL (param_id', Local.Named s', h')
+    when param_id=param_id' && s=s' && h=h' -> Some asn
+  | FPassL (_,_,_), _
+  | _, FPassL (_,_,_) -> None (* if this is pass by reference, might get
+                                 aliasing so just wimp out for now *)
   | _,_ -> if i=i' then Some asn else None
 
 let check_instruct_base asn i i' =
@@ -364,9 +364,9 @@ let check_instruct_final asn i i' =
    | VGetM (n, MemberKey.EL l), VGetM (n', MemberKey.EL l')
    | VGetM (n, MemberKey.PL l), VGetM (n', MemberKey.PL l')
     when n=n' -> reads asn l l'
-   | FPassM (m,n,MemberKey.EL l), FPassM (m',n',MemberKey.EL l')
-   | FPassM (m,n,MemberKey.PL l), FPassM (m',n',MemberKey.PL l')
-    when m=m' && n=n' -> reads asn l l'
+   | FPassM (m,n,MemberKey.EL l,h), FPassM (m',n',MemberKey.EL l',h')
+   | FPassM (m,n,MemberKey.PL l,h), FPassM (m',n',MemberKey.PL l',h')
+    when m=m' && n=n' && h=h' -> reads asn l l'
    | SetM (n, MemberKey.EL l), SetM (n', MemberKey.EL l')
    | SetM (n, MemberKey.PL l), SetM (n', MemberKey.PL l')
     when n=n' -> reads asn l l'
@@ -829,12 +829,12 @@ and specials pc pc' ((props,vs,vs') as asn) assumed todo =
            check newpc newpc' asn (add_assumption (pc,pc') asn assumed) todo) in
 
         let fpassl_fpassl_pattern =
-          uFPassL $*$ uFPassL $? (fun ((pn,_l),(pn',_l')) -> pn=pn')
-                              $> (fun ((_pn,l),(_pn',l')) -> (l,l')) in
+          uFPassL $*$ uFPassL $? (fun ((pn,_l,h),(pn',_l',h')) -> pn=pn' && h=h')
+                              $> (fun ((_pn,l,_h),(_pn',l',_h')) -> (l,l')) in
         let any_pass_pattern =
           uFPassC $| uFPassCW $| uFPassCE $| uFPassV $| uFPassVNop $| uFPassR $|
-          uFPassN $| uFPassG $| (uFPassL $> (fun (param,_) -> param)) $|
-          (uFPassS $> (fun (param,_) -> param)) in
+          uFPassN $| uFPassG $| (uFPassL $> (fun (param,_,h) -> (param,h))) $|
+          (uFPassS $> (fun (param,_,h) -> (param,h))) in
         let any_pass_list_pattern = greedy_kleene any_pass_pattern in
         let any_call_pattern =
           uFCall $| (uFCallD $> (fun (np,_,_) -> np)) $|

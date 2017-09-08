@@ -465,7 +465,7 @@ void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
-void emitFPassN(IRGS& env, uint32_t)          { INTERP }
+void emitFPassN(IRGS& env,uint32_t,FPassHint) { INTERP }
 void emitCufSafeArray(IRGS& env)              { INTERP }
 void emitCufSafeReturn(IRGS& env)             { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }

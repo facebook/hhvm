@@ -38,7 +38,7 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   | "V", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
   | "F", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassC n) :: buf, "F" :: extra
+    ILitConst (Int (Int64.of_int 1)) :: ICall (FPassC (n, Any)) :: buf, "F" :: extra
   | "R", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
@@ -144,7 +144,7 @@ let stk_data : instruct -> stack_sig = function
   | IFinal SetOpM (n, _, _)
   | IMisc MemoSet (n, _, _)
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
-  | IFinal FPassM (_, n, _)
+  | IFinal FPassM (_, n, _, _)
   | IFinal VGetM (n, _)                    -> produce "C" n, ["V"]
   | IFinal UnsetM (n, _)                   -> produce "C" n, []
   | IFinal BindM (n, _)                    -> produce "V" (n + 1), ["V"]

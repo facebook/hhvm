@@ -1078,7 +1078,8 @@ std::set<int> localImmediates(Op op) {
 #define AA(n)
 #define RATA(n)
 #define BA(n)
-#define OA(op)
+#define EMPTY_OA(n)
+#define OA(op) EMPTY_OA
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
@@ -1104,6 +1105,7 @@ std::set<int> localImmediates(Op op) {
 #undef AA
 #undef RATA
 #undef BA
+#undef EMPTY_OA
 #undef OA
 #undef VSA
 #undef KA
@@ -1375,6 +1377,16 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       // by the runtime.
       cur->silences.clear();
       break;
+    case Op::RaiseFPassWarning: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      if (decode_oa<FPassHint>(new_pc) == FPassHint::Any) {
+        ferror("RaiseFPassWarning at PC {} with immediate value 'Any',"
+               "allowable FPassHint values for this opcode are 'Cell' and "
+               "'Ref'\n", offset(pc));
+      }
+      break;
+    }
 
     default:
       break;

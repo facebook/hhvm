@@ -2211,9 +2211,17 @@ CufSafeReturn  [C C R] -> [R]
 
   Pops 3 elements from the stack, and pushes $2 ? $1 : $3, preserving refs.
 
-FPassC <param id>     [C]  ->  [F]
-FPassCW <param id>    [C]  ->  [F]
-FPassCE <param id>    [C]  ->  [F]
+
+Reffiness hints
+--------------------
+  All of the FPass* instructions take a parameter id, %1, and a reffiness hint,
+  %2, which may be 'Any', 'Cell', or 'Ref'. If the reffiness hint %2 is not
+  'Any' and does not match the reffiness of parameter %1 the runtime may raise
+  a warning. The value of %2 has no other effect on these instructions.
+
+FPassC <param id> <reffiness hint>     [C]  ->  [F]
+FPassCW <param id> <reffiness hint>    [C]  ->  [F]
+FPassCE <param id> <reffiness hint>    [C]  ->  [F]
 
   FPI pass parameter. This instruction pushes $1 onto the stack as a cell
   regardless of whether parameter %1 is pass by value or pass by reference.
@@ -2223,44 +2231,50 @@ FPassCE <param id>    [C]  ->  [F]
   function that can accept a cell for parameter %1. If this condition is not
   met, FPassCW will raise a warning while FPassCE will throw a fatal error.
 
-FPassV <param id>    [V]  ->  [F]
+FPassV <param id> <reffiness hint>    [V]  ->  [F]
 
   FPI pass parameter. If parameter %1 is pass by value, this instruction will
   unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
   reference, this instruction will push $1 onto the stack as a ref.
 
-FPassVNop <param id> [V]  ->  [F]
+FPassVNop <param id> <reffiness hint> [V]  ->  [F]
 
   FPI pass parameter, no op. Parameter %1 must be statically known to be pass
   by reference. This instruction pushes $1 onto the stack as a ref.
 
-FPassR <param id>    [R]  ->  [F]
+FPassR <param id> <reffiness hint>    [R]  ->  [F]
 
   FPI pass parameter. If $1 is a cell at run time, this instruction will behave
   like FPassC. Otherwise, this instruction will behave like FPassV.
 
-FPassL <param id> <local variable id>    []  ->  [F]
+FPassL <param id> <local variable id> <reffiness hint>    []  ->  [F]
 
   FPI pass local as parameter. This instruction behaves as CGetL if parameter
   %1 is pass by value, or it behaves like VGetL if parameter %1 is pass by
   reference.
 
-FPassN <param id>    [C]  ->  [F]
+FPassN <param id> <reffiness hint>    [C]  ->  [F]
 
   FPI pass local as parameter. This instruction behaves as CGetN if parameter
   %1 is pass by value, or it behaves like VGetN if parameter %1 is pass by
   reference.
 
-FPassG <param id>    [C]  ->  [F]
+FPassG <param id> <reffiness hint>    [C]  ->  [F]
 
   FPI pass global as parameter. This instruction behaves as CGetG if parameter
   %1 is pass by value, or it behaves like VGetG if parameter %1 is pass by
   reference.
 
-FPassS <param id> <class-ref slot>    [C]  ->  [F]
+FPassS <param id> <class-ref slot> <reffiness hint>    [C]  ->  [F]
 
   FPI pass parameter. This instruction behaves as CGetS if parameter %1 is pass
   by value, or it behaves like VGetS if parameter %1 is pass by reference.
+
+RaiseFPassWarning <reffiness hint> <func name> <param id> []  -> []
+
+  Raise a warning as if the FPass* instruction for parameter %3 to function
+  %2, with a reffiness hint of %1, did not match the reffiness of the
+  corresponding parameter for that function.
 
 FCall <num params>    [F..F]  ->  [R]
 

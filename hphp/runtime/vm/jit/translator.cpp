@@ -308,8 +308,12 @@ static const struct {
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
                                       StackTop2|FStack,
                                                     OutFPushCufSafe }},
-  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput1  }},
-  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput1  }},
+  { OpRaiseFPassWarning,
+                   {None,             None,         OutNone         }},
+  { OpFPassC,      {FuncdRef,         None,         OutSameAsInput1 }},
+  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput1 }},
+  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput1 }},
+  { OpFPassVNop,   {FuncdRef,         None,         OutSameAsInput1 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR      }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL      }},
@@ -593,8 +597,6 @@ bool isAlwaysNop(Op op) {
   switch (op) {
   case Op::BoxRNop:
   case Op::DefClsNop:
-  case Op::FPassC:
-  case Op::FPassVNop:
   case Op::Nop:
   case Op::UnboxRNop:
   case Op::RGetCNop:
@@ -602,6 +604,9 @@ bool isAlwaysNop(Op op) {
   case Op::UGetCUNop:
   case Op::EntryNop:
     return true;
+  case Op::FPassC:
+  case Op::FPassVNop:
+    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
     return !RuntimeOption::EvalCheckReturnTypeHints;
@@ -1091,9 +1096,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::UnsetN:
   case Op::UnsetG:
   case Op::FPushObjMethod:
-  case Op::FPassC:
-  case Op::FPassVNop:
-  case Op::FPassN:
   case Op::FCallUnpack:
   case Op::CufSafeArray:
   case Op::CufSafeReturn:
@@ -1114,6 +1116,12 @@ bool dontGuardAnyInputs(Op op) {
   case Op::MaybeMemoType:
   case Op::IsMemoType:
     return true;
+
+  case Op::RaiseFPassWarning:
+  case Op::FPassVNop:
+  case Op::FPassN:
+  case Op::FPassC:
+    return !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch;
   }
 
   always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(op));

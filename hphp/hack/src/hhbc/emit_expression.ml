@@ -554,7 +554,7 @@ and emit_class_get env param_num_opt qop need_ref cid prop =
     | (None, QueryOp.CGetQuiet) -> failwith "emit_class_get: CGetQuiet"
     | (None, QueryOp.Isset) -> instr_issets
     | (None, QueryOp.Empty) -> instr_emptys
-    | (Some i, _) -> instr (ICall (FPassS (i, 0)))
+    | (Some (i, h), _) -> instr (ICall (FPassS (i, 0, h)))
   ]
 
 (* Class constant <cid>::<id>.
@@ -823,7 +823,7 @@ and emit_xhp_obj_get_raw env e s nullflavor =
 and emit_xhp_obj_get ~need_ref env param_num_opt e s nullflavor =
   let call = emit_xhp_obj_get_raw env e s nullflavor in
   match param_num_opt with
-  | Some i -> gather [ call; instr_fpassr i ]
+  | Some (i, h) -> gather [ call; instr_fpassr i h ]
   | None -> gather [ call; if need_ref then instr_boxr else instr_unboxr ]
 
 and emit_get_class_no_args () =
@@ -1290,9 +1290,10 @@ and emit_quiet_expr env (_, expr_ as expr) =
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get ~need_ref env param_num_opt qop base_expr opt_elem_expr =
+and emit_array_get ~need_ref env param_num_hint_opt qop base_expr opt_elem_expr =
   let mode = get_queryMOpMode need_ref qop in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs env opt_elem_expr in
+  let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
   let base_expr_instrs_begin,
       base_expr_instrs_end,
       base_setup_instrs,
@@ -1305,13 +1306,13 @@ and emit_array_get ~need_ref env param_num_opt qop base_expr opt_elem_expr =
   let total_stack_size = elem_stack_size + base_stack_size in
   let final_instr =
     instr (IFinal (
-      match param_num_opt with
+      match param_num_hint_opt with
       | None ->
         if need_ref then
           VGetM (total_stack_size, mk)
         else
           QueryM (total_stack_size, qop, mk)
-      | Some i -> FPassM (i, total_stack_size, mk)
+      | Some (i, h) -> FPassM (i, total_stack_size, mk, h)
     )) in
   gather [
     base_expr_instrs_begin;
@@ -1325,11 +1326,12 @@ and emit_array_get ~need_ref env param_num_opt qop base_expr opt_elem_expr =
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_obj_get ~need_ref env param_num_opt qop expr prop null_flavor =
+and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
   match snd prop with
   | A.Id (_, s) when SU.Xhp.is_xhp s ->
-    emit_xhp_obj_get ~need_ref env param_num_opt expr s null_flavor
+    emit_xhp_obj_get ~need_ref env param_num_hint_opt expr s null_flavor
   | _ ->
+    let param_num_opt = Option.map ~f:(fun (n, _h) -> n) param_num_hint_opt in
     let mode = get_queryMOpMode need_ref qop in
     let prop_expr_instrs, prop_stack_size = emit_prop_instrs env prop in
     let base_expr_instrs_begin,
@@ -1344,13 +1346,13 @@ and emit_obj_get ~need_ref env param_num_opt qop expr prop null_flavor =
     let total_stack_size = prop_stack_size + base_stack_size in
     let final_instr =
       instr (IFinal (
-        match param_num_opt with
+        match param_num_hint_opt with
         | None ->
           if need_ref then
             VGetM (total_stack_size, mk)
           else
             QueryM (total_stack_size, qop, mk)
-        | Some i -> FPassM (i, total_stack_size, mk)
+        | Some (i, h) -> FPassM (i, total_stack_size, mk, h)
       )) in
     gather [
       base_expr_instrs_begin;
@@ -1616,37 +1618,48 @@ and emit_base ~is_object ~notice env mode base_offset param_num_opt (_, expr_ as
      1
 
 and emit_arg env i (pos, expr_ as expr) =
+  let force_hh =
+    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+  let is_hh = Emit_env.is_hh_file () in
+  let with_ref = expr_starts_with_ref expr in
+  let hint = match (is_hh || force_hh, with_ref) with
+  | (true, true) -> Ref
+  | (true, false) -> Cell
+  | (false, _) -> Any in
+  let expr_ = match expr_ with
+  | A.Unop (A.Uref, (_, e)) -> e
+  | _ -> expr_ in
   Emit_pos.emit_pos_then pos @@
   match expr_ with
   | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
     gather [
       instr_string (SU.Locals.strip_dollar x);
-      instr_fpassg i
+      instr_fpassg i hint
     ]
 
   | A.Lvar ((_, str) as id)
     when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
-    instr_fpassl i (get_local env id)
+    instr_fpassl i (get_local env id) hint
   | A.Lvarvar (n, id) ->
     gather [
       instr_cgetl (get_non_pipe_local id);
       instr_cgetn_seq (n - 1);
-      instr_fpassn i
+      instr_fpassn i hint
     ]
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
-      instr_fpassg i
+      instr_fpassg i hint
     ]
 
   | A.Array_get (base_expr, opt_elem_expr) ->
-    emit_array_get ~need_ref:false env (Some i) QueryOp.CGet base_expr opt_elem_expr
+    emit_array_get ~need_ref:false env (Some (i, hint)) QueryOp.CGet base_expr opt_elem_expr
 
   | A.Obj_get (e1, e2, nullflavor) ->
-    emit_obj_get ~need_ref:false env (Some i) QueryOp.CGet e1 e2 nullflavor
+    emit_obj_get ~need_ref:false env (Some (i, hint)) QueryOp.CGet e1 e2 nullflavor
 
   | A.Class_get (cid, e) ->
-    emit_class_get env (Some i) QueryOp.CGet false cid e
+    emit_class_get env (Some (i, hint)) QueryOp.CGet false cid e
 
   | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar id)) ->
     let local = get_local env id in
@@ -1655,15 +1668,15 @@ and emit_arg env i (pos, expr_ as expr) =
     gather [
       lhs_instrs;
       set_instrs;
-      instr_fpassl i local;
+      instr_fpassl i local hint;
     ]
 
   | _ ->
     let instrs, flavor = emit_flavored_expr env expr in
     let fpass_kind = match flavor with
-      | Flavor.Cell -> instr_fpass (get_passByRefKind expr) i
-      | Flavor.Ref -> instr_fpassv i
-      | Flavor.ReturnVal -> instr_fpassr i
+      | Flavor.Cell -> instr_fpass (get_passByRefKind expr) i hint
+      | Flavor.Ref -> instr_fpassv i hint
+      | Flavor.ReturnVal -> instr_fpassr i hint
     in
     gather [
       instrs;
@@ -1839,7 +1852,7 @@ and get_call_builtin_func_info fn_name =
 and emit_call_user_func_args env i expr =
   gather [
     emit_expr ~need_ref:false env expr;
-    instr_fpass PassByRefKind.AllowCell i;
+    instr_fpass PassByRefKind.AllowCell i Any;
   ]
 
 and emit_call_user_func env id arg args =

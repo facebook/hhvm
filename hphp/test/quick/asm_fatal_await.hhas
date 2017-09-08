@@ -2,7 +2,7 @@
   FPushFuncD 1 "HH\\Asio\\join"
   FPushFuncD 0 "main"
   FCall 0
-  FPassR 0
+  FPassR 0 Any
   FCall 1
   PopR
   Null

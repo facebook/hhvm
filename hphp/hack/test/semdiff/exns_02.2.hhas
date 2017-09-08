@@ -22,7 +22,7 @@
         JmpZ L0
         FPushCtorD 1 "Exception"
         String "exception 1"
-        FPassCE 0
+        FPassCE 0 Any
         FCall 1
         PopR
         Throw
@@ -45,7 +45,7 @@
             JmpZ L3
             FPushCtorD 1 "Exception"
             String "exception 3"
-            FPassCE 0
+            FPassCE 0 Any
             FCall 1
             PopR
             Throw
@@ -85,7 +85,7 @@
       JmpZ L6
       FPushCtorD 1 "Exception"
       String "exception 2"
-      FPassCE 0
+      FPassCE 0 Any
       FCall 1
       PopR
       Throw
@@ -127,7 +127,7 @@ F9:
     JmpZ L7
     FPushCtorD 1 "Exception"
     String "exception 2"
-    FPassCE 0
+    FPassCE 0 Any
     FCall 1
     PopR
     Throw

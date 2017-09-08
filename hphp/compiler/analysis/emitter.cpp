@@ -978,7 +978,8 @@ public:
   void emitConvertToCellOrLoc(Emitter& e);
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
-  void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind);
+  void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind,
+                 FPassHint hint);
   void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
@@ -1197,6 +1198,16 @@ public:
                                     bool alloc);
   ControlTargetPtr registerGoto(StatementPtr s, Region* entry,
                                 StringData* name, bool alloc);
+
+  FPassHint getPassByRefHint(ExpressionPtr exp) {
+    if (!SystemLib::s_inited) return FPassHint::Any;
+    if (!m_ue.m_isHHFile && !RuntimeOption::EnableHipHopSyntax) {
+      return FPassHint::Any;
+    }
+    return exp->hasContext(Expression::RefParameter)
+      ? FPassHint::Ref
+      : FPassHint::Cell;
+  }
 };
 
 //=============================================================================
@@ -5258,7 +5269,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (el->getType() == '`') {
       emitConvertToCell(e);
-      e.FPassC(0);
+      e.FPassC(0, FPassHint::Cell);
       delete fpi;
       e.FCall(1);
     }
@@ -6382,7 +6393,7 @@ bool EmitterVisitor::emitInlineGenva(
       emitCGet(e);
     }
     e.NewPackedArray(num_params);
-    emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+    emitFPass(e, 0, PassByRefKind::ErrorOnCell, FPassHint::Cell);
   }
   e.FCall(1);
   e.UnboxR();
@@ -6489,7 +6500,7 @@ bool EmitterVisitor::emitInlineGena(
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fromArrayStart);
     emitVirtualLocal(array);
-    e.FPassL(0, array);
+    e.FPassL(0, array, FPassHint::Cell);
   }
   e.FCall(1);
   e.UnboxR();
@@ -7197,11 +7208,12 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
     emitConvertToCell(e);
     kind = PassByRefKind::AllowCell;
   }
-  emitFPass(e, paramId, kind);
+  emitFPass(e, paramId, kind, getPassByRefHint(exp));
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
-                               PassByRefKind passByRefKind) {
+                               PassByRefKind passByRefKind,
+                               FPassHint hint) {
   if (checkIfStackEmpty("FPass*")) return;
   LocationGuard locGuard(e, m_tempLoc);
   m_tempLoc.clear();
@@ -7214,25 +7226,25 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L:  e.FPassL(paramId, m_evalStack.getLoc(i)); break;
+      case StackSym::L: e.FPassL(paramId, m_evalStack.getLoc(i), hint); break;
       case StackSym::C:
         switch (passByRefKind) {
-          case PassByRefKind::AllowCell:   e.FPassC(paramId); break;
-          case PassByRefKind::WarnOnCell:  e.FPassCW(paramId); break;
-          case PassByRefKind::ErrorOnCell: e.FPassCE(paramId); break;
+          case PassByRefKind::AllowCell:   e.FPassC(paramId, hint); break;
+          case PassByRefKind::WarnOnCell:  e.FPassCW(paramId, hint); break;
+          case PassByRefKind::ErrorOnCell: e.FPassCE(paramId, hint); break;
           default: assert(false);
         }
         break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CN: e.FPassN(paramId); break;
+      case StackSym::CN: e.FPassN(paramId, hint); break;
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CG: e.FPassG(paramId); break;
+      case StackSym::CG: e.FPassG(paramId, hint); break;
       case StackSym::LS: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CS:
-        e.FPassS(paramId, kClsRefSlotPlaceholder);
+        e.FPassS(paramId, kClsRefSlotPlaceholder, hint);
         break;
-      case StackSym::V:  e.FPassV(paramId); break;
-      case StackSym::R:  e.FPassR(paramId); break;
+      case StackSym::V:  e.FPassV(paramId, hint); break;
+      case StackSym::R:  e.FPassR(paramId, hint); break;
       default: {
         unexpectedStackSym(sym, "emitFPass");
         break;
@@ -7240,7 +7252,9 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
     }
   } else {
     auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{paramId});
-    e.FPassM(paramId, stackCount, symToMemberKey(e, iLast, true /* allowW */));
+    e.FPassM(
+      paramId, stackCount, symToMemberKey(e, iLast, true /* allowW */), hint
+    );
   }
 }
 
@@ -9027,7 +9041,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
       for (uint32_t i = 0; i < numParams; i++) {
         emitVirtualLocal(i);
-        emitFPass(e, i, PassByRefKind::ErrorOnCell);
+        emitFPass(e, i, PassByRefKind::ErrorOnCell, FPassHint::Cell);
       }
     }
     e.FCall(numParams);
@@ -9375,7 +9389,22 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     for (int i = param; i < nParams; i++) {
       visit((*params)[i]);
       emitConvertToCell(e);
-      e.FPassC(i - param);
+      auto hint = getPassByRefHint((*params)[i]);
+
+      // The passthrough type of call_user_func is always cell or any, so
+      // any call to a function taking a ref will result in a warning. In
+      // addition designating a ref on a parameter to call_user_func will
+      // itself result in a warning.
+      if (hint == FPassHint::Ref) {
+        e.RaiseFPassWarning(
+          hint, makeStaticString(func->getOriginalName()), i
+        );
+        hint = FPassHint::Cell;
+      }
+
+      // TODO(T21236852): This is broken, we need to raise a warning here if
+      // the callee does not expect the parameter to be by value.
+      e.FPassC(i - param, hint);
     }
   }
 

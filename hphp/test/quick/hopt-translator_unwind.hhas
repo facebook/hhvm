@@ -4,7 +4,7 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   PopR
 
@@ -15,7 +15,7 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCE 0
+    FPassCE 0 Any
   FCall 1
   PopR
 
@@ -45,7 +45,7 @@
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   PopR
   Throw
@@ -87,7 +87,7 @@
 
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
-    FPassL 0 $id
+    FPassL 0 $id Any
   FCall 1
   PopR
   RetC
@@ -111,21 +111,21 @@
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   SetL $k_2

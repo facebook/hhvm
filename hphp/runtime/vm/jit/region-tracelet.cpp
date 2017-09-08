@@ -236,7 +236,7 @@ bool prepareInstruction(Env& env) {
     // instrFpToArDelta includes locals and iterators, so when we're in a
     // resumed context we have to adjust for the fact that they're in a
     // different place.
-    auto argNum = env.inst.imm[0].u_IVA;
+    auto argNum =  env.inst.imm[0].u_IVA;
     auto entryArDelta = env.ctx.spOffset.offset -
       instrFpToArDelta(curFunc(env), env.inst.pc());
     if (env.sk.resumed()) entryArDelta += curFunc(env)->numSlotsInFrame();

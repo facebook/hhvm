@@ -2358,7 +2358,7 @@
 
   NewPackedArray 2345
 
-  FPassC 0
+  FPassC 0 Any
   FCall 1
   PopR
 

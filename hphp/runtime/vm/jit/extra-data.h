@@ -1258,6 +1258,18 @@ struct BeginInliningData : IRExtraData {
   int cost;
 };
 
+struct RaiseParamRefMismatchData : IRExtraData {
+  explicit RaiseParamRefMismatchData(uint32_t paramId)
+    : paramId(paramId)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(paramId);
+  }
+
+  uint32_t paramId;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1372,6 +1384,7 @@ X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
+X(RaiseParamRefMismatch,        RaiseParamRefMismatchData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 ByteOffsetData);

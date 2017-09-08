@@ -43,10 +43,14 @@ void print_string(StringData* s);
 void print_int(int64_t i);
 void print_boolean(bool val);
 
+std::string formatParamRefMismatch(const char* fname, uint32_t index,
+                                   bool funcByRef);
+
 void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
 void raiseArrayIndexNotice(int64_t index);
 void raiseArrayKeyNotice(const StringData* key);
+void raiseParamRefMismatch(uint32_t index, const Func* func);
 
 inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {
   return

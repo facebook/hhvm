@@ -22,7 +22,7 @@
   SetM -1 PC:1
   PopC
   FPushFuncD 1 "var_dump"
-  FPassL 0 $foo
+  FPassL 0 $foo Any
   FCall 1
   PopR
   Int 1

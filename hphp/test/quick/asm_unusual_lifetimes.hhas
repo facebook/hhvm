@@ -16,9 +16,9 @@
   PopC
 
   FPushFuncD 2 "main"
-    FPassL 0 $a
+    FPassL 0 $a Any
     UnsetL $a
-    FPassL 1 $b
+    FPassL 1 $b Any
     UnsetL $b
   FCall 2
   UnboxR

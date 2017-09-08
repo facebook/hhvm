@@ -9,13 +9,13 @@
 
   FPushFuncD 1 "foo"
   Int 0
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "foo"
   String "hi"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
@@ -26,53 +26,53 @@
   PopC
 
   FPushFuncD 1 "bar"
-  FPassL 0 $x
+  FPassL 0 $x Any
   FCall 1
   PopR
 
   FPushFuncD 1 "bar"
   String "hi"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "bar"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "baz"
-  FPassL 0 $x
+  FPassL 0 $x Any
   FCall 1
   PopR
 
   FPushFuncD 1 "baz"
   String "hi"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "baz"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "quux"
-  FPassL 0 $x
+  FPassL 0 $x Any
   FCall 1
   PopR
 
   FPushFuncD 1 "quux"
   String "hi"
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 
   FPushFuncD 1 "quux"
   Null
-  FPassCE 0
+  FPassCE 0 Any
   FCall 1
   PopR
 

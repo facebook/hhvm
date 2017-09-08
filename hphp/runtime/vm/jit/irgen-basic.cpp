@@ -125,38 +125,6 @@ void emitCGetL2(IRGS& env, int32_t id) {
   push(env, oldTop);
 }
 
-template<class F>
-SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {
-  auto const t = value->type();
-  if (t <= TCell) {
-    if (t <= TUninit) {
-      value = cns(env, TInitNull);
-    }
-    value = gen(env, Box, value);
-    rewrite(value);
-  } else if (t.maybe(TCell)) {
-    value = cond(env,
-                 [&](Block* taken) {
-                   auto const ret = gen(env, CheckType, TBoxedInitCell,
-                                        taken, value);
-                   env.irb->constrainValue(ret, DataTypeSpecific);
-                   return ret;
-                 },
-                 [&](SSATmp* box) { // Next: value is Boxed
-                   return box;
-                 },
-                 [&] { // Taken: value is not Boxed
-                   auto const tmpType = t - TBoxedInitCell;
-                   assertx(tmpType <= TCell);
-                   auto const tmp = gen(env, AssertType, tmpType, value);
-                   auto const ret = gen(env, Box, tmp);
-                   rewrite(ret);
-                   return ret;
-                 });
-  }
-  return value;
-}
-
 void emitVGetL(IRGS& env, int32_t id) {
   auto const value = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountnessInit);
   auto const boxed = boxHelper(
@@ -171,15 +139,6 @@ void emitVGetL(IRGS& env, int32_t id) {
 
 void emitBox(IRGS& env) {
   push(env, gen(env, Box, pop(env, DataTypeGeneric)));
-}
-
-void emitBoxR(IRGS& env) {
-  auto const value = pop(env, DataTypeGeneric);
-  auto const boxed = boxHelper(
-    env,
-    gen(env, AssertType, TCell | TBoxedInitCell, value),
-    [] (SSATmp* ) {});
-  push(env, boxed);
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
@@ -633,8 +592,6 @@ void emitUGetCUNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
 void emitRGetCNop(IRGS&)           {}
-void emitFPassC(IRGS&, uint32_t)   {}
-void emitFPassVNop(IRGS&, uint32_t){}
 void emitDefClsNop(IRGS&, uint32_t){}
 void emitBreakTraceHint(IRGS&)     {}
 

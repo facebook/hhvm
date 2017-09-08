@@ -181,6 +181,15 @@ struct InstrVisitor {
     }
   }
 
+  void imm(FPassHint hint) {
+    out.append(" ");
+    switch (hint) {
+#define OP(name) case FPassHint::name: out.append( #name ); break;
+      FPASS_HINT_OPS
+#undef OP
+    }
+  }
+
   void imm(const bc::MemberKey& mk) {
     using namespace bc;
     out.append(" ");

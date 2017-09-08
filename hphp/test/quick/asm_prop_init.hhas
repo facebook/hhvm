@@ -102,7 +102,7 @@
 .function init_test {
   FPushFuncD 1 "do_test"
     String "Init"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   RetC
@@ -111,7 +111,7 @@
 .function uninit_test {
   FPushFuncD 1 "do_test"
     String "Uninit"
-    FPassC 0
+    FPassC 0 Any
   FCall 1
   UnboxR
   RetC

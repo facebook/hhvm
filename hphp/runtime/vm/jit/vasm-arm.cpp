@@ -35,10 +35,10 @@
  *
  * movzbw: Vreg8 -> Vreg16: mov w0, w0 #nop if s==d
  * movzbl: Vreg8 -> Vreg32: mov w0, w0 #nop if s==d
- * movzbq: Vreg8 -> Vreg64: mov x0, x0 #nop if s==d
+ * movzbq: Vreg8 -> Vreg64: uxtb x0, x0
  * movzwl: Vreg16 -> Vreg32 mov w0, w0 #nop if s==d
- * movzwq: Vreg16 -> Vreg64 mov x0, x0 #nop if s==d
- * movzlq: Vreg32 -> Vreg64 mov x0, x0 #nop if s==d
+ * movzwq: Vreg16 -> Vreg64 uxth x0, x0
+ * movzlq: Vreg32 -> Vreg64 uxtw x0, x0
  * movtqb: Vreg64 -> Vreg8:  uxtb w0, w0
  * movtql: Vreg64 -> Vreg32: uxtw w0, w0
  *
@@ -347,6 +347,9 @@ struct Vgen {
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
+  void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
+  void emit(const movzwq& i) { a->Uxth(X(i.d), W(i.s).X()); }
+  void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
   void emit(const nop& /*i*/) { a->Nop(); }
@@ -1545,19 +1548,7 @@ void lower(const VLS& e, movzbl& i, Vlabel b, size_t z) {
   lower_movz(e, i, b, z);
 }
 
-void lower(const VLS& e, movzbq& i, Vlabel b, size_t z) {
-  lower_movz(e, i, b, z);
-}
-
 void lower(const VLS& e, movzwl& i, Vlabel b, size_t z) {
-  lower_movz(e, i, b, z);
-}
-
-void lower(const VLS& e, movzwq& i, Vlabel b, size_t z) {
-  lower_movz(e, i, b, z);
-}
-
-void lower(const VLS& e, movzlq& i, Vlabel b, size_t z) {
   lower_movz(e, i, b, z);
 }
 

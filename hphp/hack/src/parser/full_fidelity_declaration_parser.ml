@@ -1037,6 +1037,8 @@ module WithExpressionAndStatementAndTypeParser
      *)
      (* The type specifier is optional in non-strict mode and required in
         strict mode. We give an error in a later pass. *)
+     let has_abstract_modifier =
+         modifiers |> syntax_node_to_list |> Core_list.exists ~f:is_abstract in
      let (parser, prop_type) = match peek_token_kind parser with
      | Variable -> (parser, make_missing())
      | _ -> parse_type_specifier parser in
@@ -1044,6 +1046,11 @@ module WithExpressionAndStatementAndTypeParser
        parser Semicolon SyntaxError.error1008 parse_property_declarator in
      let (parser, semi) = require_semicolon parser in
      let result = make_property_declaration modifiers prop_type decls semi in
+     let parser =
+       if has_abstract_modifier then
+         with_error parser SyntaxError.error2058
+       else
+         parser in
      (parser, result)
 
   and parse_property_declarator parser =

@@ -201,3 +201,4 @@ let error2054 = "Method declarations require a visibility modifier " ^
 let error2055 = "At least one enumerated item is expected."
 let error2056 = "First unbracketed namespace occurrence here"
 let error2057 = "First bracketed namespace occurrence here"
+let error2058 = "Property may not be abstract."

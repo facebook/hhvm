@@ -208,8 +208,9 @@ module Lost_env = struct
 
   and params = {
     message: string; (* e.g. "hh_server has crashed." *)
-    trigger_on_lsp: bool; (* regain if we receive any LSP request/notification *)
-    trigger_on_lock_file: bool; (* regain if lockfile is created *)
+    restart_on_click: bool; (* if user clicks Restart, do we ClientStart before reconnecting? *)
+    trigger_on_lsp: bool; (* reconnect if we receive any LSP request/notification *)
+    trigger_on_lock_file: bool; (* reconnect if lockfile is created *)
   }
 end
 
@@ -1214,13 +1215,13 @@ let connect_client
   let env_connect =
     { ClientConnect.
       root;
-      autostart = true;
+      autostart = false;
       force_dormant_start = false;
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
-      no_load = false;
+      no_load = false; (* only relevant when autostart=true *)
       profile_log = false; (* irrelevant *)
-      ai_mode = None;
+      ai_mode = None; (* only relevant when autostart=true *)
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;
     } in
@@ -1231,27 +1232,16 @@ let connect_client
     { ic; oc; hhconfig_version; pending_messages; }
   with
   | Exit_with No_server_running ->
-    (* Raised when (1) the connection was refused/timed-out and no lockfile *)
-    (* is present; (2)) server was dormant and had already received too     *)
-    (* many pending connection requests. In all cases more detail has       *)
-    (* been printed to stderr.                                              *)
-    (* How should the user react? -- they can read the console to find out  *)
-    (* more; they can try to restart at the command-line; or they can try   *)
-    (* to restart within their editor.                                      *)
-    raise (ServerErrorStart (
-      "Attempts to start Hack server have failed; see console for details.",
-      { Lsp.Initialize.retry = true; }))
+    (* Raised when (1) the server's simply not running, or there's some other *)
+    (* reason why the connection was refused/timed-out and no lockfile is     *)
+    (* present; (2) server was dormant and had already received too many      *)
+    (* pending connection requests.                                           *)
+    raise (ServerErrorStart ("no server running", { Lsp.Initialize.retry = true; }))
   | Exit_with Out_of_retries
   | Exit_with Out_of_time ->
-    (* Raised when we couldn't complete the entire handshake despite        *)
-    (* repeated attempts. Most likely because hh_server was busy loading    *)
-    (* saved-state, or failed to load saved-state and had to initialize     *)
-    (* everything itself.                                                   *)
-    (* How should the user react? -- as above, by reading the console, by   *)
-    (* attempting restart at the command-line or in editor.                 *)
-    raise (ServerErrorStart (
-      "The Hack server is busy and unable to provide language services.",
-      { Lsp.Initialize.retry = true; }))
+    (* Raised when we couldn't complete the handshake up to handoff           *)
+    (* within 3 attempts over 3 seconds. Unexpected.                          *)
+    raise (ServerErrorStart ("server isn't responsive", { Lsp.Initialize.retry = true; }))
 
 
 (* connect: this method attempts to connect to the server and returns         *)
@@ -1331,6 +1321,28 @@ let do_initialize () : Initialize.result =
   }
 
 
+let start_server (root: Path.t) : unit =
+  (* This basically does "hh_client start": a single attempt to open the     *)
+  (* socket, send+read version and compare for mismatch, send handoff and    *)
+  (* read response. It will print information to stderr. If the server is in *)
+  (* an unresponsive or invalid state then it will kill the server. Next if  *)
+  (* necessary it tries to spawn the server and wait until the monitor is    *)
+  (* responsive enough to print "ready". It will do a hard program exit if   *)
+  (* there were spawn problems.                                              *)
+  let env_start =
+    { ClientStart.
+      root;
+      no_load = false;
+      profile_log = false;
+      ai_mode = None;
+      silent = true;
+      exit_on_failure = false;
+      debug_port = None;
+    } in
+  let _exit_status = ClientStart.main env_start in
+  ()
+
+
 let reconnect_from_lost_if_necessary
     (state: state)
     (reason: [> `Event of event | `Force_regain ])
@@ -1350,8 +1362,9 @@ let reconnect_from_lost_if_necessary
       | _ -> assert false in
     let needs_to_terminate = has_unsaved_changes || has_different_version in
     if needs_to_terminate then
-      (* In these cases we have to terminate our LSP server, *)
-      (* and trust the client to restart us.                 *)
+      (* In these cases we have to terminate our LSP server, and trust the    *)
+      (* client to restart us. Note that we can't do clientStart because that *)
+      (* would start our (old) version of hh_server, not the new one!         *)
       exit_fail ()
     else
       let new_state = connect () in
@@ -1403,7 +1416,15 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     let result = Option.value_map result ~default:""
       ~f:(Hh_json_helpers.get_string_val "title" ~default:"") in
     match result, state with
-    | "Restart", Lost_server _ -> reconnect_from_lost_if_necessary state `Force_regain
+    | "Restart", Lost_server _ ->
+      if p.restart_on_click then begin
+        let root = match get_root () with
+          | None -> failwith "we should have root by now"
+          | Some root -> root
+        in
+        start_server root
+      end;
+      reconnect_from_lost_if_necessary state `Force_regain
     | _ -> state
   in
 
@@ -1432,7 +1453,8 @@ let connect_from_preinit_if_necessary (state: state) (event: event) : (state * e
       let (_code, message, _data) = Lsp_fmt.get_error_info e in
       let new_state = do_lost_server state
         { Lost_env.
-          message = "hh_server failed to start: " ^ message;
+          message = "hh_server is stopped: " ^ message;
+          restart_on_click = true;
           trigger_on_lock_file = true;
           trigger_on_lsp = false;
         } in
@@ -1713,6 +1735,7 @@ let handle_event
     state := dismiss_ready_dialog_if_necessary !state event;
     state := do_lost_server !state { Lost_env.
       message = "hh_server is active in another window.";
+      restart_on_click = false;
       trigger_on_lock_file = false;
       trigger_on_lsp = true;
     };
@@ -1808,6 +1831,7 @@ let main (env: env) : 'a =
         deferred_action := Some (fun () ->
           state := do_lost_server !state { Lost_env.
             message = "hh_server has stopped.";
+            restart_on_click = true;
             trigger_on_lock_file = true;
             trigger_on_lsp = false;
           })

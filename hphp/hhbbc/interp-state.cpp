@@ -61,8 +61,8 @@ std::string show(const Iter& iter) {
     iter,
     [&] (UnknownIter) { return "unk"; },
     [&] (const TrackedIter& ti) {
-      return folly::format("{}, {}", show(ti.kv.first),
-        show(ti.kv.second)).str();
+      return folly::sformat("{}, {}", show(ti.kv.first),
+                            show(ti.kv.second));
     }
   );
 }
@@ -297,7 +297,10 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   if (src.equivLocals.size() < dst.equivLocals.size()) {
     for (auto i = src.equivLocals.size(); i < dst.equivLocals.size(); ++i) {
-      if (dst.equivLocals[i] != NoLocalId) killLocEquiv(dst, i);
+      if (dst.equivLocals[i] != NoLocalId) {
+        killLocEquiv(dst, i);
+        changed = true;
+      }
     }
     dst.equivLocals.resize(src.equivLocals.size());
   }
@@ -519,9 +522,12 @@ std::string state_string(const php::Func& f, const State& st,
 
   for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {
     if (st.equivLocals[i] == NoLocalId) continue;
-    folly::format(&ret, "{: <8} == {}\n",
-                  local_string(f, i),
-                  local_string(f, st.equivLocals[i]));
+    folly::format(&ret, "{: <8} ==", local_string(f, i));
+    for (auto j = st.equivLocals[i]; j != i; j = st.equivLocals[j]) {
+      ret += " ";
+      ret += local_string(f, j);
+    }
+    ret += "\n";
   }
 
   if (st.mInstrState.base.loc != BaseLoc::None) {
@@ -543,16 +549,10 @@ std::string property_state_string(const PropertiesInfo& props) {
   std::string ret;
 
   for (auto& kv : props.privateProperties()) {
-    ret += folly::format("$this->{: <14} :: {}\n",
-      kv.first,
-      show(kv.second)
-    ).str();
+    folly::format(&ret, "$this->{: <14} :: {}\n", kv.first, show(kv.second));
   }
   for (auto& kv : props.privateStatics()) {
-    ret += folly::format("self::${: <14} :: {}\n",
-      kv.first,
-      show(kv.second)
-    ).str();
+    folly::format(&ret, "self::${: <14} :: {}\n", kv.first, show(kv.second));
   }
 
   return ret;

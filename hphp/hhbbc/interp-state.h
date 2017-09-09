@@ -188,6 +188,7 @@ struct Base {
 struct StackElem {
   Type type;
   // A local which is known to have an equivalent value to this stack value.
+  // Note that the local may not match the stack value wrt Uninit.
   LocalId equivLocal;
 
   bool operator==(const StackElem& other) const {
@@ -271,8 +272,9 @@ struct State {
   copy_ptr<MInstrState> mInstrStateDefine;
 
   /*
-   * Mapping of a local to another local which is known to have an equivalent
-   * value.
+   * Mapping of a local to other locals which are known to have
+   * equivalent values. This equivalence ignores Uninit; users should
+   * compare types if they care.
    */
   CompactVector<LocalId> equivLocals;
 

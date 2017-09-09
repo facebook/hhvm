@@ -154,9 +154,10 @@ void in(ISS& env, const bc::EntryNop&) { nothrow(env); }
 
 void in(ISS& env, const bc::Dup& /*op*/) {
   nothrow(env);
+  auto const topEquiv = topStkEquiv(env);
   auto val = popC(env);
-  push(env, val);
-  push(env, std::move(val));
+  push(env, val, topEquiv);
+  push(env, std::move(val), topEquiv);
 }
 
 void in(ISS& env, const bc::AssertRATL& op) {
@@ -1194,24 +1195,17 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
-  LocalId equivLocal = NoLocalId;
-  // If the local could be Uninit or a Ref, don't record equality because the
-  // value on the stack won't the same as in the local.
   if (!locCouldBeUninit(env, op.loc1)) {
     nothrow(env);
     constprop(env);
-    if (!locCouldBeRef(env, op.loc1) &&
-        !is_volatile_local(env.ctx.func, op.loc1)) {
-      equivLocal = op.loc1;
-    }
   }
-  push(env, locAsCell(env, op.loc1), equivLocal);
+  push(env, locAsCell(env, op.loc1), op.loc1);
 }
 
 void in(ISS& env, const bc::CGetQuietL& op) {
   nothrow(env);
   constprop(env);
-  push(env, locAsCell(env, op.loc1));
+  push(env, locAsCell(env, op.loc1), op.loc1);
 }
 
 void in(ISS& env, const bc::CUGetL& op) {
@@ -1222,7 +1216,7 @@ void in(ISS& env, const bc::CUGetL& op) {
   nothrow(env);
   if (!ty.couldBe(TUninit)) constprop(env);
   if (!ty.subtypeOf(TCell)) ty = TCell;
-  push(env, std::move(ty));
+  push(env, std::move(ty), op.loc1);
 }
 
 void in(ISS& env, const bc::PushL& op) {
@@ -1233,9 +1227,10 @@ void in(ISS& env, const bc::CGetL2& op) {
   // Can't constprop yet because of no INS_1 support in bc.h
   if (!locCouldBeUninit(env, op.loc1)) nothrow(env);
   auto loc = locAsCell(env, op.loc1);
+  auto topEquiv = topStkEquiv(env);
   auto top = popT(env);
-  push(env, std::move(loc));
-  push(env, std::move(top));
+  push(env, std::move(loc), op.loc1);
+  push(env, std::move(top), topEquiv);
 }
 
 namespace {
@@ -1677,7 +1672,7 @@ namespace {
 
 /*
  * If the value on the top of the stack is known to be equivalent to the local
- * its being moved/copied to, return folly::none with modifying any
+ * its being moved/copied to, return folly::none without modifying any
  * state. Otherwise, pop the stack value, perform the set, and return a pair
  * giving the value's type, and any other local its known to be equivalent to.
  */
@@ -1693,7 +1688,11 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     if (equivLoc != NoLocalId) {
       if (equivLoc == op.loc1 ||
           locsAreEquiv(env, equivLoc, op.loc1)) {
-        return folly::none;
+        // We allow equivalency to ignore Uninit, so we need to check
+        // the types here.
+        if (peekLocRaw(env, op.loc1) == topC(env)) {
+          return folly::none;
+        }
       }
     } else {
       equivLoc = op.loc1;

@@ -1828,9 +1828,18 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
   do {
     if (equivFirst < bestRange) {
       auto equivRange = [&] {
+        // local equivalency includes differing by Uninit, so we need
+        // to check the types.
+        if (peekLocRaw(env, equivFirst) != peekLocRaw(env, range.first)) {
+          return false;
+        }
 
         for (uint32_t i = 1; i <= range.restCount; ++i) {
-          if (!locsAreEquiv(env, equivFirst + i, range.first + i)) return false;
+          if (!locsAreEquiv(env, equivFirst + i, range.first + i) ||
+              peekLocRaw(env, equivFirst + i) !=
+              peekLocRaw(env, range.first + i)) {
+            return false;
+          }
         }
 
         return true;

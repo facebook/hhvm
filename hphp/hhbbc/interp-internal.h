@@ -88,6 +88,8 @@ OPCODES
 
 namespace {
 
+Type peekLocRaw(ISS& env, LocalId l);
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -395,9 +397,18 @@ Type& topV(ISS& env, uint32_t i = 0) {
   return topT(env, i);
 }
 
-void push(ISS& env, Type t, LocalId l = NoLocalId) {
+void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));
-  always_assert(l == NoLocalId || !is_volatile_local(env.ctx.func, l));
+  env.state.stack.push_back(StackElem {std::move(t), NoLocalId});
+}
+
+void push(ISS& env, Type t, LocalId l) {
+  if (l == NoLocalId || peekLocRaw(env, l).couldBe(TRef)) {
+    return push(env, t);
+  }
+  assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
+  FTRACE(2, "    push: {} (={})\n",
+         show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
@@ -564,13 +575,17 @@ void killAllStkEquiv(ISS& env) {
   for (auto& e : env.state.stack) e.equivLocal = NoLocalId;
 }
 
-Type locRaw(ISS& env, LocalId l) {
-  mayReadLocal(env, l);
+Type peekLocRaw(ISS& env, LocalId l) {
   auto ret = env.state.locals[l];
   if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(ret == TGen, "volatile local was not TGen");
   }
   return ret;
+}
+
+Type locRaw(ISS& env, LocalId l) {
+  mayReadLocal(env, l);
+  return peekLocRaw(env, l);
 }
 
 void setLocRaw(ISS& env, LocalId l, Type t) {
@@ -638,13 +653,27 @@ bool locCouldBeRef(ISS& env, LocalId l) {
  * (VerifyParamType; or IsType/JmpCC), rather than an actual
  * modification to the local.
  */
-void refineLoc(ISS& env, LocalId l, Type t) {
+void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = locRaw(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(v == TGen, "volatile local was not TGen");
     return;
   }
   if (v.subtypeOf(TCell)) env.state.locals[l] = std::move(t);
+}
+
+void refineLoc(ISS& env, LocalId l, Type t) {
+  auto equiv = findLocEquiv(env, l);
+  if (equiv != NoLocalId) {
+    auto raw = peekLocRaw(env, l);
+    do {
+      if (peekLocRaw(env, equiv).subtypeOf(raw)) {
+        refineLocHelper(env, equiv, t);
+      }
+      equiv = findLocEquiv(env, equiv);
+    } while (equiv != l);
+  }
+  refineLocHelper(env, l, t);
 }
 
 /*
@@ -656,7 +685,7 @@ void setLoc(ISS& env, LocalId l, Type t) {
   killLocEquiv(env, l);
   killStkEquiv(env, l);
   modifyLocalStatic(env, l, t);
-  refineLoc(env, l, std::move(t));
+  refineLocHelper(env, l, std::move(t));
 }
 
 LocalId findLocal(ISS& env, SString name) {

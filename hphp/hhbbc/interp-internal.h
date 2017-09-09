@@ -654,7 +654,7 @@ bool locCouldBeRef(ISS& env, LocalId l) {
  * modification to the local.
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
-  auto v = locRaw(env, l);
+  auto v = peekLocRaw(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(v == TGen, "volatile local was not TGen");
     return;
@@ -685,6 +685,7 @@ void setLoc(ISS& env, LocalId l, Type t) {
   killLocEquiv(env, l);
   killStkEquiv(env, l);
   modifyLocalStatic(env, l, t);
+  mayReadLocal(env, l);
   refineLocHelper(env, l, std::move(t));
 }
 

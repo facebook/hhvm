@@ -826,6 +826,7 @@ void in(ISS& /*env*/, const bc::Jmp&) {
 template<bool Negate, class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
   nothrow(env);
+  auto const locId = topStkEquiv(env);
   auto const e = emptiness(popC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
     jmp_nofallthrough(env);
@@ -843,7 +844,31 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     jmp_nevertaken(env);
     return;
   }
+
+  if (locId == NoLocalId) return env.propagate(op.target, env.state);
+
+  auto const loc = peekLocRaw(env, locId);
+  assertx(!loc.couldBe(TRef)); // we shouldn't have an equivLoc if it was
+
+  auto const converted_true = [&]() -> const Type {
+    if (is_opt(loc)) return unopt(loc);
+    if (loc.subtypeOf(TBool)) return TTrue;
+    return loc;
+  }();
+  auto const converted_false = [&]() -> const Type {
+    if (!could_have_magic_bool_conversion(loc) && loc.subtypeOf(TOptObj)) {
+      return TInitNull;
+    }
+    if (loc.subtypeOf(TInt))  return ival(0);
+    if (loc.subtypeOf(TBool)) return TFalse;
+    if (loc.subtypeOf(TDbl))  return dval(0);
+
+    return loc;
+  }();
+
+  refineLoc(env, locId, Negate ? converted_true : converted_false);
   env.propagate(op.target, env.state);
+  refineLoc(env, locId, Negate ? converted_false : converted_true);
 }
 
 void in(ISS& env, const bc::JmpNZ& op) { jmpImpl<true>(env, op); }
@@ -1076,74 +1101,32 @@ void group(ISS& env, const bc::MemoGet& get, const bc::IsUninit& /*isuninit*/,
 }
 
 template<class JmpOp>
-void group(ISS& env, const bc::CGetL& cgetl, const JmpOp& jmp) {
-  auto const loc = derefLoc(env, cgetl.loc1);
-  auto const flag = emptiness(loc);
-  if (flag != Emptiness::Maybe) return impl(env, cgetl, jmp);
-
-  if (!locCouldBeUninit(env, cgetl.loc1)) nothrow(env);
-
-  auto const negate = jmp.op == Op::JmpNZ;
-  auto const converted_true = [&]() -> const Type {
-    if (is_opt(loc)) return unopt(loc);
-    if (loc.subtypeOf(TBool)) return TTrue;
-    return loc;
-  }();
-  auto const converted_false = [&]() -> const Type {
-    if (!could_have_magic_bool_conversion(loc) && loc.subtypeOf(TOptObj)) {
-      return TInitNull;
-    }
-    if (loc.subtypeOf(TInt))  return ival(0);
-    if (loc.subtypeOf(TBool)) return TFalse;
-    if (loc.subtypeOf(TDbl))  return dval(0);
-    // Can't tell if any of the other ?primitives are going to be
-    // null based on this, so leave those types alone.  E.g. a Str
-    // might contain "" and be falsey, or an array or collection
-    // could be empty.
-    return loc;
-  }();
-
-  refineLoc(env, cgetl.loc1, negate ? converted_true : converted_false);
-  env.propagate(jmp.target, env.state);
-  refineLoc(env, cgetl.loc1, negate ? converted_false : converted_true);
-}
-
-template<class JmpOp>
 void group(ISS& env,
-           const bc::CGetL& cgetl,
            const bc::InstanceOfD& inst,
            const JmpOp& jmp) {
-  auto bail = [&] { impl(env, cgetl, inst, jmp); };
+  auto bail = [&] { impl(env, inst, jmp); };
 
-  if (interface_supports_non_objects(inst.str1)) return bail();
+  auto const locId = topStkEquiv(env);
+  if (locId == NoLocalId || interface_supports_non_objects(inst.str1)) {
+    return bail();
+  }
+  auto const loc = peekLocRaw(env, locId);
+  assertx(!loc.couldBe(TRef)); // we shouldn't have an equivLoc if it was
   auto const rcls = env.index.resolve_class(env.ctx, inst.str1);
   if (!rcls) return bail();
 
   auto const instTy = subObj(*rcls);
-  auto const loc = derefLoc(env, cgetl.loc1);
   if (loc.subtypeOf(instTy) || !loc.couldBe(instTy)) {
     return bail();
   }
 
+  popC(env);
   auto const negate    = jmp.op == Op::JmpNZ;
   auto const was_true  = instTy;
   auto const was_false = loc;
-  refineLoc(env, cgetl.loc1, negate ? was_true : was_false);
+  refineLoc(env, locId, negate ? was_true : was_false);
   env.propagate(jmp.target, env.state);
-  refineLoc(env, cgetl.loc1, negate ? was_false : was_true);
-}
-
-void group(ISS& env,
-           const bc::CGetL& cgetl,
-           const bc::FPushObjMethodD& fpush) {
-  auto const obj = locAsCell(env, cgetl.loc1);
-  impl(env, cgetl, fpush);
-  if (!is_specialized_obj(obj)) {
-    refineLoc(env, cgetl.loc1,
-              fpush.subop3 == ObjMethodOp::NullThrows ? TObj : TOptObj);
-  } else if (is_opt(obj) && fpush.subop3 == ObjMethodOp::NullThrows) {
-    refineLoc(env, cgetl.loc1, unopt(obj));
-  }
+  refineLoc(env, locId, negate ? was_false : was_true);
 }
 
 void in(ISS& env, const bc::Switch& op) {
@@ -2036,6 +2019,7 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
+  auto loc = topStkEquiv(env);
   auto t1 = popC(env);
   if (is_opt(t1) && op.subop3 == ObjMethodOp::NullThrows) {
     t1 = unopt(t1);
@@ -2051,6 +2035,17 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     rcls,
     env.index.resolve_method(env.ctx, clsTy, op.str2)
   });
+  if (loc != NoLocalId) {
+    auto locTy = peekLocRaw(env, loc);
+    if (locTy.subtypeOf(TCell)) {
+      if (!is_specialized_obj(locTy)) {
+        refineLoc(env, loc,
+                  op.subop3 == ObjMethodOp::NullThrows ? TObj : TOptObj);
+      } else if (is_opt(locTy) && op.subop3 == ObjMethodOp::NullThrows) {
+        refineLoc(env, loc, unopt(locTy));
+      }
+    }
+  }
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
@@ -3196,21 +3191,12 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
                   it + 2 != stop ? it[2].op : Op::Nop;
 
   switch (o1) {
-  case Op::CGetL:
+  case Op::InstanceOfD:
     switch (o2) {
-    case Op::JmpZ:   return group(env, it, it[0].CGetL, it[1].JmpZ);
-    case Op::JmpNZ:  return group(env, it, it[0].CGetL, it[1].JmpNZ);
-    case Op::InstanceOfD:
-      switch (o3) {
-      case Op::JmpZ:
-        return group(env, it, it[0].CGetL, it[1].InstanceOfD, it[2].JmpZ);
-      case Op::JmpNZ:
-        return group(env, it, it[0].CGetL, it[1].InstanceOfD, it[2].JmpNZ);
-      default: break;
-      }
-      break;
-    case Op::FPushObjMethodD:
-      return group(env, it, it[0].CGetL, it[1].FPushObjMethodD);
+    case Op::JmpZ:
+      return group(env, it, it[0].InstanceOfD, it[1].JmpZ);
+    case Op::JmpNZ:
+      return group(env, it, it[0].InstanceOfD, it[1].JmpNZ);
     default: break;
     }
     break;

@@ -1317,8 +1317,10 @@ bool Type::equivData(const Type& o) const {
     return m_data.dval == o.m_data.dval ||
            (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
   case DataTag::Obj:
-    assert(!m_data.dobj.whType);
-    assert(!o.m_data.dobj.whType);
+    if (!m_data.dobj.whType != !o.m_data.dobj.whType) return false;
+    if (m_data.dobj.whType && *m_data.dobj.whType != *o.m_data.dobj.whType) {
+      return false;
+    }
     return m_data.dobj.type == o.m_data.dobj.type &&
            m_data.dobj.cls.same(o.m_data.dobj.cls);
   case DataTag::Cls:
@@ -1346,16 +1348,22 @@ bool Type::subtypeData(const Type& o) const {
 
   switch (m_dataTag) {
   case DataTag::Obj:
-    assert(!m_data.dobj.whType);
-    assert(!o.m_data.dobj.whType);
-    if (m_data.dobj.type == o.m_data.dobj.type &&
-        m_data.dobj.cls.same(o.m_data.dobj.cls)) {
-      return true;
-    }
-    if (o.m_data.dobj.type == DObj::Sub) {
-      return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
-    }
-    return false;
+  {
+    auto const outer_ok = [&] {
+      if (m_data.dobj.type == o.m_data.dobj.type &&
+          m_data.dobj.cls.same(o.m_data.dobj.cls)) {
+        return true;
+      }
+      if (o.m_data.dobj.type == DObj::Sub) {
+        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+      }
+      return false;
+    }();
+    if (!outer_ok) return false;
+    if (!o.m_data.dobj.whType) return true;
+    if (!m_data.dobj.whType) return false;
+    return m_data.dobj.whType->subtypeOf(*o.m_data.dobj.whType);
+  }
   case DataTag::Cls:
     if (m_data.dcls.type == o.m_data.dcls.type &&
         m_data.dcls.cls.same(o.m_data.dcls.cls)) {
@@ -1395,8 +1403,10 @@ bool Type::couldBeData(const Type& o) const {
   case DataTag::None:
     not_reached();
   case DataTag::Obj:
-    assert(!m_data.dobj.whType);
-    assert(!o.m_data.dobj.whType);
+  {
+    if (o.m_data.dobj.whType && m_data.dobj.whType) {
+      return m_data.dobj.whType->couldBe(*o.m_data.dobj.whType);
+    }
     if (m_data.dobj.type == o.m_data.dobj.type &&
         m_data.dobj.cls.same(o.m_data.dobj.cls)) {
       return true;
@@ -1405,6 +1415,7 @@ bool Type::couldBeData(const Type& o) const {
       return m_data.dobj.cls.couldBe(o.m_data.dobj.cls);
     }
     return false;
+  }
   case DataTag::Cls:
     if (m_data.dcls.type == o.m_data.dcls.type &&
         m_data.dcls.cls.same(o.m_data.dcls.cls)) {
@@ -1416,14 +1427,11 @@ bool Type::couldBeData(const Type& o) const {
     return false;
   case DataTag::RefInner:
     return m_data.inner->couldBe(*o.m_data.inner);
-  case DataTag::ArrLikeVal:
-    return m_data.aval == o.m_data.aval;
   case DataTag::Str:
-    return m_data.sval == o.m_data.sval;
+  case DataTag::ArrLikeVal:
   case DataTag::Int:
-    return m_data.ival == o.m_data.ival;
   case DataTag::Dbl:
-    return m_data.dval == o.m_data.dval;
+    return equivData(o);
   case DataTag::ArrLikePacked:
     return couldBePacked(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
@@ -1443,17 +1451,7 @@ bool Type::operator==(const Type& o) const {
 
   if (m_bits != o.m_bits) return false;
   if (hasData() != o.hasData()) return false;
-  if (!hasData() && !o.hasData()) return true;
-
-  if (is_specialized_wait_handle(*this)) {
-    if (is_specialized_wait_handle(o)) {
-      return wait_handle_inner(*this) == wait_handle_inner(o);
-    }
-    return false;
-  }
-  if (is_specialized_wait_handle(o)) {
-    return false;
-  }
+  if (!hasData()) return true;
 
   return equivData(o);
 }
@@ -1470,32 +1468,15 @@ bool Type::subtypeOf(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
-  if (is_specialized_wait_handle(*this)) {
-    if (is_specialized_wait_handle(o)) {
-      return
-        wait_handle_inner(*this).subtypeOf(wait_handle_inner(o)) &&
-        wait_handle_outer(*this).subtypeOf(wait_handle_outer(o));
-    }
-    return wait_handle_outer(*this).subtypeOf(o);
-  }
-  if (is_specialized_wait_handle(o)) {
-    return subtypeOf(wait_handle_outer(o));
-  }
-
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
   if (isect != m_bits) return false;
-  if (!mayHaveData(isect)) return true;
 
   // No data is always more general.
-  if (!hasData() && !o.hasData()) return true;
-  if (!o.hasData()) {
-    assert(hasData());
-    return true;
-  }
+  if (!o.hasData()) return true;
+  if (!hasData()) return !mayHaveData(m_bits);
 
-  // Both have data, and the intersection allows it, so it depends on
-  // what the data says.
-  return hasData() && subtypeData(o);
+  // Both have data, so it depends on what the data says.
+  return subtypeData(o);
 }
 
 bool Type::strictSubtypeOf(const Type& o) const {
@@ -1508,48 +1489,22 @@ bool Type::couldBe(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
 
-  if (is_specialized_wait_handle(*this)) {
-    if (is_specialized_wait_handle(o)) {
-      return wait_handle_inner(*this).couldBe(wait_handle_inner(o));
-    }
-    return o.couldBe(wait_handle_outer(*this));
-  }
-  if (is_specialized_wait_handle(o)) {
-    return couldBe(wait_handle_outer(o));
-  }
-
   auto const isect = static_cast<trep>(m_bits & o.m_bits);
   if (isect == 0) return false;
-  if (subtypeOf(o) || o.subtypeOf(*this)) return true;
+  // just an optimization; if the intersection contains one of these,
+  // we're done because they don't support data.
+  if (isect & (BNull | BBool | BArrLikeE | BCStr)) return true;
+  // hasData is actually cheaper than mayHaveData, so do those checks first
+  if (!hasData() || !o.hasData()) return true;
+  // This looks like it could be problematic - eg BCell does not
+  // support data, but lots of its subtypes do. It seems like what we
+  // need here is !subtypeMayHaveData(isect) (a function we don't
+  // actually have). We know however that both inputs have data, so
+  // all we rely on here is that if A supports data, and B is a
+  // subtype of A that does not (eg TOptArr and TOptArrE), then no
+  // subtype of B can support data.
   if (!mayHaveData(isect)) return true;
-
-  /*
-   * From here we have an intersection that may have data, and we know
-   * that neither type completely contains the other.
-   *
-   * For most of our types, where m_data represents an exact constant
-   * value, this just means the types only overlap if there is no
-   * data.
-   *
-   * The exception to that are option types with data,
-   * objects/classes, and arrays.
-   */
-
-  /*
-   * If the intersection allowed data, and either type was an option
-   * type, we can simplify the case to whether the unopt'd version of
-   * the option type couldBe the other type.  (The case where
-   * TInitNull was the overlapping part would already be handled
-   * above, because !mayHaveData(TInitNull).)
-   */
-  if (is_opt(*this)) return is_opt(o) ? true : unopt(*this).couldBe(o);
-  if (is_opt(o))     return unopt(o).couldBe(*this);
-
-  if (hasData() && o.hasData()) {
-    assert(mayHaveData(isect));
-    return couldBeData(o);
-  }
-  return true;
+  return couldBeData(o);
 }
 
 bool Type::checkInvariants() const {

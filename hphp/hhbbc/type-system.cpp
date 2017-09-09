@@ -2853,6 +2853,68 @@ Type remove_uninit(Type t) {
   return TInitCell;
 }
 
+Type assert_emptiness(Type t) {
+  if (t.subtypeOfAny(TTrue, TArrN, TVecN, TDictN, TKeysetN)) {
+    return TBottom;
+  }
+  if (!could_have_magic_bool_conversion(t) && t.subtypeOf(TOptObj)) {
+    return TInitNull;
+  }
+
+  auto remove = [&] (trep m, trep e) {
+    if ((t.m_bits & m) == t.m_bits) {
+      auto bits = static_cast<trep>(t.m_bits & e);
+      if (t.hasData() && !mayHaveData(bits)) {
+        t = Type { bits };
+      } else {
+        t.m_bits = bits;
+      }
+      return true;
+    }
+    return false;
+  };
+
+  if (remove(BOptArr, BOptArrE) || remove(BOptVec, BOptVecE) ||
+      remove(BOptDict, BOptDictE) || remove(BOptKeyset, BOptKeysetE)) {
+    return t;
+  }
+
+  if (t.subtypeOf(TInt))     return ival(0);
+  if (t.subtypeOf(TBool))    return TFalse;
+  if (t.subtypeOf(TDbl))     return dval(0);
+  if (t.subtypeOf(TSStr))    return sempty();
+
+  if (t.subtypeOf(TOptInt))  return opt(ival(0));
+  if (t.subtypeOf(TOptBool)) return opt(TFalse);
+  if (t.subtypeOf(TOptDbl))  return opt(dval(0));
+  if (t.subtypeOf(TOptSStr)) return opt(sempty());
+
+  return t;
+}
+
+Type assert_nonemptiness(Type t) {
+  if (is_opt(t)) t = unopt(std::move(t));
+  if (t.subtypeOfAny(TNull, TFalse, TArrE, TVecE, TDictE, TKeysetE)) {
+    return TBottom;
+  }
+  if (t.subtypeOf(TBool)) return TTrue;
+
+  auto remove = [&] (trep m, trep e) {
+    if ((t.m_bits & m) == t.m_bits) {
+      t.m_bits = static_cast<trep>(t.m_bits & e);
+      return true;
+    }
+    return false;
+  };
+
+  if (remove(BOptArr, BOptArrN) || remove(BOptVec, BOptVecN) ||
+      remove(BOptDict, BOptDictN) || remove(BOptKeyset, BOptKeysetN)) {
+    return t;
+  }
+
+  return remove_uninit(std::move(t));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -534,6 +534,8 @@ private:
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type add_nonemptiness(Type);
+  friend Type assert_emptiness(Type);
+  friend Type assert_nonemptiness(Type);
 
 private:
   union Data {
@@ -1099,6 +1101,13 @@ Type remove_uninit(Type t);
  * present. Doesn't change the type otherwise.
  */
 Type add_nonemptiness(Type t);
+
+/*
+ * Produced the most refined type possible, given that
+ * t passed/failed an emptiness check.
+ */
+Type assert_emptiness(Type);
+Type assert_nonemptiness(Type);
 
 /*
  * (array|vec|dict|keyset)_elem

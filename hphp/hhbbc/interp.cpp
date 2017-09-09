@@ -847,24 +847,11 @@ void jmpImpl(ISS& env, const JmpOp& op) {
 
   if (locId == NoLocalId) return env.propagate(op.target, env.state);
 
-  auto const loc = peekLocRaw(env, locId);
+  auto loc = peekLocRaw(env, locId);
   assertx(!loc.couldBe(TRef)); // we shouldn't have an equivLoc if it was
 
-  auto const converted_true = [&]() -> const Type {
-    if (is_opt(loc)) return unopt(loc);
-    if (loc.subtypeOf(TBool)) return TTrue;
-    return loc;
-  }();
-  auto const converted_false = [&]() -> const Type {
-    if (!could_have_magic_bool_conversion(loc) && loc.subtypeOf(TOptObj)) {
-      return TInitNull;
-    }
-    if (loc.subtypeOf(TInt))  return ival(0);
-    if (loc.subtypeOf(TBool)) return TFalse;
-    if (loc.subtypeOf(TDbl))  return dval(0);
-
-    return loc;
-  }();
+  auto const converted_true = assert_nonemptiness(loc);
+  auto const converted_false = assert_emptiness(std::move(loc));
 
   refineLoc(env, locId, Negate ? converted_true : converted_false);
   env.propagate(op.target, env.state);

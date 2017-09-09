@@ -1830,14 +1830,19 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (* SPEC
       field-initializer:
         single-quoted-string-literal  =>  expression
-        integer-literal  =>  expression
+        double_quoted_string_literal  =>  expression
         qualified-name  =>  expression
         scope-resolution-expression  =>  expression
         *)
 
-    (* ERROR RECOVERY: We allow any expression as the left hand side.
-       TODO: Make a later error pass that detects when it is not a
-       literal or name. *)
+    (* Specification is wrong, and fixing it is being tracked by
+     * https://github.com/hhvm/hack-langspec/issues/108
+     *)
+
+    (* ERROR RECOVERY: We allow any expression on the left-hand side,
+     * even though only some expressions are legal;
+     * we will give an error in a later pass
+     *)
     let (parser, name) = with_reset_precedence parser parse_expression in
     let (parser, arrow) = require_arrow parser in
     let (parser, value) = with_reset_precedence parser parse_expression in

@@ -771,6 +771,38 @@ let property_errors node is_strict is_hack =
       errors
   | _ -> [ ]
 
+let string_starts_with_int s =
+  if String.length s = 0 then false else
+  try let _ = int_of_string (String.make 1 s.[0]) in true with _ -> false
+
+let invalid_shape_initializer_name node =
+  match syntax node with
+  | LiteralExpression { literal_expression = expr } ->
+    let is_str =
+      begin match token_kind expr with
+      | Some TokenKind.SingleQuotedStringLiteral -> true
+      (* TODO: Double quoted string are only legal
+       * if they contain no encapsulated expressions. *)
+      | Some TokenKind.DoubleQuotedStringLiteral -> true
+      | _ -> false
+      end
+    in
+    if not is_str
+    then [make_error_from_node node SyntaxError.error2059] else begin
+      let str = text expr in
+      if string_starts_with_int str
+      then [make_error_from_node node SyntaxError.error2060] else []
+    end
+  | QualifiedNameExpression _
+  | ScopeResolutionExpression _ -> []
+  | _ -> [make_error_from_node node SyntaxError.error2059]
+
+let invalid_shape_field_check node =
+  match syntax node with
+  | FieldInitializer { field_initializer_name; _} ->
+    invalid_shape_initializer_name field_initializer_name
+  | _ -> [make_error_from_node node SyntaxError.error2059]
+
 let expression_errors node parents is_hack =
   match syntax node with
   | SubscriptExpression { subscript_left_bracket; _}
@@ -796,6 +828,9 @@ let expression_errors node parents is_hack =
   | ListExpression le
     when (is_invalid_list_expression node parents) ->
     [ make_error_from_node node SyntaxError.error2040 ]
+  | ShapeExpression { shape_expression_fields; _} ->
+    List.fold_right (fun fl acc -> (invalid_shape_field_check fl) @ acc)
+      (syntax_to_list_no_separators shape_expression_fields) []
   | _ -> [ ] (* Other kinds of expressions currently produce no expr errors. *)
 
 let require_errors node parents =

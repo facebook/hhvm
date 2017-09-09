@@ -1228,26 +1228,38 @@ void dce(Env& env, const bc::Dup&) {
     });
 }
 
-void dce(Env& env, const bc::CGetL& op) {
+void cgetImpl(Env& env, LocalId loc, bool quiet) {
   stack_ops(env, [&] (UseInfo& ui) {
-      scheduleGenLoc(env, op.loc1);
-      if (allUnused(ui) && !readCouldHaveSideEffects(locRaw(env, op.loc1))) {
+      scheduleGenLoc(env, loc);
+      if (allUnused(ui) &&
+          (quiet || !readCouldHaveSideEffects(locRaw(env, loc)))) {
         return PushFlags::MarkUnused;
       }
-      if (!isLocLive(env, op.loc1) &&
-          couldBeCowType(locRaw(env, op.loc1)) &&
-          !setCouldHaveSideEffects(locRaw(env, op.loc1)) &&
-          !readCouldHaveSideEffects(locRaw(env, op.loc1))) {
-        markUisLive(env, isLinked(ui), ui);
-        addLocGen(env, op.loc1);
+      if (!isLocLive(env, loc) &&
+          couldBeCowType(locRaw(env, loc)) &&
+          !setCouldHaveSideEffects(locRaw(env, loc)) &&
+          !readCouldHaveSideEffects(locRaw(env, loc))) {
+        // note: PushL does not deal with Uninit, so we need the
+        // readCouldHaveSideEffects here, regardless of quiet.
         CompactVector<Bytecode> bcs;
-        bcs.emplace_back(bc::PushL { op.loc1 });
+        bcs.emplace_back(bc::PushL { loc });
         env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-        ui.actions[env.id] = DceAction::Replace;
-        return PushFlags::MarkDead;
+        env.dceState.actionMap.emplace(env.id, DceAction::Replace);
       }
       return PushFlags::MarkLive;
     });
+}
+
+void dce(Env& env, const bc::CGetL& op) {
+  cgetImpl(env, op.loc1, false);
+}
+
+void dce(Env& env, const bc::CGetQuietL& op) {
+  cgetImpl(env, op.loc1, true);
+}
+
+void dce(Env& env, const bc::CUGetL& op) {
+  cgetImpl(env, op.loc1, true);
 }
 
 void dce(Env& env, const bc::CGetL2& op) {

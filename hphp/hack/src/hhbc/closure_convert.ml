@@ -67,9 +67,10 @@ let initial_state =
 (* Add a variable to the captured variables *)
 let add_var st var =
   (* If it's bound as a parameter or definite assignment, don't add it *)
-  (* Also don't add the pipe variable *)
+  (* Also don't add the pipe variable and superglobals *)
   if SSet.mem var st.defined_vars
   || var = Naming_special_names.SpecialIdents.dollardollar
+  || Naming_special_names.Superglobals.is_superglobal var
   then st
   else
   (* Don't bother if it's $this, as this is captured implicitly *)

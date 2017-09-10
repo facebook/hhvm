@@ -877,8 +877,8 @@ void VariableUnserializer::unserializeVariant(
       throwUnknownType(type);
     }
     break;
-  case 'a':
-  case 'D':
+  case 'a': // PHP array
+  case 'D': // Dict
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
@@ -886,6 +886,22 @@ void VariableUnserializer::unserializeVariant(
       // better code this way.
       auto a = (type == 'a') ? unserializeArray() : unserializeDict();
       tvMove(make_array_like_tv(a.detach()), *self.asTypedValue());
+    }
+    return; // array has '}' terminating
+  case 'Y': // DArray (same as array for now)
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeArray();
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+    }
+    return; // array has '}' terminating
+  case 'y': // VArray (same as packed array for now)
+    {
+      // Check stack depth to avoid overflow.
+      check_recursion_throw();
+      auto a = unserializeVArray();
+      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'v':
@@ -1320,6 +1336,45 @@ Array VariableUnserializer::unserializeVec() {
   return arr;
 }
 
+Array VariableUnserializer::unserializeVArray() {
+  int64_t size = readInt();
+  expectChar(':');
+  expectChar('{');
+  if (size == 0) {
+    expectChar('}');
+    return Array::Create();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const sizeClass = PackedArray::capacityToSizeIndex(size);
+  auto const allocsz = kSizeIndex2PackedArrayCapacity[sizeClass];
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
+  Array arr = PackedArrayInit(size).toArray();
+  reserveForAdd(size);
+
+  for (int64_t i = 0; i < size; i++) {
+    auto const lval = PackedArray::LvalNew(arr.get(), false);
+    assertx(lval.arr_base() == arr.get());
+    auto& val = tvAsVariant(lval.tv_ptr());
+    unserializeVariant(val);
+    if (i < (size - 1)) {
+      auto lastChar = peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
+      }
+    }
+  }
+  check_non_safepoint_surprise();
+  expectChar('}');
+  return arr;
+}
+
 Array VariableUnserializer::unserializeKeyset() {
   int64_t size = readInt();
   expectChar(':');
@@ -1623,8 +1678,9 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
     break;
   case 'a':
   case 'D':
+  case 'Y':
     {
-      buf.append(type == 'a' ? "a:" : "D:");
+      buf.append(type == 'a' ? "a:" : (type == 'Y' ? "Y:" : "D:"));
       int64_t size = readInt();
       char sep2 = readChar();
       buf.append(size);
@@ -1642,8 +1698,9 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
     break;
   case 'v':
   case 'k':
+  case 'y':
     {
-      buf.append(type == 'v' ? "v:" : "k:");
+      buf.append(type == 'v' ? "v:" : (type == 'y' ? "y:" : "k:"));
       int64_t size = readInt();
       char sep2 = readChar();
       buf.append(size);

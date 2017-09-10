@@ -1,0 +1,44 @@
+array(0) {
+}
+array(3) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(456)
+  [2]=>
+  int(789)
+}
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+array(0) {
+}
+array(3) {
+  [100]=>
+  int(123)
+  [200]=>
+  int(456)
+  [300]=>
+  int(789)
+}
+array(3) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+  [300]=>
+  string(3) "ghi"
+}
+array(3) {
+  ["abc"]=>
+  int(100)
+  ["def"]=>
+  int(200)
+  ["ghi"]=>
+  int(300)
+}

@@ -283,6 +283,8 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static MixedArray* ToMixedCopy(const ArrayData*);
   static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
 
+  static size_t capacityToSizeIndex(size_t);
+
   static constexpr auto SizeIndexOffset = HeaderAuxOffset + 1;
 private:
   static uint8_t sizeClass(const ArrayData*);

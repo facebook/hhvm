@@ -69,17 +69,6 @@ inline ArrayData* alloc_packed_static(size_t cap) {
   return static_cast<ArrayData*>(ret);
 }
 
-inline size_t packedArrayCapacityToSizeIndex(size_t cap) {
-  if (cap <= PackedArray::SmallSize) {
-    return PackedArray::SmallSizeIndex;
-  }
-  auto const sizeIndex = MemoryManager::size2Index(
-    sizeof(ArrayData) + cap * sizeof(TypedValue)
-  );
-  assert(sizeIndex <= PackedArray::MaxSizeIndex);
-  return sizeIndex;
-}
-
 }
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
@@ -350,7 +339,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
 ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
-  auto const sizeIndex = packedArrayCapacityToSizeIndex(adIn->m_size);
+  auto const sizeIndex = capacityToSizeIndex(adIn->m_size);
   auto ad = alloc_packed_static(adIn->m_size);
   // CopyPackedHelper will copy the header and m_sizeAndPos; since we pass
   // convertingPackedToVec = false, it can't fail. All we have to do afterwards
@@ -376,7 +365,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assert(arr->isVectorData());
 
-  auto const sizeIndex = packedArrayCapacityToSizeIndex(arr->m_size);
+  auto const sizeIndex = capacityToSizeIndex(arr->m_size);
   auto ad = alloc_packed_static(arr->m_size);
   ad->initHeader_16(
     HeaderKind::Packed,
@@ -407,7 +396,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
  */
 ALWAYS_INLINE
 ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
-  auto const sizeIndex = packedArrayCapacityToSizeIndex(cap);
+  auto const sizeIndex = capacityToSizeIndex(cap);
   auto ad = static_cast<ArrayData*>(MM().objMallocIndex(sizeIndex));
   ad->initHeader_16(
     hk,
@@ -1263,7 +1252,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
   }
 
   auto const size = array->m_size;
-  auto const sizeIndex = packedArrayCapacityToSizeIndex(size);
+  auto const sizeIndex = capacityToSizeIndex(size);
   auto const mem = static_cast<char*>(
     malloc_huge(extra + sizeof(ArrayData) + size * sizeof(TypedValue))
   );

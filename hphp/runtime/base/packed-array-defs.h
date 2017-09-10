@@ -87,6 +87,18 @@ static_assert(
 );
 
 ALWAYS_INLINE
+size_t PackedArray::capacityToSizeIndex(size_t cap) {
+  if (cap <= PackedArray::SmallSize) {
+    return PackedArray::SmallSizeIndex;
+  }
+  auto const sizeIndex = MemoryManager::size2Index(
+    sizeof(ArrayData) + cap * sizeof(TypedValue)
+  );
+  assert(sizeIndex <= PackedArray::MaxSizeIndex);
+  return sizeIndex;
+}
+
+ALWAYS_INLINE
 uint32_t PackedArray::capacity(const ArrayData* ad) {
   return kSizeIndex2PackedArrayCapacity[sizeClass(ad)];
 }

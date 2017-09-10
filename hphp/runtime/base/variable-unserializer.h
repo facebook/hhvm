@@ -202,6 +202,7 @@ private:
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();
+  Array unserializeVArray();
   folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
                                             char delimiter1 = '"');
   String unserializeString(char delimiter0 = '"', char delimiter1 = '"');

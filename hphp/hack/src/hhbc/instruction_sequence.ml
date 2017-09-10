@@ -515,6 +515,21 @@ let rewrite_class_refs instrseq =
         && can_initialize_static_var v)
     | A.Varray es ->
       List.for_all es ~f:can_initialize_static_var
+    | A.Collection ((_, name), fields) ->
+      let name =
+        Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
+      begin match name with
+      | "keyset" ->
+        List.for_all fields ~f:(function
+          | A.AFvalue (_, (A.String _ | A.Int _)) -> true
+          | _ -> false)
+      | "dict" ->
+        List.for_all fields ~f:(function
+          | A.AFkvalue ((_, (A.String _ | A.Int _)), v) ->
+            can_initialize_static_var v
+          | _ -> false)
+      | _ -> false
+      end
     | _ -> false
 
   let rewrite_static_instrseq static_var_map emit_expr env instrseq =

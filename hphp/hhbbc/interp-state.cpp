@@ -34,6 +34,21 @@ namespace {
 
 template<class JoinOp>
 bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
+  auto const mergeCounts = [](IterTypes::Count c1, IterTypes::Count c2) {
+    if (c1 == c2) return c1;
+    if (c1 == IterTypes::Count::Any) return c1;
+    if (c2 == IterTypes::Count::Any) return c2;
+    auto const nonEmpty = [](IterTypes::Count c) {
+      if (c == IterTypes::Count::Empty || c == IterTypes::Count::ZeroOrOne) {
+        return IterTypes::Count::Any;
+      }
+      return IterTypes::Count::NonEmpty;
+    };
+    if (c1 == IterTypes::Count::NonEmpty) return nonEmpty(c2);
+    if (c2 == IterTypes::Count::NonEmpty) return nonEmpty(c1);
+    return IterTypes::Count::ZeroOrOne;
+  };
+
   return match<bool>(
     dst,
     [&] (UnknownIter) { return false; },
@@ -45,10 +60,27 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           return true;
         },
         [&] (const TrackedIter& siter) {
-          auto k1 = join(diter.kv.first, siter.kv.first);
-          auto k2 = join(diter.kv.second, siter.kv.second);
-          auto const changed = k1 != diter.kv.first || k2 != diter.kv.second;
-          diter.kv = std::make_pair(std::move(k1), std::move(k2));
+          auto key = join(diter.types.key, siter.types.key);
+          auto value = join(diter.types.value, siter.types.value);
+          auto const count = mergeCounts(diter.types.count, siter.types.count);
+          auto const throws1 =
+            diter.types.mayThrowOnInit || siter.types.mayThrowOnInit;
+          auto const throws2 =
+            diter.types.mayThrowOnNext || siter.types.mayThrowOnNext;
+          auto const changed =
+            key != diter.types.key ||
+            value != diter.types.value ||
+            count != diter.types.count ||
+            throws1 != diter.types.mayThrowOnInit ||
+            throws2 != diter.types.mayThrowOnNext;
+          diter.types =
+            IterTypes {
+              std::move(key),
+              std::move(value),
+              count,
+              throws1,
+              throws2
+            };
           return changed;
         }
       );
@@ -61,8 +93,8 @@ std::string show(const Iter& iter) {
     iter,
     [&] (UnknownIter) { return "unk"; },
     [&] (const TrackedIter& ti) {
-      return folly::sformat("{}, {}", show(ti.kv.first),
-                            show(ti.kv.second));
+      return folly::sformat("{}, {}", show(ti.types.key),
+                            show(ti.types.value));
     }
   );
 }

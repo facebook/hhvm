@@ -1448,9 +1448,9 @@ let add_class_def buf class_def =
   add_doc buf 2 (Hhas_class.doc_comment class_def);
   add_uses buf class_def;
   add_enum_ty buf class_def;
+  List.iter (add_requirement buf) (Hhas_class.requirements class_def);
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
-  List.iter (add_requirement buf) (Hhas_class.requirements class_def);
   List.iter (add_property class_def buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)

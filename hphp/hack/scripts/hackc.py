@@ -132,13 +132,12 @@ def list_php_files(directory):
     cpt = 0
     # Walk the tree.
     for root, _directories, files in os.walk(directory):
-        if "__tests__" not in root:
-            for filename in [file for file in files if file.endswith(".php")]:
-                cpt += 1
-                # Join the two strings in order to form the full filepath.
-                filepath = os.path.abspath(os.path.join(root, filename))
-                file_paths.append(filepath)  # Add it to the list.
-                p(collecting_str.format(cpt))
+        for filename in [file for file in files if file.endswith(".php")]:
+            cpt += 1
+            # Join the two strings in order to form the full filepath.
+            filepath = os.path.abspath(os.path.join(root, filename))
+            file_paths.append(filepath)  # Add it to the list.
+            p(collecting_str.format(cpt))
     p("\n")
     return file_paths  # Self-explanatory.
 

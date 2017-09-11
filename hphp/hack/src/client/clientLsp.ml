@@ -1450,7 +1450,8 @@ let reconnect_from_lost_if_necessary
   let open Lost_env in
   let should_reconnect = match state, reason with
     | Lost_server _, `Force_regain -> true
-    | Lost_server lenv, `Event Client_message _ when lenv.p.trigger_on_lsp -> true
+    | Lost_server lenv, `Event Client_message c
+      when lenv.p.trigger_on_lsp && c.Jsonrpc_queue.kind <> Jsonrpc_queue.Response -> true
     | Lost_server lenv, `Event Tick when lenv.p.trigger_on_lock_file ->
       MonitorConnection.server_exists lenv.lock_file
     | _, _ -> false
@@ -1495,7 +1496,7 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     | None -> assert false
     | Some root -> ServerFiles.lock_file root
   in
-  let reconnect_immediately = MonitorConnection.server_exists lock_file
+  let reconnect_immediately = p.trigger_on_lock_file && MonitorConnection.server_exists lock_file
   in
 
   (* These helper functions are for the dialog *)

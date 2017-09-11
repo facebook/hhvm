@@ -608,9 +608,9 @@ and emit_string2 env exprs =
 and emit_lambda env fundef ids =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
-  let class_num = int_of_string (snd fundef.A.f_name) in
-  (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
-  let explicit_use = match fundef.A.f_body with [] -> false | _ -> true in
+  let fundef_name = snd fundef.A.f_name in
+  let class_num = int_of_string fundef_name in
+  let explicit_use = SSet.mem fundef_name (Emit_env.get_explicit_use_set ()) in
   gather [
     gather @@ List.map ids
       (fun (x, isref) ->

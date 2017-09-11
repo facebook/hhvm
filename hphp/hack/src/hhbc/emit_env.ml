@@ -18,8 +18,14 @@ type t = {
 
 let is_hh_file_ = ref false
 
+let explicit_use_set_: SSet.t ref = ref SSet.empty
+
 let set_is_hh_file v = is_hh_file_ := v
 let is_hh_file () = !is_hh_file_
+
+let set_explicit_use_set set = explicit_use_set_ := set
+let clear_explicit_use_set () = explicit_use_set_ := SSet.empty
+let get_explicit_use_set () = !explicit_use_set_
 
 let empty = {
   env_pipe_var = None;

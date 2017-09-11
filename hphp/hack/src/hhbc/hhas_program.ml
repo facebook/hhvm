@@ -93,18 +93,26 @@ let emit_fatal_program ~ignore_message op pos message =
     make [] [] [] [] body
 
 let from_ast is_hh_file ast =
-  try
+  Utils.try_finally
+  ~f:begin fun () ->
+    try
+      Emit_env.set_is_hh_file is_hh_file;
+      (* Convert closures to top-level classes;
+       * also hoist inner classes and functions *)
+      let closed_ast, explicit_use_set = convert_toplevel_prog ast in
+      Emit_env.set_explicit_use_set explicit_use_set;
+      let flat_closed_ast = List.map (fun (_, y) -> y) closed_ast in
+      let compiled_defs = emit_main flat_closed_ast in
+      let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
+      let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
+      let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
+      let adata = Emit_adata.get_adata () in
+      make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
+    with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
+      Emit_env.clear_explicit_use_set ();
+      emit_fatal_program ~ignore_message:false op pos message
+  end
+  ~finally:begin fun () ->
     Emit_adata.reset ();
-    Emit_env.set_is_hh_file is_hh_file;
-    (* Convert closures to top-level classes;
-     * also hoist inner classes and functions *)
-    let closed_ast = convert_toplevel_prog ast in
-    let flat_closed_ast = List.map (fun (_, y) -> y) closed_ast in
-    let compiled_defs = emit_main flat_closed_ast in
-    let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
-    let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
-    let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
-    let adata = Emit_adata.get_adata () in
-    make adata compiled_funs compiled_classes compiled_typedefs compiled_defs
-  with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
-    emit_fatal_program ~ignore_message:false op pos message
+    Emit_env.clear_explicit_use_set ();
+  end

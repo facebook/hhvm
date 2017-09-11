@@ -105,7 +105,7 @@
  * returns true if the left argument is GREATER than the right argument.
  * This is the opposite of what the STL's sort implementation does, and
  * we do it because it helps HHVM be more compatible with existing PHP
- * programs that (inadvertantly) depend on unspecified behavior of the
+ * programs that (inadvertently) depend on unspecified behavior of the
  * PHP5 implementation.
  */
 

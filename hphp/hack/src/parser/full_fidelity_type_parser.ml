@@ -576,6 +576,7 @@ and parse_soft_type_specifier parser =
 and parse_classname_type_specifier parser =
   (* SPEC
     classname-type-specifier:
+      classname
       classname  <  qualified-name generic-type-argument-list-opt >
 
       TODO: We parse any type as the class name type; we should write an
@@ -589,13 +590,22 @@ and parse_classname_type_specifier parser =
   (* TODO ERROR RECOVERY is unsophisticated here. *)
   let (parser, classname) = next_token parser in
   let classname = make_token classname in
-  let (parser, left_angle) = require_left_angle parser in
-  let (parser, classname_type) = parse_type_specifier parser in
-  let (parser, optional_comma) = optional_token parser Comma in
-  let (parser, right_angle) = require_right_angle parser in
-  let result = make_classname_type_specifier
-    classname left_angle classname_type optional_comma right_angle in
-  (parser, result)
+  match peek_token_kind parser with
+  | LessThan ->
+    let (parser, left_angle) = require_left_angle parser in
+    let (parser, classname_type) = parse_type_specifier parser in
+    let (parser, optional_comma) = optional_token parser Comma in
+    let (parser, right_angle) = require_right_angle parser in
+    let result = make_classname_type_specifier
+      classname left_angle classname_type optional_comma right_angle in
+    (parser, result)
+  | _ ->
+    let result =
+      make_classname_type_specifier
+        classname (make_missing()) (make_missing())
+        (make_missing()) (make_missing())
+    in
+    (parser, result)
 
 and parse_field_specifier parser =
   (* SPEC

@@ -101,7 +101,6 @@ slow/finally/try_finally_004.php
 slow/finally/try_finally_005.php
 slow/finally/try_finally_007.php
 slow/foreach_target_variables.php
-slow/function/classname-default.php
 slow/function_no_param_modifier.php
 slow/goto/label_in_finally.php
 slow/goto/label_out_finally.php

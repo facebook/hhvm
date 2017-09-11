@@ -10,6 +10,7 @@
 
 let quote_string s = "\"" ^ Php_escaping.escape s ^ "\""
 let quote_string_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
+let single_quote_string_with_escape s = "'" ^ Php_escaping.escape s ^ "'"
 
 let prefix_namespace n s = n ^ "\\" ^ s
 let strip_global_ns s =

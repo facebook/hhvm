@@ -170,8 +170,9 @@ let make_closure ~class_num
     | ScopeItem.Lambda :: scope ->
       not st.captured_this || is_scope_static scope
     | _ -> false in
+  let is_static = fd.f_static || is_scope_static env.scope in
   let md = {
-    m_kind = [Public] @ (if fd.f_static || is_scope_static env.scope then [Static] else []);
+    m_kind = [Public] @ (if is_static then [Static] else []);
     m_tparams = fd.f_tparams;
     m_constrs = [];
     m_name = (fst fd.f_name, "__invoke");
@@ -208,6 +209,7 @@ let make_closure ~class_num
   } in
   let inline_fundef =
     { fd with f_body = body;
+              f_static = is_static;
               f_name = (p, string_of_int class_num) } in
   inline_fundef, cd
 

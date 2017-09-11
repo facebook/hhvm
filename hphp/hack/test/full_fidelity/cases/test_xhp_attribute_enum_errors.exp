@@ -1,1 +1,4 @@
 (4,21)-(4,21) At least one enumerated item is expected.
+(6,21)-(6,24) Expected integer or string literal.
+(6,27)-(6,31) Expected integer or string literal.
+(7,21)-(7,23) Expected integer or string literal.

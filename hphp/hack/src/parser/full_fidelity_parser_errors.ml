@@ -346,6 +346,22 @@ let make_error_from_nodes start_node end_node error =
 let make_error_from_node node error =
   make_error_from_nodes node node error
 
+let is_invalid_xhp_attr_enum_item_literal literal_expression =
+  match syntax literal_expression with
+  | Token t -> begin
+      Full_fidelity_token_kind.(match PositionedToken.kind t with
+      | DecimalLiteral | SingleQuotedStringLiteral
+      | DoubleQuotedStringLiteral -> false
+      | _ -> true)
+    end
+  | _ -> true
+
+let is_invalid_xhp_attr_enum_item node =
+  match syntax node with
+  | LiteralExpression {literal_expression} ->
+      is_invalid_xhp_attr_enum_item_literal literal_expression
+  | _ -> true
+
 let xhp_errors node _parents =
 (* An attribute name cannot contain - or :, but we allow this in the lexer
    because it's easier to have one rule for tokenizing both attribute and
@@ -358,6 +374,11 @@ let xhp_errors node _parents =
   |  XHPEnumType enumType when
     (is_missing enumType.xhp_enum_values) ->
       [ make_error_from_node enumType.xhp_enum_values SyntaxError.error2055 ]
+  |  XHPEnumType enumType ->
+    let invalid_enum_items = List.filter is_invalid_xhp_attr_enum_item
+      (syntax_to_list_no_separators enumType.xhp_enum_values) in
+    let mapper item = make_error_from_node item SyntaxError.error2063 in
+    List.map mapper invalid_enum_items
   | _ -> [ ]
 
 let classish_duplicate_modifiers node =

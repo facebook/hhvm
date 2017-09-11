@@ -207,3 +207,4 @@ let error2060 = "Shape field name must not start with an integer"
 let error2061 = "Non-static instance variables are not allowed in abstract final
   classes."
 let error2062 = "Non-static methods are not allowed in abstract final classes."
+let error2063 = "Expected integer or string literal."

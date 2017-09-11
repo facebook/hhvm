@@ -107,6 +107,10 @@ let make_genv options config local_config handle =
         match changes with
         | Watchman.Watchman_unavailable -> Notifier_unavailable
         | Watchman.Watchman_pushed changes -> begin match changes with
+          | Watchman.Changed_merge_base _ ->
+            let () = Hh_logger.log
+              "Error: Typechecker does not use Source Control Aware mode" in
+            raise Exit_status.(Exit_with Watchman_invalid_result)
           | Watchman.State_enter (name, metadata) ->
             Notifier_state_enter (name, metadata)
           | Watchman.State_leave (name, metadata) ->

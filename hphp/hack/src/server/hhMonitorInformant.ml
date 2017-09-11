@@ -46,14 +46,23 @@ module WEWConfig = WatchmanEventWatcherConfig
  * are moving across hundreds of revisions. Without caching the Revision
  * 100 result, the restart would be delayed by seconds. With a cache, the
  * restart is triggered immediately.
+ *
+ * We use an SCM Aware Watchman subscription to follow when the merge base
+ * changes. We use State Enter and Leave events (which appear before the
+ * slower SCM Aware notification) to kick off asynchronous computation. In
+ * particular, we kick off prefetching of a saved state, and shelling out
+ * to mercurial for mapping the HG Revision to its corresponding SVN Revision
+ * (since our "distance" meausure uses svn revisions which are
+ * monotonically increasing)..
  *)
 module Revision_tracker = struct
 
   type timestamp = float
 
   type repo_transition =
-    | State_enter
-    | State_leave
+    | State_enter of Hg.hg_rev
+    | State_leave of Hg.hg_rev
+    | Changed_merge_base of Hg.hg_rev
 
   type init_settings = {
     watchman : Watchman.watchman_instance ref;
@@ -95,16 +104,12 @@ module Revision_tracker = struct
      * queue), we can catch that final hg update early on and proactively
      * trigger a server restart.
      *)
-    state_changes : (repo_transition * timestamp * Hg.hg_rev) Queue.t;
+    state_changes : (repo_transition * timestamp) Queue.t;
   }
 
   type instance =
     | Initializing of init_settings * (Hg.svn_rev Future.t)
     | Tracking of env
-
-  type change =
-    | Hg_update_enter of Hg.hg_rev
-    | Hg_update_exit of Hg.hg_rev
 
   (** Revision_tracker has lots of mutable state anyway, so might as well
    * make it responsible for maintaining its own instance. *)
@@ -168,7 +173,12 @@ module Revision_tracker = struct
    *
    * Nonblocking.
    *)
-  let maybe_significant timestamp hg_rev env =
+  let maybe_significant timestamp transition env =
+    let hg_rev = match transition with
+      | State_enter hg_rev
+      | State_leave hg_rev
+      | Changed_merge_base hg_rev -> hg_rev
+    in
     match cached_svn_rev env.queries hg_rev with
     | None ->
       None
@@ -188,27 +198,33 @@ module Revision_tracker = struct
    * Non-blocking.
    *)
   let rec churn_ready_changes ~acc env =
+    let maybe_set_base_rev transition svn_rev env = match transition with
+      | State_enter _
+      | State_leave _ ->
+        ()
+      | Changed_merge_base _ ->
+        set_base_revision svn_rev env
+    in
     if Queue.is_empty env.state_changes then
       acc
     else
-      let transition, timestamp, hg_rev = Queue.peek env.state_changes in
-      match maybe_significant timestamp hg_rev env with
+      let transition, timestamp = Queue.peek env.state_changes in
+      match maybe_significant timestamp transition env with
       | None ->
         acc
       | Some (significant, svn_rev) ->
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
         let _ = State_prefetcher.run svn_rev env.inits.prefetcher in
-        if transition = State_leave
-          (** Repo has been moved to a new SVN Rev, so we set this mutable
-           * reference. This must be done after computing distance. *)
-          then set_base_revision svn_rev env;
+        (** Maybe setting the base revision must be done after
+         * computing distance. *)
+        maybe_set_base_rev transition svn_rev env;
         churn_ready_changes ~acc:(significant || acc) env
 
   let form_decision has_significant last_transition server_state =
     let open Informant_sig in
     match has_significant, last_transition, server_state with
-    | _, State_leave, Server_not_yet_started ->
+    | _, State_leave _, Server_not_yet_started ->
      (** This case should be unreachable since Server_not_yet_started
       * should be handled by "should_start_first_server" and not by the
       * revision tracker. Restart anyway which, at worst, could result in a
@@ -216,15 +232,19 @@ module Revision_tracker = struct
       Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
         "Revision_tracker.form_decision";
       Restart_server
-    | _, State_leave, Server_dead ->
+    | _, State_leave _, Server_dead ->
       (** Regardless of whether we had a significant change or not, when the
        * server is not alive, we restart it on a state leave.*)
       Restart_server
     | false, _, _ ->
       Move_along
-    | true, State_enter, _ ->
+    | true, State_enter _, _
+    | true, State_leave _, _ ->
+      (** We use the State enter and leave events to kick off asynchronous
+       * computations off the hg revisions when they arrive (during preprocess)
+       * But actual actions are taken only on changed_merge_base below. *)
       Move_along
-    | true, State_leave, _ ->
+    | true, Changed_merge_base _, _ ->
       Restart_server
 
   let queue_peek_last q =
@@ -239,7 +259,7 @@ module Revision_tracker = struct
     if Queue.is_empty env.state_changes then
       Move_along
     else
-      let last_transition, _, _ = queue_peek_last env.state_changes in
+      let last_transition, _ = queue_peek_last env.state_changes in
       let has_significant = churn_ready_changes ~acc:false env in
       form_decision has_significant last_transition server_state
 
@@ -259,25 +279,29 @@ module Revision_tracker = struct
     | Watchman.Watchman_unavailable
     | Watchman.Watchman_synchronous _ ->
       None
+    | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, _)) ->
+      Some (Changed_merge_base rev)
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_enter: %s" hg_rev;
-          Some (Hg_update_enter hg_rev)
+          Some (State_enter hg_rev)
         end
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
         when state = "hg.update" ->
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_leave: %s" hg_rev;
-          Some (Hg_update_exit hg_rev)
+          Some (State_leave hg_rev)
         end
-    | Watchman.Watchman_pushed _ ->
+    | Watchman.Watchman_pushed (Watchman.Files_changed _)
+    | Watchman.Watchman_pushed (Watchman.State_enter _)
+    | Watchman.Watchman_pushed (Watchman.State_leave _) ->
       None
 
-  let preprocess server_state transition hg_rev env =
-    match maybe_significant (Unix.time ()) hg_rev env with
+  let preprocess server_state transition env =
+    match maybe_significant (Unix.time ()) transition env with
     | None ->
       None
     | Some (significant, svn_rev) ->
@@ -289,10 +313,12 @@ module Revision_tracker = struct
   let handle_change_then_churn server_state change env = begin
     let () = match change with
     | None -> ()
-    | Some Hg_update_enter hg_rev ->
-      Queue.add (State_enter, Unix.time (), hg_rev) env.state_changes
-    | Some Hg_update_exit hg_rev ->
-      Queue.add (State_leave, Unix.time (), hg_rev) env.state_changes
+    | Some (State_enter hg_rev) ->
+      Queue.add (State_enter hg_rev, Unix.time ()) env.state_changes
+    | Some (State_leave hg_rev) ->
+      Queue.add (State_leave hg_rev, Unix.time ()) env.state_changes
+    | Some (Changed_merge_base hg_rev) ->
+      Queue.add (Changed_merge_base hg_rev, Unix.time ()) env.state_changes
     in
     churn_changes server_state env
   end
@@ -311,17 +337,20 @@ module Revision_tracker = struct
    *   5) If no early decision, handle the new change and churn through the
    *      queue of pending changes.
    * *)
-  let process server_state env =
+  let process_once server_state env =
     let open Informant_sig in
     let change = get_change env in
     let early_decision = match change with
     | None -> None
-    | Some (Hg_update_enter hg_rev) ->
+    | Some (State_enter hg_rev) ->
       let () = maybe_add_query hg_rev env in
-      preprocess server_state State_enter hg_rev env
-    | Some (Hg_update_exit hg_rev) ->
+      preprocess server_state (State_enter hg_rev) env
+    | Some (State_leave hg_rev) ->
       let () = maybe_add_query hg_rev env in
-      preprocess server_state State_leave hg_rev env
+      preprocess server_state (State_leave hg_rev) env
+    | Some (Changed_merge_base hg_rev) ->
+      let () = maybe_add_query hg_rev env in
+      preprocess server_state (Changed_merge_base hg_rev) env
     in
     (** If we make an "early" decision to either kill or restart, we toss
      * out earlier state changes and don't need to pump the queue anymore.
@@ -329,16 +358,44 @@ module Revision_tracker = struct
      * This is an optimization.
      *
      * Otherwise, we continue as per usual. *)
-    match early_decision with
-    | Some (Restart_server, svn_rev) ->
-      (** Early decision to restart, so the prior state changes don't
-       * matter anymore. *)
-      Hh_logger.log "Informant early decision: restart server";
-      let () = Queue.clear env.state_changes in
-      let () = set_base_revision svn_rev env in
-      Restart_server
-    | Some (Move_along, _) | None ->
-      handle_change_then_churn server_state change env
+    let report = match early_decision with
+      | Some (Restart_server, svn_rev) ->
+        (** Early decision to restart, so the prior state changes don't
+         * matter anymore. *)
+        Hh_logger.log "Informant early decision: restart server";
+        let () = Queue.clear env.state_changes in
+        let () = set_base_revision svn_rev env in
+        Restart_server
+      | Some (Move_along, _) | None ->
+        handle_change_then_churn server_state change env
+    in
+    report, (change <> None)
+
+  let rec process (server_state, env, reports_acc) =
+    (** Sometimes Watchman pushes many file changes as many sequential
+     * notifications instead of all at once. Since make_report is
+     * only called once per tick, we don't want to take many ticks
+     * to consume this queue of notifications. So instead we repeatedly consume
+     * the Watchman pipe here until it has no more changes. *)
+    let report, had_watchman_changes = process_once server_state env in
+    let reports_acc = report :: reports_acc in
+    if had_watchman_changes then
+      process (server_state, env, reports_acc)
+    else
+      reports_acc
+
+  let process server_state env =
+    let open Informant_sig in
+    let reports = process (server_state, env, []) in
+    (** We fold through the reports and take the "most active" one. *)
+    let max_report a b = match a, b with
+      | Restart_server, _
+      | _, Restart_server ->
+        Restart_server
+      | _, _ ->
+        Move_along
+    in
+    List.fold_left max_report Move_along reports
 
   let make_report server_state t = match !t with
     | Initializing (init_settings, future) ->
@@ -372,6 +429,18 @@ type t =
    * or if the informant is disabled in the hhconfig. *)
   | Resigned
 
+let watchman_expression_terms =
+  let module J = Hh_json_helpers in
+  [
+    J.pred "not" @@ [
+      J.pred "anyof" @@ [
+        J.strlist ["dirname"; ".hg"];
+        J.strlist ["dirname"; ".git"];
+        J.strlist ["dirname"; ".svn"];
+      ]
+    ]
+  ]
+
 let init {
   root;
   allow_subscriptions;
@@ -386,10 +455,10 @@ let init {
     Resigned
   else
     let watchman = Watchman.init {
-      Watchman.subscribe_mode = Some Watchman.Drop_changes;
+      Watchman.subscribe_mode = Some Watchman.Scm_aware;
       init_timeout = 30;
       sync_directory = "";
-      expression_terms = [];
+      expression_terms = watchman_expression_terms;
       root;
     } in
     match watchman with

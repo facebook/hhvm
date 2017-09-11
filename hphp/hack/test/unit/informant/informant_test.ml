@@ -31,6 +31,7 @@ module Tools = struct
   type state_transition =
     | State_leave
     | State_enter
+    | Changed_merge_base
 
   let set_hg_to_svn_map () =
     Hg.Mocking.closest_svn_ancestor_bind_value hg_rev_1
@@ -51,6 +52,8 @@ module Tools = struct
       Watchman.State_leave ("hg.update", (Some json))
     | State_enter ->
       Watchman.State_enter ("hg.update", (Some json))
+    | Changed_merge_base ->
+      Watchman.Changed_merge_base (hg_rev, SSet.empty)
     in
     Watchman.Mocking.get_changes_returns
       (Watchman.Watchman_pushed move)
@@ -88,7 +91,8 @@ let test_informant_restarts_significant_move temp_dir =
   Report_asserter.assert_equals Informant_sig.Move_along report
     "no distance moved" ;
 
-  (**** Following tests all have a State_enter followed by a State_leave *)
+  (**** Following tests all have a State_enter followed by a State_leave
+   * and then a Changed_merge_base. *)
 
   (** Move base revisions insignificant distance away. *)
   Tools.test_transition
@@ -107,8 +111,12 @@ let test_informant_restarts_significant_move temp_dir =
     "state enter significant distance";
   Tools.test_transition
     informant Tools.State_leave Tools.hg_rev_3
-    Informant_sig.Server_alive Informant_sig.Restart_server
+    Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_3
+    Informant_sig.Server_alive Informant_sig.Restart_server
+    "Changed merge base significant distance";
 
   (** Informant now sitting at revision 200. Moving to 230 no restart. *)
   Tools.test_transition
@@ -119,6 +127,10 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_4
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave insignificant distance";
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_4
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Changed merge base insignificant distance";
 
   (** Moving back to 200 no restart. *)
   Tools.test_transition
@@ -129,6 +141,10 @@ let test_informant_restarts_significant_move temp_dir =
     informant Tools.State_leave Tools.hg_rev_3
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave insignificant distance";
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_3
+    Informant_sig.Server_alive Informant_sig.Move_along
+    "Changed_merge_base insignificant distance";
 
   (** Moving back to SVN rev 5 (hg_rev_2) restarts. *)
   Tools.test_transition
@@ -137,8 +153,12 @@ let test_informant_restarts_significant_move temp_dir =
     "state enter significant distance";
   Tools.test_transition
     informant Tools.State_leave Tools.hg_rev_2
-    Informant_sig.Server_alive Informant_sig.Restart_server
+    Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
+  Tools.test_transition
+    informant Tools.Changed_merge_base Tools.hg_rev_2
+    Informant_sig.Server_alive Informant_sig.Restart_server
+    "Changed merge base significant distance";
   true
 
 (** We emulate the repo being in a mid-update state when the informant

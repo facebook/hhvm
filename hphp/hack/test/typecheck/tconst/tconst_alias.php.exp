@@ -1,3 +1,4 @@
 File "tconst_alias.php", line 18, characters 5-34:
   <static>::TBar::TData
+  where <static>::TBar::TData as this::TBar::TData
 No errors

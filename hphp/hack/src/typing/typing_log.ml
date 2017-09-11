@@ -213,10 +213,15 @@ let hh_show_env p env =
 
 (* Log the type of an expression *)
 let hh_show p env ty =
-  let s = Typing_print.debug env ty in
+  let s1 = Typing_print.debug env ty in
+  let s2_opt = Typing_print.constraints_for_type env ty in
   log_position p
     (fun () ->
-       lprintf (Normal Green) "%s" s; lnewline ())
+       lprintf (Normal Green) "%s" s1;
+       lnewline ();
+       match s2_opt with
+       | None -> ()
+       | Some s2 -> (lprintf (Normal Green) "%s" s2; lnewline ()))
 
 (* Set the logging level *)
 let log_level = ref 0

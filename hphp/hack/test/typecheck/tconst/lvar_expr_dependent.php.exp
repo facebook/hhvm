@@ -1,15 +1,20 @@
 File "lvar_expr_dependent.php", line 20, characters 5-22:
   <expr#1>::T
+  where <expr#1>::T as \C::T
 File "lvar_expr_dependent.php", line 21, characters 5-22:
   <expr#1>::T
+  where <expr#1>::T as \C::T
 File "lvar_expr_dependent.php", line 29, characters 5-28:
   <expr#1>::T
+  where <expr#1>::T as \C::T
 File "lvar_expr_dependent.php", line 33, characters 5-21:
   I
 File "lvar_expr_dependent.php", line 34, characters 5-28:
   <expr#1>::T
+  where <expr#1>::T as \C::T, <expr#1>::T as \I::T
 File "lvar_expr_dependent.php", line 41, characters 5-22:
   <expr#2>::T
+  where <expr#2>::T as \C::T
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
 File "lvar_expr_dependent.php", line 42, characters 13-18:

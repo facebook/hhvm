@@ -24,6 +24,7 @@ val class_: TypecheckerOptions.t -> Typing_defs.class_type -> string
 val gconst: TypecheckerOptions.t -> Decl_heap.GConst.t -> string
 val fun_: TypecheckerOptions.t -> Decl_heap.Fun.t -> string
 val typedef: TypecheckerOptions.t -> Decl_heap.Typedef.t -> string
+val constraints_for_type: Typing_env.env -> 'a Typing_defs.ty -> string option
 
 (* Convert a type to a structured JSON value, as follows:
  * <prim> ::= "int" | "bool" | "float" | "string" | "num" | "arraykey"

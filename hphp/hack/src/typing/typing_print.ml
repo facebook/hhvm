@@ -19,6 +19,7 @@ open Utils
 
 module SN = Naming_special_names
 module Reason = Typing_reason
+module TySet = Typing_set
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
  * We generally don't want to show the whole type. If an error was due
@@ -104,7 +105,7 @@ module ErrorString = struct
     match ak, cstr with
     | AKnewtype (_, _), _ -> "an object of type "^x
     | AKenum _, _ -> "a value of "^x
-    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s -> 
+    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
       "the expression dependent type "^s
     | AKgeneric _, _ -> "a value of generic type "^x
     | AKdependent (`cls c, []), Some (_, ty) ->
@@ -424,11 +425,53 @@ module Full = struct
         ty tcopt st env o cty
       end
 
+  let visitor env =
+    object(this)
+      inherit [string list] Type_visitor.type_visitor
+      method! on_tabstract acc _ ak _ty_opt =
+        match ak with
+        | AKgeneric s -> s::acc
+        | _ -> acc
+      method! on_tvar acc r ix =
+        let _env, ty = Env.get_type env r ix in
+        this#on_type acc ty
+    end
+  let get_tparams env ty = (visitor env)#on_type [] ty
+
+  (* For a given type parameter, construct a list of its constraints *)
+  let get_constraints_on_tparam env tparam =
+    (* Dedup the lists *)
+    let lower = TySet.of_list (Env.get_lower_bounds env tparam) in
+    let upper = TySet.of_list (Env.get_upper_bounds env tparam) in
+    let equ = TySet.inter lower upper in
+    (* If we have an equality we can ignore the other bounds *)
+    if not (TySet.is_empty equ)
+    then List.map (TySet.elements equ) (fun ty -> (tparam, Ast.Constraint_eq, ty))
+    else
+      List.map (TySet.elements lower) (fun ty -> (tparam, Ast.Constraint_super, ty))
+      @
+      List.map (TySet.elements upper) (fun ty -> (tparam, Ast.Constraint_as, ty))
+
   let to_string env x =
     let tcopt = Typing_env.get_options env in
     let buf = Buffer.create 50 in
     ty tcopt ISet.empty env (Buffer.add_string buf) x;
     Buffer.contents buf
+
+  let constraints_for_type env ty =
+    let tparams = get_tparams env ty in
+    let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
+    if List.is_empty constraints
+    then None
+    else
+      let tcopt = Typing_env.get_options env in
+      let buf = Buffer.create 50 in
+      let o = Buffer.add_string buf in
+      o "where "; list_sep o ", "
+      (fun (tparam, ck, ty) ->
+        (o tparam; tparam_constraint tcopt ISet.empty env o (ck, ty)))
+      constraints;
+      Some (Buffer.contents buf)
 
   let to_string_rec env n x =
     let tcopt = Typing_env.get_options env in
@@ -442,7 +485,7 @@ module Full = struct
     let add_string str =
       let str = Utils.strip_ns str in
       Buffer.add_string buf str
-    in
+      in
     ty tcopt ISet.empty env add_string x;
     Buffer.contents buf
 
@@ -450,7 +493,7 @@ module Full = struct
     let env =
       Typing_env.empty tcopt Relative_path.default
         ~droot:None in
-    to_string env x
+    to_string   env x
 
 end
 
@@ -830,3 +873,4 @@ let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt gc
 let fun_ tcopt f = PrintFun.fun_type tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
+let constraints_for_type env ty = Full.constraints_for_type env ty

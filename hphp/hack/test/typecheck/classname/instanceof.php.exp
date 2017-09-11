@@ -2,5 +2,6 @@ File "instanceof.php", line 8, characters 5-23:
   I
 File "instanceof.php", line 21, characters 7-19:
   T
+  where T as \I
 File "instanceof.php", line 20, characters 9-29:
 'instanceof' cannot be used on 'classname<T>' because 'T' may be instantiated with a type such as 'C<int>' that cannot be checked at runtime (Typing[4162])

@@ -24,7 +24,12 @@ let infer_result_to_ide_response typename =
 let save_infer result_ty target_line target_column ty pos env =
   if Pos.inside pos target_line target_column && !result_ty = None
   then begin
-    result_ty := Some (Typing_print.full_strip_ns env ty,
+    let ty_string = Typing_print.full_strip_ns env ty in
+    let ty_with_constraints_string =
+      match Typing_print.constraints_for_type env ty with
+      | None -> ty_string
+      | Some s -> ty_string ^ "\n" ^ s in
+    result_ty := Some (ty_with_constraints_string,
       Hh_json.json_to_string (Typing_print.to_json env ty))
   end
 

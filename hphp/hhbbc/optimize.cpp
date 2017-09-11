@@ -484,20 +484,6 @@ borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
   return blk;
 }
 
-borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
-                                          borrowed_ptr<const php::Block> srcBlk,
-                                          const State& state) {
-  auto blk = make_block(ainfo, srcBlk, state);
-  auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
-  blk->hhbcs = {
-    bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-    bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
-  };
-  blk->fallthrough = NoBlockId;
-  blk->exnNode = nullptr;
-  return blk;
-}
-
 void first_pass(const Index& index,
                 FuncAnalysis& ainfo,
                 borrowed_ptr<php::Block> const blk,
@@ -582,109 +568,32 @@ void first_pass(const Index& index,
       break;
     }
 
-    if (options.RemoveDeadBlocks) {
+    if (options.RemoveDeadBlocks &&
+        flags.jmpFlag != StepFlags::JmpFlags::Either) {
+      always_assert(!flags.wasPEI);
       switch (flags.jmpFlag) {
       case StepFlags::JmpFlags::Taken:
         switch (op.op) {
-          /*
-           * For jumps, we need to pop the cell that was on the stack for the
-           * conditional jump.  Note: for jumps this also conceptually
-           * needs to execute any side effects a conversion to bool can
-           * have.  (Currently that is none.)
-           */
-        case Op::JmpNZ:
-          always_assert(!flags.wasPEI);
-          blk->fallthrough = op.JmpNZ.target;
-          gen(bc::PopC {});
-          continue;
-        case Op::JmpZ:
-          always_assert(!flags.wasPEI);
-          blk->fallthrough = op.JmpZ.target;
-          gen(bc::PopC {});
-          continue;
-        case Op::IterInit:
-          /*
-           * For iterators, if we'll always take the taken branch (which means
-           * there's nothing to iterate over), and the op cannot raise an
-           * exception, we can just pop the input and set the fall-through to
-           * the taken branch. If not, we have to keep the op, but we can make
-           * sure we'll fatal if we ever actually take the fall-through.
-           */
-          if (!flags.wasPEI) {
-            blk->fallthrough = op.IterInit.target;
-            gen(bc::PopC {});
-            continue;
-          } else {
-            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        case Op::IterInitK:
-          if (!flags.wasPEI) {
-            blk->fallthrough = op.IterInitK.target;
-            gen(bc::PopC {});
-            continue;
-          } else {
-            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
+        case Op::JmpNZ:     blk->fallthrough = op.JmpNZ.target;     break;
+        case Op::JmpZ:      blk->fallthrough = op.JmpZ.target;      break;
+        case Op::IterInit:  blk->fallthrough = op.IterInit.target;  break;
+        case Op::IterInitK: blk->fallthrough = op.IterInitK.target; break;
         default:
           // No support for switch, etc, right now.
           always_assert(0 && "unsupported tookBranch case");
         }
-        break;
+        // fall through to PopC
       case StepFlags::JmpFlags::Fallthrough:
-        switch (op.op) {
-        case Op::JmpNZ:
-        case Op::JmpZ:
-          /*
-           * Same as the taken case for jumps, except the fall-through is
-           * already set, so we can just turn them into pops.
-           */
-          always_assert(!flags.wasPEI);
-          gen(bc::PopC {});
-          continue;
-        case Op::IterInit:
-          /*
-           * We can't ever optimize away iteration initialization if we know
-           * we'll always fall-through (which means we enter the loop) because
-           * we need to initialize the iterator. We can ensure, however, that
-           * the taken branch is a fatal.
-           */
-          op.IterInit.target = make_fatal_block(ainfo, blk, state)->id;
-          break;
-        case Op::IterInitK:
-          op.IterInitK.target = make_fatal_block(ainfo, blk, state)->id;
-          break;
-        case Op::IterNext:
-          /*
-           * If we're nexting an iterator and we know we'll always fall-through
-           * (which means the iteration is over), and we can't raise an
-           * exception when nexting the iterator, we can just free the iterator
-           * and let it fall-through. If not, we can at least ensure the taken
-           * branch is a fatal.
-           */
-          if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNext.iter1 });
-            continue;
-          } else {
-            op.IterNext.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        case Op::IterNextK:
-          if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNextK.iter1 });
-            continue;
-          } else {
-            op.IterNextK.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        default:
-          // No support for switch, etc, right now.
-          always_assert(0 && "unsupported fallthrough case");
-        }
-        break;
+        /*
+         * We need to pop the cell that was on the stack for the
+         * conditional jump.  Note: for jumps this also conceptually
+         * needs to execute any side effects a conversion to bool can
+         * have.  (Currently that is none.)
+         */
+        gen(bc::PopC {});
+        continue;
       case StepFlags::JmpFlags::Either:
-        break;
+        not_reached();
       }
     }
 

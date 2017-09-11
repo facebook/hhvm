@@ -2530,39 +2530,19 @@ void in(ISS& env, const bc::DecodeCufIter& op) {
 
 void in(ISS& env, const bc::IterInit& op) {
   auto const t1 = popC(env);
-  auto ity = iter_types(t1);
-  if (!ity.mayThrowOnInit) nothrow(env);
-
-  auto const taken = [&]{
-    // Take the branch before setting locals if the iter is already
-    // empty, but after popping.  Similar for the other IterInits
-    // below.
-    freeIter(env, op.iter1);
-    env.propagate(op.target, env.state);
-  };
-
-  auto const fallthrough = [&]{
-    setLoc(env, op.loc3, ity.value);
-    setIter(env, op.iter1, TrackedIter { std::move(ity) });
-  };
-
-  switch (ity.count) {
-    case IterTypes::Count::Empty:
-      taken();
-      mayReadLocal(env, op.loc3);
-      jmp_nofallthrough(env);
-      break;
-    case IterTypes::Count::Single:
-    case IterTypes::Count::NonEmpty:
-      fallthrough();
-      jmp_nevertaken(env);
-      break;
-    case IterTypes::Count::ZeroOrOne:
-    case IterTypes::Count::Any:
-      taken();
-      fallthrough();
-      break;
+  // Take the branch before setting locals if the iter is already
+  // empty, but after popping.  Similar for the other IterInits
+  // below.
+  freeIter(env, op.iter1);
+  env.propagate(op.target, env.state);
+  if (t1.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
+    nothrow(env);
+    jmp_nofallthrough(env);
+    return;
   }
+  auto ity = iter_types(t1);
+  setLoc(env, op.loc3, ity.second);
+  setIter(env, op.iter1, TrackedIter { std::move(ity) });
 }
 
 void in(ISS& env, const bc::MIterInit& op) {
@@ -2574,38 +2554,17 @@ void in(ISS& env, const bc::MIterInit& op) {
 
 void in(ISS& env, const bc::IterInitK& op) {
   auto const t1 = popC(env);
-  auto ity = iter_types(t1);
-  if (!ity.mayThrowOnInit) nothrow(env);
-
-  auto const taken = [&]{
-    freeIter(env, op.iter1);
-    env.propagate(op.target, env.state);
-  };
-
-  auto const fallthrough = [&]{
-    setLoc(env, op.loc3, ity.value);
-    setLoc(env, op.loc4, ity.key);
-    setIter(env, op.iter1, TrackedIter { std::move(ity) });
-  };
-
-  switch (ity.count) {
-    case IterTypes::Count::Empty:
-      taken();
-      mayReadLocal(env, op.loc3);
-      mayReadLocal(env, op.loc4);
-      jmp_nofallthrough(env);
-      break;
-    case IterTypes::Count::Single:
-    case IterTypes::Count::NonEmpty:
-      fallthrough();
-      jmp_nevertaken(env);
-      break;
-    case IterTypes::Count::ZeroOrOne:
-    case IterTypes::Count::Any:
-      taken();
-      fallthrough();
-      break;
+  freeIter(env, op.iter1);
+  env.propagate(op.target, env.state);
+  if (t1.subtypeOfAny(TArrE, TVecE, TDictE, TKeysetE)) {
+    nothrow(env);
+    jmp_nofallthrough(env);
+    return;
   }
+  auto ity = iter_types(t1);
+  setLoc(env, op.loc3, ity.second);
+  setLoc(env, op.loc4, ity.first);
+  setIter(env, op.iter1, TrackedIter { std::move(ity) });
 }
 
 void in(ISS& env, const bc::MIterInitK& op) {
@@ -2635,38 +2594,19 @@ void in(ISS& env, const bc::WIterInitK& op) {
 void in(ISS& env, const bc::IterNext& op) {
   auto const curLoc3 = locRaw(env, op.loc3);
 
-  auto const noTaken = match<bool>(
+  match<void>(
     env.state.iters[op.iter1],
     [&] (UnknownIter)           {
       setLoc(env, op.loc3, TInitCell);
-      return false;
     },
     [&] (const TrackedIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
-      switch (ti.types.count) {
-        case IterTypes::Count::Single:
-        case IterTypes::Count::ZeroOrOne:
-          return true;
-        case IterTypes::Count::NonEmpty:
-        case IterTypes::Count::Any:
-          setLoc(env, op.loc3, ti.types.value);
-          return false;
-        case IterTypes::Count::Empty:
-          always_assert(false);
-      }
-      not_reached();
+      setLoc(env, op.loc3, ti.kv.second);
     }
   );
-  if (noTaken) {
-    jmp_nevertaken(env);
-    freeIter(env, op.iter1);
-    return;
-  }
-
   env.propagate(op.target, env.state);
 
   freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
+  if (curLoc3.subtypeOf(TInitCell)) setLocRaw(env, op.loc3, curLoc3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
@@ -2679,41 +2619,22 @@ void in(ISS& env, const bc::IterNextK& op) {
   auto const curLoc3 = locRaw(env, op.loc3);
   auto const curLoc4 = locRaw(env, op.loc4);
 
-  auto const noTaken = match<bool>(
+  match<void>(
     env.state.iters[op.iter1],
-    [&] (UnknownIter)           {
+    [&] (UnknownIter) {
       setLoc(env, op.loc3, TInitCell);
       setLoc(env, op.loc4, TInitCell);
-      return false;
     },
     [&] (const TrackedIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
-      switch (ti.types.count) {
-        case IterTypes::Count::Single:
-        case IterTypes::Count::ZeroOrOne:
-          return true;
-        case IterTypes::Count::NonEmpty:
-        case IterTypes::Count::Any:
-          setLoc(env, op.loc3, ti.types.value);
-          setLoc(env, op.loc4, ti.types.key);
-          return false;
-        case IterTypes::Count::Empty:
-          always_assert(false);
-      }
-      not_reached();
+      setLoc(env, op.loc3, ti.kv.second);
+      setLoc(env, op.loc4, ti.kv.first);
     }
   );
-  if (noTaken) {
-    jmp_nevertaken(env);
-    freeIter(env, op.iter1);
-    return;
-  }
-
   env.propagate(op.target, env.state);
 
   freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
-  setLocRaw(env, op.loc4, curLoc4);
+  if (curLoc3.subtypeOf(TInitCell)) setLocRaw(env, op.loc3, curLoc3);
+  if (curLoc4.subtypeOf(TInitCell)) setLocRaw(env, op.loc4, curLoc4);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {

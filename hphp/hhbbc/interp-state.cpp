@@ -45,20 +45,11 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           return true;
         },
         [&] (const TrackedIter& siter) {
-          if (std::tie(diter.types.key,
-                       diter.types.value,
-                       diter.types.count,
-                       diter.types.mayThrowOnInit,
-                       diter.types.mayThrowOnNext) !=
-              std::tie(siter.types.key,
-                       siter.types.value,
-                       siter.types.count,
-                       siter.types.mayThrowOnInit,
-                       siter.types.mayThrowOnNext)) {
-            dst = UnknownIter {};
-            return true;
-          }
-          return false;
+          auto k1 = join(diter.kv.first, siter.kv.first);
+          auto k2 = join(diter.kv.second, siter.kv.second);
+          auto const changed = k1 != diter.kv.first || k2 != diter.kv.second;
+          diter.kv = std::make_pair(std::move(k1), std::move(k2));
+          return changed;
         }
       );
     }
@@ -70,8 +61,8 @@ std::string show(const Iter& iter) {
     iter,
     [&] (UnknownIter) { return "unk"; },
     [&] (const TrackedIter& ti) {
-      return folly::sformat("{}, {}", show(ti.types.key),
-                            show(ti.types.value));
+      return folly::sformat("{}, {}", show(ti.kv.first),
+                            show(ti.kv.second));
     }
   );
 }

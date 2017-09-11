@@ -3599,72 +3599,29 @@ std::pair<Type,Type> array_newelem(Type arr, const Type& val) {
   return array_like_newelem(std::move(arr), val);
 }
 
-IterTypes iter_types(const Type& iterable) {
-  // Only array types and objects can be iterated. Everything else raises a
-  // warning and jumps out of the loop.
-  if (!iterable.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
-    return { TBottom, TBottom, IterTypes::Count::Empty, true, true };
-  }
-
-  // Optional types are okay here because a null will not set any locals (but it
-  // might throw).
+std::pair<Type,Type> iter_types(const Type& iterable) {
+  // Optional types are okay here because a null will not set any locals.
   if (!iterable.subtypeOfAny(TOptArr, TOptVec, TOptDict, TOptKeyset)) {
-    return {
-      TInitCell,
-      TInitCell,
-      IterTypes::Count::Any,
-      true,
-      iterable.couldBe(TObj)
-    };
+    return { TInitCell, TInitCell };
   }
-
-  auto const mayThrow = is_opt(iterable);
-
-  if (iterable.subtypeOfAny(TOptArrE, TOptVecE, TOptDictE, TOptKeysetE)) {
-    return { TBottom, TBottom, IterTypes::Count::Empty, mayThrow, false };
-  }
-
-  // If we get a null, it will be as if we have any empty array, so consider
-  // that possibly "empty".
-  auto const maybeEmpty =
-    mayThrow ||
-    !iterable.subtypeOfAny(TOptArrN, TOptVecN, TOptDictN, TOptKeysetN);
-
-   auto const count = [&](folly::Optional<size_t> size){
-    if (size) {
-      assert(*size > 0);
-      if (*size == 1) {
-        return maybeEmpty
-          ? IterTypes::Count::ZeroOrOne
-          : IterTypes::Count::Single;
-      }
-    }
-    return maybeEmpty ? IterTypes::Count::Any : IterTypes::Count::NonEmpty;
-  };
 
   if (!is_specialized_array_like(iterable)) {
-    auto kv = [&]() -> std::pair<Type, Type> {
-      if (iterable.subtypeOf(TOptSVec))    return { TInt, TInitUnc };
-      if (iterable.subtypeOf(TOptSDict))   return { TUncArrKey, TInitUnc };
-      if (iterable.subtypeOf(TOptSKeyset)) return { TUncArrKey, TUncArrKey };
-      if (iterable.subtypeOf(TOptSArr))    return { TUncArrKey, TInitUnc };
+    if (iterable.subtypeOf(TOptSVec))    return { TInt, TInitUnc };
+    if (iterable.subtypeOf(TOptSDict))   return { TUncArrKey, TInitUnc };
+    if (iterable.subtypeOf(TOptSKeyset)) return { TUncArrKey, TUncArrKey };
+    if (iterable.subtypeOf(TOptSArr))    return { TUncArrKey, TInitUnc };
 
-      if (iterable.subtypeOf(TOptVec))     return { TInt, TInitCell };
-      if (iterable.subtypeOf(TOptDict))    return { TArrKey, TInitCell };
-      if (iterable.subtypeOf(TOptKeyset))  return { TArrKey, TArrKey };
-      if (iterable.subtypeOf(TOptArr))     return { TArrKey, TInitCell };
+    if (iterable.subtypeOf(TOptVec))     return { TInt, TInitCell };
+    if (iterable.subtypeOf(TOptDict))    return { TArrKey, TInitCell };
+    if (iterable.subtypeOf(TOptKeyset))  return { TArrKey, TArrKey };
+    if (iterable.subtypeOf(TOptArr))     return { TArrKey, TInitCell };
 
-      always_assert(false);
-    }();
-
-    return {
-      std::move(kv.first),
-      std::move(kv.second),
-      count(folly::none),
-      mayThrow,
-      false
-    };
+    always_assert(false);
   }
+
+  // Note: we don't need to handle possible emptiness explicitly,
+  // because if the array was empty we won't ever pull anything out
+  // while iterating.
 
   switch (iterable.m_dataTag) {
   case DataTag::None:
@@ -3675,50 +3632,16 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Cls:
   case DataTag::RefInner:
     always_assert(0);
-  case DataTag::ArrLikeVal: {
-    auto kv = val_key_values(iterable.m_data.aval);
-    return {
-      std::move(kv.first),
-      std::move(kv.second),
-      count(iterable.m_data.aval->size()),
-      mayThrow,
-      false
-    };
-  }
+  case DataTag::ArrLikeVal:
+    return val_key_values(iterable.m_data.aval);
   case DataTag::ArrLikePacked:
-    return {
-      TInt,
-      packed_values(*iterable.m_data.packed),
-      count(iterable.m_data.packed->elems.size()),
-      mayThrow,
-      false
-    };
+    return { TInt, packed_values(*iterable.m_data.packed) };
   case DataTag::ArrLikePackedN:
-    return {
-      TInt,
-      iterable.m_data.packedn->type,
-      count(folly::none),
-      mayThrow,
-      false
-    };
-  case DataTag::ArrLikeMap: {
-    auto kv = map_key_values(*iterable.m_data.map);
-    return {
-      std::move(kv.first),
-      std::move(kv.second),
-      count(iterable.m_data.map->map.size()),
-      mayThrow,
-      false
-    };
-  }
+    return { TInt, iterable.m_data.packedn->type };
+  case DataTag::ArrLikeMap:
+    return map_key_values(*iterable.m_data.map);
   case DataTag::ArrLikeMapN:
-    return {
-      iterable.m_data.mapn->key,
-      iterable.m_data.mapn->val,
-      count(folly::none),
-      mayThrow,
-      false
-    };
+    return { iterable.m_data.mapn->key, iterable.m_data.mapn->val };
   }
 
   not_reached();

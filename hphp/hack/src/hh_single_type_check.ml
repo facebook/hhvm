@@ -120,6 +120,7 @@ let parse_options () =
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let safe_array = ref false in
   let safe_vector_array = ref false in
+  let forbid_nullable_cast = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -218,6 +219,9 @@ let parse_options () =
       Arg.Set safe_vector_array,
       " Enforce array subtyping relationships so that array<T> is not a \
       of array<int, T>.";
+    "--forbid_nullable_cast",
+      Arg.Set forbid_nullable_cast,
+      " Forbid casting from nullable values.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
       " Infers return types of functions and methods.";
@@ -235,6 +239,15 @@ let parse_options () =
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
   } in
+  let tcopt =
+    if not !forbid_nullable_cast
+    then { tcopt with
+      GlobalOptions.tco_experimental_features =
+        SSet.remove GlobalOptions.tco_experimental_forbid_nullable_cast
+          tcopt.GlobalOptions.tco_experimental_features
+    }
+    else tcopt
+  in
   { filename = fn;
     mode = !mode;
     no_builtins = !no_builtins;
@@ -672,7 +685,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       ignore @@ Typing_check_utils.check_defs opts.tcopt fn fileinfo
     end;
-    Typing_deps.dump_debug_deps () 
+    Typing_deps.dump_debug_deps ()
 
   | Dump_toplevel_deps ->
     (* Don't typecheck builtins *)

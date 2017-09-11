@@ -102,6 +102,13 @@ let tco_experimental_generics_arity =
 let tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
   "unknown_fields_shape_is_not_subtype_of_known_fields_shape"
 
+(**
+ * Forbid casting nullable values, since they have unexpected semantics. For
+ * example, casting `null` to an int results in `0`, which may or may not be
+ * what you were expecting.
+ *)
+let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -118,6 +125,7 @@ let tco_experimental_all =
      tco_experimental_unresolved_fix;
      tco_experimental_generics_arity;
      tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape;
+     tco_experimental_forbid_nullable_cast;
    ]
 
 let tco_migration_flags_all =

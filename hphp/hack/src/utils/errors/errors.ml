@@ -721,6 +721,7 @@ module Typing                               = struct
   let final_property                        = 4164 (* DONT MODIFY!!!! *)
   let array_get_with_optional_field         = 4165 (* DONT MODIFY!!!! *)
   let unknown_field_disallowed_in_shape     = 4166 (* DONT MODIFY!!!! *)
+  let nullable_cast                         = 4167 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1711,6 +1712,12 @@ let array_cast pos =
   add Typing.array_cast pos
     "(array) cast forbidden; arrays with unspecified \
     key and value types are not allowed"
+
+let nullable_cast pos ty ty_pos =
+  add_list Typing.nullable_cast [
+    pos, "Casting from a nullable type is forbidden";
+    ty_pos, "This is "^ty;
+  ]
 
 let anonymous_recursive pos =
   add Typing.anonymous_recursive pos

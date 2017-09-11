@@ -1629,6 +1629,14 @@ and expr_
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
       Async.enforce_not_awaitable env (fst e) ty2;
+      if (TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_forbid_nullable_cast)
+        && TUtils.is_option env ty2
+      then begin
+        let (r, ty2) = ty2 in
+        Errors.nullable_cast p (Typing_print.error ty2) (Reason.to_pos r)
+      end;
       let env, ty = Phase.hint_locl env hint in
       make_result env (T.Cast (hint, te)) ty
   | InstanceOf (e, cid) ->

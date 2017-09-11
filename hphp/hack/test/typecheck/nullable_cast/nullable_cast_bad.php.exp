@@ -1,0 +1,4 @@
+File "nullable_cast_bad.php", line 5, characters 8-20:
+Casting from a nullable type is forbidden (Typing[4167])
+File "nullable_cast_bad.php", line 4, characters 10-13:
+This is a nullable type

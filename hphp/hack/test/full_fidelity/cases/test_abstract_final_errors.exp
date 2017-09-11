@@ -1,0 +1,3 @@
+(4,3)-(4,8) Non-static instance variables are not allowed in abstract final
+  classes.
+(12,10)-(12,27) Non-static methods are not allowed in abstract final classes.

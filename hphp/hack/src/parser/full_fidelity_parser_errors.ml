@@ -462,19 +462,25 @@ let first_parent_class_name parents =
     | _ -> None (* This arm is never reached  *)
   end
 
-(* Given a classish_ or methodish_ declaration node, returns the 'abstract'
- * keyword node from its list of modifiers, or None if there isn't one. *)
-let extract_abstract_keyword declaration_node =
+(* Given a classish_ or methodish_ declaration node, returns the modifier node
+   from its list of modifiers, or None if there isn't one. *)
+let extract_keyword modifier declaration_node =
   match syntax declaration_node with
   | ClassishDeclaration { classish_modifiers = modifiers_list ; _ }
   | MethodishDeclaration { methodish_modifiers = modifiers_list ; _ } ->
-    Core.List.find ~f:is_abstract
+    Core.List.find ~f:modifier
         (syntax_to_list_no_separators modifiers_list)
   | _ -> None
 
-(* Wrapper function to convert output of the above function into boolean *)
+(* Wrapper function that uses above extract_keyword function to test if node
+   contains is_abstract keyword *)
 let is_abstract_declaration declaration_node =
-  not (Option.is_none (extract_abstract_keyword declaration_node))
+  not (Option.is_none (extract_keyword is_abstract declaration_node))
+
+(* Wrapper function that uses above extract_keyword function to test if node
+   contains is_final keyword *)
+let is_final_declaration declaration_node =
+  not (Option.is_none (extract_keyword is_final declaration_node))
 
 (* Given a methodish_declaration node and a list of parents, tests if that
  * node declares an abstract method inside of a no-nabstract class. *)
@@ -617,6 +623,31 @@ let abstract_with_initializer cd_node parents =
     not (is_missing cd_node.constant_declarator_initializer) in
   is_abstract && has_initializer
 
+(* Tests if Property contains a modifier p *)
+let property_modifier_contains_helper p node =
+  match syntax node with
+  | PropertyDeclaration syntax ->
+    let node = syntax.property_modifiers in
+    list_contains_predicate p node
+  | _ -> false
+
+(* Tests if parent class is both abstract and final *)
+let abstract_final_parent_class parents =
+  let parent = first_parent_classish_node TokenKind.Class parents in
+    match parent with
+    | None -> false
+    | Some node -> (is_abstract_declaration node) && (is_final_declaration node)
+
+(* Given a PropertyDeclaration node, tests whether parent class is abstract
+  final but child variable is non-static *)
+let abstract_final_with_inst_var cd parents =
+  (abstract_final_parent_class parents) &&
+    not (property_modifier_contains_helper is_static cd)
+
+(* Given a MethodishDeclaration, tests whether parent class is abstract final
+    but child method is non-static *)
+let astract_final_with_method cd parents =
+  (abstract_final_parent_class parents) && not (methodish_contains_static cd)
 
 let methodish_errors node parents is_hack =
   match syntax node with
@@ -679,12 +710,12 @@ let methodish_errors node parents is_hack =
         md.methodish_function_decl_header) ~default:"" in
       (* default will never be used, since existence of abstract_keyword is a
        * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_abstract_keyword node)
+      let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors (abstract_method_in_nonabstract_class node) parents
       (SyntaxError.error2044 class_name method_name) abstract_keyword in
     let errors =
-      let abstract_keyword = Option.value (extract_abstract_keyword node)
+      let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors (abstract_method_in_interface node) parents
       SyntaxError.error2045 abstract_keyword in
@@ -878,14 +909,14 @@ let classish_errors node parents =
     let errors =
       (* default will never be used, since existence of abstract_keyword is a
        * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_abstract_keyword node)
+      let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors (is_classish_kind_declared_abstract TokenKind.Interface)
       node SyntaxError.error2042 abstract_keyword in
     let errors =
       (* default will never be used, since existence of abstract_keyword is a
        * necessary condition for the production of an error. *)
-      let abstract_keyword = Option.value (extract_abstract_keyword node)
+      let abstract_keyword = Option.value (extract_keyword is_abstract node)
         ~default:node in
       produce_error errors (is_classish_kind_declared_abstract TokenKind.Trait)
       node SyntaxError.error2043 abstract_keyword in
@@ -944,6 +975,22 @@ let const_decl_errors node parents =
     errors
   | _ -> [ ]
 
+  let abstract_final_class_nonstatic_var_error node parents =
+  match syntax node with
+  | PropertyDeclaration cd ->
+    let errors = [ ] in
+      produce_error_parents errors abstract_final_with_inst_var node parents
+      SyntaxError.error2061 cd.property_modifiers
+  | _ -> [ ]
+
+  let abstract_final_class_nonstatic_method_error node parents =
+  match syntax node with
+  | MethodishDeclaration cd ->
+    let errors = [ ] in
+      produce_error_parents errors astract_final_with_method node parents
+      SyntaxError.error2062 cd.methodish_function_decl_header
+  | _ -> [ ]
+
 let mixed_namespace_errors node namespace_type =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
@@ -997,12 +1044,19 @@ let find_syntax_errors syntax_tree =
     let alias_errors = alias_errors node in
     let group_use_errors = group_use_errors node in
     let const_decl_errors = const_decl_errors node parents in
+    let abstract_final_class_nonstatic_var_error =
+        abstract_final_class_nonstatic_var_error node parents in
+    let abstract_final_class_nonstatic_method_error =
+        abstract_final_class_nonstatic_method_error node parents in
     let mixed_namespace_acc =
       mixed_namespace_errors node acc.namespace_type in
     let errors = acc.errors @ param_errs @ func_errs @
       xhp_errs @ statement_errs @ methodish_errs @ property_errs @
       expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
-      group_use_errors @ const_decl_errors @ mixed_namespace_acc.errors in
+      group_use_errors @ const_decl_errors @
+      abstract_final_class_nonstatic_var_error @
+      abstract_final_class_nonstatic_method_error @
+      mixed_namespace_acc.errors in
     { errors; namespace_type = mixed_namespace_acc.namespace_type } in
   let node = PositionedSyntax.from_tree syntax_tree in
   let acc = SyntaxUtilities.parented_fold_pre folder

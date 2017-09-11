@@ -204,3 +204,6 @@ let error2057 = "First bracketed namespace occurrence here"
 let error2058 = "Property may not be abstract."
 let error2059 = "Shape field name must be a string or a class constant"
 let error2060 = "Shape field name must not start with an integer"
+let error2061 = "Non-static instance variables are not allowed in abstract final
+  classes."
+let error2062 = "Non-static methods are not allowed in abstract final classes."

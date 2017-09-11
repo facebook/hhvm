@@ -583,6 +583,9 @@ module WithExpressionAndStatementAndTypeParser
       let parser = with_error parser SyntaxError.error1033 in
       let result = make_error (make_token token) in
       (parser, result)
+    (* Parser does not detect the error where non-static instance variables
+      or methods are within abstract final classes in its first pass, but
+      instead detects it in its second pass. *)
 
   and parse_classish_element_list_opt parser =
     (* TODO: ERROR RECOVERY: consider bailing if the token cannot possibly

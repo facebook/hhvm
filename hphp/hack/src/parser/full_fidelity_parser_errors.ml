@@ -980,7 +980,9 @@ let mixed_namespace_errors node namespace_type =
     { errors; namespace_type }
   | _ -> { errors = [ ]; namespace_type }
 
-let find_syntax_errors node is_strict is_hack =
+let find_syntax_errors syntax_tree =
+  let is_strict = SyntaxTree.is_strict syntax_tree in
+  let is_hack = (SyntaxTree.language syntax_tree = "hh") in
   let folder acc node parents =
     let param_errs = parameter_errors node parents is_strict in
     let func_errs = function_errors node parents is_strict in
@@ -1002,6 +1004,24 @@ let find_syntax_errors node is_strict is_hack =
       expr_errs @ require_errs @ classish_errors @ type_errors @ alias_errors @
       group_use_errors @ const_decl_errors @ mixed_namespace_acc.errors in
     { errors; namespace_type = mixed_namespace_acc.namespace_type } in
+  let node = PositionedSyntax.from_tree syntax_tree in
   let acc = SyntaxUtilities.parented_fold_pre folder
     { errors = []; namespace_type = Unspecified } node in
-  List.sort SyntaxError.compare acc.errors
+  acc.errors
+
+type error_level = Minimum | Typical | Maximum
+
+let parse_errors ?(level=Typical) syntax_tree =
+  (*
+  Minimum: suppress cascading errors; no second-pass errors if there are
+  any first-pass errors.
+  Typical: suppress cascading errors; give second pass errors always.
+  Maximum: all errors
+  *)
+  let errors1 = match level with
+  | Maximum -> SyntaxTree.all_errors syntax_tree
+  | _ -> SyntaxTree.errors syntax_tree in
+  let errors2 =
+    if level = Minimum && errors1 <> [] then []
+    else find_syntax_errors syntax_tree in
+  List.sort SyntaxError.compare (errors1 @ errors2)

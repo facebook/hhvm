@@ -1,7 +1,7 @@
 (3,13)-(3,13) A case statement may only appear directly inside a switch.
 (4,12)-(4,12) A default statement may only appear directly inside a switch.
-(16,17)-(16,17) The first statement inside a switch statement must be a case or default label statement.
-(17,17)-(17,17) The first statement inside a switch statement must be a case or default label statement.
 (6,3)-(6,8) A break statement may only appear inside a switch or loop.
 (10,25)-(10,30) A break statement may only appear inside a switch or loop.
 (14,3)-(14,8) A try statement requires a catch or a finally clause.
+(16,17)-(16,17) The first statement inside a switch statement must be a case or default label statement.
+(17,17)-(17,17) The first statement inside a switch statement must be a case or default label statement.

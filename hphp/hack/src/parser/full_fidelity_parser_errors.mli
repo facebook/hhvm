@@ -8,5 +8,7 @@
  *
  *)
 
-val find_syntax_errors : Full_fidelity_positioned_syntax.t -> bool -> bool ->
+type error_level = Minimum | Typical | Maximum
+
+val parse_errors : ?level:error_level -> Full_fidelity_syntax_tree.t ->
   Full_fidelity_syntax_error.t list

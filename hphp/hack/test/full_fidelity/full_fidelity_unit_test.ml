@@ -109,16 +109,10 @@ let test_errors source =
   let source_text = SourceText.make file_path source in
   let offset_to_position = SourceText.offset_to_position source_text in
   let syntax_tree = SyntaxTree.make source_text in
-  let is_strict = SyntaxTree.is_strict syntax_tree in
-  let is_hack = (SyntaxTree.language syntax_tree = "hh") in
-  let root = PositionedSyntax.from_tree syntax_tree in
-  let errors1 = SyntaxTree.errors syntax_tree in
-  let errors2 = ParserErrors.find_syntax_errors root is_strict is_hack in
-  let errors = errors1 @ errors2 in
+  let errors = ParserErrors.parse_errors syntax_tree in
   let mapper err = SyntaxError.to_positioned_string err offset_to_position in
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)
-
 
 let minimal_tests =
   let mapper testname =

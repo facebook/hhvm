@@ -81,7 +81,7 @@ struct ActRec {
  * State of an iterator in the program.
  */
 struct UnknownIter {};
-struct TrackedIter { std::pair<Type,Type> kv; };
+struct TrackedIter { IterTypes types; };
 using Iter = boost::variant< UnknownIter
                            , TrackedIter
                            >;

@@ -386,6 +386,7 @@ struct DArrLikeMap;
 struct DArrLikeMapN;
 using MapElems = ArrayLikeMap<Cell>;
 struct ArrKey;
+struct IterTypes;
 
 enum class Emptiness {
   Empty,
@@ -456,6 +457,15 @@ struct Type {
    */
   bool couldBe(const Type& o) const;
 
+  /*
+   * Could-be any of the list of types.
+   */
+  template<class... Types>
+  bool couldBeAny(const Type& t, Types... ts) const {
+    return couldBe(t) || couldBeAny(ts...);
+  }
+  bool couldBeAny() const { return false; }
+
   struct ArrayCat {
     enum { None, Empty, Packed, Struct, Mixed } cat;
     bool hasValue;
@@ -518,7 +528,7 @@ private:
                               const Type& val, bool maybeEmpty);
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
   friend Type arr_map_newelem(Type& map, const Type& val);
-  friend std::pair<Type,Type> iter_types(const Type&);
+  friend IterTypes iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
 
@@ -1160,11 +1170,29 @@ std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
 
 /*
- * Return the best known key and value type for iteration of the
- * supplied type.  This is only intended for non-mutable iteration, so
- * the returned types are at worst InitCell.
+ * Return the best known information for iteration of the supplied type. This is
+ * only intended for non-mutable iteration, so the returned types are at worst
+ * InitCell.
  */
-std::pair<Type,Type> iter_types(const Type&);
+struct IterTypes {
+  Type key;
+  Type value;
+  // The number of elements we're iterating over:
+  enum struct Count {
+    Empty,     // No elements
+    Single,    // Exactly one element
+    ZeroOrOne, // Less than 2 elements
+    NonEmpty,  // Unknown upper bound, but non-empty
+    Any        // Nothing known
+  };
+  Count count;
+  // Can a IterInit[K] op throw on this iterator?
+  bool mayThrowOnInit;
+  // Can a IterNext[K] op throw on this iterator? Can only happen for object
+  // types.
+  bool mayThrowOnNext;
+};
+IterTypes iter_types(const Type&);
 
 /*
  * Create a RepoAuthType for a Type.

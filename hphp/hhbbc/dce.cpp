@@ -1241,9 +1241,7 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
           !readCouldHaveSideEffects(locRaw(env, loc))) {
         // note: PushL does not deal with Uninit, so we need the
         // readCouldHaveSideEffects here, regardless of quiet.
-        CompactVector<Bytecode> bcs;
-        bcs.emplace_back(bc::PushL { loc });
-        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        env.dceState.replaceMap.insert({ env.id, { bc::PushL { loc } } });
         env.dceState.actionMap.emplace(env.id, DceAction::Replace);
       }
       return PushFlags::MarkLive;
@@ -1619,8 +1617,7 @@ void dce(Env& env, const bc::QueryM& op) {
         env.dceState.minstrUI.emplace(std::move(ui));
       } else if (auto const val = tv(env.stateAfter.stack.back().type)) {
         addLocGenSet(env, env.flags.mayReadLocalSet);
-        CompactVector<Bytecode> bcs;
-        bcs.emplace_back(gen_constant(*val));
+        CompactVector<Bytecode> bcs { gen_constant(*val) };
         env.dceState.replaceMap.emplace(env.id, std::move(bcs));
         ui.actions[env.id] = DceAction::Replace;
         ui.location.id = env.id.idx;
@@ -1653,9 +1650,7 @@ void dce(Env& env, const bc::FCallD& op) {
           fui.actions[env.id] = DceAction::PopInputs;
         } else {
           fui.actions[env.id] = DceAction::PopAndReplace;
-          CompactVector<Bytecode> bcs;
-          bcs.emplace_back(gen_constant(*val));
-          bcs.emplace_back(bc::RGetCNop {});
+          CompactVector<Bytecode> bcs { gen_constant(*val), bc::RGetCNop {} };
           auto const& hhbcs =
             env.dceState.ainfo.ctx.func->blocks[env.id.blk]->hhbcs;
           if (hhbcs.size() > env.id.idx + 1) {

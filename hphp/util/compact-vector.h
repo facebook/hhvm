@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <type_traits>
+#include <initializer_list>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/safe-cast.h"
@@ -55,6 +56,7 @@ struct CompactVector {
   CompactVector(size_type n, const T&);
   CompactVector(CompactVector&& other) noexcept;
   CompactVector(const CompactVector& other);
+  CompactVector(std::initializer_list<T> init);
   CompactVector& operator=(CompactVector&&);
   CompactVector& operator=(const CompactVector&);
   ~CompactVector();
@@ -156,6 +158,15 @@ CompactVector<T>& CompactVector<T>::operator=(const CompactVector& other) {
   clear();
   assign(other);
   return *this;
+}
+
+template <typename T>
+CompactVector<T>::CompactVector(std::initializer_list<T> init) :
+    m_data(nullptr) {
+  reserve_impl(init.size());
+  for (auto const& e : init) {
+    push_back(e);
+  }
 }
 
 template <typename T>

@@ -305,10 +305,13 @@ def deref(val):
     else:
         return deref(p.referenced_value())
 
+
 def get_arch(self):
+    """Get gdb Architecture Object name"""
     try:
-        arch = gdb.selected_frame().architecture().name()
+        return gdb.selected_frame().architecture().name()
     except:
-        arch = re.search('\(currently (.*)\)', gdb.execute('show architecture', to_string=True)).group(1)
-    return arch
+        return re.search('\(currently (.*)\)',
+                         gdb.execute('show architecture', to_string=True)
+                        ).group(1)
 

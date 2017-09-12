@@ -31,6 +31,9 @@ type t = {
   is illegal. *)
   lambda_count : int option;
   parents : Syntax.t list;
+  inner_variables : SSet.t;
+  outer_variables : SSet.t;
+  used_parameters : SSet.t;
   (* TODO: Fix naming in parse tree schema; why is it "class type parameters"
   but "function type parameter list"? *)
 }
@@ -44,6 +47,9 @@ let empty =
     original_node = m;
     lambda_count = None;
     parents = [];
+    inner_variables = SSet.empty;
+    outer_variables = SSet.empty;
+    used_parameters = SSet.empty;
   }
 
 (* Note that the code below assumes that the parents list contains
@@ -77,5 +83,8 @@ let make_from_context original_node parents lambda_count =
         function_name; function_type_parameter_list }
     | _ -> acc
   in
+  let (inner_variables, outer_variables, used_parameters) =
+    Lambda_analyzer.partition_used_locals parents original_node in
   { (Core_list.fold ~f:folder ~init:empty (original_node :: parents))
-    with lambda_count; parents; original_node }
+    with lambda_count; parents; original_node; inner_variables;
+    outer_variables; used_parameters }

@@ -563,7 +563,7 @@ let make_outer_params outer_variables =
   Core_list.map ~f:make_outer_param outer_variables
 
 let compute_state_machine_data
-    (inner_variables, outer_variables, _used_params)
+    context
     coroutine_result_data_variables
     function_parameter_list =
   (* TODO: Add a test case for "..." param. *)
@@ -571,7 +571,8 @@ let compute_state_machine_data
   on the parameters list, and not the properties list.  That means that
   we'll need to fix up create_closure_invocation to pass in the outer
   variables. When that happens, fix this code too. *)
-
+  let inner_variables = context.Coroutine_context.inner_variables in
+  let outer_variables = context.Coroutine_context.outer_variables in
   (* TODO: Don't put the outer variables in the property list. *)
   let properties = SSet.union inner_variables outer_variables in
   let properties = SSet.elements properties in
@@ -596,10 +597,8 @@ let generate_coroutine_state_machine
     function_parameter_list =
   let new_body, coroutine_result_data_variables =
     lower_body original_body in
-  let used_locals = Lambda_analyzer.partition_used_locals
-    context.Coroutine_context.parents context.Coroutine_context.original_node in
   let state_machine_data = compute_state_machine_data
-    used_locals
+    context
     coroutine_result_data_variables
     function_parameter_list in
   let closure_syntax =

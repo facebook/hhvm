@@ -219,11 +219,11 @@ let test_watcher_in_unknown_state temp_dir =
 let tests =
   [
     "test_informant_restarts_significant_move", (fun () ->
-      Unit_test.Tempfile.with_tempdir test_informant_restarts_significant_move);
+      Tempfile.with_tempdir test_informant_restarts_significant_move);
     "test_repo_starts_midupdate", (fun () ->
-      Unit_test.Tempfile.with_tempdir test_repo_starts_midupdate);
+      Tempfile.with_tempdir test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->
-      Unit_test.Tempfile.with_tempdir test_watcher_in_unknown_state);
+      Tempfile.with_tempdir test_watcher_in_unknown_state);
   ]
 
 let () =

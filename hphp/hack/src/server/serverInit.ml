@@ -222,7 +222,24 @@ module ServerInitCommon = struct
      )) in
      Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
    | Load_state_natively ->
-     Load_script.mk_state_future genv.config root
+     let result = State_loader.mk_state_future
+       (ServerConfig.config_hash genv.config) root in
+     lock_and_load_deptable result.State_loader.deptable_fn;
+     let old_saved = open_in result.State_loader.saved_state_fn
+       |> Marshal.from_channel in
+     let get_dirty_files = (fun () ->
+       let dirty_files = Future.get result.State_loader.dirty_files in
+       let dirty_files = List.map dirty_files Relative_path.from_root in
+       let dirty_files = Relative_path.set_of_list dirty_files in
+       Result.Ok (
+         result.State_loader.saved_state_fn,
+         result.State_loader.corresponding_base_rev,
+         dirty_files,
+         old_saved,
+         Some result.State_loader.state_distance
+       )
+     ) in
+     Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&

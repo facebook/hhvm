@@ -30,7 +30,6 @@ module type S = sig
   val unimplemented_feature : Pos.t -> string -> unit
   val experimental_feature : Pos.t -> string -> unit
 
-  val call_time_pass_by_reference : Pos.t -> unit
   val fixme_format : Pos.t -> unit
   val typeparam_alok : Pos.t * string -> unit
   val unexpected_eof : Pos.t -> unit

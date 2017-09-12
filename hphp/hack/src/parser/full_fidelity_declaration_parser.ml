@@ -510,18 +510,15 @@ module WithExpressionAndStatementAndTypeParser
 
      // constructor-declaration
      <<attr>> public/private/protected/abstract/final function __construct
-     TODO: We allow static constructors in this parser; we should produce
-     an error message in a later pass.
-     (This work is tracked by task T21630909.)
+     Note that we allow static constructors in this parser; we produce an
+     error in the post-parse error detection pass.
 
      // destructor-declaration
      <<attr>> public/private/protected function __destruct
      TODO: Hack and HHVM allow final and abstract destructors, but the
      TODO: spec says that these should not be legal; resolve this discrepancy.
-
-     TODO: We allow static destructors in this parser; we should produce
-     an error message in a later pass.
-     (This work is tracked by task T21630909.)
+     We do not give an error for incorrect destructor modifiers in this parser;
+     we produce an error in the post-parse error detection pass.
 
      // trait clauses
     require  extends  qualified-name

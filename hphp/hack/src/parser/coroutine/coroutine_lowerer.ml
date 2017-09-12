@@ -127,14 +127,12 @@ let rewrite_method_or_function
 let lower_coroutine_function
     context
     original_header
-    original_body
-    original_function =
+    original_body =
   let (new_header_node, new_body, closure_syntax) = rewrite_method_or_function
     context original_header original_body in
   let new_function_syntax =
     CoroutineMethodLowerer.rewrite_function_declaration
       context
-      original_function
       new_header_node
       new_body in
   (closure_syntax, new_function_syntax)
@@ -162,7 +160,7 @@ let lower_coroutine_functions_and_types
       let context = Coroutine_context.make_from_context
         current_node parents None in
       let (closure_syntax, new_function_syntax) = lower_coroutine_function
-        context header_node function_body current_node in
+        context header_node function_body in
       (((Option.to_list closure_syntax) @ closures, lambda_count),
         Rewriter.Result.Replace new_function_syntax)
   | LambdaExpression {
@@ -209,7 +207,6 @@ let lower_coroutine_functions_and_types
     let new_method_syntax =
       CoroutineMethodLowerer.rewrite_methodish_declaration
         context
-        current_node
         new_header_node
         new_body in
     (((Option.to_list closure_syntax) @ closures, lambda_count),

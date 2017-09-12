@@ -92,7 +92,6 @@ let make_state_machine_method_reference_syntax
  *)
 let create_closure_invocation
      context
-     method_node
      function_parameter_list
      function_type
      rewritten_body =
@@ -100,11 +99,11 @@ let create_closure_invocation
   let arg_list = parameter_list_to_arg_list function_parameter_list in
   (* ($closure, $data, $exception) ==> { body } *)
   let lambda_signature = make_closure_lambda_signature_from_method
-    method_node
+    context.Coroutine_context.original_node
     context
     function_type in
   let lambda = make_lambda_from_method_syntax
-    method_node
+    context.Coroutine_context.original_node
     lambda_signature
     rewritten_body in
   let classname = make_closure_classname context in
@@ -138,7 +137,6 @@ let create_closure_invocation
 
 let rewrite_coroutine_body
     context
-    method_node
     function_parameter_list
     function_type
     rewritten_body =
@@ -146,7 +144,6 @@ let rewrite_coroutine_body
   | CompoundStatement node ->
       let compound_statements = create_closure_invocation
         context
-        method_node
         function_parameter_list
         function_type
         rewritten_body in
@@ -165,16 +162,15 @@ let rewrite_coroutine_body
  *)
 let rewrite_methodish_declaration
     context
-    method_node
     ({ function_parameter_list; function_type; _; } as header_node)
     rewritten_body =
   let methodish_function_body =
     rewrite_coroutine_body
       context
-      method_node
       function_parameter_list
       function_type
       rewritten_body in
+  let method_node = context.Coroutine_context.original_node in
   let methodish_declaration_node = get_methodish_declaration method_node in
   Syntax.synthesize_from
     method_node
@@ -186,15 +182,14 @@ let rewrite_methodish_declaration
 
 let rewrite_function_declaration
     context
-    function_node
     ({ function_type; function_parameter_list; _; } as header_node)
     rewritten_body =
   let function_body = rewrite_coroutine_body
     context
-    function_node
     function_parameter_list
     function_type
     rewritten_body in
+  let function_node = context.Coroutine_context.original_node in
   Syntax.synthesize_from
     function_node
     (FunctionDeclaration
@@ -204,10 +199,11 @@ let rewrite_function_declaration
       })
 
 let rewrite_anon context anon_node =
+  (* TODO: redundant to context *)
   let ({ anonymous_parameters; anonymous_type; anonymous_body; _; } as anon) =
     get_anonymous_function anon_node in
   let anonymous_body = rewrite_coroutine_body
-    context anon_node anonymous_parameters anonymous_type anonymous_body in
+    context anonymous_parameters anonymous_type anonymous_body in
   let anonymous_parameters = compute_parameter_list
     anonymous_parameters anonymous_type in
   let anonymous_type = make_coroutine_result_type_syntax anonymous_type in
@@ -227,7 +223,7 @@ let rewrite_lambda
   let make_sig node =
     make_syntax (LambdaSignature node) in
   let lambda_body = rewrite_coroutine_body
-    context lambda_node lambda_parameters lambda_type lambda_body in
+    context lambda_parameters lambda_type lambda_body in
   let lambda_parameters = compute_parameter_list
     lambda_parameters lambda_type in
   let lambda_type = make_coroutine_result_type_syntax lambda_type in

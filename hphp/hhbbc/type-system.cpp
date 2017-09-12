@@ -1313,9 +1313,11 @@ bool Type::equivData(const Type& o) const {
   case DataTag::Int:
     return m_data.ival == o.m_data.ival;
   case DataTag::Dbl:
-    // For purposes of Type equivalence, NaNs are equal.
-    return m_data.dval == o.m_data.dval ||
-           (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
+    // +ve and -ve zero must not compare equal, but (for purposes of
+    // Type equivalence), NaNs are equal.
+    return m_data.dval == o.m_data.dval ?
+      std::signbit(m_data.dval) == std::signbit(o.m_data.dval) :
+      (std::isnan(m_data.dval) && std::isnan(o.m_data.dval));
   case DataTag::Obj:
     if (!m_data.dobj.whType != !o.m_data.dobj.whType) return false;
     if (m_data.dobj.whType && *m_data.dobj.whType != *o.m_data.dobj.whType) {

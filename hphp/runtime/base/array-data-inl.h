@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/util/portability.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +56,7 @@ ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Creation and destruction.
 
 ALWAYS_INLINE ArrayData* ArrayData::Create() {
   return staticEmptyArray();
@@ -77,6 +80,14 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ArrayFunction dispatch.
+
+inline size_t ArrayData::vsize() const {
+  return g_array_funcs.vsize[kind()](this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Introspection.
 
 inline size_t ArrayData::size() const {
   if (UNLIKELY((int)m_size) < 0) return vsize();
@@ -135,7 +146,9 @@ inline ArrayData::DVArray ArrayData::dvArray() const {
   return static_cast<DVArray>(m_aux16);
 }
 
-inline bool ArrayData::isVArray() const { return isPacked() || isEmptyArray(); }
+inline bool ArrayData::isVArray() const {
+  return isPacked() || isEmptyArray();
+}
 
 inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
 
@@ -158,6 +171,7 @@ inline DataType ArrayData::toPersistentDataType() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Iteration.
 
 inline int32_t ArrayData::getPosition() const {
   return m_pos;

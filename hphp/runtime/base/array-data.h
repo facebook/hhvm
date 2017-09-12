@@ -17,18 +17,23 @@
 #ifndef incl_HPHP_ARRAY_DATA_H_
 #define incl_HPHP_ARRAY_DATA_H_
 
-#include <climits>
-#include <vector>
-
-#include <folly/Likely.h>
-
 #include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/member-val.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/md5.h"
+
+#include <folly/Likely.h>
+
+#include <climits>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 
@@ -37,7 +42,10 @@ namespace HPHP {
 struct Array;
 struct MArrayIter;
 struct String;
+struct StringData;
+struct RefData;
 struct VariableSerializer;
+struct Variant;
 
 struct ArrayData : MaybeCountable {
   /*
@@ -611,8 +619,8 @@ public:
   /*
    * Comparisons.
    */
-  int compare(const ArrayData *v2) const;
-  bool equal(const ArrayData *v2, bool strict) const;
+  int compare(const ArrayData* v2) const;
+  bool equal(const ArrayData* v2, bool strict) const;
 
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);

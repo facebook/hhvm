@@ -800,22 +800,8 @@ void use(std::set<LocationId>& forcedLive,
   }
 }
 
-/*
- * A UseInfo has been popped, and we want to perform its actions. If
- * its not linked we'll just add them to the dceState; otherwise we'll
- * add them to the UseInfo on the top of the stack.
- */
-DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
-  if (!linked) {
-    FTRACE(2, "     committing {}: {}\n", show(env.id), show(am));
-  }
-
-  assert(!linked || env.dceState.stack.back().usage != Use::Used);
-
-  auto& dst = linked ?
-    env.dceState.stack.back().actions : env.dceState.actionMap;
-
-  for (auto& i : am) {
+void combineActions(DceActionMap& dst, const DceActionMap& src) {
+  for (auto& i : src) {
     auto ret = dst.insert(i);
     if (!ret.second) {
       if (i.second.action == DceAction::MinstrStackFixup ||
@@ -845,6 +831,25 @@ DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
       always_assert(false);
     }
   }
+}
+
+/*
+ * A UseInfo has been popped, and we want to perform its actions. If
+ * its not linked we'll just add them to the dceState; otherwise we'll
+ * add them to the UseInfo on the top of the stack.
+ */
+DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
+  if (!linked) {
+    FTRACE(2, "     committing {}: {}\n", show(env.id), show(am));
+  }
+
+  assert(!linked || env.dceState.stack.back().usage != Use::Used);
+
+  auto& dst = linked ?
+    env.dceState.stack.back().actions : env.dceState.actionMap;
+
+  combineActions(dst, am);
+
   if (!am.count(env.id)) {
     dst.emplace(env.id, DceAction::Kill);
   }
@@ -2521,9 +2526,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       if (!actionMap.size()) {
         actionMap = std::move(ret.actionMap);
       } else {
-        for (auto& elm : ret.actionMap) {
-          actionMap.insert(std::move(elm));
-        }
+        combineActions(actionMap, ret.actionMap);
       }
     }
     if (ret.replaceMap.size()) {

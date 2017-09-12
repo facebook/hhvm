@@ -160,7 +160,10 @@ let rec get_base_type env ty =
   | Tabstract (AKgeneric n, _) when AbstractKind.is_generic_dep_ty n ->
     begin match Env.get_upper_bounds env n with
     | ty2::_ when ty_equal ty ty2 -> ty
-    | ty::_ -> get_base_type env ty
+    (* If it's exactly equal, then the base ty is just this one *)
+    | ty::_ ->
+      if List.mem ~equal:ty_equal (Env.get_lower_bounds env n) ty
+      then ty else get_base_type env ty
     | [] -> ty
     end
   | Tabstract _ ->

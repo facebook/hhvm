@@ -603,6 +603,7 @@ TYPE_TESTS
     let is_ellipsis   = is_specific_token Full_fidelity_token_kind.DotDotDot
     let is_comma      = is_specific_token Full_fidelity_token_kind.Comma
     let is_array      = is_specific_token Full_fidelity_token_kind.Array
+    let is_var        = is_specific_token Full_fidelity_token_kind.Var
 
 CHILD_LIST_FROM_TYPE
 

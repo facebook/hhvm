@@ -1,12 +1,8 @@
 <?hh
 
 function_call(
-  function() {
-  },
-  (
-    function() {
-    }
-  )(),
+  function() {},
+  (function() {})(),
   function() {
     $short_function = 'is short';
   },

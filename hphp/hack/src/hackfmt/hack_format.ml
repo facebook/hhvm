@@ -282,7 +282,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t attr;
         when_present attr newline;
         t header;
-        handle_possible_compound_statement body;
+        handle_possible_compound_statement ~allow_collapse:true body;
         Newline;
       ]
     | FunctionDeclarationHeader x ->
@@ -368,7 +368,9 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
             args_and_where;
           ]
         );
-        when_present body (fun () -> handle_possible_compound_statement body);
+        when_present body (fun () ->
+          handle_possible_compound_statement ~allow_collapse:true body
+        );
         t semi;
         Newline;
       ]
@@ -883,7 +885,10 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         t fun_kw;
         transform_argish_with_return_type lp params rp colon ret_type;
         t use;
-        handle_possible_compound_statement ~space:false body;
+        handle_possible_compound_statement
+          ~space:false
+          ~allow_collapse:true
+          body;
       ]
     | AnonymousFunctionUseClause x ->
       (* TODO: Revisit *)
@@ -1494,20 +1499,30 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
   and transform_simple_statement node =
     Concat ((List.map (children node) t) @ [Newline])
 
-  and braced_block_nest open_b close_b nodes =
-    (* Remove the closing brace's leading trivia and handle it inside the
-     * BlockNest, so that comments will be indented correctly. *)
-    let leading, close_b = remove_leading_trivia close_b in
-    Concat [
-      t open_b;
-      Newline;
-      BlockNest [
-        Concat nodes;
-        transform_leading_trivia leading;
+  and braced_block_nest ?(allow_collapse=true) open_b close_b nodes =
+    let nodes = Concat nodes in
+    match allow_collapse, has_printable_content nodes, syntax open_b with
+    | true, false, Token ob
+      when List.for_all (EditableToken.trailing ob)
+        (fun t -> Trivia.kind t <> TriviaKind.EndOfLine) ->
+      Concat [
+        t open_b;
+        t close_b;
+      ]
+    | _ ->
+      (* Remove the closing brace's leading trivia and handle it inside the
+       * BlockNest, so that comments will be indented correctly. *)
+      let leading, close_b = remove_leading_trivia close_b in
+      Concat [
+        t open_b;
         Newline;
-      ];
-      t close_b;
-    ]
+        BlockNest [
+          nodes;
+          transform_leading_trivia leading;
+          Newline;
+        ];
+        t close_b;
+      ]
 
   and delimited_nest
       ?(spaces=false)
@@ -1560,7 +1575,7 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
   and handle_lambda_body node =
     match syntax node with
     | CompoundStatement x ->
-      handle_compound_statement x;
+      handle_compound_statement ~allow_collapse:true x;
     | XHPExpression _ ->
       WithRule (Rule.Parental, Concat [
         Space;
@@ -1574,11 +1589,15 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         Nest [t node];
       ]
 
-  and handle_possible_compound_statement ?space:(space=true) node =
+  and handle_possible_compound_statement
+      ?(space=true)
+      ?(allow_collapse=false)
+      node
+    =
     match syntax node with
     | CompoundStatement x ->
       Concat [
-        handle_compound_statement x;
+        handle_compound_statement ~allow_collapse x;
         if space then Space else Nothing;
       ]
     | _ ->
@@ -1589,11 +1608,11 @@ let transform (env: Env.t) (node: Syntax.t) : Doc.t =
         ];
       ]
 
-  and handle_compound_statement cs =
+  and handle_compound_statement ?(allow_collapse=false) cs =
     let (left_b, statements, right_b) = get_compound_statement_children cs in
     Concat [
       Space;
-      braced_block_nest left_b right_b [
+      braced_block_nest ~allow_collapse left_b right_b [
         handle_possible_list statements
       ];
     ]

@@ -48,8 +48,12 @@ std::string ParserBase::newAnonClassName(
   auto name = prefix + "$";
   if (!className.empty()) {
     name += className + "::";
-  } else if (!namespaceName.empty()) {
-    // If className is present, it already includes the namespace
+  } else if (!namespaceName.empty() &&
+             funcName.find('\\') == std::string::npos) {
+    // If className is present, it already includes the namespace. Or
+    // else we may be passed a function name already qualified by
+    // namespace, and in either case we don't want to include the
+    // namespace twice in the mangled class name.
     name += namespaceName + "\\";
   }
   name += funcName;

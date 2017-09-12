@@ -244,7 +244,6 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
 // Descriptive wrapper types to annotate root nodes
 struct PhpStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
 struct CppStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
-struct CppTls      { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
 
 // call fn(ptr,size,tyindex) for each thing in RDS, including the php stack
 // and the rds local segment. The RDS shared part cannot contain pointers.
@@ -310,22 +309,7 @@ template<class Fn> void iterateRoots(Fn fn) {
   fn(sp, s_stackLimit + s_stackSize - uintptr_t(sp),
      type_scan::getIndexForScan<CppStack>());
 
-  // C++ threadlocal data, but don't scan MemoryManager
-  auto tdata = getCppTdata(); // tdata = { ptr, size }
-  if (tdata.second > 0) {
-    auto tm = (char*)tdata.first;
-    auto tm_end = tm + tdata.second;
-    auto mm = (char*)&MM();
-    auto mm_end = mm + sizeof(MemoryManager);
-    if (mm >= tm && mm_end <= tm_end) {
-      fn(tm, mm - tm, type_scan::getIndexForScan<CppTls>());
-      fn(mm_end, tm_end - mm_end, type_scan::getIndexForScan<CppTls>());
-    } else {
-      fn(tm, tdata.second, type_scan::getIndexForScan<CppTls>());
-    }
-  }
-
-  // ThreadLocal nodes (but skip MemoryManager)
+  // ThreadLocal nodes
   ThreadLocalManager::GetManager().iterate(fn);
 
   // Root handles & sweep lists

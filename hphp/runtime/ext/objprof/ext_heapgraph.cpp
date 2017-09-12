@@ -57,7 +57,6 @@ namespace HPHP {
 
 struct PhpStack;
 struct CppStack;
-struct CppTls;
 
 namespace {
 

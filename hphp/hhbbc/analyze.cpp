@@ -330,7 +330,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
              property_state_string(collect.props));
       ++interp_counter;
 
-      auto propagate = [&] (BlockId target, const State& st) {
+      auto propagate = [&] (BlockId target, const State* st) {
+        if (!st) {
+          incompleteQ.push(rpoId(ai, target));
+          return;
+        }
+
         auto const needsWiden =
           totalVisits[target] >= options.analyzeFuncWideningLimit;
 
@@ -339,8 +344,8 @@ FuncAnalysis do_analyze_collect(const Index& index,
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
 
         auto const changed =
-          needsWiden ? widen_into(ai.bdata[target].stateIn, st)
-                     : merge_into(ai.bdata[target].stateIn, st);
+          needsWiden ? widen_into(ai.bdata[target].stateIn, *st)
+                     : merge_into(ai.bdata[target].stateIn, *st);
         if (changed) {
           incompleteQ.push(rpoId(ai, target));
         }

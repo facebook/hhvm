@@ -189,8 +189,11 @@ StepFlags step(Interp&, const Bytecode& op);
  * If a branch is taken or an exception is thrown, the supplied
  * callback is used to indicate when/where the state referenced in the
  * Interp structure should be propagated.
+ *
+ * If the PropagateFn is called with a nullptr State, it means that
+ * the given block should be re-processed.
  */
-using PropagateFn = std::function<void (BlockId, const State&)>;
+using PropagateFn = std::function<void (BlockId, const State*)>;
 RunFlags run(Interp&, PropagateFn);
 
 /*

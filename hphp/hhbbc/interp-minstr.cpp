@@ -309,7 +309,8 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
 // need to be propagated across factored exit edges.
 void miThrow(ISS& env) {
   for (auto factored : env.blk.factoredExits) {
-    env.propagate(factored, without_stacks(env.state));
+    auto const stackLess = without_stacks(env.state);
+    env.propagate(factored, &stackLess);
   }
 }
 

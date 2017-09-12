@@ -830,7 +830,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   auto const e = emptiness(popC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
     jmp_nofallthrough(env);
-    env.propagate(op.target, env.state);
+    env.propagate(op.target, &env.state);
     return;
   }
 
@@ -845,7 +845,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     return;
   }
 
-  if (locId == NoLocalId) return env.propagate(op.target, env.state);
+  if (locId == NoLocalId) return env.propagate(op.target, &env.state);
 
   auto loc = peekLocRaw(env, locId);
   assertx(!loc.couldBe(TRef)); // we shouldn't have an equivLoc if it was
@@ -854,7 +854,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   auto const converted_false = assert_emptiness(std::move(loc));
 
   refineLoc(env, locId, Negate ? converted_true : converted_false);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   refineLoc(env, locId, Negate ? converted_false : converted_true);
 }
 
@@ -892,7 +892,7 @@ void group(ISS& env, const bc::IsTypeL& istype, const JmpOp& jmp) {
   }();
 
   refineLoc(env, istype.loc1, negate ? was_true : was_false);
-  env.propagate(jmp.target, env.state);
+  env.propagate(jmp.target, &env.state);
   refineLoc(env, istype.loc1, negate ? was_false : was_true);
 }
 
@@ -971,7 +971,7 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
     push(env, std::move(valTy));
     if (takenOnSuccess) {
       jmp_nofallthrough(env);
-      env.propagate(jmp.target, env.state);
+      env.propagate(jmp.target, &env.state);
     } else {
       jmp_nevertaken(env);
     }
@@ -983,13 +983,13 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
       jmp_nevertaken(env);
     } else {
       jmp_nofallthrough(env);
-      env.propagate(jmp.target, env.state);
+      env.propagate(jmp.target, &env.state);
     }
     return;
   }
 
   push(env, std::move(takenOnSuccess ? testTy : failTy));
-  env.propagate(jmp.target, env.state);
+  env.propagate(jmp.target, &env.state);
   discard(env, 1);
   push(env, std::move(takenOnSuccess ? failTy : testTy));
 }
@@ -1013,17 +1013,17 @@ void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
       env.state = std::move(save);
       jmp_nevertaken(env);
     } else {
-      env.propagate(jmp.target, save);
+      env.propagate(jmp.target, &save);
       jmp_nofallthrough(env);
     }
     return;
   }
 
   if (takenOnInit) {
-    env.propagate(jmp.target, env.state);
+    env.propagate(jmp.target, &env.state);
     env.state = std::move(save);
   } else {
-    env.propagate(jmp.target, save);
+    env.propagate(jmp.target, &save);
   }
 }
 
@@ -1112,21 +1112,21 @@ void group(ISS& env,
   auto const was_true  = instTy;
   auto const was_false = loc;
   refineLoc(env, locId, negate ? was_true : was_false);
-  env.propagate(jmp.target, env.state);
+  env.propagate(jmp.target, &env.state);
   refineLoc(env, locId, negate ? was_false : was_true);
 }
 
 void in(ISS& env, const bc::Switch& op) {
   popC(env);
   forEachTakenEdge(op, [&] (BlockId id) {
-      env.propagate(id, env.state);
+      env.propagate(id, &env.state);
   });
 }
 
 void in(ISS& env, const bc::SSwitch& op) {
   popC(env);
   forEachTakenEdge(op, [&] (BlockId id) {
-      env.propagate(id, env.state);
+      env.propagate(id, &env.state);
   });
 }
 
@@ -2525,7 +2525,7 @@ void in(ISS& env, const bc::CufSafeReturn&) {
 
 void in(ISS& env, const bc::DecodeCufIter& op) {
   popC(env); // func
-  env.propagate(op.target, env.state); // before iter is modifed
+  env.propagate(op.target, &env.state); // before iter is modifed
 }
 
 void in(ISS& env, const bc::IterInit& op) {
@@ -2538,7 +2538,7 @@ void in(ISS& env, const bc::IterInit& op) {
     // empty, but after popping.  Similar for the other IterInits
     // below.
     freeIter(env, op.iter1);
-    env.propagate(op.target, env.state);
+    env.propagate(op.target, &env.state);
   };
 
   auto const fallthrough = [&]{
@@ -2567,7 +2567,7 @@ void in(ISS& env, const bc::IterInit& op) {
 
 void in(ISS& env, const bc::MIterInit& op) {
   popV(env);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
@@ -2579,7 +2579,7 @@ void in(ISS& env, const bc::IterInitK& op) {
 
   auto const taken = [&]{
     freeIter(env, op.iter1);
-    env.propagate(op.target, env.state);
+    env.propagate(op.target, &env.state);
   };
 
   auto const fallthrough = [&]{
@@ -2610,7 +2610,7 @@ void in(ISS& env, const bc::IterInitK& op) {
 
 void in(ISS& env, const bc::MIterInitK& op) {
   popV(env);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
@@ -2618,7 +2618,7 @@ void in(ISS& env, const bc::MIterInitK& op) {
 
 void in(ISS& env, const bc::WIterInit& op) {
   popC(env);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   // WIter* instructions may leave the value locals as either refs
   // or cells, depending whether the rhs of the assignment was a
   // ref.
@@ -2627,7 +2627,7 @@ void in(ISS& env, const bc::WIterInit& op) {
 
 void in(ISS& env, const bc::WIterInitK& op) {
   popC(env);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
   setLoc(env, op.loc4, TInitCell);
 }
@@ -2663,14 +2663,14 @@ void in(ISS& env, const bc::IterNext& op) {
     return;
   }
 
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
 
   freeIter(env, op.iter1);
   setLocRaw(env, op.loc3, curLoc3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
@@ -2709,7 +2709,7 @@ void in(ISS& env, const bc::IterNextK& op) {
     return;
   }
 
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
 
   freeIter(env, op.iter1);
   setLocRaw(env, op.loc3, curLoc3);
@@ -2717,19 +2717,19 @@ void in(ISS& env, const bc::IterNextK& op) {
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
 }
 
 void in(ISS& env, const bc::WIterNext& op) {
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
 }
 
 void in(ISS& env, const bc::WIterNextK& op) {
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
   setLoc(env, op.loc4, TInitCell);
 }
@@ -2749,7 +2749,7 @@ void in(ISS& env, const bc::CIterFree& op) {
 
 void in(ISS& env, const bc::IterBreak& op) {
   for (auto& kv : op.iterTab) freeIter(env, kv.second);
-  env.propagate(op.target, env.state);
+  env.propagate(op.target, &env.state);
 }
 
 /*
@@ -3389,7 +3389,7 @@ StepFlags interpOps(Interp& interp,
   if (flags.wasPEI) {
     FTRACE(2, "   PEI.\n");
     for (auto factored : interp.blk->factoredExits) {
-      propagate(factored, stateBefore);
+      propagate(factored, &stateBefore);
     }
   }
   return flags;
@@ -3447,14 +3447,14 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
 
   FTRACE(2, "  <end block>\n");
   if (interp.blk->fallthrough != NoBlockId) {
-    propagate(interp.blk->fallthrough, interp.state);
+    propagate(interp.blk->fallthrough, &interp.state);
   }
   return ret;
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {
   auto flags   = StepFlags{};
-  auto noop    = [] (BlockId, const State&) {};
+  auto noop    = [] (BlockId, const State*) {};
   ISS env { interp, flags, noop };
   dispatch(env, op);
   return flags;

@@ -736,6 +736,7 @@ void Vgen::emit(const decqmlock& i) {
   if (RuntimeOption::EvalJitArmLse) {
     a->Mov(rVixlScratch0, -1);
     a->stadd(rVixlScratch0, adr);
+    a->Msr(NZCV, vixl::xzr);
   } else {
     vixl::Label again;
     a->bind(&again);

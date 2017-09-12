@@ -408,14 +408,19 @@ let program_init genv =
       ServerArgs.save_filename genv.options = None then
       let load_mini_approach = match
         (ServerConfig.load_mini_script genv.config),
+        (genv.local_config.ServerLocalConfig.load_state_natively),
         (ServerArgs.with_mini_state genv.options) with
-        | None, None ->
+        | None, _, None ->
           None
-        | Some load_mini_script, None ->
+        | Some _, true, None ->
+          (** Use native loading only if the config specifies a load script,
+           * and the local config prefers native. *)
+          Some ServerInit.Load_state_natively
+        | Some load_mini_script, false, None ->
           Some (ServerInit.Load_mini_script load_mini_script)
-        | None, Some target ->
+        | None, _, Some target ->
           Some (ServerInit.Precomputed target)
-        | Some _, Some target ->
+        | Some _, _, Some target ->
           Hh_logger.log "Warning - Both a mini script in the server config %s"
             "and a mini state target in server args are configured";
           Hh_logger.log "Ignoring the script and using precomputed target";

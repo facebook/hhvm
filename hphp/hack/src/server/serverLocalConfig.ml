@@ -21,6 +21,8 @@ type t = {
   use_mini_state: bool;
   use_hackfmt: bool;
   load_mini_script_timeout: int; (* in seconds *)
+  (** Prefer using Ocaml implementation over load script. *)
+  load_state_natively: bool;
   type_decl_bucket_size: int;
   enable_on_nfs: bool;
   enable_fuzzy_search: bool;
@@ -50,6 +52,7 @@ let default = {
   use_mini_state = false;
   use_hackfmt = false;
   load_mini_script_timeout = 20;
+  load_state_natively = false;
   type_decl_bucket_size = 1000;
   enable_on_nfs = false;
   enable_fuzzy_search = true;
@@ -102,6 +105,8 @@ let load_ fn ~silent =
     ~default:default.search_chunk_size config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in
+  let load_state_natively = bool_ "load_state_natively"
+    ~default:default.load_state_natively config in
   let use_hackfmt = bool_ "use_hackfmt"
     ~default:default.use_hackfmt config in
   let start_with_recorder_on = bool_ "start_with_recorder_on"
@@ -143,6 +148,7 @@ let load_ fn ~silent =
     use_mini_state;
     use_hackfmt;
     load_mini_script_timeout;
+    load_state_natively;
     max_purgatory_clients;
     type_decl_bucket_size;
     enable_on_nfs;

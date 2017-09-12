@@ -30,6 +30,7 @@ exception Loader_timeout of string
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target
+  | Load_state_natively
 
 (** Docs are in .mli *)
 type init_result =
@@ -203,7 +204,7 @@ module ServerInitCommon = struct
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
 
-  let invoke_approach root approach = match approach with
+  let invoke_approach genv root approach = match approach with
    | Load_mini_script cmd ->
      mk_state_future root cmd
    | Precomputed { ServerArgs.saved_state_fn;
@@ -220,6 +221,8 @@ module ServerInitCommon = struct
        None
      )) in
      Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
+   | Load_state_natively ->
+     Load_script.mk_state_future genv.config root
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -481,7 +484,7 @@ module ServerEagerInit : InitKind = struct
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_approach >>= invoke_approach root in
+     load_mini_approach >>= invoke_approach genv root in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
@@ -605,7 +608,7 @@ module ServerLazyInit : InitKind = struct
   let init ~load_mini_approach genv lazy_level env root =
     assert (lazy_level = Init);
     let state_future =
-      load_mini_approach >>= invoke_approach root in
+      load_mini_approach >>= invoke_approach genv root in
 
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->

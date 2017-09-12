@@ -51,6 +51,7 @@ let () =
   let svn_ancestor = Future.get svn_ancestor in
   Printf.eprintf "SVN ancestor: %s\n" svn_ancestor;
   let changes = Hg.files_changed_since_svn_rev
-    current_hg_rev svn_ancestor @@ Args.root args in
+    svn_ancestor @@ Args.root args in
   let changes = Future.get changes in
+  let changes = String.concat "\n" changes in
   Printf.eprintf "Changes: %s\n" changes

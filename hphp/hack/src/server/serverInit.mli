@@ -11,6 +11,7 @@
 type load_mini_approach =
   | Load_mini_script of Path.t
   | Precomputed of ServerArgs.mini_state_target
+  | Load_state_natively
 
 (* Saves the state that load_mini_script below reads in *)
 val save_state: ServerEnv.env -> string -> unit

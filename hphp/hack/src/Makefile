@@ -77,6 +77,7 @@ MODULES=\
   utils\
   utils/collections\
   utils/errors\
+  utils/hashlib\
   utils/lint\
   utils/disk\
   utils/process\

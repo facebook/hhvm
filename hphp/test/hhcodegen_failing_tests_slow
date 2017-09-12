@@ -134,7 +134,6 @@ slow/hh_namespace_migration/hh_vector3.php
 slow/hh_namespace_migration/hh_vector5.php
 slow/hhbbc/array_011.php
 slow/hhbbc/array_access_004.php
-slow/hhbbc/closure_context_006.php
 slow/hhbbc/clsref-side-effects.php
 slow/hhbbc/magic_builtin_interfaces.php
 slow/hhbbc/option_type_hint_001.php
@@ -155,10 +154,7 @@ slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
 slow/llvm/switch.php
-slow/memoize/args.php
-slow/memoize/basic.php
 slow/memoize/reset.php
-slow/memoize/untyped.php
 slow/memory/uninit-leak.php
 slow/namespace/2227.php
 slow/namespace/double_use1.php
@@ -314,7 +310,6 @@ slow/reflection/1342.php
 slow/reflection/2695.php
 slow/reflection/closure_namespace.php
 slow/reflection/dynamic_property2.php
-slow/reflection/isCallable.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
 slow/reflection/scalar_param_types/php-noforcehh.php

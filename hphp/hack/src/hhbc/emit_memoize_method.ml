@@ -451,16 +451,22 @@ let false_init = Some (Typed_value.Bool false)
 let null_init = Some (Typed_value.Null)
 
 let notype = Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
-let make_instance_properties info ast_methods =
-  let is_memoized_instance ast_method =
-    Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes &&
-    not (List.mem ast_method.Ast.m_kind Ast.Static) in
-  let memoized_instance_methods = List.filter ast_methods is_memoized_instance in
-  match memoized_instance_methods with
-  | [] -> []
-  | [ast_method] when List.is_empty ast_method.Ast.m_params ->
-    let needs_guard = not (cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret) in
-    if needs_guard
+
+let is_memoize ast_method =
+  Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes
+
+let is_static ast_method =
+  List.mem ast_method.Ast.m_kind Ast.Static
+
+let needs_guard ast_method =
+  not (cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret)
+
+let make_instance_property info ast_method rest =
+  let is_single_instance_method =
+    not (List.exists rest ~f:(fun m -> is_memoize m && not (is_static m))) in
+  if is_single_instance_method && List.is_empty ast_method.Ast.m_params
+  then
+    if needs_guard ast_method
     then
       let property2 =
         Hhas_property.make
@@ -481,8 +487,7 @@ let make_instance_properties info ast_methods =
           null_init None notype None
       in
       [property]
-
-  | _ ->
+  else
     let property =
       Hhas_property.make true false false false false true
         (shared_multi_memoize_cache info.memoize_class_prefix)
@@ -490,44 +495,47 @@ let make_instance_properties info ast_methods =
     in
     [property]
 
-let make_static_properties info ast_methods =
-  let mapper ast_method =
-    let is_memoized_static =
-      Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes &&
-      List.mem ast_method.Ast.m_kind Ast.Static in
-    if is_memoized_static then
-      let no_params = List.is_empty ast_method.Ast.m_params in
-      let original_method_name = snd ast_method.Ast.m_name in
-      let prop_name =
-        Hhbc_id.Prop.from_ast_name
-        (String.lowercase_ascii @@ original_method_name) in
-      if no_params then
-        let needs_guard =
-          not (cannot_return_null ast_method.Ast.m_fun_kind ast_method.Ast.m_ret) in
-        if needs_guard then
-        let property2 = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix
-              prop_name (guarded_single_memoize_cache info.memoize_class_prefix))
-          null_init None notype None in
-        let property1 = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix
-            prop_name (guarded_single_memoize_cache_guard info.memoize_class_prefix))
-          false_init None notype None in
-        [property1; property2]
-        else
-        let property = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix prop_name (single_memoize_cache info.memoize_class_prefix))
-          null_init None notype None in
-        [property]
-      else
-        let property = Hhas_property.make true false false true false true
-          (Hhbc_id.Prop.add_suffix prop_name (multi_memoize_cache info.memoize_class_prefix))
-          empty_dict_init None notype None in
-        [property]
+let make_static_property info ast_method =
+  let no_params = List.is_empty ast_method.Ast.m_params in
+  let original_method_name = snd ast_method.Ast.m_name in
+  let prop_name =
+    Hhbc_id.Prop.from_ast_name
+    (String.lowercase_ascii @@ original_method_name) in
+  if no_params then
+    if needs_guard ast_method then
+    let property2 = Hhas_property.make true false false true false true
+      (Hhbc_id.Prop.add_suffix
+          prop_name (guarded_single_memoize_cache info.memoize_class_prefix))
+      null_init None notype None in
+    let property1 = Hhas_property.make true false false true false true
+      (Hhbc_id.Prop.add_suffix
+        prop_name (guarded_single_memoize_cache_guard info.memoize_class_prefix))
+      false_init None notype None in
+    [property1; property2]
     else
-      [] in
-  List.concat_map ast_methods mapper
+    let property = Hhas_property.make true false false true false true
+      (Hhbc_id.Prop.add_suffix prop_name (single_memoize_cache info.memoize_class_prefix))
+      null_init None notype None in
+    [property]
+  else
+    let property = Hhas_property.make true false false true false true
+      (Hhbc_id.Prop.add_suffix prop_name (multi_memoize_cache info.memoize_class_prefix))
+      empty_dict_init None notype None in
+    [property]
 
 let emit_properties info ast_methods =
-  make_static_properties info ast_methods @
-  make_instance_properties info ast_methods
+  let rec aux l has_instance_cache acc =
+    match l with
+    | [] ->
+      List.concat @@ (List.rev acc)
+    | x::xs when is_memoize x ->
+      if is_static x
+      then aux xs has_instance_cache ((make_static_property info x) :: acc)
+      else
+      let acc =
+        if has_instance_cache
+        then acc
+        else ((make_instance_property info x xs) :: acc) in
+      aux xs true acc
+    | _::xs -> aux xs has_instance_cache acc in
+  aux ast_methods false []

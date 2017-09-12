@@ -158,6 +158,13 @@ class dependency_visitor = object
     add_const_dep dep_env id;
     super#on_id dep_env id
 
+  (* Class constants: only care about the toplevel class*)
+  method! on_Class_const dep_env c0 _c1 =
+    add_class_dep dep_env c0
+
+  method! on_SFclass_const dep_env c0 _c1 =
+    add_class_dep dep_env c0
+
 end
 
 let print_deps popt ast =

@@ -1,0 +1,5 @@
+Class \Baz -> Class \Bar
+Class \Foo -> Class \Bar
+Class \Foo -> Class \Baz
+Fun \const_in_shape -> Class \Foo
+Fun \test -> Class \Foo

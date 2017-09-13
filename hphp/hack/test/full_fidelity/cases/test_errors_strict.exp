@@ -2,3 +2,4 @@
 (2,16)-(2,16) A type annotation is required in strict mode.
 (8,22)-(8,28) An XHP attribute name may not contain '-' or ':'.
 (12,3)-(12,18) A type annotation is required in strict mode.
+(15,10)-(15,10) Reference methods are not allowed in strict mode.

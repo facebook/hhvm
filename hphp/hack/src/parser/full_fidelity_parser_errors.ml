@@ -778,17 +778,24 @@ let parameter_errors node parents is_strict =
     params_errors anonymous_parameters
   | _ -> []
 
+
+let missing_type_annot_check is_strict f =
+  let label = f.function_name in
+  let is_function = not (is_construct label) && not (is_destruct label) in
+  is_strict && is_missing f.function_type && is_function
+
+let function_reference_check is_strict f =
+  is_strict && not (is_missing f.function_ampersand)
+
 let function_errors node _parents is_strict =
   match syntax node with
   | FunctionDeclarationHeader f ->
-    let label = f.function_name in
-    let is_function = not (is_construct label) && not (is_destruct label) in
-    if is_strict && is_missing f.function_type && is_function then
-      (* Where do we want to report the error? Probably on the right paren. *)
-      let rparen = f.function_right_paren in
-      [ make_error_from_node rparen SyntaxError.error2001 ]
-    else
-      [ ]
+    let errors = [] in
+    let errors = produce_error errors (missing_type_annot_check is_strict) f
+                 SyntaxError.error2001 f.function_right_paren in
+    let errors = produce_error errors (function_reference_check is_strict) f
+                 SyntaxError.error2064 f.function_ampersand in
+    errors
   | _ -> [ ]
 
 let statement_errors node parents =

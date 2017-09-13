@@ -208,3 +208,4 @@ let error2061 = "Non-static instance variables are not allowed in abstract final
   classes."
 let error2062 = "Non-static methods are not allowed in abstract final classes."
 let error2063 = "Expected integer or string literal."
+let error2064 = "Reference methods are not allowed in strict mode."

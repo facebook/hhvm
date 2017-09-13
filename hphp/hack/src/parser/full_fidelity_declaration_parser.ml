@@ -1406,8 +1406,7 @@ module WithExpressionAndStatementAndTypeParser
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     (* In non-strict mode we allow an & to appear before the name.
-      TODO: Produce an error if this occurs in strict mode
-      (This work is tracked by task T21651451.) *)
+       In strict mode this produces an error during post-parsing. *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, coroutine_token) = optional_token parser Coroutine in
     let (parser, function_token) = require_function parser in

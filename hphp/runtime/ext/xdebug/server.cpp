@@ -762,6 +762,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
 }
 
 bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
+                              const Variant& exnName,
                               const Variant& message) {
   // If we are detached, short circuit.
   Status status;
@@ -778,7 +779,7 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
       return breakpoint(bp.fileName, init_null(), message, bp.line);
     // Add the exception type and the current line # for exception breakpoints.
     case XDebugBreakpoint::Type::EXCEPTION:
-      return breakpoint(init_null(), bp.exceptionName,
+      return breakpoint(init_null(), exnName,
                         message, g_context->getLine());
     // Grab the callsite.
     case XDebugBreakpoint::Type::CALL:

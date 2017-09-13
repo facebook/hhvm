@@ -444,6 +444,11 @@ static Variant get_breakpoint_message(const BreakInfo& bi) {
   return init_null();
 }
 
+static Variant get_breakpoint_exception_name(const BreakInfo& bi) {
+  if (auto eb = boost::get<ExnBreak>(&bi)) return VarNR(eb->name);
+  return init_null();
+}
+
 DebuggerHook* XDebugHook::GetInstance() {
   static DebuggerHook* instance = new XDebugHook();
   return instance;
@@ -475,7 +480,8 @@ void XDebugHook::onBreak(const BreakInfo& bi) {
 
       // Grab the breakpoint message and do the break.
       auto const msg = get_breakpoint_message(bi);
-      if (!XDEBUG_GLOBAL(Server)->breakpoint(bp, msg)) {
+      auto const exnName = get_breakpoint_exception_name(bi);
+      if (!XDEBUG_GLOBAL(Server)->breakpoint(bp, exnName, msg)) {
         // Kill the server if there's an error.
         XDebugServer::detach();
         return;

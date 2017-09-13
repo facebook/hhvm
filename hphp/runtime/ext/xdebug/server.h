@@ -144,7 +144,9 @@ struct XDebugServer {
    * blocks until the breakpoint has finished.  True is returned on success,
    * false on failure (for instance, if the client disconnects).
    */
-  bool breakpoint(const XDebugBreakpoint& bp, const Variant& message);
+  bool breakpoint(const XDebugBreakpoint& bp,
+                  const Variant& exnName,
+                  const Variant& message);
   bool breakpoint(const Variant& filename,
                   const Variant& exception,
                   const Variant& message,

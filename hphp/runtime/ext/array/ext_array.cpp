@@ -130,6 +130,7 @@ TypedValue HHVM_FUNCTION(array_column,
                          const Variant& input,
                          const Variant& val_key,
                          const Variant& idx_key /* = uninit_variant */) {
+  SuppressHackArrCompatNotices suppress;
 
   getCheckedContainer(input);
   Variant val = val_key, idx = idx_key;
@@ -172,6 +173,8 @@ TypedValue HHVM_FUNCTION(array_column,
 TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& keys,
                          const Variant& values) {
+  SuppressHackArrCompatNotices suppress;
+
   const auto& cell_keys = *keys.asCell();
   const auto& cell_values = *values.asCell();
   if (UNLIKELY(!isContainer(cell_keys) || !isContainer(cell_values))) {
@@ -202,6 +205,7 @@ TypedValue HHVM_FUNCTION(array_combine,
 
 TypedValue HHVM_FUNCTION(array_count_values,
                          ArrayArg input) {
+  SuppressHackArrCompatNotices suppress;
   return tvReturn(ArrayUtil::CountValues(ArrNR(input.get())));
 }
 
@@ -1845,6 +1849,8 @@ TypedValue HHVM_FUNCTION(array_diff_key,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
+  SuppressHackArrCompatNotices suppress;
+
   ARRAY_DIFF_PRELUDE()
   // If we're only dealing with two containers and if they are both arrays,
   // we can avoid creating an intermediate Set
@@ -2192,6 +2198,8 @@ TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
+  SuppressHackArrCompatNotices suppress;
+
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)

@@ -1265,6 +1265,22 @@ void dce(Env& env, const bc::CUGetL& op) {
   cgetImpl(env, op.loc1, true);
 }
 
+void dce(Env& env, const bc::PushL& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      scheduleGenLoc(env, op.loc1);
+      if (allUnused(ui)) {
+        if (isLocLive(env, op.loc1) ||
+            could_run_destructor(locRaw(env, op.loc1))) {
+          env.dceState.replaceMap.insert(
+            { env.id, { bc::UnsetL { op.loc1 } } });
+          ui.actions.emplace(env.id, DceAction::Replace);
+        }
+        return PushFlags::MarkUnused;
+      }
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::CGetL2& op) {
   auto const ty = locRaw(env, op.loc1);
 

@@ -1190,6 +1190,9 @@ void in(ISS& env, const bc::CUGetL& op) {
 }
 
 void in(ISS& env, const bc::PushL& op) {
+  if (auto val = tv(locRaw(env, op.loc1))) {
+    return reduce(env, gen_constant(*val), bc::UnsetL { op.loc1 });
+  }
   impl(env, bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
 }
 

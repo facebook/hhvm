@@ -2407,6 +2407,7 @@ and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
       rhs_instrs,
       final_instr
     end
+
   | A.Unop (uop, e) ->
     empty,
     rhs_instrs,
@@ -2414,6 +2415,11 @@ and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
       emit_lval_op_nonlist env op e empty rhs_stack_size;
       from_unop uop;
     ]
+
+  | A.BracedExpr e ->
+    emit_expr ~need_ref:false env e,
+    rhs_instrs,
+    emit_final_named_local_op op
 
   | _ ->
     emit_nyi "lval expression",

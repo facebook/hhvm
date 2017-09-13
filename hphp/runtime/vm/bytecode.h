@@ -710,7 +710,7 @@ public:
 
   ALWAYS_INLINE
   void nalloc(size_t n) {
-    assert((uintptr_t)&m_top[-n] <= (uintptr_t)m_base);
+    assert((uintptr_t)(m_top - n) <= (uintptr_t)m_base);
     m_top -= n;
   }
 
@@ -737,7 +737,7 @@ public:
 
   ALWAYS_INLINE
   ActRec* allocA() {
-    assert((uintptr_t)&m_top[-kNumActRecCells] >= (uintptr_t)m_elms);
+    assert((uintptr_t)(m_top - kNumActRecCells) >= (uintptr_t)m_elms);
     assert(kNumActRecCells * sizeof(Cell) == sizeof(ActRec));
     m_top -= kNumActRecCells;
     return (ActRec*)m_top;
@@ -746,13 +746,13 @@ public:
   ALWAYS_INLINE
   void allocI() {
     assert(kNumIterCells * sizeof(Cell) == sizeof(Iter));
-    assert((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
+    assert((uintptr_t)(m_top - kNumIterCells) >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
   }
 
   ALWAYS_INLINE
   void allocClsRefSlots(size_t n) {
-    assert((uintptr_t)&m_top[-clsRefCountToCells(n)] >= (uintptr_t)m_elms);
+    assert((uintptr_t)(m_top - clsRefCountToCells(n)) >= (uintptr_t)m_elms);
     m_top -= clsRefCountToCells(n);
     if (debug) {
       memset(m_top, kTrashClsRef, clsRefCountToCells(n) * sizeof(Cell));

@@ -88,7 +88,7 @@ static void populateArgs(const Func* func,
   int64_t tmp[kMaxBuiltinArgs];
   int ntmp = 0;
 
-  for (size_t i = 0; i < numArgs; ++i) {
+  for (int i = 0; i < numArgs; ++i) {
     const auto& pi = func->params()[i];
     MaybeDataType type = pi.builtinType;
     if (type == KindOfDouble) {

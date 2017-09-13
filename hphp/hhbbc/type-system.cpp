@@ -3430,8 +3430,12 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     }
 
   case DataTag::ArrLikePacked:
-    if (maybeEmpty && !isVector) {
-      auto ty = packed_values(*arr.m_data.packed);
+    // Setting element zero of a maybe empty, 1 element packed array
+    // turns it into a 1 element packed array.
+    if (maybeEmpty && !isVector &&
+        (!fixedKey.i ||
+         *fixedKey.i ||
+         arr.m_data.packed->elems.size() != 1)) {
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
       auto const inRange = arr_packed_set(arr, fixedKey, val);

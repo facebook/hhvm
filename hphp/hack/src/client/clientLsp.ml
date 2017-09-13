@@ -1279,7 +1279,7 @@ let report_connect_end
 
 let read_hhconfig_version (root: Path.t) : string option =
   let file = Filename.concat (Path.to_string root) ".hhconfig" in
-  let config = Config_file.parse file in
+  let _, config = Config_file.parse file in
   SMap.get "version" config
 
 

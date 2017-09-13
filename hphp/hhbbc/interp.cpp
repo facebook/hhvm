@@ -2008,8 +2008,15 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto loc = topStkEquiv(env);
   auto t1 = popC(env);
-  if (is_opt(t1) && op.subop3 == ObjMethodOp::NullThrows) {
-    t1 = unopt(t1);
+  if (op.subop3 == ObjMethodOp::NullThrows) {
+    if (!t1.couldBe(TObj)) {
+      fpiPush(env, ActRec { FPIKind::ObjMeth });
+      return unreachable(env);
+    }
+    if (is_opt(t1)) t1 = unopt(std::move(t1));
+  } else if (!t1.couldBe(TOptObj)) {
+    fpiPush(env, ActRec { FPIKind::ObjMeth });
+    return unreachable(env);
   }
   auto const clsTy = objcls(t1);
   auto const rcls = [&]() -> folly::Optional<res::Class> {

@@ -698,7 +698,7 @@ let count_classes defs =
 
 let hoist_toplevel_functions all_defs =
   let funs, nonfuns =
-    List.partition_tf all_defs ~f:(function Fun _ -> true | _ -> false) in
+    List.partition_tf all_defs ~f:(function _, Fun _ -> true | _ -> false) in
   funs @ nonfuns
 
 (* For all the definitions in a file unit, convert lambdas into classes with
@@ -711,16 +711,15 @@ let convert_toplevel_prog defs =
   let defs =
     if constant_folding ()
     then Ast_constant_folder.fold_program defs else defs in
-  (* Reorder the functions so that they appear first. This matches the
-   * behaviour of HHVM *)
-  let defs = hoist_toplevel_functions defs in
   (* First compute the number of explicit classes in order to generate correct
    * integer identifiers for the generated classes. .main counts as a top-level
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 in
-  let st, p = convert_defs env 0 0 initial_state defs in
+  let st, original_defs = convert_defs env 0 0 initial_state defs in
+  (* Reorder the functions so that they appear first. This matches the
+   * behaviour of HHVM. *)
+  let original_defs = hoist_toplevel_functions original_defs in
   let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
   let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
-
-  fun_defs @ p @ class_defs,
+  fun_defs @ original_defs @ class_defs,
   st.explicit_use_set

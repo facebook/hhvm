@@ -31,7 +31,7 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   assertx(i % 64 == 0);
   assertx(i < bits.size());
   while (i < bits.size()) {
-    retval |= bits[i] << (i % 64);
+    retval |= ((uint64_t)bits[i]) << (i % 64);
     if ((++i % 64) == 0) {
       break;
     }

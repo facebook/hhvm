@@ -2477,6 +2477,16 @@ void in(ISS& env, const bc::FCall& op) {
 
 void in(ISS& env, const bc::FCallD& op) {
   auto const ar = fpiTop(env);
+  if ((ar.func && ar.func->name() != op.str3) ||
+      (ar.cls && ar.cls->name() != op.str2)) {
+    // We've found a more precise type for the call, so update it
+    return reduce(
+      env,
+      bc::FCallD {
+        op.arg1, ar.cls ? ar.cls->name() : s_empty.get(), ar.func->name()
+      }
+    );
+  }
   if (ar.kind == FPIKind::Builtin) {
     return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
   }
@@ -2487,6 +2497,17 @@ void in(ISS& env, const bc::FCallD& op) {
 }
 
 void in(ISS& env, const bc::FCallAwait& op) {
+  auto const ar = fpiTop(env);
+  if ((ar.func && ar.func->name() != op.str3) ||
+      (ar.cls && ar.cls->name() != op.str2)) {
+    // We've found a more precise type for the call, so update it
+    return reduce(
+      env,
+      bc::FCallAwait {
+        op.arg1, ar.cls ? ar.cls->name() : s_empty.get(), ar.func->name()
+      }
+    );
+  }
   impl(env,
        bc::FCallD { op.arg1, op.str2, op.str3 },
        bc::UnboxRNop {},

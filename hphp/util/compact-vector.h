@@ -243,20 +243,26 @@ typename CompactVector<T>::size_type CompactVector<T>::capacity() {
 template <typename T>
 void CompactVector<T>::erase(iterator elm) {
   assert(elm - elems() < size());
-  elm->~T();
+  auto const e = end();
+  while (++elm != e) {
+    elm[-1] = std::move(*elm);
+  }
+  elm[-1].~T();
   m_data->m_len--;
-  memmove(elm, elm + 1, (char*)end() - (char*)elm);
 }
 
 template <typename T>
 void CompactVector<T>::erase(iterator elm1, iterator elm2) {
   if (elm1 == elm2) return;
   assert(elems() <= elm1 && elm1 <= elm2 && elm2 <= end());
-  for (auto elm = elm1; elm < elm2; elm++) {
-    elm->~T();
+  auto const e = end();
+  while (elm2 != e) {
+    *elm1++ = std::move(*elm2++);
   }
-  memmove(elm1, elm2, (char*)end() - (char*)elm2);
   m_data->m_len -= elm2 - elm1;
+  while (elm1 != e) {
+    elm1++->~T();
+  }
 }
 
 template <typename T>
@@ -333,6 +339,7 @@ void CompactVector<T>::reserve_impl(size_type new_capacity) {
     auto old_elems = elems();
 
     m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
+    if (!m_data) throw std::bad_alloc{};
 
     auto new_elems = elems();
     m_data->m_len = len;

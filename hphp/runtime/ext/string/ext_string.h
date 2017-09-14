@@ -219,8 +219,7 @@ Variant HHVM_FUNCTION(setlocale,
                       const Variant& locale,
                       const Array& _argv = null_array);
 Array HHVM_FUNCTION(localeconv);
-String HHVM_FUNCTION(nl_langinfo,
-                     int item);
+Variant HHVM_FUNCTION(nl_langinfo, int item);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output

@@ -257,7 +257,7 @@ void facts_parse_impl_threaded(
   std::vector<std::string> pathListCopy;
   for(auto i = 0; i < numPaths; i++) {
     pathListCopy.push_back(
-      tvCastToString(pathList->atPos(i)).c_str()
+      tvCastToString(pathList->atPos(i)).toCppString()
     );
   }
 

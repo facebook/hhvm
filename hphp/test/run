@@ -1070,7 +1070,7 @@ function hphp_cmd($options, $test, $timeout_prefix) {
     find_test_ext($test, 'ini', 'hphp_config'),
     read_opts_file("$test.hphp_opts"),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
-    "-thhbc -l0 -k1 -o \"$test.repo\" \"$test\"",
+    "--nofork=1 -thhbc -l1 -k1 -o \"$test.repo\" \"$test\"",
     $extra_args
   ));
 }

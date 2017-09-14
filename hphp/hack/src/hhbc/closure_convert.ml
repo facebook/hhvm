@@ -52,6 +52,10 @@ type state = {
   (* Set of closure names that used to have explicit 'use' language construct
     in original anonymous function *)
   explicit_use_set: SSet.t;
+  (* Closures get converted into methods on a class. We need to keep
+     track of the original namsepace of the closure in order to
+     properly qualify things when that method's body is emitted. *)
+  closure_namespaces : Namespace_env.env SMap.t;
 }
 
 let initial_state =
@@ -66,6 +70,7 @@ let initial_state =
   namespace = Namespace_env.empty_with_default_popt;
   static_vars = ULS.empty;
   explicit_use_set = SSet.empty;
+  closure_namespaces = SMap.empty;
 }
 
 (* Add a variable to the captured variables *)
@@ -453,7 +458,10 @@ and convert_lambda env st p fd use_vars_opt =
                      captured_this = captured_this || st.captured_this;
                      defined_vars = defined_vars;
                      static_vars = static_vars;
-                     explicit_use_set; } in
+                     explicit_use_set;
+                     closure_namespaces = SMap.add
+                       (snd cd.c_name) st.namespace st.closure_namespaces;
+           } in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:add_var in
   let st = { st with hoisted_classes = cd :: st.hoisted_classes } in
@@ -721,5 +729,7 @@ let convert_toplevel_prog defs =
   let original_defs = hoist_toplevel_functions original_defs in
   let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
   let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
-  fun_defs @ original_defs @ class_defs,
-  st.explicit_use_set
+  (fun_defs @ original_defs @ class_defs
+  , st.explicit_use_set
+  , st.closure_namespaces
+  )

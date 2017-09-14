@@ -69,6 +69,8 @@ let from_ast_wrapper : bool -> _ ->
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
+  let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
+  let namespace = Option.value closure_namespace ~default:namespace in
   let method_body, method_is_generator, method_is_pair_generator =
     Emit_body.emit_body
       ~pos:ast_method.Ast.m_span

@@ -19,6 +19,7 @@ type t = {
 let is_hh_file_ = ref false
 
 let explicit_use_set_: SSet.t ref = ref SSet.empty
+let closure_namespaces_: (Namespace_env.env SMap.t) ref = ref SMap.empty
 
 let set_is_hh_file v = is_hh_file_ := v
 let is_hh_file () = !is_hh_file_
@@ -40,6 +41,9 @@ let get_scope env = env.env_scope
 let get_namespace env = env.env_namespace
 let get_needs_local_this env = env.env_needs_local_this
 let get_jump_targets env = env.env_jump_targets
+
+let set_closure_namespaces cns = closure_namespaces_ := cns
+let get_closure_namespaces () = !closure_namespaces_
 
 (* Environment is second parameter so we can chain these e.g.
  *   empty |> with_scope scope |> with_namespace ns

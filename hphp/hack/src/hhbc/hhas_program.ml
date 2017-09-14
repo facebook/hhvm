@@ -99,8 +99,10 @@ let from_ast is_hh_file ast =
       Emit_env.set_is_hh_file is_hh_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
-      let closed_ast, explicit_use_set = convert_toplevel_prog ast in
+      let closed_ast, explicit_use_set, closure_namespaces =
+        convert_toplevel_prog ast in
       Emit_env.set_explicit_use_set explicit_use_set;
+      Emit_env.set_closure_namespaces closure_namespaces;
       let flat_closed_ast = List.map (fun (_, y) -> y) closed_ast in
       let compiled_defs = emit_main flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in

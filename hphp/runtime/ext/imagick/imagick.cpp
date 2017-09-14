@@ -612,7 +612,7 @@ static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
   for (ArrayIter it(array); it; ++it) {
     imagickReadOp(
       wand->getWand(),
-      String::attach(tvCastToString(it.secondValPlus())),
+      tvCastToString(it.secondValPlus()),
       MagickReadImage
     );
   }
@@ -1808,7 +1808,7 @@ static vector<pair<String, String>> parseIdentify(const String& identify) {
   ret.reserve(keys.size());
   for (ArrayIter it(lines); it; ++it) {
     String line = HHVM_FN(trim)(
-      String::attach(tvCastToString(it.secondValPlus()))
+      tvCastToString(it.secondValPlus())
     );
     auto key = std::find_if(keys.begin(), keys.end(),
         [=](Keys::const_reference i) {
@@ -2505,7 +2505,7 @@ static bool HHVM_METHOD(Imagick, readImages, const Array& files) {
   for (ArrayIter it(files); it; ++it) {
     imagickReadOp(
       wand->getWand(),
-      String::attach(tvCastToString(it.secondValPlus())),
+      tvCastToString(it.secondValPlus()),
       MagickReadImage
     );
   }

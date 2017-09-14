@@ -32,7 +32,7 @@
 zval* zend_std_read_property(zval* /*object*/, zval* member, int /*type*/,
                              const zend_literal* /*key*/ TSRMLS_DC) {
   return Z_OBJVAL_P(member)->o_get(
-    HPHP::String{tvCastToString(*member->tv())}
+    HPHP::String{tvCastToStringData(*member->tv())}
   ).asRef()->m_data.pref;
 }
 
@@ -40,7 +40,7 @@ ZEND_API void
 zend_std_write_property(zval* /*object*/, zval* member, zval* value,
                         const zend_literal* /*key*/ TSRMLS_DC) {
   Z_OBJVAL_P(member)->o_set(
-    HPHP::String{tvCastToString(*member->tv())},
+    HPHP::String{tvCastToStringData(*member->tv())},
     tvAsVariant(value->tv())
   );
 }

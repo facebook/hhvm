@@ -48,9 +48,7 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
     if (isNullType(rval.type())) {
       return false;
     }
-    auto wh = objToWaitableWaitHandle(
-      Object::attach(tvCastToObject(rval.tv()))
-    );
+    auto wh = objToWaitableWaitHandle(tvCastToObject(rval.tv()));
     if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;

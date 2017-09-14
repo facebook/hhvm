@@ -67,7 +67,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
     *use_copy = 0;
     return;
   }
-  HPHP::StringData *str = tvCastToString(*expr->tv());
+  HPHP::StringData *str = tvCastToStringData(*expr->tv());
   ZVAL_STRING(expr_copy, str->data(), str->size());
   *use_copy = 1;
 }

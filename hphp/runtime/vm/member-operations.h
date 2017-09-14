@@ -1411,7 +1411,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
       valStr = value->m_data.pstr;
       valStr->incRefCount();
     } else {
-      valStr = tvCastToString(*value);
+      valStr = tvCastToStringData(*value);
     }
 
     if (valStr->size() > 0) {

@@ -43,7 +43,7 @@
       name.push_back(nullptr);                        \
     } else {                                          \
       name##_decrefs.push_back(                       \
-        String::attach(tvCastToString(param.tv()))    \
+        tvCastToString(param.tv())                    \
       );                                              \
       name.push_back(name##_decrefs.back().c_str());  \
     }                                                 \

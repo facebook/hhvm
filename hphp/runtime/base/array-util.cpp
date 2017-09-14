@@ -408,7 +408,7 @@ Variant ArrayUtil::StringUnique(const Array& input) {
   Array seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    auto const str = String::attach(tvCastToString(iter.secondVal()));
+    auto const str = tvCastToString(iter.secondVal());
     if (!seenValues.exists(str)) {
       seenValues.set(str, 1);
       ret.set(iter.first(), iter.secondVal());

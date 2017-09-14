@@ -217,7 +217,7 @@ String WddxPacket::wrapValue(const String& start,
 void find_var_recursive(const TypedValue* tv,
                         const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
-    String var_name{tvCastToString(*tv)};
+    String var_name{tvCastToStringData(*tv)};
     wddxPacket->add_var(var_name, true);
   }
   if (isArrayLikeType(tv->m_type)) {

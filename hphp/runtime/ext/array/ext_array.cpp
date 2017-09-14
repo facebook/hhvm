@@ -196,8 +196,7 @@ TypedValue HHVM_FUNCTION(array_combine,
       ret.setWithRef(iter1.secondValPlus(),
                      iter2.secondValPlus());
     } else {
-      ret.setWithRef(String::attach(tvCastToString(key.tv())),
-                     iter2.secondValPlus());
+      ret.setWithRef(tvCastToString(key.tv()), iter2.secondValPlus());
     }
   }
   return tvReturn(std::move(ret));
@@ -228,7 +227,7 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
         raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
                           "strict_array_fill_keys",
                           "keys must be ints or strings");
-        ai->setUnknownKey(String::attach(tvCastToString(v)), value);
+        ai->setUnknownKey(tvCastToString(v), value);
       }
     },
     [&](ObjectData* coll) {
@@ -438,7 +437,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       auto subarr1 = v.toArray().toPHPArray();
       php_array_merge_recursive(
         seen, couldRecur(v, subarr1.get()), subarr1,
-        Array::attach(tvCastToArrayLike(iter.secondVal()))
+        tvCastToArrayLike(iter.secondVal())
       );
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
@@ -509,7 +508,7 @@ TypedValue HHVM_FUNCTION(array_map,
     if (UNLIKELY(!isContainer(c))) {
       raise_warning("array_map(): Argument #%d should be an array or "
                     "collection", (int)(iters.size() + 2));
-      iters.emplace_back(Array::attach(tvCastToArrayLike(c)));
+      iters.emplace_back(tvCastToArrayLike(c));
     } else {
       iters.emplace_back(c);
       size_t len = getContainerSize(c);
@@ -1713,7 +1712,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(c);
+      s = tvCastToStringData(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }
@@ -1738,7 +1737,7 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
   if (LIKELY(isStringType(c.m_type))) {
     s = c.m_data.pstr;
   } else {
-    s = tvCastToString(c);
+    s = tvCastToStringData(c);
     decRefStr(strTv->m_data.pstr);
     strTv->m_data.pstr = s;
   }
@@ -2026,7 +2025,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(c);
+      s = tvCastToStringData(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }
@@ -2056,7 +2055,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(c);
+      s = tvCastToStringData(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }

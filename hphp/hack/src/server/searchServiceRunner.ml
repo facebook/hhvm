@@ -70,10 +70,14 @@ module SearchServiceRunner  = struct
     update_search genv (Queue.length queue)
 
   let run genv () =
-    let size = if chunk_size genv = 0
-    then Queue.length queue
-    else chunk_size genv in
-    update_search genv size
+    if ServerArgs.ai_mode genv.options = None then begin
+      let size = if chunk_size genv = 0
+        then Queue.length queue
+        else chunk_size genv
+      in
+      update_search genv size
+    end
+    else ()
 
   let update x = Queue.push x queue
 
@@ -81,6 +85,7 @@ module SearchServiceRunner  = struct
 
   let should_run_completely genv =
    chunk_size genv = 0
+   && ServerArgs.ai_mode genv.options = None
 
   let update_fileinfo_map fast =
     Relative_path.Map.iter fast

@@ -100,6 +100,8 @@ ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
 /*
  * Non-in-place casts.
  */
+bool tvCastToBoolean(TypedValue tv);
+int64_t tvCastToInt64(TypedValue tv);
 double tvCastToDouble(TypedValue tv);
 String tvCastToString(TypedValue tv);
 Array tvCastToArrayLike(TypedValue tv);

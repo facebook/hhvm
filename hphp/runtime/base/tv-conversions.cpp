@@ -116,6 +116,14 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   tv->m_type = KindOfBoolean;
 }
 
+bool tvCastToBoolean(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
+  }
+  return cellToBool(tv);
+}
+
 void tvCastToDoubleInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -248,6 +256,14 @@ void tvCastToInt64InPlace(TypedValue* tv) {
 
   tv->m_data.num = i;
   tv->m_type = KindOfInt64;
+}
+
+int64_t tvCastToInt64(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
+  }
+  return cellToInt(tv);
 }
 
 double tvCastToDouble(TypedValue tv) {

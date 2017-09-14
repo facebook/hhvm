@@ -74,9 +74,11 @@ struct Marker {
   template<bool apcgc>
   void conservativeScan(const void* start, size_t len);
 
-  static bool marked(const HeapObject* h) { return h->marks() & GCBits::Mark; }
-  bool mark(const HeapObject*, GCBits = GCBits::Mark);
-  template<bool apcgc> void checkedEnqueue(const void* p, GCBits bits);
+  static bool marked(const HeapObject* h) {
+    return h->marks() != GCBits::Unmarked;
+  }
+  bool mark(const HeapObject*);
+  template<bool apcgc> void checkedEnqueue(const void* p);
   template<bool apcgc> void finish_typescan();
   HdrBlock find(const void*);
 
@@ -126,11 +128,11 @@ HdrBlock Marker::find(const void* ptr) {
 // Mark the object at h, return true if first time. For allocations that
 // contain prefix data followed by an ObjectData, h should point to the
 // start of the whole allocation, not the interior ObjectData.
-inline bool Marker::mark(const HeapObject* h, GCBits marks) {
+inline bool Marker::mark(const HeapObject* h) {
   assert(h->kind() <= HeaderKind::BigMalloc);
   assert(h->kind() != HeaderKind::AsyncFuncWH);
   assert(h->kind() != HeaderKind::Closure);
-  return h->mark(marks) == GCBits::Unmarked;
+  return h->mark() == GCBits::Unmarked;
 }
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
@@ -188,14 +190,14 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
 }
 
 template <bool apcgc>
-void Marker::checkedEnqueue(const void* p, GCBits bits) {
+void Marker::checkedEnqueue(const void* p) {
   auto r = find(p);
   if (auto h = r.ptr) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
     // we'll skip it when we process the queue.
-    if (mark(h, bits)) {
+    if (mark(h)) {
       marked_ += r.size;
-      pinned_ += bits == GCBits::Pin ? r.size : 0;
+      pinned_ += r.size;
       enqueue(h);
       assert(checkEnqueuedKind(h));
     }
@@ -218,8 +220,7 @@ Marker::conservativeScan(const void* start, size_t len) {
     checkedEnqueue<apcgc>(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
-      (void*)(uintptr_t(*s) & (-1ULL >> 16)),
-      GCBits::Pin
+      (void*)(uintptr_t(*s) & (-1ULL >> 16))
     );
   }
 }
@@ -266,7 +267,7 @@ NEVER_INLINE void Marker::init() {
         init(h, size);
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
           unknown_ += size;
-          h->mark(GCBits::Pin);
+          h->mark();
           enqueue(h);
         }
       }
@@ -292,7 +293,7 @@ void Marker::finish_typescan() {
     },
     [this](const void** addr) {
       xscanned_ += sizeof(*addr);
-      checkedEnqueue<apcgc>(*addr, GCBits::Mark);
+      checkedEnqueue<apcgc>(*addr);
     }
   );
 }

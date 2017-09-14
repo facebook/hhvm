@@ -119,8 +119,7 @@ using UnsignedRefCount = std::make_unsigned<RefCount>::type;
 
 enum GCBits : uint8_t {
   Unmarked = 0,
-  Mark = 1,
-  Pin = 3,
+  Mark = 1
 };
 
 inline GCBits operator|(GCBits a, GCBits b) {
@@ -221,9 +220,9 @@ public:
   HeaderKind kind() const { return m_kind; }
   GCBits marks() const { return (GCBits)m_marks; }
   void clearMarks() const { m_marks = GCBits::Unmarked; }
-  GCBits mark(GCBits m) const {
+  GCBits mark() const {
     auto const old = (GCBits)m_marks;
-    m_marks = old | m;
+    m_marks = old | GCBits::Mark;
     return old;
   }
 };

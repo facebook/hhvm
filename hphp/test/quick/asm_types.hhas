@@ -113,7 +113,7 @@
     RetC
   }
   .method [public static] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
-    Null
+    Int 42
     RetC
   }
 }

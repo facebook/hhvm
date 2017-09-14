@@ -788,6 +788,14 @@ struct Index {
    * Return true if there are any interceptable functions
    */
   bool any_interceptable_functions() const;
+
+  /*
+   * Do any necessary fixups to a return type.
+   *
+   * Note that eg for an async function it will map Type to
+   * WaitH<Type>.
+   */
+  void fixup_return_type(borrowed_ptr<const php::Func>, Type&) const;
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;
@@ -808,6 +816,8 @@ private:
   folly::Optional<Type> get_type_for_annotated_type(
     Context ctx, AnnotType annot, bool nullable,
     SString name, const Type& candidate) const;
+
+  void init_return_type(borrowed_ptr<const php::Func> func);
 
 private:
   std::unique_ptr<IndexData> const m_data;

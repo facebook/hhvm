@@ -55,6 +55,7 @@
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
+#include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/analyze.h"
 
 #include "hphp/util/algorithm.h"
@@ -82,6 +83,8 @@ const StaticString s_toBoolean("__toBoolean");
 const StaticString s_86ctor("86ctor");
 const StaticString s_86cinit("86cinit");
 const StaticString s_Closure("Closure");
+const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
+const StaticString s_Generator("Generator");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2117,6 +2120,22 @@ Index::Index(borrowed_ptr<php::Program> program)
   check_invariants(*m_data);
 
   mark_no_override_classes(*m_data);    // uses AttrUnique
+
+  if (RuntimeOption::EvalCheckReturnTypeHints == 3) {
+    trace_time tracer("initialize return types");
+    std::vector<borrowed_ptr<const php::Func>> all_funcs;
+    all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
+    for (auto const fn : m_data->funcs) {
+      all_funcs.push_back(fn.second);
+    }
+    for (auto const fn : m_data->methods) {
+      all_funcs.push_back(fn.second);
+    }
+
+    parallel::for_each(all_funcs, [&] (borrowed_ptr<const php::Func> f) {
+      init_return_type(f);
+    });
+  }
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -3100,6 +3119,23 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
   if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
 }
 
+void Index::fixup_return_type(borrowed_ptr<const php::Func> func,
+                              Type& retTy) const {
+  if (func->isGenerator) {
+    if (func->isAsync) {
+      // Async generators always return AsyncGenerator object.
+      retTy = objExact(builtin_class(s_AsyncGenerator.get()));
+    } else {
+      // Non-async generators always return Generator object.
+      retTy = objExact(builtin_class(s_Generator.get()));
+    }
+  } else if (func->isAsync) {
+    // Async functions always return WaitH<T>, where T is the type returned
+    // internally.
+    retTy = wait_handle(*this, std::move(retTy));
+  }
+}
+
 void Index::refine_effect_free(borrowed_ptr<const php::Func> func, bool flag) {
   auto& fdata = create_func_info(*m_data, func)->second;
   always_assert_flog(
@@ -3142,6 +3178,46 @@ void Index::refine_local_static_types(
     if (!newTy.strictSubtypeOf(indexTy)) continue;
     indexTy = newTy;
   }
+}
+
+void Index::init_return_type(const php::Func* func) {
+  if (func->attrs & (AttrReference | AttrBuiltin) ||
+      func->isMemoizeWrapper) {
+    return;
+  }
+
+  auto const constraint = func->retTypeConstraint;
+  if (constraint.isSoft() ||
+      (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis())) {
+    return;
+  }
+
+  auto& fdata = create_func_info(*m_data, func)->second;
+
+  auto tcT = lookup_constraint(
+    Context {
+      func->unit,
+      const_cast<php::Func*>(func),
+      func->cls && func->cls->closureContextCls ?
+        func->cls->closureContextCls : func->cls
+    },
+    constraint);
+
+  if (!tcT.subtypeOf(TCell)) {
+    tcT = TInitCell;
+  } else {
+    tcT = remove_uninit(std::move(tcT));
+
+    if (is_specialized_obj(tcT)) {
+      if (dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+        tcT = is_opt(tcT) ? TOptObj : TObj;
+      }
+    } else {
+      tcT = loosen_all(std::move(tcT));
+    }
+  }
+  fixup_return_type(func, tcT);
+  fdata.returnTy = std::move(tcT);
 }
 
 void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,

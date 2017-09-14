@@ -1661,28 +1661,56 @@ TODO: This will need to be fixed to allow situations where the qualified name
       (parser, make_qualified_name_expression name)
 
   and parse_collection_literal_expression parser name =
-    let parser, left_brace = assert_token parser LeftBrace in
-    let parser, initialization_list = parse_optional_initialization parser in
-    let parser, right_brace = require_right_brace parser in
+
+    (* SPEC
+    collection-literal:
+      key-collection-class-type  {  cl-initializer-list-with-keys-opt  }
+      non-key-collection-class-type  {  cl-initializer-list-without-keys-opt  }
+      pair-type  {  cl-element-value  ,  cl-element-value  }
+
+      The types are grammatically qualified names; however the specification
+      states that they must be as follows:
+      * keyed collection type can be Map or ImmMap
+      * non-keyed collection type can be Vector, ImmVector, Set or ImmSet
+      * pair type can be Pair
+
+      We will not attempt to determine if the names give the name of an
+      appropriate type here. That's for the type checker.
+
+      The argumment lists are:
+
+      * for keyed, an optional comma-separated list of
+        expression => expression pairs
+      * for non-keyed, an optional comma-separated list of expressions
+      * for pairs, a comma-separated list of exactly two expressions
+
+      In all three cases, the lists may be comma-terminated.
+      TODO: This fact is not represented in the specification; it should be.
+      This work item is tracked by spec issue #109.
+    *)
+
+    let (parser, left_brace, initialization_list, right_brace) =
+      parse_braced_comma_list_opt_allow_trailing parser parse_init_expression in
     (* Validating the name is a collection type happens in a later phase *)
     let syntax = make_collection_literal_expression
-      name left_brace initialization_list right_brace
-    in
+      name left_brace initialization_list right_brace in
     (parser, syntax)
 
-  and parse_optional_initialization parser =
-    if peek_token_kind parser = RightBrace then
-      parser, make_missing ()
+  and parse_init_expression parser =
+    (* ERROR RECOVERY
+       We expect either a list of expr, expr, expr, ... or
+       expr => expr, expr => expr, expr => expr, ...
+       Rather than require at parse time that the list be all one or the other,
+       we allow both, and give an error in the type checker.
+    *)
+    let parser, expr1 = parse_expression_with_reset_precedence parser in
+    let parser, arrow = optional_token parser TokenKind.EqualGreaterThan in
+    if is_missing arrow then
+      (parser, expr1)
     else
-    let parser1, expr = parse_expression parser in
-    match peek_token_kind parser1 with
-    | EqualGreaterThan ->
-      parse_comma_list_allow_trailing
-        parser RightBrace SyntaxError.error1015 parse_keyed_element_initializer
-    | _ ->
-      parse_comma_list_allow_trailing
-        parser RightBrace SyntaxError.error1015
-        parse_expression_with_reset_precedence
+      let parser, expr2 = parse_expression_with_reset_precedence parser in
+      let syntax = make_element_initializer expr1 arrow expr2 in
+      (parser, syntax)
 
   and parse_keyed_element_initializer parser =
     let parser, expr1 = parse_expression_with_reset_precedence parser in

@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/heap-graph.h"
+#include "hphp/runtime/base/weakref-data.h"
+#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/bloom-filter.h"
@@ -79,6 +81,7 @@ struct Marker {
   }
   bool mark(const HeapObject*);
   template<bool apcgc> void checkedEnqueue(const void* p);
+  void enqueueWeak(const WeakRefDataHandle* p);
   template<bool apcgc> void finish_typescan();
   HdrBlock find(const void*);
 
@@ -101,6 +104,7 @@ struct Marker {
   PtrMap<const HeapObject*> ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> work_;
+  std::vector<const WeakRefDataHandle*> weakRefs_;
   APCGCManager* const apcgc_;
 };
 
@@ -207,6 +211,11 @@ void Marker::checkedEnqueue(const void* p) {
   }
 }
 
+// Enqueue a weak pointer for possible clearing at the end of scanning.
+void Marker::enqueueWeak(const WeakRefDataHandle* weak) {
+  weakRefs_.emplace_back(weak);
+}
+
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 template <bool apcgc>
@@ -294,6 +303,9 @@ void Marker::finish_typescan() {
     [this](const void** addr) {
       xscanned_ += sizeof(*addr);
       checkedEnqueue<apcgc>(*addr);
+    },
+    [this](const void* weak) {
+      enqueueWeak(reinterpret_cast<const WeakRefDataHandle*>(weak));
     }
   );
 }
@@ -336,6 +348,24 @@ NEVER_INLINE void Marker::sweep() {
     sweep_ns_ = cpu_ns() - t0;
     assert(freed_bytes_ >= 0);
   };
+
+  // Clear weak references as needed.
+  while (!weakRefs_.empty()) {
+    auto wref = weakRefs_.back();
+    assert(wref->acquire_count == 0);
+    assert(wref->wr_data);
+    weakRefs_.pop_back();
+    auto type = wref->wr_data->pointee.m_type;
+    if (type == KindOfObject) {
+      auto r = find(wref->wr_data->pointee.m_data.pobj);
+      if (!marked(r.ptr)) {
+        WeakRefData::invalidateWeakRef(uintptr_t(r.ptr));
+        mm.reinitFree();
+      }
+      continue;
+    }
+    assert(type == KindOfNull || type == KindOfUninit);
+  }
 
   bool need_reinit_free = false;
   g_context->sweepDynPropTable([&](const ObjectData* obj) {

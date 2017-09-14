@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/ptr-map.h"
 
@@ -84,6 +85,17 @@ void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
         auto offset = uintptr_t(addr) - uintptr_t(h);
         auto e = addPtr(g, from, to, HeapGraph::Counted, offset);
         g.root_ptrs.push_back(e);
+      }
+    },
+    [&](const void* p) {
+      auto weak = static_cast<const WeakRefDataHandle*>(p);
+      auto addr = &(weak->wr_data->pointee.m_data.pobj);
+      if (auto r = blocks.region(*addr)) {
+        auto to = blocks.index(r);
+        // Note that offset is going to be meaningless because weak->wr_data is
+        // a shared_ptr, so &pointee.m_data.pobj will be inside the shared_ptr's
+        // internal node, allocated separately.
+        addPtr(g, from, to, HeapGraph::Weak, 0);
       }
     }
   );
@@ -176,6 +188,14 @@ HeapGraph makeHeapGraph(bool include_free) {
           auto to = blocks.index(r);
           auto offset = uintptr_t(addr) - uintptr_t(h);
           addPtr(g, from, to, HeapGraph::Counted, offset);
+        }
+      },
+      [&](const void* p) {
+        auto weak = static_cast<const WeakRefDataHandle*>(p);
+        auto addr = &(weak->wr_data->pointee.m_data.pobj);
+        if (auto r = blocks.region(*addr)) {
+          auto to = blocks.index(r);
+          addPtr(g, from, to, HeapGraph::Weak, 0);
         }
       }
     );

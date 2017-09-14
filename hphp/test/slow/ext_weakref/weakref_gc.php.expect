@@ -1,0 +1,28 @@
+bool(false)
+NULL
+bool(true)
+object(Leaker)#4 (1) {
+  ["ptr":"Leaker":private]=>
+  object(Leaker)#5 (1) {
+    ["ptr":"Leaker":private]=>
+    object(Leaker)#4 (1) {
+      ["ptr":"Leaker":private]=>
+      object(Leaker)#5 (1) {
+        ["ptr":"Leaker":private]=>
+        *RECURSION*
+      }
+    }
+  }
+}
+bool(true)
+object(stdClass)#7 (0) {
+}
+bool(false)
+NULL
+bool(false)
+NULL
+bool(false)
+NULL
+bool(true)
+object(WeakRef)#15 (0) {
+}

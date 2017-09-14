@@ -230,6 +230,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
       switch (ptr.ptr_kind) {
         case HeapGraph::Counted: num_counted++; break;
         case HeapGraph::Ambiguous: num_ambig++; break;
+        case HeapGraph::Weak: break;
       }
     });
     auto num_ptrs = num_counted + num_ambig;

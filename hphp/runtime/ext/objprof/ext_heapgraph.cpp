@@ -32,6 +32,7 @@
  * function
  */
 
+#include <array>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -155,9 +156,9 @@ static HeapGraphContextPtr get_valid_heapgraph_context_resource(
 ///////////////////////////////////////////////////////////////////////////////
 // TRAVERSAL FUNCTIONS
 
-static const StringData* edge_kind_strs[3];
+static std::array<const StringData*, 3> edge_kind_strs{};
 static const char* edge_kind_cstrs[] = {
-  "Ptr:Counted", "Ptr:Ambiguous"
+  "Ptr:Counted", "Ptr:Ambiguous", "Ptr:Weak",
 };
 
 const StringData* edgeKindName(HeapGraph::PtrKind kind) {
@@ -167,9 +168,10 @@ const StringData* edgeKindName(HeapGraph::PtrKind kind) {
     edge_kind_strs[(int)kind] = s;
   }
   return s;
-  static_assert(HeapGraph::NumPtrKinds == 2, "");
+  static_assert(HeapGraph::NumPtrKinds == 3, "");
   static_assert(HeapGraph::Counted == 0, "");
   static_assert(HeapGraph::Ambiguous == 1, "");
+  static_assert(HeapGraph::Weak == 2, "");
 }
 
 // return metadata about this pointer, in the form of a CapturedPtr

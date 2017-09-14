@@ -13,35 +13,45 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WEAKREF_DATA_H_
-#define incl_HPHP_WEAKREF_DATA_H_
 
-#include "hphp/runtime/base/req-containers.h"
-#include "hphp/runtime/base/typed-value.h"
+#ifndef incl_HPHP_WEAKREF_DATA_HANDLE_H_
+#define incl_HPHP_WEAKREF_DATA_HANDLE_H_
 
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/weakref-data.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/native-data.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
-struct Object;
+struct WeakRefDataHandle final {
+  // We share the general validity and pointer between WeakRefHandles.
+  req::shared_ptr<WeakRefData> wr_data;
+  int32_t acquire_count;
+  TYPE_SCAN_CUSTOM_FIELD(wr_data) {
+    // If we've acquired the data, mark it, otherwise, we might need to be
+    // nulled out.
+    if (wr_data) {
+      if (acquire_count) {
+        scanner.scan(wr_data->pointee);
+      } else {
+        scanner.weak(this);
+      }
+    }
+  }
 
-// A single WeakRefData is shared between all WeakRefs to a given refcounted
-// object.
-struct WeakRefData {
-  TypedValue pointee; // Object being weakly referenced.
-  TYPE_SCAN_IGNORE_FIELD(pointee);
+  WeakRefDataHandle(const WeakRefDataHandle&) = delete;
 
-  // Invalidate WeakRefData associated with a refcounted object.
-  static void invalidateWeakRef(uintptr_t ptr);
+  WeakRefDataHandle(): wr_data(nullptr), acquire_count(0) {}
+  WeakRefDataHandle& operator=(const WeakRefDataHandle& other);
 
-  // Create or find WeakRefData for a given refcounted object.
-  static req::shared_ptr<WeakRefData> forObject(Object obj);
+  ~WeakRefDataHandle();
 
-  ~WeakRefData();
-  explicit WeakRefData(const TypedValue& tv): pointee(tv) {}
+  void sweep() {}
 };
 
-void weakref_cleanup();
-
-} // namespace HPHP
-#endif // incl_HPHP_WEAKREF_DATA_H_
+}
+#endif // incl_HPHP_WEAKREF_DATA_HANDLE_H_

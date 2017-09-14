@@ -1,0 +1,2 @@
+<?php
+if (!gc_enabled()) echo "skip\n";

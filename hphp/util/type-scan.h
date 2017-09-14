@@ -258,27 +258,38 @@ struct Scanner {
     detail::g_metadata_table[index].m_scan(*this, ptr, size);
   }
 
+  // Add a weak pointer.
+  void weak(const void* ptr) {
+    m_weak.emplace_back(ptr);
+  }
+
   // Called once all the scanning is done. Callbacks report different
   // pointer types:
   //   F1 - called to report conservative ranges
   //   F2 - called to report addresses of pointers
+  //   F3 - called to report weak pointers
   // Afterwards, all the state is cleared, and the scanner can be re-used.
-  template <typename F1, typename F2>
-  void finish(F1&& f1, F2&& f2) {
+  template <typename F1, typename F2, typename F3>
+  void finish(F1&& f1, F2&& f2, F3&& f3) {
     for (auto r : m_conservative) {
       f1(r.first, r.second);
     }
     for (auto addr : m_addrs) {
       f2(addr);
     }
+    for (auto weak : m_weak) {
+      f3(weak);
+    }
     m_addrs.clear();
     m_conservative.clear();
+    m_weak.clear();
   }
 
   // These are logically private, but they're public so that the generated
   // functions can manipulate them directly.
   std::vector<const void**> m_addrs; // pointer locations
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
+  std::vector<const void*> m_weak;
 };
 
 /*

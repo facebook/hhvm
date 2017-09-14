@@ -17,6 +17,12 @@ open CoroutineSyntax
 
 let failwithf fmt = Printf.ksprintf failwith fmt
 
+let make_return_actual_coroutine_result_syntax expr =
+  let return_expression = make_object_creation_expression_syntax
+    "ActualCoroutineResult" [expr] in
+  make_return_statement_syntax return_expression
+
+
 (* checks if one of node's parents is a try-block of try-statement
    NOTE: this function relies on physical identity of nodes being the same *)
 let rec is_in_try_block node parents =
@@ -636,7 +642,7 @@ let rewrite_suspends_in_statement
             if is_missing value
             then make_missing ()
             else if is_top_level_in_return
-            then make_return_statement_syntax value
+            then make_return_actual_coroutine_result_syntax value
             else
               make_assignment_or_return_syntax
                 temp_data_member_selection
@@ -1027,10 +1033,9 @@ let rewrite_suspends node =
           (next_label, temp_count), Rewriter.Result.Replace statements
 
         else
-          let return_expression = make_object_creation_expression_syntax
-            "ActualCoroutineResult" [return_expression] in
           let assignment = set_next_label_syntax (-1) in
-          let ret = make_return_statement_syntax return_expression in
+          let ret =
+            make_return_actual_coroutine_result_syntax return_expression in
           let statements = prefix @ [ assignment; ret ] in
           let statements = make_compound_statement_syntax statements in
 

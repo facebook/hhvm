@@ -875,7 +875,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
     if (adjusted) {
       *addr = adjusted;
       auto const begin = reinterpret_cast<TCA>(addr);
-      DataBlock::syncDirect(begin, begin + 8);
+      DataBlock::syncDirect(begin, begin + 2 * kInstructionSize);
     }
   } else if (instr->IsMovz()) {
     const auto rd = instr->Rd();

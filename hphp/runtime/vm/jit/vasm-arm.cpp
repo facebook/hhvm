@@ -432,11 +432,7 @@ static CodeBlock* getBlock(Venv& env, CodeAddress a) {
 
 static CodeAddress toReal(Venv& env, CodeAddress a) {
   CodeBlock* b = getBlock(env, a);
-  if (b) {
-    return b->toDestAddress(a);
-  }
-
-  return a;
+  return (b == nullptr) ? a : b->toDestAddress(a);
 }
 
 void Vgen::patch(Venv& env) {

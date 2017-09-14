@@ -81,6 +81,14 @@ let param_name node =
     }; _ } -> token_to_string parameter_name
   | _ -> None
 
+let use_name node =
+  (* TODO: A use clause can contain ref prefixes on the variables.
+  We should disallow this in a coroutine. *)
+  match syntax node with
+  | ListItem { list_item = ({ syntax = Token _; _ } as list_item); _ } ->
+    token_to_string list_item
+  | _ -> None
+
 let rec get_params_list node =
   match syntax node with
   | FunctionDeclaration { function_declaration_header; _ } ->
@@ -103,11 +111,6 @@ let get_params node =
   let param_list = List.filter_map param_list ~f:param_name in
   SSet.of_list param_list
 
-let all_params parents =
-  let folder acc node =
-    SSet.union acc (get_params node) in
-  List.fold_left parents ~f:folder ~init:SSet.empty
-
 let get_body node =
   match syntax node with
   | FunctionDeclaration { function_body; _ } -> function_body
@@ -124,11 +127,51 @@ let add_local acc node =
     SSet.add (Token.text token) acc
   | _ -> acc
 
+let outer_from_use use_clause =
+  match syntax use_clause with
+  | AnonymousFunctionUseClause { anonymous_use_variables; _; } ->
+    let use_list = syntax_node_to_list anonymous_use_variables in
+    let use_list = List.filter_map use_list ~f:use_name in
+    SSet.of_list use_list
+  | _ -> SSet.empty
+
+let use_clause_variables node =
+  match syntax node with
+  | AnonymousFunction { anonymous_use; _ } -> outer_from_use anonymous_use
+  | _ -> SSet.empty
+
 let local_variables acc node =
   let params = get_params node in
   let body = get_body node in
   let locals = fold_no_lambdas add_local params body in
+  let used_vars = use_clause_variables node in
+  let acc = SSet.union acc used_vars in
   SSet.union acc locals
+
+let filter_parents parents =
+  (* We want all the parents that are relevant to computing outer variables.
+  Since outer variables are indicated in a "use" clause of an anonymous
+  function, we can stop looking when we encounter one.  Otherwise, we just
+  filter out anything that is not a lambda, function or method.
+  *)
+  let rec aux acc parents =
+    match parents with
+    | [] -> acc
+    | h :: t -> begin
+      match syntax h with
+      | FunctionDeclaration _
+      | MethodishDeclaration _
+      | AnonymousFunction _ -> h :: acc
+      | LambdaExpression _ -> aux (h :: acc) t
+      | _ -> aux acc t end in
+  List.rev (aux [] parents)
+
+let compute_outer_variables parents node =
+  match syntax node with
+  | AnonymousFunction { anonymous_use; _ } -> outer_from_use anonymous_use
+  | _ ->
+    let parents = filter_parents parents in
+    List.fold_left parents ~f:local_variables ~init:SSet.empty
 
 let partition_used_locals parents node =
   let params = get_params_list node in
@@ -139,23 +182,7 @@ let partition_used_locals parents node =
   let all_params = List.filter_map decls ~f:param_name in
   let all_params = SSet.of_list all_params in
   let used_params = SSet.inter all_used all_params in
-  (* TODO: This is incorrect in cases where anonymous functions are in play.
-  For example:
-  { $x = 1; $y = 2; $f = function () use ($y) { M($x, $y); }; }
-  We should compute that $y is an outer variable of the lambda and $x is an
-  inner variable, but we compute that both are outer variables.
-  We also could have more complex situations:
-  {
-    $x = 1; $y = 2;
-    $f = function () use ($y) {
-      $z = 3;
-      $f2 = () ==> $x + $y + $z;
-    };
-  }
-  In the inner lambda, $y and $z are outer variables of the lambda, but $x is
-  not because $x is not in scope inside the anonymous function.
-  *)
-  let all_outer = List.fold_left parents ~f:local_variables ~init:SSet.empty in
+  let all_outer = compute_outer_variables parents node in
   let used_outer = SSet.inter all_used all_outer in
   let inner = SSet.diff all_used (SSet.union used_params used_outer) in
   (inner, used_outer, used_params)

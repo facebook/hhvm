@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -102,6 +103,10 @@ String HHVM_FUNCTION(server_warmup_status) {
   }
 
   return empty_string();
+}
+
+String HHVM_FUNCTION(server_warmup_status_monotonic) {
+  return String(jit::tc::warmupStatusString());
 }
 
 const StaticString
@@ -194,6 +199,8 @@ StaticString get_PHP_VERSION() {
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FALIAS(HH\\server_warmup_status_monotonic,
+                server_warmup_status_monotonic);
     HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);

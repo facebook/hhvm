@@ -153,11 +153,16 @@ namespace HPHP {
  */
 template <typename T>
 struct ThreadLocalNode {
-  T * m_p;
+  T* m_p;
   void (*m_on_thread_exit_fn)(void * p);
-  void * m_next;
+  void (*m_init_tyindex)(void*);
+  void* m_next;
   uint32_t m_size;
   type_scan::Index m_tyindex;
+  static void init_tyindex(void* node_ptr) {
+    auto node = static_cast<ThreadLocalNode<T>*>(node_ptr);
+    node->m_tyindex = type_scan::getIndexForScan<T>();
+  }
 };
 
 struct ThreadLocalManager {
@@ -165,8 +170,10 @@ struct ThreadLocalManager {
   static void PushTop(ThreadLocalNode<T>& node) {
     static_assert(sizeof(T) <= 0xffffffffu, "");
     PushTop(&node, sizeof(T), type_scan::getIndexForScan<T>());
+    node.m_init_tyindex = &node.init_tyindex;
   }
   template<class Fn> void iterate(Fn fn) const;
+  void initTypeIndices();
   static ThreadLocalManager& GetManager();
 
 private:
@@ -245,13 +252,6 @@ struct ThreadLocalImpl {
     return Check ? *get() : *getNoCheck();
   }
 
-  void fixTypeIndex() {
-    if (!type_scan::isKnownType(m_node.m_tyindex)) {
-      m_node.m_tyindex = type_scan::getIndexForScan<T>();
-      assert(type_scan::isKnownType(m_node.m_tyindex));
-    }
-  }
-
   static size_t node_ptr_offset() {
     using Self = ThreadLocalImpl<Check,T>;
     return offsetof(Self, m_node) + offsetof(ThreadLocalNode<T>, m_p);
@@ -321,13 +321,6 @@ struct ThreadLocalSingleton {
 
   T &operator*() const {
     return *getNoCheck();
-  }
-
-  static void fixTypeIndex() {
-    if (!type_scan::isKnownType(s_node.m_tyindex)) {
-      s_node.m_tyindex = type_scan::getIndexForScan<T>();
-      assert(type_scan::isKnownType(s_node.m_tyindex));
-    }
   }
 
 private:

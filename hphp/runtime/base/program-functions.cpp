@@ -1806,7 +1806,7 @@ static int execute_program_impl(int argc, char** argv) {
     Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
     exit(HPHP_EXIT_FAILURE);
   }
-  MemoryManager::TlsWrapper::fixTypeIndex();
+  ThreadLocalManager::GetManager().initTypeIndices();
 
   // It's okay if this fails.
   init_member_reflection();

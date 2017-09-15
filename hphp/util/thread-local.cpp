@@ -46,6 +46,16 @@ void ThreadLocalManager::OnThreadExit(void* p) {
   }
 }
 
+void ThreadLocalManager::initTypeIndices() {
+  auto list = getList(pthread_getspecific(m_key));
+  if (!list) return;
+  for (auto p = list->head; p != nullptr;) {
+    auto node = static_cast<ThreadLocalNode<void>*>(p);
+    node->m_init_tyindex(node);
+    p = node->m_next;
+  }
+}
+
 void ThreadLocalManager::PushTop(void* nodePtr, uint32_t nodeSize,
                                  type_scan::Index tyindex) {
   auto& node = *static_cast<ThreadLocalNode<void>*>(nodePtr);

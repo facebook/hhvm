@@ -923,7 +923,6 @@ struct IniSettingExtension final : Extension {
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
     assert(!s_saved_defaults->settings.hasValue());
-    s_user_callbacks.fixTypeIndex();
   }
 } s_ini_extension;
 

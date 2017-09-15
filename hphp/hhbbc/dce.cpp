@@ -598,11 +598,12 @@ Type topC(Env& env, uint32_t idx = 0) {
 }
 
 bool popCouldRunDestructor(Env& env, uint32_t i = 0) {
-  // If there's an equivLocal, we know that it's not the last
+  // If there's an equivLoc, we know that it's not the last
   // reference, so popping the stack won't run any destructors.
   auto const& s = env.stateBefore.stack;
   auto const& e = s[s.size() - i - 1];
-  return e.equivLocal == NoLocalId && could_run_destructor(e.type);
+  return (e.equivLoc == NoLocalId || e.equivLoc == StackDupId) &&
+    could_run_destructor(e.type);
 }
 
 //////////////////////////////////////////////////////////////////////

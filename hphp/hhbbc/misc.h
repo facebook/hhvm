@@ -69,6 +69,11 @@ enum class PrepKind { Ref, Val, Unknown };
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;
+/*
+ * Special value used by StackElem::equivLoc to indicate that
+ * this element is a dup of the one below.
+ */
+constexpr const LocalId StackDupId = -2;
 using IterId = uint32_t;
 using ClsRefSlotId = uint32_t;
 constexpr const ClsRefSlotId NoClsRefSlotId = -1;

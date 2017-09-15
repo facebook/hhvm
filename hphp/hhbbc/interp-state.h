@@ -187,12 +187,15 @@ struct Base {
 // An element on the eval stack
 struct StackElem {
   Type type;
-  // A local which is known to have an equivalent value to this stack value.
-  // Note that the local may not match the stack value wrt Uninit.
-  LocalId equivLocal;
+  // A location which is known to have an equivalent value to this
+  // stack value. This could be a valid LocalId, the special value
+  // StackDupId to indicate that its equivalent to the stack element
+  // below it, or NoLocalId if it has no known equivalents.
+  // Note that the location may not match the stack value wrt Uninit.
+  LocalId equivLoc;
 
   bool operator==(const StackElem& other) const {
-    return type == other.type && equivLocal == other.equivLocal;
+    return type == other.type && equivLoc == other.equivLoc;
   }
 };
 

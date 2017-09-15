@@ -292,9 +292,9 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
       changed = true;
       dst.stack[i].type = std::move(newT);
     }
-    if (dst.stack[i].equivLocal != src.stack[i].equivLocal) {
+    if (dst.stack[i].equivLoc != src.stack[i].equivLoc) {
       changed = true;
-      dst.stack[i].equivLocal = NoLocalId;
+      dst.stack[i].equivLoc = NoLocalId;
     }
   }
 
@@ -548,8 +548,9 @@ std::string state_string(const php::Func& f, const State& st,
     folly::format(&ret, "stk[{:02}] :: {} [{}]\n",
                   i,
                   show(st.stack[i].type),
-                  st.stack[i].equivLocal != NoLocalId ?
-                  local_string(f, st.stack[i].equivLocal) : "");
+                  st.stack[i].equivLoc == NoLocalId ? "" :
+                  st.stack[i].equivLoc == StackDupId ? "Dup" :
+                  local_string(f, st.stack[i].equivLoc));
   }
 
   for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {

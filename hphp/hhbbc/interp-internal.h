@@ -224,7 +224,7 @@ void killLocals(ISS& env) {
   readUnknownLocals(env);
   modifyLocalStatic(env, NoLocalId, TGen);
   for (auto& l : env.state.locals) l = TGen;
-  for (auto& e : env.state.stack) e.equivLocal = NoLocalId;
+  for (auto& e : env.state.stack) e.equivLoc = NoLocalId;
   env.state.equivLocals.clear();
 }
 
@@ -403,12 +403,14 @@ void push(ISS& env, Type t) {
 }
 
 void push(ISS& env, Type t, LocalId l) {
-  if (l == NoLocalId || peekLocRaw(env, l).couldBe(TRef)) {
-    return push(env, t);
+  if (l != StackDupId) {
+    if (l == NoLocalId || peekLocRaw(env, l).couldBe(TRef)) {
+      return push(env, t);
+    }
+    assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
   }
-  assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
   FTRACE(2, "    push: {} (={})\n",
-         show(t), local_string(*env.ctx.func, l));
+         show(t), l == StackDupId ? "Dup" : local_string(*env.ctx.func, l));
   env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
@@ -559,20 +561,29 @@ void addLocEquiv(ISS& env,
 }
 
 // Obtain a local which is equivalent to the given stack value
+LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
+  assert(idx < env.state.stack.size());
+  auto const equiv = env.state.stack[env.state.stack.size() - idx - 1].equivLoc;
+  return equiv == StackDupId ? NoLocalId : equiv;
+}
+
+// Obtain a location which is equivalent to the given stack value
 LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
-  return env.state.stack[env.state.stack.size() - idx - 1].equivLocal;
+  return env.state.stack[env.state.stack.size() - idx - 1].equivLoc;
 }
 
 // Kill all equivalencies involving the given local to stack values
 void killStkEquiv(ISS& env, LocalId l) {
   for (auto& e : env.state.stack) {
-    if (e.equivLocal == l) e.equivLocal = NoLocalId;
+    if (e.equivLoc == l) e.equivLoc = NoLocalId;
   }
 }
 
 void killAllStkEquiv(ISS& env) {
-  for (auto& e : env.state.stack) e.equivLocal = NoLocalId;
+  for (auto& e : env.state.stack) {
+    if (e.equivLoc != StackDupId) e.equivLoc = NoLocalId;
+  }
 }
 
 Type peekLocRaw(ISS& env, LocalId l) {
@@ -581,6 +592,10 @@ Type peekLocRaw(ISS& env, LocalId l) {
     always_assert_flog(ret == TGen, "volatile local was not TGen");
   }
   return ret;
+}
+
+Type peekLocation(ISS& env, LocalId l, uint32_t idx = 0) {
+  return l == StackDupId ? topT(env, idx) : peekLocRaw(env, l);
 }
 
 Type locRaw(ISS& env, LocalId l) {
@@ -662,18 +677,37 @@ void refineLocHelper(ISS& env, LocalId l, Type t) {
   if (v.subtypeOf(TCell)) env.state.locals[l] = std::move(t);
 }
 
-void refineLoc(ISS& env, LocalId l, Type t) {
+template<typename F>
+void refineLocation(ISS& env, LocalId l, F fun) {
+  if (l == StackDupId) {
+    auto stk = &env.state.stack.back();
+    while (true) {
+      stk->type = fun(std::move(stk->type));
+      if (stk->equivLoc != StackDupId) break;
+      assertx(stk != &env.state.stack.front());
+      --stk;
+    }
+    l = stk->equivLoc;
+  }
+  if (l == NoLocalId) return;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
-    auto raw = peekLocRaw(env, l);
     do {
-      if (peekLocRaw(env, equiv).subtypeOf(raw)) {
-        refineLocHelper(env, equiv, t);
-      }
+      refineLocHelper(env, equiv, fun(peekLocRaw(env, equiv)));
       equiv = findLocEquiv(env, equiv);
     } while (equiv != l);
   }
-  refineLocHelper(env, l, t);
+  refineLocHelper(env, l, fun(peekLocRaw(env, l)));
+}
+
+template<typename PreFun, typename PostFun>
+void refineLocation(ISS& env, LocalId l,
+                    PreFun pre, BlockId target, PostFun post) {
+  auto state = env.state;
+  refineLocation(env, l, pre);
+  env.propagate(target, &env.state);
+  env.state = std::move(state);
+  refineLocation(env, l, post);
 }
 
 /*

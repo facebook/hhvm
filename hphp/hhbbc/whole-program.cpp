@@ -375,6 +375,9 @@ void analyze_public_statics(Index& index, php::Program& program) {
     parallel::for_each(
       all_function_contexts(program),
       [&] (Context ctx) {
+        if (ctx.cls && ctx.cls->closureContextCls) {
+          ctx.cls = ctx.cls->closureContextCls;
+        }
         auto info = CollectedInfo { index, ctx, nullptr, &publicStatics, true };
         analyze_func_collect(index, ctx, info);
       }

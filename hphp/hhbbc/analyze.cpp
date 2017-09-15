@@ -253,11 +253,11 @@ Context adjust_closure_context(Context ctx) {
 }
 
 FuncAnalysis do_analyze_collect(const Index& index,
-                                Context const inputCtx,
+                                Context const ctx,
                                 CollectedInfo& collect,
                                 ClassAnalysis* clsAnalysis,
                                 const std::vector<Type>* knownArgs) {
-  auto const ctx = adjust_closure_context(inputCtx);
+  assertx(ctx.cls == adjust_closure_context(ctx).cls);
   FuncAnalysis ai{ctx};
 
   auto const bump = trace_bump_for(ctx.cls, ctx.func);
@@ -437,10 +437,11 @@ FuncAnalysis do_analyze_collect(const Index& index,
 }
 
 FuncAnalysis do_analyze(const Index& index,
-                        Context const ctx,
+                        Context const inputCtx,
                         ClassAnalysis* clsAnalysis,
                         const std::vector<Type>* knownArgs,
                         bool trackConstantArrays) {
+  auto const ctx = adjust_closure_context(inputCtx);
   CollectedInfo collect {
     index, ctx, clsAnalysis, nullptr, trackConstantArrays
   };

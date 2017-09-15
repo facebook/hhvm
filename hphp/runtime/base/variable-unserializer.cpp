@@ -568,6 +568,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     //
     // TODO(#2881866): this assumption means we can't do reallocations
     // when promoting kPackedKind -> kMixedKind.
+    SuppressHackArrCompatNotices shacn;
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
   } else {
     // Ignore fields which are marked as NoSerialize
@@ -1074,7 +1075,10 @@ void VariableUnserializer::unserializeVariant(
                                            remainingProps--);
                   hasSerializedNativeData = true;
                 } else {
-                  auto t = &arr.lvalAt(key, AccessFlags::Key);
+                  auto t = [&]() -> decltype(auto) {
+                    SuppressHackArrCompatNotices shacn;
+                    return &arr.lvalAt(key, AccessFlags::Key);
+                  }();
                   if (UNLIKELY(isRefcountedType(t->getRawType()))) {
                     putInOverwrittenList(*t);
                   }

@@ -1,0 +1,4 @@
+Class \Bar -> Class \Foo
+Class \Bar -> Class \N
+Class \Foo -> Class \M
+Class \N -> Class \M

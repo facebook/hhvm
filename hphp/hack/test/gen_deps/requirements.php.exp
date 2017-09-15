@@ -1,0 +1,8 @@
+Class \Bar -> Class \FooParent
+Class \Bar -> Class \G
+Class \Foo -> Class \Bar
+Class \Foo -> Class \FooParent
+Class \Foo -> Class \G
+Class \Foo -> Class \IFoo
+Class \IFoo -> Class \FooParent
+Class \IFoo -> Class \G

@@ -69,11 +69,11 @@ let add_fun_dep dep_env id =
     let global_name = "\\"^(snd id) in
     let (_, fun_name) = elaborate_id nsenv ElaborateFun id in
     let nm = NamingGlobal.GEnv.fun_canon_name in
-    match nm fun_name, nm global_name with
-    | Some name, _
-    | _, Some name ->
-      add_dep top (Dep.Fun name)
-    | None, None -> ()
+    let add_fun_dep x =
+      add_dep top (Dep.Fun x) in
+    Option.iter (nm fun_name) ~f: add_fun_dep;
+    Option.iter (nm global_name) ~f: add_fun_dep
+
 
 let add_const_dep dep_env id =
   let {top; nsenv; popt;} = dep_env in
@@ -84,12 +84,11 @@ let add_const_dep dep_env id =
     let global_name = "\\"^(snd id) in
     let (_, const_name) = elaborate_id nsenv ElaborateConst id in
     let nm = NamingGlobal.GEnv.gconst_pos popt in
-    match nm const_name, nm global_name with
-    | Some _, _ ->
-      add_dep top (Dep.GConst const_name)
-    | _, Some _ ->
-      add_dep top (Dep.GConst global_name)
-    | None, None -> ()
+    let add_const_dep x =
+      add_dep top (Dep.GConst x) in
+    if Option.is_some (nm const_name) then add_const_dep const_name;
+    if Option.is_some (nm global_name) then add_const_dep global_name;
+    ()
 
 
 class dependency_visitor = object
@@ -116,7 +115,7 @@ class dependency_visitor = object
     top = Some (Dep.Class (snd t.t_id));
     nsenv = Some t.t_namespace;
   } in
-  super#on_typedef dep_env t
+    super#on_typedef dep_env t
 
   method! on_gconst dep_env c =
   let dep_env = {

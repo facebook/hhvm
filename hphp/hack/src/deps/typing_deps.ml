@@ -122,6 +122,14 @@ let to_bazooka x =
   | Dep.Class cid -> Dep.Class cid
   | x -> x
 
+let simplify x =
+  let x = to_bazooka x in
+  (* Get rid of FunName and GConstName *)
+  match x with
+  | Dep.FunName f -> Dep.Fun f
+  | Dep.GConstName g -> Dep.GConst g
+  | _ -> x
+
 (* Gets ALL the dependencies ... hence the name *)
 let get_bazooka x =
   get_ideps (to_bazooka x)
@@ -142,8 +150,9 @@ let add_idep root obj =
     HashSet.add dbg_dep_set
       ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
   | Bazooka ->
-    let root = to_bazooka root in
-    let obj = to_bazooka obj in
+    let root = simplify root in
+    let obj = simplify obj in
+    if root = obj then () else
     HashSet.add dbg_dep_set
       ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
   | No_trace -> ()

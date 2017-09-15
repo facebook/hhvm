@@ -1,0 +1,5 @@
+GConst \C -> GConst \C
+Fun \NS\bar -> GConst \C
+Fun \NS\bar -> GConst \NS\C
+GConst \C -> GConst \C
+GConst \NS\C -> GConst \NS\C

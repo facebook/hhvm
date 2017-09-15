@@ -43,6 +43,11 @@ let rec parse_type_specifier ?(allow_var=false) parser =
      a simple type specifier here. *)
   let (parser1, token) = next_xhp_class_name_or_other parser in
   match Token.kind token with
+  | Var when allow_var -> parser1, make_simple_type_specifier (make_token token)
+  | This -> parse_simple_type_or_type_constant parser
+  (* Any keyword-type could be a non-keyword type, because PHP, so check whether
+   * these have generics.
+   *)
   | Double (* TODO: Specification does not mention double; fix it. *)
   | Bool
   | Int
@@ -54,9 +59,7 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Noreturn
   | Resource
   | Object
-  | Mixed -> (parser1, make_simple_type_specifier (make_token token))
-  | Var when allow_var -> parser1, make_simple_type_specifier (make_token token)
-  | This -> parse_simple_type_or_type_constant parser
+  | Mixed
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Self
   | Parent -> parse_simple_type_or_type_constant parser

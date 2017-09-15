@@ -567,22 +567,14 @@ let compute_state_machine_data
     coroutine_result_data_variables
     function_parameter_list =
   (* TODO: Add a test case for "..." param. *)
-  (* TODO: Right now we get this wrong; the outer variables have to be
-  on the parameters list, and not the properties list.  That means that
-  we'll need to fix up create_closure_invocation to pass in the outer
-  variables. When that happens, fix this code too. *)
   let inner_variables = context.Coroutine_context.inner_variables in
   let outer_variables = context.Coroutine_context.outer_variables in
-  (* TODO: Don't put the outer variables in the property list. *)
-  let properties = SSet.union inner_variables outer_variables in
-  let properties = SSet.elements properties in
+  let outer_variables = SSet.elements outer_variables in
+  let properties = SSet.elements inner_variables in
   let properties = properties @ coroutine_result_data_variables in
-
   let parameters = extract_parameter_declarations function_parameter_list in
-  (* TODO: Add the outer_variables to the params as follows. *)
-  (* let outer_variables = SSet.elements outer_variables in
   let outer_variable_params = make_outer_params outer_variables in
-  let parameters = outer_variable_params @ parameters in *)
+  let parameters = outer_variable_params @ parameters in
   CoroutineStateMachineData.{ properties; parameters; }
 
 (**

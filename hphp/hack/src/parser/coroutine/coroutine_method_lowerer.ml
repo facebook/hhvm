@@ -95,6 +95,11 @@ let create_closure_invocation
      function_parameter_list
      function_type
      rewritten_body =
+  (* $outer1, $outer2 *)
+  let outer_variables = context.Coroutine_context.outer_variables in
+  let outer_variables = SSet.elements outer_variables in
+  let outer_args = Core_list.map
+    ~f:make_variable_expression_syntax outer_variables in
   (* $param1, $param2 *)
   let arg_list = parameter_list_to_arg_list function_parameter_list in
   (* ($closure, $data, $exception) ==> { body } *)
@@ -109,11 +114,11 @@ let create_closure_invocation
   let classname = make_closure_classname context in
   (* $continuation,
     ($closure, $data, $exception) ==> { body },
-    $param1, $param2 *)
+    $outer1, $outer2, $param1, $param2 *)
   let parameters =
     continuation_variable_syntax ::
     lambda ::
-    arg_list in
+    (outer_args @ arg_list) in
   (* new Closure($continuation, ...) *)
   let new_closure_syntax = make_object_creation_expression_syntax
     classname parameters in

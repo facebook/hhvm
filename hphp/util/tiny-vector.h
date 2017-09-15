@@ -182,10 +182,12 @@ struct TinyVector {
     newHeap->capacity = (m_impl.usable_size(newHeap, requested) -
                          offsetof(HeapData, vals)) / sizeof(T);
 
-    std::copy(&m_impl.m_data.ptr()->vals[0],
-              &m_impl.m_data.ptr()->vals[size() - InternalSize],
-              &newHeap->vals[0]);
-    m_impl.deallocate(m_impl.m_data.ptr());
+    if (m_impl.m_data.ptr()) {
+      std::copy(&m_impl.m_data.ptr()->vals[0],
+                &m_impl.m_data.ptr()->vals[size() - InternalSize],
+                &newHeap->vals[0]);
+      m_impl.deallocate(m_impl.m_data.ptr());
+    }
     m_impl.m_data.set(size(), newHeap);
   }
 

@@ -1553,26 +1553,6 @@ let do_lost_server (state: state) (p: Lost_env.params) : state =
     lost_state
 
 
-let connect_from_preinit_if_necessary (state: state) (event: event) : (state * exn option) =
-  match state, event with
-  | Pre_init, Client_message c when c.Jsonrpc_queue.method_ = "initialize" ->
-    begin try
-      let new_state = connect () in
-      (new_state, None)
-    with e ->
-      let (_code, message, _data) = Lsp_fmt.get_error_info e in
-      let new_state = do_lost_server state
-        { Lost_env.
-          message = "hh_server is stopped: " ^ message;
-          restart_on_click = true;
-          trigger_on_lock_file = true;
-          trigger_on_lsp = false;
-        } in
-      (new_state, Some e)
-    end
-  | _ -> (state, None)
-
-
 let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
   (* We'll auto-dismiss the ready dialog if it was up, in response to user    *)
   (* actions like typing or hover, and in response to a lost server.          *)
@@ -1687,8 +1667,26 @@ let handle_event
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     initialize_params := Some (parse_initialize c.params);
-    (* We always succeed in initialization and send a response here.          *)
-    (* The real work to establish a server connection happens in our caller.  *)
+    state := begin try
+      connect ()
+      (* This tries to open connection to the monitor. If it succeeds,  *)
+      (* it returns In_init state, waiting for a Hello from the server. *)
+    with e ->
+      (* If it failed to open a connection to the monitor then we'll    *)
+      (* report the problem and trasition to Lost_server state.         *)
+      let stack = Printexc.get_backtrace () in
+      let (code, message, _data) = Lsp_fmt.get_error_info e in
+      client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack);
+      do_lost_server !state
+        { Lost_env.
+          message = "hh_server is stopped: " ^ message;
+          restart_on_click = true;
+          trigger_on_lock_file = true;
+          trigger_on_lsp = false;
+        }
+    end;
+    (* But regardless of whether we went to In_init or Lost_server, we'll  *)
+    (* still report success to the LSP client for the "initialize" method. *)
     do_initialize () |> print_initialize |> respond stdout c
 
   (* any request/notification if we haven't yet initialized *)
@@ -1916,12 +1914,7 @@ let main (env: env) : 'a =
       (* this is the main handler for each message*)
       let response = handle_event ~env ~state ~client ~event in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
-      log_response_if_necessary event response start_handle_t;
-
-      (* if client send an initialize request, we'll switch to either In_init or Lost_server *)
-      let (new_state, exn) = connect_from_preinit_if_necessary !state event in
-      state := new_state;
-      Option.iter exn ~f:(fun e -> raise e);
+      log_response_if_necessary event response start_handle_t
     with
     | Server_fatal_connection_exception edata ->
       if !state <> Post_shutdown then begin

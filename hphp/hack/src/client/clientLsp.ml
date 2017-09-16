@@ -625,7 +625,9 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   | Some (Client_message c)
     when c.Jsonrpc_queue.kind = Jsonrpc_queue.Request ->
     print_error e stack |> respond stdout c |> ignore
-  | _ -> ()
+  | _ ->
+    let (code, message, _original_data) = get_error_info e in
+    client_log Lsp.MessageType.ErrorMessage (Printf.sprintf "%s [%i]\n%s" message code stack)
 
 
 (* dismiss_indicators: dismisses all dialogs, progress- and action-required   *)
@@ -1966,6 +1968,5 @@ let main (env: env) : 'a =
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" start_handle_t;
-      client_log Lsp.MessageType.ErrorMessage (message ^ ", internal\n" ^ stack);
   done;
   failwith "unreachable"

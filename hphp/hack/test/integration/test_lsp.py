@@ -109,6 +109,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         )
 
     def run_lsp_test(self, test_name, test, expected):
+        self.run_check()  # wait until hh_server is ready before starting lsp
         with LspCommandProcessor.create(self.test_env) as lsp:
             observed_transcript = lsp.communicate(test)
 

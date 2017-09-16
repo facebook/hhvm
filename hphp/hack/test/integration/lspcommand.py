@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import contextlib
 import subprocess
 import uuid
+import time
 from hh_paths import hh_client
 from jsonrpc_stream import JsonRpcStreamReader
 from jsonrpc_stream import JsonRpcStreamWriter
@@ -62,6 +63,10 @@ class LspCommandProcessor:
         for command in commands:
             self.writer.write(command)
             transcript = self._scribe(transcript, sent=command, received=None)
+            # Hack: HackLSP server only connects to hh_server asynchronously.
+            # We want to delay until after it's connected before testing more.
+            if command["method"] == "initialize":
+                time.sleep(0.5)
 
         return transcript
 

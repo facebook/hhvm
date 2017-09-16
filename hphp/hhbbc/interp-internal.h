@@ -573,6 +573,23 @@ LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
   return env.state.stack[env.state.stack.size() - idx - 1].equivLoc;
 }
 
+void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
+  assertx(loc <= MaxLocalId);
+  while (true) {
+    auto equiv = topStkEquiv(env, idx);
+    if (equiv != StackDupId) {
+      if (equiv <= MaxLocalId) {
+        if (loc == equiv || locsAreEquiv(env, loc, equiv)) return;
+        addLocEquiv(env, loc, equiv);
+        return;
+      }
+      env.state.stack[env.state.stack.size() - idx - 1].equivLoc = loc;
+      return;
+    }
+    idx++;
+  }
+}
+
 // Kill all equivalencies involving the given local to stack values
 void killStkEquiv(ISS& env, LocalId l) {
   for (auto& e : env.state.stack) {

@@ -605,34 +605,161 @@ bool couldBeHackArr(Type t) {
   return t.couldBe(TVec) || t.couldBe(TDict) || t.couldBe(TKeyset);
 }
 
-}
+template<bool NSame>
+std::pair<Type,bool> resolveSame(ISS& env) {
+  auto const l1 = topStkEquiv(env, 0);
+  auto const t1 = topC(env, 0);
+  auto const l2 = topStkEquiv(env, 1);
+  auto const t2 = topC(env, 1);
 
-template<bool Negate>
-void sameImpl(ISS& env) {
-  auto const t1 = popC(env);
-  auto const t2 = popC(env);
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-
-  auto const mightWarn = [&]{
+  auto const mightWarn = [&] {
     // EvalHackArrCompatNotices will notice on === and !== between PHP arrays
     // and Hack arrays.
     if (!RuntimeOption::EvalHackArrCompatNotices) return false;
     if (t1.couldBe(TArr) && couldBeHackArr(t2)) return true;
     if (couldBeHackArr(t1) && t2.couldBe(TArr)) return true;
     return false;
-  }();
-  if (!mightWarn) {
+  };
+
+  auto const result = [&] {
+    if (l1 == StackDupId ||
+        (l1 != NoLocalId &&
+         l2 != NoLocalId && l2 != StackDupId &&
+         (l1 == l2 || locsAreEquiv(env, l1, l2)))) {
+      return NSame ? TFalse : TTrue;
+    }
+
+    auto const v1 = tv(t1);
+    auto const v2 = tv(t2);
+
+    if (v1 && v2) {
+      if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
+        return r != NSame ? TTrue : TFalse;
+      }
+    }
+
+    return NSame ? typeNSame(t1, t2) : typeSame(t1, t2);
+  };
+
+  return { result(), mightWarn() };
+}
+
+template<bool Negate>
+void sameImpl(ISS& env) {
+  auto pair = resolveSame<Negate>(env);
+  discard(env, 2);
+
+  if (!pair.second) {
     nothrow(env);
     constprop(env);
   }
 
-  if (v1 && v2) {
-    if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
-      return push(env, r != Negate ? TTrue : TFalse);
-    }
+  push(env, std::move(pair.first));
+}
+
+}
+
+template<class Same, class JmpOp>
+void group(ISS& env, const Same& same, const JmpOp& jmp) {
+
+  auto bail = [&] { impl(env, same, jmp); };
+
+  constexpr auto NSame = Same::op == Op::NSame;
+
+  if (resolveSame<NSame>(env).first != TBool) return bail();
+
+  auto const loc0 = topStkEquiv(env, 0);
+  auto const loc1 = topStkEquiv(env, 1);
+  if (loc0 == NoLocalId && loc1 == NoLocalId) return bail();
+
+  auto const ty0 = topC(env, 0);
+  auto const ty1 = topC(env, 1);
+  auto const val0 = tv(ty0);
+  auto const val1 = tv(ty1);
+
+  if ((val0 && val1) ||
+      (loc0 == NoLocalId && !val0 && ty1.subtypeOf(ty0)) ||
+      (loc1 == NoLocalId && !val1 && ty0.subtypeOf(ty1))) {
+    return bail();
   }
-  push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
+
+  discard(env, 2);
+
+  auto maybe_loosen_static = [] (const Type& orig, const Type& rep) {
+    return orig.subtypeOf(TUnc) ? rep : loosen_staticness(rep);
+  };
+
+  auto handle_same = [&] {
+    // Currently dce uses equivalency to prove that something isn't
+    // the last reference - so we can only assert equivalency here if
+    // we know that won't be affected. Its irrelevant for uncounted
+    // things, and for TObj and TRes, $x === $y iff $x and $y refer to
+    // the same thing.
+    if (loc0 <= MaxLocalId &&
+        (ty0.subtypeOfAny(TUnc, TObj, TRes) ||
+         ty1.subtypeOfAny(TUnc, TObj, TRes))) {
+      if (loc1 == StackDupId) {
+        setStkLocal(env, loc0);
+      } else if (loc1 <= MaxLocalId) {
+        assertx(loc0 != loc1 && !locsAreEquiv(env, loc0, loc1));
+        auto loc = loc0;
+        while (true) {
+          auto const other = findLocEquiv(env, loc);
+          if (other == NoLocalId) break;
+          killLocEquiv(env, loc);
+          addLocEquiv(env, loc, loc1);
+          loc = other;
+        }
+        addLocEquiv(env, loc, loc1);
+      }
+    }
+    refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
+      if (!ty.couldBe(TUninit) ||
+          !ty0.couldBe(TNull) ||
+          !ty1.couldBe(TNull)) {
+        if (val0) return maybe_loosen_static(ty, ty0);
+        if (val1) return maybe_loosen_static(ty, ty1);
+        if (ty0.subtypeOf(ty)) return maybe_loosen_static(ty, ty0);
+        if (ty1.subtypeOf(ty)) return maybe_loosen_static(ty, ty1);
+        return remove_uninit(std::move(ty));
+      }
+
+      if (ty0.subtypeOf(TNull) || ty1.subtypeOf(TNull)) {
+        return ty.couldBe(TInitNull) ? TNull : TUninit;
+      }
+
+      return ty;
+    });
+  };
+
+  auto handle_differ_side = [&] (LocalId location, Type ty) {
+    if (ty.subtypeOf(TInitNull) || ty.strictSubtypeOf(TBool)) {
+      refineLocation(env, location, [&] (Type t) {
+          if (ty.subtypeOf(TNull)) {
+            t = remove_uninit(std::move(t));
+            if (is_opt(t)) t = unopt(std::move(t));
+            return t;
+          } else if (ty.strictSubtypeOf(TBool) && t.subtypeOf(TBool)) {
+            return ty == TFalse ? TTrue : TFalse;
+          }
+          return t;
+        });
+    }
+  };
+
+  auto handle_differ = [&] {
+    if (loc0 != NoLocalId) handle_differ_side(loc0, ty1);
+    if (loc1 != NoLocalId) handle_differ_side(loc1, ty0);
+  };
+
+  auto const sameIsJmpTarget =
+    (Same::op == Op::Same) == (JmpOp::op == Op::JmpNZ);
+
+  auto save = env.state;
+  sameIsJmpTarget ? handle_same() : handle_differ();
+  env.propagate(jmp.target, &env.state);
+  env.state = std::move(save);
+  sameIsJmpTarget ? handle_differ() : handle_same();
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
@@ -3347,6 +3474,24 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
       return group(env, it, it[0].StaticLocCheck, it[1].JmpZ);
     case Op::JmpNZ:
       return group(env, it, it[0].StaticLocCheck, it[1].JmpNZ);
+    default: break;
+    }
+    break;
+  case Op::Same:
+    switch (o2) {
+    case Op::JmpZ:
+      return group(env, it, it[0].Same, it[1].JmpZ);
+    case Op::JmpNZ:
+      return group(env, it, it[0].Same, it[1].JmpNZ);
+    default: break;
+    }
+    break;
+  case Op::NSame:
+    switch (o2) {
+    case Op::JmpZ:
+      return group(env, it, it[0].NSame, it[1].JmpZ);
+    case Op::JmpNZ:
+      return group(env, it, it[0].NSame, it[1].JmpNZ);
     default: break;
     }
     break;

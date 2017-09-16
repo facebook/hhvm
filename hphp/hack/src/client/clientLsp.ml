@@ -1673,6 +1673,11 @@ let handle_event
     state := do_shutdown !state;
     print_shutdown () |> respond stdout c;
 
+  (* cancel notification *)
+  | _, Client_message c when c.method_ = "$/cancelRequest" ->
+    (* For now, we'll ignore it. *)
+    None
+
   (* exit notification *)
   | _, Client_message c when c.method_ = "exit" ->
     if !state = Post_shutdown then exit_ok () else exit_fail ()

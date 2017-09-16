@@ -8,7 +8,14 @@
       "initializationOptions":{},
       "processId":null,
       "rootPath":"${root_path}",
-      "capabilities":{}
+      "capabilities":
+        {
+          "window":
+            {
+              "progress":{},
+              "actionRequired":{}
+          }
+        }
     }
 },
 {

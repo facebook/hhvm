@@ -10,7 +10,7 @@ if(LINUX)
     execute_process(COMMAND ${GOLD_EXECUTABLE} --version
       OUTPUT_VARIABLE GOLD_VERSION
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Found gold: ${GOLD_EXECUTABLE}") 
+    message(STATUS "Found gold: ${GOLD_EXECUTABLE}")
   else()
     message(STATUS "Could not find gold linker. Using the default")
   endif()

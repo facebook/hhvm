@@ -1878,6 +1878,7 @@ let handle_event
 
   (* idle tick. No-op. *)
   | _, Tick ->
+    EventLogger.flush ();
     None
 
   (* client message when we've lost the server *)

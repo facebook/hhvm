@@ -353,6 +353,7 @@ void CompactVector<T>::reserve_impl(size_type new_capacity) {
     // If there are currently no elements, all we have to do is allocate a
     // block of memory and initialize m_len and m_capacity.
     m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
+    if (!m_data) throw std::bad_alloc{};
     m_data->m_len = 0;
     m_data->m_capacity = new_capacity;
   }

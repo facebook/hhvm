@@ -2047,26 +2047,37 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (parser, node)
 
   and parse_xhp_attribute parser =
-    let (parser1, token, _) = next_xhp_element_token parser in
+    let (parser1, token, _) = next_xhp_element_token ~attribute:true parser in
     if (Token.kind token) != XHPElementName then
       (parser, None)
     else
+      (* TODO(T21789285): Remove ugly xhp bug *)
+      let prev_errors = Lexer.errors (lexer parser) in
+      let curr_errors = Lexer.errors (lexer parser1) in
+      let colon_bug = prev_errors != curr_errors in
       let name = make_token token in
       let (parser, token, _) = next_xhp_element_token parser1 in
       if (Token.kind token) != Equal then
-        let node = make_xhp_attribute name (make_missing()) (make_missing()) in
-        let parser = with_error parser SyntaxError.error1016 in
+        let value =
+          if colon_bug
+          then make_token (Token.make TokenKind.XHPStringLiteral 0 [] [])
+          else make_missing ()
+        in
+        let node = make_xhp_attribute name (make_missing()) value in
+        let parser = if colon_bug then parser1 else
+          with_error parser1 SyntaxError.error1016
+        in
         (* ERROR RECOVERY: The = is missing; assume that the name belongs
            to the attribute, but that the remainder is missing, and start
            looking for the next attribute. *)
         (parser, Some node)
       else
         let equal = make_token token in
-        let (parser2, token, text) = next_xhp_element_token parser in
+        let (parser1, token, text) = next_xhp_element_token parser in
         match (Token.kind token) with
         | XHPStringLiteral ->
           let node = make_xhp_attribute name equal (make_token token) in
-          (parser2, Some node)
+          (parser1, Some node)
         | LeftBrace ->
           let (parser, expr) = parse_braced_expression parser in
           let node = make_xhp_attribute name equal expr in

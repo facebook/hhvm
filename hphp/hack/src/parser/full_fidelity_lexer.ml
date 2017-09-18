@@ -732,7 +732,7 @@ let scan_xhp_label lexer =
   let (lexer, _) = scan_name lexer in
   lexer
 
-let rec scan_xhp_element_name lexer =
+let rec scan_xhp_element_name ?(attribute=false) lexer =
   (* An XHP element name is a sequence of one or more XHP labels each separated
   by a single : or -.  Note that it is possible for an XHP element name to be
   followed immediately by a : or - that is the next token, so if we find
@@ -740,7 +740,7 @@ let rec scan_xhp_element_name lexer =
   let lexer = scan_xhp_label lexer in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
-  if (ch0 = ':' || ch0 = '-') && (is_name_nondigit ch1) then
+  if (not attribute && ch0 = ':' || ch0 = '-') && is_name_nondigit ch1 then
     scan_xhp_element_name (advance lexer 1)
   else
     (lexer, TokenKind.XHPElementName)
@@ -778,7 +778,7 @@ let scan_xhp_string_literal lexer =
   aux (advance lexer 1)
 
 (* Note that this does not scan an XHP body *)
-let scan_xhp_token lexer =
+let scan_xhp_token ?(attribute=false) lexer =
   (* TODO: HHVM requires that there be no trivia between < and name in an
      opening tag, but does allow trivia between </ and name in a closing tag.
      Consider allowing trivia in an opening tag. *)
@@ -797,7 +797,7 @@ let scan_xhp_token lexer =
     if ch0 = invalid && at_end lexer then
       (lexer, TokenKind.EndOfFile)
     else if is_name_nondigit ch0 then
-      scan_xhp_element_name lexer
+      scan_xhp_element_name ~attribute lexer
     else
       let lexer = with_error lexer SyntaxError.error0006 in
       (advance lexer 1, TokenKind.ErrorToken)
@@ -1167,6 +1167,26 @@ let scan_xhp_trivia lexer =
     (lexer, Some e)
   | _ -> (* Not trivia *) (lexer, None)
 
+let scan_xhp_colon_trivia (lexer : t) : t * Trivia.t =
+  (* TODO(T21789285): Take this mess out *)
+  let lexer = start_new_lexeme lexer in
+  let rec aux lexer ch0 =
+    let ch1 = peek_char lexer 1 in
+    match ch0, ch1 with
+    | '>', _
+    | '/', '>'
+    | '\n', _
+    | '\r', '\n'
+    | '}', _
+      -> lexer, Trivia.make_extra_token_error (width lexer)
+    | _ -> aux (advance lexer 1) ch1
+  in
+  (* The only valid case to use this scanner is when a name was interrupted by
+   * a colon *)
+  let () = assert (peek_char lexer 0 = ':') in
+  let lexer, trivia = aux lexer ':' in
+  with_error lexer SyntaxError.error1002, trivia
+
 let scan_leading_trivia scanner lexer =
   let rec aux lexer acc =
     let (lexer, trivia) = scanner lexer in
@@ -1321,17 +1341,23 @@ let next_token_as_name lexer =
 let next_token_in_type lexer =
   scan_next_token_as_keyword scan_token_inside_type lexer
 
-let next_xhp_element_token ~no_trailing lexer =
+let next_xhp_element_token ~no_trailing ~attribute lexer =
   (* XHP elements have whitespace, newlines and Hack comments. *)
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
-      scan_token_and_leading_trivia scan_xhp_token true lexer in
+      scan_token_and_leading_trivia (scan_xhp_token ~attribute) true lexer in
     (* We do not scan trivia after an XHPOpen's >. If that is the beginning of
        an XHP body then we want any whitespace or newlines to be leading trivia
        of the body token. *)
+    let (_, token1) = next_token lexer in
     match kind with
     | TokenKind.GreaterThan when no_trailing ->
       (lexer, Token.make kind w leading [])
+    | TokenKind.XHPElementName when attribute && token1.Token.kind = TokenKind.Colon ->
+      (* TODO(T21789285): Take this hack out when illtyped xhp is gone *)
+      let (lexer, dropped) = scan_xhp_colon_trivia lexer in
+      let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
+      (lexer, Token.make kind w leading (dropped :: trailing))
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in
       (lexer, Token.make kind w leading trailing) in

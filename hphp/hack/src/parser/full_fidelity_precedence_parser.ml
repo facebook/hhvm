@@ -95,9 +95,9 @@ let with_operator_precedence parser operator parse_function =
 let with_reset_precedence parser parse_function =
   with_numeric_precedence parser 0 parse_function
 
-let next_xhp_element_token ?no_trailing:(no_trailing=false) parser =
+let next_xhp_element_token ?(no_trailing=false) ?(attribute=false) parser =
   let (lexer, token, text) =
-    Lexer.next_xhp_element_token ~no_trailing parser.lexer in
+    Lexer.next_xhp_element_token ~no_trailing ~attribute parser.lexer in
   let parser = { parser with lexer } in
   (parser, token, text)
 

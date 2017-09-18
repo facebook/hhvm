@@ -1712,6 +1712,7 @@ static int execute_program_impl(int argc, char** argv) {
     auto const str = contents.str();
     auto const md5 = MD5{mangleUnitMd5(string_md5(str))};
 
+    compilers_start();
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
@@ -2183,6 +2184,10 @@ void hphp_process_init() {
   // initialize the tzinfo cache.
   timezone_init();
   BootStats::mark("timezone_init");
+
+  // start any external compilers
+  compilers_start();
+  BootStats::mark("compilers_start");
 
   hphp_thread_init();
 

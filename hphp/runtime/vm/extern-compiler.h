@@ -33,6 +33,7 @@ enum class HackcMode {
 HackcMode hackc_mode();
 
 void compilers_init();
+void compilers_start();
 void compilers_shutdown();
 void compilers_set_user(const std::string& username);
 

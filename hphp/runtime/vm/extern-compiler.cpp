@@ -154,7 +154,9 @@ std::mutex s_delegateLock;
 
 struct CompilerPool {
   explicit CompilerPool(CompilerOptions&& options)
-    : m_options(options) {}
+    : m_options(options)
+    , m_compilers(options.workers, nullptr)
+  {}
 
   std::pair<size_t, ExternCompiler*> getCompiler();
   void releaseCompiler(size_t id, ExternCompiler* ptr);
@@ -163,13 +165,15 @@ struct CompilerPool {
   CompilerResult compile(const char* code, int len,
       const char* filename, const MD5& md5);
   std::string getVersionString() { return m_version; }
+  bool started() const { return m_started.load(std::memory_order_relaxed); }
 
  private:
+  CompilerOptions m_options;
+  std::atomic<bool> m_started;
   std::atomic<size_t> m_freeCount{0};
   std::mutex m_compilerLock;
   std::condition_variable m_compilerCv;
-  AtomicVector<ExternCompiler*> m_compilers{0, nullptr};
-  CompilerOptions m_options;
+  AtomicVector<ExternCompiler*> m_compilers;
   std::string m_version;
 };
 
@@ -195,6 +199,8 @@ private:
 };
 
 std::pair<size_t, ExternCompiler*> CompilerPool::getCompiler() {
+  assert(started());
+
   std::unique_lock<std::mutex> l(m_compilerLock);
 
   m_compilerCv.wait(l, [&] {
@@ -223,18 +229,20 @@ void CompilerPool::releaseCompiler(size_t id, ExternCompiler* ptr) {
 void CompilerPool::start() {
   auto const nworkers = m_options.workers;
   m_freeCount.store(nworkers, std::memory_order_relaxed);
-  UnsafeReinitEmptyAtomicVector(m_compilers, nworkers);
   for (int i = 0; i < nworkers; ++i) {
     m_compilers[i].store(new ExternCompiler(m_options),
         std::memory_order_relaxed);
   }
 
+  m_started.store(true, std::memory_order_relaxed);
+
   CompilerGuard g(*this);
   m_version = g->getVersionString();
-
 }
 
 void CompilerPool::shutdown() {
+  assert(started());
+
   for (int i = 0; i < m_compilers.size(); ++i) {
     auto c = m_compilers.exchange(i, nullptr);
     delete c;
@@ -243,6 +251,8 @@ void CompilerPool::shutdown() {
 
 CompilerResult CompilerPool::compile(const char* code, int len,
     const char* filename, const MD5& md5) {
+  assert(started());
+
   CompilerGuard compiler(*this);
   std::stringstream err;
 
@@ -484,17 +494,23 @@ void compilers_init() {
 
   if (hackConfig) {
     s_hackc_pool = std::make_unique<CompilerPool>(std::move(*hackConfig));
-    s_hackc_pool->start();
   }
 
   if (php7Config) {
     s_php7_pool = std::make_unique<CompilerPool>(std::move(*php7Config));
-    s_php7_pool->start();
   }
+}
+
+void compilers_start() {
+  if (s_hackc_pool) s_hackc_pool->start();
+  if (s_php7_pool) s_php7_pool->start();
 }
 
 void compilers_set_user(const std::string& username) {
   if (s_delegate == -1) return;
+
+  assert(!s_hackc_pool || !s_hackc_pool->started());
+  assert(!s_php7_pool || !s_php7_pool->started());
 
   std::unique_lock<std::mutex> lock(s_delegateLock);
   LightProcess::ChangeUser(s_delegate, username);

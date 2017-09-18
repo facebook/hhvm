@@ -1365,13 +1365,19 @@ and emit_obj_get ~need_ref env param_num_hint_opt qop expr prop null_flavor =
       final_instr
     ]
 
+and is_special_class_constant_accessed_with_class_id (_, cName) id =
+  id = SN.Members.mClass &&
+  cName <> SN.Classes.cSelf &&
+  cName <> SN.Classes.cParent &&
+  cName <> SN.Classes.cStatic
+
 and emit_elem_instrs env opt_elem_expr =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
   | Some (_, (A.Lvar (_, id))) when not (is_local_this env id) -> empty, 0
-  | Some (_, (A.Class_const (_, (_, id))))
-    when id = SN.Members.mClass -> empty, 0
+  | Some (_, (A.Class_const (cid, (_, id))))
+    when is_special_class_constant_accessed_with_class_id cid id -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
 
@@ -1396,8 +1402,9 @@ and get_elem_member_key env stack_index opt_expr =
   (* Special case for literal string *)
   | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* Special case for class name *)
-  | Some (_, (A.Class_const ((_, cid), (_, id))))
-    when id = SN.Members.mClass -> MemberKey.ET cid
+  | Some (_, (A.Class_const ((_, cName) as cid, (_, id))))
+    when is_special_class_constant_accessed_with_class_id cid id ->
+    MemberKey.ET cName
   (* General case *)
   | Some _ -> MemberKey.EC stack_index
   (* ELement missing (so it's array append) *)

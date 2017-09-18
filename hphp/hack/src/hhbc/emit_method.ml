@@ -89,33 +89,6 @@ let from_ast_wrapper : bool -> _ ->
       ret
       [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
   in
-  (* Horrible hack to get decl_vars in the same order as HHVM *)
-  let captured_vars =
-    if method_is_closure_body
-    then List.concat_map ast_class.Ast.c_body (fun item ->
-      match item with
-      | Ast.ClassVars(_, _, cvl, _) ->
-        let cvl = List.filter cvl ~f:(fun (_, (_, id), _) ->
-          (String.length id) < 9 || (String.sub id 0 9) <> "86static_") in
-        List.map cvl (fun (_, (_,id), _) -> "$" ^ id)
-      | _ -> []
-      )
-    else [] in
-  let remove_this vars =
-    List.filter vars (fun s -> s <> "$this") in
-  let move_this vars =
-    if List.mem vars "$this"
-    then remove_this vars @ ["$this"]
-    else vars in
-  let method_decl_vars = Hhas_body.decl_vars method_body in
-  let method_decl_vars =
-    if method_is_closure_body
-    then
-      let method_decl_vars = move_this method_decl_vars in
-      "$0Closure" :: captured_vars @
-      List.filter method_decl_vars (fun v -> not (List.mem captured_vars v))
-    else move_this method_decl_vars in
-  let method_body = Hhas_body.with_decl_vars method_body method_decl_vars in
   Hhas_method.make
     method_attributes
     method_is_protected

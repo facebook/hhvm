@@ -24,7 +24,6 @@ slow/class_type_constant/type_constant3.php
 slow/class_type_constant/type_constant4.php
 slow/class_type_constant/type_constant6.php
 slow/closure/lambda_implicit_this.php
-slow/closure/lambda_uninit_capture.php
 slow/closure/return_types.php
 slow/collection_classes/815.php
 slow/compilation/1238.php

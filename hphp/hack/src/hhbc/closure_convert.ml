@@ -19,9 +19,17 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
+type variables = {
+  (* all variables declared/used in the scope*)
+  all_vars: SSet.t;
+  (* names of parameters if scope correspond to a function *)
+  parameter_names: SSet.t
+}
+
 type env = {
   (* What is the current context? *)
   scope : Scope.t;
+  variable_scopes: variables list;
   (* How many existing classes are there? *)
   defined_class_count : int;
   (* How many existing functions are there? *)
@@ -34,10 +42,6 @@ type state = {
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
-  (* Variables that are *defined* in current scope (e.g. lambda parameters,
-   * locals) and so should not be added to capture set
-   *)
-  defined_vars : SSet.t;
   (* Total number of closures created *)
   total_count : int;
   (* Closure classes and hoisted inline classes *)
@@ -63,7 +67,6 @@ let initial_state =
   per_function_count = 0;
   captured_vars = ULS.empty;
   captured_this = false;
-  defined_vars = SSet.empty;
   total_count = 0;
   hoisted_classes = [];
   hoisted_functions = [];
@@ -73,25 +76,76 @@ let initial_state =
   closure_namespaces = SMap.empty;
 }
 
+let is_in_lambda scope =
+  match scope with
+  | ScopeItem.Lambda | ScopeItem.LongLambda _ -> true
+  | _ -> false
+
+let should_capture_var env var =
+  let rec aux scope vars =
+    match scope, vars with
+    | [], [{ all_vars; _ }] -> SSet.mem var all_vars
+    | x :: xs, { all_vars; parameter_names; }::vs ->
+      SSet.mem var all_vars ||
+      SSet.mem var parameter_names ||
+      (is_in_lambda x && aux xs vs)
+    | _ -> false in
+  match env.scope, env.variable_scopes with
+  | _ :: xs, { parameter_names; _ } :: vs ->
+    (* variable used in lambda should be captured if is
+    - not contained in lambda parameter list
+    AND
+    - it exists in one of enclosing scopes *)
+    not (SSet.mem var parameter_names) && aux xs vs
+  | _ ->
+    false
+
 (* Add a variable to the captured variables *)
-let add_var st var =
-  (* If it's bound as a parameter or definite assignment, don't add it *)
-  (* Also don't add the pipe variable and superglobals *)
-  if SSet.mem var st.defined_vars
-  || var = Naming_special_names.SpecialIdents.dollardollar
-  || Naming_special_names.Superglobals.is_superglobal var
-  then st
-  else
+let add_var env st var =
   (* Don't bother if it's $this, as this is captured implicitly *)
   if var = Naming_special_names.SpecialIdents.this
   then { st with captured_this = true; }
+  (* If it's bound as a parameter or definite assignment, don't add it *)
+  (* Also don't add the pipe variable and superglobals *)
+  else if not (should_capture_var env var)
+  || var = Naming_special_names.SpecialIdents.dollardollar
+  || Naming_special_names.Superglobals.is_superglobal var
+  then st
   else { st with captured_vars = ULS.add st.captured_vars var }
 
-let env_with_lambda env =
-  { env with scope = ScopeItem.Lambda :: env.scope }
+let get_vars scope ~is_closure_body params body =
+  let has_this = Scope.has_this scope in
+  let is_toplevel = Scope.is_toplevel scope in
+  Decl_vars.vars_from_ast ~is_closure_body ~has_this ~params ~is_toplevel body
 
-let env_with_longlambda env is_static =
-  { env with scope = ScopeItem.LongLambda is_static :: env.scope }
+let wrap_block b = [Ast.Stmt (Ast.Block b)]
+
+let get_parameter_names params =
+  List.fold_left
+    ~init:SSet.empty
+    ~f:(fun s p -> SSet.add (snd p.Ast.param_id) s)
+    params
+
+let env_with_function_like_ env e ~is_closure_body params body =
+  let scope = e :: env.scope in
+  let all_vars =
+    (get_vars scope
+      ~is_closure_body
+      params
+      (wrap_block body)) in
+  let parameter_names = get_parameter_names params in
+  { env with
+      scope;
+      variable_scopes = { all_vars; parameter_names } :: env.variable_scopes }
+
+let env_with_function_like env e ~is_closure_body fd =
+  env_with_function_like_ env e ~is_closure_body fd.Ast.f_params fd.Ast.f_body
+
+let env_with_lambda env fd =
+  env_with_function_like env ScopeItem.Lambda ~is_closure_body:true fd
+
+let env_with_longlambda env is_static fd =
+  env_with_function_like env (ScopeItem.LongLambda is_static) ~is_closure_body:true fd
 
 let strip_id id = SU.strip_global_ns (snd id)
 
@@ -106,34 +160,42 @@ let rec make_scope_name scope =
   | _ :: scope -> make_scope_name scope
 
 let env_with_function env fd =
-  { env with scope = ScopeItem.Function fd :: env.scope; }
+  env_with_function_like env (ScopeItem.Function fd) ~is_closure_body:false fd
 
-let env_toplevel class_count function_count =
-  { scope = Scope.toplevel;
+let env_toplevel class_count function_count defs =
+  let scope = Scope.toplevel in
+  let all_vars =
+    get_vars scope
+      ~is_closure_body:false
+      []
+      defs in
+  { scope = scope;
+    variable_scopes = [{ all_vars; parameter_names = SSet.empty }];
     defined_class_count = class_count;
     defined_function_count = function_count; }
 
 let env_with_method env md =
-  { env with scope = ScopeItem.Method md :: env.scope; }
+  env_with_function_like_
+    env
+    (ScopeItem.Method md)
+    ~is_closure_body:false
+    md.Ast.m_params
+    md.Ast.m_body
 
 let env_with_class env cd =
-  { env with scope = [ScopeItem.Class cd]; }
+  { env with
+      scope = [ScopeItem.Class cd];
+      variable_scopes = env.variable_scopes; }
 
 (* Clear the variables, upon entering a lambda *)
-let enter_lambda st fd =
+let enter_lambda st =
   { st with
     captured_vars = ULS.empty;
     captured_this = false;
-    defined_vars =
-      SSet.of_list (List.map fd.f_params (fun param -> snd param.param_id));
     static_vars = ULS.empty;
    }
 
-let add_defined_var st var =
-  { st with defined_vars = SSet.add var st.defined_vars }
-
 let add_static_var st var =
-  let st = add_defined_var st var in
   { st with static_vars = ULS.add st.static_vars var }
 
 let set_namespace st ns =
@@ -296,7 +358,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, afl = List.map_env st afl (convert_afield env) in
     st, (p, Collection (id, afl))
   | Lvar id ->
-    let st = add_var st (snd id) in
+    let st = add_var env st (snd id) in
     st, (p, Lvar id)
   | Clone e ->
     let st, e = convert_expr env st e in
@@ -316,7 +378,7 @@ let rec convert_expr env st (p, expr_ as expr) =
       env p pe
   | Call ((_, (Class_const ((_, cid), _) | Class_get ((_, cid), _))) as e, el1, el2, el3)
   when cid = "parent" ->
-    let st = add_var st "$this" in
+    let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
@@ -394,14 +456,14 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e = convert_expr env st e in
     st, (p, Import(flavor, e))
   | Id (_, id) as ast_id when String_utils.string_starts_with id "$" ->
-    let st = add_var st id in
+    let st = add_var env st id in
     st, (p, ast_id)
   | Id id ->
     st, convert_id env p id
   | Class_get (cid, _)
   | Class_const (cid, _) ->
     let st = begin match (Ast_class_expr.id_to_expr cid) with
-    | _, Lvar (_, id) -> add_var st id
+    | _, Lvar (_, id) -> add_var env st id
     | _ -> st
     end in
     st, expr
@@ -415,17 +477,18 @@ and convert_lambda env st p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
   let captured_vars = st.captured_vars in
   let captured_this = st.captured_this in
-  let defined_vars = st.defined_vars in
   let total_count = st.total_count in
   let static_vars = st.static_vars in
   let st = { st with total_count = total_count + 1; } in
-  let st = enter_lambda st fd in
+  let st = enter_lambda st in
+  let old_env = env in
   let env = if Option.is_some use_vars_opt
-            then env_with_longlambda env false
-            else env_with_lambda env in
+            then env_with_longlambda env false fd
+            else env_with_lambda env fd in
   let st, block = convert_block env st fd.f_body in
   let st = { st with per_function_count = st.per_function_count + 1 } in
-  let lambda_vars = ULS.items st.captured_vars in
+  (* HHVM lists lambda vars in descending order - do the same *)
+  let lambda_vars = List.sort ~cmp:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
   (* For lambdas without explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
@@ -456,14 +519,14 @@ and convert_lambda env st p fd use_vars_opt =
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
                      captured_this = captured_this || st.captured_this;
-                     defined_vars = defined_vars;
                      static_vars = static_vars;
                      explicit_use_set;
                      closure_namespaces = SMap.add
                        (snd cd.c_name) st.namespace st.closure_namespaces;
            } in
+  let env = old_env in
   (* Add lambda captured vars to current captured vars *)
-  let st = List.fold_left lambda_vars ~init:st ~f:add_var in
+  let st = List.fold_left lambda_vars ~init:st ~f:(add_var env) in
   let st = { st with hoisted_classes = cd :: st.hoisted_classes } in
   st, (p, Efun (inline_fundef, use_vars))
 
@@ -546,21 +609,9 @@ and convert_stmt env st stmt =
     st, stmt
 
 and convert_block env st stmts =
-  List.map_env st stmts (convert_sequential_stmt env)
-
-(* Special case for definitely assigned locals in straight-line code *)
-and convert_sequential_stmt env st stmt =
-  match stmt with
-  | Expr (p1, Binop (Ast.Eq None, e1, e2)) ->
-    let st, e2 = convert_expr env st e2 in
-    let st, e1 = convert_lvalue_expr env st e1 in
-    st, Expr (p1, Binop (Ast.Eq None, e1, e2))
-
-  | _ ->
-    convert_stmt env st stmt
+  List.map_env st stmts (convert_stmt env)
 
 and convert_catch env st (id1, id2, b) =
-  let st = add_defined_var st (snd id2) in
   let st, b = convert_block env st b in
   st, (id1, id2, b)
 
@@ -576,8 +627,7 @@ and convert_case env st case =
 
 and convert_lvalue_expr env st (p, expr_ as expr) =
   match expr_ with
-  | Lvar id ->
-    let st = add_defined_var st (snd id) in
+  | Lvar _ ->
     st, expr
   | List exprs ->
     let st, exprs = List.map_env st exprs (convert_lvalue_expr env) in
@@ -722,7 +772,7 @@ let convert_toplevel_prog defs =
   (* First compute the number of explicit classes in order to generate correct
    * integer identifiers for the generated classes. .main counts as a top-level
    * function and we place hoisted functions just after that *)
-  let env = env_toplevel (count_classes defs) 1 in
+  let env = env_toplevel (count_classes defs) 1 defs in
   let st, original_defs = convert_defs env 0 0 initial_state defs in
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)

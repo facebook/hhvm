@@ -25,5 +25,14 @@
   has_this: bool ->
   params: Hhas_param.t list ->
   is_toplevel: bool ->
+  explicit_use_set: SSet.t ->
   Ast.program ->
   bool * string list
+
+ val vars_from_ast :
+  is_closure_body: bool ->
+  has_this: bool ->
+  params: Ast.fun_param list ->
+  is_toplevel: bool ->
+  Ast.program ->
+  SSet.t

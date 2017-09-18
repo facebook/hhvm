@@ -211,14 +211,60 @@ let emit_body
     Emit_param.from_asts
       ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
+  Jump_targets.reset ();
+
+  let remove_this vars =
+    List.filter vars (fun s -> s <> "$this") in
+
+  let move_this vars =
+    if List.mem vars "$this"
+    then remove_this vars @ ["$this"]
+    else vars in
+
+  let starts_with s prefix =
+    String.length s >= String.length prefix &&
+    String.sub s 0 (String.length prefix) = prefix in
+
   let has_this = Ast_scope.Scope.has_this scope in
   let is_toplevel = Ast_scope.Scope.is_toplevel scope in
+  (* see comment in decl_vars.ml, method on_efun of declvar_visitor
+     why Decl_vars needs 'explicit_use_set' *)
+  let explicit_use_set = Emit_env.get_explicit_use_set () in
+
   let needs_local_this, decl_vars =
-    Decl_vars.from_ast ~is_closure_body ~has_this ~params ~is_toplevel body in
-  let adjust_closure = if is_closure_body then 1 else 0 in
-  Jump_targets.reset ();
-  Local.reset_local
-    (List.length params + List.length decl_vars + adjust_closure);
+    Decl_vars.from_ast
+      ~is_closure_body
+      ~has_this
+      ~params
+      ~is_toplevel
+      ~explicit_use_set
+      body in
+  let decl_vars=
+    if is_closure_body
+    then
+      let ast_class =
+        match scope with
+        | _ :: _:: Ast_scope.ScopeItem.Class ast_class :: _ -> ast_class
+        | _ -> failwith "impossible, closure scope should be lambda->method->class" in
+      (* reorder decl_vars to match HHVM *)
+      let captured_vars =
+        ast_class.Ast.c_body
+        |> List.concat_map ~f:(fun item ->
+          match item with
+          | Ast.ClassVars(_, _, cvl, _) ->
+            List.filter_map cvl ~f:(fun (_, (_, id), _) ->
+              if not (starts_with id "86static_")
+              then Some ("$" ^ id) else None)
+          | _ -> []) in
+      "$0Closure" ::
+      captured_vars @
+      List.filter (move_this decl_vars) (fun v -> not (List.mem captured_vars v))
+    else
+      match scope with
+      | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
+      | _ -> decl_vars in
+
+  Local.reset_local (List.length params + List.length decl_vars);
   let env = Emit_env.(
     empty |>
     with_namespace namespace |>

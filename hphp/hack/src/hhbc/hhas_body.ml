@@ -51,6 +51,5 @@ let num_cls_ref_slots body = body.body_num_cls_ref_slots
 let return_type body = body.body_return_type
 let is_memoize_wrapper body = body.body_is_memoize_wrapper
 let with_instrs body instrs = { body with body_instrs = instrs }
-let with_decl_vars body decl_vars = { body with body_decl_vars = decl_vars }
 let static_inits body = body.body_static_inits
 let doc_comment body = body.body_doc_comment

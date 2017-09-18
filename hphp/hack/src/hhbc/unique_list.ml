@@ -29,6 +29,9 @@ module WithValue(Value: Set.OrderedType) = struct
   let items uniq_set =
     List.rev uniq_set.unique_list
 
+  let items_set uniq_set =
+    uniq_set.unique_set
+
   let remove item uniq_set =
     if ValueSet.mem item uniq_set.unique_set then
       {

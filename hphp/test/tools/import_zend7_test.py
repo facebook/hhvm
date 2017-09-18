@@ -128,6 +128,11 @@ def walk(filename, dest_subdir):
             exp = re.sub('string\(7\) "Closure"', 'string(%d) "Closure%s"', exp)
             exp = re.sub('Closure(?!%s)', 'Closure%s', exp)
 
+            exp = re.sub(r'Exception: Too few arguments to function ([^(]*)' +
+                          '\(\), (\d*) passed in [^\r\n]* on line [^\r\n]* ' +
+                          'and ([^\r\n]*) (\d*) expected',
+                          'Exception: Too few arguments to function \\1(), ' +
+                          '\\2 passed and \\3 \\4 expected', exp)
             sections[key] = exp
 
     if 'EXPECT' in sections:

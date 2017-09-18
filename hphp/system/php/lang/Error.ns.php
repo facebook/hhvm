@@ -32,6 +32,7 @@ class Error implements Throwable {
 }
 
 class ArithmeticError extends Error {}
+class ArgumentCountError extends Error {}
 class AssertionError extends Error {}
 class DivisionByZeroError extends Error {}
 class ParseError extends Error {}

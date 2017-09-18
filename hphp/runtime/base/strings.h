@@ -60,6 +60,8 @@ const char* const FUNCTION_NAME_MUST_BE_STRING =
   "Function name must be a string";
 const char* const METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
+const char* const MISSING_ARGUMENT_EXCEPTION =
+  "Too few arguments to function %s(), %d passed and %s %d expected";
 const char* const MISSING_ARGUMENT =
   "%s() expects %s 1 parameter, %d given";
 const char* const MISSING_ARGUMENTS =

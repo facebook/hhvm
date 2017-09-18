@@ -57,7 +57,10 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
+#include "hphp/system/systemlib.h"
+
 #include "hphp/util/portability.h"
+#include "hphp/util/string-vsnprintf.h"
 
 namespace HPHP {
 
@@ -915,6 +918,16 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
 
 //////////////////////////////////////////////////////////////////////
 
+[[noreturn]] void throwMissingArgument(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  std::string msg;
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  SystemLib::throwArgumentCountErrorObject(Variant(msg));
+}
+
 void raiseMissingArgument(const Func* func, int got) {
   const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();
@@ -928,6 +941,16 @@ void raiseMissingArgument(const Func* func, int got) {
     }
   }
   bool lessNeeded = (variadic || expected < total);
+
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    throwMissingArgument(
+      Strings::MISSING_ARGUMENT_EXCEPTION,
+      func->displayName()->data(),
+      got,
+      lessNeeded ? "at least" : "exactly",
+      expected
+    );
+  }
   if (expected == 1) {
     raise_warning(Strings::MISSING_ARGUMENT, func->displayName()->data(),
                   lessNeeded ? "at least" : "exactly", got);

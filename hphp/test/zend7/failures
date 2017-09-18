@@ -1,6 +1,3 @@
-zend7/Zend/tests/001.php
-zend7/Zend/tests/002.php
-zend7/Zend/tests/003.php
 zend7/Zend/tests/008.php
 zend7/Zend/tests/009.php
 zend7/Zend/tests/010.php
@@ -60,7 +57,6 @@ zend7/Zend/tests/anon/013.php
 zend7/Zend/tests/anon/014.php
 zend7/Zend/tests/anonymous_func_001.php
 zend7/Zend/tests/anonymous_func_002.php
-zend7/Zend/tests/anonymous_func_003.php
 zend7/Zend/tests/arg_unpack/basic.php
 zend7/Zend/tests/arg_unpack/by_ref.php
 zend7/Zend/tests/arg_unpack/by_ref_separation.php
@@ -82,7 +78,6 @@ zend7/Zend/tests/argument_restriction_005.php
 zend7/Zend/tests/argument_restriction_006.php
 zend7/Zend/tests/array_hash_zero.php
 zend7/Zend/tests/array_literal_next_element_error.php
-zend7/Zend/tests/assert/bug70208.php
 zend7/Zend/tests/assert/bug70528.php
 zend7/Zend/tests/assert/expect_003.php
 zend7/Zend/tests/assert/expect_004.php
@@ -98,7 +93,6 @@ zend7/Zend/tests/assert/expect_017.php
 zend7/Zend/tests/assert/expect_018.php
 zend7/Zend/tests/assert/expect_019.php
 zend7/Zend/tests/assert/expect_empty_stmt_bug.php
-zend7/Zend/tests/assert/indirect_var_access_misoptimization.php
 zend7/Zend/tests/assign_dim_obj_null_return.php
 zend7/Zend/tests/assign_to_obj_001.php
 zend7/Zend/tests/assign_to_obj_002.php
@@ -170,7 +164,6 @@ zend7/Zend/tests/bug33710.php
 zend7/Zend/tests/bug33732.php
 zend7/Zend/tests/bug33771.php
 zend7/Zend/tests/bug33802.php
-zend7/Zend/tests/bug33996.php
 zend7/Zend/tests/bug33999.php
 zend7/Zend/tests/bug34045.php
 zend7/Zend/tests/bug34064.php
@@ -197,7 +190,6 @@ zend7/Zend/tests/bug36759.php
 zend7/Zend/tests/bug37046.php
 zend7/Zend/tests/bug37144.php
 zend7/Zend/tests/bug37212.php
-zend7/Zend/tests/bug37251.php
 zend7/Zend/tests/bug37632.php
 zend7/Zend/tests/bug37667.php
 zend7/Zend/tests/bug37707.php
@@ -382,7 +374,6 @@ zend7/Zend/tests/bug55135.php
 zend7/Zend/tests/bug55137.php
 zend7/Zend/tests/bug55156.php
 zend7/Zend/tests/bug55247.php
-zend7/Zend/tests/bug55705.php
 zend7/Zend/tests/bug55825.php
 zend7/Zend/tests/bug60138.php
 zend7/Zend/tests/bug60139.php
@@ -909,7 +900,6 @@ zend7/Zend/tests/exception_004.php
 zend7/Zend/tests/exception_008.php
 zend7/Zend/tests/exception_009.php
 zend7/Zend/tests/exception_010.php
-zend7/Zend/tests/exception_012.php
 zend7/Zend/tests/exception_013.php
 zend7/Zend/tests/exception_014.php
 zend7/Zend/tests/exception_015.php
@@ -1397,7 +1387,6 @@ zend7/Zend/tests/nullable_types/contravariant_nullable_return_fails.php
 zend7/Zend/tests/nullable_types/covariant_nullable_param_fails.php
 zend7/Zend/tests/nullable_types/covariant_nullable_return_succeds.php
 zend7/Zend/tests/nullable_types/invariant_param_and_return_succeeds.php
-zend7/Zend/tests/nullable_types/nullable_type_parameters_do_not_have_default_value.php
 zend7/Zend/tests/numeric_string_errors.php
 zend7/Zend/tests/numeric_string_errors_assign.php
 zend7/Zend/tests/object_array_cast.php
@@ -1883,12 +1872,10 @@ zend7/tests/lang/bug21849.php
 zend7/tests/lang/bug22231.php
 zend7/tests/lang/bug22510.php
 zend7/tests/lang/bug22592.php
-zend7/tests/lang/bug22690.php
 zend7/tests/lang/bug23384.php
 zend7/tests/lang/bug23524.php
 zend7/tests/lang/bug23584.php
 zend7/tests/lang/bug23624.php
-zend7/tests/lang/bug23922.php
 zend7/tests/lang/bug24054.php
 zend7/tests/lang/bug24396.php
 zend7/tests/lang/bug24436.php

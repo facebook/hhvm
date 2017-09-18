@@ -98,6 +98,7 @@ Class* s_ThrowableClass;
 Class* s_BaseExceptionClass;
 Class* s_ErrorClass;
 Class* s_ArithmeticErrorClass;
+Class* s_ArgumentCountErrorClass;
 Class* s_AssertionErrorClass;
 Class* s_DivisionByZeroErrorClass;
 Class* s_ParseErrorClass;
@@ -121,6 +122,10 @@ Object AllocErrorObject(const Variant& message) {
 
 Object AllocArithmeticErrorObject(const Variant& message) {
   return createAndConstructThrowable(s_ArithmeticErrorClass, message);
+}
+
+Object AllocArgumentCountErrorObject(const Variant& message) {
+  return createAndConstructThrowable(s_ArgumentCountErrorClass, message);
 }
 
 Object AllocDivisionByZeroErrorObject(const Variant& message) {
@@ -202,6 +207,10 @@ void throwErrorObject(const Variant& message) {
 
 void throwArithmeticErrorObject(const Variant& message) {
   throw_object(AllocArithmeticErrorObject(message));
+}
+
+void throwArgumentCountErrorObject(const Variant& message) {
+  throw_object(AllocArgumentCountErrorObject(message));
 }
 
 void throwDivisionByZeroErrorObject(const Variant& message) {
@@ -297,6 +306,7 @@ InitFiniNode aliasPhp7Classes(
     PHP7_ROOT_ALIAS(Throwable);
     PHP7_ROOT_ALIAS(Error);
     PHP7_ROOT_ALIAS(ArithmeticError);
+    PHP7_ROOT_ALIAS(ArgumentCountError);
     PHP7_ROOT_ALIAS(AssertionError);
     PHP7_ROOT_ALIAS(DivisionByZeroError);
     PHP7_ROOT_ALIAS(ParseError);

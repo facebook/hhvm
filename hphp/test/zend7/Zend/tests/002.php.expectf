@@ -18,7 +18,7 @@ int(1)
 
 Warning: %s
 bool(false)
-Exception: Too few arguments to function test2(), 0 passed in %s002.php on line %d and exactly 1 expected
+Exception: Too few arguments to function test2(), 0 passed and exactly 1 expected
 int(1)
 int(2)
 
@@ -33,7 +33,7 @@ bool(false)
 
 Warning: %s
 bool(false)
-Exception: Too few arguments to function test3(), 1 passed in %s002.php on line %d and exactly 2 expected
+Exception: Too few arguments to function test3(), 1 passed and exactly 2 expected
 int(1)
 int(2)
 

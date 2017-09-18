@@ -999,6 +999,17 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
     }
   }
 
+  if (propInd == kInvalidSlot &&
+      !g_context.isNull() &&
+      g_context->debuggerSettings.bypassCheck &&
+      m_parent) {
+    // If the property could not be located on the current class, and this
+    // class has a parent class, and the current evaluation is a debugger
+    // eval with bypassCheck == true, search for the property as a member of
+    // the parent class. The debugger access is not subject to visibilty checks.
+    return m_parent->getDeclPropIndex(ctx, key);
+  }
+
   return PropLookup<Slot> { propInd, accessible };
 }
 

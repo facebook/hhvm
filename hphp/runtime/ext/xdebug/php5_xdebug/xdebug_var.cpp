@@ -260,15 +260,7 @@ static void object_instance_property_export_xml_node(xdebug_xml_node& parent,
     return;
   }
 
-  auto const name = [&] {
-    // Prepend the class that declared the private property if it isn't us.
-    if (info.modifier == PropModifier::Private &&
-        !info.cls_name.get()->isame(obj->getClassName().get())) {
-      return xdebug_sprintf("*%s*%s", info.cls_name.data(), prop_name.data());
-    }
-    return xdstrdup(prop_name.data());
-  }();
-
+  auto const name = xdstrdup(prop_name.data());
   auto const full_name = make_full_name(name);
 
   // Compute the facet (static/non-static + public/private).

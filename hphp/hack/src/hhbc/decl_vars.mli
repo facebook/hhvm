@@ -24,5 +24,6 @@
   is_closure_body: bool ->
   has_this: bool ->
   params: Hhas_param.t list ->
+  is_toplevel: bool ->
   Ast.program ->
   bool * string list

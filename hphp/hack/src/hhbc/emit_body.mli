@@ -44,7 +44,7 @@ val tparams_to_strings : Ast.tparam list -> string list
 val emit_method_prolog :
   pos: Pos.t ->
   params: Hhas_param.t list ->
-  needs_local_this:bool ->
+  should_emit_init_this:bool ->
   Instruction_sequence.t
 
 val emit_return_type_info :

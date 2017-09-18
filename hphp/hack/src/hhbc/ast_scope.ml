@@ -45,11 +45,13 @@ struct
 
   let rec has_this scope =
     match scope with
-    | [] -> false
+    | [] -> true (* Assume top level has this *)
     | ScopeItem.Lambda :: scope -> has_this scope
     | ScopeItem.LongLambda is_static :: scope ->
       not is_static && has_this scope
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method md :: _ -> not (List.mem md.Ast.m_kind Ast.Static)
+
+  let is_toplevel scope = scope = []
 end

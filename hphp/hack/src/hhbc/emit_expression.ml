@@ -192,7 +192,9 @@ let get_queryMOpMode need_ref op =
 
 let is_local_this env id =
   let scope = Emit_env.get_scope env in
-  id = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
+  id = SN.SpecialIdents.this
+  && Ast_scope.Scope.has_this scope
+  && not (Ast_scope.Scope.is_toplevel scope)
 
 let is_legal_lval_op_on_this op =
   match op with
@@ -393,6 +395,7 @@ and emit_cast env hint expr =
       | _ when id = SN.Typehints.real
             || id = SN.Typehints.double
             || id = SN.Typehints.float -> instr (IOp CastDouble)
+      | _ when id = "unset" -> gather [ instr_popc; instr_null ]
       | _ -> emit_nyi "cast type"
       end
       (* TODO: unset *)
@@ -2298,7 +2301,7 @@ and emit_lval_op_nonlist_steps env op (_, expr_) rhs_instrs rhs_stack_size =
   | A.Lvar (pos, str) when str = SN.SpecialIdents.this && not (is_legal_lval_op_on_this op) ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
 
-  | A.Lvar id when not (is_local_this env (snd id)) ->
+  | A.Lvar id when not (is_local_this env (snd id)) || op = LValOp.Unset ->
     empty,
     rhs_instrs,
     emit_final_local_op op (get_local env id)

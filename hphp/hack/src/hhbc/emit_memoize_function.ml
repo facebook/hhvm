@@ -86,7 +86,7 @@ let make_memoize_function_with_params_code ~pos env params renamed_method_id =
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params:params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
     instr_typedvalue (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);

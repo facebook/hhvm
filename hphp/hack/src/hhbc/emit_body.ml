@@ -17,10 +17,10 @@ let has_type_constraint ti =
   | Some ti when (Hhas_type_info.has_type_constraint ti) -> true
   | _ -> false
 
-let emit_method_prolog ~pos ~params ~needs_local_this =
+let emit_method_prolog ~pos ~params ~should_emit_init_this =
   Emit_pos.emit_pos_then pos @@
   gather (
-    (if needs_local_this
+    (if should_emit_init_this
     then instr (IMisc (InitThisLoc (Local.Named "$this")))
     else empty)
     ::
@@ -212,8 +212,9 @@ let emit_body
       ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
   let has_this = Ast_scope.Scope.has_this scope in
+  let is_toplevel = Ast_scope.Scope.is_toplevel scope in
   let needs_local_this, decl_vars =
-    Decl_vars.from_ast ~is_closure_body ~has_this ~params:params body in
+    Decl_vars.from_ast ~is_closure_body ~has_this ~params ~is_toplevel body in
   let adjust_closure = if is_closure_body then 1 else 0 in
   Jump_targets.reset ();
   Local.reset_local
@@ -239,9 +240,12 @@ let emit_body
     | Some (ILabel _) -> true
     | _ -> false
   in
+  let should_emit_init_this = needs_local_this ||
+    (is_toplevel && List.exists ~f:(fun x -> x = "$this") decl_vars)
+  in
   let header = gather [
         begin_label;
-        emit_method_prolog ~pos ~params ~needs_local_this;
+        emit_method_prolog ~pos ~params ~should_emit_init_this;
         emit_deprecation_warning scope deprecation_info;
         generator_instr;
       ]

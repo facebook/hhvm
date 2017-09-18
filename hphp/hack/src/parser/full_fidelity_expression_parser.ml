@@ -978,7 +978,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and is_easy_cast_type kind =
     (* See comments below. *)
     match kind with
-    | Array | Bool | Double | Float | Int | Object | String -> true
+    | Array | Bool | Double | Float | Int | Object | String | Unset -> true
     | _ -> false
 
   and token_implies_cast kind =
@@ -1191,7 +1191,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     cast-expression:
       (  cast-type  ) unary-expression
     cast-type:
-      array, bool, double, float, int, object, string, or a name
+      array, bool, double, float, int, object, string, unset or a name
 
     TODO: This implies that a cast "(name)" can only be a simple name, but
     I would expect that (\Foo\Bar), (:foo), (array<int>), and the like

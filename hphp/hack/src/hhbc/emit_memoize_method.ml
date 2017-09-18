@@ -193,7 +193,7 @@ let make_memoize_instance_method_with_params_code ~pos
   let first_parameter_local = local_count in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params ~should_emit_init_this:false;
     instr_checkthis;
     index_block;
     param_code_sets params first_parameter_local;
@@ -309,7 +309,7 @@ let make_memoize_static_method_with_params_code ~pos
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params:params ~needs_local_this:false;
+    Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
     param_code_sets params param_count;
     instr_string
       (original_name_lc

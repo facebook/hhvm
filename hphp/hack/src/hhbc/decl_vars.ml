@@ -93,7 +93,8 @@ class declvar_visitor = object(this)
       let acc = this#on_expr acc e2 in this#on_expr acc e1
     | _ -> super#on_binop acc binop e1 e2
 
-  method! on_lvar acc id = add_local ~bareparam:false acc id
+  method! on_lvar acc id =
+    add_local ~bareparam:false acc id
   method! on_lvarvar acc _ id = add_local ~bareparam:false acc id
   method! on_class_get acc id prop =
     on_class_get this acc id prop ~is_call_target:false
@@ -143,7 +144,7 @@ class declvar_visitor = object(this)
 end
 
 (* See decl_vars.mli for details *)
-let from_ast ~is_closure_body ~has_this ~params b =
+let from_ast ~is_closure_body ~has_this ~params ~is_toplevel b =
   let visitor = new declvar_visitor in
   let needs_local_this, decl_vars =
     (* pull variables used in default values *)
@@ -161,7 +162,7 @@ let from_ast ~is_closure_body ~has_this ~params b =
   in
   let decl_vars = ULS.diff decl_vars param_names in
   let decl_vars =
-    if needs_local_this || is_closure_body || not has_this
+    if needs_local_this || is_closure_body || not has_this || is_toplevel
     then decl_vars
     else ULS.remove "$this" decl_vars in
   needs_local_this && has_this, ULS.items decl_vars

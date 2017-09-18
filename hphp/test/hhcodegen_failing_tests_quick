@@ -3,7 +3,6 @@ quick/EmitOO.php
 quick/Xhp.php
 quick/abs_codegen.php
 quick/all_type_comparison_test.php
-quick/args-test.php
 quick/backtick.php
 quick/class_constant.php
 quick/closure_recursive_bad.php

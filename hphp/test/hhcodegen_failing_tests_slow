@@ -31,7 +31,6 @@ slow/compilation/1238.php
 slow/compilation/1247.php
 slow/compilation/1301.php
 slow/compilation/1316.php
-slow/compilation/1317.php
 slow/compilation/infinite-static-local.php
 slow/compilation/switch-default-multiple.php
 slow/concat/1573.php
@@ -77,7 +76,6 @@ slow/ext_phar/composer.php
 slow/ext_phar/create_tar.php
 slow/ext_phar/create_zip.php
 slow/ext_process/bad_shell_exec.php
-slow/ext_std/extract.008.php
 slow/ext_string/1764.php
 slow/ext_string/setlocale-threaded.php
 slow/finally/finally_break_008.php
@@ -308,7 +306,6 @@ slow/php7_bcbreak/5/uvs/static_dim_call.php
 slow/reflection/1339.php
 slow/reflection/1342.php
 slow/reflection/2695.php
-slow/reflection/closure_namespace.php
 slow/reflection/dynamic_property2.php
 slow/reflection/ns_closure.php
 slow/reflection/param_tostring_zendcompat.php
@@ -340,8 +337,6 @@ slow/types/abstract_function_typehints.php
 slow/types/scalar_names.php
 slow/unpack_args/unpack_call_error.php
 slow/unpack_args/unpack_call_multi.php
-slow/unset/1117.php
-slow/unset/1120.php
 slow/use_function/double_alias.php
 slow/use_function/override.php
 slow/use_namespace_class/double_use_ns.php

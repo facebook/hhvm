@@ -726,7 +726,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   public static function fromArrays(...$argv) {
-    if (!$argv) return \HH\Set {};
+    if (!$argv) return \HH\ImmSet {};
     $ret = \HH\Set {};
     foreach ($argv as $arr) {
       if (!\is_array($arr)) {

@@ -224,6 +224,8 @@ type state =
 
 let initialize_params: Initialize.params option ref = ref None
 
+let can_autostart_after_mismatch: bool ref = ref true
+
 type event =
   | Server_hello
   | Server_message of ServerCommandTypes.push
@@ -1318,8 +1320,9 @@ let connect_after_hello
   rpc server_conn (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
 
 
-let connect_client
+let rec connect_client
     (root: Path.t)
+    ~(autostart: bool)
   : server_conn =
   let open Exit_status in
   let open Lsp.Error in
@@ -1332,7 +1335,7 @@ let connect_client
   let env_connect =
     { ClientConnect.
       root;
-      autostart = false;
+      autostart;
       force_dormant_start = false;
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
@@ -1344,6 +1347,7 @@ let connect_client
     } in
   try
     let (ic, oc) = ClientConnect.connect env_connect in
+    can_autostart_after_mismatch := false;
     let pending_messages = Queue.create () in
     let hhconfig_version = read_hhconfig_version root in
     { ic; oc; hhconfig_version; pending_messages; }
@@ -1359,6 +1363,10 @@ let connect_client
     (* Raised when we couldn't complete the handshake up to handoff           *)
     (* within 3 attempts over 3 seconds. Unexpected.                          *)
     raise (ServerErrorStart ("server isn't responsive", { Lsp.Initialize.retry = true; }))
+  | Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
+    (* Raised when the server was running an old version. We'll retry once.   *)
+    can_autostart_after_mismatch := false;
+    connect_client root ~autostart:true
 
 
 let connect () : state =
@@ -1368,7 +1376,7 @@ let connect () : state =
     | Some root -> root
   in
   let tail_env = Tail.create_env (Sys_utils.readlink_no_fail (ServerFiles.log_link root)) in
-  let conn = connect_client root
+  let conn = connect_client root ~autostart:false
   in
   In_init { In_init_env.
     conn;

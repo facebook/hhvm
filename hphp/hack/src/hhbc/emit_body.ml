@@ -187,21 +187,10 @@ let emit_body
     Hhas_type_info.has_type_constraint return_type_info && not is_generator in
   let default_dropthrough =
     if default_dropthrough <> None then default_dropthrough else begin
-    let verify_return_instr =
-      match ret with
-      | None
-      | Some (_, (A.Happly ((_, "void"), [])
-                | A.Happly ((_, "WaitHandle"), [])
-                | A.Happly ((_, "Awaitable"),
-                  [_, A.Happly ((_, "void"), [])])
-                | A.Happly ((_, "WaitHandle"),
-                  [_, A.Happly ((_, "void"), [])]))) -> empty
-      | _ when is_generator || is_pair_generator -> empty
-      | _ -> instr_verifyRetTypeC
-    in
-    if is_async
-    then Some (gather [instr_null; verify_return_instr; instr_retc])
-    else None end
+      if is_async && verify_return
+      then Some (gather [instr_null; instr_verifyRetTypeC; instr_retc])
+      else None
+    end
   in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_default_dropthrough default_dropthrough;

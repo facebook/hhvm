@@ -651,13 +651,13 @@ and pString2: node list -> env -> expr list =
     | [] -> List.rev acc
     | ({ syntax = Token { Token.kind = TK.Dollar; _ }; _ } as l)::
       ({ syntax = EmbeddedBracedExpression {
-          embedded_braced_expression_expression = {
-            syntax = QualifiedNameExpression {
-              qualified_name_expression = {
-                syntax = Token { Token.kind = TK.Name; _ }
-                ; _ } as name
+          embedded_braced_expression_expression =
+            ( { syntax = QualifiedNameExpression { qualified_name_expression =
+                  ({ syntax = Token { Token.kind = TK.Name; _ }; _ } as name)
+                ; _ }
               ; _ }
-            ; _ }
+            | ({ syntax = Token { Token.kind = TK.Name; _ }; _ } as name)
+            )
           ; _ }
        ; _ } as r)
       ::tl ->

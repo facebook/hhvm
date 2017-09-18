@@ -328,13 +328,25 @@ module WithStatementAndDeclAndTypeParser
     string text. *)
 
     let (parser, left_brace) = assert_token parser LeftBrace in
-    let (parser, expr) = parse_expression_with_reset_precedence parser in
-    let (parser1, token) = next_token_no_trailing parser in
-    let (parser, right_brace) =
-      if (Token.kind token) = RightBrace then
-        (parser1, make_token token)
-      else
-        (with_error parser SyntaxError.error1006, (make_missing())) in
+    let (parser1, name_or_keyword_as_name) = next_token_as_name parser in
+    let (parser1, right_brace) = next_token parser1 in
+    let (parser, expr, right_brace) =
+      match Token.kind name_or_keyword_as_name, Token.kind right_brace with
+      | Name, RightBrace ->
+        let expr = make_token name_or_keyword_as_name in
+        let right_brace = make_token right_brace in
+        parser1, expr, right_brace
+      | _, _ ->
+        let (parser, expr) = parse_expression_with_reset_precedence parser in
+        let (parser1, token) = next_token_no_trailing parser in
+        let (parser, right_brace) =
+          if (Token.kind token) = RightBrace then
+            (parser1, make_token token)
+          else
+            (with_error parser SyntaxError.error1006, (make_missing()))
+        in
+        parser, expr, right_brace
+    in
     let node = make_embedded_braced_expression left_brace expr right_brace in
     (parser, node)
 
@@ -539,7 +551,7 @@ module WithStatementAndDeclAndTypeParser
       | Variable ->
         let (parser, expr) = parse_embedded_expression parser1 token in
         aux parser (expr :: acc)
-      | Dollar ->  handle_dollar parser1 token acc
+      | Dollar -> handle_dollar parser1 token acc
       | _ -> aux parser1 (merge_head token acc) in
 
     let (parser, results) = aux parser [head] in

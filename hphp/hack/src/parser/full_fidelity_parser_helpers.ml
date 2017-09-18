@@ -94,8 +94,20 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
+  let peek_token_as_name ?(lookahead=0) parser =
+    let rec lex_ahead lexer n =
+      let (next_lexer, token) = Parser.Lexer.next_token_as_name lexer in
+      match n with
+      | 0 -> token
+      | _ -> lex_ahead next_lexer (n-1)
+    in
+      lex_ahead (Parser.lexer parser) lookahead
+
   let peek_token_kind ?(lookahead=0) parser =
     Token.kind (peek_token ~lookahead parser)
+
+  let peek_token_kind_as_name ?(lookahead=0) parser =
+    Token.kind (peek_token_as_name ~lookahead parser)
 
   let skip_token parser =
     let (parser, _) = next_token parser in

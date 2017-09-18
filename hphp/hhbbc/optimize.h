@@ -37,7 +37,7 @@ struct Bytecode;
  * php::Func, but it won't modify the top-level meta-data in the
  * php::Func itself.
  */
-void optimize_func(const Index&, FuncAnalysis&&);
+void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
 
 /*
  * Return a bytecode to generate the value in cell

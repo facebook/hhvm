@@ -3397,6 +3397,10 @@ void Index::freeze() {
   m_data->frozen = true;
 }
 
+void Index::thaw() {
+  m_data->frozen = false;
+}
+
 std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
   return m_data->arrTableBuilder;
 }

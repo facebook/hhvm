@@ -362,6 +362,7 @@ struct CollectedInfo {
                          ClassAnalysis* cls,
                          PublicSPropIndexer* publicStatics,
                          bool trackConstantArrays,
+                         bool inlining,
                          const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
@@ -372,6 +373,7 @@ struct CollectedInfo {
   bool effectFree{true};
   bool readsUntrackedConstants{false};
   const bool trackConstantArrays;
+  const bool inlining;
   bool (*propagate_constants)(const Bytecode& bc, const State& state,
                               std::vector<Bytecode>& out) = nullptr;
   CompactVector<Type> localStaticTypes;

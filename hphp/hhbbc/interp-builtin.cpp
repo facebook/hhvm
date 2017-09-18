@@ -409,7 +409,9 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
       push(env, TTrue);
       return true;
     }
-    func->unit->persistent.store(false, std::memory_order_relaxed);
+    if (!env.collect.inlining) {
+      func->unit->persistent.store(false, std::memory_order_relaxed);
+    }
   }
   return false;
 }

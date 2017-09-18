@@ -443,7 +443,7 @@ FuncAnalysis do_analyze(const Index& index,
                         bool trackConstantArrays) {
   auto const ctx = adjust_closure_context(inputCtx);
   CollectedInfo collect {
-    index, ctx, clsAnalysis, nullptr, trackConstantArrays
+    index, ctx, clsAnalysis, nullptr, trackConstantArrays, knownArgs != nullptr
   };
 
   return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
@@ -814,7 +814,7 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  CollectedInfo collect { index, fa.ctx, nullptr, nullptr, true, &fa };
+  CollectedInfo collect { index, fa.ctx, nullptr, nullptr, true, false, &fa };
   auto interp = Interp { index, fa.ctx, collect, blk, state };
 
   for (auto& op : blk->hhbcs) {

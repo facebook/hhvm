@@ -357,13 +357,17 @@ void constant_pass(Index& index, php::Program& program) {
 
   auto save = options.InsertAssertions;
   options.InsertAssertions = false;
+  index.freeze();
 
   trace_time optimize_constants("optimize constants");
   parallel::for_each(
     const_pass_contexts(program, php::Program::ForAll),
-    [&] (Context ctx) { optimize_func(index, analyze_func(index, ctx, false)); }
+    [&] (Context ctx) {
+      optimize_func(index, analyze_func(index, ctx, false), false);
+    }
   );
 
+  index.thaw();
   options.InsertAssertions = save;
 }
 
@@ -378,7 +382,9 @@ void analyze_public_statics(Index& index, php::Program& program) {
         if (ctx.cls && ctx.cls->closureContextCls) {
           ctx.cls = ctx.cls->closureContextCls;
         }
-        auto info = CollectedInfo { index, ctx, nullptr, &publicStatics, true };
+        auto info = CollectedInfo {
+          index, ctx, nullptr, &publicStatics, true, false
+        };
         analyze_func_collect(index, ctx, info);
       }
     );
@@ -421,7 +427,9 @@ void final_pass(Index& index, php::Program& program) {
   index.freeze();
   parallel::for_each(
     all_function_contexts(program),
-    [&] (Context ctx) { optimize_func(index, analyze_func(index, ctx, true)); }
+    [&] (Context ctx) {
+      optimize_func(index, analyze_func(index, ctx, true), true);
+    }
   );
 }
 

@@ -303,7 +303,7 @@ void insert_assertions(const Index& index,
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true, &ainfo };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true, false, &ainfo };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -515,7 +515,7 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true, &ainfo };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true, false, &ainfo };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
@@ -758,7 +758,7 @@ void visit_blocks(const char* what,
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
+void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
 
   bool again;
@@ -793,9 +793,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
 
+  if (!isFinal) return;
+
   auto const func = ainfo.ctx.func;
-  if (index.frozen() &&
-      (func->name == s_86pinit.get() || func->name == s_86sinit.get())) {
+  if (func->name == s_86pinit.get() || func->name == s_86sinit.get()) {
     auto const& blk = *func->blocks[func->mainEntry];
     if (blk.hhbcs.size() == 2 &&
         blk.hhbcs[0].op == Op::Null &&
@@ -941,13 +942,13 @@ Bytecode gen_constant(const Cell& cell) {
   not_reached();
 }
 
-void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
+void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
 
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   Trace::Bump bumper3{Trace::hhbbc_dce, bump};
-  do_optimize(index, std::move(ainfo));
+  do_optimize(index, std::move(ainfo), isFinal);
 }
 
 //////////////////////////////////////////////////////////////////////

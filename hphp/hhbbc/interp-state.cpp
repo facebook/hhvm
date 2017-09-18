@@ -108,10 +108,12 @@ CollectedInfo::CollectedInfo(const Index& index,
                              ClassAnalysis* cls,
                              PublicSPropIndexer* publicStatics,
                              bool trackConstantArrays,
+                             bool inlining,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
     , publicStatics{publicStatics}
     , trackConstantArrays{trackConstantArrays}
+    , inlining{inlining}
 {
   if (fa) localStaticTypes = fa->localStaticTypes;
 }

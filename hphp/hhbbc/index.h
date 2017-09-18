@@ -394,6 +394,7 @@ struct Index {
    */
   bool frozen() const;
   void freeze();
+  void thaw();
 
   /*
    * The Index contains a Builder for an ArrayTypeTable.

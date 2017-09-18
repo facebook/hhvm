@@ -435,7 +435,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
-      CollectedInfo collect { index, ctx, nullptr, nullptr, false, &fa };
+      CollectedInfo collect { index, ctx, nullptr, nullptr, false, false, &fa };
       Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State*) {};

@@ -1,0 +1,37 @@
+diff --git a/mbfilter_htmlent.c b/mbfilter_htmlent.c
+index 56c364d..4dcf43e 100644
+--- a/third-party/libmbfl/filters/mbfilter_htmlent.c
++++ b/third-party/libmbfl/filters/mbfilter_htmlent.c
+@@ -88,7 +88,8 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
+ 	mbfl_filt_conv_html_dec_ctor,
+ 	mbfl_filt_conv_html_dec_dtor,
+ 	mbfl_filt_conv_html_dec,
+-	mbfl_filt_conv_html_dec_flush };
++	mbfl_filt_conv_html_dec_flush,
++	mbfl_filt_conv_html_dec_copy };
+ 
+ 
+ #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+@@ -309,4 +310,10 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
+ 	return err;
+ }
+ 
++void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
++{
++	*dest = *src;
++	dest->opaque = mbfl_malloc(html_enc_buffer_size+1);
++	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
++}
+ 
+diff --git a/mbfilter_htmlent.h b/mbfilter_htmlent.h
+index 99827c2..11a8693 100644
+--- a/third-party/libmbfl/filters/mbfilter_htmlent.h
++++ b/third-party/libmbfl/filters/mbfilter_htmlent.h
+@@ -42,6 +42,7 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter);
+ int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter);
+ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter);
+ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter);
++void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest);
+ void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter);
+ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter);
+ 

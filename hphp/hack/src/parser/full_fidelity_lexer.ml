@@ -22,6 +22,8 @@ type t = {
   errors : SyntaxError.t list
 }
 
+type lexer = t
+
 let invalid = '\000'
 
 let make text =
@@ -56,8 +58,16 @@ let peek_string lexer size =
 let match_string lexer s =
   s = peek_string lexer (String.length s)
 
+let make_error_with_location (l : lexer) (msg : string) =
+  SyntaxError.make l.start l.offset msg
+
 let advance lexer index =
-  { lexer with offset = lexer.offset + index }
+  match index with
+  | 0 -> lexer
+  | _ -> { lexer with offset = lexer.offset + index }
+
+let with_offset lexer offset =
+  if offset = lexer.offset then lexer else {lexer with offset = offset}
 
 let width lexer =
   lexer.offset - lexer.start
@@ -80,6 +90,12 @@ let start_offset lexer =
 
 let end_offset lexer =
   lexer.offset
+
+let text_len (l : lexer) =
+  SourceText.length l.text
+
+let peek (l : lexer) i =
+  SourceText.get l.text i
 
 (* Character classification *)
 
@@ -111,31 +127,42 @@ let is_name_letter ch =
 
 (* Lexing *)
 
-let rec skip_whitespace lexer =
-  let ch = peek_char lexer 0 in
-  if ch = '\t' || ch = ' ' then
-    skip_whitespace (advance lexer 1)
-  else
-    lexer
+(* create a new lexer where the offset is advanced as
+ * long as the predicate is true *)
+let skip_while (l : lexer) (p : char -> bool) =
+  let n = SourceText.length l.text in
+  let peek = SourceText.get l.text in
 
-let rec skip_to_end_of_line lexer =
-  let ch = peek_char lexer 0 in
-  if is_newline ch then lexer
-  else if ch = invalid && at_end lexer then lexer
-  else skip_to_end_of_line (advance lexer 1)
+  let rec aux i =
+    if i < n && p (peek i) then aux (i + 1) else i in
 
-let rec skip_to_end_of_line_or_end_tag lexer =
-  let ch = peek_char lexer 0 in
-  if is_newline ch then lexer
-  else if ch = invalid && at_end lexer then lexer
-  else if ch = '?' && peek_char lexer 1 = '>' then lexer
-  else skip_to_end_of_line_or_end_tag (advance lexer 1)
+  with_offset l (aux l.offset)
 
-let rec skip_name_end lexer =
-  if is_name_letter (peek_char lexer 0) then
-    skip_name_end (advance lexer 1)
-  else
-    lexer
+let skip_whitespace (l : lexer) =
+  let is_space ch = (ch = '\t' || ch = ' ') in
+  skip_while l is_space
+
+let skip_to_end_of_line (l : lexer) =
+  let not_newline ch = (ch <> '\n') in
+  skip_while l not_newline
+
+let skip_to_end_of_line_or_end_tag (l : lexer) =
+  let n = text_len l in
+  let peek i = peek l i in
+  let peek_def i = if i < n then peek i else invalid in
+
+  let should_stop i =
+    (i >= n) || begin
+      let ch = peek i in
+      (is_newline ch) || (ch = '?' && peek_def (succ i) = '>')
+    end in
+
+  let i = ref l.offset in
+  while (not (should_stop !i)) do incr i done;
+  with_offset l !i
+
+let skip_name_end (l : lexer) =
+  skip_while l is_name_letter
 
 let skip_end_of_line lexer =
   let ch0 = peek_char lexer 0 in
@@ -191,39 +218,41 @@ let scan_variable lexer =
   let lexer = scan_name_impl (advance lexer 1) in
   (lexer, TokenKind.Variable)
 
-let rec scan_with_underscores accepted_char lexer =
-  let ch = peek_char lexer 0 in
-  if accepted_char ch then scan_with_underscores accepted_char (advance lexer 1)
-  else if ch = '_' && accepted_char (peek_char lexer 1) then
-    scan_with_underscores accepted_char (advance lexer 2)
-  else lexer
+let scan_with_underscores (l : lexer) accepted_char =
+  let n = text_len l in
+  let peek i = peek l i in
+  let peek_def i = if i < n then peek i else invalid in
 
-let rec scan_decimal_digits lexer =
-  let ch = peek_char lexer 0 in
-  if is_decimal_digit ch then scan_decimal_digits (advance lexer 1)
-  else lexer
+  let rec aux i =
+    if i >= n then i
+    else let ch = peek i in
+      if accepted_char ch then aux (succ i)
+      else if ch = ' ' && accepted_char (peek_def (succ i)) then
+        aux (2 + i)
+      else i in
+
+  with_offset l (aux l.offset)
+
+let scan_decimal_digits (l : lexer) =
+  skip_while l is_decimal_digit
 
 let scan_decimal_digits_with_underscores lexer =
-  scan_with_underscores is_decimal_digit lexer
+  scan_with_underscores lexer is_decimal_digit
 
-let rec scan_octal_digits lexer =
-  let ch = peek_char lexer 0 in
-  if is_octal_digit ch then scan_octal_digits (advance lexer 1)
-  else lexer
+let scan_octal_digits (l : lexer) =
+  skip_while l is_octal_digit
 
-let scan_octal_digits_with_underscores lexer =
-  scan_with_underscores is_octal_digit lexer
+let scan_octal_digits_with_underscores (l : lexer) =
+  scan_with_underscores l is_octal_digit
 
-let scan_binary_digits_with_underscores lexer =
-  scan_with_underscores is_binary_digit lexer
+let scan_binary_digits_with_underscores (l : lexer) =
+  scan_with_underscores l is_binary_digit
 
-let rec scan_hexadecimal_digits lexer =
-  let ch = peek_char lexer 0 in
-  if is_hexadecimal_digit ch then scan_hexadecimal_digits (advance lexer 1)
-  else lexer
+let scan_hexadecimal_digits (l : lexer) =
+  skip_while l is_hexadecimal_digit
 
-let scan_hexadecimal_digits_with_underscores lexer =
-  scan_with_underscores is_hexadecimal_digit lexer
+let scan_hexadecimal_digits_with_underscores (l : lexer) =
+  scan_with_underscores l is_hexadecimal_digit
 
 let scan_hex_literal lexer =
   let ch = peek_char lexer 0 in
@@ -314,7 +343,7 @@ let scan_decimal_or_float lexer =
   | _ -> (* 123 *) (lexer_with_underscores, TokenKind.DecimalLiteral)
 
 
-let scan_execution_string_literal lexer =
+let scan_execution_string_literal (l : lexer) =
   (* TODO: PHP supports literals of the form `command` where the command
   is then executed as a shell command.  Hack does not support this.
   We should give an error if this feature is used in Hack, but we should lex
@@ -328,21 +357,37 @@ let scan_execution_string_literal lexer =
   TODO: Are there any illegal characters in execution strings?
   *)
 
-  let rec aux lexer =
-    let ch = peek_char lexer 0 in
-    match ch with
-    | '\000' ->
-      if at_end lexer then
-        let lexer = with_error lexer SyntaxError.error0012 in
-        (lexer, TokenKind.ExecutionString)
-      else
-        let lexer = with_error lexer SyntaxError.error0006 in
-        aux (advance lexer 1)
-    | '`' -> (advance lexer 1, TokenKind.ExecutionString)
-    | _ -> aux (advance lexer 1) in
-  aux (advance lexer 1)
+  let n = SourceText.length l.text in
+  let peek = SourceText.get l.text in
 
-let scan_single_quote_string_literal lexer =
+  let has_error0012 = ref false in
+  let has_error0006 = ref false in
+
+  let rec last_pos i =
+    if i >= n then
+      (has_error0012 := true; i)
+    else begin
+      let ch = peek i in
+      match ch with
+      | '\000' -> (has_error0006  := true; last_pos (1 + i))
+      | '`'    -> (1 + i)
+      | _      -> (last_pos (1 + i))
+    end in
+
+  let new_offset = last_pos (1 + l.offset) in
+
+  let new_errors =
+    let err msg = make_error_with_location l msg in
+    match (!has_error0006, !has_error0012) with
+    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: l.errors)
+    | (true, false) -> (err SyntaxError.error0006 :: l.errors)
+    | (false, true) -> (err SyntaxError.error0012 :: l.errors)
+    | (false, false) -> l.errors in
+
+  let res = { l with errors = new_errors; offset = new_offset } in
+  (res, TokenKind.ExecutionString)
+
+let scan_single_quote_string_literal (l : lexer) =
   (* TODO: What about newlines embedded? *)
   (* SPEC:
   single-quoted-string-literal::
@@ -363,24 +408,36 @@ let scan_single_quote_string_literal lexer =
 
   *)
 
-  let rec aux lexer =
-    let ch0 = peek_char lexer 0 in
-    let ch1 = peek_char lexer 1 in
-    match (ch0, ch1) with
-    | ('\000', _) ->
-      if at_end lexer then
-        let lexer = with_error lexer SyntaxError.error0012 in
-        (lexer, TokenKind.SingleQuotedStringLiteral)
-      else
-        let lexer = with_error lexer SyntaxError.error0006 in
-        aux (advance lexer 1)
-    | ('\\', _) -> aux (advance lexer 2)
-      (* Note that an "invalid" escape sequence in a single-quoted string
-      literal is not an error. It's just the \ character followed by the
-      next character. So no matter what, we can simply skip two chars. *)
-    | ('\'', _) -> (advance lexer 1, TokenKind.SingleQuotedStringLiteral)
-    | _ -> aux (advance lexer 1) in
-  aux (advance lexer 1)
+  let n = SourceText.length l.text in
+  let peek = SourceText.get l.text in
+
+  let has_error0012 = ref false in
+  let has_error0006 = ref false in
+
+  let rec stepper i =
+    if i >= n then
+      (has_error0012 := true; n - 1)
+    else begin
+      let ch = peek i in
+      match ch with
+      | '\000' -> (has_error0006 := true; stepper (1+i))
+      | '\\' -> stepper (2+i)
+      | '\'' -> (1+i)
+      | _ -> stepper (1+i)
+    end in
+
+  let new_offset = stepper (1 + l.offset) in
+
+  let new_errors =
+    let err msg = make_error_with_location l msg in
+    match (!has_error0006, !has_error0012) with
+    | (true, true) -> (err SyntaxError.error0006 :: err SyntaxError.error0012 :: l.errors)
+    | (true, false) -> (err SyntaxError.error0006 :: l.errors)
+    | (false, true) -> (err SyntaxError.error0012 :: l.errors)
+    | (false, false) -> l.errors in
+
+  let res = { l with errors = new_errors; offset = new_offset } in
+  (res, TokenKind.SingleQuotedStringLiteral)
 
 let scan_hexadecimal_escape lexer =
   let ch2 = peek_char lexer 2 in
@@ -425,14 +482,13 @@ let scan_unicode_escape lexer =
     (* TODO: Consider producing a warning for a malformed unicode escape. *)
     advance lexer 2
 
-let rec skip_uninteresting_double_quote_string_characters lexer =
-  let ch = peek_char lexer 0 in
-  if is_name_nondigit ch then
-    lexer
-  else match ch with
-  | '\000' | '"' | '\\' | '$' | '{' | '[' | ']' | '-'
-  | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' -> lexer
-  | _ -> skip_uninteresting_double_quote_string_characters (advance lexer 1)
+let skip_uninteresting_double_quote_string_characters (l : lexer) =
+  let is_uninteresting ch =
+    match ch with
+    | '\000' | '"' | '\\' | '$' | '{' | '[' | ']' | '-'
+    | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' -> false
+    | ch -> not (is_name_nondigit ch)  in
+  skip_while l is_uninteresting
 
 let scan_integer_literal lexer =
   let ch0 = peek_char lexer 0 in

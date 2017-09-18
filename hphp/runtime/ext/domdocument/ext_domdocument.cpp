@@ -211,6 +211,7 @@ static void php_libxml_ctx_warning(void *ctx,
   va_end(args);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // domexception errors
@@ -1778,6 +1779,8 @@ static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   case XML_ATTRIBUTE_NODE:
     if (nodep->children) {
       node_list_unlink(nodep->children);
+      php_libxml_node_free_list((xmlNodePtr) nodep->children);
+      nodep->children = nullptr;
     }
   case XML_TEXT_NODE:
   case XML_COMMENT_NODE:
@@ -2008,9 +2011,19 @@ static Variant domnode_textcontent_read(const Object& obj) {
   return empty_string_variant();
 }
 
-static void
-domnode_textcontent_write(const Object& /*obj*/, const Variant& /*value*/) {
-  // do nothing
+static void domnode_textcontent_write(const Object& obj, const Variant& value) {
+  CHECK_WRITE_NODE(nodep);
+
+  if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
+    if (nodep->children) {
+      node_list_unlink(nodep->children);
+      php_libxml_node_free_list((xmlNodePtr) nodep->children);
+      nodep->children = nullptr;
+    }
+  }
+
+  xmlNodeSetContent(nodep, (xmlChar *) "");
+  xmlNodeAddContent(nodep, (xmlChar *) value.toString().data());
 }
 
 static DOMPropertyAccessor domnode_properties[] = {

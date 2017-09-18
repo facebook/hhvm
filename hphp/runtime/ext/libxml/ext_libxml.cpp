@@ -405,7 +405,7 @@ void php_libxml_node_free(xmlNodePtr node) {
   }
 }
 
-static void php_libxml_node_free_list(xmlNodePtr node) {
+void php_libxml_node_free_list(xmlNodePtr node) {
   xmlNodePtr curnode;
 
   if (node != NULL) {

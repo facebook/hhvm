@@ -1,0 +1,2 @@
+File "shapes_idx_into_unknown_field.php", line 4, characters 3-35:
+The field 'field_name' may be set to an unknown type that conflicts with the return type of Shapes::idx. To avoid bugs, either add the field to the shape, remove the field (with Shapes::removeKey), or do not allow unknown fields in the shape. (Lint[5004])

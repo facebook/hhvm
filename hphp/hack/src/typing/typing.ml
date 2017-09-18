@@ -2746,11 +2746,11 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
       begin fun env fty res el -> match el with
         | [shape; field] ->
           let env, _ts, shape_ty = expr env shape in
-          Typing_shapes.idx env fty shape_ty field None
+          Typing_shapes.idx env p fty shape_ty field None
         | [shape; field; default] ->
             let env, _ts, shape_ty = expr env shape in
             let env, _td, default_ty = expr env default in
-            Typing_shapes.idx env fty shape_ty field
+            Typing_shapes.idx env p fty shape_ty field
               (Some ((fst default), default_ty))
         | _ -> env, res
       end
@@ -2764,7 +2764,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
           (* try accessing the field, to verify existence, but ignore
            * the returned type and keep the one coming from function
            * return type hint *)
-          let env, _ = Typing_shapes.idx env fty shape_ty field None in
+          let env, _ = Typing_shapes.idx env p fty shape_ty field None in
           env, res
         | _  -> env, res
       end

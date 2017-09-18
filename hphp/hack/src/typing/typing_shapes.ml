@@ -60,7 +60,7 @@ let experiment_enabled env experiment =
   If experimental_optional_shape_field is disabled, then a nullable type will be
   used instead of an optional type in the returned supertype.
 *)
-let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
+let make_idx_fake_super_shape env p (_, arg_ty) field_name res =
   let optional_shape_field_enabled = experiment_enabled env
     TypecheckerOptions.experimental_optional_shape_field in
   let shape_idx_relaxed = experiment_enabled env
@@ -81,7 +81,8 @@ let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
         field that conflicts with the return type of Shapes::idx. Programmers
         should instead use direct accessing (i.e. shape[field]) when possible to
         get stricter behavior. *)
-      Lint.shape_idx_access_unknown_field (Reason.to_pos arg_r)
+      Lint.shape_idx_access_unknown_field
+        p
         (Env.get_shape_field_name field_name);
       (* But we allow it anyhow *)
       Nast.ShapeMap.empty
@@ -123,7 +124,7 @@ let field_has_nullable_type env =
   shape(?field => Tmixed, ...)  -- if experimental_optional_shape_field
   shape(field => ?Tmixed, ...)  -- otherwise
 *)
-let idx env fty shape_ty field default =
+let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env (fst field) (snd field) with
@@ -135,7 +136,7 @@ let idx env fty shape_ty field default =
       Reason.Rnone,
       Tshape (
         FieldsPartiallyKnown Nast.ShapeMap.empty,
-        make_idx_fake_super_shape env shape_ty field_name res
+        make_idx_fake_super_shape env p shape_ty field_name res
       )
     ) in
     let env =

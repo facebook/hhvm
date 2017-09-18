@@ -60,6 +60,7 @@ std::unique_ptr<Lvalue> getLvalue(const zend_ast* ast);
 
 CFG compileUnaryOp(const zend_ast* op);
 CFG compileIncDec(const zend_ast* op);
+CFG compileIncludeEval(const zend_ast* op);
 
 CFG fixFlavor(Destination dest, Flavor actual);
 
@@ -621,6 +622,9 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
     case ZEND_AST_ARRAY:
       return compileArray(ast)
         .then(fixFlavor(dest, Flavor::Cell));
+    case ZEND_AST_INCLUDE_OR_EVAL:
+      return compileIncludeEval(ast)
+        .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_CONDITIONAL:
       return compileConditional(ast, dest);
     default:
@@ -959,6 +963,30 @@ Attr getMemberModifiers(uint32_t flags) {
     attr |= Attr::AttrFinal;
   }
   return attr;
+}
+
+CFG compileIncludeEval(const zend_ast* ast) {
+  CFG cfg = compileExpression(ast->child[0], Flavor::Cell);
+  switch (ast->attr) {
+    case ZEND_EVAL:
+      cfg.then(Eval{});
+      break;
+    case ZEND_INCLUDE:
+      cfg.then(Incl{});
+      break;
+    case ZEND_INCLUDE_ONCE:
+      cfg.then(InclOnce{});
+      break;
+    case ZEND_REQUIRE:
+      cfg.then(Req{});
+      break;
+    case ZEND_REQUIRE_ONCE:
+      cfg.then(ReqOnce{});
+      break;
+    default:
+      panic("unsupported include/eval type");
+  }
+  return cfg;
 }
 
 void compileClassStatement(Class* cls, const zend_ast* ast) {

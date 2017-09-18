@@ -150,7 +150,7 @@ int runDaemon() {
 
       auto hhas = runCompiler(filename, *buf);
       std::cout << hhas.length() << std::endl
-                << hhas << std::endl;
+                << hhas;
     } catch (const CompilerException& e) {
       std::cout << "ERROR: " << e.what() << std::endl;
     }

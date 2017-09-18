@@ -193,7 +193,6 @@ zend7/Zend/tests/bug36006.php
 zend7/Zend/tests/bug36037.php
 zend7/Zend/tests/bug36071.php
 zend7/Zend/tests/bug36303.php
-zend7/Zend/tests/bug36513.php
 zend7/Zend/tests/bug36759.php
 zend7/Zend/tests/bug37046.php
 zend7/Zend/tests/bug37144.php
@@ -375,7 +374,6 @@ zend7/Zend/tests/bug54265.php
 zend7/Zend/tests/bug54358.php
 zend7/Zend/tests/bug54367.php
 zend7/Zend/tests/bug54585.php
-zend7/Zend/tests/bug54624.php
 zend7/Zend/tests/bug54804.php
 zend7/Zend/tests/bug54910.php
 zend7/Zend/tests/bug55007.php
@@ -401,7 +399,6 @@ zend7/Zend/tests/bug60573.php
 zend7/Zend/tests/bug60598.php
 zend7/Zend/tests/bug60738.php
 zend7/Zend/tests/bug60738_variation.php
-zend7/Zend/tests/bug60771.php
 zend7/Zend/tests/bug60825.php
 zend7/Zend/tests/bug60833.php
 zend7/Zend/tests/bug60909_1.php
@@ -1856,12 +1853,7 @@ zend7/tests/lang/003.php
 zend7/tests/lang/007.php
 zend7/tests/lang/008.php
 zend7/tests/lang/011.php
-zend7/tests/lang/013.php
-zend7/tests/lang/014.php
-zend7/tests/lang/015.php
-zend7/tests/lang/016.php
 zend7/tests/lang/017.php
-zend7/tests/lang/018.php
 zend7/tests/lang/019.php
 zend7/tests/lang/020.php
 zend7/tests/lang/021.php
@@ -1976,9 +1968,6 @@ zend7/tests/lang/foreachLoopObjects.005.php
 zend7/tests/lang/foreachLoopObjects.006.php
 zend7/tests/lang/foreach_with_object_001.php
 zend7/tests/lang/foreach_with_references_001.php
-zend7/tests/lang/include_variation1.php
-zend7/tests/lang/include_variation2.php
-zend7/tests/lang/include_variation3.php
 zend7/tests/lang/invalid_octal.php
 zend7/tests/lang/operators/add_variationStr.php
 zend7/tests/lang/operators/bitwiseAnd_variationStr.php
@@ -2035,4 +2024,3 @@ zend7/tests/lang/string/unicode_escape_sign.php
 zend7/tests/lang/string/unicode_escape_sign2.php
 zend7/tests/lang/string/unicode_escape_whitespace.php
 zend7/tests/lang/string_decimals_001.php
-zend7/tests/lang/throw_variation_001.php

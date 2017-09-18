@@ -26,6 +26,7 @@ match optchannel with
 .adata A_3 = \"\"\"a:1:{i:0;i:2;}\"\"\";\n\n\
 .main {\n\
   .declvars $x $y;\n\
+  DefTypeAlias 0\n\
   Int 1\n\
   RetC\n\
   }\n\
@@ -54,7 +55,9 @@ f(<\"HH\\\\int\" \"HH\\\\int\" hh_type > $x, <\"HH\\\\int\" \"HH\\\\int\" hh_typ
   SetOpN PlusEqual\n\
   IncDecN PreInc\n\
   QueryM 1 CGet EC:0\n\
-  RetC\n}"
+  RetC\n
+  }\n\n\
+  .alias Point = <\"array\"  > \"\"\"a:2:{s:4:\"kind\";i:10;s:10:\"elem_types\";a:2:{i:0;a:1:{s:4:\"kind\";i:1;}i:1;a:1:{s:4:\"kind\";i:4;}}}\"\"\";"
 
 let parsed =  try program_parser testlexer
               with Parsing.Parse_error -> (

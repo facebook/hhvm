@@ -60,7 +60,10 @@ decl:
 ;
 aliasdecl:
     | ALIASDIRECTIVE ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
-      {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4 None}
+      {Hhas_typedef.make
+        (Hhbc_id.Class.from_raw_string $2)
+        $4
+        (Some (attribute_from_string $5))}
 ;
 maindecl:
     | MAINDIRECTIVE span LBRACE nl numiters ismemoizewrapper numclsrefslots declvars statics nl

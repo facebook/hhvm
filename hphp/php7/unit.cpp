@@ -16,6 +16,8 @@
 
 #include "hphp/php7/unit.h"
 
+#include "hphp/php7/analysis.h"
+
 namespace HPHP { namespace php7 {
 
 std::unique_ptr<Unit> makeFatalUnit(const std::string& filename,
@@ -51,6 +53,44 @@ Function* Class::getConstructor() {
     .inRegion(std::make_unique<Region>(Region::Kind::Entry));
 
   return func;
+}
+
+void Class::buildPropInit() {
+  using namespace bc;
+  bool needPropInit = false;
+  auto cfg = CFG{};
+  for (auto& prop : properties) {
+    if (prop.initializer == "uninit") {
+      auto end = cfg.makeBlock();
+      cfg
+        .then(CheckProp{prop.name})
+        .branchZ(
+          prop.cfg
+            .then(InitProp{
+              prop.name,
+              prop.attr & Attr::AttrStatic
+                ? InitPropOp::Static
+                : InitPropOp::NonStatic,
+            })
+            .thenJmp(end)
+        );
+      cfg.thenJmp(end);
+      cfg.continueFrom(end);
+      needPropInit = true;
+    }
+  }
+  if (needPropInit) {
+    auto func = makeMethod();
+    func->name = "86pinit";
+    func->attr |= Attr::AttrPrivate | Attr::AttrStatic;
+    func->cfg = CFG{
+      cfg
+        .then(Null{})
+        .then(RetC{})
+    } .makeExitsReal()
+      .inRegion(std::make_unique<Region>(Region::Kind::Entry));
+    simplifyCFG(func->cfg);
+  }
 }
 
 }} // HPHP::php7

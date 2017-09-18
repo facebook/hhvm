@@ -30,6 +30,7 @@ namespace {
 std::string dump_pseudomain(const Function& func);
 std::string dump_function(const Function& func);
 std::string dump_class(const Class& cls);
+std::string dump_property(const Class::Property& prop);
 std::string dump_method(const Function& func);
 std::string dump_blocks(const Function& func);
 std::string dump_function_body(const Function& func);
@@ -187,6 +188,24 @@ struct InstrVisitor {
 #define OP(name) case FPassHint::name: out.append( #name ); break;
       FPASS_HINT_OPS
 #undef OP
+    }
+  }
+
+  void imm(InitPropOp op) {
+    out.append(" ");
+    switch (op) {
+#define INITPROP_OP(name) case InitPropOp::name: out.append( #name ); break;
+      INITPROP_OPS
+#undef INITPROP_OP
+    }
+  }
+
+  void imm(BareThisOp op) {
+    out.append(" ");
+    switch (op) {
+#define BARETHIS_OP(name) case BareThisOp::name: out.append( #name ); break;
+      BARETHIS_OPS
+#undef BARETHIS_OP
     }
   }
 
@@ -368,12 +387,38 @@ std::string dump_class(const Class& cls) {
     folly::format(&out, " extends {}", *cls.parentName);
   }
   out.append(" {\n");
+  for (const auto& property : cls.properties) {
+    out.append(dump_property(property));
+  }
   for (const auto& method : cls.methods) {
     out.append(dump_method(*method));
   }
   out.append("}\n\n");
   return out;
+}
 
+std::string dump_property(const Class::Property& prop) {
+  std::string out;
+  out.append(".property [");
+  if (prop.attr & Attr::AttrPublic) {
+    out.append(" public");
+  }
+  if (prop.attr & Attr::AttrProtected) {
+    out.append(" protected");
+  }
+  if (prop.attr & Attr::AttrPrivate) {
+    out.append(" private");
+  }
+  if (prop.attr & Attr::AttrStatic) {
+    out.append(" static");
+  }
+  out.append(" ] ");
+
+  out.append(prop.name);
+  out.append(" = \n  ");
+  out.append(prop.initializer);
+  out.append(";\n");
+  return out;
 }
 
 std::string dump_method(const Function& func) {
@@ -411,7 +456,6 @@ std::string dump_method(const Function& func) {
   out.append(dump_function_body(func));
   out.append("}\n\n");
   return out;
-
 }
 
 std::string dump_function_body(const Function& func) {

@@ -63,6 +63,14 @@ struct BaseValue::MinstrSeq {
     }
   }
 
+  void baseStaticProp(uint32_t depth, bc::ClassrefSlot slot) {
+    instrs.push_back(BaseSC{depth, slot});
+  }
+
+  void baseThis() {
+    instrs.push_back(BaseH{});
+  }
+
   void dim(const bc::MemberKey& key) {
     if (isArg) {
       instrs.push_back(FPassDim{slot, key});
@@ -190,6 +198,110 @@ struct BaseValue::MinstrSeq {
 
 namespace {
 
+/* An lvalue corresponding to $this.
+ */
+struct ThisLvalue : Lvalue {
+  CFG getC() override {
+    return { This{} };
+  }
+
+  CFG getV() override {
+    return { VGetL{NamedLocal{"$this"}} };
+  }
+
+  CFG getF(uint32_t slot) override {
+    return { FPassL{slot, NamedLocal{"$this"}, FPassHint::Any}};
+  }
+
+  CFG getB(MinstrSeq& m) override {
+    m.baseThis();
+    return { CheckThis{} };
+  }
+
+  CFG assign(const zend_ast* rhs) override {
+    throw LanguageException("Cannot re-assign $this");
+  }
+
+  CFG bind(const zend_ast* rhs) override {
+    throw LanguageException("Cannot re-assign $this");
+  }
+
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
+    throw LanguageException("Cannot re-assign $this");
+  }
+
+  CFG incDec(IncDecOp op) override {
+    return { BareThis{BareThisOp::Notice} };
+  }
+};
+
+struct StaticPropLvalue : Lvalue {
+  explicit StaticPropLvalue(const zend_ast* cls, const zend_ast* prop)
+    : cls(cls), prop(prop) {}
+
+  CFG getC() override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(CGetS{slot});
+  }
+
+  CFG getV() override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(VGetS{slot});
+  }
+
+  CFG getF(uint32_t paramSlot) override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(FPassS{paramSlot, slot, FPassHint::Any});
+  }
+
+  CFG getB(MinstrSeq& m) override {
+    bc::ClassrefSlot slot;
+    m.baseStaticProp(m.push(), slot);
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell));
+  }
+
+  CFG assign(const zend_ast* rhs) override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(SetS{slot});
+  }
+
+  CFG bind(const zend_ast* rhs) override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Ref))
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(BindS{slot});
+  }
+
+  CFG assignOp(SetOpOp op, const zend_ast* rhs) override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(compileExpression(rhs, Flavor::Cell))
+      .then(SetOpS{op, slot});
+  }
+
+  CFG incDec(IncDecOp op) override {
+    bc::ClassrefSlot slot;
+    return compileClassref(cls, slot)
+      .then(compileExpression(prop, Flavor::Cell))
+      .then(IncDecS{op, slot});
+  }
+
+  const zend_ast* cls;
+  const zend_ast* prop;
+};
+
 /* An lvalue corresponding to a statically-known local
  * e.g.
  *   $x
@@ -296,12 +408,15 @@ struct DynamicLocalLvalue : Lvalue {
   const zend_ast* nameExpr;
 };
 
-/* An lvalue corresponding to an array element that is named dynamically
+/* An lvalue corresponding to an array element or object property that is named
+ * dynamically
  * e.g.
  *   $array[$x]
  *   $getArray()[2][getKey()]
+ *   $obj->$x
  *
- * This composes with a base value that provides the array we index into
+ * This composes with a base value that provides the array or object index we
+ * into
  */
 struct DynamicDimLvalue : Lvalue {
   DynamicDimLvalue(std::unique_ptr<BaseValue> base,
@@ -393,13 +508,16 @@ struct DynamicDimLvalue : Lvalue {
   const zend_ast* dimExpr;
 };
 
-/* An lvalue corresponding to an array element that is named statically
+/* An lvalue corresponding to an array element or object property that is named
+ * statically
  * e.g.
  *   $array[3]
  *   $getArray()[]
  *   $getArray()["foobar"]
+ *   $obj->foo
  *
- * This composes with a base value that provides the array we index into
+ * This composes with a base value that provides the array or object we index
+ * into
  */
 struct DimLvalue : Lvalue {
   DimLvalue(std::unique_ptr<BaseValue> base,
@@ -519,17 +637,23 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
   if (ast->kind == ZEND_AST_VAR) {
     auto name = ast->child[0];
     switch (name->kind) {
-      case ZEND_AST_ZVAL:
-        return std::make_unique<LocalLvalue>(
-          zval_to_string(zend_ast_get_zval(name))
-        );
+      case ZEND_AST_ZVAL: {
+        auto str = zval_to_string(zend_ast_get_zval(name));
+        if (str == "this") {
+          return std::make_unique<ThisLvalue>();
+        }
+        return std::make_unique<LocalLvalue>(str);
+      }
       default:
         return std::make_unique<DynamicLocalLvalue>(name);
     }
-  } else if (ast->kind == ZEND_AST_DIM) {
+  } else if (ast->kind == ZEND_AST_DIM || ast->kind == ZEND_AST_PROP) {
+    MemberType mt = ast->kind == ZEND_AST_PROP ? MemberType::Property
+                                               : MemberType::Element;
     auto base = ast->child[0];
     auto dim  = ast->child[1];
     if (!dim) {
+      assert(ast->kind != ZEND_AST_PROP);
       return std::make_unique<DimLvalue>(
         getBase(base),
         NewElem{}
@@ -538,6 +662,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
       auto zv = zend_ast_get_zval(dim);
       switch (Z_TYPE_P(zv)) {
         case IS_LONG:
+          assert(ast->kind != ZEND_AST_PROP);
           return std::make_unique<DimLvalue>(
             getBase(base),
             ImmIntElem{Z_LVAL_P(zv)}
@@ -545,7 +670,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
         case IS_STRING:
           return std::make_unique<DimLvalue>(
             getBase(base),
-            ImmMember{MemberType::Element, Z_STRVAL_P(zv)}
+            ImmMember{mt, Z_STRVAL_P(zv)}
           );
         default:
           // this probably shouldn't happen, but we can just create a dynamic
@@ -558,7 +683,7 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
         auto str = zval_to_string(zend_ast_get_zval(name));
         return std::make_unique<DimLvalue>(
           getBase(base),
-          LocalMember{MemberType::Element, NamedLocal{str}}
+          LocalMember{mt, NamedLocal{str}}
         );
       }
     }
@@ -568,6 +693,8 @@ std::unique_ptr<Lvalue> Lvalue::getLvalue(const zend_ast* ast) {
       getBase(base),
       dim
     );
+  } else if (ast->kind == ZEND_AST_STATIC_PROP) {
+    return std::make_unique<StaticPropLvalue>(ast->child[0], ast->child[1]);
   }
 
   return nullptr;

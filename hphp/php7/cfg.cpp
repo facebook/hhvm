@@ -468,10 +468,13 @@ std::vector<Region*> enteredRegions(Region* prev, Region* next) {
 
 void CFG::visit(CFGVisitor&& visitor) const {
   std::unordered_set<Block*> visited;
+  std::unordered_set<Block*> encountered;
+  std::unordered_set<Block*> finished;
   std::deque<Block*> breadcrumbs;
 
   auto region = m_entry->region;
   breadcrumbs.push_front(m_entry);
+  encountered.insert(m_entry);
 
   while (region || !breadcrumbs.empty()) {
     // find the next block in breadcrumbs that is still in the current region
@@ -489,9 +492,9 @@ void CFG::visit(CFGVisitor&& visitor) const {
           assert(region->handler->region->kind == Region::Kind::Catch);
           assert(region->handler->region->parent == region->parent);
           visitor.beginCatch();
-          if (0 == visited.count(region->handler)) {
+          if (0 == encountered.count(region->handler)) {
             breadcrumbs.push_front(region->handler);
-            visited.insert(region->handler);
+            encountered.insert(region->handler);
           }
           region = region->handler->region;
           break;
@@ -507,7 +510,11 @@ void CFG::visit(CFGVisitor&& visitor) const {
     }
 
     auto blk = *iter;
-    breadcrumbs.erase(iter);
+    if (visited.count(blk)) {
+      finished.insert(blk);
+      breadcrumbs.erase(iter);
+      continue;
+    }
 
     // if we enter regions, make sure to let the visitor know
     for (const auto& reg : enteredRegions(region, blk->region)) {
@@ -523,19 +530,24 @@ void CFG::visit(CFGVisitor&& visitor) const {
 
     region = blk->region;
     visitor.block(blk);
+    visited.insert(blk);
 
     // add all of the exit targets to the queue
     const auto& exits = blk->exits;
     for (auto riter = exits.rbegin(); riter != exits.rend(); riter++) {
       for (Block* child : exitOpTargets(*riter)) {
-        if (0 == visited.count(child)) {
+        if (0 == encountered.count(child)) {
           breadcrumbs.push_front(child);
-          visited.insert(child);
+          encountered.insert(child);
+          visitor.tree_edge(blk, child);
+        } else if (finished.count(child)) {
+          visitor.edge(blk, child);
+        } else {
+          visitor.back_edge(blk, child);
         }
       }
     }
   }
-
 }
 
 std::vector<Block*> Block::exitTargets() const {

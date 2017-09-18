@@ -39,6 +39,7 @@
 #include <cerrno>
 #include <cstdarg>
 #include <climits>
+#include <stdexcept>
 #else
 #include <inttypes.h>
 #include <string.h>
@@ -52,6 +53,12 @@
 
 #if defined(__cplusplus)
 #define NORETURN [[noreturn]]
+
+struct ParseException : public std::logic_error {
+  explicit ParseException(const std::string& what)
+    : std::logic_error(what) {}
+};
+
 #else
 #define NORETURN __attribute__((noreturn))
 #endif

@@ -43,7 +43,7 @@ struct Block {
 #undef EXIT
 #undef EXIT_LAST
   void emit(ExitOp op) = delete;
-  /* Add an normal instruction to the end of this block.
+  /* Add a normal instruction to the end of this block.
    *
    * If the block already has at least one exit instruction, no more regular
    * instructions can be added */
@@ -130,6 +130,23 @@ struct CFGVisitor {
   virtual void beginTry() = 0;
   virtual void beginCatch() = 0;
   virtual void endRegion() = 0;
+
+  /*
+   * The visitor traverses the control flow graph using a depth first search
+   * where it completes the traversal of each region before moving on to the
+   * next.
+   *
+   * Traversed edges are 'tree_edges'
+   * Non traversed edges (edges encountered after the target block has already
+   * been seen) are split into:
+   *   - 'back_edges' are not traversed but are seen while still traversing the
+   *     target.  They only occur with loops.
+   *   - 'edges' are all the remaining edges, and include cross edges, and
+   *     forward edges.
+   */
+  virtual void tree_edge(Block* blk, Block* child) {}
+  virtual void back_edge(Block* blk, Block* child) {}
+  virtual void edge(Block* blk, Block* child) {}
 
   virtual void block(Block* blk) = 0;
 };

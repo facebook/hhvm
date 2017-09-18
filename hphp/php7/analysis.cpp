@@ -18,6 +18,8 @@
 
 #include "hphp/util/match.h"
 
+#include <boost/dynamic_bitset.hpp>
+
 namespace HPHP { namespace php7 {
 
 namespace {
@@ -100,29 +102,38 @@ struct ClassrefVisitor : CFGVisitor {
   explicit ClassrefVisitor() {}
 
   void beginTry() override {}
-
   void beginCatch() override {}
-
   void endRegion() override {}
 
-  void block(Block* blk) override {
-    for (auto& bc : blk->code) {
-      bc.visit(*this);
-    }
-    end();
-  }
-
-  void end() const {
+  void checkNoLiveClassRefs(Block* blk) {
 #ifndef NDEBUG
-    // all classrefs must be free at block exit
-    for (const bool free : m_slotsFree) {
-      assert(free);
-    }
+    assert(m_slotsFree[blk].all());
 #endif // NDEBUG
   }
 
+  void tree_edge(Block* blk, Block* child) override {
+    m_slotsFree[child] = m_slotsFree[blk];
+  }
+
+  void back_edge(Block* blk, Block* child) override {
+    // all classrefs must be free on back edges.  They can only be live during
+    // expression evaluation.
+    checkNoLiveClassRefs(blk);
+  }
+
+  void block(Block* blk) override {
+    m_curBlock = blk;
+    for (auto& bc : blk->code) {
+      bc.visit(*this);
+    }
+  }
+
   uint32_t classrefSlotsUsed() const {
-    return m_slotsFree.size();
+    size_t maxSlotsUsed = 0;
+    for (const auto slotsFree : m_slotsFree) {
+      maxSlotsUsed = std::max(slotsFree.second.size(), maxSlotsUsed);
+    }
+    return maxSlotsUsed;
   }
 
   template <class T>
@@ -130,34 +141,44 @@ struct ClassrefVisitor : CFGVisitor {
     bc.visit_imms(*this);
   }
 
+  void bytecode(const bc::RetC&) {
+    checkNoLiveClassRefs(m_curBlock);
+  }
+
+  void bytecode(const bc::RetV&) {
+    checkNoLiveClassRefs(m_curBlock);
+  }
+
   void imm(bc::ReadClassref& read) {
     // this clasref must have been correctly allocated
     assert(read.slot.allocated());
     // the slot is now available
-    m_slotsFree[*read.slot.id] = true;
+    m_slotsFree[m_curBlock][*read.slot.id] = true;
   }
 
   void imm(bc::WriteClassref& write) {
     // find the first empty slot
-    for (uint32_t i = 0; i < m_slotsFree.size(); i++) {
-      if (m_slotsFree[i]) {
+    auto& slotsFree = m_slotsFree[m_curBlock];
+    for (uint32_t i = 0; i < slotsFree.size(); i++) {
+      if (slotsFree[i]) {
         // assign this classref to this index
         // and mark the slot as used
         *write.slot.id = i;
-        m_slotsFree[i] = false;
+        slotsFree[i] = false;
         return;
       }
     }
     // if there wasn't a free slot already allocated, grow the slot set
-    *write.slot.id = m_slotsFree.size();
-    m_slotsFree.emplace_back(false);
+    *write.slot.id = slotsFree.size();
+    slotsFree.push_back(false);
   }
 
   template <class T>
   void imm(const T&) {}
 
  private:
-  std::vector<bool> m_slotsFree;
+  std::unordered_map<Block*, boost::dynamic_bitset<>> m_slotsFree;
+  Block* m_curBlock;
 };
 
 } // namespace
@@ -165,7 +186,6 @@ struct ClassrefVisitor : CFGVisitor {
 uint32_t analyzeClassrefs(const CFG& cfg) {
   ClassrefVisitor visitor;
   cfg.visit(visitor);
-  visitor.end();
   return visitor.classrefSlotsUsed();
 }
 

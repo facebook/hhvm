@@ -48,7 +48,7 @@ struct Function {
   }
 
   std::string name;
-  Attr attr;
+  Attr attr{Attr::AttrNone};
   Unit* parent;
   Class* definingClass;
   CFG cfg;
@@ -65,14 +65,23 @@ struct Class {
     return methods.back().get();
   }
 
+  struct Property {
+    std::string name;
+    Attr attr;
+    std::string initializer;
+    CFG cfg;
+  };
+
   Function* getConstructor();
+  void buildPropInit();
 
   Unit* parent;
   std::string name;
   folly::Optional<std::string> parentName;
   uint32_t index;
-  Attr attr;
+  Attr attr{Attr::AttrNone};
   std::vector<std::unique_ptr<Function>> methods;
+  std::vector<Property> properties;
 };
 
 struct Unit {

@@ -66,6 +66,9 @@ CFG fixFlavor(Destination dest, Flavor actual);
 Attr getMemberModifiers(uint32_t flags);
 void compileClassStatement(Class* cls, const zend_ast* ast);
 void compileMethod(Class* cls, const zend_ast* ast);
+void compileProp(Class* cls, const zend_ast* ast);
+
+bool serializeInitilizer(std::string& out, const zend_ast* ast);
 
 } // namespace
 
@@ -115,6 +118,8 @@ CFG compileClass(Unit* unit, const zend_ast* ast) {
 
   /* Force the creation of a ctor if we don't have one yet */
   cls->getConstructor();
+
+  cls->buildPropInit();
 
   return CFG(DefCls{cls->index});
 }
@@ -407,7 +412,8 @@ CFG compileMethodCall(const zend_ast* ast) {
       .then(FPushObjMethod{
         params->children,
         ObjMethodOp::NullThrows
-      });
+      })
+      .then(compileCall(params));
   }
 }
 
@@ -416,50 +422,24 @@ CFG compileStaticCall(const zend_ast* ast) {
   auto method = ast->child[1];
   auto params = zend_ast_get_list(ast->child[2]);
 
-  CFG cfg;
-  auto mthString = method->kind == ZEND_AST_ZVAL
-      ? Z_STRVAL_P(zend_ast_get_zval(method))
-      : nullptr;
-  auto clsString = cls->kind == ZEND_AST_ZVAL
-      ? Z_STRVAL_P(zend_ast_get_zval(cls))
-      : nullptr;
-
   ClassrefSlot slot;
-  if (clsString) {
-    if (0 == strcasecmp(clsString, "self")) {
-      return compileExpression(method, Flavor::Cell)
-        .then(Self{slot})
-        .then(FPushClsMethodF{
-          params->children,
-          slot
-        }).then(compileCall(params));
-    } else if (0 == strcasecmp(clsString, "parent")) {
-      return compileExpression(method, Flavor::Cell)
-        .then(Parent{slot})
-        .then(FPushClsMethodF{
-          params->children,
-          slot
-        }).then(compileCall(params));
-    } else if (0 == strcasecmp(clsString, "static")) {
-      return compileExpression(method, Flavor::Cell)
-        .then(LateBoundCls{slot})
-        .then(FPushClsMethodF{
-          params->children,
-          slot
-        }).then(compileCall(params));
-    } else if (mthString) {
-      return CFG(FPushClsMethodD{
-        params->children,
-        mthString,
-        clsString
-      }).then(compileCall(params));
-    }
-  }
+  bool forward;
+  CFG cfg = compileClassref(cls, slot, &forward)
+    .then(compileExpression(method, Flavor::Cell));
 
-  return compileExpression(cls, Flavor::Cell)
-    .then(ClsRefGetC{slot})
-    .then(compileExpression(method, Flavor::Cell))
-    .then(FPushClsMethod{params->children, slot})
+  if (forward) {
+    return cfg
+      .then(FPushClsMethodF{
+        params->children,
+        slot
+      })
+      .then(compileCall(params));
+  }
+  return cfg
+    .then(FPushClsMethod{
+      params->children,
+      slot
+    })
     .then(compileCall(params));
 }
 
@@ -482,6 +462,27 @@ CFG compileNew(const zend_ast* ast) {
   } else {
     panic("new with variable classref");
   }
+}
+
+CFG compileConditional(const zend_ast* ast, Destination dest) {
+  CFG cfg;
+  auto end = cfg.makeBlock();
+
+  auto condition = ast->child[0];
+  auto iftrue = ast->child[1];
+  auto iffalse = ast->child[2];
+
+  cfg
+    .then(compileExpression(condition, Flavor::Cell))
+    .branchNZ(
+      compileExpression(iftrue, dest)
+        .thenJmp(end)
+    );
+  // false condition.
+  return cfg
+    .then(compileExpression(iffalse, dest))
+    .thenJmp(end)
+    .continueFrom(end);
 }
 
 CFG compileCall(const zend_ast_list* params) {
@@ -542,6 +543,27 @@ CFG compileArray(const zend_ast* ast) {
 
 } // namespace
 
+CFG compileClassref(const zend_ast* ast, ClassrefSlot slot,
+                    bool* forward) {
+  auto clsString = ast->kind == ZEND_AST_ZVAL
+      ? Z_STRVAL_P(zend_ast_get_zval(ast))
+      : nullptr;
+
+  if (forward) *forward = true;
+  if (clsString) {
+    if (0 == strcasecmp(clsString, "self")) {
+      return { Self{slot} };
+    } else if (0 == strcasecmp(clsString, "parent")) {
+      return { Parent{slot} };
+    } else if (0 == strcasecmp(clsString, "static")) {
+      return { LateBoundCls{slot} };
+    }
+  }
+
+  if (forward) *forward = false;
+  return compileExpression(ast, Flavor::Cell).then(ClsRefGetC{slot});
+}
+
 CFG compileExpression(const zend_ast* ast, Destination dest) {
   switch (ast->kind) {
     case ZEND_AST_ZVAL:
@@ -571,6 +593,8 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
         .then(fixFlavor(dest, Flavor::Cell));
     case ZEND_AST_VAR:
     case ZEND_AST_DIM:
+    case ZEND_AST_PROP:
+    case ZEND_AST_STATIC_PROP:
       return compileVar(ast, dest);
     case ZEND_AST_ASSIGN:
       return compileAssignment(ast)
@@ -597,6 +621,8 @@ CFG compileExpression(const zend_ast* ast, Destination dest) {
     case ZEND_AST_ARRAY:
       return compileArray(ast)
         .then(fixFlavor(dest, Flavor::Cell));
+    case ZEND_AST_CONDITIONAL:
+      return compileConditional(ast, dest);
     default:
       panic("unsupported expression");
   }
@@ -826,8 +852,6 @@ CFG compileIf(Function* func, const zend_ast* ast) {
   return cfg.continueFrom(end);
 }
 
-
-
 CFG compileWhile(Function* func,
     const zend_ast* condition,
     const zend_ast* contents,
@@ -942,6 +966,9 @@ void compileClassStatement(Class* cls, const zend_ast* ast) {
     case ZEND_AST_METHOD:
       compileMethod(cls, ast);
       break;
+    case ZEND_AST_PROP_DECL:
+      compileProp(cls, ast);
+      break;
     default:
       panic("unsupported class statement");
   }
@@ -951,6 +978,133 @@ void compileMethod(Class* cls, const zend_ast* ast) {
   auto func = cls->makeMethod();
   buildFunction(func, ast);
   func->attr |= getMemberModifiers(zend_ast_get_decl(ast)->flags);
+}
+
+bool serializeZval(std::string& out, const zval* zv) {
+  switch (Z_TYPE_P(zv)) {
+    case IS_LONG:
+      out.append(folly::sformat("i:{};", Z_LVAL_P(zv)));
+      break;
+    case IS_NULL:
+      out.append("N;");
+      break;
+    case IS_FALSE:
+      out.append("b:0;");
+      break;
+    case IS_TRUE:
+      out.append("b:1;");
+      break;
+    case IS_DOUBLE:
+      out.append(folly::sformat("d:{};", Z_DVAL_P(zv)));
+      break;
+    case IS_STRING:
+      {
+        auto str = Z_STRVAL_P(zv);
+        out.append(folly::sformat("s:{}:\\\"{}\\\";", strlen(str), str));
+      }
+      break;
+    default:
+      panic("unsupported literal");
+  }
+  return true;
+}
+
+bool serializeConstant(std::string& out, const zend_ast* ast) {
+  auto name = ast->child[0];
+  const char* str = Z_STRVAL_P(zend_ast_get_zval(name));
+  if (name->attr & ZEND_NAME_NOT_FQ) {
+    if (strcasecmp(str, "true") == 0) {
+      out.append("b:1;");
+    } else if (strcasecmp(str, "false") == 0) {
+      out.append("b:0;");
+    } else if (strcasecmp(str, "null") == 0) {
+      out.append("N;");
+    } else {
+      panic("unknown unqualified constant");
+    }
+  } else {
+    panic("unknown constant");
+  }
+  return true;
+}
+
+bool serializeArray(std::string& out, const zend_ast* ast) {
+  auto list = zend_ast_get_list(ast);
+
+  if (list->attr == ZEND_ARRAY_SYNTAX_LIST) {
+    return false;
+  }
+
+  bool ret = true;
+  out.append(folly::sformat("a:{}:{{", list->children));
+  zend_long cursor = 0;
+  for (uint32_t i = 0; i < list->children && ret; i++) {
+    auto item = list->child[i];
+    if (!item) {
+      return false;
+    }
+
+    if (item->child[1]) {
+      ret &= serializeInitilizer(out, item->child[1]);
+      ret &= serializeInitilizer(out, item->child[0]);
+      if (item->child[1]->kind == ZEND_AST_ZVAL) {
+        auto zv = zend_ast_get_zval(item->child[1]);
+        if (Z_TYPE_P(zv) == IS_LONG) {
+          cursor = std::max(Z_LVAL_P(zv), cursor);
+        }
+      }
+    } else {
+      out.append(folly::sformat("i:{};", cursor));
+      ret &= serializeInitilizer(out, item->child[0]);
+    }
+    cursor++;
+  }
+  out.append("}");
+  return ret;
+}
+
+bool serializeInitilizer(std::string& out, const zend_ast* ast) {
+  switch (ast->kind) {
+    case ZEND_AST_ZVAL:
+      return serializeZval(out, zend_ast_get_zval(ast));
+    case ZEND_AST_CONST:
+      return serializeConstant(out, ast);
+    case ZEND_AST_ARRAY:
+      return serializeArray(out, ast);
+    default:
+      return false;
+  }
+}
+
+void compileProp(Class* cls, const zend_ast* ast) {
+  auto pelem = ast->child[1];
+  assert(pelem->kind == ZEND_AST_PROP_ELEM);
+  auto name = pelem->child[0];
+  auto init = pelem->child[1];
+
+  assert(name->kind == ZEND_AST_ZVAL);
+  auto zv = zend_ast_get_zval(name);
+  assert(Z_TYPE_P(zv) == IS_STRING);
+
+  std::string initString;
+  initString.append("\"\"\"");
+  bool staticInit = serializeInitilizer(initString, init);
+  initString.append( "\"\"\"");
+  if (staticInit) {
+    cls->properties.emplace_back(Class::Property{
+      Z_STRVAL_P(zv),
+      getMemberModifiers(ast->attr),
+      initString,
+      CFG{},
+    });
+  } else {
+    cls->properties.emplace_back(Class::Property{
+      Z_STRVAL_P(zv),
+      getMemberModifiers(ast->attr),
+      "uninit",
+      compileExpression(init, Flavor::Cell),
+    });
+  }
 }
 
 } // namespace

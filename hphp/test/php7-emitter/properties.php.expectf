@@ -1,0 +1,46 @@
+a
+static b
+modfified a
+static modfified b
+modfified a
+protected c
+static modfified b
+protected static d
+modfified f a
+modfified f c
+static modfified f b
+static modfified f d
+modfified f a
+modfified f c
+private e
+static modfified f b
+static modfified f d
+private static f
+modfified g a
+modfified g c
+modfified g e
+static modfified g b
+static modfified g d
+static modfified g f
+a
+hello
+hello
+static modfified g b
+a
+a
+protected c
+private e
+static modfified g b
+static modfified g d
+static modfified g f
+modfified g a
+modfified g c
+modfified g e
+static modfified g b
+static modfified g d
+static modfified g f
+modfified g a
+static modfified g b
+
+Fatal error: %s
+Stack trace:%A

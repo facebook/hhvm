@@ -78,6 +78,8 @@ void compileFunction(Unit* unit, const zend_ast* ast);
 CFG compileClass(Unit* unit, const zend_ast* ast);
 CFG compileStatement(Function* func, const zend_ast* ast);
 CFG compileExpression(const zend_ast* ast, Destination destination);
+CFG compileClassref(const zend_ast* ast, bc::ClassrefSlot slot,
+                    bool* forward = nullptr);
 
 inline std::unique_ptr<Unit> compile(const std::string& filename,
                                      const zend_ast* ast) {

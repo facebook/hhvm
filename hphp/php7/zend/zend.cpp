@@ -6,8 +6,7 @@
 
 // handles parse errors
 void zenderror(const char* msg) {
-  std::cerr << "Parse error: " << msg << std::endl;
-  std::abort();
+  throw ParseException("Parse error: " + std::string(msg));
 }
 
 void zend_handle_encoding_declaration(zend_ast* /*declare_list*/) {

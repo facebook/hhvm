@@ -1,2 +1,3 @@
 <?php
 if (!gc_enabled()) echo "skip\n";
+echo "TODO(jfaller):Make this test non-flaky in interp mode.(T21988041)\n";

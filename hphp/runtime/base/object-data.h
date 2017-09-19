@@ -172,12 +172,13 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
    * uninitialized object of that class. These are meant to be called from the
    * JIT, where the cls, size, and attributes are constants at JIT time.
    *
-   * newInstanceRaw<> should be called only when and cls->getODAttrs() == 0.
-   * newInstanceRawAttrs takes nonzero attributes. The big=true versions should
-   * be called when size > kMaxSmallSize.
+   * newInstanceRaw<> should be called only when and cls->getODAttrs() ==
+   * DefaultAttrs; otherwise, use newInstanceRawAttrs. The big=true versions
+   * should be called when size > kMaxSmallSize.
    *
    * The initial ref-count will be set to one.
    */
+  static const uint16_t DefaultAttrs = NoDestructor;
   template<bool Big>
   static ObjectData* newInstanceRaw(Class*, size_t);
   template<bool Big>

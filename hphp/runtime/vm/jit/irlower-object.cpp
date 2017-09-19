@@ -56,7 +56,8 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->extra<NewInstanceRaw>()->cls;
   auto const size = ObjectData::sizeForNProps(cls->numDeclProperties());
 
-  if (auto attrs = cls->getODAttrs()) {
+  auto attrs = cls->getODAttrs();
+  if (attrs != ObjectData::DefaultAttrs) {
     auto func = size <= kMaxSmallSize
       ? &ObjectData::newInstanceRawAttrs<false>
       : &ObjectData::newInstanceRawAttrs<true>;

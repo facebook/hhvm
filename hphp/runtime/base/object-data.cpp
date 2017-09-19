@@ -915,11 +915,11 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 // called from jit code
 template<bool Big>
 ObjectData* ObjectData::newInstanceRaw(Class* cls, size_t size) {
-  assert(cls->getODAttrs() == 0);
+  assert(cls->getODAttrs() == DefaultAttrs);
   assert(Big || size <= kMaxSmallSize);
   auto mem = Big ? MM().mallocBigSize<MemoryManager::Unzeroed>(size) :
              MM().mallocSmallSize(size);
-  return new (mem) ObjectData(cls, InitRaw{}, 0);
+  return new (mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
 }
 
 // called from jit code

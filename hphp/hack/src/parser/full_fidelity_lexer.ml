@@ -1243,6 +1243,18 @@ let scan_xhp_colon_trivia (lexer : t) : t * Trivia.t =
   let lexer, trivia = aux lexer ':' in
   with_error lexer SyntaxError.error1002, trivia
 
+(*
+We divide trivia into "leading" and "trailing" trivia of an associated
+token. This means that we must find a dividing line between the trailing trivia
+following one token and the leading trivia of the following token. Plainly
+we need only find this line while scanning trailing trivia. The heuristics
+we use are:
+* The first newline trivia encountered is the last trailing trivia.
+* The newline which follows a // or # comment is not part of the comment
+  but does terminate the trailing trivia.
+* An /*UNSAFE_EXPR*/ is always a leading trivia.
+*)
+
 let scan_leading_trivia scanner lexer =
   let rec aux lexer acc =
     let (lexer, trivia) = scanner lexer in
@@ -1260,12 +1272,15 @@ let scan_leading_xhp_trivia lexer =
 
 let scan_trailing_trivia scanner lexer  =
   let rec aux lexer acc =
-    let (lexer, trivia) = scanner lexer in
+    let (lexer1, trivia) = scanner lexer in
     match trivia with
-    | None -> (lexer, acc)
-    | Some t ->
-      if t.Trivia.kind = TriviaKind.EndOfLine then (lexer, t :: acc)
-      else aux lexer (t :: acc) in
+    | None -> (lexer1, acc)
+    | Some t -> begin
+      match t.Trivia.kind with
+      | TriviaKind.EndOfLine -> (lexer1, t :: acc)
+      | TriviaKind.UnsafeExpression -> (lexer, acc)
+      | _ -> aux lexer1 (t :: acc)
+      end in
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
 

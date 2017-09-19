@@ -1,0 +1,4 @@
+File "pass_by_ref_annotation3.php", line 7, characters 9-10:
+This argument should be annotated with & (Typing[4168])
+  File "hhi_lib__srcs/container_functions.hhi", line 26, characters 47-50:
+  Because this parameter is passed by reference

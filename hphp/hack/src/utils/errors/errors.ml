@@ -722,6 +722,7 @@ module Typing                               = struct
   let array_get_with_optional_field         = 4165 (* DONT MODIFY!!!! *)
   let unknown_field_disallowed_in_shape     = 4166 (* DONT MODIFY!!!! *)
   let nullable_cast                         = 4167 (* DONT MODIFY!!!! *)
+  let pass_by_ref_annotation_mismatch       = 4168 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2381,6 +2382,12 @@ let class_property_only_static_literal pos =
 let reference_expr pos =
   let msg = "Cannot take a value by reference in strict mode." in
   add Typing.reference_expr pos msg
+
+let pass_by_ref_annotation ~should_add p witness =
+  let msg = if should_add
+    then "This argument should be annotated with &"
+    else "This argument should not be annotated with &" in
+  add_list Typing.pass_by_ref_annotation_mismatch ((p, msg) :: witness)
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

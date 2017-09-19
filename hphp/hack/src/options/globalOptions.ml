@@ -109,6 +109,11 @@ let tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
  *)
 let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 
+(**
+ * Require call-time pass-by-ref annotations to match function definitions.
+ *)
+let tco_experimental_safe_pass_by_ref = "safe_pass_by_ref"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -126,6 +131,7 @@ let tco_experimental_all =
      tco_experimental_generics_arity;
      tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape;
      tco_experimental_forbid_nullable_cast;
+     tco_experimental_safe_pass_by_ref;
    ]
 
 let tco_migration_flags_all =

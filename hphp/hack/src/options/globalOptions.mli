@@ -101,6 +101,7 @@ val tco_experimental_annotate_function_calls : string
 val tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
     : string
 val tco_experimental_forbid_nullable_cast : string
+val tco_experimental_safe_pass_by_ref : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

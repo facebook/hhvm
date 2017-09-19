@@ -1,0 +1,68 @@
+File "pass_by_ref_annotation2.php", line 12, characters 10-12:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 14, characters 11-12:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 15, characters 11-12:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 15, characters 15-17:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 16, characters 7-9:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 16, characters 12-13:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 17, characters 7-9:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 17, characters 12-13:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 17, characters 16-18:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 19, characters 16-18:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 20, characters 7-9:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 21, characters 7-9:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 21, characters 17-19:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 23, characters 12-14:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 18-19:
+  Because this parameter is passed by value
+File "pass_by_ref_annotation2.php", line 23, characters 17-18:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 25, characters 16-17:
+This argument should be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 30-31:
+  Because this parameter is passed by reference
+File "pass_by_ref_annotation2.php", line 25, characters 20-22:
+This argument should not be annotated with & (Typing[4168])
+  File "pass_by_ref_annotation2.php", line 3, characters 39-40:
+  Because this parameter is passed by value

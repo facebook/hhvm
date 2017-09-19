@@ -1654,7 +1654,7 @@ and expr_
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, ft = Phase.localize_ft ~ety_env env ft in
       (* check for recursive function calls *)
-      let anon = anon_make env p f idl in
+      let anon = anon_make env p f ft idl in
       let env, anon_id = Env.add_anonymous env anon in
       let env, tefun, _ = Errors.try_with_error
         (fun () ->
@@ -1663,10 +1663,10 @@ and expr_
         (fun () ->
           (* If the anonymous function declaration has errors itself, silence
              them in any subsequent usages. *)
-          let anon env fun_params =
+          let anon_ign ?el:_ env fun_params =
             Errors.ignore_ (fun () -> (anon env fun_params)) in
-          let _, tefun, ty = anon env ft.ft_params in
-          let env = Env.set_anonymous env anon_id anon in
+          let _, tefun, ty = anon_ign env ft.ft_params in
+          let env = Env.set_anonymous env anon_id anon_ign in
           env, tefun, ty) in
       env, tefun, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
@@ -1808,11 +1808,11 @@ and anon_check_param env param =
       let env = Type.sub_type hint_pos Reason.URhint env paramty hty in
       env
 
-and anon_make tenv p f idl =
+and anon_make tenv p f ft idl =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
-  fun env supplied_params ->
+  fun ?el env supplied_params ->
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
@@ -1847,6 +1847,11 @@ and anon_make tenv p f idl =
           then env
           else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
         in
+        let env = begin match el with
+          | Some el -> wfold_left_default check_pass_by_ref (env, None)
+              ft.ft_params el
+          | _ -> env
+        end in
         is_typing_self := false;
         let tfun_ = {
           T.f_mode = f.f_mode;
@@ -3901,7 +3906,24 @@ and unpack_exprl env e_tyl uel =
       (env, e_tyl, is_tuple || unpacked_tuple)
     end
 
+and check_pass_by_ref env { fp_pos; fp_is_ref; _ } (pos, e) =
+  let r = Reason.Rwitness fp_pos in
+  let () = match e with
+    | Unop (Ast.Uref, _) when fp_is_ref -> ()
+    | Unop (Ast.Uref, _) ->
+      Errors.pass_by_ref_annotation ~should_add:false pos
+        (Reason.to_string "Because this parameter is passed by value" r)
+    | _ when fp_is_ref ->
+      Errors.pass_by_ref_annotation ~should_add:true pos
+        (Reason.to_string "Because this parameter is passed by reference" r)
+    | _ -> ()
+  in
+  env
+
 and call_ pos env fty el uel =
+  let safe_pass_by_ref_enabled =
+    TypecheckerOptions.experimental_feature_enabled
+      (Env.get_options env) TypecheckerOptions.experimental_safe_pass_by_ref in
   let env, efty = Env.expand_type env fty in
   (match efty with
   | _, (Terr | Tany | Tunresolved []) ->
@@ -3944,6 +3966,10 @@ and call_ pos env fty el uel =
      *)
     let () = check_arity ~check_min:(uel = [] || unpacked_tuple)
       pos pos_def arity ft.ft_arity in
+    let env = if safe_pass_by_ref_enabled
+      then wfold_left_default check_pass_by_ref (env, var_param)
+        ft.ft_params (List.map e_tyl fst)
+      else env in
     let todos = ref [] in
     let env = wfold_left_default (call_param todos) (env, var_param)
       ft.ft_params e_tyl in
@@ -3962,7 +3988,9 @@ and call_ pos env fty el uel =
       | Some anon ->
         let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
-        let env, _, ty = anon env tyl in
+        let env, _, ty = if safe_pass_by_ref_enabled
+          then anon ~el env tyl
+          else anon env tyl in
         env, tel, [], ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
     (* Relaxing call_user_func to work with an array in partial mode *)

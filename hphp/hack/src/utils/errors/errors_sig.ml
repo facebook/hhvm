@@ -329,6 +329,8 @@ module type S = sig
   val instanceof_always_true : Pos.t -> unit
   val instanceof_generic_classname : Pos.t -> string -> unit
   val final_property : Pos.t -> unit
+  val pass_by_ref_annotation :
+    should_add:bool -> Pos.t -> (Pos.t * string) list -> unit
 
 
   val to_json : Pos.absolute error_ -> Hh_json.json

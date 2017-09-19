@@ -48,5 +48,7 @@ let experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =
     tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape
 let experimental_forbid_nullable_cast =
   GlobalOptions.tco_experimental_forbid_nullable_cast
+let experimental_safe_pass_by_ref =
+  GlobalOptions.tco_experimental_safe_pass_by_ref
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

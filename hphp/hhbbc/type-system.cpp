@@ -1523,15 +1523,14 @@ bool Type::couldBeData(const Type& o) const {
     not_reached();
   case DataTag::Obj:
   {
-    if (o.m_data.dobj.whType && m_data.dobj.whType) {
-      return m_data.dobj.whType->couldBe(*o.m_data.dobj.whType);
-    }
-    if (m_data.dobj.type == o.m_data.dobj.type &&
-        m_data.dobj.cls.same(o.m_data.dobj.cls)) {
-      return true;
-    }
-    if (m_data.dobj.type == DObj::Sub || o.m_data.dobj.type == DObj::Sub) {
-      return m_data.dobj.cls.couldBe(o.m_data.dobj.cls);
+    if ((m_data.dobj.type == o.m_data.dobj.type &&
+         m_data.dobj.cls.same(o.m_data.dobj.cls)) ||
+        ((m_data.dobj.type == DObj::Sub || o.m_data.dobj.type == DObj::Sub) &&
+         m_data.dobj.cls.couldBe(o.m_data.dobj.cls))) {
+      return
+        !o.m_data.dobj.whType ||
+        !m_data.dobj.whType ||
+        m_data.dobj.whType->couldBe(*o.m_data.dobj.whType);
     }
     return false;
   }
@@ -1729,19 +1728,12 @@ Type wait_handle(const Index& index, Type inner) {
 bool is_specialized_wait_handle(const Type& t) {
   return
     t.m_dataTag == DataTag::Obj &&
-    !!t.m_data.dobj.whType.get();
+    t.m_data.dobj.whType;
 }
 
 Type wait_handle_inner(const Type& t) {
   assert(is_specialized_wait_handle(t));
   return *t.m_data.dobj.whType;
-}
-
-Type Type::wait_handle_outer(const Type& wh) {
-  auto ret      = Type{wh.m_bits};
-  ret.m_dataTag = DataTag::Obj;
-  construct(ret.m_data.dobj, wh.m_data.dobj.type, wh.m_data.dobj.cls);
-  return ret;
 }
 
 Type sval(SString val) {

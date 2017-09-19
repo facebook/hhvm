@@ -564,10 +564,7 @@ private:
   struct DDHelperFn;
 
 private:
-  static Type wait_handle_outer(const Type&);
   static Type unionArrLike(const Type& a, const Type& b);
-
-private:
   template<class Ret, class T, class Function>
   DDHelperFn<Ret,T,Function> ddbind(const Function& f, const T& t) const;
   template<class Ret, class T, class Function>

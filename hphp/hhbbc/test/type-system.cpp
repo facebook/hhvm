@@ -1368,6 +1368,8 @@ TEST(Type, Interface) {
   // load classes in hierarchy
   auto const clsIA = idx.resolve_class(ctx, s_IA.get());
   if (!clsIA) ADD_FAILURE();
+  auto const clsIB = idx.resolve_class(ctx, s_IB.get());
+  if (!clsIB) ADD_FAILURE();
   auto const clsIAA = idx.resolve_class(ctx, s_IAA.get());
   if (!clsIAA) ADD_FAILURE();
   auto const clsA = idx.resolve_class(ctx, s_A.get());
@@ -1376,15 +1378,18 @@ TEST(Type, Interface) {
   if (!clsAA) ADD_FAILURE();
 
   // make sometypes and objects
-  auto const subObjIATy  = subObj(*clsIA);
-  auto const subClsIATy  = subCls(*clsIA);
-  auto const subObjIAATy = subObj(*clsIAA);
-  auto const subClsIAATy = subCls(*clsIAA);
-  auto const subObjATy   = subObj(*clsA);
-  auto const clsExactATy = clsExact(*clsA);
-  auto const subClsATy   = subCls(*clsA);
-  auto const subObjAATy  = subObj(*clsAA);
-  auto const subClsAATy  = subCls(*clsAA);
+  auto const subObjIATy   = subObj(*clsIA);
+  auto const subClsIATy   = subCls(*clsIA);
+  auto const subObjIAATy  = subObj(*clsIAA);
+  auto const subClsIAATy  = subCls(*clsIAA);
+  auto const subObjIBTy   = subObj(*clsIB);
+  auto const subObjATy    = subObj(*clsA);
+  auto const clsExactATy  = clsExact(*clsA);
+  auto const subClsATy    = subCls(*clsA);
+  auto const subObjAATy   = subObj(*clsAA);
+  auto const subClsAATy   = subCls(*clsAA);
+  auto const exactObjATy  = objExact(*clsA);
+  auto const exactObjAATy = objExact(*clsAA);
 
   EXPECT_TRUE(subClsATy.subtypeOf(objcls(subObjIATy)));
   EXPECT_TRUE(subClsATy.couldBe(objcls(subObjIATy)));
@@ -1396,9 +1401,17 @@ TEST(Type, Interface) {
   EXPECT_FALSE(subClsATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_FALSE(objcls(subObjATy).strictSubtypeOf(objcls(subObjIAATy)));
 
-  // We don't support couldBe intelligently for interfaces quite yet, so here's
-  // a test that will start failing if we ever do:
+  EXPECT_EQ(intersection_of(subObjIAATy, subObjAATy), subObjAATy);
+  EXPECT_EQ(intersection_of(subObjIAATy, exactObjAATy), exactObjAATy);
+  EXPECT_EQ(intersection_of(subObjIAATy, exactObjATy), TBottom);
+  EXPECT_EQ(intersection_of(subObjIAATy, subObjATy), subObjATy);
+  EXPECT_EQ(intersection_of(subObjIAATy, subObjIBTy), TObj);
+
+  // We don't support couldBe or intersection intelligently for
+  // interfaces quite yet, so here are some tests that may start
+  // failing if we ever do:
   EXPECT_TRUE(clsExactATy.couldBe(objcls(subObjIAATy)));
+
 }
 
 TEST(Type, NonUnique) {
@@ -1973,6 +1986,40 @@ TEST(Type, ArrUnions) {
   auto const aval1 = aval(test_array_packed_value());
   auto const aval2 = aval(test_array_packed_value3());
   EXPECT_EQ(union_of(aval1, aval2), sarr_packedn(TInt));
+}
+
+TEST(Type, ArrIntersections) {
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
+  auto const tstruct       = sarr_map(test_map_a);
+
+  auto test_map_b          = MapElems{};
+  test_map_b[tv(s_test)]   = TInt;
+  auto const tstruct2      = sarr_map(test_map_b);
+
+  auto test_map_c          = MapElems{};
+  test_map_c[tv(s_A)]      = TInt;
+  auto const tstruct3      = sarr_map(test_map_c);
+
+  auto test_map_d          = MapElems{};
+  test_map_d[tv(s_A)]      = TInt;
+  test_map_d[tv(s_test)]   = TDbl;
+  auto const tstruct4      = sarr_map(test_map_d);
+
+  auto const mapn_str_int = arr_mapn(TStr, TInt);
+
+  EXPECT_EQ(intersection_of(tstruct,  mapn_str_int), tstruct);
+  EXPECT_EQ(intersection_of(tstruct2, mapn_str_int), tstruct2);
+  EXPECT_EQ(intersection_of(tstruct3, mapn_str_int), tstruct3);
+  EXPECT_EQ(intersection_of(tstruct4, mapn_str_int), TBottom);
+  EXPECT_EQ(intersection_of(tstruct, tstruct2),      tstruct);
+
+  EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
+                            sarr_packedn(TDbl)),
+            sarr_packed({TDbl, TDbl, TDbl}));
+  EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
+                            sarr_packed({TDbl, TNum, TInt})),
+            sarr_packed({TDbl, TDbl, TInt}));
 }
 
 TEST(Type, ArrOfArr) {

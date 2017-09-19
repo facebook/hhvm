@@ -622,15 +622,18 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   };
 
   auto const result = [&] {
-    if (l1 == StackDupId ||
-        (l1 != NoLocalId &&
-         l2 != NoLocalId && l2 != StackDupId &&
-         (l1 == l2 || locsAreEquiv(env, l1, l2)))) {
-      return NSame ? TFalse : TTrue;
-    }
-
     auto const v1 = tv(t1);
     auto const v2 = tv(t2);
+
+    if (l1 == StackDupId ||
+        (l1 <= MaxLocalId && l2 <= MaxLocalId &&
+         (l1 == l2 || locsAreEquiv(env, l1, l2)))) {
+      if (!t1.couldBe(TDbl) || !t2.couldBe(TDbl) ||
+          (v1 && (v1->m_type != KindOfDouble || !std::isnan(v1->m_data.dbl))) ||
+          (v2 && (v2->m_type != KindOfDouble || !std::isnan(v2->m_data.dbl)))) {
+        return NSame ? TFalse : TTrue;
+      }
+    }
 
     if (v1 && v2) {
       if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
@@ -683,11 +686,8 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
     return bail();
   }
 
+  auto isect = intersection_of(ty0, ty1);
   discard(env, 2);
-
-  auto maybe_loosen_static = [] (const Type& orig, const Type& rep) {
-    return orig.subtypeOf(TUnc) ? rep : loosen_staticness(rep);
-  };
 
   auto handle_same = [&] {
     // Currently dce uses equivalency to prove that something isn't
@@ -695,12 +695,13 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
     // we know that won't be affected. Its irrelevant for uncounted
     // things, and for TObj and TRes, $x === $y iff $x and $y refer to
     // the same thing.
-    if (loc0 <= MaxLocalId &&
-        (ty0.subtypeOfAny(TUnc, TObj, TRes) ||
-         ty1.subtypeOfAny(TUnc, TObj, TRes))) {
+    if (loc0 <= MaxLocalId && loc1 <= MaxLocalId &&
+        (ty0.subtypeOfAny(TOptObj, TOptRes) ||
+         ty1.subtypeOfAny(TOptObj, TOptRes) ||
+         (ty0.subtypeOf(TUnc) && ty1.subtypeOf(TUnc)))) {
       if (loc1 == StackDupId) {
         setStkLocal(env, loc0);
-      } else if (loc1 <= MaxLocalId) {
+      } else {
         assertx(loc0 != loc1 && !locsAreEquiv(env, loc0, loc1));
         auto loc = loc0;
         while (true) {
@@ -714,17 +715,12 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
       }
     }
     refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
-      if (!ty.couldBe(TUninit) ||
-          !ty0.couldBe(TNull) ||
-          !ty1.couldBe(TNull)) {
-        if (val0) return maybe_loosen_static(ty, ty0);
-        if (val1) return maybe_loosen_static(ty, ty1);
-        if (ty0.subtypeOf(ty)) return maybe_loosen_static(ty, ty0);
-        if (ty1.subtypeOf(ty)) return maybe_loosen_static(ty, ty1);
-        return remove_uninit(std::move(ty));
+      if (!ty.couldBe(TUninit) || !isect.couldBe(TNull)) {
+        auto ret = intersection_of(std::move(ty), isect);
+        return ty.subtypeOf(TUnc) ? ret : loosen_staticness(ret);
       }
 
-      if (ty0.subtypeOf(TNull) || ty1.subtypeOf(TNull)) {
+      if (isect.subtypeOf(TNull)) {
         return ty.couldBe(TInitNull) ? TNull : TUninit;
       }
 
@@ -732,7 +728,7 @@ void group(ISS& env, const Same& same, const JmpOp& jmp) {
     });
   };
 
-  auto handle_differ_side = [&] (LocalId location, Type ty) {
+  auto handle_differ_side = [&] (LocalId location, const Type& ty) {
     if (ty.subtypeOf(TInitNull) || ty.strictSubtypeOf(TBool)) {
       refineLocation(env, location, [&] (Type t) {
           if (ty.subtypeOf(TNull)) {
@@ -798,9 +794,21 @@ void binOpInt64Impl(ISS& env, Fun fun) {
 }
 
 void in(ISS& env, const bc::Eq&) {
+  auto rs = resolveSame<false>(env);
+  if (rs.first == TTrue) {
+    if (!rs.second) constprop(env);
+    discard(env, 2);
+    return push(env, TTrue);
+  }
   binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Neq&) {
+  auto rs = resolveSame<false>(env);
+  if (rs.first == TTrue) {
+    if (!rs.second) constprop(env);
+    discard(env, 2);
+    return push(env, TFalse);
+  }
   binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Lt&) {

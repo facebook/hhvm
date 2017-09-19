@@ -133,6 +133,9 @@ let private_syntax =
 let public_syntax =
   make_token_syntax TokenKind.Public
 
+let final_syntax =
+  make_token_syntax TokenKind.Final
+
 let static_syntax =
   make_token_syntax TokenKind.Static
 
@@ -195,6 +198,10 @@ let member_selection_syntax =
 
 let this_syntax =
   make_variable_expression_syntax "$this"
+
+let this_type_syntax =
+  make_name_syntax "this"
+    |> make_simple_type_specifier
 
 let unset_syntax =
   make_name_syntax "unset"
@@ -280,6 +287,10 @@ let string_of_name_token node =
   | Token ({ Token.kind = TokenKind.Name; _; } as token) -> Token.text token
   | _ -> failwith "string_of_name_token: Was not a Name Token"
 
+let string_of_variable_token node =
+  match syntax node with
+  | Token ({ Token.kind = TokenKind.Variable; _; } as token) -> Token.text token
+  | _ -> failwith "string_of_variable_token: Was not a Variable Token"
 
 (* Syntax creation functions *)
 
@@ -456,8 +467,9 @@ let make_type_specifier_syntax classname type_parameter_list =
   else
     make_generic_type_specifier classname_syntax type_arguments_syntax
 
-let make_object_creation_expression_syntax classname arguments =
-  let type_specifier_syntax = make_type_specifier_syntax classname [] in
+let make_typed_object_creation_expression_syntax
+    type_specifier_syntax
+    arguments =
   let arguments_syntax = make_comma_list arguments in
   make_object_creation_expression
     new_keyword_syntax
@@ -465,6 +477,10 @@ let make_object_creation_expression_syntax classname arguments =
     left_paren_syntax
     arguments_syntax
     right_paren_syntax
+
+let make_object_creation_expression_syntax classname arguments =
+  let type_specifier_syntax = make_type_specifier_syntax classname [] in
+  make_typed_object_creation_expression_syntax type_specifier_syntax arguments
 
 let make_functional_type_syntax argument_types return_type_syntax =
   let argument_types_syntax = make_comma_list argument_types in
@@ -508,13 +524,13 @@ let make_classish_declaration_syntax
     (* classish_implements_list *) (make_missing ())
     classish_body
 
-(* TODO(tingley): Determine if it's worth tightening visibility here. *)
 let make_methodish_declaration_with_body_syntax
+    ?(modifiers = [ public_syntax; ])
     function_decl_header_syntax
     function_body =
   make_methodish_declaration
     (* methodish_attribute *) (make_missing ())
-    (make_list [public_syntax])
+    (make_list modifiers)
     function_decl_header_syntax
     function_body
     (* methodish_semicolon *) (make_missing ())
@@ -546,9 +562,11 @@ let make_lambda_from_method_syntax existing_node lambda_signature lambda_body =
     })
 
 let make_methodish_declaration_syntax
+    ?modifiers
     function_decl_header_syntax
     function_body =
   make_methodish_declaration_with_body_syntax
+    ?modifiers
     function_decl_header_syntax
     (make_compound_statement_syntax function_body)
 
@@ -651,8 +669,14 @@ let default_label_syntax =
 
 (* Coroutine-specific syntaxes *)
 
+let continuation_member_name =
+  "coroutineContinuation_generated"
+
+let continuation_member_name_syntax =
+  make_name_syntax continuation_member_name
+
 let continuation_variable =
-  "$coroutineContinuation_generated"
+  "$" ^ continuation_member_name
 
 let continuation_variable_syntax =
   make_variable_expression_syntax continuation_variable
@@ -661,7 +685,9 @@ let make_closure_base_type_syntax function_type =
   make_type_specifier_syntax "ClosureBase" [ function_type; ]
 
 let make_continuation_type_syntax function_type =
-  make_type_specifier_syntax "CoroutineContinuation" [ function_type; ]
+  make_type_specifier_syntax
+    "InternalCoroutineContinuation"
+    [ function_type; ]
 
 let make_continuation_parameter_syntax
     ?visibility_syntax
@@ -776,6 +802,12 @@ let do_resume_member_name =
 
 let do_resume_member_name_syntax =
   make_name_syntax do_resume_member_name
+
+let clone_member_name =
+  "clone"
+
+let clone_member_name_syntax =
+  make_name_syntax clone_member_name
 
 let coroutine_data_variable =
   "$coroutineData"

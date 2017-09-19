@@ -182,12 +182,11 @@ struct Class {
   SString name() const;
 
   /*
-   * Whether this class could possibly be an interface or a trait.
+   * Whether this class could possibly be an interface/interface or trait.
    *
-   * When returning false, it is known that this class is not an interface
-   * or a trait. When returning true, it's possible that this class is not
-   * an interface or trait but the system cannot tell.
+   * True means it might be, false means it is not.
    */
+  bool couldBeInterface() const;
   bool couldBeInterfaceOrTrait() const;
 
   /*

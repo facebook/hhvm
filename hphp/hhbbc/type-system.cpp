@@ -653,7 +653,8 @@ struct Commute : InnerFn {
   using InnerFn::operator();
 
   template<class B>
-  result_type operator()(SArray a, const B& b) const {
+  typename std::enable_if<!std::is_same<SArray, B>::value, result_type>::type
+  operator()(SArray a, const B& b) const {
     return InnerFn::operator()(b, a);
   }
 
@@ -792,9 +793,114 @@ struct DualDispatchCouldBeImpl {
   }
 };
 
-// The countedness or possible-emptiness of the arrays is handled
-// outside of this function, so it's ok to just return TArr from all
-// of these here.
+// pre: neither type is a subtype of the other
+struct DualDispatchIntersectionImpl {
+  static constexpr bool disjoint = false;
+  using result_type = Type;
+
+  explicit DualDispatchIntersectionImpl(trep b) : bits(b) {}
+
+  Type operator()() const { not_reached(); }
+
+  template <typename F>
+  Type intersect_packed(std::vector<Type> elems, F next) const {
+    for (auto& e : elems) {
+      e &= next();
+      if (e == TBottom) return TBottom;
+    }
+    return packed_impl(bits, std::move(elems));
+  }
+
+  template <typename F>
+  Type intersect_map(MapElems map, F next) const {
+    for (auto it = map.begin(); it != map.end(); it++) {
+      auto other = next();
+      if (it->first.m_type == KindOfInt64 ?
+          !other.first.couldBe(TInt) : !other.first.couldBe(TStr)) {
+        return TBottom;
+      }
+      auto val = intersection_of(it->second, other.second);
+      if (val == TBottom) return TBottom;
+      map.update(it, std::move(val));
+    }
+    return map_impl(bits, std::move(map));
+  }
+
+  // The SArray is known to not be a subtype, so the intersection must be empty
+  Type operator()(const DArrLikePacked& a, const SArray b) const {
+    return TBottom;
+  }
+  Type operator()(const DArrLikePackedN& a, const SArray b) const {
+    return TBottom;
+  }
+  Type operator()(const DArrLikeMapN& a, const SArray b) const {
+    return TBottom;
+  }
+  Type operator()(const DArrLikeMap& a, const SArray b) const {
+    return TBottom;
+  }
+  Type operator()(const SArray a, const SArray b) const {
+    return TBottom;
+  }
+
+  Type operator()(const DArrLikePacked& a, const DArrLikePacked& b) const {
+    if (a.elems.size() != b.elems.size()) return TBottom;
+
+    auto i = size_t{};
+    return intersect_packed(a.elems, [&] { return b.elems[i++]; });
+  }
+  Type operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
+    return intersect_packed(a.elems, [&] { return b.type; });
+  }
+  Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
+    if (b.key.couldBe(TInt)) {
+      return intersect_packed(a.elems, [&] { return b.val; });
+    }
+    return TBottom;
+  }
+  Type operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+    // We don't allow DArrLikeMaps which are packed
+    return TBottom;
+  }
+
+  Type operator()(const DArrLikePackedN& a, const DArrLikePackedN& b) const {
+    auto isect = intersection_of(a.type, b.type);
+    if (isect == TBottom) return TBottom;
+    return packedn_impl(bits, isect);
+  }
+  Type operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
+    if (b.key.couldBe(TInt)) {
+      auto val = intersection_of(b.val, a.type);
+      if (val != TBottom) return packedn_impl(bits, std::move(val));
+    }
+    return TBottom;
+  }
+  Type operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+    return TBottom;
+  }
+
+  Type operator()(const DArrLikeMapN& a, const DArrLikeMapN& b) const {
+    auto k = intersection_of(a.key, b.key);
+    auto v = intersection_of(a.val, b.val);
+    if (k == TBottom || v == TBottom) return TBottom;
+    return mapn_impl(bits, k, v);
+  }
+  Type operator()(const DArrLikeMapN& a, const DArrLikeMap& b) const {
+    return intersect_map(b.map, [&] { return std::make_pair(a.key, a.val); });
+  }
+
+  Type operator()(const DArrLikeMap& a, const DArrLikeMap& b) const {
+    if (a.map.size() != b.map.size()) return TBottom;
+    auto it = b.map.begin();
+    return intersect_map(a.map, [&] {
+      auto ret = std::make_pair(from_cell(it->first), it->second);
+      ++it;
+      return ret;
+    });
+  }
+private:
+  trep bits;
+};
 
 struct DualDispatchUnionImpl {
   static constexpr bool disjoint = false;
@@ -1063,9 +1169,10 @@ struct DualDispatchSubtype {
   }
 };
 
-using DualDispatchEq      = Commute<DualDispatchEqImpl>;
-using DualDispatchCouldBe = Commute<DualDispatchCouldBeImpl>;
-using DualDispatchUnion   = Commute<DualDispatchUnionImpl>;
+using DualDispatchEq           = Commute<DualDispatchEqImpl>;
+using DualDispatchCouldBe      = Commute<DualDispatchCouldBeImpl>;
+using DualDispatchUnion        = Commute<DualDispatchUnionImpl>;
+using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 
 //////////////////////////////////////////////////////////////////////
 // Helpers for creating literal array-like types
@@ -1217,6 +1324,16 @@ const Type& Type::operator |= (const Type& other) {
 
 const Type& Type::operator |= (Type&& other) {
   *this = union_of(std::move(*this), std::move(other));
+  return *this;
+}
+
+const Type& Type::operator &= (const Type& other) {
+  *this = intersection_of(std::move(*this), other);
+  return *this;
+}
+
+const Type& Type::operator &= (Type&& other) {
+  *this = intersection_of(std::move(*this), std::move(other));
   return *this;
 }
 
@@ -2404,11 +2521,94 @@ Type from_hni_constraint(SString s) {
   return TGen;
 }
 
+Type intersection_of(Type a, Type b) {
+  auto const isect = static_cast<trep>(a.m_bits & b.m_bits);
+  if (!mayHaveData(isect)) return Type { isect };
+
+  auto fix = [&] (Type& t) {
+    t.m_bits = isect;
+    return std::move(t);
+  };
+
+  if (!b.hasData())     return fix(a);
+  if (!a.hasData())     return fix(b);
+  if (a.subtypeData(b)) return fix(a);
+  if (b.subtypeData(a)) return fix(b);
+
+  if (a.m_dataTag == b.m_dataTag) {
+    switch (a.m_dataTag) {
+      case DataTag::None:
+        not_reached();
+      case DataTag::Obj:
+      {
+        auto fixWh = [&] (Type& t) {
+          if (!a.m_data.dobj.whType) {
+            t.m_data.dobj.whType = b.m_data.dobj.whType;
+          } else if (!b.m_data.dobj.whType) {
+            t.m_data.dobj.whType = a.m_data.dobj.whType;
+          } else {
+            auto whType = intersection_of(*a.m_data.dobj.whType,
+                                          *b.m_data.dobj.whType);
+            if (whType == TBottom) return TBottom;
+            *t.m_data.dobj.whType.mutate() = whType;
+          }
+          return fix(t);
+        };
+        if (a.m_data.dobj.type == b.m_data.dobj.type &&
+            a.m_data.dobj.cls.same(b.m_data.dobj.cls)) {
+          return fixWh(a);
+        }
+        if (b.m_data.dobj.type == DObj::Sub &&
+            a.m_data.dobj.cls.subtypeOf(b.m_data.dobj.cls)) {
+          return fixWh(a);
+        }
+        if (a.m_data.dobj.type == DObj::Sub &&
+            b.m_data.dobj.cls.subtypeOf(a.m_data.dobj.cls)) {
+          return fixWh(b);
+        }
+        if (a.m_data.dobj.type == DObj::Sub &&
+            b.m_data.dobj.type == DObj::Sub) {
+          if (a.m_data.dobj.cls.couldBeInterface()) {
+            if (!b.m_data.dobj.cls.couldBeInterface()) {
+              return fixWh(b);
+            } else {
+              return Type { isect };
+            }
+          } else if (b.m_data.dobj.cls.couldBeInterface()) {
+            return fixWh(a);
+          }
+        }
+        return TBottom;
+      }
+      case DataTag::Cls:
+      case DataTag::Str:
+      case DataTag::ArrLikeVal:
+      case DataTag::Int:
+      case DataTag::Dbl:
+        // Neither is a subtype of the other, so the intersection is empty
+        return TBottom;
+      case DataTag::RefInner:
+      {
+        auto inner = intersection_of(*a.m_data.inner, *b.m_data.inner);
+        if (inner == TBottom) return TBottom;
+        *a.m_data.inner.mutate() = inner;
+        return fix(a);
+      }
+      case DataTag::ArrLikePacked:
+      case DataTag::ArrLikePackedN:
+      case DataTag::ArrLikeMap:
+      case DataTag::ArrLikeMapN:
+        // will be handled by dual dispatch.
+        break;
+    }
+  }
+  return a.dualDispatchDataFn(b, DualDispatchIntersection{ isect });
+}
+
 Type Type::unionArrLike(const Type& a, const Type& b) {
   assert(!a.subtypeOf(b));
   assert(!b.subtypeOf(a));
 
-  auto ret = Type{};
   auto const newBits = combine_arr_like_bits(a.m_bits, b.m_bits);
 
   return a.dualDispatchDataFn(b, DualDispatchUnion{ newBits });

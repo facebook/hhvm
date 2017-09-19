@@ -427,6 +427,8 @@ struct Type {
 
   const Type& operator |= (const Type& other);
   const Type& operator |= (Type&& other);
+  const Type& operator &= (const Type& other);
+  const Type& operator &= (Type&& other);
 
   /*
    * Returns true if this type is definitely going to be a subtype or a strict
@@ -498,6 +500,7 @@ private:
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
+  friend Type intersection_of(Type, Type);
   friend void widen_type_impl(Type&, uint32_t);
   friend Type widen_type(Type);
   friend Type widening_union(const Type&, const Type&);
@@ -993,6 +996,12 @@ Type from_DataType(DataType dt);
  * accurate.  `s' may be nullptr.
  */
 Type from_hni_constraint(SString s);
+
+/*
+ * Make a type that represents values from the intersection of the
+ * supplied types.
+ */
+Type intersection_of(Type a, Type b);
 
 /*
  * Make a type that represents values from either of the supplied

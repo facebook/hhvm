@@ -3139,7 +3139,7 @@ void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;
-  auto const stackT = topC(env);
+  auto stackT = topC(env);
 
   // If there is no return type constraint, or if the return type
   // constraint is a typevar, or if the top of stack is the same
@@ -3164,16 +3164,6 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   auto tcT =
     remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
 
-  if (tcT.subtypeOf(TBottom)) {
-    unreachable(env);
-    return;
-  }
-
-  // Below we compute retT, which is a rough conservative approximate of the
-  // intersection of stackT and tcT.
-  // TODO(4441939): We could do better if we had an intersect_of() function
-  // that provided a formal way to compute the intersection of two Types.
-
   // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
   // Why?  Because we want uphold the invariant that we only refine return
   // types and never widen them, and if we allow tcT to be an interface then
@@ -3187,15 +3177,13 @@ void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
     tcT = is_opt(tcT) ? TOptObj : TObj;
   }
-  // If stackT is a subtype of tcT, use stackT.  Otherwise, if tc is an opt
-  // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
-  // In all other cases, use tcT.
-  auto retT = stackT.subtypeOf(tcT) ? stackT :
-                    is_opt(tcT) && !stackT.couldBe(TInitNull) ? unopt(tcT) :
-                    tcT;
 
-  // Update the top of stack with the rough conservative approximate of the
-  // intersection of stackT and tcT
+  auto retT = intersection_of(std::move(tcT), std::move(stackT));
+  if (retT.subtypeOf(TBottom)) {
+    unreachable(env);
+    return;
+  }
+
   popC(env);
   push(env, std::move(retT));
 }

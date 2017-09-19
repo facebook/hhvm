@@ -545,6 +545,15 @@ bool Class::couldBeInterfaceOrTrait() const {
   );
 }
 
+bool Class::couldBeInterface() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (borrowed_ptr<ClassInfo> cinfo) {
+      return cinfo->cls->attrs & AttrInterface;
+    }
+  );
+}
+
 bool Class::couldBeOverriden() const {
   return val.match(
     [] (SString) { return true; },

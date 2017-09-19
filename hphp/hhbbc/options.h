@@ -102,9 +102,7 @@ struct Options {
   /*
    * If true, analyze calls to functions in a context-sensitive way.
    *
-   * Note, this is disabled by default because of the need to have an
-   * intersection operation in the type system to maintain index
-   * invariants---it doesn't quite work yet.  See comments in index.cpp.
+   * Note, this is disabled by default because it doesn't quite work yet.
    */
   bool ContextSensitiveInterp = false;
 

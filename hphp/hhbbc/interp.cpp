@@ -76,7 +76,7 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
   if (!options.StrengthReduce) reduce = false;
 
   for (auto it = begin(bcs); it != end(bcs); ++it) {
-    assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
+    assert(env.flags.jmpDest == NoBlockId &&
            "you can't use impl with branching opcodes before last position");
 
     auto const wasPEI = env.flags.wasPEI;
@@ -964,7 +964,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   auto const location = topStkEquiv(env);
   auto const e = emptiness(popC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
-    jmp_nofallthrough(env);
+    jmp_setdest(env, op.target);
     env.propagate(op.target, &env.state);
     return;
   }
@@ -1129,7 +1129,7 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
   if (valTy.subtypeOf(testTy) || failTy.subtypeOf(TBottom)) {
     push(env, std::move(valTy));
     if (takenOnSuccess) {
-      jmp_nofallthrough(env);
+      jmp_setdest(env, jmp.target);
       env.propagate(jmp.target, &env.state);
     } else {
       jmp_nevertaken(env);
@@ -1141,7 +1141,7 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
     if (takenOnSuccess) {
       jmp_nevertaken(env);
     } else {
-      jmp_nofallthrough(env);
+      jmp_setdest(env, jmp.target);
       env.propagate(jmp.target, &env.state);
     }
     return;
@@ -1173,7 +1173,7 @@ void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
       jmp_nevertaken(env);
     } else {
       env.propagate(jmp.target, &save);
-      jmp_nofallthrough(env);
+      jmp_setdest(env, jmp.target);
     }
     return;
   }
@@ -1254,14 +1254,61 @@ void group(ISS& env,
 }
 
 void in(ISS& env, const bc::Switch& op) {
-  popC(env);
+  auto v = tv(popC(env));
+
+  if (v) {
+    auto go = [&] (BlockId blk) {
+      effect_free(env);
+      env.propagate(blk, &env.state);
+      jmp_setdest(env, blk);
+    };
+    auto num_elems = op.targets.size();
+    if (op.subop1 == SwitchKind::Bounded) {
+      if (v->m_type == KindOfInt64 &&
+          v->m_data.num >= 0 && v->m_data.num < num_elems) {
+        return go(op.targets[v->m_data.num]);
+      }
+    } else {
+      assertx(num_elems > 2);
+      num_elems -= 2;
+      for (auto i = size_t{}; ; i++) {
+        if (i == num_elems) {
+          return go(op.targets.back());
+        }
+        auto match = eval_cell_value([&] {
+            return cellEqual(*v, static_cast<int64_t>(op.arg2 + i));
+        });
+        if (!match) break;
+        if (*match) {
+          return go(op.targets[i]);
+        }
+      }
+    }
+  }
+
   forEachTakenEdge(op, [&] (BlockId id) {
       env.propagate(id, &env.state);
   });
 }
 
 void in(ISS& env, const bc::SSwitch& op) {
-  popC(env);
+  auto v = tv(popC(env));
+
+  if (v) {
+    for (auto& kv : op.targets) {
+      auto match = eval_cell_value([&] {
+        return !kv.first || cellEqual(*v, kv.first);
+      });
+      if (!match) break;
+      if (*match) {
+        effect_free(env);
+        env.propagate(kv.second, &env.state);
+        jmp_setdest(env, kv.second);
+        return;
+      }
+    }
+  }
+
   forEachTakenEdge(op, [&] (BlockId id) {
       env.propagate(id, &env.state);
   });
@@ -2723,7 +2770,7 @@ void in(ISS& env, const bc::IterInit& op) {
     case IterTypes::Count::Empty:
       taken();
       mayReadLocal(env, op.loc3);
-      jmp_nofallthrough(env);
+      jmp_setdest(env, op.target);
       break;
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
@@ -2766,7 +2813,7 @@ void in(ISS& env, const bc::IterInitK& op) {
       taken();
       mayReadLocal(env, op.loc3);
       mayReadLocal(env, op.loc4);
-      jmp_nofallthrough(env);
+      jmp_setdest(env, op.target);
       break;
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
@@ -3595,14 +3642,12 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       return ret;
     }
 
-    switch (flags.jmpFlag) {
-    case StepFlags::JmpFlags::Taken:
+    if (flags.jmpDest != NoBlockId &&
+        flags.jmpDest != interp.blk->fallthrough) {
       FTRACE(2, "  <took branch; no fallthrough>\n");
       return ret;
-    case StepFlags::JmpFlags::Fallthrough:
-    case StepFlags::JmpFlags::Either:
-      break;
     }
+
     if (flags.returned) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));
       always_assert(iter == stop);

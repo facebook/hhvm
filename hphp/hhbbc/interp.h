@@ -87,21 +87,10 @@ struct StepFlags {
   bool wasPEI = true;
 
   /*
-   * Information about the branch taken by a conditional JmpZ/JmpNZ at
-   * the end of the BB.
-   *
-   * 'Either' indicates that both branches could be taken. 'Taken' indicates
-   * that the conditional branch was known to be taken (e.g. because the
-   * condition was a constant). In this case, the state doesn't need to
-   * be propagated to the fallthrough block.
-   *
-   * 'Fallthrough' indicates that the conditional branch was known to be not
-   * taken, and control goes to the fallthrough block. In this case, the
-   * JmpZ/JmpNZ instruction can be converted to a PopC (no-op).
+   * If set to something other than NoBlockId, then this block
+   * unconditionally falls through to that block.
    */
-  enum class JmpFlags : uint8_t { Either, Taken, Fallthrough };
-
-  JmpFlags jmpFlag = JmpFlags::Either;
+  BlockId jmpDest = NoBlockId;
 
   /*
    * If an instruction sets this flag, it means that if it pushed a

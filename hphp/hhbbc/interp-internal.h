@@ -162,11 +162,11 @@ void effect_free(ISS& env) {
   env.flags.effectFree = true;
 }
 
-void jmp_nofallthrough(ISS& env) {
-  env.flags.jmpFlag = StepFlags::JmpFlags::Taken;
+void jmp_setdest(ISS& env, BlockId blk) {
+  env.flags.jmpDest = blk;
 }
 void jmp_nevertaken(ISS& env) {
-  env.flags.jmpFlag = StepFlags::JmpFlags::Fallthrough;
+  jmp_setdest(env, env.blk.fallthrough);
 }
 
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }

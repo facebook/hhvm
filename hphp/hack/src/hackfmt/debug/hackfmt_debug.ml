@@ -113,7 +113,7 @@ let debug_ast syntax_tree =
 
 let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n" @@
-    String.sub source_text.SourceText.text start_char (end_char - start_char)
+    String.sub (SourceText.text source_text) start_char (end_char - start_char)
 
 let debug env ~range source_text syntax_tree doc chunk_groups =
   if !debug_config.print_ast then debug_ast syntax_tree;

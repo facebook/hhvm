@@ -165,7 +165,7 @@ let errors tree =
 let to_json tree =
   let version = Full_fidelity_schema.full_fidelity_schema_version_number in
   let root = to_json tree.root in
-  let text = Hh_json.JSON_String tree.text.SourceText.text in
+  let text = Hh_json.JSON_String (SourceText.text tree.text) in
   Hh_json.JSON_Object [
     "parse_tree", root;
     "program_text", text;

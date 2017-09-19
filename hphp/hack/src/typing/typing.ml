@@ -893,12 +893,18 @@ and bind_as_expr env ty aexpr =
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
-and expr env e =
-  raw_expr ~in_cond:false env e
+and expr ?allow_uref env e =
+  raw_expr ~in_cond:false ?allow_uref env e
 
-and raw_expr ~in_cond ?lhs_of_null_coalesce ?valkind:(valkind=`other) env e =
+and raw_expr
+    ~in_cond
+    ?lhs_of_null_coalesce
+    ?allow_uref
+    ?valkind:(valkind=`other)
+    env e =
   debug_last_pos := fst e;
-  let env, te, ty = expr_ ~in_cond ?lhs_of_null_coalesce ~valkind env e in
+  let env, te, ty =
+    expr_ ~in_cond ?lhs_of_null_coalesce ?allow_uref ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -951,19 +957,20 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let te = if coalesce then T.NullCoalesce(tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
-and exprs env el =
+and exprs ?allow_uref env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr env e in
-    let env, tel, tyl = exprs env el in
+    let env, te, ty = expr ?allow_uref env e in
+    let env, tel, tyl = exprs ?allow_uref env el in
     env, te::tel, ty::tyl
 
 and expr_
   ~in_cond
   ?lhs_of_null_coalesce
+  ?allow_uref
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   env (p, e) =
   let make_result env te ty =
@@ -1477,7 +1484,7 @@ and expr_
       make_result env (T.Pipe(e0, te1, te2)) ty2
   | Unop (uop, e) ->
       let env, te, ty = raw_expr in_cond env e in
-      unop p env uop te ty
+      unop ?allow_uref p env uop te ty
   | Eif (c, e1, e2) -> eif env ~coalesce:false ~in_cond p c e1 e2
   | NullCoalesce (e1, e2) -> eif env ~coalesce:true ~in_cond p e1 None e2
   | Typename sid ->
@@ -3929,7 +3936,7 @@ and call_ pos env fty el uel =
   | _, (Terr | Tany | Tunresolved []) ->
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
-      let env, te, arg_ty = expr env elt in
+      let env, te, arg_ty = expr ~allow_uref:true env elt in
       let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
     end in
@@ -3950,7 +3957,7 @@ and call_ pos env fty el uel =
     let pos_def = Reason.to_pos r2 in
     let env, var_param = variadic_param env ft in
     let env, e_te_tyl = List.map_env env el begin fun env e ->
-      let env, te, ty = expr env e in
+      let env, te, ty = expr ~allow_uref:true env e in
       env, (e, te, ty)
     end in
     let tel = List.map e_te_tyl (fun (_, b, _) -> b) in
@@ -3978,7 +3985,7 @@ and call_ pos env fty el uel =
       ft.ft_params (List.map (el @ uel) fst) env;
     env, tel, [], ft.ft_ret
   | r2, Tanon (arity, id) when uel = [] ->
-    let env, tel, tyl = exprs env el in
+    let env, tel, tyl = exprs ~allow_uref:true env el in
     let anon = Env.get_anonymous env id in
     let fpos = Reason.to_pos r2 in
     (match anon with
@@ -4037,7 +4044,7 @@ and call_param todos env param ((pos, _ as e), arg_ty) =
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
-and unop p env uop te ty =
+and unop ?(allow_uref=false) p env uop te ty =
   let make_result env te result_ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   match uop with
@@ -4062,7 +4069,7 @@ and unop p env uop te ty =
       make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
-      if Env.is_strict env then
+      if Env.is_strict env && not allow_uref then
         Errors.reference_expr p;
       make_result env te ty
   | Ast.Usplat ->

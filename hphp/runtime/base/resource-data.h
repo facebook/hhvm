@@ -64,7 +64,7 @@ make(Args&&... args);
  * In the JIT, SSATmps of type Res are ResourceHdr pointers.
  */
 struct ResourceHdr final : Countable, // aux stores heap size
-                           type_scan::MarkCountable<ResourceHdr> {
+                           type_scan::MarkCollectable<ResourceHdr> {
   static void resetMaxId();
 
   ALWAYS_INLINE void decRefAndRelease() {
@@ -112,7 +112,7 @@ private:
 /**
  * Base class of all PHP resources.
  */
-struct ResourceData : type_scan::MarkCountable<ResourceData> {
+struct ResourceData : type_scan::MarkCollectable<ResourceData> {
   ResourceData();
 
   ResourceData(const ResourceData&) = delete;

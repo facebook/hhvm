@@ -455,7 +455,7 @@ static_assert(sizeof(FreeNode) <= kSmallSizeAlign,
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
 struct NativeNode : HeapObject,
-                    type_scan::MarkCountable<NativeNode> {
+                    type_scan::MarkCollectable<NativeNode> {
   NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
     initHeader_32(k, 0);
   }

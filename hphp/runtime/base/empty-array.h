@@ -48,7 +48,7 @@ struct MixedArray;
  * Other arrays may also be empty in the sense that size() == 0, but
  * this one is dealt with commonly enough to deserve special handlers.
  */
-struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
+struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static void Release(ArrayData*);
 
   static member_rval::ptr_u NvGetInt(const ArrayData*, int64_t) {

@@ -42,7 +42,7 @@ struct MArrayIter;
  * cache values locally depending on the type accessed and/or the operation.
  */
 struct APCLocalArray final : ArrayData,
-                             type_scan::MarkCountable<APCLocalArray> {
+                             type_scan::MarkCollectable<APCLocalArray> {
   static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);

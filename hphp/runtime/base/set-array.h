@@ -157,7 +157,7 @@ struct SetArrayElm {
 
 struct SetArray final : ArrayData,
                         array::HashTable<SetArray, SetArrayElm>,
-                        type_scan::MarkCountable<SetArray> {
+                        type_scan::MarkCollectable<SetArray> {
 
 //////////////////////////////////////////////////////////////////////
 // Set Layout

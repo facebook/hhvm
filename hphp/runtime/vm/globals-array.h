@@ -53,7 +53,8 @@ namespace HPHP {
  * to outlast the lifetime of the GlobalsArray.  (The wrapper is
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
-struct GlobalsArray final : ArrayData, type_scan::MarkCountable<GlobalsArray> {
+struct GlobalsArray final : ArrayData,
+                            type_scan::MarkCollectable<GlobalsArray> {
   explicit GlobalsArray(NameValueTable* tab);
   ~GlobalsArray() = delete;
 

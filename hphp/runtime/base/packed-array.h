@@ -49,7 +49,7 @@ struct APCHandle;
  * php arrays with zero-based contiguous integer keys, and values of mixed
  * types.  The TypedValue's are placed right after the array header.
  */
-struct PackedArray final : type_scan::MarkCountable<PackedArray> {
+struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr uint32_t SmallSize = 3;
   // the smallest and largest MM size classes we use for allocating PackedArrays
   static constexpr size_t SmallSizeIndex = 3;

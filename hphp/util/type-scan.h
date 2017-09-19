@@ -135,12 +135,12 @@ template <typename T> struct WithSuffix {};
 
 }
 
-// The type scanners need to know which types are "countable". A countable type
-// is one with a reference count that is explicitly managed. The ultimate goal
-// for the type scanners is to find all the pointers to countable types. To mark
-// a type as being countable, instantiate MarkCountable<> on the type. Its
-// usually easiest to have the type T derive from MarkCountable<T>.
-template <typename T> struct MarkCountable {};
+// The type scanners need to know which types are "collectable". A collectable
+// type is one with a reference count that is explicitly managed. The ultimate
+// goal for the type scanners is to find all the pointers to collectable types.
+// To mark a type as being collectable, instantiate MarkCollectable<> on the
+// type.  Its usually easiest to have the type T derive from MarkCollectable<T>.
+template <typename T> struct MarkCollectable {};
 
 // Normally countable types are never scanned, even if explicitly
 // requested. However, you may want to scan a countable type in certain contexts

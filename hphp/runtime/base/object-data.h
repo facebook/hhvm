@@ -73,7 +73,7 @@ struct InvokeResult {
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
+struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()

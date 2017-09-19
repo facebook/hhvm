@@ -152,7 +152,7 @@ struct MixedArrayElm {
 
 struct MixedArray final : ArrayData,
                           array::HashTable<MixedArray, MixedArrayElm>,
-                          type_scan::MarkCountable<MixedArray> {
+                          type_scan::MarkCollectable<MixedArray> {
   /*
    * Iterator helper for kPackedKind and kMixedKind.  You can use this
    * to look at the values in the array, but not the keys unless you

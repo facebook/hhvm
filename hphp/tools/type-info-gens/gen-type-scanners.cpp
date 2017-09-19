@@ -53,13 +53,13 @@
  *    other potentially interesting types, as well as address ranges that should
  *    be conservatively scanned.
  *
- * - "Countable". A type is countable if MarkCountable<> or
+ * - "Collectable". A type is collectable if MarkCollectable<> or
  *   MarkScannableCountable<> is instantiated on it. Type-scanners are never
- *   generated for countable types, it is assumed their scanners will be
+ *   generated for collectable types, it is assumed their scanners will be
  *   hand-written. The exception is if MarkScannableCountable<> is used, in
  *   which case they'll be scanned if explicitly requested. The point of the
  *   type-scanners is to determine how to find pointers to countable types from
- *   other types. Countable types correspond to the set of types in HHVM which
+ *   other types. Collectable types correspond to the set of types in HHVM which
  *   are explicitly managed by the GC.
  *
  * - "Indexed". An indexed type is a combination of a type and an action. These
@@ -92,12 +92,12 @@
  *   types either contain interesting types, pointers to "pointer
  *   followable" types, or have some custom action defined on it.
  *
- * - "Pointer followable". A type is pointer followable if it is a countable
- *   type, it has a countable type as a base, or if it is a member of at least
+ * - "Pointer followable". A type is pointer followable if it is a collectable
+ *   type, it has a collectable type as a base, or if it is a member of at least
  *   one indexed type which has an action which is not "ForScan" and is
  *   interesting. By these conditions, a pointer followable type is one which is
  *   known to be allocated out of the request heap, and transitively leads to a
- *   countable type via some chain of pointers. Pointers to pointer followable
+ *   collectable type via some chain of pointers. Pointers to pointer followable
  *   types are enqueued inside scanners. Pointers to non-pointer followable
  *   types are ignored. All base classes of pointer followable object types are
  *   also pointer followable (to handle polymorphism).
@@ -233,7 +233,7 @@ struct Generator {
   static bool isTemplateName(const std::string& candidate,
                              const std::string& name);
 
-  static bool isMarkCountableName(const std::string&);
+  static bool isMarkCollectableName(const std::string&);
   static bool isMarkScannableCountableName(const std::string&);
   static bool isIndexerName(const std::string&);
   static bool isConservativeActionName(const std::string&);
@@ -365,11 +365,11 @@ struct Generator {
   std::vector<IndexedType> m_indexed_types;
 
   // Set of all types which are currently known to be pointer followable or
-  // countable. The countable set is set once, and should never change, while
-  // the pointer followable set can grow as more pointer followable types are
-  // discovered (it must grow monotonically, never removing anything).
+  // collectable. The collectable set is set once, and should never change,
+  // while the pointer followable set can grow as more pointer followable types
+  // are discovered (it must grow monotonically, never removing anything).
   std::unordered_set<const Object*> m_ptr_followable;
-  std::unordered_set<const Object*> m_countable;
+  std::unordered_set<const Object*> m_collectable;
   std::unordered_set<const Object*> m_scannable_countable;
 
   // List of all layouts. Once computed, the indexed types will have an index
@@ -379,8 +379,8 @@ struct Generator {
   // Static strings used to identify certain special types in the debug info,
   // which serve as markers for special actions. These strings should stay in
   // sync with the types in type-scan.h.
-  static constexpr const char* const s_mark_countable_name =
-    "HPHP::type_scan::MarkCountable";
+  static constexpr const char* const s_mark_collectable_name =
+    "HPHP::type_scan::MarkCollectable";
   static constexpr const char* const s_mark_scannable_countable_name =
     "HPHP::type_scan::MarkScannableCountable";
   static constexpr const char* const s_indexer_name =
@@ -615,13 +615,13 @@ Generator::Generator(const std::string& filename, bool skip) {
   m_parser = TypeParser::make(filename);
 
   tbb::concurrent_vector<ObjectType> indexer_types;
-  tbb::concurrent_vector<ObjectType> countable_markers;
+  tbb::concurrent_vector<ObjectType> collectable_markers;
   tbb::concurrent_vector<ObjectType> scannable_countable_markers;
 
   // Iterate through all the objects the debug info parser found, storing the
-  // MarkCountable<> markers, and the Indexer<> instances. For everything, store
-  // in the appropriate getObject() maps, which will allow us to do getObject()
-  // lookups afterwards.
+  // MarkCollectable<> markers, and the Indexer<> instances. For everything,
+  // store in the appropriate getObject() maps, which will allow us to do
+  // getObject() lookups afterwards.
   //
   // There can be a lot of objects to iterate over, so do it concurrently.
   {
@@ -638,10 +638,10 @@ Generator::Generator(const std::string& filename, bool skip) {
           [&](const ObjectType& type) {
             if (isIndexerName(type.name.name)) {
               indexer_types.push_back(type);
-            } else if (isMarkCountableName(type.name.name)) {
-              countable_markers.push_back(type);
+            } else if (isMarkCollectableName(type.name.name)) {
+              collectable_markers.push_back(type);
             } else if (isMarkScannableCountableName(type.name.name)) {
-              countable_markers.push_back(type);
+              collectable_markers.push_back(type);
               scannable_countable_markers.push_back(type);
             }
 
@@ -665,24 +665,24 @@ Generator::Generator(const std::string& filename, bool skip) {
 
   // Complain if it looks like we don't have any debug info enabled.
   // (falls back to conservative scanning for everything)
-  if (countable_markers.empty() && indexer_types.empty()) {
+  if (collectable_markers.empty() && indexer_types.empty()) {
     std::cerr << "gen-type-scanners: warning: "
-                 "No countable or indexed types found. "
+                 "No collectable or indexed types found. "
                  "Is debug-info enabled?" << std::endl;
   }
 
   // Extract all the types that Mark[Scannable]Countable<> was instantiated on
   // to obtain all the types which are countable. Since all countable types are
   // automatically pointer followable, mark them as such.
-  m_countable = extractFromMarkers<decltype(m_countable)>(
-    countable_markers,
+  m_collectable = extractFromMarkers<decltype(m_collectable)>(
+    collectable_markers,
     [&](const Object& o) { return &getMarkedCountable(o); }
   );
   m_scannable_countable = extractFromMarkers<decltype(m_scannable_countable)>(
     scannable_countable_markers,
     [&](const Object& o) { return &getMarkedCountable(o); }
   );
-  for (const auto* obj : m_countable) {
+  for (const auto* obj : m_collectable) {
     makePtrFollowable(*obj);
   }
 
@@ -747,8 +747,8 @@ bool Generator::isTemplateName(const std::string& candidate,
 // Helper functions to check if an object type's name is that of a special
 // marker type:
 
-bool Generator::isMarkCountableName(const std::string& name) {
-  return isTemplateName(name, s_mark_countable_name);
+bool Generator::isMarkCollectableName(const std::string& name) {
+  return isTemplateName(name, s_mark_collectable_name);
 }
 bool Generator::isMarkScannableCountableName(const std::string& name) {
   return isTemplateName(name, s_mark_scannable_countable_name);
@@ -2353,7 +2353,7 @@ void Generator::genLayout(const Object& object,
                           bool conservative_everything) const {
   // Never generate layout for countable types, unless it was marked as
   // scannable.
-  if (m_countable.count(&object) > 0 &&
+  if (m_collectable.count(&object) > 0 &&
       !m_scannable_countable.count(&object)) {
     return;
   }
@@ -2612,7 +2612,7 @@ void Generator::makePtrFollowable(const Object& obj) {
 // Recursive function to check if a given object has a countable base somewhere
 // in its type hierarchy.
 bool Generator::hasCountableBase(const Object& object) const {
-  if (m_countable.count(&object)) return true;
+  if (m_collectable.count(&object)) return true;
   return std::any_of(
     object.bases.begin(),
     object.bases.end(),
@@ -3099,7 +3099,7 @@ void Generator::genMetrics(std::ostream& os) const {
   os << "// unique layouts: " << m_layouts.size() << std::endl;
   os << "// indexed types: " << m_indexed_types.size() << std::endl;
   os << "// pointer followable types: " << m_ptr_followable.size() << std::endl;
-  os << "// countable types: " << m_countable.size() << std::endl;
+  os << "// countable types: " << m_collectable.size() << std::endl;
   os << "// scannable countable types: " << m_scannable_countable.size()
      << std::endl;
 

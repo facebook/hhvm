@@ -71,7 +71,7 @@ enum CopyStringMode { CopyString };
  *   Proxy  |        |          |    X
  */
 struct StringData final : MaybeCountable,
-                          type_scan::MarkCountable<StringData> {
+                          type_scan::MarkCollectable<StringData> {
   friend struct APCString;
   friend StringData* allocFlat(size_t len);
 

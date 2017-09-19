@@ -170,15 +170,15 @@ class deep_type_mapper = object(this)
     let env, ty = this#on_type env ty in
     env, (r, Toption ty)
   method! on_tfun env r ft =
-    let on_param env (name, ty) =
-      let env, ty = this#on_type env ty in
-      env, (name, ty) in
+    let on_param env param =
+      let env, ty = this#on_type env param.fp_type in
+      env, { param with fp_type = ty } in
     let env, params = List.map_env env ft.ft_params on_param in
     let env, ret = this#on_type env ft.ft_ret in
     let env, arity = match ft.ft_arity with
-      | Fvariadic (min, (p_n, p_ty)) ->
+      | Fvariadic (min, ({ fp_type = p_ty; _ } as param)) ->
         let env, p_ty = this#on_type env p_ty in
-        env, Fvariadic (min, (p_n, p_ty))
+        env, Fvariadic (min, { param with fp_type = p_ty })
       | x -> env, x
     in
     env, (r, Tfun { ft with

@@ -47,7 +47,7 @@ let (taccess_hooks: (Typing_defs.class_type -> Typing_defs.typeconst_type ->
 let (lvar_hooks: (Pos.t * Local_id.t -> Typing_env.env ->
                   unit) list ref) = ref []
 
-let (fun_call_hooks: ((string option * Typing_defs.locl Typing_defs.ty) list ->
+let (fun_call_hooks: (Typing_defs.locl Typing_defs.fun_params ->
                       Pos.t list -> Typing_env.env -> unit) list ref) = ref []
 
 let (new_id_hooks: (Nast.class_id -> Typing_env.env ->

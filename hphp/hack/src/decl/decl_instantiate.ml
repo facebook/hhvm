@@ -78,14 +78,14 @@ and instantiate_ subst x =
       let subst = List.fold_left ~f:begin fun subst (_, (_, x), _) ->
         SMap.remove x subst
       end ~init:subst ft.ft_tparams in
-      let params = List.map ft.ft_params begin fun (name, param) ->
-        let param = instantiate subst param in
-        (name, param)
+      let params = List.map ft.ft_params begin fun param ->
+        let ty = instantiate subst param.fp_type in
+        { param with fp_type = ty }
       end in
       let arity = match ft.ft_arity with
-        | Fvariadic (min, (name, var_ty)) ->
+        | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
           let var_ty = instantiate subst var_ty in
-          Fvariadic (min, (name, var_ty))
+          Fvariadic (min, { param with fp_type = var_ty })
         | Fellipsis _ | Fstandard _ as x -> x
       in
       let ret = instantiate subst ft.ft_ret in

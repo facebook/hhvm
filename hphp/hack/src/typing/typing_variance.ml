@@ -426,7 +426,7 @@ and class_method tcopt root static _method_name method_ env =
           env
       | _ -> assert false
 
-and fun_param tcopt root static env (_, (reason, _ as ty)) =
+and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
   let pos = Reason.to_pos reason in
   let reason_contravariant = pos, Rfun_parameter static, Pcontravariant in
   let variance = Vcontravariant [reason_contravariant] in
@@ -500,7 +500,7 @@ and type_ tcopt root variance env (reason, ty) =
       type_ tcopt root variance env ty
   | Tprim _ -> env
   | Tfun ft ->
-      let env = List.fold_left ~f:begin fun env (_, (r, _ as ty)) ->
+      let env = List.fold_left ~f:begin fun env { fp_type = (r, _ as ty); _ } ->
         let pos = Reason.to_pos r in
         let reason = pos, Rfun_parameter `Instance, Pcontravariant in
         let variance = flip reason variance in

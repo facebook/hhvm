@@ -139,7 +139,11 @@ let rec ty (p, x) =
     | Fellipsis _ as x -> x
     | Fvariadic (n, param) -> Fvariadic (n, fun_param param)
 
-  and fun_param (x, y) = x, ty y
+  and fun_param param =
+    { param with
+      fp_pos = pos param.fp_pos;
+      fp_type = ty param.fp_type;
+    }
 
   and class_const cc =
     { cc_synthesized = cc.cc_synthesized;

@@ -61,8 +61,8 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tvar acc _ _ = acc
   method on_tfun: type a. _ -> Reason.t -> a fun_type -> _ =
     fun acc _ {ft_params; ft_tparams; ft_ret; _} ->
-    let acc =
-      List.fold_left ~f:this#on_type ~init:acc (List.map ft_params snd) in
+    let acc = List.fold_left ~f:this#on_type ~init:acc
+      (List.map ft_params (fun x -> x.fp_type)) in
     let tparams = List.map ft_tparams (fun (_, _, x) -> List.map x snd) in
     let acc = List.fold_left tparams ~f:(fun acc tp ->
       List.fold ~f:this#on_type ~init:acc tp) ~init:acc in

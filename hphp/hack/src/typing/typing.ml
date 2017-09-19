@@ -1252,8 +1252,9 @@ and expr_
             let env =
               Phase.check_tparams_constraints ~ety_env env class_.tc_tparams in
             let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
+            let local_obj_fp = TUtils.default_fun_param local_obj_ty in
             let fty = { fty with
-                        ft_params = (None, local_obj_ty) :: fty.ft_params } in
+                        ft_params = local_obj_fp :: fty.ft_params } in
             let fun_arity = match fty.ft_arity with
               | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
               | Fvariadic (min, x) -> Fvariadic (min + 1, x)
@@ -1811,7 +1812,7 @@ and anon_make tenv p f idl =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
-  fun env (supplied_params: (string option * _) list) ->
+  fun env supplied_params ->
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
@@ -1822,7 +1823,7 @@ and anon_make tenv p f idl =
       Env.anon anon_lenv env begin fun env ->
         let params = ref f.f_params in
         let env, t_params = List.fold_left ~f:(anon_bind_param params) ~init:(env, [])
-          (List.map supplied_params snd) in
+          (List.map supplied_params (fun x -> x.fp_type)) in
         let env = List.fold_left ~f:anon_bind_opt_param ~init:env !params in
         let env = List.fold_left ~f:anon_check_param ~init:env f.f_params in
         let env, hret =
@@ -2591,7 +2592,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
               let tr = List.hd_exn trl in
               env, vars, tr
             in
-            let f = (None, (
+            let f = TUtils.default_fun_param (
               r_fty,
               Tfun {
                 ft_pos = fty.ft_pos;
@@ -2600,16 +2601,13 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
                 ft_arity = Fstandard (arity, arity);
                 ft_tparams = [];
                 ft_where_constraints = [];
-                ft_params = List.map vars (fun x -> (None, x));
+                ft_params = List.map vars TUtils.default_fun_param;
                 ft_ret = tr;
               }
-            )) in
+            ) in
             let containers = List.map vars (fun var ->
-              (None,
-                (r_fty,
-                  Tclass ((fty.ft_pos, SN.Collections.cContainer), [var])
-                )
-              )
+              let tc = Tclass ((fty.ft_pos, SN.Collections.cContainer), [var]) in
+              TUtils.default_fun_param (r_fty, tc)
             ) in
             env, (r_fty, Tfun {fty with
                                ft_arity = Fstandard (arity+1, arity+1);
@@ -2715,19 +2713,22 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
       Typing_hooks.dispatch_fun_id_hook (p, SN.FB.idx);
       (match Env.get_fun env (snd id) with
       | Some fty ->
-        let param1, (name2, (r2, _)), (name3, (r3, _)) =
+        let param1, param2, param3 =
           match fty.ft_params with
             | [param1; param2; param3] -> param1, param2, param3
             | _ -> assert false in
+        let { fp_type = (r2, _); _ } = param2 in
+        let { fp_type = (r3, _); _ } = param3 in
         let params, ret = match List.length el with
           | 2 ->
-            let param2 = (name2, (r2, Toption (r2, Tgeneric "Tk"))) in
+            let ty2 = (r2, Toption (r2, Tgeneric "Tk")) in
+            let param2 = { param2 with fp_type = ty2 } in
             let rret = fst fty.ft_ret in
             let ret = (rret, Toption (rret, Tgeneric "Tv")) in
             [param1; param2], ret
           | 3 ->
-            let param2 = (name2, (r2, Tgeneric "Tk")) in
-            let param3 = (name3, (r3, Tgeneric "Tv")) in
+            let param2 = { param2 with fp_type = (r2, Tgeneric "Tk") } in
+            let param3 = { param3 with fp_type = (r3, Tgeneric "Tv") } in
             let ret = (fst fty.ft_ret, Tgeneric "Tv") in
             [param1; param2; param3], ret
           | _ -> fty.ft_params, fty.ft_ret in
@@ -3960,7 +3961,7 @@ and call_ pos env fty el uel =
         env, tel, [], err_none
       | Some anon ->
         let () = check_arity pos fpos (List.length tyl) arity in
-        let tyl = List.map tyl (fun ty -> None, ty) in
+        let tyl = List.map tyl TUtils.default_fun_param in
         let env, _, ty = anon env tyl in
         env, tel, [], ty)
   | _, Tarraykind _ when not (Env.is_strict env) ->
@@ -3971,7 +3972,8 @@ and call_ pos env fty el uel =
     env, [], [], err_none
   )
 
-and call_param todos env (name, x) ((pos, _ as e), arg_ty) =
+and call_param todos env param ((pos, _ as e), arg_ty) =
+  let { fp_name = name; fp_type = x; _ } = param in
   (match name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env x arg_ty

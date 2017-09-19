@@ -76,7 +76,7 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
-            let tyl = List.map ~f:snd funty.ft_params in
+            let tyl = List.map funty.ft_params (fun x -> x.fp_type) in
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, "return_type"), _, (r, Tfun funty) ->

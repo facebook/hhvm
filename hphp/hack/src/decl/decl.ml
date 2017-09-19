@@ -153,7 +153,12 @@ and make_param_ty env param =
       Reason.Rvar_param param.param_pos, t
     | x -> x
   in
-  Some param.param_name, ty
+  {
+    fp_pos    = param.param_pos;
+    fp_name   = Some param.param_name;
+    fp_type   = ty;
+    fp_is_ref = param.param_is_reference;
+  }
 
 and fun_decl f decl_tcopt =
   let dep = Dep.Fun (snd f.f_name) in
@@ -189,8 +194,7 @@ and fun_decl_in_env env f =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (param.param_expr = None);
-      let p_name, p_ty = make_param_ty env param in
-      Fvariadic (arity_min, (p_name, p_ty))
+      Fvariadic (arity_min, make_param_ty env param)
     | FVellipsis    -> Fellipsis (arity_min)
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in
@@ -672,8 +676,7 @@ and method_decl env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (param.param_expr = None);
-      let p_name, p_ty = make_param_ty env param in
-      Fvariadic (arity_min, (p_name, p_ty))
+      Fvariadic (arity_min, make_param_ty env param)
     | FVellipsis    -> Fellipsis arity_min
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in

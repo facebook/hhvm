@@ -56,8 +56,9 @@ and hint_ p env = function
     let h = hint env h in
     Toption h
   | Hfun (hl, b, h) ->
-    let paraml = List.map hl (hint env) in
-    let paraml = List.map paraml (fun x -> None, x) in
+    let paraml = List.map hl begin fun (p, _ as x) ->
+      { fp_pos = p; fp_name = None; fp_type = hint env x; fp_is_ref = false }
+    end in
     let ret = hint env h in
     let arity_min = List.length paraml in
     let arity = if b

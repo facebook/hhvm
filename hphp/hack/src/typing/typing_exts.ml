@@ -87,9 +87,10 @@ let parse_printf_string env s pos (class_:locl ty) : Env.env * locl fun_params =
   and read_modifier env i class_ i0 : Env.env * locl fun_params =
     let fname = magic_method_name (get_char s i) in
     let snippet = String.sub s i0 ((min (i+1) (String.length s)) - i0) in
-    let add_reason = List.map
-      ~f:(function name, (why, ty) ->
-         name, (Reason.Rformat (pos,snippet,why), ty)) in
+    let add_reason = List.map ~f:begin fun p ->
+      let why, ty = p.fp_type in
+      { p with fp_type = Reason.Rformat (pos, snippet, why), ty }
+    end in
     match lookup_magic_type env class_ fname with
       | env, Some (good_args, None) ->
           let env, xs = read_text env (i+1) in
@@ -141,16 +142,16 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env.env * locl fun_type =
   let rec f env param_types args : Env.env * locl fun_params option =
     (match param_types, args with
-      | [(_,    (_,   Toption (_, Tclass ((_, fs), [_       ]))))], [(_, Nast.Null)]
-        when SN.Classes.is_format_string fs -> env,None
-      | [(name, (why, Toption (_, Tclass ((_, fs), [type_arg]))))], (arg :: _)
-      | [(name, (why,             Tclass ((_, fs), [type_arg] )))], (arg :: _)
+      | [ { fp_type = (_,   Toption (_, Tclass ((_, fs), [_       ]))); _ }       ], [(_, Nast.Null)]
+        when SN.Classes.is_format_string fs -> env, None
+      | [({ fp_type = (why, Toption (_, Tclass ((_, fs), [type_arg]))); _ } as fp)], (arg :: _)
+      | [({ fp_type = (why,             Tclass ((_, fs), [type_arg] )); _ } as fp)], (arg :: _)
         when SN.Classes.is_format_string fs ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl =
                     parse_printf_string env str (fst arg) type_arg in
-                  env, Some ((name, (why, Tprim Nast.Tstring)) :: argl)
+                  env, Some ({ fp with fp_type = (why, Tprim Nast.Tstring) } :: argl)
              |  env, Left pos ->
                   if Env.is_strict env
                   then Errors.expected_literal_string pos;

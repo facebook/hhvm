@@ -16,6 +16,7 @@ open String_utils
 include AutocompleteTypes
 
 module Phase = Typing_phase
+module TUtils = Typing_utils
 
 let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
@@ -444,12 +445,12 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
   in
   let func_details = match ty with
     | (_, Tfun ft) ->
-      let param_to_record ?(is_variadic=false) (name, pty) =
+      let param_to_record ?(is_variadic=false) param =
         {
-          param_name     = (match name with
+          param_name     = (match param.fp_name with
                              | Some n -> n
                              | None -> "");
-          param_ty       = Typing_print.full_strip_ns env pty;
+          param_ty       = Typing_print.full_strip_ns env param.fp_type;
           param_variadic = is_variadic;
         }
       in
@@ -458,8 +459,9 @@ let resolve_ty (env: Typing_env.env) (x: partial_autocomplete_result)
         min_arity = arity_min ft.ft_arity;
         params    = List.map ft.ft_params param_to_record @
           (match ft.ft_arity with
-             | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
-                              [param_to_record ~is_variadic:true empty]
+             | Fellipsis _ ->
+                 let empty = TUtils.default_fun_param (Reason.none, Tany) in
+                 [param_to_record ~is_variadic:true empty]
              | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
              | Fstandard _ -> [])
       }

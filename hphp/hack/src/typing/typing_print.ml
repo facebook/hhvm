@@ -404,7 +404,7 @@ module Full = struct
     ty tcopt st env o ft.ft_ret
 
   and fun_param: type a. _ -> _ -> _ -> _ -> a fun_param -> _ =
-    fun tcopt st env o (param_name, param_type) ->
+    fun tcopt st env o { fp_name = param_name; fp_type = param_type; _ } ->
     match param_name, param_type with
     | None, _ -> ty tcopt st env o param_type
     | Some param_name, (_, Tany) -> o param_name
@@ -595,7 +595,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Taccess (ty, ids) ->
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
   | Tfun ft ->
-    let arg_tys = List.map ft.ft_params snd in
+    let arg_tys = List.map ft.ft_params (fun x -> x.fp_type) in
     obj @@ kind "function" @ args arg_tys @ result ft.ft_ret
   | Tanon _ ->
     obj @@ kind "anon"
@@ -799,7 +799,7 @@ end
 
 module PrintFun = struct
 
-  let fparam tcopt (sopt, ty) =
+  let fparam tcopt { fp_name = sopt; fp_type = ty; _ } =
     let s = match sopt with
       | None -> "[None]"
       | Some s -> s in

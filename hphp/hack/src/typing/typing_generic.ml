@@ -51,10 +51,10 @@ end = struct
     | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
     | Toption x -> ty x
     | Tfun fty ->
-        List.iter (List.map fty.ft_params snd) ty;
+        List.iter (List.map fty.ft_params (fun x -> x.fp_type)) ty;
         ty fty.ft_ret;
         (match fty.ft_arity with
-          | Fvariadic (_min, (_name, var_ty)) -> ty var_ty
+          | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty
           | _ -> ())
     | Tabstract (AKnewtype (_, tyl), x) ->
         List.iter tyl ty; ty_opt x

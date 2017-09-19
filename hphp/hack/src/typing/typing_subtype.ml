@@ -295,7 +295,7 @@ let add_constraint p env ck ty_sub ty_super =
 let rec subtype_params env subl superl =
   match subl, superl with
   | [], _ | _, [] -> env
-  | (_, sub) :: subl, (_, super) :: superl ->
+  | { fp_type = sub; _ } :: subl, { fp_type = super; _ } :: superl ->
     let env = { env with Env.pos = Reason.to_pos (fst sub) } in
     let env = sub_type env sub super in
     let env = subtype_params env subl superl in
@@ -385,7 +385,8 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
   (* However, if we are polymorphic in the superclass we have to be
    * polymorphic in the subclass. *)
   let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
-    | Fvariadic (_, (n_super, var_super)), Fvariadic (_, (_, var_sub)) ->
+    | Fvariadic (_, fp_super), Fvariadic (_, { fp_type = var_sub; _ }) ->
+      let { fp_name = n_super; fp_type = var_super; _ } = fp_super in
       let env, var = Unify.unify env var_super var_sub in
       env, Some (n_super, var)
     | _ -> env, None

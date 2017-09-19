@@ -503,9 +503,9 @@ and unify_funs env r1 ft1 r2 ft2 =
   if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
   let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with
-    | Fvariadic (_, (n1, var_ty1)), Fvariadic (min, (_n2, var_ty2)) ->
-      let env, var = unify env var_ty1 var_ty2 in
-      env, Some (n1, var), Fvariadic (min, (n1, var))
+    | Fvariadic (_, fp1), Fvariadic (min, fp2) ->
+      let env, var = unify env fp1.fp_type fp2.fp_type in
+      env, Some (fp1.fp_name, var), Fvariadic (min, { fp1 with fp_type = var })
     | ar1, _ar2 ->
       env, None, ar1
   in
@@ -520,19 +520,22 @@ and unify_funs env r1 ft1 r2 ft2 =
 and unify_params env l1 l2 var1_opt =
   match l1, l2, var1_opt with
   | [], l, None -> env, l
-  | [], (name2, x2) :: rl2, Some (name1, v1) ->
+  | [], fp2 :: rl2, Some (name1, v1) ->
+    let { fp_name = name2; fp_type = x2; _ } = fp2 in
     let name = if name1 = name2 then name1 else None in
     let env = { env with Env.pos = Reason.to_pos (fst x2) } in
     let env, _ = unify env x2 v1 in
     let env, rl = unify_params env [] rl2 var1_opt in
-    env, (name, x2) :: rl
+    env, { fp2 with fp_name = name } :: rl
   | l, [], _ -> env, l
-  | (name1, x1) :: rl1, (name2, x2) :: rl2, _ ->
+  | fp1 :: rl1, fp2 :: rl2, _ ->
+    let { fp_name = name1; fp_type = x1; _ } = fp1 in
+    let { fp_name = name2; fp_type = x2; _ } = fp2 in
     let name = if name1 = name2 then name1 else None in
     let env = { env with Env.pos = Reason.to_pos (fst x1) } in
     let env, _ = unify env x2 x1 in
     let env, rl = unify_params env rl1 rl2 var1_opt in
-    env, (name, x2) :: rl
+    env, { fp2 with fp_name = name } :: rl
 
 (*****************************************************************************)
 (* Exporting *)

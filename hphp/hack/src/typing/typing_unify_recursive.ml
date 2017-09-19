@@ -81,7 +81,7 @@ and occurs_array env n ak =
 and occurs_ft env n ft =
     occurs_params env n ft.ft_params || occurs env n ft.ft_ret
 and occurs_params env n p =
-  List.exists p (fun (_,t) -> occurs env n t)
+  List.exists p (fun { fp_type = t; _ } -> occurs env n t)
 
 (* Does variable [n] occur at top-level in [ty] or under any number
  * of Toption wrappers, eliding singleton Tunresolved?

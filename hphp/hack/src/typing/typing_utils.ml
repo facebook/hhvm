@@ -543,3 +543,14 @@ end = struct
 
   let check ty = Option.is_some (check_why ty)
 end
+
+(*****************************************************************************)
+(* Function parameters *)
+(*****************************************************************************)
+
+let default_fun_param ty : 'a fun_param = {
+  fp_pos = Pos.none;
+  fp_name = None;
+  fp_type = ty;
+  fp_is_ref = false;
+}

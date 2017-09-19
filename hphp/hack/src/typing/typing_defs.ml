@@ -365,7 +365,13 @@ and 'phase fun_arity =
   | Fellipsis of int       (* min *)
 
 
-and 'phase fun_param = (string option * 'phase ty)
+and 'phase fun_param = {
+  fp_pos    : Pos.t;
+  fp_name   : string option;
+  fp_type   : 'phase ty;
+  (* true if this parameter is passed by reference *)
+  fp_is_ref : bool;
+}
 
 and 'phase fun_params = 'phase fun_param list
 

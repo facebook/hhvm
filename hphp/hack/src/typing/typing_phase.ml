@@ -235,9 +235,9 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
       end ~init:ety_env.substs
   in
   let ety_env = {ety_env with substs = substs} in
-  let env, params = List.map_env env ft.ft_params begin fun env (name, param) ->
-    let env, param = localize ~ety_env env param in
-    env, (name, param)
+  let env, params = List.map_env env ft.ft_params begin fun env param ->
+    let env, ty = localize ~ety_env env param.fp_type in
+    env, { param with fp_type = ty }
   end in
   (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env (var, name, cstrl) =
@@ -277,9 +277,9 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
     else env in
 
   let env, arity = match ft.ft_arity with
-    | Fvariadic (min, (name, var_ty)) ->
+    | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
        let env, var_ty = localize ~ety_env env var_ty in
-       env, Fvariadic (min, (name, var_ty))
+       env, Fvariadic (min, { param with fp_type = var_ty })
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
   env, { ft with ft_arity = arity; ft_params = params;

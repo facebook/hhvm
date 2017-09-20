@@ -280,10 +280,17 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
     return cgetlObvious(op.CUGetL.loc1, 0);
   case Op::CGetL2:
     return cgetlObvious(op.CGetL2.loc1, 1);
+  case Op::PushL:
+    return cgetlObvious(op.PushL.loc1, 0);
 
-    // The output of SetL is obvious if you know what its input is
-    // (which we'll assert if we know).
+  // The output of SetL is obvious if you know what its input is
+  // (which we'll assert if we know).
   case Op::SetL:
+    return true;
+
+  // The output of SetM isn't quite as obvious as SetL, but the jit
+  // can work it out from the input just as well as hhbbc (if not better).
+  case Op::SetM:
     return true;
 
   default:

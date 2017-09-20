@@ -1306,7 +1306,7 @@ let as_case_insensitive_keyword text =
   non-lower versions in our codebase. *)
   let lower = String.lowercase text in
   match lower with
-  | "eval" | "isset" | "unset" | "empty" | "const"
+  | "eval" | "isset" | "unset" | "empty" | "const" | "new"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" | "instanceof" -> lower
   | _ -> text

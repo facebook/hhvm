@@ -16,17 +16,29 @@ type t = {
   env_jump_targets    : Jump_targets.t
 }
 
-let is_hh_file_ = ref false
+type global_state =
+{ global_explicit_use_set: SSet.t
+; global_closure_namespaces: Namespace_env.env SMap.t
+; global_closure_enclosing_classes: Ast.class_ SMap.t }
 
-let explicit_use_set_: SSet.t ref = ref SSet.empty
-let closure_namespaces_: (Namespace_env.env SMap.t) ref = ref SMap.empty
+let empty_global_state =
+{ global_explicit_use_set = SSet.empty
+; global_closure_namespaces = SMap.empty
+; global_closure_enclosing_classes = SMap.empty }
+
+let is_hh_file_ = ref false
+let global_state_ = ref empty_global_state
 
 let set_is_hh_file v = is_hh_file_ := v
 let is_hh_file () = !is_hh_file_
 
-let set_explicit_use_set set = explicit_use_set_ := set
-let clear_explicit_use_set () = explicit_use_set_ := SSet.empty
-let get_explicit_use_set () = !explicit_use_set_
+let get_explicit_use_set () = (!global_state_).global_explicit_use_set
+let get_closure_namespaces () = (!global_state_).global_closure_namespaces
+let get_closure_enclosing_classes () =
+  (!global_state_).global_closure_enclosing_classes
+
+let set_global_state s = global_state_ := s
+let clear_global_state () = set_global_state empty_global_state
 
 let empty = {
   env_pipe_var = None;
@@ -41,9 +53,6 @@ let get_scope env = env.env_scope
 let get_namespace env = env.env_namespace
 let get_needs_local_this env = env.env_needs_local_this
 let get_jump_targets env = env.env_jump_targets
-
-let set_closure_namespaces cns = closure_namespaces_ := cns
-let get_closure_namespaces () = !closure_namespaces_
 
 (* Environment is second parameter so we can chain these e.g.
  *   empty |> with_scope scope |> with_namespace ns

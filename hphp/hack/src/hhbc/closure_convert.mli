@@ -11,4 +11,4 @@
 (* Convert entire program *)
 val convert_toplevel_prog :
   Ast.program ->
-  (bool * Ast.def) list * SSet.t * Namespace_env.env SMap.t
+  (bool * Ast.def) list * Emit_env.global_state

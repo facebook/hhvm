@@ -60,6 +60,8 @@ type state = {
      track of the original namsepace of the closure in order to
      properly qualify things when that method's body is emitted. *)
   closure_namespaces : Namespace_env.env SMap.t;
+  (* original enclosing class for closure *)
+  closure_enclosing_classes: Ast.class_ SMap.t
 }
 
 let initial_state =
@@ -74,6 +76,7 @@ let initial_state =
   static_vars = ULS.empty;
   explicit_use_set = SSet.empty;
   closure_namespaces = SMap.empty;
+  closure_enclosing_classes = SMap.empty;
 }
 
 let is_in_lambda scope =
@@ -516,13 +519,22 @@ and convert_lambda env st p fd use_vars_opt =
     if Option.is_some use_vars_opt
     then SSet.add (snd inline_fundef.f_name) st.explicit_use_set
     else st.explicit_use_set in
+
+  let closure_class_name = snd cd.c_name in
+
+  let closure_enclosing_classes =
+    match Scope.get_class env.scope with
+    | Some cd -> SMap.add closure_class_name cd st.closure_enclosing_classes
+    | None -> st.closure_enclosing_classes in
+
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
                      captured_this = captured_this || st.captured_this;
                      static_vars = static_vars;
                      explicit_use_set;
+                     closure_enclosing_classes;
                      closure_namespaces = SMap.add
-                       (snd cd.c_name) st.namespace st.closure_namespaces;
+                       closure_class_name st.namespace st.closure_namespaces;
            } in
   let env = old_env in
   (* Add lambda captured vars to current captured vars *)
@@ -779,7 +791,9 @@ let convert_toplevel_prog defs =
   let original_defs = hoist_toplevel_functions original_defs in
   let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
   let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
-  (fun_defs @ original_defs @ class_defs
-  , st.explicit_use_set
-  , st.closure_namespaces
+  (fun_defs @ original_defs @ class_defs,
+    Emit_env.(
+      { global_explicit_use_set = st.explicit_use_set
+      ; global_closure_namespaces = st.closure_namespaces
+      ; global_closure_enclosing_classes = st.closure_enclosing_classes })
   )

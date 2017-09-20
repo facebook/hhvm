@@ -52,7 +52,7 @@ let on_class_get this acc recv prop ~is_call_target =
     else acc
   | _ -> this#on_expr acc prop
 
-class declvar_visitor explicit_use_set_opt = object(this)
+class declvar_visitor explicit_use_set_opt is_in_static_method = object(this)
   inherit [bool * ULS.t] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
@@ -64,10 +64,13 @@ class declvar_visitor explicit_use_set_opt = object(this)
         | _ -> acc)
 
   method! on_obj_get acc e prop =
-    let acc = this#on_expr acc e in
+    let acc = match snd e with
+    | Ast.Lvar (_, "$this") when is_in_static_method -> acc
+    | _ -> this#on_expr acc e in
     match snd prop with
     (* Only add if it is a variable *)
-    | Ast.Id id when is_lvar_like_id id -> add_local ~bareparam:false acc id
+    | Ast.Id id when is_lvar_like_id id ->
+      add_local ~bareparam:false acc id
     | _ -> this#on_expr acc prop
 
   method! on_foreach acc e pos iterator block =
@@ -164,15 +167,17 @@ class declvar_visitor explicit_use_set_opt = object(this)
 end
 
 let uls_from_ast ~is_closure_body ~has_this
-  ~params ~is_toplevel ~get_param_name ~get_param_default_value
+  ~params ~is_toplevel ~is_in_static_method
+  ~get_param_name ~get_param_default_value
   ~explicit_use_set_opt b =
-  let visitor = new declvar_visitor explicit_use_set_opt in
+  let visitor = new declvar_visitor explicit_use_set_opt is_in_static_method in
   let needs_local_this, decl_vars =
     (* pull variables used in default values *)
     let acc = List.fold_left params ~init:(false, ULS.empty) ~f:(
       fun acc p -> Option.fold (get_param_default_value p) ~init:acc ~f:visitor#on_expr)
     in
     visitor#on_program acc b in
+  let needs_local_this = needs_local_this || is_in_static_method in
   let param_names =
     List.fold_left
       params
@@ -187,26 +192,31 @@ let uls_from_ast ~is_closure_body ~has_this
   needs_local_this && has_this, decl_vars
 
 (* See decl_vars.mli for details *)
-let from_ast ~is_closure_body ~has_this ~params ~is_toplevel ~explicit_use_set b =
+let from_ast
+  ~is_closure_body ~has_this ~params ~is_toplevel
+  ~is_in_static_method ~explicit_use_set b =
   let needs_local_this, decl_vars =
     uls_from_ast
       ~is_closure_body
       ~has_this
       ~params
       ~is_toplevel
+      ~is_in_static_method
       ~get_param_name:Hhas_param.name
       ~get_param_default_value:(fun p -> Option.map (Hhas_param.default_value p) ~f:snd)
       ~explicit_use_set_opt:(Some explicit_use_set)
       b in
   needs_local_this, ULS.items decl_vars
 
-let vars_from_ast ~is_closure_body ~has_this ~params ~is_toplevel b =
+let vars_from_ast
+  ~is_closure_body ~has_this ~params ~is_toplevel ~is_in_static_method b =
   let _, decl_vars =
     uls_from_ast
       ~is_closure_body
       ~has_this
       ~params
       ~is_toplevel
+      ~is_in_static_method
       ~get_param_name:(fun p -> snd p.Ast.param_id)
       ~get_param_default_value:(fun p -> p.Ast.param_expr)
       ~explicit_use_set_opt:None

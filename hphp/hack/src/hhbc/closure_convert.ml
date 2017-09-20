@@ -119,7 +119,9 @@ let add_var env st var =
 let get_vars scope ~is_closure_body params body =
   let has_this = Scope.has_this scope in
   let is_toplevel = Scope.is_toplevel scope in
-  Decl_vars.vars_from_ast ~is_closure_body ~has_this ~params ~is_toplevel body
+  let is_in_static_method = Scope.is_in_static_method scope in
+  Decl_vars.vars_from_ast
+    ~is_closure_body ~has_this ~params ~is_toplevel ~is_in_static_method body
 
 let wrap_block b = [Ast.Stmt (Ast.Block b)]
 

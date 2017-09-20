@@ -28,7 +28,6 @@ slow/closure/return_types.php
 slow/collection_classes/815.php
 slow/compilation/1238.php
 slow/compilation/1247.php
-slow/compilation/1301.php
 slow/compilation/1316.php
 slow/compilation/infinite-static-local.php
 slow/compilation/switch-default-multiple.php

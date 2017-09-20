@@ -25,6 +25,7 @@
   has_this: bool ->
   params: Hhas_param.t list ->
   is_toplevel: bool ->
+  is_in_static_method: bool ->
   explicit_use_set: SSet.t ->
   Ast.program ->
   bool * string list
@@ -34,5 +35,6 @@
   has_this: bool ->
   params: Ast.fun_param list ->
   is_toplevel: bool ->
+  is_in_static_method: bool ->
   Ast.program ->
   SSet.t

@@ -219,13 +219,14 @@ let emit_body
   (* see comment in decl_vars.ml, method on_efun of declvar_visitor
      why Decl_vars needs 'explicit_use_set' *)
   let explicit_use_set = Emit_env.get_explicit_use_set () in
-
+  let is_in_static_method = Ast_scope.Scope.is_in_static_method scope in
   let needs_local_this, decl_vars =
     Decl_vars.from_ast
       ~is_closure_body
       ~has_this
       ~params
       ~is_toplevel
+      ~is_in_static_method
       ~explicit_use_set
       body in
   let decl_vars=
@@ -275,8 +276,8 @@ let emit_body
     | Some (ILabel _) -> true
     | _ -> false
   in
-  let should_emit_init_this = needs_local_this ||
-    (is_toplevel && List.exists ~f:(fun x -> x = "$this") decl_vars)
+  let should_emit_init_this = not is_in_static_method && (needs_local_this ||
+    (is_toplevel && List.exists ~f:(fun x -> x = "$this") decl_vars))
   in
   let header = gather [
         begin_label;

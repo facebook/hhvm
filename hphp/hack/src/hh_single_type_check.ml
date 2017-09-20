@@ -77,12 +77,18 @@ let magic_builtins = [|
   (
     "hh_single_type_check_magic.hhi",
     "<?hh // decl\n" ^
+    "namespace {\n" ^
     "function gena();\n" ^
     "function genva();\n" ^
     "function gen_array_rec();\n" ^
     "function hh_show($val) {}\n" ^
     "function hh_show_env() {}\n" ^
-    "function hh_log_level($level) {}\n"
+    "function hh_log_level($level) {}\n" ^
+    "}\n" ^
+    "namespace HH\\Lib\\Tuple{\n" ^
+    "function gen();\n" ^
+    "function from_async();\n" ^
+    "}\n"
   )
 |]
 

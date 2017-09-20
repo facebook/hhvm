@@ -1648,8 +1648,7 @@ class_statement:
                                          _p->onCompleteLabelScope(true);}
   | non_empty_user_attributes
     method_modifiers function_loc
-    is_reference
-    hh_name_no_semireserved_with_typevar '('
+    is_reference hh_name_with_typevar '('
                                        { _p->onNewLabelScope(true);
                                          _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}

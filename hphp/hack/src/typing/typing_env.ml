@@ -154,12 +154,16 @@ let add_lower_bound_ tpenv name ty =
 let env_with_tpenv env tpenv =
   { env with lenv = { env.lenv with tpenv = tpenv } }
 
+let env_with_global_tpenv env global_tpenv =
+  { env with global_tpenv }
+
 let union_global_tpenv tp1 tp2 =
   SMap.union tp1 tp2 ~combine:(fun _ v1 v2 ->
     let {lower_bounds=low1; upper_bounds=up1} = v1 in
     let {lower_bounds=low2; upper_bounds=up2} = v2 in
     Some  {lower_bounds=TySet.union low1 low2; upper_bounds=TySet.union up1 up2}
   )
+
 
 let add_upper_bound_global env name ty =
   let tpenv =

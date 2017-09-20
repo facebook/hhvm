@@ -103,6 +103,7 @@ val union_global_tpenv : tpenv -> tpenv -> tpenv
 val add_upper_bound_global : env -> string -> locl ty -> env
 val add_lower_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
+val env_with_global_tpenv : env -> tpenv -> env 
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
 val get_generic_parameters : env -> string list

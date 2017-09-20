@@ -239,10 +239,24 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
     let env, ty = localize ~ety_env env param.fp_type in
     env, { param with fp_type = ty }
   end in
+
   (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env (var, name, cstrl) =
     let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
+      let name_str = snd name in
+      (* In order to access type constants on generics on where clauses,
+        we need to add the constraints from the type parameters into the
+        environment before localizing the where clauses with them. Temporarily
+        add them to the environment here, and reset the environment later.
+      *)
+      let env = match ck with
+      | Ast.Constraint_as ->
+        Env.add_upper_bound env name_str ty
+      | Ast.Constraint_super ->
+        Env.add_lower_bound env name_str ty
+      | Ast.Constraint_eq ->
+        Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty in
       env, (ck, ty)
     end in
     env, (var, name, cstrl)
@@ -254,6 +268,10 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
     env, (ty1, ck, ty2)
   in
 
+  (* Grab and store the old tpenvs *)
+  let old_tpenv = env.Env.lenv.Env.tpenv in
+  let old_global_tpenv = env.Env.global_tpenv in
+
   (* If we're instantiating the generic parameters then remove them
    * from the result. Otherwise localize them *)
   let env, tparams =
@@ -263,6 +281,10 @@ and localize_ft ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env 
   (* Localize the 'where' constraints *)
   let env, where_constraints =
     List.map_env env ft.ft_where_constraints localize_where_constraint in
+
+  (* Remove the constraints we added for localizing where constraints  *)
+  let env = Env.env_with_tpenv env old_tpenv in
+  let env = Env.env_with_global_tpenv env old_global_tpenv in
 
   (* If we're instantiating the generic parameters then add a deferred
    * check that constraints are satisfied under the

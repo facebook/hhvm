@@ -1008,7 +1008,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
                                       |> String.concat "" in
         (* TODO(17796330): Get rid of linter functionality in the lowerer *)
         if s <> String.lowercase s then Lint.lowercase_constant pos s;
-        (match token_kind expr with
+        (if location = InString then String (pos, mkStr unesc_dbl s) else
+        match token_kind expr with
         | Some TK.DecimalLiteral
         | Some TK.OctalLiteral
         | Some TK.HexadecimalLiteral

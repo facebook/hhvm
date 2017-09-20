@@ -36,7 +36,6 @@ slow/concat/1575.php
 slow/concat/1576.php
 slow/concat/1577.php
 slow/concat/1578.php
-slow/concat/1589.php
 slow/constant/1597.php
 slow/constant/casing.php
 slow/constant/globals-array-constant.php
@@ -63,7 +62,6 @@ slow/dv_array/parse-error3.php
 slow/dv_array/parse-error4.php
 slow/dv_array/parse-error5.php
 slow/dynamic_variables/1164.php
-slow/eval_order/1502.php
 slow/exceptions/52.php
 slow/exceptions/62.php
 slow/ext_function/register_postsend_function-simple.php
@@ -96,7 +94,6 @@ slow/finally/new_try_catch_014.php
 slow/finally/try_finally_004.php
 slow/finally/try_finally_005.php
 slow/finally/try_finally_007.php
-slow/foreach_target_variables.php
 slow/function_no_param_modifier.php
 slow/goto/label_in_finally.php
 slow/goto/label_out_finally.php
@@ -146,7 +143,6 @@ slow/keyset/init-parse-error1.php
 slow/keyset/init-parse-error2.php
 slow/labels/72.php
 slow/lang/deprecated.php
-slow/lang/mixedbag.php
 slow/lang/redefine_function.php
 slow/lang/tuple_non_hh.php
 slow/llvm/switch.php

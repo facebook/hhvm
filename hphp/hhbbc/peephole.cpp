@@ -46,6 +46,42 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
+    if (cur.op == Op::Null &&
+        (next.op == Op::Same || next.op == Op::NSame)) {
+      cur = bc::IsTypeC { IsTypeOp::Null };
+      if (next.op == Op::NSame) {
+        m_next.push_back(bc::Not {});
+      }
+      return;
+    }
+
+    if (m_next.size() > 1 &&
+        (cur.op == Op::CGetL || cur.op == Op::CGetL2) &&
+        (next.op == Op::Same || next.op == Op::NSame)) {
+      auto& prev = (&cur)[-1];
+      if (prev.op == Op::Null) {
+        prev = bc::IsTypeL {
+          cur.op == Op::CGetL ? cur.CGetL.loc1 : cur.CGetL2.loc1, IsTypeOp::Null
+        };
+        if (next.op == Op::NSame) {
+          cur = bc::Not {};
+        } else {
+          m_next.pop_back();
+        }
+        return;
+      }
+    }
+
+    if (cur.op == Op::Not &&
+        (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
+      if (next.op == Op::JmpZ) {
+        cur = bc::JmpNZ { next.JmpZ.target };
+      } else {
+        cur = bc::JmpZ { next.JmpNZ.target };
+      }
+      return;
+    }
+
     if (!m_ctx.func->isGenerator &&
         m_next.size() > 1 &&
         cur.op == Op::UnboxRNop &&

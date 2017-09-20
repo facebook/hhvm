@@ -210,6 +210,10 @@ let builtins =
   "namespace HH\\Asio {"^
   "  function va(...$args);\n"^
   "}\n"^
+  "namespace HH\\Lib\\Tuple {\n"^
+  "function gen(...$args);\n"^
+  "function from_async(...$args);\n"^
+  "}\n"^
   "function hh_log_level(int $level) {}\n"
 
 (*****************************************************************************)

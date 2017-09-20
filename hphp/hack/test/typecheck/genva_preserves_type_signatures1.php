@@ -9,6 +9,8 @@
  *
  */
 
+use namespace HH\Lib\Tuple;
+
 async function funtimes() : Awaitable<int> {
   return 314159;
 }
@@ -29,4 +31,12 @@ function test() : Awaitable<(int, string, PositionOrVelocity)> {
 
 function test2() : Awaitable<(int, string, PositionOrVelocity)> {
   return \HH\Asio\va(funtimes(), animals(), heisenberg());
+}
+
+function test3() : Awaitable<(int, string, PositionOrVelocity)> {
+  return Tuple\gen(funtimes(), animals(), heisenberg());
+}
+
+function test4() : Awaitable<(int, string, PositionOrVelocity)> {
+  return Tuple\from_async(funtimes(), animals(), heisenberg());
 }

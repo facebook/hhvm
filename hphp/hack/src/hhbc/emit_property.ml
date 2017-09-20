@@ -12,6 +12,7 @@ open Instruction_sequence
 open Hhbc_ast
 open Core
 module A = Ast
+module SN = Naming_special_names
 
 (* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
 let rec expr_requires_deep_init (_, expr_) =
@@ -27,6 +28,12 @@ let rec expr_requires_deep_init (_, expr_) =
   | A.Varray fields -> List.exists fields expr_requires_deep_init
   | A.Darray fields -> List.exists fields expr_pair_requires_deep_init
   | A.Id(_, ("__FILE__" | "__DIR__")) -> false
+  | A.Call((_, A.Id(_, "tuple")), _, args, []) ->
+    List.exists args expr_requires_deep_init
+  | A.Class_const ((_, s), (_, "class")) ->
+    s = SN.Classes.cSelf ||
+    s = SN.Classes.cParent ||
+    s = SN.Classes.cStatic
   | _ -> true
 
 and expr_pair_requires_deep_init (expr1, expr2) =

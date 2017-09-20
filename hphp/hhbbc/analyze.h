@@ -108,6 +108,12 @@ struct FuncAnalysis {
   bool effectFree{false};
 
   /*
+   * A set of functions that are called with constant args, but which
+   * are not foldable.
+   */
+  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
+
+  /*
    * Known types of local statics.
    */
   CompactVector<Type> localStaticTypes;
@@ -150,7 +156,7 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, Context, bool trackConstantArrays);
+FuncAnalysis analyze_func(const Index&, Context, CollectionOpts opts);
 
 /*
  * Analyze a function like analyze_func, but exposing gathered CollectedInfo
@@ -172,7 +178,9 @@ FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
  */
 FuncAnalysis analyze_func_inline(const Index&,
                                  Context,
-                                 std::vector<Type> args);
+                                 std::vector<Type> args,
+                                 CollectionOpts opts =
+                                 CollectionOpts::TrackConstantArrays);
 
 /*
  * Perform an analysis for a whole php::Class at a time.

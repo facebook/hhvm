@@ -303,7 +303,9 @@ void insert_assertions(const Index& index,
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true, false, &ainfo };
+  CollectedInfo collect {
+    index, ctx, nullptr, nullptr, CollectionOpts::TrackConstantArrays, &ainfo
+  };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -515,7 +517,9 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true, false, &ainfo };
+  CollectedInfo collect {
+    index, ctx, nullptr, nullptr, CollectionOpts::TrackConstantArrays, &ainfo
+  };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
@@ -760,7 +764,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index, ainfo.ctx, true);
+      ainfo = analyze_func(index,
+                           ainfo.ctx,
+                           CollectionOpts::TrackConstantArrays);
     }
 
     // If we merged blocks, there could be new optimization opportunities

@@ -835,8 +835,18 @@ struct IndexData {
     std::vector<Type>
   > closureUseVars;
 
-  // For now we only need dependencies for function return types.
   DepMap dependencyMap;
+
+  /*
+   * If a function is effect-free when called with a particular set of
+   * literal arguments, and produces a literal result, there will be
+   * an entry here representing the type.
+   *
+   * The map isn't just an optimization; we can't call
+   * analyze_func_inline during the optimization phase, because the
+   * bytecode could be modified while we do so.
+   */
+  ContextRetTyMap foldableReturnTypeMap;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2865,6 +2875,58 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
   }
 
   return it->second.type;
+}
+
+Type Index::lookup_foldable_return_type(Context ctx,
+                                        borrowed_ptr<const php::Func> func,
+                                        std::vector<Type> args) const {
+  constexpr auto max_interp_nexting_level = 2;
+  static __thread uint32_t interp_nesting_level;
+
+  auto const& finfo = m_data->funcInfo[func->idx];
+  if (finfo.second.effectFree && is_scalar(finfo.second.returnTy)) {
+    return finfo.second.returnTy;
+  }
+  add_dependency(*m_data, func, ctx, Dep::ReturnTy);
+
+  auto const calleeCtx = CallContext {
+    { func->unit, const_cast<php::Func*>(func), func->cls }, std::move(args)
+  };
+
+  {
+    ContextRetTyMap::const_accessor acc;
+    if (m_data->foldableReturnTypeMap.find(acc, calleeCtx)) {
+      assertx(is_scalar(acc->second));
+      return acc->second;
+    }
+  }
+
+  if (frozen() || interp_nesting_level > max_interp_nexting_level) return TTop;
+
+  auto const contextType = [&] {
+    ++interp_nesting_level;
+    SCOPE_EXIT { --interp_nesting_level; };
+
+    auto const fa = analyze_func_inline(*this,
+                                        calleeCtx.caller,
+                                        calleeCtx.args,
+                                        CollectionOpts::TrackConstantArrays |
+                                        CollectionOpts::EffectFreeOnly);
+    return fa.effectFree ? fa.inferredReturn : TTop;
+  }();
+
+  if (!is_scalar(contextType)) {
+    return TTop;
+  }
+
+  ContextRetTyMap::accessor acc;
+  if (m_data->foldableReturnTypeMap.insert(acc, calleeCtx)) {
+    acc->second = contextType;
+  } else {
+    // someone beat us to it
+    assertx(acc->second == contextType);
+  }
+  return contextType;
 }
 
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {

@@ -107,15 +107,16 @@ CollectedInfo::CollectedInfo(const Index& index,
                              Context ctx,
                              ClassAnalysis* cls,
                              PublicSPropIndexer* publicStatics,
-                             bool trackConstantArrays,
-                             bool inlining,
+                             CollectionOpts opts,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
     , publicStatics{publicStatics}
-    , trackConstantArrays{trackConstantArrays}
-    , inlining{inlining}
+    , opts{opts}
 {
-  if (fa) localStaticTypes = fa->localStaticTypes;
+  if (fa) {
+    localStaticTypes = fa->localStaticTypes;
+    unfoldableFuncs = fa->unfoldableFuncs;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -242,12 +243,16 @@ void widen_props(PropState& props) {
 }
 
 bool merge_into(ActRec& dst, const ActRec& src) {
-  if (dst.kind != src.kind) {
-    dst = ActRec { FPIKind::Unknown };
+  if (dst != src) {
+    if (dst.kind != src.kind) {
+      dst = ActRec { FPIKind::Unknown };
+    } else {
+      dst = ActRec { src.kind };
+    }
     return true;
   }
-  if (dst != src) {
-    dst = ActRec { src.kind };
+  if (dst.foldable != src.foldable) {
+    dst.foldable = false;
     return true;
   }
   return false;
@@ -442,6 +447,7 @@ std::string show(const ActRec& a) {
     a.cls && a.func ? "::" : "",
     a.func ? show(*a.func) : "",
     a.fallbackFunc ? show(*a.fallbackFunc) : "",
+    a.foldable ? " (foldable)" : "",
     " }"
   );
 }

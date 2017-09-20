@@ -568,6 +568,13 @@ struct Index {
                                         SString fallbackName = nullptr) const;
 
   /*
+   * If func is effect-free when called with args, and it returns a constant,
+   * return that constant; otherwise return TTop.
+   */
+  Type lookup_foldable_return_type(Context ctx,
+                                   borrowed_ptr<const php::Func> func,
+                                   std::vector<Type> args) const;
+  /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitGen at worst.
    */

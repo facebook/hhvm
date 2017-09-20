@@ -71,6 +71,7 @@ struct ActRec {
 
   FPIKind kind;
   bool foldable{false};
+  BlockId pushBlk{NoBlockId};
   folly::Optional<res::Class> cls;
   folly::Optional<res::Func> func;
   // Possible fallback func if we cannot determine which will be called.
@@ -352,6 +353,24 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 
 //////////////////////////////////////////////////////////////////////
 
+enum class CollectionOpts {
+  TrackConstantArrays = 1,
+  Inlining = 2,
+  EffectFreeOnly = 4
+};
+
+inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {
+  return static_cast<CollectionOpts>(static_cast<int>(o1) |
+                                     static_cast<int>(o2));
+}
+
+inline CollectionOpts operator&(CollectionOpts o1, CollectionOpts o2) {
+  return static_cast<CollectionOpts>(static_cast<int>(o1) &
+                                     static_cast<int>(o2));
+}
+
+inline bool any(CollectionOpts o) { return static_cast<int>(o); }
+
 /*
  * Area used for writing down any information that is collected across
  * a series of step operations (possibly cross block).
@@ -361,19 +380,18 @@ struct CollectedInfo {
                          Context ctx,
                          ClassAnalysis* cls,
                          PublicSPropIndexer* publicStatics,
-                         bool trackConstantArrays,
-                         bool inlining,
+                         CollectionOpts opts,
                          const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
+  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
   bool mayUseVV{false};
   bool effectFree{true};
   bool readsUntrackedConstants{false};
-  const bool trackConstantArrays;
-  const bool inlining;
+  const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, const State& state,
                               std::vector<Bytecode>& out) = nullptr;
   CompactVector<Type> localStaticTypes;

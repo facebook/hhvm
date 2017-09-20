@@ -417,14 +417,41 @@ void push(ISS& env, Type t, LocalId l) {
 //////////////////////////////////////////////////////////////////////
 // fpi
 
-void fpiPush(ISS& env, ActRec ar) {
-  FTRACE(2, "    fpi+: {}\n", show(ar));
-  if (ar.kind != FPIKind::Ctor &&
+/*
+ * Push an ActRec.
+ *
+ * nArgs should either be the number of parameters that will be passed
+ * to the call, or -1 for unknown. We only need the number of args
+ * when we know the exact function being called, in order to determine
+ * eligibility for folding.
+ */
+void fpiPush(ISS& env, ActRec ar, int32_t nArgs = -1) {
+  if (nArgs >= 0 &&
+      ar.kind != FPIKind::Ctor &&
       ar.kind != FPIKind::Builtin &&
-      ar.func &&
-      (ar.func->isFoldable() || env.index.is_effect_free(*ar.func))) {
-    ar.foldable = true;
+      ar.func && !ar.fallbackFunc) {
+    ar.foldable = [&] {
+      auto const func = ar.func->exactFunc();
+      if (!func) return false;
+      if (env.collect.unfoldableFuncs.count(func)) return false;
+      // Foldable builtins are always worth trying
+      if (ar.func->isFoldable()) return true;
+      // Any native functions at this point are known to be
+      // non-foldable, but other builtins might be, even if they
+      // don't have the __Foldable attribute.
+      if (func->nativeInfo) return false;
+      if (func->params.size()) {
+        // Not worth trying if we're going to warn due to missing args
+        return check_nargs_in_range(func, nArgs);
+      }
+      // If the function has no args, we can simply check that its effect free
+      // and returns a literal.
+      return env.index.is_effect_free(*ar.func) &&
+             is_scalar(env.index.lookup_return_type_raw(func));
+    }();
   }
+  FTRACE(2, "    fpi+: {}\n", show(ar));
+  ar.pushBlk = env.blk.id;
   env.state.fpiStack.push_back(std::move(ar));
 }
 
@@ -436,19 +463,28 @@ ActRec fpiPop(ISS& env) {
   return ret;
 }
 
-ActRec fpiTop(ISS& env) {
+ActRec& fpiTop(ISS& env) {
   assert(!env.state.fpiStack.empty());
   return env.state.fpiStack.back();
 }
 
 PrepKind prepKind(ISS& env, uint32_t paramId) {
-  auto ar = fpiTop(env);
+  auto& ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
-    auto ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
-    assert(ar.kind != FPIKind::Builtin || ret != PrepKind::Unknown);
-    return ret;
+    auto const ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+    if (ar.foldable && ret != PrepKind::Val) {
+      auto const func = ar.func->exactFunc();
+      assertx(func);
+      env.collect.unfoldableFuncs.emplace(func);
+      env.propagate(ar.pushBlk, nullptr);
+      ar.foldable = false;
+      FTRACE(2, "     fpi: not foldable\n");
+    }
+    if (ret != PrepKind::Unknown) {
+      return ret;
+    }
   }
-  assert(ar.kind != FPIKind::Builtin);
+  assertx(ar.kind != FPIKind::Builtin && !ar.foldable);
   return PrepKind::Unknown;
 }
 

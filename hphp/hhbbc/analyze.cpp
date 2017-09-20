@@ -354,6 +354,10 @@ FuncAnalysis do_analyze_collect(const Index& index,
       auto stateOut = ai.bdata[blk->id].stateIn;
       auto interp   = Interp { index, ctx, collect, blk, stateOut };
       auto flags    = run(interp, propagate);
+      if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
+          !collect.effectFree) {
+        break;
+      }
       // We only care about the usedLocalStatics from the last visit
       if (flags.usedLocalStatics) {
         usedLocalStatics[blk] = std::move(*flags.usedLocalStatics);
@@ -364,6 +368,11 @@ FuncAnalysis do_analyze_collect(const Index& index,
       if (flags.returned) {
         ai.inferredReturn |= std::move(*flags.returned);
       }
+    }
+
+    if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
+        !collect.effectFree) {
+      break;
     }
 
     // maybe some local statics changed type since the last time their
@@ -392,6 +401,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.readsUntrackedConstants = collect.readsUntrackedConstants;
   ai.mayUseVV = collect.mayUseVV;
   ai.effectFree = collect.effectFree;
+  ai.unfoldableFuncs = collect.unfoldableFuncs;
 
   index.fixup_return_type(ctx.func, ai.inferredReturn);
 
@@ -440,10 +450,10 @@ FuncAnalysis do_analyze(const Index& index,
                         Context const inputCtx,
                         ClassAnalysis* clsAnalysis,
                         const std::vector<Type>* knownArgs,
-                        bool trackConstantArrays) {
+                        CollectionOpts opts) {
   auto const ctx = adjust_closure_context(inputCtx);
   CollectedInfo collect {
-    index, ctx, clsAnalysis, nullptr, trackConstantArrays, knownArgs != nullptr
+    index, ctx, clsAnalysis, nullptr, opts
   };
 
   return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
@@ -527,9 +537,9 @@ FuncAnalysis::FuncAnalysis(Context ctx)
 }
 
 FuncAnalysis analyze_func(const Index& index, Context const ctx,
-                          bool trackConstantArrays) {
+                          CollectionOpts opts) {
   while (true) {
-    auto ret = do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
+    auto ret = do_analyze(index, ctx, nullptr, nullptr, opts);
     if (!rebuild_exn_tree(ret)) return ret;
   }
 }
@@ -542,9 +552,11 @@ FuncAnalysis analyze_func_collect(const Index& index,
 
 FuncAnalysis analyze_func_inline(const Index& index,
                                  Context const ctx,
-                                 std::vector<Type> args) {
+                                 std::vector<Type> args,
+                                 CollectionOpts opts) {
   assert(!ctx.func->isClosureBody);
-  return do_analyze(index, ctx, nullptr, &args, true);
+  return do_analyze(index, ctx, nullptr, &args,
+                    opts | CollectionOpts::Inlining);
 }
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
@@ -636,7 +648,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
       nullptr,
-      true
+      CollectionOpts::TrackConstantArrays
     );
   }
   if (auto f = find_method(ctx.cls, s_86sinit.get())) {
@@ -645,7 +657,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
       nullptr,
-      true
+      CollectionOpts::TrackConstantArrays
     );
   }
   /*
@@ -659,7 +671,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       cinit_ctx,
       &clsAnalysis,
       nullptr,
-      true
+      CollectionOpts::TrackConstantArrays
     );
     // We do want to use it to resolve as-yet unresolved class
     // constants, however.
@@ -721,7 +733,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           Context { ctx.unit, borrow(f), ctx.cls },
           &clsAnalysis,
           nullptr,
-          true
+          CollectionOpts::TrackConstantArrays
         )
       );
     }
@@ -735,7 +747,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
             Context { ctx.unit, invoke, c },
             &clsAnalysis,
             nullptr,
-            true
+            CollectionOpts::TrackConstantArrays
           )
         );
       }
@@ -814,7 +826,9 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  CollectedInfo collect { index, fa.ctx, nullptr, nullptr, true, false, &fa };
+  CollectedInfo collect {
+    index, fa.ctx, nullptr, nullptr, CollectionOpts::TrackConstantArrays, &fa
+  };
   auto interp = Interp { index, fa.ctx, collect, blk, state };
 
   for (auto& op : blk->hhbcs) {

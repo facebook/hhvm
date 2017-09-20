@@ -279,7 +279,10 @@ void analyze_iteratively(Index& index, php::Program& program,
           case WorkType::Func:
             ++total_funcs;
             return WorkResult {
-              analyze_func(index, wi.ctx, mode != AnalyzeMode::ConstPass)
+              analyze_func(index, wi.ctx,
+                           mode == AnalyzeMode::ConstPass ?
+                           CollectionOpts{} :
+                           CollectionOpts::TrackConstantArrays)
             };
           case WorkType::Class:
             ++total_classes;
@@ -363,7 +366,7 @@ void constant_pass(Index& index, php::Program& program) {
   parallel::for_each(
     const_pass_contexts(program, php::Program::ForAll),
     [&] (Context ctx) {
-      optimize_func(index, analyze_func(index, ctx, false), false);
+      optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), false);
     }
   );
 
@@ -383,7 +386,8 @@ void analyze_public_statics(Index& index, php::Program& program) {
           ctx.cls = ctx.cls->closureContextCls;
         }
         auto info = CollectedInfo {
-          index, ctx, nullptr, &publicStatics, true, false
+          index, ctx, nullptr, &publicStatics,
+          CollectionOpts::TrackConstantArrays
         };
         analyze_func_collect(index, ctx, info);
       }
@@ -428,7 +432,11 @@ void final_pass(Index& index, php::Program& program) {
   parallel::for_each(
     all_function_contexts(program),
     [&] (Context ctx) {
-      optimize_func(index, analyze_func(index, ctx, true), true);
+      optimize_func(index,
+                    analyze_func(index,
+                                 ctx,
+                                 CollectionOpts::TrackConstantArrays),
+                    true);
     }
   );
 }

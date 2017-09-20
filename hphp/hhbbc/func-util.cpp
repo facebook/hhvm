@@ -57,6 +57,13 @@ SString memoize_impl_name(borrowed_ptr<const php::Func> func) {
   return Func::genMemoizeImplName(func->name);
 }
 
+bool check_nargs_in_range(borrowed_ptr<const php::Func> func, uint32_t nArgs) {
+  while (nArgs < func->dvEntries.size()) {
+    if (func->dvEntries[nArgs++] == NoBlockId) return false;
+  }
+  return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

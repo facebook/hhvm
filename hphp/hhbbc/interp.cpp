@@ -394,7 +394,9 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
     unreachable(env);
   } else if (outTy->second == ThrowMode::None) {
     nothrow(env);
-    if (env.collect.trackConstantArrays) constprop(env);
+    if (any(env.collect.opts & CollectionOpts::TrackConstantArrays)) {
+      constprop(env);
+    }
   }
   push(env, std::move(outTy->first));
 }
@@ -426,7 +428,9 @@ void in(ISS& env, const bc::AddNewElemC&) {
   if (outTy->subtypeOf(TBottom)) {
     unreachable(env);
   } else {
-    if (env.collect.trackConstantArrays) constprop(env);
+    if (any(env.collect.opts & CollectionOpts::TrackConstantArrays)) {
+      constprop(env);
+    }
   }
   push(env, std::move(*outTy));
 }
@@ -2147,11 +2151,11 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
   if (auto const func = rfunc.exactFunc()) {
     if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
-      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc });
+      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc }, op.arg1);
       return reduce(env, bc::Nop {});
     }
   }
-  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
+  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc }, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -2200,7 +2204,9 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       fpiPush(env, ActRec { FPIKind::ObjMeth });
       return unreachable(env);
     }
-    if (is_opt(t1)) t1 = unopt(std::move(t1));
+    if (is_opt(t1)) {
+      t1 = unopt(std::move(t1));
+    }
   } else if (!t1.couldBe(TOptObj)) {
     fpiPush(env, ActRec { FPIKind::ObjMeth });
     return unreachable(env);
@@ -2211,11 +2217,15 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     return folly::none;
   }();
 
-  fpiPush(env, ActRec {
-    FPIKind::ObjMeth,
-    rcls,
-    env.index.resolve_method(env.ctx, clsTy, op.str2)
-  });
+  fpiPush(
+    env,
+    ActRec {
+      FPIKind::ObjMeth,
+      rcls,
+      env.index.resolve_method(env.ctx, clsTy, op.str2)
+    },
+    op.arg1
+  );
   if (location != NoLocalId) {
     auto ty = peekLocation(env, location);
     if (ty.subtypeOf(TCell)) {
@@ -2256,7 +2266,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
     rcls ? clsExact(*rcls) : TCls,
     op.str2
   );
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun });
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfun }, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushClsMethod& op) {
@@ -2270,7 +2280,7 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   }
   folly::Optional<res::Class> rcls;
   if (is_specialized_cls(t1)) rcls = dcls_of(t1).cls;
-  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
+  fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc }, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushClsMethodF& op) {
@@ -2488,11 +2498,40 @@ void in(ISS& env, const bc::FPassVNop& op) {
 }
 
 void in(ISS& env, const bc::FPassC& op) {
-  if (fpiTop(env).kind == FPIKind::Builtin) {
+  auto& ar = fpiTop(env);
+  if (ar.kind == FPIKind::Builtin) {
     return reduceFPassBuiltin(env, prepKind(env, op.arg1), op.subop2, op.arg1,
                               bc::Nop {});
   }
-  if (op.subop2 != FPassHint::Ref) nothrow(env);
+  if (ar.foldable) {
+    auto const ok = [&] {
+      if (!is_scalar(topT(env))) return false;
+      auto const callee = ar.func->exactFunc();
+      if (op.arg1 >= callee->params.size() ||
+          (op.arg1 + 1 == callee->params.size() &&
+           callee->params.back().isVariadic)) {
+        return true;
+      }
+      auto const constraint = callee->params[op.arg1].typeConstraint;
+      if (!constraint.hasConstraint() ||
+          constraint.isTypeVar() ||
+          constraint.isTypeConstant()) {
+        return true;
+      }
+      return env.index.satisfies_constraint(
+        Context { callee->unit, const_cast<php::Func*>(callee), callee->cls },
+        topC(env), constraint);
+    }();
+    if (!ok) {
+      auto const func = ar.func->exactFunc();
+      assertx(func);
+      env.collect.unfoldableFuncs.emplace(func);
+      env.propagate(ar.pushBlk, nullptr);
+      ar.foldable = false;
+      FTRACE(2, "     fpi: not foldable\n");
+    }
+  }
+  if (op.subop2 != FPassHint::Ref) effect_free(env);
 }
 
 void fpassCXHelper(ISS& env, uint32_t param, bool error, FPassHint hint) {
@@ -2565,10 +2604,29 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   auto const ar = fpiPop(env);
   always_assert(ar.func.hasValue());
 
-  if (options.ConstantFoldBuiltins && ar.func->isFoldable()) {
-    if (auto val = const_fold(env, numArgs, *ar.func)) {
-      return push(env, std::move(*val));
-    }
+  if (options.ConstantFoldBuiltins && ar.foldable) {
+    auto ty = [&] () -> folly::Optional<Type> {
+      if (ar.func->isFoldable()) {
+        return const_fold(env, numArgs, *ar.func);
+      }
+      auto const func = ar.func->exactFunc();
+      assertx(func);
+      std::vector<Type> args(numArgs);
+      for (auto i = uint32_t{0}; i < numArgs; ++i) {
+        args[numArgs - i - 1] = topT(env, i);
+      }
+
+      auto const ret = env.index.lookup_foldable_return_type(
+        env.ctx, func, std::move(args));
+      if (ret == TTop) {
+        env.collect.unfoldableFuncs.emplace(func);
+        env.propagate(ar.pushBlk, nullptr);
+        return folly::none;
+      }
+      discard(env, numArgs);
+      return ret;
+    }();
+    if (ty) return push(env, std::move(*ty));
   }
 
   specialFunctionEffects(env, ar);
@@ -3144,7 +3202,7 @@ void in(ISS& env, const bc::OODeclExists& op) {
         constprop(env);
         return mayExist ? TTrue : TFalse;
       }
-      if (!env.collect.inlining) {
+      if (!any(env.collect.opts & CollectionOpts::Inlining)) {
         unit->persistent.store(false, std::memory_order_relaxed);
       }
       // At this point, if it mayExist, we still don't know that it
@@ -3625,6 +3683,10 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     auto const flags = interpOps(interp, iter, stop, propagate);
     if (interp.collect.effectFree && !flags.effectFree) {
       interp.collect.effectFree = false;
+      if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {
+        FTRACE(2, "  Bailing because not effect free\n");
+        return ret;
+      }
     }
 
     if (flags.usedLocalStatics) {

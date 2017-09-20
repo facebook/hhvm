@@ -52,6 +52,12 @@ bool is_volatile_local(borrowed_ptr<const php::Func>, LocalId);
  */
 SString memoize_impl_name(borrowed_ptr<const php::Func>);
 
+/*
+ * Check that passing nArgs params to func has a chance of not warning.
+ */
+bool check_nargs_in_range(borrowed_ptr<const php::Func> func, uint32_t nArgs);
+
+
 //////////////////////////////////////////////////////////////////////
 
 }}

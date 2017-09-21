@@ -322,6 +322,9 @@ let convert_id (env:env) p (pid, str as id) =
       | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)
       | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ ->
         return (prefix ^ "{closure}")
+      (* PHP weirdness: __METHOD__ inside a class outside a method
+       * returns class name *)
+      | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
     end
   | "__FUNCTION__" ->

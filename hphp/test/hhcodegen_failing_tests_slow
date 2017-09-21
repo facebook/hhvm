@@ -39,7 +39,6 @@ slow/concat/1578.php
 slow/constant/1597.php
 slow/constant/casing.php
 slow/constant/globals-array-constant.php
-slow/constant/magic_constants.php
 slow/constant/realias.php
 slow/constant/true_false_null.php
 slow/constructor/1719.php

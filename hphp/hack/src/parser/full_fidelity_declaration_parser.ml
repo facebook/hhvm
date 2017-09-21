@@ -1233,9 +1233,8 @@ module WithExpressionAndStatementAndTypeParser
      (* This function parses the parens as well. *)
      (* ERROR RECOVERY: We allow variadic parameters in all positions; a later
         pass gives an error if a variadic parameter is in an incorrect position
-        or followed by a trailing comma.  *)
-     (* TODO: Add an error checking pass that ensures that a variadic parameter
-     does not have a default value. (This work is tracked by task T21650816.) *)
+        or followed by a trailing comma, or if the parameter has a
+        default value.  *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =

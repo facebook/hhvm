@@ -69,6 +69,12 @@ let is_variadic_expression node =
     | _ -> false
   end
 
+let is_parameter_with_default_value param =
+  match (syntax param) with
+    | ParameterDeclaration { parameter_default_value; _ }
+      -> not (is_missing parameter_default_value)
+    | _ -> false
+
 let is_variadic_parameter_variable node =
   (* TODO: This shouldn't be a decorated *expression* because we are not
   expecting an expression at all. We're expecting a declaration. *)
@@ -95,6 +101,17 @@ let ends_with_variadic_comma params =
     | [] -> None
     | x :: y :: [] when is_variadic_parameter_declaration x && is_comma y ->
       Some y
+    | _ :: t -> aux t in
+  aux (syntax_to_list_with_separators params)
+
+(* If a variadic parameter has a default value, return it *)
+let variadic_params_with_default_value params =
+  let rec aux params =
+    match params with
+    | [] -> None
+    | x :: t when
+      (is_parameter_with_default_value x) &&
+      (is_variadic_parameter_declaration x) -> Some x
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 
@@ -755,16 +772,23 @@ let methodish_errors node parents is_hack =
   | _ -> [ ]
 
 let params_errors params =
+  let errors = [] in
   let errors =
     match ends_with_variadic_comma params with
-    | None -> []
+    | None -> errors
     | Some comma ->
-      [ make_error_from_node comma SyntaxError.error2022 ]
-  in
+      ( make_error_from_node comma SyntaxError.error2022 ) :: errors in
+  let errors =
     match misplaced_variadic_param params with
     | None -> errors
     | Some param ->
-      ( make_error_from_node param SyntaxError.error2021 ) :: errors
+      ( make_error_from_node param SyntaxError.error2021 ) :: errors in
+  let errors =
+    match variadic_params_with_default_value params with
+    | None -> errors
+    | Some default_argument ->
+      (make_error_from_node default_argument SyntaxError.error2065) :: errors in
+  errors
 
 let parameter_errors node parents is_strict =
   match syntax node with

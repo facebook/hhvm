@@ -1,0 +1,2 @@
+(2,13)-(2,24) A variadic argument ('...') must not have a default value.
+(3,17)-(3,28) A variadic argument ('...') must not have a default value.

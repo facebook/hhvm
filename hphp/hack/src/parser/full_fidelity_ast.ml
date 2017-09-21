@@ -1145,18 +1145,26 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax "expression" node env
   in
-  (* Since we need positions in XHP, regardless of the ignorePos flag, we
-   * parenthesise the call to pExpr_ so that the XHP expression case can flip
-   * the switch. The key part is that `get_pos node` happens before the old
-   * setting is restored.
-   *
-   * Evaluation order matters here!
-   *)
-  let local_ignore_pos = !(lowerer_state.ignorePos) in
-  let expr_ = pExpr_ node env in
-  let p = get_pos node in
-  lowerer_state.ignorePos := local_ignore_pos;
-  p, expr_
+  begin match syntax node with
+  | ParenthesizedExpression { parenthesized_expression_expression = expr; _ } ->
+    (* peel of parenthesised expresions:
+       if there is a XHP inside - we want XHP node to have its own positions,
+       not positions of enclosing parenthesised expression *)
+    pExpr ~location expr env
+  | _ ->
+    (* Since we need positions in XHP, regardless of the ignorePos flag, we
+     * parenthesise the call to pExpr_ so that the XHP expression case can flip
+     * the switch. The key part is that `get_pos node` happens before the old
+     * setting is restored.
+     *
+     * Evaluation order matters here!
+     *)
+    let local_ignore_pos = !(lowerer_state.ignorePos) in
+    let expr_ = pExpr_ node env in
+    let p = get_pos node in
+    lowerer_state.ignorePos := local_ignore_pos;
+    p, expr_
+  end
 and pBlock : block parser = fun node env ->
    match pStmt node env with
    | Block block -> List.filter ~f:(fun x -> x <> Noop) block

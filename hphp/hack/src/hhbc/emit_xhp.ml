@@ -47,7 +47,7 @@ let emit_xhp_attribute_array ~ns xal =
     | "HH\\bool" -> 2
     | "HH\\int" -> 3
     | "array" -> 4
-    | "HH\\mixed" -> 6
+    | "var" | "HH\\mixed" -> 6
     | "enum" -> 7
     | "HH\\float" -> 8
     | "callable" -> 9

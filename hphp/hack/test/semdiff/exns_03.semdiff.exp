@@ -99,7 +99,7 @@ Distance = 1
 Size = 125
 Similarity = 99.21
 Edits = 
-for foo:[31m- String "handlerstack should be empty herex"
-[32m+ String "handlerstack should be empty here"
 
-[0m
+for foo:
+- String "handlerstack should be empty herex"
++ String "handlerstack should be empty here"

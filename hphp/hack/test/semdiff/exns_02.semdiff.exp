@@ -98,39 +98,39 @@ Distance = 28
 Size = 150
 Similarity = 81.46
 Edits = 
-for foo:[31m- }
-[31m- String "finally 3x"
-[32m+ }
-[32m+ String "finally 3"
-[32m+ L1:
-[31m- L1:
-[31m- JmpZ L6
-[32m+ JmpZ L7
-[32m+ L7:
-[31m- L6:
-[31m- UnsetL _2
-[31m- UnsetL _3
-[31m- F11:
-[31m- UnsetL _2
-[31m- UnsetL _3
-[31m- String "inner, inner finally "
-[31m- Print
-[31m- PopC
-[31m- Unwind
-[31m- UnsetL _2
-[31m- UnsetL _3
-[31m- JmpZ L7
-[32m+ JmpZ L6
-[32m+ L6:
-[31m- L7:
-[31m- F8:
-[32m+ F11:
-[31m- UnsetL _2
-[32m+ String "inner, inner finally "
-[31m- UnsetL _3
-[32m+ Print
-[32m+ PopC
-[32m+ Unwind
-[32m+ F8:
 
-[0m
+for foo:
+- }
+- String "finally 3x"
++ }
++ String "finally 3"
++ L1:
+- L1:
+- JmpZ L6
++ JmpZ L7
++ L7:
+- L6:
+- UnsetL _2
+- UnsetL _3
+- F11:
+- UnsetL _2
+- UnsetL _3
+- String "inner, inner finally "
+- Print
+- PopC
+- Unwind
+- UnsetL _2
+- UnsetL _3
+- JmpZ L7
++ JmpZ L6
++ L6:
+- L7:
+- F8:
++ F11:
+- UnsetL _2
++ String "inner, inner finally "
+- UnsetL _3
++ Print
++ PopC
++ Unwind
++ F8:

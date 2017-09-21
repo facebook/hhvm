@@ -29,21 +29,21 @@ Distance = 8
 Size = 70
 Similarity = 88.73
 Edits = 
-for f:[31m- MIterInitK 0 L0 _6 _5
-[32m+ MIterInitK 0 L0 _5 _4
-[31m- CGetL $y
-[32m+ VGetL _5
-[31m- VGetL _6
-[32m+ CGetL2 $y
-[31m- CGetL _5
-[32m+ CGetL _4
-[31m- UnsetL _5
-[32m+ UnsetL _4
-[31m- MIterNextK 0 L1 _6 _5
-[32m+ MIterNextK 0 L1 _5 _4
-[31m- UnsetL _6
-[32m+ UnsetL _5
-[31m- UnsetL _5
-[32m+ UnsetL _4
 
-[0m
+for f:
+- MIterInitK 0 L0 _6 _5
++ MIterInitK 0 L0 _5 _4
+- CGetL $y
++ VGetL _5
+- VGetL _6
++ CGetL2 $y
+- CGetL _5
++ CGetL _4
+- UnsetL _5
++ UnsetL _4
+- MIterNextK 0 L1 _6 _5
++ MIterNextK 0 L1 _5 _4
+- UnsetL _6
++ UnsetL _5
+- UnsetL _5
++ UnsetL _4

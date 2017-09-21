@@ -89,3 +89,12 @@ let get_unused_fixmes codes applied_fixmes files_info  =
       add_applied_fixme acc code fn line end in
   Relative_path.Map.fold files_info ~f:(fun fn _ acc ->
     get_unused_fixmes_for codes applied_fixme_map fn acc) ~init:[]
+
+let to_string fixmes =
+  let folder1 line_number innermap acc =
+    let folder2 error_number pos acc =
+      let pos = Pos.string_no_file pos in
+      (Printf.sprintf "%d %d %s" line_number error_number pos) :: acc in
+    IMap.fold folder2 innermap acc in
+  let results = IMap.fold folder1 fixmes ["FIXMES"] in
+  String.concat "\n" (List.rev results)

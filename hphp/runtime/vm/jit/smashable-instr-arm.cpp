@@ -59,10 +59,7 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
   a.    dc64 (imm);
   a.    bind (&after_data);
 
-  auto const start = cb.toDestAddress(the_start);
-  auto const end = cb.toDestAddress(cb.frontier());
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
+  cb.sync(the_start);
   return the_start;
 }
 
@@ -94,10 +91,7 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
   a.    Ldr  (rAsm, &target_data);
   a.    Blr  (rAsm);
 
-  auto const start = cb.toDestAddress(the_start);
-  auto const end = cb.toDestAddress(cb.frontier());
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
+  cb.sync(the_start);
   return the_start;
 }
 
@@ -117,10 +111,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
   a.    bind (&target_data);
   a.    dc64 (target);
 
-  auto const start = cb.toDestAddress(the_start);
-  auto const end = cb.toDestAddress(cb.frontier());
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
+  cb.sync(the_start);
   return the_start;
 }
 
@@ -155,10 +146,7 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
 
   a.    bind (&after_data);
 
-  auto const start = cb.toDestAddress(the_start);
-  auto const end = cb.toDestAddress(cb.frontier());
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
+  cb.sync(the_start);
   return the_start;
 }
 
@@ -235,9 +223,9 @@ bool isSmashableJcc(TCA inst) {
 template<typename T>
 static void smashInstr(TCA inst, T target, size_t sz) {
   *reinterpret_cast<T*>(inst + sz - 8) = target;
-  auto const end = reinterpret_cast<char*>(inst + sz);
+  auto const end = reinterpret_cast<TCA>(inst + sz);
   auto const begin = end - 8;
-  __builtin___clear_cache(begin, end);
+  DataBlock::syncDirect(begin, end);
 }
 
 void smashMovq(TCA inst, uint64_t target) {

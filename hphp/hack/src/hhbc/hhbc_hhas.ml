@@ -1017,12 +1017,15 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
     name ^ "[" ^ string_of_afield_list afl ^ "]"
-  | A.Collection ((_, name), afl) when
-    name = "Set" || name = "Pair" || name = "Vector" || name = "Map" ||
-    name = "ImmSet" || name = "ImmVector" || name = "ImmMap" ->
-    "HH\\\\" ^ name ^ " {" ^ string_of_afield_list afl ^ "}"
-  | A.Collection ((_, name), _) ->
-    nyi ^ " - Default value for an unknown collection - " ^ name
+  | A.Collection ((_, name), afl) ->
+    let name = SU.Types.fix_casing @@ SU.strip_ns name in
+    begin match name with
+    | "Set" | "Pair" | "Vector" | "Map"
+    | "ImmSet" | "ImmVector" | "ImmMap" ->
+      "HH\\\\" ^ name ^ " {" ^ string_of_afield_list afl ^ "}"
+    | _ ->
+      nyi ^ " - Default value for an unknown collection - " ^ name
+    end
   | A.Shape fl ->
     let fl =
       List.map

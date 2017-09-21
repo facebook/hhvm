@@ -85,7 +85,23 @@ public:
     return m_map->count(k);
   }
 
+  template<class SerDe>
+  typename std::enable_if<SerDe::deserializing>::type
+  serde(SerDe& sd) {
+    Map m;
+    sd(m);
+    lookup(std::move(m));
+  }
+
+  template<class SerDe>
+  typename std::enable_if<!SerDe::deserializing>::type
+  serde(SerDe& sd) const {
+    sd(map());
+  }
+
 private:
+  struct MapCompare;
+  void lookup(Map&& map);
   Map& map() {
     if (!m_map) m_map.emplace();
     return *m_map.mutate();

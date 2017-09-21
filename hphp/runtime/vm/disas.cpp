@@ -570,19 +570,6 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
-std::string user_attrs(const UserAttributeMap* attrsMap) {
-  if (!attrsMap || attrsMap->empty()) return "";
-
-  std::vector<std::string> attrs;
-
-  for (auto& entry : *attrsMap) {
-    attrs.push_back(
-      folly::format("{}({})", escaped(entry.first),
-                    escaped_long(entry.second)).str());
-  }
-  return folly::join(" ", attrs);
-}
-
 std::string opt_attrs(AttrContext ctx, Attr attrs,
                       const UserAttributeMap* userAttrs = nullptr,
                       bool isTop = true) {
@@ -829,6 +816,19 @@ std::string disassemble(const Unit* unit) {
   Output out { os };
   print_unit(out, unit);
   return os.str();
+}
+
+std::string user_attrs(const UserAttributeMap* attrsMap) {
+  if (!attrsMap || attrsMap->empty()) return "";
+
+  std::vector<std::string> attrs;
+
+  for (auto& entry : *attrsMap) {
+    attrs.push_back(
+      folly::format("{}({})", escaped(entry.first),
+                    escaped_long(entry.second)).str());
+  }
+  return folly::join(" ", attrs);
 }
 
 //////////////////////////////////////////////////////////////////////

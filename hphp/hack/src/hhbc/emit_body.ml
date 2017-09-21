@@ -296,7 +296,7 @@ let emit_body
     then instr_entrynop
     else header
   in
-  let svar_instrs = SMap.fold (fun name _ lst -> name::lst) svar_map [] in
+  let svar_instrs = SMap.ordered_keys svar_map in
   let body_instrs = gather [
     header;
     stmt_instrs;

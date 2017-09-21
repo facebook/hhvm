@@ -1581,13 +1581,23 @@ and pClassElt : class_elt list parser = fun node env ->
           | Some (pos_end, _) -> Pos.btw p pos_end
           | None -> p
         in
+        (* Add array type for variadic params *)
+        let hint = if not param.param_is_variadic then param.param_hint else
+          begin
+            let hint_list = match param.param_hint with
+              | None -> []
+              | Some h -> [h]
+            in
+            Some (Pos.none, Happly ((Pos.none, "array"), hint_list))
+          end
+        in
         ( Expr (p, Binop (Eq None,
             (p, Obj_get((p, Lvar (p, "$this")), (p, Id cvname), OG_nullthrows)),
             (p, Lvar param.param_id)
           ))
         , ClassVars
           ( Option.to_list param.param_modifier
-          , param.param_hint
+          , hint
           , [span, cvname, None]
           , None
           )

@@ -734,7 +734,7 @@ void thread_huge_tcache_destroy() {
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16"
 #if (JEMALLOC_VERSION_MAJOR >= 5)
-    ",metadata_thp:false"
+    ",metadata_thp:disabled"
 #endif
 #if (JEMALLOC_VERSION_MAJOR < 5)
     ",lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)

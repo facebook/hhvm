@@ -42,7 +42,7 @@ TEST(SlabXmapTest, very_small_xmap) {
 
   auto hole = reinterpret_cast<FreeNode*>((char*)small + small->nbytes);
   hole->initHeader_32(HeaderKind::Hole, slab->end() - (char*)hole);
-  slab->initCrossingMap([](void*,size_t){});
+  slab->initCrossingMap();
 
   // ensure find doesn't walk off beginning of crossing map
   EXPECT_EQ(slab->find(slab).ptr, nullptr);

@@ -76,16 +76,14 @@ struct alignas(kSmallSizeAlign) SlabHeader : FreeNode {
   template<class Fn> HdrBlock find_if(HeapObject* h, Fn fn) const;
 
   /*
-   * initialize the whole crossing map by iterating the slab in address order,
-   * calling Fn after each non-free object is procesed.
+   * initialize the whole crossing map by iterating the slab in address order.
    */
-  template<class Fn> void initCrossingMap(Fn fn) {
+  void initCrossingMap() {
     // initialization algorithm:
     // for each object h in address order:
     //   1. let i = line index of h, j = line index of (h+size)
     //   2. xmap[i] = offset of h within line i, in units of Q bytes
     //   3. xmap[i+1..j] = -1 * no. of lines from line i+1..j back to h
-    //   4. call Fn(h,size) if h is not free space.
     find_if((HeapObject*)this, [&](HeapObject* h, size_t size) {
       auto s = pos(h);
       // store positive offset to start of object h
@@ -94,9 +92,6 @@ struct alignas(kSmallSizeAlign) SlabHeader : FreeNode {
         // for objects that extend into subsequent lines, store number of lines
         // back to object start, saturated to -128
         xmap_[i] = std::max(ssize_t(s.line) - ssize_t(i), ssize_t(-128));
-      }
-      if (!isFreeKind(h->kind())) {
-        fn(h, size);
       }
       return false;
     });

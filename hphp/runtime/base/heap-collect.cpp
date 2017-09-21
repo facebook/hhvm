@@ -60,9 +60,15 @@ bool hasNativeData(const HeapObject* h) {
   );
 }
 
+constexpr auto MinMark = GCBits(1);
+constexpr auto MaxMark = GCBits(3);
+GCBits operator++(GCBits& x, int) {
+  return x == MaxMark ? MinMark : GCBits(uint8_t(x) + 1);
+}
+
 struct Marker {
-  explicit Marker(HeapImpl& heap, APCGCManager* apcgc)
-    : heap_(heap), apcgc_(apcgc)
+  explicit Marker(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
+    : heap_(heap), mark_version_{mark_version}, apcgc_(apcgc)
   {}
   void init();
   template<bool apcgc> void traceRoots();
@@ -76,10 +82,9 @@ struct Marker {
   template<bool apcgc>
   void conservativeScan(const void* start, size_t len);
 
-  static bool marked(const HeapObject* h) {
-    return h->marks() != GCBits::Unmarked;
+  bool marked(const HeapObject* h) {
+    return h->marks() == mark_version_;
   }
-  bool mark(const HeapObject*);
   template<bool apcgc> void checkedEnqueue(const void* p);
   void enqueueWeak(const WeakRefDataHandle* p);
   template<bool apcgc> void finish_typescan();
@@ -95,7 +100,8 @@ struct Marker {
   }
 
   HeapImpl& heap_;
-  Counter allocd_, marked_, pinned_, unknown_; // bytes
+  GCBits const mark_version_;
+  Counter marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
@@ -127,16 +133,6 @@ HdrBlock Marker::find(const void* ptr) {
     return {h, r->second};
   }
   return {nullptr, 0};
-}
-
-// Mark the object at h, return true if first time. For allocations that
-// contain prefix data followed by an ObjectData, h should point to the
-// start of the whole allocation, not the interior ObjectData.
-inline bool Marker::mark(const HeapObject* h) {
-  assert(h->kind() <= HeaderKind::BigMalloc);
-  assert(h->kind() != HeaderKind::AsyncFuncWH);
-  assert(h->kind() != HeaderKind::Closure);
-  return h->mark() == GCBits::Unmarked;
 }
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
@@ -199,7 +195,9 @@ void Marker::checkedEnqueue(const void* p) {
   if (auto h = r.ptr) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
     // we'll skip it when we process the queue.
-    if (mark(h)) {
+    auto old = h->marks();
+    if (old != mark_version_) {
+      h->setmarks(mark_version_);
       marked_ += r.size;
       pinned_ += r.size;
       enqueue(h);
@@ -261,33 +259,20 @@ NEVER_INLINE void Marker::init() {
   MM().initFree();
   initfree_ns_ = cpu_ns() - t0;
 
-  auto init = [&](HeapObject* h, size_t size) {
-    h->clearMarks();
-    allocd_ += size;
-  };
-
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
       ptrs_.insert(h, size);
-      if (h->kind() == HeaderKind::BigObj) {
-        init(static_cast<MallocNode*>(h) + 1, size - sizeof(MallocNode));
-      } else {
-        assert(h->kind() == HeaderKind::BigMalloc);
-        init(h, size);
+      if (h->kind() == HeaderKind::BigMalloc) {
         if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
           unknown_ += size;
-          h->mark();
+          h->setmarks(mark_version_);
           enqueue(h);
         }
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
       ptrs_.insert(h, size);
-      Slab::fromHeader(h)->initCrossingMap([&](HeapObject* h, size_t size) {
-        init(h, size);
-        assert(h->kind() != HeaderKind::SmallMalloc ||
-            type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex()));
-      });
+      Slab::fromHeader(h)->initCrossingMap();
     }
   );
   ptrs_.prepare();
@@ -447,7 +432,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
       "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
-      "allocd %luM marked %.1f%% pinned %.1f%% free %.1fM "
+      "marked %.1f%% pinned %.1f%% free %.1fM "
       "cscan-heap %.1fM "
       "xscan-heap %.1fM\n",
       t_req_age,
@@ -455,9 +440,8 @@ void logCollection(const char* phase, const Marker& mkr) {
       t_trigger/1024/1024,
       mkr.init_ns_/1000000,
       mkr.mark_ns_/1000000,
-      mkr.allocd_.bytes/1024/1024,
-      100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
-      100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
+      100.0 * mkr.marked_.bytes / t_pre_stats.mmUsage,
+      100.0 * mkr.pinned_.bytes / t_pre_stats.mmUsage,
       mkr.freed_bytes_/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
@@ -476,8 +460,6 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("mark_micros", mkr.mark_ns_/1000);
   sample.setInt("sweep_micros", mkr.sweep_ns_/1000);
   // size metrics gathered during gc
-  sample.setInt("allocd_bytes", mkr.allocd_.bytes);
-  sample.setInt("allocd_objects", mkr.allocd_.count);
   sample.setInt("allocd_span", mkr.ptrs_.span().second);
   sample.setInt("marked_bytes", mkr.marked_.bytes);
   sample.setInt("pinned_bytes", mkr.pinned_.bytes);
@@ -498,7 +480,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   StructuredLog::log("hhvm_gc", sample);
 }
 
-void collectImpl(HeapImpl& heap, const char* phase) {
+void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   VMRegAnchor _;
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;
@@ -524,9 +506,11 @@ void collectImpl(HeapImpl& heap, const char* phase) {
   if (t_enable_samples) {
     t_pre_stats = MM().getStatsCopy(); // don't check or trigger OOM
   }
+  mark_version++;
   Marker mkr(
     heap,
-    RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr
+    RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr,
+    mark_version
   );
   mkr.init();
   if (RuntimeOption::EvalGCForAPC) {
@@ -585,7 +569,7 @@ void MemoryManager::collect(const char* phase) {
   if (empty()) return;
   t_req_age = cpu_ns()/1000 - m_req_start_micros;
   t_trigger = m_nextGc;
-  collectImpl(m_heap, phase);
+  collectImpl(m_heap, phase, m_mark_version);
   updateNextGc();
 }
 

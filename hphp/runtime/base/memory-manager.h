@@ -1120,6 +1120,7 @@ private:
   bool m_bypassSlabAlloc;
   bool m_gc_enabled{RuntimeOption::EvalEnableGC};
   bool m_enableStatsSync{false};
+  GCBits m_mark_version{GCBits(0)};
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;

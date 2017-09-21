@@ -117,19 +117,7 @@ enum RefCount : std::conditional<one_bit_refcount, int8_t, int32_t>::type {
 
 using UnsignedRefCount = std::make_unsigned<RefCount>::type;
 
-enum GCBits : uint8_t {
-  Unmarked = 0,
-  Mark = 1
-};
-
-inline GCBits operator|(GCBits a, GCBits b) {
-  return static_cast<GCBits>(
-      static_cast<uint8_t>(a) | static_cast<uint8_t>(b)
-  );
-}
-inline bool operator&(GCBits a, GCBits b) {
-  return (static_cast<uint8_t>(a) & static_cast<uint8_t>(b)) != 0;
-}
+enum class GCBits : uint8_t {};
 
 /*
  * Common header for all heap-allocated objects. Layout is carefully
@@ -218,13 +206,8 @@ public:
 
 public:
   HeaderKind kind() const { return m_kind; }
-  GCBits marks() const { return (GCBits)m_marks; }
-  void clearMarks() const { m_marks = GCBits::Unmarked; }
-  GCBits mark() const {
-    auto const old = (GCBits)m_marks;
-    m_marks = old | GCBits::Mark;
-    return old;
-  }
+  GCBits marks() const { return m_marks; }
+  void setmarks(GCBits m) const { m_marks = m; }
 };
 static_assert(sizeof(HeapObject) == sizeof(uint64_t),
               "HeapObject is expected to be 8 bytes.");

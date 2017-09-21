@@ -380,7 +380,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
         ~params
         ~is_static:true
         ~is_private:true
-        ~is_abstract:false
+        ~is_abstract:class_is_interface
         ~span:class_span
         instrs] in
   let ctor_methods =

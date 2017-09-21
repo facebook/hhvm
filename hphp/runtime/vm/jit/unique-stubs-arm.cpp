@@ -216,7 +216,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
-  auto const start = cb.frontier();
+  auto const begin = cb.frontier();
 
   // Jump to enterTCExit
   a.Ldr(rAsm, &target_data);
@@ -224,10 +224,8 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   a.bind(&target_data);
   a.dc64(us.enterTCExit);
 
-  auto const end = cb.frontier();
-  __builtin___clear_cache(reinterpret_cast<char*>(start),
-                          reinterpret_cast<char*>(end));
-  return start;
+  cb.sync(begin);
+  return begin;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

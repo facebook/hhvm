@@ -42,7 +42,7 @@ struct AlignImpl {
 
   static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
     vixl::MacroAssembler a { cb };
-    auto const start = cb.toDestAddress(cb.frontier());
+    auto const begin = cb.frontier();
 
     switch (context) {
       case AlignContext::Live: {
@@ -50,9 +50,7 @@ struct AlignImpl {
         for (; bytes > 0; bytes -= 4) {
           a.Nop();
         }
-        auto const end = cb.toDestAddress(cb.frontier());
-        __builtin___clear_cache(reinterpret_cast<char*>(start),
-                                reinterpret_cast<char*>(end));
+        cb.sync(begin);
         return;
       }
       case AlignContext::Dead: {
@@ -60,9 +58,7 @@ struct AlignImpl {
           a.Brk();
           bytes -= 4;
         }
-        auto const end = cb.toDestAddress(cb.frontier());
-        __builtin___clear_cache(reinterpret_cast<char*>(start),
-                                reinterpret_cast<char*>(end));
+        cb.sync(begin);
         if (bytes > 0) pad(cb, AlignContext::Live, bytes);
         return;
       }

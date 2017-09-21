@@ -30,11 +30,26 @@ let rec expr_requires_deep_init (_, expr_) =
   | A.Id(_, ("__FILE__" | "__DIR__")) -> false
   | A.Call((_, A.Id(_, "tuple")), _, args, []) ->
     List.exists args expr_requires_deep_init
-  | A.Class_const ((_, s), (_, "class")) ->
-    s = SN.Classes.cSelf ||
-    s = SN.Classes.cParent ||
-    s = SN.Classes.cStatic
+  | A.Class_const ((_, s), (_, p)) ->
+    class_const_requires_deep_init s p
+  | A.Shape fields ->
+    List.exists fields shape_field_requires_deep_init
   | _ -> true
+
+and class_const_requires_deep_init s p =
+  p <> SN.Members.mClass ||
+  s = SN.Classes.cSelf   ||
+  s = SN.Classes.cSelf   ||
+  s = SN.Classes.cParent ||
+  s = SN.Classes.cStatic
+
+and shape_field_requires_deep_init (n, v) =
+  match n with
+  | A.SFlit _ ->
+    expr_requires_deep_init v
+  | A.SFclass_const ((_, s), (_, p)) ->
+    class_const_requires_deep_init s p ||
+    expr_requires_deep_init v
 
 and expr_pair_requires_deep_init (expr1, expr2) =
   expr_requires_deep_init expr1 || expr_requires_deep_init expr2

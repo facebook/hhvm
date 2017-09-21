@@ -14,9 +14,9 @@ open Core
 exception Expected_throw_missing
 exception Thrown_exception_mismatched of (exn * exn)
 
-let expect_throws e f = fun () ->
+let expect_throws e f x =
   try
-    let _ = f () in
+    let _ = f x in
     Printf.eprintf "Error. Did not throw expected: %s\n" (Printexc.to_string e);
     false
   with | err ->

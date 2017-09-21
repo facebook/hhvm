@@ -2590,6 +2590,7 @@ module Make (GetLocals : GetLocals) = struct
       cst_name = cst.cst_name;
       cst_type = hint;
       cst_value = e;
+      cst_is_define = (cst.cst_kind = Ast.Cst_define);
     }
 
   (* Uses a default empty environment to extract the use list

@@ -1,5 +1,5 @@
 (* @generated from nast.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<5dac961b50121c1ae0dd32337a01716fdbb26a05>> *)
+(* SourceShasum<<d222f6df39bc7c7dbb04bb955b8478eb451693b4>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -2038,7 +2038,8 @@ module AnnotatedAST(Annotation:AnnotationType) =
       cst_mode: FileInfo.mode [@opaque ];
       cst_name: sid ;
       cst_type: hint option ;
-      cst_value: expr option }[@@deriving show]
+      cst_value: expr option ;
+      cst_is_define: bool }[@@deriving show]
     let rec pp_class_ :
       Format.formatter -> class_ -> Ppx_deriving_runtime.unit =
       let __17 () = pp_enum_
@@ -2651,31 +2652,35 @@ module AnnotatedAST(Annotation:AnnotationType) =
           fun fmt  ->
             fun x  ->
               Format.fprintf fmt "@[<2>{ ";
-              ((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.cst_mode";
-                  ((fun _  -> Format.pp_print_string fmt "<opaque>"))
-                    x.cst_mode;
+              (((((Format.fprintf fmt "@[%s =@ " "AnnotatedAST.cst_mode";
+                   ((fun _  -> Format.pp_print_string fmt "<opaque>"))
+                     x.cst_mode;
+                   Format.fprintf fmt "@]");
+                  Format.fprintf fmt ";@ ";
+                  Format.fprintf fmt "@[%s =@ " "cst_name";
+                  ((__0 ()) fmt) x.cst_name;
                   Format.fprintf fmt "@]");
                  Format.fprintf fmt ";@ ";
-                 Format.fprintf fmt "@[%s =@ " "cst_name";
-                 ((__0 ()) fmt) x.cst_name;
+                 Format.fprintf fmt "@[%s =@ " "cst_type";
+                 ((function
+                   | None  -> Format.pp_print_string fmt "None"
+                   | Some x ->
+                       (Format.pp_print_string fmt "(Some ";
+                        ((__1 ()) fmt) x;
+                        Format.pp_print_string fmt ")"))) x.cst_type;
                  Format.fprintf fmt "@]");
                 Format.fprintf fmt ";@ ";
-                Format.fprintf fmt "@[%s =@ " "cst_type";
+                Format.fprintf fmt "@[%s =@ " "cst_value";
                 ((function
                   | None  -> Format.pp_print_string fmt "None"
                   | Some x ->
                       (Format.pp_print_string fmt "(Some ";
-                       ((__1 ()) fmt) x;
-                       Format.pp_print_string fmt ")"))) x.cst_type;
+                       ((__2 ()) fmt) x;
+                       Format.pp_print_string fmt ")"))) x.cst_value;
                 Format.fprintf fmt "@]");
                Format.fprintf fmt ";@ ";
-               Format.fprintf fmt "@[%s =@ " "cst_value";
-               ((function
-                 | None  -> Format.pp_print_string fmt "None"
-                 | Some x ->
-                     (Format.pp_print_string fmt "(Some ";
-                      ((__2 ()) fmt) x;
-                      Format.pp_print_string fmt ")"))) x.cst_value;
+               Format.fprintf fmt "@[%s =@ " "cst_is_define";
+               (Format.fprintf fmt "%B") x.cst_is_define;
                Format.fprintf fmt "@]");
               Format.fprintf fmt "@ }@]")
         [@ocaml.warning "-A"])

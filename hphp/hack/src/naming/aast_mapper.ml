@@ -257,6 +257,7 @@ struct
     T.cst_name = c.S.cst_name;
     T.cst_type = c.S.cst_type;
     T.cst_value = Option.map c.S.cst_value (map_expr f);
+    T.cst_is_define = c.S.cst_is_define;
   }
 
   let map_def f d =

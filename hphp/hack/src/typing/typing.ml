@@ -5218,7 +5218,8 @@ and gconst_def cst tcopt =
   { T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;
-    T.cst_value = typed_cst_value
+    T.cst_value = typed_cst_value;
+    T.cst_is_define = cst.cst_is_define;
   }, tenv
 
 (* Calls the method of a class, but allows the f callback to override the

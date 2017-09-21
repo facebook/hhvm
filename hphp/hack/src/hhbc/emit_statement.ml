@@ -171,13 +171,14 @@ let rec emit_stmt env st =
           instr_popc;
         ]
   | A.Expr (_, A.Binop (A.Eq None, e_lhs, (_, A.Await e_await))) ->
+    let result = Local.scope @@ fun () -> emit_await env e_await in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
       let (lhs, rhs, setop) =
         emit_lval_op_nonlist_steps env LValOp.Set e_lhs rhs_instrs 1 in
       gather [
-        emit_await env e_await;
+        result;
         instr_setl temp;
         instr_popc;
         with_temp_local temp (fun _ _ -> lhs);

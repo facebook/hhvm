@@ -1807,7 +1807,7 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
 
   | A.Id (p, s as id)->
     let id =
-      match s with
+      match SU.strip_global_ns s with
       | "min" when nargs = 2 ->
         p, "__SystemLib\\min2"
       | "max" when nargs = 2 ->

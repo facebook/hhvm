@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ocaml_overrides
 open Stack_utils
 
 module Entry = struct

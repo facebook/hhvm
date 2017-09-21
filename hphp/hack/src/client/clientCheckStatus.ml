@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ocaml_overrides
 open String_utils
 
 module C = Tty

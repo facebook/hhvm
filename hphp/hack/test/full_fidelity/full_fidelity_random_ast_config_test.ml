@@ -17,6 +17,7 @@ module Grammar = Hack_grammar_descriptor
 
 (* open Core *)
 open OUnit
+open Ocaml_overrides
 
 type test = {config : string; error : int}
 

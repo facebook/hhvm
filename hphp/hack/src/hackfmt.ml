@@ -17,6 +17,7 @@ open Core
 open Printf
 open Libhackfmt
 open Hackfmt_error
+open Ocaml_overrides
 
 type filename = string
 type range = int * int

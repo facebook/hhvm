@@ -16,6 +16,7 @@ module SyntaxError = Full_fidelity_syntax_error
 module TestUtils = Full_fidelity_test_utils
 
 open Core
+open Ocaml_overrides
 open OUnit
 
 let fix_output_text_header text =

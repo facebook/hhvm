@@ -12,6 +12,7 @@ open Core
 open ClientEnv
 open Utils
 open ClientRefactor
+open Ocaml_overrides
 
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes

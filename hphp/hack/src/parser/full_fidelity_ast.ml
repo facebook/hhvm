@@ -146,6 +146,7 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
 
 type expr_location =
   | TopLevel
+  | MemberSelect
   | InString
 
 
@@ -799,7 +800,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _ -> []
         end
       in
-      Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
+      let recv = pExpr recv env in
+      let args = couldMap ~f:pExpr args env in
+      Call (recv, hints, args, [])
     | FunctionCallWithTypeArgumentsExpression
       { function_call_with_type_arguments_receiver = recv
       ; function_call_with_type_arguments_type_args = type_args
@@ -844,7 +847,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; embedded_member_operator = op
       ; embedded_member_name     = name
       }
-      -> Obj_get (pExpr recv env, pExpr name env, pNullFlavor op env)
+      ->
+        let recv = pExpr recv env in
+        let name = pExpr ~location:MemberSelect name env in
+        let op = pNullFlavor op env in
+        Obj_get (recv, name, op)
 
     | PrefixUnaryExpression
       { prefix_unary_operator = operator
@@ -898,8 +905,13 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           (pExpr binary_left_operand  env)
           (pExpr binary_right_operand env)
 
-    | Token _ when location = TopLevel -> Id (pos_name node)
-    | Token _ -> String (pos, unesc_dbl (text node))
+    | Token t ->
+      (match location with
+      | MemberSelect when Token.kind t = TK.Variable -> Lvar (pos_name node)
+      | InString -> String (pos, unesc_dbl (text node))
+      | MemberSelect
+      | TopLevel -> Id (pos_name node)
+      )
 
     | YieldExpression { yield_operand; _ } when text yield_operand = "break" ->
       env.saw_yield := true;

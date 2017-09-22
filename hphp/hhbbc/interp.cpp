@@ -137,14 +137,17 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
 
 namespace interp_step {
 
-void in(ISS& env, const bc::Nop&)  { nothrow(env); }
+void in(ISS& env, const bc::Nop&)  { effect_free(env); }
 void in(ISS& env, const bc::DiscardClsRef& op) {
   nothrow(env);
   takeClsRefSlot(env, op.slot);
 }
-void in(ISS& env, const bc::PopC&) { nothrow(env); popC(env); }
+void in(ISS& env, const bc::PopC&) {
+  nothrow(env);
+  if (!could_run_destructor(popC(env))) effect_free(env);
+}
+void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
-void in(ISS& env, const bc::PopU&) { nothrow(env); popU(env); }
 void in(ISS& env, const bc::PopR&) {
   auto t = topT(env, 0);
   if (t.subtypeOf(TCell)) {
@@ -154,10 +157,10 @@ void in(ISS& env, const bc::PopR&) {
   popR(env);
 }
 
-void in(ISS& env, const bc::EntryNop&) { nothrow(env); }
+void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
 
 void in(ISS& env, const bc::Dup& /*op*/) {
-  nothrow(env);
+  effect_free(env);
   auto equiv = topStkEquiv(env);
   auto val = popC(env);
   push(env, val, equiv);
@@ -166,23 +169,23 @@ void in(ISS& env, const bc::Dup& /*op*/) {
 
 void in(ISS& env, const bc::AssertRATL& op) {
   mayReadLocal(env, op.loc1);
-  nothrow(env);
+  effect_free(env);
 }
 
 void in(ISS& env, const bc::AssertRATStk&) {
-  nothrow(env);
+  effect_free(env);
 }
 
-void in(ISS& env, const bc::BreakTraceHint&) { nothrow(env); }
+void in(ISS& env, const bc::BreakTraceHint&) { effect_free(env); }
 
 void in(ISS& env, const bc::Box&) {
-  nothrow(env);
+  effect_free(env);
   popC(env);
   push(env, TRef);
 }
 
 void in(ISS& env, const bc::BoxR&) {
-  nothrow(env);
+  effect_free(env);
   if (topR(env).subtypeOf(TRef)) {
     return reduce(env, bc::BoxRNop {});
   }
@@ -191,7 +194,7 @@ void in(ISS& env, const bc::BoxR&) {
 }
 
 void in(ISS& env, const bc::Unbox&) {
-  nothrow(env);
+  effect_free(env);
   popV(env);
   push(env, TInitCell);
 }
@@ -204,22 +207,22 @@ void in(ISS& env, const bc::UnboxR&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::RGetCNop&) { nothrow(env); }
+void in(ISS& env, const bc::RGetCNop&) { effect_free(env); }
 
 void in(ISS& env, const bc::CGetCUNop&) {
-  nothrow(env);
+  effect_free(env);
   auto const t = popCU(env);
   push(env, remove_uninit(t));
 }
 
 void in(ISS& env, const bc::UGetCUNop&) {
-  nothrow(env);
+  effect_free(env);
   popCU(env);
   push(env, TUninit);
 }
 
 void in(ISS& env, const bc::UnboxRNop&) {
-  nothrow(env);
+  effect_free(env);
   constprop(env);
   auto t = popR(env);
   if (!t.subtypeOf(TInitCell)) t = TInitCell;
@@ -227,7 +230,7 @@ void in(ISS& env, const bc::UnboxRNop&) {
 }
 
 void in(ISS& env, const bc::BoxRNop&) {
-  nothrow(env);
+  effect_free(env);
   auto t = popR(env);
   if (!t.subtypeOf(TRef)) t = TRef;
   push(env, std::move(t));
@@ -513,9 +516,9 @@ void in(ISS& env, const bc::ClsCnsD& op) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::File&)   { nothrow(env); push(env, TSStr); }
-void in(ISS& env, const bc::Dir&)    { nothrow(env); push(env, TSStr); }
-void in(ISS& env, const bc::Method&) { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }
+void in(ISS& env, const bc::Dir&)    { effect_free(env); push(env, TSStr); }
+void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }
 
 void in(ISS& env, const bc::ClsRefName& op) {
   nothrow(env);
@@ -3224,7 +3227,16 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     return reduce(env, bc::Nop {});
   }
 
-  locAsCell(env, op.loc1);
+  // Generally we won't know anything about the params, but
+  // analyze_func_inline does - and this can help with effect-free analysis
+  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
+  if (env.index.satisfies_constraint(env.ctx,
+                                     locAsCell(env, op.loc1),
+                                     constraint)) {
+    reduce(env, bc::Nop {});
+    return;
+  }
+
   if (!RuntimeOption::EvalHardTypeHints) return;
 
   /*
@@ -3239,7 +3251,6 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * references if it re-enters, even if Option::HardTypeHints is
    * on.
    */
-  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
   if (!RuntimeOption::EvalCheckThisTypeHints && constraint.isThis()) {
     return;
   }

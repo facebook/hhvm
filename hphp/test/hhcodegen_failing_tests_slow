@@ -3,7 +3,6 @@ slow/anon_class/extend_local.php
 slow/arithmetic/inc-dec-dollar-this.php
 slow/array_offset/429.php
 slow/array_offset/433.php
-slow/array_trailing_comma.php
 slow/async/foreach_await_as.php
 slow/async/return-annotation-1.php
 slow/async/return-annotation-2.php

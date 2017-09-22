@@ -517,7 +517,7 @@ let rec pHint : hint parser = fun node env ->
       ; _ } ->
         Happly
         ( pos_name kw
-        , List.map ~f:(fun x -> pHint x env) [ key; value ]
+        , pHint key env :: couldMap ~f:pHint value env
         )
     | DictionaryTypeSpecifier
       { dictionary_type_keyword = kw

@@ -294,10 +294,9 @@ and parse_array_type_specifier parser =
      array<type>
      array<type, type>
      TODO: Put a proper reference to the specification in here.
-     TODO: Can we have a comma termination in either case?  This list
-     never has more than two elements.
-     TODO: Should we just parse a comma-separated list here and give an
-     error in a later pass?
+     TODO: in HHVM trailing comma is permitted only in the case with one
+     type argument: array<type, >
+     so now it is not really comma-separated list
   *)
   let (parser, array_token) = assert_token parser Array in
   if peek_token_kind parser <> LessThan then
@@ -317,7 +316,10 @@ and parse_array_type_specifier parser =
     else if kind = Comma then
       let (parser, comma) = next_token parser in
       let comma = make_token comma in
-      let (parser, value_type) = parse_type_specifier parser in
+      let next_token_kind = Token.kind (peek_token parser) in
+      let (parser, value_type) =
+        if next_token_kind = GreaterThan then (parser, make_missing())
+        else parse_type_specifier parser in
       let (parser, right_angle) = require_right_angle parser in
       let result = make_map_array_type_specifier array_token left_angle key_type
         comma value_type right_angle in

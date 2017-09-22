@@ -212,8 +212,8 @@ let make env chunk_group rbm =
   { chunk_group; lines; rbm; cost; overflow; nesting_set; candidate_rules;
     unprocessed_overflow; rules_on_partially_bound_lines; }
 
-let from_source env source_text chunk_group =
-  let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
+let rbm_from_source source_text chunk_group =
+  let rbm = Chunk_group.get_always_rule_bindings chunk_group in
   let rbm, _ = List.fold chunk_group.Chunk_group.chunks ~init:(rbm, 0)
     ~f:begin fun (rbm, prev_chunk_end) chunk ->
       let chunk_start, chunk_end = Chunk.get_range chunk in
@@ -228,6 +228,10 @@ let from_source env source_text chunk_group =
       rbm, chunk_end
     end
   in
+  rbm
+
+let from_source env source_text chunk_group =
+  let rbm = rbm_from_source source_text chunk_group in
   make env chunk_group rbm
 
 let is_rule_bound t rule_id =

@@ -51,8 +51,27 @@ let find_best_state env init_state =
   in
   aux 0 init_state
 
-let solve_chunk_group env source_text chunk_group =
-  let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
+let solve_chunk_group env ?range source_text chunk_group =
+  let rbm =
+    match range with
+    | Some range
+      when Interval.intervals_overlap range
+             (Chunk_group.get_char_range chunk_group)
+      ->
+      let source_rbm = Solve_state.rbm_from_source source_text chunk_group in
+      List.fold chunk_group.Chunk_group.chunks
+        ~init:(Chunk_group.get_always_rule_bindings chunk_group)
+        ~f:begin fun rbm chunk ->
+          let rule = chunk.Chunk.rule in
+          if Interval.intervals_overlap range (Chunk.get_range chunk)
+          then rbm
+          else
+            match IMap.get rule source_rbm with
+            | Some true -> IMap.add rule true rbm
+            | _ -> rbm
+        end
+    | _ -> Chunk_group.get_initial_rule_bindings chunk_group
+  in
   let init_state = Solve_state.make env chunk_group rbm in
   match find_best_state env init_state with
   | Some state -> state
@@ -72,7 +91,7 @@ let find_solve_states
         Interval.intervals_overlap range group_range
       )
   in
-  chunk_groups |> List.map ~f:(solve_chunk_group env source_text)
+  chunk_groups |> List.map ~f:(solve_chunk_group ?range env source_text)
 
 let print
     (env: Env.t)

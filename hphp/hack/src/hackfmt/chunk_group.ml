@@ -31,14 +31,20 @@ let get_rule_kind t id =
 let get_char_range t =
   t.chunks |> List.fold ~init:(max_int,0)
     ~f:(fun (start_char, end_char) chunk ->
-      min start_char chunk.Chunk.start_char,
-      max end_char chunk.Chunk.end_char
+      let chunk_start, chunk_end = Chunk.get_range chunk in
+      min start_char chunk_start,
+      max end_char chunk_end
     )
 
 let constrain_rules t rbm rule_list =
   let aux rule_id = Rule.cares_about_children (get_rule_kind t rule_id) in
   let rules_that_care = List.filter rule_list ~f:aux in
   List.fold rules_that_care ~init:rbm ~f:(fun acc k -> IMap.add k true acc)
+
+let get_always_rule_bindings t =
+  let is_always_rule _k v = v.Rule.kind = Rule.Always in
+  let always_rules = IMap.filter is_always_rule t.rule_map in
+  IMap.map (fun _ -> true) always_rules
 
 let get_initial_rule_bindings t =
   let is_always_rule _k v = v.Rule.kind = Rule.Always in

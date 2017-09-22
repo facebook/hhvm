@@ -58,33 +58,23 @@ let line_interval_to_offset_range line_boundaries (start_line, end_line) =
   let _, end_offset = line_boundaries.(end_line - 1) in
   start_offset, end_offset
 
-let get_split_boundaries solve_states =
-  List.fold solve_states
-    ~init:[]
-    ~f:begin fun boundaries solve_state ->
-      let chunks = Solve_state.chunks solve_state in
-      match chunks with
-      | [] -> boundaries
-      | hd :: tl ->
-        let boundaries, last_range = List.fold tl
-          ~init:(boundaries, Chunk.get_range hd)
-          ~f:begin fun (boundaries, curr_range) chunk ->
-            let chunk_range = Chunk.get_range chunk in
-            if Solve_state.has_split_before_chunk solve_state ~chunk
-              then curr_range :: boundaries, chunk_range
-              else boundaries, (fst curr_range, snd chunk_range)
-          end
-        in
-        last_range :: boundaries
-    end
-  |> List.rev
+let get_atom_boundaries chunk_groups =
+  chunk_groups
+  |> List.concat_map ~f:(fun chunk_group -> chunk_group.Chunk_group.chunks)
+  |> List.concat_map ~f:(fun chunk -> chunk.Chunk.atoms)
+  |> List.map ~f:(fun atom -> atom.Chunk.range)
 
-let expand_to_split_boundaries boundaries range =
-  List.fold boundaries ~init:range ~f:(fun (st, ed) (b_st, b_ed) ->
-    let st = if st > b_st && st < b_ed then b_st else st in
-    let ed = if ed > b_st && ed < b_ed then b_ed else ed in
-    st, ed
-  )
+let expand_to_atom_boundaries boundaries (r_st, r_ed) =
+  let rev_bounds = List.rev boundaries in
+  let st =
+    try fst (List.find_exn rev_bounds ~f:(fun (b_st, _) -> b_st <= r_st)) with
+    | Not_found -> r_st
+  in
+  let ed =
+    try snd (List.find_exn boundaries ~f:(fun (_, b_ed) -> b_ed >= r_ed)) with
+    | Not_found -> r_ed
+  in
+  st, ed
 
 let env_from_config config =
   let env = Option.value config ~default:Env.default in
@@ -147,18 +137,25 @@ let format_intervals ?config intervals tree =
     |> Hack_format.transform env
     |> Chunk_builder.build
   in
-  let solve_states = Line_splitter.find_solve_states env
-    (SourceText.text source_text) chunk_groups in
   let line_boundaries = get_line_boundaries lines in
-  let split_boundaries = get_split_boundaries solve_states in
-  let ranges = intervals
+  let atom_boundaries = get_atom_boundaries chunk_groups in
+  let ranges =
+    intervals
     |> List.map ~f:(line_interval_to_offset_range line_boundaries)
-    |> List.map ~f:(expand_to_split_boundaries split_boundaries)
+    |> List.map ~f:(expand_to_atom_boundaries atom_boundaries)
     |> Interval.union_list
     |> List.sort ~cmp:Interval.comparator
   in
+  let solve_states = Line_splitter.find_solve_states env
+    (SourceText.text source_text) chunk_groups in
   let formatted_intervals = List.map ranges (fun range ->
-    range, Line_splitter.print env ~range solve_states
+    (range,
+      Line_splitter.print
+        env
+        ~range
+        ~include_surrounding_whitespace:false
+        solve_states
+    )
   ) in
   let length = SourceText.length source_text in
   let buf = Buffer.create (length + 256) in
@@ -189,12 +186,23 @@ let format_at_offset ?config tree offset =
     tree
     |> EditableSyntax.from_tree
     |> Hack_format.transform env
-    |> Chunk_builder.build in
+    |> Chunk_builder.build
+  in
   let module PS = Full_fidelity_positioned_syntax in
-  (* Grab the node which is the direct parent of the token at offset *)
-  let token, node = match PS.parentage (PS.from_tree tree) offset with
-    | token :: node :: _ -> token, node
-    | _ -> invalid_arg "Invalid offset" in
+  (* Grab the node which is the direct parent of the token at offset. If the
+   * direct parent is a CompoundStatement, skip it and get the grandparent
+   * (so we format entire IfStatements or MethodishDeclarations when formatting
+   * at the closing brace). *)
+  let token, node =
+    let module SK = Full_fidelity_syntax_kind in
+    match PS.parentage (PS.from_tree tree) offset with
+    | token :: parent :: grandparent :: _
+      when PS.kind parent = SK.CompoundStatement
+        && PS.kind grandparent <> SK.SyntaxList ->
+      token, grandparent
+    | token :: parent :: _ -> token, parent
+    | _ -> invalid_arg "Invalid offset"
+  in
   (* Format up to the end of the token at the given offset. *)
   let offset = PS.end_offset token in
   (* Our ranges are half-open, so the range end is the token end offset + 1. *)
@@ -205,16 +213,18 @@ let format_at_offset ?config tree offset =
    * source, since we want to add a leading newline before the node we're
    * formatting if one should be there and isn't already present. *)
   let range = (fst (expand_to_line_boundaries source_text range), ed) in
-  (* Find a solution for that range, then expand the range start to a split
-   * boundary (a line boundary in the formatted source). *)
-  let solve_states = Line_splitter.find_solve_states env
-    ~range (SourceText.text source_text) chunk_groups in
-  let split_boundaries = get_split_boundaries solve_states in
-  let range = (fst (expand_to_split_boundaries split_boundaries range), ed) in
+  (* Expand the start offset to the nearest atom boundary in the original
+   * source, so that all whitespace preceding the formatted atoms is included in
+   * the range. *)
+  let atom_boundaries = get_atom_boundaries chunk_groups in
+  let range = (fst (expand_to_atom_boundaries atom_boundaries range), ed) in
   (* Produce the formatted text *)
-  let formatted = Line_splitter.print env solve_states ~range in
-  (* We don't want a trailing newline here (in as-you-type-formatting, it would
-   * place the cursor on the next line), but the Line_splitter always prints one
-   * at the end of a formatted range when the last token ought to have a
-   * trailing newline. So, we remove it. *)
-  range, String_utils.rstrip formatted "\n"
+  let formatted =
+    Line_splitter.solve
+      env
+      ~range
+      ~include_surrounding_whitespace:false
+      (SourceText.text source_text)
+      chunk_groups
+  in
+  range, formatted

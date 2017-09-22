@@ -1,0 +1,6 @@
+49 102
+;
+  {
+    // UNSAFE_BLOCK
+    takesString($x);
+  }

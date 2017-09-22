@@ -41,12 +41,17 @@ let string_of_subchunks (env: Env.t) (subchunks: t list) : string =
   end;
   Buffer.contents buf
 
-let subchunks_in_range (subchunks: t list) (range: Interval.t) : t list =
+let subchunks_in_range
+    ?(include_surrounding_whitespace=true)
+    (subchunks: t list)
+    (range: Interval.t)
+    : t list =
   let (range_start, range_end) = range in
   (* Filter to the atoms which overlap with the range, including the leading and
    * trailing non-Atom subchunks. *)
   let subchunks = List.take_while subchunks ~f:begin function
-    | Atom {range = st,_; _} -> st < range_end
+    | Atom {range = st,ed; _} -> st < range_end ||
+                                 st = range_end && ed = range_end
     | _ -> true
   end in
   let subchunks = List.rev subchunks in
@@ -60,6 +65,15 @@ let subchunks_in_range (subchunks: t list) (range: Interval.t) : t list =
     | Space | Indent _ -> true
     | _ -> false
   end in
+  (* When omitting trailing whitespace, drop trailing newlines *)
+  let subchunks =
+    if include_surrounding_whitespace
+    then subchunks
+    else List.drop_while subchunks ~f:begin function
+      | Newline -> true
+      | _ -> false
+    end
+  in
   let subchunks = List.rev subchunks in
   (* Drop leading newline. Also drop leading Commas. Comma represents a
    * trailing comma that was added because its associated split was broken on.
@@ -72,6 +86,15 @@ let subchunks_in_range (subchunks: t list) (range: Interval.t) : t list =
     | Newline | Space | Comma -> true
     | _ -> false
   end in
+  (* When omitting leading whitespace, drop leading indentation *)
+  let subchunks =
+    if include_surrounding_whitespace
+    then subchunks
+    else List.drop_while subchunks ~f:begin function
+      | Indent _ -> true
+      | _ -> false
+    end
+  in
   subchunks
 
 let subchunks_of_solve_state (state: Solve_state.t) : t list =
@@ -105,3 +128,16 @@ let subchunks_of_solve_state (state: Solve_state.t) : t list =
     | _ -> false
   end in
   subchunks
+
+let debug (subchunks: t list) : string =
+  let buf = Buffer.create 200 in
+  List.iter subchunks ~f:begin function
+    | Atom {text; range = st,ed} ->
+      Buffer.add_string buf (Printf.sprintf "Atom %d,%d %S\n" st ed text)
+    | Comma -> Buffer.add_string buf "Comma\n"
+    | Space -> Buffer.add_string buf "Space\n"
+    | Newline -> Buffer.add_string buf "Newline\n"
+    | Indent indent ->
+      Buffer.add_string buf (Printf.sprintf "Indent %d\n" indent)
+  end;
+  Buffer.contents buf

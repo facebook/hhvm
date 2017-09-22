@@ -1393,7 +1393,7 @@ void in(ISS& env, const bc::PushL& op) {
 
 void in(ISS& env, const bc::CGetL2& op) {
   // Can't constprop yet because of no INS_1 support in bc.h
-  if (!locCouldBeUninit(env, op.loc1)) nothrow(env);
+  if (!locCouldBeUninit(env, op.loc1)) effect_free(env);
   auto loc = locAsCell(env, op.loc1);
   auto topEquiv = topStkLocal(env);
   auto top = popT(env);

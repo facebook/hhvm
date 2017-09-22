@@ -25,8 +25,16 @@ namespace MyNS {
     }
   }
 }
+namespace Type {
+  class Hello {
+    public function __construct() {
+      var_dump(__CLASS__);
+    }
+  }
+}
 
 namespace {
+  new Type\Hello();
   use type MyNS\{Foo, Bar};
   use type MyNS\{
     Herp,

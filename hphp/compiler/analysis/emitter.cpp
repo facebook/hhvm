@@ -8555,8 +8555,8 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
         e.Concat();
       } else {
         e.String(makeStaticString(
-                   clsScope->getScopeName() + "::" + funcName
-                   + ": " + deprMessage));
+                   clsScope->getUnmangledScopeName() +
+                   "::" + funcName + ": " + deprMessage));
       }
     } else {
       e.String(makeStaticString(funcName + ": " + deprMessage));

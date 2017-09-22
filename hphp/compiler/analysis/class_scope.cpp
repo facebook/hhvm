@@ -138,6 +138,19 @@ std::string ClassScope::getDocName() const {
   return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
 }
 
+std::string ClassScope::getUnmangledScopeName() const {
+  static const std::string xhp_prefix{ "xhp_" };
+  std::string name{ getScopeName() };
+
+  if (name.compare(0, xhp_prefix.length(), xhp_prefix) == 0) {
+    name.replace(0, xhp_prefix.length(), ":");
+    replaceAll(name, "__", ":");
+    replaceAll(name, "_", "-");
+  }
+
+  return name;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassScope::derivedMagicMethods(ClassScopePtr super) {

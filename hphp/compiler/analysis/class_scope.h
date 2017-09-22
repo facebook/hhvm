@@ -132,6 +132,13 @@ public:
   const std::string &getOriginalName() const;
   std::string getDocName() const;
 
+  /**
+   * Unmangle XHP class method scopes like xhp_x__composable_element::foo back
+   * to x:composable_element::foo for user-visible messages like deprecation
+   * warnings.
+   */
+  std::string getUnmangledScopeName() const;
+
   void checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen);
   const std::string &getOriginalParent() const { return m_parent; }
 

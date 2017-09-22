@@ -342,5 +342,6 @@ slow/vec/hh-only1.php
 slow/vec/hh-only2.php
 slow/xhp/attr-syntax-2.php
 slow/xhp/attr-syntax-3.php
+slow/xhp/deprecated_xhp_class_method.php
 slow/yield/2167.php
 slow/yield/2229.php

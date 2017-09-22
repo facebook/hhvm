@@ -17,7 +17,7 @@
 
 #include <vector>
 #include <array>
-#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_set.h>
 
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/array-init.h"
@@ -41,69 +41,173 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
+  s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
 static_assert(
   sizeof(ArrayData) == 16,
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
-using ArrayDataMap = tbb::concurrent_hash_map<ArrayData::ScalarArrayKey,
-                                              ArrayData*,
-                                              ArrayData::ScalarHash>;
-static ArrayDataMap s_arrayDataMap;
+__thread std::pair<const ArrayData*, size_t> s_cachedHash;
 
-const StaticString s_InvalidKeysetOperationMsg("Invalid operation on keyset");
-const StaticString s_VecUnsetMsg("Vecs do not support unsetting non-end elements");
+struct ScalarHash {
+  size_t operator()(const ArrayData* arr) const {
+    return hash(arr);
+  }
+  size_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
+    return equal(ad1, ad2);
+  }
+  size_t hash(const ArrayData* arr) const {
+    if (arr == s_cachedHash.first) return s_cachedHash.second;
+    return raw_hash(arr);
+  }
+  size_t raw_hash(const ArrayData* arr) const {
+    auto ret = uint64_t{arr->isHackArray() ?
+                        arr->kind() : ArrayData::ArrayKind::kMixedKind};
+    IterateKV(
+      arr,
+      [&](Cell k, TypedValue v) {
+        assertx(!isRefcountedType(k.m_type) ||
+                (k.m_type == KindOfString && k.m_data.pstr->isStatic()));
+        assertx(!isRefcountedType(v.m_type));
+        ret = folly::hash::hash_combine(
+          ret,
+          static_cast<int>(k.m_type), k.m_data.num,
+          static_cast<int>(v.m_type));
+        switch (v.m_type) {
+          case KindOfUninit:
+          case KindOfNull:
+            break;
+          case KindOfBoolean:
+          case KindOfInt64:
+          case KindOfDouble:
+          case KindOfPersistentString:
+          case KindOfPersistentArray:
+          case KindOfPersistentVec:
+          case KindOfPersistentDict:
+          case KindOfPersistentKeyset:
+            ret = folly::hash::hash_combine(ret, v.m_data.num);
+            break;
+          case KindOfString:
+          case KindOfArray:
+          case KindOfVec:
+          case KindOfDict:
+          case KindOfKeyset:
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfRef:
+            always_assert(false);
+        }
+      }
+    );
+    return ret;
+  }
+  bool equal(const ArrayData* ad1, const ArrayData* ad2) const {
+    if (ad1 == ad2) return true;
+    if (ad1->size() != ad2->size()) return false;
 
-ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
-                                                       size_t sz) {
-  return MD5(string_md5(folly::StringPiece{str, sz}));
+    auto check = [] (const TypedValue& tv1, const TypedValue& tv2) {
+      if (tv1.m_type != tv2.m_type) {
+        // String keys from arrays might be KindOfString, even when
+        // the StringData is static.
+        if (!isStringType(tv1.m_type) || !isStringType(tv2.m_type)) {
+          return false;
+        }
+        assertx(tv1.m_data.pstr->isStatic());
+      }
+      if (isNullType(tv1.m_type)) return true;
+      return tv1.m_data.num == tv2.m_data.num;
+    };
+
+    bool equal = true;
+    ArrayIter iter2{ad2};
+    IterateKV(
+      ad1,
+      [&](Cell k, TypedValue v) {
+        if (!check(k, *iter2.first().asTypedValue()) ||
+            !check(v, iter2.secondVal())) {
+          equal = false;
+          return true;
+        }
+        ++iter2;
+        return false;
+      }
+    );
+    return equal;
+  }
+};
+
+using ArrayDataMap = tbb::concurrent_unordered_set<ArrayData*,
+                                                   ScalarHash,
+                                                   ScalarHash>;
+ArrayDataMap s_arrayDataMap;
+
 }
+///////////////////////////////////////////////////////////////////////////////
 
-ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
-  // FIXME: this function uses a lot of temporary memory, reimplement it without
-  //        serialization; do not count its memory towards OOM in meanwhile
-  MemoryManager::SuppressOOM so(MM());
+void ArrayData::GetScalarArray(ArrayData** parr) {
+  auto const arr = *parr;
+  if (arr->isStatic()) return;
+  auto replace = [&] (ArrayData* rep) {
+    *parr = rep;
+    decRefArr(arr);
+    s_cachedHash.first = nullptr;
+  };
 
-  VariableSerializer vs(VariableSerializer::Type::Serialize);
-  auto s = vs.serializeValue(VarNR(arr), false /* limit */);
-  return GetScalarArrayKey(s.data(), s.size());
-}
-
-ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
   if (arr->empty()) {
-    if (arr->isVecArray()) return staticEmptyVecArray();
-    if (arr->isDict()) return staticEmptyDictArray();
-    if (arr->isKeyset()) return staticEmptyKeysetArray();
-    return staticEmptyArray();
+    if (arr->isVecArray()) return replace(staticEmptyVecArray());
+    if (arr->isDict()) return replace(staticEmptyDictArray());
+    if (arr->isKeyset()) return replace(staticEmptyKeysetArray());
+    return replace(staticEmptyArray());
   }
-  auto key = GetScalarArrayKey(arr);
-  return GetScalarArray(arr, key);
+
+  arr->onSetEvalScalar();
+
+  s_cachedHash.first = arr;
+  s_cachedHash.second = ScalarHash{}.raw_hash(arr);
+
+  auto it = s_arrayDataMap.find(arr);
+  if (it != s_arrayDataMap.end()) return replace(*it);
+
+  static std::array<std::mutex, 128> s_mutexes;
+
+  std::lock_guard<std::mutex> g {
+    s_mutexes[s_cachedHash.second % s_mutexes.size()]
+  };
+  it = s_arrayDataMap.find(arr);
+  if (it != s_arrayDataMap.end()) return replace(*it);
+
+  ArrayData* ad;
+  if (arr->isVectorData() && !arr->hasPackedLayout() && !arr->isDict() &&
+      !arr->isKeyset()) {
+    ad = PackedArray::ConvertStatic(arr);
+  } else {
+    ad = arr->copyStatic();
+  }
+  assert(ad->isStatic());
+  s_cachedHash.first = ad;
+  assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
+  auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
+  assertx(inserted);
+  return replace(ad);
 }
 
-ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
-                                     const ScalarArrayKey& key) {
-  if (arr->empty()) {
-    if (arr->isVecArray()) return staticEmptyVecArray();
-    if (arr->isDict()) return staticEmptyDictArray();
-    if (arr->isKeyset()) return staticEmptyKeysetArray();
-    return staticEmptyArray();
-  }
-  assert(key == GetScalarArrayKey(arr));
+ArrayData* ArrayData::GetScalarArray(Array&& arr) {
+  auto a = arr.detach();
+  GetScalarArray(&a);
+  return a;
+}
 
-  ArrayDataMap::accessor acc;
-  if (s_arrayDataMap.insert(acc, key)) {
-    ArrayData* ad;
-    if (arr->isVectorData() && !arr->hasPackedLayout() && !arr->isDict() &&
-        !arr->isKeyset()) {
-      ad = PackedArray::ConvertStatic(arr);
-    } else {
-      ad = arr->copyStatic();
-    }
-    assert(ad->isStatic());
-    ad->onSetEvalScalar();
-    acc->second = ad;
-  }
-  return acc->second;
+ArrayData* ArrayData::GetScalarArray(Variant&& arr) {
+  assertx(arr.isArray() && arr.getRawType() != KindOfRef);
+  auto a = arr.detach().m_data.parr;
+  GetScalarArray(&a);
+  return a;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -54,7 +54,7 @@ void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
   if (!m_arr) thisPtr->m_arr = Ptr::attach(ArrayData::Create());
   if (!m_arr->isStatic()) {
-    thisPtr->m_arr = ArrayData::GetScalarArray(get());
+    thisPtr->m_arr = ArrayData::GetScalarArray(std::move(*thisPtr));
   }
 }
 

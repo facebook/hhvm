@@ -635,32 +635,14 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Static arrays.
 
-  using ScalarArrayKey = MD5;
-  struct ScalarHash {
-    size_t operator()(const ScalarArrayKey& key) const {
-      return key.hash();
-    }
-    size_t hash(const ScalarArrayKey& key) const {
-      return key.hash();
-    }
-    bool equal(const ScalarArrayKey& k1,
-               const ScalarArrayKey& k2) const {
-      return k1 == k2;
-    }
-  };
-
   /*
-   * Get the static array table key for `arr'.
+   * If arr points to a static array, do nothing. Otherwise, make a
+   * static copy, destroy the original and update arr.
    */
-  static ScalarArrayKey GetScalarArrayKey(ArrayData* arr);
-  static ScalarArrayKey GetScalarArrayKey(const char* str, size_t sz);
-
-  /*
-   * Make a unique, static copy of `arr' and return it (or just return `arr' if
-   * it's already static).
-   */
-  static ArrayData* GetScalarArray(ArrayData *arr);
-  static ArrayData* GetScalarArray(ArrayData *arr, const ScalarArrayKey& key);
+  static void GetScalarArray(ArrayData** arr);
+  /* Promote the array referenced by arr to a static array, and return it */
+  static ArrayData* GetScalarArray(Array&& arr);
+  static ArrayData* GetScalarArray(Variant&& arr);
 
   /*
    * Static-ify the contents of the array.

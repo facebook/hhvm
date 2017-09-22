@@ -166,21 +166,12 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
-  auto key = ArrayData::GetScalarArrayKey(const_cast<ArrayData*>(a));
-  return mergeArray(a, key);
-}
-
-Id UnitEmitter::mergeArray(const ArrayData* a,
-                           const ArrayData::ScalarArrayKey& key) {
-  auto const it = m_array2id.find(key);
-  if (it != m_array2id.end()) {
-    return it->second;
+  assertx(a->isStatic());
+  auto const emplaced = m_array2id.emplace(a, static_cast<Id>(m_arrays.size()));
+  if (emplaced.second) {
+    m_arrays.push_back(a);
   }
-  auto sa = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
-  Id id = m_arrays.size();
-  m_arrays.push_back(sa);
-  m_array2id[key] = id;
-  return id;
+  return emplaced.first->second;
 }
 
 
@@ -468,7 +459,8 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       VariableSerializer vs(VariableSerializer::Type::Serialize);
       urp.insertUnitArray[repoId].insert(
         txn, usn, i,
-        vs.serializeValue(VarNR(m_arrays[i]), false /* limit */).toCppString()
+        vs.serializeValue(VarNR(const_cast<ArrayData*>(m_arrays[i])),
+                          false /* limit */).toCppString()
       );
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, m_arrayTypeTable);
@@ -568,13 +560,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) {
     np.second = nullptr;
     u->m_namedInfo.push_back(np);
   }
-  u->m_arrays = [&]() -> std::vector<const ArrayData*> {
-    auto ret = std::vector<const ArrayData*>{};
-    for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      ret.push_back(m_arrays[i]);
-    }
-    return ret;
-  }();
+  u->m_arrays = m_arrays;
   u->m_arrayTypeTable = m_arrayTypeTable;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
@@ -1110,9 +1096,7 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
       Variant v = unserialize_from_buffer(key.data(), key.size());
-      Id id UNUSED = ue.mergeArray(
-        v.asArrRef().get(),
-        ArrayData::GetScalarArrayKey(key.c_str(), key.size()));
+      Id id DEBUG_ONLY = ue.mergeArray(ArrayData::GetScalarArray(std::move(v)));
       assert(id == arrayId);
     }
   } while (!query.done());

@@ -179,7 +179,7 @@ auto const test_array_map_value = folly::lazy([] {
     s_A.get(), s_B.get(),
     s_test.get(), 12
   );
-  return ArrayData::GetScalarArray(ar.get());
+  return ArrayData::GetScalarArray(std::move(ar));
 });
 
 auto const test_array_packed_value = folly::lazy([] {
@@ -188,7 +188,7 @@ auto const test_array_packed_value = folly::lazy([] {
     23,
     12
   );
-  return ArrayData::GetScalarArray(ar.get());
+  return ArrayData::GetScalarArray(std::move(ar));
 });
 
 auto const test_array_packed_value2 = folly::lazy([] {
@@ -197,7 +197,7 @@ auto const test_array_packed_value2 = folly::lazy([] {
     23.0,
     12
   );
-  return ArrayData::GetScalarArray(ar.get());
+  return ArrayData::GetScalarArray(std::move(ar));
 });
 
 auto const test_array_packed_value3 = folly::lazy([] {
@@ -208,7 +208,7 @@ auto const test_array_packed_value3 = folly::lazy([] {
     4,
     5
   );
-  return ArrayData::GetScalarArray(ar.get());
+  return ArrayData::GetScalarArray(std::move(ar));
 });
 
 auto const with_data = folly::lazy([] {

@@ -51,61 +51,12 @@ folly::Optional<Type> eval_cell(Pred p) {
 
     Cell c = p();
     if (isRefcountedType(c.m_type)) {
-      switch (c.m_type) {
-      case KindOfString:
-        {
-          if (c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
-            tvDecRefCountable(&c);
-            return TStr;
-          }
-          auto const sstr = makeStaticString(c.m_data.pstr);
-          tvDecRefCountable(&c);
-          c = make_tv<KindOfPersistentString>(sstr);
-        }
-        break;
-      case KindOfArray:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRefCountable(&c);
-          c = make_tv<KindOfPersistentArray>(sarr);
-        }
-        break;
-      case KindOfVec:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRefCountable(&c);
-          c = make_tv<KindOfPersistentVec>(sarr);
-        }
-        break;
-      case KindOfDict:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRefCountable(&c);
-          c = make_tv<KindOfPersistentDict>(sarr);
-        }
-        break;
-      case KindOfKeyset:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRefCountable(&c);
-          c = make_tv<KindOfPersistentKeyset>(sarr);
-        }
-        break;
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfInt64:
-      case KindOfBoolean:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfPersistentArray:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfRef:
-        always_assert(0 && "Impossible constant evaluation occurred");
+      if (c.m_type == KindOfString &&
+          c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
+        tvDecRefCountable(&c);
+        return TStr;
       }
+      tvAsVariant(&c).setEvalScalar();
     }
 
     /*

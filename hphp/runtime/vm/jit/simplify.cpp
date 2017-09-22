@@ -1841,11 +1841,10 @@ SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst,
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return nullptr;
   auto const before = get(src);
-  auto const converted = convert(const_cast<ArrayData*>(before));
+  auto converted = convert(const_cast<ArrayData*>(before));
   if (!converted) return nullptr;
-  auto const scalar = ArrayData::GetScalarArray(converted);
-  decRefArr(converted);
-  return cns(env, scalar);
+  ArrayData::GetScalarArray(&converted);
+  return cns(env, converted);
 }
 
 template <typename G>
@@ -1907,8 +1906,8 @@ SSATmp* convToVArrImpl(State& env, const IRInstruction* inst, G get) {
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    Array arr = Array::Create(src->variantVal());
-    return cns(env, ArrayData::GetScalarArray(arr.get()));
+    auto arr = Array::Create(src->variantVal());
+    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
 }

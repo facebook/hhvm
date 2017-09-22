@@ -78,8 +78,8 @@ const EnumValues* EnumCache::cachePersistentEnumValues(
   Array&& names,
   Array&& values) {
   std::unique_ptr<EnumValues> enums(new EnumValues());
-  enums->values = ArrayData::GetScalarArray(values.get());
-  enums->names = ArrayData::GetScalarArray(names.get());
+  enums->values = ArrayData::GetScalarArray(std::move(values));
+  enums->names = ArrayData::GetScalarArray(std::move(names));
   if (!recurse) {
     return const_cast<Class*>(klass)->setEnumValues(enums.release());
   }

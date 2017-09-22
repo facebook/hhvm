@@ -1836,18 +1836,16 @@ void parse_user_attribute(AsmState& as,
   auto name = read_litstr(as);
   as.in.expectWs('(');
 
-  TypedValue tvInit;
-  tvWriteNull(&tvInit); // Don't confuse Variant with uninit data
-  tvAsVariant(&tvInit) = parse_php_serialized(as);
+  auto var = parse_php_serialized(as);
 
   as.in.expectWs(')');
 
-  if (!tvIsArray(&tvInit)) {
+  if (!var.isArray()) {
     as.error("user attribute values must be arrays");
   }
 
-  tvInit = make_tv<KindOfArray>(ArrayData::GetScalarArray(tvInit.m_data.parr));
-  userAttrs[name] = tvInit;
+  userAttrs[name] =
+    make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
 }
 
 /*
@@ -2208,26 +2206,12 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     }
 
     tvAsVariant(&tvInit) = parse_php_serialized(as);
-    if (isStringType(tvInit.m_type)) {
-      tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
-      tvInit.m_type = KindOfPersistentString;
-      as.ue->mergeLitstr(tvInit.m_data.pstr);
-    } else if (isArrayType(tvInit.m_type)) {
-      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
-      tvInit.m_type = KindOfPersistentArray;
-    } else if (isVecType(tvInit.m_type)) {
-      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
-      tvInit.m_type = KindOfPersistentVec;
-    } else if (isDictType(tvInit.m_type)) {
-      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
-      tvInit.m_type = KindOfPersistentDict;
-    } else if (isKeysetType(tvInit.m_type)) {
-      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
-      tvInit.m_type = KindOfPersistentKeyset;
-    } else if (tvInit.m_type == KindOfObject) {
+    if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
     } else if (tvInit.m_type == KindOfResource) {
       as.error("property initializer can't be a resource");
+    } else {
+      tvAsVariant(&tvInit).setEvalScalar();
     }
     as.in.expectWs(';');
   } else if (what == ';') {
@@ -2664,12 +2648,11 @@ void parse_adata(AsmState& as) {
   }
 
   as.in.expectWs('=');
-  Variant var = parse_php_serialized(as);
+  auto var = parse_php_serialized(as);
   if (!var.isArray()) {
     as.error(".adata only supports serialized arrays");
   }
-  Array arr(var.toArray());
-  ArrayData* data = ArrayData::GetScalarArray(arr.get());
+  auto const data = ArrayData::GetScalarArray(std::move(var));
   as.ue->mergeArray(data);
   as.adataMap[dataLabel] = data;
 
@@ -2721,7 +2704,7 @@ void parse_alias(AsmState& as) {
   record.nullable = (ty.flags() & TypeConstraint::Nullable) != 0;
   record.attrs = attrs;
   if (ts.isInitialized()) {
-    record.typeStructure = ArrNR(ArrayData::GetScalarArray(ts.toArray().get()));
+    record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
   }
   as.ue->addTypeAlias(record);
 

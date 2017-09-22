@@ -134,7 +134,6 @@ struct UnitEmitter {
    * Merge a scalar array into the Unit.
    */
   Id mergeArray(const ArrayData* a);
-  Id mergeArray(const ArrayData* a, const ArrayData::ScalarArrayKey& key);
 
   /*
    * Clear and rebuild the array type table from the builder.
@@ -405,9 +404,8 @@ private:
   /*
    * Scalar array tables.
    */
-  hphp_hash_map<ArrayData::ScalarArrayKey, Id,
-                ArrayData::ScalarHash> m_array2id;
-  std::vector<ArrayData*> m_arrays;
+  hphp_hash_map<const ArrayData*, Id> m_array2id;
+  std::vector<const ArrayData*> m_arrays;
 
   /*
    * Unit local array type table.

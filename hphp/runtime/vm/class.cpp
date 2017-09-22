@@ -1166,7 +1166,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
       raise_error(e.getMessage());
     }
 
-    auto const ad = ArrayData::GetScalarArray(resolvedTS.get());
+    auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {
       auto const rawData = reinterpret_cast<intptr_t>(ad);
       assert((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");

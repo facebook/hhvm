@@ -1071,7 +1071,7 @@ public:
                        bool isUnpack);
   void emitClosureUseVar(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
-  bool emitScalarValue(Emitter& e, const Variant& value);
+  bool emitScalarValue(Emitter& e, Variant&& value);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   Id emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   Id emitTypedef(Emitter& e, TypedefStatementPtr);
@@ -3900,7 +3900,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             if (v.isString()) {
               v = String(makeStaticString(v.asCStrRef().get()));
             } else if (v.isArray()) {
-              v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
+              v = Array(ArrayData::GetScalarArray(std::move(v)));
             } else {
               assert(v.isInitialized());
               assert(!isRefcountedType(v.getType()));
@@ -5918,7 +5918,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     auto ex = static_pointer_cast<Expression>(node);
     Variant v;
     ex->getScalarValue(v);
-    auto const emitted = emitScalarValue(e, v);
+    auto const emitted = emitScalarValue(e, std::move(v));
     always_assert(emitted);
     return true;
   }
@@ -6247,7 +6247,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   not_reached();
 }
 
-bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
+bool EmitterVisitor::emitScalarValue(Emitter& e, Variant&& v) {
   switch (v.getRawType()) {
     case KindOfUninit:
       e.NullUninit();
@@ -6277,25 +6277,25 @@ bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
     case KindOfPersistentVec:
     case KindOfVec:
       assert(v.isVecArray());
-      e.Vec(ArrayData::GetScalarArray(v.getArrayData()));
+      e.Vec(ArrayData::GetScalarArray(std::move(v)));
       return true;
 
     case KindOfPersistentDict:
     case KindOfDict:
       assert(v.isDict());
-      e.Dict(ArrayData::GetScalarArray(v.getArrayData()));
+      e.Dict(ArrayData::GetScalarArray(std::move(v)));
       return true;
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       assert(v.isKeyset());
-      e.Keyset(ArrayData::GetScalarArray(v.getArrayData()));
+      e.Keyset(ArrayData::GetScalarArray(std::move(v)));
       return true;
 
     case KindOfPersistentArray:
     case KindOfArray:
       assert(v.isPHPArray());
-      e.Array(ArrayData::GetScalarArray(v.getArrayData()));
+      e.Array(ArrayData::GetScalarArray(std::move(v)));
       return true;
 
     case KindOfObject:
@@ -10480,7 +10480,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     m_staticColType.push_back(k);
     visit(el);
     tvVal = make_array_like_tv(
-      ArrayData::GetScalarArray(m_staticArrays.back().get())
+      ArrayData::GetScalarArray(std::move(m_staticArrays.back()))
     );
     m_staticArrays.pop_back();
     m_staticColType.pop_back();

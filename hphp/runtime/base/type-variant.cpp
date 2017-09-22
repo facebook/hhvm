@@ -633,12 +633,9 @@ void Variant::setEvalScalar() {
   assertx(cellIsPlausible(*this));
 
   auto const do_array = [this]{
-    auto parr = m_data.parr;
-    if (!parr->isStatic()) {
-      auto ad = ArrayData::GetScalarArray(parr);
-      assert(ad->isStatic());
-      m_data.parr = ad;
-      decRefArr(parr);
+    if (!m_data.parr->isStatic()) {
+      ArrayData::GetScalarArray(&m_data.parr);
+      assert(m_data.parr->isStatic());
     }
   };
 

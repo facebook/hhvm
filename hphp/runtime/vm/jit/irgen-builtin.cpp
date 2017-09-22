@@ -377,7 +377,7 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   }
 
   auto const needle = params[0].value;
-  auto const array = flipped.toArray();
+  auto array = flipped.toArray();
   if (RuntimeOption::EvalHackArrCompatNotices) {
     // AKExistsArr can throw with HackArrCompatNotices enabled, so we need to
     // manually provide a catch trace.
@@ -385,14 +385,14 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
       env,
       AKExistsArr,
       make_opt_catch(env, params),
-      cns(env, ArrayData::GetScalarArray(array.get())),
+      cns(env, ArrayData::GetScalarArray(std::move(array))),
       needle
     );
   } else {
     return gen(
       env,
       AKExistsArr,
-      cns(env, ArrayData::GetScalarArray(array.get())),
+      cns(env, ArrayData::GetScalarArray(std::move(array))),
       needle
     );
   }
@@ -662,6 +662,10 @@ SSATmp* opt_foldable(IRGS& env,
     SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));
 
+    auto scalar_array = [&] {
+      return ArrayData::GetScalarArray(std::move(tvAsVariant(&retVal)));
+    };
+
     switch (retVal.m_type) {
       case KindOfNull:
       case KindOfBoolean:
@@ -675,33 +679,25 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfVec:
         return cns(
           env,
-          make_tv<KindOfPersistentVec>(
-            ArrayData::GetScalarArray(retVal.m_data.parr)
-          )
+          make_tv<KindOfPersistentVec>(scalar_array())
         );
       case KindOfPersistentDict:
       case KindOfDict:
         return cns(
           env,
-          make_tv<KindOfPersistentDict>(
-            ArrayData::GetScalarArray(retVal.m_data.parr)
-          )
+          make_tv<KindOfPersistentDict>(scalar_array())
         );
       case KindOfPersistentKeyset:
       case KindOfKeyset:
         return cns(
           env,
-          make_tv<KindOfPersistentKeyset>(
-            ArrayData::GetScalarArray(retVal.m_data.parr)
-          )
+          make_tv<KindOfPersistentKeyset>(scalar_array())
         );
       case KindOfPersistentArray:
       case KindOfArray:
         return cns(
           env,
-          make_tv<KindOfPersistentArray>(
-            ArrayData::GetScalarArray(retVal.m_data.parr)
-          )
+          make_tv<KindOfPersistentArray>(scalar_array())
         );
       case KindOfUninit:
       case KindOfObject:

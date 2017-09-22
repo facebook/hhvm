@@ -16,8 +16,7 @@
 
 #include <unordered_set>
 
-#include <gtest/gtest.h>
-
+#include <folly/portability/GTest.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data.h"
@@ -176,8 +175,7 @@ TEST(Type, Boxes) {
   EXPECT_EQ(TInt | TDbl, (TInt | TBoxedDbl).unbox());
 
   auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
-  auto const array = make_packed_array(1, 2, 3, 4);
-  auto const arrData = ArrayData::GetScalarArray(array.get());
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
   auto boxedConstPackedArray = Type::cns(arrData).box();
   EXPECT_FALSE(boxedConstPackedArray.hasConstVal());
   EXPECT_TRUE(boxedConstPackedArray.isSpecialized());
@@ -245,8 +243,7 @@ TEST(Type, Ptr) {
   EXPECT_EQ(TBottom, TBottom.deref());
 
   auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
-  auto const array = make_packed_array(1, 2, 3, 4);
-  auto const arrData = ArrayData::GetScalarArray(array.get());
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
   auto ptrToConstPackedArray = Type::cns(arrData).ptr(Ptr::Ptr);
   EXPECT_FALSE(ptrToConstPackedArray.hasConstVal());
   EXPECT_TRUE(ptrToConstPackedArray.isSpecialized());
@@ -385,10 +382,11 @@ TEST(Type, Specialized) {
 
   EXPECT_EQ(TPtrToSPropCell, TPtrToSPropGen - TPtrToBoxedCell);
 
-  auto const array = make_packed_array(1, 2, 3, 4);
-  auto const mixed = make_map_array(1, 1, 2, 2);
-  auto const arrData = ArrayData::GetScalarArray(array.get());
-  auto const arrDataMixed = ArrayData::GetScalarArray(mixed.get());
+
+
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto const arrDataMixed = ArrayData::GetScalarArray(make_map_array(1, 1,
+                                                                     2, 2));
   auto constArray = Type::cns(arrData);
   auto constArrayMixed = Type::cns(arrDataMixed);
   auto const spacked = Type::StaticArray(ArrayData::kPackedKind);
@@ -556,8 +554,7 @@ TEST(Type, Const) {
   EXPECT_EQ(TBottom, five & True);
   EXPECT_EQ(Type::cns(false), TBool - True);
 
-  auto array = make_packed_array(1, 2, 3, 4);
-  auto arrData = ArrayData::GetScalarArray(array.get());
+  auto arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
   auto constArray = Type::cns(arrData);
   auto packedArray = Type::Array(ArrayData::kPackedKind);
   auto mixedArray = Type::Array(ArrayData::kMixedKind);
@@ -595,17 +592,17 @@ TEST(Type, Const) {
   EXPECT_EQ(packedRat, packedRat & ratArray1);
 
   auto vec = make_vec_array(1, 2, 3, 4);
-  auto vecData = ArrayData::GetScalarArray(vec.get());
+  auto vecData = ArrayData::GetScalarArray(std::move(vec));
   auto constVec = Type::cns(vecData);
   EXPECT_TRUE(constVec < TVec);
 
   auto dict = make_dict_array(1, 1, 2, 2, 3, 3, 4, 4);
-  auto dictData = ArrayData::GetScalarArray(dict.get());
+  auto dictData = ArrayData::GetScalarArray(std::move(dict));
   auto constDict = Type::cns(dictData);
   EXPECT_TRUE(constDict < TDict);
 
   auto keyset = make_keyset_array(1, 2, 3, 4);
-  auto keysetData = ArrayData::GetScalarArray(keyset.get());
+  auto keysetData = ArrayData::GetScalarArray(std::move(keyset));
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
 }

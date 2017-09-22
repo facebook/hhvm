@@ -422,7 +422,7 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
     if (v.isString()) {
       v = String(makeStaticString(v.asCStrRef().get()));
     } else if (v.isArray()) {
-      v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
+      v = Array(ArrayData::GetScalarArray(std::move(v)));
     } else {
       // Serialized variants and objects shouldn't ever make it into the repo.
       assert(!isRefcountedType(v.getType()));

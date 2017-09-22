@@ -75,6 +75,10 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
   std::vector<Bytecode> currentReduction;
   if (!options.StrengthReduce) reduce = false;
 
+  env.flags.wasPEI          = false;
+  env.flags.canConstProp    = true;
+  env.flags.effectFree      = true;
+
   for (auto it = begin(bcs); it != end(bcs); ++it) {
     assert(env.flags.jmpDest == NoBlockId &&
            "you can't use impl with branching opcodes before last position");

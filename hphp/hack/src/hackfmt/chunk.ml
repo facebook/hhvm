@@ -75,6 +75,7 @@ let add_atom c ?(leading_space=false) text width source_offset =
   {c with atoms = {text; range; leading_space} :: c.atoms}
 
 let finalize chunk rule ra space comma end_char =
+  if List.is_empty chunk.atoms then failwith "Cannot finalize empty chunk";
   let end_char = max chunk.start_char end_char in
   let rule = if Rule_allocator.get_rule_kind ra rule = Rule.Always
     || chunk.rule = Rule.null_rule_id
@@ -103,7 +104,10 @@ let get_nesting_id chunk =
   chunk.nesting.Nesting.id
 
 let get_range chunk =
-  (chunk.start_char, chunk.end_char)
+  if chunk.is_appendable then failwith "Can't get range of non-finalized chunk";
+  let first_atom = List.hd_exn chunk.atoms in
+  let last_atom = List.last_exn chunk.atoms in
+  (fst first_atom.range, snd last_atom.range)
 
 let is_empty chunk =
   match chunk.atoms with

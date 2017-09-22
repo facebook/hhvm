@@ -214,12 +214,18 @@ let make env chunk_group rbm =
 
 let from_source env source_text chunk_group =
   let rbm = Chunk_group.get_initial_rule_bindings chunk_group in
-  let rbm = List.fold chunk_group.Chunk_group.chunks ~init:rbm
-    ~f:begin fun rbm chunk ->
-      let idx = max 0 (chunk.Chunk.start_char - 1) in
-      if String.get source_text idx = '\n'
-      then IMap.add chunk.Chunk.rule true rbm
-      else rbm
+  let rbm, _ = List.fold chunk_group.Chunk_group.chunks ~init:(rbm, 0)
+    ~f:begin fun (rbm, prev_chunk_end) chunk ->
+      let chunk_start, chunk_end = Chunk.get_range chunk in
+      let rbm =
+        let rec aux i =
+          i < chunk_start && (source_text.[i] = '\n' || aux (i + 1))
+        in
+        if aux prev_chunk_end
+        then IMap.add chunk.Chunk.rule true rbm
+        else rbm
+      in
+      rbm, chunk_end
     end
   in
   make env chunk_group rbm

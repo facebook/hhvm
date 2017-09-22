@@ -2327,7 +2327,9 @@ Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
       auto const& tc = cinfo->cls->enumBaseTy;
       assert(!tc.isNullable());
       if (tc.type() != AnnotType::Object) {
-        return { tc.type(), nullable, tc.typeName() };
+        auto const type = tc.type() == AnnotType::Mixed ?
+          AnnotType::ArrayKey : tc.type();
+        return { type, nullable, tc.typeName() };
       }
       name = tc.typeName();
     } else {

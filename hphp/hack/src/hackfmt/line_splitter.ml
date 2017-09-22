@@ -70,9 +70,16 @@ let find_solve_states env ?range source_text chunk_groups =
   chunk_groups |> List.map ~f:(solve_chunk_group env source_text)
 
 let print env ?range solve_states =
+  let filter_to_range subchunks =
+    match range with
+    | None -> subchunks
+    | Some range -> Subchunk.subchunks_in_range subchunks range
+  in
   solve_states
-  |> List.map ~f:(State_printer.print_state env ?range)
-  |> String.concat ""
+  |> List.map ~f:Subchunk.subchunks_of_solve_state
+  |> List.concat
+  |> filter_to_range
+  |> Subchunk.string_of_subchunks env
 
 let solve env ?range source_text chunk_groups =
   chunk_groups

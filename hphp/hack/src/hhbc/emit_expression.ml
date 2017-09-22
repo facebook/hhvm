@@ -1805,18 +1805,16 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
       instr_fpushclsmethod ~forward nargs
     ]
 
-  | A.Id (p, s as id)->
-    let id =
-      match SU.strip_global_ns s with
-      | "min" when nargs = 2 ->
-        p, "__SystemLib\\min2"
-      | "max" when nargs = 2 ->
-        p, "__SystemLib\\max2"
-      | _ ->
-        id
-    in
+  | A.Id (_, s as id)->
     let fq_id, id_opt =
       Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id in
+    let fq_id, id_opt =
+      match id_opt, SU.strip_global_ns s with
+      | None, "min" when nargs = 2 ->
+        Hhbc_id.Function.from_raw_string "__SystemLib\\min2", None
+      | None, "max" when nargs = 2 ->
+        Hhbc_id.Function.from_raw_string  "__SystemLib\\max2", None
+      | _ -> fq_id, id_opt in
     begin match id_opt with
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))

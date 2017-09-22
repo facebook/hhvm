@@ -682,6 +682,7 @@ static bool isUnresolved(int tokid) {
 }
 
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
+  int prevTokid = m_lastToken;
   int tokid;
   bool la = !m_lookahead.empty();
   tokid = fetchToken(t, l);
@@ -712,7 +713,11 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     nextLookahead(pos);
     if (
       isValidClassConstantName(pos->t)
-      || (pos->t == T_NS_SEPARATOR && tokid == T_UNRESOLVED_TYPE)
+      || (
+        pos->t == T_NS_SEPARATOR
+        && tokid == T_UNRESOLVED_TYPE
+        && prevTokid == T_USE
+      )
     ) {
       typePos->t = tokid == T_UNRESOLVED_TYPE ? T_TYPE : T_NEWTYPE;
     } else {

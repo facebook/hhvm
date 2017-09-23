@@ -755,15 +755,18 @@ let do_definition (conn: server_conn) (params: Definition.params)
   (* and a derived class "C" without a constructor, and click on "new C()", then  *)
   (* both Hack and Typescript will take you to the constructor of B. As desired!  *)
   (* Conclusion: given a class+method, we'll return only the method.              *)
-  let result_is (kind: SymbolDefinition.kind) (result: IdentifySymbolService.single_result): bool =
+  let result_is_method (result: IdentifySymbolService.single_result): bool =
     match result with
-    | (_, None) -> false
-    | (_, Some definition) -> definition.SymbolDefinition.kind = kind
-  in
-  let has_class = List.exists results ~f:(result_is SymbolDefinition.Class) in
-  let has_method = List.exists results ~f:(result_is SymbolDefinition.Method) in
+    | { SymbolOccurrence.type_ = SymbolOccurrence.Method _; _ }, _ -> true
+    | _ -> false in
+  let result_is_class (result: IdentifySymbolService.single_result): bool =
+    match result with
+    | { SymbolOccurrence.type_ = SymbolOccurrence.Class; _ }, _ -> true
+    | _ -> false in
+  let has_class = List.exists results ~f:result_is_class in
+  let has_method = List.exists results ~f:result_is_method in
   let filtered_results = if has_class && has_method then
-    List.filter results ~f:(result_is SymbolDefinition.Method)
+    List.filter results ~f:result_is_method
   else
     results
   in

@@ -82,7 +82,6 @@ public:
     return m_classes;
   }
   void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
-  void getScopesSet(BlockScopeRawPtrQueue &v);
 
   int getFunctionCount() const;
   int getClassCount() const { return m_classes.size();}

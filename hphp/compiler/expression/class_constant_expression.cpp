@@ -99,56 +99,6 @@ void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ClassConstantExpression::preOptimize(
-  AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
-  }
-  if (m_class) {
-    updateClassName();
-    if (m_class) {
-      return ExpressionPtr();
-    }
-  }
-
-  ClassScopePtr cls = resolveClass();
-  if (!cls || (cls->isVolatile() && !isPresent())) {
-    if (cls && !m_depsSet) {
-      cls->addUse(getScope(), BlockScope::UseKindConstRef);
-      m_depsSet = true;
-    }
-    return ExpressionPtr();
-  }
-
-  ConstantTablePtr constants = cls->getConstants();
-  ClassScopePtr defClass = cls;
-  BlockScope::s_constMutex.lock();
-  ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
-  BlockScope::s_constMutex.unlock();
-  if (decl) {
-    auto value = dynamic_pointer_cast<Expression>(decl);
-
-    if (!value->isScalar() &&
-        (value->is(KindOfClassConstantExpression) ||
-         value->is(KindOfConstantExpression))) {
-      std::set<ExpressionPtr> seen;
-      do {
-        if (!seen.insert(value).second) return ExpressionPtr();
-        value = value->preOptimize(ar);
-        if (!value) return ExpressionPtr();
-      } while (!value->isScalar() &&
-               (value->is(KindOfClassConstantExpression) ||
-                value->is(KindOfConstantExpression)));
-    }
-
-    ExpressionPtr rep = Clone(value, getScope());
-    rep->setComment(getText());
-    copyLocationTo(rep);
-    return replaceValue(rep);
-  }
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

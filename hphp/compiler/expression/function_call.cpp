@@ -193,9 +193,4 @@ void FunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  if (m_class) updateClassName();
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////

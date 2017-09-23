@@ -30,7 +30,6 @@ struct QOpExpression : Expression {
                 ExpressionPtr expNo);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
   ExpressionPtr getCondition() const { return m_condition; }

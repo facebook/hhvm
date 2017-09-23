@@ -186,9 +186,6 @@ public:
   virtual void addElement(ExpressionPtr exp);
   virtual void insertElement(ExpressionPtr exp, int index = 0);
 
-  /**
-   * Called before type inference.
-   */
   virtual ExpressionPtr preOptimize(AnalysisResultConstRawPtr /*ar*/) {
     return ExpressionPtr();
   }

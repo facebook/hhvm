@@ -255,21 +255,6 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassVariable::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  auto scope = getClassScope();
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    auto exp = (*m_declaration)[i];
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      auto var =
-        dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      auto value = assignment->getValue();
-      scope->getVariables()->setClassInitVal(var->getName(), value);
-    }
-  }
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

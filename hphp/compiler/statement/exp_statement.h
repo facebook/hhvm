@@ -29,7 +29,6 @@ struct ExpStatement : Statement, IParseHandler {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   int getLocalEffects() const override { return NoEffect;}
 
   ExpressionPtr getExpression() { return m_exp;}

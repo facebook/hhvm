@@ -74,25 +74,6 @@ void EncapsListExpression::stripConcat() {
   m_exps->stripConcat();
 }
 
-ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstRawPtr) {
-  if (m_type != '`' && m_type != '\'' && m_exps) {
-    int count = m_exps->getCount();
-    // turn into cascaded concat
-    if (count > 1) {
-      auto exp = std::make_shared<BinaryOpExpression>(
-        getScope(), getRange(), (*m_exps)[0], (*m_exps)[1], '.'
-      );
-      for (int i = 2; i < count; i++) {
-        exp = std::make_shared<BinaryOpExpression>(
-          getScope(), getRange(), exp, (*m_exps)[i], '.'
-        );
-      }
-      return exp;
-    }
-  }
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

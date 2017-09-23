@@ -82,21 +82,6 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  Variant value;
-  if (m_condition->getScalarValue(value)) {
-    if (value.toBoolean()) {
-      if (m_expYes) {
-        return m_expYes;
-      }
-      return m_condition;
-    }
-    return m_expNo;
-  }
-
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

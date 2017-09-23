@@ -31,7 +31,6 @@ public:
   BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, uint64_t depth);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   uint64_t getDepth();
 protected:
   const char *m_name;

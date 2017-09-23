@@ -99,11 +99,6 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr
-ObjectMethodExpression::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

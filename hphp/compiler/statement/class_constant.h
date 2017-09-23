@@ -34,7 +34,6 @@ struct ClassConstant : Statement, IParseHandler {
                 bool typeconst, TypeAnnotationPtr typeAnnot);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   // implementing IParseHandler
   void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,

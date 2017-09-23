@@ -169,46 +169,6 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StatementList::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  bool changed = false;
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr &s = m_stmts[i];
-
-    if (s) {
-      if (s->is(KindOfStatementList) && !s->hasDecl()) {
-        auto stmts = static_pointer_cast<StatementList>(s);
-        removeElement(i);
-        m_stmts.insert(m_stmts.begin() + i,
-                       stmts->m_stmts.begin(), stmts->m_stmts.end());
-        i--;
-        changed = true;
-        continue;
-      } else if (s->is(KindOfBlockStatement)) {
-        auto bs = static_pointer_cast<BlockStatement>(s);
-        auto stmts = bs->getStmts();
-        if (!stmts) {
-          removeElement(i--);
-          changed = true;
-          continue;
-        } else {
-          FunctionScopePtr fs(getFunctionScope());
-          if (fs && (!fs->inPseudoMain() || !stmts->hasDecl())) {
-            removeElement(i);
-            m_stmts.insert(m_stmts.begin() + i,
-                           stmts->m_stmts.begin(), stmts->m_stmts.end());
-            i--;
-            changed = true;
-            continue;
-          }
-        }
-      }
-    }
-  }
-
-  return changed ? static_pointer_cast<Statement>(shared_from_this())
-                 : StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

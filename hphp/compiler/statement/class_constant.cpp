@@ -141,32 +141,6 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassConstant::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  if (!isAbstract() && !isTypeconst()) {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-
-      auto var = assignment->getVariable();
-      auto val = assignment->getValue();
-
-      const auto& name =
-        dynamic_pointer_cast<ConstantExpression>(var)->getName();
-
-      Symbol *sym = getScope()->getConstants()->getSymbol(name);
-      Lock lock(BlockScope::s_constMutex);
-      if (sym->getValue() != val) {
-        getScope()->addUpdates(BlockScope::UseKindConstRef);
-        sym->setValue(val);
-      }
-    }
-  }
-
-  // abstract constants are not added to the constant table and don't have
-  // any values to propagate.
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

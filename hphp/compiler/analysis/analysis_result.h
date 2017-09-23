@@ -162,10 +162,6 @@ public:
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 
-  void getScopesSet(BlockScopeRawPtrQueue &v);
-
-  void preOptimize();
-
   /**
    * Code generation functions.
    */
@@ -325,9 +321,6 @@ public:
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtr, s_currentScopeThreadLocal);
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
                               s_changedScopesMapThreadLocal);
-
-private:
-  void processScopesParallel(const char* id, void* context = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

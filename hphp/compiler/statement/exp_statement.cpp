@@ -77,11 +77,6 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ExpStatement::preOptimize(AnalysisResultConstRawPtr ar) {
-  assert (ar->getPhase() > AnalysisResult::AnalyzeAll);
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

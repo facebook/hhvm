@@ -364,11 +364,6 @@ void ExpressionList::optimize(AnalysisResultConstRawPtr /*ar*/) {
   }
 }
 
-ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstRawPtr ar) {
-  optimize(ar);
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

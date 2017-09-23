@@ -10866,7 +10866,6 @@ static ConstructPtr doOptimize(ConstructPtr c, AnalysisResultConstRawPtr ar) {
       case Expression::KindOfBinaryOpExpression:
       case Expression::KindOfUnaryOpExpression:
       case Expression::KindOfIncludeExpression:
-      case Expression::KindOfSimpleFunctionCall:
         return e->preOptimize(ar);
       case Expression::KindOfClosureExpression: {
         auto cl = static_pointer_cast<ClosureExpression>(e);

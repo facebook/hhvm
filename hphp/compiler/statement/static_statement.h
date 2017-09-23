@@ -30,7 +30,6 @@ struct StaticStatement : Statement {
   StaticStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   ExpressionListPtr getVars() const { return m_exp; }

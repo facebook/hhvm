@@ -29,7 +29,6 @@ struct StatementList : Statement {
   StatementListPtr shallowClone();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   bool hasDecl() const override;
   bool hasImpl() const override;
   ExpressionPtr getEffectiveImpl(AnalysisResultConstRawPtr ar) const;

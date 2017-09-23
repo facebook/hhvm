@@ -65,10 +65,6 @@ uint64_t BreakStatement::getDepth() {
   return m_depth;
 }
 
-StatementPtr BreakStatement::preOptimize(AnalysisResultConstRawPtr /*ar*/) {
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

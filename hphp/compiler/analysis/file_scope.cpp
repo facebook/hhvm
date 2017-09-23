@@ -300,25 +300,6 @@ static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
   }
 }
 
-void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
-  for (const auto& clsVec : getClasses()) {
-    for (const auto cls : clsVec.second) {
-      if (cls->getStmt()) {
-        v.push_back(cls);
-        getFuncScopesSet(v, cls->getFunctions());
-      }
-    }
-  }
-
-  getFuncScopesSet(v, getFunctions());
-  if (const auto redec = m_redeclaredFunctions) {
-    for (const auto& funcVec : *redec) {
-      auto i = funcVec.second.begin(), e = funcVec.second.end();
-      v.insert(v.end(), ++i, e);
-    }
-  }
-}
-
 void FileScope::getClassesFlattened(std::vector<ClassScopePtr>& classes) const {
   for (const auto& clsVec : m_classes) {
     for (auto cls : clsVec.second) {

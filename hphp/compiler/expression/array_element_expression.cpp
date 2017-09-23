@@ -174,37 +174,6 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ArrayElementExpression::preOptimize(
-  AnalysisResultConstRawPtr ar) {
-  if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
-                     InvokeArgument|DeepReference|DeepOprLValue))) {
-    if (m_offset && m_variable->isScalar()) {
-      Variant v, o;
-      if (m_variable->getScalarValue(v)) {
-        if (m_context & ExistContext &&
-            !v.isArray() &&
-            !v.isString() &&
-            !m_offset->hasEffect()) {
-          return replaceValue(makeConstant(ar, "null"));
-        }
-        if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
-          if (v.isArray()) {
-            try {
-              ThrowAllErrorsSetter taes;
-              Variant res = v.toArrRef().rvalAt(
-                o, hasContext(ExistContext) ?
-                AccessFlags::None : AccessFlags::Error);
-              return replaceValue(makeScalarExpression(ar, res));
-            } catch (...) {
-            }
-          }
-        }
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
 /**
  * ArrayElementExpression comes from:
  *

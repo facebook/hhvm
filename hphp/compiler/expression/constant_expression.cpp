@@ -142,66 +142,6 @@ void ConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
-  }
-  ConstructPtr decl;
-  while (!isScalar() && !m_dynamic && !(m_context & LValue)) {
-    const Symbol *sym = resolveNS(ar);
-    if (!sym) {
-      // The constant may be defined in a native extension, so check if its
-      // available and persistent.
-      auto const cns = Unit::lookupPersistentCns(makeStaticString(m_name));
-      if (!cns) break;
-      auto const& value = tvAsCVarRef(cns);
-      if (!value.isAllowedAsConstantValue()) break;
-      auto rep = makeScalarExpression(ar, value);
-      rep->setComment(getText());
-      copyLocationTo(rep);
-      return replaceValue(rep);
-    }
-    if (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic()) {
-      sym = 0;
-      m_dynamic = true;
-    }
-    if (!sym) break;
-    if (!sym->isSystem()) BlockScope::s_constMutex.lock();
-    auto value = dynamic_pointer_cast<Expression>(sym->getValue());
-    if (!sym->isSystem()) BlockScope::s_constMutex.unlock();
-
-    if (!value || !value->isScalar()) {
-      if (!m_depsSet && sym->getDeclaration()) {
-        sym->getDeclaration()->getScope()->addUse(
-          getScope(), BlockScope::UseKindConstRef);
-        m_depsSet = true;
-      }
-      break;
-    }
-
-    Variant scalarValue;
-    if (value->getScalarValue(scalarValue) &&
-        !scalarValue.isAllowedAsConstantValue()) {
-      // block further optimization
-      const_cast<Symbol*>(sym)->setDynamic();
-      m_dynamic = true;
-      break;
-    }
-
-    if (sym->isSystem() && !value->is(KindOfScalarExpression)) {
-      if (ExpressionPtr opt = value->preOptimize(ar)) {
-        value = opt;
-      }
-    }
-    ExpressionPtr rep = Clone(value, getScope());
-    rep->setComment(getText());
-    copyLocationTo(rep);
-    return replaceValue(rep);
-  }
-
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

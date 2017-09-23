@@ -178,36 +178,6 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
   return true;
 }
 
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstRawPtr) {
-  if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
-    return ExpressionPtr();
-  }
-  ExpressionPtr val = m_value;
-  while (val) {
-    if (val->is(KindOfExpressionList)) {
-      val = static_pointer_cast<ExpressionList>(val)->listValue();
-      continue;
-    }
-    if (val->is(KindOfAssignmentExpression)) {
-      val = static_pointer_cast<AssignmentExpression>(val)->m_value;
-      continue;
-    }
-    break;
-  }
-  if (val && val->isScalar()) {
-    if (val != m_value) {
-      ExpressionListPtr rep(new ExpressionList(
-                              getScope(), getRange(),
-                              ExpressionList::ListKindWrapped));
-      rep->addElement(m_value);
-      m_value = val->clone();
-      rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
-      return replaceValue(rep);
-    }
-  }
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

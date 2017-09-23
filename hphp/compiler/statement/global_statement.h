@@ -28,8 +28,6 @@ DECLARE_BOOST_TYPES(GlobalStatement);
 struct GlobalStatement : Statement {
   GlobalStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
-
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   ExpressionListPtr getVars() const { return m_exp; }

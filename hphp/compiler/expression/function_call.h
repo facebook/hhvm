@@ -39,7 +39,6 @@ public:
   void setNthKid(int n, ConstructPtr cp) override;
   int getKidCount() const override;
 
-  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   const std::string& getName() const = delete;//{ return m_name; }

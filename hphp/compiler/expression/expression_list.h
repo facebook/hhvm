@@ -42,7 +42,6 @@ struct ExpressionList : Expression {
                           ListKind kind = ListKindParam);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   void setContext(Context context) override;
   void setListKind(ListKind kind) { m_kind = kind; }

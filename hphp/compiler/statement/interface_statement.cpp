@@ -230,13 +230,6 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstRawPtr ar) {
-  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    checkVolatile(ar);
-  }
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

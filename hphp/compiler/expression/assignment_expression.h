@@ -32,7 +32,6 @@ struct AssignmentExpression : Expression, IParseHandler {
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   // implementing IParseHandler
   void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,

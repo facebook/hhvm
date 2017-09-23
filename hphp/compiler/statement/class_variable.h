@@ -35,7 +35,6 @@ struct ClassVariable : Statement, IParseHandler {
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   void analyzeProgram(AnalysisResultConstRawPtr ar) override;
-  StatementPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   // implementing IParseHandler
   void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,

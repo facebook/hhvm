@@ -60,11 +60,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   }
 }
 
-ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstRawPtr ar) {
-  if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

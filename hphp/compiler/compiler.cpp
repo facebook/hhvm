@@ -712,16 +712,6 @@ int lintTarget(const CompilerOptions &po) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void
-wholeProgramPasses(const CompilerOptions& /*po*/, AnalysisResultPtr ar) {
-  if (Option::PreOptimization) {
-    Timer timer(Timer::WallTime, "pre-optimizing");
-    ar->preOptimize();
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
   int ret = 0;
 
@@ -842,8 +832,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   RuntimeOption::RepoAuthoritative = true;
 
   if (po.optimizeLevel > 0) {
-    ret = 0;
-    wholeProgramPasses(po, ar);
     ar->analyzeProgramFinal();
   }
 

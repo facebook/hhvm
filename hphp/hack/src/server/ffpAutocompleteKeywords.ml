@@ -329,7 +329,7 @@ let try_trailing_keywords = {
 }
 
 let primary_expressions = {
-  keywords = ["tuple"; "shape"];
+  keywords = ["tuple"; "shape"; "null"];
   is_valid_in_context = begin fun context ->
     is_expression_valid context
   end;

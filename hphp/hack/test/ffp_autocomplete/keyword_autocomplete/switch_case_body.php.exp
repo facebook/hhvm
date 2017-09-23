@@ -10,6 +10,7 @@ for
 foreach
 if
 new
+null
 parent
 return
 self

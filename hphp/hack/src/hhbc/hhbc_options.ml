@@ -30,7 +30,7 @@ let default = {
   option_constant_folding = false;
   option_optimize_null_check = false;
   option_optimize_cuf = false;
-  option_max_array_elem_size_on_the_stack = 12;
+  option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = [];
   option_source_mapping = false;
 }

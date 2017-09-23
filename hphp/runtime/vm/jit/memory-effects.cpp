@@ -1871,7 +1871,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayAdd:       // decrefs source
   case AddElemIntKey:
   case AddElemStrKey:
-  case AddNewElem:     // decrefs value
+  case AddNewElem:         // can re-enter
+  case AddNewElemKeyset:   // can re-enter
   case DictAddElemIntKey:  // decrefs value
   case DictAddElemStrKey:  // decrefs value
   case ArrayGet:       // kVPackedKind warnings
@@ -1921,6 +1922,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowDivisionByZeroError:
   case SetOpCell:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+
+  case AddNewElemVec:
+    return may_load_store(AElemAny, AEmpty);
 
   case ConvArrToKeyset: // Decrefs input values
   case ConvVecToKeyset:

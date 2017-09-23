@@ -2011,7 +2011,7 @@ OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
 }
 
 OPTBLD_INLINE void iopNewStructArray(int32_t n, imm_array<int32_t> ids) {
-  assert(n > 0 && n <= MixedArray::MaxStructMakeSize);
+  assert(n > 0 && n <= ArrayData::MaxElemsOnStack);
   req::vector<const StringData*> names;
   names.reserve(n);
   auto unit = vmfp()->m_func->unit();
@@ -2079,10 +2079,24 @@ OPTBLD_INLINE void iopAddElemV() {
 OPTBLD_INLINE void iopAddNewElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  if (!isArrayType(c2->m_type)) {
-    raise_error("AddNewElemC: $2 must be an array");
+  if (isArrayType(c2->m_type)) {
+    cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
+  } else if (isVecType(c2->m_type)) {
+    auto in = c2->m_data.parr;
+    auto out = PackedArray::AppendVec(in, *c1, in->cowCheck());
+    if (in != out) decRefArr(in);
+    c2->m_type = KindOfVec;
+    c2->m_data.parr = out;
+  } else if (isKeysetType(c2->m_type)) {
+    auto in = c2->m_data.parr;
+    auto out = SetArray::Append(in, *c1, in->cowCheck());
+    if (in != out) decRefArr(in);
+    c2->m_type = KindOfKeyset;
+    c2->m_data.parr = out;
+  } else {
+    raise_error("AddNewElemC: $2 must be an array, vec, or keyset");
   }
-  cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
+  assertx(cellIsPlausible(*c2));
   vmStack().popC();
 }
 

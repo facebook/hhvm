@@ -156,6 +156,9 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case VecSetRef:
     case DictSet:
     case DictSetRef:
+    case AddNewElem:
+    case AddNewElemKeyset:
+    case AddNewElemVec:
       // Only consumes the reference to its input array
       return srcNo == 0;
 

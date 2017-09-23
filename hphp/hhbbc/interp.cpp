@@ -443,6 +443,12 @@ void in(ISS& env, const bc::AddNewElemC&) {
     if (ty.subtypeOf(TArr)) {
       return array_newelem(std::move(ty), std::move(v)).first;
     }
+    if (ty.subtypeOf(TVec)) {
+      return vec_newelem(std::move(ty), std::move(v)).first;
+    }
+    if (ty.subtypeOf(TKeyset)) {
+      return keyset_newelem(std::move(ty), std::move(v)).first;
+    }
     return folly::none;
   }(popC(env));
 

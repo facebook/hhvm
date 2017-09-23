@@ -79,7 +79,6 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }
-  tvDecRefGen(value);
   return r;
 }
 

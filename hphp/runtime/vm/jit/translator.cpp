@@ -127,7 +127,7 @@ static const struct {
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutModifiedInput3 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutModifiedInput3 }},
-  { OpAddNewElemC, {StackTop2,        Stack1,       OutArray        }},
+  { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},

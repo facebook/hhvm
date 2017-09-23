@@ -683,6 +683,8 @@ public:
    */
   static const char* kindToString(ArrayKind kind);
 
+  static constexpr uint32_t MaxElemsOnStack = 64;
+
   /*
    * Offset accessors.
    */

@@ -980,15 +980,30 @@ and emit_static_collection ~transform_to_collection tv =
   ]
 
 and emit_value_only_collection env es constructor =
-  gather [
-    gather @@
-    List.map es
+  let limit =
+    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
+  in
+  let inline exprs =
+    gather
+    [gather @@ List.map exprs
       ~f:(function
         (* Drop the keys *)
         | A.AFkvalue (_, e)
         | A.AFvalue e -> emit_expr ~need_ref:false env e);
-    instr @@ ILitConst constructor;
-  ]
+      instr @@ ILitConst (constructor @@ List.length exprs)]
+  in
+  let outofline exprs =
+    gather @@
+    List.map exprs
+      ~f:(function
+        (* Drop the keys *)
+        | A.AFkvalue (_, e)
+        | A.AFvalue e -> gather [emit_expr ~need_ref:false env e; instr_add_new_elemc])
+  in
+  match (List.groupi ~break:(fun i _ _ -> i = limit) es) with
+    | [] -> empty
+    | x1 :: [] -> inline x1
+    | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
 
 and emit_keyvalue_collection name env es constructor =
   let name = SU.strip_ns name in
@@ -1021,7 +1036,7 @@ and emit_struct_array env es =
 
 (* isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values *)
-and is_packed_init ?(check_size = true) es size =
+and is_packed_init es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
@@ -1031,12 +1046,6 @@ and is_packed_init ?(check_size = true) es size =
       | A.AFvalue _ -> true
       | _ -> false)
   in
-  let stack_limit =
-    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
-  in
-  let should_check_size_positive =
-    if check_size then size <= stack_limit else true
-  in
   let has_references =
     (* Reference can only exist as a value *)
     List.exists es
@@ -1045,8 +1054,7 @@ and is_packed_init ?(check_size = true) es size =
   in
   (is_only_values || keys_are_zero_indexed_properly_formed)
   && not has_references
-  && should_check_size_positive
-  && size > 0
+  && (List.length es) > 0
 
 and is_struct_init es =
   let has_references =
@@ -1069,10 +1077,13 @@ and is_struct_init es =
   let has_duplicate_keys =
     ULS.cardinal keys <> num_keys
   in
+  let limit =
+    Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
+  in
   are_all_keys_non_numeric_strings
   && not has_duplicate_keys
   && not has_references
-  && num_keys <= 64
+  && num_keys <= limit
   && num_keys != 0
 
 (* transform_to_collection argument keeps track of
@@ -1081,9 +1092,9 @@ and emit_dynamic_collection env expr es =
   let count = List.length es in
   match snd expr with
   | A.Collection ((_, "vec"), _) ->
-    emit_value_only_collection env es (NewVecArray count)
+    emit_value_only_collection env es (fun n -> NewVecArray n)
   | A.Collection ((_, "keyset"), _) ->
-    emit_value_only_collection env es (NewKeysetArray count)
+    emit_value_only_collection env es (fun n -> NewKeysetArray n)
   | A.Collection ((_, name), _)
     when SU.strip_ns name = "dict"
       || SU.strip_ns name = "Set"
@@ -1093,11 +1104,11 @@ and emit_dynamic_collection env expr es =
     emit_keyvalue_collection name env es (NewDictArray count)
   | _ ->
   (* From here on, we're only dealing with PHP arrays *)
-  if is_packed_init es count then
-    emit_value_only_collection env es (NewPackedArray count)
+  if is_packed_init es then
+    emit_value_only_collection env es (fun n -> NewPackedArray n)
   else if is_struct_init es then
     emit_struct_array env es
-  else if is_packed_init es count ~check_size:false then
+  else if is_packed_init es then
     emit_keyvalue_collection "array" env es (NewArray count)
   else
     emit_keyvalue_collection "array" env es (NewMixedArray count)

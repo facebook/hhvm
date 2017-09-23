@@ -702,10 +702,6 @@ let makeunaryinst s arg = match s with
    | "NewDictArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewDictArray (Int64.to_int n))
        | _ -> report_error "bad array size")
-   | "NewMIArray" -> (match arg with
-       | IAInt64 n -> ILitConst (NewMIArray (Int64.to_int n))
-       | _ -> report_error "bad array size")
-   | "NewMSArray" -> ILitConst (NewMSArray (intofiarg arg))
    | "NewPackedArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewPackedArray (Int64.to_int n))
        | _ -> report_error "bad array size")

@@ -1378,9 +1378,10 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
       if (arrPost.strictSubtypeOf(TArrN)) {
         CompactVector<Bytecode> bcs;
         if (cat.cat == Type::ArrayCat::Struct &&
-            *postSize <= MixedArray::MaxStructMakeSize) {
+            *postSize <= ArrayData::MaxElemsOnStack) {
           bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
-        } else if (cat.cat == Type::ArrayCat::Packed) {
+        } else if (cat.cat == Type::ArrayCat::Packed &&
+                   *postSize <= ArrayData::MaxElemsOnStack) {
           bcs.emplace_back(
             bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
           );

@@ -425,14 +425,27 @@ void emitAddElemC(IRGS& env) {
 }
 
 void emitAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPRelOffset{1})->isA(TArr)) {
-    return interpOne(env, TArr, 2);
+  auto const arrType = topC(env, BCSPRelOffset{1})->type();
+  if (!arrType.subtypeOfAny(TArr, TKeyset, TVec)) {
+    return interpOne(env, *env.currentNormalizedInstruction);
   }
-
-  auto const val = popC(env);
+  auto const val = popC(env, DataTypeCountness);
   auto const arr = popC(env);
-  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, AddNewElem, arr, val));
+  push(
+    env,
+    gen(
+      env,
+      [&]{
+        if (arr->isA(TArr))    return AddNewElem;
+        if (arr->isA(TKeyset)) return AddNewElemKeyset;
+        if (arr->isA(TVec))    return AddNewElemVec;
+        always_assert(false);
+      }(),
+      arr,
+      val
+    )
+  );
+  decRef(env, val);
 }
 
 void emitNewCol(IRGS& env, CollectionType type) {

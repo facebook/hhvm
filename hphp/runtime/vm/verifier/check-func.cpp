@@ -568,7 +568,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmVSA(PC& pc, PC const /*instr*/) {
   auto const len = decode_raw<int32_t>(pc);
-  if (len < 1 || len > MixedArray::MaxStructMakeSize) {
+  if (len < 1 || len > ArrayData::MaxElemsOnStack) {
     error("invalid length of immedate VSA vector %d at offset %d\n",
           len, offset(pc));
     throw unknown_length{};
@@ -1384,8 +1384,23 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         ferror("RaiseFPassWarning at PC {} with immediate value 'Any',"
                "allowable FPassHint values for this opcode are 'Cell' and "
                "'Ref'\n", offset(pc));
+        return false;
       }
       break;
+    }
+
+    case Op::NewPackedArray:
+    case Op::NewVecArray:
+    case Op::NewKeysetArray: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      auto const elems = decode_iva(new_pc);
+      static_assert(std::is_unsigned<decltype(elems)>::value,
+                    "IVA should be unsigned");
+      if (elems == 0 || elems > ArrayData::MaxElemsOnStack) {
+        ferror("{} has an illegal element count\n", opcodeToName(op));
+        return false;
+      }
     }
 
     default:

@@ -130,8 +130,6 @@ let string_of_lit_const instruction =
     | Method -> "Method"
     | NameA -> "NameA"
     | NewArray n -> sep ["NewArray"; string_of_int n]
-    | NewMIArray n -> sep ["NewMIArray"; string_of_int n]
-    | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
     | Cns cnsid -> sep ["Cns"; string_of_const_id cnsid]

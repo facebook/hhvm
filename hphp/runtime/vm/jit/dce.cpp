@@ -495,6 +495,8 @@ bool canDCE(IRInstruction* inst) {
   case AddElemStrKey:
   case AddElemIntKey:
   case AddNewElem:
+  case AddNewElemKeyset:
+  case AddNewElemVec:
   case DictAddElemStrKey:
   case DictAddElemIntKey:
   case ArrayAdd:

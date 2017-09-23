@@ -726,6 +726,42 @@ IMPL_OPCODE_CALL(SetNewElemArray);
 IMPL_OPCODE_CALL(AddElemIntKey);
 IMPL_OPCODE_CALL(AddNewElem);
 
+static ArrayData* addNewElemKeysetImpl(ArrayData* keyset, Cell v) {
+  assertx(keyset->isKeyset());
+  auto out = SetArray::Append(keyset, v, keyset->cowCheck());
+  if (keyset != out) decRefArr(keyset);
+  return out;
+}
+
+static ArrayData* addNewElemVecImpl(ArrayData* vec, Cell v) {
+  assertx(vec->isVecArray());
+  auto out = PackedArray::AppendVec(vec, v, vec->cowCheck());
+  if (vec != out) decRefArr(vec);
+  return out;
+}
+
+void cgAddNewElemKeyset(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(addNewElemKeysetImpl),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0).typedValue(1)
+  );
+}
+
+void cgAddNewElemVec(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(addNewElemVecImpl),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0).typedValue(1)
+  );
+}
+
 void cgAddElemStrKey(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 

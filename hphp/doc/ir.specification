@@ -2029,10 +2029,14 @@ To string conversions:
 
 | AddNewElem, D(Arr), S(Arr) S(Cell), Er|CRc|PRc
 
-  Add S1 as a new element to the array S0.  (Note: S1 must actually be a
-  subtype of InitCell for array invariants, but we can't assert this yet in the
-  IR because many eval stack slots are not entirely typed wrt initness right
-  now.)
+| AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), Er|CRc|PRc
+
+| AddNewElemVec, D(Vec), S(Vec) S(Cell), CRc|PRc
+
+  Add S1 as a new element to the array/keyser/vec S0.  (Note: S1 must actually
+  be a subtype of InitCell for array invariants, but we can't assert this yet
+  in the IR because many eval stack slots are not entirely typed wrt initness
+  right now.)
 
 | DictAddElemStrKey, D(Dict), S(Dict) S(Str) S(Cell), Er|CRc|PRc
 

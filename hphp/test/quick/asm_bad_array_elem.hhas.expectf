@@ -1,2 +1,2 @@
 
-Fatal error: AddNewElemC: $2 must be an array in %s on line %s
+Fatal error: AddNewElemC: $2 must be an array, vec, or keyset in %s on line %s

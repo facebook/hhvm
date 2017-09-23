@@ -107,16 +107,34 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
       if (instrFlags(it->op) & TF) {
         unreachable(env);
       }
-      if (reduce) {
-        if (env.flags.canConstProp &&
-            env.collect.propagate_constants &&
-            env.collect.propagate_constants(*it, env.state, currentReduction)) {
-          env.flags.canConstProp = false;
-          env.flags.wasPEI = false;
-          env.flags.effectFree = true;
-        } else {
-          currentReduction.push_back(std::move(*it));
+      auto applyConstProp = [&] {
+        if (env.flags.effectFree && !env.flags.wasPEI) return;
+        auto stk = env.state.stack.end();
+        for (auto i = it->numPush(); i--; ) {
+          --stk;
+          if (!is_scalar(stk->type)) return;
         }
+        env.flags.effectFree = true;
+        env.flags.wasPEI = false;
+      };
+      if (reduce) {
+        auto added = false;
+        if (env.flags.canConstProp) {
+          if (env.collect.propagate_constants) {
+            if (env.collect.propagate_constants(*it, env.state,
+                                                currentReduction)) {
+              added = true;
+              env.flags.canConstProp = false;
+              env.flags.wasPEI = false;
+              env.flags.effectFree = true;
+            }
+          } else {
+            applyConstProp();
+          }
+        }
+        if (!added) currentReduction.push_back(std::move(*it));
+      } else if (env.flags.canConstProp) {
+        applyConstProp();
       }
     }
 

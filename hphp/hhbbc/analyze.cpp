@@ -80,9 +80,7 @@ State entry_state(const Index& index, Context const ctx,
   ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
-  ret.clsRefSlots.resize(ctx.func->numClsRefSlots);
-
-  for (auto& s : ret.clsRefSlots) s = TCls;
+  ret.clsRefSlots.resize(ctx.func->numClsRefSlots, TCls);
 
   // TODO(#3788877): when we're doing a context sensitive analyze_func_inline,
   // thisAvailable and specific type of $this should be able to come from the
@@ -95,7 +93,12 @@ State entry_state(const Index& index, Context const ctx,
     // still if FPassC was used.
     if (knownArgs) {
       if (locId < knownArgs->size()) {
-        ret.locals[locId] = (*knownArgs)[locId];
+        if (ctx.func->params[locId].isVariadic) {
+          std::vector<Type> pack(knownArgs->begin() + locId, knownArgs->end());
+          ret.locals[locId] = arr_packed(std::move(pack));
+        } else {
+          ret.locals[locId] = (*knownArgs)[locId];
+        }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic ? TArr : TUninit;
       }

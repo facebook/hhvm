@@ -1854,22 +1854,60 @@ Type context_sensitive_return_type(const Index& index,
   // functions without params might be worth interpreting in a
   // context-sensitive way once the context includes the type of
   // $this.)
-  bool const tryContextSensitive =
-    options.ContextSensitiveInterp &&
-    !finfo->first->params.empty() &&
-    interp_nesting_level + 1 < max_interp_nexting_level;
+  bool const tryContextSensitive = [&] {
+    if (!options.ContextSensitiveInterp ||
+        finfo->first->params.empty() ||
+        interp_nesting_level + 1 >= max_interp_nexting_level ||
+        callInsensitiveType == TBottom) {
+      return false;
+    }
+
+    if (callCtx.args.size() < finfo->first->params.size()) return true;
+    auto ctx = Context {
+      finfo->first->unit,
+      const_cast<php::Func*>(finfo->first),
+      finfo->first->cls
+    };
+    for (auto i = 0; i < finfo->first->params.size(); i++) {
+      if (RuntimeOption::EvalHardTypeHints) {
+        auto const constraint = finfo->first->params[i].typeConstraint;
+        if (constraint.hasConstraint() && !constraint.isTypeVar() &&
+            !constraint.isTypeConstant()) {
+          auto t = index.lookup_constraint(ctx, constraint);
+          if (!callCtx.args[i].subtypeOf(t)) return true;
+          if (callCtx.args[i] != t) return true;
+          continue;
+        }
+      }
+      if (callCtx.args[i].strictSubtypeOf(TInitCell)) return true;
+    }
+    return false;
+  }();
+
   if (!tryContextSensitive) {
+    return callInsensitiveType;
+  }
+
+  auto maybe_loosen_staticness = [&] (const Type& ty) {
+    return callInsensitiveType.subtypeOf(TUnc) ? ty : loosen_staticness(ty);
+  };
+
+  if (index.frozen()) {
+    ContextRetTyMap::const_accessor acc;
+    if (finfo->second.contextualReturnTypes.find(acc, callCtx)) {
+      return maybe_loosen_staticness(acc->second);
+    }
     return callInsensitiveType;
   }
 
   ContextRetTyMap::accessor acc;
   if (finfo->second.contextualReturnTypes.insert(acc, callCtx)) {
     acc->second = TTop;
+  } else if (acc->second == TBottom || is_scalar(acc->second)) {
+    return maybe_loosen_staticness(acc->second);
   }
 
-  auto const contextType = [&] {
-    if (index.frozen()) return acc->second;
-
+  auto contextType = [&] {
     ++interp_nesting_level;
     SCOPE_EXIT { --interp_nesting_level; };
 
@@ -1881,66 +1919,26 @@ Type context_sensitive_return_type(const Index& index,
     return analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
   }();
 
-  if (!index.frozen()) {
-    if (contextType.strictSubtypeOf(acc->second)) {
-      acc->second = contextType;
-    }
+  if (!interp_nesting_level) {
+    FTRACE(3,
+           "Context sensitive type: {}\n"
+           "Context insensitive type: {}\n",
+           show(contextType), show(callInsensitiveType));
   }
 
-  // TODO(#4441939): we can't do anything if it's a strict subtype of
-  // array because of the lack of intersection types.  See below.
-  if (contextType.strictSubtypeOf(TArr)) return callInsensitiveType;
-  if (contextType.strictSubtypeOf(TVec)) return callInsensitiveType;
-  if (contextType.strictSubtypeOf(TDict)) return callInsensitiveType;
-  if (contextType.strictSubtypeOf(TKeyset)) return callInsensitiveType;
+  auto ret = intersection_of(std::move(callInsensitiveType),
+                             std::move(contextType));
 
-  /*
-   * Note: it may seem like the context sensitive return type should
-   * always be at least as good as the context insensitive one, but
-   * this doesn't hold in general, because we have a constant maximum
-   * nesting depth.  I.e. we could get a better type in the normal,
-   * context insensitive case because we're doing 'inlining'
-   * (context-sensitive) interprets on the callees instead, and there
-   * must be some maximum depth that we'll do that.
-   *
-   * For example, if the max_interp_nexting_level is two, consider the
-   * following functions:
-   *
-   *       Function:                         Context-insensitive return type
-   *
-   *    function f($x) { return $x; }                    InitCell
-   *
-   *    function g($x) { return f($x ? 1 : 2); }         Int
-   *
-   * Now given the following:
-   *
-   *    function foo() { return g(true); }
-   *
-   * We'll inline interpret g, but not f (exceeds maximum depth), so
-   * we'll determine g returned InitCell here, which is worse than
-   * it's context-insensitive type of Int.
-   */
-  if (!contextType.subtypeOf(callInsensitiveType)) {
-    FTRACE(1, "{} <= {} didn't happen on {} called from {} ({})\n",
-      show(contextType),
-      show(callInsensitiveType),
-      finfo->first->name,
-      callCtx.caller.func->name,
-      callCtx.caller.cls ? callCtx.caller.cls->name->data() : "");
-    return callInsensitiveType;
+  if (ret.strictSubtypeOf(acc->second)) {
+    acc->second = ret;
   }
 
-  /*
-   * TODO(#4441939): for this to be safe for the index invariants on
-   * return types, we need to be intersecting the types here.  This is
-   * because aggregate types (various array subtypes) could have some
-   * parts become more refined when inferring it in a
-   * context-sensitive way, while other parts are less refined.  If
-   * you take one or the other it's possible for normal context
-   * insensitive return types in the index to get bigger instead of
-   * getting smaller.
-   */
-  return contextType;
+  if (!interp_nesting_level) {
+    ret = maybe_loosen_staticness(ret);
+    FTRACE(3, "Context sensitive result: {}\n", show(ret));
+  }
+
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////

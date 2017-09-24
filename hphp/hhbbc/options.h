@@ -102,7 +102,7 @@ struct Options {
   /*
    * If true, analyze calls to functions in a context-sensitive way.
    *
-   * Note, this is disabled by default because it doesn't quite work yet.
+   * Disabled by default because its slow, with very little gain.
    */
   bool ContextSensitiveInterp = false;
 

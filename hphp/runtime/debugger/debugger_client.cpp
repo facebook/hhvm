@@ -2388,6 +2388,9 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_scriptMode, ini, config, "ScriptMode");
   BIND(script_mode, &m_scriptMode);
 
+  Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
+  BIND(never_save_config, &m_neverSaveConfig);
+
   setDebuggerClientSmallStep(Config::GetBool(ini, config, "SmallStep"));
   BIND(small_step, IniSetting::SetAndGet<bool>(
        [this](const bool& v) {
@@ -2490,9 +2493,6 @@ void DebuggerClient::loadConfig() {
 
   Config::Bind(m_sourceRoot, ini, config, "SourceRoot");
   BIND(source_root, &m_sourceRoot);
-
-  Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
-  BIND(never_save_config, &m_neverSaveConfig);
 
   // We are guaranteed to have an ini file given how m_configFileName is set
   // above

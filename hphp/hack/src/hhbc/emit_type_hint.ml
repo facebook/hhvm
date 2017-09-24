@@ -39,7 +39,10 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
     if strip_tparams then name
     else name ^ "<" ^ fmt_hints ~tparams ~namespace args ^ ">"
 
-  | A.Hfun (args, _, ret) ->
+  | A.Hfun (true, _, _, _) ->
+    failwith "Codegen for coroutine functions is not supported"
+
+  | A.Hfun (false, args, _, ret) ->
     "(function (" ^ fmt_hints ~tparams ~namespace args
     ^ "): " ^ fmt_hint ~tparams ~namespace ret ^ ")"
 
@@ -72,8 +75,8 @@ and fmt_hints ~tparams ~namespace hints =
 
 let can_be_nullable h =
   match snd h with
-  | A.Hfun (_, _, _)
-  | A.Hoption (_, A.Hfun (_, _, _))
+  | A.Hfun (_, _, _, _)
+  | A.Hoption (_, A.Hfun (_, _, _, _))
   | A.Happly ((_, "mixed"), _)
   | A.Hoption (_, A.Happly ((_, "mixed"), _)) -> false
   | _ -> true
@@ -83,7 +86,7 @@ match h with
 | A.Happly ((_, ("mixed" | "void")), []) ->
   TC.make None []
 
-| A.Hfun (_, _, _) ->
+| A.Hfun _ ->
   TC.make None []
 
 | A.Haccess _ ->
@@ -163,7 +166,7 @@ let param_hint_to_type_info ~skipawaitable ~nullable
   let is_simple_hint =
     match snd h with
     | A.Hsoft _ | A.Hoption _ | A.Haccess _
-    | A.Hfun (_, _, _)
+    | A.Hfun _
     | A.Happly (_, _::_)
     | A.Happly ((_, "mixed"), []) -> false
     | A.Happly ((_, id), _) when List.mem tparams id -> false

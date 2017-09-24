@@ -90,6 +90,7 @@ class type ['a] ast_visitor_type = object
   method on_stmt : 'a -> stmt -> 'a
   method on_string2 : 'a -> expr list -> 'a
   method on_string : 'a -> pstring -> 'a
+  method on_suspend: 'a -> expr -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_true : 'a -> 'a
@@ -162,7 +163,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Hoption h ->
       let acc = this#on_hint acc h in
       acc
-    | Hfun (hl, _, h) ->
+    | Hfun (_, hl, _, h) ->
       let acc = List.fold_left this#on_hint acc hl in
       let acc = this#on_hint acc h in
       acc
@@ -360,6 +361,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
    | Omitted                     -> this#on_omitted  acc
+   | Suspend e  -> this#on_suspend acc e
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
@@ -444,6 +446,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_yield acc e = this#on_afield acc e
   method on_yield_from acc e = this#on_expr acc e
   method on_await acc e = this#on_expr acc e
+  method on_suspend acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
 
   method on_expr_list acc el =

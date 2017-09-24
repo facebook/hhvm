@@ -1,5 +1,5 @@
 (* @generated from ast_defs.src.ml by hphp/hack/tools/ppx/ppx_gen. *)
-(* SourceShasum<<c3b86d8a94b85907a7c5b36fde5615d34d5b4886>> *)
+(* SourceShasum<<b18049774c9103f2fd210b5b90b74f91cac2e8c9>> *)
 
 (* DO NOT EDIT MANUALLY. *)
 [@@@ocaml.text
@@ -190,7 +190,8 @@ and show_og_null_flavor : og_null_flavor -> Ppx_deriving_runtime.string =
 
 type fun_decl_kind =
   | FDeclAsync 
-  | FDeclSync [@@deriving show]
+  | FDeclSync 
+  | FDeclCoroutine [@@deriving show]
 let rec (pp_fun_decl_kind :
           Format.formatter -> fun_decl_kind -> Ppx_deriving_runtime.unit)
   =
@@ -198,7 +199,8 @@ let rec (pp_fun_decl_kind :
       fun fmt  ->
         function
         | FDeclAsync  -> Format.pp_print_string fmt "FDeclAsync"
-        | FDeclSync  -> Format.pp_print_string fmt "FDeclSync")
+        | FDeclSync  -> Format.pp_print_string fmt "FDeclSync"
+        | FDeclCoroutine  -> Format.pp_print_string fmt "FDeclCoroutine")
   [@ocaml.warning "-A"])
 
 and show_fun_decl_kind : fun_decl_kind -> Ppx_deriving_runtime.string =
@@ -208,7 +210,8 @@ type fun_kind =
   | FSync 
   | FAsync 
   | FGenerator 
-  | FAsyncGenerator [@@deriving show]
+  | FAsyncGenerator 
+  | FCoroutine [@@deriving show]
 let rec (pp_fun_kind :
           Format.formatter -> fun_kind -> Ppx_deriving_runtime.unit)
   =
@@ -218,7 +221,8 @@ let rec (pp_fun_kind :
         | FSync  -> Format.pp_print_string fmt "FSync"
         | FAsync  -> Format.pp_print_string fmt "FAsync"
         | FGenerator  -> Format.pp_print_string fmt "FGenerator"
-        | FAsyncGenerator  -> Format.pp_print_string fmt "FAsyncGenerator")
+        | FAsyncGenerator  -> Format.pp_print_string fmt "FAsyncGenerator"
+        | FCoroutine  -> Format.pp_print_string fmt "FCoroutine")
   [@ocaml.warning "-A"])
 
 and show_fun_kind : fun_kind -> Ppx_deriving_runtime.string =

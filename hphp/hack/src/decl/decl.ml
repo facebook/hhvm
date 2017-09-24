@@ -184,6 +184,7 @@ and ret_from_fun_kind pos kind =
       let r = Reason.Rret_fun_kind (pos, kind) in
       r, Tapply ((pos, SN.Classes.cAwaitable), [ty_any])
     | Ast.FSync -> ty_any
+    | Ast.FCoroutine -> failwith "unsupported:coroutines"
 
 and fun_decl_in_env env f =
   let arity_min, params = make_params env f.f_params in

@@ -50,7 +50,8 @@ module CheckFunctionBody = struct
         None -> ()
         | Some _ -> Errors.return_in_gen p);
         ()
-
+    | Ast.FCoroutine, _ ->
+      failwith "unsupported:coroutines"
     | _, Throw (_, e) ->
         expr f_type e
     | _, Expr e ->
@@ -233,6 +234,8 @@ module CheckFunctionBody = struct
 
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
+
+    | Ast.FCoroutine, _ -> failwith "unsupported:coroutines"
 
     | _, Special_func func ->
         (match func with

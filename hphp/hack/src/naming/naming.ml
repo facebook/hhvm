@@ -792,7 +792,10 @@ module Make (GetLocals : GetLocals) = struct
     | Hsoft h ->
       let h = hint ~allow_retonly env h
       in snd h
-    | Hfun (hl, opt, h) ->
+    | Hfun ((* is_coroutine*) true, _, _, _) ->
+      Errors.internal_error Pos.none "unsupported:coroutines";
+      N.Hany
+    | Hfun ((* is_coroutine*) false, hl, opt, h) ->
       N.Hfun (List.map hl (hint env), opt,
               hint ~allow_retonly:true env h)
     | Happly ((p, _x) as id, hl) ->
@@ -2199,6 +2202,7 @@ module Make (GetLocals : GetLocals) = struct
     | Yield_break -> N.Yield_break
     | Yield e -> N.Yield (afield env e)
     | Await e -> N.Await (expr env e)
+    | Suspend _ -> failwith "unexpected:coroutines"
     | List el -> N.List (exprl env el)
     | Expr_list el -> N.Expr_list (exprl env el)
     | Cast (ty, e2) ->

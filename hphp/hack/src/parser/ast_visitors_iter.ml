@@ -324,19 +324,22 @@ class virtual ['self] iter =
     method on_FAsync env = ()
     method on_FGenerator env = ()
     method on_FAsyncGenerator env = ()
+    method on_FCoroutine env = ()
     method on_fun_kind env = function
       | FSync -> self#on_FSync env
       | FAsync -> self#on_FAsync env
       | FGenerator -> self#on_FGenerator env
       | FAsyncGenerator -> self#on_FAsyncGenerator env
+      | FCoroutine -> self#on_FCoroutine env
     method on_hint env (c0, c1) =
       self#on_Pos_t env c0;
       self#on_hint_ env c1;
     method on_Hoption = self#on_hint
-    method on_Hfun env c0 c1 c2 =
-      self#on_list self#on_hint env c0;
-      self#on_bool env c1;
-      self#on_hint env c2;
+    method on_Hfun env c0 c1 c2 c3 =
+      self#on_bool env c0;
+      self#on_list self#on_hint env c1;
+      self#on_bool env c2;
+      self#on_hint env c3;
     method on_Htuple = self#on_list self#on_hint
     method on_Happly env c0 c1 =
       self#on_id env c0;
@@ -351,7 +354,7 @@ class virtual ['self] iter =
     method on_Hsoft = self#on_hint
     method on_hint_ env = function
       | Hoption c0 -> self#on_Hoption env c0
-      | Hfun (c0, c1, c2) -> self#on_Hfun env c0 c1 c2
+      | Hfun (c0, c1, c2, c3) -> self#on_Hfun env c0 c1 c2 c3
       | Htuple c0 -> self#on_Htuple env c0
       | Happly (c0, c1) -> self#on_Happly env c0 c1
       | Hshape c0 -> self#on_Hshape env c0
@@ -502,6 +505,7 @@ class virtual ['self] iter =
     method on_Yield_from = self#on_expr
     method on_Yield_break env = ()
     method on_Await = self#on_expr
+    method on_Suspend = self#on_expr
     method on_List = self#on_list self#on_expr
     method on_Expr_list = self#on_list self#on_expr
     method on_Cast env c0 c1 =
@@ -586,6 +590,7 @@ class virtual ['self] iter =
       | Yield_from c0 -> self#on_Yield_from env c0
       | Yield_break -> self#on_Yield_break env
       | Await c0 -> self#on_Await env c0
+      | Suspend c0 -> self#on_Suspend env c0
       | List c0 -> self#on_List env c0
       | Expr_list c0 -> self#on_Expr_list env c0
       | Cast (c0, c1) -> self#on_Cast env c0 c1

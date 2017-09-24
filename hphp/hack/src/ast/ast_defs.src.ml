@@ -76,6 +76,7 @@ type og_null_flavor =
 type fun_decl_kind =
   | FDeclAsync
   | FDeclSync
+  | FDeclCoroutine
   [@@deriving show]
 
 type fun_kind =
@@ -83,6 +84,7 @@ type fun_kind =
   | FAsync
   | FGenerator
   | FAsyncGenerator
+  | FCoroutine
   [@@deriving show]
 
 type shape_field_name =

@@ -1125,6 +1125,7 @@ and string_of_param_default_value ?(use_single_quote=false) expr =
   | A.Yield_break
   | A.Yield_from _
   | A.Await _
+  | A.Suspend _
   | A.List _
   | A.Omitted
   | A.Expr_list _ -> failwith "illegal default value"

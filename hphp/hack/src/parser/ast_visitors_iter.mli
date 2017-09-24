@@ -32,6 +32,7 @@ class virtual ['b] iter :
         on_As_v : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Attributes : 'c -> Ast_visitors_ancestors.class_attr list -> unit;
         on_Await : 'c -> Ast_visitors_ancestors.expr -> unit;
+        on_Suspend : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_BArbar : 'c -> unit; on_Bar : 'c -> unit;
         on_Binop : 'c ->
                    Ast_visitors_ancestors.bop ->
@@ -123,7 +124,8 @@ class virtual ['b] iter :
         on_Expr : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Omitted : 'c -> unit;
         on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> unit;
-        on_FAsync : 'c -> unit; on_FAsyncGenerator : 'c -> unit;
+        on_FAsync : 'c -> unit; on_FCoroutine : 'c -> unit;
+        on_FAsyncGenerator : 'c -> unit;
         on_FGenerator : 'c -> unit; on_FSync : 'c -> unit;
         on_Fallthrough : 'c -> unit; on_False : 'c -> unit;
         on_Final : 'c -> unit;
@@ -153,8 +155,9 @@ class virtual ['b] iter :
                     Ast_visitors_ancestors.id ->
                     Ast_visitors_ancestors.hint list -> unit;
         on_Hfun : 'c ->
+                  Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_reference ->
+                  Ast_visitors_ancestors.is_variadic ->
                   Ast_visitors_ancestors.hint -> unit;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit;
@@ -384,6 +387,7 @@ class virtual ['b] iter :
     method on_Attributes :
       'c -> Ast_visitors_ancestors.class_attr list -> unit
     method on_Await : 'c -> Ast_visitors_ancestors.expr -> unit
+    method on_Suspend : 'c -> Ast_visitors_ancestors.expr -> unit
     method on_BArbar : 'c -> unit
     method on_Bar : 'c -> unit
     method on_Binop :
@@ -492,6 +496,7 @@ class virtual ['b] iter :
     method on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> unit
     method on_FAsync : 'c -> unit
     method on_FAsyncGenerator : 'c -> unit
+    method on_FCoroutine : 'c -> unit
     method on_FGenerator : 'c -> unit
     method on_FSync : 'c -> unit
     method on_Fallthrough : 'c -> unit
@@ -528,8 +533,9 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.id -> Ast_visitors_ancestors.hint list -> unit
     method on_Hfun :
       'c ->
+      Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_reference ->
+      Ast_visitors_ancestors.is_variadic ->
       Ast_visitors_ancestors.hint -> unit
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit

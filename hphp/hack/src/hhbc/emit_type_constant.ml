@@ -139,7 +139,9 @@ and hint_to_type_constant_list ~tparams ~namespace h =
     get_kind ~tparams "typeaccess" @
      [TV.String "root_name", TV.String (root_to_string s0);
      TV.String "access_list", type_constant_access_list @@ s1::sl]
-  | A.Hfun (hl, _b, h) ->
+  | A.Hfun (true, _, _, _) ->
+    failwith "Codegen for coroutine functions is not supported"
+  | A.Hfun (false, hl, _b, h) ->
     (* TODO: Bool indicates variadic argument. What to do? *)
     let kind = get_kind ~tparams "fun" in
     let return_type =

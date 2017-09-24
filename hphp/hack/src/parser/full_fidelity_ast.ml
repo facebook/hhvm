@@ -535,14 +535,19 @@ let rec pHint : hint parser = fun node env ->
       Hoption (pHint nullable_type env)
     | SoftTypeSpecifier { soft_type; _ } ->
       Hsoft (pHint soft_type env)
-    | ClosureTypeSpecifier { closure_parameter_types; closure_return_type; _} ->
+    | ClosureTypeSpecifier {
+        closure_parameter_types;
+        closure_return_type;
+        closure_coroutine; _} ->
       let param_types =
         List.map ~f:(fun x -> pHint x env)
           (as_list closure_parameter_types)
       in
+      let is_coroutine = not (is_missing closure_coroutine) in
       let is_variadic_param x = snd x = Htuple [] in
       Hfun
-      ( List.filter ~f:(fun x -> not (is_variadic_param x)) param_types
+      ( is_coroutine
+      , List.filter ~f:(fun x -> not (is_variadic_param x)) param_types
       , List.exists ~f:is_variadic_param param_types
       , pHint closure_return_type env
       )
@@ -887,6 +892,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.DotDotDot               -> Unop (Usplat, expr)
         | Some TK.At                      -> Unop (Usilence, expr)
         | Some TK.Await                   -> Await expr
+        | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
           Call ((pos, Id (pos, "echo")), [], [expr], [])

@@ -77,6 +77,10 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.expr_ ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
+        on_Suspend : 'c ->
+                   Ast_visitors_ancestors.expr_ ->
+                   Ast_visitors_ancestors.expr ->
+                   Ast_visitors_ancestors.expr_;
         on_BArbar : 'c ->
                     Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_Bar : 'c ->
@@ -286,6 +290,9 @@ class virtual ['b] endo :
         on_FAsyncGenerator : 'c ->
                              Ast_visitors_ancestors.fun_kind ->
                              Ast_visitors_ancestors.fun_kind;
+        on_FCoroutine : 'c ->
+                             Ast_visitors_ancestors.fun_kind ->
+                             Ast_visitors_ancestors.fun_kind;
         on_FGenerator : 'c ->
                         Ast_visitors_ancestors.fun_kind ->
                         Ast_visitors_ancestors.fun_kind;
@@ -352,8 +359,9 @@ class virtual ['b] endo :
                     Ast_visitors_ancestors.hint_;
         on_Hfun : 'c ->
                   Ast_visitors_ancestors.hint_ ->
+                  Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_reference ->
+                  Ast_visitors_ancestors.is_variadic ->
                   Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_;
         on_Hoption : 'c ->
                      Ast_visitors_ancestors.hint_ ->
@@ -937,6 +945,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Suspend :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_BArbar :
       'c -> Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop
     method on_Bar :
@@ -1161,6 +1173,9 @@ class virtual ['b] endo :
     method on_FAsyncGenerator :
       'c ->
       Ast_visitors_ancestors.fun_kind -> Ast_visitors_ancestors.fun_kind
+    method on_FCoroutine :
+      'c ->
+      Ast_visitors_ancestors.fun_kind -> Ast_visitors_ancestors.fun_kind
     method on_FGenerator :
       'c ->
       Ast_visitors_ancestors.fun_kind -> Ast_visitors_ancestors.fun_kind
@@ -1225,8 +1240,9 @@ class virtual ['b] endo :
     method on_Hfun :
       'c ->
       Ast_visitors_ancestors.hint_ ->
+      Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_reference ->
+      Ast_visitors_ancestors.is_variadic ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hoption :
       'c ->

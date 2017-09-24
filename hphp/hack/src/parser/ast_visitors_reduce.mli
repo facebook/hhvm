@@ -32,6 +32,7 @@ class virtual ['b] reduce :
         on_As_v : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Attributes : 'c -> Ast_visitors_ancestors.class_attr list -> 'd;
         on_Await : 'c -> Ast_visitors_ancestors.expr -> 'd;
+        on_Suspend : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_BArbar : 'c -> 'd; on_Bar : 'c -> 'd;
         on_Binop : 'c ->
                    Ast_visitors_ancestors.bop ->
@@ -121,6 +122,7 @@ class virtual ['b] reduce :
         on_Expr : 'c -> Ast_visitors_ancestors.expr -> 'd;
         on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_FAsync : 'c -> 'd; on_FAsyncGenerator : 'c -> 'd;
+        on_FCoroutine : 'c -> 'd;
         on_FGenerator : 'c -> 'd; on_FSync : 'c -> 'd;
         on_Fallthrough : 'c -> 'd; on_False : 'c -> 'd; on_Final : 'c -> 'd;
         on_Float : 'c -> Ast_visitors_ancestors.pstring -> 'd;
@@ -149,8 +151,9 @@ class virtual ['b] reduce :
                     Ast_visitors_ancestors.id ->
                     Ast_visitors_ancestors.hint list -> 'd;
         on_Hfun : 'c ->
+                  Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_reference ->
+                  Ast_visitors_ancestors.is_variadic ->
                   Ast_visitors_ancestors.hint -> 'd;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd;
@@ -376,6 +379,7 @@ class virtual ['b] reduce :
     method on_As_v : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_Attributes : 'c -> Ast_visitors_ancestors.class_attr list -> 'd
     method on_Await : 'c -> Ast_visitors_ancestors.expr -> 'd
+    method on_Suspend : 'c -> Ast_visitors_ancestors.expr -> 'd
     method on_BArbar : 'c -> 'd
     method on_Bar : 'c -> 'd
     method on_Binop :
@@ -475,6 +479,7 @@ class virtual ['b] reduce :
     method on_Expr_list : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_FAsync : 'c -> 'd
     method on_FAsyncGenerator : 'c -> 'd
+    method on_FCoroutine : 'c -> 'd
     method on_FGenerator : 'c -> 'd
     method on_FSync : 'c -> 'd
     method on_Fallthrough : 'c -> 'd
@@ -508,8 +513,9 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.id -> Ast_visitors_ancestors.hint list -> 'd
     method on_Hfun :
       'c ->
+      Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_reference ->
+      Ast_visitors_ancestors.is_variadic ->
       Ast_visitors_ancestors.hint -> 'd
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> 'd

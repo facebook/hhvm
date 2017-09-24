@@ -149,6 +149,7 @@ type token =
 (* Fake tokens *)
   | Tyield
   | Tawait
+  | Tsuspend
   | Timport
   | Teval
   | Tprint
@@ -261,6 +262,7 @@ let token_to_string = function
   | Teof          -> "eof"
   | Tyield        -> "yield"
   | Tawait        -> "await"
+  | Tsuspend      -> "suspend"
   | Timport       -> "import"
   | Teval         -> "eval"
   | Tprint        -> "print"

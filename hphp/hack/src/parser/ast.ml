@@ -224,10 +224,11 @@ and fun_ = {
   f_static          : bool;
 }
 
+and is_coroutine = bool
 and hint = Pos.t * hint_
 and hint_ =
   | Hoption of hint
-  | Hfun of hint list * bool * hint
+  | Hfun of is_coroutine * hint list * is_variadic * hint
   | Htuple of hint list
   | Happly of id * hint list
   | Hshape of shape_info
@@ -325,6 +326,7 @@ and expr_ =
   | Yield_break
   | Yield_from of expr
   | Await of expr
+  | Suspend of expr
   | List of expr list
   | Expr_list of expr list
   | Cast of hint * expr

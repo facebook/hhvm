@@ -263,7 +263,7 @@ let rec check_lvalue env = function
   | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
-  | Await _ | Expr_list _ | Cast _ | Unop _
+  | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | NullCoalesce _ | InstanceOf _ | New _ | Efun _ | Lfun _
   | Xml _ | Import _ | Pipe _) ->
       error_at env pos "Invalid lvalue"
@@ -312,6 +312,7 @@ let priorities = [
   (Left, [Tltlt; Tgtgt]);
   (Left, [Tplus; Tminus; Tdot]);
   (Left, [Tstar; Tslash; Tpercent]);
+  (Right, [Tsuspend]);
   (Right, [Tem]);
   (NonAssoc, [Tinstanceof]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
@@ -587,7 +588,7 @@ and ignore_toplevel attr_start ~attr acc env terminate =
       | "abstract" | "final"
       | "class"| "trait" | "interface"
       | "namespace"
-      | "async" | "newtype" | "type"| "const" | "enum" ->
+      | "async" | "coroutine" | "newtype" | "type"| "const" | "enum" ->
           (* Parsing toplevel declarations (class, function etc ...) *)
           let def_start = Option.value attr_start
             ~default:(Pos.make env.file env.lb) in
@@ -689,6 +690,10 @@ and toplevel_word def_start ~attr env = function
       expect_word env "function";
       let fun_ = fun_ def_start ~attr ~sync:FDeclAsync env in
       [Fun fun_]
+  | "coroutine" ->
+      expect_word env "function";
+      let fun_ = fun_ def_start ~attr ~sync:FDeclCoroutine env in
+      [Fun fun_]
   | "function" ->
       let fun_ = fun_ def_start ~attr ~sync:FDeclSync env in
       [Fun fun_]
@@ -787,10 +792,19 @@ and attribute_list_remain env =
 (* Functions *)
 (*****************************************************************************)
 
+and error_on_ref_return_in_async_or_coroutine env is_ref kind =
+  if is_ref
+  then match kind with
+    | FDeclAsync ->
+      error env "Asynchronous function cannot return reference"
+    | FDeclCoroutine ->
+      error env "Coroutine cannot return reference"
+    | _ -> ()
+
+
 and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
   let is_ref = ref_opt env in
-  if is_ref && sync = FDeclAsync
-    then error env ("Asynchronous function cannot return reference");
+  error_on_ref_return_in_async_or_coroutine env is_ref sync;
   let name = identifier env in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -1102,6 +1116,11 @@ and class_hint_param_list_remain env =
 (* Type hints: int, ?int, A<T>, array<...> etc ... *)
 (*****************************************************************************)
 
+and hint_function_with_no_parens_error env start ~is_coroutine =
+  let h = hint_function env start ~is_coroutine in
+  error_at env (fst h) "Function hints must be parenthesized";
+  h
+
 and hint env =
   match L.token env.file env.lb with
   (* ?_ *)
@@ -1113,13 +1132,17 @@ and hint env =
   | Tword when Lexing.lexeme env.lb = "shape" ->
       let pos = Pos.make env.file env.lb in
       pos, Hshape (hint_shape_info env pos)
+  | Tword
+    when Lexing.lexeme env.lb = "coroutine"
+      && peek_check_word env "function" ->
+    let start = Pos.make env.file env.lb in
+    hint_function_with_no_parens_error env start ~is_coroutine:true
   | Tword | Tcolon when Lexing.lexeme env.lb <> "function" ->
       L.back env.lb;
       hint_apply_or_access env []
   | Tword ->
-      let h = hint_function env in
-      error_at env (fst h) "Function hints must be parenthesized";
-      h
+    let start = Pos.make env.file env.lb in
+    hint_function_with_no_parens_error env start ~is_coroutine:false
   (* (_) | (function(_): _) *)
   | Tlp ->
       let start_pos = Pos.make env.file env.lb in
@@ -1168,14 +1191,25 @@ and hint_apply_or_access_remainder env id_list =
               pos, Happly ((pos, "*Unknown*"), [])
         end
 
+
+and hint_function_ env start function_hint_start ~is_coroutine =
+  let h = hint_function env function_hint_start ~is_coroutine in
+  if L.token env.file env.lb <> Trp
+  then error_at env (fst h) "Function hints must be parenthesized";
+  Pos.btw start (Pos.make env.file env.lb), (snd h)
+
 (* (_) | (function(_): _) *)
 and hint_paren start env =
   match L.token env.file env.lb with
+  | Tword
+    when Lexing.lexeme env.lb = "coroutine"
+      && peek_check_word env "function" ->
+    let function_hint_start = Pos.make env.file env.lb in
+    expect env Tword;
+    hint_function_ env start function_hint_start ~is_coroutine:true
   | Tword when Lexing.lexeme env.lb = "function" ->
-      let h = hint_function env in
-      if L.token env.file env.lb <> Trp
-      then error_at env (fst h) "Function hints must be parenthesized";
-      Pos.btw start (Pos.make env.file env.lb), (snd h)
+      let function_hint_start = Pos.make env.file env.lb in
+      hint_function_ env start function_hint_start ~is_coroutine:false
   | _ ->
       L.back env.lb;
       let hintl = hint_list env in
@@ -1223,12 +1257,11 @@ and hint_list_remain env =
 (*****************************************************************************)
 
 (* function(_): _ *)
-and hint_function env =
-  let start = Pos.make env.file env.lb in
+and hint_function env start ~is_coroutine =
   expect env Tlp;
   let params, has_dots = hint_function_params env in
   let ret = hint_return env in
-  Pos.btw start (fst ret), Hfun (params, has_dots, ret)
+  Pos.btw start (fst ret), Hfun (is_coroutine, params, has_dots, ret)
 
 (* (parameter_1, .., parameter_n) *)
 and hint_function_params env =
@@ -1790,16 +1823,22 @@ and xhp_category_list env =
  *)
 (*****************************************************************************)
 
+and async_or_coroutine_method env member_start kind  ~attrs ~modifiers =
+  expect_word env "function";
+  let is_ref = ref_opt env in
+  error_on_ref_return_in_async_or_coroutine env is_ref kind;
+  let fun_name = identifier env in
+  let method_ = method_ env member_start
+    ~modifiers ~attrs ~sync:kind is_ref fun_name in
+  Method method_
+
 and class_member_word env member_start ~attrs ~modifiers = function
   | "async" ->
-      expect_word env "function";
-      let is_ref = ref_opt env in
-      if is_ref
-        then error env ("Asynchronous function cannot return reference");
-      let fun_name = identifier env in
-      let method_ = method_ env member_start
-        ~modifiers ~attrs ~sync:FDeclAsync is_ref fun_name in
-      Method method_
+      async_or_coroutine_method env member_start FDeclAsync
+        ~attrs ~modifiers
+  | "coroutine" ->
+      async_or_coroutine_method env member_start FDeclCoroutine
+        ~attrs ~modifiers
   | "function" ->
       let is_ref = ref_opt env in
       let fun_name = identifier env in
@@ -1956,6 +1995,7 @@ and function_body env =
 
 and fun_kind sync (has_yield:bool) =
   match sync, has_yield with
+    | FDeclCoroutine, _ -> FCoroutine
     | FDeclAsync, true -> FAsyncGenerator
     | FDeclSync, true -> FGenerator
     | FDeclAsync, false -> FAsync
@@ -3074,12 +3114,16 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       expr_new env pos
   | "async" ->
       expr_anon_async env pos
+  | "coroutine" ->
+      expr_anon_coroutine env pos
   | "function" ->
       expr_anon_fun env pos ~sync:FDeclSync
   | name when is_collection env name ->
       expr_collection env pos name
   | "await" ->
       expr_await env pos
+  | "suspend" ->
+      expr_suspend env pos
   | "yield" ->
       env.in_generator := true;
       expr_yield env pos
@@ -3359,6 +3403,12 @@ and expr_await env start =
     Pos.btw start (fst e), Await e
   end
 
+and expr_suspend env start =
+  with_priority env Tsuspend begin fun env ->
+    let e = expr env in
+    Pos.btw start (fst e), Suspend e
+  end
+
 (*****************************************************************************)
 (* Clone *)
 (*****************************************************************************)
@@ -3383,24 +3433,30 @@ and expr_php_list env start =
 (*****************************************************************************)
 
 and expr_anon_async env pos =
+  expr_anon_function_like env pos FDeclAsync "async"
+
+and expr_anon_coroutine env pos =
+  expr_anon_function_like env pos FDeclCoroutine "coroutine"
+
+and expr_anon_function_like env pos kind kind_text =
   match L.token env.file env.lb with
   | Tword when Lexing.lexeme env.lb = "function" ->
-      expr_anon_fun env pos ~sync:FDeclAsync
+      expr_anon_fun env pos ~sync:kind
   | Tlvar ->
       let var_pos = Pos.make env.file env.lb in
-      pos, lambda_single_arg ~sync:FDeclAsync env (var_pos, Lexing.lexeme env.lb)
+      pos, lambda_single_arg ~sync:kind env (var_pos, Lexing.lexeme env.lb)
   | Tlp ->
       let param_list = parameter_list_remain env in
       let ret = hint_return_opt env in
       expect env Tlambda;
-      pos, lambda_body ~sync:FDeclAsync env param_list ret
-  | Tlcb -> (* async { ... } *)
+      pos, lambda_body ~sync:kind env param_list ret
+  | Tlcb -> (* <kind> { ... } *)
       L.back env.lb;
-      let lambda = pos, lambda_body ~sync:FDeclAsync env [] None in
+      let lambda = pos, lambda_body ~sync:kind env [] None in
       pos, Call (lambda, [], [], [])
   | _ ->
       L.back env.lb;
-      pos, Id (pos, "async")
+      pos, Id (pos, kind_text)
 
 and expr_anon_fun env pos ~(sync:fun_decl_kind) =
   let env = { env with priority = 0 } in

@@ -58,6 +58,9 @@ class virtual ['c] map :
         on_Await : 'd ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.expr_;
+        on_Suspend : 'd ->
+                  Ast_visitors_ancestors.expr ->
+                  Ast_visitors_ancestors.expr_;
         on_BArbar : 'd -> Ast_visitors_ancestors.bop;
         on_Bar : 'd -> Ast_visitors_ancestors.bop;
         on_Binop : 'd ->
@@ -197,6 +200,7 @@ class virtual ['c] map :
                        Ast_visitors_ancestors.expr_;
         on_FAsync : 'd -> Ast_visitors_ancestors.fun_kind;
         on_FAsyncGenerator : 'd -> Ast_visitors_ancestors.fun_kind;
+        on_FCoroutine : 'd -> Ast_visitors_ancestors.fun_kind;
         on_FGenerator : 'd -> Ast_visitors_ancestors.fun_kind;
         on_FSync : 'd -> Ast_visitors_ancestors.fun_kind;
         on_Fallthrough : 'd -> Ast_visitors_ancestors.stmt;
@@ -241,8 +245,9 @@ class virtual ['c] map :
                     Ast_visitors_ancestors.hint list ->
                     Ast_visitors_ancestors.hint_;
         on_Hfun : 'd ->
+                  Ast_visitors_ancestors.is_coroutine ->
                   Ast_visitors_ancestors.hint list ->
-                  Ast_visitors_ancestors.is_reference ->
+                  Ast_visitors_ancestors.is_variadic ->
                   Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_;
         on_Hoption : 'd ->
                      Ast_visitors_ancestors.hint ->
@@ -702,6 +707,8 @@ class virtual ['c] map :
       Ast_visitors_ancestors.class_elt
     method on_Await :
       'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
+    method on_Suspend :
+      'd -> Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr_
     method on_BArbar : 'd -> Ast_visitors_ancestors.bop
     method on_Bar : 'd -> Ast_visitors_ancestors.bop
     method on_Binop :
@@ -829,6 +836,7 @@ class virtual ['c] map :
       'd -> Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_FAsync : 'd -> Ast_visitors_ancestors.fun_kind
     method on_FAsyncGenerator : 'd -> Ast_visitors_ancestors.fun_kind
+    method on_FCoroutine : 'd -> Ast_visitors_ancestors.fun_kind
     method on_FGenerator : 'd -> Ast_visitors_ancestors.fun_kind
     method on_FSync : 'd -> Ast_visitors_ancestors.fun_kind
     method on_Fallthrough : 'd -> Ast_visitors_ancestors.stmt
@@ -872,8 +880,9 @@ class virtual ['c] map :
       Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
     method on_Hfun :
       'd ->
+      Ast_visitors_ancestors.is_coroutine ->
       Ast_visitors_ancestors.hint list ->
-      Ast_visitors_ancestors.is_reference ->
+      Ast_visitors_ancestors.is_variadic ->
       Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hoption :
       'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_

@@ -38,98 +38,101 @@ module Subst = Decl_subst
 module TUtils = Typing_utils
 
 module CheckFunctionBody = struct
-  let rec stmt f_type st = match f_type, st with
+  let rec stmt f_type ~in_finally st = match f_type, st with
     | Ast.FSync, Return (_, None)
     | Ast.FAsync, Return (_, None) -> ()
     | Ast.FSync, Return (_, Some e)
     | Ast.FAsync, Return (_, Some e) ->
-        expr_allow_await f_type e;
+        expr_allow_await f_type ~in_finally e;
         ()
     | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
         (match e with
         None -> ()
         | Some _ -> Errors.return_in_gen p);
         ()
-    | Ast.FCoroutine, _ ->
-      failwith "unsupported:coroutines"
+    | Ast.FCoroutine, Return (_, e) ->
+        Option.iter e ~f:(expr f_type ~in_finally)
     | _, Throw (_, e) ->
-        expr f_type e
+        expr f_type ~in_finally e
     | _, Expr e ->
-        expr_allow_await f_type e;
+        expr_allow_await f_type ~in_finally e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
          | Static_var _ | Global_var _ ) -> ()
     | _, If (cond, b1, b2) ->
-        expr f_type cond;
-        block f_type b1;
-        block f_type b2;
+        expr f_type ~in_finally cond;
+        block f_type ~in_finally b1;
+        block f_type ~in_finally b2;
         ()
     | _, Do (b, e) ->
-        block f_type b;
-        expr f_type e;
+        block f_type ~in_finally b;
+        expr f_type ~in_finally e;
         ()
     | _, While (e, b) ->
-        expr f_type e;
-        block f_type b;
+        expr f_type ~in_finally e;
+        block f_type ~in_finally b;
         ()
     | _, For (init, cond, incr, b) ->
-        expr f_type init;
-        expr f_type cond;
-        expr f_type incr;
-        block f_type b;
+        expr f_type ~in_finally init;
+        expr f_type ~in_finally cond;
+        expr f_type ~in_finally incr;
+        block f_type ~in_finally b;
         ()
     | _, Switch (e, cl) ->
-        expr f_type e;
-        List.iter cl (case f_type);
+        expr f_type ~in_finally e;
+        List.iter cl (case f_type ~in_finally);
         ()
+    | Ast.FCoroutine, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
+        Errors.await_in_coroutine p;
+
     | (Ast.FSync | Ast.FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_sync_function p;
         ()
     | _, Foreach (v, _, b) ->
-        expr f_type v;
-        block f_type b;
+        expr f_type ~in_finally v;
+        block f_type ~in_finally b;
         ()
     | _, Try (b, cl, fb) ->
-        block f_type b;
-        List.iter cl (catch f_type);
-        block f_type fb;
+        block f_type ~in_finally b;
+        List.iter cl (catch f_type ~in_finally);
+        block f_type ~in_finally:true fb;
         ()
 
-  and block f_type stl =
-    List.iter stl (stmt f_type)
+  and block f_type ~in_finally stl =
+    List.iter stl (stmt f_type ~in_finally)
 
-  and case f_type = function
-    | Default b -> block f_type b
+  and case f_type ~in_finally = function
+    | Default b -> block f_type ~in_finally b
     | Case (cond, b) ->
-        expr f_type cond;
-        block f_type b;
+        expr f_type ~in_finally cond;
+        block f_type ~in_finally b;
         ()
 
-  and catch f_type (_, _, b) = block f_type b
+  and catch f_type ~in_finally (_, _, b) = block f_type ~in_finally b
 
-  and afield f_type = function
-    | AFvalue e -> expr f_type e
-    | AFkvalue (e1, e2) -> expr2 f_type (e1, e2)
+  and afield f_type ~in_finally = function
+    | AFvalue e -> expr f_type ~in_finally e
+    | AFkvalue (e1, e2) -> expr2 f_type ~in_finally (e1, e2)
 
-  and expr f_type (p, e) =
-    expr_ p f_type e
+  and expr f_type ~in_finally (p, e) =
+    expr_ p f_type ~in_finally e
 
-  and expr_allow_await f_type (p, exp) = match f_type, exp with
+  and expr_allow_await f_type ~in_finally (p, exp) = match f_type, exp with
     | Ast.FAsync, Await e
-    | Ast.FAsyncGenerator, Await e -> expr f_type e; ()
+    | Ast.FAsyncGenerator, Await e -> expr f_type ~in_finally e; ()
     | Ast.FAsync, Binop (Ast.Eq None, e1, (_, Await e))
     | Ast.FAsyncGenerator, Binop (Ast.Eq None, e1, (_, Await e)) ->
-      expr f_type e1;
-      expr f_type e;
+      expr f_type ~in_finally e1;
+      expr f_type ~in_finally e;
       ()
-    | _ -> expr_ p f_type exp; ()
+    | _ -> expr_ p f_type ~in_finally exp; ()
 
-  and expr2 f_type (e1, e2) =
-    expr f_type e1;
-    expr f_type e2;
+  and expr2 f_type ~in_finally (e1, e2) =
+    expr f_type ~in_finally e1;
+    expr f_type ~in_finally e2;
     ()
 
-  and expr_ p f_type exp = match f_type, exp with
+  and expr_ p f_type ~in_finally exp = match f_type, exp with
     | _, Any -> ()
     | _, Fun_id _
     | _, Method_id _
@@ -145,82 +148,82 @@ module CheckFunctionBody = struct
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
     | _, Pipe (_, l, r) ->
-        expr f_type l;
-        expr f_type r;
+        expr f_type ~in_finally l;
+        expr f_type ~in_finally r;
     | _, Array afl ->
-        List.iter afl (afield f_type);
+        List.iter afl (afield f_type ~in_finally);
         ()
     | _, Darray afl ->
-        List.iter afl (expr2 f_type);
+        List.iter afl (expr2 f_type ~in_finally);
         ()
     | _, Varray afl ->
-        List.iter afl (expr f_type);
+        List.iter afl (expr f_type ~in_finally);
         ()
     | _, ValCollection (_, el) ->
-        List.iter el (expr f_type);
+        List.iter el (expr f_type ~in_finally);
         ()
     | _, KeyValCollection (_, fdl) ->
-        List.iter fdl (expr2 f_type);
+        List.iter fdl (expr2 f_type ~in_finally);
         ()
-    | _, Clone e -> expr f_type e; ()
+    | _, Clone e -> expr f_type ~in_finally e; ()
     | _, Obj_get (e, (_, Id _s), _) ->
-        expr f_type e;
+        expr f_type ~in_finally e;
         ()
     | _, Obj_get (e1, e2, _) ->
-        expr2 f_type (e1, e2);
+        expr2 f_type ~in_finally (e1, e2);
         ()
     | _, Array_get (e, eopt) ->
-        expr f_type e;
-        maybe expr f_type eopt;
+        expr f_type ~in_finally e;
+        maybe (expr ~in_finally) f_type eopt;
         ()
     | _, Call (_, e, _, el, uel) ->
-        expr f_type e;
-        List.iter el (expr f_type);
-        List.iter uel (expr f_type);
+        expr f_type ~in_finally e;
+        List.iter el (expr f_type ~in_finally);
+        List.iter uel (expr f_type ~in_finally);
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
     | _, String2 el ->
-        List.iter el (expr f_type);
+        List.iter el (expr f_type ~in_finally);
         ()
     | _, List el ->
-        List.iter el (expr f_type);
+        List.iter el (expr f_type ~in_finally);
         ()
     | _, Pair (e1, e2) ->
-        expr2 f_type (e1, e2);
+        expr2 f_type ~in_finally (e1, e2);
         ()
     | _, Expr_list el ->
-        List.iter el (expr f_type);
+        List.iter el (expr f_type ~in_finally);
         ()
-    | _, Unop (_, e) -> expr f_type e
+    | _, Unop (_, e) -> expr f_type ~in_finally e
     | _, Binop (_, e1, e2) ->
-        expr2 f_type (e1, e2);
+        expr2 f_type ~in_finally (e1, e2);
         ()
     | _, Eif (e1, None, e3) ->
-        expr2 f_type (e1, e3);
+        expr2 f_type ~in_finally (e1, e3);
         ()
     | _, Eif (e1, Some e2, e3) ->
-        List.iter [e1; e2; e3] (expr f_type);
+        List.iter [e1; e2; e3] (expr f_type ~in_finally);
         ()
     | _, NullCoalesce (e1, e2) ->
-        List.iter [e1; e2] (expr f_type);
+        List.iter [e1; e2] (expr f_type ~in_finally);
         ()
     | _, New (_, el, uel) ->
-      List.iter el (expr f_type);
-      List.iter uel (expr f_type);
+      List.iter el (expr f_type ~in_finally);
+      List.iter uel (expr f_type ~in_finally);
       ()
     | _, InstanceOf (e, _) ->
-        expr f_type e;
+        expr f_type ~in_finally e;
         ()
     | _, Cast (_, e) ->
-        expr f_type e;
+        expr f_type ~in_finally e;
         ()
     | _, Efun _ -> ()
 
     | Ast.FGenerator, Yield_break
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
-    | Ast.FAsyncGenerator, Yield af -> afield f_type af; ()
+    | Ast.FAsyncGenerator, Yield af -> afield f_type ~in_finally af; ()
 
     (* Should never happen -- presence of yield should make us FGenerator or
      * FAsyncGenerator. *)
@@ -235,23 +238,32 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
-    | Ast.FCoroutine, _ -> failwith "unsupported:coroutines"
+    | Ast.FCoroutine, Await _ ->
+      Errors.await_in_coroutine p
+    | Ast.FCoroutine, (Yield _ | Yield_break) ->
+      Errors.yield_in_coroutine p
+    | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
+      Errors.suspend_outside_of_coroutine p
+    | Ast.FCoroutine, Suspend e ->
+      if in_finally
+      then Errors.suspend_in_finally p;
+      expr f_type ~in_finally e
 
     | _, Special_func func ->
         (match func with
           | Gena e
-          | Gen_array_rec e -> expr f_type e
-          | Genva el -> List.iter el (expr f_type));
+          | Gen_array_rec e -> expr f_type ~in_finally e
+          | Genva el -> List.iter el (expr f_type ~in_finally));
         ()
     | _, Xml (_, attrl, el) ->
-        List.iter attrl (fun (_, e) -> expr f_type e);
-        List.iter el (expr f_type);
+        List.iter attrl (fun (_, e) -> expr f_type ~in_finally e);
+        List.iter el (expr f_type ~in_finally);
         ()
     | _, Assert (AE_assert e) ->
-        expr f_type e;
+        expr f_type ~in_finally e;
         ()
     | _, Shape fdm ->
-        ShapeMap.iter (fun _ v -> expr f_type v) fdm;
+        ShapeMap.iter (fun _ v -> expr f_type ~in_finally v) fdm;
         ()
 
 end
@@ -310,7 +322,10 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   List.iter f.f_params (fun_param env);
   block env named_body.fnb_nast;
-  CheckFunctionBody.block f.f_fun_kind named_body.fnb_nast
+  CheckFunctionBody.block
+    f.f_fun_kind
+    ~in_finally:env.t_is_finally
+    named_body.fnb_nast
 
 and tparam env (_, _, cstrl) =
   List.iter cstrl (fun (_, h) -> hint env h)
@@ -581,7 +596,7 @@ and check_class_property_initialization prop =
       | This | Lvar _ | Lvarvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
       | Method_id _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
-      | Call _ | Special_func _ | Yield_break | Yield _
+      | Call _ | Special_func _ | Yield_break | Yield _ | Suspend _
       | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Assert _ | Clone _ ->
         Errors.class_property_only_static_literal (fst e)
     and assert_static_literal_for_field_list (expr1, expr2) =
@@ -724,7 +739,10 @@ and method_ (env, is_static) m =
   List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
-  CheckFunctionBody.block m.m_fun_kind named_body.fnb_nast;
+  CheckFunctionBody.block
+    m.m_fun_kind
+    ~in_finally:env.t_is_finally
+    named_body.fnb_nast;
   if m.m_abstract && named_body.fnb_nast <> []
   then Errors.abstract_with_body m.m_name;
   if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fnb_nast = []
@@ -908,6 +926,9 @@ and expr_ env = function
       afield env e;
       ()
   | Await e ->
+      expr env e;
+      ()
+  | Suspend e ->
       expr env e;
       ()
   | List el ->

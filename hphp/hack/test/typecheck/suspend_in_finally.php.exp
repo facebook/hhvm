@@ -1,0 +1,2 @@
+File "suspend_in_finally.php", line 9, characters 19-42:
+suspend is not allowed inside finally blocks. (NastCheck[3039])

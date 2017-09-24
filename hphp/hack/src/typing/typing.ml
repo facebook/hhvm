@@ -451,8 +451,8 @@ and fun_ ?(abstract=false) env hret pos named_body f_kind =
   end
 
 and fun_implicit_return env pos ret _b = function
-  | Ast.FCoroutine -> failwith "unsupported:coroutines"
   | Ast.FGenerator | Ast.FAsyncGenerator -> env
+  | Ast.FCoroutine
   | Ast.FSync ->
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
@@ -525,7 +525,9 @@ and stmt env = function
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
       let rty = match Env.get_fn_kind env with
-        | Ast.FCoroutine -> failwith "unsupported:coroutines"
+        | Ast.FCoroutine ->
+          Errors.internal_error p "unsupported:coroutines";
+          (Reason.Rnone, Tany)
         | Ast.FSync -> (Reason.Rwitness p, Tprim Tvoid)
         | Ast.FGenerator
         (* Return type checked against the "yield". *)
@@ -541,7 +543,9 @@ and stmt env = function
       let pos = fst e in
       let env, te, rty = expr env e in
       let rty = match Env.get_fn_kind env with
-        | Ast.FCoroutine -> failwith "unsupported:coroutines"
+        | Ast.FCoroutine ->
+          Errors.internal_error p "unsupported:coroutines";
+          (Reason.Rnone, Tany)
         | Ast.FSync -> rty
         | Ast.FGenerator
         (* Is an error, but caught in NastCheck. *)
@@ -1591,7 +1595,9 @@ and expr_
         | Nast.AFvalue (p, _), None ->
           let result_ty =
             match Env.get_fn_kind env with
-              | Ast.FCoroutine -> failwith "unexpected:coroutines"
+              | Ast.FCoroutine ->
+                Errors.internal_error p "unsupported:coroutines";
+                (Reason.Rnone, Tany)
               | Ast.FSync
               | Ast.FAsync ->
                   Errors.internal_error p "yield found in non-generator";
@@ -1607,7 +1613,9 @@ and expr_
             env, x
         | _, _ -> assert false in
       let rty = match Env.get_fn_kind env with
-        | Ast.FCoroutine -> failwith "unsupported:coroutines"
+        | Ast.FCoroutine ->
+          Errors.internal_error p "unsupported:coroutines";
+          Reason.Rnone, Tany
         | Ast.FGenerator ->
             Reason.Ryield_gen p,
             Tclass ((p, SN.Classes.cGenerator), [key; value; send])
@@ -1624,6 +1632,9 @@ and expr_
       let env, te, rty = expr env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env (T.Await te) ty
+  | Suspend _ ->
+    Errors.internal_error p "unsupported:coroutines";
+    make_result env T.Any (Reason.Rnone, Tany)
   | Special_func func -> special_func env p func
   | New (c, el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;

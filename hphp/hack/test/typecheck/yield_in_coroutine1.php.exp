@@ -1,0 +1,2 @@
+File "yield_in_coroutine1.php", line 6, characters 5-9:
+yield is not allowed in coroutines. (NastCheck[3037])

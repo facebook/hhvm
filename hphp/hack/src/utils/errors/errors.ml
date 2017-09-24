@@ -554,6 +554,10 @@ module NastCheck                            = struct
   let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
   let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
   let async_in_interface                    = 3035 (* DONT MODIFY!!!! *)
+  let await_in_coroutine                    = 3036 (* DONT MODIFY!!!! *)
+  let yield_in_coroutine                    = 3037 (* DONT MODIFY!!!! *)
+  let suspend_outside_of_coroutine          = 3038 (* DONT MODIFY!!!! *)
+  let suspend_in_finally                    = 3039 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1277,6 +1281,22 @@ let await_not_allowed p =
 let async_in_interface p =
   add NastCheck.async_in_interface p
     "async is only meaningful when it modifies a method body"
+
+let await_in_coroutine p =
+  add NastCheck.await_in_coroutine p
+    "await is not allowed in coroutines."
+
+let yield_in_coroutine p =
+  add NastCheck.yield_in_coroutine p
+    "yield is not allowed in coroutines."
+
+let suspend_outside_of_coroutine p =
+  add NastCheck.suspend_outside_of_coroutine p
+    "suspend is only allowed in coroutines."
+
+let suspend_in_finally p =
+  add NastCheck.suspend_in_finally p
+    "suspend is not allowed inside finally blocks."
 
 let magic (p, s) =
   add NastCheck.magic p

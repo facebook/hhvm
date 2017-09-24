@@ -1381,6 +1381,14 @@ and taccess_loop env = wrap env begin function
   | _ -> back env
 end
 
+and is_coroutine_function env =
+  attempt env begin fun env ->
+    wrap_non_ws env begin function
+      | Tword -> !(env.last_str) = "function"
+      | _ -> false
+    end
+  end
+
 and hint env = wrap env begin function
   | Tplus | Tminus | Tqm | Tat | Tbslash | Tpipe ->
       last_token env;
@@ -1423,6 +1431,9 @@ and hint env = wrap env begin function
   | Tlp -> begin
       last_token env;
       (match token env with
+      | Tword when !(env.last_str) = "coroutine" && is_coroutine_function env ->
+          seq env [ last_token; space; expect_token Tword;
+            hint_function_params; return_type ]
       | Tword when !(env.last_str) = "function" ->
           last_token env;
           hint_function_params env;
@@ -1663,7 +1674,7 @@ and class_element_word env = function
   | "function" ->
       seq env [space; last_token; space; fun_; newline]
   | "public" | "protected" | "private" | "abstract"
-  | "final"| "static" | "async" ->
+  | "final" | "static" | "async" | "coroutine" ->
       back env;
       seq env [modifier_list; after_modifier; newline]
   | "const" ->
@@ -1700,7 +1711,7 @@ and modifier_list env =
 and modifier env = try_token env Tword begin fun env ->
   match !(env.last_str) with
   | "public" | "protected" | "private" | "abstract"
-  | "final"| "static" | "async" ->
+  | "final"| "static" | "async" | "coroutine" ->
       last_token env
   | _ -> back env
 end
@@ -2116,7 +2127,7 @@ end
 and stmt_word ~is_toplevel env word =
   match word with
   | "type" | "newtype" | "namespace" | "use"
-  | "abstract" | "final" | "interface" | "const"
+  | "abstract" | "final" | "interface" | "const" | "coroutine"
   | "class" | "trait" | "function" | "async" | "enum" as word ->
       if is_toplevel
       then stmt_toplevel_word env word
@@ -2166,7 +2177,7 @@ and stmt_word ~is_toplevel env word =
       seq env [expr; semi_colon]
 
 and stmt_toplevel_word env = function
-  | "abstract"  | "final" | "async" ->
+  | "abstract"  | "final" | "async" | "coroutine" ->
       seq env [last_token; space; stmt ~is_toplevel:true]
   | "interface" | "class" | "trait" ->
       seq env [last_token; space; class_]
@@ -2788,7 +2799,8 @@ and expr_atomic_word env last_tok = function
       last_token env;
       space env;
       expr env;
-  | "async" ->
+  | "async"
+  | "coroutine" ->
       last_token env;
       space env;
       begin match next_token env with
@@ -2799,6 +2811,10 @@ and expr_atomic_word env last_tok = function
       last_token env;
       if next_non_ws_token env <> Tlp then space env;
       fun_ env
+  | "suspend" ->
+      last_token env;
+      space env;
+      with_priority env Tsuspend expr
   | "await" ->
       last_token env;
       space env;

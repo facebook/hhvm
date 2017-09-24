@@ -39,6 +39,7 @@ and expr_ f = function
   | Yield_break -> Yield_break
   | Yield e -> Yield (afield f e)
   | Await e -> Await (expr f e)
+  | Suspend e -> Suspend (expr f e)
   | List el -> List (List.map el (expr f))
   | Assert (AE_assert ae) -> Assert (AE_assert (expr f ae))
   | Clone e -> Clone (expr f e)

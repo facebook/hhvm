@@ -2202,7 +2202,7 @@ module Make (GetLocals : GetLocals) = struct
     | Yield_break -> N.Yield_break
     | Yield e -> N.Yield (afield env e)
     | Await e -> N.Await (expr env e)
-    | Suspend _ -> failwith "unexpected:coroutines"
+    | Suspend e -> N.Suspend (expr env e)
     | List el -> N.List (exprl env el)
     | Expr_list el -> N.Expr_list (exprl env el)
     | Cast (ty, e2) ->

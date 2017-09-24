@@ -335,6 +335,7 @@ and expr_ env acc p e =
   | Yield e -> afield acc e
   | Yield_break -> acc
   | Await e -> expr acc e
+  | Suspend e -> expr acc e
   | List _ ->
       (* List is always an lvalue *)
       acc

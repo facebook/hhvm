@@ -216,6 +216,7 @@ and expr_ =
   | Yield of afield
   | Yield_break
   | Await of expr
+  | Suspend of expr
   | List of expr list
   | Expr_list of expr list
   | Cast of hint * expr
@@ -451,6 +452,7 @@ let expr_to_string expr =
   | Yield_break -> "Yield_break"
   | Yield _  -> "Yield"
   | Await _  -> "Await"
+  | Suspend _ -> "Suspend"
   | List _  -> "List"
   | Pair _  -> "Pair"
   | Expr_list _  -> "Expr_list"
@@ -546,6 +548,7 @@ class type ['a] visitor_type = object
   method on_yield_break : 'a -> 'a
   method on_yield : 'a -> afield -> 'a
   method on_await : 'a -> expr -> 'a
+  method on_suspend : 'a -> expr -> 'a
   method on_list : 'a -> expr list -> 'a
   method on_pair : 'a -> expr -> expr -> 'a
   method on_expr_list : 'a -> expr list -> 'a
@@ -708,6 +711,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Yield_break -> this#on_yield_break acc
    | Yield e     -> this#on_yield acc e
    | Await e     -> this#on_await acc e
+   | Suspend e   -> this#on_suspend acc e
    | List el     -> this#on_list acc el
    | Assert ae   -> this#on_assert acc ae
    | Clone e     -> this#on_clone acc e
@@ -807,6 +811,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_yield_break acc = acc
   method on_yield acc e = this#on_afield acc e
   method on_await acc e = this#on_expr acc e
+  method on_suspend acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
 
   method on_pair acc e1 e2 =

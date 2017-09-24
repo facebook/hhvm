@@ -37,13 +37,40 @@ module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
 
+
+type control_context =
+  | Toplevel
+  | LoopContext
+  | SwitchContext
+
+type env = {
+  t_is_finally: bool;
+  class_name: string option;
+  class_kind: Ast.class_kind option;
+  imm_ctrl_ctx: control_context;
+  typedef_tparams : Nast.tparam list;
+  tenv: Env.env;
+}
+
+let coroutines_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env.tenv)
+    TypecheckerOptions.experimental_coroutines
+
+let report_coroutines_not_enabled p =
+  Errors.experimental_feature p "coroutines"
+
+let check_coroutines_enabled condition env p =
+  if condition && not (coroutines_enabled env)
+  then report_coroutines_not_enabled p
+
 module CheckFunctionBody = struct
-  let rec stmt f_type ~in_finally st = match f_type, st with
+  let rec stmt f_type env st = match f_type, st with
     | Ast.FSync, Return (_, None)
     | Ast.FAsync, Return (_, None) -> ()
     | Ast.FSync, Return (_, Some e)
     | Ast.FAsync, Return (_, Some e) ->
-        expr_allow_await f_type ~in_finally e;
+        expr_allow_await f_type env e;
         ()
     | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
         (match e with
@@ -51,36 +78,36 @@ module CheckFunctionBody = struct
         | Some _ -> Errors.return_in_gen p);
         ()
     | Ast.FCoroutine, Return (_, e) ->
-        Option.iter e ~f:(expr f_type ~in_finally)
+        Option.iter e ~f:(expr f_type env)
     | _, Throw (_, e) ->
-        expr f_type ~in_finally e
+        expr f_type env e
     | _, Expr e ->
-        expr_allow_await f_type ~in_finally e;
+        expr_allow_await f_type env e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
          | Static_var _ | Global_var _ ) -> ()
     | _, If (cond, b1, b2) ->
-        expr f_type ~in_finally cond;
-        block f_type ~in_finally b1;
-        block f_type ~in_finally b2;
+        expr f_type env cond;
+        block f_type env b1;
+        block f_type env b2;
         ()
     | _, Do (b, e) ->
-        block f_type ~in_finally b;
-        expr f_type ~in_finally e;
+        block f_type env b;
+        expr f_type env e;
         ()
     | _, While (e, b) ->
-        expr f_type ~in_finally e;
-        block f_type ~in_finally b;
+        expr f_type env e;
+        block f_type env b;
         ()
     | _, For (init, cond, incr, b) ->
-        expr f_type ~in_finally init;
-        expr f_type ~in_finally cond;
-        expr f_type ~in_finally incr;
-        block f_type ~in_finally b;
+        expr f_type env init;
+        expr f_type env cond;
+        expr f_type env incr;
+        block f_type env b;
         ()
     | _, Switch (e, cl) ->
-        expr f_type ~in_finally e;
-        List.iter cl (case f_type ~in_finally);
+        expr f_type env e;
+        List.iter cl (case f_type env);
         ()
     | Ast.FCoroutine, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_coroutine p;
@@ -89,50 +116,50 @@ module CheckFunctionBody = struct
         Errors.await_in_sync_function p;
         ()
     | _, Foreach (v, _, b) ->
-        expr f_type ~in_finally v;
-        block f_type ~in_finally b;
+        expr f_type env v;
+        block f_type env b;
         ()
     | _, Try (b, cl, fb) ->
-        block f_type ~in_finally b;
-        List.iter cl (catch f_type ~in_finally);
-        block f_type ~in_finally:true fb;
+        block f_type env b;
+        List.iter cl (catch f_type env);
+        block f_type { env with t_is_finally = true } fb;
         ()
 
-  and block f_type ~in_finally stl =
-    List.iter stl (stmt f_type ~in_finally)
+  and block f_type env stl =
+    List.iter stl (stmt f_type env)
 
-  and case f_type ~in_finally = function
-    | Default b -> block f_type ~in_finally b
+  and case f_type env = function
+    | Default b -> block f_type env b
     | Case (cond, b) ->
-        expr f_type ~in_finally cond;
-        block f_type ~in_finally b;
+        expr f_type env cond;
+        block f_type env b;
         ()
 
-  and catch f_type ~in_finally (_, _, b) = block f_type ~in_finally b
+  and catch f_type env (_, _, b) = block f_type env b
 
-  and afield f_type ~in_finally = function
-    | AFvalue e -> expr f_type ~in_finally e
-    | AFkvalue (e1, e2) -> expr2 f_type ~in_finally (e1, e2)
+  and afield f_type env = function
+    | AFvalue e -> expr f_type env e
+    | AFkvalue (e1, e2) -> expr2 f_type env (e1, e2)
 
-  and expr f_type ~in_finally (p, e) =
-    expr_ p f_type ~in_finally e
+  and expr f_type env (p, e) =
+    expr_ p f_type env e
 
-  and expr_allow_await f_type ~in_finally (p, exp) = match f_type, exp with
+  and expr_allow_await f_type env (p, exp) = match f_type, exp with
     | Ast.FAsync, Await e
-    | Ast.FAsyncGenerator, Await e -> expr f_type ~in_finally e; ()
+    | Ast.FAsyncGenerator, Await e -> expr f_type env e; ()
     | Ast.FAsync, Binop (Ast.Eq None, e1, (_, Await e))
     | Ast.FAsyncGenerator, Binop (Ast.Eq None, e1, (_, Await e)) ->
-      expr f_type ~in_finally e1;
-      expr f_type ~in_finally e;
+      expr f_type env e1;
+      expr f_type env e;
       ()
-    | _ -> expr_ p f_type ~in_finally exp; ()
+    | _ -> expr_ p f_type env exp; ()
 
-  and expr2 f_type ~in_finally (e1, e2) =
-    expr f_type ~in_finally e1;
-    expr f_type ~in_finally e2;
+  and expr2 f_type env (e1, e2) =
+    expr f_type env e1;
+    expr f_type env e2;
     ()
 
-  and expr_ p f_type ~in_finally exp = match f_type, exp with
+  and expr_ p f_type env exp = match f_type, exp with
     | _, Any -> ()
     | _, Fun_id _
     | _, Method_id _
@@ -148,82 +175,82 @@ module CheckFunctionBody = struct
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
     | _, Pipe (_, l, r) ->
-        expr f_type ~in_finally l;
-        expr f_type ~in_finally r;
+        expr f_type env l;
+        expr f_type env r;
     | _, Array afl ->
-        List.iter afl (afield f_type ~in_finally);
+        List.iter afl (afield f_type env);
         ()
     | _, Darray afl ->
-        List.iter afl (expr2 f_type ~in_finally);
+        List.iter afl (expr2 f_type env);
         ()
     | _, Varray afl ->
-        List.iter afl (expr f_type ~in_finally);
+        List.iter afl (expr f_type env);
         ()
     | _, ValCollection (_, el) ->
-        List.iter el (expr f_type ~in_finally);
+        List.iter el (expr f_type env);
         ()
     | _, KeyValCollection (_, fdl) ->
-        List.iter fdl (expr2 f_type ~in_finally);
+        List.iter fdl (expr2 f_type env);
         ()
-    | _, Clone e -> expr f_type ~in_finally e; ()
+    | _, Clone e -> expr f_type env e; ()
     | _, Obj_get (e, (_, Id _s), _) ->
-        expr f_type ~in_finally e;
+        expr f_type env e;
         ()
     | _, Obj_get (e1, e2, _) ->
-        expr2 f_type ~in_finally (e1, e2);
+        expr2 f_type env (e1, e2);
         ()
     | _, Array_get (e, eopt) ->
-        expr f_type ~in_finally e;
-        maybe (expr ~in_finally) f_type eopt;
+        expr f_type env e;
+        maybe (expr f_type) env eopt;
         ()
     | _, Call (_, e, _, el, uel) ->
-        expr f_type ~in_finally e;
-        List.iter el (expr f_type ~in_finally);
-        List.iter uel (expr f_type ~in_finally);
+        expr f_type env e;
+        List.iter el (expr f_type env);
+        List.iter uel (expr f_type env);
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
     | _, String2 el ->
-        List.iter el (expr f_type ~in_finally);
+        List.iter el (expr f_type env);
         ()
     | _, List el ->
-        List.iter el (expr f_type ~in_finally);
+        List.iter el (expr f_type env);
         ()
     | _, Pair (e1, e2) ->
-        expr2 f_type ~in_finally (e1, e2);
+        expr2 f_type env (e1, e2);
         ()
     | _, Expr_list el ->
-        List.iter el (expr f_type ~in_finally);
+        List.iter el (expr f_type env);
         ()
-    | _, Unop (_, e) -> expr f_type ~in_finally e
+    | _, Unop (_, e) -> expr f_type env e
     | _, Binop (_, e1, e2) ->
-        expr2 f_type ~in_finally (e1, e2);
+        expr2 f_type env (e1, e2);
         ()
     | _, Eif (e1, None, e3) ->
-        expr2 f_type ~in_finally (e1, e3);
+        expr2 f_type env (e1, e3);
         ()
     | _, Eif (e1, Some e2, e3) ->
-        List.iter [e1; e2; e3] (expr f_type ~in_finally);
+        List.iter [e1; e2; e3] (expr f_type env);
         ()
     | _, NullCoalesce (e1, e2) ->
-        List.iter [e1; e2] (expr f_type ~in_finally);
+        List.iter [e1; e2] (expr f_type env);
         ()
     | _, New (_, el, uel) ->
-      List.iter el (expr f_type ~in_finally);
-      List.iter uel (expr f_type ~in_finally);
+      List.iter el (expr f_type env);
+      List.iter uel (expr f_type env);
       ()
     | _, InstanceOf (e, _) ->
-        expr f_type ~in_finally e;
+        expr f_type env e;
         ()
     | _, Cast (_, e) ->
-        expr f_type ~in_finally e;
+        expr f_type env e;
         ()
     | _, Efun _ -> ()
 
     | Ast.FGenerator, Yield_break
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
-    | Ast.FAsyncGenerator, Yield af -> afield f_type ~in_finally af; ()
+    | Ast.FAsyncGenerator, Yield af -> afield f_type env af; ()
 
     (* Should never happen -- presence of yield should make us FGenerator or
      * FAsyncGenerator. *)
@@ -243,44 +270,32 @@ module CheckFunctionBody = struct
     | Ast.FCoroutine, (Yield _ | Yield_break) ->
       Errors.yield_in_coroutine p
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
-      Errors.suspend_outside_of_coroutine p
-    | Ast.FCoroutine, Suspend e ->
-      if in_finally
+      if not (coroutines_enabled env)
+      then report_coroutines_not_enabled p
+      else Errors.suspend_outside_of_coroutine p
+    | Ast.FCoroutine, Suspend _ ->
+      if not (coroutines_enabled env)
+      then report_coroutines_not_enabled p
+      else if env.t_is_finally
       then Errors.suspend_in_finally p;
-      expr f_type ~in_finally e
-
     | _, Special_func func ->
         (match func with
           | Gena e
-          | Gen_array_rec e -> expr f_type ~in_finally e
-          | Genva el -> List.iter el (expr f_type ~in_finally));
+          | Gen_array_rec e -> expr f_type env e
+          | Genva el -> List.iter el (expr f_type env));
         ()
     | _, Xml (_, attrl, el) ->
-        List.iter attrl (fun (_, e) -> expr f_type ~in_finally e);
-        List.iter el (expr f_type ~in_finally);
+        List.iter attrl (fun (_, e) -> expr f_type env e);
+        List.iter el (expr f_type env);
         ()
     | _, Assert (AE_assert e) ->
-        expr f_type ~in_finally e;
+        expr f_type env e;
         ()
     | _, Shape fdm ->
-        ShapeMap.iter (fun _ v -> expr f_type ~in_finally v) fdm;
+        ShapeMap.iter (fun _ v -> expr f_type env v) fdm;
         ()
 
 end
-
-type control_context =
-  | Toplevel
-  | LoopContext
-  | SwitchContext
-
-type env = {
-  t_is_finally: bool;
-  class_name: string option;
-  class_kind: Ast.class_kind option;
-  imm_ctrl_ctx: control_context;
-  typedef_tparams : Nast.tparam list;
-  tenv: Env.env;
-}
 
 let is_magic =
   let h = Hashtbl.create 23 in
@@ -309,6 +324,7 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
+  check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
@@ -324,7 +340,7 @@ and func env f named_body =
   block env named_body.fnb_nast;
   CheckFunctionBody.block
     f.f_fun_kind
-    ~in_finally:env.t_is_finally
+    env
     named_body.fnb_nast
 
 and tparam env (_, _, cstrl) =
@@ -348,7 +364,8 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (_, hl,_, h) ->
+  | Hfun (is_coroutine, hl,_, h) ->
+      check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
       hint env h;
       ()
@@ -729,6 +746,8 @@ and add_constraints pos tenv (cstrs: locl where_constraint list) =
 and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
+  let p, _ = m.m_name in
+  check_coroutines_enabled (m.m_fun_kind = Ast.FCoroutine) env p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
@@ -741,7 +760,7 @@ and method_ (env, is_static) m =
   maybe hint env m.m_ret;
   CheckFunctionBody.block
     m.m_fun_kind
-    ~in_finally:env.t_is_finally
+    env
     named_body.fnb_nast;
   if m.m_abstract && named_body.fnb_nast <> []
   then Errors.abstract_with_body m.m_name;
@@ -842,10 +861,10 @@ and afield env = function
 and block env stl =
   List.iter stl (stmt env)
 
-and expr env (_, e) =
-  expr_ env e
+and expr env (p, e) =
+  expr_ env p e
 
-and expr_ env = function
+and expr_ env p = function
   | Any
   | Fun_id _
   | Method_id _
@@ -971,6 +990,7 @@ and expr_ env = function
       List.iter uel (expr env);
       ()
   | Efun (f, _) ->
+      check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
       let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()

@@ -50,5 +50,8 @@ let experimental_forbid_nullable_cast =
   GlobalOptions.tco_experimental_forbid_nullable_cast
 let experimental_safe_pass_by_ref =
   GlobalOptions.tco_experimental_safe_pass_by_ref
+let experimental_coroutines =
+  GlobalOptions.tco_experimental_coroutines
+
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

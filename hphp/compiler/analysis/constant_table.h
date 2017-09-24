@@ -86,28 +86,14 @@ struct ConstantTable : SymbolTable {
 
   void cleanupForError(AnalysisResultConstRawPtr ar);
 
-  using ClassConstantSet = boost::container::flat_set<
-    std::pair<ClassScopePtr, std::string>
-  >;
-  using DependencyMap = std::map<Symbol*, ClassConstantSet>;
-
-  void recordDependency(Symbol* sym, ClassScopePtr cls, std::string name);
-
-  const ClassConstantSet& lookupDependencies(const std::string&);
-
-  bool hasDependencies() const { return m_hasDependencies; }
-  const DependencyMap& getDependencies() const { return m_dependencies; }
 private:
   bool m_hasDynamic;
-  bool m_hasDependencies;
 
   ClassScopePtr findParent(AnalysisResultConstRawPtr ar,
                            const std::string &name) const;
   ClassScopeRawPtr findBase(AnalysisResultConstRawPtr ar,
                             const std::string &name,
                             const std::vector<std::string> &bases) const;
-
-  DependencyMap m_dependencies;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

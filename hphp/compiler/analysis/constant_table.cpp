@@ -31,8 +31,7 @@ using namespace HPHP;
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
     : SymbolTable(blockScope)
-    , m_hasDynamic(false)
-    , m_hasDependencies(false) {
+    , m_hasDynamic(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,28 +135,6 @@ const {
     return parent->getConstants()->getDeclarationRecur(ar, name, defClass);
   }
   return ConstructPtr();
-}
-
-void ConstantTable::recordDependency(Symbol* sym,
-                                     ClassScopePtr cls, std::string name) {
-  auto& set = m_dependencies[sym];
-  set.emplace(cls, name);
-  m_hasDependencies = true;
-}
-
-const ConstantTable::ClassConstantSet& ConstantTable::lookupDependencies(
-  const std::string& name) {
-
-  if (m_hasDependencies) {
-    if (auto const sym = getSymbol(name)) {
-      auto iter = m_dependencies.find(sym);
-      if (iter != m_dependencies.end()) {
-        return iter->second;
-      }
-    }
-  }
-  static ClassConstantSet empty;
-  return empty;
 }
 
 void ConstantTable::cleanupForError(AnalysisResultConstRawPtr ar) {

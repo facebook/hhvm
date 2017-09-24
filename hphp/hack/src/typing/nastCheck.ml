@@ -348,7 +348,7 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (hl,_, h) ->
+  | Hfun (_, hl,_, h) ->
       List.iter hl (hint env);
       hint env h;
       ()
@@ -685,7 +685,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
-    | Hfun (tyl, _, ty_) ->
+    | Hfun (_, tyl, _, ty_) ->
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams

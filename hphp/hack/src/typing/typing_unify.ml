@@ -320,9 +320,11 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Terr
-      | Some anon ->
+      | Some (is_coroutine, anon) ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
+        if is_coroutine <> ft.ft_is_coroutine
+        then Errors.coroutinness_mismatch is_coroutine p1 p2;
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
         then Errors.fun_arity_mismatch p1 p2;
         let env, _, ret = anon env ft.ft_params in
@@ -500,6 +502,8 @@ and iunify env ty1 ty2 =
 and unify_funs env r1 ft1 r2 ft2 =
   let p = Reason.to_pos r2 in
   let p1 = Reason.to_pos r1 in
+  if ft1.ft_is_coroutine <> ft2.ft_is_coroutine
+  then Errors.coroutinness_mismatch ft1.ft_is_coroutine p1 p;
   if not (unify_arities ~ellipsis_is_variadic:false ft1.ft_arity ft2.ft_arity)
   then Errors.fun_arity_mismatch p p1;
   let env, var_opt, arity = match ft1.ft_arity, ft2.ft_arity with

@@ -1,0 +1,6 @@
+File "suspend_operator_err14.php", line 8, characters 5-12:
+Invalid argument (Typing[4173])
+File "suspend_operator_err14.php", line 3, characters 12-38:
+This is a coroutine.
+File "suspend_operator_err14.php", line 8, characters 5-12:
+This is not a coroutine.

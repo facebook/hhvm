@@ -115,11 +115,10 @@ let rec to_string prefix r =
   | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
   | Rret_fun_kind    (_, kind) ->
     [(p, match kind with
-      | Ast.FCoroutine -> failwith "unsupported:coroutines"
       | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
       | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
       | Ast.FAsync -> prefix ^ " (result of 'async function')"
-      | Ast.FSync -> prefix)]
+      | Ast.FCoroutine | Ast.FSync -> prefix)]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]

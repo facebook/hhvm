@@ -183,10 +183,8 @@ and ret_from_fun_kind pos kind =
     | Ast.FAsync ->
       let r = Reason.Rret_fun_kind (pos, kind) in
       r, Tapply ((pos, SN.Classes.cAwaitable), [ty_any])
-    | Ast.FSync -> ty_any
-    | Ast.FCoroutine ->
-      Errors.internal_error pos "unsupported:coroutines";
-      Reason.Rnone, Tany
+    | Ast.FSync
+    | Ast.FCoroutine -> ty_any
 
 and fun_decl_in_env env f =
   let arity_min, params = make_params env f.f_params in
@@ -208,6 +206,7 @@ and fun_decl_in_env env f =
     ft_pos         = fst f.f_name;
     ft_deprecated  =
       Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
+    ft_is_coroutine = f.f_fun_kind = Ast.FCoroutine;
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = tparams;
@@ -691,6 +690,7 @@ and method_decl env m =
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;
+    ft_is_coroutine = m.m_fun_kind = Ast.FCoroutine;
     ft_arity    = arity;
     ft_tparams  = tparams;
     ft_where_constraints = where_constraints;

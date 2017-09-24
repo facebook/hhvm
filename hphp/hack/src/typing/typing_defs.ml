@@ -347,6 +347,7 @@ and 'phase fun_type = {
   ft_pos        : Pos.t               ;
   ft_deprecated : string option       ;
   ft_abstract   : bool                ;
+  ft_is_coroutine : bool              ;
   ft_arity      : 'phase fun_arity    ;
   ft_tparams    : 'phase tparam list  ;
   ft_where_constraints : 'phase where_constraint list  ;

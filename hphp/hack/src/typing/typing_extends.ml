@@ -234,6 +234,7 @@ let default_constructor_ce class_ =
   let ft = { ft_pos      = pos;
              ft_deprecated = None;
              ft_abstract = false;
+             ft_is_coroutine = false;
              ft_arity    = Fstandard (0, 0);
              ft_tparams  = [];
              ft_where_constraints = [];

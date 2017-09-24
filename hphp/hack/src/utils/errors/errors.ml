@@ -727,6 +727,11 @@ module Typing                               = struct
   let unknown_field_disallowed_in_shape     = 4166 (* DONT MODIFY!!!! *)
   let nullable_cast                         = 4167 (* DONT MODIFY!!!! *)
   let pass_by_ref_annotation_mismatch       = 4168 (* DONT MODIFY!!!! *)
+  let non_call_argument_in_suspend          = 4169 (* DONT MODIFY!!!! *)
+  let non_coroutine_call_in_suspend         = 4170 (* DONT MODIFY!!!! *)
+  let coroutine_call_outside_of_suspend     = 4171 (* DONT MODIFY!!!! *)
+  let function_is_not_coroutine             = 4172 (* DONT MODIFY!!!! *)
+  let coroutinness_mismatch                 = 4173 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2208,6 +2213,52 @@ let array_get_with_optional_field pos1 pos2 name =
       field. It may not be present in the shape. Use Shapes::idx instead.";
       pos2,
       "This is where the field was declared as optional."
+    ]
+
+let non_call_argument_in_suspend pos msgs =
+  add_list
+    Typing.non_call_argument_in_suspend (
+    [
+      pos,
+      "'suspend' operator expects call to a coroutine as an argument."
+    ] @ msgs
+  )
+let non_coroutine_call_in_suspend pos msgs =
+  add_list
+    Typing.non_coroutine_call_in_suspend (
+    [
+      pos,
+      "Only coroutine functions are allowed to be called in \
+      'suspend' operator."
+    ] @ msgs
+  )
+
+let coroutine_call_outside_of_suspend pos =
+  add_list
+    Typing.coroutine_call_outside_of_suspend
+    [
+      pos,
+      "Coroutine calls are only allowed when they are arguments to \
+      'suspend' operator"
+    ]
+
+let function_is_not_coroutine pos name =
+  add_list
+    Typing.function_is_not_coroutine
+    [
+      pos,
+      "Function '" ^ name ^ "' is not a coroutine and cannot be \
+       used in as an argument of 'suspend' operator."
+    ]
+
+let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
+  let m1 = "This is a coroutine." in
+  let m2 = "This is not a coroutine." in
+  add_list
+    Typing.coroutinness_mismatch
+    [
+      pos1, if pos1_is_coroutine then m1 else m2;
+      pos2, if pos1_is_coroutine then m2 else m1;
     ]
 
 (*****************************************************************************)

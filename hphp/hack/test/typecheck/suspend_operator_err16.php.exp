@@ -1,0 +1,11 @@
+File "suspend_operator_err16.php", line 7, characters 7-7:
+Class B does not correctly implement all required methods  (Typing[4173])
+File "suspend_operator_err16.php", line 7, characters 17-17:
+Some methods are incompatible with those declared in type A
+Read the following to see why:
+File "suspend_operator_err16.php", line 8, characters 14-14:
+The assigned type of this type constant is inconsistent with its parent
+File "suspend_operator_err16.php", line 4, characters 18-34:
+This is not a coroutine.
+File "suspend_operator_err16.php", line 8, characters 18-44:
+This is a coroutine.

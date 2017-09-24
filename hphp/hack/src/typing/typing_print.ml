@@ -322,7 +322,8 @@ module Full = struct
       ty tcopt st env o ety
     | Tfun ft ->
       if ft.ft_abstract then o "abs " else ();
-      o "(function"; fun_type tcopt st env o ft; o ")";
+      o "("; if ft.ft_is_coroutine then o "coroutine ";
+      o "function"; fun_type tcopt st env o ft; o ")";
       (match ft.ft_ret with
         | (Reason.Rdynamic_yield _, _) -> o " [DynamicYield]"
         | _ -> ())
@@ -336,7 +337,11 @@ module Full = struct
     *)
     | Tapply ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
     | Ttuple tyl -> o "("; list k tyl; o ")"
-    | Tanon _ -> o "[fun]"
+    | Tanon (_, id) ->
+      begin match Env.get_anonymous env id with
+      | Some (true, _) -> o "[coroutine fun]"
+      | _ -> o "[fun]"
+      end
     | Tunresolved [] -> o "[unresolved]"
     | Tunresolved [ty] -> if !debug_mode then (o "("; k ty; o ")") else k ty
     | Tunresolved tyl -> o "("; list_sep o " | " k tyl; o ")"
@@ -596,7 +601,10 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
   | Tfun ft ->
     let arg_tys = List.map ft.ft_params (fun x -> x.fp_type) in
-    obj @@ kind "function" @ args arg_tys @ result ft.ft_ret
+    let fun_kind =
+      if ft.ft_is_coroutine then kind "coroutine" @ kind "function"
+      else kind "function" in
+    obj @@ fun_kind @ args arg_tys @ result ft.ft_ret
   | Tanon _ ->
     obj @@ kind "anon"
   | Tdarray (ty1, ty2) ->

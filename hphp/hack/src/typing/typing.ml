@@ -525,9 +525,7 @@ and stmt env = function
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
       let rty = match Env.get_fn_kind env with
-        | Ast.FCoroutine ->
-          Errors.internal_error p "unsupported:coroutines";
-          (Reason.Rnone, Tany)
+        | Ast.FCoroutine
         | Ast.FSync -> (Reason.Rwitness p, Tprim Tvoid)
         | Ast.FGenerator
         (* Return type checked against the "yield". *)
@@ -543,9 +541,7 @@ and stmt env = function
       let pos = fst e in
       let env, te, rty = expr env e in
       let rty = match Env.get_fn_kind env with
-        | Ast.FCoroutine ->
-          Errors.internal_error p "unsupported:coroutines";
-          (Reason.Rnone, Tany)
+        | Ast.FCoroutine
         | Ast.FSync -> rty
         | Ast.FGenerator
         (* Is an error, but caught in NastCheck. *)
@@ -1018,6 +1014,12 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
+  let check_call env p call_type e hl el uel ~in_suspend=
+    let env, te, result =
+      dispatch_call p env call_type e hl el uel ~in_suspend in
+    let env = Env.forget_members env p in
+    env, te, result in
+
   match e with
   | Any -> expr_error env (Reason.Rwitness p)
   | Array [] ->
@@ -1277,6 +1279,8 @@ and expr_
               ft_pos = pos;
               ft_deprecated = None;
               ft_abstract = false;
+              (* propagate 'is_coroutine' from the method being called*)
+              ft_is_coroutine = fty.ft_is_coroutine;
               ft_arity = fun_arity;
               ft_tparams = fty.ft_tparams;
               ft_where_constraints = fty.ft_where_constraints;
@@ -1408,12 +1412,10 @@ and expr_
           tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
-      let env, te, result = dispatch_call p env call_type e hl el uel in
-      let env = Env.forget_members env p in
-      env, te, result
-    (* This case covers expressions like "e1 += e2". It is typed as if
-     * "e1 = e1 + e2" was written, meaning that e1 is typechecked twice. The
-     * returned typed expression correctly preserves the "e1 += e2" structure.
+      check_call env p call_type e hl el uel ~in_suspend:false
+    (* For example, e1 += e2. This is typed and translated as if
+     * written e1 = e1 + e2.
+     * TODO TAST: is this right? e1 will get evaluated more than once
      *)
   | Binop (Ast.Eq (Some op), e1, e2) ->
       let e_fake = (p, Binop (Ast.Eq None, e1, (p, Binop (op, e1, e2)))) in
@@ -1595,9 +1597,7 @@ and expr_
         | Nast.AFvalue (p, _), None ->
           let result_ty =
             match Env.get_fn_kind env with
-              | Ast.FCoroutine ->
-                Errors.internal_error p "unsupported:coroutines";
-                (Reason.Rnone, Tany)
+              | Ast.FCoroutine
               | Ast.FSync
               | Ast.FAsync ->
                   Errors.internal_error p "yield found in non-generator";
@@ -1614,8 +1614,9 @@ and expr_
         | _, _ -> assert false in
       let rty = match Env.get_fn_kind env with
         | Ast.FCoroutine ->
-          Errors.internal_error p "unsupported:coroutines";
-          Reason.Rnone, Tany
+            (* yield in coroutine is already reported as error in NastCheck *)
+            let _, _, ty = expr_error env (Reason.Rwitness p) in
+            ty
         | Ast.FGenerator ->
             Reason.Ryield_gen p,
             Tclass ((p, SN.Classes.cGenerator), [key; value; send])
@@ -1632,9 +1633,20 @@ and expr_
       let env, te, rty = expr env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env (T.Await te) ty
-  | Suspend _ ->
-    Errors.internal_error p "unsupported:coroutines";
-    make_result env T.Any (Reason.Rnone, Tany)
+  | Suspend (e) ->
+      let env, te, ty =
+        match e with
+        | _, Call (call_type, e, hl, el, uel) ->
+          check_call env p call_type e hl el uel ~in_suspend:true
+        | (epos, _)  ->
+          let env, te, (r, ty) = expr env e in
+          (* not a call - report an error *)
+          Errors.non_call_argument_in_suspend
+            epos
+            (Reason.to_string ("This is " ^ Typing_print.error ty) r);
+          env, te, (r, ty) in
+      make_result env (T.Suspend te) ty
+
   | Special_func func -> special_func env p func
   | New (c, el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;
@@ -1677,8 +1689,8 @@ and expr_
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, ft = Phase.localize_ft ~ety_env env ft in
       (* check for recursive function calls *)
-      let anon = anon_make env p f ft idl in
-      let env, anon_id = Env.add_anonymous env anon in
+      let (is_coroutine, anon) as anon_fun = anon_make env p f ft idl in
+      let env, anon_id = Env.add_anonymous env anon_fun in
       let env, tefun, _ = Errors.try_with_error
         (fun () ->
           let _, tefun, ty = anon env ft.ft_params
@@ -1689,7 +1701,7 @@ and expr_
           let anon_ign ?el:_ env fun_params =
             Errors.ignore_ (fun () -> (anon env fun_params)) in
           let _, tefun, ty = anon_ign env ft.ft_params in
-          let env = Env.set_anonymous env anon_id anon_ign in
+          let env = Env.set_anonymous env anon_id (is_coroutine, anon_ign) in
           env, tefun, ty) in
       env, tefun, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
@@ -1835,6 +1847,9 @@ and anon_make tenv p f ft idl =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
+  let is_coroutine = f.f_fun_kind = Ast.FCoroutine in
+
+  is_coroutine,
   fun ?el env supplied_params ->
     if !is_typing_self
     then begin
@@ -2429,18 +2444,65 @@ and is_abstract_ft fty = match fty with
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
  *)
-and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
+and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel ~in_suspend =
   let make_call env te thl tel tuel ty =
     env, T.make_typed_expr p ty (T.Call (call_type, te, thl, tel, tuel)), ty in
   let make_call_special env id tel ty =
     make_call env (T.make_implicitly_typed_expr fpos (T.Id id)) [] tel [] ty in
+
+  let check_coroutine_call env fty =
+    (* returns
+       - Some true if type is definitely a coroutine
+       - Some false if type is definitely not a coroutine
+       - None if type is Tunresolved that contains
+         both coroutine and non-coroutine constituents *)
+    let rec is_coroutine ty =
+      match snd ty with
+      | Tfun { ft_is_coroutine = true; _ } ->
+        Some true
+      | Tanon (_, id) ->
+        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:fst)
+      | Tunresolved ts ->
+        begin match List.map ts ~f:is_coroutine with
+        | None :: _ -> None
+        | Some x :: xs ->
+          (*if rest of the list has the same value as the first element
+            return value of the first element or None otherwise*)
+          if List.for_all xs ~f:(Option.value_map ~default:false ~f:((=)x))
+          then Some x
+          else None
+        | _ -> Some false
+        end
+      | _ ->
+        Some false in
+    match in_suspend, is_coroutine fty with
+    | true, Some true
+    | false, Some false -> ()
+    | true, _ ->
+      (* non-coroutine call in suspend *)
+      Errors.non_coroutine_call_in_suspend
+        fpos
+        (Reason.to_string ("This is " ^ Typing_print.error (snd fty)) (fst fty));
+    | false, _ ->
+      (*coroutine call outside of suspend *)
+      Errors.coroutine_call_outside_of_suspend p; in
+
+  let check_function_in_suspend name =
+    if in_suspend
+    then Errors.function_is_not_coroutine fpos name in
+
+  let check_class_function_in_suspend class_name function_name =
+    check_function_in_suspend (class_name ^ "::" ^ function_name) in
+
   match fun_expr with
   (* Special function `echo` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
+      check_function_in_suspend SN.SpecialFunctions.echo;
       let env, tel, _ = exprs env el in
       make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
   (* Special function `empty` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.empty ->
+    check_function_in_suspend SN.PseudoFunctions.empty;
     let env, tel, _ = exprs env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
@@ -2449,6 +2511,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
     make_call_special env id tel (Reason.Rwitness p, Tprim Tbool)
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
+    check_function_in_suspend SN.PseudoFunctions.isset;
     let env, tel, _ = exprs env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
@@ -2457,6 +2520,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
     make_call_special env id tel (Reason.Rwitness p, Tprim Tbool)
   (* Special function `unset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
+    check_function_in_suspend SN.PseudoFunctions.unset;
      let env, tel, _ = exprs env el in
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
@@ -2495,12 +2559,14 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   | Id (cp, get_called_class) when
       get_called_class = SN.StdlibFunctions.get_called_class
       && el = [] && uel = [] ->
+    check_function_in_suspend SN.StdlibFunctions.get_called_class;
     (* get_called_class fetches the late-bound class *)
     if Env.is_outside_class env then Errors.static_outside_class p;
     class_const env p (CIstatic, (cp, SN.Members.mClass))
   (* Special function `array_filter` *)
   | Id ((_, array_filter) as id)
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
+      check_function_in_suspend SN.StdlibFunctions.array_filter;
       (* dispatch the call to typecheck the arguments *)
       let env, fty = fun_type_of_id env id hl in
       let env, tel, tuel, res = call p env fty el uel in
@@ -2569,6 +2635,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   | Id (p, type_structure)
       when type_structure = SN.StdlibFunctions.type_structure
            && (List.length el = 2) && uel = [] ->
+    check_function_in_suspend SN.StdlibFunctions.type_structure;
     (match el with
      | [e1; e2] ->
        (match e2 with
@@ -2586,6 +2653,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   (* Special function `array_map` *)
   | Id ((_, array_map) as x)
       when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
+      check_function_in_suspend SN.StdlibFunctions.array_map;
       let env, fty = fun_type_of_id env x [] in
       let env, fty = Env.expand_type env fty in
       let env, fty = match fty, el with
@@ -2626,6 +2694,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
                 ft_pos = fty.ft_pos;
                 ft_deprecated = None;
                 ft_abstract = false;
+                ft_is_coroutine = false;
                 ft_arity = Fstandard (arity, arity);
                 ft_tparams = [];
                 ft_where_constraints = [];
@@ -2735,6 +2804,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
       make_call_special env x tel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
+      check_function_in_suspend SN.FB.idx;
       (* Directly call get_fun so that we can muck with the type before
        * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
        * trying to figure out which Tvar is which. *)
@@ -2771,6 +2841,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   (* Special function `Shapes::idx` *)
   | Class_const (CI((_, shapes), _) as class_id, ((_, idx) as method_id))
       when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
+      check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
       overload_function p env class_id method_id el uel
       begin fun env fty res el -> match el with
         | [shape; field] ->
@@ -2786,6 +2857,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
    (* Special function `Shapes::keyExists` *)
    | Class_const (CI((_, shapes), _) as class_id, ((_, key_exists) as method_id))
       when shapes = SN.Shapes.cShapes && key_exists = SN.Shapes.keyExists ->
+      check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.keyExists;
       overload_function p env class_id method_id el uel
       begin fun env fty res el -> match el with
         | [shape; field] ->
@@ -2800,6 +2872,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
    (* Special function `Shapes::removeKey` *)
    | Class_const (CI((_, shapes), _) as class_id, ((_, remove_key) as method_id))
       when shapes = SN.Shapes.cShapes && remove_key = SN.Shapes.removeKey ->
+      check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.removeKey;
       overload_function p env class_id method_id el uel
       begin fun env _ res el -> match el with
         | [shape; field] -> begin match shape with
@@ -2818,6 +2891,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   (* Special function `Shapes::toArray` *)
   | Class_const (CI((_, shapes), _) as class_id, ((_, to_array) as method_id))
     when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toArray ->
+    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
     overload_function p env class_id method_id el uel
     begin fun env _ res el -> match el with
       | [shape] ->
@@ -2829,6 +2903,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   (* Special function `parent::__construct` *)
   | Class_const (CIparent, ((callee_pos, construct) as id))
     when construct = SN.Members.__construct ->
+      check_class_function_in_suspend "parent" SN.Members.__construct;
       Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty = call_parent_construct p env el uel in
       make_call env (T.make_implicitly_typed_expr fpos
@@ -2844,6 +2919,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
         let env, fty, _ =
           class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
+        check_coroutine_call env fty;
         let env, tel, tuel, ty = call p env fty el uel in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const (T.CIparent, m))) hl tel tuel ty
@@ -2864,6 +2940,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
               obj_get_ ~is_method:true ~nullsafe:None env ty1 CIparent m
               begin fun (env, fty, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
+                check_coroutine_call env fty;
                 let env, _tel, _tuel, method_ = call p env fty el uel in
                 env, method_, None
               end
@@ -2875,6 +2952,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
+            check_coroutine_call env fty;
             let env, tel, tuel, ty = call p env fty el uel in
             make_call env (T.make_typed_expr fpos fty
               (T.Class_const (T.CIparent, m))) hl tel tuel ty
@@ -2900,6 +2978,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
         | CI (c, _) when is_abstract_ft fty ->
           Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
         | _ -> () in
+      check_coroutine_call env fty;
       let env, tel, tuel, ty = call p env fty el uel in
       make_call env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
@@ -2915,6 +2994,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
         ) in
       let tel = ref [] and tuel = ref [] in
       let fn = (fun (env, fty, _) ->
+        check_coroutine_call env fty;
         let env, tel_, tuel_, method_ = call p env fty el uel in
         tel := tel_; tuel := tuel_;
         env, method_, None) in
@@ -2926,15 +3006,18 @@ and dispatch_call p env call_type (fpos, fun_expr as e) hl el uel =
   | Fun_id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
+      check_coroutine_call env fty;
       let env, tel, tuel, ty = call p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
   | Id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x hl in
+      check_coroutine_call env fty;
       let env, tel, tuel, ty = call p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
   | _ ->
       let env, te, fty = expr env e in
+      check_coroutine_call env fty;
       let env, tel, tuel, ty = call p env fty el uel in
       make_call env te hl tel tuel ty
 
@@ -4008,7 +4091,7 @@ and call_ pos env fty el uel =
       | None ->
         Errors.anonymous_recursive_call pos;
         env, tel, [], err_none
-      | Some anon ->
+      | Some (_, anon) ->
         let () = check_arity pos fpos (List.length tyl) arity in
         let tyl = List.map tyl TUtils.default_fun_param in
         let env, _, ty = if safe_pass_by_ref_enabled

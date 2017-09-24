@@ -25,10 +25,12 @@ type shape_field_name = Ast.shape_field_name
 
 module ShapeMap = Ast.ShapeMap
 
+type is_coroutine = bool [@@deriving show]
+
 type hint = Pos.t * hint_
 and hint_ =
   | Hoption of hint
-  | Hfun of hint list * bool * hint
+  | Hfun of is_coroutine * hint list * bool * hint
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info

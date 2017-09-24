@@ -1,0 +1,2 @@
+File "suspend_operator_err5.php", line 5, characters 16-27:
+Function '\array_filter' is not a coroutine and cannot be used in as an argument of 'suspend' operator. (Typing[4172])

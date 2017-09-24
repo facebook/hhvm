@@ -55,7 +55,7 @@ and hint_ p env = function
   | Hoption h ->
     let h = hint env h in
     Toption h
-  | Hfun (hl, b, h) ->
+  | Hfun (is_coroutine, hl, b, h) ->
     let paraml = List.map hl begin fun (p, _ as x) ->
       { fp_pos = p; fp_name = None; fp_type = hint env x; fp_is_ref = false }
     end in
@@ -69,6 +69,7 @@ and hint_ p env = function
       ft_pos = p;
       ft_deprecated = None;
       ft_abstract = false;
+      ft_is_coroutine = is_coroutine;
       ft_arity = arity;
       ft_tparams = [];
       ft_where_constraints = [];

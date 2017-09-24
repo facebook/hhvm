@@ -195,7 +195,8 @@ let get_constructor_ty c =
         end
     | None ->
         (* Nothing defined, so we need to fake the entire constructor *)
-      reason, Typing_defs.Tfun (Typing_env.make_ft pos [] return_ty)
+      reason,
+      Typing_defs.Tfun (Typing_env.make_ft pos (*is_coroutine*)false [] return_ty)
 
 (* Global identifier autocomplete uses search service to find matching names *)
 let search_funs_and_classes input ~limit ~on_class ~on_function =

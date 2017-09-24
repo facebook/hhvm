@@ -83,12 +83,13 @@ let expand_type env x =
   | r, Tvar x -> get_type env r x
   | x -> env, x
 
-let make_ft p params ret_ty =
+let make_ft p is_coroutine params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
     ft_deprecated = None;
     ft_abstract = false;
+    ft_is_coroutine = is_coroutine;
     ft_arity    = Fstandard (arity, arity);
     ft_tparams  = [];
     ft_where_constraints = [];

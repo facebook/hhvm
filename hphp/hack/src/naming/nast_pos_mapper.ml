@@ -129,8 +129,8 @@ and hint_ f = function
   | Hvarray_or_darray h -> Hvarray_or_darray (hint f h)
   | Hprim tprim -> Hprim tprim
   | Hoption h -> Hoption (hint f h)
-  | Hfun (hl, b, h) ->
-    Hfun (List.map hl (hint f), b, hint f h)
+  | Hfun (is_coroutine, hl, b, h) ->
+    Hfun (is_coroutine, List.map hl (hint f), b, hint f h)
   | Happly (sid, hl) -> Happly (pstring f sid, List.map hl (hint f))
   | Hshape nast_shape_info ->
     let add_shape_field_info_to_shape_map sf shape_field_info acc =

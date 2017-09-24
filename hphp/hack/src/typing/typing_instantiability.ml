@@ -33,7 +33,7 @@ class type ['a] hint_visitor_type = object
   method on_array  : 'a -> Nast.hint option -> Nast.hint option -> 'a
   method on_prim   : 'a -> Nast.tprim -> 'a
   method on_option : 'a -> Nast.hint -> 'a
-  method on_fun    : 'a -> Nast.hint list -> bool -> Nast.hint -> 'a
+  method on_fun    : 'a -> bool -> Nast.hint list -> bool -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> nast_shape_info -> 'a
   method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a
@@ -59,7 +59,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hvarray h             -> this#on_array  acc (Some h) None
     | Hprim p               -> this#on_prim   acc p
     | Hoption h             -> this#on_option acc h
-    | Hfun (hl, b, h)       -> this#on_fun    acc hl b h
+    | Hfun (is_c, hl, b, h)       -> this#on_fun acc is_c hl b h
     | Happly (i, hl)        -> this#on_apply  acc i hl
     | Hshape hm             -> this#on_shape  acc hm
     | Haccess (h, il)       -> this#on_access acc h il
@@ -87,7 +87,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
 
   method on_option acc h = this#on_hint acc h
 
-  method on_fun acc hl _ h =
+  method on_fun acc _ hl _ h =
     let acc = List.fold_left ~f:this#on_hint ~init:acc hl in
     let acc = this#on_hint acc h in
     acc

@@ -792,11 +792,8 @@ module Make (GetLocals : GetLocals) = struct
     | Hsoft h ->
       let h = hint ~allow_retonly env h
       in snd h
-    | Hfun ((* is_coroutine*) true, _, _, _) ->
-      Errors.internal_error Pos.none "unsupported:coroutines";
-      N.Hany
-    | Hfun ((* is_coroutine*) false, hl, opt, h) ->
-      N.Hfun (List.map hl (hint env), opt,
+    | Hfun (is_coroutine, hl, opt, h) ->
+      N.Hfun (is_coroutine, List.map hl (hint env), opt,
               hint ~allow_retonly:true env h)
     | Happly ((p, _x) as id, hl) ->
       let hint_id =

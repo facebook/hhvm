@@ -82,6 +82,9 @@ and genv = {
 (* An anonymous function
  * the environment + the fun parameters + the captured identifiers
 *)
-and anon = ?el:Nast.expr list -> env -> locl fun_params -> env * Tast.expr * locl ty
+and anon =
+  Nast.is_coroutine *
+  (?el:Nast.expr list -> env -> locl fun_params -> env * Tast.expr * locl ty)
+
 and tfun = env -> env * bool
 end

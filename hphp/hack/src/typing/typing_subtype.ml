@@ -362,6 +362,8 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
+  if ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine
+  then Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub;
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with
@@ -903,9 +905,11 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       | None ->
           Errors.anonymous_recursive_call (Reason.to_pos r_sub);
           env
-      | Some anon ->
+      | Some (is_coroutine, anon) ->
           let p_super = Reason.to_pos r_super in
           let p_sub = Reason.to_pos r_sub in
+          if is_coroutine <> ft.ft_is_coroutine
+          then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
           if not (Unify.unify_arities
                     ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
           then Errors.fun_arity_mismatch p_super p_sub;

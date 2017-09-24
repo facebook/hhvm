@@ -1,0 +1,2 @@
+File "suspend_operator_err6.php", line 5, characters 16-26:
+Function '\Shapes::idx' is not a coroutine and cannot be used in as an argument of 'suspend' operator. (Typing[4172])

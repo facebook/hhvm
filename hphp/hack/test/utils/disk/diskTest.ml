@@ -92,17 +92,39 @@ let test_rename_dir_but_target_not_empty dir =
   true
 
 (** The target is a directory, and is empty, and the parent directories
- * leading to the target directory exist. *)
-let test_rename_target_is_dir dir =
+ * leading to the target directory exist.
+ *
+ * Note: Sys.rename (or Disk.rename) do not behave like the Commandline
+ * tool "mv", which actually puts the src directory as a subdirectory
+ * inside the target directory. *)
+let test_rename_target_is_dir ?(append_slash_on_src=false)
+?(append_slash_on_target=false) dir =
   let target = Path.concat dir "some/path/exists/to/here" in
   setup_dir target [];
   let src = Path.concat dir "testing" in
   let files = [("abc.txt", "hello"); ("foo.txt", "world")] in
   setup_dir src files;
-  (** write_file ~dir ~file:"a.txt" ~contents:"hello"; *)
-  Disk.rename (Path.to_string src) (Path.to_string target);
+  let target_str = if append_slash_on_target then
+    (Path.to_string target) ^ "/"
+  else
+    Path.to_string target
+  in
+  let src_str = if append_slash_on_src then
+    (Path.to_string src) ^ "/"
+  else
+    Path.to_string src
+  in
+  Disk.rename src_str target_str;
   verify_dir target files;
   true
+
+(** Same as test above, but append a slash to the target path. *)
+let test_rename_target_is_dir_ends_with_slash dir =
+  test_rename_target_is_dir ~append_slash_on_target:true dir
+
+(** Same as test above, but append a slash to the src path. *)
+let test_rename_src_ends_with_slash_target_is_dir dir =
+  test_rename_target_is_dir ~append_slash_on_src:true dir
 
 let tests = [
   ("test_write_and_read", with_temp_dir test_write_and_read);
@@ -121,6 +143,10 @@ let tests = [
     Unit_test.expect_throws ex
       test_rename_dir_but_target_not_empty tmp_dir)));
   ("test_rename_target_is_dir", with_temp_dir test_rename_target_is_dir);
+  ("test_rename_target_is_dir_ends_with_slash",
+    with_temp_dir test_rename_target_is_dir_ends_with_slash);
+  ("test_rename_src_ends_with_slash_target_is_dir",
+    with_temp_dir test_rename_src_ends_with_slash_target_is_dir);
 ]
 
 let () =

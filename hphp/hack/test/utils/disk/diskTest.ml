@@ -126,6 +126,27 @@ let test_rename_target_is_dir_ends_with_slash dir =
 let test_rename_src_ends_with_slash_target_is_dir dir =
   test_rename_target_is_dir ~append_slash_on_src:true dir
 
+let test_rm_dir dir =
+  let subdir = Path.concat dir "subdir" in
+  setup_dir subdir [("a.txt", "hello")];
+  let is_dir = Disk.is_directory (Path.to_string subdir) in
+  Asserter.Bool_asserter.assert_equals true is_dir "subdir should exist";
+  let file_exists = Disk.file_exists
+    (Path.to_string @@ Path.concat subdir "a.txt") in
+  Asserter.Bool_asserter.assert_equals true file_exists "file should exist";
+  Disk.rm_dir_tree (Path.to_string dir);
+  let is_dir = Disk.is_directory (Path.to_string dir) in
+  Asserter.Bool_asserter.assert_equals false is_dir
+    "Main dir should have been deleted";
+  let is_dir = Disk.is_directory (Path.to_string subdir) in
+  Asserter.Bool_asserter.assert_equals false is_dir
+    "subdir have been deleted";
+  let file_exists = Disk.file_exists
+    (Path.to_string @@ Path.concat subdir "a.txt") in
+  Asserter.Bool_asserter.assert_equals false file_exists
+    "file should have been deleted";
+  true
+
 let tests = [
   ("test_write_and_read", with_temp_dir test_write_and_read);
   ("test_is_directory_with_dot", with_temp_dir test_is_directory_with_dot);
@@ -147,6 +168,8 @@ let tests = [
     with_temp_dir test_rename_target_is_dir_ends_with_slash);
   ("test_rename_src_ends_with_slash_target_is_dir",
     with_temp_dir test_rename_src_ends_with_slash_target_is_dir);
+  ("test_rm_dir",
+    with_temp_dir test_rm_dir);
 ]
 
 let () =

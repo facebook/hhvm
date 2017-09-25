@@ -380,6 +380,27 @@ class CommonTests(object):
         self.assertEqual(output["passed"], True)
         self.assertIn("version", output)
 
+    def test_modify_extends_deps(self):
+        """
+        Introduce a change to a base class that causes an error
+        in a use case on one of its subclasses. 
+        """
+        with open(os.path.join(self.repo_dir, 'class_1.php'), 'w') as f:
+            f.write("""
+                <?hh // strict
+                class B {
+                  public static function foo () : bool {
+                      return true;
+                  }
+                }
+            """)
+        self.write_load_config('class_1.php')
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:4:51,54: It is incompatible with a bool',
+        ])
+
     def test_modify_file(self):
         """
         Add an error to a file that previously had none.

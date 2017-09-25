@@ -362,12 +362,16 @@ module ServerInitCommon = struct
     (* We need to type check all classes that have extend dependencies on the
      * classes that have changed
      *)
-    let deps =
+    let extend_deps =
       SSet.fold ~f:begin fun class_name acc ->
         let hash = Typing_deps.Dep.make (Dep.Class class_name) in
         Decl_compare.get_extend_deps hash acc
-      end n_classes ~init:deps
-    in
+        end n_classes ~init:DepSet.empty in
+    let deps = DepSet.union deps extend_deps in
+    let deps = DepSet.fold extend_deps ~init:deps ~f:begin fun dep acc ->
+    let deps = Typing_deps.get_ideps_from_hash dep in
+      DepSet.union deps acc
+    end in
     deps
 
   (* We start of with a list of files that have changed since the state was

@@ -39,7 +39,7 @@ fb_setprofile(function($when, $func, $args) {
         $func == 'baz' &&
         $args === null) {
       #var_dump($when, $func, $args);
-      throw new Exception();
+      throw new Exception;
     }
   });
 

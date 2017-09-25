@@ -1,10 +1,10 @@
 <?hh // strict
 
-$z = new stdClass();
+$z = new stdClass;
 $z->m = 1;
-function something(int $x): stdClass { global $z; return $z; }
+function something($x) { global $z; return $z; }
 
-function test(): void {
+function test() {
   global $z;
   $foo = null;
   $x =& something($foo?->bar); // ok

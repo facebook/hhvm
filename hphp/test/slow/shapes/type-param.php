@@ -10,4 +10,4 @@ class XYZ {
   ): MyOptions { return $options; }
 }
 
-var_dump((new XYZ())->getWidget());
+var_dump((new XYZ)->getWidget());

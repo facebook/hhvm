@@ -26,7 +26,7 @@ class c {
 }
 
 function main() {
-  $c = new c();
+  $c = new c;
   $c->showProp();
   $c->setProp();
 

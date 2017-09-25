@@ -8,7 +8,7 @@ class MyWaitHandle extends WaitHandle {
 }
 
 try {
-  $wh = new MyWaitHandle();
+  $wh = new MyWaitHandle;
 } catch (Exception $e) {
   echo "Exception: ", $e->getMessage(), "\n";
 }

@@ -10,7 +10,7 @@ class other extends someexception {}
 
 function main() {
   try {
-    throw new other();
+    throw new other;
   } catch (other $e) {
     echo "win\n";
   } catch (someexception $e) {

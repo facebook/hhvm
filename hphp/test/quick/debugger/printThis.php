@@ -6,7 +6,7 @@ class Foo {
   }
 }
 
-$object = new Foo();
+$object = new Foo;
 $object->prop = "Hello\n";
 
 $object->method();

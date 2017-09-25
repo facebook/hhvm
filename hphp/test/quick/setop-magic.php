@@ -10,7 +10,7 @@ class Foo {
 }
 
 function main() {
-  $x = new Foo();
+  $x = new Foo;
   $x->asd += 12;
   var_dump($x);
 }

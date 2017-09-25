@@ -25,13 +25,13 @@ class C {
 
 function u() {
   echo "------------------------\n";
-  $obj = new F();
+  $obj = new F;
   $obj->foo = $x;
   foreach ($obj as $k => $_) {
     echo $k . "\n";
   }
   echo "------------------------\n";
-  $obj = new F();
+  $obj = new F;
   $obj->foo = $y++;
   foreach ($obj as $k => $_) {
     echo $k . "\n";

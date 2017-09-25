@@ -3,7 +3,7 @@
  interface      I  {                 function foo(int $x); }
  abstract class B extends A implements I  { }
  class C extends B {          public function foo(array $x = null) {} }
- $c = new C();
+ $c = new C;
  $c->foo(null);
  echo "OK\n";
 

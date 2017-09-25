@@ -10,4 +10,4 @@ class X {
 
 echo "not reached";
 
-new X();
+new X;

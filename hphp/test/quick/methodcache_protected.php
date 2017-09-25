@@ -21,9 +21,9 @@ class c extends one {
 }
 
 function main() {
-  $a = new a();
-  $b = new b();
-  $c = new c();
+  $a = new a;
+  $b = new b;
+  $c = new c;
   $c->go($a);  // fill
   $c->go($a);  // hit
   $c->go($b);  // would call with not AttrPublic

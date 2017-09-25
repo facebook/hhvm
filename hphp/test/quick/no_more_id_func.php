@@ -6,4 +6,4 @@ class A {
   }
 }
 
-var_dump((new A())->b());
+var_dump((new A)->b());

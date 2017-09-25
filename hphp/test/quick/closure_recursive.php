@@ -11,7 +11,7 @@ class A {
     return 91;
   }
 }
-$a = new A();
+$a = new A;
 $b = $a->b();
 $first = $b();
 $second = $first();

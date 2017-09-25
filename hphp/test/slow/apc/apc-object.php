@@ -13,7 +13,7 @@ class WithStuff extends ParentClass {
   protected $prot = 'blorp';
 
   <<__Memoize>>
-  public function add($a, $b) {
+  function add($a, $b) {
     echo "Adding $a and $b\n";
     return $a + $b;
   }
@@ -22,18 +22,18 @@ class WithStuff extends ParentClass {
 if (apc_exists('foo')) {
   class X {
     private $foo;
-    public function __construct() { $this->foo='bar'; }
-    public function show() { var_dump($this->foo); }
+    function __construct() { $this->foo='bar'; }
+    function show() { var_dump($this->foo); }
   };
 
   var_dump(apc_fetch('foo'));
 } else {
   class X {
     private $foo;
-    public function __construct() { $this->foo='bar'; }
-    public function show() { var_dump($this->foo); }
+    function __construct() { $this->foo='bar'; }
+    function show() { var_dump($this->foo); }
   }
-  apc_store('foo', new X());
+  apc_store('foo', new X);
   var_dump(apc_fetch('foo'));
 
   $o = new WithStuff();

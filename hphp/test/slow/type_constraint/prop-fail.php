@@ -9,7 +9,7 @@ class Character {
   }
 }
 
-$sherlock = new Character();
+$sherlock = new Character;
 $sherlock->setActor('Bumblebee Cumberbund');
 $sherlock->setActor(5);
 echo "Done\n";

@@ -28,7 +28,7 @@ function testDbl($x) {
 echo "test int\n";
 
 try {
-  testInt(new X());
+  testInt(new X);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }
@@ -36,7 +36,7 @@ try {
 echo "test dbl\n";
 
 try {
-  testDbl(new X());
+  testDbl(new X);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }
@@ -44,7 +44,7 @@ try {
 echo "test str\n";
 
 try {
-  testStr(new X());
+  testStr(new X);
 } catch (Exception $e) {
   var_dump($e->getMessage());
 }

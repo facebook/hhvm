@@ -8,7 +8,7 @@ class X {
   }
 }
 
-$x = new X();
+$x = new X;
 $x->val = 2;
 var_dump($x->mul());
 $y = clone $x;

@@ -18,8 +18,8 @@ class doer {
 }
 
 function main() {
-  $d = new two();
-  $x = new doer();
+  $d = new two;
+  $x = new doer;
   $x->junk($d);
 }
 

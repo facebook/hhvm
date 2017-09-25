@@ -33,7 +33,7 @@ class C2 {
 }
 
 function main2() {
-  $obj = new C2();
+  $obj = new C2;
   $obj->test();
 }
 main2();
@@ -53,7 +53,7 @@ class C3 {
 }
 
 function main3() {
-  $obj = new C3();
+  $obj = new C3;
   $obj->test();
 }
 main3();
@@ -68,7 +68,7 @@ class C4 extends B4 {
 }
 
 function main4() {
-  $obj = new C4();
+  $obj = new C4;
 
   call_user_func(array('C4', 'foo'), "a", "b", "c", "d");
 }
@@ -89,7 +89,7 @@ class C5 extends B5 {
 }
 
 function main5() {
-  $obj = new C5();
+  $obj = new C5;
   call_user_func(array('C5', 'foo'), "a", "b", "c", "d");
 }
 main5();
@@ -109,10 +109,10 @@ class C6 extends B6 {
 }
 
 function main6() {
-  $obj = new C6();
+  $obj = new C6;
   $obj->test();
 
-  $obj = new B6();
+  $obj = new B6;
   $obj->test();
 }
 main6();
@@ -132,10 +132,10 @@ class C7 extends B7 {
 }
 
 function main7() {
-  $obj = new C7();
+  $obj = new C7;
   $obj->test();
 
-  $obj = new B7();
+  $obj = new B7;
   $obj->test();
 }
 main7();
@@ -155,7 +155,7 @@ class C8 extends B8 {
 }
 
 function main8() {
-  $obj = new C8();
+  $obj = new C8;
   $obj->test();
 }
 main8();
@@ -184,7 +184,7 @@ class F9 extends D9 {
 }
 
 function main9() {
-  $obj = new E9();
+  $obj = new E9;
   $obj->test();
 
   call_user_func(array('E9', 'foo'));

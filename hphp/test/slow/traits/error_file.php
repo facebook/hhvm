@@ -6,5 +6,5 @@ class X {
   use T;
 }
 
-(new X())->f();
-(new X())->g();
+(new X)->f();
+(new X)->g();

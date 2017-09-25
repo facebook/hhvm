@@ -6,13 +6,13 @@ class dtor {
 }
 
 class invoker {
-  public function __invoke($x) { throw new exception(); }
+  public function __invoke($x) { throw new exception; }
   public function __destruct() { echo "~invoker\n"; }
 }
 
 function foo() {
   try {
-    array_map(new invoker(), array(new dtor(1), new dtor(2)));
+    array_map(new invoker, array(new dtor(1), new dtor(2)));
   } catch (exception $x) {
     echo "ok\n";
   }

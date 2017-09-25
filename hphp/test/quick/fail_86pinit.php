@@ -5,6 +5,6 @@ class X {
   public $p = Y::FOO;
 }
 function test() {
-  new X();
+  new X;
 }
 test();

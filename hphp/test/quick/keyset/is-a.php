@@ -119,7 +119,7 @@ function main() {
   test_is_keyset(7);
   test_is_keyset(1.23);
   test_is_keyset("abcd");
-  test_is_keyset(new stdclass());
+  test_is_keyset(new stdclass);
   test_is_keyset([1, 2, 3]);
   test_is_keyset(Vector{'a', 'b', 'c'});
   test_is_keyset(Map{100 => 'a', 'b' => 200});

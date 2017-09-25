@@ -7,5 +7,5 @@ class C {
   }
 }
 
-$o = new C();
+$o = new C;
 echo $o->foo(3) . "\n";

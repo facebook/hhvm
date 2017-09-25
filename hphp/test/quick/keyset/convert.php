@@ -78,19 +78,19 @@ function convert_to($from) {
 
 function main() {
   convert_to([]);
-  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass()]);
+  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
   convert_to([100, 200, 'a', 'b']);
   convert_to(['1', 1]);
   convert_to(['abc', 123, 'abc', 123]);
   convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
-              'key4' => new stdclass()]);
+              'key4' => new stdclass]);
   convert_to(['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
   convert_to(['a' => '1', 'b' => 1]);
   convert_to([100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
 
   convert_to(vec[]);
-  convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdclass()]);
+  convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdclass]);
   convert_to(vec[100, 'a', 200, 'b']);
   convert_to(vec['1', 1]);
   convert_to(vec[123, 'abc', 'abc', 123]);
@@ -98,7 +98,7 @@ function main() {
   convert_to(dict[]);
   convert_to(dict[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
                   10 => null, 15 => true, 'key3' => 1.234, '1' => 20,
-                  'key4' => new stdclass()]);
+                  'key4' => new stdclass]);
   convert_to(dict['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
   convert_to(dict['a' => '1', 'b' => 1]);
   convert_to(dict[100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
@@ -113,9 +113,9 @@ function main() {
   convert_to(123);
   convert_to(1.23);
   convert_to("abcd");
-  convert_to(new IterableObj());
-  convert_to(new ThrowIterableObj());
-  convert_to(new stdclass());
+  convert_to(new IterableObj);
+  convert_to(new ThrowIterableObj);
+  convert_to(new stdclass);
   convert_to(STDIN);
   convert_to(Vector{1, 2, 3});
   convert_to(Vector{1, false, 3});

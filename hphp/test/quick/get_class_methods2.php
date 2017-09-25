@@ -23,8 +23,8 @@ class A {
 class B extends A {};
 
 function main() {
-  $objA = new A();
-  $objB = new B();
+  $objA = new A;
+  $objB = new B;
 
   echo "class A\n";
   print_r(fsort(get_class_methods($objA)));

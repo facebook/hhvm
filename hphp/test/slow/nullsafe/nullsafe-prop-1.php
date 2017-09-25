@@ -35,7 +35,7 @@ function nested() {
 class X {
   public $q = 'q';
   function __construct() {
-    $this->y = new Y();
+    $this->y = new Y;
   }
 }
 
@@ -47,7 +47,7 @@ class Y {
 
 function notNull() {
   echo "= ".__FUNCTION__.":\n\n";
-  $x = new X();
+  $x = new X;
   var_dump($x?->y?->z(sideEffect(__FUNCTION__)));
   var_dump($x->q);
   echo "\n";
@@ -60,7 +60,7 @@ function notNull() {
 function nonLocalBase() {
   echo "= ".__FUNCTION__.":\n\n";
   var_dump((() ==> null)()?->y); // null
-  var_dump((() ==> new X())()?->y?->z(sideEffect(__FUNCTION__))); // 10
+  var_dump((() ==> new X)()?->y?->z(sideEffect(__FUNCTION__))); // 10
   echo "\n";
 }
 

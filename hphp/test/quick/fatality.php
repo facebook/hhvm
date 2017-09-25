@@ -7,7 +7,7 @@ function main() {
     $str .= $errstr;
     $str .= " (in $errfile on line $errline)";
     SandboxErrorToFatalConverter::processError($errno, $errstr, $str, $errfile);
-    throw new C();
+    throw new C;
   }
   set_error_handler("e");
   function g() { }

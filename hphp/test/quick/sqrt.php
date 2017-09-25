@@ -20,7 +20,7 @@ function main($f) {
   var_dump(sqrt(null));
   var_dump(sqrt("15"));
   var_dump(sqrt("hello"));
-  var_dump(sqrt(new stdClass()));
+  var_dump(sqrt(new stdClass));
   var_dump(sqrt(array()));
   var_dump(sqrt(array(2,3,4)));
 }

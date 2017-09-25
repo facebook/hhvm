@@ -15,8 +15,8 @@ class C extends A {
 }
 
 function main() {
-  $b = new B();
-  $c = new C();
+  $b = new B;
+  $c = new C;
   $c->test($b);
 }
 

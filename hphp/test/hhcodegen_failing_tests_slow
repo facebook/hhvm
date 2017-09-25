@@ -158,12 +158,10 @@ slow/namespace/hashbang_2.php
 slow/namespace/nested-ns.php
 slow/now_doc/1906.php
 slow/now_doc/1907.php
-slow/nullsafe/nullsafe-prop-10.php
 slow/nullsafe/nullsafe-prop-11.php
 slow/nullsafe/nullsafe-prop-2.php
 slow/nullsafe/nullsafe-prop-3.php
 slow/nullsafe/nullsafe-prop-4.php
-slow/nullsafe/nullsafe-prop-5.php
 slow/nullsafe/nullsafe-prop-6.php
 slow/nullsafe/nullsafe-prop-7.php
 slow/nullsafe/nullsafe-prop-8.php
@@ -320,7 +318,6 @@ slow/traits/__class__.php
 slow/traits/duplicate_require.php
 slow/traits/require_constraint_iface_implements_error.php
 slow/traits/self_resolution.php
-slow/type_annotation/type_annotation_shape1.php
 slow/type_annotation/shape_typedef_with_multiple_optional_tokens.php
 slow/type_annotation/shape_usage_with_optional_field.php
 slow/type_assertions/1857.php

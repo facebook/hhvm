@@ -11,4 +11,4 @@ class Foo {
   }
 }
 
-(new Foo())->heh();
+(new Foo)->heh();

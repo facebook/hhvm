@@ -19,9 +19,9 @@ class goer {
 }
 
 function main() {
-  $go = new goer();
-  $one = new one();
-  $two = new two();
+  $go = new goer;
+  $one = new one;
+  $two = new two;
   foreach (array(1,2) as $k) {
     $go->go($one);
     $go->go($one);
@@ -42,9 +42,9 @@ class related_one extends base {}
 class related_two extends base {}
 
 function main2() {
-  $go = new goer();
-  $one = new related_one();
-  $two = new related_two();
+  $go = new goer;
+  $one = new related_one;
+  $two = new related_two;
   foreach (array(1,2) as $k) {
     $go->go($one);
     $go->go($one);

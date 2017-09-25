@@ -5,12 +5,12 @@ class X {}
 function foo($x, $y) {
   return $x == $y;
 }
-$x = new X();
+$x = new X;
 foo($x, $x);
 
 
-$x = new X();
-$y = new stdClass();
+$x = new X;
+$y = new stdClass;
 
 function baz($r, $s) {
   switch ($r) {

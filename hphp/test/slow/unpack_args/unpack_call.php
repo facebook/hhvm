@@ -113,7 +113,7 @@ function test_param_mix($args) {
   $prefix3 = 'arg that ensures more args passed than declared';
   variadic($prefix, $prefix2, $prefix3, ...$args);
   variadic_with_func_get_args($prefix, $prefix2, ...$args);
-  variadic_with_func_get_args(new dtor(), new dtor(), ...[new dtor()]);
+  variadic_with_func_get_args(new dtor, new dtor, ...[new dtor]);
   echo "-- after destruct\n";
   regular($prefix, $prefix2, ...$args);
   regular($prefix, $prefix2, ...$args);

@@ -2248,8 +2248,15 @@ let from_text
   (source_text : Full_fidelity_source_text.t)
   : result =
     let open Full_fidelity_syntax_tree in
-    let tree = make source_text in
-    let fi_mode = if not (is_hack tree) then FileInfo.Mphp else
+    let tree   = make source_text in
+    let script = Full_fidelity_positioned_syntax.from_tree tree in
+    let script = from_positioned_syntax script in
+    let script =
+      if lower_coroutines then
+        Coroutine_lowerer.lower_coroutines script
+      else
+        script in
+    let fi_mode = if is_php tree then FileInfo.Mphp else
       let mode_string = String.trim (mode tree) in
       let mode_word =
         try List.hd (Str.split (Str.regexp " +") mode_string) with
@@ -2262,27 +2269,6 @@ let from_text
         (* TODO: Come up with better mode detection *)
         | _                -> FileInfo.Mpartial
       )
-    in
-    let () = if keep_errors then
-      let errors = Full_fidelity_parser_errors.parse_errors tree in
-      let last_error = List.last errors in
-      Option.iter last_error ~f:begin fun err ->
-          let open Full_fidelity_syntax_error in
-          let pos = SourceText.relative_pos
-            file
-            source_text
-            err.start_offset
-            err.end_offset
-          in
-          Errors.parsing_error (pos, err.message)
-        end
-    in
-    let script = Full_fidelity_positioned_syntax.from_tree tree in
-    let script = from_positioned_syntax script in
-    let script =
-      if lower_coroutines
-      then Coroutine_lowerer.lower_coroutines script
-      else script
     in
     lower
       ~elaborate_namespaces

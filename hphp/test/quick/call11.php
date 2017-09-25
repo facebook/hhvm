@@ -24,7 +24,7 @@ class C {
 }
 
 function main() {
-  $obj = new C();
+  $obj = new C;
   $obj->test();
 }
 

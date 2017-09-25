@@ -3,9 +3,9 @@ class C {
   public $t = Pair {'foo', 42};
 }
 function f() {
-  $c = new C();
+  $c = new C;
   $t = $c->t;
-  $u = Pair {new stdClass(), 73};
+  $u = Pair {new stdClass, 73};
   var_dump(count($t), count($u));
   var_dump($t->count(), $u->count());
   var_dump($t->isEmpty(), $u->count());

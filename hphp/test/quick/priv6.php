@@ -9,7 +9,7 @@ class B1 extends A1 {
 class C1 extends B1 {
   protected function bar() { echo "C1::bar\n"; }
 }
-$obj = new C1();
+$obj = new C1;
 $obj->baz();
 
 class A2 {
@@ -22,7 +22,7 @@ class B2 extends A2 {
 class C2 extends B2 {
   public function bar() { echo "C2::bar\n"; }
 }
-$obj = new C2();
+$obj = new C2;
 $obj->baz();
 
 class A3 {
@@ -35,7 +35,7 @@ class B3 extends A3 {
 class C3 extends B3 {
   public function bar() { echo "C3::bar\n"; }
 }
-$obj = new C3();
+$obj = new C3;
 $obj->baz();
 
 class A4 {
@@ -44,5 +44,5 @@ class A4 {
 class B4 extends A4 {
   public function baz() { $this->bar(); }
 }
-$obj = new B4();
+$obj = new B4;
 $obj->baz();

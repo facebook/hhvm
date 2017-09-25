@@ -889,7 +889,7 @@ let invalid_shape_field_check node =
 let expression_errors node parents is_hack =
   match syntax node with
   | SubscriptExpression { subscript_left_bracket; _}
-    when is_left_brace subscript_left_bracket && is_hack ->
+    when is_left_brace subscript_left_bracket ->
     [ make_error_from_node node SyntaxError.error2020 ]
   | FunctionCallExpression { function_call_argument_list; _} ->
     begin match misplaced_variadic_arg function_call_argument_list with
@@ -1087,15 +1087,11 @@ let find_syntax_errors syntax_tree =
     let func_errs = function_errors node parents is_strict in
     let xhp_errs = xhp_errors node parents in
     let statement_errs = statement_errors node parents in
-    let methodish_errs =
-      if is_strict then methodish_errors node parents is_hack else []
-    in
+    let methodish_errs = methodish_errors node parents is_hack in
     let property_errs = property_errors node is_strict is_hack in
     let expr_errs = expression_errors node parents is_hack in
     let require_errs = require_errors node parents in
-    let classish_errors =
-      if is_strict then classish_errors node parents else []
-    in
+    let classish_errors = classish_errors node parents in
     let type_errors = type_errors node parents is_strict in
     let alias_errors = alias_errors node in
     let group_use_errors = group_use_errors node in

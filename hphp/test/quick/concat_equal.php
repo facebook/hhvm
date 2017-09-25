@@ -6,4 +6,4 @@ function main($b) {
 }
 class b { function __toString() { return 'b'; }}
 
-main(new b());
+main(new b);

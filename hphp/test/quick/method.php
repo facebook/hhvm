@@ -28,7 +28,7 @@ class B extends A {
   }
 }
 
-$a = new A();
+$a = new A;
 $b = new B();
 $b->foo();
 $b->g($a);

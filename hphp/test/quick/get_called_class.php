@@ -37,8 +37,8 @@ class D extends C {
 var_dump(get_called_class());
 f();
 echo "**************\n";
-$c = new C();
-$d = new D();
+$c = new C;
+$d = new D;
 echo "**************\n";
 $c->foo();
 $d->foo();

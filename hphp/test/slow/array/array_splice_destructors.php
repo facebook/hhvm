@@ -2,8 +2,8 @@
 
 class C {
   private $a;
-  public function __construct(&$a) { $this->a =& $a; }
-  public function __destruct() {
+  function __construct(&$a) { $this->a =& $a; }
+  function __destruct() {
     // tripling the number of things in an array should cause it to realloc
     $c = count($this->a) * 2;
     for ($i = 0; $i < $c; $i++) { $this->a[] = 'lol'; }

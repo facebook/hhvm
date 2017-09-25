@@ -33,7 +33,7 @@ echo "start\n";
 $filename = '/tmp/dead-static-props.php';
 gen();
 include $filename;
-$c = new C();
+$c = new C;
 $c->f(); // access static prop
 $hg = heapgraph_create();
 HH\heapgraph_foreach_root_node($hg, 'visit_root');

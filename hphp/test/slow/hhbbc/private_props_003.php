@@ -21,7 +21,7 @@ class SerDe {
 }
 
 function main() {
-  $x = new SerDe();
+  $x = new SerDe;
   $str = serialize($x);
   $str = preg_replace('/i:42/', 'i:0', $str);
   $str = preg_replace('/d:3.14/', 'd:1.0', $str);

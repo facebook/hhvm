@@ -39,17 +39,17 @@ class D {
   public function __get($k) { echo "__get $k\n"; }
   public function __set($k, $v) { echo "__set $k\n"; }
 }
-$obj = new D();
+$obj = new D;
 $obj->foo = 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new D();
+$obj = new D;
 $obj->foo += 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new D();
+$obj = new D;
 $obj->foo++;
 var_dump($obj);
 $obj = null;
@@ -62,17 +62,17 @@ class E {
   }
 }
 
-$obj = new E();
+$obj = new E;
 $obj->foo = 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new E();
+$obj = new E;
 $obj->foo += 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new E();
+$obj = new E;
 $obj->foo++;
 var_dump($obj);
 $obj = null;
@@ -85,17 +85,17 @@ class F {
   }
 }
 
-$obj = new F();
+$obj = new F;
 $obj->foo = 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new F();
+$obj = new F;
 $obj->foo += 1;
 var_dump($obj);
 $obj = null;
 
-$obj = new F();
+$obj = new F;
 $obj->foo++;
 var_dump($obj);
 $obj = null;

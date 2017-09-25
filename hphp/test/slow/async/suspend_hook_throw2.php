@@ -2,7 +2,7 @@
 
 function thrower($why, $what) {
   if ($why == 'exit' && $what == 'foo') {
-    throw new exception();
+    throw new exception;
   }
 }
 fb_setprofile('thrower');

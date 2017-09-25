@@ -3,7 +3,7 @@
 class Asd {
   static $heh = Map { 'a' => 'b' };
 
-  function other() { self::$heh = new stdclass(); }
+  function other() { self::$heh = new stdclass; }
 
   function foo() {
     var_dump(self::$heh);
@@ -11,4 +11,4 @@ class Asd {
   }
 }
 
-(new Asd())->foo();
+(new Asd)->foo();

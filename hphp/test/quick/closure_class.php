@@ -23,7 +23,7 @@ class C {
   }
 }
 
-$c = new C();
+$c = new C;
 $b = $c->b();
 var_dump($b());
 $d = $c->d();

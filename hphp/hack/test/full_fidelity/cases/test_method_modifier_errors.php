@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A {
   function a1() {} //error2052

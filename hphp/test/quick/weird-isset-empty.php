@@ -71,7 +71,7 @@ var_dump(empty($abc->foo->bar));
 
 echo "**************************\n";
 
-$abc = new stdclass();
+$abc = new stdclass;
 $abc->foo = array('bar' => 'baz');
 var_dump(isset($abc->foo));
 var_dump(empty($abc->foo));
@@ -83,7 +83,7 @@ unset($abc);
 
 echo "**************************\n";
 
-$abc = new stdclass();
+$abc = new stdclass;
 $abc2 =& $abc; // make $abc a Var
 $abc->foo = array('bar' => 'baz');
 var_dump(isset($abc->foo));
@@ -97,7 +97,7 @@ unset($abc2);
 
 echo "**************************\n";
 
-$abc = array('foo' => new stdclass());
+$abc = array('foo' => new stdclass);
 $abc['foo']->bar = 'baz';
 var_dump(isset($abc['foo']));
 var_dump(empty($abc['foo']));
@@ -113,7 +113,7 @@ unset($abc);
 
 echo "**************************\n";
 
-$abc = array('foo' => new stdclass());
+$abc = array('foo' => new stdclass);
 $abc2 =& $abc; // make $abc a Var
 $abc['foo']->bar = 'baz';
 var_dump(isset($abc['foo']));
@@ -130,3 +130,4 @@ unset($abc);
 unset($abc2);
 
 echo "**************************\n";
+

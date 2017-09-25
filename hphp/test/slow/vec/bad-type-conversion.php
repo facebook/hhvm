@@ -20,7 +20,7 @@ class X {
 }
 
 function test() {
-  $x = new X();
+  $x = new X;
   var_dump(HH\Asio\join($x->f()));
   var_dump(HH\Asio\join($x->f()));
 }

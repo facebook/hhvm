@@ -9,7 +9,7 @@ class Foo {
 }
 
 function main() {
-  $f = new Foo();
+  $f = new Foo;
   var_dump($f::ABC);
   var_dump($f->XYZ);
   var_dump($f->FOO);

@@ -65,7 +65,7 @@ final class foo {
 }
 
 async function go() {
-  $x = new foo();
+  $x = new foo;
   await $x->genThings();
   await $x->genThings();
   await $x->genThings();

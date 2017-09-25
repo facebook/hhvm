@@ -5,8 +5,8 @@ function foo($x, $y) {
   var_dump($x === $y);
 }
 
-$x1 = new stdClass();
-$x2 = new stdClass();
+$x1 = new stdClass;
+$x2 = new stdClass;
 $y1 = curl_init();
 $y2 = curl_init();
 

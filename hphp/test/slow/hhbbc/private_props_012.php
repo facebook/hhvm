@@ -13,7 +13,7 @@ class X {
 };
 
 function main() {
-  $x = new X();
+  $x = new X;
   var_dump($x->foo());
   var_dump($x->bar());
 }

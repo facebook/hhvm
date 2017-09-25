@@ -5,5 +5,5 @@ interface I {
 class C implements I {
   function foo() { echo "foo\n"; }
 }
-$obj = new C();
+$obj = new C;
 $obj->foo();

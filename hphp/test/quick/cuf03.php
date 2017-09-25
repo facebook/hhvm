@@ -14,7 +14,7 @@ class E {
 
 
 function main() {
-  $obj = new C();
+  $obj = new C;
   call_user_func(array($obj, 'foo'));
   call_user_func(array($obj, 'C::foo'));
   call_user_func(array($obj, 'D::foo')); // warns and bails returning null
@@ -25,7 +25,7 @@ function main() {
   call_user_func(array($obj, 'D::bar')); // warns and bails returning null
   call_user_func(array($obj, 'E::bar')); // warns and bails returning null
 
-  $obj = new D();
+  $obj = new D;
   call_user_func(array($obj, 'foo'));
   call_user_func(array($obj, 'C::foo'));
   call_user_func(array($obj, 'D::foo'));
@@ -36,7 +36,7 @@ function main() {
   call_user_func(array($obj, 'D::bar'));
   call_user_func(array($obj, 'E::bar')); // warns and bails returning null
 
-  $obj = new E();
+  $obj = new E;
   call_user_func(array($obj, 'foo'));
   call_user_func(array($obj, 'C::foo'));
   call_user_func(array($obj, 'D::foo'));

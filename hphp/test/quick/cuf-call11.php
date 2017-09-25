@@ -20,7 +20,7 @@ class E1 extends D1 {
 }
 
 function main1() {
-  $e1 = new E1();
+  $e1 = new E1;
   $e1->test(); // Outputs 'D1:foo true'
 }
 main1();
@@ -40,7 +40,7 @@ class F2 extends D2 {
 }
 
 function main2() {
-$e2 = new E2();
+$e2 = new E2;
 $e2->test(); // Outputs 'D2::foo false' (Zend outputs 'D2::foo true')
 }
 main2();
@@ -66,7 +66,7 @@ class F3 extends D3 {
 }
 
 function main3() {
-$e3 = new E3();
+$e3 = new E3;
 $e3->test(); // Outputs 'D3::foo false' (Zend outputs 'D3::foo true')
 }
 main3();
@@ -84,7 +84,7 @@ class F4 extends D4 {
 }
 
 function main4() {
-  $e4 = new F4();
+  $e4 = new F4;
   $e4->test(); // Outputs 'D4::foo false'
 }
 main4();
@@ -109,7 +109,7 @@ class F5 extends X5 {
 }
 
 function main5() {
-  $e5 = new E5();
+  $e5 = new E5;
   $e5->test(); // Fatals
 }
 main5();

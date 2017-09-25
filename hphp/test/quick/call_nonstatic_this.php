@@ -21,10 +21,10 @@ class E extends B {
   }
 }
 function main() {
-  $d = new D();
+  $d = new D;
   $d->test();
   $d->test2();
-  $e = new E();
+  $e = new E;
   $e->test();
   $e->test2();
 }

@@ -5,4 +5,4 @@ class someClass {
   }
 }
 
-$someClass = new someClass();
+$someClass = new someClass;

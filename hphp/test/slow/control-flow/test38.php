@@ -18,7 +18,7 @@ class C {
 }
 
 function main() {
-  $obj = new C();
+  $obj = new C;
   var_dump($obj->genWithAccessTokens(array()));
   var_dump($obj->genWithAccessTokens());
   var_dump($obj->genWithAccessTokens(array()));

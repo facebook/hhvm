@@ -9,7 +9,7 @@ function __autoload($a) {
 
 function main() {
   $a = '\\A';
-  new $a();
+  new $a;
 }
 
 main();

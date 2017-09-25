@@ -23,7 +23,7 @@ function main() {
   $x = (int $y = 7) ==> (int $z = 4): int ==> $y + $z;
   var_dump(($x())());
   var_dump(($x(5))(9));
-  $c = new C();
+  $c = new C;
   $x = (($c->foo1())())();
   $x = (($c->foo2())())();
   $x = (Vector<Vector<int>> $v = Vector {Vector {1, 2}, Vector {3, 4}},

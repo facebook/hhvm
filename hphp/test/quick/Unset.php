@@ -37,5 +37,5 @@ class A {
     unset($this);
   }
 }
-$obj = new A();
+$obj = new A;
 $obj->foo();

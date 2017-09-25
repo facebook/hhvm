@@ -8,7 +8,7 @@ class C1 {
 }
 
 function main1() {
-  $obj = new C1();
+  $obj = new C1;
 
   // FPushObjMethodD
   $obj->__call("a", "b", "c", "d");
@@ -55,7 +55,7 @@ class C2 {
 }
 
 function main2() {
-  $obj = new C2();
+  $obj = new C2;
   $obj->test();
 }
 
@@ -71,7 +71,7 @@ class C3 extends B3 {
 }
 
 function main3() {
-  $obj = new C3();
+  $obj = new C3;
 
   // FPushObjMethodD
   $obj->__call("a", "b", "c", "d");
@@ -101,7 +101,7 @@ class C4 extends B4 {
 }
 
 function main4() {
-  $obj = new C4();
+  $obj = new C4;
   $obj->foo("a", "b", "c", "d");
   $fn = 'foo';
   $obj->$fn("a", "b", "c", "d");
@@ -122,7 +122,7 @@ class C5 extends B5 {
 }
 
 function main5() {
-  $obj = new C5();
+  $obj = new C5;
   $obj->test();
 }
 
@@ -142,7 +142,7 @@ class C6 extends B6 {
 }
 
 function main6() {
-  $obj = new C6();
+  $obj = new C6;
   $obj->test();
 }
 

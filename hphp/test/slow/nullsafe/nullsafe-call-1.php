@@ -42,7 +42,7 @@ function test5(?C $c): int {
   $c?->yar($x = 123);
   return $x;
 }
-function main(): void {
+function main() {
   $c = new C();
   echo "test1:\n";
   var_dump(test1($c));

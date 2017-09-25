@@ -21,11 +21,11 @@ class Y {
 }
 
 function test() {
-  $x = new X();
+  $x = new X;
   $c = $x->f();
   var_dump($c(true));
 
-  $y = new Y();
+  $y = new Y;
   $c = $y->f();
   var_dump($c("foo"));
 }

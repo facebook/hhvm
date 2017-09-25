@@ -12,7 +12,7 @@ class Cls {
   function __destruct() {}
 }
 
-function getCls() { return new Cls(); }
+function getCls() { return new Cls; }
 
 function test($s) {
   fb_intercept('Cls::func', "Cls::$s");

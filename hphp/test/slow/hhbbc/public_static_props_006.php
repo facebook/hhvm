@@ -9,4 +9,4 @@ class Asd {
   }
 }
 
-(new Asd())->foo();
+(new Asd)->foo();

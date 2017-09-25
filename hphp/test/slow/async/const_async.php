@@ -7,7 +7,7 @@ class F {
   }
 }
 
-$async = new F();
+$async = new F;
 var_dump(F::async);
 var_dump($async::async);
 var_dump(HH\Asio\join(F::foo()));

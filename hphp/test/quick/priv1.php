@@ -5,7 +5,7 @@ class C1 {
   }
   public function test() {
     // This should call C1::foo, not D1::foo
-    $obj = new D1();
+    $obj = new D1;
     $obj->foo();
   }
 }
@@ -14,7 +14,7 @@ class D1 extends C1 {
     echo "D1::foo\n";
   }
 }
-$obj = new C1();
+$obj = new C1;
 $obj->test();
 
 
@@ -34,7 +34,7 @@ class D2 extends C2 {
 }
 class E2 extends D2 {
 }
-$obj = new E2();
+$obj = new E2;
 // This should call C2::foo, not D2::foo
 $obj->test();
 
@@ -53,7 +53,7 @@ class D3 extends C3 {
     echo "D3::foo\n";
   }
 }
-$obj = new D3();
+$obj = new D3;
 // This should call C3::foo, not D3::foo
 $obj->test();
 
@@ -77,7 +77,7 @@ class C4 {
     $obj->foo();
   }
 }
-C4::test(new B4());
+C4::test(new B4);
 
 
 class A5 {
@@ -86,7 +86,8 @@ class A5 {
 }
 class B5 extends A5 {
   public static function test() {
-    return new A5();
+    return new A5;
   }
 }
 B5::test();
+

@@ -16,7 +16,7 @@ class SerDe {
 }
 
 function main() {
-  $x = new SerDe();
+  $x = new SerDe;
   $x = unserialize(serialize($x));
   $x->foo();
 }

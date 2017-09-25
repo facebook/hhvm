@@ -21,7 +21,7 @@ function test1(?C $c, bool $b): ?E {
 function test2(?C $c, bool $b): ?F {
   return $c?->blah($b)->bar()?->baz();
 }
-function main(): void {
+function main() {
   $c = new C();
   var_dump(test1($c, true));
   try {

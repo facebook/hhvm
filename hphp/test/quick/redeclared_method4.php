@@ -8,5 +8,5 @@ abstract class B implements I {
 class C extends B {
   public function foo($x){ echo "$x\n";}
 }
-$obj = new C();
+$obj = new C;
 $obj->foo(1);

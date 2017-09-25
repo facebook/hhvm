@@ -5,5 +5,5 @@ class A {
     return 'c';
   }
 }
-$d = new A();
+$d = new A;
 var_dump((clone $d)->b());

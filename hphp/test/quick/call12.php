@@ -14,7 +14,7 @@ class C extends B {
 }
 
 function main() {
-  $obj = new C();
+  $obj = new C;
   $obj->test();
 }
 main();

@@ -26,16 +26,16 @@ class doer {
 }
 
 function main() {
-  $b = new one();
-  $d = new two();
-  $x = new doer();
+  $b = new one;
+  $d = new two;
+  $x = new doer;
   $x->junk($b);
   $x->junk($d);
   $x->junk($b);
   $x->junk($d);
-  $x->junk(new three());
+  $x->junk(new three);
   $x->junk($b);
-  $x->junk(new three());
+  $x->junk(new three);
   $x->junk($d);
 }
 

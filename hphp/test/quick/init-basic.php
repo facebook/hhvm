@@ -26,7 +26,7 @@ function main() {
   $v5 = make('z', 'y', 'x', 'w');
   $v6 = make_big(10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
   $v7 = make_big('f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o');
-  $c = new C();
+  $c = new C;
   var_dump($v1, $v2, $v3, $v4, $v5, $v6, $v7,
            C::$vec1, C::$vec2, C::$vec3, $c->vec4,
            $c::VEC5, (new ReflectionClass('C'))->getAttributes());

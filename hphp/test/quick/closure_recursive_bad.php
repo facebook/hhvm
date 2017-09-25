@@ -12,6 +12,6 @@ class A {
     return 91;
   }
 }
-$a = new A();
+$a = new A;
 $b = $a->b();
 var_dump($b());

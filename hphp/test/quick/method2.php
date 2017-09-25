@@ -32,12 +32,12 @@ class A extends Y {
 
 class B extends Y {
   function foo() {
-    $a = new A();
+    $a = new A;
     $a->foo();
     $a->bar();
 #    $a->baz();
   }
 }
 
-$b = new B();
+$b = new B;
 $b->foo();

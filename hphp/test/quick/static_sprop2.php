@@ -15,8 +15,8 @@ class D extends C {
 }
 
 echo "Creating C\n";
-$c = new C();
+$c = new C;
 echo "Creating D\n";
-$d = new D();
+$d = new D;
 echo "**************\n";
 

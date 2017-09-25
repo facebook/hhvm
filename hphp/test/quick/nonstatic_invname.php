@@ -16,4 +16,4 @@ function main(Blah $l) {
   $l->{heh()}();
 }
 
-main(new Blah());
+main(new Blah);

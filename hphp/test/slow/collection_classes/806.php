@@ -1,6 +1,6 @@
 <?hh
 
-$v = new Vector();
+$v = new Vector;
 $v[] = 7;
 $v[] = 'foo';
 var_dump(serialize($v));

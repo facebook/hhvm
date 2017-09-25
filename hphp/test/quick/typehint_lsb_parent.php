@@ -29,9 +29,9 @@ class E extends D {
 }
 
 function main() {
-  $a = new A();
-  $b = new B();
-  $c = new C();
+  $a = new A;
+  $b = new B;
+  $c = new C;
   B::test($a);
   C::test($b);
   E::test($c);

@@ -14,7 +14,7 @@ class Foo {
 }
 
 function main1() {
-  $f = new Foo();
+  $f = new Foo;
   $f->foo = 2;
 }
 
@@ -28,7 +28,7 @@ class Foo2 {
 }
 
 function main2() {
-  $f = new Foo2();
+  $f = new Foo2;
   $f->bar = 2;
 }
 
@@ -45,7 +45,7 @@ class CaseFoo {
 }
 
 function main3() {
-  $f = new CaseFoo();
+  $f = new CaseFoo;
   $f->bar = 2;
 }
 

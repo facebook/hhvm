@@ -4,10 +4,10 @@
 class SleepThrow {
   public $msg;
 
-  public function __construct($msg): void {
+  function __construct($msg) {
     $this->msg = $msg;
   }
-  public function __sleep(): void {
+  function __sleep() {
     throw new Exception($this->msg);
   }
 }

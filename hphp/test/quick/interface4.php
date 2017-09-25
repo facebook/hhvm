@@ -23,7 +23,7 @@ class C implements I, J, K, L, M {
     echo "$x $y $z\n";
   }
 }
-$obj = new C();
+$obj = new C;
 $obj->foo(1);
 $obj->foo(1, 2);
 $obj->foo(1, 2, null);

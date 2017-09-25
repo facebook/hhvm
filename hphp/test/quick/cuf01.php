@@ -10,7 +10,7 @@ class C {
 }
 
 function main() {
-  $obj = new C();
+  $obj = new C;
   var_dump(call_user_func(array($obj, 'foo'), 123, 456));
   var_dump(call_user_func(array($obj, 'bar'), 123, 456));
   var_dump(call_user_func_array(array($obj, 'foo'), array(123, 456)));

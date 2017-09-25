@@ -10,8 +10,8 @@ class doer {
 }
 
 function main() {
-  $x = new doer();
-  $o = new one();
+  $x = new doer;
+  $o = new one;
   $x->junk($o);
   $x->junk($o);
   $x->junk($o);

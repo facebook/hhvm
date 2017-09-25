@@ -3,7 +3,7 @@
 function foo() { var_dump(__METHOD__); }
 function bar() {
   var_dump(__METHOD__);
-  throw new Exception();
+  throw new Exception;
 }
 
 function boo() {

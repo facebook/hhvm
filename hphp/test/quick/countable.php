@@ -5,7 +5,7 @@ class klass implements Countable {
 }
 
 function main() {
-  $k = new klass();
+  $k = new klass;
   var_dump(count($k));
 }
 main();

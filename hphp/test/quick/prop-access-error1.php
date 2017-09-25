@@ -7,7 +7,7 @@ class B {
 class C extends B {}
 
 function main() {
-  $o = new C();
+  $o = new C;
   var_dump($o->p);
 }
 

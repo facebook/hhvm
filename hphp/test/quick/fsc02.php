@@ -12,10 +12,10 @@ class B {
 }
 class C extends B {
   public function g() {
-    $obj = new B();
+    $obj = new B;
     forward_static_call(array('B', 'f1'));
     call_user_func(array('B', 'f1'));
   }
 }
-$obj = new C();
+$obj = new C;
 $obj->g();

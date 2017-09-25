@@ -24,13 +24,13 @@ class C2 {
 }
 
 function test() {
-  $a1 = new C1();
+  $a1 = new C1;
   var_dump($a1->func1());
 
   $a2 = unserialize(serialize($a1));
   var_dump($a2->func1());
 
-  $b1 = new C2();
+  $b1 = new C2;
   var_dump($b1->func1());
   var_dump($b1->func2());
 

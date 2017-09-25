@@ -49,7 +49,7 @@ using ppc64_asm::DecodedInstruction;
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
-  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly);
+  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly, true);
 }
 
 TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
@@ -60,7 +60,7 @@ TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
 
   // don't use cmpqim because of smashableCmpqImm implementation. A "load 32bits
   // immediate" is mandatory
-  a.limmediate (rfuncln(), imm, ImmType::TocOnly);
+  a.limmediate (rfuncln(), imm, ImmType::TocOnly, true);
   a.lwz  (rAsm, r[disp]); // base + displacement
   a.extsw(rAsm, rAsm);
   a.cmpd (rfuncln(), rAsm);
@@ -73,13 +73,18 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
 }
 
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
-  return EMIT_BODY(cb, fixups, branchFar, target);
+  return EMIT_BODY(cb, fixups, branchFar, target,
+                   ppc64_asm::BranchConditions::Always,
+                   ppc64_asm::LinkReg::DoNotTouch,
+                   ppc64_asm::ImmType::TocOnly, true);
 }
 
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc) {
   assertx(cc != CC_None);
-  return EMIT_BODY(cb, fixups, branchFar, target, cc);
+  return EMIT_BODY(cb, fixups, branchFar, target, cc,
+                   ppc64_asm::LinkReg::DoNotTouch,
+                   ppc64_asm::ImmType::TocOnly, true);
 }
 
 #undef EMIT_BODY
@@ -87,60 +92,46 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 ///////////////////////////////////////////////////////////////////////////////
 
 void smashMovq(TCA inst, uint64_t imm) {
-  CodeBlock cb;
-  // Initialize code block cb pointing to li64
-  cb.init(inst, Assembler::kLi64Len, "smashing Movq");
-  CodeCursor cursor { cb, inst };
-  Assembler a { cb };
-
+  // Smash TOC value
   const DecodedInstruction di(inst);
-  Reg64 reg = di.getLimmediateReg();
-
-  a.limmediate(reg, imm, ImmType::TocOnly);
+  assertx(di.isLoadingTOC() && di.isSmashable(imm));
+  uint64_t* imm_address = di.decodeTOCAddress();
+  *imm_address = imm;
 }
 
 void smashCmpq(TCA inst, uint32_t imm) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
-  Assembler a { cb };
-
-  // the first instruction is a vasm ldimml, which is a li32
+  // Smash TOC value
   const DecodedInstruction di(inst);
-  Reg64 reg = di.getLimmediateReg();
-
-  a.limmediate(reg, imm, ImmType::TocOnly);
+  assertx(di.isLoadingTOC() && di.isSmashable(imm));
+  uint64_t* imm_address = di.decodeTOCAddress();
+  *imm_address = imm;
 }
 
 void smashCall(TCA inst, TCA target) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
-  Assembler a { cb };
-
+  // Smash TOC value
   const DecodedInstruction di(inst);
-  if (!di.isCall()) {
-    always_assert(false && "smashCall has unexpected block");
-  }
-
-  a.setFrontier(inst);
-
-  a.limmediate(rfuncentry(), reinterpret_cast<uint64_t>(target),
-      ImmType::TocOnly);
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  uint64_t* imm_address = di.decodeTOCAddress();
+  *imm_address = reinterpret_cast<uint64_t>(target);
 }
 
 void smashJmp(TCA inst, TCA target) {
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
-  Assembler a { cb };
-
-  if (target > inst && target - inst <= smashableJmpLen()) {
-    a.emitNop(target - inst);
-  } else {
-    a.branchFar(target);
-  }
+  // Smash TOC value
+  const DecodedInstruction di(inst);
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  uint64_t* imm_address = di.decodeTOCAddress();
+  if (imm_address) *imm_address = reinterpret_cast<uint64_t>(target);
 }
 
 void smashJcc(TCA inst, TCA target) {
-  Assembler::patchBranch(inst, target);
+  // Smash TOC value
+  const DecodedInstruction di(inst);
+  assertx(di.isLoadingTOC() &&
+          di.isSmashable(reinterpret_cast<uint64_t>(target)));
+  uint64_t* imm_address = di.decodeTOCAddress();
+  *imm_address = reinterpret_cast<uint64_t>(target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

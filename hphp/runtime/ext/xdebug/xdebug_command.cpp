@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
@@ -1121,6 +1122,16 @@ struct ContextGetCmd : XDebugCommand {
       }
       case XDebugContext::LOCAL: {
         VMRegAnchor regAnchor;
+
+        // If the current function is a class member, append $this to the local
+        // scope if $this exists at the current VM frame pointer.
+        Variant this_(g_context->getThis());
+        if (!this_.isNull()) {
+          auto node =
+            xdebug_get_value_xml_node("this", this_,
+                                      XDebugVarType::Normal, exporter);
+          xdebug_xml_add_child(&xml, node);
+        }
 
         auto const fp = g_context->getFrameAtDepth(m_depth);
         auto const vars = getDefinedVariables(fp);

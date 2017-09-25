@@ -42,6 +42,8 @@ let exactly_equal err1 err2 =
     err1.end_offset = err2.end_offset &&
     err1.message = err2.message
 
+let message err = err.message
+
 (* Lexical errors *)
 let error0001 = "A hexadecimal literal needs at least one digit."
 let error0002 = "A binary literal needs at least one digit."

@@ -94,13 +94,25 @@ let add_const_dep dep_env id =
     if Option.is_some (nm global_name) then add_const_dep global_name;
     ()
 
+let special_function = function
+  | "class_meth"
+  | "fun"
+  | "hh_log_level"
+  | "hh_show"
+  | "hh_show_env"
+  | "inst_meth"
+  | "meth_caller"
+  | "type_structure" -> true
+  | _ -> false
 
-class dependency_visitor = object
+class dependency_visitor = object(this)
   inherit [_] Ast_visitors_iter.iter as super
   method! on_fun_ dep_env f =
+    let new_top = if snd f.f_name <> ";anonymous"
+      then Some (Dep.Fun (snd f.f_name)) else dep_env.top in
     let dep_env = {
       dep_env with
-      top = Some (Dep.Fun (snd f.f_name));
+      top = new_top;
       nsenv = Some f.f_namespace;
     } in
     super#on_fun_ dep_env f
@@ -129,6 +141,13 @@ class dependency_visitor = object
   } in
   super#on_gconst dep_env c
 
+  method! on_New dep_env c0 _c1 _c2 =
+    match snd c0 with
+    | Id id ->
+      add_class_dep dep_env id
+    | _ -> ();
+    super#on_New dep_env c0 _c1 _c2
+
   method! on_hint dep_env hint =
     (match (snd hint) with
     | Happly (id, _)
@@ -145,7 +164,37 @@ class dependency_visitor = object
 
   method! on_Call dep_env exp hl el el2 =
     (match exp with
+    | _, Id (_, "type_structure") ->
+      (* Type structure is special and matches special classes *)
+      (* We can just put the position as none here since
+         we don't actually use the position to elaborate the namespaces
+      *)
+      add_class_dep dep_env (Pos.none, Naming_special_names.FB.cTypeStructure);
+      add_class_dep dep_env (Pos.none, Naming_special_names.Classes.cTypename)
     (* Match on a direct call on a name(not a Lvar) *)
+    (* Special function class_meth and "meth_caller" take class names *)
+    | _, Id (_, "meth_caller")
+    | _, Id (_, "class_meth") ->
+      begin match el with
+      (* String literals are valid as a classname for some reason *)
+      | (_, String (p, s))::_ ->
+        add_class_dep dep_env (p, s)
+      (* Here, it could be a classname of the form Test::class, but that
+        gets caught by on_hint. *)
+      | _ -> ()
+      end
+    (* Special function fun *)
+    | _, Id (_, "fun") ->
+      begin
+        match el with
+        | (_, String (p, s))::[] ->
+          add_fun_dep dep_env (p,s)
+          (* Anything but a string here and it won't typecheck *)
+        | _ -> ()
+      end
+    (* These special functions don't take any toplevel entities,
+    but also aren't real functions, so we don't add their dependencies *)
+    | _, Id (_, s) when special_function s -> ()
     | _, Id id ->
       add_fun_dep dep_env id
     | _ -> ());
@@ -161,12 +210,21 @@ class dependency_visitor = object
     add_const_dep dep_env id;
     super#on_id dep_env id
 
-  (* Class constants: only care about the toplevel class*)
-  method! on_Class_const dep_env c0 _c1 =
-    add_class_dep dep_env c0
+  method handle_class_const dep_env c0 c1 =
+    add_class_dep dep_env c0;
+    match c1 with
+    (* Special "::class" constant. Add the dependency to \\classname *)
+    | (_, "class") ->
+      add_class_dep dep_env (Pos.none, Naming_special_names.Classes.cClassname)
+    | _ -> ()
 
-  method! on_SFclass_const dep_env c0 _c1 =
-    add_class_dep dep_env c0
+  method! on_Class_const dep_env c0 c1 =
+    this#handle_class_const dep_env c0 c1;
+    super#on_Class_const dep_env c0 c1
+
+  method! on_SFclass_const dep_env c0 c1 =
+    this#handle_class_const dep_env c0 c1;
+    super#on_SFclass_const dep_env c0 c1
 
 end
 

@@ -60,7 +60,13 @@ let monitor_daemon_main (options: ServerArgs.options) =
     local_config.ServerLocalConfig.search_chunk_size;
 
   HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
-  if ServerArgs.check_mode options then
+  if ServerArgs.save_filename options <> None
+    && ServerArgs.use_gen_deps options then
+    let shared_config = ServerConfig.(sharedmem_config config) in
+    let handle = SharedMem.init shared_config in
+    SharedMem.connect handle ~is_master:true;
+    ServerMain.save_state options handle
+  else if ServerArgs.check_mode options then
     let shared_config = ServerConfig.(sharedmem_config config) in
     let handle = SharedMem.init shared_config in
     SharedMem.connect handle ~is_master:true;

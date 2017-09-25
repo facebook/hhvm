@@ -502,6 +502,16 @@ let setup_server ~informant_managed options handle =
   PidLog.log ~reason:"main" (Unix.getpid());
   ServerEnvBuild.make_genv options config local_config handle, init_id
 
+
+let save_state options handle =
+  let genv, _ = setup_server ~informant_managed:false options handle in
+  let env = ServerInit.init_to_save_state genv in
+  Option.iter (ServerArgs.save_filename genv.options)
+    (ServerInit.save_state env);
+  Hh_logger.log "Running to save saved state";
+  Program.run_once_and_exit genv env
+
+
 let run_once options handle =
   let genv, _ = setup_server ~informant_managed:false options handle in
   if not (ServerArgs.check_mode genv.options) then

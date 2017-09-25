@@ -7,5 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-val print_deps : ParserOptions.t -> Ast.program -> unit
-val gen_deps : ParserOptions.t -> Ast.program -> unit 
+
+val go : Worker.t list option ->
+  get_next: Relative_path.t list Bucket.next -> ParserOptions.t -> unit

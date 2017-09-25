@@ -26,6 +26,7 @@ type options = {
   profile_log      : bool;
   with_mini_state  : mini_state_target option;
   save_filename    : string option;
+  use_gen_deps     : bool;
   waiting_client   : Unix.file_descr option;
   debug_client     : Handle.handle option;
 }
@@ -51,6 +52,7 @@ module Messages = struct
   let convert       = " adds type annotations automatically"
   let save          = " DEPRECATED"
   let save_mini     = " save mini server state to file"
+  let use_gen_deps  = " use new gen_deps to generate dependency graph"
   let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
   let profile_log   = " enable profile logging"
@@ -160,6 +162,7 @@ let parse_options () =
   let should_detach = ref false in
   let convert_dir   = ref None  in
   let save          = ref None in
+  let use_gen_deps  = ref false in
   let max_procs     = ref GlobalConfig.nbr_procs in
   let no_load       = ref false in
   let profile_log   = ref false in
@@ -190,6 +193,7 @@ let parse_options () =
      "--convert"       , Arg.String cdir         , Messages.convert;
      "--save"          , Arg.Unit set_save       , Messages.save;
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
+     "--use-gen-deps"  , Arg.Set use_gen_deps   , Messages.use_gen_deps;
      "--max-procs"     , Arg.Int set_max_procs   , Messages.max_procs;
      "--no-load"       , Arg.Set no_load         , Messages.no_load;
      "--profile-log"   , Arg.Set profile_log     , Messages.profile_log;
@@ -234,6 +238,7 @@ let parse_options () =
     json_mode     = !json_mode;
     ai_mode       = !ai_mode;
     check_mode    = check_mode;
+    use_gen_deps      = !use_gen_deps;
     root          = root_path;
     should_detach = !should_detach;
     convert       = convert;
@@ -259,6 +264,7 @@ let default_options ~root = {
   profile_log = false;
   with_mini_state = None;
   save_filename = None;
+  use_gen_deps = false;
   waiting_client = None;
   debug_client = None;
 }
@@ -278,6 +284,7 @@ let no_load options = options.no_load
 let profile_log options = options.profile_log
 let with_mini_state options = options.with_mini_state
 let save_filename options = options.save_filename
+let use_gen_deps options = options.use_gen_deps
 let waiting_client options = options.waiting_client
 let debug_client options = options.debug_client
 

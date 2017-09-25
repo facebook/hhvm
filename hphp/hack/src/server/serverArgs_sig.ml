@@ -40,6 +40,7 @@ module type S = sig
   val profile_log         : options -> bool
   val with_mini_state     : options -> mini_state_target option
   val save_filename       : options -> string option
+  val use_gen_deps        : options -> bool
   val waiting_client      : options -> Unix.file_descr option
   val debug_client        : options -> Handle.handle option
 

@@ -32,6 +32,7 @@ let default_env popt = {
   nsenv = None;
 }
 
+let debug_mode = ref false
 let dbg_dep_set = HashSet.create 0
 
 (* Just print it out for now *)
@@ -41,9 +42,12 @@ let add_dep root obj =
   (* The root is already namespace elaborated,
   so does not need to be canonicalized *)
   | Some r ->
+    if !debug_mode then
     HashSet.add
       dbg_dep_set
       ((Dep.to_string r) ^ " -> " ^ (Dep.to_string obj))
+    else
+    Typing_deps.add_idep r obj
 
 
 (* Check if the hint refers to a class of some sort,
@@ -166,8 +170,12 @@ class dependency_visitor = object
 
 end
 
-let print_deps popt ast =
-  (* Elaborate the namespaces away *)
+let gen_deps popt ast =
   let env = default_env popt in
   let _ = (new dependency_visitor)#on_program env ast in
+  ()
+
+let print_deps popt ast =
+  debug_mode := true;
+  gen_deps popt ast;
   Typing_deps.print_string_hash_set dbg_dep_set

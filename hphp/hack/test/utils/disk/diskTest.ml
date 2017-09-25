@@ -1,9 +1,7 @@
+open Test_disk_utils
+
 let with_temp_dir f = fun () ->
   Tempfile.with_tempdir f
-
-let write_file ~dir ~file ~contents =
-  let file = Path.concat dir file in
-  Sys_utils.write_file ~file:(Path.to_string file) contents
 
 let verify_contents_equal ~dir ~file ~expected =
   let file = Path.concat dir file in
@@ -74,11 +72,6 @@ let test_rename_parents_dont_exist dir =
   let path = Path.concat dir "a.txt" in
   let target = Path.concat dir "some/path/doesnt/exist/b.txt" in
   Disk.rename (Path.to_string path) (Path.to_string target)
-
-let setup_dir dir files =
-  Disk.mkdir_p (Path.to_string dir);
-  List.iter (fun (file, contents) ->
-    write_file ~dir ~file ~contents) files
 
 let verify_dir dir files =
   let is_dir = Disk.is_directory (Path.to_string dir) in

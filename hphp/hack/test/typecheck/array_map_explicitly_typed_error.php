@@ -2,6 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function f(): int {
-  $x = array_map<string, int, int>(function($x, $y) { return $x + $y; }, vec[1, 2], vec[2,3]);
+  $x = array_map<string, int, int>(
+    function($x, $y) {
+      return $x + $y; },
+    vec[1, 2],
+    vec[2,3]);
   return $x[0];
 }

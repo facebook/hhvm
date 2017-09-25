@@ -1,0 +1,8 @@
+File "map_lambda_bad_pos.php", line 6, characters 23-23:
+Invalid argument (Typing[4110])
+File "map_lambda_bad_pos.php", line 6, characters 24-26:
+This is an int
+File "map_lambda_bad_pos.php", line 4, characters 19-24:
+It is incompatible with a string
+File "hhi_lib__srcs/collections/Map.hhi", line 214, characters 44-45:
+  via this generic Tk

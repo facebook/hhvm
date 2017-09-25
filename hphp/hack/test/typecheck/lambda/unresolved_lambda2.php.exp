@@ -1,7 +1,1 @@
-File "unresolved_lambda2.php", line 30, characters 5-17:
-  ^(^(float))
-File "unresolved_lambda2.php", line 33, characters 5-17:
-  ^(^(int) | ^(string))
-File "unresolved_lambda2.php", line 35, characters 3-15:
-  ^(^(float) | ^(string) | ^(int))
 No errors

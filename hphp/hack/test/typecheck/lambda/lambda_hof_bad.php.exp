@@ -1,8 +1,6 @@
-File "lambda_hof_bad.php", line 11, characters 14-15:
-Invalid argument (Typing[4110])
-File "lambda_hof_bad.php", line 11, characters 21-26:
-Typing error
-File "lambda_hof_bad.php", line 11, characters 21-22:
+File "lambda_hof_bad.php", line 15, characters 21-26:
+Typing error (Typing[4110])
+File "lambda_hof_bad.php", line 15, characters 21-22:
 This is a num (int/float) because this is used in an arithmetic operation
-File "lambda_hof_bad.php", line 10, characters 18-23:
+File "lambda_hof_bad.php", line 14, characters 18-23:
 It is incompatible with a string

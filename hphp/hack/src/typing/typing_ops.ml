@@ -24,7 +24,7 @@ module Phase   = Typing_phase
 (*****************************************************************************)
 
 let sub_type p ur env ty_sub ty_super =
-  Typing_log.log_types p env
+  Typing_log.log_types 2 p env
     [Typing_log.Log_sub ("Typing_ops.sub_type",
        [Typing_log.Log_type ("ty_sub", ty_sub);
         Typing_log.Log_type ("ty_super", ty_super)])];

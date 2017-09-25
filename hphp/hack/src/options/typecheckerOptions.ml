@@ -41,6 +41,8 @@ let experimental_annotate_function_calls =
   GlobalOptions.tco_experimental_annotate_function_calls
 let experimental_unresolved_fix =
   GlobalOptions.tco_experimental_unresolved_fix
+let experimental_contextual_inference =
+  GlobalOptions.tco_experimental_contextual_inference
 let experimental_generics_arity =
   GlobalOptions.tco_experimental_generics_arity
 let experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape =

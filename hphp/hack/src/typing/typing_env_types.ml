@@ -82,13 +82,19 @@ and genv = {
   file    : Relative_path.t;
 }
 
-(* An anonymous function
- * true if function is  coroutine - otherwise false*
- * the environment + the fun parameters + the captured identifiers
-*)
+(* A type-checker for an anonymous function
+ * Parameters are
+ * - the environment
+ * - types of the parameters under which the body should be checked
+ * - the expected return type of the body (optional)
+ *)
 and anon =
   Nast.is_coroutine *
-  (?el:Nast.expr list -> env -> locl fun_params -> env * Tast.expr * locl ty)
+  (?el:Nast.expr list ->
+  ?ret_ty: locl ty ->
+  env ->
+  locl fun_params ->
+  env * Tast.expr * locl ty)
 
 (* A deferred check; return true if the check should now be removed from the list *)
 and tfun = env -> env * bool

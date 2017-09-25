@@ -286,8 +286,8 @@ let add_constraint_with_fail env ck ty_sub ty_super fail =
  * constraint becomes C<string> as C<int>)
  *)
 let add_constraint p env ck ty_sub ty_super =
-  Typing_log.log_types p env
-    [Typing_log.Log_sub ("add_constraint",
+  Typing_log.log_types 2 p env
+    [Typing_log.Log_sub ("Typing_subtype.add_constraint",
        [Typing_log.Log_type ("ty_sub", ty_sub);
         Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
@@ -548,9 +548,9 @@ and sub_type env ty_sub ty_super =
  *      sub_type env int string => error
 *)
 and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
-  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
+  Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
     [Typing_log.Log_sub (Printf.sprintf
-        "sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
+        "Typing_subtype.sub_type_with_uenv uenv_sub.unwrappedToption=%b uenv_super.unwrappedToption=%b"
         uenv_sub.TUEnv.unwrappedToption uenv_super.TUEnv.unwrappedToption,
       [Typing_log.Log_type ("ty_sub", ty_sub);
        Typing_log.Log_type ("ty_super", ty_super)])];
@@ -628,6 +628,11 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       else
         let outer_pos = env.Env.outer_pos in
         let outer_reason = env.Env.outer_reason in
+        Typing_log.log_types 2 outer_pos env
+        [Typing_log.Log_sub
+          ("Typing_subtype.add_todo",
+           [Typing_log.Log_type ("ty_sub", ty_sub);
+           Typing_log.Log_type ("ty_super", ty_super)])];
         Env.add_todo env begin fun env' ->
           Errors.try_add_err outer_pos (Reason.string_of_ureason outer_reason)
           (fun () ->
@@ -1036,8 +1041,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     ) -> fst (Unify.unify env ty_super ty_sub)
 
 and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
-  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
-    [Typing_log.Log_sub ("sub_generic_params",
+  Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
+    [Typing_log.Log_sub ("Typing_subtype.sub_generic_params",
       [Typing_log.Log_type ("ty_sub", ty_sub);
        Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super = Env.expand_type env ty_super in

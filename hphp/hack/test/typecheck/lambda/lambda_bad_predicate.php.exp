@@ -1,0 +1,6 @@
+File "lambda_bad_predicate.php", line 40, characters 27-30:
+Could not find method hell in an object of type MyClass (Typing[4053])
+File "lambda_bad_predicate.php", line 32, characters 45-51:
+This is why I think it is an object of type MyClass
+File "lambda_bad_predicate.php", line 26, characters 7-13:
+Declaration of MyClass is here

@@ -1,0 +1,6 @@
+File "lambda_infer_bad_return.php", line 5, characters 17-20:
+Invalid return type (Typing[4110])
+File "lambda_infer_bad_return.php", line 4, characters 33-38:
+This is a string
+File "lambda_infer_bad_return.php", line 5, characters 17-20:
+It is incompatible with a bool

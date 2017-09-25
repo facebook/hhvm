@@ -1,0 +1,6 @@
+File "lambda_apply.php", line 16, characters 20-21:
+Could not find method fo in an object of type C (Typing[4053])
+File "lambda_apply.php", line 16, characters 26-32:
+This is why I think it is an object of type C
+File "lambda_apply.php", line 12, characters 7-7:
+Declaration of C is here

@@ -96,6 +96,7 @@ val tco_experimental_disable_shape_and_tuple_arrays : string
 val tco_experimental_promote_nullable_to_optional_in_shapes : string
 val tco_experimental_stronger_shape_idx_ret : string
 val tco_experimental_unresolved_fix : string
+val tco_experimental_contextual_inference : string
 val tco_experimental_generics_arity : string
 val tco_experimental_annotate_function_calls : string
 val tco_experimental_unknown_fields_shape_is_not_subtype_of_known_fields_shape

@@ -41,9 +41,9 @@ let lprintf c =
     then lnewline ()
     else accumulatedLength := !accumulatedLength + len)
 
-let indentEnv message f =
+let indentEnv ?(color=Normal Yellow) message f =
   lnewline ();
-  lprintf (Normal Yellow) "%s" message;
+  lprintf color "%s" message;
   lnewline ();
   indentLevel := !indentLevel + 1;
   f ();
@@ -156,6 +156,12 @@ let log_local_types env =
       env.Env.lenv.Env.local_types;
     log_history env)
 
+let log_return_type env =
+  indentEnv "return_type" (fun () ->
+    lprintf (Normal Green) "%s"
+      (Typing_print.debug_with_tvars env (Env.get_return env))
+  )
+
 let log_tpenv env =
   let tparams = Env.get_generic_parameters env in
   if tparams != [] then
@@ -207,6 +213,7 @@ let hh_show_env p env =
     (fun () ->
        log_local_types env;
        log_fake_members env;
+       log_return_type env;
        log_env_diff (!lastenv) env;
        log_tpenv env);
   lastenv := env
@@ -237,15 +244,17 @@ type log_structure =
 | Log_sub of string * log_structure list
 | Log_type of string * Typing_defs.locl Typing_defs.ty
 
-let log_types p env items =
-  if get_log_level() > 0 then
+let log_types level p env items =
+  if get_log_level() >= level then
   log_position p
     (fun () ->
       let rec go items =
         List.iter items (fun item ->
           match item with
           | Log_sub (message, items) ->
-          indentEnv message (fun () -> go items)
+            let color =
+              if level < get_log_level() then Bold Yellow else Normal Yellow in
+            indentEnv ~color:color message (fun () -> go items)
           | Log_type (message, ty) ->
             let s = Typing_print.debug_with_tvars env ty in
             lprintf (Bold Green) "%s: " message;

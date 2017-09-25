@@ -1,6 +1,6 @@
 File "anon9.php", line 16, characters 10-11:
-Invalid return type (Typing[4039])
-File "anon9.php", line 12, characters 18-43:
-Number of arguments doesn't match
+Invalid return type (Typing[4040])
 File "anon9.php", line 13, characters 8-15:
+Too few arguments
+File "anon9.php", line 12, characters 18-43:
 Because of this definition

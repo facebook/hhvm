@@ -200,12 +200,16 @@ module NonTracingErrors: Errors_modes = struct
 
   let add_error error =
     if !accumulate_errors then
-      begin
-        error_list := error :: !error_list;
-        has_lazy_decl_error := match !in_lazy_decl with
-        | Some fn -> Some fn
-        | None -> !has_lazy_decl_error
-      end
+      (* Cheap test to avoid duplicating most recent error *)
+      match !error_list with
+      | old_error :: _ when error = old_error -> ()
+      | _ ->
+        begin
+          error_list := error :: !error_list;
+          has_lazy_decl_error := match !in_lazy_decl with
+          | Some fn -> Some fn
+          | None -> !has_lazy_decl_error
+        end
     else
       (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in

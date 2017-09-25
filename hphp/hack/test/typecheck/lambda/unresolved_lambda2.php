@@ -5,6 +5,8 @@
  * function call, and check that subsequent unification of those types works
  * correctly.
  */
+function expect_arraykey(arraykey $k): void {}
+function expect_float(float $f): void {}
 function test(bool $b1, bool $b2): void {
 
   $make_int = function() {
@@ -27,10 +29,10 @@ function test(bool $b1, bool $b2): void {
 
   if ($b2) {
     $f = $make_float;
-    hh_show($f());
+    expect_float($f());
   } else {
     $f = $make_int_or_string;
-    hh_show($f());
+    expect_arraykey($f());
   }
-  hh_show($f());
+  // Todo: when we have explicit unions we can test float|string|int
 }

@@ -1,4 +1,4 @@
-File "async_lambda2.php", line 13, characters 10-14:
+File "async_lambda2.php", line 13, characters 23-24:
 Invalid return type (Typing[4110])
 File "async_lambda2.php", line 12, characters 31-33:
 This is an int

@@ -2,9 +2,7 @@ File "super_constraint_11.php", line 22, characters 19-33:
 Some type constraint(s) here are violated (Typing[4110])
 File "super_constraint_11.php", line 14, characters 23-23:
 'T' is a constrained type
-File "super_constraint_11.php", line 14, characters 23-23:
+File "super_constraint_11.php", line 11, characters 37-51:
 This is an object of type NotWidgetParent
-File "super_constraint_11.php", line 22, characters 19-33:
-It was implicitly typed as an object of type NotWidgetParent during this operation
 File "super_constraint_11.php", line 14, characters 31-42:
 It is incompatible with an object of type WidgetParent

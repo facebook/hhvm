@@ -79,12 +79,19 @@ and genv = {
   file    : Relative_path.t;
 }
 
-(* An anonymous function
- * the environment + the fun parameters + the captured identifiers
-*)
+(* A type-checker for an anonymous function
+ * Parameters are
+ * - the environment
+ * - types of the parameters under which the body should be checked
+ * - the expected return type of the body (optional)
+ *)
 and anon =
   Nast.is_coroutine *
-  (?el:Nast.expr list -> env -> locl fun_params -> env * Tast.expr * locl ty)
+  (?el:Nast.expr list ->
+  ?ret_ty: locl ty ->
+  env ->
+  locl fun_params ->
+  env * Tast.expr * locl ty)
 
 and tfun = env -> env * bool
 end

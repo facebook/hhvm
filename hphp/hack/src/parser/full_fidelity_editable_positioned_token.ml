@@ -96,16 +96,6 @@ let leading_text token =
 let trailing_text token =
   token.trailing_text
 
-let has_trivia_kind token kind =
-  match token.token_data with
-  | Original orig_token
-  | SynthesizedFromOriginal (_, orig_token)
-    ->
-      let kind_of = Full_fidelity_positioned_trivia.kind in
-      List.exists (fun t -> kind_of t = kind) (SourceData.leading orig_token) ||
-      List.exists (fun t -> kind_of t = kind) (SourceData.trailing orig_token)
-  | _ -> false (* Assume we don't introduce well-formed trivia *)
-
 let full_text token =
   leading_text token ^ text token ^ trailing_text token
 
